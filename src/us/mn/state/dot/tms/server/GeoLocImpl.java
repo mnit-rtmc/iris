@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2018  Minnesota Department of Transportation
+ * Copyright (C) 2005-2019  Minnesota Department of Transportation
  * Copyright (C) 2014       AHMCT, University of California
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
@@ -124,7 +124,9 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 
 	/** Create a new geo location */
 	public GeoLocImpl(String n) {
-		super(n);
+		// This constructor should only be called by sonar,
+		// when a client creates an r_node.
+		this(n, R_Node.SONAR_TYPE);
 	}
 
 	/** Create a new geo location */
@@ -152,8 +154,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	private GeoLocImpl(String n, String nt, Road r, short rd, Road x,
 		short xd, short xm, Double lt, Double ln, String lm)
 	{
-		this(n);
-		notify_tag = nt;
+		this(n, nt);
 		roadway = r;
 		road_dir = rd;
 		cross_street = x;

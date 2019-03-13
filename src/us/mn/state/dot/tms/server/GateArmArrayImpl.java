@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2018  Minnesota Department of Transportation
+ * Copyright (C) 2013-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Create a new gate arm array with a string name */
 	public GateArmArrayImpl(String n) throws TMSException, SonarException {
 		super(n);
-		GeoLocImpl g = new GeoLocImpl(name);
+		GeoLocImpl g = new GeoLocImpl(name, SONAR_TYPE);
 		g.notifyCreate();
 		geo_loc = g;
 		GateArmSystem.disable(n, "create array");

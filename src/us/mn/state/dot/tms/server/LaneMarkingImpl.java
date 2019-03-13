@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 	/** Create a new lane marking with a string name */
 	public LaneMarkingImpl(String n) throws TMSException, SonarException {
 		super(n);
-		GeoLocImpl g = new GeoLocImpl(name);
+		GeoLocImpl g = new GeoLocImpl(name, SONAR_TYPE);
 		g.notifyCreate();
 		geo_loc = g;
 	}

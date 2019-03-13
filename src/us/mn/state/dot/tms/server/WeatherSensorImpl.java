@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2018  Minnesota Department of Transportation
+ * Copyright (C) 2010-2019  Minnesota Department of Transportation
  * Copyright (C) 2017       Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -128,7 +128,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Create a new weather sensor with a string name */
 	public WeatherSensorImpl(String n) throws TMSException, SonarException {
 		super(n);
-		GeoLocImpl g = new GeoLocImpl(name);
+		GeoLocImpl g = new GeoLocImpl(name, SONAR_TYPE);
 		g.notifyCreate();
 		geo_loc = g;
 		cache = new PeriodicSampleCache(PeriodicSampleType.PRECIP_RATE);

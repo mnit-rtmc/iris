@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -74,7 +74,7 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 	/** Create a new cabinet */
 	public CabinetImpl(String n) throws TMSException, SonarException {
 		super(n);
-		GeoLocImpl g = new GeoLocImpl(n);
+		GeoLocImpl g = new GeoLocImpl(n, SONAR_TYPE);
 		g.notifyCreate();
 		geo_loc = g;
 	}
