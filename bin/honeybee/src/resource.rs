@@ -663,7 +663,7 @@ impl Resource {
             Resource::SignMsg(_)     => query_sign_msg(conn, w, dir, tx),
         }
     }
-    fn name(&self) -> &str {
+    pub fn name(&self) -> &str {
         match self {
             Resource::Simple(name, _) => name,
             Resource::Font(name)      => name,
@@ -711,17 +711,17 @@ pub fn lookup_resource(n: &str) -> Option<Resource> {
     }
 }
 
-pub const ALL: &[&'static str] = &[
-    "camera_pub",
-    "dms_pub",
-    "dms_message",
-    "incident",
-    "sign_config",
-    "sign_detail",
-    "parking_area",
-    "parking_area_dynamic",
-    "parking_area_archive",
-    "graphic",
-    "font",
-    "sign_message",
+pub const ALL: &[Resource] = &[
+    CAMERA_RES,
+    DMS_RES,
+    DMS_MSG_RES,
+    INCIDENT_RES,
+    SIGN_CONFIG_RES,
+    SIGN_DETAIL_RES,
+    TPIMS_STAT_RES,
+    TPIMS_DYN_RES,
+    TPIMS_ARCH_RES,
+    GRAPHIC_RES,
+    FONT_RES,
+    SIGN_MSG_RES,
 ];

@@ -69,7 +69,7 @@ fn db_thread(uds: String, tx: Sender<PathBuf>) -> Result<(), Error> {
     conn.execute("LISTEN tms", &[])?;
     // Initialize all the resources
     for r in ALL {
-        fetch_resource_timed(&conn, &tx, r)?;
+        fetch_resource_timed(&conn, &tx, r.name())?;
     }
     notify_loop(&conn, tx)
 }
