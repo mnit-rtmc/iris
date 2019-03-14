@@ -11,22 +11,21 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-use gif::{Frame,Encoder,Repeat,SetParameter};
-use postgres;
-use postgres::{Connection};
+use gif::{Frame, Encoder, Repeat, SetParameter};
+use postgres::{self, Connection};
 use serde_json;
-use std::collections::{HashMap,HashSet};
-use std::fs::{File,rename,remove_file,read_dir};
-use std::io::{BufReader,BufWriter,Write};
-use std::path::{Path,PathBuf};
+use std::collections::{HashMap, HashSet};
+use std::fs::{File, rename, remove_file, read_dir};
+use std::io::{BufReader, BufWriter, Write};
+use std::path::{Path, PathBuf};
 use std::sync::mpsc::Sender;
 use std::time::Instant;
 use crate::error::Error;
-use crate::font::{Font,query_font,Graphic};
-use crate::multi::{Color,ColorClassic,ColorScheme,LineJustification,
+use crate::font::{Font, query_font, Graphic};
+use crate::multi::{Color, ColorClassic, ColorScheme, LineJustification,
                    PageJustification, Rectangle};
 use crate::raster::Raster;
-use crate::render::{PageSplitter,State};
+use crate::render::{PageSplitter, State};
 
 fn make_name(dir: &Path, n: &str) -> PathBuf {
     let mut p = PathBuf::new();
@@ -42,7 +41,7 @@ fn make_tmp_name(dir: &Path, n: &str) -> PathBuf {
     make_name(dir, &b)
 }
 
-#[derive(PartialEq,Eq,Hash)]
+#[derive(PartialEq, Eq, Hash)]
 pub enum Resource {
     Simple(&'static str, &'static str),
     Font(&'static str),
@@ -198,7 +197,7 @@ pub trait Queryable {
     fn from_row(row: &postgres::rows::Row) -> Self;
 }
 
-#[derive(Serialize,Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct SignConfig {
     name        : String,
     face_width  : i32,
@@ -330,7 +329,7 @@ impl SignConfig {
     }
 }
 
-#[derive(Serialize,Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct SignDetail {
     name           : String,
     dms_type       : String,

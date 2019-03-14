@@ -11,20 +11,19 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-use base64::{Config,CharacterSet,LineWrap,decode_config_slice};
-use postgres;
-use postgres::{Connection};
+use base64::{Config, CharacterSet, LineWrap, decode_config_slice};
+use postgres::{self, Connection};
 use serde_json;
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{BufReader,Write};
-use std::path::{Path,PathBuf};
+use std::io::{BufReader, Write};
+use std::path::{Path, PathBuf};
 use crate::error::Error;
 use crate::raster::Raster;
 use crate::resource::Queryable;
-use crate::multi::{ColorClassic,ColorScheme,SyntaxError};
+use crate::multi::{ColorClassic, ColorScheme, SyntaxError};
 
-#[derive(Serialize,Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Glyph {
     pub code_point : i32,
     width          : i32,
@@ -53,7 +52,7 @@ impl Glyph {
     }
 }
 
-#[derive(Serialize,Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Font {
     pub name     : String,
     pub f_number : i32,
@@ -135,7 +134,7 @@ pub fn query_font<W: Write>(conn: &Connection, mut w: W) -> Result<u32, Error> {
     Ok(c)
 }
 
-#[derive(Serialize,Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Graphic {
     name             : String,
     g_number         : i32,

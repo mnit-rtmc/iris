@@ -17,9 +17,9 @@ use std::fs::File;
 use std::io;
 use std::net::TcpStream;
 use std::path::PathBuf;
-use std::sync::mpsc::{Receiver,TryRecvError};
+use std::sync::mpsc::{Receiver, TryRecvError};
 use std::thread;
-use std::time::{Duration,Instant};
+use std::time::{Duration, Instant};
 use crate::error::Error;
 
 /// A set of paths to mirror

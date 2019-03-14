@@ -11,10 +11,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-use base64::{Config,CharacterSet,LineWrap,decode_config_slice};
+use base64::{Config, CharacterSet, LineWrap, decode_config_slice};
 use std::collections::HashMap;
 use crate::error::Error;
-use crate::font::{Font,Graphic};
+use crate::font::{Font, Graphic};
 use crate::multi::*;
 use crate::raster::Raster;
 
@@ -26,7 +26,7 @@ type UnitResult = Result<(), SyntaxError>;
 const GLYPH_LEN: usize = (128 + 3) / 4 * 3;
 
 /// Page render state
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub struct State {
     color_scheme    : ColorScheme,
     char_width      : u8,

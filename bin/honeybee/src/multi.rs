@@ -19,7 +19,7 @@ use std::str::FromStr;
 use crate::error::Error;
 
 /// DMS color scheme.
-#[derive(Copy,Clone,PartialEq,Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum ColorScheme {
     Monochrome1Bit = 1,
     Monochrome8Bit,
@@ -41,7 +41,7 @@ impl ColorScheme {
 
 /// Color for a DMS pixel.
 /// Legacy colors are dependent on the DmsColorScheme.
-#[derive(Copy,Clone,Debug,PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Color {
     Legacy(u8),      //    0-9 (colorClassic)
                      //    0-1 (monochrome1Bit)
@@ -74,7 +74,7 @@ impl From<ColorClassic> for Color {
 }
 
 /// Classic color values
-#[derive(Copy,Clone,Debug,PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum ColorClassic {
     Black,
     Red,
@@ -128,7 +128,7 @@ impl ColorClassic {
 /// * `y` Top edge (starting from 1).
 /// * `w` Width (pixels).
 /// * `h` Height (pixels).
-#[derive(Copy,Clone,Debug,PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Rectangle {
     pub x: u16,
     pub y: u16,
@@ -161,14 +161,14 @@ impl Rectangle {
 }
 
 /// Order of flashing messages.
-#[derive(Copy,Clone,Debug,PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum FlashOrder {
     OnOff,
     OffOn,
 }
 
 /// Horizontal justification within a line.
-#[derive(Copy,Clone,PartialEq,PartialOrd,Debug)]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 pub enum LineJustification {
     Other = 1,
     Left,
@@ -199,7 +199,7 @@ impl LineJustification {
 }
 
 /// Vertical justification within a page.
-#[derive(Copy,Clone,PartialEq,PartialOrd,Debug)]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 pub enum PageJustification {
     Other = 1,
     Top,
@@ -228,7 +228,7 @@ impl PageJustification {
 }
 
 /// Mode for moving text.
-#[derive(Copy,Clone,Debug,PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum MovingTextMode {
     Circular,
     Linear(u8),
@@ -244,7 +244,7 @@ impl fmt::Display for MovingTextMode {
 }
 
 /// Direction for moving text.
-#[derive(Copy,Clone,Debug,PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum MovingTextDirection {
     Left,
     Right,
@@ -260,7 +260,7 @@ impl fmt::Display for MovingTextDirection {
 }
 
 /// Values returned from a parsed MULTI.
-#[derive(Clone,Debug,PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Value {
     ColorBackground(Option<Color>), // Legacy colors only
     ColorForeground(Option<Color>),
@@ -368,7 +368,7 @@ impl fmt::Display for Value {
 }
 
 /// Syntax errors from parsing MULTI.
-#[derive(Clone,Debug,PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum SyntaxError {
     Other,
     UnsupportedTag(String),
