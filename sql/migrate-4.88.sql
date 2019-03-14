@@ -39,4 +39,123 @@ DELETE FROM iris.sign_detail sd
       USING sign_detail_dups d
       WHERE sd.name = d.old_name;
 
+-- Update notify stuff
+DROP TRIGGER geo_loc_notify_trig ON iris.geo_loc;
+DROP FUNCTION iris.geo_loc_notify();
+DROP TRIGGER camera_notify_trig ON iris._camera;
+DROP FUNCTION iris.camera_notify();
+DROP TRIGGER font_notify_trig ON iris.font;
+DROP TRIGGER glyph_notify_trig ON iris.glyph;
+DROP FUNCTION iris.font_notify();
+DROP TRIGGER sign_detail_trig ON iris.sign_detail;
+DROP FUNCTION iris.sign_detail_notify();
+DROP TRIGGER sign_config_trig ON iris.sign_config;
+DROP FUNCTION iris.sign_config_notify();
+DROP TRIGGER sign_message_notify_trig ON iris.sign_message;
+DROP FUNCTION iris.sign_message_notify();
+DROP TRIGGER dms_notify_trig ON iris._dms;
+DROP FUNCTION iris.dms_notify();
+DROP TRIGGER incident_notify_trig ON event.incident;
+DROP FUNCTION iris.incident_notify();
+DROP TRIGGER parking_area_trig ON iris.parking_area;
+DROP FUNCTION iris.parking_area_notify();
+
+CREATE FUNCTION iris.geo_loc_notify() RETURNS TRIGGER AS
+	$geo_loc_notify$
+BEGIN
+	IF (TG_OP = 'DELETE') THEN
+		IF (OLD.notify_tag IS NOT NULL) THEN
+			PERFORM pg_notify(OLD.notify_tag, OLD.name);
+		END IF;
+	ELSIF (NEW.notify_tag IS NOT NULL) THEN
+		PERFORM pg_notify(NEW.notify_tag, NEW.name);
+	END IF;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$geo_loc_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER geo_loc_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.geo_loc
+	FOR EACH ROW EXECUTE PROCEDURE iris.geo_loc_notify();
+
+CREATE FUNCTION iris.camera_notify() RETURNS TRIGGER AS
+	$camera_notify$
+BEGIN
+	NOTIFY camera;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$camera_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris._camera
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.camera_notify();
+
+CREATE FUNCTION iris.table_notify() RETURNS TRIGGER AS
+	$table_notify$
+BEGIN
+	PERFORM pg_notify(TG_TABLE_NAME, '');
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$table_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER font_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.font
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE TRIGGER glyph_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.glyph
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE TRIGGER sign_detail_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.sign_detail
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE TRIGGER sign_config_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.sign_config
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE TRIGGER sign_message_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.sign_message
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE TRIGGER graphic_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.graphic
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE FUNCTION iris.dms_notify() RETURNS TRIGGER AS
+	$dms_notify$
+BEGIN
+	IF (NEW.msg_current IS DISTINCT FROM OLD.msg_current) THEN
+		NOTIFY dms, 'msg_current';
+	ELSE
+		NOTIFY dms;
+	END IF;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$dms_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER dms_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris._dms
+	FOR EACH ROW EXECUTE PROCEDURE iris.dms_notify();
+
+CREATE TRIGGER incident_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON event.incident
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE FUNCTION iris.parking_area_notify() RETURNS TRIGGER AS
+	$parking_area_notify$
+BEGIN
+	IF (NEW.time_stamp IS DISTINCT FROM OLD.time_stamp) THEN
+		NOTIFY parking_area, 'time_stamp';
+	ELSE
+		NOTIFY parking_area;
+	END IF;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$parking_area_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER parking_area_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.parking_area
+	FOR EACH ROW EXECUTE PROCEDURE iris.parking_area_notify();
+
 COMMIT;
