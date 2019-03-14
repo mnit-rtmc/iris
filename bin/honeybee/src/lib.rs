@@ -1,15 +1,9 @@
-extern crate base64;
-extern crate gif;
-#[macro_use] extern crate log;
-extern crate env_logger;
-extern crate serde;
-extern crate serde_json;
-#[macro_use] extern crate serde_derive;
-#[macro_use] extern crate failure;
-extern crate fallible_iterator;
-extern crate postgres;
-extern crate ssh2;
+#[macro_use]
+extern crate log;
+#[macro_use]
+extern crate serde_derive;
 
+mod error;
 pub mod fetcher;
 mod font;
 mod resource;

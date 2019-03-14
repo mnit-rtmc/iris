@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,12 +11,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-use failure::Error;
 use std::error;
 use std::fmt;
 use std::iter::Peekable;
 use std::str::Chars;
 use std::str::FromStr;
+use crate::error::Error;
 
 /// DMS color scheme.
 #[derive(Copy,Clone,PartialEq,Debug)]
@@ -34,7 +34,7 @@ impl ColorScheme {
             "monochrome8Bit" => Ok(ColorScheme::Monochrome8Bit),
             "colorClassic"   => Ok(ColorScheme::ColorClassic),
             "color24Bit"     => Ok(ColorScheme::Color24Bit),
-            _                => Err(format_err!("Unknown scheme: {:?}", s)),
+            _ => Err(Error::Other(format!("Unknown scheme: {:?}", s))),
         }
     }
 }

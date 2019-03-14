@@ -11,7 +11,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-use failure::Error;
 use gif::{Frame,Encoder,Repeat,SetParameter};
 use postgres;
 use postgres::{Connection};
@@ -22,11 +21,12 @@ use std::io::{BufReader,BufWriter,Write};
 use std::path::{Path,PathBuf};
 use std::sync::mpsc::Sender;
 use std::time::Instant;
+use crate::error::Error;
+use crate::font::{Font,query_font,Graphic};
 use crate::multi::{Color,ColorClassic,ColorScheme,LineJustification,
                    PageJustification, Rectangle};
 use crate::raster::Raster;
 use crate::render::{PageSplitter,State};
-use crate::font::{Font,query_font,Graphic};
 
 fn make_name(dir: &Path, n: &str) -> PathBuf {
     let mut p = PathBuf::new();
@@ -539,7 +539,7 @@ fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, mut f: W)
 {
     let cfg = msg_data.configs.get(&s.sign_config);
     if cfg.is_none() {
-        return Err(format_err!("Unknown config: {}", s.sign_config));
+        return Err(Error::Other(format!("Unknown config: {}", s.sign_config)));
     }
     let cfg = cfg.unwrap();
     let rs = create_render_state(s, msg_data)?;
@@ -569,7 +569,7 @@ fn create_render_state(s: &SignMessage, msg_data: &MsgData)
 {
     let cfg = msg_data.configs.get(&s.sign_config);
     if cfg.is_none() {
-        return Err(format_err!("Unknown config: {}", s.sign_config));
+        return Err(Error::Other(format!("Unknown config: {}", s.sign_config)));
     }
     let cfg = cfg.unwrap();
     let color_scheme = ColorScheme::from_str(&cfg.color_scheme)?;
@@ -590,10 +590,10 @@ fn create_render_state(s: &SignMessage, msg_data: &MsgData)
     let page_on_time_ds = 20;   // FIXME
     let page_off_time_ds = 0;   // FIXME
     if cfg.pixel_width < 1 {
-        return Err(format_err!("Invalid width: {}", cfg.pixel_width));
+        return Err(Error::Other(format!("Invalid width: {}", cfg.pixel_width)));
     }
     if cfg.pixel_height < 1 {
-        return Err(format_err!("Invalid height: {}", cfg.pixel_height));
+        return Err(Error::Other(format!("Invalid height: {}", cfg.pixel_height)));
     }
     let text_rectangle = Rectangle::new(1, 1, cfg.pixel_width as u16,
         cfg.pixel_height as u16);
@@ -601,12 +601,12 @@ fn create_render_state(s: &SignMessage, msg_data: &MsgData)
     let just_line = LineJustification::Center; // FIXME
     let fname = cfg.default_font.as_ref();
     if fname.is_none() {
-        return Err(format_err!("No default font for {}", cfg.name));
+        return Err(Error::Other(format!("No default font for {}", cfg.name)));
     }
     let fname = fname.unwrap();
     let font = msg_data.fonts.values().find(|f| &f.name == fname);
     if font.is_none() {
-        return Err(format_err!("Unknown font: {}", fname));
+        return Err(Error::Other(format!("Unknown font: {}", fname)));
     }
     let font = (font.unwrap().f_number as u8, None);
     Ok(State::new(color_scheme,

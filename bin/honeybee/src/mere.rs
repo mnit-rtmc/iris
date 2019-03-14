@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,7 +11,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-use failure::Error;
 use ssh2::Session;
 use std::collections::HashSet;
 use std::fs::File;
@@ -21,6 +20,7 @@ use std::path::PathBuf;
 use std::sync::mpsc::{Receiver,TryRecvError};
 use std::thread;
 use std::time::{Duration,Instant};
+use crate::error::Error;
 
 /// A set of paths to mirror
 struct PathSet {
@@ -83,7 +83,7 @@ impl SshSession {
     fn new(host: &str, username: &str) -> Result<Self, Error> {
         let tcp = TcpStream::connect(host)?;
         let mut session = Session::new()
-                                  .ok_or_else(|| format_err!("No session"))?;
+            .ok_or_else(|| Error::Other("No session".to_string()))?;
         session.handshake(&tcp)?;
         session = authenticate(session, username)?;
         Ok(SshSession { _tcp: tcp, session })

@@ -11,7 +11,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-use failure::Error;
 use fallible_iterator::FallibleIterator;
 use postgres::{Connection, TlsMode};
 use std::collections::HashSet;
@@ -19,6 +18,7 @@ use std::path::PathBuf;
 use std::sync::mpsc::{channel,Sender};
 use std::thread;
 use std::time::{Duration,Instant};
+use crate::error::Error;
 use crate::mere;
 use crate::resource::{lookup_resource, ALL};
 

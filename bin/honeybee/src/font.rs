@@ -12,7 +12,6 @@
  * GNU General Public License for more details.
  */
 use base64::{Config,CharacterSet,LineWrap,decode_config_slice};
-use failure::Error;
 use postgres;
 use postgres::{Connection};
 use serde_json;
@@ -20,6 +19,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufReader,Write};
 use std::path::{Path,PathBuf};
+use crate::error::Error;
 use crate::raster::Raster;
 use crate::resource::Queryable;
 use crate::multi::{ColorClassic,ColorScheme,SyntaxError};

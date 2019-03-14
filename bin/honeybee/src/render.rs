@@ -13,10 +13,10 @@
  */
 use base64::{Config,CharacterSet,LineWrap,decode_config_slice};
 use std::collections::HashMap;
-use failure::Error;
+use crate::error::Error;
+use crate::font::{Font,Graphic};
 use crate::multi::*;
 use crate::raster::Raster;
-use crate::font::{Font,Graphic};
 
 /// Value result from parsing MULTI.
 type UnitResult = Result<(), SyntaxError>;
