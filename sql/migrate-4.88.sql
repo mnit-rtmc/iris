@@ -158,4 +158,97 @@ CREATE TRIGGER parking_area_notify_trig
 	AFTER INSERT OR UPDATE OR DELETE ON iris.parking_area
 	FOR EACH ROW EXECUTE PROCEDURE iris.parking_area_notify();
 
+-- Update geo_loc names for r_nodes
+ALTER TABLE iris.r_node DROP CONSTRAINT r_node_geo_loc_fkey;
+UPDATE iris.geo_loc g
+   SET name = n.name, notify_tag = 'r_node'
+  FROM iris.r_node n
+ WHERE g.name = n.geo_loc;
+UPDATE iris.r_node SET geo_loc = name;
+ALTER TABLE iris.r_node ADD CONSTRAINT r_node_geo_loc_fkey
+    FOREIGN KEY (geo_loc) REFERENCES iris.geo_loc(name);
+
+-- Update geo_loc names for cabinets
+ALTER TABLE iris.cabinet DROP CONSTRAINT cabinet_geo_loc_fkey;
+UPDATE iris.geo_loc g
+   SET name = c.name, notify_tag = 'cabinet'
+  FROM iris.cabinet c
+ WHERE g.name = c.geo_loc;
+UPDATE iris.cabinet SET geo_loc = name;
+ALTER TABLE iris.cabinet ADD CONSTRAINT cabinet_geo_loc_fkey
+    FOREIGN KEY (geo_loc) REFERENCES iris.geo_loc(name);
+
+-- Update geo_loc names for cameras
+ALTER TABLE iris._camera DROP CONSTRAINT _camera_geo_loc_fkey;
+UPDATE iris.geo_loc g
+   SET name = c.name, notify_tag = 'camera'
+  FROM iris._camera c
+ WHERE g.name = c.geo_loc;
+UPDATE iris._camera SET geo_loc = name;
+ALTER TABLE iris._camera ADD CONSTRAINT _camera_geo_loc_fkey
+    FOREIGN KEY (geo_loc) REFERENCES iris.geo_loc(name);
+
+-- Update geo_loc names for dms
+ALTER TABLE iris._dms DROP CONSTRAINT _dms_geo_loc_fkey;
+UPDATE iris.geo_loc g
+   SET name = d.name, notify_tag = 'dms'
+  FROM iris._dms d
+ WHERE g.name = d.geo_loc;
+UPDATE iris._dms SET geo_loc = name;
+ALTER TABLE iris._dms ADD CONSTRAINT _dms_geo_loc_fkey
+    FOREIGN KEY (geo_loc) REFERENCES iris.geo_loc(name);
+
+-- Update geo_loc names for ramp meters
+ALTER TABLE iris._ramp_meter DROP CONSTRAINT _ramp_meter_geo_loc_fkey;
+UPDATE iris.geo_loc g
+   SET name = m.name, notify_tag = 'ramp_meter'
+  FROM iris._ramp_meter m
+ WHERE g.name = m.geo_loc;
+UPDATE iris._ramp_meter SET geo_loc = name;
+ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_geo_loc_fkey
+    FOREIGN KEY (geo_loc) REFERENCES iris.geo_loc(name);
+
+-- Update geo_loc names for tag readers
+ALTER TABLE iris._tag_reader DROP CONSTRAINT _tag_reader_geo_loc_fkey;
+UPDATE iris.geo_loc g
+   SET name = r.name, notify_tag = 'tag_reader'
+  FROM iris._tag_reader r
+ WHERE g.name = r.geo_loc;
+UPDATE iris._tag_reader SET geo_loc = name;
+ALTER TABLE iris._tag_reader ADD CONSTRAINT _tag_reader_geo_loc_fkey
+    FOREIGN KEY (geo_loc) REFERENCES iris.geo_loc(name);
+
+-- Update geo_loc names for beacons
+ALTER TABLE iris._beacon DROP CONSTRAINT _beacon_geo_loc_fkey;
+UPDATE iris.geo_loc g
+   SET name = b.name, notify_tag = 'beacon'
+  FROM iris._beacon b
+ WHERE g.name = b.geo_loc;
+UPDATE iris._beacon SET geo_loc = name;
+ALTER TABLE iris._beacon ADD CONSTRAINT _beacon_geo_loc_fkey
+    FOREIGN KEY (geo_loc) REFERENCES iris.geo_loc(name);
+
+-- Update geo_loc names for gate arm arrays
+ALTER TABLE iris._gate_arm_array DROP CONSTRAINT _gate_arm_array_geo_loc_fkey;
+UPDATE iris.geo_loc g
+   SET name = ga.name, notify_tag = 'gate_arm_array'
+  FROM iris._gate_arm_array ga
+ WHERE g.name = ga.geo_loc;
+UPDATE iris._gate_arm_array SET geo_loc = name;
+ALTER TABLE iris._gate_arm_array ADD CONSTRAINT _gate_arm_array_geo_loc_fkey
+    FOREIGN KEY (geo_loc) REFERENCES iris.geo_loc(name);
+
+-- Update geo_loc names for weather sensors
+ALTER TABLE iris._weather_sensor DROP CONSTRAINT _weather_sensor_geo_loc_fkey;
+UPDATE iris.geo_loc g
+   SET name = w.name, notify_tag = 'weather_sensor'
+  FROM iris._weather_sensor w
+ WHERE g.name = w.geo_loc;
+UPDATE iris._weather_sensor SET geo_loc = name;
+ALTER TABLE iris._weather_sensor ADD CONSTRAINT _weather_sensor_geo_loc_fkey
+    FOREIGN KEY (geo_loc) REFERENCES iris.geo_loc(name);
+
+-- Delete unloved geo_loc records
+DELETE FROM iris.geo_loc WHERE notify_tag IS NULL;
+
 COMMIT;
