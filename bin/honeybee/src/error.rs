@@ -6,6 +6,7 @@ use base64::DecodeError;
 use postgres;
 use serde_json;
 use ssh2;
+use std::error::Error as _;
 use std::{fmt, io};
 use std::path::PathBuf;
 use std::sync::mpsc::{SendError, RecvError, TryRecvError};
@@ -27,17 +28,12 @@ pub enum Error {
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Error::Io(e) => write!(f, "{}", e.to_string()),
-            Error::Pg(e) => write!(f, "{}", e.to_string()),
-            Error::MultiSyntax(e) => write!(f, "{}", e.to_string()),
-            Error::Base64Decode(e) => write!(f, "{}", e.to_string()),
-            Error::SerdeJson(e) => write!(f, "{}", e.to_string()),
-            Error::Ssh(e) => write!(f, "{}", e.to_string()),
-            Error::MpscSend(e) => write!(f, "{}", e.to_string()),
-            Error::MpscRecv(e) => write!(f, "{}", e.to_string()),
-            Error::MpscTryRecv(e) => write!(f, "{}", e.to_string()),
-            Error::Other(s) => write!(f, "Error {}", s),
+        if let Some(src) = self.source() {
+            fmt::Display::fmt(src, f)
+        } else if let Error::Other(e) = self {
+            write!(f, "Error {}", e)
+        } else {
+            unreachable!();
         }
     }
 }
@@ -54,7 +50,7 @@ impl std::error::Error for Error {
             Error::MpscSend(e) => Some(e),
             Error::MpscRecv(e) => Some(e),
             Error::MpscTryRecv(e) => Some(e),
-            _ => None,
+            Error::Other(_) => None,
         }
     }
 }
