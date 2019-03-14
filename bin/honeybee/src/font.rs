@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufReader,Write};
 use std::path::{Path,PathBuf};
-use raster::Raster;
-use resource::Queryable;
-use multi::{ColorClassic,ColorScheme,SyntaxError};
+use crate::raster::Raster;
+use crate::resource::Queryable;
+use crate::multi::{ColorClassic,ColorScheme,SyntaxError};
 
 #[derive(Serialize,Deserialize)]
 pub struct Glyph {

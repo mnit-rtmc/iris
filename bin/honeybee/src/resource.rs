@@ -22,11 +22,11 @@ use std::io::{BufReader,BufWriter,Write};
 use std::path::{Path,PathBuf};
 use std::sync::mpsc::Sender;
 use std::time::Instant;
-use multi::{Color,ColorClassic,ColorScheme,LineJustification,PageJustification,
-            Rectangle};
-use raster::Raster;
-use render::{PageSplitter,State};
-use font::{Font,query_font,Graphic};
+use crate::multi::{Color,ColorClassic,ColorScheme,LineJustification,
+                   PageJustification, Rectangle};
+use crate::raster::Raster;
+use crate::render::{PageSplitter,State};
+use crate::font::{Font,query_font,Graphic};
 
 fn make_name(dir: &Path, n: &str) -> PathBuf {
     let mut p = PathBuf::new();
@@ -548,13 +548,13 @@ fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, mut f: W)
     enc.set(Repeat::Infinite)?;
     for page in PageSplitter::new(rs, &s.multi) {
         let page = page?;
-        let mut raster = page.render(&msg_data.fonts, &msg_data.graphics)?;
+        let raster = page.render(&msg_data.fonts, &msg_data.graphics)?;
         let mut frame = make_face_frame(raster, &cfg, w, h);
         frame.delay = page.page_on_time_ds() * 10;
         enc.write_frame(&frame)?;
         let t = page.page_off_time_ds() * 10;
         if t > 0 {
-            let mut raster = page.render_blank()?;
+            let raster = page.render_blank()?;
             let mut frame = make_face_frame(raster, &cfg, w, h);
             frame.delay = t;
             enc.write_frame(&frame)?;
@@ -638,7 +638,7 @@ fn query_sign_msg<W: Write>(conn: &Connection, mut w: W, dir: &Path,
     for row in &conn.query(SignMessage::sql(), &[])? {
         if c > 0 { w.write(",".as_bytes())?; }
         w.write("\n".as_bytes())?;
-        let mut s = SignMessage::from_row(&row);
+        let s = SignMessage::from_row(&row);
         w.write(serde_json::to_string(&s)?.as_bytes())?;
         fetch_sign_msg(&s, dir, tx, &mut msg_data)?;
         c += 1;

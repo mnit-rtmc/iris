@@ -19,8 +19,8 @@ use std::path::PathBuf;
 use std::sync::mpsc::{channel,Sender};
 use std::thread;
 use std::time::{Duration,Instant};
-use mere;
-use resource::{lookup_resource, ALL};
+use crate::mere;
+use crate::resource::{lookup_resource, ALL};
 
 static OUTPUT_DIR: &str = "/var/www/html/iris/";
 
