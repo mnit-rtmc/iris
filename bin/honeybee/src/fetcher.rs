@@ -13,14 +13,14 @@
  */
 use failure::Error;
 use fallible_iterator::FallibleIterator;
-use postgres::{Connection,TlsMode};
+use postgres::{Connection, TlsMode};
 use std::collections::HashSet;
 use std::path::PathBuf;
 use std::sync::mpsc::{channel,Sender};
 use std::thread;
 use std::time::{Duration,Instant};
 use mere;
-use resource::{lookup_resource,ALL};
+use resource::{lookup_resource, ALL};
 
 static OUTPUT_DIR: &str = "/var/www/html/iris/";
 
@@ -54,9 +54,21 @@ fn db_thread(uds: String, tx: Sender<PathBuf>) -> Result<(), Error> {
     // We need to set it back to LOCAL time zone, so that row_to_json
     // can format properly (for incidents, etc).
     conn.execute("SET TIME ZONE 'US/Central'", &[])?;
+    // Listen for notifications on all channels we need to monitor
+    conn.execute("LISTEN camera", &[])?;
+    conn.execute("LISTEN dms", &[])?;
+    conn.execute("LISTEN font", &[])?;
+    conn.execute("LISTEN glyph", &[])?;
+    conn.execute("LISTEN graphic", &[])?;
+    conn.execute("LISTEN incident", &[])?;
+    conn.execute("LISTEN parking_area", &[])?;
+    conn.execute("LISTEN sign_config", &[])?;
+    conn.execute("LISTEN sign_detail", &[])?;
+    conn.execute("LISTEN sign_message", &[])?;
+    // FIXME: remove this after DB has been updated
     conn.execute("LISTEN tms", &[])?;
     // Initialize all the resources
-    for r in ALL.iter() {
+    for r in ALL {
         fetch_resource_timed(&conn, &tx, r)?;
     }
     notify_loop(&conn, tx)
@@ -104,10 +116,35 @@ fn notify_loop(conn: &Connection, tx: Sender<PathBuf>) -> Result<(), Error> {
     loop {
         for n in nots.timeout_iter(Duration::from_millis(300)).iterator() {
             let n = n?;
-            ns.insert(n.payload);
+            ns.insert((n.channel, n.payload));
         }
         for n in ns.drain() {
-            fetch_resource_timed(&conn, &tx, &n)?;
+            let r = get_resource_name(&n);
+            fetch_resource_timed(&conn, &tx, &r)?;
+            // NOTE: when we need to fetch one, we also need the other
+            if r == "parking_area_dynamic" {
+                fetch_resource_timed(&conn, &tx, &"parking_area_archive")?;
+            }
         }
+    }
+}
+
+fn get_resource_name(n: &(String, String)) -> &str {
+    let (chan, payload) = (&n.0, &n.1);
+    // FIXME: remove this after DB has been updated
+    if chan == "tms" {
+        &payload
+    } else {
+        get_resource_name_new(&chan, &payload)
+    }
+}
+
+fn get_resource_name_new<'a>(channel: &'a str, payload: &'a str) -> &'a str {
+    // FIXME: combine this with lookup_resource
+    match (channel, payload) {
+        ("dms", "msg_current") => &"dms_message",
+        ("parking_area", "time_stamp") => &"parking_area_dynamic",
+        ("glyph", _) => &"font",
+        (_, _) => channel,
     }
 }

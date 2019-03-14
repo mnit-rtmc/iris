@@ -712,7 +712,7 @@ pub fn lookup_resource(n: &str) -> Option<Resource> {
     }
 }
 
-pub const ALL: [&'static str; 12] = [
+pub const ALL: &[&'static str] = &[
     "camera_pub",
     "dms_pub",
     "dms_message",
