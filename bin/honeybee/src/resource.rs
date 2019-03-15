@@ -43,13 +43,13 @@ fn make_tmp_name(dir: &Path, n: &str) -> PathBuf {
 
 #[derive(PartialEq, Eq, Hash)]
 pub enum Resource {
-    Simple(&'static str, &'static str),
+    Simple(&'static str, Option<&'static str>, &'static str),
     Font(&'static str),
     SignMsg(&'static str),
 }
 
 const CAMERA_RES: Resource = Resource::Simple(
-"camera_pub",
+"camera_pub", Some("camera"),
 "SELECT row_to_json(r)::text FROM (\
     SELECT name, publish, location, lat, lon \
     FROM camera_view \
@@ -58,7 +58,7 @@ const CAMERA_RES: Resource = Resource::Simple(
 );
 
 const DMS_RES: Resource = Resource::Simple(
-"dms_pub",
+"dms_pub", Some("dms"),
 "SELECT row_to_json(r)::text FROM (\
     SELECT name, sign_config, sign_detail, roadway, road_dir, cross_street, \
            location, lat, lon \
@@ -68,7 +68,7 @@ const DMS_RES: Resource = Resource::Simple(
 );
 
 const DMS_MSG_RES: Resource = Resource::Simple(
-"dms_message",
+"dms_message", None,
 "SELECT row_to_json(r)::text FROM (\
     SELECT name, msg_current, sources, duration, expire_time \
     FROM dms_message_view WHERE condition = 'Active' \
@@ -77,7 +77,7 @@ const DMS_MSG_RES: Resource = Resource::Simple(
 );
 
 const INCIDENT_RES: Resource = Resource::Simple(
-"incident",
+"incident", None,
 "SELECT row_to_json(r)::text FROM (\
     SELECT name, event_date, description, road, direction, lane_type, \
            impact, confirmed, camera, detail, replaces, lat, lon \
@@ -87,7 +87,7 @@ const INCIDENT_RES: Resource = Resource::Simple(
 );
 
 const SIGN_CONFIG_RES: Resource = Resource::Simple(
-"sign_config",
+"sign_config", None,
 "SELECT row_to_json(r)::text FROM (\
     SELECT name, face_width, face_height, border_horiz, border_vert, \
            pitch_horiz, pitch_vert, pixel_width, pixel_height, \
@@ -98,7 +98,7 @@ const SIGN_CONFIG_RES: Resource = Resource::Simple(
 );
 
 const SIGN_DETAIL_RES: Resource = Resource::Simple(
-"sign_detail",
+"sign_detail", None,
 "SELECT row_to_json(r)::text FROM (\
     SELECT name, dms_type, portable, technology, sign_access, legend, \
            beacon_type, hardware_make, hardware_model, software_make, \
@@ -108,7 +108,7 @@ const SIGN_DETAIL_RES: Resource = Resource::Simple(
 );
 
 const TPIMS_STAT_RES: Resource = Resource::Simple(
-"TPIMS_static",
+"TPIMS_static", Some("parking_area"),
 "SELECT row_to_json(r)::text FROM (\
     SELECT site_id AS \"siteId\", to_char(time_stamp_static AT TIME ZONE 'UTC', \
            'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
@@ -129,7 +129,7 @@ const TPIMS_STAT_RES: Resource = Resource::Simple(
 );
 
 const TPIMS_DYN_RES: Resource = Resource::Simple(
-"TPIMS_dynamic",
+"TPIMS_dynamic", Some("parking_area_dynamic"),
 "SELECT row_to_json(r)::text FROM (\
     SELECT site_id AS \"siteId\", to_char(time_stamp AT TIME ZONE 'UTC', \
            'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
@@ -142,7 +142,7 @@ const TPIMS_DYN_RES: Resource = Resource::Simple(
 );
 
 const TPIMS_ARCH_RES: Resource = Resource::Simple(
-"TPIMS_archive",
+"TPIMS_archive", Some("parking_area_archive"),
 "SELECT row_to_json(r)::text FROM (\
     SELECT site_id AS \"siteId\", to_char(time_stamp AT TIME ZONE 'UTC', \
            'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
@@ -159,7 +159,7 @@ const TPIMS_ARCH_RES: Resource = Resource::Simple(
 );
 
 const GRAPHIC_RES: Resource = Resource::Simple(
-"graphic",
+"graphic", None,
 "SELECT row_to_json(r)::text FROM (\
     SELECT name, g_number, color_scheme, height, width, \
            transparent_color, pixels \
@@ -658,16 +658,28 @@ impl Resource {
         tx: &Sender<PathBuf>) -> Result<u32, Error>
     {
         match self {
-            Resource::Simple(_, sql) => query_simple(conn, sql, w),
-            Resource::Font(_)        => query_font(conn, w),
-            Resource::SignMsg(_)     => query_sign_msg(conn, w, dir, tx),
+            Resource::Simple(_, _, sql) => query_simple(conn, sql, w),
+            Resource::Font(_)           => query_font(conn, w),
+            Resource::SignMsg(_)        => query_sign_msg(conn, w, dir, tx),
         }
     }
+    /// Get the resource name
     pub fn name(&self) -> &str {
         match self {
-            Resource::Simple(name, _) => name,
-            Resource::Font(name)      => name,
-            Resource::SignMsg(name)   => name,
+            Resource::Simple(name, _, _) => name,
+            Resource::Font(name)         => name,
+            Resource::SignMsg(name)      => name,
+        }
+    }
+    /// Check if a name (or alternate name) matches
+    fn matches(&self, n: &str) -> bool {
+        n == self.name() || self.matches_alt(n)
+    }
+    /// Check if an alternate resource name matches
+    fn matches_alt(&self, n: &str) -> bool {
+        match self {
+            Resource::Simple(_, Some(a), _) => { n == *a },
+            _ => false,
         }
     }
     /// Fetch the resource and send PathBuf(s) to a channel.
@@ -690,27 +702,7 @@ impl Resource {
     }
 }
 
-pub fn lookup_resource(n: &str) -> Option<Resource> {
-    match n {
-        "camera"|"camera_pub"  => Some(CAMERA_RES),
-        "dms" | "dms_pub"      => Some(DMS_RES),
-        "dms_message"          => Some(DMS_MSG_RES),
-        "incident"             => Some(INCIDENT_RES),
-        "sign_config"          => Some(SIGN_CONFIG_RES),
-        "sign_detail"          => Some(SIGN_DETAIL_RES),
-        "parking_area" |
-        "TPIMS_static"         => Some(TPIMS_STAT_RES),
-        "parking_area_dynamic"|
-        "TPIMS_dynamic"        => Some(TPIMS_DYN_RES),
-        "parking_area_archive"|
-        "TPIMS_archive"        => Some(TPIMS_ARCH_RES),
-        "graphic"              => Some(GRAPHIC_RES),
-        "font"                 => Some(FONT_RES),
-        "sign_message"         => Some(SIGN_MSG_RES),
-        _                      => None,
-    }
-}
-
+/// All defined resources
 pub const ALL: &[Resource] = &[
     CAMERA_RES,
     DMS_RES,
@@ -725,3 +717,8 @@ pub const ALL: &[Resource] = &[
     FONT_RES,
     SIGN_MSG_RES,
 ];
+
+/// Lookup a resource by name (or alternate name)
+pub fn lookup(n: &str) -> Option<&Resource> {
+    ALL.iter().find(|r| r.matches(n))
+}

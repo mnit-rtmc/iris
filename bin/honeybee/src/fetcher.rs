@@ -20,7 +20,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 use crate::error::Error;
 use crate::mere;
-use crate::resource::{lookup_resource, ALL};
+use crate::resource;
 
 static OUTPUT_DIR: &str = "/var/www/html/iris/";
 
@@ -68,7 +68,7 @@ fn db_thread(uds: String, tx: Sender<PathBuf>) -> Result<(), Error> {
     // FIXME: remove this after DB has been updated
     conn.execute("LISTEN tms", &[])?;
     // Initialize all the resources
-    for r in ALL {
+    for r in resource::ALL {
         fetch_resource_timed(&conn, &tx, r.name())?;
     }
     notify_loop(&conn, tx)
@@ -99,7 +99,7 @@ fn fetch_resource_timed(conn: &Connection, tx: &Sender<PathBuf>, n: &str)
 fn fetch_resource(conn: &Connection, tx: &Sender<PathBuf>, n: &str)
     -> Result<Option<u32>, Error>
 {
-    if let Some(r) = lookup_resource(n) {
+    if let Some(r) = resource::lookup(n) {
         Ok(Some(r.fetch(&conn, OUTPUT_DIR, tx)?))
     } else {
         Ok(None)
@@ -140,7 +140,7 @@ fn get_resource_name(n: &(String, String)) -> &str {
 }
 
 fn get_resource_name_new<'a>(channel: &'a str, payload: &'a str) -> &'a str {
-    // FIXME: combine this with lookup_resource
+    // FIXME: combine this with resource::lookup
     match (channel, payload) {
         ("dms", "msg_current") => &"dms_message",
         ("parking_area", "time_stamp") => &"parking_area_dynamic",
