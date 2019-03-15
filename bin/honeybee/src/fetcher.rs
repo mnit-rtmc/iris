@@ -101,37 +101,30 @@ fn notify_loop(conn: &Connection, tx: Sender<PathBuf>) -> Result<(), Error> {
             ns.insert((n.channel, n.payload));
         }
         for n in ns.drain() {
-            let rn = get_resource_name(&n);
-            if let Some(r) = resource::lookup(rn) {
+            if let Some(r) = lookup_resource(&n.0, &n.1) {
                 fetch_resource(&conn, &tx, &r)?;
                 // NOTE: when we need to fetch one, we also need the other
                 if r == &resource::TPIMS_DYN_RES {
                     fetch_resource(&conn, &tx, &resource::TPIMS_ARCH_RES)?;
                 }
             } else {
-                warn!("{}: unknown resource", &rn);
+                warn!("unknown resource: ({}, {})", &n.0, &n.1);
             }
         }
     }
 }
 
-/// Get the resource name from (channel, payload) tuple
-fn get_resource_name(n: &(String, String)) -> &str {
-    let (chan, payload) = (&n.0, &n.1);
+/// Lookup resource from PostgreSQL notification channel / payload
+fn lookup_resource(chan: &str, payload: &str) -> Option<&'static Resource> {
     // FIXME: remove this after DB has been updated
     if chan == "tms" {
-        &payload
+        resource::lookup(payload)
     } else {
-        get_resource_name_new(&chan, &payload)
-    }
-}
-
-/// Get the resource name using new logic
-fn get_resource_name_new<'a>(channel: &'a str, payload: &'a str) -> &'a str {
-    match (channel, payload) {
-        ("dms", "msg_current") => &"dms_message",
-        ("parking_area", "time_stamp") => &"parking_area_dynamic",
-        ("glyph", _) => &"font",
-        (_, _) => channel,
+        match (chan, payload) {
+            ("dms", "msg_current") => Some(&resource::DMS_MSG_RES),
+            ("parking_area", "time_stamp") => Some(&resource::TPIMS_DYN_RES),
+            ("glyph", _) => Some(&resource::FONT_RES),
+            (_, _) => resource::lookup(chan),
+        }
     }
 }

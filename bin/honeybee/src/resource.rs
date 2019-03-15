@@ -67,7 +67,7 @@ const DMS_RES: Resource = Resource::Simple(
 ) r",
 );
 
-const DMS_MSG_RES: Resource = Resource::Simple(
+pub const DMS_MSG_RES: Resource = Resource::Simple(
 "dms_message", None,
 "SELECT row_to_json(r)::text FROM (\
     SELECT name, msg_current, sources, duration, expire_time \
@@ -167,7 +167,7 @@ const GRAPHIC_RES: Resource = Resource::Simple(
 ) r",
 );
 
-const FONT_RES: Resource = Resource::Font(
+pub const FONT_RES: Resource = Resource::Font(
 "font",
 );
 
@@ -719,6 +719,6 @@ pub const ALL: &[Resource] = &[
 ];
 
 /// Lookup a resource by name (or alternate name)
-pub fn lookup(n: &str) -> Option<&Resource> {
+pub fn lookup(n: &str) -> Option<&'static Resource> {
     ALL.iter().find(|r| r.matches(n))
 }
