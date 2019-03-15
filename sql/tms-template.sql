@@ -240,6 +240,12 @@ BEGIN
 END;
 $update_version$ language plpgsql;
 
+CREATE VIEW dms_attribute_view AS
+	SELECT name, value
+	FROM iris.system_attribute
+	WHERE name LIKE 'dms\_%';
+GRANT SELECT ON dms_attribute_view TO PUBLIC;
+
 --
 -- Roles, Domains, Users, Capabilities and Privileges
 --

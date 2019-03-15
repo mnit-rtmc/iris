@@ -251,4 +251,11 @@ ALTER TABLE iris._weather_sensor ADD CONSTRAINT _weather_sensor_geo_loc_fkey
 -- Delete unloved geo_loc records
 DELETE FROM iris.geo_loc WHERE notify_tag IS NULL;
 
+-- Add dms_attribute_view
+CREATE VIEW dms_attribute_view AS
+	SELECT name, value
+	FROM iris.system_attribute
+	WHERE name LIKE 'dms\_%';
+GRANT SELECT ON dms_attribute_view TO PUBLIC;
+
 COMMIT;

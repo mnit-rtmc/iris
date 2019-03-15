@@ -389,7 +389,7 @@ struct MsgData {
     fonts   : HashMap<i32, Font>,
     graphics: HashMap<i32, Graphic>,
     gifs    : HashSet<PathBuf>,
-    // FIXME: need system attributes: dms_default_justification_line,
+    // FIXME: load DMS attributes: dms_default_justification_line,
     //        dms_default_jusitfication_page, dms_max_lines,
     //        dms_page_off_default_secs, dms_page_on_default_secs
 }
