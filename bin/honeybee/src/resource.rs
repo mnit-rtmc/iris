@@ -128,7 +128,7 @@ const TPIMS_STAT_RES: Resource = Resource::Simple(
 ) r",
 );
 
-const TPIMS_DYN_RES: Resource = Resource::Simple(
+pub const TPIMS_DYN_RES: Resource = Resource::Simple(
 "TPIMS_dynamic", Some("parking_area_dynamic"),
 "SELECT row_to_json(r)::text FROM (\
     SELECT site_id AS \"siteId\", to_char(time_stamp AT TIME ZONE 'UTC', \
@@ -141,7 +141,7 @@ const TPIMS_DYN_RES: Resource = Resource::Simple(
 ) r",
 );
 
-const TPIMS_ARCH_RES: Resource = Resource::Simple(
+pub const TPIMS_ARCH_RES: Resource = Resource::Simple(
 "TPIMS_archive", Some("parking_area_archive"),
 "SELECT row_to_json(r)::text FROM (\
     SELECT site_id AS \"siteId\", to_char(time_stamp AT TIME ZONE 'UTC', \

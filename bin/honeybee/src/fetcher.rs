@@ -20,7 +20,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 use crate::error::Error;
 use crate::mere;
-use crate::resource;
+use crate::resource::{self, Resource};
 
 static OUTPUT_DIR: &str = "/var/www/html/iris/";
 
@@ -69,41 +69,23 @@ fn db_thread(uds: String, tx: Sender<PathBuf>) -> Result<(), Error> {
     conn.execute("LISTEN tms", &[])?;
     // Initialize all the resources
     for r in resource::ALL {
-        fetch_resource_timed(&conn, &tx, r.name())?;
+        fetch_resource(&conn, &tx, r)?;
     }
     notify_loop(&conn, tx)
 }
 
-/// Fetch a named resource from database and print timing information.
+/// Fetch a resource from database.
 ///
 /// * `conn` The database connection.
 /// * `tx` Channel sender for resource file names.
-/// * `n` Resource name.
-fn fetch_resource_timed(conn: &Connection, tx: &Sender<PathBuf>, n: &str)
+/// * `r` Resource to fetch.
+fn fetch_resource(conn: &Connection, tx: &Sender<PathBuf>, r: &Resource)
     -> Result<(), Error>
 {
     let t = Instant::now();
-    if let Some(c) = fetch_resource(&conn, tx, &n)? {
-        info!("{}: wrote {} rows in {:?}", &n, c, t.elapsed());
-    } else {
-        warn!("{}: unknown resource", &n);
-    }
+    let c = r.fetch(&conn, OUTPUT_DIR, tx)?;
+    info!("{}: wrote {} rows in {:?}", r.name(), c, t.elapsed());
     Ok(())
-}
-
-/// Fetch a named resource from database.
-///
-/// * `conn` The database connection.
-/// * `tx` Channel sender for resource file names.
-/// * `n` Resource name.
-fn fetch_resource(conn: &Connection, tx: &Sender<PathBuf>, n: &str)
-    -> Result<Option<u32>, Error>
-{
-    if let Some(r) = resource::lookup(n) {
-        Ok(Some(r.fetch(&conn, OUTPUT_DIR, tx)?))
-    } else {
-        Ok(None)
-    }
 }
 
 /// Receive PostgreSQL notifications, and fetch needed resources.
@@ -119,16 +101,21 @@ fn notify_loop(conn: &Connection, tx: Sender<PathBuf>) -> Result<(), Error> {
             ns.insert((n.channel, n.payload));
         }
         for n in ns.drain() {
-            let r = get_resource_name(&n);
-            fetch_resource_timed(&conn, &tx, &r)?;
-            // NOTE: when we need to fetch one, we also need the other
-            if r == "parking_area_dynamic" {
-                fetch_resource_timed(&conn, &tx, &"parking_area_archive")?;
+            let rn = get_resource_name(&n);
+            if let Some(r) = resource::lookup(rn) {
+                fetch_resource(&conn, &tx, &r)?;
+                // NOTE: when we need to fetch one, we also need the other
+                if r == &resource::TPIMS_DYN_RES {
+                    fetch_resource(&conn, &tx, &resource::TPIMS_ARCH_RES)?;
+                }
+            } else {
+                warn!("{}: unknown resource", &rn);
             }
         }
     }
 }
 
+/// Get the resource name from (channel, payload) tuple
 fn get_resource_name(n: &(String, String)) -> &str {
     let (chan, payload) = (&n.0, &n.1);
     // FIXME: remove this after DB has been updated
@@ -139,8 +126,8 @@ fn get_resource_name(n: &(String, String)) -> &str {
     }
 }
 
+/// Get the resource name using new logic
 fn get_resource_name_new<'a>(channel: &'a str, payload: &'a str) -> &'a str {
-    // FIXME: combine this with resource::lookup
     match (channel, payload) {
         ("dms", "msg_current") => &"dms_message",
         ("parking_area", "time_stamp") => &"parking_area_dynamic",
