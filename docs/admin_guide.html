@@ -2781,19 +2781,24 @@ FIXME
 	Gate arms are controlled as arrays of 1-8 gate arms.
 	Opening or closing an array will control all gate arms in the array.
 </p>
+<h4>Verification Cameras</h4>
 <p>
-	Up to two <a href="#cameras">cameras</a> can be associated with a gate
-	arm array.
+	One or two <a href="#cameras">cameras</a> can be associated with a gate
+	arm array, the second one for approaching traffic.
 	This allows operators to verify the status and check traffic conditions
 	before opening or closing a gate arm array.
+	The <b>Swap</b> button allows the camera images to be swapped between
+	larger and smaller views.
 </p>
+<h4>Warning Action Plan</h4>
 <p>
 	An <a href="#action_plan">action plan</a> can be associated with a gate
-	arm array.
-	In addition, <a href="#plan_phase">plan phases</a> can be assigned for
-	<b>open</b> and <b>closed</b> state.
-	When the state of the gate arm array changes, the action plan is
-	automatically updated to the corresponding phase.
+	arm array, allowing one or more <a href="#dms">DMS</a> to display
+	appropriate warning messages.
+	Whenever the state changes, this plan will immediately be changed to
+	the appropriate <a href="#plan_phase">phase</a> &mdash;
+	<b>Warning Open Phase</b> when fully open, otherwise <b>Warning Closed
+	Phase</b>.
 </p>
 <h4 id="interlocks">Interlocks</h4>
 <p>
