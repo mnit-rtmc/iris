@@ -23,6 +23,7 @@ use crate::raster::Raster;
 use crate::resource::Queryable;
 use crate::multi::{ColorClassic, ColorScheme, SyntaxError};
 
+/// A bitmap font glyph
 #[derive(Serialize, Deserialize)]
 pub struct Glyph {
     pub code_point : i32,
@@ -31,12 +32,14 @@ pub struct Glyph {
 }
 
 impl Queryable for Glyph {
+    /// Get the SQL to query all glyphs in a font
     fn sql() -> &'static str {
        "SELECT code_point, width, pixels \
         FROM glyph_view \
         WHERE font = ($1) \
         ORDER BY code_point"
     }
+    /// Produce a glyph from one Row
     fn from_row(row: &postgres::rows::Row) -> Self {
         Glyph {
             code_point : row.get(0),
@@ -47,11 +50,13 @@ impl Queryable for Glyph {
 }
 
 impl Glyph {
+    /// Get the glyph width
     pub fn width(&self) -> u16 {
         self.width as u16
     }
 }
 
+/// A bitmap font
 #[derive(Serialize, Deserialize)]
 pub struct Font {
     pub name     : String,
@@ -65,6 +70,7 @@ pub struct Font {
 }
 
 impl<'a> Font {
+    /// Load fonts from a JSON file
     pub fn load(dir: &Path) -> Result<HashMap<i32, Font>, Error> {
         debug!("Font::load");
         let mut n = PathBuf::new();
@@ -78,15 +84,19 @@ impl<'a> Font {
         }
         Ok(fonts)
     }
+    /// Get font height
     pub fn height(&self) -> u16 {
         self.height as u16
     }
+    /// Get line spacing
     pub fn line_spacing(&self) -> u16 {
         self.line_spacing as u16
     }
+    /// Get character spacing
     pub fn char_spacing(&self) -> u16 {
         self.char_spacing as u16
     }
+    /// Get glyph for a code point
     pub fn glyph(&'a self, cp: char) -> Result<&'a Glyph, SyntaxError> {
         match self.glyphs.iter().find(|g| g.code_point == cp as i32) {
             Some(g) => Ok(&g),
@@ -96,12 +106,14 @@ impl<'a> Font {
 }
 
 impl Queryable for Font {
+    /// Get the SQL to query all fonts
     fn sql() -> &'static str {
        "SELECT name, f_number, height, width, line_spacing, char_spacing, \
                version_id \
         FROM font_view \
         ORDER BY name"
     }
+    /// Produce a font from one Row
     fn from_row(row: &postgres::rows::Row) -> Self {
         Font {
             name        : row.get(0),
@@ -116,6 +128,7 @@ impl Queryable for Font {
     }
 }
 
+/// Query all fonts from DB
 pub fn query_font<W: Write>(conn: &Connection, mut w: W) -> Result<u32, Error> {
     let mut c = 0;
     w.write("[".as_bytes())?;
@@ -134,6 +147,7 @@ pub fn query_font<W: Write>(conn: &Connection, mut w: W) -> Result<u32, Error> {
     Ok(c)
 }
 
+/// An uncompressed graphic
 #[derive(Serialize, Deserialize)]
 pub struct Graphic {
     name             : String,
@@ -146,6 +160,7 @@ pub struct Graphic {
 }
 
 impl Graphic {
+    /// Load graphics from a JSON file
     pub fn load(dir: &Path) -> Result<HashMap<i32, Graphic>, Error> {
         debug!("Graphic::load");
         let mut n = PathBuf::new();
@@ -160,12 +175,15 @@ impl Graphic {
         }
         Ok(graphics)
     }
+    /// Get the graphic width
     pub fn width(&self) -> u32 {
         self.width as u32
     }
+    /// Get the graphic height
     pub fn height(&self) -> u32 {
         self.height as u32
     }
+    /// Get the number of bits per pixel
     fn bits_per_pixel(&self) -> Result<u32, Error> {
         let cs = ColorScheme::from_str(&self.color_scheme)?;
         Ok(match cs {
@@ -175,7 +193,7 @@ impl Graphic {
             ColorScheme::Color24Bit     => 24,
         })
     }
-    /// Render a graphic
+    /// Render a graphic onto a Raster
     pub fn render(&self, page: &mut Raster, cf: [u8;3], x: u32, y: u32)
         -> Result<(), Error>
     {
@@ -205,6 +223,7 @@ impl Graphic {
         }
         Ok(())
     }
+    /// Get one pixel color
     fn get_pixel(&self, cs: ColorScheme, buf: &[u8], x: u32, y: u32, cf: [u8;3])
         -> Option<[u8;3]>
     {
@@ -215,6 +234,7 @@ impl Graphic {
             ColorScheme::Color24Bit     => self.get_pixel_24(buf, x, y),
         }
     }
+    /// Get one pixel on a monochrome 1-bit graphic
     fn get_pixel_1(&self, buf: &[u8], x: u32, y: u32, cf: [u8;3])
         -> Option<[u8;3]>
     {
@@ -237,11 +257,13 @@ impl Graphic {
             }
         }
     }
+    /// Get one pixel on a monochrome 8-bit graphic
     fn get_pixel_8(&self, buf: &[u8], x: u32, y: u32) -> Option<[u8;3]> {
         let p = y * self.width() + x;
         let v = buf[p as usize];
         Some([v, v, v])
     }
+    /// Get one pixel on a classic color graphic
     fn get_pixel_classic(&self, buf: &[u8], x: u32, y: u32) -> Option<[u8;3]> {
         let p = y * self.width() + x;
         let v = buf[p as usize];
@@ -249,6 +271,7 @@ impl Graphic {
         let c = ColorClassic::from_u8(v).unwrap();
         Some(c.rgb())
     }
+    /// Get one pixel on a 24-bit color graphic
     fn get_pixel_24(&self, buf: &[u8], x: u32, y: u32) -> Option<[u8;3]> {
         let p = (y * self.width() + x) * 3;
         let r = buf[(p + 0) as usize];

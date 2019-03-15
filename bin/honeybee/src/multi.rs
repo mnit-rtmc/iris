@@ -28,6 +28,7 @@ pub enum ColorScheme {
 }
 
 impl ColorScheme {
+    /// Create a color scheme from a string
     pub fn from_str(s: &str) -> Result<Self, Error> {
         match s {
             "monochrome1Bit" => Ok(ColorScheme::Monochrome1Bit),

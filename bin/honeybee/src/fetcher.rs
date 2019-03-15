@@ -22,6 +22,7 @@ use crate::error::Error;
 use crate::mere;
 use crate::resource::{self, Resource};
 
+/// Output directory to write JSON resources
 static OUTPUT_DIR: &str = "/var/www/html/iris/";
 
 /// Start receiving notifications and fetching resources.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,10 +11,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-#[macro_use] extern crate log;
-extern crate env_logger;
-extern crate honeybee;
-extern crate users;
+#[macro_use]
+extern crate log;
 
 use std::env;
 use honeybee::fetcher;

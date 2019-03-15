@@ -12,6 +12,7 @@ use std::path::PathBuf;
 use std::sync::mpsc::{SendError, RecvError, TryRecvError};
 use crate::multi::SyntaxError;
 
+/// Enum for all honeybee errors
 #[derive(Debug)]
 pub enum Error {
     Io(io::Error),

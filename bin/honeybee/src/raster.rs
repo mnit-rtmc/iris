@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,6 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+/// A raster is an uncompressed 24-bit color image.
 pub struct Raster {
     width  : u32,
     height : u32,
