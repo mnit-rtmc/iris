@@ -27,6 +27,7 @@ use crate::multi::{Color, ColorClassic, ColorScheme, LineJustification,
 use crate::raster::Raster;
 use crate::render::{PageSplitter, State};
 
+/// Make a PathBuf from a Path and file name
 fn make_name(dir: &Path, n: &str) -> PathBuf {
     let mut p = PathBuf::new();
     p.push(dir);
@@ -34,6 +35,7 @@ fn make_name(dir: &Path, n: &str) -> PathBuf {
     p
 }
 
+/// Make a PathBuf for a temp file
 fn make_tmp_name(dir: &Path, n: &str) -> PathBuf {
     let mut b = String::new();
     b.push('.');
@@ -41,6 +43,7 @@ fn make_tmp_name(dir: &Path, n: &str) -> PathBuf {
     make_name(dir, &b)
 }
 
+/// A resource can produce a JSON array of records.
 #[derive(PartialEq, Eq, Hash)]
 pub enum Resource {
     Simple(&'static str, Option<&'static str>, &'static str),
@@ -48,6 +51,7 @@ pub enum Resource {
     SignMsg(&'static str),
 }
 
+/// Camera resource
 const CAMERA_RES: Resource = Resource::Simple(
 "camera_pub", Some("camera"),
 "SELECT row_to_json(r)::text FROM (\
@@ -57,6 +61,7 @@ const CAMERA_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// DMS resource
 const DMS_RES: Resource = Resource::Simple(
 "dms_pub", Some("dms"),
 "SELECT row_to_json(r)::text FROM (\
@@ -67,6 +72,7 @@ const DMS_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// DMS message resource
 pub const DMS_MSG_RES: Resource = Resource::Simple(
 "dms_message", None,
 "SELECT row_to_json(r)::text FROM (\
@@ -76,6 +82,7 @@ pub const DMS_MSG_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Incident resource
 const INCIDENT_RES: Resource = Resource::Simple(
 "incident", None,
 "SELECT row_to_json(r)::text FROM (\
@@ -86,6 +93,7 @@ const INCIDENT_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Sign configuration resource
 const SIGN_CONFIG_RES: Resource = Resource::Simple(
 "sign_config", None,
 "SELECT row_to_json(r)::text FROM (\
@@ -97,6 +105,7 @@ const SIGN_CONFIG_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Sign detail resource
 const SIGN_DETAIL_RES: Resource = Resource::Simple(
 "sign_detail", None,
 "SELECT row_to_json(r)::text FROM (\
@@ -107,6 +116,7 @@ const SIGN_DETAIL_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Static parking area resource
 const TPIMS_STAT_RES: Resource = Resource::Simple(
 "TPIMS_static", Some("parking_area"),
 "SELECT row_to_json(r)::text FROM (\
@@ -128,6 +138,7 @@ const TPIMS_STAT_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Dynamic parking area resource
 pub const TPIMS_DYN_RES: Resource = Resource::Simple(
 "TPIMS_dynamic", Some("parking_area_dynamic"),
 "SELECT row_to_json(r)::text FROM (\
@@ -141,6 +152,7 @@ pub const TPIMS_DYN_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Archive parking area resource
 pub const TPIMS_ARCH_RES: Resource = Resource::Simple(
 "TPIMS_archive", Some("parking_area_archive"),
 "SELECT row_to_json(r)::text FROM (\
@@ -158,6 +170,7 @@ pub const TPIMS_ARCH_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Graphic resource
 const GRAPHIC_RES: Resource = Resource::Simple(
 "graphic", None,
 "SELECT row_to_json(r)::text FROM (\
@@ -167,14 +180,42 @@ const GRAPHIC_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Font resource
 pub const FONT_RES: Resource = Resource::Font(
 "font",
 );
 
+/// Sign message resource
 const SIGN_MSG_RES: Resource = Resource::SignMsg(
 "sign_message",
 );
 
+/// All defined resources
+pub const ALL: &[Resource] = &[
+    CAMERA_RES,
+    DMS_RES,
+    DMS_MSG_RES,
+    INCIDENT_RES,
+    SIGN_CONFIG_RES,
+    SIGN_DETAIL_RES,
+    TPIMS_STAT_RES,
+    TPIMS_DYN_RES,
+    TPIMS_ARCH_RES,
+    GRAPHIC_RES,
+    FONT_RES,
+    SIGN_MSG_RES,
+];
+
+/// Lookup a resource by name (or alternate name)
+pub fn lookup(n: &str) -> Option<&'static Resource> {
+    ALL.iter().find(|r| r.matches(n))
+}
+
+/// Query a simple resource.
+///
+/// * `conn` The database connection.
+/// * `sql` SQL query.
+/// * `w` Writer to output resource.
 fn query_simple<W: Write>(conn: &Connection, sql: &str, mut w: W)
     -> Result<u32, Error>
 {
@@ -192,13 +233,9 @@ fn query_simple<W: Write>(conn: &Connection, sql: &str, mut w: W)
     Ok(c)
 }
 
-pub trait Queryable {
-    fn sql() -> &'static str;
-    fn from_row(row: &postgres::rows::Row) -> Self;
-}
-
+/// Sign configuration
 #[derive(Serialize, Deserialize)]
-pub struct SignConfig {
+struct SignConfig {
     name        : String,
     face_width  : i32,
     face_height : i32,
@@ -217,6 +254,7 @@ pub struct SignConfig {
 }
 
 impl SignConfig {
+    /// Load sign configurations from a JSON file
     fn load(dir: &Path) -> Result<HashMap<String, SignConfig>, Error> {
         debug!("SignConfig::load");
         let mut n = PathBuf::new();
@@ -329,8 +367,9 @@ impl SignConfig {
     }
 }
 
+/// Sign detail
 #[derive(Serialize, Deserialize)]
-pub struct SignDetail {
+struct SignDetail {
     name           : String,
     dms_type       : String,
     portable       : bool,
@@ -347,6 +386,7 @@ pub struct SignDetail {
     max_multi_len  : i32,
 }
 
+/// Sign message
 #[derive(Serialize)]
 struct SignMessage {
     name          : String,
@@ -361,13 +401,21 @@ struct SignMessage {
     duration      : Option<i32>,
 }
 
+/// A trait to query a DB and produce a struct from each returned Row.
+pub trait Queryable {
+    fn sql() -> &'static str;
+    fn from_row(row: &postgres::rows::Row) -> Self;
+}
+
 impl Queryable for SignMessage {
+    /// Get the SQL to query all sign messages
     fn sql() -> &'static str {
         "SELECT name, sign_config, incident, multi, beacon_enabled, \
                 prefix_page, msg_priority, sources, owner, duration \
         FROM sign_message_view \
         ORDER BY name"
     }
+    /// Produce a sign message from one Row
     fn from_row(row: &postgres::rows::Row) -> Self {
         SignMessage {
             name          : row.get(0),
@@ -384,6 +432,7 @@ impl Queryable for SignMessage {
     }
 }
 
+/// Data needed for rendering sign messages
 struct MsgData {
     configs : HashMap<String, SignConfig>,
     fonts   : HashMap<i32, Font>,
@@ -395,6 +444,7 @@ struct MsgData {
 }
 
 impl MsgData {
+    /// Load message data from a file path
     fn load(dir: &Path) -> Result<Self, Error> {
         debug!("MsgData::load");
         let configs = SignConfig::load(dir)?;
@@ -700,25 +750,4 @@ impl Resource {
         tx.send(n)?;
         Ok(c)
     }
-}
-
-/// All defined resources
-pub const ALL: &[Resource] = &[
-    CAMERA_RES,
-    DMS_RES,
-    DMS_MSG_RES,
-    INCIDENT_RES,
-    SIGN_CONFIG_RES,
-    SIGN_DETAIL_RES,
-    TPIMS_STAT_RES,
-    TPIMS_DYN_RES,
-    TPIMS_ARCH_RES,
-    GRAPHIC_RES,
-    FONT_RES,
-    SIGN_MSG_RES,
-];
-
-/// Lookup a resource by name (or alternate name)
-pub fn lookup(n: &str) -> Option<&'static Resource> {
-    ALL.iter().find(|r| r.matches(n))
 }
