@@ -96,6 +96,7 @@ fn notify_loop(conn: &Connection, tx: Sender<PathBuf>) -> Result<(), Error> {
     let nots = conn.notifications();
     let mut ns = HashSet::new();
     loop {
+        // Collect until 300 ms have elapsed with no new notifications
         for n in nots.timeout_iter(Duration::from_millis(300)).iterator() {
             let n = n?;
             ns.insert((n.channel, n.payload));
