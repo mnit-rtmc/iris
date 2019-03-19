@@ -271,4 +271,17 @@ CREATE VIEW r_node_view AS
 	JOIN iris.r_node_transition tr ON n.transition = tr.n_transition;
 GRANT SELECT ON r_node_view TO PUBLIC;
 
+-- Add sign_group_view
+CREATE VIEW sign_group_view AS
+	SELECT name, local, hidden
+	FROM iris.sign_group;
+GRANT SELECT ON sign_group_view TO PUBLIC;
+
+-- Add dms_sign_group_view
+CREATE VIEW dms_sign_group_view AS
+	SELECT d.name, dms, sign_group, local, hidden
+	FROM iris.dms_sign_group d
+	JOIN iris.sign_group sg ON d.sign_group = sg.name;
+GRANT SELECT ON dms_sign_group_view TO PUBLIC;
+
 COMMIT;

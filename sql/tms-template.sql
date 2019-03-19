@@ -2552,11 +2552,22 @@ CREATE TABLE iris.sign_group (
 	hidden BOOLEAN NOT NULL
 );
 
+CREATE VIEW sign_group_view AS
+	SELECT name, local, hidden
+	FROM iris.sign_group;
+GRANT SELECT ON sign_group_view TO PUBLIC;
+
 CREATE TABLE iris.dms_sign_group (
 	name VARCHAR(42) PRIMARY KEY,
 	dms VARCHAR(20) NOT NULL REFERENCES iris._dms,
 	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group
 );
+
+CREATE VIEW dms_sign_group_view AS
+	SELECT d.name, dms, sign_group, local, hidden
+	FROM iris.dms_sign_group d
+	JOIN iris.sign_group sg ON d.sign_group = sg.name;
+GRANT SELECT ON dms_sign_group_view TO PUBLIC;
 
 CREATE TABLE iris.quick_message (
 	name VARCHAR(20) PRIMARY KEY,
