@@ -6,6 +6,7 @@ extern crate serde_derive;
 mod error;
 pub mod fetcher;
 mod font;
+pub mod geo;
 mod resource;
 mod mere;
 mod render;
