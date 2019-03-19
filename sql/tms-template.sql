@@ -956,7 +956,7 @@ ALTER TABLE iris.r_node ADD CONSTRAINT active_ck
 	CHECK (active = FALSE OR abandoned = FALSE);
 
 CREATE VIEW r_node_view AS
-	SELECT n.name, roadway, road_dir, cross_mod, cross_street,
+	SELECT n.name, n.geo_loc, roadway, road_dir, cross_mod, cross_street,
 	       cross_dir, nt.name AS node_type, n.pickable, n.above,
 	       tr.name AS transition, n.lanes, n.attach_side, n.shift, n.active,
 	       n.abandoned, n.station_id, n.speed_limit, n.notes
