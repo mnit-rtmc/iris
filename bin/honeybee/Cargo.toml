@@ -1,6 +1,6 @@
 [package]
 name = "honeybee"
-version = "0.4.11"
+version = "0.4.12"
 authors = ["Douglas Lau <doug.lau@state.mn.us>"]
 description = "Server for publishing IRIS data as JSON / MVT"
 license = "GPL-2.0-or-later"
