@@ -545,6 +545,9 @@ impl PageRenderer {
               (just_page < jp ||
               (just_page == jp && line_number == ln && just_line < jl))
             {
+                warn!("just_page: {}, jp: {}", just_page, jp);
+                warn!("line_number: {}, ln: {}", line_number, ln);
+                warn!("just_line: {}, jl: {}", just_line, jl);
                 return Err(SyntaxError::TagConflict);
             }
             tr = text_rectangle;
@@ -903,6 +906,11 @@ mod test {
         assert!(pages.len() == 2);
         let pages: Vec<_> = PageSplitter::new(rs, "1[np]2[nP]").collect();
         assert!(pages.len() == 3);
+        let pages: Vec<_> = PageSplitter::new(rs, "[fo6][fo6][nl]\
+            [jl2][cf255,255,255]RAMP A[jl4][cf255,255,0]FULL[nl]\
+            [jl2][cf255,255,255]RAMP B[jl4][cf255,255,0]FULL[nl]\
+            [jl2][cf255,255,255]RAMP C[jl4][cf255,255,0]FULL").collect();
+        assert!(pages.len() == 1);
     }
     #[test]
     fn page_full_matrix() {
