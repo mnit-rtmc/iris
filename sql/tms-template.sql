@@ -105,6 +105,18 @@ CREATE TABLE iris.system_attribute (
 	value VARCHAR(64) NOT NULL
 );
 
+CREATE FUNCTION iris.table_notify() RETURNS TRIGGER AS
+	$table_notify$
+BEGIN
+	PERFORM pg_notify(TG_TABLE_NAME, '');
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$table_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER system_attribute_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.system_attribute
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 COPY iris.system_attribute (name, value) FROM stdin;
 action_plan_alert_list	
 action_plan_event_purge_days	90
@@ -129,7 +141,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.88.0
+database_version	4.89.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0
@@ -912,6 +924,10 @@ CREATE TABLE iris.r_node (
 
 CREATE UNIQUE INDEX r_node_station_idx ON iris.r_node USING btree (station_id);
 
+CREATE TRIGGER r_node_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.r_node
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 CREATE FUNCTION iris.r_node_left(INTEGER, INTEGER, BOOLEAN, INTEGER)
 	RETURNS INTEGER AS $r_node_left$
 DECLARE
@@ -1198,6 +1214,10 @@ CREATE TABLE iris.cabinet (
 	style VARCHAR(20) REFERENCES iris.cabinet_style(name),
 	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name)
 );
+
+CREATE TRIGGER cabinet_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.cabinet
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW cabinet_view AS
 	SELECT name, style, geo_loc
@@ -1713,6 +1733,18 @@ CREATE TABLE iris._beacon (
 ALTER TABLE iris._beacon ADD CONSTRAINT _beacon_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
+CREATE FUNCTION iris.beacon_notify() RETURNS TRIGGER AS
+	$beacon_notify$
+BEGIN
+	NOTIFY beacon;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$beacon_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER beacon_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris._beacon
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.beacon_notify();
+
 CREATE VIEW iris.beacon AS
 	SELECT b.name, geo_loc, controller, pin, notes, message, verify_pin,
 	       preset
@@ -2147,14 +2179,6 @@ $font_ck$ LANGUAGE plpgsql;
 CREATE TRIGGER font_ck_trig
 	BEFORE UPDATE ON iris.font
 	FOR EACH ROW EXECUTE PROCEDURE iris.font_ck();
-
-CREATE FUNCTION iris.table_notify() RETURNS TRIGGER AS
-	$table_notify$
-BEGIN
-	PERFORM pg_notify(TG_TABLE_NAME, '');
-	RETURN NULL; -- AFTER trigger return is ignored
-END;
-$table_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER font_notify_trig
 	AFTER INSERT OR UPDATE OR DELETE ON iris.font
@@ -2685,6 +2709,18 @@ CREATE TABLE iris._gate_arm_array (
 
 ALTER TABLE iris._gate_arm_array ADD CONSTRAINT _gate_arm_array_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE FUNCTION iris.gate_arm_array_notify() RETURNS TRIGGER AS
+	$gate_arm_array_notify$
+BEGIN
+	NOTIFY gate_arm_array;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$gate_arm_array_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gate_arm_array_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris._gate_arm_array
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.gate_arm_array_notify();
 
 CREATE VIEW iris.gate_arm_array AS
 	SELECT _gate_arm_array.name, geo_loc, controller, pin, notes, prereq,
@@ -3467,6 +3503,18 @@ CREATE TABLE iris._ramp_meter (
 ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
+CREATE FUNCTION iris.ramp_meter_notify() RETURNS TRIGGER AS
+	$ramp_meter_notify$
+BEGIN
+	NOTIFY ramp_meter;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$ramp_meter_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER ramp_meter_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris._ramp_meter
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.ramp_meter_notify();
+
 CREATE VIEW iris.ramp_meter AS
 	SELECT m.name, geo_loc, controller, pin, notes, meter_type, storage,
 	       max_wait, algorithm, am_target, pm_target, beacon, preset, m_lock
@@ -3698,6 +3746,18 @@ CREATE TABLE iris._tag_reader (
 
 ALTER TABLE iris._tag_reader ADD CONSTRAINT _tag_reader_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE FUNCTION iris.tag_reader_notify() RETURNS TRIGGER AS
+	$tag_reader_notify$
+BEGIN
+	NOTIFY tag_reader;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$tag_reader_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tag_reader_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris._tag_reader
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.tag_reader_notify();
 
 CREATE VIEW iris.tag_reader AS
 	SELECT t.name, geo_loc, controller, pin, notes, toll_zone,
@@ -4042,6 +4102,18 @@ CREATE TABLE iris._weather_sensor (
 
 ALTER TABLE iris._weather_sensor ADD CONSTRAINT _weather_sensor_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE FUNCTION iris.weather_sensor_notify() RETURNS TRIGGER AS
+	$weather_sensor_notify$
+BEGIN
+	NOTIFY weather_sensor;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$weather_sensor_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER weather_sensor_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris._weather_sensor
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.weather_sensor_notify();
 
 CREATE VIEW iris.weather_sensor AS SELECT
 	m.name, geo_loc, controller, pin, notes
