@@ -66,9 +66,21 @@ CREATE TRIGGER beacon_notify_trig
 	AFTER INSERT OR UPDATE OR DELETE ON iris._beacon
 	FOR EACH STATEMENT EXECUTE PROCEDURE iris.beacon_notify();
 
+CREATE FUNCTION iris.r_node_notify() RETURNS TRIGGER AS
+	$r_node_notify$
+BEGIN
+	IF (TG_OP = 'DELETE') THEN
+		PERFORM pg_notify('r_node', OLD.name);
+	ELSE
+		PERFORM pg_notify('r_node', NEW.name);
+	END IF;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$r_node_notify$ LANGUAGE plpgsql;
+
 CREATE TRIGGER r_node_notify_trig
 	AFTER INSERT OR UPDATE OR DELETE ON iris.r_node
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+	FOR EACH ROW EXECUTE PROCEDURE iris.r_node_notify();
 
 CREATE TRIGGER cabinet_notify_trig
 	AFTER INSERT OR UPDATE OR DELETE ON iris.cabinet
