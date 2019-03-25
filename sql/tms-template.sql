@@ -8,9 +8,10 @@
 -- CHANNEL: camera, dms, font, glyph, graphic, incident, parking_area,
 --          sign_config, sign_detail, sign_message
 --
--- PAYLOAD: 'msg_current' (dms)
+-- PAYLOAD: 'video_loss' (camera)
+--          'msg_current', 'msg_sched', 'expire_time' (dms)
 --          'time_stamp' (parking_area)
---          name (geo_loc)
+--          name (r_node, any notify_tag in geo_loc)
 --
 SET client_encoding = 'UTF8';
 
@@ -1362,14 +1363,22 @@ ALTER TABLE iris._camera ADD CONSTRAINT _camera_fkey
 CREATE FUNCTION iris.camera_notify() RETURNS TRIGGER AS
 	$camera_notify$
 BEGIN
-	NOTIFY camera;
+	IF (NEW.video_loss IS DISTINCT FROM OLD.video_loss) THEN
+		NOTIFY camera, 'video_loss';
+	ELSE
+		NOTIFY camera;
+	END IF;
 	RETURN NULL; -- AFTER trigger return is ignored
 END;
 $camera_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER camera_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris._camera
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.camera_notify();
+	AFTER UPDATE ON iris._camera
+	FOR EACH ROW EXECUTE PROCEDURE iris.camera_notify();
+
+CREATE TRIGGER camera_table_notify_trig
+	AFTER INSERT OR DELETE ON iris._camera
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.camera AS
 	SELECT c.name, geo_loc, controller, pin, notes, cam_num, encoder_type,
@@ -2464,6 +2473,10 @@ CREATE FUNCTION iris.dms_notify() RETURNS TRIGGER AS
 BEGIN
 	IF (NEW.msg_current IS DISTINCT FROM OLD.msg_current) THEN
 		NOTIFY dms, 'msg_current';
+	ELSIF (NEW.expire_time IS DISTINCT FROM OLD.expire_time) THEN
+		NOTIFY dms, 'expire_time';
+	ELSIF (NEW.msg_sched IS DISTINCT FROM OLD.msg_sched) THEN
+		NOTIFY dms, 'msg_sched';
 	ELSE
 		NOTIFY dms;
 	END IF;
@@ -2472,8 +2485,12 @@ END;
 $dms_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER dms_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris._dms
+	AFTER UPDATE ON iris._dms
 	FOR EACH ROW EXECUTE PROCEDURE iris.dms_notify();
+
+CREATE TRIGGER dms_table_notify_trig
+	AFTER INSERT OR DELETE ON iris._dms
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.dms AS
 	SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
@@ -3385,7 +3402,7 @@ CREATE FUNCTION iris.parking_area_notify() RETURNS TRIGGER AS
 BEGIN
 	IF (NEW.time_stamp IS DISTINCT FROM OLD.time_stamp) THEN
 		NOTIFY parking_area, 'time_stamp';
-	ELSE
+	ELSIF (NEW.time_stamp_static IS DISTINCT FROM OLD.time_stamp_static) THEN
 		NOTIFY parking_area;
 	END IF;
 	RETURN NULL; -- AFTER trigger return is ignored
@@ -3393,8 +3410,12 @@ END;
 $parking_area_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER parking_area_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris.parking_area
+	AFTER UPDATE ON iris.parking_area
 	FOR EACH ROW EXECUTE PROCEDURE iris.parking_area_notify();
+
+CREATE TRIGGER parking_area_table_notify_trig
+	AFTER INSERT OR DELETE ON iris.parking_area
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE TABLE iris.parking_area_amenities (
 	bit INTEGER PRIMARY KEY,

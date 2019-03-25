@@ -63,6 +63,7 @@ fn db_thread(uds: String, tx: Sender<PathBuf>) -> Result<(), Error> {
     conn.execute("LISTEN graphic", &[])?;
     conn.execute("LISTEN incident", &[])?;
     conn.execute("LISTEN parking_area", &[])?;
+    conn.execute("LISTEN r_node", &[])?;
     conn.execute("LISTEN sign_config", &[])?;
     conn.execute("LISTEN sign_detail", &[])?;
     conn.execute("LISTEN sign_message", &[])?;
@@ -117,9 +118,12 @@ fn notify_loop(conn: &Connection, tx: Sender<PathBuf>) -> Result<(), Error> {
 /// Lookup resource from PostgreSQL notification channel / payload
 fn lookup_resource(chan: &str, payload: &str) -> Option<&'static Resource> {
     match (chan, payload) {
+        ("camera", "video_loss") => None,
+        ("dms", "expire_time") => None,
+        ("dms", "msg_sched") => None,
         ("dms", "msg_current") => Some(&resource::DMS_MSG_RES),
-        ("parking_area", "time_stamp") => Some(&resource::TPIMS_DYN_RES),
         ("glyph", _) => Some(&resource::FONT_RES),
+        ("parking_area", "time_stamp") => Some(&resource::TPIMS_DYN_RES),
         (_, _) => resource::lookup(chan),
     }
 }

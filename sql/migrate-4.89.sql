@@ -103,4 +103,76 @@ CREATE VIEW r_node_view AS
 	JOIN iris.r_node_transition tr ON n.transition = tr.n_transition;
 GRANT SELECT ON r_node_view TO PUBLIC;
 
+-- Update notify stuff
+DROP TRIGGER camera_notify_trig ON iris._camera;
+DROP FUNCTION iris.camera_notify();
+DROP TRIGGER dms_notify_trig ON iris._dms;
+DROP FUNCTION iris.dms_notify();
+DROP TRIGGER parking_area_notify_trig ON iris.parking_area;
+DROP FUNCTION iris.parking_area_notify();
+
+CREATE FUNCTION iris.camera_notify() RETURNS TRIGGER AS
+	$camera_notify$
+BEGIN
+	IF (NEW.video_loss IS DISTINCT FROM OLD.video_loss) THEN
+		NOTIFY camera, 'video_loss';
+	ELSE
+		NOTIFY camera;
+	END IF;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$camera_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_notify_trig
+	AFTER UPDATE ON iris._camera
+	FOR EACH ROW EXECUTE PROCEDURE iris.camera_notify();
+
+CREATE TRIGGER camera_table_notify_trig
+	AFTER INSERT OR DELETE ON iris._camera
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE FUNCTION iris.dms_notify() RETURNS TRIGGER AS
+	$dms_notify$
+BEGIN
+	IF (NEW.msg_current IS DISTINCT FROM OLD.msg_current) THEN
+		NOTIFY dms, 'msg_current';
+	ELSIF (NEW.expire_time IS DISTINCT FROM OLD.expire_time) THEN
+		NOTIFY dms, 'expire_time';
+	ELSIF (NEW.msg_sched IS DISTINCT FROM OLD.msg_sched) THEN
+		NOTIFY dms, 'msg_sched';
+	ELSE
+		NOTIFY dms;
+	END IF;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$dms_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER dms_notify_trig
+	AFTER UPDATE ON iris._dms
+	FOR EACH ROW EXECUTE PROCEDURE iris.dms_notify();
+
+CREATE TRIGGER dms_table_notify_trig
+	AFTER INSERT OR DELETE ON iris._dms
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE FUNCTION iris.parking_area_notify() RETURNS TRIGGER AS
+	$parking_area_notify$
+BEGIN
+	IF (NEW.time_stamp IS DISTINCT FROM OLD.time_stamp) THEN
+		NOTIFY parking_area, 'time_stamp';
+	ELSIF (NEW.time_stamp_static IS DISTINCT FROM OLD.time_stamp_static) THEN
+		NOTIFY parking_area;
+	END IF;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$parking_area_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER parking_area_notify_trig
+	AFTER UPDATE ON iris.parking_area
+	FOR EACH ROW EXECUTE PROCEDURE iris.parking_area_notify();
+
+CREATE TRIGGER parking_area_table_notify_trig
+	AFTER INSERT OR DELETE ON iris.parking_area
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 COMMIT;
