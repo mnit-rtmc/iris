@@ -67,6 +67,7 @@ fn db_thread(uds: String, tx: Sender<PathBuf>) -> Result<(), Error> {
     conn.execute("LISTEN sign_config", &[])?;
     conn.execute("LISTEN sign_detail", &[])?;
     conn.execute("LISTEN sign_message", &[])?;
+    conn.execute("LISTEN system_attribute", &[])?;
     // Initialize all the resources
     for r in resource::ALL {
         fetch_resource(&conn, &tx, r)?;
@@ -124,6 +125,7 @@ fn lookup_resource(chan: &str, payload: &str) -> Option<&'static Resource> {
         ("dms", "msg_current") => Some(&resource::DMS_MSG_RES),
         ("glyph", _) => Some(&resource::FONT_RES),
         ("parking_area", "time_stamp") => Some(&resource::TPIMS_DYN_RES),
+        ("system_attribute", _) => Some(&resource::DMS_ATTRIBUTE_RES),
         (_, _) => resource::lookup(chan),
     }
 }

@@ -187,7 +187,7 @@ impl fmt::Display for LineJustification {
 
 impl LineJustification {
     /// Create a line justification.
-    fn new(v: &str) -> Option<Self> {
+    pub fn new(v: &str) -> Option<Self> {
         match v {
             "1" => Some(LineJustification::Other),
             "2" => Some(LineJustification::Left),
@@ -217,7 +217,7 @@ impl fmt::Display for PageJustification {
 
 impl PageJustification {
     /// Create a page justification.
-    fn new(v: &str) -> Option<Self> {
+    pub fn new(v: &str) -> Option<Self> {
         match v {
             "1" => Some(PageJustification::Other),
             "2" => Some(PageJustification::Top),

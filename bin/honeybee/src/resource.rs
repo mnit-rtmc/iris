@@ -73,6 +73,15 @@ const CAMERA_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// DMS attribute resource
+pub const DMS_ATTRIBUTE_RES: Resource = Resource::Simple(
+"dms_attribute", None,
+"SELECT row_to_json(r)::text FROM (\
+    SELECT name, value \
+    FROM dms_attribute_view \
+) r",
+);
+
 /// DMS resource
 const DMS_RES: Resource = Resource::Simple(
 "dms_pub", Some("dms"),
@@ -205,6 +214,7 @@ const SIGN_MSG_RES: Resource = Resource::SignMsg(
 /// All defined resources
 pub const ALL: &[Resource] = &[
     CAMERA_RES,
+    DMS_ATTRIBUTE_RES,
     DMS_RES,
     DMS_MSG_RES,
     INCIDENT_RES,
@@ -244,6 +254,31 @@ fn query_simple<W: Write>(conn: &Connection, sql: &str, mut w: W)
     if c > 0 { w.write("\n".as_bytes())?; }
     w.write("]\n".as_bytes())?;
     Ok(c)
+}
+
+/// DMS attribute
+#[derive(Serialize, Deserialize)]
+struct DmsAttribute {
+    name  : String,
+    value : String,
+}
+
+impl DmsAttribute {
+    /// Load DMS attributes from a JSON file
+    fn load(dir: &Path) -> Result<HashMap<String, DmsAttribute>, Error> {
+        debug!("DmsAttribute::load");
+        let mut n = PathBuf::new();
+        n.push(dir);
+        n.push("dms_attribute");
+        let r = BufReader::new(File::open(&n)?);
+        let mut attrs = HashMap::new();
+        let j: Vec<DmsAttribute> = serde_json::from_reader(r)?;
+        for da in j {
+            let an = da.name.clone();
+            attrs.insert(an, da);
+        }
+        Ok(attrs)
+    }
 }
 
 /// Sign configuration
@@ -447,24 +482,24 @@ impl Queryable for SignMessage {
 
 /// Data needed for rendering sign messages
 struct MsgData {
+    attrs   : HashMap<String, DmsAttribute>,
     configs : HashMap<String, SignConfig>,
     fonts   : HashMap<i32, Font>,
     graphics: HashMap<i32, Graphic>,
     gifs    : HashSet<PathBuf>,
-    // FIXME: load DMS attributes: dms_default_justification_line,
-    //        dms_default_jusitfication_page, dms_max_lines,
-    //        dms_page_off_default_secs, dms_page_on_default_secs
 }
 
 impl MsgData {
     /// Load message data from a file path
     fn load(dir: &Path) -> Result<Self, Error> {
         debug!("MsgData::load");
+        let attrs = DmsAttribute::load(dir)?;
         let configs = SignConfig::load(dir)?;
         let fonts = Font::load(dir)?;
         let graphics = Graphic::load(dir)?;
         let gifs = gif_listing(dir)?;
         Ok(MsgData {
+            attrs,
             configs,
             fonts,
             graphics,
@@ -487,6 +522,49 @@ impl MsgData {
             tx.send(p)?;
         }
         Ok(())
+    }
+    /// Get an attribute (seconds) in u8 deciseconds
+    fn get_as_ds(&self, name: &str) -> Option<u8> {
+        if let Some(attr) = self.attrs.get(name) {
+            if let Ok(sec) = attr.name.parse::<f32>() {
+                let ds = sec * 10.0;
+                if ds >= 0.0 && ds <= 255.0 {
+                    return Some(ds as u8);
+                }
+            }
+        }
+        debug!("MsgData::get_as_ds, {} missing!", name);
+        None
+    }
+    /// Get the default page on time
+    fn page_on_default_ds(&self) -> u8 {
+        self.get_as_ds("dms_page_on_default_secs").unwrap_or(20)
+    }
+    /// Get the default page off time
+    fn page_off_default_ds(&self) -> u8 {
+        self.get_as_ds("dms_page_off_default_secs").unwrap_or(0)
+    }
+    /// Get the default page justification
+    fn page_justification_default(&self) -> PageJustification {
+        const ATTR: &str = "dms_default_justification_page";
+        if let Some(attr) = self.attrs.get(ATTR) {
+            if let Some(pj) = PageJustification::new(&attr.name) {
+                return pj;
+            }
+        }
+        debug!("MsgData::page_justification_default, {} missing!", ATTR);
+        PageJustification::Top
+    }
+    /// Get the default line justification
+    fn line_justification_default(&self) -> LineJustification {
+        const ATTR: &str = "dms_default_justification_line";
+        if let Some(attr) = self.attrs.get(ATTR) {
+            if let Some(lj) = LineJustification::new(&attr.name) {
+                return lj;
+            }
+        }
+        debug!("MsgData::line_justification_default, {} missing!", ATTR);
+        LineJustification::Center
     }
 }
 
@@ -649,8 +727,8 @@ fn create_render_state(s: &SignMessage, msg_data: &MsgData)
         ColorScheme::ColorClassic|
         ColorScheme::Color24Bit     => ColorClassic::Black.into(),
     };
-    let page_on_time_ds = 20;   // FIXME
-    let page_off_time_ds = 0;   // FIXME
+    let page_on_time_ds = msg_data.page_on_default_ds();
+    let page_off_time_ds = msg_data.page_off_default_ds();
     if cfg.pixel_width < 1 {
         return Err(Error::Other(format!("Invalid width: {}", cfg.pixel_width)));
     }
@@ -659,8 +737,8 @@ fn create_render_state(s: &SignMessage, msg_data: &MsgData)
     }
     let text_rectangle = Rectangle::new(1, 1, cfg.pixel_width as u16,
         cfg.pixel_height as u16);
-    let just_page = PageJustification::Top;    // FIXME
-    let just_line = LineJustification::Center; // FIXME
+    let just_page = msg_data.page_justification_default();
+    let just_line = msg_data.line_justification_default();
     let fname = cfg.default_font.as_ref();
     if fname.is_none() {
         return Err(Error::Other(format!("No default font for {}", cfg.name)));
