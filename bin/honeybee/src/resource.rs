@@ -51,6 +51,18 @@ pub enum Resource {
     SignMsg(&'static str),
 }
 
+/// R_Node resource
+const R_NODE_RES: Resource = Resource::Simple(
+"r_node", None,
+"SELECT row_to_json(r)::text FROM (\
+    SELECT name, roadway, road_dir, cross_mod, cross_street, cross_dir, \
+           landmark, lat, lon, node_type, pickable, above, transition, lanes, \
+           attach_side, shift, active, abandoned, station_id, speed_limit, \
+           notes \
+    FROM r_node_view \
+) r",
+);
+
 /// Camera resource
 const CAMERA_RES: Resource = Resource::Simple(
 "camera_pub", Some("camera"),
@@ -196,6 +208,7 @@ pub const ALL: &[Resource] = &[
     DMS_RES,
     DMS_MSG_RES,
     INCIDENT_RES,
+    R_NODE_RES,
     SIGN_CONFIG_RES,
     SIGN_DETAIL_RES,
     TPIMS_STAT_RES,

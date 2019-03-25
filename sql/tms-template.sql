@@ -985,9 +985,9 @@ ALTER TABLE iris.r_node ADD CONSTRAINT active_ck
 
 CREATE VIEW r_node_view AS
 	SELECT n.name, n.geo_loc, roadway, road_dir, cross_mod, cross_street,
-	       cross_dir, nt.name AS node_type, n.pickable, n.above,
-	       tr.name AS transition, n.lanes, n.attach_side, n.shift, n.active,
-	       n.abandoned, n.station_id, n.speed_limit, n.notes
+	       cross_dir, landmark, lat, lon, nt.name AS node_type, n.pickable,
+	       n.above, tr.name AS transition, n.lanes, n.attach_side, n.shift,
+	       n.active, n.abandoned, n.station_id, n.speed_limit, n.notes
 	FROM iris.r_node n
 	JOIN geo_loc_view l ON n.geo_loc = l.name
 	JOIN iris.r_node_type nt ON n.node_type = nt.n_type
