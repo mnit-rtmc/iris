@@ -16,7 +16,6 @@ use std::fmt;
 use std::iter::Peekable;
 use std::str::Chars;
 use std::str::FromStr;
-use crate::error::Error;
 
 /// DMS color scheme.
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -27,15 +26,18 @@ pub enum ColorScheme {
     Color24Bit,
 }
 
-impl ColorScheme {
+impl From<&str> for ColorScheme {
     /// Create a color scheme from a string
-    pub fn from_str(s: &str) -> Result<Self, Error> {
+    fn from(s: &str) -> Self {
         match s {
-            "monochrome1Bit" => Ok(ColorScheme::Monochrome1Bit),
-            "monochrome8Bit" => Ok(ColorScheme::Monochrome8Bit),
-            "colorClassic"   => Ok(ColorScheme::ColorClassic),
-            "color24Bit"     => Ok(ColorScheme::Color24Bit),
-            _ => Err(Error::Other(format!("Unknown scheme: {:?}", s))),
+            "monochrome1Bit" => ColorScheme::Monochrome1Bit,
+            "monochrome8Bit" => ColorScheme::Monochrome8Bit,
+            "colorClassic"   => ColorScheme::ColorClassic,
+            "color24Bit"     => ColorScheme::Color24Bit,
+            _ => {
+                warn!("Unknown color scheme: {}", s);
+                ColorScheme::Monochrome1Bit
+            },
         }
     }
 }
@@ -91,18 +93,18 @@ pub enum ColorClassic {
 
 impl ColorClassic {
     /// Get RGB triplet for a classic color.
-    pub fn rgb(&self) -> [u8;3] {
+    pub fn rgb(&self) -> i32 {
         match self {
-            ColorClassic::Black   => [  0,  0,  0],
-            ColorClassic::Red     => [255,  0,  0],
-            ColorClassic::Yellow  => [255,255,  0],
-            ColorClassic::Green   => [  0,255,  0],
-            ColorClassic::Cyan    => [  0,255,255],
-            ColorClassic::Blue    => [  0,  0,255],
-            ColorClassic::Magenta => [255,  0,255],
-            ColorClassic::White   => [255,255,255],
-            ColorClassic::Orange  => [255,165,  0],
-            ColorClassic::Amber   => [255,208,  0],
+            ColorClassic::Black   => 0x000000,
+            ColorClassic::Red     => 0xFF0000,
+            ColorClassic::Yellow  => 0xFFFF00,
+            ColorClassic::Green   => 0x00FF00,
+            ColorClassic::Cyan    => 0x00FFFF,
+            ColorClassic::Blue    => 0x0000FF,
+            ColorClassic::Magenta => 0xFF00FF,
+            ColorClassic::White   => 0xFFFFFF,
+            ColorClassic::Orange  => 0xFFA500,
+            ColorClassic::Amber   => 0xFFD000,
         }
     }
     /// Maybe convert a u8 into a ColorClassic

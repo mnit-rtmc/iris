@@ -24,7 +24,7 @@ use crate::error::Error;
 use crate::font::{Font, query_font, Graphic};
 use crate::multi::{Color, ColorClassic, ColorScheme, LineJustification,
                    PageJustification, Rectangle};
-use crate::raster::Raster;
+use crate::raster::{Raster, Rgb24};
 use crate::render::{PageSplitter, State};
 
 /// Make a PathBuf from a Path and file name
@@ -413,6 +413,38 @@ impl SignConfig {
         let pos = vb + lo + (self.pitch_vert * y as i32) as f32;
         pos / self.face_height as f32
     }
+    /// Get the default foreground color
+    fn foreground_default(&self) -> Color {
+        match self.color_scheme[..].into() {
+            ColorScheme::ColorClassic |
+            ColorScheme::Color24Bit => ColorClassic::Amber.into(),
+            _ => self.monochrome_foreground.into(),
+        }
+    }
+    /// Get the default background color
+    fn background_default(&self) -> Color {
+        match self.color_scheme[..].into() {
+            ColorScheme::ColorClassic |
+            ColorScheme::Color24Bit => ColorClassic::Black.into(),
+            _ => self.monochrome_background.into(),
+        }
+    }
+    /// Get the default text rectangle
+    fn text_rect_default(&self) -> Result<Rectangle, Error> {
+        let w = self.pixel_width;
+        let w = if w > 0 {
+            Ok(w)
+        } else {
+            Err(Error::Other(format!("Invalid width: {}", w)))
+        }?;
+        let h = self.pixel_height;
+        let h = if h > 0 {
+            Ok(h)
+        } else {
+            Err(Error::Other(format!("Invalid height: {}", h)))
+        }?;
+        Ok(Rectangle::new(1, 1, w as u16, h as u16))
+    }
 }
 
 /// Sign detail
@@ -566,6 +598,20 @@ impl MsgData {
         debug!("MsgData::line_justification_default, {} missing!", ATTR);
         LineJustification::Center
     }
+    /// Get the default font number
+    fn font_default(&self, fname: Option<&String>) -> Result<u8, Error> {
+        match fname {
+            Some(fname) => {
+                match self.fonts.values().find(|f| &f.name == fname) {
+                    Some(font) => Ok(font.f_number as u8),
+                    None => {
+                        Err(Error::Other(format!("Unknown font: {}", fname)))
+                    },
+                }
+            },
+            None => Ok(1),
+        }
+    }
 }
 
 /// Lookup a listing of gif files
@@ -649,8 +695,8 @@ fn make_face_frame(page: Raster, cfg: &SignConfig, w: u16, h: u16) -> Frame {
 
 /// Make a raster of sign face
 fn make_face_raster(page: Raster, cfg: &SignConfig, w: u16, h: u16) -> Raster {
-    let dark = [20, 20, 0];
-    let rgb = [0, 0, 0];
+    let dark = Rgb24::new(20, 20, 0);
+    let rgb = Rgb24::new(0, 0, 0);
     let mut face = Raster::new(w.into(), h.into(), rgb);
     let ph = page.height();
     let pw = page.width();
@@ -663,26 +709,31 @@ fn make_face_raster(page: Raster, cfg: &SignConfig, w: u16, h: u16) -> Raster {
         for x in 0..pw {
             let px = cfg.pixel_x(x) * w as f32;
             let clr = page.get_pixel(x, y);
-            let sr = clr[0].max(clr[1]).max(clr[2]);
+            let sr = clr.r().max(clr.g()).max(clr.b());
             // Clamp radius between 0.6 and 0.8 (blooming)
             let r = s * (sr as f32 / 255f32).max(0.6f32).min(0.8f32);
             let clr = if sr > 20 { clr } else { dark };
-            face.circle(px, py, r, [clr[0], clr[1], clr[2]]);
+            face.circle(px, py, r, clr);
         }
     }
     face
 }
 
 /// Render a sign message into a .gif file
-fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, mut f: W)
+fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, f: W)
     -> Result<(), Error>
 {
-    let cfg = msg_data.configs.get(&s.sign_config);
-    if cfg.is_none() {
-        return Err(Error::Other(format!("Unknown config: {}", s.sign_config)));
+    match msg_data.configs.get(&s.sign_config) {
+        Some(cfg) => render_sign_msg_cfg(s, msg_data, f, cfg),
+        None => Err(Error::Other(format!("Unknown config: {}", s.sign_config))),
     }
-    let cfg = cfg.unwrap();
-    let rs = create_render_state(s, msg_data)?;
+}
+
+/// Render a sign message into a .gif file
+fn render_sign_msg_cfg<W: Write>(s: &SignMessage, msg_data: &MsgData, mut f: W,
+    cfg: &SignConfig) -> Result<(), Error>
+{
+    let rs = render_state_default(msg_data, cfg)?;
     let (w, h) = calculate_size(cfg)?;
     let mut enc = Encoder::new(&mut f, w, h, &[])?;
     enc.set(Repeat::Infinite)?;
@@ -703,52 +754,22 @@ fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, mut f: W)
     Ok(())
 }
 
-/// Create default render state for a sign message.
-fn create_render_state(s: &SignMessage, msg_data: &MsgData)
+/// Create default render state for a sign config.
+fn render_state_default(msg_data: &MsgData, cfg: &SignConfig)
     -> Result<State, Error>
 {
-    let cfg = msg_data.configs.get(&s.sign_config);
-    if cfg.is_none() {
-        return Err(Error::Other(format!("Unknown config: {}", s.sign_config)));
-    }
-    let cfg = cfg.unwrap();
-    let color_scheme = ColorScheme::from_str(&cfg.color_scheme)?;
+    let color_scheme = cfg.color_scheme[..].into();
     let char_width = cfg.char_width as u8;
     let char_height = cfg.char_height as u8;
-    let color_foreground: Color = match color_scheme {
-        ColorScheme::Monochrome1Bit|
-        ColorScheme::Monochrome8Bit => cfg.monochrome_foreground.into(),
-        ColorScheme::ColorClassic|
-        ColorScheme::Color24Bit     => ColorClassic::Amber.into(),
-    };
-    let page_background: Color = match color_scheme {
-        ColorScheme::Monochrome1Bit|
-        ColorScheme::Monochrome8Bit => cfg.monochrome_background.into(),
-        ColorScheme::ColorClassic|
-        ColorScheme::Color24Bit     => ColorClassic::Black.into(),
-    };
+    let color_foreground = cfg.foreground_default();
+    let page_background = cfg.background_default();
     let page_on_time_ds = msg_data.page_on_default_ds();
     let page_off_time_ds = msg_data.page_off_default_ds();
-    if cfg.pixel_width < 1 {
-        return Err(Error::Other(format!("Invalid width: {}", cfg.pixel_width)));
-    }
-    if cfg.pixel_height < 1 {
-        return Err(Error::Other(format!("Invalid height: {}", cfg.pixel_height)));
-    }
-    let text_rectangle = Rectangle::new(1, 1, cfg.pixel_width as u16,
-        cfg.pixel_height as u16);
+    let text_rectangle = cfg.text_rect_default()?;
     let just_page = msg_data.page_justification_default();
     let just_line = msg_data.line_justification_default();
     let fname = cfg.default_font.as_ref();
-    if fname.is_none() {
-        return Err(Error::Other(format!("No default font for {}", cfg.name)));
-    }
-    let fname = fname.unwrap();
-    let font = msg_data.fonts.values().find(|f| &f.name == fname);
-    if font.is_none() {
-        return Err(Error::Other(format!("Unknown font: {}", fname)));
-    }
-    let font = (font.unwrap().f_number as u8, None);
+    let font = (msg_data.font_default(fname)?, None);
     Ok(State::new(color_scheme,
                   char_width,
                   char_height,

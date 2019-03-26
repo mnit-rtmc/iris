@@ -19,7 +19,7 @@ use std::fs::File;
 use std::io::{BufReader, Write};
 use std::path::{Path, PathBuf};
 use crate::error::Error;
-use crate::raster::Raster;
+use crate::raster::{Raster, Rgb24};
 use crate::resource::Queryable;
 use crate::multi::{ColorClassic, ColorScheme, SyntaxError};
 
@@ -184,23 +184,21 @@ impl Graphic {
         self.height as u32
     }
     /// Get the number of bits per pixel
-    fn bits_per_pixel(&self) -> Result<u32, Error> {
-        let cs = ColorScheme::from_str(&self.color_scheme)?;
-        Ok(match cs {
+    fn bits_per_pixel(&self) -> u32 {
+        match self.color_scheme[..].into() {
             ColorScheme::Monochrome1Bit => 1,
             ColorScheme::Monochrome8Bit => 8,
             ColorScheme::ColorClassic   => 8,
             ColorScheme::Color24Bit     => 24,
-        })
+        }
     }
     /// Render a graphic onto a Raster
-    pub fn render(&self, page: &mut Raster, cf: [u8;3], x: u32, y: u32)
+    pub fn onto_raster(&self, page: &mut Raster, x: u32, y: u32, cf: Rgb24)
         -> Result<(), Error>
     {
         let config = Config::new(CharacterSet::Standard, false, true,
             LineWrap::NoWrap);
-        let cs = ColorScheme::from_str(&self.color_scheme)?;
-        let bpp = self.bits_per_pixel()?;
+        let bpp = self.bits_per_pixel();
         let x = x - 1; // x must be > 0
         let y = y - 1; // y must be > 0
         let w = self.width();
@@ -216,7 +214,7 @@ impl Graphic {
             w, h, n);
         for yy in 0..h {
             for xx in 0..w {
-                if let Some(clr) = self.get_pixel(cs, &buf, xx, yy, cf) {
+                if let Some(clr) = self.get_pixel(&buf, xx, yy, cf) {
                     page.set_pixel(x + xx, y + yy, clr);
                 }
             }
@@ -224,59 +222,59 @@ impl Graphic {
         Ok(())
     }
     /// Get one pixel color
-    fn get_pixel(&self, cs: ColorScheme, buf: &[u8], x: u32, y: u32, cf: [u8;3])
-        -> Option<[u8;3]>
-    {
-        match cs {
+    fn get_pixel(&self, buf: &[u8], x: u32, y: u32, cf: Rgb24) -> Option<Rgb24> {
+        match self.color_scheme[..].into() {
             ColorScheme::Monochrome1Bit => self.get_pixel_1(buf, x, y, cf),
             ColorScheme::Monochrome8Bit => self.get_pixel_8(buf, x, y),
-            ColorScheme::ColorClassic   => self.get_pixel_classic(buf, x, y),
-            ColorScheme::Color24Bit     => self.get_pixel_24(buf, x, y),
+            ColorScheme::ColorClassic => self.get_pixel_classic(buf, x, y),
+            ColorScheme::Color24Bit => self.get_pixel_24(buf, x, y),
         }
     }
     /// Get one pixel on a monochrome 1-bit graphic
-    fn get_pixel_1(&self, buf: &[u8], x: u32, y: u32, cf: [u8;3])
-        -> Option<[u8;3]>
+    fn get_pixel_1(&self, buf: &[u8], x: u32, y: u32, cf: Rgb24)
+        -> Option<Rgb24>
     {
         let p = y * self.width() + x;
         let by = p as usize / 8;
         let bi = 7 - (p & 7);
         let lit = ((buf[by] >> bi) & 1) != 0;
         // FIXME: background color?
-        let cb = [0, 0, 0];
+        let cb = Rgb24::new(0, 0, 0);
         if lit {
             Some(cf)
         } else {
             if let Some(tc) = self.transparent_color {
-                let r = (tc >> 16 & 0xFF) as u8;
-                let g = (tc >>  8 & 0xFF) as u8;
-                let b = (tc >>  0 & 0xFF) as u8;
-                if [r,g,b] == cb { None } else { Some(cb) }
+                let tc: Rgb24 = tc.into();
+                if tc == cb { None } else { Some(cb) }
             } else {
                 Some(cb)
             }
         }
     }
     /// Get one pixel on a monochrome 8-bit graphic
-    fn get_pixel_8(&self, buf: &[u8], x: u32, y: u32) -> Option<[u8;3]> {
+    fn get_pixel_8(&self, buf: &[u8], x: u32, y: u32) -> Option<Rgb24> {
         let p = y * self.width() + x;
         let v = buf[p as usize];
-        Some([v, v, v])
+        Some(Rgb24::new(v, v, v))
     }
     /// Get one pixel on a classic color graphic
-    fn get_pixel_classic(&self, buf: &[u8], x: u32, y: u32) -> Option<[u8;3]> {
+    fn get_pixel_classic(&self, buf: &[u8], x: u32, y: u32) -> Option<Rgb24> {
         let p = y * self.width() + x;
         let v = buf[p as usize];
-        // FIXME: improve error handling
-        let c = ColorClassic::from_u8(v).unwrap();
-        Some(c.rgb())
+        match ColorClassic::from_u8(v) {
+            Some(c) => Some(c.rgb().into()),
+            None => {
+                debug!("get_pixel_classic -- Bad color: {}", v);
+                None
+            },
+        }
     }
     /// Get one pixel on a 24-bit color graphic
-    fn get_pixel_24(&self, buf: &[u8], x: u32, y: u32) -> Option<[u8;3]> {
+    fn get_pixel_24(&self, buf: &[u8], x: u32, y: u32) -> Option<Rgb24> {
         let p = (y * self.width() + x) * 3;
         let r = buf[(p + 0) as usize];
         let g = buf[(p + 1) as usize];
         let b = buf[(p + 2) as usize];
-        Some([r, g, b])
+        Some(Rgb24::new(r, g, b))
     }
 }

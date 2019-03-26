@@ -16,7 +16,7 @@ use std::collections::HashMap;
 use crate::error::Error;
 use crate::font::{Font, Graphic};
 use crate::multi::*;
-use crate::raster::Raster;
+use crate::raster::{Raster, Rgb24};
 
 /// Value result from parsing MULTI.
 type UnitResult = Result<(), SyntaxError>;
@@ -31,8 +31,8 @@ pub struct State {
     color_scheme    : ColorScheme,
     char_width      : u8,
     char_height     : u8,
-    color_foreground: Color,
-    page_background : Color,
+    color_foreground: Color,    // default *MUST* be RGB or Legacy (classic)
+    page_background : Color,    // default *MUST* be RGB or Legacy (classic)
     page_on_time_ds : u8,       // deciseconds
     page_off_time_ds: u8,       // deciseconds
     text_rectangle  : Rectangle,
@@ -61,7 +61,7 @@ struct TextLine {
 /// Page renderer
 pub struct PageRenderer {
     state  : State,                // render state at start of page
-    values : Vec<([u8;3], Value)>, // foreground color, graphic / color rect
+    values : Vec<(Value, Rgb24)>,  // graphic / color rect, foreground color
     spans  : Vec<TextSpan>,        // text spans
 }
 
@@ -73,11 +73,13 @@ pub struct PageSplitter<'a> {
     more          : bool,
 }
 
-/// Scale a u8 value by another (mapping range to 0-1)
-fn scale_u8(a: u8, b: u8) -> u8 {
-    let c = a as u32 * b as u32;
+/// Scale between two color components
+fn scale_component(bg: u8, fg: u8, v: u8) -> u8 {
+    let d = bg.max(fg) - bg.min(fg);
+    let c = d as u32 * v as u32;
     // cheap alternative to divide by 255
-    (((c + 1) + (c >> 8)) >> 8) as u8
+    let r = (((c + 1) + (c >> 8)) >> 8) as u8;
+    bg.min(fg) + r
 }
 
 impl State {
@@ -141,6 +143,7 @@ impl State {
     /// * `c` Color value.
     /// * `ds` Default state.
     fn get_color(&self, c: Color, ds: &State) -> Result<Color, SyntaxError> {
+        // FIXME: check ds foreground / background color is RGB or classic
         match self.color_scheme {
             ColorScheme::Monochrome1Bit => self.get_monochrome_1_bit(c, ds),
             ColorScheme::Monochrome8Bit => self.get_monochrome_8_bit(c, ds),
@@ -169,11 +172,12 @@ impl State {
         -> Result<Color, SyntaxError>
     {
         if let Color::Legacy(v) = c {
-            let rgb = self.color_rgb(ds.color_foreground)?;
-            let r = scale_u8(rgb[0], v);
-            let g = scale_u8(rgb[1], v);
-            let b = scale_u8(rgb[2], v);
-            Ok(Color::RGB(r,g,b))
+            let bg = ds.background_rgb()?;
+            let fg = ds.foreground_rgb()?;
+            let r = scale_component(bg.r(), fg.r(), v);
+            let g = scale_component(bg.g(), fg.g(), v);
+            let b = scale_component(bg.b(), fg.b(), v);
+            Ok(Color::RGB(r, g, b))
         } else {
             Err(SyntaxError::UnsupportedTagValue)
         }
@@ -321,25 +325,25 @@ impl State {
         self.text_rectangle = r;
         Ok(())
     }
-    /// Get the page background color
-    fn page_background(&self) -> Result<[u8;3], SyntaxError> {
+    /// Get the background RGB color.
+    fn background_rgb(&self) -> Result<Rgb24, SyntaxError> {
         self.color_rgb(self.page_background)
     }
-    /// Get the foreground color
-    fn color_foreground(&self) -> Result<[u8;3], SyntaxError> {
+    /// Get the foreground RGB color.
+    fn foreground_rgb(&self) -> Result<Rgb24, SyntaxError> {
         self.color_rgb(self.color_foreground)
     }
-    /// Get RGB triplet for a color.
-    fn color_rgb(&self, c: Color) -> Result<[u8;3], SyntaxError> {
+    /// Get RGB triplet for a color (ignoring color_scheme).
+    fn color_rgb(&self, c: Color) -> Result<Rgb24, SyntaxError> {
         match c {
-            Color::RGB(r,g,b) => Ok([r,g,b]),
+            Color::RGB(r,g,b) => Ok(Rgb24::new(r, g, b)),
             Color::Legacy(v)  => self.color_rgb_legacy(v),
         }
     }
     /// Get RGB triplet for a legacy color value.
     ///
     /// * `v` Color value (0-255).
-    fn color_rgb_legacy(&self, v: u8) -> Result<[u8;3], SyntaxError> {
+    fn color_rgb_legacy(&self, v: u8) -> Result<Rgb24, SyntaxError> {
         match self.color_scheme {
             ColorScheme::Monochrome1Bit => self.color_rgb_monochrome_1_bit(v),
             ColorScheme::Monochrome8Bit => self.color_rgb_monochrome_8_bit(v),
@@ -348,23 +352,23 @@ impl State {
         }
     }
     /// Get RGB triplet for a monochrome 1-bit color.
-    fn color_rgb_monochrome_1_bit(&self, v: u8) -> Result<[u8;3], SyntaxError> {
+    fn color_rgb_monochrome_1_bit(&self, v: u8) -> Result<Rgb24, SyntaxError> {
         match v {
-            0 => Ok([  0,   0,   0]),
-            1 => Ok([255, 255, 255]),
+            0 => Ok(Rgb24::new(  0,   0,   0)),
+            1 => Ok(Rgb24::new(255, 255, 255)),
             _ => Err(SyntaxError::UnsupportedTagValue),
         }
     }
     /// Get RGB triplet for a monochrome 8-bit color.
-    fn color_rgb_monochrome_8_bit(&self, v: u8) -> Result<[u8;3], SyntaxError> {
-        Ok([v,v,v])
+    fn color_rgb_monochrome_8_bit(&self, v: u8) -> Result<Rgb24, SyntaxError> {
+        Ok(Rgb24::new(v, v, v))
     }
     /// Get RGB triplet for a classic color.
     ///
     /// * `v` Color value (0-9).
-    fn color_rgb_classic(&self, v: u8) -> Result<[u8;3], SyntaxError> {
+    fn color_rgb_classic(&self, v: u8) -> Result<Rgb24, SyntaxError> {
         match ColorClassic::from_u8(v) {
-            Some(c) => Ok(c.rgb()),
+            Some(c) => self.color_rgb(c.rgb().into()),
             None    => Err(SyntaxError::UnsupportedTagValue),
         }
     }
@@ -463,8 +467,7 @@ impl<'a> TextSpan {
     fn render(&self, page: &mut Raster, font: &Font, mut x: u32, y: u32)
         -> Result<(), Error>
     {
-        let cf = self.state.color_foreground()?;
-        let cf = [cf[0], cf[1], cf[2]];
+        let cf = self.state.foreground_rgb()?;
         let h = font.height() as u32;
         let cs = self.char_spacing_font(font);
         debug!("span: {}, left: {}, top: {}, height: {}", self.text, x, y, h);
@@ -521,7 +524,7 @@ impl TextLine {
 
 impl PageRenderer {
     /// Create a new page renderer
-    pub fn new(state: State, values: Vec<([u8;3], Value)>, spans: Vec<TextSpan>)
+    pub fn new(state: State, values: Vec<(Value, Rgb24)>, spans: Vec<TextSpan>)
         -> Self
     {
         PageRenderer {
@@ -570,9 +573,8 @@ impl PageRenderer {
         let rs = self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
-        let clr = rs.page_background()?;
-        let rgb = [clr[0], clr[1], clr[2]];
-        let page = Raster::new(w.into(), h.into(), rgb);
+        let clr = rs.background_rgb()?;
+        let page = Raster::new(w.into(), h.into(), clr);
         Ok(page)
     }
     /// Render the page.
@@ -582,27 +584,27 @@ impl PageRenderer {
         let rs = self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
-        let clr = rs.page_background()?;
+        let clr = rs.background_rgb()?;
         let mut page = Raster::new(w.into(), h.into(), clr);
-        for (cf, v) in &self.values {
+        for (v, cf) in &self.values {
             match v {
                 Value::ColorRectangle(r,c) => {
                     let clr = rs.color_rgb(*c)?;
                     self.render_rect(&mut page, *r, clr)?;
                 },
-                Value::Graphic(gn,None) => {
+                Value::Graphic(gn, None) => {
                     let n = *gn as i32;
                     let g = graphics.get(&n)
                                     .ok_or(SyntaxError::GraphicNotDefined(*gn))?;
-                    g.render(&mut page, *cf, 1, 1)?;
+                    g.onto_raster(&mut page, 1, 1, *cf)?;
                 },
-                Value::Graphic(gn,Some((x,y,_))) => {
+                Value::Graphic(gn, Some((x,y,_))) => {
                     let n = *gn as i32;
                     let g = graphics.get(&n)
                                     .ok_or(SyntaxError::GraphicNotDefined(*gn))?;
                     let x = *x as u32;
                     let y = *y as u32;
-                    g.render(&mut page, *cf, x, y)?;
+                    g.onto_raster(&mut page, x, y, *cf)?;
                 },
                 _ => unreachable!(),
             }
@@ -616,7 +618,7 @@ impl PageRenderer {
         Ok(page)
     }
     /// Render a color rectangle
-    fn render_rect(&self, page: &mut Raster, r: Rectangle, clr: [u8;3])
+    fn render_rect(&self, page: &mut Raster, r: Rectangle, clr: Rgb24)
         ->Result<(), SyntaxError>
     {
         let rx = r.x as u32 - 1; // r.x must be > 0
@@ -842,8 +844,8 @@ impl<'a> PageSplitter<'a> {
                 },
                 Value::Graphic(_,_)|
                 Value::ColorRectangle(_,_) => {
-                    let cf = self.state.color_foreground()?;
-                    values.push((cf, v));
+                    let cf = self.state.foreground_rgb()?;
+                    values.push((v, cf));
                 },
                 _ => (),
             }
@@ -881,6 +883,18 @@ impl<'a> Iterator for PageSplitter<'a> {
 #[cfg(test)]
 mod test {
     use super::*;
+    #[test]
+    fn color_component() {
+        assert!(scale_component(0, 255, 0) == 0);
+        assert!(scale_component(0, 255, 128) == 128);
+        assert!(scale_component(0, 255, 255) == 255);
+        assert!(scale_component(0, 128, 0) == 0);
+        assert!(scale_component(0, 128, 128) == 64);
+        assert!(scale_component(0, 128, 255) == 128);
+        assert!(scale_component(128, 255, 0) == 128);
+        assert!(scale_component(128, 255, 128) == 191);
+        assert!(scale_component(128, 255, 255) == 255);
+    }
     fn make_full_matrix() -> State {
         State::new(ColorScheme::Color24Bit,
                    0, 0,

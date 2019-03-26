@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@ extern crate gif;
 
 use std::fs::File;
 use std::io;
-use gif::{Frame,Encoder,Repeat,SetParameter};
-use honeybee::raster::Raster;
+use gif::{Frame, Encoder, Repeat, SetParameter};
+use honeybee::raster::{Raster, Rgb24};
 
 /// Write raster to a GIF file.
 ///
@@ -38,9 +38,9 @@ pub fn write_gif(rasters: &mut [Raster], filename: &str) -> io::Result<()> {
 }
 
 fn page1() -> Raster {
-    let amber = [255, 208, 0];
-    let red = [255, 0, 0];
-    let mut r = Raster::new(32, 32, [0, 0, 0]);
+    let amber = Rgb24::new(255, 208, 0);
+    let red = Rgb24::new(255, 0, 0);
+    let mut r = Raster::new(32, 32, Rgb24::new(0, 0, 0));
     r.circle(12f32, 12f32, 3f32, amber);
     r.circle(20f32, 12f32, 3f32, amber);
     r.circle(12f32, 20f32, 3f32, amber);
@@ -50,8 +50,8 @@ fn page1() -> Raster {
 }
 
 fn page2() -> Raster {
-    let amber = [255, 208, 0];
-    let mut r = Raster::new(32, 32, [0, 0, 0]);
+    let amber = Rgb24::new(255, 208, 0);
+    let mut r = Raster::new(32, 32, Rgb24::new(0, 0, 0));
     r.circle(12f32, 12f32, 3f32, amber);
     r.circle(20f32, 12f32, 3f32, amber);
     r.circle(12f32, 20f32, 3f32, amber);

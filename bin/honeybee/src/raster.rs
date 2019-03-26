@@ -11,11 +11,64 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+/// 24-bit RGB color
+#[derive(Copy, Clone, PartialEq)]
+pub struct Rgb24 {
+    rgb: [u8;3],
+}
+
 /// A raster is an uncompressed 24-bit color image.
 pub struct Raster {
     width  : u32,
     height : u32,
     pixels : Vec<u8>,
+}
+
+impl From<i32> for Rgb24 {
+    fn from(rgb: i32) -> Self {
+        let r = (rgb >> 16 & 0xFF) as u8;
+        let g = (rgb >>  8 & 0xFF) as u8;
+        let b = (rgb >>  0 & 0xFF) as u8;
+        Rgb24::new(r, g, b)
+    }
+}
+
+impl Rgb24 {
+    /// Create a new 24-bit RGB color
+    pub fn new(r: u8, g: u8, b: u8) -> Self {
+        let rgb = [r, g, b];
+        Rgb24 { rgb }
+    }
+    /// Get the red component
+    pub fn r(self) -> u8 {
+        self.rgb[0]
+    }
+    /// Get the green component
+    pub fn g(self) -> u8 {
+        self.rgb[1]
+    }
+    /// Get the blue component
+    pub fn b(self) -> u8 {
+        self.rgb[2]
+    }
+    /// Blend two 24-bit colors (over)
+    fn blend(self, dest: Rgb24, vi: u8) -> Rgb24 {
+        let sr = scale_u8(self.r(), vi);
+        let sg = scale_u8(self.g(), vi);
+        let sb = scale_u8(self.b(), vi);
+        let r = sr.max(dest.r());
+        let g = sg.max(dest.g());
+        let b = sb.max(dest.b());
+        Rgb24::new(r, g, b)
+    }
+}
+
+/// Scale a u8 value by another (mapping range to 0-1)
+fn scale_u8(a: u8, b: u8) -> u8 {
+    let aa = a as u32;
+    let bb = b as u32;
+    let c = (aa * bb + 255) >> 8;
+    c as u8
 }
 
 impl Raster {
@@ -24,11 +77,11 @@ impl Raster {
     /// * `width` Width in pixels.
     /// * `height` Height in pixels.
     /// * `color` RGB color (for initialization).
-    pub fn new(width: u32, height: u32, color: [u8; 3]) -> Raster {
+    pub fn new(width: u32, height: u32, color: Rgb24) -> Raster {
         let len = width as usize * height as usize;
         let mut pixels = Vec::with_capacity(len * 3);
         for _ in 0..len {
-            pixels.extend(color.iter());
+            pixels.extend(color.rgb.iter());
         }
         Raster { width, height, pixels }
     }
@@ -41,24 +94,23 @@ impl Raster {
         self.height
     }
     /// Set the color of one pixel.
-    pub fn set_pixel(&mut self, x: u32, y: u32, color: [u8; 3]) {
+    pub fn set_pixel(&mut self, x: u32, y: u32, color: Rgb24) {
         debug_assert!(x < self.width, "x: {}, width: {}", x, self.width);
         debug_assert!(y < self.height, "y: {}, height: {}", y, self.height);
         let i = ((y * self.width + x) * 3) as usize;
-        self.pixels[i+0] = color[0];
-        self.pixels[i+1] = color[1];
-        self.pixels[i+2] = color[2];
+        self.pixels[i+0] = color.r();
+        self.pixels[i+1] = color.g();
+        self.pixels[i+2] = color.b();
     }
     /// Get the color of one pixel.
-    pub fn get_pixel(&self, x: u32, y: u32) -> [u8; 3] {
+    pub fn get_pixel(&self, x: u32, y: u32) -> Rgb24 {
         debug_assert!(x < self.width, "x: {}, width: {}", x, self.width);
         debug_assert!(y < self.height, "y: {}, height: {}", y, self.height);
-        let mut color = [0; 3];
         let i = ((y * self.width + x) * 3) as usize;
-        color[0] = self.pixels[i+0];
-        color[1] = self.pixels[i+1];
-        color[2] = self.pixels[i+2];
-        color
+        let r = self.pixels[i+0];
+        let g = self.pixels[i+1];
+        let b = self.pixels[i+2];
+        Rgb24::new(r, g, b)
     }
     /// Get the pixel data as a slice.
     pub fn pixels(&mut self) -> &mut [u8] {
@@ -70,7 +122,7 @@ impl Raster {
     /// * `cy` Y-Center of circle.
     /// * `r` Radius of circle.
     /// * `clr` Color of circle.
-    pub fn circle(&mut self, cx: f32, cy: f32, r: f32, clr: [u8; 3]) {
+    pub fn circle(&mut self, cx: f32, cy: f32, r: f32, clr: Rgb24) {
         let x0 = (cx - r).floor().max(0f32) as u32;
         let x1 = (cx + r).ceil().min(self.width() as f32) as u32;
         let y0 = (cy - r).floor().max(0f32) as u32;
@@ -93,13 +145,7 @@ impl Raster {
                 let vi = (v * 255f32) as u8;
                 if vi > 0 {
                     let p = self.get_pixel(x, y);
-                    let sr = scale_u8(clr[0], vi);
-                    let sg = scale_u8(clr[1], vi);
-                    let sb = scale_u8(clr[2], vi);
-                    let dr = p[0];
-                    let dg = p[1];
-                    let db = p[2];
-                    let d = [sr.max(dr), sg.max(dg), sb.max(db)];
+                    let d = clr.blend(p, vi);
                     self.set_pixel(x, y, d);
                 }
             }
@@ -107,24 +153,16 @@ impl Raster {
     }
 }
 
-/// Scale a u8 value by another (mapping range to 0-1)
-fn scale_u8(a: u8, b: u8) -> u8 {
-    let aa = a as u32;
-    let bb = b as u32;
-    let c = (aa * bb + 255) >> 8;
-    c as u8
-}
-
 #[cfg(test)]
 mod test {
-    use super::{Raster};
+    use super::*;
     #[test]
     fn raster_pixel() {
-        let mut r = Raster::new(4, 4, [0, 0, 0]);
-        r.set_pixel(0, 0, [ 1, 2, 3]);
-        r.set_pixel(1, 1, [ 4, 5, 6]);
-        r.set_pixel(2, 2, [ 7, 8, 9]);
-        r.set_pixel(3, 3, [10,11,12]);
+        let mut r = Raster::new(4, 4, Rgb24::new(0, 0, 0));
+        r.set_pixel(0, 0, Rgb24::new( 1, 2, 3));
+        r.set_pixel(1, 1, Rgb24::new( 4, 5, 6));
+        r.set_pixel(2, 2, Rgb24::new( 7, 8, 9));
+        r.set_pixel(3, 3, Rgb24::new(10,11,12));
         // y == 0
         assert!(r.pixels[ 0..3 ] == [1, 2, 3]);
         assert!(r.pixels[ 3..6 ] == [0, 0, 0]);
