@@ -18,15 +18,12 @@ use crate::font::{Font, Graphic};
 use crate::multi::*;
 use crate::raster::{Raster, Rgb24};
 
-/// Value result from parsing MULTI.
-type UnitResult = Result<(), SyntaxError>;
-
 /// Length of base64 output buffer for glyphs.
 /// Encoded glyphs are restricted to 128 bytes.
 const GLYPH_LEN: usize = (128 + 3) / 4 * 3;
 
 /// Page render state
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct State {
     color_scheme    : ColorScheme,
     char_width      : u8,
@@ -70,7 +67,8 @@ pub struct PageSplitter<'a> {
     default_state : State,
     state         : State,
     parser        : Parser<'a>,
-    more          : bool,
+    more_pages    : bool,
+    line_blank    : bool,
 }
 
 /// Scale between two color components
@@ -201,106 +199,9 @@ impl State {
             _                    => Err(SyntaxError::UnsupportedTagValue),
         }
     }
-    /// Update the render state with a MULTI value.
-    ///
-    /// * `default_state` Default render state.
-    /// * `v` MULTI value.
-    fn update(&mut self, default_state: &State, v: &Value) -> UnitResult {
-        match v {
-            Value::ColorBackground(None) => {
-                // This tag remains for backward compatibility with 1203v1
-                self.page_background = default_state.page_background;
-            },
-            Value::ColorBackground(Some(c)) => {
-                // This tag remains for backward compatibility with 1203v1
-                self.page_background = self.get_color(*c, default_state)?;
-            },
-            Value::ColorForeground(None) => {
-                self.color_foreground = default_state.color_foreground;
-            },
-            Value::ColorForeground(Some(c)) => {
-                self.color_foreground = self.get_color(*c, default_state)?;
-            },
-            Value::ColorRectangle(_,c) => {
-                self.get_color(*c, default_state)?;
-            },
-            Value::Font(None) => { self.font = default_state.font },
-            Value::Font(Some(f)) => { self.font = *f },
-            Value::Graphic(_, _) => (),
-            Value::JustificationLine(Some(LineJustification::Other)) => {
-                return Err(SyntaxError::UnsupportedTagValue);
-            },
-            Value::JustificationLine(Some(LineJustification::Full)) => {
-                return Err(SyntaxError::UnsupportedTagValue);
-            },
-            Value::JustificationLine(jl) => {
-                self.just_line = jl.unwrap_or(default_state.just_line);
-                self.span_number = 0;
-            },
-            Value::JustificationPage(Some(PageJustification::Other)) => {
-                return Err(SyntaxError::UnsupportedTagValue);
-            },
-            Value::JustificationPage(jp) => {
-                self.just_page = jp.unwrap_or(default_state.just_page);
-                self.line_number = 0;
-                self.span_number = 0;
-            },
-            Value::NewLine(None) => {
-                self.line_spacing = None;
-                self.line_number += 1;
-                self.span_number = 0;
-            },
-            Value::NewLine(Some(ls)) => {
-                if !self.is_full_matrix() {
-                    return Err(SyntaxError::UnsupportedTagValue);
-                }
-                self.line_spacing = Some(*ls);
-                self.line_number += 1;
-                self.span_number = 0;
-            },
-            Value::NewPage() => {
-                self.line_number = 0;
-                self.span_number = 0;
-            },
-            Value::PageBackground(None) => {
-                self.page_background = default_state.page_background;
-            },
-            Value::PageBackground(Some(c)) => {
-                self.page_background = self.get_color(*c, default_state)?;
-            },
-            Value::PageTime(on, off) => {
-                self.page_on_time_ds = on.unwrap_or(
-                    default_state.page_on_time_ds
-                );
-                self.page_off_time_ds = off.unwrap_or(
-                    default_state.page_off_time_ds
-                );
-            },
-            Value::SpacingCharacter(sc) => {
-                if self.is_char_matrix() {
-                    return Err(SyntaxError::UnsupportedTag("sc".to_string()));
-                }
-                self.char_spacing = Some(*sc);
-            },
-            Value::SpacingCharacterEnd() => { self.char_spacing = None; },
-            Value::TextRectangle(r) => {
-                self.line_number = 0;
-                self.span_number = 0;
-                return self.update_text_rectangle(default_state, *r);
-            },
-            Value::Text(_) => {
-                self.span_number += 1;
-            },
-            _ => {
-                // Unsupported tags: [f], [fl], [hc], [ms], [mv]
-                return Err(SyntaxError::UnsupportedTag(v.to_string()));
-            },
-        }
-        Ok(())
-    }
     /// Update the text rectangle.
     fn update_text_rectangle(&mut self, default_state: &State,
-        r: Rectangle) -> UnitResult
+        r: Rectangle) -> Result<(), SyntaxError>
     {
         let r = r.match_width_height(&default_state.text_rectangle);
         if !default_state.text_rectangle.contains(&r) {
@@ -524,14 +425,10 @@ impl TextLine {
 
 impl PageRenderer {
     /// Create a new page renderer
-    pub fn new(state: State, values: Vec<(Value, Rgb24)>, spans: Vec<TextSpan>)
-        -> Self
-    {
-        PageRenderer {
-            state,
-            values,
-            spans,
-        }
+    pub fn new(state: State) -> Self {
+        let values = vec![];
+        let spans = vec![];
+        PageRenderer { state, values, spans }
     }
     /// Check page and line justification ordering
     fn check_justification(&self) -> Result<(), SyntaxError> {
@@ -548,9 +445,6 @@ impl PageRenderer {
               (just_page < jp ||
               (just_page == jp && line_number == ln && just_line < jl))
             {
-                warn!("just_page: {}, jp: {}", just_page, jp);
-                warn!("line_number: {}, ln: {}", line_number, ln);
-                warn!("just_line: {}, jl: {}", just_line, jl);
                 return Err(SyntaxError::TagConflict);
             }
             tr = text_rectangle;
@@ -570,7 +464,7 @@ impl PageRenderer {
     }
     /// Render a blank page.
     pub fn render_blank(&self) -> Result<Raster, SyntaxError> {
-        let rs = self.state;
+        let rs = &self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
         let clr = rs.background_rgb()?;
@@ -581,7 +475,7 @@ impl PageRenderer {
     pub fn render(&self, fonts: &HashMap<i32, Font>,
         graphics: &HashMap<i32, Graphic>) -> Result<Raster, Error>
     {
-        let rs = self.state;
+        let rs = &self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
         let clr = rs.background_rgb()?;
@@ -683,24 +577,24 @@ impl PageRenderer {
         -> Result<(u16, u16), SyntaxError>
     {
         debug!("offset_horiz '{}'", span.text);
-        let state = span.state;
+        let rs = &span.state;
         let mut before = 0;
         let mut after = 0;
         let mut pspan = None;
-        for s in self.spans.iter().filter(|s| state.matches_span(&s.state)) {
+        for s in self.spans.iter().filter(|s| rs.matches_span(&s.state)) {
             if let Some(ps) = pspan {
                 let w = s.char_spacing_between(ps, fonts)?;
-                if s.state.span_number <= state.span_number { before += w }
+                if s.state.span_number <= rs.span_number { before += w }
                 else { after += w }
                 debug!("  spacing {} before {} after {}", w, before, after);
             }
             let w = s.width(fonts)?;
-            if s.state.span_number < state.span_number { before += w }
+            if s.state.span_number < rs.span_number { before += w }
             else { after += w }
             debug!("  span '{}'  before {} after {}", s.text, before, after);
             pspan = Some(s);
         }
-        if before + after <= state.text_rectangle.w {
+        if before + after <= rs.text_rectangle.w {
             Ok((before, after))
         } else {
             Err(SyntaxError::TextTooBig)
@@ -763,9 +657,9 @@ impl PageRenderer {
         -> Result<(u16, u16), SyntaxError>
     {
         debug!("offset_vert '{}'", span.text);
-        let state = span.state;
+        let rs = &span.state;
         let mut lines = vec!();
-        for s in self.spans.iter().filter(|s| state.matches_line(&s.state)) {
+        for s in self.spans.iter().filter(|s| rs.matches_line(&s.state)) {
             let ln = s.state.line_number as usize;
             let h = s.height(fonts)?;
             let fs = s.font_spacing(fonts)?;
@@ -777,7 +671,7 @@ impl PageRenderer {
                 &lines[ln].combine(&line);
             }
         }
-        let sln = state.line_number as usize;
+        let sln = rs.line_number as usize;
         let mut above = 0;
         let mut below = 0;
         for ln in 0..lines.len() {
@@ -808,63 +702,140 @@ impl<'a> PageSplitter<'a> {
     /// * `ms` MULTI string to parse.
     pub fn new(default_state: State, ms: &'a str) -> Self {
         let parser = Parser::new(ms);
-        let state = default_state;
-        let more = true;
-        PageSplitter { default_state, state, parser, more }
+        let state = default_state.clone();
+        let more_pages = true;
+        let line_blank = true;
+        PageSplitter { default_state, state, parser, more_pages, line_blank }
     }
     /// Make the next page.
     fn make_page(&mut self) -> Result<PageRenderer, SyntaxError> {
-        self.more = false;
-        let mut blank = true;   // blank line
-        let mut rs = self.page_state();
-        let mut values = vec!();
-        let mut spans = vec!();
-        while let Some(t) = self.parser.next() {
-            let v = t?;
-            self.state.update(&self.default_state, &v)?;
-            match v {
-                Value::NewPage() => {
-                    self.more = true;
-                    break;
-                },
-                Value::NewLine(_) => {
-                    if blank {
-                        let ts = TextSpan::new(self.state, "".to_string());
-                        spans.push(ts);
-                    }
-                    blank = true;
-                },
-                Value::TextRectangle(_) => {
-                    blank = true;
-                }
-                Value::Text(t) => {
-                    let ts = TextSpan::new(self.state, t);
-                    spans.push(ts);
-                    blank = false;
-                },
-                Value::Graphic(_,_)|
-                Value::ColorRectangle(_,_) => {
-                    let cf = self.state.foreground_rgb()?;
-                    values.push((v, cf));
-                },
-                _ => (),
-            }
+        self.more_pages = false;
+        self.line_blank = true;
+        let mut page = PageRenderer::new(self.page_state());
+        while let Some(v) = self.parser.next() {
+            self.update_state(v?, &mut page)?;
+            if self.more_pages { break; }
         }
         // These values affect the entire page
-        rs.page_background = self.state.page_background;
-        rs.page_on_time_ds = self.state.page_on_time_ds;
-        rs.page_off_time_ds = self.state.page_off_time_ds;
-        let page = PageRenderer::new(rs, values, spans);
+        page.state.page_background = self.state.page_background;
+        page.state.page_on_time_ds = self.state.page_on_time_ds;
+        page.state.page_off_time_ds = self.state.page_off_time_ds;
         page.check_justification()?;
         Ok(page)
     }
     /// Get the current page state.
     fn page_state(&self) -> State {
-        let mut rs = self.state;
+        let mut rs = self.state.clone();
         // Set these back to default values
         rs.text_rectangle = self.default_state.text_rectangle;
         rs.line_spacing = self.default_state.line_spacing;
         rs
+    }
+    /// Update the render state with one MULTI value.
+    ///
+    /// * `v` MULTI value.
+    /// * `page` Page renderer.
+    fn update_state(&mut self, v: Value, page: &mut PageRenderer)
+        -> Result<(), SyntaxError>
+    {
+        let ds = &self.default_state;
+        let mut rs = &mut self.state;
+        match v {
+            Value::ColorBackground(None) => {
+                // This tag remains for backward compatibility with 1203v1
+                rs.page_background = ds.page_background;
+            },
+            Value::ColorBackground(Some(c)) => {
+                // This tag remains for backward compatibility with 1203v1
+                rs.page_background = rs.get_color(c, ds)?;
+            },
+            Value::ColorForeground(None) => {
+                rs.color_foreground = ds.color_foreground;
+            },
+            Value::ColorForeground(Some(c)) => {
+                rs.color_foreground = rs.get_color(c, ds)?;
+            },
+            Value::ColorRectangle(_, c) => {
+                rs.get_color(c, ds)?; // validate color
+                let cf = rs.foreground_rgb()?;
+                page.values.push((v, cf));
+            },
+            Value::Font(None) => { rs.font = ds.font },
+            Value::Font(Some(f)) => { rs.font = f },
+            Value::Graphic(_, _) =>  {
+                let cf = rs.foreground_rgb()?;
+                page.values.push((v, cf));
+            },
+            Value::JustificationLine(Some(LineJustification::Other)) => {
+                return Err(SyntaxError::UnsupportedTagValue);
+            },
+            Value::JustificationLine(Some(LineJustification::Full)) => {
+                return Err(SyntaxError::UnsupportedTagValue);
+            },
+            Value::JustificationLine(jl) => {
+                rs.just_line = jl.unwrap_or(ds.just_line);
+                rs.span_number = 0;
+            },
+            Value::JustificationPage(Some(PageJustification::Other)) => {
+                return Err(SyntaxError::UnsupportedTagValue);
+            },
+            Value::JustificationPage(jp) => {
+                rs.just_page = jp.unwrap_or(ds.just_page);
+                rs.line_number = 0;
+                rs.span_number = 0;
+            },
+            Value::NewLine(ls) => {
+                if ls.is_some() && !rs.is_full_matrix() {
+                    return Err(SyntaxError::UnsupportedTagValue);
+                }
+                // Insert an empty text span for blank lines.
+                if self.line_blank {
+                    page.spans.push(TextSpan::new(rs.clone(), "".to_string()));
+                }
+                self.line_blank = true;
+                rs.line_spacing = ls;
+                rs.line_number += 1;
+                rs.span_number = 0;
+            },
+            Value::NewPage() => {
+                rs.line_number = 0;
+                rs.span_number = 0;
+                self.more_pages = true;
+            },
+            Value::PageBackground(None) => {
+                rs.page_background = ds.page_background;
+            },
+            Value::PageBackground(Some(c)) => {
+                rs.page_background = rs.get_color(c, ds)?;
+            },
+            Value::PageTime(on, off) => {
+                rs.page_on_time_ds = on.unwrap_or(ds.page_on_time_ds);
+                rs.page_off_time_ds = off.unwrap_or(ds.page_off_time_ds);
+            },
+            Value::SpacingCharacter(sc) => {
+                if rs.is_char_matrix() {
+                    return Err(SyntaxError::UnsupportedTag("sc".to_string()));
+                }
+                rs.char_spacing = Some(sc);
+            },
+            Value::SpacingCharacterEnd() => { rs.char_spacing = None; },
+            Value::TextRectangle(r) => {
+                self.line_blank = true;
+                rs.line_number = 0;
+                rs.span_number = 0;
+                rs.update_text_rectangle(ds, r)?;
+            },
+            Value::Text(t) => {
+                page.spans.push(TextSpan::new(rs.clone(), t));
+                rs.span_number += 1;
+                self.line_blank = false;
+            },
+            _ => {
+                // Unsupported tags: [f], [fl], [hc], [ms], [mv]
+                return Err(SyntaxError::UnsupportedTag(v.to_string()));
+            },
+        }
+        Ok(())
     }
 }
 
@@ -872,7 +843,7 @@ impl<'a> Iterator for PageSplitter<'a> {
     type Item = Result<PageRenderer, SyntaxError>;
 
     fn next(&mut self) -> Option<Result<PageRenderer, SyntaxError>> {
-        if self.more {
+        if self.more_pages {
             Some(self.make_page())
         } else {
             None
@@ -920,7 +891,7 @@ mod test {
         assert!(pages.len() == 2);
         let pages: Vec<_> = PageSplitter::new(rs, "1[np]2[nP]").collect();
         assert!(pages.len() == 3);
-        let pages: Vec<_> = PageSplitter::new(rs, "[fo6][fo6][nl]\
+        let pages: Vec<_> = PageSplitter::new(rs, "[fo6][nl]\
             [jl2][cf255,255,255]RAMP A[jl4][cf255,255,0]FULL[nl]\
             [jl2][cf255,255,255]RAMP B[jl4][cf255,255,0]FULL[nl]\
             [jl2][cf255,255,255]RAMP C[jl4][cf255,255,0]FULL").collect();
