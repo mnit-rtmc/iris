@@ -879,19 +879,19 @@ mod test {
     #[test]
     fn page_count() {
         let rs = make_full_matrix();
-        let pages: Vec<_> = PageSplitter::new(rs, "").collect();
+        let pages: Vec<_> = PageSplitter::new(rs.clone(), "").collect();
         assert!(pages.len() == 1);
-        let pages: Vec<_> = PageSplitter::new(rs, "1").collect();
+        let pages: Vec<_> = PageSplitter::new(rs.clone(), "1").collect();
         assert!(pages.len() == 1);
-        let pages: Vec<_> = PageSplitter::new(rs, "[np]").collect();
+        let pages: Vec<_> = PageSplitter::new(rs.clone(), "[np]").collect();
         assert!(pages.len() == 2);
-        let pages: Vec<_> = PageSplitter::new(rs, "1[NP]").collect();
+        let pages: Vec<_> = PageSplitter::new(rs.clone(), "1[NP]").collect();
         assert!(pages.len() == 2);
-        let pages: Vec<_> = PageSplitter::new(rs, "1[Np]2").collect();
+        let pages: Vec<_> = PageSplitter::new(rs.clone(), "1[Np]2").collect();
         assert!(pages.len() == 2);
-        let pages: Vec<_> = PageSplitter::new(rs, "1[np]2[nP]").collect();
+        let pages: Vec<_> = PageSplitter::new(rs.clone(), "1[np]2[nP]").collect();
         assert!(pages.len() == 3);
-        let pages: Vec<_> = PageSplitter::new(rs, "[fo6][nl]\
+        let pages: Vec<_> = PageSplitter::new(rs.clone(), "[fo6][nl]\
             [jl2][cf255,255,255]RAMP A[jl4][cf255,255,0]FULL[nl]\
             [jl2][cf255,255,255]RAMP B[jl4][cf255,255,0]FULL[nl]\
             [jl2][cf255,255,255]RAMP C[jl4][cf255,255,0]FULL").collect();
@@ -900,7 +900,7 @@ mod test {
     #[test]
     fn page_full_matrix() {
         let rs = make_full_matrix();
-        let mut pages = PageSplitter::new(rs, "");
+        let mut pages = PageSplitter::new(rs.clone(), "");
         let p = pages.next().unwrap().unwrap();
         let rs = p.state;
         assert!(rs.color_scheme == ColorScheme::Color24Bit);
@@ -916,8 +916,8 @@ mod test {
         assert!(rs.char_width == 0);
         assert!(rs.char_height == 0);
         assert!(rs.font == (1, None));
-        let mut pages = PageSplitter::new(rs, "[pt10o2][cb9][pb5][cf3][jp3]\
-            [jl4][tr1,1,10,10][nl4][fo3,1234][sc2][np][pb][pt][cb][/sc]");
+        let mut pages = PageSplitter::new(rs.clone(), "[pt10o2][cb9][pb5][cf3]\
+            [jp3][jl4][tr1,1,10,10][nl4][fo3,1234][sc2][np][pb][pt][cb][/sc]");
         let p = pages.next().unwrap().unwrap();
         let rs = p.state;
         assert!(rs.color_foreground == Color::Legacy(1));
@@ -956,22 +956,22 @@ mod test {
     #[test]
     fn page_char_matrix() {
         let rs = make_char_matrix();
-        let mut pages = PageSplitter::new(rs, "[tr1,1,12,12]");
+        let mut pages = PageSplitter::new(rs.clone(), "[tr1,1,12,12]");
         if let Some(Err(SyntaxError::UnsupportedTagValue)) = pages.next() {
             assert!(true);
         } else { assert!(false) }
-        let mut pages = PageSplitter::new(rs, "[tr1,1,50,12]");
+        let mut pages = PageSplitter::new(rs.clone(), "[tr1,1,50,12]");
         if let Some(Err(SyntaxError::UnsupportedTagValue)) = pages.next() {
             assert!(true);
         } else { assert!(false) }
-        let mut pages = PageSplitter::new(rs, "[tr1,1,12,14]");
+        let mut pages = PageSplitter::new(rs.clone(), "[tr1,1,12,14]");
         if let Some(Err(SyntaxError::UnsupportedTagValue)) = pages.next() {
             assert!(true);
         } else { assert!(false) }
-        let mut pages = PageSplitter::new(rs, "[tr1,1,50,14]");
+        let mut pages = PageSplitter::new(rs.clone(), "[tr1,1,50,14]");
         if let Some(Ok(_)) = pages.next() { assert!(true); }
         else { assert!(false) }
-        let mut pages = PageSplitter::new(rs, "[pb9]");
+        let mut pages = PageSplitter::new(rs.clone(), "[pb9]");
         if let Some(Err(SyntaxError::UnsupportedTagValue)) = pages.next() {
             assert!(true);
         } else { assert!(false) }
