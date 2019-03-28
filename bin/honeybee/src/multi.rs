@@ -92,6 +92,129 @@ impl From<ColorClassic> for Color {
     }
 }
 
+/// Color context
+#[derive(Clone)]
+pub struct ColorCtx {
+    color_scheme : ColorScheme,
+    fg_default   : Color,
+    fg_current   : Color,
+    bg_default   : Color,
+    bg_current   : Color,
+}
+
+impl ColorCtx {
+    /// Create a new color context
+    pub fn new(color_scheme: ColorScheme, fg_default: Color, bg_default: Color)
+        -> Self
+    {
+        let fg_current = fg_default;
+        let bg_current = bg_default;
+        ColorCtx {
+            color_scheme,
+            fg_default,
+            fg_current,
+            bg_default,
+            bg_current,
+        }
+    }
+    /// Validate a color
+    pub fn validate(&self, c: Color) -> Result<Color, SyntaxError> {
+        self.color_scheme.validate(c)
+    }
+    /// Set the foreground color
+    pub fn set_foreground(&mut self, c: Option<Color>)
+        -> Result<(), SyntaxError>
+    {
+        self.fg_current = match c {
+            Some(c) => self.validate(c)?,
+            None => self.bg_default,
+        };
+        Ok(())
+    }
+    /// Get the current foreground color
+    pub fn foreground(&self) -> Color {
+        self.fg_current
+    }
+    /// Get the foreground RGB color
+    pub fn foreground_rgb(&self) -> Result<i32, SyntaxError> {
+        self.rgb(self.fg_current)
+    }
+    /// Set the background color
+    pub fn set_background(&mut self, c: Option<Color>)
+        -> Result<(), SyntaxError>
+    {
+        self.bg_current = match c {
+            Some(c) => self.validate(c)?,
+            None => self.bg_default,
+        };
+        Ok(())
+    }
+    /// Get the current background color
+    pub fn background(&self) -> Color {
+        self.bg_current
+    }
+    /// Get the background RGB color
+    pub fn background_rgb(&self) -> Result<i32, SyntaxError> {
+        self.rgb(self.bg_current)
+    }
+    /// Get RGB for the specified color.
+    pub fn rgb(&self, c: Color) -> Result<i32, SyntaxError> {
+        match (self.color_scheme, c) {
+            (ColorScheme::Monochrome1Bit, Color::Legacy(v)) => {
+                self.rgb_monochrome_1(v)
+            },
+            (ColorScheme::Monochrome8Bit, Color::Legacy(v)) => {
+                self.rgb_monochrome_8(v)
+            },
+            (_, Color::Legacy(v)) => ColorCtx::rgb_classic(v),
+            (_, Color::RGB(r, g, b)) => ColorCtx::rgb_24(r, g, b),
+        }
+    }
+    /// Get RGB for a monochrome 1-bit color.
+    fn rgb_monochrome_1(&self, v: u8) -> Result<i32, SyntaxError> {
+        match v {
+            0 => ColorCtx::rgb_default(self.bg_default),
+            1 => ColorCtx::rgb_default(self.fg_default),
+            _ => Err(SyntaxError::UnsupportedTagValue),
+        }
+    }
+    /// Get RGB for a default color.
+    fn rgb_default(c: Color) -> Result<i32, SyntaxError> {
+        match c {
+            Color::RGB(r, g, b) => ColorCtx::rgb_24(r, g, b),
+            Color::Legacy(v) => ColorCtx::rgb_classic(v),
+        }
+    }
+    /// Get RGB for a monochrome 8-bit color.
+    fn rgb_monochrome_8(&self, v: u8) -> Result<i32, SyntaxError> {
+        let bg = ColorCtx::rgb_default(self.bg_default)?;
+        let fg = ColorCtx::rgb_default(self.fg_default)?;
+        let r = ColorCtx::lerp((bg >> 16) as u8, (fg >> 16) as u8, v);
+        let g = ColorCtx::lerp((bg >>  8) as u8, (fg >>  8) as u8, v);
+        let b = ColorCtx::lerp((bg >>  0) as u8, (fg >>  0) as u8, v);
+        ColorCtx::rgb_24(r, g, b)
+    }
+    /// Get RGB for a classic color.
+    fn rgb_classic(v: u8) -> Result<i32, SyntaxError> {
+        match ColorClassic::from_u8(v) {
+            Some(c) => Ok(c.rgb()),
+            None    => Err(SyntaxError::UnsupportedTagValue),
+        }
+    }
+    /// Get RGB for a 24-bit color.
+    fn rgb_24(r: u8, g: u8, b: u8) -> Result<i32, SyntaxError> {
+        Ok((r as i32) << 16 + (g as i32) << 8 + (b as i32))
+    }
+    /// Interpolate between two color components
+    fn lerp(bg: u8, fg: u8, v: u8) -> u8 {
+        let d = bg.max(fg) - bg.min(fg);
+        let c = d as u32 * v as u32;
+        // cheap alternative to divide by 255
+        let r = (((c + 1) + (c >> 8)) >> 8) as u8;
+        bg.min(fg) + r
+    }
+}
+
 /// Classic color values
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum ColorClassic {
@@ -1036,6 +1159,18 @@ pub fn normalize(ms: &str) -> String {
 #[cfg(test)]
 mod test {
     use super::*;
+    #[test]
+    fn color_component() {
+        assert!(ColorCtx::lerp(0, 255, 0) == 0);
+        assert!(ColorCtx::lerp(0, 255, 128) == 128);
+        assert!(ColorCtx::lerp(0, 255, 255) == 255);
+        assert!(ColorCtx::lerp(0, 128, 0) == 0);
+        assert!(ColorCtx::lerp(0, 128, 128) == 64);
+        assert!(ColorCtx::lerp(0, 128, 255) == 128);
+        assert!(ColorCtx::lerp(128, 255, 0) == 128);
+        assert!(ColorCtx::lerp(128, 255, 128) == 191);
+        assert!(ColorCtx::lerp(128, 255, 255) == 255);
+    }
     fn single_text(v: &str) {
         let mut m = Parser::new(v);
         if let Some(Ok(Value::Text(t))) = m.next() { assert!(t == v) }

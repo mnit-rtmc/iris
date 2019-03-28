@@ -22,7 +22,7 @@ use std::sync::mpsc::Sender;
 use std::time::Instant;
 use crate::error::Error;
 use crate::font::{Font, query_font, Graphic};
-use crate::multi::{Color, ColorClassic, ColorScheme, LineJustification,
+use crate::multi::{Color, ColorClassic, ColorCtx, ColorScheme, LineJustification,
                    PageJustification, Rectangle};
 use crate::raster::{Raster, Rgb24};
 use crate::render::{PageSplitter, State};
@@ -759,10 +759,11 @@ fn render_state_default(msg_data: &MsgData, cfg: &SignConfig)
     -> Result<State, Error>
 {
     let color_scheme = cfg.color_scheme[..].into();
+    let fg_default = cfg.foreground_default();
+    let bg_default = cfg.background_default();
+    let color_ctx = ColorCtx::new(color_scheme, fg_default, bg_default);
     let char_width = cfg.char_width as u8;
     let char_height = cfg.char_height as u8;
-    let color_foreground = cfg.foreground_default();
-    let page_background = cfg.background_default();
     let page_on_time_ds = msg_data.page_on_default_ds();
     let page_off_time_ds = msg_data.page_off_default_ds();
     let text_rectangle = cfg.text_rect_default()?;
@@ -770,11 +771,9 @@ fn render_state_default(msg_data: &MsgData, cfg: &SignConfig)
     let just_line = msg_data.line_justification_default();
     let fname = cfg.default_font.as_ref();
     let font = (msg_data.font_default(fname)?, None);
-    Ok(State::new(color_scheme,
+    Ok(State::new(color_ctx,
                   char_width,
                   char_height,
-                  color_foreground,
-                  page_background,
                   page_on_time_ds,
                   page_off_time_ds,
                   text_rectangle,

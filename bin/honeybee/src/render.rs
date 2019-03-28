@@ -20,13 +20,9 @@ use crate::raster::{Raster, Rgb24};
 /// Page render state
 #[derive(Clone)]
 pub struct State {
-    color_scheme    : ColorScheme,
+    color_ctx       : ColorCtx,
     char_width      : u8,
     char_height     : u8,
-    fg_default      : Color,
-    bg_default      : Color,
-    color_foreground: Color,
-    page_background : Color,
     page_on_time_ds : u8,       // deciseconds
     page_off_time_ds: u8,       // deciseconds
     text_rectangle  : Rectangle,
@@ -68,22 +64,11 @@ pub struct PageSplitter<'a> {
     line_blank    : bool,
 }
 
-/// Scale between two color components
-fn scale_component(bg: u8, fg: u8, v: u8) -> u8 {
-    let d = bg.max(fg) - bg.min(fg);
-    let c = d as u32 * v as u32;
-    // cheap alternative to divide by 255
-    let r = (((c + 1) + (c >> 8)) >> 8) as u8;
-    bg.min(fg) + r
-}
-
 impl State {
     /// Create a new render state.
-    pub fn new(color_scheme     : ColorScheme,
+    pub fn new(color_ctx        : ColorCtx,
                char_width       : u8,
                char_height      : u8,
-               fg_default       : Color,
-               bg_default       : Color,
                page_on_time_ds  : u8,
                page_off_time_ds : u8,
                text_rectangle   : Rectangle,
@@ -91,16 +76,10 @@ impl State {
                just_line        : LineJustification,
                font             : (u8, Option<u16>)) -> Self
     {
-        let color_foreground = fg_default;
-        let page_background = bg_default;
         State {
-            color_scheme,
+            color_ctx,
             char_width,
             char_height,
-            fg_default,
-            bg_default,
-            color_foreground,
-            page_background,
             page_on_time_ds,
             page_off_time_ds,
             text_rectangle,
@@ -166,57 +145,11 @@ impl State {
     }
     /// Get the background RGB color.
     fn background_rgb(&self) -> Result<Rgb24, SyntaxError> {
-        self.color_rgb(self.page_background)
+        Ok(self.color_ctx.background_rgb()?.into())
     }
     /// Get the foreground RGB color.
     fn foreground_rgb(&self) -> Result<Rgb24, SyntaxError> {
-        self.color_rgb(self.color_foreground)
-    }
-    /// Get RGB for the specified color.
-    fn color_rgb(&self, c: Color) -> Result<Rgb24, SyntaxError> {
-        match (self.color_scheme, c) {
-            (ColorScheme::Monochrome1Bit, Color::Legacy(v)) => {
-                self.color_rgb_monochrome_1(v)
-            },
-            (ColorScheme::Monochrome8Bit, Color::Legacy(v)) => {
-                self.color_rgb_monochrome_8(v)
-            },
-            (_, Color::Legacy(v)) => self.color_rgb_classic(v),
-            (_, Color::RGB(r, g, b)) => Ok(Rgb24::new(r, g, b)),
-        }
-    }
-    /// Get RGB for a monochrome 1-bit color.
-    fn color_rgb_monochrome_1(&self, v: u8) -> Result<Rgb24, SyntaxError> {
-        match v {
-            0 => self.color_rgb_default(self.bg_default),
-            1 => self.color_rgb_default(self.fg_default),
-            _ => Err(SyntaxError::UnsupportedTagValue),
-        }
-    }
-    /// Get RGB for a default color.
-    fn color_rgb_default(&self, c: Color) -> Result<Rgb24, SyntaxError> {
-        match c {
-            Color::RGB(r, g, b) => Ok(Rgb24::new(r, g, b)),
-            Color::Legacy(v) => self.color_rgb_classic(v),
-        }
-    }
-    /// Get RGB for a monochrome 8-bit color.
-    fn color_rgb_monochrome_8(&self, v: u8) -> Result<Rgb24, SyntaxError> {
-        let bg = self.color_rgb_default(self.bg_default)?;
-        let fg = self.color_rgb_default(self.fg_default)?;
-        let r = scale_component(bg.r(), fg.r(), v);
-        let g = scale_component(bg.g(), fg.g(), v);
-        let b = scale_component(bg.b(), fg.b(), v);
-        Ok(Rgb24::new(r, g, b))
-    }
-    /// Get RGB for a classic color.
-    ///
-    /// * `v` Color value (0-9).
-    fn color_rgb_classic(&self, v: u8) -> Result<Rgb24, SyntaxError> {
-        match ColorClassic::from_u8(v) {
-            Some(c) => Ok(c.rgb().into()),
-            None    => Err(SyntaxError::UnsupportedTagValue),
-        }
+        Ok(self.color_ctx.foreground_rgb()?.into())
     }
     /// Check if states match for text spans
     fn matches_span(&self, other: &State) -> bool {
@@ -405,7 +338,7 @@ impl PageRenderer {
         for (v, cf) in &self.values {
             match v {
                 Value::ColorRectangle(r, c) => {
-                    let clr = rs.color_rgb(*c)?;
+                    let clr = rs.color_ctx.rgb(*c)?.into();
                     self.render_rect(&mut page, *r, clr)?;
                 },
                 Value::Graphic(gn, None) => {
@@ -639,7 +572,8 @@ impl<'a> PageSplitter<'a> {
             if self.more_pages { break; }
         }
         // These values affect the entire page
-        page.state.page_background = self.state.page_background;
+        page.state.color_ctx.set_background(
+            Some(self.state.color_ctx.background()))?;
         page.state.page_on_time_ds = self.state.page_on_time_ds;
         page.state.page_off_time_ds = self.state.page_off_time_ds;
         page.check_justification()?;
@@ -663,23 +597,16 @@ impl<'a> PageSplitter<'a> {
         let ds = &self.default_state;
         let mut rs = &mut self.state;
         match v {
-            Value::ColorBackground(None) => {
+            Value::ColorBackground(c) => {
                 // This tag remains for backward compatibility with 1203v1
-                rs.page_background = rs.bg_default;
+                rs.color_ctx.set_background(c)?;
             },
-            Value::ColorBackground(Some(c)) => {
-                // This tag remains for backward compatibility with 1203v1
-                rs.page_background = rs.color_scheme.validate(c)?;
-            },
-            Value::ColorForeground(None) => {
-                rs.color_foreground = rs.fg_default;
-            },
-            Value::ColorForeground(Some(c)) => {
-                rs.color_foreground = rs.color_scheme.validate(c)?;
+            Value::ColorForeground(c) => {
+                rs.color_ctx.set_foreground(c)?;
             },
             Value::ColorRectangle(_, c) => {
                 // foreground color is not changed by [cr]
-                rs.color_scheme.validate(c)?;
+                rs.color_ctx.validate(c)?;
                 let cf = rs.foreground_rgb()?;
                 page.values.push((v, cf));
             },
@@ -725,11 +652,8 @@ impl<'a> PageSplitter<'a> {
                 rs.span_number = 0;
                 self.more_pages = true;
             },
-            Value::PageBackground(None) => {
-                rs.page_background = rs.bg_default;
-            },
-            Value::PageBackground(Some(c)) => {
-                rs.page_background = rs.color_scheme.validate(c)?;
+            Value::PageBackground(c) => {
+                rs.color_ctx.set_background(c)?;
             },
             Value::PageTime(on, off) => {
                 rs.page_on_time_ds = on.unwrap_or(ds.page_on_time_ds);
@@ -777,22 +701,11 @@ impl<'a> Iterator for PageSplitter<'a> {
 #[cfg(test)]
 mod test {
     use super::*;
-    #[test]
-    fn color_component() {
-        assert!(scale_component(0, 255, 0) == 0);
-        assert!(scale_component(0, 255, 128) == 128);
-        assert!(scale_component(0, 255, 255) == 255);
-        assert!(scale_component(0, 128, 0) == 0);
-        assert!(scale_component(0, 128, 128) == 64);
-        assert!(scale_component(0, 128, 255) == 128);
-        assert!(scale_component(128, 255, 0) == 128);
-        assert!(scale_component(128, 255, 128) == 191);
-        assert!(scale_component(128, 255, 255) == 255);
-    }
     fn make_full_matrix() -> State {
-        State::new(ColorScheme::Color24Bit,
+        State::new(ColorCtx::new(ColorScheme::Color24Bit,
+                                 Color::Legacy(1),
+                                 Color::Legacy(0)),
                    0, 0,
-                   Color::Legacy(1), Color::Legacy(0),
                    20, 0,
                    Rectangle::new(1, 1, 60, 30),
                    PageJustification::Top,
@@ -826,9 +739,8 @@ mod test {
         let mut pages = PageSplitter::new(rs.clone(), "");
         let p = pages.next().unwrap().unwrap();
         let rs = p.state;
-        assert!(rs.color_scheme == ColorScheme::Color24Bit);
-        assert!(rs.color_foreground == Color::Legacy(1));
-        assert!(rs.page_background == Color::Legacy(0));
+        assert!(rs.color_ctx.foreground() == Color::Legacy(1));
+        assert!(rs.color_ctx.background() == Color::Legacy(0));
         assert!(rs.page_on_time_ds == 20);
         assert!(rs.page_off_time_ds == 0);
         assert!(rs.text_rectangle == Rectangle::new(1,1,60,30));
@@ -843,8 +755,8 @@ mod test {
             [jp3][jl4][tr1,1,10,10][nl4][fo3,1234][sc2][np][pb][pt][cb][/sc]");
         let p = pages.next().unwrap().unwrap();
         let rs = p.state;
-        assert!(rs.color_foreground == Color::Legacy(1));
-        assert!(rs.page_background == Color::Legacy(5));
+        assert!(rs.color_ctx.foreground() == Color::Legacy(1));
+        assert!(rs.color_ctx.background() == Color::Legacy(5));
         assert!(rs.page_on_time_ds == 10);
         assert!(rs.page_off_time_ds == 2);
         assert!(rs.text_rectangle == Rectangle::new(1,1,60,30));
@@ -855,8 +767,8 @@ mod test {
         assert!(rs.font == (1, None));
         let p = pages.next().unwrap().unwrap();
         let rs = p.state;
-        assert!(rs.color_foreground == Color::Legacy(3));
-        assert!(rs.page_background == Color::Legacy(0));
+        assert!(rs.color_ctx.foreground() == Color::Legacy(3));
+        assert!(rs.color_ctx.background() == Color::Legacy(0));
         assert!(rs.page_on_time_ds == 20);
         assert!(rs.page_off_time_ds == 0);
         assert!(rs.text_rectangle == Rectangle::new(1,1,60,30));
@@ -867,9 +779,10 @@ mod test {
         assert!(rs.font == (3, Some(0x1234)));
     }
     fn make_char_matrix() -> State {
-        State::new(ColorScheme::Monochrome1Bit,
+        State::new(ColorCtx::new(ColorScheme::Monochrome1Bit,
+                                 Color::Legacy(1),
+                                 Color::Legacy(0)),
                    5, 7,
-                   Color::Legacy(1), Color::Legacy(0),
                    20, 0,
                    Rectangle::new(1, 1, 100, 21),
                    PageJustification::Top,
