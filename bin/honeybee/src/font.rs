@@ -273,27 +273,28 @@ impl Graphic {
         let lit = ((buf[by] >> bi) & 1) != 0;
         // FIXME: background color?
         let cb = Rgb24::new(0, 0, 0);
-        if lit {
-            Some(cf)
+        let clr = if lit { cf } else { cb };
+        if let Some(tc) = self.transparent_color {
+            // FIXME: transparent color dependent on graphic color scheme
+            let tc: Rgb24 = tc.into();
+            if tc == clr { None } else { Some(clr) }
         } else {
-            if let Some(tc) = self.transparent_color {
-                let tc: Rgb24 = tc.into();
-                if tc == cb { None } else { Some(cb) }
-            } else {
-                Some(cb)
-            }
+            Some(clr)
         }
     }
     /// Get one pixel on a monochrome 8-bit graphic
     fn get_pixel_8(&self, buf: &[u8], x: u32, y: u32) -> Option<Rgb24> {
         let p = y * self.width() + x;
         let v = buf[p as usize];
+        // FIXME: wrong!
         Some(Rgb24::new(v, v, v))
+        // FIXME: check transparent color
     }
     /// Get one pixel on a classic color graphic
     fn get_pixel_classic(&self, buf: &[u8], x: u32, y: u32) -> Option<Rgb24> {
         let p = y * self.width() + x;
         let v = buf[p as usize];
+        // FIXME: check transparent color
         match ColorClassic::from_u8(v) {
             Some(c) => Some(c.rgb().into()),
             None => {
@@ -308,6 +309,7 @@ impl Graphic {
         let r = buf[(p + 0) as usize];
         let g = buf[(p + 1) as usize];
         let b = buf[(p + 2) as usize];
+        // FIXME: check transparent color
         Some(Rgb24::new(r, g, b))
     }
 }
