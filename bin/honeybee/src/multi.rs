@@ -42,14 +42,30 @@ impl From<&str> for ColorScheme {
     }
 }
 
+impl ColorScheme {
+    /// Validate a color for the scheme.
+    ///
+    /// * `c` Color value.
+    pub fn validate(&self, c: Color) -> Result<Color, SyntaxError> {
+        match (self, c) {
+            (ColorScheme::Monochrome1Bit, Color::Legacy(0...1)) => Ok(c),
+            (ColorScheme::Monochrome8Bit, Color::Legacy(_)) => Ok(c),
+            (ColorScheme::ColorClassic, Color::Legacy(0...9)) => Ok(c),
+            (ColorScheme::Color24Bit, Color::RGB(_, _, _)) => Ok(c),
+            (ColorScheme::Color24Bit, Color::Legacy(0...9)) => Ok(c),
+            _ => Err(SyntaxError::UnsupportedTagValue),
+        }
+    }
+}
+
 /// Color for a DMS pixel.
 /// Legacy colors are dependent on the DmsColorScheme.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Color {
-    Legacy(u8),      //    0-9 (colorClassic)
-                     //    0-1 (monochrome1Bit)
-                     // or 0-255 (monochrome8Bit)
-    RGB(u8, u8, u8), // red, green and blue components
+    Legacy(u8),      //    0-1   (monochrome1Bit)
+                     //    0-255 (monochrome8Bit)
+                     // or 0-9   (colorClassic)
+    RGB(u8, u8, u8), //    red, green and blue components
 }
 
 impl fmt::Display for Color {

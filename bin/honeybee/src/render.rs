@@ -28,8 +28,10 @@ pub struct State {
     color_scheme    : ColorScheme,
     char_width      : u8,
     char_height     : u8,
-    color_foreground: Color,    // default *MUST* be RGB or Legacy (classic)
-    page_background : Color,    // default *MUST* be RGB or Legacy (classic)
+    fg_default      : Color,
+    bg_default      : Color,
+    color_foreground: Color,
+    page_background : Color,
     page_on_time_ds : u8,       // deciseconds
     page_off_time_ds: u8,       // deciseconds
     text_rectangle  : Rectangle,
@@ -85,8 +87,8 @@ impl State {
     pub fn new(color_scheme     : ColorScheme,
                char_width       : u8,
                char_height      : u8,
-               color_foreground : Color,
-               page_background  : Color,
+               fg_default       : Color,
+               bg_default       : Color,
                page_on_time_ds  : u8,
                page_off_time_ds : u8,
                text_rectangle   : Rectangle,
@@ -94,10 +96,14 @@ impl State {
                just_line        : LineJustification,
                font             : (u8, Option<u16>)) -> Self
     {
+        let color_foreground = fg_default;
+        let page_background = bg_default;
         State {
             color_scheme,
             char_width,
             char_height,
+            fg_default,
+            bg_default,
             color_foreground,
             page_background,
             page_on_time_ds,
@@ -136,69 +142,6 @@ impl State {
             1
         }
     }
-    /// Get a color appropriate for the color scheme.
-    ///
-    /// * `c` Color value.
-    /// * `ds` Default state.
-    fn get_color(&self, c: Color, ds: &State) -> Result<Color, SyntaxError> {
-        // FIXME: check ds foreground / background color is RGB or classic
-        match self.color_scheme {
-            ColorScheme::Monochrome1Bit => self.get_monochrome_1_bit(c, ds),
-            ColorScheme::Monochrome8Bit => self.get_monochrome_8_bit(c, ds),
-            ColorScheme::ColorClassic   => self.get_classic(c),
-            ColorScheme::Color24Bit     => self.get_color_24_bit(c),
-        }
-    }
-    /// Get color for a monochrome 1-bit scheme.
-    ///
-    /// * `c` Color value.
-    /// * `ds` Default state.
-    fn get_monochrome_1_bit(&self, c: Color, ds: &State)
-        -> Result<Color, SyntaxError>
-    {
-        match c {
-            Color::Legacy(0) => Ok(ds.page_background),
-            Color::Legacy(1) => Ok(ds.color_foreground),
-            _                => Err(SyntaxError::UnsupportedTagValue),
-        }
-    }
-    /// Get color for a monochrome 8-bit scheme.
-    ///
-    /// * `c` Color value.
-    /// * `ds` Default state.
-    fn get_monochrome_8_bit(&self, c: Color, ds: &State)
-        -> Result<Color, SyntaxError>
-    {
-        if let Color::Legacy(v) = c {
-            let bg = ds.background_rgb()?;
-            let fg = ds.foreground_rgb()?;
-            let r = scale_component(bg.r(), fg.r(), v);
-            let g = scale_component(bg.g(), fg.g(), v);
-            let b = scale_component(bg.b(), fg.b(), v);
-            Ok(Color::RGB(r, g, b))
-        } else {
-            Err(SyntaxError::UnsupportedTagValue)
-        }
-    }
-    /// Get color for a classic scheme.
-    ///
-    /// * `c` Color value.
-    fn get_classic(&self, c: Color) -> Result<Color, SyntaxError> {
-        match c {
-            Color::Legacy(0...9) => Ok(c),
-            _                    => Err(SyntaxError::UnsupportedTagValue),
-        }
-    }
-    /// Get color for a 24-bit scheme.
-    ///
-    /// * `c` Color value.
-    fn get_color_24_bit(&self, c: Color) -> Result<Color, SyntaxError> {
-        match c {
-            Color::RGB(_,_,_)    => Ok(c),
-            Color::Legacy(0...9) => Ok(c), // allow classic colors only
-            _                    => Err(SyntaxError::UnsupportedTagValue),
-        }
-    }
     /// Update the text rectangle.
     fn update_text_rectangle(&mut self, default_state: &State,
         r: Rectangle) -> Result<(), SyntaxError>
@@ -234,42 +177,49 @@ impl State {
     fn foreground_rgb(&self) -> Result<Rgb24, SyntaxError> {
         self.color_rgb(self.color_foreground)
     }
-    /// Get RGB triplet for a color (ignoring color_scheme).
+    /// Get RGB for the specified color.
     fn color_rgb(&self, c: Color) -> Result<Rgb24, SyntaxError> {
-        match c {
-            Color::RGB(r,g,b) => Ok(Rgb24::new(r, g, b)),
-            Color::Legacy(v)  => self.color_rgb_legacy(v),
+        match (self.color_scheme, c) {
+            (ColorScheme::Monochrome1Bit, Color::Legacy(v)) => {
+                self.color_rgb_monochrome_1(v)
+            },
+            (ColorScheme::Monochrome8Bit, Color::Legacy(v)) => {
+                self.color_rgb_monochrome_8(v)
+            },
+            (_, Color::Legacy(v)) => self.color_rgb_classic(v),
+            (_, Color::RGB(r, g, b)) => Ok(Rgb24::new(r, g, b)),
         }
     }
-    /// Get RGB triplet for a legacy color value.
-    ///
-    /// * `v` Color value (0-255).
-    fn color_rgb_legacy(&self, v: u8) -> Result<Rgb24, SyntaxError> {
-        match self.color_scheme {
-            ColorScheme::Monochrome1Bit => self.color_rgb_monochrome_1_bit(v),
-            ColorScheme::Monochrome8Bit => self.color_rgb_monochrome_8_bit(v),
-            ColorScheme::ColorClassic |
-            ColorScheme::Color24Bit     => self.color_rgb_classic(v),
-        }
-    }
-    /// Get RGB triplet for a monochrome 1-bit color.
-    fn color_rgb_monochrome_1_bit(&self, v: u8) -> Result<Rgb24, SyntaxError> {
+    /// Get RGB for a monochrome 1-bit color.
+    fn color_rgb_monochrome_1(&self, v: u8) -> Result<Rgb24, SyntaxError> {
         match v {
-            0 => Ok(Rgb24::new(  0,   0,   0)),
-            1 => Ok(Rgb24::new(255, 255, 255)),
+            0 => self.color_rgb_default(self.bg_default),
+            1 => self.color_rgb_default(self.fg_default),
             _ => Err(SyntaxError::UnsupportedTagValue),
         }
     }
-    /// Get RGB triplet for a monochrome 8-bit color.
-    fn color_rgb_monochrome_8_bit(&self, v: u8) -> Result<Rgb24, SyntaxError> {
-        Ok(Rgb24::new(v, v, v))
+    /// Get RGB for a default color.
+    fn color_rgb_default(&self, c: Color) -> Result<Rgb24, SyntaxError> {
+        match c {
+            Color::RGB(r, g, b) => Ok(Rgb24::new(r, g, b)),
+            Color::Legacy(v) => self.color_rgb_classic(v),
+        }
     }
-    /// Get RGB triplet for a classic color.
+    /// Get RGB for a monochrome 8-bit color.
+    fn color_rgb_monochrome_8(&self, v: u8) -> Result<Rgb24, SyntaxError> {
+        let bg = self.color_rgb_default(self.bg_default)?;
+        let fg = self.color_rgb_default(self.fg_default)?;
+        let r = scale_component(bg.r(), fg.r(), v);
+        let g = scale_component(bg.g(), fg.g(), v);
+        let b = scale_component(bg.b(), fg.b(), v);
+        Ok(Rgb24::new(r, g, b))
+    }
+    /// Get RGB for a classic color.
     ///
     /// * `v` Color value (0-9).
     fn color_rgb_classic(&self, v: u8) -> Result<Rgb24, SyntaxError> {
         match ColorClassic::from_u8(v) {
-            Some(c) => self.color_rgb(c.rgb().into()),
+            Some(c) => Ok(c.rgb().into()),
             None    => Err(SyntaxError::UnsupportedTagValue),
         }
     }
@@ -482,7 +432,7 @@ impl PageRenderer {
         let mut page = Raster::new(w.into(), h.into(), clr);
         for (v, cf) in &self.values {
             match v {
-                Value::ColorRectangle(r,c) => {
+                Value::ColorRectangle(r, c) => {
                     let clr = rs.color_rgb(*c)?;
                     self.render_rect(&mut page, *r, clr)?;
                 },
@@ -743,20 +693,21 @@ impl<'a> PageSplitter<'a> {
         match v {
             Value::ColorBackground(None) => {
                 // This tag remains for backward compatibility with 1203v1
-                rs.page_background = ds.page_background;
+                rs.page_background = rs.bg_default;
             },
             Value::ColorBackground(Some(c)) => {
                 // This tag remains for backward compatibility with 1203v1
-                rs.page_background = rs.get_color(c, ds)?;
+                rs.page_background = rs.color_scheme.validate(c)?;
             },
             Value::ColorForeground(None) => {
-                rs.color_foreground = ds.color_foreground;
+                rs.color_foreground = rs.fg_default;
             },
             Value::ColorForeground(Some(c)) => {
-                rs.color_foreground = rs.get_color(c, ds)?;
+                rs.color_foreground = rs.color_scheme.validate(c)?;
             },
             Value::ColorRectangle(_, c) => {
-                rs.get_color(c, ds)?; // validate color
+                // foreground color is not changed by [cr]
+                rs.color_scheme.validate(c)?;
                 let cf = rs.foreground_rgb()?;
                 page.values.push((v, cf));
             },
@@ -803,10 +754,10 @@ impl<'a> PageSplitter<'a> {
                 self.more_pages = true;
             },
             Value::PageBackground(None) => {
-                rs.page_background = ds.page_background;
+                rs.page_background = rs.bg_default;
             },
             Value::PageBackground(Some(c)) => {
-                rs.page_background = rs.get_color(c, ds)?;
+                rs.page_background = rs.color_scheme.validate(c)?;
             },
             Value::PageTime(on, off) => {
                 rs.page_on_time_ds = on.unwrap_or(ds.page_on_time_ds);
