@@ -23,6 +23,10 @@ use crate::raster::{Raster, Rgb24};
 use crate::resource::Queryable;
 use crate::multi::{ColorClassic, ColorScheme, SyntaxError};
 
+/// Length of base64 output buffer for glyphs.
+/// Encoded glyphs are restricted to 128 bytes.
+const GLYPH_LEN: usize = (128 + 3) / 4 * 3;
+
 /// A bitmap font glyph
 #[derive(Serialize, Deserialize)]
 pub struct Glyph {
@@ -102,6 +106,35 @@ impl<'a> Font {
             Some(g) => Ok(&g),
             None    => Err(SyntaxError::CharacterNotDefined(cp)),
         }
+    }
+    /// Render a text span
+    pub fn render_text(&self, page: &mut Raster, text: &str, mut x: u32, y: u32,
+        cs: u32, cf: Rgb24) -> Result<(), Error>
+    {
+        let h = self.height() as u32;
+        debug!("span: {}, left: {}, top: {}, height: {}", text, x, y, h);
+        let config = Config::new(CharacterSet::Standard, false, true,
+            LineWrap::NoWrap);
+        let mut buf = [0; GLYPH_LEN];
+        for c in text.chars() {
+            let g = self.glyph(c)?;
+            let w = g.width() as u32;
+            let n = decode_config_slice(&g.pixels, config, &mut buf)?;
+            debug!("char: {}, width: {}, len: {}", c, w, n);
+            for yy in 0..h {
+                for xx in 0..w {
+                    let p = yy * w + xx;
+                    let by = p as usize / 8;
+                    let bi = 7 - (p & 7);
+                    let lit = ((buf[by] >> bi) & 1) != 0;
+                    if lit {
+                        page.set_pixel(x + xx, y + yy, cf);
+                    }
+                }
+            }
+            x += w + cs;
+        }
+        Ok(())
     }
 }
 

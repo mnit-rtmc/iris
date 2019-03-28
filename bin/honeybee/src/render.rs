@@ -11,16 +11,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-use base64::{Config, CharacterSet, LineWrap, decode_config_slice};
 use std::collections::HashMap;
 use crate::error::Error;
 use crate::font::{Font, Graphic};
 use crate::multi::*;
 use crate::raster::{Raster, Rgb24};
-
-/// Length of base64 output buffer for glyphs.
-/// Encoded glyphs are restricted to 128 bytes.
-const GLYPH_LEN: usize = (128 + 3) / 4 * 3;
 
 /// Page render state
 #[derive(Clone)]
@@ -315,35 +310,12 @@ impl<'a> TextSpan {
         }
     }
     /// Render the text span
-    fn render(&self, page: &mut Raster, font: &Font, mut x: u32, y: u32)
+    fn render_text(&self, page: &mut Raster, font: &Font, x: u32, y: u32)
         -> Result<(), Error>
     {
-        let cf = self.state.foreground_rgb()?;
-        let h = font.height() as u32;
         let cs = self.char_spacing_font(font);
-        debug!("span: {}, left: {}, top: {}, height: {}", self.text, x, y, h);
-        let config = Config::new(CharacterSet::Standard, false, true,
-            LineWrap::NoWrap);
-        let mut buf = [0; GLYPH_LEN];
-        for c in self.text.chars() {
-            let g = font.glyph(c)?;
-            let w = g.width() as u32;
-            let n = decode_config_slice(&g.pixels, config, &mut buf)?;
-            debug!("char: {}, width: {}, len: {}", c, w, n);
-            for yy in 0..h {
-                for xx in 0..w {
-                    let p = yy * w + xx;
-                    let by = p as usize / 8;
-                    let bi = 7 - (p & 7);
-                    let lit = ((buf[by] >> bi) & 1) != 0;
-                    if lit {
-                        page.set_pixel(x + xx, y + yy, cf);
-                    }
-                }
-            }
-            x += w + cs;
-        }
-        Ok(())
+        let cf = self.state.foreground_rgb()?;
+        font.render_text(page, &self.text, x, y, cs, cf)
     }
 }
 
@@ -454,10 +426,10 @@ impl PageRenderer {
             }
         }
         for s in &self.spans {
-            let x = self.span_x(s, fonts)?;
-            let y = self.span_y(s, fonts)?;
+            let x = self.span_x(s, fonts)? as u32;
+            let y = self.span_y(s, fonts)? as u32;
             let font = s.font(fonts)?;
-            s.render(&mut page, &font, x as u32, y as u32)?;
+            s.render_text(&mut page, &font, x, y)?;
         }
         Ok(page)
     }
