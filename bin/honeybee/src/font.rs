@@ -21,7 +21,7 @@ use std::path::{Path, PathBuf};
 use crate::error::Error;
 use crate::raster::{Raster, Rgb24};
 use crate::resource::Queryable;
-use crate::multi::{ColorClassic, ColorScheme, SyntaxError};
+use crate::multi::{Color, ColorCtx, ColorScheme, SyntaxError};
 
 /// Length of base64 output buffer for glyphs.
 /// Encoded glyphs are restricted to 128 bytes.
@@ -226,7 +226,7 @@ impl Graphic {
         }
     }
     /// Render a graphic onto a Raster
-    pub fn onto_raster(&self, page: &mut Raster, x: u32, y: u32, cf: Rgb24)
+    pub fn onto_raster(&self, page: &mut Raster, x: u32, y: u32, ctx: &ColorCtx)
         -> Result<(), Error>
     {
         let config = Config::new(CharacterSet::Standard, false, true,
@@ -247,7 +247,7 @@ impl Graphic {
             w, h, n);
         for yy in 0..h {
             for xx in 0..w {
-                if let Some(clr) = self.get_pixel(&buf, xx, yy, cf) {
+                if let Some(clr) = self.get_pixel(&buf, xx, yy, ctx) {
                     page.set_pixel(x + xx, y + yy, clr);
                 }
             }
@@ -255,61 +255,64 @@ impl Graphic {
         Ok(())
     }
     /// Get one pixel color
-    fn get_pixel(&self, buf: &[u8], x: u32, y: u32, cf: Rgb24) -> Option<Rgb24> {
+    fn get_pixel(&self, buf: &[u8], x: u32, y: u32, ctx: &ColorCtx)
+        -> Option<Rgb24>
+    {
         match self.color_scheme[..].into() {
-            ColorScheme::Monochrome1Bit => self.get_pixel_1(buf, x, y, cf),
-            ColorScheme::Monochrome8Bit => self.get_pixel_8(buf, x, y),
-            ColorScheme::ColorClassic => self.get_pixel_classic(buf, x, y),
+            ColorScheme::Monochrome1Bit => self.get_pixel_1(buf, x, y, ctx),
+            ColorScheme::Monochrome8Bit |
+            ColorScheme::ColorClassic => {
+                self.get_pixel_8_or_classic(buf, x, y, ctx)
+            },
             ColorScheme::Color24Bit => self.get_pixel_24(buf, x, y),
         }
     }
     /// Get one pixel on a monochrome 1-bit graphic
-    fn get_pixel_1(&self, buf: &[u8], x: u32, y: u32, cf: Rgb24)
+    fn get_pixel_1(&self, buf: &[u8], x: u32, y: u32, ctx: &ColorCtx)
         -> Option<Rgb24>
     {
         let p = y * self.width() + x;
         let by = p as usize / 8;
         let bi = 7 - (p & 7);
         let lit = ((buf[by] >> bi) & 1) != 0;
-        // FIXME: background color?
-        let cb = Rgb24::new(0, 0, 0);
-        let clr = if lit { cf } else { cb };
-        if let Some(tc) = self.transparent_color {
-            // FIXME: transparent color dependent on graphic color scheme
-            let tc: Rgb24 = tc.into();
-            if tc == clr { None } else { Some(clr) }
-        } else {
-            Some(clr)
+        match (lit, self.transparent_color) {
+            (false, Some(0)) => None,
+            (true, Some(1)) => None,
+            (false, _) => Some(ctx.background_rgb().into()),
+            (true, _) => Some(ctx.foreground_rgb().into()),
         }
     }
-    /// Get one pixel on a monochrome 8-bit graphic
-    fn get_pixel_8(&self, buf: &[u8], x: u32, y: u32) -> Option<Rgb24> {
+    /// Get one pixel on a monochrome 8-bit or classic color graphic
+    fn get_pixel_8_or_classic(&self, buf: &[u8], x: u32, y: u32, ctx: &ColorCtx)
+        -> Option<Rgb24>
+    {
         let p = y * self.width() + x;
         let v = buf[p as usize];
-        // FIXME: wrong!
-        Some(Rgb24::new(v, v, v))
-        // FIXME: check transparent color
-    }
-    /// Get one pixel on a classic color graphic
-    fn get_pixel_classic(&self, buf: &[u8], x: u32, y: u32) -> Option<Rgb24> {
-        let p = y * self.width() + x;
-        let v = buf[p as usize];
-        // FIXME: check transparent color
-        match ColorClassic::from_u8(v) {
-            Some(c) => Some(c.rgb().into()),
+        if let Some(tc) = self.transparent_color {
+            if tc == v as i32 {
+                return None;
+            }
+        }
+        match ctx.rgb(Color::Legacy(v)).ok() {
+            Some(rgb) => Some(rgb.into()),
             None => {
-                debug!("get_pixel_classic -- Bad color: {}", v);
+                debug!("get_pixel_8_or_classic -- Bad color {}", v);
                 None
             },
         }
     }
     /// Get one pixel on a 24-bit color graphic
     fn get_pixel_24(&self, buf: &[u8], x: u32, y: u32) -> Option<Rgb24> {
-        let p = (y * self.width() + x) * 3;
-        let r = buf[(p + 0) as usize];
-        let g = buf[(p + 1) as usize];
-        let b = buf[(p + 2) as usize];
-        // FIXME: check transparent color
+        let p = 3 * (y * self.width() + x) as usize;
+        let r = buf[p + 0];
+        let g = buf[p + 1];
+        let b = buf[p + 2];
+        if let Some(tc) = self.transparent_color {
+            let rgb = ((r as i32) << 16) + ((g as i32) << 8) + b as i32;
+            if rgb == tc {
+                return None;
+            }
+        }
         Some(Rgb24::new(r, g, b))
     }
 }

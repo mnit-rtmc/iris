@@ -50,9 +50,9 @@ struct TextLine {
 
 /// Page renderer
 pub struct PageRenderer {
-    state  : State,                // render state at start of page
-    values : Vec<(Value, Rgb24)>,  // graphic / color rect, foreground color
-    spans  : Vec<TextSpan>,        // text spans
+    state  : State,                 // render state at start of page
+    values : Vec<(Value, ColorCtx)>,// graphic / color rect, color context
+    spans  : Vec<TextSpan>,         // text spans
 }
 
 /// Page splitter (iterator)
@@ -145,11 +145,11 @@ impl State {
     }
     /// Get the background RGB color.
     fn background_rgb(&self) -> Result<Rgb24, SyntaxError> {
-        Ok(self.color_ctx.background_rgb()?.into())
+        Ok(self.color_ctx.background_rgb().into())
     }
     /// Get the foreground RGB color.
-    fn foreground_rgb(&self) -> Result<Rgb24, SyntaxError> {
-        Ok(self.color_ctx.foreground_rgb()?.into())
+    fn foreground_rgb(&self) -> Rgb24 {
+        self.color_ctx.foreground_rgb().into()
     }
     /// Check if states match for text spans
     fn matches_span(&self, other: &State) -> bool {
@@ -247,7 +247,7 @@ impl<'a> TextSpan {
         -> Result<(), Error>
     {
         let cs = self.char_spacing_font(font);
-        let cf = self.state.foreground_rgb()?;
+        let cf = self.state.foreground_rgb();
         font.render_text(page, &self.text, x, y, cs, cf)
     }
 }
@@ -335,17 +335,17 @@ impl PageRenderer {
         let h = rs.text_rectangle.h;
         let clr = rs.background_rgb()?;
         let mut page = Raster::new(w.into(), h.into(), clr);
-        for (v, cf) in &self.values {
+        for (v, ctx) in &self.values {
             match v {
-                Value::ColorRectangle(r, c) => {
-                    let clr = rs.color_ctx.rgb(*c)?.into();
+                Value::ColorRectangle(r, _) => {
+                    let clr = ctx.foreground_rgb().into();
                     self.render_rect(&mut page, *r, clr)?;
                 },
                 Value::Graphic(gn, None) => {
                     let n = *gn as i32;
                     let g = graphics.get(&n)
                                     .ok_or(SyntaxError::GraphicNotDefined(*gn))?;
-                    g.onto_raster(&mut page, 1, 1, *cf)?;
+                    g.onto_raster(&mut page, 1, 1, ctx)?;
                 },
                 Value::Graphic(gn, Some((x,y,_))) => {
                     let n = *gn as i32;
@@ -353,7 +353,7 @@ impl PageRenderer {
                                     .ok_or(SyntaxError::GraphicNotDefined(*gn))?;
                     let x = *x as u32;
                     let y = *y as u32;
-                    g.onto_raster(&mut page, x, y, *cf)?;
+                    g.onto_raster(&mut page, x, y, ctx)?;
                 },
                 _ => unreachable!(),
             }
@@ -605,16 +605,15 @@ impl<'a> PageSplitter<'a> {
                 rs.color_ctx.set_foreground(c)?;
             },
             Value::ColorRectangle(_, c) => {
-                // foreground color is not changed by [cr]
-                rs.color_ctx.validate(c)?;
-                let cf = rs.foreground_rgb()?;
-                page.values.push((v, cf));
+                let mut ctx = rs.color_ctx.clone();
+                // only set foreground color in cloned context
+                ctx.set_foreground(Some(c))?;
+                page.values.push((v, ctx));
             },
             Value::Font(None) => { rs.font = ds.font },
             Value::Font(Some(f)) => { rs.font = f },
             Value::Graphic(_, _) =>  {
-                let cf = rs.foreground_rgb()?;
-                page.values.push((v, cf));
+                page.values.push((v, rs.color_ctx.clone()));
             },
             Value::JustificationLine(Some(LineJustification::Other)) => {
                 return Err(SyntaxError::UnsupportedTagValue);

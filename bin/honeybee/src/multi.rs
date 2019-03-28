@@ -136,8 +136,8 @@ impl ColorCtx {
         self.fg_current
     }
     /// Get the foreground RGB color
-    pub fn foreground_rgb(&self) -> Result<i32, SyntaxError> {
-        self.rgb(self.fg_current)
+    pub fn foreground_rgb(&self) -> i32 {
+        self.rgb_no_fail(self.fg_current)
     }
     /// Set the background color
     pub fn set_background(&mut self, c: Option<Color>)
@@ -154,8 +154,18 @@ impl ColorCtx {
         self.bg_current
     }
     /// Get the background RGB color
-    pub fn background_rgb(&self) -> Result<i32, SyntaxError> {
-        self.rgb(self.bg_current)
+    pub fn background_rgb(&self) -> i32 {
+        self.rgb_no_fail(self.bg_current)
+    }
+    /// Get an RGB color with no expected failure (already validated)
+    pub fn rgb_no_fail(&self, c: Color) -> i32 {
+        match self.rgb(c) {
+            Ok(rgb) => rgb,
+            Err(e) => {
+                warn!("rgb_no_fail: {} -- {}", c, e);
+                0
+            },
+        }
     }
     /// Get RGB for the specified color.
     pub fn rgb(&self, c: Color) -> Result<i32, SyntaxError> {
@@ -167,7 +177,7 @@ impl ColorCtx {
                 self.rgb_monochrome_8(v)
             },
             (_, Color::Legacy(v)) => ColorCtx::rgb_classic(v),
-            (_, Color::RGB(r, g, b)) => ColorCtx::rgb_24(r, g, b),
+            (_, Color::RGB(r, g, b)) => Ok(ColorCtx::rgb_24(r, g, b)),
         }
     }
     /// Get RGB for a monochrome 1-bit color.
@@ -181,7 +191,7 @@ impl ColorCtx {
     /// Get RGB for a default color.
     fn rgb_default(c: Color) -> Result<i32, SyntaxError> {
         match c {
-            Color::RGB(r, g, b) => ColorCtx::rgb_24(r, g, b),
+            Color::RGB(r, g, b) => Ok(ColorCtx::rgb_24(r, g, b)),
             Color::Legacy(v) => ColorCtx::rgb_classic(v),
         }
     }
@@ -192,7 +202,7 @@ impl ColorCtx {
         let r = ColorCtx::lerp((bg >> 16) as u8, (fg >> 16) as u8, v);
         let g = ColorCtx::lerp((bg >>  8) as u8, (fg >>  8) as u8, v);
         let b = ColorCtx::lerp((bg >>  0) as u8, (fg >>  0) as u8, v);
-        ColorCtx::rgb_24(r, g, b)
+        Ok(ColorCtx::rgb_24(r, g, b))
     }
     /// Get RGB for a classic color.
     fn rgb_classic(v: u8) -> Result<i32, SyntaxError> {
@@ -202,8 +212,8 @@ impl ColorCtx {
         }
     }
     /// Get RGB for a 24-bit color.
-    fn rgb_24(r: u8, g: u8, b: u8) -> Result<i32, SyntaxError> {
-        Ok((r as i32) << 16 + (g as i32) << 8 + (b as i32))
+    fn rgb_24(r: u8, g: u8, b: u8) -> i32 {
+        (r as i32) << 16 + (g as i32) << 8 + (b as i32)
     }
     /// Interpolate between two color components
     fn lerp(bg: u8, fg: u8, v: u8) -> u8 {
