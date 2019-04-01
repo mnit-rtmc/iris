@@ -192,6 +192,9 @@ pub struct Graphic {
     pixels           : String,
 }
 
+/// Function to lookup a pixel from a graphic buffer
+type PixFn = Fn(&Graphic, u32, u32, &ColorCtx, &[u8]) -> Option<Rgb24>;
+
 impl Graphic {
     /// Load graphics from a JSON file
     pub fn load(dir: &Path) -> Result<HashMap<i32, Graphic>, Error> {
@@ -229,9 +232,6 @@ impl Graphic {
     pub fn onto_raster(&self, page: &mut Raster, x: u32, y: u32, ctx: &ColorCtx)
         -> Result<(), Error>
     {
-        let config = Config::new(CharacterSet::Standard, false, true,
-            LineWrap::NoWrap);
-        let bpp = self.bits_per_pixel();
         let x = x - 1; // x must be > 0
         let y = y - 1; // y must be > 0
         let w = self.width();
@@ -240,35 +240,42 @@ impl Graphic {
             // There is no GraphicTooBig syntax error
             return Err(SyntaxError::Other.into());
         }
-        let n = (w * h * bpp + 7) / 8;
-        let mut buf = vec!(0; n as usize);
-        let n = decode_config_slice(&self.pixels, config, &mut buf)?;
-        debug!("graphic: {}, width: {}, height: {}, len: {}", self.g_number,
-            w, h, n);
+        let buf = self.decode_base64()?;
+        let pix_fn = self.pixel_fn();
         for yy in 0..h {
             for xx in 0..w {
-                if let Some(clr) = self.get_pixel(&buf, xx, yy, ctx) {
+                if let Some(clr) = pix_fn(self, xx, yy, ctx, &buf) {
                     page.set_pixel(x + xx, y + yy, clr);
                 }
             }
         }
         Ok(())
     }
-    /// Get one pixel color
-    fn get_pixel(&self, buf: &[u8], x: u32, y: u32, ctx: &ColorCtx)
-        -> Option<Rgb24>
-    {
+    /// Decode base64 data of graphic
+    fn decode_base64(&self) -> Result<Vec<u8>, Error> {
+        let config = Config::new(CharacterSet::Standard, false, true,
+            LineWrap::NoWrap);
+        let bpp = self.bits_per_pixel();
+        let w = self.width();
+        let h = self.height();
+        let n = (w * h * bpp + 7) / 8;
+        let mut buf = vec!(0; n as usize);
+        let n = decode_config_slice(&self.pixels, config, &mut buf)?;
+        debug!("graphic: {}, width: {}, height: {}, len: {}", self.g_number,
+            w, h, n);
+        Ok(buf)
+    }
+    /// Get pixel lookup function for the color scheme
+    fn pixel_fn(&self) -> &PixFn {
         match self.color_scheme[..].into() {
-            ColorScheme::Monochrome1Bit => self.get_pixel_1(buf, x, y, ctx),
+            ColorScheme::Monochrome1Bit => &Graphic::pixel_1,
             ColorScheme::Monochrome8Bit |
-            ColorScheme::ColorClassic => {
-                self.get_pixel_8_or_classic(buf, x, y, ctx)
-            },
-            ColorScheme::Color24Bit => self.get_pixel_24(buf, x, y),
+            ColorScheme::ColorClassic => &Graphic::pixel_8,
+            ColorScheme::Color24Bit => &Graphic::pixel_24,
         }
     }
-    /// Get one pixel on a monochrome 1-bit graphic
-    fn get_pixel_1(&self, buf: &[u8], x: u32, y: u32, ctx: &ColorCtx)
+    /// Get one pixel of a monochrome 1-bit graphic
+    fn pixel_1(&self, x: u32, y: u32, ctx: &ColorCtx, buf: &[u8])
         -> Option<Rgb24>
     {
         let p = y * self.width() + x;
@@ -282,8 +289,8 @@ impl Graphic {
             (true, _) => Some(ctx.foreground_rgb().into()),
         }
     }
-    /// Get one pixel on a monochrome 8-bit or classic color graphic
-    fn get_pixel_8_or_classic(&self, buf: &[u8], x: u32, y: u32, ctx: &ColorCtx)
+    /// Get one pixel of an 8-bit (monochrome or classic) color graphic
+    fn pixel_8(&self, x: u32, y: u32, ctx: &ColorCtx, buf: &[u8])
         -> Option<Rgb24>
     {
         let p = y * self.width() + x;
@@ -296,13 +303,15 @@ impl Graphic {
         match ctx.rgb(Color::Legacy(v)).ok() {
             Some(rgb) => Some(rgb.into()),
             None => {
-                debug!("get_pixel_8_or_classic -- Bad color {}", v);
+                debug!("pixel_8 -- Bad color {}", v);
                 None
             },
         }
     }
-    /// Get one pixel on a 24-bit color graphic
-    fn get_pixel_24(&self, buf: &[u8], x: u32, y: u32) -> Option<Rgb24> {
+    /// Get one pixel of a 24-bit color graphic
+    fn pixel_24(&self, x: u32, y: u32, _ctx: &ColorCtx, buf: &[u8])
+        -> Option<Rgb24>
+    {
         let p = 3 * (y * self.width() + x) as usize;
         let r = buf[p + 0];
         let g = buf[p + 1];
