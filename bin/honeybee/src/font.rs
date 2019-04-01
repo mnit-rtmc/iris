@@ -300,7 +300,7 @@ impl Graphic {
                 return None;
             }
         }
-        match ctx.rgb(Color::Legacy(v)).ok() {
+        match ctx.rgb(Color::Legacy(v)) {
             Some(rgb) => Some(rgb.into()),
             None => {
                 debug!("pixel_8 -- Bad color {}", v);

@@ -46,14 +46,14 @@ impl ColorScheme {
     /// Validate a color for the scheme.
     ///
     /// * `c` Color value.
-    pub fn validate(&self, c: Color) -> Result<Color, SyntaxError> {
+    fn validate(&self, c: Color) -> Option<Color> {
         match (self, c) {
-            (ColorScheme::Monochrome1Bit, Color::Legacy(0...1)) => Ok(c),
-            (ColorScheme::Monochrome8Bit, Color::Legacy(_)) => Ok(c),
-            (ColorScheme::ColorClassic, Color::Legacy(0...9)) => Ok(c),
-            (ColorScheme::Color24Bit, Color::RGB(_, _, _)) => Ok(c),
-            (ColorScheme::Color24Bit, Color::Legacy(0...9)) => Ok(c),
-            _ => Err(SyntaxError::UnsupportedTagValue),
+            (ColorScheme::Monochrome1Bit, Color::Legacy(0...1)) => Some(c),
+            (ColorScheme::Monochrome8Bit, Color::Legacy(_)) => Some(c),
+            (ColorScheme::ColorClassic, Color::Legacy(0...9)) => Some(c),
+            (ColorScheme::Color24Bit, Color::RGB(_, _, _)) => Some(c),
+            (ColorScheme::Color24Bit, Color::Legacy(0...9)) => Some(c),
+            _ => None,
         }
     }
 }
@@ -118,15 +118,18 @@ impl ColorCtx {
         }
     }
     /// Validate a color
-    pub fn validate(&self, c: Color) -> Result<Color, SyntaxError> {
-        self.color_scheme.validate(c)
+    fn validate(&self, c: Color, v: &Value) -> Result<Color, SyntaxError> {
+        match self.color_scheme.validate(c) {
+            Some(c) => Ok(c),
+            None => Err(SyntaxError::UnsupportedTagValue(v.clone().into())),
+        }
     }
     /// Set the foreground color
-    pub fn set_foreground(&mut self, c: Option<Color>)
+    pub fn set_foreground(&mut self, c: Option<Color>, v: &Value)
         -> Result<(), SyntaxError>
     {
         self.fg_current = match c {
-            Some(c) => self.validate(c)?,
+            Some(c) => self.validate(c, v)?,
             None => self.bg_default,
         };
         Ok(())
@@ -140,11 +143,11 @@ impl ColorCtx {
         self.rgb_no_fail(self.fg_current)
     }
     /// Set the background color
-    pub fn set_background(&mut self, c: Option<Color>)
+    pub fn set_background(&mut self, c: Option<Color>, v: &Value)
         -> Result<(), SyntaxError>
     {
         self.bg_current = match c {
-            Some(c) => self.validate(c)?,
+            Some(c) => self.validate(c, v)?,
             None => self.bg_default,
         };
         Ok(())
@@ -160,15 +163,15 @@ impl ColorCtx {
     /// Get an RGB color with no expected failure (already validated)
     pub fn rgb_no_fail(&self, c: Color) -> i32 {
         match self.rgb(c) {
-            Ok(rgb) => rgb,
-            Err(e) => {
-                warn!("rgb_no_fail: {} -- {}", c, e);
+            Some(rgb) => rgb,
+            None => {
+                warn!("rgb_no_fail: {}", c);
                 0
             },
         }
     }
     /// Get RGB for the specified color.
-    pub fn rgb(&self, c: Color) -> Result<i32, SyntaxError> {
+    pub fn rgb(&self, c: Color) -> Option<i32> {
         match (self.color_scheme, c) {
             (ColorScheme::Monochrome1Bit, Color::Legacy(v)) => {
                 self.rgb_monochrome_1(v)
@@ -177,38 +180,38 @@ impl ColorCtx {
                 self.rgb_monochrome_8(v)
             },
             (_, Color::Legacy(v)) => ColorCtx::rgb_classic(v),
-            (_, Color::RGB(r, g, b)) => Ok(ColorCtx::rgb_24(r, g, b)),
+            (_, Color::RGB(r, g, b)) => Some(ColorCtx::rgb_24(r, g, b)),
         }
     }
     /// Get RGB for a monochrome 1-bit color.
-    fn rgb_monochrome_1(&self, v: u8) -> Result<i32, SyntaxError> {
+    fn rgb_monochrome_1(&self, v: u8) -> Option<i32> {
         match v {
             0 => ColorCtx::rgb_default(self.bg_default),
             1 => ColorCtx::rgb_default(self.fg_default),
-            _ => Err(SyntaxError::UnsupportedTagValue),
+            _ => None,
         }
     }
     /// Get RGB for a default color.
-    fn rgb_default(c: Color) -> Result<i32, SyntaxError> {
+    fn rgb_default(c: Color) -> Option<i32> {
         match c {
-            Color::RGB(r, g, b) => Ok(ColorCtx::rgb_24(r, g, b)),
+            Color::RGB(r, g, b) => Some(ColorCtx::rgb_24(r, g, b)),
             Color::Legacy(v) => ColorCtx::rgb_classic(v),
         }
     }
     /// Get RGB for a monochrome 8-bit color.
-    fn rgb_monochrome_8(&self, v: u8) -> Result<i32, SyntaxError> {
+    fn rgb_monochrome_8(&self, v: u8) -> Option<i32> {
         let bg = ColorCtx::rgb_default(self.bg_default)?;
         let fg = ColorCtx::rgb_default(self.fg_default)?;
         let r = ColorCtx::lerp((bg >> 16) as u8, (fg >> 16) as u8, v);
         let g = ColorCtx::lerp((bg >>  8) as u8, (fg >>  8) as u8, v);
         let b = ColorCtx::lerp((bg >>  0) as u8, (fg >>  0) as u8, v);
-        Ok(ColorCtx::rgb_24(r, g, b))
+        Some(ColorCtx::rgb_24(r, g, b))
     }
     /// Get RGB for a classic color.
-    fn rgb_classic(v: u8) -> Result<i32, SyntaxError> {
+    fn rgb_classic(v: u8) -> Option<i32> {
         match ColorClassic::from_u8(v) {
-            Some(c) => Ok(c.rgb()),
-            None    => Err(SyntaxError::UnsupportedTagValue),
+            Some(c) => Some(c.rgb()),
+            None    => None,
         }
     }
     /// Get RGB for a 24-bit color.
@@ -519,12 +522,18 @@ impl fmt::Display for Value {
     }
 }
 
+impl From<Value> for String {
+    fn from(v: Value) -> String {
+        format!("{}", v)
+    }
+}
+
 /// Syntax errors from parsing MULTI.
 #[derive(Clone, Debug, PartialEq)]
 pub enum SyntaxError {
     Other,
     UnsupportedTag(String),
-    UnsupportedTagValue,
+    UnsupportedTagValue(String),
     TextTooBig,
     FontNotDefined(u8),
     CharacterNotDefined(char),
@@ -555,20 +564,20 @@ pub struct Parser<'a> {
 /// Parse a color from a tag.
 ///
 /// * `v` Iterator of color parameters.
-fn parse_color<'a, I>(v: I) -> Result<Color, SyntaxError>
+fn parse_color<'a, I>(v: I) -> Option<Color>
     where I: Iterator<Item = &'a str>
 {
     match v.map(|i| i.parse::<u8>()).collect::<Vec<_>>().as_slice() {
-        [Ok(n)]             => Ok(Color::Legacy(*n)),
-        [Ok(r),Ok(g),Ok(b)] => Ok(Color::RGB(*r,*g,*b)),
-        _                   => Err(SyntaxError::UnsupportedTagValue),
+        [Ok(r), Ok(g), Ok(b)] => Some(Color::RGB(*r, *g, *b)),
+        [Ok(n)] => Some(Color::Legacy(*n)),
+        _ => None,
     }
 }
 
 /// Parse a rectangle from a tag.
 ///
 /// * `v` Iterator of rectangle parameters.
-fn parse_rectangle<'a, I>(v: &mut I) -> Result<Rectangle, SyntaxError>
+fn parse_rectangle<'a, I>(v: &mut I) -> Option<Rectangle>
     where I: Iterator<Item = &'a str>
 {
     if let (Some(x),Some(y),Some(w),Some(h)) = (v.next(),v.next(),v.next(),
@@ -578,28 +587,28 @@ fn parse_rectangle<'a, I>(v: &mut I) -> Result<Rectangle, SyntaxError>
             h.parse())
         {
             if x > 0 && y > 0 {
-                return Ok(Rectangle::new(x, y, w, h));
+                return Some(Rectangle::new(x, y, w, h));
             }
         }
     }
-    Err(SyntaxError::UnsupportedTagValue)
+    None
 }
 
 /// Parse an integer value.
-fn parse_int<'a, I, T>(v: &mut I) -> Result<T, SyntaxError>
+fn parse_int<'a, I, T>(v: &mut I) -> Option<T>
     where I: Iterator<Item = &'a str>,
           T: FromStr
 {
     if let Some(s) = v.next() {
         if let Ok(i) = s.parse::<T>() {
-            return Ok(i);
+            return Some(i);
         }
     }
-    Err(SyntaxError::UnsupportedTagValue)
+    None
 }
 
 /// Parse an optional value.
-fn parse_optional<'a, I, T>(v: &mut I) -> Result<Option<T>, SyntaxError>
+fn parse_optional<'a, I, T>(v: &mut I) -> Result<Option<T>, ()>
     where I: Iterator<Item = &'a str>,
           T: FromStr
 {
@@ -608,7 +617,7 @@ fn parse_optional<'a, I, T>(v: &mut I) -> Result<Option<T>, SyntaxError>
         if let Ok(i) = s.parse::<T>() {
             Ok(Some(i))
         } else {
-            Err(SyntaxError::UnsupportedTagValue)
+            Err(())
         }
     } else {
         Ok(None)
@@ -616,7 +625,7 @@ fn parse_optional<'a, I, T>(v: &mut I) -> Result<Option<T>, SyntaxError>
 }
 
 /// Parse an optional value ranging from 0 to 99.
-fn parse_optional_99<'a, I>(v: &mut I) -> Result<Option<u8>, SyntaxError>
+fn parse_optional_99<'a, I>(v: &mut I) -> Result<Option<u8>, ()>
     where I: Iterator<Item = &'a str>
 {
     if let Some(s) = v.next() {
@@ -624,47 +633,39 @@ fn parse_optional_99<'a, I>(v: &mut I) -> Result<Option<u8>, SyntaxError>
         if let Ok(i) = s.parse::<u8>() {
             if i <= 99 { return Ok(Some(i)); }
         }
-        return Err(SyntaxError::UnsupportedTagValue);
+        return Err(());
     }
     Ok(None)
 }
 
 /// Parse a nonzero value.
-fn parse_nonzero<'a, I, T>(v: &mut I) -> Result<T, SyntaxError>
+fn parse_nonzero<'a, I, T>(v: &mut I) -> Option<T>
     where I: Iterator<Item = &'a str>,
           T: FromStr+PartialOrd+Default
 {
     if let Some(s) = v.next() {
         if let Ok(i) = s.parse::<T>() {
             // Use default to check for nonzero
-            if i != T::default() { return Ok(i); }
+            if i != T::default() { return Some(i); }
         }
     }
-    Err(SyntaxError::UnsupportedTagValue)
+    None
 }
 
 /// Parse a version ID value.
-fn parse_version_id<'a, I>(v: &mut I) -> Result<Option<u16>, SyntaxError>
+fn parse_version_id<'a, I>(v: &mut I) -> Result<Option<u16>, ()>
     where I: Iterator<Item = &'a str>
 {
-    if let Some(s) = v.next() {
-        // Must be exactly 4 hexadecimal characters
-        if s.len() == 4 {
-            if let Ok(i) = u16::from_str_radix(s, 16) {
-                return Ok(Some(i));
+    match v.next() {
+        Some(s) if s.len() == 4 => {
+            match u16::from_str_radix(s, 16) {
+                Ok(i) => Ok(Some(i)),
+                _ => Err(()),
             }
-        }
-        return Err(SyntaxError::UnsupportedTagValue);
+        },
+        Some(_) => Err(()),
+        _ => Ok(None)
     }
-    return Ok(None);
-}
-
-/// Finish parsing a tag.
-fn parse_done<'a, I>(v: &mut I, res: ValueResult) -> ValueResult
-    where I: Iterator<Item = &'a str>
-{
-    if let None = v.next() { res }
-    else { Err(SyntaxError::UnsupportedTagValue) }
 }
 
 /// Value result from parsing MULTI.
@@ -677,7 +678,7 @@ fn parse_color_background(tag: &str) -> ValueResult {
         // but anything above 255 does not make sense
         match tag[2..].parse::<u8>() {
             Ok(n)  => Ok(Some(Value::ColorBackground(Some(Color::Legacy(n))))),
-            Err(_) => Err(SyntaxError::UnsupportedTagValue),
+            Err(_) => Err(SyntaxError::UnsupportedTagValue(tag.into())),
         }
     } else {
         Ok(Some(Value::ColorBackground(None)))
@@ -687,8 +688,10 @@ fn parse_color_background(tag: &str) -> ValueResult {
 /// Parse a Page -- Background tag [pb].
 fn parse_page_background(tag: &str) -> ValueResult {
     if tag.len() > 2 {
-        let c = parse_color(tag[2..].split(","))?;
-        Ok(Some(Value::PageBackground(Some(c))))
+        match parse_color(tag[2..].split(",")) {
+            Some(c) => Ok(Some(Value::PageBackground(Some(c)))),
+            _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+        }
     } else {
         Ok(Some(Value::PageBackground(None)))
     }
@@ -697,8 +700,10 @@ fn parse_page_background(tag: &str) -> ValueResult {
 /// Parse a Color -- Foreground tag [cf].
 fn parse_color_foreground(tag: &str) -> ValueResult {
     if tag.len() > 2 {
-        let c = parse_color(tag[2..].split(","))?;
-        Ok(Some(Value::ColorForeground(Some(c))))
+        match parse_color(tag[2..].split(",")) {
+            Some(c) => Ok(Some(Value::ColorForeground(Some(c)))),
+            _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+        }
     } else {
         Ok(Some(Value::ColorForeground(None)))
     }
@@ -706,10 +711,11 @@ fn parse_color_foreground(tag: &str) -> ValueResult {
 
 /// Parse a Color Rectangle tag [cr].
 fn parse_color_rectangle(tag: &str) -> ValueResult {
-    let mut vs = tag[2..].split(",");
-    let r = parse_rectangle(&mut vs)?;
-    let c = parse_color(vs)?;
-    Ok(Some(Value::ColorRectangle(r, c)))
+    let mut vs = tag[2..].splitn(7, ",");
+    match (parse_rectangle(&mut vs), parse_color(vs)) {
+        (Some(r), Some(c)) => Ok(Some(Value::ColorRectangle(r, c))),
+        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+    }
 }
 
 /// Parse a Field tag [f].
@@ -719,16 +725,14 @@ fn parse_field(tag: &str) -> ValueResult {
     // handling non-MULTI tags starting with "f" (e.g. [feedx]).
     if let Some(c) = tag.chars().nth(1) {
         if !c.is_digit(10) {
-            return Err(SyntaxError::UnsupportedTag(tag.to_string()));
+            return Err(SyntaxError::UnsupportedTag(tag.into()));
         }
     }
-    let mut vs = tag[1..].split(",");
-    let fid = parse_int(&mut vs)?;
-    if fid > 99 {
-        return Err(SyntaxError::UnsupportedTagValue);
+    let mut vs = tag[1..].splitn(2, ",");
+    match (parse_int(&mut vs), parse_optional(&mut vs)) {
+        (Some(fid), Ok(w)) if fid < 100 => Ok(Some(Value::Field(fid, w))),
+        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
     }
-    let w = parse_optional(&mut vs)?;
-    parse_done(&mut vs, Ok(Some(Value::Field(fid, w))))
 }
 
 /// Parse a Flash time tag [fl].
@@ -736,9 +740,15 @@ fn parse_flash_time(tag: &str) -> ValueResult {
     if tag.len() > 2 {
         let v = &tag[2..];
         match &v[..1] {
-            "t" => parse_flash_on(&v[1..]),
-            "o" => parse_flash_off(&v[1..]),
-            _   => Err(SyntaxError::UnsupportedTagValue),
+            "t" => match parse_flash_on(&v[1..]) {
+                Ok(r) => Ok(Some(r)),
+                Err(_) => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+            },
+            "o" => match parse_flash_off(&v[1..]) {
+                Ok(r) => Ok(Some(r)),
+                Err(_) => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+            },
+            _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
         }
     } else {
         Ok(Some(Value::Flash(FlashOrder::OnOff, None, None)))
@@ -746,19 +756,19 @@ fn parse_flash_time(tag: &str) -> ValueResult {
 }
 
 /// Parse a flash on -> off tag fragment.
-fn parse_flash_on(v: &str) -> ValueResult {
-    let mut vs = v.split("o");
+fn parse_flash_on(v: &str) -> Result<Value, ()> {
+    let mut vs = v.splitn(2, "o");
     let t = parse_optional_99(&mut vs)?;
     let o = parse_optional_99(&mut vs)?;
-    parse_done(&mut vs, Ok(Some(Value::Flash(FlashOrder::OnOff, t, o))))
+    Ok(Value::Flash(FlashOrder::OnOff, t, o))
 }
 
 /// Parse a flash off -> on tag fragment.
-fn parse_flash_off(v: &str) -> ValueResult {
-    let mut vs = v.split("t");
+fn parse_flash_off(v: &str) -> Result<Value, ()> {
+    let mut vs = v.splitn(2, "t");
     let o = parse_optional_99(&mut vs)?;
     let t = parse_optional_99(&mut vs)?;
-    parse_done(&mut vs, Ok(Some(Value::Flash(FlashOrder::OffOn, o, t))))
+    Ok(Value::Flash(FlashOrder::OffOn, o, t))
 }
 
 /// Parse a flash end tag [/fl].
@@ -766,17 +776,18 @@ fn parse_flash_end(tag: &str) -> ValueResult {
     if tag.len() == 3 {
         Ok(Some(Value::FlashEnd()))
     } else {
-        Err(SyntaxError::UnsupportedTagValue)
+        Err(SyntaxError::UnsupportedTagValue(tag.into()))
     }
 }
 
 /// Parse a Font tag [fo]
 fn parse_font(tag: &str) -> ValueResult {
     if tag.len() > 2 {
-        let mut vs = tag[2..].split(",");
-        let n = parse_nonzero(&mut vs)?;
-        let vid = parse_version_id(&mut vs)?;
-        parse_done(&mut vs, Ok(Some(Value::Font(Some((n, vid))))))
+        let mut vs = tag[2..].splitn(2, ",");
+        match (parse_nonzero(&mut vs), parse_version_id(&mut vs)) {
+            (Some(n), Ok(vid)) => Ok(Some(Value::Font(Some((n, vid))))),
+            _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+        }
     } else {
         Ok(Some(Value::Font(None)))
     }
@@ -784,47 +795,52 @@ fn parse_font(tag: &str) -> ValueResult {
 
 /// Parse a Graphic tag [g]
 fn parse_graphic(tag: &str) -> ValueResult {
-    let mut vs = tag[1..].split(",");
-    let n = parse_nonzero(&mut vs)?;
-    let xy = parse_point(&mut vs)?;
-    let r = if let Some((x, y)) = xy {
-        Some((x, y, parse_version_id(&mut vs)?))
-    } else {
-        None
-    };
-    parse_done(&mut vs, Ok(Some(Value::Graphic(n, r))))
+    let mut vs = tag[1..].splitn(4, ",");
+    let n = parse_nonzero(&mut vs);
+    let p = parse_point(&mut vs);
+    let vid = parse_version_id(&mut vs);
+    match (n, p, vid) {
+        (Some(n), Ok(Some((x, y))), Ok(vid)) => {
+            Ok(Some(Value::Graphic(n, Some((x, y, vid)))))
+        },
+        (Some(n), Ok(None), Ok(None)) => Ok(Some(Value::Graphic(n, None))),
+        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+    }
 }
 
 /// Parse a pont value.
-fn parse_point<'a, I>(v: &mut I) -> Result<Option<(u16, u16)>, SyntaxError>
+fn parse_point<'a, I>(v: &mut I) -> Result<Option<(u16, u16)>, ()>
     where I: Iterator<Item = &'a str>
 {
     match (v.next(), v.next()) {
-        (Some(x), Some(y)) => parse_xy(x, y),
-        (Some(_), None)    => Err(SyntaxError::UnsupportedTagValue),
+        (Some(x), Some(y)) => Ok(Some(parse_xy(x, y)?)),
+        (Some(_), None)    => Err(()),
         (_, _)             => Ok(None),
     }
 }
 
 /// Parse an x/y pair.
-fn parse_xy(x: &str, y: &str) -> Result<Option<(u16, u16)>, SyntaxError> {
+fn parse_xy(x: &str, y: &str) -> Result<(u16, u16), ()> {
     if let (Ok(x), Ok(y)) = (x.parse(), y.parse()) {
         if x > 0 && y > 0 {
-            return Ok(Some((x, y)));
+            return Ok((x, y));
         }
     }
-    Err(SyntaxError::UnsupportedTagValue)
+    Err(())
 }
 
 /// Parse a hexadecimal character tag [hc].
 fn parse_hexadecimal_character(tag: &str) -> ValueResult {
-    let mut vs = tag[2..].split(",");
-    let hc = parse_hexadecimal(&mut vs)?;
-    parse_done(&mut vs, Ok(Some(Value::HexadecimalCharacter(hc))))
+    // Not really looking for commas -- just need an iterator
+    let mut vs = tag[2..].splitn(1, ",");
+    match parse_hexadecimal(&mut vs) {
+        Ok(hc) => Ok(Some(Value::HexadecimalCharacter(hc))),
+        Err(_) => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+    }
 }
 
 /// Parse a hexadecimal value.
-fn parse_hexadecimal<'a, I>(v: &mut I) -> Result<u16, SyntaxError>
+fn parse_hexadecimal<'a, I>(v: &mut I) -> Result<u16, ()>
     where I: Iterator<Item = &'a str>
 {
     if let Some(s) = v.next() {
@@ -833,7 +849,7 @@ fn parse_hexadecimal<'a, I>(v: &mut I) -> Result<u16, SyntaxError>
             return Ok(i);
         }
     }
-    return Err(SyntaxError::UnsupportedTagValue);
+    Err(())
 }
 
 /// Parse a Justification -- Line tag [jl].
@@ -842,7 +858,7 @@ fn parse_justification_line(tag: &str) -> ValueResult {
         if let Some(jl) = LineJustification::new(&tag[2..]) {
             Ok(Some(Value::JustificationLine(Some(jl))))
         } else {
-            Err(SyntaxError::UnsupportedTagValue)
+            Err(SyntaxError::UnsupportedTagValue(tag.into()))
         }
     } else {
         Ok(Some(Value::JustificationLine(None)))
@@ -855,7 +871,7 @@ fn parse_justification_page(tag: &str) -> ValueResult {
         if let Some(jl) = PageJustification::new(&tag[2..]) {
             Ok(Some(Value::JustificationPage(Some(jl))))
         } else {
-            Err(SyntaxError::UnsupportedTagValue)
+            Err(SyntaxError::UnsupportedTagValue(tag.into()))
         }
     } else {
         Ok(Some(Value::JustificationPage(None)))
@@ -864,33 +880,25 @@ fn parse_justification_page(tag: &str) -> ValueResult {
 
 /// Parse a Manufacturer Specific tag [ms].
 fn parse_manufacturer_specific(tag: &str) -> ValueResult {
-    let mut vs = tag[2..].split(",");
-    let m: u32 = parse_int(&mut vs)?;
-    let p = vs.next();
-    if let None = vs.next() {
-        if let Some(t) = p {
-            Ok(Some(Value::ManufacturerSpecific(m, Some(t.to_string()))))
-        } else {
-            Ok(Some(Value::ManufacturerSpecific(m, None)))
-        }
-    } else {
-        Err(SyntaxError::UnsupportedTagValue)
+    let mut vs = tag[2..].splitn(2, ",");
+    match (parse_int(&mut vs), vs.next()) {
+        (Some(m), Some(t)) => {
+            Ok(Some(Value::ManufacturerSpecific(m, Some(t.into()))))
+        },
+        (Some(m), None) => Ok(Some(Value::ManufacturerSpecific(m, None))),
+        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
     }
 }
 
 /// Parse a Manufacturer Specific end tag [/ms].
 fn parse_manufacturer_specific_end(tag: &str) -> ValueResult {
-    let mut vs = tag[3..].split(",");
-    let m: u32 = parse_int(&mut vs)?;
-    let p = vs.next();
-    if let None = vs.next() {
-        if let Some(t) = p {
-            Ok(Some(Value::ManufacturerSpecificEnd(m, Some(t.to_string()))))
-        } else {
-            Ok(Some(Value::ManufacturerSpecificEnd(m, None)))
-        }
-    } else {
-        Err(SyntaxError::UnsupportedTagValue)
+    let mut vs = tag[3..].splitn(2, ",");
+    match (parse_int(&mut vs), vs.next()) {
+        (Some(m), Some(t)) => {
+            Ok(Some(Value::ManufacturerSpecificEnd(m, Some(t.into()))))
+        },
+        (Some(m), None) => Ok(Some(Value::ManufacturerSpecificEnd(m, None))),
+        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
     }
 }
 
@@ -901,10 +909,10 @@ fn parse_moving_text(tag: &str) -> ValueResult {
         match &tag[2..3] {
             "c" | "C" => parse_moving_text_mode(t, MovingTextMode::Circular),
             "l" | "L" => parse_moving_text_linear(t),
-            _         => Err(SyntaxError::UnsupportedTagValue),
+            _         => Err(SyntaxError::UnsupportedTagValue(tag.into())),
         }
     } else {
-        Err(SyntaxError::UnsupportedTagValue)
+        Err(SyntaxError::UnsupportedTagValue(tag.into()))
     }
 }
 
@@ -918,27 +926,35 @@ fn parse_moving_text_linear(tag: &str) -> ValueResult {
             parse_moving_text_mode(tag, MovingTextMode::Linear(0))
         }
     } else {
-        Err(SyntaxError::UnsupportedTagValue)
+        Err(SyntaxError::UnsupportedTagValue(tag.into()))
     }
 }
 
 /// Parse a moving text mode fragment.
 fn parse_moving_text_mode(tag: &str, m: MovingTextMode) -> ValueResult {
     if tag.len() > 0 {
-        let d = match &tag[..1] {
-            "l" | "L" => Ok(MovingTextDirection::Left),
-            "r" | "R" => Ok(MovingTextDirection::Right),
-            _         => Err(SyntaxError::UnsupportedTagValue),
-        }?;
-        let mut vs = tag[1..].split(",");
-        let w = parse_int(&mut vs)?;
-        let s = parse_int(&mut vs)?;
-        let r = parse_int(&mut vs)?;
-        if let (Some(t), None) = (vs.next(), vs.next()) {
-            return Ok(Some(Value::MovingText(m, d, w, s, r, String::from(t))));
+        let d = parse_moving_text_dir(tag.chars().next());
+        let mut vs = tag[1..].splitn(4, ",");
+        let w = parse_int(&mut vs);
+        let s = parse_int(&mut vs);
+        let r = parse_int(&mut vs);
+        let text = vs.next();
+        if let (Some(d), Some(w), Some(s), Some(r), Some(text)) = (d, w, s, r,
+            text)
+        {
+            return Ok(Some(Value::MovingText(m, d, w, s, r, text.into())));
         }
     }
-    Err(SyntaxError::UnsupportedTagValue)
+    Err(SyntaxError::UnsupportedTagValue(tag.into()))
+}
+
+/// Parse moving text direction
+fn parse_moving_text_dir(d: Option<char>) -> Option<MovingTextDirection> {
+    match d {
+        Some('l') | Some('L') => Some(MovingTextDirection::Left),
+        Some('r') | Some('R') => Some(MovingTextDirection::Right),
+        _ => None,
+    }
 }
 
 /// Parse a New Line tag [nl].
@@ -948,9 +964,9 @@ fn parse_new_line(tag: &str) -> ValueResult {
         2 => Ok(Some(Value::NewLine(None))),
         3 => match tag[2..].parse::<u8>() {
                  Ok(n)  => Ok(Some(Value::NewLine(Some(n)))),
-                 Err(_) => Err(SyntaxError::UnsupportedTagValue),
+                 Err(_) => Err(SyntaxError::UnsupportedTagValue(tag.into())),
              },
-        _ => Err(SyntaxError::UnsupportedTagValue),
+        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
     }
 }
 
@@ -959,27 +975,26 @@ fn parse_new_page(tag: &str) -> ValueResult {
     if tag.len() == 2 {
         Ok(Some(Value::NewPage()))
     } else {
-        Err(SyntaxError::UnsupportedTagValue)
+        Err(SyntaxError::UnsupportedTagValue(tag.into()))
     }
 }
 
 /// Parse a Page Time tag [pt].
 fn parse_page_time(tag: &str) -> ValueResult {
-    let mut vs = tag[2..].split("o");
-    let t = parse_optional(&mut vs)?;
-    let o = parse_optional(&mut vs)?;
-    parse_done(&mut vs, Ok(Some(Value::PageTime(t, o))))
+    let mut vs = tag[2..].splitn(2, "o");
+    match (parse_optional(&mut vs), parse_optional(&mut vs)) {
+        (Ok(t), Ok(o)) => Ok(Some(Value::PageTime(t, o))),
+        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+    }
 }
 
 /// Parse a Spacing -- Character tag [sc].
 fn parse_spacing_character(tag: &str) -> ValueResult {
     // Not really looking for commas -- just need an iterator
-    let mut vs = tag[2..].split(",");
-    let s = parse_int(&mut vs)?;
-    if s <= 99 {
-        parse_done(&mut vs, Ok(Some(Value::SpacingCharacter(s))))
-    } else {
-        Err(SyntaxError::UnsupportedTagValue)
+    let mut vs = tag[2..].splitn(1, ",");
+    match parse_int(&mut vs) {
+        Some(s) if s < 100 => Ok(Some(Value::SpacingCharacter(s))),
+        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
     }
 }
 
@@ -988,21 +1003,23 @@ fn parse_spacing_character_end(tag: &str) -> ValueResult {
     if tag.len() == 3 {
         Ok(Some(Value::SpacingCharacterEnd()))
     } else {
-        Err(SyntaxError::UnsupportedTagValue)
+        Err(SyntaxError::UnsupportedTagValue(tag.into()))
     }
 }
 
 /// Parse a Text Rectangle tag [tr].
 fn parse_text_rectangle(tag: &str) -> ValueResult {
-    let mut vs = tag[2..].split(",");
-    let r = parse_rectangle(&mut vs)?;
-    parse_done(&mut vs, Ok(Some(Value::TextRectangle(r))))
+    let mut vs = tag[2..].splitn(4, ",");
+    match parse_rectangle(&mut vs) {
+        Some(r) => Ok(Some(Value::TextRectangle(r))),
+        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+    }
 }
 
 /// Parse a tag (without brackets).
 fn parse_tag(tag: &str) -> ValueResult {
     match tag.len() {
-        0 => Err(SyntaxError::UnsupportedTag(tag.to_string())),
+        0 => Err(SyntaxError::UnsupportedTag(tag.into())),
         1 => parse_tag1(tag),
         _ => parse_tag2(tag),
     }
@@ -1011,8 +1028,8 @@ fn parse_tag(tag: &str) -> ValueResult {
 /// Parse a tag with exactly one character.
 fn parse_tag1(tag: &str) -> ValueResult {
     match tag {
-        "f"|"F"|"g"|"G" => Err(SyntaxError::UnsupportedTagValue),
-        _               => Err(SyntaxError::UnsupportedTag(tag.to_string())),
+        "f"|"F"|"g"|"G" => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+        _               => Err(SyntaxError::UnsupportedTag(tag.into())),
     }
 }
 
@@ -1051,7 +1068,7 @@ fn parse_tag_special(tag: &str, t: &str) -> ValueResult {
         "g" => parse_graphic(tag),
         "f" => parse_field(tag),
         "/" => parse_tag_end(tag, t),
-        _   => Err(SyntaxError::UnsupportedTag(tag.to_string())),
+        _   => Err(SyntaxError::UnsupportedTag(tag.into())),
     }
 }
 
@@ -1061,7 +1078,7 @@ fn parse_tag_end(tag: &str, t: &str) -> ValueResult {
         "/sc" => parse_spacing_character_end(tag),
         "/fl" => parse_flash_end(tag),
         "/ms" => parse_manufacturer_specific_end(tag),
-        _     => Err(SyntaxError::UnsupportedTag(tag.to_string())),
+        _     => Err(SyntaxError::UnsupportedTag(tag.into())),
     }
 }
 
@@ -1098,7 +1115,7 @@ impl<'a> Parser<'a> {
         let mut s = String::new();
         while let Some(c) = self.next_char()? {
             match c {
-                '[' => return Err(SyntaxError::UnsupportedTagValue),
+                '[' => return Err(SyntaxError::UnsupportedTagValue(s)),
                 ']' => return parse_tag(&s),
                 _   => s.push(c),
             }
@@ -1228,7 +1245,7 @@ mod test {
         if let Some(Ok(Value::ColorBackground(Some(n)))) = m.next() {
             assert!(n == Color::Legacy(255));
         } else { assert!(false) }
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         if let Some(Ok(Value::ColorBackground(n))) = m.next() {
             assert!(n == None);
@@ -1238,7 +1255,7 @@ mod test {
     #[test]
     fn parse_cb2() {
         let mut m = Parser::new("[cbX]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1262,7 +1279,7 @@ mod test {
         if let Some(Ok(Value::PageBackground(Some(n)))) = m.next() {
             assert!(n == Color::Legacy(255));
         } else { assert!(false) }
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         if let Some(Ok(Value::PageBackground(n))) = m.next() {
             assert!(n == None)
@@ -1272,7 +1289,7 @@ mod test {
     #[test]
     fn parse_pb2() {
         let mut m = Parser::new("[pb0,0]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1287,14 +1304,14 @@ mod test {
     #[test]
     fn parse_pb4() {
         let mut m = Parser::new("[pb0,0,255,0]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_pb5() {
         let mut m = Parser::new("[pb0,0.5,255]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1318,7 +1335,7 @@ mod test {
         if let Some(Ok(Value::ColorForeground(Some(n)))) = m.next() {
             assert!(n == Color::Legacy(255));
         } else { assert!(false) }
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         if let Some(Ok(Value::ColorForeground(None))) = m.next()
         { assert!(true) } else { assert!(false) }
@@ -1327,7 +1344,7 @@ mod test {
     #[test]
     fn parse_cf2() {
         let mut m = Parser::new("[cf0,0]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1342,14 +1359,14 @@ mod test {
     #[test]
     fn parse_cf4() {
         let mut m = Parser::new("[cf0,0,255,0]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_cf5() {
         let mut m = Parser::new("[cf0,0.5,255]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1365,14 +1382,14 @@ mod test {
     #[test]
     fn parse_cr2() {
         let mut m = Parser::new("[CR1,0,10,10,0]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_cr3() {
         let mut m = Parser::new("[cR1,1,100,100,0,1]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1388,7 +1405,7 @@ mod test {
     #[test]
     fn parse_cr5() {
         let mut m = Parser::new("[cr1,1,100,100,0,1,2,3]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1404,7 +1421,7 @@ mod test {
     #[test]
     fn parse_f() {
         let mut m = Parser::new("[F]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1425,7 +1442,7 @@ mod test {
     #[test]
     fn parse_f3() {
         let mut m = Parser::new("[f100]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1467,21 +1484,21 @@ mod test {
     #[test]
     fn parse_fl5() {
         let mut m = Parser::new("[flt10o5x]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_fl6() {
         let mut m = Parser::new("[flt10o100]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_fl7() {
         let mut m = Parser::new("[flt10o10o10]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1495,7 +1512,7 @@ mod test {
     #[test]
     fn parse_fle1() {
         let mut m = Parser::new("[/fl1]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1530,21 +1547,21 @@ mod test {
     #[test]
     fn parse_fo4() {
         let mut m = Parser::new("[FO4,FFFFF]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_fo5() {
         let mut m = Parser::new("[fo5,xxxx]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_fo6() {
         let mut m = Parser::new("[fo6,0000,0]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1558,14 +1575,14 @@ mod test {
     #[test]
     fn parse_fo8() {
         let mut m = Parser::new("[fo0]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_g() {
         let mut m = Parser::new("[G]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1586,7 +1603,7 @@ mod test {
     #[test]
     fn parse_g3() {
         let mut m = Parser::new("[g3,1]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1600,21 +1617,21 @@ mod test {
     #[test]
     fn parse_g5() {
         let mut m = Parser::new("[g5,1,0,0123]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_g6() {
         let mut m = Parser::new("[g6,300,300,12345]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_g7() {
         let mut m = Parser::new("[g7,30,30,1245,]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1628,7 +1645,7 @@ mod test {
     #[test]
     fn parse_hc() {
         let mut m = Parser::new("[hc]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1649,14 +1666,14 @@ mod test {
     #[test]
     fn parse_hc3() {
         let mut m = Parser::new("[hc1FFFF]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_hc4() {
         let mut m = Parser::new("[hcXXxx]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1677,7 +1694,7 @@ mod test {
     #[test]
     fn parse_jl0() {
         let mut m = Parser::new("[JL0]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1706,7 +1723,7 @@ mod test {
     #[test]
     fn parse_jp0() {
         let mut m = Parser::new("[JP0]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1749,7 +1766,7 @@ mod test {
     #[test]
     fn parse_ms3() {
         let mut m = Parser::new("[Ms9x9]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1779,49 +1796,49 @@ mod test {
     #[test]
     fn parse_mse3() {
         let mut m = Parser::new("[/Ms9x9]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_mv() {
         let mut m = Parser::new("[mv]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_mv1() {
         let mut m = Parser::new("[mvc]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_mv2() {
         let mut m = Parser::new("[mvcl]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_mv3() {
         let mut m = Parser::new("[mvcl100]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_mv4() {
         let mut m = Parser::new("[mvcl100,1]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_mv5() {
         let mut m = Parser::new("[mvcl100,1,10]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1878,14 +1895,14 @@ mod test {
     #[test]
     fn parse_mv11() {
         let mut m = Parser::new("[mvl4x100,5,1,left]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_mv12() {
         let mut m = Parser::new("[mvl4r100,5,300,left]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1920,7 +1937,7 @@ mod test {
     #[test]
     fn parse_pt4() {
         let mut m = Parser::new("[pt10o2o]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1941,21 +1958,21 @@ mod test {
     #[test]
     fn parse_pt7() {
         let mut m = Parser::new("[pt256o256]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_pt8() {
         let mut m = Parser::new("[pt%%%]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_sc() {
         let mut m = Parser::new("[sc]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1976,14 +1993,14 @@ mod test {
     #[test]
     fn parse_sc3() {
         let mut m = Parser::new("[sc100]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_sc4() {
         let mut m = Parser::new("[sc2,1]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1997,7 +2014,7 @@ mod test {
     #[test]
     fn parse_sce1() {
         let mut m = Parser::new("[/sc1]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -2012,14 +2029,14 @@ mod test {
     #[test]
     fn parse_tr2() {
         let mut m = Parser::new("[TR1,0,10,10]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_tr3() {
         let mut m = Parser::new("[tR1,1,100,100,1]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -2034,7 +2051,7 @@ mod test {
     #[test]
     fn parse_tr5() {
         let mut m = Parser::new("[tr1,1,,100]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -2057,7 +2074,7 @@ mod test {
         else { assert!(false) }
         if let Some(Ok(Value::NewLine(n))) = m.next() { assert!(n == Some(9)) }
         else { assert!(false) }
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -2099,7 +2116,7 @@ mod test {
     #[test]
     fn parse_tag() {
         let mut m = Parser::new("[x[x]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = m.next() { }
         else { assert!(false) }
         if let Some(Err(SyntaxError::UnsupportedTag(s))) = m.next() {
             assert!(s == "x");
