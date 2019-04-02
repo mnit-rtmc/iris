@@ -635,8 +635,10 @@ impl<'a> PageSplitter<'a> {
                 rs.span_number = 0;
             },
             Value::NewLine(ls) => {
-                if ls.is_some() && !rs.is_full_matrix() {
-                    return Err(SyntaxError::UnsupportedTagValue(v.into()));
+                if !rs.is_full_matrix() {
+                    if let Some(_) = ls {
+                        return Err(SyntaxError::UnsupportedTagValue(v.into()));
+                    }
                 }
                 // Insert an empty text span for blank lines.
                 if self.line_blank {
