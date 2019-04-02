@@ -22,7 +22,7 @@ use std::sync::mpsc::Sender;
 use std::time::Instant;
 use crate::error::Error;
 use crate::font::{Font, query_font, Graphic};
-use crate::multi::{Color, ColorClassic, ColorCtx, ColorScheme, LineJustification,
+use crate::multi::{ColorClassic, ColorCtx, ColorScheme, LineJustification,
                    PageJustification, Rectangle};
 use crate::raster::{Raster, Rgb24};
 use crate::render::{PageSplitter, State};
@@ -414,19 +414,19 @@ impl SignConfig {
         pos / self.face_height as f32
     }
     /// Get the default foreground color
-    fn foreground_default(&self) -> Color {
+    fn foreground_default(&self) -> i32 {
         match self.color_scheme[..].into() {
             ColorScheme::ColorClassic |
-            ColorScheme::Color24Bit => ColorClassic::Amber.into(),
-            _ => self.monochrome_foreground.into(),
+            ColorScheme::Color24Bit => ColorClassic::Amber.rgb(),
+            _ => self.monochrome_foreground,
         }
     }
     /// Get the default background color
-    fn background_default(&self) -> Color {
+    fn background_default(&self) -> i32 {
         match self.color_scheme[..].into() {
             ColorScheme::ColorClassic |
-            ColorScheme::Color24Bit => ColorClassic::Black.into(),
-            _ => self.monochrome_background.into(),
+            ColorScheme::Color24Bit => ColorClassic::Black.rgb(),
+            _ => self.monochrome_background,
         }
     }
     /// Get the default text rectangle

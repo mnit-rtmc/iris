@@ -571,12 +571,6 @@ impl<'a> PageSplitter<'a> {
             self.update_state(v?, &mut page)?;
             if self.more_pages { break; }
         }
-        // These values affect the entire page
-        let pb = Value::PageBackground(Some(self.state.color_ctx.background()));
-        page.state.color_ctx.set_background(
-            Some(self.state.color_ctx.background()), &pb)?;
-        page.state.page_on_time_ds = self.state.page_on_time_ds;
-        page.state.page_off_time_ds = self.state.page_off_time_ds;
         page.check_justification()?;
         Ok(page)
     }
@@ -601,6 +595,7 @@ impl<'a> PageSplitter<'a> {
             Value::ColorBackground(c) => {
                 // This tag remains for backward compatibility with 1203v1
                 rs.color_ctx.set_background(c, &v)?;
+                page.state.color_ctx.set_background(c, &v)?;
             },
             Value::ColorForeground(c) => {
                 rs.color_ctx.set_foreground(c, &v)?;
@@ -656,10 +651,13 @@ impl<'a> PageSplitter<'a> {
             },
             Value::PageBackground(c) => {
                 rs.color_ctx.set_background(c, &v)?;
+                page.state.color_ctx.set_background(c, &v)?;
             },
             Value::PageTime(on, off) => {
                 rs.page_on_time_ds = on.unwrap_or(ds.page_on_time_ds);
                 rs.page_off_time_ds = off.unwrap_or(ds.page_off_time_ds);
+                page.state.page_on_time_ds = on.unwrap_or(ds.page_on_time_ds);
+                page.state.page_off_time_ds = off.unwrap_or(ds.page_off_time_ds);
             },
             Value::SpacingCharacter(sc) => {
                 if rs.is_char_matrix() {
@@ -705,8 +703,8 @@ mod test {
     use super::*;
     fn make_full_matrix() -> State {
         State::new(ColorCtx::new(ColorScheme::Color24Bit,
-                                 Color::Legacy(1),
-                                 Color::Legacy(0)),
+                                 ColorClassic::White.rgb(),
+                                 ColorClassic::Black.rgb()),
                    0, 0,
                    20, 0,
                    Rectangle::new(1, 1, 60, 30),
@@ -741,8 +739,6 @@ mod test {
         let mut pages = PageSplitter::new(rs.clone(), "");
         let p = pages.next().unwrap().unwrap();
         let rs = p.state;
-        assert!(rs.color_ctx.foreground() == Color::Legacy(1));
-        assert!(rs.color_ctx.background() == Color::Legacy(0));
         assert!(rs.page_on_time_ds == 20);
         assert!(rs.page_off_time_ds == 0);
         assert!(rs.text_rectangle == Rectangle::new(1,1,60,30));
@@ -757,8 +753,6 @@ mod test {
             [jp3][jl4][tr1,1,10,10][nl4][fo3,1234][sc2][np][pb][pt][cb][/sc]");
         let p = pages.next().unwrap().unwrap();
         let rs = p.state;
-        assert!(rs.color_ctx.foreground() == Color::Legacy(1));
-        assert!(rs.color_ctx.background() == Color::Legacy(5));
         assert!(rs.page_on_time_ds == 10);
         assert!(rs.page_off_time_ds == 2);
         assert!(rs.text_rectangle == Rectangle::new(1,1,60,30));
@@ -769,8 +763,6 @@ mod test {
         assert!(rs.font == (1, None));
         let p = pages.next().unwrap().unwrap();
         let rs = p.state;
-        assert!(rs.color_ctx.foreground() == Color::Legacy(3));
-        assert!(rs.color_ctx.background() == Color::Legacy(0));
         assert!(rs.page_on_time_ds == 20);
         assert!(rs.page_off_time_ds == 0);
         assert!(rs.text_rectangle == Rectangle::new(1,1,60,30));
@@ -782,8 +774,8 @@ mod test {
     }
     fn make_char_matrix() -> State {
         State::new(ColorCtx::new(ColorScheme::Monochrome1Bit,
-                                 Color::Legacy(1),
-                                 Color::Legacy(0)),
+                                 ColorClassic::White.rgb(),
+                                 ColorClassic::Black.rgb()),
                    5, 7,
                    20, 0,
                    Rectangle::new(1, 1, 100, 21),
