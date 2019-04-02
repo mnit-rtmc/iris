@@ -668,143 +668,126 @@ fn parse_version_id<'a, I>(v: &mut I) -> Result<Option<u16>, ()>
     }
 }
 
-/// Value result from parsing MULTI.
-type ValueResult = Result<Option<Value>, SyntaxError>;
-
 /// Parse a Color -- Background tag (cb).
-fn parse_color_background(tag: &str) -> ValueResult {
+fn parse_color_background(tag: &str) -> Option<Value> {
     if tag.len() > 2 {
         // 1203 specifies a numeric value between 0 and 999,
         // but anything above 255 does not make sense
         match tag[2..].parse::<u8>() {
-            Ok(n)  => Ok(Some(Value::ColorBackground(Some(Color::Legacy(n))))),
-            Err(_) => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+            Ok(n)  => Some(Value::ColorBackground(Some(Color::Legacy(n)))),
+            Err(_) => None,
         }
     } else {
-        Ok(Some(Value::ColorBackground(None)))
+        Some(Value::ColorBackground(None))
     }
 }
 
 /// Parse a Page -- Background tag [pb].
-fn parse_page_background(tag: &str) -> ValueResult {
+fn parse_page_background(tag: &str) -> Option<Value> {
     if tag.len() > 2 {
         match parse_color(tag[2..].split(",")) {
-            Some(c) => Ok(Some(Value::PageBackground(Some(c)))),
-            _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+            Some(c) => Some(Value::PageBackground(Some(c))),
+            _ => None,
         }
     } else {
-        Ok(Some(Value::PageBackground(None)))
+        Some(Value::PageBackground(None))
     }
 }
 
 /// Parse a Color -- Foreground tag [cf].
-fn parse_color_foreground(tag: &str) -> ValueResult {
+fn parse_color_foreground(tag: &str) -> Option<Value> {
     if tag.len() > 2 {
         match parse_color(tag[2..].split(",")) {
-            Some(c) => Ok(Some(Value::ColorForeground(Some(c)))),
-            _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+            Some(c) => Some(Value::ColorForeground(Some(c))),
+            _ => None,
         }
     } else {
-        Ok(Some(Value::ColorForeground(None)))
+        Some(Value::ColorForeground(None))
     }
 }
 
 /// Parse a Color Rectangle tag [cr].
-fn parse_color_rectangle(tag: &str) -> ValueResult {
+fn parse_color_rectangle(tag: &str) -> Option<Value> {
     let mut vs = tag[2..].splitn(7, ",");
     match (parse_rectangle(&mut vs), parse_color(vs)) {
-        (Some(r), Some(c)) => Ok(Some(Value::ColorRectangle(r, c))),
-        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+        (Some(r), Some(c)) => Some(Value::ColorRectangle(r, c)),
+        _ => None,
     }
 }
 
 /// Parse a Field tag [f].
-fn parse_field(tag: &str) -> ValueResult {
-    // Field tag "f" must be followed by a decimal digit.
-    // If not, return UnsupportedTag instead of UnsupportedTagValue to allow
-    // handling non-MULTI tags starting with "f" (e.g. [feedx]).
-    if let Some(c) = tag.chars().nth(1) {
-        if !c.is_digit(10) {
-            return Err(SyntaxError::UnsupportedTag(tag.into()));
-        }
-    }
+fn parse_field(tag: &str) -> Option<Value> {
     let mut vs = tag[1..].splitn(2, ",");
     match (parse_int(&mut vs), parse_optional(&mut vs)) {
-        (Some(fid), Ok(w)) if fid < 100 => Ok(Some(Value::Field(fid, w))),
-        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+        (Some(fid), Ok(w)) if fid < 100 => Some(Value::Field(fid, w)),
+        _ => None,
     }
 }
 
 /// Parse a Flash time tag [fl].
-fn parse_flash_time(tag: &str) -> ValueResult {
+fn parse_flash_time(tag: &str) -> Option<Value> {
     if tag.len() > 2 {
         let v = &tag[2..];
         match &v[..1] {
-            "t" => match parse_flash_on(&v[1..]) {
-                Ok(r) => Ok(Some(r)),
-                Err(_) => Err(SyntaxError::UnsupportedTagValue(tag.into())),
-            },
-            "o" => match parse_flash_off(&v[1..]) {
-                Ok(r) => Ok(Some(r)),
-                Err(_) => Err(SyntaxError::UnsupportedTagValue(tag.into())),
-            },
-            _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+            "t" => parse_flash_on(&v[1..]),
+            "o" => parse_flash_off(&v[1..]),
+            _ => None,
         }
     } else {
-        Ok(Some(Value::Flash(FlashOrder::OnOff, None, None)))
+        Some(Value::Flash(FlashOrder::OnOff, None, None))
     }
 }
 
 /// Parse a flash on -> off tag fragment.
-fn parse_flash_on(v: &str) -> Result<Value, ()> {
+fn parse_flash_on(v: &str) -> Option<Value> {
     let mut vs = v.splitn(2, "o");
-    let t = parse_optional_99(&mut vs)?;
-    let o = parse_optional_99(&mut vs)?;
-    Ok(Value::Flash(FlashOrder::OnOff, t, o))
+    let t = parse_optional_99(&mut vs).ok()?;
+    let o = parse_optional_99(&mut vs).ok()?;
+    Some(Value::Flash(FlashOrder::OnOff, t, o))
 }
 
 /// Parse a flash off -> on tag fragment.
-fn parse_flash_off(v: &str) -> Result<Value, ()> {
+fn parse_flash_off(v: &str) -> Option<Value> {
     let mut vs = v.splitn(2, "t");
-    let o = parse_optional_99(&mut vs)?;
-    let t = parse_optional_99(&mut vs)?;
-    Ok(Value::Flash(FlashOrder::OffOn, o, t))
+    let o = parse_optional_99(&mut vs).ok()?;
+    let t = parse_optional_99(&mut vs).ok()?;
+    Some(Value::Flash(FlashOrder::OffOn, o, t))
 }
 
 /// Parse a flash end tag [/fl].
-fn parse_flash_end(tag: &str) -> ValueResult {
+fn parse_flash_end(tag: &str) -> Option<Value> {
     if tag.len() == 3 {
-        Ok(Some(Value::FlashEnd()))
+        Some(Value::FlashEnd())
     } else {
-        Err(SyntaxError::UnsupportedTagValue(tag.into()))
+        None
     }
 }
 
 /// Parse a Font tag [fo]
-fn parse_font(tag: &str) -> ValueResult {
+fn parse_font(tag: &str) -> Option<Value> {
     if tag.len() > 2 {
         let mut vs = tag[2..].splitn(2, ",");
         match (parse_nonzero(&mut vs), parse_version_id(&mut vs)) {
-            (Some(n), Ok(vid)) => Ok(Some(Value::Font(Some((n, vid))))),
-            _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+            (Some(n), Ok(vid)) => Some(Value::Font(Some((n, vid)))),
+            _ => None,
         }
     } else {
-        Ok(Some(Value::Font(None)))
+        Some(Value::Font(None))
     }
 }
 
 /// Parse a Graphic tag [g]
-fn parse_graphic(tag: &str) -> ValueResult {
+fn parse_graphic(tag: &str) -> Option<Value> {
     let mut vs = tag[1..].splitn(4, ",");
     let n = parse_nonzero(&mut vs);
     let p = parse_point(&mut vs);
     let vid = parse_version_id(&mut vs);
     match (n, p, vid) {
         (Some(n), Ok(Some((x, y))), Ok(vid)) => {
-            Ok(Some(Value::Graphic(n, Some((x, y, vid)))))
+            Some(Value::Graphic(n, Some((x, y, vid))))
         },
-        (Some(n), Ok(None), Ok(None)) => Ok(Some(Value::Graphic(n, None))),
-        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+        (Some(n), Ok(None), Ok(None)) => Some(Value::Graphic(n, None)),
+        _ => None,
     }
 }
 
@@ -830,12 +813,12 @@ fn parse_xy(x: &str, y: &str) -> Result<(u16, u16), ()> {
 }
 
 /// Parse a hexadecimal character tag [hc].
-fn parse_hexadecimal_character(tag: &str) -> ValueResult {
+fn parse_hexadecimal_character(tag: &str) -> Option<Value> {
     // Not really looking for commas -- just need an iterator
     let mut vs = tag[2..].splitn(1, ",");
     match parse_hexadecimal(&mut vs) {
-        Ok(hc) => Ok(Some(Value::HexadecimalCharacter(hc))),
-        Err(_) => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+        Ok(hc) => Some(Value::HexadecimalCharacter(hc)),
+        Err(_) => None,
     }
 }
 
@@ -853,71 +836,69 @@ fn parse_hexadecimal<'a, I>(v: &mut I) -> Result<u16, ()>
 }
 
 /// Parse a Justification -- Line tag [jl].
-fn parse_justification_line(tag: &str) -> ValueResult {
+fn parse_justification_line(tag: &str) -> Option<Value> {
     if tag.len() > 2 {
-        if let Some(jl) = LineJustification::new(&tag[2..]) {
-            Ok(Some(Value::JustificationLine(Some(jl))))
-        } else {
-            Err(SyntaxError::UnsupportedTagValue(tag.into()))
+        match LineJustification::new(&tag[2..]) {
+            Some(jl) => Some(Value::JustificationLine(Some(jl))),
+            None => None,
         }
     } else {
-        Ok(Some(Value::JustificationLine(None)))
+        Some(Value::JustificationLine(None))
     }
 }
 
 /// Parse a Justification -- Page tag [jp].
-fn parse_justification_page(tag: &str) -> ValueResult {
+fn parse_justification_page(tag: &str) -> Option<Value> {
     if tag.len() > 2 {
-        if let Some(jl) = PageJustification::new(&tag[2..]) {
-            Ok(Some(Value::JustificationPage(Some(jl))))
-        } else {
-            Err(SyntaxError::UnsupportedTagValue(tag.into()))
+        match PageJustification::new(&tag[2..]) {
+            Some(jl) => Some(Value::JustificationPage(Some(jl))),
+            None => None,
         }
     } else {
-        Ok(Some(Value::JustificationPage(None)))
+        Some(Value::JustificationPage(None))
     }
 }
 
 /// Parse a Manufacturer Specific tag [ms].
-fn parse_manufacturer_specific(tag: &str) -> ValueResult {
+fn parse_manufacturer_specific(tag: &str) -> Option<Value> {
     let mut vs = tag[2..].splitn(2, ",");
     match (parse_int(&mut vs), vs.next()) {
         (Some(m), Some(t)) => {
-            Ok(Some(Value::ManufacturerSpecific(m, Some(t.into()))))
+            Some(Value::ManufacturerSpecific(m, Some(t.into())))
         },
-        (Some(m), None) => Ok(Some(Value::ManufacturerSpecific(m, None))),
-        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+        (Some(m), None) => Some(Value::ManufacturerSpecific(m, None)),
+        _ => None,
     }
 }
 
 /// Parse a Manufacturer Specific end tag [/ms].
-fn parse_manufacturer_specific_end(tag: &str) -> ValueResult {
+fn parse_manufacturer_specific_end(tag: &str) -> Option<Value> {
     let mut vs = tag[3..].splitn(2, ",");
     match (parse_int(&mut vs), vs.next()) {
         (Some(m), Some(t)) => {
-            Ok(Some(Value::ManufacturerSpecificEnd(m, Some(t.into()))))
+            Some(Value::ManufacturerSpecificEnd(m, Some(t.into())))
         },
-        (Some(m), None) => Ok(Some(Value::ManufacturerSpecificEnd(m, None))),
-        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+        (Some(m), None) => Some(Value::ManufacturerSpecificEnd(m, None)),
+        _ => None,
     }
 }
 
 /// Parse a Moving text tag [mv].
-fn parse_moving_text(tag: &str) -> ValueResult {
+fn parse_moving_text(tag: &str) -> Option<Value> {
     if tag.len() > 2 {
         let t = &tag[3..];
         match &tag[2..3] {
             "c" | "C" => parse_moving_text_mode(t, MovingTextMode::Circular),
             "l" | "L" => parse_moving_text_linear(t),
-            _         => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+            _ => None,
         }
     } else {
-        Err(SyntaxError::UnsupportedTagValue(tag.into()))
+        None
     }
 }
 
 /// Parse a moving text linear fragment.
-fn parse_moving_text_linear(tag: &str) -> ValueResult {
+fn parse_moving_text_linear(tag: &str) -> Option<Value> {
     if tag.len() > 0 {
         let t = &tag[1..];
         if let Ok(i) = &tag[..1].parse::<u8>() {
@@ -926,12 +907,12 @@ fn parse_moving_text_linear(tag: &str) -> ValueResult {
             parse_moving_text_mode(tag, MovingTextMode::Linear(0))
         }
     } else {
-        Err(SyntaxError::UnsupportedTagValue(tag.into()))
+        None
     }
 }
 
 /// Parse a moving text mode fragment.
-fn parse_moving_text_mode(tag: &str, m: MovingTextMode) -> ValueResult {
+fn parse_moving_text_mode(tag: &str, m: MovingTextMode) -> Option<Value> {
     if tag.len() > 0 {
         let d = parse_moving_text_dir(tag.chars().next());
         let mut vs = tag[1..].splitn(4, ",");
@@ -942,10 +923,10 @@ fn parse_moving_text_mode(tag: &str, m: MovingTextMode) -> ValueResult {
         if let (Some(d), Some(w), Some(s), Some(r), Some(text)) = (d, w, s, r,
             text)
         {
-            return Ok(Some(Value::MovingText(m, d, w, s, r, text.into())));
+            return Some(Value::MovingText(m, d, w, s, r, text.into()));
         }
     }
-    Err(SyntaxError::UnsupportedTagValue(tag.into()))
+    None
 }
 
 /// Parse moving text direction
@@ -958,127 +939,97 @@ fn parse_moving_text_dir(d: Option<char>) -> Option<MovingTextDirection> {
 }
 
 /// Parse a New Line tag [nl].
-fn parse_new_line(tag: &str) -> ValueResult {
+fn parse_new_line(tag: &str) -> Option<Value> {
     // 1203 only specifies a single digit parameter for "nl" tag (0-9)
     match tag.len() {
-        2 => Ok(Some(Value::NewLine(None))),
+        2 => Some(Value::NewLine(None)),
         3 => match tag[2..].parse::<u8>() {
-                 Ok(n)  => Ok(Some(Value::NewLine(Some(n)))),
-                 Err(_) => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+                 Ok(n) => Some(Value::NewLine(Some(n))),
+                 Err(_) => None,
              },
-        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+        _ => None,
     }
 }
 
 /// Parse a New Page tag [np].
-fn parse_new_page(tag: &str) -> ValueResult {
-    if tag.len() == 2 {
-        Ok(Some(Value::NewPage()))
-    } else {
-        Err(SyntaxError::UnsupportedTagValue(tag.into()))
+fn parse_new_page(tag: &str) -> Option<Value> {
+    match tag.len() {
+        2 => Some(Value::NewPage()),
+        _ => None,
     }
 }
 
 /// Parse a Page Time tag [pt].
-fn parse_page_time(tag: &str) -> ValueResult {
+fn parse_page_time(tag: &str) -> Option<Value> {
     let mut vs = tag[2..].splitn(2, "o");
     match (parse_optional(&mut vs), parse_optional(&mut vs)) {
-        (Ok(t), Ok(o)) => Ok(Some(Value::PageTime(t, o))),
-        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+        (Ok(t), Ok(o)) => Some(Value::PageTime(t, o)),
+        _ => None,
     }
 }
 
 /// Parse a Spacing -- Character tag [sc].
-fn parse_spacing_character(tag: &str) -> ValueResult {
+fn parse_spacing_character(tag: &str) -> Option<Value> {
     // Not really looking for commas -- just need an iterator
     let mut vs = tag[2..].splitn(1, ",");
     match parse_int(&mut vs) {
-        Some(s) if s < 100 => Ok(Some(Value::SpacingCharacter(s))),
-        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+        Some(s) if s < 100 => Some(Value::SpacingCharacter(s)),
+        _ => None,
     }
 }
 
 /// Parse a Spacing -- Character end tag [/sc].
-fn parse_spacing_character_end(tag: &str) -> ValueResult {
+fn parse_spacing_character_end(tag: &str) -> Option<Value> {
     if tag.len() == 3 {
-        Ok(Some(Value::SpacingCharacterEnd()))
+        Some(Value::SpacingCharacterEnd())
     } else {
-        Err(SyntaxError::UnsupportedTagValue(tag.into()))
+        None
     }
 }
 
 /// Parse a Text Rectangle tag [tr].
-fn parse_text_rectangle(tag: &str) -> ValueResult {
+fn parse_text_rectangle(tag: &str) -> Option<Value> {
     let mut vs = tag[2..].splitn(4, ",");
     match parse_rectangle(&mut vs) {
-        Some(r) => Ok(Some(Value::TextRectangle(r))),
-        _ => Err(SyntaxError::UnsupportedTagValue(tag.into())),
+        Some(r) => Some(Value::TextRectangle(r)),
+        _ => None,
     }
 }
 
 /// Parse a tag (without brackets).
-fn parse_tag(tag: &str) -> ValueResult {
-    match tag.len() {
-        0 => Err(SyntaxError::UnsupportedTag(tag.into())),
-        1 => parse_tag1(tag),
-        _ => parse_tag2(tag),
-    }
-}
-
-/// Parse a tag with exactly one character.
-fn parse_tag1(tag: &str) -> ValueResult {
-    match tag {
-        "f"|"F"|"g"|"G" => Err(SyntaxError::UnsupportedTagValue(tag.into())),
-        _               => Err(SyntaxError::UnsupportedTag(tag.into())),
-    }
-}
-
-/// Parse a tag with 2 or more characters.
-fn parse_tag2(tag: &str) -> ValueResult {
+fn parse_tag(tag: &str) -> Result<Option<Value>, SyntaxError> {
     let tl = &tag.to_ascii_lowercase();
     let t = tl.as_str();
-    match &t[..2] {
-        // Sorted by most likely occurrence
-        "nl" => parse_new_line(t),
-        "np" => parse_new_page(t),
-        "fo" => parse_font(t),
-        "jl" => parse_justification_line(t),
-        "jp" => parse_justification_page(t),
-        "pt" => parse_page_time(t),
-        "pb" => parse_page_background(t),
-        "cf" => parse_color_foreground(t),
-        "cr" => parse_color_rectangle(t),
-        "tr" => parse_text_rectangle(t),
-        "cb" => parse_color_background(t),
-        "sc" => parse_spacing_character(t),
-        "hc" => parse_hexadecimal_character(t),
-        "fl" => parse_flash_time(t),
-        "mv" => parse_moving_text(tag),
-        "ms" => parse_manufacturer_specific(tag),
-        _    => parse_tag_special(tag, t),
-    }
-}
-
-/// Parse a special tag (single character or end tag).
-///
-/// * `tag` Tag value (without brackets).
-/// * `t` Tag value converted to lower case.
-fn parse_tag_special(tag: &str, t: &str) -> ValueResult {
-    match &t[..1] {
-        "g" => parse_graphic(tag),
-        "f" => parse_field(tag),
-        "/" => parse_tag_end(tag, t),
-        _   => Err(SyntaxError::UnsupportedTag(tag.into())),
-    }
-}
-
-/// Parse an end tag.
-fn parse_tag_end(tag: &str, t: &str) -> ValueResult {
-    match &t[..3] {
-        "/sc" => parse_spacing_character_end(tag),
-        "/fl" => parse_flash_end(tag),
-        "/ms" => parse_manufacturer_specific_end(tag),
-        _     => Err(SyntaxError::UnsupportedTag(tag.into())),
+    // Sorted by most likely occurrence
+    let v = if t.starts_with("nl") { parse_new_line(t) }
+       else if t.starts_with("np") { parse_new_page(t) }
+       else if t.starts_with("fo") { parse_font(t) }
+       else if t.starts_with("jl") { parse_justification_line(t) }
+       else if t.starts_with("jp") { parse_justification_page(t) }
+       else if t.starts_with("pt") { parse_page_time(t) }
+       else if t.starts_with("pb") { parse_page_background(t) }
+       else if t.starts_with("cf") { parse_color_foreground(t) }
+       else if t.starts_with("cr") { parse_color_rectangle(t) }
+       else if t.starts_with("tr") { parse_text_rectangle(t) }
+       else if t.starts_with("cb") { parse_color_background(t) }
+       else if t.starts_with("g") { parse_graphic(tag) }
+       else if t.starts_with("sc") { parse_spacing_character(t) }
+       else if t.starts_with("/sc") { parse_spacing_character_end(tag) }
+       else if t.starts_with("hc") { parse_hexadecimal_character(t) }
+       else if t.starts_with("fl") { parse_flash_time(t) }
+       else if t.starts_with("/fl") { parse_flash_end(tag) }
+        // Don't treat "fe" as a field tag -- this allows handling non-MULTI
+        // tag (e.g. [feedx]) properly by returning UnsupportedTag.
+       else if t.starts_with("f") && !t.starts_with("fe") { parse_field(tag) }
+       else if t.starts_with("mv") { parse_moving_text(tag) }
+       else if t.starts_with("ms") { parse_manufacturer_specific(tag) }
+       else if t.starts_with("/ms") { parse_manufacturer_specific_end(tag) }
+       else {
+           return Err(SyntaxError::UnsupportedTag(tag.into()));
+       };
+    match v {
+        Some(v) => Ok(Some(v)),
+        None => Err(SyntaxError::UnsupportedTagValue(tag.into())),
     }
 }
 
@@ -1111,7 +1062,7 @@ impl<'a> Parser<'a> {
     }
 
     /// Parse a tag starting at the current position.
-    fn parse_tag(&mut self) -> ValueResult {
+    fn parse_tag(&mut self) -> Result<Option<Value>, SyntaxError> {
         let mut s = String::new();
         while let Some(c) = self.next_char()? {
             match c {
@@ -1124,7 +1075,7 @@ impl<'a> Parser<'a> {
     }
 
     /// Parse a value at the current position.
-    fn parse_value(&mut self) -> ValueResult {
+    fn parse_value(&mut self) -> Result<Option<Value>, SyntaxError> {
         if self.tag {
             self.tag = false;
             return self.parse_tag();
