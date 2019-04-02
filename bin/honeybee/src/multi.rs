@@ -130,7 +130,7 @@ impl ColorCtx {
     {
         self.fg_current = match c {
             Some(c) => self.validate(c, v)?,
-            None => self.bg_default,
+            None => self.fg_default,
         };
         Ok(())
     }

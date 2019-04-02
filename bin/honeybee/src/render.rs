@@ -572,7 +572,7 @@ impl<'a> PageSplitter<'a> {
             if self.more_pages { break; }
         }
         // These values affect the entire page
-        let pb = Value::PageBackground(None); // FIXME: not actual pb Value
+        let pb = Value::PageBackground(Some(self.state.color_ctx.background()));
         page.state.color_ctx.set_background(
             Some(self.state.color_ctx.background()), &pb)?;
         page.state.page_on_time_ds = self.state.page_on_time_ds;
