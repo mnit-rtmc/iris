@@ -638,7 +638,7 @@ impl<'a> PageSplitter<'a> {
                 }
                 // Insert an empty text span for blank lines.
                 if self.line_blank {
-                    page.spans.push(TextSpan::new(rs.clone(), "".to_string()));
+                    page.spans.push(TextSpan::new(rs.clone(), "".into()));
                 }
                 self.line_blank = true;
                 rs.line_spacing = ls;
@@ -662,11 +662,16 @@ impl<'a> PageSplitter<'a> {
             },
             Value::SpacingCharacter(sc) => {
                 if rs.is_char_matrix() {
-                    return Err(SyntaxError::UnsupportedTag("sc".to_string()));
+                    return Err(SyntaxError::UnsupportedTag(v.into()));
                 }
                 rs.char_spacing = Some(sc);
             },
-            Value::SpacingCharacterEnd() => { rs.char_spacing = None; },
+            Value::SpacingCharacterEnd() => {
+                if rs.is_char_matrix() {
+                    return Err(SyntaxError::UnsupportedTag(v.into()));
+                }
+                rs.char_spacing = None;
+            },
             Value::TextRectangle(r) => {
                 self.line_blank = true;
                 rs.line_number = 0;
@@ -680,7 +685,7 @@ impl<'a> PageSplitter<'a> {
             },
             _ => {
                 // Unsupported tags: [f], [fl], [hc], [ms], [mv]
-                return Err(SyntaxError::UnsupportedTag(v.to_string()));
+                return Err(SyntaxError::UnsupportedTag(v.into()));
             },
         }
         Ok(())
