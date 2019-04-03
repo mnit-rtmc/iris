@@ -683,8 +683,23 @@ impl<'a> PageSplitter<'a> {
                 rs.span_number += 1;
                 self.line_blank = false;
             },
+            Value::HexadecimalCharacter(hc) => {
+                match std::char::from_u32(hc.into()) {
+                    Some(c) => {
+                        let mut t = String::new();
+                        t.push(c);
+                        page.spans.push(TextSpan::new(rs.clone(), t));
+                        rs.span_number += 1;
+                        self.line_blank = false;
+                    },
+                    None => {
+                        // Invalid code point (surrogate in D800-DFFF range)
+                        return Err(SyntaxError::UnsupportedTagValue(v.into()));
+                    },
+                }
+            },
             _ => {
-                // Unsupported tags: [f], [fl], [hc], [ms], [mv]
+                // Unsupported tags: [f], [fl], [ms], [mv]
                 return Err(SyntaxError::UnsupportedTag(v.into()));
             },
         }
