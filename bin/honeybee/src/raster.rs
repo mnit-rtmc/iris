@@ -13,7 +13,7 @@
 // GNU General Public License for more details.
 //
 /// 24-bit RGB color
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Rgb24 {
     rgb: [u8;3],
 }
@@ -52,14 +52,18 @@ impl Rgb24 {
     pub fn b(self) -> u8 {
         self.rgb[2]
     }
-    /// Blend two 24-bit colors (over)
-    fn blend(self, dest: Rgb24, vi: u8) -> Rgb24 {
-        let sr = scale_u8(self.r(), vi);
-        let sg = scale_u8(self.g(), vi);
-        let sb = scale_u8(self.b(), vi);
-        let r = sr.max(dest.r());
-        let g = sg.max(dest.g());
-        let b = sb.max(dest.b());
+    /// Scale a color
+    fn scale(self, vi: u8) -> Rgb24 {
+        let r = scale_u8(self.r(), vi);
+        let g = scale_u8(self.g(), vi);
+        let b = scale_u8(self.b(), vi);
+        Rgb24::new(r, g, b)
+    }
+    /// Blend two 24-bit colors (lighten only)
+    fn blend_lighten(self, dest: Rgb24) -> Rgb24 {
+        let r = self.r().max(dest.r());
+        let g = self.g().max(dest.g());
+        let b = self.b().max(dest.b());
         Rgb24::new(r, g, b)
     }
 }
@@ -146,7 +150,7 @@ impl Raster {
                 let vi = (v * 255f32) as u8;
                 if vi > 0 {
                     let p = self.get_pixel(x, y);
-                    let d = clr.blend(p, vi);
+                    let d = clr.scale(vi).blend_lighten(p);
                     self.set_pixel(x, y, d);
                 }
             }
@@ -157,6 +161,24 @@ impl Raster {
 #[cfg(test)]
 mod test {
     use super::*;
+    #[test]
+    fn scale_rgb24() {
+        let a = Rgb24::new(255, 0, 0);
+        let b = Rgb24::new(0, 255, 0);
+        let c = Rgb24::new(0, 0, 255);
+        assert!(a.scale(0) == Rgb24::new(0, 0, 0));
+        assert!(b.scale(128) == Rgb24::new(0, 128, 0));
+        assert!(c.scale(255) == Rgb24::new(0, 0, 255));
+    }
+    #[test]
+    fn lighten_rgb24() {
+        let a = Rgb24::new(255, 0, 0);
+        let b = Rgb24::new(0, 255, 0);
+        let c = Rgb24::new(0, 0, 255);
+        assert!(a.blend_lighten(b) == Rgb24::new(255, 255, 0));
+        assert!(a.blend_lighten(c) == Rgb24::new(255, 0, 255));
+        assert!(b.blend_lighten(c) == Rgb24::new(0, 255, 255));
+    }
     #[test]
     fn raster_pixel() {
         let mut r = Raster::new(4, 4, Rgb24::new(0, 0, 0));
