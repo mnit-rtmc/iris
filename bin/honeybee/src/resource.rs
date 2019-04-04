@@ -25,7 +25,7 @@ use crate::error::Error;
 use crate::font::{Font, query_font, Graphic};
 use crate::multi::{ColorClassic, ColorCtx, ColorScheme, LineJustification,
                    PageJustification, Rectangle};
-use crate::raster::{Raster, Rgb24};
+use crate::raster::{Raster24, Rgb24};
 use crate::render::{PageSplitter, State};
 
 /// Make a PathBuf from a Path and file name
@@ -687,7 +687,7 @@ fn calculate_size(cfg: &SignConfig) -> Result<(u16, u16), Error> {
 }
 
 /// Make a .gif frame of sign face
-fn make_face_frame(page: Raster, cfg: &SignConfig, w: u16, h: u16) -> Frame {
+fn make_face_frame(page: Raster24, cfg: &SignConfig, w: u16, h: u16) -> Frame {
     let mut face = make_face_raster(page, &cfg, w, h);
     let pix = face.pixels();
     // FIXME: color quantization is very slow here
@@ -695,10 +695,12 @@ fn make_face_frame(page: Raster, cfg: &SignConfig, w: u16, h: u16) -> Frame {
 }
 
 /// Make a raster of sign face
-fn make_face_raster(page: Raster, cfg: &SignConfig, w: u16, h: u16) -> Raster {
+fn make_face_raster(page: Raster24, cfg: &SignConfig, w: u16, h: u16)
+    -> Raster24
+{
     let dark = Rgb24::new(20, 20, 0);
     let rgb = Rgb24::new(0, 0, 0);
-    let mut face = Raster::new(w.into(), h.into(), rgb);
+    let mut face = Raster24::new(w.into(), h.into(), rgb);
     let ph = page.height();
     let pw = page.width();
     let sx = w as f32 / pw as f32;

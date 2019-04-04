@@ -20,7 +20,7 @@ use std::fs::File;
 use std::io::{BufReader, Write};
 use std::path::{Path, PathBuf};
 use crate::error::Error;
-use crate::raster::{Raster, Rgb24};
+use crate::raster::{Raster24, Rgb24};
 use crate::resource::Queryable;
 use crate::multi::{Color, ColorCtx, ColorScheme, SyntaxError};
 
@@ -109,8 +109,8 @@ impl<'a> Font {
         }
     }
     /// Render a text span
-    pub fn render_text(&self, page: &mut Raster, text: &str, mut x: u32, y: u32,
-        cs: u32, cf: Rgb24) -> Result<(), Error>
+    pub fn render_text(&self, page: &mut Raster24, text: &str, mut x: u32,
+        y: u32, cs: u32, cf: Rgb24) -> Result<(), Error>
     {
         let h = self.height() as u32;
         debug!("span: {}, left: {}, top: {}, height: {}", text, x, y, h);
@@ -229,9 +229,9 @@ impl Graphic {
             ColorScheme::Color24Bit     => 24,
         }
     }
-    /// Render a graphic onto a Raster
-    pub fn onto_raster(&self, page: &mut Raster, x: u32, y: u32, ctx: &ColorCtx)
-        -> Result<(), Error>
+    /// Render a graphic onto a Raster24
+    pub fn onto_raster(&self, page: &mut Raster24, x: u32, y: u32,
+        ctx: &ColorCtx) -> Result<(), Error>
     {
         let x = x - 1; // x must be > 0
         let y = y - 1; // y must be > 0

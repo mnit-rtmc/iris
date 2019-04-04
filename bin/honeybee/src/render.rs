@@ -16,7 +16,7 @@ use std::collections::HashMap;
 use crate::error::Error;
 use crate::font::{Font, Graphic};
 use crate::multi::*;
-use crate::raster::{Raster, Rgb24};
+use crate::raster::{Raster24, Rgb24};
 
 /// Page render state
 #[derive(Clone)]
@@ -244,7 +244,7 @@ impl<'a> TextSpan {
         }
     }
     /// Render the text span
-    fn render_text(&self, page: &mut Raster, font: &Font, x: u32, y: u32)
+    fn render_text(&self, page: &mut Raster24, font: &Font, x: u32, y: u32)
         -> Result<(), Error>
     {
         let cs = self.char_spacing_font(font);
@@ -319,23 +319,23 @@ impl PageRenderer {
         self.state.page_off_time_ds.into()
     }
     /// Render a blank page.
-    pub fn render_blank(&self) -> Result<Raster, SyntaxError> {
+    pub fn render_blank(&self) -> Result<Raster24, SyntaxError> {
         let rs = &self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
         let clr = rs.background_rgb()?;
-        let page = Raster::new(w.into(), h.into(), clr);
+        let page = Raster24::new(w.into(), h.into(), clr);
         Ok(page)
     }
     /// Render the page.
     pub fn render(&self, fonts: &HashMap<i32, Font>,
-        graphics: &HashMap<i32, Graphic>) -> Result<Raster, Error>
+        graphics: &HashMap<i32, Graphic>) -> Result<Raster24, Error>
     {
         let rs = &self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
         let clr = rs.background_rgb()?;
-        let mut page = Raster::new(w.into(), h.into(), clr);
+        let mut page = Raster24::new(w.into(), h.into(), clr);
         for (v, ctx) in &self.values {
             match v {
                 Value::ColorRectangle(r, _) => {
@@ -368,7 +368,7 @@ impl PageRenderer {
         Ok(page)
     }
     /// Render a color rectangle
-    fn render_rect(&self, page: &mut Raster, r: Rectangle, clr: Rgb24,
+    fn render_rect(&self, page: &mut Raster24, r: Rectangle, clr: Rgb24,
         v: &Value) -> Result<(), SyntaxError>
     {
         let rx = r.x as u32 - 1; // r.x must be > 0

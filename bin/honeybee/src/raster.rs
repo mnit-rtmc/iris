@@ -18,8 +18,8 @@ pub struct Rgb24 {
     rgb: [u8;3],
 }
 
-/// A raster is an uncompressed 24-bit color image.
-pub struct Raster {
+/// An uncompressed 24-bit color image.
+pub struct Raster24 {
     width  : u32,
     height : u32,
     pixels : Vec<u8>,
@@ -76,19 +76,19 @@ fn scale_u8(a: u8, b: u8) -> u8 {
     c as u8
 }
 
-impl Raster {
+impl Raster24 {
     /// Create a new raster image.
     ///
     /// * `width` Width in pixels.
     /// * `height` Height in pixels.
     /// * `color` RGB color (for initialization).
-    pub fn new(width: u32, height: u32, color: Rgb24) -> Raster {
+    pub fn new(width: u32, height: u32, color: Rgb24) -> Raster24 {
         let len = width as usize * height as usize;
         let mut pixels = Vec::with_capacity(len * 3);
         for _ in 0..len {
             pixels.extend(color.rgb.iter());
         }
-        Raster { width, height, pixels }
+        Raster24 { width, height, pixels }
     }
     /// Get raster width.
     pub fn width(&self) -> u32 {
@@ -181,7 +181,7 @@ mod test {
     }
     #[test]
     fn raster_pixel() {
-        let mut r = Raster::new(4, 4, Rgb24::new(0, 0, 0));
+        let mut r = Raster24::new(4, 4, Rgb24::new(0, 0, 0));
         r.set_pixel(0, 0, Rgb24::new( 1, 2, 3));
         r.set_pixel(1, 1, Rgb24::new( 4, 5, 6));
         r.set_pixel(2, 2, Rgb24::new( 7, 8, 9));
