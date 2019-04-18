@@ -93,6 +93,8 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 704	TT No origin data
 705	TT No route
 801	Camera SWITCHED
+811	Camera Video LOST
+812	Camera Video RESTORED
 900	Action Plan ACTIVATED
 901	Action Plan DEACTIVATED
 902	Action Plan Phase CHANGED
@@ -134,6 +136,7 @@ camera_preset_store_enable	false
 camera_ptz_blind	true
 camera_stream_controls_enable	false
 camera_switch_event_purge_days	30
+camera_video_event_purge_days	14
 camera_wiper_precip_mm_hr	8
 client_event_purge_days	0
 client_units_si	true
@@ -1628,6 +1631,23 @@ CREATE VIEW camera_switch_event_view AS
 	JOIN event.event_description
 	ON camera_switch_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON camera_switch_event_view TO PUBLIC;
+
+CREATE TABLE event.camera_video_event (
+	event_id SERIAL PRIMARY KEY,
+	event_date TIMESTAMP WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	camera_id VARCHAR(20),
+	monitor_id VARCHAR(12)
+);
+
+CREATE VIEW camera_video_event_view AS
+	SELECT event_id, event_date, event_description.description, camera_id,
+	       monitor_id
+	FROM event.camera_video_event
+	JOIN event.event_description
+	ON camera_video_event.event_desc_id = event_description.event_desc_id;
+GRANT SELECT ON camera_video_event_view TO PUBLIC;
 
 CREATE TABLE iris.camera_preset (
 	name VARCHAR(20) PRIMARY KEY,

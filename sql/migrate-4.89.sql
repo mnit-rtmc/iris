@@ -175,4 +175,22 @@ CREATE TRIGGER parking_area_table_notify_trig
 	AFTER INSERT OR DELETE ON iris.parking_area
 	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
+-- Add camera_video_event
+CREATE TABLE event.camera_video_event (
+	event_id SERIAL PRIMARY KEY,
+	event_date TIMESTAMP WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	camera_id VARCHAR(20),
+	monitor_id VARCHAR(12)
+);
+
+CREATE VIEW camera_video_event_view AS
+	SELECT event_id, event_date, event_description.description, camera_id,
+	       monitor_id
+	FROM event.camera_video_event
+	JOIN event.event_description
+	ON camera_video_event.event_desc_id = event_description.event_desc_id;
+GRANT SELECT ON camera_video_event_view TO PUBLIC;
+
 COMMIT;
