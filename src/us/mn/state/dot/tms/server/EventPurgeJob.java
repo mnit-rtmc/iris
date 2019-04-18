@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.server.event.ActionPlanEvent;
 import us.mn.state.dot.tms.server.event.AlarmEvent;
 import us.mn.state.dot.tms.server.event.BeaconEvent;
 import us.mn.state.dot.tms.server.event.CameraSwitchEvent;
+import us.mn.state.dot.tms.server.event.CameraVideoEvent;
 import us.mn.state.dot.tms.server.event.ClientEvent;
 import us.mn.state.dot.tms.server.event.CommEvent;
 import us.mn.state.dot.tms.server.event.DetAutoFailEvent;
