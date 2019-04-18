@@ -193,4 +193,9 @@ CREATE VIEW camera_video_event_view AS
 	ON camera_video_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON camera_video_event_view TO PUBLIC;
 
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (811, 'Camera Video LOST');
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (812, 'Camera Video RESTORED');
+
 COMMIT;
