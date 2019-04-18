@@ -739,15 +739,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Get the current vehicle count */
 	@Override
 	public int getVehCount(long start, long end) {
-		if (isSampling()) {
-			if (DET_LOG.isOpen()) {
-				int vc = veh_cache.getValue(start, end);
-				if (vc != veh_count_30 || "407".equals(name))
-					logMsg("vc30: " + veh_count_30 +
-					       "  vc: " + vc);
-			}
+		if (isSampling())
 			return veh_count_30;
-		} else
+		else
 			return MISSING_DATA;
 	}
 
@@ -956,7 +950,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		boolean hold = locked_on.triggered && (occ.value == 0);
 		locked_on.update(occ.period, lock || hold);
 		if (locked_on.checkLogging(occ.period))
+{
 			logEvent(EventType.DET_LOCKED_ON);
+	if (DET_LOG.isOpen()) {
+		logMsg("det: " + name + ", lock: " + lock + ", hold: " + hold +
+			", sample: " + occ + ", scans: " + occ.as60HzScans());
+	}
+}
 		boolean v = (occ.value > 0) && (occ.value == prev_value);
 		no_change.update(occ.period, v);
 		if (no_change.checkLogging(occ.period))
