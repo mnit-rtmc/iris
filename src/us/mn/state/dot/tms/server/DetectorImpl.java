@@ -729,8 +729,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	 * scn_cache to get "last_scans" value. */
 	private transient int last_scans = MISSING_DATA;
 
-	/** Scans from previous 30-second sample period */
-	private transient int prev_scans = MISSING_DATA;
+	/** Occupancy value from previous 30-second sample period */
+	private transient int prev_value = MISSING_DATA;
 
 	/** Speed from the last 30-second sample period.  FIXME: use
 	 * spd_cache to get "last_speed" value. */
@@ -939,10 +939,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		int n_scans = occ.as60HzScans();
 		if (occ.period == SAMPLE_PERIOD_SEC) {
 			testScans(occ);
-			prev_scans = occ.value;
+			prev_value = occ.value;
 			last_scans = n_scans;
 		}
-		scn_cache.add(new PeriodicSample(occ.stamp,occ.period,n_scans));
+		scn_cache.add(new PeriodicSample(occ.stamp, occ.period,
+			n_scans));
 	}
 
 	/** Test an occupancy sample with error detecting algorithms */
@@ -956,7 +957,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		locked_on.update(occ.period, lock || hold);
 		if (locked_on.checkLogging(occ.period))
 			logEvent(EventType.DET_LOCKED_ON);
-		boolean v = (occ.value > 0) && (occ.value == prev_scans);
+		boolean v = (occ.value > 0) && (occ.value == prev_value);
 		no_change.update(occ.period, v);
 		if (no_change.checkLogging(occ.period))
 			logEvent(EventType.DET_NO_CHANGE);
