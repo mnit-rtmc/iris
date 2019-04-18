@@ -954,7 +954,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			logEvent(EventType.DET_LOCKED_ON);
 	if (DET_LOG.isOpen()) {
 		logMsg("det: " + name + ", lock: " + lock + ", hold: " + hold +
-			", sample: " + occ + ", scans: " + occ.as60HzScans());
+			", value: " + occ.value + ", scans: " +
+			occ.as60HzScans());
 	}
 }
 		boolean v = (occ.value > 0) && (occ.value == prev_value);
