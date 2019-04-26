@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use base64::{Config, CharacterSet, LineWrap, decode_config_slice};
+use base64::{Config, CharacterSet, decode_config_slice};
 use postgres::{self, Connection};
 use serde_json;
 use std::collections::HashMap;
@@ -114,8 +114,7 @@ impl<'a> Font {
     {
         let h = self.height() as u32;
         debug!("span: {}, left: {}, top: {}, height: {}", text, x, y, h);
-        let config = Config::new(CharacterSet::Standard, false, true,
-            LineWrap::NoWrap);
+        let config = Config::new(CharacterSet::Standard, false);
         let mut buf = [0; GLYPH_LEN];
         for c in text.chars() {
             let g = self.glyph(c)?;
@@ -254,8 +253,7 @@ impl Graphic {
     }
     /// Decode base64 data of graphic
     fn decode_base64(&self) -> Result<Vec<u8>, Error> {
-        let config = Config::new(CharacterSet::Standard, false, true,
-            LineWrap::NoWrap);
+        let config = Config::new(CharacterSet::Standard, false);
         let bpp = self.bits_per_pixel();
         let w = self.width();
         let h = self.height();
