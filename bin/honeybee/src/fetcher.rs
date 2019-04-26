@@ -110,8 +110,6 @@ fn notify_loop(conn: &Connection, tx: Sender<PathBuf>) -> Result<(), Error> {
                 if r == &resource::TPIMS_DYN_RES {
                     fetch_resource(&conn, &tx, &resource::TPIMS_ARCH_RES)?;
                 }
-            } else {
-                warn!("unknown resource: ({}, {})", &n.0, &n.1);
             }
         }
     }
@@ -127,6 +125,13 @@ fn lookup_resource(chan: &str, payload: &str) -> Option<&'static Resource> {
         ("glyph", _) => Some(&resource::FONT_RES),
         ("parking_area", "time_stamp") => Some(&resource::TPIMS_DYN_RES),
         ("system_attribute", _) => Some(&resource::DMS_ATTRIBUTE_RES),
-        (_, _) => resource::lookup(chan),
+        (_, _) => {
+            if let Some(r) = resource::lookup(chan) {
+                Some(r)
+            } else {
+                warn!("unknown resource: ({}, {})", &chan, &payload);
+                None
+            }
+        },
     }
 }
