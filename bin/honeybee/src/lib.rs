@@ -12,6 +12,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+#![forbid(unsafe_code)]
+
 #[macro_use]
 extern crate log;
 #[macro_use]
