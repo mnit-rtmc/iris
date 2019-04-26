@@ -15,8 +15,8 @@ serde_json = "1.0"
 fallible-iterator = "0.1"
 postgres = "0.15.2"
 ssh2 = "0.3.3"
-users = "0.7"
 gif = "0.10.1"
+whoami = "0.5.0"
 
 [dependencies.env_logger]
 version = "0.6.1"

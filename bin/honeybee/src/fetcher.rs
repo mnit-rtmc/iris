@@ -30,7 +30,7 @@ static OUTPUT_DIR: &str = "/var/www/html/iris/";
 ///
 /// * `username` Name of user running process.
 /// * `host` Host name and port to mirror fetched resources.
-pub fn start(username: String, host: Option<String>) -> Result<(), Error> {
+pub fn start(username: &str, host: Option<String>) -> Result<(), Error> {
     // Format path for unix domain socket -- not worth using percent_encode
     let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
     let (tx, rx) = channel();
