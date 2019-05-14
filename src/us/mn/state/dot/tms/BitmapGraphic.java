@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2015  Minnesota Department of Transportation
+ * Copyright (C) 2006-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,11 +34,11 @@ public class BitmapGraphic extends RasterGraphic {
 
 	/** Get the pixel index for the specified location */
 	private int pixelIndex(int x, int y) {
-		if (x < 0 || x > width) {
+		if (x < 0 || x >= width) {
 			throw new IndexOutOfBoundsException("x=" + x +
 				", width=" + width);
 		}
-		if (y < 0 || y > height) {
+		if (y < 0 || y >= height) {
 			throw new IndexOutOfBoundsException("y=" + y +
 				", height=" + height);
 		}
