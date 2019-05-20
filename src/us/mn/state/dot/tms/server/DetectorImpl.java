@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -76,43 +76,68 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Auto fail counter */
 	static private class AutoFailCounter {
+
+		/** Seconds required with state to trigger failure */
 		private final int trigger_threshold_sec;
+
+		/** Seconds required without state to clear failure */
 		private final int clear_threshold_sec;
-		private boolean state;
+
+		/** Failure checking state */
+		private boolean failed;
+
+		/** Number of seconds in current state */
 		private int state_sec;
+
+		/** Failure triggered state */
 		private boolean triggered;
+
+		/** Number of seconds since last logging of state */
 		private int logging_sec;
+
+		/** Create a new auto fail counter */
 		private AutoFailCounter(Interval t, Interval c) {
 			trigger_threshold_sec = t.round(SECONDS);
 			clear_threshold_sec = c.round(SECONDS);
-			state = false;
+			failed = false;
 			state_sec = 0;
 			triggered = false;
 			logging_sec = 0;
 		}
+		/** Create a new auto fail counter */
 		private AutoFailCounter() {
 			this(new Interval(0), new Interval(0));
 		}
-		private void update(int s, boolean st) {
-			if (st != state) {
+		/** Update the fail/trigger states.
+		 * @param s Number of seconds since last update.
+		 * @param st Fail state. */
+		private void updateState(int s, boolean st) {
+			if (st != failed) {
 				state_sec = 0;
-				state = st;
+				failed = st;
 			}
 			state_sec += s;
-			triggered = isEnabled() && updateTriggered();
+			triggered = isEnabled() && checkTriggered();
 		}
+		/** Check if the fail counter is enabled */
 		private boolean isEnabled() {
 			return trigger_threshold_sec > 0;
 		}
-		private boolean updateTriggered() {
-			return (state) ? checkTriggered() : checkTriggerHang();
-		}
+		/** Check the triggered state */
 		private boolean checkTriggered() {
+			return (failed)
+			      ? checkTriggeredNow()
+			      : checkTriggerHang();
+		}
+		/** Check if the fail status is currently triggered */
+		private boolean checkTriggeredNow() {
 			return triggered || state_sec > trigger_threshold_sec;
 		}
+		/** Check if the fail status is hung in triggered state */
 		private boolean checkTriggerHang() {
 			return triggered && state_sec < clear_threshold_sec;
 		}
+		/** Check if a trigger event should be logged */
 		private boolean checkLogging(int s) {
 			if (triggered) {
 				boolean first = (logging_sec == 0);
@@ -126,6 +151,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 				return false;
 			}
 		}
+		/** Check if the logging threshold time has elapsed */
 		private boolean checkLoggingThreshold() {
 			return logging_sec >= LOG_THRESHOLD.round(SECONDS);
 		}
@@ -903,10 +929,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Test a vehicle count sample with error detecting algorithms */
 	private void testVehCount(PeriodicSample vs) {
-		chatter.update(vs.period, vs.value > MAX_VEH_COUNT_30);
+		chatter.updateState(vs.period, vs.value > MAX_VEH_COUNT_30);
 		if (chatter.checkLogging(vs.period))
 			logEvent(EventType.DET_CHATTER);
-		no_hits.update(vs.period, vs.value == 0);
+		no_hits.updateState(vs.period, vs.value == 0);
 		if (no_hits.checkLogging(vs.period))
 			logEvent(EventType.DET_NO_HITS);
 		updateAutoFail();
@@ -948,18 +974,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		// occupancy spikes is shorter than the threshold time
 		// and interspersed with zeroes.
 		boolean hold = locked_on.triggered && (occ.value == 0);
-		locked_on.update(occ.period, lock || hold);
+		locked_on.updateState(occ.period, lock || hold);
 		if (locked_on.checkLogging(occ.period))
-{
 			logEvent(EventType.DET_LOCKED_ON);
-	if (DET_LOG.isOpen()) {
-		logMsg("det: " + name + ", lock: " + lock + ", hold: " + hold +
-			", value: " + occ.value + ", scans: " +
-			occ.as60HzScans());
-	}
-}
 		boolean v = (occ.value > 0) && (occ.value == prev_value);
-		no_change.update(occ.period, v);
+		no_change.updateState(occ.period, v);
 		if (no_change.checkLogging(occ.period))
 			logEvent(EventType.DET_NO_CHANGE);
 		updateAutoFail();
@@ -1023,10 +1042,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			last_scans = v_log.getOccupancy().as60HzScans();
 			last_speed = v_log.getSpeed();
 			v_log.binEventSamples();
-			chatter.update(30, veh_count_30 > MAX_VEH_COUNT_30);
+			chatter.updateState(30, veh_count_30 > MAX_VEH_COUNT_30);
 			if (chatter.checkLogging(30))
 				logEvent(EventType.DET_CHATTER);
-			no_hits.update(30, veh_count_30 == 0);
+			no_hits.updateState(30, veh_count_30 == 0);
 			if (no_hits.checkLogging(30))
 				logEvent(EventType.DET_NO_HITS);
 			updateAutoFail();
