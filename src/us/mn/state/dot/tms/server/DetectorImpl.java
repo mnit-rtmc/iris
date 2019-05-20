@@ -973,7 +973,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		// non-zero samples.  This helps when the duration of
 		// occupancy spikes is shorter than the threshold time
 		// and interspersed with zeroes.
-		boolean hold = locked_on.triggered && (occ.value == 0);
+		boolean hold = locked_on.failed && (occ.value == 0);
 		locked_on.updateState(occ.period, lock || hold);
 		if (locked_on.checkLogging(occ.period))
 			logEvent(EventType.DET_LOCKED_ON);
