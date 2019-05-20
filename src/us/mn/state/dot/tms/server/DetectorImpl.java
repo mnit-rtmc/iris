@@ -403,7 +403,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get the scan "locked on" threshold */
 	private Interval getLockedOnThreshold() {
-		return lane_type.lock_on_threshold;
+		return lane_type.getLockedOnThreshold();
 	}
 
 	/** Get the scan "no change" threshold */
@@ -499,16 +499,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Is this a ramp detector? (merge, queue, exit, bypass) */
 	public boolean isRamp() {
 		return lane_type.isRamp();
-	}
-
-	/** Is this an onramp detector? */
-	public boolean isOnRamp() {
-		return lane_type.isOnRamp();
-	}
-
-	/** Is this an offRamp detector? */
-	public boolean isOffRamp() {
-		return lane_type.isOffRamp();
 	}
 
 	/** Is this a velocity detector? */
