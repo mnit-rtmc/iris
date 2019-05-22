@@ -27,4 +27,3 @@ mod resource;
 mod mere;
 mod render;
 pub mod multi;
-pub mod raster;

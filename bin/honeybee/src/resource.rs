@@ -13,6 +13,7 @@
 // GNU General Public License for more details.
 //
 use gif::{Frame, Encoder, Repeat, SetParameter};
+use pix::{Raster, RasterBuilder, Rgb8};
 use postgres::{self, Connection};
 use serde_json;
 use std::collections::{HashMap, HashSet};
@@ -25,7 +26,6 @@ use crate::error::Error;
 use crate::font::{Font, query_font, Graphic};
 use crate::multi::{ColorClassic, ColorCtx, ColorScheme, LineJustification,
                    PageJustification, Rectangle};
-use crate::raster::{Raster24, Rgb24};
 use crate::render::{PageSplitter, State};
 
 /// Make a PathBuf from a Path and file name
@@ -687,20 +687,22 @@ fn calculate_size(cfg: &SignConfig) -> Result<(u16, u16), Error> {
 }
 
 /// Make a .gif frame of sign face
-fn make_face_frame(page: Raster24, cfg: &SignConfig, w: u16, h: u16) -> Frame {
+fn make_face_frame(page: Raster<Rgb8>, cfg: &SignConfig, w: u16, h: u16)
+    -> Frame
+{
     let mut face = make_face_raster(page, &cfg, w, h);
-    let pix = face.pixels();
+    let pix = face.as_u8_slice_mut();
     // FIXME: color quantization is very slow here
     Frame::from_rgb(w, h, &mut pix[..])
 }
 
 /// Make a raster of sign face
-fn make_face_raster(page: Raster24, cfg: &SignConfig, w: u16, h: u16)
-    -> Raster24
+fn make_face_raster(page: Raster<Rgb8>, cfg: &SignConfig, w: u16, h: u16)
+    -> Raster<Rgb8>
 {
-    let dark = Rgb24::new(20, 20, 0);
-    let rgb = Rgb24::new(0, 0, 0);
-    let mut face = Raster24::new(w.into(), h.into(), rgb);
+    let dark = Rgb8::new(20, 20, 0);
+    let rgb = Rgb8::new(0, 0, 0);
+    let mut face = RasterBuilder::new().with_color(w.into(), h.into(), rgb);
     let ph = page.height();
     let pw = page.width();
     let sx = w as f32 / pw as f32;
@@ -711,15 +713,56 @@ fn make_face_raster(page: Raster24, cfg: &SignConfig, w: u16, h: u16)
         let py = cfg.pixel_y(y) * h as f32;
         for x in 0..pw {
             let px = cfg.pixel_x(x) * w as f32;
-            let clr = page.get_pixel(x, y);
-            let sr = clr.r().max(clr.g()).max(clr.b());
+            let clr = page.pixel(x, y);
+            let sr: u8 = clr.red().max(clr.green()).max(clr.blue()).into();
             // Clamp radius between 0.6 and 0.8 (blooming)
             let r = s * (sr as f32 / 255f32).max(0.6f32).min(0.8f32);
             let clr = if sr > 20 { clr } else { dark };
-            face.circle(px, py, r, clr);
+            render_circle(&mut face, px, py, r, clr);
         }
     }
     face
+}
+
+/// Render an attenuated circle.
+///
+/// * `cx` X-Center of circle.
+/// * `cy` Y-Center of circle.
+/// * `r` Radius of circle.
+/// * `clr` Color of circle.
+fn render_circle(raster: &mut Raster<Rgb8>, cx: f32, cy: f32, r: f32,
+    clr: Rgb8)
+{
+    let x0 = (cx - r).floor().max(0.0) as u32;
+    let x1 = (cx + r).ceil().min(raster.width() as f32) as u32;
+    let y0 = (cy - r).floor().max(0.0) as u32;
+    let y1 = (cy + r).ceil().min(raster.height() as f32) as u32;
+    let rs = r.powi(2);
+    for y in y0..y1 {
+        let yd = (cy - y as f32 - 0.5).abs();
+        let ys = yd.powi(2);
+        for x in x0..x1 {
+            let xd = (cx - x as f32 - 0.5).abs();
+            let xs = xd.powi(2);
+            let mut ds = xs + ys;
+            // If center is within this pixel, make it brighter
+            if ds < 1.0 {
+                ds = ds.powi(2);
+            }
+            // compare distance squared with radius squared
+            let drs = ds / rs;
+            let v = 1.0 - drs.powi(2).min(1.0);
+            if v > 0.0 {
+                // blend with existing pixel
+                let p = raster.pixel(x, y);
+                let red = (clr.red() * v).max(p.red());
+                let green = (clr.green() * v).max(p.green());
+                let blue = (clr.blue() * v).max(p.blue());
+                let d = Rgb8::new(red, green, blue);
+                raster.set_pixel(x, y, d);
+            }
+        }
+    }
 }
 
 /// Render a sign message into a .gif file

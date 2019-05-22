@@ -12,11 +12,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use pix::{Raster, RasterBuilder, Rgb8};
 use std::collections::HashMap;
 use crate::error::Error;
 use crate::font::{Font, Graphic};
 use crate::multi::*;
-use crate::raster::{Raster24, Rgb24};
 
 /// Page render state
 #[derive(Clone)]
@@ -145,11 +145,11 @@ impl State {
         Ok(())
     }
     /// Get the background RGB color.
-    fn background_rgb(&self) -> Result<Rgb24, SyntaxError> {
+    fn background_rgb(&self) -> Result<Rgb8, SyntaxError> {
         Ok(self.color_ctx.background_rgb().into())
     }
     /// Get the foreground RGB color.
-    fn foreground_rgb(&self) -> Rgb24 {
+    fn foreground_rgb(&self) -> Rgb8 {
         self.color_ctx.foreground_rgb().into()
     }
     /// Check if states match for text spans
@@ -244,7 +244,7 @@ impl<'a> TextSpan {
         }
     }
     /// Render the text span
-    fn render_text(&self, page: &mut Raster24, font: &Font, x: u32, y: u32)
+    fn render_text(&self, page: &mut Raster<Rgb8>, font: &Font, x: u32, y: u32)
         -> Result<(), Error>
     {
         let cs = self.char_spacing_font(font);
@@ -319,23 +319,23 @@ impl PageRenderer {
         self.state.page_off_time_ds.into()
     }
     /// Render a blank page.
-    pub fn render_blank(&self) -> Result<Raster24, SyntaxError> {
+    pub fn render_blank(&self) -> Result<Raster<Rgb8>, SyntaxError> {
         let rs = &self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
         let clr = rs.background_rgb()?;
-        let page = Raster24::new(w.into(), h.into(), clr);
+        let page = RasterBuilder::new().with_color(w.into(), h.into(), clr);
         Ok(page)
     }
     /// Render the page.
     pub fn render(&self, fonts: &HashMap<i32, Font>,
-        graphics: &HashMap<i32, Graphic>) -> Result<Raster24, Error>
+        graphics: &HashMap<i32, Graphic>) -> Result<Raster<Rgb8>, Error>
     {
         let rs = &self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
         let clr = rs.background_rgb()?;
-        let mut page = Raster24::new(w.into(), h.into(), clr);
+        let mut page = RasterBuilder::new().with_color(w.into(), h.into(), clr);
         for (v, ctx) in &self.values {
             match v {
                 Value::ColorRectangle(r, _) => {
@@ -368,7 +368,7 @@ impl PageRenderer {
         Ok(page)
     }
     /// Render a color rectangle
-    fn render_rect(&self, page: &mut Raster24, r: Rectangle, clr: Rgb24,
+    fn render_rect(&self, page: &mut Raster<Rgb8>, r: Rectangle, clr: Rgb8,
         v: &Value) -> Result<(), SyntaxError>
     {
         let rx = r.x as u32 - 1; // r.x must be > 0

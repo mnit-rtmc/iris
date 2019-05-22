@@ -13,6 +13,7 @@
 // GNU General Public License for more details.
 //
 use base64::{Config, CharacterSet, decode_config_slice};
+use pix::{Raster, Rgb8};
 use postgres::{self, Connection};
 use serde_json;
 use std::collections::HashMap;
@@ -20,7 +21,6 @@ use std::fs::File;
 use std::io::{BufReader, Write};
 use std::path::{Path, PathBuf};
 use crate::error::Error;
-use crate::raster::{Raster24, Rgb24};
 use crate::resource::Queryable;
 use crate::multi::{Color, ColorCtx, ColorScheme, SyntaxError};
 
@@ -109,8 +109,8 @@ impl<'a> Font {
         }
     }
     /// Render a text span
-    pub fn render_text(&self, page: &mut Raster24, text: &str, mut x: u32,
-        y: u32, cs: u32, cf: Rgb24) -> Result<(), Error>
+    pub fn render_text(&self, page: &mut Raster<Rgb8>, text: &str, mut x: u32,
+        y: u32, cs: u32, cf: Rgb8) -> Result<(), Error>
     {
         let h = self.height() as u32;
         debug!("span: {}, left: {}, top: {}, height: {}", text, x, y, h);
@@ -193,7 +193,7 @@ pub struct Graphic {
 }
 
 /// Function to lookup a pixel from a graphic buffer
-type PixFn = Fn(&Graphic, u32, u32, &ColorCtx, &[u8]) -> Option<Rgb24>;
+type PixFn = Fn(&Graphic, u32, u32, &ColorCtx, &[u8]) -> Option<Rgb8>;
 
 impl Graphic {
     /// Load graphics from a JSON file
@@ -228,8 +228,8 @@ impl Graphic {
             ColorScheme::Color24Bit     => 24,
         }
     }
-    /// Render a graphic onto a Raster24
-    pub fn onto_raster(&self, page: &mut Raster24, x: u32, y: u32,
+    /// Render a graphic onto a Raster
+    pub fn onto_raster(&self, page: &mut Raster<Rgb8>, x: u32, y: u32,
         ctx: &ColorCtx) -> Result<(), Error>
     {
         let x = x - 1; // x must be > 0
@@ -275,7 +275,7 @@ impl Graphic {
     }
     /// Get one pixel of a monochrome 1-bit graphic
     fn pixel_1(&self, x: u32, y: u32, ctx: &ColorCtx, buf: &[u8])
-        -> Option<Rgb24>
+        -> Option<Rgb8>
     {
         let p = y * self.width() + x;
         let by = p as usize / 8;
@@ -290,7 +290,7 @@ impl Graphic {
     }
     /// Get one pixel of an 8-bit (monochrome or classic) color graphic
     fn pixel_8(&self, x: u32, y: u32, ctx: &ColorCtx, buf: &[u8])
-        -> Option<Rgb24>
+        -> Option<Rgb8>
     {
         let p = y * self.width() + x;
         let v = buf[p as usize];
@@ -309,7 +309,7 @@ impl Graphic {
     }
     /// Get one pixel of a 24-bit color graphic
     fn pixel_24(&self, x: u32, y: u32, _ctx: &ColorCtx, buf: &[u8])
-        -> Option<Rgb24>
+        -> Option<Rgb8>
     {
         let p = 3 * (y * self.width() + x) as usize;
         let r = buf[p + 0];
@@ -321,6 +321,6 @@ impl Graphic {
                 return None;
             }
         }
-        Some(Rgb24::new(r, g, b))
+        Some(Rgb8::new(r, g, b))
     }
 }
