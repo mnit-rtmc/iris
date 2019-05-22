@@ -323,7 +323,7 @@ impl SignConfig {
     fn horizontal_border_mm(&self) -> f32 {
         let excess_mm = self.horizontal_excess_mm();
         let border_horiz = self.border_horiz as f32;
-        border_horiz.min(0f32.max(excess_mm / 2f32))
+        border_horiz.min(0_f32.max(excess_mm / 2.0))
     }
     /// Get the horizontal excess (mm).
     fn horizontal_excess_mm(&self) -> f32 {
@@ -337,18 +337,18 @@ impl SignConfig {
             let gap = (x / self.char_width as u32) as f32;
             gap * self.char_gap_mm()
         } else {
-            0f32
+            0.0
         }
     }
     /// Get the character gap (mm)
     fn char_gap_mm(&self) -> f32 {
         let excess_mm = self.horizontal_excess_mm();
-        let border_mm = self.horizontal_border_mm() * 2f32;
+        let border_mm = self.horizontal_border_mm() * 2.0;
         let gaps = self.char_gaps() as f32;
-        if excess_mm > border_mm && gaps > 0f32 {
+        if excess_mm > border_mm && gaps > 0.0 {
             (excess_mm - border_mm) / gaps
         } else {
-            0f32
+            0.0
         }
     }
     /// Get the number of gaps between characters
@@ -371,7 +371,7 @@ impl SignConfig {
     fn vertical_border_mm(&self) -> f32 {
         let excess_mm = self.vertical_excess_mm();
         let border_vert = self.border_vert as f32;
-        border_vert.min(0f32.max(excess_mm / 2f32))
+        border_vert.min(0_f32.max(excess_mm / 2.0))
     }
     /// Get the vertical excess (mm).
     fn vertical_excess_mm(&self) -> f32 {
@@ -393,18 +393,18 @@ impl SignConfig {
             let gap = (y / self.char_height as u32) as f32;
             gap * self.line_gap_mm()
         } else {
-            0f32
+            0.0
         }
     }
     /// Get the line gap (mm)
     fn line_gap_mm(&self) -> f32 {
         let excess_mm = self.vertical_excess_mm();
-        let border_mm = self.vertical_border_mm() * 2f32;
+        let border_mm = self.vertical_border_mm() * 2.0;
         let gaps = self.line_gaps() as f32;
-        if excess_mm > border_mm && gaps > 0f32 {
+        if excess_mm > border_mm && gaps > 0.0 {
             (excess_mm - border_mm) / gaps
         } else {
-            0f32
+            0.0
         }
     }
     /// Get the Y-position of a pixel on the sign (from 0 to 1)
@@ -665,16 +665,16 @@ fn fetch_sign_msg(s: &SignMessage, dir: &Path, tx: &Sender<PathBuf>,
 }
 
 /// Maximum pixel width of DMS images
-const PIX_WIDTH: f32 = 450f32;
+const PIX_WIDTH: f32 = 450.0;
 
 /// Maximum pixel height of DMS images
-const PIX_HEIGHT: f32 = 100f32;
+const PIX_HEIGHT: f32 = 100.0;
 
 /// Calculate the size of rendered DMS
 fn calculate_size(cfg: &SignConfig) -> Result<(u16, u16), Error> {
     let fw = cfg.face_width as f32;
     let fh = cfg.face_height as f32;
-    if fw > 0f32 && fh > 0f32 {
+    if fw > 0.0 && fh > 0.0 {
         let sx = PIX_WIDTH / fw;
         let sy = PIX_HEIGHT / fh;
         let s = sx.min(sy);
@@ -701,8 +701,7 @@ fn make_face_raster(page: Raster<Rgb8>, cfg: &SignConfig, w: u16, h: u16)
     -> Raster<Rgb8>
 {
     let dark = Rgb8::new(20, 20, 0);
-    let rgb = Rgb8::new(0, 0, 0);
-    let mut face = RasterBuilder::new().with_color(w.into(), h.into(), rgb);
+    let mut face = RasterBuilder::new().with_clear(w.into(), h.into());
     let ph = page.height();
     let pw = page.width();
     let sx = w as f32 / pw as f32;
@@ -716,7 +715,7 @@ fn make_face_raster(page: Raster<Rgb8>, cfg: &SignConfig, w: u16, h: u16)
             let clr = page.pixel(x, y);
             let sr: u8 = clr.red().max(clr.green()).max(clr.blue()).into();
             // Clamp radius between 0.6 and 0.8 (blooming)
-            let r = s * (sr as f32 / 255f32).max(0.6f32).min(0.8f32);
+            let r = s * (sr as f32 / 255.0).max(0.6).min(0.8);
             let clr = if sr > 20 { clr } else { dark };
             render_circle(&mut face, px, py, r, clr);
         }

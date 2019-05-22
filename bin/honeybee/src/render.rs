@@ -223,7 +223,7 @@ impl<'a> TextSpan {
             // rounded up to the nearest whole pixel ..." ???
             let psc = prev.char_spacing_fonts(fonts)?;
             let sc = self.char_spacing_fonts(fonts)?;
-            Ok(((psc + sc) as f32 / 2f32).round() as u16)
+            Ok(((psc + sc) as f32 / 2.0).round() as u16)
         }
     }
     /// Get the height of a text span
@@ -274,7 +274,7 @@ impl TextLine {
             // is the average of the 2 line spacings of each
             // line, rounded up to the nearest whole pixel."
             let s = self.font_spacing + other.font_spacing;
-            (s as f32 / 2f32).round() as u16
+            (s as f32 / 2.0).round() as u16
         }
     }
 }
