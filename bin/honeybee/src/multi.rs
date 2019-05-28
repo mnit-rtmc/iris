@@ -116,8 +116,8 @@ impl ColorCtx {
         };
         Ok(())
     }
-    /// Get the foreground RGB color
-    pub fn foreground_rgb(&self) -> i32 {
+    /// Get the foreground BGR color
+    pub fn foreground_bgr(&self) -> i32 {
         self.fg_current
     }
     /// Set the background color
@@ -134,8 +134,8 @@ impl ColorCtx {
         };
         Ok(())
     }
-    /// Get the background RGB color
-    pub fn background_rgb(&self) -> i32 {
+    /// Get the background BGR color
+    pub fn background_bgr(&self) -> i32 {
         self.bg_current
     }
     /// Get RGB for the specified color.
@@ -1122,8 +1122,8 @@ mod test {
     fn color_mono_1() {
         let mut ctx = ColorCtx::new(ColorScheme::Monochrome1Bit,
             ColorClassic::Amber.rgb(), ColorClassic::Black.rgb());
-        assert!(ctx.foreground_rgb() == 0xFFD000);
-        assert!(ctx.background_rgb() == 0x000000);
+        assert!(ctx.foreground_bgr() == 0xFFD000);
+        assert!(ctx.background_bgr() == 0x000000);
         let v = Value::ColorForeground(Some(Color::Legacy(2)));
         assert!(ctx.set_foreground(Some(Color::Legacy(2)), &v) ==
             Err(SyntaxError::UnsupportedTagValue("[cf2]".into())));
@@ -1132,63 +1132,63 @@ mod test {
             Err(SyntaxError::UnsupportedTagValue("[cf0,0,0]".into())));
         let v = Value::ColorForeground(Some(Color::Legacy(0)));
         assert!(ctx.set_foreground(Some(Color::Legacy(0)), &v) == Ok(()));
-        assert!(ctx.foreground_rgb() == 0x000000);
+        assert!(ctx.foreground_bgr() == 0x000000);
         let v = Value::PageBackground(Some(Color::Legacy(1)));
         assert!(ctx.set_background(Some(Color::Legacy(1)), &v) == Ok(()));
-        assert!(ctx.background_rgb() == 0xFFD000);
+        assert!(ctx.background_bgr() == 0xFFD000);
         assert!(ctx.set_foreground(None, &v) == Ok(()));
-        assert!(ctx.foreground_rgb() == 0xFFD000);
+        assert!(ctx.foreground_bgr() == 0xFFD000);
     }
     #[test]
     fn color_mono_8() {
         let mut ctx = ColorCtx::new(ColorScheme::Monochrome8Bit,
             ColorClassic::White.rgb(), ColorClassic::Black.rgb());
-        assert!(ctx.foreground_rgb() == 0xFFFFFF);
-        assert!(ctx.background_rgb() == 0x000000);
+        assert!(ctx.foreground_bgr() == 0xFFFFFF);
+        assert!(ctx.background_bgr() == 0x000000);
         let v = Value::ColorForeground(Some(Color::Legacy(128)));
         assert!(ctx.set_foreground(Some(Color::Legacy(128)), &v) == Ok(()));
-        assert!(ctx.foreground_rgb() == 0x808080);
+        assert!(ctx.foreground_bgr() == 0x808080);
         let v = Value::ColorForeground(Some(Color::RGB(128, 128, 128)));
         assert!(ctx.set_foreground(Some(Color::RGB(128, 128, 128)), &v) ==
             Err(SyntaxError::UnsupportedTagValue("[cf128,128,128]".into())));
         assert!(ctx.set_foreground(None, &v) == Ok(()));
-        assert!(ctx.foreground_rgb() == 0xFFFFFF);
+        assert!(ctx.foreground_bgr() == 0xFFFFFF);
     }
     #[test]
     fn color_classic() {
         let mut ctx = ColorCtx::new(ColorScheme::ColorClassic,
             ColorClassic::White.rgb(), ColorClassic::Green.rgb());
-        assert!(ctx.foreground_rgb() == 0xFFFFFF);
-        assert!(ctx.background_rgb() == 0x00FF00);
+        assert!(ctx.foreground_bgr() == 0xFFFFFF);
+        assert!(ctx.background_bgr() == 0x00FF00);
         let v = Value::ColorForeground(Some(Color::Legacy(10)));
         assert!(ctx.set_foreground(Some(Color::Legacy(10)), &v) ==
             Err(SyntaxError::UnsupportedTagValue("[cf10]".into())));
         let v = Value::ColorForeground(Some(Color::Legacy(5)));
         assert!(ctx.set_foreground(Some(Color::Legacy(5)), &v) == Ok(()));
-        assert!(ctx.foreground_rgb() == 0x0000FF);
+        assert!(ctx.foreground_bgr() == 0x0000FF);
         let v = Value::PageBackground(Some(Color::RGB(255, 0, 255)));
         assert!(ctx.set_background(Some(Color::RGB(255, 0, 255)), &v) ==
             Err(SyntaxError::UnsupportedTagValue("[pb255,0,255]".into())));
         assert!(ctx.set_foreground(None, &v) == Ok(()));
-        assert!(ctx.foreground_rgb() == 0xFFFFFF);
+        assert!(ctx.foreground_bgr() == 0xFFFFFF);
     }
     #[test]
     fn color_24() {
         let mut ctx = ColorCtx::new(ColorScheme::Color24Bit,
             ColorClassic::Yellow.rgb(), ColorClassic::Red.rgb());
-        assert!(ctx.foreground_rgb() == 0xFFFF00);
-        assert!(ctx.background_rgb() == 0xFF0000);
+        assert!(ctx.foreground_bgr() == 0xFFFF00);
+        assert!(ctx.background_bgr() == 0xFF0000);
         let v = Value::ColorForeground(Some(Color::Legacy(10)));
         assert!(ctx.set_foreground(Some(Color::Legacy(10)), &v) ==
             Err(SyntaxError::UnsupportedTagValue("[cf10]".into())));
         let v = Value::ColorForeground(Some(Color::Legacy(6)));
         assert!(ctx.set_foreground(Some(Color::Legacy(6)), &v) == Ok(()));
-        assert!(ctx.foreground_rgb() == 0xFF00FF);
+        assert!(ctx.foreground_bgr() == 0xFF00FF);
         let v = Value::PageBackground(Some(Color::RGB(121, 0, 212)));
         assert!(ctx.set_background(Some(Color::RGB(121, 0, 212)), &v) == Ok(()));
-        assert!(ctx.background_rgb() == 0x7900D4);
+        assert!(ctx.background_bgr() == 0x7900D4);
         assert!(ctx.set_foreground(None, &v) == Ok(()));
-        assert!(ctx.foreground_rgb() == 0xFFFF00);
+        assert!(ctx.foreground_bgr() == 0xFFFF00);
     }
 
     fn single_text(v: &str) {

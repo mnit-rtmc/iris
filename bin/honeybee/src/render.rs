@@ -18,6 +18,14 @@ use crate::error::Error;
 use crate::font::{Font, Graphic};
 use crate::multi::*;
 
+/// Convert BGR into Rgb8
+fn bgr_to_rgb8(bgr: i32) -> Rgb8 {
+    let r = (bgr >> 16) as u8;
+    let g = (bgr >> 8) as u8;
+    let b = (bgr >> 0) as u8;
+    Rgb8::new(r, g, b)
+}
+
 /// Page render state
 #[derive(Clone)]
 pub struct State {
@@ -145,12 +153,12 @@ impl State {
         Ok(())
     }
     /// Get the background RGB color.
-    fn background_rgb(&self) -> Result<Rgb8, SyntaxError> {
-        Ok(self.color_ctx.background_rgb().into())
+    fn background_rgb(&self) -> Rgb8 {
+        bgr_to_rgb8(self.color_ctx.background_bgr())
     }
     /// Get the foreground RGB color.
     fn foreground_rgb(&self) -> Rgb8 {
-        self.color_ctx.foreground_rgb().into()
+        bgr_to_rgb8(self.color_ctx.foreground_bgr())
     }
     /// Check if states match for text spans
     fn matches_span(&self, other: &State) -> bool {
@@ -323,7 +331,7 @@ impl PageRenderer {
         let rs = &self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
-        let clr = rs.background_rgb()?;
+        let clr = rs.background_rgb();
         let page = RasterBuilder::new().with_color(w.into(), h.into(), clr);
         Ok(page)
     }
@@ -334,12 +342,12 @@ impl PageRenderer {
         let rs = &self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
-        let clr = rs.background_rgb()?;
+        let clr = rs.background_rgb();
         let mut page = RasterBuilder::new().with_color(w.into(), h.into(), clr);
         for (v, ctx) in &self.values {
             match v {
                 Value::ColorRectangle(r, _) => {
-                    let clr = ctx.foreground_rgb().into();
+                    let clr = bgr_to_rgb8(ctx.foreground_bgr());
                     self.render_rect(&mut page, *r, clr, v)?;
                 },
                 Value::Graphic(gn, None) => {

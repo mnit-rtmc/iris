@@ -24,6 +24,14 @@ use crate::error::Error;
 use crate::resource::Queryable;
 use crate::multi::{Color, ColorCtx, ColorScheme, SyntaxError};
 
+/// Convert BGR into Rgb8
+fn bgr_to_rgb8(bgr: i32) -> Rgb8 {
+    let r = (bgr >> 16) as u8;
+    let g = (bgr >> 8) as u8;
+    let b = (bgr >> 0) as u8;
+    Rgb8::new(r, g, b)
+}
+
 /// Length of base64 output buffer for glyphs.
 /// Encoded glyphs are restricted to 128 bytes.
 const GLYPH_LEN: usize = (128 + 3) / 4 * 3;
@@ -284,8 +292,8 @@ impl Graphic {
         match (lit, self.transparent_color) {
             (false, Some(0)) => None,
             (true, Some(1)) => None,
-            (false, _) => Some(ctx.background_rgb().into()),
-            (true, _) => Some(ctx.foreground_rgb().into()),
+            (false, _) => Some(bgr_to_rgb8(ctx.background_bgr())),
+            (true, _) => Some(bgr_to_rgb8(ctx.foreground_bgr())),
         }
     }
     /// Get one pixel of an 8-bit (monochrome or classic) color graphic
