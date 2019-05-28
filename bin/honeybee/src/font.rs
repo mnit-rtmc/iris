@@ -47,7 +47,7 @@ pub struct Glyph {
 impl Queryable for Glyph {
     /// Get the SQL to query all glyphs in a font
     fn sql() -> &'static str {
-       "SELECT code_point, width, pixels \
+       "SELECT code_point, width, replace(pixels, E'\n', '') AS pixels \
         FROM glyph_view \
         WHERE font = ($1) \
         ORDER BY code_point"

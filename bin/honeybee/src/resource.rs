@@ -202,7 +202,7 @@ const GRAPHIC_RES: Resource = Resource::Simple(
 "graphic", None,
 "SELECT row_to_json(r)::text FROM (\
     SELECT name, g_number, color_scheme, height, width, \
-           transparent_color, pixels \
+           transparent_color, replace(pixels, E'\n', '') AS pixels \
     FROM graphic_view \
 ) r",
 );
