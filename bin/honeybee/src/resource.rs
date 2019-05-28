@@ -706,8 +706,7 @@ fn make_face_frame(cfg: &SignConfig, page: Raster<Rgb8>,
 
 /// Make a raster of sign face
 fn make_face_raster(cfg: &SignConfig, page: Raster<Rgb8>,
-    palette: &mut Palette<Rgb8>,
-    w: u16, h: u16) -> Raster<Gray8>
+    palette: &mut Palette<Rgb8>, w: u16, h: u16) -> Raster<Gray8>
 {
     let dark = Rgb8::new(20, 20, 0);
     let mut face = RasterBuilder::new().with_clear(w.into(), h.into());
