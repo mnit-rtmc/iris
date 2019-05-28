@@ -11,28 +11,46 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-use gif::{Frame, Encoder, Repeat, SetParameter};
+use gift::*;
+use gift::block::*;
 use pix::{Gray8, Palette, Raster, RasterBuilder, Rgb8};
+use std::error::Error;
 use std::fs::File;
-use std::io;
 
 /// Write raster to a GIF file.
 ///
 /// * `filename` Name of file to write.
 pub fn write_gif(palette: &[u8], rasters: &[Raster<Gray8>], filename: &str)
-    -> io::Result<()>
+    -> Result<(), Box<Error>>
 {
-    let h = rasters[0].height() as u16;
     let w = rasters[0].width() as u16;
+    let h = rasters[0].height() as u16;
     let mut fl = File::create(filename)?;
-    let mut enc = Encoder::new(&mut fl, w, h, palette)?;
-    enc.set(Repeat::Infinite)?;
-    for raster in rasters {
-        let pix = raster.as_u8_slice();
-        let mut frame = Frame::from_indexed_pixels(w, h, &pix[..], None);
-        frame.delay = 200; // 2 seconds
-        enc.write_frame(&frame)?;
+    let mut enc = Encoder::new(&mut fl);
+    let g_tbl = ColorTableConfig::new(ColorTableExistence::Present,
+        ColorTableOrdering::NotSorted, palette.len() as u16 / 3);
+    let mut pal = palette.to_vec();
+    while pal.len() < g_tbl.size_bytes() {
+        pal.push(0);
     }
+    enc.encode(&Header::with_version(*b"89a").into())?;
+    enc.encode(&LogicalScreenDesc::default()
+        .with_screen_width(w)
+        .with_screen_height(h)
+        .with_color_table_config(&g_tbl).into())?;
+    enc.encode(&GlobalColorTable::with_colors(&pal[..]).into())?;
+    enc.encode(&Application::with_loop_count(0).into())?;
+    for raster in rasters {
+        let mut control = GraphicControl::default();
+        control.set_delay_time_cs(200);
+        enc.encode(&control.into())?;
+        enc.encode(&ImageDesc::default().with_width(w).with_height(h).into())?;
+        let pix = raster.as_u8_slice();
+        let mut image = ImageData::new((w * h) as usize);
+        image.add_data(pix);
+        enc.encode(&image.into())?;
+    }
+    enc.encode(&Trailer::default().into())?;
     Ok(())
 }
 
@@ -135,7 +153,7 @@ fn palette_threshold_rgb8_256(v: usize) -> Rgb8 {
     Rgb8::new(i * 4, i * 4, i * 5)
 }
 
-fn main() -> io::Result<()> {
+fn main() -> Result<(), Box<Error>> {
     let mut palette = Palette::new(256);
     palette.set_entry(Rgb8::default());
     palette.set_threshold_fn(palette_threshold_rgb8_256);

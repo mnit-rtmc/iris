@@ -16,7 +16,7 @@ fallible-iterator = "0.1"
 postgres = "0.15.2"
 ssh2 = "0.3.3"
 pix = "0.6.0"
-gif = "0.10.1"
+gift = "0.3.0"
 whoami = "0.5.0"
 
 [dependencies.env_logger]
