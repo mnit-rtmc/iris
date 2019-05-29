@@ -1,6 +1,6 @@
 [package]
 name = "honeybee"
-version = "0.5.0"
+version = "0.5.2"
 authors = ["Douglas Lau <doug.lau@state.mn.us>"]
 description = "Server for publishing IRIS data as JSON / MVT"
 license = "GPL-2.0-or-later"
@@ -16,7 +16,7 @@ fallible-iterator = "0.1"
 postgres = "0.15.2"
 ssh2 = "0.3.3"
 pix = "0.6.0"
-gift = "0.3.0"
+gift = "0.3.1"
 whoami = "0.5.0"
 
 [dependencies.env_logger]
