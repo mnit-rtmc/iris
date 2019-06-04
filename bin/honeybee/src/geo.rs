@@ -64,7 +64,7 @@ impl Wgs84Pos {
         self.lon.to_degrees()
     }
     /// Calculate the distance to another position (meters).
-    pub fn distance_haversine(&self, other: &Wgs84Pos) -> f64 {
+    pub fn distance_haversine(&self, other: &Self) -> f64 {
         let dlat = other.lat - self.lat;
         let dlon = other.lon - self.lon;
         let sdlat2 = (dlat / 2.0).sin();
