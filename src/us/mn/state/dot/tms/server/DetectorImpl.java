@@ -23,7 +23,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
@@ -59,9 +58,6 @@ import us.mn.state.dot.tms.server.event.DetAutoFailEvent;
  * @author Douglas Lau
  */
 public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
-
-	/** Detector debug log */
-	static private final DebugLog DET_LOG = new DebugLog("detector");
 
 	/** Is detector auto-fail enabled? */
 	static private boolean isDetectorAutoFailEnabled() {
@@ -233,12 +229,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			if (d instanceof DetectorImpl)
 				((DetectorImpl) d).updateAutoFail();
 		}
-	}
-
-	/** Log a message */
-	private void logMsg(String msg) {
-		if (DET_LOG.isOpen())
-			DET_LOG.log(getName() + ": " + msg);
 	}
 
 	/** Get a mapping of the columns */
@@ -888,16 +878,16 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		else {
 			switch (vc) {
 			case MOTORCYCLE:
-				mc_count_cache.add(v);
+				mc_count_cache.add(v, name);
 				break;
 			case SHORT:
-				s_count_cache.add(v);
+				s_count_cache.add(v, name);
 				break;
 			case MEDIUM:
-				m_count_cache.add(v);
+				m_count_cache.add(v, name);
 				break;
 			case LONG:
-				l_count_cache.add(v);
+				l_count_cache.add(v, name);
 				break;
 			}
 		}
@@ -909,7 +899,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		if (lane_type != LaneType.GREEN &&
 		    v.period == SAMPLE_PERIOD_SEC)
 			testVehCount(v);
-		veh_cache.add(v);
+		veh_cache.add(v, name);
 		if (v.period == SAMPLE_PERIOD_SEC) {
 			veh_count_30 = v.value;
 			/* FIXME: this shouldn't be needed */
@@ -953,7 +943,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			last_scans = n_scans;
 		}
 		scn_cache.add(new PeriodicSample(occ.stamp, occ.period,
-			n_scans));
+			n_scans), name);
 	}
 
 	/** Test an occupancy sample with error detecting algorithms */
@@ -977,7 +967,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Store one speed sample for this detector.
 	 * @param speed PeriodicSample containing speed data. */
 	public void storeSpeed(PeriodicSample speed) {
-		spd_cache.add(speed);
+		spd_cache.add(speed, name);
 		if (speed.period == SAMPLE_PERIOD_SEC)
 			last_speed = speed.value;
 	}
