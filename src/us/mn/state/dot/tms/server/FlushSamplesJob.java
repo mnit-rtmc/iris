@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,11 +67,11 @@ public class FlushSamplesJob extends Job {
 	private void flushDetectorSamples(long before) throws IOException {
 		boolean do_flush = isArchiveEnabled();
 		Iterator<Detector> it = DetectorHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Detector d = it.next();
-			if(d instanceof DetectorImpl) {
-				DetectorImpl det = (DetectorImpl)d;
-				if(do_flush)
+			if (d instanceof DetectorImpl) {
+				DetectorImpl det = (DetectorImpl) d;
+				if (do_flush)
 					det.flush(writer);
 				det.purge(before);
 			}
@@ -82,11 +82,11 @@ public class FlushSamplesJob extends Job {
 	private void flushWeatherSamples(long before) throws IOException {
 		boolean do_flush = isArchiveEnabled();
 		Iterator<WeatherSensor> it = WeatherSensorHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			WeatherSensor w = it.next();
-			if(w instanceof WeatherSensorImpl) {
-				WeatherSensorImpl ws = (WeatherSensorImpl)w;
-				if(do_flush)
+			if (w instanceof WeatherSensorImpl) {
+				WeatherSensorImpl ws = (WeatherSensorImpl) w;
+				if (do_flush)
 					ws.flush(writer);
 				ws.purge(before);
 			}
