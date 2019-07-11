@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Iterator;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
@@ -37,6 +38,9 @@ import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
  * @author Douglas Lau
  */
 public class PeriodicSampleWriter {
+
+	/** Flush debug log */
+	static private final DebugLog FLUSH_LOG = new DebugLog("flush");
 
 	/** Minimum sample period (seconds) */
 	static private final Interval MIN_PERIOD = new Interval(5);
@@ -68,14 +72,23 @@ public class PeriodicSampleWriter {
 	}
 
 	/** Flush samples from a cache to files */
-	public void flush(PeriodicSampleCache cache, String sensor_id)
-		throws IOException
-	{
+	public void flush(PeriodicSampleCache cache, String sensor_id) {
 		period = new Interval(0);
 		file = null;
 		channel = null;
 		buffer.clear();
-		flush(cache.iterator(), sensor_id, cache.sample_type);
+		try {
+			flush(cache.iterator(), sensor_id, cache.sample_type);
+		}
+		catch (IOException e) {
+			String name = (file != null)
+				? file.toString()
+				: cache.sample_type.toString();
+			if (FLUSH_LOG.isOpen()) {
+				FLUSH_LOG.log(sensor_id + ": " + name + ", " +
+					e.getMessage());
+			}
+		}
 	}
 
 	/** Flush an iterator of samples to files */

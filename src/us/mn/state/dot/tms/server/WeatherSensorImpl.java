@@ -626,7 +626,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	}
 
 	/** Flush buffered sample data to disk */
-	public void flush(PeriodicSampleWriter writer) throws IOException {
+	public void flush(PeriodicSampleWriter writer) {
 		writer.flush(cache, name);
 		writer.flush(pt_cache, name);
 	}

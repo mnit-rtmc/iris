@@ -973,7 +973,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	}
 
 	/** Flush buffered data to disk */
-	public void flush(PeriodicSampleWriter writer) throws IOException {
+	public void flush(PeriodicSampleWriter writer) {
 		writer.flush(veh_cache, name);
 		writer.flush(scn_cache, name);
 		writer.flush(spd_cache, name);

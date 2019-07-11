@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
@@ -57,14 +56,14 @@ public class FlushSamplesJob extends Job {
 	}
 
 	/** Perform the flush samples job */
-	public void perform() throws IOException {
+	public void perform() {
 		long before = calculatePurgeStamp();
 		flushDetectorSamples(before);
 		flushWeatherSamples(before);
 	}
 
 	/** Flush detector sample data to disk */
-	private void flushDetectorSamples(long before) throws IOException {
+	private void flushDetectorSamples(long before) {
 		boolean do_flush = isArchiveEnabled();
 		Iterator<Detector> it = DetectorHelper.iterator();
 		while (it.hasNext()) {
@@ -79,7 +78,7 @@ public class FlushSamplesJob extends Job {
 	}
 
 	/** Flush weather sample data to disk */
-	private void flushWeatherSamples(long before) throws IOException {
+	private void flushWeatherSamples(long before) {
 		boolean do_flush = isArchiveEnabled();
 		Iterator<WeatherSensor> it = WeatherSensorHelper.iterator();
 		while (it.hasNext()) {
