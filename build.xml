@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- ant build file for IRIS project
-     Copyright (C) 2007-2018  Minnesota Department of Transportation
+     Copyright (C) 2007-2019  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -55,8 +55,6 @@
 	<property name="install.dir" value="${build.dir}/install"/>
 
 	<!-- Dependent jar configuration -->
-	<property name="scheduler.jar"
-		  value="scheduler-${scheduler.version}.jar"/>
 	<property name="sonar.server.jar"
 		  value="sonar-server-${sonar.version}.jar"/>
 	<property name="sonar.client.jar"
@@ -70,7 +68,6 @@
 	<path id="classpath">
 		<fileset dir="${lib.dir}">
 			<include name="mail.jar"/>
-			<include name="${scheduler.jar}"/>
 			<include name="${sonar.server.jar}"/>
 			<include name="${sonar.client.jar}"/>
 		</fileset>
@@ -141,12 +138,6 @@
 			<param name="file.dep" value="mail.jar"/>
 		</antcall>
 		<antcall target="check-subproject">
-			<param name="file.dep" value="${scheduler.jar}"/>
-			<param name="repo.name" value="scheduler"/>
-			<param name="repo.version"
-			       value="${scheduler.version}"/>
-		</antcall>
-		<antcall target="check-subproject">
 			<param name="file.dep" value="${sonar.server.jar}"/>
 			<param name="repo.name" value="sonar"/>
 			<param name="repo.version" value="${sonar.version}"/>
@@ -165,8 +156,6 @@
 			<filterset begintoken="@@" endtoken="@@">
 				<filter token="NAME" value="${name}"/>
 				<filter token="VERSION" value="${version}"/>
-				<filter token="SCHEDULER.VERSION"
-				        value="${scheduler.version}"/>
 				<filter token="SONAR.VERSION"
 					value="${sonar.version}"/>
 				<filter token="BUILD.RPM" value="${build.rpm}"/>
@@ -259,7 +248,6 @@
 		<copy todir="${dist.server}">
 			<fileset dir="${lib.dir}">
 				<include name="mail.jar"/>
-				<include name="${scheduler.jar}"/>
 				<include name="${sonar.server.jar}"/>
 			</fileset>
 		</copy>
@@ -269,6 +257,8 @@
 	<target name="common-jar"
 		depends="compile">
 		<jar jarfile="${build.lib}/${common.jar}">
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/sched/*.class"/>
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/tms/*.class"/>
 			<fileset dir="${build.classes}"
@@ -328,7 +318,6 @@
 		<copy todir="${dist.client}/lib">
 			<fileset dir="${lib.dir}">
 				<include name="mail.jar"/>
-				<include name="${scheduler.jar}"/>
 				<include name="${sonar.client.jar}"/>
 			</fileset>
 			<fileset dir="${build.lib}">
@@ -473,7 +462,6 @@
 		<mkdir dir="${lib.dir}" />
 		<delete>
 			<fileset dir="${lib.dir}">
-				<include name="${scheduler.jar}"/>
 				<include name="${sonar.client.jar}"/>
 				<include name="${sonar.server.jar}"/>
 			</fileset>
