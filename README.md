@@ -12,4 +12,4 @@ The IRIS software presents an intuitive map-based interface to system operators.
 This user interface has been refined over many iterations by getting feedback
 from operators to streamline their workflow.
 
-For more information, see the [Administrator Guide](docs/admin_guide.html).
+For more information, see the [Administrator Guide](http://htmlpreview.github.io/?https://github.com/mnit-rtmc/iris/blob/master/docs/admin_guide.html).
