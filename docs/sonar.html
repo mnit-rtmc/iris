@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta name="Author" content="Douglas Lau"/>
+	<link href="sonar.css" rel="stylesheet" type="text/css"/>
+	<title>SONAR: Simple Object Notification And Replication</title>
+</head>
+
+<body>
+<h1>SONAR</h1>
+<h2><small>or</small>
+	Simple Object Notification And Replication
+</h2>
+<ol>
+	<li><a href="#intro">Introduction</a></li>
+	<li><a href="#basic">Basic Concepts</a></li>
+	<li><a href="#config">Configuration</a></li>
+	<li><a href="#client">Client API</a></li>
+	<li><a href="#server">Server API</a></li>
+	<li><a href="#wire">Wire Protocol</a></li>
+</ol>
+<h2 id="intro">Introduction</h2>
+<p>
+	SONAR is a client/server protocol designed for low-latency operation
+	software. Its design is focused on addressing problems with other
+	"standard" protocols, such as SOAP, CORBA, RMI or XML-RPC. These are
+	some advantages:
+</p>
+<dl>
+	<dt>Simplicity</dt>
+	<dd>
+		There are only 10 messages defined in the SONAR
+		<a href="#wire">wire protocol</a>. These messages all apply to
+		one simple <a href="#namespace">namespace</a>. Also, there are
+		only a few basic attribute types. These facts are a
+		<em>feature</em>, because simple software is much easier to
+		audit for correctness. The full SONAR Java package is less than
+		6000 lines of code, even with plenty of comments.
+	</dd>
+	<dt>Security</dt>
+	<dd>
+		All communication between client and server is encrypted using
+		the industry-standard SSL (aka TLS) protocol. This prevents
+		man-in-the-middle attacks, while keeping passwords secure as
+		well. Actual user <a href="#auth">authentication</a> can be
+		passed on to a separate LDAP server, so users do not need to
+		remember multiple passwords, or keep different accounts in sync.
+	</dd>
+	<dt>Notification</dt>
+	<dd>
+		With these other protocols, there is no built-in way for a
+		client to be notified when changes are made to objects. To
+		provide this capability, clients must poll periodically for
+		updates. Another option would be to have the client also act as
+		a server, and have the real server perform callbacks when
+		changes are made. This option is complicated and hard to debug.
+	</dd>
+</dl>
+<h2 id="basic">Basic Concepts</h2>
+<h3 id="namespace">SONAR Namespace</h3>
+<p>
+	Each SONAR system has a simple namespace for uniquely describing
+	objects. At the root of the namespace are the <em>object types</em>.
+	Each object type is a container for all objects of that type. Each
+	object has a unique identifier which, along with the type, constitutes
+	the <em>object name</em>. Each type has a specific number of attributes,
+	which are defined for every object of that type.
+</p>
+<pre>
+	type_1
+	type_1/object_A
+	type_1/object_A/attribute_Z
+	type_1/object_A/attribute_Y
+	type_1/object_B
+	type_1/object_B/attribute_Z
+	type_1/object_B/attribute_Y
+	type_2
+	type_2/object_A
+	type_2/object_A/attribute_X
+	type_2/object_B
+	type_2/object_B/attribute_X
+</pre>
+<h3 id="auth">Authentication and User Privileges</h3>
+<p>
+	Every SONAR namespace contains the <em>user</em> and <em>role</em>
+	types. Each SONAR user must have a user object createed before logging
+	in. Each user object is assigned a set of roles that the user can
+	assume. A role consists of a name glob and a set of access flags.
+	The name glob applies to names in the SONAR namespace, and the access
+	flags (read, update, add, remove) define the privilege. All access to
+	the SONAR namespace is denied unless one of the user's roles allows it.
+</p>
+<p>
+	The actual user authentication is done by the SONAR server. It connects
+	to an LDAP server, such as NDS or Active Directory to authenticate a
+	user. Once a user is authenticated, all privilege information is
+	handled by SONAR, not the LDAP server.
+</p>
+<h2 id="config">Configuration</h2>
+<p>
+	A SONAR server uses a standard Java properties file for configuration.
+	The name of the file is dependant on the server using SONAR. There are
+	four properties which must be defined.
+</p>
+<pre>
+	# Example SONAR server configuration
+	#
+	# Keystore to use for SSL
+	keystore.file=/etc/sonar/keystore
+	# Keystore password
+	keystore.password=********
+	# List of LDAP URLs for authentication
+	sonar.ldap.urls=ldaps://ldap.example.com:636 ldap://openldap.example.com:389
+	# Port to listen for SONAR clients
+	sonar.port=1037
+</pre>
+<dl>
+	<dt>keystore.file</dt>
+	<dd>
+		The filename of a keystore in JKS format which contains the
+		keys/certs needed for SONAR to operate. For example, a
+		specific certificate may be needed to access an organizational
+		LDAP server.
+	</dd>
+	<dt>keystore.password</dt>
+	<dd>
+		The password required to access the keystore referenced by
+		the keystore.file property.
+	</dd>
+	<dt>sonar.ldap.urls</dt>
+	<dd>
+		List of URLs of LDAP servers to use for authenticating
+		users. Each URL must be seperated by spaces or tabs.
+	</dd>
+	<dt>sonar.port</dt>
+	<dd>
+		The port to listen for SONAR client connections.
+	</dd>
+</dl>
+<h2 id="client">Client API</h2>
+<p>
+	The first thing a client must do to log in to a SONAR server is create
+	a Client object. The constructor takes one parameter, a Properties
+	object. The keystore.file property must be set to the location of a
+	keystore file which contains an SSL certificate. The keystore.password
+	property must contain the password to access that keystore file.
+</p>
+<p>
+	Once a Client object is created, the user must log in. The login
+	method on the Client object takes the user name and password as
+	parameters. If the login method returns without throwing an exception,
+	then the user has successfully logged in.
+</p>
+<p>
+	After logging in, the client must create a TypeCache for each
+	SonarObject type of which it wants to be notified. Each TypeCache must
+	also be populated by passing it to the populate method of the Client
+	object. This is an asynchronous operation; the method call will return
+	immediately, and the TypeCache will be populated soon afterwards. Each
+	TypeCache has a Map from object name to a proxy object of that type.
+	This Map can be obtained by calling the getAll method on a TypeCache.
+	All access to this Map must be synchronized on the Map object.
+</p>
+<h2 id="server">Server API</h2>
+<p>
+	A server using SONAR first needs to create a Namespace object. This is
+	a container which holds all information published through SONAR. The
+	namespace must be populated by adding objects which implement the
+	SonarObject interface. There are two types which must be populated
+	for any client to log in: User and Role.
+</p>
+<p>
+	To allow the user/role information to be stored in a database, UserImpl
+	and RoleImpl (found in the server subpackeage) must be subclassed. The
+	create method should call a SQL INSERT. The destroy method should call
+	a SQL DELETE. The setRoles and setDn methods of UserImpl should call a
+	SQL UPDATE. The setPattern, setReadPrivilege, setUpdatePrivilege,
+	setAddPrivilege and setRemovePrivilege methods of RoleImpl should call
+	a SQL UPDATE as well.
+</p>
+<p>
+	Once the Namespace is fully populated, a Server object can be created.
+	This will start an SSL network server on a new thread. Another thread,
+	called a ConnectionProcessor will also be created. All calls to change
+	the Namespace will happen on this thread. This means that these calls
+	should not need to be synchronized.
+</p>
+<h2 id="wire">Wire Protocol</h2>
+<h3>Messages</h3>
+<p>
+	Messages are simple strings of UTF-8 characters.
+	Each message is terminated with an ASCII RS (record separator) character
+	(0x1E).
+	There are only a few messages, each starting with its code (letter).
+	After the code, there may be additional parameters, depending on the
+	message.
+	Each parameter is separated by an ASCII US (unit separator) character
+	(0x1F).
+</p>
+<ul>
+<li><em>CLIENT only</em>
+<dl>
+	<dt>l [name] [password]</dt>
+	<dd>
+		Logon to the SONAR server using the given credentials. If the
+		authentication fails, an <em>s</em> message is returned by the
+		server. Otherwise, an empty <em>t</em> message is sent.
+	</dd>
+	<dt>q</dt>
+	<dd>
+		Quit communicating with SONAR. This causes the session to be
+		terminated and the socket closed.
+	</dd>
+	<dt>e [name]</dt>
+	<dd>
+		Enumerate all objects within the named container. If the name
+		is a type, all objects of that type will be enumerated. If the
+		name is an object, then all attributes of that object will be
+		enumerated. The server will respond with a series of
+		<code>o</code> messages, one for each object within the
+		container. Also, for each object, a series of <code>a</code>
+		messages will be sent, one for each attribute. The client will
+		also update its watch set with the name. The watch set is
+		checked any time changes are made, and the client is notified
+		if necessary. If a name is not provided, all types will be
+		enumerated. After all objects have been enumerated, a final
+		empty <code>t</code> message will be sent by the server.
+	</dd>
+	<dt>i [name]</dt>
+	<dd>
+		Ignore any changes to the specified name. This will update the
+		client's watch set for the specified name. A watch set can
+		contain positive or negative entries, depending on the name.
+		A name with only the type, or the type and object name is
+		always a positive entry. A name with a type and attribute is
+		always a negative entry.
+	</dd>
+	<dt>p [current-password] [new-password]</dt>
+	<dd>
+		Update the password for the currently logged-in user. First,
+		the [current-password] is authenticated, and if successful,
+		it is replaced with [new-password].
+	</dd>
+</dl>
+</li>
+<li><em>CLIENT and SERVER</em>
+<dl>
+	<dt>o [name]</dt>
+	<dd>
+		Add an object at the specified name. When a client sends this
+		message, the name must be in the form of type/object. The server
+		may omit the "type/" part if the current type [t] matches the
+		type of the object.
+	</dd>
+	<dt>a [name] {[param 1] [param 2] ... [param N]}</dt>
+	<dd>
+		Set the value(s) of an attribute. When a client sends this
+		message, the name must be in the form of type/object/attribute.
+		The server may omit the "type/object/" part if the current type
+		[t] and object [o] match for the attribute.
+	</dd>
+	<dt>r [name]</dt>
+	<dd>
+		Remove the specified object.
+	</dd>
+</dl>
+</li>
+<li><em>SERVER only</em>
+<dl>
+	<dt>t [name]</dt>
+	<dd>
+		Change the current working type. This allows relative names to
+		be used in subsequent messages. Also, it allows a client to
+		defer repaint operations until a later <code>t</code> message.
+		This message is sent by the server after logon, and at the
+		beginning and end of an enumeration. This will improve
+		performance when there are hundreds of objects.
+	</dd>
+	<dt>s [text message]</dt>
+	<dd>
+		Show a warning or error message to user. This should cause
+		a dialog box to appear on the client user interface. The first
+		show message after logon is the client connection name.
+	</dd>
+</dl>
+</li>
+</ul>
+<h3>Example session:</h3>
+<pre>
+client:
+	l username *******
+server:
+	t
+	s 192.168.1.50:12345
+client:
+	e
+server:
+	t user
+	t camera
+	t ramp_meter
+	t dms
+	t lcs
+	t
+client:
+	e camera
+server:
+	t camera
+	o C001
+	o C002
+	o C003
+	t
+client:
+	i camera
+	e camera/C002
+server:
+	t camera
+	o C002
+	a controller 370
+	a failed 0
+	a location 15
+	a notes
+	a status OK
+	a status_code 0
+	a operation
+	a move
+	t
+client:
+	a camera/C002/failed 1
+server:
+	s Permission denied: Unable to write attribute
+client:
+	a camera/C002/move 1 -0.5 0
+	a camera/C002/notes This is a camera note
+server:
+	a camera/C002/notes This is a camera note
+</pre>
+
+</body>
+</html>

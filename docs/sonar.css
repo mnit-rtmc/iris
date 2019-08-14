@@ -1,0 +1,25 @@
+H1 {
+	text-align: center;
+}
+H2 {
+	page-break-after: avoid;
+}
+BODY {
+	background: #dddddd;
+	orphans: 3;
+	windows: 4;
+}
+P {
+	page-break-inside: avoid;
+}
+DT {
+	font-family: sans-serif;
+	font-weight: bold;
+}
+CODE {
+	font-family: sans-serif;
+	font-weight: bold;
+}
+.stamp {
+	text-align: right;
+}
