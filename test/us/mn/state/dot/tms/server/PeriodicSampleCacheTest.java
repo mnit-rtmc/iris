@@ -27,8 +27,8 @@ public class PeriodicSampleCacheTest extends TestCase {
 	static private final long[] T = new long[12];
 	static {
 		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(0);
-		cal.set(2012, Calendar.JANUARY, 1, 0, 0, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
 		for (int i = 0; i < 12; i++) {
 			T[i] = cal.getTimeInMillis();
 			cal.add(Calendar.SECOND, 30);
