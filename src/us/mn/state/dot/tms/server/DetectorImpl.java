@@ -374,6 +374,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			CLEAR_THRESHOLD);
 		no_change = new AutoFailCounter(getNoChangeThreshold(),
 			FAST_CLEAR_THRESHOLD);
+		updateAutoFail();
 	}
 
 	/** Get the vehicle count "no hit" threshold */
@@ -549,6 +550,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			store.update(this, "abandoned", a);
 			setAbandoned(a);
 		}
+		resetAutoFailCounters();
 	}
 
 	/** Get the abandoned status */
