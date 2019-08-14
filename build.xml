@@ -168,6 +168,28 @@
 		</javac>
 	</target>
 
+	<!-- Create the common jar -->
+	<target name="common-jar"
+		depends="compile">
+		<jar jarfile="${build.lib}/${common.jar}">
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/sched/*.class"/>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/sonar/*.class"/>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/tms/*.class"/>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/tms/geo/*.class"/>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/tms/reports/*.class"/>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/tms/units/*.class"/>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/tms/utils/*.class"/>
+			<fileset dir="${build.i18n}"/>
+		</jar>
+	</target>
+
 	<!-- Create the server jar -->
 	<target name="server-jar"
 		depends="compile"
@@ -196,28 +218,6 @@
 				<include name="mail.jar"/>
 			</fileset>
 		</copy>
-	</target>
-
-	<!-- Create the common jar -->
-	<target name="common-jar"
-		depends="compile">
-		<jar jarfile="${build.lib}/${common.jar}">
-			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/sched/*.class"/>
-			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/sonar/*.class"/>
-			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/tms/*.class"/>
-			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/tms/geo/*.class"/>
-			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/tms/reports/*.class"/>
-			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/tms/units/*.class"/>
-			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/tms/utils/*.class"/>
-			<fileset dir="${build.i18n}"/>
-		</jar>
 	</target>
 
 	<!-- Create the client jar -->
