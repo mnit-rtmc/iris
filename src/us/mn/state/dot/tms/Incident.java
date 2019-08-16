@@ -69,7 +69,7 @@ public interface Incident extends SonarObject {
 	 * There are three characters to indicate the status for each lane:
 	 * <pre>
 	 *     .  Free-flowing (no obstruction)
-	 *     ?  Partially blocked (debris, etc.)
+	 *     ?  Affected (by debris, etc.)
 	 *     !  Completely blocked
 	 * </pre>
 	 * @see us.mn.state.dot.tms.LaneImpact */

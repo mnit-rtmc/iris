@@ -192,7 +192,7 @@ public class LcsDeployModel {
 		LaneImpact ii = getImpact(shift);
 		if (ii == BLOCKED)
 			return LaneUseIndication.LANE_CLOSED;
-		else if (ii == PARTIALLY_BLOCKED ||isAdjacentLaneBlocked(shift))
+		else if (ii == AFFECTED || isAdjacentLaneBlocked(shift))
 			return LaneUseIndication.USE_CAUTION;
 		else
 			return LaneUseIndication.LANE_OPEN;
@@ -248,7 +248,7 @@ public class LcsDeployModel {
 	 * @return true if lane is open, false otherwise. */
 	private boolean isLaneOpen(LaneConfiguration cfg, int shift) {
 		LaneImpact ii = getImpact(shift);
-		return (ii == FREE_FLOWING) || (ii == PARTIALLY_BLOCKED);
+		return (ii == FREE_FLOWING) || (ii == AFFECTED);
 	}
 
 	/** Check if a lane is open and not a shoulder.

@@ -21,7 +21,7 @@ package us.mn.state.dot.tms;
  */
 public enum LaneImpact {
 	FREE_FLOWING('.'),
-	PARTIALLY_BLOCKED('?'),
+	AFFECTED('?'),
 	BLOCKED('!');
 
 	/** Character for encoding impact */

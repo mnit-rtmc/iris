@@ -109,10 +109,10 @@ The number of lanes (characters) must also match.
 Code | Lane Impact
 -----|----------------------------
 `.`  | Not blocked
-`?`  | Partially blocked
+`?`  | Affected
 `!`  | Fully blocked
-`:`  | Partially or fully (`?` or `!`)
-`;`  | Not fully blocked (`.` or `?`)
+`:`  | Blocked or affected (`?` or `!`)
+`;`  | Not blocked (`.` or `?`)
 `,`  | Any (`.` `?` or `!`)
 
 ## Clearing

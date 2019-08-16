@@ -63,25 +63,24 @@ public enum IncImpact {
 			return IncImpact.left_shoulder_blocked;
 		else if (isRightShoulder(li, LaneImpact.BLOCKED))
 			return IncImpact.right_shoulder_blocked;
-		int affected_groups = countGroups(li,
-			LaneImpact.PARTIALLY_BLOCKED);
+		int affected_groups = countGroups(li, LaneImpact.AFFECTED);
 		if (affected_groups > 0) {
-			if (isAllLanes(li, LaneImpact.PARTIALLY_BLOCKED))
+			if (isAllLanes(li, LaneImpact.AFFECTED))
 				return IncImpact.all_lanes_affected;
 			else if (blocked_groups == 1) {
-				if (isLeftLane(li, LaneImpact.PARTIALLY_BLOCKED))
+				if (isLeftLane(li, LaneImpact.AFFECTED))
 					return IncImpact.left_lanes_affected;
-				else if (isRightLane(li, LaneImpact.PARTIALLY_BLOCKED))
+				else if (isRightLane(li, LaneImpact.AFFECTED))
 					return IncImpact.right_lanes_affected;
 				else
 					return IncImpact.center_lanes_affected;
 			} else
 				return IncImpact.lanes_affected;
-		} else if (isBothShoulders(li, LaneImpact.PARTIALLY_BLOCKED))
+		} else if (isBothShoulders(li, LaneImpact.AFFECTED))
 			return IncImpact.both_shoulders_affected;
-		else if (isLeftShoulder(li, LaneImpact.PARTIALLY_BLOCKED))
+		else if (isLeftShoulder(li, LaneImpact.AFFECTED))
 			return IncImpact.left_shoulder_affected;
-		else if (isRightShoulder(li, LaneImpact.PARTIALLY_BLOCKED))
+		else if (isRightShoulder(li, LaneImpact.AFFECTED))
 			return IncImpact.right_shoulder_affected;
 		else
 			return IncImpact.all_free_flowing;

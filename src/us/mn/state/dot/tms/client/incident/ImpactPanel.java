@@ -49,19 +49,19 @@ public class ImpactPanel extends JPanel {
 	/** Color for blocked impact */
 	static private final Color COLOR_BLOCKED = new Color(208, 64, 64);
 
-	/** Image for partially-blocked impact */
-	static private final BufferedImage IMAGE_CAUTION =
+	/** Image for affected impact */
+	static private final BufferedImage IMAGE_AFFECTED =
 		new BufferedImage(4, 4, BufferedImage.TYPE_INT_ARGB);
 	static {
-		IMAGE_CAUTION.setRGB(0, 0, 0xffffff22);
-		IMAGE_CAUTION.setRGB(1, 1, 0xffffff22);
-		IMAGE_CAUTION.setRGB(2, 2, 0xffffff22);
-		IMAGE_CAUTION.setRGB(3, 3, 0xffffff22);
+		IMAGE_AFFECTED.setRGB(0, 0, 0xffffff22);
+		IMAGE_AFFECTED.setRGB(1, 1, 0xffffff22);
+		IMAGE_AFFECTED.setRGB(2, 2, 0xffffff22);
+		IMAGE_AFFECTED.setRGB(3, 3, 0xffffff22);
 	}
 
-	/** Paint for caution impact */
-	static private final TexturePaint PAINT_CAUTION = new TexturePaint(
-		IMAGE_CAUTION, new Rectangle2D.Float(0, 0, 4, 4));
+	/** Paint for affected impact */
+	static private final TexturePaint PAINT_AFFECTED = new TexturePaint(
+		IMAGE_AFFECTED, new Rectangle2D.Float(0, 0, 4, 4));
 
 	/** Get next lane impact */
 	static private LaneImpact nextImpact(LaneImpact v) {
@@ -69,7 +69,7 @@ public class ImpactPanel extends JPanel {
 		case FREE_FLOWING:
 			return LaneImpact.BLOCKED;
 		case BLOCKED:
-			return LaneImpact.PARTIALLY_BLOCKED;
+			return LaneImpact.AFFECTED;
 		default:
 			return LaneImpact.FREE_FLOWING;
 		}
@@ -113,8 +113,8 @@ public class ImpactPanel extends JPanel {
 				g.setColor(COLOR_BLOCKED);
 				g.fillRect(o, o, p, p);
 				break;
-			case PARTIALLY_BLOCKED:
-				g.setPaint(PAINT_CAUTION);
+			case AFFECTED:
+				g.setPaint(PAINT_AFFECTED);
 				g.fillRect(o, o, p, p);
 				g.setPaint(null);
 				break;
