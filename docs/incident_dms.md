@@ -62,33 +62,31 @@ cleared.
 
 ## Locator
 
-A matching *locator* determines the second line of a suggested message.  A
-roadway node (r_node) is associated with the incident location.  If the nearest
-*pickable* r_node is within 1 mile, it is used.  Otherwise, the nearest r_node
-within 1.5 miles is used.  If no r_node matches these criteria, no messages are
-suggested.
+A matching *locator* determines the second line of a suggested message.  The
+configurable locator table contains columns which are matched to the incident.
 
-Locator **range** must match the range from the sign to the incident.  For
-example, if there are 2 exits between them, the range is *middle*.
+**Range** must match the range from the sign to the incident.  For example, if
+there are 2 exits between them, the range is *middle*.
 
 **Branched** is `YES` if the sign is on a different roadway than the incident.
 
-**Pickable** is `YES` if the selected r_node is *pickable*.
+If a *pickable* roadway node (r_node) is within 1 mile of the incident, it is
+**picked**, and its location is used for *locator tags*.
 
 ### Locator Tags
 
 Several MULTI-like tags are available for locators.  These tags will be replaced
 with incident location information when composing a message.  Tags should only
-be used if the locator's *pickable* state matches.
+be used if the locator's *picked* state matches.
 
-Tag       | Pickable | Description
-----------|----------|-------------------------------------------------
-`[locrn]` | —        | Road name
-`[locrd]` | —        | Road direction (NORTH, SOUTH, etc.)
-`[locmd]` | `YES`    | Location modifier (AT, NORTH OF, SOUTH OF, etc.)
-`[locxn]` | `YES`    | Cross-street name
-`[locxa]` | `YES`    | Cross-street abbreviation
-`[locmi]` | `NO`     | Miles from sign to incident
+Tag       | Picked | Description
+----------|--------|-------------------------------------------------
+`[locrn]` | —      | Road name
+`[locrd]` | —      | Road direction (NORTH, SOUTH, etc.)
+`[locmd]` | `YES`  | Location modifier (AT, NORTH OF, SOUTH OF, etc.)
+`[locxn]` | `YES`  | Cross-street name
+`[locxa]` | `YES`  | Cross-street abbreviation
+`[locmi]` | `NO`   | Miles from sign to incident
 
 Road and cross-street names are converted to all capital letters.
 

@@ -191,22 +191,41 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	public DeviceDeployModel(IncidentManager man, Incident inc) {
 		svr = IncidentHelper.getSeverity(inc);
 		max_dist = maxDistance(svr);
-		IncidentLoc loc = new IncidentLoc(inc);
-		CorridorBase cb = man.lookupCorridor(loc);
+		IncidentLoc iloc = new IncidentLoc(inc);
+		CorridorBase cb = man.lookupCorridor(iloc);
 		if (cb != null) {
-			Float mp = cb.calculateMilePoint(loc);
-			if (mp != null)
-				populateList(inc, cb, mp);
+			Float mp = cb.calculateMilePoint(iloc);
+			if (mp != null) {
+				R_Node n = pickNode(inc, cb, mp);
+				GeoLoc loc = (n != null) ? n.getGeoLoc() : iloc;
+				populateList(inc, cb, mp, loc, n != null);
+			}
 		}
+	}
+
+	/** Pick a node within 1 mile of incident */
+	private R_Node pickNode(Incident inc, CorridorBase cb, float mp) {
+		Position pos = new Position(inc.getLat(), inc.getLon());
+		R_NodeType.Checker checker = getChecker(inc.getLaneType());
+		R_Node n = cb.findNearest(pos, checker, true);
+		if (n != null) {
+			Float lp = cb.calculateMilePoint(n.getGeoLoc());
+			if (lp != null && Math.abs(lp - mp) < 1)
+				return n;
+		}
+		return null;
 	}
 
 	/** Populate list model with device deployments.
 	 * @param inc Incident.
 	 * @param cb Corridor where incident is located.
-	 * @param mp Relative mile point of incident. */
-	private void populateList(Incident inc, CorridorBase cb, float mp) {
+	 * @param mp Relative mile point of incident.
+	 * @param loc Location of incident.
+	 * @param picked True if r_node was picked. */
+	private void populateList(Incident inc, CorridorBase cb, float mp,
+		GeoLoc loc, boolean picked)
+	{
 		Position pos = new Position(inc.getLat(), inc.getLon());
-		R_Node n = findNode(cb, mp, pos, inc);
 		LaneConfiguration config = cb.laneConfiguration(pos);
 		LcsDeployModel lcs_mdl = new LcsDeployModel(inc, config);
 		TreeMap<Distance, Device> devices = findDevices(cb, mp);
@@ -223,7 +242,8 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 			}
 			if (dev instanceof DMS) {
 				DMS dms = (DMS) dev;
-				MultiString ms = createMulti(inc, dms, up, n);
+				MultiString ms = createMulti(inc, dms, up, loc,
+					picked);
 				if (ms != null) {
 					RasterGraphic rg = createGraphic(dms,
 						ms);
@@ -235,28 +255,6 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 				}
 			}
 		}
-	}
-
-	/** Find a node within 1 mile of incident (prefer pickable) */
-	private R_Node findNode(CorridorBase cb, float mp, Position pos,
-		Incident inc)
-	{
-		R_NodeType.Checker checker = getChecker(inc.getLaneType());
-		if (null == checker)
-			return null;
-		R_Node n = cb.findNearest(pos, checker, true);
-		if (n != null) {
-			Float lp = cb.calculateMilePoint(n.getGeoLoc());
-			if (lp != null && Math.abs(lp - mp) < 1)
-				return n;
-		}
-		n = cb.findNearest(pos, checker, false);
-		if (n != null) {
-			Float lp = cb.calculateMilePoint(n.getGeoLoc());
-			if (lp != null && Math.abs(lp - mp) < 1.5)
-				return n;
-		}
-		return null;
 	}
 
 	/** Find all devices upstream of a given point on a corridor */
@@ -298,13 +296,12 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	 * @param inc Incident.
 	 * @param dms Possible sign to deploy.
 	 * @param up Distance upstream from incident.
-	 * @param n Nearest node to incident.
+	 * @param loc Location of incident.
+	 * @param picked True if r_node was picked.
 	 * @return MULTI string for DMS, or null. */
 	private MultiString createMulti(Incident inc, DMS dms, Distance up,
-		R_Node n)
+		GeoLoc loc, boolean picked)
 	{
-		if (n == null)
-			return null;
 		if (up.m() > max_dist.m())
 			return null;
 		IncRange rng = getRange(up);
@@ -313,26 +310,25 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		IncDescriptor dsc = IncDescriptorHelper.match(inc);
 		if (null == dsc)
 			return null;
-		IncLocator iloc = IncLocatorHelper.match(rng, false,
-			n.getPickable());
+		IncLocator iloc = IncLocatorHelper.match(rng, false, picked);
 		if (null == iloc)
 			return null;
 		IncAdvice adv = IncAdviceHelper.match(rng, inc);
 		if (null == adv)
 			return null;
 		String mdsc = checkMulti(dms, dsc.getMulti(), dsc.getAbbrev(),
-			up, n);
+			up, loc);
 		if (null == mdsc)
 			return null;
 		String mloc = checkMulti(dms, iloc.getMulti(), iloc.getAbbrev(),
-			up, n);
+			up, loc);
 		if (null == mloc)
 			return null;
 		String madv = checkMulti(dms, adv.getMulti(), adv.getAbbrev(),
-			up, n);
+			up, loc);
 		if (null == madv)
 			return null;
-		LocMultiBuilder lmb = new LocMultiBuilder(n, up);
+		LocMultiBuilder lmb = new LocMultiBuilder(loc, up);
 		new MultiString(mdsc).parse(lmb);
 		lmb.addLine(null);
 		new MultiString(mloc).parse(lmb);
@@ -343,17 +339,17 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 
 	/** Check if MULTI string or abbreviation will fit on a DMS */
 	private String checkMulti(DMS dms, String ms, String abbrev,
-		Distance up, R_Node n)
+		Distance up, GeoLoc loc)
 	{
-		String res = checkMulti(dms, ms, up, n);
-		return (res != null) ? res : checkMulti(dms, abbrev, up, n);
+		String res = checkMulti(dms, ms, up, loc);
+		return (res != null) ? res : checkMulti(dms, abbrev, up, loc);
 	}
 
 	/** Check if MULTI string will fit on a DMS */
-	private String checkMulti(DMS dms, String ms, Distance up, R_Node n) {
+	private String checkMulti(DMS dms, String ms, Distance up, GeoLoc loc) {
 		if (null == ms)
 			return null;
-		LocMultiBuilder lmb = new LocMultiBuilder(n, up);
+		LocMultiBuilder lmb = new LocMultiBuilder(loc, up);
 		new MultiString(ms).parse(lmb);
 		MultiString multi = lmb.toMultiString();
 		if (createGraphic(dms, multi) != null)
