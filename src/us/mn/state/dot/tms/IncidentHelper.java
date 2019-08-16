@@ -72,41 +72,6 @@ public class IncidentHelper extends BaseHelper {
 
 	/** Get the severity of an incident */
 	static public IncSeverity getSeverity(Incident inc) {
-		LaneImpact[] imp = LaneImpact.fromString(inc.getImpact());
-		if (isMajor(imp))
-			return IncSeverity.major;
-		if (isNormal(imp))
-			return IncSeverity.normal;
-		if (isMinor(imp))
-			return IncSeverity.minor;
-		else
-			return null;
-	}
-
-	/** Check if the severity is major (all lanes blocked) */
-	static private boolean isMajor(LaneImpact[] imp) {
-		for (int i = 1; i < imp.length - 1; i++) {
-			if (imp[i] != LaneImpact.BLOCKED)
-				return false;
-		}
-		return imp.length > 2;
-	}
-
-	/** Check if the severity is normal (lane blocked) */
-	static private boolean isNormal(LaneImpact[] imp) {
-		for (int i = 0; i < imp.length; i++) {
-			if (imp[i] == LaneImpact.BLOCKED)
-				return true;
-		}
-		return false;
-	}
-
-	/** Check if the severity is minor */
-	static private boolean isMinor(LaneImpact[] imp) {
-		for (int i = 0; i < imp.length; i++) {
-			if (imp[i] != LaneImpact.FREE_FLOWING)
-				return true;
-		}
-		return false;
+		return IncImpact.getImpact(inc).severity();
 	}
 }
