@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2016  Minnesota Department of Transportation
+ * Copyright (C) 2010-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,9 +15,9 @@
 package us.mn.state.dot.tms.client.incident;
 
 import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.IncidentImpact;
-import static us.mn.state.dot.tms.IncidentImpact.*;
 import us.mn.state.dot.tms.LaneConfiguration;
+import us.mn.state.dot.tms.LaneImpact;
+import static us.mn.state.dot.tms.LaneImpact.*;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
@@ -189,7 +189,7 @@ public class LcsDeployModel {
 	private LaneUseIndication createIndicationShort(LaneConfiguration cfg,
 		int shift)
 	{
-		IncidentImpact ii = getImpact(shift);
+		LaneImpact ii = getImpact(shift);
 		if (ii == BLOCKED)
 			return LaneUseIndication.LANE_CLOSED;
 		else if (ii == PARTIALLY_BLOCKED ||isAdjacentLaneBlocked(shift))
@@ -200,13 +200,13 @@ public class LcsDeployModel {
 
 	/** Get the impact at the specified lane.
 	 * @param shift Lane shift from left origin.
-	 * @return IncidentImpact for given lane, or null. */
-	private IncidentImpact getImpact(int shift) {
+	 * @return LaneImpact for given lane, or null. */
+	private LaneImpact getImpact(int shift) {
 		// FIXME: check lane continuity to incident
 		String impact = incident.getImpact();
 		int ln = shift - config.leftShift + 1;
 		if (ln >= 0 && ln < impact.length())
-			return IncidentImpact.fromChar(impact.charAt(ln));
+			return LaneImpact.fromChar(impact.charAt(ln));
 		else
 			return null;
 	}
@@ -215,8 +215,8 @@ public class LcsDeployModel {
 	 * @param shift Lane shift from left origin.
 	 * @return true if an adjacent lane is blocked, false otherwise. */
 	private boolean isAdjacentLaneBlocked(int shift) {
-		IncidentImpact left = getImpact(shift - 1);
-		IncidentImpact right = getImpact(shift + 1);
+		LaneImpact left = getImpact(shift - 1);
+		LaneImpact right = getImpact(shift + 1);
 		return left == BLOCKED || right == BLOCKED;
 	}
 
@@ -247,7 +247,7 @@ public class LcsDeployModel {
 	 * @param shift Lane shift from left origin.
 	 * @return true if lane is open, false otherwise. */
 	private boolean isLaneOpen(LaneConfiguration cfg, int shift) {
-		IncidentImpact ii = getImpact(shift);
+		LaneImpact ii = getImpact(shift);
 		return (ii == FREE_FLOWING) || (ii == PARTIALLY_BLOCKED);
 	}
 
@@ -329,7 +329,7 @@ public class LcsDeployModel {
 	 * @param shift Lane shift from left origin.
 	 * @return true if lane is blocked, false otherwise. */
 	private boolean isLaneBlocked(int shift) {
-		IncidentImpact ii = getImpact(shift);
+		LaneImpact ii = getImpact(shift);
 		return (ii == null) || (ii == BLOCKED);
 	}
 

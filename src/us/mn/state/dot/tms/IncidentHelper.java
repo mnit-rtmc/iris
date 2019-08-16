@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,8 +72,7 @@ public class IncidentHelper extends BaseHelper {
 
 	/** Get the severity of an incident */
 	static public IncSeverity getSeverity(Incident inc) {
-		IncidentImpact[] imp = IncidentImpact.fromString(
-			inc.getImpact());
+		LaneImpact[] imp = LaneImpact.fromString(inc.getImpact());
 		if (isMajor(imp))
 			return IncSeverity.major;
 		if (isNormal(imp))
@@ -85,27 +84,27 @@ public class IncidentHelper extends BaseHelper {
 	}
 
 	/** Check if the severity is major (all lanes blocked) */
-	static private boolean isMajor(IncidentImpact[] imp) {
+	static private boolean isMajor(LaneImpact[] imp) {
 		for (int i = 1; i < imp.length - 1; i++) {
-			if (imp[i] != IncidentImpact.BLOCKED)
+			if (imp[i] != LaneImpact.BLOCKED)
 				return false;
 		}
 		return imp.length > 2;
 	}
 
 	/** Check if the severity is normal (lane blocked) */
-	static private boolean isNormal(IncidentImpact[] imp) {
+	static private boolean isNormal(LaneImpact[] imp) {
 		for (int i = 0; i < imp.length; i++) {
-			if (imp[i] == IncidentImpact.BLOCKED)
+			if (imp[i] == LaneImpact.BLOCKED)
 				return true;
 		}
 		return false;
 	}
 
 	/** Check if the severity is minor */
-	static private boolean isMinor(IncidentImpact[] imp) {
+	static private boolean isMinor(LaneImpact[] imp) {
 		for (int i = 0; i < imp.length; i++) {
-			if (imp[i] != IncidentImpact.FREE_FLOWING)
+			if (imp[i] != LaneImpact.FREE_FLOWING)
 				return true;
 		}
 		return false;

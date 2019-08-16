@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ public interface Incident extends SonarObject {
 	 *     ?  Partially blocked (debris, etc.)
 	 *     !  Completely blocked
 	 * </pre>
-	 * @see us.mn.state.dot.tms.IncidentImpact */
+	 * @see us.mn.state.dot.tms.LaneImpact */
 	String getImpact();
 
 	/** Set the impact code */
