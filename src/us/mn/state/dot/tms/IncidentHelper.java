@@ -72,6 +72,7 @@ public class IncidentHelper extends BaseHelper {
 
 	/** Get the severity of an incident */
 	static public IncSeverity getSeverity(Incident inc) {
-		return IncImpact.getImpact(inc).severity();
+		LaneType lane_type = LaneType.fromOrdinal(inc.getLaneType());
+		return IncImpact.getImpact(inc).severity(lane_type);
 	}
 }

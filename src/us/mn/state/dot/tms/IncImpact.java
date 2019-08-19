@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.tms.LaneType;
+
 /**
  * An incident impact is the full impact of an incident across all lanes.  The
  * ordinal values correspond to the records in the iris.inc_impact look-up
@@ -144,7 +146,22 @@ public enum IncImpact {
 	}
 
 	/** Get the incident severity */
-	public IncSeverity severity() {
+	public IncSeverity severity(LaneType lane_type) {
+		switch (lane_type) {
+		case MAINLINE:
+			return severityMainline();
+		case EXIT:
+		case CD_LANE:
+			return severityExitCD();
+		case MERGE:
+			return severityMerge();
+		default:
+			return null;
+		}
+	}
+
+	/** Get the severity of a mainline incident */
+	private IncSeverity severityMainline() {
 		switch (this) {
 		case all_lanes_blocked:
 			return IncSeverity.major;
@@ -165,7 +182,34 @@ public enum IncImpact {
 		case left_shoulder_affected:
 		case right_shoulder_affected:
 			return IncSeverity.minor;
-		case all_free_flowing:
+		default:
+			return null;
+		}
+	}
+
+	/** Get the severity of an exit or CD road incident */
+	private IncSeverity severityExitCD() {
+		switch (this) {
+		case all_lanes_blocked:
+			return IncSeverity.normal;
+		case left_lanes_blocked:
+		case right_lanes_blocked:
+		case center_lanes_blocked:
+		case lanes_blocked:
+		case both_shoulders_blocked:
+		case left_shoulder_blocked:
+		case right_shoulder_blocked:
+			return IncSeverity.minor;
+		default:
+			return null;
+		}
+	}
+
+	/** Get the severity of a merge incident */
+	private IncSeverity severityMerge() {
+		switch (this) {
+		case all_lanes_blocked:
+			return IncSeverity.minor;
 		default:
 			return null;
 		}
