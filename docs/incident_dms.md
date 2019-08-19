@@ -63,11 +63,11 @@ The *descriptor* determines the first line of each suggested message.  The
 configurable descriptor table contains several columns which are matched to the
 incident.  Messages are only suggested if a descriptor matches.
 
-The **lane type** at the incident can be `mainline`, `exit`, `merge` or
-`CD road`.
-
 **Event type** can be `CRASH`, `STALL`, `ROAD WORK` or `HAZARD`.  Hazard events
 can have an associated **detail** (*animal, debris, ice, etc*).
+
+The **lane type** at the incident can be `mainline`, `exit`, `merge` or
+`CD road`.
 
 **Cleared** can be `YES` or `NO`, and indicates whether the incident has just
 cleared.
@@ -112,16 +112,16 @@ For the `[locxa]` tag, matching `road_affix` values are stripped.
 A matching *advice* determines the third line of a suggested message.  The
 configurable advice table contains columns which are matched to the incident.
 
-As with the locator, the **range** must match from the sign to the incident.
-
-The incident **lane type** can be `mainline`, `exit`, `merge` or `CD road`.
-
 **Impact** is one of the codes defined in the *severity* section.
 
 **Impacted Lanes** is the number of lanes impacted by the incident.  This number
 does not include shoulders.  If empty, any number is matched.
 
 **Open Lanes** is the number of lanes *not* impacted (not including shoulders).
+
+As with the locator, the **range** must match from the sign to the incident.
+
+The incident **lane type** can be `mainline`, `exit`, `merge` or `CD road`.
 
 **Cleared** can be `YES` or `NO`, and indicates whether the incident has just
 cleared.
