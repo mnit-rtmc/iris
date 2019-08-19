@@ -33,17 +33,29 @@ Severity | Maximum Range | Message Priority
 `normal` | `middle`      | `INCIDENT_MED`
 `major`  | `far`         | `INCIDENT_HIGH`
 
-Severity depends on the **lane type** and **lane impact** at the incident
-location.
+Every incident is assigned an **impact**, based on which lanes are *blocked* or
+*affected*.  They are ordered based on their effect on traffic.  Severity
+depends on impact and **lane type** at the incident location.
 
-Lane Type   | Lane Impact       | Severity
-------------|-------------------|---------
-`mainline`  | Shoulder only     | `minor`
-`mainline`  | Any lane blocked  | `normal`
-`exit`      | All lanes blocked | `normal`
-`merge`     | All lanes blocked | `normal`
-`CD road`   | All lanes blocked | `normal`
-`mainline`  | All lanes blocked | `major`
+Impact | Description               | Mainline   | CD/Exit  | Merge
+-------|---------------------------|------------|----------|--------
+ 0     | `all_lanes_blocked`       | `major`    | `normal` | `minor`
+ 1     | `left_lanes_blocked`      | `normal`   | `minor`  | —
+ 2     | `right_lanes_blocked`     | `normal`   | `minor`  | —
+ 3     | `center_lanes_blocked`    | `normal`   | `minor`  | —
+ 4     | `lanes_blocked`           | `normal`   | `minor`  | —
+ 5     | `both_shoulders_blocked`  | `normal`   | `minor`  | —
+ 6     | `left_shoulder_blocked`   | `normal`   | `minor`  | —
+ 7     | `right_shoulder_blocked`  | `normal`   | `minor`  | —
+ 8     | `all_lanes_affected`      | `minor`    | —        | —
+ 9     | `left_lanes_affected`     | `minor`    | —        | —
+10     | `right_lanes_affected`    | `minor`    | —        | —
+11     | `center_lanes_affected`   | `minor`    | —        | —
+12     | `lanes_affected`          | `minor`    | —        | —
+13     | `both_shoulders_affected` | `minor`    | —        | —
+14     | `left_shoulder_affected`  | `minor`    | —        | —
+15     | `right_shoulder_affected` | `minor`    | —        | —
+16     | `all_free_flowing`        | —          | —        | —
 
 ## Descriptor
 
@@ -97,23 +109,22 @@ For the `[locxa]` tag, matching `road_affix` values are stripped.
 
 ## Advice
 
-A matching *advice* determines the third line of a suggested message.
+A matching *advice* determines the third line of a suggested message.  The
+configurable advice table contains columns which are matched to the incident.
 
 As with the locator, the **range** must match from the sign to the incident.
 
 The incident **lane type** can be `mainline`, `exit`, `merge` or `CD road`.
 
-**Lane impact** uses special codes to match each lane of the incident impact.
-The number of lanes (characters) must also match.
+**Impact** is one of the codes defined in the *severity* section.
 
-Code | Lane Impact
------|----------------------------
-`.`  | Not blocked
-`?`  | Affected
-`!`  | Fully blocked
-`:`  | Blocked or affected (`?` or `!`)
-`;`  | Not blocked (`.` or `?`)
-`,`  | Any (`.` `?` or `!`)
+**Impacted Lanes** is the number of lanes impacted by the incident.  This number
+does not include shoulders.  If empty, any number is matched.
+
+**Open Lanes** is the number of lanes *not* impacted (not including shoulders).
+
+**Cleared** can be `YES` or `NO`, and indicates whether the incident has just
+cleared.
 
 ## Clearing
 
