@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,48 +36,16 @@ public class IncAdviceHelper extends BaseHelper {
 
 	/** Find a matching incident advice */
 	static public IncAdvice match(IncRange rng, Incident inc) {
+		IncImpact imp = IncImpact.getImpact(inc);
 		Iterator<IncAdvice> it = iterator();
 		while (it.hasNext()) {
 			IncAdvice adv = it.next();
 			if (adv.getRange() == rng.ordinal() &&
 			    adv.getLaneType() == inc.getLaneType() &&
-			    impactMatches(adv.getImpact(), inc.getImpact()) &&
+			    adv.getImpact() == imp.ordinal() &&
 			    adv.getCleared() == inc.getCleared())
 				return adv;
 		}
 		return null;
-	}
-
-	/** Check if impact matches */
-	static private boolean impactMatches(String exp, String imp) {
-		if (exp.length() != imp.length())
-			return false;
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < exp.length(); i++) {
-			char c = exp.charAt(i);
-			switch (c) {
-			case ':':
-				sb.append("[?!]");
-				break;
-			case ';':
-				sb.append("[.?]");
-				break;
-			case ',':
-				sb.append("[.?!]");
-				break;
-			case '.':
-				sb.append("[.]");
-				break;
-			case '?':
-				sb.append("[?]");
-				break;
-			case '!':
-				sb.append("[!]");
-				break;
-			default:
-				return false;
-			}
-		}
-		return imp.matches(sb.toString());
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,24 @@ public interface IncAdvice extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "inc_advice";
 
+	/** Set the impact */
+	void setImpact(int imp);
+
+	/** Get the impact */
+	int getImpact();
+
+	/** Set count of impacted lanes */
+	void setImpactedLanes(Integer ln);
+
+	/** Get count of impacted lanes */
+	Integer getImpactedLanes();
+
+	/** Set count of open lanes */
+	void setOpenLanes(Integer op);
+
+	/** Get count of open lanes */
+	Integer getOpenLanes();
+
 	/** Set the range */
 	void setRange(int r);
 
@@ -38,12 +56,6 @@ public interface IncAdvice extends SonarObject {
 
 	/** Get the lane type ordinal */
 	short getLaneType();
-
-	/** Set the lane impact */
-	void setImpact(String imp);
-
-	/** Get the lane impact */
-	String getImpact();
 
 	/** Set the cleared status */
 	void setCleared(boolean c);

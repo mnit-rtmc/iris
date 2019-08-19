@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,11 +84,11 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 				}
 			}
 		});
-		cols.add(new ProxyColumn<IncLocator>("r_node.pickable", 64,
+		cols.add(new ProxyColumn<IncLocator>("incident.picked", 64,
 			Boolean.class)
 		{
 			public Object getValueAt(IncLocator loc) {
-				return loc.getPickable();
+				return loc.getPicked();
 			}
 			public boolean isEditable(IncLocator loc) {
 				return canWrite(loc);
@@ -96,7 +96,7 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 			public void setValueAt(IncLocator loc, Object value) {
 				if (value instanceof Boolean) {
 					Boolean p = (Boolean) value;
-					loc.setPickable(p);
+					loc.setPicked(p);
 				}
 			}
 		});
@@ -143,6 +143,14 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 				int r1 = loc1.getRange();
 				if (r0 != r1)
 					return r0 - r1;
+				boolean b0 = loc0.getBranched();
+				boolean b1 = loc1.getBranched();
+				if (b0 != b1)
+					return Boolean.compare(b0, b1);
+				boolean p0 = loc0.getPicked();
+				boolean p1 = loc1.getPicked();
+				if (p0 != p1)
+					return Boolean.compare(p0, p1);
 				return loc0.getName().compareTo(loc1.getName());
 			}
 		};

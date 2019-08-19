@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 	/** Load all the incident descriptors */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncDescriptorImpl.class);
-		store.query("SELECT name, event_desc_id, lane_type, detail, " +
+		store.query("SELECT name, event_desc_id, detail, lane_type, " +
 			"cleared, multi, abbrev FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
@@ -54,8 +54,8 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("event_desc_id", event_desc_id);
-		map.put("lane_type", lane_type);
 		map.put("detail", detail);
+		map.put("lane_type", lane_type);
 		map.put("cleared", cleared);
 		map.put("multi", multi);
 		map.put("abbrev", abbrev);
@@ -78,8 +78,8 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 	private IncDescriptorImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),          // name
 		     row.getInt(2),             // event_desc_id
-		     row.getShort(3),           // lane_type
-		     row.getString(4),          // detail
+		     row.getString(3),          // detail
+		     row.getShort(4),           // lane_type
 		     row.getBoolean(5),         // cleared
 		     row.getString(6),          // multi
 		     row.getString(7)           // abbrev
@@ -87,13 +87,13 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 	}
 
 	/** Create an incident descriptor */
-	private IncDescriptorImpl(String n, int et, short lt, String dtl,
+	private IncDescriptorImpl(String n, int et, String dtl, short lt,
 		boolean c, String m, String a)
 	{
 		super(n);
 		event_desc_id = et;
-		lane_type = lt;
 		detail = lookupIncDetail(dtl);
+		lane_type = lt;
 		cleared = c;
 		multi = m;
 		abbrev = a;
@@ -141,6 +141,29 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 		return event_desc_id;
 	}
 
+	/** Incident detail */
+	private IncidentDetail detail;
+
+	/** Set the incident detail */
+	@Override
+	public void setDetail(IncidentDetail dtl) {
+		detail = dtl;
+	}
+
+	/** Set the incident detail */
+	public void doSetDetail(IncidentDetail dtl) throws TMSException {
+		if (dtl != detail) {
+			store.update(this, "detail", dtl);
+			setDetail(dtl);
+		}
+	}
+
+	/** Get the incident detail */
+	@Override
+	public IncidentDetail getDetail() {
+		return detail;
+	}
+
 	/** Lane type ordinal */
 	private short lane_type = (short) LaneType.MAINLINE.ordinal();
 
@@ -176,29 +199,6 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 	@Override
 	public short getLaneType() {
 		return lane_type;
-	}
-
-	/** Incident detail */
-	private IncidentDetail detail;
-
-	/** Set the incident detail */
-	@Override
-	public void setDetail(IncidentDetail dtl) {
-		detail = dtl;
-	}
-
-	/** Set the incident detail */
-	public void doSetDetail(IncidentDetail dtl) throws TMSException {
-		if (dtl != detail) {
-			store.update(this, "detail", dtl);
-			setDetail(dtl);
-		}
-	}
-
-	/** Get the incident detail */
-	@Override
-	public IncidentDetail getDetail() {
-		return detail;
 	}
 
 	/** Incident cleared status */

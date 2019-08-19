@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,10 @@ package us.mn.state.dot.tms;
  * @author Douglas Lau
  */
 public enum IncRange {
-	near,			// 0
-	middle,			// 1
-	far;			// 2
+	ahead,  // 0
+	near,   // 1
+	middle, // 2
+	far;    // 3
 
 	/** Get a range from an ordinal value */
 	static public IncRange fromOrdinal(int o) {

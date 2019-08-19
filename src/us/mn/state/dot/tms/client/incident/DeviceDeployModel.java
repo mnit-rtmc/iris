@@ -228,9 +228,9 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		Position pos = new Position(inc.getLat(), inc.getLon());
 		LaneConfiguration config = cb.laneConfiguration(pos);
 		LcsDeployModel lcs_mdl = new LcsDeployModel(inc, config);
-		TreeMap<Distance, Device> devices = findDevices(cb, mp);
+		TreeMap<Distance, DeviceExit> devices = findDevices(cb, mp);
 		for (Distance up: devices.keySet()) {
-			Device dev = devices.get(up);
+			Device dev = devices.get(up).device;
 			if (dev instanceof LCSArray) {
 				LCSArray lcs_a = (LCSArray) dev;
 				Integer[] ind = createIndications(cb, lcs_a,
@@ -257,13 +257,31 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		}
 	}
 
+	/** Struct for device plus exit count */
+	static private class DeviceExit {
+		Device device;
+		int exit;
+		DeviceExit(Device dev) {
+			device = dev;
+			exit = 0;
+		}
+	}
+
 	/** Find all devices upstream of a given point on a corridor */
-	private TreeMap<Distance, Device> findDevices(CorridorBase cb,
+	private TreeMap<Distance, DeviceExit> findDevices(CorridorBase cb,
 		float mp)
 	{
-		TreeMap<Distance, Device> devices =
-			new TreeMap<Distance, Device>();
-		// Find LCS arrays
+		TreeMap<Distance, DeviceExit> devices =
+			new TreeMap<Distance, DeviceExit>();
+		findLCSArrays(cb, mp, devices);
+		findDMSs(cb, mp, devices);
+		return devices;
+	}
+
+	/** Find LCS arrays */
+	private void findLCSArrays(CorridorBase cb, float mp,
+		TreeMap<Distance, DeviceExit> devices)
+	{
 		Iterator<LCSArray> lit = LCSArrayHelper.iterator();
 		while (lit.hasNext()) {
 			LCSArray lcs_a = lit.next();
@@ -271,13 +289,19 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 			Float lp = calculateMilePoint(cb, loc);
 			if (lp != null && mp > lp) {
 				Distance up = new Distance(mp - lp, MILES);
-				devices.put(up, lcs_a);
+				devices.put(up, new DeviceExit(lcs_a));
 			}
 		}
-		// Find DMS
+	}
+
+	/** Find DMS upstream of a given point on a corridor */
+	private void findDMSs(CorridorBase cb, float mp,
+		TreeMap<Distance, DeviceExit> devices)
+	{
 		Iterator<DMS> dit = DMSHelper.iterator();
 		while (dit.hasNext()) {
 			DMS dms = dit.next();
+			// FIXME: filter out HOT lane signs
 			if (DMSHelper.isHidden(dms) ||
 			    DMSHelper.isFailed(dms) ||
 			   !DMSHelper.isActive(dms))
@@ -286,10 +310,11 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 			Float lp = calculateMilePoint(cb, loc);
 			if (lp != null && mp > lp) {
 				Distance up = new Distance(mp - lp, MILES);
-				devices.put(up, dms);
+				devices.put(up, new DeviceExit(dms));
 			}
 		}
-		return devices;
+		// FIXME: scan for exit counts
+		// FIXME: scan for freeway entrances
 	}
 
 	/** Create the MULTI string for one DMS.
@@ -307,6 +332,7 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		IncRange rng = getRange(up);
 		if (null == rng)
 			return null;
+		// FIXME: compare rng to svr.max_range
 		IncDescriptor dsc = IncDescriptorHelper.match(inc);
 		if (null == dsc)
 			return null;

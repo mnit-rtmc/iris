@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -136,26 +136,6 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<IncDescriptor>("incident.lane_type",
-			96)
-		{
-			public Object getValueAt(IncDescriptor dsc) {
-				return LaneType.fromOrdinal(dsc.getLaneType());
-			}
-			public boolean isEditable(IncDescriptor dsc) {
-				return canWrite(dsc);
-			}
-			public void setValueAt(IncDescriptor dsc, Object value){
-				if (value instanceof LaneType) {
-					LaneType lt = (LaneType) value;
-					dsc.setLaneType((short) lt.ordinal());
-				}
-			}
-			protected TableCellEditor createCellEditor() {
-				return new DefaultCellEditor(IncidentCreator
-					.createLaneTypeCombo());
-			}
-		});
 		cols.add(new ProxyColumn<IncDescriptor>("incident.detail",
 			128)
 		{
@@ -181,6 +161,26 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				cbx.setModel(new IComboBoxModel<IncidentDetail>(
 					detail_mdl));
 				return new DefaultCellEditor(cbx);
+			}
+		});
+		cols.add(new ProxyColumn<IncDescriptor>("incident.lane_type",
+			96)
+		{
+			public Object getValueAt(IncDescriptor dsc) {
+				return LaneType.fromOrdinal(dsc.getLaneType());
+			}
+			public boolean isEditable(IncDescriptor dsc) {
+				return canWrite(dsc);
+			}
+			public void setValueAt(IncDescriptor dsc, Object value){
+				if (value instanceof LaneType) {
+					LaneType lt = (LaneType) value;
+					dsc.setLaneType((short) lt.ordinal());
+				}
+			}
+			protected TableCellEditor createCellEditor() {
+				return new DefaultCellEditor(IncidentCreator
+					.createLaneTypeCombo());
 			}
 		});
 		cols.add(new ProxyColumn<IncDescriptor>("incident.clear", 50,
@@ -265,10 +265,26 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				int et1 = dsc1.getEventType();
 				if (et0 != et1)
 					return et0 - et1;
+				IncidentDetail dt0 = dsc0.getDetail();
+				IncidentDetail dt1 = dsc1.getDetail();
+				if (dt0 != dt1) {
+					if (dt0 == null)
+						return -1;
+					else if (dt1 == null)
+						return 1;
+					else {
+						return dt0.getName().compareTo(
+						       dt1.getName());
+					}
+				}
 				int lt0 = dsc0.getLaneType();
 				int lt1 = dsc1.getLaneType();
 				if (lt0 != lt1)
 					return lt0 - lt1;
+				boolean cl0 = dsc0.getCleared();
+				boolean cl1 = dsc1.getCleared();
+				if (cl0 != cl1)
+					return Boolean.compare(cl0, cl1);
 				return dsc0.getName().compareTo(dsc1.getName());
 			}
 		};

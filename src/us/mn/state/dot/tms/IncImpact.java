@@ -15,31 +15,41 @@
 package us.mn.state.dot.tms;
 
 /**
- * An incident impact is the full impact of an incident across all lanes.
+ * An incident impact is the full impact of an incident across all lanes.  The
+ * ordinal values correspond to the records in the iris.inc_impact look-up
+ * table.
  *
  * @author Douglas Lau
  */
 public enum IncImpact {
 	/* Blocked - lane or shoulder */
-	all_lanes_blocked,
-	left_lanes_blocked,
-	right_lanes_blocked,
-	center_lanes_blocked,
-	lanes_blocked,
-	both_shoulders_blocked,
-	left_shoulder_blocked,
-	right_shoulder_blocked,
+	all_lanes_blocked,       // 0
+	left_lanes_blocked,      // 1
+	right_lanes_blocked,     // 2
+	center_lanes_blocked,    // 3
+	lanes_blocked,           // 4
+	both_shoulders_blocked,  // 5
+	left_shoulder_blocked,   // 6
+	right_shoulder_blocked,  // 7
 	/* Affected - partially blocked */
-	all_lanes_affected,
-	left_lanes_affected,
-	right_lanes_affected,
-	center_lanes_affected,
-	lanes_affected,
-	both_shoulders_affected,
-	left_shoulder_affected,
-	right_shoulder_affected,
+	all_lanes_affected,      // 8
+	left_lanes_affected,     // 9
+	right_lanes_affected,    // 10
+	center_lanes_affected,   // 11
+	lanes_affected,          // 12
+	both_shoulders_affected, // 13
+	left_shoulder_affected,  // 14
+	right_shoulder_affected, // 15
 	/* All clear */
-	all_free_flowing;
+	all_free_flowing;        // 16
+
+	/** Get an impact from an ordinal value */
+	static public IncImpact fromOrdinal(int o) {
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return all_free_flowing;
+	}
 
 	/** Get the impact of an incident */
 	static public IncImpact getImpact(Incident inc) {
