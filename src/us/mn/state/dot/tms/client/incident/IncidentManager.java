@@ -20,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.CorridorFinder;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
@@ -42,8 +43,9 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class IncidentManager extends ProxyManager<Incident> {
-
+public class IncidentManager extends ProxyManager<Incident>
+	implements CorridorFinder<R_Node>
+{
 	/** Create a proxy descriptor */
 	static private ProxyDescriptor<Incident> descriptor(Session s) {
 		return new ProxyDescriptor<Incident>(
@@ -122,8 +124,9 @@ public class IncidentManager extends ProxyManager<Incident> {
 		return loc;
 	}
 
-	/** Lookup the corridor for an incident location */
-	public CorridorBase lookupCorridor(IncidentLoc loc) {
+	/** Lookup the corridor for a location */
+	@Override
+	public CorridorBase<R_Node> lookupCorridor(GeoLoc loc) {
 		return session.getR_NodeManager().lookupCorridor(loc);
 	}
 

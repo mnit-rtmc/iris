@@ -33,4 +33,29 @@ public enum IncRange {
 		else
 			return null;
 	}
+
+	/** Get a range from a number of exits */
+	static public IncRange fromExits(int exits) {
+		switch (exits) {
+		case 0: return IncRange.ahead;
+		case 1: return IncRange.near;
+		case 2:
+		case 3: return IncRange.middle;
+		case 4:
+		case 5:
+		case 6:
+		case 7: return IncRange.far;
+		default: return null;
+		}
+	}
+
+	/** Get a maximum number of exits */
+	public int getExits() {
+		switch (this) {
+		case near: return 1;
+		case middle: return 3;
+		case far: return 7;
+		default: return 0;
+		}
+	}
 }

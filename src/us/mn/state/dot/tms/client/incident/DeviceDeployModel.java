@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.incident;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.TreeMap;
 import javax.swing.DefaultListModel;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.Device;
@@ -24,7 +23,6 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.IncAdvice;
 import us.mn.state.dot.tms.IncAdviceHelper;
 import us.mn.state.dot.tms.IncDescriptor;
@@ -32,17 +30,13 @@ import us.mn.state.dot.tms.IncDescriptorHelper;
 import us.mn.state.dot.tms.IncLocator;
 import us.mn.state.dot.tms.IncLocatorHelper;
 import us.mn.state.dot.tms.IncRange;
-import us.mn.state.dot.tms.IncSeverity;
-import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.units.Distance;
-import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -51,88 +45,6 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Douglas Lau
  */
 public class DeviceDeployModel extends DefaultListModel<Device> {
-
-	/** Calculate a mile point for a location on a corridor */
-	static private Float calculateMilePoint(CorridorBase cb, GeoLoc loc) {
-		if (loc != null &&
-		    loc.getRoadway() == cb.getRoadway() &&
-		    loc.getRoadDir() == cb.getRoadDir())
-			return cb.calculateMilePoint(loc);
-		else
-			return null;
-	}
-
-	/** Get an LCS array position */
-	static private Position getLCSPosition(LCSArray lcs_a) {
-		GeoLoc loc = LCSArrayHelper.lookupGeoLoc(lcs_a);
-		return (loc != null)
-		      ? new Position(loc.getLat(), loc.getLon())
-		      : null;
-	}
-
-	/** Get an LCS array lane configuration */
-	static private LaneConfiguration laneConfiguration(CorridorBase cb,
-		LCSArray lcs_a)
-	{
-		Position p = getLCSPosition(lcs_a);
-		return (p != null) ? cb.laneConfiguration(p) : null;
-	}
-
-	/** Create indications for an LCS array */
-	static private Integer[] createIndications(CorridorBase cb,
-		LCSArray lcs_a, Distance up, LcsDeployModel lcs_mdl)
-	{
-		LaneConfiguration cfg = laneConfiguration(cb, lcs_a);
-		return (cfg != null)
-		      ? lcs_mdl.createIndications(cfg, up, lcs_a)
-		      : null;
-	}
-
-	/** Distance for no range */
-	static private final Distance RANGE_NONE = new Distance(0);
-
-	/** Distance for near range */
-	static private final Distance RANGE_NEAR = new Distance(5, MILES);
-	static private final Distance RANGE_NEAR_METRO =
-		new Distance(1.5, MILES);
-
-	/** Distance for middle range */
-	static private final Distance RANGE_MIDDLE = new Distance(10, MILES);
-	static private final Distance RANGE_MIDDLE_METRO =
-		new Distance(5, MILES);
-
-	/** Distance for far range */
-	static private final Distance RANGE_FAR = new Distance(20, MILES);
-	static private final Distance RANGE_FAR_METRO = new Distance(10, MILES);
-
-	/** Get the maximum distance to deploy a DMS */
-	static private Distance maxDistance(IncSeverity svr) {
-		if (svr == null)
-			return RANGE_NONE;
-		switch (svr) {
-		case minor:
-			return RANGE_NEAR;
-		case normal:
-			return RANGE_MIDDLE;
-		case major:
-			return RANGE_FAR;
-		default:
-			return RANGE_NONE;
-		}
-	}
-
-	/** Get the range for a distance to incident */
-	static private IncRange getRange(Distance up) {
-		double m = up.m();
-		if (m > RANGE_FAR.m())
-			return null;
-		if (m > RANGE_MIDDLE.m())
-			return IncRange.far;
-		if (m > RANGE_NEAR.m())
-			return IncRange.middle;
-		else
-			return IncRange.near;
-	}
 
 	/** Get the r_node type checker */
 	static private R_NodeType.Checker getChecker(short lto) {
@@ -154,11 +66,8 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		};
 	}
 
-	/** Incident severity */
-	private final IncSeverity svr;
-
-	/** Maximum distance */
-	private final Distance max_dist;
+	/** Upstream device finder */
+	private final UpstreamDeviceFinder finder;
 
 	/** Mapping of LCS array names to proposed indications */
 	private final HashMap<String, Integer []> indications =
@@ -189,8 +98,7 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 
 	/** Create a new device deploy model */
 	public DeviceDeployModel(IncidentManager man, Incident inc) {
-		svr = IncidentHelper.getSeverity(inc);
-		max_dist = maxDistance(svr);
+		finder = new UpstreamDeviceFinder(man, inc);
 		IncidentLoc iloc = new IncidentLoc(inc);
 		CorridorBase cb = man.lookupCorridor(iloc);
 		if (cb != null) {
@@ -198,7 +106,7 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 			if (mp != null) {
 				R_Node n = pickNode(inc, cb, mp);
 				GeoLoc loc = (n != null) ? n.getGeoLoc() : iloc;
-				populateList(inc, cb, mp, loc, n != null);
+				populateList(man, inc, loc, n != null);
 			}
 		}
 	}
@@ -217,122 +125,67 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	}
 
 	/** Populate list model with device deployments.
+	 * @param man Incident manager.
 	 * @param inc Incident.
-	 * @param cb Corridor where incident is located.
-	 * @param mp Relative mile point of incident.
 	 * @param loc Location of incident.
 	 * @param picked True if r_node was picked. */
-	private void populateList(Incident inc, CorridorBase cb, float mp,
+	private void populateList(IncidentManager man, Incident inc, GeoLoc loc,
+		boolean picked)
+	{
+		LcsDeployModel lcs_mdl = new LcsDeployModel(man, inc);
+		finder.findDevices();
+		Iterator<UpstreamDevice> it = finder.iterator();
+		while (it.hasNext()) {
+			UpstreamDevice ud = it.next();
+			Device dev = ud.device;
+			if (dev instanceof LCSArray)
+				addUpstreamLCS(lcs_mdl, (LCSArray) dev, ud);
+			if (dev instanceof DMS)
+				addUpstreamDMS((DMS) dev, ud, inc, loc, picked);
+		}
+	}
+
+	/** Add an upstream LCS array */
+	private void addUpstreamLCS(LcsDeployModel lcs_mdl, LCSArray lcs_array,
+		UpstreamDevice ud)
+	{
+		Integer[] ind = lcs_mdl.createIndications(lcs_array,
+			ud.distance);
+		if (ind != null) {
+			addElement(lcs_array);
+			indications.put(lcs_array.getName(), ind);
+		}
+	}
+
+	/** Add an upstream DMS */
+	private void addUpstreamDMS(DMS dms, UpstreamDevice ud, Incident inc,
 		GeoLoc loc, boolean picked)
 	{
-		Position pos = new Position(inc.getLat(), inc.getLon());
-		LaneConfiguration config = cb.laneConfiguration(pos);
-		LcsDeployModel lcs_mdl = new LcsDeployModel(inc, config);
-		TreeMap<Distance, DeviceExit> devices = findDevices(cb, mp);
-		for (Distance up: devices.keySet()) {
-			Device dev = devices.get(up).device;
-			if (dev instanceof LCSArray) {
-				LCSArray lcs_a = (LCSArray) dev;
-				Integer[] ind = createIndications(cb, lcs_a,
-					up, lcs_mdl);
-				if (ind != null) {
-					addElement(lcs_a);
-					indications.put(lcs_a.getName(), ind);
-				}
-			}
-			if (dev instanceof DMS) {
-				DMS dms = (DMS) dev;
-				MultiString ms = createMulti(inc, dms, up, loc,
-					picked);
-				if (ms != null) {
-					RasterGraphic rg = createGraphic(dms,
-						ms);
-					if (rg != null) {
-						addElement(dms);
-						messages.put(dms.getName(), ms);
-						graphics.put(dms.getName(), rg);
-					}
-				}
+		MultiString ms = createMulti(inc, dms, ud, loc, picked);
+		if (ms != null) {
+			RasterGraphic rg = createGraphic(dms, ms);
+			if (rg != null) {
+				addElement(dms);
+				messages.put(dms.getName(), ms);
+				graphics.put(dms.getName(), rg);
 			}
 		}
-	}
-
-	/** Struct for device plus exit count */
-	static private class DeviceExit {
-		Device device;
-		int exit;
-		DeviceExit(Device dev) {
-			device = dev;
-			exit = 0;
-		}
-	}
-
-	/** Find all devices upstream of a given point on a corridor */
-	private TreeMap<Distance, DeviceExit> findDevices(CorridorBase cb,
-		float mp)
-	{
-		TreeMap<Distance, DeviceExit> devices =
-			new TreeMap<Distance, DeviceExit>();
-		findLCSArrays(cb, mp, devices);
-		findDMSs(cb, mp, devices);
-		return devices;
-	}
-
-	/** Find LCS arrays */
-	private void findLCSArrays(CorridorBase cb, float mp,
-		TreeMap<Distance, DeviceExit> devices)
-	{
-		Iterator<LCSArray> lit = LCSArrayHelper.iterator();
-		while (lit.hasNext()) {
-			LCSArray lcs_a = lit.next();
-			GeoLoc loc = LCSArrayHelper.lookupGeoLoc(lcs_a);
-			Float lp = calculateMilePoint(cb, loc);
-			if (lp != null && mp > lp) {
-				Distance up = new Distance(mp - lp, MILES);
-				devices.put(up, new DeviceExit(lcs_a));
-			}
-		}
-	}
-
-	/** Find DMS upstream of a given point on a corridor */
-	private void findDMSs(CorridorBase cb, float mp,
-		TreeMap<Distance, DeviceExit> devices)
-	{
-		Iterator<DMS> dit = DMSHelper.iterator();
-		while (dit.hasNext()) {
-			DMS dms = dit.next();
-			// FIXME: filter out HOT lane signs
-			if (DMSHelper.isHidden(dms) ||
-			    DMSHelper.isFailed(dms) ||
-			   !DMSHelper.isActive(dms))
-				continue;
-			GeoLoc loc = dms.getGeoLoc();
-			Float lp = calculateMilePoint(cb, loc);
-			if (lp != null && mp > lp) {
-				Distance up = new Distance(mp - lp, MILES);
-				devices.put(up, new DeviceExit(dms));
-			}
-		}
-		// FIXME: scan for exit counts
-		// FIXME: scan for freeway entrances
 	}
 
 	/** Create the MULTI string for one DMS.
 	 * @param inc Incident.
 	 * @param dms Possible sign to deploy.
-	 * @param up Distance upstream from incident.
+	 * @param ud Upstream device.
 	 * @param loc Location of incident.
 	 * @param picked True if r_node was picked.
 	 * @return MULTI string for DMS, or null. */
-	private MultiString createMulti(Incident inc, DMS dms, Distance up,
+	private MultiString createMulti(Incident inc, DMS dms, UpstreamDevice ud,
 		GeoLoc loc, boolean picked)
 	{
-		if (up.m() > max_dist.m())
-			return null;
-		IncRange rng = getRange(up);
+		Distance up = ud.distance;
+		IncRange rng = ud.range();
 		if (null == rng)
 			return null;
-		// FIXME: compare rng to svr.max_range
 		IncDescriptor dsc = IncDescriptorHelper.match(inc);
 		if (null == dsc)
 			return null;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -522,5 +522,25 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 			loc = l;
 			dist = d;
 		}
+	}
+
+	/** Count the freeway exits between two milepoints */
+	public int countExits(float mp0, float mp1) {
+		GeoLoc prev_exit = null;
+		int n_exits = 0;
+		Iterator<T> it = n_points.subMap(mp0, true, mp1, true)
+			.values().iterator();
+		while (it.hasNext()) {
+			T n = it.next();
+			if (n.getNodeType() == R_NodeType.EXIT.ordinal()) {
+				GeoLoc loc = n.getGeoLoc();
+				// Only count one exit per interchange
+				if (prev_exit == null ||
+				    prev_exit.getRoadway() != loc.getRoadway())
+					n_exits++;
+				prev_exit = loc;
+			}
+		}
+		return n_exits;
 	}
 }
