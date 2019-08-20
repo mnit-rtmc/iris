@@ -214,4 +214,39 @@ public enum IncImpact {
 			return null;
 		}
 	}
+
+	/** Get count of impacted lanes.
+	 *
+	 * @return If any lanes are blocked, count of blocked lanes.  Otherwise
+	 *         the count of affected lanes. */
+	static public int getImpactedLanes(Incident inc) {
+		LaneImpact[] li = LaneImpact.fromString(inc.getImpact());
+		if (countGroups(li, LaneImpact.BLOCKED) > 0)
+			return getLaneCount(li, LaneImpact.BLOCKED);
+		else
+			return getLaneCount(li, LaneImpact.AFFECTED);
+	}
+
+	/** Get count of open lanes.
+	 *
+	 * @return If any lanes are blocked, count of non-blocked lanes.
+	 *         Otherwise the count of non-affected lanes. */
+	static public int getOpenLanes(Incident inc) {
+		LaneImpact[] li = LaneImpact.fromString(inc.getImpact());
+		if (countGroups(li, LaneImpact.BLOCKED) > 0) {
+			return getLaneCount(li, LaneImpact.AFFECTED) +
+			       getLaneCount(li, LaneImpact.FREE_FLOWING);
+		} else
+			return getLaneCount(li, LaneImpact.FREE_FLOWING);
+	}
+
+	/** Count lanes (non-shoulder) with given impact */
+	static private int getLaneCount(LaneImpact[] li, LaneImpact v) {
+		int count = 0;
+		for (int i = 1; i < li.length - 1; i++) {
+			if (li[i] == v)
+				count++;
+		}
+		return count;
+	}
 }

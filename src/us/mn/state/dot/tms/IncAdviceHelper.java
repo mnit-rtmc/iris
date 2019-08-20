@@ -36,16 +36,41 @@ public class IncAdviceHelper extends BaseHelper {
 
 	/** Find a matching incident advice */
 	static public IncAdvice match(IncRange rng, Incident inc) {
+		IncAdvice res = null;
+		int priority = 0;
 		IncImpact imp = IncImpact.getImpact(inc);
 		Iterator<IncAdvice> it = iterator();
 		while (it.hasNext()) {
 			IncAdvice adv = it.next();
-			if (adv.getRange() == rng.ordinal() &&
+			if (adv.getImpact() == imp.ordinal() &&
+			    adv.getRange() == rng.ordinal() &&
 			    adv.getLaneType() == inc.getLaneType() &&
-			    adv.getImpact() == imp.ordinal() &&
 			    adv.getCleared() == inc.getCleared())
-				return adv;
+			{
+				int il = IncImpact.getImpactedLanes(inc);
+				int ol = IncImpact.getOpenLanes(inc);
+				Integer ail = adv.getImpactedLanes();
+				Integer aol = adv.getOpenLanes();
+				if (ail != null && aol != null &&
+				    ail == il && aol == ol)
+				{
+					res = adv;
+					priority = 3;
+				} else
+				if (ail != null && ail == il &&
+				    priority < 2)
+				{
+					res = adv;
+					priority = 2;
+				} else
+				if (aol != null && aol == ol &&
+				    priority < 1)
+				{
+					res = adv;
+					priority = 1;
+				}
+			}
 		}
-		return null;
+		return res;
 	}
 }
