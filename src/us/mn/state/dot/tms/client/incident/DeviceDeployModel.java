@@ -70,6 +70,9 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	/** Upstream device finder */
 	private final UpstreamDeviceFinder finder;
 
+	/** LCS indication builder */
+	private final LcsIndicationBuilder ind_builder;
+
 	/** Mapping of LCS array names to proposed indications */
 	private final HashMap<String, Integer []> indications =
 		new HashMap<String, Integer []>();
@@ -100,6 +103,7 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	/** Create a new device deploy model */
 	public DeviceDeployModel(IncidentManager man, Incident inc) {
 		finder = new UpstreamDeviceFinder(man, inc);
+		ind_builder = new LcsIndicationBuilder(man, inc);
 		IncidentLoc iloc = new IncidentLoc(inc);
 		String name = GeoLocHelper.getCorridorName(iloc);
 		CorridorBase cb = man.lookupCorridor(name);
@@ -134,24 +138,21 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	private void populateList(IncidentManager man, Incident inc, GeoLoc loc,
 		boolean picked)
 	{
-		LcsDeployModel lcs_mdl = new LcsDeployModel(man, inc);
 		finder.findDevices();
 		Iterator<UpstreamDevice> it = finder.iterator();
 		while (it.hasNext()) {
 			UpstreamDevice ud = it.next();
 			Device dev = ud.device;
 			if (dev instanceof LCSArray)
-				addUpstreamLCS(lcs_mdl, (LCSArray) dev, ud);
+				addUpstreamLCS((LCSArray) dev, ud);
 			if (dev instanceof DMS)
 				addUpstreamDMS((DMS) dev, ud, inc, loc, picked);
 		}
 	}
 
 	/** Add an upstream LCS array */
-	private void addUpstreamLCS(LcsDeployModel lcs_mdl, LCSArray lcs_array,
-		UpstreamDevice ud)
-	{
-		Integer[] ind = lcs_mdl.createIndications(lcs_array,
+	private void addUpstreamLCS(LCSArray lcs_array, UpstreamDevice ud) {
+		Integer[] ind = ind_builder.createIndications(lcs_array,
 			ud.distance);
 		if (ind != null) {
 			addElement(lcs_array);

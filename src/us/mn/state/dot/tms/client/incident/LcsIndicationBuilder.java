@@ -33,11 +33,11 @@ import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 
 /**
- * LcsDeployModel determines which LCS indications to propose for an incident.
+ * LcsIndicationBuilder builds LCS indications for an incident.
  *
  * @author Douglas Lau
  */
-public class LcsDeployModel {
+public class LcsIndicationBuilder {
 
 	/** Short distance upstream of incident to deploy devices */
 	static private final Distance DIST_SHORT = new Distance(0.5f, MILES);
@@ -108,11 +108,11 @@ public class LcsDeployModel {
 	/** Lane configuration at incident */
 	private final LaneConfiguration config;
 
-	/** Create a new LCS deploy model.
+	/** Create a new LCS indication builder.
 	 * @param cf Corridor finder.
 	 * @param inc Incident for deployment.
 	 * @param conf Lane configuration at incident location. */
-	public LcsDeployModel(CorridorFinder cf, Incident inc) {
+	public LcsIndicationBuilder(CorridorFinder cf, Incident inc) {
 		finder = cf;
 		incident = inc;
 		config = laneConfiguration(new IncidentLoc(inc));
