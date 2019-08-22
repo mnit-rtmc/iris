@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncAdvice;
 import us.mn.state.dot.tms.IncAdviceHelper;
@@ -100,7 +101,8 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	public DeviceDeployModel(IncidentManager man, Incident inc) {
 		finder = new UpstreamDeviceFinder(man, inc);
 		IncidentLoc iloc = new IncidentLoc(inc);
-		CorridorBase cb = man.lookupCorridor(iloc);
+		String name = GeoLocHelper.getCorridorName(iloc);
+		CorridorBase cb = man.lookupCorridor(name);
 		if (cb != null) {
 			Float mp = cb.calculateMilePoint(iloc);
 			if (mp != null) {

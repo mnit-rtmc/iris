@@ -18,6 +18,7 @@ import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.CorridorFinder;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LaneImpact;
 import static us.mn.state.dot.tms.LaneImpact.*;
@@ -119,7 +120,8 @@ public class LcsDeployModel {
 
 	/** Get lane configuration at a location */
 	private LaneConfiguration laneConfiguration(GeoLoc loc) {
-		CorridorBase cb = finder.lookupCorridor(loc);
+		String name = GeoLocHelper.getCorridorName(loc);
+		CorridorBase cb = finder.lookupCorridor(name);
 		return (cb != null)
 		      ? cb.laneConfiguration(new Position(loc.getLat(),
 				loc.getLon()))

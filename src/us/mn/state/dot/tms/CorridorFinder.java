@@ -15,12 +15,12 @@
 package us.mn.state.dot.tms;
 
 /**
- * Interface to lookup corridors by location.
+ * Interface to lookup corridors by name.
  *
  * @author Douglas Lau
  */
 public interface CorridorFinder<T extends R_Node> {
 
-	/** Lookup the corridor for a location */
-	CorridorBase<T> lookupCorridor(GeoLoc loc);
+	/** Lookup a corridor by name */
+	CorridorBase<T> lookupCorridor(String name);
 }

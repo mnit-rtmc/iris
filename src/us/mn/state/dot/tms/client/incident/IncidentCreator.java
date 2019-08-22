@@ -273,7 +273,8 @@ public class IncidentCreator extends JPanel {
 
 	/** Get the lane count at the incident location */
 	private int getLaneCount(LaneType lt, GeoLoc loc) {
-		CorridorBase cb = r_node_manager.lookupCorridor(loc);
+		String name = GeoLocHelper.getCorridorName(loc);
+		CorridorBase cb = r_node_manager.lookupCorridor(name);
 		return (cb != null) ? cb.getLaneCount(lt, loc) : 0;
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.CorridorFinder;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneConfiguration;
@@ -115,7 +116,8 @@ public class IncidentManager extends ProxyManager<Incident>
 	@Override
 	protected IncidentLoc getGeoLoc(Incident proxy) {
 		IncidentLoc loc = new IncidentLoc(proxy);
-		CorridorBase cb = lookupCorridor(loc);
+		String name = GeoLocHelper.getCorridorName(loc);
+		CorridorBase cb = lookupCorridor(name);
 		if (cb != null) {
 			R_Node rnd = cb.findNearest(loc);
 			if (rnd != null)
@@ -124,10 +126,10 @@ public class IncidentManager extends ProxyManager<Incident>
 		return loc;
 	}
 
-	/** Lookup the corridor for a location */
+	/** Lookup the corridor by name */
 	@Override
-	public CorridorBase<R_Node> lookupCorridor(GeoLoc loc) {
-		return session.getR_NodeManager().lookupCorridor(loc);
+	public CorridorBase<R_Node> lookupCorridor(String name) {
+		return session.getR_NodeManager().lookupCorridor(name);
 	}
 
 	/** Get lane configuration at an incident */
@@ -136,7 +138,8 @@ public class IncidentManager extends ProxyManager<Incident>
 		if (lt.isRamp())
 			return rampLaneConfiguration(inc);
 		IncidentLoc loc = new IncidentLoc(inc);
-		CorridorBase cb = lookupCorridor(loc);
+		String name = GeoLocHelper.getCorridorName(loc);
+		CorridorBase cb = lookupCorridor(name);
 		if (cb != null)
 			return cb.laneConfiguration(getWgs84Position(inc));
 		else

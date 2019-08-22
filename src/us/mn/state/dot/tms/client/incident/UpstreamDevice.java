@@ -72,6 +72,12 @@ public class UpstreamDevice implements Comparable<UpstreamDevice> {
 		distance = dist;
 	}
 
+	/** Create an adjusted upstream device */
+	public UpstreamDevice adjusted(int ex, Distance dist) {
+		return new UpstreamDevice(device, exits + ex,
+			distance.add(dist));
+	}
+
 	/** Compare with another upstream device */
 	@Override
 	public int compareTo(UpstreamDevice other) {

@@ -359,14 +359,10 @@ public class R_NodeManager extends ProxyManager<R_Node>
 		return new ProxyTheme<R_Node>(this, new R_NodeMarker());
 	}
 
-	/** Lookup the corridor for a location */
+	/** Lookup the corridor by name */
 	@Override
-	public CorridorBase<R_Node> lookupCorridor(GeoLoc loc) {
-		String cid = GeoLocHelper.getCorridorName(loc);
-		if (cid != null)
-			return corridors.get(cid);
-		else
-			return null;
+	public CorridorBase<R_Node> lookupCorridor(String name) {
+		return (name != null) ? corridors.get(name) : null;
 	}
 
 	/** Get the GeoLoc for the specified proxy */
