@@ -111,6 +111,7 @@ public class DmsDeployBuilder {
 	 * @param ud Upstream device.
 	 * @return MULTI string for DMS, or null. */
 	public MultiString createMulti(DMS dms, UpstreamDevice ud) {
+		boolean branched = !isCorridorSame(dms);
 		Distance up = ud.distance;
 		IncRange rng = ud.range();
 		if (null == rng)
@@ -118,7 +119,7 @@ public class DmsDeployBuilder {
 		IncDescriptor dsc = IncDescriptorHelper.match(inc);
 		if (null == dsc)
 			return null;
-		IncLocator iloc = IncLocatorHelper.match(rng, false, picked);
+		IncLocator iloc = IncLocatorHelper.match(rng, branched, picked);
 		if (null == iloc)
 			return null;
 		IncAdvice adv = IncAdviceHelper.match(rng, inc);
@@ -143,6 +144,12 @@ public class DmsDeployBuilder {
 		lmb.addLine(null);
 		new MultiString(madv).parse(lmb);
 		return lmb.toMultiString();
+	}
+
+	/** Check if a DMS is on same corridor as incident */
+	private boolean isCorridorSame(DMS dms) {
+		IncidentLoc iloc = new IncidentLoc(inc);
+		return GeoLocHelper.matches(iloc, dms.getGeoLoc());
 	}
 
 	/** Check if MULTI string or abbreviation will fit on a DMS */
