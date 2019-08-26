@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
 
@@ -58,6 +59,12 @@ public class IncidentHelper extends BaseHelper {
 		return null;
 	}
 
+	/** Get original incident name */
+	static public String getOriginalName(Incident inc) {
+		String rep = inc.getReplaces();
+		return (rep != null) ? rep : inc.getName();
+	}
+
 	/** Lookup the camera for an incident */
 	static public Camera getCamera(Incident inc) {
 		return (inc != null) ? inc.getCamera() : null;
@@ -74,5 +81,25 @@ public class IncidentHelper extends BaseHelper {
 	static public IncSeverity getSeverity(Incident inc) {
 		LaneType lane_type = LaneType.fromOrdinal(inc.getLaneType());
 		return IncImpact.getImpact(inc).severity(lane_type);
+	}
+
+	/** Get list of signs deployed for an incident */
+	static public ArrayList<DMS> getDeployedSigns(Incident inc) {
+		ArrayList<SignMessage> msgs = new ArrayList<SignMessage>();
+		String orig_name = getOriginalName(inc);
+		Iterator<SignMessage> it = SignMessageHelper.iterator();
+		while (it.hasNext()) {
+			SignMessage sm = it.next();
+			if (orig_name.equals(sm.getIncident()))
+				msgs.add(sm);
+		}
+		ArrayList<DMS> signs = new ArrayList<DMS>();
+		Iterator<DMS> dit = DMSHelper.iterator();
+		while (dit.hasNext()) {
+			DMS dms = dit.next();
+			if (msgs.contains(dms.getMsgCurrent()))
+				signs.add(dms);
+		}
+		return signs;
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,11 @@ package us.mn.state.dot.tms.client.incident;
 
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
@@ -34,14 +37,21 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.IncidentHelper;
+import us.mn.state.dot.tms.IncSeverity;
 import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraSelectAction;
+import us.mn.state.dot.tms.client.dms.SignMessageCreator;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
@@ -54,6 +64,7 @@ import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * The IncidentDispatcher is a GUI component for creating incidents.
@@ -72,11 +83,17 @@ public class IncidentDispatcher extends IPanel
 	/** Card layout name for camera button */
 	static private final String CAMERA_BTN = "camera_btn";
 
+	/** Duration for cleared incident message (minutes) */
+	static private final int DURATION_CLEARED = 5;
+
 	/** User session */
 	private final Session session;
 
 	/** Incident manager */
 	private final IncidentManager manager;
+
+	/** Sign message creator */
+	private final SignMessageCreator sm_creator;
 
 	/** Selection model */
 	private final ProxySelectionModel<Incident> sel_mdl;
@@ -158,7 +175,10 @@ public class IncidentDispatcher extends IPanel
 			Incident inc = sel_mdl.getSingleSelection();
 			if (inc != null) {
 				boolean c = clear_btn.isSelected();
-				inc.setCleared(c);
+				if (c)
+					clearIncident(inc);
+				else
+					inc.setCleared(false);
 			}
 		}
 	};
@@ -196,6 +216,7 @@ public class IncidentDispatcher extends IPanel
 		manager = man;
 		sel_mdl = manager.getSelectionModel();
 		creator = ic;
+		sm_creator = new SignMessageCreator(s);
 		cache = s.getSonarState().getIncCache().getIncidents();
 		detail_mdl = new ProxyListModel<IncidentDetail>(
 			s.getSonarState().getIncCache().getIncidentDetails());
@@ -339,7 +360,7 @@ public class IncidentDispatcher extends IPanel
 
 	/** Destroy the named incident */
 	private void destroyIncident(Incident inc) {
-		inc.setCleared(true);
+		clearIncident(inc);
 		inc.destroy();
 	}
 
@@ -369,7 +390,7 @@ public class IncidentDispatcher extends IPanel
 	/** Show the device deploy form */
 	private void showDeployForm(Incident inc) {
 		session.getDesktop().show(new DeviceDeployForm(session, inc,
-			manager));
+			manager, this));
 	}
 
 	/** A new proxy has been added */
@@ -584,5 +605,84 @@ public class IncidentDispatcher extends IPanel
 	/** Check if the user is permitted to update an LCS array attribute */
 	private boolean isLcsUpdatePermitted(String a) {
 		return session.isWritePermitted(LCSArray.SONAR_TYPE, "oname",a);
+	}
+
+	/** Clear an incident */
+	private void clearIncident(Incident inc) {
+		inc.setCleared(true);
+		ArrayList<DMS> signs = IncidentHelper.getDeployedSigns(inc);
+		if (signs.size() > 0) {
+			HashMap<String, MultiString> msgs = clearedMessages(inc,
+				signs);
+			for (Entry<String, MultiString> ent: msgs.entrySet()) {
+				String dn = ent.getKey();
+				MultiString multi = ent.getValue();
+				sendMessage(dn, inc, multi, DURATION_CLEARED);
+			}
+		}
+	}
+
+	/** Create cleared messages associated with an incident */
+	private HashMap<String, MultiString> clearedMessages(Incident inc,
+		ArrayList<DMS> signs)
+	{
+		HashMap<String, MultiString> msgs =
+			new HashMap<String, MultiString>();
+		for (DMS dms: signs)
+			msgs.put(dms.getName(), new MultiString(""));
+		UpstreamDeviceFinder finder = new UpstreamDeviceFinder(manager,
+			inc);
+		DmsDeployBuilder dms_builder = new DmsDeployBuilder(manager,
+			inc);
+		finder.findDevices();
+		Iterator<UpstreamDevice> it = finder.iterator();
+		while (it.hasNext()) {
+			UpstreamDevice ud = it.next();
+			if (ud.device instanceof DMS) {
+				DMS dms = (DMS) ud.device;
+				String sign = dms.getName();
+				if (msgs.containsKey(sign)) {
+					msgs.put(sign, dms_builder.createMulti(
+						dms, ud));
+				}
+			}
+		}
+		return msgs;
+	}
+
+	/** Send new sign message to a DMS */
+	public void sendMessage(String dn, Incident inc, MultiString multi,
+		Integer duration)
+	{
+		IncSeverity sev = IncidentHelper.getSeverity(inc);
+		String inc_orig = IncidentHelper.getOriginalName(inc);
+		if (multi != null && sev != null) {
+			String ms = multi.toString();
+			DmsMsgPriority prio = sev.priority;
+			DMS dms = DMSHelper.lookup(dn);
+			if (dms != null) {
+				SignConfig sc = dms.getSignConfig();
+				if (sc != null) {
+					sendMessage(dms, sc, inc_orig, ms, prio,
+						duration);
+				}
+			}
+		}
+	}
+
+	/** Send new sign message to the specified DMS */
+	private void sendMessage(final DMS dms, final SignConfig sc,
+		final String inc_orig, String ms, final DmsMsgPriority prio,
+		final Integer duration)
+	{
+		final String _ms = DMSHelper.adjustMulti(dms, ms);
+		runSwing(new Runnable() {
+			public void run() {
+				SignMessage sm = sm_creator.create(sc, inc_orig,
+					_ms, prio, duration);
+				if (sm != null)
+					dms.setMsgUser(sm);
+			}
+		});
 	}
 }
