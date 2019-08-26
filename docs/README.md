@@ -14,5 +14,5 @@ from operators to streamline their workflow.
 
 ## Links
 
-- [Release Notes](release_notes.html)
+- [Release Notes](release_notes_4.html)
 - [Administrator Guide](admin_guide.html)
