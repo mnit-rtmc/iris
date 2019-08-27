@@ -46,29 +46,17 @@ Now, the IRIS rpm file can be built with `ant rpm`.
 If there are no errors, the new rpm file should be in the
 `build/rpm/RPMS/noarch/` directory.
 
-### History
-
-**March 1999** Started work on NTCIP DMS control
-
-**May 2007** First GPL open source release
-
-**May 2008** IRIS live in Caltrans D10
-
-**April 2011** Officially adopted by Caltrans
-
-**November 2014** Adopted by Wyoming Department of Transportation
-
-### Future Plans
-
-Work is underway on a web-based user interface.  The java based interface will
-be fully supported until all features are implemented in the new UI.
-
 ### Contributing
 
 [Bug reports](https://github.com/mnit-rtmc/iris/issues) and feature requests
 are welcome and encouraged!  Please create an issue and discuss before making a
 [pull request](https://github.com/mnit-rtmc/iris/pulls).  All patches must be
 licensed under the GPL.
+
+### Future Plans
+
+Work is underway on a web-based user interface.  The java based interface will
+be fully supported until all features are implemented in the new UI.
 
 ### Coding Style
 
@@ -105,3 +93,15 @@ Unary operators, such as `++` `--` `!` `~` should be adjacent to their operand
 with no space.  Binary operators, such as `+` `-` `/` `*` `%` `&` `|` `&&` `||`
 `>` `=` `<` `>>` `==` `!=` `<<` `>>>` `>=` `<=` `^` should be separated from
 their operands by a space.
+
+### History
+
+**March 1999** — Started work on NTCIP DMS control
+
+**May 2007** — First GPL open source release
+
+**May 2008** — IRIS live in Caltrans D10
+
+**April 2011** — Officially adopted by Caltrans
+
+**November 2014** — Adopted by Wyoming Department of Transportation
