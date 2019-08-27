@@ -65,16 +65,9 @@
     <h3><a href="#slow">Slow Traffic Warning</a></h3>
     <h3><a href="#tolling">Tolling</a></h3>
     <h3><a href="#parking">Parking Area Availability</a></h3>
-    <h3><a href="#vsa">Variable Speed Advisory</a></h3>
-    <h3><a href="#spellchecker">Spell Checker</a></h3>
+    <h3><a href="vsa.html">Variable Speed Advisory</a></h3>
   </div>
-  <h2><a id="troubleshooting_link" href="#troubleshooting">Troubleshooting</a></h2>
-  <div id="troubleshooting_div">
-    <h3><a href="#error_logs">Error Logs</a></h3>
-    <h3><a href="#xml_output">Realtime XML Output</a></h3>
-    <h3><a href="#event_tables">Database Event Tables</a></h3>
-    <h3><a href="#debug_logs">Debug Trace Logs</a></h3>
-  </div>
+  <h2><a id="troubleshooting_link" href="troubleshooting.html">Troubleshooting</a></h2>
   <h2><a id="maintenance_link" href="maintenance.html">Maintenance</a></h2>
   <h2><a id="development_link" href="iris_development.html">Development</a></h2>
   <h2><a id="stepbystep_link" href="step_by_step.html">Step-by-Step</a></h2>
@@ -1942,6 +1935,45 @@ FIXME
 	messages displayed on a sign.
 </p>
 
+<h4 id="spellchecker">Spell Checker</h4>
+<aside>
+	Select <span class="menu">View ➔ Message Signs ➔ Dictionary</span> menu
+	item
+</aside>
+<p>
+	The spell checker verifies <a href="#dms">DMS</a> messages when an
+	operator presses the <b>Send</b> button.
+	It uses two word lists: <b>Allowed</b> and <b>Banned</b>.
+</p>
+<p>
+	Allowed word checking is controlled by <a href="#sys_attr"><code>
+	dict_allowed_scheme</code></a>:
+</p>
+<dl>
+	<dt>0</dt>
+	<dd>Disable checking allowed word list</dd>
+	<dt>1</dt>
+	<dd>Suggest replacement of words not in allowed list</dd>
+	<dt>2</dt>
+	<dd>Reject messages containing words not in allowed list</dd>
+</dl>
+<p>
+	Similarly, <a href="#sys_attr"><code>dict_banned_scheme</code></a>
+	controls banned word functionality:
+</p>
+<dl>
+	<dt>0</dt>
+	<dd>Disable checking banned word list</dd>
+	<dt>1</dt>
+	<dd>Suggest replacement of words in banned list</dd>
+	<dt>2</dt>
+	<dd>Reject messages containing words in banned list</dd>
+</dl>
+<p>
+	When appropriate, a form appears to suggest changes or inform the
+	operator of a rejected message.
+</p>
+
 <h3 id="lcs">Lane-use Control Signs (LCS)</h3>
 <aside>
 	Select <span class="menu">View ➔ Lane Use ➔ LCS</span> menu item
@@ -1958,7 +1990,7 @@ FIXME
 	An <em>intelligent</em> LCS is a full-matrix color <a href="#dms">DMS</a>
 	which is mounted directly over a lane of traffic.
 	In addition to being used as an LCS, it can display
-	<a href="#vsa">variable speed advisories</a>, or any operator-defined
+	<a href="vsa.html">variable speed advisories</a>, or any operator-defined
 	message as a regular DMS.
 </p>
 
@@ -3274,7 +3306,7 @@ FIXME
 	</tr>
 	<tr>
 	    <td>[vsa]</td>
-	    <td><a href="#vsa">Speed advisory</a></td>
+	    <td><a href="vsa.html">Speed advisory</a></td>
 	</tr>
 </table>
 <br/>
@@ -3554,48 +3586,6 @@ FIXME
 	<li>Text to display if parking area is closed.
 	</li>
 </ol>
-
-<h3 id="vsa">Variable Speed Advisory</h3>
-FIXME
-
-<h3 id="spellchecker">Spell Checker</h3>
-<aside>
-	Select <span class="menu">View ➔ Message Signs ➔ Dictionary</span> menu
-	item
-</aside>
-<p>
-	The spell checker verifies <a href="#dms">DMS</a> messages when an
-	operator presses the <b>Send</b> button.
-	It uses two word lists: <b>Allowed</b> and <b>Banned</b>.
-</p>
-<p>
-	Allowed word checking is controlled by <a href="#sys_attr"><code>
-	dict_allowed_scheme</code></a>:
-</p>
-<dl>
-	<dt>0</dt>
-	<dd>Disable checking allowed word list</dd>
-	<dt>1</dt>
-	<dd>Suggest replacement of words not in allowed list</dd>
-	<dt>2</dt>
-	<dd>Reject messages containing words not in allowed list</dd>
-</dl>
-<p>
-	Similarly, <a href="#sys_attr"><code>dict_banned_scheme</code></a>
-	controls banned word functionality:
-</p>
-<dl>
-	<dt>0</dt>
-	<dd>Disable checking banned word list</dd>
-	<dt>1</dt>
-	<dd>Suggest replacement of words in banned list</dd>
-	<dt>2</dt>
-	<dd>Reject messages containing words in banned list</dd>
-</dl>
-<p>
-	When appropriate, a form appears to suggest changes or inform the
-	operator of a rejected message.
-</p>
 
 </main>
 
