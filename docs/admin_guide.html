@@ -75,13 +75,7 @@
     <h3><a href="#event_tables">Database Event Tables</a></h3>
     <h3><a href="#debug_logs">Debug Trace Logs</a></h3>
   </div>
-  <h2><a id="maintenance_link" href="#maintenance">Maintenance</a></h2>
-  <div id="maintenance_div">
-    <h3><a href="#database_backups">Database Backups</a></h3>
-    <h3><a href="#iris_upgrades">IRIS Upgrades</a></h3>
-    <h3><a href="#system_updates">System Software Updates</a></h3>
-    <h3><a href="#monitoring_logs">Monitoring Logs</a></h3>
-  </div>
+  <h2><a id="maintenance_link" href="maintenance.html">Maintenance</a></h2>
   <h2><a id="development_link" href="iris_development.html">Development</a></h2>
   <h2><a id="stepbystep_link" href="step_by_step.html">Step-by-Step</a></h2>
 </nav>
@@ -3879,87 +3873,6 @@ FIXME
 	    <td>Variable speed advisory info log</td>
 	</tr>
 </table>
-
-<h2 id="maintenance">Maintenance</h2>
-<p>
-	Once an IRIS system is set up, there are a few maintenance tasks which
-	need to be done to ensure reliable operation.
-</p>
-<h3 id="database_backups">Database Backup &amp; Restore</h3>
-<p>
-	It is a good idea to backup the IRIS database on a regular basis.
-	This can be done simply with a command such as the following:
-</p>
-<pre class="code">pg_dump tms | gzip &gt; tms-20120523.sql.gz</pre>
-<p>
-	This command can be placed in a simple python or bash script which is
-	run by cron once per day.
-	For off-site backups, the file could be copied to another host, using
-	scp or a similar utility.
-</p>
-<p>
-	To restore the tms database from one of these backup files, you will
-	first need to shut down the IRIS server (and anything else connected
-	to the tms database).
-	Then, run the following commands (as tms user):
-</p>
-<pre class="code">dropdb tms
-createdb tms
-zcat tms-20120523.sql.gz | pgsql tms</pre>
-
-<h3 id="iris_upgrades">IRIS Upgrades</h3>
-<p>
-	Upgrading an IRIS system to a new version is a simple process.
-	There are two different scenarios to deal with when upgrading:
-	<b>stable</b> versus <b>unstable</b>.
-	Either way, it's advisable to <a href="#database_backups">backup the
-	database</a> before attempting an upgrade.
-</p>
-<p>
-	A stable upgrade is when the major and minor IRIS version numbers do not
-	change &mdash; just the <b>micro</b> version.
-	So, upgrading from 3.145.0 to 3.145.1 would be a stable updgrade.
-	This type of upgrade never involves a database schema change.
-	With the new rpm file available, a stable upgrade can be accomplished
-	with the following commands (as root):
-</p>
-<pre class="code">dnf update iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm
-iris_ctl update
-systemctl restart iris</pre>
-<p>
-	An unstable upgrade is when either the major or minor IRIS version
-	numbers change.
-	Upgrading from 3.144.0 to 3.145.0 would be an unstable upgrade.
-	This type of upgrade always involves a database schema change.
-	To upgrade the database schema, an SQL migrate script must be run for
-	each intervening version.
-	The following commands can be used to perform an unstable upgrade
-	(as root):
-</p>
-<pre class="code">dnf update iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm
-psql tms -f /var/lib/iris/sql/migrate-<i>{major}</i>.<i>{minor}</i>.sql
-iris_ctl update
-systemctl restart iris</pre>
-<p>
-	Note: when skipping one or more minor versions in an upgrade, <b>all</b>
-	migrate scripts must be run.
-	So, when upgrading from 3.143.0 to 3.145.0, the database upgrade would
-	consist of these commands:
-</p>
-<pre class="code">psql tms -f /var/lib/iris/sql/migrate-3.144.sql
-psql tms -f /var/lib/iris/sql/migrate-3.145.sql</pre>
-<p>
-	Warning: there is no supported method of <b>downgrading</b> an IRIS
-	system.
-	If a downgrade is required, the database should be restored from a
-	backup and the IRIS rpm should be reinstalled.
-</p>
-
-<h3 id="system_updates">System Software Updates</h3>
-FIXME
-
-<h3 id="monitoring_logs">Monitoring Logs</h3>
-FIXME
 
 </main>
 
