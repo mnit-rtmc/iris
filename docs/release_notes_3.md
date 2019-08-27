@@ -669,6 +669,7 @@
 
  - System attributes now have tooltips describing their function.
  - System attributes have been changed to be more consistent.
+
    Old Attribute                    | New Attribute
    ---------------------------------|------------------------------
    cameraviewer_num_preset_btns     | camera_num_presest_btns
@@ -703,6 +704,7 @@
    is no longer required.  Instructions for building and installing IRIS are now
    included in the docs/ directory.
  - Directory locations have been changed to be more consistent.
+
    Old Location        | New Location
    --------------------|-----------------------
    /data/meter/        | /var/lib/iris/meter/
@@ -711,6 +713,7 @@
    /var/local/tms/dds/ | /var/lib/iris/xml/
    /var/log/tms/       | /var/log/iris/
    /var/www/html/iris/ | /var/www/html/iris-client/
+
  - Properties files have been cleaned up, with some properties being renamed.
  - Moved email configuration out of .properties files to System Attributes.
    New System Attributes are: email_smtp_host, email_sender_server,
