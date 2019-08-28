@@ -659,6 +659,8 @@ public class IncidentDispatcher extends IPanel
 		if (multi != null && sev != null) {
 			String ms = multi.toString();
 			DmsMsgPriority prio = sev.priority;
+			if (inc.getCleared())
+				prio = DmsMsgPriority.PSA;
 			DMS dms = DMSHelper.lookup(dn);
 			if (dms != null) {
 				SignConfig sc = dms.getSignConfig();
