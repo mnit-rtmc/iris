@@ -41,8 +41,7 @@ public class IncDescriptorHelper extends BaseHelper {
 			IncDescriptor dsc = it.next();
 			if (dsc.getEventType() == inc.getEventType() &&
 			    dsc.getDetail() == inc.getDetail() &&
-			    dsc.getLaneType() == inc.getLaneType() &&
-			    dsc.getCleared() == inc.getCleared())
+			    dsc.getLaneType() == inc.getLaneType())
 				return dsc;
 		}
 		return null;
