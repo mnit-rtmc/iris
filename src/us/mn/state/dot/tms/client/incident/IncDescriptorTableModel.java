@@ -113,7 +113,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 	@Override
 	protected ArrayList<ProxyColumn<IncDescriptor>> createColumns() {
 		ArrayList<ProxyColumn<IncDescriptor>> cols =
-			new ArrayList<ProxyColumn<IncDescriptor>>(6);
+			new ArrayList<ProxyColumn<IncDescriptor>>(5);
 		cols.add(new ProxyColumn<IncDescriptor>("incident.type", 100) {
 			public Object getValueAt(IncDescriptor dsc) {
 				return EventType.fromId(dsc.getEventType());
@@ -181,22 +181,6 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 			protected TableCellEditor createCellEditor() {
 				return new DefaultCellEditor(IncidentCreator
 					.createLaneTypeCombo());
-			}
-		});
-		cols.add(new ProxyColumn<IncDescriptor>("incident.clear", 50,
-			Boolean.class)
-		{
-			public Object getValueAt(IncDescriptor dsc) {
-				return dsc.getCleared();
-			}
-			public boolean isEditable(IncDescriptor dsc) {
-				return canWrite(dsc);
-			}
-			public void setValueAt(IncDescriptor dsc, Object value){
-				if (value instanceof Boolean) {
-					Boolean b = (Boolean) value;
-					dsc.setCleared(b);
-				}
 			}
 		});
 		cols.add(new ProxyColumn<IncDescriptor>("dms.multi.string", 300)
@@ -281,10 +265,6 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				int lt1 = dsc1.getLaneType();
 				if (lt0 != lt1)
 					return lt0 - lt1;
-				boolean cl0 = dsc0.getCleared();
-				boolean cl1 = dsc1.getCleared();
-				if (cl0 != cl1)
-					return Boolean.compare(cl0, cl1);
 				return dsc0.getName().compareTo(dsc1.getName());
 			}
 		};

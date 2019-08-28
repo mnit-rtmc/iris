@@ -69,9 +69,6 @@ can have an associated **detail** (*animal, debris, ice, etc*).
 The **lane type** at the incident can be `mainline`, `exit`, `merge` or
 `CD road`.
 
-**Cleared** can be `YES` or `NO`, and indicates whether the incident has just
-cleared.
-
 ## Locator
 
 A matching *locator* determines the second line of a suggested message.  The
