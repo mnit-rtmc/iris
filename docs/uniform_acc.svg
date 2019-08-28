@@ -8,7 +8,7 @@
        style="overflow:visible;">
       <path
          d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z"
-         style="fill:#999922;stroke-width:0.1em;marker-start:none;"
+         style="fill:#999966;stroke-width:0.1em;marker-start:none;"
          transform="scale(0.5) rotate(180) translate(10,0)" />
     </marker>
     <marker id="Arrow1Lend"
@@ -18,12 +18,12 @@
        style="overflow:visible;">
       <path
          d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z"
-         style="fill:#999922;stroke-width:0.1em;marker-start:none;"
+         style="fill:#999966;stroke-width:0.1em;marker-start:none;"
          transform="scale(0.8) rotate(180) translate(12.5,0)" />
     </marker>
   </defs>
 
-  <g style="fill:#999922">
+  <g style="fill:#999966">
     <g transform="rotate(-90) translate(-120,16)">
       <text style="font-size:1em">
          <tspan x="0" y="0">Speed</tspan>
@@ -49,7 +49,7 @@
   <circle cx="80" cy="52" r="4" style="fill:blue" />
   <circle cx="168" cy="124" r="4" style="fill:blue" />
 
-  <g style="stroke:#999922;fill:#999922">
+  <g style="stroke:#999966;fill:#999966">
     <path style="marker-end:url(#Arrow1Lend)" d="m 24,176 0,-160" />
     <path style="marker-end:url(#Arrow1Lend)" d="m 40,192 200,0" />
     <path style="stroke-dasharray:2,3" d="m 32,52 40,0" />
