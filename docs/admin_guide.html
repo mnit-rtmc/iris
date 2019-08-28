@@ -64,7 +64,7 @@
     <h3><a href="#travel_time">Travel Time Estimation</a></h3>
     <h3><a href="#slow">Slow Traffic Warning</a></h3>
     <h3><a href="#tolling">Tolling</a></h3>
-    <h3><a href="#parking">Parking Area Availability</a></h3>
+    <h3><a href="parking.html">Parking Area Availability</a></h3>
     <h3><a href="vsa.html">Variable Speed Advisory</a></h3>
   </div>
   <h2><a id="troubleshooting_link" href="troubleshooting.html">Troubleshooting</a></h2>
@@ -287,7 +287,7 @@
 	<li><a href="#travel_time">Travel time</a> estimation</li>
 	<li><a href="#slow">Slow traffic warning</a></li>
 	<li><a href="#tolling">Toll</a> lane operation</li>
-	<li><a href="#parking">Parking area</a> availability</li>
+	<li><a href="parking.html">Parking area</a> availability</li>
 </ul>
 
 <h2 id="installation">Installation</h2>
@@ -3290,7 +3290,7 @@ FIXME
 	</tr>
 	<tr>
 	    <td>[pa<i>i</i>,<i>l</i>,<i>c</i>]</td>
-	    <td><a href="#parking">Parking area availability</a></td>
+	    <td><a href="parking.html">Parking area availability</a></td>
 	</tr>
 	<tr>
 	    <td>[slow<i>s</i>,<i>b</i>,<i>u</i>,<i>dist</i>]</td>
@@ -3557,35 +3557,6 @@ FIXME
 	to build a list of trips for each tag ID.
 	This information can be used to bill customers.
 </p>
-
-<h3 id="parking">Parking Areas</h3>
-<p>
-	A parking area could be a rest area or a parking garage.
-	The number of available parking spaces can be published on the web,
-	or displayed on a DMS.
-</p>
-<p>
-	A special <a href="#road_topology">corridor</a> must be associated with
-	the parking area in order to allow counting available spaces.
-	Within that corridor, detectors with the <b>parking</b> lane type will
-	be used.
-	Lanes 1 (front) and 2 (rear) are reserved for a <em>head</em> parking
-	space.
-	If applicable, lanes 3 (front) and 4 (rear) are for the <em>tail</em>.
-</p>
-<h4>Parking Area Availability</h4>
-<p>
-	A <b>pa</b> <a href="#action_tag">action tag</a> is replaced with the
-	number of available parking spaces to be displayed on a DMS.
-	The tag has three parameters, separated by commas.
-</p>
-<ol>
-	<li>Parking area ID</li>
-	<li>Text to display if available spaces is below the low threshold.
-	</li>
-	<li>Text to display if parking area is closed.
-	</li>
-</ol>
 
 </main>
 
