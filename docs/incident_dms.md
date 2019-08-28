@@ -43,19 +43,17 @@ Impact | Description               | Mainline   | CD/Exit  | Merge
  1     | `left_lanes_blocked`      | `normal`   | `minor`  | —
  2     | `right_lanes_blocked`     | `normal`   | `minor`  | —
  3     | `center_lanes_blocked`    | `normal`   | `minor`  | —
- 4     | `lanes_blocked`           | `normal`   | `minor`  | —
- 5     | `both_shoulders_blocked`  | `normal`   | `minor`  | —
- 6     | `left_shoulder_blocked`   | `normal`   | `minor`  | —
- 7     | `right_shoulder_blocked`  | `normal`   | `minor`  | —
- 8     | `all_lanes_affected`      | `minor`    | —        | —
- 9     | `left_lanes_affected`     | `minor`    | —        | —
-10     | `right_lanes_affected`    | `minor`    | —        | —
-11     | `center_lanes_affected`   | `minor`    | —        | —
-12     | `lanes_affected`          | `minor`    | —        | —
-13     | `both_shoulders_affected` | `minor`    | —        | —
-14     | `left_shoulder_affected`  | `minor`    | —        | —
-15     | `right_shoulder_affected` | `minor`    | —        | —
-16     | `all_free_flowing`        | —          | —        | —
+ 4     | `both_shoulders_blocked`  | `normal`   | `minor`  | —
+ 5     | `left_shoulder_blocked`   | `normal`   | `minor`  | —
+ 6     | `right_shoulder_blocked`  | `normal`   | `minor`  | —
+ 7     | `all_lanes_affected`      | `minor`    | —        | —
+ 8     | `left_lanes_affected`     | `minor`    | —        | —
+ 9     | `right_lanes_affected`    | `minor`    | —        | —
+10     | `center_lanes_affected`   | `minor`    | —        | —
+11     | `both_shoulders_affected` | `minor`    | —        | —
+12     | `left_shoulder_affected`  | `minor`    | —        | —
+13     | `right_shoulder_affected` | `minor`    | —        | —
+14     | `all_free_flowing`        | —          | —        | —
 
 ## Descriptor
 
@@ -125,7 +123,14 @@ cleared.
 
 ## Clearing
 
-When the incident is cleared, all associated signs are blanked.  The only
-exception is for `major` incidents.  In that case, another match is performed
-with *cleared* set to `YES`.  If a matching message is found, it will be
-deployed with `PSA` message priority for 5 minutes.
+When the incident is cleared, all associated signs are matched again with
+*cleared* set to `YES`.  If a matching message is found, it will be deployed
+with `PSA` message priority for 5 minutes.  If not, the previous message is
+blanked.
+
+## Updating
+
+If any devices are associated with an incident when an update is logged, the
+device deploy logic will be checked again.  If any devices have proposed
+changes, the device deploy form will appear.  All proposed changes will be
+listed in the form, including new devices and any devices to be blanked.
