@@ -212,10 +212,12 @@ public class UpstreamDeviceFinder {
 		CorridorBase<R_Node> cb = finder.lookupCorridor(name);
 		if (cb != null) {
 			R_Node n = cb.findFork(loc);
-			GeoLoc eloc = n.getGeoLoc();
-			if (eloc != null) {
-				scanners.add(new CorScanner(eloc, num_exits,
-					dist));
+			if (n != null) {
+				GeoLoc eloc = n.getGeoLoc();
+				if (eloc != null) {
+					scanners.add(new CorScanner(eloc,
+						num_exits, dist));
+				}
 			}
 		}
 	}
