@@ -63,7 +63,7 @@
     <h3><a href="#metering_strategies">Ramp Metering Strategies</a></h3>
     <h3><a href="#travel_time">Travel Time Estimation</a></h3>
     <h3><a href="#slow">Slow Traffic Warning</a></h3>
-    <h3><a href="#tolling">Tolling</a></h3>
+    <h3><a href="tolling.html">Tolling</a></h3>
     <h3><a href="parking.html">Parking Area Availability</a></h3>
     <h3><a href="vsa.html">Variable Speed Advisory</a></h3>
   </div>
@@ -286,7 +286,7 @@
 	    </a></li>
 	<li><a href="#travel_time">Travel time</a> estimation</li>
 	<li><a href="#slow">Slow traffic warning</a></li>
-	<li><a href="#tolling">Toll</a> lane operation</li>
+	<li><a href="tolling.html">Toll</a> lane operation</li>
 	<li><a href="parking.html">Parking area</a> availability</li>
 </ul>
 
@@ -2889,7 +2889,7 @@ FIXME
 	A tag reader is a sensor for in-vehicle transponders (tags).
 	When a tag is read, an event is logged in the database.
 	The event includes the date and time, tag ID, toll zone and tollway.
-	This information can be used for <a href="#tolling">tolling</a>
+	This information can be used for <a href="tolling.html">tolling</a>
 	operation.
 </p>
 
@@ -3302,7 +3302,7 @@ FIXME
 	</tr>
 	<tr>
 	    <td>[tz<i>{p,o,c}</i>,<i>{tz0},</i>…<i>{tzn}</i>]</td>
-	    <td><a href="#tolling">Toll Zone</a></td>
+	    <td><a href="tolling.html">Toll Zone</a></td>
 	</tr>
 	<tr>
 	    <td>[vsa]</td>
@@ -3482,81 +3482,6 @@ FIXME
 	<dt>[slow45,5,speed] MPH[nl]1/2 MILE[nl]AHEAD</dt>
 	<dd>Displays if traffic slower than 45 mph within 0.5 miles</dd>
 </dl>
-
-<h3 id="tolling">Tolling</h3>
-<p>
-	High-occupancy / toll (HOT) lanes can be operated through IRIS.
-	Functions include calculating tolls in real time based on density,
-	displaying prices on DMS, and logging vehicle <a href="#tag_readers">
-	transponder (tag)</a> information.
-	Customer accounts and billing are not supported; those features must
-	be provided by an external system.
-</p>
-<h4>Toll Zones</h4>
-<aside>
-	Select <span class="menu">View ➔ Lane Use ➔ Toll Zones</span> menu item
-</aside>
-<p>
-	A toll zone is a segment of roadway between two
-	<a href="#station">stations</a>.
-	All HOT lane detectors between the starting station and ending station
-	can be used to calculate the toll.
-	Every 3 minutes, tolls are calculated using data from the most recent 6
-	minutes.
-	Within a zone, each station has an associated toll, based on the highest
-	density recorded among HOT lane detectors downstream of that station.
-</p>
-<div class="label">p = α ⋅ k <sup>β</sup>, where α = 0.045 and β = 1.10</div>
-<p>
-	The toll price is then rounded to the nearest $0.25.
-</p>
-<h4>Pricing on DMS</h4>
-<p>
-	A DMS can display pricing information for toll zones.
-	This is accomplished using a <b>tz</b> <a href="#action_tag">action
-	tag</a>.
-	The tag has two or more parameters, separated by commas.
-	The first parameter is the tolling mode, and must be "<i>p</i>",
-	"<i>o</i>" or "<i>c</i>".
-	These indicate <i>priced</i>, <i>open</i> or <i>closed</i>,
-	respectively.
-	The second parameter is the (first) toll zone ID.
-	If the toll route spans multiple toll zones, additional zone IDs may be
-	provided after the first.
-</p>
-<p>
-	If the tolling mode is <i>priced</i>, the tag will be replaced with the
-	calculated price, for example "2.75".
-	It will be the sum of prices for all specified toll zones.
-	The values of <a href="#sys_attr"><code>toll_min_price</code></a> and
-	<a href="#sys_attr"><code>toll_max_price</code></a> limit the calculated
-	price.
-</p>
-<p>
-	For <i>open</i> and <i>closed</i> modes, the tag will be replaced with
-	an empty string.
-	If required, a message such as "OPEN" or "CLOSED" may be appended after
-	the tag.
-</p>
-<p>
-	Price events are logged when a message is sent to a DMS, and again when
-	the message is verified.
-	The price event includes the date and time, toll zone, tolling mode
-	(<i>priced</i>, <i>open</i>, <i>closed</i>), price, sent / verified
-	status and next downstream tag reader.
-	The logged toll zone is the last zone specified in the tag.
-	In <i>priced</i> mode, the displayed price is logged.
-	For <i>open</i> or <i>closed</i>, a price of 0 is logged.
-</p>
-<h4>Tag Readers</h4>
-<p>
-	<a href="#tag_readers">Tag readers</a> can be mounted over a tolled lane
-	to record customer trips.
-	These are typically located just downstream of a pricing DMS.
-	The tag read events can be combined with the logged pricing information
-	to build a list of trips for each tag ID.
-	This information can be used to bill customers.
-</p>
 
 </main>
 
