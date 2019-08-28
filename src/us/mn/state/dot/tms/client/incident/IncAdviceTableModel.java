@@ -53,7 +53,7 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 	protected ArrayList<ProxyColumn<IncAdvice>> createColumns() {
 		ArrayList<ProxyColumn<IncAdvice>> cols =
 			new ArrayList<ProxyColumn<IncAdvice>>(8);
-		cols.add(new ProxyColumn<IncAdvice>("incident.impact", 192) {
+		cols.add(new ProxyColumn<IncAdvice>("incident.impact", 160) {
 			public Object getValueAt(IncAdvice adv) {
 				return IncImpact.fromOrdinal(adv.getImpact());
 			}
@@ -72,37 +72,25 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<IncAdvice>("incident.impacted.lanes",
-			96, Integer.class)
-		{
+		cols.add(new ProxyColumn<IncAdvice>("incident.lane_type", 80) {
 			public Object getValueAt(IncAdvice adv) {
-				return adv.getImpactedLanes();
+				return LaneType.fromOrdinal(adv.getLaneType());
 			}
 			public boolean isEditable(IncAdvice adv) {
 				return canWrite(adv);
 			}
 			public void setValueAt(IncAdvice adv, Object value) {
-				adv.setImpactedLanes((value instanceof Integer)
-					? (Integer) value
-					: null);
+				if (value instanceof LaneType) {
+					LaneType lt = (LaneType) value;
+					adv.setLaneType((short) lt.ordinal());
+				}
+			}
+			protected TableCellEditor createCellEditor() {
+				return new DefaultCellEditor(IncidentCreator
+					.createLaneTypeCombo());
 			}
 		});
-		cols.add(new ProxyColumn<IncAdvice>("incident.open.lanes", 96,
-			Integer.class)
-		{
-			public Object getValueAt(IncAdvice adv) {
-				return adv.getOpenLanes();
-			}
-			public boolean isEditable(IncAdvice adv) {
-				return canWrite(adv);
-			}
-			public void setValueAt(IncAdvice adv, Object value) {
-				adv.setOpenLanes((value instanceof Integer)
-					? (Integer) value
-					: null);
-			}
-		});
-		cols.add(new ProxyColumn<IncAdvice>("incident.range", 96) {
+		cols.add(new ProxyColumn<IncAdvice>("incident.range", 64) {
 			public Object getValueAt(IncAdvice adv) {
 				return IncRange.fromOrdinal(adv.getRange());
 			}
@@ -121,22 +109,34 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<IncAdvice>("incident.lane_type", 96) {
+		cols.add(new ProxyColumn<IncAdvice>("incident.impacted.lanes",
+			112, Integer.class)
+		{
 			public Object getValueAt(IncAdvice adv) {
-				return LaneType.fromOrdinal(adv.getLaneType());
+				return adv.getImpactedLanes();
 			}
 			public boolean isEditable(IncAdvice adv) {
 				return canWrite(adv);
 			}
 			public void setValueAt(IncAdvice adv, Object value) {
-				if (value instanceof LaneType) {
-					LaneType lt = (LaneType) value;
-					adv.setLaneType((short) lt.ordinal());
-				}
+				adv.setImpactedLanes((value instanceof Integer)
+					? (Integer) value
+					: null);
 			}
-			protected TableCellEditor createCellEditor() {
-				return new DefaultCellEditor(IncidentCreator
-					.createLaneTypeCombo());
+		});
+		cols.add(new ProxyColumn<IncAdvice>("incident.open.lanes", 80,
+			Integer.class)
+		{
+			public Object getValueAt(IncAdvice adv) {
+				return adv.getOpenLanes();
+			}
+			public boolean isEditable(IncAdvice adv) {
+				return canWrite(adv);
+			}
+			public void setValueAt(IncAdvice adv, Object value) {
+				adv.setOpenLanes((value instanceof Integer)
+					? (Integer) value
+					: null);
 			}
 		});
 		cols.add(new ProxyColumn<IncAdvice>("incident.clear", 50,
@@ -198,12 +198,20 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				int imp1 = adv1.getImpact();
 				if (imp0 != imp1)
 					return imp0 - imp1;
+				int lt0 = adv0.getLaneType();
+				int lt1 = adv0.getLaneType();
+				if (lt0 != lt1)
+					return lt0 - lt1;
+				int r0 = adv0.getRange();
+				int r1 = adv1.getRange();
+				if (r0 != r1)
+					return r0 - r1;
 				Integer il0 = adv0.getImpactedLanes();
 				Integer il1 = adv1.getImpactedLanes();
 				if (il0 != il1) {
-					if (il0 == null)
+					if (il1 == null)
 						return -1;
-					else if (il1 == null)
+					else if (il0 == null)
 						return 1;
 					else
 						return il0.compareTo(il1);
@@ -211,21 +219,13 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				Integer ol0 = adv0.getOpenLanes();
 				Integer ol1 = adv1.getOpenLanes();
 				if (ol0 != ol1) {
-					if (ol0 == null)
+					if (ol1 == null)
 						return -1;
-					else if (ol1 == null)
+					else if (ol0 == null)
 						return 1;
 					else
 						return ol0.compareTo(ol1);
 				}
-				int r0 = adv0.getRange();
-				int r1 = adv1.getRange();
-				if (r0 != r1)
-					return r0 - r1;
-				int lt0 = adv0.getLaneType();
-				int lt1 = adv0.getLaneType();
-				if (lt0 != lt1)
-					return lt0 - lt1;
 				boolean cl0 = adv0.getCleared();
 				boolean cl1 = adv1.getCleared();
 				if (cl0 != cl1)
