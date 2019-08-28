@@ -88,8 +88,8 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	}
 
 	/** Create an incident advice */
-	private IncAdviceImpl(String n, int imp, int iln, int oln, int r,
-		short lt, boolean c, String m, String a)
+	private IncAdviceImpl(String n, int imp, Integer iln, Integer oln,
+		int r, short lt, boolean c, String m, String a)
 	{
 		super(n);
 		impact = imp;
