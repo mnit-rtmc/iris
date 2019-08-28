@@ -29,7 +29,7 @@ public enum IncImpact {
 	left_lanes_blocked,      // 1
 	right_lanes_blocked,     // 2
 	center_lanes_blocked,    // 3
-	lanes_blocked,           // 4
+	lanes_blocked,           // 4 (FIXME: remove this!)
 	both_shoulders_blocked,  // 5
 	left_shoulder_blocked,   // 6
 	right_shoulder_blocked,  // 7
@@ -38,7 +38,7 @@ public enum IncImpact {
 	left_lanes_affected,     // 9
 	right_lanes_affected,    // 10
 	center_lanes_affected,   // 11
-	lanes_affected,          // 12
+	lanes_affected,          // 12 (FIXME: remove this!)
 	both_shoulders_affected, // 13
 	left_shoulder_affected,  // 14
 	right_shoulder_affected, // 15
@@ -65,10 +65,8 @@ public enum IncImpact {
 					return IncImpact.left_lanes_blocked;
 				else if (isRightLane(li, LaneImpact.BLOCKED))
 					return IncImpact.right_lanes_blocked;
-				else
-					return IncImpact.center_lanes_blocked;
-			} else
-				return IncImpact.lanes_blocked;
+			}
+			return IncImpact.center_lanes_blocked;
 		} else if (isBothShoulders(li, LaneImpact.BLOCKED))
 			return IncImpact.both_shoulders_blocked;
 		else if (isLeftShoulder(li, LaneImpact.BLOCKED))
@@ -84,10 +82,8 @@ public enum IncImpact {
 					return IncImpact.left_lanes_affected;
 				else if (isRightLane(li, LaneImpact.AFFECTED))
 					return IncImpact.right_lanes_affected;
-				else
-					return IncImpact.center_lanes_affected;
-			} else
-				return IncImpact.lanes_affected;
+			}
+			return IncImpact.center_lanes_affected;
 		} else if (isBothShoulders(li, LaneImpact.AFFECTED))
 			return IncImpact.both_shoulders_affected;
 		else if (isLeftShoulder(li, LaneImpact.AFFECTED))
