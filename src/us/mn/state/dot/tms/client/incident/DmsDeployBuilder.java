@@ -148,8 +148,9 @@ public class DmsDeployBuilder {
 
 	/** Check if a DMS is on same corridor as incident */
 	private boolean isCorridorSame(DMS dms) {
-		IncidentLoc iloc = new IncidentLoc(inc);
-		return GeoLocHelper.matches(iloc, dms.getGeoLoc());
+		GeoLoc loc = dms.getGeoLoc();
+		return loc.getRoadway() == inc.getRoad()
+                    && loc.getRoadDir() == inc.getDir();
 	}
 
 	/** Check if MULTI string or abbreviation will fit on a DMS */
