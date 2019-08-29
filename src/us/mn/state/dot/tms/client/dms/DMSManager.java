@@ -122,7 +122,7 @@ public class DMSManager extends DeviceManager<DMS> {
 	/** Create a list cell renderer */
 	@Override
 	public ListCellRenderer<DMS> createCellRenderer() {
-		return new DmsCellRenderer(getCellSize()) {
+		return new DmsCellRenderer(session, getCellSize()) {
 			@Override protected RasterGraphic getPageOne(DMS dms) {
 				return rasters.get(dms);
 			}

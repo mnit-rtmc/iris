@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -31,7 +32,9 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.RasterGraphic;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.CellRendererSize;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -84,6 +87,9 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 	/** Prototype name */
 	static private final String PROTOTYPE_NAME = "VM999W99X_9";
 
+	/** User session */
+	protected final Session session;
+
 	/** DMS cell renderer mode */
 	private final DmsRendererMode mode;
 
@@ -91,25 +97,29 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 	private final DefaultListCellRenderer cell =
 		new DefaultListCellRenderer();
 
-	/** Title bar */
-	private final JPanel title = new JPanel();
+	/** Title panel */
+	private final JPanel title_pnl = new JPanel();
 
-	/** The label that displays the sign ID */
+	/** Sign ID label */
 	private final JLabel name_lbl = new JLabel();
 
-	/** The label for the owner */
+	/** Message owner label */
 	private final JLabel owner_lbl = new ILabel("", Font.ITALIC, 0.8f);
-
-	/** The label that displays the sign location */
-	private final JLabel loc_lbl = new JLabel();
 
 	/** Sign pixel panel to display sign message */
 	private final SignPixelPanel pixel_pnl = new SignPixelPanel(50, 200);
 
+	/** Location panel */
+	private final JPanel loc_pnl = new JPanel();
+
+	/** Sign location label */
+	private final JLabel loc_lbl = new JLabel();
+
 	/** Create a new DMS cell renderer.
 	 * @param sz StyleSummary renderer cell size. */
-	public DmsCellRenderer(CellRendererSize sz) {
+	public DmsCellRenderer(Session s, CellRendererSize sz) {
 		super(new BorderLayout());
+		session = s;
 		mode = DmsRendererMode.determine(sz);
 		initialize();
 	}
@@ -142,31 +152,31 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 
 	/** Initialize a small size DMS cell renderer */
 	private void initSmall() {
-		title.setLayout(new GridLayout(1, 1));
-		title.add(name_lbl);
-		add(title);
+		title_pnl.setLayout(new GridLayout(1, 1));
+		title_pnl.add(name_lbl);
+		add(title_pnl);
 	}
 
 	/** Initialize a medium size DMS cell renderer */
 	private void initMedium() {
-		title.setLayout(new GridLayout(1, 1));
-		title.add(name_lbl);
-		add(title, BorderLayout.NORTH);
+		title_pnl.setLayout(new GridLayout(1, 1));
+		title_pnl.add(name_lbl);
+		add(title_pnl, BorderLayout.NORTH);
 		add(pixel_pnl, BorderLayout.CENTER);
 	}
 
 	/** Initialize a large size DMS cell renderer */
 	private void initLarge() {
-		title.setLayout(new BoxLayout(title, BoxLayout.X_AXIS));
-		title.add(name_lbl);
-		title.add(Box.createGlue());
-		title.add(owner_lbl);
-		Box box = Box.createHorizontalBox();
-		box.add(loc_lbl);
-		box.add(Box.createGlue());
-		add(title, BorderLayout.NORTH);
+		title_pnl.setLayout(new BoxLayout(title_pnl, BoxLayout.X_AXIS));
+		title_pnl.add(name_lbl);
+		title_pnl.add(Box.createGlue());
+		title_pnl.add(owner_lbl);
+		loc_pnl.setLayout(new BoxLayout(loc_pnl, BoxLayout.X_AXIS));
+		loc_pnl.add(loc_lbl);
+		loc_pnl.add(Box.createGlue());
+		add(title_pnl, BorderLayout.NORTH);
 		add(pixel_pnl, BorderLayout.CENTER);
-		add(box, BorderLayout.SOUTH);
+		add(loc_pnl, BorderLayout.SOUTH);
 	}
 
 	/** Check if the background is opaque */
@@ -183,9 +193,9 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		if (isSelected) {
 			Component temp = cell.getListCellRendererComponent(list,
 				dms, index, isSelected, cellHasFocus);
-			title.setBackground(temp.getBackground());
+			title_pnl.setBackground(temp.getBackground());
 		} else
-			title.setBackground(name_lbl.getBackground());
+			title_pnl.setBackground(name_lbl.getBackground());
 		setDMS(dms);
 		return this;
 	}
@@ -194,11 +204,20 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 	private void setDMS(DMS dms) {
 		String name = dms.getName();
 		name_lbl.setText(name);
-		String loc = GeoLocHelper.getDescription(dms.getGeoLoc());
-		loc_lbl.setText(loc);
-		updateToolTip(dms, name, loc);
 		owner_lbl.setText(getOwner(dms));
 		updatePixelPanel(dms);
+		String loc = GeoLocHelper.getDescription(dms.getGeoLoc());
+		updateToolTip(dms, name, loc);
+		loc_lbl.setText(loc);
+		loc_pnl.setBackground(getLocBackground(dms));
+	}
+
+	/** Get background color of location panel */
+	private Color getLocBackground(DMS dms) {
+		Incident inc = DMSHelper.lookupIncident(dms);
+		return (inc != null)
+		      ? session.getIncidentManager().getStyle(inc).fill_color
+		      : null;
 	}
 
 	/** Get the owner user name (may be overridden) */
