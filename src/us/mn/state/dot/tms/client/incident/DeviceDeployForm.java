@@ -96,7 +96,7 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 	protected void initialize() {
 		list.setCellRenderer(new ProposedDeviceCellRenderer(session,
 			model));
-		list.setVisibleRowCount(model.getSize());
+		list.setVisibleRowCount(Math.min(model.getSize(), 6));
 		add(createPanel());
 		super.initialize();
 		updateButtons();
