@@ -13,9 +13,15 @@ If applicable, lanes 3 (front) and 4 (rear) are for the _tail_.
 
 ### Parking Area Action Tag
 
-A `[pa]` [action tag](admin_guide.html#action_tag) is replaced with the number
+A `[pa…]` [action tag](admin_guide.html#action_tag) is replaced with the number
 of available parking spaces to be displayed on a DMS.  The tag has three
 parameters, separated by commas.
  - Parking area ID
  - Text to display if available spaces is below the low threshold
  - Text to display if parking area is closed
+
+#### Example
+
+```
+REST AREA 2 MILES[nl]PARKING [pa1,LOW,CLOSED]
+```

@@ -24,7 +24,7 @@ The toll price is then rounded to the nearest $0.25.
 ### Pricing on DMS
 
 A DMS can display pricing information for toll zones.  This is accomplished
-using a `[tz]` [action tag](admin_guide.html#action_tag).  The tag has two or
+using a `[tz…]` [action tag](admin_guide.html#action_tag).  The tag has two or
 more parameters, separated by commas.  The first parameter is the tolling mode,
 and must be `p`, `o` or `c`.  These indicate _priced_, _open_ or _closed_,
 respectively.  The second parameter is the (first) toll zone ID.  If the toll
