@@ -1,10 +1,9 @@
 # Variable Speed Advisory
 
-The `[vsa]` [action tag](admin_guide.html#action_tag) is used to display speed
-advisory warnings on signs.  It will cause a message to be displayed only when
-approaching congestion — otherwise the message will be blank.  The tag itself
-will be replaced with an _advisory speed_, but the rest of the message can be
-any valid MULTI string.
+The `[vsa]` [action tag] is used to display speed advisory warnings on signs.
+It will cause a message to be displayed only when approaching congestion —
+otherwise the message will be blank.  The tag itself will be replaced with an
+_advisory speed_, but the rest of the message can be any valid MULTI string.
 
 ![Uniform Acceleration](uniform_acc.svg)
 
@@ -69,3 +68,6 @@ Light rain    | -1200 | -800    | -600
 Moderate rain | -1050 | -700    | -525
 Heavy rain    | -900  | -600    | -450
 Ice           | -750  | -500    | -375
+
+
+[action tag]: admin_guide.html#action_tag

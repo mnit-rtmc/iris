@@ -14,7 +14,7 @@ commas.
     - `blank`: do not display travel time when over limit
     - `prepend`: prepend over limit text before travel time
     - `append`: append over limit text after travel time
- 3. Over limit text ("OVER " if omitted)
+ 3. Over limit text (`OVER ` if omitted)
 
 NOTE: multiple destinations can be included on the same message by specifying
 multiple `[tt…]` tags.
@@ -47,7 +47,7 @@ _entrance_ r_node.  In order to match, the **roadway / direction** for the exit
 r_node must equal the **cross street / direction** for the entrance, and vice
 versa.
 
-Two system attributes control route pathfinding.  `route_max_legs` is the
+Two [system attribute]s control route pathfinding.  `route_max_legs` is the
 maximum number of corridors to branch.  `route_max_miles` is the maximum total
 route distance.
 
@@ -81,14 +81,15 @@ route branches, each branch adds a 1 minute **turning delay**.
 ### Travel Time Limit
 
 To prevent unreasonable messages from being displayed due to data errors, a
-limit is calculated.  The total route length is divided by
-[`travel_time_min_mph`].  The result, rounded up the to next 5 minutes, is the
-**travel time limit**.
+limit is calculated.  The total route length is divided by the value of the
+`travel_time_min_mph` [system attribute].  The result, rounded up the to next 5
+minutes, is the **travel time limit**.
 
 If the calculated travel time is over the travel time limit, the message will be
 **over limit**.  If the over limit mode is `blank`, no message will be shown.
 Otherwise, the tag will be replaced with the travel time limit, with the over
 limit text either prepended or appended.
+
 
 [action tag]: admin_guide.html#action_tag
 [node type]: admin_guide.html#r_node_type
@@ -96,6 +97,6 @@ limit text either prepended or appended.
 [road topology]: admin_guide.html#road_topology
 [station]: admin_guide.html#station
 [station ID]: admin_guide.html#station_id
-[`travel_time_min_mph`]: admin_guide.html#sys_attr
+[system attribute]: admin_guide.html#sys_attr
 [vehicle detection systems]: admin_guide.html#vds
 [speed limit]: admin_guide.html#speed_limit

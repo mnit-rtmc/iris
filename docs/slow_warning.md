@@ -1,8 +1,7 @@
 ## Slow Traffic Warning
 
-The `[slow…]` [action tag](admin_guide.html#action_tag) allows warnings to be
-displayed on DMS when traffic is slow.  The tag has three parameters, separated
-by commas.
+The `[slow…]` [action tag] allows warnings to be displayed on DMS when traffic
+is slow.  The tag has three parameters, separated by commas.
 
  1. Highest speed to activate the warning, in mph.
  2. Distance (tenths of mile) to search for slow traffic, relative to the DMS
@@ -28,3 +27,6 @@ Display message if traffic slower than 45 mph within 0.5 miles:
 ```
 [slow45,5,speed] MPH[nl]1/2 MILE[nl]AHEAD
 ```
+
+
+[action tag]: admin_guide.html#action_tag

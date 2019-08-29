@@ -2,10 +2,10 @@
 
 ### Building
 
-Install [Fedora](http://fedoraproject.org) onto the development system.  Some
-additional development packages must be installed.
+Install [Fedora] onto the development system.  Some additional development
+packages must be installed.
 ```
-dnf install java-devel-openjdk ant-junit git rpm-build gcc
+dnf install java-devel-openjdk ant-junit git rpm-build gcc cargo
 ```
 
 In a suitable development directory, clone the iris git repository.
@@ -18,8 +18,8 @@ Create lib/ directory in iris development repository.
 mkdir iris/lib/
 ```
 
-Download the [JavaMail jar](https://javaee.github.io/javamail/#Download_JavaMail_Release)
-Copy the `javax.mail.jar` file to the lib/ directory in the iris repository.
+Download the [JavaMail jar] and copy the `javax.mail.jar` file to the lib/
+directory in the iris repository.
 
 Copy `iris-build.properties` from `etc/` to `lib/`.
 Edit `lib/iris-build.properties` file as necessary for your organization.
@@ -48,10 +48,9 @@ If there are no errors, the new rpm file should be in the
 
 ### Contributing
 
-[Bug reports](https://github.com/mnit-rtmc/iris/issues) and feature requests
-are welcome and encouraged!  Please create an issue and discuss before making a
-[pull request](https://github.com/mnit-rtmc/iris/pulls).  All patches must be
-licensed under the GPL.
+[Bug reports] and feature requests are welcome and encouraged!  Please create an
+issue and discuss before making a [pull request].  All patches must be licensed
+under the GPL.
 
 ### Future Plans
 
@@ -105,3 +104,9 @@ their operands by a space.
 **April 2011** — Officially adopted by Caltrans
 
 **November 2014** — Adopted by Wyoming Department of Transportation
+
+
+[Bug reports]: https://github.com/mnit-rtmc/iris/issues
+[Fedora]: http://fedoraproject.org
+[JavaMail jar]: https://javaee.github.io/javamail/#Download_JavaMail_Release
+[pull request]: https://github.com/mnit-rtmc/iris/pulls

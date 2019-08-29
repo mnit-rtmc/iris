@@ -2,7 +2,7 @@
 
 ### Create DMS, Comm Link, and Controller
 
- 1. Make sure [edit mode](admin_guide.html#edit_mode) is **ON**
+ 1. Make sure [edit mode] is **ON**
  2. Create a new **DMS**
     - Select the `View ➔ Message Signs ➔ DMS` menu item to display the DMS form
     - Type the name of the new DMS in the text field at the bottom of the form
@@ -44,7 +44,7 @@
 
 ### Create Plan to Activate DMS Messages
 
- 1. Make sure [edit mode](admin_guide.html#edit_mode) is **ON**.
+ 1. Make sure [edit mode] is **ON**.
  2. Select the `View ➔ Plans and Schedules` menu item to display the **Plans and
     Schedules** form.
  3. Create a Phase (if it doesn't exist already)
@@ -68,8 +68,7 @@
     - The new DMS Action should appear in the table
     - Select the `deployed` phase for the DMS action
     - Click on the `Quick Message` column in the DMS Action just created
-    - Specify the name of an existing [quick message](admin_guide.html#quick_msg)
-      to send to the sign
+    - Specify the name of an existing [quick message] to send to the sign
     - Repeat the above DMS Actions steps as many times as desired to send a
       message to additional sign groups
  6. Activate the messages on the signs
@@ -87,3 +86,7 @@ Notes:
    to a Sign Group
  - Use the device debug log to diagnose problems with scheduled messages not
    appearing on signs
+
+
+[edit mode]: admin_guide.html#edit_mode
+[quick message]: admin_guide.html#quick_msg
