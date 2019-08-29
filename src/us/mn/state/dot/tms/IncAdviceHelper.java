@@ -68,7 +68,9 @@ public class IncAdviceHelper extends BaseHelper {
 				{
 					res = adv;
 					priority = 1;
-				}
+				} else
+				if (ail == null && aol == null)
+					res = adv;
 			}
 		}
 		return res;
