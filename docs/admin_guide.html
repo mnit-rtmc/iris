@@ -62,9 +62,9 @@
     <h3><a href="#plan_schedule">Plans and Schedules</a></h3>
     <h3><a href="#metering_strategies">Ramp Metering Strategies</a></h3>
     <h3><a href="#travel_time">Travel Time Estimation</a></h3>
-    <h3><a href="#slow">Slow Traffic Warning</a></h3>
+    <h3><a href="slow_warning.html">Slow Traffic Warning</a></h3>
     <h3><a href="tolling.html">Tolling</a></h3>
-    <h3><a href="parking.html">Parking Area Availability</a></h3>
+    <h3><a href="parking_areas.html">Parking Area Availability</a></h3>
     <h3><a href="vsa.html">Variable Speed Advisory</a></h3>
   </div>
   <h2><a id="troubleshooting_link" href="troubleshooting.html">Troubleshooting</a></h2>
@@ -285,9 +285,9 @@
 	<li>Coördinated <a href="#metering_strategies">ramp metering strategies
 	    </a></li>
 	<li><a href="#travel_time">Travel time</a> estimation</li>
-	<li><a href="#slow">Slow traffic warning</a></li>
+	<li><a href="slow_warning.html">Slow traffic warning</a></li>
 	<li><a href="tolling.html">Toll</a> lane operation</li>
-	<li><a href="parking.html">Parking area</a> availability</li>
+	<li><a href="parking_areas.html">Parking area</a> availability</li>
 </ul>
 
 <h2 id="installation">Installation</h2>
@@ -3290,11 +3290,11 @@ FIXME
 	</tr>
 	<tr>
 	    <td>[pa<i>i</i>,<i>l</i>,<i>c</i>]</td>
-	    <td><a href="parking.html">Parking area availability</a></td>
+	    <td><a href="parking_areas.html">Parking area availability</a></td>
 	</tr>
 	<tr>
-	    <td>[slow<i>s</i>,<i>b</i>,<i>u</i>,<i>dist</i>]</td>
-	    <td><a href="#slow">Slow traffic warning</a></td>
+	    <td>[slow<i>s</i>,<i>d</i>,<i>mode</i>]</td>
+	    <td><a href="slow_warning.html">Slow traffic warning</a></td>
 	</tr>
 	<tr>
 	    <td>[tt<i>s</i>,<i>m</i>,<i>t</i>]</td>
@@ -3455,33 +3455,6 @@ FIXME
 	Otherwise, the tag will be replaced with the travel time limit, with
 	the over limit text either prepended or appended.
 </p>
-
-<h3 id="slow">Slow Traffic Warning</h3>
-<p>
-	A <b>slow</b> <a href="#action_tag">action tag</a> allows warnings to be
-	displayed on DMS when traffic is slow.
-	The tag has three parameters, separated by commas.
-</p>
-<ol>
-	<li>Highest speed to activate the warning, in mph.</li>
-	<li>Distance (tenths of mile) to search for slow traffic, relative to
-	    the DMS location.</li>
-	<li>Tag replacement mode (<b>none</b> if omitted)
-	    <ul>
-	        <li><b>none</b>: a blank string</li>
-	        <li><b>dist</b>: distance rounded to nearest mile</li>
-	        <li><b>speed</b>: speed rounded to nearest 5 mph</li>
-	    </ul>
-	</li>
-</ol>
-<dl>
-	<dt>[slow35, 10]SLOW[nl]TRAFFIC[nl]AHEAD</dt>
-	<dd>Displays if traffic slower than 35 mph within 1 mile</dd>
-	<dt>SLOW TRAFFIC[nl][slow40,60,dist] MILES[nl]USE CAUTION</dt>
-	<dd>Displays if traffic slower than 40 mph within 6 miles</dd>
-	<dt>[slow45,5,speed] MPH[nl]1/2 MILE[nl]AHEAD</dt>
-	<dd>Displays if traffic slower than 45 mph within 0.5 miles</dd>
-</dl>
 
 </main>
 
