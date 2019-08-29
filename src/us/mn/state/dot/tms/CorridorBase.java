@@ -526,7 +526,7 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 
 	/** Count the freeway exits between two milepoints */
 	public int countExits(float mp0, float mp1) {
-		GeoLoc prev_exit = null;
+		Road prev_exit = null;
 		int n_exits = 0;
 		Iterator<T> it = n_points.subMap(mp0, true, mp1, true)
 			.values().iterator();
@@ -536,9 +536,9 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 				GeoLoc loc = n.getGeoLoc();
 				// Only count one exit per interchange
 				if (prev_exit == null ||
-				    prev_exit.getRoadway() != loc.getRoadway())
+				    prev_exit != loc.getCrossStreet())
 					n_exits++;
-				prev_exit = loc;
+				prev_exit = loc.getCrossStreet();
 			}
 		}
 		return n_exits;
