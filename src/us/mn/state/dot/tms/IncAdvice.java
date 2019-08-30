@@ -33,6 +33,18 @@ public interface IncAdvice extends SonarObject {
 	/** Get the impact */
 	int getImpact();
 
+	/** Set the lane type ordinal */
+	void setLaneType(short lt);
+
+	/** Get the lane type ordinal */
+	short getLaneType();
+
+	/** Set the range */
+	void setRange(int r);
+
+	/** Get the range */
+	int getRange();
+
 	/** Set count of impacted lanes */
 	void setImpactedLanes(Integer ln);
 
@@ -44,18 +56,6 @@ public interface IncAdvice extends SonarObject {
 
 	/** Get count of open lanes */
 	Integer getOpenLanes();
-
-	/** Set the range */
-	void setRange(int r);
-
-	/** Get the range */
-	int getRange();
-
-	/** Set the lane type ordinal */
-	void setLaneType(short lt);
-
-	/** Get the lane type ordinal */
-	short getLaneType();
 
 	/** Set the cleared status */
 	void setCleared(boolean c);

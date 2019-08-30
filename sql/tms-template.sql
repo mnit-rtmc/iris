@@ -3134,8 +3134,8 @@ CREATE TRIGGER inc_advice_ck_trig
 	FOR EACH ROW EXECUTE PROCEDURE iris.inc_advice_ck();
 
 CREATE VIEW inc_advice_view AS
-	SELECT a.name, imp.description AS impact, impacted_lanes, open_lanes,
-	       rng.description AS range, lt.description AS lane_type, cleared,
+	SELECT a.name, imp.description AS impact, lt.description AS lane_type,
+	       rng.description AS range, impacted_lanes, open_lanes, cleared,
 	       multi, abbrev
 	FROM iris.inc_advice a
 	LEFT JOIN iris.inc_impact imp ON a.impact = imp.id

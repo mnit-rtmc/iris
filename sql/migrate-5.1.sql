@@ -43,4 +43,16 @@ UPDATE iris.inc_impact SET description = 'all free flowing' WHERE id = 14;
 UPDATE iris.inc_advice SET impact = 14 WHERE impact = 16;
 DELETE FROM iris.inc_impact WHERE id > 14;
 
+-- Rearrange columns in incident advice view
+DROP VIEW inc_advice_view;
+CREATE VIEW inc_advice_view AS
+	SELECT a.name, imp.description AS impact, lt.description AS lane_type,
+	       rng.description AS range, impacted_lanes, open_lanes, cleared,
+	       multi, abbrev
+	FROM iris.inc_advice a
+	LEFT JOIN iris.inc_impact imp ON a.impact = imp.id
+	LEFT JOIN iris.inc_range rng ON a.range = rng.id
+	LEFT JOIN iris.lane_type lt ON a.lane_type = lt.id;
+GRANT SELECT ON inc_advice_view TO PUBLIC;
+
 COMMIT;

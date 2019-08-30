@@ -35,9 +35,10 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	/** Load all the incident advices */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncAdviceImpl.class);
-		store.query("SELECT name, impact, impacted_lanes, open_lanes, "+
-			"range, lane_type, cleared, multi, abbrev FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, impact, lane_type, range, " +
+			"impacted_lanes, open_lanes, cleared, multi, " +
+			"abbrev FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new IncAdviceImpl(row));
@@ -51,10 +52,10 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("impact", impact);
+		map.put("lane_type", lane_type);
+		map.put("range", range);
 		map.put("impacted_lanes", impacted_lanes);
 		map.put("open_lanes", open_lanes);
-		map.put("range", range);
-		map.put("lane_type", lane_type);
 		map.put("cleared", cleared);
 		map.put("multi", multi);
 		map.put("abbrev", abbrev);
@@ -77,10 +78,10 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	private IncAdviceImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),           // name
 		     row.getInt(2),              // impact
-		     (Integer) row.getObject(3), // impacted_lanes
-		     (Integer) row.getObject(4), // open_lanes
-		     row.getInt(5),              // range
-		     row.getShort(6),            // lane_type
+		     row.getShort(3),            // lane_type
+		     row.getInt(4),              // range
+		     (Integer) row.getObject(5), // impacted_lanes
+		     (Integer) row.getObject(6), // open_lanes
 		     row.getBoolean(7),          // cleared
 		     row.getString(8),           // multi
 		     row.getString(9)            // abbrev
@@ -88,15 +89,15 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	}
 
 	/** Create an incident advice */
-	private IncAdviceImpl(String n, int imp, Integer iln, Integer oln,
-		int r, short lt, boolean c, String m, String a)
+	private IncAdviceImpl(String n, int imp, short lt, int r, Integer iln,
+		Integer oln, boolean c, String m, String a)
 	{
 		super(n);
 		impact = imp;
+		lane_type = lt;
+		range = r;
 		impacted_lanes = iln;
 		open_lanes = oln;
-		range = r;
-		lane_type = lt;
 		cleared = c;
 		multi = m;
 		abbrev = a;
@@ -129,6 +130,66 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	@Override
 	public int getImpact() {
 		return impact;
+	}
+
+	/** Lane type ordinal */
+	private short lane_type = (short) LaneType.MAINLINE.ordinal();
+
+	/** Set the lane type ordinal */
+	@Override
+	public void setLaneType(short lt) {
+		lane_type = lt;
+	}
+
+	/** Set the lane type ordinal */
+	public void doSetLaneType(short lt) throws TMSException {
+		checkLaneType(lt);
+		if (lt != lane_type) {
+			store.update(this, "lane_type", lt);
+			setLaneType(lt);
+		}
+	}
+
+	/** Check for valid lane types */
+	private void checkLaneType(short lt) throws ChangeVetoException {
+		switch (LaneType.fromOrdinal(lt)) {
+		case MAINLINE:
+		case EXIT:
+		case MERGE:
+		case CD_LANE:
+			return;
+		default:
+			throw new ChangeVetoException("INVALID LANE TYPE");
+		}
+	}
+
+	/** Get the lane type ordinal */
+	@Override
+	public short getLaneType() {
+		return lane_type;
+	}
+
+	/** Range ordinal */
+	private int range;
+
+	/** Set the range */
+	@Override
+	public void setRange(int r) {
+		range = r;
+	}
+
+	/** Set the range */
+	public void doSetRange(int r) throws TMSException {
+		if (r != range) {
+			store.update(this, "range", r);
+			setRange(r);
+		}
+	}
+
+	/** Get the range */
+	@Override
+	public int getRange() {
+		return range;
 	}
 
 	/** Count of impacted lanes */
@@ -175,66 +236,6 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	@Override
 	public Integer getOpenLanes() {
 		return open_lanes;
-	}
-
-	/** Range ordinal */
-	private int range;
-
-	/** Set the range */
-	@Override
-	public void setRange(int r) {
-		range = r;
-	}
-
-	/** Set the range */
-	public void doSetRange(int r) throws TMSException {
-		if (r != range) {
-			store.update(this, "range", r);
-			setRange(r);
-		}
-	}
-
-	/** Get the range */
-	@Override
-	public int getRange() {
-		return range;
-	}
-
-	/** Lane type ordinal */
-	private short lane_type = (short) LaneType.MAINLINE.ordinal();
-
-	/** Set the lane type ordinal */
-	@Override
-	public void setLaneType(short lt) {
-		lane_type = lt;
-	}
-
-	/** Set the lane type ordinal */
-	public void doSetLaneType(short lt) throws TMSException {
-		checkLaneType(lt);
-		if (lt != lane_type) {
-			store.update(this, "lane_type", lt);
-			setLaneType(lt);
-		}
-	}
-
-	/** Check for valid lane types */
-	private void checkLaneType(short lt) throws ChangeVetoException {
-		switch (LaneType.fromOrdinal(lt)) {
-		case MAINLINE:
-		case EXIT:
-		case MERGE:
-		case CD_LANE:
-			return;
-		default:
-			throw new ChangeVetoException("INVALID LANE TYPE");
-		}
-	}
-
-	/** Get the lane type ordinal */
-	@Override
-	public short getLaneType() {
-		return lane_type;
 	}
 
 	/** Incident cleared status */
