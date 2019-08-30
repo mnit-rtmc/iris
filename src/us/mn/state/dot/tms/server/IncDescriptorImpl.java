@@ -39,7 +39,7 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncDescriptorImpl.class);
 		store.query("SELECT name, event_desc_id, detail, lane_type, " +
-			"cleared, multi, abbrev FROM iris." + SONAR_TYPE + ";",
+			"multi, abbrev FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -56,7 +56,6 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 		map.put("event_desc_id", event_desc_id);
 		map.put("detail", detail);
 		map.put("lane_type", lane_type);
-		map.put("cleared", cleared);
 		map.put("multi", multi);
 		map.put("abbrev", abbrev);
 		return map;
@@ -80,21 +79,19 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 		     row.getInt(2),             // event_desc_id
 		     row.getString(3),          // detail
 		     row.getShort(4),           // lane_type
-		     row.getBoolean(5),         // cleared
-		     row.getString(6),          // multi
-		     row.getString(7)           // abbrev
+		     row.getString(5),          // multi
+		     row.getString(6)           // abbrev
 		);
 	}
 
 	/** Create an incident descriptor */
 	private IncDescriptorImpl(String n, int et, String dtl, short lt,
-		boolean c, String m, String a)
+		String m, String a)
 	{
 		super(n);
 		event_desc_id = et;
 		detail = lookupIncDetail(dtl);
 		lane_type = lt;
-		cleared = c;
 		multi = m;
 		abbrev = a;
 	}
@@ -199,29 +196,6 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 	@Override
 	public short getLaneType() {
 		return lane_type;
-	}
-
-	/** Incident cleared status */
-	private boolean cleared = false;
-
-	/** Set the cleared status */
-	@Override
-	public void setCleared(boolean c) {
-		cleared = c;
-	}
-
-	/** Set the cleared status */
-	public void doSetCleared(boolean c) throws TMSException {
-		if (c != cleared) {
-			store.update(this, "cleared", c);
-			setCleared(c);
-		}
-	}
-
-	/** Get the cleared status */
-	@Override
-	public boolean getCleared() {
-		return cleared;
 	}
 
 	/** MULTI string */

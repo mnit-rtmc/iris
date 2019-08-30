@@ -45,12 +45,6 @@ public interface IncDescriptor extends SonarObject {
 	/** Get the lane type ordinal */
 	short getLaneType();
 
-	/** Set the cleared status */
-	void setCleared(boolean c);
-
-	/** Get the cleared status */
-	boolean getCleared();
-
 	/** Set the MULTI string */
 	void setMulti(String m);
 
