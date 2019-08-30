@@ -14,12 +14,14 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import javax.swing.DefaultListModel;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -55,7 +57,8 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 
 	/** Get the proposed MULTI for a DMS */
 	public MultiString getMulti(String dms) {
-		return messages.get(dms);
+		MultiString multi = messages.get(dms);
+		return (multi != null) ? multi : new MultiString("");
 	}
 
 	/** Mapping of DMS names to proposed page one graphics */
@@ -73,6 +76,11 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		ind_builder = new LcsIndicationBuilder(man, inc);
 		dms_builder = new DmsDeployBuilder(man, inc);
 		populateList();
+		// Already deployed signs should be blanked if not found
+		ArrayList<DMS> signs = IncidentHelper.getDeployedSigns(inc);
+		Iterator<DMS> it = signs.iterator();
+		while (it.hasNext())
+			addExistingDMS(it.next());
 	}
 
 	/** Populate list model with device deployments */
@@ -109,6 +117,14 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 				messages.put(dms.getName(), ms);
 				graphics.put(dms.getName(), rg);
 			}
+		}
+	}
+
+	/** Add an existing (already deployed) DMS, to be blanked */
+	private void addExistingDMS(DMS dms) {
+		if (!messages.containsKey(dms.getName())) {
+			addElement(dms);
+			messages.put(dms.getName(), new MultiString(""));
 		}
 	}
 }

@@ -70,13 +70,13 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 	};
 
 	/** Create a new incident device deploy form */
-	public DeviceDeployForm(Session s, Incident inc, IncidentManager man,
-		IncidentDispatcher disp)
+	public DeviceDeployForm(Session s, IncidentManager man,
+		IncidentDispatcher disp, Incident inc, DeviceDeployModel mdl)
 	{
 		super(I18N.get("incident") + ": ", s, inc);
 		manager = man;
 		dispatcher = disp;
-		model = new DeviceDeployModel(man, inc);
+		model = mdl;
 		list = new JList<Device>(model);
 		list.addListSelectionListener(new IListSelectionAdapter() {
 			@Override public void valueChanged() {

@@ -15,6 +15,9 @@
 package us.mn.state.dot.tms.client.incident;
 
 import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,7 +32,10 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.Popup;
+import javax.swing.PopupFactory;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -385,12 +391,39 @@ public class IncidentDispatcher extends IPanel
 	/** Update an incident */
 	private void logUpdate(Incident inc) {
 		inc.setImpact(impact_pnl.getImpact());
+		if (IncidentHelper.getDeployedCount(inc) > 0)
+			showDeployForm(inc);
 	}
 
 	/** Show the device deploy form */
 	private void showDeployForm(Incident inc) {
-		session.getDesktop().show(new DeviceDeployForm(session, inc,
-			manager, this));
+		DeviceDeployModel model = new DeviceDeployModel(manager, inc);
+		if (model.getSize() > 0) {
+			session.getDesktop().show(new DeviceDeployForm(session,
+				manager, this, inc, model));
+		} else
+			showPopup("No devices to deploy");
+	}
+
+	/** Show a popup briefly */
+	private void showPopup(String msg) {
+		PopupFactory factory = PopupFactory.getSharedInstance();
+		JLabel lbl = new JLabel(msg);
+		lbl.setOpaque(true);
+		lbl.setBackground(Color.YELLOW);
+		// clear button is next to deploy button ...
+		Point p = clear_btn.getLocationOnScreen();
+		final Popup popup = factory.getPopup(this, lbl, p.x,p.y);
+		popup.show();
+		ActionListener listener = new ActionListener() {
+			public void actionPerformed(ActionEvent ev) {
+				popup.hide();
+			}
+		};
+		Timer timer = new Timer(0, listener);
+		timer.setInitialDelay(2000);
+		timer.setRepeats(false);
+		timer.start();
 	}
 
 	/** A new proxy has been added */

@@ -83,8 +83,8 @@ public class IncidentHelper extends BaseHelper {
 		return IncImpact.getImpact(inc).severity(lane_type);
 	}
 
-	/** Get list of signs deployed for an incident */
-	static public ArrayList<DMS> getDeployedSigns(Incident inc) {
+	/** Get sign messages deployed for an incident */
+	static public ArrayList<SignMessage> getDeployedMessages(Incident inc) {
 		ArrayList<SignMessage> msgs = new ArrayList<SignMessage>();
 		String orig_name = getOriginalName(inc);
 		Iterator<SignMessage> it = SignMessageHelper.iterator();
@@ -93,6 +93,12 @@ public class IncidentHelper extends BaseHelper {
 			if (orig_name.equals(sm.getIncident()))
 				msgs.add(sm);
 		}
+		return msgs;
+	}
+
+	/** Get list of signs deployed for an incident */
+	static public ArrayList<DMS> getDeployedSigns(Incident inc) {
+		ArrayList<SignMessage> msgs = getDeployedMessages(inc);
 		ArrayList<DMS> signs = new ArrayList<DMS>();
 		Iterator<DMS> dit = DMSHelper.iterator();
 		while (dit.hasNext()) {
@@ -101,5 +107,18 @@ public class IncidentHelper extends BaseHelper {
 				signs.add(dms);
 		}
 		return signs;
+	}
+
+	/** Get count of signs deployed for an incident */
+	static public int getDeployedCount(Incident inc) {
+		int n_signs = 0;
+		ArrayList<SignMessage> msgs = getDeployedMessages(inc);
+		Iterator<DMS> dit = DMSHelper.iterator();
+		while (dit.hasNext()) {
+			DMS dms = dit.next();
+			if (msgs.contains(dms.getMsgCurrent()))
+				n_signs++;
+		}
+		return n_signs;
 	}
 }
