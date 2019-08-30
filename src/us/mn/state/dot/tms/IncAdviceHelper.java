@@ -47,32 +47,57 @@ public class IncAdviceHelper extends BaseHelper {
 			    adv.getLaneType() == inc.getLaneType() &&
 			    adv.getCleared() == inc.getCleared())
 			{
-				int il = IncImpact.getImpactedLanes(inc);
-				int ol = IncImpact.getOpenLanes(inc);
-				Integer ail = adv.getImpactedLanes();
-				Integer aol = adv.getOpenLanes();
-				if (ail != null && aol != null &&
-				    ail == il && aol == ol)
-				{
+				LaneMatch impacted = LaneMatch.check(
+					adv.getImpactedLanes(),
+					IncImpact.getImpactedLanes(inc));
+				LaneMatch open = LaneMatch.check(
+					adv.getOpenLanes(),
+					IncImpact.getOpenLanes(inc));
+				Integer p = matchPriority(impacted, open);
+				if (p != null && p >= priority) {
 					res = adv;
-					priority = 3;
-				} else
-				if (ail != null && ail == il &&
-				    priority < 2)
-				{
-					res = adv;
-					priority = 2;
-				} else
-				if (aol != null && aol == ol &&
-				    priority < 1)
-				{
-					res = adv;
-					priority = 1;
-				} else
-				if (ail == null && aol == null)
-					res = adv;
+					priority = p;
+				}
 			}
 		}
 		return res;
+	}
+
+	/** Match enum for incident lanes */
+	static private enum LaneMatch {
+		NO,	// lanes do not match
+		YES,	// lanes match
+		ANY;	// any lanes allowed
+
+		/** Check lane match.
+		 * @param al Advice lanes.
+		 * @param il Incident lanes.
+		 * @return Lane match. */
+		static private LaneMatch check(Integer al, int il) {
+			if (al != null) {
+				return (al == il)
+				      ? LaneMatch.YES
+				      : LaneMatch.NO;
+			} else
+				return LaneMatch.ANY;
+		}
+	}
+
+	/** Match impacted/open lanes.
+	 * @param impacted Match of impacted lanes.
+	 * @param open Match of open lanes.
+	 * @return Priority of match, or null if not matched */
+	static private Integer matchPriority(LaneMatch impacted, LaneMatch open)
+	{
+		if ((impacted == LaneMatch.YES) && (open == LaneMatch.YES))
+			return 3;
+		if ((impacted == LaneMatch.YES) && (open == LaneMatch.ANY))
+			return 2;
+		if ((impacted == LaneMatch.ANY) && (open == LaneMatch.YES))
+			return 1;
+		if ((impacted == LaneMatch.ANY) && (open == LaneMatch.ANY))
+			return 0;
+		else
+			return null; // no match
 	}
 }
