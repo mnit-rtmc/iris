@@ -4,8 +4,9 @@ Sign messages can be suggested from active roadway incidents.  This method uses
 incident attributes and location on the freeway network to make suggestions.
 
 Each message is composed of three lines: **descriptor**, **locator** and
-**advice**.  Each of these may have an abbreviated version, which is used only
-when the normal version does not fit the width of the sign.
+**advice**.  Messages are only suggested if a match is found for all three
+lines.  Each line may have an abbreviated version, which is used only when the
+normal version does not fit the width of the sign.
 
 ## Range
 
@@ -58,27 +59,24 @@ Impact | Description               | Mainline   | CD/Exit  | Merge
 ## Descriptor
 
 The *descriptor* determines the first line of each suggested message.  The
-configurable descriptor table contains several columns which are matched to the
-incident.  Messages are only suggested if a descriptor matches.
+configurable descriptor table contains fields which are matched to the incident.
 
-**Event type** can be `CRASH`, `STALL`, `ROAD WORK` or `HAZARD`.  Hazard events
-can have an associated **detail** (*animal, debris, ice, etc*).
-
-The **lane type** at the incident can be `mainline`, `exit`, `merge` or
-`CD road`.
+Field         | Description
+--------------|---------------------------------------------------
+Incident type | `CRASH`, `STALL`, `ROAD WORK` or `HAZARD`
+Detail        | usually hazard detail: `animal`, `debris`, `ice`, etc
+Lane Type     | `mainline`, `exit`, `merge` or `CD road`
 
 ## Locator
 
 A matching *locator* determines the second line of a suggested message.  The
-configurable locator table contains columns which are matched to the incident.
+configurable locator table contains fields which are matched to the incident.
 
-**Range** must match the range from the sign to the incident.  For example, if
-there are 2 exits between them, the range is *middle*.
-
-**Branched** is `YES` if the sign is on a different roadway than the incident.
-
-If a *pickable* roadway node (r_node) is within 1 mile of the incident, it is
-**picked**, and its location is used for *locator tags*.
+Field    | Description
+---------|---------------------------------------------------
+Range    | from sign to incident: `ahead`, `near`, `middle` or `far`
+Branched | `YES` or `NO`: sign and incident on different roadways
+Picked   | `YES` or `NO`: a *pickable* node (r_node) is within 1 mile of the incident; its location can be used for *locator tags*
 
 ### Locator Tags
 
@@ -105,21 +103,16 @@ For the `[locxa]` tag, matching `road_affix` values are stripped.
 ## Advice
 
 A matching *advice* determines the third line of a suggested message.  The
-configurable advice table contains columns which are matched to the incident.
+configurable advice table contains fields which are matched to the incident.
 
-**Impact** is one of the codes defined in the *severity* section.
-
-**Impacted Lanes** is the number of lanes impacted by the incident.  This number
-does not include shoulders.  If empty, any number is matched.
-
-**Open Lanes** is the number of lanes *not* impacted (not including shoulders).
-
-As with the locator, the **range** must match from the sign to the incident.
-
-The incident **lane type** can be `mainline`, `exit`, `merge` or `CD road`.
-
-**Cleared** can be `YES` or `NO`, and indicates whether the incident has just
-cleared.
+Field          | Description
+---------------|---------------------------------
+Impact         | code; see the *severity* section
+Lane Type      | `mainline`, `exit`, `merge` or `CD road`
+Range          | from sign to incident: `ahead`, `near`, `middle` or `far`
+Impacted Lanes | number of non-shoulder lanes, (if blank, any number matches)
+Open Lanes     | number of non-shoulder lanes *not* impacted
+Cleared        | `YES` or `NO`: indicates whether incident has just cleared
 
 ## Clearing
 
