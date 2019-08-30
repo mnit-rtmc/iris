@@ -984,13 +984,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			updateSchedMsg();
 	}
 
-	/** Set the current message.
-	 * @param sm Sign message. */
-	public void setMsgCurrentNotify(SignMessage sm) {
-		String owner = (sm != null) ? sm.getOwner() : null;
-		setMsgCurrentNotify(sm, owner);
-	}
-
 	/** Get the current messasge.
 	 * @return Currently active message */
 	@Override

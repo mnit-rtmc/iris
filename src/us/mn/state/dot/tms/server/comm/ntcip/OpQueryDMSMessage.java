@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -94,7 +94,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		boolean oper_expire = SignMessageHelper
 			.isOperatorExpiring(dms.getMsgCurrent());
 		SignMessage sm = dms.createMsgBlank();
-		setMsgCurrent(sm);
+		setMsgCurrent(sm, "FIELD BLANK");
 		/* User msg just expired -- set it to blank */
 		if (oper_expire)
 			dms.setMsgUser(sm);
@@ -116,7 +116,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		if (crc != source.getCrc())
 			return new QueryCurrentMessage();
 		else {
-			setMsgCurrent(sm);
+			setMsgCurrent(sm, sm.getOwner());
 			return null;
 		}
 	}
@@ -210,19 +210,20 @@ public class OpQueryDMSMessage extends OpDMS {
 			return rp;
 	}
 
-	/** Set the current message on the sign */
+	/** Set the current message sent from another system */
 	private void setMsgCurrent(String multi, int be, DmsMsgPriority p,
 		Integer duration)
 	{
 		int src = p.getSource();
-		setMsgCurrent(dms.createMsg(multi, (be == 1), false, p, src,
-			"OTHER SYSTEM", duration));
+		SignMessage sm = dms.createMsg(multi, (be == 1), false, p, src,
+			"OTHER SYSTEM", duration);
+		setMsgCurrent(sm, "OTHER SYSTEM");
 	}
 
 	/** Set the current message on the sign */
-	private void setMsgCurrent(SignMessage sm) {
+	private void setMsgCurrent(SignMessage sm, String owner) {
 		if (sm != null) {
-			dms.setMsgCurrentNotify(sm);
+			dms.setMsgCurrentNotify(sm, owner);
 			/* IRIS may have restarted -- recover user msg */
 			if (sm.getSource() == SignMsgSource.operator.bit())
 				dms.setMsgUser(sm);

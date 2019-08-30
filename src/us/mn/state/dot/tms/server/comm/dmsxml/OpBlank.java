@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -122,7 +122,7 @@ class OpBlank extends OpDms
 		// update dms
 		updateMaintStatus("");
 		if (valid)
-			m_dms.setMsgCurrentNotify(m_sm);
+			m_dms.setMsgCurrentNotify(m_sm, m_sm.getOwner());
 		else {
 			LOG.log(
 				"OpBlank: response from SensorServer " +
