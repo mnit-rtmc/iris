@@ -94,7 +94,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		boolean oper_expire = SignMessageHelper
 			.isOperatorExpiring(dms.getMsgCurrent());
 		SignMessage sm = dms.createMsgBlank();
-		setMsgCurrent(sm, "FIELD BLANK");
+		setMsgCurrent(sm, (oper_expire) ? "EXPIRED" : "FIELD BLANK");
 		/* User msg just expired -- set it to blank */
 		if (oper_expire)
 			dms.setMsgUser(sm);
