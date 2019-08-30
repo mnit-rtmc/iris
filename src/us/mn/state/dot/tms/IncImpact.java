@@ -29,21 +29,19 @@ public enum IncImpact {
 	left_lanes_blocked,      // 1
 	right_lanes_blocked,     // 2
 	center_lanes_blocked,    // 3
-	lanes_blocked,           // 4 (FIXME: remove this!)
-	both_shoulders_blocked,  // 5
-	left_shoulder_blocked,   // 6
-	right_shoulder_blocked,  // 7
+	both_shoulders_blocked,  // 4
+	left_shoulder_blocked,   // 5
+	right_shoulder_blocked,  // 6
 	/* Affected - partially blocked */
-	all_lanes_affected,      // 8
-	left_lanes_affected,     // 9
-	right_lanes_affected,    // 10
-	center_lanes_affected,   // 11
-	lanes_affected,          // 12 (FIXME: remove this!)
-	both_shoulders_affected, // 13
-	left_shoulder_affected,  // 14
-	right_shoulder_affected, // 15
+	all_lanes_affected,      // 7
+	left_lanes_affected,     // 8
+	right_lanes_affected,    // 9
+	center_lanes_affected,   // 10
+	both_shoulders_affected, // 11
+	left_shoulder_affected,  // 12
+	right_shoulder_affected, // 13
 	/* All clear */
-	all_free_flowing;        // 16
+	all_free_flowing;        // 14
 
 	/** Get an impact from an ordinal value */
 	static public IncImpact fromOrdinal(int o) {
@@ -164,7 +162,6 @@ public enum IncImpact {
 		case left_lanes_blocked:
 		case right_lanes_blocked:
 		case center_lanes_blocked:
-		case lanes_blocked:
 		case both_shoulders_blocked:
 		case left_shoulder_blocked:
 		case right_shoulder_blocked:
@@ -173,7 +170,6 @@ public enum IncImpact {
 		case left_lanes_affected:
 		case right_lanes_affected:
 		case center_lanes_affected:
-		case lanes_affected:
 		case both_shoulders_affected:
 		case left_shoulder_affected:
 		case right_shoulder_affected:
@@ -191,7 +187,6 @@ public enum IncImpact {
 		case left_lanes_blocked:
 		case right_lanes_blocked:
 		case center_lanes_blocked:
-		case lanes_blocked:
 		case both_shoulders_blocked:
 		case left_shoulder_blocked:
 		case right_shoulder_blocked:
