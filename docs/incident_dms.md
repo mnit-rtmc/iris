@@ -1,12 +1,13 @@
 # Incident DMS Deployment
 
 Sign messages can be suggested from active roadway incidents.  This method uses
-incident attributes and location on the freeway network to make suggestions.
+incident attributes (**range**, **severity**, etc.) and location on the freeway
+network to make suggestions.
 
-Each message is composed of three lines: **descriptor**, **locator** and
-**advice**.  Messages are only suggested if a match is found for all three
-lines.  Each line may have an abbreviated version, which is used only when the
-normal version does not fit the width of the sign.
+Each message is composed of three parts: **descriptor** (_what?_), **locator**
+(_where?_) and **advice** (_how?_).  Suggestions are only made if a match is
+found for all three parts.  Each part may have an abbreviated version, which is
+used only when the normal version does not fit the sign.
 
 ## Range
 
