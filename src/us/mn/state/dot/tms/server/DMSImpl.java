@@ -372,6 +372,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		if (!objectEquals(p, getPurpose())) {
 			store.update(this, "purpose", p);
 			setPurpose(p);
+			updateStyles();
 		}
 	}
 
@@ -1257,7 +1258,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Test if DMS is available */
 	@Override
 	protected boolean isAvailable() {
-		return super.isAvailable() && isMsgBlank();
+		return super.isAvailable()
+		    && isMsgBlank()
+		    && getPurpose() != null;
 	}
 
 	/** Test if current message is blank */
@@ -1324,6 +1327,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		long s = ItemStyle.ALL.bit();
 		if (getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
+		if (getPurpose() != null)
+			s |= ItemStyle.PURPOSE.bit();
 		if (isActive())
 			s |= ItemStyle.ACTIVE.bit();
 		else

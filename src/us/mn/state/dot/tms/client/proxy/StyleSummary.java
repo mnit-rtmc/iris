@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2016  Minnesota Department of Transportation
+ * Copyright (C) 2004-2019  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -392,8 +392,6 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Button click action */
 	private void setStyleAction(ItemStyle i_style) {
-		String t = I18N.get(manager.getSonarType()) + " " +
-			I18N.get("device.status") + ": " + i_style;
 		StyleListModel<T> mdl = model;
 		model = manager.getStyleModel(i_style.toString());
 		// JList.setModel clears the selection, so let's use
@@ -403,6 +401,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		p_list.setSelectionModel(model.getSelectionModel());
 		if (mdl != null)
 			mdl.dispose();
+		manager.setSelectedStyle(i_style);
 	}
 
 	/** Dispose of the widget */

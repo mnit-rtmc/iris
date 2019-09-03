@@ -114,6 +114,7 @@ public class DMSManager extends DeviceManager<DMS> {
 		theme.addStyle(ItemStyle.SCHEDULED, ProxyTheme.COLOR_SCHEDULED);
 		theme.addStyle(ItemStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
+		theme.addStyle(ItemStyle.PURPOSE, ProxyTheme.COLOR_PURPOSE);
 		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
@@ -166,7 +167,10 @@ public class DMSManager extends DeviceManager<DMS> {
 	/** Check if a DMS style is visible */
 	@Override
 	protected boolean isStyleVisible(DMS dms) {
-		return !DMSHelper.isHidden(dms);
+		boolean h = DMSHelper.isHidden(dms);
+		boolean p = DMSHelper.isPurpose(dms) &&
+			getSelectedStyle() != ItemStyle.PURPOSE;
+		return !(h || p);
 	}
 
 	/** Create a proxy JList */

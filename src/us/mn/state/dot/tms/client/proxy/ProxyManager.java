@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -129,6 +129,9 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Default style */
 	private final ItemStyle def_style;
 
+	/** Currently selected style */
+	private ItemStyle sel_style;
+
 	/** Screen pane */
 	protected ScreenPane s_pane;
 
@@ -151,6 +154,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 		descriptor = pd;
 		zoom_threshold = zt;
 		def_style = ds;
+		sel_style = ds;
 		theme = createTheme();
 		layer = hasLayer() ? createLayer() : null;
 	}
@@ -320,6 +324,16 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Get the specified style list model */
 	public StyleListModel<T> getStyleModel(String s) {
 		return createStyleListModel(theme.getStyle(s));
+	}
+
+	/** Set the selected style */
+	public void setSelectedStyle(ItemStyle sty) {
+		sel_style = sty;
+	}
+
+	/** Get the selected style */
+	public ItemStyle getSelectedStyle() {
+		return sel_style;
 	}
 
 	/** Create a style list model for the given symbol */

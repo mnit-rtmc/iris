@@ -69,6 +69,9 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 	/** Color to display scheduled devices */
 	static public final Color COLOR_SCHEDULED = new Color(240, 128, 0);
 
+	/** Color for dedicated purpose devices */
+	static public final Color COLOR_PURPOSE = new Color(192, 16, 192);
+
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
 

@@ -168,7 +168,7 @@ public class UpstreamDeviceFinder {
 		Iterator<DMS> dit = DMSHelper.iterator();
 		while (dit.hasNext()) {
 			DMS dms = dit.next();
-			if (dms.getPurpose() != null ||
+			if (DMSHelper.isPurpose(dms) ||
 			    DMSHelper.isHidden(dms) ||
 			    DMSHelper.isFailed(dms) ||
 			   !DMSHelper.isActive(dms))
