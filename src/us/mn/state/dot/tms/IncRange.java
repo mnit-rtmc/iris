@@ -40,21 +40,22 @@ public enum IncRange {
 		case 0: return IncRange.ahead;
 		case 1: return IncRange.near;
 		case 2:
-		case 3: return IncRange.middle;
-		case 4:
+		case 3:
+		case 4: return IncRange.middle;
 		case 5:
 		case 6:
-		case 7: return IncRange.far;
+		case 7:
+		case 8: return IncRange.far;
 		default: return null;
 		}
 	}
 
 	/** Get a maximum number of exits */
-	public int getExits() {
+	public int getMaxExits() {
 		switch (this) {
 		case near: return 1;
-		case middle: return 3;
-		case far: return 7;
+		case middle: return 4;
+		case far: return 8;
 		default: return 0;
 		}
 	}

@@ -42,7 +42,7 @@ public class UpstreamDeviceFinder {
 	/** Get the maximum number of exits upstream of an incident */
 	static private int maximum_exits(Incident inc) {
 		IncSeverity sev = IncidentHelper.getSeverity(inc);
-		return (sev != null) ? sev.maximum_range.getExits() : -1;
+		return (sev != null) ? sev.maximum_range.getMaxExits() : -1;
 	}
 
 	/** Scanner for devices on a corridor */

@@ -20,8 +20,8 @@ Range    | Exits | Miles (Metro) | Miles (Rural)
 ---------|-------|---------------|--------------
 `ahead`  |     0 |             1 |             2
 `near`   |     1 |             2 |             5
-`middle` |   2-3 |             5 |            10
-`far`    |   4-7 |            10 |            20
+`middle` |   2-4 |             5 |            10
+`far`    |   5-8 |            10 |            20
 
 ## Severity
 
