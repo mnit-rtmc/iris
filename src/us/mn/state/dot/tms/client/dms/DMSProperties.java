@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Location panel */
 	private final PropLocation location_pnl;
 
+	/** Setup panel */
+	private final PropSetup setup_pnl;
+
 	/** Messages panel */
 	private final PropMessages messages_pnl;
 
@@ -59,6 +62,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		setHelpPageName("help.dmsproperties");
 		op_pnl = new PropOp(sign);
 		location_pnl = new PropLocation(s, sign);
+		setup_pnl = new PropSetup(s, sign);
 		messages_pnl = new PropMessages(s, sign);
 		status_pnl = new PropStatus(s, sign);
 		pixel_pnl = new PropPixels(s, sign);
@@ -77,6 +81,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected void initialize() {
 		op_pnl.initialize();
 		location_pnl.initialize();
+		setup_pnl.initialize();
 		messages_pnl.initialize();
 		status_pnl.initialize();
 		pixel_pnl.initialize();
@@ -84,13 +89,14 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		manufacturer_pnl.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), location_pnl);
+		tab.add(I18N.get("device.setup"), setup_pnl);
 		tab.add(I18N.get("dms.messages"), messages_pnl);
 		tab.add(I18N.get("device.status"), status_pnl);
-		if(SystemAttrEnum.DMS_PIXEL_STATUS_ENABLE.getBoolean())
+		if (SystemAttrEnum.DMS_PIXEL_STATUS_ENABLE.getBoolean())
 			tab.add(I18N.get("dms.pixels"), pixel_pnl);
-		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean())
+		if (SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean())
 			tab.add(I18N.get("dms.brightness"), bright_pnl);
-		if(SystemAttrEnum.DMS_MANUFACTURER_ENABLE.getBoolean())
+		if (SystemAttrEnum.DMS_MANUFACTURER_ENABLE.getBoolean())
 			tab.add(I18N.get("dms.manufacturer"), manufacturer_pnl);
 		add(tab);
 		add(op_pnl, BorderLayout.SOUTH);
@@ -101,6 +107,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	@Override
 	protected void dispose() {
 		location_pnl.dispose();
+		setup_pnl.dispose();
 		messages_pnl.dispose();
 		op_pnl.dispose();
 		super.dispose();
@@ -110,6 +117,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	@Override
 	protected void updateEditMode() {
 		location_pnl.updateEditMode();
+		setup_pnl.updateEditMode();
 		messages_pnl.updateEditMode();
 	}
 
@@ -118,6 +126,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected void doUpdateAttribute(String a) {
 		op_pnl.updateAttribute(a);
 		location_pnl.updateAttribute(a);
+		setup_pnl.updateAttribute(a);
 		messages_pnl.updateAttribute(a);
 		status_pnl.updateAttribute(a);
 		pixel_pnl.updateAttribute(a);
