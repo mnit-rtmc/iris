@@ -167,10 +167,14 @@ public class DMSManager extends DeviceManager<DMS> {
 	/** Check if a DMS style is visible */
 	@Override
 	protected boolean isStyleVisible(DMS dms) {
-		boolean h = DMSHelper.isHidden(dms);
-		boolean p = DMSHelper.isPurpose(dms) &&
-			getSelectedStyle() != ItemStyle.PURPOSE;
-		return !(h || p);
+		return (!DMSHelper.isHidden(dms)) || isPurposeVisible(dms);
+	}
+
+	/** Check if DMS purpose style is visible */
+	private boolean isPurposeVisible(DMS dms) {
+		return (getSelectedStyle() == ItemStyle.PURPOSE)
+		      ? DMSHelper.isPurpose(dms)
+		      : !DMSHelper.isPurpose(dms);
 	}
 
 	/** Create a proxy JList */
