@@ -15,8 +15,10 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.event.ActionEvent;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.DevicePurpose;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.Session;
@@ -70,6 +72,29 @@ public class PropSetup extends IPanel {
 	/** Static image graphic combo box */
 	private final JComboBox<Graphic> graphic_cbx = new JComboBox<Graphic>();
 
+	/** Dedicated device purpose model */
+	private final DefaultComboBoxModel<DevicePurpose> purpose_mdl =
+		new DefaultComboBoxModel<DevicePurpose>(DevicePurpose.values());
+
+	/** Dedicated purpose action */
+	private final IAction purpose_act = new IAction("dms.purpose") {
+		protected void doActionPerformed(ActionEvent e) {
+			DevicePurpose dp = (DevicePurpose) purpose_mdl
+				.getSelectedItem();
+			dms.setPurpose((dp != null) ? dp.ordinal() : null);
+		}
+		@Override
+		protected void doUpdateSelected() {
+			DevicePurpose dp = DevicePurpose.fromOrdinal(
+				dms.getPurpose());
+			purpose_mdl.setSelectedItem(dp);
+		}
+	};
+
+	/** Dedicated purpose combo box */
+	private final JComboBox<DevicePurpose> purpose_cbx =
+		new JComboBox<DevicePurpose>();
+
 	/** User session */
 	private final Session session;
 
@@ -95,10 +120,15 @@ public class PropSetup extends IPanel {
 		graphic_cbx.setModel(graphic_mdl);
 		graphic_cbx.setAction(graphic_act);
 		graphic_cbx.setRenderer(new GraphicListCellRenderer());
+		purpose_mdl.insertElementAt(null, 0); // allow selecting null
+		purpose_cbx.setModel(purpose_mdl);
+		purpose_cbx.setAction(purpose_act);
 		add("dms.beacon.ext");
 		add(beacon_cbx, Stretch.LAST);
 		add("dms.static.graphic");
 		add(graphic_cbx, Stretch.LAST);
+		add("dms.purpose");
+		add(purpose_cbx, Stretch.LAST);
 	}
 
 	/** Dispose of the panel */
@@ -119,6 +149,8 @@ public class PropSetup extends IPanel {
 			graphic_act.updateSelected();
 		if (null == a || a.equals("beacon"))
 			beacon_act.updateSelected();
+		if (null == a || a.equals("purpose"))
+			purpose_act.updateSelected();
 	}
 
 	/** Check if the user can write an attribute */

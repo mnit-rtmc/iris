@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.DevicePurpose;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
@@ -126,10 +127,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"gps, static_graphic, beacon, preset, sign_config, " +
-			"sign_detail, override_font, override_foreground, " +
-			"override_background, msg_sched, msg_current, " +
-			"expire_time FROM iris." + SONAR_TYPE + ";",
+			"gps, static_graphic, purpose, beacon, preset, " +
+			"sign_config, sign_detail, override_font, " +
+			"override_foreground, override_background, msg_sched, " +
+			"msg_current, expire_time FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -161,6 +162,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("notes", notes);
 		map.put("gps", gps);
 		map.put("static_graphic", static_graphic);
+		map.put("purpose", getPurpose());
 		map.put("beacon", beacon);
 		map.put("preset", preset);
 		map.put("sign_config", sign_config);
@@ -210,27 +212,29 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getString(5),            // notes
 		     row.getString(6),            // gps
 		     row.getString(7),            // static_graphic
-		     row.getString(8),            // beacon
-		     row.getString(9),            // preset
-		     row.getString(10),           // sign_config
-		     row.getString(11),           // sign_detail
-		     row.getString(12),           // override_font
-		     (Integer) row.getObject(13), // override_foreground
-		     (Integer) row.getObject(14), // override_background
-		     row.getString(15),           // msg_sched
-		     row.getString(16),           // msg_current
-		     row.getTimestamp(17)         // expire_time
+		     (Integer) row.getObject(8),  // purpose
+		     row.getString(9),            // beacon
+		     row.getString(10),           // preset
+		     row.getString(11),           // sign_config
+		     row.getString(12),           // sign_detail
+		     row.getString(13),           // override_font
+		     (Integer) row.getObject(14), // override_foreground
+		     (Integer) row.getObject(15), // override_background
+		     row.getString(16),           // msg_sched
+		     row.getString(17),           // msg_current
+		     row.getTimestamp(18)         // expire_time
 		);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, String loc, String c, int p, String nt,
-		String g, String sg, String b, String cp, String sc, String sd,
-		String of, Integer fg, Integer bg, String ms, String mc,
-		Date et)
+		String g, String sg, Integer dp, String b, String cp, String sc,
+		String sd, String of, Integer fg, Integer bg, String ms,
+		String mc, Date et)
 	{
 		this(n, lookupGeoLoc(loc), lookupController(c), p, nt,
-		     lookupGps(g), lookupGraphic(sg), lookupBeacon(b),
+		     lookupGps(g), lookupGraphic(sg),
+		     DevicePurpose.fromOrdinal(dp), lookupBeacon(b),
 		     lookupPreset(cp), SignConfigHelper.lookup(sc),
 		     SignDetailHelper.lookup(sd), FontHelper.lookup(of), fg, bg,
 		     SignMessageHelper.lookup(ms), SignMessageHelper.lookup(mc),
@@ -239,14 +243,15 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, GpsImpl g, Graphic sg, Beacon b,
-		CameraPreset cp, SignConfig sc, SignDetail sd, Font of,
+		int p, String nt, GpsImpl g, Graphic sg, DevicePurpose dp,
+		Beacon b, CameraPreset cp, SignConfig sc, SignDetail sd, Font of,
 		Integer fg, Integer bg, SignMessage ms, SignMessage mc, Date et)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
 		gps = g;
 		static_graphic = sg;
+		purpose = dp;
 		beacon = b;
 		setPreset(cp);
 		sign_config = sc;
@@ -351,6 +356,30 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public Graphic getStaticGraphic() {
 		return static_graphic;
+	}
+
+	/** Dedicated device purpose */
+	private DevicePurpose purpose;
+
+	/** Set dedicated purpose (ordinal of DevicePurpose) */
+	@Override
+	public void setPurpose(Integer p) {
+		purpose = DevicePurpose.fromOrdinal(p);
+	}
+
+	/** Set dedicated purpose (ordinal of DevicePurpose) */
+	public void doSetPurpose(Integer p) throws TMSException {
+		if (!objectEquals(p, getPurpose())) {
+			store.update(this, "purpose", p);
+			setPurpose(p);
+		}
+	}
+
+	/** Get dedicated purpose (ordinal of DevicePurpose) */
+	@Override
+	public Integer getPurpose() {
+		DevicePurpose dp = purpose;
+		return (dp != null) ? dp.ordinal() : null;
 	}
 
 	/** External beacon */
