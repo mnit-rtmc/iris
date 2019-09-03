@@ -168,8 +168,8 @@ public class UpstreamDeviceFinder {
 		Iterator<DMS> dit = DMSHelper.iterator();
 		while (dit.hasNext()) {
 			DMS dms = dit.next();
-			// FIXME: filter out HOT lane signs
-			if (DMSHelper.isHidden(dms) ||
+			if (dms.getPurpose() != null ||
+			    DMSHelper.isHidden(dms) ||
 			    DMSHelper.isFailed(dms) ||
 			   !DMSHelper.isActive(dms))
 				continue;
