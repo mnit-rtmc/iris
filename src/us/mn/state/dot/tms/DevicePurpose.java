@@ -15,23 +15,24 @@
 package us.mn.state.dot.tms;
 
 /**
- * Dedicated device purpose enumeration.  The ordinal values correspond to the
- * records in the iris.device_purpose look-up table.
+ * Device purpose enumeration.  The ordinal values correspond to the records in
+ * the iris.device_purpose look-up table.
  *
  * @author Douglas Lau
  */
 public enum DevicePurpose {
-	WAYFINDING,     // 0
-	TOLLING,        // 1
-	PARKING,        // 2
-	TRAVEL_TIME,    // 3
-	SAFETY;         // 4
+	GENERAL,        // 0
+	WAYFINDING,     // 1
+	TOLLING,        // 2
+	PARKING,        // 3
+	TRAVEL_TIME,    // 4
+	SAFETY;         // 5
 
 	/** Cached values array */
 	static private final DevicePurpose[] VALUES = values();
 
 	/** Get a device purpose from an ordinal value */
 	static public DevicePurpose fromOrdinal(int o) {
-		return (o >= 0 && o < VALUES.length) ? VALUES[o] : null;
+		return (o >= 0 && o < VALUES.length) ? VALUES[o] : GENERAL;
 	}
 }

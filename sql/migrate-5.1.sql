@@ -62,15 +62,19 @@ CREATE TABLE iris.device_purpose (
 );
 
 COPY iris.device_purpose (id, description) FROM stdin;
-0	wayfinding
-1	tolling
-2	parking
-3	travel time
-4	safety
+0	general
+1	wayfinding
+2	tolling
+3	parking
+4	travel time
+5	safety
 \.
 
 ALTER TABLE iris._dms
 	ADD COLUMN purpose INTEGER REFERENCES iris.device_purpose;
+UPDATE iris._dms SET purpose = 0;
+ALTER TABLE iris._dms
+	ALTER COLUMN purpose SET NOT NULL;
 
 DROP VIEW dms_message_view;
 DROP VIEW dms_view;

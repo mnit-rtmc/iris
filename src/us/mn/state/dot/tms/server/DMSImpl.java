@@ -212,7 +212,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getString(5),            // notes
 		     row.getString(6),            // gps
 		     row.getString(7),            // static_graphic
-		     (Integer) row.getObject(8),  // purpose
+		     row.getInt(8),               // purpose
 		     row.getString(9),            // beacon
 		     row.getString(10),           // preset
 		     row.getString(11),           // sign_config
@@ -228,7 +228,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, String loc, String c, int p, String nt,
-		String g, String sg, Integer dp, String b, String cp, String sc,
+		String g, String sg, int dp, String b, String cp, String sc,
 		String sd, String of, Integer fg, Integer bg, String ms,
 		String mc, Date et)
 	{
@@ -361,26 +361,28 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Dedicated device purpose */
 	private DevicePurpose purpose;
 
-	/** Set dedicated purpose (ordinal of DevicePurpose) */
+	/** Set device purpose (ordinal of DevicePurpose) */
 	@Override
-	public void setPurpose(Integer p) {
+	public void setPurpose(int p) {
 		purpose = DevicePurpose.fromOrdinal(p);
 	}
 
-	/** Set dedicated purpose (ordinal of DevicePurpose) */
-	public void doSetPurpose(Integer p) throws TMSException {
-		if (!objectEquals(p, getPurpose())) {
+	/** Set device purpose (ordinal of DevicePurpose) */
+	public void doSetPurpose(int p) throws TMSException {
+		if (p != getPurpose()) {
 			store.update(this, "purpose", p);
 			setPurpose(p);
 			updateStyles();
 		}
 	}
 
-	/** Get dedicated purpose (ordinal of DevicePurpose) */
+	/** Get device purpose (ordinal of DevicePurpose) */
 	@Override
-	public Integer getPurpose() {
+	public int getPurpose() {
 		DevicePurpose dp = purpose;
-		return (dp != null) ? dp.ordinal() : null;
+		return (dp != null)
+		      ? dp.ordinal()
+		      : DevicePurpose.GENERAL.ordinal();
 	}
 
 	/** External beacon */
@@ -1260,7 +1262,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	protected boolean isAvailable() {
 		return super.isAvailable()
 		    && isMsgBlank()
-		    && getPurpose() != null;
+		    && purpose == DevicePurpose.GENERAL;
 	}
 
 	/** Test if current message is blank */
@@ -1327,7 +1329,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		long s = ItemStyle.ALL.bit();
 		if (getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
-		if (getPurpose() != null)
+		if (purpose != DevicePurpose.GENERAL)
 			s |= ItemStyle.PURPOSE.bit();
 		if (isActive())
 			s |= ItemStyle.ACTIVE.bit();

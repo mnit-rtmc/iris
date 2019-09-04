@@ -72,16 +72,18 @@ public class PropSetup extends IPanel {
 	/** Static image graphic combo box */
 	private final JComboBox<Graphic> graphic_cbx = new JComboBox<Graphic>();
 
-	/** Dedicated device purpose model */
+	/** Device purpose model */
 	private final DefaultComboBoxModel<DevicePurpose> purpose_mdl =
 		new DefaultComboBoxModel<DevicePurpose>(DevicePurpose.values());
 
-	/** Dedicated purpose action */
+	/** Device purpose action */
 	private final IAction purpose_act = new IAction("dms.purpose") {
 		protected void doActionPerformed(ActionEvent e) {
 			DevicePurpose dp = (DevicePurpose) purpose_mdl
 				.getSelectedItem();
-			dms.setPurpose((dp != null) ? dp.ordinal() : null);
+			dms.setPurpose((dp != null)
+					? dp.ordinal()
+					: DevicePurpose.GENERAL.ordinal());
 		}
 		@Override
 		protected void doUpdateSelected() {
@@ -91,7 +93,7 @@ public class PropSetup extends IPanel {
 		}
 	};
 
-	/** Dedicated purpose combo box */
+	/** Device purpose combo box */
 	private final JComboBox<DevicePurpose> purpose_cbx =
 		new JComboBox<DevicePurpose>();
 
@@ -120,7 +122,6 @@ public class PropSetup extends IPanel {
 		graphic_cbx.setModel(graphic_mdl);
 		graphic_cbx.setAction(graphic_act);
 		graphic_cbx.setRenderer(new GraphicListCellRenderer());
-		purpose_mdl.insertElementAt(null, 0); // allow selecting null
 		purpose_cbx.setModel(purpose_mdl);
 		purpose_cbx.setAction(purpose_act);
 		add("dms.beacon.ext");

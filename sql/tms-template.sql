@@ -1322,11 +1322,12 @@ CREATE TABLE iris.device_purpose (
 );
 
 COPY iris.device_purpose (id, description) FROM stdin;
-0	wayfinding
-1	tolling
-2	parking
-3	travel time
-4	safety
+0	general
+1	wayfinding
+2	tolling
+3	parking
+4	travel time
+5	safety
 \.
 
 --
@@ -2487,7 +2488,7 @@ CREATE TABLE iris._dms (
 	notes text NOT NULL,
 	gps VARCHAR(20) REFERENCES iris._gps,
 	static_graphic VARCHAR(20) REFERENCES iris.graphic,
-	purpose INTEGER REFERENCES iris.device_purpose,
+	purpose INTEGER NOT NULL REFERENCES iris.device_purpose,
 	beacon VARCHAR(20) REFERENCES iris._beacon,
 	sign_config VARCHAR(12) REFERENCES iris.sign_config,
 	sign_detail VARCHAR(12) REFERENCES iris.sign_detail,
