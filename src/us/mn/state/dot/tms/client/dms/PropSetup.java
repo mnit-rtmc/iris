@@ -142,6 +142,7 @@ public class PropSetup extends IPanel {
 	public void updateEditMode() {
 		graphic_act.setEnabled(canWrite("staticGraphic"));
 		beacon_act.setEnabled(canWrite("beacon"));
+		purpose_act.setEnabled(canWrite("purpose"));
 	}
 
 	/** Update one attribute on the form tab */
