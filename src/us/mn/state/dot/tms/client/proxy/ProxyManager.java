@@ -329,6 +329,8 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Set the selected style */
 	public void setSelectedStyle(ItemStyle sty) {
 		sel_style = sty;
+		if (layer != null)
+			layer.updateStatus();
 	}
 
 	/** Get the selected style */

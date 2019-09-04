@@ -167,7 +167,13 @@ public class DMSManager extends DeviceManager<DMS> {
 	/** Check if a DMS style is visible */
 	@Override
 	protected boolean isStyleVisible(DMS dms) {
-		return (!DMSHelper.isHidden(dms)) || isPurposeVisible(dms);
+		return isStyleAll(dms) ||
+		      (!DMSHelper.isHidden(dms) && isPurposeVisible(dms));
+	}
+
+	/** Check if the selected style is ALL */
+	private boolean isStyleAll(DMS dms) {
+		return getSelectedStyle() == ItemStyle.ALL;
 	}
 
 	/** Check if DMS purpose style is visible */
