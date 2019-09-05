@@ -105,19 +105,7 @@ public class DMSManager extends DeviceManager<DMS> {
 	/** Create a theme for DMSs */
 	@Override
 	protected ProxyTheme<DMS> createTheme() {
-		// NOTE: the ordering of themes controls which color is used
-		//       to render the sign icon on the map
-		ProxyTheme<DMS> theme = new ProxyTheme<DMS>(this,
-			new DmsMarker());
-		theme.addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(ItemStyle.SCHEDULED, ProxyTheme.COLOR_SCHEDULED);
-		theme.addStyle(ItemStyle.MAINTENANCE,
-			ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(ItemStyle.PURPOSE, ProxyTheme.COLOR_PURPOSE);
-		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(ItemStyle.ALL);
-		return theme;
+		return new DmsTheme(this);
 	}
 
 	/** Create a list cell renderer */
