@@ -75,7 +75,7 @@ public enum IncImpact {
 		if (affected_groups > 0) {
 			if (isAllLanes(li, LaneImpact.AFFECTED))
 				return IncImpact.all_lanes_affected;
-			else if (blocked_groups == 1) {
+			else if (affected_groups == 1) {
 				if (isLeftLane(li, LaneImpact.AFFECTED))
 					return IncImpact.left_lanes_affected;
 				else if (isRightLane(li, LaneImpact.AFFECTED))
