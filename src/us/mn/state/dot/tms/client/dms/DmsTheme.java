@@ -46,6 +46,10 @@ public class DmsTheme extends ProxyTheme<DMS> {
 	static private final Symbol TOLLING_SYMBOL = new VectorSymbol(
 		new TollingMarker());
 
+	/** Parking symbol */
+	static private final Symbol PARKING_SYMBOL = new VectorSymbol(
+		new ParkingMarker());
+
 	/** Create a new DMS theme */
 	public DmsTheme(DMSManager man) {
 		super(man, new DmsMarker());
@@ -67,6 +71,7 @@ public class DmsTheme extends ProxyTheme<DMS> {
 		float p = scale * UI.scaled(1) * 0.45f;
 		WAYFINDING_SYMBOL.setScale(p);
 		TOLLING_SYMBOL.setScale(p);
+		PARKING_SYMBOL.setScale(p);
 	}
 
 	/** Draw the specified map object */
@@ -90,6 +95,7 @@ public class DmsTheme extends ProxyTheme<DMS> {
 			switch (dp) {
 				case WAYFINDING: return WAYFINDING_SYMBOL;
 				case TOLLING: return TOLLING_SYMBOL;
+				case PARKING: return PARKING_SYMBOL;
 				default: return null;
 			}
 		}
