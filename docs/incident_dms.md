@@ -24,6 +24,31 @@ Range    | Exits | Miles (Metro) | Miles (Rural)
 `middle` |   2-4 |             5 |            10
 `far`    |   5-8 |            10 |            20
 
+## Impact
+
+Every incident is assigned an **impact**, based on which lanes are *blocked* or
+*affected*.  They are ordered based on their effect on traffic.  If both left
+and right lanes are blocked, the impact is `lanes_blocked`.  The same applies
+for `lanes_affected`.
+
+Impact | Description
+-------|--------------------
+ 0     | `lanes_blocked`
+ 1     | `left_lanes_blocked`
+ 2     | `right_lanes_blocked`
+ 3     | `center_lanes_blocked`
+ 4     | `both_shoulders_blocked`
+ 5     | `left_shoulder_blocked`
+ 6     | `right_shoulder_blocked`
+ 7     | `lanes_affected`
+ 8     | `left_lanes_affected`
+ 9     | `right_lanes_affected`
+10     | `center_lanes_affected`
+11     | `both_shoulders_affected`
+12     | `left_shoulder_affected`
+13     | `right_shoulder_affected`
+14     | `free_flowing`
+
 ## Severity
 
 Incident severity determines the **maximum range** and **message priority**.
@@ -35,27 +60,14 @@ Severity | Maximum Range | Message Priority
 `normal` | `middle`      | `INCIDENT_MED`
 `major`  | `far`         | `INCIDENT_HIGH`
 
-Every incident is assigned an **impact**, based on which lanes are *blocked* or
-*affected*.  They are ordered based on their effect on traffic.  Severity
-depends on impact and **lane type** at the incident location.
+Severity depends on whether *more than half* the lanes are *blocked* or
+*affected*, as well as the **lane type** at the incident location.
 
-Impact | Description               | Mainline   | CD/Exit  | Merge
--------|---------------------------|------------|----------|--------
- 0     | `all_lanes_blocked`       | `major`    | `normal` | `minor`
- 1     | `left_lanes_blocked`      | `normal`   | `minor`  | —
- 2     | `right_lanes_blocked`     | `normal`   | `minor`  | —
- 3     | `center_lanes_blocked`    | `normal`   | `minor`  | —
- 4     | `both_shoulders_blocked`  | `normal`   | `minor`  | —
- 5     | `left_shoulder_blocked`   | `normal`   | `minor`  | —
- 6     | `right_shoulder_blocked`  | `normal`   | `minor`  | —
- 7     | `all_lanes_affected`      | `minor`    | —        | —
- 8     | `left_lanes_affected`     | `minor`    | —        | —
- 9     | `right_lanes_affected`    | `minor`    | —        | —
-10     | `center_lanes_affected`   | `minor`    | —        | —
-11     | `both_shoulders_affected` | `minor`    | —        | —
-12     | `left_shoulder_affected`  | `minor`    | —        | —
-13     | `right_shoulder_affected` | `minor`    | —        | —
-14     | `all_free_flowing`        | —          | —        | —
+Impact                    | Mainline   | CD/Exit  | Merge
+--------------------------|------------|----------|--------
+more than half `blocked`  | `major`    | `normal` | `minor`
+half or less `blocked`    | `normal`   | `minor`  | —
+any lanes `affected`      | `minor`    | —        | —
 
 ## Descriptor
 
@@ -108,7 +120,7 @@ configurable advice table contains fields which are matched to the incident.
 
 Field          | Description
 ---------------|---------------------------------
-Impact         | code; see the *severity* section
+Impact         | code; see [Impact](#impact)
 Lane Type      | `mainline`, `exit`, `merge` or `CD road`
 Range          | from sign to incident: `ahead`, `near`, `middle` or `far`
 Impacted Lanes | number of non-shoulder lanes, (if blank, any number matches)
@@ -129,5 +141,6 @@ If any devices are associated with an incident when an update is logged, the
 device deploy logic will be checked again.  If any devices have proposed
 changes, the device deploy form will appear.  All proposed changes will be
 listed in the form, including new devices and any devices to be blanked.
+
 
 [system attribute]: admin_guide.html#sys_attr
