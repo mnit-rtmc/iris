@@ -1,28 +1,13 @@
 # Incident DMS Deployment
 
 Sign messages can be suggested from active roadway incidents.  This method uses
-incident attributes (**range**, **severity**, etc.) and location on the freeway
-network to make suggestions.
+incident attributes (**impact**, **range**, **severity**, etc.) and location on
+the freeway network to make suggestions.
 
 Each message is composed of three parts: **descriptor** (_what?_), **locator**
 (_where?_) and **advice** (_how?_).  Suggestions are only made if a match is
 found for all three parts.  Each part may have an abbreviated version, which is
 used only when the normal version does not fit the sign.
-
-## Range
-
-*Range* is the distance from an upstream sign to the incident.  There are four
-defined ranges, each with a number of freeway *exits* in between.  For this
-purpose, exits which are part of the same interchange are treated as one (for
-example, both off-ramps of a cloverleaf).  For reference, typical mile distances
-for metro and rural freeways are included.
-
-Range    | Exits | Miles (Metro) | Miles (Rural)
----------|-------|---------------|--------------
-`ahead`  |     0 |             1 |             2
-`near`   |     1 |             2 |             5
-`middle` |   2-4 |             5 |            10
-`far`    |   5-8 |            10 |            20
 
 ## Impact
 
@@ -48,6 +33,20 @@ Impact | Description
 12     | `left_shoulder_affected`
 13     | `right_shoulder_affected`
 14     | `free_flowing`
+
+## Range
+
+*Range* is the distance from an upstream sign to the incident.  There are four
+defined ranges, each with a number of freeway *exits* in between.  For this
+purpose, exits which are part of the same interchange are treated as one (for
+example, both off-ramps of a cloverleaf).
+
+Range    | Exits
+---------|------
+`ahead`  |     0
+`near`   |     1
+`middle` |   2-5
+`far`    |   6-9
 
 ## Severity
 
