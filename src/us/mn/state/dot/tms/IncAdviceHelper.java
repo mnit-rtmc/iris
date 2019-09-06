@@ -44,8 +44,7 @@ public class IncAdviceHelper extends BaseHelper {
 			IncAdvice adv = it.next();
 			if (adv.getImpact() == imp.ordinal() &&
 			    adv.getRange() == rng.ordinal() &&
-			    adv.getLaneType() == inc.getLaneType() &&
-			    adv.getCleared() == inc.getCleared())
+			    adv.getLaneType() == inc.getLaneType())
 			{
 				LaneMatch impacted = LaneMatch.check(
 					adv.getImpactedLanes(),

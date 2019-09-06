@@ -57,12 +57,6 @@ public interface IncAdvice extends SonarObject {
 	/** Get count of open lanes */
 	Integer getOpenLanes();
 
-	/** Set the cleared status */
-	void setCleared(boolean c);
-
-	/** Get the cleared status */
-	boolean getCleared();
-
 	/** Set the MULTI string */
 	void setMulti(String m);
 

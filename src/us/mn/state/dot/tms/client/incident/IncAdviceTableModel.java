@@ -52,7 +52,7 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 	@Override
 	protected ArrayList<ProxyColumn<IncAdvice>> createColumns() {
 		ArrayList<ProxyColumn<IncAdvice>> cols =
-			new ArrayList<ProxyColumn<IncAdvice>>(8);
+			new ArrayList<ProxyColumn<IncAdvice>>(7);
 		cols.add(new ProxyColumn<IncAdvice>("incident.impact", 160) {
 			public Object getValueAt(IncAdvice adv) {
 				return IncImpact.fromOrdinal(adv.getImpact());
@@ -139,22 +139,6 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 					: null);
 			}
 		});
-		cols.add(new ProxyColumn<IncAdvice>("incident.clear", 50,
-			Boolean.class)
-		{
-			public Object getValueAt(IncAdvice adv) {
-				return adv.getCleared();
-			}
-			public boolean isEditable(IncAdvice adv) {
-				return canWrite(adv);
-			}
-			public void setValueAt(IncAdvice adv, Object value) {
-				if (value instanceof Boolean) {
-					Boolean b = (Boolean) value;
-					adv.setCleared(b);
-				}
-			}
-		});
 		cols.add(new ProxyColumn<IncAdvice>("dms.multi.string", 300) {
 			public Object getValueAt(IncAdvice adv) {
 				return adv.getMulti();
@@ -226,10 +210,6 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 					else
 						return ol0.compareTo(ol1);
 				}
-				boolean cl0 = adv0.getCleared();
-				boolean cl1 = adv1.getCleared();
-				if (cl0 != cl1)
-					return Boolean.compare(cl0, cl1);
 				return adv0.getName().compareTo(adv1.getName());
 			}
 		};

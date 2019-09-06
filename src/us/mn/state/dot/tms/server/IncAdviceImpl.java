@@ -36,9 +36,8 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncAdviceImpl.class);
 		store.query("SELECT name, impact, lane_type, range, " +
-			"impacted_lanes, open_lanes, cleared, multi, " +
-			"abbrev FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+			"impacted_lanes, open_lanes, multi, abbrev FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new IncAdviceImpl(row));
@@ -56,7 +55,6 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		map.put("range", range);
 		map.put("impacted_lanes", impacted_lanes);
 		map.put("open_lanes", open_lanes);
-		map.put("cleared", cleared);
 		map.put("multi", multi);
 		map.put("abbrev", abbrev);
 		return map;
@@ -82,15 +80,14 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		     row.getInt(4),              // range
 		     (Integer) row.getObject(5), // impacted_lanes
 		     (Integer) row.getObject(6), // open_lanes
-		     row.getBoolean(7),          // cleared
-		     row.getString(8),           // multi
-		     row.getString(9)            // abbrev
+		     row.getString(7),           // multi
+		     row.getString(8)            // abbrev
 		);
 	}
 
 	/** Create an incident advice */
 	private IncAdviceImpl(String n, int imp, short lt, int r, Integer iln,
-		Integer oln, boolean c, String m, String a)
+		Integer oln, String m, String a)
 	{
 		super(n);
 		impact = imp;
@@ -98,7 +95,6 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		range = r;
 		impacted_lanes = iln;
 		open_lanes = oln;
-		cleared = c;
 		multi = m;
 		abbrev = a;
 	}
@@ -236,29 +232,6 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	@Override
 	public Integer getOpenLanes() {
 		return open_lanes;
-	}
-
-	/** Incident cleared status */
-	private boolean cleared = false;
-
-	/** Set the cleared status */
-	@Override
-	public void setCleared(boolean c) {
-		cleared = c;
-	}
-
-	/** Set the cleared status */
-	public void doSetCleared(boolean c) throws TMSException {
-		if (c != cleared) {
-			store.update(this, "cleared", c);
-			setCleared(c);
-		}
-	}
-
-	/** Get the cleared status */
-	@Override
-	public boolean getCleared() {
-		return cleared;
 	}
 
 	/** MULTI string */
