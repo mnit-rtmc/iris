@@ -38,6 +38,10 @@ public class DmsTheme extends ProxyTheme<DMS> {
 	static private final Style PURPOSE_STYLE = new Style("Purpose", null,
 		Color.BLACK);
 
+	/** Wayfinding symbol */
+	static private final Symbol WAYFINDING_SYMBOL = new VectorSymbol(
+		new WayfindingMarker());
+
 	/** Tolling symbol */
 	static private final Symbol TOLLING_SYMBOL = new VectorSymbol(
 		new TollingMarker());
@@ -61,6 +65,7 @@ public class DmsTheme extends ProxyTheme<DMS> {
 	public void setScale(float scale) {
 		super.setScale(scale);
 		float p = scale * UI.scaled(1) * 0.45f;
+		WAYFINDING_SYMBOL.setScale(p);
 		TOLLING_SYMBOL.setScale(p);
 	}
 
@@ -83,6 +88,7 @@ public class DmsTheme extends ProxyTheme<DMS> {
 			int p = proxy.getPurpose();
 			DevicePurpose dp = DevicePurpose.fromOrdinal(p);
 			switch (dp) {
+				case WAYFINDING: return WAYFINDING_SYMBOL;
 				case TOLLING: return TOLLING_SYMBOL;
 				default: return null;
 			}
