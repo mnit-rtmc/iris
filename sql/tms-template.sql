@@ -3080,21 +3080,21 @@ CREATE TABLE iris.inc_impact (
 );
 
 COPY iris.inc_impact (id, description) FROM stdin;
-0	all lanes blocked
+0	lanes blocked
 1	left lanes blocked
 2	right lanes blocked
 3	center lanes blocked
 4	both shoulders blocked
 5	left shoulder blocked
 6	right shoulder blocked
-7	all lanes affected
+7	lanes affected
 8	left lanes affected
 9	right lanes affected
 10	center lanes affected
 11	both shoulders affected
 12	left shoulder affected
 13	right shoulder affected
-14	all free flowing
+14	free flowing
 \.
 
 CREATE TABLE iris.inc_range (

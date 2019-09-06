@@ -25,4 +25,9 @@ CREATE VIEW inc_advice_view AS
 	LEFT JOIN iris.lane_type lt ON a.lane_type = lt.id;
 GRANT SELECT ON inc_advice_view TO PUBLIC;
 
+-- Updated incident impacts
+UPDATE iris.inc_impact SET description = 'lanes blocked' WHERE id = 0;
+UPDATE iris.inc_impact SET description = 'lanes affected' WHERE id = 7;
+UPDATE iris.inc_impact SET description = 'free flowing' WHERE id = 14;
+
 COMMIT;

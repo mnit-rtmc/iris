@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.LaneType;
  */
 public enum IncImpact {
 	/* Blocked - lane or shoulder */
-	all_lanes_blocked,       // 0
+	lanes_blocked,           // 0
 	left_lanes_blocked,      // 1
 	right_lanes_blocked,     // 2
 	center_lanes_blocked,    // 3
@@ -33,22 +33,22 @@ public enum IncImpact {
 	left_shoulder_blocked,   // 5
 	right_shoulder_blocked,  // 6
 	/* Affected - partially blocked */
-	all_lanes_affected,      // 7
+	lanes_affected,          // 7
 	left_lanes_affected,     // 8
 	right_lanes_affected,    // 9
 	center_lanes_affected,   // 10
 	both_shoulders_affected, // 11
 	left_shoulder_affected,  // 12
 	right_shoulder_affected, // 13
-	/* All clear */
-	all_free_flowing;        // 14
+	/* No lanes blocked or affected */
+	free_flowing;            // 14
 
 	/** Get an impact from an ordinal value */
 	static public IncImpact fromOrdinal(int o) {
 		if (o >= 0 && o < values().length)
 			return values()[o];
 		else
-			return all_free_flowing;
+			return free_flowing;
 	}
 
 	/** Get the impact of an incident */
@@ -56,8 +56,9 @@ public enum IncImpact {
 		LaneImpact[] li = LaneImpact.fromString(inc.getImpact());
 		int blocked_groups = countGroups(li, LaneImpact.BLOCKED);
 		if (blocked_groups > 0) {
-			if (isAllLanes(li, LaneImpact.BLOCKED))
-				return IncImpact.all_lanes_blocked;
+			if (isLeftLane(li, LaneImpact.BLOCKED) &&
+			    isRightLane(li, LaneImpact.BLOCKED))
+				return IncImpact.lanes_blocked;
 			else if (blocked_groups == 1) {
 				if (isLeftLane(li, LaneImpact.BLOCKED))
 					return IncImpact.left_lanes_blocked;
@@ -73,8 +74,9 @@ public enum IncImpact {
 			return IncImpact.right_shoulder_blocked;
 		int affected_groups = countGroups(li, LaneImpact.AFFECTED);
 		if (affected_groups > 0) {
-			if (isAllLanes(li, LaneImpact.AFFECTED))
-				return IncImpact.all_lanes_affected;
+			if (isLeftLane(li, LaneImpact.AFFECTED) &&
+			    isRightLane(li, LaneImpact.AFFECTED))
+				return IncImpact.lanes_affected;
 			else if (affected_groups == 1) {
 				if (isLeftLane(li, LaneImpact.AFFECTED))
 					return IncImpact.left_lanes_affected;
@@ -89,7 +91,7 @@ public enum IncImpact {
 		else if (isRightShoulder(li, LaneImpact.AFFECTED))
 			return IncImpact.right_shoulder_affected;
 		else
-			return IncImpact.all_free_flowing;
+			return IncImpact.free_flowing;
 	}
 
 	/** Count groups of non-shoulder lanes with given impact */
@@ -103,15 +105,6 @@ public enum IncImpact {
 			in_group = g;
 		}
 		return groups;
-	}
-
-	/** Check if all lanes (non-shoulder) have given impact */
-	static private boolean isAllLanes(LaneImpact[] li, LaneImpact v) {
-		for (int i = 1; i < li.length - 1; i++) {
-			if (li[i] != v)
-				return false;
-		}
-		return li.length > 2;
 	}
 
 	/** Check if left lane has given impact */
@@ -140,70 +133,58 @@ public enum IncImpact {
 	}
 
 	/** Get the incident severity */
-	public IncSeverity severity(LaneType lane_type) {
+	static public IncSeverity severity(Incident inc, LaneType lane_type) {
 		switch (lane_type) {
 		case MAINLINE:
-			return severityMainline();
+			return severityMainline(inc);
 		case EXIT:
 		case CD_LANE:
-			return severityExitCD();
+			return severityExitCD(inc);
 		case MERGE:
-			return severityMerge();
+			return severityMerge(inc);
 		default:
 			return null;
 		}
 	}
 
 	/** Get the severity of a mainline incident */
-	private IncSeverity severityMainline() {
-		switch (this) {
-		case all_lanes_blocked:
-			return IncSeverity.major;
-		case left_lanes_blocked:
-		case right_lanes_blocked:
-		case center_lanes_blocked:
-		case both_shoulders_blocked:
-		case left_shoulder_blocked:
-		case right_shoulder_blocked:
-			return IncSeverity.normal;
-		case all_lanes_affected:
-		case left_lanes_affected:
-		case right_lanes_affected:
-		case center_lanes_affected:
-		case both_shoulders_affected:
-		case left_shoulder_affected:
-		case right_shoulder_affected:
-			return IncSeverity.minor;
-		default:
-			return null;
-		}
+	static private IncSeverity severityMainline(Incident inc) {
+		int n_impacted = getImpactedLanes(inc);
+		if (isBlocked(inc)) {
+			int n_open = getOpenLanes(inc);
+			return (n_impacted > n_open)
+			      ? IncSeverity.major
+			      : IncSeverity.normal;
+		} else
+			return (n_impacted > 0) ? IncSeverity.minor : null;
 	}
 
 	/** Get the severity of an exit or CD road incident */
-	private IncSeverity severityExitCD() {
-		switch (this) {
-		case all_lanes_blocked:
-			return IncSeverity.normal;
-		case left_lanes_blocked:
-		case right_lanes_blocked:
-		case center_lanes_blocked:
-		case both_shoulders_blocked:
-		case left_shoulder_blocked:
-		case right_shoulder_blocked:
-			return IncSeverity.minor;
-		default:
+	static private IncSeverity severityExitCD(Incident inc) {
+		if (isBlocked(inc)) {
+			int n_impacted = getImpactedLanes(inc);
+			int n_open = getOpenLanes(inc);
+			return (n_impacted > n_open)
+			      ? IncSeverity.normal
+			      : IncSeverity.minor;
+		} else
 			return null;
-		}
 	}
 
 	/** Get the severity of a merge incident */
-	private IncSeverity severityMerge() {
-		switch (this) {
-		case all_lanes_blocked:
-			return IncSeverity.minor;
-		default:
+	static private IncSeverity severityMerge(Incident inc) {
+		if (isBlocked(inc)) {
+			int n_impacted = getImpactedLanes(inc);
+			int n_open = getOpenLanes(inc);
+			return (n_impacted > n_open) ? IncSeverity.minor : null;
+		} else
 			return null;
-		}
+	}
+
+	/** Check if any lanes are blocked */
+	static private boolean isBlocked(Incident inc) {
+		LaneImpact[] li = LaneImpact.fromString(inc.getImpact());
+		return countGroups(li, LaneImpact.BLOCKED) > 0;
 	}
 
 	/** Get count of impacted lanes.
@@ -212,10 +193,9 @@ public enum IncImpact {
 	 *         the count of affected lanes. */
 	static public int getImpactedLanes(Incident inc) {
 		LaneImpact[] li = LaneImpact.fromString(inc.getImpact());
-		if (countGroups(li, LaneImpact.BLOCKED) > 0)
-			return getLaneCount(li, LaneImpact.BLOCKED);
-		else
-			return getLaneCount(li, LaneImpact.AFFECTED);
+		return (isBlocked(inc))
+		      ? getLaneCount(li, LaneImpact.BLOCKED)
+		      : getLaneCount(li, LaneImpact.AFFECTED);
 	}
 
 	/** Get count of open lanes.
@@ -224,7 +204,7 @@ public enum IncImpact {
 	 *         Otherwise the count of non-affected lanes. */
 	static public int getOpenLanes(Incident inc) {
 		LaneImpact[] li = LaneImpact.fromString(inc.getImpact());
-		if (countGroups(li, LaneImpact.BLOCKED) > 0) {
+		if (isBlocked(inc)) {
 			return getLaneCount(li, LaneImpact.AFFECTED) +
 			       getLaneCount(li, LaneImpact.FREE_FLOWING);
 		} else

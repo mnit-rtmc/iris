@@ -80,7 +80,7 @@ public class IncidentHelper extends BaseHelper {
 	/** Get the severity of an incident */
 	static public IncSeverity getSeverity(Incident inc) {
 		LaneType lane_type = LaneType.fromOrdinal(inc.getLaneType());
-		return IncImpact.getImpact(inc).severity(lane_type);
+		return IncImpact.severity(inc, lane_type);
 	}
 
 	/** Get sign messages deployed for an incident */
