@@ -663,6 +663,16 @@ public class IncidentDispatcher extends IPanel
 			new HashMap<String, MultiString>();
 		for (DMS dms: signs)
 			msgs.put(dms.getName(), new MultiString(""));
+		IncSeverity sev = IncidentHelper.getSeverity(inc);
+		if (sev == IncSeverity.major)
+			updateClearedMessages(inc, msgs);
+		return msgs;
+	}
+
+	/** Update cleared messages for a major incident */
+	private void updateClearedMessages(Incident inc,
+		HashMap<String, MultiString> msgs)
+	{
 		UpstreamDeviceFinder finder = new UpstreamDeviceFinder(manager,
 			inc);
 		DmsDeployBuilder dms_builder = new DmsDeployBuilder(manager,
@@ -676,11 +686,10 @@ public class IncidentDispatcher extends IPanel
 				String sign = dms.getName();
 				if (msgs.containsKey(sign)) {
 					msgs.put(sign, dms_builder.createMulti(
-						dms, ud));
+						dms, ud, true));
 				}
 			}
 		}
-		return msgs;
 	}
 
 	/** Send new sign message to a DMS */

@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -110,7 +111,9 @@ public class DmsDeployBuilder {
 	 * @param dms Possible sign to deploy.
 	 * @param ud Upstream device.
 	 * @return MULTI string for DMS, or null. */
-	public MultiString createMulti(DMS dms, UpstreamDevice ud) {
+	public MultiString createMulti(DMS dms, UpstreamDevice ud,
+		boolean cleared)
+	{
 		boolean branched = !isCorridorSame(dms);
 		Distance up = ud.distance;
 		IncRange rng = ud.range();
@@ -122,9 +125,20 @@ public class DmsDeployBuilder {
 		IncLocator iloc = IncLocatorHelper.match(rng, branched, picked);
 		if (null == iloc)
 			return null;
-		IncAdvice adv = IncAdviceHelper.match(rng, inc);
-		if (null == adv)
-			return null;
+		String adv_multi;
+		String adv_abbrev;
+		if (cleared) {
+			adv_multi = SystemAttrEnum.INCIDENT_CLEAR_ADVICE_MULTI
+				.getString();
+			adv_abbrev = SystemAttrEnum.INCIDENT_CLEAR_ADVICE_ABBREV
+				.getString();
+		} else {
+			IncAdvice adv = IncAdviceHelper.match(rng, inc);
+			if (null == adv)
+				return null;
+			adv_multi = adv.getMulti();
+			adv_abbrev = adv.getAbbrev();
+		}
 		String mdsc = checkMulti(dms, dsc.getMulti(), dsc.getAbbrev(),
 			up, loc);
 		if (null == mdsc)
@@ -133,8 +147,7 @@ public class DmsDeployBuilder {
 			up, loc);
 		if (null == mloc)
 			return null;
-		String madv = checkMulti(dms, adv.getMulti(), adv.getAbbrev(),
-			up, loc);
+		String madv = checkMulti(dms, adv_multi, adv_abbrev, up, loc);
 		if (null == madv)
 			return null;
 		LocMultiBuilder lmb = new LocMultiBuilder(loc, up);

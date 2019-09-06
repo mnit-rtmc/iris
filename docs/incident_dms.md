@@ -113,14 +113,15 @@ Lane Type      | `mainline`, `exit`, `merge` or `CD road`
 Range          | from sign to incident: `ahead`, `near`, `middle` or `far`
 Impacted Lanes | number of non-shoulder lanes, (if blank, any number matches)
 Open Lanes     | number of non-shoulder lanes *not* impacted
-Cleared        | `YES` or `NO`: indicates whether incident has just cleared
 
 ## Clearing
 
-When the incident is cleared, all associated signs are matched again with
-*cleared* set to `YES`.  If a matching message is found, it will be deployed
-with `PSA` message priority for 5 minutes.  If not, the previous message is
-blanked.
+When a `major` severity incident is cleared, a new message will be sent to each
+deployed sign.  The *descriptor* and *locator* will be the same, but *advice*
+will be taken from the `incident_clear_advice_multi` [system attribute].  If it
+does not fit on the sign, the value of `incident_clear_advice_abbrev` will be
+used instead.  The *cleared* message will be deployed with `PSA` message
+priority for 5 minutes.
 
 ## Updating
 
@@ -128,3 +129,5 @@ If any devices are associated with an incident when an update is logged, the
 device deploy logic will be checked again.  If any devices have proposed
 changes, the device deploy form will appear.  All proposed changes will be
 listed in the form, including new devices and any devices to be blanked.
+
+[system attribute]: admin_guide.html#sys_attr

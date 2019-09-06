@@ -109,7 +109,7 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 
 	/** Add an upstream DMS */
 	private void addUpstreamDMS(DMS dms, UpstreamDevice ud) {
-		MultiString ms = dms_builder.createMulti(dms, ud);
+		MultiString ms = dms_builder.createMulti(dms, ud, false);
 		if (ms != null) {
 			RasterGraphic rg = dms_builder.createGraphic(dms, ms);
 			if (rg != null) {

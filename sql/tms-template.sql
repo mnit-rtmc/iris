@@ -192,6 +192,8 @@ gate_arm_alert_timeout_secs	90
 gate_arm_event_purge_days	0
 help_trouble_ticket_enable	false
 help_trouble_ticket_url	
+incident_clear_advice_multi	JUST CLEARED
+incident_clear_advice_abbrev	CLEARED
 incident_clear_secs	600
 map_extent_name_initial	Home
 map_icon_size_scale_max	30
