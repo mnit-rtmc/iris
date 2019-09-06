@@ -1329,11 +1329,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		long s = ItemStyle.ALL.bit();
 		if (getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
-		if (purpose != DevicePurpose.GENERAL)
-			s |= ItemStyle.PURPOSE.bit();
-		if (isActive())
+		if (isActive()) {
 			s |= ItemStyle.ACTIVE.bit();
-		else
+			if (purpose != DevicePurpose.GENERAL)
+				s |= ItemStyle.PURPOSE.bit();
+		} else
 			s |= ItemStyle.INACTIVE.bit();
 		if (hidden)
 			s |= ItemStyle.HIDDEN.bit();
