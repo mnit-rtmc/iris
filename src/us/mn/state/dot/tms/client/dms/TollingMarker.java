@@ -27,27 +27,27 @@ public class TollingMarker extends Marker {
 	public TollingMarker() {
 		super(21);
 		float x = 38;
-		float y = -16;
-		path.moveTo(x + 15, y + 3);
-		path.lineTo(x + 5, y + 5);
-		path.curveTo(x + 12, y + 5, x + 10, y + 7, x + 10, y + 10);
-		path.curveTo(x + 10, y + 13, x + 12, y + 16, x + 15, y + 16);
-		path.curveTo(x + 18, y + 16, x + 20, y + 18, x + 20, y + 21);
-		path.curveTo(x + 20, y + 24, x + 18, y + 25, x + 16, y + 25);
-		path.curveTo(x + 14, y + 25, x + 11, y + 24, x + 11, y + 22);
-		path.lineTo(x + 9, y + 23);
-		path.curveTo(x + 10, y + 26, x + 13, y + 27, x + 15, y + 27);
-		path.lineTo(x + 15, y + 29);
-		path.lineTo(x + 17, y + 29);
-		path.lineTo(x + 17, y + 27);
-		path.curveTo(x + 19, y + 27, x + 22, y + 26, x + 22, y + 21);
-		path.curveTo(x + 22, y + 16, x + 18, y + 14, x + 16, y + 14);
-		path.curveTo(x + 14, y + 14, x + 12, y + 13, x + 12, y + 10);
-		path.curveTo(x + 12, y + 7, x + 14, y + 7, x + 16, y + 7);
-		path.curveTo(x + 18, y + 7, x + 19, y + 8, x + 19, y + 9);
-		path.lineTo(x + 21, y + 8);
-		path.curveTo(x + 21, y + 7, x + 19, y + 5, x + 17, y + 5);
+		float y = -22;
+		path.moveTo(x + 15, y + 29);
+		path.lineTo(x + 15, y + 26);
+		path.curveTo(x + 12, y + 26, x + 9, y + 24, x + 9, y + 21);
+		path.curveTo(x + 9, y + 18, x + 12, y + 15, x + 15, y + 15);
+		path.curveTo(x + 18, y + 15, x + 20, y + 14, x + 20, y + 12);
+		path.curveTo(x + 20, y + 10, x + 18, y + 9, x + 16, y + 9);
+		path.curveTo(x + 14, y + 9, x + 11, y + 10, x + 11, y + 12);
+		path.lineTo(x + 9, y + 10);
+		path.curveTo(x + 10, y + 7, x + 13, y + 6, x + 15, y + 6);
+		path.lineTo(x + 15, y + 3);
 		path.lineTo(x + 17, y + 3);
+		path.lineTo(x + 17, y + 6);
+		path.curveTo(x + 19, y + 6, x + 23, y + 7, x + 23, y + 12);
+		path.curveTo(x + 22, y + 17, x + 17, y + 18, x + 15, y + 18);
+		path.curveTo(x + 13, y + 18, x + 12, y + 19, x + 12, y + 21);
+		path.curveTo(x + 12, y + 23, x + 15, y + 23, x + 16, y + 23);
+		path.curveTo(x + 17, y + 23, x + 19, y + 22, x + 19, y + 21);
+		path.lineTo(x + 21, y + 23);
+		path.curveTo(x + 21, y + 24, x + 19, y + 26, x + 17, y + 26);
+		path.lineTo(x + 17, y + 29);
 		path.closePath();
 	}
 }

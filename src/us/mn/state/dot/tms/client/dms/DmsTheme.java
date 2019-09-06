@@ -47,12 +47,12 @@ public class DmsTheme extends ProxyTheme<DMS> {
 		super(man, new DmsMarker());
 		// NOTE: the ordering of styles controls which color is used
 		//       to render the sign icon on the map
-		addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
-		addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
-		addStyle(ItemStyle.SCHEDULED, ProxyTheme.COLOR_SCHEDULED);
-		addStyle(ItemStyle.MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
-		addStyle(ItemStyle.PURPOSE, ProxyTheme.COLOR_PURPOSE);
-		addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
+		addStyle(ItemStyle.AVAILABLE, COLOR_AVAILABLE);
+		addStyle(ItemStyle.DEPLOYED, COLOR_DEPLOYED);
+		addStyle(ItemStyle.SCHEDULED, COLOR_SCHEDULED);
+		addStyle(ItemStyle.MAINTENANCE, COLOR_UNAVAILABLE);
+		addStyle(ItemStyle.PURPOSE, COLOR_PURPOSE);
+		addStyle(ItemStyle.FAILED, COLOR_FAILED);
 		addStyle(ItemStyle.ALL);
 	}
 
