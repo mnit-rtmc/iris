@@ -18,6 +18,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.units.Distance;
+import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -37,44 +38,45 @@ public class IncMultiBuilder {
 	private final Distance dist;
 
 	/** Location MULTI builder */
-	private final LocMultiBuilder builder;
+	private final MultiBuilder builder;
 
 	/** Create a new incident MULTI builder */
 	public IncMultiBuilder(DMS s, GeoLoc l, Distance d) {
 		dms = s;
 		loc = l;
 		dist = d;
-		builder = new LocMultiBuilder(loc, d);
+		builder = new MultiBuilder();
 	}
 
 	/** Add a line to MULTI string */
 	public boolean addLine(String multi, String abbrev) {
-		String ms = checkMulti(multi, abbrev);
+		MultiString ms = buildMulti(multi, abbrev);
 		if (ms != null) {
 			if (builder.toString().length() > 0)
 				builder.addLine(null);
-			new MultiString(ms).parse(builder);
+			ms.parse(builder);
 			return true;
 		} else
 			return false;
 	}
 
-	/** Check if MULTI string or abbreviation will fit */
-	private String checkMulti(String multi, String abbrev) {
-		return checkMulti(multi)
-		      ? multi
-		      : (checkMulti(abbrev) ? abbrev : null);
+	/** Build MULTI string, or abbreviation if necessary */
+	private MultiString buildMulti(String multi, String abbrev) {
+		MultiString res = buildMulti(multi);
+		return (res != null) ? res : buildMulti(abbrev);
 	}
 
-	/** Check if MULTI string will fit on a DMS */
-	private boolean checkMulti(String multi) {
+	/** Build MULTI string, replacing [loc] tags */
+	private MultiString buildMulti(String multi) {
 		if (multi != null) {
 			LocMultiBuilder lmb = new LocMultiBuilder(loc, dist);
 			new MultiString(multi).parse(lmb);
 			MultiString ms = lmb.toMultiString();
-			return (DMSHelper.createPageOne(dms, ms) != null);
+			return (DMSHelper.createPageOne(dms, ms) != null)
+			      ? ms
+			      : null;
 		} else
-			return false;
+			return null;
 	}
 
 	/** Get the MULTI string */
