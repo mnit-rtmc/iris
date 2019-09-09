@@ -57,8 +57,10 @@ import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.client.wysiwyg.selector.WMsgSelectorSignProcess;
+import us.mn.state.dot.tms.client.wysiwyg.editor.WMsgEditorForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -416,8 +418,8 @@ public class WMsgSelectorForm extends AbstractForm {
 		sgrp_pn = createScrollPane(sgrp_list);
 		sgrp_pn.setPreferredSize(new Dimension(250,200));
 		tab_pane = new JTabbedPane(JTabbedPane.TOP);
-		tab_pane.add(I18N.get("wysiwyg.selector.sign"), dms_pn);
-		tab_pane.add(I18N.get("wysiwyg.selector.sign_group"), sgrp_pn);
+		tab_pane.add(I18N.get("wysiwyg.sign"), dms_pn);
+		tab_pane.add(I18N.get("wysiwyg.sign_group"), sgrp_pn);
 		
 		/* Set the focus on the Sign list */
 		dms_list.requestFocusInWindow();
@@ -538,7 +540,6 @@ public class WMsgSelectorForm extends AbstractForm {
 		wiMap.put(KeyStroke.getKeyStroke("F4"), "create");
 		waMap.put("create", create);
 		
-		/** TODO these not working! */
 		/* Left - Toggle Sign/SignGroup tabs left */
 		wiMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0, true), "cycleTabLeft");
 		waMap.put("cycleTabLeft", cycleTabLeft);
@@ -715,7 +716,7 @@ public class WMsgSelectorForm extends AbstractForm {
 		gbc.gridheight = 1;
 		gbc.weighty = 0;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
-		p.add(new JLabel(I18N.get("wysiwyg.selector.message")), gbc);
+		p.add(new JLabel(I18N.get("wysiwyg.message")), gbc);
 		
 		/* Message List */
 		gbc.gridx = 3;
@@ -914,9 +915,9 @@ public class WMsgSelectorForm extends AbstractForm {
 			// check what we have selected and call the appropriate EditMsg
 			// method
 			if (selectedDMS != null)
-				EditMsg(selectedMessage, selectedDMS);
+				EditMsg(session, selectedMessage, selectedDMS);
 			else if (selectedSignGroup != null)
-				EditMsg(selectedMessage, selectedSignGroup);
+				EditMsg(session, selectedMessage, selectedSignGroup);
 		}
 	}
 	
@@ -989,15 +990,21 @@ public class WMsgSelectorForm extends AbstractForm {
 	}
 	
 	/** Edit an existing message for a sign */
-	public static void EditMsg(QuickMessage qm, DMS sign) {
+	public static void EditMsg(Session s, QuickMessage qm, DMS sign) {
 		System.out.format("Editing message %s for sign %s ...\n", qm.getName(), sign.getName());
-		// TODO
+		
+		// launch the editor
+		SmartDesktop desktop = s.getDesktop();
+		desktop.show(new WMsgEditorForm(s, qm, sign));
 	}	
 	
 	/** Edit an existing message for a sign group */
-	public static void EditMsg(QuickMessage qm, SignGroup sg) {
+	public static void EditMsg(Session s, QuickMessage qm, SignGroup sg) {
 		System.out.format("Editing message %s for sign group %s ...\n", qm.getName(), sg.getName());
-		// TODO
+
+		// launch the editor
+		SmartDesktop desktop = s.getDesktop();
+		desktop.show(new WMsgEditorForm(s, qm, sg));
 	}
 	
 	/** Clone a message for a sign */
