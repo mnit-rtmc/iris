@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,11 +39,11 @@ public interface IncLocator extends SonarObject {
 	/** Get the branched flag */
 	boolean getBranched();
 
-	/** Set the pickable flag */
-	void setPickable(boolean p);
+	/** Set the picked flag */
+	void setPicked(boolean p);
 
-	/** Get the pickable flag */
-	boolean getPickable();
+	/** Get the picked flag */
+	boolean getPicked();
 
 	/** Set the MULTI string */
 	void setMulti(String m);

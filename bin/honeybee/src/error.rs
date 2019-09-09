@@ -3,6 +3,8 @@
 // Copyright (c) 2019 Minnesota Department of Transportation
 //
 use base64::DecodeError;
+use crate::multi::SyntaxError;
+use gift::EncodeError;
 use postgres;
 use serde_json;
 use ssh2;
@@ -10,7 +12,6 @@ use std::error::Error as _;
 use std::{fmt, io};
 use std::path::PathBuf;
 use std::sync::mpsc::{SendError, RecvError, TryRecvError};
-use crate::multi::SyntaxError;
 
 /// Enum for all honeybee errors
 #[derive(Debug)]
@@ -24,6 +25,7 @@ pub enum Error {
     MpscSend(SendError<PathBuf>),
     MpscRecv(RecvError),
     MpscTryRecv(TryRecvError),
+    EncodeError(EncodeError),
     Other(String),
 }
 
@@ -51,6 +53,7 @@ impl std::error::Error for Error {
             Error::MpscSend(e) => Some(e),
             Error::MpscRecv(e) => Some(e),
             Error::MpscTryRecv(e) => Some(e),
+            Error::EncodeError(e) => Some(e),
             Error::Other(_) => None,
         }
     }
@@ -107,5 +110,11 @@ impl From<RecvError> for Error {
 impl From<TryRecvError> for Error {
     fn from(e: TryRecvError) -> Self {
         Error::MpscTryRecv(e)
+    }
+}
+
+impl From<EncodeError> for Error {
+    fn from(e: EncodeError) -> Self {
+        Error::EncodeError(e)
     }
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,15 +21,45 @@ package us.mn.state.dot.tms;
  * @author Douglas Lau
  */
 public enum IncRange {
-	near,			// 0
-	middle,			// 1
-	far;			// 2
+	ahead,  // 0
+	near,   // 1
+	middle, // 2
+	far;    // 3
+
+	/** Values array */
+	static private final IncRange[] VALUES = values();
 
 	/** Get a range from an ordinal value */
 	static public IncRange fromOrdinal(int o) {
-		if (o >= 0 && o < values().length)
-			return values()[o];
-		else
-			return null;
+		return (o >= 0 && o < VALUES.length) ? VALUES[o] : null;
+	}
+
+	/** Get range to an incident.
+	 * @param exits number of exits.
+	 * @param ahead_dist Distance below `ahead` threshold. */
+	static public IncRange fromExits(int exits, boolean ahead_dist) {
+		for (IncRange range: VALUES) {
+			if (range.isWithin(exits, ahead_dist))
+				return range;
+		}
+		return null;
+	}
+
+	/** Check if a number of exits is within range */
+	private boolean isWithin(int exits, boolean ahead_dist) {
+		// Only within `ahead` range if distance is below threshold
+		return (exits <= getMaxExits()) &&
+		       (ahead_dist || this != ahead);
+	}
+
+	/** Get a maximum number of exits */
+	public int getMaxExits() {
+		switch (this) {
+			case ahead:  return 0;
+			case near:   return 1;
+			case middle: return 5;
+			case far:    return 9;
+		}
+		return 0; // unreachable
 	}
 }

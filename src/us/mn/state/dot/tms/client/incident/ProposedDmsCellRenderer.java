@@ -27,16 +27,12 @@ import us.mn.state.dot.tms.client.proxy.CellRendererSize;
  */
 public class ProposedDmsCellRenderer extends DmsCellRenderer {
 
-	/** User Session */
-	private final Session session;
-
 	/** Model for deployment list */
 	private final DeviceDeployModel model;
 
 	/** Create a new proposed DMS cell renderere */
 	public ProposedDmsCellRenderer(Session s, DeviceDeployModel m) {
-		super(CellRendererSize.LARGE);
-		session = s;
+		super(s, CellRendererSize.LARGE);
 		model = m;
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,6 +69,9 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 	/** Color to display scheduled devices */
 	static public final Color COLOR_SCHEDULED = new Color(240, 128, 0);
 
+	/** Color for dedicated purpose devices */
+	static public final Color COLOR_PURPOSE = new Color(192, 16, 192);
+
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
 
@@ -99,12 +102,9 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 
 	/** Get an appropriate style for the given map object */
 	@Override
-	public Style getStyle(MapObject o) {
-		T proxy = manager.findProxy(o);
-		if (proxy != null)
-			return getStyle(proxy);
-		else
-			return def_style;
+	public Style getStyle(MapObject mo) {
+		T proxy = manager.findProxy(mo);
+		return (proxy != null) ? getStyle(proxy) : getDefaultStyle();
 	}
 
 	/** Get an appropriate style for the given proxy object */
@@ -117,7 +117,7 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 					return st;
 			}
 		}
-		return def_style;
+		return getDefaultStyle();
 	}
 
 	/** Get tooltip text for the given map object */

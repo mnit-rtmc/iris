@@ -373,7 +373,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		int period = calculatePeriod(st);
 		int value = calculatePrecipValue(a);
 		if (period > 0 && value >= 0) {
-			cache.add(new PeriodicSample(st, period, value));
+			cache.add(new PeriodicSample(st, period, value), name);
 			float period_h = 3600f / period;// periods per hour
 			float umph = value * period_h;	// micrometers per hour
 			float mmph = umph / 1000;	// millimeters per hour
@@ -433,7 +433,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Set the type of precipitation */
 	public void setPrecipitationType(PrecipitationType pt, long st) {
 		pt_cache.add(new PeriodicSample(st, SAMPLE_PERIOD_SEC,
-			pt.ordinal()));
+			pt.ordinal()), name);
 	}
 
 	/** Precipitation situation (null for missing) */
@@ -626,7 +626,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	}
 
 	/** Flush buffered sample data to disk */
-	public void flush(PeriodicSampleWriter writer) throws IOException {
+	public void flush(PeriodicSampleWriter writer) {
 		writer.flush(cache, name);
 		writer.flush(pt_cache, name);
 	}

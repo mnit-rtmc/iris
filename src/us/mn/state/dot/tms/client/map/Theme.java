@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2016  Minnesota Department of Transportation
+ * Copyright (C) 2004-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,11 +31,11 @@ public class Theme {
 	/** Name of theme */
 	private final String name;
 
-	/** Default symbol */
-	private final Symbol def_symbol;
+	/** Symbol to draw */
+	private final Symbol symbol;
 
 	/** Default style */
-	protected final Style def_style;
+	private final Style def_style;
 
 	/** List of styles */
 	private final List<Style> styles = new ArrayList<Style>();
@@ -46,7 +46,7 @@ public class Theme {
 	 * @param sty Default style. */
 	public Theme(String n, Symbol sym, Style sty) {
 		name = n;
-		def_symbol = sym;
+		symbol = sym;
 		def_style = sty;
 	}
 
@@ -59,6 +59,11 @@ public class Theme {
 	/** Add a style to the theme */
 	public void addStyle(Style sty) {
 		styles.add(sty);
+	}
+
+	/** Get the default style */
+	public Style getDefaultStyle() {
+		return def_style;
 	}
 
 	/** Get a style by label */
@@ -87,22 +92,22 @@ public class Theme {
 
 	/** Set the map scale */
 	public void setScale(float scale) {
-		def_symbol.setScale(scale);
+		symbol.setScale(scale);
 	}
 
 	/** Draw the specified map object */
 	public void draw(Graphics2D g, MapObject mo) {
-		def_symbol.draw(g, mo, getStyle(mo));
+		symbol.draw(g, mo, getStyle(mo));
 	}
 
 	/** Draw a selected map object */
 	public void drawSelected(Graphics2D g, MapObject mo) {
-		def_symbol.drawSelected(g, mo, getStyle(mo));
+		symbol.drawSelected(g, mo, getStyle(mo));
 	}
 
 	/** Hit-test map object */
 	public boolean hit(Point2D p, MapObject mo) {
-		return def_symbol.hit(p, mo);
+		return symbol.hit(p, mo);
 	}
 
 	/** Get tooltip text for the given map object */
@@ -112,6 +117,6 @@ public class Theme {
 
 	/** Get a legend icon for a style */
 	public Icon getLegend(Style sty) {
-		return def_symbol.getLegend(sty);
+		return symbol.getLegend(sty);
 	}
 }

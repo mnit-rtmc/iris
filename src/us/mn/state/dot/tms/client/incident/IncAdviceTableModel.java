@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +15,14 @@
 package us.mn.state.dot.tms.client.incident;
 
 import java.awt.Component;
-import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Comparator;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.tms.IncAdvice;
+import us.mn.state.dot.tms.IncImpact;
 import us.mn.state.dot.tms.IncRange;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.client.Session;
@@ -50,29 +48,49 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 		);
 	}
 
-	/** Renderer for lane impact in a table cell */
-	static private class ImpactCellRenderer extends DefaultTableCellRenderer
-	{
-		@Override
-		public Component getTableCellRendererComponent(JTable table,
-			Object value, boolean isSelected, boolean hasFocus,
-			int row, int column)
-		{
-			Component c = super.getTableCellRendererComponent(table,
-				value, isSelected, hasFocus, row, column);
-			Font f = c.getFont();
-			int sz = f.getSize();
-			c.setFont(new Font(Font.MONOSPACED, Font.BOLD, sz));
-			return c;
-		}
-	}
-
 	/** Create the columns in the model */
 	@Override
 	protected ArrayList<ProxyColumn<IncAdvice>> createColumns() {
 		ArrayList<ProxyColumn<IncAdvice>> cols =
-			new ArrayList<ProxyColumn<IncAdvice>>(6);
-		cols.add(new ProxyColumn<IncAdvice>("incident.range", 96) {
+			new ArrayList<ProxyColumn<IncAdvice>>(7);
+		cols.add(new ProxyColumn<IncAdvice>("incident.impact", 160) {
+			public Object getValueAt(IncAdvice adv) {
+				return IncImpact.fromOrdinal(adv.getImpact());
+			}
+			public boolean isEditable(IncAdvice adv) {
+				return canWrite(adv);
+			}
+			public void setValueAt(IncAdvice adv, Object value) {
+				if (value instanceof IncImpact) {
+					IncImpact imp = (IncImpact) value;
+					adv.setImpact(imp.ordinal());
+				}
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox<IncImpact> cbx = new JComboBox
+					<IncImpact>(IncImpact.values());
+				return new DefaultCellEditor(cbx);
+			}
+		});
+		cols.add(new ProxyColumn<IncAdvice>("incident.lane_type", 80) {
+			public Object getValueAt(IncAdvice adv) {
+				return LaneType.fromOrdinal(adv.getLaneType());
+			}
+			public boolean isEditable(IncAdvice adv) {
+				return canWrite(adv);
+			}
+			public void setValueAt(IncAdvice adv, Object value) {
+				if (value instanceof LaneType) {
+					LaneType lt = (LaneType) value;
+					adv.setLaneType((short) lt.ordinal());
+				}
+			}
+			protected TableCellEditor createCellEditor() {
+				return new DefaultCellEditor(IncidentCreator
+					.createLaneTypeCombo());
+			}
+		});
+		cols.add(new ProxyColumn<IncAdvice>("incident.range", 64) {
 			public Object getValueAt(IncAdvice adv) {
 				return IncRange.fromOrdinal(adv.getRange());
 			}
@@ -91,52 +109,34 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<IncAdvice>("incident.lane_type", 96) {
-			public Object getValueAt(IncAdvice adv) {
-				return LaneType.fromOrdinal(adv.getLaneType());
-			}
-			public boolean isEditable(IncAdvice adv) {
-				return canWrite(adv);
-			}
-			public void setValueAt(IncAdvice adv, Object value) {
-				if (value instanceof LaneType) {
-					LaneType lt = (LaneType) value;
-					adv.setLaneType((short) lt.ordinal());
-				}
-			}
-			protected TableCellEditor createCellEditor() {
-				return new DefaultCellEditor(IncidentCreator
-					.createLaneTypeCombo());
-			}
-		});
-		cols.add(new ProxyColumn<IncAdvice>("incident.impact", 128) {
-			public Object getValueAt(IncAdvice adv) {
-				return adv.getImpact();
-			}
-			public boolean isEditable(IncAdvice adv) {
-				return canWrite(adv);
-			}
-			public void setValueAt(IncAdvice adv, Object value) {
-				adv.setImpact(value.toString());
-			}
-			protected TableCellRenderer createCellRenderer() {
-				return new ImpactCellRenderer();
-			}
-		});
-		cols.add(new ProxyColumn<IncAdvice>("incident.clear", 50,
-			Boolean.class)
+		cols.add(new ProxyColumn<IncAdvice>("incident.impacted.lanes",
+			112, Integer.class)
 		{
 			public Object getValueAt(IncAdvice adv) {
-				return adv.getCleared();
+				return adv.getImpactedLanes();
 			}
 			public boolean isEditable(IncAdvice adv) {
 				return canWrite(adv);
 			}
 			public void setValueAt(IncAdvice adv, Object value) {
-				if (value instanceof Boolean) {
-					Boolean b = (Boolean) value;
-					adv.setCleared(b);
-				}
+				adv.setImpactedLanes((value instanceof Integer)
+					? (Integer) value
+					: null);
+			}
+		});
+		cols.add(new ProxyColumn<IncAdvice>("incident.open.lanes", 80,
+			Integer.class)
+		{
+			public Object getValueAt(IncAdvice adv) {
+				return adv.getOpenLanes();
+			}
+			public boolean isEditable(IncAdvice adv) {
+				return canWrite(adv);
+			}
+			public void setValueAt(IncAdvice adv, Object value) {
+				adv.setOpenLanes((value instanceof Integer)
+					? (Integer) value
+					: null);
 			}
 		});
 		cols.add(new ProxyColumn<IncAdvice>("dms.multi.string", 300) {
@@ -178,21 +178,38 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 	protected Comparator<IncAdvice> comparator() {
 		return new Comparator<IncAdvice>() {
 			public int compare(IncAdvice adv0, IncAdvice adv1) {
+				int imp0 = adv0.getImpact();
+				int imp1 = adv1.getImpact();
+				if (imp0 != imp1)
+					return imp0 - imp1;
 				int lt0 = adv0.getLaneType();
 				int lt1 = adv0.getLaneType();
 				if (lt0 != lt1)
 					return lt0 - lt1;
-				String imp0 = adv0.getImpact();
-				String imp1 = adv1.getImpact();
-				if (imp0.length() != imp1.length())
-					return imp0.length() - imp1.length();
-				int c = imp0.compareTo(imp1);
-				if (c != 0)
-					return c;
 				int r0 = adv0.getRange();
 				int r1 = adv1.getRange();
 				if (r0 != r1)
 					return r0 - r1;
+				Integer il0 = adv0.getImpactedLanes();
+				Integer il1 = adv1.getImpactedLanes();
+				if (il0 != il1) {
+					if (il1 == null)
+						return -1;
+					else if (il0 == null)
+						return 1;
+					else
+						return il0.compareTo(il1);
+				}
+				Integer ol0 = adv0.getOpenLanes();
+				Integer ol1 = adv1.getOpenLanes();
+				if (ol0 != ol1) {
+					if (ol1 == null)
+						return -1;
+					else if (ol0 == null)
+						return 1;
+					else
+						return ol0.compareTo(ol1);
+				}
 				return adv0.getName().compareTo(adv1.getName());
 			}
 		};

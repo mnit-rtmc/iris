@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,23 +33,17 @@ public interface IncDescriptor extends SonarObject {
 	/** Get the event type */
 	int getEventType();
 
-	/** Set the lane type ordinal */
-	void setLaneType(short lt);
-
-	/** Get the lane type ordinal */
-	short getLaneType();
-
 	/** Set the incident detail */
 	void setDetail(IncidentDetail dtl);
 
 	/** Get the incident detail */
 	IncidentDetail getDetail();
 
-	/** Set the cleared status */
-	void setCleared(boolean c);
+	/** Set the lane type ordinal */
+	void setLaneType(short lt);
 
-	/** Get the cleared status */
-	boolean getCleared();
+	/** Get the lane type ordinal */
+	short getLaneType();
 
 	/** Set the MULTI string */
 	void setMulti(String m);

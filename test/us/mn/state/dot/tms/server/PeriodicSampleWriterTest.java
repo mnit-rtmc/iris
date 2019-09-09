@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2018  Minnesota Department of Transportation
+ * Copyright (C) 2012-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,24 +37,24 @@ public class PeriodicSampleWriterTest extends TestCase {
 			PeriodicSampleType.VEH_COUNT);
 		Calendar cal = Calendar.getInstance();
 		cal.set(2012, Calendar.JANUARY, 1, 0, 0, 30);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 1));
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 1), "test");
 		cal.set(2012, Calendar.JANUARY, 1, 0, 1, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 2));
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 2), "test");
 		cal.set(2012, Calendar.JANUARY, 1, 0, 1, 30);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 3));
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 3), "test");
 		cal.set(2012, Calendar.JANUARY, 1, 0, 2, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 4));
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 4), "test");
 		// Missing sample @ 2012-01-01 00:02:30
 		cal.set(2012, Calendar.JANUARY, 1, 0, 3, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 6));
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 6), "test");
 		cal.set(2012, Calendar.JANUARY, 1, 0, 3, 30);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 7));
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 7), "test");
 		cal.set(2012, Calendar.JANUARY, 1, 0, 4, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 8));
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 8), "test");
 		cal.set(2012, Calendar.JANUARY, 1, 0, 4, 30);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 9));
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 9), "test");
 		cal.set(2012, Calendar.JANUARY, 1, 0, 5, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 10));
+		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 10), "test");
 		SampleArchiveFactory factory = new TestFactory();
 		PeriodicSampleWriter writer = new PeriodicSampleWriter(factory);
 		try {

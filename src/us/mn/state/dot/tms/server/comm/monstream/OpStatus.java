@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2018  Minnesota Department of Transportation
+ * Copyright (C) 2017-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -288,7 +288,7 @@ public class OpStatus extends OpStep {
 			VideoMonitorImpl vm = parseMonNum(ctrl, mon, mode);
 			CameraImpl c = parseCam(cam);
 			vm.setCamNoSelect(c, "STATUS " + ctrl);
-			c.setVideoLossNotify(stat.length() > 0);
+			c.setVideoLossNotify(stat.length() > 0, vm.getName());
 		}
 		catch (ParsingException e) {
 			// FIXME: log this

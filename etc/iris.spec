@@ -4,7 +4,7 @@
 #     and Douglas Lau
 #
 # IRIS -- Intelligent Roadway Information System
-# Copyright (C) 2009-2018  Minnesota Department of Transportation
+# Copyright (C) 2009-2019  Minnesota Department of Transportation
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -111,8 +111,6 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %{_serverdir}/iris-server-%{version}.jar
 %{_serverdir}/iris-common-%{version}.jar
 %{_serverdir}/mail.jar
-%{_serverdir}/scheduler-@@SCHEDULER.VERSION@@.jar
-%{_serverdir}/sonar-server-@@SONAR.VERSION@@.jar
 
 # /var/lib/iris
 %dir %attr(3775,tms,tms) /var/lib/iris
@@ -141,6 +139,4 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %{_clientdir}/lib/mail.jar
 %{_clientdir}/lib/iris-client-%{version}.jar
 %{_clientdir}/lib/iris-common-%{version}.jar
-%{_clientdir}/lib/scheduler-@@SCHEDULER.VERSION@@.jar
-%{_clientdir}/lib/sonar-client-@@SONAR.VERSION@@.jar
 %attr(0644,tms,apache) %{_clientdir}/session_ids

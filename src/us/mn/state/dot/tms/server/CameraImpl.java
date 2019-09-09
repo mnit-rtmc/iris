@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EncoderType;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
@@ -36,6 +37,7 @@ import us.mn.state.dot.tms.geo.Position;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
+import us.mn.state.dot.tms.server.event.CameraVideoEvent;
 
 /**
  * CameraImpl represents a single CCTV camera.
@@ -332,16 +334,26 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	}
 
 	/** Set flag to indicate video loss */
-	public void setVideoLossNotify(boolean vl) {
+	public void setVideoLossNotify(boolean vl, String mon) {
 		if (!isEncoderConfigured())
 			return;
 		long now = TimeSteward.currentTimeMillis();
-		if (vl != video_loss && shouldUpdateVideoLoss(vl, now))
+		if (vl != video_loss && shouldUpdateVideoLoss(vl, now)) {
 			setVideoLoss(vl);
+			logEvent(vl, mon);
+		}
 		if (vl)
 			video_loss_report = now;
 		else
 			video_good_report = now;
+	}
+
+	/** Log video event */
+	private void logEvent(boolean vl, String mon) {
+		EventType et = (vl)
+			? EventType.CAMERA_VIDEO_LOST
+			: EventType.CAMERA_VIDEO_RESTORED;
+		logEvent(new CameraVideoEvent(et, name, mon));
 	}
 
 	/** Check if encoder is configured */

@@ -8,9 +8,10 @@
 -- CHANNEL: camera, dms, font, glyph, graphic, incident, parking_area,
 --          sign_config, sign_detail, sign_message
 --
--- PAYLOAD: 'msg_current' (dms)
+-- PAYLOAD: 'video_loss' (camera)
+--          'msg_current', 'msg_sched', 'expire_time' (dms)
 --          'time_stamp' (parking_area)
---          name (geo_loc)
+--          name (r_node, any notify_tag in geo_loc)
 --
 SET client_encoding = 'UTF8';
 
@@ -92,6 +93,8 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 704	TT No origin data
 705	TT No route
 801	Camera SWITCHED
+811	Camera Video LOST
+812	Camera Video RESTORED
 900	Action Plan ACTIVATED
 901	Action Plan DEACTIVATED
 902	Action Plan Phase CHANGED
@@ -104,6 +107,18 @@ CREATE TABLE iris.system_attribute (
 	name VARCHAR(32) PRIMARY KEY,
 	value VARCHAR(64) NOT NULL
 );
+
+CREATE FUNCTION iris.table_notify() RETURNS TRIGGER AS
+	$table_notify$
+BEGIN
+	PERFORM pg_notify(TG_TABLE_NAME, '');
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$table_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER system_attribute_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.system_attribute
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 COPY iris.system_attribute (name, value) FROM stdin;
 action_plan_alert_list	
@@ -121,6 +136,7 @@ camera_preset_store_enable	false
 camera_ptz_blind	true
 camera_stream_controls_enable	false
 camera_switch_event_purge_days	30
+camera_video_event_purge_days	14
 camera_wiper_precip_mm_hr	8
 client_event_purge_days	0
 client_units_si	true
@@ -129,7 +145,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.88.0
+database_version	5.1.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0
@@ -176,6 +192,8 @@ gate_arm_alert_timeout_secs	90
 gate_arm_event_purge_days	0
 help_trouble_ticket_enable	false
 help_trouble_ticket_url	
+incident_clear_advice_multi	JUST CLEARED
+incident_clear_advice_abbrev	CLEARED
 incident_clear_secs	600
 map_extent_name_initial	Home
 map_icon_size_scale_max	30
@@ -912,6 +930,22 @@ CREATE TABLE iris.r_node (
 
 CREATE UNIQUE INDEX r_node_station_idx ON iris.r_node USING btree (station_id);
 
+CREATE FUNCTION iris.r_node_notify() RETURNS TRIGGER AS
+	$r_node_notify$
+BEGIN
+	IF (TG_OP = 'DELETE') THEN
+		PERFORM pg_notify('r_node', OLD.name);
+	ELSE
+		PERFORM pg_notify('r_node', NEW.name);
+	END IF;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$r_node_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER r_node_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.r_node
+	FOR EACH ROW EXECUTE PROCEDURE iris.r_node_notify();
+
 CREATE FUNCTION iris.r_node_left(INTEGER, INTEGER, BOOLEAN, INTEGER)
 	RETURNS INTEGER AS $r_node_left$
 DECLARE
@@ -957,9 +991,9 @@ ALTER TABLE iris.r_node ADD CONSTRAINT active_ck
 
 CREATE VIEW r_node_view AS
 	SELECT n.name, n.geo_loc, roadway, road_dir, cross_mod, cross_street,
-	       cross_dir, nt.name AS node_type, n.pickable, n.above,
-	       tr.name AS transition, n.lanes, n.attach_side, n.shift, n.active,
-	       n.abandoned, n.station_id, n.speed_limit, n.notes
+	       cross_dir, landmark, lat, lon, nt.name AS node_type, n.pickable,
+	       n.above, tr.name AS transition, n.lanes, n.attach_side, n.shift,
+	       n.active, n.abandoned, n.station_id, n.speed_limit, n.notes
 	FROM iris.r_node n
 	JOIN geo_loc_view l ON n.geo_loc = l.name
 	JOIN iris.r_node_type nt ON n.node_type = nt.n_type
@@ -1199,6 +1233,10 @@ CREATE TABLE iris.cabinet (
 	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name)
 );
 
+CREATE TRIGGER cabinet_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.cabinet
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 CREATE VIEW cabinet_view AS
 	SELECT name, style, geo_loc
 	FROM iris.cabinet;
@@ -1280,6 +1318,20 @@ CREATE VIEW device_controller_view AS
 	FROM iris._device_io;
 GRANT SELECT ON device_controller_view TO PUBLIC;
 
+CREATE TABLE iris.device_purpose (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(16) NOT NULL UNIQUE
+);
+
+COPY iris.device_purpose (id, description) FROM stdin;
+0	general
+1	wayfinding
+2	tolling
+3	parking
+4	travel time
+5	safety
+\.
+
 --
 -- Cameras, Encoders, Play Lists, Catalogs, Presets
 --
@@ -1330,14 +1382,22 @@ ALTER TABLE iris._camera ADD CONSTRAINT _camera_fkey
 CREATE FUNCTION iris.camera_notify() RETURNS TRIGGER AS
 	$camera_notify$
 BEGIN
-	NOTIFY camera;
+	IF (NEW.video_loss IS DISTINCT FROM OLD.video_loss) THEN
+		NOTIFY camera, 'video_loss';
+	ELSE
+		NOTIFY camera;
+	END IF;
 	RETURN NULL; -- AFTER trigger return is ignored
 END;
 $camera_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER camera_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris._camera
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.camera_notify();
+	AFTER UPDATE ON iris._camera
+	FOR EACH ROW EXECUTE PROCEDURE iris.camera_notify();
+
+CREATE TRIGGER camera_table_notify_trig
+	AFTER INSERT OR DELETE ON iris._camera
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.camera AS
 	SELECT c.name, geo_loc, controller, pin, notes, cam_num, encoder_type,
@@ -1588,6 +1648,23 @@ CREATE VIEW camera_switch_event_view AS
 	ON camera_switch_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON camera_switch_event_view TO PUBLIC;
 
+CREATE TABLE event.camera_video_event (
+	event_id SERIAL PRIMARY KEY,
+	event_date TIMESTAMP WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	camera_id VARCHAR(20),
+	monitor_id VARCHAR(12)
+);
+
+CREATE VIEW camera_video_event_view AS
+	SELECT event_id, event_date, event_description.description, camera_id,
+	       monitor_id
+	FROM event.camera_video_event
+	JOIN event.event_description
+	ON camera_video_event.event_desc_id = event_description.event_desc_id;
+GRANT SELECT ON camera_video_event_view TO PUBLIC;
+
 CREATE TABLE iris.camera_preset (
 	name VARCHAR(20) PRIMARY KEY,
 	camera VARCHAR(20) NOT NULL REFERENCES iris._camera,
@@ -1712,6 +1789,18 @@ CREATE TABLE iris._beacon (
 
 ALTER TABLE iris._beacon ADD CONSTRAINT _beacon_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE FUNCTION iris.beacon_notify() RETURNS TRIGGER AS
+	$beacon_notify$
+BEGIN
+	NOTIFY beacon;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$beacon_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER beacon_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris._beacon
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.beacon_notify();
 
 CREATE VIEW iris.beacon AS
 	SELECT b.name, geo_loc, controller, pin, notes, message, verify_pin,
@@ -2148,14 +2237,6 @@ CREATE TRIGGER font_ck_trig
 	BEFORE UPDATE ON iris.font
 	FOR EACH ROW EXECUTE PROCEDURE iris.font_ck();
 
-CREATE FUNCTION iris.table_notify() RETURNS TRIGGER AS
-	$table_notify$
-BEGIN
-	PERFORM pg_notify(TG_TABLE_NAME, '');
-	RETURN NULL; -- AFTER trigger return is ignored
-END;
-$table_notify$ LANGUAGE plpgsql;
-
 CREATE TRIGGER font_notify_trig
 	AFTER INSERT OR UPDATE OR DELETE ON iris.font
 	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
@@ -2409,6 +2490,7 @@ CREATE TABLE iris._dms (
 	notes text NOT NULL,
 	gps VARCHAR(20) REFERENCES iris._gps,
 	static_graphic VARCHAR(20) REFERENCES iris.graphic,
+	purpose INTEGER NOT NULL REFERENCES iris.device_purpose,
 	beacon VARCHAR(20) REFERENCES iris._beacon,
 	sign_config VARCHAR(12) REFERENCES iris.sign_config,
 	sign_detail VARCHAR(12) REFERENCES iris.sign_detail,
@@ -2428,6 +2510,10 @@ CREATE FUNCTION iris.dms_notify() RETURNS TRIGGER AS
 BEGIN
 	IF (NEW.msg_current IS DISTINCT FROM OLD.msg_current) THEN
 		NOTIFY dms, 'msg_current';
+	ELSIF (NEW.expire_time IS DISTINCT FROM OLD.expire_time) THEN
+		NOTIFY dms, 'expire_time';
+	ELSIF (NEW.msg_sched IS DISTINCT FROM OLD.msg_sched) THEN
+		NOTIFY dms, 'msg_sched';
 	ELSE
 		NOTIFY dms;
 	END IF;
@@ -2436,12 +2522,16 @@ END;
 $dms_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER dms_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris._dms
+	AFTER UPDATE ON iris._dms
 	FOR EACH ROW EXECUTE PROCEDURE iris.dms_notify();
+
+CREATE TRIGGER dms_table_notify_trig
+	AFTER INSERT OR DELETE ON iris._dms
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.dms AS
 	SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
-	       beacon, preset, sign_config, sign_detail,
+	       purpose, beacon, preset, sign_config, sign_detail,
 	       override_font, override_foreground, override_background,
 	       msg_sched, msg_current, expire_time
 	FROM iris._dms dms
@@ -2456,12 +2546,13 @@ BEGIN
 	INSERT INTO iris._device_preset (name, preset)
 	     VALUES (NEW.name, NEW.preset);
 	INSERT INTO iris._dms (name, geo_loc, notes, gps, static_graphic,
-	                       beacon, sign_config, sign_detail, override_font,
-	                       override_foreground, override_background,
-	                       msg_sched, msg_current, expire_time)
+	                       purpose, beacon, sign_config, sign_detail,
+	                       override_font, override_foreground,
+	                       override_background, msg_sched, msg_current,
+	                       expire_time)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.gps,
-	             NEW.static_graphic, NEW.beacon, NEW.sign_config,
-	             NEW.sign_detail, NEW.override_font,
+	             NEW.static_graphic, NEW.purpose, NEW.beacon,
+	             NEW.sign_config, NEW.sign_detail, NEW.override_font,
 	             NEW.override_foreground, NEW.override_background,
 	             NEW.msg_sched, NEW.msg_current, NEW.expire_time);
 	RETURN NEW;
@@ -2487,6 +2578,7 @@ BEGIN
 	       notes = NEW.notes,
 	       gps = NEW.gps,
 	       static_graphic = NEW.static_graphic,
+	       purpose = NEW.purpose,
 	       beacon = NEW.beacon,
 	       sign_config = NEW.sign_config,
 	       sign_detail = NEW.sign_detail,
@@ -2524,15 +2616,16 @@ CREATE TRIGGER dms_delete_trig
 
 CREATE VIEW dms_view AS
 	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
-	       d.static_graphic, d.beacon, p.camera, p.preset_num,
-	       d.sign_config, d.sign_detail, default_font, override_font,
-	       override_foreground, override_background,
+	       d.static_graphic, dp.description AS purpose, d.beacon, p.camera,
+	       p.preset_num, d.sign_config, d.sign_detail, default_font,
+	       override_font, override_foreground, override_background,
 	       msg_sched, msg_current, expire_time,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.location, l.lat, l.lon
 	FROM iris.dms d
 	LEFT JOIN iris.camera_preset p ON d.preset = p.name
 	LEFT JOIN geo_loc_view l ON d.geo_loc = l.name
+	LEFT JOIN iris.device_purpose dp ON d.purpose = dp.id
 	LEFT JOIN sign_config_view sc ON d.sign_config = sc.name;
 GRANT SELECT ON dms_view TO PUBLIC;
 
@@ -2685,6 +2778,18 @@ CREATE TABLE iris._gate_arm_array (
 
 ALTER TABLE iris._gate_arm_array ADD CONSTRAINT _gate_arm_array_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE FUNCTION iris.gate_arm_array_notify() RETURNS TRIGGER AS
+	$gate_arm_array_notify$
+BEGIN
+	NOTIFY gate_arm_array;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$gate_arm_array_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gate_arm_array_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris._gate_arm_array
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.gate_arm_array_notify();
 
 CREATE VIEW iris.gate_arm_array AS
 	SELECT _gate_arm_array.name, geo_loc, controller, pin, notes, prereq,
@@ -2935,9 +3040,8 @@ CREATE TABLE iris.inc_descriptor (
 	name VARCHAR(10) PRIMARY KEY,
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),
-	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
 	detail VARCHAR(8) REFERENCES event.incident_detail(name),
-	cleared BOOLEAN NOT NULL,
+	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
 	multi VARCHAR(64) NOT NULL,
 	abbrev VARCHAR(32)
 );
@@ -2962,32 +3066,72 @@ CREATE TRIGGER inc_descriptor_ck_trig
 	BEFORE INSERT OR UPDATE ON iris.inc_descriptor
 	FOR EACH ROW EXECUTE PROCEDURE iris.inc_descriptor_ck();
 
+CREATE VIEW inc_descriptor_view AS
+	SELECT id.name, ed.description AS event_description, detail,
+	       lt.description AS lane_type, multi, abbrev
+	FROM iris.inc_descriptor id
+	JOIN event.event_description ed ON id.event_desc_id = ed.event_desc_id
+	LEFT JOIN iris.lane_type lt ON id.lane_type = lt.id;
+GRANT SELECT ON inc_descriptor_view TO PUBLIC;
+
+CREATE TABLE iris.inc_impact (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(24) NOT NULL
+);
+
+COPY iris.inc_impact (id, description) FROM stdin;
+0	lanes blocked
+1	left lanes blocked
+2	right lanes blocked
+3	center lanes blocked
+4	both shoulders blocked
+5	left shoulder blocked
+6	right shoulder blocked
+7	lanes affected
+8	left lanes affected
+9	right lanes affected
+10	center lanes affected
+11	both shoulders affected
+12	left shoulder affected
+13	right shoulder affected
+14	free flowing
+\.
+
 CREATE TABLE iris.inc_range (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(10) NOT NULL
 );
 
 COPY iris.inc_range (id, description) FROM stdin;
-0	near
-1	middle
-2	far
+0	ahead
+1	near
+2	middle
+3	far
 \.
 
 CREATE TABLE iris.inc_locator (
 	name VARCHAR(10) PRIMARY KEY,
 	range INTEGER NOT NULL REFERENCES iris.inc_range(id),
 	branched BOOLEAN NOT NULL,
-	pickable BOOLEAN NOT NULL,
+	picked BOOLEAN NOT NULL,
 	multi VARCHAR(64) NOT NULL,
 	abbrev VARCHAR(32)
 );
 
+CREATE VIEW inc_locator_view AS
+	SELECT il.name, rng.description AS range, branched, picked,
+	       multi, abbrev
+	FROM iris.inc_locator il
+	LEFT JOIN iris.inc_range rng ON il.range = rng.id;
+GRANT SELECT ON inc_locator_view TO PUBLIC;
+
 CREATE TABLE iris.inc_advice (
 	name VARCHAR(10) PRIMARY KEY,
+	impact INTEGER NOT NULL REFERENCES iris.inc_impact(id),
+	impacted_lanes INTEGER,
+	open_lanes INTEGER,
 	range INTEGER NOT NULL REFERENCES iris.inc_range(id),
 	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
-	impact VARCHAR(20) NOT NULL,
-	cleared BOOLEAN NOT NULL,
 	multi VARCHAR(64) NOT NULL,
 	abbrev VARCHAR(32)
 );
@@ -3007,6 +3151,16 @@ $inc_advice_ck$ LANGUAGE plpgsql;
 CREATE TRIGGER inc_advice_ck_trig
 	BEFORE INSERT OR UPDATE ON iris.inc_advice
 	FOR EACH ROW EXECUTE PROCEDURE iris.inc_advice_ck();
+
+CREATE VIEW inc_advice_view AS
+	SELECT a.name, imp.description AS impact, lt.description AS lane_type,
+	       rng.description AS range, impacted_lanes, open_lanes, multi,
+	       abbrev
+	FROM iris.inc_advice a
+	LEFT JOIN iris.inc_impact imp ON a.impact = imp.id
+	LEFT JOIN iris.inc_range rng ON a.range = rng.id
+	LEFT JOIN iris.lane_type lt ON a.lane_type = lt.id;
+GRANT SELECT ON inc_advice_view TO PUBLIC;
 
 --
 -- Lane Markings
@@ -3337,7 +3491,7 @@ CREATE FUNCTION iris.parking_area_notify() RETURNS TRIGGER AS
 BEGIN
 	IF (NEW.time_stamp IS DISTINCT FROM OLD.time_stamp) THEN
 		NOTIFY parking_area, 'time_stamp';
-	ELSE
+	ELSIF (NEW.time_stamp_static IS DISTINCT FROM OLD.time_stamp_static) THEN
 		NOTIFY parking_area;
 	END IF;
 	RETURN NULL; -- AFTER trigger return is ignored
@@ -3345,8 +3499,12 @@ END;
 $parking_area_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER parking_area_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris.parking_area
+	AFTER UPDATE ON iris.parking_area
 	FOR EACH ROW EXECUTE PROCEDURE iris.parking_area_notify();
+
+CREATE TRIGGER parking_area_table_notify_trig
+	AFTER INSERT OR DELETE ON iris.parking_area
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE TABLE iris.parking_area_amenities (
 	bit INTEGER PRIMARY KEY,
@@ -3466,6 +3624,18 @@ CREATE TABLE iris._ramp_meter (
 
 ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE FUNCTION iris.ramp_meter_notify() RETURNS TRIGGER AS
+	$ramp_meter_notify$
+BEGIN
+	NOTIFY ramp_meter;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$ramp_meter_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER ramp_meter_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris._ramp_meter
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.ramp_meter_notify();
 
 CREATE VIEW iris.ramp_meter AS
 	SELECT m.name, geo_loc, controller, pin, notes, meter_type, storage,
@@ -3698,6 +3868,18 @@ CREATE TABLE iris._tag_reader (
 
 ALTER TABLE iris._tag_reader ADD CONSTRAINT _tag_reader_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE FUNCTION iris.tag_reader_notify() RETURNS TRIGGER AS
+	$tag_reader_notify$
+BEGIN
+	NOTIFY tag_reader;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$tag_reader_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tag_reader_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris._tag_reader
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.tag_reader_notify();
 
 CREATE VIEW iris.tag_reader AS
 	SELECT t.name, geo_loc, controller, pin, notes, toll_zone,
@@ -4042,6 +4224,18 @@ CREATE TABLE iris._weather_sensor (
 
 ALTER TABLE iris._weather_sensor ADD CONSTRAINT _weather_sensor_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE FUNCTION iris.weather_sensor_notify() RETURNS TRIGGER AS
+	$weather_sensor_notify$
+BEGIN
+	NOTIFY weather_sensor;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$weather_sensor_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER weather_sensor_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris._weather_sensor
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.weather_sensor_notify();
 
 CREATE VIEW iris.weather_sensor AS SELECT
 	m.name, geo_loc, controller, pin, notes

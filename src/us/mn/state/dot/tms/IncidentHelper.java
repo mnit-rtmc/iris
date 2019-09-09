@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
 
@@ -58,6 +59,12 @@ public class IncidentHelper extends BaseHelper {
 		return null;
 	}
 
+	/** Get original incident name */
+	static public String getOriginalName(Incident inc) {
+		String rep = inc.getReplaces();
+		return (rep != null) ? rep : inc.getName();
+	}
+
 	/** Lookup the camera for an incident */
 	static public Camera getCamera(Incident inc) {
 		return (inc != null) ? inc.getCamera() : null;
@@ -72,42 +79,46 @@ public class IncidentHelper extends BaseHelper {
 
 	/** Get the severity of an incident */
 	static public IncSeverity getSeverity(Incident inc) {
-		IncidentImpact[] imp = IncidentImpact.fromString(
-			inc.getImpact());
-		if (isMajor(imp))
-			return IncSeverity.major;
-		if (isNormal(imp))
-			return IncSeverity.normal;
-		if (isMinor(imp))
-			return IncSeverity.minor;
-		else
-			return null;
+		LaneType lane_type = LaneType.fromOrdinal(inc.getLaneType());
+		return IncImpact.severity(inc, lane_type);
 	}
 
-	/** Check if the severity is major (all lanes blocked) */
-	static private boolean isMajor(IncidentImpact[] imp) {
-		for (int i = 1; i < imp.length - 1; i++) {
-			if (imp[i] != IncidentImpact.BLOCKED)
-				return false;
+	/** Get sign messages deployed for an incident */
+	static public ArrayList<SignMessage> getDeployedMessages(Incident inc) {
+		ArrayList<SignMessage> msgs = new ArrayList<SignMessage>();
+		String orig_name = getOriginalName(inc);
+		Iterator<SignMessage> it = SignMessageHelper.iterator();
+		while (it.hasNext()) {
+			SignMessage sm = it.next();
+			if (orig_name.equals(sm.getIncident()))
+				msgs.add(sm);
 		}
-		return imp.length > 2;
+		return msgs;
 	}
 
-	/** Check if the severity is normal (lane blocked) */
-	static private boolean isNormal(IncidentImpact[] imp) {
-		for (int i = 0; i < imp.length; i++) {
-			if (imp[i] == IncidentImpact.BLOCKED)
-				return true;
+	/** Get list of signs deployed for an incident */
+	static public ArrayList<DMS> getDeployedSigns(Incident inc) {
+		ArrayList<SignMessage> msgs = getDeployedMessages(inc);
+		ArrayList<DMS> signs = new ArrayList<DMS>();
+		Iterator<DMS> dit = DMSHelper.iterator();
+		while (dit.hasNext()) {
+			DMS dms = dit.next();
+			if (msgs.contains(dms.getMsgCurrent()))
+				signs.add(dms);
 		}
-		return false;
+		return signs;
 	}
 
-	/** Check if the severity is minor */
-	static private boolean isMinor(IncidentImpact[] imp) {
-		for (int i = 0; i < imp.length; i++) {
-			if (imp[i] != IncidentImpact.FREE_FLOWING)
-				return true;
+	/** Get count of signs deployed for an incident */
+	static public int getDeployedCount(Incident inc) {
+		int n_signs = 0;
+		ArrayList<SignMessage> msgs = getDeployedMessages(inc);
+		Iterator<DMS> dit = DMSHelper.iterator();
+		while (dit.hasNext()) {
+			DMS dms = dit.next();
+			if (msgs.contains(dms.getMsgCurrent()))
+				n_signs++;
 		}
-		return false;
+		return n_signs;
 	}
 }

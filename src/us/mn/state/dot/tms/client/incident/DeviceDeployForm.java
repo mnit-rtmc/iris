@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2018  Minnesota Department of Transportation
+ * Copyright (C) 2010-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,19 +23,17 @@ import javax.swing.SwingConstants;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.SignConfig;
-import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.dms.SignMessageCreator;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * DeviceDeployForm is a dialog for deploying devices for an incident.
@@ -47,14 +45,14 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 	/** Incident manager */
 	private final IncidentManager manager;
 
+	/** Incident dispatcher */
+	private final IncidentDispatcher dispatcher;
+
 	/** Model for deployment list */
 	private final DeviceDeployModel model;
 
 	/** List of deployments for the incident */
 	private final JList<Device> list;
-
-	/** Sign message creator */
-	private final SignMessageCreator creator;
 
 	/** Action to remove selected device */
 	private final IAction remove = new IAction("incident.remove") {
@@ -72,11 +70,13 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 	};
 
 	/** Create a new incident device deploy form */
-	public DeviceDeployForm(Session s, Incident inc, IncidentManager man) {
+	public DeviceDeployForm(Session s, IncidentManager man,
+		IncidentDispatcher disp, Incident inc, DeviceDeployModel mdl)
+	{
 		super(I18N.get("incident") + ": ", s, inc);
 		manager = man;
-		model = new DeviceDeployModel(man, inc);
-		creator = new SignMessageCreator(s);
+		dispatcher = disp;
+		model = mdl;
 		list = new JList<Device>(model);
 		list.addListSelectionListener(new IListSelectionAdapter() {
 			@Override public void valueChanged() {
@@ -96,7 +96,7 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 	protected void initialize() {
 		list.setCellRenderer(new ProposedDeviceCellRenderer(session,
 			model));
-		list.setVisibleRowCount(model.getSize());
+		list.setVisibleRowCount(Math.min(model.getSize(), 6));
 		add(createPanel());
 		super.initialize();
 		updateButtons();
@@ -139,27 +139,9 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 
 	/** Send new sign message to the specified DMS */
 	private void sendSignMessage(DMS dms) {
-		// FIXME: create SignMessage on another thread
-		String inc = proxy.getReplaces();
-		if (null == inc)
-			inc = proxy.getName();
 		String dn = dms.getName();
-		SignConfig sc = dms.getSignConfig();
-		if (sc != null) {
-			String multi = model.getMulti(dn).toString();
-			if (multi != null)
-				sendMessage(dms, sc, inc, multi);
-		}
-	}
-
-	/** Send new sign message to the specified DMS */
-	private void sendMessage(DMS dms, SignConfig sc, String inc,
-		String ms)
-	{
-		String multi = DMSHelper.adjustMulti(dms, ms);
-		SignMessage sm = creator.create(sc, inc, multi);
-		if (sm != null)
-			dms.setMsgUser(sm);
+		MultiString multi = model.getMulti(dn);
+		dispatcher.sendMessage(dn, proxy, multi, null);
 	}
 
 	/** Update one attribute on the form */

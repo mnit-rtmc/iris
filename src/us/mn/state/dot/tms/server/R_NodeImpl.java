@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2019  Minnesota Department of Transportation
  * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -593,6 +593,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Find fork node (branch to other corridor) */
 	private R_NodeImpl findFork() {
+		// FIXME: use CorridorBase.findFork
 		R_NodeImpl nearest = null;
 		Distance d = new Distance(0);
 		Iterator<R_Node> it = R_NodeHelper.iterator();
@@ -623,12 +624,6 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Get the fork node */
 	public R_NodeImpl getFork() {
 		return fork;
-	}
-
-	/** Get the linked corridor for an entrance or exit */
-	public Corridor getLinkedCorridor() {
-		String c = GeoLocHelper.getLinkedCorridor(geo_loc);
-		return corridors.getCorridor(c);
 	}
 
 	/** Write the r_node as an XML element */

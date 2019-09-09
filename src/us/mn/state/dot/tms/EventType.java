@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -46,6 +46,7 @@ public enum EventType {
 	TT_LINK_TOO_LONG(701), TT_NO_DATA(702), TT_NO_DESTINATION_DATA(703),
 	TT_NO_ORIGIN_DATA(704), TT_NO_ROUTE(705),
 	CAMERA_SWITCHED(801),
+	CAMERA_VIDEO_LOST(811), CAMERA_VIDEO_RESTORED(812),
 	ACTION_PLAN_ACTIVATED(900), ACTION_PLAN_DEACTIVATED(901),
 	ACTION_PLAN_PHASE_CHANGED(902);
 

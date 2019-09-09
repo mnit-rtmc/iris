@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2018  Minnesota Department of Transportation
+ * Copyright (C) 2006-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.CorridorFinder;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.GeoLoc;
@@ -58,8 +59,9 @@ import us.mn.state.dot.tms.utils.NumericAlphaComparator;
  *
  * @author Douglas Lau
  */
-public class R_NodeManager extends ProxyManager<R_Node> {
-
+public class R_NodeManager extends ProxyManager<R_Node>
+	implements CorridorFinder<R_Node>
+{
 	/** Create a proxy descriptor */
 	static private ProxyDescriptor<R_Node> descriptor(Session s) {
 		return new ProxyDescriptor<R_Node>(
@@ -357,13 +359,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		return new ProxyTheme<R_Node>(this, new R_NodeMarker());
 	}
 
-	/** Lookup the corridor for a location */
-	public CorridorBase<R_Node> lookupCorridor(GeoLoc loc) {
-		String cid = GeoLocHelper.getCorridorName(loc);
-		if (cid != null)
-			return corridors.get(cid);
-		else
-			return null;
+	/** Lookup the corridor by name */
+	@Override
+	public CorridorBase<R_Node> lookupCorridor(String name) {
+		return (name != null) ? corridors.get(name) : null;
 	}
 
 	/** Get the GeoLoc for the specified proxy */

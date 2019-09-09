@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
-import us.mn.state.dot.tms.IncidentImpact;
+import us.mn.state.dot.tms.LaneImpact;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
@@ -48,8 +48,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	static private void validateImpact(String imp)
 		throws ChangeVetoException
 	{
-		String vimp = IncidentImpact.fromArray(
-			IncidentImpact.fromString(imp));
+		String vimp = LaneImpact.fromArray(LaneImpact.fromString(imp));
 		if (!vimp.equals(imp))
 			throw new ChangeVetoException("Invalid impact: " + imp);
 	}

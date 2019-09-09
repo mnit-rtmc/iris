@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.IncidentHelper;
-import us.mn.state.dot.tms.IncidentImpact;
+import us.mn.state.dot.tms.LaneImpact;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
@@ -168,7 +168,7 @@ public class IncidentCache {
 		ParsedIncident pi, GeoLoc loc, int n_lanes)
 	{
 		short lnt = (short) LaneType.MAINLINE.ordinal();
-		String im = IncidentImpact.fromLanes(n_lanes);
+		String im = LaneImpact.fromLanes(n_lanes);
 		IncidentImpl inc = new IncidentImpl(n, orig,
 			pi.inc_type.id, new Date(), pi.detail,
 			lnt, loc.getRoadway(), loc.getRoadDir(),

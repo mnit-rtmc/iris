@@ -1,38 +1,37 @@
-/*
- * Copyright (C) 2018-2019  Minnesota Department of Transportation
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- */
-use base64::{Config, CharacterSet, LineWrap, decode_config_slice};
+// render.rs
+//
+// Copyright (C) 2018-2019  Minnesota Department of Transportation
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+use pix::{Raster, RasterBuilder, Rgb8};
 use std::collections::HashMap;
 use crate::error::Error;
 use crate::font::{Font, Graphic};
 use crate::multi::*;
-use crate::raster::Raster;
 
-/// Value result from parsing MULTI.
-type UnitResult = Result<(), SyntaxError>;
-
-/// Length of base64 output buffer for glyphs.
-/// Encoded glyphs are restricted to 128 bytes.
-const GLYPH_LEN: usize = (128 + 3) / 4 * 3;
+/// Convert BGR into Rgb8
+fn bgr_to_rgb8(bgr: i32) -> Rgb8 {
+    let r = (bgr >> 16) as u8;
+    let g = (bgr >> 8) as u8;
+    let b = (bgr >> 0) as u8;
+    Rgb8::new(r, g, b)
+}
 
 /// Page render state
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct State {
-    color_scheme    : ColorScheme,
+    color_ctx       : ColorCtx,
     char_width      : u8,
     char_height     : u8,
-    color_foreground: Color,
-    page_background : Color,
     page_on_time_ds : u8,       // deciseconds
     page_off_time_ds: u8,       // deciseconds
     text_rectangle  : Rectangle,
@@ -60,9 +59,9 @@ struct TextLine {
 
 /// Page renderer
 pub struct PageRenderer {
-    state  : State,                // render state at start of page
-    values : Vec<([u8;3], Value)>, // foreground color, graphic / color rect
-    spans  : Vec<TextSpan>,        // text spans
+    state  : State,                 // render state at start of page
+    values : Vec<(Value, ColorCtx)>,// graphic / color rect, color context
+    spans  : Vec<TextSpan>,         // text spans
 }
 
 /// Page splitter (iterator)
@@ -70,23 +69,15 @@ pub struct PageSplitter<'a> {
     default_state : State,
     state         : State,
     parser        : Parser<'a>,
-    more          : bool,
-}
-
-/// Scale a u8 value by another (mapping range to 0-1)
-fn scale_u8(a: u8, b: u8) -> u8 {
-    let c = a as u32 * b as u32;
-    // cheap alternative to divide by 255
-    (((c + 1) + (c >> 8)) >> 8) as u8
+    more_pages    : bool,
+    line_blank    : bool,
 }
 
 impl State {
     /// Create a new render state.
-    pub fn new(color_scheme     : ColorScheme,
+    pub fn new(color_ctx        : ColorCtx,
                char_width       : u8,
                char_height      : u8,
-               color_foreground : Color,
-               page_background  : Color,
                page_on_time_ds  : u8,
                page_off_time_ds : u8,
                text_rectangle   : Rectangle,
@@ -95,11 +86,9 @@ impl State {
                font             : (u8, Option<u16>)) -> Self
     {
         State {
-            color_scheme,
+            color_ctx,
             char_width,
             char_height,
-            color_foreground,
-            page_background,
             page_on_time_ds,
             page_off_time_ds,
             text_rectangle,
@@ -136,178 +125,20 @@ impl State {
             1
         }
     }
-    /// Get a color appropriate for the color scheme.
-    ///
-    /// * `c` Color value.
-    /// * `ds` Default state.
-    fn get_color(&self, c: Color, ds: &State) -> Result<Color, SyntaxError> {
-        match self.color_scheme {
-            ColorScheme::Monochrome1Bit => self.get_monochrome_1_bit(c, ds),
-            ColorScheme::Monochrome8Bit => self.get_monochrome_8_bit(c, ds),
-            ColorScheme::ColorClassic   => self.get_classic(c),
-            ColorScheme::Color24Bit     => self.get_color_24_bit(c),
-        }
-    }
-    /// Get color for a monochrome 1-bit scheme.
-    ///
-    /// * `c` Color value.
-    /// * `ds` Default state.
-    fn get_monochrome_1_bit(&self, c: Color, ds: &State)
-        -> Result<Color, SyntaxError>
-    {
-        match c {
-            Color::Legacy(0) => Ok(ds.page_background),
-            Color::Legacy(1) => Ok(ds.color_foreground),
-            _                => Err(SyntaxError::UnsupportedTagValue),
-        }
-    }
-    /// Get color for a monochrome 8-bit scheme.
-    ///
-    /// * `c` Color value.
-    /// * `ds` Default state.
-    fn get_monochrome_8_bit(&self, c: Color, ds: &State)
-        -> Result<Color, SyntaxError>
-    {
-        if let Color::Legacy(v) = c {
-            let rgb = self.color_rgb(ds.color_foreground)?;
-            let r = scale_u8(rgb[0], v);
-            let g = scale_u8(rgb[1], v);
-            let b = scale_u8(rgb[2], v);
-            Ok(Color::RGB(r,g,b))
-        } else {
-            Err(SyntaxError::UnsupportedTagValue)
-        }
-    }
-    /// Get color for a classic scheme.
-    ///
-    /// * `c` Color value.
-    fn get_classic(&self, c: Color) -> Result<Color, SyntaxError> {
-        match c {
-            Color::Legacy(0...9) => Ok(c),
-            _                    => Err(SyntaxError::UnsupportedTagValue),
-        }
-    }
-    /// Get color for a 24-bit scheme.
-    ///
-    /// * `c` Color value.
-    fn get_color_24_bit(&self, c: Color) -> Result<Color, SyntaxError> {
-        match c {
-            Color::RGB(_,_,_)    => Ok(c),
-            Color::Legacy(0...9) => Ok(c), // allow classic colors only
-            _                    => Err(SyntaxError::UnsupportedTagValue),
-        }
-    }
-    /// Update the render state with a MULTI value.
-    ///
-    /// * `default_state` Default render state.
-    /// * `v` MULTI value.
-    fn update(&mut self, default_state: &State, v: &Value) -> UnitResult {
-        match v {
-            Value::ColorBackground(None) => {
-                // This tag remains for backward compatibility with 1203v1
-                self.page_background = default_state.page_background;
-            },
-            Value::ColorBackground(Some(c)) => {
-                // This tag remains for backward compatibility with 1203v1
-                self.page_background = self.get_color(*c, default_state)?;
-            },
-            Value::ColorForeground(None) => {
-                self.color_foreground = default_state.color_foreground;
-            },
-            Value::ColorForeground(Some(c)) => {
-                self.color_foreground = self.get_color(*c, default_state)?;
-            },
-            Value::ColorRectangle(_,c) => {
-                self.get_color(*c, default_state)?;
-            },
-            Value::Font(None) => { self.font = default_state.font },
-            Value::Font(Some(f)) => { self.font = *f },
-            Value::Graphic(_, _) => (),
-            Value::JustificationLine(Some(LineJustification::Other)) => {
-                return Err(SyntaxError::UnsupportedTagValue);
-            },
-            Value::JustificationLine(Some(LineJustification::Full)) => {
-                return Err(SyntaxError::UnsupportedTagValue);
-            },
-            Value::JustificationLine(jl) => {
-                self.just_line = jl.unwrap_or(default_state.just_line);
-                self.span_number = 0;
-            },
-            Value::JustificationPage(Some(PageJustification::Other)) => {
-                return Err(SyntaxError::UnsupportedTagValue);
-            },
-            Value::JustificationPage(jp) => {
-                self.just_page = jp.unwrap_or(default_state.just_page);
-                self.line_number = 0;
-                self.span_number = 0;
-            },
-            Value::NewLine(None) => {
-                self.line_spacing = None;
-                self.line_number += 1;
-                self.span_number = 0;
-            },
-            Value::NewLine(Some(ls)) => {
-                if !self.is_full_matrix() {
-                    return Err(SyntaxError::UnsupportedTagValue);
-                }
-                self.line_spacing = Some(*ls);
-                self.line_number += 1;
-                self.span_number = 0;
-            },
-            Value::NewPage() => {
-                self.line_number = 0;
-                self.span_number = 0;
-            },
-            Value::PageBackground(None) => {
-                self.page_background = default_state.page_background;
-            },
-            Value::PageBackground(Some(c)) => {
-                self.page_background = self.get_color(*c, default_state)?;
-            },
-            Value::PageTime(on, off) => {
-                self.page_on_time_ds = on.unwrap_or(
-                    default_state.page_on_time_ds
-                );
-                self.page_off_time_ds = off.unwrap_or(
-                    default_state.page_off_time_ds
-                );
-            },
-            Value::SpacingCharacter(sc) => {
-                if self.is_char_matrix() {
-                    return Err(SyntaxError::UnsupportedTag("sc".to_string()));
-                }
-                self.char_spacing = Some(*sc);
-            },
-            Value::SpacingCharacterEnd() => { self.char_spacing = None; },
-            Value::TextRectangle(r) => {
-                self.line_number = 0;
-                self.span_number = 0;
-                return self.update_text_rectangle(default_state, *r);
-            },
-            Value::Text(_) => {
-                self.span_number += 1;
-            },
-            _ => {
-                // Unsupported tags: [f], [fl], [hc], [ms], [mv]
-                return Err(SyntaxError::UnsupportedTag(v.to_string()));
-            },
-        }
-        Ok(())
-    }
     /// Update the text rectangle.
     fn update_text_rectangle(&mut self, default_state: &State,
-        r: Rectangle) -> UnitResult
+        r: Rectangle, v: &Value) -> Result<(), SyntaxError>
     {
         let r = r.match_width_height(&default_state.text_rectangle);
         if !default_state.text_rectangle.contains(&r) {
-            return Err(SyntaxError::UnsupportedTagValue);
+            return Err(SyntaxError::UnsupportedTagValue(v.clone().into()));
         }
         let cw = self.char_width();
         if cw > 0 {
             // Check text rectangle matches character boundaries
             let x = r.x - 1;
             if x % cw != 0 || r.w % cw != 0 {
-                return Err(SyntaxError::UnsupportedTagValue);
+                return Err(SyntaxError::UnsupportedTagValue(v.clone().into()));
             }
         }
         let lh = self.char_height();
@@ -315,58 +146,19 @@ impl State {
             // Check text rectangle matches line boundaries
             let y = r.y - 1;
             if y % lh != 0 || r.h % lh != 0 {
-                return Err(SyntaxError::UnsupportedTagValue);
+                return Err(SyntaxError::UnsupportedTagValue(v.clone().into()));
             }
         }
         self.text_rectangle = r;
         Ok(())
     }
-    /// Get the page background color
-    fn page_background(&self) -> Result<[u8;3], SyntaxError> {
-        self.color_rgb(self.page_background)
+    /// Get the background RGB color.
+    fn background_rgb(&self) -> Rgb8 {
+        bgr_to_rgb8(self.color_ctx.background_bgr())
     }
-    /// Get the foreground color
-    fn color_foreground(&self) -> Result<[u8;3], SyntaxError> {
-        self.color_rgb(self.color_foreground)
-    }
-    /// Get RGB triplet for a color.
-    fn color_rgb(&self, c: Color) -> Result<[u8;3], SyntaxError> {
-        match c {
-            Color::RGB(r,g,b) => Ok([r,g,b]),
-            Color::Legacy(v)  => self.color_rgb_legacy(v),
-        }
-    }
-    /// Get RGB triplet for a legacy color value.
-    ///
-    /// * `v` Color value (0-255).
-    fn color_rgb_legacy(&self, v: u8) -> Result<[u8;3], SyntaxError> {
-        match self.color_scheme {
-            ColorScheme::Monochrome1Bit => self.color_rgb_monochrome_1_bit(v),
-            ColorScheme::Monochrome8Bit => self.color_rgb_monochrome_8_bit(v),
-            ColorScheme::ColorClassic |
-            ColorScheme::Color24Bit     => self.color_rgb_classic(v),
-        }
-    }
-    /// Get RGB triplet for a monochrome 1-bit color.
-    fn color_rgb_monochrome_1_bit(&self, v: u8) -> Result<[u8;3], SyntaxError> {
-        match v {
-            0 => Ok([  0,   0,   0]),
-            1 => Ok([255, 255, 255]),
-            _ => Err(SyntaxError::UnsupportedTagValue),
-        }
-    }
-    /// Get RGB triplet for a monochrome 8-bit color.
-    fn color_rgb_monochrome_8_bit(&self, v: u8) -> Result<[u8;3], SyntaxError> {
-        Ok([v,v,v])
-    }
-    /// Get RGB triplet for a classic color.
-    ///
-    /// * `v` Color value (0-9).
-    fn color_rgb_classic(&self, v: u8) -> Result<[u8;3], SyntaxError> {
-        match ColorClassic::from_u8(v) {
-            Some(c) => Ok(c.rgb()),
-            None    => Err(SyntaxError::UnsupportedTagValue),
-        }
+    /// Get the foreground RGB color.
+    fn foreground_rgb(&self) -> Rgb8 {
+        bgr_to_rgb8(self.color_ctx.foreground_bgr())
     }
     /// Check if states match for text spans
     fn matches_span(&self, other: &State) -> bool {
@@ -439,7 +231,7 @@ impl<'a> TextSpan {
             // rounded up to the nearest whole pixel ..." ???
             let psc = prev.char_spacing_fonts(fonts)?;
             let sc = self.char_spacing_fonts(fonts)?;
-            Ok(((psc + sc) as f32 / 2f32).round() as u16)
+            Ok(((psc + sc) as f32 / 2.0).round() as u16)
         }
     }
     /// Get the height of a text span
@@ -460,36 +252,12 @@ impl<'a> TextSpan {
         }
     }
     /// Render the text span
-    fn render(&self, page: &mut Raster, font: &Font, mut x: u32, y: u32)
+    fn render_text(&self, page: &mut Raster<Rgb8>, font: &Font, x: u32, y: u32)
         -> Result<(), Error>
     {
-        let cf = self.state.color_foreground()?;
-        let cf = [cf[0], cf[1], cf[2]];
-        let h = font.height() as u32;
         let cs = self.char_spacing_font(font);
-        debug!("span: {}, left: {}, top: {}, height: {}", self.text, x, y, h);
-        let config = Config::new(CharacterSet::Standard, false, true,
-            LineWrap::NoWrap);
-        let mut buf = [0; GLYPH_LEN];
-        for c in self.text.chars() {
-            let g = font.glyph(c)?;
-            let w = g.width() as u32;
-            let n = decode_config_slice(&g.pixels, config, &mut buf)?;
-            debug!("char: {}, width: {}, len: {}", c, w, n);
-            for yy in 0..h {
-                for xx in 0..w {
-                    let p = yy * w + xx;
-                    let by = p as usize / 8;
-                    let bi = 7 - (p & 7);
-                    let lit = ((buf[by] >> bi) & 1) != 0;
-                    if lit {
-                        page.set_pixel(x + xx, y + yy, cf);
-                    }
-                }
-            }
-            x += w + cs;
-        }
-        Ok(())
+        let cf = self.state.foreground_rgb();
+        font.render_text(page, &self.text, x, y, cs, cf)
     }
 }
 
@@ -514,21 +282,17 @@ impl TextLine {
             // is the average of the 2 line spacings of each
             // line, rounded up to the nearest whole pixel."
             let s = self.font_spacing + other.font_spacing;
-            (s as f32 / 2f32).round() as u16
+            (s as f32 / 2.0).round() as u16
         }
     }
 }
 
 impl PageRenderer {
     /// Create a new page renderer
-    pub fn new(state: State, values: Vec<([u8;3], Value)>, spans: Vec<TextSpan>)
-        -> Self
-    {
-        PageRenderer {
-            state,
-            values,
-            spans,
-        }
+    pub fn new(state: State) -> Self {
+        let values = vec![];
+        let spans = vec![];
+        PageRenderer { state, values, spans }
     }
     /// Check page and line justification ordering
     fn check_justification(&self) -> Result<(), SyntaxError> {
@@ -563,58 +327,57 @@ impl PageRenderer {
         self.state.page_off_time_ds.into()
     }
     /// Render a blank page.
-    pub fn render_blank(&self) -> Result<Raster, SyntaxError> {
-        let rs = self.state;
+    pub fn render_blank(&self) -> Result<Raster<Rgb8>, SyntaxError> {
+        let rs = &self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
-        let clr = rs.page_background()?;
-        let rgb = [clr[0], clr[1], clr[2]];
-        let page = Raster::new(w.into(), h.into(), rgb);
+        let clr = rs.background_rgb();
+        let page = RasterBuilder::new().with_color(w.into(), h.into(), clr);
         Ok(page)
     }
     /// Render the page.
     pub fn render(&self, fonts: &HashMap<i32, Font>,
-        graphics: &HashMap<i32, Graphic>) -> Result<Raster, Error>
+        graphics: &HashMap<i32, Graphic>) -> Result<Raster<Rgb8>, Error>
     {
-        let rs = self.state;
+        let rs = &self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
-        let clr = rs.page_background()?;
-        let mut page = Raster::new(w.into(), h.into(), clr);
-        for (cf, v) in &self.values {
+        let clr = rs.background_rgb();
+        let mut page = RasterBuilder::new().with_color(w.into(), h.into(), clr);
+        for (v, ctx) in &self.values {
             match v {
-                Value::ColorRectangle(r,c) => {
-                    let clr = rs.color_rgb(*c)?;
-                    self.render_rect(&mut page, *r, clr)?;
+                Value::ColorRectangle(r, _) => {
+                    let clr = bgr_to_rgb8(ctx.foreground_bgr());
+                    self.render_rect(&mut page, *r, clr, v)?;
                 },
-                Value::Graphic(gn,None) => {
+                Value::Graphic(gn, None) => {
                     let n = *gn as i32;
                     let g = graphics.get(&n)
                                     .ok_or(SyntaxError::GraphicNotDefined(*gn))?;
-                    g.render(&mut page, *cf, 1, 1)?;
+                    g.onto_raster(&mut page, 1, 1, ctx)?;
                 },
-                Value::Graphic(gn,Some((x,y,_))) => {
+                Value::Graphic(gn, Some((x,y,_))) => {
                     let n = *gn as i32;
                     let g = graphics.get(&n)
                                     .ok_or(SyntaxError::GraphicNotDefined(*gn))?;
                     let x = *x as u32;
                     let y = *y as u32;
-                    g.render(&mut page, *cf, x, y)?;
+                    g.onto_raster(&mut page, x, y, ctx)?;
                 },
                 _ => unreachable!(),
             }
         }
         for s in &self.spans {
-            let x = self.span_x(s, fonts)?;
-            let y = self.span_y(s, fonts)?;
+            let x = self.span_x(s, fonts)? as u32;
+            let y = self.span_y(s, fonts)? as u32;
             let font = s.font(fonts)?;
-            s.render(&mut page, &font, x as u32, y as u32)?;
+            s.render_text(&mut page, &font, x, y)?;
         }
         Ok(page)
     }
     /// Render a color rectangle
-    fn render_rect(&self, page: &mut Raster, r: Rectangle, clr: [u8;3])
-        ->Result<(), SyntaxError>
+    fn render_rect(&self, page: &mut Raster<Rgb8>, r: Rectangle, clr: Rgb8,
+        v: &Value) -> Result<(), SyntaxError>
     {
         let rx = r.x as u32 - 1; // r.x must be > 0
         let ry = r.y as u32 - 1; // r.y must be > 0
@@ -628,7 +391,7 @@ impl PageRenderer {
             }
             return Ok(());
         }
-        Err(SyntaxError::UnsupportedTagValue)
+        Err(SyntaxError::UnsupportedTagValue(v.clone().into()))
     }
     /// Get the X position of a text span.
     fn span_x(&self, s: &TextSpan, fonts: &HashMap<i32, Font>)
@@ -678,24 +441,24 @@ impl PageRenderer {
         -> Result<(u16, u16), SyntaxError>
     {
         debug!("offset_horiz '{}'", span.text);
-        let state = span.state;
+        let rs = &span.state;
         let mut before = 0;
         let mut after = 0;
         let mut pspan = None;
-        for s in self.spans.iter().filter(|s| state.matches_span(&s.state)) {
+        for s in self.spans.iter().filter(|s| rs.matches_span(&s.state)) {
             if let Some(ps) = pspan {
                 let w = s.char_spacing_between(ps, fonts)?;
-                if s.state.span_number <= state.span_number { before += w }
+                if s.state.span_number <= rs.span_number { before += w }
                 else { after += w }
                 debug!("  spacing {} before {} after {}", w, before, after);
             }
             let w = s.width(fonts)?;
-            if s.state.span_number < state.span_number { before += w }
+            if s.state.span_number < rs.span_number { before += w }
             else { after += w }
             debug!("  span '{}'  before {} after {}", s.text, before, after);
             pspan = Some(s);
         }
-        if before + after <= state.text_rectangle.w {
+        if before + after <= rs.text_rectangle.w {
             Ok((before, after))
         } else {
             Err(SyntaxError::TextTooBig)
@@ -758,9 +521,9 @@ impl PageRenderer {
         -> Result<(u16, u16), SyntaxError>
     {
         debug!("offset_vert '{}'", span.text);
-        let state = span.state;
+        let rs = &span.state;
         let mut lines = vec!();
-        for s in self.spans.iter().filter(|s| state.matches_line(&s.state)) {
+        for s in self.spans.iter().filter(|s| rs.matches_line(&s.state)) {
             let ln = s.state.line_number as usize;
             let h = s.height(fonts)?;
             let fs = s.font_spacing(fonts)?;
@@ -772,7 +535,7 @@ impl PageRenderer {
                 &lines[ln].combine(&line);
             }
         }
-        let sln = state.line_number as usize;
+        let sln = rs.line_number as usize;
         let mut above = 0;
         let mut below = 0;
         for ln in 0..lines.len() {
@@ -803,63 +566,152 @@ impl<'a> PageSplitter<'a> {
     /// * `ms` MULTI string to parse.
     pub fn new(default_state: State, ms: &'a str) -> Self {
         let parser = Parser::new(ms);
-        let state = default_state;
-        let more = true;
-        PageSplitter { default_state, state, parser, more }
+        let state = default_state.clone();
+        let more_pages = true;
+        let line_blank = true;
+        PageSplitter { default_state, state, parser, more_pages, line_blank }
     }
     /// Make the next page.
     fn make_page(&mut self) -> Result<PageRenderer, SyntaxError> {
-        self.more = false;
-        let mut blank = true;   // blank line
-        let mut rs = self.page_state();
-        let mut values = vec!();
-        let mut spans = vec!();
-        while let Some(t) = self.parser.next() {
-            let v = t?;
-            self.state.update(&self.default_state, &v)?;
-            match v {
-                Value::NewPage() => {
-                    self.more = true;
-                    break;
-                },
-                Value::NewLine(_) => {
-                    if blank {
-                        let ts = TextSpan::new(self.state, "".to_string());
-                        spans.push(ts);
-                    }
-                    blank = true;
-                },
-                Value::TextRectangle(_) => {
-                    blank = true;
-                }
-                Value::Text(t) => {
-                    let ts = TextSpan::new(self.state, t);
-                    spans.push(ts);
-                    blank = false;
-                },
-                Value::Graphic(_,_)|
-                Value::ColorRectangle(_,_) => {
-                    let cf = self.state.color_foreground()?;
-                    values.push((cf, v));
-                },
-                _ => (),
-            }
+        self.more_pages = false;
+        self.line_blank = true;
+        let mut page = PageRenderer::new(self.page_state());
+        while let Some(v) = self.parser.next() {
+            self.update_state(v?, &mut page)?;
+            if self.more_pages { break; }
         }
-        // These values affect the entire page
-        rs.page_background = self.state.page_background;
-        rs.page_on_time_ds = self.state.page_on_time_ds;
-        rs.page_off_time_ds = self.state.page_off_time_ds;
-        let page = PageRenderer::new(rs, values, spans);
         page.check_justification()?;
         Ok(page)
     }
     /// Get the current page state.
     fn page_state(&self) -> State {
-        let mut rs = self.state;
+        let mut rs = self.state.clone();
         // Set these back to default values
         rs.text_rectangle = self.default_state.text_rectangle;
         rs.line_spacing = self.default_state.line_spacing;
         rs
+    }
+    /// Update the render state with one MULTI value.
+    ///
+    /// * `v` MULTI value.
+    /// * `page` Page renderer.
+    fn update_state(&mut self, v: Value, page: &mut PageRenderer)
+        -> Result<(), SyntaxError>
+    {
+        let ds = &self.default_state;
+        let mut rs = &mut self.state;
+        match v {
+            Value::ColorBackground(c) => {
+                // This tag remains for backward compatibility with 1203v1
+                rs.color_ctx.set_background(c, &v)?;
+                page.state.color_ctx.set_background(c, &v)?;
+            },
+            Value::ColorForeground(c) => {
+                rs.color_ctx.set_foreground(c, &v)?;
+            },
+            Value::ColorRectangle(_, c) => {
+                let mut ctx = rs.color_ctx.clone();
+                // only set foreground color in cloned context
+                ctx.set_foreground(Some(c), &v)?;
+                page.values.push((v, ctx));
+            },
+            Value::Font(None) => { rs.font = ds.font },
+            Value::Font(Some(f)) => { rs.font = f },
+            Value::Graphic(_, _) =>  {
+                page.values.push((v, rs.color_ctx.clone()));
+            },
+            Value::JustificationLine(Some(LineJustification::Other)) => {
+                return Err(SyntaxError::UnsupportedTagValue(v.into()));
+            },
+            Value::JustificationLine(Some(LineJustification::Full)) => {
+                return Err(SyntaxError::UnsupportedTagValue(v.into()));
+            },
+            Value::JustificationLine(jl) => {
+                rs.just_line = jl.unwrap_or(ds.just_line);
+                rs.span_number = 0;
+            },
+            Value::JustificationPage(Some(PageJustification::Other)) => {
+                return Err(SyntaxError::UnsupportedTagValue(v.into()));
+            },
+            Value::JustificationPage(jp) => {
+                rs.just_page = jp.unwrap_or(ds.just_page);
+                rs.line_number = 0;
+                rs.span_number = 0;
+            },
+            Value::NewLine(ls) => {
+                if !rs.is_full_matrix() {
+                    if let Some(_) = ls {
+                        return Err(SyntaxError::UnsupportedTagValue(v.into()));
+                    }
+                }
+                // Insert an empty text span for blank lines.
+                if self.line_blank {
+                    page.spans.push(TextSpan::new(rs.clone(), "".into()));
+                }
+                self.line_blank = true;
+                rs.line_spacing = ls;
+                rs.line_number += 1;
+                rs.span_number = 0;
+            },
+            Value::NewPage() => {
+                rs.line_number = 0;
+                rs.span_number = 0;
+                self.more_pages = true;
+            },
+            Value::PageBackground(c) => {
+                rs.color_ctx.set_background(c, &v)?;
+                page.state.color_ctx.set_background(c, &v)?;
+            },
+            Value::PageTime(on, off) => {
+                rs.page_on_time_ds = on.unwrap_or(ds.page_on_time_ds);
+                rs.page_off_time_ds = off.unwrap_or(ds.page_off_time_ds);
+                page.state.page_on_time_ds = on.unwrap_or(ds.page_on_time_ds);
+                page.state.page_off_time_ds = off.unwrap_or(ds.page_off_time_ds);
+            },
+            Value::SpacingCharacter(sc) => {
+                if rs.is_char_matrix() {
+                    return Err(SyntaxError::UnsupportedTag(v.into()));
+                }
+                rs.char_spacing = Some(sc);
+            },
+            Value::SpacingCharacterEnd() => {
+                if rs.is_char_matrix() {
+                    return Err(SyntaxError::UnsupportedTag(v.into()));
+                }
+                rs.char_spacing = None;
+            },
+            Value::TextRectangle(r) => {
+                self.line_blank = true;
+                rs.line_number = 0;
+                rs.span_number = 0;
+                rs.update_text_rectangle(ds, r, &v)?;
+            },
+            Value::Text(t) => {
+                page.spans.push(TextSpan::new(rs.clone(), t));
+                rs.span_number += 1;
+                self.line_blank = false;
+            },
+            Value::HexadecimalCharacter(hc) => {
+                match std::char::from_u32(hc.into()) {
+                    Some(c) => {
+                        let mut t = String::new();
+                        t.push(c);
+                        page.spans.push(TextSpan::new(rs.clone(), t));
+                        rs.span_number += 1;
+                        self.line_blank = false;
+                    },
+                    None => {
+                        // Invalid code point (surrogate in D800-DFFF range)
+                        return Err(SyntaxError::UnsupportedTagValue(v.into()));
+                    },
+                }
+            },
+            _ => {
+                // Unsupported tags: [f], [fl], [ms], [mv]
+                return Err(SyntaxError::UnsupportedTag(v.into()));
+            },
+        }
+        Ok(())
     }
 }
 
@@ -867,7 +719,7 @@ impl<'a> Iterator for PageSplitter<'a> {
     type Item = Result<PageRenderer, SyntaxError>;
 
     fn next(&mut self) -> Option<Result<PageRenderer, SyntaxError>> {
-        if self.more {
+        if self.more_pages {
             Some(self.make_page())
         } else {
             None
@@ -879,9 +731,10 @@ impl<'a> Iterator for PageSplitter<'a> {
 mod test {
     use super::*;
     fn make_full_matrix() -> State {
-        State::new(ColorScheme::Color24Bit,
+        State::new(ColorCtx::new(ColorScheme::Color24Bit,
+                                 ColorClassic::White.rgb(),
+                                 ColorClassic::Black.rgb()),
                    0, 0,
-                   Color::Legacy(1), Color::Legacy(0),
                    20, 0,
                    Rectangle::new(1, 1, 60, 30),
                    PageJustification::Top,
@@ -891,28 +744,30 @@ mod test {
     #[test]
     fn page_count() {
         let rs = make_full_matrix();
-        let pages: Vec<_> = PageSplitter::new(rs, "").collect();
+        let pages: Vec<_> = PageSplitter::new(rs.clone(), "").collect();
         assert!(pages.len() == 1);
-        let pages: Vec<_> = PageSplitter::new(rs, "1").collect();
+        let pages: Vec<_> = PageSplitter::new(rs.clone(), "1").collect();
         assert!(pages.len() == 1);
-        let pages: Vec<_> = PageSplitter::new(rs, "[np]").collect();
+        let pages: Vec<_> = PageSplitter::new(rs.clone(), "[np]").collect();
         assert!(pages.len() == 2);
-        let pages: Vec<_> = PageSplitter::new(rs, "1[NP]").collect();
+        let pages: Vec<_> = PageSplitter::new(rs.clone(), "1[NP]").collect();
         assert!(pages.len() == 2);
-        let pages: Vec<_> = PageSplitter::new(rs, "1[Np]2").collect();
+        let pages: Vec<_> = PageSplitter::new(rs.clone(), "1[Np]2").collect();
         assert!(pages.len() == 2);
-        let pages: Vec<_> = PageSplitter::new(rs, "1[np]2[nP]").collect();
+        let pages: Vec<_> = PageSplitter::new(rs.clone(), "1[np]2[nP]").collect();
         assert!(pages.len() == 3);
+        let pages: Vec<_> = PageSplitter::new(rs.clone(), "[fo6][nl]\
+            [jl2][cf255,255,255]RAMP A[jl4][cf255,255,0]FULL[nl]\
+            [jl2][cf255,255,255]RAMP B[jl4][cf255,255,0]FULL[nl]\
+            [jl2][cf255,255,255]RAMP C[jl4][cf255,255,0]FULL").collect();
+        assert!(pages.len() == 1);
     }
     #[test]
     fn page_full_matrix() {
         let rs = make_full_matrix();
-        let mut pages = PageSplitter::new(rs, "");
+        let mut pages = PageSplitter::new(rs.clone(), "");
         let p = pages.next().unwrap().unwrap();
         let rs = p.state;
-        assert!(rs.color_scheme == ColorScheme::Color24Bit);
-        assert!(rs.color_foreground == Color::Legacy(1));
-        assert!(rs.page_background == Color::Legacy(0));
         assert!(rs.page_on_time_ds == 20);
         assert!(rs.page_off_time_ds == 0);
         assert!(rs.text_rectangle == Rectangle::new(1,1,60,30));
@@ -923,12 +778,10 @@ mod test {
         assert!(rs.char_width == 0);
         assert!(rs.char_height == 0);
         assert!(rs.font == (1, None));
-        let mut pages = PageSplitter::new(rs, "[pt10o2][cb9][pb5][cf3][jp3]\
-            [jl4][tr1,1,10,10][nl4][fo3,1234][sc2][np][pb][pt][cb][/sc]");
+        let mut pages = PageSplitter::new(rs.clone(), "[pt10o2][cb9][pb5][cf3]\
+            [jp3][jl4][tr1,1,10,10][nl4][fo3,1234][sc2][np][pb][pt][cb][/sc]");
         let p = pages.next().unwrap().unwrap();
         let rs = p.state;
-        assert!(rs.color_foreground == Color::Legacy(1));
-        assert!(rs.page_background == Color::Legacy(5));
         assert!(rs.page_on_time_ds == 10);
         assert!(rs.page_off_time_ds == 2);
         assert!(rs.text_rectangle == Rectangle::new(1,1,60,30));
@@ -939,8 +792,6 @@ mod test {
         assert!(rs.font == (1, None));
         let p = pages.next().unwrap().unwrap();
         let rs = p.state;
-        assert!(rs.color_foreground == Color::Legacy(3));
-        assert!(rs.page_background == Color::Legacy(0));
         assert!(rs.page_on_time_ds == 20);
         assert!(rs.page_off_time_ds == 0);
         assert!(rs.text_rectangle == Rectangle::new(1,1,60,30));
@@ -951,9 +802,10 @@ mod test {
         assert!(rs.font == (3, Some(0x1234)));
     }
     fn make_char_matrix() -> State {
-        State::new(ColorScheme::Monochrome1Bit,
+        State::new(ColorCtx::new(ColorScheme::Monochrome1Bit,
+                                 ColorClassic::White.rgb(),
+                                 ColorClassic::Black.rgb()),
                    5, 7,
-                   Color::Legacy(1), Color::Legacy(0),
                    20, 0,
                    Rectangle::new(1, 1, 100, 21),
                    PageJustification::Top,
@@ -963,23 +815,23 @@ mod test {
     #[test]
     fn page_char_matrix() {
         let rs = make_char_matrix();
-        let mut pages = PageSplitter::new(rs, "[tr1,1,12,12]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = pages.next() {
+        let mut pages = PageSplitter::new(rs.clone(), "[tr1,1,12,12]");
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = pages.next() {
             assert!(true);
         } else { assert!(false) }
-        let mut pages = PageSplitter::new(rs, "[tr1,1,50,12]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = pages.next() {
+        let mut pages = PageSplitter::new(rs.clone(), "[tr1,1,50,12]");
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = pages.next() {
             assert!(true);
         } else { assert!(false) }
-        let mut pages = PageSplitter::new(rs, "[tr1,1,12,14]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = pages.next() {
+        let mut pages = PageSplitter::new(rs.clone(), "[tr1,1,12,14]");
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = pages.next() {
             assert!(true);
         } else { assert!(false) }
-        let mut pages = PageSplitter::new(rs, "[tr1,1,50,14]");
+        let mut pages = PageSplitter::new(rs.clone(), "[tr1,1,50,14]");
         if let Some(Ok(_)) = pages.next() { assert!(true); }
         else { assert!(false) }
-        let mut pages = PageSplitter::new(rs, "[pb9]");
-        if let Some(Err(SyntaxError::UnsupportedTagValue)) = pages.next() {
+        let mut pages = PageSplitter::new(rs.clone(), "[pb9]");
+        if let Some(Err(SyntaxError::UnsupportedTagValue(_))) = pages.next() {
             assert!(true);
         } else { assert!(false) }
     }

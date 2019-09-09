@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- ant build file for IRIS project
-     Copyright (C) 2007-2018  Minnesota Department of Transportation
+     Copyright (C) 2007-2019  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -55,12 +55,6 @@
 	<property name="install.dir" value="${build.dir}/install"/>
 
 	<!-- Dependent jar configuration -->
-	<property name="scheduler.jar"
-		  value="scheduler-${scheduler.version}.jar"/>
-	<property name="sonar.server.jar"
-		  value="sonar-server-${sonar.version}.jar"/>
-	<property name="sonar.client.jar"
-		  value="sonar-client-${sonar.version}.jar"/>
 	<property name="server.jar" value="${name}-server-${version}.jar"/>
 	<property name="common.jar" value="${name}-common-${version}.jar"/>
 	<property name="client.jar" value="${name}-client-${version}.jar"/>
@@ -70,9 +64,6 @@
 	<path id="classpath">
 		<fileset dir="${lib.dir}">
 			<include name="mail.jar"/>
-			<include name="${scheduler.jar}"/>
-			<include name="${sonar.server.jar}"/>
-			<include name="${sonar.client.jar}"/>
 		</fileset>
 	</path>
 
@@ -95,43 +86,6 @@
 		      message="Missing dependency: ${lib.dir}/${file.dep}"/>
 	</target>
 
-	<!-- Check for one subproject dependancy -->
-	<target name="check-subproject">
-		<available property="file.exists"
-			   file="${lib.dir}/${file.dep}"/>
-		<antcall target="build-subproject"/>
-	</target>
-
-	<!-- Build a subproject -->
-	<target name="build-subproject" unless="file.exists">
-		<antcall target="hg-check"/>
-		<copy todir="${build.deps}/${repo.name}/lib">
-			<fileset dir="${lib.dir}"/>
-		</copy>
-		<ant dir="${build.deps}/${repo.name}"
-		     target="jar" inheritAll="false"/>
-		<copy todir="${lib.dir}">
-			<fileset dir="${build.deps}/${repo.name}/build/lib/"/>
-		</copy>
-	</target>
-
-	<!-- Check a mercurial subproject -->
-	<target name="hg-check" unless="file.exists">
-		<available property="dir.exists"
-		           file="${build.deps}/${repo.name}"/>
-		<antcall target="hg-clone"/>
-	</target>
-
-	<!-- Clone a mercurial subproject -->
-	<target name="hg-clone" unless="dir.exists">
-		<mkdir dir="${build.deps}"/>
-		<exec executable="hg" dir="${build.deps}" failonerror="true">
-			<arg value="clone"/>
-			<arg value="-r${repo.version}"/>
-			<arg value="${hgbase.url}${repo.name}"/>
-		</exec>
-	</target>
-
 	<!-- Check for dependencies -->
 	<target name="check">
 		<antcall target="check-dep">
@@ -139,22 +93,6 @@
 		</antcall>
 		<antcall target="check-dep">
 			<param name="file.dep" value="mail.jar"/>
-		</antcall>
-		<antcall target="check-subproject">
-			<param name="file.dep" value="${scheduler.jar}"/>
-			<param name="repo.name" value="scheduler"/>
-			<param name="repo.version"
-			       value="${scheduler.version}"/>
-		</antcall>
-		<antcall target="check-subproject">
-			<param name="file.dep" value="${sonar.server.jar}"/>
-			<param name="repo.name" value="sonar"/>
-			<param name="repo.version" value="${sonar.version}"/>
-		</antcall>
-		<antcall target="check-subproject">
-			<param name="file.dep" value="${sonar.client.jar}"/>
-			<param name="repo.name" value="sonar"/>
-			<param name="repo.version" value="${sonar.version}"/>
 		</antcall>
 	</target>
 
@@ -165,10 +103,6 @@
 			<filterset begintoken="@@" endtoken="@@">
 				<filter token="NAME" value="${name}"/>
 				<filter token="VERSION" value="${version}"/>
-				<filter token="SCHEDULER.VERSION"
-				        value="${scheduler.version}"/>
-				<filter token="SONAR.VERSION"
-					value="${sonar.version}"/>
 				<filter token="BUILD.RPM" value="${build.rpm}"/>
 				<filter token="RPM.URL" value="${rpm.url}"/>
 				<filter token="RPM.RELEASE"
@@ -234,6 +168,28 @@
 		</javac>
 	</target>
 
+	<!-- Create the common jar -->
+	<target name="common-jar"
+		depends="compile">
+		<jar jarfile="${build.lib}/${common.jar}">
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/sched/*.class"/>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/sonar/*.class"/>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/tms/*.class"/>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/tms/geo/*.class"/>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/tms/reports/*.class"/>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/tms/units/*.class"/>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/tms/utils/*.class"/>
+			<fileset dir="${build.i18n}"/>
+		</jar>
+	</target>
+
 	<!-- Create the server jar -->
 	<target name="server-jar"
 		depends="compile"
@@ -241,6 +197,7 @@
 		<jar jarfile="${build.lib}/${server.jar}"
 		     manifest="${build.etc}/${manifest.server}">
 			<fileset dir="${build.classes}">
+				<include name="us/mn/state/dot/sonar/server/**/*"/>
 				<include name="us/mn/state/dot/tms/server/**/*"/>
 			</fileset>
 		</jar>
@@ -259,28 +216,8 @@
 		<copy todir="${dist.server}">
 			<fileset dir="${lib.dir}">
 				<include name="mail.jar"/>
-				<include name="${scheduler.jar}"/>
-				<include name="${sonar.server.jar}"/>
 			</fileset>
 		</copy>
-	</target>
-
-	<!-- Create the common jar -->
-	<target name="common-jar"
-		depends="compile">
-		<jar jarfile="${build.lib}/${common.jar}">
-			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/tms/*.class"/>
-			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/tms/geo/*.class"/>
-			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/tms/reports/*.class"/>
-			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/tms/units/*.class"/>
-			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/tms/utils/*.class"/>
-			<fileset dir="${build.i18n}"/>
-		</jar>
 	</target>
 
 	<!-- Create the client jar -->
@@ -289,6 +226,8 @@
 	        description="Create the iris-client jar">
 		<jar jarfile="${build.lib}/${client.jar}"
 		     manifest="${build.etc}/${manifest.client}">
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/sonar/client/**/*"/>
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/tms/client/**/*"/>
 			<fileset dir="${build.dir}" includes="images/*"/>
@@ -328,8 +267,6 @@
 		<copy todir="${dist.client}/lib">
 			<fileset dir="${lib.dir}">
 				<include name="mail.jar"/>
-				<include name="${scheduler.jar}"/>
-				<include name="${sonar.client.jar}"/>
 			</fileset>
 			<fileset dir="${build.lib}">
 				<include name="${common.jar}"/>
@@ -471,13 +408,6 @@
 	        description="Clean to the base repository distribution"
 	        depends="clean">
 		<mkdir dir="${lib.dir}" />
-		<delete>
-			<fileset dir="${lib.dir}">
-				<include name="${scheduler.jar}"/>
-				<include name="${sonar.client.jar}"/>
-				<include name="${sonar.server.jar}"/>
-			</fileset>
-		</delete>
 	</target>
 
 	<!-- init junit dirs-->

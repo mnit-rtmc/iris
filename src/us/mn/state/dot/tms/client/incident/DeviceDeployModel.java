@@ -14,35 +14,16 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.TreeMap;
 import javax.swing.DefaultListModel;
-import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
-import us.mn.state.dot.tms.IncAdvice;
-import us.mn.state.dot.tms.IncAdviceHelper;
-import us.mn.state.dot.tms.IncDescriptor;
-import us.mn.state.dot.tms.IncDescriptorHelper;
-import us.mn.state.dot.tms.IncLocator;
-import us.mn.state.dot.tms.IncLocatorHelper;
-import us.mn.state.dot.tms.IncRange;
-import us.mn.state.dot.tms.IncSeverity;
-import us.mn.state.dot.tms.LaneConfiguration;
-import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.RasterGraphic;
-import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.R_NodeType;
-import us.mn.state.dot.tms.geo.Position;
-import us.mn.state.dot.tms.units.Distance;
-import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -52,113 +33,14 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class DeviceDeployModel extends DefaultListModel<Device> {
 
-	/** Calculate a mile point for a location on a corridor */
-	static private Float calculateMilePoint(CorridorBase cb, GeoLoc loc) {
-		if (loc != null &&
-		    loc.getRoadway() == cb.getRoadway() &&
-		    loc.getRoadDir() == cb.getRoadDir())
-			return cb.calculateMilePoint(loc);
-		else
-			return null;
-	}
+	/** Upstream device finder */
+	private final UpstreamDeviceFinder finder;
 
-	/** Get an LCS array position */
-	static private Position getLCSPosition(LCSArray lcs_a) {
-		GeoLoc loc = LCSArrayHelper.lookupGeoLoc(lcs_a);
-		return (loc != null)
-		      ? new Position(loc.getLat(), loc.getLon())
-		      : null;
-	}
+	/** LCS indication builder */
+	private final LcsIndicationBuilder ind_builder;
 
-	/** Get an LCS array lane configuration */
-	static private LaneConfiguration laneConfiguration(CorridorBase cb,
-		LCSArray lcs_a)
-	{
-		Position p = getLCSPosition(lcs_a);
-		return (p != null) ? cb.laneConfiguration(p) : null;
-	}
-
-	/** Create indications for an LCS array */
-	static private Integer[] createIndications(CorridorBase cb,
-		LCSArray lcs_a, Distance up, LcsDeployModel lcs_mdl)
-	{
-		LaneConfiguration cfg = laneConfiguration(cb, lcs_a);
-		return (cfg != null)
-		      ? lcs_mdl.createIndications(cfg, up, lcs_a)
-		      : null;
-	}
-
-	/** Distance for no range */
-	static private final Distance RANGE_NONE = new Distance(0);
-
-	/** Distance for near range */
-	static private final Distance RANGE_NEAR = new Distance(5, MILES);
-	static private final Distance RANGE_NEAR_METRO =
-		new Distance(1.5, MILES);
-
-	/** Distance for middle range */
-	static private final Distance RANGE_MIDDLE = new Distance(10, MILES);
-	static private final Distance RANGE_MIDDLE_METRO =
-		new Distance(5, MILES);
-
-	/** Distance for far range */
-	static private final Distance RANGE_FAR = new Distance(20, MILES);
-	static private final Distance RANGE_FAR_METRO = new Distance(10, MILES);
-
-	/** Get the maximum distance to deploy a DMS */
-	static private Distance maxDistance(IncSeverity svr) {
-		if (svr == null)
-			return RANGE_NONE;
-		switch (svr) {
-		case minor:
-			return RANGE_NEAR;
-		case normal:
-			return RANGE_MIDDLE;
-		case major:
-			return RANGE_FAR;
-		default:
-			return RANGE_NONE;
-		}
-	}
-
-	/** Get the range for a distance to incident */
-	static private IncRange getRange(Distance up) {
-		double m = up.m();
-		if (m > RANGE_FAR.m())
-			return null;
-		if (m > RANGE_MIDDLE.m())
-			return IncRange.far;
-		if (m > RANGE_NEAR.m())
-			return IncRange.middle;
-		else
-			return IncRange.near;
-	}
-
-	/** Get the r_node type checker */
-	static private R_NodeType.Checker getChecker(short lto) {
-		final LaneType lt = LaneType.fromOrdinal(lto);
-		return new R_NodeType.Checker() {
-			public boolean check(R_NodeType nt) {
-				switch (lt) {
-				case EXIT:
-					return R_NodeType.EXIT == nt;
-				case MERGE:
-					return R_NodeType.ENTRANCE == nt;
-				case MAINLINE:
-					return R_NodeType.STATION == nt
-					    || R_NodeType.INTERSECTION == nt;
-				default:
-					return false;
-				}
-			}
-		};
-	}
-
-	/** Incident severity */
-	private final IncSeverity svr;
-
-	/** Maximum distance */
-	private final Distance max_dist;
+	/** DMS deploy message builder */
+	private final DmsDeployBuilder dms_builder;
 
 	/** Mapping of LCS array names to proposed indications */
 	private final HashMap<String, Integer []> indications =
@@ -175,7 +57,8 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 
 	/** Get the proposed MULTI for a DMS */
 	public MultiString getMulti(String dms) {
-		return messages.get(dms);
+		MultiString multi = messages.get(dms);
+		return (multi != null) ? multi : new MultiString("");
 	}
 
 	/** Mapping of DMS names to proposed page one graphics */
@@ -189,189 +72,59 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 
 	/** Create a new device deploy model */
 	public DeviceDeployModel(IncidentManager man, Incident inc) {
-		svr = IncidentHelper.getSeverity(inc);
-		max_dist = maxDistance(svr);
-		IncidentLoc loc = new IncidentLoc(inc);
-		CorridorBase cb = man.lookupCorridor(loc);
-		if (cb != null) {
-			Float mp = cb.calculateMilePoint(loc);
-			if (mp != null)
-				populateList(inc, cb, mp);
+		finder = new UpstreamDeviceFinder(man, inc);
+		ind_builder = new LcsIndicationBuilder(man, inc);
+		dms_builder = new DmsDeployBuilder(man, inc);
+		populateList();
+		// Already deployed signs should be blanked if not found
+		ArrayList<DMS> signs = IncidentHelper.getDeployedSigns(inc);
+		Iterator<DMS> it = signs.iterator();
+		while (it.hasNext())
+			addExistingDMS(it.next());
+	}
+
+	/** Populate list model with device deployments */
+	private void populateList() {
+		finder.findDevices();
+		Iterator<UpstreamDevice> it = finder.iterator();
+		while (it.hasNext()) {
+			UpstreamDevice ud = it.next();
+			Device dev = ud.device;
+			if (dev instanceof LCSArray)
+				addUpstreamLCS((LCSArray) dev, ud);
+			if (dev instanceof DMS)
+				addUpstreamDMS((DMS) dev, ud);
 		}
 	}
 
-	/** Populate list model with device deployments.
-	 * @param inc Incident.
-	 * @param cb Corridor where incident is located.
-	 * @param mp Relative mile point of incident. */
-	private void populateList(Incident inc, CorridorBase cb, float mp) {
-		Position pos = new Position(inc.getLat(), inc.getLon());
-		R_Node n = findNode(cb, mp, pos, inc);
-		LaneConfiguration config = cb.laneConfiguration(pos);
-		LcsDeployModel lcs_mdl = new LcsDeployModel(inc, config);
-		TreeMap<Distance, Device> devices = findDevices(cb, mp);
-		for (Distance up: devices.keySet()) {
-			Device dev = devices.get(up);
-			if (dev instanceof LCSArray) {
-				LCSArray lcs_a = (LCSArray) dev;
-				Integer[] ind = createIndications(cb, lcs_a,
-					up, lcs_mdl);
-				if (ind != null) {
-					addElement(lcs_a);
-					indications.put(lcs_a.getName(), ind);
-				}
-			}
-			if (dev instanceof DMS) {
-				DMS dms = (DMS) dev;
-				MultiString ms = createMulti(inc, dms, up, n);
-				if (ms != null) {
-					RasterGraphic rg = createGraphic(dms,
-						ms);
-					if (rg != null) {
-						addElement(dms);
-						messages.put(dms.getName(), ms);
-						graphics.put(dms.getName(), rg);
-					}
-				}
-			}
+	/** Add an upstream LCS array */
+	private void addUpstreamLCS(LCSArray lcs_array, UpstreamDevice ud) {
+		Integer[] ind = ind_builder.createIndications(lcs_array,
+			ud.distance);
+		if (ind != null) {
+			addElement(lcs_array);
+			indications.put(lcs_array.getName(), ind);
 		}
 	}
 
-	/** Find a node within 1 mile of incident (prefer pickable) */
-	private R_Node findNode(CorridorBase cb, float mp, Position pos,
-		Incident inc)
-	{
-		R_NodeType.Checker checker = getChecker(inc.getLaneType());
-		if (null == checker)
-			return null;
-		R_Node n = cb.findNearest(pos, checker, true);
-		if (n != null) {
-			Float lp = cb.calculateMilePoint(n.getGeoLoc());
-			if (lp != null && Math.abs(lp - mp) < 1)
-				return n;
-		}
-		n = cb.findNearest(pos, checker, false);
-		if (n != null) {
-			Float lp = cb.calculateMilePoint(n.getGeoLoc());
-			if (lp != null && Math.abs(lp - mp) < 1.5)
-				return n;
-		}
-		return null;
-	}
-
-	/** Find all devices upstream of a given point on a corridor */
-	private TreeMap<Distance, Device> findDevices(CorridorBase cb,
-		float mp)
-	{
-		TreeMap<Distance, Device> devices =
-			new TreeMap<Distance, Device>();
-		// Find LCS arrays
-		Iterator<LCSArray> lit = LCSArrayHelper.iterator();
-		while (lit.hasNext()) {
-			LCSArray lcs_a = lit.next();
-			GeoLoc loc = LCSArrayHelper.lookupGeoLoc(lcs_a);
-			Float lp = calculateMilePoint(cb, loc);
-			if (lp != null && mp > lp) {
-				Distance up = new Distance(mp - lp, MILES);
-				devices.put(up, lcs_a);
+	/** Add an upstream DMS */
+	private void addUpstreamDMS(DMS dms, UpstreamDevice ud) {
+		MultiString ms = dms_builder.createMulti(dms, ud, false);
+		if (ms != null) {
+			RasterGraphic rg = dms_builder.createGraphic(dms, ms);
+			if (rg != null) {
+				addElement(dms);
+				messages.put(dms.getName(), ms);
+				graphics.put(dms.getName(), rg);
 			}
 		}
-		// Find DMS
-		Iterator<DMS> dit = DMSHelper.iterator();
-		while (dit.hasNext()) {
-			DMS dms = dit.next();
-			if (DMSHelper.isHidden(dms) ||
-			    DMSHelper.isFailed(dms) ||
-			   !DMSHelper.isActive(dms))
-				continue;
-			GeoLoc loc = dms.getGeoLoc();
-			Float lp = calculateMilePoint(cb, loc);
-			if (lp != null && mp > lp) {
-				Distance up = new Distance(mp - lp, MILES);
-				devices.put(up, dms);
-			}
-		}
-		return devices;
 	}
 
-	/** Create the MULTI string for one DMS.
-	 * @param inc Incident.
-	 * @param dms Possible sign to deploy.
-	 * @param up Distance upstream from incident.
-	 * @param n Nearest node to incident.
-	 * @return MULTI string for DMS, or null. */
-	private MultiString createMulti(Incident inc, DMS dms, Distance up,
-		R_Node n)
-	{
-		if (n == null)
-			return null;
-		if (up.m() > max_dist.m())
-			return null;
-		IncRange rng = getRange(up);
-		if (null == rng)
-			return null;
-		IncDescriptor dsc = IncDescriptorHelper.match(inc);
-		if (null == dsc)
-			return null;
-		IncLocator iloc = IncLocatorHelper.match(rng, false,
-			n.getPickable());
-		if (null == iloc)
-			return null;
-		IncAdvice adv = IncAdviceHelper.match(rng, inc);
-		if (null == adv)
-			return null;
-		String mdsc = checkMulti(dms, dsc.getMulti(), dsc.getAbbrev(),
-			up, n);
-		if (null == mdsc)
-			return null;
-		String mloc = checkMulti(dms, iloc.getMulti(), iloc.getAbbrev(),
-			up, n);
-		if (null == mloc)
-			return null;
-		String madv = checkMulti(dms, adv.getMulti(), adv.getAbbrev(),
-			up, n);
-		if (null == madv)
-			return null;
-		LocMultiBuilder lmb = new LocMultiBuilder(n, up);
-		new MultiString(mdsc).parse(lmb);
-		lmb.addLine(null);
-		new MultiString(mloc).parse(lmb);
-		lmb.addLine(null);
-		new MultiString(madv).parse(lmb);
-		return lmb.toMultiString();
-	}
-
-	/** Check if MULTI string or abbreviation will fit on a DMS */
-	private String checkMulti(DMS dms, String ms, String abbrev,
-		Distance up, R_Node n)
-	{
-		String res = checkMulti(dms, ms, up, n);
-		return (res != null) ? res : checkMulti(dms, abbrev, up, n);
-	}
-
-	/** Check if MULTI string will fit on a DMS */
-	private String checkMulti(DMS dms, String ms, Distance up, R_Node n) {
-		if (null == ms)
-			return null;
-		LocMultiBuilder lmb = new LocMultiBuilder(n, up);
-		new MultiString(ms).parse(lmb);
-		MultiString multi = lmb.toMultiString();
-		if (createGraphic(dms, multi) != null)
-			return ms;
-		else
-			return null;
-	}
-
-	/** Create the page one graphic for a MULTI string */
-	private RasterGraphic createGraphic(DMS dms, MultiString ms) {
-		try {
-			RasterGraphic[] pixmaps = DMSHelper.createPixmaps(dms,
-				ms);
-			return pixmaps[0];
-		}
-		catch (Exception e) {
-			// could be IndexOutOfBounds or InvalidMessage
-			return null;
+	/** Add an existing (already deployed) DMS, to be blanked */
+	private void addExistingDMS(DMS dms) {
+		if (!messages.containsKey(dms.getName())) {
+			addElement(dms);
+			messages.put(dms.getName(), new MultiString(""));
 		}
 	}
 }
