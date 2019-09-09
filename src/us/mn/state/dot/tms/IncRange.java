@@ -26,37 +26,31 @@ public enum IncRange {
 	middle, // 2
 	far;    // 3
 
+	/** Values array */
+	static private final IncRange[] VALUES = values();
+
 	/** Get a range from an ordinal value */
 	static public IncRange fromOrdinal(int o) {
-		if (o >= 0 && o < values().length)
-			return values()[o];
-		else
-			return null;
+		return (o >= 0 && o < VALUES.length) ? VALUES[o] : null;
 	}
 
 	/** Get a range from a number of exits */
 	static public IncRange fromExits(int exits) {
-		switch (exits) {
-		case 0: return IncRange.ahead;
-		case 1: return IncRange.near;
-		case 2:
-		case 3:
-		case 4: return IncRange.middle;
-		case 5:
-		case 6:
-		case 7:
-		case 8: return IncRange.far;
-		default: return null;
+		for (IncRange range: VALUES) {
+			if (exits <= range.getMaxExits())
+				return range;
 		}
+		return null;
 	}
 
 	/** Get a maximum number of exits */
 	public int getMaxExits() {
 		switch (this) {
-		case near: return 1;
-		case middle: return 4;
-		case far: return 8;
-		default: return 0;
+			case ahead:  return 0;
+			case near:   return 1;
+			case middle: return 5;
+			case far:    return 9;
 		}
+		return 0; // unreachable
 	}
 }
