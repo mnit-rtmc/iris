@@ -125,6 +125,13 @@ Range          | from sign to incident: `ahead`, `near`, `middle` or `far`
 Impacted Lanes | number of non-shoulder lanes, (if blank, any number matches)
 Open Lanes     | number of non-shoulder lanes *not* impacted
 
+## Dedicated Purpose Signs
+
+*Dedicated purpose* signs normally cannot be used for incidents.  The only
+exception is `tolling` signs — they are used if the locator is not *branched*
+and the impact is `lanes_blocked`, `left_lanes_blocked`, `lanes_affected` or
+`left_lanes_affected`.
+
 ## Clearing
 
 When a `major` severity incident is cleared, a new message will be sent to each

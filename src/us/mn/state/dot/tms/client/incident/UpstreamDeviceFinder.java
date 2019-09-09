@@ -19,12 +19,14 @@ import java.util.Iterator;
 import java.util.TreeSet;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.CorridorFinder;
+import us.mn.state.dot.tms.DevicePurpose;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
+import us.mn.state.dot.tms.IncImpact;
 import us.mn.state.dot.tms.IncSeverity;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
@@ -98,6 +100,12 @@ public class UpstreamDeviceFinder {
 	/** Corridor finder */
 	private final CorridorFinder<R_Node> finder;
 
+	/** Incident impact */
+	private final IncImpact impact;
+
+	/** Maximum exits for DMS */
+	private final int maximum_exits;
+
 	/** Set of all corridor scanners */
 	private final TreeSet<CorScanner> scanners = new TreeSet<CorScanner>();
 
@@ -105,12 +113,10 @@ public class UpstreamDeviceFinder {
 	private final TreeSet<UpstreamDevice> devices =
 		new TreeSet<UpstreamDevice>();
 
-	/** Maximum exits for DMS */
-	private final int maximum_exits;
-
 	/** Create new upstream device finder */
 	public UpstreamDeviceFinder(CorridorFinder<R_Node> cf, Incident inc) {
 		finder = cf;
+		impact = IncImpact.getImpact(inc);
 		maximum_exits = maximum_exits(inc);
 		scanners.add(new CorScanner(new IncidentLoc(inc), 0,
 			new Distance(0f, MILES)));
@@ -134,7 +140,11 @@ public class UpstreamDeviceFinder {
 		return null;
 	}
 
-	/** Find all devices upstream of a given point on a corridor */
+	/** Find all devices upstream of a given point on a corridor.
+	 * @param cb Corridor to scan.
+	 * @param mp Mile point to end scan.
+	 * @param num_exits Number of exits downstream of corridor.
+	 * @param dist Distance downstream of corridor. */
 	private void findDevices(CorridorBase<R_Node> cb, float mp,
 		int num_exits, Distance dist)
 	{
@@ -161,17 +171,45 @@ public class UpstreamDeviceFinder {
 		}
 	}
 
-	/** Find DMS upstream of a given point on a corridor */
+	/** Check if a DMS is deployable for the incident */
+	private boolean isDeployable(DMS dms, boolean branched) {
+		if (DMSHelper.isHidden(dms) ||
+		    DMSHelper.isFailed(dms) ||
+		   !DMSHelper.isActive(dms))
+			return false;
+		switch (DevicePurpose.fromOrdinal(dms.getPurpose())) {
+			case GENERAL: return true;
+			case TOLLING: return isTollingDeployable(branched);
+			default: return false;
+		}
+	}
+
+	/** Check if a TOLLING sign is deployable */
+	private boolean isTollingDeployable(boolean branched) {
+		if (branched)
+			return false;
+		switch (impact) {
+			case lanes_blocked: return true;
+			case left_lanes_blocked: return true;
+			case lanes_affected: return true;
+			case left_lanes_affected: return true;
+			default: return false;
+		}
+	}
+
+	/** Find DMS upstream of a given point on a corridor.
+	 * @param cb Corridor to scan.
+	 * @param mp Mile point to end scan.
+	 * @param num_exits Number of exits downstream of corridor.
+	 * @param dist Distance downstream of corridor. */
 	private void findDMSs(CorridorBase<R_Node> cb, float mp, int num_exits,
 		Distance dist)
 	{
+		boolean branched = (num_exits > 0);
 		Iterator<DMS> dit = DMSHelper.iterator();
 		while (dit.hasNext()) {
 			DMS dms = dit.next();
-			if (DMSHelper.isPurpose(dms) ||
-			    DMSHelper.isHidden(dms) ||
-			    DMSHelper.isFailed(dms) ||
-			   !DMSHelper.isActive(dms))
+			if (!isDeployable(dms, branched))
 				continue;
 			GeoLoc loc = dms.getGeoLoc();
 			UpstreamDevice ed = UpstreamDevice.create(dms, cb, mp,
