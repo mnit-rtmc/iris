@@ -119,7 +119,7 @@ configurable advice table contains fields which are matched to the incident.
 
 Field          | Description
 ---------------|---------------------------------
-Impact         | code; see [Impact](#impact)
+Impact         | incident [impact](#impact)
 Lane Type      | `mainline`, `exit`, `merge` or `CD road`
 Range          | from sign to incident: `ahead`, `near`, `middle` or `far`
 Impacted Lanes | number of non-shoulder lanes, (if blank, any number matches)
