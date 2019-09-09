@@ -51,9 +51,9 @@ import us.mn.state.dot.tms.Encoding;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.UserProperty;
 import us.mn.state.dot.tms.client.camera_test.SimpleVideoComponent;
+import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.Icons;
-import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.OSUtils;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -65,7 +65,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  * @author Douglas Lau
  * @author Travis Swanston
  */
-public class StreamPanel extends JPanel {
+public class StreamPanel2 extends AbstractForm {
 
 	/** Status panel height */
 	static private final int HEIGHT_STATUS_PNL = 20;
@@ -155,14 +155,7 @@ public class StreamPanel extends JPanel {
 		new HashSet<StreamStatusListener>();
 	
     private static Pipeline pipe;
-    
-    private CameraPTZ ptz;
-    
-    private Session session;
-    
-	/** Smart desktop */
-	private SmartDesktop desktop;
-    
+
 	/**
 	 * Create a new stream panel.
 	 * @param req The VideoRequest object to use.
@@ -174,10 +167,11 @@ public class StreamPanel extends JPanel {
 	 *             probably want autoplay to be true.
 	 * @param auto Automatically play upon setCamera()?
 	 */
-	public StreamPanel(VideoRequest req, CameraPTZ cam_ptz, Session s,
+	public StreamPanel2(VideoRequest req, CameraPTZ cam_ptz, Session s,
 		boolean ctrl, boolean auto)
 	{
-		super(new GridBagLayout());
+		//super(new GridBagLayout());
+		super("Stream Panel " + cam_ptz.getCamera().getName());
 		video_req = req;
 		external_viewer = (s == null) ? null
 			: UserProperty.getExternalVideoViewer(s.getProperties());
@@ -199,15 +193,18 @@ public class StreamPanel extends JPanel {
 		int pnlHeight = vsz.height + HEIGHT_STATUS_PNL
 			+ (ctrl ? HEIGHT_CONTROL_PNL : 0);
 		
-		setPreferredSize(UI.dimension(vsz.width, pnlHeight));
-		setMinimumSize(UI.dimension(vsz.width, pnlHeight));
-		setMaximumSize(UI.dimension(vsz.width, pnlHeight));
+		int w = (int)(vsz.width*1.1);
+		int h = (int)(pnlHeight*1.55);
+
+		setPreferredSize(UI.dimension(w, h));
+		setMinimumSize(UI.dimension(w, h));
+		setMaximumSize(UI.dimension(w, h));
 		updateButtonState();
 		
-		ptz = cam_ptz;
-		session = s;
-		if (session != null)
-			desktop = session.getDesktop();
+		add(new CamControlPanel(cam_ptz), BorderLayout.SOUTH);
+
+		setCamera(cam_ptz.getCamera());
+		
 
 	}
 
@@ -215,7 +212,7 @@ public class StreamPanel extends JPanel {
 	 * Create a new stream panel with autoplay, no stream controls, and
 	 * no mouse PTZ.
 	 */
-	public StreamPanel(VideoRequest req) {
+	public StreamPanel2(VideoRequest req) {
 		this(req, null, null, false, true);
 	}
 
@@ -306,8 +303,7 @@ public class StreamPanel extends JPanel {
 			});
 		}
 		else if (sc == StreamCommand.PLAY_EXTERNAL)
-			//launchExternalViewer(camera);
-			desktop.showSecondScreen(new StreamPanel2(video_req, ptz, session, false, true));
+			launchExternalViewer(camera);
 	}
 
 	/**
@@ -402,8 +398,7 @@ public class StreamPanel extends JPanel {
 	        
 
 	        pipe = (Pipeline)Gst.parseLaunch("rtspsrc location=" + c.getEncoderType().getUriScheme() + 
-	        		c.getEncoder() + c.getEncoderType().getUriPath() + " protocols=tcp ! rtph264depay ! avdec_h264 ! videoconvert ! appsink name=appsink");
-	        
+	        		c.getEncoder() + c.getEncoderType().getUriPath() + " ! rtph264depay ! avdec_h264 ! videoconvert ! appsink name=appsink");
 //	        pipe = (Pipeline)Gst.parseLaunch("rtspsrc location=rtsp://10.1.4.183/axis-media/media.amp ! rtph264depay ! avdec_h264 ! videoconvert ! appsink name=appsink");
 	        SimpleVideoComponent vc = new SimpleVideoComponent((AppSink) pipe.getElementByName("appsink"));
            

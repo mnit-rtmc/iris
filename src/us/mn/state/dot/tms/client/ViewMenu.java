@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.client.weather.WeatherSensorForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IMenu;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
+import us.mn.state.dot.tms.client.camera_test.CameraTest;
 
 /**
  * ViewMenu is a JMenu which contains items to view various TMS object types.

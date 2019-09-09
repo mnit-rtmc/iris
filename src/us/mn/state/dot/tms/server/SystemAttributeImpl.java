@@ -53,7 +53,7 @@ public class SystemAttributeImpl extends BaseObjectImpl
 
 	/** Validate the database version */
 	static private void validateDatabaseVersion() {
-		String c_version = "@@VERSION@@";
+		String c_version = "5.2.0"; // "@@VERSION@@";
 		String db_version = SystemAttrEnum.DATABASE_VERSION.getString();
 		if (!validateVersions(c_version, db_version)) {
 			StringBuilder b = new StringBuilder();

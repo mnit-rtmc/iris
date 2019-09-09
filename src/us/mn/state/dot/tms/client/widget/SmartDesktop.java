@@ -17,12 +17,14 @@
 package us.mn.state.dot.tms.client.widget;
 
 import java.awt.Container;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyVetoException;
 import java.io.IOException;
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
+import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
@@ -99,6 +101,20 @@ public class SmartDesktop extends JDesktopPane {
 			frame.getSize()));
 		frame.show();
 	}
+	
+	/** Show the specified form */
+	public void showSecondScreen(AbstractForm form) {
+//		JInternalFrame frame = findFrame(form.getTitle());
+//		if (frame != null)
+//			selectFrame(frame);
+//		else
+//			frame = addForm(form);
+		JFrame frame = addFormSecondScreen(form);
+		frame.setLocation(new Point(2200, 400));
+				//screen[1].getCenteredLocation(this,
+			//frame.getSize()));
+		frame.setVisible(true);
+	}
 
 	/** Find a frame with a specific title */
 	private JInternalFrame findFrame(String title) {
@@ -115,6 +131,33 @@ public class SmartDesktop extends JDesktopPane {
 		JInternalFrame frame = createFrame(form);
 		add(frame, FRAME_LAYER);
 		frame.pack();
+		return frame;
+	}
+	
+	/** Add an abstract form to the desktop pane */
+	private JFrame addFormSecondScreen(AbstractForm form) {
+		form.initialize();
+		JFrame frame = createFrameSecondScreen(form);
+		//add(frame, FRAME_LAYER);
+		frame.pack();
+		return frame;
+	}
+	
+	/** Create a new internal frame */
+	private JFrame createFrameSecondScreen(final AbstractForm form) {
+		final JFrame frame = new JFrame();
+		frame.setTitle(form.getTitle());
+		frame.setResizable(form.isResizable());
+//		frame.setClosable(true);
+//		frame.setIconifiable(true);
+//		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+//		frame.addInternalFrameListener(new InternalFrameAdapter() {
+//			public void internalFrameClosed(InternalFrameEvent e) {
+//				smartDesktopRequestFocus();	// see note
+//				form.dispose();
+//			}
+//		});
+		frame.setContentPane(form);
 		return frame;
 	}
 
