@@ -88,6 +88,8 @@ public class UpstreamDevice implements Comparable<UpstreamDevice> {
 
 	/** Get the incident range */
 	public IncRange range() {
-		return IncRange.fromExits(exits);
+		// If distance is less than approx. 1 mile, allow `ahead` range
+		boolean ahead_dist = distance.asFloat(MILES) < 0.9f;
+		return IncRange.fromExits(exits, ahead_dist);
 	}
 }

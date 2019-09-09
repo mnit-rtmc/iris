@@ -41,12 +41,12 @@ defined ranges, each with a number of freeway *exits* in between.  For this
 purpose, exits which are part of the same interchange are treated as one (for
 example, both off-ramps of a cloverleaf).
 
-Range    | Exits
----------|------
-`ahead`  |     0
-`near`   |     1
-`middle` |   2-5
-`far`    |   6-9
+Range    | Exits | Notes
+---------|-------|-------------------------------
+`ahead`  |     0 | Distance also less than 1 mile
+`near`   |   0-1 |
+`middle` |   2-5 |
+`far`    |   6-9 |
 
 ## Severity
 

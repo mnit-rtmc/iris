@@ -34,13 +34,22 @@ public enum IncRange {
 		return (o >= 0 && o < VALUES.length) ? VALUES[o] : null;
 	}
 
-	/** Get a range from a number of exits */
-	static public IncRange fromExits(int exits) {
+	/** Get range to an incident.
+	 * @param exits number of exits.
+	 * @param ahead_dist Distance below `ahead` threshold. */
+	static public IncRange fromExits(int exits, boolean ahead_dist) {
 		for (IncRange range: VALUES) {
-			if (exits <= range.getMaxExits())
+			if (range.isWithin(exits, ahead_dist))
 				return range;
 		}
 		return null;
+	}
+
+	/** Check if a number of exits is within range */
+	private boolean isWithin(int exits, boolean ahead_dist) {
+		// Only within `ahead` range if distance is below threshold
+		return (exits <= getMaxExits()) &&
+		       (ahead_dist || this != ahead);
 	}
 
 	/** Get a maximum number of exits */
