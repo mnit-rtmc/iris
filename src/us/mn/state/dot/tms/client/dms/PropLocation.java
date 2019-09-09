@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,13 +20,10 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JTextArea;
-import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.PresetComboRenderer;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
@@ -45,43 +42,6 @@ public class PropLocation extends LocationPanel {
 
 	/** Notes text area */
 	private final JTextArea notes_txt = new JTextArea(11, 24);
-
-	/** Numbered graphic model */
-	private final NumberedGraphicModel num_graph_mdl;
-
-	/** Graphic combo box model */
-	private final IComboBoxModel<Graphic> graphic_mdl;
-
-	/** Graphic action */
-	private final IAction graphic_act = new IAction("dms.static.graphic") {
-		protected void doActionPerformed(ActionEvent e) {
-			dms.setStaticGraphic(graphic_mdl.getSelectedProxy());
-		}
-		@Override
-		protected void doUpdateSelected() {
-			graphic_mdl.setSelectedItem(dms.getStaticGraphic());
-		}
-	};
-
-	/** Static image graphic combo box */
-	private final JComboBox<Graphic> graphic_cbx = new JComboBox<Graphic>();
-
-	/** External beacon combo box model */
-	private final IComboBoxModel<Beacon> beacon_mdl;
-
-	/** External beacon action */
-	private final IAction beacon_act = new IAction("dms.beacon.ext") {
-		protected void doActionPerformed(ActionEvent e) {
-			dms.setBeacon(beacon_mdl.getSelectedProxy());
-		}
-		@Override
-		protected void doUpdateSelected() {
-			beacon_mdl.setSelectedItem(dms.getBeacon());
-		}
-	};
-
-	/** External beacon combo box */
-	private final JComboBox<Beacon> beacon_cbx = new JComboBox<Beacon>();
 
 	/** Camera preset combo box model */
 	private final IComboBoxModel<CameraPreset> preset_mdl;
@@ -127,9 +87,6 @@ public class PropLocation extends LocationPanel {
 	public PropLocation(Session s, DMS sign) {
 		super(s);
 		dms = sign;
-		num_graph_mdl = NumberedGraphicModel.create(session);
-		graphic_mdl = new IComboBoxModel<Graphic>(num_graph_mdl);
-		beacon_mdl = new IComboBoxModel<Beacon>(state.getBeaconModel());
 		preset_mdl = new IComboBoxModel<CameraPreset>(
 			state.getCamCache().getPresetModel());
 		gps_pnl = new GpsPanel(s, sign);
@@ -139,11 +96,6 @@ public class PropLocation extends LocationPanel {
 	@Override
 	public void initialize() {
 		super.initialize();
-		graphic_cbx.setModel(graphic_mdl);
-		graphic_cbx.setAction(graphic_act);
-		graphic_cbx.setRenderer(new GraphicListCellRenderer());
-		beacon_cbx.setModel(beacon_mdl);
-		beacon_cbx.setAction(beacon_act);
 		preset_cbx.setModel(preset_mdl);
 		preset_cbx.setAction(preset_act);
 		preset_cbx.setRenderer(new PresetComboRenderer());
@@ -151,20 +103,10 @@ public class PropLocation extends LocationPanel {
 		add("device.notes");
 		add(notes_txt, Stretch.DOUBLE);
 		add(gps_pnl, Stretch.CENTER);
-		add("dms.beacon.ext");
-		add(beacon_cbx);
-		add("dms.static.graphic");
-		add(graphic_cbx, Stretch.TALL);
 		add("camera.preset");
 		add(preset_cbx, Stretch.LAST);
 		add(new JButton(controller), Stretch.RIGHT);
 		setGeoLoc(dms.getGeoLoc());
-	}
-
-	/** Dispose of the panel */
-	@Override
-	public void dispose() {
-		num_graph_mdl.dispose();
 	}
 
 	/** Create the widget jobs */
@@ -185,8 +127,6 @@ public class PropLocation extends LocationPanel {
 		super.updateEditMode();
 		gps_pnl.updateEditMode();
 		notes_txt.setEnabled(canWrite("notes"));
-		graphic_act.setEnabled(canWrite("staticGraphic"));
-		beacon_act.setEnabled(canWrite("beacon"));
 		preset_act.setEnabled(canWrite("preset"));
 	}
 
@@ -196,10 +136,6 @@ public class PropLocation extends LocationPanel {
 			controller.setEnabled(dms.getController() != null);
 		if (a == null || a.equals("notes"))
 			notes_txt.setText(dms.getNotes());
-		if (null == a || a.equals("staticGraphic"))
-			graphic_act.updateSelected();
-		if (a == null || a.equals("beacon"))
-			beacon_act.updateSelected();
 		if (a == null || a.equals("preset"))
 			preset_act.updateSelected();
 	}

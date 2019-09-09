@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.client.incident;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LocModifier;
-import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.RoadAffixHelper;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.utils.MultiBuilder;
@@ -61,15 +61,15 @@ public class LocMultiBuilder extends MultiBuilder {
 		}
 	}
 
-	/** Location of r_node */
+	/** Location of incident */
 	private final GeoLoc loc;
 
 	/** Distance upstream of incident */
 	private final Distance up;
 
 	/** Create a new location MULTI builder */
-	public LocMultiBuilder(R_Node n, Distance u) {
-		loc = n.getGeoLoc();
+	public LocMultiBuilder(GeoLoc l, Distance u) {
+		loc = l;
 		up = u;
 	}
 
@@ -108,14 +108,20 @@ public class LocMultiBuilder extends MultiBuilder {
 
 	/** Add cross-street name */
 	private void addCrossStreet() {
-		String s = loc.getCrossStreet().getName().toUpperCase();
-		addSpan(RoadAffixHelper.replace(s, true));
+		Road xstreet = loc.getCrossStreet();
+		if (xstreet != null) {
+			String s = xstreet.getName().toUpperCase();
+			addSpan(RoadAffixHelper.replace(s, true));
+		}
 	}
 
 	/** Add cross-street abbreviation */
 	private void addCrossAbbrev() {
-		String s = loc.getCrossStreet().getName().toUpperCase();
-		addSpan(RoadAffixHelper.replace(s, false));
+		Road xstreet = loc.getCrossStreet();
+		if (xstreet != null) {
+			String s = xstreet.getName().toUpperCase();
+			addSpan(RoadAffixHelper.replace(s, false));
+		}
 	}
 
 	/** Add miles upstream */

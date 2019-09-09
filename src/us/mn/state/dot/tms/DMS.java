@@ -39,6 +39,12 @@ public interface DMS extends Device {
 	/** Get static graphic (hybrid sign) */
 	Graphic getStaticGraphic();
 
+	/** Set device purpose (ordinal of DevicePurpose) */
+	void setPurpose(int p);
+
+	/** Get device purpose (ordinal of DevicePurpose) */
+	int getPurpose();
+
 	/** Set external beacon */
 	void setBeacon(Beacon b);
 

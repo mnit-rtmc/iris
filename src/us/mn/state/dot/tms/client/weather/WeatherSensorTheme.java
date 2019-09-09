@@ -18,7 +18,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.awt.Color;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.ToolTipBuilder;
 import us.mn.state.dot.tms.client.map.MapObject;

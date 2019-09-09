@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2016  SRF Consulting Group
+ * Copyright (C) 2015-2019  SRF Consulting Group
  * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
@@ -103,7 +103,9 @@ public class GpsLocationProperty extends SierraGxProperty {
 	 */
 	@Override
 	protected boolean parseResponse(String resp) throws IOException {
-		Integer lk = parseInteger("GPS Fix=", resp);
+		Integer lk = parseInteger("GNSS Fix=", resp);
+		if (lk == null)
+			lk = parseInteger("GPS Fix=", resp);
 		if (lk != null)
 			gps_lock = (lk != 0);
 		Double lt = parseDouble("Latitude=", resp);

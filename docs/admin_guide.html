@@ -61,45 +61,21 @@
     <h3><a href="#incident">Incident Management</a></h3>
     <h3><a href="#plan_schedule">Plans and Schedules</a></h3>
     <h3><a href="#metering_strategies">Ramp Metering Strategies</a></h3>
-    <h3><a href="#travel_time">Travel Time Estimation</a></h3>
-    <h3><a href="#slow">Slow Traffic Warning</a></h3>
-    <h3><a href="#tolling">Tolling</a></h3>
-    <h3><a href="#parking">Parking Area Availability</a></h3>
-    <h3><a href="#vsa">Variable Speed Advisory</a></h3>
-    <h3><a href="#spellchecker">Spell Checker</a></h3>
+    <h3><a href="travel_time.html">Travel Time Estimation</a></h3>
+    <h3><a href="slow_warning.html">Slow Traffic Warning</a></h3>
+    <h3><a href="tolling.html">Tolling</a></h3>
+    <h3><a href="parking_areas.html">Parking Area Availability</a></h3>
+    <h3><a href="vsa.html">Variable Speed Advisory</a></h3>
   </div>
-  <h2><a id="troubleshooting_link" href="#troubleshooting">Troubleshooting</a></h2>
-  <div id="troubleshooting_div">
-    <h3><a href="#error_logs">Error Logs</a></h3>
-    <h3><a href="#xml_output">Realtime XML Output</a></h3>
-    <h3><a href="#event_tables">Database Event Tables</a></h3>
-    <h3><a href="#debug_logs">Debug Trace Logs</a></h3>
-  </div>
-  <h2><a id="maintenance_link" href="#maintenance">Maintenance</a></h2>
-  <div id="maintenance_div">
-    <h3><a href="#database_backups">Database Backups</a></h3>
-    <h3><a href="#iris_upgrades">IRIS Upgrades</a></h3>
-    <h3><a href="#system_updates">System Software Updates</a></h3>
-    <h3><a href="#monitoring_logs">Monitoring Logs</a></h3>
-  </div>
-  <h2><a id="development_link" href="#development">Development</a></h2>
-  <div id="development_div">
-    <h3><a href="#building">Building</a></h3>
-    <h3><a href="#history">History</a></h3>
-    <h3><a href="#future_plans">Future Plans</a></h3>
-    <h3><a href="#contributing">Contributing</a></h3>
-    <h3><a href="#coding_style">Coding Style</a></h3>
-  </div>
-  <h2><a id="stepbystep_link" href="#stepbystep">Step-by-step</a></h2>
-  <div id="stepbystep_div">
-    <h3><a href="#adddms">Create a DMS, Comm Link, and Controller</a></h3>
-    <h3><a href="#createplan">Create a Plan to Activate DMS Messages</a></h3>
-  </div>
+  <h2><a id="troubleshooting_link" href="troubleshooting.html">Troubleshooting</a></h2>
+  <h2><a id="maintenance_link" href="maintenance.html">Maintenance</a></h2>
+  <h2><a id="development_link" href="development.html">Development</a></h2>
+  <h2><a id="stepbystep_link" href="step_by_step.html">Step-by-Step</a></h2>
 </nav>
 
 <main class="mainbar">
 <header>
-<div id="stamp">15 Mar 2019</div>
+<div id="stamp">9 Sep 2019</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -308,10 +284,10 @@
 	</li>
 	<li>Coördinated <a href="#metering_strategies">ramp metering strategies
 	    </a></li>
-	<li><a href="#travel_time">Travel time</a> estimation</li>
-	<li><a href="#slow">Slow traffic warning</a></li>
-	<li><a href="#tolling">Toll</a> lane operation</li>
-	<li><a href="#parking">Parking area</a> availability</li>
+	<li><a href="travel_time.html">Travel time</a> estimation</li>
+	<li><a href="slow_warning.html">Slow traffic warning</a></li>
+	<li><a href="tolling.html">Toll</a> lane operation</li>
+	<li><a href="parking_areas.html">Parking area</a> availability</li>
 </ul>
 
 <h2 id="installation">Installation</h2>
@@ -1959,6 +1935,45 @@ FIXME
 	messages displayed on a sign.
 </p>
 
+<h4 id="spellchecker">Spell Checker</h4>
+<aside>
+	Select <span class="menu">View ➔ Message Signs ➔ Dictionary</span> menu
+	item
+</aside>
+<p>
+	The spell checker verifies <a href="#dms">DMS</a> messages when an
+	operator presses the <b>Send</b> button.
+	It uses two word lists: <b>Allowed</b> and <b>Banned</b>.
+</p>
+<p>
+	Allowed word checking is controlled by <a href="#sys_attr"><code>
+	dict_allowed_scheme</code></a>:
+</p>
+<dl>
+	<dt>0</dt>
+	<dd>Disable checking allowed word list</dd>
+	<dt>1</dt>
+	<dd>Suggest replacement of words not in allowed list</dd>
+	<dt>2</dt>
+	<dd>Reject messages containing words not in allowed list</dd>
+</dl>
+<p>
+	Similarly, <a href="#sys_attr"><code>dict_banned_scheme</code></a>
+	controls banned word functionality:
+</p>
+<dl>
+	<dt>0</dt>
+	<dd>Disable checking banned word list</dd>
+	<dt>1</dt>
+	<dd>Suggest replacement of words in banned list</dd>
+	<dt>2</dt>
+	<dd>Reject messages containing words in banned list</dd>
+</dl>
+<p>
+	When appropriate, a form appears to suggest changes or inform the
+	operator of a rejected message.
+</p>
+
 <h3 id="lcs">Lane-use Control Signs (LCS)</h3>
 <aside>
 	Select <span class="menu">View ➔ Lane Use ➔ LCS</span> menu item
@@ -1975,7 +1990,7 @@ FIXME
 	An <em>intelligent</em> LCS is a full-matrix color <a href="#dms">DMS</a>
 	which is mounted directly over a lane of traffic.
 	In addition to being used as an LCS, it can display
-	<a href="#vsa">variable speed advisories</a>, or any operator-defined
+	<a href="vsa.html">variable speed advisories</a>, or any operator-defined
 	message as a regular DMS.
 </p>
 
@@ -2075,7 +2090,7 @@ FIXME
 	Every 30 seconds, an XML file is generated containing the most recent
 	sample data from all defined detectors.
 	The file is called <code>det_sample.xml.gz</code>, and it is written to
-	the <a href="#xml_output">XML output directory</a>
+	the <a href="troubleshooting.html#xml-output">XML output directory</a>
 </p>
 
 <h4>Detector Setup</h4>
@@ -2203,7 +2218,7 @@ FIXME
 </p>
 <p>
 	When a detector is failed (<b>auto fail</b> or <b>force fail</b>), its
-	data will not be used for <a href="#travel_time">travel time</a>,
+	data will not be used for <a href="travel_time.html">travel time</a>,
 	<a href="#ramp_meters">ramp metering</a>, etc.
 	In that case, <b>fake</b> detection could be used &mdash; this field can
 	contain one or more other detector names, separated by spaces.
@@ -2874,7 +2889,7 @@ FIXME
 	A tag reader is a sensor for in-vehicle transponders (tags).
 	When a tag is read, an event is logged in the database.
 	The event includes the date and time, tag ID, toll zone and tollway.
-	This information can be used for <a href="#tolling">tolling</a>
+	This information can be used for <a href="tolling.html">tolling</a>
 	operation.
 </p>
 
@@ -2999,7 +3014,8 @@ FIXME
 	incidents within IRIS.
 	Traffic incidents have several attributes, including location, type,
 	detail, camera and lane impact.
-	Active incidents are written to an <a href="#xml_output">XML file</a>,
+	Active incidents are written to an
+	<a href="troubleshooting.html#xml-output">XML file</a>,
 	which can be processed by external systems.
 </p>
 <h4>Creating an Incident</h4>
@@ -3019,8 +3035,8 @@ FIXME
 	selected.
 	The lane impact is represented by boxes for each lane at the incident
 	location, including both shoulders.
-	Each lane can be marked clear (default), blocked (red) or partially
-	blocked (yellow) by clicking on the box.
+	Each lane can be marked clear (default), blocked (red) or affected
+	(yellow) by clicking on the box.
 	Once the attributes have been set, press the <b>Log</b> button to create
 	the incident.
 	A triangular icon will appear on the map pointing in the direction of
@@ -3045,152 +3061,9 @@ FIXME
 	the incident.
 	The list may include <a href="#lcs">Lane-use control signals</a> or
 	<a href="#dms">Dynamic Message Signs</a>.
-	All DMS within the range of the incident are checked.
-	Each of these DMS will be deployed if matching
-	<a href="#inc_descriptor">descriptor</a>, <a href="#inc_locator">locator
-	</a> and <a href="#inc_advice">advice</a> are found.
+	All DMS within the range of the incident are
+	<a href="incident_dms.html">checked</a>.
 </p>
-<h5 id="inc_descriptor">Incident Descriptor</h5>
-<aside>
-	Select <span class="menu">View ➔ Incident ➔ Incident Descriptor</span>
-	menu item
-</aside>
-<p>
-	An incident matches a descriptor only if all the attributes match.
-	Each matching descriptor will be checked to see if the
-	<a href="#multi">MULTI</a> string can be rendered on the DMS.
-	If the MULTI string is too wide for the sign, the <b>abbrev</b> MULTI
-	string is used instead.
-</p>
-<dl>
-	<dt>Event Type</dt>
-	<dd>CRASH, STALL, ROAD WORD, HAZARD</dd>
-	<dt>Lane Type</dt>
-	<dd>mainline, exit, merge, CD lane</dd>
-	<dt>Detail</dt>
-	<dd>animal, debris, ice, etc.</dd>
-	<dt>Cleared Flag</dt>
-	<dd>yes / no</dd>
-</dl>
-<h5 id="inc_locator">Incident Locator</h5>
-<aside>
-	Select <span class="menu">View ➔ Incident ➔ Incident Locator</span> menu
-	item
-</aside>
-<p>
-	The incident is associated with the nearest <em>pickable</em>
-	<a href="#r_node">r_node</a>.
-	If the distance to that node is less than 1 mile, it can be used as a
-	<em>locator</em>.
-	If not, the nearest <em>non-pickable</em> r_node is found.
-	It can be used if distance is less than 1 mile.
-</p>
-<p>
-	An incident matches a locator only if all the attributes match.
-	Each matching locator will be checked to see if the
-	<a href="#multi">MULTI</a> string (or abbrev) can be rendered on the
-	DMS.
-</p>
-<dl>
-	<dt>Range</dt>
-	<dd>near (up to 1.5 mi), middle (1.5 to 5 mi), far (5 to 10 mi)</dd>
-	<dt>Branched</dt>
-	<dd>no / yes</dd>
-	<dt>Pickable</dt>
-	<dd>no / yes</dd>
-</dl>
-<p>
-	One "<a href="#multi">MULTI</a>-like" tag is defined for incident
-	locators.
-</p>
-<table>
-	<tr>
-		<th>Tag Value</th>
-		<th>Description</th>
-	</tr>
-	<tr>
-		<td>[locrn]</td>
-		<td>Road name</td>
-	</tr>
-	<tr>
-		<td>[locrd]</td>
-		<td>Road direction</td>
-	</tr>
-	<tr>
-		<td>[locmd]</td>
-		<td>Location modifier (AT, N OF, S OF, etc.)</td>
-	</tr>
-	<tr>
-		<td>[locxn]</td>
-		<td>Cross-street name</td>
-	</tr>
-	<tr>
-		<td>[locxa]</td>
-		<td>Cross-street abbreviation</td>
-	</tr>
-	<tr>
-		<td>[locmi]</td>
-		<td>Miles from DMS to node</td>
-	</tr>
-</table>
-<p>
-	Road names are converted to all capital letters.
-	For the `[locrn]` and `[locxn]` tags, certain prefixes and suffixes are
-	replaced with other values.
-	For the `[locxa]` tag, all matching prefixes and suffixes are stripped.
-</p>
-<h5 id="inc_advice">Incident Advice</h5>
-<aside>
-	Select <span class="menu">View ➔ Incident ➔ Incident Advice</span> menu
-	item
-</aside>
-<p>
-	An incident matches an advice record only if all attributes match.
-</p>
-<dl>
-	<dt>Range</dt>
-	<dd>near (up to 1.5 mi), middle (1.5 to 5 mi), far (5 to 10 mi)</dd>
-	<dt>Lane Type</dt>
-	<dd>mainline, exit, merge, CD lane</dd>
-	<dt>Impact</dt>
-	<dd>Lane impact code</dd>
-	<dt>Cleared Flag</dt>
-	<dd>yes / no</dd>
-</dl>
-<p>
-	A lane impact code is defined for all lanes plus both shoulders.
-	So, for a two-lane r_node, the impact code would be 4 characters.
-</p>
-<table>
-	<tr>
-		<th>Code</th>
-		<th>Description</th>
-	</tr>
-	<tr>
-		<td>.</td>
-		<td>Not blocked</td>
-	</tr>
-	<tr>
-		<td>?</td>
-		<td>Partially blocked</td>
-	</tr>
-	<tr>
-		<td>!</td>
-		<td>Fully blocked</td>
-	</tr>
-	<tr>
-		<td>:</td>
-		<td>Partially of fully blocked (? or !)</td>
-	</tr>
-	<tr>
-		<td>;</td>
-		<td>Not fully blocked (. or ?)</td>
-	</tr>
-	<tr>
-		<td>,</td>
-		<td>Any (. ? or !)</td>
-	</tr>
-</table>
 <br/>
 
 <h3 id="plan_schedule">Plans and Schedules</h3>
@@ -3274,23 +3147,23 @@ FIXME
 	</tr>
 	<tr>
 	    <td>[pa<i>i</i>,<i>l</i>,<i>c</i>]</td>
-	    <td><a href="#parking">Parking area availability</a></td>
+	    <td><a href="parking_areas.html">Parking area availability</a></td>
 	</tr>
 	<tr>
-	    <td>[slow<i>s</i>,<i>b</i>,<i>u</i>,<i>dist</i>]</td>
-	    <td><a href="#slow">Slow traffic warning</a></td>
+	    <td>[slow<i>s</i>,<i>d</i>,<i>mode</i>]</td>
+	    <td><a href="slow_warning.html">Slow traffic warning</a></td>
 	</tr>
 	<tr>
 	    <td>[tt<i>s</i>,<i>m</i>,<i>t</i>]</td>
-	    <td><a href="#travel_time">Travel time</a></td>
+	    <td><a href="travel_time.html">Travel time</a></td>
 	</tr>
 	<tr>
 	    <td>[tz<i>{p,o,c}</i>,<i>{tz0},</i>…<i>{tzn}</i>]</td>
-	    <td><a href="#tolling">Toll Zone</a></td>
+	    <td><a href="tolling.html">Toll Zone</a></td>
 	</tr>
 	<tr>
 	    <td>[vsa]</td>
-	    <td><a href="#vsa">Speed advisory</a></td>
+	    <td><a href="vsa.html">Speed advisory</a></td>
 	</tr>
 </table>
 <br/>
@@ -3322,930 +3195,6 @@ FIXME
 	See <a href="density_metering.html">here</a> for details.
 </p>
 
-<h3 id="travel_time">Travel Time Estimation</h3>
-<p>
-	The current <b>travel time</b> from a <a href="#dms">DMS</a> to a
-	downstream <a href="#station">station</a> can be estimated and displayed
-	on the sign.
-	A new estimate is made every 30 seconds, based on speed data from
-	<a href="#vds">vehicle detection systems</a>.
-</p>
-<p>
-	A <b>tt</b> <a href="#action_tag">action tag</a> can be used to specify
-	a travel time within a <a href="#quick_msg">quick message</a>.
-	When the message is deployed, the tag will be replaced by the estimated
-	travel time, in minutes.
-	The tag has three parameters, separated by commas.
-</p>
-<ol>
-	<li>Destination <a href="#station_id">station ID</a></li>
-	<li><a href="#travel_time_limit">Over limit</a> mode (<b>prepend</b> if
-	    omitted)
-	    <ul>
-	        <li><b>blank</b>: do not display travel time when over limit</li>
-	        <li><b>prepend</b>: prepend over limit text before travel
-	            time</li>
-	        <li><b>append</b>: append over limit text after travel time</li>
-	    </ul>
-	</li>
-	<li>Over limit text ("OVER " if omitted)</li>
-</ol>
-<aside>
-	NOTE: multiple destinations can be included on the same message by
-	specifying multiple <b>[tt…]</b> tags.
-</aside>
-<p>
-	Examples:
-</p>
-<ul>
-	<li>FREEWAY TIME TO[nl][jl2]I-94[jl4]<b>[ttS100,prepend,OVER ]</b> MIN
-	</li>
-	<li>TIME TO[nl][jl2]I-35W[jl4]<b>[ttS200,append,+]</b> MIN</li>
-	<li>DOWNTN[nl]<b>[ttS300,blank]</b> MIN</li>
-</ul>
-<h4>Route Pathfinding</h4>
-<p>
-	This feature requires that the <a href="#road_topology">road topology
-	</a> is configured for the entire route.
-	Using this topology, the shortest route is found from the DMS to the
-	destination <a href="#station">station</a>.
-	A route consists of one or more <b>corridor trips</b>.
-	Each corridor trip has an <b>origin</b> and a <b>destination</b>, which
-	are r_nodes associated with a single freeway corridor.
-	For the first corridor trip, the origin is the DMS location.
-	A route can only branch if an r_node with <b>exit</b>
-	<a href="#r_node_type">node type</a> is matched with an <b>entrance</b>
-	r_node.
-	In order to match, the <b>roadway / direction</b> for the exit r_node
-	must equal the <b>cross street / direction</b> for the entrance, and
-	vice versa.
-</p>
-<p>
-	Two <a href="#sys_attr">system attributes</a> control route pathfinding:
-</p>
-<dl>
-	<dt>route_max_legs</dt>
-	<dd>Maximum number of corridors to branch</dd>
-	<dt>route_max_miles</dt>
-	<dd>Maximum total route distance</dd>
-</dl>
-<h4>Speed Smoothing</h4>
-<p>
-	To deal with sampling problems at low speeds, a <b>smoothing</b>
-	procedure is used.
-	For each <a href="#station">station</a>, <b>running average</b> and
-	<b>running minimum</b>
-	speeds are calculated from all valid detectors in the station.
-	If a speed higher than the <a href="#speed_limit">speed limit</a> is
-	recorded, the speed limit is used instead.
-	The sample interval used increases as the speed becomes lower:
-</p>
-<ul>
-    <li>Normally 2 minutes</li>
-    <li>Extend to 3 minutes if &lt; 25 mph</li>
-    <li>Extend to 4 minutes if &lt; 20 mph</li>
-    <li>Extend to 5 minutes if &lt; 15 mph</li>
-</ul>
-<h4>Route Travel Time</h4>
-<p>
-	The distance between each consecutive valid station is divided into 3
-	<b>links</b> of equal length.
-	If any link is longer than 0.6 miles, a travel time estimate would not
-	be reliable, so the process is aborted.
-	The links which are adjacent to a station are assigned speed from that
-	station.
-	"Middle" links are assigned an average of the immediate upstream and
-	downstream station speeds.
-	Normally, the running average speed is used.
-	If the link is less than 1 mile from the corridor destination, the
-	running minimum is used instead.
-	Travel time for each link is estimated by dividing its length by the
-	assigned speed.
-	If the route branches, each branch adds a 1 minute <b>turning delay</b>.
-</p>
-<h4 id="travel_time_limit">Travel Time Limit</h4>
-<p>
-	To prevent unreasonable messages from being displayed due to data
-	errors, a limit is calculated.
-	The total route length is divided by <a href="#sys_attr"><code>
-	travel_time_min_mph</code></a> (default 15).
-	The result, rounded up the to next 5 minutes, is the <b>travel time
-	limit</b>.
-</p>
-<p>
-	If the calculated travel time is over the travel time limit, the
-	message will be <b>over limit</b>.
-	If the over limit mode is <b>blank</b>, no message will be shown.
-	Otherwise, the tag will be replaced with the travel time limit, with
-	the over limit text either prepended or appended.
-</p>
-
-<h3 id="slow">Slow Traffic Warning</h3>
-<p>
-	A <b>slow</b> <a href="#action_tag">action tag</a> allows warnings to be
-	displayed on DMS when traffic is slow.
-	The tag has three parameters, separated by commas.
-</p>
-<ol>
-	<li>Highest speed to activate the warning, in mph.</li>
-	<li>Distance (tenths of mile) to search for slow traffic, relative to
-	    the DMS location.</li>
-	<li>Tag replacement mode (<b>none</b> if omitted)
-	    <ul>
-	        <li><b>none</b>: a blank string</li>
-	        <li><b>dist</b>: distance rounded to nearest mile</li>
-	        <li><b>speed</b>: speed rounded to nearest 5 mph</li>
-	    </ul>
-	</li>
-</ol>
-<dl>
-	<dt>[slow35, 10]SLOW[nl]TRAFFIC[nl]AHEAD</dt>
-	<dd>Displays if traffic slower than 35 mph within 1 mile</dd>
-	<dt>SLOW TRAFFIC[nl][slow40,60,dist] MILES[nl]USE CAUTION</dt>
-	<dd>Displays if traffic slower than 40 mph within 6 miles</dd>
-	<dt>[slow45,5,speed] MPH[nl]1/2 MILE[nl]AHEAD</dt>
-	<dd>Displays if traffic slower than 45 mph within 0.5 miles</dd>
-</dl>
-
-<h3 id="tolling">Tolling</h3>
-<p>
-	High-occupancy / toll (HOT) lanes can be operated through IRIS.
-	Functions include calculating tolls in real time based on density,
-	displaying prices on DMS, and logging vehicle <a href="#tag_readers">
-	transponder (tag)</a> information.
-	Customer accounts and billing are not supported; those features must
-	be provided by an external system.
-</p>
-<h4>Toll Zones</h4>
-<aside>
-	Select <span class="menu">View ➔ Lane Use ➔ Toll Zones</span> menu item
-</aside>
-<p>
-	A toll zone is a segment of roadway between two
-	<a href="#station">stations</a>.
-	All HOT lane detectors between the starting station and ending station
-	can be used to calculate the toll.
-	Every 3 minutes, tolls are calculated using data from the most recent 6
-	minutes.
-	Within a zone, each station has an associated toll, based on the highest
-	density recorded among HOT lane detectors downstream of that station.
-</p>
-<div class="label">p = α ⋅ k <sup>β</sup>, where α = 0.045 and β = 1.10</div>
-<p>
-	The toll price is then rounded to the nearest $0.25.
-</p>
-<h4>Pricing on DMS</h4>
-<p>
-	A DMS can display pricing information for toll zones.
-	This is accomplished using a <b>tz</b> <a href="#action_tag">action
-	tag</a>.
-	The tag has two or more parameters, separated by commas.
-	The first parameter is the tolling mode, and must be "<i>p</i>",
-	"<i>o</i>" or "<i>c</i>".
-	These indicate <i>priced</i>, <i>open</i> or <i>closed</i>,
-	respectively.
-	The second parameter is the (first) toll zone ID.
-	If the toll route spans multiple toll zones, additional zone IDs may be
-	provided after the first.
-</p>
-<p>
-	If the tolling mode is <i>priced</i>, the tag will be replaced with the
-	calculated price, for example "2.75".
-	It will be the sum of prices for all specified toll zones.
-	The values of <a href="#sys_attr"><code>toll_min_price</code></a> and
-	<a href="#sys_attr"><code>toll_max_price</code></a> limit the calculated
-	price.
-</p>
-<p>
-	For <i>open</i> and <i>closed</i> modes, the tag will be replaced with
-	an empty string.
-	If required, a message such as "OPEN" or "CLOSED" may be appended after
-	the tag.
-</p>
-<p>
-	Price events are logged when a message is sent to a DMS, and again when
-	the message is verified.
-	The price event includes the date and time, toll zone, tolling mode
-	(<i>priced</i>, <i>open</i>, <i>closed</i>), price, sent / verified
-	status and next downstream tag reader.
-	The logged toll zone is the last zone specified in the tag.
-	In <i>priced</i> mode, the displayed price is logged.
-	For <i>open</i> or <i>closed</i>, a price of 0 is logged.
-</p>
-<h4>Tag Readers</h4>
-<p>
-	<a href="#tag_readers">Tag readers</a> can be mounted over a tolled lane
-	to record customer trips.
-	These are typically located just downstream of a pricing DMS.
-	The tag read events can be combined with the logged pricing information
-	to build a list of trips for each tag ID.
-	This information can be used to bill customers.
-</p>
-
-<h3 id="parking">Parking Areas</h3>
-<p>
-	A parking area could be a rest area or a parking garage.
-	The number of available parking spaces can be published on the web,
-	or displayed on a DMS.
-</p>
-<p>
-	A special <a href="#road_topology">corridor</a> must be associated with
-	the parking area in order to allow counting available spaces.
-	Within that corridor, detectors with the <b>parking</b> lane type will
-	be used.
-	Lanes 1 (front) and 2 (rear) are reserved for a <em>head</em> parking
-	space.
-	If applicable, lanes 3 (front) and 4 (rear) are for the <em>tail</em>.
-</p>
-<h4>Parking Area Availability</h4>
-<p>
-	A <b>pa</b> <a href="#action_tag">action tag</a> is replaced with the
-	number of available parking spaces to be displayed on a DMS.
-	The tag has three parameters, separated by commas.
-</p>
-<ol>
-	<li>Parking area ID</li>
-	<li>Text to display if available spaces is below the low threshold.
-	</li>
-	<li>Text to display if parking area is closed.
-	</li>
-</ol>
-
-<h3 id="vsa">Variable Speed Advisory</h3>
-FIXME
-
-<h3 id="spellchecker">Spell Checker</h3>
-<aside>
-	Select <span class="menu">View ➔ Message Signs ➔ Dictionary</span> menu
-	item
-</aside>
-<p>
-	The spell checker verifies <a href="#dms">DMS</a> messages when an
-	operator presses the <b>Send</b> button.
-	It uses two word lists: <b>Allowed</b> and <b>Banned</b>.
-</p>
-<p>
-	Allowed word checking is controlled by <a href="#sys_attr"><code>
-	dict_allowed_scheme</code></a>:
-</p>
-<dl>
-	<dt>0</dt>
-	<dd>Disable checking allowed word list</dd>
-	<dt>1</dt>
-	<dd>Suggest replacement of words not in allowed list</dd>
-	<dt>2</dt>
-	<dd>Reject messages containing words not in allowed list</dd>
-</dl>
-<p>
-	Similarly, <a href="#sys_attr"><code>dict_banned_scheme</code></a>
-	controls banned word functionality:
-</p>
-<dl>
-	<dt>0</dt>
-	<dd>Disable checking banned word list</dd>
-	<dt>1</dt>
-	<dd>Suggest replacement of words in banned list</dd>
-	<dt>2</dt>
-	<dd>Reject messages containing words in banned list</dd>
-</dl>
-<p>
-	When appropriate, a form appears to suggest changes or inform the
-	operator of a rejected message.
-</p>
-
-<h2 id="troubleshooting">Troubleshooting</h2>
-
-<h3 id="error_logs">Error Logs</h3>
-FIXME
-
-<h3 id="xml_output">XML Output</h3>
-<p>
-	There are a number of XML files which are written by the IRIS server
-	periodically.
-	These files contain configuration information about the system as
-	well as realtime data concerning the current state.
-	These files are stored in the /var/www/html/iris_xml/ directory.
-</p>
-<table>
-	<tr>
-	    <th>Filename</th>
-	    <th>Description</th>
-	    <th>Period</th>
-	</tr>
-	<tr>
-	    <td>tms_config.xml.gz</td>
-	    <td>Configuration data for IRIS system.  If the
-		<a href="#district">district</a> server property is changed, the
-		filename will be changed to match {district}_config.xml.gz.</td>
-	    <td>24 hours</td>
-	</tr>
-	<tr>
-	    <td>det_sample.xml.gz</td>
-	    <td>Sample data from <a href="#vds">vehicle detection systems</a>
-	    </td>
-	    <td>30&nbsp;seconds</td>
-	</tr>
-	<tr>
-	    <td>stat_sample.xml.gz</td>
-	    <td>Mainline <a href="#station">station</a> data from
-	        <a href="#vds">vehicle detection systems</a>
-	    </td>
-	    <td>30 seconds</td>
-	</tr>
-	<tr>
-	    <td>incident.xml.gz</td>
-	    <td>Current incident information</td>
-	    <td>30 seconds</td>
-	</tr>
-	<tr>
-	    <td>sign_message.xml.gz</td>
-	    <td>Current DMS sign message information</td>
-	    <td>30 seconds</td>
-	</tr>
-</table>
-<p/>
-
-<h3 id="event_tables">Database Event Tables</h3>
-<p>
-	There are a number of event tables in the database for logging different
-	types of events.
-	Each of these tables has a <b>view</b> in the public DB schema.
-	There is also a <b>purge threshold</b> for each table, stored as a
-	<a href="#sys_attr">system attribute</a>.
-	To disable purging older records from an event table, set the
-	corresponding purge threshold to 0.
-</p>
-<table>
-	<tr>
-	    <th>View</th>
-	    <th>Purge Threshold</th>
-	</tr>
-	<tr>
-	    <td>action_plan_event_view</td>
-	    <td>action_plan_event_purge_days</td>
-	</tr>
-	<tr>
-	    <td>alarm_event_view</td>
-	    <td>alarm_event_purge_days</td>
-	</tr>
-	<tr>
-	    <td>beacon_event_view</td>
-	    <td>beacon_event_purge_days</td>
-	</tr>
-	<tr>
-	    <td>camera_switch_event_view</td>
-	    <td>camera_switch_event_purge_days</td>
-	</tr>
-	<tr>
-	    <td>client_event_view</td>
-	    <td>client_event_purge_days</td>
-	</tr>
-	<tr>
-	    <td>comm_event_view</td>
-	    <td>comm_event_purge_days</td>
-	</tr>
-	<tr>
-	    <td>detector_event_view</td>
-	    <td>detector_event_purge_days</td>
-	</tr>
-	<tr>
-	    <td>gate_arm_event_view</td>
-	    <td>gate_arm_event_purge_days</td>
-	</tr>
-	<tr>
-	    <td>meter_event_view</td>
-	    <td>meter_event_purge_days</td>
-	</tr>
-	<tr>
-	    <td>price_message_event_view</td>
-	    <td>price_message_event_purge_days</td>
-	</tr>
-	<tr>
-	    <td>sign_event_view</td>
-	    <td>sign_event_purge_days</td>
-	</tr>
-	<tr>
-	    <td>tag_read_event_view</td>
-	    <td>tag_read_event_purge_days</td>
-	</tr>
-</table>
-<br/>
-
-<h3 id="debug_logs">Debug Trace Logs</h3>
-<p>
-	There are some debugging logs which can be enabled in the /var/log/iris
-	directory.
-	To enable a particular log, use the <code>touch</code> command to
-	create a file with the proper name.
-	Some of these logs can grow very large, so be sure to have enough disk
-	space available.
-</p>
-<table>
-	<tr>
-	    <th>Filename</th>
-	    <th>Description</th>
-	</tr>
-	<tr>
-	    <td>{comm-link-name}.log</td>
-	    <td>Comm link log</td>
-	</tr>
-	<tr>
-	    <td>bottleneck</td>
-	    <td>Bottleneck calculation for VSA algorithm</td>
-	</tr>
-	<tr>
-	    <td>canoga</td>
-	    <td><a href="#canoga">Canoga</a> protocol</td>
-	</tr>
-	<tr>
-	    <td>cbw</td>
-	    <td><a href="#cbw">CBW</a> protocol</td>
-	</tr>
-	<tr>
-	    <td>device</td>
-	    <td>Device error log</td>
-	</tr>
-	<tr>
-	    <td>dinrelay</td>
-	    <td><a href="#dinrelay">DIN-Relay</a> protocol</td>
-	</tr>
-	<tr>
-	    <td>dmsxml</td>
-	    <td><a href="#dms_xml">DMS-XML</a> protocol</td>
-	</tr>
-	<tr>
-	    <td>e6</td>
-	    <td><a href="#e6">E6</a> protocol</td>
-	</tr>
-	<tr>
-	    <td>e6_pkt</td>
-	    <td><a href="#e6">E6</a> protocol packets</td>
-	</tr>
-	<tr>
-	    <td>feed</td>
-	    <td><a href="#msg_feed">Msg-Feed</a> protocol</td>
-	</tr>
-	<tr>
-	    <td>g4</td>
-	    <td><a href="#g4">G4</a> protocol</td>
-	</tr>
-	<tr>
-	    <td>infinova</td>
-	    <td><a href="#infinova">Infinova</a> protocol</td>
-	</tr>
-	<tr>
-	    <td>kadaptive</td>
-	    <td>K Adaptive metering algorithm</td>
-	</tr>
-	<tr>
-	    <td>manchester</td>
-	    <td><a href="#manchester">Manchester</a> protocol</td>
-	</tr>
-	<tr>
-	    <td>meter</td>
-	    <td>Ramp meter configuration errors</td>
-	</tr>
-	<tr>
-	    <td>mndot170</td>
-	    <td><a href="#mndot170">MnDOT-170</a> protocol</td>
-	</tr>
-	<tr>
-	    <td>modem</td>
-	    <td>Modem error log</td>
-	</tr>
-	<tr>
-	    <td>ntcip</td>
-	    <td><a href="#ntcip">NTCIP</a> protocols</td>
-	</tr>
-	<tr>
-	    <td>org815</td>
-	    <td><a href="#org815">ORG-815</a> protocol</td>
-	</tr>
-	<tr>
-	    <td>pelcod</td>
-	    <td><a href="#pelcod">Pelco-D</a> protocol</td>
-	</tr>
-	<tr>
-	    <td>polling</td>
-	    <td>Generic operaton polling log</td>
-	</tr>
-	<tr>
-	    <td>prio</td>
-	    <td>Operation priority log</td>
-	</tr>
-	<tr>
-	    <td>profile</td>
-	    <td>System profiling log</td>
-	</tr>
-	<tr>
-	    <td>sched</td>
-	    <td>DMS scheduled message log</td>
-	</tr>
-	<tr>
-	    <td>slow</td>
-	    <td>DMS <a href="#slow">slow warning</a> system log</td>
-	</tr>
-	<tr>
-	    <td>snmp</td>
-	    <td>SNMP error log</td>
-	</tr>
-	<tr>
-	    <td>sonar</td>
-	    <td>SONAR connection log</td>
-	</tr>
-	<tr>
-	    <td>sql</td>
-	    <td>SQL database error log</td>
-	</tr>
-	<tr>
-	    <td>ss105</td>
-	    <td>Wavetronix SS-105 protocol</td>
-	</tr>
-	<tr>
-	    <td>ss125</td>
-	    <td>Wavetronix SS-125 protocol</td>
-	</tr>
-	<tr>
-	    <td>ssi</td>
-	    <td><a href="#ssi">SSI</a> protocol</td>
-	</tr>
-	<tr>
-	    <td>stc</td>
-	    <td><a href="#stc">STC</a> protocol</td>
-	</tr>
-	<tr>
-	    <td>sys_attr</td>
-	    <td>System attribute change log</td>
-	</tr>
-	<tr>
-	    <td>toll</td>
-	    <td>Tolling info log</td>
-	</tr>
-	<tr>
-	    <td>travel</td>
-	    <td>Travel time info log</td>
-	</tr>
-	<tr>
-	    <td>vsa</td>
-	    <td>Variable speed advisory info log</td>
-	</tr>
-</table>
-
-<h2 id="maintenance">Maintenance</h2>
-<p>
-	Once an IRIS system is set up, there are a few maintenance tasks which
-	need to be done to ensure reliable operation.
-</p>
-<h3 id="database_backups">Database Backup &amp; Restore</h3>
-<p>
-	It is a good idea to backup the IRIS database on a regular basis.
-	This can be done simply with a command such as the following:
-</p>
-<pre class="code">pg_dump tms | gzip &gt; tms-20120523.sql.gz</pre>
-<p>
-	This command can be placed in a simple python or bash script which is
-	run by cron once per day.
-	For off-site backups, the file could be copied to another host, using
-	scp or a similar utility.
-</p>
-<p>
-	To restore the tms database from one of these backup files, you will
-	first need to shut down the IRIS server (and anything else connected
-	to the tms database).
-	Then, run the following commands (as tms user):
-</p>
-<pre class="code">dropdb tms
-createdb tms
-zcat tms-20120523.sql.gz | pgsql tms</pre>
-
-<h3 id="iris_upgrades">IRIS Upgrades</h3>
-<p>
-	Upgrading an IRIS system to a new version is a simple process.
-	There are two different scenarios to deal with when upgrading:
-	<b>stable</b> versus <b>unstable</b>.
-	Either way, it's advisable to <a href="#database_backups">backup the
-	database</a> before attempting an upgrade.
-</p>
-<p>
-	A stable upgrade is when the major and minor IRIS version numbers do not
-	change &mdash; just the <b>micro</b> version.
-	So, upgrading from 3.145.0 to 3.145.1 would be a stable updgrade.
-	This type of upgrade never involves a database schema change.
-	With the new rpm file available, a stable upgrade can be accomplished
-	with the following commands (as root):
-</p>
-<pre class="code">dnf update iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm
-iris_ctl update
-systemctl restart iris</pre>
-<p>
-	An unstable upgrade is when either the major or minor IRIS version
-	numbers change.
-	Upgrading from 3.144.0 to 3.145.0 would be an unstable upgrade.
-	This type of upgrade always involves a database schema change.
-	To upgrade the database schema, an SQL migrate script must be run for
-	each intervening version.
-	The following commands can be used to perform an unstable upgrade
-	(as root):
-</p>
-<pre class="code">dnf update iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm
-psql tms -f /var/lib/iris/sql/migrate-<i>{major}</i>.<i>{minor}</i>.sql
-iris_ctl update
-systemctl restart iris</pre>
-<p>
-	Note: when skipping one or more minor versions in an upgrade, <b>all</b>
-	migrate scripts must be run.
-	So, when upgrading from 3.143.0 to 3.145.0, the database upgrade would
-	consist of these commands:
-</p>
-<pre class="code">psql tms -f /var/lib/iris/sql/migrate-3.144.sql
-psql tms -f /var/lib/iris/sql/migrate-3.145.sql</pre>
-<p>
-	Warning: there is no supported method of <b>downgrading</b> an IRIS
-	system.
-	If a downgrade is required, the database should be restored from a
-	backup and the IRIS rpm should be reinstalled.
-</p>
-
-<h3 id="system_updates">System Software Updates</h3>
-FIXME
-
-<h3 id="monitoring_logs">Monitoring Logs</h3>
-FIXME
-
-<h2 id="development">Development</h2>
-
-<h3 id="building">Building</h3>
-<p>
-	Install <a href="http://fedoraproject.org">Fedora</a> onto the
-	development system.
-	Some additional development packages must be installed.
-</p>
-<pre class="code">dnf install java-devel-openjdk ant-junit mercurial rpm-build gcc</pre>
-<p>
-	In a suitable development directory, clone the iris mercurial
-	repository.
-</p>
-<pre class="code">hg clone http://iris.dot.state.mn.us/hg/index.cgi/iris</pre>
-<p>
-	Create lib/ directory in iris development repository.
-</p>
-<pre class="code">mkdir iris/lib/</pre>
-<p>
-	Download the <a href="http://www.oracle.com/technetwork/java/index-138643.html">JavaMail API</a> from Oracle.
-	Unzip the JavaMail archive and locate the mail.jar file.
-	Copy the mail.jar file to the lib/ directory in the iris repository.
-</p>
-<p>
-	Copy <code>iris-build.properties</code> from etc/ to lib/.
-	Edit <code>lib/iris-build.properties</code> file as necessary for your
-	organization.
-</p>
-<p>
-	Create the key for signing jar packages.
-	This is required for Java Web Start, which is used by the IRIS client.
-	The key should go into your default keystore (~/.keystore).
-</p>
-<pre class="code">keytool -genkeypair -alias signing-key</pre>
-<p>
-	Put the following lines into your ~/.ant.properties file.
-</p>
-<pre class="code">debug=off
-sign.store=${user.home}/.keystore
-sign.store.pass=password
-sign.alias=signing-key
-sign.alias.pass=signing-password
-hgbase.url=http://iris.dot.state.mn.us/hg/index.cgi/
-</pre>
-<p>
-	Now, the IRIS rpm file can be built with the following commands.
-	(The current directory should be the root of the iris repository.
-</p>
-<pre class="code">ant rpm</pre>
-<p>
-	If there are no errors, the new rpm file should be in the
-	<code>build/rpm/RPMS/noarch/</code> directory.
-</p>
-
-<h3 id="history">History</h3>
-<dl>
-	<dt>March 1999</dt>
-	<dd>Started work on NTCIP DMS control</dd>
-	<dt>May 2007</dt>
-	<dd>First GPL open source release</dd>
-	<dt>May 2008</dt>
-	<dd>IRIS live in Caltrans D10</dd>
-	<dt>April 2011</dt>
-	<dd>Officially adopted by Caltrans</dd>
-	<dt>November 2014</dt>
-	<dd>Adopted by Wyoming Department of Transportation</dd>
-</dl>
-
-<h3 id="future_plans">Future Plans</h3>
-FIXME
-
-<h3 id="contributing">Contributing</h3>
-<p>
-	FIXME
-</p>
-
-<h4 id="contributing">Admin Guide</h4>
-<p>
-	Please format text so there is a newline after each sentence.
-	This makes patches less cluttered.
-	Also, line length should be 80 characters or less.
-	When patch files are submitted directly, using a .patch file
-	extension is preferred.
-</p>
-
-<h3 id="coding_style">Coding Style</h3>
-<p>
-	The coding style for IRIS is focused on making code more readable.
-	Readability is the most important factor for software maintenance,
-	and it also helps new developers who are unfamiliar with the codebase.
-</p>
-<p>
-	First and foremost, it is recommended that each method fit in one page
-	of text (30 lines by 80 columns).
-	Whenever possible, longer methods should be decomposed to abide by this
-	recommendation.
-	This allows a developer to quickly read and understand the method's
-	logic.
-	It is much easier to spot and correct bugs in shorter methods.
-	There should be no blank lines within a method.
-</p>
-<p>
-	With methods longer than one page, it can be beneficial to have a
-	single exit point (return).
-	But for shorter methods (always the goal), this is not so important,
-	and can reduce readability.
-	It doesn't make sense to add a local "ret" variable with a single
-	return statement at the end when the whole method can be read at a
-	glance.
-</p>
-<p>
-	Each block indent should be 8 columns (using tabs instead of spaces).
-	This makes the blocks more obvious, and is easier to read than the 4
-	spaces commonly used in other Java projects.
-	Always use an indented block with if, for, while, etc. statements.
-	This makes it much easier to follow the control flow than when it is
-	combined onto the same line as the statement.
-	Don't put an opening curly brace on a line by itself unless the method
-	declaration or loop statement spans multiple lines.
-	For single line blocks (if, for, while), do not use curly braces.
-</p>
-<p>
-	Each method should have a javadoc comment describing its purpose.
-	All parameters and return values should be documented as well.
-	Comments within a method should be used sparingly &mdash; never
-	describe what the code is doing, but instead <b>why</b> it was written
-	in a certain way.
-	Code which is "commented out" should <b>never</b> be committed to a
-	repository.
-</p>
-<p>
-	Unary operators, such as ++ -- ! ~ should be adjacent to their operand
-	with no space.
-	Binary operators, such as + - / * % &amp; | &amp;&amp; || &gt; = &lt;
-	&gt;&gt; == != &lt;&lt; &gt;&gt;&gt; &gt;= &lt;= ^ should be separated
-	from their operands by a space.
-</p>
-
-<h2 id="stepbystep">Step-by-step</h2>
-<h3 id="adddms">Create a DMS, Comm Link, and Controller</h3>
-<p>
-<ol>
-<li>Make sure <a href="#edit_mode">edit mode</a> is <b>ON</b>.</li>
-<li>Create the new DMS
-    <ul>
-	<li>Select the <span class="menu">View ➔ Message Signs ➔ DMS
-	    </span> menu item to display the DMS form.</li>
-	<li>Type the name of the new DMS in the edit field at the bottom
-	    of the form and press the Create button.</li>
-	<li>Find the new DMS in the data table and select it.</li>
-	<li>Click the Properties button and the DMS Properties form
-	    will appear.</li>
-	<li>On the Location Tab specify the road and location of the
-	    physical DMS.</li>
-	<li>On the Messages Tab select the default DMS font.</li>
-	<li>Close the DMS Properties form.</li>
-    </ul>
-</li>
-<li>Create a new comm link
-    <ul>
-	<li>Select the <span class="menu">View ➔ Maintenance ➔ Comm Links
-	    </span> menu item to display the Comm Links form.</li>
-	<li>Type the name of the new comm link in the edit field in the middle
-	    of the form and press the Create button.</li>
-	<li>Find the newly created comm link in the data table in the top of the
-	    form and select it.</li>
-	<li>Enter a more complete description in the Description field as
-	    needed.</li>
-	<li>Enter the controller URI in the URI column, e.g.
-	    "tcp://10.20.30.40:1234" or "udp://10.20.30.40:1234" for signs that
-	    use UDP.</li>
-	<li>Select the desired protocol.</li>
-	<li>Enter the desired polling period and timeout.</li>
-	<li>Enable the Comm Link by clicking the Enabled Checkbox.</li>
-    </ul>
-</li>
-<li>Create a new controller associated with the comm link
-    <ul>
-	<li>In the Comm Link Form with the desired comm link selected, click the
-	    Create button on the bottom of the form.</li>
-	<li>Select the new controller in the lower data table and click the
-	    Properties button. The Controller form should appear.</li>
-	<li>On the Controller Form Setup Tab, change the condition to active.
-	</li>
-	<li>On the Cabinet Tab specify the DMS cabinet location and style.</li>
-	<li>On the Controller Form IO Tab, for Pin=1, select DMS in the Type
-	    column. In the Device column, select the name of the DMS created
-	    above.</li>
-    </ul>
-</li>
-<li>View DMS Status
-    <ul>
-	<li>If the comm link is enabled (per above) and the controller condition
-	    is active (per above), the number of successful and failed
-	    operations is visible in real-time on the Controller's Status Tab.
-	</li>
-	<li>View the DMS configuration on the DMS Form Configuration tab. The
-	    Query Configuration button on that tab manually queries the sign.
-	</li>
-	<li>The Status Tab on the DMS Form shows additional status information.
-	</li>
-    </ul>
-</li>
-</ol>
-</p>
-
-<h3 id="createplan">Create a Plan to Activate DMS Messages</h3>
-<p>
-<ol>
-<li>Make sure <a href="#edit_mode">edit mode</a> is <b>ON</b>.</li>
-<li>Select the <span class="menu">View ➔ Plans and Schedules</span> menu item to
-    display the Plans and Schedules form.</li>
-<li>Create a Phase (if it doesn't exist already)
-    <ul>
-	<li>Click the <code>Plan Phases</code> tab</li>
-	<li>In the space next to the <code>Create</code> button, enter the name
-	    of the new phase, e.g. <code>deployed</code></li>
-	<li>Press the <code>Create</code> button</li>
-	<li>Repeat to add an <code>undeployed</code> phase</li>
-    </ul>
-</li>
-<li>Create an Action Plan
-    <ul>
-	<li>Click the <code>Action Plans</code> tab</li>
-	<li>Select <code>undeployed</code> for the <code>Default Phase</code></li>
-	<li>Type the name of the new Action Plan in the edit field,
-	    e.g. "slick_roads"</li>
-	<li>Press the <code>Create</code> button</li>
-	<li>The new Plan should appear in the lower table</li>
-    </ul>
-</li>
-<li>Create the DMS Actions
-    <ul>
-	<li>Click on the Action Plan just created (e.g. slick_roads)</li>
-	<li>Click the DMS Actions tab</li>
-	<li>In the edit field on the bottom of the form, type the name of an
-	    existing sign group</li>
-	<li>Press the <code>Create</code> button</li>
-	<li>The new DMS Action should appear in the table</li>
-	<li>Select the <code>deployed</code> phase for the DMS action</li>
-	<li>Click on the "Quick Message" column in the DMS Action just created
-	</li>
-	<li>Specify the name of an existing <a href="#quick_msg">quick
-	    message</a> to send to the sign
-	</li>
-	<li>Repeat the above DMS Actions steps as many times as desired to send
-	    a message to additional sign groups.</li>
-    </ul>
-</li>
-<li>Activate the messages on the signs
-    <ul>
-	<li>Select the <code>Plan</code> tab to the left of the map</li>
-	<li>Locate the action plan from the list and select it</li>
-	<li>In the <code>Selected Action Plan</code> area, change the phase
-	    to <code>deployed</code></li>
-	<li>Signs are activated and deactivated every 30 seconds (at :29 and
-	    :59), so wait at least 30 seconds for the messages to appear or
-	    disappear.</li>
-	<li>Change the phase back to <code>undeployed</code> to blank the signs
-	</li>
-    </ul>
-</li>
-</ol>
-Notes:
-<ul>
-	<li>Before running through these steps, create the Sign Groups and Quick
-	    Messages desired.</li>
-	<li>The quick messages that the Action Plan references don't have to be
-	    assigned to a Sign Group.</li>
-	<li>Use the device debug log to diagnose problems with scheduled
-	    messages not appearing on signs.</li>
-</ul>
-
-</p>
 </main>
 
 </body>

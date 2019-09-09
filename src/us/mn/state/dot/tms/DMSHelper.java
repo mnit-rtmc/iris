@@ -83,6 +83,11 @@ public class DMSHelper extends BaseHelper {
 		return ItemStyle.FAILED.checkBit(proxy.getStyles());
 	}
 
+	/** Test if a DMS is a dedicated purpose sign */
+	static public boolean isPurpose(DMS proxy) {
+		return ItemStyle.PURPOSE.checkBit(proxy.getStyles());
+	}
+
 	/** Test if a DMS is hidden */
 	static public boolean isHidden(DMS proxy) {
 		return ItemStyle.HIDDEN.checkBit(proxy.getStyles());

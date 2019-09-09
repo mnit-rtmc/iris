@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,6 +20,8 @@ import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconHelper;
+import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -66,6 +68,7 @@ public class SendSettingsJob extends Job {
 			Controller c = it.next();
 			c.setDownload(false);
 		}
+		requestCameraStop();
 		requestDMS(DeviceRequest.SEND_SETTINGS);
 		requestDMS(DeviceRequest.QUERY_PIXEL_FAILURES);
 		requestLCS(DeviceRequest.SEND_SETTINGS);
@@ -73,6 +76,19 @@ public class SendSettingsJob extends Job {
 		requestBeacons(DeviceRequest.SEND_SETTINGS);
 		requestTagReaders(DeviceRequest.SEND_SETTINGS);
 		requestWeatherSensors(DeviceRequest.SEND_SETTINGS);
+	}
+
+	/** Send a stop PTZ request to all cameras */
+	private void requestCameraStop() {
+		Float[] ptz = new Float[3];
+		ptz[0] = 0f;
+		ptz[1] = 0f;
+		ptz[2] = 0f;
+		Iterator<Camera> it = CameraHelper.iterator();
+		while (it.hasNext()) {
+			Camera cam = it.next();
+			cam.setPtz(ptz);
+		}
 	}
 
 	/** Send a request to all DMS */

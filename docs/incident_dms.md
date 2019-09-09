@@ -1,139 +1,152 @@
 # Incident DMS Deployment
 
-## Incident Severity
+Sign messages can be suggested from active roadway incidents.  This method uses
+incident attributes (**impact**, **range**, **severity**, etc.) and location on
+the freeway network to make suggestions.
 
-Incidents have a *severity* attribute, with possible values of *MINOR*,
-*NORMAL* or *MAJOR*.  The severity of an incident affects the distance to
-deploy DMS.
+Each message is composed of three parts: **descriptor** (_what?_), **locator**
+(_where?_) and **advice** (_how?_).  Suggestions are only made if a match is
+found for all three parts.  Each part may have an abbreviated version, which is
+used only when the normal version does not fit the sign.
 
-Severity | Lane Impact     | Range  | Miles | Branching | Priority
----------|-----------------|--------|-------|-----------|---------------
-MINOR    | Shoulder only   | NEAR   | 1.5   | No        | INCIDENT_LOW
-NORMAL   | Lane(s) blocked | MIDDLE | 5.0   | Yes       | INCIDENT_MED
-MAJOR    | Road closure    | FAR    | 10.0  | Yes       | INCIDENT_HIGH
+## Impact
 
-## Deployment
+Every incident is assigned an **impact**, based on which lanes are *blocked* or
+*affected*.  If any lane or shoulder is *blocked*, then one of the `_blocked`
+impacts is used.  Otherwise, a lane or shoulder may be *affected*, meaning it
+is partially blocked by *e.g.* debris.
 
-When "Deploy" button is pressed, all DMS within the range of the incident are
-found.  Each of these DMS will be deployed if matching *descriptor*, *locator*
-and *advice* are found.
+Impact                    | Description
+--------------------------|------------------------------------------------
+`lanes_blocked`           | Left & right lanes blocked (possibly all lanes)
+`left_lanes_blocked`      | Left lane blocked, right lane open
+`right_lanes_blocked`     | Right lane blocked, left lane open
+`center_lanes_blocked`    | Center lane(s) blocked, left & right lanes open
+`both_shoulders_blocked`  | Left & right shoulders blocked, all lanes open
+`left_shoulder_blocked`   | Left shoulder blocked, all lanes open
+`right_shoulder_blocked`  | Right shoulder blocked, all lanes open
+`lanes_affected`          | Left & right lanes affected (could be all lanes)
+`left_lanes_affected`     | Left lane affected, right lane open
+`right_lanes_affected`    | Right lane affected, left lane open
+`center_lanes_affected`   | Center lane(s) affected, left & right lanes open
+`both_shoulders_affected` | Left & right shoulders affected, all lanes open
+`left_shoulder_affected`  | Left shoulder affected, all lanes open
+`right_shoulder_affected` | Right shoulder affected, all lanes open
+`free_flowing`            | No impact
 
-When the incident is cleared, all associated DMS are blanked.  The only
-exception is for *MAJOR* incidents.  In that case, another match is performed
-with *cleared* set to *YES*.  If a matching message is found, it will be
-deployed with PSA priority for 5 minutes.
+## Range
 
-### Incident Descriptor
+*Range* is the distance from an upstream sign to the incident.  There are four
+defined ranges, each with a number of freeway *exits* in between.  For this
+purpose, exits which are part of the same interchange are treated as one (for
+example, both off-ramps of a cloverleaf).
 
-An incident matches a descriptor only if the *event type*, *lane type*,
-*detail*, and *cleared* attributes match.
+Range    | Exits | Notes
+---------|-------|-------------------------------
+`ahead`  |     0 | Distance also less than 1 mile
+`near`   |   0-1 |
+`middle` |   2-5 |
+`far`    |   6-9 |
 
-Event Type | Lane Type     | Detail   | Cleared | Rank | Multi
------------|---------------|----------|---------|------|----------------
-CRASH      | mainilne      |          | NO      | 1    | CRASH
-CRASH      | mainilne      |          | YES     | 1    | CRASH CLEARED
-STALL      | mainline      |          | NO      | 1    | STALLED VEHICLE
-STALL      | mainline      |          | NO      | 2    | STALL
-ROAD WORK  | mainline      |          | NO      | 1    | ROAD WORK
-ROAD WORK  | exit ramp     |          | NO      | 1    | ROAD WORK ON RAMP
-HAZARD     | mainline      | ice      | NO      | 1    | ICE ON ROAD
-HAZARD     | mainline      | ice      | NO      | 2    | ICE
-HAZARD     | mainilne      | debris   | NO      | 1    | DEBRIS
-HAZARD     | mainline      | animal   | NO      | 1    | ANIMAL ON ROAD
-HAZARD     | mainline      | flooding | NO      | 1    | FLASH FLOODING
-HAZARD     | mainline      | flooding | NO      | 2    | FLASH FLOOD
-HAZARD     | mainline      | flooding | NO      | 3    | FLOODING
+## Severity
 
-Each matching descriptor will be checked to see if the multi string can be
-rendered on the DMS.  The lowest ranking match will be used.
+Incident severity determines the **maximum range** and **message priority**.
+There are three severity values: `minor`, `normal`, and `major`.
 
-### Incident Locator
+Severity | Maximum Range | Message Priority
+---------|---------------|------------------
+`minor`  | `near`        | `INCIDENT_LOW`
+`normal` | `middle`      | `INCIDENT_MED`
+`major`  | `far`         | `INCIDENT_HIGH`
 
-The incident is associated with the nearest *pickable* r_node.  If the distance
-to that node is less than 0.5 miles, it can be used as a *locator*.  If not,
-the nearest non-*pickable* r_node is found.  It can be used if distance is less
-than 0.5 miles.
+Severity depends on whether *more than half* the lanes are *blocked* or
+*affected*, as well as the **lane type** at the incident location.
 
-Range  | Branched | Pickable | Multi                     | Example
--------|----------|----------|---------------------------|------------------
-NEAR   | NO       | Y/N      | AHEAD                     | AHEAD
-MIDDLE | NO       | YES      | `[locmd] [locxn]`         | AT HWY 100
-MIDDLE | YES      | Y/N      | ON `[locrn]` `[locrd]`    | ON 394 EAST
-FAR    | NO       | NO       | `[locmi]` MILES AHEAD     | 8 MILES AHEAD
-FAR    | NO       | YES      | `[locmd] [locxn]`         | AT 494
-FAR    | YES      | YES      | ON `[locrn]` AT `[locxn]` | ON 394 AT HWY 100
+Impact                    | Mainline   | CD/Exit  | Merge
+--------------------------|------------|----------|--------
+more than half `blocked`  | `major`    | `normal` | `minor`
+half or less `blocked`    | `normal`   | `minor`  | —
+any lanes `affected`      | `minor`    | —        | —
 
-Several MULTI-like tags are defined for incident locators.
+## Descriptor
 
-Tag       | Description
-----------|-----------------------------------------
-`[locrn]` | Road name
-`[locrd]` | Road direction
-`[locmd]` | Location modifier (AT, N OF, S OF, etc.)
-`[locxn]` | Cross-street name
-`[locxa]` | Abbreviated cross-street name
-`[locmi]` | Miles from DMS to node
+The *descriptor* determines the first line of each suggested message.  The
+configurable descriptor table contains fields which are matched to the incident.
 
-Road names are converted to all capital letters.  For the `[locrn]` tag, certain
-prefixes and suffixes are replaced with other values.  For the `[locxa]` tag,
-all matching prefixes and suffixes are stripped.
+Field         | Description
+--------------|---------------------------------------------------
+Incident type | `CRASH`, `STALL`, `ROAD WORK` or `HAZARD`
+Detail        | usually hazard detail: `animal`, `debris`, `ice`, etc
+Lane Type     | `mainline`, `exit`, `merge` or `CD road`
 
-Type   | Value    | Replacement
--------|----------|------------
-Prefix | U.S.     | HWY
-Prefix | T.H.     | HWY
-Prefix | C.S.A.H. | CTY
-Prefix | I-       |
-Suffix | AVE      | AVE
-Suffix | BLVD     | BLVD
-Suffix | DR       | DR
-Suffix | HWY      | HWY
-Suffix | LN       | LN
-Suffix | PKWY     | PKWY
-Suffix | PL       | PL
-Suffix | RD       | RD
-Suffix | ST       | ST
-Suffix | TR       | TR
-Suffix | WAY      | WAY
+## Locator
 
-### Incident Advice
+A matching *locator* determines the second line of a suggested message.  The
+configurable locator table contains fields which are matched to the incident.
 
-The incident *range*, *lane type* and *impact* will be matched with an incident
-advice record.
+Field    | Description
+---------|---------------------------------------------------
+Range    | from sign to incident: `ahead`, `near`, `middle` or `far`
+Branched | `YES` or `NO`: sign and incident on different roadways
+Picked   | `YES` or `NO`: a *pickable* node (r_node) is within 1 mile of the incident; its location can be used for *locator tags*
 
-Code | Lane Impact
------|----------------------------
-.    | Not blocked
-?    | Partially blocked
-!    | Fully blocked
-:    | Partially or fully (? or !)
-;    | Not fully blocked (. or ?)
-,    | Any (. ? or !)
+### Locator Tags
 
-Range    | Lane Type | Impact | Cleared | Multi
----------|-----------|--------|---------|-------------------
-NEAR     | mainline  | ?....  | NO      | IN MEDIAN
-NEAR     | mainline  | ?....  | NO      | ON LEFT SHOULDER
-NEAR     | mainline  | .?...  | NO      | IN LEFT LANE
-NEAR     | mainline  | .??..  | NO      | IN LEFT 2 LANES
-NEAR     | mainline  | ..?..  | NO      | IN CENTER LANE
-NEAR     | mainline  | ...?.  | NO      | IN RIGHT LANE
-NEAR     | mainline  | ..??.  | NO      | IN RIGHT 2 LANES
-NEAR     | mainline  | ....?  | NO      | ON RIGHT SHOULDER
-NEAR     | mainline  | ....?  | NO      | ON SHOULDER
-NEAR     | mainline  | ?...?  | NO      | ON BOTH SHOULDERS
-NEAR     | mainline  | ;???;  | NO      | IN ALL LANES
-NEAR     | mainline  | ,!;;,  | NO      | LEFT LANE CLOSED
-NEAR     | mainline  | ,;;!,  | NO      | RIGHT LANE CLOSED
-NEAR     | mainline  | ,;!;,  | NO      | CENTER LANE CLOSED
-NEAR     | mainline  | !!!!!  | NO      | ROAD CLOSED
-NEAR     | mainline  | ?!!!!  | NO      | USE OTHER ROUTES
-NEAR     | mainline  | !!..?  | NO      | REDUCED TO 2 LANES
-MIDDLE   | mainline  | ,,,,,  | YES     | USE CAUTION
-FAR      | mainline  | ,!;;,  | NO      | EXPECT DELAYS
-FAR      | mainline  | ,;!;,  | NO      | EXPECT DELAYS
-FAR      | mainline  | ,;;!,  | NO      | EXPECT DELAYS
-FAR      | mainline  | ,!!;,  | NO      | MAJOR DELAY
-FAR      | mainline  | ,;!!,  | NO      | MAJOR DELAY
-FAR      | mainline  | ,!!!,  | NO      | MAJOR DELAY
-FAR      | mainline  | ,,,,,  | YES     | ALL LANES OPEN
+Several MULTI-like tags are available for locators.  These tags will be replaced
+with incident location information when composing a message.  Tags should only
+be used if the locator's *picked* state matches.
+
+Tag       | Picked | Description
+----------|--------|-------------------------------------------------
+`[locrn]` | —      | Road name
+`[locrd]` | —      | Road direction (NORTH, SOUTH, etc.)
+`[locmd]` | `YES`  | Location modifier (AT, NORTH OF, SOUTH OF, etc.)
+`[locxn]` | `YES`  | Cross-street name
+`[locxa]` | `YES`  | Cross-street abbreviation
+`[locmi]` | `NO`   | Miles from sign to incident
+
+Road and cross-street names are converted to all capital letters.
+
+For the `[locrn]` and `[locxn]` tags, prefixes and suffixes which match values
+in the `road_affix` table are replaced.
+
+For the `[locxa]` tag, matching `road_affix` values are stripped.
+
+## Advice
+
+A matching *advice* determines the third line of a suggested message.  The
+configurable advice table contains fields which are matched to the incident.
+
+Field          | Description
+---------------|---------------------------------
+Impact         | code; see [Impact](#impact)
+Lane Type      | `mainline`, `exit`, `merge` or `CD road`
+Range          | from sign to incident: `ahead`, `near`, `middle` or `far`
+Impacted Lanes | number of non-shoulder lanes, (if blank, any number matches)
+Open Lanes     | number of non-shoulder lanes *not* impacted
+
+## Dedicated Purpose Signs
+
+*Dedicated purpose* signs normally cannot be used for incidents.  The only
+exception is `tolling` signs — they are used if the locator is not *branched*
+and the impact is `lanes_blocked`, `left_lanes_blocked`, `lanes_affected` or
+`left_lanes_affected`.
+
+## Clearing
+
+When a `major` severity incident is cleared, a new message will be sent to each
+deployed sign.  The *descriptor* and *locator* will be the same, but *advice*
+will be taken from the `incident_clear_advice_multi` [system attribute].  If it
+does not fit on the sign, the value of `incident_clear_advice_abbrev` will be
+used instead.  The *cleared* message will be deployed with `PSA` message
+priority for 5 minutes.
+
+## Updating
+
+If any devices are associated with an incident when an update is logged, the
+device deploy logic will be checked again.  If any devices have proposed
+changes, the device deploy form will appear.  All proposed changes will be
+listed in the form, including new devices and any devices to be blanked.
+
+
+[system attribute]: admin_guide.html#sys_attr

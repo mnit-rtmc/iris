@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2016  Minnesota Department of Transportation
+ * Copyright (C) 2010-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,25 +14,30 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
+import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.CorridorFinder;
 import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.IncidentImpact;
-import static us.mn.state.dot.tms.IncidentImpact.*;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LaneConfiguration;
+import us.mn.state.dot.tms.LaneImpact;
+import static us.mn.state.dot.tms.LaneImpact.*;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.LCSHelper;
 import static us.mn.state.dot.tms.R_Node.MAX_SHIFT;
+import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 
 /**
- * LcsDeployModel determines which LCS indications to propose for an incident.
+ * LcsIndicationBuilder builds LCS indications for an incident.
  *
  * @author Douglas Lau
  */
-public class LcsDeployModel {
+public class LcsIndicationBuilder {
 
 	/** Short distance upstream of incident to deploy devices */
 	static private final Distance DIST_SHORT = new Distance(0.5f, MILES);
@@ -94,27 +99,59 @@ public class LcsDeployModel {
 		return false;
 	}
 
+	/** Corridor finder */
+	private final CorridorFinder finder;
+
 	/** Incident in question */
 	private final Incident incident;
 
 	/** Lane configuration at incident */
 	private final LaneConfiguration config;
 
-	/** Create a new LCS deploy model.
+	/** Create a new LCS indication builder.
+	 * @param cf Corridor finder.
 	 * @param inc Incident for deployment.
 	 * @param conf Lane configuration at incident location. */
-	public LcsDeployModel(Incident inc, LaneConfiguration conf) {
+	public LcsIndicationBuilder(CorridorFinder cf, Incident inc) {
+		finder = cf;
 		incident = inc;
-		config = conf;
+		config = laneConfiguration(new IncidentLoc(inc));
+	}
+
+	/** Get lane configuration at a location */
+	private LaneConfiguration laneConfiguration(GeoLoc loc) {
+		String name = GeoLocHelper.getCorridorName(loc);
+		CorridorBase cb = finder.lookupCorridor(name);
+		return (cb != null)
+		      ? cb.laneConfiguration(new Position(loc.getLat(),
+				loc.getLon()))
+		      : null;
+	}
+
+	/** Get lane configuration at LCS array */
+	private LaneConfiguration laneConfiguration(LCSArray lcs_array) {
+		GeoLoc loc = LCSArrayHelper.lookupGeoLoc(lcs_array);
+		return (loc != null) ? laneConfiguration(loc) : null;
 	}
 
 	/** Create proposed indications for an LCS array.
-	 * @param cfg Lane configuration at LCS array location.
-	 * @param up Distance upstream from incident (miles).
 	 * @param lcs_array LCS array.
+	 * @param up Distance upstream from incident (miles).
 	 * @return Array of LaneUseIndication ordinal values, or null. */
-	public Integer[] createIndications(LaneConfiguration cfg, Distance up,
-		LCSArray lcs_array)
+	public Integer[] createIndications(LCSArray lcs_array, Distance up) {
+		LaneConfiguration cfg = laneConfiguration(lcs_array);
+		return (cfg != null)
+		      ? createIndications(lcs_array, up, cfg)
+		      : null;
+	}
+
+	/** Create proposed indications for an LCS array.
+	 * @param lcs_array LCS array.
+	 * @param up Distance upstream from incident (miles).
+	 * @param cfg Lane configuration at LCS array location.
+	 * @return Array of LaneUseIndication ordinal values, or null. */
+	private Integer[] createIndications(LCSArray lcs_array, Distance up,
+		LaneConfiguration cfg)
 	{
 		int n_lcs = lcs_array.getIndicationsCurrent().length;
 		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
@@ -137,7 +174,7 @@ public class LcsDeployModel {
 	 * @param n_lcs Number of lanes at LCS array.
 	 * @param lcs_shift Lane shift at LCS array.
 	 * @return Array of LaneUseIndication values. */
-	LaneUseIndication[] createIndications(LaneConfiguration cfg,
+	private LaneUseIndication[] createIndications(LaneConfiguration cfg,
 		Distance up, int n_lcs, int lcs_shift)
 	{
 		LaneUseIndication[] ind = new LaneUseIndication[n_lcs];
@@ -158,7 +195,7 @@ public class LcsDeployModel {
 	{
 		if (isShoulder(cfg, shift))
 			return LaneUseIndication.DARK;
-		if (isShoulder(config, shift))
+		if (config != null && isShoulder(config, shift))
 			return LaneUseIndication.LANE_OPEN;
 		double m = up.m();
 		if (m < 0)
@@ -189,10 +226,10 @@ public class LcsDeployModel {
 	private LaneUseIndication createIndicationShort(LaneConfiguration cfg,
 		int shift)
 	{
-		IncidentImpact ii = getImpact(shift);
+		LaneImpact ii = getImpact(shift);
 		if (ii == BLOCKED)
 			return LaneUseIndication.LANE_CLOSED;
-		else if (ii == PARTIALLY_BLOCKED ||isAdjacentLaneBlocked(shift))
+		else if (ii == AFFECTED || isAdjacentLaneBlocked(shift))
 			return LaneUseIndication.USE_CAUTION;
 		else
 			return LaneUseIndication.LANE_OPEN;
@@ -200,13 +237,15 @@ public class LcsDeployModel {
 
 	/** Get the impact at the specified lane.
 	 * @param shift Lane shift from left origin.
-	 * @return IncidentImpact for given lane, or null. */
-	private IncidentImpact getImpact(int shift) {
+	 * @return LaneImpact for given lane, or null. */
+	private LaneImpact getImpact(int shift) {
 		// FIXME: check lane continuity to incident
 		String impact = incident.getImpact();
-		int ln = shift - config.leftShift + 1;
+		int ln = shift;
+		if (config != null)
+			ln = ln - config.leftShift + 1;
 		if (ln >= 0 && ln < impact.length())
-			return IncidentImpact.fromChar(impact.charAt(ln));
+			return LaneImpact.fromChar(impact.charAt(ln));
 		else
 			return null;
 	}
@@ -215,8 +254,8 @@ public class LcsDeployModel {
 	 * @param shift Lane shift from left origin.
 	 * @return true if an adjacent lane is blocked, false otherwise. */
 	private boolean isAdjacentLaneBlocked(int shift) {
-		IncidentImpact left = getImpact(shift - 1);
-		IncidentImpact right = getImpact(shift + 1);
+		LaneImpact left = getImpact(shift - 1);
+		LaneImpact right = getImpact(shift + 1);
 		return left == BLOCKED || right == BLOCKED;
 	}
 
@@ -247,8 +286,8 @@ public class LcsDeployModel {
 	 * @param shift Lane shift from left origin.
 	 * @return true if lane is open, false otherwise. */
 	private boolean isLaneOpen(LaneConfiguration cfg, int shift) {
-		IncidentImpact ii = getImpact(shift);
-		return (ii == FREE_FLOWING) || (ii == PARTIALLY_BLOCKED);
+		LaneImpact ii = getImpact(shift);
+		return (ii == FREE_FLOWING) || (ii == AFFECTED);
 	}
 
 	/** Check if a lane is open and not a shoulder.
@@ -329,7 +368,7 @@ public class LcsDeployModel {
 	 * @param shift Lane shift from left origin.
 	 * @return true if lane is blocked, false otherwise. */
 	private boolean isLaneBlocked(int shift) {
-		IncidentImpact ii = getImpact(shift);
+		LaneImpact ii = getImpact(shift);
 		return (ii == null) || (ii == BLOCKED);
 	}
 

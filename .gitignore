@@ -1,0 +1,11 @@
+lib/
+build/
+iris-server-*
+iris-client-*
+bin/honeybee/target*
+*.rej
+*.orig
+*.swp
+
+# For Eclipse output
+bin/eclipse/

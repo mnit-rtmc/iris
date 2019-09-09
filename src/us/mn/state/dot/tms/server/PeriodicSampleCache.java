@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2018  Minnesota Department of Transportation
+ * Copyright (C) 2010-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +14,12 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentSkipListSet;
+import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 
 /**
@@ -24,6 +28,23 @@ import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
  * @author Douglas Lau
  */
 public class PeriodicSampleCache {
+
+	/** Sample cache debug log */
+	static private final DebugLog SAMPLE_LOG = new DebugLog("samples");
+
+	/** Threshold for minimum valid stamp */
+	static private final long SAMPLE_MIN_MS = new Interval(2,
+		Interval.Units.DAYS).ms();
+
+	/** Threshold for maximum valid stamp */
+	static private final long SAMPLE_MAX_MS = new Interval(1,
+		Interval.Units.HOURS).ms();
+
+	/** Check if a timestamp is valid */
+	static private boolean checkStamp(long ts) {
+		long now = TimeSteward.currentTimeMillis();
+		return (ts > now - SAMPLE_MIN_MS && ts < now + SAMPLE_MAX_MS);
+	}
 
 	/** Interpolate summed sample data into an array of values.
 	 * @param values Array of existing sample values.
@@ -124,14 +145,21 @@ public class PeriodicSampleCache {
 	 * If the sampling period is incompatable with existing samples, the
 	 * cache is cleared first.
 	 * @param ps Sample to add to the cache. */
-	public void add(PeriodicSample ps) {
-		if (sample_type.isValid(ps)) {
-			if (!isPeriodOk(ps.period))
-				samples.clear();
-			if (isPeriodSame(ps.period))
-				addSample(ps);
-			else
-				interpolate(ps);
+	public void add(PeriodicSample ps, String name) {
+		if (checkStamp(ps.stamp)) {
+			if (sample_type.isValid(ps)) {
+				if (!isPeriodOk(ps.period))
+					samples.clear();
+				if (isPeriodSame(ps.period))
+					addSample(ps);
+				else
+					interpolate(ps);
+			}
+		} else {
+			if (SAMPLE_LOG.isOpen()) {
+				SAMPLE_LOG.log(name + ": invalid stamp: " +
+					new Date(ps.stamp));
+			}
 		}
 	}
 

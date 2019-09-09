@@ -11,23 +11,22 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+#![forbid(unsafe_code)]
+
 #[macro_use]
 extern crate log;
 
 use std::env;
 use honeybee::fetcher;
-use users::get_current_username;
+use whoami;
 
 fn main() {
     env_logger::Builder::from_default_env()
                         .default_format_timestamp(false)
                         .init();
     let host = env::args().nth(1);
-    if let Some(username) = get_current_username() {
-        if let Err(e) = fetcher::start(username, host) {
-            error!("fetcher: {:?}", e);
-        }
-    } else {
-        error!("User name lookup error");
+    let username = whoami::username();
+    if let Err(e) = fetcher::start(&username, host) {
+        error!("fetcher: {:?}", e);
     }
 }

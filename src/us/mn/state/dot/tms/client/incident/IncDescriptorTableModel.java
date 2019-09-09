@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,7 +113,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 	@Override
 	protected ArrayList<ProxyColumn<IncDescriptor>> createColumns() {
 		ArrayList<ProxyColumn<IncDescriptor>> cols =
-			new ArrayList<ProxyColumn<IncDescriptor>>(6);
+			new ArrayList<ProxyColumn<IncDescriptor>>(5);
 		cols.add(new ProxyColumn<IncDescriptor>("incident.type", 100) {
 			public Object getValueAt(IncDescriptor dsc) {
 				return EventType.fromId(dsc.getEventType());
@@ -134,26 +134,6 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				JComboBox<EventType> cbx = createIncTypeCombo();
 				cbx.setRenderer(new EventTypeRenderer());
 				return new DefaultCellEditor(cbx);
-			}
-		});
-		cols.add(new ProxyColumn<IncDescriptor>("incident.lane_type",
-			96)
-		{
-			public Object getValueAt(IncDescriptor dsc) {
-				return LaneType.fromOrdinal(dsc.getLaneType());
-			}
-			public boolean isEditable(IncDescriptor dsc) {
-				return canWrite(dsc);
-			}
-			public void setValueAt(IncDescriptor dsc, Object value){
-				if (value instanceof LaneType) {
-					LaneType lt = (LaneType) value;
-					dsc.setLaneType((short) lt.ordinal());
-				}
-			}
-			protected TableCellEditor createCellEditor() {
-				return new DefaultCellEditor(IncidentCreator
-					.createLaneTypeCombo());
 			}
 		});
 		cols.add(new ProxyColumn<IncDescriptor>("incident.detail",
@@ -183,20 +163,24 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<IncDescriptor>("incident.clear", 50,
-			Boolean.class)
+		cols.add(new ProxyColumn<IncDescriptor>("incident.lane_type",
+			96)
 		{
 			public Object getValueAt(IncDescriptor dsc) {
-				return dsc.getCleared();
+				return LaneType.fromOrdinal(dsc.getLaneType());
 			}
 			public boolean isEditable(IncDescriptor dsc) {
 				return canWrite(dsc);
 			}
 			public void setValueAt(IncDescriptor dsc, Object value){
-				if (value instanceof Boolean) {
-					Boolean b = (Boolean) value;
-					dsc.setCleared(b);
+				if (value instanceof LaneType) {
+					LaneType lt = (LaneType) value;
+					dsc.setLaneType((short) lt.ordinal());
 				}
+			}
+			protected TableCellEditor createCellEditor() {
+				return new DefaultCellEditor(IncidentCreator
+					.createLaneTypeCombo());
 			}
 		});
 		cols.add(new ProxyColumn<IncDescriptor>("dms.multi.string", 300)
@@ -265,6 +249,18 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				int et1 = dsc1.getEventType();
 				if (et0 != et1)
 					return et0 - et1;
+				IncidentDetail dt0 = dsc0.getDetail();
+				IncidentDetail dt1 = dsc1.getDetail();
+				if (dt0 != dt1) {
+					if (dt0 == null)
+						return -1;
+					else if (dt1 == null)
+						return 1;
+					else {
+						return dt0.getName().compareTo(
+						       dt1.getName());
+					}
+				}
 				int lt0 = dsc0.getLaneType();
 				int lt1 = dsc1.getLaneType();
 				if (lt0 != lt1)

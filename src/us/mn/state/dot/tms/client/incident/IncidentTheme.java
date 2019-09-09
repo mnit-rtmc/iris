@@ -120,8 +120,8 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 		if (mo instanceof IncidentGeoLoc) {
 			IncidentGeoLoc loc = (IncidentGeoLoc) mo;
 			return getStyle(loc.getIncident());
-		}
-		return def_style;
+		} else
+			return getDefaultStyle();
 	}
 
 	/** Get an appropriate style for the given proxy object */

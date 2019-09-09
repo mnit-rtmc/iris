@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,10 @@ import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.CorridorFinder;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneConfiguration;
@@ -33,7 +35,6 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
-import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -42,8 +43,9 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class IncidentManager extends ProxyManager<Incident> {
-
+public class IncidentManager extends ProxyManager<Incident>
+	implements CorridorFinder<R_Node>
+{
 	/** Create a proxy descriptor */
 	static private ProxyDescriptor<Incident> descriptor(Session s) {
 		return new ProxyDescriptor<Incident>(
@@ -113,7 +115,8 @@ public class IncidentManager extends ProxyManager<Incident> {
 	@Override
 	protected IncidentLoc getGeoLoc(Incident proxy) {
 		IncidentLoc loc = new IncidentLoc(proxy);
-		CorridorBase cb = lookupCorridor(loc);
+		String name = GeoLocHelper.getCorridorName(loc);
+		CorridorBase cb = lookupCorridor(name);
 		if (cb != null) {
 			R_Node rnd = cb.findNearest(loc);
 			if (rnd != null)
@@ -122,9 +125,10 @@ public class IncidentManager extends ProxyManager<Incident> {
 		return loc;
 	}
 
-	/** Lookup the corridor for an incident location */
-	public CorridorBase lookupCorridor(IncidentLoc loc) {
-		return session.getR_NodeManager().lookupCorridor(loc);
+	/** Lookup the corridor by name */
+	@Override
+	public CorridorBase<R_Node> lookupCorridor(String name) {
+		return session.getR_NodeManager().lookupCorridor(name);
 	}
 
 	/** Get lane configuration at an incident */
@@ -133,7 +137,8 @@ public class IncidentManager extends ProxyManager<Incident> {
 		if (lt.isRamp())
 			return rampLaneConfiguration(inc);
 		IncidentLoc loc = new IncidentLoc(inc);
-		CorridorBase cb = lookupCorridor(loc);
+		String name = GeoLocHelper.getCorridorName(loc);
+		CorridorBase cb = lookupCorridor(name);
 		if (cb != null)
 			return cb.laneConfiguration(getWgs84Position(inc));
 		else
@@ -249,15 +254,20 @@ public class IncidentManager extends ProxyManager<Incident> {
 			return sty;
 	}
 
+	/** Get the style for an incident */
+	@Override
+	public Style getStyle(Incident inc) {
+		if (inc != null) {
+			Style sty = getTheme().getStyle(inc);
+			if (sty != null)
+				return sty;
+		}
+		return getTheme().getStyle(ItemStyle.INACTIVE.toString());
+	}
+
 	/** Get the icon for an incident */
 	@Override
 	public Icon getIcon(Incident inc) {
-		if (inc != null) {
-			Style sty = getStyle(inc);
-			if (sty != null)
-				return getTheme().getLegend(sty);
-		}
-		Style sty = getTheme().getStyle(ItemStyle.INACTIVE.toString());
-		return getTheme().getLegend(sty);
+		return getTheme().getLegend(getStyle(inc));
 	}
 }

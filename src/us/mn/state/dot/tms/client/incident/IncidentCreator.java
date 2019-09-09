@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
-import us.mn.state.dot.tms.IncidentImpact;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.LaneImpact;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
@@ -266,14 +266,15 @@ public class IncidentCreator extends JPanel {
 				dtl, (short) lt.ordinal(), road, dir,
 				(float) pos.getLatitude(),
 				(float) pos.getLongitude(),
-				IncidentImpact.fromLanes(n_lanes));
+				LaneImpact.fromLanes(n_lanes));
 			sel_mdl.setSelected(ci);
 		}
 	}
 
 	/** Get the lane count at the incident location */
 	private int getLaneCount(LaneType lt, GeoLoc loc) {
-		CorridorBase cb = r_node_manager.lookupCorridor(loc);
+		String name = GeoLocHelper.getCorridorName(loc);
+		CorridorBase cb = r_node_manager.lookupCorridor(name);
 		return (cb != null) ? cb.getLaneCount(lt, loc) : 0;
 	}
 

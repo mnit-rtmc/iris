@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -370,10 +370,12 @@ public class GeoLocHelper extends BaseHelper {
 		StringBuilder b = new StringBuilder();
 		b.append(roadway.getAbbrev());
 		b.append("/");
-		for (int i = 0; i < lm.length(); i++) {
-			char c = lm.charAt(i);
-			if (Character.isDigit(c))
-				b.append(c);
+		if (lm != null) {
+			for (int i = 0; i < lm.length(); i++) {
+				char c = lm.charAt(i);
+				if (Character.isDigit(c))
+					b.append(c);
+			}
 		}
 		b.append(rd.det_dir);
 		return b.toString();

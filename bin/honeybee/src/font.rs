@@ -1,17 +1,19 @@
-/*
- * Copyright (C) 2018-2019  Minnesota Department of Transportation
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- */
-use base64::{Config, CharacterSet, LineWrap, decode_config_slice};
+// font.rs
+//
+// Copyright (C) 2018-2019  Minnesota Department of Transportation
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+use base64::{Config, CharacterSet, decode_config_slice};
+use pix::{Raster, Rgb8};
 use postgres::{self, Connection};
 use serde_json;
 use std::collections::HashMap;
@@ -19,9 +21,20 @@ use std::fs::File;
 use std::io::{BufReader, Write};
 use std::path::{Path, PathBuf};
 use crate::error::Error;
-use crate::raster::Raster;
 use crate::resource::Queryable;
-use crate::multi::{ColorClassic, ColorScheme, SyntaxError};
+use crate::multi::{Color, ColorCtx, ColorScheme, SyntaxError};
+
+/// Convert BGR into Rgb8
+fn bgr_to_rgb8(bgr: i32) -> Rgb8 {
+    let r = (bgr >> 16) as u8;
+    let g = (bgr >> 8) as u8;
+    let b = (bgr >> 0) as u8;
+    Rgb8::new(r, g, b)
+}
+
+/// Length of base64 output buffer for glyphs.
+/// Encoded glyphs are restricted to 128 bytes.
+const GLYPH_LEN: usize = (128 + 3) / 4 * 3;
 
 /// A bitmap font glyph
 #[derive(Serialize, Deserialize)]
@@ -34,7 +47,7 @@ pub struct Glyph {
 impl Queryable for Glyph {
     /// Get the SQL to query all glyphs in a font
     fn sql() -> &'static str {
-       "SELECT code_point, width, pixels \
+       "SELECT code_point, width, replace(pixels, E'\n', '') AS pixels \
         FROM glyph_view \
         WHERE font = ($1) \
         ORDER BY code_point"
@@ -103,6 +116,34 @@ impl<'a> Font {
             None    => Err(SyntaxError::CharacterNotDefined(cp)),
         }
     }
+    /// Render a text span
+    pub fn render_text(&self, page: &mut Raster<Rgb8>, text: &str, mut x: u32,
+        y: u32, cs: u32, cf: Rgb8) -> Result<(), Error>
+    {
+        let h = self.height() as u32;
+        debug!("span: {}, left: {}, top: {}, height: {}", text, x, y, h);
+        let config = Config::new(CharacterSet::Standard, false);
+        let mut buf = [0; GLYPH_LEN];
+        for c in text.chars() {
+            let g = self.glyph(c)?;
+            let w = g.width() as u32;
+            let n = decode_config_slice(&g.pixels, config, &mut buf)?;
+            debug!("char: {}, width: {}, len: {}", c, w, n);
+            for yy in 0..h {
+                for xx in 0..w {
+                    let p = yy * w + xx;
+                    let by = p as usize / 8;
+                    let bi = 7 - (p & 7);
+                    let lit = ((buf[by] >> bi) & 1) != 0;
+                    if lit {
+                        page.set_pixel(x + xx, y + yy, cf);
+                    }
+                }
+            }
+            x += w + cs;
+        }
+        Ok(())
+    }
 }
 
 impl Queryable for Font {
@@ -159,6 +200,9 @@ pub struct Graphic {
     pixels           : String,
 }
 
+/// Function to lookup a pixel from a graphic buffer
+type PixFn = Fn(&Graphic, u32, u32, &ColorCtx, &[u8]) -> Option<Rgb8>;
+
 impl Graphic {
     /// Load graphics from a JSON file
     pub fn load(dir: &Path) -> Result<HashMap<i32, Graphic>, Error> {
@@ -184,23 +228,18 @@ impl Graphic {
         self.height as u32
     }
     /// Get the number of bits per pixel
-    fn bits_per_pixel(&self) -> Result<u32, Error> {
-        let cs = ColorScheme::from_str(&self.color_scheme)?;
-        Ok(match cs {
+    fn bits_per_pixel(&self) -> u32 {
+        match self.color_scheme[..].into() {
             ColorScheme::Monochrome1Bit => 1,
             ColorScheme::Monochrome8Bit => 8,
             ColorScheme::ColorClassic   => 8,
             ColorScheme::Color24Bit     => 24,
-        })
+        }
     }
     /// Render a graphic onto a Raster
-    pub fn render(&self, page: &mut Raster, cf: [u8;3], x: u32, y: u32)
-        -> Result<(), Error>
+    pub fn onto_raster(&self, page: &mut Raster<Rgb8>, x: u32, y: u32,
+        ctx: &ColorCtx) -> Result<(), Error>
     {
-        let config = Config::new(CharacterSet::Standard, false, true,
-            LineWrap::NoWrap);
-        let cs = ColorScheme::from_str(&self.color_scheme)?;
-        let bpp = self.bits_per_pixel()?;
         let x = x - 1; // x must be > 0
         let y = y - 1; // y must be > 0
         let w = self.width();
@@ -209,74 +248,87 @@ impl Graphic {
             // There is no GraphicTooBig syntax error
             return Err(SyntaxError::Other.into());
         }
-        let n = (w * h * bpp + 7) / 8;
-        let mut buf = vec!(0; n as usize);
-        let n = decode_config_slice(&self.pixels, config, &mut buf)?;
-        debug!("graphic: {}, width: {}, height: {}, len: {}", self.g_number,
-            w, h, n);
+        let buf = self.decode_base64()?;
+        let pix_fn = self.pixel_fn();
         for yy in 0..h {
             for xx in 0..w {
-                if let Some(clr) = self.get_pixel(cs, &buf, xx, yy, cf) {
+                if let Some(clr) = pix_fn(self, xx, yy, ctx, &buf) {
                     page.set_pixel(x + xx, y + yy, clr);
                 }
             }
         }
         Ok(())
     }
-    /// Get one pixel color
-    fn get_pixel(&self, cs: ColorScheme, buf: &[u8], x: u32, y: u32, cf: [u8;3])
-        -> Option<[u8;3]>
-    {
-        match cs {
-            ColorScheme::Monochrome1Bit => self.get_pixel_1(buf, x, y, cf),
-            ColorScheme::Monochrome8Bit => self.get_pixel_8(buf, x, y),
-            ColorScheme::ColorClassic   => self.get_pixel_classic(buf, x, y),
-            ColorScheme::Color24Bit     => self.get_pixel_24(buf, x, y),
+    /// Decode base64 data of graphic
+    fn decode_base64(&self) -> Result<Vec<u8>, Error> {
+        let config = Config::new(CharacterSet::Standard, false);
+        let bpp = self.bits_per_pixel();
+        let w = self.width();
+        let h = self.height();
+        let n = (w * h * bpp + 7) / 8;
+        let mut buf = vec!(0; n as usize);
+        let n = decode_config_slice(&self.pixels, config, &mut buf)?;
+        debug!("graphic: {}, width: {}, height: {}, len: {}", self.g_number,
+            w, h, n);
+        Ok(buf)
+    }
+    /// Get pixel lookup function for the color scheme
+    fn pixel_fn(&self) -> &PixFn {
+        match self.color_scheme[..].into() {
+            ColorScheme::Monochrome1Bit => &Graphic::pixel_1,
+            ColorScheme::Monochrome8Bit |
+            ColorScheme::ColorClassic => &Graphic::pixel_8,
+            ColorScheme::Color24Bit => &Graphic::pixel_24,
         }
     }
-    /// Get one pixel on a monochrome 1-bit graphic
-    fn get_pixel_1(&self, buf: &[u8], x: u32, y: u32, cf: [u8;3])
-        -> Option<[u8;3]>
+    /// Get one pixel of a monochrome 1-bit graphic
+    fn pixel_1(&self, x: u32, y: u32, ctx: &ColorCtx, buf: &[u8])
+        -> Option<Rgb8>
     {
         let p = y * self.width() + x;
         let by = p as usize / 8;
         let bi = 7 - (p & 7);
         let lit = ((buf[by] >> bi) & 1) != 0;
-        // FIXME: background color?
-        let cb = [0, 0, 0];
-        if lit {
-            Some(cf)
-        } else {
-            if let Some(tc) = self.transparent_color {
-                let r = (tc >> 16 & 0xFF) as u8;
-                let g = (tc >>  8 & 0xFF) as u8;
-                let b = (tc >>  0 & 0xFF) as u8;
-                if [r,g,b] == cb { None } else { Some(cb) }
-            } else {
-                Some(cb)
-            }
+        match (lit, self.transparent_color) {
+            (false, Some(0)) => None,
+            (true, Some(1)) => None,
+            (false, _) => Some(bgr_to_rgb8(ctx.background_bgr())),
+            (true, _) => Some(bgr_to_rgb8(ctx.foreground_bgr())),
         }
     }
-    /// Get one pixel on a monochrome 8-bit graphic
-    fn get_pixel_8(&self, buf: &[u8], x: u32, y: u32) -> Option<[u8;3]> {
+    /// Get one pixel of an 8-bit (monochrome or classic) color graphic
+    fn pixel_8(&self, x: u32, y: u32, ctx: &ColorCtx, buf: &[u8])
+        -> Option<Rgb8>
+    {
         let p = y * self.width() + x;
         let v = buf[p as usize];
-        Some([v, v, v])
+        if let Some(tc) = self.transparent_color {
+            if tc == v as i32 {
+                return None;
+            }
+        }
+        match ctx.rgb(Color::Legacy(v)) {
+            Some(rgb) => Some(rgb.into()),
+            None => {
+                debug!("pixel_8 -- Bad color {}", v);
+                None
+            },
+        }
     }
-    /// Get one pixel on a classic color graphic
-    fn get_pixel_classic(&self, buf: &[u8], x: u32, y: u32) -> Option<[u8;3]> {
-        let p = y * self.width() + x;
-        let v = buf[p as usize];
-        // FIXME: improve error handling
-        let c = ColorClassic::from_u8(v).unwrap();
-        Some(c.rgb())
-    }
-    /// Get one pixel on a 24-bit color graphic
-    fn get_pixel_24(&self, buf: &[u8], x: u32, y: u32) -> Option<[u8;3]> {
-        let p = (y * self.width() + x) * 3;
-        let r = buf[(p + 0) as usize];
-        let g = buf[(p + 1) as usize];
-        let b = buf[(p + 2) as usize];
-        Some([r, g, b])
+    /// Get one pixel of a 24-bit color graphic
+    fn pixel_24(&self, x: u32, y: u32, _ctx: &ColorCtx, buf: &[u8])
+        -> Option<Rgb8>
+    {
+        let p = 3 * (y * self.width() + x) as usize;
+        let r = buf[p + 0];
+        let g = buf[p + 1];
+        let b = buf[p + 2];
+        if let Some(tc) = self.transparent_color {
+            let rgb = ((r as i32) << 16) + ((g as i32) << 8) + b as i32;
+            if rgb == tc {
+                return None;
+            }
+        }
+        Some(Rgb8::new(r, g, b))
     }
 }

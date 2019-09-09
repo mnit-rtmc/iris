@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  * Copyright (C) 2017-2018  Iteris Inc.
  *
@@ -28,7 +28,6 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.RasterGraphic;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -106,24 +105,13 @@ public class DMSManager extends DeviceManager<DMS> {
 	/** Create a theme for DMSs */
 	@Override
 	protected ProxyTheme<DMS> createTheme() {
-		// NOTE: the ordering of themes controls which color is used
-		//       to render the sign icon on the map
-		ProxyTheme<DMS> theme = new ProxyTheme<DMS>(this,
-			new DmsMarker());
-		theme.addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(ItemStyle.SCHEDULED, ProxyTheme.COLOR_SCHEDULED);
-		theme.addStyle(ItemStyle.MAINTENANCE,
-			ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(ItemStyle.ALL);
-		return theme;
+		return new DmsTheme(this);
 	}
 
 	/** Create a list cell renderer */
 	@Override
 	public ListCellRenderer<DMS> createCellRenderer() {
-		return new DmsCellRenderer(getCellSize()) {
+		return new DmsCellRenderer(session, getCellSize()) {
 			@Override protected RasterGraphic getPageOne(DMS dms) {
 				return rasters.get(dms);
 			}
@@ -167,7 +155,12 @@ public class DMSManager extends DeviceManager<DMS> {
 	/** Check if a DMS style is visible */
 	@Override
 	protected boolean isStyleVisible(DMS dms) {
-		return !DMSHelper.isHidden(dms);
+		return isStyleAll(dms) || !DMSHelper.isHidden(dms);
+	}
+
+	/** Check if the selected style is ALL */
+	private boolean isStyleAll(DMS dms) {
+		return getSelectedStyle() == ItemStyle.ALL;
 	}
 
 	/** Create a proxy JList */

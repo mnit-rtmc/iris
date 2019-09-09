@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 	/** Load all the incident locators */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncLocatorImpl.class);
-		store.query("SELECT name, range, branched, pickable, multi, " +
+		store.query("SELECT name, range, branched, picked, multi, " +
 			"abbrev FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
@@ -52,7 +52,7 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 		map.put("name", name);
 		map.put("range", range);
 		map.put("branched", branched);
-		map.put("pickable", pickable);
+		map.put("picked", picked);
 		map.put("multi", multi);
 		map.put("abbrev", abbrev);
 		return map;
@@ -75,7 +75,7 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 		this(row.getString(1),          // name
 		     row.getInt(2),             // range
 		     row.getBoolean(3),         // branched
-		     row.getBoolean(4),         // pickable
+		     row.getBoolean(4),         // picked
 		     row.getString(5),          // multi
 		     row.getString(6)           // abbrev
 		);
@@ -88,7 +88,7 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 		super(n);
 		range = r;
 		branched = b;
-		pickable = p;
+		picked = p;
 		multi = m;
 		abbrev = a;
 	}
@@ -144,27 +144,27 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 		return branched;
 	}
 
-	/** Pickable flag */
-	private boolean pickable;
+	/** Picked flag */
+	private boolean picked;
 
-	/** Set the pickable flag */
+	/** Set the picked flag */
 	@Override
-	public void setPickable(boolean p) {
-		pickable = p;
+	public void setPicked(boolean p) {
+		picked = p;
 	}
 
-	/** Set the pickable flag */
-	public void doSetPickable(boolean p) throws TMSException {
-		if (p != pickable) {
-			store.update(this, "pickable", p);
-			setPickable(p);
+	/** Set the picked flag */
+	public void doSetPicked(boolean p) throws TMSException {
+		if (p != picked) {
+			store.update(this, "picked", p);
+			setPicked(p);
 		}
 	}
 
-	/** Get the pickable flag */
+	/** Get the picked flag */
 	@Override
-	public boolean getPickable() {
-		return pickable;
+	public boolean getPicked() {
+		return picked;
 	}
 
 	/** MULTI string */

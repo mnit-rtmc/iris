@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@ public class OccupancySample extends PeriodicSample {
 	/** Convert protocol-specific scans to occupancy (0 - 10000) */
 	static private int calculateOccupancy(int n_scans, int max_scans) {
 		assert(max_scans > 0);
-		if(n_scans >= 0)
-			return Math.round((float)n_scans / max_scans * MAX);
+		if (n_scans >= 0)
+			return Math.round((float) n_scans / max_scans * MAX);
 		else
 			return MISSING_DATA;
 	}
@@ -50,7 +50,7 @@ public class OccupancySample extends PeriodicSample {
 
 	/** Get sample as 60 Hz scan count */
 	public int as60HzScans() {
-		if(value >= 0)
+		if (value >= 0)
 			return Math.round(value * period * HZ_60 / MAX);
 		else
 			return MISSING_DATA;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
@@ -60,9 +59,6 @@ import us.mn.state.dot.tms.server.event.DetAutoFailEvent;
  */
 public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
-	/** Detector debug log */
-	static private final DebugLog DET_LOG = new DebugLog("detector");
-
 	/** Is detector auto-fail enabled? */
 	static private boolean isDetectorAutoFailEnabled() {
 		return SystemAttrEnum.DETECTOR_AUTO_FAIL_ENABLE.getBoolean();
@@ -76,43 +72,68 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Auto fail counter */
 	static private class AutoFailCounter {
+
+		/** Seconds required with state to trigger failure */
 		private final int trigger_threshold_sec;
+
+		/** Seconds required without state to clear failure */
 		private final int clear_threshold_sec;
-		private boolean state;
+
+		/** Failure checking state */
+		private boolean failed;
+
+		/** Number of seconds in current state */
 		private int state_sec;
+
+		/** Failure triggered state */
 		private boolean triggered;
+
+		/** Number of seconds since last logging of state */
 		private int logging_sec;
+
+		/** Create a new auto fail counter */
 		private AutoFailCounter(Interval t, Interval c) {
 			trigger_threshold_sec = t.round(SECONDS);
 			clear_threshold_sec = c.round(SECONDS);
-			state = false;
+			failed = false;
 			state_sec = 0;
 			triggered = false;
 			logging_sec = 0;
 		}
+		/** Create a new auto fail counter */
 		private AutoFailCounter() {
 			this(new Interval(0), new Interval(0));
 		}
-		private void update(int s, boolean st) {
-			if (st != state) {
+		/** Update the fail/trigger states.
+		 * @param s Number of seconds since last update.
+		 * @param st Fail state. */
+		private void updateState(int s, boolean st) {
+			if (st != failed) {
 				state_sec = 0;
-				state = st;
+				failed = st;
 			}
 			state_sec += s;
-			triggered = isEnabled() && updateTriggered();
+			triggered = isEnabled() && checkTriggered();
 		}
+		/** Check if the fail counter is enabled */
 		private boolean isEnabled() {
 			return trigger_threshold_sec > 0;
 		}
-		private boolean updateTriggered() {
-			return (state) ? checkTriggered() : checkTriggerHang();
-		}
+		/** Check the triggered state */
 		private boolean checkTriggered() {
+			return (failed)
+			      ? checkTriggeredNow()
+			      : checkTriggerHang();
+		}
+		/** Check if the fail status is currently triggered */
+		private boolean checkTriggeredNow() {
 			return triggered || state_sec > trigger_threshold_sec;
 		}
+		/** Check if the fail status is hung in triggered state */
 		private boolean checkTriggerHang() {
 			return triggered && state_sec < clear_threshold_sec;
 		}
+		/** Check if a trigger event should be logged */
 		private boolean checkLogging(int s) {
 			if (triggered) {
 				boolean first = (logging_sec == 0);
@@ -126,6 +147,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 				return false;
 			}
 		}
+		/** Check if the logging threshold time has elapsed */
 		private boolean checkLoggingThreshold() {
 			return logging_sec >= LOG_THRESHOLD.round(SECONDS);
 		}
@@ -207,12 +229,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			if (d instanceof DetectorImpl)
 				((DetectorImpl) d).updateAutoFail();
 		}
-	}
-
-	/** Log a message */
-	private void logMsg(String msg) {
-		if (DET_LOG.isOpen())
-			DET_LOG.log(getName() + ": " + msg);
 	}
 
 	/** Get a mapping of the columns */
@@ -358,6 +374,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			CLEAR_THRESHOLD);
 		no_change = new AutoFailCounter(getNoChangeThreshold(),
 			FAST_CLEAR_THRESHOLD);
+		updateAutoFail();
 	}
 
 	/** Get the vehicle count "no hit" threshold */
@@ -377,7 +394,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get the scan "locked on" threshold */
 	private Interval getLockedOnThreshold() {
-		return lane_type.lock_on_threshold;
+		return lane_type.getLockedOnThreshold();
 	}
 
 	/** Get the scan "no change" threshold */
@@ -475,16 +492,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return lane_type.isRamp();
 	}
 
-	/** Is this an onramp detector? */
-	public boolean isOnRamp() {
-		return lane_type.isOnRamp();
-	}
-
-	/** Is this an offRamp detector? */
-	public boolean isOffRamp() {
-		return lane_type.isOffRamp();
-	}
-
 	/** Is this a velocity detector? */
 	public boolean isVelocity() {
 		return lane_type.isVelocity();
@@ -543,6 +550,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			store.update(this, "abandoned", a);
 			setAbandoned(a);
 		}
+		resetAutoFailCounters();
 	}
 
 	/** Get the abandoned status */
@@ -729,8 +737,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	 * scn_cache to get "last_scans" value. */
 	private transient int last_scans = MISSING_DATA;
 
-	/** Scans from previous 30-second sample period */
-	private transient int prev_scans = MISSING_DATA;
+	/** Occupancy value from previous 30-second sample period */
+	private transient int prev_value = MISSING_DATA;
 
 	/** Speed from the last 30-second sample period.  FIXME: use
 	 * spd_cache to get "last_speed" value. */
@@ -739,15 +747,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Get the current vehicle count */
 	@Override
 	public int getVehCount(long start, long end) {
-		if (isSampling()) {
-			if (DET_LOG.isOpen()) {
-				int vc = veh_cache.getValue(start, end);
-				if (vc != veh_count_30 || "407".equals(name))
-					logMsg("vc30: " + veh_count_30 +
-					       "  vc: " + vc);
-			}
+		if (isSampling())
 			return veh_count_30;
-		} else
+		else
 			return MISSING_DATA;
 	}
 
@@ -878,16 +880,16 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		else {
 			switch (vc) {
 			case MOTORCYCLE:
-				mc_count_cache.add(v);
+				mc_count_cache.add(v, name);
 				break;
 			case SHORT:
-				s_count_cache.add(v);
+				s_count_cache.add(v, name);
 				break;
 			case MEDIUM:
-				m_count_cache.add(v);
+				m_count_cache.add(v, name);
 				break;
 			case LONG:
-				l_count_cache.add(v);
+				l_count_cache.add(v, name);
 				break;
 			}
 		}
@@ -899,7 +901,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		if (lane_type != LaneType.GREEN &&
 		    v.period == SAMPLE_PERIOD_SEC)
 			testVehCount(v);
-		veh_cache.add(v);
+		veh_cache.add(v, name);
 		if (v.period == SAMPLE_PERIOD_SEC) {
 			veh_count_30 = v.value;
 			/* FIXME: this shouldn't be needed */
@@ -909,10 +911,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Test a vehicle count sample with error detecting algorithms */
 	private void testVehCount(PeriodicSample vs) {
-		chatter.update(vs.period, vs.value > MAX_VEH_COUNT_30);
+		chatter.updateState(vs.period, vs.value > MAX_VEH_COUNT_30);
 		if (chatter.checkLogging(vs.period))
 			logEvent(EventType.DET_CHATTER);
-		no_hits.update(vs.period, vs.value == 0);
+		no_hits.updateState(vs.period, vs.value == 0);
 		if (no_hits.checkLogging(vs.period))
 			logEvent(EventType.DET_NO_HITS);
 		updateAutoFail();
@@ -939,10 +941,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		int n_scans = occ.as60HzScans();
 		if (occ.period == SAMPLE_PERIOD_SEC) {
 			testScans(occ);
-			prev_scans = occ.value;
+			prev_value = occ.value;
 			last_scans = n_scans;
 		}
-		scn_cache.add(new PeriodicSample(occ.stamp,occ.period,n_scans));
+		scn_cache.add(new PeriodicSample(occ.stamp, occ.period,
+			n_scans), name);
 	}
 
 	/** Test an occupancy sample with error detecting algorithms */
@@ -952,12 +955,12 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		// non-zero samples.  This helps when the duration of
 		// occupancy spikes is shorter than the threshold time
 		// and interspersed with zeroes.
-		boolean hold = locked_on.triggered && (occ.value == 0);
-		locked_on.update(occ.period, lock || hold);
+		boolean hold = locked_on.failed && (occ.value == 0);
+		locked_on.updateState(occ.period, lock || hold);
 		if (locked_on.checkLogging(occ.period))
 			logEvent(EventType.DET_LOCKED_ON);
-		boolean v = (occ.value > 0) && (occ.value == prev_scans);
-		no_change.update(occ.period, v);
+		boolean v = (occ.value > 0) && (occ.value == prev_value);
+		no_change.updateState(occ.period, v);
 		if (no_change.checkLogging(occ.period))
 			logEvent(EventType.DET_NO_CHANGE);
 		updateAutoFail();
@@ -966,13 +969,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Store one speed sample for this detector.
 	 * @param speed PeriodicSample containing speed data. */
 	public void storeSpeed(PeriodicSample speed) {
-		spd_cache.add(speed);
+		spd_cache.add(speed, name);
 		if (speed.period == SAMPLE_PERIOD_SEC)
 			last_speed = speed.value;
 	}
 
 	/** Flush buffered data to disk */
-	public void flush(PeriodicSampleWriter writer) throws IOException {
+	public void flush(PeriodicSampleWriter writer) {
 		writer.flush(veh_cache, name);
 		writer.flush(scn_cache, name);
 		writer.flush(spd_cache, name);
@@ -1021,10 +1024,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			last_scans = v_log.getOccupancy().as60HzScans();
 			last_speed = v_log.getSpeed();
 			v_log.binEventSamples();
-			chatter.update(30, veh_count_30 > MAX_VEH_COUNT_30);
+			chatter.updateState(30, veh_count_30 > MAX_VEH_COUNT_30);
 			if (chatter.checkLogging(30))
 				logEvent(EventType.DET_CHATTER);
-			no_hits.update(30, veh_count_30 == 0);
+			no_hits.updateState(30, veh_count_30 == 0);
 			if (no_hits.checkLogging(30))
 				logEvent(EventType.DET_NO_HITS);
 			updateAutoFail();

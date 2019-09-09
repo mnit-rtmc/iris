@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@ import java.util.LinkedList;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import us.mn.state.dot.tms.IncidentImpact;
 import us.mn.state.dot.tms.LaneConfiguration;
+import us.mn.state.dot.tms.LaneImpact;
 import static us.mn.state.dot.tms.R_Node.MAX_SHIFT;
 
 /**
@@ -49,29 +49,29 @@ public class ImpactPanel extends JPanel {
 	/** Color for blocked impact */
 	static private final Color COLOR_BLOCKED = new Color(208, 64, 64);
 
-	/** Image for partially-blocked impact */
-	static private final BufferedImage IMAGE_CAUTION =
+	/** Image for affected impact */
+	static private final BufferedImage IMAGE_AFFECTED =
 		new BufferedImage(4, 4, BufferedImage.TYPE_INT_ARGB);
 	static {
-		IMAGE_CAUTION.setRGB(0, 0, 0xffffff22);
-		IMAGE_CAUTION.setRGB(1, 1, 0xffffff22);
-		IMAGE_CAUTION.setRGB(2, 2, 0xffffff22);
-		IMAGE_CAUTION.setRGB(3, 3, 0xffffff22);
+		IMAGE_AFFECTED.setRGB(0, 0, 0xffffff22);
+		IMAGE_AFFECTED.setRGB(1, 1, 0xffffff22);
+		IMAGE_AFFECTED.setRGB(2, 2, 0xffffff22);
+		IMAGE_AFFECTED.setRGB(3, 3, 0xffffff22);
 	}
 
-	/** Paint for caution impact */
-	static private final TexturePaint PAINT_CAUTION = new TexturePaint(
-		IMAGE_CAUTION, new Rectangle2D.Float(0, 0, 4, 4));
+	/** Paint for affected impact */
+	static private final TexturePaint PAINT_AFFECTED = new TexturePaint(
+		IMAGE_AFFECTED, new Rectangle2D.Float(0, 0, 4, 4));
 
-	/** Get next incident impact */
-	static private IncidentImpact nextImpact(IncidentImpact v) {
-		switch(v) {
+	/** Get next lane impact */
+	static private LaneImpact nextImpact(LaneImpact v) {
+		switch (v) {
 		case FREE_FLOWING:
-			return IncidentImpact.BLOCKED;
+			return LaneImpact.BLOCKED;
 		case BLOCKED:
-			return IncidentImpact.PARTIALLY_BLOCKED;
+			return LaneImpact.AFFECTED;
 		default:
-			return IncidentImpact.FREE_FLOWING;
+			return LaneImpact.FREE_FLOWING;
 		}
 	}
 
@@ -82,25 +82,25 @@ public class ImpactPanel extends JPanel {
 			lane = ln;
 			addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
-					IncidentImpact im = impact[lane];
-					if(im != null)
+					LaneImpact im = impact[lane];
+					if (im != null)
 						incrementImpact(im);
 				}
 			});
 		}
-		private void incrementImpact(IncidentImpact im) {
+		private void incrementImpact(LaneImpact im) {
 			impact[lane] = nextImpact(im);
 			fireStateChanged();
 		}
 		public void paintComponent(Graphics g) {
-			IncidentImpact im = impact[lane];
-			if(im != null) {
+			LaneImpact im = impact[lane];
+			if (im != null) {
 				Graphics2D g2 = (Graphics2D)g.create(0, 0,
 					pixels, pixels);
 				drawImpact(g2, im);
 			}
 		}
-		private void drawImpact(Graphics2D g, IncidentImpact im) {
+		private void drawImpact(Graphics2D g, LaneImpact im) {
 			int p = pixels / 2;
 			int o = p / 2;
 			g.setStroke(LINE_IMPACT);
@@ -113,8 +113,8 @@ public class ImpactPanel extends JPanel {
 				g.setColor(COLOR_BLOCKED);
 				g.fillRect(o, o, p, p);
 				break;
-			case PARTIALLY_BLOCKED:
-				g.setPaint(PAINT_CAUTION);
+			case AFFECTED:
+				g.setPaint(PAINT_AFFECTED);
 				g.fillRect(o, o, p, p);
 				g.setPaint(null);
 				break;
@@ -137,9 +137,8 @@ public class ImpactPanel extends JPanel {
 	private final LaneImpactPanel[] imp_pnl =
 		new LaneImpactPanel[MAX_SHIFT + 1];
 
-	/** Incident impact array */
-	private final IncidentImpact[] impact =
-		new IncidentImpact[MAX_SHIFT + 1];
+	/** Lane impact array */
+	private final LaneImpact[] impact = new LaneImpact[MAX_SHIFT + 1];
 
 	/** Lane configuration at incident */
 	private LaneConfiguration config = new LaneConfiguration(0, 0);
@@ -154,19 +153,19 @@ public class ImpactPanel extends JPanel {
 
 	/** Set the impact */
 	public void setImpact(String im) {
-		IncidentImpact[] imp = IncidentImpact.fromString(im);
-		for(int i = 0; i < impact.length; i++)
+		LaneImpact[] imp = LaneImpact.fromString(im);
+		for (int i = 0; i < impact.length; i++)
 			impact[i] = impactShift(imp, i);
 		repaint();
 	}
 
 	/** Get a shifted incident impact.
-	 * @param imp Array of incident impact values.
+	 * @param imp Array of lane impact values.
 	 * @param shift Lane shift.
-	 * @return Incident impact at specified lane. */
-	private IncidentImpact impactShift(IncidentImpact[] imp, int shift) {
+	 * @return Impact at specified lane. */
+	private LaneImpact impactShift(LaneImpact[] imp, int shift) {
 		int ln = shift + 1 - config.leftShift;
-		if(ln >= 0 && ln < imp.length)
+		if (ln >= 0 && ln < imp.length)
 			return imp[ln];
 		else
 			return null;
@@ -175,13 +174,13 @@ public class ImpactPanel extends JPanel {
 	/** Get the impact */
 	public String getImpact() {
 		int lanes = config.getLanes() + 2;
-		IncidentImpact[] imp = new IncidentImpact[lanes];
-		for(int i = 0; i < imp.length; i++) {
+		LaneImpact[] imp = new LaneImpact[lanes];
+		for (int i = 0; i < imp.length; i++) {
 			int s = config.leftShift + i - 1;
-			if(s >= 0 && s < impact.length)
+			if (s >= 0 && s < impact.length)
 				imp[i] = impact[s];
 		}
-		return IncidentImpact.fromArray(imp);
+		return LaneImpact.fromArray(imp);
 	}
 
 	/** Create a new impact panel.

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,11 +33,12 @@ public class GrowQueueAction extends ProxyAction<RampMeter> {
 	}
 
 	/** Actually perform the action */
+	@Override
 	protected void doActionPerformed(ActionEvent e) {
-		if(proxy != null) {
+		if (proxy != null) {
 			Integer rate = proxy.getRate();
-			if(rate != null)
-				proxy.setRateNext(rate - 150);
+			if (rate != null)
+				proxy.setRateNext(rate - 50);
 		}
 	}
 }

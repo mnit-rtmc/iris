@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -94,37 +94,6 @@ public class SignMessageHelper extends BaseHelper {
 		int srct = src           | SRC_IGNORE;
 		int sms = sm.getSource() | SRC_IGNORE;
 		return srct == sms;
-	}
-
-	/** Return an array of font names in a message.
-	 * @param f_num Default font number, one based.
-	 * @return A string array with length equal to the number
-	 *	    of pages in the message */
-	static public String[] getFontNames(SignMessage sm, int f_num) {
-		int[] fn = getFonts(sm, f_num);
-		if (fn == null || fn.length <= 0)
-			return new String[0];
-		String[] fns = new String[fn.length];
-		for (int i = 0; i < fns.length; ++i) {
-			Font font = FontHelper.find(fn[i]);
-			if (font != null)
-				fns[i] = font.getName();
-			else
-				fns[i] = "Font #" + fn[i];
-		}
-		return fns;
-	}
-
-	/** Get an array of font numbers in a message.
-	 * @param f_num Default font number, one based.
-	 * @return An array of font numbers for each page of the message. */
-	static private int[] getFonts(SignMessage sm, int f_num) {
-		if (sm == null)
-			return new int[0];
-		else {
-			MultiString m = new MultiString(sm.getMulti());
-			return m.getFonts(f_num);
-		}
 	}
 
 	/** Check if a sign message is blank */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,11 +94,18 @@ public class SignMessageCreator {
 	 * @param sc Sign configuration.
 	 * @param inc Associated incident (original name).
 	 * @param multi MULTI text.
+	 * @param mp Message priority.
+	 * @param duration Message duration; null for indefinite.
 	 * @return New sign message, or null on error.
 	 */
-	public SignMessage create(SignConfig sc, String inc, String multi) {
-		return create(sc, inc, multi, false, DmsMsgPriority.INCIDENT_MED,
-			INCIDENT_SRC, user, null);
+	public SignMessage create(SignConfig sc, String inc, String multi,
+		DmsMsgPriority mp, Integer duration)
+	{
+		if (multi.length() > 0) {
+			return create(sc, inc, multi, false, mp, INCIDENT_SRC,
+				user, duration);
+		} else
+			return createBlankMessage(sc);
 	}
 
 	/** Create a new sign message.
