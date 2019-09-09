@@ -54,37 +54,35 @@ public enum IncImpact {
 	/** Get the impact of an incident */
 	static public IncImpact getImpact(Incident inc) {
 		LaneImpact[] li = LaneImpact.fromString(inc.getImpact());
-		int blocked_groups = countGroups(li, LaneImpact.BLOCKED);
-		if (blocked_groups > 0) {
-			if (isLeftLane(li, LaneImpact.BLOCKED) &&
-			    isRightLane(li, LaneImpact.BLOCKED))
-				return IncImpact.lanes_blocked;
-			else if (blocked_groups == 1) {
-				if (isLeftLane(li, LaneImpact.BLOCKED))
-					return IncImpact.left_lanes_blocked;
-				else if (isRightLane(li, LaneImpact.BLOCKED))
-					return IncImpact.right_lanes_blocked;
-			}
+		// Check for BLOCKED lanes
+		if (isLeftLane(li, LaneImpact.BLOCKED) &&
+		    isRightLane(li, LaneImpact.BLOCKED))
+			return IncImpact.lanes_blocked;
+		else if (isLeftLane(li, LaneImpact.BLOCKED))
+			return IncImpact.left_lanes_blocked;
+		else if (isRightLane(li, LaneImpact.BLOCKED))
+			return IncImpact.right_lanes_blocked;
+		else if (isAnyLane(li, LaneImpact.BLOCKED))
 			return IncImpact.center_lanes_blocked;
-		} else if (isBothShoulders(li, LaneImpact.BLOCKED))
+		// Check for BLOCKED shoulders
+		else if (isBothShoulders(li, LaneImpact.BLOCKED))
 			return IncImpact.both_shoulders_blocked;
 		else if (isLeftShoulder(li, LaneImpact.BLOCKED))
 			return IncImpact.left_shoulder_blocked;
 		else if (isRightShoulder(li, LaneImpact.BLOCKED))
 			return IncImpact.right_shoulder_blocked;
-		int affected_groups = countGroups(li, LaneImpact.AFFECTED);
-		if (affected_groups > 0) {
-			if (isLeftLane(li, LaneImpact.AFFECTED) &&
-			    isRightLane(li, LaneImpact.AFFECTED))
-				return IncImpact.lanes_affected;
-			else if (affected_groups == 1) {
-				if (isLeftLane(li, LaneImpact.AFFECTED))
-					return IncImpact.left_lanes_affected;
-				else if (isRightLane(li, LaneImpact.AFFECTED))
-					return IncImpact.right_lanes_affected;
-			}
+		// Check for AFFECTED lanes
+		else if (isLeftLane(li, LaneImpact.AFFECTED) &&
+		         isRightLane(li, LaneImpact.AFFECTED))
+			return IncImpact.lanes_affected;
+		else if (isLeftLane(li, LaneImpact.AFFECTED))
+			return IncImpact.left_lanes_affected;
+		else if (isRightLane(li, LaneImpact.AFFECTED))
+			return IncImpact.right_lanes_affected;
+		else if (isAnyLane(li, LaneImpact.AFFECTED))
 			return IncImpact.center_lanes_affected;
-		} else if (isBothShoulders(li, LaneImpact.AFFECTED))
+		// Check for AFFECTED shoulders
+		else if (isBothShoulders(li, LaneImpact.AFFECTED))
 			return IncImpact.both_shoulders_affected;
 		else if (isLeftShoulder(li, LaneImpact.AFFECTED))
 			return IncImpact.left_shoulder_affected;
@@ -94,17 +92,13 @@ public enum IncImpact {
 			return IncImpact.free_flowing;
 	}
 
-	/** Count groups of non-shoulder lanes with given impact */
-	static private int countGroups(LaneImpact[] li, LaneImpact v) {
-		int groups = 0;
-		boolean in_group = false;
+	/** Check if any lane has given impact */
+	static private boolean isAnyLane(LaneImpact[] li, LaneImpact v) {
 		for (int i = 1; i < li.length - 1; i++) {
-			boolean g = (li[i] == v);
-			if (g && !in_group)
-				groups += 1;
-			in_group = g;
+			if (li[i] == v)
+				return true;
 		}
-		return groups;
+		return false;
 	}
 
 	/** Check if left lane has given impact */
@@ -184,7 +178,7 @@ public enum IncImpact {
 	/** Check if any lanes are blocked */
 	static private boolean isBlocked(Incident inc) {
 		LaneImpact[] li = LaneImpact.fromString(inc.getImpact());
-		return countGroups(li, LaneImpact.BLOCKED) > 0;
+		return isAnyLane(li, LaneImpact.BLOCKED);
 	}
 
 	/** Get count of impacted lanes.
