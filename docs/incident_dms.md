@@ -12,27 +12,27 @@ used only when the normal version does not fit the sign.
 ## Impact
 
 Every incident is assigned an **impact**, based on which lanes are *blocked* or
-*affected*.  They are ordered based on their effect on traffic.  If both left
-and right lanes are blocked, the impact is `lanes_blocked`.  The same applies
-for `lanes_affected`.
+*affected*.  If any lane or shoulder is *blocked*, then one of the `_blocked`
+impacts is used.  Otherwise, a lane or shoulder may be *affected*, meaning it
+is partially blocked by *e.g.* debris.
 
-Impact | Description
--------|--------------------
- 0     | `lanes_blocked`
- 1     | `left_lanes_blocked`
- 2     | `right_lanes_blocked`
- 3     | `center_lanes_blocked`
- 4     | `both_shoulders_blocked`
- 5     | `left_shoulder_blocked`
- 6     | `right_shoulder_blocked`
- 7     | `lanes_affected`
- 8     | `left_lanes_affected`
- 9     | `right_lanes_affected`
-10     | `center_lanes_affected`
-11     | `both_shoulders_affected`
-12     | `left_shoulder_affected`
-13     | `right_shoulder_affected`
-14     | `free_flowing`
+Impact                    | Description
+--------------------------|------------------------------------------------
+`lanes_blocked`           | Left & right lanes blocked (could be all lanes)
+`left_lanes_blocked`      | Left lane blocked, right lane open
+`right_lanes_blocked`     | Right lane blocked, left lane open
+`center_lanes_blocked`    | Center lane(s) blocked, left & right lanes open
+`both_shoulders_blocked`  | Left & right shoulders blocked, all lanes open
+`left_shoulder_blocked`   | Left shoulder blocked, all lanes open
+`right_shoulder_blocked`  | Right shoulder blocked, all lanes open
+`lanes_affected`          | Left & right lanes affected (could be all lanes)
+`left_lanes_affected`     | Left lane affected, right lane open
+`right_lanes_affected`    | Right lane affected, left lane open
+`center_lanes_affected`   | Center lane(s) affected, left & right lanes open
+`both_shoulders_affected` | Left & right shoulders affected, all lanes open
+`left_shoulder_affected`  | Left shoulder affected, all lanes open
+`right_shoulder_affected` | Right shoulder affected, all lanes open
+`free_flowing`            | No impact
 
 ## Range
 
