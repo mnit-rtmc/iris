@@ -20,6 +20,7 @@ import java.util.Iterator;
 import javax.swing.DefaultListModel;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.LCSArray;
@@ -111,7 +112,7 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	private void addUpstreamDMS(DMS dms, UpstreamDevice ud) {
 		MultiString ms = dms_builder.createMulti(dms, ud, false);
 		if (ms != null) {
-			RasterGraphic rg = dms_builder.createGraphic(dms, ms);
+			RasterGraphic rg = DMSHelper.createPageOne(dms, ms);
 			if (rg != null) {
 				addElement(dms);
 				messages.put(dms.getName(), ms);

@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.IncLocator;
 import us.mn.state.dot.tms.IncLocatorHelper;
 import us.mn.state.dot.tms.IncRange;
 import us.mn.state.dot.tms.LaneType;
-import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -139,18 +138,19 @@ public class DmsDeployBuilder {
 			adv_multi = adv.getMulti();
 			adv_abbrev = adv.getAbbrev();
 		}
-		String mdsc = checkMulti(dms, dsc.getMulti(), dsc.getAbbrev(),
-			up, loc);
+		LocMultiBuilder lmb = new LocMultiBuilder(loc, up);
+		String mdsc = checkMulti(lmb, dms, dsc.getMulti(),
+			dsc.getAbbrev());
 		if (null == mdsc)
 			return null;
-		String mloc = checkMulti(dms, iloc.getMulti(), iloc.getAbbrev(),
-			up, loc);
+		String mloc = checkMulti(lmb, dms, iloc.getMulti(),
+			iloc.getAbbrev());
 		if (null == mloc)
 			return null;
-		String madv = checkMulti(dms, adv_multi, adv_abbrev, up, loc);
+		String madv = checkMulti(lmb, dms, adv_multi, adv_abbrev);
 		if (null == madv)
 			return null;
-		LocMultiBuilder lmb = new LocMultiBuilder(loc, up);
+		lmb.clear();
 		new MultiString(mdsc).parse(lmb);
 		lmb.addLine(null);
 		new MultiString(mloc).parse(lmb);
@@ -167,33 +167,20 @@ public class DmsDeployBuilder {
 	}
 
 	/** Check if MULTI string or abbreviation will fit on a DMS */
-	private String checkMulti(DMS dms, String ms, String abbrev,
-		Distance up, GeoLoc loc)
+	private String checkMulti(LocMultiBuilder lmb, DMS dms, String ms,
+		String abbrev)
 	{
-		String res = checkMulti(dms, ms, up, loc);
-		return (res != null) ? res : checkMulti(dms, abbrev, up, loc);
+		String res = checkMulti(lmb, dms, ms);
+		return (res != null) ? res : checkMulti(lmb, dms, abbrev);
 	}
 
 	/** Check if MULTI string will fit on a DMS */
-	private String checkMulti(DMS dms, String ms, Distance up, GeoLoc loc) {
+	private String checkMulti(LocMultiBuilder lmb, DMS dms, String ms) {
 		if (null == ms)
 			return null;
-		LocMultiBuilder lmb = new LocMultiBuilder(loc, up);
+		lmb.clear();
 		new MultiString(ms).parse(lmb);
 		MultiString multi = lmb.toMultiString();
-		return (createGraphic(dms, multi) != null) ? ms : null;
-	}
-
-	/** Create the page one graphic for a MULTI string */
-	public RasterGraphic createGraphic(DMS dms, MultiString ms) {
-		try {
-			RasterGraphic[] pixmaps = DMSHelper.createPixmaps(dms,
-				ms);
-			return pixmaps[0];
-		}
-		catch (Exception e) {
-			// could be IndexOutOfBounds or InvalidMessage
-			return null;
-		}
+		return (DMSHelper.createPageOne(dms, multi) != null) ? ms : null;
 	}
 }
