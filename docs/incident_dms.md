@@ -18,7 +18,7 @@ is partially blocked by *e.g.* debris.
 
 Impact                    | Description
 --------------------------|------------------------------------------------
-`lanes_blocked`           | Left & right lanes blocked (could be all lanes)
+`lanes_blocked`           | Left & right lanes blocked (possibly all lanes)
 `left_lanes_blocked`      | Left lane blocked, right lane open
 `right_lanes_blocked`     | Right lane blocked, left lane open
 `center_lanes_blocked`    | Center lane(s) blocked, left & right lanes open
