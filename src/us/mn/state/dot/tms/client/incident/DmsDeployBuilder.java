@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.incident;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.CorridorFinder;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
@@ -42,6 +41,16 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Douglas Lau
  */
 public class DmsDeployBuilder {
+
+	/** Get cleared incident advice MULTI string */
+	static private String clearedAdviceMulti() {
+		return SystemAttrEnum.INCIDENT_CLEAR_ADVICE_MULTI.getString();
+	}
+
+	/** Get cleared incident advice abbreviation */
+	static private String clearedAdviceAbbrev() {
+		return SystemAttrEnum.INCIDENT_CLEAR_ADVICE_ABBREV.getString();
+	}
 
 	/** Get the r_node type checker */
 	static private R_NodeType.Checker getChecker(short lto) {
@@ -114,49 +123,33 @@ public class DmsDeployBuilder {
 		boolean cleared)
 	{
 		boolean branched = !isCorridorSame(dms);
-		Distance up = ud.distance;
+		Distance dist = ud.distance;
 		IncRange rng = ud.range();
 		if (null == rng)
 			return null;
-		IncDescriptor dsc = IncDescriptorHelper.match(inc);
-		if (null == dsc)
+		IncMultiBuilder builder = new IncMultiBuilder(dms, loc, dist);
+		// Add incident descriptor line
+		IncDescriptor idsc = IncDescriptorHelper.match(inc);
+		if (null == idsc ||
+		   !builder.addLine(idsc.getMulti(), idsc.getAbbrev()))
 			return null;
+		// Add incident locator line
 		IncLocator iloc = IncLocatorHelper.match(rng, branched, picked);
-		if (null == iloc)
+		if (null == iloc ||
+		   !builder.addLine(iloc.getMulti(), iloc.getAbbrev()))
 			return null;
-		String adv_multi;
-		String adv_abbrev;
+		// Add incident advice line
 		if (cleared) {
-			adv_multi = SystemAttrEnum.INCIDENT_CLEAR_ADVICE_MULTI
-				.getString();
-			adv_abbrev = SystemAttrEnum.INCIDENT_CLEAR_ADVICE_ABBREV
-				.getString();
-		} else {
-			IncAdvice adv = IncAdviceHelper.match(rng, inc);
-			if (null == adv)
+			if (!builder.addLine(clearedAdviceMulti(),
+			    clearedAdviceAbbrev()))
 				return null;
-			adv_multi = adv.getMulti();
-			adv_abbrev = adv.getAbbrev();
+		} else {
+			IncAdvice iadv = IncAdviceHelper.match(rng, inc);
+			if (null == iadv ||
+			   !builder.addLine(iadv.getMulti(), iadv.getAbbrev()))
+				return null;
 		}
-		LocMultiBuilder lmb = new LocMultiBuilder(loc, up);
-		String mdsc = checkMulti(lmb, dms, dsc.getMulti(),
-			dsc.getAbbrev());
-		if (null == mdsc)
-			return null;
-		String mloc = checkMulti(lmb, dms, iloc.getMulti(),
-			iloc.getAbbrev());
-		if (null == mloc)
-			return null;
-		String madv = checkMulti(lmb, dms, adv_multi, adv_abbrev);
-		if (null == madv)
-			return null;
-		lmb.clear();
-		new MultiString(mdsc).parse(lmb);
-		lmb.addLine(null);
-		new MultiString(mloc).parse(lmb);
-		lmb.addLine(null);
-		new MultiString(madv).parse(lmb);
-		return lmb.toMultiString();
+		return builder.toMultiString();
 	}
 
 	/** Check if a DMS is on same corridor as incident */
@@ -164,23 +157,5 @@ public class DmsDeployBuilder {
 		GeoLoc loc = dms.getGeoLoc();
 		return loc.getRoadway() == inc.getRoad()
                     && loc.getRoadDir() == inc.getDir();
-	}
-
-	/** Check if MULTI string or abbreviation will fit on a DMS */
-	private String checkMulti(LocMultiBuilder lmb, DMS dms, String ms,
-		String abbrev)
-	{
-		String res = checkMulti(lmb, dms, ms);
-		return (res != null) ? res : checkMulti(lmb, dms, abbrev);
-	}
-
-	/** Check if MULTI string will fit on a DMS */
-	private String checkMulti(LocMultiBuilder lmb, DMS dms, String ms) {
-		if (null == ms)
-			return null;
-		lmb.clear();
-		new MultiString(ms).parse(lmb);
-		MultiString multi = lmb.toMultiString();
-		return (DMSHelper.createPageOne(dms, multi) != null) ? ms : null;
 	}
 }
