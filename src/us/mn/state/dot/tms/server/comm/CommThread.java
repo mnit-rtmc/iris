@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,6 @@ import java.net.SocketTimeoutException;
 import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.EventType;
 import static us.mn.state.dot.tms.EventType.COMM_ERROR;
 import static us.mn.state.dot.tms.EventType.CONNECTION_REFUSED;
