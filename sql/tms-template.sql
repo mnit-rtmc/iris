@@ -145,7 +145,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	5.1.0
+database_version	5.2.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0
@@ -1330,6 +1330,7 @@ COPY iris.device_purpose (id, description) FROM stdin;
 3	parking
 4	travel time
 5	safety
+6	lane use
 \.
 
 --

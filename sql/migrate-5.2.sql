@@ -30,4 +30,7 @@ UPDATE iris.inc_impact SET description = 'lanes blocked' WHERE id = 0;
 UPDATE iris.inc_impact SET description = 'lanes affected' WHERE id = 7;
 UPDATE iris.inc_impact SET description = 'free flowing' WHERE id = 14;
 
+-- Add lane use device purpose
+INSERT INTO iris.device_purpose (id, description) VALUES ('6', 'lane use');
+
 COMMIT;
