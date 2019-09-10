@@ -1,5 +1,22 @@
 # IRIS 5.x Release Notes
 
+5.2.0 (10 Sep 2019)
+ - Add markers for dedicated purpose DMS (tolling, parking, wayfinding).
+ - Fixed some incident DMS deployment bugs.
+ - Added `incident_clear_advice_multi` and `incident_clear_advice_abbrev`
+   system attributes.
+ - Removed `cleared` from inc_advice table.
+ - Changed `all_lanes_blocked` incident impact to `lanes_blocked`.  Also,
+   `all_lanes_affected` to `lanes_affected`.
+ - Increased `middle` and `far` incident deployment ranges to 5 and 9 exits,
+   respectively.
+ - Restricted `ahead` range to less than about 1 mile.
+ - Incident deployment: use dedicated tolling signs when left lane is impacted
+   and sign is on same corridor as incident.
+ - Added `lane use` dedicated device purpose.
+ - Log FAIL DOMAIN events in client event table.
+ - Sort comm protocols by description in comm link UI combo box.
+
 5.1.0 (4 Sep 2019)
  - Add device purpose for DMS (wayfinding, safety, etc.)
  - Send PTZ stop command to all cameras on startup
