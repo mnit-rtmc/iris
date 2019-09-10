@@ -62,11 +62,12 @@ Severity | Maximum Range | Message Priority
 Severity depends on whether *more than half* the lanes are *blocked* or
 *affected*, as well as the **lane type** at the incident location.
 
-Impact                    | Mainline   | CD/Exit  | Merge
---------------------------|------------|----------|--------
-more than half `blocked`  | `major`    | `normal` | `minor`
-half or less `blocked`    | `normal`   | `minor`  | —
-any lanes `affected`      | `minor`    | —        | —
+Impact                          | Mainline   | CD/Exit  | Merge
+--------------------------------|------------|----------|--------
+more than half lanes `blocked`  | `major`    | `normal` | `minor`
+half or less lanes `blocked`    | `normal`   | `minor`  | —
+either shoulder `blocked`       | `normal`   | `minor`  | —
+any lane or shoulder `affected` | `minor`    | —        | —
 
 ## Descriptor
 
