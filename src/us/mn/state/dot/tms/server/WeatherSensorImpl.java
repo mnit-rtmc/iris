@@ -534,7 +534,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	public void setSurfTempNotify(Integer v) {
 		if (!objectEquals(v, surf_temp)) {
 			surf_temp = v;
-			notifyAttribute("SurfTemp");
+			notifyAttribute("surfTemp");
 		}
 	}
 
@@ -568,7 +568,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	public void setSurfFreezeTempNotify(Integer v) {
 		if (!objectEquals(v, surf_freeze_temp)) {
 			surf_freeze_temp = v;
-			notifyAttribute("surf_freeze_temp");
+			notifyAttribute("surfFreezeTemp");
 		}
 	}
 
@@ -585,7 +585,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	public void setSubSurfTempNotify(Integer v) {
 		if (!objectEquals(v, subsurf_temp)) {
 			subsurf_temp = v;
-			notifyAttribute("subsurf_temp");
+			notifyAttribute("subSurfTemp");
 		}
 	}
 
