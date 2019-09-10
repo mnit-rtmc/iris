@@ -41,6 +41,9 @@ import static us.mn.state.dot.tms.units.Distance.Units.MILES;
  */
 public class UpstreamDeviceFinder {
 
+	/** Maximum distance from device to nearest r_node */
+	static private final Distance MAX_DIST = new Distance(2.5, MILES);
+
 	/** Get the maximum number of exits upstream of an incident */
 	static private int maximum_exits(Incident inc) {
 		IncSeverity sev = IncidentHelper.getSeverity(inc);
@@ -81,7 +84,7 @@ public class UpstreamDeviceFinder {
 			String name = getCorridorName();
 			CorridorBase<R_Node> cb = finder.lookupCorridor(name);
 			if (cb != null) {
-				Float mp = cb.calculateMilePoint(loc);
+				Float mp = cb.calculateMilePoint(loc, MAX_DIST);
 				if (mp != null)
 					findDevices(cb, mp, exits, dist);
 			}

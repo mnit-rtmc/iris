@@ -238,6 +238,20 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 
 	/** Calculate the mile point for a location.
 	 * @param loc Location to calculate.
+	 * @param max_dist Maximum distance from corridor.
+	 * @return Mile point for location, or null if no r_nodes exist. */
+	public Float calculateMilePoint(GeoLoc loc, Distance max_dist) {
+		T n = findNearest(loc);
+		if (n != null) {
+			Distance d = nodeDistance(n, loc);
+			if (d.compareTo(max_dist) < 0)
+				return calculateMilePoint(loc);
+		}
+		return null;
+	}
+
+	/** Calculate the mile point for a location.
+	 * @param loc Location to calculate.
 	 * @return Mile point for location, or null if no r_nodes exist. */
 	public Float calculateMilePoint(GeoLoc loc) {
 		if (n_points.isEmpty())
