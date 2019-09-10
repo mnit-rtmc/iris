@@ -48,6 +48,12 @@ public class AccessLogger implements AccessMonitor {
 		log_event(EventType.CLIENT_AUTHENTICATE, hostport, user);
 	}
 
+	/** Callback for a client fail domain login event */
+	@Override
+	public void failDomain(String hostport, String user) {
+		log_event(EventType.CLIENT_FAIL_DOMAIN, hostport, user);
+	}
+
 	/** Log a fail authentication event */
 	@Override
 	public void failAuthentication(String hostport, String user) {

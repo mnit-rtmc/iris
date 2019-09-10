@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2018  Minnesota Department of Transportation
+ * Copyright (C) 2012-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,10 @@ public class ClientEvent extends BaseEvent {
 		return EventType.CLIENT_CONNECT == et
 		    || EventType.CLIENT_AUTHENTICATE == et
 		    || EventType.CLIENT_FAIL_AUTHENTICATION == et
-		    || EventType.CLIENT_DISCONNECT == et;
+		    || EventType.CLIENT_DISCONNECT == et
+		    || EventType.CLIENT_CHANGE_PASSWORD == et
+		    || EventType.CLIENT_FAIL_PASSWORD == et
+		    || EventType.CLIENT_FAIL_DOMAIN == et;
 	}
 
 	/** Host:port of client connection */

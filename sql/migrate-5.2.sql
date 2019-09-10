@@ -33,4 +33,8 @@ UPDATE iris.inc_impact SET description = 'free flowing' WHERE id = 14;
 -- Add lane use device purpose
 INSERT INTO iris.device_purpose (id, description) VALUES ('6', 'lane use');
 
+-- Add FAIL DOMAIN event type
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (207, 'Client FAIL DOMAIN');
+
 COMMIT;
