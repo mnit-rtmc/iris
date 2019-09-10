@@ -51,7 +51,6 @@ import static us.mn.state.dot.tms.client.widget.SwingRunner.runQueued;
 import us.mn.state.dot.tms.geo.MapVector;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import us.mn.state.dot.tms.units.Distance;
-import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
@@ -72,9 +71,6 @@ public class R_NodeManager extends ProxyManager<R_Node>
 
 	/** Offset angle for default North map markers */
 	static private final double NORTH_ANGLE = Math.PI / 2;
-
-	/** Maximum distance to snap */
-	static private final Distance MAX_DIST = new Distance(1, MILES);
 
 	/** Map to of corridor names to corridors */
 	private final Map<String, CorridorBase<R_Node>> corridors =
@@ -372,11 +368,13 @@ public class R_NodeManager extends ProxyManager<R_Node>
 
 	/** Create a GeoLoc snapped to nearest r_node segment.
 	 * NOTE: copied to server/CorridorManager. */
-	public GeoLoc snapGeoLoc(SphericalMercatorPosition smp, LaneType lt) {
+	public GeoLoc snapGeoLoc(SphericalMercatorPosition smp, LaneType lt,
+		Distance max_dist)
+	{
 		GeoLoc loc = null;
-		Distance dist = MAX_DIST;
+		Distance dist = max_dist;
 		for (CorridorBase<R_Node> c: corridors.values()) {
-			CorridorBase.GeoLocDist ld = c.snapGeoLoc(smp, lt,dist);
+			CorridorBase.GeoLocDist ld = c.snapGeoLoc(smp, lt, dist);
 			if (ld != null && ld.dist.m() < dist.m()) {
 				loc = ld.loc;
 				dist = ld.dist;

@@ -48,6 +48,8 @@ import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -57,6 +59,9 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class IncidentCreator extends JPanel {
+
+	/** Maximum distance to snap */
+	static private final Distance MAX_DIST = new Distance(1, MILES);
 
 	/** Create the lane type combo box */
 	static protected JComboBox<LaneType> createLaneTypeCombo() {
@@ -243,7 +248,7 @@ public class IncidentCreator extends JPanel {
 	private void createIncident(String replaces, EventType et,
 		IncidentDetail dtl, LaneType lt, SphericalMercatorPosition smp)
 	{
-		GeoLoc loc = r_node_manager.snapGeoLoc(smp, lt);
+		GeoLoc loc = r_node_manager.snapGeoLoc(smp, lt, MAX_DIST);
 		if (loc != null)
 			createIncident(replaces, et, dtl, lt, loc);
 	}
