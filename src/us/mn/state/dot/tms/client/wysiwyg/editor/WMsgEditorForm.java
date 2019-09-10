@@ -19,7 +19,9 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -77,6 +79,7 @@ public class WMsgEditorForm extends AbstractForm {
 	private JButton save_btn;
 	
 	public WMsgEditorForm(Session s) {
+		// TODO need to add the message name to the title (somehow...)
 		super(I18N.get("wysiwyg.editor.title"), true);
 		session = s;
 		initForm();
@@ -132,13 +135,25 @@ public class WMsgEditorForm extends AbstractForm {
 				if (dsg.getSignGroup() == sg) {
 					DMS dms = dsg.getDms();
 					dmsList.put(dms.getName(), dms);
+					
 				}
 			}
 			
-			// TODO ENCOUNTERING EXCEPTION HERE...
+			// selection handler for the combo box
+			class SignSelectionListener implements ActionListener {
+				@SuppressWarnings("unchecked")
+				public void actionPerformed(ActionEvent e) {
+					JComboBox<String> cb = (JComboBox<String>) e.getSource();
+					String dmsName = (String) cb.getSelectedItem();
+					System.out.printf("Sign '%s' selected...\n", dmsName);
+				}
+			}
+			
 			// setup the combo box
-			dmsNames = (String[]) dmsList.keySet().toArray();
+			dmsNames = Arrays.stream(dmsList.keySet().toArray()).
+					toArray(String[]::new);
 			dms_list = new JComboBox<String>(dmsNames);
+			dms_list.addActionListener(new SignSelectionListener());
 		}
 		
 		// TODO fill in placeholders (see placeholders in initialize() below)
