@@ -471,6 +471,9 @@ public class WMsgSelectorForm extends AbstractForm {
 		/** Add an edit mode listener for the buttons in the form */
 		session.addEditModeListener(edit_lsnr);
 		
+		/** Check edit mode right now */
+		editMode = session.canWrite(QuickMessage.SONAR_TYPE);
+		
 		/** Add a panel for the status bar */
 		msgInfo = "";
 		status_msg = new JLabel(msgInfo);
