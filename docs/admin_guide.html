@@ -57,7 +57,7 @@
   </div>
   <h2><a id="features_link" href="#features">Features</a></h2>
   <div id="features_div">
-    <h3><a href="#traffic_layer">Traffic Map Layer</a></h3>
+    <h3><a href="traffic_layer.html">Traffic Map Layer</a></h3>
     <h3><a href="incidents.html">Incident Management</a></h3>
     <h3><a href="action_plans.html">Action Plans</a></h3>
     <h3><a href="metering_strategies.html">Ramp Metering Strategies</a></h3>
@@ -278,7 +278,8 @@
 	IRIS contains these higher-level traffic management features:
 </p>
 <ul>
-	<li>Continuously updated <a href="#traffic_layer">traffic map</a></li>
+	<li>Continuously updated <a href="traffic_layer.html">traffic map</a>
+	</li>
 	<li><a href="incidents.html">Incident management</a></li>
 	<li><a href="action_plans.html">Scheduled</a> deployment of control
 	    devices</li>
@@ -886,8 +887,8 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 </figure>
 
 <p>
-	For many of the <a href="#features">features</a> IRIS provides, a model
-	of the road network topology is required.
+	For many of the features IRIS provides, a model of the road network
+	topology is required.
 	This model consists of a set of roadway nodes, or <b>r_node</b>s, which
 	describe all the points of interest on the road network.
 	For instance, each entrance or exit ramp, detector station or
@@ -1076,7 +1077,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
   <dt id='station_id'>station_id</dt>
   <dd>A unique identifier for the <a href="#vds">detectors</a> associated with a
       <a href="#station">station</a> r_node.
-      It is displayed on the <a href="#traffic_layer">traffic layer</a>.
+      It is displayed on the <a href="traffic_layer.html">traffic layer</a>.
   </dd>
   <dt id='speed_limit'>speed_limit</dt>
   <dd>This is the posted speed limit at the r_node.
@@ -1092,8 +1093,8 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
       used on the sign message.
   </dd>
   <dt>above</dt>
-  <dd>When rendering the <a href="#traffic_layer">traffic layer</a>, r_nodes are
-      rendered in two passes.
+  <dd>When rendering the <a href="traffic_layer.html">traffic layer</a>, r_nodes
+      are rendered in two passes.
       The second pass consists of r_nodes which have been marked <b>above</b>.
       This prevents overpasses from being drawn incorrectly.
   </dd>
@@ -1105,7 +1106,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
   <dt>active</dt>
   <dd>This flag allows an r_node to be deactivated.  An inactive r_node will
       not be included in any corridor or drawn on the
-      <a href="#traffic_layer">traffic layer</a>.
+      <a href="traffic_layer.html">traffic layer</a>.
   </dd>
 </dl>
 <h4>R_Node Detectors</h4>
@@ -2968,46 +2969,6 @@ FIXME
 	The <code>Query GPS</code> button can be used to manually poll the
 	coördinates.
 </p>
-
-<h2 id="features">Features</h2>
-
-<h3 id="traffic_layer">Traffic Map Layer</h3>
-<p>
-	The IRIS client user interface includes a traffic map layer which is
-	created automatically from the <a href="#road_topology">road
-	topology</a>.
-	By default, this layer uses traffic <b>density</b> to determine the
-	color of each <b>segment</b>.
-	Other themes are available for <b>speed</b> and <b>flow</b>.
-	The <b>Legend</b> menu at the top of the map can be used to view
-	the thresholds used for each color in a theme.
-</p>
-<p>
-	Every 30 seconds, the client will make an HTTP request for the current
-	traffic sample data XML file.
-	The URL to locate that file is declared as a property in the
-	<code>/etc/iris/iris-client.properties</code> file (on the IRIS server).
-	The property is <code>tdxml.detector.url</code>, and it should point to
-	the location of <a href="#vds_archiving">det_sample.xml.gz</a>, as made
-	available by apache on the IRIS server.
-</p>
-<p>
-	The appearance of the traffic map layer changes depending on the current
-	map zoom level.
-	If the zoom level is below 10, the layer will not be visible.
-	At zoom levels 10 through 13, the layer will display segments as
-	aggregate of all detectors in each mainline
-	<a href="#station">station</a>.
-	At zoom level 14 or above, each mainline <a href="#vds">detector</a>
-	will be displayed as a separate segment.
-</p>
-<p>
-	The maximum distance between adjacent <a href="#station">stations</a> to
-	draw segments on the map is specified by <a href="#sys_attr"><code>
-	map_segment_max_meters</code></a>.
-	It is also the maximum downstream distance for associating station data
-	with a segment.
-</ol>
 
 </main>
 
