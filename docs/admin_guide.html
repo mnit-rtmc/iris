@@ -58,7 +58,7 @@
   <h2><a id="features_link" href="#features">Features</a></h2>
   <div id="features_div">
     <h3><a href="#traffic_layer">Traffic Map Layer</a></h3>
-    <h3><a href="#incident">Incident Management</a></h3>
+    <h3><a href="incidents.html">Incident Management</a></h3>
     <h3><a href="action_plans.html">Action Plans</a></h3>
     <h3><a href="metering_strategies.html">Ramp Metering Strategies</a></h3>
     <h3><a href="travel_time.html">Travel Time Estimation</a></h3>
@@ -279,7 +279,7 @@
 </p>
 <ul>
 	<li>Continuously updated <a href="#traffic_layer">traffic map</a></li>
-	<li><a href="#incident">Incident management</a></li>
+	<li><a href="incidents.html">Incident management</a></li>
 	<li><a href="action_plans.html">Scheduled</a> deployment of control
 	    devices</li>
 	<li>Coördinated <a href="metering_strategies.html">ramp metering
@@ -1441,7 +1441,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 <h4 id="inc_feed">Incident Feed Protocol</h4>
 <p>
 	The <b>Inc-Feed</b> protocol can be used to interface IRIS with an
-	external system that generates <a href="#incident">incidents</a>.
+	external system that generates <a href="incidents.html">incidents</a>.
 	Periodically, IRIS will poll the URI (using HTTP) for incidents.
 	The external system should respond with an ASCII text file, with one
 	line per active incident.
@@ -3008,63 +3008,6 @@ FIXME
 	It is also the maximum downstream distance for associating station data
 	with a segment.
 </ol>
-
-<h3 id="incident">Incident Management</h3>
-<p>
-	The <b>Incident</b> tab on the client interface is used to manage
-	incidents within IRIS.
-	Traffic incidents have several attributes, including location, type,
-	detail, camera and lane impact.
-	Active incidents are written to an
-	<a href="troubleshooting.html#xml-output">XML file</a>,
-	which can be processed by external systems.
-</p>
-<h4>Creating an Incident</h4>
-<p>
-	The user interface for creating incidents is streamlined to allow
-	operators to process them quickly.
-	First, click one of the incident type buttons: <b>Crash</b>,
-	<b>Stall</b>, <b>Road Work</b> or <b>Hazard</b>.
-	Then, the lane type can be selected &mdash; <i>Mainline</i> is the
-	default, but <i>Exit</i>, <i>Entrance</i> and <i>CD Road</i> are
-	available.
-	Now, the incident location must be selected on the map (the mouse cursor
-	will change to a crosshair).
-	After that the incident detail, verification camera and lane impact
-	can be selected (if required).
-	The camera list will be populated with a few cameras near the location
-	selected.
-	The lane impact is represented by boxes for each lane at the incident
-	location, including both shoulders.
-	Each lane can be marked clear (default), blocked (red) or affected
-	(yellow) by clicking on the box.
-	Once the attributes have been set, press the <b>Log</b> button to create
-	the incident.
-	A triangular icon will appear on the map pointing in the direction of
-	travel, color-coded with the incident type.
-</p>
-<h4>Editing an Incident</h4>
-<p>
-	To change the location or verification camera, the <b>Edit</b> button
-	must be pressed first.
-	To change the lane impact or to clear the incident, the <b>Edit</b>
-	button is not required.
-	After making changes, be sure to press the <b>Log</b> button again.
-	Once an incident has been cleared, it will be removed from the list
-	after 5 minutes.
-	This allows a cleared incident to be reactivated if necessary.
-</p>
-<h4>Deploying Devices</h4>
-<p>
-	Devices can be deployed based on the incident impact by pressing the
-	<b>Deploy</b> button.
-	This will bring up a form with a list of suggested devices to deploy for
-	the incident.
-	The list may include <a href="#lcs">Lane-use control signals</a> or
-	<a href="#dms">Dynamic Message Signs</a>.
-	All DMS within the range of the incident are
-	<a href="incident_dms.html">checked</a>.
-</p>
 
 </main>
 
