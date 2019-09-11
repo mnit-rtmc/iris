@@ -25,7 +25,7 @@ Impact                    | Description
 `both_shoulders_blocked`  | Left & right shoulders blocked, all lanes open
 `left_shoulder_blocked`   | Left shoulder blocked, all lanes open
 `right_shoulder_blocked`  | Right shoulder blocked, all lanes open
-`lanes_affected`          | Left & right lanes affected (could be all lanes)
+`lanes_affected`          | Left & right lanes affected (possibly all lanes)
 `left_lanes_affected`     | Left lane affected, right lane open
 `right_lanes_affected`    | Right lane affected, left lane open
 `center_lanes_affected`   | Center lane(s) affected, left & right lanes open
