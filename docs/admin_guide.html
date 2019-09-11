@@ -59,7 +59,7 @@
   <div id="features_div">
     <h3><a href="#traffic_layer">Traffic Map Layer</a></h3>
     <h3><a href="#incident">Incident Management</a></h3>
-    <h3><a href="#plan_schedule">Plans and Schedules</a></h3>
+    <h3><a href="action_plans.html">Action Plans</a></h3>
     <h3><a href="metering_strategies.html">Ramp Metering Strategies</a></h3>
     <h3><a href="travel_time.html">Travel Time Estimation</a></h3>
     <h3><a href="slow_warning.html">Slow Traffic Warning</a></h3>
@@ -280,8 +280,8 @@
 <ul>
 	<li>Continuously updated <a href="#traffic_layer">traffic map</a></li>
 	<li><a href="#incident">Incident management</a></li>
-	<li><a href="#plan_schedule">Scheduled</a> deployment of control devices
-	</li>
+	<li><a href="action_plans.html">Scheduled</a> deployment of control
+	    devices</li>
 	<li>Coördinated <a href="metering_strategies.html">ramp metering
 	    strategies</a></li>
 	<li><a href="travel_time.html">Travel time</a> estimation</li>
@@ -1405,12 +1405,12 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 <p>
 	There are a couple of other required steps to enable a message feed
 	to operate.
-	First, an <a href="#action_plan">action plan</a> must be created which
-	associates a <a href="#dms_action">DMS action</a> with the message
-	feed.
+	First, an <a href="action_plans.html">action plan</a> must be created
+	which associates a <a href="action_plans.html#dms-actions">DMS action</a>
+	with the message feed.
 	The DMS action must be associated with a <a href="#quick_msg">quick
 	message</a> that references the message feed, using a <b>feed</b>
-	<a href="#action_tag">action tag</a>.
+	<a href="action_plans.html#dms-action-tags">action tag</a>.
 	So, if the message feed is on a Comm Link called <code>LFEED</code>,
 	then the quick message MULTI string must be <code>[feedLFEED]</code>.
 	Also, the action plan must be active and deployed.
@@ -1920,8 +1920,9 @@ FIXME
 	with a sign group.
 	When a DMS is selected, a drop-down list is populated with quick
 	messages from sign groups of which that DMS is a member.
-	Quick messages are also be used for <a href="#dms_action">DMS
-	actions</a> as part of an <a href="action_plans.html">action plan</a>.
+	Quick messages are also be used for
+	<a href="action_plans.html#dms-actions">DMS actions</a> as part of an
+	<a href="action_plans.html">action plan</a>.
 	For these messages, it is best to leave the sign group blank.
 </p>
 <p>
@@ -2811,7 +2812,7 @@ FIXME
 	gate arm array, allowing one or more <a href="#dms">DMS</a> to display
 	appropriate warning messages.
 	Whenever the state changes, this plan will immediately be changed to
-	the appropriate <a href="#plan_phase">phase</a> &mdash;
+	the appropriate <a href="action_plans.html#plan-phases">phase</a> &mdash;
 	<b>Warning Open Phase</b> when fully open, otherwise <b>Warning Closed
 	Phase</b>.
 </p>
