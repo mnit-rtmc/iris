@@ -110,4 +110,4 @@ Filename               | Description
 [station]: admin_guide.html#station
 [STC]: admin_guide.html#stc
 [system attribute]: admin_guide.html#sys_attr
-[vehicle detection systems]: admin_guilde.html#vds
+[vehicle detection systems]: admin_guide.html#vds

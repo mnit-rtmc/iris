@@ -53,7 +53,7 @@
     <h3><a href="#beacons">Beacons</a></h3>
     <h3><a href="#alarms">Alarms</a></h3>
     <h3><a href="#rwis">Road Weather Information Systems</a></h3>
-    <h3><a href="#gps">GPS</a></h3>
+    <h3><a href="gps.html">GPS</a></h3>
   </div>
   <h2><a id="features_link" href="#features">Features</a></h2>
   <div id="features_div">
@@ -233,7 +233,7 @@
 	<li><a href="#tag_readers">Tag Readers</a></li>
 	<li><a href="#beacons">Beacons</a></li>
 	<li><a href="#rwis">RWIS</a> (road-weather information systems)</li>
-	<li><a href="#gps">GPS</a> (global positioning system)</li>
+	<li><a href="gps.html">GPS</a> (global positioning system)</li>
 	<li><a href="#alarms">Alarms</a></li>
 </ul>
 <h3 id="protocols">Protocols</h3>
@@ -1158,7 +1158,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	        <a href="#ilcs">ILCS</a>,
 	        <a href="#rwis">RWIS</a>,
 	        <a href="#vds">VDS</a>,
-	        <a href="#gps">GPS</a>
+	        <a href="gps.html">GPS</a>
 	    </td>
 	    <td rowspan="4">1</td>
 	</tr>
@@ -1293,13 +1293,13 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>RedLion</td>
 	    <td>tcp</td>
 	    <td>N/A</td>
-	    <td><a href="#gps">GPS</a></td>
+	    <td><a href="gps.html">GPS</a></td>
 	</tr>
 	<tr id="sierragx">
 	    <td>SierraGX</td>
 	    <td>tcp</td>
 	    <td>N/A</td>
-	    <td><a href="#gps">GPS</a></td>
+	    <td><a href="gps.html">GPS</a></td>
 	</tr>
 	<tr id="dinrelay">
 	    <td>DIN-Relay</td>
@@ -1743,7 +1743,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	<a href="#beacons">beacons</a>,
 	<a href="#alarms">alarms</a>,
 	<a href="#rwis">road weather information systems</a> and
-	<a href="#gps">GPS</a>.
+	<a href="gps.html">GPS</a>.
 </p>
 <p>
 	For any device to be activated, it must first be connected to one of the
@@ -2940,34 +2940,6 @@ FIXME
 <p>
 	Road Weather Information Systems (RWIS) can sense data such as
 	precipitation rate, road surface temperature, wind speed, etc.
-</p>
-
-<h3 id="gps">GPS</h3>
-<p>
-	A portable <a href="#dms">DMS</a> can have an associated GPS (global
-	positioning system) receiver.
-	This allows the sign to be tracked and automatically updated with the
-	nearest roadway and direction.
-</p>
-<p>
-	To create a GPS device, select the DMS and open its
-	<code>Properties</code> form.
-	On the <code>Location</code> tab, there are controls for configuring
-	the associated GPS.
-	Once the GPS is enabled, it must be associated with a controller.
-	Its name will be the same as the DMS, with "_gps" appended.
-	For <a href="#ntcip">NTCIP</a>, the GPS should be associated with the
-	same controller as the DMS (using pin 2).
-	For <a href="#redlion">RedLion</a> or <a href="#sierragx">SierraGX</a>,
-	a new comm link and controller must be created to communicate with the
-	modem.
-</p>
-<p>
-	The GPS will be polled once every 5 minutes, unless on a
-	<code>Modem</code> comm link.
-	In that case, the comm link period will be used.
-	The <code>Query GPS</code> button can be used to manually poll the
-	coördinates.
 </p>
 
 </main>
