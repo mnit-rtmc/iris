@@ -53,7 +53,7 @@ be combined with the logged pricing information to build a list of trips for
 each tag ID.  This information can be used to bill customers.
 
 
-[action tag]: admin_guide.html#action_tag
+[action tag]: action_plans.html#dms-action-tags
 [Tag readers]: admin_guide.html#tag_readers
 [station]: admin_guide.html#station
 [system attribute]: admin_guide.html#sys_attr

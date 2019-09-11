@@ -70,4 +70,4 @@ Heavy rain    | -900  | -600    | -450
 Ice           | -750  | -500    | -375
 
 
-[action tag]: admin_guide.html#action_tag
+[action tag]: action_plans.html#dms-action-tags

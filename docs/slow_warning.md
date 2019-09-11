@@ -29,4 +29,4 @@ Display message if traffic slower than 45 mph within 0.5 miles:
 ```
 
 
-[action tag]: admin_guide.html#action_tag
+[action tag]: action_plans.html#dms-action-tags

@@ -91,7 +91,7 @@ Otherwise, the tag will be replaced with the travel time limit, with the over
 limit text either prepended or appended.
 
 
-[action tag]: admin_guide.html#action_tag
+[action tag]: action_plans.html#dms-action-tags
 [node type]: admin_guide.html#r_node_type
 [quick message]: admin_guide.html#quick_msg
 [road topology]: admin_guide.html#road_topology
