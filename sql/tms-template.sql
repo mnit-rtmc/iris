@@ -2994,10 +2994,47 @@ CREATE TRIGGER incident_notify_trig
 	AFTER INSERT OR UPDATE OR DELETE ON event.incident
 	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
+CREATE FUNCTION event.incident_blocked_lanes(TEXT)
+	RETURNS INTEGER AS $incident_blocked_lanes$
+DECLARE
+	impact ALIAS FOR $1;
+	imp TEXT;
+	lanes INTEGER;
+BEGIN
+	lanes = length(impact) - 2;
+	IF lanes > 0 THEN
+		imp = substring(impact FROM 2 FOR lanes);
+		RETURN lanes - length(replace(imp, '!', ''));
+	ELSE
+		RETURN 0;
+	END IF;
+END;
+$incident_blocked_lanes$ LANGUAGE plpgsql;
+
+CREATE FUNCTION event.incident_blocked_shoulders(TEXT)
+	RETURNS INTEGER AS $incident_blocked_shoulders$
+DECLARE
+	impact ALIAS FOR $1;
+	len INTEGER;
+	imp TEXT;
+BEGIN
+	len = length(impact);
+	IF len > 2 THEN
+		imp = substring(impact FROM 1 FOR 1) ||
+		      substring(impact FROM len FOR 1);
+		RETURN 2 - length(replace(imp, '!', ''));
+	ELSE
+		RETURN 0;
+	END IF;
+END;
+$incident_blocked_shoulders$ LANGUAGE plpgsql;
+
 CREATE VIEW incident_view AS
     SELECT event_id, name, event_date, ed.description, road, d.direction,
-           impact, cleared, confirmed, camera, ln.description AS lane_type,
-           detail, replaces, lat, lon
+           impact, event.incident_blocked_lanes(impact) AS blocked_lanes,
+           event.incident_blocked_shoulders(impact) AS blocked_shoulders,
+           cleared, confirmed, camera, ln.description AS lane_type, detail,
+           replaces, lat, lon
     FROM event.incident i
     LEFT JOIN event.event_description ed ON i.event_desc_id = ed.event_desc_id
     LEFT JOIN iris.direction d ON i.dir = d.id
