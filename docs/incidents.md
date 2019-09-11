@@ -16,16 +16,15 @@ process them quickly.
     _CD Road_ are available
  3. Select incident location on the map (the cursor will change to a crosshair)
  4. Select incident detail (for _hazards_)
- 5. Select verification camera.  The camera list will be populated with a few
-    cameras near the location selected.
- 6. Specify impact for each lane.  This is represented by a row of boxes, one
-    for each lane at the incident location.  Both shoulders are displayed even
-    if there are no actual shoulders at the location.  Each lane can be marked
-    _clear_ (default), _blocked_ (red) or _affected_ (yellow) by clicking on the
-    box.
+ 5. Select verification camera.  The list will be populated with a few cameras
+    near the selected location.
+ 6. Specify _lane impact_ in a row of boxes, one for each lane at the incident
+    location.  Both shoulders are displayed even if there are no actual
+    shoulders at the location.  Each lane can be marked _clear_ (default),
+    _blocked_ (red) or _affected_ (yellow) by clicking on the box.
  7. Finally, press the **Log** button to create the incident
 
-A triangular icon will appear on the map pointing in the direction of travel,
+A triangular marker will appear on the map pointing in the direction of travel,
 color-coded with the incident type.
 
 ### Editing
@@ -37,24 +36,24 @@ button again.
 
 ### Clearing
 
-Once an incident has been cleared, it will remain in the list for some time.
-This can be configured with the `incident_clear_secs` [system attribute] —
-the default value is 300 seconds (5 minutes).  During this time, a cleared
-incident can be reactivated if necessary.
+Press the **Clear** button to clear the incident.  It will remain in the list
+for some time afterward.  This time interval can be configured with the
+`incident_clear_secs` [system attribute] — the default value is 300 seconds (5
+minutes).  During this time, a cleared incident can be reactivated if necessary.
 
 ### Deploying Devices
 
-Devices can be deployed based on the incident impact by pressing the **Deploy**
-button.  This will bring up a form with a list of suggested devices to deploy
-for the incident.  The list may include [DMS] or [LCS] devices.  All DMS signs
-within the range of the incident are [checked](incident_dms.html).
+Devices such as [DMS] and [LCS] can be deployed based on incident attributes.
+Pressing the **Deploy** button will bring up a form with a list of suggested
+devices to deploy for the incident.  All DMS signs within the range of the
+incident are [checked](incident_dms.html).
 
 ### Incident Events
 
 Incidents and all updates are recorded in the database.  There are two views
 available:
  * `incident_view` contains one record for each recorded incident
- * `incident_update_view` contains a record for every update to all incidents
+ * `incident_update_view` contains a record for every update to each incident
 
 
 [DMS]: admin_guide.html#dms
