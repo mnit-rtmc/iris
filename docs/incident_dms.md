@@ -130,8 +130,8 @@ Open Lanes     | number of non-shoulder lanes *not* impacted
 
 *Dedicated purpose* signs normally cannot be used for incidents.  The only
 exception is `tolling` signs — they are used if the locator is not *branched*
-and the impact is `lanes_blocked`, `left_lanes_blocked`, `lanes_affected` or
-`left_lanes_affected`.
+and the left lane is impacted: `lanes_blocked`, `left_lanes_blocked`,
+`lanes_affected` or `left_lanes_affected`.
 
 ## Clearing
 
