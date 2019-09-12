@@ -35,7 +35,7 @@
     <h3><a href="#sys_attr">System Attributes</a></h3>
     <h3><a href="#users_and_roles">Users and Roles</a></h3>
     <h3><a href="#mapping">Mapping</a></h3>
-    <h3><a href="#road_topology">Road Topology</a></h3>
+    <h3><a href="road_topology.html">Road Topology</a></h3>
     <h3><a href="#comm_links">Comm Links</a></h3>
     <h3><a href="#controllers">Controllers</a></h3>
     <h3><a href="#fonts">Fonts</a></h3>
@@ -849,271 +849,6 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	First, a "Home" extent should be created, which is selected by default
 	when a user logs in.
 	Other extents can also be created for commonly selected map spots.
-</p>
-
-<h3 id="road_topology">Road Topology</h3>
-<figure>
-<svg class="right" width='240' height='480'
-     xmlns="http://www.w3.org/2000/svg" version="1.1"
-     xmlns:xlink='http://www.w3.org/1999/xlink'>
-  <title>R_Nodes</title>
-<defs>
-  <g id='r_node_marker' style='fill:lime;stroke:black;stroke-width:2'>
-    <circle cx='0' cy='0' r='10'/>
-    <path d='M-8-8L8 8'/>
-    <path d='M-8 8L8-8'/>
-  </g>
-</defs>
-<path d='M6 0L6 480 120 480 120 406C124 408 128 432 172 480L236 480
-	 C196 448 150 368 120 288L120 208C128 168 214 50 236 0L172 0
-	 C168 12 120 80 120 88L120 0Z'/>
-<path style='fill:none;stroke:white;stroke-dasharray:10,20;stroke-width:4'
-      d='M64 8L64 480'/>
-<path style='fill:none;stroke:yellow;stroke-width:4'
-      d='M16 0L16 480M112 368C118 404 168 468 180 480M180 0
-	 C180 8 128 80 112 120'/>
-<path style='fill:none;stroke:white;stroke-width:4'
-      d='M112 0L112 122M228 0C196 64 145 128 112 200L112 288
-	 C144 373 189 448 228 480M112 368L112 480'/>
-<use x='112' y='32' xlink:href='#r_node_marker'/>
-<use x='112' y='120' xlink:href='#r_node_marker'/>
-<use x='112' y='240' xlink:href='#r_node_marker'/>
-<use x='112' y='368' xlink:href='#r_node_marker'/>
-<use x='112' y='448' xlink:href='#r_node_marker'/>
-<text style="font-size:24px">
-  <tspan x="128" y="248">R_Nodes</tspan>
-</text>
-</svg>
-</figure>
-
-<p>
-	For many of the features IRIS provides, a model of the road network
-	topology is required.
-	This model consists of a set of roadway nodes, or <b>r_node</b>s, which
-	describe all the points of interest on the road network.
-	For instance, each entrance or exit ramp, detector station or
-	intersection would be represented by an r_node.
-</p>
-<p>
-	All r_nodes with the same road and direction-of-travel are grouped into
-	<b>corridors</b>.
-	The r_nodes within a corridor are automatically sorted based on their
-	coördinates.
-	Corridors are linked to each other by exit and entrance r_nodes.
-	For example an exit r_node from Northbound road A to Eastbound road B
-	would automatically link to an entrance onto Eastbound road B from
-	Northbound road A.
-</p>
-<h4 id="roads">Road Setup</h4>
-<aside>
-	Select <span class="menu">View ➔ System ➔ Roads</span> menu item
-</aside>
-<p>
-	Before creating r_nodes, some roads must be created.
-	With <a href="#edit_mode">edit mode</a> <b>ON</b>, enter the road name
-	into the text box at the bottom of the form and press the <b>Create</b>
-	button.
-	Road names must be unique, and can be up to 20 characters in length.
-	It's a good idea to capitalize each word, and abbreviate any
-	designators — for example, "Main St".
-</p>
-<p>
-	When a road is created, it will be added to the Roads table.
-	Other road attributes can be changed here.
-	The second column is <b>Abbrev</b>, which is an abbreviation of the
-	road name (up to 6 characters).
-	This is used for labeling <a href="#vds">detectors</a> and
-	<a href="#station">stations</a>.
-</p>
-<p>
-	The <b>Road Class</b> determines the presentation of the road on the
-	map.
-	For example, a road marked "Freeway" would be drawn thicker and more
-	prominent than an "Expressway" or "Arterial".
-</p>
-<p>
-	<b>Direction</b> and <b>Alt Dir</b> determine the primary and secondary
-	compass directions of the road.
-</p>
-<h4 id="r_node">R_Node Location</h4>
-<p>
-	Select the <b>R_Nodes</b> tab on the client interface to create or
-	edit r_nodes.
-	In the <b>Selected Roadway Corridor</b> frame, there is an <b>Add</b>
-	button.
-	Press the button to start creating a new r_node.
-	The mouse cursor will change to a <b>target</b> while over the map.
-	Select the point on the map where the r_node should be located and
-	left-click the mouse.
-	The new r_node will appear on the map, and in the list for the
-	selected corridor.
-</p>
-<p>
-	In the <b>Selected Roadway Corridor</b> frame, there is a
-	<b>Corridor</b> widget containing a list of all corridors which
-	contain at least one r_node.
-	When a corridor is selected, the r_node list will be populated with all
-	r_nodes on the corridor.
-	Also, any new r_nodes created will be on the selected corridor.
-</p>
-<p>
-	Once an r_node is selected, any fields on the <b>Location</b> tab can
-	be edited.
-	Changing the roadway or direction will move the r_node to another
-	corridor.
-	Other attributes are nearest cross-street, cross-street direction,
-	and notes.
-</p>
-<h4>R_Node Setup</h4>
-<p>
-	The r_node <b>Setup</b> tab contains several more attributes.
-</p>
-<dl>
-  <dt id='r_node_type'>node_type</dt>
-  <dd>There are six different r_node types:
-    <table>
-      <tr>
-        <th>Code</th>
-        <th>Node Type</th>
-        <th>Description</th>
-      </tr>
-      <tr id="station">
-        <td>0</td>
-        <td>station</td>
-        <td>Mainline detector station or shape node &mdash; can be assigned a
-            <a href="#station_id">station ID</a>
-        </td>
-      </tr>
-      <tr>
-	<td>1</td>
-	<td>entrance</td>
-	<td>Entrance ramp onto corridor</td>
-      </tr>
-      <tr>
-	<td>2</td>
-	<td>exit</td>
-	<td>Exit ramp off corridor</td>
-      </tr>
-      <tr>
-	<td>3</td>
-	<td>intersection</td>
-	<td>At-grade intersection with another corridor</td>
-      </tr>
-      <tr>
-	<td>4</td>
-	<td>access</td>
-	<td>Network access (for traveler information)</td>
-      </tr>
-      <tr>
-	<td>5</td>
-	<td>interchange</td>
-	<td>Freeway interchange (for traveler information)</td>
-      </tr>
-    </table>
-  </dd>
-  <dt id='r_node_transition'>transition</dt>
-  <dd>An r_node transition describes how entrance or exit nodes connect with
-      linked nodes.
-    <table>
-      <tr>
-	<th>Code</th>
-	<th>Transition</th>
-	<th>Description</th>
-      </tr>
-      <tr>
-	<td>0</td>
-	<td>none</td>
-	<td>No transition &mdash; non-entrance or -exit r_nodes</td>
-      </tr>
-      <tr>
-	<td>1</td>
-	<td>loop</td>
-	<td>Interchange loop ramp &mdash; "leaf" part of cloverleaf</td>
-      </tr>
-      <tr>
-	<td>2</td>
-	<td>leg</td>
-	<td>Typical "leg" ramp</td>
-      </tr>
-      <tr>
-	<td>3</td>
-	<td>slipramp</td>
-	<td>Transition ramp between parallel corridors</td>
-      </tr>
-      <tr>
-	<td>4</td>
-	<td>CD</td>
-	<td>Transition to/from collector/distributor road</td>
-      </tr>
-      <tr>
-	<td>5</td>
-	<td>HOV</td>
-	<td>Bypass ramp for high-occupancy-vehicles</td>
-      </tr>
-      <tr>
-	<td>6</td>
-	<td>common</td>
-	<td>Common section joining two corridors</td>
-      </tr>
-      <tr>
-	<td>7</td>
-	<td>flyover</td>
-	<td>Flyover ramp (bridge over mainline)</td>
-      </tr>
-    </table>
-  </dd>
-  <dt>lanes</dt>
-  <dd>Number of lanes at r_node.
-      For a ramp node, this is the number of lanes entering or exiting the
-      mainline.
-  </dd>
-  <dt>shift</dt>
-  <dd>Lane shift is the difference (number of lanes) between the corridor
-      reference lane and the attach side of the r_node.
-      This value is used for lane continuity analysis within a corridor.
-      Each corridor has a reference lane, which corresponds to the leftmost
-      lane along the entire corridor.
-  </dd>
-  <dt id='station_id'>station_id</dt>
-  <dd>A unique identifier for the <a href="#vds">detectors</a> associated with a
-      <a href="#station">station</a> r_node.
-      It is displayed on the <a href="traffic_layer.html">traffic layer</a>.
-  </dd>
-  <dt id='speed_limit'>speed_limit</dt>
-  <dd>This is the posted speed limit at the r_node.
-      The units are miles per hour, but should in future be dependent on locale
-      (KPH).
-      For ramp r_nodes, it may be used to indicate the advisory speed limit on
-      the ramp.
-      The limit is used in travel time estimation.
-  </dd>
-  <dt>pickable</dt>
-  <dd>For deploying <a href="#dms">DMS</a> from <a href="#inc_locator">
-      incidents</a>, an r_node can be marked pickable if the road name should be
-      used on the sign message.
-  </dd>
-  <dt>above</dt>
-  <dd>When rendering the <a href="traffic_layer.html">traffic layer</a>, r_nodes
-      are rendered in two passes.
-      The second pass consists of r_nodes which have been marked <b>above</b>.
-      This prevents overpasses from being drawn incorrectly.
-  </dd>
-  <dt>attach_side</dt>
-  <dd>This flag indicates whether the r_node is attached to the left side of
-      the road.
-      This can be used to create left entrance or exit ramps.
-  </dd>
-  <dt>active</dt>
-  <dd>This flag allows an r_node to be deactivated.  An inactive r_node will
-      not be included in any corridor or drawn on the
-      <a href="traffic_layer.html">traffic layer</a>.
-  </dd>
-</dl>
-<h4>R_Node Detectors</h4>
-<p>
-	The r_node <b>Detectors</b> tab allows vehicle
-	<a href="#vds">detectors</a> to be created and associated
-	with an r_node.
 </p>
 
 <h3 id="comm_links">Comm Links</h3>
@@ -2097,8 +1832,8 @@ FIXME
 
 <h4>Detector Setup</h4>
 <p>
-	To create a detector, first select the <a href="#r_node">r_node</a>
-	at the proper location.
+	To create a detector, first select the
+	<a href="road_topology.html#r_node">r_node</a> at the proper location.
 	Then select the <b>Detectors</b> tab for that r_node.
 	Enter the detector <b>Name</b> and press the <b>Create</b> button.
 </p>
@@ -2108,8 +1843,8 @@ FIXME
 	In IRIS, lanes are numbered from right-to-left, starting with the
 	right lane as 1.
 	A <b>label</b> will be created from this information, including
-	abbreviations of the <a href="#roads">roads</a> associated with the
-	<a href="#r_node">r_node</a>.
+	abbreviations of the <a href="road_topology.html#roads">roads</a>
+	associated with the <a href="road_topology.html#r_node">r_node</a>.
 </p>
 <p>
 	The <b>field length</b> of a detector determines how density and speed

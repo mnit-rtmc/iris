@@ -17,8 +17,8 @@ when variable speed advisories must be deployed.
 
 ## Policy Parameters
 
-Each mainline station has an associated speed limit **L** (mph), as well as the
-distance from the upstream end of corridor to station.  These are used to
+Each mainline station has an associated [speed limit] **L** (mph), as well as
+the distance from the upstream end of [corridor] to station.  These are used to
 calculate advisories.  There are also system attributes to control system-wide
 parameters.
 
@@ -71,3 +71,5 @@ Ice           | -750  | -500    | -375
 
 
 [action tag]: action_plans.html#dms-action-tags
+[corridor]: road_topology.html#corridors
+[speed limit]: road_topology.html#speed-limit

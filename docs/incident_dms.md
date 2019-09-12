@@ -88,8 +88,8 @@ configurable locator table contains fields which are matched to the incident.
 Field    | Description
 ---------|---------------------------------------------------
 Range    | from sign to incident: `ahead`, `near`, `middle` or `far`
-Branched | `YES` or `NO`: sign and incident on different roadways
-Picked   | `YES` or `NO`: a *pickable* node (r_node) is within 1 mile of the incident; its location can be used for *locator tags*
+Branched | sign and incident on different roadways
+Picked   | a [pickable] r_node is within 1 mile of the incident; its location can be used for _locator tags_
 
 ### Locator Tags
 
@@ -150,4 +150,5 @@ changes, the device deploy form will appear.  All proposed changes will be
 listed in the form, including new devices and any devices to be blanked.
 
 
+[pickable]: road_topology.html#pickable
 [system attribute]: admin_guide.html#sys_attr

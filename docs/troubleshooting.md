@@ -107,7 +107,7 @@ Filename               | Description
 [Pelco-D]: admin_guide.html#pelcod
 [slow warning]: admin_guide.html#slow
 [SSI]: admin_guide.html#ssi
-[station]: admin_guide.html#station
+[station]: road_topology.html#r_node_types
 [STC]: admin_guide.html#stc
 [system attribute]: admin_guide.html#sys_attr
 [vehicle detection systems]: admin_guide.html#vds

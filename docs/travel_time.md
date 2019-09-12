@@ -39,7 +39,7 @@ This feature requires that the [road topology] is configured for the entire
 route.  Using this topology, the shortest route is found from the DMS to the
 destination [station].
 
-A route consists of one or more **corridor trips**.  Each corridor trip has an
+A route consists of one or more _[corridor] trips_.  Each corridor trip has an
 _origin_ and a _destination_, which are r_nodes associated with a single freeway
 corridor.  For the first corridor trip, the origin is the DMS location.  A route
 can only branch if an r_node with _exit_ [node type] is matched with an
@@ -92,11 +92,12 @@ limit text either prepended or appended.
 
 
 [action tag]: action_plans.html#dms-action-tags
-[node type]: admin_guide.html#r_node_type
+[corridor]: road_topology.html#corridors
+[node type]: road_topology.html#r_node_types
 [quick message]: admin_guide.html#quick_msg
-[road topology]: admin_guide.html#road_topology
-[station]: admin_guide.html#station
-[station ID]: admin_guide.html#station_id
+[road topology]: road_topology.html
+[station]: road_topology.html#r_node_types
+[station ID]: road_topology.html#station_id
 [system attribute]: admin_guide.html#sys_attr
 [vehicle detection systems]: admin_guide.html#vds
-[speed limit]: admin_guide.html#speed_limit
+[speed limit]: road_topology.html#speed_limit

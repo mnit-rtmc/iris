@@ -26,4 +26,4 @@ REST AREA 2 MILES[nl]PARKING [pa1,LOW,CLOSED]
 
 
 [action tag]: action_plans.html#dms-action-tags
-[corridor]: admin_guide.html#road_topology
+[corridor]: road_topology.html#corridors
