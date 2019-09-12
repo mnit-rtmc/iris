@@ -24,7 +24,7 @@
 <use x='88' y='42' xlink:href='#r_node_marker'/>
 <use x='88' y='120' xlink:href='#r_node_marker'/>
 <use x='88' y='198' xlink:href='#r_node_marker'/>
-<text style='font-size:1em;fill:#bbaaee' text-anchor='end'>
+<text style='font-size:0.9em;fill:#bbaaee' text-anchor='end'>
   <tspan x="76" y="42">exit</tspan>
   <tspan x="76" y="120">station</tspan>
   <tspan x="76" y="198">entrance</tspan>

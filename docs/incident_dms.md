@@ -11,10 +11,10 @@ used only when the normal version does not fit the sign.
 
 ## Impact
 
-Every incident is assigned an **impact**, based on which lanes are *blocked* or
-*affected*.  If any lane or shoulder is *blocked*, then one of the `_blocked`
-impacts is used.  Otherwise, a lane or shoulder may be *affected*, meaning it
-is partially blocked by *e.g.* debris.
+Every incident is assigned an **impact**, based on which lanes are _blocked_ or
+_affected_.  If any lane or shoulder is _blocked_, then one of the `_blocked`
+impacts is used.  Otherwise, a lane or shoulder may be _affected_, meaning it
+is partially blocked by _e.g._ debris.
 
 Impact                    | Description
 --------------------------|------------------------------------------------
@@ -36,8 +36,8 @@ Impact                    | Description
 
 ## Range
 
-*Range* is the distance from an upstream sign to the incident.  There are four
-defined ranges, each with a number of freeway *exits* in between.  For this
+_Range_ is the distance from an upstream sign to the incident.  There are four
+defined ranges, each with a number of freeway _[exits]_ in between.  For this
 purpose, exits which are part of the same interchange are treated as one (for
 example, both off-ramps of a cloverleaf).
 
@@ -59,8 +59,8 @@ Severity | Maximum Range | Message Priority
 `normal` | `middle`      | `INCIDENT_MED`
 `major`  | `far`         | `INCIDENT_HIGH`
 
-Severity depends on whether *more than half* the lanes are *blocked* or
-*affected*, as well as the **lane type** at the incident location.
+Severity depends on whether _more than half_ the lanes are _blocked_ or
+_affected_, as well as the **lane type** at the incident location.
 
 Impact                          | Mainline   | CD/Exit  | Merge
 --------------------------------|------------|----------|--------
@@ -71,7 +71,7 @@ any lane or shoulder `affected` | `minor`    | —        | —
 
 ## Descriptor
 
-The *descriptor* determines the first line of each suggested message.  The
+The _descriptor_ determines the first line of each suggested message.  The
 configurable descriptor table contains fields which are matched to the incident.
 
 Field         | Description
@@ -82,7 +82,7 @@ Lane Type     | `mainline`, `exit`, `merge` or `CD road`
 
 ## Locator
 
-A matching *locator* determines the second line of a suggested message.  The
+A matching _locator_ determines the second line of a suggested message.  The
 configurable locator table contains fields which are matched to the incident.
 
 Field    | Description
@@ -93,9 +93,9 @@ Picked   | a [pickable] r_node is within 1 mile of the incident; its location ca
 
 ### Locator Tags
 
-Several MULTI-like tags are available for locators.  These tags will be replaced
-with incident location information when composing a message.  Tags should only
-be used if the locator's *picked* state matches.
+Several [MULTI]-like tags are available for locators.  These tags will be
+replaced with incident location information when composing a message.  Tags
+should only be used if the locator's _picked_ state matches.
 
 Tag       | Picked | Description
 ----------|--------|-------------------------------------------------
@@ -115,7 +115,7 @@ For the `[locxa]` tag, matching `road_affix` values are stripped.
 
 ## Advice
 
-A matching *advice* determines the third line of a suggested message.  The
+A matching _advice_ determines the third line of a suggested message.  The
 configurable advice table contains fields which are matched to the incident.
 
 Field          | Description
@@ -124,22 +124,22 @@ Impact         | incident [impact](#impact)
 Lane Type      | `mainline`, `exit`, `merge` or `CD road`
 Range          | from sign to incident: `ahead`, `near`, `middle` or `far`
 Impacted Lanes | number of non-shoulder lanes, (if blank, any number matches)
-Open Lanes     | number of non-shoulder lanes *not* impacted
+Open Lanes     | number of non-shoulder lanes _not_ impacted
 
 ## Dedicated Purpose Signs
 
-*Dedicated purpose* signs normally cannot be used for incidents.  The only
-exception is `tolling` signs — they are used if the locator is not *branched*
+_Dedicated purpose_ signs normally cannot be used for incidents.  The only
+exception is `tolling` signs — they are used if the locator is not _branched_
 and the left lane is impacted: `lanes_blocked`, `left_lanes_blocked`,
 `lanes_affected` or `left_lanes_affected`.
 
 ## Clearing
 
 When a `major` severity incident is cleared, a new message will be sent to each
-deployed sign.  The *descriptor* and *locator* will be the same, but *advice*
+deployed sign.  The _descriptor_ and _locator_ will be the same, but _advice_
 will be taken from the `incident_clear_advice_multi` [system attribute].  If it
 does not fit on the sign, the value of `incident_clear_advice_abbrev` will be
-used instead.  The *cleared* message will be deployed with `PSA` message
+used instead.  The _cleared_ message will be deployed with `PSA` message
 priority for 5 minutes.
 
 ## Updating
@@ -150,5 +150,7 @@ changes, the device deploy form will appear.  All proposed changes will be
 listed in the form, including new devices and any devices to be blanked.
 
 
+[exits]: road_topology.html#r_node-types
+[MULTI]: admin_guide.html#multi
 [pickable]: road_topology.html#pickable
 [system attribute]: admin_guide.html#sys_attr
