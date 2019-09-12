@@ -1,12 +1,12 @@
 ## Road Topology
 
-![Road Topology](road_topology.svg)
-
 For many of the features IRIS provides, a model of the road network topology is
 needed.  This model consists of a set of _roadway nodes_, or **r_nodes**, which
 describe the connection points on the road network.  For instance, each
 _entrance_ ramp, _exit_ ramp, _station_ or _intersection_ is represented by an
 r_node.
+
+![Road Topology](road_topology.svg)
 
 ### Corridors
 
@@ -36,20 +36,20 @@ alt dir    | Alternate direction
 ### R_Nodes
 
 Select the **R_Nodes** tab on the client interface to create or edit r_nodes.
-In the **Selected Roadway Corridor** frame, there is an **Add** button.  Press
-the button to start creating a new r_node.  The mouse cursor will change to a
-crosshair while over the map.  Select the point on the map where the r_node
-should be located and left-click the mouse.  The new r_node will appear on the
-map, and in the list for the selected corridor.
 
 In the **Selected Roadway Corridor** frame, there is a **Corridor** widget
 containing a list of all corridors which contain at least one r_node.  When a
 corridor is selected, the r_node list will be populated with all r_nodes on the
 corridor.  Also, any new r_nodes created will be on the selected corridor.
 
-Once an r_node is selected, any fields on the **Location** tab can be edited.
-Changing the roadway or direction will move the r_node to another corridor.
-Other attributes are nearest cross-street, cross-street direction, and notes.
+Press the **Add** button in the **Selected Roadway Corridor** frame to start
+creating a new r_node.  The mouse cursor will change to a crosshair while over
+the map.  Select a point and the new r_node will appear there, as well as in the
+selected corridor list.
+
+Once an r_node is selected, any fields can be edited.  Changing the _roadway_ or
+_direction_ will move the r_node to another corridor.  Other attributes are
+nearest _cross-street_, _cross-street direction_, and _notes_.
 
 #### R_Node Types
 
@@ -64,8 +64,8 @@ interchange  | Freeway interchange (for traveler information)
 
 #### R_Node Transitions
 
-An r_node transition describes how entrance or exit nodes connect with linked
-nodes.
+An r_node transition describes how _entrance_ or _exit_ nodes connect with
+linked nodes.
 
 Transition | Description
 -----------|------------------
@@ -73,8 +73,8 @@ none       | No transition — non-entrance or -exit r_nodes
 loop       | Interchange _loop_ ramp
 leg        | _Leg_ ramp
 slipramp   | Transition ramp between parallel road corridors
-CD         | Transition to or from _collector/distributor_ road
-HOV        | Bypass ramp for high-occupancy-vehicles
+CD         | Transition to or from a _collector/distributor_ road
+HOV        | Bypass ramp for _high occupancy vehicles_
 common     | Common section joining two corridors
 flyover    | Flyover ramp (bridge over mainline)
 
@@ -87,9 +87,9 @@ types, it is the number of lanes on the corridor.
 #### Shift
 
 Lane shift is the difference (number of lanes) between the corridor reference
-lane and the attach side of the r_node.  This value is used for lane continuity
-analysis within a corridor.  Each corridor has a reference lane, which
-corresponds to the leftmost lane along the entire corridor.
+lane and the _attach side_ of the r_node.  This value is used for lane
+continuity analysis within a corridor.  Each corridor has a reference lane,
+which corresponds to the leftmost lane along the entire corridor.
 
 #### Station ID
 

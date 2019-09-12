@@ -25,7 +25,7 @@ maximum downstream distance for associating station data with a segment.
 
 [detector]: admin_guide.html#vds
 [road topology]: road_topology.html
-[station]: road_topology.html#r_node_types
+[station]: road_topology.html#r_node-types
 [system attribute]: admin_guide.html#sys_attr
 [traffic data]: admin_guide.html#traffic_data
 [XML file]: troubleshooting.html#xml-output

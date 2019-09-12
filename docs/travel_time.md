@@ -93,11 +93,11 @@ limit text either prepended or appended.
 
 [action tag]: action_plans.html#dms-action-tags
 [corridor]: road_topology.html#corridors
-[node type]: road_topology.html#r_node_types
+[node type]: road_topology.html#r_node-types
 [quick message]: admin_guide.html#quick_msg
 [road topology]: road_topology.html
-[station]: road_topology.html#r_node_types
-[station ID]: road_topology.html#station_id
+[station]: road_topology.html#r_node-types
+[station ID]: road_topology.html#station-id
 [system attribute]: admin_guide.html#sys_attr
 [vehicle detection systems]: admin_guide.html#vds
-[speed limit]: road_topology.html#speed_limit
+[speed limit]: road_topology.html#speed-limit
