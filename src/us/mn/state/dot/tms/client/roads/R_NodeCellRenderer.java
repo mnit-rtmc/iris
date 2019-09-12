@@ -24,6 +24,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.font.GlyphVector;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
@@ -171,8 +172,10 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 			r_node.getGeoLoc());
 		if (xorl != null)
 			drawCrossOrLandmark(g2, xorl, width, height);
-		if (selected)
+		if (selected) {
+			drawMarker(g2, height);
 			drawShiftHandle(g2, height);
+		}
 	}
 
 	/** Fill the background */
@@ -501,6 +504,20 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 		int y = (height + (int) rect.getHeight()) / 2;
 		g.setColor(Color.BLACK);
 		g.drawGlyphVector(gv, x, y);
+	}
+
+	/** Draw the r_node marker */
+	private void drawMarker(Graphics2D g, int height) {
+		int x = getShiftX(r_node.getShift());
+		AffineTransform t = g.getTransform();
+		g.translate(x, height / 2);
+		Shape marker = new R_NodeMarker();
+		g.setColor(SegmentTheme.R_NODE_COLOR);
+		g.fill(marker);
+		g.setColor(SegmentTheme.OUTLINE.color);
+		g.setStroke(SegmentTheme.OUTLINE.getStroke(1));
+		g.draw(marker);
+		g.setTransform(t);
 	}
 
 	/** Draw the shift handle */

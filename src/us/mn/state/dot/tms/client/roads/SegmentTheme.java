@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,16 +48,19 @@ abstract public class SegmentTheme extends Theme {
 	static public final Color VIOLET = new Color(192, 0, 240);
 
 	/** Transparent black outline */
-	static protected final Outline OUTLINE = Outline.createSolid(
-		new Color(0, 0, 0, 128), 0.6f);
+	static public final Outline OUTLINE = Outline.createSolid(
+		new Color(0, 0, 0, 192), 0.6f);
 
 	/** Default segment style theme */
 	static protected final Style DEFAULT_STYLE = new Style(I18N.get(
 		"detector.no.data"), OUTLINE, GRAY);
 
+	/** R_Node color */
+	static public final Color R_NODE_COLOR = new Color(128, 64, 255, 128);
+
 	/** R_node style theme */
 	static private final Style R_NODE_STYLE = new Style(I18N.get("r_node"),
-		OUTLINE, new Color(255, 96, 128, 128));
+		OUTLINE, R_NODE_COLOR);
 
 	/** Create a new segment theme */
 	protected SegmentTheme(String name) {
