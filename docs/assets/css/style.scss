@@ -48,11 +48,7 @@ a {
 }
 
 ul {
-  list-style: none;
-}
-
-ul li::before {
-  content: "》";
+  list-style-type: "》";
 }
 
 section img {
