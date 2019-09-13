@@ -10,7 +10,7 @@
   <body>
     <div class="wrapper">
       <section>
-        <div id="title">
+        <div class="title">
           <h1>{{ site.title | default: site.github.repository_name }}</h1>
           <p>{{ site.description | default: site.github.project_tagline }}</p>
           <hr>
@@ -20,7 +20,7 @@
 
         <div class="footer">
           <hr>
-          <span>Project maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></span>
+          <span>Repository: <a href="{{ repository.html_url }}">{{ repository.name }}</a></span>
         </div>
       </section>
     </div>

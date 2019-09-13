@@ -37,7 +37,7 @@
     <h3><a href="#mapping">Mapping</a></h3>
     <h3><a href="road_topology.html">Road Topology</a></h3>
     <h3><a href="#comm_links">Comm Links</a></h3>
-    <h3><a href="#controllers">Controllers</a></h3>
+    <h3><a href="controllers.html">Controllers</a></h3>
     <h3><a href="fonts.html">Fonts</a></h3>
   </div>
   <h2><a id="devices_link" href="#devices">Devices</a></h2>
@@ -881,9 +881,9 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	<tr>
 	    <th>Protocol</th>
 	    <th>Default Scheme</th>
-	    <th><a href="#drop_address">Drop Address</a></th>
+	    <th><a href="controllers.html#drop-address">Drop Address</a></th>
 	    <th>Devices</th>
-	    <th><a href="#io_pins">I/O Pins</a></th>
+	    <th><a href="controllers.html#io-pins">I/O Pins</a></th>
 	</tr>
 	<tr id="ntcip">
 	    <td>NTCIP A</td>
@@ -1194,73 +1194,6 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	Camera ID may be blank, or the ID of a camera to view the incident.
 </p>
 
-<h3 id="controllers">Controllers</h3>
-<aside>
-	Select <span class="menu">View ➔ Maintenance ➔ Comm Links</span> menu
-	item
-</aside>
-<p>
-	A <b>controller</b> is an end-point for a <a href="#comm_links">comm
-	link</a>.
-	Each controller can have one or more associated <a href="#devices">
-	devices</a>, depending on the <a href="#prot_table">protocol</a>.
-	Sometimes a controller represents a separate physical <em>box</em>,
-	which is connected to devices, and other times the controller may be
-	embedded within the device.
-	In any case, IRIS requires a controller for any communication to a
-	device.
-	Controllers can be assigned to a <b>cabinet</b>, which has location
-	information, to allow displaying on a map.
-</p>
-
-<h4 id="drop_address">Drop Address</h4>
-<p>
-	Some <a href="#prot_table">protocols</a> support <b>multi-drop</b>
-	addressing, while others are <b>single-drop</b> only.
-	Multi-drop addressing allows multiple controllers to share the same
-	<a href="#comm_links">comm link</a> &mdash; typically for serial
-	communication.
-	Each controller must be assigned a unique (to the comm link) drop
-	address, which is used to route all messages sent to the controller.
-	For single-drop protocols, the drop address is ignored.
-</p>
-
-<h4 id="ctrl_pwd">Controller Password</h4>
-<p>
-	Authentication is supported or required by some communication protocols.
-	The controller <b>password</b> field is used to enter authentication
-	data.
-</p>
-<p>
-	For <a href="#ntcip">NTCIP</a>, this represents the SNMP
-	<b>community</b> name.
-	If no controller password is set, the <code>Public</code> community name
-	will be used.
-</p>
-<p>
-	Web-based devices may require HTTP Basic Authentication.
-	For these types of devices, the password field should contain both the
-	user name and password, separated by a colon (<code>user:password</code>).
-	For <a href="#cbw">CBW</a>, the user name portion must be
-	<code>none</code>.
-	HTTP Basic Authentication can be enabled on the setup page of the
-	<a href="#cbw">CBW</a> device (setup.html).
-</p>
-<p>
-	<a href="#sierragx">SierraGX</a> modems can be configured to require
-	authentiation.
-	In this case, separate the username and password with a colon, in the
-	same manner as HTTP basic authentication.
-</p>
-
-<h4 id="io_pins">I/O Pins</h4>
-<p>
-	Each controller has a set of <b>I/O pins</b>, to which
-	<a href="#devices">devices</a> can be assigned.
-	The function of these pins is protocol specific &mdash; see the
-	<a href="#prot_table">protocol table</a> for details.
-</p>
-
 <h2 id="devices">Devices</h2>
 <p>
 	A device is a hardware field control or sensing system.
@@ -1280,8 +1213,8 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 </p>
 <p>
 	For any device to be activated, it must first be connected to one of the
-	<a href="#io_pins">I/O pins</a> on a
-	<a href="#controllers">controller</a>.
+	<a href="controllers.html#io-pins">I/O pins</a> on a
+	<a href="controllers.html">controller</a>.
 	The controller must also be associated with a
 	<a href="#comm_links">comm link</a> which communicates using the
 	appropriate protocol for the device.
@@ -1537,8 +1470,8 @@ FIXME
 	<i>yellow arrow</i> <span class="yellow">&nbsp;↓&nbsp;</span> or a
 	<i>red X</i> <span class="red">&nbsp;X&nbsp;</span>).
 	Each indication must be assigned to a separate
-	<a href="#io_pins">I/O pin</a> on a
-	<a href="#controllers">controller</a>, as well as the DMS which
+	<a href="controllers.html#io-pins">I/O pin</a> on a
+	<a href="controllers.html">controller</a>, as well as the DMS which
 	represents the LCS.
 </p>
 
@@ -1655,7 +1588,7 @@ FIXME
 	IRIS supports several different <a href="#prot_table">protocols</a> for
 	communicating with vehicle detection systems.
 	The protocol used depends on the <a href="#comm_links">comm link</a> of
-	the <a href="#controllers">controller</a> to which it is assigned.
+	the <a href="controllers.html">controller</a> to which it is assigned.
 	The following table summarizes features of each protocol.
 </p>
 <table>
@@ -2167,7 +2100,7 @@ FIXME
 </ul>
 <p>
 	For PTZ control to function, the camera must be associated with a
-	<a href="#controllers">controller</a> on a PTZ protocol
+	<a href="controllers.html">controller</a> on a PTZ protocol
 	<a href="#comm_links">comm link</a>.
 </p>
 <p>
@@ -2266,8 +2199,8 @@ FIXME
 	the monstream process.
 </p>
 <p>
-	A <a href="#controllers">controller</a> must be configured to represent
-	each MonStream computer.
+	A <a href="controllers.html">controller</a> must be configured to
+	represent each MonStream computer.
 	It will need to be on a <a href="#comm_links">comm link</a> using the
 	MonStream protocol, with a timeout of 2000 ms.
 	The comm link URI should be of the form: <code>[ip address]:7001</code>.
@@ -2408,7 +2341,7 @@ FIXME
 <p>
 	Another gate arm security feature causes the entire "gate arm system"
 	to be disabled whenever any configuration change is made to a gate arm.
-	This includes any changes to a gate arm array, <a href="#controllers">
+	This includes any changes to a gate arm array, <a href="controllers.html">
 	controller</a> or associated <a href="#comm_links">comm link</a>.
 	IRIS will not send any command to open or close any gate arm in this
 	state.
