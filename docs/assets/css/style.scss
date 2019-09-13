@@ -1,8 +1,6 @@
 ---
 ---
 
-// Originally based on jekyll-theme-midnight.scss
-
 * {
   font-family: 'Overpass', sans-serif;
   font-weight: normal;
@@ -10,16 +8,15 @@
 }
 
 body {
-  padding: 0 0 1rem 0;
-  margin: 0;
-  color: #f0e7d5;
-  background: #255225;
+  padding-bottom: 1rem;
+  color: #ffeedd;
+  background: #283028;
+  background: linear-gradient(#283028, #1c201c);
   background-attachment: fixed !important;
-  background: linear-gradient(#2a2a29, #1c1c1c);
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: #e8e8e8;
+  color: #f0f0f0;
   margin: 0.5rem 0 0.5rem 0;
   line-height: 1.1;
 }
@@ -38,23 +35,16 @@ h3 {
 }
 
 p, ul, ol, table, pre, dl {
-  margin: 0 0 1rem;
+  margin-bottom: 1rem;
 }
 
 a {
-  color: #ffcc00;
-  text-decoration: none;
+  color: #ffbf00;
+  text-decoration: underline dashed;
 
   &:hover {
-    color: #ffeb9b;
+    color: #ffee99;
   }
-}
-
-a small {
-  font-size: 0.8rem;
-  color: #666;
-  margin-top: -0.6em;
-  display: block;
 }
 
 ul {
@@ -73,21 +63,14 @@ ul li::before {
 }
 
 section img {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-blockquote {
-  border-left: 0.1rem solid #ffcc00;
-  margin: 0;
-  padding: 0 0 0 1rem;
-  font-style: italic;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 code {
   font-family: 'Overpass Mono', monospace;
-  color: #efefef;
+  color: #eee;
 }
 
 pre {
@@ -122,13 +105,13 @@ table tr:nth-child(odd) td {
 th {
   font-size: 1.1rem;
   text-align: left;
-  padding: 0.1rem 0.1rem;
+  padding: 0.1rem 0.5rem 0.1rem 1rem;
   color: white;
 }
 
 td {
   text-align: left;
-  padding: 0 1rem;
+  padding: 0 0.5rem 0.1rem 0.5rem;
   color: white;
 }
 
@@ -136,74 +119,33 @@ hr {
   border-bottom: thick dashed yellow;
   outline: none;
   height: 0.1rem;
-  margin: 0 0 1rem;
-}
-
-dt {
-  color: #f0e7d5;
+  margin-bottom: 1rem;
 }
 
 section {
   max-width: 40rem;
-  padding: 1rem 0 2rem 0;
-  margin: 1rem 0;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
 
-  #title {
-    border: 0;
-    outline: none;
-    margin: 0 0 2rem 0;
-    padding: 0 0 0.5rem 0;
+#title {
+  border: 0;
+  outline: none;
+  margin-bottom: 2rem;
 
-    h1 {
-      font-size: 2rem;
-      text-align: center;
-    }
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
 
-    p {
-      color: #d7cfbe;
-      font-size: 1.5rem;
-      text-align: center;
-    }
+  p {
+    color: #ddccbb;
+    font-size: 1.5rem;
+    text-align: center;
   }
 }
 
 .credits {
   font-size: 0.8rem;
   color: #696969;
-
-  &.left {
-    float: left;
-  }
-
-  &.right {
-    float: right;
-  }
-}
-
-@media print, screen and (max-width: 720px) {
-
-  #title {
-    .credits {
-      display: block;
-      width: 100%;
-      line-height: 2rem;
-      text-align: center;
-    }
-  }
-
-  .left {
-    float: none;
-    display: block;
-  }
-
-  .right {
-    float: none;
-    display: block;
-  }
-}
-
-@media print, screen and (max-width: 480px) {
-  nav {
-    display: none;
-  }
 }
