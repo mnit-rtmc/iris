@@ -11,7 +11,12 @@
     <div class="wrapper">
       <section>
         <div class="title">
-          <h1>{{ site.title | default: site.github.repository_name }}</h1>
+          <h1>
+              {% if site.icon And site.icon != nil %}
+                  <img src="{{ site.icon }}"/>
+              {% endif %}
+              {{ site.title | default: site.github.repository_name }}
+          </h1>
           <p>{{ site.description | default: site.github.project_tagline }}</p>
           <hr>
         </div>
