@@ -38,7 +38,7 @@
     <h3><a href="road_topology.html">Road Topology</a></h3>
     <h3><a href="#comm_links">Comm Links</a></h3>
     <h3><a href="#controllers">Controllers</a></h3>
-    <h3><a href="#fonts">Fonts</a></h3>
+    <h3><a href="fonts.html">Fonts</a></h3>
   </div>
   <h2><a id="devices_link" href="#devices">Devices</a></h2>
   <div id="devices_div">
@@ -75,7 +75,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">11 Sep 2019</div>
+<div id="stamp">13 Sep 2019</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -1259,208 +1259,6 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	<a href="#devices">devices</a> can be assigned.
 	The function of these pins is protocol specific &mdash; see the
 	<a href="#prot_table">protocol table</a> for details.
-</p>
-
-<h3 id="fonts">Fonts</h3>
-<aside>
-	Select <span class="menu">View ➔ Message Signs ➔ DMS Fonts</span> menu
-	item
-</aside>
-<p>
-	A font is a set of bitmapped glyphs for displaying text on a dynamic
-	message sign (DMS).
-	Each font can contain any of the printable characters in the ASCII
-	character set (0x20 to 0x7E).
-</p>
-<p>
-	When selecting a font, a few parameters must be considered, such as
-	pixel pitch, desired character height, and font weight.
-	Pixel pitch can vary from 66 mm down to 20 mm or smaller.
-	Typically, for freeway signs, characters should be between 350 and 400
-	mm (about 14 or 15 inches) high.
-	See the table below for character heights based on these common sizes.
-</p>
-<table>
-	<tr>
-	    <th rowspan='2'>Font Height</th>
-	    <th colspan='4'>Pixel Pitch</th>
-	</tr>
-	<tr>
-	    <th>20 mm</th>
-	    <th>33 mm</th>
-	    <th>50 mm</th>
-	    <th>66 mm</th>
-	</tr>
-	<tr>
-	    <th>7 px</th>
-	    <td>120 mm</td>
-	    <td>198 mm</td>
-	    <td>300 mm</td>
-	    <td class='best'>396 mm</td>
-	</tr>
-	<tr>
-	    <th>8 px</th>
-	    <td>140 mm</td>
-	    <td>231 mm</td>
-	    <td class='best'>350 mm</td>
-	    <td>462 mm</td>
-	</tr>
-	<tr>
-	    <th>10 px</th>
-	    <td>180 mm</td>
-	    <td>297 mm</td>
-	    <td>450 mm</td>
-	    <td>594 mm</td>
-	</tr>
-	<tr>
-	    <th>12 px</th>
-	    <td>220 mm</td>
-	    <td class='best'>363 mm</td>
-	    <td>550 mm</td>
-	    <td>726 mm</td>
-	</tr>
-	<tr>
-	    <th>14 px</th>
-	    <td>260 mm</td>
-	    <td>429 mm</td>
-	    <td>650 mm</td>
-	    <td>858 mm</td>
-	</tr>
-	<tr>
-	    <th>16 px</th>
-	    <td>300 mm</td>
-	    <td>495 mm</td>
-	    <td>750 mm</td>
-	    <td>990 mm</td>
-	</tr>
-	<tr>
-	    <th>18 px</th>
-	    <td>340 mm</td>
-	    <td>561 mm</td>
-	    <td>850 mm</td>
-	    <td>1122 mm</td>
-	</tr>
-	<tr>
-	    <th>20 px</th>
-	    <td class='best'>380 mm</td>
-	    <td>627 mm</td>
-	    <td>950 mm</td>
-	    <td>1254 mm</td>
-	</tr>
-</table>
-<p>
-	In the past, DMS have been used with upper-case only fonts, but with
-	smaller pixel pitch, it is possible to create legible fonts which
-	also include lower-case characters.
-	If a message containing lower-case characters is used with an upper-case
-	only font, IRIS will replace those characters with their equivalent.
-</p>
-<p>
-	A number of fonts are included in the sql/fonts directory.
-	These fonts are designed to have a similar visual style.
-	To import a font into the IRIS database, use psql:
-</p>
-<pre class="code">psql tms -f <em>[font file]</em></pre>
-<table>
-	<tr>
-	    <th>Number</th>
-	    <th>Font Name</th>
-            <th>Description</th>
-	</tr>
-	<tr>
-	    <td>1</td>
-	    <td>07_char</td>
-	    <td>7x5 character matrix</td>
-	</tr>
-	<tr>
-	    <td>2</td>
-	    <td>07_line</td>
-	    <td>7 pixel high line-matrix</td>
-	</tr>
-	<tr>
-	    <td>3</td>
-	    <td>08_full</td>
-	    <td>8 pixel high full-matrix</td>
-	</tr>
-	<tr>
-	    <td>4</td>
-	    <td>09_full</td>
-	    <td>9 pixel high full-matrix</td>
-	</tr>
-	<tr>
-	    <td>5</td>
-	    <td>10_full</td>
-	    <td>10 pixel high full-matrix</td>
-	</tr>
-	<tr>
-	    <td>6</td>
-	    <td>11_full</td>
-	    <td>11 pixel high full-matrix</td>
-	</tr>
-	<tr>
-	    <td>7</td>
-	    <td>12_full</td>
-	    <td>12 pixel high full-matrix</td>
-	</tr>
-	<tr>
-	    <td>8</td>
-	    <td>12_full_bold</td>
-	    <td>12 pixel high full-matrix bold</td>
-	</tr>
-	<tr>
-	    <td>9</td>
-	    <td>13_full</td>
-	    <td>13 pixel high full-matrix</td>
-	</tr>
-	<tr>
-	    <td>11</td>
-	    <td>14_full</td>
-	    <td>14 pixel high full-matrix</td>
-	</tr>
-	<tr>
-	    <td>12</td>
-	    <td>14_full_thin</td>
-	    <td>14 pixel high full-matrix</td>
-	</tr>
-	<tr>
-	    <td>21</td>
-	    <td>15_full</td>
-	    <td>15 pixel high full-matrix</td>
-	</tr>
-	<tr>
-	    <td>13</td>
-	    <td>16_full</td>
-	    <td>16 pixel high full-matrix</td>
-	</tr>
-	<tr>
-	    <td>14</td>
-	    <td>18_full</td>
-	    <td>18 pixel high full-matrix</td>
-	</tr>
-	<tr>
-	    <td>15</td>
-	    <td>20_full</td>
-	    <td>20 pixel high full-matrix (numerals only)</td>
-	</tr>
-	<tr>
-	    <td>16</td>
-	    <td>24_full</td>
-	    <td>24 pixel high full-matrix (numerals only)</td>
-	</tr>
-	<tr>
-	    <td>20</td>
-	    <td>26_full</td>
-	    <td>26 pixel high full-matrix</td>
-	</tr>
-	<tr>
-	    <td>17</td>
-	    <td>_09_full_12</td>
-	    <td>9 pixel high (12 with lower case descenders)</td>
-	</tr>
-</table>
-<p>
-	The IRIS client also contains a font editor which can be used to design
-	new DMS fonts.
 </p>
 
 <h2 id="devices">Devices</h2>

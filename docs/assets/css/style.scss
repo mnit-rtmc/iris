@@ -40,7 +40,7 @@ p, ul, ol, table, pre, dl {
 
 a {
   color: #ffbf00;
-  text-decoration: underline dashed;
+  text-decoration: underline dotted;
 
   &:hover {
     color: #ffee99;
@@ -53,13 +53,6 @@ ul {
 
 ul li::before {
   content: "》";
-}
-
-.wrapper {
-  max-width: 40rem;
-  margin: 0 auto;
-  position: relative;
-  padding: 0 1rem;
 }
 
 section img {
@@ -111,41 +104,35 @@ th {
 
 td {
   text-align: left;
-  padding: 0 0.5rem 0.1rem 0.5rem;
+  padding: 0.05rem 0.5rem 0.05rem 0.5rem;
   color: white;
 }
 
 hr {
   border-bottom: thick dashed yellow;
-  outline: none;
   height: 0.1rem;
   margin-bottom: 1rem;
 }
 
-section {
+.wrapper {
   max-width: 40rem;
-  margin-top: 1rem;
-  margin-bottom: 2rem;
+  margin: 0 auto;
+  position: relative;
 }
 
-#title {
-  border: 0;
-  outline: none;
-  margin-bottom: 2rem;
+section {
+  max-width: 40rem;
+  margin-top: 0.5rem;
+}
 
-  h1 {
-    font-size: 2rem;
-    text-align: center;
-  }
-
+.title {
   p {
-    color: #ddccbb;
     font-size: 1.5rem;
     text-align: center;
   }
 }
 
-.credits {
+.footer {
   font-size: 0.8rem;
   color: #696969;
 }
