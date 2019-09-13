@@ -66,7 +66,7 @@ ul li::before {
 }
 
 .wrapper {
-  max-width: 50rem;
+  max-width: 40rem;
   margin: 0 auto;
   position: relative;
   padding: 0 1rem;
@@ -86,7 +86,7 @@ blockquote {
 }
 
 code {
-  font-family: Overpass-Mono, monospace;
+  font-family: 'Overpass Mono', monospace;
   color: #efefef;
   margin: 0 0.3rem;
   padding: 0.1rem 0.1rem;
@@ -111,41 +111,42 @@ pre {
 
 table {
   width: 100%;
+  border: solid white;
+  border-radius: 0.5rem;
   border-collapse: collapse;
-  background: #060;
+  background: #151;
+}
+
+table tr:nth-child(even) td {
+  background: #141;
 }
 
 th {
+  font-size: 1.1rem;
   text-align: left;
-  padding: 0.5 1rem;
-  border-bottom: 0.1rem solid #434343;
-  color: #b6b6b6;
-  font-family: 'Overpass', sans-serif !important;
-  font-weight: normal;
+  padding: 0.2rem 1rem;
+  color: white;
 }
 
 td {
   text-align: left;
-  padding: 0.5rem 1rem;
-  border-bottom: 0.1rem solid #434343;
+  padding: 0 1rem;
+  color: white;
 }
 
 hr {
-  border: 0;
+  border-bottom: thick dashed yellow;
   outline: none;
-  height: 0.3rem;
-  background: transparent url('../images/hr.gif') center center repeat-x;
+  height: 0.1rem;
   margin: 0 0 1rem;
 }
 
 dt {
   color: #f0e7d5;
-  font-family: 'Overpass', sans-serif !important;
-  font-weight: normal;
 }
 
 section {
-  max-width: 50rem;
+  max-width: 40rem;
   padding: 1rem 0 2rem 0;
   margin: 1rem 0;
 
