@@ -56,4 +56,11 @@ CREATE VIEW incident_view AS
     LEFT JOIN iris.lane_type ln ON i.lane_type = ln.id;
 GRANT SELECT ON incident_view TO PUBLIC;
 
+-- Add allow_retain column to road_affix
+ALTER TABLE iris.road_affix ADD COLUMN allow_retain BOOLEAN;
+UPDATE iris.road_affix SET allow_retain = 'f';
+UPDATE iris.road_affix SET allow_retain = 't'
+	WHERE name IN ('AVE', 'DR', 'RD', 'ST');
+ALTER TABLE iris.road_affix ALTER COLUMN allow_retain SET NOT NULL;
+
 COMMIT;

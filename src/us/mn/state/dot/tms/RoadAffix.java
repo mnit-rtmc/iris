@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,4 +38,10 @@ public interface RoadAffix extends SonarObject {
 
 	/** Get the traveler information fixup */
 	String getFixup();
+
+	/** Set flag to allow retaining the affix */
+	void setAllowRetain(boolean r);
+
+	/** Get flag to allow retaining the affix */
+	boolean getAllowRetain();
 }

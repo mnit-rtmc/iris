@@ -117,6 +117,18 @@ in the `road_affix` table are replaced.
 
 For the `[locxa]` tag, matching `road_affix` values are stripped.
 
+### Road Affixes
+
+The road affix table determines how road name _prefixes_ and _suffixes_ are
+handled.  For example, the suffix `AVE` is short for avenue.
+
+Field        | Description
+-------------|---------------------------------
+Affix        | road prefix / suffix string
+Prefix       | `true` for prefix, `false` for suffix
+Fixup        | string to replace affix for sign message display
+Allow Retain | `true` if retaining affix is allowed without fixup
+
 ## Advice
 
 A matching _advice_ determines the third line of a suggested message.  The

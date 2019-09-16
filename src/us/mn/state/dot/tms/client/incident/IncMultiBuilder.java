@@ -83,14 +83,22 @@ public class IncMultiBuilder {
 	/** Build MULTI string, replacing [loc] tags */
 	private MultiString buildMulti(String multi) {
 		if (multi != null) {
-			LocMultiBuilder lmb = new LocMultiBuilder(loc, dist);
-			new MultiString(multi).parse(lmb);
-			MultiString ms = lmb.toMultiString();
-			return (DMSHelper.createPageOne(dms, ms) != null)
-			      ? ms
-			      : null;
+			// First try to retain affixes, but strip if necessary
+			MultiString ms = checkMulti(multi, true);
+			return (ms != null) ? ms : checkMulti(multi, false);
 		} else
 			return null;
+	}
+
+	/** Check if a MULTI string fits on the DMS */
+	private MultiString checkMulti(String multi, boolean retain_affixes) {
+		LocMultiBuilder lmb = new LocMultiBuilder(loc, dist,
+			retain_affixes);
+		new MultiString(multi).parse(lmb);
+		MultiString ms = lmb.toMultiString();
+		return (DMSHelper.createPageOne(dms, ms) != null)
+		      ? ms
+		      : null;
 	}
 
 	/** Get the MULTI string */

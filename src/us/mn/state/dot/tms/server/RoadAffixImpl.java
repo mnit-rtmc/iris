@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ public class RoadAffixImpl extends BaseObjectImpl implements RoadAffix {
 	/** Load all the road affixes */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, RoadAffixImpl.class);
-		store.query("SELECT name, prefix, fixup FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, prefix, fixup, allow_retain " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new RoadAffixImpl(row));
@@ -49,6 +49,7 @@ public class RoadAffixImpl extends BaseObjectImpl implements RoadAffix {
 		map.put("name", name);
 		map.put("prefix", prefix);
 		map.put("fixup", fixup);
+		map.put("allow_retain", allow_retain);
 		return map;
 	}
 
@@ -70,17 +71,19 @@ public class RoadAffixImpl extends BaseObjectImpl implements RoadAffix {
 	}
 
 	/** Create a road affix */
-	private RoadAffixImpl(String n, boolean p, String f) {
+	private RoadAffixImpl(String n, boolean p, String f, boolean r) {
 		super(n);
 		prefix = p;
 		fixup = f;
+		allow_retain = r;
 	}
 
 	/** Create a road affix */
 	private RoadAffixImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
 		     row.getBoolean(2), // prefix
-		     row.getString(3)   // fixup
+		     row.getString(3),  // fixup
+		     row.getBoolean(4)  // allow_retain
 		);
 	}
 
@@ -130,5 +133,28 @@ public class RoadAffixImpl extends BaseObjectImpl implements RoadAffix {
 	@Override
 	public String getFixup() {
 		return fixup;
+	}
+
+	/** Flag to allow retaining the affix */
+	private boolean allow_retain;
+
+	/** Set flag to allow retaining the affix */
+	@Override
+	public void setAllowRetain(boolean r) {
+		allow_retain = r;
+	}
+
+	/** Set flag to allow retaining the affix */
+	public void doSetAllowRetain(boolean r) throws TMSException {
+		if (r != allow_retain) {
+			store.update(this, "allow_retain", r);
+			setAllowRetain(r);
+		}
+	}
+
+	/** Get flag to allow retaining the affix */
+	@Override
+	public boolean getAllowRetain() {
+		return allow_retain;
 	}
 }

@@ -146,7 +146,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	5.2.0
+database_version	5.3.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0
@@ -790,27 +790,28 @@ GRANT SELECT ON road_view TO PUBLIC;
 CREATE TABLE iris.road_affix (
 	name VARCHAR(12) PRIMARY KEY,
 	prefix BOOLEAN NOT NULL,
-	fixup VARCHAR(12)
+	fixup VARCHAR(12),
+	allow_retain BOOLEAN NOT NULL
 );
 
-COPY iris.road_affix (name, prefix, fixup) FROM stdin;
-C.S.A.H.	t	CTY
-CO RD	t	CTY
-I-	t	
-U.S.	t	HWY
-T.H.	t	HWY
-AVE	f	
-BLVD	f	
-CIR	f	
-DR	f	
-HWY	f	
-LN	f	
-PKWY	f	
-PL	f	
-RD	f	
-ST	f	
-TR	f	
-WAY	f	
+COPY iris.road_affix (name, prefix, fixup, allow_retain) FROM stdin;
+C.S.A.H.	t	CTY	f
+CO RD	t	CTY	f
+I-	t		f
+U.S.	t	HWY	f
+T.H.	t	HWY	f
+AVE	f		t
+BLVD	f		f
+CIR	f		f
+DR	f		t
+HWY	f		f
+LN	f		f
+PKWY	f		f
+PL	f		f
+RD	f		t
+ST	f		t
+TR	f		f
+WAY	f		f
 \.
 
 CREATE TABLE iris.geo_loc (

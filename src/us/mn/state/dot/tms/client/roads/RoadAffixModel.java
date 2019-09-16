@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ public class RoadAffixModel extends ProxyTableModel<RoadAffix> {
 	@Override
 	protected ArrayList<ProxyColumn<RoadAffix>> createColumns() {
 		ArrayList<ProxyColumn<RoadAffix>> cols =
-			new ArrayList<ProxyColumn<RoadAffix>>(3);
+			new ArrayList<ProxyColumn<RoadAffix>>(4);
 		cols.add(new ProxyColumn<RoadAffix>("location.road.affix", 200){
 			public Object getValueAt(RoadAffix ra) {
 				return ra.getName();
@@ -71,6 +71,20 @@ public class RoadAffixModel extends ProxyTableModel<RoadAffix> {
 			public void setValueAt(RoadAffix ra, Object value) {
 				String v = value.toString().trim();
 				ra.setFixup((v.length() > 0) ? v : null);
+			}
+		});
+		cols.add(new ProxyColumn<RoadAffix>(
+			"location.road.affix.allow.retain", 120, Boolean.class)
+		{
+			public Object getValueAt(RoadAffix ra) {
+				return ra.getAllowRetain();
+			}
+			public boolean isEditable(RoadAffix ra) {
+				return canWrite(ra);
+			}
+			public void setValueAt(RoadAffix ra, Object value) {
+				if (value instanceof Boolean)
+					ra.setAllowRetain((Boolean) value);
 			}
 		});
 		return cols;
