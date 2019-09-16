@@ -40,20 +40,34 @@ public class IncMultiBuilder {
 	/** Location MULTI builder */
 	private final MultiBuilder builder;
 
+	/** Total lines on DMS */
+	private final int max_lines;
+
+	/** Line count */
+	private int n_lines;
+
 	/** Create a new incident MULTI builder */
 	public IncMultiBuilder(DMS s, GeoLoc l, Distance d) {
 		dms = s;
 		loc = l;
 		dist = d;
 		builder = new MultiBuilder();
+		max_lines = DMSHelper.getLineCount(dms);
+		n_lines = 0;
 	}
 
 	/** Add a line to MULTI string */
 	public boolean addLine(String multi, String abbrev) {
 		MultiString ms = buildMulti(multi, abbrev);
 		if (ms != null) {
-			if (builder.toString().length() > 0)
-				builder.addLine(null);
+			if (builder.toString().length() > 0) {
+				n_lines++;
+				if (n_lines > max_lines) {
+					builder.addPage();
+					n_lines = 0;
+				} else
+					builder.addLine(null);
+			}
 			ms.parse(builder);
 			return true;
 		} else
