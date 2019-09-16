@@ -25,29 +25,29 @@
 
   <g style="fill:#ffeedd">
     <g transform="rotate(-90) translate(-120,16)">
-      <text style="font-size:1em">
+      <text style="font-family:Overpass;font-size:1em">
          <tspan x="0" y="0">Speed</tspan>
       </text>
     </g>
-    <text style="font-size:1em">
+    <text style="font-family:Overpass;font-size:1em">
       <tspan x="100" y="212">Distance</tspan>
     </text>
-    <text style="font-size:1em">
+    <text style="font-family:Overpass Mono;font-size:1em">
        <tspan x="88" y="56">u</tspan>
     </text>
-    <text style="font-size:1em">
+    <text style="font-family:Overpass Mono;font-size:1em">
        <tspan x="176" y="128">v</tspan>
     </text>
-    <text style="font-size:1em">
+    <text style="font-family:Overpass Mono;font-size:1em">
        <tspan x="120" y="92">s</tspan>
     </text>
-    <text style="font-size:1.2em">
+    <text style="font-family:Overpass;font-size:1.2em">
        <tspan x="64" y="240">v² = u² + 2as</tspan>
     </text>
   </g>
 
-  <circle cx="80" cy="52" r="4" style="fill:blue" />
-  <circle cx="168" cy="124" r="4" style="fill:blue" />
+  <circle cx="80" cy="52" r="4" style="fill:yellow" />
+  <circle cx="168" cy="124" r="4" style="fill:yellow" />
 
   <g style="stroke:#ffeedd;fill:#ffeedd">
     <path style="marker-end:url(#Arrow1Lend)" d="m 24,176 0,-160" />

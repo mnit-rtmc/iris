@@ -24,14 +24,15 @@
 <use x='88' y='42' xlink:href='#r_node_marker'/>
 <use x='88' y='120' xlink:href='#r_node_marker'/>
 <use x='88' y='198' xlink:href='#r_node_marker'/>
-<text style='font-size:0.8em;fill:#ffeedd' text-anchor='end'>
+<text style='font-family:Overpass;font-size:0.8em;fill:#ffeedd'
+      text-anchor='end'>
   <tspan x="76" y="42">exit</tspan>
   <tspan x="76" y="120">station</tspan>
   <tspan x="76" y="198">entrance</tspan>
 </text>
 <rect x="112" y="100" width="108" height="32" rx="8"
       style="fill:#404040;stroke:white"/>
-<text style='font-size:1.2em;fill:#ffeedd'>
+<text style='font-family:Overpass;font-size:1.2em;fill:#ffeedd'>
   <tspan x="124" y="124">r_nodes</tspan>
 </text>
 </svg>
