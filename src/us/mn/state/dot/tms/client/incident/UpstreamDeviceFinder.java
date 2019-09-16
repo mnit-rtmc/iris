@@ -20,6 +20,7 @@ import java.util.TreeSet;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.CorridorFinder;
 import us.mn.state.dot.tms.DevicePurpose;
+import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
@@ -103,8 +104,8 @@ public class UpstreamDeviceFinder {
 	/** Corridor finder */
 	private final CorridorFinder<R_Node> finder;
 
-	/** Incident impact */
-	private final IncImpact impact;
+	/** The incident */
+	private final Incident incident;
 
 	/** Maximum exits for DMS */
 	private final int maximum_exits;
@@ -119,7 +120,7 @@ public class UpstreamDeviceFinder {
 	/** Create new upstream device finder */
 	public UpstreamDeviceFinder(CorridorFinder<R_Node> cf, Incident inc) {
 		finder = cf;
-		impact = IncImpact.getImpact(inc);
+		incident = inc;
 		maximum_exits = maximum_exits(inc);
 		scanners.add(new CorScanner(new IncidentLoc(inc), 0,
 			new Distance(0f, MILES)));
@@ -191,7 +192,7 @@ public class UpstreamDeviceFinder {
 	private boolean isTollingDeployable(boolean branched) {
 		if (branched)
 			return false;
-		switch (impact) {
+		switch (IncImpact.getImpact(incident)) {
 			case lanes_blocked: return true;
 			case left_lanes_blocked: return true;
 			case lanes_affected: return true;
@@ -251,16 +252,25 @@ public class UpstreamDeviceFinder {
 	private void findInterchange(GeoLoc loc, int num_exits, Distance dist) {
 		String name = GeoLocHelper.getLinkedCorridor(loc);
 		CorridorBase<R_Node> cb = finder.lookupCorridor(name);
-		if (cb != null) {
+		GeoLoc eloc = findExit(cb, loc);
+		if (eloc != null)
+			scanners.add(new CorScanner(eloc, num_exits, dist));
+	}
+
+	/** Find a matching exit from specified corridor */
+	private GeoLoc findExit(CorridorBase<R_Node> cb, GeoLoc loc) {
+		if (cb != null && !isOppositeCorridor(cb)) {
 			R_Node n = cb.findFork(loc);
-			if (n != null) {
-				GeoLoc eloc = n.getGeoLoc();
-				if (eloc != null) {
-					scanners.add(new CorScanner(eloc,
-						num_exits, dist));
-				}
-			}
+			if (n != null)
+				return n.getGeoLoc();
 		}
+		return null;
+	}
+
+	/** Check if a corridor is opposite direction of incident */
+	private boolean isOppositeCorridor(CorridorBase<R_Node> cb) {
+		return cb.getRoadway() == incident.getRoad() &&
+		       Direction.isOpposite(cb.getRoadDir(), incident.getDir());
 	}
 
 	/** Get upstream device iterator */

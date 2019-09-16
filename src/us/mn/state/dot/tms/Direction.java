@@ -67,4 +67,17 @@ public enum Direction {
 		else
 			return UNKNOWN;
 	}
+
+	/** Check if two directions are opposite */
+	static public boolean isOpposite(short o0, short o1) {
+		Direction d0 = fromOrdinal(o0);
+		Direction d1 = fromOrdinal(o1);
+		switch (d0) {
+			case NORTH: return d1 == SOUTH;
+			case SOUTH: return d1 == NORTH;
+			case EAST: return d1 == WEST;
+			case WEST: return d1 == EAST;
+			default: return false;
+		}
+	}
 }
