@@ -546,7 +546,9 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 			.values().iterator();
 		while (it.hasNext()) {
 			T n = it.next();
-			if (n.getNodeType() == R_NodeType.EXIT.ordinal()) {
+			if (n.getNodeType() == R_NodeType.EXIT.ordinal() ||
+			    n.getNodeType() == R_NodeType.INTERSECTION.ordinal())
+			{
 				GeoLoc loc = n.getGeoLoc();
 				// Only count one exit per interchange
 				if (prev_exit == null ||
