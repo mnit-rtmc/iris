@@ -29,6 +29,14 @@ import static us.mn.state.dot.tms.units.Distance.Units.MILES;
  */
 public class UpstreamDevice implements Comparable<UpstreamDevice> {
 
+	/** Max distance threshold for `ahead` range */
+	static private final float AHEAD_DIST_MI = 1.5f;
+
+	/** Get the maximum distance threshold for `ahead` range */
+	static private float getAheadDistMi(boolean picked) {
+		return picked ? AHEAD_DIST_MI / 2f : AHEAD_DIST_MI;
+	}
+
 	/** Calculate a mile point for a location on a corridor */
 	static private Float calculateMilePoint(CorridorBase cb, GeoLoc loc) {
 		if (loc != null &&
@@ -87,9 +95,10 @@ public class UpstreamDevice implements Comparable<UpstreamDevice> {
 	}
 
 	/** Get the incident range */
-	public IncRange range() {
-		// If distance is less than approx. 1 mile, allow `ahead` range
-		boolean ahead_dist = distance.asFloat(MILES) < 0.9f;
+	public IncRange range(boolean picked) {
+		float ahead_dist_mi = getAheadDistMi(picked);
+		// If distance is less than threshold, allow `ahead` range
+		boolean ahead_dist = distance.asFloat(MILES) < ahead_dist_mi;
 		return IncRange.fromExits(exits, ahead_dist);
 	}
 }

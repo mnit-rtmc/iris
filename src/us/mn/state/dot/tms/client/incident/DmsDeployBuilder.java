@@ -124,7 +124,7 @@ public class DmsDeployBuilder {
 	{
 		boolean branched = !isCorridorSame(dms);
 		Distance dist = ud.distance;
-		IncRange rng = ud.range();
+		IncRange rng = ud.range(picked);
 		if (null == rng)
 			return null;
 		IncMultiBuilder builder = new IncMultiBuilder(dms, loc, dist);

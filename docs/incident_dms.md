@@ -41,12 +41,12 @@ defined ranges, each with a number of freeway _[exits]_ in between.  For this
 purpose, exits which are part of the same interchange are treated as one (for
 example, both off-ramps of a cloverleaf).
 
-Range    | Exits | Notes
----------|-------|-------------------------------
-`ahead`  |     0 | Distance also less than 1 mile
-`near`   |   0-1 |
-`middle` |   2-5 |
-`far`    |   6-9 |
+Range    | Exits | Maximum distance
+---------|-------|--------------------------------
+`ahead`  |     0 | 1.5 miles (0.75 miles _picked_)
+`near`   |   0-1 | —
+`middle` |   2-5 | —
+`far`    |   6-9 | —
 
 Searches for upstream signs will not continue on the opposite direction of the
 incident roadway.
