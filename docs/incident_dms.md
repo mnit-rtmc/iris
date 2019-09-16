@@ -48,6 +48,9 @@ Range    | Exits | Notes
 `middle` |   2-5 |
 `far`    |   6-9 |
 
+Searches for upstream signs will not continue on the opposite direction of the
+incident roadway.
+
 ## Severity
 
 Incident severity determines the **maximum range** and **message priority**.
