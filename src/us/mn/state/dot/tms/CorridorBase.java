@@ -565,6 +565,9 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 			.iterator();
 		while (it.hasNext()) {
 			T n = it.next();
+			// Don't include entrances before a COMMON transition
+			if (n.getTransition() == R_NodeTransition.COMMON.ordinal())
+				entrances.clear();
 			if (n.getNodeType() == R_NodeType.ENTRANCE.ordinal())
 				entrances.add(n.getGeoLoc());
 		}
