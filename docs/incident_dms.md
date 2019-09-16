@@ -39,7 +39,8 @@ Impact                    | Description
 _Range_ is the distance from an upstream sign to the incident.  There are four
 defined ranges, each with a number of freeway _[exits]_ in between.  For this
 purpose, exits which are part of the same interchange are treated as one (for
-example, both off-ramps of a cloverleaf).
+example, both off-ramps of a cloverleaf).  Also, _intersections_ are included in
+the exit count.
 
 Range    | Exits | Maximum distance
 ---------|-------|--------------------------------
