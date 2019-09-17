@@ -63,9 +63,8 @@ public class TemperatureSensorsTable {
 
 	/** Get nth temperature reading or null on error */
 	public ASN1Integer getTemp(int row) {
-		if (row >= 1 && row <= table_rows.size())
-			return table_rows.get(row - 1).air_temp;
-		else
-			return null;
+		return (row >= 1 && row <= table_rows.size())
+		      ? table_rows.get(row - 1).air_temp
+		      : null;
 	}
 }

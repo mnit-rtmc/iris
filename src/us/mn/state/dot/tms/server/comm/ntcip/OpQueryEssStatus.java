@@ -244,8 +244,6 @@ public class OpQueryEssStatus extends OpEss {
 			mess.add(ps_table.num_sensors);
 			mess.queryProps();
 			logQuery(ps_table.num_sensors);
-			if (ps_table.size() > 1)
-				log("Ignoring additional pavement sensors");
 			return new QueryPavementTable();
 		}
 	}
@@ -259,7 +257,7 @@ public class OpQueryEssStatus extends OpEss {
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (ps_table.size() <= 0) {
+			if (row > ps_table.size()) {
 				ess_rec.store(ps_table);
 				return new QuerySubsurface();
 			}
@@ -292,14 +290,9 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(sfp);
 			logQuery(pse);
 			logQuery(swd);
-			ps_table.addRow(row, ess, est, ept, sfp, pse);
-			if (row < ps_table.size()) {
-				row++;
-				return this;
-			} else {
-				ess_rec.store(ps_table);
-				return new QuerySubsurface();
-			}
+			ps_table.addRow(ess, est, ept, sfp, pse);
+			row++;
+			return this;
 		}
 	}
 
