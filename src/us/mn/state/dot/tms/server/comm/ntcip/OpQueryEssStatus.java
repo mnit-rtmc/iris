@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssRec;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssSurfaceStatus;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorError;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorError;
@@ -273,7 +274,9 @@ public class OpQueryEssStatus extends OpEss {
 			}
 			ASN1Integer pty = essPavementType.makeInt(row);
 			ASN1Integer sty = essPavementSensorType.makeInt(row);
-			ASN1Integer ess = essSurfaceStatus.makeInt(row);
+			ASN1Enum<EssSurfaceStatus> ess = new ASN1Enum<
+				EssSurfaceStatus>(EssSurfaceStatus.class,
+				essSurfaceStatus.node, row);
 			ASN1Integer est = essSurfaceTemperature.makeInt(row);
 			ASN1Integer ept = essPavementTemperature.makeInt(row);
 			ASN1Integer sfp = essSurfaceFreezePoint.makeInt(row);

@@ -19,7 +19,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.PavementSurfaceStatus;
 import us.mn.state.dot.tms.PrecipSituation;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -107,7 +106,7 @@ public class EssRec {
 	private Temperature surf_temp = null;
 
 	/** Pavement surface status */
-	private Integer pvmt_surf_status = null;
+	private EssSurfaceStatus pvmt_surf_status = null;
 
 	/** Pavement surface temperature */
 	private Temperature surf_freeze_temp = null;
@@ -390,7 +389,9 @@ public class EssRec {
 			surf_temp.round(CELSIUS) : null);
 
 		pvmt_surf_status = pst.getPvmtSurfStatus(row);
-		w_sensor.setPvmtSurfStatusNotify(pvmt_surf_status);
+		w_sensor.setPvmtSurfStatusNotify((pvmt_surf_status != null)
+			? pvmt_surf_status.ordinal()
+			: EssSurfaceStatus.undefined.ordinal());
 
 		surf_freeze_temp = convertTemp(pst.getSurfFreezeTemp(row));
 		w_sensor.setSurfFreezeTempNotify((surf_freeze_temp != null) ?
@@ -408,16 +409,6 @@ public class EssRec {
 		w_sensor.setSubSurfTempNotify((subsurf_temp != null) ?
 			subsurf_temp.round(CELSIUS) : null);
 	}
-
-	/** Get the an enum from an ordinal value */
-	private PavementSurfaceStatus getPvmtSurfStatus() {
-		if (pvmt_surf_status == null)
-			return PavementSurfaceStatus.UNDEFINED;
-		else {
-			return PavementSurfaceStatus.fromOrdinal(
-				pvmt_surf_status);
-		}
-        }
 
 	/** To string */
 	public String toString() {
@@ -451,7 +442,7 @@ public class EssRec {
 		sb.append(" visibility_m=").append(visibility);
 		sb.append(" pvmt_surf_temp_c=").append(pvmt_surf_temp);
 		sb.append(" surf_temp_c=").append(surf_temp);
-		sb.append(" pvmt_surf_status=").append(getPvmtSurfStatus());
+		sb.append(" pvmt_surf_status=").append(pvmt_surf_status);
 		sb.append(" pvmt_surf_freeze_temp=").append(surf_freeze_temp);
 		sb.append(" subsurf_temp=").append(subsurf_temp);
 		sb.append(")");

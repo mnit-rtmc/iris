@@ -91,6 +91,7 @@ public interface WeatherSensor extends Device {
 	/** Get the surface temperature (null for missing) */
 	Integer getSurfTemp();
 
+	// FIXME: change to String
 	/** Get the pavement surface status (null for missing) */
 	Integer getPvmtSurfStatus();
 

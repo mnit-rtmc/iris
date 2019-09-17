@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.PavementSurfaceStatus;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.WeatherSensorHelper;
@@ -690,9 +689,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		sb.append(" atmos_pressure_pa=").append(getPressure());
 		sb.append(" pvmt_surf_temp_c=").append(getPvmtSurfTemp());
 		sb.append(" surf_temp_c=").append(getSurfTemp());
-		sb.append(" pvmt_surf_status=").append(
-			WeatherSensorHelper.getPvmtSurfStatus(
-			(WeatherSensor)this));
+		sb.append(" pvmt_surf_status=").append(getPvmtSurfStatus());
 		sb.append(" surf_freeze_temp_c=").append(getSurfFreezeTemp());
 		sb.append(" subsurf_temp_c=").append(getSubSurfTemp());
 		sb.append(")");
@@ -736,11 +733,9 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		w.write(createAttribute("atmos_pressure_pa", getPressure()));
 		w.write(createAttribute("pvmt_surf_temp_c", 
 			getPvmtSurfTemp()));
-		w.write(createAttribute("surf_temp_c", 
-			getSurfTemp()));
+		w.write(createAttribute("surf_temp_c", getSurfTemp()));
 		w.write(createAttribute("pvmt_surf_status=", 
-			WeatherSensorHelper.getPvmtSurfStatus(
-			(WeatherSensor)this)));
+			getPvmtSurfStatus()));
 		w.write(createAttribute("surf_freeze_temp_c", 
 			getSurfFreezeTemp()));
 		w.write(createAttribute("subsurf_temp_c", 

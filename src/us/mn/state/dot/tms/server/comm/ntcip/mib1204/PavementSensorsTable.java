@@ -34,15 +34,15 @@ public class PavementSensorsTable {
 	/** Table row */
 	static private class TableRow {
 		private final int row_num;
-		private final ASN1Integer surf_status;
+		private final ASN1Enum<EssSurfaceStatus> surf_status;
 		private final ASN1Integer surf_temp;
 		private final ASN1Integer pvmt_temp;
 		private final ASN1Integer surf_freeze_temp;
 		private final ASN1Enum<PavementSensorError> pvmt_sens_err;
 
 		/** Create a table row */
-		private TableRow(int rn, ASN1Integer ess, ASN1Integer est,
-			ASN1Integer ept, ASN1Integer sft,
+		private TableRow(int rn, ASN1Enum<EssSurfaceStatus> ess,
+			ASN1Integer est, ASN1Integer ept, ASN1Integer sft,
 			ASN1Enum<PavementSensorError> pse)
 		{
 			row_num = rn;
@@ -65,8 +65,8 @@ public class PavementSensorsTable {
 
 	/** Add a row to the table.
 	 * @param row Row number (1 based) */
-	public void addRow(int row, ASN1Integer ess, ASN1Integer est,
-		ASN1Integer ept, ASN1Integer sfp,
+	public void addRow(int row, ASN1Enum<EssSurfaceStatus> ess,
+		ASN1Integer est, ASN1Integer ept, ASN1Integer sfp,
 		ASN1Enum<PavementSensorError> pse)
 	{
 		table_rows.put(row, new TableRow(row, ess, est, ept, sfp, pse));
@@ -85,9 +85,9 @@ public class PavementSensorsTable {
 	}
 
 	/** Get nth pvmt surf status or null on error */
-	public Integer getPvmtSurfStatus(int row) {
+	public EssSurfaceStatus getPvmtSurfStatus(int row) {
 		TableRow tr = table_rows.get(row);
-		return (tr != null) ? tr.surf_status.getInteger() : null;
+		return (tr != null) ? tr.surf_status.getEnum() : null;
 	}
 
 	/** Get nth surf freeze temp or null on error */
