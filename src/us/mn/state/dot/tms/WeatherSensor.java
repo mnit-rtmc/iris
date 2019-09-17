@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2019  Minnesota Department of Transportation
  * Copyright (C) 2011  AHMCT, University of California
  * Copyright (C) 2017  Iteris Inc.
  *
@@ -99,6 +99,9 @@ public interface WeatherSensor extends Device {
 
 	/** Get the subsurface temperature (null for missing) */
 	Integer getSubSurfTemp();
+
+	/** Get the latest sample as JSON */
+	String getSample();
 
 	/** Get the latest sample time stamp */
 	Long getStamp();

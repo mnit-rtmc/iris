@@ -122,6 +122,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		cache = new PeriodicSampleCache(PeriodicSampleType.PRECIP_RATE);
 		pt_cache = new PeriodicSampleCache(
 			PeriodicSampleType.PRECIP_TYPE);
+		sample = null; // should this be loaded from DB?
 		initTransients();
 	}
 
@@ -586,6 +587,34 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		if (!objectEquals(v, subsurf_temp)) {
 			subsurf_temp = v;
 			notifyAttribute("subSurfTemp");
+		}
+	}
+
+	/** Most recent sample data (JSON) */
+	private String sample;
+
+	/** Get the latest sample as JSON */
+	@Override
+	public String getSample() {
+		return sample;
+	}
+
+	/** Set the current JSON sample */
+	private void setSample(String s) {
+		try {
+			store.update(this, "sample", s);
+			sample = s;
+		}
+		catch (TMSException e) {
+			logError("sample: " + e.getMessage());
+		}
+	}
+
+	/** Set the current JSON sample */
+	public void setSampleNotify(String s) {
+		if (!objectEquals(s, sample)) {
+			setSample(s);
+			notifyAttribute("sample");
 		}
 	}
 
