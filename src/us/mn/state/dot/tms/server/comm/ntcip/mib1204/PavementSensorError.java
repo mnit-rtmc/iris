@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017  Iteris Inc.
+ * Copyright (C) 2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,37 +13,20 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms;
+package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 /**
  * Pavement sensor errors as defined by essPavementSensorError in NTCIP 1204.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public enum PavementSensorError {
-
-	/** Pavement sensor errors defined by essPavementSensorError */
-	UNDEFINED("???"),
-	OTHER("Other"),	
-	NONE("None"),
-	NO_RESPONSE("noResponse"),
-	CUT_CABLE("cutCable"),
-	SHORT_CIRCUIT("shortCircuit"),
-	DIRTY_LENSE("dirtyLense");
-
-	/** Description string */
-	public final String description;
-
-	/** Constructor */
-	private PavementSensorError(String d) {
-		description = d;
-	}
-
-	/** Get an enum from an ordinal value */
-	static public PavementSensorError fromOrdinal(Integer o) {
-		if (o != null && o >= 0 && o < values().length)
-			return values()[o];
-		else
-			return UNDEFINED;
-	}
+	undefined,    // 0
+	other,        // 1
+	none,         // 2
+	noResponse,   // 3
+	cutCable,     // 4
+	shortCircuit, // 5
+	dirtyLens;    // 6
 }

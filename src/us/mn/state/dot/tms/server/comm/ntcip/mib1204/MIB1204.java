@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2017  SRF Consulting Group
  * Copyright (C) 2017	    Iteris Inc.
+ * Copyright (C) 2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +14,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 import us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201;
@@ -23,11 +23,10 @@ import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
 /**
  * MIB nodes for NTCIP 1204 -
  *  Object Definitions for Environmental Sensor Stations (ESS)
- *  
+ *
  * @author John L. Stanley - SRF Consulting
  * @author Michael Darter
  */
-
 public enum MIB1204 {
 	// objects part of SNMP MIB-2 definitions
 	system					(new int[] {1,3,6,1,2,1,1}),

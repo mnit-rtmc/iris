@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017  Iteris Inc.
+ * Copyright (C) 2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,23 +13,22 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip;
+package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 import java.util.TreeMap;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 
 /**
- * Subsurface sensors data table, where each table row 
- * contains data read from a single sensor within the 
- * same controller.
+ * SubSurface sensors data table, where each table row contains data read from a
+ * single sensor within the same controller.
  *
  * @author Michael Darter
  */
-public class SubsurfaceSensorsTable {
+public class SubSurfaceSensorsTable {
 
 	/** Number of temperature sensors in table */
-	public final ASN1Integer num_sensors = 
+	public final ASN1Integer num_sensors =
 		numEssSubSurfaceSensors.makeInt();
 
 	/** Table row */
@@ -61,6 +61,6 @@ public class SubsurfaceSensorsTable {
 	/** Get nth subsurface temp or null on error */
 	public ASN1Integer getTemp(int row) {
 		TableRow tr = table_rows.get(row);
-		return (tr != null ? tr.subsurf_temp : null);
+		return (tr != null) ? tr.subsurf_temp : null;
 	}
 }

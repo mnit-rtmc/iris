@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017 Iteris Inc.
+ * Copyright (C) 2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +16,17 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.PavementSensorError;
-import us.mn.state.dot.tms.SubSurfaceSensorError;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssRec;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorError;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorsTable;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorError;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorsTable;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1204.TemperatureSensorsTable;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 
@@ -28,20 +34,21 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
  * Operation to query the status of a weather sensor.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class OpQueryEssStatus extends OpEss {
 
 	/** Table of temperature sensor data read from the controller */
-	private final TemperatureSensorsTable ts_table = 
+	private final TemperatureSensorsTable ts_table =
 		new TemperatureSensorsTable();
 
 	/** Table of pavement sensor data read from the controller */
-	private final PavementSensorsTable ps_table = 
+	private final PavementSensorsTable ps_table =
 		new PavementSensorsTable();
 
 	/** Table of subsurface sensor data read from controller */
-	private final SubsurfaceSensorsTable ss_table = 
-		new SubsurfaceSensorsTable();
+	private final SubSurfaceSensorsTable ss_table =
+		new SubSurfaceSensorsTable();
 
 	/** Record of values read from the controller */
 	private final EssRec ess_rec;
@@ -134,11 +141,11 @@ public class OpQueryEssStatus extends OpEss {
 				ess_rec.storeAirTemp(ts_table);
 				return new QueryPrecipitation();
 			}
-			ASN1Integer tsi = 
+			ASN1Integer tsi =
 				essTemperatureSensorIndex.makeInt(row);
-			ASN1Integer tsh = 
+			ASN1Integer tsh =
 				essTemperatureSensorHeight.makeInt(row);
-			ASN1Integer tsa = 
+			ASN1Integer tsa =
 				essAirTemperature.makeInt(row);
 			mess.add(tsi);
 			mess.add(tsh);
@@ -270,7 +277,9 @@ public class OpQueryEssStatus extends OpEss {
 			ASN1Integer est = essSurfaceTemperature.makeInt(row);
 			ASN1Integer ept = essPavementTemperature.makeInt(row);
 			ASN1Integer sfp = essSurfaceFreezePoint.makeInt(row);
-			ASN1Integer pse = essPavementSensorError.makeInt(row);
+			ASN1Enum<PavementSensorError> pse = new ASN1Enum<
+				PavementSensorError>(PavementSensorError.class,
+				essPavementSensorError.node, row);
 			ASN1Integer swd = essSurfaceWaterDepth.makeInt(row);
 			mess.add(pty);
 			mess.add(sty);
@@ -334,7 +343,9 @@ public class OpQueryEssStatus extends OpEss {
 			ASN1Integer ssd = essSubSurfaceSensorDepth.makeInt(row);
 			ASN1Integer sst = essSubSurfaceTemperature.makeInt(row);
 			ASN1Integer ssm = essSubSurfaceMoisture.makeInt(row);
-			ASN1Integer sse = essSubSurfaceSensorError.makeInt(row);
+			ASN1Enum<SubSurfaceSensorError> sse = new ASN1Enum<
+				SubSurfaceSensorError>(SubSurfaceSensorError.class,
+				essSubSurfaceSensorError.node, row);
 			mess.add(ssl);
 			mess.add(sty);
 			mess.add(ssd);

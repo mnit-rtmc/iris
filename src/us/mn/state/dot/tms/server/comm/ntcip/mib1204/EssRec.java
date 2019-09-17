@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017  Iteris Inc.
+ * Copyright (C) 2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip;
+package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -121,9 +122,9 @@ public class EssRec {
 	}
 
 	/** Convert a temperature to iris format.
-	 * @arg tc Is a temperature in tenths of a degree C. A value
-	 *	   of 1001 is an error condition or missing value.
-	 * @return Temperature in C rounded to nearest degree or 
+	 * @param tc Is a temperature in tenths of a degree C. A value
+	 *	     of 1001 is an error condition or missing value.
+	 * @return Temperature in C rounded to nearest degree or
 	 * 	   null if missing */
 	private Temperature convertTemp(ASN1Integer tc) {
 		if (tc != null) {
@@ -136,9 +137,9 @@ public class EssRec {
 	}
 
 	/** Convert essAvgWindDirection to iris format.
-	 * @arg awd Is essAvgWindDirection, which is the two minute 
-	 * 	average of direction, measured clockwise in degs from
-	 * 	north, with 361 indicating an error or missing value.
+	 * @param awd Is essAvgWindDirection, which is the two minute average of
+	 *            direction, measured clockwise in degs from north, with 361
+	 *            indicating an error or missing value.
 	 * @return Angle in degrees or null for missing. */
 	private Integer convertAngle(ASN1Integer awd) {
 		if (awd != null) {
@@ -150,9 +151,9 @@ public class EssRec {
 	}
 
 	/** Convert integer in tenths of m/s to Speed.
-	 * @arg aws Is essAvgWindSpeed, which is the two minute 
-	 * 	average of speed in tenths of meters per second,
-	 * 	with 65,535 indicating an error or missing value.
+	 * @param aws Is essAvgWindSpeed, which is the two minute average of
+	 *            speed in tenths of meters per second, with 65,535
+	 *            indicating an error or missing value.
 	 * @return Speed in KPH or null if missing */
 	public Speed convertSpeed(ASN1Integer aws) {
 		Speed ret;
@@ -167,8 +168,8 @@ public class EssRec {
 	}
 
 	/** Convert humidity to an integer.
-	 * @arg rhu Relative humidity in percent. A value of 
-	 * 	    101 indicates * an error or missing value.
+	 * @param rhu Relative humidity in percent. A value of 101 indicates an
+	 *            error or missing value.
 	 * @return Humidity as a percent or null if missing. */
 	public Integer convertHumidity(ASN1Integer rhu) {
 		if (rhu != null) {
@@ -179,7 +180,7 @@ public class EssRec {
 		return null;
 	}
 
-	/** Convert the precipitation rate in 1/10s of gram per square 
+	/** Convert the precipitation rate in 1/10s of gram per square
 	 * meter per second to mm/hr.
 	 * @return Precipiration rate in mm/hr or null if missing */
 	public Integer convertPrecipRate(ASN1Integer prr) {
@@ -219,8 +220,8 @@ public class EssRec {
 	}
 
 	/** Convert essAtmosphericPressure to iris format.
-	 * @arg apr Is essAtmosphericPressure in 1/10ths of millibars,
-	 *      with 65535 indicating an error or missing value.
+	 * @param apr Is essAtmosphericPressure in 1/10ths of millibars, with
+	 *            65535 indicating an error or missing value.
 	 * @return Pressure in pascals */
 	private Integer convertAtmosphericPressure(ASN1Integer apr) {
 		if (apr != null) {
@@ -235,8 +236,8 @@ public class EssRec {
 	}
 
 	/** Convert essVisibility to a distance object.
-	 * @arg vis Visibility as essVisibility, which is in one tenth of
-	 *      a meter with 1,000,001 indicating an error or missing value.
+	 * @param vis Visibility as essVisibility, which is in one tenth of a
+	 *            meter with 1,000,001 indicating an error or missing value.
 	 * @return Visibility in meters with null for missing */
 	private Distance convertVisibility(ASN1Integer vis) {
 		if (vis != null) {
@@ -256,9 +257,9 @@ public class EssRec {
 	}
 
 	/** Store the average wind speed using essAvgWindSpeed.
-	 * @arg awd Is essAvgWindSpeed, which is the two minute 
-	 * 	average of speed in tenths of meters per second,
-	 * 	with 65,535 indicating an error or missing value. */
+	 * @param awd Is essAvgWindSpeed, which is the two minute average of
+	 *            speed in tenths of meters per second, with 65,535
+	 *            indicating an error or missing value. */
 	public void storeAvgWindSpeed(ASN1Integer aws) {
 		wind_speed_avg = convertSpeed(aws);
 		if (wind_speed_avg != null)
@@ -304,14 +305,14 @@ public class EssRec {
 	/** Store the dew point temperature */
 	public void storeDewpointTemp(ASN1Integer dpt) {
 		dew_point_temp = convertTemp(dpt);
-		w_sensor.setDewPointTempNotify(dew_point_temp != null ? 
+		w_sensor.setDewPointTempNotify((dew_point_temp != null) ?
 			dew_point_temp.round(CELSIUS) : null);
 	}
 
 	/** Store the max temperature */
 	public void storeMaxTemp(ASN1Integer mt) {
 		max_temp = convertTemp(mt);
-		w_sensor.setMaxTempNotify(max_temp != null ?
+		w_sensor.setMaxTempNotify((max_temp != null) ?
 			max_temp.round(CELSIUS) : null);
 	}
 
@@ -374,38 +375,37 @@ public class EssRec {
 	}
 
 	/** Store pavement sensor related values.
-	 * @arg pst Pavement sensor table, which might contain observations
-	 *          from multiple sensors. Only the first sensor is used. */
+	 * @param pst Pavement sensor table, which might contain observations
+	 *            from multiple sensors.  Only the first sensor is used. */
 	public void store(PavementSensorsTable pst) {
 		// Even if no table rows present, set values
 		// Ignore rows > 1
 		final int row = 1;
 		pvmt_surf_temp = convertTemp(pst.getSurfTemp(row));
-		w_sensor.setPvmtSurfTempNotify(pvmt_surf_temp != null ? 
+		w_sensor.setPvmtSurfTempNotify((pvmt_surf_temp != null) ?
 			pvmt_surf_temp.round(CELSIUS) : null);
 
 		surf_temp = convertTemp(pst.getSurfTemp(row));
-		w_sensor.setSurfTempNotify(surf_temp != null ? 
+		w_sensor.setSurfTempNotify((surf_temp != null) ?
 			surf_temp.round(CELSIUS) : null);
 
 		pvmt_surf_status = pst.getPvmtSurfStatus(row);
 		w_sensor.setPvmtSurfStatusNotify(pvmt_surf_status);
 
 		surf_freeze_temp = convertTemp(pst.getSurfFreezeTemp(row));
-		w_sensor.setSurfFreezeTempNotify(surf_freeze_temp != null ?
+		w_sensor.setSurfFreezeTempNotify((surf_freeze_temp != null) ?
 			surf_freeze_temp.round(CELSIUS) : null);
 	}
 
 	/** Store subsurface sensor related values.
-	 * @arg sst Subsurface sensor table, which might 
-	 *          contain observations from multiple 
-	 *          sensors. Only the first sensor is used. */
-	public void store(SubsurfaceSensorsTable sst) {
+	 * @param sst Subsurface sensor table, which might contain observations
+	 *            from multiple sensors. Only the first sensor is used. */
+	public void store(SubSurfaceSensorsTable sst) {
 		// Even if no table rows present, set values
 		// Ignore rows > 1
 		final int row = 1;
 		subsurf_temp = convertTemp(sst.getTemp(row));
-		w_sensor.setSubSurfTempNotify(subsurf_temp != null ? 
+		w_sensor.setSubSurfTempNotify((subsurf_temp != null) ?
 			subsurf_temp.round(CELSIUS) : null);
 	}
 
@@ -431,17 +431,17 @@ public class EssRec {
 		sb.append(" min_temp_c=").append(min_temp);
 		sb.append(" rel_humidity_perc=").append(rel_humidity);
 		sb.append(" wind_speed_avg_mph=").append(
-			(wind_speed_avg != null ? 
-			wind_speed_avg.convert(MPH) : "null"));
+			(wind_speed_avg != null) ?
+			wind_speed_avg.convert(MPH) : "null");
 		sb.append(" wind_dir_avg_degs=").append(wind_dir_avg);
 		sb.append(" max_wind_gust_speed_mph=").append(
-			(max_wind_gust_speed != null ?
-			max_wind_gust_speed.convert(MPH) : "null"));
+			(max_wind_gust_speed != null) ?
+			max_wind_gust_speed.convert(MPH) : "null");
 		sb.append(" max_wind_gust_dir_degs=").append(
 			max_wind_gust_dir);
 		sb.append(" spot_wind_speed_mph=").append(
-			(spot_wind_speed != null ?
-			spot_wind_speed.convert(MPH) : "null"));
+			(spot_wind_speed != null) ?
+			spot_wind_speed.convert(MPH) : "null");
 		sb.append(" spot_wind_dir_degs=").append(
 			spot_wind_dir);
 		sb.append(" air_pressure_pa=").append(air_pressure);
