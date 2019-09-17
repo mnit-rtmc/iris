@@ -251,7 +251,7 @@ public class OpQueryEssStatus extends OpEss {
 		}
 	}
 
-	/** Phase to query all rows in temperature table */
+	/** Phase to query all rows in pavement table */
 	protected class QueryPavementTable extends Phase {
 
 		/** Row to query */
