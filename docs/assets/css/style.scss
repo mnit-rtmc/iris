@@ -63,10 +63,9 @@ code {
 
 pre {
   padding: 0.5rem 1rem;
-  background: #d8b820;
-  border-radius: 0.2rem;
-  border: 0.1rem solid black;
-  box-shadow: inset 0 0.1rem 0.3rem #c0a02040;
+  background: #c0a020;
+  border-radius: 0.4rem;
+  border: solid black;
   overflow: auto;
   overflow-y: hidden;
 
@@ -79,7 +78,6 @@ pre {
 
 table {
   width: 100%;
-  box-shadow: 0 0 0 0.2rem #408050;
   border: solid white;
   border-collapse: collapse;
   background: #408050;
