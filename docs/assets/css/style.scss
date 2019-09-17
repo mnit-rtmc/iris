@@ -63,16 +63,15 @@ code {
 
 pre {
   padding: 0.5rem 1rem;
-  background: #191919;
+  background: #d8b820;
   border-radius: 0.2rem;
-  border: 0.1rem solid #121212;
-  box-shadow: inset 0 0.1rem 0.3rem rgba(0,0,0,.3);
+  border: 0.1rem solid black;
+  box-shadow: inset 0 0.1rem 0.3rem #c0a02040;
   overflow: auto;
   overflow-y: hidden;
 
   code {
-    color: #efefef;
-    text-shadow: 0 0.1rem 0 #000;
+    color: black;
     margin: 0;
     padding: 0;
   }
