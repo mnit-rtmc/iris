@@ -118,8 +118,6 @@ public class OpQueryEssStatus extends OpEss {
 			mess.add(mit);
 			mess.queryProps();
 			logQuery(ts_table.num_temp_sensors);
-			if (ts_table.size() > 1)
-				log("Ignoring additional temp sensors");
 			logQuery(dpt);
 			logQuery(mat);
 			logQuery(mit);
@@ -139,31 +137,21 @@ public class OpQueryEssStatus extends OpEss {
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (ts_table.size() <= 0) {
+			if (row >= ts_table.size()) {
 				ess_rec.storeAirTemp(ts_table);
 				return new QueryPrecipitation();
 			}
-			ASN1Integer tsi =
-				essTemperatureSensorIndex.makeInt(row);
 			ASN1Integer tsh =
 				essTemperatureSensorHeight.makeInt(row);
-			ASN1Integer tsa =
-				essAirTemperature.makeInt(row);
-			mess.add(tsi);
+			ASN1Integer tsa = essAirTemperature.makeInt(row);
 			mess.add(tsh);
 			mess.add(tsa);
 			mess.queryProps();
-			logQuery(tsi);
 			logQuery(tsh);
 			logQuery(tsa);
-			ts_table.addRow(row, tsh, tsa);
-			if (row < ts_table.size()) {
-				row++;
-				return this;
-			} else {
-				ess_rec.storeAirTemp(ts_table);
-				return new QueryPrecipitation();
-			}
+			ts_table.addRow(tsh, tsa);
+			row++;
+			return this;
 		}
 	}
 

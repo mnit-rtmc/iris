@@ -15,7 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
-import java.util.TreeMap;
+import java.util.ArrayList;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 
@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
  * a single temperature sensor within the same controller.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class TemperatureSensorsTable {
 
@@ -33,21 +34,20 @@ public class TemperatureSensorsTable {
 
 	/** Table row */
 	static private class TableRow {
-		private final int row_num;
+		// height in meters relative to essReferenceHeight
+		// 1001 indicates missing value
 		private final ASN1Integer height;
 		private final ASN1Integer air_temp;
 
-		/** Row constructor */
-		private TableRow(int tsi, ASN1Integer hm, ASN1Integer at) {
-			row_num = tsi;
+		/** Create a table row */
+		private TableRow(ASN1Integer hm, ASN1Integer at) {
 			height = hm;
 			air_temp = at;
 		}
 	}
 
-	/** Table of rows, which maps row number to row */
-	private final TreeMap<Integer, TableRow> table_rows =
-		new TreeMap<Integer, TableRow>();
+	/** Rows in table */
+	private final ArrayList<TableRow> table_rows = new ArrayList<TableRow>();
 
 	/** Get number of rows in table reported by ESS */
 	public int size() {
@@ -55,16 +55,17 @@ public class TemperatureSensorsTable {
 	}
 
 	/** Add a row to the table.
-	 * @param row Row number (1 based)
 	 * @param tsh Temperature sensor height in meters
 	 * @param tsa Air temperature in tenths of a degree C */
-	public void addRow(int row, ASN1Integer tsh, ASN1Integer tsa) {
-		table_rows.put(row, new TableRow(row, tsh, tsa));
+	public void addRow(ASN1Integer tsh, ASN1Integer tsa) {
+		table_rows.add(new TableRow(tsh, tsa));
 	}
 
 	/** Get nth temperature reading or null on error */
 	public ASN1Integer getTemp(int row) {
-		TableRow tr = table_rows.get(row);
-		return (tr != null) ? tr.air_temp : null;
+		if (row >= 1 && row <= table_rows.size())
+			return table_rows.get(row - 1).air_temp;
+		else
+			return null;
 	}
 }

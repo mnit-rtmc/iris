@@ -37,9 +37,13 @@ import static us.mn.state.dot.tms.units.Temperature.Units.CELSIUS;
 /**
  * A collection of weather condition values with functionality
  * to convert from NTCIP 1204 units to IRIS units.
+ *
  * @author Michael Darter
  */
 public class EssRec {
+
+	/** A temperature of 1001 is an error condition or missing value */
+	static private final int TEMP_ERROR_MISSING = 1001;
 
 	/** Creation time */
 	private long create_time = 0;
@@ -120,16 +124,13 @@ public class EssRec {
 	}
 
 	/** Convert a temperature to iris format.
-	 * @param tc Is a temperature in tenths of a degree C. A value
-	 *	     of 1001 is an error condition or missing value.
-	 * @return Temperature in C rounded to nearest degree or
-	 * 	   null if missing */
+	 * @param tc Temperature in tenths of a degree C.
+	 * @return Temperature or null if missing */
 	private Temperature convertTemp(ASN1Integer tc) {
 		if (tc != null) {
 			int itc = tc.getInteger();
-			if (itc == 1001)
-				return null;
-			return new Temperature(.1 * (double)itc);
+			if (itc != TEMP_ERROR_MISSING)
+				return new Temperature(0.1 * (double) itc);
 		}
 		return null;
 	}
@@ -306,7 +307,7 @@ public class EssRec {
 	/** Store the min temperature */
 	public void storeMinTemp(ASN1Integer mt) {
 		min_temp = convertTemp(mt);
-		w_sensor.setMinTempNotify(min_temp != null ?
+		w_sensor.setMinTempNotify((min_temp != null) ?
 			min_temp.round(CELSIUS) : null);
 	}
 
@@ -315,7 +316,7 @@ public class EssRec {
 	public void storeAirTemp(TemperatureSensorsTable tst) {
 		// even if no table rows present, set values
 		air_temp = convertTemp(tst.getTemp(1));
-		w_sensor.setAirTempNotify(air_temp != null?
+		w_sensor.setAirTempNotify((air_temp != null) ?
 			air_temp.round(CELSIUS) : null);
 	}
 
