@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017 Iteris Inc.
+ * Copyright (C) 2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,10 +29,6 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
  */
 public class OpQueryEssSettings extends OpEss {
 
-	/** Table of temperature sensor data */
-	private final TemperatureSensorsTable ts_table = 
-		new TemperatureSensorsTable();
-
 	/** Create a new query status object */
 	public OpQueryEssSettings(WeatherSensorImpl d) {
 		super(PriorityLevel.DEVICE_DATA, d);
@@ -49,10 +46,10 @@ public class OpQueryEssSettings extends OpEss {
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1String sdes = new ASN1String(sysDescr.node, 0);
-			ASN1String scon = new ASN1String(sysContact.node, 0);
-			ASN1String snam = new ASN1String(sysName.node, 0);
-			ASN1String sloc = new ASN1String(sysLocation.node, 0);
+			ASN1String sdes = new ASN1String(sysDescr.node);
+			ASN1String scon = new ASN1String(sysContact.node);
+			ASN1String snam = new ASN1String(sysName.node);
+			ASN1String sloc = new ASN1String(sysLocation.node);
 			mess.add(sdes);
 			mess.add(scon);
 			mess.add(snam);

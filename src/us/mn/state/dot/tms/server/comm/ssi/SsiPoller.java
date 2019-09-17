@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010  AHMCT, University of California
- * Copyright (C) 2012-2016  Minnesota Department of Transportation
+ * Copyright (C) 2012-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,11 +60,5 @@ public class SsiPoller extends ThreadedPoller<SsiProperty>
 			// Ignore other requests
 			break;
 		}
-	}
-
-	/** Send settings to a weather sensor */
-	@Override
-	public void sendSettings(WeatherSensorImpl ws) {
-		// Nothing to do
 	}
 }
