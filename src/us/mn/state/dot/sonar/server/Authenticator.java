@@ -110,10 +110,12 @@ public class Authenticator {
 
 	/** Check if user is connecting from an allowed domain */
 	private boolean checkDomain(ConnectionImpl c, UserImpl user) {
-		InetAddress addr = c.getAddress();
-		for (Domain d : user.getDomains()) {
-			if (checkDomain(d, addr))
-				return true;
+		if (c != null) {
+			InetAddress addr = c.getAddress();
+			for (Domain d : user.getDomains()) {
+				if (checkDomain(d, addr))
+					return true;
+			}
 		}
 		return false;
 	}
