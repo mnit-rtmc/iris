@@ -130,14 +130,4 @@ public class WeatherSensorHelper extends BaseHelper {
 		} else
 			return "";
 	}
-
-	/** Get the precipitation situation as an enum */
-	static public PrecipSituation getPrecipSituation(WeatherSensor ws) {
-		if (ws != null) {
-			Integer ps = ws.getPrecipSituation();
-			if (ps != null)
-				return PrecipSituation.fromOrdinal(ps);
-		}
-		return PrecipSituation.UNDEFINED;
-	}
 }

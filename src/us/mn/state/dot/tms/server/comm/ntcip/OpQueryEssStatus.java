@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssRec;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssPrecipSituation;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssSurfaceStatus;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorError;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorsTable;
@@ -179,7 +180,9 @@ public class OpQueryEssStatus extends OpEss {
 			ASN1Integer p06 = essPrecipitationSixHours.makeInt();
 			ASN1Integer p12 = essPrecipitationTwelveHours.makeInt();
 			ASN1Integer p24 = essPrecipitation24Hours.makeInt();
-			ASN1Integer prs = essPrecipSituation.makeInt();
+			ASN1Enum<EssPrecipSituation> prs = new ASN1Enum<
+				EssPrecipSituation>(EssPrecipSituation.class,
+				essPrecipSituation.node);
 			mess.add(rhu);
 			mess.add(prr);
 			mess.add(p01);
@@ -200,7 +203,7 @@ public class OpQueryEssStatus extends OpEss {
 			ess_rec.storeHumidity(rhu);
 			ess_rec.storePrecipRate(prr);
 			ess_rec.storePrecipOneHour(p01);
-			ess_rec.storePrecipSituation(prr);
+			ess_rec.storePrecipSituation(prs.getEnum());
 			return new QueryElevation();
 		}
 	}

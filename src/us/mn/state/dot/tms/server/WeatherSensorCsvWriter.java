@@ -19,7 +19,6 @@ import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
-import us.mn.state.dot.tms.PrecipSituation;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.WeatherSensorHelper;
 import us.mn.state.dot.tms.units.Pressure;
@@ -206,14 +205,6 @@ public class WeatherSensorCsvWriter extends XmlWriter {
 		return sb;
 	}
 
-	/** Append a CSV value to a StringBuffer */
-	private StringBuilder append(StringBuilder sb, PrecipSituation value) {
-		if (value != null && value != PrecipSituation.UNDEFINED)
-			sb.append(value);
-		sb.append(",");
-		return sb;
-	}
-
 	/** Write a terminated line */
 	private void writeLine(Writer wr, String line) 
 		throws IOException
@@ -253,8 +244,7 @@ public class WeatherSensorCsvWriter extends XmlWriter {
 		append(sb, prToN(w.getPressure()));	//Pressure
 		append(sb, WeatherSensorHelper.
 			getPrecipRateIntensity(w));	//PcIntens
-		append(sb, WeatherSensorHelper.
-			getPrecipSituation(w));		//PcType
+		append(sb, w.getPrecipSituation());     //PcType
 		append(sb, praToN(w.getPrecipRate()));	//PcRate
 		append(sb, pToN(w.getPrecipOneHour()));	//PcAccum
 		append(sb, dToN(w.getVisibility()));	//Visibility

@@ -19,7 +19,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.PrecipSituation;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
@@ -88,7 +87,7 @@ public class EssRec {
 	private Integer precip_rate = null;
 
 	/** Precipitation situation */
-	private Integer precip_situation = null;
+	private EssPrecipSituation precip_situation = null;
 
 	/** Precipitation 1h */
 	private Integer precip_one_hour = null;
@@ -190,17 +189,6 @@ public class EssRec {
 				int mmhr = (int)Math.round((double)tg * .36);
 				return new Integer(mmhr);
 			}
-		}
-		return null;
-	}
-
-	/** Convert the precipitation situation */
-	public Integer convertPrecipSituation(ASN1Integer prs) {
-		if (prs != null) {
-			int i = prs.getInteger();
-			PrecipSituation eps = PrecipSituation.fromOrdinal(i);
-			if (eps != PrecipSituation.UNDEFINED)
-				return new Integer(i);
 		}
 		return null;
 	}
@@ -344,9 +332,11 @@ public class EssRec {
 	}
 
 	/** Store the precipitation stuation */
-	public void storePrecipSituation(ASN1Integer ps) {
-		precip_situation = convertPrecipSituation(ps);
-		w_sensor.setPrecipSituationNotify(precip_situation);
+	public void storePrecipSituation(EssPrecipSituation ps) {
+		precip_situation = ps;
+		w_sensor.setPrecipSituationNotify((ps != null)
+			? ps.ordinal()
+		        : null);
 	}
 
 	/** Store the precipitation 1h */
