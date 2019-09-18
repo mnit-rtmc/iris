@@ -76,9 +76,19 @@ public enum MIB1204 {
 	      essSpotWindDirection		(essNtcipWind, 1),
 	      essSpotWindSpeed			(essNtcipWind, 2),
 	      essWindSituation			(essNtcipWind, 3),
-	      windSensorAvgDirectionV2		(essNtcipWind, 4),
-	      windSensorSpotDirectionV2		(essNtcipWind, 5),
-	      windSensorGustDirectionV2		(essNtcipWind, 6),
+	      windSensorTableNumSensors		(essNtcipWind, 7), // V2
+	      windSensorTable			(essNtcipWind, 8), // V2
+	        windSensorEntry			(windSensorTable, 1), // V2
+	          windSensorIndex		(windSensorEntry, 1), // V2
+	          windSensorHeight		(windSensorEntry, 2), // V2
+	          windSensorLocation		(windSensorEntry, 3), // V2
+	          windSensorAvgSpeed		(windSensorEntry, 4), // V2
+	          windSensorAvgDirection	(windSensorEntry, 5), // V2
+	          windSensorSpotSpeed		(windSensorEntry, 6), // V2
+	          windSensorSpotDirection	(windSensorEntry, 7), // V2
+	          windSensorGustSpeed		(windSensorEntry, 8), // V2
+	          windSensorGustDirection	(windSensorEntry, 9), // V2
+	          windSensorSituation		(windSensorEntry, 10), // V2
 	    essNtcipTemperature			(essNtcip, 5),
 	      essNumTemperatureSensors		(essNtcipTemperature, 1),
 	      essTemperatureSensorTable		(essNtcipTemperature, 2),
