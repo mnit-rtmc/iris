@@ -23,10 +23,7 @@ import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.units.Distance;
-import static us.mn.state.dot.tms.units.Distance.Units.FEET;
-import static us.mn.state.dot.tms.units.Distance.Units.METERS;
-import static us.mn.state.dot.tms.units.Distance.Units.MICROMETERS;
-import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
+import static us.mn.state.dot.tms.units.Distance.Units.*;
 import us.mn.state.dot.tms.units.Speed;
 import static us.mn.state.dot.tms.units.Speed.Units.KPH;
 import static us.mn.state.dot.tms.units.Speed.Units.MPH;
@@ -154,16 +151,14 @@ public class EssRec {
 	static private final int VISIBILITY_ERROR_MISSING = 1000001;
 
 	/** Convert visibility to Distance.
-	 * @param vis Visibility in one tenth of a meter with 1000001
-	 *            indicating an error or missing value.
+	 * @param vis Visibility in decimeters with 1000001 indicating an error
+	 *            or missing value.
 	 * @return Visibility distance or null for missing */
 	static private Distance convertVisibility(ASN1Integer vis) {
 		if (vis != null) {
 			int iv = vis.getInteger();
-			if (iv == VISIBILITY_ERROR_MISSING)
-				return null;
-			iv = (int) Math.round((double) iv / 10);
-			return new Distance(iv, METERS);
+			if (iv != VISIBILITY_ERROR_MISSING)
+				return new Distance(iv, DECIMETERS);
 		}
 		return null;
 	}
@@ -254,7 +249,7 @@ public class EssRec {
 
 	/** Store the average wind speed using essAvgWindSpeed.
 	 * @param awd Is essAvgWindSpeed, which is the two minute average of
-	 *            speed in tenths of meters per second, with 65,535
+	 *            speed in tenths of meters per second, with 65535
 	 *            indicating an error or missing value. */
 	public void storeAvgWindSpeed(ASN1Integer aws) {
 		wind_speed_avg = convertSpeed(aws);
