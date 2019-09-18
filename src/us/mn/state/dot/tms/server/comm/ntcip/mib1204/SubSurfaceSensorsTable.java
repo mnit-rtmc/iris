@@ -15,7 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
-import java.util.TreeMap;
+import java.util.ArrayList;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 
@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
  * single sensor within the same controller.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class SubSurfaceSensorsTable {
 
@@ -33,34 +34,31 @@ public class SubSurfaceSensorsTable {
 
 	/** Table row */
 	static private class TableRow {
-		private final int row_num;
 		private final ASN1Integer subsurf_temp;
 
-		/** Row constructor */
-		private TableRow(int rn, ASN1Integer sst) {
-			row_num = rn;
+		/** Create a table row */
+		private TableRow(ASN1Integer sst) {
 			subsurf_temp = sst;
 		}
 	}
 
-	/** Table of rows, which maps row number to row */
-	private final TreeMap<Integer, TableRow> table_rows =
-		new TreeMap<Integer, TableRow>();
+	/** Rows in table */
+	private final ArrayList<TableRow> table_rows = new ArrayList<TableRow>();
 
 	/** Get number of rows in table reported by ESS */
 	public int size() {
 		return num_sensors.getInteger();
 	}
 
-	/** Add a row to the table.
-	 * @param row Row number (1 based) */
-	public void addRow(int row, ASN1Integer sst) {
-		table_rows.put(row, new TableRow(row, sst));
+	/** Add a row to the table */
+	public void addRow(ASN1Integer sst) {
+		table_rows.add(new TableRow(sst));
 	}
 
 	/** Get nth subsurface temp or null on error */
 	public ASN1Integer getTemp(int row) {
-		TableRow tr = table_rows.get(row);
-		return (tr != null) ? tr.subsurf_temp : null;
+		return (row >= 1 && row <= table_rows.size())
+		      ? table_rows.get(row - 1).subsurf_temp
+		      : null;
 	}
 }

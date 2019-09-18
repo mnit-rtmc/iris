@@ -320,7 +320,7 @@ public class OpQueryEssStatus extends OpEss {
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (ss_table.size() <= 0) {
+			if (row > ss_table.size()) {
 				ess_rec.store(ss_table);
 				return new FinalPhase();
 			}
@@ -346,14 +346,9 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(sst);
 			logQuery(ssm);
 			logQuery(sse);
-			ss_table.addRow(row, sst);
-			if (row < ss_table.size()) {
-				row++;
-				return this;
-			} else {
-				ess_rec.store(ss_table);
-				return new FinalPhase();
-			}
+			ss_table.addRow(sst);
+			row++;
+			return this;
 		}
 	}
 
