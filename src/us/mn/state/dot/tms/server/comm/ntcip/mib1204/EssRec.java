@@ -45,6 +45,129 @@ public class EssRec {
 	/** A temperature of 1001 is an error condition or missing value */
 	static private final int TEMP_ERROR_MISSING = 1001;
 
+	/** Convert a temperature to iris format.
+	 * @param tc Temperature in tenths of a degree C.
+	 * @return Temperature or null if missing */
+	static private Temperature convertTemp(ASN1Integer tc) {
+		if (tc != null) {
+			int itc = tc.getInteger();
+			if (itc != TEMP_ERROR_MISSING)
+				return new Temperature(0.1 * (double) itc);
+		}
+		return null;
+	}
+
+	/** Precipitation of 65535 indicates error or missing value */
+	static private final int PRECIP_INVALID_MISSING = 65535;
+
+	/** Convert precipitation rate to mm/hr.
+	 * @param pr precipitation rate in 1/10s of gram per square meter per
+	 *           second.
+	 * @return Precipiration rate in mm/hr or null if missing */
+	static private Integer convertPrecipRate(ASN1Integer pr) {
+		if (pr != null) {
+			// 1mm of water over 1 sqm is 1L which is 1Kg
+			int tg = pr.getInteger();
+			if (tg != PRECIP_INVALID_MISSING) {
+				int mmhr = (int) Math.round((double) tg * 0.36);
+				return new Integer(mmhr);
+			}
+		}
+		return null;
+	}
+
+	/** Convert one hour precipitation amount.
+	 * @param pr One hour precipitation in tenths of a mm.
+	 * @return One hour precipitation in mm or null */
+	static private Integer convertPrecip(ASN1Integer pr) {
+		if (pr != null) {
+			int pri = pr.getInteger();
+			if (pri != PRECIP_INVALID_MISSING) {
+				int cp = (int) Math.round((double) pri * 0.1);
+				return new Integer(cp);
+			}
+		}
+		return null;
+	}
+
+	/** Wind speed of 65535 indicates error or missing value */
+	static private final int WIND_SPEED_INVALID_MISSING = 65535;
+
+	/** Convert wind speed in tenths of m/s to Speed.
+	 * @param ws Wind speed in tenths of meters per second, with 65535
+	 *           indicating an error or missing value.
+	 * @return Speed value or null if missing */
+	static private Speed convertSpeed(ASN1Integer ws) {
+		if (ws != null) {
+			int tmps = ws.getInteger();
+			if (tmps != WIND_SPEED_INVALID_MISSING) {
+				double mps = 0.1 * (double) tmps;
+				return new Speed(mps, MPS);
+			}
+		}
+		return null;
+	}
+
+	/** Convert wind direction to iris format.
+	 * @param wd Wind direction in degrees clockwise from north, with 361
+	 *           indicating an error or missing value.
+	 * @return Angle in degrees or null for missing. */
+	static private Integer convertWindDir(ASN1Integer wd) {
+		if (wd != null) {
+			int iwd = wd.getInteger();
+			if (iwd >= 0 && iwd <= 360)
+				return new Integer(iwd);
+		}
+		return null;
+	}
+
+	/** Convert humidity to an integer.
+	 * @param rhu Relative humidity in percent. A value of 101 indicates an
+	 *            error or missing value.
+	 * @return Humidity as a percent or null if missing. */
+	static private Integer convertHumidity(ASN1Integer rhu) {
+		if (rhu != null) {
+			int irhu = rhu.getInteger();
+			if (irhu >= 0 && irhu <= 100)
+				return new Integer(irhu);
+		}
+		return null;
+	}
+
+	/** Convert atmospheric pressure to pascals.
+	 * @param apr Atmospheric pressure in 1/10ths of millibars, with
+	 *            65535 indicating an error or missing value.
+	 * @return Pressure in pascals */
+	static private Integer convertAtmosphericPressure(ASN1Integer apr) {
+		if (apr != null) {
+			int tmb = apr.getInteger();
+			if (tmb != 65535) {
+				double mb = (double) tmb * 0.1;
+				double pa = mb * 100;
+				return new Integer((int) Math.round(pa));
+			}
+		}
+		return null;
+	}
+
+	/** Visibility of 1000001 indicates error or missing value */
+	static private final int VISIBILITY_ERROR_MISSING = 1000001;
+
+	/** Convert visibility to Distance.
+	 * @param vis Visibility in one tenth of a meter with 1000001
+	 *            indicating an error or missing value.
+	 * @return Visibility distance or null for missing */
+	static private Distance convertVisibility(ASN1Integer vis) {
+		if (vis != null) {
+			int iv = vis.getInteger();
+			if (iv == VISIBILITY_ERROR_MISSING)
+				return null;
+			iv = (int) Math.round((double) iv / 10);
+			return new Distance(iv, METERS);
+		}
+		return null;
+	}
+
 	/** Creation time */
 	private long create_time = 0;
 
@@ -117,130 +240,15 @@ public class EssRec {
 	/** Subsurface temperature */
 	private Temperature subsurf_temp = null;
 
-	/** Constructor */
+	/** Create a new ESS record */
 	public EssRec(WeatherSensorImpl ws) {
 		w_sensor = ws;
 		create_time = TimeSteward.currentTimeMillis();
 	}
 
-	/** Convert a temperature to iris format.
-	 * @param tc Temperature in tenths of a degree C.
-	 * @return Temperature or null if missing */
-	private Temperature convertTemp(ASN1Integer tc) {
-		if (tc != null) {
-			int itc = tc.getInteger();
-			if (itc != TEMP_ERROR_MISSING)
-				return new Temperature(0.1 * (double) itc);
-		}
-		return null;
-	}
-
-	/** Convert essAvgWindDirection to iris format.
-	 * @param awd Is essAvgWindDirection, which is the two minute average of
-	 *            direction, measured clockwise in degs from north, with 361
-	 *            indicating an error or missing value.
-	 * @return Angle in degrees or null for missing. */
-	private Integer convertAngle(ASN1Integer awd) {
-		if (awd != null) {
-			int iawd = awd.getInteger();
-			if (iawd >= 0 && iawd <= 360)
-				return new Integer(iawd);
-		}
-		return null;
-	}
-
-	/** Convert integer in tenths of m/s to Speed.
-	 * @param aws Is essAvgWindSpeed, which is the two minute average of
-	 *            speed in tenths of meters per second, with 65,535
-	 *            indicating an error or missing value.
-	 * @return Speed in KPH or null if missing */
-	public Speed convertSpeed(ASN1Integer aws) {
-		Speed ret;
-		if (aws != null) {
-			int iaws = aws.getInteger();
-			if (iaws != 65535) {
-				double mps = .1 * (double)iaws;
-				return new Speed(mps, MPS);
-			}
-		}
-		return null;
-	}
-
-	/** Convert humidity to an integer.
-	 * @param rhu Relative humidity in percent. A value of 101 indicates an
-	 *            error or missing value.
-	 * @return Humidity as a percent or null if missing. */
-	public Integer convertHumidity(ASN1Integer rhu) {
-		if (rhu != null) {
-			int irhu = rhu.getInteger();
-			if (irhu >= 0 && irhu <= 100)
-				return new Integer(irhu);
-		}
-		return null;
-	}
-
-	/** Convert the precipitation rate in 1/10s of gram per square
-	 * meter per second to mm/hr.
-	 * @return Precipiration rate in mm/hr or null if missing */
-	public Integer convertPrecipRate(ASN1Integer prr) {
-		if (prr != null) {
-			// 1mm of water over 1 sqm is 1L which is 1Kg
-			int tg = prr.getInteger();
-			if (tg != 65535) {
-				int mmhr = (int)Math.round((double)tg * .36);
-				return new Integer(mmhr);
-			}
-		}
-		return null;
-	}
-
-	/** Convert the precipitation 1h from tenths of a mm to mm.
-	 * @return Precipitation over 1h in mm or null */
-	public Integer convertPrecip(ASN1Integer pr) {
-		if (pr != null) {
-			int pi = pr.getInteger();
-			if (pi != 65535) {
-				int cp = (int)Math.round((double)pi * .1);
-				return new Integer(cp);
-			}
-		}
-		return null;
-	}
-
-	/** Convert essAtmosphericPressure to iris format.
-	 * @param apr Is essAtmosphericPressure in 1/10ths of millibars, with
-	 *            65535 indicating an error or missing value.
-	 * @return Pressure in pascals */
-	private Integer convertAtmosphericPressure(ASN1Integer apr) {
-		if (apr != null) {
-			int tmb = apr.getInteger();
-			if (tmb == 65535)
-				return null;
-			double mb = (double)tmb * .1;
-			double pa = mb * 100;
-			return new Integer((int)Math.round(pa));
-		}
-		return null;
-	}
-
-	/** Convert essVisibility to a distance object.
-	 * @param vis Visibility as essVisibility, which is in one tenth of a
-	 *            meter with 1,000,001 indicating an error or missing value.
-	 * @return Visibility in meters with null for missing */
-	private Distance convertVisibility(ASN1Integer vis) {
-		if (vis != null) {
-			int iv = vis.getInteger();
-			if (iv == 1000001)
-				return null;
-			iv = (int)Math.round((double)iv / 10);
-			return new Distance(iv, METERS);
-		}
-		return null;
-	}
-
 	/** Update the wind dir */
 	public void storeAvgWindDir(ASN1Integer angle) {
-		wind_dir_avg = convertAngle(angle);
+		wind_dir_avg = convertWindDir(angle);
 		w_sensor.setWindDirNotify(wind_dir_avg);
 	}
 
@@ -269,13 +277,13 @@ public class EssRec {
 
 	/** Store the max wind gust direction */
 	public void storeMaxWindGustDir(ASN1Integer mwgd) {
-		max_wind_gust_dir = convertAngle(mwgd);
+		max_wind_gust_dir = convertWindDir(mwgd);
 		w_sensor.setMaxWindGustDirNotify(max_wind_gust_dir);
 	}
 
 	/** Store spot wind direction */
 	public void storeSpotWindDir(ASN1Integer swd) {
-		spot_wind_dir = convertAngle(swd);
+		spot_wind_dir = convertWindDir(swd);
 		w_sensor.setSpotWindDirNotify(spot_wind_dir);
 	}
 
