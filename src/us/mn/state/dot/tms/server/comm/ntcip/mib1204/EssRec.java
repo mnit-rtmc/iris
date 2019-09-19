@@ -36,6 +36,7 @@ import static us.mn.state.dot.tms.units.Temperature.Units.CELSIUS;
  * to convert from NTCIP 1204 units to IRIS units.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class EssRec {
 
@@ -294,22 +295,22 @@ public class EssRec {
 	}
 
 	/** Store the dew point temperature */
-	public void storeDewpointTemp(ASN1Integer dpt) {
-		dew_point_temp = convertTemp(dpt);
+	public void storeDewpointTemp(TemperatureObject dpt) {
+		dew_point_temp = dpt.getTemperature();
 		w_sensor.setDewPointTempNotify((dew_point_temp != null) ?
 			dew_point_temp.round(CELSIUS) : null);
 	}
 
 	/** Store the max temperature */
-	public void storeMaxTemp(ASN1Integer mt) {
-		max_temp = convertTemp(mt);
+	public void storeMaxTemp(TemperatureObject mt) {
+		max_temp = mt.getTemperature();
 		w_sensor.setMaxTempNotify((max_temp != null) ?
 			max_temp.round(CELSIUS) : null);
 	}
 
 	/** Store the min temperature */
-	public void storeMinTemp(ASN1Integer mt) {
-		min_temp = convertTemp(mt);
+	public void storeMinTemp(TemperatureObject mt) {
+		min_temp = mt.getTemperature();
 		w_sensor.setMinTempNotify((min_temp != null) ?
 			min_temp.round(CELSIUS) : null);
 	}
@@ -317,8 +318,7 @@ public class EssRec {
 	/** Store the air temperature, which is assumed to be the
 	 * first sensor in the table. Additional sensors are ignored */
 	public void storeAirTemp(TemperatureSensorsTable tst) {
-		// even if no table rows present, set values
-		air_temp = convertTemp(tst.getTemp(1));
+		air_temp = tst.getAirTemperature(1);
 		w_sensor.setAirTempNotify((air_temp != null) ?
 			air_temp.round(CELSIUS) : null);
 	}

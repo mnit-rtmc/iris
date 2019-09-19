@@ -99,31 +99,30 @@ public class OpQueryEssStatus extends OpEss {
 			ess_rec.storeMaxWindGustDir(mwgd);
 			ess_rec.storeSpotWindDir(swd);
 			ess_rec.storeSpotWindSpeed(sws);
-			return new QueryNumTemperatureSensors();
+			return new QueryTemperatureSensors();
 		}
 	}
 
-	/** Phase to query the number of temperature sensors and other data */
-	protected class QueryNumTemperatureSensors extends Phase {
+	/** Phase to query the temperature sensors and other data */
+	protected class QueryTemperatureSensors extends Phase {
 
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer dpt = essDewpointTemp.makeInt();
-			ASN1Integer mat = essMaxTemp.makeInt();
-			ASN1Integer mit = essMinTemp.makeInt();
 			mess.add(ts_table.num_temp_sensors);
-			mess.add(dpt);
-			mess.add(mat);
-			mess.add(mit);
+			mess.add(ts_table.wet_bulb_temp.node);
+			mess.add(ts_table.dew_point_temp.node);
+			mess.add(ts_table.max_air_temp.node);
+			mess.add(ts_table.min_air_temp.node);
 			mess.queryProps();
 			logQuery(ts_table.num_temp_sensors);
-			logQuery(dpt);
-			logQuery(mat);
-			logQuery(mit);
-			ess_rec.storeDewpointTemp(dpt);
-			ess_rec.storeMaxTemp(mat);
-			ess_rec.storeMinTemp(mit);
+			logQuery(ts_table.wet_bulb_temp.node);
+			logQuery(ts_table.dew_point_temp.node);
+			logQuery(ts_table.max_air_temp.node);
+			logQuery(ts_table.min_air_temp.node);
+			ess_rec.storeDewpointTemp(ts_table.dew_point_temp);
+			ess_rec.storeMaxTemp(ts_table.max_air_temp);
+			ess_rec.storeMinTemp(ts_table.min_air_temp);
 			return new QueryTemperatureTable();
 		}
 	}
@@ -141,15 +140,12 @@ public class OpQueryEssStatus extends OpEss {
 				ess_rec.storeAirTemp(ts_table);
 				return new QueryPrecipitation();
 			}
-			ASN1Integer tsh =
-				essTemperatureSensorHeight.makeInt(row);
-			ASN1Integer tsa = essAirTemperature.makeInt(row);
-			mess.add(tsh);
-			mess.add(tsa);
+			TemperatureSensorsTable.Row tr = ts_table.addRow(row);
+			mess.add(tr.temperature_sensor_height);
+			mess.add(tr.air_temperature.node);
 			mess.queryProps();
-			logQuery(tsh);
-			logQuery(tsa);
-			ts_table.addRow(tsh, tsa);
+			logQuery(tr.temperature_sensor_height);
+			logQuery(tr.air_temperature.node);
 			row++;
 			return this;
 		}

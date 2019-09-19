@@ -10,7 +10,7 @@ Wind directions are recorded in degrees clockwise from due north.
 
 Field                  | Description
 -----------------------|------------------------------------
-`air_temp`             | Instantaneous air temperature in ℃
+`air_temperature`      | Instantaneous air temperature in ℃
 `wet_bulb_temp`        | Instantaneous wet-bulb temperature in ℃
 `dew_point_temp`       | Instantaneous dew point temperature in ℃
 `min_air_temp`         | Minimum 24 hour air temperature in ℃
