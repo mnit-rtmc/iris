@@ -15,12 +15,12 @@ Field                  | Description
 `dew_point_temp`       | Instantaneous dew point temperature in ℃
 `min_air_temp`         | Minimum 24 hour air temperature in ℃
 `max_air_temp`         | Maximum 24 hour air temperature in ℃
-`spot_wind_speed`      | Spot wind speed in KPH
-`spot_wind_dir`        | Spot wind direction
-`avg_wind_speed`       | Two minute average wind speed in KPH
 `avg_wind_dir`         | Two minute average wind direction
-`gust_wind_speed`      | Ten minute maximum wind gust speed in KPH
+`avg_wind_speed`       | Two minute average wind speed in KPH
+`spot_wind_dir`        | Spot wind direction
+`spot_wind_speed`      | Spot wind speed in KPH
 `gust_wind_dir`        | Ten minute maximum wind gust direction
+`gust_wind_speed`      | Ten minute maximum wind gust speed in KPH
 `precip_rate`          | Precipitation rate in mm/hr
 `precip_situation`     | Precipitation situation code
 `precip_one_hour`      | One hour accumulated precipitation in mm

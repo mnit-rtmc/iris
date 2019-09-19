@@ -40,9 +40,11 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
  */
 public class OpQueryEssStatus extends OpEss {
 
+	/** Record of values read from the controller */
+	private final EssRec ess_rec;
+
 	/** Table of temperature sensor data read from the controller */
-	private final TemperatureSensorsTable ts_table =
-		new TemperatureSensorsTable();
+	private final TemperatureSensorsTable ts_table;
 
 	/** Table of pavement sensor data read from the controller */
 	private final PavementSensorsTable ps_table =
@@ -52,13 +54,11 @@ public class OpQueryEssStatus extends OpEss {
 	private final SubSurfaceSensorsTable ss_table =
 		new SubSurfaceSensorsTable();
 
-	/** Record of values read from the controller */
-	private final EssRec ess_rec;
-
-	/** Constructor */
+	/** Create new query ESS status operation */
 	public OpQueryEssStatus(WeatherSensorImpl ws) {
 		super(PriorityLevel.DEVICE_DATA, ws);
 		ess_rec = new EssRec(ws);
+		ts_table = ess_rec.ts_table;
 	}
 
 	/** Create the second phase of the operation */
@@ -73,32 +73,19 @@ public class OpQueryEssStatus extends OpEss {
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer awd = essAvgWindDirection.makeInt();
-			ASN1Integer aws = essAvgWindSpeed.makeInt();
-			ASN1Integer mwgs = essMaxWindGustSpeed.makeInt();
-			ASN1Integer mwgd = essMaxWindGustDir.makeInt();
-			ASN1Integer swd = essSpotWindDirection.makeInt();
-			ASN1Integer sws = essSpotWindSpeed.makeInt();
-			mess.add(awd);
-			mess.add(aws);
-			mess.add(mwgs);
-			mess.add(mwgd);
-			mess.add(swd);
-			mess.add(sws);
+			mess.add(ess_rec.wind_values.avg_wind_dir);
+			mess.add(ess_rec.wind_values.avg_wind_speed);
+			mess.add(ess_rec.wind_values.spot_wind_dir);
+			mess.add(ess_rec.wind_values.spot_wind_speed);
+			mess.add(ess_rec.wind_values.gust_wind_dir);
+			mess.add(ess_rec.wind_values.gust_wind_speed);
 			mess.queryProps();
-			logQuery(awd);
-			logQuery(aws);
-			logQuery(mwgs);
-			logQuery(mwgd);
-			logQuery(swd);
-			logQuery(sws);
-			ess_rec.storeStamp();
-			ess_rec.storeAvgWindDir(awd);
-			ess_rec.storeAvgWindSpeed(aws);
-			ess_rec.storeMaxWindGustSpeed(mwgs);
-			ess_rec.storeMaxWindGustDir(mwgd);
-			ess_rec.storeSpotWindDir(swd);
-			ess_rec.storeSpotWindSpeed(sws);
+			logQuery(ess_rec.wind_values.avg_wind_dir);
+			logQuery(ess_rec.wind_values.avg_wind_speed);
+			logQuery(ess_rec.wind_values.spot_wind_dir);
+			logQuery(ess_rec.wind_values.spot_wind_speed);
+			logQuery(ess_rec.wind_values.gust_wind_dir);
+			logQuery(ess_rec.wind_values.gust_wind_speed);
 			return new QueryTemperatureSensors();
 		}
 	}
@@ -120,9 +107,6 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(ts_table.dew_point_temp.node);
 			logQuery(ts_table.max_air_temp.node);
 			logQuery(ts_table.min_air_temp.node);
-			ess_rec.storeDewpointTemp(ts_table.dew_point_temp);
-			ess_rec.storeMaxTemp(ts_table.max_air_temp);
-			ess_rec.storeMinTemp(ts_table.min_air_temp);
 			return new QueryTemperatureTable();
 		}
 	}
@@ -133,10 +117,8 @@ public class OpQueryEssStatus extends OpEss {
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (ts_table.isDone()) {
-				ess_rec.storeAirTemp(ts_table);
+			if (ts_table.isDone())
 				return new QueryPrecipitation();
-			}
 			TemperatureSensorsTable.Row tr = ts_table.addRow();
 			mess.add(tr.temperature_sensor_height);
 			mess.add(tr.air_temp.node);
@@ -319,7 +301,7 @@ public class OpQueryEssStatus extends OpEss {
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ess_rec.storeStamp();
+			ess_rec.store();
 			log("ess_rec=" + ess_rec);
 			log("w_sensor=" + w_sensor.toStringDebug());
 			return null;

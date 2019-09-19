@@ -21,11 +21,8 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.units.Distance;
-import static us.mn.state.dot.tms.units.Distance.Units.*;
-import us.mn.state.dot.tms.units.Speed;
-import static us.mn.state.dot.tms.units.Speed.Units.KPH;
-import static us.mn.state.dot.tms.units.Speed.Units.MPH;
-import static us.mn.state.dot.tms.units.Speed.Units.MPS;
+import static us.mn.state.dot.tms.units.Distance.Units.DECIMETERS;
+import static us.mn.state.dot.tms.units.Distance.Units.METERS;
 import us.mn.state.dot.tms.units.Temperature;
 import static us.mn.state.dot.tms.units.Temperature.Units.CELSIUS;
 
@@ -67,37 +64,6 @@ public class EssRec {
 				int cp = (int) Math.round((double) pri * 0.1);
 				return new Integer(cp);
 			}
-		}
-		return null;
-	}
-
-	/** Wind speed of 65535 indicates error or missing value */
-	static private final int WIND_SPEED_INVALID_MISSING = 65535;
-
-	/** Convert wind speed in tenths of m/s to Speed.
-	 * @param ws Wind speed in tenths of meters per second, with 65535
-	 *           indicating an error or missing value.
-	 * @return Speed value or null if missing */
-	static private Speed convertSpeed(ASN1Integer ws) {
-		if (ws != null) {
-			int tmps = ws.getInteger();
-			if (tmps != WIND_SPEED_INVALID_MISSING) {
-				double mps = 0.1 * (double) tmps;
-				return new Speed(mps, MPS);
-			}
-		}
-		return null;
-	}
-
-	/** Convert wind direction to iris format.
-	 * @param wd Wind direction in degrees clockwise from north, with 361
-	 *           indicating an error or missing value.
-	 * @return Angle in degrees or null for missing. */
-	static private Integer convertWindDir(ASN1Integer wd) {
-		if (wd != null) {
-			int iwd = wd.getInteger();
-			if (iwd >= 0 && iwd <= 360)
-				return new Integer(iwd);
 		}
 		return null;
 	}
@@ -148,43 +114,17 @@ public class EssRec {
 	}
 
 	/** Creation time */
-	private long create_time = 0;
-
-	/** Storage time */
-	private long storage_time = 0;
+	private final long create_time;
 
 	/** Weather sensor */
 	private final WeatherSensorImpl w_sensor;
 
-	/** Average wind direction in degrees */
-	private Integer wind_dir_avg = null;
+	/** Wind sensor values */
+	public final WindSensorValues wind_values = new WindSensorValues();
 
-	/** Average wind speed */
-	private Speed wind_speed_avg = null;
-
-	/** Max wind gust speed */
-	private Speed max_wind_gust_speed = null;
-
-	/** Max wind gust direction in degrees */
-	private Integer max_wind_gust_dir = null;
-
-	/** Spot wind direction */
-	private Integer spot_wind_dir = null;
-
-	/** Spot wind Speed */
-	private Speed spot_wind_speed = null;
-
-	/** Dew point temperature */
-	private Temperature dew_point_temp = null;
-
-	/** Max temp */
-	private Temperature max_temp = null;
-
-	/** Min temp */
-	private Temperature min_temp = null;
-
-	/** Air temperature */
-	private Temperature air_temp = null;
+	/** Table of temperature sensor data read from the controller */
+	public final TemperatureSensorsTable ts_table =
+		new TemperatureSensorsTable();
 
 	/** Relative humidity (%)  */
 	private Integer rel_humidity = null;
@@ -225,85 +165,49 @@ public class EssRec {
 		create_time = TimeSteward.currentTimeMillis();
 	}
 
-	/** Update the wind dir */
-	public void storeAvgWindDir(ASN1Integer angle) {
-		wind_dir_avg = convertWindDir(angle);
-		w_sensor.setWindDirNotify(wind_dir_avg);
+	/** Get the dew point temp */
+	private Temperature getDewPointTemp() {
+		return ts_table.dew_point_temp.getTemperature();
 	}
 
-	/** Store the average wind speed using essAvgWindSpeed.
-	 * @param awd Is essAvgWindSpeed, which is the two minute average of
-	 *            speed in tenths of meters per second, with 65535
-	 *            indicating an error or missing value. */
-	public void storeAvgWindSpeed(ASN1Integer aws) {
-		wind_speed_avg = convertSpeed(aws);
-		if (wind_speed_avg != null)
-			w_sensor.setWindSpeedNotify(wind_speed_avg.round(KPH));
-		else
-			w_sensor.setWindSpeedNotify(null);
+	/** Get the max temp */
+	private Temperature getMaxTemp() {
+		return ts_table.max_air_temp.getTemperature();
 	}
 
-	/** Store the max wind gust speed. */
-	public void storeMaxWindGustSpeed(ASN1Integer mwgs) {
-		max_wind_gust_speed = convertSpeed(mwgs);
-		if (max_wind_gust_speed != null) {
-			w_sensor.setMaxWindGustSpeedNotify(
-				max_wind_gust_speed.round(KPH));
-		} else {
-			w_sensor.setMaxWindGustSpeedNotify(null);
-		}
+	/** Get the min temp */
+	private Temperature getMinTemp() {
+		return ts_table.min_air_temp.getTemperature();
 	}
 
-	/** Store the max wind gust direction */
-	public void storeMaxWindGustDir(ASN1Integer mwgd) {
-		max_wind_gust_dir = convertWindDir(mwgd);
-		w_sensor.setMaxWindGustDirNotify(max_wind_gust_dir);
+	/** Store the wind sensor samples */
+	private void storeWinds() {
+		w_sensor.setWindDirNotify(wind_values.getAvgWindDir());
+		w_sensor.setWindSpeedNotify(wind_values.getAvgWindSpeedKPH());
+		w_sensor.setSpotWindDirNotify(wind_values.getSpotWindDir());
+		w_sensor.setSpotWindSpeedNotify(wind_values
+			.getSpotWindSpeedKPH());
+		w_sensor.setMaxWindGustDirNotify(wind_values.getGustWindDir());
+		w_sensor.setMaxWindGustSpeedNotify(wind_values
+			.getGustWindSpeedKPH());
 	}
 
-	/** Store spot wind direction */
-	public void storeSpotWindDir(ASN1Integer swd) {
-		spot_wind_dir = convertWindDir(swd);
-		w_sensor.setSpotWindDirNotify(spot_wind_dir);
-	}
-
-	/** Store spot wind speed */
-	public void storeSpotWindSpeed(ASN1Integer sws) {
-		spot_wind_speed = convertSpeed(sws);
-		if (spot_wind_speed != null) {
-			w_sensor.setSpotWindSpeedNotify(
-				spot_wind_speed.round(KPH));
-		} else {
-			w_sensor.setSpotWindSpeedNotify(null);
-		}
-	}
-
-	/** Store the dew point temperature */
-	public void storeDewpointTemp(TemperatureObject dpt) {
-		dew_point_temp = dpt.getTemperature();
-		w_sensor.setDewPointTempNotify((dew_point_temp != null) ?
-			dew_point_temp.round(CELSIUS) : null);
-	}
-
-	/** Store the max temperature */
-	public void storeMaxTemp(TemperatureObject mt) {
-		max_temp = mt.getTemperature();
-		w_sensor.setMaxTempNotify((max_temp != null) ?
-			max_temp.round(CELSIUS) : null);
-	}
-
-	/** Store the min temperature */
-	public void storeMinTemp(TemperatureObject mt) {
-		min_temp = mt.getTemperature();
-		w_sensor.setMinTempNotify((min_temp != null) ?
-			min_temp.round(CELSIUS) : null);
-	}
-
-	/** Store the air temperature, which is assumed to be the
-	 * first sensor in the table. Additional sensors are ignored */
-	public void storeAirTemp(TemperatureSensorsTable tst) {
-		air_temp = tst.getAirTemp(1);
-		w_sensor.setAirTempNotify((air_temp != null) ?
-			air_temp.round(CELSIUS) : null);
+	/** Store the temperatures */
+	private void storeTemps() {
+		Temperature dpt = getDewPointTemp();
+		w_sensor.setDewPointTempNotify((dpt != null) ?
+			dpt.round(CELSIUS) : null);
+		Temperature mxt = getMaxTemp();
+		w_sensor.setMaxTempNotify((mxt != null) ?
+			mxt.round(CELSIUS) : null);
+		Temperature mnt = getMinTemp();
+		w_sensor.setMinTempNotify((mnt != null) ?
+			mnt.round(CELSIUS) : null);
+		// Air temperature is assumed to be the first sensor
+		// in the table.  Additional sensors are ignored.
+		Temperature t = ts_table.getAirTemp(1);
+		w_sensor.setAirTempNotify((t != null) ?
+			t.round(CELSIUS) : null);
 	}
 
 	/** Store humidity */
@@ -344,9 +248,11 @@ public class EssRec {
 		w_sensor.setVisibilityNotify(visibility.round(METERS));
 	}
 
-	/** Store current time */
-	public void storeStamp() {
-		storage_time = TimeSteward.currentTimeMillis();
+	/** Store all sample values */
+	public void store() {
+		storeWinds();
+		storeTemps();
+		long storage_time = TimeSteward.currentTimeMillis();
 		w_sensor.setStampNotify(storage_time);
 	}
 
@@ -393,25 +299,23 @@ public class EssRec {
 		sb.append("(EssRec:");
 		sb.append(" w_sensor_name=").append(w_sensor.getName());
 		sb.append(" create_time=").append(new Date(create_time));
-		sb.append(" air_temp_c=").append(air_temp);
-		sb.append(" dew_point_temp_c=").append(dew_point_temp);
-		sb.append(" max_temp_c=").append(max_temp);
-		sb.append(" min_temp_c=").append(min_temp);
+		sb.append(" air_temp_c=").append(ts_table.getAirTemp(1));
+		sb.append(" dew_point_temp_c=").append(getDewPointTemp());
+		sb.append(" max_temp_c=").append(getMaxTemp());
+		sb.append(" min_temp_c=").append(getMinTemp());
 		sb.append(" rel_humidity_perc=").append(rel_humidity);
-		sb.append(" wind_speed_avg_mph=").append(
-			(wind_speed_avg != null) ?
-			wind_speed_avg.convert(MPH) : "null");
-		sb.append(" wind_dir_avg_degs=").append(wind_dir_avg);
-		sb.append(" max_wind_gust_speed_mph=").append(
-			(max_wind_gust_speed != null) ?
-			max_wind_gust_speed.convert(MPH) : "null");
-		sb.append(" max_wind_gust_dir_degs=").append(
-			max_wind_gust_dir);
-		sb.append(" spot_wind_speed_mph=").append(
-			(spot_wind_speed != null) ?
-			spot_wind_speed.convert(MPH) : "null");
-		sb.append(" spot_wind_dir_degs=").append(
-			spot_wind_dir);
+		sb.append(" wind_speed_avg_mph=").append(wind_values
+			.getAvgWindSpeedMPH());
+		sb.append(" wind_dir_avg_degs=").append(
+			wind_values.getAvgWindDir());
+		sb.append(" max_wind_gust_speed_mph=").append(wind_values
+			.getGustWindSpeedMPH());
+		sb.append(" max_wind_gust_dir_degs=").append(wind_values
+			.getGustWindDir());
+		sb.append(" spot_wind_speed_mph=").append(wind_values
+			.getSpotWindSpeedMPH());
+		sb.append(" spot_wind_dir_degs=").append(wind_values
+			.getSpotWindDir());
 		sb.append(" air_pressure_pa=").append(air_pressure);
 		sb.append(" precip_rate_mmhr=").append(precip_rate);
 		sb.append(" precip_situation=").append(precip_situation);

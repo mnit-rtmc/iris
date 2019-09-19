@@ -18,14 +18,14 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.units.Temperature;
 
 /**
- * ASN1 temperature object.
+ * Temperature object in tenths of a degree C.
  *
  * @author Douglas Lau
  */
 public class TemperatureObject {
 
-	/** A temperature of 1001 is an error condition or missing value */
-	static private final int TEMP_ERROR_MISSING = 1001;
+	/** A value of 1001 indicates an error condition or missing value */
+	static private final int ERROR_MISSING = 1001;
 
 	/** Integer MIB node */
 	public final ASN1Integer node;
@@ -33,14 +33,14 @@ public class TemperatureObject {
 	/** Create a temperature object */
 	public TemperatureObject(ASN1Integer n) {
 		node = n;
-		node.setInteger(TEMP_ERROR_MISSING);
+		node.setInteger(ERROR_MISSING);
 	}
 
 	/** Get value as Temperature.
 	 * @return Temperature or null if missing */
 	public Temperature getTemperature() {
 		int t = node.getInteger();
-		return (t != TEMP_ERROR_MISSING)
+		return (t != ERROR_MISSING)
 		      ? new Temperature(0.1 * (double) t)
 		      : null;
 	}
@@ -48,9 +48,7 @@ public class TemperatureObject {
 	/** Get JSON representation */
 	public String toJson() {
 		int t = node.getInteger();
-		return (t != TEMP_ERROR_MISSING)
-		      ? Double.toString(0.1 * t)
-		      : null;
+		return (t != ERROR_MISSING) ? Double.toString(0.1 * t) : null;
 	}
 
 	/** Get JSON representation */
