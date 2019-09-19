@@ -149,30 +149,6 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(ess_rec.precip_values.precipitation_12_hours);
 			logQuery(ess_rec.precip_values.precipitation_24_hours);
 			logQuery(ess_rec.precip_values.precip_situation);
-			return new QueryElevation();
-		}
-	}
-
-	/** Phase to query elevation values */
-	protected class QueryElevation extends Phase {
-
-		/** Query */
-		@SuppressWarnings("unchecked")
-		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer reh = essReferenceHeight.makeInt();
-			ASN1Integer prh = essPressureHeight.makeInt();
-			ASN1Integer wsh = essWindSensorHeight.makeInt();
-			ASN1Integer apr = essAtmosphericPressure.makeInt();
-			mess.add(reh);
-			mess.add(prh);
-			mess.add(wsh);
-			mess.add(apr);
-			mess.queryProps();
-			logQuery(reh);
-			logQuery(prh);
-			logQuery(wsh);
-			logQuery(apr);
-			ess_rec.storeAtmosphericPressure(apr);
 			return new QueryVisibility();
 		}
 	}
@@ -183,10 +159,14 @@ public class OpQueryEssStatus extends OpEss {
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Integer apr = essAtmosphericPressure.makeInt();
 			ASN1Integer vis = essVisibility.makeInt();
+			mess.add(apr);
 			mess.add(vis);
 			mess.queryProps();
+			logQuery(apr);
 			logQuery(vis);
+			ess_rec.storeAtmosphericPressure(apr);
 			ess_rec.storeVisibility(vis);
 			return new QueryPavement();
 		}

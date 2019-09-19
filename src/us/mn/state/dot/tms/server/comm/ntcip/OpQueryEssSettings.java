@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 
 /**
@@ -60,6 +61,28 @@ public class OpQueryEssSettings extends OpEss {
 			logQuery(scon);
 			logQuery(snam);
 			logQuery(sloc);
+			return new QueryElevation();
+		}
+	}
+
+	/** Phase to query elevation values */
+	protected class QueryElevation extends Phase {
+
+		/** Query */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Integer reh = essReferenceHeight.makeInt();
+			ASN1Integer prh = essPressureHeight.makeInt();
+			ASN1Integer wsh = essWindSensorHeight.makeInt();
+			// essPavementElevation
+			mess.add(reh);
+			mess.add(prh);
+			mess.add(wsh);
+			mess.queryProps();
+			logQuery(reh);
+			logQuery(prh);
+			logQuery(wsh);
+			// FIXME: store as config json value
 			return null;
 		}
 	}
