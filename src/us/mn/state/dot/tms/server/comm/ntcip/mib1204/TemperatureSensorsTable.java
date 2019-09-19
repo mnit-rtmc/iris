@@ -55,7 +55,7 @@ public class TemperatureSensorsTable {
 	/** Temperature table row */
 	static public class Row {
 		public final ASN1Integer temperature_sensor_height;
-		public final TemperatureObject air_temperature;
+		public final TemperatureObject air_temp;
 
 		/** Create a table row */
 		private Row(int row) {
@@ -63,7 +63,7 @@ public class TemperatureSensorsTable {
 				.makeInt(row);
 			temperature_sensor_height.setInteger(
 				HEIGHT_ERROR_MISSING);
-			air_temperature = new TemperatureObject(
+			air_temp = new TemperatureObject(
 				essAirTemperature.makeInt(row));
 		}
 
@@ -72,7 +72,7 @@ public class TemperatureSensorsTable {
 			StringBuilder sb = new StringBuilder();
 			sb.append('{');
 			// FIXME: add height
-			String at = air_temperature.toJson("air_temperature");
+			String at = air_temp.toJson("air_temp");
 			if (at != null)
 				sb.append(at);
 			sb.append("},");
@@ -84,21 +84,26 @@ public class TemperatureSensorsTable {
 	private final ArrayList<Row> table_rows = new ArrayList<Row>();
 
 	/** Get number of rows in table reported by ESS */
-	public int size() {
+	private int size() {
 		return num_temp_sensors.getInteger();
 	}
 
+	/** Check if all rows have been read */
+	public boolean isDone() {
+		return table_rows.size() >= size();
+	}
+
 	/** Add a row to the table */
-	public Row addRow(int row) {
-		Row tr = new Row(row);
+	public Row addRow() {
+		Row tr = new Row(table_rows.size() + 1);
 		table_rows.add(tr);
 		return tr;
 	}
 
 	/** Get nth temperature reading or null on error */
-	public Temperature getAirTemperature(int row) {
+	public Temperature getAirTemp(int row) {
 		return (row >= 1 && row <= table_rows.size())
-		      ? table_rows.get(row - 1).air_temperature.getTemperature()
+		      ? table_rows.get(row - 1).air_temp.getTemperature()
 		      : null;
 	}
 

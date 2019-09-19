@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.units.Temperature;
 
 /**
  * Temperature sensors data table, where each table row contains data read from
@@ -33,74 +34,88 @@ public class PavementSensorsTable {
 	public final ASN1Integer num_sensors = numEssPavementSensors.makeInt();
 
 	/** Table row */
-	static private class TableRow {
-		private final ASN1Enum<EssSurfaceStatus> surf_status;
-		private final ASN1Integer surf_temp;
-		private final ASN1Integer pvmt_temp;
-		private final ASN1Integer surf_freeze_temp;
-		private final ASN1Enum<PavementSensorError> pvmt_sens_err;
+	static public class Row {
+		public final ASN1Integer pavement_type;
+		public final ASN1Integer sensor_type;
+		public final ASN1Enum<EssSurfaceStatus> surface_status;
+		public final TemperatureObject surface_temp;
+		public final TemperatureObject pavement_temp;
+		public final TemperatureObject surface_freeze_point;
+		public final ASN1Enum<PavementSensorError> pavement_sensor_error;
+		public final ASN1Integer surface_water_depth;
 
 		/** Create a table row */
-		private TableRow(ASN1Enum<EssSurfaceStatus> ess,
-			ASN1Integer est, ASN1Integer ept, ASN1Integer sft,
-			ASN1Enum<PavementSensorError> pse)
-		{
-			surf_status = ess;
-			surf_temp = est;
-			pvmt_temp = ept;
-			surf_freeze_temp = sft;
-			pvmt_sens_err = pse;
+		private Row(int row) {
+			pavement_type = essPavementType.makeInt(row);
+			sensor_type = essPavementSensorType.makeInt(row);
+			surface_status = new ASN1Enum<EssSurfaceStatus>(
+				EssSurfaceStatus.class, essSurfaceStatus.node,
+				row);
+			surface_temp = new TemperatureObject(
+				essSurfaceTemperature.makeInt(row));
+			pavement_temp = new TemperatureObject(
+				essPavementTemperature.makeInt(row));
+			surface_freeze_point = new TemperatureObject(
+				essSurfaceFreezePoint.makeInt(row));
+			pavement_sensor_error = new ASN1Enum<PavementSensorError>(
+				PavementSensorError.class,
+				essPavementSensorError.node, row);
+			surface_water_depth = essSurfaceWaterDepth.makeInt(row);
 		}
 	}
 
 	/** Rows in table */
-	private final ArrayList<TableRow> table_rows = new ArrayList<TableRow>();
+	private final ArrayList<Row> table_rows = new ArrayList<Row>();
 
 	/** Get number of rows in table reported by ESS */
-	public int size() {
+	private int size() {
 		return num_sensors.getInteger();
 	}
 
+	/** Check if all rows have been read */
+	public boolean isDone() {
+		return table_rows.size() >= size();
+	}
+
 	/** Add a row to the table */
-	public void addRow(ASN1Enum<EssSurfaceStatus> ess, ASN1Integer est,
-		ASN1Integer ept, ASN1Integer sfp,
-		ASN1Enum<PavementSensorError> pse)
-	{
-		table_rows.add(new TableRow(ess, est, ept, sfp, pse));
+	public Row addRow() {
+		Row tr = new Row(table_rows.size() + 1);
+		table_rows.add(tr);
+		return tr;
 	}
 
 	/** Get nth surface temp or null on error */
-	public ASN1Integer getSurfTemp(int row) {
+	public Temperature getSurfTemp(int row) {
 		return (row >= 1 && row <= table_rows.size())
-		      ? table_rows.get(row - 1).surf_temp
+		      ? table_rows.get(row - 1).surface_temp.getTemperature()
 		      : null;
 	}
 
 	/** Get nth pavement surf temp or null on error */
-	public ASN1Integer getPvmtTemp(int row) {
+	public Temperature getPvmtTemp(int row) {
 		return (row >= 1 && row <= table_rows.size())
-		      ? table_rows.get(row - 1).pvmt_temp
+		      ? table_rows.get(row - 1).pavement_temp.getTemperature()
 		      : null;
 	}
 
 	/** Get nth pvmt surf status or null on error */
 	public EssSurfaceStatus getPvmtSurfStatus(int row) {
 		return (row >= 1 && row <= table_rows.size())
-		      ? table_rows.get(row - 1).surf_status.getEnum()
+		      ? table_rows.get(row - 1).surface_status.getEnum()
 		      : null;
 	}
 
 	/** Get nth surf freeze temp or null on error */
-	public ASN1Integer getSurfFreezeTemp(int row) {
+	public Temperature getSurfFreezeTemp(int row) {
 		return (row >= 1 && row <= table_rows.size())
-		      ? table_rows.get(row - 1).surf_freeze_temp
+		      ? table_rows.get(row - 1).surface_freeze_point.getTemperature()
 		      : null;
 	}
 
 	/** Get nth surf sensor error or null on error */
 	public PavementSensorError getPvmtSensErr(int row) {
 		return (row >= 1 && row <= table_rows.size())
-		      ? table_rows.get(row - 1).pvmt_sens_err.getEnum()
+		      ? table_rows.get(row - 1).pavement_sensor_error.getEnum()
 		      : null;
 	}
 }

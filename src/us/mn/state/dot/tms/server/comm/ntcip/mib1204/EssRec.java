@@ -318,7 +318,7 @@ public class EssRec {
 	/** Store the air temperature, which is assumed to be the
 	 * first sensor in the table. Additional sensors are ignored */
 	public void storeAirTemp(TemperatureSensorsTable tst) {
-		air_temp = tst.getAirTemperature(1);
+		air_temp = tst.getAirTemp(1);
 		w_sensor.setAirTempNotify((air_temp != null) ?
 			air_temp.round(CELSIUS) : null);
 	}
@@ -374,11 +374,11 @@ public class EssRec {
 		// Even if no table rows present, set values
 		// Ignore rows > 1
 		final int row = 1;
-		pvmt_surf_temp = convertTemp(pst.getSurfTemp(row));
+		pvmt_surf_temp = pst.getSurfTemp(row);
 		w_sensor.setPvmtSurfTempNotify((pvmt_surf_temp != null) ?
 			pvmt_surf_temp.round(CELSIUS) : null);
 
-		surf_temp = convertTemp(pst.getSurfTemp(row));
+		surf_temp = pst.getSurfTemp(row);
 		w_sensor.setSurfTempNotify((surf_temp != null) ?
 			surf_temp.round(CELSIUS) : null);
 
@@ -387,7 +387,7 @@ public class EssRec {
 			? pvmt_surf_status.ordinal()
 			: EssSurfaceStatus.undefined.ordinal());
 
-		surf_freeze_temp = convertTemp(pst.getSurfFreezeTemp(row));
+		surf_freeze_temp = pst.getSurfFreezeTemp(row);
 		w_sensor.setSurfFreezeTempNotify((surf_freeze_temp != null) ?
 			surf_freeze_temp.round(CELSIUS) : null);
 	}

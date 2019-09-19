@@ -130,23 +130,19 @@ public class OpQueryEssStatus extends OpEss {
 	/** Phase to query all rows in temperature table */
 	protected class QueryTemperatureTable extends Phase {
 
-		/** Row to query */
-		private int row = 1;
-
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (row >= ts_table.size()) {
+			if (ts_table.isDone()) {
 				ess_rec.storeAirTemp(ts_table);
 				return new QueryPrecipitation();
 			}
-			TemperatureSensorsTable.Row tr = ts_table.addRow(row);
+			TemperatureSensorsTable.Row tr = ts_table.addRow();
 			mess.add(tr.temperature_sensor_height);
-			mess.add(tr.air_temperature.node);
+			mess.add(tr.air_temp.node);
 			mess.queryProps();
 			logQuery(tr.temperature_sensor_height);
-			logQuery(tr.air_temperature.node);
-			row++;
+			logQuery(tr.air_temp.node);
 			return this;
 		}
 	}
@@ -247,47 +243,31 @@ public class OpQueryEssStatus extends OpEss {
 	/** Phase to query all rows in pavement table */
 	protected class QueryPavementTable extends Phase {
 
-		/** Row to query */
-		private int row = 1;
-
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (row > ps_table.size()) {
+			if (ps_table.isDone()) {
 				ess_rec.store(ps_table);
 				return new QuerySubsurface();
 			}
-			ASN1Integer pty = essPavementType.makeInt(row);
-			ASN1Integer sty = essPavementSensorType.makeInt(row);
-			ASN1Enum<EssSurfaceStatus> ess = new ASN1Enum<
-				EssSurfaceStatus>(EssSurfaceStatus.class,
-				essSurfaceStatus.node, row);
-			ASN1Integer est = essSurfaceTemperature.makeInt(row);
-			ASN1Integer ept = essPavementTemperature.makeInt(row);
-			ASN1Integer sfp = essSurfaceFreezePoint.makeInt(row);
-			ASN1Enum<PavementSensorError> pse = new ASN1Enum<
-				PavementSensorError>(PavementSensorError.class,
-				essPavementSensorError.node, row);
-			ASN1Integer swd = essSurfaceWaterDepth.makeInt(row);
-			mess.add(pty);
-			mess.add(sty);
-			mess.add(ess);
-			mess.add(est);
-			mess.add(ept);
-			mess.add(sfp);
-			mess.add(pse);
-			mess.add(swd);
+			PavementSensorsTable.Row pr = ps_table.addRow();
+			mess.add(pr.pavement_type);
+			mess.add(pr.sensor_type);
+			mess.add(pr.surface_status);
+			mess.add(pr.surface_temp.node);
+			mess.add(pr.pavement_temp.node);
+			mess.add(pr.surface_freeze_point.node);
+			mess.add(pr.pavement_sensor_error);
+			mess.add(pr.surface_water_depth);
 			mess.queryProps();
-			logQuery(pty);
-			logQuery(sty);
-			logQuery(ess);
-			logQuery(est);
-			logQuery(ept);
-			logQuery(sfp);
-			logQuery(pse);
-			logQuery(swd);
-			ps_table.addRow(ess, est, ept, sfp, pse);
-			row++;
+			logQuery(pr.pavement_type);
+			logQuery(pr.sensor_type);
+			logQuery(pr.surface_status);
+			logQuery(pr.surface_temp.node);
+			logQuery(pr.pavement_temp.node);
+			logQuery(pr.surface_freeze_point.node);
+			logQuery(pr.pavement_sensor_error);
+			logQuery(pr.surface_water_depth);
 			return this;
 		}
 	}
