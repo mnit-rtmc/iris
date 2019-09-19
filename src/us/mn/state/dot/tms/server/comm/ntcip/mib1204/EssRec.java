@@ -35,52 +35,6 @@ import static us.mn.state.dot.tms.units.Temperature.Units.CELSIUS;
  */
 public class EssRec {
 
-	/** Precipitation of 65535 indicates error or missing value */
-	static private final int PRECIP_INVALID_MISSING = 65535;
-
-	/** Convert precipitation rate to mm/hr.
-	 * @param pr precipitation rate in 1/10s of gram per square meter per
-	 *           second.
-	 * @return Precipiration rate in mm/hr or null if missing */
-	static private Integer convertPrecipRate(ASN1Integer pr) {
-		if (pr != null) {
-			// 1mm of water over 1 sqm is 1L which is 1Kg
-			int tg = pr.getInteger();
-			if (tg != PRECIP_INVALID_MISSING) {
-				int mmhr = (int) Math.round((double) tg * 0.36);
-				return new Integer(mmhr);
-			}
-		}
-		return null;
-	}
-
-	/** Convert one hour precipitation amount.
-	 * @param pr One hour precipitation in tenths of a mm.
-	 * @return One hour precipitation in mm or null */
-	static private Integer convertPrecip(ASN1Integer pr) {
-		if (pr != null) {
-			int pri = pr.getInteger();
-			if (pri != PRECIP_INVALID_MISSING) {
-				int cp = (int) Math.round((double) pri * 0.1);
-				return new Integer(cp);
-			}
-		}
-		return null;
-	}
-
-	/** Convert humidity to an integer.
-	 * @param rhu Relative humidity in percent. A value of 101 indicates an
-	 *            error or missing value.
-	 * @return Humidity as a percent or null if missing. */
-	static private Integer convertHumidity(ASN1Integer rhu) {
-		if (rhu != null) {
-			int irhu = rhu.getInteger();
-			if (irhu >= 0 && irhu <= 100)
-				return new Integer(irhu);
-		}
-		return null;
-	}
-
 	/** Convert atmospheric pressure to pascals.
 	 * @param apr Atmospheric pressure in 1/10ths of millibars, with
 	 *            65535 indicating an error or missing value.
@@ -126,17 +80,9 @@ public class EssRec {
 	public final TemperatureSensorsTable ts_table =
 		new TemperatureSensorsTable();
 
-	/** Relative humidity (%)  */
-	private Integer rel_humidity = null;
-
-	/** Precipitation rate in mm/hr */
-	private Integer precip_rate = null;
-
-	/** Precipitation situation */
-	private EssPrecipSituation precip_situation = null;
-
-	/** Precipitation 1h */
-	private Integer precip_one_hour = null;
+	/** Precipitation sensor values */
+	public final PrecipitationValues precip_values =
+		new PrecipitationValues();
 
 	/** Air pressure in Pascals  */
 	private Integer air_pressure = null;
@@ -210,30 +156,15 @@ public class EssRec {
 			t.round(CELSIUS) : null);
 	}
 
-	/** Store humidity */
-	public void storeHumidity(ASN1Integer rhu) {
-		rel_humidity = convertHumidity(rhu);
-		w_sensor.setHumidityNotify(rel_humidity);
-	}
-
-	/** Store the precipitation rate */
-	public void storePrecipRate(ASN1Integer prr) {
-		precip_rate = convertPrecipRate(prr);
-		w_sensor.setPrecipRateNotify(precip_rate);
-	}
-
-	/** Store the precipitation stuation */
-	public void storePrecipSituation(EssPrecipSituation ps) {
-		precip_situation = ps;
+	/** Store precipitation samples */
+	private void storePrecip() {
+		w_sensor.setHumidityNotify(precip_values.getRelativeHumidity());
+		w_sensor.setPrecipRateNotify(precip_values.getPrecipRate());
+		w_sensor.setPrecipOneHourNotify(precip_values.getPrecip1Hour());
+		EssPrecipSituation ps = precip_values.getPrecipSituation();
 		w_sensor.setPrecipSituationNotify((ps != null)
 			? ps.ordinal()
 		        : null);
-	}
-
-	/** Store the precipitation 1h */
-	public void storePrecipOneHour(ASN1Integer pr) {
-		precip_one_hour = convertPrecip(pr);
-		w_sensor.setPrecipOneHourNotify(precip_one_hour);
 	}
 
 	/** Store the atmospheric pressure */
@@ -252,6 +183,7 @@ public class EssRec {
 	public void store() {
 		storeWinds();
 		storeTemps();
+		storePrecip();
 		long storage_time = TimeSteward.currentTimeMillis();
 		w_sensor.setStampNotify(storage_time);
 	}
@@ -303,7 +235,8 @@ public class EssRec {
 		sb.append(" dew_point_temp_c=").append(getDewPointTemp());
 		sb.append(" max_temp_c=").append(getMaxTemp());
 		sb.append(" min_temp_c=").append(getMinTemp());
-		sb.append(" rel_humidity_perc=").append(rel_humidity);
+		sb.append(" rel_humidity_perc=").append(precip_values
+			.getRelativeHumidity());
 		sb.append(" wind_speed_avg_mph=").append(wind_values
 			.getAvgWindSpeedMPH());
 		sb.append(" wind_dir_avg_degs=").append(
@@ -317,9 +250,11 @@ public class EssRec {
 		sb.append(" spot_wind_dir_degs=").append(wind_values
 			.getSpotWindDir());
 		sb.append(" air_pressure_pa=").append(air_pressure);
-		sb.append(" precip_rate_mmhr=").append(precip_rate);
-		sb.append(" precip_situation=").append(precip_situation);
-		sb.append(" precip_1h=").append(precip_one_hour);
+		sb.append(" precip_rate_mmhr=").append(precip_values
+			.getPrecipRate());
+		sb.append(" precip_situation=").append(precip_values
+			.getPrecipSituation());
+		sb.append(" precip_1h=").append(precip_values.getPrecip1Hour());
 		sb.append(" visibility_m=").append(visibility);
 		sb.append(" pvmt_surf_temp_c=").append(pvmt_surf_temp);
 		sb.append(" surf_temp_c=").append(surf_temp);

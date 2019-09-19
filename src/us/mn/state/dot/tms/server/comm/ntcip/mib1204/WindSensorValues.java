@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +26,7 @@ import static us.mn.state.dot.tms.units.Speed.Units.MPS;
  * Wind sensor sample values.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class WindSensorValues {
 

@@ -22,10 +22,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssRec;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssPrecipSituation;
-import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssSurfaceStatus;
-import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorError;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorsTable;
-import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorError;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.TemperatureSensorsTable;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
@@ -135,37 +132,23 @@ public class OpQueryEssStatus extends OpEss {
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer rhu = essRelativeHumidity.makeInt();
-			ASN1Integer prr = essPrecipRate.makeInt();
-			ASN1Integer p01 = essPrecipitationOneHour.makeInt();
-			ASN1Integer p03 = essPrecipitationThreeHours.makeInt();
-			ASN1Integer p06 = essPrecipitationSixHours.makeInt();
-			ASN1Integer p12 = essPrecipitationTwelveHours.makeInt();
-			ASN1Integer p24 = essPrecipitation24Hours.makeInt();
-			ASN1Enum<EssPrecipSituation> prs = new ASN1Enum<
-				EssPrecipSituation>(EssPrecipSituation.class,
-				essPrecipSituation.node);
-			mess.add(rhu);
-			mess.add(prr);
-			mess.add(p01);
-			mess.add(p03);
-			mess.add(p06);
-			mess.add(p12);
-			mess.add(p24);
-			mess.add(prs);
+			mess.add(ess_rec.precip_values.relative_humidity);
+			mess.add(ess_rec.precip_values.precip_rate);
+			mess.add(ess_rec.precip_values.precipitation_1_hour);
+			mess.add(ess_rec.precip_values.precipitation_3_hours);
+			mess.add(ess_rec.precip_values.precipitation_6_hours);
+			mess.add(ess_rec.precip_values.precipitation_12_hours);
+			mess.add(ess_rec.precip_values.precipitation_24_hours);
+			mess.add(ess_rec.precip_values.precip_situation);
 			mess.queryProps();
-			logQuery(rhu);
-			logQuery(prr);
-			logQuery(p01);
-			logQuery(p03);
-			logQuery(p06);
-			logQuery(p12);
-			logQuery(p24);
-			logQuery(prs);
-			ess_rec.storeHumidity(rhu);
-			ess_rec.storePrecipRate(prr);
-			ess_rec.storePrecipOneHour(p01);
-			ess_rec.storePrecipSituation(prs.getEnum());
+			logQuery(ess_rec.precip_values.relative_humidity);
+			logQuery(ess_rec.precip_values.precip_rate);
+			logQuery(ess_rec.precip_values.precipitation_1_hour);
+			logQuery(ess_rec.precip_values.precipitation_3_hours);
+			logQuery(ess_rec.precip_values.precipitation_6_hours);
+			logQuery(ess_rec.precip_values.precipitation_12_hours);
+			logQuery(ess_rec.precip_values.precipitation_24_hours);
+			logQuery(ess_rec.precip_values.precip_situation);
 			return new QueryElevation();
 		}
 	}
