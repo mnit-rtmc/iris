@@ -17,7 +17,10 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 import java.util.ArrayList;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
+import us.mn.state.dot.tms.units.Temperature;
 
 /**
  * SubSurface sensors data table, where each table row contains data read from a
@@ -33,32 +36,55 @@ public class SubSurfaceSensorsTable {
 		numEssSubSurfaceSensors.makeInt();
 
 	/** Table row */
-	static private class TableRow {
-		private final ASN1Integer subsurf_temp;
+	static public class Row {
+		public final ASN1String sub_surface_sensor_location;
+		public final ASN1Integer sub_surface_type;
+		public final ASN1Integer sub_surface_sensor_depth;
+		public final TemperatureObject sub_surface_temp;
+		public final ASN1Integer sub_surface_moisture;
+		public final ASN1Enum<SubSurfaceSensorError> sub_surface_sensor_error;
 
 		/** Create a table row */
-		private TableRow(ASN1Integer sst) {
-			subsurf_temp = sst;
+		private Row(int row) {
+			sub_surface_sensor_location = new ASN1String(
+				essSubSurfaceSensorLocation.node, row);
+			sub_surface_type = essSubSurfaceType.makeInt(row);
+			sub_surface_sensor_depth = essSubSurfaceSensorDepth
+				.makeInt(row);
+			sub_surface_temp = new TemperatureObject(
+				essSubSurfaceTemperature.makeInt(row));
+			sub_surface_moisture = essSubSurfaceMoisture.makeInt(
+				row);
+			sub_surface_sensor_error = new ASN1Enum<
+				SubSurfaceSensorError>(SubSurfaceSensorError.class,
+				essSubSurfaceSensorError.node, row);
 		}
 	}
 
 	/** Rows in table */
-	private final ArrayList<TableRow> table_rows = new ArrayList<TableRow>();
+	private final ArrayList<Row> table_rows = new ArrayList<Row>();
 
 	/** Get number of rows in table reported by ESS */
-	public int size() {
+	private int size() {
 		return num_sensors.getInteger();
 	}
 
-	/** Add a row to the table */
-	public void addRow(ASN1Integer sst) {
-		table_rows.add(new TableRow(sst));
+	/** Check if all rows have been read */
+	public boolean isDone() {
+		return table_rows.size() >= size();
 	}
 
-	/** Get nth subsurface temp or null on error */
-	public ASN1Integer getTemp(int row) {
+	/** Add a row to the table */
+	public Row addRow() {
+		Row tr = new Row(table_rows.size() + 1);
+		table_rows.add(tr);
+		return tr;
+	}
+
+	/** Get nth sub-surface temp or null on error */
+	public Temperature getTemp(int row) {
 		return (row >= 1 && row <= table_rows.size())
-		      ? table_rows.get(row - 1).subsurf_temp
+		      ? table_rows.get(row - 1).sub_surface_temp.getTemperature()
 		      : null;
 	}
 }

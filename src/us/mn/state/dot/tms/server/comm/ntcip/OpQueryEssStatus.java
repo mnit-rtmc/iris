@@ -281,8 +281,6 @@ public class OpQueryEssStatus extends OpEss {
 			mess.add(ss_table.num_sensors);
 			mess.queryProps();
 			logQuery(ss_table.num_sensors);
-			if (ss_table.size() > 1)
-				log("Ignoring additional subsurface sensors");
 			return new QuerySubsurfaceTable();
 		}
 	}
@@ -290,40 +288,27 @@ public class OpQueryEssStatus extends OpEss {
 	/** Phase to query all rows in subsurface table */
 	protected class QuerySubsurfaceTable extends Phase {
 
-		/** Row to query */
-		private int row = 1;
-
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (row > ss_table.size()) {
+			if (ss_table.isDone()) {
 				ess_rec.store(ss_table);
 				return new FinalPhase();
 			}
-			ASN1String ssl = new ASN1String(
-				essSubSurfaceSensorLocation.node, row);
-			ASN1Integer sty = essSubSurfaceType.makeInt(row);
-			ASN1Integer ssd = essSubSurfaceSensorDepth.makeInt(row);
-			ASN1Integer sst = essSubSurfaceTemperature.makeInt(row);
-			ASN1Integer ssm = essSubSurfaceMoisture.makeInt(row);
-			ASN1Enum<SubSurfaceSensorError> sse = new ASN1Enum<
-				SubSurfaceSensorError>(SubSurfaceSensorError.class,
-				essSubSurfaceSensorError.node, row);
-			mess.add(ssl);
-			mess.add(sty);
-			mess.add(ssd);
-			mess.add(sst);
-			mess.add(ssm);
-			mess.add(sse);
+			SubSurfaceSensorsTable.Row sr = ss_table.addRow();
+			mess.add(sr.sub_surface_sensor_location);
+			mess.add(sr.sub_surface_type);
+			mess.add(sr.sub_surface_sensor_depth);
+			mess.add(sr.sub_surface_temp.node);
+			mess.add(sr.sub_surface_moisture);
+			mess.add(sr.sub_surface_sensor_error);
 			mess.queryProps();
-			logQuery(ssl);
-			logQuery(sty);
-			logQuery(ssd);
-			logQuery(sst);
-			logQuery(ssm);
-			logQuery(sse);
-			ss_table.addRow(sst);
-			row++;
+			logQuery(sr.sub_surface_sensor_location);
+			logQuery(sr.sub_surface_type);
+			logQuery(sr.sub_surface_sensor_depth);
+			logQuery(sr.sub_surface_temp.node);
+			logQuery(sr.sub_surface_moisture);
+			logQuery(sr.sub_surface_sensor_error);
 			return this;
 		}
 	}

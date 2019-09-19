@@ -17,10 +17,8 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
-import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.*;
@@ -39,21 +37,6 @@ import static us.mn.state.dot.tms.units.Temperature.Units.CELSIUS;
  * @author Douglas Lau
  */
 public class EssRec {
-
-	/** A temperature of 1001 is an error condition or missing value */
-	static private final int TEMP_ERROR_MISSING = 1001;
-
-	/** Convert a temperature to iris format.
-	 * @param tc Temperature in tenths of a degree C.
-	 * @return Temperature or null if missing */
-	static private Temperature convertTemp(ASN1Integer tc) {
-		if (tc != null) {
-			int itc = tc.getInteger();
-			if (itc != TEMP_ERROR_MISSING)
-				return new Temperature(0.1 * (double) itc);
-		}
-		return null;
-	}
 
 	/** Precipitation of 65535 indicates error or missing value */
 	static private final int PRECIP_INVALID_MISSING = 65535;
@@ -399,7 +382,7 @@ public class EssRec {
 		// Even if no table rows present, set values
 		// Ignore rows > 1
 		final int row = 1;
-		subsurf_temp = convertTemp(sst.getTemp(row));
+		subsurf_temp = sst.getTemp(row);
 		w_sensor.setSubSurfTempNotify((subsurf_temp != null) ?
 			subsurf_temp.round(CELSIUS) : null);
 	}
