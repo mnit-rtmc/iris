@@ -20,14 +20,9 @@ import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssRec;
-import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
-import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssPrecipSituation;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.TemperatureSensorsTable;
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 
 /**
  * Operation to query the status of a weather sensor.
@@ -149,25 +144,23 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(ess_rec.precip_values.precipitation_12_hours);
 			logQuery(ess_rec.precip_values.precipitation_24_hours);
 			logQuery(ess_rec.precip_values.precip_situation);
-			return new QueryVisibility();
+			return new QueryAtmospheric();
 		}
 	}
 
-	/** Phase to query visibility values */
-	protected class QueryVisibility extends Phase {
+	/** Phase to query atmospheric values */
+	protected class QueryAtmospheric extends Phase {
 
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer apr = essAtmosphericPressure.makeInt();
-			ASN1Integer vis = essVisibility.makeInt();
-			mess.add(apr);
-			mess.add(vis);
+			mess.add(ess_rec.atmospheric_values.atmospheric_pressure);
+			mess.add(ess_rec.atmospheric_values.visibility);
+			mess.add(ess_rec.atmospheric_values.visibility_situation);
 			mess.queryProps();
-			logQuery(apr);
-			logQuery(vis);
-			ess_rec.storeAtmosphericPressure(apr);
-			ess_rec.storeVisibility(vis);
+			logQuery(ess_rec.atmospheric_values.atmospheric_pressure);
+			logQuery(ess_rec.atmospheric_values.visibility);
+			logQuery(ess_rec.atmospheric_values.visibility_situation);
 			return new QueryPavement();
 		}
 	}

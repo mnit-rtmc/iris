@@ -20,9 +20,6 @@ import java.util.Date;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-import us.mn.state.dot.tms.units.Distance;
-import static us.mn.state.dot.tms.units.Distance.Units.DECIMETERS;
-import static us.mn.state.dot.tms.units.Distance.Units.METERS;
 import us.mn.state.dot.tms.units.Temperature;
 import static us.mn.state.dot.tms.units.Temperature.Units.CELSIUS;
 
@@ -34,38 +31,6 @@ import static us.mn.state.dot.tms.units.Temperature.Units.CELSIUS;
  * @author Douglas Lau
  */
 public class EssRec {
-
-	/** Convert atmospheric pressure to pascals.
-	 * @param apr Atmospheric pressure in 1/10ths of millibars, with
-	 *            65535 indicating an error or missing value.
-	 * @return Pressure in pascals */
-	static private Integer convertAtmosphericPressure(ASN1Integer apr) {
-		if (apr != null) {
-			int tmb = apr.getInteger();
-			if (tmb != 65535) {
-				double mb = (double) tmb * 0.1;
-				double pa = mb * 100;
-				return new Integer((int) Math.round(pa));
-			}
-		}
-		return null;
-	}
-
-	/** Visibility of 1000001 indicates error or missing value */
-	static private final int VISIBILITY_ERROR_MISSING = 1000001;
-
-	/** Convert visibility to Distance.
-	 * @param vis Visibility in decimeters with 1000001 indicating an error
-	 *            or missing value.
-	 * @return Visibility distance or null for missing */
-	static private Distance convertVisibility(ASN1Integer vis) {
-		if (vis != null) {
-			int iv = vis.getInteger();
-			if (iv != VISIBILITY_ERROR_MISSING)
-				return new Distance(iv, DECIMETERS);
-		}
-		return null;
-	}
 
 	/** Creation time */
 	private final long create_time;
@@ -84,11 +49,9 @@ public class EssRec {
 	public final PrecipitationValues precip_values =
 		new PrecipitationValues();
 
-	/** Air pressure in Pascals  */
-	private Integer air_pressure = null;
-
-	/** Visibility */
-	private Distance visibility = null;
+	/** Atmospheric values */
+	public final AtmosphericValues atmospheric_values =
+		new AtmosphericValues();
 
 	/** Pavement surface temperature */
 	private Temperature pvmt_surf_temp = null;
@@ -167,16 +130,13 @@ public class EssRec {
 		        : null);
 	}
 
-	/** Store the atmospheric pressure */
-	public void storeAtmosphericPressure(ASN1Integer apr) {
-		air_pressure = convertAtmosphericPressure(apr);
-		w_sensor.setPressureNotify(air_pressure);
-	}
-
-	/** Store visibility */
-	public void storeVisibility(ASN1Integer vis) {
-		visibility = convertVisibility(vis);
-		w_sensor.setVisibilityNotify(visibility.round(METERS));
+	/** Store the atmospheric values */
+	private void storeAtmospheric() {
+		w_sensor.setPressureNotify(atmospheric_values
+			.getAtmosphericPressure());
+		Float vis = atmospheric_values.getVisibility();
+		Integer v = (vis != null) ? Math.round(vis) : null;
+		w_sensor.setVisibilityNotify(v);
 	}
 
 	/** Store all sample values */
@@ -184,6 +144,7 @@ public class EssRec {
 		storeWinds();
 		storeTemps();
 		storePrecip();
+		storeAtmospheric();
 		long storage_time = TimeSteward.currentTimeMillis();
 		w_sensor.setStampNotify(storage_time);
 	}
@@ -236,12 +197,11 @@ public class EssRec {
 		sb.append(wind_values.toJson());
 		sb.append(ts_table.toJson());
 		sb.append(precip_values.toJson());
+		sb.append(atmospheric_values.toJson());
 
 
 
 // FIXME
-	sb.append(" air_pressure_pa=").append(air_pressure);
-	sb.append(" visibility_m=").append(visibility);
 	sb.append(" pvmt_surf_temp_c=").append(pvmt_surf_temp);
 	sb.append(" surf_temp_c=").append(surf_temp);
 	sb.append(" pvmt_surf_status=").append(pvmt_surf_status);

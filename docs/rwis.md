@@ -25,8 +25,8 @@ Field                  | Description
 `precipitation_rate`   | Precipitation rate in mm/hr
 `precipitation_1_hour` | One hour accumulated precipitation in mm
 `precip_situation`     | Precipitation situation code
+`atmospheric_pressure` | Atmospheric pressure in pascals
 `visibility`           | Visibility in meters
-`pressure`             | Atmospheric pressure in pascals
 `surface_temp`         | Surface temperature in ℃
 `pavement_temp`        | Pavement temperature in ℃
 `surface_status`       | Pavement surface status
