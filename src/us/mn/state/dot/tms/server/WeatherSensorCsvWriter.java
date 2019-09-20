@@ -121,8 +121,10 @@ public class WeatherSensorCsvWriter extends XmlWriter {
 	 * @param w Weather sensor
 	 * @return Pavement surface status description or empty if missing. */
 	private String pssToN(WeatherSensorImpl w) {
-		Integer ess = w.getPvmtSurfStatus();
-		return (ess != null) ? SString.splitCamel(ess.toString()) : "";
+		String ess = w.getPvmtSurfStatus();
+		return (ess != null && !ess.equals("undefined"))
+		      ? SString.splitCamel(ess)
+		      : "";
 	}
 
 	/** Convert pressure in pascals to NTCIP pressure.

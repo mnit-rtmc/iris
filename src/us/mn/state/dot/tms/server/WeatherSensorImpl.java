@@ -539,16 +539,16 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	}
 
 	/** Pavement surface status (null for missing) */
-	private transient Integer pvmt_surf_status;
+	private transient String pvmt_surf_status;
 
 	/** Get pavement surface status (null for missing) */
 	@Override
-	public Integer getPvmtSurfStatus() {
+	public String getPvmtSurfStatus() {
 		return pvmt_surf_status;
 	}
 
 	/** Set pavement surface status (null for missing) */
-	public void setPvmtSurfStatusNotify(Integer v) {
+	public void setPvmtSurfStatusNotify(String v) {
 		if (!objectEquals(v, pvmt_surf_status)) {
 			pvmt_surf_status = v;
 			notifyAttribute("pvmtSurfStatus");
