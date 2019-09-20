@@ -35,14 +35,13 @@ public class OpQueryEssStatus extends OpEss {
 	/** Record of values read from the controller */
 	private final EssRec ess_rec;
 
-	/** Table of temperature sensor data read from the controller */
+	/** Temperature sensors table */
 	private final TemperatureSensorsTable ts_table;
 
-	/** Table of pavement sensor data read from the controller */
-	private final PavementSensorsTable ps_table =
-		new PavementSensorsTable();
+	/** Pavement sensors table */
+	private final PavementSensorsTable ps_table;
 
-	/** Table of subsurface sensor data read from controller */
+	/** Sub-surface sensors table */
 	private final SubSurfaceSensorsTable ss_table =
 		new SubSurfaceSensorsTable();
 
@@ -51,6 +50,7 @@ public class OpQueryEssStatus extends OpEss {
 		super(PriorityLevel.DEVICE_DATA, ws);
 		ess_rec = new EssRec(ws);
 		ts_table = ess_rec.ts_table;
+		ps_table = ess_rec.ps_table;
 	}
 
 	/** Create the second phase of the operation */
@@ -184,27 +184,21 @@ public class OpQueryEssStatus extends OpEss {
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (ps_table.isDone()) {
-				ess_rec.store(ps_table);
+			if (ps_table.isDone())
 				return new QuerySubsurface();
-			}
 			PavementSensorsTable.Row pr = ps_table.addRow();
-			mess.add(pr.pavement_type);
-			mess.add(pr.sensor_type);
 			mess.add(pr.surface_status);
 			mess.add(pr.surface_temp.node);
 			mess.add(pr.pavement_temp.node);
 			mess.add(pr.surface_freeze_point.node);
-			mess.add(pr.pavement_sensor_error);
+			mess.add(pr.sensor_error);
 			mess.add(pr.surface_water_depth);
 			mess.queryProps();
-			logQuery(pr.pavement_type);
-			logQuery(pr.sensor_type);
 			logQuery(pr.surface_status);
 			logQuery(pr.surface_temp.node);
 			logQuery(pr.pavement_temp.node);
 			logQuery(pr.surface_freeze_point.node);
-			logQuery(pr.pavement_sensor_error);
+			logQuery(pr.sensor_error);
 			logQuery(pr.surface_water_depth);
 			return this;
 		}

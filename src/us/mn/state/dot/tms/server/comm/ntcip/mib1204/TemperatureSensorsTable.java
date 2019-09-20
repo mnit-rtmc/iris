@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 import java.util.ArrayList;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-import us.mn.state.dot.tms.units.Temperature;
 
 /**
  * Temperature sensors data table, where each table row contains data read from
@@ -31,6 +30,10 @@ public class TemperatureSensorsTable {
 
 	/** A height of 1001 is an error condition or missing value */
 	static private final int HEIGHT_ERROR_MISSING = 1001;
+
+	/** Number of sensors in table */
+	public final ASN1Integer num_temp_sensors =
+		essNumTemperatureSensors.makeInt();
 
 	/** Wet-bulb temperature */
 	public final TemperatureObject wet_bulb_temp = new TemperatureObject(
@@ -48,10 +51,6 @@ public class TemperatureSensorsTable {
 	public final TemperatureObject min_air_temp = new TemperatureObject(
 		essMinTemp.makeInt());
 
-	/** Number of temperature sensors in table */
-	public final ASN1Integer num_temp_sensors =
-		essNumTemperatureSensors.makeInt();
-
 	/** Temperature table row */
 	static public class Row {
 		public final ASN1Integer temperature_sensor_height;
@@ -67,14 +66,17 @@ public class TemperatureSensorsTable {
 				essAirTemperature.makeInt(row));
 		}
 
+		/** Get air temperature or null on error */
+		public Integer getAirTempC() {
+			return air_temp.getTempC();
+		}
+
 		/** Get JSON representation */
 		private String toJson() {
 			StringBuilder sb = new StringBuilder();
 			sb.append('{');
 			// FIXME: add height
-			String at = air_temp.toJson("air_temp");
-			if (at != null)
-				sb.append(at);
+			sb.append(air_temp.toJson("air_temp"));
 			sb.append("},");
 			return sb.toString();
 		}
@@ -100,11 +102,26 @@ public class TemperatureSensorsTable {
 		return tr;
 	}
 
-	/** Get nth temperature reading or null on error */
-	public Temperature getAirTemp(int row) {
+	/** Get one table row */
+	public Row getRow(int row) {
 		return (row >= 1 && row <= table_rows.size())
-		      ? table_rows.get(row - 1).air_temp.getTemperature()
+		      ? table_rows.get(row - 1)
 		      : null;
+	}
+
+	/** Get the dew point temp */
+	public Integer getDewPointTempC() {
+		return dew_point_temp.getTempC();
+	}
+
+	/** Get the max temp */
+	public Integer getMaxTempC() {
+		return max_air_temp.getTempC();
+	}
+
+	/** Get the min temp */
+	public Integer getMinTempC() {
+		return min_air_temp.getTempC();
 	}
 
 	/** Get JSON representation */
@@ -116,18 +133,10 @@ public class TemperatureSensorsTable {
 				sb.append(row.toJson());
 			sb.append("],");
 		}
-		String wbc = wet_bulb_temp.toJson("wet_bulb_temp");
-		if (wbc != null)
-			sb.append(wbc);
-		String dpc = dew_point_temp.toJson("dew_point_temp");
-		if (dpc != null)
-			sb.append(dpc);
-		String mxt = max_air_temp.toJson("max_air_temp");
-		if (mxt != null)
-			sb.append(mxt);
-		String mnt = min_air_temp.toJson("min_air_temp");
-		if (mnt != null)
-			sb.append(mnt);
+		sb.append(wet_bulb_temp.toJson("wet_bulb_temp"));
+		sb.append(dew_point_temp.toJson("dew_point_temp"));
+		sb.append(max_air_temp.toJson("max_air_temp"));
+		sb.append(min_air_temp.toJson("min_air_temp"));
 		return sb.toString();
 	}
 }

@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.units.Temperature;
+import static us.mn.state.dot.tms.units.Temperature.Units.CELSIUS;
 
 /**
  * Temperature object in tenths of a degree C.
@@ -45,24 +46,20 @@ public class TemperatureObject {
 		      : null;
 	}
 
+	/** Get value as degrees celcius */
+	public Integer getTempC() {
+		Temperature t = getTemperature();
+		return (t != null) ? t.round(CELSIUS) : null;
+	}
+
 	/** Get JSON representation */
-	public String toJson() {
+	private Double tempC() {
 		int t = node.getInteger();
-		return (t != ERROR_MISSING) ? Double.toString(0.1 * t) : null;
+		return (t != ERROR_MISSING) ? (double) t * 0.1 : null;
 	}
 
 	/** Get JSON representation */
 	public String toJson(String key) {
-		String value = toJson();
-		if (value != null) {
-			StringBuilder sb = new StringBuilder();
-			sb.append("\"");
-			sb.append(key);
-			sb.append("\":");
-			sb.append(value);
-			sb.append(',');
-			return sb.toString();
-		} else
-			return null;
+		return Json.num(key, tempC());
 	}
 }

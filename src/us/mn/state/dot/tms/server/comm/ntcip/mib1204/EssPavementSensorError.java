@@ -21,7 +21,7 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public enum PavementSensorError {
+public enum EssPavementSensorError {
 	undefined,    // 0
 	other,        // 1
 	none,         // 2

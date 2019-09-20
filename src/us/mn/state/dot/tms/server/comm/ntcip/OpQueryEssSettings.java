@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorsTable;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 
@@ -29,6 +30,9 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
  * @author Michael Darter
  */
 public class OpQueryEssSettings extends OpEss {
+
+	/** Pavement sensors table */
+	private final PavementSensorsTable ps_table = new PavementSensorsTable();
 
 	/** Create a new query status object */
 	public OpQueryEssSettings(WeatherSensorImpl d) {
@@ -82,8 +86,42 @@ public class OpQueryEssSettings extends OpEss {
 			logQuery(reh);
 			logQuery(prh);
 			logQuery(wsh);
-			// FIXME: store as config json value
-			return null;
+			return new QueryPavement();
 		}
 	}
+
+	/** Phase to query pavement values */
+	protected class QueryPavement extends Phase {
+
+		/** Query */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(ps_table.num_sensors);
+			mess.queryProps();
+			logQuery(ps_table.num_sensors);
+			return new QueryPavementTable();
+		}
+	}
+
+	/** Phase to query all rows in pavement table */
+	protected class QueryPavementTable extends Phase {
+
+		/** Query */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			if (ps_table.isDone())
+				return null;
+			PavementSensorsTable.Row pr = ps_table.addRow();
+			// FIXME: add pavement exposure & sensor location
+			//        elevation
+			mess.add(pr.pavement_type);
+			mess.add(pr.sensor_type);
+			mess.queryProps();
+			logQuery(pr.pavement_type);
+			logQuery(pr.sensor_type);
+			return this;
+		}
+	}
+
+	// FIXME: store as config json value
 }

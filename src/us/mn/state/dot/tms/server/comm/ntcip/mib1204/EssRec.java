@@ -41,7 +41,7 @@ public class EssRec {
 	/** Wind sensor values */
 	public final WindSensorValues wind_values = new WindSensorValues();
 
-	/** Table of temperature sensor data read from the controller */
+	/** Temperature sensors table */
 	public final TemperatureSensorsTable ts_table =
 		new TemperatureSensorsTable();
 
@@ -53,17 +53,8 @@ public class EssRec {
 	public final AtmosphericValues atmospheric_values =
 		new AtmosphericValues();
 
-	/** Pavement surface temperature */
-	private Temperature pvmt_surf_temp = null;
-
-	/** Surface temperature */
-	private Temperature surf_temp = null;
-
-	/** Pavement surface status */
-	private EssSurfaceStatus pvmt_surf_status = null;
-
-	/** Pavement surface temperature */
-	private Temperature surf_freeze_temp = null;
+	/** Pavement sensors table */
+	public final PavementSensorsTable ps_table = new PavementSensorsTable();
 
 	/** Subsurface temperature */
 	private Temperature subsurf_temp = null;
@@ -72,21 +63,6 @@ public class EssRec {
 	public EssRec(WeatherSensorImpl ws) {
 		w_sensor = ws;
 		create_time = TimeSteward.currentTimeMillis();
-	}
-
-	/** Get the dew point temp */
-	private Temperature getDewPointTemp() {
-		return ts_table.dew_point_temp.getTemperature();
-	}
-
-	/** Get the max temp */
-	private Temperature getMaxTemp() {
-		return ts_table.max_air_temp.getTemperature();
-	}
-
-	/** Get the min temp */
-	private Temperature getMinTemp() {
-		return ts_table.min_air_temp.getTemperature();
 	}
 
 	/** Store the wind sensor samples */
@@ -103,20 +79,14 @@ public class EssRec {
 
 	/** Store the temperatures */
 	private void storeTemps() {
-		Temperature dpt = getDewPointTemp();
-		w_sensor.setDewPointTempNotify((dpt != null) ?
-			dpt.round(CELSIUS) : null);
-		Temperature mxt = getMaxTemp();
-		w_sensor.setMaxTempNotify((mxt != null) ?
-			mxt.round(CELSIUS) : null);
-		Temperature mnt = getMinTemp();
-		w_sensor.setMinTempNotify((mnt != null) ?
-			mnt.round(CELSIUS) : null);
+		w_sensor.setDewPointTempNotify(ts_table.getDewPointTempC());
+		w_sensor.setMaxTempNotify(ts_table.getMaxTempC());
+		w_sensor.setMinTempNotify(ts_table.getMinTempC());
 		// Air temperature is assumed to be the first sensor
 		// in the table.  Additional sensors are ignored.
-		Temperature t = ts_table.getAirTemp(1);
-		w_sensor.setAirTempNotify((t != null) ?
-			t.round(CELSIUS) : null);
+		TemperatureSensorsTable.Row row = ts_table.getRow(1);
+		Integer t = (row != null) ? row.getAirTempC() : null;
+		w_sensor.setAirTempNotify(t);
 	}
 
 	/** Store precipitation samples */
@@ -139,39 +109,35 @@ public class EssRec {
 		w_sensor.setVisibilityNotify(v);
 	}
 
+	/** Store pavement sensor related values */
+	private void storePavement() {
+		PavementSensorsTable.Row row = ps_table.getRow(1);
+		if (row != null) {
+			w_sensor.setPvmtSurfTempNotify(row.getPvmtTempC());
+			w_sensor.setSurfTempNotify(row.getSurfTempC());
+			EssSurfaceStatus ess = row.getSurfStatus();
+			w_sensor.setPvmtSurfStatusNotify((ess != null)
+				? ess.ordinal()
+				: EssSurfaceStatus.undefined.ordinal());
+			w_sensor.setSurfFreezeTempNotify(row
+				.getSurfFreezePointC());
+		} else {
+			w_sensor.setPvmtSurfTempNotify(null);
+			w_sensor.setSurfTempNotify(null);
+			w_sensor.setPvmtSurfStatusNotify(null);
+			w_sensor.setSurfFreezeTempNotify(null);
+		}
+	}
+
 	/** Store all sample values */
 	public void store() {
 		storeWinds();
 		storeTemps();
 		storePrecip();
 		storeAtmospheric();
+		storePavement();
 		long storage_time = TimeSteward.currentTimeMillis();
 		w_sensor.setStampNotify(storage_time);
-	}
-
-	/** Store pavement sensor related values.
-	 * @param pst Pavement sensor table, which might contain observations
-	 *            from multiple sensors.  Only the first sensor is used. */
-	public void store(PavementSensorsTable pst) {
-		// Even if no table rows present, set values
-		// Ignore rows > 1
-		final int row = 1;
-		pvmt_surf_temp = pst.getSurfTemp(row);
-		w_sensor.setPvmtSurfTempNotify((pvmt_surf_temp != null) ?
-			pvmt_surf_temp.round(CELSIUS) : null);
-
-		surf_temp = pst.getSurfTemp(row);
-		w_sensor.setSurfTempNotify((surf_temp != null) ?
-			surf_temp.round(CELSIUS) : null);
-
-		pvmt_surf_status = pst.getPvmtSurfStatus(row);
-		w_sensor.setPvmtSurfStatusNotify((pvmt_surf_status != null)
-			? pvmt_surf_status.ordinal()
-			: EssSurfaceStatus.undefined.ordinal());
-
-		surf_freeze_temp = pst.getSurfFreezeTemp(row);
-		w_sensor.setSurfFreezeTempNotify((surf_freeze_temp != null) ?
-			surf_freeze_temp.round(CELSIUS) : null);
 	}
 
 	/** Store subsurface sensor related values.
@@ -198,14 +164,11 @@ public class EssRec {
 		sb.append(ts_table.toJson());
 		sb.append(precip_values.toJson());
 		sb.append(atmospheric_values.toJson());
+		sb.append(ps_table.toJson());
 
 
 
 // FIXME
-	sb.append(" pvmt_surf_temp_c=").append(pvmt_surf_temp);
-	sb.append(" surf_temp_c=").append(surf_temp);
-	sb.append(" pvmt_surf_status=").append(pvmt_surf_status);
-	sb.append(" pvmt_surf_freeze_temp=").append(surf_freeze_temp);
 	sb.append(" subsurf_temp=").append(subsurf_temp);
 
 
