@@ -27,6 +27,9 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
  */
 public class PrecipitationValues {
 
+	/** Humidity of 101 indicates error or missing value */
+	static private final int HUMIDITY_ERROR_MISSING = 101;
+
 	/** Convert humidity to an integer.
 	 * @param rhu Relative humidity in percent. A value of 101 indicates an
 	 *            error or missing value.
@@ -34,14 +37,14 @@ public class PrecipitationValues {
 	static private Integer convertHumidity(ASN1Integer rhu) {
 		if (rhu != null) {
 			int irhu = rhu.getInteger();
-			if (irhu >= 0 && irhu <= 100)
+			if (irhu >= 0 && irhu < HUMIDITY_ERROR_MISSING)
 				return new Integer(irhu);
 		}
 		return null;
 	}
 
 	/** Precipitation of 65535 indicates error or missing value */
-	static private final int PRECIP_INVALID_MISSING = 65535;
+	static private final int PRECIP_ERROR_MISSING = 65535;
 
 	/** Convert precipitation rate to mm/hr.
 	 * @param pr precipitation rate in 1/10s of gram per square meter per
@@ -51,7 +54,7 @@ public class PrecipitationValues {
 		if (pr != null) {
 			// 1mm of water over 1 sqm is 1L which is 1Kg
 			int tg = pr.getInteger();
-			if (tg != PRECIP_INVALID_MISSING) {
+			if (tg != PRECIP_ERROR_MISSING) {
 				int mmhr = (int) Math.round((double) tg * 0.36);
 				return new Integer(mmhr);
 			}
@@ -65,7 +68,7 @@ public class PrecipitationValues {
 	static private Integer convertPrecip(ASN1Integer pr) {
 		if (pr != null) {
 			int pri = pr.getInteger();
-			if (pri != PRECIP_INVALID_MISSING) {
+			if (pri != PRECIP_ERROR_MISSING) {
 				int cp = (int) Math.round((double) pri * 0.1);
 				return new Integer(cp);
 			}
@@ -105,6 +108,17 @@ public class PrecipitationValues {
 		new ASN1Enum<EssPrecipSituation>(EssPrecipSituation.class,
 		essPrecipSituation.node);
 
+	/** Create precipitation values */
+	public PrecipitationValues() {
+		relative_humidity.setInteger(HUMIDITY_ERROR_MISSING);
+		precip_rate.setInteger(PRECIP_ERROR_MISSING);
+		precipitation_1_hour.setInteger(PRECIP_ERROR_MISSING);
+		precipitation_3_hours.setInteger(PRECIP_ERROR_MISSING);
+		precipitation_6_hours.setInteger(PRECIP_ERROR_MISSING);
+		precipitation_12_hours.setInteger(PRECIP_ERROR_MISSING);
+		precipitation_24_hours.setInteger(PRECIP_ERROR_MISSING);
+	}
+
 	/** Get the relative humidity (%) */
 	public Integer getRelativeHumidity() {
 		return convertHumidity(relative_humidity);
@@ -122,7 +136,8 @@ public class PrecipitationValues {
 
 	/** Get the precipitation situation */
 	public EssPrecipSituation getPrecipSituation() {
-		return precip_situation.getEnum();
+		EssPrecipSituation eps = precip_situation.getEnum();
+		return (eps != EssPrecipSituation.undefined) ? eps : null;
 	}
 
 	/** Get JSON representation */

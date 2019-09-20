@@ -20,7 +20,9 @@ import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssRec;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorsTable;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorsTable;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 
@@ -31,12 +33,21 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
  */
 public class OpQueryEssSettings extends OpEss {
 
+	/** Record of values read from the controller */
+	private final EssRec ess_rec;
+
 	/** Pavement sensors table */
-	private final PavementSensorsTable ps_table = new PavementSensorsTable();
+	private final PavementSensorsTable ps_table;
+
+	/** Sub-surface sensors table */
+	private final SubSurfaceSensorsTable ss_table;
 
 	/** Create a new query status object */
-	public OpQueryEssSettings(WeatherSensorImpl d) {
-		super(PriorityLevel.DEVICE_DATA, d);
+	public OpQueryEssSettings(WeatherSensorImpl ws) {
+		super(PriorityLevel.DEVICE_DATA, ws);
+		ess_rec = new EssRec(ws);
+		ps_table = ess_rec.ps_table;
+		ss_table = ess_rec.ss_table;
 	}
 
 	/** Create the second phase of the operation */
@@ -110,7 +121,7 @@ public class OpQueryEssSettings extends OpEss {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			if (ps_table.isDone())
-				return null;
+				return new QuerySubSurface();
 			PavementSensorsTable.Row pr = ps_table.addRow();
 			// FIXME: add pavement exposure & sensor location
 			//        elevation
@@ -119,6 +130,39 @@ public class OpQueryEssSettings extends OpEss {
 			mess.queryProps();
 			logQuery(pr.pavement_type);
 			logQuery(pr.sensor_type);
+			return this;
+		}
+	}
+
+	/** Phase to query sub-surface values */
+	protected class QuerySubSurface extends Phase {
+
+		/** Query */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(ss_table.num_sensors);
+			mess.queryProps();
+			logQuery(ss_table.num_sensors);
+			return new QuerySubSurfaceTable();
+		}
+	}
+
+	/** Phase to query all rows in sub-surface table */
+	protected class QuerySubSurfaceTable extends Phase {
+
+		/** Query */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			if (ss_table.isDone())
+				return null;
+			SubSurfaceSensorsTable.Row sr = ss_table.addRow();
+			mess.add(sr.sensor_location);
+			mess.add(sr.sub_surface_type);
+			mess.add(sr.sensor_depth);
+			mess.queryProps();
+			logQuery(sr.sensor_location);
+			logQuery(sr.sub_surface_type);
+			logQuery(sr.sensor_depth);
 			return this;
 		}
 	}

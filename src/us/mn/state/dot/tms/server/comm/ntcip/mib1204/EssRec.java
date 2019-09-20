@@ -15,13 +15,9 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-import us.mn.state.dot.tms.units.Temperature;
-import static us.mn.state.dot.tms.units.Temperature.Units.CELSIUS;
 
 /**
  * A collection of weather condition values with functionality
@@ -31,9 +27,6 @@ import static us.mn.state.dot.tms.units.Temperature.Units.CELSIUS;
  * @author Douglas Lau
  */
 public class EssRec {
-
-	/** Creation time */
-	private final long create_time;
 
 	/** Weather sensor */
 	private final WeatherSensorImpl w_sensor;
@@ -56,13 +49,13 @@ public class EssRec {
 	/** Pavement sensors table */
 	public final PavementSensorsTable ps_table = new PavementSensorsTable();
 
-	/** Subsurface temperature */
-	private Temperature subsurf_temp = null;
+	/** Sub-surface sensors table */
+	public final SubSurfaceSensorsTable ss_table =
+		new SubSurfaceSensorsTable();
 
 	/** Create a new ESS record */
 	public EssRec(WeatherSensorImpl ws) {
 		w_sensor = ws;
-		create_time = TimeSteward.currentTimeMillis();
 	}
 
 	/** Store the wind sensor samples */
@@ -129,6 +122,13 @@ public class EssRec {
 		}
 	}
 
+	/** Store subsurface sensor values */
+	private void storeSubSurface() {
+		SubSurfaceSensorsTable.Row row = ss_table.getRow(1);
+		Integer t = (row != null) ? row.getTempC() : null;
+		w_sensor.setSubSurfTempNotify(t);
+	}
+
 	/** Store all sample values */
 	public void store() {
 		storeWinds();
@@ -136,44 +136,21 @@ public class EssRec {
 		storePrecip();
 		storeAtmospheric();
 		storePavement();
-		long storage_time = TimeSteward.currentTimeMillis();
-		w_sensor.setStampNotify(storage_time);
-	}
-
-	/** Store subsurface sensor related values.
-	 * @param sst Subsurface sensor table, which might contain observations
-	 *            from multiple sensors. Only the first sensor is used. */
-	public void store(SubSurfaceSensorsTable sst) {
-		// Even if no table rows present, set values
-		// Ignore rows > 1
-		final int row = 1;
-		subsurf_temp = sst.getTemp(row);
-		w_sensor.setSubSurfTempNotify((subsurf_temp != null) ?
-			subsurf_temp.round(CELSIUS) : null);
+		storeSubSurface();
+		long st = TimeSteward.currentTimeMillis();
+		w_sensor.setStampNotify(st);
 	}
 
 	/** Get JSON representation */
 	public String toJson() {
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
-		sb.append("\"create_time\":\"");
-		// FIXME: format as standard date/time
-		sb.append(new Date(create_time));
-		sb.append("\",");
 		sb.append(wind_values.toJson());
 		sb.append(ts_table.toJson());
 		sb.append(precip_values.toJson());
 		sb.append(atmospheric_values.toJson());
 		sb.append(ps_table.toJson());
-
-
-
-// FIXME
-	sb.append(" subsurf_temp=").append(subsurf_temp);
-
-
-
-
+		sb.append(ss_table.toJson());
 		// remove trailing comma
 		if (sb.length() > 1)
 			sb.setLength(sb.length() - 1);

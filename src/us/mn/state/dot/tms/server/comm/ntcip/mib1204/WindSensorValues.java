@@ -29,6 +29,9 @@ import static us.mn.state.dot.tms.units.Speed.Units.MPS;
  */
 public class WindSensorValues {
 
+	/** Wind dir of 361 indicates error or missing value */
+	static private final int WIND_DIR_ERROR_MISSING = 361;
+
 	/** Convert wind direction to iris format.
 	 * @param wd Wind direction in degrees clockwise from north, with 361
 	 *           indicating an error or missing value.
@@ -43,7 +46,7 @@ public class WindSensorValues {
 	}
 
 	/** Wind speed of 65535 indicates error or missing value */
-	static private final int WIND_SPEED_INVALID_MISSING = 65535;
+	static private final int WIND_SPEED_ERROR_MISSING = 65535;
 
 	/** Convert wind speed in tenths of m/s to Speed.
 	 * @param ws Wind speed in tenths of meters per second, with 65535
@@ -52,7 +55,7 @@ public class WindSensorValues {
 	static private Speed convertSpeed(ASN1Integer ws) {
 		if (ws != null) {
 			int tmps = ws.getInteger();
-			if (tmps != WIND_SPEED_INVALID_MISSING) {
+			if (tmps != WIND_SPEED_ERROR_MISSING) {
 				double mps = 0.1 * (double) tmps;
 				return new Speed(mps, MPS);
 			}
@@ -78,6 +81,16 @@ public class WindSensorValues {
 	/** Ten minute max gust wind speed */
 	public final ASN1Integer gust_wind_speed = essMaxWindGustSpeed.makeInt();
 
+	/** Create wind sensor values */
+	public WindSensorValues() {
+		avg_wind_dir.setInteger(WIND_DIR_ERROR_MISSING);
+		avg_wind_speed.setInteger(WIND_SPEED_ERROR_MISSING);
+		spot_wind_dir.setInteger(WIND_DIR_ERROR_MISSING);
+		spot_wind_speed.setInteger(WIND_SPEED_ERROR_MISSING);
+		gust_wind_dir.setInteger(WIND_DIR_ERROR_MISSING);
+		gust_wind_speed.setInteger(WIND_SPEED_ERROR_MISSING);
+	}
+
 	/** Get two minute average wind direction */
 	public Integer getAvgWindDir() {
 		return convertWindDir(avg_wind_dir);
@@ -90,7 +103,7 @@ public class WindSensorValues {
 	}
 
 	/** Get two minute average wind speed in MPS */
-	public Float getAvgWindSpeedMPS() {
+	private Float getAvgWindSpeedMPS() {
 		Speed s = convertSpeed(avg_wind_speed);
 		return (s != null) ? s.asFloat(MPS) : null;
 	}
@@ -107,7 +120,7 @@ public class WindSensorValues {
 	}
 
 	/** Get spot wind speed in MPS */
-	public Float getSpotWindSpeedMPS() {
+	private Float getSpotWindSpeedMPS() {
 		Speed s = convertSpeed(spot_wind_speed);
 		return (s != null) ? s.asFloat(MPS) : null;
 	}
@@ -124,7 +137,7 @@ public class WindSensorValues {
 	}
 
 	/** Get ten minute max gust wind speed in MPS */
-	public Float getGustWindSpeedMPS() {
+	private Float getGustWindSpeedMPS() {
 		Speed s = convertSpeed(gust_wind_speed);
 		return (s != null) ? s.asFloat(MPS) : null;
 	}

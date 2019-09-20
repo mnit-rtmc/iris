@@ -42,8 +42,7 @@ public class OpQueryEssStatus extends OpEss {
 	private final PavementSensorsTable ps_table;
 
 	/** Sub-surface sensors table */
-	private final SubSurfaceSensorsTable ss_table =
-		new SubSurfaceSensorsTable();
+	private final SubSurfaceSensorsTable ss_table;
 
 	/** Create new query ESS status operation */
 	public OpQueryEssStatus(WeatherSensorImpl ws) {
@@ -51,6 +50,7 @@ public class OpQueryEssStatus extends OpEss {
 		ess_rec = new EssRec(ws);
 		ts_table = ess_rec.ts_table;
 		ps_table = ess_rec.ps_table;
+		ss_table = ess_rec.ss_table;
 	}
 
 	/** Create the second phase of the operation */
@@ -185,7 +185,7 @@ public class OpQueryEssStatus extends OpEss {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			if (ps_table.isDone())
-				return new QuerySubsurface();
+				return new QuerySubSurface();
 			PavementSensorsTable.Row pr = ps_table.addRow();
 			mess.add(pr.surface_status);
 			mess.add(pr.surface_temp.node);
@@ -204,8 +204,8 @@ public class OpQueryEssStatus extends OpEss {
 		}
 	}
 
-	/** Phase to query subsurface values */
-	protected class QuerySubsurface extends Phase {
+	/** Phase to query sub-surface values */
+	protected class QuerySubSurface extends Phase {
 
 		/** Query */
 		@SuppressWarnings("unchecked")
@@ -213,48 +213,27 @@ public class OpQueryEssStatus extends OpEss {
 			mess.add(ss_table.num_sensors);
 			mess.queryProps();
 			logQuery(ss_table.num_sensors);
-			return new QuerySubsurfaceTable();
+			return new QuerySubSurfaceTable();
 		}
 	}
 
-	/** Phase to query all rows in subsurface table */
-	protected class QuerySubsurfaceTable extends Phase {
+	/** Phase to query all rows in sub-surface table */
+	protected class QuerySubSurfaceTable extends Phase {
 
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (ss_table.isDone()) {
-				ess_rec.store(ss_table);
-				return new FinalPhase();
-			}
+			if (ss_table.isDone())
+				return null;
 			SubSurfaceSensorsTable.Row sr = ss_table.addRow();
-			mess.add(sr.sub_surface_sensor_location);
-			mess.add(sr.sub_surface_type);
-			mess.add(sr.sub_surface_sensor_depth);
-			mess.add(sr.sub_surface_temp.node);
-			mess.add(sr.sub_surface_moisture);
-			mess.add(sr.sub_surface_sensor_error);
+			mess.add(sr.temp.node);
+			mess.add(sr.moisture);
+			mess.add(sr.sensor_error);
 			mess.queryProps();
-			logQuery(sr.sub_surface_sensor_location);
-			logQuery(sr.sub_surface_type);
-			logQuery(sr.sub_surface_sensor_depth);
-			logQuery(sr.sub_surface_temp.node);
-			logQuery(sr.sub_surface_moisture);
-			logQuery(sr.sub_surface_sensor_error);
+			logQuery(sr.temp.node);
+			logQuery(sr.moisture);
+			logQuery(sr.sensor_error);
 			return this;
-		}
-	}
-
-	/** Final phase */
-	protected class FinalPhase extends Phase {
-
-		/** Query */
-		@SuppressWarnings("unchecked")
-		protected Phase poll(CommMessage mess) throws IOException {
-			ess_rec.store();
-			log("w_sensor=" + w_sensor.toStringDebug());
-			log("ess_rec=" + ess_rec.toJson());
-			return null;
 		}
 	}
 
@@ -262,8 +241,9 @@ public class OpQueryEssStatus extends OpEss {
 	@Override
 	public void cleanup() {
 		if (isSuccess()) {
-			setMaintStatus("");
-			setErrorStatus("");
+			ess_rec.store();
+			log("w_sensor=" + w_sensor.toStringDebug());
+			log("ess_rec=" + ess_rec.toJson());
 		}
 		super.cleanup();
 	}

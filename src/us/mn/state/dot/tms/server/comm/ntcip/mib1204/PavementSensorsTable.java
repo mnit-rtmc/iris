@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
+import static us.mn.state.dot.tms.units.Distance.Units.METERS;
 
 /**
  * Temperature sensors data table, where each table row contains data read from
@@ -31,6 +34,19 @@ public class PavementSensorsTable {
 
 	/** A depth of 255 is an error condition or missing value */
 	static private final int DEPTH_ERROR_MISSING = 255;
+
+	/** Convert depth to Distance.
+	 * @param d Depth in millimeters with 255 indicating an error or missing
+	 *          value.
+	 * @return Depth distance or null for missing */
+	static private Distance convertDepth(ASN1Integer d) {
+		if (d != null) {
+			int id = d.getInteger();
+			if (id < DEPTH_ERROR_MISSING)
+				return new Distance(id, MILLIMETERS);
+		}
+		return null;
+	}
 
 	/** Number of sensors in table */
 	public final ASN1Integer num_sensors = numEssPavementSensors.makeInt();
@@ -113,12 +129,10 @@ public class PavementSensorsTable {
 			      : null;
 		}
 
-		/** Get surface water depth in mm */
-		public Integer getSurfaceWaterDepth() {
-			Integer mm = surface_water_depth.getInteger();
-			return (mm != null && mm < DEPTH_ERROR_MISSING)
-			      ? mm
-			      : null;
+		/** Get surface water depth in meters */
+		public Float getSurfaceWaterDepth() {
+			Distance d = convertDepth(surface_water_depth);
+			return (d != null) ? d.asFloat(METERS) : null;
 		}
 
 		/** Get JSON representation */

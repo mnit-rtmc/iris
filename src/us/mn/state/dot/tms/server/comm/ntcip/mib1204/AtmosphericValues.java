@@ -31,7 +31,7 @@ import static us.mn.state.dot.tms.units.Distance.Units.METERS;
 public class AtmosphericValues {
 
 	/** Pressure of 65535 indicates error or missing value */
-	static private final int PRESSURE_INVALID_MISSING = 65535;
+	static private final int PRESSURE_ERROR_MISSING = 65535;
 
 	/** Convert atmospheric pressure to pascals.
 	 * @param apr Atmospheric pressure in 1/10ths of millibars, with
@@ -40,7 +40,7 @@ public class AtmosphericValues {
 	static private Integer convertAtmosphericPressure(ASN1Integer apr) {
 		if (apr != null) {
 			int tmb = apr.getInteger();
-			if (tmb != PRESSURE_INVALID_MISSING) {
+			if (tmb != PRESSURE_ERROR_MISSING) {
 				double mb = (double) tmb * 0.1;
 				double pa = mb * 100;
 				return new Integer((int) Math.round(pa));
@@ -77,6 +77,12 @@ public class AtmosphericValues {
 		new ASN1Enum<EssVisibilitySituation>(EssVisibilitySituation.class,
 		essVisibilitySituation.node);
 
+	/** Create atmospheric values */
+	public AtmosphericValues() {
+		atmospheric_pressure.setInteger(PRESSURE_ERROR_MISSING);
+		visibility.setInteger(VISIBILITY_ERROR_MISSING);
+	}
+
 	/** Get atmospheric pressure in pascals */
 	public Integer getAtmosphericPressure() {
 		return convertAtmosphericPressure(atmospheric_pressure);
@@ -90,7 +96,8 @@ public class AtmosphericValues {
 
 	/** Get the visibility situation */
 	public EssVisibilitySituation getVisibilitySituation() {
-		return visibility_situation.getEnum();
+		EssVisibilitySituation vs = visibility_situation.getEnum();
+		return (vs != EssVisibilitySituation.undefined) ? vs : null;
 	}
 
 	/** Get JSON representation */

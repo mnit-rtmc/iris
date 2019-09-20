@@ -20,7 +20,9 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
-import us.mn.state.dot.tms.units.Temperature;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.CENTIMETERS;
+import static us.mn.state.dot.tms.units.Distance.Units.METERS;
 
 /**
  * SubSurface sensors data table, where each table row contains data read from a
@@ -31,33 +33,119 @@ import us.mn.state.dot.tms.units.Temperature;
  */
 public class SubSurfaceSensorsTable {
 
+	/** Depth of 1001 indicates error or missing value */
+	static private final int DEPTH_ERROR_MISSING = 1001;
+
+	/** Convert depth to Distance.
+	 * @param d Depth in centimeters with 1001 indicating an error or
+	 *          missing value.
+	 * @return Depth distance or null for missing */
+	static private Distance convertDepth(ASN1Integer d) {
+		if (d != null) {
+			int id = d.getInteger();
+			if (id != DEPTH_ERROR_MISSING)
+				return new Distance(id, CENTIMETERS);
+		}
+		return null;
+	}
+
+	/** Moisture of 101 indicates error or missing value */
+	static private final int MOISTURE_ERROR_MISSING = 101;
+
+	/** Convert moisture to an integer.
+	 * @param ms Moisture saturation in percent. A value of 101 indicates an
+	 *           error or missing value.
+	 * @return Moisture as a percent or null if missing. */
+	static private Integer convertMoisture(ASN1Integer ms) {
+		if (ms != null) {
+			int ims = ms.getInteger();
+			if (ims >= 0 && ims < MOISTURE_ERROR_MISSING)
+				return new Integer(ims);
+		}
+		return null;
+	}
+
 	/** Number of temperature sensors in table */
 	public final ASN1Integer num_sensors =
 		numEssSubSurfaceSensors.makeInt();
 
 	/** Table row */
 	static public class Row {
-		public final ASN1String sub_surface_sensor_location;
-		public final ASN1Integer sub_surface_type;
-		public final ASN1Integer sub_surface_sensor_depth;
-		public final TemperatureObject sub_surface_temp;
-		public final ASN1Integer sub_surface_moisture;
-		public final ASN1Enum<SubSurfaceSensorError> sub_surface_sensor_error;
+		public final ASN1String sensor_location;
+		public final ASN1Enum<EssSubSurfaceType> sub_surface_type;
+		public final ASN1Integer sensor_depth;
+		public final TemperatureObject temp;
+		public final ASN1Integer moisture;
+		public final ASN1Enum<EssSubSurfaceSensorError> sensor_error;
 
 		/** Create a table row */
 		private Row(int row) {
-			sub_surface_sensor_location = new ASN1String(
+			sensor_location = new ASN1String(
 				essSubSurfaceSensorLocation.node, row);
-			sub_surface_type = essSubSurfaceType.makeInt(row);
-			sub_surface_sensor_depth = essSubSurfaceSensorDepth
-				.makeInt(row);
-			sub_surface_temp = new TemperatureObject(
-				essSubSurfaceTemperature.makeInt(row));
-			sub_surface_moisture = essSubSurfaceMoisture.makeInt(
+			sub_surface_type = new ASN1Enum<EssSubSurfaceType>(
+				EssSubSurfaceType.class, essSubSurfaceType.node,
 				row);
-			sub_surface_sensor_error = new ASN1Enum<
-				SubSurfaceSensorError>(SubSurfaceSensorError.class,
+			sensor_depth = essSubSurfaceSensorDepth.makeInt(row);
+			sensor_depth.setInteger(DEPTH_ERROR_MISSING);
+			temp = new TemperatureObject(
+				essSubSurfaceTemperature.makeInt(row));
+			moisture = essSubSurfaceMoisture.makeInt(row);
+			moisture.setInteger(MOISTURE_ERROR_MISSING);
+			sensor_error = new ASN1Enum<EssSubSurfaceSensorError>(
+				EssSubSurfaceSensorError.class,
 				essSubSurfaceSensorError.node, row);
+		}
+
+		/** Get the sensor location */
+		public String getSensorLocation() {
+			String sl = sensor_location.getValue();
+			return (sl.length() > 0) ? sl : null;
+		}
+
+		/** Get sub-surface type or null on error */
+		public EssSubSurfaceType getSubSurfaceType() {
+			EssSubSurfaceType sst = sub_surface_type.getEnum();
+			return (sst != EssSubSurfaceType.undefined) ? sst : null;
+		}
+
+		/** Get sub-surface sensor depth in meters */
+		public Float getSensorDepth() {
+			Distance d = convertDepth(sensor_depth);
+			return (d != null) ? d.asFloat(METERS) : null;
+		}
+
+		/** Get sub-surface temp or null on error */
+		public Integer getTempC() {
+			return temp.getTempC();
+		}
+
+		/** Get the moisture saturation (%) */
+		public Integer getMoisture() {
+			return convertMoisture(moisture);
+		}
+
+		/** Get sensor error or null on error */
+		public EssSubSurfaceSensorError getSensorError() {
+			EssSubSurfaceSensorError se = sensor_error.getEnum();
+			return (se != EssSubSurfaceSensorError.undefined)
+			      ? se
+			      : null;
+		}
+
+		/** Get JSON representation */
+		private String toJson() {
+			StringBuilder sb = new StringBuilder();
+			sb.append('{');
+			sb.append(Json.str("sensor_location",
+				getSensorLocation()));
+			sb.append(Json.str("sub_surface_type",
+				getSubSurfaceType()));
+			sb.append(Json.num("sensor_depth", getSensorDepth()));
+			sb.append(temp.toJson("temp"));
+			sb.append(Json.num("moisture", getMoisture()));
+			sb.append(Json.str("sensor_error", getSensorError()));
+			sb.append("},");
+			return sb.toString();
 		}
 	}
 
@@ -81,10 +169,22 @@ public class SubSurfaceSensorsTable {
 		return tr;
 	}
 
-	/** Get nth sub-surface temp or null on error */
-	public Temperature getTemp(int row) {
+	/** Get one table row */
+	public Row getRow(int row) {
 		return (row >= 1 && row <= table_rows.size())
-		      ? table_rows.get(row - 1).sub_surface_temp.getTemperature()
+		      ? table_rows.get(row - 1)
 		      : null;
+	}
+
+	/** Get JSON representation */
+	public String toJson() {
+		StringBuilder sb = new StringBuilder();
+		if (table_rows.size() > 0) {
+			sb.append("\"sub_surface_sensor\":[");
+			for (Row row : table_rows)
+				sb.append(row.toJson());
+			sb.append("],");
+		}
+		return sb.toString();
 	}
 }
