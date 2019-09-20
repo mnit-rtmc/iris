@@ -28,15 +28,6 @@ import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
  * @author Michael Darter
  */
 public enum MIB1204 {
-	// objects part of SNMP MIB-2 definitions
-	system					(new int[] {1,3,6,1,2,1,1}),
-	  sysDescr				(system, 1),
-	  sysObjectID				(system, 2),
-	  sysUpTime				(system, 3),
-	  sysContact				(system, 4),
-	  sysName				(system, 5),
-	  sysLocation				(system, 6),
-	// objects part of NTCIP 1204
 	ess					(MIB1201.devices, 5),
 	  essBufr				(ess, 1),
 	    essBufrInstrumentation		(essBufr, 2),
