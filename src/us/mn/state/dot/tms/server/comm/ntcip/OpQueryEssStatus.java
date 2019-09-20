@@ -240,8 +240,6 @@ public class OpQueryEssStatus extends OpEss {
 		if (isSuccess()) {
 			w_sensor.setSampleNotify(ess_rec.toJson());
 			ess_rec.store(w_sensor);
-			log("w_sensor=" + w_sensor.toStringDebug());
-			log("ess_rec=" + ess_rec.toJson());
 		}
 		super.cleanup();
 	}
