@@ -33,7 +33,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1204.TemperatureSensorsTable;
 public class OpQueryEssStatus extends OpEss {
 
 	/** Record of values read from the controller */
-	private final EssRec ess_rec;
+	private final EssRec ess_rec = new EssRec();
 
 	/** Temperature sensors table */
 	private final TemperatureSensorsTable ts_table;
@@ -47,7 +47,6 @@ public class OpQueryEssStatus extends OpEss {
 	/** Create new query ESS status operation */
 	public OpQueryEssStatus(WeatherSensorImpl ws) {
 		super(PriorityLevel.DEVICE_DATA, ws);
-		ess_rec = new EssRec(ws);
 		ts_table = ess_rec.ts_table;
 		ps_table = ess_rec.ps_table;
 		ss_table = ess_rec.ss_table;
@@ -112,10 +111,8 @@ public class OpQueryEssStatus extends OpEss {
 			if (ts_table.isDone())
 				return new QueryPrecipitation();
 			TemperatureSensorsTable.Row tr = ts_table.addRow();
-			mess.add(tr.temperature_sensor_height);
 			mess.add(tr.air_temp.node);
 			mess.queryProps();
-			logQuery(tr.temperature_sensor_height);
 			logQuery(tr.air_temp.node);
 			return this;
 		}
@@ -241,7 +238,8 @@ public class OpQueryEssStatus extends OpEss {
 	@Override
 	public void cleanup() {
 		if (isSuccess()) {
-			ess_rec.store();
+			w_sensor.setSampleNotify(ess_rec.toJson());
+			ess_rec.store(w_sensor);
 			log("w_sensor=" + w_sensor.toStringDebug());
 			log("ess_rec=" + ess_rec.toJson());
 		}

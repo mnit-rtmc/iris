@@ -611,10 +611,10 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
 	/** Set the current JSON sample */
 	public void setSampleNotify(String s) {
-		if (!objectEquals(s, sample)) {
-			setSample(s);
-			notifyAttribute("sample");
-		}
+		// No need for equality check -- samples are always
+		// stored even when equal to previous sample
+		setSample(s);
+		notifyAttribute("sample");
 	}
 
 	/** Time stamp from the last sample */

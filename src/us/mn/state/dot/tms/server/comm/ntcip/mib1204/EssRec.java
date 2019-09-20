@@ -20,16 +20,13 @@ import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 
 /**
- * A collection of weather condition values with functionality
- * to convert from NTCIP 1204 units to IRIS units.
+ * A collection of weather condition values which can be converted to JSON.
+ * Only values which have been successfully read will be included.
  *
  * @author Michael Darter
  * @author Douglas Lau
  */
 public class EssRec {
-
-	/** Weather sensor */
-	private final WeatherSensorImpl w_sensor;
 
 	/** Wind sensor values */
 	public final WindSensorValues wind_values = new WindSensorValues();
@@ -54,91 +51,84 @@ public class EssRec {
 		new SubSurfaceSensorsTable();
 
 	/** Create a new ESS record */
-	public EssRec(WeatherSensorImpl ws) {
-		w_sensor = ws;
-	}
+	public EssRec() { }
 
 	/** Store the wind sensor samples */
-	private void storeWinds() {
-		w_sensor.setWindDirNotify(wind_values.getAvgWindDir());
-		w_sensor.setWindSpeedNotify(wind_values.getAvgWindSpeedKPH());
-		w_sensor.setSpotWindDirNotify(wind_values.getSpotWindDir());
-		w_sensor.setSpotWindSpeedNotify(wind_values
-			.getSpotWindSpeedKPH());
-		w_sensor.setMaxWindGustDirNotify(wind_values.getGustWindDir());
-		w_sensor.setMaxWindGustSpeedNotify(wind_values
-			.getGustWindSpeedKPH());
+	private void storeWinds(WeatherSensorImpl ws) {
+		ws.setWindDirNotify(wind_values.getAvgWindDir());
+		ws.setWindSpeedNotify(wind_values.getAvgWindSpeedKPH());
+		ws.setSpotWindDirNotify(wind_values.getSpotWindDir());
+		ws.setSpotWindSpeedNotify(wind_values.getSpotWindSpeedKPH());
+		ws.setMaxWindGustDirNotify(wind_values.getGustWindDir());
+		ws.setMaxWindGustSpeedNotify(wind_values.getGustWindSpeedKPH());
 	}
 
 	/** Store the temperatures */
-	private void storeTemps() {
-		w_sensor.setDewPointTempNotify(ts_table.getDewPointTempC());
-		w_sensor.setMaxTempNotify(ts_table.getMaxTempC());
-		w_sensor.setMinTempNotify(ts_table.getMinTempC());
+	private void storeTemps(WeatherSensorImpl ws) {
+		ws.setDewPointTempNotify(ts_table.getDewPointTempC());
+		ws.setMaxTempNotify(ts_table.getMaxTempC());
+		ws.setMinTempNotify(ts_table.getMinTempC());
 		// Air temperature is assumed to be the first sensor
 		// in the table.  Additional sensors are ignored.
 		TemperatureSensorsTable.Row row = ts_table.getRow(1);
 		Integer t = (row != null) ? row.getAirTempC() : null;
-		w_sensor.setAirTempNotify(t);
+		ws.setAirTempNotify(t);
 	}
 
 	/** Store precipitation samples */
-	private void storePrecip() {
-		w_sensor.setHumidityNotify(precip_values.getRelativeHumidity());
-		w_sensor.setPrecipRateNotify(precip_values.getPrecipRate());
-		w_sensor.setPrecipOneHourNotify(precip_values.getPrecip1Hour());
+	private void storePrecip(WeatherSensorImpl ws) {
+		ws.setHumidityNotify(precip_values.getRelativeHumidity());
+		ws.setPrecipRateNotify(precip_values.getPrecipRate());
+		ws.setPrecipOneHourNotify(precip_values.getPrecip1Hour());
 		EssPrecipSituation ps = precip_values.getPrecipSituation();
-		w_sensor.setPrecipSituationNotify((ps != null)
-			? ps.ordinal()
-		        : null);
+		ws.setPrecipSituationNotify((ps != null) ? ps.ordinal() : null);
 	}
 
 	/** Store the atmospheric values */
-	private void storeAtmospheric() {
-		w_sensor.setPressureNotify(atmospheric_values
+	private void storeAtmospheric(WeatherSensorImpl ws) {
+		ws.setPressureNotify(atmospheric_values
 			.getAtmosphericPressure());
 		Float vis = atmospheric_values.getVisibility();
 		Integer v = (vis != null) ? Math.round(vis) : null;
-		w_sensor.setVisibilityNotify(v);
+		ws.setVisibilityNotify(v);
 	}
 
 	/** Store pavement sensor related values */
-	private void storePavement() {
+	private void storePavement(WeatherSensorImpl ws) {
 		PavementSensorsTable.Row row = ps_table.getRow(1);
 		if (row != null) {
-			w_sensor.setPvmtSurfTempNotify(row.getPvmtTempC());
-			w_sensor.setSurfTempNotify(row.getSurfTempC());
+			ws.setPvmtSurfTempNotify(row.getPvmtTempC());
+			ws.setSurfTempNotify(row.getSurfTempC());
 			EssSurfaceStatus ess = row.getSurfStatus();
-			w_sensor.setPvmtSurfStatusNotify((ess != null)
+			ws.setPvmtSurfStatusNotify((ess != null)
 				? ess.ordinal()
 				: EssSurfaceStatus.undefined.ordinal());
-			w_sensor.setSurfFreezeTempNotify(row
-				.getSurfFreezePointC());
+			ws.setSurfFreezeTempNotify(row.getSurfFreezePointC());
 		} else {
-			w_sensor.setPvmtSurfTempNotify(null);
-			w_sensor.setSurfTempNotify(null);
-			w_sensor.setPvmtSurfStatusNotify(null);
-			w_sensor.setSurfFreezeTempNotify(null);
+			ws.setPvmtSurfTempNotify(null);
+			ws.setSurfTempNotify(null);
+			ws.setPvmtSurfStatusNotify(null);
+			ws.setSurfFreezeTempNotify(null);
 		}
 	}
 
 	/** Store subsurface sensor values */
-	private void storeSubSurface() {
+	private void storeSubSurface(WeatherSensorImpl ws) {
 		SubSurfaceSensorsTable.Row row = ss_table.getRow(1);
 		Integer t = (row != null) ? row.getTempC() : null;
-		w_sensor.setSubSurfTempNotify(t);
+		ws.setSubSurfTempNotify(t);
 	}
 
 	/** Store all sample values */
-	public void store() {
-		storeWinds();
-		storeTemps();
-		storePrecip();
-		storeAtmospheric();
-		storePavement();
-		storeSubSurface();
+	public void store(WeatherSensorImpl ws) {
+		storeWinds(ws);
+		storeTemps(ws);
+		storePrecip(ws);
+		storeAtmospheric(ws);
+		storePavement(ws);
+		storeSubSurface(ws);
 		long st = TimeSteward.currentTimeMillis();
-		w_sensor.setStampNotify(st);
+		ws.setStampNotify(st);
 	}
 
 	/** Get JSON representation */
@@ -152,7 +142,7 @@ public class EssRec {
 		sb.append(ps_table.toJson());
 		sb.append(ss_table.toJson());
 		// remove trailing comma
-		if (sb.length() > 1)
+		if (sb.charAt(sb.length() - 1) == ',')
 			sb.setLength(sb.length() - 1);
 		sb.append('}');
 		return sb.toString();

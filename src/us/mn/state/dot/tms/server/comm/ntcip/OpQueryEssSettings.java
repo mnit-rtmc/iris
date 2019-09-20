@@ -23,6 +23,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssRec;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorsTable;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1204.TemperatureSensorsTable;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 
@@ -34,7 +35,10 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 public class OpQueryEssSettings extends OpEss {
 
 	/** Record of values read from the controller */
-	private final EssRec ess_rec;
+	private final EssRec ess_rec = new EssRec();;
+
+	/** Temperature sensors table */
+	private final TemperatureSensorsTable ts_table;
 
 	/** Pavement sensors table */
 	private final PavementSensorsTable ps_table;
@@ -45,7 +49,7 @@ public class OpQueryEssSettings extends OpEss {
 	/** Create a new query status object */
 	public OpQueryEssSettings(WeatherSensorImpl ws) {
 		super(PriorityLevel.DEVICE_DATA, ws);
-		ess_rec = new EssRec(ws);
+		ts_table = ess_rec.ts_table;
 		ps_table = ess_rec.ps_table;
 		ss_table = ess_rec.ss_table;
 	}
@@ -97,7 +101,36 @@ public class OpQueryEssSettings extends OpEss {
 			logQuery(reh);
 			logQuery(prh);
 			logQuery(wsh);
-			return new QueryPavement();
+			return new QueryTemperatureSensors();
+		}
+	}
+
+	/** Phase to query the temperature sensors and other data */
+	protected class QueryTemperatureSensors extends Phase {
+
+		/** Query */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(ts_table.num_temp_sensors);
+			mess.queryProps();
+			logQuery(ts_table.num_temp_sensors);
+			return new QueryTemperatureTable();
+		}
+	}
+
+	/** Phase to query all rows in temperature table */
+	protected class QueryTemperatureTable extends Phase {
+
+		/** Query */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			if (ts_table.isDone())
+				return new QueryPavement();
+			TemperatureSensorsTable.Row tr = ts_table.addRow();
+			mess.add(tr.height);
+			mess.queryProps();
+			logQuery(tr.height);
+			return this;
 		}
 	}
 

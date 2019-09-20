@@ -62,7 +62,7 @@ public class OpQueryConditions extends OpOrg815 {
 			if (cond.shouldReset())
 				return new ResetAccumulator();
 			else
-				return new FinalPhase();
+				return null;
 		}
 	}
 
@@ -77,16 +77,6 @@ public class OpQueryConditions extends OpOrg815 {
 			mess.add(reset);
 			mess.storeProps();
 			sensor.resetAccumulation();
-			return new FinalPhase();
-		}
-	}
-
-	/** Phase to finish the operation */
-	private class FinalPhase extends Phase<Org815Property> {
-		protected Phase<Org815Property> poll(
-			CommMessage<Org815Property> mess) throws IOException
-		{
-			sensor.setSampleNotify("{\"key\":\"value\"}");
 			return null;
 		}
 	}

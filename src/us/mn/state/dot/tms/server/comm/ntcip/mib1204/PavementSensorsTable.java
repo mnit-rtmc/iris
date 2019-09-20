@@ -190,6 +190,9 @@ public class PavementSensorsTable {
 			sb.append("\"pavement_sensor\":[");
 			for (Row row : table_rows)
 				sb.append(row.toJson());
+			// remove trailing comma
+			if (sb.charAt(sb.length() - 1) == ',')
+				sb.setLength(sb.length() - 1);
 			sb.append("],");
 		}
 		return sb.toString();
