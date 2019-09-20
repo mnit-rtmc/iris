@@ -124,4 +124,22 @@ public class PrecipitationValues {
 	public EssPrecipSituation getPrecipSituation() {
 		return precip_situation.getEnum();
 	}
+
+	/** Get JSON representation */
+	public String toJson() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(Json.num("relative_humidity", getRelativeHumidity()));
+		sb.append(Json.num("precipitation_rate", getPrecipRate()));
+		sb.append(Json.num("precipitation_1_hour", getPrecip1Hour()));
+		sb.append(Json.num("precipitation_3_hours",
+			convertPrecip(precipitation_3_hours)));
+		sb.append(Json.num("precipitation_6_hours",
+			convertPrecip(precipitation_6_hours)));
+		sb.append(Json.num("precipitation_12_hours",
+			convertPrecip(precipitation_12_hours)));
+		sb.append(Json.num("precipitation_24_hours",
+			convertPrecip(precipitation_24_hours)));
+		sb.append(Json.str("precip_situation", getPrecipSituation()));
+		return sb.toString();
+	}
 }

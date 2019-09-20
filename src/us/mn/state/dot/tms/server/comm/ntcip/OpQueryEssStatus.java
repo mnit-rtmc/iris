@@ -265,8 +265,8 @@ public class OpQueryEssStatus extends OpEss {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ess_rec.store();
-			log("ess_rec=" + ess_rec);
 			log("w_sensor=" + w_sensor.toStringDebug());
+			log("ess_rec=" + ess_rec.toJson());
 			return null;
 		}
 	}

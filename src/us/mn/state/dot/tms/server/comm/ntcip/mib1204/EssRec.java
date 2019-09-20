@@ -225,43 +225,36 @@ public class EssRec {
 			subsurf_temp.round(CELSIUS) : null);
 	}
 
-	/** To string */
-	public String toString() {
+	/** Get JSON representation */
+	public String toJson() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("(EssRec:");
-		sb.append(" w_sensor_name=").append(w_sensor.getName());
-		sb.append(" create_time=").append(new Date(create_time));
-		sb.append(" air_temp_c=").append(ts_table.getAirTemp(1));
-		sb.append(" dew_point_temp_c=").append(getDewPointTemp());
-		sb.append(" max_temp_c=").append(getMaxTemp());
-		sb.append(" min_temp_c=").append(getMinTemp());
-		sb.append(" rel_humidity_perc=").append(precip_values
-			.getRelativeHumidity());
-		sb.append(" wind_speed_avg_mph=").append(wind_values
-			.getAvgWindSpeedMPH());
-		sb.append(" wind_dir_avg_degs=").append(
-			wind_values.getAvgWindDir());
-		sb.append(" max_wind_gust_speed_mph=").append(wind_values
-			.getGustWindSpeedMPH());
-		sb.append(" max_wind_gust_dir_degs=").append(wind_values
-			.getGustWindDir());
-		sb.append(" spot_wind_speed_mph=").append(wind_values
-			.getSpotWindSpeedMPH());
-		sb.append(" spot_wind_dir_degs=").append(wind_values
-			.getSpotWindDir());
-		sb.append(" air_pressure_pa=").append(air_pressure);
-		sb.append(" precip_rate_mmhr=").append(precip_values
-			.getPrecipRate());
-		sb.append(" precip_situation=").append(precip_values
-			.getPrecipSituation());
-		sb.append(" precip_1h=").append(precip_values.getPrecip1Hour());
-		sb.append(" visibility_m=").append(visibility);
-		sb.append(" pvmt_surf_temp_c=").append(pvmt_surf_temp);
-		sb.append(" surf_temp_c=").append(surf_temp);
-		sb.append(" pvmt_surf_status=").append(pvmt_surf_status);
-		sb.append(" pvmt_surf_freeze_temp=").append(surf_freeze_temp);
-		sb.append(" subsurf_temp=").append(subsurf_temp);
-		sb.append(")");
+		sb.append('{');
+		sb.append("\"create_time\":\"");
+		// FIXME: format as standard date/time
+		sb.append(new Date(create_time));
+		sb.append("\",");
+		sb.append(wind_values.toJson());
+		sb.append(ts_table.toJson());
+		sb.append(precip_values.toJson());
+
+
+
+// FIXME
+	sb.append(" air_pressure_pa=").append(air_pressure);
+	sb.append(" visibility_m=").append(visibility);
+	sb.append(" pvmt_surf_temp_c=").append(pvmt_surf_temp);
+	sb.append(" surf_temp_c=").append(surf_temp);
+	sb.append(" pvmt_surf_status=").append(pvmt_surf_status);
+	sb.append(" pvmt_surf_freeze_temp=").append(surf_freeze_temp);
+	sb.append(" subsurf_temp=").append(subsurf_temp);
+
+
+
+
+		// remove trailing comma
+		if (sb.length() > 1)
+			sb.setLength(sb.length() - 1);
+		sb.append('}');
 		return sb.toString();
 	}
 }

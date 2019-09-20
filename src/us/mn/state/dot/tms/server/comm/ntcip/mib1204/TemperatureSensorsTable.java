@@ -128,9 +128,6 @@ public class TemperatureSensorsTable {
 		String mnt = min_air_temp.toJson("min_air_temp");
 		if (mnt != null)
 			sb.append(mnt);
-		// remove trailing comma
-		if (sb.length() > 0)
-			sb.setLength(sb.length() - 1);
 		return sb.toString();
 	}
 }

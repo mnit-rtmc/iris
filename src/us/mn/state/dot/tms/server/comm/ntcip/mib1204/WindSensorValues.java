@@ -19,7 +19,6 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.units.Speed;
 import static us.mn.state.dot.tms.units.Speed.Units.KPH;
-import static us.mn.state.dot.tms.units.Speed.Units.MPH;
 import static us.mn.state.dot.tms.units.Speed.Units.MPS;
 
 /**
@@ -90,10 +89,10 @@ public class WindSensorValues {
 		return (s != null) ? s.round(KPH) : null;
 	}
 
-	/** Get two minute average wind speed in MPH */
-	public Integer getAvgWindSpeedMPH() {
+	/** Get two minute average wind speed in MPS */
+	public Float getAvgWindSpeedMPS() {
 		Speed s = convertSpeed(avg_wind_speed);
-		return (s != null) ? s.round(MPH) : null;
+		return (s != null) ? s.asFloat(MPS) : null;
 	}
 
 	/** Get spot wind direction */
@@ -107,10 +106,10 @@ public class WindSensorValues {
 		return (s != null) ? s.round(KPH) : null;
 	}
 
-	/** Get spot wind speed in MPH */
-	public Integer getSpotWindSpeedMPH() {
+	/** Get spot wind speed in MPS */
+	public Float getSpotWindSpeedMPS() {
 		Speed s = convertSpeed(spot_wind_speed);
-		return (s != null) ? s.round(MPH) : null;
+		return (s != null) ? s.asFloat(MPS) : null;
 	}
 
 	/** Get ten minute max gust wind direction */
@@ -124,9 +123,21 @@ public class WindSensorValues {
 		return (s != null) ? s.round(KPH) : null;
 	}
 
-	/** Get ten minute max gust wind speed in MPH */
-	public Integer getGustWindSpeedMPH() {
+	/** Get ten minute max gust wind speed in MPS */
+	public Float getGustWindSpeedMPS() {
 		Speed s = convertSpeed(gust_wind_speed);
-		return (s != null) ? s.round(MPH) : null;
+		return (s != null) ? s.asFloat(MPS) : null;
+	}
+
+	/** Get JSON representation */
+	public String toJson() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(Json.num("avg_wind_dir", getAvgWindDir()));
+		sb.append(Json.num("avg_wind_speed", getAvgWindSpeedMPS()));
+		sb.append(Json.num("spot_wind_dir", getSpotWindDir()));
+		sb.append(Json.num("spot_wind_speed", getSpotWindSpeedMPS()));
+		sb.append(Json.num("gust_wind_dir", getGustWindDir()));
+		sb.append(Json.num("gust_wind_speed", getGustWindSpeedMPS()));
+		return sb.toString();
 	}
 }
