@@ -70,9 +70,8 @@ public interface WeatherSensor extends Device {
 	/** Get precipitation rate in mm/hr (null for missing) */
 	Integer getPrecipRate();
 
-	// FIXME: change to String
-	/** Get precip situation code essPrecipSituation (null for missing) */
-	Integer getPrecipSituation();
+	/** Get precip situation essPrecipSituation (null for missing) */
+	String getPrecipSituation();
 
 	/** Get precipitation accumulation for 1h in mm (null for missing) */
 	Integer getPrecipOneHour();

@@ -437,16 +437,16 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	}
 
 	/** Precipitation situation (null for missing) */
-	private transient Integer precip_situation;
+	private transient String precip_situation;
 
 	/** Get precipitation situation (null for missing) */
 	@Override
-	public Integer getPrecipSituation() {
+	public String getPrecipSituation() {
 		return precip_situation;
 	}
 
 	/** Set precipitation situation (null for missing) */
-	public void setPrecipSituationNotify(Integer prs) {
+	public void setPrecipSituationNotify(String prs) {
 		if (!objectEquals(prs, precip_situation)) {
 			precip_situation = prs;
 			notifyAttribute("precipSituation");

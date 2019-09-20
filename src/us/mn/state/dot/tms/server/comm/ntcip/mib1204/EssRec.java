@@ -81,7 +81,7 @@ public class EssRec {
 		ws.setPrecipRateNotify(precip_values.getPrecipRate());
 		ws.setPrecipOneHourNotify(precip_values.getPrecip1Hour());
 		EssPrecipSituation ps = precip_values.getPrecipSituation();
-		ws.setPrecipSituationNotify((ps != null) ? ps.ordinal() : null);
+		ws.setPrecipSituationNotify((ps != null) ? ps.toString() : null);
 	}
 
 	/** Store the atmospheric values */
