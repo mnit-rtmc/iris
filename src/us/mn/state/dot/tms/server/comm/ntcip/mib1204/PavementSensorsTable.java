@@ -86,6 +86,7 @@ public class PavementSensorsTable {
 
 	/** Table row */
 	static public class Row {
+		// FIXME: add salinity & black ice signal
 		public final ASN1String sensor_location;
 		public final ASN1Enum<EssPavementType> pavement_type;
 		public final ASN1Integer elevation;

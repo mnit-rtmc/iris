@@ -17,6 +17,8 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.METERS;
 import us.mn.state.dot.tms.units.Speed;
 import static us.mn.state.dot.tms.units.Speed.Units.KPH;
 import static us.mn.state.dot.tms.units.Speed.Units.MPS;
@@ -28,6 +30,22 @@ import static us.mn.state.dot.tms.units.Speed.Units.MPS;
  * @author Michael Darter
  */
 public class WindSensorValues {
+
+	/** A height of 1001 is an error condition or missing value */
+	static private final int HEIGHT_ERROR_MISSING = 1001;
+
+	/** Convert height to Distance.
+	 * @param h Height in meters with 1001 indicating an error or missing
+	 *          value.
+	 * @return Height distance or null for missing */
+	static private Distance convertHeight(ASN1Integer h) {
+		if (h != null) {
+			int ih = h.getInteger();
+			if (ih < HEIGHT_ERROR_MISSING)
+				return new Distance(ih, METERS);
+		}
+		return null;
+	}
 
 	/** Wind dir of 361 indicates error or missing value */
 	static private final int WIND_DIR_ERROR_MISSING = 361;
@@ -63,6 +81,10 @@ public class WindSensorValues {
 		return null;
 	}
 
+	/** Wind sensor height in meters */
+	public final ASN1Integer wind_sensor_height = essWindSensorHeight
+		.makeInt();
+
 	/** Two minute average wind direction */
 	public final ASN1Integer avg_wind_dir = essAvgWindDirection.makeInt();
 
@@ -83,12 +105,20 @@ public class WindSensorValues {
 
 	/** Create wind sensor values */
 	public WindSensorValues() {
+		// FIXME: add support for sensor table (v2?)
+		wind_sensor_height.setInteger(HEIGHT_ERROR_MISSING);
 		avg_wind_dir.setInteger(WIND_DIR_ERROR_MISSING);
 		avg_wind_speed.setInteger(WIND_SPEED_ERROR_MISSING);
 		spot_wind_dir.setInteger(WIND_DIR_ERROR_MISSING);
 		spot_wind_speed.setInteger(WIND_SPEED_ERROR_MISSING);
 		gust_wind_dir.setInteger(WIND_DIR_ERROR_MISSING);
 		gust_wind_speed.setInteger(WIND_SPEED_ERROR_MISSING);
+	}
+
+	/** Get sensor height in meters */
+	public Integer getSensorHeight() {
+		Distance h = convertHeight(wind_sensor_height);
+		return (h != null) ? h.round(METERS) : null;
 	}
 
 	/** Get two minute average wind direction */
@@ -145,6 +175,7 @@ public class WindSensorValues {
 	/** Get JSON representation */
 	public String toJson() {
 		StringBuilder sb = new StringBuilder();
+		sb.append(Json.num("wind_sensor_height", getSensorHeight()));
 		sb.append(Json.num("avg_wind_dir", getAvgWindDir()));
 		sb.append(Json.num("avg_wind_speed", getAvgWindSpeedMPS()));
 		sb.append(Json.num("spot_wind_dir", getSpotWindDir()));

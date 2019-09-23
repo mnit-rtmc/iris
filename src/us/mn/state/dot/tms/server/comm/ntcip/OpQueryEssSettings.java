@@ -93,17 +93,15 @@ public class OpQueryEssSettings extends OpEss {
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			// FIXME: move to EssRec
-			ASN1Integer reh = essReferenceHeight.makeInt();
-			ASN1Integer prh = essPressureHeight.makeInt();
-			ASN1Integer wsh = essWindSensorHeight.makeInt();
-			mess.add(reh);
-			mess.add(prh);
-			mess.add(wsh);
+			mess.add(ess_rec.atmospheric_values.reference_height);
+			mess.add(ess_rec.atmospheric_values
+				.pressure_sensor_height);
+			mess.add(ess_rec.wind_values.wind_sensor_height);
 			mess.queryProps();
-			logQuery(reh);
-			logQuery(prh);
-			logQuery(wsh);
+			logQuery(ess_rec.atmospheric_values.reference_height);
+			logQuery(ess_rec.atmospheric_values
+				.pressure_sensor_height);
+			logQuery(ess_rec.wind_values.wind_sensor_height);
 			return new QueryTemperatureSensors();
 		}
 	}
