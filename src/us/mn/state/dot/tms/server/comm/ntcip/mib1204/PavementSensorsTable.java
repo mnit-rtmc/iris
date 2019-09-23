@@ -25,7 +25,7 @@ import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
 import static us.mn.state.dot.tms.units.Distance.Units.METERS;
 
 /**
- * Temperature sensors data table, where each table row contains data read from
+ * Pavement sensors data table, where each table row contains data read from
  * a single pavement sensor within the same controller.
  *
  * @author Michael Darter
