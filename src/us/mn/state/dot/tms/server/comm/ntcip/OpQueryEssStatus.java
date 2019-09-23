@@ -190,6 +190,8 @@ public class OpQueryEssStatus extends OpEss {
 			mess.add(pr.surface_freeze_point.node);
 			mess.add(pr.sensor_error);
 			mess.add(pr.surface_water_depth);
+			mess.add(pr.salinity);
+			mess.add(pr.black_ice_signal);
 			mess.queryProps();
 			logQuery(pr.surface_status);
 			logQuery(pr.surface_temp.node);
@@ -197,6 +199,8 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(pr.surface_freeze_point.node);
 			logQuery(pr.sensor_error);
 			logQuery(pr.surface_water_depth);
+			logQuery(pr.salinity);
+			logQuery(pr.black_ice_signal);
 			return this;
 		}
 	}

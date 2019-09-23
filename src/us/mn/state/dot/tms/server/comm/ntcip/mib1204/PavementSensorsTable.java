@@ -81,12 +81,27 @@ public class PavementSensorsTable {
 		return null;
 	}
 
+	/** A salinity of 65535 is an error condition or missing value */
+	static private final int SALINITY_ERROR_MISSING = 65535;
+
+	/** Convert value to salinity.
+	 * @param s Salinity in parts per 100,000 by weight with 65535
+	 * 	    indicating an error or missing value.
+	 * @return Depth distance or null for missing */
+	static private Integer convertSalinity(ASN1Integer s) {
+		if (s != null) {
+			int is = s.getInteger();
+			if (is < SALINITY_ERROR_MISSING)
+				return is;
+		}
+		return null;
+	}
+
 	/** Number of sensors in table */
 	public final ASN1Integer num_sensors = numEssPavementSensors.makeInt();
 
 	/** Table row */
 	static public class Row {
-		// FIXME: add salinity & black ice signal
 		public final ASN1String sensor_location;
 		public final ASN1Enum<EssPavementType> pavement_type;
 		public final ASN1Integer elevation;
@@ -95,9 +110,11 @@ public class PavementSensorsTable {
 		public final ASN1Enum<EssSurfaceStatus> surface_status;
 		public final TemperatureObject surface_temp;
 		public final TemperatureObject pavement_temp;
-		public final TemperatureObject surface_freeze_point;
 		public final ASN1Enum<EssPavementSensorError> sensor_error;
 		public final ASN1Integer surface_water_depth;
+		public final ASN1Integer salinity;
+		public final TemperatureObject surface_freeze_point;
+		public final ASN1Enum<EssSurfaceBlackIceSignal> black_ice_signal;
 
 		/** Create a table row */
 		private Row(int row) {
@@ -120,13 +137,18 @@ public class PavementSensorsTable {
 				essSurfaceTemperature.makeInt(row));
 			pavement_temp = new TemperatureObject(
 				essPavementTemperature.makeInt(row));
-			surface_freeze_point = new TemperatureObject(
-				essSurfaceFreezePoint.makeInt(row));
 			sensor_error = new ASN1Enum<EssPavementSensorError>(
 				EssPavementSensorError.class,
 				essPavementSensorError.node, row);
 			surface_water_depth = essSurfaceWaterDepth.makeInt(row);
 			surface_water_depth.setInteger(DEPTH_ERROR_MISSING);
+			salinity = essSurfaceSalinity.makeInt(row);
+			salinity.setInteger(SALINITY_ERROR_MISSING);
+			surface_freeze_point = new TemperatureObject(
+				essSurfaceFreezePoint.makeInt(row));
+			black_ice_signal = new ASN1Enum<EssSurfaceBlackIceSignal>
+				(EssSurfaceBlackIceSignal.class,
+				essSurfaceBlackIceSignal.node, row);
 		}
 
 		/** Get the sensor location */
@@ -176,11 +198,6 @@ public class PavementSensorsTable {
 			return pavement_temp.getTempC();
 		}
 
-		/** Get surf freeze temp or null on error */
-		public Integer getSurfFreezePointC() {
-			return surface_freeze_point.getTempC();
-		}
-
 		/** Get pavement sensor error or null on error */
 		public EssPavementSensorError getPavementSensorError() {
 			EssPavementSensorError pse = sensor_error.getEnum();
@@ -193,6 +210,24 @@ public class PavementSensorsTable {
 		public Float getSurfaceWaterDepth() {
 			Distance d = convertDepth(surface_water_depth);
 			return (d != null) ? d.asFloat(METERS) : null;
+		}
+
+		/** Get surface salinity in parts per 100,000 by weight */
+		public Integer getSalinity() {
+			return convertSalinity(salinity);
+		}
+
+		/** Get surf freeze temp or null on error */
+		public Integer getSurfFreezePointC() {
+			return surface_freeze_point.getTempC();
+		}
+
+		/** Get black ice signal or null on error */
+		public EssSurfaceBlackIceSignal getBlackIceSignal() {
+			EssSurfaceBlackIceSignal bis = black_ice_signal.getEnum();
+			return (bis != EssSurfaceBlackIceSignal.undefined)
+			      ? bis
+			      : null;
 		}
 
 		/** Get JSON representation */
@@ -209,12 +244,15 @@ public class PavementSensorsTable {
 			sb.append(Json.str("surface_status", getSurfStatus()));
 			sb.append(surface_temp.toJson("surface_temp"));
 			sb.append(pavement_temp.toJson("pavement_temp"));
-			sb.append(surface_freeze_point.toJson(
-				"surface_freeze_point"));
 			sb.append(Json.str("sensor_error",
 				getPavementSensorError()));
 			sb.append(Json.num("surface_water_depth",
 				getSurfaceWaterDepth()));
+			sb.append(Json.num("salinity", getSalinity()));
+			sb.append(surface_freeze_point.toJson(
+				"surface_freeze_point"));
+			sb.append(Json.str("black_ice_signal",
+				getBlackIceSignal()));
 			sb.append("},");
 			return sb.toString();
 		}
