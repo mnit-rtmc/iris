@@ -97,7 +97,8 @@ public enum CommProtocol {
 	@Deprecated
 	PEMS("PeMS", false),
 
-	/** SSI (22) */
+	/** SSI -- removed (22) */
+	@Deprecated
 	SSI("SSI", false),
 
 	/** CHP Incidents (23) */

@@ -83,7 +83,6 @@ Filename               | Description
 `sql`                  | SQL database error log
 `ss105`                | Wavetronix SS-105 protocol
 `ss125`                | Wavetronix SS-125 protocol
-`ssi`                  | [SSI] protocol
 `stc`                  | [STC] protocol
 `sys_attr`             | System attribute change log
 `toll`                 | Tolling info log
@@ -106,7 +105,6 @@ Filename               | Description
 [ORG-815]: admin_guide.html#org815
 [Pelco-D]: admin_guide.html#pelcod
 [slow warning]: admin_guide.html#slow
-[SSI]: admin_guide.html#ssi
 [station]: road_topology.html#r_node-types
 [STC]: admin_guide.html#stc
 [system attribute]: admin_guide.html#sys_attr
