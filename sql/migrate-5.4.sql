@@ -79,4 +79,50 @@ CREATE VIEW weather_sensor_view AS
 	LEFT JOIN controller_view ctr ON w.controller = ctr.name;
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
 
+-- Add weather sensor sample events
+CREATE TABLE event.weather_sensor_settings (
+	event_id SERIAL PRIMARY KEY,
+	event_date TIMESTAMP WITH time zone NOT NULL,
+	weather_sensor VARCHAR(20) NOT NULL,
+	settings JSONB
+);
+
+CREATE TABLE event.weather_sensor_sample (
+	event_id SERIAL PRIMARY KEY,
+	event_date TIMESTAMP WITH time zone NOT NULL,
+	weather_sensor VARCHAR(20) NOT NULL,
+	sample JSONB
+);
+
+CREATE FUNCTION event.weather_sensor_sample_trig() RETURNS TRIGGER AS
+$weather_sensor_sample_trig$
+BEGIN
+    IF NEW.settings != OLD.settings THEN
+        INSERT INTO event.weather_sensor_settings
+                   (event_date, weather_sensor, settings)
+            VALUES (now(), NEW.name, NEW.settings);
+    END IF;
+    IF NEW.sample != OLD.sample THEN
+        INSERT INTO event.weather_sensor_sample
+                   (event_date, weather_sensor, sample)
+            VALUES (now(), NEW.name, NEW.sample);
+    END IF;
+    RETURN NEW;
+END;
+$weather_sensor_sample_trig$ LANGUAGE plpgsql;
+
+CREATE TRIGGER weather_sensor_sample_trigger
+	AFTER UPDATE ON iris._weather_sensor
+	FOR EACH ROW EXECUTE PROCEDURE event.weather_sensor_sample_trig();
+
+CREATE VIEW weather_sensor_settings_view AS
+	SELECT event_id, event_date, weather_sensor, settings
+	FROM event.weather_sensor_settings;
+GRANT SELECT ON weather_sensor_settings_view TO PUBLIC;
+
+CREATE VIEW weather_sensor_sample_view AS
+	SELECT event_id, event_date, weather_sensor, sample
+	FROM event.weather_sensor_sample;
+GRANT SELECT ON weather_sensor_sample_view TO PUBLIC;
+
 COMMIT;
