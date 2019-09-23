@@ -146,7 +146,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	5.3.0
+database_version	5.4.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0
@@ -4260,6 +4260,7 @@ CREATE TABLE iris._weather_sensor (
 	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes VARCHAR(64) NOT NULL,
+	settings JSONB,
 	sample JSONB
 );
 
@@ -4279,7 +4280,7 @@ CREATE TRIGGER weather_sensor_notify_trig
 	FOR EACH STATEMENT EXECUTE PROCEDURE iris.weather_sensor_notify();
 
 CREATE VIEW iris.weather_sensor AS SELECT
-	m.name, geo_loc, controller, pin, notes, sample
+	m.name, geo_loc, controller, pin, notes, settings, sample
 	FROM iris._weather_sensor m JOIN iris._device_io d ON m.name = d.name;
 
 CREATE FUNCTION iris.weather_sensor_insert() RETURNS TRIGGER AS
@@ -4287,8 +4288,8 @@ CREATE FUNCTION iris.weather_sensor_insert() RETURNS TRIGGER AS
 BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._weather_sensor (name, geo_loc, notes, sample)
-	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.sample);
+	INSERT INTO iris._weather_sensor (name, geo_loc, notes, settings, sample)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.settings, NEW.sample);
 	RETURN NEW;
 END;
 $weather_sensor_insert$ LANGUAGE plpgsql;
@@ -4307,6 +4308,7 @@ BEGIN
 	UPDATE iris._weather_sensor
 	   SET geo_loc = NEW.geo_loc,
 	       notes = NEW.notes,
+	       settings = NEW.settings,
 	       sample = NEW.sample
 	 WHERE name = OLD.name;
 	RETURN NEW;
@@ -4334,8 +4336,8 @@ CREATE TRIGGER weather_sensor_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_delete();
 
 CREATE VIEW weather_sensor_view AS
-	SELECT w.name, w.notes, w.sample, w.geo_loc, l.roadway, l.road_dir,
-	       l.cross_mod, l.cross_street, l.cross_dir, l.lat, l.lon,
+	SELECT w.name, w.notes, w.settings, w.sample, w.geo_loc, l.roadway,
+	       l.road_dir, l.cross_mod, l.cross_street, l.cross_dir, l.lat, l.lon,
 	       w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.condition
 	FROM iris.weather_sensor w
 	LEFT JOIN geo_loc_view l ON w.geo_loc = l.name

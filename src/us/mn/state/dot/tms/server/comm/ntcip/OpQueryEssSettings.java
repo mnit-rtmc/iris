@@ -26,11 +26,13 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.TemperatureSensorsTable;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
+import static us.mn.state.dot.tms.server.comm.snmp.MIB.*;
 
 /**
  * Operation to query a weather sensor's settings.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class OpQueryEssSettings extends OpEss {
 
@@ -66,6 +68,7 @@ public class OpQueryEssSettings extends OpEss {
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
+			// FIXME: move to EssRec
 			ASN1String sdes = new ASN1String(sysDescr.node);
 			ASN1String scon = new ASN1String(sysContact.node);
 			ASN1String snam = new ASN1String(sysName.node);
@@ -90,10 +93,10 @@ public class OpQueryEssSettings extends OpEss {
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
+			// FIXME: move to EssRec
 			ASN1Integer reh = essReferenceHeight.makeInt();
 			ASN1Integer prh = essPressureHeight.makeInt();
 			ASN1Integer wsh = essWindSensorHeight.makeInt();
-			// essPavementElevation
 			mess.add(reh);
 			mess.add(prh);
 			mess.add(wsh);
@@ -157,7 +160,7 @@ public class OpQueryEssSettings extends OpEss {
 				return new QuerySubSurface();
 			PavementSensorsTable.Row pr = ps_table.addRow();
 			// FIXME: add pavement exposure & sensor location
-			//        elevation
+			//        essPavementElevation
 			mess.add(pr.pavement_type);
 			mess.add(pr.sensor_type);
 			mess.queryProps();
@@ -200,5 +203,11 @@ public class OpQueryEssSettings extends OpEss {
 		}
 	}
 
-	// FIXME: store as config json value
+	/** Cleanup the operation */
+	@Override
+	public void cleanup() {
+		if (isSuccess())
+			w_sensor.setSettingsNotify(ess_rec.toJson());
+		super.cleanup();
+	}
 }

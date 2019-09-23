@@ -100,6 +100,9 @@ public interface WeatherSensor extends Device {
 	/** Get the subsurface temperature (null for missing) */
 	Integer getSubSurfTemp();
 
+	/** Get the settings as JSON */
+	String getSettings();
+
 	/** Get the latest sample as JSON */
 	String getSample();
 
