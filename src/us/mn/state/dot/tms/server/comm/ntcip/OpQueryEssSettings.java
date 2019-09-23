@@ -159,12 +159,16 @@ public class OpQueryEssSettings extends OpEss {
 			if (ps_table.isDone())
 				return new QuerySubSurface();
 			PavementSensorsTable.Row pr = ps_table.addRow();
-			// FIXME: add pavement exposure & sensor location
-			//        essPavementElevation
+			mess.add(pr.sensor_location);
 			mess.add(pr.pavement_type);
+			mess.add(pr.elevation);
+			mess.add(pr.exposure);
 			mess.add(pr.sensor_type);
 			mess.queryProps();
+			logQuery(pr.sensor_location);
 			logQuery(pr.pavement_type);
+			logQuery(pr.elevation);
+			logQuery(pr.exposure);
 			logQuery(pr.sensor_type);
 			return this;
 		}

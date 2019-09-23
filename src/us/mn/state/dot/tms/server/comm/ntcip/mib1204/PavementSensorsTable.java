@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
 import static us.mn.state.dot.tms.units.Distance.Units.METERS;
@@ -31,6 +32,38 @@ import static us.mn.state.dot.tms.units.Distance.Units.METERS;
  * @author Douglas Lau
  */
 public class PavementSensorsTable {
+
+	/** An elevation of 1001 is an error condition or missing value */
+	static private final int ELEVATION_ERROR_MISSING = 1001;
+
+	/** Convert elevation to Distance.
+	 * @param e Elevation in meters with 1001 indicating an error or missing
+	 *          value.
+	 * @return Elevation distance or null for missing */
+	static private Distance convertElevation(ASN1Integer e) {
+		if (e != null) {
+			int ie = e.getInteger();
+			if (ie < ELEVATION_ERROR_MISSING)
+				return new Distance(ie, METERS);
+		}
+		return null;
+	}
+
+	/** An exposure of 101 is an error condition or missing value */
+	static private final int EXPOSURE_ERROR_MISSING = 101;
+
+	/** Convert solar exposure to percent.
+	 * @param e Exposure in percent with 101 indicating an error or missing
+	 *          value.
+	 * @return Exposure or null for missing */
+	static private Integer convertExposure(ASN1Integer e) {
+		if (e != null) {
+			int ie = e.getInteger();
+			if (ie >= 0 && ie < EXPOSURE_ERROR_MISSING)
+				return ie;
+		}
+		return null;
+	}
 
 	/** A depth of 255 is an error condition or missing value */
 	static private final int DEPTH_ERROR_MISSING = 255;
@@ -53,7 +86,10 @@ public class PavementSensorsTable {
 
 	/** Table row */
 	static public class Row {
+		public final ASN1String sensor_location;
 		public final ASN1Enum<EssPavementType> pavement_type;
+		public final ASN1Integer elevation;
+		public final ASN1Integer exposure;
 		public final ASN1Enum<EssPavementSensorType> sensor_type;
 		public final ASN1Enum<EssSurfaceStatus> surface_status;
 		public final TemperatureObject surface_temp;
@@ -64,9 +100,15 @@ public class PavementSensorsTable {
 
 		/** Create a table row */
 		private Row(int row) {
+			sensor_location = new ASN1String(
+				essPavementSensorLocation.node, row);
 			pavement_type = new ASN1Enum<EssPavementType>(
 				EssPavementType.class, essPavementType.node,
 				row);
+			elevation = essPavementElevation.makeInt(row);
+			elevation.setInteger(ELEVATION_ERROR_MISSING);
+			exposure = essPavementExposure.makeInt(row);
+			exposure.setInteger(EXPOSURE_ERROR_MISSING);
 			sensor_type = new ASN1Enum<EssPavementSensorType>(
 				EssPavementSensorType.class,
 				essPavementSensorType.node, row);
@@ -86,10 +128,27 @@ public class PavementSensorsTable {
 			surface_water_depth.setInteger(DEPTH_ERROR_MISSING);
 		}
 
+		/** Get the sensor location */
+		public String getSensorLocation() {
+			String sl = sensor_location.getValue();
+			return (sl.length() > 0) ? sl : null;
+		}
+
 		/** Get pavement type or null on error */
 		public EssPavementType getPavementType() {
 			EssPavementType ept = pavement_type.getEnum();
 			return (ept != EssPavementType.undefined) ? ept : null;
+		}
+
+		/** Get pavement elevation in meters */
+		public Integer getElevation() {
+			Distance pe = convertElevation(elevation);
+			return (pe != null) ? pe.round(METERS) : null;
+		}
+
+		/** Get pavement exposure in percent */
+		public Integer getExposure() {
+			return convertExposure(exposure);
 		}
 
 		/** Get pavement sensor type or null on error */
@@ -139,7 +198,11 @@ public class PavementSensorsTable {
 		private String toJson() {
 			StringBuilder sb = new StringBuilder();
 			sb.append('{');
+			sb.append(Json.str("sensor_location",
+				getSensorLocation()));
 			sb.append(Json.str("pavement_type", getPavementType()));
+			sb.append(Json.num("elevation", getElevation()));
+			sb.append(Json.num("exposure", getExposure()));
 			sb.append(Json.str("sensor_type",
 				getPavementSensorType()));
 			sb.append(Json.str("surface_status", getSurfStatus()));
