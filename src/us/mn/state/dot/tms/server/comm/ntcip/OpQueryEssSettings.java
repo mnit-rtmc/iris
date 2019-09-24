@@ -157,13 +157,13 @@ public class OpQueryEssSettings extends OpEss {
 			if (ps_table.isDone())
 				return new QuerySubSurface();
 			PavementSensorsTable.Row pr = ps_table.addRow();
-			mess.add(pr.sensor_location);
+			mess.add(pr.location);
 			mess.add(pr.pavement_type);
 			mess.add(pr.elevation);
 			mess.add(pr.exposure);
 			mess.add(pr.sensor_type);
 			mess.queryProps();
-			logQuery(pr.sensor_location);
+			logQuery(pr.location);
 			logQuery(pr.pavement_type);
 			logQuery(pr.elevation);
 			logQuery(pr.exposure);
@@ -194,11 +194,11 @@ public class OpQueryEssSettings extends OpEss {
 			if (ss_table.isDone())
 				return null;
 			SubSurfaceSensorsTable.Row sr = ss_table.addRow();
-			mess.add(sr.sensor_location);
+			mess.add(sr.location);
 			mess.add(sr.sub_surface_type);
 			mess.add(sr.sensor_depth);
 			mess.queryProps();
-			logQuery(sr.sensor_location);
+			logQuery(sr.location);
 			logQuery(sr.sub_surface_type);
 			logQuery(sr.sensor_depth);
 			return this;

@@ -20,13 +20,13 @@ Field                    | Description
 `reference_elevation`    | Reference elevation in meters above mean sea level
 `pressure_sensor_height` | Height in meters relative to `reference_elevation`
 `pavement_sensor`        | Array of pavement settings objects
-↳`sensor_location`       | Sensor location description
+↳`location`              | Sensor location description
 ↳`pavement_type`         | Pavement type description
 ↳`elevation`             | Height in meters relative to `reference_elevation`
 ↳`exposure`              | Rough estimate of solar energy %
 ↳`sensor_type`           | Sensor type description
 `sub_surface_sensor`     | Array of sub-surface sample objects
-↳`sensor_location`       | Sensor location description
+↳`location`              | Sensor location description
 ↳`sub_surface_type`      | Sub-surface type description
 ↳`sensor_depth`          | Depth in meters below surface
 

@@ -71,7 +71,7 @@ public class SubSurfaceSensorsTable {
 
 	/** Table row */
 	static public class Row {
-		public final ASN1String sensor_location;
+		public final ASN1String location;
 		public final ASN1Enum<EssSubSurfaceType> sub_surface_type;
 		public final ASN1Integer sensor_depth;
 		public final TemperatureObject temp;
@@ -80,7 +80,7 @@ public class SubSurfaceSensorsTable {
 
 		/** Create a table row */
 		private Row(int row) {
-			sensor_location = new ASN1String(
+			location = new ASN1String(
 				essSubSurfaceSensorLocation.node, row);
 			sub_surface_type = new ASN1Enum<EssSubSurfaceType>(
 				EssSubSurfaceType.class, essSubSurfaceType.node,
@@ -98,7 +98,7 @@ public class SubSurfaceSensorsTable {
 
 		/** Get the sensor location */
 		public String getSensorLocation() {
-			String sl = sensor_location.getValue();
+			String sl = location.getValue();
 			return (sl.length() > 0) ? sl : null;
 		}
 
@@ -136,8 +136,7 @@ public class SubSurfaceSensorsTable {
 		private String toJson() {
 			StringBuilder sb = new StringBuilder();
 			sb.append('{');
-			sb.append(Json.str("sensor_location",
-				getSensorLocation()));
+			sb.append(Json.str("location", getSensorLocation()));
 			sb.append(Json.str("sub_surface_type",
 				getSubSurfaceType()));
 			sb.append(Json.num("sensor_depth", getSensorDepth()));
