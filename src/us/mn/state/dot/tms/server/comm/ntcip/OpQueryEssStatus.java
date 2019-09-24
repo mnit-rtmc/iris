@@ -55,7 +55,24 @@ public class OpQueryEssStatus extends OpEss {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase phaseTwo() {
-		return new QueryWind();
+		return new QueryAtmospheric();
+	}
+
+	/** Phase to query atmospheric values */
+	protected class QueryAtmospheric extends Phase {
+
+		/** Query */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(ess_rec.atmospheric_values.atmospheric_pressure);
+			mess.add(ess_rec.atmospheric_values.visibility);
+			mess.add(ess_rec.atmospheric_values.visibility_situation);
+			mess.queryProps();
+			logQuery(ess_rec.atmospheric_values.atmospheric_pressure);
+			logQuery(ess_rec.atmospheric_values.visibility);
+			logQuery(ess_rec.atmospheric_values.visibility_situation);
+			return new QueryWind();
+		}
 	}
 
 	/** Phase to query wind values */
@@ -141,23 +158,6 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(ess_rec.precip_values.precip_12_hours);
 			logQuery(ess_rec.precip_values.precip_24_hours);
 			logQuery(ess_rec.precip_values.precip_situation);
-			return new QueryAtmospheric();
-		}
-	}
-
-	/** Phase to query atmospheric values */
-	protected class QueryAtmospheric extends Phase {
-
-		/** Query */
-		@SuppressWarnings("unchecked")
-		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(ess_rec.atmospheric_values.atmospheric_pressure);
-			mess.add(ess_rec.atmospheric_values.visibility);
-			mess.add(ess_rec.atmospheric_values.visibility_situation);
-			mess.queryProps();
-			logQuery(ess_rec.atmospheric_values.atmospheric_pressure);
-			logQuery(ess_rec.atmospheric_values.visibility);
-			logQuery(ess_rec.atmospheric_values.visibility_situation);
 			return new QueryPavement();
 		}
 	}

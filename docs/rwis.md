@@ -14,11 +14,11 @@ The settings fields are:
 
 Field                    | Description
 -------------------------|-------------------------------------------------------
+`reference_elevation`    | Reference elevation in meters above mean sea level
+`pressure_sensor_height` | Height in meters relative to `reference_elevation`
 `wind_sensor_height`     | Height in meters relative to `reference_elevation`
 `temperature_sensor`     | Array of temperature settings objects
 ↳`height`                | Height in meters relative to `reference_elevation`
-`reference_elevation`    | Reference elevation in meters above mean sea level
-`pressure_sensor_height` | Height in meters relative to `reference_elevation`
 `pavement_sensor`        | Array of pavement settings objects
 ↳`location`              | Sensor location description
 ↳`pavement_type`         | Pavement type description
@@ -39,6 +39,9 @@ fields are:
 
 Field                   | Description
 ------------------------|------------------------------------
+`atmospheric_pressure`  | Atmospheric pressure in pascals
+`visibility`            | Visibility in meters
+`visibility_situation`  | Visibility situation description
 `avg_wind_dir`          | Two minute average wind direction †
 `avg_wind_speed`        | Two minute average wind speed in MPS
 `spot_wind_dir`         | Spot wind direction †
@@ -59,9 +62,6 @@ Field                   | Description
 `precip_12_hours`       | Twelve hour accumulated precipitation in mm
 `precip_24_hours`       | Twenty-four hour accumulated precipitation in mm
 `precip_situation`      | Precipitation situation description
-`atmospheric_pressure`  | Atmospheric pressure in pascals
-`visibility`            | Visibility in meters
-`visibility_situation`  | Visibility situation description
 `pavement_sensor`       | Array of pavement sample objects
 ↳`surface_status`       | Surface status description
 ↳`surface_temp`         | Surface temperature in ℃

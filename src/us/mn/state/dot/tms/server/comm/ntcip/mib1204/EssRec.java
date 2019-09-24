@@ -28,6 +28,10 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
  */
 public class EssRec {
 
+	/** Atmospheric values */
+	public final AtmosphericValues atmospheric_values =
+		new AtmosphericValues();
+
 	/** Wind sensor values */
 	public final WindSensorValues wind_values = new WindSensorValues();
 
@@ -39,10 +43,6 @@ public class EssRec {
 	public final PrecipitationValues precip_values =
 		new PrecipitationValues();
 
-	/** Atmospheric values */
-	public final AtmosphericValues atmospheric_values =
-		new AtmosphericValues();
-
 	/** Pavement sensors table */
 	public final PavementSensorsTable ps_table = new PavementSensorsTable();
 
@@ -52,6 +52,15 @@ public class EssRec {
 
 	/** Create a new ESS record */
 	public EssRec() { }
+
+	/** Store the atmospheric values */
+	private void storeAtmospheric(WeatherSensorImpl ws) {
+		ws.setPressureNotify(atmospheric_values
+			.getAtmosphericPressure());
+		Float vis = atmospheric_values.getVisibility();
+		Integer v = (vis != null) ? Math.round(vis) : null;
+		ws.setVisibilityNotify(v);
+	}
 
 	/** Store the wind sensor samples */
 	private void storeWinds(WeatherSensorImpl ws) {
@@ -84,15 +93,6 @@ public class EssRec {
 		ws.setPrecipSituationNotify((ps != null) ? ps.toString() : null);
 	}
 
-	/** Store the atmospheric values */
-	private void storeAtmospheric(WeatherSensorImpl ws) {
-		ws.setPressureNotify(atmospheric_values
-			.getAtmosphericPressure());
-		Float vis = atmospheric_values.getVisibility();
-		Integer v = (vis != null) ? Math.round(vis) : null;
-		ws.setVisibilityNotify(v);
-	}
-
 	/** Store pavement sensor related values */
 	private void storePavement(WeatherSensorImpl ws) {
 		PavementSensorsTable.Row row = ps_table.getRow(1);
@@ -121,10 +121,10 @@ public class EssRec {
 
 	/** Store all sample values */
 	public void store(WeatherSensorImpl ws) {
+		storeAtmospheric(ws);
 		storeWinds(ws);
 		storeTemps(ws);
 		storePrecip(ws);
-		storeAtmospheric(ws);
 		storePavement(ws);
 		storeSubSurface(ws);
 		long st = TimeSteward.currentTimeMillis();
@@ -135,10 +135,10 @@ public class EssRec {
 	public String toJson() {
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
+		sb.append(atmospheric_values.toJson());
 		sb.append(wind_values.toJson());
 		sb.append(ts_table.toJson());
 		sb.append(precip_values.toJson());
-		sb.append(atmospheric_values.toJson());
 		sb.append(ps_table.toJson());
 		sb.append(ss_table.toJson());
 		// remove trailing comma
