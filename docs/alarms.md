@@ -2,17 +2,16 @@
 
 Select `View ➔ Maintenance ➔ Alarms` menu item
 
-An alarm is a simple device triggered by an event.  The event might be an
-equipment failure, high temperature, or low voltage in a field controller.
-Alarms can be monitored to help maintain field devices.  Device drivers trigger
-alarms based on field controller states, information read from controllers
-(_e.g._ voltages), _etc_.
+An alarm is a device which has a boolean `state` indicating whether or not it is
+_triggered_.  The `description` of the alarm might indicate an equipment
+failure, high temperature, low voltage, _etc_.
 
-Users can view the status of alarms on the alarm form.  The `Status` column
-indicates the state of each alarm, which can be **Clear** or **Triggered**.
+An alarm can be created for controllers using a [protocol] that generates
+alarms, such as [MnDOT-170].
 
-Alarms are created using the Alarm Form and can only be created for
-controllers using a protocol that generates alarms, such as [MnDOT-170].
+The `state` field is set to `true` when _triggered_.  When it changes, a
+time-stamped record is added to the `alarm_event` table.
 
 
 [MnDOT-170]: admin_guide.html#mndot170
+[protocol]: admin_guide.html#prot_table
