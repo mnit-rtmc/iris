@@ -30,18 +30,18 @@ import static us.mn.state.dot.tms.units.Distance.Units.METERS;
  */
 public class AtmosphericValues {
 
-	/** A height of 8001 is an error condition or missing value */
-	static private final int REF_HEIGHT_ERROR_MISSING = 8001;
+	/** An elevation of 8001 is an error condition or missing value */
+	static private final int REF_ELEVATION_ERROR_MISSING = 8001;
 
-	/** Convert reference height to Distance.
-	 * @param h Height in meters with 8001 indicating an error or missing
+	/** Convert reference elevation to Distance.
+	 * @param e Elevation in meters with 8001 indicating an error or missing
 	 *          value.
-	 * @return Height distance or null for missing */
-	static private Distance convertRefHeight(ASN1Integer h) {
-		if (h != null) {
-			int ih = h.getInteger();
-			if (ih < REF_HEIGHT_ERROR_MISSING)
-				return new Distance(ih, METERS);
+	 * @return Elevation distance or null for missing */
+	static private Distance convertRefElevation(ASN1Integer e) {
+		if (e != null) {
+			int ie = e.getInteger();
+			if (ie < REF_ELEVATION_ERROR_MISSING)
+				return new Distance(ie, METERS);
 		}
 		return null;
 	}
@@ -97,8 +97,8 @@ public class AtmosphericValues {
 		return null;
 	}
 
-	/** Height of reference in meters */
-	public final ASN1Integer reference_height = essReferenceHeight
+	/** Elevation of reference in meters */
+	public final ASN1Integer reference_elevation = essReferenceHeight
 		.makeInt();
 
 	/** Height of pressure sensor in meters */
@@ -119,15 +119,15 @@ public class AtmosphericValues {
 
 	/** Create atmospheric values */
 	public AtmosphericValues() {
-		reference_height.setInteger(REF_HEIGHT_ERROR_MISSING);
+		reference_elevation.setInteger(REF_ELEVATION_ERROR_MISSING);
 		pressure_sensor_height.setInteger(HEIGHT_ERROR_MISSING);
 		atmospheric_pressure.setInteger(PRESSURE_ERROR_MISSING);
 		visibility.setInteger(VISIBILITY_ERROR_MISSING);
 	}
 
-	/** Get reference height in meters */
-	public Integer getReferenceHeight() {
-		Distance h = convertRefHeight(reference_height);
+	/** Get reference elevation in meters above mean sea level */
+	public Integer getReferenceElevation() {
+		Distance h = convertRefElevation(reference_elevation);
 		return (h != null) ? h.round(METERS) : null;
 	}
 
@@ -157,7 +157,8 @@ public class AtmosphericValues {
 	/** Get JSON representation */
 	public String toJson() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(Json.num("reference_height", getReferenceHeight()));
+		sb.append(Json.num("reference_elevation",
+			getReferenceElevation()));
 		sb.append(Json.num("pressure_sensor_height", getSensorHeight()));
 		sb.append(Json.num("atmospheric_pressure",
 			getAtmosphericPressure()));

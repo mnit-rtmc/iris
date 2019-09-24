@@ -14,15 +14,15 @@ The settings fields are:
 
 Field                    | Description
 -------------------------|-------------------------------------------------------
-`wind_sensor_height`     | Height in meters relative to `reference_height`
+`wind_sensor_height`     | Height in meters relative to `reference_elevation`
 `temperature_sensor`     | Array of temperature settings objects
-↳`height`                | Height in meters relative to `reference_height`
-`reference_height`       | Reference elevation in meters above mean sea level
-`pressure_sensor_height` | Height in meters relative to `reference_height`
+↳`height`                | Height in meters relative to `reference_elevation`
+`reference_elevation`    | Reference elevation in meters above mean sea level
+`pressure_sensor_height` | Height in meters relative to `reference_elevation`
 `pavement_sensor`        | Array of pavement settings objects
 ↳`sensor_location`       | Sensor location description
 ↳`pavement_type`         | Pavement type description
-↳`elevation`             | Height in meters relative to `reference_height`
+↳`elevation`             | Height in meters relative to `reference_elevation`
 ↳`exposure`              | Rough estimate of solar energy %
 ↳`sensor_type`           | Sensor type description
 `sub_surface_sensor`     | Array of sub-surface sample objects
