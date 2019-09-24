@@ -1,5 +1,12 @@
 # IRIS 5.x Release Notes
 
+5.4.0 (24 Sep 2019)
+ - Added JSONB `settings` column to weather_sensor table
+ - Added JSON output for NTCIP RWIS operations
+ - Fixed an NPE in network domain checking on login
+ - Removed SSI protocol driver
+ - Improved documentation
+
 5.3.0 (17 Sep 2019)
  - Incident deployment:
     1. Don't suggest DMS too far from an r_node
