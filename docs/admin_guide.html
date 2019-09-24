@@ -51,7 +51,7 @@
     <h3><a href="#gate_arms">Gate Arms</a></h3>
     <h3><a href="#tag_readers">Tag Readers</a></h3>
     <h3><a href="#beacons">Beacons</a></h3>
-    <h3><a href="#alarms">Alarms</a></h3>
+    <h3><a href="alarms.html">Alarms</a></h3>
     <h3><a href="rwis.html">Road Weather Information Systems</a></h3>
     <h3><a href="gps.html">GPS</a></h3>
   </div>
@@ -234,7 +234,7 @@
 	<li><a href="#beacons">Beacons</a></li>
 	<li><a href="rwis.html">RWIS</a> (road-weather information systems)</li>
 	<li><a href="gps.html">GPS</a> (global positioning system)</li>
-	<li><a href="#alarms">Alarms</a></li>
+	<li><a href="alarms.html">Alarms</a></li>
 </ul>
 <h3 id="protocols">Protocols</h3>
 <p>
@@ -920,7 +920,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	        <a href="#ramp_meters">Ramp Meters</a>,
 		<a href="#beacons">beacons</a>,
 	        <a href="#dlcs">DLCS</a>,
-		<a href="#alarms">alarms</a>
+		<a href="alarms.html">alarms</a>
 	    </td>
 	    <td rowspan="2"><a href="#mndot_pins">[*]</a</td>
 	</tr>
@@ -1093,7 +1093,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>39 - 62</td>
 	</tr>
 	<tr>
-	    <td><a href="#alarms">Alarms</a></td>
+	    <td><a href="alarms.html">Alarms</a></td>
 	    <td>70 - 79</td>
 	</tr>
 </table>
@@ -1201,7 +1201,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	<a href="#gate_arms">gate arms</a>,
 	<a href="#tag_readers">tag readers</a>,
 	<a href="#beacons">beacons</a>,
-	<a href="#alarms">alarms</a>,
+	<a href="alarms.html">alarms</a>,
 	<a href="rwis.html">road weather information systems</a> and
 	<a href="gps.html">GPS</a>.
 </p>
@@ -2372,25 +2372,6 @@ FIXME
 	considered part of the DMS.
 	External beacons use dedicated controllers and protocols (e.g.
 	<a href="#mndot170">MnDOT-170</a>).
-</p>
-
-<h3 id="alarms">Alarms</h3>
-<aside>
-	Select <span class="menu">View ➔ Maintenance ➔ Alarms</span> menu item
-</aside>
-<p>
-	An alarm is a simple device triggered by an event.
-	The event might be an equipment failure, high temperature, or low
-	voltage in a field controller.
-	Alarms can be monitored to help maintain field devices.
-	Device drivers trigger alarms based on field controller states,
-	information read from controllers (e.g. voltages), etc.
-	Users can view the status of alarms on the Alarm Form. The Status
-	Column indicates the state of each alarm, which can be Clear or
-	Triggered.
-	Alarms are created using the Alarm Form and can only be created for
-	controllers using a protocol that generates alarms, such as
-	<a href="#mndot170">MnDOT-170</a>.
 </p>
 
 </main>
