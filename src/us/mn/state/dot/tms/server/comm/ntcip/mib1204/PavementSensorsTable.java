@@ -252,6 +252,9 @@ public class PavementSensorsTable {
 				"surface_freeze_point"));
 			sb.append(Json.str("black_ice_signal",
 				getBlackIceSignal()));
+			// remove trailing comma
+			if (sb.charAt(sb.length() - 1) == ',')
+				sb.setLength(sb.length() - 1);
 			sb.append("},");
 			return sb.toString();
 		}

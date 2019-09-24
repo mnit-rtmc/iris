@@ -143,6 +143,9 @@ public class SubSurfaceSensorsTable {
 			sb.append(temp.toJson("temp"));
 			sb.append(Json.num("moisture", getMoisture()));
 			sb.append(Json.str("sensor_error", getSensorError()));
+			// remove trailing comma
+			if (sb.charAt(sb.length() - 1) == ',')
+				sb.setLength(sb.length() - 1);
 			sb.append("},");
 			return sb.toString();
 		}

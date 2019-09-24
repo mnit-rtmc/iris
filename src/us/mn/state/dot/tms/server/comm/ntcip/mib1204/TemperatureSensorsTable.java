@@ -96,6 +96,9 @@ public class TemperatureSensorsTable {
 			sb.append('{');
 			sb.append(Json.num("height", getHeight()));
 			sb.append(air_temp.toJson("air_temp"));
+			// remove trailing comma
+			if (sb.charAt(sb.length() - 1) == ',')
+				sb.setLength(sb.length() - 1);
 			sb.append("},");
 			return sb.toString();
 		}
