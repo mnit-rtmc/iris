@@ -159,13 +159,13 @@ public class OpQueryEssSettings extends OpEss {
 			PavementSensorsTable.Row pr = ps_table.addRow();
 			mess.add(pr.location);
 			mess.add(pr.pavement_type);
-			mess.add(pr.elevation);
+			mess.add(pr.height);
 			mess.add(pr.exposure);
 			mess.add(pr.sensor_type);
 			mess.queryProps();
 			logQuery(pr.location);
 			logQuery(pr.pavement_type);
-			logQuery(pr.elevation);
+			logQuery(pr.height);
 			logQuery(pr.exposure);
 			logQuery(pr.sensor_type);
 			return this;

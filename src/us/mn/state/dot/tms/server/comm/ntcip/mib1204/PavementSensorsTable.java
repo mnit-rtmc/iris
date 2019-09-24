@@ -33,18 +33,18 @@ import static us.mn.state.dot.tms.units.Distance.Units.METERS;
  */
 public class PavementSensorsTable {
 
-	/** An elevation of 1001 is an error condition or missing value */
-	static private final int ELEVATION_ERROR_MISSING = 1001;
+	/** A height of 1001 is an error condition or missing value */
+	static private final int HEIGHT_ERROR_MISSING = 1001;
 
-	/** Convert elevation to Distance.
-	 * @param e Elevation in meters with 1001 indicating an error or missing
+	/** Convert height to Distance.
+	 * @param h Height in meters with 1001 indicating an error or missing
 	 *          value.
-	 * @return Elevation distance or null for missing */
-	static private Distance convertElevation(ASN1Integer e) {
-		if (e != null) {
-			int ie = e.getInteger();
-			if (ie < ELEVATION_ERROR_MISSING)
-				return new Distance(ie, METERS);
+	 * @return Height distance or null for missing */
+	static private Distance convertHeight(ASN1Integer h) {
+		if (h != null) {
+			int ih = h.getInteger();
+			if (ih < HEIGHT_ERROR_MISSING)
+				return new Distance(ih, METERS);
 		}
 		return null;
 	}
@@ -104,7 +104,7 @@ public class PavementSensorsTable {
 	static public class Row {
 		public final ASN1String location;
 		public final ASN1Enum<EssPavementType> pavement_type;
-		public final ASN1Integer elevation;
+		public final ASN1Integer height;
 		public final ASN1Integer exposure;
 		public final ASN1Enum<EssPavementSensorType> sensor_type;
 		public final ASN1Enum<EssSurfaceStatus> surface_status;
@@ -123,8 +123,8 @@ public class PavementSensorsTable {
 			pavement_type = new ASN1Enum<EssPavementType>(
 				EssPavementType.class, essPavementType.node,
 				row);
-			elevation = essPavementElevation.makeInt(row);
-			elevation.setInteger(ELEVATION_ERROR_MISSING);
+			height = essPavementElevation.makeInt(row);
+			height.setInteger(HEIGHT_ERROR_MISSING);
 			exposure = essPavementExposure.makeInt(row);
 			exposure.setInteger(EXPOSURE_ERROR_MISSING);
 			sensor_type = new ASN1Enum<EssPavementSensorType>(
@@ -163,9 +163,9 @@ public class PavementSensorsTable {
 			return (ept != EssPavementType.undefined) ? ept : null;
 		}
 
-		/** Get pavement elevation in meters */
-		public Integer getElevation() {
-			Distance pe = convertElevation(elevation);
+		/** Get pavement height in meters */
+		public Integer getHeight() {
+			Distance pe = convertHeight(height);
 			return (pe != null) ? pe.round(METERS) : null;
 		}
 
@@ -236,7 +236,7 @@ public class PavementSensorsTable {
 			sb.append('{');
 			sb.append(Json.str("location", getSensorLocation()));
 			sb.append(Json.str("pavement_type", getPavementType()));
-			sb.append(Json.num("elevation", getElevation()));
+			sb.append(Json.num("height", getHeight()));
 			sb.append(Json.num("exposure", getExposure()));
 			sb.append(Json.str("sensor_type",
 				getPavementSensorType()));

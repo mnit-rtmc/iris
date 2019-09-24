@@ -22,7 +22,7 @@ Field                    | Description
 `pavement_sensor`        | Array of pavement settings objects
 ↳`location`              | Sensor location description
 ↳`pavement_type`         | Pavement type description
-↳`elevation`             | Height in meters relative to `reference_elevation`
+↳`height`                | Pavement height in meters relative to `reference_elevation`
 ↳`exposure`              | Rough estimate of solar energy %
 ↳`sensor_type`           | Sensor type description
 `sub_surface_sensor`     | Array of sub-surface sample objects
