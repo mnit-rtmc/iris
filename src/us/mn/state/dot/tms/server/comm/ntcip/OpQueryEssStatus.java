@@ -126,20 +126,20 @@ public class OpQueryEssStatus extends OpEss {
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(ess_rec.precip_values.relative_humidity);
 			mess.add(ess_rec.precip_values.precip_rate);
-			mess.add(ess_rec.precip_values.precipitation_1_hour);
-			mess.add(ess_rec.precip_values.precipitation_3_hours);
-			mess.add(ess_rec.precip_values.precipitation_6_hours);
-			mess.add(ess_rec.precip_values.precipitation_12_hours);
-			mess.add(ess_rec.precip_values.precipitation_24_hours);
+			mess.add(ess_rec.precip_values.precip_1_hour);
+			mess.add(ess_rec.precip_values.precip_3_hours);
+			mess.add(ess_rec.precip_values.precip_6_hours);
+			mess.add(ess_rec.precip_values.precip_12_hours);
+			mess.add(ess_rec.precip_values.precip_24_hours);
 			mess.add(ess_rec.precip_values.precip_situation);
 			mess.queryProps();
 			logQuery(ess_rec.precip_values.relative_humidity);
 			logQuery(ess_rec.precip_values.precip_rate);
-			logQuery(ess_rec.precip_values.precipitation_1_hour);
-			logQuery(ess_rec.precip_values.precipitation_3_hours);
-			logQuery(ess_rec.precip_values.precipitation_6_hours);
-			logQuery(ess_rec.precip_values.precipitation_12_hours);
-			logQuery(ess_rec.precip_values.precipitation_24_hours);
+			logQuery(ess_rec.precip_values.precip_1_hour);
+			logQuery(ess_rec.precip_values.precip_3_hours);
+			logQuery(ess_rec.precip_values.precip_6_hours);
+			logQuery(ess_rec.precip_values.precip_12_hours);
+			logQuery(ess_rec.precip_values.precip_24_hours);
 			logQuery(ess_rec.precip_values.precip_situation);
 			return new QueryAtmospheric();
 		}

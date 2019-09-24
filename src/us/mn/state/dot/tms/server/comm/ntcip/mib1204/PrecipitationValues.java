@@ -84,23 +84,23 @@ public class PrecipitationValues {
 	public final ASN1Integer precip_rate = essPrecipRate.makeInt();
 
 	/** One hour precipitation total */
-	public final ASN1Integer precipitation_1_hour =
+	public final ASN1Integer precip_1_hour =
 		essPrecipitationOneHour.makeInt();
 
 	/** Three hour precipitation total */
-	public final ASN1Integer precipitation_3_hours =
+	public final ASN1Integer precip_3_hours =
 		essPrecipitationThreeHours.makeInt();
 
 	/** Six hour precipitation total */
-	public final ASN1Integer precipitation_6_hours =
+	public final ASN1Integer precip_6_hours =
 		essPrecipitationSixHours.makeInt();
 
 	/** Twelve hour precipitation total */
-	public final ASN1Integer precipitation_12_hours =
+	public final ASN1Integer precip_12_hours =
 		essPrecipitationTwelveHours.makeInt();
 
 	/** Twenty-four hour precipitation total */
-	public final ASN1Integer precipitation_24_hours =
+	public final ASN1Integer precip_24_hours =
 		essPrecipitation24Hours.makeInt();
 
 	/** Precipitation situation */
@@ -112,11 +112,11 @@ public class PrecipitationValues {
 	public PrecipitationValues() {
 		relative_humidity.setInteger(HUMIDITY_ERROR_MISSING);
 		precip_rate.setInteger(PRECIP_ERROR_MISSING);
-		precipitation_1_hour.setInteger(PRECIP_ERROR_MISSING);
-		precipitation_3_hours.setInteger(PRECIP_ERROR_MISSING);
-		precipitation_6_hours.setInteger(PRECIP_ERROR_MISSING);
-		precipitation_12_hours.setInteger(PRECIP_ERROR_MISSING);
-		precipitation_24_hours.setInteger(PRECIP_ERROR_MISSING);
+		precip_1_hour.setInteger(PRECIP_ERROR_MISSING);
+		precip_3_hours.setInteger(PRECIP_ERROR_MISSING);
+		precip_6_hours.setInteger(PRECIP_ERROR_MISSING);
+		precip_12_hours.setInteger(PRECIP_ERROR_MISSING);
+		precip_24_hours.setInteger(PRECIP_ERROR_MISSING);
 	}
 
 	/** Get the relative humidity (%) */
@@ -131,7 +131,7 @@ public class PrecipitationValues {
 
 	/** Get the one hour precipitation in mm */
 	public Integer getPrecip1Hour() {
-		return convertPrecip(precipitation_1_hour);
+		return convertPrecip(precip_1_hour);
 	}
 
 	/** Get the precipitation situation */
@@ -144,16 +144,16 @@ public class PrecipitationValues {
 	public String toJson() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Json.num("relative_humidity", getRelativeHumidity()));
-		sb.append(Json.num("precipitation_rate", getPrecipRate()));
-		sb.append(Json.num("precipitation_1_hour", getPrecip1Hour()));
-		sb.append(Json.num("precipitation_3_hours",
-			convertPrecip(precipitation_3_hours)));
-		sb.append(Json.num("precipitation_6_hours",
-			convertPrecip(precipitation_6_hours)));
-		sb.append(Json.num("precipitation_12_hours",
-			convertPrecip(precipitation_12_hours)));
-		sb.append(Json.num("precipitation_24_hours",
-			convertPrecip(precipitation_24_hours)));
+		sb.append(Json.num("precip_rate", getPrecipRate()));
+		sb.append(Json.num("precip_1_hour", getPrecip1Hour()));
+		sb.append(Json.num("precip_3_hours", convertPrecip(
+			precip_3_hours)));
+		sb.append(Json.num("precip_6_hours", convertPrecip(
+			precip_6_hours)));
+		sb.append(Json.num("precip_12_hours", convertPrecip(
+			precip_12_hours)));
+		sb.append(Json.num("precip_24_hours", convertPrecip(
+			precip_24_hours)));
 		sb.append(Json.str("precip_situation", getPrecipSituation()));
 		return sb.toString();
 	}
