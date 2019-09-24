@@ -6,14 +6,14 @@ Road Weather Information Systems, or **RWIS** can sense data such as
 precipitation rate, road surface temperature, wind speed, etc.  The [NTCIP]
 and [Org-815] protocols can collect RWIS data.
 
-Current settings are stored as JSONB in the `settings` column of the
+Sensor settings are stored as JSONB in the `settings` column of the
 `weather_sensor` table.  When new settings are stored, a time-stamped record is
 added to the `weather_sensor_settings` table.
 
-The settings fields are:
+The possible settings fields are:
 
 Field                    | Description
--------------------------|-------------------------------------------------------
+-------------------------|---------------------------------------------------
 `reference_elevation`    | Reference elevation in meters above mean sea level
 `pressure_sensor_height` | Height in meters relative to `reference_elevation`
 `wind_sensor_height`     | Height in meters relative to `reference_elevation`
@@ -34,8 +34,7 @@ Current sample data is stored as JSONB in the `sample` column of the
 `weather_sensor` table.  When a new sample is stored, a time-stamped record is
 added to the `weather_sensor_sample` table.
 
-Only collected data will be stored in the `sample` column.  The possible sample
-fields are:
+Only collected data is stored in the `sample` column.  The possible fields are:
 
 Field                   | Description
 ------------------------|------------------------------------
