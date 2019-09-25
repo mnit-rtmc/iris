@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
+import java.text.NumberFormat;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.units.Temperature;
 import static us.mn.state.dot.tms.units.Temperature.Units.CELSIUS;
@@ -60,6 +61,14 @@ public class TemperatureObject {
 
 	/** Get JSON representation */
 	public String toJson(String key) {
-		return Json.num(key, tempC());
+		Double t = tempC();
+		if (t != null) {
+			// Format temp C to 1 decimal place
+			NumberFormat f = NumberFormat.getInstance();
+			f.setMaximumFractionDigits(1);
+			f.setMinimumFractionDigits(1);
+			return Json.str(key, f.format(t));
+		} else
+			return "";
 	}
 }
