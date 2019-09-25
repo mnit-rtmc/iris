@@ -27,9 +27,9 @@ changes, this plan will immediately be changed to the appropriate [phase] —
 ### Interlocks
 
 Great care must be taken to prevent traffic conflicts when operating gate arms.
-Two types of _interlock_ are available for this purpose.  An _open interlock_ is
-a constraint which prevents the gate arm from being opened within IRIS.
-Similarly, a _close interlock_ prevents the gate arm from being closed.
+Two types of _interlock_ are available for this purpose.  An **open interlock**
+is a constraint which prevents the gate arm from being opened.  Similarly, a
+**close interlock** prevents the gate arm from being closed.
 
 When a gate arm is open, all other gate arms on the same roadway, but in any
 other direction will have an _open interlock_.
@@ -44,17 +44,16 @@ interlock_ until the other array is closed.
 
 #### Conflicts
 
-An _open conflict_ exists when an _open interlock_ constraint is broken.
-Similarly, a _close conflict_ exists for _close interlock_ constraints.  IRIS
+An **open conflict** exists when an _open interlock_ constraint is broken.
+Similarly, a **close conflict** exists for _close interlock_ constraints.  IRIS
 will not automatically try to resolve conflicts.
 
-If a _conflict_ is detected, an _alert_ email will be sent to the address in the
+If a conflict is detected, an _alert_ email will be sent to the address in the
 `email_recipient_gate_arm` [system attribute].
 
-If communication is lost to a gate arm, the state will be unknown by IRIS.
-After an interval equal to the `gate_arm_alert_timeout_secs` [system attribute]
-(default 90), it will be treated as _possibly open_, and interlock conflicts
-will be checked.
+If communication is lost to a gate arm, the state will be unknown.  After an
+interval equal to the `gate_arm_alert_timeout_secs` [system attribute], it will
+be treated as **possibly open**, and interlock conflicts will be checked.
 
 ### Security
 
