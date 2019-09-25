@@ -47,7 +47,7 @@
     <h3><a href="#vds">Vehicle Detection</a></h3>
     <h3><a href="#cameras">Cameras</a></h3>
     <h3><a href="#video">Video Monitors</a></h3>
-    <h3><a href="#ramp_meters">Ramp Meters</a></h3>
+    <h3><a href="ramp_meters.html">Ramp Meters</a></h3>
     <h3><a href="gate_arms.html">Gate Arms</a></h3>
     <h3><a href="tolling.html#tag-readers">Tag Readers</a></h3>
     <h3><a href="beacons.html">Beacons</a></h3>
@@ -60,7 +60,7 @@
     <h3><a href="traffic_layer.html">Traffic Map Layer</a></h3>
     <h3><a href="incidents.html">Incident Management</a></h3>
     <h3><a href="action_plans.html">Action Plans</a></h3>
-    <h3><a href="metering_strategies.html">Ramp Metering Strategies</a></h3>
+    <h3><a href="ramp_meters.html#metering-strategies">Ramp Metering Strategies</a></h3>
     <h3><a href="travel_time.html">Travel Time Estimation</a></h3>
     <h3><a href="slow_warning.html">Slow Traffic Warning</a></h3>
     <h3><a href="tolling.html">Tolling</a></h3>
@@ -228,7 +228,7 @@
 	</li>
 	<li><a href="#vds">VDS</a> (vehicle detection systems)</li>
 	<li><a href="#lcs">LCS</a> (lane-use control signs)</li>
-	<li><a href="#ramp_meters">Ramp meters</a></li>
+	<li><a href="ramp_meters.html">Ramp meters</a></li>
 	<li><a href="gate_arms.html">Gate Arms</a></li>
 	<li><a href="tolling.html#tag-readers">Tag Readers</a></li>
 	<li><a href="beacons.html">Beacons</a></li>
@@ -282,8 +282,8 @@
 	<li><a href="incidents.html">Incident management</a></li>
 	<li><a href="action_plans.html">Scheduled</a> deployment of control
 	    devices</li>
-	<li>Coördinated <a href="metering_strategies.html">ramp metering
-	    strategies</a></li>
+	<li>Coördinated <a href="ramp_meters.html#metering-strategies">ramp
+	    metering strategies</a></li>
 	<li><a href="travel_time.html">Travel time</a> estimation</li>
 	<li><a href="slow_warning.html">Slow traffic warning</a></li>
 	<li><a href="tolling.html">Toll</a> lane operation</li>
@@ -917,7 +917,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td rowspan="2">tcp</td>
 	    <td>1-15</td>
 	    <td rowspan="2"><a href="#vds">VDS</a>,
-	        <a href="#ramp_meters">Ramp Meters</a>,
+	        <a href="ramp_meters.html">Ramp Meters</a>,
 		<a href="beacons.html">beacons</a>,
 	        <a href="#dlcs">DLCS</a>,
 		<a href="alarms.html">alarms</a>
@@ -1077,7 +1077,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <th>I/O Pin(s)</th>
 	</tr>
 	<tr>
-	    <td><a href="#ramp_meters">Ramp Meter</a></td>
+	    <td><a href="ramp_meters.html">Ramp Meter</a></td>
 	    <td>2 or 3</td>
 	</tr>
 	<tr>
@@ -1197,7 +1197,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	<a href="#vds">vehicle detection</a>,
 	<a href="#cameras">cameras</a>,
 	<a href="#video">video monitors</a>,
-	<a href="#ramp_meters">ramp meters</a>,
+	<a href="ramp_meters.html">ramp meters</a>,
 	<a href="gate_arms.html">gate arms</a>,
 	<a href="tolling.html#tag-readers">tag readers</a>,
 	<a href="beacons.html">beacons</a>,
@@ -1681,7 +1681,7 @@ FIXME
 <p>
 	When a detector is failed (<b>auto fail</b> or <b>force fail</b>), its
 	data will not be used for <a href="travel_time.html">travel time</a>,
-	<a href="#ramp_meters">ramp metering</a>, etc.
+	<a href="ramp_meters.html">ramp metering</a>, etc.
 	In that case, <b>fake</b> detection could be used &mdash; this field can
 	contain one or more other detector names, separated by spaces.
 	The average density or speed of those detectors (which are not also
@@ -2114,7 +2114,7 @@ FIXME
 	The <b>Preset</b> tab within a camera properties form can be used to
 	configure up to 12 presets per camera.
 	A preset can be associated with either a compass direction or a device,
-	such as <a href="#dms">DMS</a> or <a href="#ramp_meters">ramp meter</a>.
+	such as <a href="#dms">DMS</a> or <a href="ramp_meters.html">ramp meter</a>.
 	To associate a preset with a device, enable the preset, then select
 	that preset on the <b>Location</b> tab of the device's properties form.
 </p>
@@ -2216,32 +2216,6 @@ FIXME
 	automatically switch.
 	The interval is specified by <a href="#sys_attr"><code>
 	camera_sequence_dwell_sec</code></a>.
-</p>
-
-<h3 id="ramp_meters">Ramp Meters</h3>
-<aside>
-	Select <span class="menu">View ➔ Ramp Meters</span> menu item
-</aside>
-<p>
-	A ramp meter is a traffic signal at an on-ramp which controls the rate
-	of vehicles entering a freeway.
-	Typically, one vehicle is permitted to enter for each green indication
-	displayed on the signal.
-</p>
-<p>
-	The following operations can be performed on a ramp meter:
-</p>
-<ul>
-	<li>Activating and deactivating meter</li>
-	<li>Adjusting meter release rate</li>
-	<li>Querying meter status</li>
-	<li>Querying green counts</li>
-	<li>Synchronizing clock</li>
-	<li>Configuring time-of-day operation</li>
-</ul>
-<p>
-	Each ramp meter can be assigned to a <a href="metering_strategies.html">
-	metering strategy</a>, or <b>algorithm</b>.
 </p>
 
 </main>
