@@ -25,4 +25,16 @@ public enum EssSurfaceBlackIceSignal {
 	noIce,         // 2
 	blackIce,      // 3
 	detectorError; // 4
+
+	/** Is there an interesting value? */
+	public boolean isValue() {
+		switch (this) {
+			case noIce:
+			case blackIce:
+			case detectorError:
+				return true;
+			default:
+				return false;
+		}
+	}
 }

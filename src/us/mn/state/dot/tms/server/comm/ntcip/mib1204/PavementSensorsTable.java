@@ -223,9 +223,7 @@ public class PavementSensorsTable {
 		/** Get black ice signal or null on error */
 		public EssSurfaceBlackIceSignal getBlackIceSignal() {
 			EssSurfaceBlackIceSignal bis = black_ice_signal.getEnum();
-			return (bis != EssSurfaceBlackIceSignal.undefined)
-			      ? bis
-			      : null;
+			return (bis != null && bis.isValue()) ? bis : null;
 		}
 
 		/** Get JSON representation */
