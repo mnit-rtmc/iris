@@ -96,12 +96,12 @@ public class Authenticator {
 		String name, char[] pwd)
 	{
 		try {
+			if (!authenticate(user, pwd))
+				processor.failLogin(c, name, false);
 			if (!checkDomain(c, user))
 				processor.failLogin(c, name, true);
-			else if (authenticate(user, pwd))
-				processor.finishLogin(c, user);
 			else
-				processor.failLogin(c, name, false);
+				processor.finishLogin(c, user);
 		}
 		finally {
 			clearPassword(pwd);
@@ -110,7 +110,7 @@ public class Authenticator {
 
 	/** Check if user is connecting from an allowed domain */
 	private boolean checkDomain(ConnectionImpl c, UserImpl user) {
-		if (c != null) {
+		if (c != null && user != null) {
 			InetAddress addr = c.getAddress();
 			for (Domain d : user.getDomains()) {
 				if (checkDomain(d, addr))
