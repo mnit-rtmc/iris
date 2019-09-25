@@ -48,7 +48,7 @@
     <h3><a href="#cameras">Cameras</a></h3>
     <h3><a href="#video">Video Monitors</a></h3>
     <h3><a href="#ramp_meters">Ramp Meters</a></h3>
-    <h3><a href="#gate_arms">Gate Arms</a></h3>
+    <h3><a href="gate_arms.html">Gate Arms</a></h3>
     <h3><a href="tolling.html#tag-readers">Tag Readers</a></h3>
     <h3><a href="beacons.html">Beacons</a></h3>
     <h3><a href="alarms.html">Alarms</a></h3>
@@ -229,7 +229,7 @@
 	<li><a href="#vds">VDS</a> (vehicle detection systems)</li>
 	<li><a href="#lcs">LCS</a> (lane-use control signs)</li>
 	<li><a href="#ramp_meters">Ramp meters</a></li>
-	<li><a href="#gate_arms">Gate Arms</a></li>
+	<li><a href="gate_arms.html">Gate Arms</a></li>
 	<li><a href="tolling.html#tag-readers">Tag Readers</a></li>
 	<li><a href="beacons.html">Beacons</a></li>
 	<li><a href="rwis.html">RWIS</a> (road-weather information systems)</li>
@@ -1014,7 +1014,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>STC</td>
 	    <td>tcp</td>
 	    <td>1-99</td>
-	    <td><a href="#gate_arms">Gate Arm</a></td>
+	    <td><a href="gate_arms.html">Gate Arm</a></td>
 	    <td rowspan="3">1</td>
 	</tr>
 	<tr id="e6">
@@ -1198,7 +1198,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	<a href="#cameras">cameras</a>,
 	<a href="#video">video monitors</a>,
 	<a href="#ramp_meters">ramp meters</a>,
-	<a href="#gate_arms">gate arms</a>,
+	<a href="gate_arms.html">gate arms</a>,
 	<a href="tolling.html#tag-readers">tag readers</a>,
 	<a href="beacons.html">beacons</a>,
 	<a href="alarms.html">alarms</a>,
@@ -2242,105 +2242,6 @@ FIXME
 <p>
 	Each ramp meter can be assigned to a <a href="metering_strategies.html">
 	metering strategy</a>, or <b>algorithm</b>.
-</p>
-
-<h3 id="gate_arms">Gate Arms</h3>
-<aside>
-	Select <span class="menu">View ➔ Gate Arm Arrays</span> menu item
-</aside>
-<p>
-	Gate arms are traffic control devices which restrict access to a
-	section of roadway.
-	They can be used, for example, for reversible lanes which can be changed
-	by time of day.
-</p>
-<p>
-	Gate arms are controlled as arrays of 1-8 gate arms.
-	Opening or closing an array will control all gate arms in the array.
-</p>
-<h4>Verification Cameras</h4>
-<p>
-	One or two <a href="#cameras">cameras</a> can be associated with a gate
-	arm array, the second one for approaching traffic.
-	This allows operators to verify the status and check traffic conditions
-	before opening or closing a gate arm array.
-	The <b>Swap</b> button allows the camera images to be swapped between
-	larger and smaller views.
-</p>
-<h4>Warning Action Plan</h4>
-<p>
-	An <a href="action_plans.html">action plan</a> can be associated with a
-	gate arm array, allowing one or more <a href="#dms">DMS</a> to display
-	appropriate warning messages.
-	Whenever the state changes, this plan will immediately be changed to
-	the appropriate <a href="action_plans.html#plan-phases">phase</a> &mdash;
-	<b>Warning Open Phase</b> when fully open, otherwise <b>Warning Closed
-	Phase</b>.
-</p>
-<h4 id="interlocks">Interlocks</h4>
-<p>
-	Great care must be taken to prevent traffic conflicts when using gate
-	arms.
-	Two types of <em>interlock</em> are available for this purpose.
-	An <em>open interlock</em> is a constraint which prevents the gate arm
-	from being opened within IRIS.
-	Similarly, a <em>close interlock</em> prevents the gate arm from being
-	closed.
-</p>
-<p>
-	When a gate arm is open, all other gate arms on the same roadway, but in
-	any other direction will have an <em>open interlock</em>.
-</p>
-</p>
-	Each gate arm can be assigned a <em>prerequisite</em> gate arm (on the
-	same roadway and direction).
-	This configuration prevents the gate arm from opening until the
-	prerequisite has been opened, using an <em>open interlock</em>.
-	Once a gate arm and its prerequisite are both open, the prerequisite
-	gate arm will have a <em>close interlock</em> until the other gate arm
-	is closed.
-</p>
-<p>
-	If communication is lost to a gate arm, the state will be unknown by
-	IRIS.
-	After <a href="#sys_attr"><code>gate_arm_alert_timeout_secs</code></a>
-	(default 90), it will be treated as <em>possibly open</em>, causing
-	interlocks to be checked.
-	Also, an email will be sent to the address in
-	<a href="#sys_attr"><code>email_recipient_gate_arm</code></a>.
-</p>
-<h4 id="gate_conflict">Conflicts</h4>
-<p>
-	If a <em>conflict</em> is detected, an <em>alert</em> email will be sent
-	to the address in the <a href="#sys_attr"><code>email_recipient_gate_arm
-	</code></a>.
-	An <em>open conflict</em> exists when an <em>open interlock</em>
-	constraint is broken.
-	Similarly, a <em>close conflict</em> exists for <em>close interlock</em>
-	constraints.
-	IRIS will not automatically try to resolve conflicts.
-</p>
-<h4 id="gate_security">Gate Arm Security</h4>
-<p>
-	There are a couple of extra security features to restrict access to
-	gate arm control.
-	There is a whitelist of IP addresses from which IRIS clients are allowed
-	to control gate arms.
-	It is specified as a property in the
-	<code>/etc/iris/iris-server.properties</code> configuration file.
-	The property is <code>gate.arm.whitelist</code>, and it contains a list
-	of addresses in CIDR notation (exact IP, or ranges specified such as
-	192.168.1.0/24).
-</p>
-<p>
-	Another gate arm security feature causes the entire "gate arm system"
-	to be disabled whenever any configuration change is made to a gate arm.
-	This includes any changes to a gate arm array, <a href="controllers.html">
-	controller</a> or associated <a href="#comm_links">comm link</a>.
-	IRIS will not send any command to open or close any gate arm in this
-	state.
-	The only way to re-enable gate arm control is to create a file at
-	<code>/var/lib/iris/gate_arm_enable</code> (using touch).
 </p>
 
 </main>
