@@ -127,9 +127,7 @@ public class SubSurfaceSensorsTable {
 		/** Get sensor error or null on error */
 		public EssSubSurfaceSensorError getSensorError() {
 			EssSubSurfaceSensorError se = sensor_error.getEnum();
-			return (se != EssSubSurfaceSensorError.undefined)
-			      ? se
-			      : null;
+			return (se != null && se.isError()) ? se : null;
 		}
 
 		/** Get JSON representation */

@@ -29,4 +29,18 @@ public enum EssPavementSensorError {
 	cutCable,     // 4
 	shortCircuit, // 5
 	dirtyLens;    // 6
+
+	/** Is there an error? */
+	public boolean isError() {
+		switch (this) {
+			case other:
+			case noResponse:
+			case cutCable:
+			case shortCircuit:
+			case dirtyLens:
+				return true;
+			default:
+				return false;
+		}
+	}
 }

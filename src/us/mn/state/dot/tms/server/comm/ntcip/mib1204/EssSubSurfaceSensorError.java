@@ -28,4 +28,17 @@ public enum EssSubSurfaceSensorError {
 	noResponse,   // 3
 	cutCable,     // 4
 	shortCircuit; // 5
+
+	/** Is there an error? */
+	public boolean isError() {
+		switch (this) {
+			case other:
+			case noResponse:
+			case cutCable:
+			case shortCircuit:
+				return true;
+			default:
+				return false;
+		}
+	}
 }

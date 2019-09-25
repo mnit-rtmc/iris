@@ -201,9 +201,7 @@ public class PavementSensorsTable {
 		/** Get pavement sensor error or null on error */
 		public EssPavementSensorError getPavementSensorError() {
 			EssPavementSensorError pse = sensor_error.getEnum();
-			return (pse != EssPavementSensorError.undefined)
-			      ? pse
-			      : null;
+			return (pse != null && pse.isError()) ? pse : null;
 		}
 
 		/** Get surface water depth in meters */
