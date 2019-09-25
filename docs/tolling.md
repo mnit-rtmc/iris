@@ -47,13 +47,18 @@ _closed_, a price of 0 is logged.
 
 ### Tag Readers
 
-[Tag readers] can be mounted over a tolled lane to record customer trips.  These
-are typically located just downstream of a pricing DMS.  The tag read events can
-be combined with the logged pricing information to build a list of trips for
+Select `View ➔ Lane Use ➔ Tag Readers` menu item
+
+A tag reader is a sensor for in-vehicle transponders (tags).  They can be
+mounted over a tolled lane to record customer trips.  These are typically
+located just downstream of a pricing DMS.
+
+When a tag is read, an event is logged in the `tag_read_event` database table.
+The event includes the date and time, tag ID, toll zone and tollway.  This
+can be combined with the logged pricing information to build a list of trips for
 each tag ID.  This information can be used to bill customers.
 
 
 [action tag]: action_plans.html#dms-action-tags
-[Tag readers]: admin_guide.html#tag_readers
 [station]: road_topology.html#r_node-types
 [system attribute]: admin_guide.html#sys_attr

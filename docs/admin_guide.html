@@ -49,7 +49,7 @@
     <h3><a href="#video">Video Monitors</a></h3>
     <h3><a href="#ramp_meters">Ramp Meters</a></h3>
     <h3><a href="#gate_arms">Gate Arms</a></h3>
-    <h3><a href="#tag_readers">Tag Readers</a></h3>
+    <h3><a href="tolling.html#tag-readers">Tag Readers</a></h3>
     <h3><a href="beacons.html">Beacons</a></h3>
     <h3><a href="alarms.html">Alarms</a></h3>
     <h3><a href="rwis.html">Road Weather Information Systems</a></h3>
@@ -230,7 +230,7 @@
 	<li><a href="#lcs">LCS</a> (lane-use control signs)</li>
 	<li><a href="#ramp_meters">Ramp meters</a></li>
 	<li><a href="#gate_arms">Gate Arms</a></li>
-	<li><a href="#tag_readers">Tag Readers</a></li>
+	<li><a href="tolling.html#tag-readers">Tag Readers</a></li>
 	<li><a href="beacons.html">Beacons</a></li>
 	<li><a href="rwis.html">RWIS</a> (road-weather information systems)</li>
 	<li><a href="gps.html">GPS</a> (global positioning system)</li>
@@ -1021,7 +1021,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>E6</td>
 	    <td>udp</td>
 	    <td>N/A</td>
-	    <td><a href="#tag_readers">Tag Reader</a></td>
+	    <td><a href="tolling.html#tag-readers">Tag Reader</a></td>
 	</tr>
 	<tr id="redlion">
 	    <td>RedLion</td>
@@ -1199,7 +1199,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	<a href="#video">video monitors</a>,
 	<a href="#ramp_meters">ramp meters</a>,
 	<a href="#gate_arms">gate arms</a>,
-	<a href="#tag_readers">tag readers</a>,
+	<a href="tolling.html#tag-readers">tag readers</a>,
 	<a href="beacons.html">beacons</a>,
 	<a href="alarms.html">alarms</a>,
 	<a href="rwis.html">road weather information systems</a> and
@@ -2341,18 +2341,6 @@ FIXME
 	state.
 	The only way to re-enable gate arm control is to create a file at
 	<code>/var/lib/iris/gate_arm_enable</code> (using touch).
-</p>
-
-<h3 id="tag_readers">Tag Readers</h3>
-<aside>
-	Select <span class="menu">View ➔ Lane Use ➔ Tag Readers</span> menu item
-</aside>
-<p>
-	A tag reader is a sensor for in-vehicle transponders (tags).
-	When a tag is read, an event is logged in the database.
-	The event includes the date and time, tag ID, toll zone and tollway.
-	This information can be used for <a href="tolling.html">tolling</a>
-	operation.
 </p>
 
 </main>
