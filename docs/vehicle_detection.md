@@ -103,10 +103,12 @@ button.
 
 If a detector is no longer used, it can be marked **abandoned**.
 
-### Detector Failure
+### Auto Fail
 
-IRIS checks traffic data continuously for common detector failures.  These are
-some possible problems:
+IRIS can check traffic data continuously for common detector failures.  If the
+`detector_auto_fail_enable` [system attribute] is `true`, the **auto fail** flag
+will be set and cleared automatically for all detectors.  These are the failure
+criteria:
 
 Problem   | Description
 ----------|-----------------------------------------------------------
@@ -119,18 +121,19 @@ When one of these conditions first occurs and every hour that it persists, an
 event is logged in the `detector_event` database table.  The
 `detector_auto_fail_view` can be used to check recent events.
 
-If the `detector_auto_fail_enable` [system attribute] is `true`, the **auto
-fail** flag is set and cleared when these problems come and go.
+### Force Fail
 
 If a detector has a fault which is not handled automatically, it can be **force
 failed**.  This flag is only set manually, so it must be cleared once the
 failure is corrected.
 
+### Fake Detectors
+
 When a detector is _failed_ (**auto fail** or **force fail**), its data will not
 be used for [travel time], [ramp metering], _etc_.  In that case, **fake**
-detection could be used — this field can contain one or more other detector
-names, separated by spaces.  The average density or speed of those detectors
-(which are not also failed) will be used instead.
+detection can be used — this field can contain one or more other detector names,
+separated by spaces.  The average density or speed of those detectors (which are
+not also failed) will be used instead.
 
 ### Traffic Data Archiving
 
@@ -176,11 +179,12 @@ Period | Binning Interval | Samples | Stored Bins
 43200  | 12 hours         | 2       | 30 seconds
 86400  | 24 hours         | 1       | 30 seconds
 
-For each detector, a binned sample file is created for each sampled traffic data
-type.  The base file name is the detector name.  The extension is the
-[traffic data](#traffic-data) **code** followed by the **period** (in seconds).
-For example, 60-second vehicle count samples collected from detector 100 would
-be stored in a file called `100.v60`, containing 2880 bins.
+For each detector, a binned sample file is created for each
+[traffic data](#traffic-data) **sample type**.  The base file name is the
+detector name.  The extension is the traffic data **code** followed by the
+**period** (in seconds).  For example, 60-second vehicle count samples collected
+from detector 100 would be stored in a file called `100.v60`, containing 2880
+bins.
 
 Each data sample is either an 8- or 16-bit signed integer, depending on the
 sample type.  16-bit samples are in high-byte first order.  A negative value
@@ -204,7 +208,7 @@ Column | Name       | Description
 
 #### Example Log
 
-Interpreting sample `.vlog` data:
+Interpreting example `.vlog` data for 11 vehicles:
 
 Log Data            | Duration | Headway | Time     | Speed
 --------------------|----------|---------|----------|-------
@@ -226,10 +230,10 @@ Log Data            | Duration | Headway | Time     | Speed
 [controller]: controllers.html
 [district]: admin_guide.html#district
 [IO pins]: controllers.html#io-pins
-[parking area]: parking_area.html
+[parking area]: parking_areas.html
 [period]: admin_guide.html#poll_period
 [protocols]: admin_guide.html#prot_table
-[r_node]: road_topology.html#r_node
+[r_node]: road_topology.html#r_nodes
 [ramp metering]: ramp_meters.html
 [roads]: road_topology.html#roads
 [system attribute]: admin_guide.html#sys_attr
