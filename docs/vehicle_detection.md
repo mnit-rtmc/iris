@@ -36,13 +36,35 @@ select the **Detectors** tab for that r_node.  Enter the detector **Name** and
 press the **Create** button.
 
 After selecting a detector in the r_node detector table, its properties, such as
-**lane type** and **lane #** can be changed.  In IRIS, lanes are numbered from
+**lane type** and **lane #** can be changed.  Lanes are numbered from
 _right-to-left_, starting with the right lane as 1.  A **label** will be created
 from this information, including abbreviations of the [roads] associated with
 the [r_node].
 
 The **field length** of a detector determines how density and speed are
 estimated from counts and occupancy.  It is in units of feet.
+
+#### Lane Types
+
+Type       | [No Hit](#auto-fail) Threshold | [Locked On](#auto-fail) Threshold
+-----------|--------------------------------|----------------------------------
+Mainline   | 4 hours                        | 2 minutes
+Auxiliary  | 24 hours                       | 2 minutes
+CD Lane    | 4 hours                        | 2 minutes
+Reversible | 72 hours                       | 2 minutes
+Merge      | 12 hours                       | 30 minutes
+Queue      | 12 hours                       | 30 minutes
+Exit       | 8 hours                        | 30 minutes
+Bypass     | 72 hours                       | 30 minutes
+Passage    | 12 hours                       | 30 minutes
+Velocity   | 4 hours                        | 2 minutes
+Omnibus    | 72 hours                       | 30 minutes
+Green      | 72 hours                       | 30 minutes
+Wrong Way  | 8 hours                        | 30 minutes
+HOV        | 8 hours                        | 2 minutes
+HOT        | 72 hours                       | 2 minutes
+Shoulder   | 72 hours                       | 2 minutes
+Parking    | 2 weeks                        | 2 weeks
 
 ### Detector Protocols
 
