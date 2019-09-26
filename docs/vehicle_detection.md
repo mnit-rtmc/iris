@@ -44,9 +44,9 @@ the [r_node].
 The **field length** of a detector determines how density and speed are
 estimated from counts and occupancy.  It is in units of feet.
 
-#### Lane Types
+#### Lane Type
 
-Type       | [No Hit](#auto-fail) Threshold | [Locked On](#auto-fail) Threshold
+Lane Type  | [No Hit](#auto-fail) Threshold | [Locked On](#auto-fail) Threshold
 -----------|--------------------------------|----------------------------------
 Mainline   | 4 hours                        | 2 minutes
 Auxiliary  | 24 hours                       | 2 minutes
@@ -134,9 +134,9 @@ criteria:
 
 Problem   | Description
 ----------|-----------------------------------------------------------
-no hits   | No vehicles counted for a duration determined by lane type
+no hits   | No vehicles counted for a duration determined by [lane type](#lane-type)
 chatter   | Unreasonably high vehicle count
-locked on | Occupancy at 100% for a duration determined by lane type
+locked on | Occupancy at 100% for a duration determined by [lane type](#lane-type)
 no change | No change in occupancy for 24 hours
 
 When one of these conditions first occurs and every hour that it persists, an
