@@ -40,7 +40,7 @@ import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.event.CameraVideoEvent;
 
 /**
- * CameraImpl represents a single CCTV camera.
+ * CameraImpl represents a single roadside camera.
  *
  * @author Douglas Lau
  * @author Tim Johnson
