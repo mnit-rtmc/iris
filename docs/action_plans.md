@@ -84,7 +84,7 @@ fields will match.  **Shift** is only required for days like *Black Friday*
 [MULTI]: admin_guide.html#multi
 [Parking area]: parking_areas.html
 [quick message]: admin_guide.html#quick_msg
-[ramp meter]: admin_guide.html#ramp_meters
+[ramp meter]: ramp_meters.html
 [Slow traffic warning]: slow_warning.html
 [Toll zone]: tolling.html
 [Travel time]: travel_time.html

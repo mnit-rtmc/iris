@@ -28,7 +28,7 @@ configure the encoded stream.
 
 Field                     | Description
 --------------------------|-------------------------------------------
-`#`                       | Camera number, used for [keyboard systems]
+`#`                       | Camera number, used for [keyboards](#camera-keyboards)
 Encoder Type              | The type of encoder for the video stream
 Encoder Address           | The host name or IP address of the encoder.  If the encoder type does not specify a path, it can also be included here.  If a URI scheme is included, it will be used instead of the scheme from the encoder type
 Encoder Multicast Address | A multicast address can be used by [MonStream] clients.  If defined, it will be used instead of the encoder address.  It must be a UDP address in the multicast range, including port.  Multicast requires less bandwidth, and allows scaling to many simultaneous streams
@@ -44,8 +44,8 @@ operations can be performed:
 * Manual focus: near / far
 * Manual iris: open / close
 * Wiper control
-* Recall [preset](#preset) positions
-* Store [preset](#preset) positions
+* Recall [preset](#presets) positions
+* Store [preset](#presets) positions
 
 For PTZ control to function, the camera must be associated with a [controller]
 on a PTZ protocol [comm link].
@@ -73,14 +73,13 @@ entry field with a camera icon and label.  This tool enables quick switching of
 the selected camera.
 
 The keyboard _numpad_ can be used from anywhere within IRIS to control the
-camera selector tool.  When the <kbd>Num Lock</kbd> key is off, all numpad
-keystrokes are directed to the tool.  The <kbd>+</kbd> and <kbd>-</kbd> keys can
-select the next and previous cameras, respectively.
+camera selector tool.  When the `Num Lock` key is off, all numpad keystrokes are
+directed to the tool.  The `+` and `-` keys can select the next and previous
+cameras, respectively.
 
-Pressing the <kbd>.</kbd> key (on the numpad) changes to [video monitor]
-selection mode — the icon will change to a monitor.  Pressing the <kbd>`*`</kbd>
-key (on the numpad) changes to [play list] selection mode — the icon will change
-to a play list.
+Pressing the `.` key (on the numpad) changes to [video monitor] selection mode —
+the icon will change to a monitor.  Pressing the `*` key (on the numpad) changes
+to [play list] selection mode — the icon will change to a play list.
 
 ### Camera Keyboards
 
@@ -116,6 +115,6 @@ Otherwise, requests will be made directly to the camera's encoder address.
 [MonStream]: video.html#monstream
 [Pelco-P]: admin_guide.html#pelcop
 [play list]: video.html#play-lists
-[ramp meter]: admin_guide.html#ramp_meters
+[ramp meter]: ramp_meters.html
 [system attribute]: admin_guide.html#sys_attr
 [video monitor]: video.html
