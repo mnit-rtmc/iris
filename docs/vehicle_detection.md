@@ -6,30 +6,7 @@ Some systems use _radar_ mounted on the side of the road.  _Video detection_
 uses a camera and computer vision software.  Collectively, these systems are
 simply called **detectors**.
 
-### Traffic Data
-
-Most detectors sample traffic data in fixed time intervals and put it into
-[bins](#binned-data).  IRIS can store these types of binned traffic data:
-
-Sample Type      | Description                              | Code | Sample Size
------------------|------------------------------------------|------|------------
-Vehicle Count    | Count of vehicles detected               | v    | 8 bits
-Motorcycle Count | Count of vehicles up to 7 feet           | vmc  | 8 bits
-Small Count      | Count of vehicles between 7 and 20 feet  | vs   | 8 bits
-Medium Count     | Count of vehicles between 20 and 43 feet | vm   | 8 bits
-Large Count      | Number of vehicles 43 feet or longer     | vl   | 8 bits
-Occupancy        | Percent _occupancy_ count (0 to 100.00)  | op   | 16 bits
-Scans            | Scan _occupancy_ count (0 to 1800)       | c    | 16 bits
-Speed            | Average speed (mph) of detected vehicles | s    | 8 bits
-
-Instead of binning, some detectors can record a [vehicle log](#vehicle-logging),
-with information about each detected vehicle, such as headway and speed.
-
-Every 30 seconds, an XML file is generated containing the most recent sample
-data from all defined detectors.  The file is called `det_sample.xml.gz`, and it
-is written to the [XML output directory].
-
-### Detector Setup
+### Configuration
 
 To create a detector, first select the [r_node] at the proper location.  Then
 select the **Detectors** tab for that r_node.  Enter the detector **Name** and
@@ -43,6 +20,8 @@ the [r_node].
 
 The **field length** of a detector determines how density and speed are
 estimated from counts and occupancy.  It is in units of feet.
+
+If a detector is no longer used, it can be marked **abandoned**.
 
 #### Lane Type
 
@@ -65,6 +44,36 @@ HOV        | 8 hours                        | 2 minutes
 HOT        | 72 hours                       | 2 minutes
 Shoulder   | 72 hours                       | 2 minutes
 Parking    | 2 weeks                        | 2 weeks
+
+### Transfer
+
+It is possible to move a detector to another r_node.  Select the target r_node
+and enter the detector **Name**.  The current label for that detector will
+appear on the right.  To move it to the current r_node, press the **Transfer**
+button.
+
+### Traffic Data
+
+Most detectors sample traffic data in fixed time intervals and put it into
+[bins](#binned-data).  IRIS can store these types of binned traffic data:
+
+Sample Type      | Description                              | Code | Sample Size
+-----------------|------------------------------------------|------|------------
+Vehicle Count    | Count of vehicles detected               | v    | 8 bits
+Motorcycle Count | Count of vehicles up to 7 feet           | vmc  | 8 bits
+Small Count      | Count of vehicles between 7 and 20 feet  | vs   | 8 bits
+Medium Count     | Count of vehicles between 20 and 43 feet | vm   | 8 bits
+Large Count      | Number of vehicles 43 feet or longer     | vl   | 8 bits
+Occupancy        | Percent _occupancy_ count (0 to 100.00)  | op   | 16 bits
+Scans            | Scan _occupancy_ count (0 to 1800)       | c    | 16 bits
+Speed            | Average speed (mph) of detected vehicles | s    | 8 bits
+
+Instead of binning, some detectors can record a [vehicle log](#vehicle-logging),
+with information about each detected vehicle, such as headway and speed.
+
+Every 30 seconds, an XML file is generated containing the most recent sample
+data from all defined detectors.  The file is called `det_sample.xml.gz`, and it
+is written to the [XML output directory].
 
 ### Detector Protocols
 
@@ -115,15 +124,6 @@ The Houston Radar DR-500 doppler radar can be used to collect speed data only.
 
 The Banner Engineering DXM magnetometer can detect presence.  It can be used for
 [parking area] monitoring.
-
-### Configuration Changes
-
-It is possible to move a detector to another r_node.  Select the target r_node
-and enter the detector **Name**.  The current label for that detector will
-appear on the right.  To move it to the current r_node, press the **Transfer**
-button.
-
-If a detector is no longer used, it can be marked **abandoned**.
 
 ### Auto Fail
 
