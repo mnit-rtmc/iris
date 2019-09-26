@@ -13,9 +13,9 @@ chosen monitor will switch whenever the user selects a new camera.
 
 ### MonStream
 
-**MonStream** is a full-screen video streaming application which runs on
-low-cost Linux computers.  IRIS can send switching messages to MonStream,
-creating a low-latency IP video system.
+[MonStream] is a full-screen video streaming application which runs on low-cost
+Linux computers.  IRIS can send switching messages to MonStream, creating a
+low-latency IP video system.
 
 A computer running MonStream can be configured to stream a grid of four or more
 video feeds onto a single large monitor.  The only configuration required on the

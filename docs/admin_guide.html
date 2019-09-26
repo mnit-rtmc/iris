@@ -45,7 +45,7 @@
     <h3><a href="#dms">Dynamic Message Signs</a></h3>
     <h3><a href="#lcs">Lane-Use Control Signs</a></h3>
     <h3><a href="#vds">Vehicle Detection</a></h3>
-    <h3><a href="#cameras">Cameras</a></h3>
+    <h3><a href="cameras.html">Cameras</a></h3>
     <h3><a href="video.html">Video Monitors</a></h3>
     <h3><a href="ramp_meters.html">Ramp Meters</a></h3>
     <h3><a href="gate_arms.html">Gate Arms</a></h3>
@@ -223,7 +223,7 @@
 </p>
 <ul>
 	<li><a href="#dms">DMS</a> (dynamic message signs)</li>
-	<li><a href="#cameras">CCTV cameras</a> and
+	<li><a href="cameras.html">CCTV cameras</a> and
 	    <a href="video.hdml">Video monitors</a>
 	</li>
 	<li><a href="#vds">VDS</a> (vehicle detection systems)</li>
@@ -968,7 +968,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>Axis-PTZ</td>
 	    <td>http</td>
 	    <td>N/A</td>
-	    <td rowspan="6"><a href="#ptz">PTZ</a></td>
+	    <td rowspan="6"><a href="cameras.html#pan-tilt-and-zoom">PTZ</a></td>
 	    <td rowspan="6">1</td>
 	</tr>
 	<tr id="pelcod">
@@ -1000,7 +1000,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>Pelco-P</td>
 	    <td>tcp</td>
 	    <td>N/A</td>
-	    <td><a href="#cam_kbd">Camera KBD</a></td>
+	    <td><a href="cameras.html#camera-keyboards">Camera KBD</a></td>
 	    <td>N/A</td>
 	</tr>
 	<tr>
@@ -1195,7 +1195,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	<a href="#dms">dynamic message signs</a>,
 	<a href="#lcs">lane-use control signs</a>,
 	<a href="#vds">vehicle detection</a>,
-	<a href="#cameras">cameras</a>,
+	<a href="cameras.html">cameras</a>,
 	<a href="video.html">video monitors</a>,
 	<a href="ramp_meters.html">ramp meters</a>,
 	<a href="gate_arms.html">gate arms</a>,
@@ -1998,169 +1998,6 @@ FIXME
 </tr>
 </table>
 <br/>
-
-<h3 id="cameras">Cameras</h3>
-<p>
-	Video cameras with remote <a href="#ptz">pan / tilt / zoom</a>
-	capability can be used to monitor freeway conditions.
-	The <b>Camera</b> tab can display Motion JPEG (MJPEG) video.
-	To view MPEG4 or h.264 video, the <a href="video.html#monstream">MonStream</a>
-	application is required.
-</p>
-<h4 id="video_servlet">Video Servlet</h4>
-<p>
-	The <b>video</b> servlet is a proxy server which provides MJPEG streams
-	to IRIS clients.
-	Properties in the <a href="#client_properties">
-	iris-client.properties</a> file are used to configure use of the
-	video servlet: <code>video.host</code>, <code>video.port</code>, and
-	<code>district</code>.
-	When specified, video requests will be made to
-	<code>http://<i>[video.host]</i>:<i>[video.port]</i>/video/stream/<i>[district]</i>/<i>[camera_name]</i></code>.
-	Otherwise, requests will be made directly to the camera's
-	<a href="#encoder">encoder</a> address.
-</p>
-
-<aside>
-	Select <span class="menu">View ➔ Video ➔ Encoder Types</span> menu item
-</aside>
-<h4 id="encoder_type">Encoder Types</h4>
-<p>
-	An encoder type represents a specific make and model of video encoder.
-	It determines how video request URIs are formed.
-</p>
-<dl>
-    <dt>Encoder Type</dt>
-    <dd>Make / model name</dd>
-    <dt>Encoding</dt>
-    <dd>Stream encoding: MJPEG, MPEG2, MPEG4, H264</dd>
-    <dt>URI Scheme</dt>
-    <dd>Scheme part of request URI: <code>rtsp</code> / <code>http</code></dd>
-    <dt>URI Path</dt>
-    <dd>Path part of request URI.
-        This could be the location of an SDP file, for example.
-        To include the encoder channel number in the path, use
-        <code>{chan}</code>.
-    </dd>
-    <dt>Latency</dt>
-    <dd>Buffering latency for consuming stream</dd>
-</dl>
-
-<aside>
-	Select <span class="menu">View ➔ Video ➔ Cameras</span> menu item
-</aside>
-<h4 id="encoder">Video Encoders</h4>
-<p>
-	The <b>Setup</b> tab within a camera properties form contains attributes
-	to configure the encoded stream.
-</p>
-<dl>
-    <dt>#</dt>
-    <dd>Camera number, used for <a href="#cam_kbd">keyboard systems</a>.</dd>
-    <dt>Encoder Type</dt>
-    <dd>The <a href="#encoder_type">type of encoder</a> for the video stream.
-    </dd>
-    <dt>Encoder Address</dt>
-    <dd>The host name or IP address of the encoder.
-        If the encoder type does not specify a path, it can also be included
-        here.
-        If a URI scheme is included, it will be used instead of the scheme from
-        the encoder type.
-    </dd>
-    <dt>Encoder Multicast Address</dt>
-    <dd>A multicast address can be used by
-	<a href="video.html#monstream">MonStream</a> clients.
-        If defined, it will be used instead of the encoder address.
-        It must be a UDP address in the multicast range, including port.
-        Multicast requires less bandwidth, and allows scaling to many
-        simultaneous streams.</dd>
-    <dt>Encoder Channel</dt>
-    <dd>This only needs to be specified if the URI path of the encoder type
-        requires it.</dd>
-</dl>
-<h4 id="ptz">Pan / Tilt / Zoom</h4>
-<p>
-	Many cameras have built-in pan/tilt/zoom (PTZ) functionality.
-	The following operations can be performed:
-</p>
-<ul>
-	<li>Panning or tilting the camera</li>
-	<li>Zooming in or out</li>
-	<li>Manual focus: near / far</li>
-	<li>Manual iris: open / close</li>
-	<li>Wiper control</li>
-	<li>Recall <a href="#preset">preset</a> positions</li>
-	<li>Store <a href="#preset">preset</a> positions</li>
-</ul>
-<p>
-	For PTZ control to function, the camera must be associated with a
-	<a href="controllers.html">controller</a> on a PTZ protocol
-	<a href="#comm_links">comm link</a>.
-</p>
-<p>
-	A selected camera can be panned and/or tilted by clicking on the video
-	display on the <b>Camera</b> tab.
-	The pan/tilt speed will vary depending on distance from the mouse-click
-	to the center of the image.
-	Similarly, using a mouse wheel on the video display will cause the
-	camera to zoom in or out.
-</p>
-<p>
-	Below the video display, there are also buttons for PTZ, as well as
-	focus, iris and wiper control.
-</p>
-<h4 id="preset">Presets</h4>
-<p>
-	The <b>Preset</b> tab within a camera properties form can be used to
-	configure up to 12 presets per camera.
-	A preset can be associated with either a compass direction or a device,
-	such as <a href="#dms">DMS</a> or <a href="ramp_meters.html">ramp meter</a>.
-	To associate a preset with a device, enable the preset, then select
-	that preset on the <b>Location</b> tab of the device's properties form.
-</p>
-<h4 id="cam_tool">Camera Selector Tool</h4>
-<p>
-	The camera selector tool is on the toolbar just below the map.
-	It has a text entry field with a camera icon and label.
-	This tool enables quick switching of the selected camera.
-</p>
-<p>
-	The keyboard "numpad" can be used from anywhere within IRIS to control
-	the camera selector tool.
-	When the <b>Num Lock</b> key is off, all numpad keystrokes are directed
-	to the tool.
-	The <b>+</b> and <b>-</b> keys can select the next and previous cameras,
-	respectively.
-	Pressing the <b>.</b> key (on the numpad) changes to
-	<a href="video.html">video monitor</a> selection mode &mdash; the icon
-	will change to a monitor.
-	Pressing the <b>*</b> key (on the numpad) changes to
-	<a href="video.html#play-lists">play list</a> selection mode &mdash; the
-	icon will change to a play list.
-</p>
-
-<h4 id="cam_kbd">Camera Keyboards</h4>
-<p>
-	Dedicated keyboards are supported for easier camera control.
-	These keyboards have joysticks for <a href="#ptz">pan / tilt / zoom</a>
-	control.
-	Two protocols are supported: <a href="#pelcop">Pelco-P</a> and
-	Panasonic CU-950.
-</p>
-<p>
-	To configure a <a href="#pelcop">Pelco-P</a> keyboard, a comm link using
-	the <code>pelcop</code> protocol must be created.
-	One active controller must exist on that comm link, but no devices
-	are necessary.
-	IRIS will initiate a TCP connection to connect to the keyboard &mdash;
-	typically, this will be managed by an ethernet-to-serial device.
-</p>
-<p>
-	For Panasonic CU-950 keyboards, <a href="#sys_attr"><code>
-	camera_kbd_panasonic_enable</code></a> must be enabled.
-	This will cause IRIS to listen for connections on TCP port 7001.
-	The keyboard must be configured with the IRIS server's IP address.
-</p>
 
 </main>
 
