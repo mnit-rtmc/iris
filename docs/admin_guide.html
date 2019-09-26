@@ -44,7 +44,7 @@
   <div id="devices_div">
     <h3><a href="#dms">Dynamic Message Signs</a></h3>
     <h3><a href="#lcs">Lane-Use Control Signs</a></h3>
-    <h3><a href="#vds">Vehicle Detection</a></h3>
+    <h3><a href="vehicle_detection.html">Vehicle Detection</a></h3>
     <h3><a href="cameras.html">Cameras</a></h3>
     <h3><a href="video.html">Video Monitors</a></h3>
     <h3><a href="ramp_meters.html">Ramp Meters</a></h3>
@@ -226,7 +226,7 @@
 	<li><a href="cameras.html">Cameras</a> and
 	    <a href="video.hdml">Video monitors</a>
 	</li>
-	<li><a href="#vds">VDS</a> (vehicle detection systems)</li>
+	<li><a href="vehicle_detection.html">VDS</a> (vehicle detection systems)</li>
 	<li><a href="#lcs">LCS</a> (lane-use control signs)</li>
 	<li><a href="ramp_meters.html">Ramp meters</a></li>
 	<li><a href="gate_arms.html">Gate Arms</a></li>
@@ -891,7 +891,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td rowspan="3"><a href="#dms">DMS</a>,
 	        <a href="#ilcs">ILCS</a>,
 	        <a href="rwis.html">RWIS</a>,
-	        <a href="#vds">VDS</a>,
+	        <a href="vehicle_detection.html">VDS</a>,
 	        <a href="gps.html">GPS</a>
 	    </td>
 	    <td rowspan="4">1</td>
@@ -916,7 +916,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>MnDOT-170 4</td>
 	    <td rowspan="2">tcp</td>
 	    <td>1-15</td>
-	    <td rowspan="2"><a href="#vds">VDS</a>,
+	    <td rowspan="2"><a href="vehicle_detection.html">VDS</a>,
 	        <a href="ramp_meters.html">Ramp Meters</a>,
 		<a href="beacons.html">beacons</a>,
 	        <a href="#dlcs">DLCS</a>,
@@ -932,7 +932,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>SS105</td>
 	    <td>tcp</td>
 	    <td>1-9999</td>
-	    <td rowspan="6"><a href="#vds">VDS</a></td>
+	    <td rowspan="6"><a href="vehicle_detection.html">VDS</a></td>
 	    <td rowspan="2">1-8</td>
 	</tr>
 	<tr id="ss125">
@@ -1089,7 +1089,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>19 - 36</td>
 	</tr>
 	<tr>
-	    <td><a href="#vds">VDS</a></td>
+	    <td><a href="vehicle_detection.html">VDS</a></td>
 	    <td>39 - 62</td>
 	</tr>
 	<tr>
@@ -1194,7 +1194,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	IRIS supports several different device types:
 	<a href="#dms">dynamic message signs</a>,
 	<a href="#lcs">lane-use control signs</a>,
-	<a href="#vds">vehicle detection</a>,
+	<a href="vehicle_detection.html">vehicle detection</a>,
 	<a href="cameras.html">cameras</a>,
 	<a href="video.html">video monitors</a>,
 	<a href="ramp_meters.html">ramp meters</a>,
@@ -1468,536 +1468,6 @@ FIXME
 	<a href="controllers.html">controller</a>, as well as the DMS which
 	represents the LCS.
 </p>
-
-<h3 id="vds">Vehicle Detection Systems</h3>
-<p>
-	There are several types of <b>vehicle detection systems</b> (VDS).
-	The earliest of these is the <b>inductive loop</b>, which is a wire
-	looped under the road surface.
-	Some systems use <b>radar</b> mounted on the side of the road.
-	<b>Video detection</b> uses a camera and computer vision software.
-	Collectively, these systems are simply called <b>detectors</b>.
-</p>
-
-<h4 id="traffic_data">Traffic Data</h4>
-<p>
-	Most detectors sample traffic data in fixed time intervals and put it
-	into <a href="#binned_data">bins</a>.
-	IRIS can store these types of binned traffic data:
-</p>
-<table>
-<tr>
-	<th>Sample Type</th>
-	<th>Description</th>
-	<th>Code</th>
-	<th>Sample Size</th>
-</tr>
-<tr>
-	<td>Vehicle Count</td>
-	<td>Number of vehicles detected</td>
-	<td>v</td>
-	<td>8 bits</td>
-</tr>
-<tr>
-	<td>Motorcycle Count</td>
-	<td>Number of vehicles up to 7'</td>
-	<td>vmc</td>
-	<td>8 bits</td>
-</tr>
-<tr>
-	<td>Small Count</td>
-	<td>Number of vehicles between 7 and 20'</td>
-	<td>vs</td>
-	<td>8 bits</td>
-</tr>
-<tr>
-	<td>Medium Count</td>
-	<td>Number of vehicles between 20 and 43'</td>
-	<td>vm</td>
-	<td>8 bits</td>
-</tr>
-<tr>
-	<td>Large Count</td>
-	<td>Number of vehicles 43' or longer</td>
-	<td>vl</td>
-	<td>8 bits</td>
-</tr>
-<tr>
-	<td>Occupancy</td>
-	<td>Percent of time a vehicle occupied the detection zone (fixed
-	    point 0.00 to 100.00)</td>
-	<td>op</td>
-	<td>16 bits</td>
-</tr>
-<tr>
-	<td>Scans</td>
-	<td>Number of scans during which a vehicle occupied the detection zone
-	    (0 to 1800)</td>
-	<td>c</td>
-	<td>16 bits</td>
-</tr>
-<tr>
-	<td>Speed</td>
-	<td>Average speed (mph) of vehicles detected</td>
-	<td>s</td>
-	<td>8 bits</td>
-</tr>
-</table>
-<p>
-	Instead of binning, some detectors can record a <a href="#veh_log">
-	vehicle log</a>, with information about each detected vehicle, such as
-	headway and speed.
-</p>
-<p>
-	Every 30 seconds, an XML file is generated containing the most recent
-	sample data from all defined detectors.
-	The file is called <code>det_sample.xml.gz</code>, and it is written to
-	the <a href="troubleshooting.html#xml-output">XML output directory</a>
-</p>
-
-<h4>Detector Setup</h4>
-<p>
-	To create a detector, first select the
-	<a href="road_topology.html#r_node">r_node</a> at the proper location.
-	Then select the <b>Detectors</b> tab for that r_node.
-	Enter the detector <b>Name</b> and press the <b>Create</b> button.
-</p>
-<p>
-	After selecting a detector in the r_node detector table, its properties,
-	such as <b>lane type</b> and <b>lane #</b> can be changed.
-	In IRIS, lanes are numbered from right-to-left, starting with the
-	right lane as 1.
-	A <b>label</b> will be created from this information, including
-	abbreviations of the <a href="road_topology.html#roads">roads</a>
-	associated with the <a href="road_topology.html#r_node">r_node</a>.
-</p>
-<p>
-	The <b>field length</b> of a detector determines how density and speed
-	are estimated from counts and occupancy.
-	It is in units of feet.
-</p>
-
-<h4>Detector Protocols</h4>
-<p>
-	IRIS supports several different <a href="#prot_table">protocols</a> for
-	communicating with vehicle detection systems.
-	The protocol used depends on the <a href="#comm_links">comm link</a> of
-	the <a href="controllers.html">controller</a> to which it is assigned.
-	The following table summarizes features of each protocol.
-</p>
-<table>
-	<tr>
-	    <th>Protocol</th>
-	    <th>Binning</th>
-	    <th>Traffic Data</th>
-	</tr>
-	<tr>
-	    <th><a href="#ntcip">NTCIP</a></th>
-	    <td>0-255 seconds</td>
-	    <td rowspan="2">Count, Occupancy</td>
-	</tr>
-	<tr>
-	    <th><a href="#mndot170">MnDOT-170</a></th>
-	    <td>30 seconds</td>
-	</tr>
-	<tr>
-	    <th><a href="#ss105">SS105</a></th>
-	    <td>5 seconds to 1 month</td>
-	    <td rowspan="3">Count, Occupancy, Speed, Classification</td>
-	</tr>
-	<tr>
-	    <th><a href="#ss125">SS125</a></th>
-	    <td>5 seconds to 1 month (?)</td>
-	</tr>
-	<tr>
-	    <th><a href="#g4">G4</a></th>
-	    <td>10 seconds to 1 hour</td>
-	</tr>
-	<tr>
-	    <th><a href="#canoga">Canoga</a></th>
-	    <td>N/A (vehicle logging)</td>
-	    <td>Timestamp, Speed (double loops)</td>
-	</tr>
-	<tr>
-	    <th><a href="#dr500">DR-500</a></th>
-	    <td>1-5? minutes</td>
-	    <td>Speed</td>
-	</tr>
-	<tr>
-	    <th><a href="#dxm">DXM</a></th>
-	    <td>N/A (presence)</td>
-	    <td>Magnetic Field</td>
-	</tr>
-</table>
-<p>
-	For protocols which allow the binning intereval to be adjusted, it will
-	be set to the poll <a href="#poll_period">period</a> of the comm link.
-</p>
-
-<h4>Configuration Changes</h4>
-<p>
-	It is possible to move a detector to another r_node.
-	Select the target r_node and enter the detector <b>Name</b>.
-	The current label for that detector will appear on the right.
-	To move it to the current r_node, press the <b>Transfer</b> button.
-</p>
-<p>
-	If a detector is no longer used, it can be marked <b>abandoned</b>.
-</p>
-
-<h4>Detector Failure</h4>
-<p>
-	IRIS checks traffic data continuously for common detector failures.
-	These are some possible problems:
-</p>
-<dl>
-	<dt>no hits</dt>
-	<dd>No vehicles counted for a duration determined by lane type</dd>
-	<dt>chatter</dt>
-	<dd>Unreasonably high vehicle count</dd>
-	<dt>locked on</dt>
-	<dd>Occupancy at 100% for a duration determined by lane type</dd>
-	<dt>no change</dt>
-	<dd>No change in occupancy for 24 hours</dd>
-</dl>
-<p>
-	When one of these conditions first occurs and every hour that it
-	persists, an event is logged in the <code>detector_event</code> database
-	table.
-	The <code>detector_auto_fail_view</code> can be used to check recent
-	events.
-</p>
-<p>
-	If <a href="#sys_attr"><code>detector_auto_fail_enable</code></a> is
-	<code>true</code>, the <b>auto fail</b> flag is set and cleared when
-	these problems come and go.
-</p>
-<p>
-	If a detector has a fault which is not handled automatically, it can be
-	<b>force failed</b>.
-	This flag is only set manually, so it must be cleared once the failure
-	is corrected.
-</p>
-<p>
-	When a detector is failed (<b>auto fail</b> or <b>force fail</b>), its
-	data will not be used for <a href="travel_time.html">travel time</a>,
-	<a href="ramp_meters.html">ramp metering</a>, etc.
-	In that case, <b>fake</b> detection could be used &mdash; this field can
-	contain one or more other detector names, separated by spaces.
-	The average density or speed of those detectors (which are not also
-	failed) will be used instead.
-</p>
-
-<h4 id="vds_archiving">Traffic Data Archiving</h4>
-<p>
-	Sample data is archived only if <a href="#sys_attr"><code>
-	sample_archive_enable</code></a> is <code>true</code>.
-	Files are stored in <code>/var/lib/iris/traffic</code>, in a directory
-	with the <a href="#district">district</a> name.
-	Within that directory a new subdirectory is created for each year, with
-	a 4-digit name (<code>1994-9999</code>).
-</p>
-<p>
-	As data is collected, a new subdirectory is created every day &mdash;
-	the name is 8-digits: year (<code>1994-9999</code>), month
-	(<code>01-12</code>) and day-of-month (<code>01-31</code>).
-	At 10 PM, all traffic data from the previous day is moved into a single
-	ZIP file with the 8-digit base name and a <code>.traffic</code>
-	extension.
-</p>
-
-<h4 id="binned_data">Daily Binned Traffic Data</h4>
-<p>
-	A binned sample file consists of some number of periods of equal
-	duration.
-	The first period begins (and the last period ends) at midnight.
-	The <b>binning interval</b> determines the number of samples collected
-	per day &mdash; a shorter interval results in more samples.
-	If the period is longer than 30 seconds, the samples are allocated
-	evenly into 30-second bins for storage.
-</p>
-<table>
-<tr>
-	<th>Period</th>
-	<th>Binning Interval</th>
-	<th>Samples</th>
-	<th>Stored Bins</th>
-</tr>
-<tr>
-	<td>5</td>
-	<td>5 seconds</td>
-	<td>17280</td>
-	<td>5 seconds</td>
-</tr>
-<tr>
-	<td>6</td>
-	<td>6 seconds</td>
-	<td>14400</td>
-	<td>6 seconds</td>
-</tr>
-<tr>
-	<td>10</td>
-	<td>10 seconds</td>
-	<td>8640</td>
-	<td>10 seconds</td>
-</tr>
-<tr>
-	<td>15</td>
-	<td>15 seconds</td>
-	<td>5760</td>
-	<td>15 seconds</td>
-</tr>
-<tr>
-	<td>20</td>
-	<td>20 seconds</td>
-	<td>4320</td>
-	<td>20 seconds</td>
-</tr>
-<tr>
-	<td>30</td>
-	<td>30 seconds</td>
-	<td>2880</td>
-	<td>30 seconds</td>
-</tr>
-<tr>
-	<td>60</td>
-	<td>60 seconds</td>
-	<td>1440</td>
-	<td>30 seconds</td>
-</tr>
-<tr>
-	<td>90</td>
-	<td>90 seconds</td>
-	<td>960</td>
-	<td>30 seconds</td>
-</tr>
-<tr>
-	<td>120</td>
-	<td>2 minutes</td>
-	<td>720</td>
-	<td>30 seconds</td>
-</tr>
-<tr>
-	<td>240</td>
-	<td>4 minutes</td>
-	<td>360</td>
-	<td>30 seconds</td>
-</tr>
-<tr>
-	<td>300</td>
-	<td>5 minutes</td>
-	<td>288</td>
-	<td>30 seconds</td>
-</tr>
-<tr>
-	<td>600</td>
-	<td>10 minutes</td>
-	<td>144</td>
-	<td>30 seconds</td>
-</tr>
-<tr>
-	<td>900</td>
-	<td>15 minutes</td>
-	<td>96</td>
-	<td>30 seconds</td>
-</tr>
-<tr>
-	<td>1200</td>
-	<td>20 minutes</td>
-	<td>72</td>
-	<td>30 seconds</td>
-</tr>
-<tr>
-	<td>1800</td>
-	<td>30 minutes</td>
-	<td>48</td>
-	<td>30 seconds</td>
-</tr>
-<tr>
-	<td>3600</td>
-	<td>60 minutes</td>
-	<td>24</td>
-	<td>30 seconds</td>
-</tr>
-<tr>
-	<td>7200</td>
-	<td>2 hours</td>
-	<td>12</td>
-	<td>30 seconds</td>
-</tr>
-<tr>
-	<td>14400</td>
-	<td>4 hours</td>
-	<td>6</td>
-	<td>30 seconds</td>
-</tr>
-<tr>
-	<td>28800</td>
-	<td>8 hours</td>
-	<td>3</td>
-	<td>30 seconds</td>
-</tr>
-<tr>
-	<td>43200</td>
-	<td>12 hours</td>
-	<td>2</td>
-	<td>30 seconds</td>
-</tr>
-<tr>
-	<td>86400</td>
-	<td>24 hours</td>
-	<td>1</td>
-	<td>30 seconds</td>
-</tr>
-</table>
-<p>
-	For each detector, a binned sample file is created for each sampled
-	traffic data type.
-	The base file name is the detector name.
-	The extension is the <a href="#traffic_data">traffic data</a>
-	<b>code</b> followed by the <b>period</b> (in seconds).
-	For example, 60-second vehicle count samples collected from detector
-	100 would be stored in a file called <code>100.v60</code>, containing
-	2880 bins.
-</p>
-<p>
-	Each data sample is either an 8- or 16-bit signed integer, depending on
-	the sample type.
-	16-bit samples are in high-byte first order.
-	A negative value (-1) indicates a missing sample.
-	Any data outside the valid ranges should be considered <em>bad</em>.
-</p>
-
-<h4 id="veh_log">Individual Vehicle Logging</h4>
-<p>
-	The <code>.vlog</code> format is a comma-separated text log with one
-	line for each vehicle detected.
-	Each line ends with a newline <code>\n</code> (ASCII 0x0A).
-	If present, <b>duration</b>, <b>headway</b>, and <b>speed</b> are
-	positive integer values.
-	Missing duration or headway values are represented by a <code>?</code>
-	character.
-	A gap in sampling data is represented by <code>*</code> on a line by
-	itself.
-</p>
-<table>
-<tr>
-	<th>Column</th>
-	<th>Name</th>
-	<th>Description</th>
-</tr>
-<tr>
-	<td>1</td>
-	<td>Duration</td>
-	<td>Number of milliseconds the vehicle occupied the detector</td>
-</tr>
-<tr>
-	<td>2</td>
-	<td>Headway</td>
-	<td>Number of milliseconds bewteen vehicle start times</td>
-</tr>
-<tr>
-	<td>3</td>
-	<td>Time stamp</td>
-	<td>24-hour HH:MM:SS format (may be omitted if headway is valid)</td>
-</tr>
-<tr>
-	<td>4</td>
-	<td>Speed</td>
-	<td>Speed in miles per hour (if available)</td>
-</tr>
-</table>
-
-<p>
-	Interpreting sample <code>.vlog</code> data:
-</p>
-<table>
-<tr>
-	<th>Log Data</th>
-	<th>Duration</th>
-	<th>Headway</th>
-	<th>Time</th>
-	<th>Speed</th>
-</tr>
-<tr>
-	<td>296,9930,17:49:36</td>
-	<td>296</td>
-	<td>9930</td>
-	<td>17:49:36</td>
-	<td>?</td>
-</tr>
-<tr>
-	<td>231,14069</td>
-	<td>231</td>
-	<td>14069</td>
-	<td>17:49:50</td>
-	<td>?</td>
-</tr>
-<tr>
-	<td>240,453,,45</td>
-	<td>240</td>
-	<td>453</td>
-	<td>17:49:50</td>
-	<td>45</td>
-</tr>
-<tr>
-	<td>296,23510,,53</td>
-	<td>296</td>
-	<td>23510</td>
-	<td>17:50:14</td>
-	<td>53</td>
-</tr>
-<tr>
-	<td>259,1321</td>
-	<td>259</td>
-	<td>1321</td>
-	<td>17:50:15</td>
-	<td>?</td>
-</tr>
-<tr>
-	<td>?,?</td>
-	<td>?</td>
-	<td>?</td>
-	<td>?</td>
-	<td>?</td>
-</tr>
-<tr>
-	<td>249,?</td>
-	<td>249</td>
-	<td>?</td>
-	<td>17:50:24</td>
-	<td>?</td>
-</tr>
-<tr>
-	<td>323,4638,17:50:28</td>
-	<td>323</td>
-	<td>4638</td>
-	<td>17:50:28</td>
-	<td>?</td>
-</tr>
-<tr>
-	<td>258,5967</td>
-	<td>258</td>
-	<td>5967</td>
-	<td>17:50:33</td>
-	<td>?</td>
-</tr>
-<tr>
-	<td>111,1542</td>
-	<td>111</td>
-	<td>1542</td>
-	<td>17:50:35</td>
-	<td>?</td>
-</tr>
-<tr>
-	<td>304,12029</td>
-	<td>304</td>
-	<td>12029</td>
-	<td>17:50:47</td>
-	<td>?</td>
-</tr>
-</table>
-<br/>
 
 </main>
 

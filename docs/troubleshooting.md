@@ -108,4 +108,4 @@ Filename               | Description
 [station]: road_topology.html#r_node-types
 [STC]: admin_guide.html#stc
 [system attribute]: admin_guide.html#sys_attr
-[vehicle detection systems]: admin_guide.html#vds
+[vehicle detection systems]: vehicle_detection.html

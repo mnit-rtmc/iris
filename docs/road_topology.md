@@ -129,7 +129,7 @@ The r_node **Detectors** tab allows vehicle [detectors] to be created and
 associated with an r_node.
 
 
-[detectors]: admin_guide.html#vds
+[detectors]: vehicle_detection.html
 [DMS]: admin_guide.html#dms
 [edit mode]: admin_guide.html#edit_mode
 [incident locator]: incident_dms.html#locator

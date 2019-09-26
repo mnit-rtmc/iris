@@ -99,5 +99,5 @@ limit text either prepended or appended.
 [station]: road_topology.html#r_node-types
 [station ID]: road_topology.html#station-id
 [system attribute]: admin_guide.html#sys_attr
-[vehicle detection systems]: admin_guide.html#vds
+[vehicle detection systems]: vehicle_detection.html
 [speed limit]: road_topology.html#speed-limit

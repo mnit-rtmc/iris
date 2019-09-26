@@ -23,7 +23,7 @@ specified by the `map_segment_max_meters` [system attribute].  It is also the
 maximum downstream distance for associating station data with a segment.
 
 
-[detector]: admin_guide.html#vds
+[detector]: vehicle_detection.html
 [road topology]: road_topology.html
 [station]: road_topology.html#r_node-types
 [system attribute]: admin_guide.html#sys_attr
