@@ -46,7 +46,7 @@
     <h3><a href="#lcs">Lane-Use Control Signs</a></h3>
     <h3><a href="#vds">Vehicle Detection</a></h3>
     <h3><a href="#cameras">Cameras</a></h3>
-    <h3><a href="#video">Video Monitors</a></h3>
+    <h3><a href="video.html">Video Monitors</a></h3>
     <h3><a href="ramp_meters.html">Ramp Meters</a></h3>
     <h3><a href="gate_arms.html">Gate Arms</a></h3>
     <h3><a href="tolling.html#tag-readers">Tag Readers</a></h3>
@@ -75,7 +75,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">25 Sep 2019</div>
+<div id="stamp">26 Sep 2019</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -224,7 +224,7 @@
 <ul>
 	<li><a href="#dms">DMS</a> (dynamic message signs)</li>
 	<li><a href="#cameras">CCTV cameras</a> and
-	    <a href="#video">Video monitors</a>
+	    <a href="video.hdml">Video monitors</a>
 	</li>
 	<li><a href="#vds">VDS</a> (vehicle detection systems)</li>
 	<li><a href="#lcs">LCS</a> (lane-use control signs)</li>
@@ -261,7 +261,7 @@
 	<li><a href="#cohu">Cohu Camera PTZ</a></li>
 	<li><a href="#infinova">Infinova Camera PTZ</a></li>
 	<li><a href="#pelcop">Pelco-P Keyboard</a></li>
-	<li><a href="#monstream">MonStream</a></li>
+	<li><a href="video.html#monstream">MonStream</a></li>
 	<li><a href="#stc">HySecurity SmartTouch Controller STC</a></li>
 	<li><a href="#e6">Transcore Encompass 6 E6</a></li>
 	<li><a href="#redlion">RedLion modem GPS</a></li>
@@ -714,7 +714,7 @@ systemctl status iris</pre>
 	    <tr>
 	    <td>play_list</td>
 	    <td>user</td>
-	    <td>Personal camera <a href="#playlist">play list</a></td>
+	    <td>Personal camera <a href="video.html#play-lists">play list</a></td>
 	    </table>
 	</dd>
 	<dt>Attribute</dt>
@@ -1004,10 +1004,10 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>N/A</td>
 	</tr>
 	<tr>
-	    <td><a href="#monstream">MonStream</a></td>
+	    <td><a href="video.html#monstream">MonStream</a></td>
 	    <td>udp</td>
 	    <td>N/A</td>
-	    <td><a href="#video">Monitors</a></td>
+	    <td><a href="video.html">Monitors</a></td>
 	    <td>1-16</td>
 	</tr>
 	<tr id="stc">
@@ -1196,7 +1196,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	<a href="#lcs">lane-use control signs</a>,
 	<a href="#vds">vehicle detection</a>,
 	<a href="#cameras">cameras</a>,
-	<a href="#video">video monitors</a>,
+	<a href="video.html">video monitors</a>,
 	<a href="ramp_meters.html">ramp meters</a>,
 	<a href="gate_arms.html">gate arms</a>,
 	<a href="tolling.html#tag-readers">tag readers</a>,
@@ -2004,7 +2004,7 @@ FIXME
 	Video cameras with remote <a href="#ptz">pan / tilt / zoom</a>
 	capability can be used to monitor freeway conditions.
 	The <b>Camera</b> tab can display Motion JPEG (MJPEG) video.
-	To view MPEG4 or h.264 video, the <a href="#monstream">MonStream</a>
+	To view MPEG4 or h.264 video, the <a href="video.html#monstream">MonStream</a>
 	application is required.
 </p>
 <h4 id="video_servlet">Video Servlet</h4>
@@ -2068,8 +2068,8 @@ FIXME
         the encoder type.
     </dd>
     <dt>Encoder Multicast Address</dt>
-    <dd>A multicast address can be used by <a href="#monstream">MonStream</a>
-        clients.
+    <dd>A multicast address can be used by
+	<a href="video.html#monstream">MonStream</a> clients.
         If defined, it will be used instead of the encoder address.
         It must be a UDP address in the multicast range, including port.
         Multicast requires less bandwidth, and allows scaling to many
@@ -2132,11 +2132,11 @@ FIXME
 	The <b>+</b> and <b>-</b> keys can select the next and previous cameras,
 	respectively.
 	Pressing the <b>.</b> key (on the numpad) changes to
-	<a href="#video">video monitor</a> selection mode &mdash; the icon will
-	change to a monitor.
+	<a href="video.html">video monitor</a> selection mode &mdash; the icon
+	will change to a monitor.
 	Pressing the <b>*</b> key (on the numpad) changes to
-	<a href="#playlist">play list</a> selection mode &mdash; the icon will
-	change to a play list.
+	<a href="video.html#play-lists">play list</a> selection mode &mdash; the
+	icon will change to a play list.
 </p>
 
 <h4 id="cam_kbd">Camera Keyboards</h4>
@@ -2160,62 +2160,6 @@ FIXME
 	camera_kbd_panasonic_enable</code></a> must be enabled.
 	This will cause IRIS to listen for connections on TCP port 7001.
 	The keyboard must be configured with the IRIS server's IP address.
-</p>
-
-<h3 id="video">Video Monitors</h3>
-<aside>
-	Select <span class="menu">View ➔ Video ➔ Video Monitor</span> menu item
-</aside>
-<p>
-	IRIS can also be configured to send commands to a video switcher
-	system, such as <a href="#monstream">MonStream</a>.
-	This allows camera streams to be routed to any number of video monitors.
-	Each monitor can be assigned to display the video from any camera.
-</p>
-<h4>Monitor Selection</h4>
-<p>
-	On the upper-right of the <b>Camera</b> tab, there is a monitor
-	selector.
-	The chosen monitor will switch whenever the user selects a new camera.
-</p>
-<h4 id="monstream">MonStream</h4>
-<p>
-	<b>MonStream</b> is a full-screen video streaming application which runs
-	on low-cost Linux computers.
-	IRIS can send switching messages to MonStream, creating a low-latency
-	IP video system.
-</p>
-<p>
-	A computer running MonStream can be configured to stream a grid of four
-	or more video feeds onto a single large monitor.
-	The only configuration required on the MonStream computer is to grant
-	access to the <code>/var/lib/monstream/</code> directory for the UID of
-	the monstream process.
-</p>
-<p>
-	A <a href="controllers.html">controller</a> must be configured to
-	represent each MonStream computer.
-	It will need to be on a <a href="#comm_links">comm link</a> using the
-	MonStream protocol, with a timeout of 2000 ms.
-	The comm link URI should be of the form: <code>[ip address]:7001</code>.
-	Each video monitor to be displayed should be associated with an IO pin
-	of the controller.
-	For example, a quad-screen monitor would have monitors associated with
-	pins 1 thru 4.
-</p>
-
-<h4 id="playlist">Play Lists</h4>
-<aside>
-	Select <span class="menu">View ➔ Video ➔ Play Lists</span> menu item
-</aside>
-<p>
-	Play lists can be created to cycle through related cameras.
-	Each user can have a personal play list, but system play lists are
-	available to all users.
-	Selecting a play list on a monitor will cause the play list to
-	automatically switch.
-	The interval is specified by <a href="#sys_attr"><code>
-	camera_sequence_dwell_sec</code></a>.
 </p>
 
 </main>
