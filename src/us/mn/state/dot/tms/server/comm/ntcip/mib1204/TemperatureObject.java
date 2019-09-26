@@ -67,7 +67,7 @@ public class TemperatureObject {
 			NumberFormat f = NumberFormat.getInstance();
 			f.setMaximumFractionDigits(1);
 			f.setMinimumFractionDigits(1);
-			return Json.str(key, f.format(t));
+			return Json.num(key, f.format(t));
 		} else
 			return "";
 	}
