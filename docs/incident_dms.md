@@ -167,6 +167,6 @@ listed in the form, including new devices and any devices to be blanked.
 
 
 [exits]: road_topology.html#r_node-types
-[MULTI]: admin_guide.html#multi
+[MULTI]: dms.html#multi
 [pickable]: road_topology.html#pickable
 [system attribute]: admin_guide.html#sys_attr

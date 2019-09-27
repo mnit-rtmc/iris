@@ -94,7 +94,7 @@ limit text either prepended or appended.
 [action tag]: action_plans.html#dms-action-tags
 [corridor]: road_topology.html#corridors
 [node type]: road_topology.html#r_node-types
-[quick message]: admin_guide.html#quick_msg
+[quick message]: dms.html#quick-messages
 [road topology]: road_topology.html
 [station]: road_topology.html#r_node-types
 [station ID]: road_topology.html#station-id

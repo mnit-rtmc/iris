@@ -89,4 +89,4 @@ Notes:
 
 
 [edit mode]: admin_guide.html#edit_mode
-[quick message]: admin_guide.html#quick_msg
+[quick message]: dms.html#quick-messages

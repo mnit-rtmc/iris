@@ -16,7 +16,7 @@ that case, the comm link period will be used.  The `Query GPS` button can be
 used to manually poll the coördinates.
 
 
-[DMS]: admin_guide.html#dms
+[DMS]: dms.html
 [NTCIP]: admin_guide.html#ntcip
 [RedLion]: admin_guide.html#redlion
 [SierraGX]: admin_guide.html#sierragx

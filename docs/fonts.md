@@ -64,4 +64,4 @@ The IRIS client also contains a font editor which can be used to design new DMS
 fonts.
 
 
-[DMS]: admin_guide.html#dms
+[DMS]: dms.html

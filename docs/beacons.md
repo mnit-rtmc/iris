@@ -19,6 +19,6 @@ the `beacon_event` table.
 
 [action plans]: action_plans.html
 [beacon actions]: action_plans.html#beacon-actions
-[DMS]: admin_guide.html#dms
+[DMS]: dms.html
 [MnDOT-170]: admin_guide.html#mndot170
 [NTCIP]: admin_guide.html#ntcip

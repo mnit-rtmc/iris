@@ -79,11 +79,11 @@ fields will match.  **Shift** is only required for days like *Black Friday*
 
 
 [beacon]: admin_guide.html#beacons
-[DMS]: admin_guide.html#dms
+[DMS]: dms.html
 [Msg-Feed]: admin_guide.html#msg_feed
-[MULTI]: admin_guide.html#multi
+[MULTI]: dms.html#multi
 [Parking area]: parking_areas.html
-[quick message]: admin_guide.html#quick_msg
+[quick message]: dms.html#quick-messages
 [ramp meter]: ramp_meters.html
 [Slow traffic warning]: slow_warning.html
 [Toll zone]: tolling.html

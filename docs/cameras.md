@@ -109,7 +109,7 @@ Otherwise, requests will be made directly to the camera's encoder address.
 
 [comm link]: admin_guide.html#comm_links
 [controller]: controllers.html
-[DMS]: admin_guide.html#dms
+[DMS]: dms.html
 [keyboard systems]: admin_guide.html#cam_kbd
 [iris-client.properties]: admin_guide.html#client_properties
 [MonStream]: video.html#monstream

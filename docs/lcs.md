@@ -29,6 +29,6 @@ well as the DMS which represents the LCS.
 
 
 [controller]: controllers.html
-[DMS]: admin_guide.html#dms
+[DMS]: dms.html
 [IO pin]: controllers.html#io-pins
 [variable speed advisory]: vsa.html

@@ -62,7 +62,7 @@ button will bring up a form with a list of [suggested DMS] and [suggested LCS]
 devices to deploy for the incident.
 
 
-[DMS]: admin_guide.html#dms
+[DMS]: dms.html
 [LCS]: lcs.html
 [suggested DMS]: incident_dms.html
 [suggested LCS]: incident_lcs.html
