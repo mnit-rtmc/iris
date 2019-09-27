@@ -1,8 +1,8 @@
 # Incident DMS Deployment
 
 Sign messages can be suggested from active roadway incidents.  This method uses
-incident attributes (**impact**, **range**, **severity**, etc.) and location on
-the freeway network to make suggestions.
+incident attributes to make suggestions: [impact](#impact), [range](#range),
+[severity](#severity), and location on the freeway network.
 
 Each message is composed of three parts: **descriptor** (_what?_), **locator**
 (_where?_) and **advice** (_how?_).  Suggestions are only made if a match is

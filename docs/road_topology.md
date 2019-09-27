@@ -94,7 +94,7 @@ which corresponds to the leftmost lane along the entire corridor.
 #### Station ID
 
 A unique identifier for the [detectors] associated with a _station_ r_node.
-It is displayed on the [traffic layer].
+It is displayed on the [traffic map].
 
 #### Speed Limit
 
@@ -109,7 +109,7 @@ from an incident.
 
 #### Above
 
-When rendering the [traffic layer], r_nodes are rendered in two passes.  The
+When rendering the [traffic map], r_nodes are rendered in two passes.  The
 second pass consists of r_nodes which have been marked **above**.  This prevents
 overpasses from being drawn incorrectly.
 
@@ -121,7 +121,7 @@ This can be used to create left entrance or exit ramps.
 #### Active
 
 This flag allows an r_node to be deactivated.  An inactive r_node will not be
-included in any corridor or drawn on the [traffic layer].
+included in any corridor or drawn on the [traffic map].
 
 #### Detectors
 
@@ -133,5 +133,5 @@ associated with an r_node.
 [DMS]: dms.html
 [edit mode]: admin_guide.html#edit_mode
 [incident locator]: incident_dms.html#locator
-[traffic layer]: traffic_layer.html
+[traffic map]: vehicle_detection.html#traffic-map
 [travel time]: travel_time.html
