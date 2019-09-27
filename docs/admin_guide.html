@@ -43,7 +43,7 @@
   <h2><a id="devices_link" href="#devices">Devices</a></h2>
   <div id="devices_div">
     <h3><a href="#dms">Dynamic Message Signs</a></h3>
-    <h3><a href="#lcs">Lane-Use Control Signs</a></h3>
+    <h3><a href="lcs.html">Lane-Use Control Signs</a></h3>
     <h3><a href="vehicle_detection.html">Vehicle Detection</a></h3>
     <h3><a href="cameras.html">Cameras</a></h3>
     <h3><a href="video.html">Video Monitors</a></h3>
@@ -75,7 +75,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">26 Sep 2019</div>
+<div id="stamp">27 Sep 2019</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -227,7 +227,7 @@
 	    <a href="video.hdml">Video monitors</a>
 	</li>
 	<li><a href="vehicle_detection.html">VDS</a> (vehicle detection systems)</li>
-	<li><a href="#lcs">LCS</a> (lane-use control signs)</li>
+	<li><a href="lcs.html">LCS</a> (lane-use control signs)</li>
 	<li><a href="ramp_meters.html">Ramp meters</a></li>
 	<li><a href="gate_arms.html">Gate Arms</a></li>
 	<li><a href="tolling.html#tag-readers">Tag Readers</a></li>
@@ -889,7 +889,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>udp</td>
 	    <td>N/A</td>
 	    <td rowspan="3"><a href="#dms">DMS</a>,
-	        <a href="#ilcs">ILCS</a>,
+	        <a href="lcs.html#intelligent-lcs">Intelligent LCS</a>,
 	        <a href="rwis.html">RWIS</a>,
 	        <a href="vehicle_detection.html">VDS</a>,
 	        <a href="gps.html">GPS</a>
@@ -919,7 +919,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td rowspan="2"><a href="vehicle_detection.html">VDS</a>,
 	        <a href="ramp_meters.html">Ramp Meters</a>,
 		<a href="beacons.html">beacons</a>,
-	        <a href="#dlcs">DLCS</a>,
+	        <a href="lcs.html#changeable-lcs">Changeable LCS</a>,
 		<a href="alarms.html">alarms</a>
 	    </td>
 	    <td rowspan="2"><a href="#mndot_pins">[*]</a</td>
@@ -1039,7 +1039,9 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>DIN-Relay</td>
 	    <td>http</td>
 	    <td>N/A</td>
-	    <td><a href="#dlcs">DLCS</a>, <a href="beacons.html">beacons</a></td>
+	    <td><a href="lcs.html#changeable-lcs">Changeable LCS</a>,
+	        <a href="beacons.html">beacons</a>
+	    </td>
 	    <td rowspan="2">1-8</td>
 	</tr>
 	<tr id="cbw">
@@ -1085,7 +1087,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>2</td>
 	</tr>
 	<tr>
-	    <td><a href="#dlcs">DLCS</a></td>
+	    <td><a href="lcs.html#changeable-lcs">Changeable LCS</a></td>
 	    <td>19 - 36</td>
 	</tr>
 	<tr>
@@ -1193,7 +1195,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	A device is a hardware field control or sensing system.
 	IRIS supports several different device types:
 	<a href="#dms">dynamic message signs</a>,
-	<a href="#lcs">lane-use control signs</a>,
+	<a href="lcs.html">lane-use control signs</a>,
 	<a href="vehicle_detection.html">vehicle detection</a>,
 	<a href="cameras.html">cameras</a>,
 	<a href="video.html">video monitors</a>,
@@ -1434,39 +1436,6 @@ FIXME
 <p>
 	When appropriate, a form appears to suggest changes or inform the
 	operator of a rejected message.
-</p>
-
-<h3 id="lcs">Lane-use Control Signs (LCS)</h3>
-<aside>
-	Select <span class="menu">View ➔ Lane Use ➔ LCS</span> menu item
-</aside>
-<p>
-	A lane-use control sign (LCS) is a sign which is mounted over a single
-	lane of traffic (typically one for each lane).
-	It can display a set of indications which either permit or restrict
-	use of that lane.
-</p>
-
-<h4 id="ilcs">"Intelligent" Lane-use Control Signs (ILCS)</h4>
-<p>
-	An <em>intelligent</em> LCS is a full-matrix color <a href="#dms">DMS</a>
-	which is mounted directly over a lane of traffic.
-	In addition to being used as an LCS, it can display
-	<a href="vsa.html">variable speed advisories</a>, or any operator-defined
-	message as a regular DMS.
-</p>
-
-<h4 id="dlcs">"Dumb" Lane-use Control Signs (DLCS)</h4>
-<p>
-	A <em>dumb</em> LCS device is much simpler than an ILCS.
-	It can display one of a fixed set of indications &mdash; typically a
-	<i>green arrow</i> <span class="green">&nbsp;↓&nbsp;</span>, a
-	<i>yellow arrow</i> <span class="yellow">&nbsp;↓&nbsp;</span> or a
-	<i>red X</i> <span class="red">&nbsp;X&nbsp;</span>).
-	Each indication must be assigned to a separate
-	<a href="controllers.html#io-pins">I/O pin</a> on a
-	<a href="controllers.html">controller</a>, as well as the DMS which
-	represents the LCS.
 </p>
 
 </main>

@@ -57,6 +57,6 @@ available:
 
 
 [DMS]: admin_guide.html#dms
-[LCS]: admin_guide.html#lcs
+[LCS]: lcs.html
 [system attribute]: admin_guide.html#sys_attr
 [XML file]: troubleshooting.html#xml-output
