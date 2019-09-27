@@ -2,11 +2,11 @@
 
 Select `View ➔ Message Signs ➔ DMS` menu item
 
-A _dynamic message sign_ (DMS) is a sign which is capable of changing thei
+A _dynamic message sign_ (DMS) is a sign which is capable of changing the
 message displayed to motorists.  They can be classified as _character-matrix_,
-_line-matrix_ and _full-matrix_, depending on the spacing between pixels.  Some
-are monochrome, and some support full color display.  All of these
-configurations are supported by IRIS.
+_line-matrix_ or _full-matrix_ depending on the spacing between pixels.  Some
+are monochrome and others support full color display.  All of these
+configurations are supported.
 
 The following operations can be performed on a DMS:
 
@@ -14,7 +14,8 @@ The following operations can be performed on a DMS:
 * Displaying new messages
 * Querying configuration information
 * Querying diagnostic information
-* Sending fonts and graphics
+* Querying or sending [fonts]
+* Sending graphics
 
 ## Setup
 
@@ -24,17 +25,17 @@ Field           | Description
 ----------------|----------------------------------------------------
 External beacon | [beacon] controlled when sign messages are deployed
 Static graphic  | image of static sign in which DMS is inset
-Device purpose  | general or dedicated purpose for sign operation
+Device purpose  | _general_ or _dedicated_ purpose for sign operation
 Override font   | font to override the _default font_ in the sign configuration
 
 Sign groups and sign text libraries can be managed in the **Setup** tab.
 
-## MULTI (Markup Language for Transportation Information)
+## MULTI
 
 **MULTI** is the _MarkUp Language for Transportation Information_ used to
 compose DMS messages.  It is defined by the NTCIP 1203 standard.  In _MULTI_,
 messages are ASCII strings, with formatting or other instructions denoted by
-tags inside square brackets.  For example, the tag `[nl]` indicates a new line.
+tags inside square brackets.  For example, the `[nl]` tag indicates a new line.
 Most of the useful MULTI tags are supported.
 
 Tag                                           | Description              | Supported
@@ -60,7 +61,7 @@ Tag                                           | Description              | Suppo
 
 ## Quick Messages
 
-A quick message is a fully composed DMS message which can be associated with a
+A _quick message_ is a fully composed DMS message which can be associated with a
 sign group.  When a DMS is selected, a drop-down list is populated with quick
 messages from sign groups of which that DMS is a member.  Quick messages are
 also used for [DMS actions] as part of an [action plan].  For these messages, it
@@ -80,6 +81,8 @@ Select `View ➔ Message Signs ➔ Dictionary` menu item
 The spell checker verifies DMS messages when an operator presses the **Send**
 button.  It uses two word lists: **Allowed** and **Banned**.
 
+### Allowed Words
+
 Allowed word checking is controlled by the `dict_allowed_scheme` [system
 attribute]:
 
@@ -88,6 +91,8 @@ attribute]:
 `0`                   | Disable checking allowed word list
 `1`                   | Suggest replacement of words not in allowed list
 `2`                   | Reject messages containing words not in allowed list
+
+### Banned Words
 
 Similarly, the `dict_banned_scheme` [system attribute] controls banned word
 functionality:
@@ -105,4 +110,5 @@ rejected message.
 [action plan]: action_plans.html
 [beacon]: beacons.html
 [DMS actions]: action_plans.html#dms-actions
+[fonts]: fonts.html
 [system attribute]: admin_guide.html#sys_attr

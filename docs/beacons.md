@@ -6,8 +6,8 @@ A beacon is a light or set of lights that flashes toward oncoming traffic.
 Sometimes called _flashers_ or _wig-wags_, their purpose is to draw attention to
 a [DMS] or static sign.
 
-Internal and external beacons are supported by IRIS.  Internal beacons are
-controlled through the DMS controller, are activated through the [NTCIP] DMS
+**Internal** and **external** beacons are supported by IRIS.  Internal beacons
+are controlled through the DMS controller, are activated through the [NTCIP] DMS
 protocol and are considered part of the DMS.  External beacons use dedicated
 controllers and protocols (_e.g._ [MnDOT-170]).
 
