@@ -1,11 +1,11 @@
-## Incidents
+# Incidents
 
 The **Incident** tab on the client interface is used to manage incidents within
 IRIS.  Traffic incidents have several attributes, including _location_, _type_,
 _detail_, _camera_ and _lane impact_.  Active incidents are written to an
 [XML file], which can be processed by external systems.
 
-### Creating
+## Creating
 
 The interface for creating incidents is streamlined to allow operators to
 process them quickly.
@@ -27,36 +27,37 @@ process them quickly.
 A triangular marker will appear on the map pointing in the direction of travel,
 color-coded with the incident type.
 
-### Editing
+## Editing
 
 To change the location or verification camera, the **Edit** button must be
 pressed first.  To change the lane impact or to clear the incident, the **Edit**
 button is not required.  After making changes, be sure to press the **Log**
 button again.
 
-### Clearing
+## Clearing
 
 Press the **Clear** button to clear the incident.  It will remain in the list
 for some time afterward.  This time interval can be configured with the
 `incident_clear_secs` [system attribute] — the default value is 300 seconds (5
 minutes).  During this time, a cleared incident can be reactivated if necessary.
 
-### Deploying Devices
-
-Devices such as [DMS] and [LCS] can be deployed based on incident attributes.
-Pressing the **Deploy** button will bring up a form with a list of suggested
-devices to deploy for the incident.  All DMS signs within the range of the
-incident are [checked](incident_dms.html).
-
-### Incident Events
+## Incident Events
 
 Incidents and all updates are recorded in the database.  There are two views
 available:
  * `incident_view` contains one record for each recorded incident
  * `incident_update_view` contains a record for every update to each incident
 
+## Deploying Devices
+
+Devices can be deployed based on incident attributes.  Pressing the **Deploy**
+button will bring up a form with a list of [suggested DMS] and [suggested LCS]
+devices to deploy for the incident.
+
 
 [DMS]: admin_guide.html#dms
 [LCS]: lcs.html
+[suggested DMS]: incident_dms.html
+[suggested LCS]: incident_lcs.html
 [system attribute]: admin_guide.html#sys_attr
 [XML file]: troubleshooting.html#xml-output

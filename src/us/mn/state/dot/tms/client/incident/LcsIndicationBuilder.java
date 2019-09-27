@@ -67,7 +67,7 @@ public class LcsIndicationBuilder {
 		return LaneUseIndication.DARK;
 	}
 
-	/** Get alternate indication for "dumb" LCS devices. */
+	/** Get alternate indication for "changeable" LCS devices. */
 	static private LaneUseIndication altIndication(LaneUseIndication lui) {
 		switch (lui) {
 		case LOW_VISIBILITY:
