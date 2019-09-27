@@ -19,13 +19,20 @@ process them quickly.
  5. Select verification camera.  The list will be populated with a few cameras
     near the selected location.
  6. Specify _lane impact_ in a row of boxes, one for each lane at the incident
-    location.  Both shoulders are displayed even if there are no actual
-    shoulders at the location.  Each lane can be marked _clear_ (default),
-    _blocked_ (red) or _affected_ (yellow) by clicking on the box.
+    location.  Clicking on a box cycles thru lane impact values.  Both shoulders
+    are displayed even if there are no actual shoulders at the location.
  7. Finally, press the **Log** button to create the incident
 
 A triangular marker will appear on the map pointing in the direction of travel,
 color-coded with the incident type.
+
+### Lane Impact
+
+There are three lane impact values:
+
+ 1. _free flowing_ (clear) — lane not impacted
+ 2. _blocked_ (red) — lane completely blocked by incident
+ 3. _affected_ (yellow) — lane partially blocked by incident
 
 ## Editing
 

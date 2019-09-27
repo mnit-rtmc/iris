@@ -1,7 +1,7 @@
 # Incident LCS Deployment
 
 _Lane-use Control Signs_ ([LCS]) indications can be suggested from active
-roadway incidents.  The lane impact and distance to the incident are used to
+roadway incidents.  The [lane impact] and distance to the incident are used to
 determine which indications to put on the signs.
 
 There are three distance thresholds for making suggestions:
@@ -14,8 +14,8 @@ long      | 1.0 to 1.5 mi
 
 ## Short Distance
 
-For incidents in _short_ distance from the LCS, the indications are based on
-impact in the same lane as the LCS only:
+For incidents that are a _short_ distance from the LCS, the indications are
+based only on impact in the same lane as the LCS:
 
 Indication    | Condition
 --------------|-------------
@@ -51,4 +51,5 @@ left`, `merge right`, `merge both` or `lane closed ahead`.
 
 
 [changeable LCS]: lcs.html#changeable-lcs
+[lane impact]: incidents.html#lane-impact
 [LCS]: lcs.html

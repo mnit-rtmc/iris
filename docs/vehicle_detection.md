@@ -1,4 +1,4 @@
-## Vehicle Detection Systems
+# Vehicle Detection Systems
 
 There are several types of **vehicle detection systems** (VDS).  The earliest of
 these is the _inductive loop_, which is a wire looped under the road surface.
@@ -6,7 +6,7 @@ Some systems use _radar_ mounted on the side of the road.  _Video detection_
 uses a camera and computer vision software.  Collectively, these systems are
 simply called **detectors**.
 
-### Configuration
+## Configuration
 
 To create a detector, first select the [r_node] at the proper location.  Then
 select the **Detectors** tab for that r_node.  Enter the detector **Name** and
@@ -23,7 +23,7 @@ estimated from counts and occupancy.  It is in units of feet.
 
 If a detector is no longer used, it can be marked **abandoned**.
 
-#### Lane Type
+### Lane Type
 
 Lane Type  | [No Hit](#auto-fail) Threshold | [Locked On](#auto-fail) Threshold
 -----------|--------------------------------|----------------------------------
@@ -45,14 +45,14 @@ HOT        | 72 hours                       | 2 minutes
 Shoulder   | 72 hours                       | 2 minutes
 Parking    | 2 weeks                        | 2 weeks
 
-### Transfer
+## Transfer
 
 It is possible to move a detector to another r_node.  Select the target r_node
 and enter the detector **Name**.  The current label for that detector will
 appear on the right.  To move it to the current r_node, press the **Transfer**
 button.
 
-### Traffic Data
+## Traffic Data
 
 Most detectors sample traffic data in fixed time intervals and put it into
 [bins](#binned-data).  IRIS can store these types of binned traffic data:
@@ -75,7 +75,7 @@ Every 30 seconds, an XML file is generated containing the most recent sample
 data from all defined detectors.  The file is called `det_sample.xml.gz`, and it
 is written to the [XML output directory].
 
-### Detector Protocols
+## Detector Protocols
 
 IRIS supports several different [protocols] for communicating with vehicle
 detection systems.  The protocol used depends on the [comm link] of the
@@ -96,36 +96,36 @@ Protocol                | Binning               | Traffic Data
 For protocols which allow the binning intereval to be adjusted, it will be set
 to the poll [period] of the comm link.
 
-#### NTCIP
+### NTCIP
 
 Traffic signal controllers which support NTCIP 1202 can be used for detection
 data.
 
-#### MnDOT-170
+### MnDOT-170
 
 170 style controllers running the _MnDOT 170_ firmware can have up to 24 vehicle
 detectors attached.  These detectors must be assigned to [IO pins] in the range
 of 39-62.
 
-#### Wavetronix
+### Wavetronix
 
 The _SS105_ and _SS125_ (HD) protocols can collect data from [Wavetronix] radar
 sensors.  Each device can support up to 8 detectors, using [IO pins] 1-8.
 
-#### RTMS G4
+### RTMS G4
 
 The _G4_ protocol can support up to 12 detectors per controller.
 
-#### DR-500
+### DR-500
 
 The Houston Radar DR-500 doppler radar can be used to collect speed data only.
 
-#### DXM
+### DXM
 
 The Banner Engineering DXM magnetometer can detect presence.  It can be used for
 [parking area] monitoring.
 
-### Auto Fail
+## Auto Fail
 
 IRIS can check traffic data continuously for common detector failures.  If the
 `detector_auto_fail_enable` [system attribute] is `true`, the **auto fail** flag
@@ -143,13 +143,13 @@ When one of these conditions first occurs and every hour that it persists, an
 event is logged in the `detector_event` database table.  The
 `detector_auto_fail_view` can be used to check recent events.
 
-### Force Fail
+## Force Fail
 
 If a detector has a fault which is not handled automatically, it can be **force
 failed**.  This flag is only set manually, so it must be cleared once the
 failure is corrected.
 
-### Fake Detectors
+## Fake Detectors
 
 When a detector is _failed_ (**auto fail** or **force fail**), its data will not
 be used for [travel time], [ramp metering], _etc_.  In that case, **fake**
@@ -157,7 +157,7 @@ detection can be used — this field can contain one or more other detector name
 separated by spaces.  The average density or speed of those detectors (which are
 not also failed) will be used instead.
 
-### Traffic Data Archiving
+## Traffic Data Archiving
 
 Sample data is archived only if the `sample_archive_enable` [system attribute]
 is `true`.  Files are stored in `/var/lib/iris/traffic`, in a directory with the
@@ -169,7 +169,7 @@ As data is collected, a new subdirectory is created every day — the name is
 At 10 PM, all traffic data from the previous day is moved into a single ZIP file
 with the 8-digit base name and a `.traffic` extension.
 
-### Binned Data
+## Binned Data
 
 A binned sample file consists of some number of periods of equal duration.  The
 first period begins (and the last period ends) at midnight.  The **binning
@@ -213,7 +213,7 @@ sample type.  16-bit samples are in high-byte first order.  A negative value
 (-1) indicates a missing sample.  Any data outside the valid ranges should be
 considered _bad_.
 
-### Vehicle Logging
+## Vehicle Logging
 
 The `.vlog` format is a comma-separated text log with one line for each vehicle
 detected.  Each line ends with a newline `\n` (ASCII 0x0A).  If present,
@@ -228,7 +228,7 @@ Column | Name       | Description
 3      | Time stamp | 24-hour `HH:MM:SS` format (may be omitted if headway is valid)
 4      | Speed      | Speed in miles per hour (if available)
 
-#### Example Log
+### Example Log
 
 Interpreting example `.vlog` data for 11 vehicles:
 
