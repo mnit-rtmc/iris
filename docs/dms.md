@@ -33,8 +33,8 @@ Sign groups and sign text libraries can be managed in the **Setup** tab.
 ## MULTI
 
 **MULTI** is the _MarkUp Language for Transportation Information_ used to
-compose DMS messages.  It is defined by the NTCIP 1203 standard.  In _MULTI_,
-messages are ASCII strings, with formatting or other instructions denoted by
+compose DMS messages.  It is defined by the NTCIP 1203 standard.  Messages in
+_MULTI_ are ASCII strings, with formatting or other instructions denoted by
 tags inside square brackets.  For example, the `[nl]` tag indicates a new line.
 Most of the useful MULTI tags are supported.
 

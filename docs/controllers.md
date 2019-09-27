@@ -77,5 +77,5 @@ pins is protocol specific — see the [protocol] table for details.
 [road weather information systems]: rwis.html
 [SierraGX]: admin_guide.html#sierragx
 [tag readers]: tolling.html#tag-readers
-[vehicle detection]: vehicle_detection.html
+[vehicle detection systems]: vehicle_detection.html
 [video monitors]: video.html

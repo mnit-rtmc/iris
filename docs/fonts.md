@@ -1,4 +1,4 @@
-## Fonts
+# Fonts
 
 Select `View ➔ Message Signs ➔ DMS Fonts` menu item
 
@@ -8,9 +8,11 @@ can contain any of the printable characters in the ASCII character set (0x20 to
 
 When selecting a font, a few parameters must be considered, such as pixel pitch,
 desired character height, and font weight.  Pixel pitch can vary from 66 mm down
-to 20 mm or smaller.  Typically, for freeway signs, characters should be between
-350 and 400 mm (about 14 or 15 inches) high.  See the table below for character
-heights based on these common sizes.
+to 20 mm or smaller.
+
+Typically, for freeway signs, characters should be between 350 and 400 mm (about
+14 or 15 inches) high.  See the table below for character heights based on these
+common sizes.
 
 Font Height | Pitch: 20 mm | Pitch: 33 mm | Pitch: 50 mm | Pitch 66 mm
 ------------|--------------|--------------|--------------|-------------
@@ -30,6 +32,8 @@ pixel pitch, it is possible to create legible fonts which also include
 lower-case characters.  If a message containing lower-case characters is used
 with an upper-case only font, IRIS will replace those characters with their
 equivalent.
+
+## Predefined Fonts
 
 A number of fonts are included in the `sql/fonts` directory.  These fonts are
 designed to have a similar visual style.  To import a font into the IRIS
