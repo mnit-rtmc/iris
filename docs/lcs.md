@@ -18,11 +18,11 @@ A _changeable_ LCS device is much simpler than an ILCS.  It can display one of
 these indications:
 
  * `lane open` — _green arrow_
-<span style="background:#222;color:#0f0;border:solid white"> ↓ </span>
+<span style="background:#222;color:#0f0;border:0.1rem solid gray"> ↓ </span>
  * `use caution` — _yellow arrow_
-<span style="background:#222;color:#ff0;border:solid white"> ↓ </span>
+<span style="background:#222;color:#ff0;border:0.1rem solid gray"> ↓ </span>
  * `lane closed` — _red_
-<span style="background:#222;color:#f00;border:solid white"> X </span>
+<span style="background:#222;color:#f00;border:0.1rem solid gray"> X </span>
 
 Each indication must be assigned to a separate [IO pin] on a [controller], as
 well as the DMS which represents the LCS.
