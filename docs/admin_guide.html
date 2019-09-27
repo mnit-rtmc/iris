@@ -40,7 +40,7 @@
     <h3><a href="controllers.html">Controllers</a></h3>
     <h3><a href="fonts.html">Fonts</a></h3>
   </div>
-  <h2><a id="devices_link" href="#devices">Devices</a></h2>
+  <h2><a id="devices_link" href="controller.html#devices">Devices</a></h2>
   <div id="devices_div">
     <h3><a href="dms.html">Dynamic Message Signs</a></h3>
     <h3><a href="lcs.html">Lane-Use Control Signs</a></h3>
@@ -1188,32 +1188,6 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	The detail may be blank, or one of the incident detail names.
 	Latitude and longitude must be coördinates of the incident.
 	Camera ID may be blank, or the ID of a camera to view the incident.
-</p>
-
-<h2 id="devices">Devices</h2>
-<p>
-	A device is a hardware field control or sensing system.
-	IRIS supports several different device types:
-	<a href="dms.html">dynamic message signs</a>,
-	<a href="lcs.html">lane-use control signs</a>,
-	<a href="vehicle_detection.html">vehicle detection</a>,
-	<a href="cameras.html">cameras</a>,
-	<a href="video.html">video monitors</a>,
-	<a href="ramp_meters.html">ramp meters</a>,
-	<a href="gate_arms.html">gate arms</a>,
-	<a href="tolling.html#tag-readers">tag readers</a>,
-	<a href="beacons.html">beacons</a>,
-	<a href="alarms.html">alarms</a>,
-	<a href="rwis.html">road weather information systems</a> and
-	<a href="gps.html">GPS</a>.
-</p>
-<p>
-	For any device to be activated, it must first be connected to one of the
-	<a href="controllers.html#io-pins">I/O pins</a> on a
-	<a href="controllers.html">controller</a>.
-	The controller must also be associated with a
-	<a href="#comm_links">comm link</a> which communicates using the
-	appropriate protocol for the device.
 </p>
 
 </main>

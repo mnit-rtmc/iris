@@ -3,12 +3,12 @@
 Select `View ➔ Maintenance ➔ Comm Links` menu item
 
 A **controller** is an end-point for a [comm link].  Each controller can have
-one or more associated [devices], depending on the [protocol].  Sometimes a
-controller represents a separate physical _box_, which is connected to devices,
-and other times the controller may be embedded within the device.  In either
-case, IRIS requires a controller for any communication to a device.  Controllers
-can be assigned to a **cabinet**, which has location information, to allow
-displaying on a map.
+one or more associated [devices](#devices), depending on the [protocol].
+Sometimes a controller represents a separate physical _box_, which is connected
+to devices, and other times the controller may be embedded within the device.
+In either case, a controller is required for any communication to a device.
+Controllers can be assigned to a **cabinet**, which has location information to
+allow displaying on a map.
 
 ### Drop Address
 
@@ -35,16 +35,47 @@ controller **password** field is used to enter authentication data.
   separate the username and password with a colon, in the same manner as HTTP
   basic authentication.
 
-### IO Pins
+### Devices
 
-Each controller has a set of **I/O pins**, to which [devices] can be assigned.
-The function of these pins is protocol specific — see the [protocol] table for
-details.
+A device is a hardware field control or sensing system:
+
+* [alarms]
+* [beacons]
+* [cameras]
+* [dynamic message signs] — DMS
+* [gate arms]
+* [GPS]
+* [lane-use control signs] — LCS
+* [ramp meters]
+* [road weather information systems]
+* [tag readers]
+* [vehicle detection systems]
+* [video monitors]
+
+The controller must also be associated with a [comm link] which communicates
+using an appropriate protocol for the device.
+
+#### IO Pins
+
+Each controller has a set of **IO pins** for connecting [devices](#devices).
+Every device must be assigned to an _IO pin_ to be used.  The function of these
+pins is protocol specific — see the [protocol] table for details.
 
 
+[alarms]: alarms.html
+[beacons]: beacons.html
+[cameras]: cameras.html
 [CBW]: admin_guidel.html#cbw
 [comm link]: admin_guide.html#comm_links
-[devices]: admin_guide.html#devices
+[dynamic message signs]: dms.html
+[gate arms]: gate_arms.html
+[GPS]: gps.html
+[lane-use control signs]: lcs.html
 [protocol]: admin_guide.html#prot_table
 [NTCIP]: admin_guide.html#ntcip
+[ramp meters]: ramp_meters.html
+[road weather information systems]: rwis.html
 [SierraGX]: admin_guide.html#sierragx
+[tag readers]: tolling.html#tag-readers
+[vehicle detection]: vehicle_detection.html
+[video monitors]: video.html
