@@ -1,4 +1,4 @@
-## Gate Arms
+# Gate Arms
 
 Select `View ➔ Gate Arm Arrays` menu item
 
@@ -9,7 +9,7 @@ changed by time of day.
 Gate arms are grouped as arrays of 1-8 arms.  Opening or closing an array will
 control all gate arms in the array.
 
-### Verification Cameras
+## Verification Cameras
 
 One or two [cameras] can be associated with a gate arm array.  This allows
 operators to check traffic conditions and verify the status before opening or
@@ -17,14 +17,14 @@ closing the gates.  The second camera can be used to monitor approaching
 traffic.  The _Swap_ button allows the camera images to be swapped between
 larger and smaller views.
 
-### Warning Action Plan
+## Warning Action Plan
 
 An [action plan] can be associated with a gate arm array, allowing one or more
 [DMS] to display appropriate warning messages.  Whenever the array state
 changes, this plan will immediately be changed to the appropriate [phase] —
 **Warning Open Phase** when fully open, otherwise **Warning Closed Phase**.
 
-### Interlocks
+## Interlocks
 
 Great care must be taken to prevent traffic conflicts when operating gate arms.
 Two types of _interlock_ are available for this purpose.  An **open interlock**
@@ -34,7 +34,7 @@ is a constraint which prevents the gate arm from being opened.  Similarly, a
 When a gate arm is open, all other gate arms on the same roadway, but in any
 other direction will have an _open interlock_.
 
-#### Prerequesites
+### Prerequesites
 
 Each gate arm array can be assigned a _prerequisite_ array (on the same roadway
 and direction).  This configuration prevents the gate arms from opening until
@@ -42,7 +42,7 @@ the prerequisite has been opened, using an _open interlock_.  Once an array and
 its prerequisite are both open, the prerequisite array will have a _close
 interlock_ until the other array is closed.
 
-#### Conflicts
+### Conflicts
 
 An **open conflict** exists when an _open interlock_ constraint is broken.
 Similarly, a **close conflict** exists for _close interlock_ constraints.  IRIS
@@ -55,12 +55,12 @@ If communication is lost to a gate arm, the state will be unknown.  After an
 interval equal to the `gate_arm_alert_timeout_secs` [system attribute], it will
 be treated as **possibly open**, and interlock conflicts will be checked.
 
-### Security
+## Security
 
 There are a couple of extra security features to restrict access to gate arm
 control.
 
-#### Whitelist
+### Whitelist
 
 There is a whitelist of client IP addresses from which clients are allowed to
 control gate arms.  It is specified as the `gate.arm.whitelist` property in the
@@ -68,7 +68,7 @@ control gate arms.  It is specified as the `gate.arm.whitelist` property in the
 list of addresses in [CIDR] notation (exact IP, or ranges specified such as
 `192.168.1.0/24`).
 
-#### System Disable
+### System Disable
 
 Another gate arm security feature causes the entire _gate arm system_ to be
 disabled whenever any configuration change is made to a gate arm.  This includes

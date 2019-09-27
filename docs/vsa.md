@@ -34,7 +34,7 @@ System Attribute        | Default | Description
 `vsa_start_threshold`   | -1500   | Threshold to activate a bottleneck (mi/hr²)
 `vsa_stop_threshold`    | -750    | Threshold to deactivate a bottleneck (mi/hr²)
 
-### Station Sample Speeds
+## Station Sample Speeds
 
 Speed in miles per hour, average of lanes in station.  A rolling average is
 used, with the number of sample intervals depending on the current average
@@ -51,7 +51,7 @@ below 10 vpm    | N/A          | N/A (Speed Limit **L**)
 40-55 vpm       | 4 samples    | 2 minutes
 above 55 vpm    | 6 samples    | 3 minutes
 
-### Deceleration Thresholds
+## Deceleration Thresholds
 
 NOTE: using precipitation rates to control thresholds is not yet implemented.
 

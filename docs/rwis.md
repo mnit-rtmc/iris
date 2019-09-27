@@ -1,4 +1,4 @@
-## Road Weather Information Systems
+# Road Weather Information Systems
 
 Select `View ➔ Weather Sensors` menu item
 
@@ -6,7 +6,7 @@ Road Weather Information Systems, or **RWIS** can sense data such as
 precipitation rate, road surface temperature, wind speed, etc.  The [NTCIP]
 and [Org-815] protocols can collect RWIS data.
 
-### Settings
+## Settings
 
 Sensor settings are checked once per day and stored in the `settings` column of
 the `weather_sensor` table as JSONB.  When the value changes, a time-stamped
@@ -32,7 +32,7 @@ Field                    | Description
 ↳`sub_surface_type`      | Sub-surface type description
 ↳`sensor_depth`          | Depth in meters below pavement surface
 
-### Sample Data
+## Sample Data
 
 Sample data is collected at regular intervals equal to the polling period of the
 [comm link].  It is stored in the `sample` column of the `weather_sensor` table

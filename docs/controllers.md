@@ -1,4 +1,4 @@
-## Controllers
+# Controllers
 
 Select `View ➔ Maintenance ➔ Comm Links` menu item
 
@@ -10,7 +10,7 @@ In either case, a controller is required for any communication to a device.
 Controllers can be assigned to a **cabinet**, which has location information to
 allow displaying on a map.
 
-### Drop Address
+## Drop Address
 
 Some [protocol]s support _multi-drop_ addressing, while others are _single-drop_
 only.  Multi-drop addressing allows multiple controllers to share the same
@@ -19,7 +19,7 @@ assigned a unique (to the comm link) drop address, which is used to route all
 messages sent to the controller.  For single-drop protocols, the drop address is
 ignored.
 
-### Controller Password
+## Controller Password
 
 Authentication is supported or required by some communication protocols.  The
 controller **password** field is used to enter authentication data.
@@ -35,7 +35,7 @@ controller **password** field is used to enter authentication data.
   separate the username and password with a colon, in the same manner as HTTP
   basic authentication.
 
-### Devices
+## Devices
 
 A device is a hardware field control or sensing system:
 
@@ -55,7 +55,7 @@ A device is a hardware field control or sensing system:
 The controller must also be associated with a [comm link] which communicates
 using an appropriate protocol for the device.
 
-#### IO Pins
+### IO Pins
 
 Each controller has a set of **IO pins** for connecting [devices](#devices).
 Every device must be assigned to an _IO pin_ to be used.  The function of these

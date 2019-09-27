@@ -1,4 +1,4 @@
-## GPS
+# GPS
 
 A portable [DMS] can have an associated GPS (global positioning system)
 receiver.  This allows the sign to be tracked and automatically updated with the

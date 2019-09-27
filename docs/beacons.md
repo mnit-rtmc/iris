@@ -1,4 +1,4 @@
-## Beacons
+# Beacons
 
 Select `View ➔ Message Signs ➔ Beacons` menu item
 

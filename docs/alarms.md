@@ -1,4 +1,4 @@
-## Alarms
+# Alarms
 
 Select `View ➔ Maintenance ➔ Alarms` menu item
 

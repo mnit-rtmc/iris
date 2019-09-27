@@ -1,4 +1,4 @@
-## Tolling
+# Tolling
 
 High-occupancy / toll (HOT) lanes can be operated through IRIS.  Functions
 include calculating tolls in real time based on density, displaying prices on
@@ -6,7 +6,7 @@ DMS, and logging vehicle transponder (tag) information.  Customer accounts and
 billing are not supported; those features must be provided by an external
 system.
 
-### Toll Zones
+## Toll Zones
 
 Select `View ➔ Lane Use ➔ Toll Zones` menu item
 
@@ -21,7 +21,7 @@ p = α ⋅ k <sup>β</sup>, where α = 0.045 and β = 1.10
 
 The toll price is then rounded to the nearest $0.25.
 
-### Pricing on DMS
+## Pricing on DMS
 
 A DMS can display pricing information for toll zones.  This is accomplished
 using a `[tz…]` [action tag].  The tag has two or more parameters, separated by
@@ -45,7 +45,7 @@ next downstream tag reader.  The logged toll zone is the last zone specified in
 the tag.  In _priced_ mode, the displayed price is logged.  For _open_ or
 _closed_, a price of 0 is logged.
 
-### Tag Readers
+## Tag Readers
 
 Select `View ➔ Lane Use ➔ Tag Readers` menu item
 

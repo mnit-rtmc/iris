@@ -1,4 +1,4 @@
-## Action Plans
+# Action Plans
 
 Select `View ➔ Plans and Schedules` menu item
 
@@ -18,14 +18,14 @@ devices are online.  If **Sticky** is selected, messages sent with
 [DMS actions](#dms-actions) will be configured to persist even if communication
 or power is lost.
 
-### Plan Phases
+## Plan Phases
 
 The basic phases are **deployed** and **undeployed**.  Additional phases can be
 added on the **Plan Phases** tab.  Each phase must have a unique name.
 By specifying **Hold Time**, a *transient* phase will advance automatically to
 the **Next Phase**.  *Hold Time* must be a multiple of 30 seconds.
 
-### DMS Actions
+## DMS Actions
 
 [DMS] actions have an associated *sign group* to determine which signs are
 affected by the action.  The action happens when the corresponding action plan
@@ -33,7 +33,7 @@ phase is selected.  The [quick message] indicates which message is activated.
 If **activate beacon** is selected, the sign beacon will also be activated.
 **Message priority** determines the priority of messages created by the action.
 
-#### DMS Action Tags
+### DMS Action Tags
 
 Some *[MULTI]-like* tags are supported in [quick message]s used by DMS actions.
 These tags are interpreted by IRIS before sending the message to the DMS.
@@ -47,19 +47,19 @@ Tag                             | Description
 `[tz *{p,o,c},{tz0},…{tzn}* `]` | [Toll zone] pricing
 `[vsa]`                         | [Speed advisory]
 
-### Beacon Actions
+## Beacon Actions
 
 A [beacon] action can cause a beacon to be deployed when the action plan is set
 to the specified *phase*.  When the plan is set to any other phase, the beacon
 will shut off.
 
-### Meter Actions
+## Meter Actions
 
 A [ramp meter] action causes the meter to begin metering when the specified
 *phase* is selected.  When the plan is set to any other phase, the meter will
 shut off.
 
-### Time Actions
+## Time Actions
 
 A *time action* automatically changes the phase at specified dates and times.
 These events are scheduled using either a [day plan](#day-plans) or a specific
@@ -67,7 +67,7 @@ date (but not both).  A time of day must also be specified (HH:MM in 24-hour
 format).  Whenever the scheduled time occurs, the action plan will be changed to
 the specified phase.
 
-### Day Plans
+## Day Plans
 
 A day plan is a set of days which can be used for scheduling.  Day plans are
 specified with a table of **day matchers**.  The matchers for a day plan

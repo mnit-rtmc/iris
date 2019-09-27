@@ -1,6 +1,6 @@
-## Development
+# Development
 
-### Building
+## Building
 
 Install [Fedora] onto the development system.  Some additional development
 packages must be installed.
@@ -46,18 +46,18 @@ Now, the IRIS rpm file can be built with `ant rpm`.
 If there are no errors, the new rpm file should be in the
 `build/rpm/RPMS/noarch/` directory.
 
-### Contributing
+## Contributing
 
 [Bug reports] and feature requests are welcome and encouraged!  Please create an
 issue and discuss before making a [pull request].  All patches must be licensed
 under the GPL.
 
-### Future Plans
+## Future Plans
 
 Work is underway on a web-based user interface.  The java based interface will
 be fully supported until all features are implemented in the new UI.
 
-### Coding Style
+## Coding Style
 
 The IRIS coding style is focused on readability.  This is the most important
 factor for software maintenance, and also helps new developers who are
@@ -93,7 +93,7 @@ with no space.  Binary operators, such as `+` `-` `/` `*` `%` `&` `|` `&&` `||`
 `>` `=` `<` `>>` `==` `!=` `<<` `>>>` `>=` `<=` `^` should be separated from
 their operands by a space.
 
-### History
+## History
 
 **March 1999** — Started work on NTCIP DMS control
 

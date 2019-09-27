@@ -1,4 +1,4 @@
-## Ramp Meters
+# Ramp Meters
 
 Select `View ➔ Ramp Meters` menu item
 
@@ -15,7 +15,7 @@ The following operations can be performed on a ramp meter:
 * Synchronizing clock
 * Configuring time-of-day operation
 
-### Metering Strategies
+## Metering Strategies
 
 Each ramp meter can be assigned a _metering strategy_, or **algorithm**.  There
 are currently two metering strategies available — **simple** and [density

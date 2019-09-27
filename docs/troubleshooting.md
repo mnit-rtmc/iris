@@ -1,12 +1,12 @@
-## Troubleshooting
+# Troubleshooting
 
-### Error Logs
+## Error Logs
 
 Serious system errors are written to `stderr`, which is redirected to a file
 at `/var/log/iris/iris.stderr`.  Check this file first when any problems are
 suspected.
 
-### XML Output
+## XML Output
 
 There are a number of XML files which are written by the IRIS server
 periodically.  These files contain configuration information about the system as
@@ -21,7 +21,7 @@ Filename              | Period     | Description
 `incident.xml.gz`     | 30 seconds | Current incident information
 `sign_message.xml.gz` | 30 seconds | Current DMS sign message information
 
-### Database Event Tables
+## Database Event Tables
 
 There are a number of event tables in the database for logging different types
 of events.  Each of these tables has a **view** in the public DB schema.  There
@@ -44,7 +44,7 @@ View                       | Purge Threshold
 `sign_event_view`          | `sign_event_purge_days`
 `tag_read_event_view`      | `tag_read_event_purge_days`
 
-### Debug Trace Logs
+## Debug Trace Logs
 
 There are a number of debugging logs which can be enabled in the `/var/log/iris`
 directory.  To enable a particular log, use the `touch` command to create a file
