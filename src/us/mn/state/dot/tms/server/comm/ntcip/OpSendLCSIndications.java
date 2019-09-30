@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,13 +81,11 @@ public class OpSendLCSIndications extends OpLCS {
 		DMSImpl dms = dmss[lane];
 		if (dms != null) {
 			SignConfig sc = dms.getSignConfig();
-			if (null == sc)
-				return null;
-			int w = sc.getPixelWidth();
-			int h = sc.getPixelHeight();
-			String ms = createIndicationMulti(ind, w, h);
-			if (ms != null)
-				return createSignMessage(dms, ms, ind);
+			if (sc != null) {
+				String ms = createIndicationMulti(ind, sc);
+				if (ms != null)
+					return createSignMessage(dms, ms, ind);
+			}
 		}
 		return null;
 	}
@@ -107,9 +105,9 @@ public class OpSendLCSIndications extends OpLCS {
 	}
 
 	/** Create a MULTI string for a lane use indication */
-	private String createIndicationMulti(int ind, int w, int h) {
+	private String createIndicationMulti(int ind, SignConfig sc) {
 		String m = "";
-		LaneUseMulti lum = LaneUseMultiHelper.find(ind, w, h);
+		LaneUseMulti lum = LaneUseMultiHelper.find(ind, sc);
 		if (lum != null) {
 			QuickMessage qm = lum.getQuickMessage();
 			if (qm != null)

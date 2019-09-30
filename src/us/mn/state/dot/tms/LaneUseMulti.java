@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,18 +38,6 @@ public interface LaneUseMulti extends SonarObject {
 
 	/** Get the message number */
 	Integer getMsgNum();
-
-	/** Set the indication sign width */
-	void setWidth(int w);
-
-	/** Get the indication sign width */
-	int getWidth();
-
-	/** Set the indication sign height */
-	void setHeight(int h);
-
-	/** Get the indication sign height */
-	int getHeight();
 
 	/** Set the quick message */
 	void setQuickMessage(QuickMessage qm);

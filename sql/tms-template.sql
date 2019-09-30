@@ -146,7 +146,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	5.4.0
+database_version	5.5.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0
@@ -3479,16 +3479,13 @@ CREATE TABLE iris.lane_use_multi (
 	name VARCHAR(10) PRIMARY KEY,
 	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
 	msg_num INTEGER,
-	width INTEGER NOT NULL,
-	height INTEGER NOT NULL,
 	quick_message VARCHAR(20) REFERENCES iris.quick_message
 );
 
-CREATE UNIQUE INDEX lane_use_multi_indication_idx ON iris.lane_use_multi
-	USING btree (indication, width, height);
-
-CREATE UNIQUE INDEX lane_use_multi_msg_num_idx ON iris.lane_use_multi
-	USING btree (msg_num, width, height);
+CREATE VIEW lane_use_multi_view AS
+	SELECT name, indication, msg_num, quick_message
+	FROM iris.lane_use_multi;
+GRANT SELECT ON lane_use_multi_view TO PUBLIC;
 
 --
 -- Parking Areas

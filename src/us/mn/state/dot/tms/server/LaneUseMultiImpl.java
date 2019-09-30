@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,42 +35,40 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 	/** Load all the lane-use MULTIs */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, LaneUseMultiImpl.class);
-		store.query("SELECT name, indication, msg_num, width, height, "+
-			"quick_message FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+		store.query("SELECT name, indication, msg_num, quick_message " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new LaneUseMultiImpl(
 					namespace,
 					row.getString(1),	// name
 					row.getInt(2),		// indication
-					(Integer)row.getObject(3), // msg_num
-					row.getInt(4),		// width
-					row.getInt(5),		// height
-					row.getString(6)	// quick_message
+					(Integer) row.getObject(3), // msg_num
+					row.getString(4)	// quick_message
 				));
 			}
 		});
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("indication", indication);
 		map.put("msg_num", msg_num);
-		map.put("width", width);
-		map.put("height", height);
 		map.put("quick_message", quick_message);
 		return map;
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -81,22 +79,17 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 	}
 
 	/** Create a new lane-use MULTI */
-	protected LaneUseMultiImpl(Namespace ns, String n, int i, Integer mn,
-		int w, int h, String qm)
+	private LaneUseMultiImpl(Namespace ns, String n, int i, Integer mn,
+		String qm)
 	{
-		this(n, i, mn, w, h, (QuickMessage)ns.lookupObject(
-		     QuickMessage.SONAR_TYPE, qm));
+		this(n, i, mn, lookupQuickMessage(qm));
 	}
 
 	/** Create a new lane-use MULTI */
-	protected LaneUseMultiImpl(String n, int i, Integer mn, int w, int h,
-		QuickMessage qm)
-	{
+	private LaneUseMultiImpl(String n, int i, Integer mn, QuickMessage qm) {
 		this(n);
 		indication = i;
 		msg_num = mn;
-		width = w;
-		height = h;
 		quick_message = qm;
 	}
 
@@ -104,6 +97,7 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 	protected int indication;
 
 	/** Set the indication (ordinal of LaneUseIndication) */
+	@Override
 	public void setIndication(int i) {
 		indication = i;
 	}
@@ -120,6 +114,7 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 	}
 
 	/** Get the indication (ordinal of LaneUseIndication) */
+	@Override
 	public int getIndication() {
 		return indication;
 	}
@@ -128,6 +123,7 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 	protected Integer msg_num;
 
 	/** Set the message number */
+	@Override
 	public void setMsgNum(Integer n) {
 		msg_num = n;
 	}
@@ -141,56 +137,16 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 	}
 
 	/** Get the message number */
+	@Override
 	public Integer getMsgNum() {
 		return msg_num;
-	}
-
-	/** Indication sign width */
-	protected int width;
-
-	/** Set the indication sign width */
-	public void setWidth(int w) {
-		width = w;
-	}
-
-	/** Set the indication sign width */
-	public void doSetWidth(int w) throws TMSException {
-		if(w == width)
-			return;
-		store.update(this, "width", w);
-		setWidth(w);
-	}
-
-	/** Get the indication sign width */
-	public int getWidth() {
-		return width;
-	}
-
-	/** Indication sign height */
-	protected int height;
-
-	/** Set the indication sign height */
-	public void setHeight(int h) {
-		height = h;
-	}
-
-	/** Set the indication sign height */
-	public void doSetHeight(int h) throws TMSException {
-		if(h == height)
-			return;
-		store.update(this, "height", h);
-		setHeight(h);
-	}
-
-	/** Get the indication sign height */
-	public int getHeight() {
-		return height;
 	}
 
 	/** Quick message to send for indication */
 	protected QuickMessage quick_message;
 
 	/** Set the quick message */
+	@Override
 	public void setQuickMessage(QuickMessage qm) {
 		quick_message = qm;
 	}
@@ -204,6 +160,7 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 	}
 
 	/** Get the quick message */
+	@Override
 	public QuickMessage getQuickMessage() {
 		return quick_message;
 	}
