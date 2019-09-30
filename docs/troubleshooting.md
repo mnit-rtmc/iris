@@ -92,7 +92,7 @@ Filename               | Description
 
 [Canoga]: comm_links.html#canoga
 [CBW]: comm_links.html#cbw
-[DIN-Relay]: comm_links.html#dinrelay
+[DIN-Relay]: comm_links.html#din-relay
 [district]: admin_guide.html#district
 [DMS-XML]: comm_links.html#dms-xml
 [E6]: comm_links.html#e6
@@ -103,7 +103,7 @@ Filename               | Description
 [Msg-Feed]: comm_links.html#msg-feed
 [NTCIP]: comm_links.html#ntcip
 [ORG-815]: comm_links.html#org815
-[Pelco-D]: comm_links.html#pelcod
+[Pelco-D]: comm_links.html#pelco-d
 [slow warning]: slow_warning.html
 [station]: road_topology.html#r_node-types
 [SS105]: comm_links.html#smartsensor
