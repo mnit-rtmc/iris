@@ -83,6 +83,6 @@ Field                   | Description
 _† Wind direction in degrees clockwise from due north_.
 
 
-[comm link]: admin_guide.html#comm_links
-[NTCIP]: admin_guide.html#ntcip
-[ORG-815]: admin_guide.html#org815
+[comm link]: comm_links.html
+[NTCIP]: comm_links.html#ntcip
+[ORG-815]: comm_links.html#org815

@@ -81,7 +81,7 @@ filesystem at `/var/lib/iris/gate_arm_enable` (using the touch command).
 [action plan]: action_plans.html
 [cameras]: cameras.html
 [CIDR]: https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing
-[comm link]: admin_guide.html#comm_links
+[comm link]: comm_links.html
 [controller]: controllers.html
 [DMS]: dms.html
 [phase]: action_plans.html#plan-phases

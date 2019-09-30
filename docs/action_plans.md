@@ -80,7 +80,7 @@ fields will match.  **Shift** is only required for days like *Black Friday*
 
 [beacon]: admin_guide.html#beacons
 [DMS]: dms.html
-[Msg-Feed]: admin_guide.html#msg_feed
+[Msg-Feed]: comm_links.html#msg-feed
 [MULTI]: dms.html#multi
 [Parking area]: parking_areas.html
 [quick message]: dms.html#quick-messages

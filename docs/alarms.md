@@ -13,5 +13,5 @@ The `state` field is set to `true` when _triggered_.  When it changes, a
 time-stamped record is added to the `alarm_event` table.
 
 
-[MnDOT-170]: admin_guide.html#mndot170
-[protocol]: admin_guide.html#prot_table
+[MnDOT-170]: comm_links.html#mndot-170
+[protocol]: comm_links.html#protocols

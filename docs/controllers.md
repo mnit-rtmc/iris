@@ -65,17 +65,17 @@ pins is protocol specific — see the [protocol] table for details.
 [alarms]: alarms.html
 [beacons]: beacons.html
 [cameras]: cameras.html
-[CBW]: admin_guidel.html#cbw
-[comm link]: admin_guide.html#comm_links
+[CBW]: comm_links.html#cbw
+[comm link]: comm_links.html
 [dynamic message signs]: dms.html
 [gate arms]: gate_arms.html
 [GPS]: gps.html
 [lane-use control signs]: lcs.html
-[protocol]: admin_guide.html#prot_table
-[NTCIP]: admin_guide.html#ntcip
+[protocol]: comm_links.html#protocols
+[NTCIP]: comm_links.html#ntcip
 [ramp meters]: ramp_meters.html
 [road weather information systems]: rwis.html
-[SierraGX]: admin_guide.html#sierragx
+[SierraGX]: comm_links.html#sierragx
 [tag readers]: tolling.html#tag-readers
 [vehicle detection systems]: vehicle_detection.html
 [video monitors]: video.html

@@ -82,48 +82,19 @@ detection systems.  The protocol used depends on the [comm link] of the
 [controller] to which it is assigned.  The following table summarizes features
 of each protocol.
 
-Protocol                | Binning               | Traffic Data
-------------------------|-----------------------|-----------------
-[NTCIP](#ntcip)         | 0-255 seconds         | Count, Occupancy
-[MnDOT-170](#mndot-170) | 30 seconds            | Count, Scans
-[SS105](#wavetronix)    | 5 seconds to 1 month  | Count, Occupancy, Speed, Classification
-[SS125](#wavetronix)    | 5 seconds to 1 month  | Count, Occupancy, Speed, Classification
-[G4](#rtms-g4)          | 10 seconds to 1 hour  | Count, Occupancy, Speed, Classification
-[Canoga](#canoga)       | N/A (vehicle logging) | Timestamp, Speed (double loops)
-[DR-500](#dr-500)       | 1-5? minutes          | Speed
-[DXM](#dxm)             | N/A (presence)        | Magnetic Field
+Protocol    | Binning               | Traffic Data
+------------|-----------------------|-----------------
+[NTCIP]     | 0-255 seconds         | Count, Occupancy
+[MnDOT-170] | 30 seconds            | Count, Scans
+[SS105]     | 5 seconds to 1 month  | Count, Occupancy, Speed, Classification
+[SS125]     | 5 seconds to 1 month  | Count, Occupancy, Speed, Classification
+[G4]        | 10 seconds to 1 hour  | Count, Occupancy, Speed, Classification
+[Canoga]    | N/A [vehicle logging] | Timestamp, Speed (double loops)
+[DR-500]    | 1-5? minutes          | Speed
+[DXM]       | N/A (presence)        | Magnetic Field
 
 For protocols which allow the binning intereval to be adjusted, it will be set
 to the poll [period] of the comm link.
-
-### NTCIP
-
-Traffic signal controllers which support NTCIP 1202 can be used for detection
-data.
-
-### MnDOT-170
-
-170 style controllers running the _MnDOT 170_ firmware can have up to 24 vehicle
-detectors attached.  These detectors must be assigned to [IO pins] in the range
-of 39-62.
-
-### Wavetronix
-
-The _SS105_ and _SS125_ (HD) protocols can collect data from [Wavetronix] radar
-sensors.  Each device can support up to 8 detectors, using [IO pins] 1-8.
-
-### RTMS G4
-
-The _G4_ protocol can support up to 12 detectors per controller.
-
-### DR-500
-
-The Houston Radar DR-500 doppler radar can be used to collect speed data only.
-
-### DXM
-
-The Banner Engineering DXM magnetometer can detect presence.  It can be used for
-[parking area] monitoring.
 
 ## Auto Fail
 
@@ -271,21 +242,27 @@ specified by the `map_segment_max_meters` [system attribute].  It is also the
 maximum downstream distance for associating station data with a segment.
 
 
-[canoga]: https://www.gtt.com/canoga-traffic-sensing/
-[comm link]: admin_guide.html#comm_links
+[Canoga]: comm_links.html#canoga
+[comm link]: comm_links.html
 [controller]: controllers.html
 [district]: admin_guide.html#district
+[DR-500]: comm_links.html#dr-500
+[DXM]: comm_links.html#dxm
+[G4]: comm_links.html#g4
 [IO pins]: controllers.html#io-pins
-[parking area]: parking_areas.html
-[period]: admin_guide.html#poll_period
-[protocols]: admin_guide.html#prot_table
+[MnDOT-170]: comm_links.html#mndot-170
+[NTCIP]: comm_links.html#ntcip
+[period]: comm_links.html#poll-period
+[protocols]: comm_links.html#protocols
 [r_node]: road_topology.html#r_nodes
 [ramp metering]: ramp_meters.html
 [road topology]: road_topology.html
 [roads]: road_topology.html#roads
+[SS105]: comm_links.html#smartsensor
+[SS125]: comm_links.html#smartsensor
 [station]: road_topology.html#r_node-types
 [system attribute]: admin_guide.html#sys_attr
 [travel time]: travel_time.html
-[Wavetronix]: https://www.wavetronix.com/smartsensor
+[vehicle logging]: #vehicle-logging
 [XML file]: troubleshooting.html#xml-output
 [XML output directory]: troubleshooting.html#xml-output

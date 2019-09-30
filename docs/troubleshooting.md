@@ -81,8 +81,8 @@ Filename               | Description
 `snmp`                 | SNMP error log
 `sonar`                | SONAR connection log
 `sql`                  | SQL database error log
-`ss105`                | Wavetronix SS-105 protocol
-`ss125`                | Wavetronix SS-125 protocol
+`ss105`                | Wavetronix [SS105] protocol
+`ss125`                | Wavetronix [SS125] protocol
 `stc`                  | [STC] protocol
 `sys_attr`             | System attribute change log
 `toll`                 | Tolling info log
@@ -90,22 +90,24 @@ Filename               | Description
 `vsa`                  | Variable speed advisory info log
 
 
-[Canoga]: admin_guide.html#canoga
-[CBW]: admin_guide.html#cbw
-[DIN-Relay]: admin_guide.html#dinrelay
+[Canoga]: comm_links.html#canoga
+[CBW]: comm_links.html#cbw
+[DIN-Relay]: comm_links.html#dinrelay
 [district]: admin_guide.html#district
-[DMS-XML]: admin_guide.html#dms_xml
-[E6]: admin_guide.html#e6
-[G4]: admin_guide.html#g4
-[Infinova]: admin_guide.html#infinova
-[Manchester]: admin_guide.html#manchester
-[MnDOT-170]: admin_guide.html#mndot170
-[Msg-Feed]: admin_guide.html#msg_feed
-[NTCIP]: admin_guide.html#ntcip
-[ORG-815]: admin_guide.html#org815
-[Pelco-D]: admin_guide.html#pelcod
-[slow warning]: admin_guide.html#slow
+[DMS-XML]: comm_links.html#dms-xml
+[E6]: comm_links.html#e6
+[G4]: comm_links.html#g4
+[Infinova]: comm_links.html#infinova
+[Manchester]: comm_links.html#manchester
+[MnDOT-170]: comm_links.html#mndot-170
+[Msg-Feed]: comm_links.html#msg-feed
+[NTCIP]: comm_links.html#ntcip
+[ORG-815]: comm_links.html#org815
+[Pelco-D]: comm_links.html#pelcod
+[slow warning]: slow_warning.html
 [station]: road_topology.html#r_node-types
-[STC]: admin_guide.html#stc
+[SS105]: comm_links.html#smartsensor
+[SS125]: comm_links.html#smartsensor
+[STC]: comm_links.html#stc
 [system attribute]: admin_guide.html#sys_attr
 [vehicle detection systems]: vehicle_detection.html

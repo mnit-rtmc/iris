@@ -107,12 +107,12 @@ specified, video requests will be made to
 Otherwise, requests will be made directly to the camera's encoder address.
 
 
-[comm link]: admin_guide.html#comm_links
+[comm link]: comm_links.html
 [controller]: controllers.html
 [DMS]: dms.html
 [iris-client.properties]: admin_guide.html#client_properties
 [MonStream]: video.html#monstream
-[Pelco-P]: admin_guide.html#pelcop
+[Pelco-P]: comm_links.html#pelcop
 [play list]: video.html#play-lists
 [ramp meter]: ramp_meters.html
 [system attribute]: admin_guide.html#sys_attr

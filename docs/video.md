@@ -45,7 +45,7 @@ A catalog is a collection of play lists.  Both play lists and catalogs can be
 assigned sequence numbers, so they can be used in the same way.
 
 
-[comm link]: admin_guide.html#comm_links
+[comm link]: comm_links.html
 [controller]: controllers.html
 [MonStream]: https://github.com/mnit-rtmc/monstream
 [system attribute]: admin_guide.html#sys_attr
