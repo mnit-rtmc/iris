@@ -48,7 +48,7 @@ associated with each [controller], using [IO pin]s 1 - 4.
 
 The `cbw` protocol can be used for [beacons], using a Control-By-Web controller.
 The _default scheme_ is `http`.  _Multi-drop_ is not supported.  Up to 8
-[beacons] can be associated with each [controller], using [IO pins] 1 - 8.
+[beacons] can be associated with each [controller], using [IO pin]s 1 - 8.
 
 ### Cohu
 
@@ -60,7 +60,7 @@ camera can be associated with each [controller], using [IO pin] 1.
 
 The `dinrelay` protocol can be used for [changeable LCS] or [beacons], using a
 DLI Din-Relay.  The _default scheme_ is `http`.  _Multi-drop_ is not supported.
-Up to 8 [indications] can be associated with each [controller], using [IO pins]
+Up to 8 [indications] can be associated with each [controller], using [IO pin]s
 1 - 8.
 
 ### DMS-XML
@@ -162,7 +162,7 @@ with one line per message to be deployed.
 
 Each line must contain 3 fields, separated by tab characters `\t` (ASCII 0x09),
 and terminated with a single newline character `\n` (ASCII 0x0A).  The fields
-are **DMS name**, **[MULTI] string**, and **expiration time**.  The _DMS name_
+are **DMS name**, [MULTI] **string**, and **expiration time**.  The _DMS name_
 must exactly match one of the DMS as identified by IRIS.  The _MULTI string_
 specifies a message to display on the sign, using the _MULTI_ markup language,
 from NTCIP 1203.  For example, `ROAD CLOSED[nl]AHEAD[nl]LEFT LANE CLOSED` is a
@@ -189,11 +189,11 @@ the message feed host is fully trusted and there is no possibility of
 man-in-the-middle attacks between IRIS and the feed host.  In this case the
 `msg_feed_verify` [system attribute] can be set to `false` to disable this check.
 
-To control DMS [beacon] activation through a message feed, configure 2 message
-feeds.  One message feed is for DMS containing messages with activated beacons
-and the other for messages with deactivated beacons.  There is no way to control
-which message feed is executed first, so each message feed must list each DMS
-and at least one of the message feeds must contain a blank `MULTI` for each DMS. 
+To activate DMS [beacons] through a message feed, configure 2 message feeds.
+One is for DMS containing messages with activated beacons and the other for
+messages with deactivated beacons.  There is no way to control which message
+feed is executed first, so each message feed must list each DMS and at least one
+of the message feeds must contain a blank _MULTI_ for each DMS.
 
 ### NTCIP
 
@@ -281,6 +281,7 @@ camera can be associated with each [controller], using [IO pin] 1.
 [device]: controllers.html#devices
 [DMS]: dms.html
 [DMS action]: action_plans.html#dms-actions
+[gate arm]: gate_arms.html
 [GPS]: gps.html
 [incidents]: incidents.html
 [indications]: lcs.html#indications
