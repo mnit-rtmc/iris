@@ -12,15 +12,15 @@ These are some typical lane-use indications:
 
 Indication          | Example Image
 --------------------|-----------------------------------------------------------
-`Dark`              | <span style="background:black;border:0.1rem solid gray">   </span>
+`Dark`              | <span style="background:black;border:0.1rem solid gray">    </span>
 `Lane open`         | <span style="background:black;color:#0f0;border:0.1rem solid gray"> ↓ </span>
-`Use caution`       | <span style="background:black;color:#ff0;border:0.1rem solid gray"> ↓ </span>
+`Use caution`       | <span style="background:black;color:#ff0;border:0.1rem solid gray"> ↓ </span> (animated)
 `Lane closed ahead` | <span style="background:black;color:#ff0;border:0.1rem solid gray"> X </span>
 `Lane closed`       | <span style="background:black;color:#f00;border:0.1rem solid gray"> X </span>
 `HOV / HOT`         | <span style="background:black;color:#fff;border:0.1rem solid gray"> ◊ </span>
-`Merge right`       | <span style="background:black;color:#ff0;border:0.1rem solid gray"> 》 </span> (animated)
-`Merge left`        | <span style="background:black;color:#ff0;border:0.1rem solid gray"> 《 </span> (animated)
-`Merge both`        | <span style="background:black;color:#ff0;border:0.1rem solid gray"> 〈〉 </span> (animated)
+`Merge right`       | <span style="background:black;color:#ff0;border:0.1rem solid gray"> 》</span> (animated)
+`Merge left`        | <span style="background:black;color:#ff0;border:0.1rem solid gray">《 </span> (animated)
+`Merge both`        | <span style="background:black;color:#ff0;border:0.1rem solid gray">〈〉</span> (animated)
 
 ## Intelligent LCS
 
@@ -30,10 +30,10 @@ of traffic.  In addition to being used as an LCS, it can display
 
 ### Lane-Use MULTI
 
-_Lane-Use MULTI_ is an association from an [indication](#indications) to a
-[quick message].  The quick message typically contains a _graphic_ or series of
-graphics on multiple pages.  For it to be available for use, the _quick message_
-must have a _sign config_ which matches the sign.
+A _lane-use MULTI_ associates an [indication](#indications) to a [quick message].
+The quick message typically contains a _graphic_ or series of graphics on
+multiple pages.  To be used, the _sign config_ of the _quick message_ must match
+the DMS.
 
 ## Changeable LCS
 
@@ -52,4 +52,4 @@ well as the DMS which represents the LCS.
 [DMS]: dms.html
 [IO pin]: controllers.html#io-pins
 [quick message]: dms.html#quick-messages
-[variable speed advisory]: vsa.html
+[variable speed advisories]: vsa.html
