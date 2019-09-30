@@ -59,7 +59,7 @@ using an appropriate protocol for the device.
 
 Each controller has a set of **IO pins** for connecting [devices](#devices).
 Every device must be assigned to an _IO pin_ to be used.  The function of these
-pins is protocol specific — see the [protocol] table for details.
+pins is [protocol] specific.
 
 
 [alarms]: alarms.html

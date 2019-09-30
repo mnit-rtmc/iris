@@ -30,10 +30,9 @@ of traffic.  In addition to being used as an LCS, it can display
 
 ### Lane-Use MULTI
 
-A _lane-use MULTI_ associates an [indication](#indications) to a [quick message].
-The quick message typically contains a _graphic_ or series of graphics on
-multiple pages.  To be used, the _sign config_ of the _quick message_ must match
-the DMS.
+A _lane-use MULTI_ associates an [indication](#indications) with a
+[quick message].  The message typically contains a _graphic_ of the _indication_
+image.  To be used, the _sign config_ of the _quick message_ must match the DMS.
 
 ## Changeable LCS
 
