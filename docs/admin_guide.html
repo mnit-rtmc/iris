@@ -31,7 +31,7 @@
     <h3><a href="#user_properties">User Properties</a></h3>
     <h3><a href="#edit_mode">Edit Mode</a></h3>
     <h3><a href="#sys_attr">System Attributes</a></h3>
-    <h3><a href="#users_and_roles">Users and Roles</a></h3>
+    <h3><a href="user_roles.html">User Roles</a></h3>
     <h3><a href="mapping.html">Mapping</a></h3>
     <h3><a href="road_topology.html">Road Topology</a></h3>
     <h3><a href="#comm_links">Comm Links</a></h3>
@@ -416,7 +416,7 @@ systemctl status iris</pre>
 <p>
 	Enter <code>admin</code> as the username and <code>atms_242</code> as
 	the password for the initial login.
-	After <a href="#users_and_roles">creating</a> and logging in with a
+	After <a href="user_roles.html">creating</a> and logging in with a
 	real administrator account, the <code>admin</code> user account should
 	be disabled.
 </p>
@@ -550,7 +550,7 @@ systemctl status iris</pre>
 	It is recommended to only turn the edit mode <b>ON</b> while updating
 	the system configuration.
 	Note: edit mode does not grant any capabilities which are not already
-	associated with the <a href="#users_and_roles">user's role</a>.
+	associated with the <a href="user_roles.html">user's role</a>.
 </p>
 
 <h3 id="sys_attr">System Attributes</h3>
@@ -575,99 +575,6 @@ systemctl status iris</pre>
 	Most attribute changes take effect immediately, but some require the
 	IRIS client or server to be restarted. Some System Attributes are
 	described in more detail below.
-</p>
-
-<h3 id="users_and_roles">Users and Roles</h3>
-<aside>
-	Select <span class="menu">View ➔ System ➔ Users and Roles</span>
-	menu item
-</aside>
-<p>
-	IRIS contains a set of user accounts which are allowed to access the
-	system.
-	Each account must be assigned to a specific <a href="#roles">role</a>.
-	During login, the user account is checked for validity.
-	For a successful login, the user and role must both be enabled.
-	If the user has a "distinguished name" (dn), then authentication is
-	performed using <a href="#sonar_config">LDAP</a>.
-	Otherwise, the supplied password is checked against the stored password
-	hash for the account.
-</p>
-<h4 id="roles">Roles</h4>
-<p>
-	A role defines the set of <a href="#capabilities">capabilities</a>
-	associated with a user account (any other capabilities will not be
-	available).
-	The default roles are <code>administrator</code> and
-	<code>operator</code>.
-	The <code>administrator</code> role has <a href="#capabilities">
-	capabilities</a> which allow unfettered access to the system.
-	Other roles can be created to allow different capability sets for users,
-	as needed.
-	<b>WARNING: if the administrator role or admin user are disabled,
-	the ability to make further changes will be lost immediately.</b>
-</p>
-<h4 id="capabilities">Capabilities</h4>
-<p>
-	A capability is a set of <a href="#privileges">privileges</a> which can
-	be associated with roles.
-	It grants all necessary privileges to perform a specific user task.
-	There are typically 3 capabilities for each device type:
-	<dl>
-	<dt><code>_tab</code></dt>
-	<dd>Grant <b>view</b> privileges</dd>
-	<dt><code>_control</code></dt>
-	<dd>Grant <b>control</b> privileges</dd>
-	<dt><code>_admin</code></dt>
-	<dd>Grant <b>administration</b> privileges</dd>
-	</dl>
-	Capabilities can be disabled, preventing all users from having access to
-	them.
-	For example, if a system does not contain any LCS devices, the
-	<code>lcs_tab</code> capability could be disabled, preventing that tab
-	from appearing in the user interface for any users.
-	<b>WARNING: the <code>base_admin</code> capability can grant access for
-	all IRIS functions.</b>
-</p>
-<h4 id="privileges">Privileges</h4>
-<p>
-	A privilege grants read or write access to one type of object.
-	There are 5 fields required to fully specify a privilege.
-	<dl>
-	<dt>Type</dt>
-	<dd>Object type can be selected from a list of available types.</dd>
-	<dt>Object</dt>
-	<dd>A regular expression used to match object names.
-	    NOTE: Write access only.
-	    This feature will be removed in a future version of IRIS.
-	</dd>
-	<dt>Group</dt>
-	<dd>Group names are used to divide objects into related groups.
-	    This is an experimental feature intended to replace the
-	    <b>object</b> field.
-	    NOTE: Write access only.
-	    <table>
-	    <tr>
-	    <th>Type</th>
-	    <th>Group</th>
-	    <th>Description</th>
-	    </tr>
-	    <tr>
-	    <td>play_list</td>
-	    <td>user</td>
-	    <td>Personal camera <a href="video.html#play-lists">play list</a></td>
-	    </table>
-	</dd>
-	<dt>Attribute</dt>
-	<dd>Write access to a specific attribute of an object type can be
-	    specified with this field.
-	</dd>
-	<dt>Write</dt>
-	<dd>When this checkbox is checked, write access is granted.
-	    Otherwise, the privilege grants read access.
-	    To be granted write access, a role must also have read access to
-	    the object type.
-	</dl>
 </p>
 
 </main>
