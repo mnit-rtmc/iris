@@ -37,7 +37,8 @@ controller **password** field is used to enter authentication data.
 
 ## Devices
 
-A device is a hardware field control or sensing system:
+A _device_ is one of several types of traffic control or sensing systems.  These
+include:
 
 * [alarms]
 * [beacons]
@@ -58,8 +59,8 @@ using an appropriate protocol for the device.
 ### IO Pins
 
 Each controller has a set of **IO pins** for connecting [devices](#devices).
-Every device must be assigned to an _IO pin_ to be used.  The function of these
-pins is [protocol] specific.
+Every _device_ must be assigned to an _IO pin_ to be used.  The function of
+these pins is [protocol] specific.
 
 
 [alarms]: alarms.html
