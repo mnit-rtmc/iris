@@ -17,6 +17,6 @@ used to manually poll the coördinates.
 
 
 [DMS]: dms.html
-[NTCIP]: admin_guide.html#ntcip
-[RedLion]: admin_guide.html#redlion
-[SierraGX]: admin_guide.html#sierragx
+[NTCIP]: comm_links.html#ntcip
+[RedLion]: comm_links.html#redlion
+[SierraGX]: comm_links.html#sierragx

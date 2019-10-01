@@ -17,7 +17,10 @@ most recent 6 minutes.  Within a zone, each station has an associated toll,
 based on the highest density recorded among HOT lane detectors downstream of
 that station.
 
-p = α ⋅ k <sup>β</sup>, where α = 0.045 and β = 1.10
+p = α ⋅ k <sup>β</sup>
+
+* α is the value of the `toll_density_alpha` [system attribute], default 0.045
+* β is the value of the `toll_density_beta` [system attribute], default 1.10
 
 The toll price is then rounded to the nearest $0.25.
 

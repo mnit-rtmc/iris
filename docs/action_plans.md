@@ -77,8 +77,21 @@ flagged as **holidays** are excluded.  Day matchers are specified by **Month**,
 fields will match.  **Shift** is only required for days like *Black Friday*
 (Fourth Thursday of November **+1**).
 
+## Manual Control
 
-[beacon]: admin_guide.html#beacons
+On the **Plan** tab of the client interface, users can manually change the phase
+of an action plan.  If the user is in the list specified by the
+`action_plan_alert_list` [system attribute], an email will be sent to the
+address specified by the `email_recipient_action_plan` [system attribute].
+
+## Events
+
+Whenever an action plan phase changes, a time-stamped record is added to the
+`action_plan_event` table.  These events are purged automatically when older
+than the value of the `action_plan_event_purge_days` [system attribute].
+
+
+[beacon]: beacons.html
 [DMS]: dms.html
 [Msg-Feed]: comm_links.html#msg-feed
 [MULTI]: dms.html#multi
@@ -89,3 +102,4 @@ fields will match.  **Shift** is only required for days like *Black Friday*
 [Toll zone]: tolling.html
 [Travel time]: travel_time.html
 [Speed advisory]: vsa.html
+[system attribute]: system_attributes.html
