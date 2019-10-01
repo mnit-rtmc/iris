@@ -20,9 +20,9 @@ body {
 nav {
   order: 0;
   flex-grow: 1;
-  flex-basis: 20%;
   margin-left: 0.1rem;
-  font-size: 0.6rem;
+  margin-right: 0.4rem;
+  font-size: 0.5rem;
 }
 
 nav a {
@@ -31,9 +31,8 @@ nav a {
 
 .main {
   order: 1;
-  align-self: center;
-  flex-grow: 4;
-  flex-basis: 80%;
+  flex-grow: 3;
+  align-self: stretch;
 }
 
 section {
