@@ -217,9 +217,9 @@ Log Data            | Duration | Headway | Time     | Speed
 `111,1542`          | 111      | 1542    | 17:50:35 | ?
 `304,12029`         | 304      | 12029   | 17:50:47 | ?
 
-## Traffic Map
+## Traffic Layer
 
-The IRIS client user interface includes a traffic map layer which is created
+The IRIS client user interface includes a _traffic map layer_ which is created
 automatically from the [road topology].  By default, this layer uses traffic
 **density** to determine the color of each **segment**.  Other themes are
 available for **speed** and **flow**.  The **Legend** menu at the top of the map
@@ -231,7 +231,7 @@ property in the `/etc/iris/iris-client.properties` file (on the IRIS server).
 The property is `tdxml.detector.url`, and it should point to the
 `det_sample.xml.gz` [XML file], as made available by apache on the IRIS server.
 
-The appearance of the traffic map layer changes depending on the current zoom
+The appearance of the _traffic map layer_ changes depending on the current zoom
 level.  If the zoom level is below 10, the layer will not be visible.  At zoom
 levels 10 through 13, the layer will display segments as aggregate of all
 detectors in each mainline [station].  At zoom level 14 or above, each mainline

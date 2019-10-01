@@ -29,7 +29,7 @@
   <div id="basic_setup_div">
     <h3><a href="#client_properties">Client Properties</a></h3>
     <h3><a href="#user_properties">User Properties</a></h3>
-    <h3><a href="#edit_mode">Edit Mode</a></h3>
+    <h3><a href="user_interface.html#edit-mode">Edit Mode</a></h3>
     <h3><a href="system_attributes.html">System Attributes</a></h3>
     <h3><a href="user_roles.html">User Roles</a></h3>
     <h3><a href="mapping.html">Mapping</a></h3>
@@ -55,7 +55,7 @@
   </div>
   <h2><a id="features_link" href="#features">Features</a></h2>
   <div id="features_div">
-    <h3><a href="vehicle_detection.html#traffic-map">Traffic Map Layer</a></h3>
+    <h3><a href="vehicle_detection.html#traffic-layer">Traffic Map Layer</a></h3>
     <h3><a href="incidents.html">Incident Management</a></h3>
     <h3><a href="action_plans.html">Action Plans</a></h3>
     <h3><a href="ramp_meters.html#metering-strategies">Ramp Metering Strategies</a></h3>
@@ -218,7 +218,7 @@
 	IRIS contains these higher-level traffic management features:
 </p>
 <ul>
-	<li>Continuously updated <a href="vehicle_detection.html#traffic-map">traffic map</a>
+	<li>Continuously updated <a href="vehicle_detection.html#traffic-layer">traffic layer</a>
 	</li>
 	<li><a href="incidents.html">Incident management</a></li>
 	<li><a href="action_plans.html">Scheduled</a> deployment of control
@@ -537,20 +537,6 @@ systemctl status iris</pre>
 	The file is overwritten when logging out.
 	The window geometry and last selected tab will be updated,
 	but all other properties will be left unchanged.
-</p>
-
-<h3 id="edit_mode">Edit Mode</h3>
-<p>
-	There is an <b>edit mode</b> toggle button on the lower-right corner of
-	the IRIS client.
-	When the edit mode is <b>OFF</b>, all configuration changes will be
-	disallowed.
-	This feature prevents administrators from accidentally modifying the
-	system while looking up information.
-	It is recommended to only turn the edit mode <b>ON</b> while updating
-	the system configuration.
-	Note: edit mode does not grant any capabilities which are not already
-	associated with the <a href="user_roles.html">user's role</a>.
 </p>
 
 </main>

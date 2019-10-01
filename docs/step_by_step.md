@@ -88,5 +88,5 @@ Notes:
    appearing on signs
 
 
-[edit mode]: admin_guide.html#edit_mode
+[edit mode]: user_interface.html#edit-mode
 [quick message]: dms.html#quick-messages
