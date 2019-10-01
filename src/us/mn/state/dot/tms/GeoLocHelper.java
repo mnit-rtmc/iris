@@ -211,10 +211,12 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Get the corridor for a road */
 	static public String getCorridorName(Road r, short d) {
-		if (r == null)
+		if (r != null) {
+			Direction dir = Direction.fromOrdinal(d);
+			String c = r.getName() + " " + dir.abbrev;
+			return c.trim();
+		} else
 			return null;
-		String c = r.getName() + " " + filterDirection(d, r).abbrev;
-		return c.trim();
 	}
 
 	/** Get the roadway corridor */
