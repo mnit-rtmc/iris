@@ -110,7 +110,7 @@ Otherwise, requests will be made directly to the camera's encoder address.
 [comm link]: comm_links.html
 [controller]: controllers.html
 [DMS]: dms.html
-[iris-client.properties]: admin_guide.html#client_properties
+[iris-client.properties]: client_properties.html
 [MonStream]: video.html#monstream
 [Pelco-P]: comm_links.html#pelcop
 [play list]: video.html#play-lists

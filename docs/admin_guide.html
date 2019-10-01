@@ -25,10 +25,10 @@
     <h3><a href="#start_services">Start Services</a></h3>
     <h3><a href="#initial_login">Initial Login</a></h3>
   </div>
-  <h2><a id="basic_setup_link" href="#basic_setup">Basic Setup</a></h2>
+  <h2><a id="basic_setup_link">Basic Setup</a></h2>
   <div id="basic_setup_div">
-    <h3><a href="#client_properties">Client Properties</a></h3>
-    <h3><a href="#user_properties">User Properties</a></h3>
+    <h3><a href="client_properties.html">Client Properties</a></h3>
+    <h3><a href="client_properties.html#user-properties">User Properties</a></h3>
     <h3><a href="user_interface.html#edit-mode">Edit Mode</a></h3>
     <h3><a href="system_attributes.html">System Attributes</a></h3>
     <h3><a href="user_roles.html">User Roles</a></h3>
@@ -419,124 +419,6 @@ systemctl status iris</pre>
 	After <a href="user_roles.html">creating</a> and logging in with a
 	real administrator account, the <code>admin</code> user account should
 	be disabled.
-</p>
-
-<h2 id="basic_setup">Basic Setup</h2>
-<br/>
-
-<h3 id="client_properties">Client Properties</h3>
-<p>
-	The IRIS server has a configuration file which contains default
-	properties for clients &mdash; <i>/etc/iris/iris-client.properties</i>.
-	These properties include internationalization, network proxy, and other
-	system configuration.
-	Note that even though IRIS has been internationalized, it has not yet
-	been translated to languages other than english.
-</p>
-<dl>
-	<dt>language</dt>
-	<dd>
-		ISO 639 alpha-2 or alpha-3 language code.
-		E.g., "en", "es", "fr".
-	</dd>
-	<dt>country</dt>
-	<dd>
-		ISO 3166 alpha-2 country code or UN M.49 numeric-3 area code.
-		E.g., "US", "MX", "CA".
-	</dd>
-	<dt>variant</dt>
-	<dd>
-		IETF BCP 47 language variant subtag.
-	</dd>
-	<dt>district</dt>
-	<dd>
-		District name.
-		Useful in cases where multiple IRIS servers exist within the
-		same organization.
-	</dd>
-	<dt>http.proxy</dt>
-	<dd>
-		List of HTTP proxy settings (used for downloading map tiles,
-		XML files, etc.)
-	</dd>
-	<dt>http.proxy.whitelist</dt>
-	<dd>
-		A list of addresses to bypass using proxy server.
-		Addresses are in CIDR notation (exact IP, or ranges specified
-		such as 192.168.1.0/24).
-	</dd>
-	<dt>keystore.file</dt>
-	<dd>
-		URL for the client keystore file.
-	</dd>
-	<dt>keystore.password</dt>
-	<dd>
-		Password for the client keystore.
-	</dd>
-	<dt>sonar.host</dt>
-	<dd>
-		IP or hostname of the SONAR server.
-	</dd>
-	<dt>sonar.port</dt>
-	<dd>
-		TCP port number of the SONAR server.
-	</dd>
-	<dt>tdxml.detector.url</dt>
-	<dd>
-		URL for XML detector stream.
-	</dd>
-	<dt>map.tile.url</dt>
-	<dd>
-		Base URL for map tileset.
-		Must end in "/".
-	</dd>
-	<dt>video.host</dt>
-	<dd>
-		IP or hostname of video server/proxy.
-	</dd>
-	<dt>video.port</dt>
-	<dd>
-		TCP port number of video server/proxy.
-	</dd>
-	<dt>video.extviewer</dt>
-	<dd>
-		External video viewer.
-	</dd>
-	<dt>autologin.username</dt>
-	<dd>
-		A username to be used for automatic login upon client startup.
-		Note: use of this property is a security risk.
-	</dd>
-	<dt>autologin.password</dt>
-	<dd>
-		A password to be used for automatic login upon client startup.
-		Note: use of this property is a security risk.
-	</dd>
-	<dt>tab.list</dt>
-	<dd>
-		A list specifying the visibility and ordering of the primary UI
-		tabs in the IRIS client.
-		The default value is:
-		<code>incident, dms, camera, lcs, ramp.meter, gate.arm, r_node,
-		      action.plan, comm</code>
-	</dd>
-	<dt>scale</dt>
-	<dd>
-		User interface scaling factor (0.25 to 4.0).
-		Useful for Hi-DPI screens.
-	</dd>
-</dl>
-
-<h3 id="user_properties">User Properties</h3>
-<p>
-	The IRIS client also reads a property file on client computers.
-	The file is named "user.properties", and can be found in the "iris"
-	folder of the user's home directory.
-	It can contain overrides for any of the default values in the
-	<a href="#client_properties">client properties</a> file.
-	The file is overwritten when logging out.
-	The window geometry and last selected tab will be updated,
-	but all other properties will be left unchanged.
 </p>
 
 </main>
