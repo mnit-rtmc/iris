@@ -24,11 +24,6 @@ _transport layer security_ (TLS).  The server may be configured to pass
 authentication requests off to an external LDAP server, allowing IRIS to
 integrate into an existing authentication system.
 
-## Links
-
-- [Release Notes](release_notes.html)
-- [Development](development.html)
-
 
 [Apache]: http://projects.apache.org/projects/http_server.html
 [GPL]: http://www.gnu.org/licenses/old-licenses/gpl-2.0.html

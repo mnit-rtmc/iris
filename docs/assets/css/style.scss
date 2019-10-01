@@ -7,11 +7,34 @@
 }
 
 body {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   padding-bottom: 1rem;
   color: #ffeedd;
   background: #283028;
   background: linear-gradient(#283028, #1c201c);
   background-attachment: fixed !important;
+}
+
+nav {
+  order: 0;
+  flex-grow: 1;
+  flex-basis: 25%;
+  margin-left: 0.1rem;
+  font-size: 0.8rem;
+}
+
+nav a {
+  display: block;
+}
+
+section {
+  order: 1;
+  flex-grow: 3;
+  flex-basis: 75%;
+  max-width: 36rem;
+  margin-top: 0.5rem;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -104,27 +127,6 @@ hr {
   border-bottom: thick dashed white;
   height: 0.1rem;
   margin-bottom: 1rem;
-}
-
-nav {
-  position: fixed;
-  height: 100%;
-  margin-left: 0.2rem;
-}
-
-nav a {
-  display: block;
-}
-
-.wrapper {
-  max-width: 36rem;
-  margin: 0 auto;
-  position: relative;
-}
-
-section {
-  max-width: 36rem;
-  margin-top: 0.5rem;
 }
 
 .title {

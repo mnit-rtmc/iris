@@ -10,6 +10,7 @@
   <body>
     <nav>
       <a href="README.html">IRIS</a>
+      <a href="release_notes.html">Release Notes</a>
       <a href="installation.html">Installation</a>
       <a href="mapping.html">Mapping</a>
       <a href="client_properties.html">Client Properties</a>
@@ -19,31 +20,32 @@
       <a href="comm_links.html">Comm Links</a>
       <a href="controllers.html">Controllers</a>
       <a href="road_topology.html">Road Topology</a>
+      <a href="incidents.html">Incidents</a>
+      <a href="action_plans.html">Action Plans</a>
+      <a href="tolling.html">Tolling</a>
       <a href="troubleshooting.html">Troubleshooting</a>
       <a href="maintenance.html">Maintenance</a>
       <a href="development.html">Development</a>
       <a href="step_by_step.html">Step-by-Step</a>
     </nav>
-    <div class="wrapper">
-      <section>
-        <div class="title">
-          <h1>
-              {% if site.icon And site.icon != nil %}
-                  <img src="{{ site.icon }}"/>
-              {% endif %}
-              {{ site.title | default: site.github.repository_name }}
-          </h1>
-          <p>{{ site.description | default: site.github.project_tagline }}</p>
-          <hr>
-        </div>
+    <section>
+      <div class="title">
+        <h1>
+            {% if site.icon And site.icon != nil %}
+                <img src="{{ site.icon }}"/>
+            {% endif %}
+            {{ site.title | default: site.github.repository_name }}
+        </h1>
+        <p>{{ site.description | default: site.github.project_tagline }}</p>
+        <hr>
+      </div>
 
-        {{ content }}
+      {{ content }}
 
-        <div class="footer">
-          <hr>
-          <span>Repository: <a href="{{ site.github.repository_url }}">{{ site.title | default: site.github.repository_name }}</a></span>
-        </div>
-      </section>
-    </div>
+      <div class="footer">
+        <hr>
+        <span>Repository: <a href="{{ site.github.repository_url }}">{{ site.title | default: site.github.repository_name }}</a></span>
+      </div>
+    </section>
   </body>
 </html>
