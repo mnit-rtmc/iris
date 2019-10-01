@@ -4,29 +4,14 @@
 	<meta charset="UTF-8" name="Author" content="Douglas Lau"/>
 	<link href="iris_doc.css" rel="stylesheet" type="text/css"/>
 	<title>IRIS Administrator Guide</title>
-	<script type="text/javascript" src="admin_guide.js"></script>
 </head>
 
 <body>
 <nav class="sidebar">
-  <h1><a id="contents_link" href="#admin_guide">Contents</a></h1>
-  <div id="contents_div"><!-- div required for js, DO NOT REMOVE --></div>
   <h2><a id="overview_link" href="#overview">Overview</a></h2>
-  <div id="overview_div">
     <h3><a href="#architecture">System Architecture</a></h3>
-    <h3><a href="#advanced_features">Advanced Features</a></h3>
-  </div>
-  <h2><a id="installation_link" href="#installation">Installation</a></h2>
-  <div id="installation_div">
-    <h3><a href="#operating_system">Operating System</a></h3>
-    <h3><a href="#install_iris">Install IRIS</a></h3>
-    <h3><a href="#init_iris">Initialize IRIS</a></h3>
-    <h3><a href="#server_properties">Server Properties</a></h3>
-    <h3><a href="#start_services">Start Services</a></h3>
-    <h3><a href="#initial_login">Initial Login</a></h3>
-  </div>
+  <h2><a id="installation_link" href="installation.html">Installation</a></h2>
   <h2><a id="basic_setup_link">Basic Setup</a></h2>
-  <div id="basic_setup_div">
     <h3><a href="client_properties.html">Client Properties</a></h3>
     <h3><a href="client_properties.html#user-properties">User Properties</a></h3>
     <h3><a href="user_interface.html#edit-mode">Edit Mode</a></h3>
@@ -37,9 +22,7 @@
     <h3><a href="#comm_links">Comm Links</a></h3>
     <h3><a href="controllers.html">Controllers</a></h3>
     <h3><a href="fonts.html">Fonts</a></h3>
-  </div>
   <h2><a id="devices_link" href="controllers.html#devices">Devices</a></h2>
-  <div id="devices_div">
     <h3><a href="dms.html">Dynamic Message Signs</a></h3>
     <h3><a href="lcs.html">Lane-Use Control Signs</a></h3>
     <h3><a href="vehicle_detection.html">Vehicle Detection</a></h3>
@@ -52,9 +35,7 @@
     <h3><a href="alarms.html">Alarms</a></h3>
     <h3><a href="rwis.html">Road Weather Information Systems</a></h3>
     <h3><a href="gps.html">GPS</a></h3>
-  </div>
   <h2><a id="features_link" href="#features">Features</a></h2>
-  <div id="features_div">
     <h3><a href="vehicle_detection.html#traffic-layer">Traffic Map Layer</a></h3>
     <h3><a href="incidents.html">Incident Management</a></h3>
     <h3><a href="action_plans.html">Action Plans</a></h3>
@@ -64,7 +45,6 @@
     <h3><a href="tolling.html">Tolling</a></h3>
     <h3><a href="parking_areas.html">Parking Area Availability</a></h3>
     <h3><a href="vsa.html">Variable Speed Advisory</a></h3>
-  </div>
   <h2><a id="troubleshooting_link" href="troubleshooting.html">Troubleshooting</a></h2>
   <h2><a id="maintenance_link" href="maintenance.html">Maintenance</a></h2>
   <h2><a id="development_link" href="development.html">Development</a></h2>
@@ -211,214 +191,6 @@
 	The server may be configured to pass authentication requests off to an
 	external LDAP server, allowing IRIS to integrate into an existing
 	authentication system.
-</p>
-
-<h3 id="advanced_features">Advanced Features</h3>
-<p>
-	IRIS contains these higher-level traffic management features:
-</p>
-<ul>
-	<li>Continuously updated <a href="vehicle_detection.html#traffic-layer">traffic layer</a>
-	</li>
-	<li><a href="incidents.html">Incident management</a></li>
-	<li><a href="action_plans.html">Scheduled</a> deployment of control
-	    devices</li>
-	<li>Coördinated <a href="ramp_meters.html#metering-strategies">ramp
-	    metering strategies</a></li>
-	<li><a href="travel_time.html">Travel time</a> estimation</li>
-	<li><a href="slow_warning.html">Slow traffic warning</a></li>
-	<li><a href="tolling.html">Toll</a> lane operation</li>
-	<li><a href="parking_areas.html">Parking area</a> availability</li>
-</ul>
-
-<h2 id="installation">Installation</h2>
-<p/>
-
-<h3 id="operating_system">Operating System</h3>
-<p>
-	Install <a href="http://fedoraproject.org">Fedora</a> onto the server
-	computer.
-	Other operating systems, such as Red Hat Enterprise Linux, can also be
-	used, but the procedures may vary slightly.
-	This machine should have a minimum of 2 GB of RAM and 200 GB hard drive
-	storage space.
-	The IRIS server does not have a GUI interface, so this computer can be
-	set up headless.
-</p>
-<p>
-	After the operating system is installed, make sure the hostname is
-	configured correctly in DNS.
-	The hostname is needed for some configuration files in the following
-	steps.
-	The following command should display the hostname that can be used to
-	access the server:
-</p>
-<pre class="code">hostname -f</pre>
-
-<h3 id="install_iris">Install IRIS</h3>
-<p>
-	<a href="http://iris.dot.state.mn.us/rpms/">Download</a> and install
-	the IRIS package.
-	This should be a file called
-	<b>iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.<i>{arch}</i>.rpm</b>.
-	The <i>{major}</i>, <i>{minor}</i>, and <i>{micro}</i> version numbers
-	and the <i>{build}</i> number can change with each release.
-	The system architecture, <i>{arch}</i>, will be <i>noarch</i>,
-	since Java is architecture independent.
-	It can be installed with the following command (as root):
-</p>
-<pre class="code">dnf install iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm</pre>
-<p>
-	This will install dependencies not already installed, including
-	<a href="http://openjdk.java.net">OpenJDK</a>,
-	<a href="http://www.postgresql.org">PostgreSQL</a> and
-	<a href="http://projects.apache.org/projects/http_server.html">Apache</a>.
-</p>
-<h3 id="init_iris">Initialize IRIS</h3>
-<p>
-	Next, you must initialize the IRIS server installation.
-	Run the following command (as root):
-</p>
-<pre class="code">iris_ctl init</pre>
-<p>
-	This command will perform the following steps:
-</p>
-<ol>
-	<li>
-		Update the <code>/etc/iris/iris-client.properties</code> file
-		with the server's hostname.
-	</li>
-	<li>
-		Create an SSL key pair for encrypted communication between the
-		server and clients.
-		The keystore files are
-		<code>/etc/iris/iris-server.keystore</code> and
-		<code>/etc/iris/iris-client.keystore</code>.
-		The keystore passwords are put into
-		<code>/etc/iris/iris-server.properties</code> and
-		<code>/etc/iris/iris-client.properties</code>.
-	</li>
-	<li>
-		Create a symbolic link to the PostgreSQL JDBC driver to make it
-		available to the IRIS server.
-	</li>
-	<li>
-		Create the database cluster and start the PostgreSQL server.
-	</li>
-	<li>
-		Create the <code>osm</code> databsae (for OpenStreetMap data).
-	</li>
-	<li>
-		Create the <code>tms</code> PostgreSQL user, which IRIS uses to
-		connect to the database.
-	</li>
-	<li>
-		Create the <code>tms</code> database and populate it using a
-		template SQL script.
-	</li>
-	<li>
-		Configure the apache (httpd) and IRIS services to start
-		automatically.
-	</li>
-	<li>
-		Create symbolic links to the current IRIS software version.
-	</li>
-</ol>
-<p>
-	The command should finish with the following message:
-</p>
-<pre>Successfully initialized the IRIS server</pre>
-
-<h3 id="server_properties">Server Properties</h3>
-<p>
-	The IRIS server has a configuration file which controls some of its
-	basic settings &mdash; <i>/etc/iris/iris-server.properties</i>.
-	Most of the default settings should work, but it may be necessary to
-	make some changes.
-	The file can be modified using a text editor, such as <i>gedit</i> or
-	<i>vi</i>.
-</p>
-<h4>Internationalization</h4>
-<p>
-	There are three properties which control internationalization (i18n).
-	They are <i>language</i>, <i>country</i> and <i>variant</i>.
-	These should only be changed if the IRIS software has been localized
-	for a specific locale.
-</p>
-<h4 id="district">District</h4>
-<p>
-	This property allows multiple IRIS servers to exist within the same
-	organization.
-	The default value is <code>tms</code>.
-</p>
-<h4>HTTP Proxy</h4>
-<p>
-	These properties can be used when IRIS must connect to HTTP servers
-	using a proxy server, due to organization firewall policies.
-</p>
-<h4>Database Connection</h4>
-<p>
-	The <i>db.url</i>, <i>db.user</i> and <i>db.password</i> properties
-	control how the IRIS server connects to the PostgreSQL database.
-	None of these properties should be changed, since they were configured
-	earlier by the <code>iris_ctl</code> script.
-</p>
-<h4 id="sonar_config">SONAR Configuration</h4>
-<p>
-	The <i>sonar.ldap.urls</i> property can be used to let IRIS pass user
-	authentication requests to one or more LDAP servers.
-	Multiple URLs must be separated by a space.
-	IRIS can manage user accounts and passwords without an LDAP server, but
-	this feature allows operators to log into IRIS without requiring them to
-	remember an additional user name and password.
-	If your organization already has an LDAP server, such as Active
-	Directory, you should use that.
-</p>
-<p>
-	The URL protocol is normally <i>ldap:</i>, but must be <i>ldaps:</i>
-	for encrypted communication over SSL.
-	To use ldaps, you must first import the SSL certificate into the IRIS
-	keystore.
-	Once you have obtained the SSL certificate for the LDAP server, save it
-	as <i>ldap.cert</i>.
-	Now you can import it with the following command (as root):
-</p>
-<pre class="code">keytool -import -alias ldap-cert -keystore /etc/iris/iris-server.keystore -file ldap.cert</pre>
-<p>
-	The <i>keystore.password</i> is used for accessing keys in
-	<code>/etc/iris/iris-server.keystore</code>.
-	This password is automatically generated by the <code>iris_ctl</code>
-	script.
-	It will not need to be changed.
-</p>
-
-<h3 id="start_services">Start Services</h3>
-<p>
-	Finally, the IRIS server can now be started with the following command:
-</p>
-<pre class="code">systemctl start iris</pre>
-<p>
-	Check that everything started OK:
-</p>
-<pre class="code">tail /var/log/iris/iris.stderr
-systemctl status iris</pre>
-<p>
-	This should indicate that IRIS is active and running.
-</p>
-
-<h3 id="initial_login">Initial Login</h3>
-<p>
-	From a client computer with Java installed, point your web browser at
-	http://YOUR_SERVER_NAME/iris-client/.
-	From there, you should be able to launch the IRIS client Web Start
-	application and log in.
-</p>
-<p>
-	Enter <code>admin</code> as the username and <code>atms_242</code> as
-	the password for the initial login.
-	After <a href="user_roles.html">creating</a> and logging in with a
-	real administrator account, the <code>admin</code> user account should
-	be disabled.
 </p>
 
 </main>

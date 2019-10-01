@@ -55,4 +55,4 @@ Write     | When this checkbox is checked, write access is granted.  Otherwise, 
 
 [device]: controllers.html#devices
 [LCS]: lcs.html
-[LDAP]: admin_guide.html#sonar_config
+[LDAP]: installation.html#ldap

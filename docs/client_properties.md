@@ -32,7 +32,7 @@ Property               | Description
 
 The IRIS client also reads a property file on client computers.  The file is
 named `user.properties`, and can be found in the `iris` folder of the user's
-home directory.  It can contain overrides for any of the default values in the
+home directory.  It can contain overrides for any of the values in the
 _client properties_ file.
 
 The file is overwritten when logging out.  The window geometry and last selected

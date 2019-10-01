@@ -62,7 +62,7 @@ dialogs.
 [camera selector tool]: cameras.html#camera-selector-tool
 [capabilities]: user_roles.html#capabilities
 [device]: controllers.html#devices
-[LDAP]: admin_guide.html#sonar_config
+[LDAP]: installation.html#ldap
 [map extents]: mapping.html#map-extents
 [role]: user_roles.html
 [traffic layer]: vehicle_detection.html#traffic-layer
