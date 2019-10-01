@@ -245,7 +245,7 @@ maximum downstream distance for associating station data with a segment.
 [Canoga]: comm_links.html#canoga
 [comm link]: comm_links.html
 [controller]: controllers.html
-[district]: admin_guide.html#district
+[district]: installation.html#server-properties
 [DR-500]: comm_links.html#dr-500
 [DXM]: comm_links.html#dxm
 [G4]: comm_links.html#g4

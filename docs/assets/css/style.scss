@@ -106,14 +106,24 @@ hr {
   margin-bottom: 1rem;
 }
 
+nav {
+  position: fixed;
+  height: 100%;
+  margin-left: 0.2rem;
+}
+
+nav a {
+  display: block;
+}
+
 .wrapper {
-  max-width: 40rem;
+  max-width: 36rem;
   margin: 0 auto;
   position: relative;
 }
 
 section {
-  max-width: 40rem;
+  max-width: 36rem;
   margin-top: 0.5rem;
 }
 

@@ -93,7 +93,7 @@ Filename               | Description
 [Canoga]: comm_links.html#canoga
 [CBW]: comm_links.html#cbw
 [DIN-Relay]: comm_links.html#din-relay
-[district]: admin_guide.html#district
+[district]: installation.html#server-properties
 [DMS-XML]: comm_links.html#dms-xml
 [E6]: comm_links.html#e6
 [G4]: comm_links.html#g4
