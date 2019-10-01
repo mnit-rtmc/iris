@@ -20,19 +20,23 @@ body {
 nav {
   order: 0;
   flex-grow: 1;
-  flex-basis: 25%;
+  flex-basis: 20%;
   margin-left: 0.1rem;
-  font-size: 0.8rem;
+  font-size: 0.6rem;
 }
 
 nav a {
   display: block;
 }
 
-section {
+.main {
   order: 1;
-  flex-grow: 3;
-  flex-basis: 75%;
+  align-self: center;
+  flex-grow: 4;
+  flex-basis: 80%;
+}
+
+section {
   max-width: 36rem;
   margin-top: 0.5rem;
 }
