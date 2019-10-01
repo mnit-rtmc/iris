@@ -111,4 +111,4 @@ rejected message.
 [beacon]: beacons.html
 [DMS actions]: action_plans.html#dms-actions
 [fonts]: fonts.html
-[system attribute]: admin_guide.html#sys_attr
+[system attribute]: system_attributes.html

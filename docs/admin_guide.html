@@ -30,7 +30,7 @@
     <h3><a href="#client_properties">Client Properties</a></h3>
     <h3><a href="#user_properties">User Properties</a></h3>
     <h3><a href="#edit_mode">Edit Mode</a></h3>
-    <h3><a href="#sys_attr">System Attributes</a></h3>
+    <h3><a href="system_attributes.html">System Attributes</a></h3>
     <h3><a href="user_roles.html">User Roles</a></h3>
     <h3><a href="mapping.html">Mapping</a></h3>
     <h3><a href="road_topology.html">Road Topology</a></h3>
@@ -73,7 +73,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">30 Sep 2019</div>
+<div id="stamp">1 Oct 2019</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -551,30 +551,6 @@ systemctl status iris</pre>
 	the system configuration.
 	Note: edit mode does not grant any capabilities which are not already
 	associated with the <a href="user_roles.html">user's role</a>.
-</p>
-
-<h3 id="sys_attr">System Attributes</h3>
-<aside>
-	Select <span class="menu">View ➔ System ➔ System Attributes</span> menu
-	item
-</aside>
-<p>
-	A <b>system attribute</b> is a configurable value which can be used to
-	customize an IRIS system.
-	Each system attribute has a corresponding type: string, boolean,
-	integer or floating point number.
-	String values are limited to 64 characters or less.
-	Boolean values must be specified as either <code>true</code> or
-	<code>false</code>.
-	Many numeric system attributes are constrained to a range of values
-	within a minimum and maximum bound, depending on the attribute.
-	A system attribute can be customized by updating the value in the table
-	on the System Attributes form.
-	When a system attribute has been modified from its default value, it
-	will be displayed <b>in bold</b>.
-	Most attribute changes take effect immediately, but some require the
-	IRIS client or server to be restarted. Some System Attributes are
-	described in more detail below.
 </p>
 
 </main>

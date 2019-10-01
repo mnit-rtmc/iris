@@ -115,5 +115,5 @@ Otherwise, requests will be made directly to the camera's encoder address.
 [Pelco-P]: comm_links.html#pelcop
 [play list]: video.html#play-lists
 [ramp meter]: ramp_meters.html
-[system attribute]: admin_guide.html#sys_attr
+[system attribute]: system_attributes.html
 [video monitor]: video.html

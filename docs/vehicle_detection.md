@@ -261,7 +261,7 @@ maximum downstream distance for associating station data with a segment.
 [SS105]: comm_links.html#smartsensor
 [SS125]: comm_links.html#smartsensor
 [station]: road_topology.html#r_node-types
-[system attribute]: admin_guide.html#sys_attr
+[system attribute]: system_attributes.html
 [travel time]: travel_time.html
 [vehicle logging]: #vehicle-logging
 [XML file]: troubleshooting.html#xml-output

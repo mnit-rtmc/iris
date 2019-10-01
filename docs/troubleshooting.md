@@ -84,7 +84,7 @@ Filename               | Description
 `ss105`                | Wavetronix [SS105] protocol
 `ss125`                | Wavetronix [SS125] protocol
 `stc`                  | [STC] protocol
-`sys_attr`             | System attribute change log
+`sys_attr`             | [System attribute] change log
 `toll`                 | Tolling info log
 `travel`               | Travel time info log
 `vsa`                  | Variable speed advisory info log
@@ -109,5 +109,5 @@ Filename               | Description
 [SS105]: comm_links.html#smartsensor
 [SS125]: comm_links.html#smartsensor
 [STC]: comm_links.html#stc
-[system attribute]: admin_guide.html#sys_attr
+[system attribute]: system_attributes.html
 [vehicle detection systems]: vehicle_detection.html

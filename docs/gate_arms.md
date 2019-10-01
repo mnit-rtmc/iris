@@ -85,4 +85,4 @@ filesystem at `/var/lib/iris/gate_arm_enable` (using the touch command).
 [controller]: controllers.html
 [DMS]: dms.html
 [phase]: action_plans.html#plan-phases
-[system attribute]: admin_guide.html#sys_attr
+[system attribute]: system_attributes.html

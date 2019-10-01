@@ -61,4 +61,4 @@ each tag ID.  This information can be used to bill customers.
 
 [action tag]: action_plans.html#dms-action-tags
 [station]: road_topology.html#r_node-types
-[system attribute]: admin_guide.html#sys_attr
+[system attribute]: system_attributes.html

@@ -66,5 +66,5 @@ devices to deploy for the incident.
 [LCS]: lcs.html
 [suggested DMS]: incident_dms.html
 [suggested LCS]: incident_lcs.html
-[system attribute]: admin_guide.html#sys_attr
+[system attribute]: system_attributes.html
 [XML file]: troubleshooting.html#xml-output
