@@ -301,12 +301,14 @@ camera can be associated with each [controller], using [IO pin] 1.
 [IO pin]: controllers.html#io-pins
 [LCS]: lcs.html
 [monstream]: video.html#monstream
+[MULTI]: dms.html#multi
 [parking area]: parking_areas.html
 [PTZ]: cameras.html#pan-tilt-and-zoom
 [quick message]: dms.html#quick-messages
 [ramp meters]: ramp_meters.html
 [RFC 3339]: https://tools.ietf.org/html/rfc3339#section-5.6
 [RWIS]: rwis.html
+[system attribute]: system_attributes.html
 [tag readers]: tolling.html#tag-readers
 [vehicle detection]: vehicle_detection.html
 [vehicle logging]: vehicle_detection.html#vehicle-logging
