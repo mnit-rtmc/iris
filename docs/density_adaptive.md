@@ -16,7 +16,7 @@ calculate metering rates.
 
 ## Queueing
 
-![ramp meter queueing](ramp_meter_queueing.svg)
+![ramp meter queueing](images/ramp_meter_queueing.svg)
 
 A queue is formed at a ramp meter when the input (demand) is greater than the
 output (passage).  At any point in time, the difference between these counts is
@@ -95,7 +95,7 @@ is the queue length times the queue empty ratio.
 
 ## Limits
 
-![tracking demand limits](tracking_demand_limits.svg)
+![tracking demand limits](images/tracking_demand_limits.svg)
 
 The metering rate is limited by the **minimum** and **maximum** rates.  These
 are determined by the state of the ramp queue.
@@ -119,7 +119,7 @@ When the passage detector malfunctions, the minimum rate is equal to the
 
 ### Queue Wait Limit
 
-![queue wait limit](queue_wait_limit.svg)
+![queue wait limit](images/queue_wait_limit.svg)
 
 The purpose of the queue wait limit is to keep wait times below a maximum limit.
 All past intervals within the target wait time are checked.  Rates are
@@ -127,7 +127,7 @@ calculated from the current passage to the accumulated demand at those
 intervals, using the remaining target wait time.  The queue wait limit is the
 highest of those.
 
-![queue wait limit fixed](queue_wait_limit_fixed.svg)
+![queue wait limit fixed](images/queue_wait_limit_fixed.svg)
 
 When the queue detector is malfunctioning, the target value for the current
 metering period (AM or PM) is used for demand.  This makes the queue wait limit
@@ -136,14 +136,14 @@ short queues to be held to break up platoons of vehicles.
 
 ### Queue Storage Limit
 
-![queue storage limit](queue_storage_limit.svg)
+![queue storage limit](images/queue_storage_limit.svg)
 
 The queue storage limit prevents the queue from becoming more than 75% full.
 The target storage is subtracted from the accumulated demand, then projected to
 the target wait time, using the **tracking demand**.  The queue storage limit is
 the rate from the current passage to that projected target storage.
 
-![queue storage limit fixed](queue_storage_limit_fixed.svg)
+![queue storage limit fixed](images/queue_storage_limit_fixed.svg)
 
 When the queue detector is malfunctioning, the target value for the current
 metering period (AM or PM) is used for demand.  This makes the queue storage
@@ -160,7 +160,7 @@ backup factor.
 
 ## Mainline Segments
 
-![mainline segments](mainline_segments.svg)
+![mainline segments](images/mainline_segments.svg)
 
 A mainline segment is derived from a contiguous series of mainline stations.
 The distance between each pair of stations is divided into 3 links of equal
@@ -178,7 +178,7 @@ the highest segment density.
 
 ## Rate Calculation
 
-![rate calculation](rate_calculation.svg)
+![rate calculation](images/rate_calculation.svg)
 
 Mainline segment density will cause the metering rate to be adjusted within the
 rate limits.  The metering rate is calculated iteratively, based on the metering
@@ -197,7 +197,7 @@ the rate is interpolated between the previous rate and the minimum rate.
 
 ## Metering Period
 
-![metering phases](metering_phases.svg)
+![metering phases](images/metering_phases.svg)
 
 A metering period begins and ends at specific times during the day.  Within the
 metering period, a meter can be in one of 4 phases: **not started**,

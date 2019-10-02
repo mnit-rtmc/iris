@@ -13,7 +13,7 @@ from operators to streamline their workflow.
 
 ## System Architecture
 
-![system architecture](architecture.svg)
+![system architecture](images/architecture.svg)
 
 The software has a client/server architecture.  System configuration data is
 stored in a [PostgreSQL] database, and managed by the IRIS server.  The server

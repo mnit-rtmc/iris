@@ -6,7 +6,7 @@ describe the connection points on the road network.  For instance, each
 _entrance_ ramp, _exit_ ramp, _station_ or _intersection_ is represented by an
 r_node.
 
-![Road Topology](road_topology.svg)
+![Road Topology](images/road_topology.svg)
 
 ### Corridors
 

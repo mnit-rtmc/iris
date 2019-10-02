@@ -5,7 +5,7 @@ It will cause a message to be displayed only when approaching congestion —
 otherwise the message will be blank.  The tag itself will be replaced with an
 _advisory speed_, but the rest of the message can be any valid MULTI string.
 
-![Uniform Acceleration](uniform_acc.svg)
+![Uniform Acceleration](images/uniform_acc.svg)
 
 The goal is to promote a safe, **uniform deceleration** for vehicles approaching
 congestion.  Speed advisory signs are activated to warn motorists of slow
