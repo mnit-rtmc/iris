@@ -1,5 +1,14 @@
 # IRIS 5.x Release Notes
 
+5.5.0 (2 Oct 2019)
+ - Converted documentation (administrator guide) to Jekyll markdown
+ - Added missing documentation
+ - Removed width/height from lane_use_multi table/class
+ - Simplified corridor names - don't use `alt dir`
+ - Fixed JSON formatting of temperature values
+ - Cleaned up ntcip rwis JSON sample data
+ - Fixed an NPE in network domain checking on login (for real this time)
+
 5.4.0 (24 Sep 2019)
  - Added JSONB `settings` column to weather_sensor table
  - Added JSON output for NTCIP RWIS operations
