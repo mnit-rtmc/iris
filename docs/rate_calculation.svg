@@ -2,30 +2,35 @@
      xmlns:xlink='http://www.w3.org/1999/xlink'
      width='400' height='400'>
 <title>Rate Calculation</title>
-<text style='font-family:Overpass;font-size:x-large' x='120' y='20'>Rate Calculation</text>
+<style>
+  text { font-family: sans-serif; }
+  .title { font-size: x-large; }
+  .small { font-size: xx-small; }
+</style>
+<text class='title' style='fill:white' x='120' y='20'>Rate Calculation</text>
 <path id='output_rate' style='fill:none' d='M40 290 V60'/>
-<text style='font-family:Overpass'>
+<text style='fill:white'>
   <textPath xlink:href='#output_rate'>Metering Rate (Output)</textPath>
 </text>
 <path id='max_rate' style='fill:none' d='M54 100 V0'/>
-<text style='font-family:Overpass;font-size:small'>
+<text class='small' style='fill:white'>
   <textPath xlink:href='#max_rate'>Maximum</textPath>
 </text>
 <path id='previous_rate' style='fill:none' d='M54 210 V0'/>
-<text style='font-family:Overpass;font-size:small'>
+<text class='small' style='fill:white'>
   <textPath xlink:href='#previous_rate'>Previous</textPath>
 </text>
 <path id='min_rate' style='fill:none' d='M54 320 V200'/>
-<text style='font-family:Overpass;font-size:small'>
+<text class='small' style='fill:white'>
   <textPath xlink:href='#min_rate'>Minimum</textPath>
 </text>
-<text style='font-family:Overpass' x='120' y='394'>Segment Density (Input)</text>
-<text style='font-family:Overpass;font-size:small'>
+<text style='fill:white' x='120' y='394'>Segment Density (Input)</text>
+<text class='small' style='fill:white'>
   <tspan x='60' y='374'>0</tspan>
   <tspan x='140' y='374'>Desired (33.3)</tspan>
   <tspan x='340' y='374'>Jam (180)</tspan>
 </text>
-<rect style='fill:#f6f6ff;stroke:black;stroke-width:2'
+<rect style='fill:white;fill-opacity:0.8;stroke:black;stroke-width:2'
       x='60' y='40' width='320' height='320'/>
 <path style='stroke:gray;stroke-width:0.25' d='M180 40V360'/>
 <path style='stroke:gray;stroke-width:0.25'

@@ -1,8 +1,11 @@
-<svg xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1'
+<svg xmlns='http://www.w3.org/2000/svg' version='1.1'
      width='400' height='140'>
 <title>Mainline Segments</title>
-<text style='font-family:Overpass' x='130' y='28'>Mainline Stations</text>
-<text style='font-family:Overpass' x='160' y='132'>Segments</text>
+<style>
+  text { font-family: sans-serif; }
+</style>
+<text style='fill:white' x='130' y='28'>Mainline Stations</text>
+<text style='fill:white' x='160' y='132'>Segments</text>
 <path style='fill:#aaa' d='M20 40 H370 V70 H20 Z'/>
 <path style='fill:none;stroke:#666;stroke-width:2'
       d='M20 40 H370 M20 70 H370'/>

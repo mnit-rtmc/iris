@@ -3,6 +3,7 @@
      width='560' height='450' viewBox='0,20,560,450'>
 <title>Queue Wait Limit (Fixed)</title>
 <style>
+  text { font-family: sans-serif; }
   .title { font-size: x-large; }
   .small { font-size: xx-small; }
 </style>

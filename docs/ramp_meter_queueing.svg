@@ -3,6 +3,7 @@
      width='400' height='410'>
 <title>Ramp Meter Queueing</title>
 <style>
+  text { font-family: sans-serif; }
   .title { font-size: x-large; }
   .small { font-size: xx-small; }
 </style>
