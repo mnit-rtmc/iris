@@ -85,6 +85,7 @@ p img {
 code {
   font-family: 'Overpass Mono', monospace;
   color: #eee;
+  background: black;
 }
 
 pre {
@@ -124,6 +125,11 @@ td {
   text-align: left;
   padding: 0.05rem 0.5rem 0.05rem 0.5rem;
   color: white;
+}
+
+table code {
+  color: #eee;
+  background: #2e3b25;
 }
 
 hr {
