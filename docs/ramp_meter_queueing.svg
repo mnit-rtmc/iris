@@ -2,11 +2,14 @@
      xmlns:xlink='http://www.w3.org/1999/xlink'
      width='400' height='410'>
 <title>Ramp Meter Queueing</title>
-<style>
-  * { font: medium Overpass; }
-  .title { font: x-large; }
-  .small { font: x-small; }
-</style>
+<defs>
+  <style>
+    @import url("https://fonts.googleapis.com/css?family=Overpass");
+    * { font-family: Overpass; }
+    .title { font-size: x-large; }
+    .small { font-size: x-small; }
+  </style>
+</defs>
 <text class='title' style='fill:white' x='160' y='20'>Queueing</text>
 <path id='count_text_0' style='fill:none' d='M40 250 V60'/>
 <text style='fill:white'>
@@ -23,7 +26,7 @@
   <tspan x='300' y='374'>t-2</tspan>
   <tspan x='340' y='374'>t</tspan>
 </text>
-<rect style='fill:white;fill-opacity:0.5;stroke:black;stroke-width:2'
+<rect style='fill:white;fill-opacity:0.8;stroke:black;stroke-width:2'
       x='60' y='40' width='320' height='320'/>
 <path style='fill:none;stroke:gray;stroke-width:0.25'
       d='M100 40V360 M140 40V360 M180 40V360 M220 40V360 M260 40V360 M300 40V360

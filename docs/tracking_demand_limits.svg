@@ -2,11 +2,14 @@
      xmlns:xlink='http://www.w3.org/1999/xlink'
      width='560' height='450' viewBox='0,20,560,450'>
 <title>Tracking Demand Limits</title>
-<style>
-  * { font: medium Overpass; }
-  .title { font: x-large; }
-  .small { font: x-small; }
-</style>
+<defs>
+  <style>
+    @import url("https://fonts.googleapis.com/css?family=Overpass");
+    * { font-family: Overpass; }
+    .title { font-size: x-large; }
+    .small { font-size: x-small; }
+  </style>
+</defs>
 <text class='title' style='fill:white'
       x='160' y='40'>Tracking Demand Limits</text>
 <path id='count_text_2' d='M40 300 V60'/>
@@ -28,7 +31,7 @@
   <tspan x='460' y='434'>t+6</tspan>
   <tspan x='500' y='434'>t+8</tspan>
 </text>
-<rect style='fill:white;fill-opacity:0.5;stroke:black;stroke-width:2'
+<rect style='fill:white;fill-opacity:0.8;stroke:black;stroke-width:2'
       x='60' y='60' width='480' height='360'/>
 <path style='fill:none;stroke:gray;stroke-width:0.25'
       d='M100 60V420 M140 60V420 M180 60V420 M220 60V420 M260 60V420 M300 60V420
