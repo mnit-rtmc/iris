@@ -3,10 +3,8 @@
      width='400' height='410'>
 <title>Ramp Meter Queueing</title>
 <style>
-  @import url("https://fonts.googleapis.com/css?family=Overpass");
-  text { font-family: Overpass, sans-serif; }
   .title { font-size: x-large; }
-  .small { font-size: x-small; }
+  .small { font-size: xx-small; }
 </style>
 <text class='title' style='fill:white' x='160' y='22'>Queueing</text>
 <path id='count_text_0' style='fill:none' d='M40 250 V60'/>

@@ -2,14 +2,10 @@
      xmlns:xlink='http://www.w3.org/1999/xlink'
      width='560' height='450' viewBox='0,20,560,450'>
 <title>Tracking Demand Limits</title>
-<defs>
-  <style>
-    @import url("https://fonts.googleapis.com/css?family=Overpass");
-    * { font-family: Overpass; }
-    .title { font-size: x-large; }
-    .small { font-size: x-small; }
-  </style>
-</defs>
+<style>
+  .title { font-size: x-large; }
+  .small { font-size: xx-small; }
+</style>
 <text class='title' style='fill:white'
       x='160' y='40'>Tracking Demand Limits</text>
 <path id='count_text_2' d='M40 300 V60'/>

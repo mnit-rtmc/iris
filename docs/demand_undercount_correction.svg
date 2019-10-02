@@ -2,14 +2,10 @@
      xmlns:xlink='http://www.w3.org/1999/xlink'
      width='400' height='450' viewBox='0,20,400,450'>
 <title>Demand Undercount Correction</title>
-<defs>
-  <style>
-    @import url("https://fonts.googleapis.com/css?family=Overpass");
-    * { font-family: Overpass; }
-    .title { font-size: x-large; }
-    .small { font-size: x-small; }
-  </style>
-</defs>
+<style>
+  .title { font-size: x-large; }
+  .small { font-size: xx-small; }
+</style>
 <text class='title' style='fill:white' x='100' y='40'>Demand Correction</text>
 <path id='count_text_1' d='M40 300 V60'/>
 <text style='fill:white'>
