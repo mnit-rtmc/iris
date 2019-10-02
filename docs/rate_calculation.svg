@@ -1,0 +1,35 @@
+<svg xmlns='http://www.w3.org/2000/svg' version='1.1'
+     xmlns:xlink='http://www.w3.org/1999/xlink'
+     width='400' height='400'>
+<title>Rate Calculation</title>
+<text style='font-family:Overpass;font-size:x-large' x='120' y='20'>Rate Calculation</text>
+<path id='output_rate' style='fill:none' d='M40 290 V60'/>
+<text style='font-family:Overpass'>
+  <textPath xlink:href='#output_rate'>Metering Rate (Output)</textPath>
+</text>
+<path id='max_rate' style='fill:none' d='M54 100 V0'/>
+<text style='font-family:Overpass;font-size:small'>
+  <textPath xlink:href='#max_rate'>Maximum</textPath>
+</text>
+<path id='previous_rate' style='fill:none' d='M54 210 V0'/>
+<text style='font-family:Overpass;font-size:small'>
+  <textPath xlink:href='#previous_rate'>Previous</textPath>
+</text>
+<path id='min_rate' style='fill:none' d='M54 320 V200'/>
+<text style='font-family:Overpass;font-size:small'>
+  <textPath xlink:href='#min_rate'>Minimum</textPath>
+</text>
+<text style='font-family:Overpass' x='120' y='394'>Segment Density (Input)</text>
+<text style='font-family:Overpass;font-size:small'>
+  <tspan x='60' y='374'>0</tspan>
+  <tspan x='140' y='374'>Desired (33.3)</tspan>
+  <tspan x='340' y='374'>Jam (180)</tspan>
+</text>
+<rect style='fill:#f6f6ff;stroke:black;stroke-width:2'
+      x='60' y='40' width='320' height='320'/>
+<path style='stroke:gray;stroke-width:0.25' d='M180 40V360'/>
+<path style='stroke:gray;stroke-width:0.25'
+      d='M60 100H380 M60 210H380 M60 320H380'/>
+<path style='fill:none;stroke:#003373'
+      d='M60 100 L180 210 380 320'/>
+</svg>
