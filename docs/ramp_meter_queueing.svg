@@ -2,21 +2,18 @@
      xmlns:xlink='http://www.w3.org/1999/xlink'
      width='400' height='410'>
 <title>Ramp Meter Queueing</title>
-<defs>
-  <style>
-    @import url("https://fonts.googleapis.com/css?family=Overpass");
-    * { font-family: Overpass; }
-    .title { font-size: x-large; }
-    .small { font-size: x-small; }
-  </style>
-</defs>
-<text class='title' style='fill:white' x='160' y='20'>Queueing</text>
+<style>
+  @import url("https://fonts.googleapis.com/css?family=Overpass");
+  text { font-family: Overpass, sans-serif; }
+  .title { font-size: x-large; }
+  .small { font-size: x-small; }
+</style>
+<text class='title' style='fill:white' x='160' y='22'>Queueing</text>
 <path id='count_text_0' style='fill:none' d='M40 250 V60'/>
 <text style='fill:white'>
   <textPath xlink:href='#count_text_0'>Vehicle Count</textPath>
 </text>
-<text style='fill:white'
-      x='180' y='404'>Time (Steps)</text>
+<text style='fill:white' x='180' y='404'>Time (Steps)</text>
 <text class='small' style='fill:white'>
   <tspan x='100' y='374'>t-12</tspan>
   <tspan x='140' y='374'>t-10</tspan>
