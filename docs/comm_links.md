@@ -5,6 +5,12 @@ Select `View ➔ Maintenance ➔ Comm Links` menu item
 A **comm link** is a network connection to an external [device] or system.  IRIS
 is capable of supporting thousands of simultaneous comm links.
 
+## Modem
+
+The **modem** flag indicates the connection uses a _dial-up_ or _cell_ modem.
+The _comm link_ will be disconnected if communication is idle for longer than
+the value of the `comm_idle_disconnect_modem_sec` [system attribute].
+
 ## URI
 
 The **URI** includes a DNS host name or network IP address, and port number,
@@ -76,10 +82,10 @@ detector can be associated with each [controller], using [IO pin] 1.
 
 ### DXM
 
-The Banner Engineering DXM magnetometer can detect vehicle presence.  It can be
-used for [parking area] monitoring.  The _default scheme_ is `tcp`.
-_Multi-drop_ is not supported.  Up to 76 detectors can be associated with each
-[controller], using [IO pin]s 11 - 86.
+The Banner Engineering DXM magnetometer can detect vehicle presence for
+[parking area] monitoring.  The _default scheme_ is `tcp`.  _Multi-drop_ is not
+supported.  Up to 76 detectors can be associated with each [controller], using
+[IO pin]s 11 - 86.
 
 ### E6
 
@@ -99,18 +105,20 @@ Up to 12 detectors can be associated with each [controller], using [IO pin]s
 
 The `incfeed` protocol can be used to interface IRIS with an external system
 that generates [incidents].  Periodically, IRIS will poll the URI (using `http`)
-for incidents.  The external system should respond with an ASCII text file, with
-one line per active incident.
+for incidents.
 
 #### Incident Feed Format
+
+The external system should respond with an ASCII text file, with one line per
+active incident.
 
 Each line should contain 6 fields, separated by comma characters `,` and
 terminated with a single newline character `\n` (ASCII 0x0A).  The fields are
 **incident ID**, **type**, **incident detail**, **latitude**, **longitude**,
 and **camera ID**.  The type must be `CRASH`, `STALL`, `ROADWORK`, or `HAZARD`.
 The detail may be blank, or one of the _incident detail_ names.  _Latitude_ and
-_longitude_ must be coördinates of the incident.  _Camera ID_ may be blank, or
-the ID of a [camera] to view the incident.
+_longitude_ define coördinates using the WGS 84 datum.  _Camera ID_ may be
+blank, or the ID of a [camera] to view the incident.
 
 ### Infinova
 
@@ -155,39 +163,44 @@ Up to 16 [video monitors] can be associated with each [controller], using
 
 The `msgfeed` protocol can be used to interface with an external system that
 generates [DMS] messages.  Periodically, IRIS will poll the URI (using `http`)
-for DMS messages.  The external system should respond with an ASCII text file,
-with one line per message to be deployed.
+for DMS messages.
 
-#### Message Feed Format
+#### Msg-Feed Format
+
+The external system should respond with an ASCII text file, with one line per
+message to be deployed.
 
 Each line must contain 3 fields, separated by tab characters `\t` (ASCII 0x09),
 and terminated with a single newline character `\n` (ASCII 0x0A).  The fields
 are **DMS name**, [MULTI] **string**, and **expiration time**.  The _DMS name_
 must exactly match one of the DMS as identified by IRIS.  The _MULTI string_
-specifies a message to display on the sign, using the _MULTI_ markup language,
-from NTCIP 1203.  For example, `ROAD CLOSED[nl]AHEAD[nl]LEFT LANE CLOSED` is a
-valid three-line _MULTI_ message.  The _expiration time_ field indicates the
-date and time that the message should expire.  It is in [RFC 3339] format:
-`yyyy-MM-dd HH:mm:ssZ`.  A valid expiration time is `2012-05-15 11:37:00-0600`.
+specifies a message to display on the sign, using the _MULTI_ markup language.
+The _expiration time_ field indicates the date and time that the message should
+expire, in [RFC 3339] format: `yyyy-MM-dd HH:mm:ssZ`.
+```
+V66E37	CRASH[nl]5 MILES AHEAD[nl]LEFT LANE CLOSED	2019-10-02 11:37:00-0500
+```
 
-#### Feed Configuration
+#### Msg-Feed Action Plan
 
-There are a couple of other required steps to enable a message feed to operate.
-First, an [action plan] must be created which associates a [DMS action] with the
-message feed.  The DMS action must be associated with a [quick message] that
-references the message feed, using a `feed` [action tag].  So, if the message
-feed is on a _Comm Link_ called `LFEED`, then the quick message _MULTI_ string
-must be `[feedLFEED]`.  Also, the action plan must be active and deployed.
-This requirement allows only administrator-approved DMS to be controlled
-by the message feed.
+An [action plan] is required to associate a [DMS action] with the feed.  The
+_DMS action_ must have a [quick message] with a `feed` [action tag].  So, if the
+_message feed_ is on a _Comm Link_ called `LFEED`, then the quick message
+[MULTI] string must be `[feedLFEED]`.  Also, the _action plan_ must be active
+and deployed.  This requirement allows only administrator-approved DMS to be
+controlled by the message feed.
 
-The other requirement for message feeds is that all messages used by the feed
-must be defined in the DMS message library.  This requirement allows only
-administrator-approved messages to be deployed by the message feed.  In some
-circumstances, it may be appropriate to disable this checking.  For example, if
-the message feed host is fully trusted and there is no possibility of
-man-in-the-middle attacks between IRIS and the feed host.  In this case the
-`msg_feed_verify` [system attribute] can be set to `false` to disable this check.
+#### Msg-Feed Text
+
+All messages used by the feed must be defined in the DMS message library.  This
+requirement allows only administrator-approved messages to be deployed by the
+_message feed_.  In some circumstances, it may be appropriate to disable this
+checking.  For example, if the message feed host is fully trusted and there is
+no possibility of man-in-the-middle attacks between IRIS and the feed host.  In
+this case the `msg_feed_verify` [system attribute] can be set to `false` to
+disable this check.
+
+#### Msg-Feed Beacons
 
 To activate DMS [beacons] through a message feed, configure 2 message feeds.
 One is for DMS containing messages with activated beacons and the other for

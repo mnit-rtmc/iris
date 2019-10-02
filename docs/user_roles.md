@@ -52,7 +52,30 @@ Group     | Used to divide objects into related groups.  This is an experimental
 Attribute | Write access to a specific attribute of an object type can be specified with this field.
 Write     | When this checkbox is checked, write access is granted.  Otherwise, the privilege grants read access.  To be granted write access, a role must also have read access to the object type.
 
+## Domains
 
+A network _domain_ uses [CIDR] to restrict the IP addresses from which a _user_
+can connect to IRIS.  To log in, a _user_ must be assigned to a matching
+_enabled_ domain.
+
+## Events
+
+Whenever certain client events occur, a time-stamped record is added to the
+`client_event` table:
+
+* CONNECT
+* DISCONNECT
+* AUTHENTICATE
+* FAIL AUTHENTICATION
+* FAIL DOMAIN
+* CHANGE PASSWORD
+
+These records are purged automatically when older than the value of the
+`client_event_purge_days` [system attribute].
+
+
+[CIDR]: https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing
 [device]: controllers.html#devices
 [LCS]: lcs.html
 [LDAP]: installation.html#ldap
+[system attribute]: system_attributes.html
