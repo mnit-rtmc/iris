@@ -42,10 +42,10 @@ Tag                             | Description
 --------------------------------|-------------------
 `[feed` *n* `]`                 | [Msg-Feed] message
 `[pa` *i,l,c* `]`               | [Parking area] availability
-`[slow` *s,d,mode* `]`          | [Slow traffic warning]
+`[slow` *s,d,mode* `]`          | [Slow traffic] warning
 `[tt` *s,m,t* `]`               | [Travel time]
 `[tz *{p,o,c},{tz0},…{tzn}* `]` | [Toll zone] pricing
-`[vsa]`                         | [Speed advisory]
+`[vsa]`                         | [Variable speed advisory]
 
 ## Beacon Actions
 
@@ -98,8 +98,8 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 [Parking area]: parking_areas.html
 [quick message]: dms.html#quick-messages
 [ramp meter]: ramp_meters.html
-[Slow traffic warning]: slow_warning.html
+[Slow traffic]: slow_warning.html
+[Variable speed advisory]: vsa.html
 [Toll zone]: tolling.html
 [Travel time]: travel_time.html
-[Speed advisory]: vsa.html
 [system attribute]: system_attributes.html

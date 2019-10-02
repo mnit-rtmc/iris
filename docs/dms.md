@@ -8,7 +8,7 @@ _line-matrix_ or _full-matrix_ depending on the spacing between pixels.  Some
 are monochrome and others support full color display.  All of these
 configurations are supported.
 
-The following operations can be performed on a DMS:
+The following features are supported:
 
 * Querying currently displayed message
 * Displaying new messages
@@ -16,6 +16,9 @@ The following operations can be performed on a DMS:
 * Querying diagnostic information
 * Querying or sending [fonts]
 * Sending graphics
+* [Travel time] estimation
+* [Variable speed advisories]
+* [Slow traffic] warnings
 
 ## Setup
 
@@ -111,4 +114,7 @@ rejected message.
 [beacon]: beacons.html
 [DMS actions]: action_plans.html#dms-actions
 [fonts]: fonts.html
+[Slow traffic]: slow_warning.html
 [system attribute]: system_attributes.html
+[Travel time]: travel_time.html
+[Variable speed advisories]: vsa.html

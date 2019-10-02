@@ -122,7 +122,7 @@ System Attribute                 | Description
 `toll_density_beta`              | β coefficient (exponent) to convert density to [tolling] price
 `toll_min_price`                 | Minimum [tolling] price for one trip
 `toll_max_price`                 | Default maximum [tolling] price for one trip
-`travel_time_min_mph`            | Minimum overall speed for estimating travel times
+`travel_time_min_mph`            | Minimum overall speed for estimating [travel time]s
 `uptime_log_enable`              | Enable logging of system uptime
 `vsa_bottleneck_id_mph`          | Maximum speed to identify a bottleneck station for [VSA]
 `vsa_control_threshold`          | Acceleration threshold for [VSA] control distance
@@ -145,4 +145,5 @@ System Attribute                 | Description
 [keyboards]: cameras.html#camera-keyboards
 [ramp meter]: ramp_meters.html
 [tolling]: tolling.html
+[travel time]: travel_time.html
 [VSA]: vsa.html

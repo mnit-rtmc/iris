@@ -77,7 +77,7 @@ Filename               | Description
 `prio`                 | Operation priority log
 `profile`              | System profiling log
 `sched`                | DMS scheduled message log
-`slow`                 | DMS [slow warning] system log
+`slow`                 | DMS [slow traffic] warning system log
 `snmp`                 | SNMP error log
 `sonar`                | SONAR connection log
 `sql`                  | SQL database error log
@@ -87,7 +87,7 @@ Filename               | Description
 `sys_attr`             | [System attribute] change log
 `toll`                 | Tolling info log
 `travel`               | Travel time info log
-`vsa`                  | Variable speed advisory info log
+`vsa`                  | [Variable speed advisory] info log
 
 
 [Canoga]: comm_links.html#canoga
@@ -104,10 +104,11 @@ Filename               | Description
 [NTCIP]: comm_links.html#ntcip
 [ORG-815]: comm_links.html#org815
 [Pelco-D]: comm_links.html#pelco-d
-[slow warning]: slow_warning.html
+[slow traffic]: slow_warning.html
 [station]: road_topology.html#r_node-types
 [SS105]: comm_links.html#smartsensor
 [SS125]: comm_links.html#smartsensor
 [STC]: comm_links.html#stc
 [system attribute]: system_attributes.html
+[Variable speed advisory]: vsa.html
 [vehicle detection systems]: vehicle_detection.html
