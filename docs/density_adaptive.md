@@ -65,7 +65,7 @@ demand at the ramp.
 
 ### Demand Undercount Correction
 
-![demand undercount correction](demand_undercount_correction.svg)
+![demand undercount correction](images/demand_undercount_correction.svg)
 
 If the queue backs up over the detector, the occupancy will jump to greater than
 25%.  When this happens, the detector may undercount vehicles.  To correct this,
