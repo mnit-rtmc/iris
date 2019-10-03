@@ -59,7 +59,7 @@ h3 {
   font-size: 1.5rem;
 }
 
-p, ul, ol, table, pre, dl {
+p, ul, ol, table, pre {
   margin-bottom: 1rem;
 }
 
@@ -85,7 +85,10 @@ p img {
 code {
   font-family: 'Overpass Mono', monospace;
   color: #ffa;
-  background: #1c201c;
+}
+
+p > code {
+  background: #1c1c20;
 }
 
 pre {
@@ -93,22 +96,20 @@ pre {
   background: #c0a020;
   border-radius: 0.4rem;
   border: solid black;
-  overflow: auto;
-  overflow-y: hidden;
+  overflow-x: auto;
+}
 
-  code {
-    font-weight: bold;
-    color: black;
-    margin: 0;
-    padding: 0;
-  }
+pre code {
+  font-weight: bold;
+  color: black;
 }
 
 table {
-  width: 100%;
   border: solid white;
   border-collapse: collapse;
   background: #408050;
+  color: white;
+  text-align: left;
 }
 
 table tr:nth-child(odd) td {
@@ -117,19 +118,11 @@ table tr:nth-child(odd) td {
 
 th {
   font-size: 1.1rem;
-  text-align: left;
   padding: 0.1rem 0.5rem 0.1rem 0.6rem;
-  color: white;
 }
 
 td {
-  text-align: left;
   padding: 0.05rem 0.5rem 0.05rem 0.5rem;
-  color: white;
-}
-
-table code {
-  color: #ffa;
 }
 
 hr {
@@ -138,11 +131,9 @@ hr {
   margin-bottom: 1rem;
 }
 
-.title {
-  p {
-    font-size: 1.5rem;
-    text-align: center;
-  }
+.title p {
+  font-size: 1.4rem;
+  text-align: center;
 }
 
 .footer {
