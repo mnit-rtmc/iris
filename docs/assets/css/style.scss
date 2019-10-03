@@ -84,7 +84,7 @@ p img {
 
 code {
   font-family: 'Overpass Mono', monospace;
-  color: #eee;
+  color: #ffa;
   background: #1c201c;
 }
 
@@ -97,6 +97,7 @@ pre {
   overflow-y: hidden;
 
   code {
+    font-weight: bold;
     color: black;
     margin: 0;
     padding: 0;
@@ -128,8 +129,7 @@ td {
 }
 
 table code {
-  color: #eee;
-  background: #608050;
+  color: #ffa;
 }
 
 hr {
