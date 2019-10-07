@@ -9,8 +9,6 @@ use postgres;
 use serde_json;
 use std::error::Error as _;
 use std::{fmt, io};
-use std::path::PathBuf;
-use std::sync::mpsc::{SendError, RecvError, TryRecvError};
 
 /// Enum for all honeybee errors
 #[derive(Debug)]
@@ -20,9 +18,6 @@ pub enum Error {
     MultiSyntax(SyntaxError),
     Base64Decode(DecodeError),
     SerdeJson(serde_json::Error),
-    MpscSend(SendError<PathBuf>),
-    MpscRecv(RecvError),
-    MpscTryRecv(TryRecvError),
     EncodeError(EncodeError),
     Other(String),
 }
@@ -47,9 +42,6 @@ impl std::error::Error for Error {
             Error::MultiSyntax(e) => Some(e),
             Error::Base64Decode(e) => Some(e),
             Error::SerdeJson(e) => Some(e),
-            Error::MpscSend(e) => Some(e),
-            Error::MpscRecv(e) => Some(e),
-            Error::MpscTryRecv(e) => Some(e),
             Error::EncodeError(e) => Some(e),
             Error::Other(_) => None,
         }
@@ -83,24 +75,6 @@ impl From<DecodeError> for Error {
 impl From<serde_json::Error> for Error {
     fn from(e: serde_json::Error) -> Self {
         Error::SerdeJson(e)
-    }
-}
-
-impl From<SendError<PathBuf>> for Error {
-    fn from(e: SendError<PathBuf>) -> Self {
-        Error::MpscSend(e)
-    }
-}
-
-impl From<RecvError> for Error {
-    fn from(e: RecvError) -> Self {
-        Error::MpscRecv(e)
-    }
-}
-
-impl From<TryRecvError> for Error {
-    fn from(e: TryRecvError) -> Self {
-        Error::MpscTryRecv(e)
     }
 }
 
