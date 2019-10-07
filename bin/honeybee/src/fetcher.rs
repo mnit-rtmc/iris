@@ -15,7 +15,6 @@
 use fallible_iterator::FallibleIterator;
 use postgres::{Connection, TlsMode};
 use std::collections::HashSet;
-use std::thread;
 use std::time::{Duration, Instant};
 use crate::error::Error;
 use crate::resource::{self, Resource};
@@ -29,21 +28,13 @@ static OUTPUT_DIR: &str = "/var/www/html/iris/";
 pub fn start(username: &str) -> Result<(), Error> {
     // Format path for unix domain socket -- not worth using percent_encode
     let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
-    let db = thread::spawn(move || {
-        if let Err(e) = db_thread(uds) {
-            error!("{:?}", e);
-        }
-    });
-    if let Err(e) = db.join() {
-        error!("db_thread panicked: {:?}", e);
-    }
-    Ok(())
+    fetch_loop(uds)
 }
 
 /// Connect to database and fetch resources as notifications are received.
 ///
 /// * `uds` Unix domain socket for database.
-fn db_thread(uds: String) -> Result<(), Error> {
+fn fetch_loop(uds: String) -> Result<(), Error> {
     let conn = Connection::connect(uds, TlsMode::None)?;
     // The postgresql crate sets the session time zone to UTC.
     // We need to set it back to LOCAL time zone, so that row_to_json
