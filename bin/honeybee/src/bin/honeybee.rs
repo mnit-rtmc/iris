@@ -16,12 +16,9 @@
 
 use honeybee::fetcher;
 use log::error;
-use whoami;
 
 fn main() {
-    env_logger::Builder::from_default_env()
-                        .default_format_timestamp(false)
-                        .init();
+    env_logger::builder().format_timestamp(None).init();
     let username = whoami::username();
     if let Err(e) = fetcher::start(&username) {
         error!("fetcher: {:?}", e);
