@@ -201,7 +201,7 @@ pub struct Graphic {
 }
 
 /// Function to lookup a pixel from a graphic buffer
-type PixFn = Fn(&Graphic, u32, u32, &ColorCtx, &[u8]) -> Option<Rgb8>;
+type PixFn = dyn Fn(&Graphic, u32, u32, &ColorCtx, &[u8]) -> Option<Rgb8>;
 
 impl Graphic {
     /// Load graphics from a JSON file
