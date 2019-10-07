@@ -1022,7 +1022,7 @@ impl<'a> Parser<'a> {
         if let Some(c) = self.remaining.next() {
             // NTCIP 1203 mentions Extended ASCII (codepage 437) -- don't do it!
             match c {
-                ' '...'~' => Ok(Some(c)),
+                ' '..='~' => Ok(Some(c)),
                 _         => Err(SyntaxError::CharacterNotDefined(c)),
             }
         } else {
