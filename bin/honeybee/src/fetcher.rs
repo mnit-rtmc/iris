@@ -15,12 +15,9 @@
 use fallible_iterator::FallibleIterator;
 use postgres::{Connection, TlsMode};
 use std::collections::HashSet;
-use std::path::PathBuf;
-use std::sync::mpsc::{channel, Sender};
 use std::thread;
 use std::time::{Duration, Instant};
 use crate::error::Error;
-use crate::mere;
 use crate::resource::{self, Resource};
 
 /// Output directory to write JSON resources
@@ -29,17 +26,14 @@ static OUTPUT_DIR: &str = "/var/www/html/iris/";
 /// Start receiving notifications and fetching resources.
 ///
 /// * `username` Name of user running process.
-/// * `host` Host name and port to mirror fetched resources.
-pub fn start(username: &str, host: Option<String>) -> Result<(), Error> {
+pub fn start(username: &str) -> Result<(), Error> {
     // Format path for unix domain socket -- not worth using percent_encode
     let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
-    let (tx, rx) = channel();
     let db = thread::spawn(move || {
-        if let Err(e) = db_thread(uds, tx) {
+        if let Err(e) = db_thread(uds) {
             error!("{:?}", e);
         }
     });
-    mere::start(host, &username, rx);
     if let Err(e) = db.join() {
         error!("db_thread panicked: {:?}", e);
     }
@@ -49,8 +43,7 @@ pub fn start(username: &str, host: Option<String>) -> Result<(), Error> {
 /// Connect to database and fetch resources as notifications are received.
 ///
 /// * `uds` Unix domain socket for database.
-/// * `tx` Channel sender for resource file names.
-fn db_thread(uds: String, tx: Sender<PathBuf>) -> Result<(), Error> {
+fn db_thread(uds: String) -> Result<(), Error> {
     let conn = Connection::connect(uds, TlsMode::None)?;
     // The postgresql crate sets the session time zone to UTC.
     // We need to set it back to LOCAL time zone, so that row_to_json
@@ -71,21 +64,18 @@ fn db_thread(uds: String, tx: Sender<PathBuf>) -> Result<(), Error> {
     conn.execute("LISTEN system_attribute", &[])?;
     // Initialize all the resources
     for r in resource::ALL {
-        fetch_resource(&conn, &tx, r)?;
+        fetch_resource(&conn, r)?;
     }
-    notify_loop(&conn, tx)
+    notify_loop(&conn)
 }
 
 /// Fetch a resource from database.
 ///
 /// * `conn` The database connection.
-/// * `tx` Channel sender for resource file names.
 /// * `r` Resource to fetch.
-fn fetch_resource(conn: &Connection, tx: &Sender<PathBuf>, r: &Resource)
-    -> Result<(), Error>
-{
+fn fetch_resource(conn: &Connection, r: &Resource) -> Result<(), Error> {
     let t = Instant::now();
-    let c = r.fetch(&conn, OUTPUT_DIR, tx)?;
+    let c = r.fetch(&conn, OUTPUT_DIR)?;
     info!("{}: wrote {} rows in {:?}", r.name(), c, t.elapsed());
     Ok(())
 }
@@ -93,8 +83,7 @@ fn fetch_resource(conn: &Connection, tx: &Sender<PathBuf>, r: &Resource)
 /// Receive PostgreSQL notifications, and fetch needed resources.
 ///
 /// * `conn` The database connection.
-/// * `tx` Channel sender for resource file names.
-fn notify_loop(conn: &Connection, tx: Sender<PathBuf>) -> Result<(), Error> {
+fn notify_loop(conn: &Connection) -> Result<(), Error> {
     let nots = conn.notifications();
     let mut ns = HashSet::new();
     loop {
@@ -105,10 +94,10 @@ fn notify_loop(conn: &Connection, tx: Sender<PathBuf>) -> Result<(), Error> {
         }
         for n in ns.drain() {
             if let Some(r) = lookup_resource(&n.0, &n.1) {
-                fetch_resource(&conn, &tx, &r)?;
+                fetch_resource(&conn, &r)?;
                 // NOTE: when we need to fetch one, we also need the other
                 if r == &resource::TPIMS_DYN_RES {
-                    fetch_resource(&conn, &tx, &resource::TPIMS_ARCH_RES)?;
+                    fetch_resource(&conn, &resource::TPIMS_ARCH_RES)?;
                 }
             }
         }

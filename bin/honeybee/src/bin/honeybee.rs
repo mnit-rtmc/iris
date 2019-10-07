@@ -13,20 +13,16 @@
  */
 #![forbid(unsafe_code)]
 
-#[macro_use]
-extern crate log;
-
-use std::env;
 use honeybee::fetcher;
+use log::error;
 use whoami;
 
 fn main() {
     env_logger::Builder::from_default_env()
                         .default_format_timestamp(false)
                         .init();
-    let host = env::args().nth(1);
     let username = whoami::username();
-    if let Err(e) = fetcher::start(&username, host) {
+    if let Err(e) = fetcher::start(&username) {
         error!("fetcher: {:?}", e);
     }
 }

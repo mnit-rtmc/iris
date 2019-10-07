@@ -1,13 +1,12 @@
 // error.rs
 //
-// Copyright (c) 2019 Minnesota Department of Transportation
+// Copyright (c) 2019  Minnesota Department of Transportation
 //
 use base64::DecodeError;
 use crate::multi::SyntaxError;
 use gift::EncodeError;
 use postgres;
 use serde_json;
-use ssh2;
 use std::error::Error as _;
 use std::{fmt, io};
 use std::path::PathBuf;
@@ -21,7 +20,6 @@ pub enum Error {
     MultiSyntax(SyntaxError),
     Base64Decode(DecodeError),
     SerdeJson(serde_json::Error),
-    Ssh(ssh2::Error),
     MpscSend(SendError<PathBuf>),
     MpscRecv(RecvError),
     MpscTryRecv(TryRecvError),
@@ -49,7 +47,6 @@ impl std::error::Error for Error {
             Error::MultiSyntax(e) => Some(e),
             Error::Base64Decode(e) => Some(e),
             Error::SerdeJson(e) => Some(e),
-            Error::Ssh(e) => Some(e),
             Error::MpscSend(e) => Some(e),
             Error::MpscRecv(e) => Some(e),
             Error::MpscTryRecv(e) => Some(e),
@@ -86,12 +83,6 @@ impl From<DecodeError> for Error {
 impl From<serde_json::Error> for Error {
     fn from(e: serde_json::Error) -> Self {
         Error::SerdeJson(e)
-    }
-}
-
-impl From<ssh2::Error> for Error {
-    fn from(e: ssh2::Error) -> Self {
-        Error::Ssh(e)
     }
 }
 

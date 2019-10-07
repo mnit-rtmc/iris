@@ -25,7 +25,6 @@ use std::collections::{HashMap, HashSet};
 use std::fs::{File, rename, remove_file, read_dir};
 use std::io::{BufReader, BufWriter, Write};
 use std::path::{Path, PathBuf};
-use std::sync::mpsc::Sender;
 use std::time::Instant;
 use crate::error::Error;
 use crate::font::{Font, query_font, Graphic};
@@ -551,13 +550,12 @@ impl MsgData {
         self.gifs.remove(n)
     }
     /// Delete out-of-date .gif files
-    fn delete_gifs(&mut self, tx: &Sender<PathBuf>) -> Result<(), Error> {
+    fn delete_gifs(&mut self) -> Result<(), Error> {
         for p in self.gifs.drain() {
             info!("delete gif: {:?}", &p);
             if let Err(e) = remove_file(&p) {
                 error!("{:?}", e);
             }
-            tx.send(p)?;
         }
         Ok(())
     }
@@ -643,8 +641,8 @@ fn gif_listing(dir: &Path) -> Result<HashSet<PathBuf>, Error> {
 }
 
 /// Check and fetch one sign message (into a .gif file).
-fn fetch_sign_msg(s: &SignMessage, dir: &Path, tx: &Sender<PathBuf>,
-    msg_data: &mut MsgData) -> Result<(), Error>
+fn fetch_sign_msg(s: &SignMessage, dir: &Path, msg_data: &mut MsgData)
+    -> Result<(), Error>
 {
     let mut img = PathBuf::new();
     img.push(dir);
@@ -664,7 +662,6 @@ fn fetch_sign_msg(s: &SignMessage, dir: &Path, tx: &Sender<PathBuf>,
         };
         rename(tn, &n)?;
         info!("{}.gif rendered in {:?}", &s.name, t.elapsed());
-        tx.send(n)?;
     }
     Ok(())
 }
@@ -927,9 +924,8 @@ fn render_state_default(msg_data: &MsgData, cfg: &SignConfig)
 /// * `conn` The database connection.
 /// * `w` Writer for the file.
 /// * `dir` Output file directory.
-/// * `tx` Channel sender for resource file names.
-fn query_sign_msg<W: Write>(conn: &Connection, mut w: W, dir: &Path,
-    tx: &Sender<PathBuf>) -> Result<u32, Error>
+fn query_sign_msg<W: Write>(conn: &Connection, mut w: W, dir: &Path)
+    -> Result<u32, Error>
 {
     let mut msg_data = MsgData::load(dir)?;
     let mut c = 0;
@@ -939,11 +935,11 @@ fn query_sign_msg<W: Write>(conn: &Connection, mut w: W, dir: &Path,
         w.write("\n".as_bytes())?;
         let s = SignMessage::from_row(&row);
         w.write(serde_json::to_string(&s)?.as_bytes())?;
-        fetch_sign_msg(&s, dir, tx, &mut msg_data)?;
+        fetch_sign_msg(&s, dir, &mut msg_data)?;
         c += 1;
     }
     w.write("]\n".as_bytes())?;
-    msg_data.delete_gifs(tx)?;
+    msg_data.delete_gifs()?;
     Ok(c)
 }
 
@@ -953,14 +949,13 @@ impl Resource {
     /// * `conn` The database connection.
     /// * `w` Writer for the file.
     /// * `dir` Output file directory.
-    /// * `tx` Channel sender for resource file names.
-    fn fetch_file<W: Write>(&self, conn: &Connection, w: W, dir: &Path,
-        tx: &Sender<PathBuf>) -> Result<u32, Error>
+    fn fetch_file<W: Write>(&self, conn: &Connection, w: W, dir: &Path)
+        -> Result<u32, Error>
     {
         match self {
             Resource::Simple(_, _, sql) => query_simple(conn, sql, w),
             Resource::Font(_)           => query_font(conn, w),
-            Resource::SignMsg(_)        => query_sign_msg(conn, w, dir, tx),
+            Resource::SignMsg(_)        => query_sign_msg(conn, w, dir),
         }
     }
     /// Get the resource name
@@ -986,18 +981,14 @@ impl Resource {
     ///
     /// * `conn` The database connection.
     /// * `dir` Output file directory.
-    /// * `tx` Channel sender for resource file names.
-    pub fn fetch(&self, conn: &Connection, dir: &str, tx: &Sender<PathBuf>)
-        -> Result<u32, Error>
-    {
+    pub fn fetch(&self, conn: &Connection, dir: &str) -> Result<u32, Error> {
         debug!("fetch: {:?}", self.name());
         let p = Path::new(dir);
         let tn = make_tmp_name(p, self.name());
         let n = make_name(p, self.name());
         let f = BufWriter::new(File::create(&tn)?);
-        let c = self.fetch_file(conn, f, p, tx)?;
+        let c = self.fetch_file(conn, f, p)?;
         rename(tn, &n)?;
-        tx.send(n)?;
         Ok(c)
     }
 }
