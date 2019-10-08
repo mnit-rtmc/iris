@@ -23,6 +23,7 @@ mod error;
 pub mod fetcher;
 mod font;
 pub mod geo;
+pub mod multi;
 mod resource;
 mod render;
-pub mod multi;
+mod signmsg;
