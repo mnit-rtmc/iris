@@ -17,7 +17,7 @@ use crate::font::{Font, query_font, Graphic};
 use crate::multi::{ColorClassic, ColorScheme, LineJustification,
                    PageJustification, Rectangle};
 use crate::signmsg;
-use postgres::{self, Connection};
+use postgres::{Connection, rows::Row};
 use std::collections::{HashMap, HashSet};
 use std::convert::TryInto;
 use std::fs::{File, rename, remove_file, read_dir};
@@ -44,8 +44,11 @@ fn make_tmp_name(dir: &Path, n: &str) -> PathBuf {
 /// A resource can produce a JSON array of records.
 #[derive(PartialEq, Eq, Hash)]
 pub enum Resource {
+    /// Simple file resource
     Simple(&'static str, Option<&'static str>, &'static str),
+    /// Font resource
     Font(&'static str),
+    /// Sign message resource
     SignMsg(&'static str),
 }
 
@@ -200,14 +203,10 @@ const GRAPHIC_RES: Resource = Resource::Simple(
 );
 
 /// Font resource
-pub const FONT_RES: Resource = Resource::Font(
-"font",
-);
+pub const FONT_RES: Resource = Resource::Font("font");
 
 /// Sign message resource
-const SIGN_MSG_RES: Resource = Resource::SignMsg(
-"sign_message",
-);
+const SIGN_MSG_RES: Resource = Resource::SignMsg("sign_message");
 
 /// All defined resources
 pub const ALL: &[Resource] = &[
@@ -497,8 +496,10 @@ pub struct SignMessage {
 
 /// A trait to query a DB and produce a struct from each returned Row.
 pub trait Queryable {
+    /// Get SQL query string
     fn sql() -> &'static str;
-    fn from_row(row: &postgres::rows::Row) -> Self;
+    /// Create Self from a Row
+    fn from_row(row: &Row) -> Self;
 }
 
 impl Queryable for SignMessage {
@@ -510,7 +511,7 @@ impl Queryable for SignMessage {
         ORDER BY name"
     }
     /// Produce a sign message from one Row
-    fn from_row(row: &postgres::rows::Row) -> Self {
+    fn from_row(row: &Row) -> Self {
         SignMessage {
             name          : row.get(0),
             sign_config   : row.get(1),
@@ -756,7 +757,7 @@ impl Resource {
             _ => false,
         }
     }
-    /// Fetch the resource and send PathBuf(s) to a channel.
+    /// Fetch the resource from a connection.
     ///
     /// * `conn` The database connection.
     /// * `dir` Output file directory.
