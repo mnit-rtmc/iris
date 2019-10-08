@@ -22,6 +22,7 @@ use pix::{Gray8, Palette, Raster, RasterBuilder, Rgb8};
 use postgres::{self, Connection};
 use serde_json;
 use std::collections::{HashMap, HashSet};
+use std::convert::TryInto;
 use std::fs::{File, rename, remove_file, read_dir};
 use std::io::{BufReader, BufWriter, Write};
 use std::path::{Path, PathBuf};
@@ -436,19 +437,9 @@ impl SignConfig {
     }
     /// Get the default text rectangle
     fn text_rect_default(&self) -> Result<Rectangle, Error> {
-        let w = self.pixel_width;
-        let w = if w > 0 {
-            Ok(w)
-        } else {
-            Err(Error::Other(format!("Invalid width: {}", w)))
-        }?;
-        let h = self.pixel_height;
-        let h = if h > 0 {
-            Ok(h)
-        } else {
-            Err(Error::Other(format!("Invalid height: {}", h)))
-        }?;
-        Ok(Rectangle::new(1, 1, w as u16, h as u16))
+        let w = self.pixel_width.try_into()?;
+        let h = self.pixel_height.try_into()?;
+        Ok(Rectangle::new(1, 1, w, h))
     }
 }
 
@@ -607,9 +598,9 @@ impl MsgData {
         match fname {
             Some(fname) => {
                 match self.fonts.values().find(|f| &f.name == fname) {
-                    Some(font) => Ok(font.f_number as u8),
+                    Some(font) => Ok(font.f_number.try_into()?),
                     None => {
-                        Err(Error::Other(format!("Unknown font: {}", fname)))
+                        Err(Error::UnknownResource(format!("Font: {}", fname)))
                     },
                 }
             },
@@ -788,7 +779,7 @@ fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, f: W)
             let (preamble, frames) = render_sign_msg_cfg(s, msg_data, cfg)?;
             write_gif(f, preamble, frames)
         },
-        None => Err(Error::Other(format!("Unknown config: {}", s.sign_config))),
+        None => Err(Error::UnknownResource(format!("Config: {}", s.sign_config))),
     }
 }
 
@@ -898,8 +889,8 @@ fn render_state_default(msg_data: &MsgData, cfg: &SignConfig)
     let fg_default = cfg.foreground_default();
     let bg_default = cfg.background_default();
     let color_ctx = ColorCtx::new(color_scheme, fg_default, bg_default);
-    let char_width = cfg.char_width as u8;
-    let char_height = cfg.char_height as u8;
+    let char_width = cfg.char_width.try_into()?;
+    let char_height = cfg.char_height.try_into()?;
     let page_on_time_ds = msg_data.page_on_default_ds();
     let page_off_time_ds = msg_data.page_off_default_ds();
     let text_rectangle = cfg.text_rect_default()?;

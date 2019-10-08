@@ -5,10 +5,9 @@
 use base64::DecodeError;
 use crate::multi::SyntaxError;
 use gift::EncodeError;
-use postgres;
-use serde_json;
 use std::error::Error as _;
 use std::{fmt, io};
+use std::num::TryFromIntError;
 
 /// Enum for all honeybee errors
 #[derive(Debug)]
@@ -17,16 +16,17 @@ pub enum Error {
     Pg(postgres::Error),
     MultiSyntax(SyntaxError),
     Base64Decode(DecodeError),
-    SerdeJson(serde_json::Error),
     EncodeError(EncodeError),
-    Other(String),
+    SerdeJson(serde_json::Error),
+    TryFromInt(TryFromIntError),
+    UnknownResource(String),
 }
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if let Some(src) = self.source() {
             fmt::Display::fmt(src, f)
-        } else if let Error::Other(e) = self {
+        } else if let Error::UnknownResource(e) = self {
             write!(f, "Error {}", e)
         } else {
             unreachable!();
@@ -43,7 +43,8 @@ impl std::error::Error for Error {
             Error::Base64Decode(e) => Some(e),
             Error::SerdeJson(e) => Some(e),
             Error::EncodeError(e) => Some(e),
-            Error::Other(_) => None,
+            Error::TryFromInt(e) => Some(e),
+            Error::UnknownResource(_) => None,
         }
     }
 }
@@ -81,5 +82,11 @@ impl From<serde_json::Error> for Error {
 impl From<EncodeError> for Error {
     fn from(e: EncodeError) -> Self {
         Error::EncodeError(e)
+    }
+}
+
+impl From<TryFromIntError> for Error {
+    fn from(e: TryFromIntError) -> Self {
+        Error::TryFromInt(e)
     }
 }
