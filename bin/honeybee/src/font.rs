@@ -12,17 +12,16 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::error::Result;
+use crate::resource::Queryable;
+use crate::multi::{Color, ColorCtx, ColorScheme, SyntaxError};
 use base64::{Config, CharacterSet, decode_config_slice};
 use pix::{Raster, Rgb8};
 use postgres::{self, Connection};
-use serde_json;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufReader, Write};
 use std::path::{Path, PathBuf};
-use crate::error::Error;
-use crate::resource::Queryable;
-use crate::multi::{Color, ColorCtx, ColorScheme, SyntaxError};
 
 /// Convert BGR into Rgb8
 fn bgr_to_rgb8(bgr: i32) -> Rgb8 {
@@ -84,7 +83,7 @@ pub struct Font {
 
 impl<'a> Font {
     /// Load fonts from a JSON file
-    pub fn load(dir: &Path) -> Result<HashMap<i32, Font>, Error> {
+    pub fn load(dir: &Path) -> Result<HashMap<i32, Font>> {
         debug!("Font::load");
         let mut n = PathBuf::new();
         n.push(dir);
@@ -110,15 +109,15 @@ impl<'a> Font {
         self.char_spacing as u16
     }
     /// Get glyph for a code point
-    pub fn glyph(&'a self, cp: char) -> Result<&'a Glyph, SyntaxError> {
+    pub fn glyph(&'a self, cp: char) -> Result<&'a Glyph> {
         match self.glyphs.iter().find(|g| g.code_point == cp as i32) {
             Some(g) => Ok(&g),
-            None    => Err(SyntaxError::CharacterNotDefined(cp)),
+            None    => Err(SyntaxError::CharacterNotDefined(cp).into()),
         }
     }
     /// Render a text span
     pub fn render_text(&self, page: &mut Raster<Rgb8>, text: &str, mut x: u32,
-        y: u32, cs: u32, cf: Rgb8) -> Result<(), Error>
+        y: u32, cs: u32, cf: Rgb8) -> Result<()>
     {
         let h = self.height() as u32;
         debug!("span: {}, left: {}, top: {}, height: {}", text, x, y, h);
@@ -170,7 +169,7 @@ impl Queryable for Font {
 }
 
 /// Query all fonts from DB
-pub fn query_font<W: Write>(conn: &Connection, mut w: W) -> Result<u32, Error> {
+pub fn query_font<W: Write>(conn: &Connection, mut w: W) -> Result<u32> {
     let mut c = 0;
     w.write("[".as_bytes())?;
     for row in &conn.query(Font::sql(), &[])? {
@@ -205,7 +204,7 @@ type PixFn = dyn Fn(&Graphic, u32, u32, &ColorCtx, &[u8]) -> Option<Rgb8>;
 
 impl Graphic {
     /// Load graphics from a JSON file
-    pub fn load(dir: &Path) -> Result<HashMap<i32, Graphic>, Error> {
+    pub fn load(dir: &Path) -> Result<HashMap<i32, Graphic>> {
         debug!("Graphic::load");
         let mut n = PathBuf::new();
         n.push(dir);
@@ -238,7 +237,7 @@ impl Graphic {
     }
     /// Render a graphic onto a Raster
     pub fn onto_raster(&self, page: &mut Raster<Rgb8>, x: u32, y: u32,
-        ctx: &ColorCtx) -> Result<(), Error>
+        ctx: &ColorCtx) -> Result<()>
     {
         let x = x - 1; // x must be > 0
         let y = y - 1; // y must be > 0
@@ -260,7 +259,7 @@ impl Graphic {
         Ok(())
     }
     /// Decode base64 data of graphic
-    fn decode_base64(&self) -> Result<Vec<u8>, Error> {
+    fn decode_base64(&self) -> Result<Vec<u8>> {
         let config = Config::new(CharacterSet::Standard, false);
         let bpp = self.bits_per_pixel();
         let w = self.width();

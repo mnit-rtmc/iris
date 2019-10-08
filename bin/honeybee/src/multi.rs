@@ -109,8 +109,7 @@ impl ColorCtx {
         self.fg_current = match c {
             Some(c) => match self.rgb(c) {
                 Some(rgb) => rgb,
-                None => return Err(SyntaxError::UnsupportedTagValue(
-                    v.clone().into())),
+                None => return Err(SyntaxError::UnsupportedTagValue(v.into())),
             }
             None => self.fg_default,
         };
@@ -127,8 +126,7 @@ impl ColorCtx {
         self.bg_current = match c {
             Some(c) => match self.rgb(c) {
                 Some(rgb) => rgb,
-                None => return Err(SyntaxError::UnsupportedTagValue(
-                    v.clone().into())),
+                None => return Err(SyntaxError::UnsupportedTagValue(v.into())),
             }
             None => self.bg_default,
         };
@@ -493,6 +491,12 @@ impl fmt::Display for Value {
 
 impl From<Value> for String {
     fn from(v: Value) -> String {
+        format!("{}", v)
+    }
+}
+
+impl From<&Value> for String {
+    fn from(v: &Value) -> Self {
         format!("{}", v)
     }
 }

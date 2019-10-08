@@ -12,12 +12,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::error::Result;
+use crate::resource::{self, Resource};
 use fallible_iterator::FallibleIterator;
 use postgres::{Connection, TlsMode};
 use std::collections::HashSet;
 use std::time::{Duration, Instant};
-use crate::error::Error;
-use crate::resource::{self, Resource};
 
 /// Output directory to write JSON resources
 static OUTPUT_DIR: &str = "/var/www/html/iris/";
@@ -25,7 +25,7 @@ static OUTPUT_DIR: &str = "/var/www/html/iris/";
 /// Start receiving notifications and fetching resources.
 ///
 /// * `username` Name of user running process.
-pub fn start(username: &str) -> Result<(), Error> {
+pub fn start(username: &str) -> Result<()> {
     // Format path for unix domain socket -- not worth using percent_encode
     let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
     fetch_loop(uds)
@@ -34,7 +34,7 @@ pub fn start(username: &str) -> Result<(), Error> {
 /// Connect to database and fetch resources as notifications are received.
 ///
 /// * `uds` Unix domain socket for database.
-fn fetch_loop(uds: String) -> Result<(), Error> {
+fn fetch_loop(uds: String) -> Result<()> {
     let conn = Connection::connect(uds, TlsMode::None)?;
     // The postgresql crate sets the session time zone to UTC.
     // We need to set it back to LOCAL time zone, so that row_to_json
@@ -64,7 +64,7 @@ fn fetch_loop(uds: String) -> Result<(), Error> {
 ///
 /// * `conn` The database connection.
 /// * `r` Resource to fetch.
-fn fetch_resource(conn: &Connection, r: &Resource) -> Result<(), Error> {
+fn fetch_resource(conn: &Connection, r: &Resource) -> Result<()> {
     let t = Instant::now();
     let c = r.fetch(&conn, OUTPUT_DIR)?;
     info!("{}: wrote {} rows in {:?}", r.name(), c, t.elapsed());
@@ -74,7 +74,7 @@ fn fetch_resource(conn: &Connection, r: &Resource) -> Result<(), Error> {
 /// Receive PostgreSQL notifications, and fetch needed resources.
 ///
 /// * `conn` The database connection.
-fn notify_loop(conn: &Connection) -> Result<(), Error> {
+fn notify_loop(conn: &Connection) -> Result<()> {
     let nots = conn.notifications();
     let mut ns = HashSet::new();
     loop {

@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::Error;
+use crate::error::Result;
 use crate::multi::ColorCtx;
 use crate::render::{PageSplitter, State};
 use crate::resource::{MsgData, SignConfig, SignMessage};
@@ -32,7 +32,7 @@ const PIX_WIDTH: f32 = 450.0;
 const PIX_HEIGHT: f32 = 100.0;
 
 /// Calculate the size of rendered DMS
-fn calculate_size(cfg: &SignConfig) -> Result<(u16, u16), Error> {
+fn calculate_size(cfg: &SignConfig) -> Result<(u16, u16)> {
     let fw = cfg.face_width();
     let fh = cfg.face_height();
     if fw > 0.0 && fh > 0.0 {
@@ -139,8 +139,7 @@ fn render_circle(raster: &mut Raster<Gray8>, palette: &mut Palette<Rgb8>,
 }
 
 /// Render a sign message into a .gif file
-pub fn render<W: Write>(s: &SignMessage, msg_data: &MsgData, f: W)
-    -> Result<(), Error>
+pub fn render<W: Write>(s: &SignMessage, msg_data: &MsgData, f: W) -> Result<()>
 {
     let cfg = msg_data.config(s)?;
     let (preamble, frames) = render_sign_msg_cfg(s, msg_data, cfg)?;
@@ -149,7 +148,7 @@ pub fn render<W: Write>(s: &SignMessage, msg_data: &MsgData, f: W)
 
 /// Write a .gif file
 fn write_gif<W: Write>(mut fl: W, preamble: Preamble, frames: Vec<Frame>)
-    -> Result<(), Error>
+    -> Result<()>
 {
     let mut enc = Encoder::new(&mut fl).into_frame_encoder();
     enc.encode_preamble(&preamble)?;
@@ -162,7 +161,7 @@ fn write_gif<W: Write>(mut fl: W, preamble: Preamble, frames: Vec<Frame>)
 
 /// Render a sign message to a Vec of Frames
 fn render_sign_msg_cfg(s: &SignMessage, msg_data: &MsgData, cfg: &SignConfig)
-    -> Result<(Preamble, Vec<Frame>), Error>
+    -> Result<(Preamble, Vec<Frame>)>
 {
     let mut palette = Palette::new(256);
     palette.set_threshold_fn(palette_threshold_rgb8_256);
@@ -246,9 +245,7 @@ fn palette_threshold_rgb8_256(v: usize) -> Rgb8 {
 }
 
 /// Create default render state for a sign config.
-fn render_state_default(msg_data: &MsgData, cfg: &SignConfig)
-    -> Result<State, Error>
-{
+fn render_state_default(msg_data: &MsgData, cfg: &SignConfig) -> Result<State> {
     let color_scheme = cfg.color_scheme();
     let fg_default = cfg.foreground_default();
     let bg_default = cfg.background_default();

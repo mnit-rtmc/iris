@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::Error;
+use crate::error::{Error, Result};
 use crate::font::{Font, query_font, Graphic};
 use crate::multi::{ColorClassic, ColorScheme, LineJustification,
                    PageJustification, Rectangle};
@@ -238,7 +238,7 @@ pub fn lookup(n: &str) -> Option<&'static Resource> {
 /// * `sql` SQL query.
 /// * `w` Writer to output resource.
 fn query_simple<W: Write>(conn: &Connection, sql: &str, mut w: W)
-    -> Result<u32, Error>
+    -> Result<u32>
 {
     let mut c = 0;
     w.write("[".as_bytes())?;
@@ -263,7 +263,7 @@ struct DmsAttribute {
 
 impl DmsAttribute {
     /// Load DMS attributes from a JSON file
-    fn load(dir: &Path) -> Result<HashMap<String, DmsAttribute>, Error> {
+    fn load(dir: &Path) -> Result<HashMap<String, DmsAttribute>> {
         debug!("DmsAttribute::load");
         let mut n = PathBuf::new();
         n.push(dir);
@@ -301,7 +301,7 @@ pub struct SignConfig {
 
 impl SignConfig {
     /// Load sign configurations from a JSON file
-    fn load(dir: &Path) -> Result<HashMap<String, SignConfig>, Error> {
+    fn load(dir: &Path) -> Result<HashMap<String, SignConfig>> {
         debug!("SignConfig::load");
         let mut n = PathBuf::new();
         n.push(dir);
@@ -344,11 +344,11 @@ impl SignConfig {
         self.face_width() - pixels_mm
     }
     /// Get the character height
-    pub fn char_height(&self) -> Result<u8, Error> {
+    pub fn char_height(&self) -> Result<u8> {
         Ok(self.char_height.try_into()?)
     }
     /// Get the character width
-    pub fn char_width(&self) -> Result<u8, Error> {
+    pub fn char_width(&self) -> Result<u8> {
         Ok(self.char_width.try_into()?)
     }
     /// Get the horizontal character offset (mm)
@@ -454,7 +454,7 @@ impl SignConfig {
         }
     }
     /// Get the default text rectangle
-    pub fn text_rect_default(&self) -> Result<Rectangle, Error> {
+    pub fn text_rect_default(&self) -> Result<Rectangle> {
         let w = self.pixel_width.try_into()?;
         let h = self.pixel_height.try_into()?;
         Ok(Rectangle::new(1, 1, w, h))
@@ -544,7 +544,7 @@ pub struct MsgData {
 
 impl MsgData {
     /// Load message data from a file path
-    fn load(dir: &Path) -> Result<Self, Error> {
+    fn load(dir: &Path) -> Result<Self> {
         debug!("MsgData::load");
         let attrs = DmsAttribute::load(dir)?;
         let configs = SignConfig::load(dir)?;
@@ -560,7 +560,7 @@ impl MsgData {
         })
     }
     /// Lookup a config
-    pub fn config(&self, s: &SignMessage) -> Result<&SignConfig, Error> {
+    pub fn config(&self, s: &SignMessage) -> Result<&SignConfig> {
         let cfg = &s.sign_config;
         match self.configs.get(cfg) {
             Some(c) => Ok(c),
@@ -574,7 +574,7 @@ impl MsgData {
         self.gifs.remove(n)
     }
     /// Delete out-of-date .gif files
-    fn delete_gifs(&mut self) -> Result<(), Error> {
+    fn delete_gifs(&mut self) -> Result<()> {
         for p in self.gifs.drain() {
             info!("delete gif: {:?}", &p);
             if let Err(e) = remove_file(&p) {
@@ -627,7 +627,7 @@ impl MsgData {
         LineJustification::Center
     }
     /// Get the default font number
-    pub fn font_default(&self, fname: Option<&str>) -> Result<u8, Error> {
+    pub fn font_default(&self, fname: Option<&str>) -> Result<u8> {
         match fname {
             Some(fname) => {
                 match self.fonts.values().find(|f| &f.name == fname) {
@@ -651,7 +651,7 @@ impl MsgData {
 }
 
 /// Lookup a listing of gif files
-fn gif_listing(dir: &Path) -> Result<HashSet<PathBuf>, Error> {
+fn gif_listing(dir: &Path) -> Result<HashSet<PathBuf>> {
     let mut gifs = HashSet::new();
     let mut img = PathBuf::new();
     img.push(dir);
@@ -674,7 +674,7 @@ fn gif_listing(dir: &Path) -> Result<HashSet<PathBuf>, Error> {
 
 /// Check and fetch one sign message (into a .gif file).
 fn fetch_sign_msg(s: &SignMessage, dir: &Path, msg_data: &mut MsgData)
-    -> Result<(), Error>
+    -> Result<()>
 {
     let mut img = PathBuf::new();
     img.push(dir);
@@ -704,7 +704,7 @@ fn fetch_sign_msg(s: &SignMessage, dir: &Path, msg_data: &mut MsgData)
 /// * `w` Writer for the file.
 /// * `dir` Output file directory.
 fn query_sign_msg<W: Write>(conn: &Connection, mut w: W, dir: &Path)
-    -> Result<u32, Error>
+    -> Result<u32>
 {
     let mut msg_data = MsgData::load(dir)?;
     let mut c = 0;
@@ -729,7 +729,7 @@ impl Resource {
     /// * `w` Writer for the file.
     /// * `dir` Output file directory.
     fn fetch_file<W: Write>(&self, conn: &Connection, w: W, dir: &Path)
-        -> Result<u32, Error>
+        -> Result<u32>
     {
         match self {
             Resource::Simple(_, _, sql) => query_simple(conn, sql, w),
@@ -760,7 +760,7 @@ impl Resource {
     ///
     /// * `conn` The database connection.
     /// * `dir` Output file directory.
-    pub fn fetch(&self, conn: &Connection, dir: &str) -> Result<u32, Error> {
+    pub fn fetch(&self, conn: &Connection, dir: &str) -> Result<u32> {
         debug!("fetch: {:?}", self.name());
         let p = Path::new(dir);
         let tn = make_tmp_name(p, self.name());
