@@ -82,4 +82,21 @@ public class BoundedSampleHistoryTest extends TestCase {
 		assertTrue(new Double(30).equals(hist.average(2, 1)));
 		assertTrue(new Double(25).equals(hist.average(2, 2)));
 	}
+
+	public void testMissing() {
+		BoundedSampleHistory hist = new BoundedSampleHistory(4);
+		assertTrue(hist.size() == 0);
+		hist.push(10.0);
+		hist.push(20.0);
+		hist.push(10.0);
+		hist.push(20.0);
+		assertTrue(hist.size() == 4);
+		assertTrue(new Double(15).equals(hist.average(0, 2)));
+		hist.push(null);
+		hist.push(null);
+		hist.push(null);
+		hist.push(null);
+		assertTrue(hist.size() == 4);
+		assertTrue(hist.average() == null);
+	}
 }
