@@ -105,7 +105,7 @@ System Attribute                 | Description
 `meter_yellow_secs`              | [Ramp meter] yellow interval time
 `msg_feed_verify`                | Require [DMS] messages from msg_feed to exist in message library
 `operation_retry_threshold`      | Number of times a controller operation is retried if not already failed
-`price_message_event_purge_days` | Number of days after which price message events will be purges
+`price_message_event_purge_days` | Number of days after which price message events will be purged
 `route_max_legs`                 | Maximum number of corridors for route finding
 `route_max_miles`                | Maximum distance (miles) for route finding
 `rwis_high_wind_speed_kph`       | Wind speed (kph) greater than this value triggers the high wind condition
