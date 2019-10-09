@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
@@ -37,6 +38,7 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.TollZoneHelper;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
+import us.mn.state.dot.tms.server.event.PriceMessageEvent;
 import us.mn.state.dot.tms.server.event.TravelTimeEvent;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.units.Interval;
@@ -173,11 +175,17 @@ public class DmsActionMsg {
 	private String feed_msg;
 
 	/** Tolling prices */
-	private final HashMap<String, Float> prices =
-		new HashMap<String, Float>();
+	private final ArrayList<PriceMessageEvent> prices =
+		new ArrayList<PriceMessageEvent>();
+
+	/** Add a price message */
+	private void addPriceMessage(String zid, float price) {
+		prices.add(new PriceMessageEvent(EventType.PRICE_DEPLOYED,
+			dms.getName(), zid, price));
+	}
 
 	/** Get tolling prices */
-	public HashMap<String, Float> getPrices() {
+	public ArrayList<PriceMessageEvent> getPrices() {
 		return (valid && prices.size() > 0) ? prices : null;
 	}
 
@@ -499,13 +507,13 @@ public class DmsActionMsg {
 		case "p": // priced
 			Float p = calculatePrice(zones);
 			if (p != null) {
-				prices.put(z, p);
+				addPriceMessage(z, p);
 				return priceSpan(p);
 			} else
 				return fail("Invalid toll zone");
 		case "o": // open
 		case "c": // closed
-			prices.put(z, 0f);
+			addPriceMessage(z, 0f);
 			return EMPTY_SPAN;
 		default:
 			return fail("Invalid toll mode");
@@ -531,9 +539,9 @@ public class DmsActionMsg {
 
 	/** Lookup a toll zone by ID */
 	private TollZoneImpl lookupZone(String zid) {
-		TollZone z = TollZoneHelper.lookup(zid);
-		return (z instanceof TollZoneImpl)
-		      ? (TollZoneImpl) z
+		TollZone tz = TollZoneHelper.lookup(zid);
+		return (tz instanceof TollZoneImpl)
+		      ? (TollZoneImpl) tz
 		      : null;
 	}
 

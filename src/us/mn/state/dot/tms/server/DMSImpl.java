@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -958,7 +959,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Tolling prices */
-	private transient HashMap<String, Float> prices;
+	private transient ArrayList<PriceMessageEvent> prices;
 
 	/** Set tolling prices */
 	private void setPrices(DmsActionMsg amsg) {
@@ -968,13 +969,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Log price (tolling) messages.
 	 * @param et Event type. */
 	private void logPriceMessages(EventType et) {
-		HashMap<String, Float> p = prices;
+		ArrayList<PriceMessageEvent> p = prices;
 		if (p != null) {
-			for (Map.Entry<String, Float> ent: p.entrySet()) {
-				String tz = ent.getKey();
-				Float price = ent.getValue();
-				logEvent(new PriceMessageEvent(et, name, tz,
-				                               price));
+			for (PriceMessageEvent ev : p) {
+				logEvent(ev.withEventType(et));
 			}
 		}
 	}

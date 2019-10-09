@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,6 +62,13 @@ public class PriceMessageEvent extends BaseEvent {
 		device_id = d;
 		toll_zone = tz;
 		price = p;
+	}
+
+	/** Get a price message event with specified event type */
+	public PriceMessageEvent withEventType(EventType net) {
+		return (net == event_type)
+		      ? this
+		      : new PriceMessageEvent(net, device_id, toll_zone, price);
 	}
 
 	/** Get the database table name */
