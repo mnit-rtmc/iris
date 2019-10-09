@@ -902,11 +902,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		    v.period == SAMPLE_PERIOD_SEC)
 			testVehCount(v);
 		veh_cache.add(v, name);
-		if (v.period == SAMPLE_PERIOD_SEC) {
+		if (v.period == SAMPLE_PERIOD_SEC)
 			veh_count_30 = v.value;
-			/* FIXME: this shouldn't be needed */
-			last_speed = MISSING_DATA;
-		}
+	}
+
+	/** Clear the 30 second vehicle count */
+	public void clearVehCount() {
+		veh_count_30 = MISSING_DATA;
 	}
 
 	/** Test a vehicle count sample with error detecting algorithms */
@@ -948,6 +950,12 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			n_scans), name);
 	}
 
+	/** Clear the 30 second occupancy */
+	public void clearOccupancy() {
+		prev_value = MISSING_DATA;
+		last_scans = MISSING_DATA;
+	}
+
 	/** Test an occupancy sample with error detecting algorithms */
 	private void testScans(OccupancySample occ) {
 		boolean lock = occ.value >= OccupancySample.MAX;
@@ -972,6 +980,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		spd_cache.add(speed, name);
 		if (speed.period == SAMPLE_PERIOD_SEC)
 			last_speed = speed.value;
+	}
+
+	/** Clear the 30 second speed */
+	public void clearSpeed() {
+		last_speed = MISSING_DATA;
 	}
 
 	/** Flush buffered data to disk */

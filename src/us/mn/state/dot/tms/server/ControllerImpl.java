@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -570,7 +570,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			if (v >= 0) {
 				det.storeVehCount(new PeriodicSample(stamp,
 					period, v), vc);
-			}
+			} else
+				det.clearVehCount();
 		}
 	}
 
@@ -591,7 +592,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			if (n_scans >= 0) {
 				det.storeOccupancy(new OccupancySample(stamp,
 					period, n_scans, max_scans));
-			}
+			} else
+				det.clearOccupancy();
 		}
 	}
 
@@ -611,7 +613,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			if (s > 0) {
 				det.storeSpeed(new PeriodicSample(stamp,
 					period, s));
-			}
+			} else
+				det.clearSpeed();
 		}
 	}
 
