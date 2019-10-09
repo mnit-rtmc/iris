@@ -53,9 +53,9 @@ public class LcsDeployModelTest extends TestCase {
 	{
 		LaneUseIndication[] inds = m.createIndications(cfg, up, n_lcs,
 			lcs_shift);
-/*		for (LaneUseIndication l: inds)
+		for (LaneUseIndication l: inds)
 			System.err.print(l + " ");
-		System.err.println();*/
+		System.err.println();
 		assertTrue(Arrays.equals(ind, inds));
 	}
 
