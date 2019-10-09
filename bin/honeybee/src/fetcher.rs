@@ -36,9 +36,10 @@ pub fn start(username: &str) -> Result<()> {
 /// * `uds` Unix domain socket for database.
 fn fetch_loop(uds: String) -> Result<()> {
     let conn = Connection::connect(uds, TlsMode::None)?;
-    // The postgresql crate sets the session time zone to UTC.
+    // The postgres crate sets the session time zone to UTC.
     // We need to set it back to LOCAL time zone, so that row_to_json
-    // can format properly (for incidents, etc).
+    // can format properly (for incidents, etc).  Unfortunately,
+    // the LOCAL and DEFAULT zones are also reset to UTC.
     conn.execute("SET TIME ZONE 'US/Central'", &[])?;
     // Listen for notifications on all channels we need to monitor
     conn.execute("LISTEN camera", &[])?;

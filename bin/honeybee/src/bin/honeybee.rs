@@ -21,6 +21,6 @@ fn main() {
     env_logger::builder().format_timestamp(None).init();
     let username = whoami::username();
     if let Err(e) = fetcher::start(&username) {
-        error!("fetcher: {:?}", e);
+        error!("error: {:?}", e);
     }
 }

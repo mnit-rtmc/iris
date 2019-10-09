@@ -684,6 +684,7 @@ fn fetch_sign_msg(s: &SignMessage, dir: &Path, msg_data: &mut MsgData)
     g.push_str(&s.name);
     g.push_str(&".gif");
     let n = make_name(&img.as_path(), &g);
+    debug!("fetch: {:?}", n);
     if !msg_data.check_gif_listing(&n) {
         let tn = make_tmp_name(&img.as_path(), &g);
         let f = BufWriter::new(File::create(&tn)?);
