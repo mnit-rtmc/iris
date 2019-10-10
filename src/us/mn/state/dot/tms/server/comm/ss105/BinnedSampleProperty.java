@@ -56,6 +56,19 @@ public class BinnedSampleProperty extends SS105Property {
 		return (end == stamp);
 	}
 
+	/** Is time stamp valid (within valid interval) */
+	public boolean isValidStamp() {
+		long valid_ms = 2 * period * 1000;
+		long now = TimeSteward.currentTimeMillis();
+		return (stamp > now - valid_ms) && (stamp < now + valid_ms);
+	}
+
+	/** Clear the sample data */
+	public void clear() {
+		stamp = 0;
+		samples = new LaneSample[0];
+	}
+
 	/** Sample data for each lane */
 	private LaneSample[] samples = new LaneSample[0];
 
