@@ -85,19 +85,6 @@ public class DmsActionMsg {
 		return ((v - 1) / 5 + 1) * 5;
 	}
 
-	/** Get minimum tolling price */
-	static private float min_price() {
-		return SystemAttrEnum.TOLL_MIN_PRICE.getFloat();
-	}
-
-	/** Limit tolling price.
-	 * @param p Tolling price (dollars).
-	 * @param mp Maximum price (dollars).
-	 * @return Price limited by maximum, then minimum. */
-	static private float limit_price(float p, float mp) {
-		return Math.max(Math.min(p, mp), min_price());
-	}
-
 	/** Calculate the maximum trip minutes to display */
 	static private int maximumTripMinutes(Distance d) {
 		Speed min_trip = new Speed(
@@ -178,10 +165,12 @@ public class DmsActionMsg {
 	private final ArrayList<PriceMessageEvent> prices =
 		new ArrayList<PriceMessageEvent>();
 
-	/** Add a price message */
-	private void addPriceMessage(String zid, float price) {
-		prices.add(new PriceMessageEvent(EventType.PRICE_DEPLOYED,
-			dms.getName(), zid, price));
+	/** Create a price message */
+	private PriceMessageEvent createPriceMessage(String zid, String det,
+		float price)
+	{
+		return new PriceMessageEvent(EventType.PRICE_DEPLOYED,
+			dms.getName(), zid, det, price);
 	}
 
 	/** Get tolling prices */
@@ -502,18 +491,18 @@ public class DmsActionMsg {
 		addSrc(SignMsgSource.tolling);
 		if (zones.length < 1)
 			return fail("No toll zones");
-		String z = zones[zones.length - 1]; // last zone
 		switch (mode) {
 		case "p": // priced
-			Float p = calculatePrice(zones);
-			if (p != null) {
-				addPriceMessage(z, p);
-				return priceSpan(p);
+			PriceMessageEvent ev = calculatePriceMessage(zones);
+			if (ev != null) {
+				prices.add(ev);
+				return priceSpan(ev.price);
 			} else
 				return fail("Invalid toll zone");
 		case "o": // open
 		case "c": // closed
-			addPriceMessage(z, 0f);
+			String last_zid = zones[zones.length - 1];
+			prices.add(createPriceMessage(last_zid, null, 0f));
 			return EMPTY_SPAN;
 		default:
 			return fail("Invalid toll mode");
@@ -521,20 +510,32 @@ public class DmsActionMsg {
 	}
 
 	/** Calculate the price for tolling zones */
-	private Float calculatePrice(String[] zones) {
+	private PriceMessageEvent calculatePriceMessage(String[] zones) {
 		assert (zones.length > 0);
-		float price = 0;
-		float max_price = 0;
+		String last_zid = null; // last toll zone
+		String det = null;
+		float price = TollZoneImpl.min_price();
+		float max_price = TollZoneImpl.max_price();
 		for (String zid: zones) {
 			TollZoneImpl tz = lookupZone(zid);
-			if (tz != null) {
-				price += tz.getPrice(dms.getName(), loc);
-				float mp = tz.getMaxPriceOrDefault();
-				max_price = Math.max(max_price, mp);
-			} else
+			if (null == tz)
 				return null;
+			VehicleSampler vs = tz.findMaxDensity(dms.getName(),
+				loc);
+			if (null == vs)
+				return null;
+			Float zone_price = tz.getPrice(vs, dms.getName(), loc);
+			if (null == zone_price)
+				return null;
+			last_zid = zid;
+			det = vs.toString();
+			price += zone_price;
+			Float mp = tz.getMaxPrice();
+			if (mp != null)
+				max_price = Math.min(max_price, mp);
 		}
-		return limit_price(price, max_price);
+		price = Math.min(price, max_price);
+		return createPriceMessage(last_zid, det, price);
 	}
 
 	/** Lookup a toll zone by ID */

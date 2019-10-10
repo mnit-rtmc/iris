@@ -46,7 +46,8 @@ If required, a message such as `OPEN` or `CLOSED` may be appended after the tag.
 
 _Price events_ are logged when a message is sent to a DMS, and again when the
 message is verified.  The price event includes the **date and time**,
-**DEPLOYED** or **VERIFIED** status, **DMS id**, **toll zone** and **price**.
+**DEPLOYED** or **VERIFIED** status, **DMS id**, **toll zone**, _highest
+density_ **detector(s)** and **price**.
 
 The logged _toll zone_ is the last zone specified in the tag.  In _priced_ mode,
 the displayed price is logged.  For _open_ or _closed_, a price of 0 is logged.
