@@ -1,5 +1,12 @@
 # IRIS 5.x Release Notes
 
+5.6.0 (10 Oct 2019)
+ - Add `detector` column to `price_message_event` table
+ - Apply minimum toll zone price separately for each zone
+ - Fixed toll zones using stale density data when occupancy is missing
+ - Separated file mirroring out of honeybee into "mere" project
+ - More documentation cleanups and additions
+
 5.5.0 (2 Oct 2019)
  - Converted documentation (administrator guide) to Jekyll markdown
  - Added missing documentation
