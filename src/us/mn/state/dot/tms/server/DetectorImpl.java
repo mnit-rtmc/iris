@@ -755,7 +755,22 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get the current occupancy */
 	public float getOccupancy() {
-		if (isSampling() && last_scans != MISSING_DATA)
+		if (isSampling()) {
+			long end = calculateEndTime();
+			long start = end - SAMPLE_PERIOD_MS;
+			return getOccupancy(start, end);
+		} else
+			return MISSING_DATA;
+	}
+
+	/** Get the current occupancy */
+	private float getOccupancy(long start, long end) {
+		if (isDeviceLogging()) {
+			int scn = scn_cache.getValue(start, end);
+			if (scn != last_scans)
+				logError("scans: " + scn + " != " + last_scans);
+		}
+		if (last_scans != MISSING_DATA)
 			return MAX_OCCUPANCY * (float) last_scans / MAX_C30;
 		else
 			return MISSING_DATA;
