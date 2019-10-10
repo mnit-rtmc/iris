@@ -15,11 +15,9 @@
 package us.mn.state.dot.tms.server.comm.ss125;
 
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.Date;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.DownloadRequestException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
