@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,16 +42,16 @@ public class OpQuerySamples extends OpSS125 {
 	private final int period;
 
 	/** Time stamp of sample data */
-	protected long stamp;
+	private long stamp;
 
 	/** Oldest time stamp to accept from controller */
-	protected final long oldest;
+	private final long oldest;
 
 	/** Newest timestamp to accept from controller */
-	protected final long newest;
+	private final long newest;
 
 	/** Interval sample data */
-	protected final IntervalDataProperty sample_data =
+	private final IntervalDataProperty sample_data =
 		new IntervalDataProperty();
 
 	/** Create a new "query binned samples" operation */
@@ -75,7 +75,7 @@ public class OpQuerySamples extends OpSS125 {
 	}
 
 	/** Phase to get the most recent sample interval */
-	protected class GetCurrentSamples extends Phase<SS125Property> {
+	private class GetCurrentSamples extends Phase<SS125Property> {
 
 		/** Get the most recent sample interval */
 		protected Phase<SS125Property> poll(

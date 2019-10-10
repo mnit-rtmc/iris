@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,15 +29,17 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 public class IntervalDataProperty extends SS125Property {
 
 	/** Message ID for interval data request */
+	@Override
 	protected MessageID msgId() {
 		return MessageID.INTERVAL;
 	}
 
 	/** Format a QUERY request */
+	@Override
 	protected byte[] formatQuery() throws IOException {
 		byte[] body = new byte[7];
 		formatBody(body, MessageType.READ);
-		format24(body, 3, 0);
+		format24(body, 3, 0); // 0 is most recent interval
 		return body;
 	}
 
@@ -45,12 +47,12 @@ public class IntervalDataProperty extends SS125Property {
 	private boolean complete = false;
 
 	/** Test if the request is complete */
-	protected boolean isComplete() {
+	private boolean isComplete() {
 		return complete;
 	}
 
 	/** Set the complete flag */
-	protected void setComplete(boolean c) {
+	private void setComplete(boolean c) {
 		complete = c;
 	}
 
@@ -66,6 +68,7 @@ public class IntervalDataProperty extends SS125Property {
 	}
 
 	/** Parse a QUERY response */
+	@Override
 	protected void parseQuery(byte[] body) throws IOException {
 		if (body.length == 6)
 			parseResult(body);
@@ -108,10 +111,10 @@ public class IntervalDataProperty extends SS125Property {
 	}
 
 	/** Interval number */
-	protected int interval;
+	private int interval;
 
 	/** Timestamp at end of sample interval */
-	protected long stamp;
+	private long stamp;
 
 	/** Get timestamp at end of sample interval */
 	public long getTime() {
@@ -119,13 +122,13 @@ public class IntervalDataProperty extends SS125Property {
 	}
 
 	/** Number of lanes */
-	protected int n_lanes;
+	private int n_lanes;
 
 	/** Number of approaches */
-	protected int n_approaches;
+	private int n_approaches;
 
 	/** Lane interval data */
-	protected LaneInterval[] lanes = new LaneInterval[0];
+	private LaneInterval[] lanes = new LaneInterval[0];
 
 	/** Test the if property has some data */
 	public boolean hasData() {
@@ -141,7 +144,7 @@ public class IntervalDataProperty extends SS125Property {
 		public final Float speed_85;
 		public final int headway;
 		public final int gap;
-		protected LaneInterval(byte[] body) {
+		private LaneInterval(byte[] body) {
 			speed = parse24Fixed(body, 14);
 			veh_count = parse24(body, 17);
 			scan = parseOcc(body, 20);
