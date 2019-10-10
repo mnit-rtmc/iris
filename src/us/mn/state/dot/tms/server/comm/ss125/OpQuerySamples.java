@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.ss125;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.DownloadRequestException;
@@ -38,34 +37,13 @@ public class OpQuerySamples extends OpSS125 {
 	 * fractional part. */
 	static private final int MAX_SCANS = 100 << 8;
 
-	/** Binning period (seconds) */
-	private final int period;
-
-	/** Time stamp of sample data */
-	private long stamp;
-
-	/** Oldest time stamp to accept from controller */
-	private final long oldest;
-
-	/** Newest timestamp to accept from controller */
-	private final long newest;
-
 	/** Interval sample data */
-	private final IntervalDataProperty sample_data =
-		new IntervalDataProperty();
+	private final IntervalDataProperty sample_data;
 
 	/** Create a new "query binned samples" operation */
 	public OpQuerySamples(ControllerImpl c, int p) {
 		super(PriorityLevel.DATA_30_SEC, c);
-		period = p;
-		stamp = TimeSteward.currentTimeMillis();
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(stamp);
-		cal.add(Calendar.HOUR, -4);
-		oldest = cal.getTimeInMillis();
-		cal.setTimeInMillis(stamp);
-		cal.add(Calendar.MINUTE, 5);
-		newest = cal.getTimeInMillis();
+		sample_data = new IntervalDataProperty(p);
 	}
 
 	/** Create the first phase of the operation */
@@ -83,14 +61,27 @@ public class OpQuerySamples extends OpSS125 {
 		{
 			mess.add(sample_data);
 			mess.queryProps();
-			stamp = sample_data.getTime();
-			if (stamp < oldest || stamp > newest) {
-				mess.logError("BAD TIMESTAMP: " +
-					new Date(stamp));
-				setFailed();
-				throw new DownloadRequestException(
-					controller.toString());
-			}
+			return (sample_data.isPreviousInterval())
+			      ? null
+			      : new SendDateTime();
+		}
+	}
+
+	/** Phase to send the date and time */
+	private class SendDateTime extends Phase<SS125Property> {
+
+		/** Send the date and time */
+		protected Phase<SS125Property> poll(
+			CommMessage<SS125Property> mess) throws IOException
+		{
+			// We should ignore the collected sample data, but let's
+			// let it slide to allow for interoperability with
+			// systems which emulate the protocol poorly
+			long stamp = sample_data.getTime();
+			mess.logError("BAD TIMESTAMP: " + new Date(stamp));
+			DateTimeProperty date_time = new DateTimeProperty();
+			mess.add(date_time);
+			mess.storeProps();
 			return null;
 		}
 	}
@@ -98,6 +89,8 @@ public class OpQuerySamples extends OpSS125 {
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
+		long stamp = sample_data.getTime();
+		int period = sample_data.getPeriod();
 		controller.storeVehCount(stamp, period, START_PIN,
 			sample_data.getVehCount());
 		controller.storeOccupancy(stamp, period, START_PIN,

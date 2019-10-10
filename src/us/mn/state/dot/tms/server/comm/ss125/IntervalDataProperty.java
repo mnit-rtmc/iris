@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ss125;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.Date;
+import us.mn.state.dot.sched.TimeSteward;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -27,6 +28,27 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  * @author Douglas Lau
  */
 public class IntervalDataProperty extends SS125Property {
+
+	/** Interval period (sec) */
+	private final int period;
+
+	/** Get the interval period (sec) */
+	public int getPeriod() {
+		return period;
+	}
+
+	/** Create a new interval data property */
+	public IntervalDataProperty(int p) {
+		period = p;
+	}
+
+	/** Check if time stamp is from the previous interval */
+	public boolean isPreviousInterval() {
+		long now = TimeSteward.currentTimeMillis();
+		int pms = period * 1000;
+		long end = now / pms * pms; // end of previous interval
+		return (end == stamp);
+	}
 
 	/** Message ID for interval data request */
 	@Override
@@ -39,7 +61,7 @@ public class IntervalDataProperty extends SS125Property {
 	protected byte[] formatQuery() throws IOException {
 		byte[] body = new byte[7];
 		formatBody(body, MessageType.READ);
-		format24(body, 3, 0); // 0 is most recent interval
+		format24(body, 3, interval); // 0 is most recent interval
 		return body;
 	}
 
