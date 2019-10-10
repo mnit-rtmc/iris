@@ -50,6 +50,23 @@ public class IntervalDataProperty extends SS125Property {
 		return (end == stamp);
 	}
 
+	/** Is time stamp valid (within valid interval) */
+	public boolean isValidStamp() {
+		long valid_ms = 2 * period * 1000;
+		long now = TimeSteward.currentTimeMillis();
+		return (stamp > now - valid_ms) && (stamp < now + valid_ms);
+	}
+
+	/** Clear the sample data */
+	public void clear() {
+		setComplete(false);
+		interval = 0;
+		stamp = 0;
+		n_lanes = 0;
+		n_approaches = 0;
+		lanes = new LaneInterval[0];
+	}
+
 	/** Message ID for interval data request */
 	@Override
 	protected MessageID msgId() {

@@ -72,11 +72,10 @@ public class OpQuerySamples extends OpSS125 {
 		protected Phase<SS125Property> poll(
 			CommMessage<SS125Property> mess) throws IOException
 		{
-			// We should ignore the collected sample data, but let's
-			// let it slide to allow for interoperability with
-			// systems which emulate the protocol poorly
 			long stamp = sample_data.getTime();
 			mess.logError("BAD TIMESTAMP: " + new Date(stamp));
+			if (!sample_data.isValidStamp())
+				sample_data.clear();
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
 			mess.storeProps();
