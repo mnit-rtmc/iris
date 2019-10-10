@@ -44,6 +44,11 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	/** "Long" polling period */
 	static private final int PERIOD_LONG_SEC = 60 * 5;
 
+	/** Check if device log is open */
+	protected boolean isDeviceLogging() {
+		return DEVICE_LOG.isOpen();
+	}
+
 	/** Log a device message */
 	protected void logError(String msg) {
 		if (DEVICE_LOG.isOpen())

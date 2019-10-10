@@ -843,6 +843,18 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get the current raw (non-faked) speed (miles per hour) */
 	protected float getSpeedRaw() {
+		long end = calculateEndTime();
+		long start = end - SAMPLE_PERIOD_MS;
+		return getSpeedRaw(start, end);
+	}
+
+	/** Get the raw (non-faked) speed (MPH) */
+	private float getSpeedRaw(long start, long end) {
+		if (isDeviceLogging()) {
+			int spd = spd_cache.getValue(start, end);
+			if (spd != last_speed)
+				logError("speed: " + spd + " != " + last_speed);
+		}
 		return isSampling() ? last_speed : MISSING_DATA;
 	}
 
