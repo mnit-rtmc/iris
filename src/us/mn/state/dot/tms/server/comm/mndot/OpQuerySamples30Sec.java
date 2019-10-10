@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,9 @@ public class OpQuerySamples30Sec extends OpQuerySamples {
 
 	/** Maximum number of scans in 30 seconds */
 	static private final int MAX_SCANS = 1800;
+
+	/** Missing speed data -- not supported by protocol */
+	static private final int[] SPEED_MISSING = new int[0];
 
 	/** Create a new 30-second data operation */
 	public OpQuerySamples30Sec(ControllerImpl c) {
@@ -68,6 +71,8 @@ public class OpQuerySamples30Sec extends OpQuerySamples {
 			FIRST_DETECTOR_PIN, v_count);
 		controller.storeOccupancy(getStamp(), SAMPLE_PERIOD_SEC,
 			FIRST_DETECTOR_PIN, scans, MAX_SCANS);
+		controller.storeSpeed(getStamp(), SAMPLE_PERIOD_SEC,
+			FIRST_DETECTOR_PIN, SPEED_MISSING);
 		super.cleanup();
 	}
 }
