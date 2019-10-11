@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2018  Minnesota Department of Transportation
+ * Copyright (C) 2006-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,11 +75,6 @@ public class OpQueryEventSamples extends OpCanoga {
 			else
 				return null;
 		}
-	}
-
-	/** Store event data samples as binned data */
-	public void binSamples(int p) {
-		controller.binEventSamples(p);
 	}
 
 	/** Update the controller operation counters */
