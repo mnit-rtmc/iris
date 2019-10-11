@@ -910,7 +910,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	public void storeVehCount(PeriodicSample v, VehLengthClass vc) {
 		if (vc == null)
 			storeVehCount(v);
-		else {
+		else if (v != null) {
 			switch (vc) {
 			case MOTORCYCLE:
 				mc_count_cache.add(v, name);
@@ -931,17 +931,15 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Store one vehicle count sample for this detector.
 	 * @param v PeriodicSample containing vehicle count data. */
 	public void storeVehCount(PeriodicSample v) {
-		if (lane_type != LaneType.GREEN &&
-		    v.period == SAMPLE_PERIOD_SEC)
-			testVehCount(v);
-		veh_cache.add(v, name);
-		if (v.period == SAMPLE_PERIOD_SEC)
-			veh_count_30 = v.value;
-	}
-
-	/** Clear the 30 second vehicle count */
-	public void clearVehCount() {
-		veh_count_30 = MISSING_DATA;
+		if (v != null) {
+			if (lane_type != LaneType.GREEN &&
+			    v.period == SAMPLE_PERIOD_SEC)
+				testVehCount(v);
+			veh_cache.add(v, name);
+			if (v.period == SAMPLE_PERIOD_SEC)
+				veh_count_30 = v.value;
+		} else
+			veh_count_30 = MISSING_DATA;
 	}
 
 	/** Test a vehicle count sample with error detecting algorithms */
@@ -970,20 +968,19 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Store one occupancy sample for this detector.
 	 * @param occ Occupancy sample data. */
 	public void storeOccupancy(OccupancySample occ) {
-		int n_scans = occ.as60HzScans();
-		if (occ.period == SAMPLE_PERIOD_SEC) {
-			testScans(occ);
-			prev_value = occ.value;
-			last_scans = n_scans;
+		if (occ != null) {
+			int n_scans = occ.as60HzScans();
+			if (occ.period == SAMPLE_PERIOD_SEC) {
+				testScans(occ);
+				prev_value = occ.value;
+				last_scans = n_scans;
+			}
+			scn_cache.add(new PeriodicSample(occ.stamp, occ.period,
+				n_scans), name);
+		} else {
+			prev_value = MISSING_DATA;
+			last_scans = MISSING_DATA;
 		}
-		scn_cache.add(new PeriodicSample(occ.stamp, occ.period,
-			n_scans), name);
-	}
-
-	/** Clear the 30 second occupancy */
-	public void clearOccupancy() {
-		prev_value = MISSING_DATA;
-		last_scans = MISSING_DATA;
 	}
 
 	/** Test an occupancy sample with error detecting algorithms */

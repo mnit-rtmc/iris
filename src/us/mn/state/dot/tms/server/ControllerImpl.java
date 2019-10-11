@@ -567,11 +567,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			DetectorImpl det = dets.get(pin);
 			int i = pin - start_pin;
 			int v = sampleValue(veh_count, i);
-			if (v >= 0) {
-				det.storeVehCount(new PeriodicSample(stamp,
-					period, v), vc);
-			} else
-				det.clearVehCount();
+			PeriodicSample ps = (v >= 0)
+				? new PeriodicSample(stamp, period, v)
+				: null;
+			det.storeVehCount(ps, vc);
 		}
 	}
 
@@ -588,12 +587,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		for (Integer pin: dets.keySet()) {
 			DetectorImpl det = dets.get(pin);
 			int i = pin - start_pin;
-			int n_scans = sampleValue(scans, i);
-			if (n_scans >= 0) {
-				det.storeOccupancy(new OccupancySample(stamp,
-					period, n_scans, max_scans));
-			} else
-				det.clearOccupancy();
+			int v = sampleValue(scans, i);
+			OccupancySample occ = (v >= 0)
+			    ? new OccupancySample(stamp, period, v, max_scans)
+			    : null;
+			det.storeOccupancy(occ);
 		}
 	}
 
