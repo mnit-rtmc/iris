@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,14 +65,16 @@ public class OpQuerySpeed extends OpDR500 {
 		}
 	}
 
+	/** Get the average speed sample array */
+	private int[] getSpeed() {
+		Integer s = avg_speed.getSpeed();
+		return (s != null) ? new int[] { s } : new int[0];
+	}
+
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		Integer s = avg_speed.getSpeed();
-		if (s != null) {
-			int[] spd = new int[] { s };
-			controller.storeSpeed(stamp, period, START_PIN, spd);
-		}
+		controller.storeSpeed(stamp, period, START_PIN, getSpeed());
 		super.cleanup();
 	}
 }
