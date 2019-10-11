@@ -29,7 +29,6 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
-import static us.mn.state.dot.tms.CommProtocol.MSG_FEED;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.ControllerIO;
