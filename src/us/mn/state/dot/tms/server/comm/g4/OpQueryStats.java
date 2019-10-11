@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2018  Minnesota Department of Transportation
+ * Copyright (C) 2012-2019  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -71,6 +71,8 @@ public class OpQueryStats extends OpG4 {
 		{
 			mess.add(stat);
 			mess.queryProps();
+			// FIXME: change timestamp check to match ss125, and
+			//        update the RTC if stamp is not correct
 			long stamp = stat.getStamp();
 			PeriodicSample ps = new PeriodicSample(stamp, period,0);
 			long e = ps.end();
