@@ -59,6 +59,9 @@ import us.mn.state.dot.tms.server.event.DetAutoFailEvent;
  */
 public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
+	/** Reversible lane name */
+	static private final String REV = "I-394 Rev";
+
 	/** Is detector auto-fail enabled? */
 	static private boolean isDetectorAutoFailEnabled() {
 		return SystemAttrEnum.DETECTOR_AUTO_FAIL_ENABLE.getBoolean();
@@ -228,6 +231,23 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			Detector d = it.next();
 			if (d instanceof DetectorImpl)
 				((DetectorImpl) d).updateAutoFail();
+		}
+	}
+
+	/** Create a fake detector object */
+	static private FakeDetector createFakeDetector(String f)
+		throws ChangeVetoException
+	{
+		try {
+			return (f != null) ? new FakeDetector(f) : null;
+		}
+		catch (NumberFormatException e) {
+			throw new ChangeVetoException(
+				"Invalid detector number");
+		}
+		catch (IndexOutOfBoundsException e) {
+			throw new ChangeVetoException(
+				"Bad detector #:" + e.getMessage());
 		}
 	}
 
@@ -661,23 +681,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Fake detector to use if detector is failed */
 	private transient FakeDetector fake_det;
 
-	/** Create a fake detector object */
-	static private FakeDetector createFakeDetector(String f)
-		throws ChangeVetoException
-	{
-		try {
-			return (f != null) ? new FakeDetector(f) : null;
-		}
-		catch (NumberFormatException e) {
-			throw new ChangeVetoException(
-				"Invalid detector number");
-		}
-		catch (IndexOutOfBoundsException e) {
-			throw new ChangeVetoException(
-				"Bad detector #:" + e.getMessage());
-		}
-	}
-
 	/** Set the fake expression */
 	@Override
 	public void setFake(String f) {
@@ -728,6 +731,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Periodic LONG class count sample cache */
 	private transient final PeriodicSampleCache l_count_cache;
+
+	/** Vehicle event log */
+	private transient final VehicleEventLog v_log;
 
 	/** Vehicle count from the last 30-second sample period.  FIXME: use
 	 * veh_cache to get "veh_count_30" value. */
@@ -949,9 +955,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		updateAutoFail();
 	}
 
-	/** Reversible lane name */
-	static private final String REV = "I-394 Rev";
-
 	/** Check if a location is on a reversible road */
 	private boolean isReversibleLocationHack(GeoLoc loc) {
 		// FIXME: this is a MnDOT-specific hack
@@ -1036,9 +1039,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		l_count_cache.purge(before);
 	}
 
-	/** Vehicle event log */
-	private transient final VehicleEventLog v_log;
-
 	/** Log a vehicle detection event.
 	 * @param stamp Timestamp of detection event.
 	 * @param duration Event duration in milliseconds.
@@ -1050,8 +1050,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		v_log.logVehicle(stamp, duration, headway, speed);
 	}
 
-	/** Log a gap in vehicle events.
-	 */
+	/** Log a gap in vehicle events */
 	public void logGap() {
 		v_log.logGap();
 	}
