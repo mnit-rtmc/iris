@@ -186,7 +186,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	static private final int MAX_C30 = 1800;
 
 	/** Sample period for detectors (seconds) */
-	static public final int SAMPLE_PERIOD_SEC = 30;
+	static private final int SAMPLE_PERIOD_SEC = 30;
 
 	/** Sample period for detectors (ms) */
 	static public final long SAMPLE_PERIOD_MS = new Interval(
@@ -1007,14 +1007,12 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Store one speed sample for this detector.
 	 * @param speed PeriodicSample containing speed data. */
 	public void storeSpeed(PeriodicSample speed) {
-		spd_cache.add(speed, name);
-		if (speed.period == SAMPLE_PERIOD_SEC)
-			last_speed = speed.value;
-	}
-
-	/** Clear the 30 second speed */
-	public void clearSpeed() {
-		last_speed = MISSING_DATA;
+		if (speed != null) {
+			spd_cache.add(speed, name);
+			if (speed.period == SAMPLE_PERIOD_SEC)
+				last_speed = speed.value;
+		} else
+			last_speed = MISSING_DATA;
 	}
 
 	/** Flush buffered data to disk */
@@ -1057,20 +1055,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Bin sample data to the specified period */
 	public void binEventSamples(int p) {
-		// FIXME: make this work for other binning periods
-		if (30 == p) {
-			veh_count_30 = v_log.getVehicleCount();
-			last_scans = v_log.getOccupancy().as60HzScans();
-			last_speed = v_log.getSpeed();
-			v_log.binEventSamples();
-			chatter.updateState(30, veh_count_30 > MAX_VEH_COUNT_30);
-			if (chatter.checkLogging(30))
-				logEvent(EventType.DET_CHATTER);
-			no_hits.updateState(30, veh_count_30 == 0);
-			if (no_hits.checkLogging(30))
-				logEvent(EventType.DET_NO_HITS);
-			updateAutoFail();
-		}
+		long end = calculateEndTime();
+		storeVehCount(v_log.getVehCount(end, p));
+		storeOccupancy(v_log.getOccupancy(end, p));
+		storeSpeed(v_log.getSpeed(end, p));
+		v_log.binEventSamples();
 	}
 
 	/** Write a single detector as an XML element */

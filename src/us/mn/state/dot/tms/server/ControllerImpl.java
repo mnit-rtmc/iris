@@ -610,11 +610,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			DetectorImpl det = dets.get(pin);
 			int i = pin - start_pin;
 			int s = sampleValue(speed, i);
-			if (s > 0) {
-				det.storeSpeed(new PeriodicSample(stamp,
-					period, s));
-			} else
-				det.clearSpeed();
+			PeriodicSample ps = (s > 0)
+				? new PeriodicSample(stamp, period, s)
+				: null;
+			det.storeSpeed(ps);
 		}
 	}
 
