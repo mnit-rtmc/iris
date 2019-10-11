@@ -90,7 +90,7 @@ Protocol    | Binning               | Traffic Data
 [SS125]     | 5 seconds to 1 month  | Count, Occupancy, Speed, Classification
 [G4]        | 10 seconds to 1 hour  | Count, Occupancy, Speed, Classification
 [Canoga]    | N/A [vehicle logging] | Timestamp, Speed (double loops)
-[DR-500]    | 1-5? minutes          | Speed
+[DR-500]    | 30-300? seconds       | Speed
 [DXM]       | N/A (presence)        | Magnetic Field
 
 For protocols which allow the binning intereval to be adjusted, it will be set
