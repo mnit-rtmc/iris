@@ -744,6 +744,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Get the current vehicle count */
 	@Override
 	public int getVehCount(long start, long end) {
+		if (isDeviceLogging()) {
+			int veh = veh_cache.getValue(start, end);
+			if (veh != veh_count_30) {
+				logError("veh count: " + veh + " != " +
+					veh_count_30);
+			}
+		}
 		if (isSampling())
 			return veh_count_30;
 		else
