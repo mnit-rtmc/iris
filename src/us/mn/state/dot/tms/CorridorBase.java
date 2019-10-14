@@ -463,12 +463,16 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 		return null;
 	}
 
+	/** Check if the road class is a CD road */
+	private boolean isCDRoad() {
+		return RoadClass.CD_ROAD == RoadClass.fromOrdinal(
+			roadway.getRClass());
+	}
+
 	/** Check if the road class matches a lane type */
 	private boolean checkLaneType(LaneType lt) {
-		RoadClass rc = RoadClass.fromOrdinal(roadway.getRClass());
-		boolean cd_cls = (rc == RoadClass.CD_ROAD);
 		boolean cd_typ = (lt == LaneType.CD_LANE);
-		return cd_cls == cd_typ;
+		return isCDRoad() == cd_typ;
 	}
 
 	/** Snap a point to the corridor.
@@ -540,6 +544,8 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 
 	/** Count the freeway exits between two milepoints */
 	public int countExits(float mp0, float mp1) {
+		if (isCDRoad())
+			return 0;
 		Road prev_exit = null;
 		int n_exits = 0;
 		Iterator<T> it = n_points.subMap(mp0, true, mp1, true)
