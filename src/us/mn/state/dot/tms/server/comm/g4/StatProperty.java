@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2018  Minnesota Department of Transportation
+ * Copyright (C) 2012-2019  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -63,11 +63,27 @@ public class StatProperty extends G4Property {
 
 	/** Convert KPH to MPH */
 	static private int kphToMph(int kph) {
-		return (int)Math.round(.621371192 * (double)kph);
+		return (int) Math.round(.621371192 * (double) kph);
+	}
+
+	/** Get a string representation of a data array */
+	static private String arrayStr(String lbl, int[] a) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < MAX_LANES; i++) {
+			if (a[i] != MISSING_DATA)
+				sb.append(a[i]);
+			sb.append(',');
+		}
+		while (sb.length() > 0 && sb.charAt(sb.length() - 1) == ',')
+			sb.deleteCharAt(sb.length() - 1);
+		if (sb.length() > 0)
+			return lbl + ':' + sb.toString() + ' ';
+		else
+			return "";
 	}
 
 	/** Binning period (seconds) */
-	private final int period;
+	public final int period;
 
 	/** Vehicle count data */
 	private final int[] v_count = new int[MAX_LANES];
@@ -195,6 +211,15 @@ public class StatProperty extends G4Property {
 		return stamp;
 	}
 
+	/** Check if time stamp is from the previous interval */
+	public boolean isPreviousInterval() {
+		long now = TimeSteward.currentTimeMillis();
+		int pms = period * 1000;
+		long end = now / pms * pms; // end of previous interval
+		long start = end - pms;
+		return (stamp >= start && stamp <= end);
+	}
+
 	/** Low 4 bits are zone count; bit 6 is mounting (0: side-fired,
 	 * 1: forward) */
 	private int n_zones = MISSING_DATA;
@@ -206,9 +231,6 @@ public class StatProperty extends G4Property {
 
 	/** Extra frame composition */
 	private StatComposition msg_comp = new StatComposition(0);
-
-	/** Message period (seconds) */
-	private int msg_period = MISSING_DATA;
 
 	/** Voltage (tenths of volts) */
 	private int volt = MISSING_DATA;
@@ -232,9 +254,8 @@ public class StatProperty extends G4Property {
 	/** Parse the data from one frame.
 	 * @param qual Qualifier code.
 	 * @param data Data packet. */
-	@Override protected void parseData(QualCode qual, byte[] data)
-		throws IOException
-	{
+	@Override
+	protected void parseData(QualCode qual, byte[] data) throws IOException {
 		switch (qual) {
 		case STAT_HEADER:
 			parseStatHeader(data);
@@ -292,7 +313,7 @@ public class StatProperty extends G4Property {
 		msg_comp = new StatComposition(parse8(data, OFF_COMP));
 		if (msg_comp.getClassCount() == 0)
 			throw new ParsingException("INVALID COMP");
-		msg_period = parse16(data, OFF_PERIOD);
+		int msg_period = parse16(data, OFF_PERIOD);
 		if (msg_period != period)
 			throw new ParsingException("INVALID PERIOD");
 		volt = parse8(data, OFF_VOLT);
@@ -412,7 +433,7 @@ public class StatProperty extends G4Property {
 		sb.append(" comp:");
 		sb.append(msg_comp);
 		sb.append(" period:");
-		sb.append(msg_period);
+		sb.append(period);
 		sb.append(" volts:");
 		sb.append(volt);
 		sb.append(' ');
@@ -428,21 +449,5 @@ public class StatProperty extends G4Property {
 		sb.append(arrayStr("c4", getVehCount(G4VehClass.TRUCK)));
 		sb.append(arrayStr("c5", getVehCount(G4VehClass.EXTRA_LARGE)));
 		return sb.toString().trim();
-	}
-
-	/** Get a string representation of a data array */
-	static private String arrayStr(String lbl, int[] a) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < MAX_LANES; i++) {
-			if (a[i] != MISSING_DATA)
-				sb.append(a[i]);
-			sb.append(',');
-		}
-		while (sb.length() > 0 && sb.charAt(sb.length() - 1) == ',')
-			sb.deleteCharAt(sb.length() - 1);
-		if (sb.length() > 0)
-			return lbl + ':' + sb.toString() + ' ';
-		else
-			return "";
 	}
 }

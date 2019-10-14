@@ -16,12 +16,9 @@
 package us.mn.state.dot.tms.server.comm.g4;
 
 import java.io.IOException;
-import java.util.Date;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.PeriodicSample;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.DownloadRequestException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -35,24 +32,12 @@ public class OpQueryStats extends OpG4 {
 	/** Starting pin for controller I/O */
 	static private final int START_PIN = 1;
 
-	/** Time stamp */
-	private final long stamp;
-
-	/** Binning period (seconds) */
-	private final int period;
-
-	/** Sample data */
-	private final PeriodicSample sample;
-
 	/** Statistical property */
 	private final StatProperty stat;
 
 	/** Create a new "query binned samples" operation */
 	public OpQueryStats(ControllerImpl c, int p) {
 		super(PriorityLevel.DATA_30_SEC, c);
-		period = p;
-		stamp = TimeSteward.currentTimeMillis();
-		sample = new PeriodicSample(stamp, period, 0);
 		stat = new StatProperty(p);
 	}
 
@@ -63,7 +48,7 @@ public class OpQueryStats extends OpG4 {
 	}
 
 	/** Phase to get the most recent binned samples */
-	protected class GetCurrentSamples extends Phase<G4Property> {
+	private class GetCurrentSamples extends Phase<G4Property> {
 
 		/** Get the most recent binned samples */
 		protected Phase<G4Property> poll(CommMessage<G4Property> mess)
@@ -71,18 +56,23 @@ public class OpQueryStats extends OpG4 {
 		{
 			mess.add(stat);
 			mess.queryProps();
-			// FIXME: change timestamp check to match ss125, and
-			//        update the RTC if stamp is not correct
-			long stamp = stat.getStamp();
-			PeriodicSample ps = new PeriodicSample(stamp, period,0);
-			long e = ps.end();
-			if (e < sample.start() || e > sample.end()) {
-				mess.logError("BAD TIMESTAMP: " +
-					new Date(stamp));
-				setFailed();
-				throw new DownloadRequestException(
-					controller.toString());
-			}
+			return (stat.isPreviousInterval())
+			      ? null
+			      : new StoreRTC();
+		}
+	}
+
+	/** Phase to store the RTC */
+	private class StoreRTC extends Phase<G4Property> {
+
+		/** Store the RTC */
+		protected Phase<G4Property> poll(
+			CommMessage<G4Property> mess) throws IOException
+		{
+			RTCProperty rtc = new RTCProperty();
+			rtc.setStamp(TimeSteward.currentTimeMillis());
+			mess.add(rtc);
+			mess.storeProps();
 			return null;
 		}
 	}
@@ -91,6 +81,7 @@ public class OpQueryStats extends OpG4 {
 	@Override
 	public void cleanup() {
 		long stamp = stat.getStamp();
+		int period = stat.period;
 		controller.storeVehCount(stamp, period, START_PIN,
 			stat.getVehCount());
 		controller.storeOccupancy(stamp, period, START_PIN,
