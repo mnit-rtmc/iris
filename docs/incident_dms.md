@@ -58,7 +58,7 @@ Incident severity determines the **maximum range** and **message priority**.
 There are three severity values: `minor`, `normal`, and `major`.
 
 Severity | Maximum Range | Message Priority
----------|---------------|------------------
+---------|---------------|-----------------
 `minor`  | `near`        | `INCIDENT_LOW`
 `normal` | `middle`      | `INCIDENT_MED`
 `major`  | `far`         | `INCIDENT_HIGH`
@@ -79,7 +79,7 @@ The _descriptor_ determines the first line of each suggested message.  The
 configurable descriptor table contains fields which are matched to the incident.
 
 Field         | Description
---------------|---------------------------------------------------
+--------------|------------------------------------------
 Incident type | `CRASH`, `STALL`, `ROAD WORK` or `HAZARD`
 Detail        | usually hazard detail: `animal`, `debris`, `ice`, etc
 Lane Type     | `mainline`, `exit`, `merge` or `CD road`
@@ -90,7 +90,7 @@ A matching _locator_ determines the second line of a suggested message.  The
 configurable locator table contains fields which are matched to the incident.
 
 Field    | Description
----------|---------------------------------------------------
+---------|----------------------------------------------------------
 Range    | from sign to incident: `ahead`, `near`, `middle` or `far`
 Branched | sign and incident on different roadways
 Picked   | a [pickable] r_node is within 1 mile of the incident; its location can be used for _locator tags_
@@ -144,10 +144,13 @@ Open Lanes     | number of non-shoulder lanes _not_ impacted
 
 ## Dedicated Purpose Signs
 
-_Dedicated purpose_ signs normally cannot be used for incidents.  The only
-exception is `tolling` signs — they are used if the locator is not _branched_
-and the left lane is impacted: `lanes_blocked`, `left_lanes_blocked`,
-`lanes_affected` or `left_lanes_affected`.
+_Dedicated purpose_ signs normally cannot be used for incidents.  An exception
+is `tolling` signs — they are used if these conditions are met:
+
+* Sign and incident are on the same roadway (not _branched_)
+* Sign is less than 1 mile upstream of the incident
+* Left lane impacted: `lanes_blocked`, `left_lanes_blocked`, `lanes_affected` or
+  `left_lanes_affected`
 
 ## Clearing
 

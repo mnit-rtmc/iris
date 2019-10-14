@@ -45,6 +45,10 @@ public class UpstreamDeviceFinder {
 	/** Maximum distance from device to nearest r_node */
 	static private final Distance MAX_DIST = new Distance(2.5, MILES);
 
+	/** Maximum distance from incident to deploy tolling signs */
+	static private final Distance MAX_TOLLING_DEPLOYMENT_DIST =
+		new Distance(1.0, MILES);
+
 	/** Get the maximum number of exits upstream of an incident */
 	static private int maximum_exits(Incident inc) {
 		IncSeverity sev = IncidentHelper.getSeverity(inc);
@@ -176,21 +180,27 @@ public class UpstreamDeviceFinder {
 	}
 
 	/** Check if a DMS is deployable for the incident */
-	private boolean isDeployable(DMS dms, boolean branched) {
+	private boolean isDeployable(DMS dms, UpstreamDevice ed,
+		boolean branched)
+	{
 		if (DMSHelper.isHidden(dms) ||
 		    DMSHelper.isFailed(dms) ||
 		   !DMSHelper.isActive(dms))
 			return false;
 		switch (DevicePurpose.fromOrdinal(dms.getPurpose())) {
 			case GENERAL: return true;
-			case TOLLING: return isTollingDeployable(branched);
+			case TOLLING: return isTollingDeployable(ed, branched);
 			default: return false;
 		}
 	}
 
 	/** Check if a TOLLING sign is deployable */
-	private boolean isTollingDeployable(boolean branched) {
+	private boolean isTollingDeployable(UpstreamDevice ed,
+		boolean branched)
+	{
 		if (branched)
+			return false;
+		if (ed.distance.m() > MAX_TOLLING_DEPLOYMENT_DIST.m())
 			return false;
 		switch (IncImpact.getImpact(incident)) {
 			case lanes_blocked: return true;
@@ -213,12 +223,10 @@ public class UpstreamDeviceFinder {
 		Iterator<DMS> dit = DMSHelper.iterator();
 		while (dit.hasNext()) {
 			DMS dms = dit.next();
-			if (!isDeployable(dms, branched))
-				continue;
 			GeoLoc loc = dms.getGeoLoc();
 			UpstreamDevice ed = UpstreamDevice.create(dms, cb, mp,
 				loc);
-			if (ed != null) {
+			if (ed != null && isDeployable(dms, ed, branched)) {
 				ed = ed.adjusted(num_exits, dist);
 				if (ed.exits <= maximum_exits)
 					devices.add(ed);
