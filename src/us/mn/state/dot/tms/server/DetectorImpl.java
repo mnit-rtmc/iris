@@ -738,16 +738,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	 * veh_cache to get "veh_count_30" value. */
 	private transient int veh_count_30 = MISSING_DATA;
 
-	/** Scans from the last 30-second sample period.  FIXME: use
-	 * scn_cache to get "last_scans" value. */
-	private transient int last_scans = MISSING_DATA;
-
 	/** Occupancy value from previous 30-second sample period */
 	private transient int prev_value = MISSING_DATA;
-
-	/** Speed from the last 30-second sample period.  FIXME: use
-	 * spd_cache to get "last_speed" value. */
-	private transient int last_speed = MISSING_DATA;
 
 	/** Get the current vehicle count */
 	@Override
@@ -760,25 +752,17 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get the current occupancy */
 	public float getOccupancy() {
-		if (isSampling()) {
-			long end = calculateEndTime();
-			long start = end - SAMPLE_PERIOD_MS;
-			return getOccupancy(start, end);
-		} else
-			return MISSING_DATA;
+		long end = calculateEndTime();
+		long start = end - SAMPLE_PERIOD_MS;
+		return getOccupancy(start, end);
 	}
 
 	/** Get the current occupancy */
 	private float getOccupancy(long start, long end) {
-		if (isDeviceLogging()) {
-			int scn = scn_cache.getValue(start, end);
-			if (scn != last_scans)
-				logError("scans: " + scn + " != " + last_scans);
-		}
-		if (last_scans != MISSING_DATA)
-			return MAX_OCCUPANCY * (float) last_scans / MAX_C30;
-		else
-			return MISSING_DATA;
+		int scn = scn_cache.getValue(start, end);
+		return (scn != MISSING_DATA)
+		      ? MAX_OCCUPANCY * (float) scn / MAX_C30
+		      : MISSING_DATA;
 	}
 
 	/** Get a flow rate (vehicles per hour) */
@@ -870,12 +854,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get the raw (non-faked) speed (MPH) */
 	private float getSpeedRaw(long start, long end) {
-		if (isDeviceLogging()) {
-			int spd = spd_cache.getValue(start, end);
-			if (spd != last_speed)
-				logError("speed: " + spd + " != " + last_speed);
-		}
-		return isSampling() ? last_speed : MISSING_DATA;
+		return spd_cache.getValue(start, end);
 	}
 
 	/** Get speed estimate based on flow / density */
@@ -972,14 +951,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			if (occ.period == SAMPLE_PERIOD_SEC) {
 				testScans(occ);
 				prev_value = occ.value;
-				last_scans = n_scans;
 			}
 			scn_cache.add(new PeriodicSample(occ.stamp, occ.period,
 				n_scans), name);
-		} else {
+		} else
 			prev_value = MISSING_DATA;
-			last_scans = MISSING_DATA;
-		}
 	}
 
 	/** Test an occupancy sample with error detecting algorithms */
@@ -1003,12 +979,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Store one speed sample for this detector.
 	 * @param speed PeriodicSample containing speed data. */
 	public void storeSpeed(PeriodicSample speed) {
-		if (speed != null) {
+		if (speed != null)
 			spd_cache.add(speed, name);
-			if (speed.period == SAMPLE_PERIOD_SEC)
-				last_speed = speed.value;
-		} else
-			last_speed = MISSING_DATA;
 	}
 
 	/** Flush buffered data to disk */
