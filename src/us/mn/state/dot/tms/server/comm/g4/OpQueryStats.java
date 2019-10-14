@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.server.comm.g4;
 
 import java.io.IOException;
+import java.util.Date;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -69,6 +70,10 @@ public class OpQueryStats extends OpG4 {
 		protected Phase<G4Property> poll(
 			CommMessage<G4Property> mess) throws IOException
 		{
+			long stamp = stat.getStamp();
+			mess.logError("BAD TIMESTAMP: " + new Date(stamp));
+			if (!stat.isValidStamp())
+				stat.clear();
 			RTCProperty rtc = new RTCProperty();
 			rtc.setStamp(TimeSteward.currentTimeMillis());
 			mess.add(rtc);

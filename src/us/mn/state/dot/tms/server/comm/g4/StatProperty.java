@@ -172,6 +172,20 @@ public class StatProperty extends G4Property {
 	 * @param p Binning period (seconds). */
 	public StatProperty(int p) {
 		period = p;
+		clear();
+	}
+
+	/** Clear the sample data */
+	public void clear() {
+		msg_num = MISSING_DATA;
+		page_num = MISSING_DATA;
+		stat_flags = new StatusFlags(0);
+		stamp = 0;
+		n_zones = MISSING_DATA;
+		msg_comp = new StatComposition(0);
+		volt = MISSING_DATA;
+		health = MISSING_DATA;
+		footer = false;
 		for (int i = 0; i < MAX_LANES; i++) {
 			v_count[i] = MISSING_DATA;
 			scans[i] = MISSING_DATA;
@@ -195,16 +209,16 @@ public class StatProperty extends G4Property {
 	}
 
 	/** Message number (0 - 255) */
-	private int msg_num = MISSING_DATA;
+	private int msg_num;
 
 	/** Memory page where data is stored */
-	private int page_num = MISSING_DATA;
+	private int page_num;
 
 	/** Status flags */
-	private StatusFlags stat_flags = new StatusFlags(0);
+	private StatusFlags stat_flags;
 
 	/** Time stamp */
-	private long stamp = TimeSteward.currentTimeMillis();
+	private long stamp;
 
 	/** Time stamp */
 	public long getStamp() {
@@ -220,9 +234,16 @@ public class StatProperty extends G4Property {
 		return (stamp >= start && stamp <= end);
 	}
 
+	/** Is time stamp valid (within valid interval) */
+	public boolean isValidStamp() {
+		long valid_ms = 2 * period * 1000;
+		long now = TimeSteward.currentTimeMillis();
+		return (stamp > now - valid_ms) && (stamp < now + valid_ms);
+	}
+
 	/** Low 4 bits are zone count; bit 6 is mounting (0: side-fired,
 	 * 1: forward) */
-	private int n_zones = MISSING_DATA;
+	private int n_zones;
 
 	/** Get the zone count */
 	public int getZones() {
@@ -230,16 +251,16 @@ public class StatProperty extends G4Property {
 	}
 
 	/** Extra frame composition */
-	private StatComposition msg_comp = new StatComposition(0);
+	private StatComposition msg_comp;
 
 	/** Voltage (tenths of volts) */
-	private int volt = MISSING_DATA;
+	private int volt;
 
 	/** Sensor health (currently always 0x10) */
-	private int health = MISSING_DATA;
+	private int health;
 
 	/** Flag indicating a footer was received */
-	private boolean footer = false;
+	private boolean footer;
 
 	/** Decode a QUERY response */
 	@Override
