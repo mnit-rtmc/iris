@@ -21,28 +21,28 @@ import us.mn.state.dot.tms.LaneType;
  * ordinal values correspond to the records in the iris.inc_impact look-up
  * table.
  *
- * FIXME: rearrange these in actual priority order: lanes before shoulders
- *
  * @author Douglas Lau
  */
 public enum IncImpact {
-	/* Blocked - lane or shoulder */
+	/* lanes blocked */
 	lanes_blocked,           // 0
 	left_lanes_blocked,      // 1
 	right_lanes_blocked,     // 2
 	center_lanes_blocked,    // 3
-	both_shoulders_blocked,  // 4
-	left_shoulder_blocked,   // 5
-	right_shoulder_blocked,  // 6
-	/* Affected - partially blocked */
-	lanes_affected,          // 7
-	left_lanes_affected,     // 8
-	right_lanes_affected,    // 9
-	center_lanes_affected,   // 10
+	/* lanes affected */
+	lanes_affected,          // 4
+	left_lanes_affected,     // 5
+	right_lanes_affected,    // 6
+	center_lanes_affected,   // 7
+	/* shoulders blocked */
+	both_shoulders_blocked,  // 8
+	left_shoulder_blocked,   // 9
+	right_shoulder_blocked,  // 10
+	/* shoulders affected */
 	both_shoulders_affected, // 11
 	left_shoulder_affected,  // 12
 	right_shoulder_affected, // 13
-	/* No lanes blocked or affected */
+	/* nothing blocked or affected */
 	free_flowing;            // 14
 
 	/** Get an impact from an ordinal value */

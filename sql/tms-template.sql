@@ -146,7 +146,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	5.6.0
+database_version	5.7.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0
@@ -3124,13 +3124,13 @@ COPY iris.inc_impact (id, description) FROM stdin;
 1	left lanes blocked
 2	right lanes blocked
 3	center lanes blocked
-4	both shoulders blocked
-5	left shoulder blocked
-6	right shoulder blocked
-7	lanes affected
-8	left lanes affected
-9	right lanes affected
-10	center lanes affected
+4	lanes affected
+5	left lanes affected
+6	right lanes affected
+7	center lanes affected
+8	both shoulders blocked
+9	left shoulder blocked
+10	right shoulder blocked
 11	both shoulders affected
 12	left shoulder affected
 13	right shoulder affected
