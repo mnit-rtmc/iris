@@ -48,8 +48,8 @@ Range    | Exits | Maximum distance
 
 * Only one exit is counted for each _interchange_ (for example, the off-ramps of
   a cloverleaf).
-* Each _intersection_ is counted as if it was an exit.
-* Exits from a _CD road_ are not included in the count.
+* _Intersections_ are counted as if they were exits.
+* Exits from a _CD road_ are **not** included in the count.
 
 Searches for upstream signs will not continue on the opposite direction of the
 incident roadway.
