@@ -61,13 +61,13 @@ public class IncMultiBuilder {
 		MultiString ms = buildMulti(multi, abbrev);
 		if (ms != null) {
 			if (builder.toString().length() > 0) {
-				n_lines++;
-				if (n_lines > max_lines) {
+				if (n_lines >= max_lines) {
 					builder.addPage();
 					n_lines = 0;
 				} else
 					builder.addLine(null);
 			}
+			n_lines++;
 			ms.parse(builder);
 			return true;
 		} else
