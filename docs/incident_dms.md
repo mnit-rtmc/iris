@@ -1,6 +1,6 @@
 # Incident DMS Deployment
 
-Sign messages can be suggested for [DMS] from active roadway incidents.  The
+Messages can be suggested for [DMS] from active roadway incidents.  The
 attributes of the incident are used to make suggestions: [impact](#impact),
 [range](#range), [severity](#severity), and location on the freeway network.
 
@@ -12,9 +12,10 @@ used only when the normal version does not fit the sign.
 ## Impact
 
 Every incident is assigned an **impact**, based on which lanes are _blocked_ or
-_affected_.  If any lane or shoulder is _blocked_, then one of the `_blocked`
-impacts is used.  Otherwise, a lane or shoulder may be _affected_, meaning it
-is partially blocked by _e.g._ debris.
+_affected_.  If any lane is _blocked_, then one of the `_lanes_blocked` impacts
+is used.  If any lanes are _affected_ (partially blocked), the impact is one of
+the `_lanes_affected` values.  Shoulder impacts are lower priority, first
+_blocked_ then _affected_.
 
 Impact                    | Description
 --------------------------|------------------------------------------------
@@ -22,13 +23,13 @@ Impact                    | Description
 `left_lanes_blocked`      | Left lane blocked, right lane open
 `right_lanes_blocked`     | Right lane blocked, left lane open
 `center_lanes_blocked`    | Center lane(s) blocked, left & right lanes open
-`both_shoulders_blocked`  | Left & right shoulders blocked, all lanes open
-`left_shoulder_blocked`   | Left shoulder blocked, all lanes open
-`right_shoulder_blocked`  | Right shoulder blocked, all lanes open
 `lanes_affected`          | Left & right lanes affected (possibly all lanes)
 `left_lanes_affected`     | Left lane affected, right lane open
 `right_lanes_affected`    | Right lane affected, left lane open
 `center_lanes_affected`   | Center lane(s) affected, left & right lanes open
+`both_shoulders_blocked`  | Left & right shoulders blocked, all lanes open
+`left_shoulder_blocked`   | Left shoulder blocked, all lanes open
+`right_shoulder_blocked`  | Right shoulder blocked, all lanes open
 `both_shoulders_affected` | Left & right shoulders affected, all lanes open
 `left_shoulder_affected`  | Left shoulder affected, all lanes open
 `right_shoulder_affected` | Right shoulder affected, all lanes open

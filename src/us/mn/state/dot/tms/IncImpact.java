@@ -21,6 +21,8 @@ import us.mn.state.dot.tms.LaneType;
  * ordinal values correspond to the records in the iris.inc_impact look-up
  * table.
  *
+ * FIXME: rearrange these in actual priority order: lanes before shoulders
+ *
  * @author Douglas Lau
  */
 public enum IncImpact {
@@ -64,13 +66,6 @@ public enum IncImpact {
 			return IncImpact.right_lanes_blocked;
 		else if (isAnyLane(li, LaneImpact.BLOCKED))
 			return IncImpact.center_lanes_blocked;
-		// Check for BLOCKED shoulders
-		else if (isBothShoulders(li, LaneImpact.BLOCKED))
-			return IncImpact.both_shoulders_blocked;
-		else if (isLeftShoulder(li, LaneImpact.BLOCKED))
-			return IncImpact.left_shoulder_blocked;
-		else if (isRightShoulder(li, LaneImpact.BLOCKED))
-			return IncImpact.right_shoulder_blocked;
 		// Check for AFFECTED lanes
 		else if (isLeftLane(li, LaneImpact.AFFECTED) &&
 		         isRightLane(li, LaneImpact.AFFECTED))
@@ -81,6 +76,13 @@ public enum IncImpact {
 			return IncImpact.right_lanes_affected;
 		else if (isAnyLane(li, LaneImpact.AFFECTED))
 			return IncImpact.center_lanes_affected;
+		// Check for BLOCKED shoulders
+		else if (isBothShoulders(li, LaneImpact.BLOCKED))
+			return IncImpact.both_shoulders_blocked;
+		else if (isLeftShoulder(li, LaneImpact.BLOCKED))
+			return IncImpact.left_shoulder_blocked;
+		else if (isRightShoulder(li, LaneImpact.BLOCKED))
+			return IncImpact.right_shoulder_blocked;
 		// Check for AFFECTED shoulders
 		else if (isBothShoulders(li, LaneImpact.AFFECTED))
 			return IncImpact.both_shoulders_affected;
