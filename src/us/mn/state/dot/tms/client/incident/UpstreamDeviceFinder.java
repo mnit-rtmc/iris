@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
+import static us.mn.state.dot.tms.client.incident.UpstreamDevice.MAX_GAP_MI;
 
 /**
  * Helper class to find devices upstream of an incident.
@@ -242,15 +243,19 @@ public class UpstreamDeviceFinder {
 		for (GeoLoc loc: entrances) {
 			Float p = cb.calculateMilePoint(loc);
 			if (p != null && mp > p) {
-				int e = cb.countExits(p, mp);
-				// Must add at least 1 exit on other corridors
-				if (dist.m() > 0.0)
-					e = Math.max(1, e);
-				int exits = num_exits + e;
-				if (exits <= maximum_exits) {
-					Distance d = dist.add(
-						new Distance(mp - p, MILES));
-					findInterchange(loc, exits, d);
+				Integer e = cb.countExits(p, mp, MAX_GAP_MI);
+				if (e != null) {
+					// Must add at least 1 exit
+					// if not on original corridor
+					if (dist.m() > 0.0)
+						e = Math.max(1, e);
+					int exits = num_exits + e;
+					if (exits <= maximum_exits) {
+						Distance d = dist.add(
+							new Distance(mp - p,
+							MILES));
+						findInterchange(loc, exits, d);
+					}
 				}
 			}
 		}

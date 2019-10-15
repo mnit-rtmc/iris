@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import static us.mn.state.dot.tms.GeoLocHelper.distanceTo;
@@ -543,15 +544,21 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 	}
 
 	/** Count the freeway exits between two milepoints */
-	public int countExits(float mp0, float mp1) {
+	public Integer countExits(float mp0, float mp1, float max_gap_mi) {
 		if (isCDRoad())
 			return 0;
+		float prev_mp = mp0;
 		Road prev_exit = null;
 		int n_exits = 0;
-		Iterator<T> it = n_points.subMap(mp0, true, mp1, true)
-			.values().iterator();
+		Iterator<Map.Entry<Float, T>> it = n_points
+			.subMap(mp0, true, mp1, true).entrySet().iterator();
 		while (it.hasNext()) {
-			T n = it.next();
+			Map.Entry<Float, T> ent = it.next();
+			float mp = ent.getKey();
+			if (mp - prev_mp > max_gap_mi)
+				return null;
+			prev_mp = mp;
+			T n = ent.getValue();
 			if (n.getNodeType() == R_NodeType.EXIT.ordinal() ||
 			    n.getNodeType() == R_NodeType.INTERSECTION.ordinal())
 			{
