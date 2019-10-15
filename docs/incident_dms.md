@@ -12,9 +12,9 @@ used only when the normal version does not fit the sign.
 ## Impact
 
 Every incident is assigned an **impact**, based on which lanes are _blocked_ or
-_affected_.  If any lane is _blocked_, then one of the `_lanes_blocked` impacts
+_affected_.  If any lane is _blocked_, then one of the `*lanes_blocked` impacts
 is used.  If any lanes are _affected_ (partially blocked), the impact is one of
-the `_lanes_affected` values.  Shoulder impacts are lower priority, first
+the `*lanes_affected` values.  Shoulder impacts are lower priority, first
 _blocked_ then _affected_.
 
 Impact                    | Description
