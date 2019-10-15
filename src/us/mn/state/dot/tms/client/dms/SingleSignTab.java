@@ -410,8 +410,7 @@ public class SingleSignTab extends IPanel {
 	/** Update the current message */
 	private void updateMessageCurrent(DMS dms) {
 		adjusting++;
-		dispatcher.setComposedMulti(DMSHelper.getOperatorMulti(dms),
-			false);
+		dispatcher.setSignMessage(dms);
 		adjusting--;
 		expiration_lbl.setText(getExpiration(dms));
 	}

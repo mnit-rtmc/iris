@@ -696,13 +696,10 @@ public class IncidentDispatcher extends IPanel
 	public void sendMessage(String dn, Incident inc, MultiString multi,
 		Integer duration)
 	{
-		IncSeverity sev = IncidentHelper.getSeverity(inc);
+		DmsMsgPriority prio = IncidentHelper.getPriority(inc);
 		String inc_orig = IncidentHelper.getOriginalName(inc);
-		if (multi != null && sev != null) {
+		if (multi != null && prio != null) {
 			String ms = multi.toString();
-			DmsMsgPriority prio = sev.priority;
-			if (inc.getCleared())
-				prio = DmsMsgPriority.PSA;
 			DMS dms = DMSHelper.lookup(dn);
 			if (dms != null) {
 				SignConfig sc = dms.getSignConfig();

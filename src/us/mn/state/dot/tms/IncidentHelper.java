@@ -83,6 +83,18 @@ public class IncidentHelper extends BaseHelper {
 		return IncImpact.severity(inc, lane_type);
 	}
 
+	/** Get the DMS message priority for an incident */
+	static public DmsMsgPriority getPriority(Incident inc) {
+		if (inc != null) {
+			if (inc.getCleared())
+				return DmsMsgPriority.PSA;
+			IncSeverity sev = getSeverity(inc);
+			if (sev != null)
+				return sev.priority;
+		}
+		return null;
+	}
+
 	/** Get sign messages deployed for an incident */
 	static public ArrayList<SignMessage> getDeployedMessages(Incident inc) {
 		ArrayList<SignMessage> msgs = new ArrayList<SignMessage>();

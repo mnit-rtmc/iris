@@ -1,8 +1,8 @@
 # Incident DMS Deployment
 
-Sign messages can be suggested from active roadway incidents.  This method uses
-incident attributes to make suggestions: [impact](#impact), [range](#range),
-[severity](#severity), and location on the freeway network.
+Sign messages can be suggested for [DMS] from active roadway incidents.  The
+attributes of the incident are used to make suggestions: [impact](#impact),
+[range](#range), [severity](#severity), and location on the freeway network.
 
 Each message is composed of three parts: **descriptor** (_what?_), **locator**
 (_where?_) and **advice** (_how?_).  Suggestions are only made if a match is
@@ -154,23 +154,30 @@ is `tolling` signs — they are used if these conditions are met:
 * Left lane impacted: `lanes_blocked`, `left_lanes_blocked`, `lanes_affected` or
   `left_lanes_affected`
 
+## Linked Signs
+
+Deployed signs will be linked with the incident.  If a sign message is later
+changed by an operator, it will keep incident link unless the first line
+_descriptor_ is changed.
+
+## Incident Updates
+
+If any signs are linked with an incident when an update is logged, the device
+deploy logic will be checked again.  If there are proposed changes, the device
+deploy form will appear.  All proposed changes will be listed in the form,
+including new devices and any devices to be blanked.
+
 ## Clearing
 
 When a `major` severity incident is cleared, a new message will be sent to each
-deployed sign.  The _descriptor_ and _locator_ will be the same, but _advice_
+linked sign.  The _descriptor_ and _locator_ will be the same, but _advice_
 will be taken from the `incident_clear_advice_multi` [system attribute].  If it
 does not fit on the sign, the value of `incident_clear_advice_abbrev` will be
 used instead.  The _cleared_ message will be deployed with `PSA` message
 priority for 5 minutes.
 
-## Updating
 
-If any devices are associated with an incident when an update is logged, the
-device deploy logic will be checked again.  If any devices have proposed
-changes, the device deploy form will appear.  All proposed changes will be
-listed in the form, including new devices and any devices to be blanked.
-
-
+[DMS]: dms.html
 [exits]: road_topology.html#r_node-types
 [MULTI]: dms.html#multi
 [pickable]: road_topology.html#pickable
