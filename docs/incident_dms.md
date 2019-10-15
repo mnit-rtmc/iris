@@ -155,18 +155,18 @@ is `tolling` signs — they are used if these conditions are met:
 * Left lane impacted: `lanes_blocked`, `left_lanes_blocked`, `lanes_affected` or
   `left_lanes_affected`
 
-## Linked Signs
+## Linking
 
-Deployed signs will be linked with the incident.  If a sign message is later
-changed by an operator, it will keep incident link unless the first line
-_descriptor_ is changed.
+Deployed signs will be **linked** with the incident.  If a sign message is later
+changed by an operator, it will keep the incident link unless the _descriptor_
+(first line) is changed.
 
-## Incident Updates
+## Updates
 
-If any signs are linked with an incident when an update is logged, the device
-deploy logic will be checked again.  If there are proposed changes, the device
-deploy form will appear.  All proposed changes will be listed in the form,
-including new devices and any devices to be blanked.
+If any signs are _linked_ with an incident when an update is logged, the device
+deploy logic will be checked again.  If there are suggested changes, the device
+deploy form will appear.  All changes will be listed in the form, including new
+devices and devices to be blanked.
 
 ## Clearing
 
