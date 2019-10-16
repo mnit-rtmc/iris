@@ -734,27 +734,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Vehicle event log */
 	private transient final VehicleEventLog v_log;
 
-	/** Vehicle count from the last 30-second sample period.  FIXME: use
-	 * veh_cache to get "veh_count_30" value. */
-	private transient int veh_count_30 = MISSING_DATA;
-
 	/** Occupancy value from previous 30-second sample period */
 	private transient int prev_value = MISSING_DATA;
 
 	/** Get the current vehicle count */
 	@Override
 	public int getVehCount(long start, long end) {
-		if (isDeviceLogging()) {
-			int veh = veh_cache.getValue(start, end);
-			if (veh != veh_count_30) {
-				logError("veh count: " + veh + " != " +
-					veh_count_30);
-			}
-		}
-		if (isSampling())
-			return veh_count_30;
-		else
-			return MISSING_DATA;
+		return veh_cache.getValue(start, end);
 	}
 
 	/** Get the current occupancy */
@@ -921,10 +907,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			    v.period == SAMPLE_PERIOD_SEC)
 				testVehCount(v);
 			veh_cache.add(v, name);
-			if (v.period == SAMPLE_PERIOD_SEC)
-				veh_count_30 = v.value;
-		} else
-			veh_count_30 = MISSING_DATA;
+		}
 	}
 
 	/** Test a vehicle count sample with error detecting algorithms */
