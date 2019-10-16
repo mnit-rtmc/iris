@@ -155,8 +155,8 @@ is `tolling` signs — they are used if these conditions are met:
 
 * Sign and incident are on the same roadway (not _branched_)
 * Sign is less than 1 mile upstream of the incident
-* Left lane impacted: `lanes_blocked`, `left_lanes_blocked`, `lanes_affected` or
-  `left_lanes_affected`
+* _Left_ lane impacted: `lanes_blocked`, `left_lanes_blocked`, `lanes_affected`
+  or `left_lanes_affected`
 
 ## Linking
 
