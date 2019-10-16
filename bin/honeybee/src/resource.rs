@@ -687,9 +687,9 @@ fn fetch_sign_msg(s: &SignMessage, dir: &Path, msg_data: &mut MsgData)
     debug!("fetch: {:?}", n);
     if !msg_data.check_gif_listing(&n) {
         let tn = make_tmp_name(&img.as_path(), &g);
-        let f = BufWriter::new(File::create(&tn)?);
+        let writer = BufWriter::new(File::create(&tn)?);
         let t = Instant::now();
-        if let Err(e) = signmsg::render(s, msg_data, f) {
+        if let Err(e) = signmsg::render(s, msg_data, writer) {
             warn!("{},cfg={},multi={} {:?}", &s.name, s.sign_config, s.multi,e);
             remove_file(&tn)?;
             return Ok(());
@@ -767,8 +767,8 @@ impl Resource {
         let p = Path::new(dir);
         let tn = make_tmp_name(p, self.name());
         let n = make_name(p, self.name());
-        let f = BufWriter::new(File::create(&tn)?);
-        let c = self.fetch_file(conn, f, p)?;
+        let writer = BufWriter::new(File::create(&tn)?);
+        let c = self.fetch_file(conn, writer, p)?;
         rename(tn, &n)?;
         Ok(c)
     }

@@ -139,11 +139,12 @@ fn render_circle(raster: &mut Raster<Gray8>, palette: &mut Palette<Rgb8>,
 }
 
 /// Render a sign message into a .gif file
-pub fn render<W: Write>(s: &SignMessage, msg_data: &MsgData, f: W) -> Result<()>
+pub fn render<W: Write>(s: &SignMessage, msg_data: &MsgData, writer: W)
+    -> Result<()>
 {
     let cfg = msg_data.config(s)?;
     let (preamble, frames) = render_sign_msg_cfg(s, msg_data, cfg)?;
-    write_gif(f, preamble, frames)
+    write_gif(writer, preamble, frames)
 }
 
 /// Write a .gif file
