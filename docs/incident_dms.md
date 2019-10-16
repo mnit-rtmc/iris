@@ -48,9 +48,9 @@ Range    | Exits | Maximum distance
 `far`    |   6-9 | —
 
 * Only one exit is counted for each _interchange_ (for example, the off-ramps of
-  a cloverleaf).
-* _Intersections_ are counted as if they were exits.
-* Exits from a _CD road_ are **not** included in the count.
+  a cloverleaf)
+* _Intersections_ are counted as if they were exits
+* Exits from a _CD road_ are **not** included in the count
 
 Searches for upstream signs will not continue on the opposite direction of the
 incident roadway.
@@ -66,8 +66,8 @@ Severity | Maximum Range | Message Priority
 `normal` | `middle`      | `INCIDENT_MED`
 `major`  | `far`         | `INCIDENT_HIGH`
 
-Severity depends on whether _more than half_ the lanes are _blocked_ or
-_affected_, as well as the **lane type** at the incident location.
+Severity depends on how many lanes are _blocked_ or _affected_, as well as the
+**lane type** at the incident location.
 
 Impact                          | Mainline   | CD/Exit  | Merge
 --------------------------------|------------|----------|--------
@@ -115,22 +115,22 @@ Tag       | Picked | Description
 
 Road and cross-street names are converted to all capital letters.
 
-For the `[locrn]` and `[locxn]` tags, prefixes and suffixes which match values
-in the `road_affix` table are replaced.
+#### Road Affixes
 
-For the `[locxa]` tag, matching `road_affix` values are stripped.
-
-### Road Affixes
-
-The road affix table determines how road name _prefixes_ and _suffixes_ are
-handled.  For example, the suffix `AVE` is short for avenue.
+The _road affix_ table determines how _prefixes_ and _suffixes_ are handled
+within `[locrn]`, `[locxn]` and `[locxa]` tags.  Example suffixes are **AVE**
+and **RD**.
 
 Field        | Description
--------------|---------------------------------
+-------------|----------------------------
 Affix        | road prefix / suffix string
 Prefix       | `true` for prefix, `false` for suffix
 Fixup        | string to replace affix for sign message display
 Allow Retain | `true` if retaining affix is allowed without fixup
+
+* For the `[locrn]` and `[locxn]` locator tags, matched affixes are replaced
+  with the _fixup_ value
+* For the `[locxa]` tag, matching affixes are stripped
 
 ## Advice
 
@@ -144,6 +144,9 @@ Lane Type      | `mainline`, `exit`, `merge` or `CD road`
 Range          | from sign to incident: `ahead`, `near`, `middle` or `far`
 Impacted Lanes | number of non-shoulder lanes, (if blank, any number matches)
 Open Lanes     | number of non-shoulder lanes _not_ impacted
+
+Rows where _impacted_ and / or _open lanes_ are specified will be matched
+in preference to rows where they are not.
 
 ## Dedicated Purpose Signs
 
