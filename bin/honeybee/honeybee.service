@@ -4,6 +4,7 @@ StartLimitIntervalSec=0
 
 [Service]
 Environment=RUST_LOG=warn
+Environment=PGTZ=US/Central
 ExecStart=/usr/local/bin/honeybee
 Restart=always
 RestartSec=2

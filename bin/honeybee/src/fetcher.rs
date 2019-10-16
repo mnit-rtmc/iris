@@ -17,6 +17,7 @@ use crate::resource::{self, Resource};
 use fallible_iterator::FallibleIterator;
 use postgres::{Connection, TlsMode};
 use std::collections::HashSet;
+use std::env;
 use std::time::{Duration, Instant};
 
 /// Output directory to write JSON resources
@@ -26,22 +27,52 @@ static OUTPUT_DIR: &str = "/var/www/html/iris/";
 ///
 /// * `username` Name of user running process.
 pub fn start(username: &str) -> Result<()> {
-    // Format path for unix domain socket -- not worth using percent_encode
-    let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
-    fetch_loop(uds)
+    let conn = create_connection(username)?;
+    listen_notifications(&conn)?;
+    // Initialize all the resources
+    for r in resource::ALL {
+        fetch_resource(&conn, r)?;
+    }
+    notify_loop(&conn)
 }
 
-/// Connect to database and fetch resources as notifications are received.
+/// Create database connection
 ///
-/// * `uds` Unix domain socket for database.
-fn fetch_loop(uds: String) -> Result<()> {
+/// * `username` Name of user running process.
+fn create_connection(username: &str) -> Result<Connection> {
+    // Format path for unix domain socket -- not worth using percent_encode
+    let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
     let conn = Connection::connect(uds, TlsMode::None)?;
     // The postgres crate sets the session time zone to UTC.
     // We need to set it back to LOCAL time zone, so that row_to_json
     // can format properly (for incidents, etc).  Unfortunately,
-    // the LOCAL and DEFAULT zones are also reset to UTC.
-    conn.execute("SET TIME ZONE 'US/Central'", &[])?;
-    // Listen for notifications on all channels we need to monitor
+    // the LOCAL and DEFAULT zones are also reset to UTC, so the PGTZ
+    // environment variable must be used for this purpose.
+    if let Some(tz) = time_zone() {
+        conn.execute(&format!("SET TIME ZONE '{}'", tz), &[])?;
+    }
+    Ok(conn)
+}
+
+/// Postgres time zone environment variable name
+const PGTZ: &'static str = "PGTZ";
+
+/// Get time zone name for database connection
+fn time_zone() -> Option<String> {
+    match env::var(PGTZ) {
+        Ok(tz) => Some(tz),
+        Err(env::VarError::NotPresent) => None,
+        Err(env::VarError::NotUnicode(_)) => {
+            error!("{} env var is not unicode!", PGTZ);
+            None
+        }
+    }
+}
+
+/// Listen for notifications on all channels we need to monitor.
+///
+/// * `conn` Database connection.
+fn listen_notifications(conn: &Connection) -> Result<()> {
     conn.execute("LISTEN camera", &[])?;
     conn.execute("LISTEN dms", &[])?;
     conn.execute("LISTEN font", &[])?;
@@ -54,11 +85,7 @@ fn fetch_loop(uds: String) -> Result<()> {
     conn.execute("LISTEN sign_detail", &[])?;
     conn.execute("LISTEN sign_message", &[])?;
     conn.execute("LISTEN system_attribute", &[])?;
-    // Initialize all the resources
-    for r in resource::ALL {
-        fetch_resource(&conn, r)?;
-    }
-    notify_loop(&conn)
+    Ok(())
 }
 
 /// Fetch a resource from database.
