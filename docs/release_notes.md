@@ -1,5 +1,21 @@
 # IRIS 5.x Release Notes
 
+5.7.0 (16 Oct 2019)
+ - Synchronize clock immediately after collecting a sample with wrong time
+   (Wavetronix + HD + G4)
+ - Don't record samples with invalid time stamps (Wavetronix + HD + G4)
+ - For Houston Radar, set time averaging to match poll period of comm link
+ - Canoga: store binned samples in addition to vehicle event log
+ - Removed redundant cached occupancy and speed values from detector
+ - Incident deployment:
+    1. For `tolling` signs, limit suggestions to 1 mile from incident
+    2. Don't include exits from CD roads in exit count for range
+    3. For new DMS operator messages, keep link if line 1 does not change
+    4. Make all lane impact priorities higher than shoulder priorities
+    5. Fixed 2-page suggestion bug
+    6. Don't suggest DMS if gap between r_nodes is greater than 10 miles
+    7. Use linked incident color for DMS pixel panel background
+
 5.6.0 (10 Oct 2019)
  - Add `detector` column to `price_message_event` table
  - Apply minimum toll zone price separately for each zone
