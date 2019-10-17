@@ -20,8 +20,10 @@
 //!
 use crate::error::{Error, Result};
 use crate::font::{Font, Graphic};
-use crate::multi::{ColorClassic, ColorCtx, ColorScheme, LineJustification,
-                   PageJustification, Rectangle};
+use crate::ntcip::multi::{
+    ColorClassic, ColorCtx, ColorScheme, LineJustification, PageJustification,
+    Rectangle
+};
 use crate::render::{PageSplitter, State};
 use crate::resource::{make_name, make_tmp_name};
 use gift::Encoder;

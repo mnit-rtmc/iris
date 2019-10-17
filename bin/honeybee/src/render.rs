@@ -14,7 +14,7 @@
 //
 use crate::error::Result;
 use crate::font::{Font, Graphic};
-use crate::multi::*;
+use crate::ntcip::multi::*;
 use pix::{Raster, RasterBuilder, Rgb8};
 use std::collections::HashMap;
 

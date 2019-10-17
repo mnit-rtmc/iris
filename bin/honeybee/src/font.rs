@@ -13,7 +13,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
-use crate::multi::{Color, ColorCtx, ColorScheme, SyntaxError};
+use crate::ntcip::multi::{Color, ColorCtx, ColorScheme, SyntaxError};
 use base64::{Config, CharacterSet, decode_config_slice};
 use pix::{Raster, Rgb8};
 use postgres::{Connection, rows::Row};
@@ -268,7 +268,7 @@ impl Graphic {
         let w = self.width();
         let h = self.height();
         let n = (w * h * bpp + 7) / 8;
-        let mut buf = vec!(0; n as usize);
+        let mut buf = vec![0; n as usize];
         let n = decode_config_slice(&self.pixels, config, &mut buf)?;
         debug!("graphic: {}, width: {}, height: {}, len: {}", self.g_number,
             w, h, n);

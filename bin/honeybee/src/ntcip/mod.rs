@@ -1,6 +1,6 @@
-// lib.rs
+// ntcip
 //
-// Copyright (C) 2018-2019  Minnesota Department of Transportation
+// Copyright (C) 2019  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,18 +12,4 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-#![forbid(unsafe_code)]
-
-#[macro_use]
-extern crate log;
-#[macro_use]
-extern crate serde_derive;
-
-mod error;
-pub mod fetcher;
-mod font;
-pub mod geo;
-pub mod ntcip;
-mod resource;
-mod render;
-mod signmsg;
+pub mod multi;
