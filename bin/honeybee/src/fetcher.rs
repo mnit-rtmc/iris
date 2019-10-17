@@ -13,26 +13,20 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
-use crate::resource::{self, Resource};
+use crate::resource;
 use fallible_iterator::FallibleIterator;
 use postgres::{Connection, TlsMode};
 use std::collections::HashSet;
 use std::env;
-use std::time::{Duration, Instant};
-
-/// Output directory to write JSON resources
-static OUTPUT_DIR: &str = "/var/www/html/iris/";
+use std::time::Duration;
 
 /// Start receiving notifications and fetching resources.
 ///
 /// * `username` Name of user running process.
 pub fn start(username: &str) -> Result<()> {
     let conn = create_connection(username)?;
-    listen_notifications(&conn)?;
-    // Initialize all the resources
-    for r in resource::ALL {
-        fetch_resource(&conn, r)?;
-    }
+    resource::listen_all(&conn)?;
+    resource::fetch_all(&conn)?;
     notify_loop(&conn)
 }
 
@@ -69,36 +63,6 @@ fn time_zone() -> Option<String> {
     }
 }
 
-/// Listen for notifications on all channels we need to monitor.
-///
-/// * `conn` Database connection.
-fn listen_notifications(conn: &Connection) -> Result<()> {
-    conn.execute("LISTEN camera", &[])?;
-    conn.execute("LISTEN dms", &[])?;
-    conn.execute("LISTEN font", &[])?;
-    conn.execute("LISTEN glyph", &[])?;
-    conn.execute("LISTEN graphic", &[])?;
-    conn.execute("LISTEN incident", &[])?;
-    conn.execute("LISTEN parking_area", &[])?;
-    conn.execute("LISTEN r_node", &[])?;
-    conn.execute("LISTEN sign_config", &[])?;
-    conn.execute("LISTEN sign_detail", &[])?;
-    conn.execute("LISTEN sign_message", &[])?;
-    conn.execute("LISTEN system_attribute", &[])?;
-    Ok(())
-}
-
-/// Fetch a resource from database.
-///
-/// * `conn` The database connection.
-/// * `r` Resource to fetch.
-fn fetch_resource(conn: &Connection, r: &Resource) -> Result<()> {
-    let t = Instant::now();
-    let c = r.fetch(&conn, OUTPUT_DIR)?;
-    info!("{}: wrote {} rows in {:?}", r.name(), c, t.elapsed());
-    Ok(())
-}
-
 /// Receive PostgreSQL notifications, and fetch needed resources.
 ///
 /// * `conn` The database connection.
@@ -112,34 +76,7 @@ fn notify_loop(conn: &Connection) -> Result<()> {
             ns.insert((n.channel, n.payload));
         }
         for n in ns.drain() {
-            if let Some(r) = lookup_resource(&n.0, &n.1) {
-                fetch_resource(&conn, &r)?;
-                // NOTE: when we need to fetch one, we also need the other
-                if r == &resource::TPIMS_DYN_RES {
-                    fetch_resource(&conn, &resource::TPIMS_ARCH_RES)?;
-                }
-            }
+            resource::notify(conn, &n.0, &n.1)?;
         }
-    }
-}
-
-/// Lookup resource from PostgreSQL notification channel / payload
-fn lookup_resource(chan: &str, payload: &str) -> Option<&'static Resource> {
-    match (chan, payload) {
-        ("camera", "video_loss") => None,
-        ("dms", "expire_time") => None,
-        ("dms", "msg_sched") => None,
-        ("dms", "msg_current") => Some(&resource::DMS_MSG_RES),
-        ("glyph", _) => Some(&resource::FONT_RES),
-        ("parking_area", "time_stamp") => Some(&resource::TPIMS_DYN_RES),
-        ("system_attribute", _) => Some(&resource::DMS_ATTRIBUTE_RES),
-        (_, _) => {
-            if let Some(r) = resource::lookup(chan) {
-                Some(r)
-            } else {
-                warn!("unknown resource: ({}, {})", &chan, &payload);
-                None
-            }
-        },
     }
 }
