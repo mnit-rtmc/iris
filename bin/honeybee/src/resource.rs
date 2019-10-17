@@ -13,8 +13,8 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
-use crate::font::query_font;
-use crate::signmsg::query_sign_msg;
+use crate::font::fetch_font;
+use crate::signmsg::render_all;
 use postgres::Connection;
 use std::fs::{File, rename};
 use std::io::{BufWriter, Write};
@@ -91,8 +91,12 @@ enum Resource {
     /// * Listen specification.
     /// * SQL query.
     Simple(&'static str, Listen, &'static str),
-    /// Sign message file resource
-    SignMsg(),
+    /// Sign message resource.
+    ///
+    /// * File name.
+    /// * Listen specification.
+    /// * SQL query.
+    SignMsg(&'static str, Listen, &'static str),
     /// Font file resource
     Font(),
 }
@@ -247,6 +251,17 @@ const GRAPHIC_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Sign message resource
+const SIGN_MSG_RES: Resource = Resource::SignMsg(
+"sign_message", Listen::All("sign_message"),
+"SELECT row_to_json(r)::text FROM (\
+    SELECT name, sign_config, incident, multi, beacon_enabled, \
+           prefix_page, msg_priority, sources, owner, duration \
+    FROM sign_message_view \
+    ORDER BY name \
+) r",
+);
+
 /// Font resource
 const FONT_RES: Resource = Resource::Font();
 
@@ -254,48 +269,46 @@ const FONT_RES: Resource = Resource::Font();
 const FONT_LISTEN: Listen = Listen::All("font");
 const GLYPH_LISTEN: Listen = Listen::All("glyph");
 
-/// Sign message resource
-const SIGN_MSG_RES: Resource = Resource::SignMsg();
-
-/// Sign message listen value
-const SIGN_MSG_LISTEN: Listen = Listen::All("sign_message");
-
 /// All defined resources
 const ALL: &[Resource] = &[
     CAMERA_RES,
     DMS_ATTRIBUTE_RES,
     DMS_RES,
     DMS_MSG_RES,
+    FONT_RES,
+    GRAPHIC_RES,
     INCIDENT_RES,
     R_NODE_RES,
     SIGN_CONFIG_RES,
     SIGN_DETAIL_RES,
+    SIGN_MSG_RES,
     TPIMS_STAT_RES,
     TPIMS_DYN_RES,
     TPIMS_ARCH_RES,
-    GRAPHIC_RES,
-    FONT_RES,
-    SIGN_MSG_RES,
 ];
 
-/// Query a simple resource.
+/// Fetch a simple resource.
 ///
 /// * `conn` The database connection.
 /// * `sql` SQL query.
 /// * `w` Writer to output resource.
-fn query_simple<W: Write>(conn: &Connection, sql: &str, mut w: W)
+fn fetch_simple<W: Write>(conn: &Connection, sql: &str, mut w: W)
     -> Result<u32>
 {
     let mut c = 0;
     w.write("[".as_bytes())?;
     for row in &conn.query(sql, &[])? {
-        if c > 0 { w.write(",".as_bytes())?; }
+        if c > 0 {
+            w.write(",".as_bytes())?;
+        }
         w.write("\n".as_bytes())?;
         let j: String = row.get(0);
         w.write(j.as_bytes())?;
         c += 1;
     }
-    if c > 0 { w.write("\n".as_bytes())?; }
+    if c > 0 {
+        w.write("\n".as_bytes())?;
+    }
     w.write("]\n".as_bytes())?;
     Ok(c)
 }
@@ -311,49 +324,57 @@ impl Resource {
             _ => self.listen().is_listening(chan, payload),
         }
     }
-    /// Fetch a file.
-    ///
-    /// * `conn` The database connection.
-    /// * `w` Writer for the file.
-    /// * `dir` Output file directory.
-    fn fetch_file<W: Write>(&self, conn: &Connection, w: W, dir: &Path)
-        -> Result<u32>
-    {
-        match self {
-            Resource::Simple(_, _, sql) => query_simple(conn, sql, w),
-            Resource::SignMsg() => query_sign_msg(conn, w, dir),
-            Resource::Font() => query_font(conn, w),
-        }
-    }
     /// Get the listen value
     fn listen(&self) -> &Listen {
         match self {
-            Resource::Simple(_, l, _) => &l,
-            Resource::SignMsg() => &SIGN_MSG_LISTEN,
+            Resource::Simple(_, lsn, _) => &lsn,
+            Resource::SignMsg(_, lsn, _) => &lsn,
             Resource::Font() => &FONT_LISTEN,
         }
     }
-    /// Get the resource file name
-    fn file_name(&self) -> &str {
+    /// Fetch to a writer.
+    ///
+    /// * `conn` The database connection.
+    /// * `w` Writer for the file.
+    fn fetch_writer<W: Write>(&self, conn: &Connection, w: W) -> Result<u32> {
         match self {
-            Resource::Simple(name, _, _) => name,
-            Resource::SignMsg() => "sign_message",
-            Resource::Font() => "font",
+            Resource::Simple(_, _, sql) => fetch_simple(conn, sql, w),
+            Resource::SignMsg(_, _, sql) => fetch_simple(conn, sql, w),
+            Resource::Font() => fetch_font(conn, w),
         }
+    }
+    /// Fetch a file resource from a connection.
+    ///
+    /// * `conn` The database connection.
+    /// * `name` File name.
+    fn fetch_file(&self, conn: &Connection, name: &str) -> Result<()> {
+        debug!("fetch: {:?}", name);
+        let t = Instant::now();
+        let p = Path::new(OUTPUT_DIR);
+        let tn = make_tmp_name(p, name);
+        let n = make_name(p, name);
+        let writer = BufWriter::new(File::create(&tn)?);
+        let c = self.fetch_writer(conn, writer)?;
+        rename(tn, &n)?;
+        info!("{}: wrote {} rows in {:?}", name, c, t.elapsed());
+        Ok(())
+    }
+    /// Fetch sign messages resource.
+    fn fetch_sign_msgs(&self, conn: &Connection, name: &str) -> Result<()> {
+        self.fetch_file(conn, name)?;
+        // FIXME: spawn another thread for this?
+        render_all(Path::new(OUTPUT_DIR))
     }
     /// Fetch the resource from a connection.
     ///
     /// * `conn` The database connection.
-    fn fetch(&self, conn: &Connection) -> Result<u32> {
+    fn fetch(&self, conn: &Connection) -> Result<()> {
         // FIXME: for r_nodes, build corridors and store in earthwyrm db
-        debug!("fetch: {:?}", self.file_name());
-        let p = Path::new(OUTPUT_DIR);
-        let tn = make_tmp_name(p, self.file_name());
-        let n = make_name(p, self.file_name());
-        let writer = BufWriter::new(File::create(&tn)?);
-        let c = self.fetch_file(conn, writer, p)?;
-        rename(tn, &n)?;
-        Ok(c)
+        match self {
+            Resource::Simple(n, _, _) => self.fetch_file(conn, n),
+            Resource::SignMsg(n, _, _) => self.fetch_sign_msgs(conn, n),
+            Resource::Font() => self.fetch_file(conn, "font"),
+        }
     }
 }
 
@@ -374,19 +395,8 @@ pub fn listen_all(conn: &Connection) -> Result<()> {
 /// * `conn` The database connection.
 pub fn fetch_all(conn: &Connection) -> Result<()> {
     for r in ALL {
-        fetch_resource(&conn, r)?;
+        r.fetch(&conn)?;
     }
-    Ok(())
-}
-
-/// Fetch a resource from database.
-///
-/// * `conn` The database connection.
-/// * `r` Resource to fetch.
-fn fetch_resource(conn: &Connection, r: &Resource) -> Result<()> {
-    let t = Instant::now();
-    let c = r.fetch(&conn)?;
-    info!("{}: wrote {} rows in {:?}", r.file_name(), c, t.elapsed());
     Ok(())
 }
 
@@ -401,7 +411,7 @@ pub fn notify(conn: &Connection, chan: &str, payload: &str) -> Result<()> {
     for r in ALL {
         if r.is_listening(chan, payload) {
             found = true;
-            fetch_resource(&conn, &r)?;
+            r.fetch(&conn)?;
         }
     }
     if !found {

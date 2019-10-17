@@ -12,6 +12,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+//! The signmsg module is for rendering DMS sign messages to .gif files.
+//!
+//! It reads JSON files containing sign configurations, fonts, graphics, etc.
+//! and renders to images.  This design allows it to be
+//! used in Web Assembly contexts.
+//!
 use crate::error::{Error, Result};
 use crate::font::{Font, Graphic};
 use crate::multi::{ColorClassic, ColorCtx, ColorScheme, LineJustification,
@@ -25,7 +31,6 @@ use gift::block::{
     LogicalScreenDesc, Preamble,
 };
 use pix::{Gray8, Palette, Raster, RasterBuilder, Rgb8};
-use postgres::{Connection, rows::Row};
 use std::collections::{HashMap, HashSet};
 use std::convert::TryInto;
 use std::fs::{File, rename, remove_file, read_dir};
@@ -40,14 +45,14 @@ const PIX_WIDTH: f32 = 450.0;
 const PIX_HEIGHT: f32 = 100.0;
 
 /// DMS attribute
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize, Serialize)]
 struct DmsAttribute {
     name  : String,
     value : String,
 }
 
 /// Sign configuration
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize, Serialize)]
 struct SignConfig {
     name        : String,
     face_width  : i32,
@@ -67,7 +72,7 @@ struct SignConfig {
 }
 
 /// Sign detail
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize, Serialize)]
 struct SignDetail {
     name           : String,
     dms_type       : String,
@@ -95,7 +100,7 @@ struct MsgData {
 }
 
 /// Sign message
-#[derive(Serialize)]
+#[derive(Deserialize, Serialize)]
 struct SignMessage {
     name          : String,
     sign_config   : String,
@@ -398,27 +403,14 @@ impl MsgData {
 }
 
 impl SignMessage {
-    /// Get the SQL to query all sign messages
-    fn sql() -> &'static str {
-        "SELECT name, sign_config, incident, multi, beacon_enabled, \
-                prefix_page, msg_priority, sources, owner, duration \
-        FROM sign_message_view \
-        ORDER BY name"
-    }
-    /// Produce a sign message from one Row
-    fn from_row(row: &Row) -> Self {
-        SignMessage {
-            name          : row.get(0),
-            sign_config   : row.get(1),
-            incident      : row.get(2),
-            multi         : row.get(3),
-            beacon_enabled: row.get(4),
-            prefix_page   : row.get(5),
-            msg_priority  : row.get(6),
-            sources       : row.get(7),
-            owner         : row.get(8),
-            duration      : row.get(9),
-        }
+    /// Load sign messages from a JSON file
+    fn load(dir: &Path) -> Result<Vec<SignMessage>> {
+        debug!("SignMessage::load");
+        let mut n = PathBuf::new();
+        n.push(dir);
+        n.push("sign_message");
+        let r = BufReader::new(File::open(&n)?);
+        Ok(serde_json::from_reader(r)?)
     }
     /// Get the MULTI string
     fn multi(&self) -> &str {
@@ -686,31 +678,24 @@ fn render_state_default(msg_data: &MsgData, cfg: &SignConfig) -> Result<State> {
     ))
 }
 
-/// Query the sign messages.
+/// Fetch all sign messages.
 ///
-/// * `conn` The database connection.
-/// * `w` Writer for the file.
 /// * `dir` Output file directory.
-pub fn query_sign_msg<W: Write>(conn: &Connection, mut w: W, dir: &Path)
-    -> Result<u32>
-{
+pub fn render_all(dir: &Path) -> Result<()> {
     let mut msg_data = MsgData::load(dir)?;
-    let mut c = 0;
-    w.write("[".as_bytes())?;
-    for row in &conn.query(SignMessage::sql(), &[])? {
-        if c > 0 { w.write(",".as_bytes())?; }
-        w.write("\n".as_bytes())?;
-        let s = SignMessage::from_row(&row);
-        w.write(serde_json::to_string(&s)?.as_bytes())?;
-        fetch_sign_msg(&s, dir, &mut msg_data)?;
-        c += 1;
+    let sign_msgs = SignMessage::load(dir)?;
+    for sign_msg in sign_msgs {
+        fetch_sign_msg(&sign_msg, dir, &mut msg_data)?;
     }
-    w.write("]\n".as_bytes())?;
     msg_data.delete_gifs()?;
-    Ok(c)
+    Ok(())
 }
 
 /// Check and fetch one sign message (into a .gif file).
+///
+/// * `s` Sign message to render.
+/// * `dir` Directory to store .gif file.
+/// * `msg_data` Data required to render messages.
 fn fetch_sign_msg(s: &SignMessage, dir: &Path, msg_data: &mut MsgData)
     -> Result<()>
 {

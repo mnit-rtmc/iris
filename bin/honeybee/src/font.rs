@@ -65,7 +65,7 @@ impl Glyph {
 }
 
 /// A bitmap font
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct Font {
     pub name     : String,
     pub f_number : i32,
@@ -161,12 +161,14 @@ impl<'a> Font {
     }
 }
 
-/// Query all fonts from DB
-pub fn query_font<W: Write>(conn: &Connection, mut w: W) -> Result<u32> {
+/// Fetch fonts from DB
+pub fn fetch_font<W: Write>(conn: &Connection, mut w: W) -> Result<u32> {
     let mut c = 0;
     w.write("[".as_bytes())?;
     for row in &conn.query(Font::sql(), &[])? {
-        if c > 0 { w.write(",".as_bytes())?; }
+        if c > 0 {
+            w.write(",".as_bytes())?;
+        }
         w.write("\n".as_bytes())?;
         let mut f = Font::from_row(&row);
         for r2 in &conn.query(Glyph::sql(), &[&f.name])? {
@@ -181,7 +183,7 @@ pub fn query_font<W: Write>(conn: &Connection, mut w: W) -> Result<u32> {
 }
 
 /// An uncompressed graphic
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct Graphic {
     name             : String,
     g_number         : i32,
