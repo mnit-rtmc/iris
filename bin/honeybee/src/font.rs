@@ -13,11 +13,10 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
-use crate::resource::Queryable;
 use crate::multi::{Color, ColorCtx, ColorScheme, SyntaxError};
 use base64::{Config, CharacterSet, decode_config_slice};
 use pix::{Raster, Rgb8};
-use postgres::{self, Connection};
+use postgres::{Connection, rows::Row};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufReader, Write};
@@ -43,7 +42,7 @@ pub struct Glyph {
     pub pixels     : String,
 }
 
-impl Queryable for Glyph {
+impl Glyph {
     /// Get the SQL to query all glyphs in a font
     fn sql() -> &'static str {
        "SELECT code_point, width, replace(pixels, E'\n', '') AS pixels \
@@ -52,16 +51,13 @@ impl Queryable for Glyph {
         ORDER BY code_point"
     }
     /// Produce a glyph from one Row
-    fn from_row(row: &postgres::rows::Row) -> Self {
+    fn from_row(row: &Row) -> Self {
         Glyph {
             code_point : row.get(0),
             width      : row.get(1),
             pixels     : row.get(2),
         }
     }
-}
-
-impl Glyph {
     /// Get the glyph width
     pub fn width(&self) -> u16 {
         self.width as u16
@@ -82,6 +78,26 @@ pub struct Font {
 }
 
 impl<'a> Font {
+    /// Get the SQL to query all fonts
+    fn sql() -> &'static str {
+       "SELECT name, f_number, height, width, line_spacing, char_spacing, \
+               version_id \
+        FROM font_view \
+        ORDER BY name"
+    }
+    /// Produce a font from one Row
+    fn from_row(row: &Row) -> Self {
+        Font {
+            name        : row.get(0),
+            f_number    : row.get(1),
+            height      : row.get(2),
+            width       : row.get(3),
+            line_spacing: row.get(4),
+            char_spacing: row.get(5),
+            version_id  : row.get(6),
+            glyphs      : vec!(),
+        }
+    }
     /// Load fonts from a JSON file
     pub fn load(dir: &Path) -> Result<HashMap<i32, Font>> {
         debug!("Font::load");
@@ -142,29 +158,6 @@ impl<'a> Font {
             x += w + cs;
         }
         Ok(())
-    }
-}
-
-impl Queryable for Font {
-    /// Get the SQL to query all fonts
-    fn sql() -> &'static str {
-       "SELECT name, f_number, height, width, line_spacing, char_spacing, \
-               version_id \
-        FROM font_view \
-        ORDER BY name"
-    }
-    /// Produce a font from one Row
-    fn from_row(row: &postgres::rows::Row) -> Self {
-        Font {
-            name        : row.get(0),
-            f_number    : row.get(1),
-            height      : row.get(2),
-            width       : row.get(3),
-            line_spacing: row.get(4),
-            char_spacing: row.get(5),
-            version_id  : row.get(6),
-            glyphs      : vec!(),
-        }
     }
 }
 
