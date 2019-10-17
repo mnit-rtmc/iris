@@ -382,8 +382,8 @@ impl MsgData {
     fn font_default(&self, fname: Option<&str>) -> Result<u8> {
         match fname {
             Some(fname) => {
-                match self.fonts.values().find(|f| &f.name == fname) {
-                    Some(font) => Ok(font.f_number.try_into()?),
+                match self.fonts.values().find(|f| f.name() == fname) {
+                    Some(font) => Ok(font.f_number().try_into()?),
                     None => {
                         Err(Error::UnknownResource(format!("Font: {}", fname)))
                     },

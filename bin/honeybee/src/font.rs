@@ -35,11 +35,11 @@ fn bgr_to_rgb8(bgr: i32) -> Rgb8 {
 const GLYPH_LEN: usize = (128 + 3) / 4 * 3;
 
 /// A bitmap font glyph
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct Glyph {
-    pub code_point : i32,
-    width          : i32,
-    pub pixels     : String,
+    code_point: i32,
+    width: i32,
+    pixels: String,
 }
 
 impl Glyph {
@@ -53,9 +53,9 @@ impl Glyph {
     /// Produce a glyph from one Row
     fn from_row(row: &Row) -> Self {
         Glyph {
-            code_point : row.get(0),
-            width      : row.get(1),
-            pixels     : row.get(2),
+            code_point: row.get(0),
+            width: row.get(1),
+            pixels: row.get(2),
         }
     }
     /// Get the glyph width
@@ -67,14 +67,14 @@ impl Glyph {
 /// A bitmap font
 #[derive(Deserialize, Serialize)]
 pub struct Font {
-    pub name     : String,
-    pub f_number : i32,
-    height       : i32,
-    width        : i32,
-    line_spacing : i32,
-    char_spacing : i32,
-    glyphs       : Vec<Glyph>,
-    version_id   : i32,
+    name: String,
+    f_number: i32,
+    height: i32,
+    width: i32,
+    line_spacing: i32,
+    char_spacing: i32,
+    glyphs: Vec<Glyph>,
+    version_id: i32,
 }
 
 impl<'a> Font {
@@ -88,14 +88,14 @@ impl<'a> Font {
     /// Produce a font from one Row
     fn from_row(row: &Row) -> Self {
         Font {
-            name        : row.get(0),
-            f_number    : row.get(1),
-            height      : row.get(2),
-            width       : row.get(3),
+            name: row.get(0),
+            f_number: row.get(1),
+            height: row.get(2),
+            width: row.get(3),
             line_spacing: row.get(4),
             char_spacing: row.get(5),
-            version_id  : row.get(6),
-            glyphs      : vec!(),
+            version_id: row.get(6),
+            glyphs: vec![],
         }
     }
     /// Load fonts from a JSON file
@@ -111,6 +111,14 @@ impl<'a> Font {
             fonts.insert(f.f_number, f);
         }
         Ok(fonts)
+    }
+    /// Get font name
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+    /// Get font number
+    pub fn f_number(&self) -> i32 {
+        self.f_number
     }
     /// Get font height
     pub fn height(&self) -> u16 {
@@ -185,13 +193,13 @@ pub fn fetch_font<W: Write>(conn: &Connection, mut w: W) -> Result<u32> {
 /// An uncompressed graphic
 #[derive(Deserialize, Serialize)]
 pub struct Graphic {
-    name             : String,
-    g_number         : i32,
-    color_scheme     : String,
-    height           : i32,
-    width            : i32,
+    name: String,
+    g_number: i32,
+    color_scheme: String,
+    height: i32,
+    width: i32,
     transparent_color: Option<i32>,
-    pixels           : String,
+    pixels: String,
 }
 
 /// Function to lookup a pixel from a graphic buffer
@@ -226,8 +234,8 @@ impl Graphic {
         match self.color_scheme[..].into() {
             ColorScheme::Monochrome1Bit => 1,
             ColorScheme::Monochrome8Bit => 8,
-            ColorScheme::ColorClassic   => 8,
-            ColorScheme::Color24Bit     => 24,
+            ColorScheme::ColorClassic => 8,
+            ColorScheme::Color24Bit => 24,
         }
     }
     /// Render a graphic onto a Raster
