@@ -17,13 +17,13 @@ pub struct Character {
 /// A bitmap font
 #[derive(Deserialize, Serialize)]
 pub struct Font {
-    name: String,
     number: u8,
+    name: String,
     height: u8,
     char_spacing: u8,
     line_spacing: u8,
     characters: Vec<Character>,
-    version_id: i32,
+    version_id: u16,
 }
 
 impl Character {

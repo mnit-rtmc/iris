@@ -44,7 +44,7 @@ impl Graphic {
         self.height as u32
     }
     /// Render a graphic onto a Raster
-    pub fn onto_raster(&self, page: &mut Raster<Rgb8>, x: u32, y: u32,
+    pub fn render_graphic(&self, page: &mut Raster<Rgb8>, x: u32, y: u32,
         ctx: &ColorCtx) -> Result<(), SyntaxError>
     {
         let x = x - 1; // x must be > 0

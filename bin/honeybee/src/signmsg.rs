@@ -617,7 +617,7 @@ fn render_sign_msg_cfg(s: &SignMessage, msg_data: &MsgData, cfg: &SignConfig)
     let (w, h) = calculate_size(cfg)?;
     for page in PageSplitter::new(rs, s.multi()) {
         let page = page?;
-        let raster = page.render(msg_data.fonts(), msg_data.graphics())?;
+        let raster = page.render_page(msg_data.fonts(), msg_data.graphics())?;
         let delay = page.page_on_time_ds() * 10;
         frames.push(make_face_frame(&cfg, raster, &mut palette, w, h, delay));
         let t = page.page_off_time_ds() * 10;

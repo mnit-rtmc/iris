@@ -323,7 +323,7 @@ impl PageRenderer {
         Ok(page)
     }
     /// Render the page.
-    pub fn render(&self, fonts: &HashMap<u8, Font>,
+    pub fn render_page(&self, fonts: &HashMap<u8, Font>,
         graphics: &HashMap<u8, Graphic>) -> Result<Raster<Rgb8>>
     {
         let rs = &self.state;
@@ -341,7 +341,7 @@ impl PageRenderer {
                     let n = *gn;
                     let g = graphics.get(&n)
                                     .ok_or(SyntaxError::GraphicNotDefined(*gn))?;
-                    g.onto_raster(&mut page, 1, 1, ctx)?;
+                    g.render_graphic(&mut page, 1, 1, ctx)?;
                 },
                 Value::Graphic(gn, Some((x,y,_))) => {
                     let n = *gn;
@@ -349,7 +349,7 @@ impl PageRenderer {
                                     .ok_or(SyntaxError::GraphicNotDefined(*gn))?;
                     let x = *x as u32;
                     let y = *y as u32;
-                    g.onto_raster(&mut page, x, y, ctx)?;
+                    g.render_graphic(&mut page, x, y, ctx)?;
                 },
                 _ => unreachable!(),
             }
