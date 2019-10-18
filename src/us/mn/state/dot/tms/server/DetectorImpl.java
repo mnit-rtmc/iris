@@ -740,7 +740,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Get the current vehicle count */
 	@Override
 	public int getVehCount(long start, long end) {
-		return veh_cache.getValue(start, end);
+		return isSampling()
+		      ? veh_cache.getValue(start, end)
+		      : MISSING_DATA;
 	}
 
 	/** Get the current occupancy */
@@ -752,7 +754,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get the current occupancy */
 	private float getOccupancy(long start, long end) {
-		int scn = scn_cache.getValue(start, end);
+		int scn = isSampling()
+		       ? scn_cache.getValue(start, end)
+		       : MISSING_DATA;
 		return (scn != MISSING_DATA)
 		      ? MAX_OCCUPANCY * (float) scn / MAX_C30
 		      : MISSING_DATA;
@@ -847,7 +851,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get the raw (non-faked) speed (MPH) */
 	private float getSpeedRaw(long start, long end) {
-		return spd_cache.getValue(start, end);
+		return isSampling()
+		      ? spd_cache.getValue(start, end)
+		      : MISSING_DATA;
 	}
 
 	/** Get speed estimate based on flow / density */
