@@ -11,14 +11,6 @@ use std::collections::HashMap;
 /// Result type
 type Result<T> = std::result::Result<T, SyntaxError>;
 
-/// Convert BGR into Rgb8
-fn bgr_to_rgb8(bgr: i32) -> Rgb8 {
-    let r = (bgr >> 16) as u8;
-    let g = (bgr >> 8) as u8;
-    let b = (bgr >> 0) as u8;
-    Rgb8::new(r, g, b)
-}
-
 /// Page render state
 #[derive(Clone)]
 pub struct State {
@@ -34,6 +26,7 @@ pub struct State {
     span_number: u8,
     line_spacing: Option<u8>,
     char_spacing: Option<u8>,
+    /// Font number and version_id
     font: (u8, Option<u16>),
 }
 
@@ -91,10 +84,10 @@ impl State {
             text_rectangle,
             just_page,
             just_line,
-            line_number : 0,
-            span_number : 0,
-            line_spacing : None,
-            char_spacing : None,
+            line_number: 0,
+            span_number: 0,
+            line_spacing: None,
+            char_spacing: None,
             font,
         }
     }
@@ -151,11 +144,13 @@ impl State {
     }
     /// Get the background RGB color.
     fn background_rgb(&self) -> Rgb8 {
-        bgr_to_rgb8(self.color_ctx.background_bgr())
+        let (r, g, b) = self.color_ctx.background_rgb();
+        Rgb8::new(r, g, b)
     }
     /// Get the foreground RGB color.
     fn foreground_rgb(&self) -> Rgb8 {
-        bgr_to_rgb8(self.color_ctx.foreground_bgr())
+        let (r, g, b) = self.color_ctx.foreground_rgb();
+        Rgb8::new(r, g, b)
     }
     /// Check if states match for text spans
     fn matches_span(&self, other: &State) -> bool {
@@ -181,7 +176,7 @@ impl<'a> TextSpan {
         let fnum = self.state.font.0;
         match fonts.get(&fnum) {
             Some(f) => Ok(f),
-            None => Err(SyntaxError::FontNotDefined(self.state.font.0)),
+            None => Err(SyntaxError::FontNotDefined(fnum)),
         }
     }
     /// Get the width of a text span
@@ -201,7 +196,7 @@ impl<'a> TextSpan {
     fn char_spacing_font(&self, font: &Font) -> u32 {
         match self.state.char_spacing {
             Some(s) => s.into(),
-            None    => font.char_spacing().into(),
+            None => font.char_spacing().into(),
         }
     }
     /// Get the char spacing from a previous span
@@ -328,9 +323,10 @@ impl PageRenderer {
         let mut page = RasterBuilder::new().with_color(w, h, clr);
         for (v, ctx) in &self.values {
             match v {
-                Value::ColorRectangle(r, _) => {
-                    let clr = bgr_to_rgb8(ctx.foreground_bgr());
-                    self.render_rect(&mut page, *r, clr, v)?;
+                Value::ColorRectangle(rect, _) => {
+                    let (r, g, b) = ctx.foreground_rgb();
+                    let clr = Rgb8::new(r, g, b);
+                    self.render_rect(&mut page, *rect, clr, v)?;
                 },
                 Value::Graphic(gn, None) => {
                     let n = *gn;

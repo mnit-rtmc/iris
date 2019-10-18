@@ -8,6 +8,55 @@ use std::iter::Peekable;
 use std::str::Chars;
 use std::str::FromStr;
 
+/// Classic color values
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum ColorClassic {
+    Black,
+    Red,
+    Yellow,
+    Green,
+    Cyan,
+    Blue,
+    Magenta,
+    White,
+    Orange,
+    Amber,
+}
+
+impl ColorClassic {
+    /// Get RGB triplet for a classic color.
+    pub fn rgb(&self) -> (u8, u8, u8) {
+        match self {
+            ColorClassic::Black   => (0x00, 0x00, 0x00),
+            ColorClassic::Red     => (0xFF, 0x00, 0x00),
+            ColorClassic::Yellow  => (0xFF, 0xFF, 0x00),
+            ColorClassic::Green   => (0x00, 0xFF, 0x00),
+            ColorClassic::Cyan    => (0x00, 0xFF, 0xFF),
+            ColorClassic::Blue    => (0x00, 0x00, 0xFF),
+            ColorClassic::Magenta => (0xFF, 0x00, 0xFF),
+            ColorClassic::White   => (0xFF, 0xFF, 0xFF),
+            ColorClassic::Orange  => (0xFF, 0xA5, 0x00),
+            ColorClassic::Amber   => (0xFF, 0xD0, 0x00),
+        }
+    }
+    /// Maybe convert a u8 into a ColorClassic
+    pub fn from_u8(v: u8) -> Option<Self> {
+        match v {
+            v if v == ColorClassic::Black   as u8 => Some(ColorClassic::Black),
+            v if v == ColorClassic::Red     as u8 => Some(ColorClassic::Red),
+            v if v == ColorClassic::Yellow  as u8 => Some(ColorClassic::Yellow),
+            v if v == ColorClassic::Green   as u8 => Some(ColorClassic::Green),
+            v if v == ColorClassic::Cyan    as u8 => Some(ColorClassic::Cyan),
+            v if v == ColorClassic::Blue    as u8 => Some(ColorClassic::Blue),
+            v if v == ColorClassic::Magenta as u8 => Some(ColorClassic::Magenta),
+            v if v == ColorClassic::White   as u8 => Some(ColorClassic::White),
+            v if v == ColorClassic::Orange  as u8 => Some(ColorClassic::Orange),
+            v if v == ColorClassic::Amber   as u8 => Some(ColorClassic::Amber),
+            _                                     => None,
+        }
+    }
+}
+
 /// DMS color scheme.
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum ColorScheme {
@@ -34,56 +83,52 @@ impl From<&str> for ColorScheme {
 }
 
 /// Color for a DMS pixel.
-/// Legacy colors are dependent on the DmsColorScheme.
+///
+/// Legacy colors are dependent on the ColorScheme.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Color {
-    Legacy(u8),      //    0-1   (monochrome1Bit)
-                     //    0-255 (monochrome8Bit)
-                     // or 0-9   (colorClassic)
-    RGB(u8, u8, u8), //    red, green and blue components
+    /// Legacy (non-RGB) color.
+    ///
+    /// `0-1` is valid for `ColorScheme::Monochrome1Bit`.
+    /// `0-255` is valid for `ColorScheme::Monochrome8Bit`.
+    /// `0-9` is valid for `ColorScheme::ColorClassic`.
+    Legacy(u8),
+    /// 24-bit RGB (red, green, blue) color.
+    RGB(u8, u8, u8),
 }
 
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Color::Legacy(v)  => write!(f, "{}", v),
+            Color::Legacy(v) => write!(f, "{}", v),
             Color::RGB(r,g,b) => write!(f, "{},{},{}", r, g, b),
         }
     }
 }
 
-impl From<i32> for Color {
-    fn from(rgb: i32) -> Self {
-        let r = (rgb >> 16) as u8;
-        let g = (rgb >> 8) as u8;
-        let b = (rgb >> 0) as u8;
-        Color::RGB(r, g, b)
-    }
-}
-
-impl From<ColorClassic> for Color {
-    fn from(c: ColorClassic) -> Self {
-        Color::Legacy(c as u8)
+impl From<(u8, u8, u8)> for Color {
+    fn from(rgb: (u8, u8, u8)) -> Self {
+        Color::RGB(rgb.0, rgb.1, rgb.2)
     }
 }
 
 /// Color context
 #[derive(Clone)]
 pub struct ColorCtx {
-    color_scheme : ColorScheme,
-    fg_default   : i32,
-    fg_current   : i32,
-    bg_default   : i32,
-    bg_current   : i32,
+    color_scheme: ColorScheme,
+    fg_default: (u8, u8, u8),
+    fg_current: Color,
+    bg_default: (u8, u8, u8),
+    bg_current: Color,
 }
 
 impl ColorCtx {
     /// Create a new color context
-    pub fn new(color_scheme: ColorScheme, fg_default: i32, bg_default: i32)
-        -> Self
+    pub fn new(color_scheme: ColorScheme, fg_default: (u8, u8, u8),
+        bg_default: (u8, u8, u8)) -> Self
     {
-        let fg_current = fg_default;
-        let bg_current = bg_default;
+        let fg_current = fg_default.into();
+        let bg_current = bg_default.into();
         ColorCtx {
             color_scheme,
             fg_default,
@@ -98,16 +143,23 @@ impl ColorCtx {
     {
         self.fg_current = match c {
             Some(c) => match self.rgb(c) {
-                Some(rgb) => rgb,
+                Some(_) => c,
                 None => return Err(SyntaxError::UnsupportedTagValue(v.into())),
             }
-            None => self.fg_default,
+            None => self.fg_default.into(),
         };
         Ok(())
     }
     /// Get the foreground BGR color
-    pub fn foreground_bgr(&self) -> i32 {
+    pub fn foreground(&self) -> Color {
         self.fg_current
+    }
+    /// Get the foreground RGB color
+    pub fn foreground_rgb(&self) -> (u8, u8, u8) {
+        match self.rgb(self.foreground()) {
+            Some(rgb) => rgb,
+            None => self.fg_default,
+        }
     }
     /// Set the background color
     pub fn set_background(&mut self, c: Option<Color>, v: &Value)
@@ -115,19 +167,26 @@ impl ColorCtx {
     {
         self.bg_current = match c {
             Some(c) => match self.rgb(c) {
-                Some(rgb) => rgb,
+                Some(_) => c,
                 None => return Err(SyntaxError::UnsupportedTagValue(v.into())),
             }
-            None => self.bg_default,
+            None => self.bg_default.into(),
         };
         Ok(())
     }
-    /// Get the background BGR color
-    pub fn background_bgr(&self) -> i32 {
+    /// Get the background color
+    pub fn background(&self) -> Color {
         self.bg_current
     }
+    /// Get the background RGB color
+    pub fn background_rgb(&self) -> (u8, u8, u8) {
+        match self.rgb(self.background()) {
+            Some(rgb) => rgb,
+            None => self.bg_default,
+        }
+    }
     /// Get RGB for the specified color.
-    pub fn rgb(&self, c: Color) -> Option<i32> {
+    pub fn rgb(&self, c: Color) -> Option<(u8, u8, u8)> {
         match (self.color_scheme, c) {
             (ColorScheme::Monochrome1Bit, Color::Legacy(v)) => {
                 self.rgb_monochrome_1(v)
@@ -138,14 +197,12 @@ impl ColorCtx {
             },
             (ColorScheme::Monochrome8Bit, _) => None,
             (_, Color::Legacy(v)) => ColorCtx::rgb_classic(v),
-            (ColorScheme::Color24Bit, Color::RGB(r, g, b)) => {
-                Some(ColorCtx::rgb_24(r, g, b))
-            },
+            (ColorScheme::Color24Bit, Color::RGB(r, g, b)) => Some((r, g, b)),
             _ => None,
         }
     }
     /// Get RGB for a monochrome 1-bit color.
-    fn rgb_monochrome_1(&self, v: u8) -> Option<i32> {
+    fn rgb_monochrome_1(&self, v: u8) -> Option<(u8, u8, u8)> {
         match v {
             0 => Some(self.bg_default),
             1 => Some(self.fg_default),
@@ -153,27 +210,20 @@ impl ColorCtx {
         }
     }
     /// Get RGB for a monochrome 8-bit color.
-    fn rgb_monochrome_8(&self, v: u8) -> Option<i32> {
+    fn rgb_monochrome_8(&self, v: u8) -> Option<(u8, u8, u8)> {
         let bg = self.bg_default;
         let fg = self.fg_default;
-        let r = ColorCtx::lerp((bg >> 16) as u8, (fg >> 16) as u8, v);
-        let g = ColorCtx::lerp((bg >>  8) as u8, (fg >>  8) as u8, v);
-        let b = ColorCtx::lerp((bg >>  0) as u8, (fg >>  0) as u8, v);
-        Some(ColorCtx::rgb_24(r, g, b))
+        let r = ColorCtx::lerp(bg.0, fg.0, v);
+        let g = ColorCtx::lerp(bg.1, fg.1, v);
+        let b = ColorCtx::lerp(bg.2, fg.2, v);
+        Some((r, g, b))
     }
     /// Get RGB for a classic color.
-    fn rgb_classic(v: u8) -> Option<i32> {
+    fn rgb_classic(v: u8) -> Option<(u8, u8, u8)> {
         match ColorClassic::from_u8(v) {
             Some(c) => Some(c.rgb()),
-            None    => None,
+            None => None,
         }
-    }
-    /// Get RGB for a 24-bit color.
-    fn rgb_24(r: u8, g: u8, b: u8) -> i32 {
-        let r = (r as i32) << 16;
-        let g = (g as i32) << 8;
-        let b = (b as i32) << 0;
-        r | g | b
     }
     /// Interpolate between two color components
     fn lerp(bg: u8, fg: u8, v: u8) -> u8 {
@@ -182,55 +232,6 @@ impl ColorCtx {
         // cheap alternative to divide by 255
         let r = (((c + 1) + (c >> 8)) >> 8) as u8;
         bg.min(fg) + r
-    }
-}
-
-/// Classic color values
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub enum ColorClassic {
-    Black,
-    Red,
-    Yellow,
-    Green,
-    Cyan,
-    Blue,
-    Magenta,
-    White,
-    Orange,
-    Amber,
-}
-
-impl ColorClassic {
-    /// Get RGB triplet for a classic color.
-    pub fn rgb(&self) -> i32 {
-        match self {
-            ColorClassic::Black   => 0x000000,
-            ColorClassic::Red     => 0xFF0000,
-            ColorClassic::Yellow  => 0xFFFF00,
-            ColorClassic::Green   => 0x00FF00,
-            ColorClassic::Cyan    => 0x00FFFF,
-            ColorClassic::Blue    => 0x0000FF,
-            ColorClassic::Magenta => 0xFF00FF,
-            ColorClassic::White   => 0xFFFFFF,
-            ColorClassic::Orange  => 0xFFA500,
-            ColorClassic::Amber   => 0xFFD000,
-        }
-    }
-    /// Maybe convert a u8 into a ColorClassic
-    pub fn from_u8(v: u8) -> Option<Self> {
-        match v {
-            v if v == ColorClassic::Black   as u8 => Some(ColorClassic::Black),
-            v if v == ColorClassic::Red     as u8 => Some(ColorClassic::Red),
-            v if v == ColorClassic::Yellow  as u8 => Some(ColorClassic::Yellow),
-            v if v == ColorClassic::Green   as u8 => Some(ColorClassic::Green),
-            v if v == ColorClassic::Cyan    as u8 => Some(ColorClassic::Cyan),
-            v if v == ColorClassic::Blue    as u8 => Some(ColorClassic::Blue),
-            v if v == ColorClassic::Magenta as u8 => Some(ColorClassic::Magenta),
-            v if v == ColorClassic::White   as u8 => Some(ColorClassic::White),
-            v if v == ColorClassic::Orange  as u8 => Some(ColorClassic::Orange),
-            v if v == ColorClassic::Amber   as u8 => Some(ColorClassic::Amber),
-            _                                     => None,
-        }
     }
 }
 
@@ -1116,73 +1117,86 @@ mod test {
     fn color_mono_1() {
         let mut ctx = ColorCtx::new(ColorScheme::Monochrome1Bit,
             ColorClassic::Amber.rgb(), ColorClassic::Black.rgb());
-        assert!(ctx.foreground_bgr() == 0xFFD000);
-        assert!(ctx.background_bgr() == 0x000000);
+        assert_eq!(ctx.foreground_rgb(), (0xFF, 0xD0, 0x00));
+        assert_eq!(ctx.background_rgb(), (0x00, 0x00, 0x00));
         let v = Value::ColorForeground(Some(Color::Legacy(2)));
-        assert!(ctx.set_foreground(Some(Color::Legacy(2)), &v) ==
-            Err(SyntaxError::UnsupportedTagValue("[cf2]".into())));
+        assert_eq!(
+            ctx.set_foreground(Some(Color::Legacy(2)), &v),
+            Err(SyntaxError::UnsupportedTagValue("[cf2]".into()))
+        );
         let v = Value::ColorForeground(Some(Color::RGB(0, 0, 0)));
-        assert!(ctx.set_foreground(Some(Color::RGB(0, 0, 0)), &v) ==
-            Err(SyntaxError::UnsupportedTagValue("[cf0,0,0]".into())));
+        assert_eq!(
+            ctx.set_foreground(Some(Color::RGB(0, 0, 0)), &v),
+            Err(SyntaxError::UnsupportedTagValue("[cf0,0,0]".into()))
+        );
         let v = Value::ColorForeground(Some(Color::Legacy(0)));
-        assert!(ctx.set_foreground(Some(Color::Legacy(0)), &v) == Ok(()));
-        assert!(ctx.foreground_bgr() == 0x000000);
+        assert_eq!(ctx.set_foreground(Some(Color::Legacy(0)), &v), Ok(()));
+        assert_eq!(ctx.foreground_rgb(), (0x00, 0x00, 0x00));
         let v = Value::PageBackground(Some(Color::Legacy(1)));
-        assert!(ctx.set_background(Some(Color::Legacy(1)), &v) == Ok(()));
-        assert!(ctx.background_bgr() == 0xFFD000);
-        assert!(ctx.set_foreground(None, &v) == Ok(()));
-        assert!(ctx.foreground_bgr() == 0xFFD000);
+        assert_eq!(ctx.set_background(Some(Color::Legacy(1)), &v), Ok(()));
+        assert_eq!(ctx.background_rgb(), (0xFF, 0xD0, 0x00));
+        assert_eq!(ctx.set_foreground(None, &v), Ok(()));
+        assert_eq!(ctx.foreground_rgb(), (0xFF, 0xD0, 0x00));
     }
     #[test]
     fn color_mono_8() {
         let mut ctx = ColorCtx::new(ColorScheme::Monochrome8Bit,
             ColorClassic::White.rgb(), ColorClassic::Black.rgb());
-        assert!(ctx.foreground_bgr() == 0xFFFFFF);
-        assert!(ctx.background_bgr() == 0x000000);
+        assert_eq!(ctx.foreground_rgb(), (0xFF, 0xFF, 0xFF));
+        assert_eq!(ctx.background_rgb(), (0x00, 0x00, 0x00));
         let v = Value::ColorForeground(Some(Color::Legacy(128)));
-        assert!(ctx.set_foreground(Some(Color::Legacy(128)), &v) == Ok(()));
-        assert!(ctx.foreground_bgr() == 0x808080);
+        assert_eq!(ctx.set_foreground(Some(Color::Legacy(128)), &v), Ok(()));
+        assert_eq!(ctx.foreground_rgb(), (0x80, 0x80, 0x80));
         let v = Value::ColorForeground(Some(Color::RGB(128, 128, 128)));
-        assert!(ctx.set_foreground(Some(Color::RGB(128, 128, 128)), &v) ==
-            Err(SyntaxError::UnsupportedTagValue("[cf128,128,128]".into())));
-        assert!(ctx.set_foreground(None, &v) == Ok(()));
-        assert!(ctx.foreground_bgr() == 0xFFFFFF);
+        assert_eq!(
+            ctx.set_foreground(Some(Color::RGB(128, 128, 128)), &v),
+            Err(SyntaxError::UnsupportedTagValue("[cf128,128,128]".into()))
+        );
+        assert_eq!(ctx.set_foreground(None, &v), Ok(()));
+        assert_eq!(ctx.foreground_rgb(), (0xFF, 0xFF, 0xFF));
     }
     #[test]
     fn color_classic() {
         let mut ctx = ColorCtx::new(ColorScheme::ColorClassic,
             ColorClassic::White.rgb(), ColorClassic::Green.rgb());
-        assert!(ctx.foreground_bgr() == 0xFFFFFF);
-        assert!(ctx.background_bgr() == 0x00FF00);
+        assert_eq!(ctx.foreground_rgb(), (0xFF, 0xFF, 0xFF));
+        assert_eq!(ctx.background_rgb(), (0x00, 0xFF, 0x00));
         let v = Value::ColorForeground(Some(Color::Legacy(10)));
-        assert!(ctx.set_foreground(Some(Color::Legacy(10)), &v) ==
-            Err(SyntaxError::UnsupportedTagValue("[cf10]".into())));
+        assert_eq!(
+            ctx.set_foreground(Some(Color::Legacy(10)), &v),
+            Err(SyntaxError::UnsupportedTagValue("[cf10]".into()))
+        );
         let v = Value::ColorForeground(Some(Color::Legacy(5)));
-        assert!(ctx.set_foreground(Some(Color::Legacy(5)), &v) == Ok(()));
-        assert!(ctx.foreground_bgr() == 0x0000FF);
+        assert_eq!(ctx.set_foreground(Some(Color::Legacy(5)), &v), Ok(()));
+        assert_eq!(ctx.foreground_rgb(), (0x00, 0x00, 0xFF));
         let v = Value::PageBackground(Some(Color::RGB(255, 0, 255)));
-        assert!(ctx.set_background(Some(Color::RGB(255, 0, 255)), &v) ==
+        assert_eq!(ctx.set_background(Some(Color::RGB(255, 0, 255)), &v),
             Err(SyntaxError::UnsupportedTagValue("[pb255,0,255]".into())));
-        assert!(ctx.set_foreground(None, &v) == Ok(()));
-        assert!(ctx.foreground_bgr() == 0xFFFFFF);
+        assert_eq!(ctx.set_foreground(None, &v), Ok(()));
+        assert_eq!(ctx.foreground_rgb(), (0xFF, 0xFF, 0xFF));
     }
     #[test]
     fn color_24() {
         let mut ctx = ColorCtx::new(ColorScheme::Color24Bit,
             ColorClassic::Yellow.rgb(), ColorClassic::Red.rgb());
-        assert!(ctx.foreground_bgr() == 0xFFFF00);
-        assert!(ctx.background_bgr() == 0xFF0000);
+        assert_eq!(ctx.foreground_rgb(), (0xFF, 0xFF, 0x00));
+        assert_eq!(ctx.background_rgb(), (0xFF, 0x00, 0x00));
         let v = Value::ColorForeground(Some(Color::Legacy(10)));
-        assert!(ctx.set_foreground(Some(Color::Legacy(10)), &v) ==
-            Err(SyntaxError::UnsupportedTagValue("[cf10]".into())));
+        assert_eq!(
+            ctx.set_foreground(Some(Color::Legacy(10)), &v),
+            Err(SyntaxError::UnsupportedTagValue("[cf10]".into()))
+        );
         let v = Value::ColorForeground(Some(Color::Legacy(6)));
-        assert!(ctx.set_foreground(Some(Color::Legacy(6)), &v) == Ok(()));
-        assert!(ctx.foreground_bgr() == 0xFF00FF);
+        assert_eq!(ctx.set_foreground(Some(Color::Legacy(6)), &v), Ok(()));
+        assert_eq!(ctx.foreground_rgb(), (0xFF, 0x00, 0xFF));
         let v = Value::PageBackground(Some(Color::RGB(121, 0, 212)));
-        assert!(ctx.set_background(Some(Color::RGB(121, 0, 212)), &v) == Ok(()));
-        assert!(ctx.background_bgr() == 0x7900D4);
-        assert!(ctx.set_foreground(None, &v) == Ok(()));
-        assert!(ctx.foreground_bgr() == 0xFFFF00);
+        assert_eq!(
+            ctx.set_background(Some(Color::RGB(121, 0, 212)), &v),
+            Ok(())
+        );
+        assert_eq!(ctx.background_rgb(), (0x79, 0x00, 0xD4));
+        assert_eq!(ctx.set_foreground(None, &v), Ok(()));
+        assert_eq!(ctx.foreground_rgb(), (0xFF, 0xFF, 0x00));
     }
 
     fn single_text(v: &str) {

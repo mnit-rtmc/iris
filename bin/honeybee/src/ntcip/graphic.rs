@@ -5,14 +5,6 @@
 use crate::ntcip::multi::{Color, ColorCtx, ColorScheme, SyntaxError};
 use pix::{Raster, Rgb8};
 
-/// Convert BGR into Rgb8
-fn bgr_to_rgb8(bgr: i32) -> Rgb8 {
-    let r = (bgr >> 16) as u8;
-    let g = (bgr >> 8) as u8;
-    let b = (bgr >> 0) as u8;
-    Rgb8::new(r, g, b)
-}
-
 /// An uncompressed graphic
 #[derive(Deserialize, Serialize)]
 pub struct Graphic {
@@ -85,8 +77,14 @@ impl Graphic {
         match (lit, self.transparent_color) {
             (false, Some(0)) => None,
             (true, Some(1)) => None,
-            (false, _) => Some(bgr_to_rgb8(ctx.background_bgr())),
-            (true, _) => Some(bgr_to_rgb8(ctx.foreground_bgr())),
+            (false, _) => {
+                let (r, g, b) = ctx.rgb(ctx.background())?;
+                Some(Rgb8::new(r, g, b))
+            }
+            (true, _) => {
+                let (r, g, b) = ctx.rgb(ctx.foreground())?;
+                Some(Rgb8::new(r, g, b))
+            }
         }
     }
     /// Get one pixel of an 8-bit (monochrome or classic) color graphic
@@ -101,7 +99,7 @@ impl Graphic {
             }
         }
         match ctx.rgb(Color::Legacy(v)) {
-            Some(rgb) => Some(rgb.into()),
+            Some((r, g, b)) => Some(Rgb8::new(r, g, b)),
             None => {
                 debug!("pixel_8 -- Bad color {}", v);
                 None

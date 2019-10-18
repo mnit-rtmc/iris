@@ -22,8 +22,8 @@ use crate::error::{Error, Result};
 use crate::ntcip::font::Font;
 use crate::ntcip::graphic::Graphic;
 use crate::ntcip::multi::{
-    ColorClassic, ColorCtx, ColorScheme, LineJustification, PageJustification,
-    Rectangle
+    ColorClassic, ColorCtx, ColorScheme, LineJustification,
+    PageJustification, Rectangle
 };
 use crate::ntcip::render::{PageSplitter, State};
 use crate::resource::{make_name, make_tmp_name};
@@ -138,6 +138,14 @@ impl DmsAttribute {
         }
         Ok(attrs)
     }
+}
+
+/// Convert a BGR value to an (red, green, blue) tuple
+fn bgr_to_rgb(bgr: i32) -> (u8, u8, u8) {
+    let r = (bgr >> 0) as u8;
+    let g = (bgr >> 8) as u8;
+    let b = (bgr >> 16) as u8;
+    (r, g, b)
 }
 
 impl SignConfig {
@@ -279,19 +287,19 @@ impl SignConfig {
         self.color_scheme[..].into()
     }
     /// Get the default foreground color
-    fn foreground_default(&self) -> i32 {
+    fn foreground_default_rgb(&self) -> (u8, u8, u8) {
         match self.color_scheme() {
             ColorScheme::ColorClassic |
             ColorScheme::Color24Bit => ColorClassic::Amber.rgb(),
-            _ => self.monochrome_foreground,
+            _ => bgr_to_rgb(self.monochrome_foreground),
         }
     }
     /// Get the default background color
-    fn background_default(&self) -> i32 {
+    fn background_default_rgb(&self) -> (u8, u8, u8) {
         match self.color_scheme() {
             ColorScheme::ColorClassic |
             ColorScheme::Color24Bit => ColorClassic::Black.rgb(),
-            _ => self.monochrome_background,
+            _ => bgr_to_rgb(self.monochrome_background),
         }
     }
     /// Get the default text rectangle
@@ -693,8 +701,8 @@ fn palette_threshold_rgb8_256(v: usize) -> Rgb8 {
 /// Create default render state for a sign config.
 fn render_state_default(msg_data: &MsgData, cfg: &SignConfig) -> Result<State> {
     let color_scheme = cfg.color_scheme();
-    let fg_default = cfg.foreground_default();
-    let bg_default = cfg.background_default();
+    let fg_default = cfg.foreground_default_rgb();
+    let bg_default = cfg.background_default_rgb();
     let color_ctx = ColorCtx::new(color_scheme, fg_default, bg_default);
     let char_width = cfg.char_width()?;
     let char_height = cfg.char_height()?;
