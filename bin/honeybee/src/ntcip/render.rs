@@ -128,14 +128,14 @@ impl State {
     {
         let r = r.match_width_height(&default_state.text_rectangle);
         if !default_state.text_rectangle.contains(&r) {
-            return Err(SyntaxError::UnsupportedTagValue(v.into()).into());
+            return Err(SyntaxError::UnsupportedTagValue(v.into()));
         }
         let cw = self.char_width();
         if cw > 0 {
             // Check text rectangle matches character boundaries
             let x = r.x - 1;
             if x % cw != 0 || r.w % cw != 0 {
-                return Err(SyntaxError::UnsupportedTagValue(v.into()).into());
+                return Err(SyntaxError::UnsupportedTagValue(v.into()));
             }
         }
         let lh = self.char_height();
@@ -143,7 +143,7 @@ impl State {
             // Check text rectangle matches line boundaries
             let y = r.y - 1;
             if y % lh != 0 || r.h % lh != 0 {
-                return Err(SyntaxError::UnsupportedTagValue(v.into()).into());
+                return Err(SyntaxError::UnsupportedTagValue(v.into()));
             }
         }
         self.text_rectangle = r;
@@ -181,7 +181,7 @@ impl<'a> TextSpan {
         let fnum = self.state.font.0;
         match fonts.get(&fnum) {
             Some(f) => Ok(f),
-            None => Err(SyntaxError::FontNotDefined(self.state.font.0).into()),
+            None => Err(SyntaxError::FontNotDefined(self.state.font.0)),
         }
     }
     /// Get the width of a text span
@@ -292,7 +292,7 @@ impl PageRenderer {
               (just_page < jp ||
               (just_page == jp && line_number == ln && just_line < jl))
             {
-                return Err(SyntaxError::TagConflict.into());
+                return Err(SyntaxError::TagConflict);
             }
             tr = text_rectangle;
             jp = just_page;
@@ -322,10 +322,10 @@ impl PageRenderer {
         graphics: &HashMap<u8, Graphic>) -> Result<Raster<Rgb8>>
     {
         let rs = &self.state;
-        let w = rs.text_rectangle.w;
-        let h = rs.text_rectangle.h;
+        let w = rs.text_rectangle.w.into();
+        let h = rs.text_rectangle.h.into();
         let clr = rs.background_rgb();
-        let mut page = RasterBuilder::new().with_color(w.into(), h.into(), clr);
+        let mut page = RasterBuilder::new().with_color(w, h, clr);
         for (v, ctx) in &self.values {
             match v {
                 Value::ColorRectangle(r, _) => {
@@ -373,7 +373,7 @@ impl PageRenderer {
             }
             return Ok(());
         }
-        Err(SyntaxError::UnsupportedTagValue(v.into()).into())
+        Err(SyntaxError::UnsupportedTagValue(v.into()))
     }
     /// Get the X position of a text span.
     fn span_x(&self, s: &TextSpan, fonts: &HashMap<u8, Font>) -> Result<u16> {
@@ -441,7 +441,7 @@ impl PageRenderer {
         if before + after <= rs.text_rectangle.w {
             Ok((before, after))
         } else {
-            Err(SyntaxError::TextTooBig.into())
+            Err(SyntaxError::TextTooBig)
         }
     }
     /// Get the Y position of a text span.
@@ -530,7 +530,7 @@ impl PageRenderer {
         if above + below <= span.state.text_rectangle.h {
             Ok((above, below))
         } else {
-            Err(SyntaxError::TextTooBig.into())
+            Err(SyntaxError::TextTooBig)
         }
     }
 }
@@ -595,17 +595,17 @@ impl<'a> PageSplitter<'a> {
                 page.values.push((v, rs.color_ctx.clone()));
             },
             Value::JustificationLine(Some(LineJustification::Other)) => {
-                return Err(SyntaxError::UnsupportedTagValue(v.into()).into());
+                return Err(SyntaxError::UnsupportedTagValue(v.into()));
             },
             Value::JustificationLine(Some(LineJustification::Full)) => {
-                return Err(SyntaxError::UnsupportedTagValue(v.into()).into());
+                return Err(SyntaxError::UnsupportedTagValue(v.into()));
             },
             Value::JustificationLine(jl) => {
                 rs.just_line = jl.unwrap_or(ds.just_line);
                 rs.span_number = 0;
             },
             Value::JustificationPage(Some(PageJustification::Other)) => {
-                return Err(SyntaxError::UnsupportedTagValue(v.into()).into());
+                return Err(SyntaxError::UnsupportedTagValue(v.into()));
             },
             Value::JustificationPage(jp) => {
                 rs.just_page = jp.unwrap_or(ds.just_page);
@@ -615,8 +615,7 @@ impl<'a> PageSplitter<'a> {
             Value::NewLine(ls) => {
                 if !rs.is_full_matrix() {
                     if let Some(_) = ls {
-                        return Err(SyntaxError::UnsupportedTagValue(v.into())
-                            .into());
+                        return Err(SyntaxError::UnsupportedTagValue(v.into()));
                     }
                 }
                 // Insert an empty text span for blank lines.
@@ -645,13 +644,13 @@ impl<'a> PageSplitter<'a> {
             },
             Value::SpacingCharacter(sc) => {
                 if rs.is_char_matrix() {
-                    return Err(SyntaxError::UnsupportedTag(v.into()).into());
+                    return Err(SyntaxError::UnsupportedTag(v.into()));
                 }
                 rs.char_spacing = Some(sc);
             },
             Value::SpacingCharacterEnd() => {
                 if rs.is_char_matrix() {
-                    return Err(SyntaxError::UnsupportedTag(v.into()).into());
+                    return Err(SyntaxError::UnsupportedTag(v.into()));
                 }
                 rs.char_spacing = None;
             },
@@ -677,14 +676,13 @@ impl<'a> PageSplitter<'a> {
                     },
                     None => {
                         // Invalid code point (surrogate in D800-DFFF range)
-                        return Err(SyntaxError::UnsupportedTagValue(v.into())
-                            .into());
+                        return Err(SyntaxError::UnsupportedTagValue(v.into()));
                     },
                 }
             },
             _ => {
                 // Unsupported tags: [f], [fl], [ms], [mv]
-                return Err(SyntaxError::UnsupportedTag(v.into()).into());
+                return Err(SyntaxError::UnsupportedTag(v.into()));
             },
         }
         Ok(())
