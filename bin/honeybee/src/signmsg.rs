@@ -96,7 +96,7 @@ struct SignDetail {
 struct MsgData {
     attrs   : HashMap<String, DmsAttribute>,
     configs : HashMap<String, SignConfig>,
-    fonts   : HashMap<i32, Font>,
+    fonts   : HashMap<u8, Font>,
     graphics: HashMap<i32, Graphic>,
     gifs    : HashSet<PathBuf>,
 }
@@ -385,7 +385,7 @@ impl MsgData {
         match fname {
             Some(fname) => {
                 match self.fonts.values().find(|f| f.name() == fname) {
-                    Some(font) => Ok(font.f_number().try_into()?),
+                    Some(font) => Ok(font.number()),
                     None => {
                         Err(Error::UnknownResource(format!("Font: {}", fname)))
                     },
@@ -395,7 +395,7 @@ impl MsgData {
         }
     }
     /// Get font mapping
-    fn fonts(&self) -> &HashMap<i32, Font> {
+    fn fonts(&self) -> &HashMap<u8, Font> {
         &self.fonts
     }
     /// Get graphic mapping

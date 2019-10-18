@@ -12,14 +12,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::Result;
+use crate::error::Error;
 use crate::ntcip::multi::{Color, ColorCtx, ColorScheme, SyntaxError};
-use base64::{Config, CharacterSet, decode_config_slice};
 use pix::{Raster, Rgb8};
-use postgres::{Connection, rows::Row};
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{BufReader, Write};
+use std::io::BufReader;
 use std::path::{Path, PathBuf};
 
 /// Convert BGR into Rgb8
@@ -30,76 +28,61 @@ fn bgr_to_rgb8(bgr: i32) -> Rgb8 {
     Rgb8::new(r, g, b)
 }
 
-/// Length of base64 output buffer for glyphs.
-/// Encoded glyphs are restricted to 128 bytes.
-const GLYPH_LEN: usize = (128 + 3) / 4 * 3;
-
-/// A bitmap font glyph
+/// A character for a bitmap font
 #[derive(Deserialize, Serialize)]
-pub struct Glyph {
-    code_point: i32,
-    width: i32,
-    pixels: String,
-}
-
-impl Glyph {
-    /// Get the SQL to query all glyphs in a font
-    fn sql() -> &'static str {
-       "SELECT code_point, width, replace(pixels, E'\n', '') AS pixels \
-        FROM glyph_view \
-        WHERE font = ($1) \
-        ORDER BY code_point"
-    }
-    /// Produce a glyph from one Row
-    fn from_row(row: &Row) -> Self {
-        Glyph {
-            code_point: row.get(0),
-            width: row.get(1),
-            pixels: row.get(2),
-        }
-    }
-    /// Get the glyph width
-    pub fn width(&self) -> u16 {
-        self.width as u16
-    }
+pub struct Character {
+    number: u16,
+    width: u8,
+    #[serde(with = "b64")]
+    bitmap: Vec<u8>,
 }
 
 /// A bitmap font
 #[derive(Deserialize, Serialize)]
 pub struct Font {
     name: String,
-    f_number: i32,
-    height: i32,
-    width: i32,
-    line_spacing: i32,
-    char_spacing: i32,
-    glyphs: Vec<Glyph>,
+    number: u8,
+    height: u8,
+    char_spacing: u8,
+    line_spacing: u8,
+    characters: Vec<Character>,
     version_id: i32,
 }
 
-impl<'a> Font {
-    /// Get the SQL to query all fonts
-    fn sql() -> &'static str {
-       "SELECT name, f_number, height, width, line_spacing, char_spacing, \
-               version_id \
-        FROM font_view \
-        ORDER BY name"
+impl Character {
+    /// Get the width
+    pub fn width(&self) -> u8 {
+        self.width
     }
-    /// Produce a font from one Row
-    fn from_row(row: &Row) -> Self {
-        Font {
-            name: row.get(0),
-            f_number: row.get(1),
-            height: row.get(2),
-            width: row.get(3),
-            line_spacing: row.get(4),
-            char_spacing: row.get(5),
-            version_id: row.get(6),
-            glyphs: vec![],
+    /// Render the character to a raster
+    fn render_char(&self, page: &mut Raster<Rgb8>, x: u32, y: u32, height: u32,
+        cf: Rgb8)
+    {
+        let width = self.width.into();
+        debug!("render_char: {} @ {},{}", self.number, x, y);
+        let mut xx = 0;
+        let mut yy = 0;
+        for by in &self.bitmap {
+            for bi in 0..8 {
+                if by >> (7 - bi) & 1u8 != 0u8 {
+                    page.set_pixel(x + xx, y + yy, cf);
+                }
+                xx += 1;
+                if xx >= width {
+                    xx = 0;
+                    yy += 1;
+                    if yy >= height {
+                        break;
+                    }
+                }
+            }
         }
     }
+}
+
+impl<'a> Font {
     /// Load fonts from a JSON file
-    pub fn load(dir: &Path) -> Result<HashMap<i32, Font>> {
+    pub fn load(dir: &Path) -> Result<HashMap<u8, Font>, Error> {
         debug!("Font::load");
         let mut n = PathBuf::new();
         n.push(dir);
@@ -108,7 +91,7 @@ impl<'a> Font {
         let mut fonts = HashMap::new();
         let j: Vec<Font> = serde_json::from_reader(r)?;
         for f in j {
-            fonts.insert(f.f_number, f);
+            fonts.insert(f.number, f);
         }
         Ok(fonts)
     }
@@ -117,77 +100,64 @@ impl<'a> Font {
         &self.name
     }
     /// Get font number
-    pub fn f_number(&self) -> i32 {
-        self.f_number
+    pub fn number(&self) -> u8 {
+        self.number
     }
     /// Get font height
-    pub fn height(&self) -> u16 {
-        self.height as u16
+    pub fn height(&self) -> u8 {
+        self.height
     }
     /// Get line spacing
-    pub fn line_spacing(&self) -> u16 {
-        self.line_spacing as u16
+    pub fn line_spacing(&self) -> u8 {
+        self.line_spacing
     }
     /// Get character spacing
-    pub fn char_spacing(&self) -> u16 {
-        self.char_spacing as u16
+    pub fn char_spacing(&self) -> u8 {
+        self.char_spacing
     }
-    /// Get glyph for a code point
-    pub fn glyph(&'a self, cp: char) -> Result<&'a Glyph> {
-        match self.glyphs.iter().find(|g| g.code_point == cp as i32) {
-            Some(g) => Ok(&g),
-            None    => Err(SyntaxError::CharacterNotDefined(cp).into()),
+    /// Get a character
+    pub fn character(&'a self, ch: char) -> Result<&'a Character, SyntaxError> {
+        let code_point: u32 = ch.into();
+        if code_point <= std::u16::MAX.into() {
+            let n = code_point as u16;
+            if let Some(c) = self.characters.iter().find(|c| c.number == n) {
+                return Ok(c)
+            }
         }
+        Err(SyntaxError::CharacterNotDefined(ch))
+    }
+    /// Calculate the width of a span of text
+    pub fn text_width(&self, text: &str, cs: Option<u16>)
+        -> Result<u16, SyntaxError>
+    {
+        let mut width = 0;
+        let cs = cs.unwrap_or(self.char_spacing.into());
+        for ch in text.chars() {
+            let c = self.character(ch)?;
+            if width > 0 {
+                width += cs;
+            }
+            width += <u16>::from(c.width());
+        }
+        Ok(width)
     }
     /// Render a text span
-    pub fn render_text(&self, page: &mut Raster<Rgb8>, text: &str, mut x: u32,
-        y: u32, cs: u32, cf: Rgb8) -> Result<()>
+    pub fn render_text(&self, page: &mut Raster<Rgb8>, text: &str, x: u32,
+        y: u32, cs: u32, cf: Rgb8) -> Result<(), SyntaxError>
     {
-        let h = self.height() as u32;
-        debug!("span: {}, left: {}, top: {}, height: {}", text, x, y, h);
-        let config = Config::new(CharacterSet::Standard, false);
-        let mut buf = [0; GLYPH_LEN];
-        for c in text.chars() {
-            let g = self.glyph(c)?;
-            let w = g.width() as u32;
-            let n = decode_config_slice(&g.pixels, config, &mut buf)?;
-            debug!("char: {}, width: {}, len: {}", c, w, n);
-            for yy in 0..h {
-                for xx in 0..w {
-                    let p = yy * w + xx;
-                    let by = p as usize / 8;
-                    let bi = 7 - (p & 7);
-                    let lit = ((buf[by] >> bi) & 1) != 0;
-                    if lit {
-                        page.set_pixel(x + xx, y + yy, cf);
-                    }
-                }
+        let height = self.height() as u32;
+        debug!("span: {}, left: {}, top: {}, height: {}", text, x, y, height);
+        let mut xx = 0;
+        for ch in text.chars() {
+            let c = self.character(ch)?;
+            if xx > 0 {
+                xx += cs;
             }
-            x += w + cs;
+            c.render_char(page, x + xx, y, height, cf);
+            xx += <u32>::from(c.width());
         }
         Ok(())
     }
-}
-
-/// Fetch fonts from DB
-pub fn fetch_font<W: Write>(conn: &Connection, mut w: W) -> Result<u32> {
-    let mut c = 0;
-    w.write("[".as_bytes())?;
-    for row in &conn.query(Font::sql(), &[])? {
-        if c > 0 {
-            w.write(",".as_bytes())?;
-        }
-        w.write("\n".as_bytes())?;
-        let mut f = Font::from_row(&row);
-        for r2 in &conn.query(Glyph::sql(), &[&f.name])? {
-            let g = Glyph::from_row(&r2);
-            f.glyphs.push(g);
-        }
-        w.write(serde_json::to_string(&f)?.as_bytes())?;
-        c += 1;
-    }
-    w.write("]\n".as_bytes())?;
-    Ok(c)
 }
 
 /// An uncompressed graphic
@@ -199,7 +169,8 @@ pub struct Graphic {
     height: i32,
     width: i32,
     transparent_color: Option<i32>,
-    pixels: String,
+    #[serde(with = "b64")]
+    bitmap: Vec<u8>,
 }
 
 /// Function to lookup a pixel from a graphic buffer
@@ -207,7 +178,7 @@ type PixFn = dyn Fn(&Graphic, u32, u32, &ColorCtx, &[u8]) -> Option<Rgb8>;
 
 impl Graphic {
     /// Load graphics from a JSON file
-    pub fn load(dir: &Path) -> Result<HashMap<i32, Graphic>> {
+    pub fn load(dir: &Path) -> Result<HashMap<i32, Graphic>, Error> {
         debug!("Graphic::load");
         let mut n = PathBuf::new();
         n.push(dir);
@@ -229,18 +200,9 @@ impl Graphic {
     pub fn height(&self) -> u32 {
         self.height as u32
     }
-    /// Get the number of bits per pixel
-    fn bits_per_pixel(&self) -> u32 {
-        match self.color_scheme[..].into() {
-            ColorScheme::Monochrome1Bit => 1,
-            ColorScheme::Monochrome8Bit => 8,
-            ColorScheme::ColorClassic => 8,
-            ColorScheme::Color24Bit => 24,
-        }
-    }
     /// Render a graphic onto a Raster
     pub fn onto_raster(&self, page: &mut Raster<Rgb8>, x: u32, y: u32,
-        ctx: &ColorCtx) -> Result<()>
+        ctx: &ColorCtx) -> Result<(), SyntaxError>
     {
         let x = x - 1; // x must be > 0
         let y = y - 1; // y must be > 0
@@ -250,29 +212,15 @@ impl Graphic {
             // There is no GraphicTooBig syntax error
             return Err(SyntaxError::Other.into());
         }
-        let buf = self.decode_base64()?;
         let pix_fn = self.pixel_fn();
         for yy in 0..h {
             for xx in 0..w {
-                if let Some(clr) = pix_fn(self, xx, yy, ctx, &buf) {
+                if let Some(clr) = pix_fn(self, xx, yy, ctx, &self.bitmap) {
                     page.set_pixel(x + xx, y + yy, clr);
                 }
             }
         }
         Ok(())
-    }
-    /// Decode base64 data of graphic
-    fn decode_base64(&self) -> Result<Vec<u8>> {
-        let config = Config::new(CharacterSet::Standard, false);
-        let bpp = self.bits_per_pixel();
-        let w = self.width();
-        let h = self.height();
-        let n = (w * h * bpp + 7) / 8;
-        let mut buf = vec![0; n as usize];
-        let n = decode_config_slice(&self.pixels, config, &mut buf)?;
-        debug!("graphic: {}, width: {}, height: {}, len: {}", self.g_number,
-            w, h, n);
-        Ok(buf)
     }
     /// Get pixel lookup function for the color scheme
     fn pixel_fn(&self) -> &PixFn {
@@ -332,5 +280,25 @@ impl Graphic {
             }
         }
         Some(Rgb8::new(r, g, b))
+    }
+}
+
+/// Serialize base64 fields
+mod b64 {
+    use base64::display::Base64Display;
+    use serde::{Serializer, de, Deserialize, Deserializer};
+
+    pub fn serialize<S>(bytes: &[u8], serializer: S) -> Result<S::Ok, S::Error>
+        where S: Serializer
+    {
+        serializer.collect_str(&Base64Display::with_config(bytes,
+            base64::STANDARD))
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Vec<u8>, D::Error>
+        where D: Deserializer<'de>
+    {
+        let s = <&str>::deserialize(deserializer)?;
+        base64::decode(s).map_err(de::Error::custom)
     }
 }

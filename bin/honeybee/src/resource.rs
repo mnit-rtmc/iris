@@ -13,7 +13,6 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
-use crate::font::fetch_font;
 use crate::signmsg::render_all;
 use postgres::Connection;
 use std::fs::{File, rename};
@@ -57,15 +56,21 @@ enum Listen {
     /// * channel name
     /// * payloads to exclude
     Exclude(&'static str, &'static [&'static str]),
+    /// Listen for all payloads on two channels.
+    ///
+    /// * first channel name
+    /// * second channel name
+    Two(&'static str, &'static str),
 }
 
 impl Listen {
     /// Get the LISTEN channel name
-    fn channel_name(&self) -> &str {
+    fn channel_names(&self) -> Vec<&str> {
         match self {
-            Listen::All(n) => n,
-            Listen::Include(n, _) => n,
-            Listen::Exclude(n, _) => n,
+            Listen::All(n) => vec![n],
+            Listen::Include(n, _) => vec![n],
+            Listen::Exclude(n, _) => vec![n],
+            Listen::Two(n0, n1) => vec![n0, n1],
         }
     }
     /// Check if listening to a channel
@@ -78,6 +83,7 @@ impl Listen {
             Listen::Exclude(n, exc) => {
                 n == &chan && !exc.contains(&payload)
             }
+            Listen::Two(n0, n1) => n0 == &chan || n1 == &chan,
         }
     }
 }
@@ -97,8 +103,6 @@ enum Resource {
     /// * Listen specification.
     /// * SQL query.
     SignMsg(&'static str, Listen, &'static str),
-    /// Font file resource
-    Font(),
 }
 
 /// R_Node resource
@@ -241,6 +245,18 @@ const TPIMS_ARCH_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Font resource
+const FONT_RES: Resource = Resource::Simple(
+"font", Listen::Two("font", "glyph"),
+"SELECT row_to_json(f)::text FROM (\
+    SELECT name, f_number AS number, height, char_spacing, line_spacing, \
+           array(SELECT row_to_json(c) FROM (\
+               SELECT code_point AS number, width, pixels AS bitmap \
+               FROM iris.glyph WHERE font = ft.name ORDER BY code_point) AS c) \
+           AS characters, version_id \
+    FROM iris.font ft ORDER BY name) AS f"
+);
+
 /// Graphic resource
 const GRAPHIC_RES: Resource = Resource::Simple(
 "graphic", Listen::All("graphic"),
@@ -261,13 +277,6 @@ const SIGN_MSG_RES: Resource = Resource::SignMsg(
     ORDER BY name \
 ) r",
 );
-
-/// Font resource
-const FONT_RES: Resource = Resource::Font();
-
-/// Font listen value
-const FONT_LISTEN: Listen = Listen::All("font");
-const GLYPH_LISTEN: Listen = Listen::All("glyph");
 
 /// All defined resources
 const ALL: &[Resource] = &[
@@ -316,20 +325,13 @@ fn fetch_simple<W: Write>(conn: &Connection, sql: &str, mut w: W)
 impl Resource {
     /// Check if a resource is listening to a channel
     fn is_listening(&self, chan: &str, payload: &str) -> bool {
-        match self {
-            Resource::Font() => {
-                FONT_LISTEN.is_listening(chan, payload) ||
-                GLYPH_LISTEN.is_listening(chan, payload)
-            }
-            _ => self.listen().is_listening(chan, payload),
-        }
+        self.listen().is_listening(chan, payload)
     }
     /// Get the listen value
     fn listen(&self) -> &Listen {
         match self {
             Resource::Simple(_, lsn, _) => &lsn,
             Resource::SignMsg(_, lsn, _) => &lsn,
-            Resource::Font() => &FONT_LISTEN,
         }
     }
     /// Fetch to a writer.
@@ -340,7 +342,6 @@ impl Resource {
         match self {
             Resource::Simple(_, _, sql) => fetch_simple(conn, sql, w),
             Resource::SignMsg(_, _, sql) => fetch_simple(conn, sql, w),
-            Resource::Font() => fetch_font(conn, w),
         }
     }
     /// Fetch a file resource from a connection.
@@ -373,7 +374,6 @@ impl Resource {
         match self {
             Resource::Simple(n, _, _) => self.fetch_file(conn, n),
             Resource::SignMsg(n, _, _) => self.fetch_sign_msgs(conn, n),
-            Resource::Font() => self.fetch_file(conn, "font"),
         }
     }
 }
@@ -383,10 +383,10 @@ impl Resource {
 /// * `conn` Database connection.
 pub fn listen_all(conn: &Connection) -> Result<()> {
     for r in ALL {
-        conn.execute("LISTEN $1", &[&r.listen().channel_name()])?;
+        for lsn in r.listen().channel_names() {
+            conn.execute("LISTEN $1", &[&lsn])?;
+        }
     }
-    // Also LISTEN to glpyh channel (for font resource)
-    conn.execute("LISTEN $1", &[&GLYPH_LISTEN.channel_name()])?;
     Ok(())
 }
 

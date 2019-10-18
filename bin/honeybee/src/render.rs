@@ -180,43 +180,35 @@ impl<'a> TextSpan {
         TextSpan { state, text }
     }
     /// Get the font of a text span
-    fn font(&self, fonts: &'a HashMap<i32, Font>) -> Result<&'a Font> {
-        let fnum = self.state.font.0 as i32;
+    fn font(&self, fonts: &'a HashMap<u8, Font>) -> Result<&'a Font> {
+        let fnum = self.state.font.0;
         match fonts.get(&fnum) {
             Some(f) => Ok(f),
             None => Err(SyntaxError::FontNotDefined(self.state.font.0).into()),
         }
     }
     /// Get the width of a text span
-    fn width(&self, fonts: &HashMap<i32, Font>) -> Result<u16> {
-        let mut width = 0;
+    fn width(&self, fonts: &HashMap<u8, Font>) -> Result<u16> {
         let font = self.font(fonts)?;
-        let cs = self.char_spacing_fonts(fonts)?;
-        for c in self.text.chars() {
-            let g = font.glyph(c)?;
-            if width > 0 {
-                width += cs;
-            }
-            width += g.width() as u16;
-        }
-        Ok(width)
+        let cs = self.char_spacing_fonts(fonts)?.into();
+        Ok(font.text_width(&self.text, Some(cs))?)
     }
     /// Get the char spacing
-    fn char_spacing_fonts(&self, fonts: &HashMap<i32, Font>) -> Result<u16> {
+    fn char_spacing_fonts(&self, fonts: &HashMap<u8, Font>) -> Result<u16> {
         match self.state.char_spacing {
             Some(s) => Ok(s as u16),
-            None    => Ok(self.font(fonts)?.char_spacing()),
+            None => Ok(self.font(fonts)?.char_spacing().into()),
         }
     }
     /// Get the char spacing
     fn char_spacing_font(&self, font: &Font) -> u32 {
         match self.state.char_spacing {
-            Some(s) => s as u32,
-            None    => font.char_spacing() as u32,
+            Some(s) => s.into(),
+            None    => font.char_spacing().into(),
         }
     }
     /// Get the char spacing from a previous span
-    fn char_spacing_between(&self, prev: &TextSpan, fonts: &HashMap<i32, Font>)
+    fn char_spacing_between(&self, prev: &TextSpan, fonts: &HashMap<u8, Font>)
         -> Result<u16>
     {
         if let Some(c) = self.state.char_spacing {
@@ -231,12 +223,12 @@ impl<'a> TextSpan {
         }
     }
     /// Get the height of a text span
-    fn height(&self, fonts: &HashMap<i32, Font>) -> Result<u16> {
-        Ok(self.font(fonts)?.height())
+    fn height(&self, fonts: &HashMap<u8, Font>) -> Result<u16> {
+        Ok(self.font(fonts)?.height().into())
     }
     /// Get the font line spacing
-    fn font_spacing(&self, fonts: &HashMap<i32, Font>) -> Result<u16> {
-        Ok(self.font(fonts)?.line_spacing())
+    fn font_spacing(&self, fonts: &HashMap<u8, Font>) -> Result<u16> {
+        Ok(self.font(fonts)?.line_spacing().into())
     }
     /// Get the line spacing
     fn line_spacing(&self) -> Option<u16> {
@@ -251,7 +243,7 @@ impl<'a> TextSpan {
     {
         let cs = self.char_spacing_font(font);
         let cf = self.state.foreground_rgb();
-        font.render_text(page, &self.text, x, y, cs, cf)
+        Ok(font.render_text(page, &self.text, x, y, cs, cf)?)
     }
 }
 
@@ -330,7 +322,7 @@ impl PageRenderer {
         Ok(page)
     }
     /// Render the page.
-    pub fn render(&self, fonts: &HashMap<i32, Font>,
+    pub fn render(&self, fonts: &HashMap<u8, Font>,
         graphics: &HashMap<i32, Graphic>) -> Result<Raster<Rgb8>>
     {
         let rs = &self.state;
@@ -388,7 +380,7 @@ impl PageRenderer {
         Err(SyntaxError::UnsupportedTagValue(v.into()).into())
     }
     /// Get the X position of a text span.
-    fn span_x(&self, s: &TextSpan, fonts: &HashMap<i32, Font>) -> Result<u16> {
+    fn span_x(&self, s: &TextSpan, fonts: &HashMap<u8, Font>) -> Result<u16> {
         match s.state.just_line {
             LineJustification::Left   => self.span_x_left(s, fonts),
             LineJustification::Center => self.span_x_center(s, fonts),
@@ -397,7 +389,7 @@ impl PageRenderer {
         }
     }
     /// Get the X position of a left-justified text span.
-    fn span_x_left(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
+    fn span_x_left(&self, span: &TextSpan, fonts: &HashMap<u8, Font>)
         -> Result<u16>
     {
         let left = span.state.text_rectangle.x - 1;
@@ -405,7 +397,7 @@ impl PageRenderer {
         Ok(left + before)
     }
     /// Get the X position of a center-justified text span.
-    fn span_x_center(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
+    fn span_x_center(&self, span: &TextSpan, fonts: &HashMap<u8, Font>)
         -> Result<u16>
     {
         let left = span.state.text_rectangle.x - 1;
@@ -418,7 +410,7 @@ impl PageRenderer {
         Ok((x / cw) * cw)
     }
     /// Get the X position of a right-justified span
-    fn span_x_right(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
+    fn span_x_right(&self, span: &TextSpan, fonts: &HashMap<u8, Font>)
         -> Result<u16>
     {
         let left = span.state.text_rectangle.x - 1;
@@ -429,7 +421,7 @@ impl PageRenderer {
     /// Calculate horizontal offsets of a span.
     ///
     /// Returns a tuple of (before, after) widths of matching spans.
-    fn offset_horiz(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
+    fn offset_horiz(&self, span: &TextSpan, fonts: &HashMap<u8, Font>)
         -> Result<(u16, u16)>
     {
         debug!("offset_horiz '{}'", span.text);
@@ -457,14 +449,14 @@ impl PageRenderer {
         }
     }
     /// Get the Y position of a text span.
-    fn span_y(&self, s: &TextSpan, fonts: &HashMap<i32, Font>) -> Result<u16> {
+    fn span_y(&self, s: &TextSpan, fonts: &HashMap<u8, Font>) -> Result<u16> {
         let b = self.baseline(s, fonts)?;
         let h = s.height(fonts)?;
         debug_assert!(b >= h);
         Ok(b - h)
     }
     /// Get the baseline of a text span.
-    fn baseline(&self, s: &TextSpan, fonts: &HashMap<i32, Font>) -> Result<u16> {
+    fn baseline(&self, s: &TextSpan, fonts: &HashMap<u8, Font>) -> Result<u16> {
         match s.state.just_page {
             PageJustification::Top    => self.baseline_top(s, fonts),
             PageJustification::Middle => self.baseline_middle(s, fonts),
@@ -473,7 +465,7 @@ impl PageRenderer {
         }
     }
     /// Get the baseline of a top-justified span
-    fn baseline_top(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
+    fn baseline_top(&self, span: &TextSpan, fonts: &HashMap<u8, Font>)
         -> Result<u16>
     {
         let top = span.state.text_rectangle.y - 1;
@@ -481,7 +473,7 @@ impl PageRenderer {
         Ok(top + above)
     }
     /// Get the baseline of a middle-justified span
-    fn baseline_middle(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
+    fn baseline_middle(&self, span: &TextSpan, fonts: &HashMap<u8, Font>)
         -> Result<u16>
     {
         let top = span.state.text_rectangle.y - 1;
@@ -494,7 +486,7 @@ impl PageRenderer {
         Ok((y / ch) * ch)
     }
     /// Get the baseline of a bottom-justified span
-    fn baseline_bottom(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
+    fn baseline_bottom(&self, span: &TextSpan, fonts: &HashMap<u8, Font>)
         -> Result<u16>
     {
         let top = span.state.text_rectangle.y - 1;
@@ -505,7 +497,7 @@ impl PageRenderer {
     /// Calculate vertical offset of a span.
     ///
     /// Returns a tuple of (above, below) heights of matching lines.
-    fn offset_vert(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
+    fn offset_vert(&self, span: &TextSpan, fonts: &HashMap<u8, Font>)
         -> Result<(u16, u16)>
     {
         debug!("offset_vert '{}'", span.text);
