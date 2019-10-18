@@ -105,18 +105,6 @@ enum Resource {
     SignMsg(&'static str, Listen, &'static str),
 }
 
-/// R_Node resource
-const R_NODE_RES: Resource = Resource::Simple(
-"r_node", Listen::All("r_node"),
-"SELECT row_to_json(r)::text FROM (\
-    SELECT name, roadway, road_dir, cross_mod, cross_street, cross_dir, \
-           landmark, lat, lon, node_type, pickable, above, transition, lanes, \
-           attach_side, shift, active, abandoned, station_id, speed_limit, \
-           notes \
-    FROM r_node_view \
-) r",
-);
-
 /// Camera resource
 const CAMERA_RES: Resource = Resource::Simple(
 "camera_pub", Listen::Exclude("camera", &["video_loss"]),
@@ -157,6 +145,28 @@ const DMS_MSG_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Font resource
+const FONT_RES: Resource = Resource::Simple(
+"font", Listen::Two("font", "glyph"),
+"SELECT row_to_json(f)::text FROM (\
+    SELECT name, f_number AS number, height, char_spacing, line_spacing, \
+           array(SELECT row_to_json(c) FROM (\
+               SELECT code_point AS number, width, pixels AS bitmap \
+               FROM iris.glyph WHERE font = ft.name ORDER BY code_point) AS c) \
+           AS characters, version_id \
+    FROM iris.font ft ORDER BY name) AS f"
+);
+
+/// Graphic resource
+const GRAPHIC_RES: Resource = Resource::Simple(
+"graphic", Listen::All("graphic"),
+"SELECT row_to_json(r)::text FROM (\
+    SELECT g_number AS number, name, height, width, color_scheme, \
+           transparent_color, replace(pixels, E'\n', '') AS bitmap \
+    FROM graphic_view \
+) r",
+);
+
 /// Incident resource
 const INCIDENT_RES: Resource = Resource::Simple(
 "incident", Listen::All("incident"),
@@ -165,6 +175,18 @@ const INCIDENT_RES: Resource = Resource::Simple(
            impact, confirmed, camera, detail, replaces, lat, lon \
     FROM incident_view \
     WHERE cleared = false \
+) r",
+);
+
+/// R_Node resource
+const R_NODE_RES: Resource = Resource::Simple(
+"r_node", Listen::All("r_node"),
+"SELECT row_to_json(r)::text FROM (\
+    SELECT name, roadway, road_dir, cross_mod, cross_street, cross_dir, \
+           landmark, lat, lon, node_type, pickable, above, transition, lanes, \
+           attach_side, shift, active, abandoned, station_id, speed_limit, \
+           notes \
+    FROM r_node_view \
 ) r",
 );
 
@@ -188,6 +210,17 @@ const SIGN_DETAIL_RES: Resource = Resource::Simple(
            beacon_type, hardware_make, hardware_model, software_make, \
            software_model, supported_tags, max_pages, max_multi_len \
     FROM sign_detail_view \
+) r",
+);
+
+/// Sign message resource
+const SIGN_MSG_RES: Resource = Resource::SignMsg(
+"sign_message", Listen::All("sign_message"),
+"SELECT row_to_json(r)::text FROM (\
+    SELECT name, sign_config, incident, multi, beacon_enabled, \
+           prefix_page, msg_priority, sources, owner, duration \
+    FROM sign_message_view \
+    ORDER BY name \
 ) r",
 );
 
@@ -242,39 +275,6 @@ const TPIMS_ARCH_RES: Resource = Resource::Simple(
            low_threshold AS \"lowThreshold\", \
            true_available AS \"trueAvailable\" \
     FROM parking_area_view \
-) r",
-);
-
-/// Font resource
-const FONT_RES: Resource = Resource::Simple(
-"font", Listen::Two("font", "glyph"),
-"SELECT row_to_json(f)::text FROM (\
-    SELECT name, f_number AS number, height, char_spacing, line_spacing, \
-           array(SELECT row_to_json(c) FROM (\
-               SELECT code_point AS number, width, pixels AS bitmap \
-               FROM iris.glyph WHERE font = ft.name ORDER BY code_point) AS c) \
-           AS characters, version_id \
-    FROM iris.font ft ORDER BY name) AS f"
-);
-
-/// Graphic resource
-const GRAPHIC_RES: Resource = Resource::Simple(
-"graphic", Listen::All("graphic"),
-"SELECT row_to_json(r)::text FROM (\
-    SELECT name, g_number, color_scheme, height, width, \
-           transparent_color, replace(pixels, E'\n', '') AS pixels \
-    FROM graphic_view \
-) r",
-);
-
-/// Sign message resource
-const SIGN_MSG_RES: Resource = Resource::SignMsg(
-"sign_message", Listen::All("sign_message"),
-"SELECT row_to_json(r)::text FROM (\
-    SELECT name, sign_config, incident, multi, beacon_enabled, \
-           prefix_page, msg_priority, sources, owner, duration \
-    FROM sign_message_view \
-    ORDER BY name \
 ) r",
 );
 

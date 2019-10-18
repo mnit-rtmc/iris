@@ -13,7 +13,8 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
-use crate::font::{Font, Graphic};
+use crate::ntcip::font::Font;
+use crate::ntcip::graphic::Graphic;
 use crate::ntcip::multi::*;
 use pix::{Raster, RasterBuilder, Rgb8};
 use std::collections::HashMap;
@@ -323,7 +324,7 @@ impl PageRenderer {
     }
     /// Render the page.
     pub fn render(&self, fonts: &HashMap<u8, Font>,
-        graphics: &HashMap<i32, Graphic>) -> Result<Raster<Rgb8>>
+        graphics: &HashMap<u8, Graphic>) -> Result<Raster<Rgb8>>
     {
         let rs = &self.state;
         let w = rs.text_rectangle.w;
@@ -337,13 +338,13 @@ impl PageRenderer {
                     self.render_rect(&mut page, *r, clr, v)?;
                 },
                 Value::Graphic(gn, None) => {
-                    let n = *gn as i32;
+                    let n = *gn;
                     let g = graphics.get(&n)
                                     .ok_or(SyntaxError::GraphicNotDefined(*gn))?;
                     g.onto_raster(&mut page, 1, 1, ctx)?;
                 },
                 Value::Graphic(gn, Some((x,y,_))) => {
-                    let n = *gn as i32;
+                    let n = *gn;
                     let g = graphics.get(&n)
                                     .ok_or(SyntaxError::GraphicNotDefined(*gn))?;
                     let x = *x as u32;

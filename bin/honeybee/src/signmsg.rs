@@ -19,7 +19,8 @@
 //! used in Web Assembly contexts.
 //!
 use crate::error::{Error, Result};
-use crate::font::{Font, Graphic};
+use crate::ntcip::font::Font;
+use crate::ntcip::graphic::Graphic;
 use crate::ntcip::multi::{
     ColorClassic, ColorCtx, ColorScheme, LineJustification, PageJustification,
     Rectangle
@@ -102,7 +103,7 @@ struct MsgData {
     attrs   : HashMap<String, DmsAttribute>,
     configs : HashMap<String, SignConfig>,
     fonts   : HashMap<u8, Font>,
-    graphics: HashMap<i32, Graphic>,
+    graphics: HashMap<u8, Graphic>,
     gifs    : HashSet<PathBuf>,
 }
 
@@ -316,6 +317,22 @@ fn load_fonts(dir: &Path) -> Result<HashMap<u8, Font>> {
     Ok(fonts)
 }
 
+/// Load graphics from a JSON file
+fn load_graphics(dir: &Path) -> Result<HashMap<u8, Graphic>> {
+    debug!("Graphic::load");
+    let mut n = PathBuf::new();
+    n.push(dir);
+    n.push("graphic");
+    let r = BufReader::new(File::open(&n)?);
+    let mut graphics = HashMap::new();
+    let j: Vec<Graphic> = serde_json::from_reader(r)?;
+    for g in j {
+        let gn = g.number();
+        graphics.insert(gn, g);
+    }
+    Ok(graphics)
+}
+
 impl MsgData {
     /// Load message data from a file path
     fn load(dir: &Path) -> Result<Self> {
@@ -323,7 +340,7 @@ impl MsgData {
         let attrs = DmsAttribute::load(dir)?;
         let configs = SignConfig::load(dir)?;
         let fonts = load_fonts(dir)?;
-        let graphics = Graphic::load(dir)?;
+        let graphics = load_graphics(dir)?;
         let gifs = gif_listing(dir)?;
         Ok(MsgData {
             attrs,
@@ -419,7 +436,7 @@ impl MsgData {
         &self.fonts
     }
     /// Get graphic mapping
-    fn graphics(&self) -> &HashMap<i32, Graphic> {
+    fn graphics(&self) -> &HashMap<u8, Graphic> {
         &self.graphics
     }
 }

@@ -21,7 +21,6 @@ extern crate serde_derive;
 
 mod error;
 pub mod fetcher;
-mod font;
 pub mod geo;
 pub mod ntcip;
 mod resource;
