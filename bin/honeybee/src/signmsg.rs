@@ -46,6 +46,11 @@ const PIX_WIDTH: f32 = 450.0;
 /// Maximum pixel height of DMS images
 const PIX_HEIGHT: f32 = 100.0;
 
+/// JSON Loader
+trait Loader where Self: std::marker::Sized {
+    fn load<T>(dir: &Path) -> Result<HashMap<T, Self>>;
+}
+
 /// DMS attribute
 #[derive(Deserialize, Serialize)]
 struct DmsAttribute {
@@ -296,13 +301,28 @@ impl SignConfig {
     }
 }
 
+/// Load fonts from a JSON file
+fn load_fonts(dir: &Path) -> Result<HashMap<u8, Font>> {
+    debug!("Font::load");
+    let mut n = PathBuf::new();
+    n.push(dir);
+    n.push("font");
+    let r = BufReader::new(File::open(&n)?);
+    let mut fonts = HashMap::new();
+    let j: Vec<Font> = serde_json::from_reader(r)?;
+    for f in j {
+        fonts.insert(f.number(), f);
+    }
+    Ok(fonts)
+}
+
 impl MsgData {
     /// Load message data from a file path
     fn load(dir: &Path) -> Result<Self> {
         debug!("MsgData::load");
         let attrs = DmsAttribute::load(dir)?;
         let configs = SignConfig::load(dir)?;
-        let fonts = Font::load(dir)?;
+        let fonts = load_fonts(dir)?;
         let graphics = Graphic::load(dir)?;
         let gifs = gif_listing(dir)?;
         Ok(MsgData {

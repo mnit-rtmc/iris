@@ -51,7 +51,7 @@ pub struct Font {
 
 impl Character {
     /// Get the width
-    pub fn width(&self) -> u8 {
+    fn width(&self) -> u8 {
         self.width
     }
     /// Render the character to a raster
@@ -81,20 +81,6 @@ impl Character {
 }
 
 impl<'a> Font {
-    /// Load fonts from a JSON file
-    pub fn load(dir: &Path) -> Result<HashMap<u8, Font>, Error> {
-        debug!("Font::load");
-        let mut n = PathBuf::new();
-        n.push(dir);
-        n.push("font");
-        let r = BufReader::new(File::open(&n)?);
-        let mut fonts = HashMap::new();
-        let j: Vec<Font> = serde_json::from_reader(r)?;
-        for f in j {
-            fonts.insert(f.number, f);
-        }
-        Ok(fonts)
-    }
     /// Get font name
     pub fn name(&self) -> &str {
         &self.name
@@ -116,7 +102,7 @@ impl<'a> Font {
         self.char_spacing
     }
     /// Get a character
-    pub fn character(&'a self, ch: char) -> Result<&'a Character, SyntaxError> {
+    fn character(&'a self, ch: char) -> Result<&'a Character, SyntaxError> {
         let code_point: u32 = ch.into();
         if code_point <= std::u16::MAX.into() {
             let n = code_point as u16;
