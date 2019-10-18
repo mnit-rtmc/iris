@@ -24,5 +24,4 @@ pub mod fetcher;
 pub mod geo;
 pub mod ntcip;
 mod resource;
-mod render;
 mod signmsg;

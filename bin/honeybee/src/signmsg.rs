@@ -25,7 +25,7 @@ use crate::ntcip::multi::{
     ColorClassic, ColorCtx, ColorScheme, LineJustification, PageJustification,
     Rectangle
 };
-use crate::render::{PageSplitter, State};
+use crate::ntcip::render::{PageSplitter, State};
 use crate::resource::{make_name, make_tmp_name};
 use gift::Encoder;
 use gift::block::{
@@ -622,7 +622,7 @@ fn render_sign_msg_cfg(s: &SignMessage, msg_data: &MsgData, cfg: &SignConfig)
         frames.push(make_face_frame(&cfg, raster, &mut palette, w, h, delay));
         let t = page.page_off_time_ds() * 10;
         if t > 0 {
-            let raster = page.render_blank()?;
+            let raster = page.render_blank();
             frames.push(make_face_frame(&cfg, raster, &mut palette, w, h, t));
         }
     }

@@ -6,3 +6,4 @@ mod base64;
 pub mod font;
 pub mod graphic;
 pub mod multi;
+pub mod render;

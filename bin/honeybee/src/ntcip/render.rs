@@ -2,22 +2,14 @@
 //
 // Copyright (C) 2018-2019  Minnesota Department of Transportation
 //
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-use crate::error::Result;
 use crate::ntcip::font::Font;
 use crate::ntcip::graphic::Graphic;
 use crate::ntcip::multi::*;
 use pix::{Raster, RasterBuilder, Rgb8};
 use std::collections::HashMap;
+
+/// Result type
+type Result<T> = std::result::Result<T, SyntaxError>;
 
 /// Convert BGR into Rgb8
 fn bgr_to_rgb8(bgr: i32) -> Rgb8 {
@@ -30,48 +22,52 @@ fn bgr_to_rgb8(bgr: i32) -> Rgb8 {
 /// Page render state
 #[derive(Clone)]
 pub struct State {
-    color_ctx       : ColorCtx,
-    char_width      : u8,
-    char_height     : u8,
-    page_on_time_ds : u8,       // deciseconds
-    page_off_time_ds: u8,       // deciseconds
-    text_rectangle  : Rectangle,
-    just_page       : PageJustification,
-    just_line       : LineJustification,
-    line_number     : u8,
-    span_number     : u8,
-    line_spacing    : Option<u8>,
-    char_spacing    : Option<u8>,
-    font            : (u8, Option<u16>),
+    color_ctx: ColorCtx,
+    char_width: u8,
+    char_height: u8,
+    page_on_time_ds: u8, // deciseconds
+    page_off_time_ds: u8, // deciseconds
+    text_rectangle: Rectangle,
+    just_page: PageJustification,
+    just_line: LineJustification,
+    line_number: u8,
+    span_number: u8,
+    line_spacing: Option<u8>,
+    char_spacing: Option<u8>,
+    font: (u8, Option<u16>),
 }
 
 /// Text span
-pub struct TextSpan {
-    state : State,   // render state at start of span
-    text  : String,
+struct TextSpan {
+    /// Render state at start of span
+    state: State,
+    text: String,
 }
 
 /// Text line
 struct TextLine {
-    height       : u16,
-    font_spacing : u16,
-    line_spacing : Option<u16>,
+    height: u16,
+    font_spacing: u16,
+    line_spacing: Option<u16>,
 }
 
 /// Page renderer
 pub struct PageRenderer {
-    state  : State,                 // render state at start of page
-    values : Vec<(Value, ColorCtx)>,// graphic / color rect, color context
-    spans  : Vec<TextSpan>,         // text spans
+    /// Render state at start of page
+    state: State,
+    /// graphic / color rect, color context
+    values: Vec<(Value, ColorCtx)>,
+    /// text spans
+    spans: Vec<TextSpan>,
 }
 
 /// Page splitter (iterator)
 pub struct PageSplitter<'a> {
-    default_state : State,
-    state         : State,
-    parser        : Parser<'a>,
-    more_pages    : bool,
-    line_blank    : bool,
+    default_state: State,
+    state: State,
+    parser: Parser<'a>,
+    more_pages: bool,
+    line_blank: bool,
 }
 
 impl State {
@@ -276,7 +272,7 @@ impl TextLine {
 
 impl PageRenderer {
     /// Create a new page renderer
-    pub fn new(state: State) -> Self {
+    fn new(state: State) -> Self {
         let values = vec![];
         let spans = vec![];
         PageRenderer { state, values, spans }
@@ -314,13 +310,12 @@ impl PageRenderer {
         self.state.page_off_time_ds.into()
     }
     /// Render a blank page.
-    pub fn render_blank(&self) -> Result<Raster<Rgb8>> {
+    pub fn render_blank(&self) -> Raster<Rgb8> {
         let rs = &self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
         let clr = rs.background_rgb();
-        let page = RasterBuilder::new().with_color(w.into(), h.into(), clr);
-        Ok(page)
+        RasterBuilder::new().with_color(w.into(), h.into(), clr)
     }
     /// Render the page.
     pub fn render_page(&self, fonts: &HashMap<u8, Font>,
