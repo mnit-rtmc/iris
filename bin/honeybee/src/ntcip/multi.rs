@@ -5,7 +5,6 @@
 //! This module is for NTCIP 1203 DMS MULTI (Markup Language for Transportation
 //! Information).
 //!
-use std::error;
 use std::fmt;
 use std::iter::Peekable;
 use std::str::Chars;
@@ -53,10 +52,15 @@ pub enum Color {
 /// Color context
 #[derive(Clone)]
 pub struct ColorCtx {
+    /// Color scheme
     color_scheme: ColorScheme,
+    /// Default foreground RGB color
     fg_default: (u8, u8, u8),
+    /// Current foreground color
     fg_current: Color,
+    /// Default background RGB color
     bg_default: (u8, u8, u8),
+    /// Current background color
     bg_current: Color,
 }
 
@@ -533,7 +537,7 @@ impl fmt::Display for SyntaxError {
     }
 }
 
-impl error::Error for SyntaxError { }
+impl std::error::Error for SyntaxError { }
 
 /// Parse a color from a tag.
 ///

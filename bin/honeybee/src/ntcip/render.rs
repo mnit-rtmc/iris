@@ -16,19 +16,29 @@ type Result<T> = std::result::Result<T, SyntaxError>;
 /// Page render state
 #[derive(Clone)]
 pub struct State {
+    /// Color context
     color_ctx: ColorCtx,
+    /// Character width in pixels
     char_width: u8,
+    /// Character height in pixels
     char_height: u8,
-    /// Page on time, in deciseconds
+    /// Page-on time in deciseconds
     page_on_time_ds: u8,
-    /// Page off time, in deciseconds
+    /// Page-off time in deciseconds
     page_off_time_ds: u8,
+    /// Current text rectangle
     text_rectangle: Rectangle,
+    /// Current page justification
     just_page: PageJustification,
+    /// Current line justification
     just_line: LineJustification,
+    /// Current line number
     line_number: u8,
+    /// Current text span number
     span_number: u8,
+    /// Current specified line spacing
     line_spacing: Option<u8>,
+    /// Current specified char spacing
     char_spacing: Option<u8>,
     /// Font number and version_id
     font: (u8, Option<u16>),
@@ -38,13 +48,17 @@ pub struct State {
 struct TextSpan {
     /// Render state at start of span
     state: State,
+    /// Text string
     text: String,
 }
 
 /// Text line
 struct TextLine {
+    /// Height in pixels
     height: u16,
+    /// Font spacing
     font_spacing: u16,
+    /// Specified line spacing
     line_spacing: Option<u16>,
 }
 
@@ -60,10 +74,15 @@ pub struct PageRenderer {
 
 /// Page splitter (iterator)
 pub struct PageSplitter<'a> {
+    /// Default rendering state
     default_state: State,
+    /// Current state
     state: State,
+    /// MULTI parser
     parser: Parser<'a>,
+    /// Flag to indicate more pages
     more_pages: bool,
+    /// Flag indicating current line blank
     line_blank: bool,
 }
 
@@ -186,21 +205,21 @@ impl<'a> TextSpan {
     /// Get the width of a text span
     fn width(&self, fonts: &HashMap<u8, Font>) -> Result<u16> {
         let font = self.font(fonts)?;
-        let cs = self.char_spacing_fonts(fonts)?.into();
+        let cs = self.char_spacing_fonts(fonts)?;
         Ok(font.text_width(&self.text, Some(cs))?)
     }
     /// Get the char spacing
     fn char_spacing_fonts(&self, fonts: &HashMap<u8, Font>) -> Result<u16> {
         match self.state.char_spacing {
-            Some(s) => Ok(s as u16),
+            Some(s) => Ok(s.into()),
             None => Ok(self.font(fonts)?.char_spacing().into()),
         }
     }
     /// Get the char spacing
-    fn char_spacing_font(&self, font: &Font) -> u32 {
+    fn char_spacing_font(&self, font: &Font) -> u8 {
         match self.state.char_spacing {
-            Some(s) => s.into(),
-            None => font.char_spacing().into(),
+            Some(s) => s,
+            None => font.char_spacing(),
         }
     }
     /// Get the char spacing from a previous span
@@ -208,14 +227,14 @@ impl<'a> TextSpan {
         -> Result<u16>
     {
         if let Some(c) = self.state.char_spacing {
-            Ok(c as u16)
+            Ok(c.into())
         } else {
             // NTCIP 1203 fontCharSpacing:
             // "... the average character spacing of the two fonts,
             // rounded up to the nearest whole pixel ..." ???
             let psc = prev.char_spacing_fonts(fonts)?;
             let sc = self.char_spacing_fonts(fonts)?;
-            Ok(((psc + sc) as f32 / 2.0).round() as u16)
+            Ok(((psc + sc) >> 1) + ((psc + sc) & 1))
         }
     }
     /// Get the height of a text span
@@ -229,15 +248,15 @@ impl<'a> TextSpan {
     /// Get the line spacing
     fn line_spacing(&self) -> Option<u16> {
         match self.state.line_spacing {
-            Some(s) => Some(s as u16),
-            None    => None,
+            Some(s) => Some(s.into()),
+            None => None,
         }
     }
     /// Render the text span
     fn render_text(&self, page: &mut Raster<Rgb8>, font: &Font, x: u32, y: u32)
         -> Result<()>
     {
-        let cs = self.char_spacing_font(font);
+        let cs = self.char_spacing_font(font).into();
         let cf = self.state.foreground_rgb();
         Ok(font.render_text(page, &self.text, x, y, cs, cf)?)
     }
@@ -263,8 +282,9 @@ impl TextLine {
             // "The number of pixels between adjacent lines
             // is the average of the 2 line spacings of each
             // line, rounded up to the nearest whole pixel."
-            let s = self.font_spacing + other.font_spacing;
-            (s as f32 / 2.0).round() as u16
+            let ps = other.font_spacing;
+            let s = self.font_spacing;
+            ((ps + s) >> 1) + ((ps + s) & 1)
         }
     }
 }
@@ -342,16 +362,16 @@ impl PageRenderer {
                     let n = *gn;
                     let g = graphics.get(&n)
                                     .ok_or(SyntaxError::GraphicNotDefined(*gn))?;
-                    let x = *x as u32;
-                    let y = *y as u32;
+                    let x = (*x).into();
+                    let y = (*y).into();
                     g.render_graphic(&mut page, x, y, ctx)?;
                 },
                 _ => unreachable!(),
             }
         }
         for s in &self.spans {
-            let x = self.span_x(s, fonts)? as u32;
-            let y = self.span_y(s, fonts)? as u32;
+            let x = self.span_x(s, fonts)?.into();
+            let y = self.span_y(s, fonts)?.into();
             let font = s.font(fonts)?;
             s.render_text(&mut page, &font, x, y)?;
         }
@@ -361,10 +381,10 @@ impl PageRenderer {
     fn render_rect(&self, page: &mut Raster<Rgb8>, r: Rectangle, clr: Rgb8,
         v: &Value) -> Result<()>
     {
-        let rx = r.x as u32 - 1; // r.x must be > 0
-        let ry = r.y as u32 - 1; // r.y must be > 0
-        let rw = r.w as u32;
-        let rh = r.h as u32;
+        let rx = <u32>::from(r.x) - 1; // r.x must be > 0
+        let ry = <u32>::from(r.y) - 1; // r.y must be > 0
+        let rw = r.w.into();
+        let rh = r.h.into();
         if rx + rw <= page.width() && ry + rh <= page.height() {
             for y in 0..rh {
                 for x in 0..rw {
@@ -500,7 +520,7 @@ impl PageRenderer {
         let rs = &span.state;
         let mut lines = vec!();
         for s in self.spans.iter().filter(|s| rs.matches_line(&s.state)) {
-            let ln = s.state.line_number as usize;
+            let ln: usize = s.state.line_number.into();
             let h = s.height(fonts)?;
             let fs = s.font_spacing(fonts)?;
             let ls = s.line_spacing();
@@ -511,7 +531,7 @@ impl PageRenderer {
                 &lines[ln].combine(&line);
             }
         }
-        let sln = rs.line_number as usize;
+        let sln: usize = rs.line_number.into();
         let mut above = 0;
         let mut below = 0;
         for ln in 0..lines.len() {
