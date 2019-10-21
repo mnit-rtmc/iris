@@ -2,6 +2,8 @@
 //
 // Copyright (C) 2018-2019  Minnesota Department of Transportation
 //
+//! This module is for NTCIP 1203 DMS rendering.
+//!
 use crate::ntcip::font::Font;
 use crate::ntcip::graphic::Graphic;
 use crate::ntcip::multi::*;
@@ -17,8 +19,10 @@ pub struct State {
     color_ctx: ColorCtx,
     char_width: u8,
     char_height: u8,
-    page_on_time_ds: u8, // deciseconds
-    page_off_time_ds: u8, // deciseconds
+    /// Page on time, in deciseconds
+    page_on_time_ds: u8,
+    /// Page off time, in deciseconds
+    page_off_time_ds: u8,
     text_rectangle: Rectangle,
     just_page: PageJustification,
     just_line: LineJustification,

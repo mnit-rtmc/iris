@@ -2,6 +2,9 @@
 //
 // Copyright (C) 2018-2019  Minnesota Department of Transportation
 //
+//! This module is for NTCIP 1203 DMS MULTI (Markup Language for Transportation
+//! Information).
+//!
 use std::error;
 use std::fmt;
 use std::iter::Peekable;
@@ -21,6 +24,153 @@ pub enum ColorClassic {
     White,
     Orange,
     Amber,
+}
+
+/// DMS color scheme.
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub enum ColorScheme {
+    Monochrome1Bit = 1,
+    Monochrome8Bit,
+    ColorClassic,
+    Color24Bit,
+}
+
+/// Color for a DMS pixel.
+///
+/// Legacy colors are dependent on the ColorScheme.
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum Color {
+    /// Legacy (non-RGB) color.
+    ///
+    /// `0-1` is valid for `ColorScheme::Monochrome1Bit`.
+    /// `0-255` is valid for `ColorScheme::Monochrome8Bit`.
+    /// `0-9` is valid for `ColorScheme::ColorClassic`.
+    Legacy(u8),
+    /// 24-bit RGB (red, green, blue) color.
+    RGB(u8, u8, u8),
+}
+
+/// Color context
+#[derive(Clone)]
+pub struct ColorCtx {
+    color_scheme: ColorScheme,
+    fg_default: (u8, u8, u8),
+    fg_current: Color,
+    bg_default: (u8, u8, u8),
+    bg_current: Color,
+}
+
+/// A rectangular area of a DMS.
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub struct Rectangle {
+    /// Left edge (starting from 1).
+    pub x: u16,
+    /// Top edge (starting from 1).
+    pub y: u16,
+    /// Width in pixels.
+    pub w: u16,
+    /// Height in pixels.
+    pub h: u16,
+}
+
+/// Horizontal justification within a line.
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+pub enum LineJustification {
+    Other = 1,
+    Left,
+    Center,
+    Right,
+    Full,
+}
+
+/// Vertical justification within a page.
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+pub enum PageJustification {
+    Other = 1,
+    Top,
+    Middle,
+    Bottom,
+}
+
+/// Order of flashing messages.
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum FlashOrder {
+    /// Flash on, then off
+    OnOff,
+    /// Flash off, then on
+    OffOn,
+}
+
+/// Mode for moving text.
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum MovingTextMode {
+    /// Text wraps around, appearing circular
+    Circular,
+    /// No wrap around, delay in tenths of a second
+    Linear(u8),
+}
+
+/// Direction for moving text.
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum MovingTextDirection {
+    /// Left-moving text
+    Left,
+    /// Right-moving text
+    Right,
+}
+
+/// Values returned from a parsed MULTI.
+#[derive(Clone, Debug, PartialEq)]
+pub enum Value {
+    ColorBackground(Option<Color>), // Legacy colors only
+    ColorForeground(Option<Color>),
+    ColorRectangle(Rectangle, Color),
+    Field(u8, Option<u8>),
+    Flash(FlashOrder, Option<u8>, Option<u8>),
+    FlashEnd(),
+    Font(Option<(u8, Option<u16>)>),
+    Graphic(u8, Option<(u16, u16, Option<u16>)>),
+    HexadecimalCharacter(u16),
+    JustificationLine(Option<LineJustification>),
+    JustificationPage(Option<PageJustification>),
+    ManufacturerSpecific(u32, Option<String>),
+    ManufacturerSpecificEnd(u32, Option<String>),
+    MovingText(MovingTextMode, MovingTextDirection, u16, u8, u8, String),
+    NewLine(Option<u8>),
+    NewPage(),
+    PageBackground(Option<Color>),
+    PageTime(Option<u8>, Option<u8>),
+    SpacingCharacter(u8),
+    SpacingCharacterEnd(),
+    Text(String),
+    TextRectangle(Rectangle),
+}
+
+/// Syntax errors from parsing MULTI.
+#[derive(Clone, Debug, PartialEq)]
+pub enum SyntaxError {
+    Other,
+    UnsupportedTag(String),
+    UnsupportedTagValue(String),
+    TextTooBig,
+    FontNotDefined(u8),
+    CharacterNotDefined(char),
+    FieldDeviceNotExist,
+    FieldDeviceError,
+    FlashRegionError,
+    TagConflict,
+    TooManyPages,
+    FontVersionID,
+    GraphicID,
+    GraphicNotDefined(u8),
+}
+
+/// Parser for MULTI values.
+pub struct Parser<'a> {
+    /// Remaining characters to parse
+    remaining: Peekable<Chars<'a>>,
+    /// Currently parsing a tag
+    within_tag: bool,
 }
 
 impl ColorClassic {
@@ -57,15 +207,6 @@ impl ColorClassic {
     }
 }
 
-/// DMS color scheme.
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub enum ColorScheme {
-    Monochrome1Bit = 1,
-    Monochrome8Bit,
-    ColorClassic,
-    Color24Bit,
-}
-
 impl From<&str> for ColorScheme {
     /// Create a color scheme from a string
     fn from(s: &str) -> Self {
@@ -82,21 +223,6 @@ impl From<&str> for ColorScheme {
     }
 }
 
-/// Color for a DMS pixel.
-///
-/// Legacy colors are dependent on the ColorScheme.
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub enum Color {
-    /// Legacy (non-RGB) color.
-    ///
-    /// `0-1` is valid for `ColorScheme::Monochrome1Bit`.
-    /// `0-255` is valid for `ColorScheme::Monochrome8Bit`.
-    /// `0-9` is valid for `ColorScheme::ColorClassic`.
-    Legacy(u8),
-    /// 24-bit RGB (red, green, blue) color.
-    RGB(u8, u8, u8),
-}
-
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -110,16 +236,6 @@ impl From<(u8, u8, u8)> for Color {
     fn from(rgb: (u8, u8, u8)) -> Self {
         Color::RGB(rgb.0, rgb.1, rgb.2)
     }
-}
-
-/// Color context
-#[derive(Clone)]
-pub struct ColorCtx {
-    color_scheme: ColorScheme,
-    fg_default: (u8, u8, u8),
-    fg_current: Color,
-    bg_default: (u8, u8, u8),
-    bg_current: Color,
 }
 
 impl ColorCtx {
@@ -235,20 +351,6 @@ impl ColorCtx {
     }
 }
 
-/// A rectangular area of a DMS.
-///
-/// * `x` Left edge (starting from 1).
-/// * `y` Top edge (starting from 1).
-/// * `w` Width (pixels).
-/// * `h` Height (pixels).
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub struct Rectangle {
-    pub x: u16,
-    pub y: u16,
-    pub w: u16,
-    pub h: u16,
-}
-
 impl fmt::Display for Rectangle {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{},{},{},{}", self.x, self.y, self.w, self.h)
@@ -273,23 +375,6 @@ impl Rectangle {
     }
 }
 
-/// Order of flashing messages.
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub enum FlashOrder {
-    OnOff,
-    OffOn,
-}
-
-/// Horizontal justification within a line.
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
-pub enum LineJustification {
-    Other = 1,
-    Left,
-    Center,
-    Right,
-    Full,
-}
-
 impl fmt::Display for LineJustification {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let v = (*self).clone();
@@ -309,15 +394,6 @@ impl LineJustification {
             _   => None,
         }
     }
-}
-
-/// Vertical justification within a page.
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
-pub enum PageJustification {
-    Other = 1,
-    Top,
-    Middle,
-    Bottom,
 }
 
 impl fmt::Display for PageJustification {
@@ -340,27 +416,13 @@ impl PageJustification {
     }
 }
 
-/// Mode for moving text.
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub enum MovingTextMode {
-    Circular,
-    Linear(u8),
-}
-
 impl fmt::Display for MovingTextMode {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            MovingTextMode::Circular  => write!(f, "c"),
+            MovingTextMode::Circular => write!(f, "c"),
             MovingTextMode::Linear(x) => write!(f, "l{}", x),
         }
     }
-}
-
-/// Direction for moving text.
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub enum MovingTextDirection {
-    Left,
-    Right,
 }
 
 impl fmt::Display for MovingTextDirection {
@@ -372,33 +434,6 @@ impl fmt::Display for MovingTextDirection {
     }
 }
 
-/// Values returned from a parsed MULTI.
-#[derive(Clone, Debug, PartialEq)]
-pub enum Value {
-    ColorBackground(Option<Color>), // Legacy colors only
-    ColorForeground(Option<Color>),
-    ColorRectangle(Rectangle, Color),
-    Field(u8, Option<u8>),
-    Flash(FlashOrder, Option<u8>, Option<u8>),
-    FlashEnd(),
-    Font(Option<(u8, Option<u16>)>),
-    Graphic(u8, Option<(u16, u16, Option<u16>)>),
-    HexadecimalCharacter(u16),
-    JustificationLine(Option<LineJustification>),
-    JustificationPage(Option<PageJustification>),
-    ManufacturerSpecific(u32, Option<String>),
-    ManufacturerSpecificEnd(u32, Option<String>),
-    MovingText(MovingTextMode, MovingTextDirection, u16, u8, u8, String),
-    NewLine(Option<u8>),
-    NewPage(),
-    PageBackground(Option<Color>),
-    PageTime(Option<u8>, Option<u8>),
-    SpacingCharacter(u8),
-    SpacingCharacterEnd(),
-    Text(String),
-    TextRectangle(Rectangle),
-}
-
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -407,33 +442,33 @@ impl fmt::Display for Value {
             Value::ColorForeground(None) => write!(f, "[cf]"),
             Value::ColorForeground(Some(c)) => write!(f, "[cf{}]", c),
             Value::ColorRectangle(r,c) => write!(f, "[cr{},{}", r, c),
-            Value::Field(i,Some(w))    => write!(f, "[f{},{}]", i, w),
-            Value::Field(i,None)       => write!(f, "[f{}]", i),
-            Value::Flash(FlashOrder::OnOff,Some(a),Some(b))
+            Value::Field(i, Some(w))   => write!(f, "[f{},{}]", i, w),
+            Value::Field(i, None)      => write!(f, "[f{}]", i),
+            Value::Flash(FlashOrder::OnOff, Some(a), Some(b))
                                        => write!(f, "[flt{}o{}]", a, b),
-            Value::Flash(FlashOrder::OnOff,Some(a),None)
+            Value::Flash(FlashOrder::OnOff, Some(a), None)
                                        => write!(f, "[flt{}o]", a),
-            Value::Flash(FlashOrder::OnOff,None,Some(b))
+            Value::Flash(FlashOrder::OnOff, None, Some(b))
                                        => write!(f, "[flto{}]", b),
-            Value::Flash(FlashOrder::OnOff,None,None)
+            Value::Flash(FlashOrder::OnOff, None, None)
                                        => write!(f, "[flto]"),
-            Value::Flash(FlashOrder::OffOn,Some(a),Some(b))
+            Value::Flash(FlashOrder::OffOn, Some(a), Some(b))
                                        => write!(f, "[flo{}t{}]", a, b),
-            Value::Flash(FlashOrder::OffOn,Some(a),None)
+            Value::Flash(FlashOrder::OffOn, Some(a), None)
                                        => write!(f, "[flo{}t]", a),
-            Value::Flash(FlashOrder::OffOn,None,Some(b))
+            Value::Flash(FlashOrder::OffOn, None, Some(b))
                                        => write!(f, "[flot{}]", b),
-            Value::Flash(FlashOrder::OffOn,None,None)
+            Value::Flash(FlashOrder::OffOn, None, None)
                                        => write!(f, "[flot]"),
             Value::FlashEnd()          => write!(f, "[/fl]"),
             Value::Font(None)          => write!(f, "[fo]"),
             Value::Font(Some((i,None)))=> write!(f, "[fo{}]", i),
-            Value::Font(Some((i,Some(c))))
+            Value::Font(Some((i, Some(c))))
                                        => write!(f, "[fo{},{:04x}]", i, c),
-            Value::Graphic(i,None)     => write!(f, "[g{}]", i),
-            Value::Graphic(i,Some((x,y,None)))
+            Value::Graphic(i, None)    => write!(f, "[g{}]", i),
+            Value::Graphic(i, Some((x,y,None)))
                                        => write!(f, "[g{},{},{}]", i, x, y),
-            Value::Graphic(i,Some((x,y,Some(c))))
+            Value::Graphic(i, Some((x,y,Some(c))))
                                        => write!(f, "[g{},{},{},{:04x}]",
                                                  i, x, y, c),
             Value::HexadecimalCharacter(c)
@@ -463,13 +498,13 @@ impl fmt::Display for Value {
             Value::PageBackground(Some(c))
                                        => write!(f, "[pb{}]", c),
             Value::PageBackground(None)=> write!(f, "[pb]"),
-            Value::PageTime(Some(x),Some(y))
+            Value::PageTime(Some(x), Some(y))
                                        => write!(f, "[pt{}o{}]", x, y),
-            Value::PageTime(Some(x),None)
+            Value::PageTime(Some(x), None)
                                        => write!(f, "[pt{}o]", x),
-            Value::PageTime(None,Some(y))
+            Value::PageTime(None, Some(y))
                                        => write!(f, "[pto{}]", y),
-            Value::PageTime(None,None) => write!(f, "[pto]"),
+            Value::PageTime(None, None)=> write!(f, "[pto]"),
             Value::SpacingCharacter(s) => write!(f, "[sc{}]", s),
             Value::SpacingCharacterEnd()
                                        => write!(f, "[/sc]"),
@@ -492,25 +527,6 @@ impl From<&Value> for String {
     }
 }
 
-/// Syntax errors from parsing MULTI.
-#[derive(Clone, Debug, PartialEq)]
-pub enum SyntaxError {
-    Other,
-    UnsupportedTag(String),
-    UnsupportedTagValue(String),
-    TextTooBig,
-    FontNotDefined(u8),
-    CharacterNotDefined(char),
-    FieldDeviceNotExist,
-    FieldDeviceError,
-    FlashRegionError,
-    TagConflict,
-    TooManyPages,
-    FontVersionID,
-    GraphicID,
-    GraphicNotDefined(u8),
-}
-
 impl fmt::Display for SyntaxError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "syntaxError: {:?}", self)
@@ -518,12 +534,6 @@ impl fmt::Display for SyntaxError {
 }
 
 impl error::Error for SyntaxError { }
-
-/// Parser for MULTI values.
-pub struct Parser<'a> {
-    remaining : Peekable<Chars<'a>>,
-    tag       : bool,
-}
 
 /// Parse a color from a tag.
 ///
@@ -1000,7 +1010,7 @@ fn parse_tag(tag: &str) -> Result<Option<Value>, SyntaxError> {
 impl<'a> Parser<'a> {
     /// Create a new MULTI parser.
     pub fn new(m: &'a str) -> Self {
-        Parser { remaining: m.chars().peekable(), tag: false }
+        Parser { remaining: m.chars().peekable(), within_tag: false }
     }
 
     /// Peek at the next character.
@@ -1040,8 +1050,8 @@ impl<'a> Parser<'a> {
 
     /// Parse a value at the current position.
     fn parse_value(&mut self) -> Result<Option<Value>, SyntaxError> {
-        if self.tag {
-            self.tag = false;
+        if self.within_tag {
+            self.within_tag = false;
             return self.parse_tag();
         }
         let mut s = String::new();
@@ -1050,7 +1060,7 @@ impl<'a> Parser<'a> {
                 if let Some('[') = self.peek_char() {
                     self.next_char()?;
                 } else if s.len() > 0 {
-                    self.tag = true;
+                    self.within_tag = true;
                     break;
                 } else {
                     return self.parse_tag();

@@ -2,19 +2,27 @@
 //
 // Copyright (C) 2018-2019  Minnesota Department of Transportation
 //
+//! This module is for NTCIP 1203 DMS graphics.
+//!
 use crate::ntcip::multi::{Color, ColorCtx, ColorScheme, SyntaxError};
 use pix::{Raster, Rgb8};
 
-/// An uncompressed graphic
+/// An uncompressed DMS graphic
 #[derive(Deserialize, Serialize)]
 pub struct Graphic {
+    /// Graphic number
     number: u8,
+    /// Name (max 64 characters)
     name: String,
+    /// Height in pixels
     height: u8,
+    /// Width in pixels
     width: u16,
     /// Color scheme, or dmsGraphicType from NTCIP 1203
     color_scheme: String,
+    /// Transparent color (RGB)
     transparent_color: Option<i32>,
+    /// Bitmap data (by rows)
     #[serde(with = "super::base64")]
     bitmap: Vec<u8>,
 }
@@ -23,19 +31,31 @@ pub struct Graphic {
 type PixFn = dyn Fn(&Graphic, u32, u32, &ColorCtx, &[u8]) -> Option<Rgb8>;
 
 impl Graphic {
-    /// Get the graphic number
+    /// Get the number
     pub fn number(&self) -> u8 {
         self.number
     }
-    /// Get the graphic width
-    pub fn width(&self) -> u32 {
-        self.width as u32
+    /// Get the name
+    pub fn name(&self) -> &str {
+        &self.name
     }
-    /// Get the graphic height
+    /// Get the height in pixels
     pub fn height(&self) -> u32 {
         self.height as u32
     }
-    /// Render a graphic onto a Raster
+    /// Get the width in pixels
+    pub fn width(&self) -> u32 {
+        self.width as u32
+    }
+    /// Get the color scheme
+    pub fn color_scheme(&self) -> &str {
+        &self.color_scheme
+    }
+    /// Get the transparent color
+    pub fn transparent_color(&self) -> Option<i32> {
+        self.transparent_color
+    }
+    /// Render graphic onto a Raster
     pub fn render_graphic(&self, page: &mut Raster<Rgb8>, x: u32, y: u32,
         ctx: &ColorCtx) -> Result<(), SyntaxError>
     {
@@ -45,7 +65,7 @@ impl Graphic {
         let h = self.height();
         if x + w > page.width() || y + h > page.height() {
             // There is no GraphicTooBig syntax error
-            return Err(SyntaxError::Other.into());
+            return Err(SyntaxError::Other);
         }
         let pix_fn = self.pixel_fn();
         for yy in 0..h {
