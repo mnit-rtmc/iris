@@ -96,6 +96,8 @@ struct MsgData {
 struct ImageCache {
     /// Image directory
     img_dir: PathBuf,
+    /// Image extension
+    ext: String,
     /// Cached image files
     files: HashSet<PathBuf>,
 }
@@ -287,7 +289,7 @@ impl SignConfig {
 
 /// Load fonts from a JSON file
 fn load_fonts(dir: &Path) -> Result<FontCache> {
-    debug!("Font::load");
+    debug!("load_fonts");
     let mut n = PathBuf::new();
     n.push(dir);
     n.push("font");
@@ -302,7 +304,7 @@ fn load_fonts(dir: &Path) -> Result<FontCache> {
 
 /// Load graphics from a JSON file
 fn load_graphics(dir: &Path) -> Result<GraphicCache> {
-    debug!("Graphic::load");
+    debug!("load_graphics");
     let mut n = PathBuf::new();
     n.push(dir);
     n.push("graphic");
@@ -421,8 +423,8 @@ impl MsgData {
 
 impl SignMessage {
     /// Load sign messages from a JSON file
-    fn load(dir: &Path) -> Result<Vec<SignMessage>> {
-        debug!("SignMessage::load");
+    fn load_all(dir: &Path) -> Result<Vec<SignMessage>> {
+        debug!("SignMessage::load_all");
         let mut n = PathBuf::new();
         n.push(dir);
         n.push("sign_message");
@@ -443,23 +445,24 @@ impl SignMessage {
 
 impl ImageCache {
     /// Create a set of image files
-    fn new(dir: &Path) -> Result<Self> {
+    fn new(dir: &Path, ext: &str) -> Result<Self> {
         let mut img_dir = PathBuf::new();
         img_dir.push(dir);
         img_dir.push("img");
-        let files = ImageCache::gif_listing(img_dir.as_path())?;
-        Ok(ImageCache { img_dir, files })
+        let files = ImageCache::files(img_dir.as_path(), ext)?;
+        let ext = ext.to_string();
+        Ok(ImageCache { img_dir, ext, files })
     }
-    /// Lookup a listing of gif files
-    fn gif_listing(img_dir: &Path) -> Result<HashSet<PathBuf>> {
+    /// Lookup a listing of files with a given extension
+    fn files(img_dir: &Path, ext: &str) -> Result<HashSet<PathBuf>> {
         let mut files = HashSet::new();
         if img_dir.is_dir() {
             for f in read_dir(img_dir)? {
                 let f = f?;
                 if f.file_type()?.is_file() {
                     let p = f.path();
-                    if let Some(ext) = p.extension() {
-                        if ext == "gif" {
+                    if let Some(e) = p.extension() {
+                        if e == ext {
                             files.insert(p);
                         }
                     }
@@ -472,7 +475,8 @@ impl ImageCache {
     fn dir_name(&self, name: &str) -> (&Path, String) {
         let mut n = String::new();
         n.push_str(name);
-        n.push_str(&".gif");
+        n.push('.');
+        n.push_str(&self.ext);
         (&self.img_dir.as_path(), n)
     }
     /// Make image file name
@@ -492,7 +496,7 @@ impl ImageCache {
     /// Remove expired image files
     fn remove_expired(&mut self) -> Result<()> {
         for p in self.files.drain() {
-            info!("delete gif: {:?}", &p);
+            info!("remove_expired: {:?}", &p);
             if let Err(e) = remove_file(&p) {
                 error!("{:?}", e);
             }
@@ -739,9 +743,9 @@ fn render_state_default(msg_data: &MsgData, cfg: &SignConfig) -> Result<State> {
 ///
 /// * `dir` Output file directory.
 pub fn render_all(dir: &Path) -> Result<()> {
-    let mut images = ImageCache::new(dir)?;
     let msg_data = MsgData::load(dir)?;
-    let sign_msgs = SignMessage::load(dir)?;
+    let mut images = ImageCache::new(dir, "gif")?;
+    let sign_msgs = SignMessage::load_all(dir)?;
     for sign_msg in sign_msgs {
         fetch_sign_msg(&sign_msg, &msg_data, &mut images)?;
     }
