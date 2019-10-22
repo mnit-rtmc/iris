@@ -118,10 +118,8 @@ const CAMERA_RES: Resource = Resource::Simple(
 /// DMS attribute resource
 const DMS_ATTRIBUTE_RES: Resource = Resource::Simple(
 "dms_attribute", Listen::All("system_attribute"),
-"SELECT row_to_json(r)::text FROM (\
-    SELECT name, value \
-    FROM dms_attribute_view \
-) r",
+"SELECT jsonb_object_agg(name, value)::text \
+ FROM dms_attribute_view",
 );
 
 /// DMS resource
@@ -149,10 +147,14 @@ const DMS_MSG_RES: Resource = Resource::Simple(
 const FONT_RES: Resource = Resource::Simple(
 "font", Listen::Two("font", "glyph"),
 "SELECT row_to_json(f)::text FROM (\
-    SELECT name, f_number AS number, height, char_spacing, line_spacing, \
-           array(SELECT row_to_json(c) FROM (\
-               SELECT code_point AS number, width, pixels AS bitmap \
-               FROM iris.glyph WHERE font = ft.name ORDER BY code_point) AS c) \
+    SELECT f_number AS number, name, height, char_spacing, line_spacing, \
+           array(SELECT row_to_json(c) FROM \
+               (SELECT code_point AS number, width, replace(pixels, E'\n', '') \
+                AS bitmap \
+                FROM iris.glyph \
+                WHERE font = ft.name \
+                ORDER BY code_point \
+               ) AS c) \
            AS characters, version_id \
     FROM iris.font ft ORDER BY name) AS f"
 );
@@ -164,6 +166,7 @@ const GRAPHIC_RES: Resource = Resource::Simple(
     SELECT g_number AS number, name, height, width, color_scheme, \
            transparent_color, replace(pixels, E'\n', '') AS bitmap \
     FROM graphic_view \
+    WHERE g_number < 256 \
 ) r",
 );
 
@@ -384,7 +387,7 @@ impl Resource {
 pub fn listen_all(conn: &Connection) -> Result<()> {
     for r in ALL {
         for lsn in r.listen().channel_names() {
-            conn.execute("LISTEN $1", &[&lsn])?;
+            conn.execute(&format!("LISTEN {}", lsn), &[])?;
         }
     }
     Ok(())

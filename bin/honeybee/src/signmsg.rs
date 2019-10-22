@@ -45,13 +45,6 @@ const PIX_WIDTH: f32 = 450.0;
 /// Maximum pixel height of DMS images
 const PIX_HEIGHT: f32 = 100.0;
 
-/// DMS attribute
-#[derive(Deserialize, Serialize)]
-struct DmsAttribute {
-    name  : String,
-    value : String,
-}
-
 /// Sign configuration
 #[derive(Deserialize, Serialize)]
 struct SignConfig {
@@ -93,11 +86,11 @@ struct SignDetail {
 
 /// Data needed for rendering sign messages
 struct MsgData {
-    attrs   : HashMap<String, DmsAttribute>,
-    configs : HashMap<String, SignConfig>,
-    fonts   : FontCache,
+    attrs: HashMap<String, String>,
+    configs: HashMap<String, SignConfig>,
+    fonts: FontCache,
     graphics: GraphicCache,
-    gifs    : HashSet<PathBuf>,
+    gifs: HashSet<PathBuf>,
 }
 
 /// Sign message
@@ -115,29 +108,11 @@ struct SignMessage {
     duration      : Option<i32>,
 }
 
-impl DmsAttribute {
-    /// Load DMS attributes from a JSON file
-    fn load(dir: &Path) -> Result<HashMap<String, DmsAttribute>> {
-        debug!("DmsAttribute::load");
-        let mut n = PathBuf::new();
-        n.push(dir);
-        n.push("dms_attribute");
-        let r = BufReader::new(File::open(&n)?);
-        let mut attrs = HashMap::new();
-        let j: Vec<DmsAttribute> = serde_json::from_reader(r)?;
-        for da in j {
-            let an = da.name.clone();
-            attrs.insert(an, da);
-        }
-        Ok(attrs)
-    }
-}
-
-/// Convert a BGR value to an (red, green, blue) tuple
-fn bgr_to_rgb(bgr: i32) -> (u8, u8, u8) {
-    let r = (bgr >> 0) as u8;
-    let g = (bgr >> 8) as u8;
-    let b = (bgr >> 16) as u8;
+/// Convert a RGB value to an (red, green, blue) tuple
+fn rgb_from_i32(rgb: i32) -> (u8, u8, u8) {
+    let r = (rgb >> 16) as u8;
+    let g = (rgb >> 8) as u8;
+    let b = (rgb >> 0) as u8;
     (r, g, b)
 }
 
@@ -284,7 +259,7 @@ impl SignConfig {
         match self.color_scheme() {
             ColorScheme::ColorClassic |
             ColorScheme::Color24Bit => ColorClassic::Amber.rgb(),
-            _ => bgr_to_rgb(self.monochrome_foreground),
+            _ => rgb_from_i32(self.monochrome_foreground),
         }
     }
     /// Get the default background color
@@ -292,7 +267,7 @@ impl SignConfig {
         match self.color_scheme() {
             ColorScheme::ColorClassic |
             ColorScheme::Color24Bit => ColorClassic::Black.rgb(),
-            _ => bgr_to_rgb(self.monochrome_background),
+            _ => rgb_from_i32(self.monochrome_background),
         }
     }
     /// Get the default text rectangle
@@ -337,7 +312,7 @@ impl MsgData {
     /// Load message data from a file path
     fn load(dir: &Path) -> Result<Self> {
         debug!("MsgData::load");
-        let attrs = DmsAttribute::load(dir)?;
+        let attrs = MsgData::load_dms_attributes(dir)?;
         let configs = SignConfig::load(dir)?;
         let fonts = load_fonts(dir)?;
         let graphics = load_graphics(dir)?;
@@ -350,6 +325,21 @@ impl MsgData {
             gifs,
         })
     }
+    /// Load DMS attributes from a JSON file
+    fn load_dms_attributes(dir: &Path) -> Result<HashMap<String, String>> {
+        debug!("load_dms_attributes");
+        let mut n = PathBuf::new();
+        n.push(dir);
+        n.push("dms_attribute");
+        let r = BufReader::new(File::open(&n)?);
+        let mut j: Vec<HashMap<String, String>> = serde_json::from_reader(r)?;
+        match j.pop() {
+            Some(da) => Ok(da),
+            // FIXME
+            _ => unreachable!(),
+        }
+    }
+
     /// Lookup a config
     fn config(&self, s: &SignMessage) -> Result<&SignConfig> {
         let cfg = &s.sign_config;
@@ -376,8 +366,8 @@ impl MsgData {
     }
     /// Get an attribute (seconds) in u8 deciseconds
     fn get_as_ds(&self, name: &str) -> Option<u8> {
-        if let Some(attr) = self.attrs.get(name) {
-            if let Ok(sec) = attr.name.parse::<f32>() {
+        if let Some(value) = self.attrs.get(name) {
+            if let Ok(sec) = value.parse::<f32>() {
                 let ds = sec * 10.0;
                 if ds >= 0.0 && ds <= 255.0 {
                     return Some(ds as u8);
@@ -398,8 +388,8 @@ impl MsgData {
     /// Get the default page justification
     fn page_justification_default(&self) -> JustificationPage {
         const ATTR: &str = "dms_default_justification_page";
-        if let Some(attr) = self.attrs.get(ATTR) {
-            if let Some(pj) = JustificationPage::new(&attr.name) {
+        if let Some(value) = self.attrs.get(ATTR) {
+            if let Some(pj) = JustificationPage::new(&value) {
                 return pj;
             }
         }
@@ -409,8 +399,8 @@ impl MsgData {
     /// Get the default line justification
     fn line_justification_default(&self) -> JustificationLine {
         const ATTR: &str = "dms_default_justification_line";
-        if let Some(attr) = self.attrs.get(ATTR) {
-            if let Some(lj) = JustificationLine::new(&attr.name) {
+        if let Some(value) = self.attrs.get(ATTR) {
+            if let Some(lj) = JustificationLine::new(&value) {
                 return lj;
             }
         }
@@ -509,7 +499,7 @@ fn make_face_frame(cfg: &SignConfig, page: Raster<Rgb8>,
     let mut control = GraphicControl::default();
     control.set_delay_time_cs(delay);
     let image_desc = ImageDesc::default().with_width(w).with_height(h);
-    let mut image_data = ImageData::new((w * h) as usize);
+    let mut image_data = ImageData::new((w * h).into());
     image_data.add_data(face.as_u8_slice());
     Frame::new(Some(control), image_desc, None, image_data)
 }
