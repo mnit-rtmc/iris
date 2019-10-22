@@ -90,7 +90,14 @@ struct MsgData {
     configs: HashMap<String, SignConfig>,
     fonts: FontCache,
     graphics: GraphicCache,
-    gifs: HashSet<PathBuf>,
+}
+
+/// Cache of image files
+struct ImageCache {
+    /// Image directory
+    img_dir: PathBuf,
+    /// Cached image files
+    files: HashSet<PathBuf>,
 }
 
 /// Sign message
@@ -316,13 +323,11 @@ impl MsgData {
         let configs = SignConfig::load(dir)?;
         let fonts = load_fonts(dir)?;
         let graphics = load_graphics(dir)?;
-        let gifs = gif_listing(dir)?;
         Ok(MsgData {
             attrs,
             configs,
             fonts,
             graphics,
-            gifs,
         })
     }
     /// Load DMS attributes from a JSON file
@@ -339,7 +344,6 @@ impl MsgData {
             _ => unreachable!(),
         }
     }
-
     /// Lookup a config
     fn config(&self, s: &SignMessage) -> Result<&SignConfig> {
         let cfg = &s.sign_config;
@@ -347,22 +351,6 @@ impl MsgData {
             Some(c) => Ok(c),
             None => Err(Error::UnknownResource(format!("Config: {}", cfg))),
         }
-    }
-    /// Check if a .gif file is in the listing.
-    ///
-    /// Returns true if the file exists.
-    fn check_gif_listing(&mut self, n: &PathBuf) -> bool {
-        self.gifs.remove(n)
-    }
-    /// Delete out-of-date .gif files
-    fn delete_gifs(&mut self) -> Result<()> {
-        for p in self.gifs.drain() {
-            info!("delete gif: {:?}", &p);
-            if let Err(e) = remove_file(&p) {
-                error!("{:?}", e);
-            }
-        }
-        Ok(())
     }
     /// Get an attribute (seconds) in u8 deciseconds
     fn get_as_ds(&self, name: &str) -> Option<u8> {
@@ -453,26 +441,64 @@ impl SignMessage {
     }
 }
 
-/// Lookup a listing of gif files
-fn gif_listing(dir: &Path) -> Result<HashSet<PathBuf>> {
-    let mut gifs = HashSet::new();
-    let mut img = PathBuf::new();
-    img.push(dir);
-    img.push("img");
-    if img.is_dir() {
-        for f in read_dir(img)? {
-            let f = f?;
-            if f.file_type()?.is_file() {
-                let p = f.path();
-                let b = if let Some(ext) = p.extension() { ext == "gif" }
-                        else { false };
-                if b {
-                    gifs.insert(p);
+impl ImageCache {
+    /// Create a set of image files
+    fn new(dir: &Path) -> Result<Self> {
+        let mut img_dir = PathBuf::new();
+        img_dir.push(dir);
+        img_dir.push("img");
+        let files = ImageCache::gif_listing(img_dir.as_path())?;
+        Ok(ImageCache { img_dir, files })
+    }
+    /// Lookup a listing of gif files
+    fn gif_listing(img_dir: &Path) -> Result<HashSet<PathBuf>> {
+        let mut files = HashSet::new();
+        if img_dir.is_dir() {
+            for f in read_dir(img_dir)? {
+                let f = f?;
+                if f.file_type()?.is_file() {
+                    let p = f.path();
+                    if let Some(ext) = p.extension() {
+                        if ext == "gif" {
+                            files.insert(p);
+                        }
+                    }
                 }
             }
         }
+        Ok(files)
     }
-    Ok(gifs)
+    /// Make image file name
+    fn dir_name(&self, name: &str) -> (&Path, String) {
+        let mut n = String::new();
+        n.push_str(name);
+        n.push_str(&".gif");
+        (&self.img_dir.as_path(), n)
+    }
+    /// Make image file name
+    fn make_name(&self, name: &str) -> PathBuf {
+        let (dir, n) = self.dir_name(name);
+        make_name(dir, &n)
+    }
+    /// Make temp image file name
+    fn make_tmp_name(&self, name: &str) -> PathBuf {
+        let (dir, n) = self.dir_name(name);
+        make_tmp_name(dir, &n)
+    }
+    /// Check if an image exists
+    fn contains(&mut self, n: &PathBuf) -> bool {
+        self.files.remove(n)
+    }
+    /// Remove expired image files
+    fn remove_expired(&mut self) -> Result<()> {
+        for p in self.files.drain() {
+            info!("delete gif: {:?}", &p);
+            if let Err(e) = remove_file(&p) {
+                error!("{:?}", e);
+            }
+        }
+        Ok(())
+    }
 }
 
 /// Calculate the size of rendered DMS
@@ -713,41 +739,36 @@ fn render_state_default(msg_data: &MsgData, cfg: &SignConfig) -> Result<State> {
 ///
 /// * `dir` Output file directory.
 pub fn render_all(dir: &Path) -> Result<()> {
-    let mut msg_data = MsgData::load(dir)?;
+    let mut images = ImageCache::new(dir)?;
+    let msg_data = MsgData::load(dir)?;
     let sign_msgs = SignMessage::load(dir)?;
     for sign_msg in sign_msgs {
-        fetch_sign_msg(&sign_msg, dir, &mut msg_data)?;
+        fetch_sign_msg(&sign_msg, &msg_data, &mut images)?;
     }
-    msg_data.delete_gifs()?;
+    images.remove_expired()?;
     Ok(())
 }
 
 /// Check and fetch one sign message (into a .gif file).
 ///
 /// * `s` Sign message to render.
-/// * `dir` Directory to store .gif file.
 /// * `msg_data` Data required to render messages.
-fn fetch_sign_msg(s: &SignMessage, dir: &Path, msg_data: &mut MsgData)
+/// * `images` Image cache.
+fn fetch_sign_msg(s: &SignMessage, msg_data: &MsgData, images: &mut ImageCache)
     -> Result<()>
 {
-    let mut img = PathBuf::new();
-    img.push(dir);
-    img.push("img");
-    let mut g = String::new();
-    g.push_str(&s.name);
-    g.push_str(&".gif");
-    let n = make_name(&img.as_path(), &g);
-    debug!("fetch: {:?}", n);
-    if !msg_data.check_gif_listing(&n) {
-        let tn = make_tmp_name(&img.as_path(), &g);
-        let writer = BufWriter::new(File::create(&tn)?);
+    let name = images.make_name(&s.name);
+    debug!("fetch: {:?}", name);
+    if !images.contains(&name) {
+        let tmp_name = images.make_tmp_name(&s.name);
+        let writer = BufWriter::new(File::create(&tmp_name)?);
         let t = Instant::now();
         if let Err(e) = s.render(msg_data, writer) {
             warn!("{},cfg={},multi={} {:?}", &s.name, s.sign_config, s.multi,e);
-            remove_file(&tn)?;
+            remove_file(&tmp_name)?;
             return Ok(());
         };
-        rename(tn, &n)?;
+        rename(tmp_name, name)?;
         info!("{}.gif rendered in {:?}", &s.name, t.elapsed());
     }
     Ok(())
