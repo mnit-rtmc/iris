@@ -21,19 +21,16 @@ use std::env;
 use std::time::Duration;
 
 /// Start receiving notifications and fetching resources.
-///
-/// * `username` Name of user running process.
-pub fn start(username: &str) -> Result<()> {
-    let conn = create_connection(username)?;
+pub fn start() -> Result<()> {
+    let conn = create_connection()?;
     resource::listen_all(&conn)?;
     resource::fetch_all(&conn)?;
     notify_loop(&conn)
 }
 
 /// Create database connection
-///
-/// * `username` Name of user running process.
-fn create_connection(username: &str) -> Result<Connection> {
+fn create_connection() -> Result<Connection> {
+    let username = whoami::username();
     // Format path for unix domain socket -- not worth using percent_encode
     let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
     let conn = Connection::connect(uds, TlsMode::None)?;

@@ -19,8 +19,7 @@ use log::error;
 
 fn main() {
     env_logger::builder().format_timestamp(None).init();
-    let username = whoami::username();
-    if let Err(e) = fetcher::start(&username) {
+    if let Err(e) = fetcher::start() {
         error!("error: {:?}", e);
     }
 }
