@@ -19,19 +19,17 @@
 //! used in Web Assembly contexts.
 //!
 use crate::error::{Error, Result};
-use crate::ntcip::font::Font;
-use crate::ntcip::graphic::Graphic;
-use crate::ntcip::multi::{
-    ColorClassic, ColorCtx, ColorScheme, LineJustification,
-    PageJustification, Rectangle
-};
-use crate::ntcip::render::{PageSplitter, State};
 use crate::resource::{make_name, make_tmp_name};
 use gift::Encoder;
 use gift::block::{
     Application, ColorTableConfig, ColorTableExistence, ColorTableOrdering,
     Frame, GlobalColorTable, GraphicControl, ImageData, ImageDesc,
     LogicalScreenDesc, Preamble,
+};
+use ntcip::dms::{Font, FontCache, Graphic, GraphicCache, PageSplitter, State};
+use ntcip::dms::multi::{
+    ColorClassic, ColorCtx, ColorScheme, JustificationLine,
+    JustificationPage, Rectangle
 };
 use pix::{Gray8, Palette, Raster, RasterBuilder, Rgb8};
 use std::collections::{HashMap, HashSet};
@@ -46,11 +44,6 @@ const PIX_WIDTH: f32 = 450.0;
 
 /// Maximum pixel height of DMS images
 const PIX_HEIGHT: f32 = 100.0;
-
-/// JSON Loader
-trait Loader where Self: std::marker::Sized {
-    fn load<T>(dir: &Path) -> Result<HashMap<T, Self>>;
-}
 
 /// DMS attribute
 #[derive(Deserialize, Serialize)]
@@ -102,8 +95,8 @@ struct SignDetail {
 struct MsgData {
     attrs   : HashMap<String, DmsAttribute>,
     configs : HashMap<String, SignConfig>,
-    fonts   : HashMap<u8, Font>,
-    graphics: HashMap<u8, Graphic>,
+    fonts   : FontCache,
+    graphics: GraphicCache,
     gifs    : HashSet<PathBuf>,
 }
 
@@ -311,32 +304,31 @@ impl SignConfig {
 }
 
 /// Load fonts from a JSON file
-fn load_fonts(dir: &Path) -> Result<HashMap<u8, Font>> {
+fn load_fonts(dir: &Path) -> Result<FontCache> {
     debug!("Font::load");
     let mut n = PathBuf::new();
     n.push(dir);
     n.push("font");
     let r = BufReader::new(File::open(&n)?);
-    let mut fonts = HashMap::new();
+    let mut fonts = FontCache::new();
     let j: Vec<Font> = serde_json::from_reader(r)?;
     for f in j {
-        fonts.insert(f.number(), f);
+        fonts.insert(f);
     }
     Ok(fonts)
 }
 
 /// Load graphics from a JSON file
-fn load_graphics(dir: &Path) -> Result<HashMap<u8, Graphic>> {
+fn load_graphics(dir: &Path) -> Result<GraphicCache> {
     debug!("Graphic::load");
     let mut n = PathBuf::new();
     n.push(dir);
     n.push("graphic");
     let r = BufReader::new(File::open(&n)?);
-    let mut graphics = HashMap::new();
+    let mut graphics = GraphicCache::new();
     let j: Vec<Graphic> = serde_json::from_reader(r)?;
     for g in j {
-        let gn = g.number();
-        graphics.insert(gn, g);
+        graphics.insert(g);
     }
     Ok(graphics)
 }
@@ -404,32 +396,32 @@ impl MsgData {
         self.get_as_ds("dms_page_off_default_secs").unwrap_or(0)
     }
     /// Get the default page justification
-    fn page_justification_default(&self) -> PageJustification {
+    fn page_justification_default(&self) -> JustificationPage {
         const ATTR: &str = "dms_default_justification_page";
         if let Some(attr) = self.attrs.get(ATTR) {
-            if let Some(pj) = PageJustification::new(&attr.name) {
+            if let Some(pj) = JustificationPage::new(&attr.name) {
                 return pj;
             }
         }
         debug!("MsgData::page_justification_default, {} missing!", ATTR);
-        PageJustification::Top
+        JustificationPage::Top
     }
     /// Get the default line justification
-    fn line_justification_default(&self) -> LineJustification {
+    fn line_justification_default(&self) -> JustificationLine {
         const ATTR: &str = "dms_default_justification_line";
         if let Some(attr) = self.attrs.get(ATTR) {
-            if let Some(lj) = LineJustification::new(&attr.name) {
+            if let Some(lj) = JustificationLine::new(&attr.name) {
                 return lj;
             }
         }
         debug!("MsgData::line_justification_default, {} missing!", ATTR);
-        LineJustification::Center
+        JustificationLine::Center
     }
     /// Get the default font number
     fn font_default(&self, fname: Option<&str>) -> Result<u8> {
         match fname {
             Some(fname) => {
-                match self.fonts.values().find(|f| f.name() == fname) {
+                match self.fonts.lookup_name(fname) {
                     Some(font) => Ok(font.number()),
                     None => {
                         Err(Error::UnknownResource(format!("Font: {}", fname)))
@@ -440,11 +432,11 @@ impl MsgData {
         }
     }
     /// Get font mapping
-    fn fonts(&self) -> &HashMap<u8, Font> {
+    fn fonts(&self) -> &FontCache {
         &self.fonts
     }
     /// Get graphic mapping
-    fn graphics(&self) -> &HashMap<u8, Graphic> {
+    fn graphics(&self) -> &GraphicCache {
         &self.graphics
     }
 }
@@ -712,7 +704,8 @@ fn render_state_default(msg_data: &MsgData, cfg: &SignConfig) -> Result<State> {
     let just_page = msg_data.page_justification_default();
     let just_line = msg_data.line_justification_default();
     let fname = cfg.default_font();
-    let font = (msg_data.font_default(fname)?, None);
+    let font_num = msg_data.font_default(fname)?;
+    let font_version_id = None;
     Ok(State::new(color_ctx,
                   char_width,
                   char_height,
@@ -721,7 +714,8 @@ fn render_state_default(msg_data: &MsgData, cfg: &SignConfig) -> Result<State> {
                   text_rectangle,
                   just_page,
                   just_line,
-                  font,
+                  font_num,
+                  font_version_id,
     ))
 }
 

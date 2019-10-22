@@ -3,8 +3,8 @@
 // Copyright (c) 2019  Minnesota Department of Transportation
 //
 use base64::DecodeError;
-use crate::ntcip::multi::SyntaxError;
 use gift::EncodeError;
+use ntcip::dms::multi::SyntaxError;
 use std::error::Error as _;
 use std::{fmt, io};
 use std::num::TryFromIntError;
