@@ -285,6 +285,117 @@ impl SignConfig {
         let h = self.pixel_height.try_into()?;
         Ok(Rectangle::new(1, 1, w, h))
     }
+    /// Render a sign message to a Vec of Frames
+    fn render_sign_config(&self, multi: &str, msg_data: &MsgData)
+        -> Result<(Preamble, Vec<Frame>)>
+    {
+        let mut palette = Palette::new(256);
+        palette.set_threshold_fn(palette_threshold_rgb8_256);
+        palette.set_entry(Rgb8::default());
+        let mut frames = Vec::new();
+        let rs = self.render_state_default(msg_data)?;
+        let (w, h) = self.calculate_size()?;
+        for page in PageSplitter::new(rs, multi) {
+            let page = page?;
+            let raster = page.render_page(msg_data.fonts(),
+                msg_data.graphics())?;
+            let delay = page.page_on_time_ds() * 10;
+            let frame = self.make_face_frame(raster, &mut palette, w, h, delay);
+            frames.push(frame);
+            let t = page.page_off_time_ds() * 10;
+            if t > 0 {
+                let raster = page.render_blank();
+                let frame = self.make_face_frame(raster, &mut palette, w, h, t);
+                frames.push(frame);
+            }
+        }
+        let mut preamble = make_preamble(w, h, palette);
+        if frames.len() > 1 {
+            preamble.loop_count_ext = Some(Application::with_loop_count(0));
+        }
+        Ok((preamble, frames))
+    }
+    /// Create default render state for a sign config.
+    fn render_state_default(&self, msg_data: &MsgData) -> Result<State> {
+        let color_scheme = self.color_scheme();
+        let fg_default = self.foreground_default_rgb();
+        let bg_default = self.background_default_rgb();
+        let color_ctx = ColorCtx::new(color_scheme, fg_default, bg_default);
+        let char_width = self.char_width()?;
+        let char_height = self.char_height()?;
+        let page_on_time_ds = msg_data.page_on_default_ds();
+        let page_off_time_ds = msg_data.page_off_default_ds();
+        let text_rectangle = self.text_rect_default()?;
+        let just_page = msg_data.page_justification_default();
+        let just_line = msg_data.line_justification_default();
+        let fname = self.default_font();
+        let font_num = msg_data.font_default(fname)?;
+        let font_version_id = None;
+        Ok(State::new(color_ctx,
+                      char_width,
+                      char_height,
+                      page_on_time_ds,
+                      page_off_time_ds,
+                      text_rectangle,
+                      just_page,
+                      just_line,
+                      font_num,
+                      font_version_id,
+        ))
+    }
+    /// Calculate the size of rendered DMS
+    fn calculate_size(&self) -> Result<(u16, u16)> {
+        let fw = self.face_width();
+        let fh = self.face_height();
+        if fw > 0.0 && fh > 0.0 {
+            let sx = PIX_WIDTH / fw;
+            let sy = PIX_HEIGHT / fh;
+            let s = sx.min(sy);
+            let w = (fw * s).round() as u16;
+            let h = (fh * s).round() as u16;
+            Ok((w, h))
+        } else {
+            Ok((PIX_WIDTH as u16, PIX_HEIGHT as u16))
+        }
+    }
+    /// Make a .gif frame of sign face
+    fn make_face_frame(&self, page: Raster<Rgb8>, palette: &mut Palette<Rgb8>,
+        w: u16, h: u16, delay: u16) -> Frame
+    {
+        let face = self.make_face_raster(page, palette, w, h);
+        let mut control = GraphicControl::default();
+        control.set_delay_time_cs(delay);
+        let image_desc = ImageDesc::default().with_width(w).with_height(h);
+        let mut image_data = ImageData::new((w * h).into());
+        image_data.add_data(face.as_u8_slice());
+        Frame::new(Some(control), image_desc, None, image_data)
+    }
+    /// Make a raster of sign face
+    fn make_face_raster(&self, page: Raster<Rgb8>, palette: &mut Palette<Rgb8>,
+        w: u16, h: u16) -> Raster<Gray8>
+    {
+        let dark = Rgb8::new(20, 20, 0);
+        let mut face = RasterBuilder::new().with_clear(w.into(), h.into());
+        let ph = page.height();
+        let pw = page.width();
+        let sx = w as f32 / pw as f32;
+        let sy = h as f32 / ph as f32;
+        let s = sx.min(sy);
+        debug!("face: {:?}, scale: {}", self.name(), s);
+        for y in 0..ph {
+            let py = self.pixel_y(y) * h as f32;
+            for x in 0..pw {
+                let px = self.pixel_x(x) * w as f32;
+                let clr = page.pixel(x, y);
+                let sr: u8 = clr.red().max(clr.green()).max(clr.blue()).into();
+                // Clamp radius between 0.6 and 0.8 (blooming)
+                let r = s * (sr as f32 / 255.0).max(0.6).min(0.8);
+                let clr = if sr > 20 { clr } else { dark };
+                render_circle(&mut face, palette, px, py, r, clr);
+            }
+        }
+        face
+    }
 }
 
 /// Load fonts from a JSON file
@@ -435,10 +546,34 @@ impl SignMessage {
     fn multi(&self) -> &str {
         &self.multi
     }
+    /// Fetch sign message .gif if it is not in the image cache.
+    ///
+    /// * `msg_data` Data required to render messages.
+    /// * `images` Image cache.
+    fn fetch(&self, msg_data: &MsgData, images: &mut ImageCache) -> Result<()> {
+        let name = images.make_name(&self.name);
+        debug!("SignMessage::fetch: {:?}", name);
+        if !images.contains(&name) {
+            let tmp_name = images.make_tmp_name(&self.name);
+            let writer = BufWriter::new(File::create(&tmp_name)?);
+            let t = Instant::now();
+            if let Err(e) = self.render_sign_msg(msg_data, writer) {
+                warn!("{}, cfg={}, multi={} {:?}", &self.name, self.sign_config,
+                    self.multi, e);
+                remove_file(&tmp_name)?;
+                return Ok(());
+            };
+            rename(tmp_name, name)?;
+            info!("{}.gif rendered in {:?}", &self.name, t.elapsed());
+        }
+        Ok(())
+    }
     /// Render into a .gif file
-    fn render<W: Write>(&self, msg_data: &MsgData, writer: W) -> Result<()> {
+    fn render_sign_msg<W: Write>(&self, msg_data: &MsgData, writer: W)
+        -> Result<()>
+    {
         let cfg = msg_data.config(self)?;
-        let (preamble, frames) = render_sign_msg_cfg(self, msg_data, cfg)?;
+        let (preamble, frames) = cfg.render_sign_config(self.multi(), msg_data)?;
         write_gif(writer, preamble, frames)
     }
 }
@@ -505,62 +640,6 @@ impl ImageCache {
     }
 }
 
-/// Calculate the size of rendered DMS
-fn calculate_size(cfg: &SignConfig) -> Result<(u16, u16)> {
-    let fw = cfg.face_width();
-    let fh = cfg.face_height();
-    if fw > 0.0 && fh > 0.0 {
-        let sx = PIX_WIDTH / fw;
-        let sy = PIX_HEIGHT / fh;
-        let s = sx.min(sy);
-        let w = (fw * s).round() as u16;
-        let h = (fh * s).round() as u16;
-        Ok((w, h))
-    } else {
-        Ok((PIX_WIDTH as u16, PIX_HEIGHT as u16))
-    }
-}
-
-/// Make a .gif frame of sign face
-fn make_face_frame(cfg: &SignConfig, page: Raster<Rgb8>,
-    palette: &mut Palette<Rgb8>, w: u16, h: u16, delay: u16) -> Frame
-{
-    let face = make_face_raster(&cfg, page, palette, w, h);
-    let mut control = GraphicControl::default();
-    control.set_delay_time_cs(delay);
-    let image_desc = ImageDesc::default().with_width(w).with_height(h);
-    let mut image_data = ImageData::new((w * h).into());
-    image_data.add_data(face.as_u8_slice());
-    Frame::new(Some(control), image_desc, None, image_data)
-}
-
-/// Make a raster of sign face
-fn make_face_raster(cfg: &SignConfig, page: Raster<Rgb8>,
-    palette: &mut Palette<Rgb8>, w: u16, h: u16) -> Raster<Gray8>
-{
-    let dark = Rgb8::new(20, 20, 0);
-    let mut face = RasterBuilder::new().with_clear(w.into(), h.into());
-    let ph = page.height();
-    let pw = page.width();
-    let sx = w as f32 / pw as f32;
-    let sy = h as f32 / ph as f32;
-    let s = sx.min(sy);
-    debug!("face: {:?}, scale: {}", cfg.name(), s);
-    for y in 0..ph {
-        let py = cfg.pixel_y(y) * h as f32;
-        for x in 0..pw {
-            let px = cfg.pixel_x(x) * w as f32;
-            let clr = page.pixel(x, y);
-            let sr: u8 = clr.red().max(clr.green()).max(clr.blue()).into();
-            // Clamp radius between 0.6 and 0.8 (blooming)
-            let r = s * (sr as f32 / 255.0).max(0.6).min(0.8);
-            let clr = if sr > 20 { clr } else { dark };
-            render_circle(&mut face, palette, px, py, r, clr);
-        }
-    }
-    face
-}
-
 /// Render an attenuated circle.
 ///
 /// * `raster` Indexed raster.
@@ -625,34 +704,6 @@ fn write_gif<W: Write>(mut fl: W, preamble: Preamble, frames: Vec<Frame>)
     Ok(())
 }
 
-/// Render a sign message to a Vec of Frames
-fn render_sign_msg_cfg(s: &SignMessage, msg_data: &MsgData, cfg: &SignConfig)
-    -> Result<(Preamble, Vec<Frame>)>
-{
-    let mut palette = Palette::new(256);
-    palette.set_threshold_fn(palette_threshold_rgb8_256);
-    palette.set_entry(Rgb8::default());
-    let mut frames = Vec::new();
-    let rs = render_state_default(msg_data, cfg)?;
-    let (w, h) = calculate_size(cfg)?;
-    for page in PageSplitter::new(rs, s.multi()) {
-        let page = page?;
-        let raster = page.render_page(msg_data.fonts(), msg_data.graphics())?;
-        let delay = page.page_on_time_ds() * 10;
-        frames.push(make_face_frame(&cfg, raster, &mut palette, w, h, delay));
-        let t = page.page_off_time_ds() * 10;
-        if t > 0 {
-            let raster = page.render_blank();
-            frames.push(make_face_frame(&cfg, raster, &mut palette, w, h, t));
-        }
-    }
-    let mut preamble = make_preamble(w, h, palette);
-    if frames.len() > 1 {
-        preamble.loop_count_ext = Some(Application::with_loop_count(0));
-    }
-    Ok((preamble, frames))
-}
-
 /// Make the GIF preamble blocks
 fn make_preamble(w: u16, h: u16, palette: Palette<Rgb8>) -> Preamble {
     let tbl_cfg = ColorTableConfig::new(ColorTableExistence::Present,
@@ -710,35 +761,6 @@ fn palette_threshold_rgb8_256(v: usize) -> Rgb8 {
     Rgb8::new(i * 4, i * 4, i * 5)
 }
 
-/// Create default render state for a sign config.
-fn render_state_default(msg_data: &MsgData, cfg: &SignConfig) -> Result<State> {
-    let color_scheme = cfg.color_scheme();
-    let fg_default = cfg.foreground_default_rgb();
-    let bg_default = cfg.background_default_rgb();
-    let color_ctx = ColorCtx::new(color_scheme, fg_default, bg_default);
-    let char_width = cfg.char_width()?;
-    let char_height = cfg.char_height()?;
-    let page_on_time_ds = msg_data.page_on_default_ds();
-    let page_off_time_ds = msg_data.page_off_default_ds();
-    let text_rectangle = cfg.text_rect_default()?;
-    let just_page = msg_data.page_justification_default();
-    let just_line = msg_data.line_justification_default();
-    let fname = cfg.default_font();
-    let font_num = msg_data.font_default(fname)?;
-    let font_version_id = None;
-    Ok(State::new(color_ctx,
-                  char_width,
-                  char_height,
-                  page_on_time_ds,
-                  page_off_time_ds,
-                  text_rectangle,
-                  just_page,
-                  just_line,
-                  font_num,
-                  font_version_id,
-    ))
-}
-
 /// Fetch all sign messages.
 ///
 /// * `dir` Output file directory.
@@ -747,33 +769,8 @@ pub fn render_all(dir: &Path) -> Result<()> {
     let mut images = ImageCache::new(dir, "gif")?;
     let sign_msgs = SignMessage::load_all(dir)?;
     for sign_msg in sign_msgs {
-        fetch_sign_msg(&sign_msg, &msg_data, &mut images)?;
+        sign_msg.fetch(&msg_data, &mut images)?;
     }
     images.remove_expired()?;
-    Ok(())
-}
-
-/// Check and fetch one sign message (into a .gif file).
-///
-/// * `s` Sign message to render.
-/// * `msg_data` Data required to render messages.
-/// * `images` Image cache.
-fn fetch_sign_msg(s: &SignMessage, msg_data: &MsgData, images: &mut ImageCache)
-    -> Result<()>
-{
-    let name = images.make_name(&s.name);
-    debug!("fetch: {:?}", name);
-    if !images.contains(&name) {
-        let tmp_name = images.make_tmp_name(&s.name);
-        let writer = BufWriter::new(File::create(&tmp_name)?);
-        let t = Instant::now();
-        if let Err(e) = s.render(msg_data, writer) {
-            warn!("{},cfg={},multi={} {:?}", &s.name, s.sign_config, s.multi,e);
-            remove_file(&tmp_name)?;
-            return Ok(());
-        };
-        rename(tmp_name, name)?;
-        info!("{}.gif rendered in {:?}", &s.name, t.elapsed());
-    }
     Ok(())
 }
