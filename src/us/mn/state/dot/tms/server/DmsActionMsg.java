@@ -514,7 +514,7 @@ public class DmsActionMsg {
 		assert (zones.length > 0);
 		String last_zid = null; // last toll zone
 		String det = null;
-		float price = TollZoneImpl.min_price();
+		float price = 0f;
 		float max_price = TollZoneImpl.max_price();
 		for (String zid: zones) {
 			TollZoneImpl tz = lookupZone(zid);
