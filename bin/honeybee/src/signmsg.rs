@@ -453,8 +453,7 @@ impl MsgData {
         let mut j: Vec<HashMap<String, String>> = serde_json::from_reader(r)?;
         match j.pop() {
             Some(da) => Ok(da),
-            // FIXME
-            _ => unreachable!(),
+            _ => Err(Error::UnknownResource("DMS attributes".into())),
         }
     }
     /// Lookup a config

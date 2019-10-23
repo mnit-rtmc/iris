@@ -20,9 +20,6 @@ use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
-/// Output directory to write JSON resources
-static OUTPUT_DIR: &str = "/var/www/html/iris/";
-
 /// Make a PathBuf from a Path and file name
 pub fn make_name(dir: &Path, n: &str) -> PathBuf {
     let mut p = PathBuf::new();
@@ -354,7 +351,7 @@ impl Resource {
     fn fetch_file(&self, conn: &Connection, name: &str) -> Result<()> {
         debug!("fetch: {:?}", name);
         let t = Instant::now();
-        let p = Path::new(OUTPUT_DIR);
+        let p = Path::new("");
         let tn = make_tmp_name(p, name);
         let n = make_name(p, name);
         let writer = BufWriter::new(File::create(&tn)?);
@@ -367,7 +364,7 @@ impl Resource {
     fn fetch_sign_msgs(&self, conn: &Connection, name: &str) -> Result<()> {
         self.fetch_file(conn, name)?;
         // FIXME: spawn another thread for this?
-        render_all(Path::new(OUTPUT_DIR))
+        render_all(Path::new(""))
     }
     /// Fetch the resource from a connection.
     ///
