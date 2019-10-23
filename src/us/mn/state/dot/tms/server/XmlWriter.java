@@ -36,7 +36,7 @@ abstract public class XmlWriter {
 
 	/** XML output directory */
 	static public final File XML_OUTPUT_DIRECTORY =
-		new File("/var/www/html/iris_xml/");
+		new File("C:/Users/mjanson/iris-workspace/var/www/html/iris_xml/");
 
 	/** XML version and encoding declaration */
 	static protected final String XML_DECLARATION =

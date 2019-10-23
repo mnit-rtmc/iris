@@ -35,7 +35,7 @@ public class MainClient {
 
 	/** Name of default properties file to load */
 	static private final String DEFAULT_PROPERTIES =
-		"iris-client.properties";
+		"C:/Users/mjanson/iris-workspace/srf-iris/etc/iris-client.properties";
 
 	/** Get the name of the property file to use */
 	static private String getPropertyFile(String[] args) {

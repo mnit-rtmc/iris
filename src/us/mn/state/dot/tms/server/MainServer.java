@@ -50,10 +50,10 @@ public class MainServer {
 
 	/** Location of IRIS property configuration file */
 	static private final String PROP_FILE =
-		"/etc/iris/iris-server.properties";
+		"C:/Users/mjanson/iris-workspace/srf-iris/etc/iris-server.properties";
 
 	/** Directory to store IRIS log files */
-	static private final String LOG_FILE_DIR = "/var/log/iris/";
+	static private final String LOG_FILE_DIR = "C:/Users/mjanson/iris-workspace/var/log/iris/";
 
 	/** File to log standard out stream */
 	static private final String STD_OUT = LOG_FILE_DIR + "iris.stdout";

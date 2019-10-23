@@ -6,10 +6,10 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/mail.jar"/>
-	<classpathentry kind="lib" path="lib/postgresql-42.2.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/mjanson/iris-workspace/lib/mail.jar"/>
+	<classpathentry kind="lib" path="C:/Users/mjanson/iris-workspace/lib/postgresql-42.2.5.jar"/>
 	<classpathentry kind="lib" path="etc/i18n"/>
-	<classpathentry kind="lib" path="C:/Users/gparikh/MnDOT-iris/iris/prop.jar"/>
+	<classpathentry kind="lib" path="C:/Users/mjanson/iris-workspace/lib/prop.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/gst1-java-core"/>
 	<classpathentry kind="output" path="bin/eclipse"/>
 </classpath>
