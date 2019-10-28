@@ -23,4 +23,5 @@ mod error;
 pub mod fetcher;
 pub mod geo;
 mod resource;
+mod segments;
 mod signmsg;

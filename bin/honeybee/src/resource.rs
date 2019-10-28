@@ -13,11 +13,13 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
+use crate::segments::{RNode, RNodeMsg};
 use crate::signmsg::render_all;
 use postgres::Connection;
 use std::fs::{File, rename};
 use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
+use std::sync::mpsc::Sender;
 use std::time::Instant;
 
 /// Make a PathBuf from a Path and file name
@@ -83,11 +85,23 @@ impl Listen {
             Listen::Two(n0, n1) => n0 == &chan || n1 == &chan,
         }
     }
+    /// Check if listening to a channel / payload
+    fn is_listening_payload(&self, chan: &str, payload: &str) -> bool {
+        if let Listen::Exclude(n, exc) = self {
+            n == &chan && exc.contains(&payload)
+        } else {
+            self.is_listening(chan, payload)
+        }
+    }
 }
 
 /// A resource which can be fetched from a database connection.
 #[derive(PartialEq, Eq, Hash)]
 enum Resource {
+    /// RNode resource.
+    ///
+    /// * Listen specification.
+    RNode(Listen),
     /// Simple file resource.
     ///
     /// * File name.
@@ -178,17 +192,8 @@ const INCIDENT_RES: Resource = Resource::Simple(
 ) r",
 );
 
-/// R_Node resource
-const R_NODE_RES: Resource = Resource::Simple(
-"r_node", Listen::All("r_node"),
-"SELECT row_to_json(r)::text FROM (\
-    SELECT name, roadway, road_dir, cross_mod, cross_street, cross_dir, \
-           landmark, lat, lon, node_type, pickable, above, transition, lanes, \
-           attach_side, shift, active, abandoned, station_id, speed_limit, \
-           notes \
-    FROM r_node_view \
-) r",
-);
+/// RNode resource
+const R_NODE_RES: Resource = Resource::RNode(Listen::All("r_node"));
 
 /// Sign configuration resource
 const SIGN_CONFIG_RES: Resource = Resource::Simple(
@@ -322,26 +327,71 @@ fn fetch_simple<W: Write>(conn: &Connection, sql: &str, mut w: W)
     Ok(c)
 }
 
-impl Resource {
-    /// Check if a resource is listening to a channel
-    fn is_listening(&self, chan: &str, payload: &str) -> bool {
-        self.listen().is_listening(chan, payload)
+/// Fetch all r_nodes.
+///
+/// * `conn` The database connection.
+fn fetch_all_nodes(conn: &Connection, sender: &Sender<RNodeMsg>)
+    -> Result<()>
+{
+    debug!("fetch_all_nodes");
+    for row in &conn.query(RNode::SQL_ALL, &[])? {
+        sender.send(RNode::from_row(&row).into())?;
     }
+    Ok(())
+}
+
+/// Fetch one r_node.
+///
+/// * `conn` The database connection.
+fn fetch_one_node(conn: &Connection, name: &str, sender: &Sender<RNodeMsg>)
+    -> Result<()>
+{
+    debug!("fetch_one_node: {}", name);
+    let rows = &conn.query(RNode::SQL_ONE, &[&name])?;
+    if rows.len() == 1 {
+        for row in rows.iter() {
+            sender.send(RNode::from_row(&row).into())?;
+        }
+    } else {
+        assert!(rows.is_empty());
+        sender.send(RNodeMsg::Remove(name.to_string()))?;
+    }
+    Ok(())
+}
+
+impl Resource {
     /// Get the listen value
     fn listen(&self) -> &Listen {
         match self {
+            Resource::RNode(lsn) => &lsn,
             Resource::Simple(_, lsn, _) => &lsn,
             Resource::SignMsg(_, lsn, _) => &lsn,
         }
     }
-    /// Fetch to a writer.
+    /// Fetch the resource from a connection.
     ///
     /// * `conn` The database connection.
-    /// * `w` Writer for the file.
-    fn fetch_writer<W: Write>(&self, conn: &Connection, w: W) -> Result<u32> {
+    /// * `payload` Postgres NOTIFY payload.
+    fn fetch(&self, conn: &Connection, payload: &str,
+        sender: &Sender<RNodeMsg>) -> Result<()>
+    {
         match self {
-            Resource::Simple(_, _, sql) => fetch_simple(conn, sql, w),
-            Resource::SignMsg(_, _, sql) => fetch_simple(conn, sql, w),
+            Resource::RNode(_) => self.fetch_nodes(conn, payload, sender),
+            Resource::Simple(n, _, _) => self.fetch_file(conn, n),
+            Resource::SignMsg(n, _, _) => self.fetch_sign_msgs(conn, n),
+        }
+    }
+    /// Fetch r_node resource from a connection.
+    ///
+    /// * `conn` The database connection.
+    /// * `payload` Postgres NOTIFY payload.
+    fn fetch_nodes(&self, conn: &Connection, payload: &str,
+        sender: &Sender<RNodeMsg>) -> Result<()>
+    {
+        if payload == "" {
+            fetch_all_nodes(conn, sender)
+        } else {
+            fetch_one_node(conn, payload, sender)
         }
     }
     /// Fetch a file resource from a connection.
@@ -349,7 +399,7 @@ impl Resource {
     /// * `conn` The database connection.
     /// * `name` File name.
     fn fetch_file(&self, conn: &Connection, name: &str) -> Result<()> {
-        debug!("fetch: {:?}", name);
+        debug!("fetch_file: {:?}", name);
         let t = Instant::now();
         let p = Path::new("");
         let tn = make_tmp_name(p, name);
@@ -360,21 +410,22 @@ impl Resource {
         info!("{}: wrote {} rows in {:?}", name, c, t.elapsed());
         Ok(())
     }
+    /// Fetch to a writer.
+    ///
+    /// * `conn` The database connection.
+    /// * `w` Writer for the file.
+    fn fetch_writer<W: Write>(&self, conn: &Connection, w: W) -> Result<u32> {
+        match self {
+            Resource::RNode(_) => unreachable!(),
+            Resource::Simple(_, _, sql) => fetch_simple(conn, sql, w),
+            Resource::SignMsg(_, _, sql) => fetch_simple(conn, sql, w),
+        }
+    }
     /// Fetch sign messages resource.
     fn fetch_sign_msgs(&self, conn: &Connection, name: &str) -> Result<()> {
         self.fetch_file(conn, name)?;
         // FIXME: spawn another thread for this?
         render_all(Path::new(""))
-    }
-    /// Fetch the resource from a connection.
-    ///
-    /// * `conn` The database connection.
-    fn fetch(&self, conn: &Connection) -> Result<()> {
-        // FIXME: for r_nodes, build corridors and store in earthwyrm db
-        match self {
-            Resource::Simple(n, _, _) => self.fetch_file(conn, n),
-            Resource::SignMsg(n, _, _) => self.fetch_sign_msgs(conn, n),
-        }
     }
 }
 
@@ -393,9 +444,9 @@ pub fn listen_all(conn: &Connection) -> Result<()> {
 /// Fetch all resources.
 ///
 /// * `conn` The database connection.
-pub fn fetch_all(conn: &Connection) -> Result<()> {
+pub fn fetch_all(conn: &Connection, sender: &Sender<RNodeMsg>) -> Result<()> {
     for r in ALL {
-        r.fetch(&conn)?;
+        r.fetch(&conn, "", sender)?;
     }
     Ok(())
 }
@@ -405,17 +456,24 @@ pub fn fetch_all(conn: &Connection) -> Result<()> {
 /// * `conn` The database connection.
 /// * `chan` Channel name.
 /// * `payload` Notification payload.
-pub fn notify(conn: &Connection, chan: &str, payload: &str) -> Result<()> {
-    trace!("notification: ({}, {})", &chan, &payload);
+pub fn notify(conn: &Connection, chan: &str, payload: &str,
+    sender: &Sender<RNodeMsg>) -> Result<()>
+{
+    debug!("notify: {}, {}", &chan, &payload);
     let mut found = false;
     for r in ALL {
-        if r.is_listening(chan, payload) {
+        if r.listen().is_listening(chan, payload) {
             found = true;
-            r.fetch(&conn)?;
+            r.fetch(&conn, payload, sender)?;
         }
     }
     if !found {
         warn!("unknown resource: ({}, {})", &chan, &payload);
     }
     Ok(())
+}
+
+/// Check if any resource is listening to a channel / payload
+pub fn is_listening_payload(chan: &str, payload: &str) -> bool {
+    ALL.iter().any(|r| r.listen().is_listening_payload(chan,  payload))
 }

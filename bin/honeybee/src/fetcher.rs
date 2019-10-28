@@ -14,18 +14,25 @@
 //
 use crate::error::Result;
 use crate::resource;
+use crate::segments::{receive_nodes, RNodeMsg};
 use fallible_iterator::FallibleIterator;
 use postgres::{Connection, TlsMode};
 use std::collections::HashSet;
 use std::env;
+use std::thread;
 use std::time::Duration;
+use std::sync::mpsc::Sender;
 
 /// Start receiving notifications and fetching resources.
 pub fn start() -> Result<()> {
+    let (sender, receiver) = std::sync::mpsc::channel();
+    thread::spawn(move || {
+        receive_nodes(receiver)
+    });
     let conn = create_connection()?;
     resource::listen_all(&conn)?;
-    resource::fetch_all(&conn)?;
-    notify_loop(&conn)
+    resource::fetch_all(&conn, &sender)?;
+    notify_loop(&conn, sender)
 }
 
 /// Create database connection
@@ -63,17 +70,22 @@ fn time_zone() -> Option<String> {
 /// Receive PostgreSQL notifications, and fetch needed resources.
 ///
 /// * `conn` The database connection.
-fn notify_loop(conn: &Connection) -> Result<()> {
+fn notify_loop(conn: &Connection, sender: Sender<RNodeMsg>) -> Result<()> {
     let nots = conn.notifications();
     let mut ns = HashSet::new();
     loop {
         // Collect until 300 ms have elapsed with no new notifications
         for n in nots.timeout_iter(Duration::from_millis(300)).iterator() {
             let n = n?;
-            ns.insert((n.channel, n.payload));
+            // Discard payload if we're not listening for it
+            if resource::is_listening_payload(&n.channel, &n.payload) {
+                ns.insert((n.channel, n.payload));
+            } else {
+                ns.insert((n.channel, "".to_string()));
+            }
         }
         for n in ns.drain() {
-            resource::notify(conn, &n.0, &n.1)?;
+            resource::notify(conn, &n.0, &n.1, &sender)?;
         }
     }
 }
