@@ -649,7 +649,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 			String mod = GeoLocHelper.getModifier(loc);
 			if (loc.getCrossMod() == 0)
 				mod = "";
-			String lbl = GeoLocHelper.getCrossDescription(loc, mod);
+			String lbl = GeoLocHelper.getCrossLocation(loc, mod);
 			w.write(createAttribute("label", lbl));
 			Position pos = GeoLocHelper.getWgs84Position(loc);
 			if (pos != null) {

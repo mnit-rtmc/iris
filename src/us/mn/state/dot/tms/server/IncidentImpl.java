@@ -386,7 +386,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		R_Node rnd = cor.findNearest(getWgs84Position());
 		if (rnd == null)
 			return null;
-		return GeoLocHelper.getCrossDescription(rnd.getGeoLoc());
+		return GeoLocHelper.getCrossLocation(rnd.getGeoLoc());
 	}
 
 	/** Get Position in WGS84 */

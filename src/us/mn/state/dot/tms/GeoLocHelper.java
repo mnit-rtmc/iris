@@ -38,7 +38,7 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Lookup a geo location */
 	static public GeoLoc lookup(String name) {
-		return (GeoLoc)namespace.lookupObject(GeoLoc.SONAR_TYPE,
+		return (GeoLoc) namespace.lookupObject(GeoLoc.SONAR_TYPE,
 			name);
 	}
 
@@ -69,7 +69,7 @@ public class GeoLocHelper extends BaseHelper {
 				b.append(road.trim());
 			}
 		}
-		String c = getCrossDescription(l, connect);
+		String c = getCrossLocation(l, connect);
 		if (c != null) {
 			if (b.length() > 0)
 				b.append(' ');
@@ -86,20 +86,19 @@ public class GeoLocHelper extends BaseHelper {
 	}
 
 	/** Get a description of the cross-street location */
-	static public String getCrossDescription(GeoLoc l) {
-		return getCrossDescription(l, null);
+	static public String getCrossLocation(GeoLoc l) {
+		return getCrossLocation(l, null);
 	}
 
 	/** Get a description of the cross-street location */
-	static public String getCrossDescription(GeoLoc l, String connect) {
+	static public String getCrossLocation(GeoLoc l, String connect) {
 		if (l != null) {
 			Road x = l.getCrossStreet();
 			if (x != null) {
 				StringBuilder cross = new StringBuilder();
-				if (connect != null)
-					cross.append(connect);
-				else
-					cross.append(getModifier(l));
+				cross.append((connect != null)
+					? connect
+				        : getModifier(l));
 				cross.append(' ');
 				cross.append(x.getName());
 				cross.append(' ');
@@ -120,11 +119,8 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Get cross street or landmark label */
 	static public String getCrossOrLandmark(GeoLoc l) {
-		String xd = getCrossDescription(l);
-		if (xd != null)
-			return xd;
-		else
-			return getLandmark(l);
+		String xd = getCrossLocation(l);
+		return (xd != null) ? xd : getLandmark(l);
 	}
 
 	/** Get the location landmark */
@@ -250,19 +246,17 @@ public class GeoLocHelper extends BaseHelper {
 	static public Distance distanceTo(GeoLoc l0, GeoLoc l1) {
 		Position p0 = getWgs84Position(l0);
 		Position p1 = getWgs84Position(l1);
-		if (p0 != null && p1 != null)
-			return new Distance(p0.distanceHaversine(p1));
-		else
-			return null;
+		return (p0 != null && p1 != null)
+		      ? new Distance(p0.distanceHaversine(p1))
+		      : null;
 	}
 
 	/** Calculate the distance between two locations */
 	static public Distance distanceTo(GeoLoc l0, Position p1) {
 		Position p0 = getWgs84Position(l0);
-		if (p0 != null && p1 != null)
-			return new Distance(p0.distanceHaversine(p1));
-		else
-			return null;
+		return (p0 != null && p1 != null)
+		      ? new Distance(p0.distanceHaversine(p1))
+		      : null;
 	}
 
 	/** Test if another location matches */
@@ -324,19 +318,17 @@ public class GeoLocHelper extends BaseHelper {
 	static public Position getWgs84Position(GeoLoc p) {
 		Double lat = getLat(p);
 		Double lon = getLon(p);
-		if (lat != null && lon != null)
-			return new Position(lat, lon);
-		else
-			return null;
+		return (lat != null && lon != null)
+		      ? new Position(lat, lon)
+		      : null;
 	}
 
 	/** Create a spherical mercator position */
 	static public SphericalMercatorPosition getPosition(GeoLoc p) {
 		Position pos = getWgs84Position(p);
-		if (pos != null)
-			return SphericalMercatorPosition.convert(pos);
-		else
-			return null;
+		return (pos != null)
+		      ? SphericalMercatorPosition.convert(pos)
+		      : null;
 	}
 
 	/** Get the root label (for a detector or a station) */
