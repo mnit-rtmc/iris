@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2017  Minnesota Department of Transportation
+ * Copyright (C) 2005-2019  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -378,15 +378,15 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	@Override
 	public void clear() {
 		loc = null;
-		roadway_cbx.setEnabled(false);
+		roadway_act.setEnabled(false);
 		roadway_cbx.setSelectedIndex(0);
-		road_dir_cbx.setEnabled(false);
+		road_dir_act.setEnabled(false);
 		road_dir_cbx.setSelectedIndex(0);
-		cross_mod_cbx.setEnabled(false);
+		cross_mod_act.setEnabled(false);
 		cross_mod_cbx.setSelectedIndex(0);
-		cross_cbx.setEnabled(false);
+		cross_act.setEnabled(false);
 		cross_cbx.setSelectedIndex(0);
-		cross_dir_cbx.setEnabled(false);
+		cross_dir_act.setEnabled(false);
 		cross_dir_cbx.setSelectedIndex(0);
 		lat_txt.setEnabled(false);
 		lat_txt.setText("");
