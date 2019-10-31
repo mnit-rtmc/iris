@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.ArrayList;
 import us.mn.state.dot.tms.geo.MapLineSegment;
 import us.mn.state.dot.tms.geo.MapVector;
 import us.mn.state.dot.tms.geo.Position;
@@ -60,15 +61,7 @@ public class GeoLocHelper extends BaseHelper {
 	/** Get a description of the location */
 	static private String getLocation(GeoLoc l, String connect) {
 		StringBuilder b = new StringBuilder();
-		if (l != null) {
-			Road r = l.getRoadway();
-			if (r != null) {
-				short rd = l.getRoadDir();
-				String road = r.getName() + " " +
-					Direction.fromOrdinal(rd).abbrev;
-				b.append(road.trim());
-			}
-		}
+		b.append(getRoadLocation(l));
 		String c = getCrossLocation(l, connect);
 		if (c != null) {
 			if (b.length() > 0)
@@ -83,6 +76,20 @@ public class GeoLocHelper extends BaseHelper {
 			}
 		}
 		return (b.length() > 0) ? b.toString() : "Unknown location";
+	}
+
+	/** Get a description of the roadway location */
+	static private String getRoadLocation(GeoLoc l) {
+		if (l != null) {
+			Road r = l.getRoadway();
+			if (r != null) {
+				short rd = l.getRoadDir();
+				String road = r.getName() + " " +
+					Direction.fromOrdinal(rd).abbrev;
+				return road.trim();
+			}
+		}
+		return "";
 	}
 
 	/** Get a description of the cross-street location */
@@ -117,10 +124,16 @@ public class GeoLocHelper extends BaseHelper {
 		      : null;
 	}
 
-	/** Get cross street or landmark label */
-	static public String getCrossOrLandmark(GeoLoc l) {
-		String xd = getCrossLocation(l);
-		return (xd != null) ? xd : getLandmark(l);
+	/** Get cross street / landmark label */
+	static public String getCrossLandmark(GeoLoc l) {
+		ArrayList<String> list = new ArrayList<String>();
+		String xloc = getCrossLocation(l);
+		if (xloc != null)
+			list.add(xloc);
+		String lm = getLandmark(l);
+		if (lm != null)
+			list.add(lm);
+		return String.join(" ", list);
 	}
 
 	/** Get the location landmark */

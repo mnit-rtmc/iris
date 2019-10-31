@@ -168,10 +168,10 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 		drawSkipStripes(g2, height);
 		drawDetectors(g2, height);
 		drawSpeedLimit(g2, height);
-		String xorl = GeoLocHelper.getCrossOrLandmark(
+		String xl = GeoLocHelper.getCrossLandmark(
 			r_node.getGeoLoc());
-		if (xorl != null)
-			drawCrossOrLandmark(g2, xorl, width, height);
+		if (xl.length() > 0)
+			drawCrossLandmark(g2, xl, width, height);
 		if (selected) {
 			drawMarker(g2, height);
 			drawShiftHandle(g2, height);
@@ -493,12 +493,12 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 		}
 	}
 
-	/** Draw the cross-street or landmark label */
-	private void drawCrossOrLandmark(Graphics2D g, String xorl, int width,
+	/** Draw the cross-street / landmark label */
+	private void drawCrossLandmark(Graphics2D g, String xl, int width,
 		int height)
 	{
 		GlyphVector gv = FONT_XSTREET.createGlyphVector(
-			g.getFontRenderContext(), xorl);
+			g.getFontRenderContext(), xl);
 		Rectangle2D rect = gv.getVisualBounds();
 		int x = width - (int) rect.getWidth() - UI.hgap * 2;
 		int y = (height + (int) rect.getHeight()) / 2;
