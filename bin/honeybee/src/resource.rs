@@ -334,9 +334,11 @@ fn fetch_all_nodes(conn: &Connection, sender: &Sender<RNodeMsg>)
     -> Result<()>
 {
     debug!("fetch_all_nodes");
+    sender.send(RNodeMsg::Order(false))?;
     for row in &conn.query(RNode::SQL_ALL, &[])? {
         sender.send(RNode::from_row(&row).into())?;
     }
+    sender.send(RNodeMsg::Order(true))?;
     Ok(())
 }
 

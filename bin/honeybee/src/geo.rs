@@ -48,7 +48,7 @@ impl Wgs84Pos {
     }
 
     /// Create a new WGS-84 position
-    fn new(lat_deg: f64, lon_deg: f64) -> Self {
+    pub fn new(lat_deg: f64, lon_deg: f64) -> Self {
         let lat_deg = limit_value(lat_deg, 90.0);
         let lon_deg = limit_value(lon_deg, 180.0);
         let lat = lat_deg.to_radians();

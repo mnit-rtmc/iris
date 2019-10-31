@@ -13,8 +13,10 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
+use crate::geo::Wgs84Pos;
 use postgres::rows::Row;
 use std::collections::HashMap;
+use std::cmp::Ordering;
 use std::sync::mpsc::Receiver;
 
 /// Roadway node
@@ -49,6 +51,8 @@ pub enum RNodeMsg {
     AddUpdate(Box<RNode>),
     /// Remove an RNode
     Remove(String),
+    /// Enable/disable ordering for all RNodes
+    Order(bool),
 }
 
 impl From<RNode> for RNodeMsg {
@@ -57,17 +61,55 @@ impl From<RNode> for RNodeMsg {
     }
 }
 
+/// General direction of travel
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+enum TravelDir {
+    /// Northbound
+    NB,
+    /// Southbound
+    SB,
+    /// Eastbound
+    EB,
+    /// Westbound
+    WB,
+}
+
+impl TravelDir {
+    fn from_i16(dir: i16) -> Option<Self> {
+        match dir {
+            1 => Some(TravelDir::NB),
+            2 => Some(TravelDir::SB),
+            3 => Some(TravelDir::EB),
+            4 => Some(TravelDir::WB),
+            _ => None,
+        }
+    }
+}
+
 /// Corridor ID
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 struct CorridorId {
     roadway: String,
-    road_dir: i16,
+    travel_dir: TravelDir,
 }
 
-/// A corridor is one direction of a roadway
+/// A corridor is one direction of a roadway.
+///
+/// Each corridor contains a Vec of nodes.
+///
+/// When ordered, the first node depends on the direction of travel.  For
+/// example, on a northbound corridor it would be the furthest south node.
+/// The other nodes are ordered based on the nearest remaining node to the
+/// previous, using haversine distance.
+///
+/// Invalid nodes (not active or missing location) are placed at the end.
 struct Corridor {
+    /// Corridor ID
     cor_id: CorridorId,
+    /// Nodes ordered by corridor direction
     nodes: Vec<Box<RNode>>,
+    /// Valid node count
+    count: usize,
 }
 
 /// All segments state
@@ -76,6 +118,8 @@ struct SegmentState {
     node_cors: HashMap<String, CorridorId>,
     /// Mapping of corridor IDs to Corridors
     corridors: HashMap<CorridorId, Corridor>,
+    /// Ordered flag
+    ordered: bool,
 }
 
 impl Corridor {
@@ -83,28 +127,110 @@ impl Corridor {
     fn new(cor_id: CorridorId) -> Self {
         debug!("Corridor::new {:?}", &cor_id);
         let nodes = vec![];
-        Corridor { cor_id, nodes }
+        let count = 0;
+        Corridor { cor_id, nodes, count }
+    }
+    /// Compare lat/lon positions in corridor direction
+    fn cmp_dir(&self, lat: f64, lt: f64, lon: f64, ln: f64) -> Option<Ordering>{
+        match self.cor_id.travel_dir {
+            TravelDir::NB => lt.partial_cmp(&lat),
+            TravelDir::SB => lat.partial_cmp(&lt),
+            TravelDir::EB => ln.partial_cmp(&lon),
+            TravelDir::WB => lon.partial_cmp(&ln),
+        }
+    }
+    /// Get index of the first node in corridor direction
+    fn first_node(&mut self) -> Option<usize> {
+        let mut idx_lt_ln = None; // (node index, lat, lon)
+        for (i, ref n) in self.nodes.iter().enumerate() {
+            if let Some((lat, lon)) = n.latlon() {
+                idx_lt_ln = Some(match idx_lt_ln {
+                    None => (i, lat, lon),
+                    Some((j, lt, ln)) => {
+                        match self.cmp_dir(lat, lt, lon, ln) {
+                            Some(Ordering::Greater) => (i, lat, lon),
+                            _ => (j, lt, ln),
+                        }
+                    }
+                });
+            }
+        }
+        idx_lt_ln.and_then(|(i, _lt, _ln)| Some(i))
+    }
+    /// Get index of the nearest node after idx
+    fn nearest_node(&self, idx: usize) -> Option<usize> {
+        let pos = self.nodes.iter().nth(idx)?.pos()?;
+        let mut idx_dist = None; // (node index, distance)
+        for (i, ref n) in self.nodes.iter().enumerate().skip(idx + 1) {
+            if let Some(ref p) = n.pos() {
+                let i_dist = (i, pos.distance_haversine(p));
+                idx_dist = Some(match idx_dist {
+                    None => i_dist,
+                    Some((j, d)) => {
+                        if d < i_dist.1 {
+                            (j, d)
+                        } else {
+                            i_dist
+                        }
+                    },
+                });
+            }
+        }
+        idx_dist.and_then(|(i, _d)| Some(i))
+    }
+    /// Order all nodes
+    fn order_nodes(&mut self) {
+        self.count = match self.first_node() {
+            Some(i) => {
+                if i > 0 {
+                    self.nodes.swap(0, i);
+                }
+                let mut idx = 0;
+                while idx < self.nodes.len() {
+                    match self.nearest_node(idx) {
+                        Some(j) => self.nodes.swap(idx + 1, j),
+                        None => break,
+                    }
+                    idx += 1;
+                }
+                idx + 1
+            }
+            None => 0,
+        };
+        debug!("order_nodes: {:?}, count: {} of {}", self.cor_id, self.count,
+            self.nodes.len());
     }
     /// Add a node
-    fn add_node(&mut self, node: Box<RNode>) {
+    fn add_node(&mut self, node: Box<RNode>, ordered: bool) {
         debug!("add_node {} to {:?} ({} + 1)", &node.name, &self.cor_id,
             self.nodes.len());
-        // FIXME: put node in correct order
         self.nodes.push(node);
+        if ordered {
+            self.order_nodes();
+        }
     }
     /// Update a node
-    fn update_node(&mut self, node: Box<RNode>) {
+    fn update_node(&mut self, node: Box<RNode>, ordered: bool) {
         debug!("update_node {} to {:?} ({})", &node.name, &self.cor_id,
             self.nodes.len());
-        // FIXME: update node position
+        match self.nodes.iter_mut().find(|n| n.name == node.name) {
+            Some(n) => *n = node,
+            None => error!("update_node: {} not found", node.name),
+        }
+        if ordered {
+            self.order_nodes();
+        }
     }
     /// Remove a node
-    fn remove_node(&mut self, name: &str) {
+    fn remove_node(&mut self, name: &str, ordered: bool) {
         debug!("remove_node {} from {:?} ({} - 1)", &name, &self.cor_id,
             self.nodes.len());
         match self.nodes.iter().position(|n| n.name == name) {
             Some(idx) => {
                 self.nodes.remove(idx);
+                if ordered {
+                    self.order_nodes();
+                }
             },
             None => error!("remove_node: {} not found", name),
         }
@@ -162,10 +288,24 @@ impl RNode {
         match (&self.roadway, self.road_dir) {
             (Some(roadway), Some(road_dir)) => {
                 let roadway = roadway.clone();
-                Some(CorridorId { roadway, road_dir })
+                match TravelDir::from_i16(road_dir) {
+                    Some(travel_dir) => Some(CorridorId { roadway, travel_dir }),
+                    None => None,
+                }
             },
             _ => None,
         }
+    }
+    /// Get the lat/lon of the node
+    fn latlon(&self) -> Option<(f64, f64)> {
+        match (self.active, self.lat, self.lon) {
+            (true, Some(lat), Some(lon)) => Some((lat, lon)),
+            _ => None,
+        }
+    }
+    /// Get the node position
+    fn pos(&self) -> Option<Wgs84Pos> {
+        self.latlon().and_then(|(lat, lon)| Some(Wgs84Pos::new(lat, lon)))
     }
 }
 
@@ -174,7 +314,8 @@ impl SegmentState {
     fn new() -> Self {
         let node_cors = HashMap::new();
         let corridors = HashMap::new();
-        SegmentState { node_cors, corridors }
+        let ordered = false;
+        SegmentState { node_cors, corridors, ordered }
     }
     /// Add or update a node
     fn add_update_node(&mut self, node: Box<RNode>) {
@@ -195,19 +336,19 @@ impl SegmentState {
     /// Add a node to corridor
     fn add_corridor_node(&mut self, cid: &CorridorId, node: Box<RNode>) {
         match self.corridors.get_mut(&cid) {
-            Some(cor) => cor.add_node(node),
+            Some(cor) => cor.add_node(node, self.ordered),
             None => {
                 let mut cor = Corridor::new(cid.clone());
-                cor.add_node(node);
+                cor.add_node(node, self.ordered);
                 self.corridors.insert(cid.clone(), cor);
-            },
+            }
         }
     }
     /// Remove a node from a corridor
     fn remove_corridor_node(&mut self, cid: &CorridorId, name: &str) {
         match self.corridors.get_mut(cid) {
             Some(cor) => {
-                cor.remove_node(name);
+                cor.remove_node(name, self.ordered);
                 if cor.nodes.is_empty() {
                     debug!("removing corridor: {:?}", cid);
                     self.corridors.remove(cid);
@@ -219,7 +360,7 @@ impl SegmentState {
     /// Update a node on a corridor
     fn update_corridor_node(&mut self, cid: &CorridorId, node: Box<RNode>) {
         match self.corridors.get_mut(cid) {
-            Some(cor) => cor.update_node(node),
+            Some(cor) => cor.update_node(node, self.ordered),
             None => error!("corridor ID not found {:?}", cid),
         }
     }
@@ -228,6 +369,15 @@ impl SegmentState {
         match self.node_cors.remove(name) {
             Some(ref cid) => self.remove_corridor_node(cid, name),
             None => error!("corridor not found for node: {}", name),
+        }
+    }
+    /// Order all corridors
+    fn set_ordered(&mut self, ordered: bool) {
+        self.ordered = ordered;
+        if ordered {
+            for (_cid, cor) in &mut self.corridors {
+                cor.order_nodes();
+            }
         }
     }
 }
@@ -239,6 +389,7 @@ pub fn receive_nodes(receiver: Receiver<RNodeMsg>) -> Result<()> {
         match receiver.recv()? {
             RNodeMsg::AddUpdate(node) => state.add_update_node(node),
             RNodeMsg::Remove(name) => state.remove_node(&name),
+            RNodeMsg::Order(ordered) => state.set_ordered(ordered),
         }
         debug!("total corridors: {}", state.corridors.len());
     }
