@@ -126,6 +126,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	public R_NodeImpl(String n) {
 		super(n);
 		notes = "";
+		active = true;
 	}
 
 	/** Create an r_node */
