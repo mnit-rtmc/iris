@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -125,7 +125,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 		});
 		cols.add(new ProxyColumn<Controller>("location", 200) {
 			public Object getValueAt(Controller c) {
-				return GeoLocHelper.getDescription(
+				return GeoLocHelper.getLocation(
 					c.getCabinet().getGeoLoc());
 			}
 		});

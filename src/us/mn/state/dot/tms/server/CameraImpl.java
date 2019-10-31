@@ -468,7 +468,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		w.write("<camera");
 		w.write(createAttribute("name", getName()));
 		w.write(createAttribute("description",
-		        GeoLocHelper.getDescription(geo_loc)));
+		        GeoLocHelper.getLocation(geo_loc)));
 		Position pos = GeoLocHelper.getWgs84Position(geo_loc);
 		if (pos != null) {
 			w.write(createAttribute("lon",

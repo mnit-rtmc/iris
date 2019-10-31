@@ -52,7 +52,7 @@ public class ControllerHelper extends BaseHelper {
 	/** Get a controller location or an empty string */
 	static public String getLocation(Controller ctrl) {
 		GeoLoc loc = getGeoLoc(ctrl);
-		return (loc != null) ? GeoLocHelper.getDescription(loc) : "";
+		return (loc != null) ? GeoLocHelper.getLocation(loc) : "";
 	}
 
 	/** Get a controller position or null */

@@ -214,7 +214,7 @@ public class IncidentManager extends ProxyManager<Incident>
 	public String getDescription(Incident inc) {
 		String td = getTypeDesc(inc);
 		if (td.length() > 0) {
-			String loc = getGeoLoc(inc).getDescription();
+			String loc = getGeoLoc(inc).getLocation();
 			return td + " -- " + loc;
 		} else
 			return "";

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,6 +103,6 @@ public class MeterManager extends DeviceManager<RampMeter> {
 	@Override
 	public String getDescription(RampMeter proxy) {
 		return proxy.getName() + " - " +
-			GeoLocHelper.getOnRampDescription(getGeoLoc(proxy));
+			GeoLocHelper.getOnRampLocation(getGeoLoc(proxy));
 	}
 }

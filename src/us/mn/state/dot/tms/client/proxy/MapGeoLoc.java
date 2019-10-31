@@ -18,7 +18,6 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.map.MapObject;
@@ -117,11 +116,6 @@ public class MapGeoLoc implements MapObject {
 	@Override
 	public AffineTransform getInverseTransform() {
 		return itransform;
-	}
-
-	/** Get a description of the location */
-	public String getDescription() {
-		return GeoLocHelper.getDescription(loc);
 	}
 
 	/** Proxy manager */

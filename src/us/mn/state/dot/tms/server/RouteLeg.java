@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -158,9 +158,9 @@ public class RouteLeg {
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return "leg orig: " + GeoLocHelper.getDescription(orig)
+		return "leg orig: " + GeoLocHelper.getLocation(orig)
 		       + ", o_mi: " + o_mi
-		       + ", dest: " + GeoLocHelper.getDescription(dest)
+		       + ", dest: " + GeoLocHelper.getLocation(dest)
 		       + ", d_mi: " + d_mi
 		       + ", turn: " + turn;
 	}

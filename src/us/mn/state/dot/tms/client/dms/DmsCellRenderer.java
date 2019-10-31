@@ -206,7 +206,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		name_lbl.setText(name);
 		owner_lbl.setText(getOwner(dms));
 		updatePixelPanel(dms);
-		String loc = GeoLocHelper.getDescription(dms.getGeoLoc());
+		String loc = GeoLocHelper.getLocation(dms.getGeoLoc());
 		updateToolTip(dms, name, loc);
 		Color bc = getIncBackground(dms);
 		pixel_pnl.setBackground(bc);

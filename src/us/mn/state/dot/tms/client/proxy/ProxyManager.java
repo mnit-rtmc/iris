@@ -507,7 +507,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Get the description of a proxy */
 	public String getDescription(T proxy) {
 		return proxy.getName() + " - " +
-			GeoLocHelper.getDescription(getGeoLoc(proxy));
+			GeoLocHelper.getLocation(getGeoLoc(proxy));
 	}
 
 	/** Check if the corresponding layer is visible.

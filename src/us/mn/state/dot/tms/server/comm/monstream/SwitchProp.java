@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -166,7 +166,7 @@ public class SwitchProp extends MonProp {
 	private String getDescription() {
 		return CameraHelper.isBlank(camera)
 		      ? ""
-		      : GeoLocHelper.getDescription(camera.getGeoLoc());
+		      : GeoLocHelper.getLocation(camera.getGeoLoc());
 	}
 
 	/** Get the stream latency (ms) */

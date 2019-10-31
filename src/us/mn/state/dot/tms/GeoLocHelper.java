@@ -43,22 +43,22 @@ public class GeoLocHelper extends BaseHelper {
 	}
 
 	/** Get a description of the location */
-	static public String getDescription(GeoLoc l) {
-		return getDescription(l, null);
+	static public String getLocation(GeoLoc l) {
+		return getLocation(l, null);
 	}
 
 	/** Get a description of an on-ramp location */
-	static public String getOnRampDescription(GeoLoc l) {
-		return getDescription(l, "from");
+	static public String getOnRampLocation(GeoLoc l) {
+		return getLocation(l, "from");
 	}
 
 	/** Get a description of an off-ramp location */
-	static public String getOffRampDescription(GeoLoc l) {
-		return getDescription(l, "to");
+	static public String getOffRampLocation(GeoLoc l) {
+		return getLocation(l, "to");
 	}
 
 	/** Get a description of the location */
-	static private String getDescription(GeoLoc l, String connect) {
+	static private String getLocation(GeoLoc l, String connect) {
 		StringBuilder b = new StringBuilder();
 		if (l != null) {
 			Road r = l.getRoadway();

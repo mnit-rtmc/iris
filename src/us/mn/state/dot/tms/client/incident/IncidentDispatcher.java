@@ -560,7 +560,7 @@ public class IncidentDispatcher extends IPanel
 			type_lbl.setText(manager.getTypeDesc(inc));
 			type_lbl.setIcon(manager.getIcon(inc));
 			location_lbl.setText(
-				manager.getGeoLoc(inc).getDescription());
+				manager.getGeoLoc(inc).getLocation());
 			if (inc instanceof ClientIncident)
 				camera_cbx.setModel(createCameraModel(inc));
 			setCameraAction(inc);

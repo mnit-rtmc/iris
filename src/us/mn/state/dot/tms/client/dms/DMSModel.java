@@ -43,8 +43,7 @@ public class DMSModel extends ProxyTableModel<DMS> {
 		});
 		cols.add(new ProxyColumn<DMS>("location", 240) {
 			public Object getValueAt(DMS d) {
-				return GeoLocHelper.getDescription(
-					d.getGeoLoc());
+				return GeoLocHelper.getLocation(d.getGeoLoc());
 			}
 		});
 		cols.add(new ProxyColumn<DMS>("location.dir", 32) {

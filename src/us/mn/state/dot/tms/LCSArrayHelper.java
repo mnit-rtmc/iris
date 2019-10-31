@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.TreeMap;
 
 /**
@@ -82,7 +81,7 @@ public class LCSArrayHelper extends BaseHelper {
 
 	/** Lookup the location of the LCS array */
 	static public String lookupLocation(LCSArray lcs_array) {
-		return GeoLocHelper.getDescription(lookupGeoLoc(lcs_array));
+		return GeoLocHelper.getLocation(lookupGeoLoc(lcs_array));
 	}
 
 	/** Lookup the location of the LCS array */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -186,7 +186,7 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 			setPresetAction(rm);
 		// FIXME: this won't update when geoLoc attributes change
 		if(a == null || a.equals("geoLoc")) {
-			location_lbl.setText(GeoLocHelper.getOnRampDescription(
+			location_lbl.setText(GeoLocHelper.getOnRampLocation(
 				rm.getGeoLoc()));
 		}
 		if(a == null || a.equals("operation"))

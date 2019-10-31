@@ -317,7 +317,7 @@ public class GateArmDispatcher extends IPanel
 		if (null == a || a.equals("name"))
 			name_lbl.setText(ga.getName());
 		if (null == a || a.equals("geoLoc")) {
-			location_lbl.setText(GeoLocHelper.getDescription(
+			location_lbl.setText(GeoLocHelper.getLocation(
 				ga.getGeoLoc()));
 		}
 		if ("camera".equals(a))

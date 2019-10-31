@@ -357,7 +357,7 @@ public class SingleSignTab extends IPanel {
 			setPresetAction(dms);
 		// FIXME: this won't update when geoLoc attributes change
 		if (a == null || a.equals("geoLoc")) {
-			location_lbl.setText(GeoLocHelper.getDescription(
+			location_lbl.setText(GeoLocHelper.getLocation(
 				dms.getGeoLoc()));
 		}
 		if (a == null || a.equals("operation"))
