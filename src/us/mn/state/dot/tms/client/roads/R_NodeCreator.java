@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.R_Node;
-import static us.mn.state.dot.tms.R_Node.MID_SHIFT;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.geo.Position;
@@ -68,7 +67,7 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 
 	/** Create a new r_node */
 	public void create(Road roadway, short road_dir, Position pos,
-		int lanes, int shift)
+		int lanes, int shift, Integer speed_limit)
 	{
 		Float lat = null;
 		Float lon = null;
@@ -78,7 +77,7 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 		}
 		String name = createUniqueR_NodeName();
 		if (canAdd(name)) {
-			putAttrs(name, lanes, shift);
+			putAttrs(name, lanes, shift, speed_limit);
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			if (roadway != null)
@@ -91,19 +90,18 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	}
 
 	/** Put a set of attributes for an in-process name */
-	private void putAttrs(String name, int lanes, int shift) {
+	private void putAttrs(String name, int lanes, int shift,
+		Integer speed_limit)
+	{
 		HashMap<String, Object> attrs =
 			new HashMap<String, Object>();
 		attrs.put("lanes", lanes);
 		attrs.put("shift", shift);
+		if (speed_limit != null)
+			attrs.put("speed_limit", speed_limit);
 		synchronized (in_process) {
 			in_process.put(name, attrs);
 		}
-	}
-
-	/** Create a new r_node (with no default corridor) */
-	public void create(Position pos) {
-		create(null, (short)0, pos, 2, MID_SHIFT + 1);
 	}
 
 	/** Create a unique R_Node name */

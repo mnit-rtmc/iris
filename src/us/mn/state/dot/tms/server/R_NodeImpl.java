@@ -69,7 +69,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new R_NodeImpl(namespace,
+				namespace.addObject(new R_NodeImpl(
 					row.getString(1),	// name
 					row.getString(2),	// geo_loc
 					row.getInt(3),		// node_type
@@ -129,7 +129,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Create an r_node */
-	protected R_NodeImpl(String n, GeoLocImpl loc, int typ, boolean p,
+	private R_NodeImpl(String n, GeoLocImpl loc, int typ, boolean p,
 		boolean a, int trn, int l, boolean as, int s, boolean act,
 		boolean abnd, String st, int sl, String nt)
 	{
@@ -151,12 +151,12 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Create an r_node */
-	protected R_NodeImpl(Namespace ns, String n, String loc, int typ,
-		boolean p, boolean a, int trn, int l, boolean as, int s,
-		boolean act, boolean abnd, String st, int sl, String nt)
+	private R_NodeImpl(String n, String loc, int typ, boolean p, boolean a,
+		int trn, int l, boolean as, int s, boolean act, boolean abnd,
+		String st, int sl, String nt)
 	{
-		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
-			typ, p, a, trn, l, as, s, act, abnd, st, sl, nt);
+		this(n, lookupGeoLoc(loc), typ, p, a, trn, l, as, s, act, abnd,
+		     st, sl, nt);
 	}
 
 	/** Initialize transient fields */

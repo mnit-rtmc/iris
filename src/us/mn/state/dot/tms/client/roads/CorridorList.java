@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2017  Minnesota Department of Transportation
+ * Copyright (C) 2006-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -463,19 +463,23 @@ public class CorridorList extends IPanel {
 
 	/** Create a new node at a specified point */
 	private void createNode(CorridorBase<R_Node> c, Point2D p) {
+		int lanes = 2;
+		int shift = MID_SHIFT + 1;
+		Integer speed_limit = null;
 		Position pos = getWgs84Position(p);
 		if (c != null) {
-			int lanes = 2;
-			int shift = MID_SHIFT + 1;
 			R_NodeModel m = findModel(c, pos);
 			if (m != null) {
 				shift = m.getDownstreamLane(false);
 				lanes = shift - m.getDownstreamLane(true);
+				speed_limit = m.r_node.getSpeedLimit();
 			}
 			creator.create(c.getRoadway(), c.getRoadDir(), pos,
-				lanes, shift);
-		} else
-			creator.create(pos);
+				lanes, shift, speed_limit);
+		} else {
+			creator.create(null, (short) 0, pos, lanes, shift,
+				speed_limit);
+		}
 	}
 
 	/** Get a position */
