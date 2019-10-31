@@ -60,22 +60,23 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Get a description of the location */
 	static private String getLocation(GeoLoc l, String connect) {
-		StringBuilder b = new StringBuilder();
-		b.append(getRoadLocation(l));
-		String c = getCrossLocation(l, connect);
-		if (c != null) {
-			if (b.length() > 0)
-				b.append(' ');
-			b.append(c);
-		} else if (connect == null || connect.length() == 0) {
-			String lm = getLandmark(l);
-			if (lm != null) {
-				if (b.length() > 0)
-					b.append(' ');
-				b.append(lm);
+		ArrayList<String> list = new ArrayList<String>();
+		String rl = getRoadLocation(l);
+		if (rl.length() > 0)
+			list.add(rl);
+		String xlm = getCrossLandmark(l);
+		if (xlm.length() > 0) {
+			if (rl.length() > 0) {
+				if (connect != null)
+					list.add(connect);
+				else if (isModifierAt(l))
+					list.add("@");
 			}
+			list.add(xlm);
 		}
-		return (b.length() > 0) ? b.toString() : "Unknown location";
+		return (list.size() > 0)
+		      ? String.join(" ", list)
+		      : "Unknown location";
 	}
 
 	/** Get a description of the roadway location */
@@ -92,48 +93,59 @@ public class GeoLocHelper extends BaseHelper {
 		return "";
 	}
 
-	/** Get a description of the cross-street location */
-	static public String getCrossLocation(GeoLoc l) {
-		return getCrossLocation(l, null);
+	/** Check if the cross-street modifier is AT */
+	static private boolean isModifierAt(GeoLoc l) {
+		return (l != null) &&
+		        l.getCrossMod() == LocModifier.AT.ordinal();
 	}
 
-	/** Get a description of the cross-street location */
-	static public String getCrossLocation(GeoLoc l, String connect) {
-		if (l != null) {
-			Road x = l.getCrossStreet();
-			if (x != null) {
-				StringBuilder cross = new StringBuilder();
-				cross.append((connect != null)
-					? connect
-				        : getModifier(l));
-				cross.append(' ');
-				cross.append(x.getName());
-				cross.append(' ');
-				cross.append(Direction.fromOrdinal(
-					l.getCrossDir()).abbrev);
-				return cross.toString().trim();
-			}
-		}
-		return null;
-	}
-
-	/** Get the cross-street modifier */
-	static public String getModifier(GeoLoc l) {
-		return (l != null)
-		      ? LocModifier.fromOrdinal(l.getCrossMod()).description
-		      : null;
-	}
-
-	/** Get cross street / landmark label */
+	/** Get cross street / landmark label.
+	 *
+	 * @param l The location.
+	 * @return Cross-street if specified, followed by landmark in
+	 *         parentheses, if specified.  Cross-street modifier is only
+	 *         prepended if not "@". */
 	static public String getCrossLandmark(GeoLoc l) {
 		ArrayList<String> list = new ArrayList<String>();
 		String xloc = getCrossLocation(l);
-		if (xloc != null)
+		if (xloc.length() > 0)
 			list.add(xloc);
 		String lm = getLandmark(l);
-		if (lm != null)
+		if (lm.length() > 0)
 			list.add(lm);
 		return String.join(" ", list);
+	}
+
+	/** Get a description of the cross-street location.
+	 *
+	 * @param l The location.
+	 * @return Cross-street if specified.  Cross-street modifier is only
+	 *         prepended if not "@". */
+	static private String getCrossLocation(GeoLoc l) {
+		if (l != null) {
+			Road xs = l.getCrossStreet();
+			if (xs != null) {
+				ArrayList<String> list = new ArrayList<String>();
+				String mod = getModifier(l);
+				if (mod != null)
+					list.add(mod);
+				list.add(xs.getName());
+				String dir = Direction.fromOrdinal(
+					l.getCrossDir()).abbrev;
+				if (dir.length() > 0)
+					list.add(dir);
+				return String.join(" ", list);
+			}
+		}
+		return "";
+	}
+
+	/** Get the cross-street modifier (if not AT) */
+	static private String getModifier(GeoLoc l) {
+		short mod = (l != null) ? l.getCrossMod() : 0;
+		return (mod > 0)
+		      ? LocModifier.fromOrdinal(mod).description
+		      : null;
 	}
 
 	/** Get the location landmark */
@@ -143,7 +155,7 @@ public class GeoLocHelper extends BaseHelper {
 			if (lm != null && lm.length() > 0)
 				return '(' + lm + ')';
 		}
-		return null;
+		return "";
 	}
 
 	/** Filter for alternate directions on a North-South road.
