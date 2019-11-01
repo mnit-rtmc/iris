@@ -291,4 +291,16 @@ GRANT SELECT ON controller_report TO PUBLIC;
 -- Delete unused IN/OUT directions
 DELETE FROM iris.direction WHERE id > 6;
 
+-- Drop alt_dir from road / road_view
+DROP VIEW road_view;
+
+ALTER TABLE iris.road DROP COLUMN alt_dir;
+
+CREATE VIEW road_view AS
+	SELECT name, abbrev, rcl.description AS r_class, dir.direction
+	FROM iris.road r
+	LEFT JOIN iris.road_class rcl ON r.r_class = rcl.id
+	LEFT JOIN iris.direction dir ON r.direction = dir.id;
+GRANT SELECT ON road_view TO PUBLIC;
+
 COMMIT;

@@ -31,7 +31,6 @@ name       | Unique road name, including affixes such as "St" or "Rd"
 abbrev     | Abbreviation (up to 6 characters), used for labeling [detectors]
 road class | _Freeway_, _arterial_ etc.  Affects style of map segments
 direction  | Primary direction
-alt dir    | Alternate direction
 
 ### R_Nodes
 

@@ -772,17 +772,14 @@ CREATE TABLE iris.road (
 	name VARCHAR(20) PRIMARY KEY,
 	abbrev VARCHAR(6) NOT NULL,
 	r_class SMALLINT NOT NULL REFERENCES iris.road_class(id),
-	direction SMALLINT NOT NULL REFERENCES iris.direction(id),
-	alt_dir SMALLINT NOT NULL REFERENCES iris.direction(id)
+	direction SMALLINT NOT NULL REFERENCES iris.direction(id)
 );
 
 CREATE VIEW road_view AS
-	SELECT name, abbrev, rcl.description AS r_class, dir.direction,
-	       adir.direction AS alt_dir
+	SELECT name, abbrev, rcl.description AS r_class, dir.direction
 	FROM iris.road r
 	LEFT JOIN iris.road_class rcl ON r.r_class = rcl.id
-	LEFT JOIN iris.direction dir ON r.direction = dir.id
-	LEFT JOIN iris.direction adir ON r.alt_dir = adir.id;
+	LEFT JOIN iris.direction dir ON r.direction = dir.id;
 GRANT SELECT ON road_view TO PUBLIC;
 
 CREATE TABLE iris.road_affix (

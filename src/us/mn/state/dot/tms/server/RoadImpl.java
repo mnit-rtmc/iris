@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,44 +33,45 @@ import us.mn.state.dot.tms.TMSException;
 public class RoadImpl extends BaseObjectImpl implements Road {
 
 	/** Abbreviation regex pattern */
-	static protected final Pattern ABBREV_PATTERN =
+	static private final Pattern ABBREV_PATTERN =
 		Pattern.compile("[A-Za-z0-9]{0,6}");
 
 	/** Load all the roads */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, RoadImpl.class);
-		store.query("SELECT name, abbrev, r_class, direction, alt_dir" +
-			" FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, abbrev, r_class, direction " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new RoadImpl(
-					row.getString(1),	// name
-					row.getString(2),	// abbrev 
-					row.getShort(3),	// r_class
-					row.getShort(4),	// direction
-					row.getShort(5)		// alt_dir
+					row.getString(1), // name
+					row.getString(2), // abbrev
+					row.getShort(3),  // r_class
+					row.getShort(4)   // direction
 				));
 			}
 		});
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("abbrev", abbrev);
 		map.put("r_class", r_class);
 		map.put("direction", direction);
-		map.put("alt_dir", alt_dir);
 		return map;
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -82,110 +83,87 @@ public class RoadImpl extends BaseObjectImpl implements Road {
 	}
 
 	/** Create a new road */
-	protected RoadImpl(String n, String a, short c, short d, short ad) {
+	private RoadImpl(String n, String a, short c, short d) {
 		super(n);
 		abbrev = a;
 		r_class = c;
 		direction = d;
-		alt_dir = ad;
 	}
 
 	/** Abbreviated name (for detector and station names) */
-	protected String abbrev;
+	private String abbrev;
 
 	/** Set the abbreviated name */
+	@Override
 	public void setAbbrev(String a) {
 		abbrev = a;
 	}
 
 	/** Set the abbreviated name */
 	public void doSetAbbrev(String a) throws TMSException {
-		if(a.equals(abbrev))
+		if (a.equals(abbrev))
 			return;
 		Matcher m = ABBREV_PATTERN.matcher(a);
-		if(!m.matches())
+		if (!m.matches())
 			throw new ChangeVetoException("Invalid abbrev: " + a);
 		store.update(this, "abbrev", a);
 		setAbbrev(a);
 	}
 
 	/** Get the abbreviated name */
+	@Override
 	public String getAbbrev() {
 		return abbrev;
 	}
 
 	/** Road class */
-	protected short r_class;
+	private short r_class;
 
 	/** Set the road class */
+	@Override
 	public void setRClass(short c) {
 		r_class = c;
 	}
 
 	/** Set the road class */
 	public void doSetRClass(short c) throws TMSException {
-		if(c == r_class)
-			return;
-		store.update(this, "r_class", c);
-		setRClass(c);
+		if (c != r_class) {
+			store.update(this, "r_class", c);
+			setRClass(c);
+		}
 	}
 
 	/** Get the road class */
+	@Override
 	public short getRClass() {
 		return r_class;
 	}
 
 	/** Direction (NORTH_SOUTH or EAST_WEST) */
-	protected short direction;
+	private short direction;
 
 	/** Set the direction */
+	@Override
 	public void setDirection(short d) {
 		direction = d;
 	}
 
 	/** Set the direction */
 	public void doSetDirection(short d) throws TMSException {
-		if(d == direction)
+		if (d == direction)
 			return;
 		Direction dir = Direction.fromOrdinal(d);
-		if(dir != Direction.UNKNOWN &&
-		   dir != Direction.NORTH_SOUTH &&
-		   dir != Direction.EAST_WEST)
+		if (dir != Direction.UNKNOWN &&
+		    dir != Direction.NORTH_SOUTH &&
+		    dir != Direction.EAST_WEST)
 			throw new ChangeVetoException("Invalid direction");
 		store.update(this, "direction", d);
 		setDirection(d);
 	}
 
 	/** Get the direction */
+	@Override
 	public short getDirection() {
 		return direction;
-	}
-
-	/** Alternate direction (NORTH, SOUTH, EAST, or WEST) */
-	protected short alt_dir;
-
-	/** Set the alternate direction */
-	public void setAltDir(short ad) {
-		alt_dir = ad;
-	}
-
-	/** Set the alternate direction */
-	public void doSetAltDir(short ad) throws TMSException {
-		if(ad == alt_dir)
-			return;
-		Direction adir = Direction.fromOrdinal(ad);
-		if(adir != Direction.UNKNOWN &&
-		   adir != Direction.NORTH &&
-		   adir != Direction.SOUTH &&
-		   adir != Direction.EAST &&
-		   adir != Direction.WEST)
-			throw new ChangeVetoException("Invalid direction");
-		store.update(this, "alt_dir", ad);
-		setAltDir(ad);
-	}
-
-	/** Get the alternate direction */
-	public short getAltDir() {
-		return alt_dir;
 	}
 }
