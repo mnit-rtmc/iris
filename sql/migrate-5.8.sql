@@ -288,4 +288,7 @@ CREATE VIEW controller_report AS
 	LEFT JOIN controller_device_view d ON d.controller = c.name;
 GRANT SELECT ON controller_report TO PUBLIC;
 
+-- Delete unused IN/OUT directions
+DELETE FROM iris.direction WHERE id > 6;
+
 COMMIT;

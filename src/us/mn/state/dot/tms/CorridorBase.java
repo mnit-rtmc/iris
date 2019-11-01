@@ -208,12 +208,6 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 			return pf.getLongitude() < pl.getLongitude();
 		case WEST:
 			return pf.getLongitude() > pl.getLongitude();
-		case INNER_LOOP:
-			// FIXME: this might be tricky
-			return false;
-		case OUTER_LOOP:
-			// FIXME: this might be tricky
-			return false;
 		}
 		return false;
 	}
