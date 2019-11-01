@@ -69,7 +69,7 @@ public class GeoLocHelper extends BaseHelper {
 			if (rl.length() > 0) {
 				if (connect != null)
 					list.add(connect);
-				else if (isModifierAt(l))
+				else if (isCrossStreetAt(l))
 					list.add("@");
 			}
 			list.add(xlm);
@@ -94,9 +94,10 @@ public class GeoLocHelper extends BaseHelper {
 	}
 
 	/** Check if the cross-street modifier is AT */
-	static private boolean isModifierAt(GeoLoc l) {
+	static private boolean isCrossStreetAt(GeoLoc l) {
 		return (l != null) &&
-		        l.getCrossMod() == LocModifier.AT.ordinal();
+		       (l.getCrossMod() == LocModifier.AT.ordinal()) &&
+		       (l.getCrossStreet() != null);
 	}
 
 	/** Get cross street / landmark label.
