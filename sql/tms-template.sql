@@ -918,7 +918,6 @@ CREATE TABLE iris.r_node (
 	attach_side BOOLEAN NOT NULL,
 	shift INTEGER NOT NULL,
 	active BOOLEAN NOT NULL,
-	abandoned BOOLEAN NOT NULL,
 	station_id VARCHAR(10),
 	speed_limit INTEGER NOT NULL,
 	notes text NOT NULL
@@ -982,15 +981,13 @@ ALTER TABLE iris.r_node ADD CONSTRAINT left_edge_ck
 	CHECK (iris.r_node_left(node_type, lanes, attach_side, shift) >= 1);
 ALTER TABLE iris.r_node ADD CONSTRAINT right_edge_ck
 	CHECK (iris.r_node_right(node_type, lanes, attach_side, shift) <= 9);
-ALTER TABLE iris.r_node ADD CONSTRAINT active_ck
-	CHECK (active = FALSE OR abandoned = FALSE);
 
 CREATE VIEW r_node_view AS
 	SELECT n.name, n.geo_loc,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.landmark, l.lat, l.lon, l.corridor, l.location,
 	       nt.name AS node_type, n.pickable, n.above, tr.name AS transition,
-	       n.lanes, n.attach_side, n.shift, n.active, n.abandoned,
+	       n.lanes, n.attach_side, n.shift, n.active,
 	       n.station_id, n.speed_limit, n.notes
 	FROM iris.r_node n
 	JOIN geo_loc_view l ON n.geo_loc = l.name

@@ -5,6 +5,11 @@ BEGIN;
 
 SELECT iris.update_version('5.7.0', '5.8.0');
 
+-- Drop abandoned column from r_node
+DROP VIEW r_node_view;
+ALTER TABLE iris.r_node DROP CONSTRAINT active_ck;
+ALTER TABLE iris.r_node DROP COLUMN abandoned;
+
 -- Drop old views and function
 DROP VIEW controller_report;
 DROP VIEW controller_device_view;
@@ -24,7 +29,6 @@ DROP VIEW beacon_view;
 DROP VIEW camera_view;
 DROP VIEW controller_loc_view;
 DROP VIEW roadway_station_view;
-DROP VIEW r_node_view;
 DROP VIEW geo_loc_view;
 DROP FUNCTION iris.geo_location(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT);
 
@@ -71,7 +75,7 @@ CREATE VIEW r_node_view AS
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.landmark, l.lat, l.lon, l.corridor, l.location,
 	       nt.name AS node_type, n.pickable, n.above, tr.name AS transition,
-	       n.lanes, n.attach_side, n.shift, n.active, n.abandoned,
+	       n.lanes, n.attach_side, n.shift, n.active,
 	       n.station_id, n.speed_limit, n.notes
 	FROM iris.r_node n
 	JOIN geo_loc_view l ON n.geo_loc = l.name

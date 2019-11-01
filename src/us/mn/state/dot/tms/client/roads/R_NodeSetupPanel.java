@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2017  Minnesota Department of Transportation
+ * Copyright (C) 2007-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,9 +86,6 @@ public class R_NodeSetupPanel extends IPanel implements ProxyView<R_Node> {
 	/** Station ID text field */
 	private final JTextField station_txt = new JTextField(8);
 
-	/** Abandoned check box */
-	private final JCheckBox abandoned_chk = new JCheckBox();
-
 	/** Component for speed limit */
 	private final JSpinner speed_spn = new JSpinner(
 		new SpinnerNumberModel(55, 25, 120, 5));
@@ -138,11 +135,6 @@ public class R_NodeSetupPanel extends IPanel implements ProxyView<R_Node> {
 				n.setActive(active_chk.isSelected());
 			}
 		});
-		abandoned_chk.setAction(new NAction(null) {
-			protected void do_perform(R_Node n) {
-				n.setAbandoned(abandoned_chk.isSelected());
-			}
-		});
 		add("r_node.type");
 		add(type_cbx);
 		add("r_node.pickable");
@@ -160,9 +152,7 @@ public class R_NodeSetupPanel extends IPanel implements ProxyView<R_Node> {
 		add("r_node.active");
 		add(active_chk, Stretch.LAST);
 		add("r_node.station");
-		add(station_txt);
-		add("r_node.abandoned");
-		add(abandoned_chk, Stretch.LAST);
+		add(station_txt, Stretch.LAST);
 		add("r_node.speed.limit");
 		add(speed_spn, Stretch.LAST);
 		createJobs();
@@ -238,7 +228,6 @@ public class R_NodeSetupPanel extends IPanel implements ProxyView<R_Node> {
 		shift_spn.setEnabled(canWrite(n, "shift"));
 		active_chk.setEnabled(canWrite(n, "active"));
 		station_txt.setEnabled(canWrite(n, "stationID"));
-		abandoned_chk.setEnabled(canWrite(n, "abandoned"));
 		speed_spn.setEnabled(canWrite(n, "speedLimit"));
 	}
 
@@ -271,8 +260,6 @@ public class R_NodeSetupPanel extends IPanel implements ProxyView<R_Node> {
 			active_chk.setSelected(n.getActive());
 		if (a == null || a.equals("stationID"))
 			station_txt.setText(n.getStationID());
-		if (a == null || a.equals("abandoned"))
-			abandoned_chk.setSelected(n.getAbandoned());
 		if (a == null || a.equals("speedLimit"))
 			speed_spn.setValue(n.getSpeedLimit());
 	}
@@ -299,8 +286,6 @@ public class R_NodeSetupPanel extends IPanel implements ProxyView<R_Node> {
 		active_chk.setSelected(false);
 		station_txt.setEnabled(false);
 		station_txt.setText("");
-		abandoned_chk.setEnabled(false);
-		abandoned_chk.setSelected(false);
 		speed_spn.setEnabled(false);
 		speed_spn.setValue(55);
 	}

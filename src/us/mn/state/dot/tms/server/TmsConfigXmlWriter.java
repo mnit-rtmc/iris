@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2013  Minnesota Department of Transportation
+ * Copyright (C) 2012-2019  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  * Copyright (C) 2012  Iteris Inc.
  *
@@ -101,6 +101,8 @@ public class TmsConfigXmlWriter extends XmlWriter {
 		w.write("<!ATTLIST r_node attach_side CDATA 'right'>\n");
 		w.write("<!ATTLIST r_node shift CDATA '0'>\n");
 		w.write("<!ATTLIST r_node active CDATA 't'>\n");
+		// The abandoned attribute has been removed,
+		// but kept in the XML for compatibility
 		w.write("<!ATTLIST r_node abandoned CDATA 'f'>\n");
 		w.write("<!ATTLIST r_node s_limit CDATA '" +
 			R_NodeImpl.getDefaultSpeedLimit() +"'>\n");

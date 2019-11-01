@@ -50,9 +50,9 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 		return distanceTo(n.getGeoLoc(), l);
 	}
 
-	/** Check if the r_node location is valid */
-	static private boolean hasLocation(R_Node n) {
-		return !GeoLocHelper.isNull(n.getGeoLoc());
+	/** Check if the r_node is valid */
+	static private boolean isValid(R_Node n) {
+		return n.getActive() && !GeoLocHelper.isNull(n.getGeoLoc());
 	}
 
 	/** Corridor name */
@@ -104,7 +104,7 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 
 	/** Add a roadway node to the corridor */
 	public void addNode(T r_node) {
-		if (hasLocation(r_node) && !r_node.getAbandoned()) {
+		if (isValid(r_node)) {
 			unsorted.add(r_node);
 			unsorted.addAll(r_nodes);
 			r_nodes.clear();
