@@ -146,7 +146,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	5.7.0
+database_version	5.8.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0
@@ -822,9 +822,9 @@ CREATE TABLE iris.geo_loc (
 	cross_street VARCHAR(20) REFERENCES iris.road(name),
 	cross_dir SMALLINT REFERENCES iris.direction(id),
 	cross_mod SMALLINT REFERENCES iris.road_modifier(id),
+	landmark VARCHAR(24),
 	lat double precision,
-	lon double precision,
-	landmark VARCHAR(24)
+	lon double precision
 );
 
 CREATE FUNCTION iris.geo_loc_notify() RETURNS TRIGGER AS
@@ -854,17 +854,15 @@ DECLARE
 	cross_street ALIAS FOR $4;
 	cross_dir ALIAS FOR $5;
 	landmark ALIAS FOR $6;
-	res TEXT;
+	corridor TEXT;
+	xloc TEXT;
+	lmrk TEXT;
 BEGIN
-	res = trim(roadway || ' ' || road_dir);
-	IF char_length(cross_street) > 0 THEN
-		RETURN trim(concat(res || ' ', cross_mod || ' ', cross_street),
-		            ' ' || cross_dir);
-	ELSIF char_length(landmark) > 0 THEN
-		RETURN concat(res || ' ', '(' || landmark || ')');
-	ELSE
-		RETURN res;
-	END IF;
+	corridor = trim(roadway || concat(' ', road_dir));
+	xloc = trim(concat(cross_mod, ' ') || cross_street
+	    || concat(' ', cross_dir));
+	lmrk = replace('(' || landmark || ')', '()', '');
+	RETURN trim(concat(corridor, ' ' || xloc, ' ' || lmrk));
 END;
 $geo_location$ LANGUAGE plpgsql;
 
@@ -872,7 +870,8 @@ CREATE VIEW geo_loc_view AS
 	SELECT l.name, r.abbrev AS rd, l.roadway, r_dir.direction AS road_dir,
 	       r_dir.dir AS rdir, m.modifier AS cross_mod, m.mod AS xmod,
 	       c.abbrev as xst, l.cross_street, c_dir.direction AS cross_dir,
-	       l.lat, l.lon, l.landmark,
+	       l.landmark, l.lat, l.lon,
+	       trim(l.roadway || concat(' ', r_dir.direction)) AS corridor,
 	       iris.geo_location(l.roadway, r_dir.direction, m.modifier,
 	       l.cross_street, c_dir.direction, l.landmark) AS location
 	FROM iris.geo_loc l
@@ -992,10 +991,12 @@ ALTER TABLE iris.r_node ADD CONSTRAINT active_ck
 	CHECK (active = FALSE OR abandoned = FALSE);
 
 CREATE VIEW r_node_view AS
-	SELECT n.name, n.geo_loc, roadway, road_dir, cross_mod, cross_street,
-	       cross_dir, landmark, lat, lon, nt.name AS node_type, n.pickable,
-	       n.above, tr.name AS transition, n.lanes, n.attach_side, n.shift,
-	       n.active, n.abandoned, n.station_id, n.speed_limit, n.notes
+	SELECT n.name, n.geo_loc,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       l.landmark, l.lat, l.lon, l.corridor, l.location,
+	       nt.name AS node_type, n.pickable, n.above, tr.name AS transition,
+	       n.lanes, n.attach_side, n.shift, n.active, n.abandoned,
+	       n.station_id, n.speed_limit, n.notes
 	FROM iris.r_node n
 	JOIN geo_loc_view l ON n.geo_loc = l.name
 	JOIN iris.r_node_type nt ON n.node_type = nt.n_type
@@ -1472,7 +1473,7 @@ CREATE VIEW camera_view AS
 	SELECT c.name, c.notes, cam_num, encoder_type, c.encoder, c.enc_mcast,
 	       c.encoder_channel, c.publish, c.video_loss, c.geo_loc,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	       l.location, l.lat, l.lon,
+	       l.landmark, l.lat, l.lon, l.corridor, l.location,
 	       c.controller, ctr.comm_link, ctr.drop_id, ctr.condition
 	FROM iris.camera c
 	LEFT JOIN geo_loc_view l ON c.geo_loc = l.name
@@ -1874,7 +1875,7 @@ CREATE TRIGGER beacon_delete_trig
 CREATE VIEW beacon_view AS
 	SELECT b.name, b.notes, b.message, p.camera, p.preset_num, b.geo_loc,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	       l.lat, l.lon,
+	       l.landmark, l.lat, l.lon, l.corridor, l.location,
 	       b.controller, b.pin, b.verify_pin, ctr.comm_link, ctr.drop_id,
 	       ctr.condition
 	FROM iris.beacon b
@@ -2624,7 +2625,7 @@ CREATE VIEW dms_view AS
 	       override_font, override_foreground, override_background,
 	       msg_sched, msg_current, expire_time,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	       l.location, l.lat, l.lon
+	       l.landmark, l.lat, l.lon, l.corridor, l.location
 	FROM iris.dms d
 	LEFT JOIN iris.camera_preset p ON d.preset = p.name
 	LEFT JOIN geo_loc_view l ON d.geo_loc = l.name
@@ -2859,8 +2860,9 @@ CREATE TRIGGER gate_arm_array_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_array_delete();
 
 CREATE VIEW gate_arm_array_view AS
-	SELECT ga.name, ga.notes, ga.geo_loc, l.roadway, l.road_dir,
-	       l.cross_mod, l.cross_street, l.cross_dir, l.lat, l.lon,
+	SELECT ga.name, ga.notes, ga.geo_loc,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       l.landmark, l.lat, l.lon, l.corridor, l.location,
 	       ga.controller, ga.pin, ctr.comm_link, ctr.drop_id, ctr.condition,
 	       ga.prereq, ga.camera, ga.approach, ga.action_plan, ga.open_phase,
 	       ga.closed_phase
@@ -2919,8 +2921,9 @@ CREATE TRIGGER gate_arm_update_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_update();
 
 CREATE VIEW gate_arm_view AS
-	SELECT g.name, g.ga_array, g.notes, ga.geo_loc, l.roadway, l.road_dir,
-	       l.cross_mod, l.cross_street, l.cross_dir, l.lat, l.lon,
+	SELECT g.name, g.ga_array, g.notes, ga.geo_loc,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       l.landmark, l.lat, l.lon, l.corridor, l.location,
 	       g.controller, g.pin, ctr.comm_link, ctr.drop_id, ctr.condition,
 	       ga.prereq, ga.camera, ga.approach
 	FROM iris.gate_arm g
@@ -3270,8 +3273,9 @@ CREATE TRIGGER lane_marking_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_delete();
 
 CREATE VIEW lane_marking_view AS
-	SELECT m.name, m.notes, m.geo_loc, l.roadway, l.road_dir, l.cross_mod,
-	       l.cross_street, l.cross_dir, l.lat, l.lon,
+	SELECT m.name, m.notes, m.geo_loc,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       l.landmark, l.lat, l.lon, l.corridor, l.location,
 	       m.controller, m.pin, ctr.comm_link, ctr.drop_id, ctr.condition
 	FROM iris.lane_marking m
 	LEFT JOIN geo_loc_view l ON m.geo_loc = l.name
@@ -3595,7 +3599,8 @@ CREATE VIEW parking_area_view AS
 	       p1.camera AS camera_1, p2.camera AS camera_2,
 	       p3.camera AS camera_3,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	       l.lat, l.lon, sa.value AS camera_image_base_url
+	       l.landmark, l.lat, l.lon, l.corridor, l.location,
+	       sa.value AS camera_image_base_url
 	FROM iris.parking_area pa
 	LEFT JOIN iris.camera_preset p1 ON preset_1 = p1.name
 	LEFT JOIN iris.camera_preset p2 ON preset_2 = p2.name
@@ -3754,8 +3759,8 @@ CREATE VIEW ramp_meter_view AS
 	       mt.description AS meter_type, storage, max_wait,
 	       alg.description AS algorithm, am_target, pm_target, beacon,
 	       camera, preset_num, ml.description AS meter_lock,
-	       l.rd, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
-	       l.cross_dir, l.lat, l.lon
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       l.landmark, l.lat, l.lon, l.corridor, l.location, l.rd
 	FROM iris.ramp_meter m
 	LEFT JOIN iris.meter_type mt ON m.meter_type = mt.id
 	LEFT JOIN iris.meter_algorithm alg ON m.algorithm = alg.id
@@ -4334,8 +4339,9 @@ CREATE TRIGGER weather_sensor_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_delete();
 
 CREATE VIEW weather_sensor_view AS
-	SELECT w.name, w.notes, w.settings, w.sample, w.geo_loc, l.roadway,
-	       l.road_dir, l.cross_mod, l.cross_street, l.cross_dir, l.lat, l.lon,
+	SELECT w.name, w.notes, w.settings, w.sample, w.geo_loc,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       l.landmark, l.lat, l.lon, l.corridor, l.location,
 	       w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.condition
 	FROM iris.weather_sensor w
 	LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
