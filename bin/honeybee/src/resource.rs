@@ -467,6 +467,8 @@ pub fn notify(conn: &Connection, chan: &str, payload: &str,
         if r.listen().is_listening(chan, payload) {
             found = true;
             r.fetch(&conn, payload, sender)?;
+        } else if r.listen().is_listening_payload(chan, payload) {
+            found = true;
         }
     }
     if !found {
