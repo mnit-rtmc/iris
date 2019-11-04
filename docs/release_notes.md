@@ -1,5 +1,15 @@
 # IRIS 5.x Release Notes
 
+5.8.0 (4 Nov 2019)
+ - Fixed bug adding $0.25 to all tolling prices
+ - Fixed bug ignoring failed detectors for tolling / travel times
+ - Include landmark in all `geo_loc` location descriptions
+ - Removed `r_node` abandoned column/field
+ - Removed `alt_dir` column from road table
+ - Removed redundant cached vehicle count values from detector
+ - Removed unused `IN` / `OUT` directions
+ - honeybee v0.7.0: refactored code, added segments module
+
 5.7.0 (16 Oct 2019)
  - Synchronize clock immediately after collecting a sample with wrong time
    (Wavetronix + HD + G4)
