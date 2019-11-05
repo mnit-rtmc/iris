@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
@@ -91,7 +91,7 @@ abstract public class LayerState {
 	};
 
 	/** List of available themes */
-	private final List<Theme> themes = new LinkedList<Theme>();
+	private final List<Theme> themes = new ArrayList<Theme>();
 
 	/** Current theme */
 	private Theme theme;
