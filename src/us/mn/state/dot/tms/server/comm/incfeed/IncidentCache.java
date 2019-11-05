@@ -202,7 +202,8 @@ public class IncidentCache {
 	/** Set an incident to cleared status */
 	private void setCleared(String id) {
 		IncidentImpl inc = lookupIncident(id);
-		if (inc != null && !inc.getCleared()) {
+		// Don't automatically clear confirmed incidents
+		if (inc != null && !inc.getConfirmed() && !inc.getCleared()) {
 			inc.setClearedNotify(true);
 			inc_log.log("Incident cleared: " + id);
 		}
