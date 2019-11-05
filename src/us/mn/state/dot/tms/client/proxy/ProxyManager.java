@@ -243,7 +243,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	}
 
 	/** Check if an attribute change is interesting */
-	protected boolean checkAttributeChange(String attr) {
+	private boolean checkAttributeChange(String attr) {
 		return isStyleAttrib(attr);
 	}
 
