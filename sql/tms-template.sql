@@ -857,7 +857,7 @@ BEGIN
 	xloc = trim(concat(cross_mod, ' ') || cross_street
 	    || concat(' ', cross_dir));
 	lmrk = replace('(' || landmark || ')', '()', '');
-	RETURN trim(concat(corridor, ' ' || xloc, ' ' || lmrk));
+	RETURN NULLIF(trim(concat(corridor, ' ' || xloc, ' ' || lmrk)), '');
 END;
 $geo_location$ LANGUAGE plpgsql;
 
