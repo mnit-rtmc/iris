@@ -306,8 +306,12 @@ public class StreamPanel extends JPanel {
 			});
 		}
 		else if (sc == StreamCommand.PLAY_EXTERNAL)
+		{
 			//launchExternalViewer(camera);
-			desktop.showSecondScreen(new StreamPanel2(video_req, ptz, session, false, true));
+			final CameraPTZ cam_ptz = new CameraPTZ(session);
+			cam_ptz.setCamera(ptz.getCamera());
+			desktop.showSecondScreen(new StreamPanel2(video_req, cam_ptz, session, false, true));
+		}
 	}
 
 	/**
