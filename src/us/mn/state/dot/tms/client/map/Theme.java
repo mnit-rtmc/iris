@@ -77,12 +77,7 @@ public class Theme {
 
 	/** Get a list of all legend styles */
 	public List<Style> getStyles() {
-		ArrayList<Style> s = new ArrayList<Style>();
-		for (Style sty : styles) {
-			if (sty.legend)
-				s.add(sty);
-		}
-		return s;
+		return styles;
 	}
 
 	/** Get style for a map object */
