@@ -101,9 +101,9 @@ public class UpstreamDevice implements Comparable<UpstreamDevice> {
 
 	/** Get the incident range */
 	public IncRange range(boolean picked) {
-		float ahead_dist_mi = getAheadDistMi(picked);
-		// If distance is less than threshold, allow `ahead` range
-		boolean ahead_dist = distance.asFloat(MILES) < ahead_dist_mi;
-		return IncRange.fromExits(exits, ahead_dist);
+		// If distance is less than threshold, use `ahead` range
+		return (distance.asFloat(MILES) < getAheadDistMi(picked))
+		      ? IncRange.ahead
+		      : IncRange.fromExits(exits);
 	}
 }

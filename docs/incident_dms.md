@@ -42,7 +42,7 @@ defined ranges, each with a number of freeway _[exits]_ in between.
 
 Range    | Exits | Maximum distance
 ---------|-------|--------------------------------
-`ahead`  |     0 | 1.5 miles (0.75 miles _picked_)
+`ahead`  |     — | 1.5 miles (0.75 miles _picked_)
 `near`   |   0-1 | —
 `middle` |   2-5 | —
 `far`    |   6-9 | —
