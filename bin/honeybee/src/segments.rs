@@ -128,6 +128,100 @@ struct SegmentState {
     ordered: bool,
 }
 
+impl GeoLoc {
+    /// Get the lat/lon of the location
+    fn latlon(&self) -> Option<(f64, f64)> {
+        match (self.lat, self.lon) {
+            (Some(lat), Some(lon)) => Some((lat, lon)),
+            _ => None,
+        }
+    }
+    /// Get the node position
+    fn pos(&self) -> Option<Wgs84Pos> {
+        self.latlon().and_then(|(lat, lon)| Some(Wgs84Pos::new(lat, lon)))
+    }
+}
+
+impl RNode {
+    /// SQL query for all RNodes
+    pub const SQL_ALL: &'static str =
+        "SELECT n.name, roadway, road_dir, cross_mod, cross_street, cross_dir, \
+                landmark, lat, lon, node_type, pickable, above, transition, \
+                lanes, attach_side, shift, active, station_id, speed_limit, \
+                notes \
+        FROM iris.r_node n \
+        JOIN iris.geo_loc g ON n.geo_loc = g.name";
+
+    /// SQL query for one RNode
+    pub const SQL_ONE: &'static str =
+        "SELECT n.name, roadway, road_dir, cross_mod, cross_street, cross_dir, \
+                landmark, lat, lon, node_type, pickable, above, transition, \
+                lanes, attach_side, shift, active, station_id, speed_limit, \
+                notes \
+        FROM iris.r_node n \
+        JOIN iris.geo_loc g ON n.geo_loc = g.name \
+        WHERE n.name = $1";
+
+    /// Create an RNode from a result Row
+    pub fn from_row(row: &Row) -> Self {
+        let loc = GeoLoc {
+            roadway: row.get(1),
+            road_dir: row.get(2),
+            cross_mod: row.get(3),
+            cross_street: row.get(4),
+            cross_dir: row.get(5),
+            lankmark: row.get(6),
+            location: None,
+            lat: row.get(7),
+            lon: row.get(8),
+        };
+        RNode {
+            name: row.get(0),
+            loc,
+            node_type: row.get(9),
+            pickable: row.get(10),
+            above: row.get(11),
+            transition: row.get(12),
+            lanes: row.get(13),
+            attach_side: row.get(14),
+            shift: row.get(15),
+            active: row.get(16),
+            station_id: row.get(17),
+            speed_limit: row.get(18),
+            notes: row.get(19),
+        }
+    }
+    /// Get the corridor ID
+    fn cor_id(&self) -> Option<CorridorId> {
+        match (&self.loc.roadway, self.loc.road_dir) {
+            (Some(roadway), Some(road_dir)) => {
+                let roadway = roadway.clone();
+                match TravelDir::from_i16(road_dir) {
+                    Some(travel_dir) => Some(CorridorId { roadway, travel_dir }),
+                    None => None,
+                }
+            },
+            _ => None,
+        }
+    }
+    /// Get the lat/lon of the node
+    fn latlon(&self) -> Option<(f64, f64)> {
+        if self.active {
+            self.loc.latlon()
+        } else {
+            None
+        }
+    }
+    /// Get the node position
+    fn pos(&self) -> Option<Wgs84Pos> {
+        if self.active {
+            self.loc.pos()
+        } else {
+            None
+        }
+    }
+}
+
 impl Corridor {
     /// Create a new corridor
     fn new(cor_id: CorridorId) -> Self {
@@ -240,81 +334,6 @@ impl Corridor {
             },
             None => error!("remove_node: {} not found", name),
         }
-    }
-}
-
-impl RNode {
-    /// SQL query for all RNodes
-    pub const SQL_ALL: &'static str =
-        "SELECT n.name, roadway, road_dir, cross_mod, cross_street, cross_dir, \
-                landmark, lat, lon, node_type, pickable, above, transition, \
-                lanes, attach_side, shift, active, station_id, speed_limit, \
-                notes \
-        FROM iris.r_node n \
-        JOIN iris.geo_loc g ON n.geo_loc = g.name";
-
-    /// SQL query for one RNode
-    pub const SQL_ONE: &'static str =
-        "SELECT n.name, roadway, road_dir, cross_mod, cross_street, cross_dir, \
-                landmark, lat, lon, node_type, pickable, above, transition, \
-                lanes, attach_side, shift, active, station_id, speed_limit, \
-                notes \
-        FROM iris.r_node n \
-        JOIN iris.geo_loc g ON n.geo_loc = g.name \
-        WHERE n.name = $1";
-
-    /// Create an RNode from a result Row
-    pub fn from_row(row: &Row) -> Self {
-        let loc = GeoLoc {
-            roadway: row.get(1),
-            road_dir: row.get(2),
-            cross_mod: row.get(3),
-            cross_street: row.get(4),
-            cross_dir: row.get(5),
-            lankmark: row.get(6),
-            location: None,
-            lat: row.get(7),
-            lon: row.get(8),
-        };
-        RNode {
-            name: row.get(0),
-            loc,
-            node_type: row.get(9),
-            pickable: row.get(10),
-            above: row.get(11),
-            transition: row.get(12),
-            lanes: row.get(13),
-            attach_side: row.get(14),
-            shift: row.get(15),
-            active: row.get(16),
-            station_id: row.get(17),
-            speed_limit: row.get(18),
-            notes: row.get(19),
-        }
-    }
-    /// Get the corridor ID
-    fn cor_id(&self) -> Option<CorridorId> {
-        match (&self.loc.roadway, self.loc.road_dir) {
-            (Some(roadway), Some(road_dir)) => {
-                let roadway = roadway.clone();
-                match TravelDir::from_i16(road_dir) {
-                    Some(travel_dir) => Some(CorridorId { roadway, travel_dir }),
-                    None => None,
-                }
-            },
-            _ => None,
-        }
-    }
-    /// Get the lat/lon of the node
-    fn latlon(&self) -> Option<(f64, f64)> {
-        match (self.active, self.loc.lat, self.loc.lon) {
-            (true, Some(lat), Some(lon)) => Some((lat, lon)),
-            _ => None,
-        }
-    }
-    /// Get the node position
-    fn pos(&self) -> Option<Wgs84Pos> {
-        self.latlon().and_then(|(lat, lon)| Some(Wgs84Pos::new(lat, lon)))
     }
 }
 
