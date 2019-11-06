@@ -19,18 +19,25 @@ use std::collections::HashMap;
 use std::cmp::Ordering;
 use std::sync::mpsc::Receiver;
 
-/// Roadway node
+/// Geographic location
 #[derive(Debug)]
-pub struct RNode {
-    name: String,
+struct GeoLoc {
     roadway: Option<String>,
     road_dir: Option<i16>,
     cross_mod: Option<i16>,
     cross_street: Option<String>,
     cross_dir: Option<i16>,
     lankmark: Option<String>,
+    location: Option<String>,
     lat: Option<f64>,
     lon: Option<f64>,
+}
+
+/// Roadway node
+#[derive(Debug)]
+pub struct RNode {
+    name: String,
+    loc: GeoLoc,
     node_type: i32,
     pickable: bool,
     above: bool,
@@ -101,7 +108,7 @@ struct CorridorId {
 /// The other nodes are ordered based on the nearest remaining node to the
 /// previous, using haversine distance.
 ///
-/// Invalid nodes (not active or missing location) are placed at the end.
+/// Invalid nodes (not active or missing lat/lon) are placed at the end.
 struct Corridor {
     /// Corridor ID
     cor_id: CorridorId,
@@ -258,16 +265,20 @@ impl RNode {
 
     /// Create an RNode from a result Row
     pub fn from_row(row: &Row) -> Self {
-        RNode {
-            name: row.get(0),
+        let loc = GeoLoc {
             roadway: row.get(1),
             road_dir: row.get(2),
             cross_mod: row.get(3),
             cross_street: row.get(4),
             cross_dir: row.get(5),
             lankmark: row.get(6),
+            location: None,
             lat: row.get(7),
             lon: row.get(8),
+        };
+        RNode {
+            name: row.get(0),
+            loc,
             node_type: row.get(9),
             pickable: row.get(10),
             above: row.get(11),
@@ -283,7 +294,7 @@ impl RNode {
     }
     /// Get the corridor ID
     fn cor_id(&self) -> Option<CorridorId> {
-        match (&self.roadway, self.road_dir) {
+        match (&self.loc.roadway, self.loc.road_dir) {
             (Some(roadway), Some(road_dir)) => {
                 let roadway = roadway.clone();
                 match TravelDir::from_i16(road_dir) {
@@ -296,7 +307,7 @@ impl RNode {
     }
     /// Get the lat/lon of the node
     fn latlon(&self) -> Option<(f64, f64)> {
-        match (self.active, self.lat, self.lon) {
+        match (self.active, self.loc.lat, self.loc.lon) {
             (true, Some(lat), Some(lon)) => Some((lat, lon)),
             _ => None,
         }
