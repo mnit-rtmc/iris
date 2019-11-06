@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ public interface Graphic extends SonarObject {
 	int MAX_NUMBER = 999;
 
 	/** Maximum allowed graphic width */
-	int MAX_WIDTH = 225;
+	int MAX_WIDTH = 240;
 
 	/** Maximum allowed graphic height */
 	int MAX_HEIGHT = 144;
