@@ -22,6 +22,11 @@
 //! * No external dependencies -- fast compile time
 //! * The API is easy to understand and use
 //!
+//! Limitations:
+//!
+//! * Quantities are not generic -- f64 only
+//! * Small set of quantities and units implemented
+//!
 //! ```rust
 //! use honeybee::units::{Length, length::{Ft, M}};
 //!
@@ -42,8 +47,8 @@ use std::ops::{Add, Div, Mul, Sub};
 /// * Length `*` Length `=>` [Area]
 /// * Length `/` f64 `=>` Length
 ///
-/// Units must be the same for operations with two operands.  The [to] method
-/// can be used for conversion.
+/// Units must be the same for operations with two Length operands.  The [to]
+/// method can be used for conversion.
 ///
 /// ```rust
 /// use honeybee::units::{Length, length::In};
@@ -120,8 +125,8 @@ pub struct Volume<U> where U: length::Unit {
 /// * Time `-` Time `=>` Time
 /// * Time `*` f64 `=>` Time
 ///
-/// Units must be the same for operations with two operands.  The [to] method
-/// can be used for conversion.
+/// Units must be the same for operations with two Time operands.  The [to]
+/// method can be used for conversion.
 ///
 /// ```rust
 /// use honeybee::units::{Time, time::Min};
