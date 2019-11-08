@@ -14,14 +14,19 @@
 //
 //! Rust units of measure.
 //!
-//! There are dozens of similar Rust crates.  I couldn't find one with a simple
-//! API which made sense, so I made another one!
+//! There are many similar Rust crates.  I couldn't find one which fit my
+//! needs, so I made another one!  Some features:
+//!
+//! * Units are not discarded when creating quantities.  In keeping with Rust
+//!   philosohpy, conversions must be done manually (using the `to` method).
+//! * No external dependencies -- fast compile time
+//! * The API is easy to understand and use
 //!
 //! ```rust
 //! use honeybee::units::{Length, length::{Ft, M}};
 //!
-//! let m: Length<M> = Length::<Ft>::new(3.0).to();
-//! println!("length: {}", m);
+//! let m: Length<M> = Length::<Ft>::new(3.5).to();
+//! assert_eq!(m.to_string(), "1.0668 m");
 //! ```
 use std::fmt;
 use std::marker::PhantomData;
@@ -102,6 +107,37 @@ pub struct Area<U> where U: length::Unit {
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Volume<U> where U: length::Unit {
     /// Volume quantity
+    pub quantity: f64,
+    /// Measurement unit
+    unit: PhantomData<U>,
+}
+
+/// Time is a base quantity with a specific [time unit].
+///
+/// ## Operations
+///
+/// * Time `+` Time `=>` Time
+/// * Time `-` Time `=>` Time
+/// * Time `*` f64 `=>` Time
+///
+/// Units must be the same for operations with two operands.  The [to] method
+/// can be used for conversion.
+///
+/// ```rust
+/// use honeybee::units::{Time, time::Min};
+///
+/// let a = Time::<Min>::new(15.0);
+/// let b = Time::<Min>::new(5.5);
+/// println!("{} + {} = {}", a, b, a + b);
+/// println!("{} - {} = {}", a, b, a - b);
+/// ```
+///
+/// [time unit]: time/index.html
+/// [to]: struct.Time.html#method.to
+///
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct Time<U> where U: time::Unit {
+    /// Time quantity
     pub quantity: f64,
     /// Measurement unit
     unit: PhantomData<U>,
@@ -346,6 +382,61 @@ impl<U> Div<Area<U>> for Volume<U> where U: length::Unit {
     }
 }
 
+impl<U> Time<U> where U: time::Unit {
+    /// Create a new time measurement
+    pub fn new(quantity: f64) -> Self {
+        Time::<U> { quantity, unit: PhantomData }
+    }
+
+    /// Convert to specified units
+    pub fn to<T: time::Unit>(self) -> Time<T> {
+        let quantity = self.quantity * U::factor::<T>();
+        Time::<T> { quantity, unit: PhantomData }
+    }
+}
+
+impl<U> fmt::Display for Time<U> where U: time::Unit {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} {}", self.quantity, U::ABBREVIATION)
+    }
+}
+
+impl<U> Add for Time<U> where U: time::Unit {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self::Output {
+        let quantity = self.quantity + other.quantity;
+        Self { quantity, unit: PhantomData }
+    }
+}
+
+impl<U> Sub for Time<U> where U: time::Unit {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self::Output {
+        let quantity = self.quantity - other.quantity;
+        Self { quantity, unit: PhantomData }
+    }
+}
+
+impl<U> Mul<f64> for Time<U> where U: time::Unit {
+    type Output = Self;
+
+    fn mul(self, other: f64) -> Self::Output {
+        let quantity = self.quantity * other;
+        Self::Output { quantity, unit: PhantomData }
+    }
+}
+
+impl<U> Mul<Time<U>> for f64 where U: time::Unit {
+    type Output = Time<U>;
+
+    fn mul(self, other: Time<U>) -> Self::Output {
+        let quantity = self * other.quantity;
+        Self::Output { quantity, unit: PhantomData }
+    }
+}
+
 /// Base units of length.
 ///
 /// Each unit is defined relative to meters with a conversion factor.
@@ -386,7 +477,7 @@ pub mod length {
     length_unit!(/** Decimeter / Decimetre */ Dm, 0.1, "dm");
     length_unit!(/** Centimeter / Centimetre */ Cm, 0.01, "cm");
     length_unit!(/** Millimeter / Millimetre */ Mm, 0.001, "mm");
-    length_unit!(/** Micrometer / Micrometre */ Um, 0.000_001, "um");
+    length_unit!(/** Micrometer / Micrometre */ Um, 0.000_001, "μm");
     length_unit!(/** Nanometer / Nanometre */ Nm, 0.000_000_001, "nm");
     length_unit!(/** Mile */ Mi, 1609.344, "mi");
     length_unit!(/** Foot */ Ft, 0.3048, "ft");
@@ -394,10 +485,54 @@ pub mod length {
     length_unit!(/** Yard */ Yd, 0.9144, "yd");
 }
 
+/// Base units of time.
+///
+/// Each unit is defined relative to seconds with a conversion factor.
+pub mod time {
+
+    /// Unit definition for Time
+    pub trait Unit {
+        /// Multiplication factor to convert to seconds
+        fn s_factor() -> f64;
+        /// Multiplication factor to convert to another unit
+        fn factor<T: Unit>() -> f64 {
+            Self::s_factor() / T::s_factor()
+        }
+        /// Unit abbreviation
+        const ABBREVIATION: &'static str;
+    }
+
+    macro_rules! time_unit {
+        ($(#[$meta:meta])* $unit:ident, $s_factor:expr, $abbreviation:expr) => {
+
+            $(#[$meta])*
+            #[derive(Debug, Copy, Clone, PartialEq)]
+            pub struct $unit;
+
+            impl Unit for $unit {
+                fn s_factor() -> f64 { $s_factor }
+                const ABBREVIATION: &'static str = { $abbreviation };
+            }
+        };
+    }
+
+    time_unit!(/** 14 Days */ Fortnight, 14.0 * 24.0 * 60.0 * 60.0, "fortnight");
+    time_unit!(/** Week */ Wk, 7.0 * 24.0 * 60.0 * 60.0, "wk");
+    time_unit!(/** Day */ Day, 24.0 * 60.0 * 60.0, "day");
+    time_unit!(/** Hour */ Hr, 60.0 * 60.0, "hr");
+    time_unit!(/** Minute */ Min, 60.0, "min");
+    time_unit!(/** Second */ S, 1.0, "s");
+    time_unit!(/** Decisecond */ Ds, 0.1, "ds");
+    time_unit!(/** Millisecond */ Ms, 0.001, "ms");
+    time_unit!(/** Microsecond */ Us, 0.000_001, "μs");
+    time_unit!(/** Nanosecond */ Ns, 0.000_000_001, "ns");
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
     use super::length::*;
+    use super::time::*;
 
     #[test]
     fn len_display() {
@@ -406,7 +541,7 @@ mod test {
         assert_eq!(Length::<Dm>::new(11.1).to_string(), "11.1 dm");
         assert_eq!(Length::<Cm>::new(25.0).to_string(), "25 cm");
         assert_eq!(Length::<Mm>::new(101.01).to_string(), "101.01 mm");
-        assert_eq!(Length::<Um>::new(3.9).to_string(), "3.9 um");
+        assert_eq!(Length::<Um>::new(3.9).to_string(), "3.9 μm");
         assert_eq!(Length::<Mi>::new(2.22).to_string(), "2.22 mi");
         assert_eq!(Length::<Ft>::new(0.5).to_string(), "0.5 ft");
         assert_eq!(Length::<In>::new(6.).to_string(), "6 in");
@@ -421,8 +556,14 @@ mod test {
 
     #[test]
     fn volume_display() {
-        assert_eq!(Volume::<Um>::new(123.0).to_string(), "123 um³");
+        assert_eq!(Volume::<Um>::new(123.0).to_string(), "123 μm³");
         assert_eq!(Volume::<In>::new(54.3).to_string(), "54.3 in³");
+    }
+
+    #[test]
+    fn time_display() {
+        assert_eq!(Time::<S>::new(23.7).to_string(), "23.7 s");
+        assert_eq!(Time::<Hr>::new(3.25).to_string(), "3.25 hr");
     }
 
     #[test]
@@ -449,6 +590,12 @@ mod test {
     fn volume_to() {
         assert_eq!(Volume::<Yd>::new(2.0).to(), Volume::<Ft>::new(54.0));
         assert_eq!(Volume::<Cm>::new(4.8).to(), Volume::<Mm>::new(4_800.0));
+    }
+
+    #[test]
+    fn time_to() {
+        assert_eq!(Time::<Hr>::new(4.75).to(), Time::<Min>::new(285.0));
+        assert_eq!(Time::<S>::new(2.5).to(), Time::<Ms>::new(2_500.0));
     }
 
     #[test]
@@ -492,6 +639,18 @@ mod test {
     }
 
     #[test]
+    fn time_add() {
+        assert_eq!(
+            Time::<Day>::new(3.5) + Time::<Day>::new(1.25),
+            Time::<Day>::new(4.75)
+        );
+        assert_eq!(
+            Time::<Wk>::new(1.0) + Time::<Wk>::new(2.1),
+            Time::<Wk>::new(3.1)
+        );
+    }
+
+    #[test]
     fn len_sub() {
         assert_eq!(
             Length::<Km>::new(5.0) - Length::<Km>::new(1.0),
@@ -516,6 +675,14 @@ mod test {
         assert_eq!(
             Volume::<M>::new(10.0) - Volume::<M>::new(4.5),
             Volume::<M>::new(5.5)
+        );
+    }
+
+    #[test]
+    fn time_sub() {
+        assert_eq!(
+            Time::<Us>::new(567.8) - Time::<Us>::new(123.4),
+            Time::<Us>::new(444.4)
         );
     }
 
@@ -547,6 +714,12 @@ mod test {
     fn volume_mul() {
         assert_eq!(Volume::<Um>::new(8.0) * 1.5, Volume::<Um>::new(12.0));
         assert_eq!(4.0 * Volume::<Km>::new(2.5), Volume::<Km>::new(10.0));
+    }
+
+    #[test]
+    fn time_mul() {
+        assert_eq!(Time::<Ns>::new(6.5) * 12.0, Time::<Ns>::new(78.0));
+        assert_eq!(4.0 * Time::<Hr>::new(1.5), Time::<Hr>::new(6.0));
     }
 
     #[test]
