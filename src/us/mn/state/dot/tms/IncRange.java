@@ -47,7 +47,7 @@ public enum IncRange {
 	/** Get a maximum number of exits */
 	public int getMaxExits() {
 		switch (this) {
-			case near:   return 1;
+			case near:   return 3;
 			case middle: return 5;
 			case far:    return 9;
 		}
