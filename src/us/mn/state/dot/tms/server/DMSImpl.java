@@ -1268,11 +1268,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return SignMessageHelper.isBlank(msg_current);
 	}
 
-	/** Test if the current message source contains "operator" */
-	private boolean isMsgOperator() {
-		return isMsgSource(getMsgCurrent(), SignMsgSource.operator);
-	}
-
 	/** Test if the current message source contains "scheduled" */
 	private boolean isMsgScheduled() {
 		return isMsgSource(getMsgCurrent(), SignMsgSource.schedule);
@@ -1294,9 +1289,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return isOnline() && !isMsgBlank();
 	}
 
-	/** Test if a DMS has been deployed by a user */
+	/** Test if a DMS has been deployed by a user (not scheduled) */
 	public boolean isUserDeployed() {
-		return isMsgDeployed() && isMsgOperator() && !isMsgAws();
+		return isMsgDeployed() && !isMsgScheduled();
 	}
 
 	/** Test if a DMS has been deployed by schedule */
