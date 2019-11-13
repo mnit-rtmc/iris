@@ -110,25 +110,32 @@ public class OpQueryDMSMessage extends OpDMS {
 		/* Compare the CRC of the message on the sign to the
 		 * CRC of the message IRIS knows about */
 		SignMessage sm = dms.getMsgCurrent();
-		String multi = parseMulti(sm);
-		int crc = DmsMessageCRC.calculate(multi, getBeaconEnabled(sm),
-			false);
-		if (crc != source.getCrc()) {
-			System.err.println("processMessageValid crc " + crc +
-				" != " + source.getCrc() + " for " + dms);
-			System.err.println("multi: " + multi);
-			return new QueryCurrentMessage();
-		} else {
+		if (checkMsgCrc(sm, true) || checkMsgCrc(sm, false)) {
 			setMsgCurrent(sm, sm.getOwner());
 			return null;
+		} else {
+			String multi = lookupMulti(sm);
+			System.err.println("processMessageValid: " + dms +
+				", CRC mismatch for (" + multi + ")");
+			return new QueryCurrentMessage();
 		}
 	}
 
-	/** Parse a sign message MULTI string and add graphic version IDs.
+	/** Check sign message CRC.
+	 * @param gids Include graphic version IDs in MULTI string. */
+	private boolean checkMsgCrc(SignMessage sm, boolean gids) {
+		String ms = lookupMulti(sm);
+		String multi = (gids) ? parseMulti(ms) : ms;
+		int crc = DmsMessageCRC.calculate(multi, getBeaconEnabled(sm),
+			false);
+		return source.getCrc() == crc;
+	}
+
+	/** Lookup the MULTI string for a sign message.
 	 * @param sm Sign message.
-	 * @return MULTI string with graphic IDs added. */
-	private String parseMulti(SignMessage sm) {
-		return (sm != null) ? parseMulti(sm.getMulti()) : "";
+	 * @return MULTI string or empty string. */
+	private String lookupMulti(SignMessage sm) {
+		return (sm != null) ? sm.getMulti() : "";
 	}
 
 	/** Get beacon enabled flag for a sign message */
@@ -187,8 +194,8 @@ public class OpQueryDMSMessage extends OpDMS {
 
 	/** Set the current message on the sign */
 	private void setMsgCurrent() {
-		System.err.println("setMsgCurrent (" + ms.getValue() + ") for "
-			+ dms);
+		System.err.println("setMsgCurrent: " + dms + " (" +
+			ms.getValue() + ")");
 		if (status.getEnum() == DmsMessageStatus.valid) {
 			Integer duration = parseDuration(time.getInteger());
 			DmsMsgPriority rp = getMsgPriority();
