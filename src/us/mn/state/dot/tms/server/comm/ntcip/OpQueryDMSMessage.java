@@ -112,7 +112,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		SignMessage sm = dms.getMsgCurrent();
 		String multi = parseMulti(sm);
 		int crc = DmsMessageCRC.calculate(multi, getBeaconEnabled(sm),
-			0);
+			false);
 		if (crc != source.getCrc())
 			return new QueryCurrentMessage();
 		else {

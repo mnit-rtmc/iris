@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -81,9 +81,6 @@ public class OpSendDMSMessage extends OpDMS {
 
 	/** Maximum message priority */
 	static private final int MAX_MESSAGE_PRIORITY = 255;
-
-	/** Pixel service disabled while message is deployed */
-	static private final int PIXEL_SERVICE_DISABLED = 0;
 
 	/** Make a new DmsMessageStatus enum */
 	static private ASN1Enum<DmsMessageStatus> makeStatus(
@@ -176,7 +173,7 @@ public class OpSendDMSMessage extends OpDMS {
 		multi = parseMulti(sm.getMulti());
 		msg_num = lookupMsgNum(multi);
 		message_crc = DmsMessageCRC.calculate(multi,
-			sm.getBeaconEnabled(), PIXEL_SERVICE_DISABLED);
+			sm.getBeaconEnabled(), false);
 		status = makeStatus(DmsMessageMemoryType.changeable, msg_num);
 		graphics = GraphicHelper.lookupMulti(multi);
 	}
@@ -336,7 +333,7 @@ public class OpSendDMSMessage extends OpDMS {
 				msg_num);
 			ms.setString(multi);
 			beacon.setInteger(message.getBeaconEnabled() ? 1 : 0);
-			srv.setInteger(PIXEL_SERVICE_DISABLED);
+			srv.setInteger(0);
 			prior.setInteger(message.getMsgPriority());
 			mess.add(ms);
 			// NOTE: If dmsMessageBeacon and dmsMessagePixelService
