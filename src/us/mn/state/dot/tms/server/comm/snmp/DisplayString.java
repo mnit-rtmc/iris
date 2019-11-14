@@ -15,31 +15,30 @@
 package us.mn.state.dot.tms.server.comm.snmp;
 
 /**
- * An ASN1 String is an OCTET STRING which contains text which might be outside
- * of the ASCII range.  Each octet represents one character in the string.
+ * DisplayString as defined in RFC 1213.
  *
  * @author Douglas Lau
  */
-public class ASN1String extends ASN1OctetString {
+public class DisplayString extends ASN1OctetString {
 
-	/** Create a new ASN1 string */
-	public ASN1String(MIBNode n, int idx, int j) {
+	/** Create a new display string */
+	public DisplayString(MIBNode n, int idx, int j) {
 		super(n, idx, j);
 	}
 
-	/** Create a new ASN1 string */
-	public ASN1String(MIBNode n, int idx) {
+	/** Create a new display string */
+	public DisplayString(MIBNode n, int idx) {
 		super(n, idx);
 	}
 
-	/** Create a new ASN1 string */
-	public ASN1String(MIBNode n) {
+	/** Create a new display string */
+	public DisplayString(MIBNode n) {
 		super(n);
 	}
 
-	/** Set the octet string to a string */
+	/** Set string value */
 	public void setString(String v) {
-		// FIXME: this should encode to a specific code page
+		// FIXME: should only accept NVT ASCII from RFC 854
 		setByteValue(v.getBytes());
 	}
 

@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 import us.mn.state.dot.tms.server.comm.snmp.BadValue;
+import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import us.mn.state.dot.tms.server.comm.snmp.GenError;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
@@ -541,7 +542,7 @@ public class OpSendDMSMessage extends OpDMS {
 		private final ASN1Enum<MultiSyntaxError> m_err;
 
 		/** Other error string */
-		private final ASN1String o_err = new ASN1String(
+		private final DisplayString o_err = new DisplayString(
 			dmsMultiOtherErrorDescription.node);
 
 		/** Create a phase to query an other MULTI error */
@@ -925,8 +926,8 @@ public class OpSendDMSMessage extends OpDMS {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer number = dmsGraphicNumber.makeInt(row);
-			ASN1String name = new ASN1String(dmsGraphicName.node,
-				row);
+			DisplayString name = new DisplayString(
+				dmsGraphicName.node, row);
 			ASN1Integer height = dmsGraphicHeight.makeInt(row);
 			ASN1Integer width = dmsGraphicWidth.makeInt(row);
 			ASN1Enum<ColorScheme> type = new ASN1Enum<

@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.TemperatureSensorsTable;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
+import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import static us.mn.state.dot.tms.server.comm.snmp.MIB.*;
 
 /**
@@ -69,10 +69,10 @@ public class OpQueryEssSettings extends OpEss {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			// FIXME: move to EssRec
-			ASN1String sdes = new ASN1String(sysDescr.node);
-			ASN1String scon = new ASN1String(sysContact.node);
-			ASN1String snam = new ASN1String(sysName.node);
-			ASN1String sloc = new ASN1String(sysLocation.node);
+			DisplayString sdes = new DisplayString(sysDescr.node);
+			DisplayString scon = new DisplayString(sysContact.node);
+			DisplayString snam = new DisplayString(sysName.node);
+			DisplayString sloc = new DisplayString(sysLocation.node);
 			mess.add(sdes);
 			mess.add(scon);
 			mess.add(snam);

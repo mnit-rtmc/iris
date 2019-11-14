@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mibskyline.MIB.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
+import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
@@ -340,15 +340,15 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query status of one power supply */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1String desc = new ASN1String(dmsPowerDescription
-				.node, row);
+			DisplayString desc = new DisplayString(
+				dmsPowerDescription.node, row);
 			ASN1Enum<DmsPowerType> p_type = new ASN1Enum<
 				DmsPowerType>(DmsPowerType.class,
 				dmsPowerType.node, row);
 			ASN1Enum<DmsPowerStatus> status = new ASN1Enum<
 				DmsPowerStatus>(DmsPowerStatus.class,
 				dmsPowerStatus.node, row);
-			ASN1String mfr_status = new ASN1String(
+			DisplayString mfr_status = new DisplayString(
 				dmsPowerMfrStatus.node, row);
 			ASN1Integer voltage = dmsPowerVoltage.makeInt(row);
 			mess.add(desc);
@@ -437,7 +437,7 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query status of one light sensor */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1String desc = new ASN1String(
+			DisplayString desc = new DisplayString(
 				dmsLightSensorDescription.node, row);
 			ASN1Enum<DmsLightSensorStatus> status = new ASN1Enum<
 				DmsLightSensorStatus>(DmsLightSensorStatus.class,

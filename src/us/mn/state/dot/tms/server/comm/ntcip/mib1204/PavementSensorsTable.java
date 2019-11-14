@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
+import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
 import static us.mn.state.dot.tms.units.Distance.Units.METERS;
@@ -102,7 +102,7 @@ public class PavementSensorsTable {
 
 	/** Table row */
 	static public class Row {
-		public final ASN1String location;
+		public final DisplayString location;
 		public final ASN1Enum<EssPavementType> pavement_type;
 		public final ASN1Integer height;
 		public final ASN1Integer exposure;
@@ -118,7 +118,7 @@ public class PavementSensorsTable {
 
 		/** Create a table row */
 		private Row(int row) {
-			location = new ASN1String(
+			location = new DisplayString(
 				essPavementSensorLocation.node, row);
 			pavement_type = new ASN1Enum<EssPavementType>(
 				EssPavementType.class, essPavementType.node,

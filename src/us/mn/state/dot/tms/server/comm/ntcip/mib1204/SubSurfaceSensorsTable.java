@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
+import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.CENTIMETERS;
 import static us.mn.state.dot.tms.units.Distance.Units.METERS;
@@ -71,7 +71,7 @@ public class SubSurfaceSensorsTable {
 
 	/** Table row */
 	static public class Row {
-		public final ASN1String location;
+		public final DisplayString location;
 		public final ASN1Enum<EssSubSurfaceType> sub_surface_type;
 		public final ASN1Integer sensor_depth;
 		public final TemperatureObject temp;
@@ -80,7 +80,7 @@ public class SubSurfaceSensorsTable {
 
 		/** Create a table row */
 		private Row(int row) {
-			location = new ASN1String(
+			location = new DisplayString(
 				essSubSurfaceSensorLocation.node, row);
 			sub_surface_type = new ASN1Enum<EssSubSurfaceType>(
 				EssSubSurfaceType.class, essSubSurfaceType.node,
