@@ -115,8 +115,11 @@ public class OpQueryDMSMessage extends OpDMS {
 			return null;
 		} else {
 			String multi = lookupMulti(sm);
-			System.err.println("processMessageValid: " + dms +
-				", CRC mismatch for (" + multi + ")");
+			if (multi.equals(ms.getValue())) {
+				System.err.println("processMessageValid: " +
+					dms + ", CRC mismatch for (" + multi +
+					")");
+			}
 			return new QueryCurrentMessage();
 		}
 	}
@@ -194,8 +197,6 @@ public class OpQueryDMSMessage extends OpDMS {
 
 	/** Set the current message on the sign */
 	private void setMsgCurrent() {
-		System.err.println("setMsgCurrent: " + dms + " (" +
-			ms.getValue() + ")");
 		if (status.getEnum() == DmsMessageStatus.valid) {
 			Integer duration = parseDuration(time.getInteger());
 			DmsMsgPriority rp = getMsgPriority();
