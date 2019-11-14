@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2019  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,11 +54,18 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
  *
  * @author Douglas Lau
  * @author Travis Swanston
+ * @author John Stanley - SRF Consulting
  */
 public class Session {
 
 	/** Session User */
 	private final User user;
+	
+	/** Global current session */
+	static private Session curSession;
+	
+	/** Sync object for changing current session */
+	static private Object mySync = new Object();
 
 	/** Get the currently logged-in user */
 	public User getUser() {
@@ -189,6 +197,7 @@ public class Session {
 		managers.add(inc_manager);
 		managers.add(new PlanManager(this, loc_manager));
 		tile_layer = createTileLayer(props.getProperty("map.tile.url"));
+		setCurrent(this, null);
 	}
 
 	/** Create the tile layer */
@@ -394,6 +403,7 @@ public class Session {
 
 	/** Dispose of the session */
 	public void dispose() {
+		setCurrent(null, this);
 		listeners.clear();
 		desktop.dispose();
 		for (MapTab tab: all_tabs.values())
@@ -426,5 +436,19 @@ public class Session {
 	private void fireEditModeChange() {
 		for (EditModeListener l: listeners)
 			l.editModeChanged();
+	}
+	
+	/** Set current session */
+	static private void setCurrent(Session newSes, Session oldSes) {
+		synchronized (mySync) {
+			if ((oldSes == curSession) || (oldSes == null))
+				curSession = newSes;
+		}
+	}
+	
+	/** Get current session.
+	 * Returns current session or null if not logged in. */
+	static public Session getCurrent() {
+		return curSession;
 	}
 }
