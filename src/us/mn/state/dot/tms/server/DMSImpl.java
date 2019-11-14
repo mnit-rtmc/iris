@@ -1289,19 +1289,14 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return (sm != null) && sm.getBeaconEnabled();
 	}
 
-	/** Test if the current message is AWS */
-	private boolean isMsgAws() {
-		return isMsgSource(getMsgCurrent(), SignMsgSource.aws);
-	}
-
 	/** Test if a DMS is active, not failed and deployed */
 	public boolean isMsgDeployed() {
 		return isOnline() && !isMsgBlank();
 	}
 
-	/** Test if a DMS has been deployed by a user (or external) */
+	/** Test if a DMS has been deployed by a user */
 	public boolean isUserDeployed() {
-		return isMsgDeployed() && (isMsgOperator() || isMsgExternal());
+		return isMsgDeployed() && isMsgOperator();
 	}
 
 	/** Test if a DMS has been deployed by schedule */
@@ -1309,9 +1304,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return isMsgDeployed() && isMsgScheduled();
 	}
 
-	/** Test if a DMS is active, not failed and deployed by AWS */
-	private boolean isAwsDeployed() {
-		return isMsgDeployed() && isMsgAws();
+	/** Test if a DMS has been deployed by an external system */
+	private boolean isExternalDeployed() {
+		return isMsgDeployed() && isMsgExternal();
 	}
 
 	/** Test if DMS needs maintenance */
@@ -1351,8 +1346,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				s |= ItemStyle.DEPLOYED.bit();
 			if (isScheduleDeployed())
 				s |= ItemStyle.SCHEDULED.bit();
-			if (isAwsDeployed())
-				s |= ItemStyle.AWS_DEPLOYED.bit();
+			if (isExternalDeployed())
+				s |= ItemStyle.EXTERNAL.bit();
 		}
 		return s;
 	}

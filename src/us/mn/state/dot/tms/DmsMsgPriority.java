@@ -90,8 +90,8 @@ public enum DmsMsgPriority {
 			                            SignMsgSource.incident);
 		case AWS:
 		case AWS_HIGH:
-			return SignMsgSource.toBits(SignMsgSource.schedule,
-			                            SignMsgSource.aws);
+		case OTHER_SYSTEM:
+			return SignMsgSource.external.bit();
 		default:
 			return SignMsgSource.external.bit();
 		}
