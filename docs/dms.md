@@ -46,9 +46,23 @@ External beacon | [beacon] controlled when sign messages are deployed
 Static graphic  | image of static sign in which DMS is inset
 Device purpose  | _general_ or _dedicated_ purpose for sign operation
 Hidden          | hide sign when _available_ or _deployed_ styles are selected
-Override font   | font to override the _default font_ in the sign configuration
 
-Sign groups and sign text libraries can be managed in the **Setup** tab.
+## Messages
+
+_Sign groups_ and associated _sign text_ libraries can be managed in the
+**Messages** tab.
+
+All sign groups are displayed in the table, even if the DMS is not a member of
+that group.  To add the DMS to a group, select the _Member_ check box.
+
+When a sign group is selected, its message library is displayed in the _sign
+text_ table.  Each row contains a message for one _line_ of the sign.  The
+_rank_ determines sort order in message lists.
+
+The _message preview_ displays a graphical rendering of the selected sign text.
+
+Select an _override font_ to use a font other than the _default font_ from the
+sign configuration.
 
 ## MULTI
 
