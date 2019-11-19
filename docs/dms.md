@@ -27,13 +27,13 @@ are ordered by precedence, determining which color a map marker is drawn.
 
 Style     | Description
 ----------|---------------------------------------
-Available | Blank and ready for operators to use
+Available | Sign is blank and ready to use
 Deployed  | Displaying an operator-defined message
 Schedule  | Displaying a scheduled message
 External  | Displaying a message from an external system (not IRIS)
 Maint.    | Sign requires maintenance, but might still be functional
-Failed    | Communication failure
-Purpose   | Special-purpose sign (travel time, wayfinding, etc.)
+Failed    | Communication failure to sign
+Purpose   | _Dedicated-purpose_ sign (travel time, wayfinding, etc.)
 All       | All signs
 
 ## Setup
