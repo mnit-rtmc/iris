@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Helper class for sign text.
@@ -51,5 +52,11 @@ public class SignTextHelper extends BaseHelper {
 				return true;
 		}
 		return false;
+	}
+
+	/** Validate a MULTI string */
+	static public boolean isMultiValid(String m) {
+		return m.length() <= SignText.MAX_LEN_MULTI &&
+		       m.equals(new MultiString(m).normalizeLine().toString());
 	}
 }

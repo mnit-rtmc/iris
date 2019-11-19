@@ -146,9 +146,9 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 			public boolean isEditable(IncAdvice adv) {
 				return canWrite(adv);
 			}
-			public void setValueAt(IncAdvice adv, Object value){
+			public void setValueAt(IncAdvice adv, Object value) {
 				adv.setMulti(new MultiString(value.toString())
-					.normalize());
+					.normalizeLine().toString());
 			}
 		});
 		cols.add(new ProxyColumn<IncAdvice>("dms.multi.abbrev", 150) {
@@ -160,7 +160,7 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 			}
 			public void setValueAt(IncAdvice adv, Object value) {
 				String a = new MultiString(value.toString())
-					.normalize();
+					.normalizeLine().toString();
 				adv.setAbbrev((a.length() > 0) ? a : null);
 			}
 		});

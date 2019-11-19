@@ -193,7 +193,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 			}
 			public void setValueAt(IncDescriptor dsc, Object value){
 				dsc.setMulti(new MultiString(value.toString())
-					.normalize());
+					.normalizeLine().toString());
 			}
 		});
 		cols.add(new ProxyColumn<IncDescriptor>("dms.multi.abbrev", 150)
@@ -206,7 +206,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 			}
 			public void setValueAt(IncDescriptor dsc, Object value){
 				String a = new MultiString(value.toString())
-					.normalize();
+					.normalizeLine().toString().trim();
 				dsc.setAbbrev((a.length() > 0) ? a : null);
 			}
 		});

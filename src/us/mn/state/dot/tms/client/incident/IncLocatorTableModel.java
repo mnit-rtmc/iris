@@ -109,7 +109,7 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 			}
 			public void setValueAt(IncLocator loc, Object value){
 				loc.setMulti(new MultiString(value.toString())
-					.normalize());
+					.normalizeLocator().toString());
 			}
 		});
 		cols.add(new ProxyColumn<IncLocator>("dms.multi.abbrev", 150) {
@@ -121,7 +121,7 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 			}
 			public void setValueAt(IncLocator loc, Object value) {
 				String a = new MultiString(value.toString())
-					.normalize();
+					.normalizeLocator().toString();
 				loc.setAbbrev((a.length() > 0) ? a : null);
 			}
 		});

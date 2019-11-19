@@ -38,13 +38,58 @@ public class MultiString {
 	static private final Pattern SPAN = Pattern.compile(
 		"[ !\"#$%&'()*+,-./0-9:;<=>?@A-Z\\[\\\\\\]^_`a-z{|}~]*");
 
-	/** A MULTI string which is automatically normalized */
+	/** A MULTI builder for normalizing spans and removing invalid tags */
 	static private class MultiNormalizer extends MultiBuilder {
-		@Override public void addSpan(String s) {
+		@Override
+		public void addSpan(String s) {
 			Matcher m = SPAN.matcher(s);
 			while (m.find())
 				super.addSpan(filterSpan(m.group()));
 		}
+	}
+
+	/** A MULTI builder for normalizing by line */
+	static private class LineMultiNormalizer extends MultiNormalizer {
+		// Strip tags which don't associate with a line
+		@Override
+		public void setColorBackground(int x) {}
+		@Override
+		public void setPageBackground(int z) {}
+		@Override
+		public void setPageBackground(int r, int g, int b) {}
+		@Override
+		public void addColorRectangle(int x, int y, int w, int h,
+			int z) {}
+		@Override
+		public void addColorRectangle(int x, int y, int w, int h,
+			int r, int g, int b) {}
+		@Override
+		public void addGraphic(int g_num, Integer x, Integer y,
+			String g_id) {}
+		@Override
+		public void setJustificationPage(Multi.JustificationPage jp) {}
+		@Override
+		public void addLine(Integer spacing) {}
+		@Override
+		public void addPage() {}
+		@Override
+		public void setPageTimes(Integer on, Integer off) {}
+		@Override
+		public void setTextRectangle(int x, int y, int w, int h) {}
+		// action tags not allowed in SignText
+		@Override
+		public void addFeed(String fid) {}
+		@Override
+		public void addParking(String pid, String l_txt, String c_txt){}
+		@Override
+		public void addSlowWarning(int spd, int dist, String mode) {}
+		@Override
+		public void addTolling(String mode, String[] zones) {}
+		@Override
+		public void addTravelTime(String sid, OverLimitMode mode,
+			String o_txt) {}
+		@Override
+		public void addSpeedAdvisory() {}
 	}
 
 	/** Filter brackets in a span of text */
@@ -365,8 +410,9 @@ public class MultiString {
 		if (o == this)
 			return true;
 		if (o != null) {
-			String ms = normalize();
-			String oms = new MultiString(o.toString()).normalize();
+			String ms = normalize().toString();
+			String oms = new MultiString(o.toString())
+				.normalize().toString();
 			return ms.equals(oms);
 		}
                 return false;
@@ -480,90 +526,38 @@ public class MultiString {
 	/** Normalize a MULTI string.
 	 * @return A normalized MULTI string with invalid characters and
 	 *         invalid tags removed. */
-	public String normalize() {
+	public MultiString normalize() {
 		MultiBuilder mb = new MultiNormalizer();
 		parse(mb);
-		return mb.toString();
+		return mb.toMultiString();
 	}
 
-	/** Normalize a single line MULTI string.
-	 * @return The normalized MULTI string. */
-	public String normalizeLine() {
-		// Strip tags which don't associate with a line
-		MultiBuilder mb = new MultiNormalizer() {
+	/** Normalize an incident locator MULTI string */
+	public MultiString normalizeLocator() {
+		MultiBuilder mb = new LineMultiNormalizer();
+		parse(mb);
+		return mb.toMultiString();
+	}
+
+	/** Normalize a single line MULTI string */
+	public MultiString normalizeLine() {
+		MultiBuilder mb = new LineMultiNormalizer() {
+			// locator tags also not allowed
 			@Override
-			public void setColorBackground(int x) {}
-			@Override
-			public void setPageBackground(int z) {}
-			@Override
-			public void setPageBackground(int r, int g, int b) {}
-			@Override
-			public void addColorRectangle(int x, int y, int w,
-				int h, int z) {}
-			@Override
-			public void addColorRectangle(int x, int y, int w,
-				int h, int r, int g, int b) {}
-			@Override
-			public void addGraphic(int g_num, Integer x, Integer y,
-				String g_id) {}
-			@Override
-			public void setJustificationPage(
-				Multi.JustificationPage jp) {}
-			@Override
-			public void addLine(Integer spacing) {}
-			@Override
-			public void addPage() {}
-			@Override
-			public void setPageTimes(Integer on, Integer off) {}
-			@Override
-			public void setTextRectangle(int x, int y, int w,
-				int h) {}
-			@Override
-			public void addFeed(String fid) {}
+			public void addLocator(String code) {}
 		};
 		parse(mb);
-		return mb.toString();
+		return mb.toMultiString();
 	}
 
-	/** Normalize a single line MULTI string.  (Also removes font tags).
-	 * @return The normalized MULTI string. */
-	public String normalizeLine2() {
-		// Strip tags which don't associate with a line
-		MultiBuilder mb = new MultiNormalizer() {
-			@Override
-			public void setColorBackground(int x) {}
-			@Override
-			public void setPageBackground(int z) {}
-			@Override
-			public void setPageBackground(int r, int g, int b) {}
+	/** Strip font tags from a MULTI string */
+	public MultiString stripFonts() {
+		MultiBuilder mb = new MultiBuilder() {
 			@Override
 			public void setFont(int fn, String f_id) {}
-			@Override
-			public void addColorRectangle(int x, int y, int w,
-				int h, int z) {}
-			@Override
-			public void addColorRectangle(int x, int y, int w,
-				int h, int r, int g, int b) {}
-			@Override
-			public void addGraphic(int g_num, Integer x, Integer y,
-				String g_id) {}
-			@Override
-			public void setJustificationPage(
-				Multi.JustificationPage jp) {}
-			@Override
-			public void addLine(Integer spacing) {}
-			@Override
-			public void addPage() {}
-			@Override
-			public void setPageTimes(Integer on, Integer off) {}
-			@Override
-			public void setTextRectangle(int x, int y, int w,
-				int h) {}
-			@Override
-			public void addFeed(String fid) {}
 		};
 		parse(mb);
-		return mb.toString();
+		return mb.toMultiString();
 	}
 
 	/** Strip all page time tags from a MULTI string */
@@ -728,7 +722,7 @@ public class MultiString {
 				if (j < n_total) {
 					MultiString ms = new MultiString(
 						lns[ln]);
-					lines[j] = ms.normalizeLine();
+					lines[j] = ms.normalizeLine().toString();
 				} else {
 					// MULTI string defines more than
 					// n_lines on this page.  We'll just

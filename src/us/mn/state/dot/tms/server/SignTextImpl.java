@@ -17,12 +17,11 @@ package us.mn.state.dot.tms.server;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.SignTextHelper;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Sign text contains the properties of a single line MULTI string for display
@@ -31,16 +30,6 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Douglas Lau
  */
 public class SignTextImpl extends BaseObjectImpl implements SignText {
-
-	/** Validate a MULTI string */
-	static private void validateMulti(String t) throws ChangeVetoException {
-		// FIXME: only allow true MULTI tags here
-		String multi = new MultiString(t).normalizeLine();
-		if (!multi.equals(t))
-			throw new ChangeVetoException("Invalid message: " + t);
-		if (multi.length() > 64)
-			throw new ChangeVetoException("Message too wide");
-	}
 
 	/** Load all the sign text */
 	static protected void loadAll() throws TMSException {
@@ -147,7 +136,8 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 	/** Set the MULTI string */
 	public void doSetMulti(String m) throws TMSException {
 		if (!m.equals(multi)) {
-			validateMulti(m);
+			if (!SignTextHelper.isMultiValid(m))
+			    throw new ChangeVetoException("Invalid MULTI: " + m);
 			store.update(this, "multi", m);
 			setMulti(m);
 		}

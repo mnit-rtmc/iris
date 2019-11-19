@@ -56,10 +56,8 @@ public class SignTextCreator {
 	 * @param multi MULTI string.
 	 * @param rank Message rank.
 	 */
-	public void create(SignGroup sg, short line, String multi,
-		short rank)
-	{
-		multi = new MultiString(multi).normalize();
+	public void create(SignGroup sg, short line, String multi, short rank) {
+		multi = new MultiString(multi).normalizeLine().toString();
 		String name = createUniqueSignTextName(sg);
 		if (isWritePermitted(name)) {
 			HashMap<String, Object> attrs =

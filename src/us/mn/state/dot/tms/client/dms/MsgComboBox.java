@@ -243,7 +243,7 @@ public class MsgComboBox extends JComboBox<SignText> {
 			return (SignText) item;
 		else if (item != null) {
 			String txt = new MultiString(item.toString())
-				.normalize();
+				.normalizeLine().toString();
 			return new ClientSignText(txt, line, ON_THE_FLY_RANK);
 		} else
 			return BLANK_SIGN_TEXT;

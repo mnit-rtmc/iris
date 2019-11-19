@@ -184,7 +184,7 @@ public class ComposerPagePanel extends JPanel {
 			int i = getLineNumber(n) - 1;
 			if (i < lines.length) {
 				String ms = new MultiString(lines[i])
-					.normalizeLine2();
+					.normalizeLine().stripFonts().toString();
 				cl.getModel().setSelectedItem(ms);
 			} else if (cl.getItemCount() > 0)
 				cl.setSelectedIndex(0);

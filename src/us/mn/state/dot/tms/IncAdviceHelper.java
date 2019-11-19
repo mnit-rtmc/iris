@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Helper class for Incident Advices.
@@ -98,5 +99,10 @@ public class IncAdviceHelper extends BaseHelper {
 			return 0;
 		else
 			return null; // no match
+	}
+
+	/** Validate a MULTI string */
+	static public boolean isMultiValid(String m) {
+		return m.equals(new MultiString(m).normalizeLine().toString());
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2013  Minnesota Department of Transportation
+ * Copyright (C) 2004-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,9 @@ public interface SignText extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "sign_text";
+
+	/** Maximum length of MULTI string */
+	int MAX_LEN_MULTI = 64;
 
 	/** Get the sign group */
 	SignGroup getSignGroup();

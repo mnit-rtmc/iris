@@ -20,9 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.IncAdvice;
+import us.mn.state.dot.tms.IncAdviceHelper;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * An incident advice is part of a message to deploy on a DMS, matching
@@ -245,8 +245,7 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 
 	/** Set the MULTI string */
 	public void doSetMulti(String m) throws TMSException {
-		// FIXME: only allow true MULTI tags here
-		if (!new MultiString(m).isValid())
+		if (!IncAdviceHelper.isMultiValid(m))
 			throw new ChangeVetoException("Invalid MULTI: " + m);
 		if (!m.equals(multi)) {
 			store.update(this, "multi", m);
@@ -271,8 +270,7 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 
 	/** Set abbreviated MULTI string */
 	public void doSetAbbrev(String a) throws TMSException {
-		// FIXME: only allow true MULTI tags here
-		if (a != null && !new MultiString(a).isValid())
+		if (a != null && !IncAdviceHelper.isMultiValid(a))
 			throw new ChangeVetoException("Invalid MULTI: " + a);
 		if (!objectEquals(a, abbrev)) {
 			store.update(this, "abbrev", a);
