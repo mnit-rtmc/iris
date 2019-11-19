@@ -331,7 +331,6 @@ public class DmsActionMsg {
 	/** Test if a feed message is valid */
 	private boolean isFeedMsgValid(MultiString _multi) {
 		int n_lines = DMSHelper.getLineCount(dms);
-		// FIXME: reject most MULTI tags
 		String[] lines = _multi.getLines(n_lines);
 		for (int i = 0; i < lines.length; i++) {
 			if (!isValidSignText((short) (i + 1), lines[i]))
