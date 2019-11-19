@@ -155,12 +155,18 @@ public class DMSManager extends DeviceManager<DMS> {
 	/** Check if a DMS style is visible */
 	@Override
 	protected boolean isStyleVisible(DMS dms) {
-		return isStyleAll(dms) || !DMSHelper.isHidden(dms);
+		return isStyleAlwaysVisible(dms) || !dms.getHidden();
 	}
 
-	/** Check if the selected style is ALL */
-	private boolean isStyleAll(DMS dms) {
-		return getSelectedStyle() == ItemStyle.ALL;
+	/** Check if the selected style is always visible */
+	private boolean isStyleAlwaysVisible(DMS dms) {
+		switch (getSelectedStyle()) {
+			case AVAILABLE:
+			case DEPLOYED:
+				return false;
+			default:
+				return true;
+		}
 	}
 
 	/** Create a proxy JList */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,14 +30,13 @@ public class SignGroupImpl extends BaseObjectImpl implements SignGroup {
 	/** Load all the sign groups */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, SignGroupImpl.class);
-		store.query("SELECT name, local, hidden FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, local FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new SignGroupImpl(
 					row.getString(1),	// name
-					row.getBoolean(2),	// local
-					row.getBoolean(3)	// hidden
+					row.getBoolean(2)	// local
 				));
 			}
 		});
@@ -49,7 +48,6 @@ public class SignGroupImpl extends BaseObjectImpl implements SignGroup {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("local", local);
-		map.put("hidden", hidden);
 		return map;
 	}
 
@@ -67,14 +65,13 @@ public class SignGroupImpl extends BaseObjectImpl implements SignGroup {
 
 	/** Create a new sign group */
 	public SignGroupImpl(String n) {
-		this(n, false, false);
+		this(n, false);
 	}
 
 	/** Create a new sign group */
-	public SignGroupImpl(String n, boolean l, boolean h) {
+	public SignGroupImpl(String n, boolean l) {
 		super(n);
 		local = l;
-		hidden = h;
 	}
 
 	/** Flag indicating local sign group */
@@ -84,28 +81,5 @@ public class SignGroupImpl extends BaseObjectImpl implements SignGroup {
 	@Override
 	public boolean getLocal() {
 		return local;
-	}
-
-	/** Flag indicating hidden sign group */
-	private boolean hidden;
-
-	/** Set the hidden flag */
-	@Override
-	public void setHidden(boolean h) {
-		hidden = h;
-	}
-
-	/** Set the hidden flag */
-	public void doSetHidden(boolean h) throws TMSException {
-		if (h != hidden) {
-			store.update(this, "hidden", h);
-			setHidden(h);
-		}
-	}
-
-	/** Get the hidden flag */
-	@Override
-	public boolean getHidden() {
-		return hidden;
 	}
 }

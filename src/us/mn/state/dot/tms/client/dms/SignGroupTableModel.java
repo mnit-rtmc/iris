@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2017  Minnesota Department of Transportation
+ * Copyright (C) 2005-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	@Override
 	protected ArrayList<ProxyColumn<SignGroup>> createColumns() {
 		ArrayList<ProxyColumn<SignGroup>> cols =
-			new ArrayList<ProxyColumn<SignGroup>>(3);
+			new ArrayList<ProxyColumn<SignGroup>>(2);
 		cols.add(new ProxyColumn<SignGroup>("dms.group", 200) {
 			public Object getValueAt(SignGroup sg) {
 				return sg.getName();
@@ -69,20 +69,6 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 					else
 						destroyDmsSignGroup(sg);
 				}
-			}
-		});
-		cols.add(new ProxyColumn<SignGroup>("dms.group.hidden", 50,
-			Boolean.class)
-		{
-			public Object getValueAt(SignGroup sg) {
-				return sg.getHidden();
-			}
-			public boolean isEditable(SignGroup sg) {
-				return canWrite(sg);
-			}
-			public void setValueAt(SignGroup sg, Object value) {
-				if (value instanceof Boolean)
-					sg.setHidden((Boolean) value);
 			}
 		});
 		return cols;

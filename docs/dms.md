@@ -20,6 +20,22 @@ The following features are supported:
 * [Variable speed advisories]
 * [Slow traffic] warnings
 
+## Styles
+
+Each DMS can have a number of _styles_, depending on its current state.  Styles
+are ordered by precedence, determining which color a map marker is drawn.
+
+Style     | Description
+----------|---------------------------------------
+Available | Blank and ready for operators to use
+Deployed  | Displaying an operator-defined message
+Schedule  | Displaying a scheduled message
+External  | Displaying a message from an external system (not IRIS)
+Maint.    | Sign requires maintenance, but might still be functional
+Failed    | Communication failure
+Purpose   | Special-purpose sign (travel time, wayfinding, etc.)
+All       | All signs
+
 ## Setup
 
 There are a number of fields available for configuring a DMS.
@@ -29,6 +45,7 @@ Field           | Description
 External beacon | [beacon] controlled when sign messages are deployed
 Static graphic  | image of static sign in which DMS is inset
 Device purpose  | _general_ or _dedicated_ purpose for sign operation
+Hidden          | hide sign when _available_ or _deployed_ styles are selected
 Override font   | font to override the _default font_ in the sign configuration
 
 Sign groups and sign text libraries can be managed in the **Setup** tab.

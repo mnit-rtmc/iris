@@ -2487,6 +2487,7 @@ CREATE TABLE iris._dms (
 	gps VARCHAR(20) REFERENCES iris._gps,
 	static_graphic VARCHAR(20) REFERENCES iris.graphic,
 	purpose INTEGER NOT NULL REFERENCES iris.device_purpose,
+	hidden BOOLEAN NOT NULL,
 	beacon VARCHAR(20) REFERENCES iris._beacon,
 	sign_config VARCHAR(12) REFERENCES iris.sign_config,
 	sign_detail VARCHAR(12) REFERENCES iris.sign_detail,
@@ -2527,7 +2528,7 @@ CREATE TRIGGER dms_table_notify_trig
 
 CREATE VIEW iris.dms AS
 	SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
-	       purpose, beacon, preset, sign_config, sign_detail,
+	       purpose, hidden, beacon, preset, sign_config, sign_detail,
 	       override_font, override_foreground, override_background,
 	       msg_sched, msg_current, expire_time
 	FROM iris._dms dms
@@ -2542,12 +2543,12 @@ BEGIN
 	INSERT INTO iris._device_preset (name, preset)
 	     VALUES (NEW.name, NEW.preset);
 	INSERT INTO iris._dms (name, geo_loc, notes, gps, static_graphic,
-	                       purpose, beacon, sign_config, sign_detail,
+	                       purpose, hidden, beacon, sign_config, sign_detail,
 	                       override_font, override_foreground,
 	                       override_background, msg_sched, msg_current,
 	                       expire_time)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.gps,
-	             NEW.static_graphic, NEW.purpose, NEW.beacon,
+	             NEW.static_graphic, NEW.purpose, NEW.hidden, NEW.beacon,
 	             NEW.sign_config, NEW.sign_detail, NEW.override_font,
 	             NEW.override_foreground, NEW.override_background,
 	             NEW.msg_sched, NEW.msg_current, NEW.expire_time);
@@ -2575,6 +2576,7 @@ BEGIN
 	       gps = NEW.gps,
 	       static_graphic = NEW.static_graphic,
 	       purpose = NEW.purpose,
+	       hidden = NEW.hidden,
 	       beacon = NEW.beacon,
 	       sign_config = NEW.sign_config,
 	       sign_detail = NEW.sign_detail,
@@ -2612,10 +2614,10 @@ CREATE TRIGGER dms_delete_trig
 
 CREATE VIEW dms_view AS
 	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
-	       d.static_graphic, dp.description AS purpose, d.beacon, p.camera,
-	       p.preset_num, d.sign_config, d.sign_detail, default_font,
-	       override_font, override_foreground, override_background,
-	       msg_sched, msg_current, expire_time,
+	       d.static_graphic, dp.description AS purpose, d.hidden, d.beacon,
+	       p.camera, p.preset_num, d.sign_config, d.sign_detail,
+	       default_font, override_font, override_foreground,
+	       override_background, msg_sched, msg_current, expire_time,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.landmark, l.lat, l.lon, l.corridor, l.location
 	FROM iris.dms d
@@ -2637,12 +2639,11 @@ GRANT SELECT ON dms_message_view TO PUBLIC;
 
 CREATE TABLE iris.sign_group (
 	name VARCHAR(20) PRIMARY KEY,
-	local BOOLEAN NOT NULL,
-	hidden BOOLEAN NOT NULL
+	local BOOLEAN NOT NULL
 );
 
 CREATE VIEW sign_group_view AS
-	SELECT name, local, hidden
+	SELECT name, local
 	FROM iris.sign_group;
 GRANT SELECT ON sign_group_view TO PUBLIC;
 
@@ -2653,7 +2654,7 @@ CREATE TABLE iris.dms_sign_group (
 );
 
 CREATE VIEW dms_sign_group_view AS
-	SELECT d.name, dms, sign_group, local, hidden
+	SELECT d.name, dms, sign_group, local
 	FROM iris.dms_sign_group d
 	JOIN iris.sign_group sg ON d.sign_group = sg.name;
 GRANT SELECT ON dms_sign_group_view TO PUBLIC;

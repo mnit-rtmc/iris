@@ -88,11 +88,6 @@ public class DMSHelper extends BaseHelper {
 		return ItemStyle.PURPOSE.checkBit(proxy.getStyles());
 	}
 
-	/** Test if a DMS is hidden */
-	static public boolean isHidden(DMS proxy) {
-		return ItemStyle.HIDDEN.checkBit(proxy.getStyles());
-	}
-
 	/** Get a string that contains all active DMS styles,
 	 * separated by commas. */
 	static public String getAllStyles(DMS proxy) {

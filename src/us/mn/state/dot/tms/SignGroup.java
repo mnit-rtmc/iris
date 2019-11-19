@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,10 +28,4 @@ public interface SignGroup extends SonarObject {
 
 	/** Is the group local to one sign? */
 	boolean getLocal();
-
-	/** Set the hidden flag */
-	void setHidden(boolean h);
-
-	/** Get the hidden flag */
-	boolean getHidden();
 }

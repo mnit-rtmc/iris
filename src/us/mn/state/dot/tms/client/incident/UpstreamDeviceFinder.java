@@ -184,7 +184,7 @@ public class UpstreamDeviceFinder {
 	private boolean isDeployable(DMS dms, UpstreamDevice ed,
 		boolean branched)
 	{
-		if (DMSHelper.isHidden(dms) ||
+		if (dms.getHidden() ||
 		    DMSHelper.isFailed(dms) ||
 		   !DMSHelper.isActive(dms))
 			return false;
