@@ -8,31 +8,43 @@ video.  To view MPEG4 or h.264 video, the [MonStream] application is required.
 
 Select `View ➔ Video ➔ Encoder Types` menu item
 
-An encoder type represents a specific make and model of video encoder.  It
-determines how video request URIs are formed.
+An encoder type represents a specific make and model of video encoder.  All
+cameras with the same type share a common configuration.
 
-Field        | Description
--------------|------------------
-Encoder Type | Make / model name
-Encoding     | Stream encoding: MJPEG, MPEG2, MPEG4, H264
-URI Scheme   | Scheme part of request URI: `rtsp` / `http`
-URI Path     | Path part of request URI.  This could be the location of an SDP file, for example.  To include the encoder channel number in the path, use `{chan}`.
-Latency      | Buffering latency for consuming stream
+### Streams
+
+A _stream_ contains all the fields needed for viewing a camera.  Multiple
+streams can be configured for differing quality or _views_.
+
+Field          | Description
+---------------|------------------
+Encoder Type   | Make / model name
+View #         | Fixed view (no pan/tilt/zoom), usable as a preset
+Encoding       | Stream encoding: `MJPEG`, `MPEG2`, `MPEG4`, `H264`
+Quality        | Resolution and frame rate comparison: `Low` / `Medium` / `High`
+URI scheme     | Scheme part of unicast request URI: `rtsp` / `http`
+URI path       | Path part of unicast request URI.  Use `{chan}` for camera's channel number.
+Multicast port | Port for encoder's [Multicast] address
+Latency        | Buffering latency for consuming stream
+
+A stream can be either _unicast_ or _multicast_, but not both.  For a multicast
+stream defined by an [SDP] file, specify the _URI pcheme_ and _path_ instead of
+_multicast port_.
 
 ## Video Encoders
 
 Select `View ➔ Video ➔ Cameras` menu item
 
 The **Setup** tab within a camera properties form contains attributes to
-configure the encoded stream.
+configure the video encoder.
 
-Field                     | Description
---------------------------|-------------------------------------------
-`#`                       | Camera number, used for [keyboards](#camera-keyboards)
-Encoder Type              | The type of encoder for the video stream
-Encoder Address           | The host name or IP address of the encoder.  If the encoder type does not specify a path, it can also be included here.  If a URI scheme is included, it will be used instead of the scheme from the encoder type
-Encoder Multicast Address | A multicast address can be used by [MonStream] clients.  If defined, it will be used instead of the encoder address.  It must be a UDP address in the multicast range, including port.  Multicast requires less bandwidth, and allows scaling to many simultaneous streams
-Encoder Channel           | This only needs to be specified if the URI path of the encoder type requires it
+Field             | Description
+------------------|-------------------------------------------------------
+`#`               | Camera number, used for [keyboards](#camera-keyboards)
+Encoder Type      | The type of video encoder
+Unicast Address   | IP address or host name for unicast streams
+Multicast Address | IP address for [Multicast] streams
+Encoder Channel   | Channel number, for encoders which support multiple cameras
 
 ## Pan Tilt and Zoom
 
@@ -112,8 +124,10 @@ Otherwise, requests will be made directly to the camera's encoder address.
 [DMS]: dms.html
 [iris-client.properties]: client_properties.html
 [MonStream]: video.html#monstream
+[Multicast]: https://en.wikipedia.org/wiki/Multicast_address
 [Pelco-P]: comm_links.html#pelcop
 [play list]: video.html#play-lists
 [ramp meter]: ramp_meters.html
+[SDP]: https://en.wikipedia.org/wiki/Session_Description_Protocol
 [system attribute]: system_attributes.html
 [video monitor]: video.html
