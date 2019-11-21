@@ -24,7 +24,7 @@ types can have multiple streams for differing quality or _views_.
 
 Field          | Description
 ---------------|--------------------------------------------------
-View #         | Fixed view (no pan/tilt/zoom), usable as a preset
+View Num       | Fixed view (no pan/tilt/zoom), usable as a preset
 Encoding       | Stream encoding: `MJPEG`, `MPEG2`, `MPEG4`, `H264`, `AV1`
 Quality        | Resolution and frame rate comparison: `Low` / `Medium` / `High`
 URI scheme     | Scheme part of unicast request URI: `rtsp` / `http`
@@ -45,7 +45,7 @@ configure the video encoder.
 
 Field             | Description
 ------------------|-------------------------------------------------------
-`#`               | Camera number, used for [keyboards](#camera-keyboards)
+Cam Num           | Camera number, used for [keyboards](#camera-keyboards)
 Encoder Type      | The type of video encoder
 Encoder Address   | IP address for unicast streams (or [SDP] files)
 Encoder Port      | Port number for unicast streams (overrides scheme default)
@@ -85,8 +85,8 @@ direction or a device, such as [DMS] or [ramp meter].  To associate a preset
 with a device, enable the preset, then select that preset on the **Location**
 tab of the device's properties form.
 
-If a stream is defined with a _view #_ that matches the _preset #_, that stream
-will be selected, instead of a typical PTZ preset.
+If a stream is defined with a _view num_ that matches the _preset num_, that
+stream will be selected, instead of a typical PTZ preset.
 
 ## Camera Selector Tool
 
