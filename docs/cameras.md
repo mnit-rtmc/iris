@@ -19,12 +19,11 @@ Config   | Encoder configuration
 
 ### Streams
 
-A _stream_ contains all the fields needed for viewing a camera.  Encoder types
-can have multiple streams for differing quality or _views_.
+A _stream_ contains fields needed for consuming video from a camera.  Encoder
+types can have multiple streams for differing quality or _views_.
 
 Field          | Description
----------------|------------------
-Encoder Type   | Make / model name
+---------------|--------------------------------------------------
 View #         | Fixed view (no pan/tilt/zoom), usable as a preset
 Encoding       | Stream encoding: `MJPEG`, `MPEG2`, `MPEG4`, `H264`, `AV1`
 Quality        | Resolution and frame rate comparison: `Low` / `Medium` / `High`
@@ -48,7 +47,8 @@ Field             | Description
 ------------------|-------------------------------------------------------
 `#`               | Camera number, used for [keyboards](#camera-keyboards)
 Encoder Type      | The type of video encoder
-Encoder Address   | IP address or host name for unicast streams
+Encoder Address   | IP address for unicast streams (or [SDP] files)
+Encoder Port      | Port number for unicast streams (overrides scheme default)
 Multicast Address | IP address for [Multicast] streams
 Encoder Channel   | Channel number, for encoders which support multiple cameras
 Publish           | Flag to allow public viewing of camera video
@@ -84,6 +84,9 @@ to 12 presets per camera.  A preset can be associated with either a compass
 direction or a device, such as [DMS] or [ramp meter].  To associate a preset
 with a device, enable the preset, then select that preset on the **Location**
 tab of the device's properties form.
+
+If a stream is defined with a _view #_ that matches the _preset #_, that stream
+will be selected, instead of a typical PTZ preset.
 
 ## Camera Selector Tool
 
