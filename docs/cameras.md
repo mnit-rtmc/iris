@@ -8,8 +8,8 @@ video.  To view MPEG4 or h.264 video, the [MonStream] application is required.
 
 Select `View ➔ Video ➔ Encoder Types` menu item
 
-Encoder type represents a specific make and model of video encoder.  All cameras
-with the same type share a common configuration.
+An encoder type represents a specific make and model of video encoder.  All
+cameras with the same type share a common configuration.
 
 Field    | Description
 ---------|------------------
@@ -20,20 +20,23 @@ Config   | Encoder configuration
 ### Streams
 
 A _stream_ contains fields needed for consuming video from a camera.  Encoder
-types can have multiple streams for differing quality or _views_.
+types can have multiple streams for differing quality.
+
+For cameras with multiple **fixed-position** _views_, a number can be used to
+identify them.
 
 Field          | Description
----------------|--------------------------------------------------
-View Num       | Fixed view (no pan/tilt/zoom), usable as a preset
+---------------|-----------------------------------------------
+View Num       | Fixed-position view, usable as a preset number
 Encoding       | Stream encoding: `MJPEG`, `MPEG2`, `MPEG4`, `H264`, `AV1`
 Quality        | Resolution and frame rate comparison: `Low` / `Medium` / `High`
 URI scheme     | Scheme part of unicast request URI: `rtsp` / `http`
 URI path       | Path part of unicast request URI.  Use `{chan}` for camera's channel number.
-Multicast port | Port for camera's [Multicast] address
+Multicast port | Port for camera's [multicast] address
 Latency        | Buffering latency (ms) for consuming stream
 
 A stream can be either _unicast_ or _multicast_, but not both.  For a multicast
-stream defined by an [SDP] file, specify the _URI pcheme_ and _path_ instead of
+stream defined by an [SDP] file, specify the _URI scheme_ and _path_ instead of
 _multicast port_.
 
 ## Setup
@@ -49,7 +52,7 @@ Cam Num           | Camera number, used for [keyboards](#camera-keyboards)
 Encoder Type      | The type of video encoder
 Encoder Address   | IP address for unicast streams (or [SDP] files)
 Encoder Port      | Port number for unicast streams (overrides scheme default)
-Multicast Address | IP address for [Multicast] streams
+Multicast Address | IP address for [multicast] streams
 Encoder Channel   | Channel number, for encoders which support multiple cameras
 Publish           | Flag to allow public viewing of camera video
 
@@ -86,7 +89,7 @@ with a device, enable the preset, then select that preset on the **Location**
 tab of the device's properties form.
 
 If a stream is defined with a _view num_ that matches the _preset num_, that
-stream will be selected, instead of a typical PTZ preset.
+stream will be selected instead of a typical PTZ preset.
 
 ## Camera Selector Tool
 
@@ -134,7 +137,7 @@ Otherwise, requests will be made directly to the camera's encoder address.
 [DMS]: dms.html
 [iris-client.properties]: client_properties.html
 [MonStream]: video.html#monstream
-[Multicast]: https://en.wikipedia.org/wiki/Multicast_address
+[multicast]: https://en.wikipedia.org/wiki/Multicast_address
 [Pelco-P]: comm_links.html#pelcop
 [play list]: video.html#play-lists
 [ramp meter]: ramp_meters.html
