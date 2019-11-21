@@ -8,30 +8,36 @@ video.  To view MPEG4 or h.264 video, the [MonStream] application is required.
 
 Select `View ➔ Video ➔ Encoder Types` menu item
 
-An encoder type represents a specific make and model of video encoder.  All
-cameras with the same type share a common configuration.
+Encoder type represents a specific make and model of video encoder.  All cameras
+with the same type share a common configuration.
+
+Field    | Description
+---------|------------------
+Make     | Manufacturer name
+Model    | Device model
+Config   | Encoder configuration
 
 ### Streams
 
-A _stream_ contains all the fields needed for viewing a camera.  Multiple
-streams can be configured for differing quality or _views_.
+A _stream_ contains all the fields needed for viewing a camera.  Encoder types
+can have multiple streams for differing quality or _views_.
 
 Field          | Description
 ---------------|------------------
 Encoder Type   | Make / model name
 View #         | Fixed view (no pan/tilt/zoom), usable as a preset
-Encoding       | Stream encoding: `MJPEG`, `MPEG2`, `MPEG4`, `H264`
+Encoding       | Stream encoding: `MJPEG`, `MPEG2`, `MPEG4`, `H264`, `AV1`
 Quality        | Resolution and frame rate comparison: `Low` / `Medium` / `High`
 URI scheme     | Scheme part of unicast request URI: `rtsp` / `http`
 URI path       | Path part of unicast request URI.  Use `{chan}` for camera's channel number.
-Multicast port | Port for encoder's [Multicast] address
-Latency        | Buffering latency for consuming stream
+Multicast port | Port for camera's [Multicast] address
+Latency        | Buffering latency (ms) for consuming stream
 
 A stream can be either _unicast_ or _multicast_, but not both.  For a multicast
 stream defined by an [SDP] file, specify the _URI pcheme_ and _path_ instead of
 _multicast port_.
 
-## Video Encoders
+## Setup
 
 Select `View ➔ Video ➔ Cameras` menu item
 
@@ -42,9 +48,10 @@ Field             | Description
 ------------------|-------------------------------------------------------
 `#`               | Camera number, used for [keyboards](#camera-keyboards)
 Encoder Type      | The type of video encoder
-Unicast Address   | IP address or host name for unicast streams
+Encoder Address   | IP address or host name for unicast streams
 Multicast Address | IP address for [Multicast] streams
 Encoder Channel   | Channel number, for encoders which support multiple cameras
+Publish           | Flag to allow public viewing of camera video
 
 ## Pan Tilt and Zoom
 
