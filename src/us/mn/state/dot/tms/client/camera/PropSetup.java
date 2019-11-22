@@ -112,6 +112,7 @@ public class PropSetup extends IPanel {
 		enc_type_cbx.setModel(new IComboBoxModel<EncoderType>(session
 			.getSonarState().getCamCache().getEncoderTypeModel()));
 		enc_type_cbx.setAction(enc_type_act);
+		enc_type_cbx.setRenderer(new EncoderTypeRenderer());
 		add("camera.num");
 		add(cam_num_txt, Stretch.LAST);
 		add("encoder.type");
