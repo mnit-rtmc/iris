@@ -31,7 +31,7 @@ View Num       | Fixed-position view, usable as a preset number
 Encoding       | Stream encoding: `MJPEG`, `MPEG2`, `MPEG4`, `H264`, `AV1`
 Quality        | Resolution and frame rate comparison: `Low` / `Medium` / `High`
 URI scheme     | Scheme part of unicast request URI: `rtsp` / `http`
-URI path       | Path part of unicast request URI.  Use `{chan}` for camera's channel number.
+URI path       | Path part of unicast request URI.  Query parameters may be appended; use `{chan}` for camera's channel number.
 Multicast port | Port for camera's [multicast] address
 Latency        | Buffering latency (ms) for consuming stream
 

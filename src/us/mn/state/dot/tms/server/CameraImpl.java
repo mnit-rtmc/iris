@@ -60,9 +60,9 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CameraImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"cam_num, encoder_type, encoder, enc_mcast, " +
-			"encoder_channel, publish, video_loss FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+			"cam_num, encoder_type, enc_address, enc_port, " +
+			"enc_mcast, enc_channel, publish, video_loss " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new CameraImpl(row));
@@ -81,9 +81,10 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		map.put("notes", notes);
 		map.put("cam_num", cam_num);
 		map.put("encoder_type", encoder_type);
-		map.put("encoder", encoder);
+		map.put("enc_address", enc_address);
+		map.put("enc_port", enc_port);
 		map.put("enc_mcast", enc_mcast);
-		map.put("encoder_channel", encoder_channel);
+		map.put("enc_channel", enc_channel);
 		map.put("publish", publish);
 		map.put("video_loss", video_loss);
 		return map;
@@ -112,42 +113,44 @@ public class CameraImpl extends DeviceImpl implements Camera {
 
 	/** Create a camera */
 	private CameraImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),		// name
-		     row.getString(2),		// geo_loc
-		     row.getString(3),		// controller
-		     row.getInt(4),		// pin
-		     row.getString(5),		// notes
-		     (Integer) row.getObject(6),// cam_num
-		     row.getString(7),		// encoder_type
-		     row.getString(8),		// encoder
-		     row.getString(9),		// enc_mcast
-		     row.getInt(10),		// encoder_channel
-		     row.getBoolean(11),	// publish
-		     row.getBoolean(12)		// video_loss
+		this(row.getString(1),           // name
+		     row.getString(2),           // geo_loc
+		     row.getString(3),           // controller
+		     row.getInt(4),              // pin
+		     row.getString(5),           // notes
+		     (Integer) row.getObject(6), // cam_num
+		     row.getString(7),           // encoder_type
+		     row.getString(8),           // enc_address
+		     (Integer) row.getObject(9), // enc_port
+		     row.getString(10),          // enc_mcast
+		     (Integer) row.getInt(11),   // enc_channel
+		     row.getBoolean(12),         // publish
+		     row.getBoolean(13)          // video_loss
 		);
 	}
 
 	/** Create a camera */
 	private CameraImpl(String n, String l, String c, int p, String nt,
-		Integer cn, String et, String e, String em, int ec, boolean pb,
-		boolean vl)
+		Integer cn, String et, String ea, Integer ep, String em,
+		Integer ec, boolean pb, boolean vl)
 	{
 		this(n, lookupGeoLoc(l), lookupController(c), p, nt, cn,
-		     lookupEncoderType(et), e, em, ec, pb, vl);
+		     lookupEncoderType(et), ea, ep, em, ec, pb, vl);
 	}
 
 	/** Create a camera */
 	private CameraImpl(String n, GeoLocImpl l, ControllerImpl c, int p,
-		String nt, Integer cn, EncoderType et, String e, String em,
-		int ec, boolean pb, boolean vl)
+		String nt, Integer cn, EncoderType et, String ea, Integer ep,
+		String em, Integer ec, boolean pb, boolean vl)
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
 		cam_num = cn;
 		encoder_type = et;
-		encoder = e;
+		enc_address = ea;
+		enc_port = ep;
 		enc_mcast = em;
-		encoder_channel = ec;
+		enc_channel = ec;
 		publish = pb;
 		video_loss = vl;
 		initTransients();
@@ -205,7 +208,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 
 	/** Set the encoder type */
 	public void doSetEncoderType(EncoderType et) throws TMSException {
-		if (et != encoder_type) {
+		if (!objectEquals(et, encoder_type)) {
 			store.update(this, "encoder_type", et);
 			setEncoderType(et);
 		}
@@ -217,73 +220,96 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		return encoder_type;
 	}
 
-	/** Encoder stream URI */
-	private String encoder = "";
+	/** Encoder address */
+	private String enc_address;
 
-	/** Set the encoder stream URI */
+	/** Set the encoder address */
 	@Override
-	public void setEncoder(String enc) {
-		encoder = enc;
+	public void setEncAddress(String ea) {
+		enc_address = ea;
 	}
 
-	/** Set the encoder stream URI */
-	public void doSetEncoder(String enc) throws TMSException {
-		if (!enc.equals(encoder)) {
-			store.update(this, "encoder", enc);
-			setEncoder(enc);
+	/** Set the encoder address */
+	public void doSetEncAddress(String ea) throws TMSException {
+		if (!objectEquals(ea, enc_address)) {
+			store.update(this, "enc_address", ea);
+			setEncAddress(ea);
 		}
 	}
 
-	/** Get the encoder stream URI */
+	/** Get the encoder address */
 	@Override
-	public String getEncoder() {
-		return encoder;
+	public String getEncAddress() {
+		return enc_address;
 	}
 
-	/** Encoder multicast URI */
-	private String enc_mcast = "";
+	/** Encoder unicast port */
+	private Integer enc_port;
 
-	/** Set the encoder multicast URI */
+	/** Set the override encoder port */
 	@Override
-	public void setEncMulticast(String em) {
+	public void setEncPort(Integer p) {
+		enc_port = p;
+	}
+
+	/** Set the override encoder port */
+	public void doSetEncPort(Integer p) throws TMSException {
+		if (p != enc_port) {
+			store.update(this, "enc_port", p);
+			setEncPort(p);
+		}
+	}
+
+	/** Get the override encoder port */
+	@Override
+	public Integer getEncPort() {
+		return enc_port;
+	}
+
+	/** Encoder multicast address */
+	private String enc_mcast;
+
+	/** Set the encoder multicast address */
+	@Override
+	public void setEncMcast(String em) {
 		enc_mcast = em;
 	}
 
-	/** Set the encoder multicast URI */
-	public void doSetEncMulticast(String em) throws TMSException {
-		if (!em.equals(enc_mcast)) {
+	/** Set the encoder multicast address */
+	public void doSetEncMcast(String em) throws TMSException {
+		if (!objectEquals(em, enc_mcast)) {
 			store.update(this, "enc_mcast", em);
-			setEncMulticast(em);
+			setEncMcast(em);
 		}
 	}
 
 	/** Get the encoder multicast URI */
 	@Override
-	public String getEncMulticast() {
+	public String getEncMcast() {
 		return enc_mcast;
 	}
 
 	/** Input channel for video stream on encoder */
-	private int encoder_channel;
+	private Integer enc_channel;
 
 	/** Set the input channel on the encoder */
 	@Override
-	public void setEncoderChannel(int c) {
-		encoder_channel = c;
+	public void setEncChannel(Integer c) {
+		enc_channel = c;
 	}
 
 	/** Set the input channel on the encoder */
-	public void doSetEncoderChannel(int c) throws TMSException {
-		if (c == encoder_channel)
-			return;
-		store.update(this, "encoder_channel", c);
-		setEncoderChannel(c);
+	public void doSetEncChannel(Integer c) throws TMSException {
+		if (c != enc_channel) {
+			store.update(this, "enc_channel", c);
+			setEncChannel(c);
+		}
 	}
 
 	/** Get the input channel on the encoder */
 	@Override
-	public int getEncoderChannel() {
-		return encoder_channel;
+	public Integer getEncChannel() {
+		return enc_channel;
 	}
 
 	/** Flag to allow publishing camera images */
@@ -358,8 +384,8 @@ public class CameraImpl extends DeviceImpl implements Camera {
 
 	/** Check if encoder is configured */
 	private boolean isEncoderConfigured() {
-		return (getEncMulticast().length() > 0)
-		    || (getEncoder().length() > 0);
+		return getEncoderType() != null &&
+		      (getEncAddress() != null || getEncMcast() != null);
 	}
 
 	/** Check if video loss flag should be updated */

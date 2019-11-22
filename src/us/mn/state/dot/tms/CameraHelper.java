@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -32,6 +32,10 @@ import us.mn.state.dot.tms.units.Distance;
  */
 public class CameraHelper extends BaseHelper {
 
+	/** Invalid URI needed because URI.toURL throws
+	 * IllegalArgumentException when scheme is empty. */
+	static private final URI INVALID_URI = URIUtil.HTTP;
+
 	/** Don't allow instances to be created */
 	private CameraHelper() {
 		assert false;
@@ -39,7 +43,7 @@ public class CameraHelper extends BaseHelper {
 
 	/** Lookup the camera with the specified name */
 	static public Camera lookup(String name) {
-		return (Camera)namespace.lookupObject(Camera.SONAR_TYPE,
+		return (Camera) namespace.lookupObject(Camera.SONAR_TYPE,
 			name);
 	}
 
@@ -206,26 +210,60 @@ public class CameraHelper extends BaseHelper {
 		return (c != null) ? c : findFirst();
 	}
 
-	/** Create a camera encoder URI */
-	static public URI encoderUri(Camera c, String query) {
+	/** Get an encoder stream for a camera.
+	 * @param c Camera for stream.
+	 * @param q Preferred encoding quality.
+	 * @param allow_mcast Allow multicast streams. */
+	static public EncoderStream getStream(Camera c, EncodingQuality q,
+		boolean allow_mcast)
+	{
 		if (c != null) {
 			EncoderType et = c.getEncoderType();
-			if (et != null)
-				return encoderUri(c, et, query);
+			if (et != null) {
+				boolean mcast = allow_mcast &&
+					(c.getEncMcast() != null);
+				return EncoderStreamHelper.find(et, q, mcast);
+			}
 		}
-		// URI.toURL throws IllegalArgumentException with empty scheme
-		return URIUtil.HTTP;
+		return null;
 	}
 
 	/** Create a camera encoder URI */
-	static private URI encoderUri(Camera c, EncoderType et, String query) {
-		assert c != null;
-		String enc = c.getEncoder();
-		int chan = c.getEncoderChannel();
-		URI scheme = URIUtil.createScheme(et.getUriScheme());
-		String auth = getAuth(c);
-		return URIUtil.create(scheme, auth + enc + buildPath(
-			et.getUriPath(), chan) + query);
+	static public URI encoderUri(Camera c, EncoderStream es) {
+		if (c != null && es != null) {
+			if (EncoderStreamHelper.isMcast(es))
+				return mcastUri(es, c);
+			else
+				return ucastUri(es, c);
+		} else
+			return INVALID_URI;
+	}
+
+	/** Create a multicast URI */
+	static private URI mcastUri(EncoderStream es, Camera c) {
+		Integer port = es.getMcastPort();
+		String madr = c.getEncMcast();
+		return (madr != null && port != null)
+		      ? URIUtil.create(URIUtil.UDP, madr + ":" + port)
+		      : INVALID_URI;
+	}
+
+	/** Create a unicast URI */
+	static private URI ucastUri(EncoderStream es, Camera c) {
+		String sch = es.getUriScheme();
+		String path = es.getUriPath();
+		String addr = c.getEncAddress();
+		if (sch != null && path != null && addr != null) {
+			URI scheme = URIUtil.createScheme(sch);
+			String auth = getAuth(c);
+			Integer port = c.getEncPort();
+			if (port != null)
+				addr = addr + ":" + port;
+			Integer chan = c.getEncChannel();
+			return URIUtil.create(scheme, auth + addr + buildPath(
+				path, chan));
+		} else
+			return INVALID_URI;
 	}
 
 	/** Get camera encoder auth string */
@@ -241,8 +279,10 @@ public class CameraHelper extends BaseHelper {
 	}
 
 	/** Build URI path */
-	static private String buildPath(String path, int chan) {
-		return path.replace("{chan}", Integer.toString(chan));
+	static private String buildPath(String path, Integer chan) {
+		return (chan != null)
+		      ? path.replace("{chan}", Integer.toString(chan))
+		      : path;
 	}
 
 	/** Check if camera is blank */

@@ -391,6 +391,7 @@ dms
 dms_action
 dms_sign_group
 domain
+encoder_stream
 encoder_type
 font
 gate_arm
@@ -480,6 +481,7 @@ PRV_0021	beacon_admin	beacon		t
 PRV_0022	beacon_control	beacon	flashing	t
 PRV_0023	beacon_tab	beacon		f
 PRV_0024	camera_admin	camera		t
+PRV_002A	camera_admin	encoder_stream		t
 PRV_0025	camera_admin	encoder_type		t
 PRV_0026	camera_admin	camera_preset		t
 PRV_0027	camera_admin	video_monitor		t
@@ -491,6 +493,7 @@ PRV_0030	camera_control	camera	recallPreset	t
 PRV_0031	camera_control	camera	deviceRequest	t
 PRV_0032	camera_policy	camera	publish	t
 PRV_0033	camera_policy	camera	storePreset	t
+PRV_003A	camera_tab	encoder_stream		f
 PRV_0034	camera_tab	encoder_type		f
 PRV_0035	camera_tab	camera		f
 PRV_0036	camera_tab	camera_preset		f
@@ -547,6 +550,7 @@ PRV_0082	gate_arm_control	gate_arm_array	deviceRequest	t
 PRV_0083	gate_arm_tab	gate_arm		f
 PRV_0084	gate_arm_tab	gate_arm_array		f
 PRV_0085	gate_arm_tab	camera		f
+PRV_008A	gate_arm_tab	encoder_stream		f
 PRV_0086	gate_arm_tab	encoder_type		f
 PRV_0087	incident_admin	incident_detail		t
 PRV_0088	incident_admin	inc_descriptor		t
@@ -1343,31 +1347,65 @@ COPY iris.encoding (id, description) FROM stdin;
 3	MPEG4
 4	H264
 5	H265
+6	AV1
+\.
+
+CREATE TABLE iris.encoding_quality (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(20) NOT NULL
+);
+
+COPY iris.encoding_quality (id, description) FROM stdin;
+0	Low
+1	Medium
+2	High
 \.
 
 CREATE TABLE iris.encoder_type (
-	name VARCHAR(24) PRIMARY KEY,
-	encoding INTEGER NOT NULL REFERENCES iris.encoding,
-	uri_scheme VARCHAR(8) NOT NULL,
-	uri_path VARCHAR(64) NOT NULL,
-	latency INTEGER NOT NULL
+	name VARCHAR(8) PRIMARY KEY,
+	make VARCHAR(16) NOT NULL,
+	model VARCHAR(16) NOT NULL,
+	config VARCHAR(8) NOT NULL,
+	UNIQUE(make, model, config)
 );
 
-CREATE VIEW encoder_type_view AS
-	SELECT name, enc.description AS encoding, uri_scheme, uri_path, latency
-	FROM iris.encoder_type et
-	LEFT JOIN iris.encoding enc ON et.encoding = enc.id;
-GRANT SELECT ON encoder_type_view TO PUBLIC;
+CREATE TABLE iris.encoder_stream (
+	name VARCHAR(8) PRIMARY KEY,
+	encoder_type VARCHAR(8) NOT NULL REFERENCES iris.encoder_type,
+	view_num INTEGER CHECK (view_num > 0 AND view_num <= 12),
+	encoding INTEGER NOT NULL REFERENCES iris.encoding,
+	quality INTEGER NOT NULL REFERENCES iris.encoding_quality,
+	uri_scheme VARCHAR(8),
+	uri_path VARCHAR(64),
+	mcast_port INTEGER CHECK (mcast_port > 0 AND mcast_port <= 65535),
+	latency INTEGER NOT NULL,
+	UNIQUE(encoder_type, mcast_port)
+);
+
+ALTER TABLE iris.encoder_stream
+	ADD CONSTRAINT unicast_or_multicast_ck
+	CHECK ((uri_scheme IS NULL AND uri_path IS NULL) OR mcast_port IS NULL);
+
+CREATE VIEW encoder_stream_view AS
+	SELECT es.name, encoder_type, make, model, config, view_num,
+	       enc.description AS encoding, eq.description AS quality,
+	       uri_scheme, uri_path, mcast_port, latency
+	FROM iris.encoder_stream es
+	LEFT JOIN iris.encoder_type et ON es.encoder_type = et.name
+	LEFT JOIN iris.encoding enc ON es.encoding = enc.id
+	LEFT JOIN iris.encoding_quality eq ON es.quality = eq.id;
+GRANT SELECT ON encoder_stream_view TO PUBLIC;
 
 CREATE TABLE iris._camera (
 	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-	notes text NOT NULL,
+	notes VARCHAR(256) NOT NULL,
 	cam_num INTEGER UNIQUE,
-	encoder_type VARCHAR(24) REFERENCES iris.encoder_type,
-	encoder VARCHAR(64) NOT NULL,
-	enc_mcast VARCHAR(64) NOT NULL,
-	encoder_channel INTEGER NOT NULL,
+	encoder_type VARCHAR(8) REFERENCES iris.encoder_type,
+	enc_address INET,
+	enc_port INTEGER CHECK (enc_port > 0 AND enc_port <= 65535),
+	enc_mcast INET,
+	enc_channel INTEGER CHECK (enc_channel > 0 AND enc_channel <= 16),
 	publish BOOLEAN NOT NULL,
 	video_loss BOOLEAN NOT NULL
 );
@@ -1397,7 +1435,8 @@ CREATE TRIGGER camera_table_notify_trig
 
 CREATE VIEW iris.camera AS
 	SELECT c.name, geo_loc, controller, pin, notes, cam_num, encoder_type,
-	       encoder, enc_mcast, encoder_channel, publish, video_loss
+	       enc_address, enc_port, enc_mcast, enc_channel, publish,
+	       video_loss
 	FROM iris._camera c
 	JOIN iris._device_io d ON c.name = d.name;
 
@@ -1407,10 +1446,12 @@ BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._camera (name, geo_loc, notes, cam_num, encoder_type,
-	            encoder, enc_mcast, encoder_channel, publish, video_loss)
+	            enc_address, enc_port, enc_mcast, enc_channel, publish,
+	            video_loss)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.cam_num,
-	             NEW.encoder_type, NEW.encoder, NEW.enc_mcast,
-	             NEW.encoder_channel, NEW.publish, NEW.video_loss);
+	             NEW.encoder_type, NEW.enc_address, NEW.enc_port,
+	             NEW.enc_mcast, NEW.enc_channel, NEW.publish,
+	             NEW.video_loss);
 	RETURN NEW;
 END;
 $camera_insert$ LANGUAGE plpgsql;
@@ -1431,9 +1472,10 @@ BEGIN
 	       notes = NEW.notes,
 	       cam_num = NEW.cam_num,
 	       encoder_type = NEW.encoder_type,
-	       encoder = NEW.encoder,
+	       enc_address = NEW.enc_address,
+	       enc_port = NEW.enc_port,
 	       enc_mcast = NEW.enc_mcast,
-	       encoder_channel = NEW.encoder_channel,
+	       enc_channel = NEW.enc_channel,
 	       publish = NEW.publish,
 	       video_loss = NEW.video_loss
 	 WHERE name = OLD.name;
@@ -1462,12 +1504,14 @@ CREATE TRIGGER camera_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.camera_delete();
 
 CREATE VIEW camera_view AS
-	SELECT c.name, c.notes, cam_num, encoder_type, c.encoder, c.enc_mcast,
-	       c.encoder_channel, c.publish, c.video_loss, c.geo_loc,
+	SELECT c.name, cam_num, encoder_type, et.make, et.model, et.config,
+	       c.enc_address, c.enc_port, c.enc_mcast, c.enc_channel, c.publish,
+	       c.video_loss, c.geo_loc,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.landmark, l.lat, l.lon, l.corridor, l.location,
-	       c.controller, ctr.comm_link, ctr.drop_id, ctr.condition
+	       c.controller, ctr.comm_link, ctr.drop_id, ctr.condition, c.notes
 	FROM iris.camera c
+	LEFT JOIN iris.encoder_type et ON c.encoder_type = et.name
 	LEFT JOIN geo_loc_view l ON c.geo_loc = l.name
 	LEFT JOIN controller_view ctr ON c.controller = ctr.name;
 GRANT SELECT ON camera_view TO PUBLIC;

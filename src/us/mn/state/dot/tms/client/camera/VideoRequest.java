@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2017  Minnesota Department of Transportation
+ * Copyright (C) 2003-2019  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  * Copyright (C) 2015-2018  SRF Consulting Group
  *
@@ -20,8 +20,9 @@ import java.net.URI;
 import java.util.Properties;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
-import us.mn.state.dot.tms.EncoderType;
+import us.mn.state.dot.tms.EncoderStream;
 import us.mn.state.dot.tms.Encoding;
+import us.mn.state.dot.tms.EncodingQuality;
 import static us.mn.state.dot.tms.utils.URIUtil.create;
 import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
 import static us.mn.state.dot.tms.utils.URIUtil.RTSP;
@@ -202,29 +203,10 @@ public class VideoRequest {
 	}
 
 	/** Create a camera encoder URI */
-	public URI getCameraUri(Camera cam) {
-		return CameraHelper.encoderUri(cam, getQuery(cam));
-	}
-
-	/** Create camera encoder URI query part */
-	private String getQuery(Camera cam) {
-		/* NOTE: query only required for older Axis encoders */
-		if (isAxisEncoder(cam)) {
-			/* NOTE: showlength needed to force ancient (2401)
-			 *       servers to provide Content-Length headers */
-			return "?camera=" + cam.getEncoderChannel()
-			     + "&resolution=" + size.getResolution()
-			     + "&showlength=1";
-		} else
-			return "";
-	}
-
-	/** Check if encoder type is AXIS */
-	private boolean isAxisEncoder(Camera cam) {
-		EncoderType et = cam.getEncoderType();
-		return (et != null)
-		      ? et.getName().toUpperCase().contains("AXIS")
-		      : false;
+	public URI getCameraUri(Camera c) {
+		EncoderStream es = CameraHelper.getStream(c,
+			EncodingQuality.LOW, false);
+		return CameraHelper.encoderUri(c, es);
 	}
 
 	/** Check if encoding is MJPEG.
@@ -236,17 +218,19 @@ public class VideoRequest {
 
 	/** Get the encoding for a camera */
 	private Encoding getEncoding(Camera c) {
-		Encoding enc = getEncoding(c.getEncoderType());
+		EncoderStream es = CameraHelper.getStream(c,
+			EncodingQuality.LOW, false);
+		Encoding enc = getEncoding(es);
 		if (usingServletProxy() && (enc != Encoding.UNKNOWN))
 			return Encoding.MJPEG;
 		else
 			return enc;
 	}
 
-	/** Get the encoding for an encoder type */
-	private Encoding getEncoding(EncoderType et) {
-		return (et != null)
-		      ? Encoding.fromOrdinal(et.getEncoding())
+	/** Get the encoding for an encoder stream */
+	private Encoding getEncoding(EncoderStream es) {
+		return (es != null)
+		      ? Encoding.fromOrdinal(es.getEncoding())
 		      : Encoding.UNKNOWN;
 	}
 }

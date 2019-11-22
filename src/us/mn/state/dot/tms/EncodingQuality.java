@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2019  Minnesota Department of Transportation
+ * Copyright (C) 2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,33 +14,22 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.SonarObject;
-
 /**
- * Video encoder type.
+ * Encoding quality enumeration.  The ordinal values correspond to the records
+ * in the iris.encoding_quality look-up table.
  *
  * @author Douglas Lau
  */
-public interface EncoderType extends SonarObject {
+public enum EncodingQuality {
+	LOW,    /* 0 */
+	MEDIUM, /* 1 */
+	HIGH;   /* 2 */
 
-	/** SONAR type name */
-	String SONAR_TYPE = "encoder_type";
+	/** Cached values array */
+	static private final EncodingQuality[] VALUES = values();
 
-	/** Set the encoder make */
-	void setMake(String m);
-
-	/** Get the encoder make */
-	String getMake();
-
-	/** Set the encoder model */
-	void setModel(String m);
-
-	/** Get the encoder model */
-	String getModel();
-
-	/** Set the encoder config */
-	void setConfig(String c);
-
-	/** Get the encoder config */
-	String getConfig();
+	/** Get an encoding quality from an ordinal value */
+	static public EncodingQuality fromOrdinal(int o) {
+		return (o >= 0 && o < VALUES.length) ? VALUES[o] : null;
+	}
 }

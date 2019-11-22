@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Catalog;
 import us.mn.state.dot.tms.Direction;
+import us.mn.state.dot.tms.EncoderStream;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.MonitorStyle;
 import us.mn.state.dot.tms.PlayList;
@@ -53,6 +54,14 @@ public class CamCache {
 	/** Get the encoder type model */
 	public ProxyListModel<EncoderType> getEncoderTypeModel() {
 		return enc_type_mdl;
+	}
+
+	/** Cache of encoder streams */
+	private final TypeCache<EncoderStream> encoder_streams;
+
+	/** Get the encoder streams object cache */
+	public TypeCache<EncoderStream> getEncoderStreams() {
+		return encoder_streams;
 	}
 
 	/** Cache of cameras */
@@ -135,6 +144,8 @@ public class CamCache {
 			client);
 		enc_type_mdl = new ProxyListModel<EncoderType>(encoder_types);
 		enc_type_mdl.initialize();
+		encoder_streams = new TypeCache<EncoderStream>(
+			EncoderStream.class, client);
 		cameras = new TypeCache<Camera>(Camera.class, client);
 		camera_model = new ProxyListModel<Camera>(cameras);
 		camera_model.initialize();
@@ -161,6 +172,7 @@ public class CamCache {
 	/** Populate the type caches */
 	public void populate(SonarState client) {
 		client.populateReadable(encoder_types);
+		client.populateReadable(encoder_streams);
 		client.populateReadable(cameras);
 		if (client.canRead(Camera.SONAR_TYPE))
 			cameras.ignoreAttribute("operation");
