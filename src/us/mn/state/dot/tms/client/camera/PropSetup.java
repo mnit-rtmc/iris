@@ -141,12 +141,14 @@ public class PropSetup extends IPanel {
 		});
 		enc_address_txt.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
-			    camera.setEncAddress(enc_address_txt.getText());
+			    String a = enc_address_txt.getText().trim();
+			    camera.setEncAddress((a.length() > 0) ? a : null);
 			}
 		});
 		enc_mcast_txt.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
-			    camera.setEncMcast(enc_mcast_txt.getText());
+			    String m = enc_mcast_txt.getText().trim();
+			    camera.setEncMcast((m.length() > 0) ? m : null);
 			}
 		});
 		enc_chn_spn.addChangeListener(new ChangeListener() {
@@ -179,10 +181,14 @@ public class PropSetup extends IPanel {
 		}
 		if (a == null || a.equals("encoderType"))
 			enc_type_act.updateSelected();
-		if (a == null || a.equals("encAddress"))
-			enc_address_txt.setText(camera.getEncAddress());
-		if (a == null || a.equals("encMcast"))
-			enc_mcast_txt.setText(camera.getEncMcast());
+		if (a == null || a.equals("encAddress")) {
+			String ea = camera.getEncAddress();
+			enc_address_txt.setText((ea != null) ? ea : "");
+		}
+		if (a == null || a.equals("encMcast")) {
+			String em = camera.getEncMcast();
+			enc_mcast_txt.setText((em != null) ? em : "");
+		}
 		if (a == null || a.equals("encChannel")) {
 			Integer ch = camera.getEncChannel();
 			enc_chn_spn.setValue((ch != null) ? ch : 0);
