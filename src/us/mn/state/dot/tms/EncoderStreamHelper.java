@@ -70,7 +70,8 @@ public class EncoderStreamHelper extends BaseHelper {
 	static private int value(EncoderType et, EncodingQuality q,
 		boolean mcast, EncoderStream es)
 	{
-		return objectEquals(et, es.getEncoderType())
+		return (objectEquals(et, es.getEncoderType()) &&
+		        es.getViewNum() == null)
 		      ? qualityValue(es, q) + mcastValue(es, mcast)
 		      : 0;
 	}
