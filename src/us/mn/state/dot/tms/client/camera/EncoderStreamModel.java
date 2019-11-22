@@ -15,10 +15,14 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.EncoderStream;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.Encoding;
@@ -87,7 +91,7 @@ public class EncoderStreamModel extends ProxyTableModel<EncoderStream> {
 			}
 		});
 		cols.add(new ProxyColumn<EncoderStream>(
-			"encoder.stream.quality", 96)
+			"encoder.stream.quality", 80)
 		{
 			public Object getValueAt(EncoderStream es) {
 				return EncodingQuality.fromOrdinal(
@@ -183,6 +187,34 @@ public class EncoderStreamModel extends ProxyTableModel<EncoderStream> {
 	@Override
 	protected boolean check(EncoderStream proxy) {
 		return proxy.getEncoderType() == encoder_type;
+	}
+
+	/** Get a table row sorter */
+	@Override
+	public RowSorter<ProxyTableModel<EncoderStream>> createSorter() {
+		TableRowSorter<ProxyTableModel<EncoderStream>> sorter =
+			new TableRowSorter<ProxyTableModel<EncoderStream>>(this)
+		{
+			@Override public boolean isSortable(int c) {
+				return true;
+			}
+		};
+		sorter.setSortsOnUpdates(true);
+		sorter.setComparator(2, new Comparator<EncodingQuality>() {
+			public int compare(EncodingQuality eq0,
+				EncodingQuality eq1)
+			{
+				return eq0.ordinal() - eq1.ordinal();
+			}
+		});
+		ArrayList<RowSorter.SortKey> keys =
+			new ArrayList<RowSorter.SortKey>();
+		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+		keys.add(new RowSorter.SortKey(2, SortOrder.DESCENDING));
+		keys.add(new RowSorter.SortKey(5, SortOrder.DESCENDING));
+		keys.add(new RowSorter.SortKey(4, SortOrder.ASCENDING));
+		sorter.setSortKeys(keys);
+		return sorter;
 	}
 
 	/** Create an object with the given name.
