@@ -40,13 +40,13 @@ import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 public class LcsIndicationBuilder {
 
 	/** Short distance upstream of incident to deploy devices */
-	static private final Distance DIST_SHORT = new Distance(0.5f, MILES);
+	static private final Distance DIST_SHORT = new Distance(0.4f, MILES);
 
 	/** Medium distance upstream of incident to deploy devices */
-	static private final Distance DIST_MEDIUM = new Distance(1.0f, MILES);
+	static private final Distance DIST_MEDIUM = new Distance(0.7f, MILES);
 
 	/** Long distance upstream of incident to deploy devices */
-	static private final Distance DIST_LONG = new Distance(1.5f, MILES);
+	static private final Distance DIST_LONG = new Distance(1.0f, MILES);
 
 	/** Assign a requested indication to an available indication.
 	 * @param lui Requested lane use indication.

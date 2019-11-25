@@ -8,9 +8,9 @@ There are three distance thresholds for making suggestions:
 
 Threshold | Distance
 ----------|------------
-short     | 0 to 0.5 mi
-medium    | 0.5 to 1.0 mi
-long      | 1.0 to 1.5 mi
+short     | 0 to 0.4 mi
+medium    | 0.4 to 0.7 mi
+long      | 0.7 to 1.0 mi
 
 ## Short Distance
 
