@@ -8,7 +8,7 @@
 -- CHANNEL: camera, dms, font, glyph, graphic, incident, parking_area,
 --          sign_config, sign_detail, sign_message
 --
--- PAYLOAD: 'video_loss' (camera)
+-- PAYLOAD: 'publish', 'video_loss' (camera)
 --          'msg_current', 'msg_sched', 'expire_time' (dms)
 --          'time_stamp' (parking_area)
 --          name (r_node, any notify_tag in geo_loc)
@@ -1416,7 +1416,9 @@ ALTER TABLE iris._camera ADD CONSTRAINT _camera_fkey
 CREATE FUNCTION iris.camera_notify() RETURNS TRIGGER AS
 	$camera_notify$
 BEGIN
-	IF (NEW.video_loss IS DISTINCT FROM OLD.video_loss) THEN
+	IF (NEW.publish IS DISTINCT FROM OLD.publish) THEN
+		NOTIFY camera, 'publish';
+	ELSIF (NEW.video_loss IS DISTINCT FROM OLD.video_loss) THEN
 		NOTIFY camera, 'video_loss';
 	ELSE
 		NOTIFY camera;

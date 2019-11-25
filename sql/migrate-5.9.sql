@@ -415,4 +415,19 @@ CREATE VIEW camera_view AS
 	LEFT JOIN controller_view ctr ON c.controller = ctr.name;
 GRANT SELECT ON camera_view TO PUBLIC;
 
+-- Add NOTIFY for camera publish
+CREATE OR REPLACE FUNCTION iris.camera_notify() RETURNS TRIGGER AS
+	$camera_notify$
+BEGIN
+	IF (NEW.publish IS DISTINCT FROM OLD.publish) THEN
+		NOTIFY camera, 'publish';
+	ELSIF (NEW.video_loss IS DISTINCT FROM OLD.video_loss) THEN
+		NOTIFY camera, 'video_loss';
+	ELSE
+		NOTIFY camera;
+	END IF;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$camera_notify$ LANGUAGE plpgsql;
+
 COMMIT;
