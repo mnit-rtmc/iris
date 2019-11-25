@@ -1,5 +1,20 @@
 # IRIS 5.x Release Notes
 
+5.9.0 (25 Nov 2019)
+ - Added `encoder_stream` table associated with `encoder_type`, to allow
+   multiple streams per camera
+ - Don't clear confirmed incidents when cleared through incident feed
+ - Added "external" DMS item style
+ - Fixed transparent DMS markers when message sent by other system
+ - When checking DMS message CRC, try with and without graphic IDs
+ - Moved "hidden" field from `sign_group` to dms
+ - Improved MULTI normalization for `sign_text`, `inc_descriptor`, _etc_.
+ - Fixed incident deploy `ahead` range
+ - Increased incident deploy `near` range to 3 exits
+ - Increased maximum width of graphics to 240 pixels
+ - Added camera NOTIFY with `publish` payload
+ - Fixed problems in database script
+
 5.8.0 (4 Nov 2019)
  - Fixed bug adding $0.25 to all tolling prices
  - Fixed bug ignoring failed detectors for tolling / travel times
