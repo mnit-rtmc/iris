@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -494,6 +494,8 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	@Override
 	public void setPlayList(PlayList pl) {
 		CamSequence seq = (pl != null) ? new CamSequence(pl) : null;
+		if (!seq.isValid())
+			seq = null;
 		setCamSequence(mon_num, seq);
 		if (seq != null)
 			CAM_SWITCH.addJob(new CamSequenceUpdateJob(seq));
@@ -518,6 +520,8 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	/** Set the camera sequence number */
 	public boolean setSeqNum(Integer sn) {
 		CamSequence seq = (sn != null) ? new CamSequence(sn) : null;
+		if (!seq.isValid())
+			seq = null;
 		setCamSequence(mon_num, seq);
 		if (seq != null)
 			CAM_SWITCH.addJob(new CamSequenceUpdateJob(seq));

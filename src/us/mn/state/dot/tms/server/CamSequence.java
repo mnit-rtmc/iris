@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,6 +78,11 @@ public class CamSequence {
 
 	/** Remaining dwell time (negative means paused) */
 	private int dwell;
+
+	/** Check if sequence is valid */
+	public boolean isValid() {
+		return catalog != null || play_list != null;
+	}
 
 	/** Get the sequence number */
 	public Integer getSeqNum() {
