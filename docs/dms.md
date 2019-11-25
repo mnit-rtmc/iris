@@ -108,12 +108,12 @@ page.  Care must be taken to ensure the combined message can be displayed on the
 sign.  This feature could be used, for example, to put a graphic logo on all
 messages displayed on a sign.
 
-## Spell Checker
+## Dictionary
 
 Select `View ➔ Message Signs ➔ Dictionary` menu item
 
-The spell checker verifies DMS messages when an operator presses the **Send**
-button.  It uses two word lists: **Allowed** and **Banned**.
+DMS messages can be checked against the dictionary when an operator presses the
+**Send** button.  It uses two word lists: **Allowed** and **Banned**.
 
 ### Allowed Words
 
@@ -125,6 +125,8 @@ attribute]:
 `0`                   | Disable checking allowed word list
 `1`                   | Suggest replacement of words not in allowed list
 `2`                   | Reject messages containing words not in allowed list
+
+This list is also used for [abbreviation] of incident DMS messages.
 
 ### Banned Words
 
@@ -141,6 +143,7 @@ When appropriate, a form appears to suggest changes or inform the operator of a
 rejected message.
 
 
+[abbreviation]: incident_dms.html#abbreviation
 [action plan]: action_plans.html
 [beacon]: beacons.html
 [DMS actions]: action_plans.html#dms-actions

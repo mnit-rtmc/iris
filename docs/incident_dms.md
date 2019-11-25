@@ -6,8 +6,7 @@ attributes of the incident are used to make suggestions: [impact](#impact),
 
 Each message is composed of three parts: **descriptor** (_what?_), **locator**
 (_where?_) and **advice** (_how?_).  Suggestions are only made if a match is
-found for all three parts.  Each part may have an abbreviated version, which is
-used only when the normal version does not fit the sign.
+found for all three parts.
 
 ## Impact
 
@@ -148,6 +147,20 @@ Open Lanes     | number of non-shoulder lanes _not_ impacted
 Rows where _impacted_ and / or _open lanes_ are specified will be matched
 in preference to rows where they are not.
 
+## Abbreviation
+
+If a message is too wide to fit on the sign, an abbreviated version can be
+created using the [allowed words] list.
+
+Each line which doesn't fit is split into words.  Starting at the end, any word
+which appears in the _allowed words_ list is replaced with its abbreviated form.
+Then the line is checked again, and if still too wide, the process repeats.
+Words with empty abbreviations are checked last, only if all other abbreviations
+are insufficient.
+
+If a line is still too wide after all words are checked, the message is
+discarded, with no suggestion for that sign.
+
 ## Dedicated Purpose Signs
 
 _Dedicated purpose_ signs normally cannot be used for incidents.  An exception
@@ -181,6 +194,7 @@ used instead.  The _cleared_ message will be deployed with `PSA` message
 priority for 5 minutes.
 
 
+[allowed words]: dms.html#allowed-words
 [DMS]: dms.html
 [exits]: road_topology.html#r_node-types
 [MULTI]: dms.html#multi
