@@ -137,15 +137,15 @@ A matching _advice_ determines the third line of a suggested message.  The
 configurable advice table contains fields which are matched to the incident.
 
 Field          | Description
----------------|---------------------------------
+---------------|-----------------------------------------
 Impact         | incident [impact](#impact)
 Lane Type      | `mainline`, `exit`, `merge` or `CD road`
 Range          | from sign to incident: `ahead`, `near`, `middle` or `far`
-Impacted Lanes | number of non-shoulder lanes, (if blank, any number matches)
-Open Lanes     | number of non-shoulder lanes _not_ impacted
+Open Lanes     | count of non-shoulder lanes _not_ impacted by incident
+Impacted Lanes | count of non-shoulder lanes impacted
 
-Rows where _impacted_ and / or _open lanes_ are specified will be matched
-in preference to rows where they are not.
+Rows where _open_ and / or _impacted lanes_ are specified will be matched in
+preference to rows where they are not.
 
 ## Abbreviation
 
