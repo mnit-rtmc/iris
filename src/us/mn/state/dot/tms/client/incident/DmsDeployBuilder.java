@@ -114,9 +114,7 @@ public class DmsDeployBuilder {
 	 * @param dms Possible sign to deploy.
 	 * @param ud Upstream device.
 	 * @return MULTI string for DMS, or null. */
-	public MultiString createMulti(DMS dms, UpstreamDevice ud,
-		boolean cleared)
-	{
+	public String createMulti(DMS dms, UpstreamDevice ud, boolean cleared) {
 		boolean branched = !isCorridorSame(dms);
 		Distance dist = ud.distance;
 		IncRange rng = ud.range(picked);
@@ -140,7 +138,7 @@ public class DmsDeployBuilder {
 			if (null == iadv || !builder.addLine(iadv.getMulti()))
 				return null;
 		}
-		return builder.toMultiString();
+		return builder.toString();
 	}
 
 	/** Check if a DMS is on same corridor as incident */

@@ -409,10 +409,10 @@ public class DMSHelper extends BaseHelper {
 
 	/** Create the page one raster graphic for a DMS with a MULTI string.
 	 * @param dms The sign.
-	 * @param ms MULTI string.
+	 * @param multi MULTI string.
 	 * @return RasterGraphic for page one, or null on error. */
-	static public RasterGraphic createPageOne(DMS dms, MultiString ms) {
-		RasterGraphic[] rasters = getRasters(dms, ms.toString());
+	static public RasterGraphic createPageOne(DMS dms, String multi) {
+		RasterGraphic[] rasters = getRasters(dms, multi);
 		if (rasters != null && rasters.length > 0)
 			return rasters[0];
 		else
@@ -470,5 +470,14 @@ public class DMSHelper extends BaseHelper {
 		return (sm != null)
 		      ? IncidentHelper.lookupOriginal(sm.getIncident())
 		      : null;
+	}
+
+	/** Check if a MULTI string fits on a DMS.
+	 * @param dms Sign in question.
+	 * @param multi MULTI string.
+	 * @param abbrev Check word abbreviations.
+	 * @return Best fit MULTI string, or null if message does not fit. */
+	static public String checkMulti(DMS dms, String multi, boolean abbrev) {
+		return (createPageOne(dms, multi) != null) ? multi : null;
 	}
 }

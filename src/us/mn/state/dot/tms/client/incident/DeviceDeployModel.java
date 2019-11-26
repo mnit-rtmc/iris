@@ -53,13 +53,13 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	}
 
 	/** Mapping of DMS names to proposed MULTI strings */
-	private final HashMap<String, MultiString> messages =
-		new HashMap<String, MultiString>();
+	private final HashMap<String, String> messages =
+		new HashMap<String, String>();
 
 	/** Get the proposed MULTI for a DMS */
-	public MultiString getMulti(String dms) {
-		MultiString multi = messages.get(dms);
-		return (multi != null) ? multi : new MultiString("");
+	public String getMulti(String dms) {
+		String multi = messages.get(dms);
+		return (multi != null) ? multi : "";
 	}
 
 	/** Mapping of DMS names to proposed page one graphics */
@@ -110,12 +110,12 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 
 	/** Add an upstream DMS */
 	private void addUpstreamDMS(DMS dms, UpstreamDevice ud) {
-		MultiString ms = dms_builder.createMulti(dms, ud, false);
-		if (ms != null) {
-			RasterGraphic rg = DMSHelper.createPageOne(dms, ms);
+		String multi = dms_builder.createMulti(dms, ud, false);
+		if (multi != null) {
+			RasterGraphic rg = DMSHelper.createPageOne(dms, multi);
 			if (rg != null) {
 				addElement(dms);
-				messages.put(dms.getName(), ms);
+				messages.put(dms.getName(), multi);
 				graphics.put(dms.getName(), rg);
 			}
 		}
@@ -125,7 +125,7 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	private void addExistingDMS(DMS dms) {
 		if (!messages.containsKey(dms.getName())) {
 			addElement(dms);
-			messages.put(dms.getName(), new MultiString(""));
+			messages.put(dms.getName(), "");
 		}
 	}
 }

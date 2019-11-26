@@ -89,10 +89,10 @@ public class IncMultiBuilder {
 		LocMultiBuilder lmb = new LocMultiBuilder(loc, dist,
 			retain_affixes);
 		new MultiString(multi).parse(lmb);
-		MultiString ms = lmb.toMultiString();
-		return (DMSHelper.createPageOne(dms, ms) != null)
-		      ? ms
-		      : null;
+		// Don't try abbreviating if we're retaining affixes
+		multi = DMSHelper.checkMulti(dms, lmb.toString(),
+			!retain_affixes);
+		return (multi != null) ? new MultiString(multi) : null;
 	}
 
 	/** Get the MULTI string */
