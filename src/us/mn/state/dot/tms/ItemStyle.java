@@ -62,6 +62,7 @@ public enum ItemStyle {
 	/* Plan styles */
 	DMS,
 	BEACON,
+	CAMERA,
 	LANE,
 	METER,
 	TIME;

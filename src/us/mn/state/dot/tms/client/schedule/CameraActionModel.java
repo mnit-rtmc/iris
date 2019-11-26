@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2019  Minnesota Department of Transportation
+ * Copyright (C) 2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.Beacon;
-import us.mn.state.dot.tms.BeaconAction;
-import us.mn.state.dot.tms.BeaconHelper;
+import us.mn.state.dot.tms.CameraAction;
+import us.mn.state.dot.tms.CameraPreset;
+import us.mn.state.dot.tms.CameraPresetHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -32,39 +32,40 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 
 /**
- * Table model for beacon actions assigned to action plans
+ * Table model for camera actions assigned to action plans
  *
  * @author Douglas Lau
  */
-public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
+public class CameraActionModel extends ProxyTableModel<CameraAction> {
 
 	/** Create a proxy descriptor */
-	static public ProxyDescriptor<BeaconAction> descriptor(Session s) {
-		return new ProxyDescriptor<BeaconAction>(
-			s.getSonarState().getBeaconActions(), false
+	static public ProxyDescriptor<CameraAction> descriptor(Session s) {
+		return new ProxyDescriptor<CameraAction>(
+			s.getSonarState().getCamCache().getCameraActions(),
+			false
 		);
 	}
 
 	/** Create the columns in the model */
 	@Override
-	protected ArrayList<ProxyColumn<BeaconAction>> createColumns() {
-		ArrayList<ProxyColumn<BeaconAction>> cols =
-			new ArrayList<ProxyColumn<BeaconAction>>(2);
-		cols.add(new ProxyColumn<BeaconAction>("beacon", 160) {
-			public Object getValueAt(BeaconAction ba) {
-				return ba.getBeacon();
+	protected ArrayList<ProxyColumn<CameraAction>> createColumns() {
+		ArrayList<ProxyColumn<CameraAction>> cols =
+			new ArrayList<ProxyColumn<CameraAction>>(2);
+		cols.add(new ProxyColumn<CameraAction>("camera.preset", 160) {
+			public Object getValueAt(CameraAction ca) {
+				return ca.getPreset();
 			}
 		});
-		cols.add(new ProxyColumn<BeaconAction>("action.plan.phase",100){
-			public Object getValueAt(BeaconAction ba) {
-				return ba.getPhase();
+		cols.add(new ProxyColumn<CameraAction>("action.plan.phase",100){
+			public Object getValueAt(CameraAction ca) {
+				return ca.getPhase();
 			}
-			public boolean isEditable(BeaconAction ba) {
-				return canWrite(ba);
+			public boolean isEditable(CameraAction ca) {
+				return canWrite(ca);
 			}
-			public void setValueAt(BeaconAction ba, Object value) {
+			public void setValueAt(CameraAction ca, Object value) {
 				if (value instanceof PlanPhase)
-					ba.setPhase((PlanPhase) value);
+					ca.setPhase((PlanPhase) value);
 			}
 			protected TableCellEditor createCellEditor() {
 				JComboBox<PlanPhase> cbx = new JComboBox
@@ -83,8 +84,8 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 	/** Plan phase model */
 	private final ProxyListModel<PlanPhase> phase_mdl;
 
-	/** Create a new beacon action table model */
-	public BeaconActionModel(Session s, ActionPlan ap) {
+	/** Create a new camera action table model */
+	public CameraActionModel(Session s, ActionPlan ap) {
 		super(s, descriptor(s), 16);
 		action_plan = ap;
 		phase_mdl = s.getSonarState().getPhaseModel();
@@ -92,7 +93,7 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 
 	/** Check if a proxy is included in the list */
 	@Override
-	protected boolean check(BeaconAction proxy) {
+	protected boolean check(CameraAction proxy) {
 		return proxy.getActionPlan() == action_plan;
 	}
 
@@ -102,28 +103,28 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 		return action_plan != null && super.canAdd();
 	}
 
-	/** Create an object with the beacon name */
+	/** Create an object with the camera name */
 	@Override
 	public void createObject(String name) {
-		Beacon b = BeaconHelper.lookup(name.trim());
-		if (b != null && action_plan != null)
-			create(b);
+		CameraPreset cp = CameraPresetHelper.lookup(name.trim());
+		if (cp != null && action_plan != null)
+			create(cp);
 	}
 
-	/** Create a new beacon action */
-	private void create(Beacon b) {
+	/** Create a new camera action */
+	private void create(CameraPreset cp) {
 		String name = createUniqueName();
 		if (name != null) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("action_plan", action_plan);
-			attrs.put("beacon", b);
+			attrs.put("preset", cp);
 			attrs.put("phase", action_plan.getDefaultPhase());
 			descriptor.cache.createObject(name, attrs);
 		}
 	}
 
-	/** Create a unique beacon action name */
+	/** Create a unique camera action name */
 	private String createUniqueName() {
 		for (int uid = 1; uid <= 999; uid++) {
 			String n = action_plan.getName() + "_" + uid;

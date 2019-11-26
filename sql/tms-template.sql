@@ -377,6 +377,7 @@ beacon_action
 cabinet
 cabinet_style
 camera
+camera_action
 camera_preset
 capability
 catalog
@@ -589,6 +590,7 @@ PRV_0121	plan_admin	plan_phase		t
 PRV_0122	plan_admin	time_action		t
 PRV_0123	plan_admin	dms_action		t
 PRV_0124	plan_admin	beacon_action		t
+PRV_012A	plan_admin	camera_action		t
 PRV_0125	plan_admin	lane_action		t
 PRV_0126	plan_admin	meter_action		t
 PRV_0127	plan_control	action_plan	phase	t
@@ -599,6 +601,7 @@ PRV_0131	plan_tab	plan_phase		f
 PRV_0132	plan_tab	time_action		f
 PRV_0133	plan_tab	dms_action		f
 PRV_0134	plan_tab	beacon_action		f
+PRV_013A	plan_tab	camera_action		f
 PRV_0135	plan_tab	lane_action		f
 PRV_0136	plan_tab	meter_action		f
 PRV_0137	sensor_admin	detector		t
@@ -1724,6 +1727,13 @@ CREATE VIEW camera_preset_view AS
 	FROM iris.camera_preset cp
 	JOIN iris._device_preset dp ON cp.name = dp.preset;
 GRANT SELECT ON camera_preset_view TO PUBLIC;
+
+CREATE TABLE iris.camera_action (
+	name VARCHAR(30) PRIMARY KEY,
+	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+	preset VARCHAR(20) NOT NULL REFERENCES iris.camera_preset,
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+);
 
 --
 -- Alarms

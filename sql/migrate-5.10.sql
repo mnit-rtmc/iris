@@ -40,4 +40,20 @@ ALTER TABLE iris.inc_advice DROP COLUMN abbrev;
 -- DELETE incident_clear_advice_abbrev system attribute
 DELETE FROM iris.system_attribute WHERE name = 'incident_clear_advice_abbrev';
 
+-- Add camera_action sonar_type
+INSERT INTO iris.sonar_type (name) VALUES ('camera_action');
+
+-- Add privileges for camera_action
+INSERT INTO iris.privilege (name, capability, type_n, write)
+	VALUES ('PRV_ca0', 'plan_admin', 'camera_action', true),
+	       ('PRV_ca1', 'plan_tab', 'camera_action', false);
+
+-- Add camera_action table
+CREATE TABLE iris.camera_action (
+	name VARCHAR(30) PRIMARY KEY,
+	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+	preset VARCHAR(20) NOT NULL REFERENCES iris.camera_preset,
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+);
+
 COMMIT;

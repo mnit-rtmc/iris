@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -304,6 +304,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			if (getSyncActions()) {
 				validateDmsActions();    // throws exception
 				validateBeaconActions(); // throws exception
+				// FIXME: any way to validate camera actions?
 				validateLaneActions();   // throws exception
 				validateMeterActions();  // throws exception
 			}

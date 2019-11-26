@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2017  Minnesota Department of Transportation
+ * Copyright (C) 2011-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@ import javax.swing.JPopupMenu;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.BeaconActionHelper;
+import us.mn.state.dot.tms.CameraAction;
+import us.mn.state.dot.tms.CameraActionHelper;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.GeoLoc;
@@ -82,6 +84,8 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 			return proxy.getActive() && hasDmsAction(proxy);
 		case BEACON:
 			return proxy.getActive() && hasBeaconAction(proxy);
+		case CAMERA:
+			return proxy.getActive() && hasCameraAction(proxy);
 		case METER:
 			return proxy.getActive() && hasMeterAction(proxy);
 		case LANE:
@@ -130,6 +134,17 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		while (it.hasNext()) {
 			BeaconAction ba = it.next();
 			if (ba.getActionPlan() == p)
+				return true;
+		}
+		return false;
+	}
+
+	/** Test if an action plan has camera actions */
+	private boolean hasCameraAction(ActionPlan p) {
+		Iterator<CameraAction> it = CameraActionHelper.iterator();
+		while (it.hasNext()) {
+			CameraAction ca = it.next();
+			if (ca.getActionPlan() == p)
 				return true;
 		}
 		return false;
