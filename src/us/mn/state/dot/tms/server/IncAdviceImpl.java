@@ -36,7 +36,7 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncAdviceImpl.class);
 		store.query("SELECT name, impact, lane_type, range, " +
-			"impacted_lanes, open_lanes, multi FROM iris." +
+			"open_lanes, impacted_lanes, multi FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -53,8 +53,8 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		map.put("impact", impact);
 		map.put("lane_type", lane_type);
 		map.put("range", range);
-		map.put("impacted_lanes", impacted_lanes);
 		map.put("open_lanes", open_lanes);
+		map.put("impacted_lanes", impacted_lanes);
 		map.put("multi", multi);
 		return map;
 	}
@@ -77,22 +77,22 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		     row.getInt(2),              // impact
 		     row.getShort(3),            // lane_type
 		     row.getInt(4),              // range
-		     (Integer) row.getObject(5), // impacted_lanes
-		     (Integer) row.getObject(6), // open_lanes
+		     (Integer) row.getObject(5), // open_lanes
+		     (Integer) row.getObject(6), // impacted_lanes
 		     row.getString(7)            // multi
 		);
 	}
 
 	/** Create an incident advice */
-	private IncAdviceImpl(String n, int imp, short lt, int r, Integer iln,
-		Integer oln, String m)
+	private IncAdviceImpl(String n, int imp, short lt, int r, Integer oln,
+		Integer iln, String m)
 	{
 		super(n);
 		impact = imp;
 		lane_type = lt;
 		range = r;
-		impacted_lanes = iln;
 		open_lanes = oln;
+		impacted_lanes = iln;
 		multi = m;
 	}
 
@@ -185,29 +185,6 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		return range;
 	}
 
-	/** Count of impacted lanes */
-	private Integer impacted_lanes;
-
-	/** Set count of impacted lanes */
-	@Override
-	public void setImpactedLanes(Integer iln) {
-		impacted_lanes = iln;
-	}
-
-	/** Set count of impacted lanes */
-	public void doSetImpactedLanes(Integer iln) throws TMSException {
-		if (!objectEquals(iln, impacted_lanes)) {
-			store.update(this, "impacted_lanes", iln);
-			setImpactedLanes(iln);
-		}
-	}
-
-	/** Get count of impacted lanes */
-	@Override
-	public Integer getImpactedLanes() {
-		return impacted_lanes;
-	}
-
 	/** Count of open lanes */
 	private Integer open_lanes;
 
@@ -229,6 +206,29 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	@Override
 	public Integer getOpenLanes() {
 		return open_lanes;
+	}
+
+	/** Count of impacted lanes */
+	private Integer impacted_lanes;
+
+	/** Set count of impacted lanes */
+	@Override
+	public void setImpactedLanes(Integer iln) {
+		impacted_lanes = iln;
+	}
+
+	/** Set count of impacted lanes */
+	public void doSetImpactedLanes(Integer iln) throws TMSException {
+		if (!objectEquals(iln, impacted_lanes)) {
+			store.update(this, "impacted_lanes", iln);
+			setImpactedLanes(iln);
+		}
+	}
+
+	/** Get count of impacted lanes */
+	@Override
+	public Integer getImpactedLanes() {
+		return impacted_lanes;
 	}
 
 	/** MULTI string */

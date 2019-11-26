@@ -47,13 +47,13 @@ public class IncAdviceHelper extends BaseHelper {
 			    adv.getRange() == rng.ordinal() &&
 			    adv.getLaneType() == inc.getLaneType())
 			{
-				LaneMatch impacted = LaneMatch.check(
-					adv.getImpactedLanes(),
-					IncImpact.getImpactedLanes(inc));
 				LaneMatch open = LaneMatch.check(
 					adv.getOpenLanes(),
 					IncImpact.getOpenLanes(inc));
-				Integer p = matchPriority(impacted, open);
+				LaneMatch impacted = LaneMatch.check(
+					adv.getImpactedLanes(),
+					IncImpact.getImpactedLanes(inc));
+				Integer p = matchPriority(open, impacted);
 				if (p != null && p >= priority) {
 					res = adv;
 					priority = p;
@@ -83,19 +83,19 @@ public class IncAdviceHelper extends BaseHelper {
 		}
 	}
 
-	/** Match impacted/open lanes.
-	 * @param impacted Match of impacted lanes.
+	/** Match open/impacted lanes.
 	 * @param open Match of open lanes.
+	 * @param impacted Match of impacted lanes.
 	 * @return Priority of match, or null if not matched */
-	static private Integer matchPriority(LaneMatch impacted, LaneMatch open)
+	static private Integer matchPriority(LaneMatch open, LaneMatch impacted)
 	{
-		if ((impacted == LaneMatch.YES) && (open == LaneMatch.YES))
+		if ((open == LaneMatch.YES) && (impacted == LaneMatch.YES))
 			return 3;
-		if ((impacted == LaneMatch.YES) && (open == LaneMatch.ANY))
+		if ((open == LaneMatch.YES) && (impacted == LaneMatch.ANY))
 			return 2;
-		if ((impacted == LaneMatch.ANY) && (open == LaneMatch.YES))
+		if ((open == LaneMatch.ANY) && (impacted == LaneMatch.YES))
 			return 1;
-		if ((impacted == LaneMatch.ANY) && (open == LaneMatch.ANY))
+		if ((open == LaneMatch.ANY) && (impacted == LaneMatch.ANY))
 			return 0;
 		else
 			return null; // no match

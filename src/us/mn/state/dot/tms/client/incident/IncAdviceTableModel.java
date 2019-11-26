@@ -109,21 +109,6 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<IncAdvice>("incident.impacted.lanes",
-			112, Integer.class)
-		{
-			public Object getValueAt(IncAdvice adv) {
-				return adv.getImpactedLanes();
-			}
-			public boolean isEditable(IncAdvice adv) {
-				return canWrite(adv);
-			}
-			public void setValueAt(IncAdvice adv, Object value) {
-				adv.setImpactedLanes((value instanceof Integer)
-					? (Integer) value
-					: null);
-			}
-		});
 		cols.add(new ProxyColumn<IncAdvice>("incident.open.lanes", 80,
 			Integer.class)
 		{
@@ -135,6 +120,21 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 			}
 			public void setValueAt(IncAdvice adv, Object value) {
 				adv.setOpenLanes((value instanceof Integer)
+					? (Integer) value
+					: null);
+			}
+		});
+		cols.add(new ProxyColumn<IncAdvice>("incident.impacted.lanes",
+			112, Integer.class)
+		{
+			public Object getValueAt(IncAdvice adv) {
+				return adv.getImpactedLanes();
+			}
+			public boolean isEditable(IncAdvice adv) {
+				return canWrite(adv);
+			}
+			public void setValueAt(IncAdvice adv, Object value) {
+				adv.setImpactedLanes((value instanceof Integer)
 					? (Integer) value
 					: null);
 			}

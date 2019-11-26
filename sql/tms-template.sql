@@ -3207,8 +3207,8 @@ GRANT SELECT ON inc_locator_view TO PUBLIC;
 CREATE TABLE iris.inc_advice (
 	name VARCHAR(10) PRIMARY KEY,
 	impact INTEGER NOT NULL REFERENCES iris.inc_impact(id),
-	impacted_lanes INTEGER,
 	open_lanes INTEGER,
+	impacted_lanes INTEGER,
 	range INTEGER NOT NULL REFERENCES iris.inc_range(id),
 	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
 	multi VARCHAR(64) NOT NULL
@@ -3232,7 +3232,7 @@ CREATE TRIGGER inc_advice_ck_trig
 
 CREATE VIEW inc_advice_view AS
 	SELECT a.name, imp.description AS impact, lt.description AS lane_type,
-	       rng.description AS range, impacted_lanes, open_lanes, multi
+	       rng.description AS range, open_lanes, impacted_lanes, multi
 	FROM iris.inc_advice a
 	LEFT JOIN iris.inc_impact imp ON a.impact = imp.id
 	LEFT JOIN iris.inc_range rng ON a.range = rng.id

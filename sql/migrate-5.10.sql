@@ -28,7 +28,7 @@ ALTER TABLE iris.inc_locator DROP COLUMN abbrev;
 -- DROP abbrev from inc_advice
 CREATE OR REPLACE VIEW inc_advice_view AS
 	SELECT a.name, imp.description AS impact, lt.description AS lane_type,
-	       rng.description AS range, impacted_lanes, open_lanes, multi
+	       rng.description AS range, open_lanes, impacted_lanes, multi
 	FROM iris.inc_advice a
 	LEFT JOIN iris.inc_impact imp ON a.impact = imp.id
 	LEFT JOIN iris.inc_range rng ON a.range = rng.id
