@@ -478,6 +478,37 @@ public class DMSHelper extends BaseHelper {
 	 * @param abbrev Check word abbreviations.
 	 * @return Best fit MULTI string, or null if message does not fit. */
 	static public String checkMulti(DMS dms, String multi, boolean abbrev) {
-		return (createPageOne(dms, multi) != null) ? multi : null;
+		return (createPageOne(dms, multi) != null)
+		      ? multi
+		      : (abbrev) ? checkMultiAbbrev(dms, multi) : null;
+	}
+
+	/** Check if a MULTI string fits on a DMS (with abbreviations).
+	 * @param dms Sign in question.
+	 * @param multi MULTI string.
+	 * @return Best fit MULTI string, or null if message does not fit. */
+	static private String checkMultiAbbrev(DMS dms, String multi) {
+		String[] words = multi.split(" ");
+		// Abbreviate words with non-blank abbreviations
+		for (int i = words.length - 1; i >= 0; i--) {
+			String abbrev = WordHelper.abbreviate(words[i]);
+			if (abbrev != null && abbrev.length() > 0) {
+				words[i] = abbrev;
+				String ms = String.join(" ", words);
+				if (createPageOne(dms, ms) != null)
+					return ms;
+			}
+		}
+		// Abbreviate words with blank abbreviations
+		for (int i = words.length - 1; i >= 0; i--) {
+			String abbrev = WordHelper.abbreviate(words[i]);
+			if (abbrev != null) {
+				words[i] = abbrev;
+				String ms = String.join(" ", words);
+				if (createPageOne(dms, ms) != null)
+					return ms;
+			}
+		}
+		return null;
 	}
 }

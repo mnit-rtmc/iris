@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2016  Iteris Inc.
+ * Copyright (C) 2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +28,9 @@ import us.mn.state.dot.tms.utils.SString;
 /**
  * Static Word convenience methods accessible from
  * the client and server.
+ *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class WordHelper extends BaseHelper {
 
@@ -289,5 +292,13 @@ public class WordHelper extends BaseHelper {
 			System.err.println("ex=" + ex);
 			return n;
 		}
+	}
+
+	/** Lookup a word and return its abbreviation */
+	static public String abbreviate(String w) {
+		Word word = lookup(w);
+		return (word != null && word.getAllowed())
+		      ? word.getAbbr()
+		      : null;
 	}
 }
