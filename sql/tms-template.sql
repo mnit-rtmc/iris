@@ -584,15 +584,15 @@ PRV_0115	meter_control	ramp_meter	rateNext	t
 PRV_0116	meter_control	ramp_meter	deviceRequest	t
 PRV_0117	meter_tab	ramp_meter		f
 PRV_0118	plan_admin	action_plan		t
-PRV_0119	plan_admin	day_plan		t
-PRV_0120	plan_admin	day_matcher		t
-PRV_0121	plan_admin	plan_phase		t
-PRV_0122	plan_admin	time_action		t
-PRV_0123	plan_admin	dms_action		t
-PRV_0124	plan_admin	beacon_action		t
+PRV_0119	plan_admin	beacon_action		t
 PRV_012A	plan_admin	camera_action		t
-PRV_0125	plan_admin	lane_action		t
-PRV_0126	plan_admin	meter_action		t
+PRV_0120	plan_admin	day_plan		t
+PRV_0121	plan_admin	day_matcher		t
+PRV_0122	plan_admin	dms_action		t
+PRV_0123	plan_admin	lane_action		t
+PRV_0124	plan_admin	meter_action		t
+PRV_0125	plan_admin	plan_phase		t
+PRV_0126	plan_admin	time_action		t
 PRV_0127	plan_control	action_plan	phase	t
 PRV_0128	plan_tab	action_plan		f
 PRV_0129	plan_tab	day_plan		f
