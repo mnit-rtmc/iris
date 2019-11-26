@@ -47,11 +47,6 @@ public class DmsDeployBuilder {
 		return SystemAttrEnum.INCIDENT_CLEAR_ADVICE_MULTI.getString();
 	}
 
-	/** Get cleared incident advice abbreviation */
-	static private String clearedAdviceAbbrev() {
-		return SystemAttrEnum.INCIDENT_CLEAR_ADVICE_ABBREV.getString();
-	}
-
 	/** Get the r_node type checker */
 	static private R_NodeType.Checker getChecker(short lto) {
 		final LaneType lt = LaneType.fromOrdinal(lto);
@@ -138,8 +133,7 @@ public class DmsDeployBuilder {
 			return null;
 		// Add incident advice line
 		if (cleared) {
-			if (!builder.addLine(clearedAdviceMulti(),
-			    clearedAdviceAbbrev()))
+			if (!builder.addLine(clearedAdviceMulti()))
 				return null;
 		} else {
 			IncAdvice iadv = IncAdviceHelper.match(rng, inc);

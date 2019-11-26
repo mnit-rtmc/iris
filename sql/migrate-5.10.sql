@@ -37,4 +37,7 @@ GRANT SELECT ON inc_advice_view TO PUBLIC;
 
 ALTER TABLE iris.inc_advice DROP COLUMN abbrev;
 
+-- DELETE incident_clear_advice_abbrev system attribute
+DELETE FROM iris.system_attribute WHERE name = 'incident_clear_advice_abbrev';
+
 COMMIT;

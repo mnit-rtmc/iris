@@ -92,7 +92,6 @@ System Attribute                 | Description
 `help_trouble_ticket_enable`     | Enable help menu item for creating trouble tickets
 `help_trouble_ticket_url`        | URL of Trac trouble ticket system
 `incident_clear_advice_multi`    | Advice for [DMS] messages when incidents are cleared
-`incident_clear_advice_abbrev`   | Abbreviated advice for [DMS] messages when incidents are cleared
 `incident_clear_secs`            | Seconds to leave cleared incidents before removing them
 `map_extent_name_initial`        | Name of map extent displayed when client starts
 `map_icon_size_scale_max`        | Maximum map scale (meters per pixel) to use full icon size

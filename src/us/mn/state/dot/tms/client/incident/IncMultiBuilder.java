@@ -58,12 +58,7 @@ public class IncMultiBuilder {
 
 	/** Add a line to MULTI string */
 	public boolean addLine(String multi) {
-		return addLine(multi, null);
-	}
-
-	/** Add a line to MULTI string */
-	public boolean addLine(String multi, String abbrev) {
-		MultiString ms = buildMulti(multi, abbrev);
+		MultiString ms = buildMulti(multi);
 		if (ms != null) {
 			if (builder.toString().length() > 0) {
 				if (n_lines >= max_lines) {
@@ -77,12 +72,6 @@ public class IncMultiBuilder {
 			return true;
 		} else
 			return false;
-	}
-
-	/** Build MULTI string, or abbreviation if necessary */
-	private MultiString buildMulti(String multi, String abbrev) {
-		MultiString res = buildMulti(multi);
-		return (res != null) ? res : buildMulti(abbrev);
 	}
 
 	/** Build MULTI string, replacing [loc] tags */
