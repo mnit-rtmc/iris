@@ -35,9 +35,8 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 	/** Load all the incident locators */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncLocatorImpl.class);
-		store.query("SELECT name, range, branched, picked, multi, " +
-			"abbrev FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+		store.query("SELECT name, range, branched, picked, multi " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new IncLocatorImpl(row));
@@ -54,7 +53,6 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 		map.put("branched", branched);
 		map.put("picked", picked);
 		map.put("multi", multi);
-		map.put("abbrev", abbrev);
 		return map;
 	}
 
@@ -76,21 +74,17 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 		     row.getInt(2),             // range
 		     row.getBoolean(3),         // branched
 		     row.getBoolean(4),         // picked
-		     row.getString(5),          // multi
-		     row.getString(6)           // abbrev
+		     row.getString(5)           // multi
 		);
 	}
 
 	/** Create an incident locator */
-	private IncLocatorImpl(String n, int r, boolean b, boolean p, String m,
-		String a)
-	{
+	private IncLocatorImpl(String n, int r, boolean b, boolean p, String m){
 		super(n);
 		range = r;
 		branched = b;
 		picked = p;
 		multi = m;
-		abbrev = a;
 	}
 
 	/** Create a new incident locator */
@@ -190,30 +184,5 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 	@Override
 	public String getMulti() {
 		return multi;
-	}
-
-	/** Abbreviated MULTI string */
-	private String abbrev;
-
-	/** Set abbreviated MULTI string */
-	@Override
-	public void setAbbrev(String a) {
-		abbrev = a;
-	}
-
-	/** Set abbreviated MULTI string */
-	public void doSetAbbrev(String a) throws TMSException {
-		if (a != null && !IncLocatorHelper.isMultiValid(a))
-			throw new ChangeVetoException("Invalid MULTI: " + a);
-		if (!objectEquals(a, abbrev)) {
-			store.update(this, "abbrev", a);
-			setAbbrev(a);
-		}
-	}
-
-	/** Get abbreviated MULTI string */
-	@Override
-	public String getAbbrev() {
-		return abbrev;
 	}
 }

@@ -57,6 +57,11 @@ public class IncMultiBuilder {
 	}
 
 	/** Add a line to MULTI string */
+	public boolean addLine(String multi) {
+		return addLine(multi, null);
+	}
+
+	/** Add a line to MULTI string */
 	public boolean addLine(String multi, String abbrev) {
 		MultiString ms = buildMulti(multi, abbrev);
 		if (ms != null) {

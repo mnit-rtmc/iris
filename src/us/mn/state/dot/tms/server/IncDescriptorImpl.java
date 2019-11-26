@@ -39,7 +39,7 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncDescriptorImpl.class);
 		store.query("SELECT name, event_desc_id, detail, lane_type, " +
-			"multi, abbrev FROM iris." + SONAR_TYPE + ";",
+			"multi FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -57,7 +57,6 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 		map.put("detail", detail);
 		map.put("lane_type", lane_type);
 		map.put("multi", multi);
-		map.put("abbrev", abbrev);
 		return map;
 	}
 
@@ -79,21 +78,19 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 		     row.getInt(2),             // event_desc_id
 		     row.getString(3),          // detail
 		     row.getShort(4),           // lane_type
-		     row.getString(5),          // multi
-		     row.getString(6)           // abbrev
+		     row.getString(5)           // multi
 		);
 	}
 
 	/** Create an incident descriptor */
 	private IncDescriptorImpl(String n, int et, String dtl, short lt,
-		String m, String a)
+		String m)
 	{
 		super(n);
 		event_desc_id = et;
 		detail = lookupIncDetail(dtl);
 		lane_type = lt;
 		multi = m;
-		abbrev = a;
 	}
 
 	/** Create a new incident descriptor */
@@ -221,30 +218,5 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 	@Override
 	public String getMulti() {
 		return multi;
-	}
-
-	/** Abbreviated MULTI string */
-	private String abbrev;
-
-	/** Set abbreviated MULTI string */
-	@Override
-	public void setAbbrev(String a) {
-		abbrev = a;
-	}
-
-	/** Set abbreviated MULTI string */
-	public void doSetAbbrev(String a) throws TMSException {
-		if (a != null && !IncDescriptorHelper.isMultiValid(a))
-			throw new ChangeVetoException("Invalid MULTI: " + a);
-		if (!objectEquals(a, abbrev)) {
-			store.update(this, "abbrev", a);
-			setAbbrev(a);
-		}
-	}
-
-	/** Get abbreviated MULTI string */
-	@Override
-	public String getAbbrev() {
-		return abbrev;
 	}
 }

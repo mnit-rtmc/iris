@@ -146,7 +146,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	5.9.0
+database_version	5.10.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0
@@ -3124,8 +3124,7 @@ CREATE TABLE iris.inc_descriptor (
 		REFERENCES event.event_description(event_desc_id),
 	detail VARCHAR(8) REFERENCES event.incident_detail(name),
 	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
-	multi VARCHAR(64) NOT NULL,
-	abbrev VARCHAR(32)
+	multi VARCHAR(64) NOT NULL
 );
 
 CREATE FUNCTION iris.inc_descriptor_ck() RETURNS TRIGGER AS
@@ -3150,7 +3149,7 @@ CREATE TRIGGER inc_descriptor_ck_trig
 
 CREATE VIEW inc_descriptor_view AS
 	SELECT id.name, ed.description AS event_description, detail,
-	       lt.description AS lane_type, multi, abbrev
+	       lt.description AS lane_type, multi
 	FROM iris.inc_descriptor id
 	JOIN event.event_description ed ON id.event_desc_id = ed.event_desc_id
 	LEFT JOIN iris.lane_type lt ON id.lane_type = lt.id;
@@ -3196,13 +3195,11 @@ CREATE TABLE iris.inc_locator (
 	range INTEGER NOT NULL REFERENCES iris.inc_range(id),
 	branched BOOLEAN NOT NULL,
 	picked BOOLEAN NOT NULL,
-	multi VARCHAR(64) NOT NULL,
-	abbrev VARCHAR(32)
+	multi VARCHAR(64) NOT NULL
 );
 
 CREATE VIEW inc_locator_view AS
-	SELECT il.name, rng.description AS range, branched, picked,
-	       multi, abbrev
+	SELECT il.name, rng.description AS range, branched, picked, multi
 	FROM iris.inc_locator il
 	LEFT JOIN iris.inc_range rng ON il.range = rng.id;
 GRANT SELECT ON inc_locator_view TO PUBLIC;
@@ -3214,8 +3211,7 @@ CREATE TABLE iris.inc_advice (
 	open_lanes INTEGER,
 	range INTEGER NOT NULL REFERENCES iris.inc_range(id),
 	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
-	multi VARCHAR(64) NOT NULL,
-	abbrev VARCHAR(32)
+	multi VARCHAR(64) NOT NULL
 );
 
 CREATE FUNCTION iris.inc_advice_ck() RETURNS TRIGGER AS
@@ -3236,8 +3232,7 @@ CREATE TRIGGER inc_advice_ck_trig
 
 CREATE VIEW inc_advice_view AS
 	SELECT a.name, imp.description AS impact, lt.description AS lane_type,
-	       rng.description AS range, impacted_lanes, open_lanes, multi,
-	       abbrev
+	       rng.description AS range, impacted_lanes, open_lanes, multi
 	FROM iris.inc_advice a
 	LEFT JOIN iris.inc_impact imp ON a.impact = imp.id
 	LEFT JOIN iris.inc_range rng ON a.range = rng.id

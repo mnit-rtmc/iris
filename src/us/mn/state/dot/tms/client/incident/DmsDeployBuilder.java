@@ -130,13 +130,11 @@ public class DmsDeployBuilder {
 		IncMultiBuilder builder = new IncMultiBuilder(dms, loc, dist);
 		// Add incident descriptor line
 		IncDescriptor idsc = IncDescriptorHelper.match(inc);
-		if (null == idsc ||
-		   !builder.addLine(idsc.getMulti(), idsc.getAbbrev()))
+		if (null == idsc || !builder.addLine(idsc.getMulti()))
 			return null;
 		// Add incident locator line
 		IncLocator iloc = IncLocatorHelper.match(rng, branched, picked);
-		if (null == iloc ||
-		   !builder.addLine(iloc.getMulti(), iloc.getAbbrev()))
+		if (null == iloc || !builder.addLine(iloc.getMulti()))
 			return null;
 		// Add incident advice line
 		if (cleared) {
@@ -145,8 +143,7 @@ public class DmsDeployBuilder {
 				return null;
 		} else {
 			IncAdvice iadv = IncAdviceHelper.match(rng, inc);
-			if (null == iadv ||
-			   !builder.addLine(iadv.getMulti(), iadv.getAbbrev()))
+			if (null == iadv || !builder.addLine(iadv.getMulti()))
 				return null;
 		}
 		return builder.toMultiString();

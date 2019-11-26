@@ -52,7 +52,7 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 	@Override
 	protected ArrayList<ProxyColumn<IncAdvice>> createColumns() {
 		ArrayList<ProxyColumn<IncAdvice>> cols =
-			new ArrayList<ProxyColumn<IncAdvice>>(7);
+			new ArrayList<ProxyColumn<IncAdvice>>(6);
 		cols.add(new ProxyColumn<IncAdvice>("incident.impact", 160) {
 			public Object getValueAt(IncAdvice adv) {
 				return IncImpact.fromOrdinal(adv.getImpact());
@@ -149,19 +149,6 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 			public void setValueAt(IncAdvice adv, Object value) {
 				adv.setMulti(new MultiString(value.toString())
 					.normalizeLine().toString());
-			}
-		});
-		cols.add(new ProxyColumn<IncAdvice>("dms.multi.abbrev", 150) {
-			public Object getValueAt(IncAdvice adv) {
-				return adv.getAbbrev();
-			}
-			public boolean isEditable(IncAdvice adv) {
-				return canWrite(adv);
-			}
-			public void setValueAt(IncAdvice adv, Object value) {
-				String a = new MultiString(value.toString())
-					.normalizeLine().toString();
-				adv.setAbbrev((a.length() > 0) ? a : null);
 			}
 		});
 		return cols;

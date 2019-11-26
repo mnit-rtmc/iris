@@ -36,7 +36,7 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncAdviceImpl.class);
 		store.query("SELECT name, impact, lane_type, range, " +
-			"impacted_lanes, open_lanes, multi, abbrev FROM iris." +
+			"impacted_lanes, open_lanes, multi FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -56,7 +56,6 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		map.put("impacted_lanes", impacted_lanes);
 		map.put("open_lanes", open_lanes);
 		map.put("multi", multi);
-		map.put("abbrev", abbrev);
 		return map;
 	}
 
@@ -80,14 +79,13 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		     row.getInt(4),              // range
 		     (Integer) row.getObject(5), // impacted_lanes
 		     (Integer) row.getObject(6), // open_lanes
-		     row.getString(7),           // multi
-		     row.getString(8)            // abbrev
+		     row.getString(7)            // multi
 		);
 	}
 
 	/** Create an incident advice */
 	private IncAdviceImpl(String n, int imp, short lt, int r, Integer iln,
-		Integer oln, String m, String a)
+		Integer oln, String m)
 	{
 		super(n);
 		impact = imp;
@@ -96,7 +94,6 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		impacted_lanes = iln;
 		open_lanes = oln;
 		multi = m;
-		abbrev = a;
 	}
 
 	/** Create a new incident advice */
@@ -257,30 +254,5 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	@Override
 	public String getMulti() {
 		return multi;
-	}
-
-	/** Abbreviated MULTI string */
-	private String abbrev;
-
-	/** Set abbreviated MULTI string */
-	@Override
-	public void setAbbrev(String a) {
-		abbrev = a;
-	}
-
-	/** Set abbreviated MULTI string */
-	public void doSetAbbrev(String a) throws TMSException {
-		if (a != null && !IncAdviceHelper.isMultiValid(a))
-			throw new ChangeVetoException("Invalid MULTI: " + a);
-		if (!objectEquals(a, abbrev)) {
-			store.update(this, "abbrev", a);
-			setAbbrev(a);
-		}
-	}
-
-	/** Get abbreviated MULTI string */
-	@Override
-	public String getAbbrev() {
-		return abbrev;
 	}
 }

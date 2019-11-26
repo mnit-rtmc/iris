@@ -113,7 +113,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 	@Override
 	protected ArrayList<ProxyColumn<IncDescriptor>> createColumns() {
 		ArrayList<ProxyColumn<IncDescriptor>> cols =
-			new ArrayList<ProxyColumn<IncDescriptor>>(5);
+			new ArrayList<ProxyColumn<IncDescriptor>>(4);
 		cols.add(new ProxyColumn<IncDescriptor>("incident.type", 100) {
 			public Object getValueAt(IncDescriptor dsc) {
 				return EventType.fromId(dsc.getEventType());
@@ -194,20 +194,6 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 			public void setValueAt(IncDescriptor dsc, Object value){
 				dsc.setMulti(new MultiString(value.toString())
 					.normalizeLine().toString());
-			}
-		});
-		cols.add(new ProxyColumn<IncDescriptor>("dms.multi.abbrev", 150)
-		{
-			public Object getValueAt(IncDescriptor dsc) {
-				return dsc.getAbbrev();
-			}
-			public boolean isEditable(IncDescriptor dsc) {
-				return canWrite(dsc);
-			}
-			public void setValueAt(IncDescriptor dsc, Object value){
-				String a = new MultiString(value.toString())
-					.normalizeLine().toString().trim();
-				dsc.setAbbrev((a.length() > 0) ? a : null);
 			}
 		});
 		return cols;

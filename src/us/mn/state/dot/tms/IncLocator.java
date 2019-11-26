@@ -50,10 +50,4 @@ public interface IncLocator extends SonarObject {
 
 	/** Get the MULTI string */
 	String getMulti();
-
-	/** Set abbreviated MULTI string */
-	void setAbbrev(String a);
-
-	/** Get abbreviated MULTI string */
-	String getAbbrev();
 }
