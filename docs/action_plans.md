@@ -10,8 +10,9 @@ set.  It can be changed by an operator, or at specified times with
 [time actions](#time-actions).
 
 Each phase can be associated with any number of [DMS](#dms-actions),
-[beacon](#beacon-actions) or [ramp meter](#meter-actions) actions.  Advanced
-plans can have many phases, each with separate actions.
+[ramp meter](#meter-actions), [camera](#camera-actions), or
+[beacon](#beacon-actions) actions.  Advanced plans can have many phases, each
+with separate actions.
 
 If **Sync Actions** is selected, the phase can only be changed if all associated
 devices are online.  If **Sticky** is selected, messages sent with
@@ -47,17 +48,22 @@ Tag                             | Description
 `[tz *{p,o,c},{tz0},…{tzn}* `]` | [Toll zone] pricing
 `[vsa]`                         | [Variable speed advisory]
 
-## Beacon Actions
-
-A [beacon] action can cause a beacon to be deployed when the action plan is set
-to the specified *phase*.  When the plan is set to any other phase, the beacon
-will shut off.
-
 ## Meter Actions
 
 A [ramp meter] action causes the meter to begin metering when the specified
 *phase* is selected.  When the plan is set to any other phase, the meter will
 shut off.
+
+## Camera Actions
+
+A [camera] action causes a specific [preset] to be recalled when the specified
+*phase* is selected.
+
+## Beacon Actions
+
+A [beacon] action can cause a beacon to be deployed when the action plan is set
+to the specified *phase*.  When the plan is set to any other phase, the beacon
+will shut off.
 
 ## Time Actions
 
@@ -92,10 +98,12 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 
 
 [beacon]: beacons.html
+[camera]: cameras.html
 [DMS]: dms.html
 [Msg-Feed]: comm_links.html#msg-feed
 [MULTI]: dms.html#multi
 [Parking area]: parking_areas.html
+[preset]: cameras.html#presets
 [quick message]: dms.html#quick-messages
 [ramp meter]: ramp_meters.html
 [Slow traffic]: slow_warning.html
