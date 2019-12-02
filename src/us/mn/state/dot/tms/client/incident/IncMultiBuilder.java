@@ -95,6 +95,12 @@ public class IncMultiBuilder {
 		return (multi != null) ? new MultiString(multi) : null;
 	}
 
+	/** Get the MULTI as a String */
+	@Override
+	public String toString() {
+		return builder.toString();
+	}
+
 	/** Get the MULTI string */
 	public MultiString toMultiString() {
 		return builder.toMultiString();
