@@ -1,5 +1,11 @@
 # IRIS 5.x Release Notes
 
+5.10.0 (2 Dec 2019)
+ - Use "allowed words" list for abbreviating DMS messages from incidents
+ - Removed `abbrev` columns from incident deployment tables
+ - Added camera actions to schedule the recall of camera presets
+ - Reduced distances for LCS ranges when deploying incidents
+
 5.9.0 (25 Nov 2019)
  - Added `encoder_stream` table associated with `encoder_type`, to allow
    multiple streams per camera
