@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ public class WorkRequestAction<T extends SonarObject> extends IAction {
 			StringBuilder sb = new StringBuilder();
 			sb.append("http://");
 			sb.append(getUrl());
-			sb.append("/georilla/forms/tams/");
+			sb.append("/3/forms/tams/");
 			sb.append("?asset-type=720");
 			sb.append("&inventory-id-field=its_device_name");
 			sb.append("&inventory-id=");
