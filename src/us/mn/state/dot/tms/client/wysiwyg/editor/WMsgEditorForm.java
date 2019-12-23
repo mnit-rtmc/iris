@@ -36,18 +36,26 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
+import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.RasterBuilder;
+import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.dms.DMSPanelPager;
+import us.mn.state.dot.tms.client.dms.SignFacePanel;
+import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
- * WYSIWYG DMS Message Editor Selector Form
+ * WYSIWYG DMS Message Editor Form
  *
  * @author Gordon Parikh, John L. Stanley, and Michael Janson - SRF Consulting
  */
@@ -244,6 +252,10 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.fill = GridBagConstraints.BOTH;
 		
 		// TODO PLACEHOLDER
+		
+		// TODO use MultiString object (see below) to get page information and
+		// pack into scroll pane - need to figure out how RasterGraphics work 
+		
 		p.add(new JScrollPane(new JList<String>(),
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), gbc);
@@ -256,9 +268,24 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.fill = GridBagConstraints.BOTH;
 
 		// TODO PLACEHOLDER
-		p.add(new JScrollPane(new JList<String>(),
+		/*p.add(new JScrollPane(new JList<String>(),
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), gbc);
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), gbc);*/
+		
+		SignFacePanel sfp = new SignFacePanel();
+		SignPixelPanel spp = sfp.setSign(sign);
+		RasterBuilder rb = DMSHelper.createRasterBuilder(sign);
+		String ms = qm.getMulti();
+		MultiString mso = new MultiString(ms);
+		
+		RasterGraphic[] rg = null;
+		try {
+			rg = rb.createPixmaps(mso);
+		} catch (IndexOutOfBoundsException e) {
+		} catch (InvalidMsgException e) {
+		}
+		DMSPanelPager dpp = new DMSPanelPager(spp, rg, ms);
+		p.add(sfp, gbc);
 		
 		/* Preview Button */
 		gbc.gridx = 6;
