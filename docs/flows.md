@@ -15,18 +15,18 @@ on a streambed controller.
 Select `View ➔ Video ➔ Flows` menu item
 
 To configure a flow, edit the first eight fields in the table.  A flow can be
-either a _camera flow_ or a _video monitor flow_, but not both.
+either a _camera flow_ or _video monitor flow_, but not both.
 
 Field            | Description
 -----------------|--------------------------------------------------------
 Flow             | Flow name
 Location overlay | Flag indicating whether camera location should be added
-View num         | Fixed position view number for encoder type
-Quality          | Encoder stream quality
+View num         | Fixed position view number for [encoder type]
+Quality          | Encoder [stream] quality
 Camera           | Camera name
 Monitor number   | [Video monitor] number
-Address          | Video monitor's _sink_ address
-port             | Video monitor's _sink_ port
+Address          | Monitor _sink_ address
+port             | Monitor _sink_ port
 
 ## Status
 
@@ -41,7 +41,7 @@ Late   | Late packet count
 
 ## Camera Flows
 
-A _camera flow_ is used to rebroadcast a camera stream.  The `view num`,
+A _camera flow_ uses a camera stream for its _source_.  The `view num`,
 `quality` and `camera` fields should be configured.  `Monitor number`, `address`
 and `port` must be blank.
 
@@ -51,9 +51,10 @@ other.  They define the _sink_ (checked) and _source_ (unchecked) of the flow.
 
 ## Video Monitor Flows
 
-A _video monitor flow_ can rebroadcast the stream currently being displayed on a
-[video monitor].  The `view num`, `quality`, `monitor number`, `address` and
-`port` fields should be configured.  `Camera` must be blank.
+A _video monitor flow_ uses a [video monitor] for its _source_ — more precisely,
+the camera currently displayed on that monitor.  The `view num`, `quality`,
+`monitor number`, `address` and `port` fields should be configured.  `Camera`
+must be blank.
 
 The _source_ is defined by the current camera displayed on the specified monitor
 number.  That camera's [encoder type] must contain a [stream] with matching
@@ -71,8 +72,10 @@ simply rebroadcasting.
 
 [comm link]: comm_links.html
 [controller]: controllers.html
+[encoder type]: cameras.html#encoder-types
 [IO pin]: controllers.html#io-pins
 [multicast]: https://en.wikipedia.org/wiki/Multicast_address
 [protocol]: comm_links.html#protocols
+[stream]: cameras.html#streams
 [streambed]: https://github.com/mnit-rtmc/streambed
 [video monitor]: video.html
