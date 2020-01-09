@@ -20,12 +20,13 @@ either a _camera flow_ or _video monitor flow_, but not both.
 Field            | Description
 -----------------|----------------------------------------------------------
 Flow             | Flow name
+Restricted       | Flag restricting flow to only published cameras
 Location overlay | Flag indicating whether [camera] location should be added
 Quality          | Encoder [stream] quality
 Camera           | [Camera] name
 Monitor number   | [Video monitor] number
 Address          | Monitor _sink_ address
-port             | Monitor _sink_ port
+Port             | Monitor _sink_ port
 
 ## Status
 
