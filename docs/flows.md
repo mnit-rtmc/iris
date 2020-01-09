@@ -41,12 +41,16 @@ Late   | Late packet count
 
 ## Camera Flows
 
-A _camera flow_ uses a [camera] stream for its _source_.  The `camera` field
-should be configured, but `monitor number`, `address` and `port` must be blank.
+A _camera flow_ uses [camera] streams for its _source_.  The `camera` field
+should be configured, but `monitor number` must be blank.
 
-The camera's [encoder type] must contain two [stream]s with the same `quality`
-value as the flow.  The `flow` field must be checked on one but not the
-other.  They define the _sink_ (checked) and _source_ (unchecked) of the flow.
+The camera's [encoder type] must contain a [stream] with the same `quality`
+value as the flow, but with `flow` unchecked.  That stream defines the _source_
+of the flow.
+
+If `address` and `port` are specified, they define the flow's _sink_.
+Otherwise, it is defined by a stream of the camera's encoder type with `flow`
+checked and a matching `quality` value.
 
 ## Video Monitor Flows
 
