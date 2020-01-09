@@ -26,8 +26,9 @@ For cameras with multiple **fixed-position** _views_, a number can be used to
 identify them.
 
 Field          | Description
----------------|-----------------------------------------------
+---------------|-----------------------------------------------------------
 View Num       | Fixed-position view, usable as a preset number
+Flow           | If checked, the stream is a [flow] _sink_ from [streambed]
 Encoding       | Stream encoding: `MJPEG`, `MPEG2`, `MPEG4`, `H264`, `AV1`
 Quality        | Resolution and frame rate comparison: `Low` / `Medium` / `High`
 URI scheme     | Scheme part of unicast request URI: `rtsp` / `http`
@@ -109,7 +110,7 @@ to [play list] selection mode — the icon will change to a play list.
 ## Camera Keyboards
 
 Dedicated keyboards are supported for easier camera control.  These keyboards
-have joysticks for _pan / tilt / zoom_ control.  Two protocols are supported:
+have joysticks for _pan / tilt / zoom_ control.  Two [protocol]s are supported:
 [Pelco-P] and Panasonic CU-950.
 
 To configure a [Pelco-P] keyboard, a [comm link] using the `pelcop` protocol
@@ -135,12 +136,15 @@ Otherwise, requests will be made directly to the camera's encoder address.
 [comm link]: comm_links.html
 [controller]: controllers.html
 [DMS]: dms.html
+[flow]: flows.html
 [iris-client.properties]: client_properties.html
 [MonStream]: video.html#monstream
 [multicast]: https://en.wikipedia.org/wiki/Multicast_address
 [Pelco-P]: comm_links.html#pelcop
 [play list]: video.html#play-lists
+[protocol]: comm_links.html#protocols
 [ramp meter]: ramp_meters.html
 [SDP]: https://en.wikipedia.org/wiki/Session_Description_Protocol
+[streambed]: https://github.com/mnit-rtmc/streambed
 [system attribute]: system_attributes.html
 [video monitor]: video.html

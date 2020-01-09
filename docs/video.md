@@ -8,8 +8,14 @@ monitors.  Each monitor can be assigned to display the video from any camera.
 
 ## Monitor Selection
 
-On the upper-right of the **Camera** tab, there is a monitor selector.  The
-chosen monitor will switch whenever the user selects a new camera.
+Each monitor can be assigned a _monitor number_.  This is used to identify the
+monitor when selecting cameras, _etc_.  When a camera is assigned to a monitor
+number, **all** video monitors and [flow]s with that number will display video
+from that camera.
+
+On the upper-right of the **Camera** tab, there is a selector containing monitor
+numbers.  Selecting a camera will assign that camera to the currently selected
+monitor number.
 
 ## MonStream
 
@@ -47,5 +53,6 @@ assigned sequence numbers, so they can be used in the same way.
 
 [comm link]: comm_links.html
 [controller]: controllers.html
+[flow]: flows.html
 [MonStream]: https://github.com/mnit-rtmc/monstream
 [system attribute]: system_attributes.html
