@@ -21,7 +21,6 @@ Field            | Description
 -----------------|----------------------------------------------------------
 Flow             | Flow name
 Location overlay | Flag indicating whether [camera] location should be added
-View num         | Fixed position view number for [encoder type]
 Quality          | Encoder [stream] quality
 Camera           | [Camera] name
 Monitor number   | [Video monitor] number
@@ -44,8 +43,8 @@ Late   | Late packet count
 A _camera flow_ uses a [camera] stream for its _source_.  The `camera` field
 should be configured, but `monitor number`, `address` and `port` must be blank.
 
-The camera's [encoder type] must contain two [stream]s with matching values for
-`view num` and `quality`.  The `flow` field must be checked on one but not the
+The camera's [encoder type] must contain two [stream]s with the same `quality`
+value as the flow.  The `flow` field must be checked on one but not the
 other.  They define the _sink_ (checked) and _source_ (unchecked) of the flow.
 
 ## Video Monitor Flows
@@ -55,8 +54,8 @@ the [camera] currently displayed on that monitor.  The `monitor number`,
 `address` and `port` fields should be configured, but `camera` must be blank.
 
 The _source_ is defined by the current camera displayed on the specified monitor
-number.  That camera's [encoder type] must contain a [stream] with matching
-`view num` and `quality`.  If multiple streams match, the one with `flow`
+number.  That camera's [encoder type] must contain a [stream] with the same
+`quality` value as the flow.  If multiple streams match, the one with `flow`
 checked is used.
 
 The `address` and `port` fields define the flow's _sink_.
