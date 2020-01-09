@@ -3,13 +3,13 @@
 Select `View ➔ Video ➔ Video Monitor` menu item
 
 IRIS can be configured to send commands to a video switcher system, such as
-[MonStream].  This allows camera streams to be routed to any number of video
+[MonStream].  This allows [camera] streams to be routed to any number of video
 monitors.  Each monitor can be assigned to display the video from any camera.
 
 ## Monitor Selection
 
 Each monitor can be assigned a _monitor number_.  This is used to identify the
-monitor when selecting cameras, _etc_.  When a camera is assigned to a monitor
+monitor when selecting [camera]s, _etc_.  When a camera is assigned to a monitor
 number, **all** video monitors and [flow]s with that number will display video
 from that camera.
 
@@ -39,8 +39,8 @@ thru 4.
 
 Select `View ➔ Video ➔ Play Lists` menu item
 
-Play lists can be created to cycle through related cameras.  Each user can have
-a personal play list, but system play lists are available to all users.
+Play lists can be created to cycle through related [camera]s.  Each user can
+have a personal play list, but system play lists are available to all users.
 Selecting a play list on a monitor will cause the play list to automatically
 switch.  The interval is specified by the `camera_sequence_dwell_sec`
 [system attribute].
@@ -51,6 +51,7 @@ A catalog is a collection of play lists.  Both play lists and catalogs can be
 assigned sequence numbers, so they can be used in the same way.
 
 
+[camera]: cameras.html
 [comm link]: comm_links.html
 [controller]: controllers.html
 [flow]: flows.html
