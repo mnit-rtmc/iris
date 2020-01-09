@@ -25,8 +25,8 @@ Location overlay | Flag indicating whether [camera] location should be added
 Quality          | Encoder [stream] quality
 Camera           | [Camera] name
 Monitor number   | [Video monitor] number
-Address          | Monitor _sink_ address
-Port             | Monitor _sink_ port
+Address          | _Sink_ address
+Port             | _Sink_ port
 
 ## Status
 
@@ -41,7 +41,7 @@ Late   | Late packet count
 
 ## Camera Flows
 
-A _camera flow_ uses [camera] streams for its _source_.  The `camera` field
+A _camera flow_ uses a [camera] stream for its _source_.  The `camera` field
 should be configured, but `monitor number` must be blank.
 
 The camera's [encoder type] must contain a [stream] with the same `quality`
