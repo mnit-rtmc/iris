@@ -37,7 +37,7 @@ Monitor num   | Number for selecting and switching
 Restricted    | Flag restricting monitor to published cameras only
 Monitor style | [Style](#style) of title bar, _etc_
 
-The _monitor num_ is used to identify monitors when selecting [camera]s with
+The `monitor num` is used to identify monitors when selecting [camera]s with
 a [switching](#switching) system.
 
 ## Style
@@ -56,16 +56,16 @@ Auto Expand   | Flag to use full screen when only one monitor is active
 ## Switching
 
 There are several methods available for switching video monitors.  Using any of
-these methods, when a [camera] is assigned to a _monitor num_, **all** monitors
+these methods, when a [camera] is assigned to a `monitor num`, **all** monitors
 and [flow]s with that number will be switched.
 
 ### Camera Tab
 
-On the upper-right of the **Camera** tab, there is a _monitor num_ selector.
+On the upper-right of the **Camera** tab, there is a `monitor num` selector.
 The number chosen here will be switched any time a camera is selected, either
 from the map or a list.
 
-The [selector tool] can also be used to change the _monitor num_ or camera.
+The [selector tool] can also be used to change the `monitor num` or camera.
 
 ### Keyboards
 
@@ -100,5 +100,6 @@ assigned sequence numbers, so they can be used in the same way.
 [IO pin]: controllers.html#io-pins
 [MonStream]: https://github.com/mnit-rtmc/monstream
 [Privilege]: user_roles.html#privileges
+[protocol]: comm_links.html#protocols
 [selector tool]: cameras.html#selector-tool
 [system attribute]: system_attributes.html
