@@ -24,7 +24,7 @@ Restricted       | Flag restricting flow to only published cameras
 Location overlay | Flag indicating whether [camera] location should be added
 Quality          | Encoder [stream] quality
 Camera           | [Camera] name
-Monitor number   | [Video monitor] number
+Monitor num      | [Video monitor] number
 Address          | _Sink_ address
 Port             | _Sink_ port
 
@@ -42,7 +42,7 @@ Late   | Late packet count
 ## Camera Flows
 
 A _camera flow_ uses a [camera] stream for its _source_.  The `camera` field
-should be configured, but `monitor number` must be blank.
+should be configured, but `monitor num` must be blank.
 
 The camera's [encoder type] must contain a [stream] with the same `quality`
 value as the flow, but with `flow` unchecked.  That stream defines the _source_
@@ -55,7 +55,7 @@ checked and a matching `quality` value.
 ## Video Monitor Flows
 
 A _video monitor flow_ uses a [video monitor] for its _source_ — more precisely,
-the [camera] currently displayed on that monitor.  The `monitor number` field
+the [camera] currently displayed on that monitor.  The `monitor num` field
 should be configured, but `camera` must be blank.
 
 The _source_ is defined by the current camera displayed on the specified monitor

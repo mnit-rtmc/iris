@@ -15,8 +15,8 @@ above the map, there is a menu to _enable_ or _disable_ **layers** of the map.
 A **legend** menu shows the various icons.
 
 Below the map, the mouse pointer location is displayed as **latitude** and
-**longitude**.  To the left of that is the [camera selector tool].  To the right
-is the **Edit Mode** button.
+**longitude**.  To the left of that is the [selector tool].  To the right is the
+**Edit Mode** button.
 
 ## Edit Mode
 
@@ -59,7 +59,7 @@ The **view** menu is used for displaying [device] tables and other configuration
 dialogs.
 
 
-[camera selector tool]: cameras.html#camera-selector-tool
+[selector tool]: cameras.html#selector-tool
 [capabilities]: user_roles.html#capabilities
 [device]: controllers.html#devices
 [LDAP]: installation.html#ldap

@@ -92,14 +92,14 @@ tab of the device's properties form.
 If a stream is defined with a _view num_ that matches the _preset num_, that
 stream will be selected instead of a typical PTZ preset.
 
-## Camera Selector Tool
+## Selector Tool
 
-The camera selector tool is on the toolbar just below the map.  It has a text
-entry field with a camera icon and label.  This tool enables quick switching of
-the selected camera.
+The _selector tool_ is on the toolbar just below the map.  It has a text entry
+field with a camera icon and label.  This tool enables quick switching of the
+selected camera.
 
 The keyboard _numpad_ can be used from anywhere within IRIS to control the
-camera selector tool.  When the `Num Lock` key is off, all numpad keystrokes are
+selector tool.  When the `Num Lock` key is off, all numpad keystrokes are
 directed to the tool.  The `+` and `-` keys can select the next and previous
 cameras, respectively.
 

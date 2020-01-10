@@ -1,27 +1,14 @@
 # Video Monitors
 
-Select `View ➔ Video ➔ Video Monitor` menu item
-
-IRIS can be configured to send commands to a video switcher system, such as
-[MonStream].  This allows [camera] streams to be routed to any number of video
-monitors.  Each monitor can be assigned to display the video from any camera.
-
-## Monitor Selection
-
-Each monitor can be assigned a _monitor number_.  This is used to identify the
-monitor when selecting [camera]s, _etc_.  When a camera is assigned to a monitor
-number, **all** video monitors and [flow]s with that number will display video
-from that camera.
-
-On the upper-right of the **Camera** tab, there is a selector containing monitor
-numbers.  Selecting a camera will assign that camera to the currently selected
-monitor number.
+A _video monitor_ is a dedicated screen which can display [camera] streams in
+real time.  IRIS can quickly switch the stream and title text displayed on a
+video monitor, using supported protocols.
 
 ## MonStream
 
 [MonStream] is a full-screen video streaming application which runs on low-cost
-Linux computers.  IRIS can send switching messages to MonStream, creating a
-low-latency IP video system.
+Linux computers.  IRIS has a _MonStream_ [protocol] driver, which can be used
+for video monitor control.
 
 A computer running MonStream can be configured to stream a grid of four or more
 video feeds onto a single large monitor.  The only configuration required on the
@@ -31,9 +18,63 @@ the UID of the monstream process.
 A [controller] must be configured to represent each MonStream computer.  It will
 need to be on a [comm link] using the MonStream protocol, with a timeout of 2000
 ms.  The comm link URI should be of the form: `[ip address]:7001`.  Each video
-monitor to be displayed should be associated with an IO pin of the controller.
+monitor to be displayed should be associated with an [IO pin] of the controller.
 For example, a quad-screen monitor would have monitors associated with pins 1
 thru 4.
+
+## Configuration
+
+Select `View ➔ Video ➔ Video Monitor` menu item
+
+Each row of the table represents one _video monitor_.
+
+Field         | Description
+--------------|---------------------------------------------------
+Name          | Video monitor name
+Notes         | Location or usage text
+Group name    | [Privilege] group, for access control
+Monitor num   | Number for selecting and switching
+Restricted    | Flag restricting monitor to published cameras only
+Monitor style | [Style](#style) of title bar, _etc_
+
+The _monitor num_ is used to identify monitors when selecting [camera]s with
+a [switching](#switching) system.
+
+## Style
+
+Select `View ➔ Video ➔ Monitor Styles` menu item
+
+Field         | Description
+--------------|---------------------------------------------------
+Monitor Style | Monitor style name
+Force aspect  | Flag to preserve video aspect ratio
+Accent        | Hexadecimal RGB color of title bar
+Font Size     | Size of title bar font (points)
+Title Bar     | Flag to enable title bar
+Auto Expand   | Flag to use full screen when only one monitor is active
+
+## Switching
+
+There are several methods available for switching video monitors.  Using any of
+these methods, when a [camera] is assigned to a _monitor num_, **all** monitors
+and [flow]s with that number will be switched.
+
+### Camera Tab
+
+On the upper-right of the **Camera** tab, there is a _monitor num_ selector.
+The number chosen here will be switched any time a camera is selected, either
+from the map or a list.
+
+The [selector tool] can also be used to change the _monitor num_ or camera.
+
+### Keyboards
+
+Certain [camera keyboards] can be used for video monitor switching.
+
+### MonStream Control
+
+With a USB joystick and keypad, a [MonStream](#monstream) computer can be used
+for switching.
 
 ## Play Lists
 
@@ -52,8 +93,12 @@ assigned sequence numbers, so they can be used in the same way.
 
 
 [camera]: cameras.html
+[camera keyboards]: cameras.html#camera-keyboards
 [comm link]: comm_links.html
 [controller]: controllers.html
 [flow]: flows.html
+[IO pin]: controllers.html#io-pins
 [MonStream]: https://github.com/mnit-rtmc/monstream
+[Privilege]: user_roles.html#privileges
+[selector tool]: cameras.html#selector-tool
 [system attribute]: system_attributes.html
