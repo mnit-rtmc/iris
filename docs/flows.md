@@ -1,9 +1,9 @@
 # Flows
 
 A **flow** is a video stream which is not provided directly by a [camera], but
-by a server called [streambed].  Flows can be used to transcode from one video
-encoding to another, overlay text, or rebroadcast a unicast RTSP stream to a
-[multicast] address.
+by a [streambed] server.  Flows can be used to transcode from one video encoding
+to another, overlay text, or rebroadcast a unicast RTSP stream to a [multicast]
+address.
 
 Streambed can run on one or more dedicated computers, and is controlled by IRIS
 through the `streambed` [protocol].  A [controller] and associated [comm link]
@@ -55,8 +55,8 @@ checked and a matching `quality` value.
 ## Video Monitor Flows
 
 A _video monitor flow_ uses a [video monitor] for its _source_ — more precisely,
-the [camera] currently displayed on that monitor.  The `monitor number`,
-`address` and `port` fields should be configured, but `camera` must be blank.
+the [camera] currently displayed on that monitor.  The `monitor number` field
+should be configured, but `camera` must be blank.
 
 The _source_ is defined by the current camera displayed on the specified monitor
 number.  That camera's [encoder type] must contain a [stream] with the same
