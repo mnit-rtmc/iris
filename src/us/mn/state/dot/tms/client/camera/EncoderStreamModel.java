@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ public class EncoderStreamModel extends ProxyTableModel<EncoderStream> {
 	@Override
 	protected ArrayList<ProxyColumn<EncoderStream>> createColumns() {
 		ArrayList<ProxyColumn<EncoderStream>> cols =
-			new ArrayList<ProxyColumn<EncoderStream>>(7);
+			new ArrayList<ProxyColumn<EncoderStream>>(8);
 		cols.add(new ProxyColumn<EncoderStream>(
 			"encoder.stream.view.num", 80, Integer.class)
 		{
@@ -68,6 +68,20 @@ public class EncoderStreamModel extends ProxyTableModel<EncoderStream> {
 					? (Integer) value
 					: null;
 				es.setViewNum(view);
+			}
+		});
+		cols.add(new ProxyColumn<EncoderStream>("encoder.stream.flow",
+			90, Boolean.class)
+		{
+			public Object getValueAt(EncoderStream es) {
+				return es.getFlow();
+			}
+			public boolean isEditable(EncoderStream es) {
+				return canWrite(es, "flow");
+			}
+			public void setValueAt(EncoderStream es, Object value) {
+				if (value instanceof Boolean)
+					es.setFlow((Boolean) value);
 			}
 		});
 		cols.add(new ProxyColumn<EncoderStream>(
