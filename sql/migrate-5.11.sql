@@ -234,4 +234,19 @@ CREATE TRIGGER gate_arm_delete_trig
     INSTEAD OF DELETE ON iris.gate_arm
     FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
+-- Add flow column to encoder stream
+DROP VIEW encoder_stream_view;
+ALTER TABLE iris.encoder_stream ADD COLUMN flow BOOLEAN;
+UPDATE iris.encoder_stream SET flow = false;
+ALTER TABLE iris.encoder_stream ALTER COLUMN flow SET NOT NULL;
+CREATE VIEW encoder_stream_view AS
+	SELECT es.name, encoder_type, make, model, config, view_num, flow,
+	       enc.description AS encoding, eq.description AS quality,
+	       uri_scheme, uri_path, mcast_port, latency
+	FROM iris.encoder_stream es
+	LEFT JOIN iris.encoder_type et ON es.encoder_type = et.name
+	LEFT JOIN iris.encoding enc ON es.encoding = enc.id
+	LEFT JOIN iris.encoding_quality eq ON es.quality = eq.id;
+GRANT SELECT ON encoder_stream_view TO PUBLIC;
+
 COMMIT;

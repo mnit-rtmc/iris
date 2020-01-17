@@ -1388,6 +1388,7 @@ CREATE TABLE iris.encoder_stream (
 	name VARCHAR(8) PRIMARY KEY,
 	encoder_type VARCHAR(8) NOT NULL REFERENCES iris.encoder_type,
 	view_num INTEGER CHECK (view_num > 0 AND view_num <= 12),
+	flow BOOLEAN NOT NULL,
 	encoding INTEGER NOT NULL REFERENCES iris.encoding,
 	quality INTEGER NOT NULL REFERENCES iris.encoding_quality,
 	uri_scheme VARCHAR(8),
@@ -1402,7 +1403,7 @@ ALTER TABLE iris.encoder_stream
 	CHECK ((uri_scheme IS NULL AND uri_path IS NULL) OR mcast_port IS NULL);
 
 CREATE VIEW encoder_stream_view AS
-	SELECT es.name, encoder_type, make, model, config, view_num,
+	SELECT es.name, encoder_type, make, model, config, view_num, flow,
 	       enc.description AS encoding, eq.description AS quality,
 	       uri_scheme, uri_path, mcast_port, latency
 	FROM iris.encoder_stream es
