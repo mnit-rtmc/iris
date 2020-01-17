@@ -57,7 +57,7 @@ Auto Expand   | Flag to use full screen when only one monitor is active
 
 There are several methods available for switching video monitors.  Using any of
 these methods, when a [camera] is assigned to a `monitor num`, **all** monitors
-and [flow]s with that number will be switched.
+and [flow streams] with that number will be switched.
 
 ### Camera Tab
 
@@ -96,7 +96,7 @@ assigned sequence numbers, so they can be used in the same way.
 [camera keyboards]: cameras.html#camera-keyboards
 [comm link]: comm_links.html
 [controller]: controllers.html
-[flow]: flows.html
+[flow streams]: flow_streams.html
 [IO pin]: controllers.html#io-pins
 [MonStream]: https://github.com/mnit-rtmc/monstream
 [Privilege]: user_roles.html#privileges

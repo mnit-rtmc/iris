@@ -28,7 +28,7 @@ identify them.
 Field          | Description
 ---------------|-----------------------------------------------------------
 View Num       | Fixed-position view, usable as a preset number
-Flow           | If checked, the stream is a [flow] _sink_ from [streambed]
+Flow stream    | If checked, the stream is a [flow stream] _sink_ from [streambed]
 Encoding       | Stream encoding: `MJPEG`, `MPEG2`, `MPEG4`, `H264`, `AV1`
 Quality        | Resolution and frame rate comparison: `Low` / `Medium` / `High`
 URI scheme     | Scheme part of unicast request URI: `rtsp` / `http`
@@ -136,7 +136,7 @@ Otherwise, requests will be made directly to the camera's encoder address.
 [comm link]: comm_links.html
 [controller]: controllers.html
 [DMS]: dms.html
-[flow]: flows.html
+[flow stream]: flow_streams.html
 [iris-client.properties]: client_properties.html
 [MonStream]: video.html#monstream
 [multicast]: https://en.wikipedia.org/wiki/Multicast_address

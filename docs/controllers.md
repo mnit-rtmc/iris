@@ -59,8 +59,8 @@ using an appropriate protocol for the device.
 ### IO Pins
 
 Each controller has a set of **IO pins** for connecting [devices](#devices) or
-[flows].  Every _device_ or _flow_ must be assigned to an _IO pin_ to be used.
-The function of these pins is [protocol] specific.
+[flow streams].  Every _device_ or _flow stream_ must be assigned to an _IO pin_
+to be used.  The function of these pins is [protocol] specific.
 
 
 [alarms]: alarms.html
@@ -69,7 +69,7 @@ The function of these pins is [protocol] specific.
 [CBW]: comm_links.html#cbw
 [comm link]: comm_links.html
 [dynamic message signs]: dms.html
-[flows]: flows.html
+[flow streams]: flow_streams.html
 [gate arms]: gate_arms.html
 [GPS]: gps.html
 [lane-use control signs]: lcs.html
