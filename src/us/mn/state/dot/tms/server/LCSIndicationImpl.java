@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,6 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.TMSException;
@@ -30,8 +28,9 @@ import us.mn.state.dot.tms.TMSException;
  *
  * @author Douglas Lau
  */
-public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
-
+public class LCSIndicationImpl extends ControllerIoImpl
+	implements LCSIndication
+{
 	/** Load all the LCS indications */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, LCSIndicationImpl.class);
@@ -52,6 +51,7 @@ public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -63,11 +63,13 @@ public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -81,8 +83,8 @@ public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
 	public LCSIndicationImpl(Namespace ns, String n, String c, int p,
 		String l, int i)
 	{
-		this(n,(ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE,c),
-		     p, (LCSImpl)ns.lookupObject(LCS.SONAR_TYPE, l), i);
+		this(n, lookupController(c), p,
+		     (LCSImpl) ns.lookupObject(LCS.SONAR_TYPE, l), i);
 	}
 
 	/** Create a new LCS indication */
@@ -95,77 +97,6 @@ public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
 		lcs = l;
 		indication = i;
 		initTransients();
-	}
-
-	/** Initialize the controller for this LCS indicaiton */
-	public void initTransients() {
-		updateControllerPin(null, 0, controller, pin);
-	}
-
-	/** Controller associated with this LCS indication */
-	protected ControllerImpl controller;
-
-	/** Update the controller and/or pin.
-	 * @param oc Old controller.
-	 * @param op Old pin.
-	 * @param nc New controller.
-	 * @param np New pin. */
-	private void updateControllerPin(ControllerImpl oc, int op,
-		ControllerImpl nc, int np)
-	{
-		if(oc != null)
-			oc.setIO(op, null);
-		if(nc != null)
-			nc.setIO(np, this);
-	}
-
-	/** Set the controller of the LCS indication */
-	public void setController(Controller c) {
-		controller = (ControllerImpl)c;
-	}
-
-	/** Set the controller of the LCS indication */
-	public void doSetController(Controller c) throws TMSException {
-		if (c == controller)
-			return;
-		if (pin < 1 || pin > Controller.ALL_PINS)
-			throw new ChangeVetoException("Invalid pin: " + pin);
-		ControllerImpl oc = controller;
-		store.update(this, "controller", c);
-		setController(c);
-		// Do this last so updateStyles sees updates
-		updateControllerPin(oc, pin, (ControllerImpl) c, pin);
-	}
-
-	/** Get the controller to which this LCS indication is assigned */
-	public Controller getController() {
-		return controller;
-	}
-
-	/** Controller I/O pin number */
-	protected int pin;
-
-	/** Set the controller I/O pin number */
-	public void setPin(int p) {
-		pin = p;
-	}
-
-	/** Set the controller I/O pin number */
-	public void doSetPin(int p) throws TMSException {
-		if (p == pin)
-			return;
-		if (p < 1 || p > Controller.ALL_PINS)
-			throw new ChangeVetoException("Invalid pin: " + p);
-		int op = pin;
-		store.update(this, "pin", p);
-		setPin(p);
-		// Do this last so updateStyles sees updates
-		updateControllerPin(controller, op, controller, p);
-	}
-
-	/** Get the controller I/O pin number */
-	public int getPin() {
-		return pin;
 	}
 
 	/** LCS associated with this indication */
@@ -188,18 +119,5 @@ public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
 	@Override
 	public long getStyles() {
 		return 0;
-	}
-
-	/** Destroy an indication */
-	public void doDestroy() throws TMSException {
-		// Don't allow an indication to be destroyed if it is assigned
-		// to a controller.  This is needed because the Controller
-		// io_pins HashMap will still have a reference to it.
-		if(controller != null) {
-			throw new ChangeVetoException("Indication must be " +
-				"removed from controller before being " +
-				"destroyed: " + name);
-		}
-		super.doDestroy();
 	}
 }

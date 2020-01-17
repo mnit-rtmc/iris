@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Alarm;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.TMSException;

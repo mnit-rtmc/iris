@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,11 +17,8 @@ package us.mn.state.dot.tms.server;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.CommLink;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
-import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.ItemStyle;
@@ -35,9 +32,8 @@ import us.mn.state.dot.tms.server.comm.OpDevice;
  *
  * @author Douglas Lau
  */
-abstract public class DeviceImpl extends BaseObjectImpl implements Device,
-	ControllerIO
-{
+abstract public class DeviceImpl extends ControllerIoImpl implements Device {
+
 	/** Device debug log */
 	static private final DebugLog DEVICE_LOG = new DebugLog("device");
 
@@ -69,111 +65,10 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		notes = nt;
 	}
 
-	/** Initialize the controller for this device */
-	@Override
-	public void initTransients() {
-		ControllerImpl c = controller;
-		if (c != null)
-			c.setIO(pin, this);
-		updateStyles();
-	}
-
 	/** Get the device poller */
 	public DevicePoller getPoller() {
 		ControllerImpl c = controller;	// Avoid race
 		return (c != null) ? c.getPoller() : null;
-	}
-
-	/** Controller associated with this traffic device */
-	protected ControllerImpl controller;
-
-	/** Update the controller and/or pin.
-	 * @param oc Old controller.
-	 * @param op Old pin.
-	 * @param nc New controller.
-	 * @param np New pin. */
-	protected void updateControllerPin(ControllerImpl oc, int op,
-		ControllerImpl nc, int np)
-	{
-		if (oc != null)
-			oc.setIO(op, null);
-		if (nc != null)
-			nc.setIO(np, this);
-		updateStyles();
-	}
-
-	/** Set the controller of the device */
-	@Override
-	public void setController(Controller c) {
-		controller = (ControllerImpl) c;
-	}
-
-	/** Set the controller of the device */
-	public void doSetController(Controller c) throws TMSException {
-		if (c == controller)
-			return;
-		if (c == null || c instanceof ControllerImpl)
-			doSetControllerImpl((ControllerImpl) c);
-		else
-			throw new ChangeVetoException("Invalid controller");
-	}
-
-	/** Set the controller of the device */
-	protected void doSetControllerImpl(ControllerImpl c)
-		throws TMSException
-	{
-		if (c != null && controller != null)
-			throw new ChangeVetoException("Device has controller");
-		if (pin < 1 || pin > Controller.ALL_PINS)
-			throw new ChangeVetoException("Invalid pin: " + pin);
-		if (c != null)
-			checkControllerPin(pin);
-		ControllerImpl oc = controller;
-		store.update(this, "controller", c);
-		setController(c);
-		// Do this last so updateStyles sees updates
-		updateControllerPin(oc, pin, c, pin);
-	}
-
-	/** Check the controller pin */
-	protected void checkControllerPin(int p) throws TMSException {
-		ControllerImpl c = controller;
-		if (c != null && c.getIO(p) != null)
-			throw new ChangeVetoException("Unavailable pin: " + p);
-	}
-
-	/** Get the controller to which this device is assigned */
-	@Override
-	public Controller getController() {
-		return controller;
-	}
-
-	/** Controller I/O pin number */
-	protected int pin = 0;
-
-	/** Set the controller I/O pin number */
-	@Override
-	public void setPin(int p) {
-		pin = p;
-	}
-
-	/** Set the controller I/O pin number */
-	public void doSetPin(int p) throws TMSException {
-		if (p == pin)
-			return;
-		if (p < 1 || p > Controller.ALL_PINS)
-			throw new ChangeVetoException("Invalid pin: " + p);
-		int op = pin;
-		store.update(this, "pin", p);
-		setPin(p);
-		// Do this last so updateStyles sees updates
-		updateControllerPin(controller, op, controller, p);
-	}
-
-	/** Get the controller I/O pin number */
-	@Override
-	public int getPin() {
-		return pin;
 	}
 
 	/** Administrator notes for this device */
@@ -325,20 +220,6 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	private boolean hasStatusError() {
 		ControllerImpl c = controller;	// Avoid race
 		return (c == null) || !c.getStatus().isEmpty();
-	}
-
-	/** Destroy an object */
-	@Override
-	public void doDestroy() throws TMSException {
-		// Don't allow a device to be destroyed if it is assigned to
-		// a controller.  This is needed because the Controller io_pins
-		// HashMap will still have a reference to the device.
-		if (controller != null) {
-			throw new ChangeVetoException("Device must be removed" +
-				" from controller before being destroyed: " +
-				name);
-		}
-		super.doDestroy();
 	}
 
 	/** Get the polling period (sec) */

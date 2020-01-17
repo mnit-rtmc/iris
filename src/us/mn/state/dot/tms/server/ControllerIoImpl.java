@@ -27,12 +27,6 @@ import us.mn.state.dot.tms.TMSException;
 abstract public class ControllerIoImpl extends BaseObjectImpl
 	implements ControllerIO
 {
-	/** Check if an I/O pin is valid */
-	static private void checkPin(int p) throws ChangeVetoException {
-		if (p < 1 || p > Controller.ALL_PINS)
-			throw new ChangeVetoException("Invalid pin: " + p);
-	}
-
 	/** Create a new controller I/O */
 	protected ControllerIoImpl(String n) {
 		super(n);
@@ -52,7 +46,7 @@ abstract public class ControllerIoImpl extends BaseObjectImpl
 	 * @param op Old pin.
 	 * @param nc New controller.
 	 * @param np New pin. */
-	private void updateControllerPin(ControllerImpl oc, int op,
+	protected void updateControllerPin(ControllerImpl oc, int op,
 		ControllerImpl nc, int np)
 	{
 		if (oc != null)
@@ -72,13 +66,40 @@ abstract public class ControllerIoImpl extends BaseObjectImpl
 
 	/** Set the controller for the I/O */
 	public void doSetController(Controller c) throws TMSException {
-		if (c != controller) {
-			checkPin(pin);
-			ControllerImpl oc = controller;
-			store.update(this, "controller", c);
-			setController(c);
-			// Do this last so updateStyles sees updates
-			updateControllerPin(oc, pin, (ControllerImpl) c, pin);
+		ControllerImpl ci = (c instanceof ControllerImpl)
+			? (ControllerImpl) c
+			: null;
+		if (ci != controller)
+			doSetControllerImpl(ci);
+	}
+
+	/** Set the controller for the I/O */
+	protected void doSetControllerImpl(ControllerImpl c)
+		throws TMSException
+	{
+		checkControllerPin(c, pin);
+		ControllerImpl oc = controller;
+		store.update(this, "controller", c);
+		setController(c);
+		// Do this last so updateStyles sees updates
+		updateControllerPin(oc, pin, c, pin);
+	}
+
+	/** Check controller and pin */
+	protected void checkControllerPin(ControllerImpl c, Integer p)
+		throws ChangeVetoException
+	{
+		if (c != null && controller != null && c != controller)
+			throw new ChangeVetoException("I/O has controller");
+		if (p != null) {
+			if (p < 1 || p > Controller.ALL_PINS) {
+				throw new ChangeVetoException(
+					"Invalid pin: " + p);
+			}
+			if (c != null && c.getIO(p) != null) {
+				throw new ChangeVetoException(
+					"Unavailable pin: " + p);
+			}
 		}
 	}
 
@@ -100,7 +121,7 @@ abstract public class ControllerIoImpl extends BaseObjectImpl
 	/** Set the controller I/O pin number */
 	public void doSetPin(int p) throws TMSException {
 		if (p != pin) {
-			checkPin(p);
+			checkControllerPin(controller, p);
 			int op = pin;
 			store.update(this, "pin", p);
 			setPin(p);
