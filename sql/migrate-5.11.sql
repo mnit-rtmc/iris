@@ -109,4 +109,129 @@ CREATE VIEW flow_view AS
 	LEFT JOIN iris.encoding_quality eq ON f.quality = eq.id;
 GRANT SELECT ON flow_view TO PUBLIC;
 
+-- Use device_delete instead of separate functions for delete triggers
+DROP TRIGGER camera_delete_trig ON iris.camera;
+DROP FUNCTION iris.camera_delete;
+CREATE TRIGGER camera_delete_trig
+    INSTEAD OF DELETE ON iris.camera
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
+
+DROP TRIGGER alarm_delete_trig ON iris.alarm;
+DROP FUNCTION iris.alarm_delete;
+CREATE TRIGGER alarm_delete_trig
+    INSTEAD OF DELETE ON iris.alarm
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
+
+DROP TRIGGER beacon_delete_trig ON iris.beacon;
+DROP FUNCTION iris.beacon_delete;
+CREATE TRIGGER beacon_delete_trig
+    INSTEAD OF DELETE ON iris.beacon
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
+
+DROP TRIGGER detector_delete_trig ON iris.detector;
+DROP FUNCTION iris.detector_delete;
+CREATE TRIGGER detector_delete_trig
+    INSTEAD OF DELETE ON iris.detector
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
+
+DROP TRIGGER gps_delete_trig ON iris.gps;
+DROP FUNCTION iris.gps_delete;
+CREATE TRIGGER gps_delete_trig
+    INSTEAD OF DELETE ON iris.gps
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
+
+DROP TRIGGER dms_delete_trig ON iris.dms;
+DROP FUNCTION iris.dms_delete;
+CREATE TRIGGER dms_delete_trig
+    INSTEAD OF DELETE ON iris.dms
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
+
+DROP TRIGGER gate_arm_array_delete_trig ON iris.gate_arm_array;
+DROP FUNCTION iris.gate_arm_array_delete;
+CREATE TRIGGER gate_arm_array_delete_trig
+    INSTEAD OF DELETE ON iris.gate_arm_array
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
+
+DROP TRIGGER lane_marking_delete_trig ON iris.lane_marking;
+DROP FUNCTION iris.lane_marking_delete;
+CREATE TRIGGER lane_marking_delete_trig
+    INSTEAD OF DELETE ON iris.lane_marking
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
+
+DROP TRIGGER lcs_array_delete_trig ON iris.lcs_array;
+DROP FUNCTION iris.lcs_array_delete;
+CREATE TRIGGER lcs_array_delete_trig
+    INSTEAD OF DELETE ON iris.lcs_array
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
+
+DROP TRIGGER lcs_indication_delete_trig ON iris.lcs_indication;
+DROP FUNCTION iris.lcs_indication_delete;
+CREATE TRIGGER lcs_indication_delete_trig
+    INSTEAD OF DELETE ON iris.lcs_indication
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
+
+DROP TRIGGER ramp_meter_delete_trig ON iris.ramp_meter;
+DROP FUNCTION iris.ramp_meter_delete;
+CREATE TRIGGER ramp_meter_delete_trig
+    INSTEAD OF DELETE ON iris.ramp_meter
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
+
+DROP TRIGGER tag_reader_delete_trig ON iris.tag_reader;
+DROP FUNCTION iris.tag_reader_delete;
+CREATE TRIGGER tag_reader_delete_trig
+    INSTEAD OF DELETE ON iris.tag_reader
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
+
+DROP TRIGGER video_monitor_delete_trig ON iris.video_monitor;
+DROP FUNCTION iris.video_monitor_delete;
+CREATE TRIGGER video_monitor_delete_trig
+    INSTEAD OF DELETE ON iris.video_monitor
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
+
+DROP TRIGGER weather_sensor_delete_trig ON iris.weather_sensor;
+DROP FUNCTION iris.weather_sensor_delete;
+CREATE TRIGGER weather_sensor_delete_trig
+    INSTEAD OF DELETE ON iris.weather_sensor
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
+
+-- Change gate arm triggers to better style
+DROP TRIGGER gate_arm_update_trig ON iris.gate_arm;
+DROP FUNCTION iris.gate_arm_update;
+
+CREATE FUNCTION iris.gate_arm_insert() RETURNS TRIGGER AS
+	$gate_arm_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._gate_arm (name, ga_array, idx, notes)
+	     VALUES (NEW.name, NEW.ga_array, NEW.idx, NEW.notes);
+	RETURN NEW;
+END;
+$gate_arm_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gate_arm_insert_trig
+    INSTEAD OF INSERT ON iris.gate_arm
+    FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_insert();
+
+CREATE FUNCTION iris.gate_arm_update() RETURNS TRIGGER AS
+	$gate_arm_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller, pin = NEW.pin
+	WHERE name = OLD.name;
+	UPDATE iris._gate_arm
+	   SET ga_array = NEW.ga_array, idx = NEW.idx, notes = NEW.notes
+	WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$gate_arm_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gate_arm_update_trig
+    INSTEAD OF UPDATE ON iris.gate_arm
+    FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_update();
+
+CREATE TRIGGER gate_arm_delete_trig
+    INSTEAD OF DELETE ON iris.gate_arm
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
+
 COMMIT;
