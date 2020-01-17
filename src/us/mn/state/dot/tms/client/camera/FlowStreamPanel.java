@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2020  Minnesota Department of Transportation
+ * Copyright (C) 2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,25 +18,25 @@ import java.awt.event.ActionEvent;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.FlowStream;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
- * A panel for displaying a table of video monitors.
+ * A panel for displaying a table of flow streams.
  *
  * @author Douglas Lau
  */
-public class VideoMonitorPanel extends ProxyTablePanel<VideoMonitor> {
+public class FlowStreamPanel extends ProxyTablePanel<FlowStream> {
 
 	/** Send settings action */
 	private final IAction settings = new IAction("device.send.settings") {
 		protected void doActionPerformed(ActionEvent e) {
-			VideoMonitor vm = getSelectedProxy();
-			if (vm != null) {
-				vm.setDeviceRequest(DeviceRequest.
+			FlowStream fs = getSelectedProxy();
+			if (fs != null) {
+				fs.setDeviceRequest(DeviceRequest.
 					SEND_SETTINGS.ordinal());
 			}
 		}
@@ -45,9 +45,9 @@ public class VideoMonitorPanel extends ProxyTablePanel<VideoMonitor> {
 	/** User session */
 	private final Session session;
 
-	/** Create a new video monitor panel */
-	public VideoMonitorPanel(Session s) {
-		super(new VideoMonitorModel(s));
+	/** Create a new flow stream panel */
+	public FlowStreamPanel(Session s) {
+		super(new FlowStreamModel(s));
 		session = s;
 	}
 
@@ -73,13 +73,13 @@ public class VideoMonitorPanel extends ProxyTablePanel<VideoMonitor> {
 	/** Update the button panel */
 	@Override
 	public void updateButtonPanel() {
-		VideoMonitor vm = getSelectedProxy();
-		settings.setEnabled(canRequest(vm));
+		FlowStream fs = getSelectedProxy();
+		settings.setEnabled(canRequest(fs));
 		super.updateButtonPanel();
 	}
 
 	/** Check if the user can make device requests */
-	private boolean canRequest(VideoMonitor vm) {
-		return session.isWritePermitted(vm, "deviceRequest");
+	private boolean canRequest(FlowStream fs) {
+		return session.isWritePermitted(fs, "deviceRequest");
 	}
 }

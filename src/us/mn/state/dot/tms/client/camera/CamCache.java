@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.Catalog;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.EncoderStream;
 import us.mn.state.dot.tms.EncoderType;
+import us.mn.state.dot.tms.FlowStream;
 import us.mn.state.dot.tms.MonitorStyle;
 import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.VideoMonitor;
@@ -145,6 +146,14 @@ public class CamCache {
 		return monitor_model;
 	}
 
+	/** Cache of flow proxies */
+	private final TypeCache<FlowStream> flow_streams;
+
+	/** Get the flow type cache */
+	public TypeCache<FlowStream> getFlowStreams() {
+		return flow_streams;
+	}
+
 	/** Create a new camera cache */
 	public CamCache(SonarState client) throws IllegalAccessException,
 		NoSuchFieldException
@@ -178,6 +187,8 @@ public class CamCache {
 			client, VideoMonitor.GROUP_CHECKER);
 		monitor_model = new ProxyListModel<VideoMonitor>(monitors);
 		monitor_model.initialize();
+		flow_streams = new TypeCache<FlowStream>(FlowStream.class,
+			client);
 	}
 
 	/** Populate the type caches */
@@ -195,5 +206,6 @@ public class CamCache {
 		client.populateReadable(monitors);
 		if (client.canRead(VideoMonitor.SONAR_TYPE))
 			monitors.ignoreAttribute("camera");
+		client.populateReadable(flow_streams);
 	}
 }
