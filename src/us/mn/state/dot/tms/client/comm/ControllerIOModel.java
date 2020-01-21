@@ -223,8 +223,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		state = s.getSonarState();;
 		controller = c;
 		cell_editor = new DeviceCellEditor();
-		io = new ControllerIO[Controller.ALL_PINS];
-		types = new DeviceType[Controller.ALL_PINS];
+		io = new ControllerIO[Controller.ALL_PINS + 1];
+		types = new DeviceType[Controller.ALL_PINS + 1];
 		d_combo.setRenderer(new IListCellRenderer<ControllerIO>() {
 			@Override
 			protected String valueToString(ControllerIO value) {
@@ -403,7 +403,6 @@ public class ControllerIOModel extends AbstractTableModel {
 
 	/** Set the device type */
 	private void setDeviceType(int pin, DeviceType io_type) {
-		int row = pin - 1;
 		if (io_type != types[pin]) {
 			clearDevice(pin);
 			types[pin] = io_type;
