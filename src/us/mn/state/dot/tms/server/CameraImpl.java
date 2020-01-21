@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -482,6 +482,24 @@ public class CameraImpl extends DeviceImpl implements Camera {
 			last_preset = preset;
 			cp.sendRecallPreset(this, preset);
 		}
+	}
+
+	/** Get the active status */
+	@Override
+	public boolean isActive() {
+		// since controller is only for PTZ,
+		// it can be null for active cameras
+		ControllerImpl c = controller;	// Avoid race
+		return (c == null) || c.isActive();
+	}
+
+	/** Get the failure status */
+	@Override
+	public boolean isFailed() {
+		// since controller is only for PTZ,
+		// treat camera without controller as not failed
+		ControllerImpl c = controller;	// Avoid race
+		return (c != null) && c.isFailed();
 	}
 
 	/** Calculate the item styles */
