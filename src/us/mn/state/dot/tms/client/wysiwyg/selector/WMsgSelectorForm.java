@@ -497,23 +497,23 @@ public class WMsgSelectorForm extends AbstractForm {
 	/** Setup key bindings
 	 *
 	 * Global
-                XX Esc          Close selector
-                XX Tab         Toggle focus between sign/group list and message list areas
-                XX Left/Right   Toggle between sign and group tabs
-                XX Up/Down            Move selection to previous/next item in current list
-                XX Home    Move selection to top of current list
-                XX End        Move selection to bottom of current list
-                XX PgUp/PgDown Move selection up/down the list by page
-                XX F3           Refresh
-                XX F4           Create
+                Esc          Close selector
+                Tab         Toggle focus between sign/group list and message list areas
+                Left/Right   Toggle between sign and group tabs
+                Up/Down            Move selection to previous/next item in current list
+                Home    Move selection to top of current list
+                End        Move selection to bottom of current list
+                PgUp/PgDown Move selection up/down the list by page
+                F3           Refresh
+                F4           Create
 	   
 	   While message-list has focus and a message is selected
-                XX Enter     Edit
-                X? F5           <reserved>
-                XX F6           Edit
-                XX F7           Clone
-                XX Delete  Delete message (with confirmation)
-                XX Shift-Delete   Delete message (without confirmation)
+                Enter     Edit
+                F5           <reserved>
+                F6           Edit
+                F7           Clone
+                Delete  Delete message (with confirmation)
+                Shift-Delete   Delete message (without confirmation)
 
 	 */
 	protected void setupKeyBindings() {
