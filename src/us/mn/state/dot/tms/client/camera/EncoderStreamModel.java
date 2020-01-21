@@ -74,14 +74,14 @@ public class EncoderStreamModel extends ProxyTableModel<EncoderStream> {
 			90, Boolean.class)
 		{
 			public Object getValueAt(EncoderStream es) {
-				return es.getFlow();
+				return es.getFlowStream();
 			}
 			public boolean isEditable(EncoderStream es) {
-				return canWrite(es, "flow");
+				return canWrite(es, "flowStream");
 			}
 			public void setValueAt(EncoderStream es, Object value) {
 				if (value instanceof Boolean)
-					es.setFlow((Boolean) value);
+					es.setFlowStream((Boolean) value);
 			}
 		});
 		cols.add(new ProxyColumn<EncoderStream>(

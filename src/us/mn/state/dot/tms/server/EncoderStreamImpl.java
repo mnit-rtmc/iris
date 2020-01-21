@@ -34,10 +34,10 @@ public class EncoderStreamImpl extends BaseObjectImpl implements EncoderStream {
 	/** Load all the encoder streams */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, EncoderStreamImpl.class);
-		store.query("SELECT name, encoder_type, view_num, flow, " +
-			"encoding, quality, uri_scheme, uri_path, mcast_port, "+
-			"latency FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+		store.query("SELECT name, encoder_type, view_num, " +
+			"flow_stream, encoding, quality, uri_scheme, " +
+			"uri_path, mcast_port, latency FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new EncoderStreamImpl(row));
@@ -52,7 +52,7 @@ public class EncoderStreamImpl extends BaseObjectImpl implements EncoderStream {
 		map.put("name", name);
 		map.put("encoder_type", encoder_type);
 		map.put("view_num", view_num);
-		map.put("flow", flow);
+		map.put("flow_stream", flow_stream);
 		map.put("encoding", encoding);
 		map.put("quality", quality);
 		map.put("uri_scheme", uri_scheme);
@@ -87,7 +87,7 @@ public class EncoderStreamImpl extends BaseObjectImpl implements EncoderStream {
 		this(row.getString(1),           // name
 		     row.getString(2),           // encoder_type
 		     (Integer) row.getObject(3), // view_num
-		     row.getBoolean(4),          // flow
+		     row.getBoolean(4),          // flow_stream
 		     row.getInt(5),              // encoding
 		     row.getInt(6),              // quality
 		     row.getString(7),           // uri_scheme
@@ -98,13 +98,13 @@ public class EncoderStreamImpl extends BaseObjectImpl implements EncoderStream {
 	}
 
 	/** Create a new encoder stream */
-	private EncoderStreamImpl(String n, String et, Integer vn, boolean f,
+	private EncoderStreamImpl(String n, String et, Integer vn, boolean fs,
 		int e, int q, String s, String p, Integer mp, int l)
 	{
 		this(n);
 		encoder_type = lookupEncoderType(et);
 		view_num = vn;
-		flow = f;
+		flow_stream = fs;
 		encoding = e;
 		quality = q;
 		uri_scheme = s;
@@ -145,27 +145,27 @@ public class EncoderStreamImpl extends BaseObjectImpl implements EncoderStream {
 		return view_num;
 	}
 
-	/** Flow flag */
-	private boolean flow;
+	/** Flow stream flag */
+	private boolean flow_stream;
 
-	/** Set the flow flag */
+	/** Set the flow stream flag */
 	@Override
-	public void setFlow(boolean f) {
-		flow = f;
+	public void setFlowStream(boolean fs) {
+		flow_stream = fs;
 	}
 
-	/** Set the flow flag */
-	public void doSetFlow(boolean f) throws TMSException {
-		if (f != flow) {
-			store.update(this, "flow", f);
-			setFlow(f);
+	/** Set the flow stream flag */
+	public void doSetFlowStream(boolean fs) throws TMSException {
+		if (fs != flow_stream) {
+			store.update(this, "flow_stream", fs);
+			setFlowStream(fs);
 		}
 	}
 
-	/** Get the flow flag */
+	/** Get the flow stream flag */
 	@Override
-	public boolean getFlow() {
-		return flow;
+	public boolean getFlowStream() {
+		return flow_stream;
 	}
 
 	/** Encoding ordinal */

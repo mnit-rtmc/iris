@@ -38,11 +38,11 @@ public interface EncoderStream extends SonarObject {
 	/** Get the view number */
 	Integer getViewNum();
 
-	/** Set the flow flag */
-	void setFlow(boolean f);
+	/** Set the flow stream flag */
+	void setFlowStream(boolean fs);
 
-	/** Get the flow flag */
-	boolean getFlow();
+	/** Get the flow stream flag */
+	boolean getFlowStream();
 
 	/** Set the encoding ordinal */
 	void setEncoding(int e);
