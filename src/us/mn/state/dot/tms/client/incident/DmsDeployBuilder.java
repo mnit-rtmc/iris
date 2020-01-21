@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2019  Minnesota Department of Transportation
+ * Copyright (C) 2010-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -101,7 +101,7 @@ public class DmsDeployBuilder {
 	private R_Node pickNode(CorridorBase cb, float mp) {
 		Position pos = new Position(inc.getLat(), inc.getLon());
 		R_NodeType.Checker checker = getChecker(inc.getLaneType());
-		R_Node n = cb.findNearest(pos, checker, true);
+		R_Node n = cb.pickNearest(pos, checker);
 		if (n != null) {
 			Float lp = cb.calculateMilePoint(n.getGeoLoc());
 			if (lp != null && Math.abs(lp - mp) < 1)

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2019  Minnesota Department of Transportation
+ * Copyright (C) 2007-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -332,23 +332,24 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 		return nearest;
 	}
 
-	/** Find the nearest node to the given location with given type.
+	/** Pick the nearest node to the given location with given type.
 	 * @param pos Location to search.
 	 * @param checker Node type checker.
-	 * @param pickable Pickable flag.
-	 * @return Nearest matching node. */
-	public T findNearest(Position pos, R_NodeType.Checker checker,
-		boolean pickable)
-	{
+	 * @return Nearest matching pickable node. */
+	public T pickNearest(Position pos, R_NodeType.Checker checker) {
 		T nearest = null;
 		double n_meters = 0;
 		for (T n: r_nodes) {
+			if (!n.getPickable())
+				continue;
+			GeoLoc loc = n.getGeoLoc();
+			if (loc.getCrossStreet() == null &&
+			    loc.getLandmark() == null)
+				continue;
 			R_NodeType nt = R_NodeType.fromOrdinal(n.getNodeType());
 			if (!checker.check(nt))
 				continue;
-			if (n.getPickable() != pickable)
-				continue;
-			Distance m = distanceTo(n.getGeoLoc(), pos);
+			Distance m = distanceTo(loc, pos);
 			if (m != null && (nearest == null || m.m() < n_meters)) {
 				nearest = n;
 				n_meters = m.m();
