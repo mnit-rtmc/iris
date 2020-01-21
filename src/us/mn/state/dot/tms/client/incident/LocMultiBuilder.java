@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2019  Minnesota Department of Transportation
+ * Copyright (C) 2016-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,6 +116,10 @@ public class LocMultiBuilder extends MultiBuilder {
 		if (xstreet != null) {
 			String s = xstreet.getName().toUpperCase();
 			addSpan(RoadAffixHelper.replace(s, retain_affixes));
+		} else {
+			String s = loc.getLandmark();
+			if (s != null)
+				addSpan(s.toUpperCase());
 		}
 	}
 
@@ -125,6 +129,10 @@ public class LocMultiBuilder extends MultiBuilder {
 		if (xstreet != null) {
 			String s = xstreet.getName().toUpperCase();
 			addSpan(RoadAffixHelper.replace(s, false));
+		} else {
+			String s = loc.getLandmark();
+			if (s != null)
+				addSpan(s.toUpperCase());
 		}
 	}
 
