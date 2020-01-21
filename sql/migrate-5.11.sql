@@ -249,4 +249,12 @@ CREATE VIEW encoder_stream_view AS
 	LEFT JOIN iris.encoding_quality eq ON es.quality = eq.id;
 GRANT SELECT ON encoder_stream_view TO PUBLIC;
 
+-- Add flow_stream sonar_type
+INSERT INTO iris.sonar_type (name) VALUES ('flow_stream');
+
+-- Add privileges for flow_stream
+INSERT INTO iris.privilege (name, capability, type_n, write)
+	VALUES ('PRV_fs0', 'camera_admin', 'flow_stream', true),
+	       ('PRV_fs1', 'camera_tab', 'flow_stream', false);
+
 COMMIT;

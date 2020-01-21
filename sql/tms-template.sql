@@ -393,6 +393,7 @@ dms_sign_group
 domain
 encoder_stream
 encoder_type
+flow_stream
 font
 gate_arm
 gate_arm_array
@@ -483,6 +484,7 @@ PRV_0023	beacon_tab	beacon		f
 PRV_0024	camera_admin	camera		t
 PRV_002A	camera_admin	encoder_stream		t
 PRV_0025	camera_admin	encoder_type		t
+PRV_002E	camera_admin	flow_stream		t
 PRV_0026	camera_admin	camera_preset		t
 PRV_0027	camera_admin	video_monitor		t
 PRV_0028	camera_admin	monitor_style		t
@@ -495,6 +497,7 @@ PRV_0032	camera_policy	camera	publish	t
 PRV_0033	camera_policy	camera	storePreset	t
 PRV_003A	camera_tab	encoder_stream		f
 PRV_0034	camera_tab	encoder_type		f
+PRV_003F	camera_tab	flow_stream		f
 PRV_0035	camera_tab	camera		f
 PRV_0036	camera_tab	camera_preset		f
 PRV_0037	camera_tab	video_monitor		f
