@@ -15,9 +15,9 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.TMSException;
@@ -38,14 +38,7 @@ public class LCSIndicationImpl extends ControllerIoImpl
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new LCSIndicationImpl(
-					namespace,
-					row.getString(1),	// name
-					row.getString(2),	// controller
-					row.getInt(3),		// pin
-					row.getString(4),	// lcs
-					row.getInt(5)		// indication
-				));
+				namespace.addObject(new LCSIndicationImpl(row));
 			}
 		});
 	}
@@ -75,49 +68,43 @@ public class LCSIndicationImpl extends ControllerIoImpl
 	}
 
 	/** Create a new LCS indication */
-	public LCSIndicationImpl(String n) {
-		super(n);
+	private LCSIndicationImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),  // name
+		     row.getString(2),  // controller
+		     row.getInt(3),     // pin
+		     row.getString(4),  // lcs
+		     row.getInt(5)      // indication
+		);
 	}
 
 	/** Create a new LCS indication */
-	public LCSIndicationImpl(Namespace ns, String n, String c, int p,
-		String l, int i)
-	{
-		this(n, lookupController(c), p,
-		     (LCSImpl) ns.lookupObject(LCS.SONAR_TYPE, l), i);
-	}
-
-	/** Create a new LCS indication */
-	public LCSIndicationImpl(String n, ControllerImpl c, int p, LCSImpl l,
-		int i)
-	{
-		this(n);
-		controller = c;
-		pin = p;
-		lcs = l;
+	private LCSIndicationImpl(String n, String c, int p, String l, int i) {
+		super(n, lookupController(c), p);
+		lcs = lookupLCS(l);
 		indication = i;
 		initTransients();
 	}
 
+	/** Create a new LCS indication */
+	public LCSIndicationImpl(String n) {
+		super(n, null, 0);
+	}
+
 	/** LCS associated with this indication */
-	protected LCSImpl lcs;
+	private LCSImpl lcs;
 
 	/** Get the LCS */
+	@Override
 	public LCS getLcs() {
 		return lcs;
 	}
 
 	/** Ordinal of LaneUseIndication */
-	protected int indication;
+	private int indication;
 
 	/** Get the indication (ordinal of LaneUseIndication) */
+	@Override
 	public int getIndication() {
 		return indication;
-	}
-
-	/** Get item style bits */
-	@Override
-	public long getStyles() {
-		return 0;
 	}
 }

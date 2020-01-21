@@ -28,8 +28,10 @@ abstract public class ControllerIoImpl extends BaseObjectImpl
 	implements ControllerIO
 {
 	/** Create a new controller I/O */
-	protected ControllerIoImpl(String n) {
+	protected ControllerIoImpl(String n, ControllerImpl c, int p) {
 		super(n);
+		controller = c;
+		pin = p;
 	}
 
 	/** Initialize the controller */
@@ -138,6 +140,17 @@ abstract public class ControllerIoImpl extends BaseObjectImpl
 
 	/** Update item styles */
 	public void updateStyles() {
+		// subclasses may override
+	}
+
+	/** Get item style bits */
+	@Override
+	public long getStyles() {
+		return 0; // subclasses may override
+	}
+
+	/** Perform a periodic poll */
+	public void periodicPoll() {
 		// subclasses may override
 	}
 

@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,14 +51,7 @@ public class AlarmImpl extends ControllerIoImpl implements Alarm {
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new AlarmImpl(
-					row.getString(1),	// name
-					row.getString(2),	// description
-					row.getString(3),	// controller
-					row.getInt(4),		// pin
-					row.getBoolean(5),	// state
-					row.getTimestamp(6)	// triggerTime
-				));
+				namespace.addObject(new AlarmImpl(row));
 			}
 		});
 	}
@@ -89,28 +83,30 @@ public class AlarmImpl extends ControllerIoImpl implements Alarm {
 
 	/** Create a new alarm */
 	public AlarmImpl(String n) {
-		super(n);
+		super(n, null, 0);
 		state = false;
 	}
 
 	/** Create a new alarm */
-	private AlarmImpl(String n, String d, ControllerImpl c, int p,
-		boolean s, Date tt)
-	{
-		this(n);
-		description = d;
-		controller = c;
-		pin = p;
-		state = s;
-		triggerTime = stampMillis(tt);
-		initTransients();
+	private AlarmImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),   // name
+		     row.getString(2),   // description
+		     row.getString(3),   // controller
+		     row.getInt(4),      // pin
+		     row.getBoolean(5),  // state
+		     row.getTimestamp(6) // triggerTime
+		);
 	}
 
 	/** Create a new alarm */
 	private AlarmImpl(String n, String d, String c, int p, boolean s,
 		Date tt)
 	{
-		this(n, d, lookupController(c), p, s, tt);
+		super(n, lookupController(c), p);
+		description = d;
+		state = s;
+		triggerTime = stampMillis(tt);
+		initTransients();
 	}
 
 	/** Description of the alarm */
@@ -188,12 +184,6 @@ public class AlarmImpl extends ControllerIoImpl implements Alarm {
 		return triggerTime;
 	}
 
-	/** Get item style bits */
-	@Override
-	public long getStyles() {
-		return 0;
-	}
-
 	/** Request a device operation */
 	public void sendDeviceRequest(DeviceRequest req) {
 		AlarmPoller p = getAlarmPoller();
@@ -214,6 +204,7 @@ public class AlarmImpl extends ControllerIoImpl implements Alarm {
 	}
 
 	/** Perform a periodic poll */
+	@Override
 	public void periodicPoll() {
 		sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 	}

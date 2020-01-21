@@ -19,7 +19,7 @@ package us.mn.state.dot.tms;
  *
  * @author Douglas Lau
  */
-public interface FlowStream extends Device {
+public interface FlowStream extends ControllerIO {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "flow_stream";
@@ -31,7 +31,7 @@ public interface FlowStream extends Device {
 	boolean getRestricted();
 
 	/** Set flag to enable location overlay text */
-	void setLocOverlay(boolean o);
+	void setLocOverlay(boolean lo);
 
 	/** Get flag to enable location overlay text */
 	boolean getLocOverlay();

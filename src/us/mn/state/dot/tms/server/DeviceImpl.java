@@ -51,18 +51,15 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 			DEVICE_LOG.log(getName() + ": " + msg);
 	}
 
-	/** Create a new device */
-	protected DeviceImpl(String n) throws TMSException, SonarException {
-		super(n);
-		notes = "";
-	}
-
 	/** Create a device */
 	protected DeviceImpl(String n, ControllerImpl c, int p, String nt) {
-		super(n);
-		controller = c;
-		pin = p;
+		super(n, c, p);
 		notes = nt;
+	}
+
+	/** Create a new device */
+	protected DeviceImpl(String n) throws TMSException, SonarException {
+		this(n, null, 0, "");
 	}
 
 	/** Get the device poller */
@@ -260,6 +257,7 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 	abstract protected void sendDeviceRequest(DeviceRequest dr);
 
 	/** Perform a periodic poll */
+	@Override
 	public void periodicPoll() {
 		sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 	}
