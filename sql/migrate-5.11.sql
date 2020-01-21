@@ -257,4 +257,7 @@ INSERT INTO iris.privilege (name, capability, type_n, write)
 	VALUES ('PRV_fs0', 'camera_admin', 'flow_stream', true),
 	       ('PRV_fs1', 'camera_tab', 'flow_stream', false);
 
+-- Reserve Streambed comm protocol value
+INSERT INTO iris.comm_protocol (id, description) VALUES (41, 'Streambed');
+
 COMMIT;

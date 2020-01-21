@@ -275,6 +275,13 @@ The `stc` protocol can be used for [gate arm] control for Smart Touch gate arms.
 The _default scheme_ is `tcp`.  _Multi-drop_ is supported with drops 1 - 99.
 One gate arm can be associated with each [controller], using [IO pin] 1.
 
+### Streambed
+
+The `streambed` protocol is for [flow stream] configuration with a [streambed]
+server.  The _default scheme_ is `tcp`.  _Multi-drop_ is not supported.
+Up to 120 flow streams can be associated with each [controller], using
+[IO pin]s.
+
 ### Vicon
 
 The `vicon` protocol can be used for [PTZ] control of Vicon [camera]s.  The
@@ -294,6 +301,7 @@ camera can be associated with each [controller], using [IO pin] 1.
 [device]: controllers.html#devices
 [DMS]: dms.html
 [DMS action]: action_plans.html#dms-actions
+[flow stream]: flow_streams.html
 [gate arm]: gate_arms.html
 [GPS]: gps.html
 [incidents]: incidents.html
@@ -308,6 +316,7 @@ camera can be associated with each [controller], using [IO pin] 1.
 [ramp meters]: ramp_meters.html
 [RFC 3339]: https://tools.ietf.org/html/rfc3339#section-5.6
 [RWIS]: rwis.html
+[streambed]: https://github.com/mnit-rtmc/streambed
 [system attribute]: system_attributes.html
 [tag readers]: tolling.html#tag-readers
 [vehicle detection]: vehicle_detection.html

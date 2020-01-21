@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -157,7 +157,10 @@ public enum CommProtocol {
 	GPS_REDLION("GPS RedLion"),
 	
 	/** Cohu Helois PTZ (40) */
-	COHU_HELIOS_PTZ("Cohu Helios PTZ");
+	COHU_HELIOS_PTZ("Cohu Helios PTZ"),
+
+	/** Streambed (41) */
+	STREAMBED("Streambed", false);
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {

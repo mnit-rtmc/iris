@@ -1193,6 +1193,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 38	SierraGX
 39	GPS RedLion
 40	Cohu Helios PTZ
+41	Streambed
 \.
 
 CREATE TABLE iris.comm_link (
