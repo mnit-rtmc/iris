@@ -88,8 +88,6 @@ public class LocMultiBuilder extends MultiBuilder {
 			addModifier();
 		else if ("xn".equals(code))
 			addCrossStreet();
-		else if ("xa".equals(code))
-			addCrossAbbrev();
 		else if ("mi".equals(code))
 			addMiles();
 	}
@@ -116,19 +114,6 @@ public class LocMultiBuilder extends MultiBuilder {
 		if (xstreet != null) {
 			String s = xstreet.getName().toUpperCase();
 			addSpan(RoadAffixHelper.replace(s, retain_affixes));
-		} else {
-			String s = loc.getLandmark();
-			if (s != null)
-				addSpan(s.toUpperCase());
-		}
-	}
-
-	/** Add cross-street abbreviation */
-	private void addCrossAbbrev() {
-		Road xstreet = loc.getCrossStreet();
-		if (xstreet != null) {
-			String s = xstreet.getName().toUpperCase();
-			addSpan(RoadAffixHelper.replace(s, false));
 		} else {
 			String s = loc.getLandmark();
 			if (s != null)
