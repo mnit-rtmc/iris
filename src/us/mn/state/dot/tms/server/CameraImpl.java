@@ -508,7 +508,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		long s = super.calculateStyles();
 		if (!getPublish())
 			s |= ItemStyle.UNPUBLISHED.bit();
-		if (video_loss && isActive())
+		if (video_loss)
 			s |= ItemStyle.VIDEO_LOSS.bit();
 		return s;
 	}
