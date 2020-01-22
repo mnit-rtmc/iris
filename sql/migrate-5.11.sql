@@ -260,4 +260,10 @@ INSERT INTO iris.privilege (name, capability, type_n, write)
 -- Reserve Streambed comm protocol value
 INSERT INTO iris.comm_protocol (id, description) VALUES (41, 'Streambed');
 
+-- Add word view
+CREATE VIEW word_view AS
+	SELECT name, abbr, allowed
+	FROM iris.word;
+GRANT SELECT ON word_view TO PUBLIC;
+
 COMMIT;
