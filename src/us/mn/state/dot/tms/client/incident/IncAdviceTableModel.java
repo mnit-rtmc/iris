@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2019  Minnesota Department of Transportation
+ * Copyright (C) 2016-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -177,16 +177,6 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				int r1 = adv1.getRange();
 				if (r0 != r1)
 					return r0 - r1;
-				Integer il0 = adv0.getImpactedLanes();
-				Integer il1 = adv1.getImpactedLanes();
-				if (il0 != il1) {
-					if (il1 == null)
-						return -1;
-					else if (il0 == null)
-						return 1;
-					else
-						return il0.compareTo(il1);
-				}
 				Integer ol0 = adv0.getOpenLanes();
 				Integer ol1 = adv1.getOpenLanes();
 				if (ol0 != ol1) {
@@ -196,6 +186,16 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 						return 1;
 					else
 						return ol0.compareTo(ol1);
+				}
+				Integer il0 = adv0.getImpactedLanes();
+				Integer il1 = adv1.getImpactedLanes();
+				if (il0 != il1) {
+					if (il1 == null)
+						return -1;
+					else if (il0 == null)
+						return 1;
+					else
+						return il0.compareTo(il1);
 				}
 				return adv0.getName().compareTo(adv1.getName());
 			}
