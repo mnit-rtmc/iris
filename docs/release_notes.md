@@ -1,5 +1,18 @@
 # IRIS 5.x Release Notes
 
+5.11.0 (22 Jan 2020)
+ - Added flow streams to manage streambed video streams
+ - Don't base camera active / failed status on PTZ controller
+ - Incident deployment:
+   1. Use landmark for [locxn] tag if cross street is blank
+   2. Don't pick r_node if cross street and landmark are both blank
+   3. Added sample configuration to template DB
+   4. Removed [locxa] locator tag
+ - Filter out quick messages containing DMS action tags from Quick Msg combo box
+ - Reserved streambed comm protocol
+ - Improved camera / video monitor documentation
+ - Cleaned up database trigger functions
+
 5.10.0 (2 Dec 2019)
  - Use "allowed words" list for abbreviating DMS messages from incidents
  - Removed `abbrev` columns from incident deployment tables
@@ -117,7 +130,6 @@
  - Log user for unexpected blank DMS (NTCIP)
 
 5.0.0 (28 Aug 2019)
-
  - Switched from Mercurial to Git and moved to github.com
  - "Vendored" scheduler and sonar dependencies
  - Fixed NPE in GeoLocHelper.getParkingRoot
