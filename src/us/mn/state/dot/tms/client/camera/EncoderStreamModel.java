@@ -214,7 +214,7 @@ public class EncoderStreamModel extends ProxyTableModel<EncoderStream> {
 			}
 		};
 		sorter.setSortsOnUpdates(true);
-		sorter.setComparator(2, new Comparator<EncodingQuality>() {
+		sorter.setComparator(3, new Comparator<EncodingQuality>() {
 			public int compare(EncodingQuality eq0,
 				EncodingQuality eq1)
 			{
@@ -224,9 +224,9 @@ public class EncoderStreamModel extends ProxyTableModel<EncoderStream> {
 		ArrayList<RowSorter.SortKey> keys =
 			new ArrayList<RowSorter.SortKey>();
 		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
-		keys.add(new RowSorter.SortKey(2, SortOrder.DESCENDING));
-		keys.add(new RowSorter.SortKey(5, SortOrder.DESCENDING));
-		keys.add(new RowSorter.SortKey(4, SortOrder.ASCENDING));
+		keys.add(new RowSorter.SortKey(3, SortOrder.DESCENDING));
+		keys.add(new RowSorter.SortKey(6, SortOrder.DESCENDING));
+		keys.add(new RowSorter.SortKey(5, SortOrder.ASCENDING));
 		sorter.setSortKeys(keys);
 		return sorter;
 	}
