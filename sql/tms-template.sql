@@ -3239,16 +3239,20 @@ GRANT SELECT ON inc_locator_view TO PUBLIC;
 COPY iris.inc_locator (name, range, branched, picked, multi) FROM stdin;
 iloc_00001	0	f	f	AHEAD
 iloc_00002	0	f	t	AHEAD
-iloc_00003	1	f	f	[locmi] MILES AHEAD
-iloc_00004	1	f	t	[locmd] [locxn]
-iloc_00005	2	f	f	[locmi] MILES AHEAD
-iloc_00006	2	f	t	[locmd] [locxn]
-iloc_00007	2	t	f	ON [locrn] [locrd]
-iloc_00008	2	t	t	ON [locrn] [locrd]
-iloc_00009	3	f	f	[locmi] MILES AHEAD
-iloc_00010	3	f	t	[locmd] [locxn]
-iloc_00011	3	t	f	ON [locrn] [locrd]
-iloc_00012	3	t	t	ON [locrn] [locmd] [locxn]
+iloc_00003	0	t	f	AHEAD
+iloc_00004	0	t	t	AHEAD
+iloc_00005	1	f	f	[locmi] MILES AHEAD
+iloc_00006	1	f	t	[locmd] [locxn]
+iloc_00007	1	t	f	ON [locrn] [locrd]
+iloc_00008	1	t	t	ON [locrn] [locrd]
+iloc_00009	2	f	f	[locmi] MILES AHEAD
+iloc_00010	2	f	t	[locmd] [locxn]
+iloc_00011	2	t	f	ON [locrn] [locrd]
+iloc_00012	2	t	t	ON [locrn] [locmd] [locxn]
+iloc_00013	3	f	f	[locmi] MILES AHEAD
+iloc_00014	3	f	t	[locmd] [locxn]
+iloc_00015	3	t	f	ON [locrn] [locrd]
+iloc_00016	3	t	t	ON [locrn] [locmd] [locxn]
 \.
 
 CREATE TABLE iris.inc_advice (
