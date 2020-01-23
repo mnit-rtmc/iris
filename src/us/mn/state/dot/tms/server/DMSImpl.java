@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  * Copyright (C) 2010       AHMCT, University of California
  * Copyright (C) 2012       Iteris Inc.
  * Copyright (C) 2016-2017  SRF Consulting Group
@@ -800,7 +800,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Create a blank message for the sign */
 	public SignMessage createMsgBlank() {
-		return findOrCreateMsg("", false, false, BLANK,
+		return findOrCreateMsg(null, "", false, false, BLANK,
 			SignMsgSource.blank.bit(), null, null);
 	}
 
@@ -816,10 +816,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public SignMessage createMsg(String m, boolean be, boolean pp,
 		DmsMsgPriority mp, int src, String o, Integer d)
 	{
-		return findOrCreateMsg(m, be, pp, mp, src, o, d);
+		return createMsg(null, m, be, pp, mp, src, o, d);
 	}
 
-	/** Find or create a sign message.
+	/** Create a message for the sign.
+	 * @param inc Associated incident (original name).
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
 	 * @param pp Prefix page flag.
@@ -828,18 +829,35 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param o Message owner.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage findOrCreateMsg(String m, boolean be, boolean pp,
-		DmsMsgPriority mp, int src, String o, Integer d)
+	private SignMessage createMsg(String inc, String m, boolean be,
+		boolean pp, DmsMsgPriority mp, int src, String o, Integer d)
 	{
-		SignMessage esm = SignMessageHelper.find(sign_config, null, m,
+		return findOrCreateMsg(inc, m, be, pp, mp, src, o, d);
+	}
+
+	/** Find or create a sign message.
+	 * @param inc Associated incident (original name).
+	 * @param m MULTI string for message.
+	 * @param be Beacon enabled flag.
+	 * @param pp Prefix page flag.
+	 * @param mp Message priority.
+	 * @param src Message source.
+	 * @param o Message owner.
+	 * @param d Duration in minutes; null means indefinite.
+	 * @return New sign message, or null on error. */
+	private SignMessage findOrCreateMsg(String inc, String m, boolean be,
+		boolean pp, DmsMsgPriority mp, int src, String o, Integer d)
+	{
+		SignMessage esm = SignMessageHelper.find(sign_config, inc, m,
 			be, mp, src, o, d);
 		if (esm != null)
 			return esm;
 		else
-			return createMsgNotify(m, be, pp, mp, src, o, d);
+			return createMsgNotify(inc, m, be, pp, mp, src, o, d);
 	}
 
 	/** Create a new sign message and notify clients.
+	 * @param inc Associated incident (original name).
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
 	 * @param pp Prefix page flag.
@@ -848,14 +866,14 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param o Message owner.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage createMsgNotify(String m, boolean be, boolean pp,
-		DmsMsgPriority mp, int src, String o, Integer d)
+	private SignMessage createMsgNotify(String inc, String m, boolean be,
+		boolean pp, DmsMsgPriority mp, int src, String o, Integer d)
 	{
 		SignConfig sc = sign_config;
 		if (null == sc)
 			return null;
-		SignMessageImpl sm = new SignMessageImpl(sc, m, be, pp, mp, src,
-			o, d);
+		SignMessageImpl sm = new SignMessageImpl(sc, inc, m, be, pp, mp,
+			src, o, d);
 		try {
 			sm.notifyCreate();
 			return sm;
@@ -1117,10 +1135,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		boolean be = user.getBeaconEnabled();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			user.getMsgPriority());
+		String inc = user.getIncident();
 		int src = user.getSource() | sched.getSource();
 		String o = user.getOwner();
 		Integer dur = user.getDuration();
-		return createMsg(ms, be, false, mp, src, o, dur);
+		return createMsg(inc, ms, be, false, mp, src, o, dur);
 	}
 
 	/** Check if a sign message is valid */

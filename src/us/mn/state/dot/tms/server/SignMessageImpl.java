@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -143,11 +143,12 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	}
 
 	/** Create a new sign message (by IRIS) */
-	public SignMessageImpl(SignConfig sc, String m, boolean be, boolean pp,
-		DmsMsgPriority mp, int s, String o, Integer d)
+	public SignMessageImpl(SignConfig sc, String inc, String m, boolean be,
+		boolean pp, DmsMsgPriority mp, int s, String o, Integer d)
 	{
 		super(createUniqueName());
 		sign_config = sc;
+		incident = inc;
 		multi = m;
 		beacon_enabled = be;
 		prefix_page = pp;
