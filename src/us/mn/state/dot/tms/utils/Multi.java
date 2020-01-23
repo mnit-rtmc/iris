@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +20,7 @@ package us.mn.state.dot.tms.utils;
  *
  * @author Douglas Lau
  * @author Michael Darter
+ * @author John Stanley - SRF Consulting
  */
 public interface Multi {
 
@@ -29,15 +31,17 @@ public interface Multi {
 	void addSpan(String span);
 
 	/** Set the (deprecated) message background color.
-	 * @param x Background color (0-9; colorClassic value). */
-	void setColorBackground(int x);
+	 * @param x Background color (0-9; colorClassic value).
+	 * Use the sign's default background color if x is null. */
+	void setColorBackground(Integer x);
 
 	/** Set the page background color for monochrome1bit, monochrome8bit,
 	 * and colorClassic color schemes.
-	 * @param z Background color (0-1 for monochrome1bit),
+	 * @param x Background color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
-	 *                           (0-9 for colorClassic). */
-	void setPageBackground(int z);
+	 *                           (0-9 for colorClassic).
+	 * Use the sign's default background color if x is null. */
+	void setPageBackground(Integer x);
 
 	/** Set the page background color for color24bit color scheme.
 	 * @param r Red component (0-255).
@@ -45,12 +49,12 @@ public interface Multi {
 	 * @param b Blue component (0-255). */
 	void setPageBackground(int r, int g, int b);
 
-	/** Set the foreground color for monochrome1bit, monochrome8bit, and
-	 * colorClassic color schemes.
+	/** Set the foreground color for single-int color tag.  [cfX]
 	 * @param x Foreground color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
-	 *                           (0-9 for colorClassic). */
-	void setColorForeground(int x);
+	 *                           (0-9 for colorClassic & color24bit).
+	 * Use the sign's default foreground color if x is null. */
+	void setColorForeground(Integer x);
 
 	/** Set the foreground color for color24bit color scheme.
 	 * @param r Red component (0-255).
@@ -81,8 +85,9 @@ public interface Multi {
 
 	/** Set the font number.
 	 * @param f_num Font number (1 to 255)
-	 * @param f_id Font version ID (4-digit hex) */
-	void setFont(int f_num, String f_id);
+	 * @param f_id Font version ID (4-digit hex string)
+	 * Use the sign's default font if f_num is null. */
+	void setFont(Integer f_num, String f_id);
 
 	/** Add a graphic */
 	void addGraphic(int g_num, Integer x, Integer y, String g_id);
@@ -91,32 +96,40 @@ public interface Multi {
 	enum JustificationLine {
 		UNDEFINED, OTHER, LEFT, CENTER, RIGHT, FULL;
 
+		/** Cached values array */
+		static private final JustificationLine[] VALUES = values();
+
 		/** Get line justification from an ordinal value */
 		static public JustificationLine fromOrdinal(int o) {
-			if (o >= 0 && o < values().length)
-				return values()[o];
+			if (o >= 0 && o < VALUES.length)
+				return VALUES[o];
 			else
 				return UNDEFINED;
 		}
 	}
 
-	/** Set the line justification */
+	/** Set the line justification.
+	 * Use the sign's default line justification if jl is null. */
 	void setJustificationLine(JustificationLine jl);
 
 	/** Page Justification enumeration. See NTCIP 1203 as necessary. */
 	enum JustificationPage {
 		UNDEFINED, OTHER, TOP, MIDDLE, BOTTOM;
 
+		/** Cached values array */
+		static private final JustificationPage[] VALUES = values();
+
 		/** Get page justification from an ordinal value */
 		static public JustificationPage fromOrdinal(int o) {
-			if (o >= 0 && o < values().length)
-				return values()[o];
+			if (o >= 0 && o < VALUES.length)
+				return VALUES[o];
 			else
 				return UNDEFINED;
 		}
 	}
 
-	/** Set the page justification */
+	/** Set the page justification.
+	 * Use the sign's default page justification if jp is null. */
 	void setJustificationPage(JustificationPage jp);
 
 	/** Add a new line.

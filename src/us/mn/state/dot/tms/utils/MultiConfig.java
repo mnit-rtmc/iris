@@ -418,9 +418,9 @@ public class MultiConfig {
 		if (dmsType == DMSType.UNKNOWN)
 			logError("Unknown sign type = "+signDetail.getDmsType());
 //		if (maxMultiLen <= 0)
-//		logError("maxMultiLen = "+maxMultiLen);
-//	if (maxPages <= 0)
-//		logError("maxPages = "+maxPages);
+//			logError("maxMultiLen = "+maxMultiLen);
+//		if (maxPages <= 0)
+//			logError("maxPages = "+maxPages);
 
 		// deal with problems in IRIS sign_details table
 		if (maxMultiLen <= 0)

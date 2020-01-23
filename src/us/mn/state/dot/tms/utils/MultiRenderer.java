@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,9 +31,12 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  * A MULTI renderer is for rendering MULTI on a raster graphic.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class MultiRenderer extends MultiAdapter {
 
+	private MultiConfig mcfg = null;
+	
 	/** Default line justification */
 	static public JustificationLine defaultJustificationLine() {
 		return JustificationLine.fromOrdinal(SystemAttrEnum
@@ -45,13 +49,45 @@ public class MultiRenderer extends MultiAdapter {
 			.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
 	}
 
-	/** Get a color for the color scheme.
+	/** Get a tag color for the color scheme.
+	 * (Used for all tags with single-int colors
+	 *  except the depreciated [bgX] tag.) 
 	 * @param x Color value.
 	 * @return DmsColor or null for invalid color. */
-	static private DmsColor schemeColor(int x) {
-		// FIXME: add support for monochrome color schemes
-		ColorClassic cc = ColorClassic.fromOrdinal(x);
-		return (cc != null) ? cc.clr : null;
+	@SuppressWarnings("incomplete-switch")
+	private DmsColor schemeColor(int x) {
+		ColorClassic cc;
+		if (mcfg == null) {
+			cc = ColorClassic.fromOrdinal(x);
+			return (cc != null) ? cc.clr : null;
+		}
+		switch (mcfg.getColorScheme()) {
+			case MONOCHROME_1_BIT:
+				switch (x) {
+					case 0:
+						return mcfg.getDefaultBG();
+					case 1:
+						return mcfg.getDefaultFG();
+				}
+				break;
+
+			case MONOCHROME_8_BIT:
+				if ((0 > x) || (x > 255))
+					break;
+				DmsColor c = mcfg.getDefaultFG();
+				int r = (c.red   * x) >> 8;
+				int g = (c.green * x) >> 8;
+				int b = (c.blue  * x) >> 8;
+				return new DmsColor(r, g, b);
+
+			case COLOR_CLASSIC:
+			case COLOR_24_BIT:	// <- Per NTCIP 1203 v03-04 - section 5.5.22
+				cc = ColorClassic.fromOrdinal(x);
+				if (cc != null)
+					return cc.clr;
+		}
+		syntax_err = MultiSyntaxError.unsupportedTagValue;
+		return null;
 	}
 
 	/** Raster graphic factory */
@@ -122,6 +158,23 @@ public class MultiRenderer extends MultiAdapter {
 		resetTextRectangle();
 	}
 
+	/**
+	 * Create a new MULTI renderer.
+	 * @param fct Raster graphic factory.
+	 * @param mc MultiConfig for sign or sign-group.
+	 */
+	public MultiRenderer(RasterGraphic.Factory fct, MultiConfig mc) {
+		factory = fct;
+		raster  = factory.create();
+		mcfg    = mc;
+		background_clr = mcfg.getDefaultBG();
+		foreground_clr = mcfg.getDefaultFG();
+		c_width        = Math.max(mcfg.getCharWidth(), 1);
+		c_height       = Math.max(mcfg.getCharHeight(), 1);
+		font_num       = mcfg.getDefaultFontNum();
+		resetTextRectangle();
+	}
+	
 	/** Check for character-matrix sign */
 	private boolean isCharMatrix() {
 		return c_width > 1;
@@ -146,10 +199,14 @@ public class MultiRenderer extends MultiAdapter {
 		syntax_err = MultiSyntaxError.unsupportedTag;
 	}
 
-	/** Set the page justification */
+	/** Set the page justification.
+	 * Use IRIS's default page justification if jp is null. */
 	@Override
 	public void setJustificationPage(JustificationPage jp) {
-		just_page = jp;
+		if (jp == null)
+			just_page = defaultJustificationPage();
+		else
+			just_page = jp;
 		Block block = new Block();
 		Block cb = currentBlock();
 		if (block.justp.ordinal() < cb.justp.ordinal())
@@ -158,18 +215,31 @@ public class MultiRenderer extends MultiAdapter {
 			blocks.addLast(block);
 	}
 
-	/** Set the line justification */
+	/** Set the line justification.
+	 * Use IRIS's default line justification if jl is null. */
 	@Override
 	public void setJustificationLine(JustificationLine jl) {
-		just_line = jl;
+		if (jl == null)
+			just_line = defaultJustificationLine();
+		else
+			just_line = jl;
 	}
 
 	/** Set the font number.
 	 * @param f_num Font number (1 to 255)
-	 * @param f_id Font version ID (4-digit hex) */
+	 * @param f_id Font version ID (4-digit hex)
+	 * Use the sign's default font if f_num is null. */
 	@Override
-	public void setFont(int f_num, String f_id) {
-		font_num = f_num;
+	public void setFont(Integer f_num, String f_id) {
+		if (f_num == null)
+			if (mcfg == null) {
+				// need mcfg to use "default value" tags
+				syntax_err = MultiSyntaxError.unsupportedTagValue;
+			}
+			else
+				font_num = mcfg.getDefaultFontNum();
+		else
+			font_num = f_num;
 	}
 
 	/** Set the character spacing.
@@ -215,25 +285,52 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** Set the (deprecated) message background color.
-	 * @param x Background color (0-9; colorClassic value). */
+	 * @param x Background color (0-9; colorClassic value).
+	 * If x is null, use the sign's default background color. */
 	@Override
-	public void setColorBackground(int x) {
-		ColorClassic cc = ColorClassic.fromOrdinal(x);
-		if (cc != null)
+	public void setColorBackground(Integer x) {
+		if (x == null) {
+			if (mcfg == null) {
+				// need mcfg to use "default value" tags
+				syntax_err = MultiSyntaxError.unsupportedTagValue;
+				return;
+			}
+			background_clr = mcfg.getDefaultBG();
+		}
+		else {
+			ColorClassic cc = ColorClassic.fromOrdinal(x);
+			if (cc == null) {
+				syntax_err = MultiSyntaxError.unsupportedTagValue;
+				return;
+			}
 			background_clr = cc.clr;
+		}
 		fillBackground();
 	}
 
-	/** Set the page background color for monochrome1bit, monochrome8bit,
-	 * and colorClassic color schemes.
+	/** Set the page background color using a single-int color tag. [pbZ]
 	 * @param z Background color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
-	 *                           (0-9 for colorClassic). */
+	 *                           (0-9 for colorClassic & color24bit).
+	 * Use sign's default background color if z is null. */
 	@Override
-	public void setPageBackground(int z) {
-		DmsColor clr = schemeColor(z);
-		if (clr != null)
+	public void setPageBackground(Integer z) {
+		if (z == null) {
+			if (mcfg == null) {
+				// need mcfg to use "default value" tags
+				syntax_err = MultiSyntaxError.unsupportedTagValue;
+				return;
+			}
+			background_clr = mcfg.getDefaultBG();
+		}
+		else {
+			DmsColor clr = schemeColor(z);
+			if (clr == null) {
+				syntax_err = MultiSyntaxError.unsupportedTagValue;
+				return;
+			}
 			background_clr = clr;
+		}
 		fillBackground();
 	}
 
@@ -253,16 +350,29 @@ public class MultiRenderer extends MultiAdapter {
 			background_clr);
 	}
 
-	/** Set the foreground color for monochrome1bit, monochrome8bit, and
-	 * colorClassic color schemes.
+	/** Set the foreground color using a single-int color tag.  [cfX]
 	 * @param x Foreground color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
-	 *                           (0-9 for colorClassic). */
+	 *                           (0-9 for colorClassic &  & color24bit).
+	 * If x is null, use the sign's default foreground color . */
 	@Override
-	public void setColorForeground(int x) {
-		DmsColor clr = schemeColor(x);
-		if (clr != null)
+	public void setColorForeground(Integer x) {
+		if (x == null) {
+			if (mcfg == null) {
+				// need mcfg to use "default value" tags
+				syntax_err = MultiSyntaxError.unsupportedTagValue;
+				return;
+			}
+			foreground_clr = mcfg.getDefaultFG();
+		}
+		else {
+			DmsColor clr = schemeColor(x);
+			if (clr == null) {
+				syntax_err = MultiSyntaxError.unsupportedTagValue;
+				return;
+			}
 			foreground_clr = clr;
+		}
 	}
 
 	/** Set the foreground color for color24bit color scheme.
@@ -274,15 +384,14 @@ public class MultiRenderer extends MultiAdapter {
 		foreground_clr = new DmsColor(r, g, b);
 	}
 
-	/** Add a color rectangle for monochrome1bit, monochrome8bit, and
-	 * colorClassic color schemes.
+	/** Add a color rectangle using a single-int color tag.  [crX,Y,W,H,Z]
 	 * @param x X pixel position of upper left corner.
 	 * @param y Y pixel position of upper left corner.
 	 * @param w Width in pixels.
 	 * @param h Height in pixels.
 	 * @param z Color of rectangle (0-1 for monochrome1bit),
 	 *                             (0-255 for monochrome8bit),
-	 *                             (0-9 for colorClassic). */
+	 *                             (0-9 for colorClassic & color24bit). */
 	@Override
 	public void addColorRectangle(int x, int y, int w, int h, int z) {
 		DmsColor clr = schemeColor(z);
