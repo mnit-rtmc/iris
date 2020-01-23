@@ -27,7 +27,7 @@ public interface Controller extends SonarObject {
 	String SONAR_TYPE = "controller";
 
 	/** All I/O pins */
-	int ALL_PINS = 120;
+	int ALL_PINS = 150;
 
 	/** Set the controller cabinet */
 	void setCabinet(Cabinet c);

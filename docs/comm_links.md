@@ -279,7 +279,7 @@ One gate arm can be associated with each [controller], using [IO pin] 1.
 
 The `streambed` protocol is for [flow stream] configuration with a [streambed]
 server.  The _default scheme_ is `tcp`.  _Multi-drop_ is not supported.
-Up to 120 flow streams can be associated with each [controller], using
+Up to 150 flow streams can be associated with each [controller], using
 [IO pin]s.
 
 ### Vicon
