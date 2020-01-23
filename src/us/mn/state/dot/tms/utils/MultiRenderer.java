@@ -418,6 +418,10 @@ public class MultiRenderer extends MultiAdapter {
 	private void fillRectangle(int x, int y, int w, int h, DmsColor clr) {
 		x--;	/* make X zero-based for raster */
 		y--;	/* make Y zero-based for raster */
+		if (w == 0)
+			w = raster.getWidth() - x;
+		if (h == 0)
+			h = raster.getHeight() - y;
 		for (int yy = 0; yy < h; yy++) {
 			for (int xx = 0; xx < w; xx++)
 				raster.setPixel(x + xx, y + yy, clr);
