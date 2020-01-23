@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,6 +59,9 @@ public class UpstreamDeviceFinder {
 	/** Scanner for devices on a corridor */
 	private class CorScanner implements Comparable<CorScanner> {
 
+		/** Initial corridor flag */
+		private final boolean initial;
+
 		/** Downstream location on corridor */
 		private final GeoLoc loc;
 
@@ -71,8 +74,18 @@ public class UpstreamDeviceFinder {
 		/** Flag indicating scan complete */
 		private boolean scanned;
 
+		/** Create an initial corridor scanner */
+		private CorScanner(GeoLoc gl) {
+			initial = true;
+			loc = gl;
+			exits = 0;
+			dist = new Distance(0f, MILES);
+			scanned = false;
+		}
+
 		/** Create a corridor scanner */
 		private CorScanner(GeoLoc gl, int e, Distance d) {
+			initial = false;
 			loc = gl;
 			exits = e;
 			dist = d;
@@ -92,9 +105,23 @@ public class UpstreamDeviceFinder {
 			if (cb != null) {
 				Float mp = cb.calculateMilePoint(loc, MAX_DIST);
 				if (mp != null)
-					findDevices(cb, mp, exits, dist);
+					findDevices(cb, mp);
 			}
 			scanned = true;
+		}
+
+		/** Find all devices upstream of a given point on a corridor.
+		 * @param cb Corridor to scan.
+		 * @param mp Mile point of downstream location. */
+		private void findDevices(CorridorBase<R_Node> cb, float mp) {
+			// Only scan for LCS arrays on initial corridor
+			if (initial)
+				findLCSArrays(cb, mp);
+			if (exits <= maximum_exits) {
+				findDMSs(cb, mp, exits, dist);
+				if (exits < maximum_exits)
+					findEntrances(cb, mp, exits, dist);
+			}
 		}
 
 		/** Compare with another corridor scanner */
@@ -127,8 +154,7 @@ public class UpstreamDeviceFinder {
 		finder = cf;
 		incident = inc;
 		maximum_exits = maximum_exits(inc);
-		scanners.add(new CorScanner(new IncidentLoc(inc), 0,
-			new Distance(0f, MILES)));
+		scanners.add(new CorScanner(new IncidentLoc(inc)));
 	}
 
 	/** Find all devices */
@@ -149,25 +175,9 @@ public class UpstreamDeviceFinder {
 		return null;
 	}
 
-	/** Find all devices upstream of a given point on a corridor.
+	/** Find LCS arrays.
 	 * @param cb Corridor to scan.
-	 * @param mp Mile point to end scan.
-	 * @param num_exits Number of exits downstream of corridor.
-	 * @param dist Distance downstream of corridor. */
-	private void findDevices(CorridorBase<R_Node> cb, float mp,
-		int num_exits, Distance dist)
-	{
-		// Don't scan for LCS arrays on branched corridors
-		if (num_exits == 0)
-			findLCSArrays(cb, mp);
-		if (num_exits <= maximum_exits) {
-			findDMSs(cb, mp, num_exits, dist);
-			if (num_exits < maximum_exits)
-				findEntrances(cb, mp, num_exits, dist);
-		}
-	}
-
-	/** Find LCS arrays */
+	 * @param mp Mile point of downstream location. */
 	private void findLCSArrays(CorridorBase<R_Node> cb, float mp) {
 		Iterator<LCSArray> it = LCSArrayHelper.iterator();
 		while (it.hasNext()) {
@@ -214,7 +224,7 @@ public class UpstreamDeviceFinder {
 
 	/** Find DMS upstream of a given point on a corridor.
 	 * @param cb Corridor to scan.
-	 * @param mp Mile point to end scan.
+	 * @param mp Mile point of downstream location.
 	 * @param num_exits Number of exits downstream of corridor.
 	 * @param dist Distance downstream of corridor. */
 	private void findDMSs(CorridorBase<R_Node> cb, float mp, int num_exits,
@@ -235,7 +245,11 @@ public class UpstreamDeviceFinder {
 		}
 	}
 
-	/** Find entrances from interchanges to other corridors */
+	/** Find entrances from interchanges to other corridors.
+	 * @param cb Corridor to scan.
+	 * @param mp Mile point of downstream location.
+	 * @param num_exits Number of exits downstream of corridor.
+	 * @param dist Distance downstream of corridor. */
 	private void findEntrances(CorridorBase<R_Node> cb, float mp,
 		int num_exits, Distance dist)
 	{
@@ -247,7 +261,7 @@ public class UpstreamDeviceFinder {
 				if (e != null) {
 					// Must add at least 1 exit
 					// if not on original corridor
-					if (dist.m() > 0.0)
+					if (num_exits > 0)
 						e = Math.max(1, e);
 					int exits = num_exits + e;
 					if (exits <= maximum_exits) {
