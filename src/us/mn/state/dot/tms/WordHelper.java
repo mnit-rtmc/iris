@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2016  Iteris Inc.
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,27 +26,26 @@ import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
- * Static Word convenience methods accessible from
- * the client and server.
+ * Static Word convenience methods accessible from the client and server.
  *
  * @author Michael Darter
  * @author Douglas Lau
  */
 public class WordHelper extends BaseHelper {
 
-	/** Dictionary scheme system attribute */
-	public enum DictScheme {
+	/** Word scheme system attribute */
+	private enum WordScheme {
 		OFF(),		// 0
 		RECOMMEND(),	// 1
 		ENFORCE();	// 2
 
-		// Get the number of items in the enum
+		/** Get the number of items in the enum */
 		public int size() {
-			return DictScheme.values().length;
+			return WordScheme.values().length;
 		}
 
 		/** Return the enum from an ordinal or null if invalid */
-		static public DictScheme fromOrdinal(int o) {
+		static private WordScheme fromOrdinal(int o) {
 			if (o >= 0 && o < values().length)
 				return values()[o];
 			else
@@ -80,31 +79,31 @@ public class WordHelper extends BaseHelper {
 		return (Word) namespace.lookupObject(Word.SONAR_TYPE, en);
 	}
 
-	/** Get the dictionary scheme state for allowed or banned words.
+	/** Get the word scheme for allowed or banned words.
 	 * @param allow True for the allowed list else banned.
-	 * @return Dictionary scheme specified by system attribute */
-	static public DictScheme getDictScheme(boolean allow) {
+	 * @return Word scheme specified by system attribute */
+	static private WordScheme getWordScheme(boolean allow) {
 		if (allow) {
-			return DictScheme.fromOrdinal(SystemAttrEnum.
+			return WordScheme.fromOrdinal(SystemAttrEnum.
 				DICT_ALLOWED_SCHEME.getInt());
 		} else {
-			return DictScheme.fromOrdinal(SystemAttrEnum.
+			return WordScheme.fromOrdinal(SystemAttrEnum.
 				DICT_BANNED_SCHEME.getInt());
 		}
 	}
 
-	/** Is spell checking disabled? */
+	/** Is spell checking enabled? */
 	static public boolean spellCheckEnabled() {
-		DictScheme ads = getDictScheme(true);
-		DictScheme bds = getDictScheme(false);
-		return ads != DictScheme.OFF || bds != DictScheme.OFF;
+		WordScheme ads = getWordScheme(true);
+		WordScheme bds = getWordScheme(false);
+		return ads != WordScheme.OFF || bds != WordScheme.OFF;
 	}
 
 	/** Is spell checking in enforcement mode? */
 	static public boolean spellCheckEnforced() {
-		DictScheme ads = getDictScheme(true);
-		DictScheme bds = getDictScheme(false);
-		return ads == DictScheme.ENFORCE || bds == DictScheme.ENFORCE;
+		WordScheme ads = getWordScheme(true);
+		WordScheme bds = getWordScheme(false);
+		return ads == WordScheme.ENFORCE || bds == WordScheme.ENFORCE;
 	}
 
 	/** Is spell checking in recommend mode? */
@@ -132,18 +131,18 @@ public class WordHelper extends BaseHelper {
 	 * @param ms MULTI string
 	 * @return A user message indicating which words are misspelled */
 	static private String buildBannedUserMsg(String multi) {
-		DictScheme bds = getDictScheme(false);
-		if (bds == DictScheme.OFF)
+		WordScheme bds = getWordScheme(false);
+		if (bds == WordScheme.OFF)
 			return "";
 		List<String> bw = WordHelper.spellCheck(multi, false);
 		if (bw.size() <= 0)
 			return "";
 		StringBuilder msg = new StringBuilder();
-		if (bds == DictScheme.RECOMMEND) {
-			msg.append(I18N.get("dictionary.ban_nr_words.msg"));
+		if (bds == WordScheme.RECOMMEND) {
+			msg.append(I18N.get("word.not.recommended"));
 			msg.append("\n").append(INDENT);
-		} else if (bds == DictScheme.ENFORCE) {
-			msg.append(I18N.get("dictionary.ban_ns_words.msg"));
+		} else if (bds == WordScheme.ENFORCE) {
+			msg.append(I18N.get("word.banned.msg"));
 			msg.append("\n").append(INDENT);
 		}
 		for (int i = 0; i < bw.size(); ++i) {
@@ -159,18 +158,18 @@ public class WordHelper extends BaseHelper {
 	 * @param ms MULTI string
 	 * @return A user message indicating which words are misspelled */
 	static private String buildAllowedUserMsg(String multi) {
-		DictScheme ads = getDictScheme(true);
-		if (ads == DictScheme.OFF)
+		WordScheme ads = getWordScheme(true);
+		if (ads == WordScheme.OFF)
 			return "";
 		List<String> aw = WordHelper.spellCheck(multi, true);
 		if (aw.size() <= 0)
 			return "";
 		StringBuilder msg = new StringBuilder();
-		if (ads == DictScheme.RECOMMEND) {
-			msg.append(I18N.get("dictionary.allow_nr_words.msg"));
+		if (ads == WordScheme.RECOMMEND) {
+			msg.append(I18N.get("word.not.recommended"));
 			msg.append("\n").append(INDENT);
-		} else if (ads == DictScheme.ENFORCE) {
-			msg.append(I18N.get("dictionary.allow_ns_words.msg"));
+		} else if (ads == WordScheme.ENFORCE) {
+			msg.append(I18N.get("word.not.allowed"));
 			msg.append("\n").append(INDENT);
 		}
 		for (int i = 0; i < aw.size(); ++i) {

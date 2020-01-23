@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015  Iteris Inc.
+ * Copyright (C) 2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +23,11 @@ import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * A form for displaying ane editing dictionary words
+ * A form for displaying ane editing allowed/banned DMS words.
+ *
  * @author Michael Darter
  */
-public class DictionaryForm extends AbstractForm {
+public class WordForm extends AbstractForm {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
@@ -42,13 +44,13 @@ public class DictionaryForm extends AbstractForm {
 	private final JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
 
 	/** Create form */
-	public DictionaryForm(Session s) {
-		super(I18N.get("dictionary"));
-		setHelpPageName("help.dictionaryform");
+	public WordForm(Session s) {
+		super(I18N.get("word.plural"));
+		setHelpPageName("help.word.form");
 		a_panel = new ProxyTablePanel<Word>(
-			new DictTableModel(s, true));
+			new WordTableModel(s, true));
 		b_panel = new ProxyTablePanel<Word>(
-			new DictTableModel(s, false));
+			new WordTableModel(s, false));
 	}
 
 	/** Initialize form widgets */
@@ -57,8 +59,8 @@ public class DictionaryForm extends AbstractForm {
 		super.initialize();
 		a_panel.initialize();
 		b_panel.initialize();
-		tab.add(I18N.get("dictionary.allowed_words"), a_panel);
-		tab.add(I18N.get("dictionary.banned_words"), b_panel);
+		tab.add(I18N.get("word.allowed"), a_panel);
+		tab.add(I18N.get("word.banned"), b_panel);
 		add(tab);
 	}
 
