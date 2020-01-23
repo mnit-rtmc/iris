@@ -186,7 +186,7 @@ public class DMSHelper extends BaseHelper {
 	};
 
 	/** Get the default background color for a color scheme */
-	static private byte[] getDefaultBackgroundBytes(ColorScheme scheme) {
+	static public byte[] getDefaultBackgroundBytes(ColorScheme scheme) {
 		switch (scheme) {
 		case MONOCHROME_1_BIT:
 			return MONO_1_BACKGROUND;
@@ -223,7 +223,7 @@ public class DMSHelper extends BaseHelper {
 	};
 
 	/** Get the default foreground color for a color scheme */
-	static private byte[] getDefaultForegroundBytes(ColorScheme scheme) {
+	static public byte[] getDefaultForegroundBytes(ColorScheme scheme) {
 		switch (scheme) {
 		case MONOCHROME_1_BIT:
 			return MONO_1_FOREGROUND;
