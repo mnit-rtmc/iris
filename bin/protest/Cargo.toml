@@ -1,0 +1,7 @@
+[package]
+name = "protest"
+version = "0.1.0"
+authors = ["Douglas Lau <doug.lau@state.mn.us>"]
+edition = "2018"
+
+[dependencies]
