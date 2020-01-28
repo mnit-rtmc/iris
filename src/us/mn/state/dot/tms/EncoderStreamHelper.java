@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,16 +48,32 @@ public class EncoderStreamHelper extends BaseHelper {
 		return es.getMcastPort() != null;
 	}
 
-	/** Find the best matching encoder stream */
-	static public EncoderStream find(EncoderType et, EncodingQuality q,
-		boolean mcast)
+	/** Find the best matching encoder stream.
+	 * @param et Encoder type.
+	 * @param eq Encoding quality (null for any).
+	 * @param mcast Allow multicast.
+	 * @param flow_stream Flow stream (null for any). */
+	static EncoderStream find(EncoderType et, EncodingQuality eq,
+		boolean mcast, Boolean flow_stream)
 	{
 		EncoderStream best = null;
 		int best_val = 0;
 		Iterator<EncoderStream> it = iterator();
 		while (it.hasNext()) {
 			EncoderStream es = it.next();
-			int v = value(et, q, mcast, es);
+			if (!objectEquals(et, es.getEncoderType()))
+				continue;
+			if (es.getViewNum() != null)
+				continue;
+			if (eq != null &&
+			    eq != EncodingQuality.fromOrdinal(es.getQuality()))
+				continue;
+			if (isMcast(es) && !mcast)
+				continue;
+			if (flow_stream != null &&
+		            flow_stream != es.getFlowStream())
+				continue;
+			int v = value(es);
 			if (v > best_val) {
 				best = es;
 				best_val = v;
@@ -67,25 +83,12 @@ public class EncoderStreamHelper extends BaseHelper {
 	}
 
 	/** Get encoder stream value */
-	static private int value(EncoderType et, EncodingQuality q,
-		boolean mcast, EncoderStream es)
-	{
-		return (objectEquals(et, es.getEncoderType()) &&
-		        es.getViewNum() == null)
-		      ? qualityValue(es, q) + mcastValue(es, mcast)
-		      : 0;
-	}
-
-	/** Get quality value */
-	static private int qualityValue(EncoderStream es, EncodingQuality q) {
-		return 3 - Math.abs(q.ordinal() - es.getQuality());
-	}
-
-	/** Get multicast value */
-	static private int mcastValue(EncoderStream es, boolean mcast) {
-		if (mcast)
-			return isMcast(es) ? 5 : 0;
-		else
-			return isMcast(es) ? -5 : 0;
+	static private int value(EncoderStream es) {
+		int qual_val = es.getQuality();
+		int mcast_val = isMcast(es)
+			? EncodingQuality.VALUES.length + 2
+			: 0;
+		int flow_val = es.getFlowStream() ? 1 : 0;
+		return qual_val + mcast_val + flow_val;
 	}
 }

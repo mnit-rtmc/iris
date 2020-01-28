@@ -127,6 +127,7 @@ action_plan_event_purge_days	90
 alarm_event_purge_days	0
 beacon_event_purge_days	0
 camera_autoplay	true
+camera_blank_url	
 camera_construction_url	
 camera_image_base_url	
 camera_kbd_panasonic_enable	false
@@ -146,7 +147,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	5.11.0
+database_version	5.12.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0

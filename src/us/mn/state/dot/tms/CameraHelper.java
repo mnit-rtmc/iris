@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,6 +31,21 @@ import us.mn.state.dot.tms.units.Distance;
  * @author Travis Swanston
  */
 public class CameraHelper extends BaseHelper {
+
+	/** Get the blank URL */
+	static private String getBlankUrl() {
+		return SystemAttrEnum.CAMERA_BLANK_URL.getString();
+	}
+
+	/** Get the construction URL */
+	static private String getConstructionUrl() {
+		return SystemAttrEnum.CAMERA_CONSTRUCTION_URL.getString();
+	}
+
+	/** Get the out-of-service URL */
+	static private String getOutOfServiceUrl() {
+		return SystemAttrEnum.CAMERA_OUT_OF_SERVICE_URL.getString();
+	}
 
 	/** Invalid URI needed because URI.toURL throws
 	 * IllegalArgumentException when scheme is empty. */
@@ -212,20 +227,33 @@ public class CameraHelper extends BaseHelper {
 
 	/** Get an encoder stream for a camera.
 	 * @param c Camera for stream.
-	 * @param q Preferred encoding quality.
-	 * @param allow_mcast Allow multicast streams. */
-	static public EncoderStream getStream(Camera c, EncodingQuality q,
-		boolean allow_mcast)
+	 * @param eq Encoding quality (null for any).
+	 * @param flow_stream Flow stream (null for any). */
+	static private EncoderStream getStream(Camera c, EncodingQuality eq,
+		Boolean flow_stream)
 	{
 		if (c != null) {
 			EncoderType et = c.getEncoderType();
 			if (et != null) {
-				boolean mcast = allow_mcast &&
-					(c.getEncMcast() != null);
-				return EncoderStreamHelper.find(et, q, mcast);
+				boolean mcast = (c.getEncMcast() != null);
+				return EncoderStreamHelper.find(et, eq, mcast,
+					flow_stream);
 			}
 		}
 		return null;
+	}
+
+	/** Get an encoder stream for a camera.
+	 * @param c Camera for stream.
+	 * @param eq Encoding quality (null for any). */
+	static private EncoderStream getStream(Camera c, EncodingQuality eq) {
+		return getStream(c, eq, null);
+	}
+
+	/** Get an encoder stream for a camera.
+	 * @param c Camera for stream. */
+	static public EncoderStream getStream(Camera c) {
+		return getStream(c, null, null);
 	}
 
 	/** Create a camera encoder URI */
@@ -309,5 +337,63 @@ public class CameraHelper extends BaseHelper {
 			      : cam.getName();
 		} else
 			return "";
+	}
+
+	/** Get a camera URI.
+	 * @param cam The camera.
+	 * @param eq Encoding quality (null for any).
+	 * @param flow_stream Flow stream (null for any). */
+	static public String getUri(Camera cam, EncodingQuality eq,
+		Boolean flow_stream)
+	{
+		if (isBlank(cam))
+			return getBlankUrl();
+		String cond = getConditionUri(cam);
+		if (cond != null)
+			return cond;
+		EncoderStream es = getStream(cam, eq, flow_stream);
+		return encoderUri(cam, es).toString();
+	}
+
+	/** Get a camera URI.
+	 * @param cam The camera.
+	 * @param eq Encoding quality (null for any). */
+	static public String getUri(Camera cam, EncodingQuality eq) {
+		return getUri(cam, eq, null);
+	}
+
+	/** Get a camera URI.
+	 * @param cam The camera. */
+	static public String getUri(Camera cam) {
+		return getUri(cam, null, null);
+	}
+
+	/** Get the condition URI */
+	static private String getConditionUri(Camera cam) {
+		switch (getCondition(cam)) {
+		case CONSTRUCTION:
+			return getConstructionUrl();
+		case PLANNED:
+		case REMOVED:
+			return getOutOfServiceUrl();
+		default:
+			return null;
+		}
+	}
+
+	/** Get the camera condition */
+	static private CtrlCondition getCondition(Camera cam) {
+		if (cam != null) {
+			Controller c = cam.getController();
+			return (c != null)
+			      ? CtrlCondition.fromOrdinal(c.getCondition())
+			      : CtrlCondition.ACTIVE;
+		}
+		return CtrlCondition.REMOVED;
+	}
+
+	/** Check if a camera is active */
+	static public boolean isActive(Camera cam) {
+		return CtrlCondition.ACTIVE == getCondition(cam);
 	}
 }
