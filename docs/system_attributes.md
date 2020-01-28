@@ -24,11 +24,11 @@ System Attribute                 | Description
 `alarm_event_purge_days`         | Number of days after which [alarm] events will be purged
 `beacon_event_purge_days`        | Number of days after which [beacon] events will be purged
 `camera_autoplay`                | Automatically stream video when a [camera] is selected
-`camera_blank_url`               | Location of PNG image to display for blank [camera]s
+`camera_blank_url`               | Location of PNG image to display for blankd [video monitors]
 `camera_construction_url`        | Location of PNG image to display for [camera]s out due to construction
 `camera_image_base_url`          | Base location of published [camera] images
 `camera_kbd_panasonic_enable`    | Enable [camera] control from Panasonic CU-950 [keyboards]
-`camera_num_blank`               | [Camera] number reserved for blanking video monitors
+`camera_num_blank`               | [Camera] number reserved for blanking [video monitors]
 `camera_out_of_service_url`      | Location of PNG image to display for out of service [camera]s
 `camera_sequence_dwell_sec`      | Dwell time for [camera] sequences
 `camera_preset_store_enable`     | Enable preset-store button in the [camera] preset control panel
@@ -146,4 +146,5 @@ System Attribute                 | Description
 [ramp meter]: ramp_meters.html
 [tolling]: tolling.html
 [travel time]: travel_time.html
+[video monitors]: video.html
 [VSA]: vsa.html
