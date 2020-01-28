@@ -24,6 +24,7 @@ System Attribute                 | Description
 `alarm_event_purge_days`         | Number of days after which [alarm] events will be purged
 `beacon_event_purge_days`        | Number of days after which [beacon] events will be purged
 `camera_autoplay`                | Automatically stream video when a [camera] is selected
+`camera_blank_url`               | Location of PNG image to display for blank [camera]s
 `camera_construction_url`        | Location of PNG image to display for [camera]s out due to construction
 `camera_image_base_url`          | Base location of published [camera] images
 `camera_kbd_panasonic_enable`    | Enable [camera] control from Panasonic CU-950 [keyboards]
