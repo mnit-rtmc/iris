@@ -63,11 +63,18 @@ public class StreambedPoller extends BasePoller implements FlowStreamPoller {
 
 	/** Create flow operation */
 	private Operation createFlowOp(FlowStreamImpl fs) {
+		String uri = fs.getSourceUri();
 		OpStoreProps op = new OpStoreProps("flow");
 		op.addParam("number", fs.getPin() - 1);
-		op.addParam("location", fs.getSourceUri());
-		op.addParam("rtsp-transport", ""); // FIXME
-		op.addParam("source-encoding", fs.getSourceEncoding());
+		if (uri.isEmpty()) {
+			op.addParam("location", "test");
+			op.addParam("rtsp-transport", "");
+			op.addParam("source-encoding", "");
+		} else {
+			op.addParam("location", uri);
+			op.addParam("rtsp-transport", ""); // FIXME
+			op.addParam("source-encoding", fs.getSourceEncoding());
+		}
 		op.addParam("timeout", 5);
 		op.addParam("latency", 0);
 		op.addParam("overlay-text", fs.getOverlayText());

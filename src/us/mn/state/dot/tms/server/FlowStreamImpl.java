@@ -133,8 +133,10 @@ public class FlowStreamImpl extends ControllerIoImpl implements FlowStream {
 	{
 		super.updateControllerPin(oc, op, nc, np);
 		FlowStreamPoller p = getFlowStreamPoller();
-		if (p != null && nc != null)
+		if (p != null && nc != null) {
 			p.sendConfig(nc);
+			p.sendFlow(this);
+		}
 	}
 
 	/** Flag to restrict publishing camera images */
@@ -442,6 +444,8 @@ public class FlowStreamImpl extends ControllerIoImpl implements FlowStream {
 		String enc = (cam != null)
 		      ? getEncoding(cam, null)
 		      : getEncoding(camera, true);
-		return ("PNG".equals(enc)) ? getSourceEncoding() : enc;
+		if ("PNG".equals(enc))
+			enc = getSourceEncoding();
+		return (!"PNG".equals(enc)) ? enc : "H264";
 	}
 }

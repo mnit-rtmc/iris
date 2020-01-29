@@ -122,7 +122,8 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 			FlowStream f = fit.next();
 			if (f instanceof FlowStreamImpl) {
 				FlowStreamImpl fs = (FlowStreamImpl) f;
-				if (fs.getMonNum() == mn)
+				Integer num = fs.getMonNum();
+				if (num != null && num == mn)
 					fs.setMonCamera(c);
 			}
 		}
