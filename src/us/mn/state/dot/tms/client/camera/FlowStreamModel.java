@@ -131,8 +131,9 @@ public class FlowStreamModel extends ProxyTableModel<FlowStream> {
 				return canWrite(fs, "monNum");
 			}
 			public void setValueAt(FlowStream fs, Object value) {
-				if (value instanceof Integer)
-					fs.setMonNum((Integer) value);
+				fs.setMonNum((value instanceof Integer)
+					? (Integer) value
+					: null);
 			}
 		});
 		cols.add(new ProxyColumn<FlowStream>("flow.stream.address", 110)
