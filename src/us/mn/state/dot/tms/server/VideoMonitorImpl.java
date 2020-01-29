@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2019  Minnesota Department of Transportation
+ * Copyright (C) 2007-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.FlowStream;
+import us.mn.state.dot.tms.FlowStreamHelper;
 import us.mn.state.dot.tms.MonitorStyle;
 import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.TMSException;
@@ -98,7 +100,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		}
 	}
 
-	/** Set camera on all video monitors with a given number.
+	/** Set camera on all video monitors / flow streams with a given number.
 	 * @param mn Monitor number.
 	 * @param c Camera to display.
 	 * @param src Source of command.
@@ -115,6 +117,15 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 					vm.setCamNotify(c, src, select);
 			}
 		}
+		Iterator<FlowStream> fit = FlowStreamHelper.iterator();
+		while (fit.hasNext()) {
+			FlowStream f = fit.next();
+			if (f instanceof FlowStreamImpl) {
+				FlowStreamImpl fs = (FlowStreamImpl) f;
+				if (fs.getMonNum() == mn)
+					fs.setMonCamera(c);
+			}
+		}
 	}
 
 	/** Blank restricted video monitors viewing a camera */
@@ -125,6 +136,14 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 			if (m instanceof VideoMonitorImpl) {
 				VideoMonitorImpl vm = (VideoMonitorImpl) m;
 				vm.blankRestricted();
+			}
+		}
+		Iterator<FlowStream> fit = FlowStreamHelper.iterator();
+		while (fit.hasNext()) {
+			FlowStream f = fit.next();
+			if (f instanceof FlowStreamImpl) {
+				FlowStreamImpl fs = (FlowStreamImpl) f;
+				fs.updateStream();
 			}
 		}
 	}
@@ -268,11 +287,11 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Set flag to restrict publishing camera images */
 	public void doSetRestricted(boolean r) throws TMSException {
-		if (r == restricted)
-			return;
-		store.update(this, "restricted", r);
-		setRestricted(r);
-		blankRestricted();
+		if (r != restricted) {
+			store.update(this, "restricted", r);
+			setRestricted(r);
+			blankRestricted();
+		}
 	}
 
 	/** Blank restricted monitor */

@@ -33,7 +33,7 @@ import us.mn.state.dot.tms.units.Distance;
 public class CameraHelper extends BaseHelper {
 
 	/** Get the blank URL */
-	static private String getBlankUrl() {
+	static public String getBlankUrl() {
 		return SystemAttrEnum.CAMERA_BLANK_URL.getString();
 	}
 
@@ -229,7 +229,7 @@ public class CameraHelper extends BaseHelper {
 	 * @param c Camera for stream.
 	 * @param eq Encoding quality (null for any).
 	 * @param flow_stream Flow stream (null for any). */
-	static private EncoderStream getStream(Camera c, EncodingQuality eq,
+	static public EncoderStream getStream(Camera c, EncodingQuality eq,
 		Boolean flow_stream)
 	{
 		if (c != null) {
@@ -395,5 +395,19 @@ public class CameraHelper extends BaseHelper {
 	/** Check if a camera is active */
 	static public boolean isActive(Camera cam) {
 		return CtrlCondition.ACTIVE == getCondition(cam);
+	}
+
+	/** Get encoding for a camera */
+	static public Encoding getEncoding(Camera cam, EncodingQuality eq,
+		Boolean flow_stream)
+	{
+		if (isBlank(cam))
+			return Encoding.UNKNOWN;
+		if (CtrlCondition.ACTIVE != getCondition(cam))
+			return Encoding.UNKNOWN;
+		EncoderStream es = getStream(cam, eq, flow_stream);
+		return (es != null)
+		      ? Encoding.fromOrdinal(es.getEncoding())
+		      : Encoding.UNKNOWN;
 	}
 }

@@ -20,7 +20,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.DeviceImpl;
+import us.mn.state.dot.tms.server.ControllerIoImpl;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -71,10 +71,10 @@ public final class Operation implements Comparable<Operation> {
 	}
 
 	/** Device ID */
-	private final DeviceImpl device;
+	private final ControllerIoImpl device;
 
 	/** Get the operation device */
-	public DeviceImpl getDevice() {
+	public ControllerIoImpl getDevice() {
 		return device;
 	}
 
@@ -90,7 +90,9 @@ public final class Operation implements Comparable<Operation> {
 	 * @param c Controller.
 	 * @param d Device.
 	 * @param s First step. */
-	private Operation(String n, ControllerImpl c, DeviceImpl d, OpStep s) {
+	private Operation(String n, ControllerImpl c, ControllerIoImpl d,
+		OpStep s)
+	{
 		name = n;
 		controller = c;
 		device = d;
@@ -109,7 +111,7 @@ public final class Operation implements Comparable<Operation> {
 	 * @param n Operation name.
 	 * @param d Device.
 	 * @param s First step. */
-	public Operation(String n, DeviceImpl d, OpStep s) {
+	public Operation(String n, ControllerIoImpl d, OpStep s) {
 		this(n, (ControllerImpl) d.getController(), d, s);
 		// FIXME: acquire device lock before first step
 	}

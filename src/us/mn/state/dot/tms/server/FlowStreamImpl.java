@@ -19,10 +19,18 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.EncoderStream;
+import us.mn.state.dot.tms.Encoding;
 import us.mn.state.dot.tms.EncodingQuality;
 import us.mn.state.dot.tms.FlowStream;
 import us.mn.state.dot.tms.FlowStreamStatus;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.VideoMonitorHelper;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
+import us.mn.state.dot.tms.server.comm.FlowStreamPoller;
 
 /**
  * A flow stream "device".
@@ -114,6 +122,21 @@ public class FlowStreamImpl extends ControllerIoImpl implements FlowStream {
 		initTransients();
 	}
 
+	/** Update the controller and/or pin.
+	 * @param oc Old controller.
+	 * @param op Old pin.
+	 * @param nc New controller.
+	 * @param np New pin. */
+	@Override
+	protected void updateControllerPin(ControllerImpl oc, int op,
+		ControllerImpl nc, int np)
+	{
+		super.updateControllerPin(oc, op, nc, np);
+		FlowStreamPoller p = getFlowStreamPoller();
+		if (p != null && nc != null)
+			p.sendConfig(nc);
+	}
+
 	/** Flag to restrict publishing camera images */
 	private boolean restricted;
 
@@ -128,13 +151,8 @@ public class FlowStreamImpl extends ControllerIoImpl implements FlowStream {
 		if (r != restricted) {
 			store.update(this, "restricted", r);
 			setRestricted(r);
-			blankRestricted();
+			updateStream();
 		}
-	}
-
-	/** Blank restricted stream */
-	private void blankRestricted() {
-		// FIXME
 	}
 
 	/** Get flag to restrict publishing camera images */
@@ -157,6 +175,7 @@ public class FlowStreamImpl extends ControllerIoImpl implements FlowStream {
 		if (lo != loc_overlay) {
 			store.update(this, "loc_overlay", lo);
 			setLocOverlay(lo);
+			updateStream();
 		}
 	}
 
@@ -180,6 +199,7 @@ public class FlowStreamImpl extends ControllerIoImpl implements FlowStream {
 		if (q != quality) {
 			store.update(this, "quality", q);
 			setQuality(q);
+			updateStream();
 		}
 	}
 
@@ -187,6 +207,11 @@ public class FlowStreamImpl extends ControllerIoImpl implements FlowStream {
 	@Override
 	public int getQuality() {
 		return quality;
+	}
+
+	/** Get encoding quality */
+	private EncodingQuality getEncodingQuality() {
+		return EncodingQuality.fromOrdinal(quality);
 	}
 
 	/** Source camera */
@@ -203,6 +228,7 @@ public class FlowStreamImpl extends ControllerIoImpl implements FlowStream {
 		if (c != camera) {
 			store.update(this, "camera", c);
 			setCamera(c);
+			updateStream();
 		}
 	}
 
@@ -249,6 +275,7 @@ public class FlowStreamImpl extends ControllerIoImpl implements FlowStream {
 		if (!objectEquals(a, address)) {
 			store.update(this, "address", a);
 			setAddress(a);
+			updateStream();
 		}
 	}
 
@@ -272,6 +299,7 @@ public class FlowStreamImpl extends ControllerIoImpl implements FlowStream {
 		if (!objectEquals(p, port)) {
 			store.update(this, "port", p);
 			setPort(p);
+			updateStream();
 		}
 	}
 
@@ -297,5 +325,123 @@ public class FlowStreamImpl extends ControllerIoImpl implements FlowStream {
 	@Override
 	public int getStatus() {
 		return status;
+	}
+
+	/** Monitor camera */
+	private transient Camera mon_cam;
+
+	/** Set the monitor camera */
+	public void setMonCamera(Camera cam) {
+		mon_cam = isDisplayAllowed(cam) ? cam : null;
+		updateStream();
+	}
+
+	/** Get the monitor camera */
+	public Camera getMonCamera() {
+		return mon_cam;
+	}
+
+	/** Update the flow stream */
+	public void updateStream() {
+		FlowStreamPoller p = getFlowStreamPoller();
+		if (p != null)
+			p.sendFlow(this);
+	}
+
+	/** Get the flow stream poller */
+	private FlowStreamPoller getFlowStreamPoller() {
+		ControllerImpl c = controller;	// Avoid race
+		if (c != null) {
+			DevicePoller dp = c.getPoller();
+			if (dp instanceof FlowStreamPoller)
+				return (FlowStreamPoller) dp;
+		}
+		return null;
+	}
+
+	/** Get source URI */
+	public String getSourceUri() {
+		Camera cam = getMonCamera();
+		return (cam != null)
+		      ? getCameraUri(cam, null)
+		      : getCameraUri(camera, false);
+	}
+
+	/** Get a camera URI */
+	private String getCameraUri(Camera cam, Boolean flow_stream) {
+		EncodingQuality eq = getEncodingQuality();
+		return isDisplayAllowed(cam)
+		      ? CameraHelper.getUri(cam, eq, flow_stream)
+		      : CameraHelper.getBlankUrl();
+	}
+
+	/** Check if a camera is published or we're not restricted */
+	private boolean isDisplayAllowed(Camera cam) {
+		return (cam == null) || cam.getPublish() || !restricted;
+	}
+
+	/** Get source encoding */
+	public String getSourceEncoding() {
+		Camera cam = getMonCamera();
+		return (cam != null)
+		      ? getEncoding(cam, null)
+		      : getEncoding(camera, false);
+	}
+
+	/** Get camera stream encoding */
+	private String getEncoding(Camera cam, Boolean flow_stream) {
+		EncodingQuality eq = getEncodingQuality();
+		Encoding enc = CameraHelper.getEncoding(cam, eq, flow_stream);
+		return (enc != Encoding.UNKNOWN) ? enc.toString() : "PNG";
+	}
+
+	/** Get location overlay text */
+	public String getOverlayText() {
+		if (getLocOverlay()) {
+			Camera cam = getSourceCamera();
+			return (cam != null)
+			      ? GeoLocHelper.getLocation(cam.getGeoLoc())
+			      : "";
+		} else
+			return "";
+	}
+
+	/** Get the source camera */
+	private Camera getSourceCamera() {
+		Camera cam = getMonCamera();
+		return (cam != null) ? cam : camera;
+	}
+
+	/** Get the sink address */
+	public String getSinkAddress() {
+		String adr = getAddress();
+		if (adr != null)
+			return adr;
+		Camera cam = camera;
+		return (cam != null) ? cam.getEncMcast() : "";
+	}
+
+	/** Get the sink port */
+	public String getSinkPort() {
+		Integer p = getPort();
+		if (p != null)
+			return p.toString();
+		EncodingQuality eq = getEncodingQuality();
+		EncoderStream es = CameraHelper.getStream(camera, eq, true);
+		if (es != null) {
+			p = es.getMcastPort();
+			if (p != null)
+				return p.toString();
+		}
+		return "";
+	}
+
+	/** Get sink encoding */
+	public String getSinkEncoding() {
+		Camera cam = getMonCamera();
+		String enc = (cam != null)
+		      ? getEncoding(cam, null)
+		      : getEncoding(camera, true);
+		return ("PNG".equals(enc)) ? getSourceEncoding() : enc;
 	}
 }
