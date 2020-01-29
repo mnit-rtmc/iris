@@ -3,7 +3,7 @@
 A **flow stream** is a video stream which is not provided directly by a
 [camera], but by a [streambed] server.  They can be used to transcode from one
 video encoding to another, overlay text, or rebroadcast a unicast RTSP stream to
-a [multicast] address.
+a [multicast] address (with RTP).
 
 Streambed can run on one or more dedicated computers, and is controlled by IRIS
 through the `streambed` [protocol].  A [controller] and associated [comm link]
@@ -37,9 +37,18 @@ should be configured, but `monitor num` must be blank.
 The camera's [encoder type] must contain a [stream] with the same `quality`
 value, but with `flow stream` unchecked.  That stream defines the _source_.
 
-If `address` and `port` are specified, they define the _sink_.  Otherwise, it is
-defined by a stream of the camera's encoder type with `flow stream` checked and
-a matching `quality` value.
+## Camera Sink
+
+With a camera source, the _sink_ is normally defined by the camera's encoder
+type.  It must contain a stream with `flow stream` checked and a `quality`
+that matches the flow stream.
+
+If the sink _encoding_ is different than the source encoding,  the flow stream
+will be _transcoded_.  Warning: this requires more CPU time than simply
+rebroadcasting.
+
+The camera sink uses RTP, sent to the camera's multicast address with the
+stream's multicast port.
 
 ## Video Monitor Source
 
@@ -52,13 +61,12 @@ number.  That camera's [encoder type] must contain a [stream] with the same
 `quality` value.  If multiple streams match, the one with `flow stream` checked
 is used.
 
-The `address` and `port` fields define the _sink_.
+## Static Sink
 
-## Transcoding
+For either type of source, if `address` and `port` are specified, they define a
+static _sink_, using RTP.
 
-If the _sink_ encoding is different than the _source_, the flow stream will be
-_transcoded_ by streambed.  Warning: transcoding requires more CPU time than
-simply rebroadcasting.
+The encoding will be the same as the source encoding.
 
 
 [camera]: cameras.html
