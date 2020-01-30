@@ -36,6 +36,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -61,6 +62,7 @@ import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.Icons;
+import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -82,6 +84,13 @@ public class WMsgEditorForm extends AbstractForm {
 	private SignGroup sg;
 	private QuickMessage qm;
 	
+	/* Currently selected page (defaults to first available) */
+	private WMsgSignPage selectedPage;
+	private JLabel pg_num_lbl;
+	
+	/* Menu Bar */
+	private WMsgEditorMenuBar menu_bar;
+	
 	/* Beacon and Prefix Check Boxes */ 
 	private JCheckBox beacon_chk; 
 	private JCheckBox prefix_chk;
@@ -98,6 +107,9 @@ public class WMsgEditorForm extends AbstractForm {
 	private JButton page_mv_up_btn;
 	private JButton page_mv_down_btn;
 	private JList<WMsgSignPage> page_list;
+	
+	/* Main Editor Panel */
+	private WMsgEditorPanel editor;
 	
 	/** Buttons */
 	private JButton preview_btn;
@@ -157,6 +169,9 @@ public class WMsgEditorForm extends AbstractForm {
 		// TODO may want to change these dimensions
 		setPreferredSize(new Dimension(800,400));
 		
+		/* Menu Bar */
+		menu_bar = new WMsgEditorMenuBar();
+		
 		/* Beacon and Prefix Check Boxes */ 
 		beacon_chk = new JCheckBox(); 
 		prefix_chk = new JCheckBox();
@@ -192,6 +207,9 @@ public class WMsgEditorForm extends AbstractForm {
 			dms_list.addActionListener(new SignSelectionListener());
 		}
 		
+		/* Page number label (default to 1) */
+		pg_num_lbl = new JLabel(String.format(I18N.get("wysiwyg.editor.page_number"), 1));
+		
 		/* Page buttons */
 		page_add_btn = new JButton(pageAdd);
 		ImageIcon pg_add_icon = Icons.getIconByPropName("wysiwyg.editor.page_add");
@@ -212,6 +230,9 @@ public class WMsgEditorForm extends AbstractForm {
 		ImageIcon pg_mv_down_icon = Icons.getIconByPropName("wysiwyg.editor.page_move_down");
 		page_mv_down_btn.setIcon(pg_mv_down_icon);
 		page_mv_down_btn.setHideActionText(true);
+		
+		/* Main Editor Panel */
+		editor = new WMsgEditorPanel(this);
 		
 		/* Buttons - TODO finish implementing */
 		preview_btn = new JButton(preview);
@@ -241,6 +262,7 @@ public class WMsgEditorForm extends AbstractForm {
 		/* Beacon Label */
 		gbc.gridx = 0;
 		gbc.gridy = 0;
+		gbc.gridwidth = 1;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		p.add(new JLabel(I18N.get("wysiwyg.editor.beacon")), gbc);
 		
@@ -277,9 +299,7 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.gridy = 1;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
-		
-		// TODO placeholder - this needs to be connected to the controller
-		p.add(new JLabel(I18N.get("wysiwyg.editor.page") + " 1"), gbc);
+		p.add(pg_num_lbl, gbc);
 		
 		/* Page List Label */
 		gbc.gridx = 0;
@@ -312,30 +332,11 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		
-		// TODO PLACEHOLDER
-		
-		// TODO use MultiString object (see below) to get page information and
-		// pack into scroll pane - need to figure out how RasterGraphics work 
-		
 		// TODO this needs to update when the sign changes (for sign groups)
-		
-//		updatePageList();
-		// reset the list
-//		page_btn_pnl = new JPanel();
-//		page_btn_pnl.setPreferredSize(new Dimension(100,200));
 		
 		// get the pages for the message
 		String ms = qm.getMulti();
 		MultiString mso = new MultiString(ms);
-		
-//		page_btn_pnl.setLayout(new GridLayout(mso.getNumPages(), 1));
-//		for (int i = 0; i < mso.getNumPages(); i++) {
-//			WMsgSignPage wm = new WMsgSignPage(sign, mso, i);
-//			SignFacePanel sf = new SignFacePanel();
-//			SignPixelPanel sp = sf.setSign(sign);
-//			sp.setGraphic(wm.getPageRaster());
-//			page_btn_pnl.add(sf);
-//		}
 		
 		updatePageList();
 		System.out.println(page_list.getModel().getSize());
@@ -343,7 +344,6 @@ public class WMsgEditorForm extends AbstractForm {
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), gbc);
 		initPageSelector();
-//		p.add(new WMsgSignPagePanel(session, sign, mso, 0));
 		
 		/* Editor (will be a GBL itself) */
 		gbc.gridx = 4;
@@ -351,26 +351,22 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.gridheight = 3;
 		gbc.gridwidth = 6;
 		gbc.fill = GridBagConstraints.BOTH;
-
-		// TODO PLACEHOLDER
-		/*p.add(new JScrollPane(new JList<String>(),
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), gbc);*/
 		
-		SignFacePanel sfp = new SignFacePanel();
-		SignPixelPanel spp = sfp.setSign(sign);
-		RasterBuilder rb = DMSHelper.createRasterBuilder(sign);
-//		String ms = qm.getMulti();
-//		MultiString mso = new MultiString(ms);
-		
-		RasterGraphic[] rg = null;
-		try {
-			rg = rb.createPixmaps(mso);
-		} catch (IndexOutOfBoundsException e) {
-		} catch (InvalidMsgException e) {
-		}
-		DMSPanelPager dpp = new DMSPanelPager(spp, rg, ms);
-		p.add(sfp, gbc);
+//		SignFacePanel sfp = new SignFacePanel();
+//		SignPixelPanel spp = sfp.setSign(sign);
+//		RasterBuilder rb = DMSHelper.createRasterBuilder(sign);
+////		String ms = qm.getMulti();
+////		MultiString mso = new MultiString(ms);
+//		
+//		RasterGraphic[] rg = null;
+//		try {
+//			rg = rb.createPixmaps(mso);
+//		} catch (IndexOutOfBoundsException e) {
+//		} catch (InvalidMsgException e) {
+//		}
+//		DMSPanelPager dpp = new DMSPanelPager(spp, rg, ms);
+//		p.add(sfp, gbc);
+		p.add(editor, gbc);
 		
 		/* Preview Button */
 		gbc.gridx = 6;
@@ -408,6 +404,11 @@ public class WMsgEditorForm extends AbstractForm {
 		add(p);
 	}
 	
+	/** Set the menu bar of the frame (which should be this form's frame. */
+	public void setMenuBar(JInternalFrame frame) {
+		frame.setJMenuBar(menu_bar);
+	}
+	
 	/** Initialize the page selection handler. */
 	private void initPageSelector() {
 		page_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -419,8 +420,10 @@ public class WMsgEditorForm extends AbstractForm {
 					int indx = lsm.getMinSelectionIndex();
 					
 					if (indx != -1) {
-						WMsgSignPage sp = page_list.getModel().getElementAt(indx);
-						System.out.println(String.format("Selected page %s", sp.getPageNumberLabel()));
+						selectedPage = page_list.getModel().getElementAt(indx);
+						System.out.println(String.format("Selected page %s",
+								selectedPage.getPageNumberLabel()));
+						pg_num_lbl.setText(selectedPage.getPageNumberLabel());
 					}
 				}
 			}
@@ -446,6 +449,12 @@ public class WMsgEditorForm extends AbstractForm {
 		// set the renderer on the list
 		ListCellRenderer rndr = new WMsgSignPageListRenderer();
 		page_list.setCellRenderer(rndr);
+		
+		// set the selected page if one isn't selected
+		if (selectedPage == null) {
+			selectedPage = (WMsgSignPage) model.get(0);
+			pg_num_lbl.setText(selectedPage.getPageNumberLabel());
+		}
 	}
 
 	/** Page Add action */
