@@ -420,7 +420,12 @@ public class FlowStreamImpl extends ControllerIoImpl implements FlowStream {
 		if (adr != null)
 			return adr;
 		Camera cam = camera;
-		return (cam != null) ? cam.getEncMcast() : "";
+		if (cam != null) {
+			adr = cam.getEncMcast();
+			if (adr != null)
+				return adr;
+		}
+		return "";
 	}
 
 	/** Get the sink port */
