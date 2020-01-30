@@ -36,6 +36,7 @@ import javax.swing.BoxLayout;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -998,7 +999,9 @@ public class WMsgSelectorForm extends AbstractForm {
 		
 		// launch the editor
 		SmartDesktop desktop = s.getDesktop();
-		desktop.show(new WMsgEditorForm(s, qm, sign));
+		WMsgEditorForm editor = new WMsgEditorForm(s, qm, sign);
+		JInternalFrame frame = desktop.show(editor);
+		editor.setMenuBar(frame);
 	}	
 	
 	/** Edit an existing message for a sign group */
@@ -1007,7 +1010,9 @@ public class WMsgSelectorForm extends AbstractForm {
 
 		// launch the editor
 		SmartDesktop desktop = s.getDesktop();
-		desktop.show(new WMsgEditorForm(s, qm, sg));
+		WMsgEditorForm editor = new WMsgEditorForm(s, qm, sg);
+		JInternalFrame frame = desktop.show(editor);
+		editor.setMenuBar(frame);
 	}
 	
 	/** Clone a message for a sign */
