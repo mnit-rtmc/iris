@@ -50,7 +50,7 @@ public class EncoderStreamHelper extends BaseHelper {
 
 	/** Find the best matching encoder stream.
 	 * @param et Encoder type.
-	 * @param eq Encoding quality (null for any).
+	 * @param eq Best allowed encoding quality (null for any).
 	 * @param mcast Allow multicast.
 	 * @param flow_stream Flow stream (null for any). */
 	static EncoderStream find(EncoderType et, EncodingQuality eq,
@@ -65,8 +65,7 @@ public class EncoderStreamHelper extends BaseHelper {
 				continue;
 			if (es.getViewNum() != null)
 				continue;
-			if (eq != null &&
-			    eq != EncodingQuality.fromOrdinal(es.getQuality()))
+			if (eq != null && eq.ordinal() >= es.getQuality())
 				continue;
 			if (isMcast(es) && !mcast)
 				continue;

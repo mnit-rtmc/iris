@@ -227,7 +227,7 @@ public class CameraHelper extends BaseHelper {
 
 	/** Get an encoder stream for a camera.
 	 * @param c Camera for stream.
-	 * @param eq Encoding quality (null for any).
+	 * @param eq Best allowed encoding quality (null for any).
 	 * @param flow_stream Flow stream (null for any). */
 	static public EncoderStream getStream(Camera c, EncodingQuality eq,
 		Boolean flow_stream)
@@ -245,7 +245,7 @@ public class CameraHelper extends BaseHelper {
 
 	/** Get an encoder stream for a camera.
 	 * @param c Camera for stream.
-	 * @param eq Encoding quality (null for any). */
+	 * @param eq Best allowed encoding quality (null for any). */
 	static private EncoderStream getStream(Camera c, EncodingQuality eq) {
 		return getStream(c, eq, null);
 	}
@@ -341,7 +341,7 @@ public class CameraHelper extends BaseHelper {
 
 	/** Get a camera URI.
 	 * @param cam The camera.
-	 * @param eq Encoding quality (null for any).
+	 * @param eq Best allowed encoding quality (null for any).
 	 * @param flow_stream Flow stream (null for any). */
 	static public String getUri(Camera cam, EncodingQuality eq,
 		Boolean flow_stream)
@@ -353,13 +353,6 @@ public class CameraHelper extends BaseHelper {
 			return cond;
 		EncoderStream es = getStream(cam, eq, flow_stream);
 		return encoderUri(cam, es).toString();
-	}
-
-	/** Get a camera URI.
-	 * @param cam The camera.
-	 * @param eq Encoding quality (null for any). */
-	static public String getUri(Camera cam, EncodingQuality eq) {
-		return getUri(cam, eq, null);
 	}
 
 	/** Get a camera URI.
