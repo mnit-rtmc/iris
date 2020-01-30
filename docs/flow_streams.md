@@ -66,7 +66,9 @@ is used.
 For either type of source, if `address` and `port` are specified, they define a
 static _sink_, using RTP.
 
-The encoding will be the same as the source encoding.
+A static sink encoding is:
+* same as the source encoding for a _camera source_
+* _h.264_ for a _video monitor source_
 
 
 [camera]: cameras.html

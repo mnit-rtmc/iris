@@ -447,7 +447,7 @@ public class FlowStreamImpl extends ControllerIoImpl implements FlowStream {
 	public String getSinkEncoding() {
 		Camera cam = getMonCamera();
 		String enc = (cam != null)
-		      ? getEncoding(cam, null)
+		      ? Encoding.H264.toString()
 		      : getEncoding(camera, true);
 		if ("PNG".equals(enc))
 			enc = getSourceEncoding();
