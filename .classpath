@@ -10,6 +10,6 @@
 	<classpathentry kind="lib" path="lib/postgresql-42.2.5.jar"/>
 	<classpathentry kind="lib" path="etc/i18n"/>
 	<classpathentry kind="lib" path="images"/>
-	<classpathentry kind="lib" path="C:/Users/gparikh/MnDOT-iris/iris/prop.jar"/>
+	<classpathentry kind="lib" path="prop.jar"/>
 	<classpathentry kind="output" path="bin/eclipse"/>
 </classpath>
