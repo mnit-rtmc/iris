@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2019  SRF Consulting Group
+ * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -128,34 +128,4 @@ public class WMsgSignPageListRenderer extends JPanel implements ListCellRenderer
 		pixel_pnl.setGraphic(sp.getPageRaster());
 		info_lbl.setText(sp.getPageInfo());
 	}
-	
-//	/** Get the table cell renderer component */
-//	@Override
-//	public Component getListCellRendererComponent(JList list, Object value,
-//		int index, boolean isSelected, boolean hasFocus)
-//	{
-//		JLabel lbl = (JLabel)super.getListCellRendererComponent(list,
-//			value, index, isSelected, hasFocus);
-//		Component c = null;
-//		if (value instanceof WMsgSignPage) {
-//			WMsgSignPage sp = (WMsgSignPage) value;
-////			lbl.setIcon(sp.getPageRaster());
-//			c = sp.getSignFacePanel();
-//		}
-//		
-//		
-////		} else
-////			lbl.setIcon(null);
-////		return lbl;
-//		
-//		if (isSelected) {
-//			setBackground(list.getSelectionBackground());
-//			setForeground(list.getSelectionForeground());
-//		} else {
-//			setBackground(list.getBackground());
-//			setForeground(list.getForeground());			
-//		}
-//		
-//		return lbl;
-//	}
 }
