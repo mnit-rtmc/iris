@@ -65,7 +65,7 @@ public class EncoderStreamHelper extends BaseHelper {
 				continue;
 			if (es.getViewNum() != null)
 				continue;
-			if (eq != null && eq.ordinal() >= es.getQuality())
+			if (eq != null && eq.ordinal() < es.getQuality())
 				continue;
 			if (isMcast(es) && !mcast)
 				continue;
