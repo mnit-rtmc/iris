@@ -122,10 +122,7 @@ public class WMsgSignPageListRenderer extends JPanel implements ListCellRenderer
 	/** Render the Sign Page */
 	private void renderSignPage(WMsgSignPage sp) {
 		pgnum_lbl.setText(sp.getPageNumberLabel());
-		DMS dms = sp.getDMS();
-		pixel_pnl.setFilterColor(SignPixelPanel.filterColor(dms));
-		pixel_pnl.setDimensions(dms.getSignConfig());
-		pixel_pnl.setGraphic(sp.getPageRaster());
+		sp.renderToPanel(pixel_pnl);
 		info_lbl.setText(sp.getPageInfo());
 	}
 }

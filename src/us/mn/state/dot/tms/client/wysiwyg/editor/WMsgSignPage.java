@@ -124,6 +124,13 @@ public class WMsgSignPage extends Component {
 		return sp;
 	}
 	
+	/* Render the page on the panel provided */
+	public void renderToPanel(SignPixelPanel spp) {
+		spp.setFilterColor(SignPixelPanel.filterColor(sign));
+		spp.setDimensions(sign.getSignConfig());
+		spp.setGraphic(getPageRaster());
+	}
+	
 	public DMS getDMS() {
 		return sign;
 	}
