@@ -167,7 +167,7 @@ public class WMsgEditorForm extends AbstractForm {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		
 		// TODO may want to change these dimensions
-		setPreferredSize(new Dimension(800,400));
+		setPreferredSize(new Dimension(800,500));
 		
 		/* Menu Bar */
 		menu_bar = new WMsgEditorMenuBar();
@@ -424,6 +424,7 @@ public class WMsgEditorForm extends AbstractForm {
 						System.out.println(String.format("Selected page %s",
 								selectedPage.getPageNumberLabel()));
 						pg_num_lbl.setText(selectedPage.getPageNumberLabel());
+						updateWysiwygPanel();
 					}
 				}
 			}
@@ -454,7 +455,15 @@ public class WMsgEditorForm extends AbstractForm {
 		if (selectedPage == null) {
 			selectedPage = (WMsgSignPage) model.get(0);
 			pg_num_lbl.setText(selectedPage.getPageNumberLabel());
+			updateWysiwygPanel();
 		}
+	}
+	
+	/** Update the main WYSIWYG panel with any changes from the editor form */
+	private void updateWysiwygPanel() {
+		// use the currently selected page to update the main WYSIWYG panel
+		if (selectedPage != null)
+			editor.updateWysiwygSignPage(selectedPage);
 	}
 
 	/** Page Add action */

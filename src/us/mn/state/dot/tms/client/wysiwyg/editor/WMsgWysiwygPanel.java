@@ -43,6 +43,7 @@ import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.SignFacePanel;
+import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.Icons;
@@ -78,9 +79,11 @@ public class WMsgWysiwygPanel extends JPanel {
 	private JPanel text_option_pnl;
 	private JComboBox<String> font_options;
 	
-	// TODO color pickers (gets complicated)
+	/* Color Pickers */
 	private JButton fg_color_btn;
 	private Color fgColor;
+	private JButton bg_color_btn;
+	private Color bgColor;
 	
 	/* Justify Buttons */
 	private JPanel text_vjust_btn_pnl;
@@ -95,9 +98,8 @@ public class WMsgWysiwygPanel extends JPanel {
 	private JToggleButton text_hjust_right_btn;
 	
 	/* The Panel */
-	// TODO temporary
-	private SignFacePanel sfp = new SignFacePanel();
-	
+	/** Sign pixel panel to display the current sign message page */
+	private final SignPixelPanel pixel_pnl = new SignPixelPanel(250, 550);
 	
 	public WMsgWysiwygPanel(WMsgEditorForm f) {
 		form = f;
@@ -120,7 +122,7 @@ public class WMsgWysiwygPanel extends JPanel {
 		mode_btn_grp.add(multitag_mode_btn);
 		
 		// now I guess we need to create a panel too...
-		mode_btn_pnl = new JPanel();
+		mode_btn_pnl = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		mode_btn_pnl.setLayout(new BoxLayout(mode_btn_pnl, BoxLayout.X_AXIS));
 		mode_btn_pnl.add(text_mode_btn);
 		mode_btn_pnl.add(graphic_mode_btn);
@@ -140,7 +142,14 @@ public class WMsgWysiwygPanel extends JPanel {
 		fgColor = Color.decode("#FFD000");
 		fg_color_btn = new JButton(open_fg_color_picker);
 		fg_color_btn.setIcon(createColorIcon(fgColor, 16, 16));
+		fg_color_btn.setMargin(new Insets(0,0,0,0));
 		text_option_pnl.add(fg_color_btn);
+		
+		bgColor = Color.decode("#000000");
+		bg_color_btn = new JButton(open_bg_color_picker);
+		bg_color_btn.setIcon(createColorIcon(bgColor, 16, 16));
+		bg_color_btn.setMargin(new Insets(0,0,0,0));
+		text_option_pnl.add(bg_color_btn);
 		
 		// justification buttons
 		text_vjust_btn_grp = new ButtonGroup();
@@ -206,10 +215,16 @@ public class WMsgWysiwygPanel extends JPanel {
 		text_hjust_btn_pnl.add(text_hjust_right_btn);
 		text_option_pnl.add(text_hjust_btn_pnl);
 		
-		
 		add(text_option_pnl);
 		
-		// 
+		// sign face panel - the main show
+		add(pixel_pnl);
+	}
+	
+	/** Set the currently selected page to display */
+	public void setPage(WMsgSignPage sp) {
+		// update the rendering on the pixel panel
+		sp.renderToPanel(pixel_pnl);
 	}
 	
 	/***** Button Actions *****/
@@ -267,17 +282,35 @@ public class WMsgWysiwygPanel extends JPanel {
 		}
 	};
 	
-	/** Text vertical justify top action */
+	/** Foreground color picker action */
 	private final IAction open_fg_color_picker = new IAction("wysiwyg.epanel.fg_color_picker_btn") {
 		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
 		{
+			// TODO change this so it handles things better (whatever that means...)
+			
 			Color newColor = JColorChooser.showDialog(null,
 					I18N.get("wysiwyg.epanel.fg_color_picker_title"),
 					fgColor);
 			fgColor = newColor;
 			fg_color_btn.setIcon(createColorIcon(fgColor, 16, 16));
+		}
+	};
+	
+	/** Background color picker action */
+	private final IAction open_bg_color_picker = new IAction("wysiwyg.epanel.bg_color_picker_btn") {
+		@SuppressWarnings("synthetic-access")
+		protected void doActionPerformed(ActionEvent e)
+				throws Exception
+		{
+			// TODO change this so it handles things better (whatever that means...)
+			
+			Color newColor = JColorChooser.showDialog(null,
+					I18N.get("wysiwyg.epanel.bg_color_picker_title"),
+					bgColor);
+			bgColor = newColor;
+			bg_color_btn.setIcon(createColorIcon(bgColor, 16, 16));
 		}
 	};
 	
