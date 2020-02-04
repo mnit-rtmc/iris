@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.client.widget.IMenu;
 public class WMsgHelpMenu extends IMenu {
 	/** Create a new help menu */
 	public WMsgHelpMenu() {
-		super("wysiwyg.editor.menu.edit");
+		super("wysiwyg.editor.menu.help");
 		
 		// TODO
 		addItem(createPlaceholderItem());
