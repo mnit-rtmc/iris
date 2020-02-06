@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2018  SRF Consulting Group
+ * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -773,6 +773,28 @@ public class WMsgSelectorForm extends AbstractForm {
 		gbc.weightx = 1;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		p.add(status_msg, gbc);
+		
+		/* TODO add a preview pane to the right of the message list that shows
+		 * the selected message on the selected sign (and sign group, somehow).
+		 * Use the panel pager like below so multiple pages show up if
+		 * applicable (this is old test code from editor, it probably won't
+		 * look too much like this). 
+		 */
+
+//		SignFacePanel sfp = new SignFacePanel();
+//		SignPixelPanel spp = sfp.setSign(sign);
+//		RasterBuilder rb = DMSHelper.createRasterBuilder(sign);
+////		String ms = qm.getMulti();
+////		MultiString mso = new MultiString(ms);
+//		
+//		RasterGraphic[] rg = null;
+//		try {
+//			rg = rb.createPixmaps(mso);
+//		} catch (IndexOutOfBoundsException e) {
+//		} catch (InvalidMsgException e) {
+//		}
+//		DMSPanelPager dpp = new DMSPanelPager(spp, rg, ms);
+//		p.add(sfp, gbc);
 		
 		add(p);
 	}
