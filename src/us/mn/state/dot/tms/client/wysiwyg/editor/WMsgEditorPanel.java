@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import us.mn.state.dot.tms.client.dms.SignFacePanel;
+import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -30,13 +31,6 @@ import us.mn.state.dot.tms.utils.I18N;
 
 
 public class WMsgEditorPanel extends JPanel {
-
-	// TODO TODO TODO
-	
-	/** Handle to the main form 
-	 *  TODO we may not keep this */
-	private WMsgEditorForm form;
-	
 	/** WController for updating renderings */
 	private WController controller;
 	
@@ -49,15 +43,14 @@ public class WMsgEditorPanel extends JPanel {
 	
 	// TODO - warnings and errors (should be dynamic)
 	
-	public WMsgEditorPanel(WMsgEditorForm f) {
-		form = f;
-		controller = form.getController();
+	public WMsgEditorPanel(WController c) {
+		controller = c;
 		
 		// create the tab pane and the tabs
 		tab_pane = new JTabbedPane(JTabbedPane.TOP);
 		
 		// generate each tab
-		wysiwyg_pnl = new WMsgWysiwygPanel(form);
+		wysiwyg_pnl = new WMsgWysiwygPanel(controller);
 		multi_pnl = new WMsgMultiPanel(controller);
 		config_pnl = new JPanel();					// TODO
 		
@@ -77,5 +70,9 @@ public class WMsgEditorPanel extends JPanel {
 		wysiwyg_pnl.setPage(sp);
 	}
 
+	/** Get the pixel panel from the WYSIWYG editor panel */
+	public SignPixelPanel getEditorPixelPanel() {
+		return wysiwyg_pnl.getEditorPixelPanel(); 
+	}
 }
 

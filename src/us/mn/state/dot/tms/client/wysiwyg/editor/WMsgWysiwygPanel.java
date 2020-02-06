@@ -65,7 +65,7 @@ public class WMsgWysiwygPanel extends JPanel {
 	 * that to the controller (eventually), which should be a better state
 	 * manager
 	 */
-	private WMsgEditorForm form;
+	private WController controller;
 	
 	/* Mode buttons - Button group and toggle buttons */
 	private JPanel mode_btn_pnl;
@@ -102,8 +102,8 @@ public class WMsgWysiwygPanel extends JPanel {
 	/** Sign pixel panel to display the current sign message page */
 	private final SignPixelPanel pixel_pnl = new SignPixelPanel(250, 550);
 	
-	public WMsgWysiwygPanel(WMsgEditorForm f) {
-		form = f;
+	public WMsgWysiwygPanel(WController c) {
+		controller = c;
 		
 		// use a box layout to put components in a column
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -230,8 +230,7 @@ public class WMsgWysiwygPanel extends JPanel {
 		 * left edge of the sign...
 		 */
 		
-		WMsgMouseInputAdapter mouseHandler = new WMsgMouseInputAdapter(form);
-		
+		WMsgMouseInputAdapter mouseHandler = new WMsgMouseInputAdapter(controller);
 		pixel_pnl.addMouseListener(mouseHandler);
 		pixel_pnl.addMouseMotionListener(mouseHandler);
 	}
@@ -240,13 +239,11 @@ public class WMsgWysiwygPanel extends JPanel {
 	public void setPage(WMsgSignPage sp) {
 		// update the rendering on the pixel panel
 		sp.renderToPanel(pixel_pnl);
-		
-		AffineTransform t = pixel_pnl.getTransform();
-		if (t != null) {
-			double tx = t.getTranslateX();
-			double ty = t.getTranslateY();
-			System.out.println(String.format("Translating pixel_pnl by (%f, %f) ...", tx, ty));
-		}
+	}
+	
+	/** Get the pixel panel from the WYSIWYG editor panel */
+	public SignPixelPanel getEditorPixelPanel() {
+		return pixel_pnl; 
 	}
 	
 	/***** Button Actions *****/

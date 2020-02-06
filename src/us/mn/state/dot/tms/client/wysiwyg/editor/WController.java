@@ -17,6 +17,9 @@ package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,6 +30,7 @@ import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -130,6 +134,77 @@ public class WController {
 	/** Change the sign being used */
 	public void setSign(DMS d) {
 		sign = d;
+	}
+	
+	/** Use the AffineTransform object from the editor's SignPixelPanel to
+	 *  calculate the coordinates of the click on the sign itself, rather than
+	 *  the JPanel in which it resides.
+	 */
+	private Point2D transformSignCoordinates(int x, int y) {
+		// update the editor to make sure everything is in place
+		update();
+		
+		// get the AffineTransform object from the pixel panel
+		AffineTransform t = editor.getEditorPixelPanel().getTransform();
+		
+		// calculate the adjusted coordinates of the click
+		if (t != null) {
+			int tx = (int) t.getTranslateX();
+			int ty = (int) t.getTranslateY();
+			return new Point2D.Double(x-tx, y-ty);
+		} else { return null; }
+	}
+	
+	/** Handle a click on the main editor panel */
+	public void handleClick(MouseEvent e) {
+		// calculate the adjusted coordinates of the click
+		Point2D pSign = transformSignCoordinates(e.getX(), e.getY());
+		
+		// just print for now
+		if (pSign != null) {
+			int b = e.getButton();
+			int x = (int) pSign.getX();
+			int y = (int) pSign.getY();
+			System.out.println(String.format(
+					"Mouse button %d clicked at (%d, %d) ...", b, x, y));
+		}
+	}
+	
+	/** Handle a mouse move event on the main editor panel */
+	public void handleMouseMove(MouseEvent e) {
+		// calculate the adjusted coordinates of the mouse pointer
+		Point2D pSign = transformSignCoordinates(e.getX(), e.getY());
+		
+		// just print for now
+		if (pSign != null) {
+			int x = (int) pSign.getX();
+			int y = (int) pSign.getY();
+//			System.out.println(String.format(
+//					"Mouse moved to (%d, %d) ...", x, y));
+		}
+	}
+	
+	/** Handle a mouse drag event on the main editor panel */
+	public void handleMouseDrag(MouseEvent e) {
+		// calculate the adjusted coordinates of the mouse pointer
+		Point2D pSign = transformSignCoordinates(e.getX(), e.getY());
+		
+		// figure out what button was pressed when dragging
+		String b = "";
+		if (SwingUtilities.isLeftMouseButton(e))
+			b = "left";
+		else if (SwingUtilities.isRightMouseButton(e))
+			b = "right";
+		else if (SwingUtilities.isMiddleMouseButton(e))
+			b = "middle";
+		
+		// just print for now
+		if (pSign != null) {
+			int x = (int) pSign.getX();
+			int y = (int) pSign.getY();
+//			System.out.println(String.format(
+//					"Mouse dragged with %s button to (%d, %d) ...", b, x, y));
+		}
 	}
 	
 	/** Return a JList of WMsgSignPage objects from the selected/created message */

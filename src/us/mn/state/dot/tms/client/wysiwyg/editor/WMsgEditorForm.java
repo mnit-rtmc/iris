@@ -226,7 +226,7 @@ public class WMsgEditorForm extends AbstractForm {
 		page_mv_down_btn.setMargin(new Insets(0,0,0,0));
 		
 		/* Main Editor Panel */
-		epanel = new WMsgEditorPanel(this);
+		epanel = new WMsgEditorPanel(controller);
 		
 		/* Buttons - TODO finish implementing */
 		preview_btn = new JButton(preview);
@@ -371,6 +371,11 @@ public class WMsgEditorForm extends AbstractForm {
 	/** Get the WController for this form */
 	public WController getController() {
 		return controller;
+	}
+
+	/** Get the pixel panel from the WYSIWYG editor panel */
+	public SignPixelPanel getEditorPixelPanel() {
+		return epanel.getEditorPixelPanel();
 	}
 	
 	/** Set the menu bar of the frame (which should be this form's frame. */
