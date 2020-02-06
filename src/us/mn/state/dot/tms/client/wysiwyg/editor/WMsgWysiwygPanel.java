@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2018  SRF Consulting Group
+ * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.awt.event.ActionEvent;
+import java.awt.geom.AffineTransform;
 
 import javax.swing.JPanel;
 import javax.swing.BoxLayout;
@@ -121,9 +122,8 @@ public class WMsgWysiwygPanel extends JPanel {
 		mode_btn_grp.add(textrect_mode_btn);
 		mode_btn_grp.add(multitag_mode_btn);
 		
-		// now I guess we need to create a panel too...
-		mode_btn_pnl = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		mode_btn_pnl.setLayout(new BoxLayout(mode_btn_pnl, BoxLayout.X_AXIS));
+		// now we need to create a panel too...
+		mode_btn_pnl = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		mode_btn_pnl.add(text_mode_btn);
 		mode_btn_pnl.add(graphic_mode_btn);
 		mode_btn_pnl.add(colorrect_mode_btn);
@@ -219,12 +219,34 @@ public class WMsgWysiwygPanel extends JPanel {
 		
 		// sign face panel - the main show
 		add(pixel_pnl);
+		
+		// mouse input adapter for handling mouse events
+		
+		/* TODO just for testing - need to figure out how to deal with
+		 * component focus, etc. - we can probably reuse the same mouse
+		 * listener class and give it different components or something...
+		 * TODO there's also a coordinate issue with the pixel_pnl geometry,
+		 * since it maintains aspect ratio and X = 0 is not necessarily the
+		 * left edge of the sign...
+		 */
+		
+		WMsgMouseInputAdapter mouseHandler = new WMsgMouseInputAdapter(form);
+		
+		pixel_pnl.addMouseListener(mouseHandler);
+		pixel_pnl.addMouseMotionListener(mouseHandler);
 	}
 	
 	/** Set the currently selected page to display */
 	public void setPage(WMsgSignPage sp) {
 		// update the rendering on the pixel panel
 		sp.renderToPanel(pixel_pnl);
+		
+		AffineTransform t = pixel_pnl.getTransform();
+		if (t != null) {
+			double tx = t.getTranslateX();
+			double ty = t.getTranslateY();
+			System.out.println(String.format("Translating pixel_pnl by (%f, %f) ...", tx, ty));
+		}
 	}
 	
 	/***** Button Actions *****/

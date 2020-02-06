@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2019  SRF Consulting Group
+ * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import java.awt.Component;
+import java.util.IllegalFormatException;
 
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -141,7 +142,11 @@ public class WMsgSignPage extends Component {
 	
 	public String getPageNumberLabel() {
 		// add 1 to the page number since it's 0 indexed here
-		return String.format(I18N.get("wysiwyg.editor.page_number"), pn+1);
+		try {
+			return String.format(I18N.get("wysiwyg.editor.page_number"), pn+1);
+		} catch (IllegalFormatException e) {
+			return "Page" + pn+1;
+		}
 	}
 	
 	/** Get information about the page. For now just on/off times. */

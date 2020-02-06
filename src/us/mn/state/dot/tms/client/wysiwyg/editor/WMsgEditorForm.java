@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2019  SRF Consulting Group
+ * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ import us.mn.state.dot.tms.utils.MultiString;
 /**
  * WYSIWYG DMS Message Editor Form
  *
- * @author Gordon Parikh, John L. Stanley, and Michael Janson - SRF Consulting
+ * @author Gordon Parikh and John L. Stanley - SRF Consulting
  */
 @SuppressWarnings("serial")
 
@@ -84,8 +85,14 @@ public class WMsgEditorForm extends AbstractForm {
 	private SignGroup sg;
 	private QuickMessage qm;
 	
+	/* what "mode" (single sign or sign group) we're in */ 
+	Boolean singleSign;
+	
+	/* Controller - for handling back and forth between the GUI and renderer */
+	WController controller;
+	
 	/* Currently selected page (defaults to first available) */
-	private WMsgSignPage selectedPage;
+//	private WMsgSignPage selectedPage;
 	private JLabel pg_num_lbl;
 	
 	/* Menu Bar */
@@ -95,9 +102,7 @@ public class WMsgEditorForm extends AbstractForm {
 	private JCheckBox beacon_chk; 
 	private JCheckBox prefix_chk;
 
-	/* Sign group drop-down (not always present) */
-	private Map<String,DMS> dmsList = new HashMap<String,DMS>();
-	private String[] dmsNames;
+	/* Sign drop-down (only present for groups) */
 	private JComboBox<String> dms_list;
 	
 	/* Page List */
@@ -107,9 +112,10 @@ public class WMsgEditorForm extends AbstractForm {
 	private JButton page_mv_up_btn;
 	private JButton page_mv_down_btn;
 	private JList<WMsgSignPage> page_list;
+	private JScrollPane page_list_pn;
 	
 	/* Main Editor Panel */
-	private WMsgEditorPanel editor;
+	private WMsgEditorPanel epanel;
 	
 	/** Buttons */
 	private JButton preview_btn;
@@ -121,6 +127,7 @@ public class WMsgEditorForm extends AbstractForm {
 		// TODO need to add the message name to the title (somehow...)
 		super(getWindowTitle(null), true);
 		session = s;
+		controller = new WController(this);
 		initForm();
 	}
 	
@@ -131,6 +138,8 @@ public class WMsgEditorForm extends AbstractForm {
 		super(getWindowTitle(null), true);
 		session = s;
 		sign = d;
+		singleSign = true;
+		controller = new WController(this, sign);
 		initForm();
 	}
 	
@@ -138,6 +147,8 @@ public class WMsgEditorForm extends AbstractForm {
 		super(getWindowTitle(null), true);
 		session = s;
 		sg = g;
+		singleSign = false;
+		controller = new WController(this, sg);
 		initForm();
 	}
 	
@@ -146,6 +157,8 @@ public class WMsgEditorForm extends AbstractForm {
 		session = s;
 		sign = d;
 		qm = q;
+		singleSign = true;
+		controller = new WController(this, qm, sign);
 		initForm();
 	}
 	
@@ -154,6 +167,8 @@ public class WMsgEditorForm extends AbstractForm {
 		session = s;
 		sg = g;
 		qm = q;
+		singleSign = false;
+		controller = new WController(this, qm, sg);
 		initForm();
 	}
 	
@@ -167,6 +182,7 @@ public class WMsgEditorForm extends AbstractForm {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		
 		// TODO may want to change these dimensions
+		// OR BETTER YET - figure out how to make it more adaptive...
 		setPreferredSize(new Dimension(800,500));
 		
 		/* Menu Bar */
@@ -178,33 +194,7 @@ public class WMsgEditorForm extends AbstractForm {
 		
 		/* Sign group drop-down - only present if editing for sign group */
 		if (signGroupMessage()) {
-			// get the list of signs in the sign group
-			// look through the DmsSignGroups to find all signs with this group
-			Iterator<DmsSignGroup> dsgit = DmsSignGroupHelper.iterator();
-			while (dsgit.hasNext()) {
-				DmsSignGroup dsg = dsgit.next();
-				if (dsg.getSignGroup() == sg) {
-					DMS dms = dsg.getDms();
-					dmsList.put(dms.getName(), dms);
-					
-				}
-			}
-			
-			// selection handler for the combo box
-			class SignSelectionListener implements ActionListener {
-				@SuppressWarnings("unchecked")
-				public void actionPerformed(ActionEvent e) {
-					JComboBox<String> cb = (JComboBox<String>) e.getSource();
-					String dmsName = (String) cb.getSelectedItem();
-					System.out.printf("Sign '%s' selected...\n", dmsName);
-				}
-			}
-			
-			// setup the combo box
-			dmsNames = Arrays.stream(dmsList.keySet().toArray()).
-					toArray(String[]::new);
-			dms_list = new JComboBox<String>(dmsNames);
-			dms_list.addActionListener(new SignSelectionListener());
+			dms_list = controller.getSignListForGroup();
 		}
 		
 		/* Page number label (default to 1) */
@@ -215,24 +205,28 @@ public class WMsgEditorForm extends AbstractForm {
 		ImageIcon pg_add_icon = Icons.getIconByPropName("wysiwyg.editor.page_add");
 		page_add_btn.setIcon(pg_add_icon);
 		page_add_btn.setHideActionText(true);
+		page_add_btn.setMargin(new Insets(0,0,0,0));
 		
 		page_del_btn = new JButton(pageDelete);
 		ImageIcon pg_del_icon = Icons.getIconByPropName("wysiwyg.editor.page_delete");
 		page_del_btn.setIcon(pg_del_icon);
 		page_del_btn.setHideActionText(true);
+		page_del_btn.setMargin(new Insets(0,0,0,0));
 		
 		page_mv_up_btn = new JButton(pageMoveUp);
 		ImageIcon pg_mv_up_icon = Icons.getIconByPropName("wysiwyg.editor.page_move_up");
 		page_mv_up_btn.setIcon(pg_mv_up_icon);
 		page_mv_up_btn.setHideActionText(true);
+		page_mv_up_btn.setMargin(new Insets(0,0,0,0));
 		
 		page_mv_down_btn = new JButton(pageMoveDown);
 		ImageIcon pg_mv_down_icon = Icons.getIconByPropName("wysiwyg.editor.page_move_down");
 		page_mv_down_btn.setIcon(pg_mv_down_icon);
 		page_mv_down_btn.setHideActionText(true);
+		page_mv_down_btn.setMargin(new Insets(0,0,0,0));
 		
 		/* Main Editor Panel */
-		editor = new WMsgEditorPanel(this);
+		epanel = new WMsgEditorPanel(this);
 		
 		/* Buttons - TODO finish implementing */
 		preview_btn = new JButton(preview);
@@ -290,7 +284,7 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.gridx = 1;
 		gbc.gridy = 1;
 		if (singleSignMessage())
-			p.add(new JLabel(sign.getName()), gbc);
+			p.add(new JLabel(controller.getSign().getName()), gbc);
 		else if (signGroupMessage())
 			p.add(dms_list, gbc);
 		
@@ -314,13 +308,11 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.anchor = GridBagConstraints.CENTER;
 		page_btn_pnl = new JPanel();
 		page_btn_pnl.setLayout(new FlowLayout(FlowLayout.CENTER));
-//		page_btn_pnl.add(Box.createHorizontalStrut(20));
 		page_btn_pnl.add(page_add_btn);
 		page_btn_pnl.add(page_del_btn);
-		page_btn_pnl.add(Box.createHorizontalStrut(20));
+		page_btn_pnl.add(Box.createHorizontalStrut(10));
 		page_btn_pnl.add(page_mv_up_btn);
 		page_btn_pnl.add(page_mv_down_btn);
-//		page_btn_pnl.add(Box.createHorizontalStrut(20));
 		p.add(page_btn_pnl, gbc);
 		
 		/* Page List */
@@ -332,41 +324,20 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		
-		// TODO this needs to update when the sign changes (for sign groups)
-		
-		// get the pages for the message
-		String ms = qm.getMulti();
-		MultiString mso = new MultiString(ms);
-		
-		updatePageList();
-		System.out.println(page_list.getModel().getSize());
-		p.add(new JScrollPane(page_list,
+		page_list = controller.getPageList();
+		page_list_pn = new JScrollPane(page_list,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), gbc);
-		initPageSelector();
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		p.add(page_list_pn, gbc);
 		
-		/* Editor (will be a GBL itself) */
+		/* Editor (its own panel with multiple tabs) */
 		gbc.gridx = 4;
 		gbc.gridy = 2;
 		gbc.gridheight = 3;
 		gbc.gridwidth = 6;
 		gbc.fill = GridBagConstraints.BOTH;
 		
-//		SignFacePanel sfp = new SignFacePanel();
-//		SignPixelPanel spp = sfp.setSign(sign);
-//		RasterBuilder rb = DMSHelper.createRasterBuilder(sign);
-////		String ms = qm.getMulti();
-////		MultiString mso = new MultiString(ms);
-//		
-//		RasterGraphic[] rg = null;
-//		try {
-//			rg = rb.createPixmaps(mso);
-//		} catch (IndexOutOfBoundsException e) {
-//		} catch (InvalidMsgException e) {
-//		}
-//		DMSPanelPager dpp = new DMSPanelPager(spp, rg, ms);
-//		p.add(sfp, gbc);
-		p.add(editor, gbc);
+		p.add(epanel, gbc);
 		
 		/* Preview Button */
 		gbc.gridx = 6;
@@ -394,13 +365,6 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.gridy = 5;
 		p.add(save_btn, gbc);
 		
-		
-		/*** TODO evaluate need for constraints/fill rules like below ***/
-		
-//		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
-//		gbc.fill = GridBagConstraints.NONE;
-//		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
-
 		add(p);
 	}
 	
@@ -409,61 +373,18 @@ public class WMsgEditorForm extends AbstractForm {
 		frame.setJMenuBar(menu_bar);
 	}
 	
-	/** Initialize the page selection handler. */
-	private void initPageSelector() {
-		page_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		
-		class PageSelectionHandler implements ListSelectionListener {
-			public void valueChanged(ListSelectionEvent e) {
-				if (!e.getValueIsAdjusting()) {
-					ListSelectionModel lsm = (ListSelectionModel) e.getSource();
-					int indx = lsm.getMinSelectionIndex();
-					
-					if (indx != -1) {
-						selectedPage = page_list.getModel().getElementAt(indx);
-						System.out.println(String.format("Selected page %s",
-								selectedPage.getPageNumberLabel()));
-						pg_num_lbl.setText(selectedPage.getPageNumberLabel());
-						updateWysiwygPanel();
-					}
-				}
-			}
-		}
-		page_list.getSelectionModel().addListSelectionListener(new PageSelectionHandler());
+	public void setPageNumberLabel(String pnl) {
+		pg_num_lbl.setText(pnl);
 	}
 	
-	/** Update the page list from the selected/created message */
-	private void updatePageList() {
-		DefaultListModel model = new DefaultListModel();
-		
-		// get the pages for the message
-		String ms = qm.getMulti();
-		MultiString mso = new MultiString(ms);
-		for (int i = 0; i < mso.getNumPages(); i++) {
-			WMsgSignPage sp = new WMsgSignPage(sign, mso, i);
-			model.addElement(sp);
-		}
-
-		// reset the list
-		page_list = new JList<WMsgSignPage>(model);
-		
-		// set the renderer on the list
-		ListCellRenderer rndr = new WMsgSignPageListRenderer();
-		page_list.setCellRenderer(rndr);
-		
-		// set the selected page if one isn't selected
-		if (selectedPage == null) {
-			selectedPage = (WMsgSignPage) model.get(0);
-			pg_num_lbl.setText(selectedPage.getPageNumberLabel());
-			updateWysiwygPanel();
-		}
-	}
-	
-	/** Update the main WYSIWYG panel with any changes from the editor form */
-	private void updateWysiwygPanel() {
+	/** Update the main WYSIWYG panel with any changes from the editor form
+	 *  TODO do we want to do this here, and like this?
+	 */
+	public void updateWysiwygPanel() {
 		// use the currently selected page to update the main WYSIWYG panel
+		WMsgSignPage selectedPage = controller.getSelectedPage();
 		if (selectedPage != null)
-			editor.updateWysiwygSignPage(selectedPage);
+			epanel.updateWysiwygSignPage(selectedPage);
 	}
 
 	/** Page Add action */
@@ -553,18 +474,12 @@ public class WMsgEditorForm extends AbstractForm {
 	/** Returns true if editing a message for a single sign, false otherwise
 	 * (i.e. a group or TODO config). */
 	private boolean singleSignMessage() {
-		if (sign != null)
-			return true;
-		else
-			return false;
+		return singleSign;
 	}
 	
 	/** Returns true if editing a sign group message */
 	private boolean signGroupMessage() {
-		if (sg != null)
-			return true;
-		else
-			return false;
+		return !singleSign;
 	}
 	
 	/** Returns the string that should be used for the label next to the sign
