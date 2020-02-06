@@ -368,6 +368,11 @@ public class WMsgEditorForm extends AbstractForm {
 		add(p);
 	}
 	
+	/** Get the WController for this form */
+	public WController getController() {
+		return controller;
+	}
+	
 	/** Set the menu bar of the frame (which should be this form's frame. */
 	public void setMenuBar(JInternalFrame frame) {
 		frame.setJMenuBar(menu_bar);

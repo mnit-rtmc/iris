@@ -33,8 +33,12 @@ public class WMsgEditorPanel extends JPanel {
 
 	// TODO TODO TODO
 	
-	/* Handle to the main form */
+	/** Handle to the main form 
+	 *  TODO we may not keep this */
 	private WMsgEditorForm form;
+	
+	/** WController for updating renderings */
+	private WController controller;
 	
 	/** Tabs for switching between WYSIWYG/MULTI mode and viewing sign config,
 	 * warnings, and errors */
@@ -47,14 +51,15 @@ public class WMsgEditorPanel extends JPanel {
 	
 	public WMsgEditorPanel(WMsgEditorForm f) {
 		form = f;
+		controller = form.getController();
 		
 		// create the tab pane and the tabs
 		tab_pane = new JTabbedPane(JTabbedPane.TOP);
 		
-		// TODO should we define new classes for the tabs? may make things easier in the long run...
+		// generate each tab
 		wysiwyg_pnl = new WMsgWysiwygPanel(form);
-		multi_pnl = new JPanel();
-		config_pnl = new JPanel();
+		multi_pnl = new WMsgMultiPanel(controller);
+		config_pnl = new JPanel();					// TODO
 		
 		// add the tabs to the pane
 		tab_pane.add(I18N.get("wysiwyg.epanel.wysiwyg_tab"), wysiwyg_pnl);

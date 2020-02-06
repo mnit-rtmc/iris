@@ -35,6 +35,8 @@ import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -47,24 +49,29 @@ import us.mn.state.dot.tms.utils.MultiString;
 
 public class WController {
 	
-	/* Keep a handle to the editor for any updates we need to make from here */
+	/** Keep a handle to the editor for any updates we need to make from here */
 	WMsgEditorForm editor;
 	
-	/* Sign/Group and Message being edited */
+	/** Sign/Group and Message being edited */
 	private DMS sign;
 	private SignGroup sg;
 	private QuickMessage qm;
+	private MultiString multiString;
+	private String multiStringText;
 	
-	/* Page list */
+	/** MultiConfig for config-related stuff  */
+	private MultiConfig multiConfig;
+	
+	/** Page list */
 	// TODO should we make this a generic array? might make more sense but w/e
 	private DefaultListModel<WMsgSignPage> page_list_model;
 	private JList<WMsgSignPage> page_list;
 	
-	/* DMS List (for sign groups) */
+	/** DMS List (for sign groups) */
 	private Map<String,DMS> dmsList;
 	private JComboBox<String> dms_list;
 	
-	/* Currently selected page (defaults to first available) */
+	/** Currently selected page (defaults to first available) */
 	private int selectedPageIndx = 0;
 	private WMsgSignPage selectedPage;
 	
@@ -75,23 +82,49 @@ public class WController {
 	public WController(WMsgEditorForm e, DMS d) {
 		editor = e;
 		sign = d;
+		
+		// generate the MultiConfig for the sign
+		try {
+			multiConfig = MultiConfig.from(sign);
+		} catch (TMSException e1) {
+			// TODO what to do??
+		}
 	}
 	
 	public WController(WMsgEditorForm e, SignGroup g) {
 		editor = e;
 		sg = g;
+
+		// generate the MultiConfig for the sign group
+		multiConfig = MultiConfig.from(sg);
 	}
 	
 	public WController(WMsgEditorForm e, QuickMessage q, DMS d) {
 		editor = e;
 		qm = q;
 		sign = d;
+
+		// generate the MultiConfig for the sign
+		try {
+			multiConfig = MultiConfig.from(sign);
+		} catch (TMSException e1) {
+			// TODO what to do??
+		}
+		
+		// get the MULTI string text from the quick message
+		multiStringText = qm.getMulti();
 	}
 	
 	public WController(WMsgEditorForm e, QuickMessage q, SignGroup g) {
 		editor = e;
 		qm = q;
 		sg = g;
+
+		// generate the MultiConfig for the sign group
+		multiConfig = MultiConfig.from(sg);
+		
+		// get the MULTI string text from the quick message
+		multiStringText = qm.getMulti();
 	}
 	
 	/** Change the sign being used */
@@ -122,11 +155,7 @@ public class WController {
 					
 					if (indx != -1) {
 						selectedPageIndx = indx;
-						selectedPage = page_list.getModel()
-								.getElementAt(selectedPageIndx);
-						editor.setPageNumberLabel(
-								selectedPage.getPageNumberLabel());
-						editor.updateWysiwygPanel();
+						updateSelectedPage();
 					}
 				}
 			}
@@ -135,6 +164,24 @@ public class WController {
 				new PageSelectionHandler());
 		
 		return page_list;
+	}
+	
+	/** Get any message text in the controller */
+	public String getMultiText() {
+		return multiStringText;
+	}
+	
+	/** Edit the MULTI string text directly and update the GUI */
+	public void editMulti(String multiText) {
+		multiStringText = multiText;
+		update();
+	}
+	
+	/** Update everything that needs updating */
+	public void update() {
+		updatePageListModel();
+		
+		// TODO add more stuff here eventually
 	}
 	
 	/** Update the model containing the list of WMsgSignPage objects. Note
@@ -146,10 +193,9 @@ public class WController {
 			page_list_model.clear();
 			
 			// get the pages for the message and add them to the model
-			String ms = qm.getMulti();
-			MultiString mso = new MultiString(ms);
-			for (int i = 0; i < mso.getNumPages(); i++) {
-				WMsgSignPage sp = new WMsgSignPage(sign, mso, i);
+			multiString = new MultiString(multiStringText);
+			for (int i = 0; i < multiString.getNumPages(); i++) {
+				WMsgSignPage sp = new WMsgSignPage(sign, multiString, i);
 				page_list_model.addElement(sp);
 			}
 
