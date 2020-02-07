@@ -172,6 +172,11 @@ public class WMsgEditorForm extends AbstractForm {
 		initForm();
 	}
 	
+	/** Get the current client session */
+	public Session getSession() {
+		return session;
+	}
+	
 	public static String getWindowTitle(QuickMessage q) {
 		String editorName = I18N.get("wysiwyg.editor.title");
 		String msgName = q != null ? q.getName() : "<Untitled>";
@@ -194,7 +199,7 @@ public class WMsgEditorForm extends AbstractForm {
 		
 		/* Sign group drop-down - only present if editing for sign group */
 		if (signGroupMessage()) {
-			dms_list = controller.getSignListForGroup();
+			dms_list = controller.getSignGroupComboBox();
 		}
 		
 		/* Page number label (default to 1) */
@@ -335,8 +340,9 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.gridy = 2;
 		gbc.gridheight = 3;
 		gbc.gridwidth = 6;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
 		gbc.fill = GridBagConstraints.BOTH;
-		
 		p.add(epanel, gbc);
 		
 		/* Preview Button */

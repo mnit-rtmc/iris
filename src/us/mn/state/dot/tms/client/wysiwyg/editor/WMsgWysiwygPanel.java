@@ -29,6 +29,7 @@ import java.awt.geom.AffineTransform;
 import javax.swing.JPanel;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.ComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
@@ -40,6 +41,7 @@ import javax.swing.JTabbedPane;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
+import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.Session;
@@ -47,6 +49,7 @@ import us.mn.state.dot.tms.client.dms.SignFacePanel;
 import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.utils.I18N;
@@ -78,7 +81,7 @@ public class WMsgWysiwygPanel extends JPanel {
 	
 	/* Panel for font drop down, color pickers, text justification buttons */
 	private JPanel text_option_pnl;
-	private JComboBox<String> font_options;
+	private JComboBox<Font> font_options;
 	
 	/* Color Pickers */
 	private JButton fg_color_btn;
@@ -135,7 +138,15 @@ public class WMsgWysiwygPanel extends JPanel {
 		text_option_pnl = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		
 		// fonts
-		font_options = new JComboBox<String>();
+		font_options = new JComboBox<Font>();
+		font_options.setAction(new IAction("font") {
+			protected void doActionPerformed(ActionEvent e) {
+				controller.setCurrentFont(
+					(Font) font_options.getSelectedItem());
+			}
+		});
+		font_options.setModel(new IComboBoxModel<Font>(controller.getFontModel()));
+		font_options.setSelectedItem(controller.getCurrentFont());
 		text_option_pnl.add(font_options);
 
 		// color pickers

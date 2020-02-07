@@ -34,12 +34,15 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.MultiString;
 
@@ -52,6 +55,9 @@ import us.mn.state.dot.tms.utils.MultiString;
 @SuppressWarnings("serial")
 
 public class WController {
+	
+	/** Client Session */
+	Session session; 
 	
 	/** Keep a handle to the editor for any updates we need to make from here */
 	WMsgEditorForm editor;
@@ -66,6 +72,10 @@ public class WController {
 	/** MultiConfig for config-related stuff  */
 	private MultiConfig multiConfig;
 	
+	/** Current Font
+	 *  TODO need some model for this, I don't think it can just be one */
+	private Font currentFont;
+	
 	/** Page list */
 	// TODO should we make this a generic array? might make more sense but w/e
 	private DefaultListModel<WMsgSignPage> page_list_model;
@@ -74,6 +84,7 @@ public class WController {
 	/** DMS List (for sign groups) */
 	private Map<String,DMS> dmsList;
 	private JComboBox<String> dms_list;
+	String[] dmsNames;
 	
 	/** Currently selected page (defaults to first available) */
 	private int selectedPageIndx = 0;
@@ -84,27 +95,27 @@ public class WController {
 	}	
 	
 	public WController(WMsgEditorForm e) {
-		editor = e;
+		setEditorForm(e);
 	}	
 	
 	public WController(WMsgEditorForm e, DMS d) {
-		editor = e;
+		setEditorForm(e);
 		setSign(d);
 	}
 	
 	public WController(WMsgEditorForm e, SignGroup g) {
-		editor = e;
+		setEditorForm(e);
 		setSignGroup(g);
 	}
 	
 	public WController(WMsgEditorForm e, QuickMessage q, DMS d) {
-		editor = e;
+		setEditorForm(e);
 		setSign(d);
 		setQuickMessage(q);
 	}
 	
 	public WController(WMsgEditorForm e, QuickMessage q, SignGroup g) {
-		editor = e;
+		setEditorForm(e);
 		setSignGroup(g);
 		setQuickMessage(q);
 	}
@@ -112,6 +123,7 @@ public class WController {
 	/** Set the editor form handle */
 	public void setEditorForm(WMsgEditorForm e) {
 		editor = e;
+		session = editor.getSession();
 	}
 	
 	/** Set the sign being used */
@@ -122,20 +134,31 @@ public class WController {
 		if (sign != null) {
 			try {
 				multiConfig = MultiConfig.from(sign);
+				setFontFromConfig();
 			} catch (TMSException e1) {
 				// TODO what to do??
 			}
-			update();
+		} else {
+			multiConfig = null;
 		}
+		update();
 	}
 	
 	/** Set the sign group being used */
 	public void setSignGroup(SignGroup g) {
 		sg = g;
 		
-		// generate the MultiConfig for the sign group
-		if (sg != null)
+		if (sg != null) {
+			// generate the MultiConfig for the sign group
 			multiConfig = MultiConfig.from(sg);
+			setFontFromConfig();
+			
+			// generate the list of signs in the group
+			makeSignListForGroup(true);
+		} else {
+			multiConfig = null;
+			sign = null;
+		}
 		update();
 	}
 	
@@ -314,21 +337,12 @@ public class WController {
 	 * TODO same note as with JList above - should maybe abstract this more
 	 * but whatever... 
 	 */
-	public JComboBox<String> getSignListForGroup() {
+	public JComboBox<String> getSignGroupComboBox() {
 		if (sg != null) {
-			// get the list of signs in the sign group
-			// look through the DmsSignGroups to find all signs with this group
-			dmsList = new HashMap<String,DMS>();
-			Iterator<DmsSignGroup> dsgit = DmsSignGroupHelper.iterator();
-			while (dsgit.hasNext()) {
-				DmsSignGroup dsg = dsgit.next();
-				if (dsg.getSignGroup() == sg) {
-					DMS dms = dsg.getDms();
-					dmsList.put(dms.getName(), dms);
-				}
-			}
+			// generate a list of signs in the sign group
+			makeSignListForGroup(true);
 			
-			// selection handler for the combo box
+			// define a selection handler for the combo box
 			class SignSelectionListener implements ActionListener {
 				@SuppressWarnings("unchecked")
 				public void actionPerformed(ActionEvent e) {
@@ -346,17 +360,57 @@ public class WController {
 				}
 			}
 			
-			// setup and return the combo box (making sure to sort the list)
-			String[] dmsNames = Arrays.stream(dmsList.keySet().toArray()).
-					toArray(String[]::new);
-			Arrays.sort(dmsNames);
+			// setup and return the combo box
 			dms_list = new JComboBox<String>(dmsNames);
 			dms_list.addActionListener(new SignSelectionListener());
-			
-			// also set the current sign to the first one in the group
-			sign = dmsList.get(dmsNames[0]);
 		}
 		return dms_list;
+	}
+	
+	/** Get a list of signs in the group. If setSign is true, the controller's
+	 *  "sign" attribute be set to the first sign in the group.
+	 */
+	public void makeSignListForGroup(boolean setSign) {
+		// get the list of signs in the sign group
+		// look through the DmsSignGroups to find all signs with this group
+		dmsList = new HashMap<String,DMS>();
+		Iterator<DmsSignGroup> dsgit = DmsSignGroupHelper.iterator();
+		while (dsgit.hasNext()) {
+			DmsSignGroup dsg = dsgit.next();
+			if (dsg.getSignGroup() == sg) {
+				DMS dms = dsg.getDms();
+				dmsList.put(dms.getName(), dms);
+			}
+		}
+		
+		// get the list of sign names and sort them alphabetically
+		dmsNames = Arrays.stream(dmsList.keySet().toArray()).
+				toArray(String[]::new);
+		Arrays.sort(dmsNames);
+		
+		// set the current sign to the first one in the group if desired
+		if (setSign && dmsNames.length > 0)
+			sign = dmsList.get(dmsNames[0]);
+	}
+	
+	public ProxyListModel<Font> getFontModel() {
+		if (session != null) {
+			return session.getSonarState().getDmsCache().getFontModel();
+		} return null;
+	}
+	
+	public void setCurrentFont(Font f) {
+		currentFont = f;
+	}
+	
+	public Font getCurrentFont() {
+		return currentFont;
+	}
+	
+	private void setFontFromConfig() {
+		if (multiConfig != null) {
+			currentFont = multiConfig.getDefaultFont();
+		}
 	}
 	
 	/* Get the current DMS object */
