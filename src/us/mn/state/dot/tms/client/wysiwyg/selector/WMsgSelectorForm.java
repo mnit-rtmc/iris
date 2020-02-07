@@ -303,12 +303,14 @@ public class WMsgSelectorForm extends AbstractForm {
 			msg_list.clearSelection();
 
 			// update the controller
+			controller.setSign(null);
 			controller.setSignGroup(selectedSignGroup);
 			controller.setQuickMessage(null);
 		} else {
 			// we got a null - reset
 			disableButtons();
 			updateMessageList();
+			controller.setSign(null);
 			controller.setSignGroup(null);
 			controller.setQuickMessage(null);
 		}
