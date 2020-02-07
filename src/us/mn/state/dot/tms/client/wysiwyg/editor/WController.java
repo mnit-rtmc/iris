@@ -61,7 +61,7 @@ public class WController {
 	private SignGroup sg;
 	private QuickMessage qm;
 	private MultiString multiString;
-	private String multiStringText;
+	private String multiStringText = "";
 	
 	/** MultiConfig for config-related stuff  */
 	private MultiConfig multiConfig;
@@ -79,61 +79,76 @@ public class WController {
 	private int selectedPageIndx = 0;
 	private WMsgSignPage selectedPage;
 	
+	public WController() {
+		// empty controller - everything will be set later as it is available
+	}	
+	
 	public WController(WMsgEditorForm e) {
 		editor = e;
 	}	
 	
 	public WController(WMsgEditorForm e, DMS d) {
 		editor = e;
-		sign = d;
-		
-		// generate the MultiConfig for the sign
-		try {
-			multiConfig = MultiConfig.from(sign);
-		} catch (TMSException e1) {
-			// TODO what to do??
-		}
+		setSign(d);
 	}
 	
 	public WController(WMsgEditorForm e, SignGroup g) {
 		editor = e;
-		sg = g;
-
-		// generate the MultiConfig for the sign group
-		multiConfig = MultiConfig.from(sg);
+		setSignGroup(g);
 	}
 	
 	public WController(WMsgEditorForm e, QuickMessage q, DMS d) {
 		editor = e;
-		qm = q;
-		sign = d;
-
-		// generate the MultiConfig for the sign
-		try {
-			multiConfig = MultiConfig.from(sign);
-		} catch (TMSException e1) {
-			// TODO what to do??
-		}
-		
-		// get the MULTI string text from the quick message
-		multiStringText = qm.getMulti();
+		setSign(d);
+		setQuickMessage(q);
 	}
 	
 	public WController(WMsgEditorForm e, QuickMessage q, SignGroup g) {
 		editor = e;
-		qm = q;
-		sg = g;
-
-		// generate the MultiConfig for the sign group
-		multiConfig = MultiConfig.from(sg);
-		
-		// get the MULTI string text from the quick message
-		multiStringText = qm.getMulti();
+		setSignGroup(g);
+		setQuickMessage(q);
 	}
 	
-	/** Change the sign being used */
+	/** Set the editor form handle */
+	public void setEditorForm(WMsgEditorForm e) {
+		editor = e;
+	}
+	
+	/** Set the sign being used */
 	public void setSign(DMS d) {
 		sign = d;
+		
+		// generate the MultiConfig for the sign
+		if (sign != null) {
+			try {
+				multiConfig = MultiConfig.from(sign);
+			} catch (TMSException e1) {
+				// TODO what to do??
+			}
+			update();
+		}
+	}
+	
+	/** Set the sign group being used */
+	public void setSignGroup(SignGroup g) {
+		sg = g;
+		
+		// generate the MultiConfig for the sign group
+		if (sg != null)
+			multiConfig = MultiConfig.from(sg);
+		update();
+	}
+	
+	/** Set the quick message being edited */
+	public void setQuickMessage(QuickMessage q) {
+		qm = q;
+		
+		// get the MULTI string text from the quick message
+		if (qm != null)
+			multiStringText = qm.getMulti();
+		else
+			multiStringText = "";
+		update();
 	}
 	
 	/** Use the AffineTransform object from the editor's SignPixelPanel to
@@ -145,14 +160,17 @@ public class WController {
 		update();
 		
 		// get the AffineTransform object from the pixel panel
-		AffineTransform t = editor.getEditorPixelPanel().getTransform();
-		
-		// calculate the adjusted coordinates of the click
-		if (t != null) {
-			int tx = (int) t.getTranslateX();
-			int ty = (int) t.getTranslateY();
-			return new Point2D.Double(x-tx, y-ty);
-		} else { return null; }
+		if (editor != null) {
+			AffineTransform t = editor.getEditorPixelPanel().getTransform();
+			
+			// calculate the adjusted coordinates of the click
+			if (t != null) {
+				int tx = (int) t.getTranslateX();
+				int ty = (int) t.getTranslateY();
+				return new Point2D.Double(x-tx, y-ty);
+			}
+		}
+		return null;
 	}
 	
 	/** Handle a click on the main editor panel */
@@ -267,23 +285,28 @@ public class WController {
 			// clear the model
 			page_list_model.clear();
 			
-			// get the pages for the message and add them to the model
-			multiString = new MultiString(multiStringText);
-			for (int i = 0; i < multiString.getNumPages(); i++) {
-				WMsgSignPage sp = new WMsgSignPage(sign, multiString, i);
-				page_list_model.addElement(sp);
+			if (sign != null) {
+				// get the pages for the message and add them to the model
+				multiString = new MultiString(multiStringText);
+				for (int i = 0; i < multiString.getNumPages(); i++) {
+					WMsgSignPage sp = new WMsgSignPage(sign, multiString, i);
+					page_list_model.addElement(sp);
+				}
+	
+				// update the selected page
+				updateSelectedPage();
 			}
-
-			// update the selected page
-			updateSelectedPage();
 		}
 	}
 	
 	/** Update the selected page to use one in the current page_list_model. */
 	private void updateSelectedPage() {
 		selectedPage = (WMsgSignPage) page_list_model.get(selectedPageIndx);
-		editor.setPageNumberLabel(selectedPage.getPageNumberLabel());
-		editor.updateWysiwygPanel();
+		
+		if (editor != null) {
+			editor.setPageNumberLabel(selectedPage.getPageNumberLabel());
+			editor.updateWysiwygPanel();
+		}
 	}
 	
 	/** Get a JComboBox containing a list of sign names (only applies when
@@ -317,7 +340,9 @@ public class WController {
 					// TODO a bunch more needs to happen here in addition to this
 					// (need to remake page list and stuff)
 					updatePageListModel();
-					editor.updateWysiwygPanel();
+					if (editor != null) {
+						editor.updateWysiwygPanel();
+					}
 				}
 			}
 			

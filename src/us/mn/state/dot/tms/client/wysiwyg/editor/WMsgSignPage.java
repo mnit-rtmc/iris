@@ -102,17 +102,18 @@ public class WMsgSignPage extends Component {
 		// create a RasterBuilder for this sign
 		rb = DMSHelper.createRasterBuilder(sign);
 		
-		// try to render the page graphics
-		// TODO do something if we hit these exceptions
-		RasterGraphic[] rg = null;
-		prg = null;
-		try {
-			// generate all message graphics but save the graphic for this
-			// page only
-			rg = rb.createPixmaps(ms);
-			prg = rg[pn];
-		} catch (IndexOutOfBoundsException e) {
-		} catch (InvalidMsgException e) {
+		if (rb != null) {
+			// try to render the page graphics
+			// TODO do something if we hit these exceptions
+			RasterGraphic[] rg = null;
+			prg = null;
+			try {
+				// generate all message graphics but save the graphic for this
+				// page only
+				rg = rb.createPixmaps(ms);
+				prg = rg[pn];
+			} catch (IndexOutOfBoundsException e) {
+			} catch (InvalidMsgException e) { }
 		}
 	}
 	

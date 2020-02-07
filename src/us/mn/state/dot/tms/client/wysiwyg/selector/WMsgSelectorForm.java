@@ -33,6 +33,7 @@ import javax.swing.AbstractListModel;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -62,6 +63,8 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.client.wysiwyg.selector.WMsgSelectorSignProcess;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WMsgEditorForm;
+import us.mn.state.dot.tms.client.wysiwyg.editor.WMsgSignPage;
+import us.mn.state.dot.tms.client.wysiwyg.editor.WController;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -104,6 +107,12 @@ public class WMsgSelectorForm extends AbstractForm {
 	private DMS selectedDMS;
 	private SignGroup selectedSignGroup;
 	private QuickMessage selectedMessage;
+	
+	/** Controller for rendering a preview */
+	private WController controller;
+	
+	/** Use the page list as the message preview */
+	private JList<WMsgSignPage> msg_preview;
     
 	/** Buttons */
 	private JButton reload_btn;
@@ -260,10 +269,16 @@ public class WMsgSelectorForm extends AbstractForm {
 			// reset any message selection
 			setSelectedMessage(null);
 			msg_list.clearSelection();
+			
+			// update the controller
+			controller.setSign(selectedDMS);
+			controller.setQuickMessage(null);
 		} else {
 			// we got a null - reset
 			disableButtons();
 			updateMessageList();
+			controller.setSign(null);
+			controller.setQuickMessage(null);
 		}
 	}
 	
@@ -286,10 +301,16 @@ public class WMsgSelectorForm extends AbstractForm {
 			// reset any message selection
 			setSelectedMessage(null);
 			msg_list.clearSelection();
+
+			// update the controller
+			controller.setSignGroup(selectedSignGroup);
+			controller.setQuickMessage(null);
 		} else {
 			// we got a null - reset
 			disableButtons();
 			updateMessageList();
+			controller.setSignGroup(null);
+			controller.setQuickMessage(null);
 		}
 	}
 	
@@ -323,14 +344,33 @@ public class WMsgSelectorForm extends AbstractForm {
 			if (selectedMessage.getPrefixPage()) {
 				msgInfo += ", {Prefix}";
 			}
+
+			// update the controller
+			controller.setQuickMessage(selectedMessage);
 		} else {
 			// we got a null - disable edit buttons
 			disableEditButtons();
 			
 			// reset the status message
 			msgInfo = "";
+			
+			// rest the controller
+			controller.setQuickMessage(null);
 		}
 		status_msg.setText(msgInfo);
+	}
+	
+	/** A class for disabling selection in a list */
+	class DisabledSelectionModel extends DefaultListSelectionModel {
+		@Override
+		public void setSelectionInterval(int index0, int index1) {
+			super.setSelectionInterval(-1, -1);
+	 	}
+
+		@Override
+		public void addSelectionInterval(int index0, int index1) {
+			super.setSelectionInterval(-1, -1);
+		}
 	}
 	
 	protected void initForm() {
@@ -339,6 +379,13 @@ public class WMsgSelectorForm extends AbstractForm {
 		/** Create sign/sign group lists */
 		// TODO change this to use a table or something to give us more info (?)
 		updateDeviceLists();
+
+		/* Initialize a controller for rendering a preview */
+		controller = new WController();
+		msg_preview = controller.getPageList();
+		
+		/* Disable selection on the message preview */
+		msg_preview.setSelectionModel(new DisabledSelectionModel());
 		
 		/** Sign list */
 		ListModel<String> dmsNamesModel = new AbstractListModel<String>() {
@@ -719,7 +766,6 @@ public class WMsgSelectorForm extends AbstractForm {
 		gbc.gridy = 0;
 		gbc.gridheight = 1;
 		gbc.weighty = 0;
-		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		p.add(new JLabel(I18N.get("wysiwyg.message")), gbc);
 		
 		/* Message List */
@@ -728,7 +774,6 @@ public class WMsgSelectorForm extends AbstractForm {
 		gbc.gridwidth = 6;
 		gbc.weightx = 0.5;
 		gbc.weighty = 0.5;
-		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		p.add(msg_pn, gbc);
 		
 		/* Reload button */
@@ -738,7 +783,6 @@ public class WMsgSelectorForm extends AbstractForm {
 		gbc.gridwidth = 1;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
-		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		p.add(reload_btn, gbc);
 		
 		/* Create button */
@@ -751,19 +795,16 @@ public class WMsgSelectorForm extends AbstractForm {
 		/* Edit button */
 		gbc.gridx = 6;
 		gbc.gridy = 2;
-		gbc.anchor = GridBagConstraints.BASELINE_TRAILING;
 		p.add(edit_btn, gbc);
 
 		/* Clone button */
 		gbc.gridx = 7;
 		gbc.gridy = 2;
-		gbc.anchor = GridBagConstraints.BASELINE_TRAILING;
 		p.add(clone_btn, gbc);
 		
 		/* Delete button */
 		gbc.gridx = 8;
 		gbc.gridy = 2;
-		gbc.anchor = GridBagConstraints.BASELINE_TRAILING;
 		p.add(delete_btn, gbc);
 		
 		/* Status bar panel */
@@ -774,27 +815,20 @@ public class WMsgSelectorForm extends AbstractForm {
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		p.add(status_msg, gbc);
 		
-		/* TODO add a preview pane to the right of the message list that shows
-		 * the selected message on the selected sign (and sign group, somehow).
-		 * Use the panel pager like below so multiple pages show up if
-		 * applicable (this is old test code from editor, it probably won't
-		 * look too much like this). 
-		 */
-
-//		SignFacePanel sfp = new SignFacePanel();
-//		SignPixelPanel spp = sfp.setSign(sign);
-//		RasterBuilder rb = DMSHelper.createRasterBuilder(sign);
-////		String ms = qm.getMulti();
-////		MultiString mso = new MultiString(ms);
-//		
-//		RasterGraphic[] rg = null;
-//		try {
-//			rg = rb.createPixmaps(mso);
-//		} catch (IndexOutOfBoundsException e) {
-//		} catch (InvalidMsgException e) {
-//		}
-//		DMSPanelPager dpp = new DMSPanelPager(spp, rg, ms);
-//		p.add(sfp, gbc);
+		/* Preview Pane Label */
+		gbc.gridx = 9;
+		gbc.gridy = 0;
+		gbc.gridheight = 1;
+		gbc.gridwidth = 1;
+		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+		p.add(new JLabel(I18N.get("wysiwyg.selector.preview")), gbc);
+		
+		/* Preview Pane */
+		gbc.gridx = 9;
+		gbc.gridy = 1;
+		gbc.gridheight = 3;
+		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+		p.add(msg_preview, gbc);
 		
 		add(p);
 	}
