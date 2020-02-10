@@ -15,6 +15,7 @@
 
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Dimension;
@@ -64,13 +65,10 @@ import us.mn.state.dot.tms.utils.I18N;
 
 public class WMsgWysiwygPanel extends JPanel {
 	
-	/* TODO for now we're taking the editor form - think we're going to change
-	 * that to the controller (eventually), which should be a better state
-	 * manager
-	 */
+	/** Handle to the controller */
 	private WController controller;
 	
-	/* Mode buttons - Button group and toggle buttons */
+	/** Mode buttons - Button group and toggle buttons */
 	private JPanel mode_btn_pnl;
 	private ButtonGroup mode_btn_grp;
 	private JToggleButton text_mode_btn;
@@ -79,29 +77,29 @@ public class WMsgWysiwygPanel extends JPanel {
 	private JToggleButton textrect_mode_btn;
 	private JToggleButton multitag_mode_btn;
 	
-	/* Panel for font drop down, color pickers, text justification buttons */
-	private JPanel text_option_pnl;
-	private JComboBox<Font> font_options;
+	/** Master toolbar panel (changes) */
+	private JPanel toolbar_pnl;
 	
-	/* Color Pickers */
-	private JButton fg_color_btn;
-	private Color fgColor;
-	private JButton bg_color_btn;
-	private Color bgColor;
+	/** Panel for font drop down, color pickers, text justification buttons */
+	final static private String TEXT_TOOLBAR = "Text Mode Toolbar";
+	private JPanel text_toolbar_pnl;
 	
-	/* Justify Buttons */
-	private JPanel text_vjust_btn_pnl;
-	private ButtonGroup text_vjust_btn_grp;
-	private JToggleButton text_vjust_top_btn;
-	private JToggleButton text_vjust_center_btn;
-	private JToggleButton text_vjust_bottom_btn;
-	private JPanel text_hjust_btn_pnl;
-	private ButtonGroup text_hjust_btn_grp;
-	private JToggleButton text_hjust_left_btn;
-	private JToggleButton text_hjust_center_btn;
-	private JToggleButton text_hjust_right_btn;
+	/** Panel for graphics toolbar */
+	final static private String GRAPHIC_TOOLBAR = "Graphic Mode Toolbar";
+	private JPanel graphic_toolbar_pnl;
 	
-	/* The Panel */
+	/** Panel for color rectangle toolbar */
+	final static private String COLOR_RECTANGLE_TOOLBAR = "Color Rectangle Toolbar";
+	private JPanel colorrect_toolbar_pnl;
+	
+	/** Panel for graphics toolbar */
+	final static private String TEXT_RECTANGLE_TOOLBAR = "Text Rectangle Toolbar";
+	private JPanel textrect_toolbar_pnl;
+	
+	/** Panel for graphics toolbar */
+	final static private String MULTI_TAG_TOOLBAR = "MULTI Tag Toolbar";
+	private JPanel multitag_toolbar_pnl;
+	
 	/** Sign pixel panel to display the current sign message page */
 	private final SignPixelPanel pixel_pnl = new SignPixelPanel(250, 550);
 	
@@ -134,99 +132,31 @@ public class WMsgWysiwygPanel extends JPanel {
 		mode_btn_pnl.add(multitag_mode_btn);
 		add(mode_btn_pnl);
 		
-		/** text option panel */
-		text_option_pnl = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		/** Option Panel - changes depending on the mode */
+		toolbar_pnl = new JPanel(new CardLayout(10,10));
 		
-		// fonts
-		font_options = new JComboBox<Font>();
-		font_options.setAction(new IAction("font") {
-			protected void doActionPerformed(ActionEvent e) {
-				controller.setCurrentFont(
-					(Font) font_options.getSelectedItem());
-			}
-		});
-		font_options.setModel(new IComboBoxModel<Font>(controller.getFontModel()));
-		font_options.setSelectedItem(controller.getCurrentFont());
-		text_option_pnl.add(font_options);
-
-		// color pickers
-		fgColor = Color.decode("#FFD000");
-		fg_color_btn = new JButton(open_fg_color_picker);
-		fg_color_btn.setIcon(createColorIcon(fgColor, 16, 16));
-		fg_color_btn.setMargin(new Insets(0,0,0,0));
-		text_option_pnl.add(fg_color_btn);
+		// Text toolbar panel
+		text_toolbar_pnl = new WMsgTextToolbar(controller);
+		toolbar_pnl.add(text_toolbar_pnl, TEXT_TOOLBAR);
 		
-		bgColor = Color.decode("#000000");
-		bg_color_btn = new JButton(open_bg_color_picker);
-		bg_color_btn.setIcon(createColorIcon(bgColor, 16, 16));
-		bg_color_btn.setMargin(new Insets(0,0,0,0));
-		text_option_pnl.add(bg_color_btn);
+		// Graphic toolbar panel - used in graphic mode
+		graphic_toolbar_pnl = new WMsgGraphicToolbar(controller);
+		toolbar_pnl.add(graphic_toolbar_pnl, GRAPHIC_TOOLBAR);
 		
-		// justification buttons
-		text_vjust_btn_grp = new ButtonGroup();
-		text_vjust_top_btn = new JToggleButton(text_vjust_top);
-		text_vjust_center_btn = new JToggleButton(text_vjust_center);
-		text_vjust_bottom_btn = new JToggleButton(text_vjust_bottom);
-		text_vjust_center_btn.setSelected(true);
-		text_vjust_btn_grp.add(text_vjust_top_btn);
-		text_vjust_btn_grp.add(text_vjust_center_btn);
-		text_vjust_btn_grp.add(text_vjust_bottom_btn);
+		// Color rectangle toolbar panel
+		colorrect_toolbar_pnl = new WMsgColorRectangleToolbar(controller);
+		toolbar_pnl.add(colorrect_toolbar_pnl, COLOR_RECTANGLE_TOOLBAR);
 		
-		// set icons for justification buttons
-		ImageIcon text_vjust_top_icon = Icons.getIconByPropName("wysiwyg.epanel.text_vjust_top");
-		text_vjust_top_btn.setIcon(text_vjust_top_icon);
-		text_vjust_top_btn.setHideActionText(true);
-		text_vjust_top_btn.setMargin(new Insets(0,0,0,0));
+		// Text rectangle toolbar panel
+		textrect_toolbar_pnl = new WMsgTextRectangleToolbar(controller);
+		toolbar_pnl.add(textrect_toolbar_pnl, TEXT_RECTANGLE_TOOLBAR);
 		
-		ImageIcon text_vjust_center_icon = Icons.getIconByPropName("wysiwyg.epanel.text_vjust_center");
-		text_vjust_center_btn.setIcon(text_vjust_center_icon);
-		text_vjust_center_btn.setHideActionText(true);
-		text_vjust_center_btn.setMargin(new Insets(0,0,0,0));
+		// MULTI Tag toolbar panel
+		multitag_toolbar_pnl = new WMsgMultiTagToolbar(controller);
+		toolbar_pnl.add(multitag_toolbar_pnl, MULTI_TAG_TOOLBAR);
 		
-		ImageIcon text_vjust_bottom_icon = Icons.getIconByPropName("wysiwyg.epanel.text_vjust_bottom");
-		text_vjust_bottom_btn.setIcon(text_vjust_bottom_icon);
-		text_vjust_bottom_btn.setHideActionText(true);
-		text_vjust_bottom_btn.setMargin(new Insets(0,0,0,0));
-		
-		text_vjust_btn_pnl = new JPanel();
-		text_vjust_btn_pnl.setLayout(new BoxLayout(text_vjust_btn_pnl, BoxLayout.X_AXIS));
-		text_vjust_btn_pnl.add(text_vjust_top_btn);
-		text_vjust_btn_pnl.add(text_vjust_center_btn);
-		text_vjust_btn_pnl.add(text_vjust_bottom_btn);
-		text_option_pnl.add(text_vjust_btn_pnl);
-		
-		text_hjust_btn_grp = new ButtonGroup();
-		text_hjust_left_btn = new JToggleButton(text_hjust_left);
-		text_hjust_center_btn = new JToggleButton(text_hjust_center);
-		text_hjust_right_btn = new JToggleButton(text_hjust_right);
-		text_hjust_center_btn.setSelected(true);
-		text_hjust_btn_grp.add(text_hjust_left_btn);
-		text_hjust_btn_grp.add(text_hjust_center_btn);
-		text_hjust_btn_grp.add(text_hjust_right_btn);
-		
-		ImageIcon text_hjust_left_icon = Icons.getIconByPropName("wysiwyg.epanel.text_hjust_left");
-		text_hjust_left_btn.setIcon(text_hjust_left_icon);
-		text_hjust_left_btn.setHideActionText(true);
-		text_hjust_left_btn.setMargin(new Insets(0,0,0,0));
-		
-		ImageIcon text_hjust_center_icon = Icons.getIconByPropName("wysiwyg.epanel.text_hjust_center");
-		text_hjust_center_btn.setIcon(text_hjust_center_icon);
-		text_hjust_center_btn.setHideActionText(true);
-		text_hjust_center_btn.setMargin(new Insets(0,0,0,0));
-		
-		ImageIcon text_hjust_right_icon = Icons.getIconByPropName("wysiwyg.epanel.text_hjust_right");
-		text_hjust_right_btn.setIcon(text_hjust_right_icon);
-		text_hjust_right_btn.setHideActionText(true);
-		text_hjust_right_btn.setMargin(new Insets(0,0,0,0));
-		
-		text_hjust_btn_pnl = new JPanel();
-		text_hjust_btn_pnl.setLayout(new BoxLayout(text_hjust_btn_pnl, BoxLayout.X_AXIS));
-		text_hjust_btn_pnl.add(text_hjust_left_btn);
-		text_hjust_btn_pnl.add(text_hjust_center_btn);
-		text_hjust_btn_pnl.add(text_hjust_right_btn);
-		text_option_pnl.add(text_hjust_btn_pnl);
-		
-		add(text_option_pnl);
+		// add the toolbars to the panel
+		add(toolbar_pnl);
 		
 		// sign face panel - the main show
 		add(pixel_pnl);
@@ -236,9 +166,6 @@ public class WMsgWysiwygPanel extends JPanel {
 		/* TODO just for testing - need to figure out how to deal with
 		 * component focus, etc. - we can probably reuse the same mouse
 		 * listener class and give it different components or something...
-		 * TODO there's also a coordinate issue with the pixel_pnl geometry,
-		 * since it maintains aspect ratio and X = 0 is not necessarily the
-		 * left edge of the sign...
 		 */
 		
 		WMsgMouseInputAdapter mouseHandler = new WMsgMouseInputAdapter(controller);
@@ -266,6 +193,10 @@ public class WMsgWysiwygPanel extends JPanel {
 			throws Exception
 		{
 			System.out.println("Text mode...");
+			
+			// change toolbar panel to text options
+			CardLayout cl = (CardLayout) toolbar_pnl.getLayout();
+			cl.show(toolbar_pnl, TEXT_TOOLBAR);
 		}
 	};
 	
@@ -276,6 +207,10 @@ public class WMsgWysiwygPanel extends JPanel {
 				throws Exception
 		{
 			System.out.println("Graphic mode...");
+
+			// change toolbar panel to graphic options
+			CardLayout cl = (CardLayout) toolbar_pnl.getLayout();
+			cl.show(toolbar_pnl, GRAPHIC_TOOLBAR);
 		}
 	};
 	
@@ -287,6 +222,10 @@ public class WMsgWysiwygPanel extends JPanel {
 				throws Exception
 		{
 			System.out.println("Color Rectangle mode...");
+
+			// change toolbar panel to color rectangle options
+			CardLayout cl = (CardLayout) toolbar_pnl.getLayout();
+			cl.show(toolbar_pnl, COLOR_RECTANGLE_TOOLBAR);
 		}
 	};
 	
@@ -298,6 +237,10 @@ public class WMsgWysiwygPanel extends JPanel {
 				throws Exception
 		{
 			System.out.println("Text Rectangle mode...");
+
+			// change toolbar panel to text rectangle options
+			CardLayout cl = (CardLayout) toolbar_pnl.getLayout();
+			cl.show(toolbar_pnl, TEXT_RECTANGLE_TOOLBAR);
 		}
 	};
 	
@@ -309,112 +252,12 @@ public class WMsgWysiwygPanel extends JPanel {
 				throws Exception
 		{
 			System.out.println("MULTI Tag mode...");
+
+			// change toolbar panel to MULTI tag options
+			CardLayout cl = (CardLayout) toolbar_pnl.getLayout();
+			cl.show(toolbar_pnl, MULTI_TAG_TOOLBAR);
 		}
 	};
-	
-	/** Foreground color picker action */
-	private final IAction open_fg_color_picker = new IAction("wysiwyg.epanel.fg_color_picker_btn") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			// TODO change this so it handles things better (whatever that means...)
-			
-			Color newColor = JColorChooser.showDialog(null,
-					I18N.get("wysiwyg.epanel.fg_color_picker_title"),
-					fgColor);
-			fgColor = newColor;
-			fg_color_btn.setIcon(createColorIcon(fgColor, 16, 16));
-		}
-	};
-	
-	/** Background color picker action */
-	private final IAction open_bg_color_picker = new IAction("wysiwyg.epanel.bg_color_picker_btn") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			// TODO change this so it handles things better (whatever that means...)
-			
-			Color newColor = JColorChooser.showDialog(null,
-					I18N.get("wysiwyg.epanel.bg_color_picker_title"),
-					bgColor);
-			bgColor = newColor;
-			bg_color_btn.setIcon(createColorIcon(bgColor, 16, 16));
-		}
-	};
-	
-	/** Text vertical justify top action */
-	private final IAction text_vjust_top = new IAction("wysiwyg.epanel.text_vjust_top") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			System.out.println("Vertical Justify Top...");
-		}
-	};
-	
-	/** Text vertical justify center action */
-	private final IAction text_vjust_center = new IAction("wysiwyg.epanel.text_vjust_center") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			System.out.println("Vertical Justify Center...");
-		}
-	};
-	
-	/** Text vertical justify bottom action */
-	private final IAction text_vjust_bottom = new IAction("wysiwyg.epanel.text_vjust_bottom") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			System.out.println("Vertical Justify Bottom...");
-		}
-	};
-	
-	/** Text horizontal justify left action */
-	private final IAction text_hjust_left = new IAction("wysiwyg.epanel.text_hjust_left") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			System.out.println("Horizontal Justify Left...");
-		}
-	};
-	
-	/** Text horizontal justify left action */
-	private final IAction text_hjust_center = new IAction("wysiwyg.epanel.text_hjust_center") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			System.out.println("Horizontal Justify Center...");
-		}
-	};
-	
-	/** Text horizontal justify left action */
-	private final IAction text_hjust_right = new IAction("wysiwyg.epanel.text_hjust_right") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			System.out.println("Horizontal Justify Right...");
-		}
-	};
-	
-	public static  ImageIcon createColorIcon(Color c, int width, int height) {
-		BufferedImage image = new BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = image.createGraphics();
-        graphics.setColor(c);
-        graphics.fillRect(0, 0, width, height);
-        graphics.setXORMode(Color.DARK_GRAY);
-        graphics.drawRect(0, 0, width-1, height-1);
-        image.flush();
-        ImageIcon icon = new ImageIcon(image);
-        return icon;
-    }
 	
 }
 

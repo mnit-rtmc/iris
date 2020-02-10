@@ -393,6 +393,10 @@ public class WController {
 			sign = dmsList.get(dmsNames[0]);
 	}
 	
+	public MultiConfig getMultiConfig() {
+		return multiConfig;
+	}
+	
 	public ProxyListModel<Font> getFontModel() {
 		if (session != null) {
 			return session.getSonarState().getDmsCache().getFontModel();

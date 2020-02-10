@@ -27,9 +27,10 @@ import javax.swing.JTextArea;
 import us.mn.state.dot.tms.client.widget.IAction;
 
 /**
- * WYSIWYG DMS Message Editor WYSIWYG Tab - This one has the good stuff...
+ * WYSIWYG DMS Message Editor MULTI Mode Tab for direct editing of MULTI
+ * strings, which may be forced for some types of messages.
  *
- * @author Gordon Parikh, John L. Stanley - SRF Consulting
+ * @author Gordon Parikh - SRF Consulting
  */
 @SuppressWarnings("serial")
 
