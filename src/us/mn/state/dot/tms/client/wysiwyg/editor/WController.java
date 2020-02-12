@@ -324,6 +324,10 @@ public class WController {
 	
 	/** Update the selected page to use one in the current page_list_model. */
 	private void updateSelectedPage() {
+		// make sure the selected page still exists
+		if (selectedPageIndx >= page_list_model.getSize()) 
+			selectedPageIndx = page_list_model.getSize() - 1;
+		
 		selectedPage = (WMsgSignPage) page_list_model.get(selectedPageIndx);
 		
 		if (editor != null) {
