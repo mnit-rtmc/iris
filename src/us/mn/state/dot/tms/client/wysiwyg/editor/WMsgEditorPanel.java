@@ -52,7 +52,7 @@ public class WMsgEditorPanel extends JPanel {
 		// generate each tab
 		wysiwyg_pnl = new WMsgWysiwygPanel(controller);
 		multi_pnl = new WMsgMultiPanel(controller);
-		config_pnl = new JPanel();					// TODO
+		config_pnl = new WMsgConfigPanel(controller);					// TODO
 		
 		// add the tabs to the pane
 		tab_pane.add(I18N.get("wysiwyg.epanel.wysiwyg_tab"), wysiwyg_pnl);
