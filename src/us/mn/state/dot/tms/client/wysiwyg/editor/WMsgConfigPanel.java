@@ -146,7 +146,7 @@ public class WMsgConfigPanel extends IPanel {
 	private JLabel font_height_lbl = IPanel.createValueLabel();
 
 	/** User session */
-	private Session session;
+//	private Session session;
 	
 	/** MultiConfig for sign(s) being edited */
 	private MultiConfig config;
@@ -154,7 +154,7 @@ public class WMsgConfigPanel extends IPanel {
 	/** Create a new MULTI-mode panel */
 	public WMsgConfigPanel(WController c) {
 		controller = c;
-		session = controller.getSession();
+//		session = controller.getSession();
 		config = controller.getMultiConfig();
 		
 		// initialize the panel
