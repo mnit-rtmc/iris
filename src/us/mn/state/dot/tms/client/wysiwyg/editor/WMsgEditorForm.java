@@ -89,7 +89,7 @@ public class WMsgEditorForm extends AbstractForm {
 	Boolean singleSign;
 	
 	/* Controller - for handling back and forth between the GUI and renderer */
-	WController controller;
+	private WController controller;
 	
 	/* Currently selected page (defaults to first available) */
 //	private WMsgSignPage selectedPage;

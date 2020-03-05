@@ -15,6 +15,7 @@
 
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -36,13 +37,16 @@ import javax.swing.event.ListSelectionListener;
 
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
+import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.MultiString;
 
@@ -55,12 +59,32 @@ import us.mn.state.dot.tms.utils.MultiString;
 @SuppressWarnings("serial")
 
 public class WController {
+	/** Editing modes */
+	private final static String MODE_TEXT = "text";
+	private final static String MODE_GRAPHIC = "graphic";
+	private final static String MODE_COLORRECT = "color_rectangle";
+	private final static String MODE_TEXTRECT = "text_rectangle";
+	private final static String MODE_MULTITAG = "multi_tag";
+	private String editingMode = MODE_TEXT;
 	
-	/** Client Session */
-	Session session; 
+	/** Client Session and SmartDesktop */
+	private Session session;
+	private SmartDesktop desktop;
 	
-	/** Keep a handle to the editor for any updates we need to make from here */
-	WMsgEditorForm editor;
+	/** Keep a handle to the editor form and sign pixel panel (TODO may 
+	 * change) for any updates we need to make from here */
+	private WMsgEditorForm editor;
+	private SignPixelPanel pixel_pnl;
+	
+	/** Cursor that will change depending on mode, etc. */
+	// TODO should we make these final or have an initCursors method???
+	private final Cursor textCursor = new Cursor(Cursor.TEXT_CURSOR);
+	private final Cursor graphicCursor = new Cursor(Cursor.HAND_CURSOR);
+	private final Cursor colorRectCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+	private final Cursor textRectCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+	private final Cursor multiTagCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+	private final Cursor moveCursor = new Cursor(Cursor.MOVE_CURSOR);
+	private Cursor cursor = textCursor;
 	
 	/** Sign/Group and Message being edited */
 	private DMS sign;
@@ -75,6 +99,10 @@ public class WController {
 	/** Current Font
 	 *  TODO need some model for this, I don't think it can just be one */
 	private Font currentFont;
+	
+	/** Current Colors */
+	private DmsColor fgColor;
+	private DmsColor bgColor;
 	
 	/** Page list */
 	// TODO should we make this a generic array? might make more sense but w/e
@@ -95,35 +123,41 @@ public class WController {
 	}	
 	
 	public WController(WMsgEditorForm e) {
-		setEditorForm(e);
+		init(e);
 	}	
 	
 	public WController(WMsgEditorForm e, DMS d) {
-		setEditorForm(e);
+		init(e);
 		setSign(d);
 	}
 	
 	public WController(WMsgEditorForm e, SignGroup g) {
-		setEditorForm(e);
+		init(e);
 		setSignGroup(g);
 	}
 	
 	public WController(WMsgEditorForm e, QuickMessage q, DMS d) {
-		setEditorForm(e);
+		init(e);
 		setSign(d);
 		setQuickMessage(q);
 	}
 	
 	public WController(WMsgEditorForm e, QuickMessage q, SignGroup g) {
-		setEditorForm(e);
+		init(e);
 		setSignGroup(g);
 		setQuickMessage(q);
 	}
 	
-	/** Set the editor form handle */
-	public void setEditorForm(WMsgEditorForm e) {
+	/** Perform some initialization on the controller. Sets the editor form
+	 *  handle, sets up the mouse cursor, etc.
+	 */
+	public void init(WMsgEditorForm e) {
 		editor = e;
 		session = editor.getSession();
+		desktop = session.getDesktop();
+		
+		// initialize the cursor, starting in text mode
+		cursor = new Cursor(Cursor.TEXT_CURSOR);
 	}
 	
 	/** Set the sign being used */
@@ -133,8 +167,7 @@ public class WController {
 		// generate the MultiConfig for the sign
 		if (sign != null) {
 			try {
-				multiConfig = MultiConfig.from(sign);
-				setFontFromConfig();
+				setMultiConfig(MultiConfig.from(sign));
 			} catch (TMSException e1) {
 				// TODO what to do??
 			}
@@ -150,8 +183,7 @@ public class WController {
 		
 		if (sg != null) {
 			// generate the MultiConfig for the sign group
-			multiConfig = MultiConfig.from(sg);
-			setFontFromConfig();
+			setMultiConfig(MultiConfig.from(sg));
 			
 			// generate the list of signs in the group
 			makeSignListForGroup(true);
@@ -184,7 +216,7 @@ public class WController {
 		
 		// get the AffineTransform object from the pixel panel
 		if (editor != null) {
-			AffineTransform t = editor.getEditorPixelPanel().getTransform();
+			AffineTransform t = pixel_pnl.getTransform();
 			
 			// calculate the adjusted coordinates of the click
 			if (t != null) {
@@ -220,6 +252,17 @@ public class WController {
 		if (pSign != null) {
 			int x = (int) pSign.getX();
 			int y = (int) pSign.getY();
+			
+			// TODO test code for cursor changing
+			if (y >= 100 && y <= 160) {
+				cursor = moveCursor;
+				update();
+			} else {
+				setCursorFromMode();
+			}
+			
+			// TODO hook this into token finding and mouse cursor changing
+			
 //			System.out.println(String.format(
 //					"Mouse moved to (%d, %d) ...", x, y));
 		}
@@ -296,6 +339,7 @@ public class WController {
 	/** Update everything that needs updating */
 	public void update() {
 		updatePageListModel();
+		updateCursor();
 		
 		// TODO add more stuff here eventually
 	}
@@ -334,6 +378,27 @@ public class WController {
 			editor.setPageNumberLabel(selectedPage.getPageNumberLabel());
 			editor.updateWysiwygPanel();
 		}
+	}
+	
+	/** Update the cursor that is active over the sign pixel panel */
+	private void updateCursor() {
+		if (pixel_pnl != null) {
+			pixel_pnl.setCursor(cursor);
+		}
+	}
+	
+	/** Set the cursor type based on the editing mode */
+	private void setCursorFromMode() {
+		if (editingMode == MODE_TEXT)
+			cursor = textCursor;
+		else if (editingMode == MODE_GRAPHIC)
+			cursor = graphicCursor;
+		else if (editingMode == MODE_COLORRECT)
+			cursor = colorRectCursor;
+		else if (editingMode == MODE_TEXTRECT)
+			cursor = textRectCursor;
+		else if (editingMode == MODE_MULTITAG)
+			cursor = multiTagCursor;
 	}
 	
 	/** Get a JComboBox containing a list of sign names (only applies when
@@ -397,6 +462,45 @@ public class WController {
 			sign = dmsList.get(dmsNames[0]);
 	}
 	
+	public void activateTextMode() {
+		// put the cursor in text mode then update everything
+		editingMode = MODE_TEXT;
+		setCursorFromMode();
+		update();
+	}
+	
+	public void activateGraphicMode() {
+		// put the cursor in ?? hand ?? mode then update everything
+		editingMode = MODE_GRAPHIC;
+		setCursorFromMode();
+		update();
+	}
+	
+	public void activateTextRectangleMode() {
+		// put the cursor in crosshair mode then update everything
+		editingMode = MODE_TEXTRECT;
+		setCursorFromMode();
+		update();
+	}
+	
+	public void activateColorRectangleMode() {
+		// put the cursor in crosshair mode then update everything
+		editingMode = MODE_COLORRECT;
+		setCursorFromMode();
+		update();
+	}
+		
+	public void activateMultiTagMode() {
+		// put the cursor in ?? default ?? mode then update everything
+		editingMode = MODE_MULTITAG;
+		setCursorFromMode();
+		update();
+	}
+	
+	public Cursor getCursor() {
+		return cursor;
+	}
+	
 	public MultiConfig getMultiConfig() {
 		return multiConfig;
 	}
@@ -415,10 +519,51 @@ public class WController {
 		return currentFont;
 	}
 	
+	public void setPixelPanel(SignPixelPanel spp) {
+		pixel_pnl = spp;
+	}
+	
+	private void setMultiConfig(MultiConfig mc) {
+		multiConfig = mc;
+		setFontFromConfig();
+		setColorsFromConfig();
+	}
+	
 	private void setFontFromConfig() {
 		if (multiConfig != null) {
 			currentFont = multiConfig.getDefaultFont();
 		}
+	}
+	
+	private void setColorsFromConfig() {
+		if (multiConfig != null) {
+			fgColor = multiConfig.getDefaultFG();
+			bgColor = multiConfig.getDefaultBG();
+		}
+	}
+	
+	public void setForegroundColor(DmsColor c) {
+		fgColor = c;
+	}
+		
+	public void setBackgroundColor(DmsColor c) {
+		bgColor = c;
+	}
+	
+	public DmsColor getForegroundColor() {
+		return fgColor;
+	}
+		
+	public DmsColor getBackgroundColor() {
+		return bgColor;
+	}
+	
+	public Session getSession() {
+		return session;
+	}
+		
+	public SmartDesktop getDesktop() {
+		return desktop;
 	}
 	
 	/* Get the current DMS object */

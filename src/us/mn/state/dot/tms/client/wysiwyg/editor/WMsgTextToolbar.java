@@ -31,10 +31,14 @@ import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JToggleButton;
 
+import us.mn.state.dot.tms.ColorScheme;
+import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.Icons;
+import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -87,22 +91,38 @@ public class WMsgTextToolbar extends JPanel {
 			}
 		});
 		
-		font_options.setModel(new IComboBoxModel<Font>(controller.getFontModel()));
+		font_options.setModel(
+				new IComboBoxModel<Font>(controller.getFontModel()));
 		font_options.setSelectedItem(controller.getCurrentFont());
 		add(font_options);
 		
 		// color pickers
-		fgColor = controller.getMultiConfig().getDefaultFG().color;
 		fg_color_btn = new JButton(open_fg_color_picker);
-		fg_color_btn.setIcon(createColorIcon(fgColor, 16, 16));
-		fg_color_btn.setMargin(new Insets(0,0,0,0));
+		DmsColor fgc = controller.getForegroundColor();
+		if (fgc != null) {
+			fgColor = fgc.color;
+			fg_color_btn.setIcon(
+					WMsgColorChooser.createColorIcon(fgColor, 16, 16));
+			fg_color_btn.setMargin(new Insets(0,0,0,0));
+		}
 		add(fg_color_btn);
 		
-		bgColor = controller.getMultiConfig().getDefaultBG().color;
 		bg_color_btn = new JButton(open_bg_color_picker);
-		bg_color_btn.setIcon(createColorIcon(bgColor, 16, 16));
-		bg_color_btn.setMargin(new Insets(0,0,0,0));
+		DmsColor bgc = controller.getBackgroundColor();
+		if (bgc != null) {
+			bgColor = bgc.color;
+			bg_color_btn.setIcon(
+					WMsgColorChooser.createColorIcon(bgColor, 16, 16));
+			bg_color_btn.setMargin(new Insets(0,0,0,0));
+		}
 		add(bg_color_btn);
+		
+		// disable color picker buttons for 1-bit and unknown color schemes
+		ColorScheme cs = controller.getMultiConfig().getColorScheme();
+		if (cs == ColorScheme.MONOCHROME_1_BIT || cs == ColorScheme.UNKNOWN) {
+			fg_color_btn.setEnabled(false);
+			bg_color_btn.setEnabled(false);
+		}
 		
 		// justification buttons
 		text_vjust_btn_grp = new ButtonGroup();
@@ -115,23 +135,27 @@ public class WMsgTextToolbar extends JPanel {
 		text_vjust_btn_grp.add(text_vjust_bottom_btn);
 		
 		// set icons for justification buttons
-		ImageIcon text_vjust_top_icon = Icons.getIconByPropName("wysiwyg.epanel.text_vjust_top");
+		ImageIcon text_vjust_top_icon = Icons.getIconByPropName(
+				"wysiwyg.epanel.text_vjust_top");
 		text_vjust_top_btn.setIcon(text_vjust_top_icon);
 		text_vjust_top_btn.setHideActionText(true);
 		text_vjust_top_btn.setMargin(new Insets(0,0,0,0));
 		
-		ImageIcon text_vjust_center_icon = Icons.getIconByPropName("wysiwyg.epanel.text_vjust_center");
+		ImageIcon text_vjust_center_icon = Icons.getIconByPropName(
+				"wysiwyg.epanel.text_vjust_center");
 		text_vjust_center_btn.setIcon(text_vjust_center_icon);
 		text_vjust_center_btn.setHideActionText(true);
 		text_vjust_center_btn.setMargin(new Insets(0,0,0,0));
 		
-		ImageIcon text_vjust_bottom_icon = Icons.getIconByPropName("wysiwyg.epanel.text_vjust_bottom");
+		ImageIcon text_vjust_bottom_icon = Icons.getIconByPropName(
+				"wysiwyg.epanel.text_vjust_bottom");
 		text_vjust_bottom_btn.setIcon(text_vjust_bottom_icon);
 		text_vjust_bottom_btn.setHideActionText(true);
 		text_vjust_bottom_btn.setMargin(new Insets(0,0,0,0));
 		
 		text_vjust_btn_pnl = new JPanel();
-		text_vjust_btn_pnl.setLayout(new BoxLayout(text_vjust_btn_pnl, BoxLayout.X_AXIS));
+		text_vjust_btn_pnl.setLayout(
+				new BoxLayout(text_vjust_btn_pnl, BoxLayout.X_AXIS));
 		text_vjust_btn_pnl.add(text_vjust_top_btn);
 		text_vjust_btn_pnl.add(text_vjust_center_btn);
 		text_vjust_btn_pnl.add(text_vjust_bottom_btn);
@@ -146,65 +170,101 @@ public class WMsgTextToolbar extends JPanel {
 		text_hjust_btn_grp.add(text_hjust_center_btn);
 		text_hjust_btn_grp.add(text_hjust_right_btn);
 		
-		ImageIcon text_hjust_left_icon = Icons.getIconByPropName("wysiwyg.epanel.text_hjust_left");
+		ImageIcon text_hjust_left_icon = Icons.getIconByPropName(
+				"wysiwyg.epanel.text_hjust_left");
 		text_hjust_left_btn.setIcon(text_hjust_left_icon);
 		text_hjust_left_btn.setHideActionText(true);
 		text_hjust_left_btn.setMargin(new Insets(0,0,0,0));
 		
-		ImageIcon text_hjust_center_icon = Icons.getIconByPropName("wysiwyg.epanel.text_hjust_center");
+		ImageIcon text_hjust_center_icon = Icons.getIconByPropName(
+				"wysiwyg.epanel.text_hjust_center");
 		text_hjust_center_btn.setIcon(text_hjust_center_icon);
 		text_hjust_center_btn.setHideActionText(true);
 		text_hjust_center_btn.setMargin(new Insets(0,0,0,0));
 		
-		ImageIcon text_hjust_right_icon = Icons.getIconByPropName("wysiwyg.epanel.text_hjust_right");
+		ImageIcon text_hjust_right_icon = Icons.getIconByPropName(
+				"wysiwyg.epanel.text_hjust_right");
 		text_hjust_right_btn.setIcon(text_hjust_right_icon);
 		text_hjust_right_btn.setHideActionText(true);
 		text_hjust_right_btn.setMargin(new Insets(0,0,0,0));
 		
 		text_hjust_btn_pnl = new JPanel();
-		text_hjust_btn_pnl.setLayout(new BoxLayout(text_hjust_btn_pnl, BoxLayout.X_AXIS));
+		text_hjust_btn_pnl.setLayout(
+				new BoxLayout(text_hjust_btn_pnl, BoxLayout.X_AXIS));
 		text_hjust_btn_pnl.add(text_hjust_left_btn);
 		text_hjust_btn_pnl.add(text_hjust_center_btn);
 		text_hjust_btn_pnl.add(text_hjust_right_btn);
 		add(text_hjust_btn_pnl);
 	}
 	
+	/** Set the foreground or background color to c. The color to set is
+	 *  specified by passing "foreground" or "background" in the fgbg 
+	 *  parameter.
+     */
+	public void setColor(Color c, String fgbg) {
+		if (fgbg.equalsIgnoreCase("foreground"))
+			setForegroundColor(c);
+		else if (fgbg.equalsIgnoreCase("background"))
+			setBackgroundColor(c);
+	}
 	
+	/** Set the foreground color on the controller and change the button
+	 *  appearance
+	 */
+	public void setForegroundColor(Color c) {
+		fgColor = c;
+		controller.setForegroundColor(new DmsColor(fgColor));
+		fg_color_btn.setIcon(WMsgColorChooser.createColorIcon(fgColor, 16, 16));
+	}
+	
+	/** Set the background color on the controller and change the button
+	 *  appearance
+	 */
+	public void setBackgroundColor(Color c) {
+		bgColor = c;
+		controller.setBackgroundColor(new DmsColor(bgColor));
+		bg_color_btn.setIcon(WMsgColorChooser.createColorIcon(bgColor, 16, 16));
+	}
+	
+	WMsgTextToolbar tb = this;
 	
 	/** Foreground color picker action */
-	private final IAction open_fg_color_picker = new IAction("wysiwyg.epanel.fg_color_picker_btn") {
+	private final IAction open_fg_color_picker =
+			new IAction("wysiwyg.epanel.fg_color_picker_btn") {
 		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
 		{
-			// TODO change this so it handles things better (whatever that means...)
-			
-			Color newColor = JColorChooser.showDialog(null,
-					I18N.get("wysiwyg.epanel.fg_color_picker_title"),
-					fgColor);
-			fgColor = newColor;
-			fg_color_btn.setIcon(createColorIcon(fgColor, 16, 16));
+			String title = I18N.get("wysiwyg.epanel.fg_color_picker_title");
+			WMsgColorChooser ccForm = new WMsgColorChooser(
+					controller.getDesktop(), tb,
+					controller.getMultiConfig().getColorScheme(),
+					title, fgColor, "foreground");
+			SmartDesktop desktop = controller.getDesktop();
+			desktop.show(ccForm);
 		}
 	};
 	
 	/** Background color picker action */
-	private final IAction open_bg_color_picker = new IAction("wysiwyg.epanel.bg_color_picker_btn") {
+	private final IAction open_bg_color_picker =
+			new IAction("wysiwyg.epanel.bg_color_picker_btn") {
 		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
 		{
-			// TODO change this so it handles things better (whatever that means...)
-			
-			Color newColor = JColorChooser.showDialog(null,
-					I18N.get("wysiwyg.epanel.bg_color_picker_title"),
-					bgColor);
-			bgColor = newColor;
-			bg_color_btn.setIcon(createColorIcon(bgColor, 16, 16));
+			String title = I18N.get("wysiwyg.epanel.bg_color_picker_title");
+			WMsgColorChooser ccForm = new WMsgColorChooser(
+					controller.getDesktop(), tb,
+					controller.getMultiConfig().getColorScheme(),
+					title, fgColor, "background");
+			SmartDesktop desktop = controller.getDesktop();
+			desktop.show(ccForm);
 		}
 	};
 	
 	/** Text vertical justify top action */
-	private final IAction text_vjust_top = new IAction("wysiwyg.epanel.text_vjust_top") {
+	private final IAction text_vjust_top =
+			new IAction("wysiwyg.epanel.text_vjust_top") {
 		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
@@ -214,7 +274,8 @@ public class WMsgTextToolbar extends JPanel {
 	};
 	
 	/** Text vertical justify center action */
-	private final IAction text_vjust_center = new IAction("wysiwyg.epanel.text_vjust_center") {
+	private final IAction text_vjust_center =
+			new IAction("wysiwyg.epanel.text_vjust_center") {
 		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
@@ -224,7 +285,8 @@ public class WMsgTextToolbar extends JPanel {
 	};
 	
 	/** Text vertical justify bottom action */
-	private final IAction text_vjust_bottom = new IAction("wysiwyg.epanel.text_vjust_bottom") {
+	private final IAction text_vjust_bottom =
+			new IAction("wysiwyg.epanel.text_vjust_bottom") {
 		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
@@ -234,7 +296,8 @@ public class WMsgTextToolbar extends JPanel {
 	};
 	
 	/** Text horizontal justify left action */
-	private final IAction text_hjust_left = new IAction("wysiwyg.epanel.text_hjust_left") {
+	private final IAction text_hjust_left =
+			new IAction("wysiwyg.epanel.text_hjust_left") {
 		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
@@ -244,7 +307,8 @@ public class WMsgTextToolbar extends JPanel {
 	};
 	
 	/** Text horizontal justify left action */
-	private final IAction text_hjust_center = new IAction("wysiwyg.epanel.text_hjust_center") {
+	private final IAction text_hjust_center =
+			new IAction("wysiwyg.epanel.text_hjust_center") {
 		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
@@ -254,7 +318,8 @@ public class WMsgTextToolbar extends JPanel {
 	};
 	
 	/** Text horizontal justify left action */
-	private final IAction text_hjust_right = new IAction("wysiwyg.epanel.text_hjust_right") {
+	private final IAction text_hjust_right =
+			new IAction("wysiwyg.epanel.text_hjust_right") {
 		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
@@ -262,16 +327,4 @@ public class WMsgTextToolbar extends JPanel {
 			System.out.println("Horizontal Justify Right...");
 		}
 	};
-	
-	public static  ImageIcon createColorIcon(Color c, int width, int height) {
-		BufferedImage image = new BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = image.createGraphics();
-        graphics.setColor(c);
-        graphics.fillRect(0, 0, width, height);
-        graphics.setXORMode(Color.DARK_GRAY);
-        graphics.drawRect(0, 0, width-1, height-1);
-        image.flush();
-        ImageIcon icon = new ImageIcon(image);
-        return icon;
-    }
 }

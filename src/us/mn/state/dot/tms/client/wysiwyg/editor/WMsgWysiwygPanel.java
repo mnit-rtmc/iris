@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -36,6 +37,7 @@ import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JToggleButton;
+
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
@@ -101,7 +103,7 @@ public class WMsgWysiwygPanel extends JPanel {
 	private JPanel multitag_toolbar_pnl;
 	
 	/** Sign pixel panel to display the current sign message page */
-	private final SignPixelPanel pixel_pnl = new SignPixelPanel(250, 550);
+	private SignPixelPanel pixel_pnl;
 	
 	public WMsgWysiwygPanel(WController c) {
 		controller = c;
@@ -159,6 +161,8 @@ public class WMsgWysiwygPanel extends JPanel {
 		add(toolbar_pnl);
 		
 		// sign face panel - the main show
+		pixel_pnl = new SignPixelPanel(250, 550);
+		controller.setPixelPanel(pixel_pnl);
 		add(pixel_pnl);
 		
 		// mouse input adapter for handling mouse events
@@ -197,6 +201,12 @@ public class WMsgWysiwygPanel extends JPanel {
 			// change toolbar panel to text options
 			CardLayout cl = (CardLayout) toolbar_pnl.getLayout();
 			cl.show(toolbar_pnl, TEXT_TOOLBAR);
+			
+			// tell the controller we've changed modes
+			controller.activateTextMode();
+			
+			// update the mouse cursor based on the controller's decisions
+			setCursor(controller.getCursor());
 		}
 	};
 	
@@ -211,6 +221,9 @@ public class WMsgWysiwygPanel extends JPanel {
 			// change toolbar panel to graphic options
 			CardLayout cl = (CardLayout) toolbar_pnl.getLayout();
 			cl.show(toolbar_pnl, GRAPHIC_TOOLBAR);
+
+			// tell the controller we've changed modes
+			controller.activateGraphicMode();
 		}
 	};
 	
@@ -226,6 +239,9 @@ public class WMsgWysiwygPanel extends JPanel {
 			// change toolbar panel to color rectangle options
 			CardLayout cl = (CardLayout) toolbar_pnl.getLayout();
 			cl.show(toolbar_pnl, COLOR_RECTANGLE_TOOLBAR);
+
+			// tell the controller we've changed modes
+			controller.activateColorRectangleMode();
 		}
 	};
 	
@@ -241,6 +257,9 @@ public class WMsgWysiwygPanel extends JPanel {
 			// change toolbar panel to text rectangle options
 			CardLayout cl = (CardLayout) toolbar_pnl.getLayout();
 			cl.show(toolbar_pnl, TEXT_RECTANGLE_TOOLBAR);
+
+			// tell the controller we've changed modes
+			controller.activateTextRectangleMode();
 		}
 	};
 	
@@ -256,6 +275,9 @@ public class WMsgWysiwygPanel extends JPanel {
 			// change toolbar panel to MULTI tag options
 			CardLayout cl = (CardLayout) toolbar_pnl.getLayout();
 			cl.show(toolbar_pnl, MULTI_TAG_TOOLBAR);
+			
+			// tell the controller we've changed modes
+			controller.activateMultiTagMode();
 		}
 	};
 	
