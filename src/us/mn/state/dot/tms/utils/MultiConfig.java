@@ -15,6 +15,9 @@
 package us.mn.state.dot.tms.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -40,9 +43,6 @@ import us.mn.state.dot.tms.TMSException;
  * 
  * Combines info from _dms, sign_config,
  * and sign_detail records.
- * 
- * Can also generate a least-common-denominator
- * configuration for rendering sign-group messages.
  * 
  * Obtain a MultiConfig by calling one of:
  *   MultiConfig.from(DMS), 
@@ -107,16 +107,35 @@ public class MultiConfig {
 
 	final static public String BITMAP    = "Bitmap";
 	final static public String SIGN      = "Sign";
+	final static public String CONFIG    = "Config";
 	final static public String SIGNGROUP = "SignGroup";
-	private String type;  // "Bitmap", "Sign", or "SignGroup"
+	private String type;  // "Bitmap", "Sign", "Config", or "SignGroup"
 	
-	private String name;  // sign-name or sign-group-name
+	private String name;
 
-	/** This list contains a self-reference to this MultiConfig.
-	 * If this is a composite (sign-group) MultiConfig, the
-	 * self-reference is followed by a MultiConfig for each
-	 * sign in the group. */
+	/** If this MultiConfig is for a Sign or a
+	 *  config, this list is null.
+	 *  
+	 *  If this MultiConfig is for a SignGroup,
+	 *  this list contains one MultiConfig for each
+	 *  configuration (same dmsType, geometry,
+	 *  default font, and default BG/FG colors)
+	 *  in the SignGroup.  This list is sorted
+	 *  with the most common configuration first,
+	 *  and has names "Config1", "Config2", etc... */
 	private List<MultiConfig> configList = null;
+
+	/** If this MultiConfig is for a Sign, this
+	 *  list is null.
+	 *  
+	 * If this MultiConfig is for a config, this
+	 * list contains a MultiConfig for each sign
+	 * with that config.
+	 *  
+	 * If this MultiConfig is for a SignGroup,
+	 * this list contains a MultiConfig for each
+	 * sign in that sign group. */
+	private List<MultiConfig> signList = null;
 
 	//-------------
 	// values obtained from more than one source
@@ -217,8 +236,8 @@ public class MultiConfig {
 	private void genIrisDefaultColors() {
 		byte[] bgBytes = DMSHelper.getDefaultBackgroundBytes(colorScheme);
 		byte[] fgBytes = DMSHelper.getDefaultForegroundBytes(colorScheme);
-		int bg0 = bgBytes[0];
-		int fg0 = fgBytes[0];
+		int bg0 = bgBytes[0] & 0x0ff;
+		int fg0 = fgBytes[0] & 0x0ff;
 		DmsColor bgMonoColor;
 		DmsColor fgMonoColor;
 		switch (colorScheme) {
@@ -245,20 +264,20 @@ public class MultiConfig {
 				break;
 			case COLOR_24_BIT:
 				if (bgBytes.length == 3) {
-					defaultBG = new DmsColor(bg0, bgBytes[1], bgBytes[2]);
+					defaultBG = new DmsColor(bg0, bgBytes[1] & 0x0ff, bgBytes[2] & 0x0ff);
 					defaultBGTagVal = genTagVal3(defaultBG);
 				}
 				else {
 					defaultBG = ColorClassic.fromOrdinal(bg0).clr;
-					defaultBGTagVal = genTagVal1(bg0);
+					defaultBGTagVal = genTagVal1(bg0 & 0x0ff);
 				}
 				if (fgBytes.length == 3) {
-					defaultFG = new DmsColor(fg0, fgBytes[1], fgBytes[2]);
+					defaultFG = new DmsColor(fg0, fgBytes[1] & 0x0ff, fgBytes[2] & 0x0ff);
 					defaultFGTagVal = genTagVal3(defaultFG);
 				}
 				else {
 					defaultFG = ColorClassic.fromOrdinal(fg0).clr;
-					defaultFGTagVal = genTagVal1(fg0);
+					defaultFGTagVal = genTagVal1(fg0 & 0x0ff);
 				}
 		}
 	}
@@ -304,32 +323,32 @@ public class MultiConfig {
 		return bUsingBasicColorsMode;
 	}
 	
-	//===========================================
-	// Certain conditions prohibit use of WYSIWYG,
-	// but we can still allow MULTI-only editing.
-	
-	private boolean bMultiOnlyEditing = false;
+//	//===========================================
+//	// Certain conditions prohibit use of WYSIWYG,
+//	// but we can still allow MULTI-only editing.
+//	
+//	private boolean bMultiOnlyEditing = false;
+//
+//	private void forceMultiOnlyEditing(String errStr) {
+//		bMultiOnlyEditing = true;
+//		if (errStr != null)
+//			logWarning(errStr+"  Using MULTI-only editing.");
+//	}
+//	
+//	public boolean usingMultiOnlyEditing() {
+//		return bMultiOnlyEditing;
+//	}
 
-	private void forceMultiOnlyEditing(String errStr) {
-		bMultiOnlyEditing = true;
-		if (errStr != null)
-			logWarning(errStr+"  Using MULTI-only editing.");
-	}
-	
-	public boolean usingMultiOnlyEditing() {
-		return bMultiOnlyEditing;
-	}
-
-	//===========================================
-	//TODO: Use this flag to make changes to editor:
-	// 1) Automatically add a [fo<groupDefaultFont>] at start of all messages
-	// 2) Convert sign-default font tags [fo] to explicit group-default font tags.
-
-	private boolean bMultipleDefaultFonts = false;
-
-	public boolean usingMultipleDefaultFonts() {
-		return bMultipleDefaultFonts;
-	}
+//	//===========================================
+//	//TODO: Use this flag to make changes to editor:
+//	// 1) Automatically add a [fo<groupDefaultFont>] at start of all messages
+//	// 2) Convert sign-default font tags [fo] to explicit group-default font tags.
+//
+//	private boolean bMultipleDefaultFonts = false;
+//
+//	public boolean usingMultipleDefaultFonts() {
+//		return bMultipleDefaultFonts;
+//	}
 
 	//===========================================
 	// load and reconcile methods
@@ -371,43 +390,47 @@ public class MultiConfig {
 		return isUseable();
 	}
 
-	/** Reconcile SignConfig differences. */
-	private void reconcileSignConfigs(MultiConfig mcfgNew) {
-		faceWidth    = Math.min(faceWidth,   mcfgNew.faceWidth);
-		faceHeight   = Math.min(faceHeight,  mcfgNew.faceHeight);
-		borderHoriz  = Math.min(borderHoriz, mcfgNew.borderHoriz);
-		borderVert   = Math.min(borderVert,  mcfgNew.borderVert);
-		pitchHoriz   = Math.min(pitchHoriz,  mcfgNew.pitchHoriz);
-		pitchVert    = Math.min(pitchVert,   mcfgNew.pitchVert);
-		pixelWidth   = Math.min(pixelWidth,  mcfgNew.pixelWidth);
-		pixelHeight  = Math.min(pixelHeight, mcfgNew.pixelHeight);
-		charWidth    = Math.min(charWidth,   mcfgNew.charWidth);
-		charHeight   = Math.min(charHeight,  mcfgNew.charHeight);
-		if (!colorScheme.equals(mcfgNew.colorScheme)) {
-			forceBasicColorsMode("Multiple color schemes detected.");
-		}
-	}
+//	/** Reconcile SignConfig differences. */
+//	private void reconcileSignConfigs(MultiConfig mcfgNew) {
+//		faceWidth    = Math.min(faceWidth,   mcfgNew.faceWidth);
+//		faceHeight   = Math.min(faceHeight,  mcfgNew.faceHeight);
+//		borderHoriz  = Math.min(borderHoriz, mcfgNew.borderHoriz);
+//		borderVert   = Math.min(borderVert,  mcfgNew.borderVert);
+//		pitchHoriz   = Math.min(pitchHoriz,  mcfgNew.pitchHoriz);
+//		pitchVert    = Math.min(pitchVert,   mcfgNew.pitchVert);
+//		pixelWidth   = Math.min(pixelWidth,  mcfgNew.pixelWidth);
+//		pixelHeight  = Math.min(pixelHeight, mcfgNew.pixelHeight);
+//		charWidth    = Math.min(charWidth,   mcfgNew.charWidth);
+//		charHeight   = Math.min(charHeight,  mcfgNew.charHeight);
+//		if (!colorScheme.equals(mcfgNew.colorScheme)) {
+//			forceBasicColorsMode("Multiple color schemes detected.");
+//		}
+//	}
 
 	//-------------
 
 	/** Load SignDetail values */
-	private void loadSignDetail(SignDetail signDetail) {
+	private boolean loadSignDetail(SignDetail signDetail) {
 		if (signDetail == null) {
-			// make-up a set of minimum details
-			bHasBeacon    = false;
-			if (charHeight > 0) {
-				if (charWidth > 0)
-					dmsType = DMSType.VMS_CHAR;
-				else
-					dmsType = DMSType.VMS_LINE;
-			}
-			else
-				dmsType = DMSType.VMS_FULL;
-			supportedTags = -53510145;
-			maxMultiLen   = 312;
-			maxPages      = 6;
-			return;
+			logError("Sign detail info is missing.");
+			return false;
 		}
+//		if (signDetail == null) {
+//			// make-up a set of minimum details
+//			bHasBeacon    = false;
+//			if (charHeight > 0) {
+//				if (charWidth > 0)
+//					dmsType = DMSType.VMS_CHAR;
+//				else
+//					dmsType = DMSType.VMS_LINE;
+//			}
+//			else
+//				dmsType = DMSType.VMS_FULL;
+//			supportedTags = -53510145;
+//			maxMultiLen   = 312;
+//			maxPages      = 6;
+//			return;
+//		}
 		String bt = signDetail.getBeaconType();
 		bHasBeacon = !(bt.equals("none") || bt.equals("unknown"));
 		dmsType       = DMSType.fromOrdinal(signDetail.getDmsType());
@@ -427,20 +450,21 @@ public class MultiConfig {
 			maxMultiLen = 312;
 		if (maxPages <= 0)
 			maxPages = 3;
+		return true;
 	}
 	
-	/** Reconcile SignDetail differences. */
-	private void reconcileSignDetails(MultiConfig mcfgNew) {
-		bHasBeacon    &= mcfgNew.bHasBeacon;    // allow beacon if both have one
-		supportedTags &= mcfgNew.supportedTags; // allow tags supported by both signs
-		maxPages      = Math.min(maxPages,    mcfgNew.maxPages);
-		maxMultiLen   = Math.min(maxMultiLen, mcfgNew.maxMultiLen);
-
-		if (dmsType != mcfgNew.dmsType) {
-			// incompatible sign layouts (char/line/full matrix)
-			forceMultiOnlyEditing("Sign-group contins multiple sign-types.");
-		}
-	}
+//	/** Reconcile SignDetail differences. */
+//	private void reconcileSignDetails(MultiConfig mcfgNew) {
+//		bHasBeacon    &= mcfgNew.bHasBeacon;    // allow beacon if both have one
+//		supportedTags &= mcfgNew.supportedTags; // allow tags supported by both signs
+//		maxPages      = Math.min(maxPages,    mcfgNew.maxPages);
+//		maxMultiLen   = Math.min(maxMultiLen, mcfgNew.maxMultiLen);
+//
+//		if (dmsType != mcfgNew.dmsType) {
+//			// incompatible sign layouts (char/line/full matrix)
+//			forceMultiOnlyEditing("Sign-group contins multiple sign-types.");
+//		}
+//	}
 
 	//-------------
 	// values from DMS
@@ -454,7 +478,8 @@ public class MultiConfig {
 			return;
 
 		// Load sign_detail values
-		loadSignDetail(dms.getSignDetail());
+		if (!loadSignDetail(dms.getSignDetail()))
+			return;
 
 		genIrisDefaultColors();
 
@@ -520,61 +545,82 @@ public class MultiConfig {
 			logError("Default font ("+defaultFontNo+") not in database");
 	}
 
-	/** Reconcile Sign differences. */
-	private void reconcileSigns(MultiConfig mcfgNew) {
-		if (defaultFont != mcfgNew.defaultFont) {
-			// Keep initial default font, but record warning.
-			logWarning("Conflicting default fonts: "
-					+defaultFont.getNumber()+" vs "
-					+mcfgNew.defaultFont.getNumber()
-					+" on sign "+mcfgNew.name);
-			mcfgNew.logWarning("Conflicting default font: "+mcfgNew.defaultFontNo);
-			bMultipleDefaultFonts = true;
-		}
-
-		//TODO:  Change to allow "similar" default-colors...
-		try {
-			if ((defaultFG.rgb() != mcfgNew.defaultFG.rgb())
-			 || (defaultBG.rgb() != mcfgNew.defaultBG.rgb())) {
-				forceBasicColorsMode("Conflicting default colors detected.");
-				mcfgNew.logWarning("Conflicting default colors detected.");
-			}
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-		}
-	}
+//	/** Reconcile Sign differences. */
+//	private void reconcileSigns(MultiConfig mcfgNew) {
+//		if (defaultFont != mcfgNew.defaultFont) {
+//			// Keep initial default font, but record warning.
+//			logWarning("Conflicting default fonts: "
+//					+defaultFont.getNumber()+" vs "
+//					+mcfgNew.defaultFont.getNumber()
+//					+" on sign "+mcfgNew.name);
+//			mcfgNew.logWarning("Conflicting default font: "+mcfgNew.defaultFontNo);
+//			bMultipleDefaultFonts = true;
+//		}
+//
+//		//TODO:  Change to allow "similar" default-colors...
+//		try {
+//			if ((defaultFG.rgb() != mcfgNew.defaultFG.rgb())
+//			 || (defaultBG.rgb() != mcfgNew.defaultBG.rgb())) {
+//				forceBasicColorsMode("Conflicting default colors detected.");
+//				mcfgNew.logWarning("Conflicting default colors detected.");
+//			}
+//		}
+//		catch (Exception ex) {
+//			ex.printStackTrace();
+//		}
+//	}
 
 	//===========================================
 	// MultiConfig generators
 	//===========================================
 	
-	/** Create a MultiConfig from a DMS object. */
-	static public MultiConfig from(DMS dms) throws TMSException {
-		if (dms == null)
+	/** Private base method used for generating
+	 *  all types of MultiConfig */
+	static private MultiConfig from(DMS dms, String type) throws TMSException {
+		if ((dms == null) || (type == null) || type.isEmpty())
 			return null;
 		MultiConfig mcfg = new MultiConfig();
 		mcfg.loadSign(dms);
+		if (!mcfg.isUseable())
+			return null;
 		mcfg.name = dms.getName();
-		mcfg.type = SIGN;
+		mcfg.type = type;
 		return mcfg;
 	}
 
-	/** Create a MultiConfig from a sign name. */
+	/** Private method to create a MultiConfig 
+	 *  from a sign name and MultiConfig type. */
+	static private MultiConfig fromSign(String signName, String type) {
+		DMS dms = DMSHelper.lookup(signName);
+		try {
+			return from(dms, type);
+		} catch (TMSException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	/** Create a MultiConfig from a DMS (sign) object. */
+	static public MultiConfig from(DMS dms) throws TMSException {
+		return from(dms, SIGN);
+	}
+
+	/** Create a MultiConfig from a DMS (sign) name. */
 	static public MultiConfig fromSign(String signName) throws TMSException {
 		DMS dms = DMSHelper.lookup(signName);
 		return from(dms);
 	}
 
-	/** Create a composite MultiConfig from a SignGroup object. */
+	/** Create a MultiConfig tree from a SignGroup object. */
 	static public MultiConfig from(SignGroup sg) {
 		if (sg == null)
 			return null;
-		MultiConfig cfgGroup = null;
-		MultiConfig cfgSign;
+		// build an array list of sign MultiConfig objects
+		MultiConfig mcSign;
 		DmsSignGroup dsg;
 		DMS dms;
 		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
+		ArrayList<MultiConfig> mcaSigns = new ArrayList<MultiConfig>();
 		while (it.hasNext()) {
 			dsg = it.next();
 			if (dsg.getSignGroup() == sg) {
@@ -582,37 +628,201 @@ public class MultiConfig {
 				if (dms == null)
 					continue;
 				try {
-					cfgSign = from(dms);
-					if ((cfgSign == null) || !cfgSign.isUseable())
+					mcSign = from(dms);
+					if (mcSign == null)
 						continue;
-					if (cfgGroup == null) {
-						// Make a copy of the 1st sign's MultiConfig
-						// to start building a composite MultiConfig.
-						cfgGroup = from(dms);
-						cfgGroup.name = sg.getName();
-						cfgGroup.type = SIGNGROUP;
-						cfgGroup.configList = new ArrayList<MultiConfig>();
-						cfgGroup.configList.add(cfgGroup);
-					}
-					else {
-						cfgGroup.reconcileSignConfigs(cfgSign);
-						cfgGroup.reconcileSignDetails(cfgSign);
-						cfgGroup.reconcileSigns(cfgSign);
-					}
-					cfgGroup.configList.add(cfgSign);
+					mcaSigns.add(mcSign);
 				} catch (TMSException e) {
 					// Should never happen...
 					e.printStackTrace();
 				}
 			}
 		}
-		return cfgGroup;
+		if (mcaSigns.isEmpty())
+			return null;
+		// Sort and group the sign-MCs, creating a new
+		// config-MC for each set of identical signs.
+		ArrayList<MultiConfig> mcaConfigs;
+		mcaConfigs = sortAndGroup(mcaSigns);
+		if (mcaConfigs.isEmpty())
+			return null;
+		// Create a primary SignGroup-MC based on
+		// the most common config in SignGroup.
+		MultiConfig mcConfig = mcaConfigs.get(0);
+		MultiConfig mcSignGroup = fromSign(mcConfig.name, SIGNGROUP);
+		mcSignGroup.name = sg.getName();
+		mcSignGroup.configList = mcaConfigs;
+		// Rename config MCs based on position in list
+		int cfgNo = 1;
+		for (MultiConfig mc : mcaConfigs) {
+			mc.name = CONFIG+"_"+cfgNo;
+			++cfgNo;
+		}
+		return mcSignGroup;
 	}
 
-	/** Create a composite MultiConfig from a SignGroup name. */
+	/** Create a MultiConfig tree from a SignGroup name. */
 	static public MultiConfig fromSignGroup(String groupName) {
 		SignGroup sg = SignGroupHelper.lookup(groupName);
 		return from(sg);
+	}
+
+	//===========================================
+	// Sorting and Grouping
+
+	/** Compare by DmsType, geometry, and
+	 *  default font. */
+	public int compare1(MultiConfig mc2) {
+		if (dmsType == null) {
+			System.out.println("MultiConfig.compare1: dmsType is null");
+			return 0;
+		}
+		if (mc2.dmsType == null) {
+			System.out.println("MultiConfig.compare1: mc2.dmsType is null");
+			return 0;
+		}
+		int cmp = dmsType.compareTo(mc2.dmsType);
+		if (cmp != 0)
+			return cmp;
+		cmp = pixelWidth - mc2.pixelWidth;
+		if (cmp != 0)
+			return cmp;
+		cmp = pixelHeight - mc2.pixelHeight;
+		if (cmp != 0)
+			return cmp;
+		cmp = charWidth - mc2.charWidth;
+		if (cmp != 0)
+			return cmp;
+		cmp = charHeight - mc2.charHeight;
+		if (cmp != 0)
+			return cmp;
+		return defaultFontNo - mc2.defaultFontNo;
+	}
+
+	/** Compare by DmsType, geometry, default font,
+	 *  and default background/foreground colors. */
+	public int compare2(MultiConfig mc2) {
+		if (mc2 == null) {
+			System.out.println("MultiConfig.compare1: mc2 is null");
+			return 0;
+		}
+		int cmp = compare1(mc2);
+		if (cmp != 0)
+			return cmp;
+		cmp = defaultBG.rgb() - mc2.defaultBG.rgb();
+		if (cmp != 0)
+			return cmp;
+		return defaultFG.rgb() - mc2.defaultFG.rgb();
+	}
+
+	/** Comparator to sort MultiConfig(s) by DmsType,
+	 *  geometry, and default font. */
+	public static Comparator<MultiConfig> comparator1 =
+		new Comparator<MultiConfig>() {
+			public int compare(MultiConfig mc1, MultiConfig mc2) {
+				return mc1.compare1(mc2);
+			}
+		};
+		
+	/** Comparator to sort MultiConfig(s) by DmsType,
+	 *  geometry, default font, and BG/FG colors. */
+	public static Comparator<MultiConfig> comparator2 =
+		new Comparator<MultiConfig>() {
+			public int compare(MultiConfig mc1, MultiConfig mc2) {
+				return mc1.compare2(mc2);
+			}
+		};
+	
+	/** Comparator to sort by number of entries
+	 *  in each Multiconfig's signList.  Largest
+	 *  signList comes first. */
+	public static Comparator<MultiConfig> comparatorSignListSize =
+		new Comparator<MultiConfig>() {
+			public int compare(MultiConfig mc1, MultiConfig mc2) {
+				int s1, s2;
+				if (mc1.signList == null)
+					s1 = 0;
+				else
+					s1 = mc1.signList.size();
+				if (mc2.signList == null)
+					s2 = 0;
+				else
+					s2 = mc2.signList.size();
+				return s2 - s1;
+			}
+		};
+		
+	/* Generate a hashkey-string containing
+	 * dmsType, sign geometry, and
+	 * default font. */
+	public String genHashKey1() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(dmsType.ordinal());
+		sb.append('\t');
+		sb.append(pixelWidth);
+		sb.append('\t');
+		sb.append(pixelHeight);
+		sb.append('\t');
+		sb.append(charWidth);
+		sb.append('\t');
+		sb.append(charHeight);
+		sb.append('\t');
+		sb.append(defaultFontNo);
+		return sb.toString();
+	}
+
+	/* Generate a hashkey-string containing
+	 * dmsType, sign geometry, default font,
+	 * and default BG/FG colors. */
+	public String genHashKey2() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(genHashKey1());
+		sb.append('\t');
+		sb.append(defaultBG.rgb());
+		sb.append('\t');
+		sb.append(defaultFG.rgb());
+		sb.append('\t');
+		sb.append(Arrays.toString(defaultBGTagVal));
+		sb.append('\t');
+		sb.append(Arrays.toString(defaultFGTagVal));
+		return sb.toString();
+	}
+
+	/** Convert a MultiConfig array-list to a sign-group
+	 *  MultiConfig and a set of config-MultiConfig(s).
+	 *  All the signs represented in a config-MultiConfig
+	 *  have the same geometry and default font.
+	 * @param mca  Source MultiConfig array-list
+	 * @return
+	 */
+	private static ArrayList<MultiConfig>
+			sortAndGroup(ArrayList<MultiConfig> mcaAll) {
+		// Sort by DmsType, geometry, font, and color(s)
+		mcaAll.sort(comparator2);
+		// Bin all MultiConfigs with the same config.
+		// (Creates a new MC for each config.)
+		HashMap<String,MultiConfig> mchConfigMap =
+				new HashMap<String,MultiConfig>();
+		ArrayList<MultiConfig> mcaConfigList =
+				new ArrayList<MultiConfig>();
+		String key;
+		MultiConfig mcGroup;
+		for (MultiConfig mc : mcaAll) {
+			key = mc.genHashKey1();
+			mcGroup = mchConfigMap.get(key);
+			if (mcGroup == null) {
+				mcGroup = fromSign(mc.name, CONFIG);
+				if (mcGroup == null)
+					continue;
+				mcGroup.signList = new ArrayList<MultiConfig>();
+				mchConfigMap.put(key, mcGroup);
+				mcaConfigList.add(mcGroup);
+			}
+			mcGroup.signList.add(mc);
+		}
+		// Sort bins by number of signs in each bin (largest first)
+		mcaConfigList.sort(comparatorSignListSize);
+		return mcaConfigList;
 	}
 
 	//===========================================
@@ -632,6 +842,10 @@ public class MultiConfig {
 
 	public List<MultiConfig> getConfigList() {
 		return configList;
+	}
+
+	public List<MultiConfig> getSignList() {
+		return signList;
 	}
 
 	//------

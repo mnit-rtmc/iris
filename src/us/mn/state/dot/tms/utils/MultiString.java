@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2006-2019  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
+ * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +32,7 @@ import us.mn.state.dot.tms.utils.Multi.OverLimitMode;
  * @author Douglas Lau
  * @author Michael Darter
  * @author Travis Swanston
+ * @author John L. Stanley - SRF Consulting
  */
 public class MultiString {
 
@@ -404,9 +406,9 @@ public class MultiString {
 		multi = m;
 	}
 
-        /** Test if the MULTI string is equal to another MULTI string */
+	/** Test if the MULTI string is equal to another MULTI string */
 	@Override
-        public boolean equals(Object o) {
+	public boolean equals(Object o) {
 		if (o == this)
 			return true;
 		if (o != null) {
@@ -415,8 +417,8 @@ public class MultiString {
 				.normalize().toString();
 			return ms.equals(oms);
 		}
-                return false;
-        }
+		return false;
+	}
 
 	/** Calculate a hash code for the MULTI string */
 	@Override
@@ -621,7 +623,10 @@ public class MultiString {
 		parse(new MultiAdapter() {
 			private int font_num = f_num;
 			@Override public void setFont(Integer fn, String f_id) {
-				font_num = fn;
+				if (fn == null)
+					font_num = f_num;
+				else
+					font_num = fn;
 				fonts.set(fonts.size() - 1, font_num);
 			}
 			@Override public void addPage() {
