@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2014  Minnesota Department of Transportation
+ * Copyright (C) 2010-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,10 +56,10 @@ public class OpQueryConditions extends OpOrg815 {
 			sensor.updateAccumulation(
 				Math.round(cond.getAccumulation() * 1000), now);
 			PrecipitationType pt = cond.getPrecipitationType();
-			if(pt != null)
+			if (pt != null)
 				sensor.setPrecipitationType(pt, now);
 			sensor.setStampNotify(now);
-			if(cond.shouldReset())
+			if (cond.shouldReset())
 				return new ResetAccumulator();
 			else
 				return null;

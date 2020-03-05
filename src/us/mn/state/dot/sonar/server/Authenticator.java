@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2018  Minnesota Department of Transportation
+ * Copyright (C) 2006-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -96,10 +96,12 @@ public class Authenticator {
 		String name, char[] pwd)
 	{
 		try {
-			if (authenticate(user, pwd) && checkDomain(c, user))
-				processor.finishLogin(c, user);
+			if (!authenticate(user, pwd))
+				processor.failLogin(c, name, false);
+			if (!checkDomain(c, user))
+				processor.failLogin(c, name, true);
 			else
-				processor.failLogin(c, name);
+				processor.finishLogin(c, user);
 		}
 		finally {
 			clearPassword(pwd);
@@ -108,10 +110,12 @@ public class Authenticator {
 
 	/** Check if user is connecting from an allowed domain */
 	private boolean checkDomain(ConnectionImpl c, UserImpl user) {
-		InetAddress addr = c.getAddress();
-		for (Domain d : user.getDomains()) {
-			if (checkDomain(d, addr))
-				return true;
+		if (c != null && user != null) {
+			InetAddress addr = c.getAddress();
+			for (Domain d : user.getDomains()) {
+				if (checkDomain(d, addr))
+					return true;
+			}
 		}
 		return false;
 	}

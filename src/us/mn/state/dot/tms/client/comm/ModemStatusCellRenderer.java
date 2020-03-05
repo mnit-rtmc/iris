@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import us.mn.state.dot.tms.ModemState;
 
 /**
- * Renderer for modem status status in a table cell.
+ * Renderer for modem status in a table cell.
  *
  * @author Michael Janson
  * @author Douglas Lau

@@ -40,33 +40,40 @@ public class RoadAffixHelper extends BaseHelper {
 			RoadAffix.SONAR_TYPE));
 	}
 
-	/** Replace any affixes from a string.
+	/** Replace any affixes on a string.
 	 * @param s String to modify.
-	 * @param r Replace with fixup (true) or strip (false).
+	 * @param fixup_retain Fixup or retain affix if allowed.
 	 * @return Updated string. */
-	static public String replace(String s, boolean r) {
+	static public String replace(String s, boolean fixup_retain) {
 		Iterator<RoadAffix> it = iterator();
 		while (it.hasNext()) {
 			RoadAffix ra = it.next();
-			s = ra.getPrefix()
-			  ? replacePrefix(ra, s, r)
-			  : replaceSuffix(ra, s, r);
+			boolean retain = fixup_retain && ra.getAllowRetain();
+			if (!retain) {
+				String ns = ra.getPrefix()
+				          ? replacePrefix(ra, s, fixup_retain)
+				          : replaceSuffix(ra, s, fixup_retain);
+				if (ns != null)
+					return ns.trim();
+			}
 		}
 		return s.trim();
 	}
 
-	/** Replace a prefix on a given string */
-	static private String replacePrefix(RoadAffix ra, String s, boolean r) {
+	/** Replace prefix on a given string */
+	static private String replacePrefix(RoadAffix ra, String s,
+		boolean allow_fixup)
+	{
 		String a = fullPrefix(ra.getName());
 		if (s.startsWith(a)) {
-			s = s.substring(a.length());
-			if (r) {
+			String root = s.substring(a.length());
+			if (allow_fixup) {
 				String f = ra.getFixup();
-				if (f != null)
-					s = fullPrefix(f) + s;
-			}
+				return (f != null) ? fullPrefix(f) + root : s;
+			} else
+				return root;
 		}
-		return s;
+		return null;
 	}
 
 	/** Get the full prefix string (including space) */
@@ -79,18 +86,20 @@ public class RoadAffixHelper extends BaseHelper {
 		return a;
 	}
 
-	/** Replace a suffix on a given string */
-	static private String replaceSuffix(RoadAffix ra, String s, boolean r) {
+	/** Replace suffix on a given string */
+	static private String replaceSuffix(RoadAffix ra, String s,
+		boolean allow_fixup)
+	{
 		String a = fullSuffix(ra.getName());
 		if (s.endsWith(a)) {
-			s = s.substring(0, s.length() - a.length());
-			if (r) {
+			String root = s.substring(0, s.length() - a.length());
+			if (allow_fixup) {
 				String f = ra.getFixup();
-				if (f != null)
-					s = s + fullSuffix(f);
-			}
+				return (f != null) ? root + fullSuffix(f) : s;
+			} else
+				return root;
 		}
-		return s;
+		return null;
 	}
 
 	/** Get the full suffix string (including space) */

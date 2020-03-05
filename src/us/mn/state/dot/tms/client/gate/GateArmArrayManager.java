@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2017  Minnesota Department of Transportation
+ * Copyright (C) 2013-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,7 +84,7 @@ public class GateArmArrayManager extends DeviceManager<GateArmArray> {
 		ProxyTheme<GateArmArray> theme = new ProxyTheme<GateArmArray>(
 			this, new GateArmMarker());
 		theme.addStyle(ItemStyle.CLOSED, ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(ItemStyle.MOVING, ProxyTheme.COLOR_SCHEDULED);
+		theme.addStyle(ItemStyle.MOVING, ProxyTheme.COLOR_MOVING);
 		theme.addStyle(ItemStyle.OPEN, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(ItemStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
@@ -134,6 +134,6 @@ public class GateArmArrayManager extends DeviceManager<GateArmArray> {
 	@Override
 	public String getDescription(GateArmArray proxy) {
 		return proxy.getName() + " - " +
-			GeoLocHelper.getDescription(getGeoLoc(proxy));
+			GeoLocHelper.getLocation(getGeoLoc(proxy));
 	}
 }

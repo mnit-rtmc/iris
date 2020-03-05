@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Minnesota Department of Transportation
+ * Copyright (C) 2017-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EncoderType;
-import us.mn.state.dot.tms.Encoding;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -32,9 +31,8 @@ public class EncoderTypeImpl extends BaseObjectImpl implements EncoderType {
 	/** Load all the encoder types */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, EncoderTypeImpl.class);
-		store.query("SELECT name, encoding, uri_scheme, uri_path, " +
-			"latency FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+		store.query("SELECT name, make, model, config FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new EncoderTypeImpl(row));
@@ -47,10 +45,9 @@ public class EncoderTypeImpl extends BaseObjectImpl implements EncoderType {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("encoding", encoding);
-		map.put("uri_scheme", uri_scheme);
-		map.put("uri_path", uri_path);
-		map.put("latency", latency);
+		map.put("make", make);
+		map.put("model", model);
+		map.put("config", config);
 		return map;
 	}
 
@@ -69,120 +66,94 @@ public class EncoderTypeImpl extends BaseObjectImpl implements EncoderType {
 	/** Create a new encoder type */
 	public EncoderTypeImpl(String n) {
 		super(n);
-		encoding = Encoding.UNKNOWN.ordinal();
-		uri_scheme = "";
-		uri_path = "";
-		latency = DEFAULT_LATENCY_MS;
+		make = "";
+		model = "";
+		config = "";
 	}
 
 	/** Create an encoder type */
 	private EncoderTypeImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),		// name
-		     row.getInt(2),		// encoding
-		     row.getString(3),		// uri_scheme
-		     row.getString(4),		// uri_path
-		     row.getInt(5)		// latency
+		this(row.getString(1), // name
+		     row.getString(2), // make
+		     row.getString(3), // model
+		     row.getString(4)  // config
 		);
 	}
 
 	/** Create a new encoder type */
-	private EncoderTypeImpl(String n, int e, String s, String p, int l) {
+	private EncoderTypeImpl(String n, String mk, String mdl, String c) {
 		this(n);
-		encoding = e;
-		uri_scheme = s;
-		uri_path = p;
-		latency = l;
+		make = mk;
+		model = mdl;
+		config = c;
 	}
 
-	/** Encoding ordinal */
-	private int encoding;
+	/** Encoder make */
+	private String make;
 
-	/** Set the encoding ordinal */
+	/** Set the encoder make */
 	@Override
-	public void setEncoding(int e) {
-		encoding = e;
+	public void setMake(String m) {
+		make = m;
 	}
 
-	/** Set the encoding ordinal */
-	public void doSetEncoding(int e) throws TMSException {
-		if (e != encoding) {
-			store.update(this, "encoding", e);
-			setEncoding(e);
+	/** Set the encoder make */
+	public void doSetMake(String m) throws TMSException {
+		if (!objectEquals(m, make)) {
+			store.update(this, "make", m);
+			setMake(m);
 		}
 	}
 
-	/** Get the encoding ordinal */
+	/** Get the encoder make */
 	@Override
-	public int getEncoding() {
-		return encoding;
+	public String getMake() {
+		return make;
 	}
 
-	/** URI scheme */
-	private String uri_scheme;
+	/** Encoder model */
+	private String model;
 
-	/** Set the URI scheme */
+	/** Set the encoder model */
 	@Override
-	public void setUriScheme(String s) {
-		uri_scheme = s;
+	public void setModel(String m) {
+		model = m;
 	}
 
-	/** Set the URI scheme */
-	public void doSetUriScheme(String s) throws TMSException {
-		if (!s.equals(uri_scheme)) {
-			store.update(this, "uri_scheme", s);
-			setUriScheme(s);
+	/** Set the encoder model */
+	public void doSetModel(String m) throws TMSException {
+		if (!objectEquals(m, model)) {
+			store.update(this, "model", m);
+			setModel(m);
 		}
 	}
 
-	/** Get the URI scheme */
+	/** Get the encoder model */
 	@Override
-	public String getUriScheme() {
-		return uri_scheme;
+	public String getModel() {
+		return model;
 	}
 
-	/** URI path */
-	private String uri_path;
+	/** Encoder config */
+	private String config;
 
-	/** Set the URI path */
+	/** Set the encoder config */
 	@Override
-	public void setUriPath(String p) {
-		uri_path = p;
+	public void setConfig(String c) {
+		config = c;
 	}
 
-	/** Set the URI path */
-	public void doSetUriPath(String p) throws TMSException {
-		if (!p.equals(uri_path)) {
-			store.update(this, "uri_path", p);
-			setUriPath(p);
+	/** Set the encoder config */
+	public void doSetConfig(String c) throws TMSException {
+		if (!objectEquals(c, config)) {
+			store.update(this, "config", c);
+			setConfig(c);
 		}
 	}
 
-	/** Get the URI path */
+	/** Get the encoder config */
 	@Override
-	public String getUriPath() {
-		return uri_path;
-	}
-
-	/** Stream latency */
-	private int latency;
-
-	/** Set the stream latency (ms) */
-	@Override
-	public void setLatency(int l) {
-		latency = l;
-	}
-
-	/** Set the stream latency (ms) */
-	public void doSetLatency(int l) throws TMSException {
-		if (l != latency) {
-			store.update(this, "latency", l);
-			setLatency(l);
-		}
-	}
-
-	/** Get the stream latency (ms) */
-	@Override
-	public int getLatency() {
-		return latency;
+	public String getConfig() {
+		return config;
 	}
 }

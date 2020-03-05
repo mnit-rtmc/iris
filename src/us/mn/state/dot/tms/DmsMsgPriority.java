@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,16 +78,20 @@ public enum DmsMsgPriority {
 		case OPERATOR:
 			return SignMsgSource.operator.bit();
 		case GATE_ARM:
-			return SignMsgSource.gate_arm.bit();
+			return SignMsgSource.toBits(SignMsgSource.schedule,
+			                            SignMsgSource.gate_arm);
 		case LCS:
-			return SignMsgSource.lcs.bit();
+			return SignMsgSource.toBits(SignMsgSource.operator,
+			                            SignMsgSource.lcs);
 		case INCIDENT_LOW:
 		case INCIDENT_MED:
 		case INCIDENT_HIGH:
-			return SignMsgSource.incident.bit();
+			return SignMsgSource.toBits(SignMsgSource.operator,
+			                            SignMsgSource.incident);
 		case AWS:
 		case AWS_HIGH:
-			return SignMsgSource.aws.bit();
+		case OTHER_SYSTEM:
+			return SignMsgSource.external.bit();
 		default:
 			return SignMsgSource.external.bit();
 		}

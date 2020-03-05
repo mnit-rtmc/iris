@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,11 @@ package us.mn.state.dot.tms.client.camera;
 
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraAction;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Catalog;
 import us.mn.state.dot.tms.Direction;
+import us.mn.state.dot.tms.EncoderStream;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.MonitorStyle;
 import us.mn.state.dot.tms.PlayList;
@@ -55,6 +57,14 @@ public class CamCache {
 		return enc_type_mdl;
 	}
 
+	/** Cache of encoder streams */
+	private final TypeCache<EncoderStream> encoder_streams;
+
+	/** Get the encoder streams object cache */
+	public TypeCache<EncoderStream> getEncoderStreams() {
+		return encoder_streams;
+	}
+
 	/** Cache of cameras */
 	protected final TypeCache<Camera> cameras;
 
@@ -85,6 +95,14 @@ public class CamCache {
 	/** Get the unassigned camera preset list model */
 	public ProxyListModel<CameraPreset> getPresetModel() {
 		return preset_model;
+	}
+
+	/** Cache of camera actions */
+	private final TypeCache<CameraAction> camera_actions;
+
+	/** Get the camera action object cache */
+	public TypeCache<CameraAction> getCameraActions() {
+		return camera_actions;
 	}
 
 	/** Cache of play lists */
@@ -135,6 +153,8 @@ public class CamCache {
 			client);
 		enc_type_mdl = new ProxyListModel<EncoderType>(encoder_types);
 		enc_type_mdl.initialize();
+		encoder_streams = new TypeCache<EncoderStream>(
+			EncoderStream.class, client);
 		cameras = new TypeCache<Camera>(Camera.class, client);
 		camera_model = new ProxyListModel<Camera>(cameras);
 		camera_model.initialize();
@@ -147,6 +167,8 @@ public class CamCache {
 			}
 		};
 		preset_model.initialize();
+		camera_actions = new TypeCache<CameraAction>(CameraAction.class,
+			client);
 		play_lists = new TypeCache<PlayList>(PlayList.class, client,
 			PlayList.GROUP_CHECKER);
 		catalogs = new TypeCache<Catalog>(Catalog.class, client);
@@ -161,10 +183,12 @@ public class CamCache {
 	/** Populate the type caches */
 	public void populate(SonarState client) {
 		client.populateReadable(encoder_types);
+		client.populateReadable(encoder_streams);
 		client.populateReadable(cameras);
 		if (client.canRead(Camera.SONAR_TYPE))
 			cameras.ignoreAttribute("operation");
 		client.populateReadable(presets);
+		client.populateReadable(camera_actions);
 		client.populateReadable(play_lists);
 		client.populateReadable(catalogs);
 		client.populateReadable(monitor_styles);

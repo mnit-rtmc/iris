@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.TMSException;
 
 /**
- * CameraPresetImpl represents a single CCTV camera preset.
+ * CameraPresetImpl represents a single camera preset.
  *
  * @author Douglas Lau
  */
@@ -87,10 +87,10 @@ public class CameraPresetImpl extends BaseObjectImpl implements CameraPreset {
 		this(n, (CameraImpl)ns.lookupObject(Camera.SONAR_TYPE, c), p,d);
 	}
 
-	/** CCTV Camera */
+	/** Roadside camera */
 	private CameraImpl camera;
 
-	/** Get the CCTV camera */
+	/** Get the camera */
 	@Override
 	public Camera getCamera() {
 		return camera;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,20 +41,20 @@ public class OpSendSensorSettings extends OpDR500 {
 	/** Target value (0 = select strongest, 1 = select fastest) */
 	static private final int TARGET_VAL = 0;
 
-	/** Time average value (seconds) */
-	static private final int TIME_AVG_VAL = 30;
+	/** Binning interval (minutes) */
+	static private final int BIN_INTERVAL = 1;
 
 	/** Requested mode flags */
 	static private int MODE_FLAGS = ModeFlag.SLOW_FILTER.flag
 	                              | ModeFlag.RAIN_FILTER.flag;
 
-	/** Binning interval (minutes) */
-	private final int interval;
+	/** Time average period (seconds) */
+	private final int period;
 
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(PriorityLevel p, ControllerImpl c) {
 		super(p, c);
-		interval = Math.max(1, c.getPollPeriod() / 60);
+		period = c.getPollPeriod();
 	}
 
 	/** Create a new operation to send settings to a sensor */
@@ -139,7 +139,7 @@ public class OpSendSensorSettings extends OpDR500 {
 			VarProperty bn = new VarProperty(VarName.BIN_MINUTES);
 			mess.add(bn);
 			mess.queryProps();
-			if (bn.getValue() != interval)
+			if (bn.getValue() != BIN_INTERVAL)
 				return new StoreBinning();
 			else
 				return new QuerySensitivity();
@@ -154,7 +154,7 @@ public class OpSendSensorSettings extends OpDR500 {
 			CommMessage<DR500Property> mess) throws IOException
 		{
 			VarProperty bn = new VarProperty(VarName.BIN_MINUTES,
-				interval);
+				BIN_INTERVAL);
 			mess.add(bn);
 			mess.storeProps();
 			return new QuerySensitivity();
@@ -332,7 +332,7 @@ public class OpSendSensorSettings extends OpDR500 {
 			VarProperty ta = new VarProperty(VarName.TIME_AVG);
 			mess.add(ta);
 			mess.queryProps();
-			if (ta.getValue() != TIME_AVG_VAL)
+			if (ta.getValue() != period)
 				return new StoreTimeAvg();
 			else
 				return new QueryMode();
@@ -347,7 +347,7 @@ public class OpSendSensorSettings extends OpDR500 {
 			CommMessage<DR500Property> mess) throws IOException
 		{
 			VarProperty ta = new VarProperty(VarName.TIME_AVG,
-				TIME_AVG_VAL);
+				period);
 			mess.add(ta);
 			mess.storeProps();
 			return new QueryMode();

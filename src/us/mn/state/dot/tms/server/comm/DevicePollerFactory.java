@@ -40,7 +40,6 @@ import us.mn.state.dot.tms.server.comm.pelcop.PelcoPPoller;
 import us.mn.state.dot.tms.server.comm.sierragx.SierraGxPoller;
 import us.mn.state.dot.tms.server.comm.ss105.SS105Poller;
 import us.mn.state.dot.tms.server.comm.ss125.SS125Poller;
-import us.mn.state.dot.tms.server.comm.ssi.SsiPoller;
 import us.mn.state.dot.tms.server.comm.stc.STCPoller;
 import us.mn.state.dot.tms.server.comm.viconptz.ViconPTZPoller;
 
@@ -101,8 +100,6 @@ public class DevicePollerFactory {
 			return new SS105Poller(name);
 		case SS_125:
 			return new SS125Poller(name);
-		case SSI:
-			return new SsiPoller(name);
 		case TRANSCORE_E6:
 			return new E6Poller(name);
 		case VICON_PTZ:

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2017  Minnesota Department of Transportation
+ * Copyright (C) 2014-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ public class PropSetup extends IPanel {
 		new JComboBox<EncoderType>();
 
 	/** Encoder type action */
-	private final IAction enc_type_act = new IAction("camera.encoder.type"){
+	private final IAction enc_type_act = new IAction("encoder.type") {
 		protected void doActionPerformed(ActionEvent e) {
 		      camera.setEncoderType(getSelectedEncoderType());
 		}
@@ -73,15 +73,15 @@ public class PropSetup extends IPanel {
 		return (et instanceof EncoderType) ? (EncoderType) et : null;
 	}
 
-	/** Encoder stream URI */
-	private final JTextField encoder_txt = new JTextField("", 32);
+	/** Encoder address */
+	private final JTextField enc_address_txt = new JTextField("", 32);
 
-	/** Encoder multicast URI */
+	/** Encoder multicast address */
 	private final JTextField enc_mcast_txt = new JTextField("", 32);
 
 	/** Model for encoder channel spinner */
 	private final SpinnerNumberModel num_model =
-		new SpinnerNumberModel(1, 0, 10, 1);
+		new SpinnerNumberModel(0, 0, 16, 1);
 
 	/** Encoder channel spinner */
 	private final JSpinner enc_chn_spn = new JSpinner(num_model);
@@ -112,16 +112,16 @@ public class PropSetup extends IPanel {
 		enc_type_cbx.setModel(new IComboBoxModel<EncoderType>(session
 			.getSonarState().getCamCache().getEncoderTypeModel()));
 		enc_type_cbx.setAction(enc_type_act);
+		enc_type_cbx.setRenderer(new EncoderTypeRenderer());
 		add("camera.num");
 		add(cam_num_txt, Stretch.LAST);
-		add("camera.encoder.type");
+		add("encoder.type");
 		add(enc_type_cbx, Stretch.LAST);
-		add("camera.encoder");
-		add(encoder_txt, Stretch.LAST);
+		add("camera.enc_address");
+		add(enc_address_txt, Stretch.LAST);
 		add("camera.enc_mcast");
 		add(enc_mcast_txt, Stretch.LAST);
-		add("camera.encoder.note", Stretch.END);
-		add("camera.encoder.channel");
+		add("camera.enc_channel");
 		add(enc_chn_spn, Stretch.LAST);
 		add("camera.publish");
 		add(publish_chk, Stretch.LAST);
@@ -139,20 +139,26 @@ public class PropSetup extends IPanel {
 			    camera.setCamNum(cn);
 			}
 		});
-		encoder_txt.addFocusListener(new FocusAdapter() {
+		enc_address_txt.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
-			    camera.setEncoder(encoder_txt.getText());
+			    String a = enc_address_txt.getText().trim();
+			    camera.setEncAddress((a.length() > 0) ? a : null);
 			}
 		});
 		enc_mcast_txt.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
-			    camera.setEncMulticast(enc_mcast_txt.getText());
+			    String m = enc_mcast_txt.getText().trim();
+			    camera.setEncMcast((m.length() > 0) ? m : null);
 			}
 		});
 		enc_chn_spn.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-			    Number c = (Number)enc_chn_spn.getValue();
-			    camera.setEncoderChannel(c.intValue());
+			    Number c = (Number) enc_chn_spn.getValue();
+			    int ch = c.intValue();
+			    if (ch > 0 && ch <= 16)
+				camera.setEncChannel(ch);
+			    else
+				camera.setEncChannel(null);
 			}
 		});
 	}
@@ -161,9 +167,9 @@ public class PropSetup extends IPanel {
 	public void updateEditMode() {
 		cam_num_txt.setEnabled(canWrite("camNum"));
 		enc_type_act.setEnabled(canWrite("encoderType"));
-		encoder_txt.setEnabled(canWrite("encoder"));
-		enc_mcast_txt.setEnabled(canWrite("encMulticast"));
-		enc_chn_spn.setEnabled(canWrite("encoderChannel"));
+		enc_address_txt.setEnabled(canWrite("encAddress"));
+		enc_mcast_txt.setEnabled(canWrite("encMcast"));
+		enc_chn_spn.setEnabled(canWrite("encChannel"));
 		publish_chk.setEnabled(canWrite("publish"));
 	}
 
@@ -175,12 +181,18 @@ public class PropSetup extends IPanel {
 		}
 		if (a == null || a.equals("encoderType"))
 			enc_type_act.updateSelected();
-		if (a == null || a.equals("encoder"))
-			encoder_txt.setText(camera.getEncoder());
-		if (a == null || a.equals("encMulticast"))
-			enc_mcast_txt.setText(camera.getEncMulticast());
-		if (a == null || a.equals("encoderChannel"))
-			enc_chn_spn.setValue(camera.getEncoderChannel());
+		if (a == null || a.equals("encAddress")) {
+			String ea = camera.getEncAddress();
+			enc_address_txt.setText((ea != null) ? ea : "");
+		}
+		if (a == null || a.equals("encMcast")) {
+			String em = camera.getEncMcast();
+			enc_mcast_txt.setText((em != null) ? em : "");
+		}
+		if (a == null || a.equals("encChannel")) {
+			Integer ch = camera.getEncChannel();
+			enc_chn_spn.setValue((ch != null) ? ch : 0);
+		}
 		if (a == null || a.equals("publish"))
 			publish_chk.setSelected(camera.getPublish());
 	}

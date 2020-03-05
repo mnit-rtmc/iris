@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2015  Minnesota Department of Transportation
+ * Copyright (C) 2010-2019  Minnesota Department of Transportation
  * Copyright (C) 2011  AHMCT, University of California
  * Copyright (C) 2017  Iteris Inc.
  *
@@ -34,7 +34,7 @@ public class WeatherSensorHelper extends BaseHelper {
 
 	/** Lookup the weather sensor with the specified name */
 	static public WeatherSensor lookup(String name) {
-		return (WeatherSensor)namespace.lookupObject(
+		return (WeatherSensor) namespace.lookupObject(
 			WeatherSensor.SONAR_TYPE, name);
 	}
 
@@ -56,14 +56,14 @@ public class WeatherSensorHelper extends BaseHelper {
 
 	/** Is wind speed high? */
 	static public boolean isHighWind(WeatherSensor ws) {
-		if(isSampleExpired(ws))
+		if (isSampleExpired(ws))
 			return false;
 		Integer s = ws.getWindSpeed();
-		if(s == null)
+		if (s == null)
 			return false;
 		int t = getHighWindLimitKph();
 		int m = getMaxValidWindSpeedKph();
-		if(m <= 0)
+		if (m <= 0)
 			return s > t;
 		else
 			return s > t && s <= m;
@@ -76,7 +76,7 @@ public class WeatherSensorHelper extends BaseHelper {
 
 	/** Is visibility low? */
 	static public boolean isLowVisibility(WeatherSensor ws) {
-		if(isSampleExpired(ws))
+		if (isSampleExpired(ws))
 			return false;
 		Integer v = ws.getVisibility();
 		return v != null && v < getLowVisLimitMeters();
@@ -129,27 +129,5 @@ public class WeatherSensorHelper extends BaseHelper {
 				return "heavy";
 		} else
 			return "";
-	}
-
-	/** Get the precipitation situation as an enum */
-	static public PrecipSituation getPrecipSituation(WeatherSensor ws) {
-		if (ws != null) {
-			Integer ps = ws.getPrecipSituation();
-			if (ps != null)
-				return PrecipSituation.fromOrdinal(ps);
-		}
-		return PrecipSituation.UNDEFINED;
-	}
-
-	/** Get the pavement surface status as an enum */
-	static public PavementSurfaceStatus getPvmtSurfStatus(
-		WeatherSensor ws) 
-	{
-		if (ws != null) {
-			Integer pss = ws.getPvmtSurfStatus();
-			if (pss != null)
-				return PavementSurfaceStatus.fromOrdinal(pss);
-		}
-		return PavementSurfaceStatus.UNDEFINED;
 	}
 }

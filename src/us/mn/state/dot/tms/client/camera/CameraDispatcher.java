@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2017  Minnesota Department of Transportation
+ * Copyright (C) 2005-2019  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -383,7 +383,7 @@ public class CameraDispatcher extends JPanel {
 			name_lbl.setText(camera.getName());
 			Integer num = camera.getCamNum();
 			number_lbl.setText(num != null ? num.toString() : "  ");
-			location_lbl.setText(GeoLocHelper.getDescription(
+			location_lbl.setText(GeoLocHelper.getLocation(
 				camera.getGeoLoc()));
 			cache.watchObject(camera);
 			stream_pnl.setCamera(camera);

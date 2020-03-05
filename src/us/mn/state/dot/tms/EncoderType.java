@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2017  Minnesota Department of Transportation
+ * Copyright (C) 2011-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,30 +26,21 @@ public interface EncoderType extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "encoder_type";
 
-	/** Default buffering latency */
-	int DEFAULT_LATENCY_MS = 50;
+	/** Set the encoder make */
+	void setMake(String m);
 
-	/** Set the encoding ordinal */
-	void setEncoding(int e);
+	/** Get the encoder make */
+	String getMake();
 
-	/** Get the encoding ordinal */
-	int getEncoding();
+	/** Set the encoder model */
+	void setModel(String m);
 
-	/** Set the URI scheme */
-	void setUriScheme(String s);
+	/** Get the encoder model */
+	String getModel();
 
-	/** Get the URI scheme */
-	String getUriScheme();
+	/** Set the encoder config */
+	void setConfig(String c);
 
-	/** Set the URI path */
-	void setUriPath(String p);
-
-	/** Get the URI path*/
-	String getUriPath();
-
-	/** Set stream latency (ms) */
-	void setLatency(int l);
-
-	/** Get stream latency (ms) */
-	int getLatency();
+	/** Get the encoder config */
+	String getConfig();
 }

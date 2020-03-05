@@ -1,0 +1,75 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink='http://www.w3.org/1999/xlink'
+     width='560' height='450' viewBox='0,20,560,450'>
+<title>Queue Storage Limit (Fixed)</title>
+<style>
+  text { font-family: sans-serif; }
+  .title { font-size: x-large; }
+  .small { font-size: xx-small; }
+</style>
+<text class='title' style='fill:white'
+      x='140' y='40'>Queue Storage Limit (Fixed)</text>
+<path id='count_text_6' d='M40 300 V60'/>
+<text style='fill:white'>
+  <textPath xlink:href='#count_text_6'>Vehicle Count</textPath>
+</text>
+<text style='fill:white' x='260' y='464'>Time (Steps)</text>
+<text class='small' style='fill:white'>
+  <tspan x='100' y='434'>t-12</tspan>
+  <tspan x='140' y='434'>t-10</tspan>
+  <tspan x='180' y='434'>t-8</tspan>
+  <tspan x='220' y='434'>t-6</tspan>
+  <tspan x='260' y='434'>t-4</tspan>
+  <tspan x='300' y='434'>t-2</tspan>
+  <tspan x='340' y='434'>t</tspan>
+  <tspan x='380' y='434'>t+2</tspan>
+  <tspan x='420' y='434'>t+4</tspan>
+  <tspan x='460' y='434'>t+6</tspan>
+  <tspan x='500' y='434'>t+8</tspan>
+</text>
+<rect style='fill:white;fill-opacity:0.8;stroke:black;stroke-width:2'
+      x='60' y='60' width='480' height='360'/>
+<path style='fill:none;stroke:gray;stroke-width:0.25'
+      d='M100 60V420 M140 60V420 M180 60V420 M220 60V420 M260 60V420 M300 60V420
+         M340 60V420 M380 60V420 M420 60V420 M460 60V420 M500 60V420'/>
+<path style='fill:#fffcbb'
+      d='M220 350 L220 400 500 80 460 80'/>
+<path style='fill:#ceffcf'
+      d='M220 270L220 350 460 80 340 80'/>
+<path style='fill:#def;stroke:#003373'
+      d='M340 80L100 340 L60 380 100 340 120 335 140 330 160 320 180 310 200 300
+         220 280 240 270 260 250 280 230 300 220 320 200 340 180'/>
+<path style='stroke:#509200;stroke-dasharray:1,2'
+      d='M220 350L460 80'/>
+<path style='stroke:black;stroke-dasharray:1,2'
+      d='M220 400L500 80'/>
+<text class='small' x='100' y='350'>metering begins</text>
+<path id='queue_length_6' style='stroke:black;stroke-dasharray:1,3'
+      d='M340 180 340 80'/>
+<text class='small' transform='translate(-2,-16)'>
+  <textPath xlink:href='#queue_length_6'>queue length</textPath>
+</text>
+<path id='queue_demand_6' d='M180 246 300 116'/>
+<text class='small'>
+  <textPath xlink:href='#queue_demand_6'>demand (input) — fixed target
+  </textPath>
+</text>
+<path id='passage_rate_6' d='M200 290 320 190'/>
+<text class='small'>
+  <textPath xlink:href='#passage_rate_6'>passage (output)</textPath>
+</text>
+<path id='storage_limit_6'
+      style='stroke:#003373;stroke-dasharray:1,2'
+      d='M340 180L460 80'/>
+<text class='small' transform='translate(20,-22)'>
+  <textPath xlink:href='#storage_limit_6'>storage limit</textPath>
+</text>
+<path id='target_storage_6' d='M290 290 350 220'/>
+<text class='small'>
+  <textPath xlink:href='#target_storage_6'>target storage</textPath>
+</text>
+<path id='max_storage_6' d='M300 328 360 258'/>
+<text class='small'>
+  <textPath xlink:href='#max_storage_6'>max storage</textPath>
+</text>
+</svg>

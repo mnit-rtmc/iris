@@ -20,9 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.IncAdvice;
+import us.mn.state.dot.tms.IncAdviceHelper;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * An incident advice is part of a message to deploy on a DMS, matching
@@ -36,7 +36,7 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncAdviceImpl.class);
 		store.query("SELECT name, impact, lane_type, range, " +
-			"impacted_lanes, open_lanes, multi, abbrev FROM iris." +
+			"open_lanes, impacted_lanes, multi FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -53,10 +53,9 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		map.put("impact", impact);
 		map.put("lane_type", lane_type);
 		map.put("range", range);
-		map.put("impacted_lanes", impacted_lanes);
 		map.put("open_lanes", open_lanes);
+		map.put("impacted_lanes", impacted_lanes);
 		map.put("multi", multi);
-		map.put("abbrev", abbrev);
 		return map;
 	}
 
@@ -78,25 +77,23 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		     row.getInt(2),              // impact
 		     row.getShort(3),            // lane_type
 		     row.getInt(4),              // range
-		     (Integer) row.getObject(5), // impacted_lanes
-		     (Integer) row.getObject(6), // open_lanes
-		     row.getString(7),           // multi
-		     row.getString(8)            // abbrev
+		     (Integer) row.getObject(5), // open_lanes
+		     (Integer) row.getObject(6), // impacted_lanes
+		     row.getString(7)            // multi
 		);
 	}
 
 	/** Create an incident advice */
-	private IncAdviceImpl(String n, int imp, short lt, int r, Integer iln,
-		Integer oln, String m, String a)
+	private IncAdviceImpl(String n, int imp, short lt, int r, Integer oln,
+		Integer iln, String m)
 	{
 		super(n);
 		impact = imp;
 		lane_type = lt;
 		range = r;
-		impacted_lanes = iln;
 		open_lanes = oln;
+		impacted_lanes = iln;
 		multi = m;
-		abbrev = a;
 	}
 
 	/** Create a new incident advice */
@@ -188,29 +185,6 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		return range;
 	}
 
-	/** Count of impacted lanes */
-	private Integer impacted_lanes;
-
-	/** Set count of impacted lanes */
-	@Override
-	public void setImpactedLanes(Integer iln) {
-		impacted_lanes = iln;
-	}
-
-	/** Set count of impacted lanes */
-	public void doSetImpactedLanes(Integer iln) throws TMSException {
-		if (!objectEquals(iln, impacted_lanes)) {
-			store.update(this, "impacted_lanes", iln);
-			setImpactedLanes(iln);
-		}
-	}
-
-	/** Get count of impacted lanes */
-	@Override
-	public Integer getImpactedLanes() {
-		return impacted_lanes;
-	}
-
 	/** Count of open lanes */
 	private Integer open_lanes;
 
@@ -234,6 +208,29 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		return open_lanes;
 	}
 
+	/** Count of impacted lanes */
+	private Integer impacted_lanes;
+
+	/** Set count of impacted lanes */
+	@Override
+	public void setImpactedLanes(Integer iln) {
+		impacted_lanes = iln;
+	}
+
+	/** Set count of impacted lanes */
+	public void doSetImpactedLanes(Integer iln) throws TMSException {
+		if (!objectEquals(iln, impacted_lanes)) {
+			store.update(this, "impacted_lanes", iln);
+			setImpactedLanes(iln);
+		}
+	}
+
+	/** Get count of impacted lanes */
+	@Override
+	public Integer getImpactedLanes() {
+		return impacted_lanes;
+	}
+
 	/** MULTI string */
 	private String multi = "";
 
@@ -245,8 +242,7 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 
 	/** Set the MULTI string */
 	public void doSetMulti(String m) throws TMSException {
-		// FIXME: only allow true MULTI tags here
-		if (!new MultiString(m).isValid())
+		if (!IncAdviceHelper.isMultiValid(m))
 			throw new ChangeVetoException("Invalid MULTI: " + m);
 		if (!m.equals(multi)) {
 			store.update(this, "multi", m);
@@ -258,31 +254,5 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	@Override
 	public String getMulti() {
 		return multi;
-	}
-
-	/** Abbreviated MULTI string */
-	private String abbrev;
-
-	/** Set abbreviated MULTI string */
-	@Override
-	public void setAbbrev(String a) {
-		abbrev = a;
-	}
-
-	/** Set abbreviated MULTI string */
-	public void doSetAbbrev(String a) throws TMSException {
-		// FIXME: only allow true MULTI tags here
-		if (a != null && !new MultiString(a).isValid())
-			throw new ChangeVetoException("Invalid MULTI: " + a);
-		if (!objectEquals(a, abbrev)) {
-			store.update(this, "abbrev", a);
-			setAbbrev(a);
-		}
-	}
-
-	/** Get abbreviated MULTI string */
-	@Override
-	public String getAbbrev() {
-		return abbrev;
 	}
 }

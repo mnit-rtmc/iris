@@ -1,4 +1,4 @@
-## Parking Areas
+# Parking Areas
 
 The number of available spaces in a parking area can be published on the web,
 or displayed on a DMS.  A parking area could be a rest area or a parking garage.
@@ -10,7 +10,7 @@ counting available spaces.  Within that corridor, detectors with the **parking**
 lane type will be used.  Lanes 1 (front) and 2 (rear) are reserved for a _head_
 parking space.  If applicable, lanes 3 (front) and 4 (rear) are for the _tail_.
 
-### Parking Area Action Tag
+## Parking Area Action Tag
 
 A `[pa…]` [action tag] is replaced with the number of available parking spaces
 to be displayed on a DMS.  The tag has three parameters, separated by commas.
@@ -18,12 +18,12 @@ to be displayed on a DMS.  The tag has three parameters, separated by commas.
  - Text to display if available spaces is below the low threshold
  - Text to display if parking area is closed
 
-#### Example
+### Example
 
 ```
 REST AREA 2 MILES[nl]PARKING [pa1,LOW,CLOSED]
 ```
 
 
-[action tag]: admin_guide.html#action_tag
-[corridor]: admin_guide.html#road_topology
+[action tag]: action_plans.html#dms-action-tags
+[corridor]: road_topology.html#corridors

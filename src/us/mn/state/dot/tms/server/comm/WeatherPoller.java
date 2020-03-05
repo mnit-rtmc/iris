@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2016  Minnesota Department of Transportation
+ * Copyright (C) 2010-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,4 @@ public interface WeatherPoller {
 
 	/** Send a device request */
 	void sendRequest(WeatherSensorImpl ws, DeviceRequest r);
-
-	/** Send settings to a weather sensor */
-	void sendSettings(WeatherSensorImpl ws);
 }

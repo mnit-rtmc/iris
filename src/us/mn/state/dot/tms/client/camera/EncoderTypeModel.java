@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Minnesota Department of Transportation
+ * Copyright (C) 2017-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +15,10 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.util.ArrayList;
-import javax.swing.JComboBox;
-import javax.swing.DefaultCellEditor;
-import javax.swing.table.TableCellEditor;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
+import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.EncoderType;
-import us.mn.state.dot.tms.Encoding;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -36,7 +35,9 @@ public class EncoderTypeModel extends ProxyTableModel<EncoderType> {
 	static public ProxyDescriptor<EncoderType> descriptor(Session s) {
 		return new ProxyDescriptor<EncoderType>(
 			s.getSonarState().getCamCache().getEncoderTypes(),
-			false
+			false,	/* has_properties */
+			true,	/* has_create_delete */
+			false	/* has_name */
 		);
 	}
 
@@ -44,72 +45,42 @@ public class EncoderTypeModel extends ProxyTableModel<EncoderType> {
 	@Override
 	protected ArrayList<ProxyColumn<EncoderType>> createColumns() {
 		ArrayList<ProxyColumn<EncoderType>> cols =
-			new ArrayList<ProxyColumn<EncoderType>>(5);
-		cols.add(new ProxyColumn<EncoderType>("camera.encoder.type",
-			120)
+			new ArrayList<ProxyColumn<EncoderType>>(3);
+		cols.add(new ProxyColumn<EncoderType>("encoder.type.make",
+			100)
 		{
 			public Object getValueAt(EncoderType et) {
-				return et.getName();
-			}
-		});
-		cols.add(new ProxyColumn<EncoderType>("camera.encoder.encoding",
-			96)
-		{
-			public Object getValueAt(EncoderType et) {
-				return Encoding.fromOrdinal(et.getEncoding());
+				return et.getMake();
 			}
 			public boolean isEditable(EncoderType et) {
-				return canWrite(et, "encoding");
+				return canWrite(et, "make");
 			}
 			public void setValueAt(EncoderType et, Object value) {
-				if (value instanceof Encoding) {
-					Encoding e = (Encoding) value;
-					et.setEncoding(e.ordinal());
-				}
-			}
-			protected TableCellEditor createCellEditor() {
-				return new DefaultCellEditor(new JComboBox
-					<Encoding>(Encoding.values()));
+				et.setMake(value.toString());
 			}
 		});
-		cols.add(new ProxyColumn<EncoderType>(
-			"camera.encoder.uri.scheme", 100)
+		cols.add(new ProxyColumn<EncoderType>("encoder.type.model", 100)
 		{
 			public Object getValueAt(EncoderType et) {
-				return et.getUriScheme();
+				return et.getModel();
 			}
 			public boolean isEditable(EncoderType et) {
-				return canWrite(et, "uriScheme");
+				return canWrite(et, "model");
 			}
 			public void setValueAt(EncoderType et, Object value) {
-				et.setUriScheme(value.toString());
+				et.setModel(value.toString());
 			}
 		});
-		cols.add(new ProxyColumn<EncoderType>(
-			"camera.encoder.uri.path", 200)
+		cols.add(new ProxyColumn<EncoderType>("encoder.type.config", 70)
 		{
 			public Object getValueAt(EncoderType et) {
-				return et.getUriPath();
+				return et.getConfig();
 			}
 			public boolean isEditable(EncoderType et) {
-				return canWrite(et, "uriPath");
+				return canWrite(et, "config");
 			}
 			public void setValueAt(EncoderType et, Object value) {
-				et.setUriPath(value.toString());
-			}
-		});
-		cols.add(new ProxyColumn<EncoderType>("camera.encoder.latency",
-			90, Integer.class)
-		{
-			public Object getValueAt(EncoderType et) {
-				return et.getLatency();
-			}
-			public boolean isEditable(EncoderType et) {
-				return canWrite(et, "latency");
-			}
-			public void setValueAt(EncoderType et, Object value) {
-				if (value instanceof Integer)
-					et.setLatency((Integer) value);
+				et.setConfig(value.toString());
 			}
 		});
 		return cols;
@@ -118,5 +89,45 @@ public class EncoderTypeModel extends ProxyTableModel<EncoderType> {
 	/** Create a new encoder type table model */
 	public EncoderTypeModel(Session s) {
 		super(s, descriptor(s), 12);
+	}
+
+	/** Get a table row sorter */
+	@Override
+	public RowSorter<ProxyTableModel<EncoderType>> createSorter() {
+		TableRowSorter<ProxyTableModel<EncoderType>> sorter =
+			new TableRowSorter<ProxyTableModel<EncoderType>>(this)
+		{
+			@Override public boolean isSortable(int c) {
+				return true;
+			}
+		};
+		sorter.setSortsOnUpdates(true);
+		ArrayList<RowSorter.SortKey> keys =
+			new ArrayList<RowSorter.SortKey>();
+		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+		keys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
+		keys.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
+		sorter.setSortKeys(keys);
+		return sorter;
+	}
+
+	/** Create an object with the given name.
+	 * @param tn Type name. */
+	@Override
+	public void createObject(String tn) {
+		String name = createUniqueName();
+		if (name != null)
+			descriptor.cache.createObject(name);
+	}
+
+	/** Create a unique stream name */
+	private String createUniqueName() {
+		for (int uid = 1; uid <= 9999; uid++) {
+			String n = "etp_" + uid;
+			if (descriptor.cache.lookupObject(n) == null)
+				return n;
+		}
+		assert false;
+		return null;
 	}
 }

@@ -88,10 +88,12 @@ public class SignMessageComposer extends JPanel {
 	protected int adjusting = 0;
 
 	/** Update the DMS dispatcher message */
-	public void updateMessage() {
+	public void updateMessage(boolean unlink_incident) {
 		if (adjusting == 0) {
 			adjusting++;
-			dispatcher.setComposedMulti(getComposedMulti(), true);
+			dispatcher.setComposedMulti(getComposedMulti());
+			if (unlink_incident)
+				dispatcher.unlinkIncident();
 			dispatcher.selectPreview(true);
 			adjusting--;
 		}
@@ -150,7 +152,8 @@ public class SignMessageComposer extends JPanel {
 		setTabPage(0);
 		for (ComposerPagePanel pg: pages)
 			pg.clearWidgets();
-		dispatcher.setComposedMulti("", true);
+		dispatcher.setComposedMulti("");
+		dispatcher.unlinkIncident();
 		misc_pnl.setComposedMulti("");
 		misc_pnl.clearWidgets();
 		adjusting--;

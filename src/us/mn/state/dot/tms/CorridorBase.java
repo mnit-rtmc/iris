@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import static us.mn.state.dot.tms.GeoLocHelper.distanceTo;
@@ -49,9 +50,9 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 		return distanceTo(n.getGeoLoc(), l);
 	}
 
-	/** Check if the r_node location is valid */
-	static private boolean hasLocation(R_Node n) {
-		return !GeoLocHelper.isNull(n.getGeoLoc());
+	/** Check if the r_node is valid */
+	static private boolean isValid(R_Node n) {
+		return n.getActive() && !GeoLocHelper.isNull(n.getGeoLoc());
 	}
 
 	/** Corridor name */
@@ -103,7 +104,7 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 
 	/** Add a roadway node to the corridor */
 	public void addNode(T r_node) {
-		if (hasLocation(r_node) && !r_node.getAbandoned()) {
+		if (isValid(r_node)) {
 			unsorted.add(r_node);
 			unsorted.addAll(r_nodes);
 			r_nodes.clear();
@@ -207,12 +208,6 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 			return pf.getLongitude() < pl.getLongitude();
 		case WEST:
 			return pf.getLongitude() > pl.getLongitude();
-		case INNER_LOOP:
-			// FIXME: this might be tricky
-			return false;
-		case OUTER_LOOP:
-			// FIXME: this might be tricky
-			return false;
 		}
 		return false;
 	}
@@ -234,6 +229,20 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 			n_points.put(miles, n);
 			previous = n;
 		}
+	}
+
+	/** Calculate the mile point for a location.
+	 * @param loc Location to calculate.
+	 * @param max_dist Maximum distance from corridor.
+	 * @return Mile point for location, or null if no r_nodes exist. */
+	public Float calculateMilePoint(GeoLoc loc, Distance max_dist) {
+		T n = findNearest(loc);
+		if (n != null) {
+			Distance d = nodeDistance(n, loc);
+			if (d.compareTo(max_dist) < 0)
+				return calculateMilePoint(loc);
+		}
+		return null;
 	}
 
 	/** Calculate the mile point for a location.
@@ -449,12 +458,16 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 		return null;
 	}
 
+	/** Check if the road class is a CD road */
+	private boolean isCDRoad() {
+		return RoadClass.CD_ROAD == RoadClass.fromOrdinal(
+			roadway.getRClass());
+	}
+
 	/** Check if the road class matches a lane type */
 	private boolean checkLaneType(LaneType lt) {
-		RoadClass rc = RoadClass.fromOrdinal(roadway.getRClass());
-		boolean cd_cls = (rc == RoadClass.CD_ROAD);
 		boolean cd_typ = (lt == LaneType.CD_LANE);
-		return cd_cls == cd_typ;
+		return isCDRoad() == cd_typ;
 	}
 
 	/** Snap a point to the corridor.
@@ -525,14 +538,24 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 	}
 
 	/** Count the freeway exits between two milepoints */
-	public int countExits(float mp0, float mp1) {
+	public Integer countExits(float mp0, float mp1, float max_gap_mi) {
+		if (isCDRoad())
+			return 0;
+		float prev_mp = mp0;
 		Road prev_exit = null;
 		int n_exits = 0;
-		Iterator<T> it = n_points.subMap(mp0, true, mp1, true)
-			.values().iterator();
+		Iterator<Map.Entry<Float, T>> it = n_points
+			.subMap(mp0, true, mp1, true).entrySet().iterator();
 		while (it.hasNext()) {
-			T n = it.next();
-			if (n.getNodeType() == R_NodeType.EXIT.ordinal()) {
+			Map.Entry<Float, T> ent = it.next();
+			float mp = ent.getKey();
+			if (mp - prev_mp > max_gap_mi)
+				return null;
+			prev_mp = mp;
+			T n = ent.getValue();
+			if (n.getNodeType() == R_NodeType.EXIT.ordinal() ||
+			    n.getNodeType() == R_NodeType.INTERSECTION.ordinal())
+			{
 				GeoLoc loc = n.getGeoLoc();
 				// Only count one exit per interchange
 				if (prev_exit == null ||
@@ -551,6 +574,9 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 			.iterator();
 		while (it.hasNext()) {
 			T n = it.next();
+			// Don't include entrances before a COMMON transition
+			if (n.getTransition() == R_NodeTransition.COMMON.ordinal())
+				entrances.clear();
 			if (n.getNodeType() == R_NodeType.ENTRANCE.ordinal())
 				entrances.add(n.getGeoLoc());
 		}

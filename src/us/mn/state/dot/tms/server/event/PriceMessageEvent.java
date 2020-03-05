@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.util.Map;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * This is a class for logging price message events to a database.
@@ -51,17 +52,29 @@ public class PriceMessageEvent extends BaseEvent {
 	/** Toll zone ID */
 	private final String toll_zone;
 
+	/** Detector name */
+	private final String detector;
+
 	/** Price on message */
-	private final float price;
+	public final float price;
 
 	/** Create a new price message event */
-	public PriceMessageEvent(EventType et, String d, String tz, float p) {
+	public PriceMessageEvent(EventType et, String d, String tz, String det,
+		float p)
+	{
 		super(et);
 		assert et == EventType.PRICE_DEPLOYED ||
 		       et == EventType.PRICE_VERIFIED;
 		device_id = d;
 		toll_zone = tz;
+		detector = SString.truncate(det, 20);
 		price = p;
+	}
+
+	/** Get a price message event with specified event type */
+	public PriceMessageEvent withEventType(EventType net) {
+		return (net == event_type) ? this : new PriceMessageEvent(net,
+			device_id, toll_zone, detector, price);
 	}
 
 	/** Get the database table name */
@@ -78,6 +91,7 @@ public class PriceMessageEvent extends BaseEvent {
 		map.put("event_desc_id", event_type.id);
 		map.put("device_id", device_id);
 		map.put("toll_zone", toll_zone);
+		map.put("detector", detector);
 		map.put("price", price);
 		return map;
 	}

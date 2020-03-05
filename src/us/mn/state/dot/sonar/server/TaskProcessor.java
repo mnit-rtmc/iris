@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2018  Minnesota Department of Transportation
+ * Copyright (C) 2006-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -356,11 +356,18 @@ public class TaskProcessor {
 	}
 
 	/** Fail a LOGIN */
-	void failLogin(final ConnectionImpl c, final String name) {
+	void failLogin(final ConnectionImpl c, final String name,
+		final boolean domain)
+	{
 		processor.addWork(new TaskWork("Fail LOGIN", c) {
 			protected void doPerform() {
-				access_monitor.failAuthentication(c.getName(),
-					name);
+				if (domain) {
+					access_monitor.failDomain(c.getName(),
+						name);
+				} else {
+					access_monitor.failAuthentication(
+						c.getName(), name);
+				}
 				c.failLogin();
 			}
 		});

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2018  Minnesota Department of Transportation
+ * Copyright (C) 2004-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,14 +15,11 @@
 package us.mn.state.dot.tms.server.comm.ss105;
 
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.Date;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.VehLengthClass;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.DownloadRequestException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -35,33 +32,13 @@ public class OpQuerySamples extends OpSS105 {
 	/** Starting pin for controller I/O */
 	static private final int START_PIN = 1;
 
-	/** Binning period (seconds) */
-	private final int period;
-
-	/** Time stamp of sample data */
-	protected long stamp;
-
-	/** Oldest time stamp to accept from controller */
-	protected final long oldest;
-
-	/** Newest timestamp to accept from controller */
-	protected final long newest;
-
 	/** Binned sample property */
-	private final BinnedSampleProperty samples = new BinnedSampleProperty();
+	private final BinnedSampleProperty sample_data;
 
 	/** Create a new "query binned samples" operation */
 	public OpQuerySamples(ControllerImpl c, int p) {
 		super(PriorityLevel.DATA_30_SEC, c);
-		period = p;
-		stamp = TimeSteward.currentTimeMillis();
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(stamp);
-		cal.add(Calendar.HOUR, -4);
-		oldest = cal.getTimeInMillis();
-		cal.setTimeInMillis(stamp);
-		cal.add(Calendar.MINUTE, 5);
-		newest = cal.getTimeInMillis();
+		sample_data = new BinnedSampleProperty(p);
 	}
 
 	/** Create the first phase of the operation */
@@ -71,22 +48,34 @@ public class OpQuerySamples extends OpSS105 {
 	}
 
 	/** Phase to get the most recent binned samples */
-	protected class GetCurrentSamples extends Phase<SS105Property> {
+	private class GetCurrentSamples extends Phase<SS105Property> {
 
 		/** Get the most recent binned samples */
 		protected Phase<SS105Property> poll(
 			CommMessage<SS105Property> mess) throws IOException
 		{
-			mess.add(samples);
+			mess.add(sample_data);
 			mess.queryProps();
-			stamp = samples.timestamp.getTime();
-			if (stamp < oldest || stamp > newest) {
-				mess.logError("BAD TIMESTAMP: " +
-					new Date(stamp));
-				setFailed();
-				throw new DownloadRequestException(
-					controller.toString());
-			}
+			return (sample_data.isPreviousInterval())
+			      ? null
+			      : new SendDateTime();
+		}
+	}
+
+	/** Phase to send the date and time */
+	private class SendDateTime extends Phase<SS105Property> {
+
+		/** Send the date and time */
+		protected Phase<SS105Property> poll(
+			CommMessage<SS105Property> mess) throws IOException
+		{
+			long stamp = sample_data.getTime();
+			mess.logError("BAD TIMESTAMP: " + new Date(stamp));
+			if (!sample_data.isValidStamp())
+				sample_data.clear();
+			TimeProperty date_time = new TimeProperty();
+			mess.add(date_time);
+			mess.storeProps();
 			return null;
 		}
 	}
@@ -94,15 +83,17 @@ public class OpQuerySamples extends OpSS105 {
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
+		long stamp = sample_data.getTime();
+		int period = sample_data.getPeriod();
 		controller.storeVehCount(stamp, period, START_PIN,
-			samples.getVehCount());
+			sample_data.getVehCount());
 		controller.storeOccupancy(stamp, period, START_PIN,
-			samples.getScans(), BinnedSampleProperty.MAX_PERCENT);
+			sample_data.getScans(), BinnedSampleProperty.MAX_PERCENT);
 		controller.storeSpeed(stamp, period, START_PIN,
-			samples.getSpeed());
+			sample_data.getSpeed());
 		for (VehLengthClass vc: VehLengthClass.values()) {
 			controller.storeVehCount(stamp, period, START_PIN,
-				samples.getVehCount(vc), vc);
+				sample_data.getVehCount(vc), vc);
 		}
 		super.cleanup();
 	}

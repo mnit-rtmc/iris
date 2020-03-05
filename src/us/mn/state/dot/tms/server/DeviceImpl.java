@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,7 +19,6 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.CommLink;
-import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.ControllerIO;
@@ -44,6 +43,11 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 
 	/** "Long" polling period */
 	static private final int PERIOD_LONG_SEC = 60 * 5;
+
+	/** Check if device log is open */
+	protected boolean isDeviceLogging() {
+		return DEVICE_LOG.isOpen();
+	}
 
 	/** Log a device message */
 	protected void logError(String msg) {

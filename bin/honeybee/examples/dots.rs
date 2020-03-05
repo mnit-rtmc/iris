@@ -1,16 +1,17 @@
-/*
- * Copyright (C) 2018-2019  Minnesota Department of Transportation
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- */
+// dots.rs
+//
+// Copyright (C) 2018-2019  Minnesota Department of Transportation
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
 use gift::*;
 use gift::block::*;
 use pix::{Gray8, Palette, Raster, RasterBuilder, Rgb8};
@@ -21,7 +22,7 @@ use std::fs::File;
 ///
 /// * `filename` Name of file to write.
 pub fn write_gif(palette: &[u8], rasters: &[Raster<Gray8>], filename: &str)
-    -> Result<(), Box<Error>>
+    -> Result<(), Box<dyn Error>>
 {
     let w = rasters[0].width() as u16;
     let h = rasters[0].height() as u16;
@@ -118,42 +119,42 @@ fn render_circle(raster: &mut Raster<Gray8>, palette: &mut Palette<Rgb8>,
 /// Get the difference threshold for Rgb8 with 256 capacity palette
 fn palette_threshold_rgb8_256(v: usize) -> Rgb8 {
     let i = match v as u8 {
-        0x00...0x0F => 0,
-        0x10...0x1E => 1,
-        0x1F...0x2D => 2,
-        0x2E...0x3B => 3,
-        0x3C...0x49 => 4,
-        0x4A...0x56 => 5,
-        0x57...0x63 => 6,
-        0x64...0x6F => 7,
-        0x70...0x7B => 8,
-        0x7C...0x86 => 9,
-        0x87...0x91 => 10,
-        0x92...0x9B => 11,
-        0x9C...0xA5 => 12,
-        0xA6...0xAE => 13,
-        0xAF...0xB7 => 14,
-        0xB8...0xBF => 15,
-        0xC0...0xC7 => 16,
-        0xC8...0xCE => 17,
-        0xCF...0xD5 => 18,
-        0xD6...0xDB => 19,
-        0xDC...0xE1 => 20,
-        0xE2...0xE6 => 21,
-        0xE7...0xEB => 22,
-        0xEC...0xEF => 23,
-        0xF0...0xF3 => 24,
-        0xF4...0xF6 => 25,
-        0xF7...0xF9 => 26,
-        0xFA...0xFB => 27,
-        0xFC...0xFD => 28,
-        0xFE...0xFE => 29,
-        0xFF...0xFF => 30,
+        0x00..=0x0F => 0,
+        0x10..=0x1E => 1,
+        0x1F..=0x2D => 2,
+        0x2E..=0x3B => 3,
+        0x3C..=0x49 => 4,
+        0x4A..=0x56 => 5,
+        0x57..=0x63 => 6,
+        0x64..=0x6F => 7,
+        0x70..=0x7B => 8,
+        0x7C..=0x86 => 9,
+        0x87..=0x91 => 10,
+        0x92..=0x9B => 11,
+        0x9C..=0xA5 => 12,
+        0xA6..=0xAE => 13,
+        0xAF..=0xB7 => 14,
+        0xB8..=0xBF => 15,
+        0xC0..=0xC7 => 16,
+        0xC8..=0xCE => 17,
+        0xCF..=0xD5 => 18,
+        0xD6..=0xDB => 19,
+        0xDC..=0xE1 => 20,
+        0xE2..=0xE6 => 21,
+        0xE7..=0xEB => 22,
+        0xEC..=0xEF => 23,
+        0xF0..=0xF3 => 24,
+        0xF4..=0xF6 => 25,
+        0xF7..=0xF9 => 26,
+        0xFA..=0xFB => 27,
+        0xFC..=0xFD => 28,
+        0xFE..=0xFE => 29,
+        0xFF..=0xFF => 30,
     };
     Rgb8::new(i * 4, i * 4, i * 5)
 }
 
-fn main() -> Result<(), Box<Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
     let mut palette = Palette::new(256);
     palette.set_entry(Rgb8::default());
     palette.set_threshold_fn(palette_threshold_rgb8_256);

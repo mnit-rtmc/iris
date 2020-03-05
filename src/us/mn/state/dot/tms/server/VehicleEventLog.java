@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
-import static us.mn.state.dot.tms.server.DetectorImpl.SAMPLE_PERIOD_SEC;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 
 /**
@@ -34,9 +33,6 @@ public class VehicleEventLog {
 
 	/** Maximum logged headway is 90 seconds */
 	static private final int MAX_HEADWAY = 90 * 1000;
-
-	/** Sample period for detectors (ms) */
-	static private final int SAMPLE_PERIOD_MS = SAMPLE_PERIOD_SEC * 1000;
 
 	/** Is archiving enabled? */
 	static private boolean isArchiveEnabled() {
@@ -174,22 +170,23 @@ public class VehicleEventLog {
 		ev_speed = 0;
 	}
 
-	/** Get the vehicle count */
-	public int getVehicleCount() {
-		return ev_vehicles;
+	/** Get the vehicle count sample for a given period */
+	public PeriodicSample getVehCount(long stamp, int period) {
+		return new PeriodicSample(stamp, period, ev_vehicles);
 	}
 
-	/** Get the occupancy for a 30-second period */
-	public OccupancySample getOccupancy() {
-		return new OccupancySample(0, SAMPLE_PERIOD_SEC, ev_duration,
-			SAMPLE_PERIOD_MS);
+	/** Get the occupancy for a given period */
+	public OccupancySample getOccupancy(long stamp, int period) {
+		int per_ms = period * 1000;
+		return new OccupancySample(stamp, period, ev_duration, per_ms);
 	}
 
-	/** Calculate the average vehicle speed */
-	public int getSpeed() {
-		if (ev_n_speed > 0 && ev_speed > 0)
-			return ev_speed / ev_n_speed;
-		else
-			return MISSING_DATA;
+	/** Get the average vehicle speed for a given period */
+	public PeriodicSample getSpeed(long stamp, int period) {
+		if (ev_n_speed > 0 && ev_speed > 0) {
+			int s = ev_speed / ev_n_speed;
+			return new PeriodicSample(stamp, period, s);
+		}
+		return null;
 	}
 }

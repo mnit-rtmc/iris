@@ -52,7 +52,7 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 	@Override
 	protected ArrayList<ProxyColumn<IncAdvice>> createColumns() {
 		ArrayList<ProxyColumn<IncAdvice>> cols =
-			new ArrayList<ProxyColumn<IncAdvice>>(7);
+			new ArrayList<ProxyColumn<IncAdvice>>(6);
 		cols.add(new ProxyColumn<IncAdvice>("incident.impact", 160) {
 			public Object getValueAt(IncAdvice adv) {
 				return IncImpact.fromOrdinal(adv.getImpact());
@@ -109,21 +109,6 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<IncAdvice>("incident.impacted.lanes",
-			112, Integer.class)
-		{
-			public Object getValueAt(IncAdvice adv) {
-				return adv.getImpactedLanes();
-			}
-			public boolean isEditable(IncAdvice adv) {
-				return canWrite(adv);
-			}
-			public void setValueAt(IncAdvice adv, Object value) {
-				adv.setImpactedLanes((value instanceof Integer)
-					? (Integer) value
-					: null);
-			}
-		});
 		cols.add(new ProxyColumn<IncAdvice>("incident.open.lanes", 80,
 			Integer.class)
 		{
@@ -139,6 +124,21 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 					: null);
 			}
 		});
+		cols.add(new ProxyColumn<IncAdvice>("incident.impacted.lanes",
+			112, Integer.class)
+		{
+			public Object getValueAt(IncAdvice adv) {
+				return adv.getImpactedLanes();
+			}
+			public boolean isEditable(IncAdvice adv) {
+				return canWrite(adv);
+			}
+			public void setValueAt(IncAdvice adv, Object value) {
+				adv.setImpactedLanes((value instanceof Integer)
+					? (Integer) value
+					: null);
+			}
+		});
 		cols.add(new ProxyColumn<IncAdvice>("dms.multi.string", 300) {
 			public Object getValueAt(IncAdvice adv) {
 				return adv.getMulti();
@@ -146,22 +146,9 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 			public boolean isEditable(IncAdvice adv) {
 				return canWrite(adv);
 			}
-			public void setValueAt(IncAdvice adv, Object value){
-				adv.setMulti(new MultiString(value.toString())
-					.normalize());
-			}
-		});
-		cols.add(new ProxyColumn<IncAdvice>("dms.multi.abbrev", 150) {
-			public Object getValueAt(IncAdvice adv) {
-				return adv.getAbbrev();
-			}
-			public boolean isEditable(IncAdvice adv) {
-				return canWrite(adv);
-			}
 			public void setValueAt(IncAdvice adv, Object value) {
-				String a = new MultiString(value.toString())
-					.normalize();
-				adv.setAbbrev((a.length() > 0) ? a : null);
+				adv.setMulti(new MultiString(value.toString())
+					.normalizeLine().toString());
 			}
 		});
 		return cols;

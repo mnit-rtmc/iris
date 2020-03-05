@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ public class RoadModel extends ProxyTableModel<Road> {
 	@Override
 	protected ArrayList<ProxyColumn<Road>> createColumns() {
 		ArrayList<ProxyColumn<Road>> cols =
-			new ArrayList<ProxyColumn<Road>>(5);
+			new ArrayList<ProxyColumn<Road>>(4);
 		cols.add(new ProxyColumn<Road>("location.road", 200) {
 			public Object getValueAt(Road r) {
 				return r.getName();
@@ -70,8 +70,8 @@ public class RoadModel extends ProxyTableModel<Road> {
 			}
 			public void setValueAt(Road r, Object value) {
 				if (value instanceof RoadClass) {
-					RoadClass c = (RoadClass)value;
-					r.setRClass((short)c.ordinal());
+					RoadClass c = (RoadClass) value;
+					r.setRClass((short) c.ordinal());
 				}
 			}
 			protected TableCellEditor createCellEditor() {
@@ -89,27 +89,8 @@ public class RoadModel extends ProxyTableModel<Road> {
 			}
 			public void setValueAt(Road r, Object value) {
 				if (value instanceof Direction) {
-					Direction d = (Direction)value;
-					r.setDirection((short)d.ordinal());
-				}
-			}
-			protected TableCellEditor createCellEditor() {
-				JComboBox<Direction> cbx = new JComboBox
-					<Direction>(Direction.values());
-				return new DefaultCellEditor(cbx);
-			}
-		});
-		cols.add(new ProxyColumn<Road>("location.alt_dir", 120) {
-			public Object getValueAt(Road r) {
-				return Direction.fromOrdinal(r.getAltDir());
-			}
-			public boolean isEditable(Road r) {
-				return canWrite(r);
-			}
-			public void setValueAt(Road r, Object value) {
-				if (value instanceof Direction) {
-					Direction d = (Direction)value;
-					r.setAltDir((short)d.ordinal());
+					Direction d = (Direction) value;
+					r.setDirection((short) d.ordinal());
 				}
 			}
 			protected TableCellEditor createCellEditor() {

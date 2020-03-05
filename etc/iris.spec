@@ -76,7 +76,7 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 
 # post-uninstall
 %postun
-%systemd_postun
+%systemd_postun iris.service
 
 # All files included in RPM are listed here.
 %files

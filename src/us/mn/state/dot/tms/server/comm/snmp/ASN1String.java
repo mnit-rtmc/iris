@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,8 @@
 package us.mn.state.dot.tms.server.comm.snmp;
 
 /**
- * ASN1 String.
+ * An ASN1 String is an OCTET STRING which contains text which might be outside
+ * of the ASCII range.  Each octet represents one character in the string.
  *
  * @author Douglas Lau
  */
@@ -38,6 +39,7 @@ public class ASN1String extends ASN1OctetString {
 
 	/** Set the octet string to a string */
 	public void setString(String v) {
+		// FIXME: this should encode to a specific code page
 		setByteValue(v.getBytes());
 	}
 

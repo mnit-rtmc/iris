@@ -206,14 +206,16 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		name_lbl.setText(name);
 		owner_lbl.setText(getOwner(dms));
 		updatePixelPanel(dms);
-		String loc = GeoLocHelper.getDescription(dms.getGeoLoc());
+		String loc = GeoLocHelper.getLocation(dms.getGeoLoc());
 		updateToolTip(dms, name, loc);
+		Color bc = getIncBackground(dms);
+		pixel_pnl.setBackground(bc);
 		loc_lbl.setText(loc);
-		loc_pnl.setBackground(getLocBackground(dms));
+		loc_pnl.setBackground(bc);
 	}
 
-	/** Get background color of location panel */
-	private Color getLocBackground(DMS dms) {
+	/** Get background color of associated incident */
+	private Color getIncBackground(DMS dms) {
 		Incident inc = DMSHelper.lookupIncident(dms);
 		return (inc != null)
 		      ? session.getIncidentManager().getStyle(inc).fill_color

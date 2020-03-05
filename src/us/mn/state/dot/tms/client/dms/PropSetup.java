@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.event.ActionEvent;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.DevicePurpose;
@@ -97,6 +98,13 @@ public class PropSetup extends IPanel {
 	private final JComboBox<DevicePurpose> purpose_cbx =
 		new JComboBox<DevicePurpose>();
 
+	/** Checkbox for hidden flag */
+	private final JCheckBox hidden_chk = new JCheckBox(new IAction(null) {
+		protected void doActionPerformed(ActionEvent e) {
+			dms.setHidden(hidden_chk.isSelected());
+		}
+	});
+
 	/** User session */
 	private final Session session;
 
@@ -130,6 +138,8 @@ public class PropSetup extends IPanel {
 		add(graphic_cbx, Stretch.LAST);
 		add("dms.purpose");
 		add(purpose_cbx, Stretch.LAST);
+		add("dms.hidden");
+		add(hidden_chk, Stretch.LAST);
 	}
 
 	/** Dispose of the panel */
@@ -143,6 +153,7 @@ public class PropSetup extends IPanel {
 		graphic_act.setEnabled(canWrite("staticGraphic"));
 		beacon_act.setEnabled(canWrite("beacon"));
 		purpose_act.setEnabled(canWrite("purpose"));
+		hidden_chk.setEnabled(canWrite("hidden"));
 	}
 
 	/** Update one attribute on the form tab */
@@ -153,6 +164,8 @@ public class PropSetup extends IPanel {
 			beacon_act.updateSelected();
 		if (null == a || a.equals("purpose"))
 			purpose_act.updateSelected();
+		if (null == a || a.equals("hidden"))
+			hidden_chk.setSelected(dms.getHidden());
 	}
 
 	/** Check if the user can write an attribute */

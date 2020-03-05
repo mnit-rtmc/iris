@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -136,13 +136,11 @@ public class ParkingSpace implements MapObject {
 
 	/** Get the map segment tool tip */
 	public String getTip() {
-		return getDescription() + ": " + getStatus();
-	}
-
-	/** Get description */
-	private String getDescription() {
-		return GeoLocHelper.getCrossOrLandmark(
+		String loc = GeoLocHelper.getCrossLandmark(
 			segment.getModel().r_node.getGeoLoc());
+		return (loc.length() > 0)
+		      ? loc + ": " + getStatus()
+		      : getStatus();
 	}
 
 	/** Get the parking space status */

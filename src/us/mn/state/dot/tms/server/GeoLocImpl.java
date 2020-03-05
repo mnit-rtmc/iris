@@ -83,8 +83,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, GeoLocImpl.class);
 		store.query("SELECT name, notify_tag, roadway, road_dir, " +
-			"cross_street, cross_dir, cross_mod, lat, lon, " +
-			"landmark FROM iris." + SONAR_TYPE  + ";",
+			"cross_street, cross_dir, cross_mod, landmark, lat, " +
+			"lon FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -104,9 +104,9 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		map.put("cross_street", cross_street);
 		map.put("cross_dir", cross_dir);
 		map.put("cross_mod", cross_mod);
+		map.put("landmark", landmark);
 		map.put("lat", lat);
 		map.put("lon", lon);
-		map.put("landmark", landmark);
 		return map;
 	}
 
@@ -144,15 +144,15 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		     row.getString(5),          // cross_street
 		     row.getShort(6),           // cross_dir
 		     row.getShort(7),           // cross_mod
-		     (Double) row.getObject(8), // lat
-		     (Double) row.getObject(9), // lon
-		     row.getString(10)          // landmark
+		     row.getString(8),          // landmark
+		     (Double) row.getObject(9), // lat
+		     (Double) row.getObject(10) // lon
 		);
 	}
 
 	/** Create a new geo location */
 	private GeoLocImpl(String n, String nt, Road r, short rd, Road x,
-		short xd, short xm, Double lt, Double ln, String lm)
+		short xd, short xm, String lm, Double lt, Double ln)
 	{
 		this(n, nt);
 		roadway = r;
@@ -160,17 +160,17 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		cross_street = x;
 		cross_dir = xd;
 		cross_mod = xm;
+		landmark = lm;
 		lat = lt;
 		lon = ln;
-		landmark = lm;
 	}
 
 	/** Create a new geo location */
 	private GeoLocImpl(String n, String nt, String r, short rd, String x,
-		short xd, short xm, Double lt, Double ln, String lm)
+		short xd, short xm, String lm, Double lt, Double ln)
 	{
-		this(n, nt, lookupRoad(r), rd, lookupRoad(x), xd, xm, lt, ln,
-		     lm);
+		this(n, nt, lookupRoad(r), rd, lookupRoad(x), xd, xm, lm,
+		     lt, ln);
 	}
 
 	/** Tag for pg_notify trigger on update */
@@ -326,6 +326,35 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return cross_mod;
 	}
 
+	/** Landmark */
+	private String landmark;
+
+	/** Set the landmark */
+	@Override
+	public void setLandmark(String lm) {
+		landmark = lm;
+	}
+
+	/** Set the landmark */
+	public void doSetLandmark(String lm) throws TMSException {
+		if (!objectEquals(lm, landmark)) {
+			store.update(this, "landmark", lm);
+			setLandmark(lm);
+		}
+	}
+
+	/** Set the landmark and notify clients of the change */
+	private void setLandmarkNotify(String lm) throws TMSException {
+		doSetLandmark(lm);
+		notifyAttribute("landmark");
+	}
+
+	/** Get the landmark */
+	@Override
+	public String getLandmark() {
+		return landmark;
+	}
+
 	/** Latitude */
 	private Double lat;
 
@@ -384,35 +413,6 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	@Override
 	public Double getLon() {
 		return lon;
-	}
-
-	/** Landmark */
-	private String landmark;
-
-	/** Set the landmark */
-	@Override
-	public void setLandmark(String lm) {
-		landmark = lm;
-	}
-
-	/** Set the landmark */
-	public void doSetLandmark(String lm) throws TMSException {
-		if (!objectEquals(lm, landmark)) {
-			store.update(this, "landmark", lm);
-			setLandmark(lm);
-		}
-	}
-
-	/** Set the landmark and notify clients of the change */
-	private void setLandmarkNotify(String lm) throws TMSException {
-		doSetLandmark(lm);
-		notifyAttribute("landmark");
-	}
-
-	/** Get the landmark */
-	@Override
-	public String getLandmark() {
-		return landmark;
 	}
 
 	/** Calculate nearest roadway, direction, cross-street,

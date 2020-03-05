@@ -51,9 +51,20 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		return SystemAttrEnum.TOLL_DENSITY_BETA.getFloat();
 	}
 
+	/** Get minimum tolling price */
+	static public float min_price() {
+		return SystemAttrEnum.TOLL_MIN_PRICE.getFloat();
+	}
+
 	/** Get default maximum tolling price (dollars) */
-	static private float defaultMaxPrice() {
+	static public float max_price() {
 		return SystemAttrEnum.TOLL_MAX_PRICE.getFloat();
+	}
+
+	/** Round price to nearest $0.25 */
+	static private float nearestQuarter(double price) {
+		int quarters = (int) Math.round(price * 4);
+		return quarters / 4.0f;
 	}
 
 	/** Load all the toll zones */
@@ -275,12 +286,6 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		return max_price;
 	}
 
-	/** Get the max price (or default) */
-	public float getMaxPriceOrDefault() {
-		Float mp = getMaxPrice();
-		return (mp != null) ? mp : defaultMaxPrice();
-	}
-
 	/** Density history for one detector */
 	static private class DensityHist {
 
@@ -396,48 +401,66 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		}
 	}
 
-	/** Get the current toll zone price.
+	/** Find the max density sampler.
 	 * @param lbl Sign label for logging.
 	 * @param o Origin (location of DMS).
-	 * @return Price (dollars). */
-	public float getPrice(String lbl, GeoLoc o) {
+	 * @return VehicleSampler with maximum density. */
+	public VehicleSampler findMaxDensity(String lbl, GeoLoc o) {
 		SamplerSet ss = lookupDetectors(buildRoute(o));
 		if (isLogging())
 			log(lbl + " use detectors: " + ss);
-		Double k_hot = findMaxDensity(ss);
-		float price = calculatePricing(k_hot);
+		VehicleSampler sampler = findMaxDensity(ss);
+		if (isLogging())
+			log(lbl + " max density @ " + sampler);
+		return sampler;
+	}
+
+	/** Find the max density sampler within a sampler set */
+	private synchronized VehicleSampler findMaxDensity(SamplerSet ss) {
+		Double k_max = null;
+		VehicleSampler sampler = null;
+		for (Map.Entry<VehicleSampler, DensityHist> e:
+		     k_hist.entrySet())
+		{
+			VehicleSampler vs = e.getKey();
+			if (ss.contains(vs)) {
+				Double k = e.getValue().density;
+				if (k_max == null || (k != null && k > k_max)) {
+					k_max = k;
+					sampler = vs;
+				}
+			}
+		}
+		return sampler;
+	}
+
+	/** Get the density for one vehicle sampler */
+	private synchronized Double getDensity(VehicleSampler vs) {
+		DensityHist hist = k_hist.get(vs);
+		return (hist != null) ? hist.density : null;
+	}
+
+	/** Get the current toll zone price.
+	 * @param sampler Vehicle sampler with max density.
+	 * @param lbl Sign label for logging.
+	 * @param o Origin (location of DMS).
+	 * @return Price (dollars). */
+	public Float getPrice(VehicleSampler sampler, String lbl, GeoLoc o) {
+		Double k_hot = getDensity(sampler);
+		Float price = (k_hot != null) ? calculatePricing(k_hot) : null;
 		if (isLogging())
 			log(lbl + " k_hot: " + k_hot + ", price: $" + price);
 		return price;
 	}
 
-	/** Find the max density within a sampler set */
-	private synchronized Double findMaxDensity(SamplerSet ss) {
-		Double k_hot = null;
-		for (Map.Entry<VehicleSampler, DensityHist> e:
-		     k_hist.entrySet())
-		{
-			if (ss.contains(e.getKey())) {
-				Double k = e.getValue().density;
-				if (k_hot == null || (k != null && k > k_hot))
-					k_hot = k;
-			}
-		}
-		return k_hot;
-	}
-
 	/** Calculate the toll pricing.
 	 * @param k_hot Maximum density in toll zone.
-	 * @return Price (dollars). */
-	private float calculatePricing(Double k_hot) {
-		if (k_hot != null) {
-			float a = getAlphaOrDefault();
-			float b = getBetaOrDefault();
-			double price = a * Math.pow(k_hot, b);
-			int quarters = (int) Math.round(price * 4);
-			return quarters / 4.0f;
-		} else
-			return 0;
+	 * @return Price (dollars), rounded to nearest $0.25. */
+	private float calculatePricing(double k_hot) {
+		float a = getAlphaOrDefault();
+		float b = getBetaOrDefault();
+		double price = a * Math.pow(k_hot, b);
+		return Math.max(nearestQuarter(price), min_price());
 	}
 
 	/** Check if we're logging */

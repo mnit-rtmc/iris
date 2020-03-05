@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2017  Minnesota Department of Transportation
+ * Copyright (C) 2006-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@ package us.mn.state.dot.tms.client.roads;
 
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.swing.BorderFactory;
@@ -271,7 +271,7 @@ public class CorridorList extends IPanel {
 	/** Called when an r_node attribute has changed */
 	private void nodeChanged(final R_Node n, String a) {
 		if (checkCorridor(n)) {
-			if (a.equals("abandoned"))
+			if (a.equals("active"))
 				updateListModel();
 			else {
 				runSwing(new Runnable() {
@@ -367,8 +367,8 @@ public class CorridorList extends IPanel {
 	/** Create a list model of roadway node models for one corridor */
 	private List<R_NodeModel> createNodeList() {
 		Set<R_Node> node_s = createSet();
-		List<R_NodeModel> no_loc = createNullLocList(node_s);
-		LinkedList<R_NodeModel> nodes = new LinkedList<R_NodeModel>();
+		List<R_NodeModel> invalid = createInvalidList(node_s);
+		ArrayList<R_NodeModel> nodes = new ArrayList<R_NodeModel>();
 		CorridorBase<R_Node> c = createCorridor(node_s);
 		if (c != null) {
 			R_NodeModel prev = null;
@@ -378,7 +378,7 @@ public class CorridorList extends IPanel {
 				prev = m;
 			}
 		}
-		nodes.addAll(no_loc);
+		nodes.addAll(invalid);
 		return nodes;
 	}
 
@@ -392,27 +392,26 @@ public class CorridorList extends IPanel {
 		return nodes;
 	}
 
-	/** Create a list of r_node models with null locations.  The r_nodes
-	 * are then removed from the set passed in.
+	/** Create a list of invalid r_node models.  The r_nodes are then
+	 * removed from the set passed in.
 	 * @param node_s Set of nodes on the corridor.
-	 * @return List of r_node models with null location. */
-	private List<R_NodeModel> createNullLocList(Set<R_Node> node_s) {
-		LinkedList<R_NodeModel> no_loc =
-			new LinkedList<R_NodeModel>();
+	 * @return List of invalid r_node models. */
+	private List<R_NodeModel> createInvalidList(Set<R_Node> node_s) {
+		ArrayList<R_NodeModel> invalid = new ArrayList<R_NodeModel>();
 		Iterator<R_Node> it = node_s.iterator();
 		while (it.hasNext()) {
 			R_Node n = it.next();
-			if (isNullOrAbandoned(n)) {
-				no_loc.add(new R_NodeModel(n, null));
+			if (!isValid(n)) {
+				invalid.add(new R_NodeModel(n, null));
 				it.remove();
 			}
 		}
-		return no_loc;
+		return invalid;
 	}
 
-	/** Check if location is null or r_node is abandoned */
-	private boolean isNullOrAbandoned(R_Node n) {
-		return n.getAbandoned() || GeoLocHelper.isNull(n.getGeoLoc());
+	/** Check if r_node is valid */
+	private boolean isValid(R_Node n) {
+		return n.getActive() && !GeoLocHelper.isNull(n.getGeoLoc());
 	}
 
 	/** Set the corridor list model.
@@ -463,19 +462,23 @@ public class CorridorList extends IPanel {
 
 	/** Create a new node at a specified point */
 	private void createNode(CorridorBase<R_Node> c, Point2D p) {
+		int lanes = 2;
+		int shift = MID_SHIFT + 1;
+		Integer speed_limit = null;
 		Position pos = getWgs84Position(p);
 		if (c != null) {
-			int lanes = 2;
-			int shift = MID_SHIFT + 1;
 			R_NodeModel m = findModel(c, pos);
 			if (m != null) {
 				shift = m.getDownstreamLane(false);
 				lanes = shift - m.getDownstreamLane(true);
+				speed_limit = m.r_node.getSpeedLimit();
 			}
 			creator.create(c.getRoadway(), c.getRoadDir(), pos,
-				lanes, shift);
-		} else
-			creator.create(pos);
+				lanes, shift, speed_limit);
+		} else {
+			creator.create(null, (short) 0, pos, lanes, shift,
+				speed_limit);
+		}
 	}
 
 	/** Get a position */

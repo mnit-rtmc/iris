@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
@@ -58,6 +57,9 @@ import us.mn.state.dot.tms.server.event.DetAutoFailEvent;
  * @author Douglas Lau
  */
 public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
+
+	/** Reversible lane name */
+	static private final String REV = "I-394 Rev";
 
 	/** Is detector auto-fail enabled? */
 	static private boolean isDetectorAutoFailEnabled() {
@@ -183,7 +185,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	static private final int MAX_C30 = 1800;
 
 	/** Sample period for detectors (seconds) */
-	static public final int SAMPLE_PERIOD_SEC = 30;
+	static private final int SAMPLE_PERIOD_SEC = 30;
 
 	/** Sample period for detectors (ms) */
 	static public final long SAMPLE_PERIOD_MS = new Interval(
@@ -228,6 +230,23 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			Detector d = it.next();
 			if (d instanceof DetectorImpl)
 				((DetectorImpl) d).updateAutoFail();
+		}
+	}
+
+	/** Create a fake detector object */
+	static private FakeDetector createFakeDetector(String f)
+		throws ChangeVetoException
+	{
+		try {
+			return (f != null) ? new FakeDetector(f) : null;
+		}
+		catch (NumberFormatException e) {
+			throw new ChangeVetoException(
+				"Invalid detector number");
+		}
+		catch (IndexOutOfBoundsException e) {
+			throw new ChangeVetoException(
+				"Bad detector #:" + e.getMessage());
 		}
 	}
 
@@ -661,23 +680,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Fake detector to use if detector is failed */
 	private transient FakeDetector fake_det;
 
-	/** Create a fake detector object */
-	static private FakeDetector createFakeDetector(String f)
-		throws ChangeVetoException
-	{
-		try {
-			return (f != null) ? new FakeDetector(f) : null;
-		}
-		catch (NumberFormatException e) {
-			throw new ChangeVetoException(
-				"Invalid detector number");
-		}
-		catch (IndexOutOfBoundsException e) {
-			throw new ChangeVetoException(
-				"Bad detector #:" + e.getMessage());
-		}
-	}
-
 	/** Set the fake expression */
 	@Override
 	public void setFake(String f) {
@@ -729,36 +731,35 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Periodic LONG class count sample cache */
 	private transient final PeriodicSampleCache l_count_cache;
 
-	/** Vehicle count from the last 30-second sample period.  FIXME: use
-	 * veh_cache to get "veh_count_30" value. */
-	private transient int veh_count_30 = MISSING_DATA;
-
-	/** Scans from the last 30-second sample period.  FIXME: use
-	 * scn_cache to get "last_scans" value. */
-	private transient int last_scans = MISSING_DATA;
+	/** Vehicle event log */
+	private transient final VehicleEventLog v_log;
 
 	/** Occupancy value from previous 30-second sample period */
 	private transient int prev_value = MISSING_DATA;
 
-	/** Speed from the last 30-second sample period.  FIXME: use
-	 * spd_cache to get "last_speed" value. */
-	private transient int last_speed = MISSING_DATA;
-
 	/** Get the current vehicle count */
 	@Override
 	public int getVehCount(long start, long end) {
-		if (isSampling())
-			return veh_count_30;
-		else
-			return MISSING_DATA;
+		return isSampling()
+		      ? veh_cache.getValue(start, end)
+		      : MISSING_DATA;
 	}
 
 	/** Get the current occupancy */
 	public float getOccupancy() {
-		if (isSampling() && last_scans != MISSING_DATA)
-			return MAX_OCCUPANCY * (float) last_scans / MAX_C30;
-		else
-			return MISSING_DATA;
+		long end = calculateEndTime();
+		long start = end - SAMPLE_PERIOD_MS;
+		return getOccupancy(start, end);
+	}
+
+	/** Get the current occupancy */
+	private float getOccupancy(long start, long end) {
+		int scn = isSampling()
+		       ? scn_cache.getValue(start, end)
+		       : MISSING_DATA;
+		return (scn != MISSING_DATA)
+		      ? MAX_OCCUPANCY * (float) scn / MAX_C30
+		      : MISSING_DATA;
 	}
 
 	/** Get a flow rate (vehicles per hour) */
@@ -843,7 +844,16 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get the current raw (non-faked) speed (miles per hour) */
 	protected float getSpeedRaw() {
-		return isSampling() ? last_speed : MISSING_DATA;
+		long end = calculateEndTime();
+		long start = end - SAMPLE_PERIOD_MS;
+		return getSpeedRaw(start, end);
+	}
+
+	/** Get the raw (non-faked) speed (MPH) */
+	private float getSpeedRaw(long start, long end) {
+		return isSampling()
+		      ? spd_cache.getValue(start, end)
+		      : MISSING_DATA;
 	}
 
 	/** Get speed estimate based on flow / density */
@@ -877,7 +887,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	public void storeVehCount(PeriodicSample v, VehLengthClass vc) {
 		if (vc == null)
 			storeVehCount(v);
-		else {
+		else if (v != null) {
 			switch (vc) {
 			case MOTORCYCLE:
 				mc_count_cache.add(v, name);
@@ -898,14 +908,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Store one vehicle count sample for this detector.
 	 * @param v PeriodicSample containing vehicle count data. */
 	public void storeVehCount(PeriodicSample v) {
-		if (lane_type != LaneType.GREEN &&
-		    v.period == SAMPLE_PERIOD_SEC)
-			testVehCount(v);
-		veh_cache.add(v, name);
-		if (v.period == SAMPLE_PERIOD_SEC) {
-			veh_count_30 = v.value;
-			/* FIXME: this shouldn't be needed */
-			last_speed = MISSING_DATA;
+		if (v != null) {
+			if (lane_type != LaneType.GREEN &&
+			    v.period == SAMPLE_PERIOD_SEC)
+				testVehCount(v);
+			veh_cache.add(v, name);
 		}
 	}
 
@@ -919,9 +926,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			logEvent(EventType.DET_NO_HITS);
 		updateAutoFail();
 	}
-
-	/** Reversible lane name */
-	static private final String REV = "I-394 Rev";
 
 	/** Check if a location is on a reversible road */
 	private boolean isReversibleLocationHack(GeoLoc loc) {
@@ -938,14 +942,16 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Store one occupancy sample for this detector.
 	 * @param occ Occupancy sample data. */
 	public void storeOccupancy(OccupancySample occ) {
-		int n_scans = occ.as60HzScans();
-		if (occ.period == SAMPLE_PERIOD_SEC) {
-			testScans(occ);
-			prev_value = occ.value;
-			last_scans = n_scans;
-		}
-		scn_cache.add(new PeriodicSample(occ.stamp, occ.period,
-			n_scans), name);
+		if (occ != null) {
+			int n_scans = occ.as60HzScans();
+			if (occ.period == SAMPLE_PERIOD_SEC) {
+				testScans(occ);
+				prev_value = occ.value;
+			}
+			scn_cache.add(new PeriodicSample(occ.stamp, occ.period,
+				n_scans), name);
+		} else
+			prev_value = MISSING_DATA;
 	}
 
 	/** Test an occupancy sample with error detecting algorithms */
@@ -969,9 +975,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Store one speed sample for this detector.
 	 * @param speed PeriodicSample containing speed data. */
 	public void storeSpeed(PeriodicSample speed) {
-		spd_cache.add(speed, name);
-		if (speed.period == SAMPLE_PERIOD_SEC)
-			last_speed = speed.value;
+		if (speed != null)
+			spd_cache.add(speed, name);
 	}
 
 	/** Flush buffered data to disk */
@@ -996,9 +1001,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		l_count_cache.purge(before);
 	}
 
-	/** Vehicle event log */
-	private transient final VehicleEventLog v_log;
-
 	/** Log a vehicle detection event.
 	 * @param stamp Timestamp of detection event.
 	 * @param duration Event duration in milliseconds.
@@ -1010,28 +1012,18 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		v_log.logVehicle(stamp, duration, headway, speed);
 	}
 
-	/** Log a gap in vehicle events.
-	 */
+	/** Log a gap in vehicle events */
 	public void logGap() {
 		v_log.logGap();
 	}
 
 	/** Bin sample data to the specified period */
 	public void binEventSamples(int p) {
-		// FIXME: make this work for other binning periods
-		if (30 == p) {
-			veh_count_30 = v_log.getVehicleCount();
-			last_scans = v_log.getOccupancy().as60HzScans();
-			last_speed = v_log.getSpeed();
-			v_log.binEventSamples();
-			chatter.updateState(30, veh_count_30 > MAX_VEH_COUNT_30);
-			if (chatter.checkLogging(30))
-				logEvent(EventType.DET_CHATTER);
-			no_hits.updateState(30, veh_count_30 == 0);
-			if (no_hits.checkLogging(30))
-				logEvent(EventType.DET_NO_HITS);
-			updateAutoFail();
-		}
+		long end = calculateEndTime();
+		storeVehCount(v_log.getVehCount(end, p));
+		storeOccupancy(v_log.getOccupancy(end, p));
+		storeSpeed(v_log.getSpeed(end, p));
+		v_log.binEventSamples();
 	}
 
 	/** Write a single detector as an XML element */

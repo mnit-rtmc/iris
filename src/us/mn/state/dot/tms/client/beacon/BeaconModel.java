@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,8 +40,7 @@ public class BeaconModel extends ProxyTableModel<Beacon> {
 		});
 		cols.add(new ProxyColumn<Beacon>("location", 300) {
 			public Object getValueAt(Beacon b) {
-				return GeoLocHelper.getDescription(
-					b.getGeoLoc());
+				return GeoLocHelper.getLocation(b.getGeoLoc());
 			}
 		});
 		return cols;

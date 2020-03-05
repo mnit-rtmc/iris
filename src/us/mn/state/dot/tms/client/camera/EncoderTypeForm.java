@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Minnesota Department of Transportation
+ * Copyright (C) 2017-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,10 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import us.mn.state.dot.tms.EncoderStream;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
+import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -24,16 +25,35 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class EncoderTypeForm extends ProxyTableForm<EncoderType> {
+public class EncoderTypeForm extends AbstractForm {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.isWritePermitted(EncoderType.SONAR_TYPE);
+		return s.isWritePermitted(EncoderType.SONAR_TYPE) ||
+		       s.isWritePermitted(EncoderStream.SONAR_TYPE);
 	}
+
+	/** Encoder type panel */
+	private final EncoderTypePanel enc_panel;
 
 	/** Create a new encoder type form */
 	public EncoderTypeForm(Session s) {
-		super(I18N.get("camera.encoder.type.plural"),
-			new EncoderTypeModel(s));
+		super(I18N.get("encoder.type.plural"));
+		enc_panel = new EncoderTypePanel(s);
+	}
+
+	/** Initializze the widgets in the form */
+	@Override
+	protected void initialize() {
+		super.initialize();
+		enc_panel.initialize();
+		add(enc_panel);
+	}
+
+	/** Dispose of the form */
+	@Override
+	protected void dispose() {
+		enc_panel.dispose();
+		super.dispose();
 	}
 }

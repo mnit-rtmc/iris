@@ -243,7 +243,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	}
 
 	/** Check if an attribute change is interesting */
-	protected boolean checkAttributeChange(String attr) {
+	private boolean checkAttributeChange(String attr) {
 		return isStyleAttrib(attr);
 	}
 
@@ -487,10 +487,9 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Find the map geo location for a proxy */
 	public MapGeoLoc findGeoLoc(T proxy) {
 		GeoLoc loc = getGeoLoc(proxy);
-		if (loc != null)
-			return loc_manager.findMapGeoLoc(loc);
-		else
-			return null;
+		return (loc != null)
+		      ? loc_manager.findMapGeoLoc(loc)
+		      : null;
 	}
 
 	/** Get the GeoLoc for the specified proxy */
@@ -498,16 +497,15 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Find a proxy matching the given map object */
 	public T findProxy(MapObject mo) {
-		if (mo instanceof MapGeoLoc)
-			return map_cache.lookup((MapGeoLoc)mo);
-		else
-			return null;
+		return (mo instanceof MapGeoLoc)
+		      ? map_cache.lookup((MapGeoLoc) mo)
+		      : null;
 	}
 
 	/** Get the description of a proxy */
 	public String getDescription(T proxy) {
 		return proxy.getName() + " - " +
-			GeoLocHelper.getDescription(getGeoLoc(proxy));
+			GeoLocHelper.getLocation(getGeoLoc(proxy));
 	}
 
 	/** Check if the corresponding layer is visible.

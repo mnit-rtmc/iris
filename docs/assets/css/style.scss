@@ -1,0 +1,142 @@
+---
+---
+
+* {
+  font-family: 'Overpass', sans-serif;
+  font-size: 1rem;
+}
+
+body {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding-bottom: 1rem;
+  color: #ffeedd;
+  background: #283028;
+  background: linear-gradient(#283028, #1c201c);
+  background-attachment: fixed !important;
+}
+
+nav {
+  order: 0;
+  flex-grow: 1;
+  margin-left: 0.1rem;
+  margin-right: 0.4rem;
+}
+
+nav a {
+  display: block;
+  font-size: 0.8rem;
+}
+
+.main {
+  order: 1;
+  flex-grow: 3;
+  align-self: stretch;
+}
+
+section {
+  max-width: 36rem;
+  margin-top: 0.5rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #f0f0f0;
+  margin: 0.5rem 0 0.5rem 0;
+  line-height: 1.1;
+}
+
+h1 {
+  font-size: 2rem;
+  text-align: center;
+}
+
+h2 {
+  font-size: 1.8rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+p, ul, ol, table, pre {
+  margin-bottom: 1rem;
+}
+
+a {
+  color: #ffbf00;
+  text-decoration: underline dotted;
+
+  &:hover {
+    color: #ffee99;
+  }
+}
+
+ul {
+  list-style-type: "》";
+}
+
+p img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+code {
+  font-family: 'Overpass Mono', monospace;
+  color: #ffa;
+}
+
+p > code {
+  background: #1c1c20;
+}
+
+pre {
+  padding: 0.5rem 1rem;
+  background: #c0a020;
+  border-radius: 0.4rem;
+  border: solid black;
+  overflow-x: auto;
+}
+
+pre code {
+  font-weight: bold;
+  color: black;
+}
+
+table {
+  border: solid white;
+  border-collapse: collapse;
+  background: #408050;
+  color: white;
+  text-align: left;
+}
+
+table tr:nth-child(odd) td {
+  background: #3c784a;
+}
+
+th {
+  font-size: 1.1rem;
+  padding: 0.1rem 0.5rem 0.1rem 0.6rem;
+}
+
+td {
+  padding: 0.05rem 0.5rem 0.05rem 0.5rem;
+}
+
+hr {
+  border-bottom: thick dashed white;
+  height: 0.1rem;
+  margin-bottom: 1rem;
+}
+
+.title p {
+  font-size: 1.4rem;
+  text-align: center;
+}
+
+.footer {
+  font-size: 0.7rem;
+  color: #696969;
+}

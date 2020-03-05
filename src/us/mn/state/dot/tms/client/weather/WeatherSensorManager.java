@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2018  Minnesota Department of Transportation
+ * Copyright (C) 2010-2019  Minnesota Department of Transportation
  * Copyright (C) 2017       Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -93,9 +93,9 @@ public class WeatherSensorManager extends DeviceManager<WeatherSensor> {
 		return null;
 	}
 
-	/** Check if an attribute change is interesting */
+	/** Check if a given attribute affects a proxy style */
 	@Override
-	protected boolean checkAttributeChange(String attr) {
+	public boolean isStyleAttrib(String a) {
 		return true;
 	}
 

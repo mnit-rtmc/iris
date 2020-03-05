@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2018  Minnesota Department of Transportation
+ * Copyright (C) 2013-2019  Minnesota Department of Transportation
  * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -90,10 +90,8 @@ public class EmailHandler {
 			if (elapsed_ms < getEmailRateLimitMs())
 				return;
 		}
-		if (null == recip || recip.length() <= 0) {
-			logEmailError(msg, "invalid recipient");
+		if (null == recip || recip.length() <= 0)
 			return;
-		}
 		String host = SystemAttrEnum.EMAIL_SMTP_HOST.getString();
 		if (null == host || host.length() <= 0) {
 			logEmailError(msg, "invalid host");

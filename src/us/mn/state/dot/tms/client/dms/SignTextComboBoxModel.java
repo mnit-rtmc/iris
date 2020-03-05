@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -105,14 +105,13 @@ public class SignTextComboBoxModel extends AbstractListModel<SignText>
 
 	/** Get or create a sign text for the given string */
 	private SignText getSignText(String s) {
-		String m = new MultiString(s.trim()).normalize();
+		String m = new MultiString(s.trim()).normalizeLine().toString();
 		if (m.length() == 0)
 			return BLANK_SIGN_TEXT;
 		SignText st = lookupMessage(m);
-		if (st != null)
-			return st;
-		else
-			return new ClientSignText(m, line, ON_THE_FLY_RANK);
+		return (st != null)
+		      ? st
+		      : new ClientSignText(m, line, ON_THE_FLY_RANK);
 	}
 
 	/** Lookup a sign text.

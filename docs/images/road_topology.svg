@@ -1,0 +1,38 @@
+<svg xmlns='http://www.w3.org/2000/svg' version='1.1'
+     xmlns:xlink='http://www.w3.org/1999/xlink'
+     width='240' height='240'>
+  <title>R_Nodes</title>
+<defs>
+  <g id='r_node_marker' style='fill:#8040ff;opacity:0.7;stroke:black'>
+    <circle cx='0' cy='0' r='10'/>
+    <path d='M-7-7L7 7'/>
+    <path d='M-7 7L7-7'/>
+  </g>
+</defs>
+<path style='fill:#404040'
+     d='M 8,0 V 240 H 88 V 198 C 130,234 200,234 240,234 V 204
+        C 174,204 104,198 88,138 L 88,102 C 104,42 174,36 240,36
+        V 6 C 200,6 130,6 88,42 V 0 Z'/>
+<path style='fill:none;stroke:yellow;stroke-width:2'
+      d='M 8,0 V 240 M 88,198 C 130,234 200,234 240,234
+         M 240,6 C 200,6 130,6 88,42'/>
+<path style='fill:none;stroke:white;stroke-width:2'
+      d='M 88,196 V 240 M 240,204 C 174,204 102,194 88,138
+         L 88,102 C 104,42 174,36 240,36 M 88,0 V 42'/>
+<path style='fill:none;stroke:white;stroke-dasharray:8,34;stroke-width:2'
+      d='M 48,8 V 240'/>
+<use x='88' y='42' xlink:href='#r_node_marker'/>
+<use x='88' y='120' xlink:href='#r_node_marker'/>
+<use x='88' y='198' xlink:href='#r_node_marker'/>
+<text style='font-family:sans-serif;font-size:small;fill:#ffeedd'
+      text-anchor='end'>
+  <tspan x="76" y="42">exit</tspan>
+  <tspan x="76" y="120">station</tspan>
+  <tspan x="76" y="198">entrance</tspan>
+</text>
+<rect x="112" y="100" width="108" height="32" rx="8"
+      style="fill:#404040;stroke:white"/>
+<text style='font-family:sans-serif;font-size:large;fill:#ffeedd'>
+  <tspan x="124" y="124">r_nodes</tspan>
+</text>
+</svg>

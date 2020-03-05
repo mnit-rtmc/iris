@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="{{ site.lang | default: "en-US" }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% seo %}
+    <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
+    <link href="https://fonts.googleapis.com/css?family=Overpass|Overpass+Mono&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <nav>
+      <a href="index.html">IRIS</a>
+      <a href="release_notes.html">Release Notes</a>
+      <a href="installation.html">Installation</a>
+      <a href="mapping.html">Mapping</a>
+      <a href="client_properties.html">Client Properties</a>
+      <a href="user_interface.html">User Interface</a>
+      <a href="system_attributes.html">System Attributes</a>
+      <a href="user_roles.html">User Roles</a>
+      <a href="comm_links.html">Comm Links</a>
+      <a href="controllers.html">Controllers</a>
+      <a href="road_topology.html">Road Topology</a>
+      <a href="dms.html">Dynamic Message Signs</a>
+      <a href="lcs.html">Lane-Use Control Signs</a>
+      <a href="incidents.html">Incidents</a>
+      <a href="vehicle_detection.html">Vehicle Detection</a>
+      <a href="cameras.html">Cameras</a>
+      <a href="video.html">Video Monitors</a>
+      <a href="ramp_meters.html">Ramp Meters</a>
+      <a href="gate_arms.html">Gate Arms</a>
+      <a href="rwis.html">Road Weather<br/>&nbsp;&nbsp;Information Systems</a>
+      <a href="parking_areas.html">Parking Areas</a>
+      <a href="action_plans.html">Action Plans</a>
+      <a href="tolling.html">Tolling</a>
+      <a href="beacons.html">Beacons</a>
+      <a href="alarms.html">Alarms</a>
+      <a href="gps.html">GPS</a>
+      <a href="troubleshooting.html">Troubleshooting</a>
+      <a href="maintenance.html">Maintenance</a>
+      <a href="development.html">Development</a>
+      <a href="step_by_step.html">Step-by-Step</a>
+    </nav>
+    <div class="main">
+      <section>
+        <div class="title">
+          <h1>
+              {% if site.icon And site.icon != nil %}
+                  <img src="{{ site.icon }}"/>
+              {% endif %}
+              {{ site.title | default: site.github.repository_name }}
+          </h1>
+          <p>{{ site.description | default: site.github.project_tagline }}</p>
+          <hr>
+        </div>
+
+        {{ content }}
+
+        <div class="footer">
+          <hr>
+          <span>Repository: <a href="{{ site.github.repository_url }}">{{ site.title | default: site.github.repository_name }}</a></span>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

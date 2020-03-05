@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 import us.mn.state.dot.tms.server.comm.snmp.BadValue;
+import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import us.mn.state.dot.tms.server.comm.snmp.GenError;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
@@ -81,9 +82,6 @@ public class OpSendDMSMessage extends OpDMS {
 
 	/** Maximum message priority */
 	static private final int MAX_MESSAGE_PRIORITY = 255;
-
-	/** Pixel service disabled while message is deployed */
-	static private final int PIXEL_SERVICE_DISABLED = 0;
 
 	/** Make a new DmsMessageStatus enum */
 	static private ASN1Enum<DmsMessageStatus> makeStatus(
@@ -176,7 +174,7 @@ public class OpSendDMSMessage extends OpDMS {
 		multi = parseMulti(sm.getMulti());
 		msg_num = lookupMsgNum(multi);
 		message_crc = DmsMessageCRC.calculate(multi,
-			sm.getBeaconEnabled(), PIXEL_SERVICE_DISABLED);
+			sm.getBeaconEnabled(), false);
 		status = makeStatus(DmsMessageMemoryType.changeable, msg_num);
 		graphics = GraphicHelper.lookupMulti(multi);
 	}
@@ -336,7 +334,7 @@ public class OpSendDMSMessage extends OpDMS {
 				msg_num);
 			ms.setString(multi);
 			beacon.setInteger(message.getBeaconEnabled() ? 1 : 0);
-			srv.setInteger(PIXEL_SERVICE_DISABLED);
+			srv.setInteger(0);
 			prior.setInteger(message.getMsgPriority());
 			mess.add(ms);
 			// NOTE: If dmsMessageBeacon and dmsMessagePixelService
@@ -544,7 +542,7 @@ public class OpSendDMSMessage extends OpDMS {
 		private final ASN1Enum<MultiSyntaxError> m_err;
 
 		/** Other error string */
-		private final ASN1String o_err = new ASN1String(
+		private final DisplayString o_err = new DisplayString(
 			dmsMultiOtherErrorDescription.node);
 
 		/** Create a phase to query an other MULTI error */
@@ -928,8 +926,8 @@ public class OpSendDMSMessage extends OpDMS {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer number = dmsGraphicNumber.makeInt(row);
-			ASN1String name = new ASN1String(dmsGraphicName.node,
-				row);
+			DisplayString name = new DisplayString(
+				dmsGraphicName.node, row);
 			ASN1Integer height = dmsGraphicHeight.makeInt(row);
 			ASN1Integer width = dmsGraphicWidth.makeInt(row);
 			ASN1Enum<ColorScheme> type = new ASN1Enum<

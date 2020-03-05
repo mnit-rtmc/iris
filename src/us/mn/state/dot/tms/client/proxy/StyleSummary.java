@@ -177,25 +177,29 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Create style buttons */
 	private StyleButton[] createStyleButtons() {
 		ProxyTheme<T> theme = manager.getTheme();
-		List<Style> styles = theme.getStyles();
 		ButtonGroup bg = new ButtonGroup();
-		int n_styles = styles.size();
-		StyleButton[] btns = new StyleButton[n_styles];
-		for (int i = 0; i < btns.length; i++) {
-			Style sty = styles.get(i);
-			final ItemStyle i_style = ItemStyle.lookupStyle(
-				sty.toString());
-			StyleButton btn = new StyleButton(i_style,
-				theme.getLegend(sty));
-			btn.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent a) {
-					setStyleAction(i_style);
-				}
-			});
-			btns[i] = btn;
-			bg.add(btn);
+		ArrayList<StyleButton> btns = new ArrayList<StyleButton>();
+		for (Style sty : theme.getStyles()) {
+			if (sty.legend) {
+				StyleButton btn = createStyleButton(theme, sty);
+				btns.add(btn);
+				bg.add(btn);
+			}
 		}
-		return btns;
+		return btns.toArray(new StyleButton[0]);
+	}
+
+	/** Create a style button */
+	private StyleButton createStyleButton(ProxyTheme<T> theme, Style sty) {
+		final ItemStyle i_style = ItemStyle.lookupStyle(sty.toString());
+		StyleButton btn = new StyleButton(i_style,
+			theme.getLegend(sty));
+		btn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent a) {
+				setStyleAction(i_style);
+			}
+		});
+		return btn;
 	}
 
 	/** Initialize the style summary */

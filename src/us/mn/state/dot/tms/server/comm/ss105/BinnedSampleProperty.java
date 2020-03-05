@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2018  Minnesota Department of Transportation
+ * Copyright (C) 2004-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ss105;
 
 import java.io.IOException;
 import java.util.Date;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.VehLengthClass;
 import us.mn.state.dot.tms.utils.HexString;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
@@ -28,23 +29,53 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 public class BinnedSampleProperty extends SS105Property {
 
-	/** Sample age (number of intervals old) */
-	protected final int age;
+	/** Interval period (sec) */
+	private final int period;
 
-	/** Timestamp at end of sample interval */
-	Date timestamp = null;
-
-	/** Sample data for each lane */
-	protected LaneSample[] samples = new LaneSample[0];
-
-	/** Create a new binned sample property */
-	public BinnedSampleProperty() {
-		this(0);
+	/** Get the interval period (sec) */
+	public int getPeriod() {
+		return period;
 	}
 
+	/** Sample age (number of intervals old) */
+	private final int age;
+
+	/** Timestamp at end of sample interval */
+	private long stamp;
+
+	/** Get timestamp at end of sample interval */
+	public long getTime() {
+		return stamp;
+	}
+
+	/** Check if time stamp is from the previous interval */
+	public boolean isPreviousInterval() {
+		long now = TimeSteward.currentTimeMillis();
+		int pms = period * 1000;
+		long end = now / pms * pms; // end of previous interval
+		return (end == stamp);
+	}
+
+	/** Is time stamp valid (within valid interval) */
+	public boolean isValidStamp() {
+		long valid_ms = 2 * period * 1000;
+		long now = TimeSteward.currentTimeMillis();
+		return (stamp > now - valid_ms) && (stamp < now + valid_ms);
+	}
+
+	/** Clear the sample data */
+	public void clear() {
+		stamp = 0;
+		samples = new LaneSample[0];
+	}
+
+	/** Sample data for each lane */
+	private LaneSample[] samples = new LaneSample[0];
+
 	/** Create a new binned sample property */
-	public BinnedSampleProperty(int a) {
-		age = a;
+	public BinnedSampleProperty(int p) {
+		period = p;
+		age = 0;
 	}
 
 	/** Check if the property has a checksum */
@@ -53,6 +84,7 @@ public class BinnedSampleProperty extends SS105Property {
 	}
 
 	/** Format a basic "GET" request */
+	@Override
 	protected String formatGetRequest() {
 		if (age < 1)
 			return "XD";
@@ -61,6 +93,7 @@ public class BinnedSampleProperty extends SS105Property {
 	}
 
 	/** Format a basic "SET" request */
+	@Override
 	protected String formatSetRequest() {
 		return null;
 	}
@@ -150,8 +183,9 @@ public class BinnedSampleProperty extends SS105Property {
 	}
 
 	/** Parse the response to a QUERY */
+	@Override
 	protected void parseQuery(String r) throws IOException {
-		timestamp = TimeStamp.parse(r.substring(0, 8));
+		stamp = TimeStamp.parse(r.substring(0, 8)).getTime();
 		String payload = r.substring(8);
 		if (payload.length() % LANE_SAMPLE_BYTES != 0)
 			throw new ParsingException("INVALID SAMPLE SIZE");
@@ -173,10 +207,11 @@ public class BinnedSampleProperty extends SS105Property {
 	}
 
 	/** Get a string representation of the sample data */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("XD: ");
-		sb.append(timestamp.toString());
+		sb.append(new Date(stamp));
 		for (LaneSample ls: samples) {
 			sb.append('\n');
 			sb.append(ls.toString());

@@ -67,10 +67,14 @@ public class LocMultiBuilder extends MultiBuilder {
 	/** Distance upstream of incident */
 	private final Distance up;
 
+	/** Flag to retain allowed road affixes */
+	private final boolean retain_affixes;
+
 	/** Create a new location MULTI builder */
-	public LocMultiBuilder(GeoLoc l, Distance u) {
+	public LocMultiBuilder(GeoLoc l, Distance u, boolean ra) {
 		loc = l;
 		up = u;
+		retain_affixes = ra;
 	}
 
 	/** Add an incident locator */
@@ -93,7 +97,7 @@ public class LocMultiBuilder extends MultiBuilder {
 	/** Add roadway name */
 	private void addRoadway() {
 		String s = loc.getRoadway().getName().toUpperCase();
-		addSpan(RoadAffixHelper.replace(s, true));
+		addSpan(RoadAffixHelper.replace(s, retain_affixes));
 	}
 
 	/** Add roadway direction */
@@ -111,7 +115,7 @@ public class LocMultiBuilder extends MultiBuilder {
 		Road xstreet = loc.getCrossStreet();
 		if (xstreet != null) {
 			String s = xstreet.getName().toUpperCase();
-			addSpan(RoadAffixHelper.replace(s, true));
+			addSpan(RoadAffixHelper.replace(s, retain_affixes));
 		}
 	}
 

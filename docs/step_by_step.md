@@ -1,6 +1,6 @@
-## Step-by-step Guides
+# Step-by-step Guides
 
-### Create DMS, Comm Link, and Controller
+## Create DMS, Comm Link, and Controller
 
  1. Make sure [edit mode] is **ON**
  2. Create a new **DMS**
@@ -42,7 +42,7 @@
       Configuration button on that tab manually queries the sign
     - The Status Tab on the DMS Form shows additional status information
 
-### Create Plan to Activate DMS Messages
+## Create Plan to Activate DMS Messages
 
  1. Make sure [edit mode] is **ON**.
  2. Select the `View ➔ Plans and Schedules` menu item to display the **Plans and
@@ -88,5 +88,5 @@ Notes:
    appearing on signs
 
 
-[edit mode]: admin_guide.html#edit_mode
-[quick message]: admin_guide.html#quick_msg
+[edit mode]: user_interface.html#edit-mode
+[quick message]: dms.html#quick-messages

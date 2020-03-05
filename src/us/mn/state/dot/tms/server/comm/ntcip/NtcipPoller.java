@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  * Copyright (C) 2017       Iteris Inc.
  *
@@ -218,17 +218,13 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 		case QUERY_STATUS:
 			addOp(new OpQueryEssStatus(ws));
 			break;
+		case SEND_SETTINGS:
+			addOp(new OpQueryEssSettings(ws));
+			break;
 		default:
 			// Ignore other requests
 			break;
 		}
-	}
-
-	/** Send settings to a weather sensor */
-	@SuppressWarnings("unchecked")
-	@Override
-	public void sendSettings(WeatherSensorImpl ws) {
-		addOp(new OpQueryEssSettings(ws));
 	}
 
 	/** Start communication test */

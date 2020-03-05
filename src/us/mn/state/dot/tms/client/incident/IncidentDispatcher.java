@@ -70,7 +70,6 @@ import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * The IncidentDispatcher is a GUI component for creating incidents.
@@ -560,7 +559,7 @@ public class IncidentDispatcher extends IPanel
 			type_lbl.setText(manager.getTypeDesc(inc));
 			type_lbl.setIcon(manager.getIcon(inc));
 			location_lbl.setText(
-				manager.getGeoLoc(inc).getDescription());
+				manager.getGeoLoc(inc).getLocation());
 			if (inc instanceof ClientIncident)
 				camera_cbx.setModel(createCameraModel(inc));
 			setCameraAction(inc);
@@ -645,24 +644,23 @@ public class IncidentDispatcher extends IPanel
 		inc.setCleared(true);
 		ArrayList<DMS> signs = IncidentHelper.getDeployedSigns(inc);
 		if (signs.size() > 0) {
-			HashMap<String, MultiString> msgs = clearedMessages(inc,
+			HashMap<String, String> msgs = clearedMessages(inc,
 				signs);
-			for (Entry<String, MultiString> ent: msgs.entrySet()) {
+			for (Entry<String, String> ent: msgs.entrySet()) {
 				String dn = ent.getKey();
-				MultiString multi = ent.getValue();
+				String multi = ent.getValue();
 				sendMessage(dn, inc, multi, DURATION_CLEARED);
 			}
 		}
 	}
 
 	/** Create cleared messages associated with an incident */
-	private HashMap<String, MultiString> clearedMessages(Incident inc,
+	private HashMap<String, String> clearedMessages(Incident inc,
 		ArrayList<DMS> signs)
 	{
-		HashMap<String, MultiString> msgs =
-			new HashMap<String, MultiString>();
+		HashMap<String, String> msgs = new HashMap<String, String>();
 		for (DMS dms: signs)
-			msgs.put(dms.getName(), new MultiString(""));
+			msgs.put(dms.getName(), "");
 		IncSeverity sev = IncidentHelper.getSeverity(inc);
 		if (sev == IncSeverity.major)
 			updateClearedMessages(inc, msgs);
@@ -671,7 +669,7 @@ public class IncidentDispatcher extends IPanel
 
 	/** Update cleared messages for a major incident */
 	private void updateClearedMessages(Incident inc,
-		HashMap<String, MultiString> msgs)
+		HashMap<String, String> msgs)
 	{
 		UpstreamDeviceFinder finder = new UpstreamDeviceFinder(manager,
 			inc);
@@ -693,22 +691,18 @@ public class IncidentDispatcher extends IPanel
 	}
 
 	/** Send new sign message to a DMS */
-	public void sendMessage(String dn, Incident inc, MultiString multi,
+	public void sendMessage(String dn, Incident inc, String multi,
 		Integer duration)
 	{
-		IncSeverity sev = IncidentHelper.getSeverity(inc);
+		DmsMsgPriority prio = IncidentHelper.getPriority(inc);
 		String inc_orig = IncidentHelper.getOriginalName(inc);
-		if (multi != null && sev != null) {
-			String ms = multi.toString();
-			DmsMsgPriority prio = sev.priority;
-			if (inc.getCleared())
-				prio = DmsMsgPriority.PSA;
+		if (multi != null && prio != null) {
 			DMS dms = DMSHelper.lookup(dn);
 			if (dms != null) {
 				SignConfig sc = dms.getSignConfig();
 				if (sc != null) {
-					sendMessage(dms, sc, inc_orig, ms, prio,
-						duration);
+					sendMessage(dms, sc, inc_orig, multi,
+						prio, duration);
 				}
 			}
 		}

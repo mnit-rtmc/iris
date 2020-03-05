@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2017  Minnesota Department of Transportation
+ * Copyright (C) 2006-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -280,7 +280,7 @@ public class AttributeDispatcher {
 	{
 		Method m = setters.get(a);
 		if (m == null)
-			throw PermissionDenied.cannotWrite();
+			throw PermissionDenied.cannotWrite(a);
 		invoke(o, m, v);
 	}
 
@@ -325,7 +325,7 @@ public class AttributeDispatcher {
 	{
 		Method m = getters.get(a);
 		if (m == null)
-			throw PermissionDenied.cannotRead();
+			throw PermissionDenied.cannotRead(a);
 		Object result = _invoke(o, m, NO_PARAMS);
 		if (result instanceof Object[]) {
 			Object[] r = (Object [])result;

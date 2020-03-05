@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -33,8 +33,8 @@ public class ControllerHelper extends BaseHelper {
 
 	/** Lookup the controller with the specified name */
 	static public Controller lookup(String name) {
-		return (Controller)namespace.lookupObject(Controller.SONAR_TYPE,
-			name);
+		return (Controller) namespace.lookupObject(
+			Controller.SONAR_TYPE, name);
 	}
 
 	/** Get a controller iterator */
@@ -46,28 +46,19 @@ public class ControllerHelper extends BaseHelper {
 	/** Get the geo location of a controller or null */
 	static public GeoLoc getGeoLoc(Controller ctrl) {
 		Cabinet cab = ctrl.getCabinet();
-		if(cab != null)
-			return cab.getGeoLoc();
-		else
-			return null;
+		return (cab != null) ? cab.getGeoLoc() : null;
 	}
 
 	/** Get a controller location or an empty string */
 	static public String getLocation(Controller ctrl) {
 		GeoLoc loc = getGeoLoc(ctrl);
-		if(loc != null)
-			return GeoLocHelper.getDescription(loc);
-		else
-			return "";
+		return (loc != null) ? GeoLocHelper.getLocation(loc) : "";
 	}
 
 	/** Get a controller position or null */
 	static public Position getPosition(Controller ctrl) {
 		GeoLoc gl = getGeoLoc(ctrl);
-		if(gl != null)
-			return GeoLocHelper.getWgs84Position(gl);
-		else
-			return null;
+		return (gl != null) ? GeoLocHelper.getWgs84Position(gl) : null;
 	}
 
 	/** Test if a controller is active */
@@ -92,17 +83,15 @@ public class ControllerHelper extends BaseHelper {
 
 	/** Get controller communication status */
 	static public String getStatus(Controller ctrl) {
-		if(ctrl != null)
-			return ctrl.getStatus();
-		else
-			return ItemStyle.NO_CONTROLLER.toString();
+		return (ctrl != null)
+		      ? ctrl.getStatus()
+		      : ItemStyle.NO_CONTROLLER.toString();
 	}
 
 	/** Get controller maintenance status */
 	static public String getMaintenance(Controller ctrl) {
-		if(ctrl != null)
-			return ctrl.getMaint();
-		else
-			return ItemStyle.NO_CONTROLLER.toString();
+		return (ctrl != null)
+		      ? ctrl.getMaint()
+		      : ItemStyle.NO_CONTROLLER.toString();
 	}
 }

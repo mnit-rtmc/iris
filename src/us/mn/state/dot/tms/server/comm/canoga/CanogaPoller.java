@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2018  Minnesota Department of Transportation
+ * Copyright (C) 2006-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.canoga;
 
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.HashMap;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -40,9 +39,9 @@ public class CanogaPoller extends ThreadedPoller<CanogaProperty>
 		super(n, TCP, CANOGA_LOG);
 	}
 
-	/** List of all event data collectors on line */
-	private final LinkedList<OpQueryEventSamples> collectors =
-		new LinkedList<OpQueryEventSamples>();
+	/** Mapping of all event data collectors on line */
+	private final HashMap<ControllerImpl, OpQueryEventSamples> collectors =
+		new HashMap<ControllerImpl, OpQueryEventSamples>();
 
 	/** Perform a controller reset */
 	@Override
@@ -68,36 +67,20 @@ public class CanogaPoller extends ThreadedPoller<CanogaProperty>
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
 		if (c.getPollPeriod() == p) {
-			OpQueryEventSamples qes = getEventCollector(c);
-			qes.binSamples(p);
+			c.binEventSamples(p);
+			updateOpCounters(c);
 		}
 	}
 
-	/** Get an event collector operation */
-	private OpQueryEventSamples getEventCollector(final ControllerImpl c) {
-		OpQueryEventSamples qes = findEventCollector(c);
-		if (qes != null) {
+	/** Update operation counters for a controller */
+	private synchronized void updateOpCounters(final ControllerImpl c) {
+		OpQueryEventSamples qes = collectors.get(c);
+		if (qes != null)
 			qes.updateCounters();
-			return qes;
-		} else {
+		if (qes == null || qes.isDone()) {
 			qes = new OpQueryEventSamples(c);
-			collectors.add(qes);
+			collectors.put(c, qes);
 			addOp(qes);
-			return qes;
 		}
-	}
-
-	/** Find an existing event collector operation */
-	private OpQueryEventSamples findEventCollector(final ControllerImpl c) {
-		Iterator<OpQueryEventSamples> it = collectors.iterator();
-		while (it.hasNext()) {
-			OpQueryEventSamples qes = it.next();
-			if (qes.isDone()) {
-				qes.updateCounters();
-				it.remove();
-			} else if (qes.getController() == c)
-				return qes;
-		}
-		return null;
 	}
 }

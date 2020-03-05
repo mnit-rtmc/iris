@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ public class RampMeterModel extends ProxyTableModel<RampMeter> {
 		});
 		cols.add(new ProxyColumn<RampMeter>("location", 300) {
 			public Object getValueAt(RampMeter rm) {
-				return GeoLocHelper.getOnRampDescription(
+				return GeoLocHelper.getOnRampLocation(
 					rm.getGeoLoc());
 			}
 		});

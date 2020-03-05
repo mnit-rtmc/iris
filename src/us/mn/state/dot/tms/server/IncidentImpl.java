@@ -357,7 +357,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		w.write(createAttribute("road", road));
 		w.write(createAttribute("dir",
 			Direction.fromOrdinal(dir).abbrev));
-		if (loc != null)
+		if (loc != null && loc.length() > 0)
 			w.write(createAttribute("location", loc));
 		Position pos = getWgs84Position();
 		w.write(createAttribute("lon",
@@ -386,7 +386,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		R_Node rnd = cor.findNearest(getWgs84Position());
 		if (rnd == null)
 			return null;
-		return GeoLocHelper.getCrossDescription(rnd.getGeoLoc());
+		return GeoLocHelper.getCrossLandmark(rnd.getGeoLoc());
 	}
 
 	/** Get Position in WGS84 */

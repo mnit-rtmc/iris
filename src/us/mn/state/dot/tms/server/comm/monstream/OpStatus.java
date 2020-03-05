@@ -299,7 +299,7 @@ public class OpStatus extends OpStep {
 	private void parseQuery(String[] par) {
 		String mon = (par.length > 1) ? par[1] : "";
 		display = createDisplayProp(mon);
-		super.setPolling(true);
+		setPolling(true);
 	}
 
 	/** Parse switch message */

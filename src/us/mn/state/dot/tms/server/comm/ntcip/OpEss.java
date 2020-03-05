@@ -33,10 +33,4 @@ abstract public class OpEss extends OpNtcip {
 		super(p, ws);
 		w_sensor = ws;
 	}
-
-	/** Cleanup the operation */
-	@Override
-	public void cleanup() {
-		super.cleanup();
-	}
 }

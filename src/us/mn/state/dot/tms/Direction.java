@@ -29,9 +29,7 @@ public enum Direction {
 	EAST("Eastbound", "EB", "E"),           // 3
 	WEST("Westbound", "WB", "W"),           // 4
 	NORTH_SOUTH("North-South", "NS", "NS"), // 5
-	EAST_WEST("East-West", "EW", "EW"),     // 6
-	INNER_LOOP("Inner Loop", "IN", "IN"),   // 7
-	OUTER_LOOP("Outer Loop", "OUT", "OUT"); // 8
+	EAST_WEST("East-West", "EW", "EW");     // 6
 
 	/** Direction description */
 	public final String description;
@@ -66,5 +64,18 @@ public enum Direction {
 			return values()[o];
 		else
 			return UNKNOWN;
+	}
+
+	/** Check if two directions are opposite */
+	static public boolean isOpposite(short o0, short o1) {
+		Direction d0 = fromOrdinal(o0);
+		Direction d1 = fromOrdinal(o1);
+		switch (d0) {
+			case NORTH: return d1 == SOUTH;
+			case SOUTH: return d1 == NORTH;
+			case EAST: return d1 == WEST;
+			case WEST: return d1 == EAST;
+			default: return false;
+		}
 	}
 }

@@ -5,7 +5,7 @@ It will cause a message to be displayed only when approaching congestion —
 otherwise the message will be blank.  The tag itself will be replaced with an
 _advisory speed_, but the rest of the message can be any valid MULTI string.
 
-![Uniform Acceleration](uniform_acc.svg)
+![Uniform Acceleration](images/uniform_acc.svg)
 
 The goal is to promote a safe, **uniform deceleration** for vehicles approaching
 congestion.  Speed advisory signs are activated to warn motorists of slow
@@ -17,8 +17,8 @@ when variable speed advisories must be deployed.
 
 ## Policy Parameters
 
-Each mainline station has an associated speed limit **L** (mph), as well as the
-distance from the upstream end of corridor to station.  These are used to
+Each mainline station has an associated [speed limit] **L** (mph), as well as
+the distance from the upstream end of [corridor] to station.  These are used to
 calculate advisories.  There are also system attributes to control system-wide
 parameters.
 
@@ -34,7 +34,7 @@ System Attribute        | Default | Description
 `vsa_start_threshold`   | -1500   | Threshold to activate a bottleneck (mi/hr²)
 `vsa_stop_threshold`    | -750    | Threshold to deactivate a bottleneck (mi/hr²)
 
-### Station Sample Speeds
+## Station Sample Speeds
 
 Speed in miles per hour, average of lanes in station.  A rolling average is
 used, with the number of sample intervals depending on the current average
@@ -51,7 +51,7 @@ below 10 vpm    | N/A          | N/A (Speed Limit **L**)
 40-55 vpm       | 4 samples    | 2 minutes
 above 55 vpm    | 6 samples    | 3 minutes
 
-### Deceleration Thresholds
+## Deceleration Thresholds
 
 NOTE: using precipitation rates to control thresholds is not yet implemented.
 
@@ -70,4 +70,6 @@ Heavy rain    | -900  | -600    | -450
 Ice           | -750  | -500    | -375
 
 
-[action tag]: admin_guide.html#action_tag
+[action tag]: action_plans.html#dms-action-tags
+[corridor]: road_topology.html#corridors
+[speed limit]: road_topology.html#speed-limit

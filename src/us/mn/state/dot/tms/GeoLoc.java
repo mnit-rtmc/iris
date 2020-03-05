@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2016  Minnesota Department of Transportation
+ * Copyright (C) 2005-2019  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -58,6 +58,12 @@ public interface GeoLoc extends SonarObject {
 	/** Get the cross street modifier */
 	short getCrossMod();
 
+	/** Set the landmark */
+	void setLandmark(String lm);
+
+	/** Get the landmark */
+	String getLandmark();
+
 	/** Set the latitude */
 	void setLat(Double lt);
 
@@ -69,10 +75,4 @@ public interface GeoLoc extends SonarObject {
 
 	/** Get the longitude */
 	Double getLon();
-
-	/** Set the landmark */
-	void setLandmark(String lm);
-
-	/** Get the landmark */
-	String getLandmark();
 }

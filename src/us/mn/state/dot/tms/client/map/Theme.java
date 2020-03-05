@@ -61,6 +61,11 @@ public class Theme {
 		styles.add(sty);
 	}
 
+	/** Get a list of all styles */
+	public List<Style> getStyles() {
+		return styles;
+	}
+
 	/** Get the default style */
 	public Style getDefaultStyle() {
 		return def_style;
@@ -73,16 +78,6 @@ public class Theme {
 				return sty;
 		}
 		return def_style;
-	}
-
-	/** Get a list of all legend styles */
-	public List<Style> getStyles() {
-		ArrayList<Style> s = new ArrayList<Style>();
-		for (Style sty : styles) {
-			if (sty.legend)
-				s.add(sty);
-		}
-		return s;
 	}
 
 	/** Get style for a map object */

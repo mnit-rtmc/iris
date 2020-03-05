@@ -1,0 +1,31 @@
+<svg xmlns='http://www.w3.org/2000/svg' version='1.1'
+     width='400' height='140'>
+<title>Mainline Segments</title>
+<style>
+  text { font-family: sans-serif; }
+</style>
+<text style='fill:white' x='130' y='28'>Mainline Stations</text>
+<text style='fill:white' x='160' y='132'>Segments</text>
+<path style='fill:#aaa' d='M20 40 H370 V70 H20 Z'/>
+<path style='fill:none;stroke:#666;stroke-width:2'
+      d='M20 40 H370 M20 70 H370'/>
+<path style='fill:none;stroke:white;stroke-width:2;stroke-dasharray:8,16'
+      d='M20 55 H380'/>
+<path style='fill:none;stroke:white;stroke-dasharray:4,4'
+      d='M30 55 L120 106 M210 55 L120 106 M210 55 L285 106 M360 55 L285 106'/>
+<path style='fill:none;stroke:white'
+      d='M30 55 L60 106 M210 55 L180 106 M210 55 L235 106 M360 55 L335 106'/>
+<g style='stroke:white'>
+    <rect fill='#faa' x='24' y='44' width='12' height='22' rx='4' ry='6'/>
+    <rect fill='#ffa' x='204' y='44' width='12' height='22' rx='4' ry='6'/>
+    <rect fill='#bbf' x='354' y='44' width='12' height='22' rx='4' ry='6'/>
+</g>
+<g style='stroke:white'>
+    <rect fill='#faa' x='30' y='100' width='60' height='12' rx='6' ry='4'/>
+    <rect fill='#fda' x='90' y='100' width='60' height='12' rx='6' ry='4'/>
+    <rect fill='#ffa' x='150' y='100' width='60' height='12' rx='6' ry='4'/>
+    <rect fill='#ffa' x='210' y='100' width='50' height='12' rx='6' ry='4'/>
+    <rect fill='#cfc' x='260' y='100' width='50' height='12' rx='6' ry='4'/>
+    <rect fill='#bbf' x='310' y='100' width='50' height='12' rx='6' ry='4'/>
+</g>
+</svg>

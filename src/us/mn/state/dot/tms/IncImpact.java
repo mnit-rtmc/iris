@@ -24,23 +24,25 @@ import us.mn.state.dot.tms.LaneType;
  * @author Douglas Lau
  */
 public enum IncImpact {
-	/* Blocked - lane or shoulder */
+	/* lanes blocked */
 	lanes_blocked,           // 0
 	left_lanes_blocked,      // 1
 	right_lanes_blocked,     // 2
 	center_lanes_blocked,    // 3
-	both_shoulders_blocked,  // 4
-	left_shoulder_blocked,   // 5
-	right_shoulder_blocked,  // 6
-	/* Affected - partially blocked */
-	lanes_affected,          // 7
-	left_lanes_affected,     // 8
-	right_lanes_affected,    // 9
-	center_lanes_affected,   // 10
+	/* lanes affected */
+	lanes_affected,          // 4
+	left_lanes_affected,     // 5
+	right_lanes_affected,    // 6
+	center_lanes_affected,   // 7
+	/* shoulders blocked */
+	both_shoulders_blocked,  // 8
+	left_shoulder_blocked,   // 9
+	right_shoulder_blocked,  // 10
+	/* shoulders affected */
 	both_shoulders_affected, // 11
 	left_shoulder_affected,  // 12
 	right_shoulder_affected, // 13
-	/* No lanes blocked or affected */
+	/* nothing blocked or affected */
 	free_flowing;            // 14
 
 	/** Get an impact from an ordinal value */
@@ -64,13 +66,6 @@ public enum IncImpact {
 			return IncImpact.right_lanes_blocked;
 		else if (isAnyLane(li, LaneImpact.BLOCKED))
 			return IncImpact.center_lanes_blocked;
-		// Check for BLOCKED shoulders
-		else if (isBothShoulders(li, LaneImpact.BLOCKED))
-			return IncImpact.both_shoulders_blocked;
-		else if (isLeftShoulder(li, LaneImpact.BLOCKED))
-			return IncImpact.left_shoulder_blocked;
-		else if (isRightShoulder(li, LaneImpact.BLOCKED))
-			return IncImpact.right_shoulder_blocked;
 		// Check for AFFECTED lanes
 		else if (isLeftLane(li, LaneImpact.AFFECTED) &&
 		         isRightLane(li, LaneImpact.AFFECTED))
@@ -81,6 +76,13 @@ public enum IncImpact {
 			return IncImpact.right_lanes_affected;
 		else if (isAnyLane(li, LaneImpact.AFFECTED))
 			return IncImpact.center_lanes_affected;
+		// Check for BLOCKED shoulders
+		else if (isBothShoulders(li, LaneImpact.BLOCKED))
+			return IncImpact.both_shoulders_blocked;
+		else if (isLeftShoulder(li, LaneImpact.BLOCKED))
+			return IncImpact.left_shoulder_blocked;
+		else if (isRightShoulder(li, LaneImpact.BLOCKED))
+			return IncImpact.right_shoulder_blocked;
 		// Check for AFFECTED shoulders
 		else if (isBothShoulders(li, LaneImpact.AFFECTED))
 			return IncImpact.both_shoulders_affected;
@@ -90,6 +92,15 @@ public enum IncImpact {
 			return IncImpact.right_shoulder_affected;
 		else
 			return IncImpact.free_flowing;
+	}
+
+	/** Check if any lane or shoulder has given impact */
+	static private boolean isAny(LaneImpact[] li, LaneImpact v) {
+		for (int i = 0; i < li.length; i++) {
+			if (li[i] == v)
+				return true;
+		}
+		return false;
 	}
 
 	/** Check if any lane has given impact */
@@ -126,6 +137,11 @@ public enum IncImpact {
 		return (li.length > 1) && (li[li.length - 1] == v);
 	}
 
+	/** Check if either shoulder has given impact */
+	static private boolean isEitherShoulder(LaneImpact[] li, LaneImpact v) {
+		return isLeftShoulder(li, v) || isRightShoulder(li, v);
+	}
+
 	/** Get the incident severity */
 	static public IncSeverity severity(Incident inc, LaneType lane_type) {
 		switch (lane_type) {
@@ -143,31 +159,37 @@ public enum IncImpact {
 
 	/** Get the severity of a mainline incident */
 	static private IncSeverity severityMainline(Incident inc) {
-		int n_impacted = getImpactedLanes(inc);
-		if (isBlocked(inc)) {
+		if (isLaneBlocked(inc)) {
+			int n_impacted = getImpactedLanes(inc);
 			int n_open = getOpenLanes(inc);
 			return (n_impacted > n_open)
 			      ? IncSeverity.major
 			      : IncSeverity.normal;
-		} else
-			return (n_impacted > 0) ? IncSeverity.minor : null;
+		} else if (isShoulderBlocked(inc))
+			return IncSeverity.normal;
+		else if (isAnyAffected(inc))
+			return IncSeverity.minor;
+		else
+			return null;
 	}
 
 	/** Get the severity of an exit or CD road incident */
 	static private IncSeverity severityExitCD(Incident inc) {
-		if (isBlocked(inc)) {
+		if (isLaneBlocked(inc)) {
 			int n_impacted = getImpactedLanes(inc);
 			int n_open = getOpenLanes(inc);
 			return (n_impacted > n_open)
 			      ? IncSeverity.normal
 			      : IncSeverity.minor;
-		} else
+		} else if (isShoulderBlocked(inc))
+			return IncSeverity.minor;
+		else
 			return null;
 	}
 
 	/** Get the severity of a merge incident */
 	static private IncSeverity severityMerge(Incident inc) {
-		if (isBlocked(inc)) {
+		if (isLaneBlocked(inc)) {
 			int n_impacted = getImpactedLanes(inc);
 			int n_open = getOpenLanes(inc);
 			return (n_impacted > n_open) ? IncSeverity.minor : null;
@@ -176,9 +198,21 @@ public enum IncImpact {
 	}
 
 	/** Check if any lanes are blocked */
-	static private boolean isBlocked(Incident inc) {
+	static private boolean isLaneBlocked(Incident inc) {
 		LaneImpact[] li = LaneImpact.fromString(inc.getImpact());
 		return isAnyLane(li, LaneImpact.BLOCKED);
+	}
+
+	/** Check if either shoulder is blocked */
+	static private boolean isShoulderBlocked(Incident inc) {
+		LaneImpact[] li = LaneImpact.fromString(inc.getImpact());
+		return isEitherShoulder(li, LaneImpact.BLOCKED);
+	}
+
+	/** Check if any lane or shoulder is affected */
+	static private boolean isAnyAffected(Incident inc) {
+		LaneImpact[] li = LaneImpact.fromString(inc.getImpact());
+		return isAny(li, LaneImpact.AFFECTED);
 	}
 
 	/** Get count of impacted lanes.
@@ -187,7 +221,7 @@ public enum IncImpact {
 	 *         the count of affected lanes. */
 	static public int getImpactedLanes(Incident inc) {
 		LaneImpact[] li = LaneImpact.fromString(inc.getImpact());
-		return (isBlocked(inc))
+		return (isLaneBlocked(inc))
 		      ? getLaneCount(li, LaneImpact.BLOCKED)
 		      : getLaneCount(li, LaneImpact.AFFECTED);
 	}
@@ -198,7 +232,7 @@ public enum IncImpact {
 	 *         Otherwise the count of non-affected lanes. */
 	static public int getOpenLanes(Incident inc) {
 		LaneImpact[] li = LaneImpact.fromString(inc.getImpact());
-		if (isBlocked(inc)) {
+		if (isLaneBlocked(inc)) {
 			return getLaneCount(li, LaneImpact.AFFECTED) +
 			       getLaneCount(li, LaneImpact.FREE_FLOWING);
 		} else

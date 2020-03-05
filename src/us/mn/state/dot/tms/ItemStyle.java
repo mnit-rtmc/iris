@@ -14,8 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -45,7 +45,7 @@ public enum ItemStyle {
 	UNCONFIRMED,
 	/* DMS styles */
 	SCHEDULED,
-	AWS_DEPLOYED,
+	EXTERNAL,
 	/* Camera styles */
 	PLAYLIST,
 	UNPUBLISHED,
@@ -62,6 +62,7 @@ public enum ItemStyle {
 	/* Plan styles */
 	DMS,
 	BEACON,
+	CAMERA,
 	LANE,
 	METER,
 	TIME;
@@ -100,7 +101,7 @@ public enum ItemStyle {
 
 	/** Get an array of item styles from a bit set */
 	static public ItemStyle[] toStyles(long bits) {
-		LinkedList<ItemStyle> styles = new LinkedList<ItemStyle>();
+		ArrayList<ItemStyle> styles = new ArrayList<ItemStyle>();
 		for (ItemStyle is: ItemStyle.values()) {
 			if (is.checkBit(bits))
 				styles.add(is);

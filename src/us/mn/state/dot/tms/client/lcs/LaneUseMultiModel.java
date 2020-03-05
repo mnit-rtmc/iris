@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 	@Override
 	protected ArrayList<ProxyColumn<LaneUseMulti>> createColumns() {
 		ArrayList<ProxyColumn<LaneUseMulti>> cols =
-			new ArrayList<ProxyColumn<LaneUseMulti>>(6);
+			new ArrayList<ProxyColumn<LaneUseMulti>>(4);
 		cols.add(new ProxyColumn<LaneUseMulti>("device.name", 80) {
 			public Object getValueAt(LaneUseMulti lum) {
 				return lum.getName();
@@ -94,34 +94,6 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 					lum.setMsgNum((Integer)value);
 				else
 					lum.setMsgNum(null);
-			}
-		});
-		cols.add(new ProxyColumn<LaneUseMulti>("graphic.width", 80,
-			Integer.class)
-		{
-			public Object getValueAt(LaneUseMulti lum) {
-				return lum.getWidth();
-			}
-			public boolean isEditable(LaneUseMulti lum) {
-				return canWrite(lum);
-			}
-			public void setValueAt(LaneUseMulti lum, Object value) {
-				if (value instanceof Integer)
-					lum.setWidth((Integer)value);
-			}
-		});
-		cols.add(new ProxyColumn<LaneUseMulti>("graphic.height", 80,
-			Integer.class)
-		{
-			public Object getValueAt(LaneUseMulti lum) {
-				return lum.getHeight();
-			}
-			public boolean isEditable(LaneUseMulti lum) {
-				return canWrite(lum);
-			}
-			public void setValueAt(LaneUseMulti lum, Object value) {
-				if (value instanceof Integer)
-					lum.setHeight((Integer)value);
 			}
 		});
 		cols.add(new ProxyColumn<LaneUseMulti>("dms.quick.message",160){

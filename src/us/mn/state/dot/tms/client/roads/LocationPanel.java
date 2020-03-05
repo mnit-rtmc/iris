@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2017  Minnesota Department of Transportation
+ * Copyright (C) 2005-2019  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -181,14 +181,14 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		}
 	};
 
+	/** Landmark field */
+	private final JTextField landmark_txt = new JTextField();
+
 	/** Latitude field */
 	private final JTextField lat_txt = new JTextField();
 
 	/** Longitude field */
 	private final JTextField lon_txt = new JTextField();
-
-	/** Landmark field */
-	private final JTextField landmark_txt = new JTextField();
 
 	/** Point selector */
 	private final PointSelector point_sel = new PointSelector() {
@@ -236,6 +236,8 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 				return value.abbrev;
 			}
 		});
+		landmark_txt.setColumns(24);
+		lat_txt.setColumns(15);
 		lon_txt.setColumns(15);
 		add("location.roadway");
 		add(roadway_cbx);
@@ -248,16 +250,13 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		add(cross_mod_cbx, Stretch.NONE);
 		add(cross_cbx);
 		add(cross_dir_cbx, Stretch.LAST);
+		add("location.landmark");
+		add(landmark_txt, Stretch.LAST);
 		add("location.latitude");
-		lat_txt.setColumns(15);
 		add(lat_txt, Stretch.LEFT);
 		add(new JButton(select_pt), Stretch.TALL);
 		add("location.longitude");
 		add(lon_txt, Stretch.LEFT);
-		add("location.landmark");
-		landmark_txt.setColumns(24);
-		add(landmark_txt, Stretch.WIDE);
-		add(new JLabel(), Stretch.LEFT);
 		createJobs();
 		watcher.initialize();
 	}
@@ -271,6 +270,13 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 
 	/** Create the jobs */
 	protected void createJobs() {
+		landmark_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				String lm = landmark_txt.getText();
+				setLandmark(lm.trim());
+			}
+		});
 		lat_txt.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
@@ -283,13 +289,13 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 				setLon(getTextDouble(lon_txt));
 			}
 		});
-		landmark_txt.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				String lm = landmark_txt.getText();
-				setLandmark(lm.trim());
-			}
-		});
+	}
+
+	/** Set the landmark */
+	private void setLandmark(String lm) {
+		GeoLoc l = loc;
+		if (l != null)
+			l.setLandmark(("".equals(lm)) ? null : lm);
 	}
 
 	/** Get a position */
@@ -313,13 +319,6 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 			l.setLon(ln);
 	}
 
-	/** Set the landmark */
-	private void setLandmark(String lm) {
-		GeoLoc l = loc;
-		if (l != null)
-			l.setLandmark(("".equals(lm)) ? null : lm);
-	}
-
 	/** Update the edit mode */
 	public void updateEditMode() {
 		GeoLoc l = loc;
@@ -328,11 +327,11 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		cross_mod_act.setEnabled(canWrite(l, "crossMod"));
 		cross_act.setEnabled(canWrite(l, "crossStreet"));
 		cross_dir_act.setEnabled(canWrite(l, "crossDir"));
+		landmark_txt.setEnabled(canWrite(l, "landmark"));
 		lat_txt.setEnabled(canWrite(l, "lat"));
 		lon_txt.setEnabled(canWrite(l, "lon"));
 		select_pt.setEnabled(canWrite(l, "lat")
 		                  && canWrite(l, "lon"));
-		landmark_txt.setEnabled(canWrite(l, "landmark"));
 	}
 
 	/** Called when all proxies have been enumerated (from ProxyView). */
@@ -356,14 +355,14 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 			cross_act.updateSelected();
 		if (a == null || a.equals("crossDir"))
 			cross_dir_act.updateSelected();
-		if (a == null || a.equals("lat"))
-			lat_txt.setText(asText(l.getLat()));
-		if (a == null || a.equals("lon"))
-			lon_txt.setText(asText(l.getLon()));
 		if (a == null || a.equals("landmark")) {
 			String lm = l.getLandmark();
 			landmark_txt.setText((lm != null) ? lm : "");
 		}
+		if (a == null || a.equals("lat"))
+			lat_txt.setText(asText(l.getLat()));
+		if (a == null || a.equals("lon"))
+			lon_txt.setText(asText(l.getLon()));
 		// NOTE: this was needed to fix a problem where a combo box
 		//       displays the wrong entry after call to setSelectedItem
 		repaint();
@@ -378,22 +377,22 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	@Override
 	public void clear() {
 		loc = null;
-		roadway_cbx.setEnabled(false);
+		roadway_act.setEnabled(false);
 		roadway_cbx.setSelectedIndex(0);
-		road_dir_cbx.setEnabled(false);
+		road_dir_act.setEnabled(false);
 		road_dir_cbx.setSelectedIndex(0);
-		cross_mod_cbx.setEnabled(false);
+		cross_mod_act.setEnabled(false);
 		cross_mod_cbx.setSelectedIndex(0);
-		cross_cbx.setEnabled(false);
+		cross_act.setEnabled(false);
 		cross_cbx.setSelectedIndex(0);
-		cross_dir_cbx.setEnabled(false);
+		cross_dir_act.setEnabled(false);
 		cross_dir_cbx.setSelectedIndex(0);
+		landmark_txt.setEnabled(false);
+		landmark_txt.setText("");
 		lat_txt.setEnabled(false);
 		lat_txt.setText("");
 		lon_txt.setEnabled(false);
 		lon_txt.setText("");
-		landmark_txt.setEnabled(false);
-		landmark_txt.setText("");
 		select_pt.setEnabled(false);
 	}
 }

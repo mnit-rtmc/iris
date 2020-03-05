@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2018  Minnesota Department of Transportation
+ * Copyright (C) 2001-2019  Minnesota Department of Transportation
  * Copyright (C) 2011  University of Minnesota Duluth (NATSRL)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -47,7 +47,7 @@ public class BoundedSampleHistory {
 	public void push(Double sam) {
 		cursor = nextIndex(cursor);
 		samples[cursor] = filterSample(sam);
-		if(n_samples < samples.length)
+		if (n_samples < samples.length)
 			n_samples++;
 	}
 
@@ -58,7 +58,7 @@ public class BoundedSampleHistory {
 	 */
 	private int nextIndex(int idx) {
 		idx++;
-		return idx < samples.length ? idx : 0;
+		return (idx < samples.length) ? idx : 0;
 	}
 
 	/**
@@ -67,10 +67,7 @@ public class BoundedSampleHistory {
 	 * @return Sample data, with negative values replaced with null.
 	 */
 	private Double filterSample(Double sam) {
-		if(sam != null && sam >= 0)
-			return sam;
-		else
-			return null;
+		return (sam != null && sam >= 0) ? sam : null;
 	}
 
 	/**
@@ -79,9 +76,9 @@ public class BoundedSampleHistory {
 	 * @return Sample data, or null for missing data.
 	 */
 	public Double get(int t) {
-		if(t < n_samples) {
+		if (t < n_samples) {
 			int idx = cursor - t;
-			if(idx < 0)
+			if (idx < 0)
 				idx += samples.length;
 			return samples[idx];
 		} else
@@ -113,17 +110,14 @@ public class BoundedSampleHistory {
 	public Double average(int t, int n_sam) {
 		double sum = 0;
 		int count = 0;
-		for(int i = t; i < t + n_sam; i++) {
+		for (int i = t; i < t + n_sam; i++) {
 			Double d = get(i);
-			if(d != null) {
+			if (d != null) {
 				sum += d;
 				count++;
 			}
 		}
-		if(count > 0)
-			return sum / count;
-		else
-			return null;
+		return (count > 0) ? sum / count : null;
 	}
 
 	/**

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,10 +43,4 @@ public interface Road extends SonarObject {
 
 	/** Get direction */
 	short getDirection();
-
-	/** Set alternate direction */
-	void setAltDir(short a);
-
-	/** Get alternate direction */
-	short getAltDir();
 }

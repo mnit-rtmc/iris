@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,11 +46,6 @@ abstract public class DeviceManager<T extends Device>
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, T proxy) {
-		long styles = proxy.getStyles();
-		for (ItemStyle s: ItemStyle.toStyles(styles)) {
-			if (s == is)
-				return true;
-		}
-		return false;
+		return is.checkBit(proxy.getStyles());
 	}
 }

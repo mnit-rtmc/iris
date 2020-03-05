@@ -19,7 +19,6 @@ import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
-import us.mn.state.dot.tms.PrecipSituation;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.WeatherSensorHelper;
 import us.mn.state.dot.tms.units.Pressure;
@@ -52,9 +51,9 @@ public class WeatherSensorCsvWriter extends XmlWriter {
 		return new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(d);
 	}
 
-	/* Factory to create a new CSV file writer and write the file.
-	 * @arg ft File type
-	 * @returns Null on error or a new file writer */
+	/** Factory to create a new CSV file writer and write the file.
+	 * @param ft File type
+	 * @return Null on error or a new file writer */
 	static public WeatherSensorCsvWriter createWrite(int ft) 
 		throws IOException
 	{
@@ -107,7 +106,7 @@ public class WeatherSensorCsvWriter extends XmlWriter {
 	}
 
 	/** Convert a temperature to an NTCIP temperature.
-	 * @arg v Temperature in C or null if missing.
+	 * @param v Temperature in C or null if missing.
 	 * @return Temperature as tenths of a degree C or 1001 for missing. */
 	private String tToN(Integer v) {
 		if (v != null) {
@@ -119,16 +118,17 @@ public class WeatherSensorCsvWriter extends XmlWriter {
 	}
 
 	/** Convert pavement surface status to NTCIP string
-	 * @arg w Weather sensor
+	 * @param w Weather sensor
 	 * @return Pavement surface status description or empty if missing. */
 	private String pssToN(WeatherSensorImpl w) {
-		String v = SString.splitCamel(WeatherSensorHelper.
-			getPvmtSurfStatus(w).description);
-		return (v.equals("???") ? "" : v);
+		String ess = w.getPvmtSurfStatus();
+		return (ess != null && !ess.equals("undefined"))
+		      ? SString.splitCamel(ess)
+		      : "";
 	}
 
 	/** Convert pressure in pascals to NTCIP pressure.
-	 * @arg v Pressure in Pascals or null.
+	 * @param v Pressure in Pascals or null.
 	 * @return Pressure Pressure in 1/10ths of millibar, which are tenths 
 	 *                  of hectoPascal or 65535 if missing. */
 	private String prToN(Integer v) {
@@ -140,7 +140,7 @@ public class WeatherSensorCsvWriter extends XmlWriter {
 	}
 
 	/** Convert precip rate to NTCIP units (essPrecipRate).
-	 * @arg v Precip rate in mm/hr, null for missing.
+	 * @param v Precip rate in mm/hr, null for missing.
 	 * @return Precip rate as .36 mm/hr or 65535 for missing. */
 	private String praToN(Integer v) {
 		if (v != null)
@@ -150,14 +150,14 @@ public class WeatherSensorCsvWriter extends XmlWriter {
 	}
 
 	/** Convert distance to NTCIP units (e.g. essVisibility).
-	 * @arg v Distance in meters, null for missing.
+	 * @param v Distance in meters, null for missing.
 	 * @return Distance in tenths of a meter or 1000001 for missing. */
 	private String dToN(Integer v) {
 		return (v != null ? String.valueOf(v * 10) : "65535");
 	}
 
 	/** Convert precipitation accumulation to NTCIP units.
-	 * @arg v Precip accum in mm, null for missing.
+	 * @param v Precip accum in mm, null for missing.
 	 * @return Precip accumulation in tenths of mm or 65535 for 
 	 *         missing. See essPrecipitationOneHour */
 	private String pToN(Integer v) {
@@ -165,7 +165,7 @@ public class WeatherSensorCsvWriter extends XmlWriter {
 	}
 
 	/** Convert speed to NTCIP units.
-	 * @arg v Speed in KPH, null for missing.
+	 * @param v Speed in KPH, null for missing.
 	 * @return Speed in tenths of a meter per second or 65535 
 	 *         for missing. See essAvgWindSpeed. */
 	private String sToN(Integer v) {
@@ -202,14 +202,6 @@ public class WeatherSensorCsvWriter extends XmlWriter {
 	/** Append a CSV value to a StringBuffer */
 	private StringBuilder append(StringBuilder sb, Double value) {
 		if (value != null)
-			sb.append(value);
-		sb.append(",");
-		return sb;
-	}
-
-	/** Append a CSV value to a StringBuffer */
-	private StringBuilder append(StringBuilder sb, PrecipSituation value) {
-		if (value != null && value != PrecipSituation.UNDEFINED)
 			sb.append(value);
 		sb.append(",");
 		return sb;
@@ -254,8 +246,7 @@ public class WeatherSensorCsvWriter extends XmlWriter {
 		append(sb, prToN(w.getPressure()));	//Pressure
 		append(sb, WeatherSensorHelper.
 			getPrecipRateIntensity(w));	//PcIntens
-		append(sb, WeatherSensorHelper.
-			getPrecipSituation(w));		//PcType
+		append(sb, w.getPrecipSituation());     //PcType
 		append(sb, praToN(w.getPrecipRate()));	//PcRate
 		append(sb, pToN(w.getPrecipOneHour()));	//PcAccum
 		append(sb, dToN(w.getVisibility()));	//Visibility

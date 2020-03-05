@@ -1,9 +1,9 @@
-## Maintenance
+# Maintenance
 
 Once an IRIS system is set up, there are a few maintenance tasks which should be
 done to ensure reliable operation.
 
-### Database Backup & Restore
+## Database Backup & Restore
 
 It is a good idea to backup the IRIS database on a regular basis.  This can be
 done with a command such as the following:
@@ -24,7 +24,7 @@ createdb tms
 zcat tms-20190827.sql.gz | pgsql tms
 ```
 
-### IRIS Upgrades
+## IRIS Upgrades
 
 It is a good idea to backup the database before attempting an upgrade.
 

@@ -110,22 +110,35 @@ public class OpQueryDMSMessage extends OpDMS {
 		/* Compare the CRC of the message on the sign to the
 		 * CRC of the message IRIS knows about */
 		SignMessage sm = dms.getMsgCurrent();
-		String multi = parseMulti(sm);
-		int crc = DmsMessageCRC.calculate(multi, getBeaconEnabled(sm),
-			0);
-		if (crc != source.getCrc())
-			return new QueryCurrentMessage();
-		else {
+		if (checkMsgCrc(sm, true) || checkMsgCrc(sm, false)) {
 			setMsgCurrent(sm, sm.getOwner());
 			return null;
+		} else {
+			String multi = lookupMulti(sm);
+			if (multi.equals(ms.getValue())) {
+				System.err.println("processMessageValid: " +
+					dms + ", CRC mismatch for (" + multi +
+					")");
+			}
+			return new QueryCurrentMessage();
 		}
 	}
 
-	/** Parse a sign message MULTI string and add graphic version IDs.
+	/** Check sign message CRC.
+	 * @param gids Include graphic version IDs in MULTI string. */
+	private boolean checkMsgCrc(SignMessage sm, boolean gids) {
+		String ms = lookupMulti(sm);
+		String multi = (gids) ? parseMulti(ms) : ms;
+		int crc = DmsMessageCRC.calculate(multi, getBeaconEnabled(sm),
+			false);
+		return source.getCrc() == crc;
+	}
+
+	/** Lookup the MULTI string for a sign message.
 	 * @param sm Sign message.
-	 * @return MULTI string with graphic IDs added. */
-	private String parseMulti(SignMessage sm) {
-		return (sm != null) ? parseMulti(sm.getMulti()) : "";
+	 * @return MULTI string or empty string. */
+	private String lookupMulti(SignMessage sm) {
+		return (sm != null) ? sm.getMulti() : "";
 	}
 
 	/** Get beacon enabled flag for a sign message */
@@ -157,7 +170,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Phase to query the current message */
-	protected class QueryCurrentMessage extends Phase {
+	private class QueryCurrentMessage extends Phase {
 
 		/** Query the current message */
 		@SuppressWarnings("unchecked")
@@ -185,9 +198,13 @@ public class OpQueryDMSMessage extends OpDMS {
 	/** Set the current message on the sign */
 	private void setMsgCurrent() {
 		if (status.getEnum() == DmsMessageStatus.valid) {
-			Integer d = parseDuration(time.getInteger());
+			Integer duration = parseDuration(time.getInteger());
 			DmsMsgPriority rp = getMsgPriority();
-			setMsgCurrent(ms.getValue(), beacon.getInteger(), rp,d);
+			boolean be = (beacon.getInteger() == 1);
+			int src = rp.getSource();
+			SignMessage sm = dms.createMsg(ms.getValue(), be, false,
+				rp, src, "OTHER SYSTEM", duration);
+			setMsgCurrent(sm, "OTHER SYSTEM");
 		} else
 			setErrorStatus("INVALID STATUS: " + status);
 	}
@@ -208,16 +225,6 @@ public class OpQueryDMSMessage extends OpDMS {
 			return DmsMsgPriority.OTHER_SYSTEM;
 		else
 			return rp;
-	}
-
-	/** Set the current message sent from another system */
-	private void setMsgCurrent(String multi, int be, DmsMsgPriority p,
-		Integer duration)
-	{
-		int src = p.getSource();
-		SignMessage sm = dms.createMsg(multi, (be == 1), false, p, src,
-			"OTHER SYSTEM", duration);
-		setMsgCurrent(sm, "OTHER SYSTEM");
 	}
 
 	/** Set the current message on the sign */

@@ -26,7 +26,8 @@ public enum DevicePurpose {
 	TOLLING,        // 2
 	PARKING,        // 3
 	TRAVEL_TIME,    // 4
-	SAFETY;         // 5
+	SAFETY,         // 5
+	LANE_USE;       // 6
 
 	/** Cached values array */
 	static private final DevicePurpose[] VALUES = values();

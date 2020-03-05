@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2017  Minnesota Department of Transportation
+ * Copyright (C) 2014-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,20 +51,20 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 		ArrayList<ProxyColumn<BeaconAction>> cols =
 			new ArrayList<ProxyColumn<BeaconAction>>(2);
 		cols.add(new ProxyColumn<BeaconAction>("beacon", 160) {
-			public Object getValueAt(BeaconAction la) {
-				return la.getBeacon();
+			public Object getValueAt(BeaconAction ba) {
+				return ba.getBeacon();
 			}
 		});
 		cols.add(new ProxyColumn<BeaconAction>("action.plan.phase",100){
-			public Object getValueAt(BeaconAction la) {
-				return la.getPhase();
+			public Object getValueAt(BeaconAction ba) {
+				return ba.getPhase();
 			}
-			public boolean isEditable(BeaconAction la) {
-				return canWrite(la);
+			public boolean isEditable(BeaconAction ba) {
+				return canWrite(ba);
 			}
-			public void setValueAt(BeaconAction la, Object value) {
+			public void setValueAt(BeaconAction ba, Object value) {
 				if (value instanceof PlanPhase)
-					la.setPhase((PlanPhase)value);
+					ba.setPhase((PlanPhase) value);
 			}
 			protected TableCellEditor createCellEditor() {
 				JComboBox<PlanPhase> cbx = new JComboBox

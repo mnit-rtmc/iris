@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms;
 
 /**
- * CCTV Camera
+ * Camera for monitoring roadway conditions.
  *
  * @author Douglas Lau
  */
@@ -45,23 +45,29 @@ public interface Camera extends Device {
 	/** Get the encoder type */
 	EncoderType getEncoderType();
 
-	/** Set the encoder stream URI */
-	void setEncoder(String enc);
+	/** Set the encoder address */
+	void setEncAddress(String enc);
 
-	/** Get the encoder stream URI */
-	String getEncoder();
+	/** Get the encoder address */
+	String getEncAddress();
 
-	/** Set the encoder multicast URI */
-	void setEncMulticast(String em);
+	/** Set the override encoder port */
+	void setEncPort(Integer p);
 
-	/** Get the encoder multicast URI */
-	String getEncMulticast();
+	/** Get the override encoder port */
+	Integer getEncPort();
 
-	/** Set the encoder input channel */
-	void setEncoderChannel(int c);
+	/** Set the encoder multicast address */
+	void setEncMcast(String em);
 
-	/** Get the encoder input channel */
-	int getEncoderChannel();
+	/** Get the encoder multicast address */
+	String getEncMcast();
+
+	/** Set the encoder channel number */
+	void setEncChannel(Integer c);
+
+	/** Get the encoder channel number */
+	Integer getEncChannel();
 
 	/** Set flag to allow publishing camera images */
 	void setPublish(boolean p);

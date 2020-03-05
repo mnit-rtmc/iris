@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2015  Minnesota Department of Transportation
+ * Copyright (C) 2014-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.WeatherSensorHelper;
 import us.mn.state.dot.tms.units.Distance;
 
 /**
- * Job to send wiper commands to CCTV cameras.
+ * Job to send wiper commands to roadside cameras.
  *
  * @author Douglas Lau
  */

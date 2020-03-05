@@ -1,12 +1,12 @@
-## Troubleshooting
+# Troubleshooting
 
-### Error Logs
+## Error Logs
 
 Serious system errors are written to `stderr`, which is redirected to a file
 at `/var/log/iris/iris.stderr`.  Check this file first when any problems are
 suspected.
 
-### XML Output
+## XML Output
 
 There are a number of XML files which are written by the IRIS server
 periodically.  These files contain configuration information about the system as
@@ -21,7 +21,7 @@ Filename              | Period     | Description
 `incident.xml.gz`     | 30 seconds | Current incident information
 `sign_message.xml.gz` | 30 seconds | Current DMS sign message information
 
-### Database Event Tables
+## Database Event Tables
 
 There are a number of event tables in the database for logging different types
 of events.  Each of these tables has a **view** in the public DB schema.  There
@@ -44,7 +44,7 @@ View                       | Purge Threshold
 `sign_event_view`          | `sign_event_purge_days`
 `tag_read_event_view`      | `tag_read_event_purge_days`
 
-### Debug Trace Logs
+## Debug Trace Logs
 
 There are a number of debugging logs which can be enabled in the `/var/log/iris`
 directory.  To enable a particular log, use the `touch` command to create a file
@@ -77,37 +77,38 @@ Filename               | Description
 `prio`                 | Operation priority log
 `profile`              | System profiling log
 `sched`                | DMS scheduled message log
-`slow`                 | DMS [slow warning] system log
+`slow`                 | DMS [slow traffic] warning system log
 `snmp`                 | SNMP error log
 `sonar`                | SONAR connection log
 `sql`                  | SQL database error log
-`ss105`                | Wavetronix SS-105 protocol
-`ss125`                | Wavetronix SS-125 protocol
-`ssi`                  | [SSI] protocol
+`ss105`                | Wavetronix [SS105] protocol
+`ss125`                | Wavetronix [SS125] protocol
 `stc`                  | [STC] protocol
-`sys_attr`             | System attribute change log
+`sys_attr`             | [System attribute] change log
 `toll`                 | Tolling info log
 `travel`               | Travel time info log
-`vsa`                  | Variable speed advisory info log
+`vsa`                  | [Variable speed advisory] info log
 
 
-[Canoga]: admin_guide.html#canoga
-[CBW]: admin_guide.html#cbw
-[DIN-Relay]: admin_guide.html#dinrelay
-[district]: admin_guide.html#district
-[DMS-XML]: admin_guide.html#dms_xml
-[E6]: admin_guide.html#e6
-[G4]: admin_guide.html#g4
-[Infinova]: admin_guide.html#infinova
-[Manchester]: admin_guide.html#manchester
-[MnDOT-170]: admin_guide.html#mndot170
-[Msg-Feed]: admin_guide.html#msg_feed
-[NTCIP]: admin_guide.html#ntcip
-[ORG-815]: admin_guide.html#org815
-[Pelco-D]: admin_guide.html#pelcod
-[slow warning]: admin_guide.html#slow
-[SSI]: admin_guide.html#ssi
-[station]: admin_guide.html#station
-[STC]: admin_guide.html#stc
-[system attribute]: admin_guide.html#sys_attr
-[vehicle detection systems]: admin_guilde.html#vds
+[Canoga]: comm_links.html#canoga
+[CBW]: comm_links.html#cbw
+[DIN-Relay]: comm_links.html#din-relay
+[district]: installation.html#server-properties
+[DMS-XML]: comm_links.html#dms-xml
+[E6]: comm_links.html#e6
+[G4]: comm_links.html#g4
+[Infinova]: comm_links.html#infinova
+[Manchester]: comm_links.html#manchester
+[MnDOT-170]: comm_links.html#mndot-170
+[Msg-Feed]: comm_links.html#msg-feed
+[NTCIP]: comm_links.html#ntcip
+[ORG-815]: comm_links.html#org815
+[Pelco-D]: comm_links.html#pelco-d
+[slow traffic]: slow_warning.html
+[station]: road_topology.html#r_node-types
+[SS105]: comm_links.html#smartsensor
+[SS125]: comm_links.html#smartsensor
+[STC]: comm_links.html#stc
+[system attribute]: system_attributes.html
+[Variable speed advisory]: vsa.html
+[vehicle detection systems]: vehicle_detection.html

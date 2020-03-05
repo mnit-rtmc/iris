@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2017  Minnesota Department of Transportation
+ * Copyright (C) 2006-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,13 +45,13 @@ public class PermissionDenied extends SonarException {
 	}
 
 	/** Create a "cannot read" error */
-	static public PermissionDenied cannotRead() {
-		return new PermissionDenied("Unable to read attribute");
+	static public PermissionDenied cannotRead(String attr) {
+		return new PermissionDenied("Unable to read attribute: " +attr);
 	}
 
 	/** Create a "cannot write" error */
-	static public PermissionDenied cannotWrite() {
-		return new PermissionDenied("Unable to write attribute");
+	static public PermissionDenied cannotWrite(String attr) {
+		return new PermissionDenied("Unable to write attribute: "+attr);
 	}
 
 	/** Create a new "insufficient privileges" exception */

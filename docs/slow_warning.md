@@ -1,4 +1,4 @@
-## Slow Traffic Warning
+# Slow Traffic Warning
 
 The `[slow…]` [action tag] allows warnings to be displayed on DMS when traffic
 is slow.  The tag has three parameters, separated by commas.
@@ -11,7 +11,7 @@ is slow.  The tag has three parameters, separated by commas.
     - `dist`: distance rounded to nearest mile
     - `speed`: speed rounded to nearest 5 mph
 
-### Examples
+## Examples
 
 Display message if traffic slower than 35 mph within 1 mile:
 ```
@@ -29,4 +29,4 @@ Display message if traffic slower than 45 mph within 0.5 miles:
 ```
 
 
-[action tag]: admin_guide.html#action_tag
+[action tag]: action_plans.html#dms-action-tags

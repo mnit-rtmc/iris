@@ -23,6 +23,9 @@ import javax.swing.JPanel;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.DmsMsgPriority;
+import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
@@ -46,7 +49,7 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class DMSDispatcher extends JPanel {
 
-	/** Check all the words in the specified MULT string.
+	/** Check all the words in the specified MULTI string.
 	 * @param ms Multi string to spell check.
 	 * @return True to send the sign message else false to cancel. */
 	static private boolean checkWords(String ms) {
@@ -100,6 +103,12 @@ public class DMSDispatcher extends JPanel {
 	/** Message composer widget */
 	private final SignMessageComposer composer;
 
+	/** Composed MULTI string */
+	private String multi = "";
+
+	/** Linked incident */
+	private Incident incident;
+
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(Session s, DMSManager manager) {
 		super(new BorderLayout());
@@ -129,14 +138,19 @@ public class DMSDispatcher extends JPanel {
 		composer.dispose();
 	}
 
-	/** Composed MULTI string */
-	private String multi = "";
+	/** Set the sign message */
+	public void setSignMessage(DMS dms) {
+		String ms = DMSHelper.getOperatorMulti(dms);
+		composer.setComposedMulti(ms);
+		multi = composer.getComposedMulti();
+		incident = DMSHelper.lookupIncident(dms);
+	}
 
 	/** Set the composed MULTI string.  This will update all the widgets
 	 * on the dispatcher with the specified message. */
-	public void setComposedMulti(String ms, boolean raw) {
+	public void setComposedMulti(String ms) {
 		composer.setComposedMulti(ms);
-		multi = raw ? ms : composer.getComposedMulti();
+		multi = ms;
 		singleTab.setMessage();
 	}
 
@@ -242,7 +256,10 @@ public class DMSDispatcher extends JPanel {
 
 	/** Send a new message to all selected DMS */
 	private void sendMessage() {
-		for (DMS dms: getValidSelected()) {
+		Set<DMS> signs = getValidSelected();
+		if (signs.size() > 1)
+			unlinkIncident();
+		for (DMS dms: signs) {
 			SignMessage sm = createMessage(dms);
 			if (sm != null)
 				dms.setMsgUser(sm);
@@ -254,21 +271,34 @@ public class DMSDispatcher extends JPanel {
 	/** Create a new message from the widgets.
 	 * @return A SignMessage from composer selection, or null on error. */
 	private SignMessage createMessage(DMS dms) {
-		return createMessage(dms, getComposedMulti(dms));
+		return createMessage(dms, incident, getComposedMulti(dms));
 	}
 
 	/** Create a new message using the specified MULTI */
-	private SignMessage createMessage(DMS dms, String ms) {
+	private SignMessage createMessage(DMS dms, Incident inc, String ms) {
 		SignConfig sc = dms.getSignConfig();
 		if (sc != null) {
-			if (ms.length() > 0) {
-				boolean be = composer.isBeaconEnabled();
-				Integer d = composer.getDuration();
-				return creator.create(sc, ms, be, d);
-			} else
+			if (ms.length() > 0)
+				return createMessage(sc, inc, ms);
+			else
 				return creator.createBlankMessage(sc);
 		} else
 			return null;
+	}
+
+	/** Create a new message using the specified MULTI */
+	private SignMessage createMessage(SignConfig sc, Incident inc,
+		String ms)
+	{
+		Integer d = composer.getDuration();
+		if (inc != null) {
+			String inc_orig = IncidentHelper.getOriginalName(inc);
+			DmsMsgPriority prio = IncidentHelper.getPriority(inc);
+			return creator.create(sc, inc_orig, ms, prio, d);
+		} else {
+			boolean be = composer.isBeaconEnabled();
+			return creator.create(sc, ms, be, d);
+		}
 	}
 
 	/** Blank the select DMS */
@@ -330,7 +360,8 @@ public class DMSDispatcher extends JPanel {
 	private void clearSelected() {
 		setEnabled(false);
 		composer.setSign(null);
-		setComposedMulti("", true);
+		setComposedMulti("");
+		unlinkIncident();
 		singleTab.setSelected(null);
 	}
 
@@ -338,6 +369,11 @@ public class DMSDispatcher extends JPanel {
 	private void setSelected(DMS dms) {
 		setEnabled(DMSHelper.isActive(dms));
 		singleTab.setSelected(dms);
+	}
+
+	/** Unlink incident */
+	public void unlinkIncident() {
+		incident = null;
 	}
 
 	/** Set the enabled status of the dispatcher */

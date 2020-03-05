@@ -20,9 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.IncLocator;
+import us.mn.state.dot.tms.IncLocatorHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * An incident locator is part of a message to deploy on a DMS, matching
@@ -35,9 +35,8 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 	/** Load all the incident locators */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncLocatorImpl.class);
-		store.query("SELECT name, range, branched, picked, multi, " +
-			"abbrev FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+		store.query("SELECT name, range, branched, picked, multi " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new IncLocatorImpl(row));
@@ -54,7 +53,6 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 		map.put("branched", branched);
 		map.put("picked", picked);
 		map.put("multi", multi);
-		map.put("abbrev", abbrev);
 		return map;
 	}
 
@@ -76,21 +74,17 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 		     row.getInt(2),             // range
 		     row.getBoolean(3),         // branched
 		     row.getBoolean(4),         // picked
-		     row.getString(5),          // multi
-		     row.getString(6)           // abbrev
+		     row.getString(5)           // multi
 		);
 	}
 
 	/** Create an incident locator */
-	private IncLocatorImpl(String n, int r, boolean b, boolean p, String m,
-		String a)
-	{
+	private IncLocatorImpl(String n, int r, boolean b, boolean p, String m){
 		super(n);
 		range = r;
 		branched = b;
 		picked = p;
 		multi = m;
-		abbrev = a;
 	}
 
 	/** Create a new incident locator */
@@ -178,8 +172,7 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 
 	/** Set the MULTI string */
 	public void doSetMulti(String m) throws TMSException {
-		// FIXME: allow true MULTI tags plus locator tags
-		if (!new MultiString(m).isValid())
+		if (!IncLocatorHelper.isMultiValid(m))
 			throw new ChangeVetoException("Invalid MULTI: " + m);
 		if (!m.equals(multi)) {
 			store.update(this, "multi", m);
@@ -191,31 +184,5 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 	@Override
 	public String getMulti() {
 		return multi;
-	}
-
-	/** Abbreviated MULTI string */
-	private String abbrev;
-
-	/** Set abbreviated MULTI string */
-	@Override
-	public void setAbbrev(String a) {
-		abbrev = a;
-	}
-
-	/** Set abbreviated MULTI string */
-	public void doSetAbbrev(String a) throws TMSException {
-		// FIXME: only allow true MULTI tags here
-		if (a != null && !new MultiString(a).isValid())
-			throw new ChangeVetoException("Invalid MULTI: " + a);
-		if (!objectEquals(a, abbrev)) {
-			store.update(this, "abbrev", a);
-			setAbbrev(a);
-		}
-	}
-
-	/** Get abbreviated MULTI string */
-	@Override
-	public String getAbbrev() {
-		return abbrev;
 	}
 }

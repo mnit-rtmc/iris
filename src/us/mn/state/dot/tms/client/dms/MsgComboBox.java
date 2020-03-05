@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2016  Minnesota Department of Transportation
+ * Copyright (C) 2011-2019  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -92,7 +92,7 @@ public class MsgComboBox extends JComboBox<SignText> {
 	/** Listener for combo box events */
 	private final ActionListener comboListener = new ActionListener() {
 		public void actionPerformed(ActionEvent ae) {
-			composer.updateMessage();
+			composer.updateMessage(shouldUnlinkIncident());
 		}
 	};
 
@@ -193,7 +193,12 @@ public class MsgComboBox extends JComboBox<SignText> {
 	private void doFocusLost() {
 		if (edit_mode == EditMode.AFTERKEY)
 			setEditable(false);
-		composer.updateMessage();
+		composer.updateMessage(shouldUnlinkIncident());
+	}
+
+	/** Should incident be unlinked on updates? */
+	private boolean shouldUnlinkIncident() {
+		return line == 1;
 	}
 
 	/** Get message text */
@@ -238,7 +243,7 @@ public class MsgComboBox extends JComboBox<SignText> {
 			return (SignText) item;
 		else if (item != null) {
 			String txt = new MultiString(item.toString())
-				.normalize();
+				.normalizeLine().toString();
 			return new ClientSignText(txt, line, ON_THE_FLY_RANK);
 		} else
 			return BLANK_SIGN_TEXT;

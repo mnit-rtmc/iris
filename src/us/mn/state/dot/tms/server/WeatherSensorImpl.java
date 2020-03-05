@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.PavementSurfaceStatus;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.WeatherSensorHelper;
@@ -122,6 +121,8 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		cache = new PeriodicSampleCache(PeriodicSampleType.PRECIP_RATE);
 		pt_cache = new PeriodicSampleCache(
 			PeriodicSampleType.PRECIP_TYPE);
+		settings = null; // should this be loaded from DB?
+		sample = null; // should this be loaded from DB?
 		initTransients();
 	}
 
@@ -437,16 +438,16 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	}
 
 	/** Precipitation situation (null for missing) */
-	private transient Integer precip_situation;
+	private transient String precip_situation;
 
 	/** Get precipitation situation (null for missing) */
 	@Override
-	public Integer getPrecipSituation() {
+	public String getPrecipSituation() {
 		return precip_situation;
 	}
 
 	/** Set precipitation situation (null for missing) */
-	public void setPrecipSituationNotify(Integer prs) {
+	public void setPrecipSituationNotify(String prs) {
 		if (!objectEquals(prs, precip_situation)) {
 			precip_situation = prs;
 			notifyAttribute("precipSituation");
@@ -534,21 +535,21 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	public void setSurfTempNotify(Integer v) {
 		if (!objectEquals(v, surf_temp)) {
 			surf_temp = v;
-			notifyAttribute("SurfTemp");
+			notifyAttribute("surfTemp");
 		}
 	}
 
 	/** Pavement surface status (null for missing) */
-	private transient Integer pvmt_surf_status;
+	private transient String pvmt_surf_status;
 
 	/** Get pavement surface status (null for missing) */
 	@Override
-	public Integer getPvmtSurfStatus() {
+	public String getPvmtSurfStatus() {
 		return pvmt_surf_status;
 	}
 
 	/** Set pavement surface status (null for missing) */
-	public void setPvmtSurfStatusNotify(Integer v) {
+	public void setPvmtSurfStatusNotify(String v) {
 		if (!objectEquals(v, pvmt_surf_status)) {
 			pvmt_surf_status = v;
 			notifyAttribute("pvmtSurfStatus");
@@ -568,7 +569,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	public void setSurfFreezeTempNotify(Integer v) {
 		if (!objectEquals(v, surf_freeze_temp)) {
 			surf_freeze_temp = v;
-			notifyAttribute("surf_freeze_temp");
+			notifyAttribute("surfFreezeTemp");
 		}
 	}
 
@@ -585,8 +586,64 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	public void setSubSurfTempNotify(Integer v) {
 		if (!objectEquals(v, subsurf_temp)) {
 			subsurf_temp = v;
-			notifyAttribute("subsurf_temp");
+			notifyAttribute("subSurfTemp");
 		}
+	}
+
+	/** Settings (JSON) read from sensors */
+	private String settings;
+
+	/** Get the settings as JSON */
+	@Override
+	public String getSettings() {
+		return settings;
+	}
+
+	/** Set the JSON settings */
+	private void setSettings(String s) {
+		try {
+			store.update(this, "settings", s);
+			settings = s;
+		}
+		catch (TMSException e) {
+			logError("settings: " + e.getMessage());
+		}
+	}
+
+	/** Set the JSON settings */
+	public void setSettingsNotify(String s) {
+		if (!objectEquals(s, settings)) {
+			setSettings(s);
+			notifyAttribute("settings");
+		}
+	}
+
+	/** Most recent sample data (JSON) */
+	private String sample;
+
+	/** Get the latest sample as JSON */
+	@Override
+	public String getSample() {
+		return sample;
+	}
+
+	/** Set the current JSON sample */
+	private void setSample(String s) {
+		try {
+			store.update(this, "sample", s);
+			sample = s;
+		}
+		catch (TMSException e) {
+			logError("sample: " + e.getMessage());
+		}
+	}
+
+	/** Set the current JSON sample */
+	public void setSampleNotify(String s) {
+		// No need for equality check -- samples are always
+		// stored even when equal to previous sample
+		setSample(s);
+		notifyAttribute("sample");
 	}
 
 	/** Time stamp from the last sample */
@@ -661,9 +718,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		sb.append(" atmos_pressure_pa=").append(getPressure());
 		sb.append(" pvmt_surf_temp_c=").append(getPvmtSurfTemp());
 		sb.append(" surf_temp_c=").append(getSurfTemp());
-		sb.append(" pvmt_surf_status=").append(
-			WeatherSensorHelper.getPvmtSurfStatus(
-			(WeatherSensor)this));
+		sb.append(" pvmt_surf_status=").append(getPvmtSurfStatus());
 		sb.append(" surf_freeze_temp_c=").append(getSurfFreezeTemp());
 		sb.append(" subsurf_temp_c=").append(getSubSurfTemp());
 		sb.append(")");
@@ -675,7 +730,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		w.write("<weather_sensor");
 		w.write(createAttribute("name", getName()));
 		w.write(createAttribute("description",
-			GeoLocHelper.getDescription(geo_loc)));
+			GeoLocHelper.getLocation(geo_loc)));
 		Position pos = GeoLocHelper.getWgs84Position(geo_loc);
 		if (pos != null) {
 			w.write(createAttribute("lon",
@@ -707,11 +762,9 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		w.write(createAttribute("atmos_pressure_pa", getPressure()));
 		w.write(createAttribute("pvmt_surf_temp_c", 
 			getPvmtSurfTemp()));
-		w.write(createAttribute("surf_temp_c", 
-			getSurfTemp()));
+		w.write(createAttribute("surf_temp_c", getSurfTemp()));
 		w.write(createAttribute("pvmt_surf_status=", 
-			WeatherSensorHelper.getPvmtSurfStatus(
-			(WeatherSensor)this)));
+			getPvmtSurfStatus()));
 		w.write(createAttribute("surf_freeze_temp_c", 
 			getSurfFreezeTemp()));
 		w.write(createAttribute("subsurf_temp_c", 

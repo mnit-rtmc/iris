@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2019  Minnesota Department of Transportation
  * Copyright (C) 2011  AHMCT, University of California
  * Copyright (C) 2017  Iteris Inc.
  *
@@ -70,8 +70,8 @@ public interface WeatherSensor extends Device {
 	/** Get precipitation rate in mm/hr (null for missing) */
 	Integer getPrecipRate();
 
-	/** Get precip situation code essPrecipSituation (null for missing) */
-	Integer getPrecipSituation();
+	/** Get precip situation essPrecipSituation (null for missing) */
+	String getPrecipSituation();
 
 	/** Get precipitation accumulation for 1h in mm (null for missing) */
 	Integer getPrecipOneHour();
@@ -92,13 +92,19 @@ public interface WeatherSensor extends Device {
 	Integer getSurfTemp();
 
 	/** Get the pavement surface status (null for missing) */
-	Integer getPvmtSurfStatus();
+	String getPvmtSurfStatus();
 
 	/** Get the pavement surface freeze temperature (null for missing) */
 	Integer getSurfFreezeTemp();
 
 	/** Get the subsurface temperature (null for missing) */
 	Integer getSubSurfTemp();
+
+	/** Get the settings as JSON */
+	String getSettings();
+
+	/** Get the latest sample as JSON */
+	String getSample();
 
 	/** Get the latest sample time stamp */
 	Long getStamp();

@@ -141,10 +141,10 @@ public class DMSManager extends DeviceManager<DMS> {
 			updateRaster(dms);
 	}
 
-	/** Check if an attribute change is interesting */
+	/** Check if a given attribute affects a proxy style */
 	@Override
-	protected boolean checkAttributeChange(String a) {
-		return super.checkAttributeChange(a) || "msgCurrent".equals(a);
+	public boolean isStyleAttrib(String a) {
+		return "styles".equals(a) || "msgCurrent".equals(a);
 	}
 
 	/** Called when a proxy attribute has changed */
@@ -158,12 +158,18 @@ public class DMSManager extends DeviceManager<DMS> {
 	/** Check if a DMS style is visible */
 	@Override
 	protected boolean isStyleVisible(DMS dms) {
-		return isStyleAll(dms) || !DMSHelper.isHidden(dms);
+		return isStyleAlwaysVisible(dms) || !dms.getHidden();
 	}
 
-	/** Check if the selected style is ALL */
-	private boolean isStyleAll(DMS dms) {
-		return getSelectedStyle() == ItemStyle.ALL;
+	/** Check if the selected style is always visible */
+	private boolean isStyleAlwaysVisible(DMS dms) {
+		switch (getSelectedStyle()) {
+			case AVAILABLE:
+			case DEPLOYED:
+				return false;
+			default:
+				return true;
+		}
 	}
 
 	/** Create a proxy JList */
@@ -196,9 +202,9 @@ public class DMSManager extends DeviceManager<DMS> {
 		p.addSeparator();
 		if (blankAction != null)
 			p.add(blankAction);
-		if(test_dms_action != null)
+		if (test_dms_action != null)
 			p.add(test_dms_action);
-		if(qstatus_dms_action != null)
+		if (qstatus_dms_action != null)
 			p.add(qstatus_dms_action);
 		return p;
 	}

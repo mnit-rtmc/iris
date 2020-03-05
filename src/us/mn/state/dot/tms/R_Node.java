@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,12 +93,6 @@ public interface R_Node extends SonarObject {
 
 	/** Get the active state */
 	boolean getActive();
-
-	/** Set the abandoned state */
-	void setAbandoned(boolean a);
-
-	/** Get the abandoned state */
-	boolean getAbandoned();
 
 	/** Set the station ID */
 	void setStationID(String s);

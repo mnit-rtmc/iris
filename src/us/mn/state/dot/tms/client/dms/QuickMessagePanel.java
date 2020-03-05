@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,8 +119,10 @@ public class QuickMessagePanel extends IPanel
 	/** Set the MULTI string */
 	private void setMulti(String m) {
 		QuickMessage qm = quick_msg;
-		if (qm != null)
-			qm.setMulti(new MultiString(m.trim()).normalize());
+		if (qm != null) {
+			MultiString ms = new MultiString(m).normalize();
+			qm.setMulti(ms.toString());
+		}
 		updatePixelPanel(qm);
 	}
 

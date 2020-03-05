@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,9 +50,9 @@ public final class ProxyMapCache<T extends SonarObject>
 	public synchronized void remove(T proxy) {
 		Iterator<Map.Entry<MapGeoLoc, T>> it =
 			map_proxies.entrySet().iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Map.Entry<MapGeoLoc, T> ent = it.next();
-			if(ent.getValue() == proxy) {
+			if (ent.getValue() == proxy) {
 				it.remove();
 				break;
 			}

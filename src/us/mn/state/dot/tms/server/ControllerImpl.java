@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,6 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
-import static us.mn.state.dot.tms.CommProtocol.MSG_FEED;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.ControllerIO;
@@ -567,10 +566,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			DetectorImpl det = dets.get(pin);
 			int i = pin - start_pin;
 			int v = sampleValue(veh_count, i);
-			if (v >= 0) {
-				det.storeVehCount(new PeriodicSample(stamp,
-					period, v), vc);
-			}
+			PeriodicSample ps = (v >= 0)
+				? new PeriodicSample(stamp, period, v)
+				: null;
+			det.storeVehCount(ps, vc);
 		}
 	}
 
@@ -587,11 +586,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		for (Integer pin: dets.keySet()) {
 			DetectorImpl det = dets.get(pin);
 			int i = pin - start_pin;
-			int n_scans = sampleValue(scans, i);
-			if (n_scans >= 0) {
-				det.storeOccupancy(new OccupancySample(stamp,
-					period, n_scans, max_scans));
-			}
+			int v = sampleValue(scans, i);
+			OccupancySample occ = (v >= 0)
+			    ? new OccupancySample(stamp, period, v, max_scans)
+			    : null;
+			det.storeOccupancy(occ);
 		}
 	}
 
@@ -608,10 +607,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			DetectorImpl det = dets.get(pin);
 			int i = pin - start_pin;
 			int s = sampleValue(speed, i);
-			if (s > 0) {
-				det.storeSpeed(new PeriodicSample(stamp,
-					period, s));
-			}
+			PeriodicSample ps = (s > 0)
+				? new PeriodicSample(stamp, period, s)
+				: null;
+			det.storeSpeed(ps);
 		}
 	}
 

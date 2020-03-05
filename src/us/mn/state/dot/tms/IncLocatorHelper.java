@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Helper class for Incident Locators.
@@ -47,5 +48,11 @@ public class IncLocatorHelper extends BaseHelper {
 				return iloc;
 		}
 		return null;
+	}
+
+	/** Validate a MULTI string */
+	static public boolean isMultiValid(String m) {
+		return m.equals(new MultiString(m).normalizeLocator()
+			.toString());
 	}
 }

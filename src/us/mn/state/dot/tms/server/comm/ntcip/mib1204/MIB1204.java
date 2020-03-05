@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2017  SRF Consulting Group
  * Copyright (C) 2017	    Iteris Inc.
+ * Copyright (C) 2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +14,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 import us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201;
@@ -23,21 +23,11 @@ import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
 /**
  * MIB nodes for NTCIP 1204 -
  *  Object Definitions for Environmental Sensor Stations (ESS)
- *  
+ *
  * @author John L. Stanley - SRF Consulting
  * @author Michael Darter
  */
-
 public enum MIB1204 {
-	// objects part of SNMP MIB-2 definitions
-	system					(new int[] {1,3,6,1,2,1,1}),
-	  sysDescr				(system, 1),
-	  sysObjectID				(system, 2),
-	  sysUpTime				(system, 3),
-	  sysContact				(system, 4),
-	  sysName				(system, 5),
-	  sysLocation				(system, 6),
-	// objects part of NTCIP 1204
 	ess					(MIB1201.devices, 5),
 	  essBufr				(ess, 1),
 	    essBufrInstrumentation		(essBufr, 2),
@@ -77,9 +67,19 @@ public enum MIB1204 {
 	      essSpotWindDirection		(essNtcipWind, 1),
 	      essSpotWindSpeed			(essNtcipWind, 2),
 	      essWindSituation			(essNtcipWind, 3),
-	      windSensorAvgDirectionV2		(essNtcipWind, 4),
-	      windSensorSpotDirectionV2		(essNtcipWind, 5),
-	      windSensorGustDirectionV2		(essNtcipWind, 6),
+	      windSensorTableNumSensors		(essNtcipWind, 7), // V2
+	      windSensorTable			(essNtcipWind, 8), // V2
+	        windSensorEntry			(windSensorTable, 1), // V2
+	          windSensorIndex		(windSensorEntry, 1), // V2
+	          windSensorHeight		(windSensorEntry, 2), // V2
+	          windSensorLocation		(windSensorEntry, 3), // V2
+	          windSensorAvgSpeed		(windSensorEntry, 4), // V2
+	          windSensorAvgDirection	(windSensorEntry, 5), // V2
+	          windSensorSpotSpeed		(windSensorEntry, 6), // V2
+	          windSensorSpotDirection	(windSensorEntry, 7), // V2
+	          windSensorGustSpeed		(windSensorEntry, 8), // V2
+	          windSensorGustDirection	(windSensorEntry, 9), // V2
+	          windSensorSituation		(windSensorEntry, 10), // V2
 	    essNtcipTemperature			(essNtcip, 5),
 	      essNumTemperatureSensors		(essNtcipTemperature, 1),
 	      essTemperatureSensorTable		(essNtcipTemperature, 2),

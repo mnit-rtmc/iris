@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.incident;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.CorridorFinder;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
@@ -29,7 +28,6 @@ import us.mn.state.dot.tms.IncLocator;
 import us.mn.state.dot.tms.IncLocatorHelper;
 import us.mn.state.dot.tms.IncRange;
 import us.mn.state.dot.tms.LaneType;
-import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -43,6 +41,11 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Douglas Lau
  */
 public class DmsDeployBuilder {
+
+	/** Get cleared incident advice MULTI string */
+	static private String clearedAdviceMulti() {
+		return SystemAttrEnum.INCIDENT_CLEAR_ADVICE_MULTI.getString();
+	}
 
 	/** Get the r_node type checker */
 	static private R_NodeType.Checker getChecker(short lto) {
@@ -111,52 +114,31 @@ public class DmsDeployBuilder {
 	 * @param dms Possible sign to deploy.
 	 * @param ud Upstream device.
 	 * @return MULTI string for DMS, or null. */
-	public MultiString createMulti(DMS dms, UpstreamDevice ud,
-		boolean cleared)
-	{
+	public String createMulti(DMS dms, UpstreamDevice ud, boolean cleared) {
 		boolean branched = !isCorridorSame(dms);
-		Distance up = ud.distance;
-		IncRange rng = ud.range();
+		Distance dist = ud.distance;
+		IncRange rng = ud.range(picked);
 		if (null == rng)
 			return null;
-		IncDescriptor dsc = IncDescriptorHelper.match(inc);
-		if (null == dsc)
+		IncMultiBuilder builder = new IncMultiBuilder(dms, loc, dist);
+		// Add incident descriptor line
+		IncDescriptor idsc = IncDescriptorHelper.match(inc);
+		if (null == idsc || !builder.addLine(idsc.getMulti()))
 			return null;
+		// Add incident locator line
 		IncLocator iloc = IncLocatorHelper.match(rng, branched, picked);
-		if (null == iloc)
+		if (null == iloc || !builder.addLine(iloc.getMulti()))
 			return null;
-		String adv_multi;
-		String adv_abbrev;
+		// Add incident advice line
 		if (cleared) {
-			adv_multi = SystemAttrEnum.INCIDENT_CLEAR_ADVICE_MULTI
-				.getString();
-			adv_abbrev = SystemAttrEnum.INCIDENT_CLEAR_ADVICE_ABBREV
-				.getString();
-		} else {
-			IncAdvice adv = IncAdviceHelper.match(rng, inc);
-			if (null == adv)
+			if (!builder.addLine(clearedAdviceMulti()))
 				return null;
-			adv_multi = adv.getMulti();
-			adv_abbrev = adv.getAbbrev();
+		} else {
+			IncAdvice iadv = IncAdviceHelper.match(rng, inc);
+			if (null == iadv || !builder.addLine(iadv.getMulti()))
+				return null;
 		}
-		String mdsc = checkMulti(dms, dsc.getMulti(), dsc.getAbbrev(),
-			up, loc);
-		if (null == mdsc)
-			return null;
-		String mloc = checkMulti(dms, iloc.getMulti(), iloc.getAbbrev(),
-			up, loc);
-		if (null == mloc)
-			return null;
-		String madv = checkMulti(dms, adv_multi, adv_abbrev, up, loc);
-		if (null == madv)
-			return null;
-		LocMultiBuilder lmb = new LocMultiBuilder(loc, up);
-		new MultiString(mdsc).parse(lmb);
-		lmb.addLine(null);
-		new MultiString(mloc).parse(lmb);
-		lmb.addLine(null);
-		new MultiString(madv).parse(lmb);
-		return lmb.toMultiString();
+		return builder.toString();
 	}
 
 	/** Check if a DMS is on same corridor as incident */
@@ -164,36 +146,5 @@ public class DmsDeployBuilder {
 		GeoLoc loc = dms.getGeoLoc();
 		return loc.getRoadway() == inc.getRoad()
                     && loc.getRoadDir() == inc.getDir();
-	}
-
-	/** Check if MULTI string or abbreviation will fit on a DMS */
-	private String checkMulti(DMS dms, String ms, String abbrev,
-		Distance up, GeoLoc loc)
-	{
-		String res = checkMulti(dms, ms, up, loc);
-		return (res != null) ? res : checkMulti(dms, abbrev, up, loc);
-	}
-
-	/** Check if MULTI string will fit on a DMS */
-	private String checkMulti(DMS dms, String ms, Distance up, GeoLoc loc) {
-		if (null == ms)
-			return null;
-		LocMultiBuilder lmb = new LocMultiBuilder(loc, up);
-		new MultiString(ms).parse(lmb);
-		MultiString multi = lmb.toMultiString();
-		return (createGraphic(dms, multi) != null) ? ms : null;
-	}
-
-	/** Create the page one graphic for a MULTI string */
-	public RasterGraphic createGraphic(DMS dms, MultiString ms) {
-		try {
-			RasterGraphic[] pixmaps = DMSHelper.createPixmaps(dms,
-				ms);
-			return pixmaps[0];
-		}
-		catch (Exception e) {
-			// could be IndexOutOfBounds or InvalidMessage
-			return null;
-		}
 	}
 }

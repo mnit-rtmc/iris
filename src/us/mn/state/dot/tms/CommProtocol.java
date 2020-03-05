@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -14,6 +14,9 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.tms;
+
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Communication protocol enumeration.  The ordinal values correspond to the
@@ -94,7 +97,8 @@ public enum CommProtocol {
 	@Deprecated
 	PEMS("PeMS", false),
 
-	/** SSI (22) */
+	/** SSI -- removed (22) */
+	@Deprecated
 	SSI("SSI", false),
 
 	/** CHP Incidents (23) */
@@ -187,5 +191,17 @@ public enum CommProtocol {
 			return VALUES[o];
 		else
 			return null;
+	}
+
+	/** Get protocol values sorted by name */
+	static public CommProtocol[] valuesSorted() {
+		CommProtocol[] v = values();
+		Arrays.sort(v, new Comparator<CommProtocol>() {
+			public int compare(CommProtocol cp0, CommProtocol cp1) {
+				return cp0.description.compareTo(
+				       cp1.description);
+			}
+		});
+		return v;
 	}
 }

@@ -69,8 +69,14 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 	/** Color to display scheduled devices */
 	static public final Color COLOR_SCHEDULED = new Color(240, 128, 0);
 
+	/** Color to display external controlled devices */
+	static public final Color COLOR_EXTERNAL = new Color(176, 240, 0);
+
 	/** Color for dedicated purpose devices */
 	static public final Color COLOR_PURPOSE = new Color(192, 16, 192);
+
+	/** Color to display moving gate devices */
+	static public final Color COLOR_MOVING = new Color(240, 128, 0);
 
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
@@ -110,11 +116,11 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 	/** Get an appropriate style for the given proxy object */
 	public Style getStyle(T proxy) {
 		if (proxy != null) {
-			for (Style st: getStyles()) {
+			for (Style sty: getStyles()) {
 				ItemStyle is = ItemStyle.lookupStyle(
-					st.toString());
+					sty.toString());
 				if (is != null && manager.checkStyle(is, proxy))
-					return st;
+					return sty;
 			}
 		}
 		return getDefaultStyle();

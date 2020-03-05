@@ -20,6 +20,7 @@ import java.util.TreeSet;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.CorridorFinder;
 import us.mn.state.dot.tms.DevicePurpose;
+import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
@@ -33,6 +34,7 @@ import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
+import static us.mn.state.dot.tms.client.incident.UpstreamDevice.MAX_GAP_MI;
 
 /**
  * Helper class to find devices upstream of an incident.
@@ -40,6 +42,13 @@ import static us.mn.state.dot.tms.units.Distance.Units.MILES;
  * @author Douglas Lau
  */
 public class UpstreamDeviceFinder {
+
+	/** Maximum distance from device to nearest r_node */
+	static private final Distance MAX_DIST = new Distance(2.5, MILES);
+
+	/** Maximum distance from incident to deploy tolling signs */
+	static private final Distance MAX_TOLLING_DEPLOYMENT_DIST =
+		new Distance(1.0, MILES);
 
 	/** Get the maximum number of exits upstream of an incident */
 	static private int maximum_exits(Incident inc) {
@@ -81,7 +90,7 @@ public class UpstreamDeviceFinder {
 			String name = getCorridorName();
 			CorridorBase<R_Node> cb = finder.lookupCorridor(name);
 			if (cb != null) {
-				Float mp = cb.calculateMilePoint(loc);
+				Float mp = cb.calculateMilePoint(loc, MAX_DIST);
 				if (mp != null)
 					findDevices(cb, mp, exits, dist);
 			}
@@ -100,8 +109,8 @@ public class UpstreamDeviceFinder {
 	/** Corridor finder */
 	private final CorridorFinder<R_Node> finder;
 
-	/** Incident impact */
-	private final IncImpact impact;
+	/** The incident */
+	private final Incident incident;
 
 	/** Maximum exits for DMS */
 	private final int maximum_exits;
@@ -116,7 +125,7 @@ public class UpstreamDeviceFinder {
 	/** Create new upstream device finder */
 	public UpstreamDeviceFinder(CorridorFinder<R_Node> cf, Incident inc) {
 		finder = cf;
-		impact = IncImpact.getImpact(inc);
+		incident = inc;
 		maximum_exits = maximum_exits(inc);
 		scanners.add(new CorScanner(new IncidentLoc(inc), 0,
 			new Distance(0f, MILES)));
@@ -172,23 +181,29 @@ public class UpstreamDeviceFinder {
 	}
 
 	/** Check if a DMS is deployable for the incident */
-	private boolean isDeployable(DMS dms, boolean branched) {
-		if (DMSHelper.isHidden(dms) ||
+	private boolean isDeployable(DMS dms, UpstreamDevice ed,
+		boolean branched)
+	{
+		if (dms.getHidden() ||
 		    DMSHelper.isFailed(dms) ||
 		   !DMSHelper.isActive(dms))
 			return false;
 		switch (DevicePurpose.fromOrdinal(dms.getPurpose())) {
 			case GENERAL: return true;
-			case TOLLING: return isTollingDeployable(branched);
+			case TOLLING: return isTollingDeployable(ed, branched);
 			default: return false;
 		}
 	}
 
 	/** Check if a TOLLING sign is deployable */
-	private boolean isTollingDeployable(boolean branched) {
+	private boolean isTollingDeployable(UpstreamDevice ed,
+		boolean branched)
+	{
 		if (branched)
 			return false;
-		switch (impact) {
+		if (ed.distance.m() > MAX_TOLLING_DEPLOYMENT_DIST.m())
+			return false;
+		switch (IncImpact.getImpact(incident)) {
 			case lanes_blocked: return true;
 			case left_lanes_blocked: return true;
 			case lanes_affected: return true;
@@ -209,12 +224,10 @@ public class UpstreamDeviceFinder {
 		Iterator<DMS> dit = DMSHelper.iterator();
 		while (dit.hasNext()) {
 			DMS dms = dit.next();
-			if (!isDeployable(dms, branched))
-				continue;
 			GeoLoc loc = dms.getGeoLoc();
 			UpstreamDevice ed = UpstreamDevice.create(dms, cb, mp,
 				loc);
-			if (ed != null) {
+			if (ed != null && isDeployable(dms, ed, branched)) {
 				ed = ed.adjusted(num_exits, dist);
 				if (ed.exits <= maximum_exits)
 					devices.add(ed);
@@ -230,15 +243,19 @@ public class UpstreamDeviceFinder {
 		for (GeoLoc loc: entrances) {
 			Float p = cb.calculateMilePoint(loc);
 			if (p != null && mp > p) {
-				int e = cb.countExits(p, mp);
-				// Must add at least 1 exit on other corridors
-				if (dist.m() > 0.0)
-					e = Math.max(1, e);
-				int exits = num_exits + e;
-				if (exits <= maximum_exits) {
-					Distance d = dist.add(
-						new Distance(mp - p, MILES));
-					findInterchange(loc, exits, d);
+				Integer e = cb.countExits(p, mp, MAX_GAP_MI);
+				if (e != null) {
+					// Must add at least 1 exit
+					// if not on original corridor
+					if (dist.m() > 0.0)
+						e = Math.max(1, e);
+					int exits = num_exits + e;
+					if (exits <= maximum_exits) {
+						Distance d = dist.add(
+							new Distance(mp - p,
+							MILES));
+						findInterchange(loc, exits, d);
+					}
 				}
 			}
 		}
@@ -248,16 +265,25 @@ public class UpstreamDeviceFinder {
 	private void findInterchange(GeoLoc loc, int num_exits, Distance dist) {
 		String name = GeoLocHelper.getLinkedCorridor(loc);
 		CorridorBase<R_Node> cb = finder.lookupCorridor(name);
-		if (cb != null) {
+		GeoLoc eloc = findExit(cb, loc);
+		if (eloc != null)
+			scanners.add(new CorScanner(eloc, num_exits, dist));
+	}
+
+	/** Find a matching exit from specified corridor */
+	private GeoLoc findExit(CorridorBase<R_Node> cb, GeoLoc loc) {
+		if (cb != null && !isOppositeCorridor(cb)) {
 			R_Node n = cb.findFork(loc);
-			if (n != null) {
-				GeoLoc eloc = n.getGeoLoc();
-				if (eloc != null) {
-					scanners.add(new CorScanner(eloc,
-						num_exits, dist));
-				}
-			}
+			if (n != null)
+				return n.getGeoLoc();
 		}
+		return null;
+	}
+
+	/** Check if a corridor is opposite direction of incident */
+	private boolean isOppositeCorridor(CorridorBase<R_Node> cb) {
+		return cb.getRoadway() == incident.getRoad() &&
+		       Direction.isOpposite(cb.getRoadDir(), incident.getDir());
 	}
 
 	/** Get upstream device iterator */

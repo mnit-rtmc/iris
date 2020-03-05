@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
@@ -37,6 +38,7 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.TollZoneHelper;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
+import us.mn.state.dot.tms.server.event.PriceMessageEvent;
 import us.mn.state.dot.tms.server.event.TravelTimeEvent;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.units.Interval;
@@ -81,19 +83,6 @@ public class DmsActionMsg {
 	/** Round value up to the next 5 */
 	static private int roundUp5(int v) {
 		return ((v - 1) / 5 + 1) * 5;
-	}
-
-	/** Get minimum tolling price */
-	static private float min_price() {
-		return SystemAttrEnum.TOLL_MIN_PRICE.getFloat();
-	}
-
-	/** Limit tolling price.
-	 * @param p Tolling price (dollars).
-	 * @param mp Maximum price (dollars).
-	 * @return Price limited by maximum, then minimum. */
-	static private float limit_price(float p, float mp) {
-		return Math.max(Math.min(p, mp), min_price());
 	}
 
 	/** Calculate the maximum trip minutes to display */
@@ -173,11 +162,19 @@ public class DmsActionMsg {
 	private String feed_msg;
 
 	/** Tolling prices */
-	private final HashMap<String, Float> prices =
-		new HashMap<String, Float>();
+	private final ArrayList<PriceMessageEvent> prices =
+		new ArrayList<PriceMessageEvent>();
+
+	/** Create a price message */
+	private PriceMessageEvent createPriceMessage(String zid, String det,
+		float price)
+	{
+		return new PriceMessageEvent(EventType.PRICE_DEPLOYED,
+			dms.getName(), zid, det, price);
+	}
 
 	/** Get tolling prices */
-	public HashMap<String, Float> getPrices() {
+	public ArrayList<PriceMessageEvent> getPrices() {
 		return (valid && prices.size() > 0) ? prices : null;
 	}
 
@@ -334,7 +331,6 @@ public class DmsActionMsg {
 	/** Test if a feed message is valid */
 	private boolean isFeedMsgValid(MultiString _multi) {
 		int n_lines = DMSHelper.getLineCount(dms);
-		// FIXME: reject most MULTI tags
 		String[] lines = _multi.getLines(n_lines);
 		for (int i = 0; i < lines.length; i++) {
 			if (!isValidSignText((short) (i + 1), lines[i]))
@@ -494,18 +490,18 @@ public class DmsActionMsg {
 		addSrc(SignMsgSource.tolling);
 		if (zones.length < 1)
 			return fail("No toll zones");
-		String z = zones[zones.length - 1]; // last zone
 		switch (mode) {
 		case "p": // priced
-			Float p = calculatePrice(zones);
-			if (p != null) {
-				prices.put(z, p);
-				return priceSpan(p);
+			PriceMessageEvent ev = calculatePriceMessage(zones);
+			if (ev != null) {
+				prices.add(ev);
+				return priceSpan(ev.price);
 			} else
 				return fail("Invalid toll zone");
 		case "o": // open
 		case "c": // closed
-			prices.put(z, 0f);
+			String last_zid = zones[zones.length - 1];
+			prices.add(createPriceMessage(last_zid, null, 0f));
 			return EMPTY_SPAN;
 		default:
 			return fail("Invalid toll mode");
@@ -513,27 +509,39 @@ public class DmsActionMsg {
 	}
 
 	/** Calculate the price for tolling zones */
-	private Float calculatePrice(String[] zones) {
+	private PriceMessageEvent calculatePriceMessage(String[] zones) {
 		assert (zones.length > 0);
-		float price = 0;
-		float max_price = 0;
+		String last_zid = null; // last toll zone
+		String det = null;
+		float price = 0f;
+		float max_price = TollZoneImpl.max_price();
 		for (String zid: zones) {
 			TollZoneImpl tz = lookupZone(zid);
-			if (tz != null) {
-				price += tz.getPrice(dms.getName(), loc);
-				float mp = tz.getMaxPriceOrDefault();
-				max_price = Math.max(max_price, mp);
-			} else
+			if (null == tz)
 				return null;
+			VehicleSampler vs = tz.findMaxDensity(dms.getName(),
+				loc);
+			if (null == vs)
+				return null;
+			Float zone_price = tz.getPrice(vs, dms.getName(), loc);
+			if (null == zone_price)
+				return null;
+			last_zid = zid;
+			det = vs.toString();
+			price += zone_price;
+			Float mp = tz.getMaxPrice();
+			if (mp != null)
+				max_price = Math.min(max_price, mp);
 		}
-		return limit_price(price, max_price);
+		price = Math.min(price, max_price);
+		return createPriceMessage(last_zid, det, price);
 	}
 
 	/** Lookup a toll zone by ID */
 	private TollZoneImpl lookupZone(String zid) {
-		TollZone z = TollZoneHelper.lookup(zid);
-		return (z instanceof TollZoneImpl)
-		      ? (TollZoneImpl) z
+		TollZone tz = TollZoneHelper.lookup(zid);
+		return (tz instanceof TollZoneImpl)
+		      ? (TollZoneImpl) tz
 		      : null;
 	}
 

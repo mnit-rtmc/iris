@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" version="1.1">
+  <defs>
+    <marker id="Arrow1Mend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       style="overflow:visible;">
+      <path
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z"
+         style="fill:#ffeedd;stroke-width:0.1em;marker-start:none;"
+         transform="scale(0.5) rotate(180) translate(10,0)" />
+    </marker>
+    <marker id="Arrow1Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       style="overflow:visible;">
+      <path
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z"
+         style="fill:#ffeedd;stroke-width:0.1em;marker-start:none;"
+         transform="scale(0.8) rotate(180) translate(12.5,0)" />
+    </marker>
+  </defs>
+
+  <g style="fill:#ffeedd">
+    <g transform="rotate(-90) translate(-120,16)">
+      <text style="font-family:Overpass;font-size:1em">
+         <tspan x="0" y="0">Speed</tspan>
+      </text>
+    </g>
+    <text style="font-family:Overpass;font-size:1em">
+      <tspan x="100" y="212">Distance</tspan>
+    </text>
+    <text style="font-family:Overpass Mono;font-size:1em">
+       <tspan x="88" y="56">u</tspan>
+    </text>
+    <text style="font-family:Overpass Mono;font-size:1em">
+       <tspan x="176" y="128">v</tspan>
+    </text>
+    <text style="font-family:Overpass Mono;font-size:1em">
+       <tspan x="120" y="92">s</tspan>
+    </text>
+    <text style="font-family:Overpass;font-size:1.2em">
+       <tspan x="64" y="240">v² = u² + 2as</tspan>
+    </text>
+  </g>
+
+  <circle cx="80" cy="52" r="4" style="fill:yellow" />
+  <circle cx="168" cy="124" r="4" style="fill:yellow" />
+
+  <g style="stroke:#ffeedd;fill:#ffeedd">
+    <path style="marker-end:url(#Arrow1Lend)" d="m 24,176 0,-160" />
+    <path style="marker-end:url(#Arrow1Lend)" d="m 40,192 200,0" />
+    <path style="stroke-dasharray:2,3" d="m 32,52 40,0" />
+    <path d="m 80,72 0,32" />
+    <path style="stroke-dasharray:2,3" d="m 32,124 128,0" />
+    <path d="m 168,72 0,32" />
+    <path style="marker-end:url(#Arrow1Mend)" d="m 136,88 32,0" />
+    <path style="marker-end:url(#Arrow1Mend)" d="m 112,88 -32,0" />
+  </g>
+</svg>

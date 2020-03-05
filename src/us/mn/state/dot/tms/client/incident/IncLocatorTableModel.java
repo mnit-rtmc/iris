@@ -48,7 +48,7 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 	@Override
 	protected ArrayList<ProxyColumn<IncLocator>> createColumns() {
 		ArrayList<ProxyColumn<IncLocator>> cols =
-			new ArrayList<ProxyColumn<IncLocator>>(5);
+			new ArrayList<ProxyColumn<IncLocator>>(4);
 		cols.add(new ProxyColumn<IncLocator>("incident.range", 96) {
 			public Object getValueAt(IncLocator loc) {
 				return IncRange.fromOrdinal(loc.getRange());
@@ -109,20 +109,7 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 			}
 			public void setValueAt(IncLocator loc, Object value){
 				loc.setMulti(new MultiString(value.toString())
-					.normalize());
-			}
-		});
-		cols.add(new ProxyColumn<IncLocator>("dms.multi.abbrev", 150) {
-			public Object getValueAt(IncLocator loc) {
-				return loc.getAbbrev();
-			}
-			public boolean isEditable(IncLocator loc) {
-				return canWrite(loc);
-			}
-			public void setValueAt(IncLocator loc, Object value) {
-				String a = new MultiString(value.toString())
-					.normalize();
-				loc.setAbbrev((a.length() > 0) ? a : null);
+					.normalizeLocator().toString());
 			}
 		});
 		return cols;

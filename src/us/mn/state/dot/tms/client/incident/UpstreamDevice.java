@@ -29,6 +29,17 @@ import static us.mn.state.dot.tms.units.Distance.Units.MILES;
  */
 public class UpstreamDevice implements Comparable<UpstreamDevice> {
 
+	/** Max distance threshold for `ahead` range */
+	static private final float AHEAD_DIST_MI = 1.5f;
+
+	/** Max gap between r_nodes in corridor */
+	static public final float MAX_GAP_MI = 10f;
+
+	/** Get the maximum distance threshold for `ahead` range */
+	static private float getAheadDistMi(boolean picked) {
+		return picked ? AHEAD_DIST_MI / 2f : AHEAD_DIST_MI;
+	}
+
 	/** Calculate a mile point for a location on a corridor */
 	static private Float calculateMilePoint(CorridorBase cb, GeoLoc loc) {
 		if (loc != null &&
@@ -49,11 +60,13 @@ public class UpstreamDevice implements Comparable<UpstreamDevice> {
 	{
 		Float p = calculateMilePoint(cb, loc);
 		if (p != null && mp > p) {
-			int exits = cb.countExits(p, mp);
-			Distance up = new Distance(mp - p, MILES);
-			return new UpstreamDevice(dev, exits, up);
-		} else
-			return null;
+			Integer exits = cb.countExits(p, mp, MAX_GAP_MI);
+			if (exits != null) {
+				Distance up = new Distance(mp - p, MILES);
+				return new UpstreamDevice(dev, exits, up);
+			}
+		}
+		return null;
 	}
 
 	/** Upstream device */
@@ -87,9 +100,10 @@ public class UpstreamDevice implements Comparable<UpstreamDevice> {
 	}
 
 	/** Get the incident range */
-	public IncRange range() {
-		// If distance is less than approx. 1 mile, allow `ahead` range
-		boolean ahead_dist = distance.asFloat(MILES) < 0.9f;
-		return IncRange.fromExits(exits, ahead_dist);
+	public IncRange range(boolean picked) {
+		// If distance is less than threshold, use `ahead` range
+		return (distance.asFloat(MILES) < getAheadDistMi(picked))
+		      ? IncRange.ahead
+		      : IncRange.fromExits(exits);
 	}
 }

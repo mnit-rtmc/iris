@@ -1,0 +1,30 @@
+<svg xmlns='http://www.w3.org/2000/svg' version='1.1'
+     width='240' height='380'>
+<title>Metering Phases</title>
+<defs>
+  <marker id='Arrow1Mend' style='overflow:visible' orient='auto'>
+    <path style='fill:white;stroke-width:1pt'
+          d='m-4 0l-2 2l7-2l-7-2l2 2z'/>
+  </marker>
+</defs>
+<g style='fill:none;stroke:white;stroke-width:2'>
+  <rect fill='#fda' x='20' y='10' width='200' height='60' rx='8' ry='8'/>
+  <rect fill='#7f7' x='50' y='110' width='140' height='60' rx='8' ry='8'/>
+  <rect fill='#efa' x='50' y='210' width='140' height='60' rx='8' ry='8'/>
+  <rect fill='#faa' x='50' y='310' width='140' height='60' rx='8' ry='8'/>
+</g>
+<text style='font-family:sans-serif;font-size:large'>
+  <tspan x='60' y='50'>Not started</tspan>
+  <tspan x='70' y='150'>Metering</tspan>
+  <tspan x='70' y='250'>Flushing</tspan>
+  <tspan x='70' y='350'>Stopped</tspan>
+</text>
+<g style='fill:none;stroke:white;stroke-width:2;marker-end:url(#Arrow1Mend)'>
+  <path d='M110 70 V110'/>
+  <path d='M110 170 V210'/>
+  <path d='M110 270 V310'/>
+  <path d='M40 70 C20 90 20 300 50 340' style='stroke-dasharray:4,2'/>
+  <path d='M190 340 C220 320 220 300 220 240 C220 180 220 160 190 140'
+        style='stroke-dasharray:4,2'/>
+</g>
+</svg>

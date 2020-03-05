@@ -45,27 +45,21 @@ public interface IncAdvice extends SonarObject {
 	/** Get the range */
 	int getRange();
 
-	/** Set count of impacted lanes */
-	void setImpactedLanes(Integer ln);
-
-	/** Get count of impacted lanes */
-	Integer getImpactedLanes();
-
 	/** Set count of open lanes */
 	void setOpenLanes(Integer op);
 
 	/** Get count of open lanes */
 	Integer getOpenLanes();
 
+	/** Set count of impacted lanes */
+	void setImpactedLanes(Integer ln);
+
+	/** Get count of impacted lanes */
+	Integer getImpactedLanes();
+
 	/** Set the MULTI string */
 	void setMulti(String m);
 
 	/** Get the MULTI string */
 	String getMulti();
-
-	/** Set abbreviated MULTI string */
-	void setAbbrev(String a);
-
-	/** Get abbreviated MULTI string */
-	String getAbbrev();
 }
