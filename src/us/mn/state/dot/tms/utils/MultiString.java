@@ -52,9 +52,9 @@ public class MultiString {
 	static private class LineMultiNormalizer extends MultiNormalizer {
 		// Strip tags which don't associate with a line
 		@Override
-		public void setColorBackground(int x) {}
+		public void setColorBackground(Integer x) {}
 		@Override
-		public void setPageBackground(int z) {}
+		public void setPageBackground(Integer z) {}
 		@Override
 		public void setPageBackground(int r, int g, int b) {}
 		@Override
@@ -554,7 +554,7 @@ public class MultiString {
 	public MultiString stripFonts() {
 		MultiBuilder mb = new MultiBuilder() {
 			@Override
-			public void setFont(int fn, String f_id) {}
+			public void setFont(Integer fn, String f_id) {}
 		};
 		parse(mb);
 		return mb.toMultiString();
@@ -620,7 +620,7 @@ public class MultiString {
 		fonts.add(f_num);
 		parse(new MultiAdapter() {
 			private int font_num = f_num;
-			@Override public void setFont(int fn, String f_id) {
+			@Override public void setFont(Integer fn, String f_id) {
 				font_num = fn;
 				fonts.set(fonts.size() - 1, font_num);
 			}
