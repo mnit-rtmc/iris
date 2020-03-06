@@ -982,7 +982,7 @@ public class WRenderer {
 	static private int msgCnt = 0;
 
 	
-	static private void println(String str) {
+	static public void println(String str) {
 		System.out.println(str);
 		out.println(str);
 	}
