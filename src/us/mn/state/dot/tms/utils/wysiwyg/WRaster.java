@@ -37,8 +37,8 @@ import us.mn.state.dot.tms.utils.MultiConfig;
  * imaging WYSIWYG-rendered MULTI strings.
  *
  * (Parts of this class are structured similarly to the
- *  method-outline used for RasterGraphic, BitmapGraphic,
- *  and PixmapGraphic classes.)
+ *  method-outline used for the earlier RasterGraphic,
+ *  BitmapGraphic, and PixmapGraphic classes.)
  * 
  * One of the 4 WRaster subclasses is obtained by
  * calling one of the WRaster.create methods.  Do
@@ -123,8 +123,7 @@ abstract public class WRaster {
 
 	/** Color used for rendering a ERROR_PIXEL */
 	private static final DmsColor ERROR_COLOR =
-//			new DmsColor(255,0,128);  // Intense pink
-			new DmsColor(255,0,255);  // Fuschia
+			new DmsColor(255,0,255);  // = Fuschia
 
 	//===========================================
 			
@@ -191,13 +190,11 @@ abstract public class WRaster {
 	}
 
 	/** Get the raster graphic width */
-	//DONE
 	public int getWidth() {
 		return width;
 	}
 
 	/** Get the raster graphic height */
-	//DONE
 	public int getHeight() {
 		return height;
 	}
@@ -283,7 +280,6 @@ abstract public class WRaster {
 	}
 
 	/** Set the pixel at the specified location */
-	//DONE
 	public void setPixel(int x, int y, int pixel) {
 		switch (pixel) {
 		case DEFAULT_BG:
@@ -314,7 +310,6 @@ abstract public class WRaster {
 		return pixelToColor(pixel);
 	}
 
-	//DONE
 	public boolean isLit(int pixel) {
 		return pixel != BLACK;
 	}
@@ -342,7 +337,6 @@ abstract public class WRaster {
 	}
 
 	/** Copy the common region of the specified raster */
-	//DONE
 	public void copy(WRaster b) {
 		int x0 = Math.max(width - b.width, 0) / 2;
 		int x1 = Math.max(b.width - width, 0) / 2;
@@ -365,7 +359,6 @@ abstract public class WRaster {
 	 * @param x0 X-position on raster (0-based).
 	 * @param y0 Y-position on raster (0-based).
 	 * @param fg Foreground color. */
-	//DONE
 	public void copy(WRaster wg, int x0, int y0) {
 		int w = wg.getWidth();
 		int h = wg.getHeight();
@@ -387,7 +380,6 @@ abstract public class WRaster {
 	 * @param x0 X-position on raster (0-based).
 	 * @param y0 Y-position on raster (0-based).
 	 * @param fg Foreground pixel color. */
-	//DONE
 	public void copy(WRaster wg, int x0, int y0, int fg) {
 		int w = wg.getWidth();
 		int h = wg.getHeight();
@@ -400,7 +392,6 @@ abstract public class WRaster {
 	}
 
 	/** Update the raster by clearing pixels not set in another raster */
-	//DONE
 	public void union(WRaster rg) {
 		if (width != rg.width)
 			throw new IndexOutOfBoundsException("width mismatch");
@@ -414,7 +405,6 @@ abstract public class WRaster {
 	}
 
 	/** Update the raster by clearing pixels set in another raster */
-	//DONE
 	public void difference(WRaster rg) {
 		if (width != rg.width)
 			throw new IndexOutOfBoundsException("width mismatch");
@@ -430,7 +420,6 @@ abstract public class WRaster {
 	//================================
 	
 	/** Get the pixel index for the specified location */
-	//DONE
 	protected int pixelIndex(int x, int y) {
 		if (x < 0 || x >= width) {
 			throw new IndexOutOfBoundsException("x=" + x +
@@ -442,40 +431,6 @@ abstract public class WRaster {
 		}
 		return (y * width) + x;
 	}
-
-//	/** Set all pixels2 adjacent to lit pixels2 (clearing lit pixels2) */
-//	public void outline() {
-//		WRaster b = createBlankCopy();
-//		b.copy(this);
-//		for (int x = 0; x < width; x++) {
-//			for (int y = 0; y < height; y++) {
-//				if (b.getWColor(x, y).isLit())
-//					setNeighbors(x, y);
-//			}
-//		}
-//		difference(b);
-//	}
-
-//	/** Set the neighbors of the specified pixel */
-//	private void setNeighbors(int x, int y) {
-//		int xmin = Math.max(x - 1, 0);
-//		int xmax = Math.min(x + 2, width);
-//		int ymin = Math.max(y - 1, 0);
-//		int ymax = Math.min(y + 2, height);
-//		for (int xx = xmin; xx < xmax; xx++) {
-//			for (int yy = ymin; yy < ymax; yy++)
-//				setWColor(xx, yy, DmsColor.AMBER);
-//		}
-//	}
-
-//	/** Create a blank copy */
-//	//DONE
-//	public WRaster createBlankCopy() {
-//		WRaster wg = create(colorscheme, width, height);
-//		wg.defaultBG   = defaultBG;
-//		wg.defaultFG   = defaultFG;
-//		return wg;
-//	};
 
 	//===========================================
 	// tagval helper methods
@@ -513,71 +468,26 @@ abstract public class WRaster {
 	//===========================================
 	// methods to generate various image objects
 	
-	/** Get raw rendered image */
-	public BufferedImage getImage() {
-		BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		DmsColor dc;
-		int rgb;
-		for (int y = 0; (y < height); ++y) {
-			for (int x = 0; (x < width); ++x) {
-				dc = getColor(x, y);
-				rgb = dc.rgb() & 0x0ffffff;
-				bi.setRGB(x, y, rgb);
-			}
-		}
-		return bi;
-	}
-
-//TODO:  Write this
-//	/** Get basic image with black border and row/column dividers. */
-//	public BufferedImage getPreviewImage() {
-//		int width2 = width;
-//		int height2 = height;
-//		fixModuleSize();
-//		if (moduleW > 1)
-//			width2 += (width / moduleW) + 1;
-//		if (moduleH > 1)
-//			height2 += (height / moduleH) + 1;
-//		BufferedImage bi = new BufferedImage(width2, height2, BufferedImage.TYPE_INT_RGB);
+//	/** Get raw rendered image.
+//	 * 
+//	 * This should never be needed.  Use
+//	 * getPreviewImage, getPreviewImageIcon,
+//	 * or getWysiwygImage() instead.
+//	 */
+//	public BufferedImage getImage() {
+//		BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 //		DmsColor dc;
 //		int rgb;
-//		// Borders and LED-module dividers are dark gray
-//		dc = new DmsColor(50, 50, 50);
-//		int darkGray = dc.rgb();
-//		//TODO: Rewrite to do this more efficiently
-//		for (int y = 0; (y < height2); ++y) {
-//			for (int x = 0; (x < width2); ++x) {
-//				bi.setRGB(x, y, darkGray);
-//			}
-//		}
-//		// draw black border
-//		for (int y = 0; (y < height2); ++y) {
-//			bi.setRGB(0,      y, darkGray);
-//			bi.setRGB(width2-1, y, darkGray);
-//		}
-//		for (int x = 0; (x < width2); ++x) {
-//			bi.setRGB(x, 0, darkGray);
-//			bi.setRGB(x, height2-1, darkGray);
-//		}
-//		// draw main area(s)
-//		int y2 = 0;
 //		for (int y = 0; (y < height); ++y) {
-//			if ((y % moduleH) == 0)
-//				++y2;
-//			int x2 = 0;
 //			for (int x = 0; (x < width); ++x) {
-//				if ((x % moduleW) == 0)
-//					++x2;
 //				dc = getColor(x, y);
-//				rgb = dc.rgb();
-//				bi.setRGB(x2, y2, rgb);
-//				++x2;
+//				rgb = dc.rgb() & 0x0ffffff;
+//				bi.setRGB(x, y, rgb);
 //			}
-//			++y2;
 //		}
 //		return bi;
 //	}
-	
+
 	/** Generate preview-image with black border and row/column dividers. */
 	public BufferedImage getPreviewImage() {
 		int dividers = 2;
@@ -603,15 +513,6 @@ abstract public class WRaster {
 			}
 		}
 
-//		// draw black border
-//		for (int y = 0; (y < height2); ++y) {
-//			bi.setRGB(0,      y, darkGray);
-//			bi.setRGB(width2-1, y, darkGray);
-//		}
-//		for (int x = 0; (x < width2); ++x) {
-//			bi.setRGB(x, 0, darkGray);
-//			bi.setRGB(x, height2-1, darkGray);
-//		}
 		// copy main area(s)
 		int x, x2, y, y2;
 		y2 = 0;
@@ -625,10 +526,6 @@ abstract public class WRaster {
 				dc = getColor(x, y);
 				rgb = dc.rgb();
 				bi.setRGB(x2, y2, rgb);
-//				bi.setRGB(x2+1, y2, rgb);
-//				bi.setRGB(x2, y2+1, rgb);
-//				rgb = (rgb >> 1) & 0x7f7f7f; // divide brightness by 2
-//				bi.setRGB(x2+1, y2+1, rgb);
 				x2 += 2;
 			}
 			y2 += 2;
@@ -713,7 +610,8 @@ abstract public class WRaster {
 		return (int) Math.round(gray * maxGray / 256);
 	}
 
-	/** Dump a grayscale text representation to a buffered writer 
+	/** Dump a grayscale text representation
+	 *  of raster image to a buffered writer.
 	 * @throws IOException */
 	public void dumpGray(PrintWriter out) {
 //		String grayStr = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
@@ -747,7 +645,7 @@ abstract public class WRaster {
 	}
 
 	/** Save a BufferedImage to a .png file. */
-	public void dumpPng(BufferedImage bi, String filename) {
+	static public void dumpPng(BufferedImage bi, String filename) {
 		File out = new File(filename);
 		try {
 			ImageIO.write(bi, "png", out);
@@ -757,16 +655,16 @@ abstract public class WRaster {
 		}
 	}
 
-	//-------------------------------------------
-	// Token coordinate management
-
-	/** Add token to raster. (Coordinates of
-	 *  token are updated as part of raster
-	 *  copy operations.) */
-	public void bindToken(WToken tok) {
-//		tok.clearTokCoordinates();
-		tokens.add(tok);
-	}
+//	//-------------------------------------------
+//	// Token coordinate management
+//
+//	/** Add token to raster. (Coordinates of
+//	 *  token are updated as part of raster
+//	 *  copy operations.) */
+//	public void bindToken(WToken tok) {
+////		tok.clearTokCoordinates();
+//		tokens.add(tok);
+//	}
 
 	//===========================================
 	// Subclass (Color-scheme specific) methods
@@ -824,7 +722,7 @@ abstract public class WRaster {
 	class IntArrayGen {
 		private int[] ia;
 		private int maxLen;
-		private int offset = 0;
+		public int offset = 0;
 		private boolean bError = false;
 		private float excess = 0;
 		
@@ -862,7 +760,7 @@ abstract public class WRaster {
 	 * @param arrayLen        Total length of array
 	 * @param pixelsPerBorder Length of border
 	 * @param modulesPerFace  Number of modules
-	 * @param pixelsPerModSep Length of module separator
+	 * @param pixPerModuleSepX Length of module separator
 	 * @param ledsPerModule   Number of LEDs per module
 	 * @param pixelsPerLed    Length of single LED
 	 * @return The coordinate array.
@@ -871,7 +769,7 @@ abstract public class WRaster {
 			int arrayLen,
 			int pixelsPerBorder,
 			int modulesPerFace,
-			int pixelsPerModSep,
+			float pixPerModuleSepX,
 			int ledsPerModule, 
 			float pixelsPerLed) {
 		IntArrayGen gen = new IntArrayGen(arrayLen);
@@ -879,7 +777,7 @@ abstract public class WRaster {
 		int pixNum = 0;
 		for (int mod = 0; (mod < modulesPerFace); ++mod) {
 			if (mod > 0)
-				gen.add(MODULE_SEPARATOR, pixelsPerModSep);
+				gen.add(MODULE_SEPARATOR, pixPerModuleSepX);
 			for (int modPix = 0; (modPix < ledsPerModule); ++modPix) {
 				if (modPix == 0)
 					gen.add(PIXEL_SEPARATOR);
@@ -888,43 +786,9 @@ abstract public class WRaster {
 			}
 		}
 		gen.add(SIGN_BORDER, pixelsPerBorder);
+		WRenderer.println("   "+gen.offset);
 		return gen.getArray();
 	}
-
-//	/** Generate horizontal or vertical coordinate array.
-//	 * @param arrayLen        Total length of array
-//	 * @param pixelsPerBorder Length of border
-//	 * @param modulesPerFace  Number of modules
-//	 * @param pixelsPerModSep Length of module separator
-//	 * @param ledsPerModule   Number of LEDs per module
-//	 * @param pixelsPerLed    Length of single LED
-//	 * @param pixelsPerLedSep Length of LED separator
-//	 * @return The coordinate array.
-//	 */
-//	private int[] genCoordArray(
-//			int arrayLen,
-//			int pixelsPerBorder,
-//			int modulesPerFace,
-//			int pixelsPerModSep,
-//			int ledsPerModule, 
-//			float pixelsPerLed,
-//			int pixelsPerLedSep) {
-//		IntArrayGen gen = new IntArrayGen(arrayLen);
-//		gen.add(SIGN_BORDER, pixelsPerBorder);
-//		int pixNum = 0;
-//		for (int mod = 0; (mod < modulesPerFace); ++mod) {
-//			if (mod > 0)
-//				gen.add(MODULE_SEPARATOR, pixelsPerModSep);
-//			for (int modPix = 0; (modPix < ledsPerModule); ++modPix) {
-//				if (modPix == 0)
-//					gen.add(PIXEL_SEPARATOR, pixelsPerLedSep);
-//				gen.add(pixNum++, pixelsPerLed);
-//				gen.add(PIXEL_SEPARATOR, pixelsPerLedSep);
-//			}
-//		}
-//		gen.add(SIGN_BORDER, pixelsPerBorder);
-//		return gen.getArray();
-//	}
 
 	/** Set width/height for WISIWIG sign-image.
 	 *  (Generates horizontal and vertical
@@ -947,19 +811,7 @@ abstract public class WRaster {
 			throw new InvalidMsgException("Invalid WYSIWYG-image size");
 		wysiwygImgWidth  = pixWidth;
 		wysiwygImgHeight = pixHeight;
-		int mmPerFaceX = mcfg.getFaceWidth() - (mcfg.getBorderHoriz() * 2);
-		int mmPerFaceY = mcfg.getFaceHeight() - (mcfg.getBorderVert() * 2);
 		DMSType dmsType = mcfg.getDmsType();
-//		if (dmsType == DMSType.UNKNOWN) {
-//			if (mcfg.getCharHeight() > 0) {
-//				if (mcfg.getCharWidth() > 0)
-//					dmsType = DMSType.VMS_CHAR;
-//				else
-//					dmsType = DMSType.VMS_LINE;
-//			}
-//			else
-//				dmsType = DMSType.VMS_FULL;
-//		}
 		int ledsPerFaceX = width;
 		int ledsPerFaceY = height;
 		int ledsPerModuleX;
@@ -1004,41 +856,29 @@ abstract public class WRaster {
 					"Can't use WYSIWYG editor on "
 					+ mcfg.getDmsType()	+ " signs");
 		}
+		// a "space" is one led-width or led-height
+		float spacesPerFaceX = (float) (width  + ((modulesPerFaceX - 1) * 1.5));
+		float spacesPerFaceY = (float) (height + ((modulesPerFaceY - 1) * 4.0));
 
 		int pixBorderHoriz = 20;
 		int pixBorderVert  = 20;
+		// calc number of pix not used by border and led-separators
 		int pixPerFaceX = pixWidth  - (sepCountX + (pixBorderHoriz*2));
 		int pixPerFaceY = pixHeight - (sepCountY + (pixBorderVert*2));
-		float pixPerMMX = (float)pixPerFaceX / (float)mmPerFaceX;
-		float pixPerMMY = (float)pixPerFaceY / (float)mmPerFaceY;
-		float pixPerMM = Math.min(pixPerMMX, pixPerMMY);
-
-		float pixPerLedX = mcfg.getPitchHoriz() * pixPerMM;
-		float pixPerLedY = mcfg.getPitchVert()  * pixPerMM;
-		int pixSpareX = (int) ((mmPerFaceX * pixPerMM) - (pixPerLedX * ledsPerFaceX));
-		if (pixSpareX < 0)
-			pixSpareX = 0;
-		int pixSpareY = (int) ((mmPerFaceY * pixPerMM) - (pixPerLedY * ledsPerFaceY));
-		if (pixSpareY < 0)
-			pixSpareY = 0;
-
-		int pixPerModuleSepX;
-		int pixPerModuleSepY; 
-		if (modulesPerFaceX <= 1)
-			pixPerModuleSepX = 0;
-		else
-			pixPerModuleSepX = pixSpareX / (modulesPerFaceX - 1);
-		if (modulesPerFaceY <= 1)
-			pixPerModuleSepY = 0;
-		else
-			pixPerModuleSepY = pixSpareY / (modulesPerFaceY - 1);
+		// calc pix size of each LED (not counting separators)
+		float pixPerLedX = (float)pixPerFaceX / spacesPerFaceX;
+		float pixPerLedY = (float)pixPerFaceY / spacesPerFaceY;
+		float pixPerLed = Math.min(pixPerLedX, pixPerLedY);
+		float pixPerModuleSepX = (float) (pixPerLed * 1.5);
+		float pixPerModuleSepY = (float) (pixPerLed * 4.0);
+			
 		horizCoords = genCoordArray(
 				pixWidth,
 				pixBorderHoriz, //4, //int borderLen,
 				modulesPerFaceX,
 				pixPerModuleSepX,
 				ledsPerModuleX, 
-				pixPerLedX
+				pixPerLed
 				);
 		vertCoords = genCoordArray(
 				pixHeight,
@@ -1046,7 +886,7 @@ abstract public class WRaster {
 				modulesPerFaceY,
 				pixPerModuleSepY,
 				ledsPerModuleY, 
-				pixPerLedY
+				pixPerLed
 				);
 	}
 
@@ -1089,80 +929,79 @@ abstract public class WRaster {
 			}
 		}
 		return img;
-//		return super.getScaledInstance(width, height, hints);
 	}
 
-    //===========================================
-    // Convert WYSIWYG image coordinates
-    // to sign-tag coordinates
+	//===========================================
+	// Convert WYSIWYG image coordinates
+	// to sign-tag coordinates.  (Used
+	// for WYSIWYG mouse operations.)
 
-    private int findClosestSignCoord(int[] coords, int maxCoord, int wc) 
-                  throws IndexOutOfBoundsException {
-           if (coords == null)
-                  throw new IndexOutOfBoundsException("Uninitialized WYSIWIG coordinates");
-           if (wc < 0)
-                  return 1;
-           int len = coords.length;
-           if (wc >= len)
-                  return maxCoord+1;
-           int sc = coords[wc];
-           if (sc >= 0)
-                  return sc;
-           int d1 = wc - 1;
-           int sc1 = -1;
-           int d2 = wc + 1;
-           int sc2 = -1;
-           // search down
-           while (d1 >= 0) {
-                  sc1 = coords[d1];
-                  if (sc1 >= 0)
-                        break;
-                  --d1;
-           }
-           // search up
-           while (d2 < len) {
-                  sc2 = coords[d2];
-                  if (sc2 >= 0)
-                        break;
-                  ++d2;
-           }
-           // find closest LED coordinate
-           if (sc1 < 0) {
-                  if (sc2 < 0)
-                        throw new IndexOutOfBoundsException("Bad sign-coordinate array");
-                  return sc2;
-           }
-           if (sc2 < 0)
-                  return sc1;
-           return ((wc - d1) <= (d2 - wc)) ? sc1 : sc2;
-    }
-    
-    /** Convert horizontal WYSIWIG coordinate
-    *  to a sign-tag coordinate.
-    *  If the x coordinate points to a non-LED
-    *  part of the image, this returns the
-    *  closest LED coordinate.
-    * @param x  0-based horizontal image coordinate
-    * @return   1-based horizontal sign-tag coordinate
-    * @throws IndexOutOfBoundsException if the setWysiwygImageSize method has not been called
-    */
-    public int cvtWysiwygToSignX(int x)
-                  throws IndexOutOfBoundsException {
-           return findClosestSignCoord(horizCoords, width, x);
-    }
-    
-    /** Convert vertical WYSIWIG coordinate
-    *  to a sign-tag coordinate.
-    *  If the y coordinate points to a non-LED
-    *  part of the image, this returns the
-    *  closest LED coordinate.
-    * @param y  0-based vertical image coordinate
-    * @return   1-based vertical sign-tag coordinate
-    * @throws IndexOutOfBoundsException if the setWysiwygImageSize method has not been called
-    */
-    public int cvtWysiwygToSignY(int y)
-                  throws IndexOutOfBoundsException {
-           return findClosestSignCoord(vertCoords, height, y);
-    }
-
+	private int findClosestSignCoord(int[] coords, int maxCoord, int wc) 
+			throws IndexOutOfBoundsException {
+		if (coords == null)
+			throw new IndexOutOfBoundsException("Uninitialized WYSIWIG coordinates");
+		if (wc < 0)
+			return 1;
+		int len = coords.length;
+		if (wc >= len)
+			return maxCoord+1;
+		int sc = coords[wc];
+		if (sc >= 0)
+			return sc;
+		int d1 = wc - 1;
+		int sc1 = -1;
+		int d2 = wc + 1;
+		int sc2 = -1;
+		// search down
+		while (d1 >= 0) {
+			sc1 = coords[d1];
+			if (sc1 >= 0)
+				break;
+			--d1;
+		}
+		// search up
+		while (d2 < len) {
+			sc2 = coords[d2];
+			if (sc2 >= 0)
+				break;
+			++d2;
+		}
+		// find closest LED coordinate
+		if (sc1 < 0) {
+			if (sc2 < 0)
+				throw new IndexOutOfBoundsException("Bad sign-coordinate array");
+			return sc2;
+		}
+		if (sc2 < 0)
+			return sc1;
+		return ((wc - d1) <= (d2 - wc)) ? sc1 : sc2;
+	}
+	
+	/** Convert horizontal WYSIWIG coordinate
+	 *  to a sign-tag coordinate.
+	 *  If the x coordinate points to a non-LED
+	 *  part of the image, this returns the
+	 *  closest LED coordinate.
+	 * @param x  0-based horizontal image coordinate
+	 * @return   1-based horizontal sign-tag coordinate
+	 * @throws IndexOutOfBoundsException if the setWysiwygImageSize method has not been called
+	 */
+	public int cvtWysiwygToSignX(int x)
+			throws IndexOutOfBoundsException {
+		return findClosestSignCoord(horizCoords, width, x);
+	}
+	
+	/** Convert vertical WYSIWIG coordinate
+	 *  to a sign-tag coordinate.
+	 *  If the y coordinate points to a non-LED
+	 *  part of the image, this returns the
+	 *  closest LED coordinate.
+	 * @param y  0-based vertical image coordinate
+	 * @return   1-based vertical sign-tag coordinate
+	 * @throws IndexOutOfBoundsException if the setWysiwygImageSize method has not been called
+	 */
+	public int cvtWysiwygToSignY(int y)
+			throws IndexOutOfBoundsException {
+		return findClosestSignCoord(vertCoords, height, y);
+	}
 }
