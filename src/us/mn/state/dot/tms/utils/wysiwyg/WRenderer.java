@@ -1032,11 +1032,11 @@ public class WRenderer {
 //		testName = String.format("%s_%03d", name, ++testNo);
 		testName = name;
 		println("Testname: \""+testName+"\"");
-		println("Config: "+mcfg.genHashKey2());
 		if (mcfg == null) {
 			println("ERROR: Null mcfg");
 			return;
 		}
+		println("Config: "+mcfg.genHashKey2());
 		println("MULTI string: "+multiStr);
 		if (!mcfg.isUseable()) {
 			String[] errs = mcfg.getErrors();
