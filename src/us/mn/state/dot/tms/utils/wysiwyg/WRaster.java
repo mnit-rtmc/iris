@@ -1092,5 +1092,77 @@ abstract public class WRaster {
 //		return super.getScaledInstance(width, height, hints);
 	}
 
+    //===========================================
+    // Convert WYSIWYG image coordinates
+    // to sign-tag coordinates
+
+    private int findClosestSignCoord(int[] coords, int maxCoord, int wc) 
+                  throws IndexOutOfBoundsException {
+           if (coords == null)
+                  throw new IndexOutOfBoundsException("Uninitialized WYSIWIG coordinates");
+           if (wc < 0)
+                  return 1;
+           int len = coords.length;
+           if (wc >= len)
+                  return maxCoord+1;
+           int sc = coords[wc];
+           if (sc >= 0)
+                  return sc;
+           int d1 = wc - 1;
+           int sc1 = -1;
+           int d2 = wc + 1;
+           int sc2 = -1;
+           // search down
+           while (d1 >= 0) {
+                  sc1 = coords[d1];
+                  if (sc1 >= 0)
+                        break;
+                  --d1;
+           }
+           // search up
+           while (d2 < len) {
+                  sc2 = coords[d2];
+                  if (sc2 >= 0)
+                        break;
+                  ++d2;
+           }
+           // find closest LED coordinate
+           if (sc1 < 0) {
+                  if (sc2 < 0)
+                        throw new IndexOutOfBoundsException("Bad sign-coordinate array");
+                  return sc2;
+           }
+           if (sc2 < 0)
+                  return sc1;
+           return ((wc - d1) <= (d2 - wc)) ? sc1 : sc2;
+    }
+    
+    /** Convert horizontal WYSIWIG coordinate
+    *  to a sign-tag coordinate.
+    *  If the x coordinate points to a non-LED
+    *  part of the image, this returns the
+    *  closest LED coordinate.
+    * @param x  0-based horizontal image coordinate
+    * @return   1-based horizontal sign-tag coordinate
+    * @throws IndexOutOfBoundsException if the setWysiwygImageSize method has not been called
+    */
+    public int cvtWysiwygToSignX(int x)
+                  throws IndexOutOfBoundsException {
+           return findClosestSignCoord(horizCoords, width, x);
+    }
+    
+    /** Convert vertical WYSIWIG coordinate
+    *  to a sign-tag coordinate.
+    *  If the y coordinate points to a non-LED
+    *  part of the image, this returns the
+    *  closest LED coordinate.
+    * @param y  0-based vertical image coordinate
+    * @return   1-based vertical sign-tag coordinate
+    * @throws IndexOutOfBoundsException if the setWysiwygImageSize method has not been called
+    */
+    public int cvtWysiwygToSignY(int y)
+                  throws IndexOutOfBoundsException {
+           return findClosestSignCoord(vertCoords, height, y);
+    }
 
 }
