@@ -984,7 +984,9 @@ public class WRenderer {
 	
 	static public void println(String str) {
 		System.out.println(str);
-		out.println(str);
+		if (out != null) {
+			out.println(str);
+		}
 	}
 	
 //	static public void test2(MultiConfig mcfg, String multiStr) {
