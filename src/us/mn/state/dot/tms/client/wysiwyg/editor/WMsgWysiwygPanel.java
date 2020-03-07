@@ -23,6 +23,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.awt.event.ActionEvent;
@@ -56,11 +57,12 @@ import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 
 /**
  * WYSIWYG DMS Message Editor WYSIWYG Tab - This one has the good stuff...
  *
- * @author Gordon Parikh, John L. Stanley - SRF Consulting
+ * @author Gordon Parikh - SRF Consulting
  */
 @SuppressWarnings("serial")
 
@@ -103,7 +105,8 @@ public class WMsgWysiwygPanel extends JPanel {
 	private JPanel multitag_toolbar_pnl;
 	
 	/** Sign pixel panel to display the current sign message page */
-	private SignPixelPanel pixel_pnl;
+//	private SignPixelPanel pixel_pnl;
+	private WImagePanel signPanel;
 	
 	public WMsgWysiwygPanel(WController c) {
 		controller = c;
@@ -161,9 +164,11 @@ public class WMsgWysiwygPanel extends JPanel {
 		add(toolbar_pnl);
 		
 		// sign face panel - the main show
-		pixel_pnl = new SignPixelPanel(250, 550);
-		controller.setPixelPanel(pixel_pnl);
-		add(pixel_pnl);
+//		pixel_pnl = new SignPixelPanel(250, 550);
+//		controller.setPixelPanel(pixel_pnl);
+//		add(pixel_pnl);
+		signPanel = new WImagePanel(550, 250);
+		add(signPanel);
 		
 		// mouse input adapter for handling mouse events
 		
@@ -173,19 +178,19 @@ public class WMsgWysiwygPanel extends JPanel {
 		 */
 		
 		WMsgMouseInputAdapter mouseHandler = new WMsgMouseInputAdapter(controller);
-		pixel_pnl.addMouseListener(mouseHandler);
-		pixel_pnl.addMouseMotionListener(mouseHandler);
+		signPanel.addMouseListener(mouseHandler);
+		signPanel.addMouseMotionListener(mouseHandler);
 	}
 	
 	/** Set the currently selected page to display */
-	public void setPage(WMsgSignPage sp) {
+	public void setPage(WPage sp) {
 		// update the rendering on the pixel panel
-		sp.renderToPanel(pixel_pnl);
+		signPanel.setPage(sp);
 	}
 	
 	/** Get the pixel panel from the WYSIWYG editor panel */
-	public SignPixelPanel getEditorPixelPanel() {
-		return pixel_pnl; 
+	public WImagePanel getWImagePanel() {
+		return signPanel; 
 	}
 	
 	/***** Button Actions *****/

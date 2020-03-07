@@ -67,11 +67,12 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiString;
+import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 
 /**
  * WYSIWYG DMS Message Editor Form
  *
- * @author Gordon Parikh and John L. Stanley - SRF Consulting
+ * @author Gordon Parikh - SRF Consulting
  */
 @SuppressWarnings("serial")
 
@@ -111,7 +112,7 @@ public class WMsgEditorForm extends AbstractForm {
 	private JButton page_del_btn;
 	private JButton page_mv_up_btn;
 	private JButton page_mv_down_btn;
-	private JList<WMsgSignPage> page_list;
+	private JList<WPage> page_list;
 	private JScrollPane page_list_pn;
 	
 	/* Main Editor Panel */
@@ -380,8 +381,8 @@ public class WMsgEditorForm extends AbstractForm {
 	}
 
 	/** Get the pixel panel from the WYSIWYG editor panel */
-	public SignPixelPanel getEditorPixelPanel() {
-		return epanel.getEditorPixelPanel();
+	public WImagePanel getWImagePanel() {
+		return epanel.getWImagePanel();
 	}
 	
 	/** Set the menu bar of the frame (which should be this form's frame. */
@@ -398,7 +399,7 @@ public class WMsgEditorForm extends AbstractForm {
 	 */
 	public void updateWysiwygPanel() {
 		// use the currently selected page to update the main WYSIWYG panel
-		WMsgSignPage selectedPage = controller.getSelectedPage();
+		WPage selectedPage = controller.getSelectedPage();
 		if (selectedPage != null)
 			epanel.updateWysiwygSignPage(selectedPage);
 	}

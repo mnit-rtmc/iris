@@ -34,13 +34,15 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 
 /**
  * Renderer for a DMS message page in a list.
  *
  * @author Gordon Parikh - SRF Consulting
  */
-public class WMsgSignPageListRenderer extends JPanel implements ListCellRenderer<WMsgSignPage> {
+public class WMsgSignPageListRenderer extends JPanel implements ListCellRenderer<WPage> {
 
 	/** List cell renderer (needed for colors) */
 	private final DefaultListCellRenderer cell =
@@ -52,8 +54,10 @@ public class WMsgSignPageListRenderer extends JPanel implements ListCellRenderer
 	/** Sign ID label */
 	private final JLabel pgnum_lbl = new JLabel();
 
-	/** Sign pixel panel to display sign message */
-	private final SignPixelPanel pixel_pnl = new SignPixelPanel(50, 200);
+	/** Image panel to display sign message */
+	
+//	private final SignPixelPanel pixel_pnl = new SignPixelPanel(50, 200);
+	private final WImagePanel signPanel = new WImagePanel(200,50);
 	
 	/** Location panel */
 	private final JPanel info_pnl = new JPanel();
@@ -82,47 +86,58 @@ public class WMsgSignPageListRenderer extends JPanel implements ListCellRenderer
 		info_pnl.add(info_lbl);
 //		info_pnl.setAlignmentX(Component.LEFT_ALIGNMENT);
 		add(title_pnl, BorderLayout.NORTH);
-		add(pixel_pnl, BorderLayout.CENTER);
+		add(signPanel, BorderLayout.CENTER);
 		add(info_pnl, BorderLayout.SOUTH);
 	}
 
 	private void setPreferredSize() {
-		Dimension pix_pnl_size = pixel_pnl.getPreferredSize();
+		Dimension pix_pnl_size = signPanel.getPreferredSize();
 		int width = pix_pnl_size.width;
 		// set a dummy page number so we can get a preferred height for the 
 		// labels
 		pgnum_lbl.setText("Page 1");
-		int height = 4*pgnum_lbl.getPreferredSize().height + pix_pnl_size.height;
+		int height = 8*pgnum_lbl.getPreferredSize().height + pix_pnl_size.height;
 		System.out.println(String.format("Width = %d, Height = %d", width, height));
 		setPreferredSize(new Dimension(width, height));
 	}
 	
 	/** Get a component configured to render a cell of the list */
 	@Override
-	public Component getListCellRendererComponent(JList<? extends WMsgSignPage> list,
-			WMsgSignPage sp, int index, boolean isSelected, boolean hasFocus)
+	public Component getListCellRendererComponent(JList<? extends WPage> list,
+			WPage sp, int index, boolean isSelected, boolean hasFocus)
 	{
 		if (isSelected) {
 			title_pnl.setBackground(list.getSelectionBackground());
-			pixel_pnl.setBackground(list.getSelectionBackground());
+			signPanel.setBackground(list.getSelectionBackground());
 			info_pnl.setBackground(list.getSelectionBackground());
 			setBackground(list.getSelectionBackground());
 //			title_pnl.setForeground(list.getSelectionForeground());
 		} else {
 			title_pnl.setBackground(pgnum_lbl.getBackground());
-			pixel_pnl.setBackground(pgnum_lbl.getBackground());
+			signPanel.setBackground(pgnum_lbl.getBackground());
 			info_pnl.setBackground(pgnum_lbl.getBackground());
 			setBackground(pgnum_lbl.getBackground());
 //			title_pnl.setForeground(pgnum_lbl.getForeground());
 		}
+		pgnum_lbl.setText(WController.getPageNumberLabel(index));
 		renderSignPage(sp);
 		return this;
 	}
 
 	/** Render the Sign Page */
-	private void renderSignPage(WMsgSignPage sp) {
-		pgnum_lbl.setText(sp.getPageNumberLabel());
-		sp.renderToPanel(pixel_pnl);
-		info_lbl.setText(sp.getPageInfo());
+	private void renderSignPage(WPage sp) {
+		signPanel.setPage(sp);
+		info_lbl.setText(getPageInfo(sp));
+	}
+	
+	/** Create the page info label from the page on/off time */
+	private String getPageInfo(WPage sp) {
+		// calculate page on and off time in seconds (WPage gives deciseconds)
+		int pgOnInt = sp.getPageOn()/10;
+		int pgOffInt = sp.getPageOff()/10;
+		
+		String pgOnStr = String.format(I18N.get("wysiwyg.editor.page_on"), pgOnInt);
+		String pgOffStr = String.format(I18N.get("wysiwyg.editor.page_off"), pgOffInt);
+		return String.format("%s   %s", pgOnStr, pgOffStr);
 	}
 }

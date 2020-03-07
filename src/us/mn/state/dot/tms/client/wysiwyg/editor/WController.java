@@ -23,6 +23,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.IllegalFormatException;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -47,6 +48,9 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
+import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
+import us.mn.state.dot.tms.utils.wysiwyg.WPage;
+import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.MultiString;
 
@@ -54,7 +58,7 @@ import us.mn.state.dot.tms.utils.MultiString;
  * WYSIWYG DMS Message Editor Controller for handling exchanges between the
  * editor GUI form and the renderer.
  *
- * @author Gordon Parikh and John L. Stanley - SRF Consulting
+ * @author Gordon Parikh - SRF Consulting
  */
 @SuppressWarnings("serial")
 
@@ -96,6 +100,9 @@ public class WController {
 	/** MultiConfig for config-related stuff  */
 	private MultiConfig multiConfig;
 	
+	/** WMessage for working with rendered message */
+	private WMessage wmsg;
+	
 	/** Current Font
 	 *  TODO need some model for this, I don't think it can just be one */
 	private Font currentFont;
@@ -106,8 +113,8 @@ public class WController {
 	
 	/** Page list */
 	// TODO should we make this a generic array? might make more sense but w/e
-	private DefaultListModel<WMsgSignPage> page_list_model;
-	private JList<WMsgSignPage> page_list;
+	private DefaultListModel<WPage> page_list_model;
+	private JList<WPage> page_list;
 	
 	/** DMS List (for sign groups) */
 	private Map<String,DMS> dmsList;
@@ -116,7 +123,7 @@ public class WController {
 	
 	/** Currently selected page (defaults to first available) */
 	private int selectedPageIndx = 0;
-	private WMsgSignPage selectedPage;
+	private WPage selectedPage;
 	
 	public WController() {
 		// empty controller - everything will be set later as it is available
@@ -292,15 +299,15 @@ public class WController {
 	}
 	
 	/** Return a JList of WMsgSignPage objects from the selected/created message */
-	public JList<WMsgSignPage> getPageList() {
-		page_list_model = new DefaultListModel<WMsgSignPage>();
+	public JList<WPage> getPageList() {
+		page_list_model = new DefaultListModel<WPage>();
 		updatePageListModel();
 
 		// reset the list
-		page_list = new JList<WMsgSignPage>(page_list_model);
+		page_list = new JList<WPage>(page_list_model);
 		
 		// set the renderer on the list
-		ListCellRenderer<WMsgSignPage> rndr = new WMsgSignPageListRenderer();
+		ListCellRenderer<WPage> rndr = new WMsgSignPageListRenderer();
 		page_list.setCellRenderer(rndr);
 		
 		// set up the page selection handler
@@ -336,8 +343,18 @@ public class WController {
 		update();
 	}
 	
+	/** Render the message using the current MULTI String and MultiConfig */
+	private void renderMsg() {
+		// update the WMessage object and re-render if we have a MultiConfig
+		wmsg = new WMessage(multiStringText);
+		System.out.println(multiStringText);
+		if (multiConfig != null)
+			wmsg.renderMsg(multiConfig);
+	}
+	
 	/** Update everything that needs updating */
 	public void update() {
+		renderMsg();
 		updatePageListModel();
 		updateCursor();
 		
@@ -347,17 +364,19 @@ public class WController {
 	/** Update the model containing the list of WMsgSignPage objects. Note
 	 *  that page_list_model must already exist */
 	private void updatePageListModel() {
+		// render if we haven't
+		if (wmsg == null)
+			renderMsg();
+		
 		// make sure the model exists
 		if (page_list_model != null) {
 			// clear the model
 			page_list_model.clear();
 			
-			if (sign != null) {
+			if (wmsg.isValid()) {
 				// get the pages for the message and add them to the model
-				multiString = new MultiString(multiStringText);
-				for (int i = 0; i < multiString.getNumPages(); i++) {
-					WMsgSignPage sp = new WMsgSignPage(sign, multiString, i);
-					page_list_model.addElement(sp);
+				for (int i = 1; i <= wmsg.getNumPages(); i++) {
+					page_list_model.addElement(wmsg.getPage(i));
 				}
 	
 				// update the selected page
@@ -370,13 +389,23 @@ public class WController {
 	private void updateSelectedPage() {
 		// make sure the selected page still exists
 		if (selectedPageIndx >= page_list_model.getSize()) 
-			selectedPageIndx = page_list_model.getSize() - 1;
+			selectedPageIndx = page_list_model.getSize()-1;
 		
-		selectedPage = (WMsgSignPage) page_list_model.get(selectedPageIndx);
+		selectedPage = (WPage) page_list_model.get(selectedPageIndx);
 		
 		if (editor != null) {
-			editor.setPageNumberLabel(selectedPage.getPageNumberLabel());
+			editor.setPageNumberLabel(getPageNumberLabel(selectedPageIndx));
 			editor.updateWysiwygPanel();
+		}
+	}
+	
+	/** Get the label indicating the page number */
+	public static String getPageNumberLabel(int pn) {
+		try {
+			return String.format(I18N.get("wysiwyg.editor.page_number"),
+					pn+1);
+		} catch (IllegalFormatException e) {
+			return "Page" + pn+1;
 		}
 	}
 	
@@ -571,7 +600,7 @@ public class WController {
 		return sign;
 	}
 	
-	public WMsgSignPage getSelectedPage() {
+	public WPage getSelectedPage() {
 		return selectedPage;
 	}
 }

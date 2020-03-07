@@ -63,9 +63,10 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.client.wysiwyg.selector.WMsgSelectorSignProcess;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WMsgEditorForm;
-import us.mn.state.dot.tms.client.wysiwyg.editor.WMsgSignPage;
+import us.mn.state.dot.tms.client.wysiwyg.editor.WPagePanel;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WController;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 
 /**
  * WYSIWYG DMS Message Editor Selector Form
@@ -112,7 +113,7 @@ public class WMsgSelectorForm extends AbstractForm {
 	private WController controller;
 	
 	/** Use the page list as the message preview */
-	private JList<WMsgSignPage> msg_preview;
+	private JList<WPage> msg_preview;
     
 	/** Buttons */
 	private JButton reload_btn;
@@ -384,10 +385,10 @@ public class WMsgSelectorForm extends AbstractForm {
 
 		/* Initialize a controller for rendering a preview */
 		controller = new WController();
-		msg_preview = controller.getPageList();
+//		msg_preview = controller.getPageList();
 		
 		/* Disable selection on the message preview */
-		msg_preview.setSelectionModel(new DisabledSelectionModel());
+//		msg_preview.setSelectionModel(new DisabledSelectionModel());
 		
 		/** Sign list */
 		ListModel<String> dmsNamesModel = new AbstractListModel<String>() {
@@ -825,12 +826,12 @@ public class WMsgSelectorForm extends AbstractForm {
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		p.add(new JLabel(I18N.get("wysiwyg.selector.preview")), gbc);
 		
-		/* Preview Pane */
-		gbc.gridx = 9;
-		gbc.gridy = 1;
-		gbc.gridheight = 3;
-		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
-		p.add(msg_preview, gbc);
+//		/* Preview Pane */
+//		gbc.gridx = 9;
+//		gbc.gridy = 1;
+//		gbc.gridheight = 3;
+//		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+//		p.add(msg_preview, gbc);
 		
 		add(p);
 	}

@@ -21,11 +21,12 @@ import javax.swing.JTabbedPane;
 import us.mn.state.dot.tms.client.dms.SignFacePanel;
 import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 
 /**
  * WYSIWYG DMS Message Editor Pane
  *
- * @author Gordon Parikh, John L. Stanley - SRF Consulting
+ * @author Gordon Parikh - SRF Consulting
  */
 @SuppressWarnings("serial")
 
@@ -65,14 +66,14 @@ public class WMsgEditorPanel extends JPanel {
 	
 	/** Update the main WYSIWYG panel with the currently selected page (called
 	 *  from the main form). */
-	public void updateWysiwygSignPage(WMsgSignPage sp) {
+	public void updateWysiwygSignPage(WPage sp) {
 		// use the currently selected page to update the main WYSIWYG panel
 		wysiwyg_pnl.setPage(sp);
 	}
 
 	/** Get the pixel panel from the WYSIWYG editor panel */
-	public SignPixelPanel getEditorPixelPanel() {
-		return wysiwyg_pnl.getEditorPixelPanel(); 
+	public WImagePanel getWImagePanel() {
+		return wysiwyg_pnl.getWImagePanel(); 
 	}
 }
 

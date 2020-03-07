@@ -43,7 +43,7 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Gordon Parikh - SRF Consulting
  */
 
-public class WMsgSignPage extends Component {
+public class WPagePanel extends Component {
 
 	// TODO TODO TODO
 
@@ -61,7 +61,7 @@ public class WMsgSignPage extends Component {
 	private RasterBuilder rb;
 	private RasterGraphic prg;
 	
-	public WMsgSignPage(DMS d, MultiString m, int pageNum) {
+	public WPagePanel(DMS d, MultiString m, int pageNum) {
 		sign = d;
 		ms = m;
 		pn = pageNum;

@@ -80,7 +80,7 @@ import us.mn.state.dot.tms.utils.MultiString;
 /**
  * WYSIWYG DMS Message Editor Color Chooser
  *
- * @author Gordon Parikh and John L. Stanley - SRF Consulting
+ * @author Gordon Parikh - SRF Consulting
  */
 @SuppressWarnings("serial")
 
