@@ -94,6 +94,17 @@ abstract public class WToken {
 		return true;
 	}
 
+	/** Check if the point (x, y) is inside this token.
+	 *  TODO need to add a buffer and leave room for clicking on edges. */
+	public boolean isInside(int x, int y) {
+		// calculate right edge and bottom edge coordinates
+		int rX = coordX + coordW;
+		int bY = coordY + coordH;
+		boolean inX = (x >= coordX) && (x <= rX);
+		boolean inY = (y >= coordY) && (y <= bY);
+		return inX && inY;
+	}
+	
 //	/** Do we want to use an AnchorChar to
 //	 *  find the coordinates of this token? */
 //	public boolean useAnchor() {
@@ -201,7 +212,7 @@ abstract public class WToken {
 		this.paramY = tokY;
 	}
 
-	/** Return token width in pixels.
+	/** Return token parameter width in pixels.
 	 * @return the width 
 	 */
 	public Integer getParamW() {
@@ -214,14 +225,14 @@ abstract public class WToken {
 //		return (paramW != null) ? paramW : defW;
 //	}
 
-	/** Set token width in pixels.
+	/** Set token parameter width in pixels.
 	 * @param the width
 	 */
 	public void setParamW(Integer tokW) {
 		this.paramW = tokW;
 	}
 
-	/** Return token height in pixels.
+	/** Return token parameter height in pixels.
 	 * @return the height
 	 */
 	public Integer getParamH() {
@@ -234,7 +245,7 @@ abstract public class WToken {
 //		return (paramH != null) ? paramH : defH;
 //	}
 
-	/** Set token height in pixels.
+	/** Set token parameter height in pixels.
 	 * @param the height
 	 */
 	public void setParamH(Integer tokH) {
@@ -257,6 +268,34 @@ abstract public class WToken {
 		coordW = w;
 		coordH = h;
 		//TODO: Limit coordinates to within the main raster
+	}
+	
+	/** Return token X coordinate in pixels.
+	 * @return the X coordinate
+	 */
+	public Integer getCoordX() {
+		return coordX;
+	}
+	
+	/** Return token Y coordinate in pixels.
+	 * @return the Y coordinate
+	 */
+	public Integer getCoordY() {
+		return coordY;
+	}
+	
+	/** Return token coordinate width in pixels.
+	 * @return the width
+	 */
+	public Integer getCoordW() {
+		return coordW;
+	}
+	
+	/** Return token coordinate height in pixels.
+	 * @return the height
+	 */
+	public Integer getCoordH() {
+		return coordH;
 	}
 	
 	public boolean validCoordinates() {

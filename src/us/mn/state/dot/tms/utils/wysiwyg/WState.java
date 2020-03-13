@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.utils.MultiRenderer;
 /** WYSIWYG-editor State
  * 
  * @author John L. Stanley - SRF Consulting
+ * @author Gordon Parikh - SRF Consulting
  *
  */
 public class WState {
@@ -56,6 +57,27 @@ public class WState {
 	public int pageOn;
 	public int pageOff;
 
+	public WToken currentTok;
+	public WTokenList tokensBefore;
+	public WTokenList tokensAfter;
+	
+	public int lastClickX;
+	public int lastClickY;
+	
+	public int mousePosX;
+	public int mousePosY;
+	
+	public boolean mouseButtonLeft;
+	public boolean mouseButtonRight;
+	public boolean mouseButtonMiddle;
+	
+	public int cursorX;
+	public int cursorY;
+	public int cursorW;
+	public int cursorH;
+	
+	
+	
 	//-------------------------------------------
 
 	public static int getDeciseconds(SystemAttrEnum attr) {
@@ -76,6 +98,7 @@ public class WState {
 	//-------------------------------------------
 	
 	/** Copy constructor */
+	// TODO need to add more stuff here 
 	public WState(WState old) {
 		bgPixel     = old.bgPixel;
 		fgPixel     = old.fgPixel;
@@ -134,5 +157,13 @@ public class WState {
 	/** Get current font */
 	public WFont getWFont() {
 		return wfont;
+	}
+	
+	/** Set the current token, moving the cursor and stuff */
+	public void setCurrentToken(WToken tok) {
+		currentTok = tok;
+		
+		// fill the tokensBefore and tokensAfter lists
+//		int indx = 
 	}
 }

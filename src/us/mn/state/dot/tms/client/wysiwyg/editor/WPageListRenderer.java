@@ -42,7 +42,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WPage;
  *
  * @author Gordon Parikh - SRF Consulting
  */
-public class WMsgSignPageListRenderer extends JPanel implements ListCellRenderer<WPage> {
+public class WPageListRenderer extends JPanel implements ListCellRenderer<WPage> {
 
 	/** List cell renderer (needed for colors) */
 	private final DefaultListCellRenderer cell =
@@ -57,7 +57,7 @@ public class WMsgSignPageListRenderer extends JPanel implements ListCellRenderer
 	/** Image panel to display sign message */
 	
 //	private final SignPixelPanel pixel_pnl = new SignPixelPanel(50, 200);
-	private final WImagePanel signPanel = new WImagePanel(200,50);
+	private WImagePanel signPanel;
 	
 	/** Location panel */
 	private final JPanel info_pnl = new JPanel();
@@ -65,7 +65,8 @@ public class WMsgSignPageListRenderer extends JPanel implements ListCellRenderer
 	/** Sign location label */
 	private final JLabel info_lbl = new JLabel();
 	
-	public WMsgSignPageListRenderer() {
+	public WPageListRenderer() {
+		super(new BorderLayout());
 		setOpaque(true);
 		initialize();
 	}
@@ -74,16 +75,20 @@ public class WMsgSignPageListRenderer extends JPanel implements ListCellRenderer
 	 *  TODO alignment isn't doing what I want it to..... 
 	 *  */
 	private void initialize() {
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBorder(UI.cellRendererBorder());
+		signPanel = new WImagePanel(250,110, 0.5);
 		setPreferredSize();
 		title_pnl.setLayout(new BoxLayout(title_pnl, BoxLayout.X_AXIS));
 		title_pnl.add(Box.createHorizontalGlue());
 		title_pnl.add(pgnum_lbl);
+		title_pnl.add(Box.createHorizontalGlue());
 //		title_pnl.setAlignmentX(Component.LEFT_ALIGNMENT);
 //		pgnum_lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 		info_pnl.setLayout(new BoxLayout(info_pnl, BoxLayout.X_AXIS));
 		info_pnl.add(Box.createHorizontalGlue());
 		info_pnl.add(info_lbl);
+		info_pnl.add(Box.createHorizontalGlue());
 //		info_pnl.setAlignmentX(Component.LEFT_ALIGNMENT);
 		add(title_pnl, BorderLayout.NORTH);
 		add(signPanel, BorderLayout.CENTER);
@@ -96,9 +101,11 @@ public class WMsgSignPageListRenderer extends JPanel implements ListCellRenderer
 		// set a dummy page number so we can get a preferred height for the 
 		// labels
 		pgnum_lbl.setText("Page 1");
-		int height = 8*pgnum_lbl.getPreferredSize().height + pix_pnl_size.height;
+		int height = 2*pgnum_lbl.getPreferredSize().height+10 + pix_pnl_size.height;
 		System.out.println(String.format("Width = %d, Height = %d", width, height));
-		setPreferredSize(new Dimension(width, height));
+		Dimension d = new Dimension(width, height);
+		setMinimumSize(d);
+		setPreferredSize(d);
 	}
 	
 	/** Get a component configured to render a cell of the list */

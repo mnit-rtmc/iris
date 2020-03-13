@@ -69,6 +69,10 @@ public class WPage {
 	public Iterator<WToken> tokens() {
 		return tokenList.iterator();
 	}
+	
+	public WTokenList getTokenList() {
+		return tokenList;
+	}
 
 	public boolean isValid() {
 		WToken tok;
@@ -111,7 +115,7 @@ public class WPage {
 		Iterator<WToken> it = tokenList.iterator();
 		while (it.hasNext()) {
 			tok = it.next();
-			System.out.println(tok.toString());
+//			System.out.println(tok.toString());
 			switch (tok.getAnchorLoc()) {
 				case BEFORE:
 					wr.addAnchor(tok);

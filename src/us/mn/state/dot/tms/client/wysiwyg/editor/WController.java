@@ -31,6 +31,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
+import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
@@ -48,8 +49,14 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
+import us.mn.state.dot.tms.utils.wysiwyg.WFontCache;
+import us.mn.state.dot.tms.utils.wysiwyg.WGraphicCache;
 import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
+import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
+import us.mn.state.dot.tms.utils.wysiwyg.WState;
+import us.mn.state.dot.tms.utils.wysiwyg.WToken;
+import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -78,7 +85,7 @@ public class WController {
 	/** Keep a handle to the editor form and sign pixel panel (TODO may 
 	 * change) for any updates we need to make from here */
 	private WMsgEditorForm editor;
-	private SignPixelPanel pixel_pnl;
+	private WImagePanel signPanel;
 	
 	/** Cursor that will change depending on mode, etc. */
 	// TODO should we make these final or have an initCursors method???
@@ -100,6 +107,15 @@ public class WController {
 	/** MultiConfig for config-related stuff  */
 	private MultiConfig multiConfig;
 	
+	/** Token lists for helping with cursor placement and stuff */
+	private WTokenList tokensBefore = new WTokenList();
+	private WTokenList tokensSelected = new WTokenList();
+	private WTokenList tokensAfter = new WTokenList();
+	
+	/** Font and graphics caches */
+	private WFontCache fontCache = new WFontCache();
+	private WGraphicCache graphicCache = new WGraphicCache();
+	
 	/** WMessage for working with rendered message */
 	private WMessage wmsg;
 	
@@ -112,9 +128,7 @@ public class WController {
 	private DmsColor bgColor;
 	
 	/** Page list */
-	// TODO should we make this a generic array? might make more sense but w/e
-	private DefaultListModel<WPage> page_list_model;
-	private JList<WPage> page_list;
+	private WPageList pageList;
 	
 	/** DMS List (for sign groups) */
 	private Map<String,DMS> dmsList;
@@ -217,68 +231,148 @@ public class WController {
 	 *  calculate the coordinates of the click on the sign itself, rather than
 	 *  the JPanel in which it resides.
 	 */
-	private Point2D transformSignCoordinates(int x, int y) {
-		// update the editor to make sure everything is in place
-		update();
+//	private Point2D transformSignCoordinates(int x, int y) {
+//		// update the editor to make sure everything is in place
+//		update();
+//		
+//		// get the AffineTransform object from the pixel panel
+//		if (editor != null) {
+//			
+//			AffineTransform t = pixel_pnl.getTransform();
+//			
+//			// calculate the adjusted coordinates of the click
+//			if (t != null) {
+//				int tx = (int) t.getTranslateX();
+//				int ty = (int) t.getTranslateY();
+//				return new Point2D.Double(x-tx, y-ty);
+//			}
+//		}
+//		return null;
+//	}
+	
+	/** Find the closest token on the page given a set of click coordinates. */
+	public void findClosestToken(int x, int y) {
+		// get the sign coordinates for working with the message
+		WRaster wr = selectedPage.getRaster();
+		int sx = wr.cvtWysiwygToSignX(x);
+		int sy = wr.cvtWysiwygToSignY(y);
 		
-		// get the AffineTransform object from the pixel panel
-		if (editor != null) {
-			AffineTransform t = pixel_pnl.getTransform();
-			
-			// calculate the adjusted coordinates of the click
-			if (t != null) {
-				int tx = (int) t.getTranslateX();
-				int ty = (int) t.getTranslateY();
-				return new Point2D.Double(x-tx, y-ty);
+		// find the closest token on this page
+		WToken tok = null;
+		Iterator<WToken> it = selectedPage.tokens();
+		while (it.hasNext()) {
+			WToken t = it.next();
+			if (t.isInside(sx, sy)) {
+				tok = t;
+				break;
 			}
 		}
-		return null;
+		
+		// TODO test code
+		// back-convert to click coordinates
+		int[] cx = wr.cvtSignToWysiwygX(sx);
+		int cx0 = -1, cx1 = -1;
+		if (cx.length == 2) {
+			cx0 = cx[0];
+			cx1 = cx[1];
+		} else if (cx.length == 1) {
+			cx0 = cx[0];
+		}
+		int[] cy = wr.cvtSignToWysiwygY(sy);
+		int cy0 = -1, cy1 = -1;
+		if (cy.length == 2) {
+			cy0 = cy[0];
+			cy1 = cy[1];
+		} else if (cy.length == 1) {
+			cy0 = cy[0];
+		}
+		
+		String tokStr = "NOT FOUND";
+		if (tok != null) {
+			tokStr = tok.toString();
+		
+			System.out.println(String.format(
+					"Click at (%d, %d) => sign coords (%d, %d) => (%d->%d, %d->%d)",
+					x, y, sx, sy, cx0, cx1, cy0, cy1));
+			System.out.println(String.format(
+					"Token '%s' found at coords (%d, %d) w/h (%d, %d)",
+					tokStr, tok.getCoordX(), tok.getCoordY(), tok.getCoordW(), tok.getCoordH()));
+			System.out.println(String.format(
+					"              Param coords (%d, %d) w/h (%d, %d)", 
+					tok.getParamX(), tok.getParamY(), tok.getParamW(), tok.getParamH()));
+			
+			// move the caret
+			moveCaret(tok);
+		} else {
+			System.out.println(String.format(
+					"Click at (%d, %d) => sign coords (%d, %d) => (%d->%d, %d->%d)",
+					x, y, sx, sy, cx0, cx1, cy0, cy1));
+		}
+	}
+	
+	/** Move the caret to the spot just before the specified token. Note that
+	 *  this doesn't select the token. */
+	public void moveCaret(WToken tok) {
+		// get a list of tokens on this page and find this token in the list
+		WTokenList pgTokens = selectedPage.getTokenList();
+		int tIndx = pgTokens.indexOf(tok);
+		if (tIndx != -1) {
+			// slice the list at the token
+			tokensBefore = pgTokens.slice(0, tIndx);
+			tokensAfter = pgTokens.slice(tIndx, pgTokens.size());
+			
+			// reset the selection
+			tokensSelected.clear();
+			
+			// set the new caret location
+			signPanel.setCaretLocation(tok);
+		}
 	}
 	
 	/** Handle a click on the main editor panel */
 	public void handleClick(MouseEvent e) {
 		// calculate the adjusted coordinates of the click
-		Point2D pSign = transformSignCoordinates(e.getX(), e.getY());
+//		Point2D pSign = transformSignCoordinates(e.getX(), e.getY());
 		
 		// just print for now
-		if (pSign != null) {
-			int b = e.getButton();
-			int x = (int) pSign.getX();
-			int y = (int) pSign.getY();
-			System.out.println(String.format(
-					"Mouse button %d clicked at (%d, %d) ...", b, x, y));
-		}
+//		if (pSign != null) {
+		int b = e.getButton();
+		int x = e.getX();
+		int y = e.getY();
+		
+		findClosestToken(x, y);
+//		}
 	}
 	
 	/** Handle a mouse move event on the main editor panel */
 	public void handleMouseMove(MouseEvent e) {
 		// calculate the adjusted coordinates of the mouse pointer
-		Point2D pSign = transformSignCoordinates(e.getX(), e.getY());
+//		Point2D pSign = transformSignCoordinates(e.getX(), e.getY());
 		
 		// just print for now
-		if (pSign != null) {
-			int x = (int) pSign.getX();
-			int y = (int) pSign.getY();
-			
-			// TODO test code for cursor changing
-			if (y >= 100 && y <= 160) {
-				cursor = moveCursor;
-				update();
-			} else {
-				setCursorFromMode();
-			}
+//		if (pSign != null) {
+		int x = e.getX();
+		int y = e.getY();
+		
+		// TODO test code for cursor changing
+//		if (y >= 100 && y <= 160) {
+//			cursor = moveCursor;
+//		} else {
+//			setCursorFromMode();
+//		}
+		update();
 			
 			// TODO hook this into token finding and mouse cursor changing
 			
-//			System.out.println(String.format(
-//					"Mouse moved to (%d, %d) ...", x, y));
-		}
+//		System.out.println(String.format(
+//				"Mouse moved to (%d, %d) ...", x, y));
+//		}
 	}
 	
 	/** Handle a mouse drag event on the main editor panel */
 	public void handleMouseDrag(MouseEvent e) {
 		// calculate the adjusted coordinates of the mouse pointer
-		Point2D pSign = transformSignCoordinates(e.getX(), e.getY());
+//		Point2D pSign = transformSignCoordinates(e.getX(), e.getY());
 		
 		// figure out what button was pressed when dragging
 		String b = "";
@@ -290,46 +384,38 @@ public class WController {
 			b = "middle";
 		
 		// just print for now
-		if (pSign != null) {
-			int x = (int) pSign.getX();
-			int y = (int) pSign.getY();
-//			System.out.println(String.format(
-//					"Mouse dragged with %s button to (%d, %d) ...", b, x, y));
-		}
+//		if (pSign != null) {
+		int x = e.getX();
+		int y = e.getY();
+//		System.out.println(String.format(
+//				"Mouse dragged with %s button to (%d, %d) ...", b, x, y));
+//		}
 	}
 	
-	/** Return a JList of WMsgSignPage objects from the selected/created message */
-	public JList<WPage> getPageList() {
-		page_list_model = new DefaultListModel<WPage>();
-		updatePageListModel();
-
-		// reset the list
-		page_list = new JList<WPage>(page_list_model);
-		
-		// set the renderer on the list
-		ListCellRenderer<WPage> rndr = new WMsgSignPageListRenderer();
-		page_list.setCellRenderer(rndr);
-		
-		// set up the page selection handler
-		page_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		
-		class PageSelectionHandler implements ListSelectionListener {
-			public void valueChanged(ListSelectionEvent e) {
-				if (!e.getValueIsAdjusting()) {
-					ListSelectionModel lsm = (ListSelectionModel) e.getSource();
-					int indx = lsm.getMinSelectionIndex();
-					
-					if (indx != -1) {
-						selectedPageIndx = indx;
-						updateSelectedPage();
+	/** Return a WPageList for displaying a list of pages from the message */
+	public WPageList getPageList(boolean enableSelection) {
+		// TODO/NOTE should we split these up?
+		if (!enableSelection) {
+			// return a new non-selectable list
+			return new WPageList(enableSelection);
+		} else {
+			// create and save our page list with a selection handler
+			class PageSelectionHandler implements ListSelectionListener {
+				public void valueChanged(ListSelectionEvent e) {
+					if (!e.getValueIsAdjusting()) {
+						ListSelectionModel lsm = (ListSelectionModel) e.getSource();
+						int indx = lsm.getMinSelectionIndex();
+						
+						if (indx != -1) {
+							selectedPageIndx = indx;
+							updateSelectedPage();
+						}
 					}
 				}
 			}
+			pageList = new WPageList(new PageSelectionHandler());
+			return pageList;
 		}
-		page_list.getSelectionModel().addListSelectionListener(
-				new PageSelectionHandler());
-		
-		return page_list;
 	}
 	
 	/** Get any message text in the controller */
@@ -347,7 +433,7 @@ public class WController {
 	private void renderMsg() {
 		// update the WMessage object and re-render if we have a MultiConfig
 		wmsg = new WMessage(multiStringText);
-		System.out.println(multiStringText);
+//		System.out.println(multiStringText);
 		if (multiConfig != null)
 			wmsg.renderMsg(multiConfig);
 	}
@@ -361,42 +447,40 @@ public class WController {
 		// TODO add more stuff here eventually
 	}
 	
-	/** Update the model containing the list of WMsgSignPage objects. Note
-	 *  that page_list_model must already exist */
+	/** Update the WPageList given the current MULTI string and MultiConfig. */
 	private void updatePageListModel() {
-		// render if we haven't
-		if (wmsg == null)
-			renderMsg();
-		
-		// make sure the model exists
-		if (page_list_model != null) {
-			// clear the model
-			page_list_model.clear();
-			
-			if (wmsg.isValid()) {
-				// get the pages for the message and add them to the model
-				for (int i = 1; i <= wmsg.getNumPages(); i++) {
-					page_list_model.addElement(wmsg.getPage(i));
-				}
-	
-				// update the selected page
-				updateSelectedPage();
-			}
+		// update the page list and the selected page
+		if (pageList != null) {
+			pageList.updatePageList(multiStringText, multiConfig);
+			updateSelectedPage();
 		}
 	}
 	
 	/** Update the selected page to use one in the current page_list_model. */
 	private void updateSelectedPage() {
 		// make sure the selected page still exists
-		if (selectedPageIndx >= page_list_model.getSize()) 
-			selectedPageIndx = page_list_model.getSize()-1;
+		if (selectedPageIndx >= pageList.getNumPages()) 
+			selectedPageIndx = pageList.getNumPages()-1;
 		
-		selectedPage = (WPage) page_list_model.get(selectedPageIndx);
+		// rerender the messsage and get the page from our wmsg
+		renderMsg();
+		
+		if (wmsg.isValid())
+			setSelectedPage(wmsg.getPage(selectedPageIndx+1));
 		
 		if (editor != null) {
 			editor.setPageNumberLabel(getPageNumberLabel(selectedPageIndx));
 			editor.updateWysiwygPanel();
 		}
+	}
+
+	/** Set the currently selected page */
+	public void setSelectedPage(WPage pg) {
+		selectedPage = pg;
+	}
+	
+	public WPage getSelectedPage() {
+		return selectedPage;
 	}
 	
 	/** Get the label indicating the page number */
@@ -411,8 +495,8 @@ public class WController {
 	
 	/** Update the cursor that is active over the sign pixel panel */
 	private void updateCursor() {
-		if (pixel_pnl != null) {
-			pixel_pnl.setCursor(cursor);
+		if (signPanel != null) {
+			signPanel.setCursor(cursor);
 		}
 	}
 	
@@ -548,8 +632,8 @@ public class WController {
 		return currentFont;
 	}
 	
-	public void setPixelPanel(SignPixelPanel spp) {
-		pixel_pnl = spp;
+	public void setSignPanel(WImagePanel sp) {
+		signPanel = sp;
 	}
 	
 	private void setMultiConfig(MultiConfig mc) {
@@ -600,7 +684,4 @@ public class WController {
 		return sign;
 	}
 	
-	public WPage getSelectedPage() {
-		return selectedPage;
-	}
 }

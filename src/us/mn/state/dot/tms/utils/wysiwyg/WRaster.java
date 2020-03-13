@@ -20,6 +20,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -786,7 +787,7 @@ abstract public class WRaster {
 			}
 		}
 		gen.add(SIGN_BORDER, pixelsPerBorder);
-		WRenderer.println("   "+gen.offset);
+//		WRenderer.println("   "+gen.offset);
 		return gen.getArray();
 	}
 
@@ -976,6 +977,37 @@ abstract public class WRaster {
 			return sc1;
 		return ((wc - d1) <= (d2 - wc)) ? sc1 : sc2;
 	}
+
+	/** Convert sign-tag coordinate to WYSIWYG
+	 *  coordinates.
+	 *  Returns the first and last WYSIWYG coordinates
+	 *  assigned to the given sign-tag coordinate. If the
+	 *  coordinate is invalid, an empty array is returned.
+	 */
+	private int[] findWysiwygCoords(int[] coords, int sc)
+			throws IndexOutOfBoundsException { 
+		if (coords == null)
+			throw new IndexOutOfBoundsException("Uninitialized WYSIWIG coordinates");
+		int[] wc = new int[2];
+		boolean found = false;
+		for (int i = 0; i < coords.length; ++i) {
+			if (!found) {
+				if (coords[i] == sc) {
+					wc[0] = i;
+					found = true;
+					System.out.println(String.format("Found %d at %d", sc, i));
+				}
+			} else {
+				// TODO this may not be sufficient if we hit the end of the
+				// array and for some reason it's not a border (negative value)
+				if (coords[i] != sc) {
+					wc[1] = i-1;
+					return wc;
+				}
+			}
+		}
+		return new int[0];
+	}
 	
 	/** Convert horizontal WYSIWIG coordinate
 	 *  to a sign-tag coordinate.
@@ -991,6 +1023,21 @@ abstract public class WRaster {
 		return findClosestSignCoord(horizCoords, width, x);
 	}
 	
+	/** Convert horizontal sign-tag coordinate
+	 *  to WYSIWYG coordinates.
+	 *  Returns the first and last WYSIWYG X coordinates
+	 *  assigned to the given sign-tag coordinate. If the
+	 *  coordinate is invalid, an empty array is returned.
+	 * @param x  1-based horizontal sign-tag coordinate
+	 * @return   Array of [start, end] WYSIWYG coordinates 
+	 * @throws IndexOutOfBoundsException if the setWysiwygImageSize method has not been called
+	 */
+	public int[] cvtSignToWysiwygX(int x)
+			throws IndexOutOfBoundsException {
+		System.out.println("X: " + Arrays.toString(horizCoords));
+		return findWysiwygCoords(horizCoords, x);
+	}
+	
 	/** Convert vertical WYSIWIG coordinate
 	 *  to a sign-tag coordinate.
 	 *  If the y coordinate points to a non-LED
@@ -1003,5 +1050,20 @@ abstract public class WRaster {
 	public int cvtWysiwygToSignY(int y)
 			throws IndexOutOfBoundsException {
 		return findClosestSignCoord(vertCoords, height, y);
+	}
+
+	/** Convert vertival sign-tag coordinate
+	 *  to WYSIWYG coordinates.
+	 *  Returns the first and last WYSIWYG Y coordinates
+	 *  assigned to the given sign-tag coordinate. If the
+	 *  coordinate is invalid, an empty array is returned.
+	 * @param x  1-based horizontal sign-tag coordinate
+	 * @return   Array of [start, end] WYSIWYG coordinates 
+	 * @throws IndexOutOfBoundsException if the setWysiwygImageSize method has not been called
+	 */
+	public int[] cvtSignToWysiwygY(int y)
+			throws IndexOutOfBoundsException {
+		System.out.println("Y: " + Arrays.toString(vertCoords));
+		return findWysiwygCoords(vertCoords, y);
 	}
 }

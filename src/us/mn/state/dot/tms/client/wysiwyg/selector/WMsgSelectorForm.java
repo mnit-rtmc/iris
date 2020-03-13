@@ -63,6 +63,7 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.client.wysiwyg.selector.WMsgSelectorSignProcess;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WMsgEditorForm;
+import us.mn.state.dot.tms.client.wysiwyg.editor.WPageList;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WPagePanel;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WController;
 import us.mn.state.dot.tms.utils.I18N;
@@ -113,7 +114,8 @@ public class WMsgSelectorForm extends AbstractForm {
 	private WController controller;
 	
 	/** Use the page list as the message preview */
-	private JList<WPage> msg_preview;
+	private WPageList msg_preview;
+	private JScrollPane msg_preview_pn;
     
 	/** Buttons */
 	private JButton reload_btn;
@@ -274,12 +276,17 @@ public class WMsgSelectorForm extends AbstractForm {
 			// update the controller
 			controller.setSign(selectedDMS);
 			controller.setQuickMessage(null);
+			
+			// update the page list
+			if (controller.getMultiConfig() != null)
+				msg_preview.updatePageList("", controller.getMultiConfig());
 		} else {
 			// we got a null - reset
 			disableButtons();
 			updateMessageList();
 			controller.setSign(null);
 			controller.setQuickMessage(null);
+			msg_preview.clearPageList();
 		}
 	}
 	
@@ -307,6 +314,10 @@ public class WMsgSelectorForm extends AbstractForm {
 			controller.setSign(null);
 			controller.setSignGroup(selectedSignGroup);
 			controller.setQuickMessage(null);
+			
+			// update the page list
+			if (controller.getMultiConfig() != null)
+				msg_preview.updatePageList("", controller.getMultiConfig());
 		} else {
 			// we got a null - reset
 			disableButtons();
@@ -314,6 +325,7 @@ public class WMsgSelectorForm extends AbstractForm {
 			controller.setSign(null);
 			controller.setSignGroup(null);
 			controller.setQuickMessage(null);
+			msg_preview.clearPageList();
 		}
 	}
 	
@@ -350,6 +362,11 @@ public class WMsgSelectorForm extends AbstractForm {
 
 			// update the controller
 			controller.setQuickMessage(selectedMessage);
+			
+			// update the page list
+			if (controller.getMultiConfig() != null)
+				msg_preview.updatePageList(selectedMessage.getMulti(),
+						controller.getMultiConfig());
 		} else {
 			// we got a null - disable edit buttons
 			disableEditButtons();
@@ -359,6 +376,10 @@ public class WMsgSelectorForm extends AbstractForm {
 			
 			// rest the controller
 			controller.setQuickMessage(null);
+			
+			// update the page list
+			if (controller.getMultiConfig() != null)
+				msg_preview.updatePageList("", controller.getMultiConfig());
 		}
 		status_msg.setText(msgInfo);
 	}
@@ -385,10 +406,9 @@ public class WMsgSelectorForm extends AbstractForm {
 
 		/* Initialize a controller for rendering a preview */
 		controller = new WController();
-//		msg_preview = controller.getPageList();
-		
-		/* Disable selection on the message preview */
-//		msg_preview.setSelectionModel(new DisabledSelectionModel());
+		msg_preview = controller.getPageList(false);
+		msg_preview_pn = createScrollPane(msg_preview);
+		msg_preview_pn.setPreferredSize(new Dimension(300,200));
 		
 		/** Sign list */
 		ListModel<String> dmsNamesModel = new AbstractListModel<String>() {
@@ -826,12 +846,14 @@ public class WMsgSelectorForm extends AbstractForm {
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		p.add(new JLabel(I18N.get("wysiwyg.selector.preview")), gbc);
 		
-//		/* Preview Pane */
-//		gbc.gridx = 9;
-//		gbc.gridy = 1;
-//		gbc.gridheight = 3;
-//		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
-//		p.add(msg_preview, gbc);
+		/* Preview Pane */
+		gbc.gridx = 9;
+		gbc.gridy = 1;
+		gbc.gridheight = 3;
+		gbc.weightx = 0.5;
+		gbc.weighty = 0.5;
+		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+		p.add(msg_preview_pn, gbc);
 		
 		add(p);
 	}

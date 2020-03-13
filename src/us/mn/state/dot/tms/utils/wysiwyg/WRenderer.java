@@ -406,7 +406,7 @@ public class WRenderer {
 
 	/** Render the current text rectangle */
 	private void renderText() {
-		println("\nrenderText(): blocks = "+blocks.size());
+//		println("\nrenderText(): blocks = "+blocks.size());
 		try {
 			for (Block block: blocks)
 				block.render();
@@ -524,22 +524,22 @@ public class WRenderer {
 			return lines.peekLast();
 		}
 		void render() throws InvalidMsgException {
-			println("Block.render(): lines = "+lines.size());
+//			println("Block.render(): lines = "+lines.size());
 			int ex = getExtraHeight();
-			println("getExtraHeight()="+ex);
+//			println("getExtraHeight()="+ex);
 			if (ex < 0) {
 				renderError(MultiSyntaxError.textTooBig);
 				println("TEXT TOO TALL");
 				return;
 			}
 			int top = getTop(ex);
-			println("getTop()="+top);
+//			println("getTop()="+top);
 			int y = 0;
 			Line pline = null;
 			for (Line line: lines) {
 				y += line.getLineSpacing(pline);
 				y += line.getHeight();
-				println("line.render: baseline = "+(top + y)+"");
+//				println("line.render: baseline = "+(top + y)+"");
 				line.render(top + y);
 				pline = line;
 			}
@@ -983,7 +983,7 @@ public class WRenderer {
 
 	
 	static public void println(String str) {
-		System.out.println(str);
+//		System.out.println(str);
 		if (out != null) {
 			out.println(str);
 		}

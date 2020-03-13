@@ -16,6 +16,9 @@
 package us.mn.state.dot.tms.utils.wysiwyg;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 
 /**
  * WTokenList - List of WYSIWYG Tokens
@@ -52,5 +55,14 @@ public class WTokenList extends ArrayList<WToken> {
 		for (WToken tok : this) {
 			tok.moveTok(offsetX, offsetY);
 		}
+	}
+	
+	/** Slice the list */
+	public WTokenList slice(int fromIndex, int toIndex) {
+		// make a new WTokenList then add items from the sublist
+		WTokenList tl = new WTokenList();
+		List<WToken> sl = subList(fromIndex, toIndex);
+		tl.addAll(0, sl);
+		return tl;
 	}
 }

@@ -87,7 +87,7 @@ public class WMsgEditorForm extends AbstractForm {
 	private QuickMessage qm;
 	
 	/* what "mode" (single sign or sign group) we're in */ 
-	Boolean singleSign;
+	private Boolean singleSign;
 	
 	/* Controller - for handling back and forth between the GUI and renderer */
 	private WController controller;
@@ -330,7 +330,7 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		
-		page_list = controller.getPageList();
+		page_list = controller.getPageList(true);
 		page_list_pn = new JScrollPane(page_list,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
