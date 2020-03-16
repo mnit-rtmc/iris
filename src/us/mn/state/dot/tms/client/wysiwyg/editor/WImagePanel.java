@@ -28,6 +28,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 
 /**
@@ -54,6 +55,10 @@ public class WImagePanel extends JPanel {
 	private int caretY;
 	private int caretH;
 	private int caretW = 0;
+	private Color caretColor = Color.WHITE;
+	
+	// TODO I don't think we should need this, but for now it makes things look better
+	private int offset = 2;
 	
 	public WImagePanel(int w, int h) {
 		width = w;
@@ -134,6 +139,7 @@ public class WImagePanel extends JPanel {
 	private int convertSignToWysiwygY(int y, boolean start) {
 		if (wr != null) {
 			int[] wy = wr.cvtSignToWysiwygY(y);
+			System.out.println(Integer.toString(y) + " -> " + Arrays.toString(wy));
 			if (wy.length > 0) {
 				if (start)
 					return wy[0];
@@ -147,34 +153,44 @@ public class WImagePanel extends JPanel {
 	/** Set the caret location given the token. */
 	public void setCaretLocation(WToken tok) {
 		// get coordinates from the token
-		int tX = tok.getCoordX();
-		int tY = tok.getCoordY();
+		// TODO -2 is offset to make things look OK for now, but I think
+		// there's a bug to be fixed...
+		int tX = tok.getCoordX() - offset;
+		int tY = tok.getCoordY() - offset;
 		int tY2 = tY + tok.getCoordH();
 		
-		// convert token (sign) coordinates to raster coordinates
-		// TODO do we need to move the X position at all??
-		int cX = convertSignToWysiwygX(tX, true);
-		int cY = convertSignToWysiwygY(tY, true);
-		int cY2 = convertSignToWysiwygY(tY2, false);
+		// convert token (sign) coordinates to raster coordinates and clip any
+		// overrun
+		// TODO we need to adjust the position some, but not sure how...
+		caretX = clipX(convertSignToWysiwygX(tX, true));
+		caretY = clipY(convertSignToWysiwygY(tY, true));
+		int cY2 = clipY(convertSignToWysiwygY(tY2, false));
+		caretH = cY2-caretY;
+//		System.out.println(String.format(
+//				"Drawing caret at (%d, %d) w/h (%d, %d); tY2 = %d -> cY2 = %d",
+//				caretX, caretY, caretW, caretH, tY2, cY2));
 		
-		
-		// validate the caret location before setting
-		if ((cX >= 0 && cX <= width) && (cY >= 0 && cY <= height)
-				&& (cY2 >= 0 && cY2 <= height)) {
-			caretX = cX;
-			caretY = cY;
-			caretH = cY2-cY;
-
-			// assume this means the caret should be displayed
-			showCaret();
-		} else {
-			// if invalid, disable the caret
-			System.out.println(String.format(
-					"Problem with caret from (%d, %d) to (%d, %d)",
-					cX, cY, cX+caretW, cY2));
-			hideCaret();
-		}
+		// set the caret to enabled and repaint everything
+		showCaret();
 		repaint();
+	}
+	
+	/** Clip the given x coordinate to the drawing area [0 width-1] */
+	public int clipX(int x) {
+		if (x < 0)
+			return 0;
+		else if (x >= width)
+			return width-1;
+		return x;
+	}
+	
+	/** Clip the given y coordinate to the drawing area [0 height-1] */
+	public int clipY(int y) {
+		if (y < 0)
+			return 0;
+		else if (y >= height)
+			return height-1;
+		return y;
 	}
 	
 	/** Show the caret on the panel (must have a valid location too). */
@@ -194,28 +210,29 @@ public class WImagePanel extends JPanel {
 		if (image != null) {
 			g.drawImage(image, 0, 0, width, height, null);
 			
-			// add the cursor to the image if it's enabled
-			if (caretOn) {
-//				System.out.println(String.format(
-//						"Drawing cursor at (%d, %d) w/h (%d, %d)",
-//						caretX, caretY, caretW, caretH));
-				Color oc = g.getColor();
-				// set color to white
-				g.setColor(Color.WHITE);
-				g.drawRect(caretX, caretY, caretW, caretH);
-				g.fillRect(caretX, caretY, caretW, caretH);
-				g.setColor(oc);
-			}
+			// add the caret to the image if it's enabled
+			if (caretOn)
+				drawCaret(g);
 			
 			// TODO draw things with g.draw*
 //			g.drawLine(x1, y1, x2, y2);
 		}
 	}
 	
-	/** Draw the cursor on the image at the specified point with the given
-	 *  blink rate.
+	/** Draw the caret on the image at/with the caretX/Y/W/H/color and TODO
+	 *  blink rate values. 
 	 */
-	private void drawCursor(Graphics g) {
+	private void drawCaret(Graphics g) {
+		// get the original color so we can reset the color
+		Color oc = g.getColor();
 		
+		// set color to to the cursor color and draw a rectangle
+		g.setColor(Color.WHITE);
+//		g.drawArc(caretX, caretY, 10, 10, 0, 360);
+		g.drawRect(caretX, caretY, caretW, caretH);
+		g.fillRect(caretX, caretY, caretW, caretH);
+		
+		// return the color
+		g.setColor(oc);
 	}
 }
