@@ -19,11 +19,6 @@ import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 
-
-
-// TODO NOTE MAY DELETE THIS!! (WState might be better, not sure...)
-
-
 /**
  * WAction - WYSIWYG Message Editor Action
  * 
