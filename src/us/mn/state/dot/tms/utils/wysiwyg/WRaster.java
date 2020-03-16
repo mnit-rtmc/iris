@@ -945,7 +945,7 @@ abstract public class WRaster {
 			return 1;
 		int len = coords.length;
 		if (wc >= len)
-			return maxCoord+1;
+			return maxCoord;
 		int sc = coords[wc];
 		if (sc >= 0)
 			return sc;
