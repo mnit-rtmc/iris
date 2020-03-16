@@ -88,6 +88,22 @@ public class WImagePanel extends JPanel {
 		scaleImg = true;
 		scale = s;
 	}
+
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		
+		if (image != null) {
+			g.drawImage(image, 0, 0, width, height, null);
+			
+			// add the caret to the image if it's enabled
+			if (caretOn)
+				drawCaret(g);
+			
+			// TODO draw things with g.draw*
+//			g.drawLine(x1, y1, x2, y2);
+		}
+	}
 	
 	public void setPage(WPage p) {
 		pg = p;
@@ -149,6 +165,24 @@ public class WImagePanel extends JPanel {
 		}
 		return -1;
 	}
+
+	/** Clip the given x coordinate to the drawing area [0 width-1] */
+	public int clipX(int x) {
+		if (x < 0)
+			return 0;
+		else if (x >= width)
+			return width-1;
+		return x;
+	}
+	
+	/** Clip the given y coordinate to the drawing area [0 height-1] */
+	public int clipY(int y) {
+		if (y < 0)
+			return 0;
+		else if (y >= height)
+			return height-1;
+		return y;
+	}
 	
 	/** Set the caret location given the token. */
 	public void setCaretLocation(WToken tok) {
@@ -175,24 +209,6 @@ public class WImagePanel extends JPanel {
 		repaint();
 	}
 	
-	/** Clip the given x coordinate to the drawing area [0 width-1] */
-	public int clipX(int x) {
-		if (x < 0)
-			return 0;
-		else if (x >= width)
-			return width-1;
-		return x;
-	}
-	
-	/** Clip the given y coordinate to the drawing area [0 height-1] */
-	public int clipY(int y) {
-		if (y < 0)
-			return 0;
-		else if (y >= height)
-			return height-1;
-		return y;
-	}
-	
 	/** Show the caret on the panel (must have a valid location too). */
 	public void showCaret() {
 		caretOn = true;
@@ -201,22 +217,6 @@ public class WImagePanel extends JPanel {
 	/** Hide the caret on the panel. */
 	public void hideCaret() {
 		caretOn = false;
-	}
-	
-	@Override
-	protected void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		
-		if (image != null) {
-			g.drawImage(image, 0, 0, width, height, null);
-			
-			// add the caret to the image if it's enabled
-			if (caretOn)
-				drawCaret(g);
-			
-			// TODO draw things with g.draw*
-//			g.drawLine(x1, y1, x2, y2);
-		}
 	}
 	
 	/** Draw the caret on the image at/with the caretX/Y/W/H/color and TODO

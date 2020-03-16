@@ -55,7 +55,7 @@ public class WPage {
 		this.wMsg = msg;
 	}
 
-	/** Add token to page
+	/** Add token to the end of the page
 	 * 
 	 * Called during initial MULTI string parsing.
 	 * 
@@ -65,6 +65,18 @@ public class WPage {
 		tokenList.add(tok);
 		wMsg.setChanged();
 	}
+	
+	/** Add token tok at the specified index */
+	public void addToken(int tokIndx, WToken tok) {
+		tokenList.add(tokIndx, tok);
+		wMsg.setChanged();
+	}
+
+	/* Remove (and return) the token at the index provided */
+	public WToken removeToken(int tokIndx) {
+		wMsg.setChanged();
+		return tokenList.remove(tokIndx);
+	}
 
 	public Iterator<WToken> tokens() {
 		return tokenList.iterator();
@@ -72,6 +84,11 @@ public class WPage {
 	
 	public WTokenList getTokenList() {
 		return tokenList;
+	}
+	
+	/** Get the index of the token in this page's token list. */
+	public int getTokenIndex(WToken tok) {
+		return tokenList.indexOf(tok);
 	}
 
 	public boolean isValid() {

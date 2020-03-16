@@ -21,12 +21,15 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.JList;
@@ -49,6 +52,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
+import us.mn.state.dot.tms.client.wysiwyg.editor.action.WDeleteToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WFontCache;
 import us.mn.state.dot.tms.utils.wysiwyg.WGraphicCache;
 import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
@@ -86,6 +90,11 @@ public class WController {
 	 * change) for any updates we need to make from here */
 	private WMsgEditorForm editor;
 	private WImagePanel signPanel;
+	
+	/** Keep a list of actions that have been performed and undone */
+	// TODO make a new list type if it seems like it would be useful
+	private ArrayList<WAction> actionsDone = new ArrayList<WAction>();
+	private ArrayList<WAction> actionsUnDone = new ArrayList<WAction>();
 	
 	/** Cursor that will change depending on mode, etc. */
 	// TODO should we make these final or have an initCursors method???
@@ -327,6 +336,55 @@ public class WController {
 			// set the new caret location
 			signPanel.setCaretLocation(tok);
 		}
+	}
+	
+	/** Action triggered with the backspace key.
+	 *  TODO/NOTE any reason to make this a WAction?? */
+	private Action backspace = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (!tokensSelected.isEmpty()) {
+				// TODO if we have a selection, delete the selection				 
+			} else {
+				// if we don't have any selection, delete the token just
+				// before the caret
+				// delete the last token in this list if possible
+				// (otherwise just don't do anything)
+				if (!tokensBefore.isEmpty()) {
+					// get the last token, make the action, and execute it
+					WToken tok = tokensBefore.getLast();
+					executeAction(new WDeleteToken(selectedPage, tok));
+					
+					// TODO how do we handle cursor placement after deletion??
+				}
+			}
+			
+		}
+	};
+	
+	/** Execute the action then place it in the list of done actions. */
+	private void executeAction(WAction a) {
+		a.actionPerformed(null);
+		actionsDone.add(a);
+	}
+	
+	/** Undo the last action. */
+	private void undoLastAction() {
+		// pop the last action off the list and undo it
+		WAction a = actionsDone.remove(actionsDone.size()-1);
+		a.undo(null);
+		
+		// add it to the list of undone actions so it can be redone
+		actionsUnDone.add(a);
+	}
+	
+	/** Re-do the last action. */
+	private void redoLastAction() {
+		// pop the last action off the list of undone and re-do it
+		WAction a = actionsUnDone.remove(actionsUnDone.size()-1);
+		a.actionPerformed(null);
+		
+		// add it to the list of done actions so it can be undone
+		actionsDone.add(a);
 	}
 	
 	/** Handle a click on the main editor panel */

@@ -65,4 +65,11 @@ public class WTokenList extends ArrayList<WToken> {
 		tl.addAll(0, sl);
 		return tl;
 	}
+	
+	/** Get the last token from the list. This is just a shortcut method for
+	 *  list.get(list.size()-1).
+	 */
+	public WToken getLast() {
+		return get(size()-1);
+	}
 }

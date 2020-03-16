@@ -100,8 +100,8 @@ abstract public class WToken {
 		// calculate right edge and bottom edge coordinates
 		int rX = coordX + coordW;
 		int bY = coordY + coordH;
-		boolean inX = (x >= coordX) && (x <= rX);
-		boolean inY = (y >= coordY) && (y <= bY);
+		boolean inX = (x >= coordX) && (x < rX);
+		boolean inY = (y >= coordY) && (y < bY);
 		return inX && inY;
 	}
 	
