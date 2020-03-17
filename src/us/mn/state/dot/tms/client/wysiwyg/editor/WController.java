@@ -126,7 +126,7 @@ public class WController {
 	private WGraphicCache graphicCache = new WGraphicCache();
 	
 	/** WMessage for working with rendered message */
-	private WMessage wmsg;
+	private WMessage wmsg = null;
 	
 	/** Current Font
 	 *  TODO need some model for this, I don't think it can just be one */
@@ -204,7 +204,7 @@ public class WController {
 		} else {
 			multiConfig = null;
 		}
-		update();
+//		update();
 	}
 	
 	/** Set the sign group being used */
@@ -221,7 +221,7 @@ public class WController {
 			multiConfig = null;
 			sign = null;
 		}
-		update();
+//		update();
 	}
 	
 	/** Set the quick message being edited */
@@ -233,6 +233,7 @@ public class WController {
 			multiStringText = qm.getMulti();
 		else
 			multiStringText = "";
+		System.out.println("From QuickMessage: " + multiStringText);
 		update();
 	}
 	
@@ -300,22 +301,22 @@ public class WController {
 		if (tok != null) {
 			tokStr = tok.toString();
 		
-			System.out.println(String.format(
-					"Click at (%d, %d) => sign coords (%d, %d) => (%d->%d, %d->%d)",
-					x, y, sx, sy, cx0, cx1, cy0, cy1));
-			System.out.println(String.format(
-					"Token '%s' found at coords (%d, %d) w/h (%d, %d)",
-					tokStr, tok.getCoordX(), tok.getCoordY(), tok.getCoordW(), tok.getCoordH()));
-			System.out.println(String.format(
-					"              Param coords (%d, %d) w/h (%d, %d)", 
-					tok.getParamX(), tok.getParamY(), tok.getParamW(), tok.getParamH()));
+//			System.out.println(String.format(
+//					"Click at (%d, %d) => sign coords (%d, %d) => (%d->%d, %d->%d)",
+//					x, y, sx, sy, cx0, cx1, cy0, cy1));
+//			System.out.println(String.format(
+//					"Token '%s' found at coords (%d, %d) w/h (%d, %d)",
+//					tokStr, tok.getCoordX(), tok.getCoordY(), tok.getCoordW(), tok.getCoordH()));
+//			System.out.println(String.format(
+//					"              Param coords (%d, %d) w/h (%d, %d)", 
+//					tok.getParamX(), tok.getParamY(), tok.getParamW(), tok.getParamH()));
 			
 			// move the caret
 			moveCaret(tok);
 		} else {
-			System.out.println(String.format(
-					"Click at (%d, %d) => sign coords (%d, %d) => (%d->%d, %d->%d)",
-					x, y, sx, sy, cx0, cx1, cy0, cy1));
+//			System.out.println(String.format(
+//					"Click at (%d, %d) => sign coords (%d, %d) => (%d->%d, %d->%d)",
+//					x, y, sx, sy, cx0, cx1, cy0, cy1));
 		}
 	}
 	
@@ -340,8 +341,9 @@ public class WController {
 	
 	/** Action triggered with the backspace key.
 	 *  TODO/NOTE any reason to make this a WAction?? */
-	private Action backspace = new AbstractAction() {
+	public final Action backspace = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
+			System.out.println("Got backspace key");
 			if (!tokensSelected.isEmpty()) {
 				// TODO if we have a selection, delete the selection				 
 			} else {
@@ -352,7 +354,11 @@ public class WController {
 				if (!tokensBefore.isEmpty()) {
 					// get the last token, make the action, and execute it
 					WToken tok = tokensBefore.getLast();
-					executeAction(new WDeleteToken(selectedPage, tok));
+					System.out.println(String.format("Deleting token %s", tok.toString()));
+					executeAction(new WDeleteToken(selectedPage, tok, multiConfig));
+					
+					// TODO for testing
+					signPanel.setPage(selectedPage);
 					
 					// TODO how do we handle cursor placement after deletion??
 				}
@@ -365,6 +371,7 @@ public class WController {
 	private void executeAction(WAction a) {
 		a.actionPerformed(null);
 		actionsDone.add(a);
+//		update();
 	}
 	
 	/** Undo the last action. */
@@ -375,6 +382,7 @@ public class WController {
 		
 		// add it to the list of undone actions so it can be redone
 		actionsUnDone.add(a);
+//		update();
 	}
 	
 	/** Re-do the last action. */
@@ -385,6 +393,7 @@ public class WController {
 		
 		// add it to the list of done actions so it can be undone
 		actionsDone.add(a);
+//		update();
 	}
 	
 	/** Handle a click on the main editor panel */
@@ -399,6 +408,9 @@ public class WController {
 		int y = e.getY();
 		
 		findClosestToken(x, y);
+		
+		// get focus for this component when someone clicks on it
+		signPanel.requestFocusInWindow();
 //		}
 	}
 	
@@ -490,7 +502,17 @@ public class WController {
 	/** Render the message using the current MULTI String and MultiConfig */
 	private void renderMsg() {
 		// update the WMessage object and re-render if we have a MultiConfig
-		wmsg = new WMessage(multiStringText);
+		System.out.println("In renderMsg: " + multiStringText);
+		if (wmsg == null) {
+			System.out.println("Making wmsg with: " + multiStringText);
+			wmsg = new WMessage(multiStringText);
+		} else {
+			// if we already have a WMessage object, use it to update the
+			// MULTI string then use that to re-render
+			multiStringText = wmsg.toString();
+			System.out.println("Remaking wmsg with: " + multiStringText);
+			wmsg = new WMessage(multiStringText);
+		}
 //		System.out.println(multiStringText);
 		if (multiConfig != null)
 			wmsg.renderMsg(multiConfig);
@@ -498,6 +520,7 @@ public class WController {
 	
 	/** Update everything that needs updating */
 	public void update() {
+		System.out.println("In update: " + multiStringText);
 		renderMsg();
 		updatePageListModel();
 		updateCursor();

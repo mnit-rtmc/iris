@@ -15,7 +15,13 @@
 
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
@@ -27,6 +33,8 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
@@ -155,7 +163,7 @@ public class WImagePanel extends JPanel {
 	private int convertSignToWysiwygY(int y, boolean start) {
 		if (wr != null) {
 			int[] wy = wr.cvtSignToWysiwygY(y);
-			System.out.println(Integer.toString(y) + " -> " + Arrays.toString(wy));
+//			System.out.println(Integer.toString(y) + " -> " + Arrays.toString(wy));
 			if (wy.length > 0) {
 				if (start)
 					return wy[0];

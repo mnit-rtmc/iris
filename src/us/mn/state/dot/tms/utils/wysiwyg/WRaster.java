@@ -995,7 +995,7 @@ abstract public class WRaster {
 				if (coords[i] == sc) {
 					wc[0] = i;
 					found = true;
-					System.out.println(String.format("Found %d at %d", sc, i));
+//					System.out.println(String.format("Found %d at %d", sc, i));
 				}
 			} else {
 				// TODO this may not be sufficient if we hit the end of the
@@ -1034,7 +1034,7 @@ abstract public class WRaster {
 	 */
 	public int[] cvtSignToWysiwygX(int x)
 			throws IndexOutOfBoundsException {
-		System.out.println("X: " + Arrays.toString(horizCoords));
+//		System.out.println("X: " + Arrays.toString(horizCoords));
 		return findWysiwygCoords(horizCoords, x);
 	}
 	
@@ -1063,7 +1063,7 @@ abstract public class WRaster {
 	 */
 	public int[] cvtSignToWysiwygY(int y)
 			throws IndexOutOfBoundsException {
-		System.out.println("Y: " + Arrays.toString(vertCoords));
+//		System.out.println("Y: " + Arrays.toString(vertCoords));
 		return findWysiwygCoords(vertCoords, y);
 	}
 }

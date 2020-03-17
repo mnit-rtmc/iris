@@ -37,6 +37,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JToggleButton;
 
 import javax.swing.JScrollPane;
@@ -108,6 +109,9 @@ public class WMsgWysiwygPanel extends JPanel {
 //	private SignPixelPanel pixel_pnl;
 	private WImagePanel signPanel;
 	
+	/** Key Bindings active when panel is in focus. */
+	private WEditorKeyBindings editorKeyBindings;
+	
 	public WMsgWysiwygPanel(WController c) {
 		controller = c;
 		
@@ -172,15 +176,13 @@ public class WMsgWysiwygPanel extends JPanel {
 		add(signPanel);
 		
 		// mouse input adapter for handling mouse events
-		
-		/* TODO just for testing - need to figure out how to deal with
-		 * component focus, etc. - we can probably reuse the same mouse
-		 * listener class and give it different components or something...
-		 */
-		
 		WMsgMouseInputAdapter mouseHandler = new WMsgMouseInputAdapter(controller);
 		signPanel.addMouseListener(mouseHandler);
 		signPanel.addMouseMotionListener(mouseHandler);
+		
+		// initialize key bindings and attach to panel
+		editorKeyBindings = new WEditorKeyBindings(controller);
+		editorKeyBindings.setKeyBindings(signPanel, JComponent.WHEN_FOCUSED);
 	}
 	
 	/** Set the currently selected page to display */

@@ -18,7 +18,9 @@ package us.mn.state.dot.tms.client.wysiwyg.editor.action;
 import java.awt.event.ActionEvent;
 
 import us.mn.state.dot.tms.client.wysiwyg.editor.WAction;
+import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
+import us.mn.state.dot.tms.utils.wysiwyg.WRenderer;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 
 /**
@@ -37,21 +39,26 @@ public class WDeleteToken extends WAction {
 	 * TODO how to handle multiple tokens? (override constructor, then what? */
 	private WToken tok;
 	
+	/** MultiConfig for (re-)rendering */
+	private MultiConfig mcfg;
+	
 	/** Index of the token before removal (for undoing insert) */
 	private int tokIndx;
 	
 	/** Initialize the action to remove a single token */
-	public WDeleteToken(WPage pg, WToken t) {
+	public WDeleteToken(WPage pg, WToken t, MultiConfig mc) {
 		super();
 		
-		// save everything we need to delete the token
+		// save everything we need to delete the token and render the message
 		page = pg;
 		tok = t;
+		mcfg = mc;
 		
 		// get the current index of the token in case we need to put it back
 		// later
 		// TODO how should we handle if the token wasn't found?? (i.e. we get -1) 
 		tokIndx = page.getTokenIndex(tok);
+		System.out.println(String.format("Token %s at index %d", tok.toString(), tokIndx));
 	}
 	
 	/** Perform the action by removing the token from the page. */
@@ -59,6 +66,10 @@ public class WDeleteToken extends WAction {
 	public void actionPerformed(ActionEvent e) {
 		if (!done) {
 			page.removeToken(tokIndx);
+			
+			// re-render the page
+//			page.renderPage(mcfg);
+			
 			markDone();
 		}
 	}

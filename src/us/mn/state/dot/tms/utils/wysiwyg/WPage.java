@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import us.mn.state.dot.tms.utils.Multi;
+import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtColorForeground;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtFont;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
@@ -151,6 +152,14 @@ public class WPage {
 //			tok.doRender(wr);
 		}
 		wr.addAnchor(this);
+	}
+	
+	/** Re-render the page */
+	public void renderPage(MultiConfig mcfg) {
+		WRenderer wr = new WRenderer(mcfg);
+		doRender(wr);
+		wr.complete();
+		setRaster(wr.getRaster());
 	}
 	
 	//===============================
