@@ -24,6 +24,7 @@ import java.util.List;
  * WTokenList - List of WYSIWYG Tokens
  * 
  * @author John L. Stanley - SRF Consulting
+ * @author Gordon Parikh - SRF Consulting
  */
 
 @SuppressWarnings("serial")
@@ -71,5 +72,11 @@ public class WTokenList extends ArrayList<WToken> {
 	 */
 	public WToken getLast() {
 		return get(size()-1);
+	}
+	
+	/** Remove and return the last token from the list. This is a shortcut
+	 *  method for list.remove(list.size()-1). */
+	public WToken removeLast() {
+		return remove(size()-1);
 	}
 }

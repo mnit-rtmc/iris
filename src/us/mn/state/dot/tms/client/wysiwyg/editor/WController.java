@@ -96,6 +96,10 @@ public class WController {
 	private ArrayList<WAction> actionsDone = new ArrayList<WAction>();
 	private ArrayList<WAction> actionsUnDone = new ArrayList<WAction>();
 	
+	/** Keep a list of MULTI strings for undoing/redoing */
+	private ArrayList<String> undoStack = new ArrayList<String>();
+	private ArrayList<String> redoStack = new ArrayList<String>();
+	
 	/** Cursor that will change depending on mode, etc. */
 	// TODO should we make these final or have an initCursors method???
 	private final Cursor textCursor = new Cursor(Cursor.TEXT_CURSOR);
@@ -111,7 +115,7 @@ public class WController {
 	private SignGroup sg;
 	private QuickMessage qm;
 	private MultiString multiString;
-	private String multiStringText = "";
+	private String multiStringText = null;
 	
 	/** MultiConfig for config-related stuff  */
 	private MultiConfig multiConfig;
@@ -204,7 +208,7 @@ public class WController {
 		} else {
 			multiConfig = null;
 		}
-//		update();
+		update();
 	}
 	
 	/** Set the sign group being used */
@@ -221,7 +225,7 @@ public class WController {
 			multiConfig = null;
 			sign = null;
 		}
-//		update();
+		update();
 	}
 	
 	/** Set the quick message being edited */
@@ -267,6 +271,8 @@ public class WController {
 		int sx = wr.cvtWysiwygToSignX(x);
 		int sy = wr.cvtWysiwygToSignY(y);
 		
+		// TODO I think we should move the next two blocks to WPage
+		
 		// find the closest token on this page
 		WToken tok = null;
 		Iterator<WToken> it = selectedPage.tokens();
@@ -277,6 +283,22 @@ public class WController {
 				break;
 			}
 		}
+		
+		// TODO how to deal with distance???
+		// if they didn't click IN any token, find the closest token
+//		if (tok == null) {
+//			Iterator<WToken> it = selectedPage.tokens();
+//			while (it.hasNext()) {
+//				WToken t = it.next();
+//				
+//				// calculate distance
+//				double d = t.distance(sx, sy)
+//				if (t.isInside(sx, sy)) {
+//					tok = t;
+//					break;
+//				}
+//			}
+//		}
 		
 		// TODO test code
 		// back-convert to click coordinates
@@ -321,29 +343,38 @@ public class WController {
 	}
 	
 	/** Move the caret to the spot just before the specified token. Note that
-	 *  this doesn't select the token. */
+	 *  this doesn't select the token.
+	 */
 	public void moveCaret(WToken tok) {
 		// get a list of tokens on this page and find this token in the list
-		WTokenList pgTokens = selectedPage.getTokenList();
-		int tIndx = pgTokens.indexOf(tok);
-		if (tIndx != -1) {
+		int tokIndx = selectedPage.getTokenList().indexOf(tok);
+		
+		// dispatch to the other moveCaret method
+		moveCaret(tokIndx);
+	}
+	
+	/** Move the caret to the spot just before the specified token index. Note
+	 *  that this does not select the token.
+	 */
+	public void moveCaret(int tokIndx) {
+		if (tokIndx != -1) {
 			// slice the list at the token
-			tokensBefore = pgTokens.slice(0, tIndx);
-			tokensAfter = pgTokens.slice(tIndx, pgTokens.size());
+			WTokenList pgTokens = selectedPage.getTokenList();
+			tokensBefore = pgTokens.slice(0, tokIndx);
+			tokensAfter = pgTokens.slice(tokIndx, pgTokens.size());
 			
 			// reset the selection
 			tokensSelected.clear();
 			
 			// set the new caret location
+			WToken tok = tokensAfter.get(0);
 			signPanel.setCaretLocation(tok);
 		}
 	}
 	
-	/** Action triggered with the backspace key.
-	 *  TODO/NOTE any reason to make this a WAction?? */
+	/** Action triggered with the backspace key. */
 	public final Action backspace = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("Got backspace key");
 			if (!tokensSelected.isEmpty()) {
 				// TODO if we have a selection, delete the selection				 
 			} else {
@@ -352,49 +383,93 @@ public class WController {
 				// delete the last token in this list if possible
 				// (otherwise just don't do anything)
 				if (!tokensBefore.isEmpty()) {
-					// get the last token, make the action, and execute it
+					// get the last token and it's index in the page's list
 					WToken tok = tokensBefore.getLast();
-					System.out.println(String.format("Deleting token %s", tok.toString()));
-					executeAction(new WDeleteToken(selectedPage, tok, multiConfig));
+					int i = selectedPage.getTokenIndex(tok);
+					System.out.println(String.format("Deleting token '%s' at index %d",
+							tok.toString(), i));
 					
-					// TODO for testing
-					signPanel.setPage(selectedPage);
-					
-					// TODO how do we handle cursor placement after deletion??
+					// save the current MULTI string then remove the token
+					saveMulti();
+					selectedPage.removeToken(i);
+										
+					// update everything
+					update();
+					moveCaret(i);
 				}
 			}
 			
 		}
 	};
 	
-	/** Execute the action then place it in the list of done actions. */
-	private void executeAction(WAction a) {
-		a.actionPerformed(null);
-		actionsDone.add(a);
-//		update();
+	/** Action triggered with the delete key. */
+	public final Action delete = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (!tokensSelected.isEmpty()) {
+				// TODO if we have a selection, delete the selection				 
+			} else {
+				// if we don't have any selection, delete the token just
+				// after the caret
+				// delete the first token in this list if possible
+				// (otherwise just don't do anything)
+				if (!tokensAfter.isEmpty()) {
+					// get the last token and it's index in the page's list
+					WToken tok = tokensAfter.remove(0);
+					int i = selectedPage.getTokenIndex(tok);
+					System.out.println(String.format("Deleting token '%s' at index %d",
+							tok.toString(), i));
+					
+					// save the current MULTI string then remove the token
+					saveMulti();
+					selectedPage.removeToken(i);
+					
+					// update everything
+					update();
+					moveCaret(i);
+				}
+			}
+			
+		}
+	};
+	
+	/** Save the current MULTI string on the stack for undoing. */
+	private void saveMulti() {
+		undoStack.add(multiStringText);
 	}
 	
-	/** Undo the last action. */
-	private void undoLastAction() {
-		// pop the last action off the list and undo it
-		WAction a = actionsDone.remove(actionsDone.size()-1);
-		a.undo(null);
+	/** Undo the last message change by reverting to the previous MULTI string. */
+	public Action undo = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			System.out.println("Starting undo...");
+			if (!undoStack.isEmpty()) {
+				// save the current string on the redo stack so the action can
+				// be redone
+				redoStack.add(multiStringText);
+				
+				// pop the last string off the stack and apply it
+				multiStringText = undoStack.remove(undoStack.size()-1);
+				wmsg.parseMulti(multiStringText);
+				update();
+			}
+		}
+	};
 		
-		// add it to the list of undone actions so it can be redone
-		actionsUnDone.add(a);
-//		update();
-	}
-	
-	/** Re-do the last action. */
-	private void redoLastAction() {
-		// pop the last action off the list of undone and re-do it
-		WAction a = actionsUnDone.remove(actionsUnDone.size()-1);
-		a.actionPerformed(null);
-		
-		// add it to the list of done actions so it can be undone
-		actionsDone.add(a);
-//		update();
-	}
+	/** Redo the last message change by reverting to the previous MULTI string. */
+	public Action redo = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			System.out.println("Starting redo...");
+			if (!redoStack.isEmpty()) {
+				// put the current string back on the undo stack so the action can
+				// be undone
+				undoStack.add(multiStringText);
+				
+				// pop the last string off the stack and apply it
+				multiStringText = redoStack.remove(redoStack.size()-1);
+				wmsg.parseMulti(multiStringText);
+				update();
+			}
+		}
+	};
 	
 	/** Handle a click on the main editor panel */
 	public void handleClick(MouseEvent e) {
@@ -406,7 +481,8 @@ public class WController {
 		int b = e.getButton();
 		int x = e.getX();
 		int y = e.getY();
-		
+
+		update();
 		findClosestToken(x, y);
 		
 		// get focus for this component when someone clicks on it
@@ -430,7 +506,7 @@ public class WController {
 //		} else {
 //			setCursorFromMode();
 //		}
-		update();
+//		update();
 			
 			// TODO hook this into token finding and mouse cursor changing
 			
@@ -502,25 +578,26 @@ public class WController {
 	/** Render the message using the current MULTI String and MultiConfig */
 	private void renderMsg() {
 		// update the WMessage object and re-render if we have a MultiConfig
-		System.out.println("In renderMsg: " + multiStringText);
+//		System.out.println("In renderMsg: " + multiStringText);
 		if (wmsg == null) {
-			System.out.println("Making wmsg with: " + multiStringText);
-			wmsg = new WMessage(multiStringText);
+			if  (multiStringText != null)
+//			System.out.println("Making wmsg with: " + multiStringText);
+				wmsg = new WMessage(multiStringText);
 		} else {
 			// if we already have a WMessage object, use it to update the
 			// MULTI string then use that to re-render
 			multiStringText = wmsg.toString();
-			System.out.println("Remaking wmsg with: " + multiStringText);
+//			System.out.println("Remaking wmsg with: " + multiStringText);
 			wmsg = new WMessage(multiStringText);
 		}
 //		System.out.println(multiStringText);
-		if (multiConfig != null)
+		if (multiConfig != null && wmsg != null)
 			wmsg.renderMsg(multiConfig);
 	}
 	
 	/** Update everything that needs updating */
 	public void update() {
-		System.out.println("In update: " + multiStringText);
+//		System.out.println("In update: " + multiStringText);
 		renderMsg();
 		updatePageListModel();
 		updateCursor();

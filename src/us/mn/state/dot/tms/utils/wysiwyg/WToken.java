@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.utils.MultiSyntaxError;
  * the error detection code.
  * 
  * @author John L. Stanley - SRF Consulting
+ * @author Gordon Parikh - SRF Consulting
  */
 
 abstract public class WToken {
@@ -48,6 +49,10 @@ abstract public class WToken {
 	protected Integer coordY;
 	protected Integer coordW;
 	protected Integer coordH;
+	
+	/** Token centroid coordinates */
+	protected Integer centroidX;
+	protected Integer centroidY;
 
 	//-------------------------------------------
 
@@ -94,8 +99,7 @@ abstract public class WToken {
 		return true;
 	}
 
-	/** Check if the point (x, y) is inside this token.
-	 *  TODO need to add a buffer and leave room for clicking on edges. */
+	/** Check if the point (x, y) is inside this token. */
 	public boolean isInside(int x, int y) {
 		// calculate right edge and bottom edge coordinates
 		int rX = coordX + coordW;
@@ -103,6 +107,13 @@ abstract public class WToken {
 		boolean inX = (x >= coordX) && (x < rX);
 		boolean inY = (y >= coordY) && (y < bY);
 		return inX && inY;
+	}
+	
+	/** Calculate the distance between point (x, y) and this token's centroid. */
+	public double distance(int x, int y) {
+		double dx = centroidX - x;
+		double dy = centroidY - y;
+		return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
 	}
 	
 //	/** Do we want to use an AnchorChar to
@@ -267,7 +278,17 @@ abstract public class WToken {
 		coordY = y;
 		coordW = w;
 		coordH = h;
+		
+		// calculate the centroid based on the new coordinates
+		calculateCentroid();
+		
 		//TODO: Limit coordinates to within the main raster
+	}
+	
+	/** Calculate the centroid of the token based on the coordinates */
+	private void calculateCentroid() {
+		centroidX = coordX + coordW/2;
+		centroidY = coordY + coordH/2;
 	}
 	
 	/** Return token X coordinate in pixels.
@@ -296,6 +317,20 @@ abstract public class WToken {
 	 */
 	public Integer getCoordH() {
 		return coordH;
+	}
+
+	/** Return token centroid X coordinate in pixels.
+	 * @return the centroid X coordinate
+	 */
+	public Integer getCentroidX() {
+		return centroidX;
+	}
+	
+	/** Return token centroid Y coordinate in pixels.
+	 * @return the centroid Y coordinate
+	 */
+	public Integer getCentroidY() {
+		return centroidY;
 	}
 	
 	public boolean validCoordinates() {

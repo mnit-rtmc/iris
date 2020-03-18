@@ -37,7 +37,7 @@ import javax.swing.KeyStroke;
 public class WEditorKeyBindings {
 	
 	/** Controller for manipulating message. */
-	WController controller;
+	WController wc;
 	
 	/** InputMap for handling key presses. */
 	private InputMap inputMap;
@@ -52,21 +52,38 @@ public class WEditorKeyBindings {
 	 *  panel.
 	 */
 	public WEditorKeyBindings(WController c) {
-		controller = c;
+		wc = c;
 	}
 	
 	public void setKeyBindings(JComponent comp, int condition) {
-		System.out.println("Setting up key bindings on component " + comp.toString());
+//		System.out.println("Setting up key bindings on component " + comp.toString());
 		inputMap = comp.getInputMap(condition);
 		actionMap = comp.getActionMap();
 		comp.setFocusTraversalKeysEnabled(false);
 		
-		System.out.println("InputMap: " + inputMap.toString());
-		System.out.println("ActionMap: " + actionMap.toString());
+//		System.out.println("InputMap: " + inputMap.toString());
+//		System.out.println("ActionMap: " + actionMap.toString());
 		
 		/* Backspace key - delete selected token or token behind caret */
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), "backspace");
-		actionMap.put("backspace", controller.backspace);
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0),
+				"backspace");
+		actionMap.put("backspace", wc.backspace);
+		
+		/* Delete key - delete selected token or token in front of caret */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "delete");
+		actionMap.put("delete", wc.delete);
+		
+		/* Ctrl + Z - undo */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
+				KeyEvent.CTRL_DOWN_MASK), "undo");
+		actionMap.put("undo", wc.undo);
+
+		/* Ctrl + Shift + Z  OR  Ctrl + Y - redo */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
+				KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK), "redo");
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y,
+				KeyEvent.CTRL_DOWN_MASK), "redo");
+		actionMap.put("redo", wc.redo);
 	}
 	
 	public InputMap getInputMap() {
