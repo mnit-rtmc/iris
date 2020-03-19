@@ -372,33 +372,44 @@ public class WController {
 	 */
 	public void moveCaret(int tokIndx) {
 		if (tokIndx != -1) {
-			// slice the list at the token
 			caretIndx = tokIndx;
-			WTokenList pgTokens = selectedPage.getTokenList();
-			if (!caretAtEnd) {
-				tokensBefore = pgTokens.slice(0, tokIndx);
-				tokensAfter = pgTokens.slice(tokIndx, pgTokens.size());
-			} else {
-				// if the caret is going to the end of the page, everything
-				// is before it
-				tokensBefore = pgTokens;
-				tokensAfter = new WTokenList();
-			}
-			
-			// reset the selection
-			tokensSelected.clear();
-			
-			// set the new caret location
-			// TODO where do we put the caret when there are no tokens????
-			WToken tok;
-			if (tokensAfter.isEmpty()) {
-				tok = tokensBefore.getLast();
-			} else {
-				tok = tokensAfter.get(0);
-			}
-			System.out.println("Before: " + tokensBefore.toString());
-			System.out.println("After: " + tokensAfter.toString());
-			System.out.println(tok.toString());
+			updateCaret();
+		}
+	}
+	
+	/** Update the caret location by moving it to the location defined by
+	 *  caretIndx and caretAtEnd.
+	 */
+	public void updateCaret() {
+		// slice the list at the token
+		WTokenList pgTokens = selectedPage.getTokenList();
+		if (!caretAtEnd) {
+			tokensBefore = pgTokens.slice(0, caretIndx);
+			tokensAfter = pgTokens.slice(caretIndx, pgTokens.size());
+		} else {
+			// if the caret is going to the end of the page, everything
+			// is before it
+			tokensBefore = pgTokens;
+			tokensAfter = new WTokenList();
+		}
+		
+		// reset the selection
+		tokensSelected.clear();
+		
+		// set the new caret location
+		WToken tok = null;
+		if (tokensAfter.isEmpty() && !tokensBefore.isEmpty()) {
+			tok = tokensBefore.getLast();
+		} else if (!tokensAfter.isEmpty()) {
+			tok = tokensAfter.get(0);
+		}
+		
+		// we can't (currently) set the caret location without a token
+		// TODO how do we deal with that for new messages?!?!
+		if (tok != null) {
+//			System.out.println("Before: " + tokensBefore.toString());
+//			System.out.println("After: " + tokensAfter.toString());
+//			System.out.println(tok.toString());
 			signPanel.setCaretLocation(tok, caretAtEnd);
 		}
 	}
@@ -406,7 +417,29 @@ public class WController {
 	/** Action to move caret to left (using left arrow key) */
 	public Action moveCaretLeft = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-			
+			// if the caret is at the end of the message, just change that
+			if (caretAtEnd) {
+				caretAtEnd = false;
+				updateCaret();
+			} else {
+				// otherwise decrement the caret index, but don't go below 0
+				if (caretIndx >= 1)
+					moveCaret(caretIndx-1);
+			}
+		}
+	};
+	
+	/** Action to move caret to right (using right arrow key) */
+	public Action moveCaretRight = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// if we're on the last token, just go to the end of the message
+			if (caretIndx == selectedPage.getTokenList().size()-1) {
+				caretAtEnd = true;
+				updateCaret();
+			} else {
+				// otherwise increment the caret index
+				moveCaret(caretIndx+1);
+			}
 		}
 	};
 	
@@ -436,7 +469,6 @@ public class WController {
 					moveCaret(i);
 				}
 			}
-			
 		}
 	};
 	

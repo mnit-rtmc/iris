@@ -84,6 +84,12 @@ public class WEditorKeyBindings {
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y,
 				KeyEvent.CTRL_DOWN_MASK), "redo");
 		actionMap.put("redo", wc.redo);
+		
+		/* Left/Right arrow keys - move caret left/right */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), "moveCaretLeft");
+		actionMap.put("moveCaretLeft", wc.moveCaretLeft);
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), "moveCaretRight");
+		actionMap.put("moveCaretRight", wc.moveCaretRight);
 	}
 	
 	public InputMap getInputMap() {
