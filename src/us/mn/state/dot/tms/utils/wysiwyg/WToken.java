@@ -109,6 +109,11 @@ abstract public class WToken {
 		return inX && inY;
 	}
 	
+	/** Check if the Y-coordinate provided is on the same line as this token. */
+	public boolean sameLine(int y) {
+		return (y >= coordY) && (y <= coordY + coordH);
+	}
+	
 	/** Calculate the distance between point (x, y) and this token's centroid. */
 	public double distance(int x, int y) {
 		double dx = centroidX - x;

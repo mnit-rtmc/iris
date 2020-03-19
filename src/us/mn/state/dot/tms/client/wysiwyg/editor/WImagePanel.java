@@ -193,17 +193,24 @@ public class WImagePanel extends JPanel {
 	}
 	
 	/** Set the caret location given the token. */
-	public void setCaretLocation(WToken tok) {
+	public void setCaretLocation(WToken tok, boolean toRight) {
 		// get coordinates from the token
 		// TODO -2 is offset to make things look OK for now, but I think
-		// there's a bug to be fixed...
-		int tX = tok.getCoordX() - offset;
+		// there's a better way (or a bug)...
+		int tX;
+		if (toRight) {
+			tX = tok.getCoordX() + tok.getCoordW() - offset;
+		} else {
+			tX = tok.getCoordX() - offset;
+		}
 		int tY = tok.getCoordY() - offset;
 		int tY2 = tY + tok.getCoordH();
 		
 		// convert token (sign) coordinates to raster coordinates and clip any
 		// overrun
 		// TODO we need to adjust the position some, but not sure how...
+		
+		// put caret to right of token if toRight is true
 		caretX = clipX(convertSignToWysiwygX(tX, true));
 		caretY = clipY(convertSignToWysiwygY(tY, true));
 		int cY2 = clipY(convertSignToWysiwygY(tY2, false));

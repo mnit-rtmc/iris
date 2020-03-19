@@ -58,7 +58,9 @@ public class WTokenList extends ArrayList<WToken> {
 		}
 	}
 	
-	/** Slice the list */
+	/** Slice the list. If indeces are out of bounds, they are truncated to
+	 *  the bounds of the list. 
+	 */
 	public WTokenList slice(int fromIndex, int toIndex) {
 		// make a new WTokenList then add items from the sublist
 		WTokenList tl = new WTokenList();

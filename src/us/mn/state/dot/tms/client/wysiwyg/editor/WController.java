@@ -97,8 +97,8 @@ public class WController {
 	private ArrayList<WAction> actionsUnDone = new ArrayList<WAction>();
 	
 	/** Keep a list of MULTI strings for undoing/redoing */
-	private ArrayList<String> undoStack = new ArrayList<String>();
-	private ArrayList<String> redoStack = new ArrayList<String>();
+	private ArrayList<WHistory> undoStack = new ArrayList<WHistory>();
+	private ArrayList<WHistory> redoStack = new ArrayList<WHistory>();
 	
 	/** Cursor that will change depending on mode, etc. */
 	// TODO should we make these final or have an initCursors method???
@@ -120,10 +120,12 @@ public class WController {
 	/** MultiConfig for config-related stuff  */
 	private MultiConfig multiConfig;
 	
-	/** Token lists for helping with cursor placement and stuff */
+	/** Token lists for helping with caret placement and stuff */
 	private WTokenList tokensBefore = new WTokenList();
 	private WTokenList tokensSelected = new WTokenList();
 	private WTokenList tokensAfter = new WTokenList();
+	int caretIndx = 0;
+	boolean caretAtEnd = false;
 	
 	/** Font and graphics caches */
 	private WFontCache fontCache = new WFontCache();
@@ -271,11 +273,12 @@ public class WController {
 		int sx = wr.cvtWysiwygToSignX(x);
 		int sy = wr.cvtWysiwygToSignY(y);
 		
-		// TODO I think we should move the next two blocks to WPage
+		// TODO I think we should move the next three blocks to WPage
 		
 		// find the closest token on this page
 		WToken tok = null;
 		Iterator<WToken> it = selectedPage.tokens();
+		caretAtEnd = false;
 		while (it.hasNext()) {
 			WToken t = it.next();
 			if (t.isInside(sx, sy)) {
@@ -286,19 +289,30 @@ public class WController {
 		
 		// TODO how to deal with distance???
 		// if they didn't click IN any token, find the closest token
-//		if (tok == null) {
-//			Iterator<WToken> it = selectedPage.tokens();
-//			while (it.hasNext()) {
-//				WToken t = it.next();
-//				
-//				// calculate distance
-//				double d = t.distance(sx, sy)
-//				if (t.isInside(sx, sy)) {
-//					tok = t;
-//					break;
-//				}
-//			}
-//		}
+		
+		if (tok == null) {
+			it = selectedPage.tokens();
+			double minDist = 999999;
+			while (it.hasNext()) {
+				WToken t = it.next();
+				
+				// calculate distance
+				double d = t.distance(sx, sy);
+				
+				// if this token is closer and on the same line then take it
+				if (d < minDist && t.sameLine(sy)) {
+					tok = t;
+					minDist = d;
+				}
+			}
+			// if the token is the last token, check if they clicked to the
+			// right of it - they probably wanted the end of the page
+			if (tok == selectedPage.getTokenList().getLast()) {
+				if (sx > tok.getCoordX()+tok.getCoordW())
+					caretAtEnd = true;
+			}
+		}
+		
 		
 		// TODO test code
 		// back-convert to click coordinates
@@ -326,9 +340,9 @@ public class WController {
 //			System.out.println(String.format(
 //					"Click at (%d, %d) => sign coords (%d, %d) => (%d->%d, %d->%d)",
 //					x, y, sx, sy, cx0, cx1, cy0, cy1));
-//			System.out.println(String.format(
-//					"Token '%s' found at coords (%d, %d) w/h (%d, %d)",
-//					tokStr, tok.getCoordX(), tok.getCoordY(), tok.getCoordW(), tok.getCoordH()));
+			System.out.println(String.format(
+					"Token '%s' found at coords (%d, %d) w/h (%d, %d)",
+					tokStr, tok.getCoordX(), tok.getCoordY(), tok.getCoordW(), tok.getCoordH()));
 //			System.out.println(String.format(
 //					"              Param coords (%d, %d) w/h (%d, %d)", 
 //					tok.getParamX(), tok.getParamY(), tok.getParamW(), tok.getParamH()));
@@ -359,21 +373,45 @@ public class WController {
 	public void moveCaret(int tokIndx) {
 		if (tokIndx != -1) {
 			// slice the list at the token
+			caretIndx = tokIndx;
 			WTokenList pgTokens = selectedPage.getTokenList();
-			tokensBefore = pgTokens.slice(0, tokIndx);
-			tokensAfter = pgTokens.slice(tokIndx, pgTokens.size());
+			if (!caretAtEnd) {
+				tokensBefore = pgTokens.slice(0, tokIndx);
+				tokensAfter = pgTokens.slice(tokIndx, pgTokens.size());
+			} else {
+				// if the caret is going to the end of the page, everything
+				// is before it
+				tokensBefore = pgTokens;
+				tokensAfter = new WTokenList();
+			}
 			
 			// reset the selection
 			tokensSelected.clear();
 			
 			// set the new caret location
-			WToken tok = tokensAfter.get(0);
-			signPanel.setCaretLocation(tok);
+			// TODO where do we put the caret when there are no tokens????
+			WToken tok;
+			if (tokensAfter.isEmpty()) {
+				tok = tokensBefore.getLast();
+			} else {
+				tok = tokensAfter.get(0);
+			}
+			System.out.println("Before: " + tokensBefore.toString());
+			System.out.println("After: " + tokensAfter.toString());
+			System.out.println(tok.toString());
+			signPanel.setCaretLocation(tok, caretAtEnd);
 		}
 	}
 	
+	/** Action to move caret to left (using left arrow key) */
+	public Action moveCaretLeft = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			
+		}
+	};
+	
 	/** Action triggered with the backspace key. */
-	public final Action backspace = new AbstractAction() {
+	public Action backspace = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
 			if (!tokensSelected.isEmpty()) {
 				// TODO if we have a selection, delete the selection				 
@@ -390,7 +428,7 @@ public class WController {
 							tok.toString(), i));
 					
 					// save the current MULTI string then remove the token
-					saveMulti();
+					saveState();
 					selectedPage.removeToken(i);
 										
 					// update everything
@@ -419,8 +457,13 @@ public class WController {
 					System.out.println(String.format("Deleting token '%s' at index %d",
 							tok.toString(), i));
 					
+					// if we're going to delete the last token, put the caret
+					// at the end of the message
+					if (tok == selectedPage.getTokenList().getLast())
+						caretAtEnd = true;
+					
 					// save the current MULTI string then remove the token
-					saveMulti();
+					saveState();
 					selectedPage.removeToken(i);
 					
 					// update everything
@@ -432,24 +475,31 @@ public class WController {
 		}
 	};
 	
-	/** Save the current MULTI string on the stack for undoing. */
-	private void saveMulti() {
-		undoStack.add(multiStringText);
+	/** Save the current state on the stack for undoing. Resets the redo stack. */
+	private void saveState() {
+		WHistory wh = new WHistory(multiStringText, caretIndx,
+				tokensSelected.size());
+		undoStack.add(wh);
+		
+		// reset the redo stack, since reapplying those changes is not trivial
+		// after another change is made
+		redoStack.clear();
 	}
 	
 	/** Undo the last message change by reverting to the previous MULTI string. */
 	public Action undo = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("Starting undo...");
+//			System.out.println("Starting undo...");
 			if (!undoStack.isEmpty()) {
-				// save the current string on the redo stack so the action can
+				// save the current state on the redo stack so the action can
 				// be redone
-				redoStack.add(multiStringText);
+				WHistory wh = new WHistory(multiStringText, caretIndx,
+						tokensSelected.size());
+				redoStack.add(wh);
 				
 				// pop the last string off the stack and apply it
-				multiStringText = undoStack.remove(undoStack.size()-1);
-				wmsg.parseMulti(multiStringText);
-				update();
+				wh = undoStack.remove(undoStack.size()-1);
+				applyHistory(wh);
 			}
 		}
 	};
@@ -457,19 +507,31 @@ public class WController {
 	/** Redo the last message change by reverting to the previous MULTI string. */
 	public Action redo = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("Starting redo...");
+//			System.out.println("Starting redo...");
 			if (!redoStack.isEmpty()) {
-				// put the current string back on the undo stack so the action can
+				// put the current state back on the undo stack so the action can
 				// be undone
-				undoStack.add(multiStringText);
+				WHistory wh = new WHistory(multiStringText, caretIndx,
+						tokensSelected.size());
+				undoStack.add(wh);
 				
 				// pop the last string off the stack and apply it
-				multiStringText = redoStack.remove(redoStack.size()-1);
-				wmsg.parseMulti(multiStringText);
-				update();
+				wh = redoStack.remove(redoStack.size()-1);
+				applyHistory(wh);
 			}
 		}
 	};
+	
+	/** Apply the historical state to the controller. */
+	private void applyHistory(WHistory wh) {
+		setMultiString(wh.getMultiString());
+		
+		// TODO handle selection and selected page
+		
+		update();
+		
+		moveCaret(wh.getCaretIndex());
+	}
 	
 	/** Handle a click on the main editor panel */
 	public void handleClick(MouseEvent e) {
@@ -593,6 +655,12 @@ public class WController {
 //		System.out.println(multiStringText);
 		if (multiConfig != null && wmsg != null)
 			wmsg.renderMsg(multiConfig);
+	}
+	
+	/** Update the controller with a MULTI string */
+	public void setMultiString(String ms) {
+		multiStringText = ms;
+		wmsg.parseMulti(multiStringText);
 	}
 	
 	/** Update everything that needs updating */
