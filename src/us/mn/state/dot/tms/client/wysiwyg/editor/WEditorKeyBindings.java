@@ -86,10 +86,26 @@ public class WEditorKeyBindings {
 		actionMap.put("redo", wc.redo);
 		
 		/* Left/Right arrow keys - move caret left/right */
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), "moveCaretLeft");
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0),
+				"moveCaretLeft");
 		actionMap.put("moveCaretLeft", wc.moveCaretLeft);
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), "moveCaretRight");
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
+				"moveCaretRight");
 		actionMap.put("moveCaretRight", wc.moveCaretRight);
+		
+		/* ASCII Text Characters - pass character to controller
+		 * Note that 32 is space, 126 is ~, and everything in between is a
+		 * readable character.
+		 */
+		for (int i = 32; i < 127; ++i) {
+			// get a character from the ASCII code
+			char c = (char) i;
+			
+			// make a KeyAction for that character and add entries to the
+			// input/action maps
+			inputMap.put(KeyStroke.getKeyStroke(c), c);
+			actionMap.put(c, new KeyAction(c));
+		}
 	}
 	
 	public InputMap getInputMap() {
@@ -98,5 +114,18 @@ public class WEditorKeyBindings {
 	
 	public ActionMap getActionMap() {
 		return actionMap;
+	}
+	
+	private class KeyAction extends AbstractAction {
+		private char ch;
+		
+		public KeyAction(char c) {
+			ch = c;
+		}
+		
+		public void actionPerformed(ActionEvent e) {
+			// pass the character to the controller - it knows what to do
+			wc.typeChar(ch);
+		}
 	}
 }

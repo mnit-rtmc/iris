@@ -61,6 +61,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
 import us.mn.state.dot.tms.utils.wysiwyg.WState;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextChar;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -506,6 +507,28 @@ public class WController {
 			
 		}
 	};
+	
+	/** Add a single ASCII character to the message at the caret location. */
+	public void typeChar(char c) {
+//		System.out.println(String.format("Typed: '%c'", c));
+		
+		// TODO handle overwrite mode somehow (default is insert mode)
+		
+		// first create a token from the character
+		WtTextChar t = new WtTextChar(c);
+		
+		// if we're already at the end of the page, add the token there
+		if (caretAtEnd)
+			selectedPage.addToken(t);
+		else
+			// otherwise put it at the caret index
+			selectedPage.addToken(caretIndx, t);
+		
+		// either way update then move the caret one more token (just behind
+		// the character that was just added)
+		update();
+		moveCaret(caretIndx+1);
+	}
 	
 	/** Save the current state on the stack for undoing. Resets the redo stack. */
 	private void saveState() {
