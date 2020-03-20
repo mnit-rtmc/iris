@@ -172,8 +172,8 @@ public class WMsgWysiwygPanel extends JPanel {
 //		controller.setPixelPanel(pixel_pnl);
 //		add(pixel_pnl);
 		signPanel = new WImagePanel(550, 250);
-		controller.setSignPanel(signPanel);
 		add(signPanel);
+		controller.setSignPanel(signPanel);
 		
 		// mouse input adapter for handling mouse events
 		WMsgMouseInputAdapter mouseHandler = new WMsgMouseInputAdapter(controller);

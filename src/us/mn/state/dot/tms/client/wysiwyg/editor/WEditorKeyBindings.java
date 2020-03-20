@@ -45,6 +45,9 @@ public class WEditorKeyBindings {
 	/** ActionMap for mapping key presses to actions. */
 	private ActionMap actionMap;
 	
+	/** Invalid characters that will be discarded */
+	private String invalidChars = "`";
+	
 	/** Initialize all key bindings in an InputMap/ActionMap pair.
 	 *  To activate key bindings on a panel, use the getInputMap and
 	 *  getActionMap methods to retrieve the InputMap and ActionMap, then use
@@ -93,18 +96,32 @@ public class WEditorKeyBindings {
 				"moveCaretRight");
 		actionMap.put("moveCaretRight", wc.moveCaretRight);
 		
+		/* Enter key - add newline */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+				"addNewLine");
+		actionMap.put("addNewLine", wc.addNewLine);
+		
 		/* ASCII Text Characters - pass character to controller
-		 * Note that 32 is space, 126 is ~, and everything in between is a
-		 * readable character.
+		 * Note that 32 is space, 122 is z, and most things in between are
+		 * readable characters.
 		 */
-		for (int i = 32; i < 127; ++i) {
+		for (int i = 32; i < 123; ++i) {
 			// get a character from the ASCII code
 			char c = (char) i;
 			
-			// make a KeyAction for that character and add entries to the
-			// input/action maps
-			inputMap.put(KeyStroke.getKeyStroke(c), c);
-			actionMap.put(c, new KeyAction(c));
+			// exclude invalid characters
+			if (invalidChars.indexOf(c) < 0) {
+				// if it's a lower-case character, map it to the upper-case
+				// action
+				char uc = c;
+				if (Character.isLowerCase(i))
+					uc = (char) Character.toUpperCase(i);
+				
+				// make a KeyAction for that character and add entries to the
+				// input/action maps
+				inputMap.put(KeyStroke.getKeyStroke(c), uc);
+				actionMap.put(uc, new KeyAction(uc));
+			}
 		}
 	}
 	

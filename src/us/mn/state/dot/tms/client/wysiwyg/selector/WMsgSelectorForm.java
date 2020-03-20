@@ -406,7 +406,7 @@ public class WMsgSelectorForm extends AbstractForm {
 
 		/* Initialize a controller for rendering a preview */
 		controller = new WController();
-		msg_preview = controller.getPageList(false);
+		msg_preview = controller.getPagePreviewList();
 		msg_preview_pn = createScrollPane(msg_preview);
 		msg_preview_pn.setPreferredSize(new Dimension(300,200));
 		

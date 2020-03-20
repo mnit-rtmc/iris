@@ -61,6 +61,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
 import us.mn.state.dot.tms.utils.wysiwyg.WState;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextChar;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiConfig;
@@ -152,6 +153,8 @@ public class WController {
 	String[] dmsNames;
 	
 	/** Currently selected page (defaults to first available) */
+	// TODO need to initialize this so there is always a selected page (blank
+	// if the message is empty)
 	private int selectedPageIndx = 0;
 	private WPage selectedPage;
 	
@@ -164,25 +167,25 @@ public class WController {
 	}	
 	
 	public WController(WMsgEditorForm e, DMS d) {
-		init(e);
 		setSign(d);
+		init(e);
 	}
 	
 	public WController(WMsgEditorForm e, SignGroup g) {
-		init(e);
 		setSignGroup(g);
+		init(e);
 	}
 	
 	public WController(WMsgEditorForm e, QuickMessage q, DMS d) {
-		init(e);
 		setSign(d);
 		setQuickMessage(q);
+		init(e);
 	}
 	
 	public WController(WMsgEditorForm e, QuickMessage q, SignGroup g) {
-		init(e);
 		setSignGroup(g);
 		setQuickMessage(q);
+		init(e);
 	}
 	
 	/** Perform some initialization on the controller. Sets the editor form
@@ -195,6 +198,23 @@ public class WController {
 		
 		// initialize the cursor, starting in text mode
 		cursor = new Cursor(Cursor.TEXT_CURSOR);
+
+		// initialize the page list
+		makePageList();
+	}
+	
+	/** Initialize some things that need to take place after other elements of
+	 *  the editor are in place. Called by the WMsgEditorForm at the end of
+	 *  initialize().
+	 *  
+	 *  TODO/NOTE there is probably a better way to do this.
+	 */
+	public void postInit() {
+		
+		// do an update to render the message and fill the page list, then
+		// initialize the caret
+		update();
+		initCaret();
 	}
 	
 	/** Set the sign being used */
@@ -282,7 +302,7 @@ public class WController {
 		caretAtEnd = false;
 		while (it.hasNext()) {
 			WToken t = it.next();
-			if (t.isInside(sx, sy)) {
+			if (t.isInside(sx, sy) && t.isText()) {
 				tok = t;
 				break;
 			}
@@ -301,7 +321,7 @@ public class WController {
 				double d = t.distance(sx, sy);
 				
 				// if this token is closer and on the same line then take it
-				if (d < minDist && t.sameLine(sy)) {
+				if (d < minDist && t.sameLine(sy) && t.isText()) {
 					tok = t;
 					minDist = d;
 				}
@@ -355,6 +375,16 @@ public class WController {
 //					"Click at (%d, %d) => sign coords (%d, %d) => (%d->%d, %d->%d)",
 //					x, y, sx, sy, cx0, cx1, cy0, cy1));
 		}
+	}
+	
+	/** Initialize the caret. If there is text in the message, it is placed at
+	 *  the beginning of the message (before the first printable character).
+	 *  If there is no text, it goes...somewhere. */
+	private void initCaret() {
+		// if the message isn't empty, put the caret at 0
+		if (!selectedPage.getTokenList().isEmpty())
+			moveCaret(0);
+		// TODO what to do if not???
 	}
 	
 	/** Move the caret to the spot just before the specified token. Note that
@@ -474,7 +504,7 @@ public class WController {
 	};
 	
 	/** Action triggered with the delete key. */
-	public final Action delete = new AbstractAction() {
+	public Action delete = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
 			if (!tokensSelected.isEmpty()) {
 				// TODO if we have a selection, delete the selection				 
@@ -514,15 +544,34 @@ public class WController {
 		
 		// TODO handle overwrite mode somehow (default is insert mode)
 		
+		// save our state so we can undo
+		saveState();
+		
 		// first create a token from the character
 		WtTextChar t = new WtTextChar(c);
-		
+		if (t.isValid()) {
+			addToken(t);
+		}
+	}
+	
+	/** Add a newline character at the current position */
+	public Action addNewLine = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// create a newline token
+			// TODO how to deal with spacing?? just doing default for now
+			WtNewLine t = new WtNewLine(null);
+			addToken(t);
+		}
+	};
+	
+	/** Add the token to the selected page at the caret index */
+	private void addToken(WToken tok) {
 		// if we're already at the end of the page, add the token there
 		if (caretAtEnd)
-			selectedPage.addToken(t);
+			selectedPage.addToken(tok);
 		else
 			// otherwise put it at the caret index
-			selectedPage.addToken(caretIndx, t);
+			selectedPage.addToken(caretIndx, tok);
 		
 		// either way update then move the caret one more token (just behind
 		// the character that was just added)
@@ -655,30 +704,35 @@ public class WController {
 //		}
 	}
 	
-	/** Return a WPageList for displaying a list of pages from the message */
-	public WPageList getPageList(boolean enableSelection) {
-		// TODO/NOTE should we split these up?
-		if (!enableSelection) {
-			// return a new non-selectable list
-			return new WPageList(enableSelection);
-		} else {
-			// create and save our page list with a selection handler
-			class PageSelectionHandler implements ListSelectionListener {
-				public void valueChanged(ListSelectionEvent e) {
-					if (!e.getValueIsAdjusting()) {
-						ListSelectionModel lsm = (ListSelectionModel) e.getSource();
-						int indx = lsm.getMinSelectionIndex();
-						
-						if (indx != -1) {
-							selectedPageIndx = indx;
-							updateSelectedPage();
-						}
+	/** Return a WPageList with selection disabled for previewing a message */
+	public WPageList getPagePreviewList() {
+		return new WPageList(false);
+	}
+	
+	/** Return this controller's WPageList which is used for selecting pages */
+	public WPageList getPageList() {
+		if (pageList == null)
+			makePageList();
+		return pageList;
+	}
+	
+	/** Create a WPageList for displaying a list of pages from the message */
+	private void makePageList() {
+		// create and save our page list with a selection handler
+		class PageSelectionHandler implements ListSelectionListener {
+			public void valueChanged(ListSelectionEvent e) {
+				if (!e.getValueIsAdjusting()) {
+					ListSelectionModel lsm = (ListSelectionModel) e.getSource();
+					int indx = lsm.getMinSelectionIndex();
+					
+					if (indx != -1) {
+						selectedPageIndx = indx;
+						updateSelectedPage();
 					}
 				}
 			}
-			pageList = new WPageList(new PageSelectionHandler());
-			return pageList;
 		}
+		pageList = new WPageList(new PageSelectionHandler());
 	}
 	
 	/** Get any message text in the controller */
@@ -915,6 +969,7 @@ public class WController {
 	
 	public void setSignPanel(WImagePanel sp) {
 		signPanel = sp;
+//		update();
 	}
 	
 	private void setMultiConfig(MultiConfig mc) {

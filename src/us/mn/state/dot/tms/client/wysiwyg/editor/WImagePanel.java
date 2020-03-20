@@ -224,6 +224,8 @@ public class WImagePanel extends JPanel {
 		repaint();
 	}
 	
+	
+	
 	/** Show the caret on the panel (must have a valid location too). */
 	public void showCaret() {
 		caretOn = true;

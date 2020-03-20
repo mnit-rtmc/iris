@@ -330,7 +330,7 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		
-		page_list = controller.getPageList(true);
+		page_list = controller.getPageList();
 		page_list_pn = new JScrollPane(page_list,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -373,6 +373,9 @@ public class WMsgEditorForm extends AbstractForm {
 		p.add(save_btn, gbc);
 		
 		add(p);
+		
+		// finish initializing the controller now that everything is in place
+		controller.postInit();
 	}
 	
 	/** Get the WController for this form */
