@@ -1,5 +1,13 @@
 # IRIS 5.x Release Notes
 
+5.12.0 (23 Mar 2020)
+ - Added Camera "streamable" flag
+ - Fixed camera encoding quality logic bugs
+ - Added streambed protocol
+ - Renamed "Dictionary" to "Word" in UI and documentation
+ - Fixed bug where "prefix page" messages would lose incident association
+ - Fixed LCS found on branched corridors for incident deployment
+
 5.11.0 (22 Jan 2020)
  - Added flow streams to manage streambed video streams
  - Don't base camera active / failed status on PTZ controller
