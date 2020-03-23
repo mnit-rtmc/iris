@@ -64,8 +64,9 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		namespace.registerType(SONAR_TYPE, CameraImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"cam_num, encoder_type, enc_address, enc_port, " +
-			"enc_mcast, enc_channel, publish, video_loss " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+			"enc_mcast, enc_channel, publish, streamable, " +
+			"video_loss FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new CameraImpl(row));
@@ -89,6 +90,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		map.put("enc_mcast", enc_mcast);
 		map.put("enc_channel", enc_channel);
 		map.put("publish", publish);
+		map.put("streamable", streamable);
 		map.put("video_loss", video_loss);
 		return map;
 	}
@@ -128,23 +130,24 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		     row.getString(10),          // enc_mcast
 		     (Integer) row.getInt(11),   // enc_channel
 		     row.getBoolean(12),         // publish
-		     row.getBoolean(13)          // video_loss
+		     row.getBoolean(13),         // streamable
+		     row.getBoolean(14)          // video_loss
 		);
 	}
 
 	/** Create a camera */
 	private CameraImpl(String n, String l, String c, int p, String nt,
 		Integer cn, String et, String ea, Integer ep, String em,
-		Integer ec, boolean pb, boolean vl)
+		Integer ec, boolean pb, boolean st, boolean vl)
 	{
 		this(n, lookupGeoLoc(l), lookupController(c), p, nt, cn,
-		     lookupEncoderType(et), ea, ep, em, ec, pb, vl);
+		     lookupEncoderType(et), ea, ep, em, ec, pb, st, vl);
 	}
 
 	/** Create a camera */
 	private CameraImpl(String n, GeoLocImpl l, ControllerImpl c, int p,
 		String nt, Integer cn, EncoderType et, String ea, Integer ep,
-		String em, Integer ec, boolean pb, boolean vl)
+		String em, Integer ec, boolean pb, boolean st, boolean vl)
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
@@ -155,6 +158,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		enc_mcast = em;
 		enc_channel = ec;
 		publish = pb;
+		streamable = st;
 		video_loss = vl;
 		initTransients();
 	}
@@ -339,6 +343,29 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	@Override
 	public boolean getPublish() {
 		return publish;
+	}
+
+	/** Streamable flag */
+	private boolean streamable;
+
+	/** Set streamable flag */
+	@Override
+	public void setStreamable(boolean s) {
+		streamable = s;
+	}
+
+	/** Set streamable flag */
+	public void doSetStreamable(boolean s) throws TMSException {
+		if (s != streamable) {
+			store.update(this, "streamable", s);
+			setStreamable(s);
+		}
+	}
+
+	/** Get streamable flag */
+	@Override
+	public boolean getStreamable() {
+		return streamable;
 	}
 
 	/** Flag to indicate video loss */

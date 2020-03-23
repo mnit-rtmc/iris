@@ -56,6 +56,7 @@ Encoder Port      | Port number for unicast streams (overrides scheme default)
 Multicast Address | IP address for [multicast] streams
 Encoder Channel   | Channel number, for encoders which support multiple cameras
 Publish           | Flag to allow public viewing of camera video
+Streamable        | Flag to indicate whether stream is available
 
 ## Pan Tilt and Zoom
 

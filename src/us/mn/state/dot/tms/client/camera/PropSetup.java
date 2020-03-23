@@ -96,6 +96,14 @@ public class PropSetup extends IPanel {
 		}
 	});
 
+	/** Checkbox to allow streaming camera images */
+	private final JCheckBox streamable_chk = new JCheckBox(new IAction(null)
+	{
+		protected void doActionPerformed(ActionEvent e) {
+			camera.setStreamable(streamable_chk.isSelected());
+		}
+	});
+
 	/** User session */
 	private final Session session;
 
@@ -130,6 +138,8 @@ public class PropSetup extends IPanel {
 		add(enc_chn_spn, Stretch.LAST);
 		add("camera.publish");
 		add(publish_chk, Stretch.LAST);
+		add("camera.streamable");
+		add(streamable_chk, Stretch.LAST);
 		createJobs();
 	}
 
@@ -186,6 +196,7 @@ public class PropSetup extends IPanel {
 		enc_mcast_txt.setEnabled(canWrite("encMcast"));
 		enc_chn_spn.setEnabled(canWrite("encChannel"));
 		publish_chk.setEnabled(canWrite("publish"));
+		streamable_chk.setEnabled(canWrite("streamable"));
 	}
 
 	/** Update one attribute on the form tab */
@@ -214,6 +225,8 @@ public class PropSetup extends IPanel {
 		}
 		if (a == null || a.equals("publish"))
 			publish_chk.setSelected(camera.getPublish());
+		if (a == null || a.equals("streamable"))
+			streamable_chk.setSelected(camera.getStreamable());
 	}
 
 	/** Check if the user can write an attribute */
