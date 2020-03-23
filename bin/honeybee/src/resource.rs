@@ -1,6 +1,6 @@
 // resource.rs
 //
-// Copyright (C) 2018-2019  Minnesota Department of Transportation
+// Copyright (C) 2018-2020  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -120,7 +120,7 @@ enum Resource {
 const CAMERA_RES: Resource = Resource::Simple(
 "camera_pub", Listen::Exclude("camera", &["video_loss"]),
 "SELECT row_to_json(r)::text FROM (\
-    SELECT name, publish, location, lat, lon \
+    SELECT name, publish, streamable, location, lat, lon \
     FROM camera_view \
     ORDER BY name \
 ) r",
