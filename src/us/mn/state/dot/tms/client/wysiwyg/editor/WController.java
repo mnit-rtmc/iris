@@ -92,6 +92,7 @@ public class WController {
 	 * change) for any updates we need to make from here */
 	private WMsgEditorForm editor;
 	private WImagePanel signPanel;
+	private WMsgMultiPanel multiPanel;
 	
 	/** Keep a list of actions that have been performed and undone */
 	// TODO make a new list type if it seems like it would be useful
@@ -294,46 +295,15 @@ public class WController {
 		int sx = wr.cvtWysiwygToSignX(x);
 		int sy = wr.cvtWysiwygToSignY(y);
 		
-		// TODO I think we should move the next three blocks to WPage
-		
 		// find the closest token on this page
-		WToken tok = null;
-		Iterator<WToken> it = selectedPage.tokens();
+		WToken tok = selectedPage.findClosestToken(sx, sy);
+		
+		// if this is the last token, check if they clicked to the right of
+		// it - they probably wanted the end of the page
 		caretAtEnd = false;
-		while (it.hasNext()) {
-			WToken t = it.next();
-			if (t.isInside(sx, sy) && t.isText()) {
-				tok = t;
-				break;
+		if (selectedPage.isLast(tok) && sx > tok.getRightEdge()) {
+				caretAtEnd = true;
 			}
-		}
-		
-		// TODO how to deal with distance???
-		// if they didn't click IN any token, find the closest token
-		
-		if (tok == null) {
-			it = selectedPage.tokens();
-			double minDist = 999999;
-			while (it.hasNext()) {
-				WToken t = it.next();
-				
-				// calculate distance
-				double d = t.distance(sx, sy);
-				
-				// if this token is closer and on the same line then take it
-				if (d < minDist && t.sameLine(sy) && t.isText()) {
-					tok = t;
-					minDist = d;
-				}
-			}
-			// if the token is the last token, check if they clicked to the
-			// right of it - they probably wanted the end of the page
-			if (tok == selectedPage.getTokenList().getLast()) {
-				if (sx > tok.getCoordX()+tok.getCoordW())
-					caretAtEnd = true;
-			}
-		}
-		
 		
 		// TODO test code
 		// back-convert to click coordinates
@@ -428,12 +398,7 @@ public class WController {
 		tokensSelected.clear();
 		
 		// set the new caret location
-		WToken tok = null;
-		if (tokensAfter.isEmpty() && !tokensBefore.isEmpty()) {
-			tok = tokensBefore.getLast();
-		} else if (!tokensAfter.isEmpty()) {
-			tok = tokensAfter.get(0);
-		}
+		WToken tok = getCaretToken();
 		
 		// we can't (currently) set the caret location without a token
 		// TODO how do we deal with that for new messages?!?!
@@ -443,6 +408,19 @@ public class WController {
 //			System.out.println(tok.toString());
 			signPanel.setCaretLocation(tok, caretAtEnd);
 		}
+	}
+	
+	/** Get the token associated with the current caret position. This is
+	 *  either the first token after the caret or the last token before
+	 *  the caret, or null if neither is valid. */
+	private WToken getCaretToken() {
+		WToken tok = null;
+		if (tokensAfter.isEmpty() && !tokensBefore.isEmpty()) {
+			tok = tokensBefore.getLast();
+		} else if (!tokensAfter.isEmpty()) {
+			tok = tokensAfter.get(0);
+		}
+		return tok;
 	}
 	
 	/** Action to move caret to left (using left arrow key) */
@@ -473,6 +451,69 @@ public class WController {
 			}
 		}
 	};
+	
+	/** Action to move caret up one line (using up arrow key) */
+	public Action moveCaretUp = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// get the current token
+			WToken tok = getCaretToken();
+			
+			// get the line this token is on
+			int li = selectedPage.getLineIndex(tok);
+			if (li > 0) {
+				// if this isn't the first line, find the closest token (based
+				// on the X coordinate) on the next line up
+				WToken upTok = getClosestTokenOnLine(li-1, tok.getCoordX());
+				
+				// if we got a valid token, move the caret up (otherwise do
+				// nothing)
+				if (upTok != null) {
+					moveCaret(upTok);
+				}
+			}
+		}
+	};
+	
+	/** Action to move caret up one line (using up arrow key) */
+	public Action moveCaretDown = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// get the current token
+			WToken tok = getCaretToken();
+			
+			// get the line this token is on
+			int li = selectedPage.getLineIndex(tok);
+			if (li < selectedPage.getNumLines()-1) {
+				// if this isn't the last line, find the closest token (based
+				// on the X coordinate) on the next line down
+				WToken downTok = getClosestTokenOnLine(li+1, tok.getCoordX());
+				
+				// if we got a valid token, move the caret up (otherwise do
+				// nothing)
+				if (downTok != null) {
+					moveCaret(downTok);
+				}
+			}
+		}
+	};
+	
+	/** Return the closest token on the line with index lineIndx to the x
+	 *  coordinate provided (in sign coordinates.
+	 */
+	private WToken getClosestTokenOnLine(int lineIndx, int sx) {
+		WTokenList line = selectedPage.getLines().get(lineIndx);
+		Iterator<WToken> it = line.iterator();
+		int minDist = 999999;
+		WToken tok = null;
+		while (it.hasNext()) {
+			WToken t = it.next();
+			int xd = Math.abs(t.getCoordX() - sx);
+			if (xd < minDist) {
+				minDist = xd;
+				tok = t;
+			}
+		}
+		return tok;
+	}
 	
 	/** Action triggered with the backspace key. */
 	public Action backspace = new AbstractAction() {
@@ -740,12 +781,6 @@ public class WController {
 		return multiStringText;
 	}
 	
-	/** Edit the MULTI string text directly and update the GUI */
-	public void editMulti(String multiText) {
-		multiStringText = multiText;
-		update();
-	}
-	
 	/** Render the message using the current MULTI String and MultiConfig */
 	private void renderMsg() {
 		// update the WMessage object and re-render if we have a MultiConfig
@@ -770,16 +805,24 @@ public class WController {
 	public void setMultiString(String ms) {
 		multiStringText = ms;
 		wmsg.parseMulti(multiStringText);
+		update();
 	}
 	
 	/** Update everything that needs updating */
 	public void update() {
 //		System.out.println("In update: " + multiStringText);
 		renderMsg();
+		updateMultiPanel();
 		updatePageListModel();
 		updateCursor();
 		
 		// TODO add more stuff here eventually
+	}
+	
+	/** Update the MULTI panel with the current MULTI string. */
+	private void updateMultiPanel() {
+		if (multiPanel != null && multiStringText != null)
+			multiPanel.setText(multiStringText);
 	}
 	
 	/** Update the WPageList given the current MULTI string and MultiConfig. */
@@ -796,6 +839,8 @@ public class WController {
 		// make sure the selected page still exists
 		if (selectedPageIndx >= pageList.getNumPages()) 
 			selectedPageIndx = pageList.getNumPages()-1;
+		else if (selectedPageIndx < 0)
+			selectedPageIndx = 0;
 		
 		// rerender the messsage and get the page from our wmsg
 		renderMsg();
@@ -965,6 +1010,10 @@ public class WController {
 	
 	public Font getCurrentFont() {
 		return currentFont;
+	}
+	
+	public void setMultiPanel(WMsgMultiPanel mp) {
+		multiPanel = mp;
 	}
 	
 	public void setSignPanel(WImagePanel sp) {

@@ -338,6 +338,20 @@ abstract public class WToken {
 		return centroidY;
 	}
 	
+	/** Return the token's right edge X coordinate in pixels.
+	 *  @return the token X coordinate plus the token width
+	 */
+	public Integer getRightEdge() {
+		return coordX + coordW;
+	}
+	
+	/** Return the token's bottom edge Y coordinate in pixels.
+	 *  @return the token Y coordinate plus the token height
+	 */
+	public Integer getBottomEdge() {
+		return coordY + coordH;
+	}
+	
 	public boolean validCoordinates() {
 		return (coordX != null)
 		    && (coordY != null)

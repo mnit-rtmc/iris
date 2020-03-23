@@ -96,6 +96,14 @@ public class WEditorKeyBindings {
 				"moveCaretRight");
 		actionMap.put("moveCaretRight", wc.moveCaretRight);
 		
+		/* Up/Down arrow keys - move caret up/down */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
+				"moveCaretUp");
+		actionMap.put("moveCaretUp", wc.moveCaretUp);
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
+				"moveCaretDown");
+		actionMap.put("moveCaretDown", wc.moveCaretDown);
+		
 		/* Enter key - add newline */
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
 				"addNewLine");

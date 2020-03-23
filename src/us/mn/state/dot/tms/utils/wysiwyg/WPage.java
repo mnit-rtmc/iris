@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.utils.wysiwyg;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -44,6 +45,9 @@ public class WPage {
 	 * Does not include the implicit [np] token between pages. */
 	private WTokenList tokenList = new WTokenList();
 
+	/** Lines on page. DOES include the [nl] token at the end of each line. */
+	private ArrayList<WTokenList> pageLines;
+	
 	// End-of-page cursor-coordinates
 	int eopX;
 	int eopY;
@@ -86,12 +90,106 @@ public class WPage {
 	public WTokenList getTokenList() {
 		return tokenList;
 	}
-	
+
 	/** Get the index of the token in this page's token list. */
 	public int getTokenIndex(WToken tok) {
 		return tokenList.indexOf(tok);
 	}
 
+	/** Return an ArrayList of WTokenLists containing the lines of the message
+	 *  on this page. Note that the [nl] tags ARE included at the end of each
+	 *  array.
+	 */
+	public ArrayList<WTokenList> getLines() {
+		// if the message has changed, re-initialize the lines
+		if (pageLines == null || wMsg.isChanged()) {
+			// initialize the ArrayList, then iterate through the tokens to fill it
+			pageLines = new ArrayList<WTokenList>();
+			Iterator<WToken> it = tokens();
+			
+			// initialize a WTokenList to hold the line
+			WTokenList line = new WTokenList();
+			while(it.hasNext()) {
+				// get the token and add it to the list (even if it's a newline,
+				// since that is included at the end)
+				WToken t = it.next();
+				line.add(t);
+				
+				// if this is a newline, store the current line and start a new one
+				if (t.getClass() == WtNewLine.class) {
+					pageLines.add(line);
+					line = new WTokenList();
+				}
+			}
+			// add the last line to the list
+			pageLines.add(line);
+		}
+		return pageLines;
+	}
+	
+	/** Get the index of the line on which this token is found.
+	 *  @return the index of the line, or -1 if not found */
+	public int getLineIndex(WToken tok) {
+		// get the list of lines, then try to find the token in one of them
+		ArrayList<WTokenList> lines = getLines();
+		for (int i = 0; i < lines.size(); ++i) {
+			WTokenList line = lines.get(i);
+			if (line.contains(tok)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	/** Return the number of lines on the page. */
+	public int getNumLines() {
+		return getLines().size();
+	}
+	
+	/** Return the closest text token to the point sx, sy (sign coordinates) */
+	public WToken findClosestToken(int sx, int sy) {
+		// first look through all the tokens on the page to find any that were
+		// clicked directly on
+		WToken tok = null;
+		Iterator<WToken> it = tokens();
+		boolean caretAtEnd = false;
+		while (it.hasNext()) {
+			WToken t = it.next();
+			if (t.isInside(sx, sy) && t.isText()) {
+				tok = t;
+				break;
+			}
+		}
+		
+		// if we didn't get anything, find the token that was closest AND on
+		// the same line
+		if (tok == null) {
+			it = tokens();
+			double minDist = 999999;
+			while (it.hasNext()) {
+				WToken t = it.next();
+				
+				// calculate distance
+				double d = t.distance(sx, sy);
+				
+				// if this token is closer and on the same line then take it
+				if (d < minDist && t.sameLine(sy) && t.isText()) {
+					tok = t;
+					minDist = d;
+				}
+			}
+		}
+		return tok;
+	}
+	
+	/** Determine if this is the last token of the page. */
+	public boolean isLast(WToken tok) {
+		if (tok == tokenList.getLast())
+			return true;
+		else
+			return false;
+	}
+	
 	public boolean isValid() {
 		WToken tok;
 		Iterator<WToken> it = tokenList.iterator();

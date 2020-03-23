@@ -63,6 +63,9 @@ public class WMsgMultiPanel extends JPanel {
 		if (multiText != null) {
 			setText(multiText);
 		}
+		
+		// give the controller a handle so it can update the text
+		controller.setMultiPanel(this);
 	}
 	
 	/** Create and add components to the panel */
@@ -99,7 +102,7 @@ public class WMsgMultiPanel extends JPanel {
 		{
 			// use the controller to update the rendering
 			multiText = text_box.getText();
-			controller.editMulti(multiText);
+			controller.setMultiString(multiText);
 		}
 	};
 	

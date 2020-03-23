@@ -189,7 +189,7 @@ public class WMsgEditorForm extends AbstractForm {
 		
 		// TODO may want to change these dimensions
 		// OR BETTER YET - figure out how to make it more adaptive...
-		setPreferredSize(new Dimension(800,500));
+		setPreferredSize(new Dimension(850,500));
 		
 		/* Menu Bar */
 		menu_bar = new WMsgEditorMenuBar();
@@ -205,6 +205,9 @@ public class WMsgEditorForm extends AbstractForm {
 		
 		/* Page number label (default to 1) */
 		pg_num_lbl = new JLabel(String.format(I18N.get("wysiwyg.editor.page_number"), 1));
+		
+		/* Page List */
+		page_list = controller.getPageList();
 		
 		/* Page buttons */
 		page_add_btn = new JButton(pageAdd);
@@ -305,10 +308,28 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.gridx = 0;
 		gbc.gridy = 2;
 		p.add(new JLabel(I18N.get("wysiwyg.editor.page_list")), gbc);
+
+		/* Page List */
+		gbc.gridx = 0;
+		gbc.gridy = 3;
+		gbc.gridheight = 1;
+		gbc.gridwidth = 4;
+		gbc.weightx = 0.5;
+		gbc.weighty = 1;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+		
+		page_list_pn = new JScrollPane(page_list,
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		page_list_pn.setPreferredSize(new Dimension(300, 400));
+		p.add(page_list_pn, gbc);
 		
 		/* Page Buttons */
 		gbc.gridx = 0;
-		gbc.gridy = 3;
+		gbc.gridy = 4;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
 		gbc.gridwidth = 4;
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.anchor = GridBagConstraints.CENTER;
@@ -320,21 +341,6 @@ public class WMsgEditorForm extends AbstractForm {
 		page_btn_pnl.add(page_mv_up_btn);
 		page_btn_pnl.add(page_mv_down_btn);
 		p.add(page_btn_pnl, gbc);
-		
-		/* Page List */
-		gbc.gridx = 0;
-		gbc.gridy = 4;
-		gbc.gridheight = 1;
-		gbc.weightx = 0.5;
-		gbc.weighty = 1;
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
-		
-		page_list = controller.getPageList();
-		page_list_pn = new JScrollPane(page_list,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		p.add(page_list_pn, gbc);
 		
 		/* Editor (its own panel with multiple tabs) */
 		gbc.gridx = 4;
