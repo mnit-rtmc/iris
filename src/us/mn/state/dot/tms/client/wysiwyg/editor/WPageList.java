@@ -38,7 +38,7 @@ public class WPageList extends JList<WPage> {
 	
 	WMessage wmsg;
 	DefaultListModel<WPage> model;
-	ListCellRenderer<WPage> rndr;
+	WPageListRenderer rndr;
 	
 	/** Create a page list without a selection handler. If enableSelection is
 	 *  false, selection is disabled.

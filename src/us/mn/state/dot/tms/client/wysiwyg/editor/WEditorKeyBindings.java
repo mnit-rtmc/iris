@@ -56,9 +56,42 @@ public class WEditorKeyBindings {
 	 */
 	public WEditorKeyBindings(WController c) {
 		wc = c;
+		
+		// set global key bindings first - the WysiwygPanel will take care of
+		// editor-panel-specific ones
+		setFormGlobalKeyBindings();
 	}
 	
-	public void setKeyBindings(JComponent comp, int condition) {
+	/** Set key bindings that apply when any part of the editor form is in
+	 *  focus. Key bindings are applied to the controller's editor form
+	 *  whenever it is the ancestor of a focused component.
+	 */
+	public void setFormGlobalKeyBindings() {
+		// get the input/action maps for the form and disable focus traversal
+		// keys
+		WMsgEditorForm e = wc.getEditorForm();
+		inputMap = e.getInputMap(
+				JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		actionMap = e.getActionMap();
+		e.setFocusTraversalKeysEnabled(false);
+		
+		/* Ctrl + Z - undo */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
+				KeyEvent.CTRL_DOWN_MASK), "undo");
+		actionMap.put("undo", wc.undo);
+
+		/* Ctrl + Shift + Z  OR  Ctrl + Y - redo */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
+				KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK), "redo");
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y,
+				KeyEvent.CTRL_DOWN_MASK), "redo");
+		actionMap.put("redo", wc.redo);
+	}
+	
+	/** Set key bindings that apply when the editor panel (WImagePanel) is in
+	 *  focus.
+	 */
+	public void setEditorPanelKeyBindings(JComponent comp, int condition) {
 //		System.out.println("Setting up key bindings on component " + comp.toString());
 		inputMap = comp.getInputMap(condition);
 		actionMap = comp.getActionMap();
@@ -75,18 +108,6 @@ public class WEditorKeyBindings {
 		/* Delete key - delete selected token or token in front of caret */
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "delete");
 		actionMap.put("delete", wc.delete);
-		
-		/* Ctrl + Z - undo */
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
-				KeyEvent.CTRL_DOWN_MASK), "undo");
-		actionMap.put("undo", wc.undo);
-
-		/* Ctrl + Shift + Z  OR  Ctrl + Y - redo */
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
-				KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK), "redo");
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y,
-				KeyEvent.CTRL_DOWN_MASK), "redo");
-		actionMap.put("redo", wc.redo);
 		
 		/* Left/Right arrow keys - move caret left/right */
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0),

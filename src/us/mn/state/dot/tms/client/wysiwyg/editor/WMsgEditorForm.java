@@ -210,25 +210,25 @@ public class WMsgEditorForm extends AbstractForm {
 		page_list = controller.getPageList();
 		
 		/* Page buttons */
-		page_add_btn = new JButton(pageAdd);
+		page_add_btn = new JButton(controller.pageAdd);
 		ImageIcon pg_add_icon = Icons.getIconByPropName("wysiwyg.editor.page_add");
 		page_add_btn.setIcon(pg_add_icon);
 		page_add_btn.setHideActionText(true);
 		page_add_btn.setMargin(new Insets(0,0,0,0));
 		
-		page_del_btn = new JButton(pageDelete);
+		page_del_btn = new JButton(controller.pageDelete);
 		ImageIcon pg_del_icon = Icons.getIconByPropName("wysiwyg.editor.page_delete");
 		page_del_btn.setIcon(pg_del_icon);
 		page_del_btn.setHideActionText(true);
 		page_del_btn.setMargin(new Insets(0,0,0,0));
 		
-		page_mv_up_btn = new JButton(pageMoveUp);
+		page_mv_up_btn = new JButton(controller.pageMoveUp);
 		ImageIcon pg_mv_up_icon = Icons.getIconByPropName("wysiwyg.editor.page_move_up");
 		page_mv_up_btn.setIcon(pg_mv_up_icon);
 		page_mv_up_btn.setHideActionText(true);
 		page_mv_up_btn.setMargin(new Insets(0,0,0,0));
 		
-		page_mv_down_btn = new JButton(pageMoveDown);
+		page_mv_down_btn = new JButton(controller.pageMoveDown);
 		ImageIcon pg_mv_down_icon = Icons.getIconByPropName("wysiwyg.editor.page_move_down");
 		page_mv_down_btn.setIcon(pg_mv_down_icon);
 		page_mv_down_btn.setHideActionText(true);
@@ -412,50 +412,6 @@ public class WMsgEditorForm extends AbstractForm {
 		if (selectedPage != null)
 			epanel.updateWysiwygSignPage(selectedPage);
 	}
-
-	/** Page Add action */
-	private final IAction pageAdd = new IAction("wysiwyg.editor.page_add") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-			throws Exception
-		{
-			// TODO need to keep track of what page we're on somewhere
-			System.out.println("Adding page...");
-		}
-	};
-	
-	/** Page Delete action */
-	private final IAction pageDelete = new IAction("wysiwyg.editor.page_delete") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			// TODO need to keep track of what page we're on somewhere
-			System.out.println("Deleting page...");
-		}
-	};
-	
-	/** Page Move Up action */
-	private final IAction pageMoveUp = new IAction("wysiwyg.editor.page_move_up") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			// TODO need to keep track of what page we're on somewhere
-			System.out.println("Moving page up...");
-		}
-	};
-	
-	/** Page Move Down action */
-	private final IAction pageMoveDown = new IAction("wysiwyg.editor.page_move_down") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			// TODO need to keep track of what page we're on somewhere
-			System.out.println("Moving page down...");
-		}
-	};
 	
 	/** Preview action */
 	private final IAction preview = new IAction("wysiwyg.editor.preview") {

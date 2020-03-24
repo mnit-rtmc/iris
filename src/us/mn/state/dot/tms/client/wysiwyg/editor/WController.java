@@ -605,6 +605,70 @@ public class WController {
 		}
 	};
 	
+	/** Add a page after the selected page. */
+	public Action pageAdd = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// save state to allow undoing
+			saveState();
+			
+			// add a page to the wmsg after the selected page then update
+			// increment the selected page index so the new page is selected 
+			WPage pg = new WPage(wmsg);
+			++selectedPageIndx;
+			wmsg.addPage(selectedPageIndx, pg);
+			update();
+		}
+	};
+		
+	/** Delete the selected page. */
+	public Action pageDelete = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// save state to allow undoing
+			saveState();
+			
+			// delete the selected page from the wmsg then update
+			wmsg.removePage(selectedPageIndx);
+			update();
+		}
+	};
+	
+	/** Delete the selected page. */
+	public Action pageMoveUp = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (selectedPageIndx > 0) {
+				// save state to allow undoing
+				saveState();
+				
+				// remove the selected page from the wmsg then move it up one
+				WPage pg = wmsg.removePage(selectedPageIndx);
+				
+				// decrement the page index so the same page stays selected
+				--selectedPageIndx;
+				wmsg.addPage(selectedPageIndx, pg);
+				update();
+			}
+		}
+	};
+	
+	/** Delete the selected page. */
+	public Action pageMoveDown = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (selectedPageIndx < wmsg.getNumPages()-1) {
+				// save state to allow undoing
+				saveState();
+				
+				// remove the selected page from the wmsg then move it up one
+				WPage pg = wmsg.removePage(selectedPageIndx);
+
+				// increment the page index so the same page stays selected
+				++selectedPageIndx;
+				
+				wmsg.addPage(selectedPageIndx, pg);
+				update();
+			}
+		}
+	};
+	
 	/** Add the token to the selected page at the caret index */
 	private void addToken(WToken tok) {
 		// if we're already at the end of the page, add the token there
@@ -1062,6 +1126,10 @@ public class WController {
 		
 	public SmartDesktop getDesktop() {
 		return desktop;
+	}
+	
+	public WMsgEditorForm getEditorForm() {
+		return editor;
 	}
 	
 	/* Get the current DMS object */

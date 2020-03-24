@@ -182,7 +182,7 @@ public class WMsgWysiwygPanel extends JPanel {
 		
 		// initialize key bindings and attach to panel
 		editorKeyBindings = new WEditorKeyBindings(controller);
-		editorKeyBindings.setKeyBindings(signPanel, JComponent.WHEN_FOCUSED);
+		editorKeyBindings.setEditorPanelKeyBindings(signPanel, JComponent.WHEN_FOCUSED);
 	}
 	
 	/** Set the currently selected page to display */
