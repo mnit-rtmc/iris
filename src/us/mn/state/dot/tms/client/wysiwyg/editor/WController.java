@@ -1082,6 +1082,8 @@ public class WController {
 		// save the object, then get the object and set our quick message
 		qmCache.createObject(msgName, qmAttrs);
 		qm = QuickMessageHelper.lookup(msgName);
+		
+		// TODO maybe don't do this...
 		while (qm == null)
 			qm = QuickMessageHelper.lookup(msgName);			
 		

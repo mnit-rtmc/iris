@@ -758,8 +758,7 @@ public class WMsgSelectorForm extends AbstractForm {
 		// set the buttons based on edit mode and the respective enabled state
 		create_btn.setEnabled(createEnabled && editMode);
 		edit_btn.setEnabled(editEnabled && editMode);
-//		clone_btn.setEnabled(cloneEnabled && editMode);
-		clone_btn.setEnabled(false); // TODO temporary
+		clone_btn.setEnabled(cloneEnabled && editMode);
 		delete_btn.setEnabled(deleteEnabled && editMode);
 	}
 	
@@ -1027,13 +1026,18 @@ public class WMsgSelectorForm extends AbstractForm {
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
 		{
+			// open a form to get the name of the new message, then copy the
+			// MULTI from this message
 			if (editMode && selectedMessage != null) {
-				// check what we have selected and call the appropriate
-				// CloneMsg method
-				if (selectedDMS != null)
-					CloneMsg(selectedMessage, selectedDMS);
-				else if (selectedSignGroup != null)
-					CloneMsg(selectedMessage, selectedSignGroup);
+				if (selectedDMS != null) {
+					session.getDesktop().show(
+							new WMsgNewMsgForm(session, selectorForm,
+									selectedDMS, selectedMessage));
+				} else if (selectedSignGroup != null) {
+					session.getDesktop().show(
+							new WMsgNewMsgForm(session, selectorForm,
+									selectedSignGroup, selectedMessage));
+				}
 			}
 		}
 	};
@@ -1075,6 +1079,21 @@ public class WMsgSelectorForm extends AbstractForm {
 		System.out.format("Creating message for sign %s ...\n", sign.getName());
 		
 		// make sure we have a single-sign sign group for this sign
+		SignGroup sg = getSingleSignGroup(s, sign);
+		
+		// create a new quick message
+		TypeCache<QuickMessage> qmCache = s.getSonarState().
+				getDmsCache().getQuickMessages();
+		HashMap<String, Object> qmAttrs = new HashMap<String, Object>();
+		qmAttrs.put("sign_group", sg);
+		qmAttrs.put("multi", "");
+		qmCache.createObject(msgName, qmAttrs);
+	}
+	
+	/** Get the single-sign sign group for a sign. If it does not exist,
+	 *  it is created.
+	 */
+	public static SignGroup getSingleSignGroup(Session s, DMS sign) {
 		SignGroup sg = SignGroupHelper.lookup(sign.getName());
 		if (sg == null) {
 			// if we don't, add one
@@ -1094,14 +1113,7 @@ public class WMsgSelectorForm extends AbstractForm {
 			attrs.put("sign_group", sg);
 			dsgCache.createObject(oname, attrs);
 		}
-		
-		// create a new quick message
-		TypeCache<QuickMessage> qmCache = s.getSonarState().
-				getDmsCache().getQuickMessages();
-		HashMap<String, Object> qmAttrs = new HashMap<String, Object>();
-		qmAttrs.put("sign_group", sg);
-		qmAttrs.put("multi", "");
-		qmCache.createObject(msgName, qmAttrs);
+		return sg;
 	}
 	
 	/** Create a message for a sign group */
@@ -1132,17 +1144,26 @@ public class WMsgSelectorForm extends AbstractForm {
 		editor.setFrame(frame);
 	}
 	
-	/** Clone a message for a sign */
-	public static void CloneMsg(QuickMessage qm, DMS sign) {
-		System.out.format("Cloning message %s for sign %s ...\n", qm.getName(), sign.getName());
-		// TODO
+	/** Clone a message for a sign OR group - we get the sign/group from the
+	 *  quick message, and whether it's a single-sign group or real sign group
+	 *  is handled implicitly (the operations we need to do are the same).
+	 */
+	public static void CloneMsg(Session s, QuickMessage qm, String msgName) {
+		// create a new quick message with the same sign group and MULTI as
+		// the original but with a new name
+		TypeCache<QuickMessage> qmCache = s.getSonarState().
+				getDmsCache().getQuickMessages();
+		HashMap<String, Object> qmAttrs = new HashMap<String, Object>();
+		
+		// get either the group or config - one has to be not null
+		SignGroup sg = qm.getSignGroup();
+		if (sg != null)
+			qmAttrs.put("sign_group", sg);
+		else
+			qmAttrs.put("sign_config", qm.getSignConfig());
+		qmAttrs.put("multi", qm.getMulti());
+		qmCache.createObject(msgName, qmAttrs);
 	}	
-	
-	/** Clone a message for a sign group */
-	public static void CloneMsg(QuickMessage qm, SignGroup sg) {
-		System.out.format("Cloning message %s for sign group %s ...\n", qm.getName(), sg.getName());
-		// TODO
-	}
 	
 	/** Delete a message */
 	public static void DeleteMsg(QuickMessage qm) {

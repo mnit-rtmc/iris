@@ -54,6 +54,9 @@ public class WMsgNewMsgForm extends AbstractForm {
 	private DMS sign;
 	private SignGroup signGroup;
 	
+	/** Quick message (for cloning, not always provided) */
+	QuickMessage qm;
+	
 	/** Info message */
 	private JLabel infoMsg;
 	
@@ -70,9 +73,9 @@ public class WMsgNewMsgForm extends AbstractForm {
 		selectorForm = sForm;
 		sign = d;
 		initForm();
-		
-		// the OK button does something slightly different depending on who
-		// called us
+
+		// the OK button does something slightly different depending on how
+		// we were called
 		ok_btn = new JButton(createMsg);
 	}
 	
@@ -82,10 +85,33 @@ public class WMsgNewMsgForm extends AbstractForm {
 		selectorForm = sForm;
 		signGroup = sg;
 		initForm();
-		
-		// the OK button does something slightly different depending on who
-		// called us
 		ok_btn = new JButton(createMsg);
+	}
+	
+	public WMsgNewMsgForm(Session s, WMsgSelectorForm sForm, DMS d, QuickMessage q) {
+		super(I18N.get("wysiwyg.new_message.title"), true);
+		session = s;
+		selectorForm = sForm;
+		sign = d;
+		qm = q;
+		initForm();
+		
+		// prefill the text with the previous message name
+		msgNameInput.setText(qm.getName());
+		ok_btn = new JButton(cloneMsg);
+	}
+	
+	public WMsgNewMsgForm(Session s, WMsgSelectorForm sForm, SignGroup sg, QuickMessage q) {
+		super(I18N.get("wysiwyg.new_message.title"), true);
+		session = s;
+		selectorForm = sForm;
+		signGroup = sg;
+		qm = q;
+		initForm();
+
+		// prefill the text with the previous message name
+		msgNameInput.setText(qm.getName());
+		ok_btn = new JButton(cloneMsg);
 	}
 	
 	public WMsgNewMsgForm(Session s, WController c, String prefill) {
@@ -93,9 +119,6 @@ public class WMsgNewMsgForm extends AbstractForm {
 		session = s;
 		controller = c;
 		initForm();
-		
-		// the OK button does something slightly different depending on who
-		// called us
 		ok_btn = new JButton(saveMsgAs);
 		
 		// prefill the text with the previous message name (or whatever really)
@@ -184,7 +207,54 @@ public class WMsgNewMsgForm extends AbstractForm {
 					WMsgSelectorForm.CreateMsg(session, sign, newMsgName);
 				else if (signGroup != null)
 					WMsgSelectorForm.CreateMsg(session, signGroup, newMsgName);
+				
+				// TODO maybe don't do this...
+				while (qm == null)
+					qm = QuickMessageHelper.lookup(newMsgName);
+				
 				selectorForm.reloadForm();
+				
+				if (sign != null)
+					WMsgSelectorForm.EditMsg(session,  qm, sign);
+				else if (signGroup != null)
+					WMsgSelectorForm.EditMsg(session, qm, signGroup);
+				
+				close(session.getDesktop());
+			} else {
+				// if not, show a warning
+				setWarningText();
+			}
+		}
+	};
+
+	/** Clone Message action */
+	private final IAction cloneMsg = new IAction(
+			"wysiwyg.new_message.ok") {
+		@SuppressWarnings("synthetic-access")
+		protected void doActionPerformed(ActionEvent e)
+				throws Exception {
+			// try to create a new quick message
+			String newMsgName = createNewQuickMessage();
+			
+			// if it works (i.e. there is no existing message with that name)
+			// then open the editor and close this form
+			if (newMsgName != null) {
+				// the clone operation is the same for signs and groups (we
+				// use the same sign group as the existing quick message)
+				WMsgSelectorForm.CloneMsg(session, qm, newMsgName);
+				
+				// TODO maybe don't do this...
+				qm = QuickMessageHelper.lookup(newMsgName);
+				while (qm == null)
+					qm = QuickMessageHelper.lookup(newMsgName);
+				
+				selectorForm.reloadForm();
+				
+				if (sign != null)
+					WMsgSelectorForm.EditMsg(session,  qm, sign);
+				else if (signGroup != null)
+					WMsgSelectorForm.EditMsg(session, qm, signGroup);
+				
 				close(session.getDesktop());
 			} else {
 				// if not, show a warning
