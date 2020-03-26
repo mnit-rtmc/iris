@@ -490,7 +490,7 @@ public class WMsgSelectorForm extends AbstractForm {
 		sgrp_pn.setPreferredSize(new Dimension(250,200));
 		tab_pane = new JTabbedPane(JTabbedPane.TOP);
 		tab_pane.add(I18N.get("wysiwyg.sign"), dms_pn);
-		tab_pane.add(I18N.get("wysiwyg.sign_group"), sgrp_pn);
+//		tab_pane.add(I18N.get("wysiwyg.sign_group"), sgrp_pn);
 		
 		/* Set the focus on the Sign list */
 		dms_list.requestFocusInWindow();
