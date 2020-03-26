@@ -49,8 +49,10 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignGroup;
@@ -63,6 +65,7 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.client.wysiwyg.selector.WMsgSelectorSignProcess;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WMsgEditorForm;
+import us.mn.state.dot.tms.client.wysiwyg.editor.WMsgNewMsgForm;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WPageList;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WPagePanel;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WController;
@@ -755,7 +758,8 @@ public class WMsgSelectorForm extends AbstractForm {
 		// set the buttons based on edit mode and the respective enabled state
 		create_btn.setEnabled(createEnabled && editMode);
 		edit_btn.setEnabled(editEnabled && editMode);
-		clone_btn.setEnabled(cloneEnabled && editMode);
+//		clone_btn.setEnabled(cloneEnabled && editMode);
+		clone_btn.setEnabled(false); // TODO temporary
 		delete_btn.setEnabled(deleteEnabled && editMode);
 	}
 	
@@ -981,16 +985,17 @@ public class WMsgSelectorForm extends AbstractForm {
 	private final IAction create = new IAction("wysiwyg.selector.create") {
 		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			// check what we have selected and call the appropriate CreateMsg
-			// method
+				throws Exception {
+			// open a form to get the name of the new message and create it
 			if (editMode) {
-				if (selectedDMS != null)
-					CreateMsg(selectedDMS);
-				else if (selectedSignGroup != null)
-					CreateMsg(selectedSignGroup);
-			}
+				if (selectedDMS != null) {
+					session.getDesktop().show(
+							new WMsgNewMsgForm(session, selectorForm, selectedDMS));
+				} else if (selectedSignGroup != null) {
+					session.getDesktop().show(
+							new WMsgNewMsgForm(session, selectorForm, selectedSignGroup));
+				}
+			}	
 		}
 	};
 	
@@ -1037,6 +1042,7 @@ public class WMsgSelectorForm extends AbstractForm {
 		// delete the selected message if edit mode is enabled
 		if (editMode && selectedMessage != null) {
 			DeleteMsg(selectedMessage);
+			reloadForm();
 		}
 	}
 	
@@ -1057,19 +1063,48 @@ public class WMsgSelectorForm extends AbstractForm {
 		public void actionPerformed(ActionEvent e) {
 			// call delete with no confirmation
 			deleteSelectedMessage();
+			reloadForm();
 		}
 	};	
 	
 	/** Methods for creating/editing/cloning/deleting messages */
 	
 	/** Create a message for a sign */
-	public static void CreateMsg(DMS sign) {
+	public static void CreateMsg(Session s, DMS sign, String msgName) {
 		System.out.format("Creating message for sign %s ...\n", sign.getName());
-		// TODO
+		
+		// make sure we have a single-sign sign group for this sign
+		SignGroup sg = SignGroupHelper.lookup(sign.getName());
+		if (sg == null) {
+			// if we don't, add one
+			TypeCache<SignGroup> sgCache = s.getSonarState().
+					getDmsCache().getSignGroups();
+			HashMap<String, Object> sgAttrs = new HashMap<String, Object>();
+			sgAttrs.put("local", true);
+			sgCache.createObject(sign.getName(), sgAttrs);
+			
+			// also a DMS sign group
+			TypeCache<DmsSignGroup> dsgCache = s.getSonarState().
+					getDmsCache().getDmsSignGroups();
+			sg = SignGroupHelper.lookup(sign.getName());
+			HashMap<String, Object> attrs = new HashMap<String, Object>();
+			String oname = sign.getName() + "_" + sign.getName();
+			attrs.put("dms", sign);
+			attrs.put("sign_group", sg);
+			dsgCache.createObject(oname, attrs);
+		}
+		
+		// create a new quick message
+		TypeCache<QuickMessage> qmCache = s.getSonarState().
+				getDmsCache().getQuickMessages();
+		HashMap<String, Object> qmAttrs = new HashMap<String, Object>();
+		qmAttrs.put("sign_group", sg);
+		qmAttrs.put("multi", "");
+		qmCache.createObject(msgName, qmAttrs);
 	}
 	
 	/** Create a message for a sign group */
-	public static void CreateMsg(SignGroup sg) {
+	public static void CreateMsg(Session s, SignGroup sg, String msgName) {
 		System.out.format("Creating message for sign group %s ...\n", sg.getName());
 		// TODO
 	}
@@ -1082,7 +1117,7 @@ public class WMsgSelectorForm extends AbstractForm {
 		SmartDesktop desktop = s.getDesktop();
 		WMsgEditorForm editor = new WMsgEditorForm(s, qm, sign);
 		JInternalFrame frame = desktop.show(editor);
-		editor.setMenuBar(frame);
+		editor.setFrame(frame);
 	}	
 	
 	/** Edit an existing message for a sign group */
@@ -1093,7 +1128,7 @@ public class WMsgSelectorForm extends AbstractForm {
 		SmartDesktop desktop = s.getDesktop();
 		WMsgEditorForm editor = new WMsgEditorForm(s, qm, sg);
 		JInternalFrame frame = desktop.show(editor);
-		editor.setMenuBar(frame);
+		editor.setFrame(frame);
 	}
 	
 	/** Clone a message for a sign */
@@ -1111,7 +1146,7 @@ public class WMsgSelectorForm extends AbstractForm {
 	/** Delete a message */
 	public static void DeleteMsg(QuickMessage qm) {
 		System.out.format("Deleting message %s ...\n", qm.getName());
-		// TODO
+		qm.destroy();
 	}
 	
 }

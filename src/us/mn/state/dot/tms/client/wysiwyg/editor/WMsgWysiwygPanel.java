@@ -141,6 +141,12 @@ public class WMsgWysiwygPanel extends JPanel {
 		mode_btn_pnl.add(multitag_mode_btn);
 		add(mode_btn_pnl);
 		
+		// TODO temporary
+		graphic_mode_btn.setEnabled(false);
+		colorrect_mode_btn.setEnabled(false);
+		textrect_mode_btn.setEnabled(false);
+		multitag_mode_btn.setEnabled(false);
+		
 		/** Option Panel - changes depending on the mode */
 		toolbar_pnl = new JPanel(new CardLayout(10,10));
 		

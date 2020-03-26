@@ -54,8 +54,6 @@ public class WMsgConfirmDeleteForm extends AbstractForm {
 		
 		no_btn = new JButton(cancel);
 		yes_btn = new JButton(delete);
-		
-		// TODO finish this...
 	}
 	
 	/** Initialize the form */

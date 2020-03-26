@@ -81,6 +81,9 @@ public class WMsgEditorForm extends AbstractForm {
 	/** User session */
 	private final Session session;
 	
+	/** Frame containing this form */
+	private JInternalFrame frame;
+	
 	/* Sign/Group and Message being edited */
 	private DMS sign;
 	private SignGroup sg;
@@ -178,6 +181,10 @@ public class WMsgEditorForm extends AbstractForm {
 		return session;
 	}
 	
+	public void setWindowTitle(QuickMessage q) {
+		frame.setTitle(getWindowTitle(q));
+	}
+	
 	public static String getWindowTitle(QuickMessage q) {
 		String editorName = I18N.get("wysiwyg.editor.title");
 		String msgName = q != null ? q.getName() : "<Untitled>";
@@ -242,6 +249,9 @@ public class WMsgEditorForm extends AbstractForm {
 		cancel_btn = new JButton(cancel);
 		save_as_btn = new JButton(saveas);
 		save_btn = new JButton(save);
+		
+		// TODO temporary
+		preview_btn.setEnabled(false);
 	}
 
 	/** Initialize the form */
@@ -394,8 +404,9 @@ public class WMsgEditorForm extends AbstractForm {
 		return epanel.getWImagePanel();
 	}
 	
-	/** Set the menu bar of the frame (which should be this form's frame. */
-	public void setMenuBar(JInternalFrame frame) {
+	/** Set the frame (which should be this form's frame. */
+	public void setFrame(JInternalFrame f) {
+		frame = f;
 		frame.setJMenuBar(menu_bar);
 	}
 	
@@ -429,7 +440,8 @@ public class WMsgEditorForm extends AbstractForm {
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
 		{
-			System.out.println("Cancelling...");
+			// close the frame without doing anything else
+			close(session.getDesktop());
 		}
 	};
 	
@@ -440,6 +452,10 @@ public class WMsgEditorForm extends AbstractForm {
 				throws Exception
 		{
 			System.out.println("Saving As...");
+			
+			// open a text input form for the user to input the name of a new
+			// message
+			controller.saveMessageAs.actionPerformed(e);
 		}
 	};
 	
@@ -449,7 +465,7 @@ public class WMsgEditorForm extends AbstractForm {
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
 		{
-			System.out.println("Saving...");
+			controller.saveMessage.actionPerformed(e);
 		}
 	};
 	

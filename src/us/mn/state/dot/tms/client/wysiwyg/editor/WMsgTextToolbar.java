@@ -196,6 +196,15 @@ public class WMsgTextToolbar extends JPanel {
 		text_hjust_btn_pnl.add(text_ln_just_center_btn);
 		text_hjust_btn_pnl.add(text_ln_just_right_btn);
 		add(text_hjust_btn_pnl);
+		
+
+		// TODO temporary
+		text_pg_just_top_btn.setEnabled(false);
+		text_pg_just_center_btn.setEnabled(false);
+		text_pg_just_bottom_btn.setEnabled(false);
+		fg_color_btn.setEnabled(false);
+		bg_color_btn.setEnabled(false);
+		font_options.setEnabled(false);
 	}
 	
 	/** Set the foreground or background color to c. The color to set is

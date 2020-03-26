@@ -41,12 +41,15 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.SignPixelPanel;
@@ -275,6 +278,7 @@ public class WController {
 		else
 			multiStringText = "";
 //		System.out.println("From QuickMessage: " + multiStringText);
+		
 		update();
 	}
 
@@ -1031,6 +1035,57 @@ public class WController {
 //		System.out.println(multiStringText);
 		if (multiConfig != null && wmsg != null)
 			wmsg.renderMsg(multiConfig);
+	}
+	
+	/** Save the current MULTI string in the quick message */
+	public Action saveMessage = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// get the MULTI string from the wmsg and save it
+			multiStringText = wmsg.toString();
+			qm.setMulti(multiStringText);
+		}
+	};
+	
+	/** Save the current MULTI string in the quick message */
+	WController wc = this; // TODO do something better
+	public Action saveMessageAs = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// open a form to get the new message name
+			// the new form will trigger the rest
+			session.getDesktop().show(new WMsgNewMsgForm(session, wc));
+		}
+	};
+	
+	/** Save a new quick message with the given name (using the current MULTI
+	 *  string) and start editing it.
+	 */
+	public void saveNewQuickMessage(String msgName) {
+		// NOTE we know there is a sign/sign group associated with us, so we
+		// don't have to make those
+		
+		// update the current MULTI string
+		multiStringText = wmsg.toString();
+		
+		// make the quick message
+		TypeCache<QuickMessage> qmCache = session.getSonarState().
+				getDmsCache().getQuickMessages();
+		HashMap<String, Object> qmAttrs = new HashMap<String, Object>();
+		qmAttrs.put("multi", multiStringText);
+		if (sg != null)
+			qmAttrs.put("sign_group", sg);
+		else {
+			// if we're not editing a sign group, get the single-sign group
+			SignGroup ssg = SignGroupHelper.lookup(sign.getName());
+			qmAttrs.put("sign_group", ssg);
+		}
+		// save the object, then get the object and set our quick message
+		qmCache.createObject(msgName, qmAttrs);
+		qm = QuickMessageHelper.lookup(msgName);
+		while (qm == null)
+			qm = QuickMessageHelper.lookup(msgName);			
+		
+		// update the window title too
+		editor.setWindowTitle(qm);
 	}
 	
 	/** Update the controller with a MULTI string */
