@@ -147,7 +147,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	5.12.0
+database_version	5.13.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0
@@ -2750,6 +2750,12 @@ CREATE VIEW sign_text_view AS
 	JOIN iris.sign_group sg ON dsg.sign_group = sg.name
 	JOIN iris.sign_text st ON sg.name = st.sign_group;
 GRANT SELECT ON sign_text_view TO PUBLIC;
+
+CREATE VIEW sign_group_text_view AS
+	SELECT sign_group, line, multi, rank
+	FROM iris.sign_group sg
+	JOIN iris.sign_text st ON sg.name = st.sign_group;
+GRANT SELECT ON sign_group_text_view TO PUBLIC;
 
 CREATE TABLE iris.dms_action (
 	name VARCHAR(30) PRIMARY KEY,
