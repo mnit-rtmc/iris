@@ -221,6 +221,13 @@ public class WRenderer {
 		Block block = currentBlock();
 		block.addText(tc);
 	}
+	
+	/** Add an end-of-page anchor-character for non-empty pages */
+	public void addAnchor(WPage wPage, WToken tok) {
+		TextChar tc = new AnchorChar(wPage, tok);
+		Block block = currentBlock();
+		block.addText(tc);
+	}
 
 //	/** Add a new line */
 //	@Override
@@ -879,6 +886,12 @@ public class WRenderer {
 		public AnchorChar(WPage p) {
 			wpage = p;
 		}
+
+		/** construct an end-of-page anchor for non-empty pages */
+		public AnchorChar(WPage p, WToken tok) {
+			wpage = p;
+			this.tok = tok;
+		}
 		
 		@Override
 		int getWidth() {
@@ -890,9 +903,20 @@ public class WRenderer {
 		void render(int x, int base) throws InvalidMsgException {
 			int h = getHeight();
 			int y = base - h;
-			if (tok != null)
-				tok.setCoordinates(x, y, w, h);
-			else if (wpage != null)
+			if (tok != null) {
+				if (wpage == null)
+					// anchor for non-visible tokens
+					tok.setCoordinates(x, y, w, h);
+				else {
+					// anchor (EOP) for pages with tokens
+					int tx = tok.getCoordX();
+					int ty = tok.getCoordY();
+					int th = tok.getCoordH();
+					int tw = tok.getCoordW();
+					wpage.setEOP(tx+tw, ty, w, th);
+				}
+			} else if (wpage != null)
+				// anchor (EOP) for pages with no tokens (empty pages)
 				wpage.setEOP(x, y, w, h);
 		}
 	}

@@ -61,9 +61,12 @@ import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
 import us.mn.state.dot.tms.utils.wysiwyg.WState;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
+import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtJustLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextChar;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.Multi.JustificationLine;
 import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.MultiString;
 
@@ -113,6 +116,12 @@ public class WController {
 	private final Cursor moveCursor = new Cursor(Cursor.MOVE_CURSOR);
 	private Cursor cursor = textCursor;
 	
+	/** Mouse selection parameters */
+	private int lastPressX;
+	private int lastPressY;
+	private WToken startTok;
+	private WToken endTok;
+	
 	/** Sign/Group and Message being edited */
 	private DMS sign;
 	private SignGroup sg;
@@ -127,8 +136,9 @@ public class WController {
 	private WTokenList tokensBefore = new WTokenList();
 	private WTokenList tokensSelected = new WTokenList();
 	private WTokenList tokensAfter = new WTokenList();
-	int caretIndx = 0;
-	boolean caretAtEnd = false;
+	private int caretIndx = 0;
+//	private boolean caretAtEnd = false;
+	public final static int CARET_EOP = -1;
 	
 	/** Font and graphics caches */
 	private WFontCache fontCache = new WFontCache();
@@ -211,11 +221,14 @@ public class WController {
 	 *  TODO/NOTE there is probably a better way to do this.
 	 */
 	public void postInit() {
-		
 		// do an update to render the message and fill the page list, then
 		// initialize the caret
 		update();
 		initCaret();
+		
+		// also give the sign panel focus so the user can immediately start
+		// typing
+		signPanel.requestFocusInWindow();
 	}
 	
 	/** Set the sign being used */
@@ -261,100 +274,201 @@ public class WController {
 			multiStringText = qm.getMulti();
 		else
 			multiStringText = "";
-		System.out.println("From QuickMessage: " + multiStringText);
+//		System.out.println("From QuickMessage: " + multiStringText);
 		update();
 	}
-	
-	/** Use the AffineTransform object from the editor's SignPixelPanel to
-	 *  calculate the coordinates of the click on the sign itself, rather than
-	 *  the JPanel in which it resides.
-	 */
-//	private Point2D transformSignCoordinates(int x, int y) {
-//		// update the editor to make sure everything is in place
-//		update();
-//		
-//		// get the AffineTransform object from the pixel panel
-//		if (editor != null) {
-//			
-//			AffineTransform t = pixel_pnl.getTransform();
-//			
-//			// calculate the adjusted coordinates of the click
-//			if (t != null) {
-//				int tx = (int) t.getTranslateX();
-//				int ty = (int) t.getTranslateY();
-//				return new Point2D.Double(x-tx, y-ty);
-//			}
+
+	/** Handle a click on the main editor panel */
+	public void handleClick(MouseEvent e) {
+		// calculate the adjusted coordinates of the click
+//		Point2D pSign = transformSignCoordinates(e.getX(), e.getY());
+		
+		// just print for now
+//		if (pSign != null) {
+		int b = e.getButton();
+		int x = e.getX();
+		int y = e.getY();
+		System.out.println(String.format(
+				"Mouse clicked at (%d, %d) ...", x, y));
+		update();
+		WToken tok = findClosestToken(x, y);
+		
+		// move the caret based on the token we got
+		if (tok != null) {
+			// if this is the last token, check if they clicked towards the right
+			// of it - they probably wanted the end of the page
+			if (selectedPage.isLast(tok) && rightHalf(x, tok)) {
+				moveCaret(CARET_EOP);
+			} else
+				// otherwise just move the caret to this token
+				moveCaret(tok);
+		}
+		
+		// get focus for this component when someone clicks on it
+		signPanel.requestFocusInWindow();
 //		}
-//		return null;
-//	}
+	}
+	
+	/** Handle a mouse move event on the main editor panel */
+	public void handleMouseMove(MouseEvent e) {
+		// calculate the adjusted coordinates of the mouse pointer
+//		Point2D pSign = transformSignCoordinates(e.getX(), e.getY());
+		
+		// just print for now
+//		if (pSign != null) {
+		int x = e.getX();
+		int y = e.getY();
+		
+		// TODO test code for cursor changing
+//		if (y >= 100 && y <= 160) {
+//			cursor = moveCursor;
+//		} else {
+//			setCursorFromMode();
+//		}
+//		update();
+			
+			// TODO hook this into token finding and mouse cursor changing
+			
+//		System.out.println(String.format(
+//				"Mouse moved to (%d, %d) ...", x, y));
+//		}
+	}
+	
+	/** Handle a mouse pressed event  */
+	public void handleMousePressed(MouseEvent e) {
+		// TODO only handling left-click drag for now
+		if (e.getButton() == MouseEvent.BUTTON1) {
+			// set the press coordinates and get the closest token
+			lastPressX = e.getX();
+			lastPressY = e.getY();
+			startTok = findClosestToken(lastPressX, lastPressY);
+		} else {
+			lastPressX = -1;
+			lastPressY = -1;
+			startTok = null;
+		}
+	}
+
+	/** Handle a mouse drag event on the main editor panel */
+	public void handleMouseDrag(MouseEvent e) {
+		// TODO only handling left-click drag for now
+		if (SwingUtilities.isLeftMouseButton(e)) {
+			// TODO only doing basic text selection for now
+			// update which token is under the cursor
+			int x = e.getX();
+			int y = e.getY();
+			updateMouseDrag(x, y);
+		}
+	}
+	
+	private void updateMouseDrag(int x, int y) {
+		endTok = findClosestToken(x, y);
+		
+		// update the selection if they're not the same token
+		if ((startTok != endTok) && startTok != null && endTok != null) {
+			// get the indeces and figure out which is first
+			int start = selectedPage.getTokenIndex(startTok);
+			int end = selectedPage.getTokenIndex(endTok);
+			
+			boolean includeEnd = false;
+			int si;
+			int ei;
+			if (start < end) {
+				si = start;
+				ei = end;
+				includeEnd = rightHalf(x, endTok);
+			} else {
+				// if they are selecting backwards, we need to use the initial
+				// click and token and reverse the indeces
+				si = end;
+				ei = start;
+				includeEnd = rightHalf(lastPressX, startTok);
+			}
+			updateTextSelection(si, ei, includeEnd);
+		}
+	}
+	
+	public void handleMouseReleased(MouseEvent e) {
+		// finalize the drag motion
+		int x = e.getX();
+		int y = e.getY();
+		updateMouseDrag(x, y);
+		
+		// if the x and y are the same as the last press, do nothing
+		// (handleClick SHOULD take care of it...)
+		if ((x != lastPressX && y != lastPressY)
+				&& (lastPressX != -1 && lastPressY != -1)) {
+//			System.out.println(String.format(
+//					"Mouse dragged from (%d, %d) to (%d, %d) ...",
+//					lastPressX, lastPressY, x, y));
+		}
+		
+		// reset the drag handler
+		lastPressX = -1;
+		lastPressY = -1;
+		startTok = null;
+		endTok = null;
+	}
 	
 	/** Find the closest token on the page given a set of click coordinates. */
-	public void findClosestToken(int x, int y) {
+	public WToken findClosestToken(int x, int y) {
 		// get the sign coordinates for working with the message
 		WRaster wr = selectedPage.getRaster();
 		int sx = wr.cvtWysiwygToSignX(x);
 		int sy = wr.cvtWysiwygToSignY(y);
 		
-		// find the closest token on this page
+		// find the closest token on this page and return it
 		WToken tok = selectedPage.findClosestToken(sx, sy);
-		
-		// if this is the last token, check if they clicked to the right of
-		// it - they probably wanted the end of the page
-		caretAtEnd = false;
-		if (selectedPage.isLast(tok) && sx > tok.getRightEdge()) {
-				caretAtEnd = true;
-			}
-		
-		// TODO test code
-		// back-convert to click coordinates
-		int[] cx = wr.cvtSignToWysiwygX(sx);
-		int cx0 = -1, cx1 = -1;
-		if (cx.length == 2) {
-			cx0 = cx[0];
-			cx1 = cx[1];
-		} else if (cx.length == 1) {
-			cx0 = cx[0];
-		}
-		int[] cy = wr.cvtSignToWysiwygY(sy);
-		int cy0 = -1, cy1 = -1;
-		if (cy.length == 2) {
-			cy0 = cy[0];
-			cy1 = cy[1];
-		} else if (cy.length == 1) {
-			cy0 = cy[0];
-		}
-		
-		String tokStr = "NOT FOUND";
-		if (tok != null) {
-			tokStr = tok.toString();
-		
-//			System.out.println(String.format(
-//					"Click at (%d, %d) => sign coords (%d, %d) => (%d->%d, %d->%d)",
-//					x, y, sx, sy, cx0, cx1, cy0, cy1));
-			System.out.println(String.format(
-					"Token '%s' found at coords (%d, %d) w/h (%d, %d)",
-					tokStr, tok.getCoordX(), tok.getCoordY(), tok.getCoordW(), tok.getCoordH()));
-//			System.out.println(String.format(
-//					"              Param coords (%d, %d) w/h (%d, %d)", 
-//					tok.getParamX(), tok.getParamY(), tok.getParamW(), tok.getParamH()));
-			
-			// move the caret
-			moveCaret(tok);
-		} else {
-//			System.out.println(String.format(
-//					"Click at (%d, %d) => sign coords (%d, %d) => (%d->%d, %d->%d)",
-//					x, y, sx, sy, cx0, cx1, cy0, cy1));
-		}
+		return tok;
+	}
+	
+	/** Determine if the coordinate x is on the left half of token tok. */
+	private boolean leftHalf(int x, WToken tok) {
+		WRaster wr = selectedPage.getRaster();
+		int sx = wr.cvtWysiwygToSignX(x);
+		return sx < tok.getCentroidX();
+	}	
+	
+	/** Determine if the coordinate x is on the right half of token tok. */
+	private boolean rightHalf(int x, WToken tok) {
+		WRaster wr = selectedPage.getRaster();
+		int sx = wr.cvtWysiwygToSignX(x);
+		return sx > tok.getCentroidX();
 	}
 	
 	/** Initialize the caret. If there is text in the message, it is placed at
 	 *  the beginning of the message (before the first printable character).
 	 *  If there is no text, it goes...somewhere. */
 	private void initCaret() {
-		// if the message isn't empty, put the caret at 0
+		// if the page isn't empty, put the caret at 0
 		if (!selectedPage.getTokenList().isEmpty())
 			moveCaret(0);
+		else {
+			// if it is, put it at the end of the page
+			moveCaret(CARET_EOP);
+		}
 		// TODO what to do if not???
+	}
+	
+	/** Update text selection given the token indeces provided (set by mouse
+	 *  events). 
+	 */
+	private void updateTextSelection(int si, int ei, boolean includeEnd) {
+		// slice the token list into 3
+		if (includeEnd)
+			++ei;
+		WTokenList pgTokens = selectedPage.getTokenList();
+		tokensBefore = pgTokens.slice(0, si);
+		tokensAfter = pgTokens.slice(ei, pgTokens.size());
+		tokensSelected = pgTokens.slice(si, ei);
+//		System.out.println(String.format("Before: %s", tokensBefore.toString()));
+//		System.out.println(String.format("Selected: %s", tokensSelected.toString()));
+//		System.out.println(String.format("After: %s", tokensAfter.toString()));
+		
+		// tell the image panel what the selection is
+		signPanel.setTextSelection(tokensSelected);
+		
+		// TODO move the caret too
 	}
 	
 	/** Move the caret to the spot just before the specified token. Note that
@@ -362,7 +476,7 @@ public class WController {
 	 */
 	public void moveCaret(WToken tok) {
 		// get a list of tokens on this page and find this token in the list
-		int tokIndx = selectedPage.getTokenList().indexOf(tok);
+		int tokIndx = selectedPage.getTokenIndex(tok);
 		
 		// dispatch to the other moveCaret method
 		moveCaret(tokIndx);
@@ -370,44 +484,45 @@ public class WController {
 	
 	/** Move the caret to the spot just before the specified token index. Note
 	 *  that this does not select the token.
+	 *  
+	 *  If tokIndx is -1, the caret is moved to the end of the page.
 	 */
 	public void moveCaret(int tokIndx) {
-		if (tokIndx != -1) {
-			caretIndx = tokIndx;
-			updateCaret();
-		}
+		caretIndx = tokIndx;
+		updateCaret();
 	}
 	
 	/** Update the caret location by moving it to the location defined by
 	 *  caretIndx and caretAtEnd.
 	 */
 	public void updateCaret() {
-		// slice the list at the token
 		WTokenList pgTokens = selectedPage.getTokenList();
-		if (!caretAtEnd) {
+		if (caretIndx != CARET_EOP) {
+//			System.out.println(String.format("Caret at %d", caretIndx));
+			
+			// slice the list at the token
 			tokensBefore = pgTokens.slice(0, caretIndx);
 			tokensAfter = pgTokens.slice(caretIndx, pgTokens.size());
+			
+			// set the new caret location
+			WToken tok = getCaretToken();
+			
+			// put the caret at that token
+			if (tok != null) {
+				signPanel.setCaretLocation(tok);
+			}
 		} else {
-			// if the caret is going to the end of the page, everything
-			// is before it
+//			System.out.println("Caret at end");
 			tokensBefore = pgTokens;
 			tokensAfter = new WTokenList();
+			int x = selectedPage.getEOPX();
+			int y = selectedPage.getEOPY();
+			int h = selectedPage.getEOPH();
+			signPanel.setCaretLocation(x, y, h);
 		}
-		
-		// reset the selection
+		// either way reset the selection
 		tokensSelected.clear();
-		
-		// set the new caret location
-		WToken tok = getCaretToken();
-		
-		// we can't (currently) set the caret location without a token
-		// TODO how do we deal with that for new messages?!?!
-		if (tok != null) {
-//			System.out.println("Before: " + tokensBefore.toString());
-//			System.out.println("After: " + tokensAfter.toString());
-//			System.out.println(tok.toString());
-			signPanel.setCaretLocation(tok, caretAtEnd);
-		}
+		signPanel.clearTextSelection();
 	}
 	
 	/** Get the token associated with the current caret position. This is
@@ -426,10 +541,10 @@ public class WController {
 	/** Action to move caret to left (using left arrow key) */
 	public Action moveCaretLeft = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-			// if the caret is at the end of the message, just change that
-			if (caretAtEnd) {
-				caretAtEnd = false;
-				updateCaret();
+			// if the caret is at the end of the page, put it before the
+			// last token (if there are any)
+			if (caretIndx == CARET_EOP && selectedPage.getNumTokens() > 0) {
+				moveCaret(selectedPage.getNumTokens()-1);
 			} else {
 				// otherwise decrement the caret index, but don't go below 0
 				if (caretIndx >= 1)
@@ -442,9 +557,8 @@ public class WController {
 	public Action moveCaretRight = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
 			// if we're on the last token, just go to the end of the message
-			if (caretIndx == selectedPage.getTokenList().size()-1) {
-				caretAtEnd = true;
-				updateCaret();
+			if (caretIndx == selectedPage.getNumTokens()-1) {
+				moveCaret(CARET_EOP);
 			} else {
 				// otherwise increment the caret index
 				moveCaret(caretIndx+1);
@@ -519,7 +633,8 @@ public class WController {
 	public Action backspace = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
 			if (!tokensSelected.isEmpty()) {
-				// TODO if we have a selection, delete the selection				 
+				// if we have a selection, delete the selection
+				deleteSelection(true);
 			} else {
 				// if we don't have any selection, delete the token just
 				// before the caret
@@ -529,8 +644,8 @@ public class WController {
 					// get the last token and it's index in the page's list
 					WToken tok = tokensBefore.getLast();
 					int i = selectedPage.getTokenIndex(tok);
-					System.out.println(String.format("Deleting token '%s' at index %d",
-							tok.toString(), i));
+//					System.out.println(String.format("Deleting token '%s' at index %d",
+//							tok.toString(), i));
 					
 					// save the current MULTI string then remove the token
 					saveState();
@@ -538,7 +653,13 @@ public class WController {
 										
 					// update everything
 					update();
-					moveCaret(i);
+					
+					// only move the caret if it's not at the end
+					if (caretIndx != CARET_EOP)
+						moveCaret(i);
+					else
+						// otherwise just update
+						updateCaret();
 				}
 			}
 		}
@@ -548,7 +669,8 @@ public class WController {
 	public Action delete = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
 			if (!tokensSelected.isEmpty()) {
-				// TODO if we have a selection, delete the selection				 
+				// if we have a selection, delete the selection
+				deleteSelection(true);
 			} else {
 				// if we don't have any selection, delete the token just
 				// after the caret
@@ -558,13 +680,13 @@ public class WController {
 					// get the last token and it's index in the page's list
 					WToken tok = tokensAfter.remove(0);
 					int i = selectedPage.getTokenIndex(tok);
-					System.out.println(String.format("Deleting token '%s' at index %d",
-							tok.toString(), i));
+//					System.out.println(String.format("Deleting token '%s' at index %d",
+//							tok.toString(), i));
 					
 					// if we're going to delete the last token, put the caret
 					// at the end of the message
 					if (tok == selectedPage.getTokenList().getLast())
-						caretAtEnd = true;
+						caretIndx = CARET_EOP;
 					
 					// save the current MULTI string then remove the token
 					saveState();
@@ -572,12 +694,55 @@ public class WController {
 					
 					// update everything
 					update();
-					moveCaret(i);
+					
+					// only move the caret if it's not at the end
+					if (caretIndx != CARET_EOP)
+						moveCaret(i);
+					else
+						// otherwise just update
+						updateCaret();
 				}
 			}
 			
 		}
 	};
+	
+	/** Delete all tokens in the selection. If saveForUndo is true, the state
+	 *  is saved before deleting the tokens. */
+	public void deleteSelection(boolean saveForUndo) {
+		// TODO save the selection to reset it after undoing
+		if (saveForUndo)
+			saveState();
+		
+		// now find and delete each token, then clear the selection and update
+		for (WToken tok: tokensSelected) {
+			int i = selectedPage.getTokenIndex(tok);
+			System.out.println(String.format("Removing token '%s' from %d", tok.toString(), i));
+			selectedPage.removeToken(i);
+		}
+		tokensSelected.clear();
+		
+		// figure out where to put the caret
+		if (!tokensBefore.isEmpty()) {
+			// if there are tokens before, put after the last one
+			if (!tokensAfter.isEmpty()) {
+				WToken tok = tokensBefore.getLast();
+				caretIndx = selectedPage.getTokenIndex(tok) + 1;
+			} else
+				// if there are no tokens after, it's the EOP
+				caretIndx = CARET_EOP;
+		} else if (!tokensAfter.isEmpty()) {
+			// if there are no tokens before but there are after, go to 0
+			caretIndx = 0;
+		} else {
+			// if the page is empty, go to EOP
+			caretIndx = CARET_EOP;
+		}
+		
+		// update then move the caret
+		update();
+		updateCaret();
+	}
 	
 	/** Add a single ASCII character to the message at the caret location. */
 	public void typeChar(char c) {
@@ -587,6 +752,10 @@ public class WController {
 		
 		// save our state so we can undo
 		saveState();
+		
+		// if there was a selection, delete it first
+		if (!tokensSelected.isEmpty())
+			deleteSelection(false);
 		
 		// first create a token from the character
 		WtTextChar t = new WtTextChar(c);
@@ -617,6 +786,7 @@ public class WController {
 			++selectedPageIndx;
 			wmsg.addPage(selectedPageIndx, pg);
 			update();
+			initCaret();
 		}
 	};
 		
@@ -629,6 +799,7 @@ public class WController {
 			// delete the selected page from the wmsg then update
 			wmsg.removePage(selectedPageIndx);
 			update();
+			initCaret();
 		}
 	};
 	
@@ -669,10 +840,65 @@ public class WController {
 		}
 	};
 	
+	/** Add a line justify left token at the current location. */
+	public Action lineJustifyLeft = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// create the appropriate WtJustLine token then pass it to
+			// addJustLineToken
+			WtJustLine jlTok = new WtJustLine(JustificationLine.LEFT);
+			addJustLineToken(jlTok);
+		}
+	};
+
+	/** Add a line justify center token at the current location. */
+	public Action lineJustifyCenter = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// create the appropriate WtJustLine token then pass it to
+			// addJustLineToken
+			WtJustLine jlTok = new WtJustLine(JustificationLine.CENTER);
+			addJustLineToken(jlTok);
+		}
+	};
+	
+	/** Add a line justify center token at the current location. */
+	public Action lineJustifyRight = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// create the appropriate WtJustLine token then pass it to
+			// addJustLineToken
+			WtJustLine jlTok = new WtJustLine(JustificationLine.RIGHT);
+			addJustLineToken(jlTok);
+		}
+	};
+	
+	/** Add the line justify token provided at the current caret location. If
+	 *  the token immediately preceding is also a line justify token it is
+	 *  replaced, otherwise it is added.
+	 */
+	private void addJustLineToken(WtJustLine jlTok) {
+		// save state here so we can undo this whole process
+		saveState();
+		
+		// check the type of the preceding token
+		if (tokensBefore.size() > 0) {
+			WToken tok = tokensBefore.getLast();
+			
+			if (tok.getClass() == WtJustLine.class) {
+				// if it's a line justify, delete it (but don't create a
+				// separate undo step)
+				int i = selectedPage.getTokenIndex(tok);
+				selectedPage.removeToken(i);
+			}
+		}
+		
+		// now add the token
+		addToken(jlTok);
+	}
+	
 	/** Add the token to the selected page at the caret index */
 	private void addToken(WToken tok) {
 		// if we're already at the end of the page, add the token there
-		if (caretAtEnd)
+		// TODO TEMPORARY - FIGURE OUT CARET PLACEMENT (DON'T THINK WE NEED caretAtEnd)
+		if (caretIndx == CARET_EOP)
 			selectedPage.addToken(tok);
 		else
 			// otherwise put it at the caret index
@@ -681,7 +907,16 @@ public class WController {
 		// either way update then move the caret one more token (just behind
 		// the character that was just added)
 		update();
-		moveCaret(caretIndx+1);
+		
+		// TODO we may change this into something else (checking a parameter)
+		// TODO we need to be more careful than this...
+		if (tok.isType(WTokenType.textChar)) {
+			if (caretIndx == CARET_EOP)
+				moveCaret(CARET_EOP);
+			else
+				moveCaret(caretIndx+1);
+			
+		}
 	}
 	
 	/** Save the current state on the stack for undoing. Resets the redo stack. */
@@ -740,73 +975,6 @@ public class WController {
 		update();
 		
 		moveCaret(wh.getCaretIndex());
-	}
-	
-	/** Handle a click on the main editor panel */
-	public void handleClick(MouseEvent e) {
-		// calculate the adjusted coordinates of the click
-//		Point2D pSign = transformSignCoordinates(e.getX(), e.getY());
-		
-		// just print for now
-//		if (pSign != null) {
-		int b = e.getButton();
-		int x = e.getX();
-		int y = e.getY();
-
-		update();
-		findClosestToken(x, y);
-		
-		// get focus for this component when someone clicks on it
-		signPanel.requestFocusInWindow();
-//		}
-	}
-	
-	/** Handle a mouse move event on the main editor panel */
-	public void handleMouseMove(MouseEvent e) {
-		// calculate the adjusted coordinates of the mouse pointer
-//		Point2D pSign = transformSignCoordinates(e.getX(), e.getY());
-		
-		// just print for now
-//		if (pSign != null) {
-		int x = e.getX();
-		int y = e.getY();
-		
-		// TODO test code for cursor changing
-//		if (y >= 100 && y <= 160) {
-//			cursor = moveCursor;
-//		} else {
-//			setCursorFromMode();
-//		}
-//		update();
-			
-			// TODO hook this into token finding and mouse cursor changing
-			
-//		System.out.println(String.format(
-//				"Mouse moved to (%d, %d) ...", x, y));
-//		}
-	}
-	
-	/** Handle a mouse drag event on the main editor panel */
-	public void handleMouseDrag(MouseEvent e) {
-		// calculate the adjusted coordinates of the mouse pointer
-//		Point2D pSign = transformSignCoordinates(e.getX(), e.getY());
-		
-		// figure out what button was pressed when dragging
-		String b = "";
-		if (SwingUtilities.isLeftMouseButton(e))
-			b = "left";
-		else if (SwingUtilities.isRightMouseButton(e))
-			b = "right";
-		else if (SwingUtilities.isMiddleMouseButton(e))
-			b = "middle";
-		
-		// just print for now
-//		if (pSign != null) {
-		int x = e.getX();
-		int y = e.getY();
-//		System.out.println(String.format(
-//				"Mouse dragged with %s button to (%d, %d) ...", b, x, y));
-//		}
 	}
 	
 	/** Return a WPageList with selection disabled for previewing a message */
@@ -915,6 +1083,9 @@ public class WController {
 		if (editor != null) {
 			editor.setPageNumberLabel(getPageNumberLabel(selectedPageIndx));
 			editor.updateWysiwygPanel();
+			
+			// give focus to the sign panel
+			signPanel.requestFocusInWindow();
 		}
 	}
 

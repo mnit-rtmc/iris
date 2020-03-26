@@ -124,6 +124,14 @@ public class WEditorKeyBindings {
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
 				"moveCaretDown");
 		actionMap.put("moveCaretDown", wc.moveCaretDown);
+
+		/* TODO Home/End keys - move caret to beginning/end of line */
+//		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
+//				"moveCaretUp");
+//		actionMap.put("moveCaretUp", wc.moveCaretUp);
+//		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
+//				"moveCaretDown");
+//		actionMap.put("moveCaretDown", wc.moveCaretDown);
 		
 		/* Enter key - add newline */
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),

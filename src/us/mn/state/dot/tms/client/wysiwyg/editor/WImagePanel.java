@@ -27,15 +27,19 @@ import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
+import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
 
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 
@@ -64,6 +68,10 @@ public class WImagePanel extends JPanel {
 	private int caretH;
 	private int caretW = 0;
 	private Color caretColor = Color.WHITE;
+	
+	/** For working with selection drawing */
+	private boolean selectionOn = false;
+	private ArrayList<Rectangle> selectRects = new ArrayList<Rectangle>();
 	
 	// TODO I don't think we should need this, but for now it makes things look better
 	private int offset = 2;
@@ -108,6 +116,10 @@ public class WImagePanel extends JPanel {
 			if (caretOn)
 				drawCaret(g);
 			
+			// add a text selection if something is selected
+			if (selectionOn)
+				drawTextSelection(g);
+			
 			// TODO draw things with g.draw*
 //			g.drawLine(x1, y1, x2, y2);
 		}
@@ -123,9 +135,9 @@ public class WImagePanel extends JPanel {
 			try {
 				wr.setWysiwygImageSize(wiWidth, wiHeight);
 				image = wr.getWysiwygImage();
-				if (wr.isBlank()) {
-					System.out.println("POSSIBLE ERROR:  Blank render image");
-				}
+//				if (wr.isBlank()) {
+//					System.out.println("POSSIBLE ERROR:  Blank render image");
+//				}
 			} catch (InvalidMsgException e) {
 				// TODO do something with this
 				image = null;
@@ -193,39 +205,35 @@ public class WImagePanel extends JPanel {
 	}
 	
 	/** Set the caret location given the token. */
-	public void setCaretLocation(WToken tok, boolean toRight) {
-		// get coordinates from the token
+	public void setCaretLocation(WToken tok) {
+		// get coordinates from the token and set the caret to appear there
+		setCaretLocation(tok.getCoordX(), tok.getCoordY(), tok.getCoordH());
+	}
+	
+	/** Set the caret location given the x,y coordinates and height h (all in
+	 *  sign coordinates).
+	 */
+	public void setCaretLocation(int sx, int sy, int h) {
 		// TODO -2 is offset to make things look OK for now, but I think
 		// there's a better way (or a bug)...
-		int tX;
-		if (toRight) {
-			tX = tok.getCoordX() + tok.getCoordW() - offset;
-		} else {
-			tX = tok.getCoordX() - offset;
-		}
-		int tY = tok.getCoordY() - offset;
-		int tY2 = tY + tok.getCoordH();
+		int x = sx - offset;
+		int y = sy - offset;
 		
-		// convert token (sign) coordinates to raster coordinates and clip any
-		// overrun
-		// TODO we need to adjust the position some, but not sure how...
+//		System.out.println(String.format("Caret at (%d, %d) H = %d ", x, y, h));
 		
-		// put caret to right of token if toRight is true
-		caretX = clipX(convertSignToWysiwygX(tX, true));
-		caretY = clipY(convertSignToWysiwygY(tY, true));
-		int cY2 = clipY(convertSignToWysiwygY(tY2, false));
+		// convert from sign to raster coordinates and clip any overrun
+		caretX = clipX(convertSignToWysiwygX(x, true));
+		caretY = clipY(convertSignToWysiwygY(y, true));
+		int cY2 = clipY(convertSignToWysiwygY(y+h, false));
 		caretH = cY2-caretY;
-//		System.out.println(String.format(
-//				"Drawing caret at (%d, %d) w/h (%d, %d); tY2 = %d -> cY2 = %d",
-//				caretX, caretY, caretW, caretH, tY2, cY2));
+		
+//		System.out.println(String.format("Caret img at (%d, %d) H = %d (cY2 = %d) ", caretX, caretY, caretH, cY2));
 		
 		// set the caret to enabled and repaint everything
 		showCaret();
 		repaint();
 	}
-	
-	
-	
+
 	/** Show the caret on the panel (must have a valid location too). */
 	public void showCaret() {
 		caretOn = true;
@@ -245,11 +253,98 @@ public class WImagePanel extends JPanel {
 		
 		// set color to to the cursor color and draw a rectangle
 		g.setColor(Color.WHITE);
-//		g.drawArc(caretX, caretY, 10, 10, 0, 360);
 		g.drawRect(caretX, caretY, caretW, caretH);
 		g.fillRect(caretX, caretY, caretW, caretH);
 		
 		// return the color
 		g.setColor(oc);
 	}
+	
+	/** Set the text selection based on the list of tokens selected. */
+	public void setTextSelection(WTokenList tokensSelected) {
+		// first turn on selection feedback
+		selectionOn = true;
+		
+		// reset the selection rectangles
+		selectRects.clear();
+		
+		// now go through the tokens to make rectangles - we may need more
+		// than one if the selection spans multiple lines or TODO complex tags
+		int rx = -1, ry = -1;
+		int rx2 = -1, ry2 = -1;
+		for (WToken tok : tokensSelected) {
+			// get the token X coordinates in image space (Y is less important)
+			int tx = tok.getCoordX() - offset;
+			int x = clipX(convertSignToWysiwygX(tx, true));
+			int x2 = clipX(convertSignToWysiwygX(tx+tok.getCoordW(), false));
+			
+			// initialize the rectangle if it hasn't been started
+			if (rx == -1 && ry == -1) {
+				int ty = tok.getCoordY() - offset;
+				int y = clipX(convertSignToWysiwygY(ty, true));
+				int y2 = clipY(convertSignToWysiwygY(ty+tok.getCoordH(), false));
+				
+				rx = x;
+				ry = y;
+				rx2 = x2;
+				ry2 = y2;
+			} else {
+				// otherwise just update the width to include the current token
+				rx2 = x2;
+			}
+			
+			// if we hit a newline token, start a new rectangle
+			// TODO this needs to handle other types of tags
+			if (tok instanceof WtNewLine) {
+				addSelectRectangle(rx, ry, rx2, ry2);
+				
+				// reset the machine
+				rx = -1;
+				ry = -1;
+				rx2 = -1;
+				ry2 = -1;
+			}
+		}
+		
+		// if we haven't finished the current rectangle, finish it
+		if (rx != -1 && ry != -1) {
+			addSelectRectangle(rx, ry, rx2, ry2);
+		}
+		repaint();
+	}
+	
+	/** Add a selection rectangle with the given corners. */
+	private void addSelectRectangle(int x, int y, int x2, int y2) {
+		int rw = x2 - x;
+		int rh = y2 - y;
+		Rectangle r = new Rectangle(x, y, rw, rh);
+		selectRects.add(r);
+	}
+	
+	/** Clear the text selection. */
+	public void clearTextSelection() {
+		selectRects.clear();
+		selectionOn = false;
+	}
+	
+	/** Draw the text selection rectangle on the graphics context. */
+	private void drawTextSelection(Graphics g) {
+		// get the original color so we can reset the color
+		Color oc = g.getColor();
+		
+		// set color to to the cursor color and draw one or more rectangles
+		g.setColor(Color.WHITE);
+		for (Rectangle r: selectRects) {
+			g.drawRect(r.x, r.y, r.width, r.height);
+			
+			// use a transparent filling
+			Color fill = new Color((float) 1, (float) 1, (float) 1, (float) 0.3);
+			g.setColor(fill);
+			g.fillRect(r.x, r.y, r.width, r.height);
+		}
+		
+		// return the color
+		g.setColor(oc);
+	}
+	
 }

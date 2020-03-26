@@ -184,6 +184,11 @@ abstract public class WToken {
 	public boolean isValid() {
 		return errList.isEmpty();
 	}
+	
+	/** Determine if this token is the given type. */
+	public boolean isType(WTokenType type) {
+		return tokType == type;
+	}
 
 	//-------------------------------------------
 	// Get/Set coordinate parameters (0 based coordinates)

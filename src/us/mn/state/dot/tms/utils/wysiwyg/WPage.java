@@ -90,6 +90,10 @@ public class WPage {
 	public WTokenList getTokenList() {
 		return tokenList;
 	}
+	
+	public int getNumTokens() {
+		return tokenList.size();
+	}
 
 	/** Get the index of the token in this page's token list. */
 	public int getTokenIndex(WToken tok) {
@@ -227,7 +231,7 @@ public class WPage {
 	
 	/** Execute doRender callbacks for all tokens in a page */
 	public void doRender(WRenderer wr) {
-		WToken tok;
+		WToken tok = null;
 		Iterator<WToken> it = tokenList.iterator();
 		while (it.hasNext()) {
 			tok = it.next();
@@ -249,7 +253,12 @@ public class WPage {
 //				wr.addAnchor(tok);
 //			tok.doRender(wr);
 		}
-		wr.addAnchor(this);
+		// use the token to place the anchor for non-empty pages
+		if (tok == null) {
+			wr.addAnchor(this);
+		} else {
+			wr.addAnchor(this, tok);
+		}
 	}
 	
 	/** Re-render the page */
@@ -337,6 +346,22 @@ public class WPage {
 		eopY = y;
 		eopW = w;
 		eopH = h;
+	}
+	
+	public int getEOPX() {
+		return eopX;
+	}
+	
+	public int getEOPY() {
+		return eopY;
+	}
+	
+	public int getEOPW() {
+		return eopW;
+	}
+	
+	public int getEOPH() {
+		return eopH;
 	}
 
 	/** Dump the end-of-page cursor-coordinates */

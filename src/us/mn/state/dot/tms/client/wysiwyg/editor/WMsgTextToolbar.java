@@ -65,15 +65,15 @@ public class WMsgTextToolbar extends JPanel {
 	
 	/** Justify Buttons */
 	private JPanel text_vjust_btn_pnl;
-	private ButtonGroup text_vjust_btn_grp;
-	private JToggleButton text_vjust_top_btn;
-	private JToggleButton text_vjust_center_btn;
-	private JToggleButton text_vjust_bottom_btn;
+	private ButtonGroup text_pg_just_btn_grp;
+	private JToggleButton text_pg_just_top_btn;
+	private JToggleButton text_pg_just_center_btn;
+	private JToggleButton text_pg_just_bottom_btn;
 	private JPanel text_hjust_btn_pnl;
 	private ButtonGroup text_hjust_btn_grp;
-	private JToggleButton text_hjust_left_btn;
-	private JToggleButton text_hjust_center_btn;
-	private JToggleButton text_hjust_right_btn;
+	private JToggleButton text_ln_just_left_btn;
+	private JToggleButton text_ln_just_center_btn;
+	private JToggleButton text_ln_just_right_btn;
 	
 	
 	public WMsgTextToolbar(WController c) {
@@ -125,75 +125,76 @@ public class WMsgTextToolbar extends JPanel {
 		}
 		
 		// justification buttons
-		text_vjust_btn_grp = new ButtonGroup();
-		text_vjust_top_btn = new JToggleButton(text_vjust_top);
-		text_vjust_center_btn = new JToggleButton(text_vjust_center);
-		text_vjust_bottom_btn = new JToggleButton(text_vjust_bottom);
-		text_vjust_center_btn.setSelected(true);
-		text_vjust_btn_grp.add(text_vjust_top_btn);
-		text_vjust_btn_grp.add(text_vjust_center_btn);
-		text_vjust_btn_grp.add(text_vjust_bottom_btn);
+		text_pg_just_btn_grp = new ButtonGroup();
+		text_pg_just_top_btn = new JToggleButton(text_vjust_top);
+		text_pg_just_center_btn = new JToggleButton(text_vjust_center);
+		text_pg_just_bottom_btn = new JToggleButton(text_vjust_bottom);
+		text_pg_just_center_btn.setSelected(true);
+		text_pg_just_btn_grp.add(text_pg_just_top_btn);
+		text_pg_just_btn_grp.add(text_pg_just_center_btn);
+		text_pg_just_btn_grp.add(text_pg_just_bottom_btn);
 		
 		// set icons for justification buttons
 		ImageIcon text_vjust_top_icon = Icons.getIconByPropName(
 				"wysiwyg.epanel.text_vjust_top");
-		text_vjust_top_btn.setIcon(text_vjust_top_icon);
-		text_vjust_top_btn.setHideActionText(true);
-		text_vjust_top_btn.setMargin(new Insets(0,0,0,0));
+		text_pg_just_top_btn.setIcon(text_vjust_top_icon);
+		text_pg_just_top_btn.setHideActionText(true);
+		text_pg_just_top_btn.setMargin(new Insets(0,0,0,0));
 		
 		ImageIcon text_vjust_center_icon = Icons.getIconByPropName(
 				"wysiwyg.epanel.text_vjust_center");
-		text_vjust_center_btn.setIcon(text_vjust_center_icon);
-		text_vjust_center_btn.setHideActionText(true);
-		text_vjust_center_btn.setMargin(new Insets(0,0,0,0));
+		text_pg_just_center_btn.setIcon(text_vjust_center_icon);
+		text_pg_just_center_btn.setHideActionText(true);
+		text_pg_just_center_btn.setMargin(new Insets(0,0,0,0));
 		
 		ImageIcon text_vjust_bottom_icon = Icons.getIconByPropName(
 				"wysiwyg.epanel.text_vjust_bottom");
-		text_vjust_bottom_btn.setIcon(text_vjust_bottom_icon);
-		text_vjust_bottom_btn.setHideActionText(true);
-		text_vjust_bottom_btn.setMargin(new Insets(0,0,0,0));
+		text_pg_just_bottom_btn.setIcon(text_vjust_bottom_icon);
+		text_pg_just_bottom_btn.setHideActionText(true);
+		text_pg_just_bottom_btn.setMargin(new Insets(0,0,0,0));
 		
 		text_vjust_btn_pnl = new JPanel();
 		text_vjust_btn_pnl.setLayout(
 				new BoxLayout(text_vjust_btn_pnl, BoxLayout.X_AXIS));
-		text_vjust_btn_pnl.add(text_vjust_top_btn);
-		text_vjust_btn_pnl.add(text_vjust_center_btn);
-		text_vjust_btn_pnl.add(text_vjust_bottom_btn);
+		text_vjust_btn_pnl.add(text_pg_just_top_btn);
+		text_vjust_btn_pnl.add(text_pg_just_center_btn);
+		text_vjust_btn_pnl.add(text_pg_just_bottom_btn);
 		add(text_vjust_btn_pnl);
 		
 		text_hjust_btn_grp = new ButtonGroup();
-		text_hjust_left_btn = new JToggleButton(text_hjust_left);
-		text_hjust_center_btn = new JToggleButton(text_hjust_center);
-		text_hjust_right_btn = new JToggleButton(text_hjust_right);
-		text_hjust_center_btn.setSelected(true);
-		text_hjust_btn_grp.add(text_hjust_left_btn);
-		text_hjust_btn_grp.add(text_hjust_center_btn);
-		text_hjust_btn_grp.add(text_hjust_right_btn);
+		text_ln_just_left_btn = new JToggleButton(controller.lineJustifyLeft);
+		text_ln_just_center_btn = new JToggleButton(
+				controller.lineJustifyCenter);
+		text_ln_just_right_btn = new JToggleButton(controller.lineJustifyRight);
+		text_ln_just_center_btn.setSelected(true);
+		text_hjust_btn_grp.add(text_ln_just_left_btn);
+		text_hjust_btn_grp.add(text_ln_just_center_btn);
+		text_hjust_btn_grp.add(text_ln_just_right_btn);
 		
 		ImageIcon text_hjust_left_icon = Icons.getIconByPropName(
 				"wysiwyg.epanel.text_hjust_left");
-		text_hjust_left_btn.setIcon(text_hjust_left_icon);
-		text_hjust_left_btn.setHideActionText(true);
-		text_hjust_left_btn.setMargin(new Insets(0,0,0,0));
+		text_ln_just_left_btn.setIcon(text_hjust_left_icon);
+		text_ln_just_left_btn.setHideActionText(true);
+		text_ln_just_left_btn.setMargin(new Insets(0,0,0,0));
 		
 		ImageIcon text_hjust_center_icon = Icons.getIconByPropName(
 				"wysiwyg.epanel.text_hjust_center");
-		text_hjust_center_btn.setIcon(text_hjust_center_icon);
-		text_hjust_center_btn.setHideActionText(true);
-		text_hjust_center_btn.setMargin(new Insets(0,0,0,0));
+		text_ln_just_center_btn.setIcon(text_hjust_center_icon);
+		text_ln_just_center_btn.setHideActionText(true);
+		text_ln_just_center_btn.setMargin(new Insets(0,0,0,0));
 		
 		ImageIcon text_hjust_right_icon = Icons.getIconByPropName(
 				"wysiwyg.epanel.text_hjust_right");
-		text_hjust_right_btn.setIcon(text_hjust_right_icon);
-		text_hjust_right_btn.setHideActionText(true);
-		text_hjust_right_btn.setMargin(new Insets(0,0,0,0));
+		text_ln_just_right_btn.setIcon(text_hjust_right_icon);
+		text_ln_just_right_btn.setHideActionText(true);
+		text_ln_just_right_btn.setMargin(new Insets(0,0,0,0));
 		
 		text_hjust_btn_pnl = new JPanel();
 		text_hjust_btn_pnl.setLayout(
 				new BoxLayout(text_hjust_btn_pnl, BoxLayout.X_AXIS));
-		text_hjust_btn_pnl.add(text_hjust_left_btn);
-		text_hjust_btn_pnl.add(text_hjust_center_btn);
-		text_hjust_btn_pnl.add(text_hjust_right_btn);
+		text_hjust_btn_pnl.add(text_ln_just_left_btn);
+		text_hjust_btn_pnl.add(text_ln_just_center_btn);
+		text_hjust_btn_pnl.add(text_ln_just_right_btn);
 		add(text_hjust_btn_pnl);
 	}
 	

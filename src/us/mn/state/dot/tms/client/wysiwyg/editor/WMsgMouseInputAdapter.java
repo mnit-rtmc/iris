@@ -28,7 +28,6 @@ public class WMsgMouseInputAdapter extends MouseInputAdapter {
 		controller = c;
 	}
 	
-	// TODO still just for testing
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		controller.handleClick(e);
@@ -42,5 +41,15 @@ public class WMsgMouseInputAdapter extends MouseInputAdapter {
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		controller.handleMouseDrag(e);
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		controller.handleMousePressed(e);
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		controller.handleMouseReleased(e);
 	}
 }
