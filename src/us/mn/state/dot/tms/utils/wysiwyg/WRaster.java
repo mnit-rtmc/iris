@@ -491,15 +491,16 @@ abstract public class WRaster {
 
 	/** Generate preview-image with black border and row/column dividers. */
 	public BufferedImage getPreviewImage() {
-		int dividers = 2;
-		int borders = 2;
-		int width2 = (width + borders) * 2;
-		int height2 = (height + borders) * 2;
+		int dividersX = 2;
+		int dividersY = 3;
+		int borders = 5;
+		int width2 = width + (borders * 2);
+		int height2 = height + (borders * 2);
 		fixModuleSize();
 		if (moduleW > 1)
-			width2 += ((width / moduleW) - 1) * dividers;
+			width2 += ((width / moduleW) - 1) * dividersX;
 		if (moduleH > 1)
-			height2 += ((height / moduleH) - 1) * dividers;
+			height2 += ((height / moduleH) - 1) * dividersY;
 		BufferedImage bi = new BufferedImage(width2, height2, BufferedImage.TYPE_INT_RGB);
 		DmsColor dc;
 		int rgb;
@@ -516,20 +517,20 @@ abstract public class WRaster {
 
 		// copy main area(s)
 		int x, x2, y, y2;
-		y2 = 0;
+		y2 = borders;
 		for (y = 0; (y < height); ++y) {
-			if ((y % moduleH) == 0)
-				y2 += dividers;
-			x2 = 0;
+			x2 = borders;
 			for (x = 0; (x < width); ++x) {
-				if ((x % moduleW) == 0)
-					x2 += dividers;
 				dc = getColor(x, y);
 				rgb = dc.rgb();
 				bi.setRGB(x2, y2, rgb);
-				x2 += 2;
+				x2 += 1;
+				if (((x + 1) % moduleW) == 0)
+					x2 += dividersX;
 			}
-			y2 += 2;
+			y2 += 1;
+			if (((y + 1) % moduleH) == 0)
+				y2 += dividersY;
 		}
 		return bi;
 	}
@@ -780,16 +781,47 @@ abstract public class WRaster {
 			if (mod > 0)
 				gen.add(MODULE_SEPARATOR, pixPerModuleSepX);
 			for (int modPix = 0; (modPix < ledsPerModule); ++modPix) {
-				if (modPix == 0)
+				if (pixelsPerLed < 1.9) {
+					if (modPix == 0)
+						gen.add(SIGN_BORDER);
+					gen.add(pixNum++, pixelsPerLed+1);
+				}
+				else {
+					if (modPix == 0)
+						gen.add(PIXEL_SEPARATOR);
+					gen.add(pixNum++, pixelsPerLed);
 					gen.add(PIXEL_SEPARATOR);
-				gen.add(pixNum++, pixelsPerLed);
-				gen.add(PIXEL_SEPARATOR);
+				}
 			}
 		}
 		gen.add(SIGN_BORDER, pixelsPerBorder);
-//		WRenderer.println("   "+gen.offset);
+		WRenderer.println("   "+gen.offset);
 		return gen.getArray();
 	}
+//	private int[] genCoordArray(
+//			int arrayLen,
+//			int pixelsPerBorder,
+//			int modulesPerFace,
+//			float pixPerModuleSepX,
+//			int ledsPerModule, 
+//			float pixelsPerLed) {
+//		IntArrayGen gen = new IntArrayGen(arrayLen);
+//		gen.add(SIGN_BORDER, pixelsPerBorder);
+//		int pixNum = 0;
+//		for (int mod = 0; (mod < modulesPerFace); ++mod) {
+//			if (mod > 0)
+//				gen.add(MODULE_SEPARATOR, pixPerModuleSepX);
+//			for (int modPix = 0; (modPix < ledsPerModule); ++modPix) {
+//				if (modPix == 0)
+//					gen.add(PIXEL_SEPARATOR);
+//				gen.add(pixNum++, pixelsPerLed);
+//				gen.add(PIXEL_SEPARATOR);
+//			}
+//		}
+//		gen.add(SIGN_BORDER, pixelsPerBorder);
+////		WRenderer.println("   "+gen.offset);
+//		return gen.getArray();
+//	}
 
 	/** Set width/height for WISIWIG sign-image.
 	 *  (Generates horizontal and vertical

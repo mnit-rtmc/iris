@@ -46,7 +46,10 @@ import us.mn.state.dot.tms.utils.Multi.JustificationPage;
  *  MultiRenderer, written by Doug Lau.)
  */
 public class WRenderer {
-
+	
+	/** Flag to enable/disable verbose logging output */
+	private final static boolean DEBUG = true; 
+	
 	/** Default line justification */
 	static public JustificationLine defaultJustificationLine() {
 		return JustificationLine.fromOrdinal(SystemAttrEnum
@@ -1007,9 +1010,11 @@ public class WRenderer {
 
 	
 	static public void println(String str) {
-//		System.out.println(str);
-		if (out != null) {
-			out.println(str);
+		if (DEBUG) {
+			System.out.println(str);
+			if (out != null) {
+				out.println(str);
+			}
 		}
 	}
 	
