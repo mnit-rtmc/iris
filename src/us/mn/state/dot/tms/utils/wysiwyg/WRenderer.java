@@ -48,7 +48,7 @@ import us.mn.state.dot.tms.utils.Multi.JustificationPage;
 public class WRenderer {
 	
 	/** Flag to enable/disable verbose logging output */
-	private final static boolean DEBUG = true; 
+	private final static boolean DEBUG = false; 
 	
 	/** Default line justification */
 	static public JustificationLine defaultJustificationLine() {
