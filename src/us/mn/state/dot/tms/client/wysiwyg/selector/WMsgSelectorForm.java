@@ -933,6 +933,7 @@ public class WMsgSelectorForm extends AbstractForm {
 		for (QuickMessage qm : qmList) {
 			messageList.add(qm.getName());
 		}
+		messageList.sort(String::compareToIgnoreCase);
 		msg_list.updateUI();
 		
 		// select a message if there is one selected
