@@ -56,10 +56,9 @@ public class WImagePanel extends JPanel {
 	private int wiWidth;
 	private int height;
 	private int wiHeight;
-	private boolean scaleImg = false;
-	private double scale = 0;
 	private WPage pg;
 	private WRaster wr;
+	private boolean preview = false;
 	private BufferedImage image = null;
 	
 	private boolean caretOn = false;
@@ -89,20 +88,14 @@ public class WImagePanel extends JPanel {
 
 	// TODO I don't think we should have to do this - we may be able to fix in
 	// the renderer
-	public WImagePanel(int w, int h, double s) {
+	public WImagePanel(int w, int h, boolean usePreviewImg) {
 		width = w;
 		height = h;
-		wiWidth = (int) (w/s);
-		wiHeight = (int) (h/s);
+		preview = usePreviewImg;
 		Dimension d = UI.dimension(width, height);
 		setMinimumSize(d);
 		setMaximumSize(d);
 		setPreferredSize(d);
-		
-		// we got a scale factor - scale the image (NOTE only do this for
-		// previews)
-		scaleImg = true;
-		scale = s;
 	}
 
 	@Override
@@ -133,11 +126,13 @@ public class WImagePanel extends JPanel {
 		
 		if (wr != null) {
 			try {
-				wr.setWysiwygImageSize(wiWidth, wiHeight);
-				image = wr.getWysiwygImage();
-//				if (wr.isBlank()) {
-//					System.out.println("POSSIBLE ERROR:  Blank render image");
-//				}
+				if (!preview) {
+					wr.setWysiwygImageSize(wiWidth, wiHeight);
+					image = wr.getWysiwygImage();
+				} else {
+					image = wr.getPreviewImage();
+				}
+				
 			} catch (InvalidMsgException e) {
 				// TODO do something with this
 				image = null;

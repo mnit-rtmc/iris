@@ -88,7 +88,7 @@ public class WMsgNewMsgForm extends AbstractForm {
 		ok_btn = new JButton(createMsg);
 	}
 	
-	public WMsgNewMsgForm(Session s, WController c) {
+	public WMsgNewMsgForm(Session s, WController c, String prefill) {
 		super(I18N.get("wysiwyg.new_message.title"), true);
 		session = s;
 		controller = c;
@@ -97,6 +97,9 @@ public class WMsgNewMsgForm extends AbstractForm {
 		// the OK button does something slightly different depending on who
 		// called us
 		ok_btn = new JButton(saveMsgAs);
+		
+		// prefill the text with the previous message name (or whatever really)
+		msgNameInput.setText(prefill);
 	}
 
 	private void initForm() {

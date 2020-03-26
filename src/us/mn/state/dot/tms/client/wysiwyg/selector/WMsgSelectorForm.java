@@ -411,7 +411,7 @@ public class WMsgSelectorForm extends AbstractForm {
 		controller = new WController();
 		msg_preview = controller.getPagePreviewList();
 		msg_preview_pn = createScrollPane(msg_preview);
-		msg_preview_pn.setPreferredSize(new Dimension(300,200));
+		msg_preview_pn.setPreferredSize(new Dimension(400,200));
 		
 		/** Sign list */
 		ListModel<String> dmsNamesModel = new AbstractListModel<String>() {

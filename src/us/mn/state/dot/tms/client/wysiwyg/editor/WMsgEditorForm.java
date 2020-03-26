@@ -196,7 +196,7 @@ public class WMsgEditorForm extends AbstractForm {
 		
 		// TODO may want to change these dimensions
 		// OR BETTER YET - figure out how to make it more adaptive...
-		setPreferredSize(new Dimension(850,500));
+		setPreferredSize(new Dimension(1100,600));
 		
 		/* Menu Bar */
 		menu_bar = new WMsgEditorMenuBar();
@@ -332,7 +332,7 @@ public class WMsgEditorForm extends AbstractForm {
 		page_list_pn = new JScrollPane(page_list,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		page_list_pn.setPreferredSize(new Dimension(300, 400));
+		page_list_pn.setPreferredSize(new Dimension(450, 400));
 		p.add(page_list_pn, gbc);
 		
 		/* Page Buttons */

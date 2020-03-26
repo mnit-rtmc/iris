@@ -1052,7 +1052,8 @@ public class WController {
 		public void actionPerformed(ActionEvent e) {
 			// open a form to get the new message name
 			// the new form will trigger the rest
-			session.getDesktop().show(new WMsgNewMsgForm(session, wc));
+			session.getDesktop().show(new WMsgNewMsgForm(session, wc,
+					qm.getName()));
 		}
 	};
 	

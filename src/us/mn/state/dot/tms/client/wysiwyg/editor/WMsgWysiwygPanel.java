@@ -177,7 +177,7 @@ public class WMsgWysiwygPanel extends JPanel {
 //		pixel_pnl = new SignPixelPanel(250, 550);
 //		controller.setPixelPanel(pixel_pnl);
 //		add(pixel_pnl);
-		signPanel = new WImagePanel(550, 250);
+		signPanel = new WImagePanel(650, 350);
 		add(signPanel);
 		controller.setSignPanel(signPanel);
 		

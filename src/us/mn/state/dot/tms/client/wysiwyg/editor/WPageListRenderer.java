@@ -32,7 +32,6 @@ import javax.swing.ListCellRenderer;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
@@ -77,7 +76,7 @@ public class WPageListRenderer extends JPanel implements ListCellRenderer<WPage>
 	private void initialize() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBorder(UI.cellRendererBorder());
-		signPanel = new WImagePanel(250,110, 0.5);
+		signPanel = new WImagePanel(380,120, true);
 		setPreferredSize();
 		title_pnl.setLayout(new BoxLayout(title_pnl, BoxLayout.X_AXIS));
 		title_pnl.add(Box.createHorizontalGlue());
