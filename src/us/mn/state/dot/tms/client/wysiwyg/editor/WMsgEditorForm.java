@@ -408,6 +408,9 @@ public class WMsgEditorForm extends AbstractForm {
 	public void setFrame(JInternalFrame f) {
 		frame = f;
 		frame.setJMenuBar(menu_bar);
+		
+		// what the hell, call postInit again
+		controller.postInit();
 	}
 	
 	public void setPageNumberLabel(String pnl) {

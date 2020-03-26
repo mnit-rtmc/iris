@@ -336,6 +336,8 @@ public class WController {
 //		System.out.println(String.format(
 //				"Mouse moved to (%d, %d) ...", x, y));
 //		}
+		// get focus for this component when someone clicks on it
+		signPanel.requestFocusInWindow();
 	}
 	
 	/** Handle a mouse pressed event  */
@@ -351,6 +353,8 @@ public class WController {
 			lastPressY = -1;
 			startTok = null;
 		}
+		// get focus for this component when someone clicks on it
+		signPanel.requestFocusInWindow();
 	}
 
 	/** Handle a mouse drag event on the main editor panel */
@@ -363,6 +367,8 @@ public class WController {
 			int y = e.getY();
 			updateMouseDrag(x, y);
 		}
+		// get focus for this component when someone clicks on it
+		signPanel.requestFocusInWindow();
 	}
 	
 	private void updateMouseDrag(int x, int y) {
@@ -412,6 +418,9 @@ public class WController {
 		lastPressY = -1;
 		startTok = null;
 		endTok = null;
+		
+		// get focus for this component when someone clicks on it
+		signPanel.requestFocusInWindow();
 	}
 	
 	/** Find the closest token on the page given a set of click coordinates. */
@@ -750,7 +759,7 @@ public class WController {
 	
 	/** Add a single ASCII character to the message at the caret location. */
 	public void typeChar(char c) {
-//		System.out.println(String.format("Typed: '%c'", c));
+		System.out.println(String.format("Typed: '%c'", c));
 		
 		// TODO handle overwrite mode somehow (default is insert mode)
 		

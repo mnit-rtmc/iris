@@ -101,7 +101,7 @@ public class WPageListRenderer extends JPanel implements ListCellRenderer<WPage>
 		// labels
 		pgnum_lbl.setText("Page 1");
 		int height = 2*pgnum_lbl.getPreferredSize().height+10 + pix_pnl_size.height;
-		System.out.println(String.format("Width = %d, Height = %d", width, height));
+//		System.out.println(String.format("Width = %d, Height = %d", width, height));
 		Dimension d = new Dimension(width, height);
 		setMinimumSize(d);
 		setPreferredSize(d);

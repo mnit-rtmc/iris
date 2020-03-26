@@ -327,13 +327,14 @@ public class WImagePanel extends JPanel {
 		// get the original color so we can reset the color
 		Color oc = g.getColor();
 		
-		// set color to to the cursor color and draw one or more rectangles
-		g.setColor(Color.WHITE);
+		// use a transparent filling for the rectangles
+		Color fill = new Color((float) 1, (float) 1, (float) 1, (float) 0.3);
+		
+		// set color to to the caret color and draw one or more rectangles
 		for (Rectangle r: selectRects) {
+			g.setColor(caretColor);
 			g.drawRect(r.x, r.y, r.width, r.height);
 			
-			// use a transparent filling
-			Color fill = new Color((float) 1, (float) 1, (float) 1, (float) 0.3);
 			g.setColor(fill);
 			g.fillRect(r.x, r.y, r.width, r.height);
 		}
