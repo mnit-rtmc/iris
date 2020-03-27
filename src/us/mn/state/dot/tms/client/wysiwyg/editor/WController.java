@@ -1066,12 +1066,20 @@ public class WController {
 			// if there were errors, try to restore the previous state then
 			// TODO show them in the error tab
 			if (!undoStack.isEmpty()) {
-				System.out.println("Trying to restore previous state!");
-				WHistory wh = undoStack.remove(undoStack.size()-1);
+				int i = undoStack.size() - 1;
+				System.out.println(String.format(
+				  "Trying to restore previous state! (%d of %d) Previous MULTI:",
+						i+1, undoStack.size()));
+				WHistory wh = undoStack.remove(i);
+				System.out.println(wh.multiString);
+				
+				// we have to clear the errors here, otherwise we will hit
+				// false errors when applyHistory calls renderMsg again (via
+				// update)
+				errMan.clearErrors();
 				applyHistory(wh);
 			}
 			
-			errMan.clearErrors();
 		}
 	}
 	
