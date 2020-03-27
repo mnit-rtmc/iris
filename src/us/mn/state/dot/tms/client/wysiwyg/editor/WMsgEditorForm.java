@@ -362,21 +362,21 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.fill = GridBagConstraints.BOTH;
 		p.add(epanel, gbc);
 		
-		/* Preview Button */
-		gbc.gridx = 6;
-		gbc.gridy = 5;
+		/* Cancel Button */
 		gbc.gridheight = 1;
 		gbc.gridwidth = 1;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		gbc.fill = GridBagConstraints.NONE;
 		gbc.anchor = GridBagConstraints.BASELINE_TRAILING;
-		p.add(preview_btn, gbc);
-		
-		/* Cancel Button */
-		gbc.gridx = 7;
+		gbc.gridx = 6;
 		gbc.gridy = 5;
 		p.add(cancel_btn, gbc);
+		
+		/* Preview Button */
+		gbc.gridx = 7;
+		gbc.gridy = 5;
+		p.add(preview_btn, gbc);
 		
 		/* Save As Button */
 		gbc.gridx = 8;
