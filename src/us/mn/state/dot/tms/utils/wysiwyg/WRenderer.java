@@ -78,13 +78,27 @@ public class WRenderer {
 	/** Current raster buffer to render into */
 	private WRaster raster;
 
+	/** Error manager */
+	private WRenderErrorManager errMan;
+	
 	/**
 	 * Create a new MULTI renderer.
-	 * @param fct Raster graphic factory.
+	 * 
 	 * @param mc MultiConfig for sign or sign-group.
 	 */
 	public WRenderer(MultiConfig mcfg) {
 		setConfig(mcfg);
+	}
+
+	/**
+	 * Create a new MULTI renderer with an error manager.
+	 * 
+	 * @param mc MultiConfig for sign or sign-group.
+	 * @param em WRenderErrorManager for collecting errors.
+	 */
+	public WRenderer(MultiConfig mcfg, WRenderErrorManager em) {
+		setConfig(mcfg);
+		errMan = em;
 	}
 
 	public void setConfig(MultiConfig mcfg) {
@@ -851,6 +865,9 @@ public class WRenderer {
 	 */
 	public void renderError(MultiSyntaxError mse) {
 		println("RENDERERROR: "+mse);
+		
+		// pass the error to the error manager
+		saveError(mse);
 	}
 
 	/**
@@ -860,8 +877,16 @@ public class WRenderer {
 	private void renderError(MultiSyntaxError mse, WToken tok) {
 		tok.addErr(mse);
 		println("RENDERERROR: "+mse);
+		saveError(mse);
 	}
 
+	/** Save the error in the error manager */
+	private void saveError(MultiSyntaxError mse) {
+		if (errMan != null) {
+			errMan.addError(mse);
+		}
+	}
+	
 	//===========================================
 
 	/** AnchorChar: Used as a zero-width TextChar

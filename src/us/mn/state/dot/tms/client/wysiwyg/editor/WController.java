@@ -61,6 +61,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WGraphicCache;
 import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
+import us.mn.state.dot.tms.utils.wysiwyg.WRenderErrorManager;
 import us.mn.state.dot.tms.utils.wysiwyg.WState;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
@@ -72,6 +73,7 @@ import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Multi.JustificationLine;
 import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.MultiString;
+import us.mn.state.dot.tms.utils.MultiSyntaxError;
 
 /**
  * WYSIWYG DMS Message Editor Controller for handling exchanges between the
@@ -149,6 +151,9 @@ public class WController {
 	
 	/** WMessage for working with rendered message */
 	private WMessage wmsg = null;
+	
+	/** Render Error Manager for receiving errors from renderer */
+	private WRenderErrorManager errMan = new WRenderErrorManager(); 
 	
 	/** Current Font
 	 *  TODO need some model for this, I don't think it can just be one */
@@ -780,6 +785,9 @@ public class WController {
 	/** Add a newline character at the current position */
 	public Action addNewLine = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
+			// save state to allow undo
+			saveState();
+			
 			// create a newline token
 			// TODO how to deal with spacing?? just doing default for now
 			WtNewLine t = new WtNewLine(null);
@@ -1026,6 +1034,10 @@ public class WController {
 		return multiStringText;
 	}
 	
+	public WRenderErrorManager getErrorManager() {
+		return errMan;
+	}
+	
 	/** Render the message using the current MULTI String and MultiConfig */
 	private void renderMsg() {
 		// update the WMessage object and re-render if we have a MultiConfig
@@ -1043,7 +1055,24 @@ public class WController {
 		}
 //		System.out.println(multiStringText);
 		if (multiConfig != null && wmsg != null)
-			wmsg.renderMsg(multiConfig);
+			wmsg.renderMsg(multiConfig, errMan);
+		
+		// check for errors from the renderer
+		if (errMan.hasErrors()) {
+			System.out.println(
+					"Renderer errors!");
+			errMan.printErrors();
+			
+			// if there were errors, try to restore the previous state then
+			// TODO show them in the error tab
+			if (!undoStack.isEmpty()) {
+				System.out.println("Trying to restore previous state!");
+				WHistory wh = undoStack.remove(undoStack.size()-1);
+				applyHistory(wh);
+			}
+			
+			errMan.clearErrors();
+		}
 	}
 	
 	/** Save the current MULTI string in the quick message */

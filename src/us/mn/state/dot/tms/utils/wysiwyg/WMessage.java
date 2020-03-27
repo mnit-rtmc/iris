@@ -412,14 +412,20 @@ public class WMessage {
 
 	/** Render all pages in message.
 	 * Updates the raster image in all WPage(s) */
-	public void renderMsg(MultiConfig mcfg) {
-		WRenderer wr = new WRenderer(mcfg);
+	public void renderMsg(MultiConfig mcfg, WRenderErrorManager errMan) {
+		WRenderer wr = new WRenderer(mcfg, errMan);
 		for (WPage pg: pagelist) {
 			pg.doRender(wr);
 			wr.complete();
 			pg.setRaster(wr.getRaster());
 			wr.addPage();
 		}
+	}
+	
+	/** Render all pages in message without any error management
+	 * Updates the raster image in all WPage(s) */
+	public void renderMsg(MultiConfig mcfg) {
+		renderMsg(mcfg, null);
 	}
 	
 //	/** Re-render message and then tell watchers */
