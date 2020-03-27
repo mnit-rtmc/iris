@@ -202,7 +202,13 @@ public class WImagePanel extends JPanel {
 	/** Set the caret location given the token. */
 	public void setCaretLocation(WToken tok) {
 		// get coordinates from the token and set the caret to appear there
-		setCaretLocation(tok.getCoordX(), tok.getCoordY(), tok.getCoordH());
+		try {
+			setCaretLocation(tok.getCoordX(), tok.getCoordY(), tok.getCoordH());
+		} catch (NullPointerException e) {
+			// TODO not sure why this happens (coords are uninitialized I
+			// think), but for now we'll just ignore it
+			e.printStackTrace();
+		}
 	}
 	
 	/** Set the caret location given the x,y coordinates and height h (all in

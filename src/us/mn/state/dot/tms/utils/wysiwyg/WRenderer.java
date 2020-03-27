@@ -79,7 +79,7 @@ public class WRenderer {
 	private WRaster raster;
 
 	/** Error manager */
-	private WRenderErrorManager errMan;
+	private WEditorErrorManager errMan;
 	
 	/**
 	 * Create a new MULTI renderer.
@@ -96,7 +96,7 @@ public class WRenderer {
 	 * @param mc MultiConfig for sign or sign-group.
 	 * @param em WRenderErrorManager for collecting errors.
 	 */
-	public WRenderer(MultiConfig mcfg, WRenderErrorManager em) {
+	public WRenderer(MultiConfig mcfg, WEditorErrorManager em) {
 		setConfig(mcfg);
 		errMan = em;
 	}

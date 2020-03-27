@@ -67,6 +67,7 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiString;
+import us.mn.state.dot.tms.utils.wysiwyg.WEditorErrorManager;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 
 /**
@@ -425,6 +426,33 @@ public class WMsgEditorForm extends AbstractForm {
 		WPage selectedPage = controller.getSelectedPage();
 		if (selectedPage != null)
 			epanel.updateWysiwygSignPage(selectedPage);
+	}
+	
+	/** Add the dynamic error panel for displaying current MULTI/renderer
+	 *  errors. This tab only appears when there are errors.
+	 */
+	public void addErrorPanel(WEditorErrorManager errMan) {
+		// dispatch to the EditorPanel
+		epanel.addErrorPanel(errMan);
+	}
+
+	/** Return whether or not the error panel is currently showing. */
+	public boolean hasErrorPanel() {
+		return epanel.hasErrorPanel();
+	}
+
+	/** Update the error panel with the current MULTI/renderer errors from the
+	 *  error manager. The error panel must have been initialized first.
+	 */
+	public void updateErrorPanel() {
+		epanel.updateErrorPanel();
+	}
+	
+	/** Remove the dynamic error panel. Performed when errors are addressed
+	 *  by the user.
+	 */
+	public void removeErrorPanel() {
+		epanel.removeErrorPanel();
 	}
 	
 	/** Preview action */

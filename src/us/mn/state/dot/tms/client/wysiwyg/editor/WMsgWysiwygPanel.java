@@ -30,6 +30,7 @@ import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 
 import javax.swing.JPanel;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ComboBoxModel;
@@ -81,6 +82,9 @@ public class WMsgWysiwygPanel extends JPanel {
 	private JToggleButton colorrect_mode_btn;
 	private JToggleButton textrect_mode_btn;
 	private JToggleButton multitag_mode_btn;
+	
+	/** Restore button, for restoring the most recent non-error state */
+	private JButton restoreBtn;
 	
 	/** Master toolbar panel (changes) */
 	private JPanel toolbar_pnl;
@@ -139,6 +143,13 @@ public class WMsgWysiwygPanel extends JPanel {
 		mode_btn_pnl.add(colorrect_mode_btn);
 		mode_btn_pnl.add(textrect_mode_btn);
 		mode_btn_pnl.add(multitag_mode_btn);
+		
+		// add a separator, then another button - this will be for restoring
+		// a good state when errors are encountered (disabled by default)
+		restoreBtn = new JButton(controller.restoreLastGoodState);
+		mode_btn_pnl.add(Box.createHorizontalStrut(100));
+		mode_btn_pnl.add(restoreBtn);
+		disableRestoreButton();
 		add(mode_btn_pnl);
 		
 		// TODO temporary
@@ -200,6 +211,16 @@ public class WMsgWysiwygPanel extends JPanel {
 	/** Get the pixel panel from the WYSIWYG editor panel */
 	public WImagePanel getWImagePanel() {
 		return signPanel; 
+	}
+	
+	/** Enable the restore button for restoring the last non-error state. */
+	public void enableRestoreButton() {
+		restoreBtn.setEnabled(true);
+	}
+
+	/** Disable the restore button. Called when errors have been cleared. */
+	public void disableRestoreButton() {
+		restoreBtn.setEnabled(false);
 	}
 	
 	/***** Button Actions *****/

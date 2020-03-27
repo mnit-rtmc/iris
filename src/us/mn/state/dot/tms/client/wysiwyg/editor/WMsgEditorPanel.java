@@ -15,12 +15,13 @@
 
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
+import java.awt.Color;
+
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import us.mn.state.dot.tms.client.dms.SignFacePanel;
-import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.wysiwyg.WEditorErrorManager;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 
 /**
@@ -37,10 +38,12 @@ public class WMsgEditorPanel extends JPanel {
 	
 	/** Tabs for switching between WYSIWYG/MULTI mode and viewing sign config,
 	 * warnings, and errors */
-	private JTabbedPane tab_pane;
-	private WMsgWysiwygPanel wysiwyg_pnl;
-	private JPanel multi_pnl;
-	private JPanel config_pnl;
+	private JTabbedPane tabPane;
+	private WMsgWysiwygPanel wysiwygPanel;
+	private WMsgMultiPanel multiPanel;
+	private WMsgConfigPanel configPanel;
+	private WMsgErrorPanel errorPanel;
+	private final static int ERROR_PANEL_TAB = 3;
 	
 	// TODO - warnings and errors (should be dynamic)
 	
@@ -48,32 +51,72 @@ public class WMsgEditorPanel extends JPanel {
 		controller = c;
 		
 		// create the tab pane and the tabs
-		tab_pane = new JTabbedPane(JTabbedPane.TOP);
+		tabPane = new JTabbedPane(JTabbedPane.TOP);
 		
 		// generate each tab
-		wysiwyg_pnl = new WMsgWysiwygPanel(controller);
-		multi_pnl = new WMsgMultiPanel(controller);
-		config_pnl = new WMsgConfigPanel(controller);					// TODO
+		wysiwygPanel = new WMsgWysiwygPanel(controller);
+		multiPanel = new WMsgMultiPanel(controller);
+		configPanel = new WMsgConfigPanel(controller);					// TODO
 		
 		// add the tabs to the pane
-		tab_pane.add(I18N.get("wysiwyg.epanel.wysiwyg_tab"), wysiwyg_pnl);
-		tab_pane.add(I18N.get("wysiwyg.epanel.multi_tab"), multi_pnl);
-		tab_pane.add(I18N.get("wysiwyg.epanel.config_tab"), config_pnl);
+		tabPane.add(I18N.get("wysiwyg.epanel.wysiwyg_tab"), wysiwygPanel);
+		tabPane.add(I18N.get("wysiwyg.epanel.multi_tab"), multiPanel);
+		tabPane.add(I18N.get("wysiwyg.epanel.config_tab"), configPanel);
 		
 		// add the tab pane to the panel
-		add(tab_pane);
+		add(tabPane);
 	}
 	
 	/** Update the main WYSIWYG panel with the currently selected page (called
 	 *  from the main form). */
 	public void updateWysiwygSignPage(WPage sp) {
 		// use the currently selected page to update the main WYSIWYG panel
-		wysiwyg_pnl.setPage(sp);
+		wysiwygPanel.setPage(sp);
 	}
 
 	/** Get the pixel panel from the WYSIWYG editor panel */
 	public WImagePanel getWImagePanel() {
-		return wysiwyg_pnl.getWImagePanel(); 
+		return wysiwygPanel.getWImagePanel(); 
+	}
+	
+	/** Add the dynamic error panel for displaying current MULTI/renderer
+	 *  errors. This tab only appears when there are errors.
+	 */
+	public void addErrorPanel(WEditorErrorManager errMan) {
+		// create a new error panel then add it to the tab pane
+		errorPanel = new WMsgErrorPanel(errMan);
+		tabPane.add(I18N.get("wysiwyg.epanel.error_tab"), errorPanel);
+		
+		// make it red to catch attention
+		tabPane.setBackgroundAt(ERROR_PANEL_TAB, Color.RED);
+		tabPane.setForegroundAt(ERROR_PANEL_TAB, Color.MAGENTA);
+		
+		// enable the restore button
+		wysiwygPanel.enableRestoreButton();
+	}
+	
+	/** Return whether or not the error panel is currently showing. */
+	public boolean hasErrorPanel() {
+		return errorPanel != null;
+	}
+	
+	/** Update the error panel with the current MULTI/renderer errors from the
+	 *  error manager. The error panel must have been initialized first.
+	 */
+	public void updateErrorPanel() {
+		if (hasErrorPanel())
+			errorPanel.updateErrorList();
+	}
+	
+	/** Remove the dynamic error panel. Performed when errors are addressed
+	 *  by the user.
+	 */
+	public void removeErrorPanel() {
+		if (hasErrorPanel()) {
+			tabPane.remove(errorPanel);
+			errorPanel = null;
+			wysiwygPanel.disableRestoreButton();
+		}
 	}
 }
 

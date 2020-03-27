@@ -27,21 +27,24 @@ import us.mn.state.dot.tms.utils.MultiSyntaxError;
  * can be other things as well.
  * 
  * @author John L. Stanley - SRF Consulting
+ * @author Gordon Parikh - SRF Consulting
  */
 
 public class WEditorError {
 	MultiSyntaxError mse; // MultiSyntaxError
 	String shortErrStr;   // short MULTI error name
 	String longErrStr;    // human readable explanation
+	WToken tok;			  // token associated with the error, if applicable
 
 	/** Constructor for a MultiSyntaxError error */
 	public WEditorError(MultiSyntaxError xmse) {
-		mse = xmse;
-		shortErrStr = mse.toString();
-		String des = I18N.get(shortErrStr);
-		if ("Undefined I18N string".equals(des))
-			des = null;
-		longErrStr = des;
+		longErrStr = getI18NErrStr(xmse);
+	}
+	
+	/** Constructor for a MultiSyntaxError associated with a specific token */
+	public WEditorError(MultiSyntaxError xmse, WToken t) {
+		longErrStr = getI18NErrStr(xmse);
+		tok = t;
 	}
 
 	/** Constructor for errors that are not
@@ -49,10 +52,26 @@ public class WEditorError {
 	public WEditorError(String em) {
 		mse = MultiSyntaxError.other;
 		shortErrStr = "other";
+		longErrStr = getI18NErrStr(em);
+	}
+	
+	/** Read the human-readable error string from I18N definitions.
+	 *  Used when the error is a MultiSyntaxError.
+	 */
+	private String getI18NErrStr(MultiSyntaxError xmse) {
+		shortErrStr = "MultiSyntaxError." + xmse.toString();
+		String des = getI18NErrStr(shortErrStr);
+		return des;
+	}
+
+	/** Read the human-readable error string from I18N definitions.
+	 *  Used when the error is a not MultiSyntaxError.
+	 */
+	private String getI18NErrStr(String em) {
 		String des = I18N.get(em);
-		if ("Undefined I18N string".equals(des))
+		if (des.startsWith("I18N: failed to read ("))
 			des = em;
-		longErrStr = des;
+		return des;
 	}
 
 	//-------------------------------------------
@@ -63,8 +82,23 @@ public class WEditorError {
 		return shortErrStr;
 	}
 
-	/** Get long error description */
+	/** Get long error description. If there is a token associated with this
+	 *  error, it is included in the description.
+	 */
 	public String getLongErrStr() {
-		return longErrStr;
+		if (tok != null)
+			return longErrStr + ": " + tok.toString();
+		else
+			return longErrStr;
+	}
+	
+	/** Provide a short representation of the error. Includes the token if
+	 *  there is one.
+	 */
+	public String toString() {
+		if (tok != null)
+			return shortErrStr + ": " + tok.toString();
+		else
+			return shortErrStr;
 	}
 }

@@ -412,7 +412,7 @@ public class WMessage {
 
 	/** Render all pages in message.
 	 * Updates the raster image in all WPage(s) */
-	public void renderMsg(MultiConfig mcfg, WRenderErrorManager errMan) {
+	public void renderMsg(MultiConfig mcfg, WEditorErrorManager errMan) {
 		WRenderer wr = new WRenderer(mcfg, errMan);
 		for (WPage pg: pagelist) {
 			pg.doRender(wr);

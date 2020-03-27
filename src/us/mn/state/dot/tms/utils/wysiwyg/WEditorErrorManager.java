@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.utils.wysiwyg;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import us.mn.state.dot.tms.utils.MultiSyntaxError;
 
@@ -24,18 +25,25 @@ import us.mn.state.dot.tms.utils.MultiSyntaxError;
  *
  * @author Gordon Parikh - SRF Consulting
  */
-public class WRenderErrorManager {
-	public ArrayList<MultiSyntaxError> errors;
+public class WEditorErrorManager {
+	public ArrayList<WEditorError> errors;
 	
-	public WRenderErrorManager() {
-		errors = new ArrayList<MultiSyntaxError>();
+	public WEditorErrorManager() {
+		errors = new ArrayList<WEditorError>();
 	}
 	
 	/** Log an error with the manager */
-	public void addError(MultiSyntaxError err) {
+	public void addError(MultiSyntaxError mse) {
 		// for now print it
-		System.out.println("RENDERERROR: "+err);
-		errors.add(err);
+		System.out.println("RENDERERROR: "+mse);
+		errors.add(new WEditorError(mse));
+	}
+	
+	/** Log an error with a token with the manager */
+	public void addError(MultiSyntaxError mse, WToken tok) {
+		// for now print it
+		System.out.println("RENDERERROR: "+mse);
+		errors.add(new WEditorError(mse, tok));
 	}
 	
 	/** Check if there are errors */
@@ -51,5 +59,10 @@ public class WRenderErrorManager {
 	/** Print all errors to the terminal */
 	public void printErrors() {
 		System.out.println(errors.toString());
+	}
+	
+	/** Iterator for all errors */
+	public Iterator<WEditorError> iterator() {
+		return errors.iterator();
 	}
 }

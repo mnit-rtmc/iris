@@ -54,6 +54,7 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.wysiwyg.editor.action.WDeleteToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WFontCache;
@@ -61,7 +62,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WGraphicCache;
 import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
-import us.mn.state.dot.tms.utils.wysiwyg.WRenderErrorManager;
+import us.mn.state.dot.tms.utils.wysiwyg.WEditorErrorManager;
 import us.mn.state.dot.tms.utils.wysiwyg.WState;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
@@ -102,14 +103,13 @@ public class WController {
 	private WImagePanel signPanel;
 	private WMsgMultiPanel multiPanel;
 	
-	/** Keep a list of actions that have been performed and undone */
-	// TODO make a new list type if it seems like it would be useful
-	private ArrayList<WAction> actionsDone = new ArrayList<WAction>();
-	private ArrayList<WAction> actionsUnDone = new ArrayList<WAction>();
-	
 	/** Keep a list of MULTI strings for undoing/redoing */
 	private ArrayList<WHistory> undoStack = new ArrayList<WHistory>();
 	private ArrayList<WHistory> redoStack = new ArrayList<WHistory>();
+	
+	/** Keep the size of the undo stack as of the last good state (i.e. with
+	 *  no MULTI/renderer errors) for restoring. */
+	private int lastGoodState = 0;
 	
 	/** Cursor that will change depending on mode, etc. */
 	// TODO should we make these final or have an initCursors method???
@@ -153,7 +153,7 @@ public class WController {
 	private WMessage wmsg = null;
 	
 	/** Render Error Manager for receiving errors from renderer */
-	private WRenderErrorManager errMan = new WRenderErrorManager(); 
+	private WEditorErrorManager errMan = new WEditorErrorManager(); 
 	
 	/** Current Font
 	 *  TODO need some model for this, I don't think it can just be one */
@@ -577,8 +577,9 @@ public class WController {
 			// if we're on the last token, just go to the end of the message
 			if (caretIndx == selectedPage.getNumTokens()-1) {
 				moveCaret(CARET_EOP);
-			} else {
-				// otherwise increment the caret index
+			} else if (caretIndx != CARET_EOP) {
+				// otherwise increment the caret index, but don't go past the
+				// end of the page
 				moveCaret(caretIndx+1);
 			}
 		}
@@ -1034,9 +1035,60 @@ public class WController {
 		return multiStringText;
 	}
 	
-	public WRenderErrorManager getErrorManager() {
+	public WEditorErrorManager getErrorManager() {
 		return errMan;
 	}
+	
+	/** Show the dynamic error panel for displaying current MULTI/renderer
+	 *  errors on the editor form. This tab only appears when there are
+	 *  errors.
+	 */
+	private void updateErrorPanel() {
+		if (editor != null) {
+			if (!editor.hasErrorPanel())
+				editor.addErrorPanel(errMan);
+			else
+				editor.updateErrorPanel();
+		}
+	}
+	
+	/** Declare a "no error" state, i.e. a state with no MULTI/renderer
+	 *  errors. Removes the error panel (if it is displayed) and saves a
+	 *  record of this state to allow restoring.
+	 */
+	private void noErrors() {
+		if (editor != null)
+			editor.removeErrorPanel();
+		
+		// update the index of the last good state (the current size of the
+		// undo stack)
+		lastGoodState = undoStack.size();
+		System.out.println(String.format("No errors at %d",
+				lastGoodState));
+	}
+	
+	/** An action to restore the last good state of the editor (i.e. the last
+	 *  state that had no MULTI/renderer errors) in a way that can be redone.
+	 *  Lets the user to return to a good state if they are confused, while
+	 *  allowing them to step back through their changes to help them find
+	 *  the error to achieve whatever they wanted to do.
+	 *  
+	 *  Note that if there wasn't a good state, we're hosed. MULTI mode is the
+	 *  only way back in that case (perhaps we should display an message
+	 *  then??).
+	 */
+	public IAction restoreLastGoodState = new IAction("wysiwyg.epanel.restore") {
+		public void doActionPerformed(ActionEvent e) {
+			System.out.println("Restoring");
+			if (lastGoodState >= 0) {
+				System.out.println(String.format("Last good state: %d",
+						lastGoodState));
+				while (undoStack.size() > lastGoodState) {
+					undo.actionPerformed(e);
+				}
+			}
+		}
+	};
 	
 	/** Render the message using the current MULTI String and MultiConfig */
 	private void renderMsg() {
@@ -1054,33 +1106,24 @@ public class WController {
 			wmsg = new WMessage(multiStringText);
 		}
 //		System.out.println(multiStringText);
+		
+		// clear any errors before re-rendering
+		errMan.clearErrors();
+		
 		if (multiConfig != null && wmsg != null)
 			wmsg.renderMsg(multiConfig, errMan);
 		
 		// check for errors from the renderer
 		if (errMan.hasErrors()) {
-			System.out.println(
-					"Renderer errors!");
+			System.out.println("Renderer errors!");
 			errMan.printErrors();
 			
-			// if there were errors, try to restore the previous state then
-			// TODO show them in the error tab
-			if (!undoStack.isEmpty()) {
-				int i = undoStack.size() - 1;
-				System.out.println(String.format(
-				  "Trying to restore previous state! (%d of %d) Previous MULTI:",
-						i+1, undoStack.size()));
-				WHistory wh = undoStack.remove(i);
-				System.out.println(wh.multiString);
-				
-				// we have to clear the errors here, otherwise we will hit
-				// false errors when applyHistory calls renderMsg again (via
-				// update)
-				errMan.clearErrors();
-				applyHistory(wh);
-			}
-			
-		}
+			// show or update the dynamic error panel to tell the user what's
+			// wrong
+			updateErrorPanel();
+		} else
+			// if there were no errors, make a note of it
+			noErrors();
 	}
 	
 	/** Save the current MULTI string in the quick message */
