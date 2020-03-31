@@ -15,6 +15,9 @@
 
 package us.mn.state.dot.tms.utils.wysiwyg.token;
 
+import java.awt.Color;
+
+import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.utils.Multi;
 import us.mn.state.dot.tms.utils.wysiwyg.WRenderer;
 import us.mn.state.dot.tms.utils.wysiwyg.WState;
@@ -61,7 +64,20 @@ public class WtColorForeground extends WToken {
 	public int[] getColorTagval() {
 		return tagval;
 	}
+	
+	/** Get a DmsColor object in the color of this tag. */
+	public DmsColor getDmsColor() {
+		if (r == null)
+			return new DmsColor(z);
+		else
+			return new DmsColor(r, g, b);
+	}
 
+	/** Get a Color object in the color of this tag. */
+	public Color getColor() {
+		return getDmsColor().color;
+	}
+	
 	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#updateState(us.mn.state.dot.tms.utils.wysiwyg.WState)
 	 */
