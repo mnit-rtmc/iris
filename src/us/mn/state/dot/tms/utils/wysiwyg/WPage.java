@@ -145,6 +145,16 @@ public class WPage {
 		return -1;
 	}
 	
+	/** Get the line on which this token found.
+	 *  @return the WTokenList representing the line, or null if not found
+	 */
+	public WTokenList getTokenLine(WToken tok) {
+		int li = getLineIndex(tok);
+		if (li != -1)
+			return getLines().get(li);
+		return null;
+	}
+	
 	/** Return the number of lines on the page. */
 	public int getNumLines() {
 		return getLines().size();

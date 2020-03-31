@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.utils.wysiwyg;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -80,5 +81,13 @@ public class WTokenList extends ArrayList<WToken> {
 	 *  method for list.remove(list.size()-1). */
 	public WToken removeLast() {
 		return remove(size()-1);
+	}
+	
+	/** Return a copy of the list with tokens in reverse order. */
+	public WTokenList reversed() {
+		WTokenList rev = new WTokenList();
+		rev.addAll(this);
+		Collections.reverse(rev);
+		return rev;
 	}
 }
