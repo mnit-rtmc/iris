@@ -23,6 +23,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IllegalFormatException;
 import java.util.Iterator;
 import java.util.Map;
@@ -559,6 +560,9 @@ public class WController {
 		signPanel.clearTextSelection();
 		
 		printCaretTokens();
+		
+		// TODO need to organize this better somehow
+		updateTextToolbar();
 	}
 	
 	/** Get the token associated with the current caret position. This is
@@ -643,6 +647,40 @@ public class WController {
 				if (downTok != null) {
 					moveCaret(downTok);
 				}
+			}
+		}
+	};
+	
+	/** Action to move caret to the beginning of the current line (home key) */
+	public Action moveCaretLineBeginning = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// get the current token and find what line it's on
+			WToken tok = getCaretToken();
+			WTokenList lineTokens = selectedPage.getTokenLine(tok);
+			
+			if (lineTokens != null) {
+				// grab the first token on the line
+				WToken homeTok = lineTokens.get(0);
+				
+				// move the caret to that token
+				moveCaret(homeTok);
+			}
+		}
+	};
+	
+	/** Action to move caret to the end of the current line (end key) */
+	public Action moveCaretLineEnd = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// get the current token and find what line it's on
+			WToken tok = getCaretToken();
+			WTokenList lineTokens = selectedPage.getTokenLine(tok);
+			
+			if (lineTokens != null) {
+				// get the line and grab the last token on the line
+				WToken endTok = lineTokens.get(lineTokens.size()-1);
+				
+				// move the caret to that token
+				moveCaret(endTok);
 			}
 		}
 	};
@@ -880,13 +918,141 @@ public class WController {
 		}
 	};
 	
+	/** Get the last token of type tokType (i.e. closest token behind the
+	 *  caret). Used for for determining the active font/color/justification
+	 *  used to set the respective button on the toolbar. If one isn't found,
+	 *  null is returned (and the caller should use the default).
+	 */
+	public WToken getPrecedingTokenOfType(WTokenType tokType) {
+		// look in the tokensBefore to find any tokens of this type
+		for (WToken tok: tokensBefore.reversed()) {
+			if (tok.isType(tokType))
+				// return the first one we find
+				return tok;
+		}
+		// or null otherwise
+		return null;
+	}
+	
+	/** Get the list of tokens matching type tokType in the current selection.
+	 *  Used for determining the active font/color/justification used to set
+	 *  the respective buttons on the toolbar. If none are found, an empty
+	 *  list is returned.
+	 */
+	public WTokenList getTokensOfTypeInSelection(WTokenType tokType) {
+		// look in the tokensSelected to find any tokens of this type
+		WTokenList toks = new WTokenList();
+		for (WToken tok: tokensSelected) {
+			if (tok.isType(tokType))
+				toks.add(tok);
+		}
+		return toks;
+	}
+	
+	// TODO font
+	
+	/** Get the active page justification value given the current caret
+	 *  location. Uses page justification tags in the preceding and/or
+	 *  selected tokens and the default to determine what the "active" page
+	 *  justification value is.
+	 */
+	public JustificationPage getActivePageJustification() {
+		// first look in the preceding tokens
+		WtJustPage pjTag = (WtJustPage) getPrecedingTokenOfType(
+				WTokenType.justificationPage);
+		
+		// the color based on this is either the tag value or the default
+		JustificationPage pj = (pjTag != null) ? pjTag.getJustification()
+				: JustificationPage.TOP;
+		
+		// now look in the selected tokens
+		WTokenList selJusts = getTokensOfTypeInSelection(
+				WTokenType.justificationPage);
+		
+		// now check that every token is the same type
+		HashSet<JustificationPage> jpvals = new HashSet<JustificationPage>();
+		jpvals.add(pj);
+		for (WToken tok: selJusts)
+			jpvals.add(((WtJustPage) tok).getJustification());
+		
+		if (jpvals.size() == 1)
+			return pj;
+		return null;
+	}
+
+	/** Get the active page justification value given the current caret
+	 *  location. Uses page justification tags in the preceding and/or
+	 *  selected tokens and the default to determine what the "active" page
+	 *  justification value is.
+	 */
+	public JustificationLine getActiveLineJustification() {
+		// first look in the preceding tokens
+		WtJustLine pjTag = (WtJustLine) getPrecedingTokenOfType(
+				WTokenType.justificationLine);
+		
+		println("Preceding token: %s", (pjTag != null) ? pjTag.toString() : "null");
+		
+		// the color based on this is either the tag value or the default
+		JustificationLine pj = (pjTag != null) ? pjTag.getJustification()
+				: JustificationLine.CENTER;
+		
+		// now look in the selected tokens
+		WTokenList selJusts = getTokensOfTypeInSelection(
+				WTokenType.justificationLine);
+		
+		// now check that every token is the same type
+		HashSet<JustificationLine> jlvals = new HashSet<JustificationLine>();
+		jlvals.add(pj);
+		for (WToken tok: selJusts)
+			jlvals.add(((WtJustLine) tok).getJustification());
+		
+		if (jlvals.size() == 1)
+			return pj;
+		return null;
+	}
+	
+	// TODO will remove this and do something else instead
+	/** Get the active foreground color given the current caret location. Uses
+	 *  foreground color tags in the preceding and/or selected tokens and the
+	 *  default to determine what the "active" color is.
+	 */
+	public Color getActiveForegroundColor() {
+		// first look in the preceding tokens
+		WtColorForeground pcTag = (WtColorForeground) getPrecedingTokenOfType(
+				WTokenType.colorForeground);
+		
+		// the color based on this is either the tag value or the default
+		Color pfgColor = (pcTag != null) ? pcTag.getColor()
+				: fgColorDefault.color;
+		
+		// now look in the selected tokens
+		WTokenList selColors = getTokensOfTypeInSelection(
+				WTokenType.colorForeground);
+		
+		// now check that every token is the same type
+		HashSet<Color> colors = new HashSet<Color>();
+		colors.add(pfgColor);
+		for (WToken tok: selColors) {
+			colors.add(((WtColorForeground) tok).getColor());
+		}
+		if (colors.size() == 1)
+			return pfgColor;
+		return null;
+	}
+	
 	/** Add a line justify left token at the current location. */
 	public Action lineJustifyLeft = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
 			// create the appropriate WtJustLine token then pass it to
 			// addTextOptionToken
 			WtJustLine jlTok = new WtJustLine(JustificationLine.LEFT);
-			addTextOptionToken(jlTok);
+			
+			// this needs to be the first token on the line - move the caret
+			// to the beginning of the line then do the normal procedure
+			// TODO will this be annoying? should we do it without moving the
+			// caret???
+			moveCaretLineBeginning.actionPerformed(null);
+			addLineJustifyToken(jlTok);
 		}
 	};
 
@@ -896,7 +1062,7 @@ public class WController {
 			// create the appropriate WtJustLine token then pass it to
 			// addTextOptionToken
 			WtJustLine jlTok = new WtJustLine(JustificationLine.CENTER);
-			addTextOptionToken(jlTok);
+			addLineJustifyToken(jlTok);
 		}
 	};
 	
@@ -906,9 +1072,90 @@ public class WController {
 			// create the appropriate WtJustLine token then pass it to
 			// addTextOptionToken
 			WtJustLine jlTok = new WtJustLine(JustificationLine.RIGHT);
-			addTextOptionToken(jlTok);
+			addLineJustifyToken(jlTok);
 		}
 	};
+	
+	/** Add a line justify tag at the current location. Checks for preceding
+	 *  and following line justify tags on the same line and removes any 
+	 *  conflicting tags them to avoid an error (assuming THIS is the token
+	 *  the user wants).
+	 */
+	private void addLineJustifyToken(WtJustLine jlTok) {
+		// first save the state so we can undo this
+		saveState();
+		
+		// look through the tokens BEFORE the caret and make sure there are no
+		// line justification tags with a justification value HIGHER than this
+		// one
+		for (int i = 0; i < tokensBefore.size(); ++i) {
+			if (i >= tokensBefore.size())
+				break;
+			
+			WToken tok = tokensBefore.reversed().get(i);
+
+//			println("BEFORE - on token: %s", tok.toString());
+			
+			// if we hit a newline, stop immediately
+			if (tok.isType(WTokenType.newLine))
+				break;
+			
+			if (tok.isType(WTokenType.justificationLine)) {
+				// cast to a WtJustLine token to tell Java/Eclipse it's OK
+				WtJustLine jlt = (WtJustLine) tok;
+				
+				// check the value against the tag we're trying to add
+				int thisJL = jlt.getJustification().ordinal();
+				int addJL = jlTok.getJustification().ordinal();
+				if (thisJL >= addJL) {
+					// if it's greater or the same, assume the user wants to
+					// remove it
+					int ti = selectedPage.getTokenIndex(tok);
+					selectedPage.removeToken(ti);
+					moveCaretLeft.actionPerformed(null);
+				}
+			}
+		}
+
+		// look through the tokens AFTER the caret and make sure there are no
+		// line justification tags with a justification value LOWER than this
+		// one
+		for (int i = 0; i < tokensAfter.size(); ++i) {
+			if (i >= tokensAfter.size())
+				break;
+			
+			WToken tok = tokensAfter.get(i);
+
+//			println("AFTER - on token: %s", tok.toString());
+			
+			// if we hit a newline, stop immediately
+			if (tok.isType(WTokenType.newLine))
+				break;
+			
+			if (tok.isType(WTokenType.justificationLine)) {
+				// cast to a WtJustLine token to tell Java/Eclipse it's OK
+				WtJustLine jlt = (WtJustLine) tok;
+				
+				// check the value against the tag we're trying to add
+				int thisJL = jlt.getJustification().ordinal();
+				int addJL = jlTok.getJustification().ordinal();
+				if (thisJL <= addJL) {
+					// if it's greater or the same, assume the user wants to
+					// remove it
+					int ti = selectedPage.getTokenIndex(tok);
+					selectedPage.removeToken(ti);
+					updateCaret();
+				}
+			}
+		}
+
+		// now trim any line justification tokens in the immediate vicinity
+		trimTextOptionTokens(WTokenType.justificationLine);
+		
+		// finally, add the token and update everything
+		addToken(jlTok);
+		updateTextToolbar();
+	}
 	
 	/** Add a page justify top token at the current location. */
 	public Action pageJustifyTop = new AbstractAction() {
@@ -916,7 +1163,7 @@ public class WController {
 			// create the appropriate WtJustPage token then pass it to
 			// addTextOptionToken
 			WtJustPage jpTok = new WtJustPage(JustificationPage.TOP);
-			addTextOptionToken(jpTok);
+			addPageJustifyToken(jpTok);
 		}
 	};
 	
@@ -926,7 +1173,7 @@ public class WController {
 			// create the appropriate WtJustLine token then pass it to
 			// addTextOptionToken
 			WtJustPage jpTok = new WtJustPage(JustificationPage.MIDDLE);
-			addTextOptionToken(jpTok);
+			addPageJustifyToken(jpTok);
 		}
 	};
 	
@@ -936,9 +1183,76 @@ public class WController {
 			// create the appropriate WtJustLine token then pass it to
 			// addTextOptionToken
 			WtJustPage jpTok = new WtJustPage(JustificationPage.BOTTOM);
-			addTextOptionToken(jpTok);
+			addPageJustifyToken(jpTok);
 		}
 	};
+	
+	/** Add a page justify tag at the current location. Checks for preceding
+	 *  and following page justify tags on the same page and removes any 
+	 *  conflicting tags them to avoid an error (assuming THIS is the token
+	 *  the user wants).
+	 */
+	private void addPageJustifyToken(WtJustPage jpTok) {
+		// first save the state so we can undo this
+		saveState();
+		
+		// look through the tokens BEFORE the caret and make sure there are no
+		// page justification tags with a justification value HIGHER than this
+		// one
+		for (int i = 0; i < tokensBefore.size(); ++i) {
+			if (i >= tokensBefore.size())
+				break;
+			
+			WToken tok = tokensBefore.get(i);
+			if (tok.isType(WTokenType.justificationPage)) {
+				// cast to a WtJustPage token to tell Java/Eclipse it's OK
+				WtJustPage jpt = (WtJustPage) tok;
+				
+				// check the value against the tag we're trying to add
+				int thisJP = jpt.getJustification().ordinal();
+				int addJP = jpTok.getJustification().ordinal();
+				if (thisJP >= addJP) {
+					// if it's greater or the same, assume the user wants to
+					// remove it
+					int ti = selectedPage.getTokenIndex(tok);
+					selectedPage.removeToken(ti);
+					moveCaretLeft.actionPerformed(null);
+				}
+			}
+		}
+		
+		// now look through the tokens AFTER the caret and make sure there
+		// are no page justification tags with a justification value LOWER
+		// than this one
+		for (int i = 0; i < tokensAfter.size(); ++i) {
+			if (i >= tokensAfter.size())
+				break;
+			
+			WToken tok = tokensAfter.get(i);
+			if (tok.isType(WTokenType.justificationPage)) {
+				// cast to a WtJustPage token to tell Java/Eclipse it's OK
+				WtJustPage jpt = (WtJustPage) tok;
+				
+				// check the value against the tag we're trying to add
+				int thisJP = jpt.getJustification().ordinal();
+				int addJP = jpTok.getJustification().ordinal();
+				if (thisJP <= addJP) {
+					// if it's lower or the same, assume the user wants to
+					// remove it
+					int ti = selectedPage.getTokenIndex(tok);
+					selectedPage.removeToken(ti);
+					updateCaret();
+				}
+			}
+		}
+		
+		// now trim any page justification tokens in the immediate vicinity
+		trimTextOptionTokens(WTokenType.justificationPage);
+		
+		// finally, add the token and update everything
+		addToken(jpTok);
+		updateTextToolbar();
+	}
 	
 	/** Add a foreground color token at the current location. */
 	public void setForegroundColor(DmsColor c) {
@@ -953,17 +1267,50 @@ public class WController {
 		addTextOptionToken(cfTok);
 	}
 	
-	/** Add a background color token at the current location. */
+	/** Add a background color token at the beginning of the page. Uses a page
+	 *  background color tag and not the deprecated color background tag. */
 	public void setBackgroundColor(DmsColor c) {
 		// TODO do something with default colors?
 		
 		// set the background color
 		bgColor = c;
 		
-		// create the appropriate WtColorForeground token then add it
+		// clear any page background tokens that may already be on the page
+		clearPageTokenType(WTokenType.pageBackground);
+		
+		// save state, create the appropriate WtColorForeground token and
+		// add it, then update and move the caret to reflect the change
+		saveState();
 		WtPageBackground cbTok = new WtPageBackground(
 				c.red, c.green, c.blue);
-		addTextOptionToken(cbTok);
+		selectedPage.addToken(0, cbTok);
+		update();
+		moveCaretRight.actionPerformed(null);
+	}
+	
+	/** Clear the selected page of all tokens of type tokType. */
+	private void clearPageTokenType(WTokenType tokType) {
+		// loop over at most the number of tokens on the page
+		for (int i = 0; i < selectedPage.getNumTokens(); ++i) {
+			if (i >= selectedPage.getNumTokens())
+				// account for the removal of tokens
+				break;
+			
+			// get the token at this index and check the type
+			WToken tok = selectedPage.getTokenList().get(i);
+			if (tok.isType(tokType)) {
+				// if it's the same type, remove it
+				selectedPage.removeToken(i);
+				
+				// now adjust the caret appropriately
+				if (i < caretIndx)
+					// if we're to the left of the caret, move one to the left
+					moveCaretLeft.actionPerformed(null);
+				else
+					// otherwise just update
+					updateCaret();
+			}
+		}
 	}
 	
 	/** Add a text option token (justification, font, color) at the current
@@ -975,10 +1322,22 @@ public class WController {
 		// save state here so we can undo this whole process
 		saveState();
 		
+		// trim any tokens of the same type around the current caret location
+		trimTextOptionTokens(toTok.getType());
+		
+		// now add the token
+		addToken(toTok);
+	}
+	
+	/** Trim (remove) any tokens of the type tokType that are immediately
+	 *  before or after the caret.
+	 */
+	private void trimTextOptionTokens(WTokenType tokType) {
+		
 		// check the type of the preceding token to remove all immediately-
-		// tokens of the same type
+		// preceding tokens of the same type
 		while (tokensBefore.size() > 0 &&
-				tokensBefore.getLast().isType(toTok.getType())) {
+				tokensBefore.getLast().isType(tokType)) {
 			WToken tok = tokensBefore.getLast();
 			println("Last token: '%s'", tok.toString());
 			
@@ -993,7 +1352,7 @@ public class WController {
 		
 		// do the same thing, but forwards
 		while (tokensAfter.size() > 0 &&
-				tokensAfter.get(0).isType(toTok.getType())) {
+				tokensAfter.get(0).isType(tokType)) {
 			WToken tok = tokensAfter.get(0);
 			println("Last token: '%s'", tok.toString());
 			
@@ -1002,12 +1361,10 @@ public class WController {
 			int i = selectedPage.getTokenIndex(tok);
 			selectedPage.removeToken(i);
 			
-			// move the caret to account for the removal
-			moveCaretRight.actionPerformed(null);
+			// update the caret to account for the removal
+			updateCaret();
 		}
 		
-		// now add the token
-		addToken(toTok);
 	}
 	
 	/** Add the token to the selected page at the caret index */
@@ -1038,7 +1395,7 @@ public class WController {
 	/** Save the current state on the stack for undoing. Resets the redo stack. */
 	private void saveState() {
 		WHistory wh = new WHistory(multiStringText, caretIndx,
-				tokensSelected.size());
+				tokensSelected.size(), selectedPageIndx, fgColor, bgColor);
 		undoStack.add(wh);
 		
 		// reset the redo stack, since reapplying those changes is not trivial
@@ -1084,9 +1441,14 @@ public class WController {
 	
 	/** Apply the historical state to the controller. */
 	private void applyHistory(WHistory wh) {
+		// apply the old MULTI string - this will change the re
 		setMultiString(wh.getMultiString(), false);
 		
 		// TODO handle selection and selected page
+		
+		// TODO font
+		
+		// now the color
 		
 		update();
 		
@@ -1292,6 +1654,12 @@ public class WController {
 		updateCursor();
 		
 		// TODO add more stuff here eventually
+	}
+	
+	/** Update the text toolbar if one is available. */
+	private void updateTextToolbar() {
+		if (editor != null)
+			editor.updateTextToolbar();
 	}
 	
 	/** Update the MULTI panel with the current MULTI string. */

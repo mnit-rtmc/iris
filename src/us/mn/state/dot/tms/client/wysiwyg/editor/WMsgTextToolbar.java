@@ -40,6 +40,8 @@ import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.Multi.JustificationLine;
+import us.mn.state.dot.tms.utils.Multi.JustificationPage;
 
 /**
  * WYSIWYG DMS Message Editor Text Option Panel containing buttons with
@@ -196,10 +198,6 @@ public class WMsgTextToolbar extends JPanel {
 		text_hjust_btn_pnl.add(text_ln_just_center_btn);
 		text_hjust_btn_pnl.add(text_ln_just_right_btn);
 		add(text_hjust_btn_pnl);
-		
-
-		// TODO temporary
-		font_options.setEnabled(false);
 	}
 	
 	/** Set the foreground or background color to c. The color to set is
@@ -219,6 +217,13 @@ public class WMsgTextToolbar extends JPanel {
 	public void setForegroundColor(Color c) {
 		fgColor = c;
 		controller.setForegroundColor(new DmsColor(fgColor));
+		applyForegroundColorIcon();
+	}
+	
+	/** Set the icon color on the foreground color chooser button using our
+	 *  current foreground color.
+     */
+	public void applyForegroundColorIcon() {
 		fg_color_btn.setIcon(WMsgColorChooser.createColorIcon(fgColor, 16, 16));
 	}
 	
@@ -228,7 +233,70 @@ public class WMsgTextToolbar extends JPanel {
 	public void setBackgroundColor(Color c) {
 		bgColor = c;
 		controller.setBackgroundColor(new DmsColor(bgColor));
+		applyBackgroundColorIcon();
+	}
+
+	/** Set the icon color on the background color chooser button using our
+	 *  current background color.
+     */
+	public void applyBackgroundColorIcon() {
 		bg_color_btn.setIcon(WMsgColorChooser.createColorIcon(bgColor, 16, 16));
+	}
+	
+	/** Update the page justification buttons given the value jp. */
+	public void updatePageJustBtns(JustificationPage jp) {
+		String s = (jp != null) ? jp.toString() : "null";
+		controller.println("Updating page just with: %s", s);
+		if (jp == JustificationPage.TOP)
+			text_pg_just_top_btn.setSelected(true);
+		else if (jp == JustificationPage.MIDDLE)
+			text_pg_just_middle_btn.setSelected(true);
+		else if (jp == JustificationPage.BOTTOM)
+			text_pg_just_bottom_btn.setSelected(true);
+		else {
+			// null - deselect all
+			text_pg_just_top_btn.setSelected(false);
+			text_pg_just_middle_btn.setSelected(false);
+			text_pg_just_bottom_btn.setSelected(false);
+		}
+	}
+	
+	/** Update the line justification buttons given the value jl. */
+	public void updateLineJustBtns(JustificationLine jl) {
+		String s = (jl != null) ? jl.toString() : "null";
+		controller.println("Updating line just with: %s", s);
+		if (jl == JustificationLine.LEFT)
+			text_ln_just_left_btn.setSelected(true);
+		else if (jl == JustificationLine.CENTER)
+			text_ln_just_center_btn.setSelected(true);
+		else if (jl == JustificationLine.RIGHT)
+			text_ln_just_right_btn.setSelected(true);
+		else {
+			// null - deselect all
+			text_ln_just_left_btn.setSelected(false);
+			text_ln_just_center_btn.setSelected(false);
+			text_ln_just_right_btn.setSelected(false);
+		}
+	}
+	
+	/** Update the toolbar buttons/combo-box from the controller state. */
+	public void updateToolbar() {
+		// TODO font
+		
+		// TODO colors ?? (should we?)
+		
+		// page and line justification
+		updatePageJustBtns(controller.getActivePageJustification());
+		updateLineJustBtns(controller.getActiveLineJustification());
+	}
+	
+	/** Save the current toolbar button/combobox state into the given WHistory
+	 *  object (allows the toolbar state to be reset when undoing/redoing).
+	 */
+	public void saveToolbarState(WHistory wh) {
+		// TODO font combo-box
+		
+		// foreground and background color
 	}
 	
 	WMsgTextToolbar tb = this;

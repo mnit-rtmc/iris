@@ -455,6 +455,11 @@ public class WMsgEditorForm extends AbstractForm {
 		epanel.removeErrorPanel();
 	}
 	
+	/** Update the text toolbar */
+	public void updateTextToolbar() {
+		epanel.updateTextToolbar();
+	}
+	
 	/** Preview action */
 	private final IAction preview = new IAction("wysiwyg.editor.preview") {
 		@SuppressWarnings("synthetic-access")

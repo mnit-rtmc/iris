@@ -15,6 +15,8 @@
 
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
+import us.mn.state.dot.tms.DmsColor;
+
 /**
  * WHistory - WYSIWYG Message Editor History
  * 
@@ -32,14 +34,21 @@ package us.mn.state.dot.tms.client.wysiwyg.editor;
 public class WHistory {
 	
 	/** MULTI String containing message state */
-	protected String multiString;
+	private String multiString;
 	
 	/** Caret location (and selection size, if applicable) */
-	protected int caretIndx;
-	protected int selectionLength;
+	private int caretIndx;
+	private int selectionLength;
 	
 	/** Selected page for when pages are added/removed */
-	protected int selectedPageIndx;
+	private int selectedPageIndx;
+	
+	/** Current foreground/background color */
+	private DmsColor fgColor;
+	private DmsColor bgColor;
+	
+	/** Justification setting */
+	
 	
 	public WHistory(String ms, int ci, int sl) {
 		multiString = ms;
@@ -52,6 +61,16 @@ public class WHistory {
 		caretIndx = ci;
 		selectionLength = sl;
 		selectedPageIndx = spg;
+	}
+	
+	public WHistory(String ms, int ci, int sl, int spg, DmsColor fgc,
+			DmsColor bgc) {
+		multiString = ms;
+		caretIndx = ci;
+		selectionLength = sl;
+		selectedPageIndx = spg;
+		fgColor = fgc;
+		bgColor = bgc;
 	}
 	
 	public String getMultiString() {

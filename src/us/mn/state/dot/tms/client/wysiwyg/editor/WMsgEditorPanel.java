@@ -118,5 +118,10 @@ public class WMsgEditorPanel extends JPanel {
 			wysiwygPanel.disableRestoreButton();
 		}
 	}
+	
+	/** Update the text toolbar */
+	public void updateTextToolbar() {
+		wysiwygPanel.updateTextToolbar();
+	}
 }
 

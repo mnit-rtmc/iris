@@ -91,23 +91,23 @@ public class WMsgWysiwygPanel extends JPanel {
 	
 	/** Panel for font drop down, color pickers, text justification buttons */
 	final static private String TEXT_TOOLBAR = "Text Mode Toolbar";
-	private JPanel text_toolbar_pnl;
+	private WMsgTextToolbar text_toolbar_pnl;
 	
 	/** Panel for graphics toolbar */
 	final static private String GRAPHIC_TOOLBAR = "Graphic Mode Toolbar";
-	private JPanel graphic_toolbar_pnl;
+	private WMsgGraphicToolbar graphic_toolbar_pnl;
 	
 	/** Panel for color rectangle toolbar */
 	final static private String COLOR_RECTANGLE_TOOLBAR = "Color Rectangle Toolbar";
-	private JPanel colorrect_toolbar_pnl;
+	private WMsgColorRectangleToolbar colorrect_toolbar_pnl;
 	
 	/** Panel for graphics toolbar */
 	final static private String TEXT_RECTANGLE_TOOLBAR = "Text Rectangle Toolbar";
-	private JPanel textrect_toolbar_pnl;
+	private WMsgTextRectangleToolbar textrect_toolbar_pnl;
 	
 	/** Panel for graphics toolbar */
 	final static private String MULTI_TAG_TOOLBAR = "MULTI Tag Toolbar";
-	private JPanel multitag_toolbar_pnl;
+	private WMsgMultiTagToolbar multitag_toolbar_pnl;
 	
 	/** Sign pixel panel to display the current sign message page */
 //	private SignPixelPanel pixel_pnl;
@@ -221,6 +221,11 @@ public class WMsgWysiwygPanel extends JPanel {
 	/** Disable the restore button. Called when errors have been cleared. */
 	public void disableRestoreButton() {
 		restoreBtn.setEnabled(false);
+	}
+	
+	/** Update the text toolbar */
+	public void updateTextToolbar() {
+		text_toolbar_pnl.updateToolbar();
 	}
 	
 	/***** Button Actions *****/
