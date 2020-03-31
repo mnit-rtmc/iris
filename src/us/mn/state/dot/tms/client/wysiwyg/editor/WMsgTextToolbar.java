@@ -67,7 +67,7 @@ public class WMsgTextToolbar extends JPanel {
 	private JPanel text_vjust_btn_pnl;
 	private ButtonGroup text_pg_just_btn_grp;
 	private JToggleButton text_pg_just_top_btn;
-	private JToggleButton text_pg_just_center_btn;
+	private JToggleButton text_pg_just_middle_btn;
 	private JToggleButton text_pg_just_bottom_btn;
 	private JPanel text_hjust_btn_pnl;
 	private ButtonGroup text_hjust_btn_grp;
@@ -126,12 +126,12 @@ public class WMsgTextToolbar extends JPanel {
 		
 		// justification buttons
 		text_pg_just_btn_grp = new ButtonGroup();
-		text_pg_just_top_btn = new JToggleButton(text_vjust_top);
-		text_pg_just_center_btn = new JToggleButton(text_vjust_center);
-		text_pg_just_bottom_btn = new JToggleButton(text_vjust_bottom);
-		text_pg_just_center_btn.setSelected(true);
+		text_pg_just_top_btn = new JToggleButton(controller.pageJustifyTop);
+		text_pg_just_middle_btn = new JToggleButton(controller.pageJustifyMiddle);
+		text_pg_just_bottom_btn = new JToggleButton(controller.pageJustifyBottom);
+		text_pg_just_top_btn.setSelected(true);
 		text_pg_just_btn_grp.add(text_pg_just_top_btn);
-		text_pg_just_btn_grp.add(text_pg_just_center_btn);
+		text_pg_just_btn_grp.add(text_pg_just_middle_btn);
 		text_pg_just_btn_grp.add(text_pg_just_bottom_btn);
 		
 		// set icons for justification buttons
@@ -143,9 +143,9 @@ public class WMsgTextToolbar extends JPanel {
 		
 		ImageIcon text_vjust_center_icon = Icons.getIconByPropName(
 				"wysiwyg.epanel.text_vjust_center");
-		text_pg_just_center_btn.setIcon(text_vjust_center_icon);
-		text_pg_just_center_btn.setHideActionText(true);
-		text_pg_just_center_btn.setMargin(new Insets(0,0,0,0));
+		text_pg_just_middle_btn.setIcon(text_vjust_center_icon);
+		text_pg_just_middle_btn.setHideActionText(true);
+		text_pg_just_middle_btn.setMargin(new Insets(0,0,0,0));
 		
 		ImageIcon text_vjust_bottom_icon = Icons.getIconByPropName(
 				"wysiwyg.epanel.text_vjust_bottom");
@@ -157,7 +157,7 @@ public class WMsgTextToolbar extends JPanel {
 		text_vjust_btn_pnl.setLayout(
 				new BoxLayout(text_vjust_btn_pnl, BoxLayout.X_AXIS));
 		text_vjust_btn_pnl.add(text_pg_just_top_btn);
-		text_vjust_btn_pnl.add(text_pg_just_center_btn);
+		text_vjust_btn_pnl.add(text_pg_just_middle_btn);
 		text_vjust_btn_pnl.add(text_pg_just_bottom_btn);
 		add(text_vjust_btn_pnl);
 		
@@ -199,11 +199,6 @@ public class WMsgTextToolbar extends JPanel {
 		
 
 		// TODO temporary
-		text_pg_just_top_btn.setEnabled(false);
-		text_pg_just_center_btn.setEnabled(false);
-		text_pg_just_bottom_btn.setEnabled(false);
-		fg_color_btn.setEnabled(false);
-		bg_color_btn.setEnabled(false);
 		font_options.setEnabled(false);
 	}
 	
@@ -212,9 +207,9 @@ public class WMsgTextToolbar extends JPanel {
 	 *  parameter.
      */
 	public void setColor(Color c, String fgbg) {
-		if (fgbg.equalsIgnoreCase("foreground"))
+		if (fgbg.equalsIgnoreCase(WMsgColorChooser.FOREGROUND))
 			setForegroundColor(c);
-		else if (fgbg.equalsIgnoreCase("background"))
+		else if (fgbg.equalsIgnoreCase(WMsgColorChooser.BACKGROUND))
 			setBackgroundColor(c);
 	}
 	
@@ -246,10 +241,8 @@ public class WMsgTextToolbar extends JPanel {
 				throws Exception
 		{
 			String title = I18N.get("wysiwyg.epanel.fg_color_picker_title");
-			WMsgColorChooser ccForm = new WMsgColorChooser(
-					controller.getDesktop(), tb,
-					controller.getMultiConfig().getColorScheme(),
-					title, fgColor, "foreground");
+			WMsgColorChooser ccForm = new WMsgColorChooser(controller, tb,
+					title, fgColor, WMsgColorChooser.FOREGROUND);
 			SmartDesktop desktop = controller.getDesktop();
 			desktop.show(ccForm);
 		}
@@ -263,78 +256,10 @@ public class WMsgTextToolbar extends JPanel {
 				throws Exception
 		{
 			String title = I18N.get("wysiwyg.epanel.bg_color_picker_title");
-			WMsgColorChooser ccForm = new WMsgColorChooser(
-					controller.getDesktop(), tb,
-					controller.getMultiConfig().getColorScheme(),
-					title, fgColor, "background");
+			WMsgColorChooser ccForm = new WMsgColorChooser(controller, tb,
+					title, fgColor, WMsgColorChooser.BACKGROUND);
 			SmartDesktop desktop = controller.getDesktop();
 			desktop.show(ccForm);
-		}
-	};
-	
-	/** Text vertical justify top action */
-	private final IAction text_vjust_top =
-			new IAction("wysiwyg.epanel.text_vjust_top") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			System.out.println("Vertical Justify Top...");
-		}
-	};
-	
-	/** Text vertical justify center action */
-	private final IAction text_vjust_center =
-			new IAction("wysiwyg.epanel.text_vjust_center") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			System.out.println("Vertical Justify Center...");
-		}
-	};
-	
-	/** Text vertical justify bottom action */
-	private final IAction text_vjust_bottom =
-			new IAction("wysiwyg.epanel.text_vjust_bottom") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			System.out.println("Vertical Justify Bottom...");
-		}
-	};
-	
-	/** Text horizontal justify left action */
-	private final IAction text_hjust_left =
-			new IAction("wysiwyg.epanel.text_hjust_left") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			System.out.println("Horizontal Justify Left...");
-		}
-	};
-	
-	/** Text horizontal justify left action */
-	private final IAction text_hjust_center =
-			new IAction("wysiwyg.epanel.text_hjust_center") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			System.out.println("Horizontal Justify Center...");
-		}
-	};
-	
-	/** Text horizontal justify left action */
-	private final IAction text_hjust_right =
-			new IAction("wysiwyg.epanel.text_hjust_right") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception
-		{
-			System.out.println("Horizontal Justify Right...");
 		}
 	};
 }

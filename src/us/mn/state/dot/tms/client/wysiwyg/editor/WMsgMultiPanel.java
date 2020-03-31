@@ -102,7 +102,7 @@ public class WMsgMultiPanel extends JPanel {
 		{
 			// use the controller to update the rendering
 			multiText = text_box.getText();
-			controller.setMultiString(multiText);
+			controller.setMultiString(multiText, true);
 		}
 	};
 	

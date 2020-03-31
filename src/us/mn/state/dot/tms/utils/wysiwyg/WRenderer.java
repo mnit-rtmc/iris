@@ -864,7 +864,7 @@ public class WRenderer {
 	 * @param texttoobig
 	 */
 	public void renderError(MultiSyntaxError mse) {
-		println("RENDERERROR: "+mse);
+//		println("RENDERERROR: "+mse);
 		
 		// pass the error to the error manager
 		saveError(mse);
@@ -876,7 +876,7 @@ public class WRenderer {
 	 */
 	private void renderError(MultiSyntaxError mse, WToken tok) {
 		tok.addErr(mse);
-		println("RENDERERROR: "+mse);
+//		println("RENDERERROR: "+mse);
 		saveError(mse);
 	}
 

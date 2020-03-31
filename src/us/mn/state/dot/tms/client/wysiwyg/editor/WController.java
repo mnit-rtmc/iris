@@ -15,12 +15,11 @@
 
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,11 +29,7 @@ import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
-import javax.swing.JList;
-import javax.swing.ListCellRenderer;
-import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
@@ -52,29 +47,30 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
-import us.mn.state.dot.tms.client.wysiwyg.editor.action.WDeleteToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WFontCache;
 import us.mn.state.dot.tms.utils.wysiwyg.WGraphicCache;
 import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
 import us.mn.state.dot.tms.utils.wysiwyg.WEditorErrorManager;
-import us.mn.state.dot.tms.utils.wysiwyg.WState;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtColorBackground;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtColorForeground;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtJustLine;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtJustPage;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtPageBackground;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextChar;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Multi.JustificationLine;
+import us.mn.state.dot.tms.utils.Multi.JustificationPage;
 import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.MultiString;
-import us.mn.state.dot.tms.utils.MultiSyntaxError;
 
 /**
  * WYSIWYG DMS Message Editor Controller for handling exchanges between the
@@ -85,6 +81,10 @@ import us.mn.state.dot.tms.utils.MultiSyntaxError;
 @SuppressWarnings("serial")
 
 public class WController {
+
+	/** Flag to enable/disable verbose logging output */
+	private final static boolean DEBUG = true; 
+	
 	/** Editing modes */
 	private final static String MODE_TEXT = "text";
 	private final static String MODE_GRAPHIC = "graphic";
@@ -162,6 +162,8 @@ public class WController {
 	/** Current Colors */
 	private DmsColor fgColor;
 	private DmsColor bgColor;
+	private DmsColor fgColorDefault;
+	private DmsColor bgColorDefault;
 	
 	/** Page list */
 	private WPageList pageList;
@@ -205,6 +207,24 @@ public class WController {
 		setSignGroup(g);
 		setQuickMessage(q);
 		init(e);
+	}
+	
+	/** Print the message to stdout */
+	public void println(String msg) {
+		System.out.println(msg);
+	}
+	
+	/** Print a String.formatted message to stdout */
+	public void println(String fmt, Object... args) {
+		if (DEBUG)
+			println(String.format(fmt, args));
+	}
+	
+	/** Print the tokens before, selected, and after the caret */
+	public void printCaretTokens() {
+		println("Before: %s", tokensBefore.toString());
+		println("Selected: %s", tokensSelected.toString());
+		println("After: %s", tokensAfter.toString());
 	}
 	
 	/** Perform some initialization on the controller. Sets the editor form
@@ -282,7 +302,7 @@ public class WController {
 			multiStringText = qm.getMulti();
 		else
 			multiStringText = "";
-//		System.out.println("From QuickMessage: " + multiStringText);
+//		println("From QuickMessage: " + multiStringText);
 		
 		update();
 	}
@@ -297,8 +317,7 @@ public class WController {
 		int b = e.getButton();
 		int x = e.getX();
 		int y = e.getY();
-		System.out.println(String.format(
-				"Mouse clicked at (%d, %d) ...", x, y));
+		println("Mouse clicked at (%d, %d) ...", x, y);
 		update();
 		WToken tok = findClosestToken(x, y);
 		
@@ -338,8 +357,7 @@ public class WController {
 			
 			// TODO hook this into token finding and mouse cursor changing
 			
-//		System.out.println(String.format(
-//				"Mouse moved to (%d, %d) ...", x, y));
+//		println("Mouse moved to (%d, %d) ...", x, y);
 //		}
 		// get focus for this component when someone clicks on it
 		signPanel.requestFocusInWindow();
@@ -413,9 +431,8 @@ public class WController {
 		// (handleClick SHOULD take care of it...)
 		if ((x != lastPressX && y != lastPressY)
 				&& (lastPressX != -1 && lastPressY != -1)) {
-//			System.out.println(String.format(
-//					"Mouse dragged from (%d, %d) to (%d, %d) ...",
-//					lastPressX, lastPressY, x, y));
+//			println("Mouse dragged from (%d, %d) to (%d, %d) ...",
+//					lastPressX, lastPressY, x, y);
 		}
 		
 		// reset the drag handler
@@ -451,7 +468,7 @@ public class WController {
 	private boolean rightHalf(int x, WToken tok) {
 		WRaster wr = selectedPage.getRaster();
 		int sx = wr.cvtWysiwygToSignX(x);
-		return sx > tok.getCentroidX();
+		return sx >= tok.getCentroidX();
 	}
 	
 	/** Initialize the caret. If there is text in the message, it is placed at
@@ -479,9 +496,8 @@ public class WController {
 		tokensBefore = pgTokens.slice(0, si);
 		tokensAfter = pgTokens.slice(ei, pgTokens.size());
 		tokensSelected = pgTokens.slice(si, ei);
-//		System.out.println(String.format("Before: %s", tokensBefore.toString()));
-//		System.out.println(String.format("Selected: %s", tokensSelected.toString()));
-//		System.out.println(String.format("After: %s", tokensAfter.toString()));
+		
+//		printCaretTokens();
 		
 		// tell the image panel what the selection is
 		signPanel.setTextSelection(tokensSelected);
@@ -516,7 +532,7 @@ public class WController {
 	public void updateCaret() {
 		WTokenList pgTokens = selectedPage.getTokenList();
 		if (caretIndx != CARET_EOP) {
-//			System.out.println(String.format("Caret at %d", caretIndx));
+			println("Caret at %d", caretIndx);
 			
 			// slice the list at the token
 			tokensBefore = pgTokens.slice(0, caretIndx);
@@ -530,7 +546,7 @@ public class WController {
 				signPanel.setCaretLocation(tok);
 			}
 		} else {
-//			System.out.println("Caret at end");
+//			println("Caret at end");
 			tokensBefore = pgTokens;
 			tokensAfter = new WTokenList();
 			int x = selectedPage.getEOPX();
@@ -541,6 +557,8 @@ public class WController {
 		// either way reset the selection
 		tokensSelected.clear();
 		signPanel.clearTextSelection();
+		
+		printCaretTokens();
 	}
 	
 	/** Get the token associated with the current caret position. This is
@@ -663,8 +681,8 @@ public class WController {
 					// get the last token and it's index in the page's list
 					WToken tok = tokensBefore.getLast();
 					int i = selectedPage.getTokenIndex(tok);
-//					System.out.println(String.format("Deleting token '%s' at index %d",
-//							tok.toString(), i));
+//					println("Deleting token '%s' at index %d",
+//							tok.toString(), i);
 					
 					// save the current MULTI string then remove the token
 					saveState();
@@ -699,8 +717,8 @@ public class WController {
 					// get the last token and it's index in the page's list
 					WToken tok = tokensAfter.remove(0);
 					int i = selectedPage.getTokenIndex(tok);
-//					System.out.println(String.format("Deleting token '%s' at index %d",
-//							tok.toString(), i));
+//					println("Deleting token '%s' at index %d",
+//							tok.toString(), i);
 					
 					// if we're going to delete the last token, put the caret
 					// at the end of the message
@@ -736,7 +754,7 @@ public class WController {
 		// now find and delete each token, then clear the selection and update
 		for (WToken tok: tokensSelected) {
 			int i = selectedPage.getTokenIndex(tok);
-			System.out.println(String.format("Removing token '%s' from %d", tok.toString(), i));
+			println("Removing token '%s' from %d", tok.toString(), i);
 			selectedPage.removeToken(i);
 		}
 		tokensSelected.clear();
@@ -765,7 +783,7 @@ public class WController {
 	
 	/** Add a single ASCII character to the message at the caret location. */
 	public void typeChar(char c) {
-		System.out.println(String.format("Typed: '%c'", c));
+		println("Typed: '%c'", c);
 		
 		// TODO handle overwrite mode somehow (default is insert mode)
 		
@@ -866,9 +884,9 @@ public class WController {
 	public Action lineJustifyLeft = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
 			// create the appropriate WtJustLine token then pass it to
-			// addJustLineToken
+			// addTextOptionToken
 			WtJustLine jlTok = new WtJustLine(JustificationLine.LEFT);
-			addJustLineToken(jlTok);
+			addTextOptionToken(jlTok);
 		}
 	};
 
@@ -876,9 +894,9 @@ public class WController {
 	public Action lineJustifyCenter = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
 			// create the appropriate WtJustLine token then pass it to
-			// addJustLineToken
+			// addTextOptionToken
 			WtJustLine jlTok = new WtJustLine(JustificationLine.CENTER);
-			addJustLineToken(jlTok);
+			addTextOptionToken(jlTok);
 		}
 	};
 	
@@ -886,34 +904,110 @@ public class WController {
 	public Action lineJustifyRight = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
 			// create the appropriate WtJustLine token then pass it to
-			// addJustLineToken
+			// addTextOptionToken
 			WtJustLine jlTok = new WtJustLine(JustificationLine.RIGHT);
-			addJustLineToken(jlTok);
+			addTextOptionToken(jlTok);
 		}
 	};
 	
-	/** Add the line justify token provided at the current caret location. If
-	 *  the token immediately preceding is also a line justify token it is
-	 *  replaced, otherwise it is added.
-	 */
-	private void addJustLineToken(WtJustLine jlTok) {
+	/** Add a page justify top token at the current location. */
+	public Action pageJustifyTop = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// create the appropriate WtJustPage token then pass it to
+			// addTextOptionToken
+			WtJustPage jpTok = new WtJustPage(JustificationPage.TOP);
+			addTextOptionToken(jpTok);
+		}
+	};
+	
+	/** Add a page justify middle token at the current location. */
+	public Action pageJustifyMiddle = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// create the appropriate WtJustLine token then pass it to
+			// addTextOptionToken
+			WtJustPage jpTok = new WtJustPage(JustificationPage.MIDDLE);
+			addTextOptionToken(jpTok);
+		}
+	};
+	
+	/** Add a page justify bottom token at the current location. */
+	public Action pageJustifyBottom = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// create the appropriate WtJustLine token then pass it to
+			// addTextOptionToken
+			WtJustPage jpTok = new WtJustPage(JustificationPage.BOTTOM);
+			addTextOptionToken(jpTok);
+		}
+	};
+	
+	/** Add a foreground color token at the current location. */
+	public void setForegroundColor(DmsColor c) {
+		// TODO do something with default colors?
+		
+		// set the foreground color
+		fgColor = c;
+		
+		// create the appropriate WtColorForeground token then add it
+		WtColorForeground cfTok = new WtColorForeground(
+				c.red, c.green, c.blue);
+		addTextOptionToken(cfTok);
+	}
+	
+	/** Add a background color token at the current location. */
+	public void setBackgroundColor(DmsColor c) {
+		// TODO do something with default colors?
+		
+		// set the background color
+		bgColor = c;
+		
+		// create the appropriate WtColorForeground token then add it
+		WtPageBackground cbTok = new WtPageBackground(
+				c.red, c.green, c.blue);
+		addTextOptionToken(cbTok);
+	}
+	
+	/** Add a text option token (justification, font, color) at the current
+	 *  caret location. If the token(s) immediately preceding is/are the same
+	 *  type of text option, it/they are replaced by the specified token
+	 *  (otherwise it is just added).
+     */
+	private void addTextOptionToken(WToken toTok) {
 		// save state here so we can undo this whole process
 		saveState();
 		
-		// check the type of the preceding token
-		if (tokensBefore.size() > 0) {
+		// check the type of the preceding token to remove all immediately-
+		// tokens of the same type
+		while (tokensBefore.size() > 0 &&
+				tokensBefore.getLast().isType(toTok.getType())) {
 			WToken tok = tokensBefore.getLast();
+			println("Last token: '%s'", tok.toString());
 			
-			if (tok.getClass() == WtJustLine.class) {
-				// if it's a line justify, delete it (but don't create a
-				// separate undo step)
-				int i = selectedPage.getTokenIndex(tok);
-				selectedPage.removeToken(i);
-			}
+			// if it's the same, delete it (but don't create a separate undo
+			// step)
+			int i = selectedPage.getTokenIndex(tok);
+			selectedPage.removeToken(i);
+			
+			// move the caret to account for the removal
+			moveCaretLeft.actionPerformed(null);
+		}
+		
+		// do the same thing, but forwards
+		while (tokensAfter.size() > 0 &&
+				tokensAfter.get(0).isType(toTok.getType())) {
+			WToken tok = tokensAfter.get(0);
+			println("Last token: '%s'", tok.toString());
+			
+			// if it's the same, delete it (but don't create a separate undo
+			// step)
+			int i = selectedPage.getTokenIndex(tok);
+			selectedPage.removeToken(i);
+			
+			// move the caret to account for the removal
+			moveCaretRight.actionPerformed(null);
 		}
 		
 		// now add the token
-		addToken(jlTok);
+		addToken(toTok);
 	}
 	
 	/** Add the token to the selected page at the caret index */
@@ -932,13 +1026,13 @@ public class WController {
 		
 		// TODO we may change this into something else (checking a parameter)
 		// TODO we need to be more careful than this...
-		if (tok.isType(WTokenType.textChar)) {
-			if (caretIndx == CARET_EOP)
-				moveCaret(CARET_EOP);
-			else
-				moveCaret(caretIndx+1);
-			
-		}
+//		if (tok.isType(WTokenType.textChar)) {
+		if (caretIndx == CARET_EOP)
+			moveCaret(CARET_EOP);
+		else
+			moveCaret(caretIndx+1);
+		
+//		}
 	}
 	
 	/** Save the current state on the stack for undoing. Resets the redo stack. */
@@ -955,7 +1049,7 @@ public class WController {
 	/** Undo the last message change by reverting to the previous MULTI string. */
 	public Action undo = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-//			System.out.println("Starting undo...");
+//			println("Starting undo...");
 			if (!undoStack.isEmpty()) {
 				// save the current state on the redo stack so the action can
 				// be redone
@@ -973,7 +1067,7 @@ public class WController {
 	/** Redo the last message change by reverting to the previous MULTI string. */
 	public Action redo = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-//			System.out.println("Starting redo...");
+//			println("Starting redo...");
 			if (!redoStack.isEmpty()) {
 				// put the current state back on the undo stack so the action can
 				// be undone
@@ -990,7 +1084,7 @@ public class WController {
 	
 	/** Apply the historical state to the controller. */
 	private void applyHistory(WHistory wh) {
-		setMultiString(wh.getMultiString());
+		setMultiString(wh.getMultiString(), false);
 		
 		// TODO handle selection and selected page
 		
@@ -1063,8 +1157,7 @@ public class WController {
 		// update the index of the last good state (the current size of the
 		// undo stack)
 		lastGoodState = undoStack.size();
-		System.out.println(String.format("No errors at %d",
-				lastGoodState));
+//		println("No errors at %d", lastGoodState);
 	}
 	
 	/** An action to restore the last good state of the editor (i.e. the last
@@ -1079,10 +1172,9 @@ public class WController {
 	 */
 	public IAction restoreLastGoodState = new IAction("wysiwyg.epanel.restore") {
 		public void doActionPerformed(ActionEvent e) {
-			System.out.println("Restoring");
+			println("Restoring");
 			if (lastGoodState >= 0) {
-				System.out.println(String.format("Last good state: %d",
-						lastGoodState));
+				println("Last good state: %d", lastGoodState);
 				while (undoStack.size() > lastGoodState) {
 					undo.actionPerformed(e);
 				}
@@ -1093,16 +1185,16 @@ public class WController {
 	/** Render the message using the current MULTI String and MultiConfig */
 	private void renderMsg() {
 		// update the WMessage object and re-render if we have a MultiConfig
-//		System.out.println("In renderMsg: " + multiStringText);
+//		println("In renderMsg: " + multiStringText);
 		if (wmsg == null) {
 			if  (multiStringText != null)
-//			System.out.println("Making wmsg with: " + multiStringText);
+//			println("Making wmsg with: " + multiStringText);
 				wmsg = new WMessage(multiStringText);
 		} else {
 			// if we already have a WMessage object, use it to update the
 			// MULTI string then use that to re-render
 			multiStringText = wmsg.toString();
-//			System.out.println("Remaking wmsg with: " + multiStringText);
+//			println("Remaking wmsg with: " + multiStringText);
 			wmsg = new WMessage(multiStringText);
 		}
 //		System.out.println(multiStringText);
@@ -1115,8 +1207,8 @@ public class WController {
 		
 		// check for errors from the renderer
 		if (errMan.hasErrors()) {
-			System.out.println("Renderer errors!");
-			errMan.printErrors();
+//			println("Renderer errors!");
+//			errMan.printErrors();
 			
 			// show or update the dynamic error panel to tell the user what's
 			// wrong
@@ -1180,8 +1272,12 @@ public class WController {
 		editor.setWindowTitle(qm);
 	}
 	
-	/** Update the controller with a MULTI string */
-	public void setMultiString(String ms) {
+	/** Update the controller with a MULTI string (this action can be undone) */
+	public void setMultiString(String ms, boolean undoable) {
+		if (undoable)
+			// save state to allow undoing
+			saveState();
+		
 		multiStringText = ms;
 		wmsg.parseMulti(multiStringText);
 		update();
@@ -1189,7 +1285,7 @@ public class WController {
 	
 	/** Update everything that needs updating */
 	public void update() {
-//		System.out.println("In update: " + multiStringText);
+//		println("In update: " + multiStringText);
 		renderMsg();
 		updateMultiPanel();
 		updatePageListModel();
@@ -1419,15 +1515,9 @@ public class WController {
 		if (multiConfig != null) {
 			fgColor = multiConfig.getDefaultFG();
 			bgColor = multiConfig.getDefaultBG();
+			fgColorDefault = fgColor;
+			bgColorDefault = bgColor;
 		}
-	}
-	
-	public void setForegroundColor(DmsColor c) {
-		fgColor = c;
-	}
-		
-	public void setBackgroundColor(DmsColor c) {
-		bgColor = c;
 	}
 	
 	public DmsColor getForegroundColor() {

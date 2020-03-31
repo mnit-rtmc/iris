@@ -86,6 +86,9 @@ import us.mn.state.dot.tms.utils.MultiString;
 
 public class WMsgColorChooser extends AbstractForm {
 	
+	/** Handle to the controller managing everything */
+	private WController controller;
+	
 	/** SmartDesktop handle for closing the form */
 	private SmartDesktop desktop;
 	
@@ -100,6 +103,8 @@ public class WMsgColorChooser extends AbstractForm {
 	
 	/** "Mode" of color chooser so we know whether we're editing the fore- or
 	 *  background color */
+	public final static String FOREGROUND="foreground";
+	public final static String BACKGROUND="background";
 	private String fgbgMode;
 	
 	/** Color chooser components - which one used changes depending on the
@@ -115,13 +120,14 @@ public class WMsgColorChooser extends AbstractForm {
 	private JButton ok_btn;
 	private JButton cancel_btn;
 	
-	public WMsgColorChooser(SmartDesktop d, WMsgTextToolbar tb,
-			ColorScheme cs, String title, Color col, String fgbg) {
+	public WMsgColorChooser(WController c, WMsgTextToolbar tb, String title,
+			Color col, String fgbg) {
 		super(title, true);
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		desktop = d;
+		controller = c;
+		desktop = controller.getDesktop();
 		toolbar = tb;
-		colorScheme = cs;
+		colorScheme = controller.getMultiConfig().getColorScheme();
 		color = col;
 		fgbgMode = fgbg;
 		
@@ -231,8 +237,6 @@ public class WMsgColorChooser extends AbstractForm {
 				}
 			} else if (colorScheme == ColorScheme.MONOCHROME_8_BIT) {
 				int mValue = monochrome8BitSlider.getValue();
-				
-				// TODO what do we actually do with this???
 			}
 			
 			if (color != null)

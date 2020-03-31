@@ -185,6 +185,11 @@ abstract public class WToken {
 		return errList.isEmpty();
 	}
 	
+	/** Return the token type */
+	public WTokenType getType() {
+		return tokType;
+	}
+	
 	/** Determine if this token is the given type. */
 	public boolean isType(WTokenType type) {
 		return tokType == type;
