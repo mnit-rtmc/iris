@@ -160,8 +160,12 @@ public class WPage {
 		return getLines().size();
 	}
 	
-	/** Return the closest text token to the point sx, sy (sign coordinates) */
-	public WToken findClosestToken(int sx, int sy) {
+	/** Return the closest text token to the point sx, sy (sign coordinates).
+	 *  If includeNonPrint is false, only printable text characters (including
+	 *  spaces and newlines) are included, otherwise all tokens that aren't
+	 *  text/color rectangles or graphics are included.
+	 */
+	public WToken findClosestToken(int sx, int sy, boolean includeNonPrint) {
 		// first look through all the tokens on the page to find any that were
 		// clicked directly on
 		WToken tok = null;
@@ -169,7 +173,8 @@ public class WPage {
 		boolean caretAtEnd = false;
 		while (it.hasNext()) {
 			WToken t = it.next();
-			if (t.isInside(sx, sy) && t.isText()) {
+			if (t.isInside(sx, sy) && t.isText()
+					&& (includeNonPrint || t.isPrintableText())) {
 				tok = t;
 				break;
 			}
@@ -187,7 +192,8 @@ public class WPage {
 				double d = t.distance(sx, sy);
 				
 				// if this token is closer and on the same line then take it
-				if (d < minDist && t.sameLine(sy) && t.isText()) {
+				if (d < minDist && t.sameLine(sy) && t.isText()
+						&& (includeNonPrint || t.isPrintableText())) {
 					tok = t;
 					minDist = d;
 				}

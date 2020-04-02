@@ -98,7 +98,14 @@ abstract public class WToken {
 	public boolean isText() {
 		return true;
 	}
-
+	
+	/** Is this token a printable text character that is part of the message
+	 *  text? This includes text characters (blank or not) and newlines.
+	 */
+	public boolean isPrintableText() {
+		return false;
+	}
+	
 	/** Check if the point (x, y) is inside this token. */
 	public boolean isInside(int x, int y) {
 		// calculate right edge and bottom edge coordinates
@@ -430,6 +437,16 @@ abstract public class WToken {
 		return String.format("{%4d, %4d, %4d, %4d} %s",
 				coordX, coordY, coordW, coordH, tokStr);
 //		return "x:"+coordX+", y:"+coordY+", w:"+coordW+", h:"+coordH+", tok:"+tokStr;
+	}
+	
+	/** Return a string providing a human-readable description of the token
+	 *  including the token/tag type and tag value. Subclasses should override
+	 *  this method to present type-specific values.
+	 */
+	public String getDescription() {
+		String tag = isTag() ? " tag" : "";
+		return String.format("%s%s: '%s'",
+				getType().getLabel(), tag, toString());
 	}
 	
 	/** Update internal copy of token string.

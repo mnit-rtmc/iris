@@ -17,47 +17,20 @@ package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Graphics2D;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
 import java.awt.Insets;
-import java.awt.image.BufferedImage;
 import java.awt.event.ActionEvent;
-import java.awt.geom.AffineTransform;
 
 import javax.swing.JPanel;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.ComboBoxModel;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DmsSignGroup;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
-import us.mn.state.dot.tms.Font;
-import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.dms.SignFacePanel;
-import us.mn.state.dot.tms.client.dms.SignPixelPanel;
-import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.IComboBoxModel;
-import us.mn.state.dot.tms.client.widget.Icons;
-import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 
@@ -82,6 +55,13 @@ public class WMsgWysiwygPanel extends JPanel {
 	private JToggleButton colorrect_mode_btn;
 	private JToggleButton textrect_mode_btn;
 	private JToggleButton multitag_mode_btn;
+	
+	/** Non-text tag handling button for working with non-text tags */
+	private JToggleButton nonTextTagBtn;
+	
+	/** Also a label for displaying some info about non-text tags */
+	private JLabel nonTextTagInfo;
+	private JPanel nonTextTagInfoPnl;
 	
 	/** Restore button, for restoring the most recent non-error state */
 	private JButton restoreBtn;
@@ -144,10 +124,23 @@ public class WMsgWysiwygPanel extends JPanel {
 		mode_btn_pnl.add(textrect_mode_btn);
 		mode_btn_pnl.add(multitag_mode_btn);
 		
-		// add a separator, then another button - this will be for restoring
-		// a good state when errors are encountered (disabled by default)
+		// add a separator, then a button for enabling/disabling of direct
+		// handling of non-text tags (¶)
+		nonTextTagBtn = new JToggleButton(controller.toggleNonTextTagMode);
+		nonTextTagBtn.setText("¶");
+		nonTextTagBtn.setFont(
+				new java.awt.Font("Arial", java.awt.Font.PLAIN, 18));
+		nonTextTagBtn.setToolTipText(
+				I18N.get("wysiwyg.epanel.non_text_tag_tooltip"));
+		nonTextTagBtn.setMargin(new Insets(0,5,0,5));
+		mode_btn_pnl.add(Box.createHorizontalStrut(40));
+		mode_btn_pnl.add(nonTextTagBtn);
+		
+		// add another separator, then another button - this will be for
+		// restoring a good state when errors are encountered (disabled by
+		// default)
 		restoreBtn = new JButton(controller.restoreLastGoodState);
-		mode_btn_pnl.add(Box.createHorizontalStrut(100));
+		mode_btn_pnl.add(Box.createHorizontalStrut(40));
 		mode_btn_pnl.add(restoreBtn);
 		disableRestoreButton();
 		add(mode_btn_pnl);
@@ -188,9 +181,15 @@ public class WMsgWysiwygPanel extends JPanel {
 //		pixel_pnl = new SignPixelPanel(250, 550);
 //		controller.setPixelPanel(pixel_pnl);
 //		add(pixel_pnl);
-		signPanel = new WImagePanel(650, 350);
+		signPanel = new WImagePanel(650, 300);
 		add(signPanel);
 		controller.setSignPanel(signPanel);
+		
+		// also add a JLabel for displaying non-text tag info
+		nonTextTagInfo = new JLabel();
+		nonTextTagInfoPnl = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		nonTextTagInfoPnl.add(nonTextTagInfo);
+		add(nonTextTagInfoPnl);
 		
 		// mouse input adapter for handling mouse events
 		WMsgMouseInputAdapter mouseHandler = new WMsgMouseInputAdapter(controller);
@@ -226,6 +225,18 @@ public class WMsgWysiwygPanel extends JPanel {
 	/** Update the text toolbar */
 	public void updateTextToolbar() {
 		text_toolbar_pnl.updateToolbar();
+	}
+	
+	/** Update the non-text tag info label, optionally including a color icon
+	 *  (if c is null, no color is shown).
+	 */
+	public void updateNonTextTagInfo(String s, Color c) {
+		if (c != null)
+			nonTextTagInfo.setIcon(WMsgColorChooser.createColorIcon(c, 16, 16));
+		else
+			nonTextTagInfo.setIcon(null);
+		nonTextTagInfo.setText(s);
+		repaint();
 	}
 	
 	/***** Button Actions *****/

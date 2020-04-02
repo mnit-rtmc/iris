@@ -28,10 +28,10 @@ public enum WTokenType {
 	// {Bit numbers match bits in dmsSupportedMultiTags.}
 
 	// [cb] [cbN]
-	colorBackground(      0, "message background color (deprecated)"),
+	colorBackground(      0, "Message background color (deprecated)"),
 
 	// [cf] [cfN] [cfR,G,B]
-	colorForeground(      1, "foreground color"),
+	colorForeground(      1, "Foreground color"),
 
 //	// [fltXoY] [floYtX] (not supported by current version of IRIS)
 //	flashing(             2, "Flashing"),
@@ -156,13 +156,13 @@ public enum WTokenType {
 	//=== Special WYSIWYG-editor tokens ===
 
 	// one character in a span of text
-	textChar(                "Text Char"),
+	textChar(                "Text Character"),
 	
 	//-------------------------------------
 	//=== unsupported tag ===
 
 	// something we don't recognize that looks like a MULTI tag
-	unsupportedTag,      
+	unsupportedTag(          "Unsupported tag"),
 	;
 
 	//-----------------------------------------------------

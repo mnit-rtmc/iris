@@ -84,4 +84,9 @@ public class WtJustPage extends WToken {
 		if (jp != null)
 			sb.append(jp.ordinal());
 	}
+	
+	public String getDescription() {
+		return String.format("%s tag: %s",
+				getType().getLabel(), getJustification().toString());
+	}
 }

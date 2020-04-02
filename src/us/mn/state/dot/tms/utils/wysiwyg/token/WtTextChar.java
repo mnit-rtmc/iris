@@ -101,6 +101,11 @@ public class WtTextChar extends WToken {
 		return false;
 	}
 	
+	@Override
+	public boolean isPrintableText() {
+		return true;
+	}
+	
 	/** Update internal copy of token string.
 	 * (Overridden here because WtTextChar
 	 *  has no MULTI-tag prefix or suffix.) */

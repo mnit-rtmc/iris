@@ -123,5 +123,12 @@ public class WMsgEditorPanel extends JPanel {
 	public void updateTextToolbar() {
 		wysiwygPanel.updateTextToolbar();
 	}
+	
+	/** Update the non-text tag info label, optionally including a color icon
+	 *  (if c is null, no color is shown).
+	 */
+	public void updateNonTextTagInfo(String s, Color c) {
+		wysiwygPanel.updateNonTextTagInfo(s, c);
+	}
 }
 

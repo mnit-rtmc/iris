@@ -15,6 +15,7 @@
 
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -458,6 +459,13 @@ public class WMsgEditorForm extends AbstractForm {
 	/** Update the text toolbar */
 	public void updateTextToolbar() {
 		epanel.updateTextToolbar();
+	}
+	
+	/** Update the non-text tag info label, optionally including a color icon
+	 *  (if c is null, no color is shown).
+	 */
+	public void updateNonTextTagInfo(String s, Color c) {
+		epanel.updateNonTextTagInfo(s, c);
 	}
 	
 	/** Preview action */

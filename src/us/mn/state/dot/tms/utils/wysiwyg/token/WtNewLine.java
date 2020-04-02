@@ -40,6 +40,11 @@ public class WtNewLine extends WToken {
 		updateString();
 	}
 
+	@Override
+	public boolean isPrintableText() {
+		return true;
+	}
+	
 	/** Get line spacing.
 	 * null = use default font line-spacing. */
 	public Integer getLineSpacing() {

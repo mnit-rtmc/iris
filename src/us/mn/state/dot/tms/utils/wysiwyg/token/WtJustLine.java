@@ -91,4 +91,9 @@ public class WtJustLine extends WToken {
 	public boolean isNormalizeLine() {
 		return true;
 	}
+	
+	public String getDescription() {
+		return String.format("%s tag: %s",
+				getType().getLabel(), getJustification().toString());
+	}
 }

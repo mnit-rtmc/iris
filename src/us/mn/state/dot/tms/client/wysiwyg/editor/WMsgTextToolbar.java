@@ -16,25 +16,23 @@
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.FlowLayout;
 import java.awt.Insets;
-import java.awt.image.BufferedImage;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.ComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JToggleButton;
 
 import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Font;
-import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.Icons;
@@ -57,7 +55,7 @@ public class WMsgTextToolbar extends JPanel {
 	private WController controller;
 	
 	/** Font option menu */
-	private JComboBox<Font> font_options;
+	private JComboBox<Font> fontOptions;
 	
 	/** Color Pickers */
 	private JButton fg_color_btn;
@@ -85,18 +83,12 @@ public class WMsgTextToolbar extends JPanel {
 		setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
 		// fonts
-		font_options = new JComboBox<Font>();
-		font_options.setAction(new IAction("font") {
-			protected void doActionPerformed(ActionEvent e) {
-				controller.setCurrentFont(
-					(Font) font_options.getSelectedItem());
-			}
-		});
-		
-		font_options.setModel(
+		fontOptions = new JComboBox<Font>();		
+		fontOptions.setModel(
 				new IComboBoxModel<Font>(controller.getFontModel()));
-		font_options.setSelectedItem(controller.getCurrentFont());
-		add(font_options);
+		fontOptions.setSelectedItem(controller.getDefaultFont());
+		fontOptions.addActionListener(setFont);
+		add(fontOptions);
 		
 		// color pickers
 		fg_color_btn = new JButton(open_fg_color_picker);
@@ -200,6 +192,13 @@ public class WMsgTextToolbar extends JPanel {
 		add(text_hjust_btn_pnl);
 	}
 	
+	/** ActionListener to set the current font */
+	private ActionListener setFont = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			controller.setFont((Font) fontOptions.getSelectedItem());
+		}
+	};
+	
 	/** Set the foreground or background color to c. The color to set is
 	 *  specified by passing "foreground" or "background" in the fgbg 
 	 *  parameter.
@@ -243,10 +242,36 @@ public class WMsgTextToolbar extends JPanel {
 		bg_color_btn.setIcon(WMsgColorChooser.createColorIcon(bgColor, 16, 16));
 	}
 	
+	/** Update the font combo-box given the font number value fNum. */
+	public void updateFontMenu(Integer fNum) {
+//		String s = (fNum != null) ? fNum.toString() : "null";
+//		controller.println("Updating font with: %s", s);
+		// first disable the action listener on the combo-box to avoid
+		// triggering an event when we change the value
+		fontOptions.removeActionListener(setFont);
+		
+		if (fNum != null) {
+			// if we got a non-null value, find it in the list
+			ComboBoxModel<Font> fontModel = fontOptions.getModel();
+			for (int i = 0; i < fontModel.getSize(); ++i) {
+				Font f = fontModel.getElementAt(i);
+				if (f != null && f.getNumber() == fNum) {
+					fontOptions.setSelectedIndex(i);
+					break;
+				}
+			}
+		} else
+			// if we didn't get a font, go to no selection
+			fontOptions.setSelectedIndex(0);
+		
+		// reactivate the listener
+		fontOptions.addActionListener(setFont);
+	}
+	
 	/** Update the page justification buttons given the value jp. */
 	public void updatePageJustBtns(JustificationPage jp) {
-		String s = (jp != null) ? jp.toString() : "null";
-		controller.println("Updating page just with: %s", s);
+//		String s = (jp != null) ? jp.toString() : "null";
+//		controller.println("Updating page just with: %s", s);
 		if (jp == JustificationPage.TOP)
 			text_pg_just_top_btn.setSelected(true);
 		else if (jp == JustificationPage.MIDDLE)
@@ -263,8 +288,8 @@ public class WMsgTextToolbar extends JPanel {
 	
 	/** Update the line justification buttons given the value jl. */
 	public void updateLineJustBtns(JustificationLine jl) {
-		String s = (jl != null) ? jl.toString() : "null";
-		controller.println("Updating line just with: %s", s);
+//		String s = (jl != null) ? jl.toString() : "null";
+//		controller.println("Updating line just with: %s", s);
 		if (jl == JustificationLine.LEFT)
 			text_ln_just_left_btn.setSelected(true);
 		else if (jl == JustificationLine.CENTER)
@@ -281,7 +306,8 @@ public class WMsgTextToolbar extends JPanel {
 	
 	/** Update the toolbar buttons/combo-box from the controller state. */
 	public void updateToolbar() {
-		// TODO font
+		// font
+		updateFontMenu(controller.getActiveFont());
 		
 		// TODO colors ?? (should we?)
 		

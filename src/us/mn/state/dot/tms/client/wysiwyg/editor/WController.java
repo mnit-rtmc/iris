@@ -62,6 +62,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtColorBackground;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtColorForeground;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtFont;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtJustLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtJustPage;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
@@ -146,6 +147,12 @@ public class WController {
 //	private boolean caretAtEnd = false;
 	public final static int CARET_EOP = -1;
 	
+	/** Toggle for how non-text tags are handled. If false (default), non-text
+	 *  tags are skipped, otherwise they can be manipulated through caret
+	 *  navigation and a status bar below the sign panel.
+	 */
+	private boolean stepNonTextTags = false;
+	
 	/** Font and graphics caches */
 	private WFontCache fontCache = new WFontCache();
 	private WGraphicCache graphicCache = new WGraphicCache();
@@ -156,11 +163,11 @@ public class WController {
 	/** Render Error Manager for receiving errors from renderer */
 	private WEditorErrorManager errMan = new WEditorErrorManager(); 
 	
-	/** Current Font
-	 *  TODO need some model for this, I don't think it can just be one */
-	private Font currentFont;
+	/** Current and default fonts */
+	private Font font;
+	private Font defaultFont;
 	
-	/** Current Colors */
+	/** Current and default colors */
 	private DmsColor fgColor;
 	private DmsColor bgColor;
 	private DmsColor fgColorDefault;
@@ -372,6 +379,7 @@ public class WController {
 			lastPressX = e.getX();
 			lastPressY = e.getY();
 			startTok = findClosestToken(lastPressX, lastPressY);
+			moveCaret(startTok);
 		} else {
 			lastPressX = -1;
 			lastPressY = -1;
@@ -389,13 +397,18 @@ public class WController {
 			// update which token is under the cursor
 			int x = e.getX();
 			int y = e.getY();
-			updateMouseDrag(x, y);
+			
+			if (inTextMode())
+				updateTextSelection(x, y);
+			else if (inTextRectMode()) {
+				// TODO
+			}
 		}
 		// get focus for this component when someone clicks on it
 		signPanel.requestFocusInWindow();
 	}
 	
-	private void updateMouseDrag(int x, int y) {
+	private void updateTextSelection(int x, int y) {
 		endTok = findClosestToken(x, y);
 		
 		// update the selection if they're not the same token
@@ -418,7 +431,29 @@ public class WController {
 				ei = start;
 				includeEnd = rightHalf(lastPressX, startTok);
 			}
-			updateTextSelection(si, ei, includeEnd);
+			
+			// update the token lists
+			updateTokenListsSelection(si, ei, includeEnd);
+			
+			// tell the image panel what the selection is
+			signPanel.setTextSelection(tokensSelected);
+			
+			// move the caret too - do it "manually" to avoid changing token
+			// lists
+			// TODO the caret will always appear at the end of the selection,
+			// regardless of the "direction" - not a big issue but fix if it
+			// comes
+			caretIndx = Math.max(si-1, 0);
+			if (!tokensAfter.isEmpty())
+				signPanel.setCaretLocation(tokensAfter.get(0)); 
+			else {
+				// no tokens following - go to EOP
+				signPanel.setCaretLocation(selectedPage.getEOPX(),
+						selectedPage.getEOPY(), selectedPage.getEOPH());
+			}
+
+			// update the toolbar
+			updateTextToolbar();
 		}
 	}
 	
@@ -426,7 +461,12 @@ public class WController {
 		// finalize the drag motion
 		int x = e.getX();
 		int y = e.getY();
-		updateMouseDrag(x, y);
+		
+		if (inTextMode())
+			updateTextSelection(x, y);
+		else if (inTextRectMode()) {
+			// TODO
+		}
 		
 		// if the x and y are the same as the last press, do nothing
 		// (handleClick SHOULD take care of it...)
@@ -454,7 +494,7 @@ public class WController {
 		int sy = wr.cvtWysiwygToSignY(y);
 		
 		// find the closest token on this page and return it
-		WToken tok = selectedPage.findClosestToken(sx, sy);
+		WToken tok = selectedPage.findClosestToken(sx, sy, stepNonTextTags);
 		return tok;
 	}
 	
@@ -472,14 +512,29 @@ public class WController {
 		return sx >= tok.getCentroidX();
 	}
 	
+	/** Toggle non-text char mode for handling of non-text tag */
+	public Action toggleNonTextTagMode = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			stepNonTextTags = !stepNonTextTags;
+			updateNonTextTagInfo();
+			signPanel.requestFocusInWindow();
+		}
+	};
+	
 	/** Initialize the caret. If there is text in the message, it is placed at
 	 *  the beginning of the message (before the first printable character).
-	 *  If there is no text, it goes...somewhere. */
+	 *  If there is no text, it goes at the end of the page. 
+	 */
 	private void initCaret() {
-		// if the page isn't empty, put the caret at 0
-		if (!selectedPage.getTokenList().isEmpty())
-			moveCaret(0);
-		else {
+		// if the page isn't empty, put the caret the first text character
+		if (!selectedPage.getTokenList().isEmpty()) {
+			WToken tok = findNextTextToken(0);
+			if (tok != null)
+				moveCaret(tok);
+			else
+				// go to EOP if no text characters
+				moveCaret(CARET_EOP);
+		} else {
 			// if it is, put it at the end of the page
 			moveCaret(CARET_EOP);
 		}
@@ -489,7 +544,8 @@ public class WController {
 	/** Update text selection given the token indeces provided (set by mouse
 	 *  events). 
 	 */
-	private void updateTextSelection(int si, int ei, boolean includeEnd) {
+	private void updateTokenListsSelection(int si, int ei,
+			boolean includeEnd) {
 		// slice the token list into 3
 		if (includeEnd)
 			++ei;
@@ -499,11 +555,40 @@ public class WController {
 		tokensSelected = pgTokens.slice(si, ei);
 		
 //		printCaretTokens();
-		
-		// tell the image panel what the selection is
-		signPanel.setTextSelection(tokensSelected);
-		
-		// TODO move the caret too
+	}
+
+	/** Return the next printable text token on the page after index si 
+	 *  (inclusive - if the token at si is printable text, it is returned).
+	 *  If no tokens are found, null is returned.
+	 */
+	public WToken findNextTextToken(int si) {
+		for (int i = si; i < selectedPage.getNumTokens(); ++i) {
+			WToken tok = selectedPage.getTokenList().get(i);
+			
+			// TODO need to figure out how to deal with text/color rectangles
+			// and graphics (will be a different "mode")
+			if (tok.isPrintableText())
+				return tok;
+		}
+		return null;
+	}
+	
+	/** Return the previous printable text token on the page after index si
+	 *  (inclusive - if the token at si is printable text, it is returned).
+	 *  If no tokens are found, null is returned.
+	 */
+	public WToken findPrevTextToken(int si) {
+		if (si >= selectedPage.getNumTokens())
+			return null;
+		for (int i = si; i >= 0; --i) {
+			WToken tok = selectedPage.getTokenList().get(i);
+			
+			// TODO need to figure out how to deal with text/color rectangles
+			// and graphics (will be a different "mode")
+			if (tok.isPrintableText())
+				return tok;
+		}
+		return null;
 	}
 	
 	/** Move the caret to the spot just before the specified token. Note that
@@ -563,32 +648,45 @@ public class WController {
 		
 		// TODO need to organize this better somehow
 		updateTextToolbar();
+		updateNonTextTagInfo();
 	}
 	
 	/** Get the token associated with the current caret position. This is
 	 *  either the first token after the caret or the last token before
 	 *  the caret, or null if neither is valid. */
 	private WToken getCaretToken() {
-		WToken tok = null;
 		if (tokensAfter.isEmpty() && !tokensBefore.isEmpty()) {
-			tok = tokensBefore.getLast();
+			return tokensBefore.getLast();
 		} else if (!tokensAfter.isEmpty()) {
-			tok = tokensAfter.get(0);
+			return tokensAfter.get(0);
 		}
-		return tok;
+		return null;
 	}
 	
 	/** Action to move caret to left (using left arrow key) */
 	public Action moveCaretLeft = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-			// if the caret is at the end of the page, put it before the
-			// last token (if there are any)
-			if (caretIndx == CARET_EOP && selectedPage.getNumTokens() > 0) {
-				moveCaret(selectedPage.getNumTokens()-1);
-			} else {
-				// otherwise decrement the caret index, but don't go below 0
-				if (caretIndx >= 1)
-					moveCaret(caretIndx-1);
+			// check the navigation mode
+			if (stepNonTextTags) {  // go through all tokens
+				// if the caret is at the end of the page, put it before the
+				// last token (if there are any)
+				if (caretIndx == CARET_EOP && selectedPage.getNumTokens() > 0) {
+					moveCaret(selectedPage.getNumTokens()-1);
+				} else {
+					// otherwise decrement the caret index, but don't go below 0
+					if (caretIndx >= 1)
+						moveCaret(caretIndx-1);
+				}
+			} else {  // skip any non-text tokens
+				int si = caretIndx == CARET_EOP
+						? selectedPage.getNumTokens() : caretIndx;
+				int nextIndx = Math.max(si-1, 0);
+				WToken textTok = findPrevTextToken(nextIndx);
+				if (textTok != null)
+					moveCaret(textTok);
+				else
+					// move to beginning of page if no preceding text tokens
+					moveCaret(0);
 			}
 		}
 	};
@@ -596,13 +694,27 @@ public class WController {
 	/** Action to move caret to right (using right arrow key) */
 	public Action moveCaretRight = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-			// if we're on the last token, just go to the end of the message
-			if (caretIndx == selectedPage.getNumTokens()-1) {
-				moveCaret(CARET_EOP);
-			} else if (caretIndx != CARET_EOP) {
-				// otherwise increment the caret index, but don't go past the
-				// end of the page
-				moveCaret(caretIndx+1);
+			// check the navigation mode
+			if (stepNonTextTags) {  // go through all tokens
+				// if we're on the last token, just go to the end of the message
+				if (caretIndx == selectedPage.getNumTokens()-1) {
+					moveCaret(CARET_EOP);
+				} else if (caretIndx != CARET_EOP) {
+					// otherwise increment the caret index, but don't go past the
+					// end of the page
+					moveCaret(caretIndx+1);
+				}
+			} else {  // skip any non-text tokens
+				// only move if we're not at EOP - otherwise stay put
+				if (caretIndx != CARET_EOP) {
+					// find the next text token, if there is one
+					WToken textTok = findNextTextToken(caretIndx+1);
+					if (textTok != null)
+						moveCaret(textTok);
+					else
+						// move to EOP if no remaining text tokens
+						moveCaret(CARET_EOP);
+				}
 			}
 		}
 	};
@@ -673,14 +785,19 @@ public class WController {
 		public void actionPerformed(ActionEvent e) {
 			// get the current token and find what line it's on
 			WToken tok = getCaretToken();
-			WTokenList lineTokens = selectedPage.getTokenLine(tok);
-			
-			if (lineTokens != null) {
-				// get the line and grab the last token on the line
-				WToken endTok = lineTokens.get(lineTokens.size()-1);
+			if (selectedPage.getLineIndex(tok)==selectedPage.getNumLines()-1)
+				// if it's the last line, go to EOP
+				moveCaret(CARET_EOP);
+			else {
+				WTokenList lineTokens = selectedPage.getTokenLine(tok);
 				
-				// move the caret to that token
-				moveCaret(endTok);
+				if (lineTokens != null) {
+					// get the line and grab the last token on the line
+					WToken endTok = lineTokens.get(lineTokens.size()-1);
+					
+					// move the caret to that token
+					moveCaret(endTok);
+				}
 			}
 		}
 	};
@@ -696,7 +813,7 @@ public class WController {
 		while (it.hasNext()) {
 			WToken t = it.next();
 			int xd = Math.abs(t.getCoordX() - sx);
-			if (xd < minDist) {
+			if ((t.isPrintableText() || stepNonTextTags) && xd < minDist) {
 				minDist = xd;
 				tok = t;
 			}
@@ -949,7 +1066,84 @@ public class WController {
 		return toks;
 	}
 	
-	// TODO font
+	/** Get the active page font given the current caret location. Uses font
+	 *  tags in the preceding and/or selected tokens and the default to
+	 *  determine what the "active" font value is.
+	 */
+	public Integer getActiveFont() {
+		// first look in the preceding tokens
+		WtFont pfTag = (WtFont) getPrecedingTokenOfType(
+				WTokenType.font);
+		
+		// use the font number to determine likeness
+		// TODO do we need to include the version ID??
+		int pfNum = (pfTag != null) ? pfTag.getFontNum()
+				: defaultFont.getNumber();
+		
+		// now look in the selected tokens
+		WTokenList selJusts = getTokensOfTypeInSelection(
+				WTokenType.font);
+		
+		// now check that every token is the same type
+		HashSet<Integer> jpvals = new HashSet<Integer>();
+		jpvals.add(pfNum);
+		for (WToken tok: selJusts)
+			jpvals.add(((WtFont) tok).getFontNum());
+		
+		if (jpvals.size() == 1)
+			return pfNum;
+		return null;
+	}
+	
+	/** Add a font tag at the current location. */
+	public void setFont(Font f) {
+		// set the font
+		font = f;
+		
+		// create the appropriate font tag token then add it
+		// TODO I think it's ok to do this with the font ID
+		WtFont fTok = new WtFont(font.getNumber(),
+				String.valueOf(font.getVersionID()));
+		println("Adding font tag at %d", caretIndx);
+		addTextOptionToken(fTok);
+		
+		// update the toolbar
+		updateTextToolbar();
+	}
+	
+	/** Add a foreground color token at the current location. */
+	public void setForegroundColor(DmsColor c) {
+		// TODO do something with default colors?
+		
+		// set the foreground color
+		fgColor = c;
+		
+		// create the appropriate WtColorForeground token then add it
+		WtColorForeground cfTok = new WtColorForeground(
+				c.red, c.green, c.blue);
+		addTextOptionToken(cfTok);
+	}
+	
+	/** Add a background color token at the beginning of the page. Uses a page
+	 *  background color tag and not the deprecated color background tag. */
+	public void setBackgroundColor(DmsColor c) {
+		// TODO do something with default colors?
+		
+		// set the background color
+		bgColor = c;
+		
+		// clear any page background tokens that may already be on the page
+		clearPageTokenType(WTokenType.pageBackground);
+		
+		// save state, create the appropriate WtColorForeground token and
+		// add it, then update and move the caret to reflect the change
+		saveState();
+		WtPageBackground cbTok = new WtPageBackground(
+				c.red, c.green, c.blue);
+		selectedPage.addToken(0, cbTok);
+		update();
+		moveCaretRight.actionPerformed(null);
+	}
 	
 	/** Get the active page justification value given the current caret
 	 *  location. Uses page justification tags in the preceding and/or
@@ -961,7 +1155,7 @@ public class WController {
 		WtJustPage pjTag = (WtJustPage) getPrecedingTokenOfType(
 				WTokenType.justificationPage);
 		
-		// the color based on this is either the tag value or the default
+		// the just. based on this is either the tag value or the default
 		JustificationPage pj = (pjTag != null) ? pjTag.getJustification()
 				: JustificationPage.TOP;
 		
@@ -992,7 +1186,7 @@ public class WController {
 		
 		println("Preceding token: %s", (pjTag != null) ? pjTag.toString() : "null");
 		
-		// the color based on this is either the tag value or the default
+		// the just. based on this is either the tag value or the default
 		JustificationLine pj = (pjTag != null) ? pjTag.getJustification()
 				: JustificationLine.CENTER;
 		
@@ -1016,30 +1210,30 @@ public class WController {
 	 *  foreground color tags in the preceding and/or selected tokens and the
 	 *  default to determine what the "active" color is.
 	 */
-	public Color getActiveForegroundColor() {
-		// first look in the preceding tokens
-		WtColorForeground pcTag = (WtColorForeground) getPrecedingTokenOfType(
-				WTokenType.colorForeground);
-		
-		// the color based on this is either the tag value or the default
-		Color pfgColor = (pcTag != null) ? pcTag.getColor()
-				: fgColorDefault.color;
-		
-		// now look in the selected tokens
-		WTokenList selColors = getTokensOfTypeInSelection(
-				WTokenType.colorForeground);
-		
-		// now check that every token is the same type
-		HashSet<Color> colors = new HashSet<Color>();
-		colors.add(pfgColor);
-		for (WToken tok: selColors) {
-			colors.add(((WtColorForeground) tok).getColor());
-		}
-		if (colors.size() == 1)
-			return pfgColor;
-		return null;
-	}
-	
+//	public Color getActiveForegroundColor() {
+//		// first look in the preceding tokens
+//		WtColorForeground pcTag = (WtColorForeground) getPrecedingTokenOfType(
+//				WTokenType.colorForeground);
+//		
+//		// the color based on this is either the tag value or the default
+//		Color pfgColor = (pcTag != null) ? pcTag.getColor()
+//				: fgColorDefault.color;
+//		
+//		// now look in the selected tokens
+//		WTokenList selColors = getTokensOfTypeInSelection(
+//				WTokenType.colorForeground);
+//		
+//		// now check that every token is the same type
+//		HashSet<Color> colors = new HashSet<Color>();
+//		colors.add(pfgColor);
+//		for (WToken tok: selColors) {
+//			colors.add(((WtColorForeground) tok).getColor());
+//		}
+//		if (colors.size() == 1)
+//			return pfgColor;
+//		return null;
+//	}
+
 	/** Add a line justify left token at the current location. */
 	public Action lineJustifyLeft = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
@@ -1254,40 +1448,6 @@ public class WController {
 		updateTextToolbar();
 	}
 	
-	/** Add a foreground color token at the current location. */
-	public void setForegroundColor(DmsColor c) {
-		// TODO do something with default colors?
-		
-		// set the foreground color
-		fgColor = c;
-		
-		// create the appropriate WtColorForeground token then add it
-		WtColorForeground cfTok = new WtColorForeground(
-				c.red, c.green, c.blue);
-		addTextOptionToken(cfTok);
-	}
-	
-	/** Add a background color token at the beginning of the page. Uses a page
-	 *  background color tag and not the deprecated color background tag. */
-	public void setBackgroundColor(DmsColor c) {
-		// TODO do something with default colors?
-		
-		// set the background color
-		bgColor = c;
-		
-		// clear any page background tokens that may already be on the page
-		clearPageTokenType(WTokenType.pageBackground);
-		
-		// save state, create the appropriate WtColorForeground token and
-		// add it, then update and move the caret to reflect the change
-		saveState();
-		WtPageBackground cbTok = new WtPageBackground(
-				c.red, c.green, c.blue);
-		selectedPage.addToken(0, cbTok);
-		update();
-		moveCaretRight.actionPerformed(null);
-	}
-	
 	/** Clear the selected page of all tokens of type tokType. */
 	private void clearPageTokenType(WTokenType tokType) {
 		// loop over at most the number of tokens on the page
@@ -1313,26 +1473,56 @@ public class WController {
 		}
 	}
 	
+	/** Clear the selected tokens of all tokens of type tokType.
+	 *  @returns the number of tokens removed
+	 */
+	private void clearSelectionTokenType(WTokenType tokType) {
+		// loop over at most the number of tokens in the selection
+		int nRemoved = 0;
+		for (int i = 0; i < tokensSelected.size(); ++i) {
+			if (i >= tokensSelected.size())
+				// account for the removal of tokens
+				break;
+			
+			// get the token at this index and check the type
+			WToken tok = tokensSelected.get(i);
+			if (tok.isType(tokType)) {
+				// if it's the same type, remove it
+				tokensSelected.remove(i);
+				
+				// also remove it from the page
+				selectedPage.getTokenList().remove(tok);
+			}
+		}
+	}
+	
 	/** Add a text option token (justification, font, color) at the current
 	 *  caret location. If the token(s) immediately preceding is/are the same
 	 *  type of text option, it/they are replaced by the specified token
-	 *  (otherwise it is just added).
+	 *  (otherwise it is just added). Also if any tokens in the current
+	 *  selection are the same type, they are removed (since we assume that's
+	 *  what the user wanted).
      */
 	private void addTextOptionToken(WToken toTok) {
 		// save state here so we can undo this whole process
 		saveState();
 		
 		// trim any tokens of the same type around the current caret location
+		// and/or in the selection
 		trimTextOptionTokens(toTok.getType());
-		
+				
 		// now add the token
 		addToken(toTok);
 	}
 	
 	/** Trim (remove) any tokens of the type tokType that are immediately
-	 *  before or after the caret.
+	 *  before the caret. If there is a selection, the selection is cleared of
+	 *  tokens of this type as well. If there is no selection, tokens after
+	 *  the caret will be trimmed instead.
 	 */
 	private void trimTextOptionTokens(WTokenType tokType) {
+		// we will adjust how this works if there is a selection
+		boolean haveSelection = !tokensSelected.isEmpty();
 		
 		// check the type of the preceding token to remove all immediately-
 		// preceding tokens of the same type
@@ -1346,25 +1536,35 @@ public class WController {
 			int i = selectedPage.getTokenIndex(tok);
 			selectedPage.removeToken(i);
 			
-			// move the caret to account for the removal
-			moveCaretLeft.actionPerformed(null);
+			// each token removed here will require the caret to move one to
+			// the left (only if no selection)
+			if (!haveSelection)
+				moveCaretLeft.actionPerformed(null);
+			else
+				// if there is a selection, just delete from tokensBefore
+				tokensBefore.remove(tok);
 		}
 		
-		// do the same thing, but forwards
-		while (tokensAfter.size() > 0 &&
-				tokensAfter.get(0).isType(tokType)) {
-			WToken tok = tokensAfter.get(0);
-			println("Last token: '%s'", tok.toString());
-			
-			// if it's the same, delete it (but don't create a separate undo
-			// step)
-			int i = selectedPage.getTokenIndex(tok);
-			selectedPage.removeToken(i);
-			
-			// update the caret to account for the removal
-			updateCaret();
+		// if we have a selection, just clear it of these tokens
+		if (!tokensSelected.isEmpty())
+			clearSelectionTokenType(tokType);
+		else {
+			// if not, trim forwards
+			while (tokensAfter.size() > 0 &&
+					tokensAfter.get(0).isType(tokType)) {
+				WToken tok = tokensAfter.get(0);
+				println("Last token: '%s'", tok.toString());
+				
+				// if it's the same, delete it (but don't create a separate
+				// undo step)
+				int i = selectedPage.getTokenIndex(tok);
+				selectedPage.removeToken(i);
+				
+				// delete from the tokensAfter too
+				tokensAfter.remove(tok);
+				
+			}
 		}
-		
 	}
 	
 	/** Add the token to the selected page at the caret index */
@@ -1662,6 +1862,29 @@ public class WController {
 			editor.updateTextToolbar();
 	}
 	
+	/** Update the non-text tag info label with information about the current
+	 *  tag (printable text or not) when in the proper mode.
+	 */
+	private void updateNonTextTagInfo() {
+		// default is to show nothing
+		String s = "";
+		Color c = null;
+		if (stepNonTextTags) {
+			WToken tok = getCaretToken();
+			if (tok != null) {
+				// TODO add methods to token types to provide better description
+				s = tok.getDescription();
+				
+				// check if there is a color we can include too
+				if (tok.isType(WTokenType.colorForeground))
+					c = ((WtColorForeground) tok).getColor();
+				else if (tok.isType(WTokenType.pageBackground))
+					c = ((WtPageBackground) tok).getColor();
+			}
+		}
+		editor.updateNonTextTagInfo(s, c);
+	}
+	
 	/** Update the MULTI panel with the current MULTI string. */
 	private void updateMultiPanel() {
 		if (multiPanel != null && multiStringText != null)
@@ -1801,11 +2024,19 @@ public class WController {
 			sign = dmsList.get(dmsNames[0]);
 	}
 	
+	public boolean inTextMode() {
+		return editingMode == MODE_TEXT;
+	}
+	
 	public void activateTextMode() {
 		// put the cursor in text mode then update everything
 		editingMode = MODE_TEXT;
 		setCursorFromMode();
 		update();
+	}
+
+	public boolean inGraphicMode() {
+		return editingMode == MODE_GRAPHIC;
 	}
 	
 	public void activateGraphicMode() {
@@ -1814,12 +2045,20 @@ public class WController {
 		setCursorFromMode();
 		update();
 	}
+
+	public boolean inTextRectMode() {
+		return editingMode == MODE_TEXTRECT;
+	}
 	
 	public void activateTextRectangleMode() {
 		// put the cursor in crosshair mode then update everything
 		editingMode = MODE_TEXTRECT;
 		setCursorFromMode();
 		update();
+	}
+
+	public boolean inColorRectMode() {
+		return editingMode == MODE_COLORRECT;
 	}
 	
 	public void activateColorRectangleMode() {
@@ -1828,7 +2067,11 @@ public class WController {
 		setCursorFromMode();
 		update();
 	}
-		
+	
+	public boolean inMultiTagMode() {
+		return editingMode == MODE_MULTITAG;
+	}
+	
 	public void activateMultiTagMode() {
 		// put the cursor in ?? default ?? mode then update everything
 		editingMode = MODE_MULTITAG;
@@ -1850,12 +2093,12 @@ public class WController {
 		} return null;
 	}
 	
-	public void setCurrentFont(Font f) {
-		currentFont = f;
-	}
-	
 	public Font getCurrentFont() {
-		return currentFont;
+		return font;
+	}
+
+	public Font getDefaultFont() {
+		return defaultFont;
 	}
 	
 	public void setMultiPanel(WMsgMultiPanel mp) {
@@ -1875,7 +2118,8 @@ public class WController {
 	
 	private void setFontFromConfig() {
 		if (multiConfig != null) {
-			currentFont = multiConfig.getDefaultFont();
+			font = multiConfig.getDefaultFont();
+			defaultFont = font;
 		}
 	}
 	

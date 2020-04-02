@@ -150,6 +150,8 @@ public class WMsgColorChooser extends AbstractForm {
 		if (colorScheme == ColorScheme.COLOR_24_BIT) {
 			fullColorChooser = new JColorChooser(color);
 			add(fullColorChooser);
+			
+			// TODO add classic color chooser too somehow
 		} else if (colorScheme == ColorScheme.COLOR_CLASSIC) {
 			// for classic color scheme, use a JList filled with the classic
 			// colors as options
