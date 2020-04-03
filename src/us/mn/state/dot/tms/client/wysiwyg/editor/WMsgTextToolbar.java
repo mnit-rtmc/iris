@@ -22,6 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ComboBoxModel;
@@ -81,27 +82,11 @@ public class WMsgTextToolbar extends JPanel {
 		
 		// use a FlowLayout with no margins to give more control of separation
 		setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-		
-		// fonts
-		fontOptions = new JComboBox<Font>();		
-		fontOptions.setModel(
-				new IComboBoxModel<Font>(controller.getFontModel()));
-		fontOptions.setSelectedItem(controller.getDefaultFont());
-		fontOptions.addActionListener(setFont);
-		add(fontOptions);
-		
+
 		// color pickers
-		fg_color_btn = new JButton(open_fg_color_picker);
-		DmsColor fgc = controller.getForegroundColor();
-		if (fgc != null) {
-			fgColor = fgc.color;
-			fg_color_btn.setIcon(
-					WMsgColorChooser.createColorIcon(fgColor, 16, 16));
-			fg_color_btn.setMargin(new Insets(0,0,0,0));
-		}
-		add(fg_color_btn);
-		
 		bg_color_btn = new JButton(open_bg_color_picker);
+		bg_color_btn.setToolTipText(
+				I18N.get("wysiwyg.epanel.bg_color_picker_title"));
 		DmsColor bgc = controller.getBackgroundColor();
 		if (bgc != null) {
 			bgColor = bgc.color;
@@ -110,6 +95,29 @@ public class WMsgTextToolbar extends JPanel {
 			bg_color_btn.setMargin(new Insets(0,0,0,0));
 		}
 		add(bg_color_btn);
+		add(Box.createHorizontalStrut(30));
+		
+		fg_color_btn = new JButton(open_fg_color_picker);
+		fg_color_btn.setToolTipText(
+				I18N.get("wysiwyg.epanel.fg_color_picker_title"));
+		DmsColor fgc = controller.getForegroundColor();
+		if (fgc != null) {
+			fgColor = fgc.color;
+			fg_color_btn.setIcon(
+					WMsgColorChooser.createColorIcon(fgColor, 16, 16));
+			fg_color_btn.setMargin(new Insets(0,0,0,0));
+		}
+		add(fg_color_btn);
+		add(Box.createHorizontalStrut(10));
+		
+		// fonts
+		fontOptions = new JComboBox<Font>();		
+		fontOptions.setModel(
+				new IComboBoxModel<Font>(controller.getFontModel()));
+		fontOptions.setSelectedItem(controller.getDefaultFont());
+		fontOptions.addActionListener(setFont);
+		add(fontOptions);
+		add(Box.createHorizontalStrut(10));
 		
 		// disable color picker buttons for 1-bit and unknown color schemes
 		ColorScheme cs = controller.getMultiConfig().getColorScheme();
@@ -133,18 +141,24 @@ public class WMsgTextToolbar extends JPanel {
 				"wysiwyg.epanel.text_vjust_top");
 		text_pg_just_top_btn.setIcon(text_vjust_top_icon);
 		text_pg_just_top_btn.setHideActionText(true);
+		text_pg_just_top_btn.setToolTipText(
+				I18N.get("wysiwyg.epanel.text_vjust_top"));
 		text_pg_just_top_btn.setMargin(new Insets(0,0,0,0));
 		
 		ImageIcon text_vjust_center_icon = Icons.getIconByPropName(
 				"wysiwyg.epanel.text_vjust_center");
 		text_pg_just_middle_btn.setIcon(text_vjust_center_icon);
 		text_pg_just_middle_btn.setHideActionText(true);
+		text_pg_just_middle_btn.setToolTipText(
+				I18N.get("wysiwyg.epanel.text_vjust_middle"));
 		text_pg_just_middle_btn.setMargin(new Insets(0,0,0,0));
 		
 		ImageIcon text_vjust_bottom_icon = Icons.getIconByPropName(
 				"wysiwyg.epanel.text_vjust_bottom");
 		text_pg_just_bottom_btn.setIcon(text_vjust_bottom_icon);
 		text_pg_just_bottom_btn.setHideActionText(true);
+		text_pg_just_bottom_btn.setToolTipText(
+				I18N.get("wysiwyg.epanel.text_vjust_bottom"));
 		text_pg_just_bottom_btn.setMargin(new Insets(0,0,0,0));
 		
 		text_vjust_btn_pnl = new JPanel();
@@ -154,6 +168,7 @@ public class WMsgTextToolbar extends JPanel {
 		text_vjust_btn_pnl.add(text_pg_just_middle_btn);
 		text_vjust_btn_pnl.add(text_pg_just_bottom_btn);
 		add(text_vjust_btn_pnl);
+		add(Box.createHorizontalStrut(10));
 		
 		text_hjust_btn_grp = new ButtonGroup();
 		text_ln_just_left_btn = new JToggleButton(controller.lineJustifyLeft);
@@ -169,18 +184,24 @@ public class WMsgTextToolbar extends JPanel {
 				"wysiwyg.epanel.text_hjust_left");
 		text_ln_just_left_btn.setIcon(text_hjust_left_icon);
 		text_ln_just_left_btn.setHideActionText(true);
+		text_ln_just_left_btn.setToolTipText(
+				I18N.get("wysiwyg.epanel.text_hjust_left"));
 		text_ln_just_left_btn.setMargin(new Insets(0,0,0,0));
 		
 		ImageIcon text_hjust_center_icon = Icons.getIconByPropName(
 				"wysiwyg.epanel.text_hjust_center");
 		text_ln_just_center_btn.setIcon(text_hjust_center_icon);
 		text_ln_just_center_btn.setHideActionText(true);
+		text_ln_just_center_btn.setToolTipText(
+				I18N.get("wysiwyg.epanel.text_hjust_center"));
 		text_ln_just_center_btn.setMargin(new Insets(0,0,0,0));
 		
 		ImageIcon text_hjust_right_icon = Icons.getIconByPropName(
 				"wysiwyg.epanel.text_hjust_right");
 		text_ln_just_right_btn.setIcon(text_hjust_right_icon);
 		text_ln_just_right_btn.setHideActionText(true);
+		text_ln_just_right_btn.setToolTipText(
+				I18N.get("wysiwyg.epanel.text_hjust_right"));
 		text_ln_just_right_btn.setMargin(new Insets(0,0,0,0));
 		
 		text_hjust_btn_pnl = new JPanel();
