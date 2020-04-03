@@ -108,11 +108,28 @@ abstract public class WToken {
 	
 	/** Check if the point (x, y) is inside this token. */
 	public boolean isInside(int x, int y) {
+		// get coordinates for this token - either the token itself or its
+		// parameters
+		int tX = 0, tY = 0, tW = 0, tH = 0;
+		if (coordX != null && coordY != null
+				&& coordW != null && coordH != null) {
+			tX = coordX;
+			tY = coordY;
+			tW = coordW;
+			tH = coordH;
+		} else if (paramX != null && paramY != null 
+				&& paramW != null && paramH != null) {
+			tX = paramX;
+			tY = paramY;
+			tW = paramW;
+			tH = paramH;
+		}
+		
 		// calculate right edge and bottom edge coordinates
-		int rX = coordX + coordW;
-		int bY = coordY + coordH;
-		boolean inX = (x >= coordX) && (x < rX);
-		boolean inY = (y >= coordY) && (y < bY);
+		int rX = tX + tW;
+		int bY = tY + tH;
+		boolean inX = (x >= tX) && (x < rX);
+		boolean inY = (y >= tY) && (y < bY);
 		return inX && inY;
 	}
 	

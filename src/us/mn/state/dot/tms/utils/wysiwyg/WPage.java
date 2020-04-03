@@ -22,9 +22,8 @@ import java.util.List;
 
 import us.mn.state.dot.tms.utils.Multi;
 import us.mn.state.dot.tms.utils.MultiConfig;
-import us.mn.state.dot.tms.utils.wysiwyg.token.WtColorForeground;
-import us.mn.state.dot.tms.utils.wysiwyg.token.WtFont;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextRectangle;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtUnsupportedTag;
 
 /**
@@ -34,6 +33,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.token.WtUnsupportedTag;
  * represents a MULTI page.
  *  
  * @author John L. Stanley - SRF Consulting
+ * @author Gordon Parikh - SRF Consulting
  */
 
 public class WPage {
@@ -45,6 +45,14 @@ public class WPage {
 	 * Does not include the implicit [np] token between pages. */
 	private WTokenList tokenList = new WTokenList();
 
+	/** Text rectangles on this page. Includes the implicit "whole-sign" text
+	 *  rectangle (first in the list) along with any explicitly-declared text
+	 *  rectangles.
+	 */
+	private ArrayList<WTextRect> textRects;
+	
+	// TODO may need to rework how pageLines is handled with textRects  
+	
 	/** Lines on page. DOES include the [nl] token at the end of each line. */
 	private ArrayList<WTokenList> pageLines;
 	
@@ -99,7 +107,37 @@ public class WPage {
 	public int getTokenIndex(WToken tok) {
 		return tokenList.indexOf(tok);
 	}
-
+	
+	/** Return an ArrayList of WTextRects that represent the text rectangles
+	 *  on this page.
+	 */
+	public ArrayList<WTextRect> getTextRects() {
+		// if the message has changed, re-initialize the text rectangles
+		if (textRects == null || wMsg.isChanged()) {
+			// initialize the ArrayList
+			textRects = new ArrayList<WTextRect>();
+			
+			// start the first text rectangle that covers the whole sign
+			WTextRect tr = new WTextRect(null);
+			
+			// now iterate through the tokens to add tokens or make new text
+			// rectangles
+			for (WToken tok: tokenList) {
+				// check if it's a text rectangle tag
+				if (tok.isType(WTokenType.textRectangle)) {
+					// if it is, we need to store the old text rectangle and
+					// start a new one
+					textRects.add(tr);
+					tr = new WTextRect((WtTextRectangle) tok);
+				} else
+					// if it's not, just add the token
+					tr.addToken(tok);
+			}
+			textRects.add(tr);
+		}
+		return textRects;
+	}
+	
 	/** Return an ArrayList of WTokenLists containing the lines of the message
 	 *  on this page. Note that the [nl] tags ARE included at the end of each
 	 *  array.

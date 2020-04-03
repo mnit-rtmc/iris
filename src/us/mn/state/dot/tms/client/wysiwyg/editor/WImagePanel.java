@@ -26,16 +26,21 @@ import javax.swing.KeyStroke;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
+import us.mn.state.dot.tms.utils.wysiwyg.WTextRect;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextRectangle;
 
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -66,11 +71,21 @@ public class WImagePanel extends JPanel {
 	private int caretY;
 	private int caretH;
 	private int caretW = 0;
-	private Color caretColor = Color.WHITE;
+	private final static Color caretColor = Color.WHITE;
 	
 	/** For working with selection drawing */
 	private boolean selectionOn = false;
 	private ArrayList<Rectangle> selectRects = new ArrayList<Rectangle>();
+	
+	/** For working with text rectangle drawing */
+	private boolean textRectsOn = false;
+	private ArrayList<Rectangle> textRects = new ArrayList<Rectangle>();
+	private final static Color trColor = Color.LIGHT_GRAY;
+	
+	/** For drawing dashed lines */
+	final static float dashA[] = {10.0f};
+    final static BasicStroke dashed = new BasicStroke(1.0f,
+    		BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashA, 0.0f);
 	
 	// TODO I don't think we should need this, but for now it makes things look better
 	private int offset = 2;
@@ -113,8 +128,9 @@ public class WImagePanel extends JPanel {
 			if (selectionOn)
 				drawTextSelection(g);
 			
-			// TODO draw things with g.draw*
-//			g.drawLine(x1, y1, x2, y2);
+			// same with text rectangles
+			if (textRectsOn)
+				drawTextRectangles(g);
 		}
 	}
 	
@@ -328,7 +344,7 @@ public class WImagePanel extends JPanel {
 		selectionOn = false;
 	}
 	
-	/** Draw the text selection rectangle on the graphics context. */
+	/** Draw the text selection rectangle(s) on the graphics context. */
 	private void drawTextSelection(Graphics g) {
 		// get the original color so we can reset the color
 		Color oc = g.getColor();
@@ -349,4 +365,83 @@ public class WImagePanel extends JPanel {
 		g.setColor(oc);
 	}
 	
+	/** Set the text rectangles for drawing based on the list of text
+	 *  rectangles provided.
+	 */
+	public void setTextRectangles(ArrayList<WTextRect> tRects) {
+		textRectsOn = true;
+		
+		// loop through the text rectangles
+		for (WTextRect tr: tRects) {
+			WtTextRectangle trTok = tr.getTextRextToken();
+			
+			// don't draw anything for the implicit "whole-sign" TR
+			if (trTok != null) {
+				// convert from sign coordinates to image coordinates
+				int tx = trTok.getParamX() - offset;
+				int x = clipX(convertSignToWysiwygX(tx, true));
+				int x2 = clipX(convertSignToWysiwygX(
+						tx+trTok.getParamW(), false));
+				
+				int ty = trTok.getParamY() - offset;
+				int y = clipX(convertSignToWysiwygY(ty, true));
+				int y2 = clipY(convertSignToWysiwygY(
+						ty+trTok.getParamH(), false));
+				
+				// store the drawing coordinates in a rectangle
+				Rectangle r = new Rectangle(x, y, x2 - x, y2 - y);
+				textRects.add(r);
+			}
+		}
+	}
+
+	/** Draw the text rectangles on the graphics context. */
+	private void drawTextRectangles(Graphics g) {
+		// change to Graphics2D so we can set the stroke for dashed lines
+		Graphics2D g2d = (Graphics2D) g;
+		
+		// save the original stroke
+		Stroke os = g2d.getStroke();
+		
+		g2d.setStroke(dashed);
+		
+		// get the original color so we can reset the color
+		Color oc = g2d.getColor();
+		
+		// set color to to the text rectangle color and draw
+		for (Rectangle r: textRects) {
+			g2d.setColor(trColor);
+			g2d.drawRect(r.x, r.y, r.width, r.height);
+		}
+		
+		// return the color
+		g.setColor(oc);
+	}
+
+	/** Clear the text rectangles. */
+	public void clearTextRectangles() {
+		textRects.clear();
+		textRectsOn = false;
+	}
+	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

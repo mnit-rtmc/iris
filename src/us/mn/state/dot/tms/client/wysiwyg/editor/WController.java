@@ -56,6 +56,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WGraphicCache;
 import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
+import us.mn.state.dot.tms.utils.wysiwyg.WTextRect;
 import us.mn.state.dot.tms.utils.wysiwyg.WEditorErrorManager;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
@@ -138,6 +139,22 @@ public class WController {
 	
 	/** MultiConfig for config-related stuff  */
 	private MultiConfig multiConfig;
+
+	/** Currently selected page (defaults to first available) */
+	// TODO need to initialize this so there is always a selected page (blank
+	// if the message is empty)
+	private int selectedPageIndx = 0;
+	private WPage selectedPage;
+	
+	/** Text rectangle(s) on the selected page */
+	private ArrayList<WTextRect> textRects;
+	
+	/** Currently selected text rectangle (may be the implicit "whole-sign"
+	 *  text rectangle) */
+	private WTextRect selectedTextRect;
+	
+	// TODO figure out how to make general text editing code work for text
+	// rectangles (should be able to manage without major changes)
 	
 	/** Token lists for helping with caret placement and stuff */
 	private WTokenList tokensBefore = new WTokenList();
@@ -180,12 +197,6 @@ public class WController {
 	private Map<String,DMS> dmsList;
 	private JComboBox<String> dms_list;
 	String[] dmsNames;
-	
-	/** Currently selected page (defaults to first available) */
-	// TODO need to initialize this so there is always a selected page (blank
-	// if the message is empty)
-	private int selectedPageIndx = 0;
-	private WPage selectedPage;
 	
 	public WController() {
 		// empty controller - everything will be set later as it is available
@@ -331,6 +342,8 @@ public class WController {
 		
 		// move the caret based on the token we got
 		if (tok != null) {
+			println("Selected token: %s", tok.toString());
+			
 			// if this is the last token, check if they clicked towards the right
 			// of it - they probably wanted the end of the page
 			if (selectedPage.isLast(tok) && rightHalf(x, tok)) {
@@ -644,7 +657,7 @@ public class WController {
 		tokensSelected.clear();
 		signPanel.clearTextSelection();
 		
-		printCaretTokens();
+//		printCaretTokens();
 		
 		// TODO need to organize this better somehow
 		updateTextToolbar();
@@ -1173,7 +1186,7 @@ public class WController {
 			return pj;
 		return null;
 	}
-
+	
 	/** Get the active page justification value given the current caret
 	 *  location. Uses page justification tags in the preceding and/or
 	 *  selected tokens and the default to determine what the "active" page
@@ -1184,7 +1197,7 @@ public class WController {
 		WtJustLine pjTag = (WtJustLine) getPrecedingTokenOfType(
 				WTokenType.justificationLine);
 		
-		println("Preceding token: %s", (pjTag != null) ? pjTag.toString() : "null");
+//		println("Preceding token: %s", (pjTag != null) ? pjTag.toString() : "null");
 		
 		// the just. based on this is either the tag value or the default
 		JustificationLine pj = (pjTag != null) ? pjTag.getJustification()
@@ -2033,6 +2046,9 @@ public class WController {
 		editingMode = MODE_TEXT;
 		setCursorFromMode();
 		update();
+		
+		if (signPanel != null)
+			signPanel.clearTextRectangles();
 	}
 
 	public boolean inGraphicMode() {
@@ -2055,6 +2071,13 @@ public class WController {
 		editingMode = MODE_TEXTRECT;
 		setCursorFromMode();
 		update();
+		
+		// get the list of text rectangles on this page
+		textRects = selectedPage.getTextRects();
+		
+		// draw them on the sign panel
+		if(signPanel != null)
+			signPanel.setTextRectangles(textRects);
 	}
 
 	public boolean inColorRectMode() {
