@@ -90,6 +90,14 @@ public class WPage {
 		wMsg.setChanged();
 		return tokenList.remove(tokIndx);
 	}
+	
+	/* Remove the token provided, if it exists on the page */
+	public void removeToken(WToken tok) {
+		boolean removed = tokenList.remove(tok);
+		if (removed) {
+			wMsg.setChanged();
+		}
+	}
 
 	public Iterator<WToken> tokens() {
 		return tokenList.iterator();
@@ -203,41 +211,13 @@ public class WPage {
 	 *  spaces and newlines) are included, otherwise all tokens that aren't
 	 *  text/color rectangles or graphics are included.
 	 */
-	public WToken findClosestToken(int sx, int sy, boolean includeNonPrint) {
-		// first look through all the tokens on the page to find any that were
-		// clicked directly on
-		WToken tok = null;
-		Iterator<WToken> it = tokens();
-		boolean caretAtEnd = false;
-		while (it.hasNext()) {
-			WToken t = it.next();
-			if (t.isInside(sx, sy) && t.isText()
-					&& (includeNonPrint || t.isPrintableText())) {
-				tok = t;
-				break;
-			}
-		}
-		
-		// if we didn't get anything, find the token that was closest AND on
-		// the same line
-		if (tok == null) {
-			it = tokens();
-			double minDist = 999999;
-			while (it.hasNext()) {
-				WToken t = it.next();
-				
-				// calculate distance
-				double d = t.distance(sx, sy);
-				
-				// if this token is closer and on the same line then take it
-				if (d < minDist && t.sameLine(sy) && t.isText()
-						&& (includeNonPrint || t.isPrintableText())) {
-					tok = t;
-					minDist = d;
-				}
-			}
-		}
-		return tok;
+	public WToken findClosestTextToken(WPoint p, boolean includeNonPrint) {
+		// find the closest text token in the list of tokens on this page
+		return tokenList.findClosestTextToken(p, includeNonPrint);
+	}
+	
+	public WToken findClosestTokenOfType(WPoint p, WTokenType tokType) {
+		return tokenList.findClosestTokenOfType(p, tokType);
 	}
 	
 	/** Determine if this is the last token of the page. */

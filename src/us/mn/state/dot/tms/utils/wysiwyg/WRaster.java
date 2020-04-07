@@ -1010,35 +1010,42 @@ abstract public class WRaster {
 		return ((wc - d1) <= (d2 - wc)) ? sc1 : sc2;
 	}
 
-	/** Convert sign-tag coordinate to WYSIWYG
-	 *  coordinates.
-	 *  Returns the first and last WYSIWYG coordinates
-	 *  assigned to the given sign-tag coordinate. If the
-	 *  coordinate is invalid, an empty array is returned.
+	/** Convert sign-tag coordinate to WYSIWYG coordinates.
+	 *  Returns the first or last WYSIWYG coordinates assigned to the given
+	 *  sign-tag coordinate (returns the first coordinate if first is true,
+	 *  and the last coordinate otherwise).
+	 *  If sep is true, the coordinates of the LED separators around the sign
+	 *  coordinate (LED) are returned instead of the LEDs themselves.
+	 *  If the coordinate is invalid, -1 is returned.
 	 */
-	private int[] findWysiwygCoords(int[] coords, int sc)
+	private int findWysiwygCoords(int[] coords, int sc, boolean first, boolean sep)
 			throws IndexOutOfBoundsException { 
 		if (coords == null)
 			throw new IndexOutOfBoundsException("Uninitialized WYSIWIG coordinates");
 		int[] wc = new int[2];
 		boolean found = false;
+		--sc;
 		for (int i = 0; i < coords.length; ++i) {
 			if (!found) {
 				if (coords[i] == sc) {
-					wc[0] = i;
+					if (first) {
+						if (sep)
+							return i-1;
+						else
+							return i;
+					}
 					found = true;
-//					System.out.println(String.format("Found %d at %d", sc, i));
 				}
 			} else {
-				// TODO this may not be sufficient if we hit the end of the
-				// array and for some reason it's not a border (negative value)
 				if (coords[i] != sc) {
-					wc[1] = i-1;
-					return wc;
+					if (sep)
+						return i;
+					else
+						return i-1;
 				}
 			}
 		}
-		return new int[0];
+		return -1;
 	}
 	
 	/** Convert horizontal WYSIWIG coordinate
@@ -1057,17 +1064,17 @@ abstract public class WRaster {
 	
 	/** Convert horizontal sign-tag coordinate
 	 *  to WYSIWYG coordinates.
-	 *  Returns the first and last WYSIWYG X coordinates
+	 *  Returns either the first or last WYSIWYG X coordinate
 	 *  assigned to the given sign-tag coordinate. If the
-	 *  coordinate is invalid, an empty array is returned.
+	 *  coordinate is invalid, -1 is returned.
 	 * @param x  1-based horizontal sign-tag coordinate
-	 * @return   Array of [start, end] WYSIWYG coordinates 
+	 * @param i  index of the coordinate to return (0 for first, 1 for last)
+	 * @return   The WYSIWYG coordinate.
 	 * @throws IndexOutOfBoundsException if the setWysiwygImageSize method has not been called
 	 */
-	public int[] cvtSignToWysiwygX(int x)
+	public int cvtSignToWysiwygX(int x, boolean first, boolean sep)
 			throws IndexOutOfBoundsException {
-//		System.out.println("X: " + Arrays.toString(horizCoords));
-		return findWysiwygCoords(horizCoords, x);
+		return findWysiwygCoords(horizCoords, x, first, sep);
 	}
 	
 	/** Convert vertical WYSIWIG coordinate
@@ -1083,19 +1090,20 @@ abstract public class WRaster {
 			throws IndexOutOfBoundsException {
 		return findClosestSignCoord(vertCoords, height, y);
 	}
-
-	/** Convert vertival sign-tag coordinate
-	 *  to WYSIWYG coordinates.
-	 *  Returns the first and last WYSIWYG Y coordinates
+	
+	/** Convert vertical sign-tag coordinate
+	 *  to WYSIWYG coordinates - convenience method.
+	 *  Returns either the first or last WYSIWYG Y coordinate
 	 *  assigned to the given sign-tag coordinate. If the
-	 *  coordinate is invalid, an empty array is returned.
+	 *  coordinate is invalid, -1 is returned.
 	 * @param x  1-based horizontal sign-tag coordinate
-	 * @return   Array of [start, end] WYSIWYG coordinates 
+	 * @param i  index of the coordinate to return (0 for first, 1 for last)
+	 * @return   The WYSIWYG coordinate.
 	 * @throws IndexOutOfBoundsException if the setWysiwygImageSize method has not been called
 	 */
-	public int[] cvtSignToWysiwygY(int y)
+	public int cvtSignToWysiwygY(int y, boolean first, boolean sep)
 			throws IndexOutOfBoundsException {
-//		System.out.println("Y: " + Arrays.toString(vertCoords));
-		return findWysiwygCoords(vertCoords, y);
+		return findWysiwygCoords(vertCoords, y, first, sep);
 	}
+	
 }

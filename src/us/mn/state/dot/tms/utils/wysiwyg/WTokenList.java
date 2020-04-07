@@ -90,4 +90,69 @@ public class WTokenList extends ArrayList<WToken> {
 		Collections.reverse(rev);
 		return rev;
 	}
+	
+	/** Return the closest text token to the point sx, sy (sign coordinates).
+	 *  If includeNonPrint is false, only printable text characters (including
+	 *  spaces and newlines) are included, otherwise all tokens that aren't
+	 *  text/color rectangles or graphics are included.
+	 */
+	public WToken findClosestTextToken(WPoint p, boolean includeNonPrint) {
+		// first look through all the tokens on the page to find any that were
+		// clicked directly on
+		WToken tok = null;
+		for (WToken t: this) {
+			if (t.isInside(p) && t.isText()
+					&& (includeNonPrint || t.isPrintableText())) {
+				tok = t;
+				break;
+			}
+		}
+		
+		// if we didn't get anything, find the token that was closest AND on
+		// the same line
+		if (tok == null) {
+			double minDist = 999999;
+			for (WToken t: this) {
+				// calculate distance
+				double d = t.distance(p);
+				
+				// if this token is closer and on the same line then take it
+				if (d < minDist && t.sameLine(p.getSignY()) && t.isText()
+						&& (includeNonPrint || t.isPrintableText())) {
+					tok = t;
+					minDist = d;
+				}
+			}
+		}
+		return tok;
+	}
+	
+	public WToken findClosestTokenOfType(WPoint p, WTokenType tokType) {
+		// first look through all the tokens on the page to find any that were
+		// clicked directly on
+		WToken tok = null;
+		for (WToken t: this) {
+			if (t.isInside(p) && t.isType(tokType)) {
+				tok = t;
+				break;
+			}
+		}
+		
+		// if we didn't get anything, find the token that was closest AND on
+		// the same line
+		if (tok == null) {
+			double minDist = 999999;
+			for (WToken t: this) {
+				// calculate distance
+				double d = t.distance(p);
+				
+				// if this token is closer and on the same line then take it
+				if (d < minDist && t.sameLine(p.getSignY()) && t.isType(tokType)) {
+					tok = t;
+					minDist = d;
+				}
+			}
+		}
+		return tok;
+	}
 }

@@ -106,8 +106,8 @@ abstract public class WToken {
 		return false;
 	}
 	
-	/** Check if the point (x, y) is inside this token. */
-	public boolean isInside(int x, int y) {
+	/** Check if the point p(x, y) is inside this token. */
+	public boolean isInside(WPoint p) {
 		// get coordinates for this token - either the token itself or its
 		// parameters
 		int tX = 0, tY = 0, tW = 0, tH = 0;
@@ -128,8 +128,8 @@ abstract public class WToken {
 		// calculate right edge and bottom edge coordinates
 		int rX = tX + tW;
 		int bY = tY + tH;
-		boolean inX = (x >= tX) && (x < rX);
-		boolean inY = (y >= tY) && (y < bY);
+		boolean inX = (p.getSignX() >= tX) && (p.getSignX() < rX);
+		boolean inY = (p.getSignY() >= tY) && (p.getSignY() < bY);
 		return inX && inY;
 	}
 	
@@ -138,10 +138,12 @@ abstract public class WToken {
 		return (y >= coordY) && (y <= coordY + coordH);
 	}
 	
-	/** Calculate the distance between point (x, y) and this token's centroid. */
-	public double distance(int x, int y) {
-		double dx = centroidX - x;
-		double dy = centroidY - y;
+	/** Calculate the distance between point p(x, y) and this token's
+	 *  centroid.
+	 */
+	public double distance(WPoint p) {
+		double dx = centroidX - p.getSignX();
+		double dy = centroidY - p.getSignY();
 		return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
 	}
 	
@@ -326,8 +328,15 @@ abstract public class WToken {
 	
 	/** Calculate the centroid of the token based on the coordinates */
 	private void calculateCentroid() {
-		centroidX = coordX + coordW/2;
-		centroidY = coordY + coordH/2;
+		if (coordX != null && coordY != null
+				&& coordW != null && coordH != null) {
+			centroidX = coordX + coordW/2;
+			centroidY = coordY + coordH/2;
+		} else if (paramX != null && paramY != null 
+				&& paramW != null && paramH != null) {
+			centroidX = paramX + paramW/2;
+			centroidY = paramY + paramH/2;
+		}
 	}
 	
 	/** Return token X coordinate in pixels.

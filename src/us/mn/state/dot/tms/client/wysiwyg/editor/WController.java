@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -55,13 +56,13 @@ import us.mn.state.dot.tms.utils.wysiwyg.WFontCache;
 import us.mn.state.dot.tms.utils.wysiwyg.WGraphicCache;
 import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
+import us.mn.state.dot.tms.utils.wysiwyg.WPoint;
 import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
 import us.mn.state.dot.tms.utils.wysiwyg.WTextRect;
 import us.mn.state.dot.tms.utils.wysiwyg.WEditorErrorManager;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
-import us.mn.state.dot.tms.utils.wysiwyg.token.WtColorBackground;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtColorForeground;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtFont;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtJustLine;
@@ -69,6 +70,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.token.WtJustPage;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtPageBackground;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextChar;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextRectangle;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Multi.JustificationLine;
 import us.mn.state.dot.tms.utils.Multi.JustificationPage;
@@ -125,8 +127,7 @@ public class WController {
 	private Cursor cursor = textCursor;
 	
 	/** Mouse selection parameters */
-	private int lastPressX;
-	private int lastPressY;
+	private WPoint lastPress;
 	private WToken startTok;
 	private WToken endTok;
 	
@@ -141,17 +142,20 @@ public class WController {
 	private MultiConfig multiConfig;
 
 	/** Currently selected page (defaults to first available) */
-	// TODO need to initialize this so there is always a selected page (blank
-	// if the message is empty)
 	private int selectedPageIndx = 0;
 	private WPage selectedPage;
+	
+	/** Click threshold for selecting rectangles/graphics (sign coordinates) */
+	private final static int rThreshold = 1;
 	
 	/** Text rectangle(s) on the selected page */
 	private ArrayList<WTextRect> textRects;
 	
-	/** Currently selected text rectangle (may be the implicit "whole-sign"
-	 *  text rectangle) */
+	/** Currently selected/active text rectangle (may be the implicit "whole-
+	 *  sign" text rectangle) and the tokens it contains. */
+	private int selectedTrIndx = 0;
 	private WTextRect selectedTextRect;
+	private WTokenList trTokens;
 	
 	// TODO figure out how to make general text editing code work for text
 	// rectangles (should be able to manage without major changes)
@@ -325,48 +329,64 @@ public class WController {
 		
 		update();
 	}
-
+	
+	/** Return a new WPoint object created from the mouse event object and the
+	 *  selected page's WRaster.
+	 */
+	private WPoint getWPoint(MouseEvent e) {
+		return new WPoint(e, selectedPage.getRaster());
+	}
+	
 	/** Handle a click on the main editor panel */
 	public void handleClick(MouseEvent e) {
-		// calculate the adjusted coordinates of the click
-//		Point2D pSign = transformSignCoordinates(e.getX(), e.getY());
+//		int b = e.getButton();
 		
-		// just print for now
-//		if (pSign != null) {
-		int b = e.getButton();
-		int x = e.getX();
-		int y = e.getY();
-		println("Mouse clicked at (%d, %d) ...", x, y);
+		// TODO do we need this?
 		update();
-		WToken tok = findClosestToken(x, y);
 		
-		// move the caret based on the token we got
-		if (tok != null) {
-			println("Selected token: %s", tok.toString());
+		// create a WPoint for this click
+		WPoint p = getWPoint(e);
+		
+		// in text mode or text rectangle mode we are looking to place the
+		// caret
+		if (inTextMode() || inTextRectMode()) {
+			// in text rectangle mode, first check if the active text rectangle
+			// has changed
+			if (inTextRectMode()) {
+				setSelectedTextRectangle(findClickedTextRectangle(p));
+				String trs = (selectedTextRect != null)
+						? selectedTextRect.toString() : "null";
+				println("Selected text rectangle: %s", trs);
+				// add handles to the rectangle to show that this is the "active"
+				// rectangle
+				//** TODO
+			}
 			
-			// if this is the last token, check if they clicked towards the right
-			// of it - they probably wanted the end of the page
-			if (selectedPage.isLast(tok) && rightHalf(x, tok)) {
-				moveCaret(CARET_EOP);
-			} else
-				// otherwise just move the caret to this token
-				moveCaret(tok);
+			// find the closest text token
+			WToken tok = findClosestTextToken(p);
+			
+			// move the caret based on the token we got
+			if (tok != null) {
+				println("Selected token: %s", tok.toString());
+				
+				// if this is the last token, check if they clicked towards the right
+				// of it - they probably wanted the end of the page
+				if (selectedPage.isLast(tok) && rightHalf(p, tok)) {
+					moveCaret(CARET_EOP);
+				} else
+					// otherwise just move the caret to this token
+					moveCaret(tok);
+			}
 		}
 		
-		// get focus for this component when someone clicks on it
+		// get focus for the sign panel when someone clicks on it
 		signPanel.requestFocusInWindow();
-//		}
 	}
 	
 	/** Handle a mouse move event on the main editor panel */
 	public void handleMouseMove(MouseEvent e) {
-		// calculate the adjusted coordinates of the mouse pointer
-//		Point2D pSign = transformSignCoordinates(e.getX(), e.getY());
-		
-		// just print for now
-//		if (pSign != null) {
-		int x = e.getX();
-		int y = e.getY();
+		// create a WPoint for this mouse event
+//		WPoint p = getWPoint(e);
 		
 		// TODO test code for cursor changing
 //		if (y >= 100 && y <= 160) {
@@ -389,13 +409,11 @@ public class WController {
 		// TODO only handling left-click drag for now
 		if (e.getButton() == MouseEvent.BUTTON1) {
 			// set the press coordinates and get the closest token
-			lastPressX = e.getX();
-			lastPressY = e.getY();
-			startTok = findClosestToken(lastPressX, lastPressY);
+			lastPress = getWPoint(e);
+			startTok = findClosestTextToken(lastPress);
 			moveCaret(startTok);
 		} else {
-			lastPressX = -1;
-			lastPressY = -1;
+			lastPress = null;
 			startTok = null;
 		}
 		// get focus for this component when someone clicks on it
@@ -411,8 +429,11 @@ public class WController {
 			int x = e.getX();
 			int y = e.getY();
 			
+			// create a WPoint for this click
+			WPoint p = getWPoint(e);
+			
 			if (inTextMode())
-				updateTextSelection(x, y);
+				updateTextSelection(p);
 			else if (inTextRectMode()) {
 				// TODO
 			}
@@ -421,14 +442,14 @@ public class WController {
 		signPanel.requestFocusInWindow();
 	}
 	
-	private void updateTextSelection(int x, int y) {
-		endTok = findClosestToken(x, y);
+	private void updateTextSelection(WPoint p) {
+		endTok = findClosestTextToken(p);
 		
 		// update the selection if they're not the same token
 		if ((startTok != endTok) && startTok != null && endTok != null) {
 			// get the indeces and figure out which is first
-			int start = selectedPage.getTokenIndex(startTok);
-			int end = selectedPage.getTokenIndex(endTok);
+			int start = trTokens.indexOf(startTok);
+			int end = trTokens.indexOf(endTok);
 			
 			boolean includeEnd = false;
 			int si;
@@ -436,13 +457,13 @@ public class WController {
 			if (start < end) {
 				si = start;
 				ei = end;
-				includeEnd = rightHalf(x, endTok);
+				includeEnd = rightHalf(p, endTok);
 			} else {
 				// if they are selecting backwards, we need to use the initial
 				// click and token and reverse the indeces
 				si = end;
 				ei = start;
-				includeEnd = rightHalf(lastPressX, startTok);
+				includeEnd = rightHalf(lastPress, startTok);
 			}
 			
 			// update the token lists
@@ -470,28 +491,26 @@ public class WController {
 		}
 	}
 	
+	/** Finalize any active drag motion. */
 	public void handleMouseReleased(MouseEvent e) {
-		// finalize the drag motion
-		int x = e.getX();
-		int y = e.getY();
-		
+		// construct a WPoint from the mouse event
+		WPoint p = getWPoint(e);
+				
 		if (inTextMode())
-			updateTextSelection(x, y);
+			updateTextSelection(p);
 		else if (inTextRectMode()) {
 			// TODO
 		}
 		
 		// if the x and y are the same as the last press, do nothing
 		// (handleClick SHOULD take care of it...)
-		if ((x != lastPressX && y != lastPressY)
-				&& (lastPressX != -1 && lastPressY != -1)) {
-//			println("Mouse dragged from (%d, %d) to (%d, %d) ...",
-//					lastPressX, lastPressY, x, y);
+		if (lastPress != null &&
+				lastPress.getWysiwygPoint() != p.getWysiwygPoint()) {
+			
 		}
 		
 		// reset the drag handler
-		lastPressX = -1;
-		lastPressY = -1;
+		lastPress = null;
 		startTok = null;
 		endTok = null;
 		
@@ -499,30 +518,37 @@ public class WController {
 		signPanel.requestFocusInWindow();
 	}
 	
-	/** Find the closest token on the page given a set of click coordinates. */
-	public WToken findClosestToken(int x, int y) {
-		// get the sign coordinates for working with the message
-		WRaster wr = selectedPage.getRaster();
-		int sx = wr.cvtWysiwygToSignX(x);
-		int sy = wr.cvtWysiwygToSignY(y);
-		
+	/** Find the closest token in the active text rectangle given a set of
+	 *  click coordinates.
+	 */
+	public WToken findClosestTextToken(WPoint p) {
 		// find the closest token on this page and return it
-		WToken tok = selectedPage.findClosestToken(sx, sy, stepNonTextTags);
-		return tok;
+		if (trTokens != null)
+			return trTokens.findClosestTextToken(p, stepNonTextTags);
+		return null;
 	}
 	
-	/** Determine if the coordinate x is on the left half of token tok. */
-	private boolean leftHalf(int x, WToken tok) {
-		WRaster wr = selectedPage.getRaster();
-		int sx = wr.cvtWysiwygToSignX(x);
-		return sx < tok.getCentroidX();
+	/** Find the text rectangle that should be selected given a set of click
+	 *  coordinates.
+	 */
+	public WTextRect findClickedTextRectangle(WPoint p) {
+		// find the closest token of type text rectangle on the selected page
+		// and return
+		for (WTextRect tr: textRects) {
+			if (tr.isNear(p, rThreshold))
+				return tr;
+		}
+		return null;
+	}
+	
+	/** Determine if the x-coordinate of p is on the left half of token tok.*/
+	private boolean leftHalf(WPoint p, WToken tok) {
+		return p.getSignX() < tok.getCentroidX();
 	}	
 	
-	/** Determine if the coordinate x is on the right half of token tok. */
-	private boolean rightHalf(int x, WToken tok) {
-		WRaster wr = selectedPage.getRaster();
-		int sx = wr.cvtWysiwygToSignX(x);
-		return sx >= tok.getCentroidX();
+	/** Determine if the x-coordinate of p is on the right half of token tok.*/
+	private boolean rightHalf(WPoint p, WToken tok) {
+		return p.getSignX() >= tok.getCentroidX();
 	}
 	
 	/** Toggle non-text char mode for handling of non-text tag */
@@ -540,7 +566,7 @@ public class WController {
 	 */
 	private void initCaret() {
 		// if the page isn't empty, put the caret the first text character
-		if (!selectedPage.getTokenList().isEmpty()) {
+		if (!trTokens.isEmpty()) {
 			WToken tok = findNextTextToken(0);
 			if (tok != null)
 				moveCaret(tok);
@@ -562,10 +588,9 @@ public class WController {
 		// slice the token list into 3
 		if (includeEnd)
 			++ei;
-		WTokenList pgTokens = selectedPage.getTokenList();
-		tokensBefore = pgTokens.slice(0, si);
-		tokensAfter = pgTokens.slice(ei, pgTokens.size());
-		tokensSelected = pgTokens.slice(si, ei);
+		tokensBefore = trTokens.slice(0, si);
+		tokensAfter = trTokens.slice(ei, trTokens.size());
+		tokensSelected = trTokens.slice(si, ei);
 		
 //		printCaretTokens();
 	}
@@ -575,8 +600,8 @@ public class WController {
 	 *  If no tokens are found, null is returned.
 	 */
 	public WToken findNextTextToken(int si) {
-		for (int i = si; i < selectedPage.getNumTokens(); ++i) {
-			WToken tok = selectedPage.getTokenList().get(i);
+		for (int i = si; i < trTokens.size(); ++i) {
+			WToken tok = trTokens.get(i);
 			
 			// TODO need to figure out how to deal with text/color rectangles
 			// and graphics (will be a different "mode")
@@ -591,10 +616,10 @@ public class WController {
 	 *  If no tokens are found, null is returned.
 	 */
 	public WToken findPrevTextToken(int si) {
-		if (si >= selectedPage.getNumTokens())
+		if (si >= trTokens.size())
 			return null;
 		for (int i = si; i >= 0; --i) {
-			WToken tok = selectedPage.getTokenList().get(i);
+			WToken tok = trTokens.get(i);
 			
 			// TODO need to figure out how to deal with text/color rectangles
 			// and graphics (will be a different "mode")
@@ -609,7 +634,7 @@ public class WController {
 	 */
 	public void moveCaret(WToken tok) {
 		// get a list of tokens on this page and find this token in the list
-		int tokIndx = selectedPage.getTokenIndex(tok);
+		int tokIndx = trTokens.indexOf(tok);
 		
 		// dispatch to the other moveCaret method
 		moveCaret(tokIndx);
@@ -629,13 +654,12 @@ public class WController {
 	 *  caretIndx and caretAtEnd.
 	 */
 	public void updateCaret() {
-		WTokenList pgTokens = selectedPage.getTokenList();
 		if (caretIndx != CARET_EOP) {
-			println("Caret at %d", caretIndx);
+//			println("Caret at %d", caretIndx);
 			
 			// slice the list at the token
-			tokensBefore = pgTokens.slice(0, caretIndx);
-			tokensAfter = pgTokens.slice(caretIndx, pgTokens.size());
+			tokensBefore = trTokens.slice(0, caretIndx);
+			tokensAfter = trTokens.slice(caretIndx, trTokens.size());
 			
 			// set the new caret location
 			WToken tok = getCaretToken();
@@ -646,7 +670,7 @@ public class WController {
 			}
 		} else {
 //			println("Caret at end");
-			tokensBefore = pgTokens;
+			tokensBefore = trTokens;
 			tokensAfter = new WTokenList();
 			int x = selectedPage.getEOPX();
 			int y = selectedPage.getEOPY();
@@ -890,6 +914,7 @@ public class WController {
 					
 					// if we're going to delete the last token, put the caret
 					// at the end of the message
+					// TODO need to figure this stuff out for text rectangles
 					if (tok == selectedPage.getTokenList().getLast())
 						caretIndx = CARET_EOP;
 					
@@ -897,7 +922,7 @@ public class WController {
 					saveState();
 					selectedPage.removeToken(i);
 					
-					// update everything
+					// update everything and move the caret
 					update();
 					
 					// only move the caret if it's not at the end
@@ -1317,8 +1342,7 @@ public class WController {
 				if (thisJL >= addJL) {
 					// if it's greater or the same, assume the user wants to
 					// remove it
-					int ti = selectedPage.getTokenIndex(tok);
-					selectedPage.removeToken(ti);
+					selectedPage.removeToken(tok);
 					moveCaretLeft.actionPerformed(null);
 				}
 			}
@@ -1349,8 +1373,7 @@ public class WController {
 				if (thisJL <= addJL) {
 					// if it's greater or the same, assume the user wants to
 					// remove it
-					int ti = selectedPage.getTokenIndex(tok);
-					selectedPage.removeToken(ti);
+					selectedPage.removeToken(tok);
 					updateCaret();
 				}
 			}
@@ -1421,8 +1444,7 @@ public class WController {
 				if (thisJP >= addJP) {
 					// if it's greater or the same, assume the user wants to
 					// remove it
-					int ti = selectedPage.getTokenIndex(tok);
-					selectedPage.removeToken(ti);
+					selectedPage.removeToken(tok);
 					moveCaretLeft.actionPerformed(null);
 				}
 			}
@@ -1446,8 +1468,7 @@ public class WController {
 				if (thisJP <= addJP) {
 					// if it's lower or the same, assume the user wants to
 					// remove it
-					int ti = selectedPage.getTokenIndex(tok);
-					selectedPage.removeToken(ti);
+					selectedPage.removeToken(tok);
 					updateCaret();
 				}
 			}
@@ -1485,6 +1506,32 @@ public class WController {
 			}
 		}
 	}
+
+	/** Clear the selected text rectangle of all tokens of type tokType. */
+	private void clearTrTokenType(WTokenType tokType) {
+		// loop over at most the number of tokens in the text rectangle
+		for (int i = 0; i < trTokens.size(); ++i) {
+			if (i >= trTokens.size())
+				// account for the removal of tokens
+				break;
+			
+			// get the token at this index and check the type
+			WToken tok = trTokens.get(i);
+			if (tok.isType(tokType)) {
+				// if it's the same type, remove it from the list and page
+				trTokens.remove(tok);
+				selectedPage.removeToken(tok);
+				
+				// now adjust the caret appropriately
+				if (i < caretIndx)
+					// if we're to the left of the caret, move one to the left
+					moveCaretLeft.actionPerformed(null);
+				else
+					// otherwise just update
+					updateCaret();
+			}
+		}
+	}
 	
 	/** Clear the selected tokens of all tokens of type tokType.
 	 *  @returns the number of tokens removed
@@ -1504,7 +1551,7 @@ public class WController {
 				tokensSelected.remove(i);
 				
 				// also remove it from the page
-				selectedPage.getTokenList().remove(tok);
+				selectedPage.removeToken(tok);
 			}
 		}
 	}
@@ -1546,8 +1593,7 @@ public class WController {
 			
 			// if it's the same, delete it (but don't create a separate undo
 			// step)
-			int i = selectedPage.getTokenIndex(tok);
-			selectedPage.removeToken(i);
+			selectedPage.removeToken(tok);
 			
 			// each token removed here will require the caret to move one to
 			// the left (only if no selection)
@@ -1570,8 +1616,7 @@ public class WController {
 				
 				// if it's the same, delete it (but don't create a separate
 				// undo step)
-				int i = selectedPage.getTokenIndex(tok);
-				selectedPage.removeToken(i);
+				selectedPage.removeToken(tok);
 				
 				// delete from the tokensAfter too
 				tokensAfter.remove(tok);
@@ -1865,6 +1910,7 @@ public class WController {
 		updateMultiPanel();
 		updatePageListModel();
 		updateCursor();
+		updateTextRectangles();
 		
 		// TODO add more stuff here eventually
 	}
@@ -1913,7 +1959,7 @@ public class WController {
 		}
 	}
 	
-	/** Update the selected page to use one in the current page_list_model. */
+	/** Update the selected page to use one in the current pageList. */
 	private void updateSelectedPage() {
 		// make sure the selected page still exists
 		if (selectedPageIndx >= pageList.getNumPages()) 
@@ -1939,10 +1985,66 @@ public class WController {
 	/** Set the currently selected page */
 	public void setSelectedPage(WPage pg) {
 		selectedPage = pg;
+		
+		// get the text rectangles from this page and set the active one
+		textRects = selectedPage.getTextRects();
+		
+		if (!inTextRectMode())
+			// in any mode besides text-rectangle mode we only work on "whole-
+			// sign" text
+			selectedTrIndx = 0;
+		else {
+			// if we are in text rectangle mode, make sure we select one that
+			// exists
+			if (selectedTrIndx >= textRects.size())
+				selectedTrIndx = textRects.size() - 1;
+			else if (selectedTrIndx < 0)
+				selectedTrIndx = 0;
+		}
+		setSelectedTextRectangle(textRects.get(selectedTrIndx));
 	}
 	
 	public WPage getSelectedPage() {
 		return selectedPage;
+	}
+	
+	/** Update text rectangles drawn on the sign panel (only in text rectangle
+	 *  mode).
+	 */
+	public void updateTextRectangles() {
+		if (signPanel != null) {
+			if (inTextRectMode()) {
+				// get the list of text rectangles on this page
+				textRects = selectedPage.getTextRects();
+				
+				// draw them on the sign panel
+				signPanel.setTextRectangles(textRects);
+			} else
+				signPanel.clearTextRectangles();
+		}
+	}
+	
+	/** Set the selected/active text rectangle from the index provided. This
+	 *  does not check that the index is valid for the current list of tokens.
+	 */
+	public void setSelectedTextRectangle(int i) {
+		setSelectedTextRectangle(textRects.get(selectedTrIndx));
+		trTokens = selectedTextRect.getTokenList();
+	}
+
+	/** Set the selected/active text rectangle. Also sets the selectedTrIndx
+	 *  to maintain selection across updates (if it's not null).
+	 */
+	public void setSelectedTextRectangle(WTextRect tr) {
+		selectedTextRect = tr;
+		if (selectedTextRect != null) {
+			selectedTrIndx = textRects.indexOf(selectedTextRect);
+			trTokens = selectedTextRect.getTokenList();
+			
+			// only draw the selected text rectangle if it is an explicit TR
+			if (!selectedTextRect.isWholeSign())
+				signPanel.setSelectedTextRectangle(selectedTextRect);
+		}
 	}
 	
 	/** Get the label indicating the page number */
@@ -2046,9 +2148,6 @@ public class WController {
 		editingMode = MODE_TEXT;
 		setCursorFromMode();
 		update();
-		
-		if (signPanel != null)
-			signPanel.clearTextRectangles();
 	}
 
 	public boolean inGraphicMode() {
@@ -2071,13 +2170,6 @@ public class WController {
 		editingMode = MODE_TEXTRECT;
 		setCursorFromMode();
 		update();
-		
-		// get the list of text rectangles on this page
-		textRects = selectedPage.getTextRects();
-		
-		// draw them on the sign panel
-		if(signPanel != null)
-			signPanel.setTextRectangles(textRects);
 	}
 
 	public boolean inColorRectMode() {
