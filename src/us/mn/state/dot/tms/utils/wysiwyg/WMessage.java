@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.utils.Multi;
 import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -420,6 +421,13 @@ public class WMessage {
 			pg.setRaster(wr.getRaster());
 			wr.addPage();
 		}
+	}
+	
+	/** Set the WYSIWYG image size on each page's raster. */
+	public void setWysiwygImageSize(int pixWidth, int pixHeight)
+			throws InvalidMsgException {
+		for (WPage pg: pagelist)
+			pg.setWysiwygImageSize(pixWidth, pixHeight);
 	}
 	
 	/** Render all pages in message without any error management

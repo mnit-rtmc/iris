@@ -69,7 +69,7 @@ public class WMsgEditorPanel extends JPanel {
 	
 	/** Update the main WYSIWYG panel with the currently selected page (called
 	 *  from the main form). */
-	public void updateWysiwygSignPage(WPage sp) {
+	public void setPage(WPage sp) {
 		// use the currently selected page to update the main WYSIWYG panel
 		wysiwygPanel.setPage(sp);
 	}

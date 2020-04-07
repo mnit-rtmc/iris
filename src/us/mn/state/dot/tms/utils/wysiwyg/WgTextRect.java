@@ -18,23 +18,19 @@ package us.mn.state.dot.tms.utils.wysiwyg;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextRectangle;
 
 /**
- * Class for working with text rectangles in the WYSIWYG DMS Message Editor.
- * Not to be confused with the text rectangle MULTI tag token WtTextRectangle.
+ * Class for GUI operations with text rectangles in the WYSIWYG DMS Message
+ * Editor. Not to be confused with the text rectangle MULTI tag token
+ * WtTextRectangle.
  *
  * @author Gordon Parikh - SRF Consulting
  */
 
-public class WTextRect extends WRectangle {
-	
-	/** Text rectangle tag that starts this text rectangle. If null, the text
-	 *  rectangle is the entire sign (as per NTCIP 1203).
-	 */
-//	protected WtTextRectangle rectTok;
+public class WgTextRect extends WgRectangle {
 	
 	/** The list of tokens that are contained within this text rectangle. */
 	private WTokenList tokenList;
 	
-	public WTextRect(WtTextRectangle trTok) {
+	public WgTextRect(WtTextRectangle trTok) {
 		super(trTok);
 		tokenList = new WTokenList();
 	}
@@ -44,9 +40,11 @@ public class WTextRect extends WRectangle {
 		tokenList.add(tok);
 	}
 	
-	/** Return the text rectangle tag associated with this text rectangle. */
+	/** Return the text rectangle tag associated with this text rectangle. If
+	 *  null, the text rectangle is the entire sign (as per NTCIP 1203).
+	 */
 	public WtTextRectangle getTextRectToken() {
-		return (WtTextRectangle) rectTok;
+		return (WtTextRectangle) rt;
 	}
 	
 	/** Return the list of tokens inside this text rectangle. */
@@ -58,11 +56,8 @@ public class WTextRect extends WRectangle {
 	 *  text rectangle.
 	 */
 	public boolean isWholeSign() {
-		return rectTok == null;
+		return rt == null;
 	}
-	
-	// TODO take these next two methods and put them in a parent class
-	// (WRect?) so we can do the same thing with color rectangles
 	
 	/** Return the closest text token to the point sx, sy (sign coordinates).
 	 *  If includeNonPrint is false, only printable text characters (including
@@ -78,9 +73,4 @@ public class WTextRect extends WRectangle {
 		return tokenList.findClosestTokenOfType(p, tokType);
 	}
 	
-	public String toString() {
-		if (rectTok != null)
-			return rectTok.toString();
-		return "null";
-	}
 }

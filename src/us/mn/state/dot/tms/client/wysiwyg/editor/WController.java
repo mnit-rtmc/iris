@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.client.wysiwyg.editor;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -38,6 +39,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsColor;
@@ -58,11 +60,13 @@ import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 import us.mn.state.dot.tms.utils.wysiwyg.WPoint;
 import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
-import us.mn.state.dot.tms.utils.wysiwyg.WTextRect;
+import us.mn.state.dot.tms.utils.wysiwyg.WgRectangle;
+import us.mn.state.dot.tms.utils.wysiwyg.WgTextRect;
 import us.mn.state.dot.tms.utils.wysiwyg.WEditorErrorManager;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
+import us.mn.state.dot.tms.utils.wysiwyg.WgColorRect;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtColorForeground;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtFont;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtJustLine;
@@ -117,14 +121,14 @@ public class WController {
 	private int lastGoodState = 0;
 	
 	/** Cursor that will change depending on mode, etc. */
-	// TODO should we make these final or have an initCursors method???
-	private final Cursor textCursor = new Cursor(Cursor.TEXT_CURSOR);
-	private final Cursor graphicCursor = new Cursor(Cursor.HAND_CURSOR);
-	private final Cursor colorRectCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
-	private final Cursor textRectCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
-	private final Cursor multiTagCursor = new Cursor(Cursor.DEFAULT_CURSOR);
-	private final Cursor moveCursor = new Cursor(Cursor.MOVE_CURSOR);
-	private Cursor cursor = textCursor;
+	private Cursor textCursor;
+	private Cursor graphicCursor;
+	private Cursor colorRectCursor;
+	private Cursor textRectCursor;
+	private Cursor multiTagCursor;
+	private Cursor moveCursor;
+	private HashMap<String, Cursor> resizeCursors;
+	private Cursor cursor;
 	
 	/** Mouse selection parameters */
 	private WPoint lastPress;
@@ -145,17 +149,29 @@ public class WController {
 	private int selectedPageIndx = 0;
 	private WPage selectedPage;
 	
-	/** Click threshold for selecting rectangles/graphics (sign coordinates) */
-	private final static int rThreshold = 1;
+	/** Click threshold for selecting rectangles/graphics (in WYSIWYG
+	 *  coordinates) */
+	private final static int rThreshold = 3;
 	
 	/** Text rectangle(s) on the selected page */
-	private ArrayList<WTextRect> textRects;
+	private ArrayList<WgTextRect> textRects;
 	
 	/** Currently selected/active text rectangle (may be the implicit "whole-
 	 *  sign" text rectangle) and the tokens it contains. */
 	private int selectedTrIndx = 0;
-	private WTextRect selectedTextRect;
+	private WgTextRect selectedTextRect;
 	private WTokenList trTokens;
+
+	/** Color rectangle(s) on the selected page */
+	private ArrayList<WgColorRect> colorRects;
+	
+	/** Currently selected rectangle (text or color). If in text rectangle
+	 *  mode, this will be the same as the selectedTextRectangle.
+	 */
+	private WgRectangle selectedRectangle;
+	
+	/** Handles of currently selected text or color rectangles */
+	private HashMap<String,Rectangle> resizeHandles;
 	
 	// TODO figure out how to make general text editing code work for text
 	// rectangles (should be able to manage without major changes)
@@ -233,12 +249,12 @@ public class WController {
 	}
 	
 	/** Print the message to stdout */
-	public void println(String msg) {
+	public static void println(String msg) {
 		System.out.println(msg);
 	}
 	
 	/** Print a String.formatted message to stdout */
-	public void println(String fmt, Object... args) {
+	public static void println(String fmt, Object... args) {
 		if (DEBUG)
 			println(String.format(fmt, args));
 	}
@@ -259,7 +275,7 @@ public class WController {
 		desktop = session.getDesktop();
 		
 		// initialize the cursor, starting in text mode
-		cursor = new Cursor(Cursor.TEXT_CURSOR);
+		initCursors();
 
 		// initialize the page list
 		makePageList();
@@ -273,9 +289,10 @@ public class WController {
 	 */
 	public void postInit() {
 		// do an update to render the message and fill the page list, then
-		// initialize the caret
+		// initialize the caret and mouse cursors
 		update();
 		initCaret();
+		initCursors();
 		
 		// also give the sign panel focus so the user can immediately start
 		// typing
@@ -334,7 +351,7 @@ public class WController {
 	 *  selected page's WRaster.
 	 */
 	private WPoint getWPoint(MouseEvent e) {
-		return new WPoint(e, selectedPage.getRaster());
+		return new WPoint(e, getActiveRaster());
 	}
 	
 	/** Handle a click on the main editor panel */
@@ -353,7 +370,7 @@ public class WController {
 			// in text rectangle mode, first check if the active text rectangle
 			// has changed
 			if (inTextRectMode()) {
-				setSelectedTextRectangle(findClickedTextRectangle(p));
+				setSelectedTextRectangle((WgTextRect) findRectangle(p));
 				String trs = (selectedTextRect != null)
 						? selectedTextRect.toString() : "null";
 				println("Selected text rectangle: %s", trs);
@@ -361,22 +378,10 @@ public class WController {
 				// rectangle
 				//** TODO
 			}
-			
-			// find the closest text token
-			WToken tok = findClosestTextToken(p);
-			
-			// move the caret based on the token we got
-			if (tok != null) {
-				println("Selected token: %s", tok.toString());
-				
-				// if this is the last token, check if they clicked towards the right
-				// of it - they probably wanted the end of the page
-				if (selectedPage.isLast(tok) && rightHalf(p, tok)) {
-					moveCaret(CARET_EOP);
-				} else
-					// otherwise just move the caret to this token
-					moveCaret(tok);
-			}
+			// move the caret based on the mouse coordinates
+			moveCaret(p);
+		} else if (inColorRectMode()) {
+			setSelectedRectangle(findRectangle(p));
 		}
 		
 		// get focus for the sign panel when someone clicks on it
@@ -386,20 +391,47 @@ public class WController {
 	/** Handle a mouse move event on the main editor panel */
 	public void handleMouseMove(MouseEvent e) {
 		// create a WPoint for this mouse event
-//		WPoint p = getWPoint(e);
+		WPoint p = getWPoint(e);
 		
-		// TODO test code for cursor changing
-//		if (y >= 100 && y <= 160) {
-//			cursor = moveCursor;
-//		} else {
-//			setCursorFromMode();
-//		}
-//		update();
+		// check the mode to determine if we need to change the cursor at all
+		if (inTextRectMode() || inColorRectMode()) {
+			String hDir = null;
 			
-			// TODO hook this into token finding and mouse cursor changing
+			// if we have a selected rectangle, we can set the cursor to show
+			// resize icons
+			if (selectedRectangle != null)
+				// if we have a selected rectangle, check where the mouse
+				// pointer is WRT the resize handles
+				hDir = getResizeHandleDir(p);
 			
-//		println("Mouse moved to (%d, %d) ...", x, y);
-//		}
+			// either way, we can use any rectangle to set the other cursor
+			// types
+			if (hDir != null)
+				// if we're on a resize handle, change the mouse cursor to
+				// this direction
+				setCursor(resizeCursors.get(hDir));
+			else {
+				WgRectangle r = findRectangle(p);
+				if (r != null) {
+					if (r.isOnBorder(p))
+						// if the point is on the border but not a handle, use
+						// the move cursor
+						setCursor(moveCursor);
+					else
+						// if it's not on the border it must be near
+						// (otherwise r would be null)
+						setCursor(textCursor);
+				} else
+					// otherwise use the default for this mode - crosshair to
+					// create a new rectangle
+					setCursorFromMode();
+			}
+		} else if (inGraphicMode()) {
+			// TODO - will change to move cursor if over graphic
+		}
+		// NOTE - MULTI tag mode will probably just be like text mode (text
+		// cursor only and always)
+		
 		// get focus for this component when someone clicks on it
 		signPanel.requestFocusInWindow();
 	}
@@ -411,7 +443,7 @@ public class WController {
 			// set the press coordinates and get the closest token
 			lastPress = getWPoint(e);
 			startTok = findClosestTextToken(lastPress);
-			moveCaret(startTok);
+			moveCaret(lastPress);
 		} else {
 			lastPress = null;
 			startTok = null;
@@ -447,7 +479,7 @@ public class WController {
 		
 		// update the selection if they're not the same token
 		if ((startTok != endTok) && startTok != null && endTok != null) {
-			// get the indeces and figure out which is first
+			// get the indices and figure out which is first
 			int start = trTokens.indexOf(startTok);
 			int end = trTokens.indexOf(endTok);
 			
@@ -460,7 +492,7 @@ public class WController {
 				includeEnd = rightHalf(p, endTok);
 			} else {
 				// if they are selecting backwards, we need to use the initial
-				// click and token and reverse the indeces
+				// click and token and reverse the indices
 				si = end;
 				ei = start;
 				includeEnd = rightHalf(lastPress, startTok);
@@ -518,6 +550,20 @@ public class WController {
 		signPanel.requestFocusInWindow();
 	}
 	
+	/** Get the resize handle direction (N/S/E/W/NE/NW/SE/SW) given the mouse
+	 *  coordinates in p.
+	 */
+	private String getResizeHandleDir(WPoint p) {
+		if (resizeHandles != null) {
+			for (String d: resizeHandles.keySet()) {
+				Rectangle r = resizeHandles.get(d);
+				if (r.contains(p.getWysiwygPoint()))
+					return d;
+			}
+		}
+		return null;
+	}
+	
 	/** Find the closest token in the active text rectangle given a set of
 	 *  click coordinates.
 	 */
@@ -528,15 +574,21 @@ public class WController {
 		return null;
 	}
 	
-	/** Find the text rectangle that should be selected given a set of click
-	 *  coordinates.
+	/** Find the rectangle (text or color, depending on the current mode)
+	 *  under the WPoint p.
 	 */
-	public WTextRect findClickedTextRectangle(WPoint p) {
-		// find the closest token of type text rectangle on the selected page
-		// and return
-		for (WTextRect tr: textRects) {
-			if (tr.isNear(p, rThreshold))
-				return tr;
+	public WgRectangle findRectangle(WPoint p) {
+		if (inTextRectMode()) {
+			// find the closest text rectangle on the selected page and return
+			for (WgTextRect tr: textRects) {
+				if (!tr.isWholeSign() && tr.isNear(p))
+					return tr;
+			}
+		} else if (inColorRectMode()) {
+			for (WgColorRect cr: colorRects) {
+				if (cr.isNear(p))
+					return cr;
+			}
 		}
 		return null;
 	}
@@ -560,6 +612,30 @@ public class WController {
 		}
 	};
 	
+	/** Initialize mouse cursors available to the GUI. */
+	private void initCursors() {
+		textCursor = new Cursor(Cursor.TEXT_CURSOR);
+		graphicCursor = new Cursor(Cursor.HAND_CURSOR);
+		colorRectCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+		textRectCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+		multiTagCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+		moveCursor = new Cursor(Cursor.MOVE_CURSOR);
+		
+		// initialize resize cursors in a HashMap to make them easy to access
+		resizeCursors = new HashMap<String, Cursor>();
+		resizeCursors.put(WgRectangle.N, new Cursor(Cursor.N_RESIZE_CURSOR));
+		resizeCursors.put(WgRectangle.S, new Cursor(Cursor.S_RESIZE_CURSOR));
+		resizeCursors.put(WgRectangle.E, new Cursor(Cursor.E_RESIZE_CURSOR));
+		resizeCursors.put(WgRectangle.W, new Cursor(Cursor.W_RESIZE_CURSOR));
+		resizeCursors.put(WgRectangle.NE, new Cursor(Cursor.NE_RESIZE_CURSOR));
+		resizeCursors.put(WgRectangle.NW, new Cursor(Cursor.NW_RESIZE_CURSOR));
+		resizeCursors.put(WgRectangle.SE, new Cursor(Cursor.SE_RESIZE_CURSOR));
+		resizeCursors.put(WgRectangle.SW, new Cursor(Cursor.SW_RESIZE_CURSOR));
+		
+		// set the cursor mode based on the current editor mode
+		setCursorFromMode();
+	}
+	
 	/** Initialize the caret. If there is text in the message, it is placed at
 	 *  the beginning of the message (before the first printable character).
 	 *  If there is no text, it goes at the end of the page. 
@@ -580,7 +656,7 @@ public class WController {
 		// TODO what to do if not???
 	}
 	
-	/** Update text selection given the token indeces provided (set by mouse
+	/** Update text selection given the token indices provided (set by mouse
 	 *  events). 
 	 */
 	private void updateTokenListsSelection(int si, int ei,
@@ -627,6 +703,32 @@ public class WController {
 				return tok;
 		}
 		return null;
+	}
+	
+	/** Move the caret given a mouse pointer coordinate indicated by the
+	 *  WPoint p. 
+	 */
+	public void moveCaret(WPoint p) {
+		// find the closest text token
+		WToken tok = findClosestTextToken(p);
+		
+		// move the caret based on the token we got
+		if (tok != null) {
+			println("Selected token: %s", tok.toString());
+			
+			// if this is the last token, check if they clicked towards the right
+			// of it - they probably wanted the end of the page
+			if (selectedPage.isLast(tok) && rightHalf(p, tok)) {
+				moveCaret(CARET_EOP);
+			} else if (rightHalf(p, tok)) {
+				// if they clicked on the right half of the token, put the
+				// to the right of that token - this accounts for
+				// character spacing better
+				moveCaret(trTokens.indexOf(tok) + 1);
+			} else
+				// otherwise just move the caret to this token
+				moveCaret(tok);
+		}
 	}
 	
 	/** Move the caret to the spot just before the specified token. Note that
@@ -1822,8 +1924,20 @@ public class WController {
 		// clear any errors before re-rendering
 		errMan.clearErrors();
 		
-		if (multiConfig != null && wmsg != null)
+		if (multiConfig != null && wmsg != null) {
 			wmsg.renderMsg(multiConfig, errMan);
+			
+			// set the WYSIWYG image size on the pages
+			if (signPanel != null) {
+				try {
+					wmsg.setWysiwygImageSize(
+							signPanel.getWidth(), signPanel.getHeight());
+				} catch (InvalidMsgException e) {
+					// TODO do something with this?
+					e.printStackTrace();
+				}
+			}
+		}
 		
 		// check for errors from the renderer
 		if (errMan.hasErrors()) {
@@ -1910,7 +2024,7 @@ public class WController {
 		updateMultiPanel();
 		updatePageListModel();
 		updateCursor();
-		updateTextRectangles();
+		updateRectangles();
 		
 		// TODO add more stuff here eventually
 	}
@@ -1972,21 +2086,25 @@ public class WController {
 		
 		if (wmsg.isValid())
 			setSelectedPage(wmsg.getPage(selectedPageIndx+1));
-		
-		if (editor != null) {
-			editor.setPageNumberLabel(getPageNumberLabel(selectedPageIndx));
-			editor.updateWysiwygPanel();
-			
-			// give focus to the sign panel
-			signPanel.requestFocusInWindow();
-		}
 	}
 
 	/** Set the currently selected page */
 	public void setSelectedPage(WPage pg) {
 		selectedPage = pg;
 		
-		// get the text rectangles from this page and set the active one
+		// set the selected page on the WYSIWYG panel
+		if (editor != null) {
+			editor.setPageNumberLabel(getPageNumberLabel(selectedPageIndx));
+			editor.setPage(selectedPage);
+			
+			// give focus to the sign panel
+			signPanel.requestFocusInWindow();
+		}
+		
+		// make color and text rectangle GUI objects for this page
+		selectedPage.makeGuiRectangles(rThreshold);
+		
+		// get GUI text rectangles and set the active one
 		textRects = selectedPage.getTextRects();
 		
 		if (!inTextRectMode())
@@ -2001,26 +2119,48 @@ public class WController {
 			else if (selectedTrIndx < 0)
 				selectedTrIndx = 0;
 		}
-		setSelectedTextRectangle(textRects.get(selectedTrIndx));
+		setSelectedTextRectangle(selectedTrIndx);
+		
+		// get color rectangles
+		colorRects = selectedPage.getColorRects();
 	}
 	
 	public WPage getSelectedPage() {
 		return selectedPage;
 	}
 	
-	/** Update text rectangles drawn on the sign panel (only in text rectangle
-	 *  mode).
+	/** Get the currently active raster from the selected page. Ensures the
+	 *  raster object has been initialized with the dimensions of the sign
+	 *  panel.
 	 */
-	public void updateTextRectangles() {
+	public WRaster getActiveRaster() {
+		WRaster wr = null;
+		if (selectedPage != null) {
+			// get the raster for the selected page
+			wr = selectedPage.getRaster();
+			
+			// make sure it's initialized
+			if (!wr.isWysiwygInitialized() && signPanel != null)
+				signPanel.initRaster(wr);
+		}
+		return wr;
+	}
+	
+	/** Update rectangles drawn on the sign panel (only in text or color
+	 *  rectangle mode).
+	 */
+	public void updateRectangles() {
 		if (signPanel != null) {
-			if (inTextRectMode()) {
-				// get the list of text rectangles on this page
-				textRects = selectedPage.getTextRects();
-				
-				// draw them on the sign panel
-				signPanel.setTextRectangles(textRects);
-			} else
-				signPanel.clearTextRectangles();
+			ArrayList<WgRectangle> rects = null;
+			if (inTextRectMode())
+				rects = new ArrayList<WgRectangle>(textRects);
+			else if (inColorRectMode())
+				rects = new ArrayList<WgRectangle>(colorRects);
+			
+			if (rects != null)
+				signPanel.setRectangles(rects);
+			else
+				signPanel.clearRectangles();
 		}
 	}
 	
@@ -2029,21 +2169,46 @@ public class WController {
 	 */
 	public void setSelectedTextRectangle(int i) {
 		setSelectedTextRectangle(textRects.get(selectedTrIndx));
-		trTokens = selectedTextRect.getTokenList();
 	}
 
 	/** Set the selected/active text rectangle. Also sets the selectedTrIndx
 	 *  to maintain selection across updates (if it's not null).
 	 */
-	public void setSelectedTextRectangle(WTextRect tr) {
+	public void setSelectedTextRectangle(WgTextRect tr) {
 		selectedTextRect = tr;
 		if (selectedTextRect != null) {
 			selectedTrIndx = textRects.indexOf(selectedTextRect);
 			trTokens = selectedTextRect.getTokenList();
 			
 			// only draw the selected text rectangle if it is an explicit TR
-			if (!selectedTextRect.isWholeSign())
-				signPanel.setSelectedTextRectangle(selectedTextRect);
+			if (!selectedTextRect.isWholeSign()) {
+				setSelectedRectangle(selectedTextRect);
+			}
+		} else {
+			// reset the selected text rectangle
+			selectedTrIndx = -1;
+			selectedTextRect = null;
+			trTokens = new WTokenList();
+			setSelectedRectangle(null);
+		}
+	}
+	
+	/** Set the selected rectangle (text or color). If in text rectangle mode,
+	 *  the selectedRectangle is the same as the selectedTextRectangle.
+	 */
+	public void setSelectedRectangle(WgRectangle r) {
+		selectedRectangle = r;
+		
+		// initialize the geometry used by this rectangle to determine
+		// relative cursor placement
+		if (selectedRectangle != null) {
+			if (!selectedRectangle.geomInitialized())
+				selectedRectangle.initGeom(getActiveRaster(), rThreshold);
+			resizeHandles = selectedRectangle.getResizeHandles();
+			signPanel.setSelectedRectangle(selectedRectangle);
+		} else {
+			resizeHandles = null;
+			signPanel.clearSelectedRectangle();
 		}
 	}
 	
@@ -2064,18 +2229,24 @@ public class WController {
 		}
 	}
 	
+	/** Set the cursor that is active over the sign pixel panel */
+	private void setCursor(Cursor c) {
+		cursor = c;
+		updateCursor();
+	}
+	
 	/** Set the cursor type based on the editing mode */
 	private void setCursorFromMode() {
-		if (editingMode == MODE_TEXT)
-			cursor = textCursor;
-		else if (editingMode == MODE_GRAPHIC)
-			cursor = graphicCursor;
-		else if (editingMode == MODE_COLORRECT)
-			cursor = colorRectCursor;
-		else if (editingMode == MODE_TEXTRECT)
-			cursor = textRectCursor;
-		else if (editingMode == MODE_MULTITAG)
-			cursor = multiTagCursor;
+		if (inTextMode())
+			setCursor(textCursor);
+		else if (inGraphicMode())
+			setCursor(graphicCursor);
+		else if (inColorRectMode())
+			setCursor(colorRectCursor);
+		else if (inTextRectMode())
+			setCursor(textRectCursor);
+		else if (inMultiTagMode())
+			setCursor(multiTagCursor);
 	}
 	
 	/** Get a JComboBox containing a list of sign names (only applies when
@@ -2097,12 +2268,9 @@ public class WController {
 					// TODO - do we need to catch any exceptions here?
 					sign = dmsList.get(dmsName);
 					
-					// TODO a bunch more needs to happen here in addition to this
-					// (need to remake page list and stuff)
+					// update the page list and selected page given the change
 					updatePageListModel();
-					if (editor != null) {
-						editor.updateWysiwygPanel();
-					}
+					updateSelectedPage();
 				}
 			}
 			

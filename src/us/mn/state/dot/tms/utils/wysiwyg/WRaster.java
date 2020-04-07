@@ -713,7 +713,7 @@ abstract public class WRaster {
 
 	/** height of sign-image */
 	private int wysiwygImgHeight;
-
+	
 	/** Special mapping-array values */
 	static final int PIXEL_SEPARATOR  = -1; // gap between pixels
 	static final int MODULE_SEPARATOR = -2; // gap between modules
@@ -835,7 +835,8 @@ abstract public class WRaster {
 	 * @param pixHeight desired sign-image height (in pixels)
 	 * @throws InvalidMsgException
 	 */
-	public void setWysiwygImageSize(int pixWidth, int pixHeight) throws InvalidMsgException {
+	public void setWysiwygImageSize(int pixWidth, int pixHeight)
+			throws InvalidMsgException {
 		if (mcfg == null)
 			throw new InvalidMsgException("Missing MultiConfig");
 		if ((width <= 0) || (height <= 0))
@@ -922,7 +923,12 @@ abstract public class WRaster {
 				pixPerLed
 				);
 	}
-
+	
+	/** Return whether or not the WYSIWYG image size has been set. */
+	public boolean isWysiwygInitialized() {
+		return horizCoords != null && vertCoords != null;
+	}
+	
 	static final int RGB_BLACK     = Color.BLACK.getRGB();
 	static final int RGB_DARKGRAY  = Color.DARK_GRAY.getRGB();
 	static final int RGB_GRAY      = Color.GRAY.getRGB();

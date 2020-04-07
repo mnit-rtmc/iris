@@ -15,22 +15,16 @@
 
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.KeyStroke;
 
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
-import us.mn.state.dot.tms.utils.wysiwyg.WTextRect;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
+import us.mn.state.dot.tms.utils.wysiwyg.WgRectangle;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
-import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextRectangle;
+import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_Rectangle;
 
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
@@ -41,11 +35,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Stroke;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 
@@ -59,9 +50,7 @@ import java.util.HashMap;
 public class WImagePanel extends JPanel {
 	
 	private int width;
-	private int wiWidth;
 	private int height;
-	private int wiHeight;
 	private WPage pg;
 	private WRaster wr;
 	private boolean preview = false;
@@ -71,18 +60,19 @@ public class WImagePanel extends JPanel {
 	private int caretX;
 	private int caretY;
 	private int caretH;
-	private int caretW = 0;
+	private int caretW = 1;
 	private final static Color caretColor = Color.WHITE;
 	
 	/** For working with selection drawing */
 	private boolean selectionOn = false;
 	private ArrayList<Rectangle> selectRects = new ArrayList<Rectangle>();
 	
-	/** For working with text rectangle drawing */
-	private boolean textRectsOn = false;
-	private ArrayList<Rectangle> textRects = new ArrayList<Rectangle>();
-	private final static Color trColor = Color.LIGHT_GRAY;
-	private ArrayList<Rectangle> strHandles = new ArrayList<Rectangle>();
+	/** For working with text/color rectangle drawing */
+	private boolean tcRectsOn = false;
+	private ArrayList<Rectangle> tcRects = new ArrayList<Rectangle>();
+	private final static Color tcrColor = Color.LIGHT_GRAY;
+	private Rectangle selectedRectangle;
+	private ArrayList<Rectangle> srHandles = new ArrayList<Rectangle>();
 	
 	/** For drawing dashed lines */
 	private final static float dashA[] = {10.0f};
@@ -99,8 +89,6 @@ public class WImagePanel extends JPanel {
 	public WImagePanel(int w, int h) {
 		width = w;
 		height = h;
-		wiWidth = w;
-		wiHeight = h;
 		Dimension d = UI.dimension(width, height);
 		setMinimumSize(d);
 		setMaximumSize(d);
@@ -135,8 +123,8 @@ public class WImagePanel extends JPanel {
 				drawTextSelection(g);
 			
 			// same with text rectangles
-			if (textRectsOn)
-				drawTextRectangles(g);
+			if (tcRectsOn)
+				drawRectangles(g);
 		}
 	}
 	
@@ -149,7 +137,7 @@ public class WImagePanel extends JPanel {
 		if (wr != null) {
 			try {
 				if (!preview) {
-					wr.setWysiwygImageSize(wiWidth, wiHeight);
+					wr.setWysiwygImageSize(width, height);
 					image = wr.getWysiwygImage();
 				} else {
 					image = wr.getPreviewImage();
@@ -162,6 +150,26 @@ public class WImagePanel extends JPanel {
 			}
 		}
 		repaint();
+	}
+	
+	/** Initialize the raster provided with the sign panel's dimensions. */
+	public void initRaster(WRaster r) {
+		if (r != null) {
+			try {
+				r.setWysiwygImageSize(width, height);
+			} catch (InvalidMsgException e) {
+				// TODO do something with this?
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public int getWidth() {
+		return width;
+	}
+
+	public int getHeight() {
+		return height;
 	}
 	
 	/* (non-Javadoc)
@@ -216,22 +224,27 @@ public class WImagePanel extends JPanel {
 		return y;
 	}
 	
-	/** Convert a rectangle in sign coordinates to one in WYSIWYG coordinates.
-	 *  Includes the offset (TODO need to fix this?) and clips to the drawing
-	 *  area.
+	/** Get a Rectangle in WYSIWYG coordinates from a text or color rectangle
+	 *  token (in sign coordinates).
 	 */
-//	private Rectangle convertRectangleSignToWysiwyg(Rectangle r) {
-//		int tx = r.x - offset;
-//		int x = clipX(convertSignToWysiwygX(tx, 0));
-//		int w = clipX(convertSignToWysiwygX(
-//				tx+r.width, 1)) - x;
-//		
-//		int ty = r.y - offset;
-//		int y = clipX(convertSignToWysiwygY(ty, 0));
-//		int h = clipY(convertSignToWysiwygY(
-//				ty+r.height, 1)) - y;
-//		return new Rectangle(x, y, w, h);
-//	}
+	private Rectangle getRectangleFromToken(Wt_Rectangle rTok) {
+		if (rTok != null) {
+			// convert from sign coordinates to image coordinates
+			int tx = rTok.getParamX();
+			int x = clipX(convertSignToWysiwygX(tx, PIX_START));
+			int x2 = clipX(convertSignToWysiwygX(
+					tx+rTok.getParamW()-1, PIX_END));
+			
+			int ty = rTok.getParamY();
+			int y = clipX(convertSignToWysiwygY(ty, PIX_START));
+			int y2 = clipY(convertSignToWysiwygY(
+					ty+rTok.getParamH()-1, PIX_END));
+			
+			// store the drawing coordinates in a rectangle
+			return new Rectangle(x, y, x2 - x, y2 - y);
+		}
+		return null;
+	}
 	
 	/** Set the caret location given the token. */
 	public void setCaretLocation(WToken tok) {
@@ -380,54 +393,46 @@ public class WImagePanel extends JPanel {
 		g.setColor(oc);
 	}
 	
-	/** Set the text rectangles for drawing based on the list of text
+	/** Set the text or color rectangles for drawing based on the list of
 	 *  rectangles provided.
 	 */
-	public void setTextRectangles(ArrayList<WTextRect> tRects) {
-		// turn display of text rectangles on and reset before updating
-		textRectsOn = true;
-		textRects.clear();
+	public void setRectangles(ArrayList<WgRectangle> rects) {
+		// turn display of text/color rectangles on and reset before updating
+		tcRectsOn = true;
+		tcRects.clear();
 		
-		// loop through the text rectangles
-		for (WTextRect tr: tRects) {
-			WtTextRectangle trTok = tr.getTextRectToken();
-			
-			// don't draw anything for the implicit "whole-sign" TR
-			if (trTok != null) {
-				// convert from sign coordinates to image coordinates
-				int tx = trTok.getParamX();
-				int x = clipX(convertSignToWysiwygX(tx, PIX_START));
-				int x2 = clipX(convertSignToWysiwygX(
-						tx+trTok.getParamW()-1, PIX_END));
-				
-				int ty = trTok.getParamY();
-				int y = clipX(convertSignToWysiwygY(ty, PIX_START));
-				int y2 = clipY(convertSignToWysiwygY(
-						ty+trTok.getParamH()-1, PIX_END));
-				
-				// store the drawing coordinates in a rectangle
-				Rectangle r = new Rectangle(x, y, x2 - x, y2 - y);
-				textRects.add(r);
-			}
+		// loop through the rectangles
+		for (WgRectangle tr: rects) {
+			Wt_Rectangle rTok = tr.getRectToken();
+			Rectangle r = getRectangleFromToken(rTok);
+			if (r != null)
+				tcRects.add(r);
 		}
 	}
 	
-	/** Set the selected text rectangle, indicated by drawing resizing handles
-	 *  on the rectangle.
-	 */
-	public void setSelectedTextRectangle(WTextRect stRect) {
-		// get handles from the text rectangle
-		// TODO change the 2 to a variable
-		HashMap<String, Rectangle> rHandles = stRect.getHandles(2, wr);
+	/** Add resizing handles to indicate the selected the rectangle. */
+	public void setSelectedRectangle(WgRectangle sr) {
+		// set the selected rectangle - it will be drawn with solid lines (not
+		// dashed)
+		Wt_Rectangle rt = sr.getRectToken();
+		if (rt != null)
+			selectedRectangle = getRectangleFromToken(sr.getRectToken());
 		
-		// convert them to WYSIWYG coordinates and store them for drawing
+		// store resize handles for drawing - note that we don't care about
+		// direction here
+		HashMap<String, Rectangle> rHandles = sr.getResizeHandles();
 		if (rHandles != null) {
-			strHandles = new ArrayList<Rectangle>(rHandles.values());
+			srHandles = new ArrayList<Rectangle>(rHandles.values());
 		}
 	}
-
-	/** Draw the text rectangles on the graphics context. */
-	private void drawTextRectangles(Graphics g) {
+	
+	public void clearSelectedRectangle() {
+		selectedRectangle = null;
+		srHandles.clear();
+	}
+	
+	/** Draw the text/color rectangles on the graphics context. */
+	private void drawRectangles(Graphics g) {
 		// change to Graphics2D so we can set the stroke for dashed lines
 		Graphics2D g2d = (Graphics2D) g;
 		
@@ -438,16 +443,22 @@ public class WImagePanel extends JPanel {
 		
 		// get the original color so we can reset the color
 		Color oc = g2d.getColor();
-		g2d.setColor(trColor);
+		g2d.setColor(tcrColor);
 		
 		// set color to to the text rectangle color and draw
-		for (Rectangle r: textRects) {
+		for (Rectangle r: tcRects) {
 			g2d.drawRect(r.x, r.y, r.width, r.height);
 		}
 		
-		// add any handles to the selected rectangle (solid lines & filled)
+		// draw the selected rectangle
 		g2d.setStroke(os);
-		for (Rectangle hr: strHandles) {
+		if (selectedRectangle != null) {
+			g2d.drawRect(selectedRectangle.x, selectedRectangle.y,
+					selectedRectangle.width, selectedRectangle.height);
+		}
+		
+		// add handles to the selected rectangle (solid lines & filled)
+		for (Rectangle hr: srHandles) {
 			g2d.drawRect(hr.x, hr.y, hr.width, hr.height);
 			g2d.fillRect(hr.x, hr.y, hr.width, hr.height);
 		}
@@ -456,10 +467,12 @@ public class WImagePanel extends JPanel {
 		g.setColor(oc);
 	}
 
-	/** Clear the text rectangles. */
-	public void clearTextRectangles() {
-		textRects.clear();
-		textRectsOn = false;
+	/** Clear the text/color rectangles and any resize handles. */
+	public void clearRectangles() {
+		tcRects.clear();
+		selectedRectangle = null;
+		srHandles.clear();
+		tcRectsOn = false;
 	}
 	
 }

@@ -419,14 +419,9 @@ public class WMsgEditorForm extends AbstractForm {
 		pg_num_lbl.setText(pnl);
 	}
 	
-	/** Update the main WYSIWYG panel with any changes from the editor form
-	 *  TODO do we want to do this here, and like this?
-	 */
-	public void updateWysiwygPanel() {
-		// use the currently selected page to update the main WYSIWYG panel
-		WPage selectedPage = controller.getSelectedPage();
-		if (selectedPage != null)
-			epanel.updateWysiwygSignPage(selectedPage);
+	/** Set the current page displayed on the WYSIWYG panel. */
+	public void setPage(WPage sp) {
+		epanel.setPage(sp);
 	}
 	
 	/** Add the dynamic error panel for displaying current MULTI/renderer

@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.utils.Multi;
 import us.mn.state.dot.tms.utils.MultiConfig;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtColorRectangle;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextRectangle;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtUnsupportedTag;
@@ -49,7 +51,10 @@ public class WPage {
 	 *  rectangle (first in the list) along with any explicitly-declared text
 	 *  rectangles.
 	 */
-	private ArrayList<WTextRect> textRects;
+	private ArrayList<WgTextRect> textRects;
+	
+	/** Color rectangles on this page. */
+	private ArrayList<WgColorRect> colorRects;
 	
 	// TODO may need to rework how pageLines is handled with textRects  
 	
@@ -116,34 +121,75 @@ public class WPage {
 		return tokenList.indexOf(tok);
 	}
 	
-	/** Return an ArrayList of WTextRects that represent the text rectangles
-	 *  on this page.
+	/** Create WgTextRect and WgColorRect objects for this page to assist with
+	 *  GUI operations. Requires that this page's WRaster has had it's WYSIWYG
+	 *  image size set.
 	 */
-	public ArrayList<WTextRect> getTextRects() {
-		// if the message has changed, re-initialize the text rectangles
-		if (textRects == null || wMsg.isChanged()) {
-			// initialize the ArrayList
-			textRects = new ArrayList<WTextRect>();
-			
-			// start the first text rectangle that covers the whole sign
-			WTextRect tr = new WTextRect(null);
-			
-			// now iterate through the tokens to add tokens or make new text
-			// rectangles
-			for (WToken tok: tokenList) {
-				// check if it's a text rectangle tag
-				if (tok.isType(WTokenType.textRectangle)) {
-					// if it is, we need to store the old text rectangle and
-					// start a new one
-					textRects.add(tr);
-					tr = new WTextRect((WtTextRectangle) tok);
-				} else
-					// if it's not, just add the token
-					tr.addToken(tok);
-			}
-			textRects.add(tr);
+	public void makeGuiRectangles(int threshold) {
+		makeGuiTextRects(threshold);
+		makeGuiColorRects(threshold);
+	}
+	
+	/** Create WgTextRect objects for this page to assist with GUI operations.
+	 *  Requires that this page's WRaster has had it's WYSIWYG image size set.
+	 */
+	public void makeGuiTextRects(int threshold) {
+		// initialize the ArrayList
+		textRects = new ArrayList<WgTextRect>();
+		
+		// start the first text rectangle that covers the whole sign
+		WgTextRect tr = new WgTextRect(null);
+		
+		// now iterate through the tokens to add tokens or make new text
+		// rectangles
+		for (WToken tok: tokenList) {
+			// check if it's a text rectangle tag
+			if (tok.isType(WTokenType.textRectangle)) {
+				// if it is, we need to store the old text rectangle and
+				// start a new one
+				textRects.add(tr);
+				tr = new WgTextRect((WtTextRectangle) tok);
+				tr.initGeom(raster, threshold);
+			} else
+				// if it's not, just add the token
+				tr.addToken(tok);
 		}
+		textRects.add(tr);
+	}
+
+	/** Create WgColorRect objects for this page to assist with GUI
+	 *  operations. Requires that this page's WRaster has had it's WYSIWYG
+	 *  image size set.
+	 */
+	public void makeGuiColorRects(int threshold) {
+		// initialize the ArrayList
+		colorRects = new ArrayList<WgColorRect>();
+		
+		// look through the tokens to find color rectangle tags
+		for (WToken tok: tokenList) {
+			if (tok.isType(WTokenType.colorRectangle)) {
+				// if we get one, make a new WColorRect object for it
+				WgColorRect cr = new WgColorRect((WtColorRectangle) tok);
+				cr.initGeom(raster, threshold);
+				colorRects.add(cr);
+			}
+		}
+	}
+	
+	/** Return an ArrayList of WgTextRects that represent the text rectangles
+	 *  on this page, used for GUI operations. WgTextRects must be initialized
+	 *  first with the makeGuiTextRects method.
+	 */
+	public ArrayList<WgTextRect> getTextRects() {
 		return textRects;
+	}
+
+	/** Return an ArrayList of WgColorRects that represent the text rectangles
+	 *  on this page, used for GUI operations. WgColorRects must be
+	 *  initialized first with the makeGuiColorRects method.
+	 */
+	public ArrayList<WgColorRect> getColorRects() {
+		return colorRects;
 	}
 	
 	/** Return an ArrayList of WTokenLists containing the lines of the message
@@ -321,6 +367,14 @@ public class WPage {
 		return raster;
 	}
 
+	/** Set the width/height of the WYSIWYG image rendered from this page. */
+	public void setWysiwygImageSize(int pixWidth, int pixHeight)
+			throws InvalidMsgException {
+		if (raster == null)
+			throw new InvalidMsgException("Page not rendered");
+		raster.setWysiwygImageSize(pixWidth, pixHeight);
+	}
+	
 	/** Set the rendered raster
 	 * @param raster
 	 */
