@@ -125,7 +125,9 @@ public class WMsgTextToolbar extends WToolbar {
 		ColorScheme cs = controller.getMultiConfig().getColorScheme();
 		if (cs == ColorScheme.MONOCHROME_1_BIT || cs == ColorScheme.UNKNOWN) {
 			fg_color_btn.setEnabled(false);
-			bg_color_btn.setEnabled(false);
+			
+			if (includeBG)
+				bg_color_btn.setEnabled(false);
 		}
 		
 		// justification buttons
@@ -262,7 +264,8 @@ public class WMsgTextToolbar extends WToolbar {
 	 *  current background color.
      */
 	public void applyBackgroundColorIcon() {
-		bg_color_btn.setIcon(WMsgColorChooser.createColorIcon(bgColor, 16, 16));
+		if (bg_color_btn != null)
+			bg_color_btn.setIcon(WMsgColorChooser.createColorIcon(bgColor, 16, 16));
 	}
 	
 	/** Update the font combo-box given the font number value fNum. */
