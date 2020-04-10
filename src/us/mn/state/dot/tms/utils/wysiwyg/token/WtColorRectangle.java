@@ -45,7 +45,7 @@ public class WtColorRectangle extends Wt_Rectangle {
 		this.paramY = y;
 		this.paramW = w;
 		this.paramH = h;
-		this.tvColor = toTagval(r,b,g);
+		this.tvColor = toTagval(r,g,b);
 		updateString();
 	}
 
@@ -54,6 +54,11 @@ public class WtColorRectangle extends Wt_Rectangle {
 		return tvColor;
 	}
 
+	/** Set the color rectangle's color */
+	public void setColor(int r, int g, int b) {
+		tvColor = toTagval(r,g,b);
+	}
+	
 	@Override
 	public boolean isBlank() {
 		return false;

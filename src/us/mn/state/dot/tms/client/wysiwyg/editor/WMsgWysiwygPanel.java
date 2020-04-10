@@ -83,7 +83,7 @@ public class WMsgWysiwygPanel extends JPanel {
 	
 	/** Panel for graphics toolbar */
 	final static private String TEXT_RECTANGLE_TOOLBAR = "Text Rectangle Toolbar";
-	private WMsgTextRectangleToolbar textrect_toolbar_pnl;
+	private WMsgTextToolbar textrect_toolbar_pnl;
 	
 	/** Panel for graphics toolbar */
 	final static private String MULTI_TAG_TOOLBAR = "MULTI Tag Toolbar";
@@ -155,7 +155,7 @@ public class WMsgWysiwygPanel extends JPanel {
 		toolbar_pnl = new JPanel(new CardLayout(10,10));
 		
 		// Text toolbar panel
-		text_toolbar_pnl = new WMsgTextToolbar(controller);
+		text_toolbar_pnl = new WMsgTextToolbar(controller, true);
 		toolbar_pnl.add(text_toolbar_pnl, TEXT_TOOLBAR);
 		
 		// Graphic toolbar panel - used in graphic mode
@@ -167,7 +167,7 @@ public class WMsgWysiwygPanel extends JPanel {
 		toolbar_pnl.add(colorrect_toolbar_pnl, COLOR_RECTANGLE_TOOLBAR);
 		
 		// Text rectangle toolbar panel
-		textrect_toolbar_pnl = new WMsgTextRectangleToolbar(controller);
+		textrect_toolbar_pnl = new WMsgTextToolbar(controller, false);
 		toolbar_pnl.add(textrect_toolbar_pnl, TEXT_RECTANGLE_TOOLBAR);
 		
 		// MULTI Tag toolbar panel
@@ -192,13 +192,15 @@ public class WMsgWysiwygPanel extends JPanel {
 		add(nonTextTagInfoPnl);
 		
 		// mouse input adapter for handling mouse events
-		WMsgMouseInputAdapter mouseHandler = new WMsgMouseInputAdapter(controller);
+		WMsgMouseInputAdapter mouseHandler = 
+				new WMsgMouseInputAdapter(controller);
 		signPanel.addMouseListener(mouseHandler);
 		signPanel.addMouseMotionListener(mouseHandler);
 		
 		// initialize key bindings and attach to panel
 		editorKeyBindings = new WEditorKeyBindings(controller);
-		editorKeyBindings.setEditorPanelKeyBindings(signPanel, JComponent.WHEN_FOCUSED);
+		editorKeyBindings.setEditorPanelKeyBindings(
+				signPanel, JComponent.WHEN_FOCUSED);
 	}
 	
 	/** Set the currently selected page to display */
@@ -222,9 +224,10 @@ public class WMsgWysiwygPanel extends JPanel {
 		restoreBtn.setEnabled(false);
 	}
 	
-	/** Update the text toolbar */
+	/** Update the text toolbars */
 	public void updateTextToolbar() {
 		text_toolbar_pnl.updateToolbar();
+		textrect_toolbar_pnl.updateToolbar();
 	}
 	
 	/** Update the non-text tag info label, optionally including a color icon

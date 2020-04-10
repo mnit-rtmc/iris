@@ -16,8 +16,18 @@
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import javax.swing.JPanel;
-import java.awt.FlowLayout;
 
+import us.mn.state.dot.tms.DmsColor;
+import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.SmartDesktop;
+import us.mn.state.dot.tms.utils.I18N;
+
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+
+import javax.swing.JButton;
 // TODO TEMPORARY
 import javax.swing.JLabel;
 
@@ -29,10 +39,15 @@ import javax.swing.JLabel;
  */
 @SuppressWarnings("serial")
 
-public class WMsgColorRectangleToolbar extends JPanel {
+public class WMsgColorRectangleToolbar extends WToolbar {
 	
 	/** Handle to the controller */
 	private WController controller;
+	
+	/** Color picker button */
+	private JButton color_btn;
+	
+	private Color color;
 	
 	/** TODO PLACEHOLDER */
 	private JLabel placeholder;
@@ -43,7 +58,44 @@ public class WMsgColorRectangleToolbar extends JPanel {
 		// use a FlowLayout with no margins to give more control of separation
 		setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
-		placeholder = new JLabel("<COLOR RECTANGLE OPTIONS>");
-		add(placeholder);
+		color_btn = new JButton(open_color_picker);
+		color_btn.setToolTipText(
+				I18N.get("wysiwyg.epanel.color_rect_picker_title"));
+		
+		// default to the controller's current foreground color
+		DmsColor fgc = controller.getForegroundColor();
+		if (fgc != null) {
+			color = fgc.color;
+			color_btn.setIcon(
+					WMsgColorChooser.createColorIcon(color, 16, 16));
+			color_btn.setMargin(new Insets(0,0,0,0));
+		}
+		add(color_btn);
+	}
+	
+	WMsgColorRectangleToolbar tb = this;
+	
+	/** Color picker action */
+	private final IAction open_color_picker =
+			new IAction("wysiwyg.epanel.color_rect_picker_btn") {
+		@SuppressWarnings("synthetic-access")
+		protected void doActionPerformed(ActionEvent e)
+				throws Exception
+		{
+			String title = I18N.get("wysiwyg.epanel.color_rect_picker_title");
+			WMsgColorChooser ccForm = new WMsgColorChooser(controller, tb,
+					title, color, WMsgColorChooser.COLOR_RECT);
+			SmartDesktop desktop = controller.getDesktop();
+			desktop.show(ccForm);
+		}
+	};
+	
+	/** Set the color rectangle color on the controller and change the button
+	 *  appearance
+	 */
+	public void setColor(Color c, String mode) {
+		color = c;
+		controller.setColorRectangleColor(new DmsColor(color));
+		color_btn.setIcon(WMsgColorChooser.createColorIcon(color, 16, 16));
 	}
 }

@@ -246,11 +246,24 @@ public class WImagePanel extends JPanel {
 		return null;
 	}
 	
-	/** Set the caret location given the token. */
+	/** Set the caret location given the token, placing it on the left. */
 	public void setCaretLocation(WToken tok) {
+		setCaretLocation(tok, false);
+	}
+	
+	/** Set the caret location given the token. If toRight is true, it will be
+	 *  placed to the right of this token, otherwise it will be placed on the
+	 *  left.
+	 */
+	public void setCaretLocation(WToken tok, boolean toRight) {
 		// get coordinates from the token and set the caret to appear there
 		try {
-			setCaretLocation(tok.getCoordX(), tok.getCoordY(), tok.getCoordH());
+			int y = tok.getCoordY();
+			int h = tok.getCoordH();
+			int x = tok.getCoordX();
+			if (toRight)
+				x += tok.getCoordW();
+			setCaretLocation(x, y, h);
 		} catch (NullPointerException e) {
 			// TODO not sure why this happens (coords are uninitialized I
 			// think), but for now we'll just ignore it
@@ -268,11 +281,11 @@ public class WImagePanel extends JPanel {
 		int cY2 = clipY(convertSignToWysiwygY(sy+h-1, PIX_END));
 		caretH = cY2-caretY;
 		
-		System.out.println(String.format(
-				"Caret sign at (%d, %d) H = %d", sx, sy, h));
-		System.out.println(String.format(
-				"Caret img at (%d, %d) H = %d (cY2 = %d)",
-				caretX, caretY, caretH, cY2));
+//		System.out.println(String.format(
+//				"Caret sign at (%d, %d) H = %d", sx, sy, h));
+//		System.out.println(String.format(
+//				"Caret img at (%d, %d) H = %d (cY2 = %d)",
+//				caretX, caretY, caretH, cY2));
 		
 		// set the caret to enabled and repaint everything
 		showCaret();
@@ -287,6 +300,7 @@ public class WImagePanel extends JPanel {
 	/** Hide the caret on the panel. */
 	public void hideCaret() {
 		caretOn = false;
+		repaint();
 	}
 	
 	/** Draw the caret on the image at/with the caretX/Y/W/H/color and TODO
@@ -417,13 +431,16 @@ public class WImagePanel extends JPanel {
 		Wt_Rectangle rt = sr.getRectToken();
 		if (rt != null)
 			selectedRectangle = getRectangleFromToken(sr.getRectToken());
+		else
+			selectedRectangle = null;
 		
 		// store resize handles for drawing - note that we don't care about
 		// direction here
 		HashMap<String, Rectangle> rHandles = sr.getResizeHandles();
-		if (rHandles != null) {
+		if (rHandles != null)
 			srHandles = new ArrayList<Rectangle>(rHandles.values());
-		}
+		else
+			srHandles.clear();
 	}
 	
 	public void clearSelectedRectangle() {

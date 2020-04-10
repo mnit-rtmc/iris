@@ -15,6 +15,7 @@
 
 package us.mn.state.dot.tms.utils.wysiwyg;
 
+import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtColorRectangle;
 
 /**
@@ -34,5 +35,11 @@ public class WgColorRect extends WgRectangle {
 	/** Return the color rectangle tag associated with this color rectangle. */
 	public WtColorRectangle getColorRectToken() {
 		return (WtColorRectangle) rt;
+	}
+	
+	/** Set the color on the color rectangle tag. */
+	public void setColor(DmsColor c) {
+		getColorRectToken().setColor(c.red, c.green, c.blue);
+		rt.updateString();
 	}
 }

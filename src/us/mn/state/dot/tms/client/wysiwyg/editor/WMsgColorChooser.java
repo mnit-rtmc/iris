@@ -92,8 +92,8 @@ public class WMsgColorChooser extends AbstractForm {
 	/** SmartDesktop handle for closing the form */
 	private SmartDesktop desktop;
 	
-	/** Handle to the text option toolbar that created us */
-	private WMsgTextToolbar toolbar;
+	/** Handle to the toolbar that created us */
+	private WToolbar toolbar;
 	
 	/** Color scheme - determines what the color chooser looks like */
 	private ColorScheme colorScheme;
@@ -105,7 +105,8 @@ public class WMsgColorChooser extends AbstractForm {
 	 *  background color */
 	public final static String FOREGROUND="foreground";
 	public final static String BACKGROUND="background";
-	private String fgbgMode;
+	public final static String COLOR_RECT="color rectangle";
+	private String mode;
 	
 	/** Color chooser components - which one used changes depending on the
 	 *  color scheme */
@@ -120,8 +121,8 @@ public class WMsgColorChooser extends AbstractForm {
 	private JButton ok_btn;
 	private JButton cancel_btn;
 	
-	public WMsgColorChooser(WController c, WMsgTextToolbar tb, String title,
-			Color col, String fgbg) {
+	public WMsgColorChooser(WController c, WToolbar tb, String title,
+			Color col, String md) {
 		super(title, true);
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		controller = c;
@@ -129,7 +130,7 @@ public class WMsgColorChooser extends AbstractForm {
 		toolbar = tb;
 		colorScheme = controller.getMultiConfig().getColorScheme();
 		color = col;
-		fgbgMode = fgbg;
+		mode = md;
 		
 		// create and add the color chooser panes
 		initColorChooser();
@@ -242,7 +243,7 @@ public class WMsgColorChooser extends AbstractForm {
 			}
 			
 			if (color != null)
-				toolbar.setColor(color, fgbgMode);
+				toolbar.setColor(color, mode);
 			close(desktop);
 		}
 	};

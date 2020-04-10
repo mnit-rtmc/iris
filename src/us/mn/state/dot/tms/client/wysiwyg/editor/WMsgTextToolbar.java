@@ -50,7 +50,7 @@ import us.mn.state.dot.tms.utils.Multi.JustificationPage;
  */
 @SuppressWarnings("serial")
 
-public class WMsgTextToolbar extends JPanel {
+public class WMsgTextToolbar extends WToolbar {
 	
 	/** Handle to the controller */
 	private WController controller;
@@ -77,25 +77,27 @@ public class WMsgTextToolbar extends JPanel {
 	private JToggleButton text_ln_just_right_btn;
 	
 	
-	public WMsgTextToolbar(WController c) {
+	public WMsgTextToolbar(WController c, boolean includeBG) {
 		controller = c;
 		
 		// use a FlowLayout with no margins to give more control of separation
 		setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
 		// color pickers
-		bg_color_btn = new JButton(open_bg_color_picker);
-		bg_color_btn.setToolTipText(
-				I18N.get("wysiwyg.epanel.bg_color_picker_title"));
-		DmsColor bgc = controller.getBackgroundColor();
-		if (bgc != null) {
-			bgColor = bgc.color;
-			bg_color_btn.setIcon(
-					WMsgColorChooser.createColorIcon(bgColor, 16, 16));
-			bg_color_btn.setMargin(new Insets(0,0,0,0));
+		if (includeBG) {
+			bg_color_btn = new JButton(open_bg_color_picker);
+			bg_color_btn.setToolTipText(
+					I18N.get("wysiwyg.epanel.bg_color_picker_title"));
+			DmsColor bgc = controller.getBackgroundColor();
+			if (bgc != null) {
+				bgColor = bgc.color;
+				bg_color_btn.setIcon(
+						WMsgColorChooser.createColorIcon(bgColor, 16, 16));
+				bg_color_btn.setMargin(new Insets(0,0,0,0));
+			}
+			add(bg_color_btn);
+			add(Box.createHorizontalStrut(30));
 		}
-		add(bg_color_btn);
-		add(Box.createHorizontalStrut(30));
 		
 		fg_color_btn = new JButton(open_fg_color_picker);
 		fg_color_btn.setToolTipText(
@@ -224,10 +226,10 @@ public class WMsgTextToolbar extends JPanel {
 	 *  specified by passing "foreground" or "background" in the fgbg 
 	 *  parameter.
      */
-	public void setColor(Color c, String fgbg) {
-		if (fgbg.equalsIgnoreCase(WMsgColorChooser.FOREGROUND))
+	public void setColor(Color c, String mode) {
+		if (mode.equalsIgnoreCase(WMsgColorChooser.FOREGROUND))
 			setForegroundColor(c);
-		else if (fgbg.equalsIgnoreCase(WMsgColorChooser.BACKGROUND))
+		else if (mode.equalsIgnoreCase(WMsgColorChooser.BACKGROUND))
 			setBackgroundColor(c);
 	}
 	

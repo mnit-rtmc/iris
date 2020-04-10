@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
+
 
 /**
  * WTokenList - List of WYSIWYG Tokens
@@ -52,16 +54,14 @@ public class WTokenList extends ArrayList<WToken> {
 		}
 	}
 
-	/** Move all tokens in a list */
+	/** Move all tokens in a list by a specified amount. */
 	public void move(int offsetX, int offsetY) {
 		for (WToken tok : this) {
 			tok.moveTok(offsetX, offsetY);
 		}
 	}
 	
-	/** Slice the list. If indeces are out of bounds, they are truncated to
-	 *  the bounds of the list. 
-	 */
+	/** Slice the list. */
 	public WTokenList slice(int fromIndex, int toIndex) {
 		// make a new WTokenList then add items from the sublist
 		WTokenList tl = new WTokenList();
@@ -155,4 +155,110 @@ public class WTokenList extends ArrayList<WToken> {
 		}
 		return tok;
 	}
+	
+	/** Lines of text in this list */
+	private ArrayList<WTokenList> listLines;
+	
+	/** Return an ArrayList of WTokenLists containing the lines of the message
+	 *  in this list. Note that the [nl] tags ARE included at the end of each
+	 *  array.
+	 */
+	public ArrayList<WTokenList> getLines() {
+		// if the message has changed, re-initialize the lines
+		if (listLines == null) {
+			// initialize the ArrayList, then iterate through the tokens to fill it
+			listLines = new ArrayList<WTokenList>();
+			// initialize a WTokenList to hold the line
+			WTokenList l = new WTokenList();
+			
+			for (WToken t: this) {
+				l.add(t);
+				
+				if (t.isType(WTokenType.newLine)) {
+					listLines.add(l);
+					l = new WTokenList();
+				}
+			}
+			
+			// add the last line to the list
+			listLines.add(l);
+		}
+		return listLines;
+	}
+	
+
+	/** Get the index of the line on which this token is found.
+	 *  @return the index of the line, or -1 if not found */
+	public int getLineIndex(WToken tok) {
+		// get the list of lines, then try to find the token in one of them
+		ArrayList<WTokenList> lines = getLines();
+		for (int i = 0; i < lines.size(); ++i) {
+			WTokenList line = lines.get(i);
+			if (line.contains(tok)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	/** Get the line on which this token found.
+	 *  @return the WTokenList representing the line, or null if not found
+	 */
+	public WTokenList getTokenLine(WToken tok) {
+		int li = getLineIndex(tok);
+		if (li != -1)
+			return getLines().get(li);
+		return null;
+	}
+	
+	/** Return the number of lines on the page. */
+	public int getNumLines() {
+		return getLines().size();
+	}
+	
+	/** Return the next printable text token in the list after index si 
+	 *  (inclusive - if the token at si is printable text, it is returned).
+	 *  If no tokens are found, null is returned.
+	 */
+	public WToken findNextTextToken(int si) {
+		for (int i = si; i < size(); ++i) {
+			WToken tok = get(i);
+			
+			// TODO need to figure out how to deal with text/color rectangles
+			// and graphics (will be a different "mode")
+			if (tok.isPrintableText())
+				return tok;
+		}
+		return null;
+	}
+	
+	/** Find the first printable text token in the list. */
+	public WToken findFirstTextToken() {
+		return findNextTextToken(0);
+	}
+	
+	/** Return the previous printable text token in the list after index si
+	 *  (inclusive - if the token at si is printable text, it is returned).
+	 *  If no tokens are found, null is returned.
+	 */
+	public WToken findPrevTextToken(int si) {
+		if (si >= size())
+			// clip to the list size
+			si = size() - 1;
+		for (int i = si; i >= 0; --i) {
+			WToken tok = get(i);
+			
+			// TODO need to figure out how to deal with text/color rectangles
+			// and graphics (will be a different "mode")
+			if (tok.isPrintableText())
+				return tok;
+		}
+		return null;
+	}
+
+	/** Find the last printable text token in the list. */
+	public WToken findLastTextToken() {
+		return findPrevTextToken(size()-1);
+	}
+	
 }

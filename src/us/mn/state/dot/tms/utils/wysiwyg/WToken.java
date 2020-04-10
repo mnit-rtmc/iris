@@ -325,6 +325,17 @@ abstract public class WToken {
 		
 		//TODO: Limit coordinates to within the main raster
 	}
+
+	/** Set token parameter values */
+	public void setParameters(int x, int y, int w, int h) {
+		paramX = x;
+		paramY = y;
+		paramW = w;
+		paramH = h;
+		
+		// calculate the centroid based on the new parameters
+		calculateCentroid();
+	}
 	
 	/** Calculate the centroid of the token based on the coordinates */
 	private void calculateCentroid() {
@@ -403,11 +414,12 @@ abstract public class WToken {
 		//TODO: Check that coordinates are within the main raster
 	}
 
+	/** Move the token by a specified amount. */
 	public void moveTok(int offsetX, int offsetY) {
 		paramX += offsetX;
 		paramY += offsetY;
 	}
-
+	
 	//TODO:  Add code for adding & reporting errors/warnings
 	
 	//-------------------------------------------

@@ -19,7 +19,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.HashMap;
 
-import us.mn.state.dot.tms.client.wysiwyg.editor.WController;
 import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_Rectangle;
 
 /**
@@ -119,7 +118,8 @@ abstract public class WgRectangle {
 	
 	/** Return whether geometry objects have been initialized. */
 	public boolean geomInitialized() {
-		return wr != null && near != null && inside != null;
+		return wr != null && near != null
+				&& inside != null && resizeHandles != null;
 	}
 	
 	/** Return whether or not the point p is near (i.e. within the threshold)
@@ -127,7 +127,7 @@ abstract public class WgRectangle {
 	 */
 	public boolean isNear(WPoint p)
 			throws NullPointerException {
-		if (near == null)
+		if (rt != null && near == null)
 			throw new NullPointerException("Geometry not initialized");
 		return near.contains(p.getWysiwygPoint());
 	}
@@ -137,7 +137,7 @@ abstract public class WgRectangle {
 	 */
 	public boolean isOnBorder(WPoint p)
 			throws NullPointerException {
-		if (near == null || inside == null)
+		if (rt != null && (near == null || inside == null))
 			throw new NullPointerException("Geometry not initialized");
 		Point wp = p.getWysiwygPoint();
 		return near.contains(wp) && !inside.contains(wp);
@@ -148,22 +148,60 @@ abstract public class WgRectangle {
 	 */
 	public HashMap<String, Rectangle> getResizeHandles()
 			throws NullPointerException {
-		if (resizeHandles == null)
+		if (rt != null && resizeHandles == null)
 			throw new NullPointerException("Geometry not initialized");
 		return resizeHandles;
 	}
 
 	public String toString() {
+		String ts = "null";
 		if (rt != null)
-			return rt.toString();
-		return "null";
+			ts = rt.toString();
+		return String.format("<%s: %s>", this.getClass().getName(), ts);
+	}
+	
+	/** Move the rectangle by the given offsets. */
+	public void move(int offsetX, int offsetY) {
+		if (rt != null) {
+			rt.moveTok(offsetX, offsetY);
+			rt.updateString();
+		}
+	}
+	
+	/** Resize the rectangle given the direction (N/S/E/W/NE/NW/SE/SW) and
+	 *  offsets provided.
+	 */
+	public void resize(String dir, int offsetX, int offsetY) {
+		if (rt != null) {
+			// first get the original dimensions of the rectangle
+			int x = rt.getParamX();
+			int y = rt.getParamY();
+			int w = rt.getParamW();
+			int h = rt.getParamH();
+			
+			// now use the direction to determine which values to adjust
+			if (dir.startsWith(N)) {
+				// for any north operations, increase y and decrease h
+				y += offsetY;
+				h -= offsetY;
+			} else if (dir.startsWith(S))
+				// otherwise for south operations just adjust h
+				h += offsetY;
+			
+			if (dir.endsWith(W)) {
+				// for any west operations, increase x and decrease w
+				x += offsetX;
+				w -= offsetX;
+			} else if (dir.endsWith(E))
+				// otherwise for east operations just adjust w
+				w += offsetX;
+			
+			// now set the parameters and update the string
+			rt.setParameters(x, y, w, h);
+			rt.updateString();
+		}
 	}
 }
-
-
-
-
-
 
 
 

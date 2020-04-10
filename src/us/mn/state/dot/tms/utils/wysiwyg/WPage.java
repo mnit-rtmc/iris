@@ -115,6 +115,10 @@ public class WPage {
 	public int getNumTokens() {
 		return tokenList.size();
 	}
+	
+	public boolean isEmpty() {
+		return tokenList.isEmpty();
+	}
 
 	/** Get the index of the token in this page's token list. */
 	public int getTokenIndex(WToken tok) {
@@ -197,59 +201,25 @@ public class WPage {
 	 *  array.
 	 */
 	public ArrayList<WTokenList> getLines() {
-		// if the message has changed, re-initialize the lines
-		if (pageLines == null || wMsg.isChanged()) {
-			// initialize the ArrayList, then iterate through the tokens to fill it
-			pageLines = new ArrayList<WTokenList>();
-			Iterator<WToken> it = tokens();
-			
-			// initialize a WTokenList to hold the line
-			WTokenList line = new WTokenList();
-			while(it.hasNext()) {
-				// get the token and add it to the list (even if it's a newline,
-				// since that is included at the end)
-				WToken t = it.next();
-				line.add(t);
-				
-				// if this is a newline, store the current line and start a new one
-				if (t.getClass() == WtNewLine.class) {
-					pageLines.add(line);
-					line = new WTokenList();
-				}
-			}
-			// add the last line to the list
-			pageLines.add(line);
-		}
-		return pageLines;
+		return tokenList.getLines();
 	}
 	
 	/** Get the index of the line on which this token is found.
 	 *  @return the index of the line, or -1 if not found */
 	public int getLineIndex(WToken tok) {
-		// get the list of lines, then try to find the token in one of them
-		ArrayList<WTokenList> lines = getLines();
-		for (int i = 0; i < lines.size(); ++i) {
-			WTokenList line = lines.get(i);
-			if (line.contains(tok)) {
-				return i;
-			}
-		}
-		return -1;
+		return tokenList.getLineIndex(tok);
 	}
 	
 	/** Get the line on which this token found.
 	 *  @return the WTokenList representing the line, or null if not found
 	 */
 	public WTokenList getTokenLine(WToken tok) {
-		int li = getLineIndex(tok);
-		if (li != -1)
-			return getLines().get(li);
-		return null;
+		return tokenList.getTokenLine(tok);
 	}
 	
 	/** Return the number of lines on the page. */
 	public int getNumLines() {
-		return getLines().size();
+		return tokenList.getNumLines();
 	}
 	
 	/** Return the closest text token to the point sx, sy (sign coordinates).
