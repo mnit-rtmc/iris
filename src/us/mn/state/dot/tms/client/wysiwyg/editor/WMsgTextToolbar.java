@@ -53,28 +53,28 @@ import us.mn.state.dot.tms.utils.Multi.JustificationPage;
 public class WMsgTextToolbar extends WToolbar {
 	
 	/** Handle to the controller */
-	private WController controller;
+	protected WController controller;
 	
 	/** Font option menu */
-	private JComboBox<Font> fontOptions;
+	protected JComboBox<Font> fontOptions;
 	
 	/** Color Pickers */
-	private JButton fg_color_btn;
-	private Color fgColor;
-	private JButton bg_color_btn;
-	private Color bgColor;
+	protected JButton fg_color_btn;
+	protected Color fgColor;
+	protected JButton bg_color_btn;
+	protected Color bgColor;
 	
 	/** Justify Buttons */
-	private JPanel text_vjust_btn_pnl;
-	private ButtonGroup text_pg_just_btn_grp;
-	private JToggleButton text_pg_just_top_btn;
-	private JToggleButton text_pg_just_middle_btn;
-	private JToggleButton text_pg_just_bottom_btn;
-	private JPanel text_hjust_btn_pnl;
-	private ButtonGroup text_hjust_btn_grp;
-	private JToggleButton text_ln_just_left_btn;
-	private JToggleButton text_ln_just_center_btn;
-	private JToggleButton text_ln_just_right_btn;
+	protected JPanel text_vjust_btn_pnl;
+	protected ButtonGroup text_pg_just_btn_grp;
+	protected JToggleButton text_pg_just_top_btn;
+	protected JToggleButton text_pg_just_middle_btn;
+	protected JToggleButton text_pg_just_bottom_btn;
+	protected JPanel text_hjust_btn_pnl;
+	protected ButtonGroup text_hjust_btn_grp;
+	protected JToggleButton text_ln_just_left_btn;
+	protected JToggleButton text_ln_just_center_btn;
+	protected JToggleButton text_ln_just_right_btn;
 	
 	
 	public WMsgTextToolbar(WController c, boolean includeBG) {

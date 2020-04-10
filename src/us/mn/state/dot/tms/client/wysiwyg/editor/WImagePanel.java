@@ -17,17 +17,6 @@ package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import javax.swing.JPanel;
 
-import us.mn.state.dot.tms.InvalidMsgException;
-import us.mn.state.dot.tms.utils.wysiwyg.WPage;
-import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
-import us.mn.state.dot.tms.utils.wysiwyg.WToken;
-import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
-import us.mn.state.dot.tms.utils.wysiwyg.WgRectangle;
-import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
-import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_Rectangle;
-
-import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -39,6 +28,16 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import us.mn.state.dot.tms.InvalidMsgException;
+import us.mn.state.dot.tms.utils.wysiwyg.WPage;
+import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
+import us.mn.state.dot.tms.utils.wysiwyg.WToken;
+import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
+import us.mn.state.dot.tms.utils.wysiwyg.WgRectangle;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
+import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_Rectangle;
+
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * Panel for displaying a WYSIWYG DMS image.
@@ -73,6 +72,9 @@ public class WImagePanel extends JPanel {
 	private final static Color tcrColor = Color.LIGHT_GRAY;
 	private Rectangle selectedRectangle;
 	private ArrayList<Rectangle> srHandles = new ArrayList<Rectangle>();
+	
+	/** For feedback when creating new text/color rectangles */
+	private Rectangle newRectInProgress;
 	
 	/** For drawing dashed lines */
 	private final static float dashA[] = {10.0f};
@@ -480,6 +482,12 @@ public class WImagePanel extends JPanel {
 			g2d.fillRect(hr.x, hr.y, hr.width, hr.height);
 		}
 		
+		// if a new rectangle is being created, draw it
+		if (newRectInProgress != null) {
+			g2d.drawRect(newRectInProgress.x, newRectInProgress.y,
+					newRectInProgress.width, newRectInProgress.height);
+		}
+		
 		// return the color
 		g.setColor(oc);
 	}
@@ -490,8 +498,18 @@ public class WImagePanel extends JPanel {
 		selectedRectangle = null;
 		srHandles.clear();
 		tcRectsOn = false;
+		repaint();
 	}
 	
+	public void setRectangleInProgress(int x, int y, int w, int h) {
+		newRectInProgress = new Rectangle(x, y, w, h);
+		repaint();
+	}
+	
+	public void clearRectangleInProgress() {
+		newRectInProgress = null;
+		repaint();
+	}
 }
 
 

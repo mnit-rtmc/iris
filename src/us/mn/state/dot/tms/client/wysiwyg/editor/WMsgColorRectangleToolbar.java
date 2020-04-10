@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -27,6 +28,8 @@ import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
+import javax.swing.Box;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 // TODO TEMPORARY
 import javax.swing.JLabel;
@@ -49,8 +52,9 @@ public class WMsgColorRectangleToolbar extends WToolbar {
 	
 	private Color color;
 	
-	/** TODO PLACEHOLDER */
-	private JLabel placeholder;
+	/** Buttons to move the rectangle forward (up) or backward (down) */
+	private JButton moveRectUp;
+	private JButton moveRectDown;
 	
 	public WMsgColorRectangleToolbar(WController c) {
 		controller = c;
@@ -71,6 +75,28 @@ public class WMsgColorRectangleToolbar extends WToolbar {
 			color_btn.setMargin(new Insets(0,0,0,0));
 		}
 		add(color_btn);
+		
+		// TODO this is the same as the text rectangle toolbar - they may be a
+		// better way
+//		moveRectUp = new JButton(controller.moveSelectedRectangleUp);
+//		ImageIcon moveRectUpIcon = Icons.getIconByPropName(
+//				"wysiwyg.epanel.move_rect_up");
+//		moveRectUp.setIcon(moveRectUpIcon);
+//		moveRectUp.setHideActionText(true);
+//		moveRectUp.setToolTipText(I18N.get("wysiwyg.epanel.move_rect_up"));
+//		moveRectUp.setMargin(new Insets(0,0,0,0));
+//		add(Box.createHorizontalStrut(30));
+//		add(moveRectUp);
+//		
+//		moveRectDown = new JButton(controller.pageMoveUp);
+//		ImageIcon moveRectDownIcon = Icons.getIconByPropName(
+//				"wysiwyg.epanel.move_rect_down");
+//		moveRectDown.setIcon(moveRectDownIcon);
+//		moveRectDown.setHideActionText(true);
+//		moveRectUp.setToolTipText(I18N.get("wysiwyg.epanel.move_rect_down"));
+//		moveRectDown.setMargin(new Insets(0,0,0,0));
+//		add(Box.createHorizontalStrut(10));
+//		add(moveRectDown);
 	}
 	
 	WMsgColorRectangleToolbar tb = this;

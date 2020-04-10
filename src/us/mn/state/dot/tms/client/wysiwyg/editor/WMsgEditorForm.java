@@ -213,32 +213,37 @@ public class WMsgEditorForm extends AbstractForm {
 		}
 		
 		/* Page number label (default to 1) */
-		pg_num_lbl = new JLabel(String.format(I18N.get("wysiwyg.editor.page_number"), 1));
+		pg_num_lbl = new JLabel(String.format(I18N.get(
+				"wysiwyg.editor.page_number"), 1));
 		
 		/* Page List */
 		page_list = controller.getPageList();
 		
 		/* Page buttons */
 		page_add_btn = new JButton(controller.pageAdd);
-		ImageIcon pg_add_icon = Icons.getIconByPropName("wysiwyg.editor.page_add");
+		ImageIcon pg_add_icon = Icons.getIconByPropName(
+				"wysiwyg.editor.page_add");
 		page_add_btn.setIcon(pg_add_icon);
 		page_add_btn.setHideActionText(true);
 		page_add_btn.setMargin(new Insets(0,0,0,0));
 		
 		page_del_btn = new JButton(controller.pageDelete);
-		ImageIcon pg_del_icon = Icons.getIconByPropName("wysiwyg.editor.page_delete");
+		ImageIcon pg_del_icon = Icons.getIconByPropName(
+				"wysiwyg.editor.page_delete");
 		page_del_btn.setIcon(pg_del_icon);
 		page_del_btn.setHideActionText(true);
 		page_del_btn.setMargin(new Insets(0,0,0,0));
 		
 		page_mv_up_btn = new JButton(controller.pageMoveUp);
-		ImageIcon pg_mv_up_icon = Icons.getIconByPropName("wysiwyg.editor.page_move_up");
+		ImageIcon pg_mv_up_icon = Icons.getIconByPropName(
+				"wysiwyg.editor.page_move_up");
 		page_mv_up_btn.setIcon(pg_mv_up_icon);
 		page_mv_up_btn.setHideActionText(true);
 		page_mv_up_btn.setMargin(new Insets(0,0,0,0));
 		
 		page_mv_down_btn = new JButton(controller.pageMoveDown);
-		ImageIcon pg_mv_down_icon = Icons.getIconByPropName("wysiwyg.editor.page_move_down");
+		ImageIcon pg_mv_down_icon = Icons.getIconByPropName(
+				"wysiwyg.editor.page_move_down");
 		page_mv_down_btn.setIcon(pg_mv_down_icon);
 		page_mv_down_btn.setHideActionText(true);
 		page_mv_down_btn.setMargin(new Insets(0,0,0,0));

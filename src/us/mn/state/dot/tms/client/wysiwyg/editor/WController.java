@@ -68,6 +68,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 import us.mn.state.dot.tms.utils.wysiwyg.WgColorRect;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtColorForeground;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtColorRectangle;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtFont;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtJustLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtJustPage;
@@ -75,6 +76,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtPageBackground;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextChar;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextRectangle;
+import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_Rectangle;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Multi.JustificationLine;
 import us.mn.state.dot.tms.utils.Multi.JustificationPage;
@@ -123,11 +125,10 @@ public class WController {
 	/** Cursor that will change depending on mode, etc. */
 	private Cursor textCursor;
 	private Cursor graphicCursor;
-	private Cursor colorRectCursor;
-	private Cursor textRectCursor;
 	private Cursor multiTagCursor;
 	private Cursor moveCursor;
 	private HashMap<String, Cursor> resizeCursors;
+	private Cursor newRectCursor;
 	private Cursor cursor;
 	
 	/** Mouse drag parameters */
@@ -170,7 +171,7 @@ public class WController {
 	/** Either text or color rectangles on the selected page, depending on
 	 *  the mode
 	 */
-	private ArrayList<WgRectangle> modeRects;
+	private ArrayList<WgRectangle> modeRects = new ArrayList<WgRectangle>();
 	
 	/** Index of the selected rectangle in the rectangles for the cureent mode */
 	private int selectedRectIndx = 0;
@@ -381,11 +382,18 @@ public class WController {
 			setSelectedRectangle(findRectangle(p));
 		}
 		
-		// in text mode or text rectangle mode we are also looking to place
-		// the caret
-		if (inTextMode() || inTextRectMode())
-			// move the caret based on the mouse coordinates
+		// in text mode place the caret based on the mouse coordinates
+		if (inTextMode())
 			moveCaret(p);
+		else if (inTextRectMode()) {
+			// in text rectangle mode, we only place the caret if the user
+			// clicked IN the text rectangle
+			if (selectedTextRect != null && !selectedTextRect.isOnBorder(p))
+				moveCaret(p);
+			else
+				clearCaret();
+		} else if (inColorRectMode() || inGraphicMode())
+			clearCaret();
 		
 		// TODO Graphic mode, MULTI tag mode
 		
@@ -458,6 +466,8 @@ public class WController {
 				updateMoveOperation(p);
 			else if (inResizeMode())
 				updateResizeOperation(p);
+			else if (inNewRectMode())
+				updateNewRectangleOperation(p);
 		}
 		// get focus for this component when someone clicks on it
 		signPanel.requestFocusInWindow();
@@ -478,6 +488,8 @@ public class WController {
 				updateMoveOperation(p);
 			else if (inResizeMode())
 				updateResizeOperation(p);
+			else if (inNewRectMode())
+				finishNewRectangleOperation(p);
 		}
 		
 		if (inTextSelectionMode())
@@ -604,6 +616,85 @@ public class WController {
 		update();
 	}
 	
+	/** Update the new rectangle operation given the current cursor position.
+	 *  This only provides feedback for the user.
+	 */
+	private void updateNewRectangleOperation(WPoint p) {
+		if (inTextRectMode() || inColorRectMode()) {
+			// get coordinates of the rectangle in WYSIWYG coordinates
+			// make sure the (x,y) coordinates are top-left
+			int x = Math.min(lastPress.getWysiwygX(), p.getWysiwygX());
+			int y = Math.min(lastPress.getWysiwygY(), p.getWysiwygY());
+			int rx = Math.max(lastPress.getWysiwygX(), p.getWysiwygX());
+			int by = Math.max(lastPress.getWysiwygY(), p.getWysiwygY());
+			
+			// calculate the size of the new rectangle
+			int w = rx - x;
+			int h = by - y;
+			
+			// pass the parameters to the sign panel for drawing
+			signPanel.setRectangleInProgress(x, y, w, h);
+		}
+	}
+	
+	/** Finish the new rectangle operation. This actually creates the
+	 *  rectangle (text or color).
+	 *  
+	 *  Note that to simplify things, the rectangle that is created will
+	 *  differ very slightly from the one that was being drawn due to the
+	 *  position of LED separators. This will not be very noticeable and can
+	 *  be corrected with moving/resizing as needed (and saves many additional
+	 *  calculations).
+	 */
+	private void finishNewRectangleOperation(WPoint p) {
+		if (inTextRectMode() || inColorRectMode()) {
+			// get coordinates of the rectangle in sign coordinates
+			// make sure the (x,y) coordinates are top-left
+			int x = Math.min(lastPress.getSignX(), p.getSignX()) + 1;
+			int y = Math.min(lastPress.getSignY(), p.getSignY()) + 1;
+			int rx = Math.max(lastPress.getSignX(), p.getSignX()) + 1;
+			int by = Math.max(lastPress.getSignY(), p.getSignY()) + 1;
+			
+			// calculate the size of the new rectangle
+			int w = rx - x;
+			int h = by - y;
+			
+			// don't create 0-width/height rectangles (invalid)
+			if (w > 0 && h > 0) {
+				// create a new rectangle token
+				Wt_Rectangle rt;
+				if (inTextRectMode())
+					rt = new WtTextRectangle(x, y, w, h);
+				else {
+					rt = new WtColorRectangle(x, y, w, h, colorRectColor.red,
+							colorRectColor.green, colorRectColor.blue);
+				}
+				
+				// make an undo point then add it to the page - it doesn't
+				// really matter where (at least for now)
+				saveState();
+				selectedPage.addToken(rt);
+				
+				// also clear the temporary rectangle we were using for
+				// feedback
+				signPanel.clearRectangleInProgress();
+				
+				// update rectangles and get the WgRectangle object for the
+				// rectangle we just created
+				updateRectangles();
+				for (WgRectangle r: modeRects) {
+					if (r.getRectToken() == rt) {
+						setSelectedRectangle(r);
+						break;
+					}
+				}
+				
+				// update so the new rectangle shows up
+				update();
+			}
+		}
+	}
+	
 	/** Get the resize handle direction (N/S/E/W/NE/NW/SE/SW) given the mouse
 	 *  coordinates in p.
 	 */
@@ -720,8 +811,7 @@ public class WController {
 	private void initCursors() {
 		textCursor = new Cursor(Cursor.TEXT_CURSOR);
 		graphicCursor = new Cursor(Cursor.HAND_CURSOR);
-		colorRectCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
-		textRectCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+		newRectCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
 		multiTagCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 		moveCursor = new Cursor(Cursor.MOVE_CURSOR);
 		
@@ -890,22 +980,28 @@ public class WController {
 				int h = selectedPage.getEOPH();
 				signPanel.setCaretLocation(x, y, h);
 			}
-		} else {
+			
+			// a click resets the selection
+			tokensSelected.clear();
+			signPanel.clearTextSelection();
+			
+			printCaretTokens();
+			
+			// TODO need to organize this better somehow
+			updateTextToolbar();
+			updateNonTextTagInfo();
+		} else
 			// if there is no selected text rectangle, there is no caret
-			tokensBefore.clear();
-			tokensAfter.clear();
-			signPanel.hideCaret();
-		}
-		
-		// either way reset the selection
+			clearCaret();
+	}
+	
+	/** Clear the caret from the screen and reset relevant token lists. */
+	private void clearCaret() {
+		tokensBefore.clear();
+		tokensAfter.clear();
 		tokensSelected.clear();
+		signPanel.hideCaret();
 		signPanel.clearTextSelection();
-		
-		printCaretTokens();
-		
-		// TODO need to organize this better somehow
-		updateTextToolbar();
-		updateNonTextTagInfo();
 	}
 	
 	/** Get the token associated with the current caret position. This is
@@ -1104,7 +1200,7 @@ public class WController {
 			// get the current token and find what line it's on
 			WToken tok = getCaretToken();
 			WTokenList lineTokens = trTokens.getTokenLine(tok);
-			println("End of line: %s", lineTokens.toString());
+			
 			if (lineTokens != null) {
 				WToken endTok;
 				if (stepNonTextTags)
@@ -1188,6 +1284,11 @@ public class WController {
 			if (!tokensSelected.isEmpty()) {
 				// if we have a selection, delete the selection
 				deleteSelection(true);
+			} else if (selectedRectangle != null
+					&& tokensAfter.isEmpty() && tokensBefore.isEmpty()) {
+				// if we have a selected rectangle and no caret (indicated by
+				// the empty token lists), delete the rectangle
+				deleteSelectedRectangle();
 			} else {
 				// if we don't have any selection, delete the token just
 				// after the caret
@@ -1222,7 +1323,7 @@ public class WController {
 	
 	/** Delete all tokens in the selection. If saveForUndo is true, the state
 	 *  is saved before deleting the tokens. */
-	public void deleteSelection(boolean saveForUndo) {
+	private void deleteSelection(boolean saveForUndo) {
 		// TODO save the selection to reset it after undoing
 		if (saveForUndo)
 			saveState();
@@ -1241,6 +1342,137 @@ public class WController {
 		// update then move the caret
 		update();
 		updateCaret();
+	}
+	
+	/** Delete the selected rectangle. If the selected rectangle is a text
+	 *  rectangle, the tokens inside the rectangle will be deleted as well.
+	 */
+	private void deleteSelectedRectangle() {
+		if (removeSelectedRectangleTokens(true) != null) {
+			update();
+			updateCaret();
+		}
+	}
+	
+	/** Move the selected rectangle up (forwards) on the page by moving it
+	 *  later in the MULTI string.
+	 */
+	public Action moveSelectedRectangleUp = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (selectedRectangle != null
+					&& selectedRectangle.getRectToken() != null) {
+				// first figure out where we will move the tokens to
+				int newRectIndx = -1;
+				WToken lastTok = null;
+				if (selectedRectIndx < modeRects.size()-1) {
+					// if the rectangle isn't the last of this type of
+					// rectangle, add it just after the next one
+					newRectIndx = selectedRectIndx + 1;
+					lastTok = modeRects.get(newRectIndx).getLastToken();
+				} else {
+					// if this is the only type of this rectangle, move it
+					// to the end (the rectangle index will stay the same)
+					newRectIndx = selectedRectIndx;
+				}
+				
+				// remove the rectangle tokens from the page so we can add
+				// them somewhere else
+				WTokenList rToks = removeSelectedRectangleTokens(true);
+				
+				// either insert after the last token of the other rectangle
+				int newTokIndx;
+				if (lastTok != null)
+					newTokIndx = selectedPage.getTokenIndex(lastTok);
+				else
+					// or just add them to the end
+					newTokIndx = selectedPage.getNumTokens() - 1;
+				
+				for (WToken rt: rToks)
+					selectedPage.addToken(++newTokIndx, rt);
+				
+				// update to reflect the change
+				selectedRectIndx = newRectIndx;
+				update();
+				updateCaret();
+			}
+		}
+	};
+
+	/** Move the selected rectangle down (backwards) on the page by moving it
+	 *  earlier in the MULTI string.
+	 */
+	public Action moveSelectedRectangleDown = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (selectedRectangle != null
+					&& selectedRectangle.getRectToken() != null) {
+				// first figure out where we will move the tokens to
+				int newRectIndx = -1;
+				WToken firstTok = null;
+				if (selectedRectIndx > 0) {
+					// if the rectangle isn't the first of this type of
+					// rectangle, add it just before the previous one
+					newRectIndx = selectedRectIndx - 1;
+					firstTok = modeRects.get(newRectIndx).getRectToken();
+				} else {
+					// if this is the only type of this rectangle, move it to
+					// the beginning (the rectangle index will stay the same)
+					newRectIndx = selectedRectIndx;
+				}
+				
+				// remove the rectangle tokens from the page so we can add
+				// them somewhere else
+				WTokenList rToks = removeSelectedRectangleTokens(true);
+				
+				// either insert after the last token of the other rectangle
+				int newTokIndx;
+				if (firstTok != null)
+					newTokIndx = selectedPage.getTokenIndex(firstTok) - 1;
+				else
+					// or just add them to the beginning
+					newTokIndx = 0;
+				
+				for (WToken rt: rToks)
+					selectedPage.addToken(newTokIndx++, rt);
+				
+				// update to reflect the change
+				selectedRectIndx = newRectIndx;
+				update();
+				updateCaret();
+			}
+		}
+	};
+	
+	/** Remove and return all tokens associated with the currently selected
+	 *  rectangle. Returns a WTokenList of the tokens that were removed,
+	 *  or null if no tokens were removed.
+	 */
+	private WTokenList removeSelectedRectangleTokens(boolean saveForUndo) {
+		if (selectedRectangle != null) {
+			Wt_Rectangle rt = selectedRectangle.getRectToken();
+			// only do this for real rectangles (not the "whole-sign" TR)
+			
+			if (rt != null) {
+				// make an undo point if requested
+				if (saveForUndo)
+					saveState();
+				
+				WTokenList rToks = new WTokenList();
+				
+				// remove the rectangle token
+				selectedPage.removeToken(rt);
+				rToks.add(rt);
+				
+				// if it's a text rectangle, delete any tokens inside
+				if (selectedRectangle instanceof WgTextRect) {
+					for (WToken t: selectedTextRect.getTokenList()) {
+						selectedPage.removeToken(t);
+						rToks.add(t);
+					}
+				}
+				return rToks;
+			}
+		}
+		return null;
 	}
 	
 	/** Add a single ASCII character to the message at the caret location. */
@@ -1942,8 +2174,14 @@ public class WController {
 		// character that was just added)
 		update();
 		
-		// this will follow the stepNonTextTags mode
-		moveCaretRight.actionPerformed(null);
+		if (tok.isPrintableText())
+			// this will follow the stepNonTextTags mode
+			moveCaretRight.actionPerformed(null);
+		else {
+			// just added non-printable text - ignore stepNonTextTags
+			if (caretIndx < trTokens.size())
+				moveCaret(caretIndx+1);
+		}
 	}
 	
 	/** Save the current state on the stack for undoing. Resets the redo stack. */
@@ -2293,9 +2531,6 @@ public class WController {
 			// give focus to the sign panel
 			signPanel.requestFocusInWindow();
 		}
-		
-		// make color and text rectangle GUI objects for this page
-		selectedPage.makeGuiRectangles(rThreshold);
 		updateRectangles();
 	}
 	
@@ -2322,6 +2557,9 @@ public class WController {
 	
 	/** Update rectangle handling on the selected page. */
 	public void updateRectangles() {
+		// make color and text rectangle GUI objects for this page
+		selectedPage.makeGuiRectangles(rThreshold);
+		
 		// get GUI text rectangles and set the active one
 		textRects = selectedPage.getTextRects();
 
@@ -2443,9 +2681,9 @@ public class WController {
 		else if (inGraphicMode())
 			setCursor(graphicCursor);
 		else if (inColorRectMode())
-			setCursor(colorRectCursor);
+			setCursor(newRectCursor);
 		else if (inTextRectMode())
-			setCursor(textRectCursor);
+			setCursor(newRectCursor);
 		else if (inMultiTagMode())
 			setCursor(multiTagCursor);
 	}
@@ -2465,6 +2703,11 @@ public class WController {
 	/** Return whether or not we are in any resize mode (for drag operations) */
 	private boolean inResizeMode() {
 		return resizeCursors.containsValue(cursor);
+	}
+	
+	/** Return whether or not we are in new rectangle mode */
+	private boolean inNewRectMode() {
+		return cursor == newRectCursor;
 	}
 	
 	/** Get a JComboBox containing a list of sign names (only applies when
@@ -2630,6 +2873,10 @@ public class WController {
 			bgColor = multiConfig.getDefaultBG();
 			fgColorDefault = fgColor;
 			bgColorDefault = bgColor;
+			
+			// use the default foreground color for color rectangles (so we
+			// always have one)
+			colorRectColor = multiConfig.getDefaultFG();
 		}
 	}
 	

@@ -382,6 +382,8 @@ abstract public class WToken {
 	 * @return the centroid X coordinate
 	 */
 	public Integer getCentroidX() {
+		if (centroidX == null)
+			calculateCentroid();
 		return centroidX;
 	}
 	
@@ -389,6 +391,8 @@ abstract public class WToken {
 	 * @return the centroid Y coordinate
 	 */
 	public Integer getCentroidY() {
+		if (centroidY == null)
+			calculateCentroid();
 		return centroidY;
 	}
 	

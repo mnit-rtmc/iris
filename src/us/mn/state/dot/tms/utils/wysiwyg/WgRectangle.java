@@ -74,6 +74,13 @@ abstract public class WgRectangle {
 		return rt;
 	}
 	
+	/** Return the last token associated with this rectangle (by default just
+	 *  the rectangle token itself).
+	 */
+	public WToken getLastToken() {
+		return rt;
+	}
+	
 	/** Initialize geometry objects for use by the WRectangle. */
 	public void initGeom(WRaster r, int threshold) {
 		// set the WRaster and threshold

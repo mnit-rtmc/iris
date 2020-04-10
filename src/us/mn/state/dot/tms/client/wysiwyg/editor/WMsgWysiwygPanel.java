@@ -167,7 +167,7 @@ public class WMsgWysiwygPanel extends JPanel {
 		toolbar_pnl.add(colorrect_toolbar_pnl, COLOR_RECTANGLE_TOOLBAR);
 		
 		// Text rectangle toolbar panel
-		textrect_toolbar_pnl = new WMsgTextToolbar(controller, false);
+		textrect_toolbar_pnl = new WMsgTextRectangleToolbar(controller);
 		toolbar_pnl.add(textrect_toolbar_pnl, TEXT_RECTANGLE_TOOLBAR);
 		
 		// MULTI Tag toolbar panel

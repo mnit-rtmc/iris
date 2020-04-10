@@ -47,6 +47,19 @@ public class WgTextRect extends WgRectangle {
 		return (WtTextRectangle) rt;
 	}
 	
+	/** Return the last token associated with this text rectangle, either the
+	 *  text rectangle token itself or the last token inside of it. If this
+	 *  is the whole-sign text rectangle, null is returned.
+	 */
+	@Override
+	public WToken getLastToken() {
+		if (rt != null) {
+			if (!tokenList.isEmpty())
+				return tokenList.getLast();
+		}
+		return rt;
+	}
+	
 	/** Return the list of tokens inside this text rectangle. */
 	public WTokenList getTokenList() {
 		return tokenList;

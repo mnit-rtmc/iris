@@ -15,11 +15,14 @@
 
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
-import javax.swing.JPanel;
-import java.awt.FlowLayout;
+import java.awt.Insets;
 
-// TODO TEMPORARY
-import javax.swing.JLabel;
+import javax.swing.Box;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+
+import us.mn.state.dot.tms.client.widget.Icons;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * WYSIWYG DMS Message Editor Text Rectangle Option Panel containing buttons
@@ -29,21 +32,34 @@ import javax.swing.JLabel;
  */
 @SuppressWarnings("serial")
 
-public class WMsgTextRectangleToolbar extends JPanel {
+public class WMsgTextRectangleToolbar extends WMsgTextToolbar {
 	
-	/** Handle to the controller */
-	private WController controller;
-	
-	/** TODO PLACEHOLDER */
-	private JLabel placeholder;
+	/** Buttons to move the rectangle forward (up) or backward (down) */
+	private JButton moveRectUp;
+	private JButton moveRectDown;
 	
 	public WMsgTextRectangleToolbar(WController c) {
-		controller = c;
-
-		// use a FlowLayout with no margins to give more control of separation
-		setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		super(c, false);
 		
-		placeholder = new JLabel("<TEXT RECTANGLE OPTIONS>");
-		add(placeholder);
+//		moveRectUp = new JButton(controller.moveSelectedRectangleUp);
+//		ImageIcon moveRectUpIcon = Icons.getIconByPropName(
+//				"wysiwyg.epanel.move_rect_up");
+//		moveRectUp.setIcon(moveRectUpIcon);
+//		moveRectUp.setHideActionText(true);
+//		moveRectUp.setToolTipText(I18N.get("wysiwyg.epanel.move_rect_up"));
+//		moveRectUp.setMargin(new Insets(0,0,0,0));
+//		add(Box.createHorizontalStrut(30));
+//		add(moveRectUp);
+//		
+//		moveRectDown = new JButton(controller.pageMoveUp);
+//		ImageIcon moveRectDownIcon = Icons.getIconByPropName(
+//				"wysiwyg.epanel.move_rect_down");
+//		moveRectDown.setIcon(moveRectDownIcon);
+//		moveRectDown.setHideActionText(true);
+//		moveRectUp.setToolTipText(I18N.get("wysiwyg.epanel.move_rect_down"));
+//		moveRectDown.setMargin(new Insets(0,0,0,0));
+//		add(Box.createHorizontalStrut(10));
+//		add(moveRectDown);
+		
 	}
 }
