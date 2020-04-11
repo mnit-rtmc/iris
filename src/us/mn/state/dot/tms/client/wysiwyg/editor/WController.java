@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,6 +31,7 @@ import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -39,6 +39,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
@@ -70,6 +72,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WgColorRect;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtColorForeground;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtColorRectangle;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtFont;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtGraphic;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtJustLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtJustPage;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
@@ -183,9 +186,16 @@ public class WController {
 	
 	/** Handles of currently selected text or color rectangles */
 	private HashMap<String,Rectangle> resizeHandles;
+
+	/** Graphic list model */
+	private DefaultComboBoxModel<Graphic> supportedGraphics =
+			new DefaultComboBoxModel<Graphic>();
 	
-	// TODO figure out how to make general text editing code work for text
-	// rectangles (should be able to manage without major changes)
+	/** Graphics on the selected page */
+	private WTokenList graphics = new WTokenList();
+	
+	/** Currently selected graphic */
+	private WtGraphic selectedGraphic;
 	
 	/** Token lists for helping with caret placement and stuff */
 	private WTokenList tokensBefore = new WTokenList();
@@ -200,10 +210,6 @@ public class WController {
 	 *  navigation and a status bar below the sign panel.
 	 */
 	private boolean stepNonTextTags = false;
-	
-	/** Font and graphics caches */
-	private WFontCache fontCache = new WFontCache();
-	private WGraphicCache graphicCache = new WGraphicCache();
 	
 	/** WMessage for working with rendered message */
 	private WMessage wmsg = null;
@@ -422,6 +428,8 @@ public class WController {
 			if (inTextRectMode() || inColorRectMode())
 				// first set (or clear) the selected rectangle
 				setSelectedRectangle(findRectangle(p));
+			else if (inGraphicMode())
+				selectedGraphic = findGraphic(p);
 			
 			// set the drag mode given what the user just clicked on and save
 			// these coordinates
@@ -510,7 +518,7 @@ public class WController {
 	private void startDrag() {
 		if (!dragStarted) {
 			dragStarted = true;
-			if (inMoveMode() || inResizeMode())
+			if (inMoveMode() || inResizeMode() || inGraphicMode())
 				saveState();
 		}
 	}
@@ -589,7 +597,17 @@ public class WController {
 			}
 		} else if (inGraphicMode()) {
 			// move the selected graphic(s) to the new point
-			
+			if (selectedGraphic != null && lastPress != null) {
+				// calculate the change in position
+				int offsetX = p.getSignX() - lastPress.getSignX();
+				int offsetY = p.getSignY() - lastPress.getSignY();
+				
+				// move the token
+				selectedGraphic.moveTok(offsetX, offsetY);
+				
+				// update the last press
+				lastPress = p;
+			}
 		}
 		
 		// update everything
@@ -659,6 +677,10 @@ public class WController {
 			int w = rx - x;
 			int h = by - y;
 			
+			println(
+			  "Creating new rectangle with: (%d, %d) -> (%d, %d) => %d w, %d h",
+			  x, y, rx, by, w, h);
+			
 			// don't create 0-width/height rectangles (invalid)
 			if (w > 0 && h > 0) {
 				// create a new rectangle token
@@ -695,6 +717,18 @@ public class WController {
 		}
 	}
 	
+	/** Add a graphic to the current page. The graphic will be added to (1, 1)
+	 *  (in sign coordinates), but it can be moved later.
+	 */
+	public void addGraphic(Graphic g) {
+		// create a WtGraphic token for this graphic and add it to the end
+		// of the page
+		saveState();
+		WtGraphic gt = new WtGraphic(g.getGNumber(), 1, 1, null);
+		selectedPage.addToken(gt);
+		update();
+	}
+	
 	/** Get the resize handle direction (N/S/E/W/NE/NW/SE/SW) given the mouse
 	 *  coordinates in p.
 	 */
@@ -722,7 +756,7 @@ public class WController {
 	/** Find the rectangle (text or color, depending on the current mode)
 	 *  under the WPoint p.
 	 */
-	public WgRectangle findRectangle(WPoint p) {
+	private WgRectangle findRectangle(WPoint p) {
 		if (inTextRectMode()) {
 			// find the closest text rectangle on the selected page and return
 			for (WgTextRect tr: textRects) {
@@ -735,6 +769,18 @@ public class WController {
 					return cr;
 			}
 		}
+		return null;
+	}
+	
+	/** Find the graphic under the WPoint p. */
+	private WtGraphic findGraphic(WPoint p) {
+//		if (inGraphicMode()) {
+//			for (WToken g: graphics) {
+//				if (g.isInside(p))
+//					println("Found %s", g.toString());
+//					return (WtGraphic) g;
+//			}
+//		}
 		return null;
 	}
 	
@@ -778,7 +824,12 @@ public class WController {
 					setCursorFromMode();
 			}
 		} else if (inGraphicMode()) {
-			// TODO - will change to move cursor if over graphic
+			// check if we're on a graphic - if so, use the move cursor
+			WtGraphic gt = findGraphic(p);
+			if (gt != null)
+				setCursor(moveCursor);
+			else
+				setCursorFromMode();
 		} else { // MULTI tag mode or text mode
 			// NOTE - MULTI tag mode will probably just be like text mode (text
 			// cursor only and always)
@@ -1354,91 +1405,91 @@ public class WController {
 		}
 	}
 	
-	/** Move the selected rectangle up (forwards) on the page by moving it
-	 *  later in the MULTI string.
+	/** Move the selected region (rectangle or graphic) up (forwards) on the
+	 *  the page by moving it later in the MULTI string.
 	 */
-	public Action moveSelectedRectangleUp = new AbstractAction() {
+	public Action moveSelectedRegionUp = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-			if (selectedRectangle != null
-					&& selectedRectangle.getRectToken() != null) {
-				// first figure out where we will move the tokens to
-				int newRectIndx = -1;
-				WToken lastTok = null;
-				if (selectedRectIndx < modeRects.size()-1) {
-					// if the rectangle isn't the last of this type of
-					// rectangle, add it just after the next one
-					newRectIndx = selectedRectIndx + 1;
-					lastTok = modeRects.get(newRectIndx).getLastToken();
-				} else {
-					// if this is the only type of this rectangle, move it
-					// to the end (the rectangle index will stay the same)
-					newRectIndx = selectedRectIndx;
-				}
-				
-				// remove the rectangle tokens from the page so we can add
-				// them somewhere else
-				WTokenList rToks = removeSelectedRectangleTokens(true);
-				
-				// either insert after the last token of the other rectangle
-				int newTokIndx;
-				if (lastTok != null)
-					newTokIndx = selectedPage.getTokenIndex(lastTok);
-				else
-					// or just add them to the end
-					newTokIndx = selectedPage.getNumTokens() - 1;
-				
-				for (WToken rt: rToks)
-					selectedPage.addToken(++newTokIndx, rt);
-				
-				// update to reflect the change
-				selectedRectIndx = newRectIndx;
-				update();
-				updateCaret();
-			}
+//			if (selectedRectangle != null
+//					&& selectedRectangle.getRectToken() != null) {
+//				// first figure out where we will move the tokens to
+//				int newRectIndx = -1;
+//				WToken lastTok = null;
+//				if (selectedRectIndx < modeRects.size()-1) {
+//					// if the rectangle isn't the last of this type of
+//					// rectangle, add it just after the next one
+//					newRectIndx = selectedRectIndx + 1;
+//					lastTok = modeRects.get(newRectIndx).getLastToken();
+//				} else {
+//					// if this is the only type of this rectangle, move it
+//					// to the end (the rectangle index will stay the same)
+//					newRectIndx = selectedRectIndx;
+//				}
+//				
+//				// remove the rectangle tokens from the page so we can add
+//				// them somewhere else
+//				WTokenList rToks = removeSelectedRectangleTokens(true);
+//				
+//				// either insert after the last token of the other rectangle
+//				int newTokIndx;
+//				if (lastTok != null)
+//					newTokIndx = selectedPage.getTokenIndex(lastTok);
+//				else
+//					// or just add them to the end
+//					newTokIndx = selectedPage.getNumTokens() - 1;
+//				
+//				for (WToken rt: rToks)
+//					selectedPage.addToken(++newTokIndx, rt);
+//				
+//				// update to reflect the change
+//				selectedRectIndx = newRectIndx;
+//				update();
+//				updateCaret();
+//			}
 		}
 	};
 
-	/** Move the selected rectangle down (backwards) on the page by moving it
-	 *  earlier in the MULTI string.
+	/** Move the selected region (rectangle or graphic) down (backwards) on
+	 *  the page by moving it earlier in the MULTI string.
 	 */
-	public Action moveSelectedRectangleDown = new AbstractAction() {
+	public Action moveSelectedRegionDown = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-			if (selectedRectangle != null
-					&& selectedRectangle.getRectToken() != null) {
-				// first figure out where we will move the tokens to
-				int newRectIndx = -1;
-				WToken firstTok = null;
-				if (selectedRectIndx > 0) {
-					// if the rectangle isn't the first of this type of
-					// rectangle, add it just before the previous one
-					newRectIndx = selectedRectIndx - 1;
-					firstTok = modeRects.get(newRectIndx).getRectToken();
-				} else {
-					// if this is the only type of this rectangle, move it to
-					// the beginning (the rectangle index will stay the same)
-					newRectIndx = selectedRectIndx;
-				}
-				
-				// remove the rectangle tokens from the page so we can add
-				// them somewhere else
-				WTokenList rToks = removeSelectedRectangleTokens(true);
-				
-				// either insert after the last token of the other rectangle
-				int newTokIndx;
-				if (firstTok != null)
-					newTokIndx = selectedPage.getTokenIndex(firstTok) - 1;
-				else
-					// or just add them to the beginning
-					newTokIndx = 0;
-				
-				for (WToken rt: rToks)
-					selectedPage.addToken(newTokIndx++, rt);
-				
-				// update to reflect the change
-				selectedRectIndx = newRectIndx;
-				update();
-				updateCaret();
-			}
+//			if (selectedRectangle != null
+//					&& selectedRectangle.getRectToken() != null) {
+//				// first figure out where we will move the tokens to
+//				int newRectIndx = -1;
+//				WToken firstTok = null;
+//				if (selectedRectIndx > 0) {
+//					// if the rectangle isn't the first of this type of
+//					// rectangle, add it just before the previous one
+//					newRectIndx = selectedRectIndx - 1;
+//					firstTok = modeRects.get(newRectIndx).getRectToken();
+//				} else {
+//					// if this is the only type of this rectangle, move it to
+//					// the beginning (the rectangle index will stay the same)
+//					newRectIndx = selectedRectIndx;
+//				}
+//				
+//				// remove the rectangle tokens from the page so we can add
+//				// them somewhere else
+//				WTokenList rToks = removeSelectedRectangleTokens(true);
+//				
+//				// either insert after the last token of the other rectangle
+//				int newTokIndx;
+//				if (firstTok != null)
+//					newTokIndx = selectedPage.getTokenIndex(firstTok) - 1;
+//				else
+//					// or just add them to the beginning
+//					newTokIndx = 0;
+//				
+//				for (WToken rt: rToks)
+//					selectedPage.addToken(newTokIndx++, rt);
+//				
+//				// update to reflect the change
+//				selectedRectIndx = newRectIndx;
+//				update();
+//				updateCaret();
+//			}
 		}
 	};
 	
@@ -2165,7 +2216,8 @@ public class WController {
 	/** Add the token to the selected page at the caret index. */
 	private void addToken(WToken tok) {
 		// figure out where on the page to add the token
-		int pgi = getCaretIndexOnPage(tok.isPrintableText());
+//		int pgi = getCaretIndexOnPage(tok.isPrintableText());
+		int pgi = getCaretIndexOnPage(false);
 		
 		// add the token at this location
 		selectedPage.addToken(pgi, tok);
@@ -2777,6 +2829,7 @@ public class WController {
 		editingMode = MODE_TEXT;
 		setCursorFromMode();
 		update();
+		updateCaret();
 	}
 
 	public boolean inGraphicMode() {
@@ -2788,6 +2841,7 @@ public class WController {
 		editingMode = MODE_GRAPHIC;
 		setCursorFromMode();
 		update();
+		updateCaret();
 	}
 
 	public boolean inTextRectMode() {
@@ -2799,6 +2853,7 @@ public class WController {
 		editingMode = MODE_TEXTRECT;
 		setCursorFromMode();
 		update();
+		updateCaret();
 	}
 
 	public boolean inColorRectMode() {
@@ -2810,6 +2865,7 @@ public class WController {
 		editingMode = MODE_COLORRECT;
 		setCursorFromMode();
 		update();
+		updateCaret();
 	}
 	
 	public boolean inMultiTagMode() {
@@ -2821,6 +2877,7 @@ public class WController {
 		editingMode = MODE_MULTITAG;
 		setCursorFromMode();
 		update();
+		updateCaret();
 	}
 	
 	public Cursor getCursor() {
@@ -2835,6 +2892,35 @@ public class WController {
 		if (session != null) {
 			return session.getSonarState().getDmsCache().getFontModel();
 		} return null;
+	}
+	
+	/** Update the list model of graphics supported by the current MultiConfig
+	 *  based on the dimensions and color scheme of the sign.
+	 *  
+	 *  TODO (as everywhere) - SignGroups... 
+	 */
+	public void updateGraphicModel() {
+		// get sign parameters from the MultiConfig
+		int maxHeight = multiConfig.getPixelHeight();
+		int maxWidth = multiConfig.getPixelWidth();
+		int maxColorScheme = multiConfig.getColorScheme().ordinal();
+		
+		// clear the list we have before updating
+		supportedGraphics.removeAllElements();
+		
+		// filter the list of all graphics available to the ones we support
+		Iterator<Graphic> it = GraphicHelper.iterator();
+		while (it.hasNext()) {
+			Graphic g = it.next();
+			if (g.getHeight() <= maxHeight && g.getWidth() <= maxWidth
+					&& g.getColorScheme() <= maxColorScheme)
+				supportedGraphics.addElement(g);
+		}
+	}
+	
+	public DefaultComboBoxModel<Graphic> getGraphicModel() {
+		updateGraphicModel();
+		return supportedGraphics;
 	}
 	
 	public Font getCurrentFont() {

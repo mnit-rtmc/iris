@@ -16,10 +16,27 @@
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import javax.swing.JPanel;
-import java.awt.FlowLayout;
+import javax.swing.ListCellRenderer;
+import javax.swing.SwingConstants;
 
-// TODO TEMPORARY
-import javax.swing.JLabel;
+import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.client.dms.GraphicListCellRenderer;
+import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.utils.I18N;
+
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
+
+import javax.swing.Box;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JList;
 
 /**
  * WYSIWYG DMS Message Editor Graphic Option Panel containing buttons with
@@ -34,8 +51,12 @@ public class WMsgGraphicToolbar extends JPanel {
 	/** Handle to the controller */
 	private WController controller;
 	
-	/** TODO PLACEHOLDER */
-	private JLabel placeholder;
+	/** Graphics list */
+	private DefaultComboBoxModel<Graphic> supportedGraphics;
+	private JComboBox<Graphic> graphicList;
+	
+	/** "Add" button */
+	private JButton addBtn;
 	
 	public WMsgGraphicToolbar(WController c) {
 		controller = c;
@@ -43,7 +64,53 @@ public class WMsgGraphicToolbar extends JPanel {
 		// use a FlowLayout with no margins to give more control of separation
 		setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
-		placeholder = new JLabel("<GRAPHICS OPTIONS>");
-		add(placeholder);
+		// get the list of graphics from the controller
+		supportedGraphics = controller.getGraphicModel();
+		
+		// make the ComboBox and add it
+		graphicList = new JComboBox<Graphic>(supportedGraphics);
+		graphicList.setRenderer(new WGraphicListCellRenderer());
+		add(graphicList);
+		
+		// add the "add" button
+		addBtn = new JButton(addGraphic);
+		addBtn.setToolTipText(I18N.get("wysiwyg.epanel.add_graphic_tooltip"));
+		add(Box.createHorizontalStrut(10));
+		add(addBtn);
 	}
+	
+	/** Action to add the graphic */
+	private final IAction addGraphic = new IAction(
+			"wysiwyg.epanel.add_graphic_button") {
+		protected void doActionPerformed(ActionEvent e)
+				throws Exception {
+			// get the selected graphic and add it using the controller
+			Graphic g = (Graphic) graphicList.getSelectedItem();
+			WController.println("Adding graphic %d", g.getGNumber());
+			controller.addGraphic(g);
+		}
+	};
+	
+	private class WGraphicListCellRenderer extends GraphicListCellRenderer {
+		public WGraphicListCellRenderer() {
+			cell.setPreferredSize(new Dimension(200, 30));
+			cell.setHorizontalTextPosition(SwingConstants.LEFT);
+		}
+		
+		/** Modified cell renderer to scale images. */
+		@Override
+		public Component getListCellRendererComponent(
+			JList<? extends Graphic> list, Graphic g, int index,
+			boolean isSelected, boolean hasFocus)
+		{
+			String v = (g != null) ? Integer.toString(g.getGNumber()) : "";
+			cell.getListCellRendererComponent(list, v, index, isSelected,
+				hasFocus);
+			Image im = createImage(g).getScaledInstance(
+					-1, 25, BufferedImage.SCALE_DEFAULT);
+			cell.setIcon((im != null) ? new ImageIcon(im) : null);
+			return cell;
+		}
+	}
+	
 }

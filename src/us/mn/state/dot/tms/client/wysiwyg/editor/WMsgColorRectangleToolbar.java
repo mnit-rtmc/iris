@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import javax.swing.JPanel;
 
+import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.Icons;
@@ -76,27 +77,37 @@ public class WMsgColorRectangleToolbar extends WToolbar {
 		}
 		add(color_btn);
 		
+		// disable the color button for monochrome or unknown color schemes
+		ColorScheme cs = controller.getMultiConfig().getColorScheme();
+		if (cs == ColorScheme.MONOCHROME_1_BIT || cs == ColorScheme.UNKNOWN) {
+			color_btn.setEnabled(false);
+		}
+		
 		// TODO this is the same as the text rectangle toolbar - they may be a
 		// better way
-//		moveRectUp = new JButton(controller.moveSelectedRectangleUp);
-//		ImageIcon moveRectUpIcon = Icons.getIconByPropName(
-//				"wysiwyg.epanel.move_rect_up");
-//		moveRectUp.setIcon(moveRectUpIcon);
-//		moveRectUp.setHideActionText(true);
-//		moveRectUp.setToolTipText(I18N.get("wysiwyg.epanel.move_rect_up"));
-//		moveRectUp.setMargin(new Insets(0,0,0,0));
-//		add(Box.createHorizontalStrut(30));
-//		add(moveRectUp);
-//		
-//		moveRectDown = new JButton(controller.pageMoveUp);
-//		ImageIcon moveRectDownIcon = Icons.getIconByPropName(
-//				"wysiwyg.epanel.move_rect_down");
-//		moveRectDown.setIcon(moveRectDownIcon);
-//		moveRectDown.setHideActionText(true);
-//		moveRectUp.setToolTipText(I18N.get("wysiwyg.epanel.move_rect_down"));
-//		moveRectDown.setMargin(new Insets(0,0,0,0));
-//		add(Box.createHorizontalStrut(10));
-//		add(moveRectDown);
+		moveRectUp = new JButton(controller.moveSelectedRegionUp);
+		ImageIcon moveRectUpIcon = Icons.getIconByPropName(
+				"wysiwyg.epanel.move_rect_up");
+		moveRectUp.setIcon(moveRectUpIcon);
+		moveRectUp.setHideActionText(true);
+		moveRectUp.setToolTipText(I18N.get("wysiwyg.epanel.move_rect_up"));
+		moveRectUp.setMargin(new Insets(0,0,0,0));
+		add(Box.createHorizontalStrut(30));
+		add(moveRectUp);
+		
+		moveRectDown = new JButton(controller.pageMoveUp);
+		ImageIcon moveRectDownIcon = Icons.getIconByPropName(
+				"wysiwyg.epanel.move_rect_down");
+		moveRectDown.setIcon(moveRectDownIcon);
+		moveRectDown.setHideActionText(true);
+		moveRectDown.setToolTipText(I18N.get("wysiwyg.epanel.move_rect_down"));
+		moveRectDown.setMargin(new Insets(0,0,0,0));
+		add(Box.createHorizontalStrut(10));
+		add(moveRectDown);
+		
+		// TODO temporary
+		moveRectUp.setEnabled(false);
+		moveRectDown.setEnabled(false);
 	}
 	
 	WMsgColorRectangleToolbar tb = this;

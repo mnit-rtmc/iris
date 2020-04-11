@@ -30,6 +30,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 
+import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
@@ -145,10 +146,17 @@ public class WMsgWysiwygPanel extends JPanel {
 		disableRestoreButton();
 		add(mode_btn_pnl);
 		
+		// disable color rectangle, text rectangle, and graphics buttons for
+		// all signs that aren't full matrix
+		// TODO may need to adjust this for sign groups
+		if (controller.getMultiConfig().getDmsType() != DMSType.VMS_FULL) {
+			graphic_mode_btn.setEnabled(false);
+			colorrect_mode_btn.setEnabled(false);
+			textrect_mode_btn.setEnabled(false);
+		}
+		
 		// TODO temporary
 		graphic_mode_btn.setEnabled(false);
-//		colorrect_mode_btn.setEnabled(false);
-//		textrect_mode_btn.setEnabled(false);
 		multitag_mode_btn.setEnabled(false);
 		
 		/** Option Panel - changes depending on the mode */
