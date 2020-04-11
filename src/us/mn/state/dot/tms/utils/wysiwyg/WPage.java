@@ -154,8 +154,10 @@ public class WPage {
 				textRects.add(tr);
 				tr = new WgTextRect((WtTextRectangle) tok);
 				tr.initGeom(raster, threshold);
-			} else
-				// if it's not, just add the token
+			} else if (!tok.isType(WTokenType.colorRectangle)
+					&& !tok.isType(WTokenType.graphic))
+				// if it's not a text rectangle, color rectangle, or graphic,
+				// just add the token (CR and graphics we'll just skip)
 				tr.addToken(tok);
 		}
 		textRects.add(tr);
