@@ -19,6 +19,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.HashMap;
 
+import us.mn.state.dot.tms.client.wysiwyg.editor.WController;
 import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_Rectangle;
 
 /**
@@ -167,10 +168,14 @@ abstract public class WgRectangle {
 		return String.format("<%s: %s>", this.getClass().getName(), ts);
 	}
 	
-	/** Move the rectangle by the given offsets. */
+	/** Move the rectangle by the given offsets. Note that this doesn't allow
+	 *  moving past the sign border.
+	 */
 	public void move(int offsetX, int offsetY) {
 		if (rt != null) {
-			rt.moveTok(offsetX, offsetY);
+			int ox = checkOffsetX(offsetX);
+			int oy = checkOffsetY(offsetY);
+			rt.moveTok(ox, oy);
 			rt.updateString();
 		}
 	}
@@ -207,6 +212,50 @@ abstract public class WgRectangle {
 			rt.setParameters(x, y, w, h);
 			rt.updateString();
 		}
+	}
+	
+	/** Check that the X offset value will not move the rectangle beyond the
+	 *  sign border. If it won't, offsetX is returned unchanged, otherwise the
+	 *  value will be reduced until it will fit on the sign (down to 0).
+	 */
+	public int checkOffsetX(int offsetX)
+			throws NullPointerException {
+		if (wr == null)
+			throw new NullPointerException("Geometry not initialized");
+		if (rt != null) {
+			// first check under, then check over
+			int x = rt.getParamX();
+			int rx = rt.getRightEdge();
+			if (x + offsetX < 1)
+				return 1 - x;
+			else if (rx + offsetX > wr.getWidth())
+				return Math.max(rx - wr.getWidth(), 0);
+			else
+				return offsetX;
+		}
+		return 0;
+	}
+
+	/** Check that the Y offset value will not move the rectangle beyond the
+	 *  sign border. If it won't, offsetY is returned unchanged, otherwise the
+	 *  value will be reduced until it will fit on the sign (down to 0).
+	 */
+	public Integer checkOffsetY(int offsetY)
+			throws NullPointerException {
+		if (wr == null)
+			throw new NullPointerException("Geometry not initialized");
+		if (rt != null) {
+			// first check under, then check over
+			int y = rt.getParamY();
+			int ry = rt.getBottomEdge();
+			if (y + offsetY < 1)
+				return 1 - y;
+			else if (ry + offsetY > wr.getHeight())
+				return Math.max(ry - wr.getHeight(), 0);
+			else
+				return offsetY;
+		}
+		return 0;
 	}
 }
 

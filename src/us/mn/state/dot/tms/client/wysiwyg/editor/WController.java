@@ -589,7 +589,9 @@ public class WController {
 				int offsetX = p.getSignX() - lastPress.getSignX();
 				int offsetY = p.getSignY() - lastPress.getSignY();
 				
-				// move the token
+				// move the token (safely)
+				// TODO for some reason text rectangles can't be moved all the
+				// way to the bottom-right... not sure why since CR are fine
 				selectedRectangle.move(offsetX, offsetY);
 				
 				// update the last press
@@ -603,6 +605,7 @@ public class WController {
 				int offsetY = p.getSignY() - lastPress.getSignY();
 				
 				// move the token
+				// TODO need to make this "safe" like for rectangles
 				selectedGraphic.moveTok(offsetX, offsetY);
 				
 				// update the last press
@@ -623,6 +626,7 @@ public class WController {
 				int offsetY = p.getSignY() - lastPress.getSignY();
 				
 				// resize the rectangle
+				// TODO need to make this safe
 				selectedRectangle.resize(resizeDir, offsetX, offsetY);
 				
 				// update the last press
@@ -668,18 +672,14 @@ public class WController {
 		if (inTextRectMode() || inColorRectMode()) {
 			// get coordinates of the rectangle in sign coordinates
 			// make sure the (x,y) coordinates are top-left
-			int x = Math.min(lastPress.getSignX(), p.getSignX()) + 1;
-			int y = Math.min(lastPress.getSignY(), p.getSignY()) + 1;
-			int rx = Math.max(lastPress.getSignX(), p.getSignX()) + 1;
-			int by = Math.max(lastPress.getSignY(), p.getSignY()) + 1;
+			int x = Math.min(lastPress.getSignX(), p.getSignX());
+			int y = Math.min(lastPress.getSignY(), p.getSignY());
+			int rx = Math.max(lastPress.getSignX(), p.getSignX());
+			int by = Math.max(lastPress.getSignY(), p.getSignY());
 			
 			// calculate the size of the new rectangle
-			int w = rx - x;
-			int h = by - y;
-			
-			println(
-			  "Creating new rectangle with: (%d, %d) -> (%d, %d) => %d w, %d h",
-			  x, y, rx, by, w, h);
+			int w = rx - x + 1;
+			int h = by - y + 1;
 			
 			// don't create 0-width/height rectangles (invalid)
 			if (w > 0 && h > 0) {
