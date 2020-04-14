@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.utils.wysiwyg;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 
+
 /**
  * A class representing a point referenced in the WYSIWYG DMS message editor
  * GUI (e.g. created by mouse pointer activities like clicking, moving,
@@ -76,7 +77,7 @@ public class WPoint {
 	private void convertSignCoordinates() {
 		// convert into sign coordinates then make a Point object
 		sx = wr.cvtWysiwygToSignX(wx);
-		sy = wr.cvtWysiwygToSignX(wy);
+		sy = wr.cvtWysiwygToSignY(wy);
 		sp = new Point(sx, sy);
 	}
 	
