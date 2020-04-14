@@ -400,14 +400,23 @@ abstract public class WToken {
 	 *  @return the token X coordinate plus the token width
 	 */
 	public Integer getRightEdge() {
-		return coordX + coordW;
+		if (coordX != null && coordW != null)
+			return coordX + coordW;
+		else if (paramX != null && paramW != null)
+			return paramX + paramW;
+		return null;
 	}
 	
 	/** Return the token's bottom edge Y coordinate in pixels.
 	 *  @return the token Y coordinate plus the token height
 	 */
 	public Integer getBottomEdge() {
-		return coordY + coordH;
+		if (coordY != null && coordH != null)
+			return coordY + coordH;
+		else if (paramY != null && paramH != null)
+			return paramY + paramH;
+		return null;
+		
 	}
 	
 	public boolean validCoordinates() {
