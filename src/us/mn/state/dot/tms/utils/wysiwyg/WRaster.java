@@ -986,7 +986,7 @@ abstract public class WRaster {
 			return maxCoord;
 		int sc = coords[wc];
 		if (sc >= 0)
-			return sc;
+			return sc + 1;
 		int d1 = wc - 1;
 		int sc1 = -1;
 		int d2 = wc + 1;
@@ -1009,11 +1009,11 @@ abstract public class WRaster {
 		if (sc1 < 0) {
 			if (sc2 < 0)
 				throw new IndexOutOfBoundsException("Bad sign-coordinate array");
-			return sc2;
+			return sc2 + 1;
 		}
 		if (sc2 < 0)
-			return sc1;
-		return ((wc - d1) <= (d2 - wc)) ? sc1 : sc2;
+			return sc1 + 1;
+		return (((wc - d1) <= (d2 - wc)) ? sc1 : sc2) + 1;
 	}
 
 	/** Convert sign-tag coordinate to WYSIWYG coordinates.
@@ -1074,7 +1074,9 @@ abstract public class WRaster {
 	 *  assigned to the given sign-tag coordinate. If the
 	 *  coordinate is invalid, -1 is returned.
 	 * @param x  1-based horizontal sign-tag coordinate
-	 * @param i  index of the coordinate to return (0 for first, 1 for last)
+	 * @param first if true, return first matching coordinate, otherwise last
+	 * @param sep return coordinate of LED separators around sign instead
+	 *        of LEDs themselves
 	 * @return   The WYSIWYG coordinate.
 	 * @throws IndexOutOfBoundsException if the setWysiwygImageSize method has not been called
 	 */
@@ -1103,7 +1105,9 @@ abstract public class WRaster {
 	 *  assigned to the given sign-tag coordinate. If the
 	 *  coordinate is invalid, -1 is returned.
 	 * @param x  1-based horizontal sign-tag coordinate
-	 * @param i  index of the coordinate to return (0 for first, 1 for last)
+	 * @param first if true, return first matching coordinate, otherwise last
+	 * @param sep return coordinate of LED separators around sign instead
+	 *        of LEDs themselves
 	 * @return   The WYSIWYG coordinate.
 	 * @throws IndexOutOfBoundsException if the setWysiwygImageSize method has not been called
 	 */
