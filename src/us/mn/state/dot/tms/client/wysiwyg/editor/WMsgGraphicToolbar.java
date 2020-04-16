@@ -15,15 +15,16 @@
 
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
-import javax.swing.JPanel;
-import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.dms.GraphicListCellRenderer;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.utils.I18N;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -46,10 +47,7 @@ import javax.swing.JList;
  */
 @SuppressWarnings("serial")
 
-public class WMsgGraphicToolbar extends JPanel {
-	
-	/** Handle to the controller */
-	private WController controller;
+public class WMsgGraphicToolbar extends WToolbar {
 	
 	/** Graphics list */
 	private DefaultComboBoxModel<Graphic> supportedGraphics;
@@ -59,7 +57,7 @@ public class WMsgGraphicToolbar extends JPanel {
 	private JButton addBtn;
 	
 	public WMsgGraphicToolbar(WController c) {
-		controller = c;
+		super(c);
 
 		// use a FlowLayout with no margins to give more control of separation
 		setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -70,6 +68,7 @@ public class WMsgGraphicToolbar extends JPanel {
 		// make the ComboBox and add it
 		graphicList = new JComboBox<Graphic>(supportedGraphics);
 		graphicList.setRenderer(new WGraphicListCellRenderer());
+		graphicList.addPopupMenuListener(graphicMenuListener);
 		add(graphicList);
 		
 		// add the "add" button
@@ -77,6 +76,12 @@ public class WMsgGraphicToolbar extends JPanel {
 		addBtn.setToolTipText(I18N.get("wysiwyg.epanel.add_graphic_tooltip"));
 		add(Box.createHorizontalStrut(10));
 		add(addBtn);
+		
+		// TODO add a button to open graphic menu
+		// TODO also need to somehow update the graphic list (proxy watcher?)
+		
+		addMoveRegionForwardButton();
+		addMoveRegionBackwardButton();
 	}
 	
 	/** Action to add the graphic */
@@ -89,6 +94,18 @@ public class WMsgGraphicToolbar extends JPanel {
 			WController.println("Adding graphic %d", g.getGNumber());
 			controller.addGraphic(g);
 		}
+	};
+	
+	/** Listener for updating graphic list when popup menu is opened */
+	private PopupMenuListener graphicMenuListener = new PopupMenuListener() {
+		public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+			// update the list of supported graphics - this should carry to
+			// the combobox
+			controller.updateGraphicModel();
+		}
+		
+		public void popupMenuWillBecomeInvisible(PopupMenuEvent arg0) { }
+		public void popupMenuCanceled(PopupMenuEvent arg0) { }
 	};
 	
 	private class WGraphicListCellRenderer extends GraphicListCellRenderer {
@@ -112,5 +129,8 @@ public class WMsgGraphicToolbar extends JPanel {
 			return cell;
 		}
 	}
-	
+
+	/** Does nothing in graphic toolbar. */
+	@Override
+	public void setColor(Color c, String mode) { }
 }

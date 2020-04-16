@@ -108,8 +108,8 @@ abstract public class WgRectangle {
 			inside = new Rectangle(x+t, y+t, w-t2, h-t2);
 			
 			// and the handles for resizing
-			int mx = wr.cvtSignToWysiwygX(rt.getCentroidX(), true, false);
-			int my = wr.cvtSignToWysiwygY(rt.getCentroidY(), true, false);
+			int mx = wr.cvtSignToWysiwygX(rt.getCentroidX(), false, false);
+			int my = wr.cvtSignToWysiwygY(rt.getCentroidY(), false, false);
 			
 			// create one handle for each midpoint/corner (N,S,E,W,NE,NW,SE,SW)
 			resizeHandles = new HashMap<String, Rectangle>();
@@ -122,6 +122,14 @@ abstract public class WgRectangle {
 			resizeHandles.put(SE, new Rectangle(rx-t,by-t,t2,t2));
 			resizeHandles.put(SW, new Rectangle(x-t,by-t,t2,t2));
 		}
+	}
+	
+	/** Return an awt.Rectangle that can be used to draw a handle (e.g. for
+	 *  resizing).
+	 */
+	public static Rectangle getHandleRectangle(int x, int y, int t) {
+		int t2 = 2*t;
+		return new Rectangle(x-t, y-t, t2, t2);
 	}
 	
 	/** Return whether geometry objects have been initialized. */
@@ -168,22 +176,14 @@ abstract public class WgRectangle {
 		return String.format("<%s: %s>", this.getClass().getName(), ts);
 	}
 	
-	/** Move the rectangle by the given offsets. Note that this doesn't allow
-	 *  moving past the sign border.
-	 */
-	public void move(int offsetX, int offsetY) {
-		if (rt != null) {
-			int ox = checkOffsetX(offsetX);
-			int oy = checkOffsetY(offsetY);
-			rt.moveTok(ox, oy);
-			rt.updateString();
-		}
-	}
-	
 	/** Resize the rectangle given the direction (N/S/E/W/NE/NW/SE/SW) and
 	 *  offsets provided.
 	 */
-	public void resize(String dir, int offsetX, int offsetY) {
+	public void resize(String dir, int offsetX, int offsetY)
+			throws NullPointerException {
+		if (wr == null)
+			throw new NullPointerException("Geometry not initialized");
+		
 		if (rt != null) {
 			// first get the original dimensions of the rectangle
 			int x = rt.getParamX();
@@ -193,69 +193,58 @@ abstract public class WgRectangle {
 			
 			// now use the direction to determine which values to adjust
 			if (dir.startsWith(N)) {
-				// for any north operations, increase y and decrease h
+				// for any north operations, we will increase y and decrease h
+				
+				// first make sure this won't move y beyond the sign border OR
+				// make h < 1
+				if (y + offsetY < 1)
+					offsetY = 1 - y;
+				else if (h - offsetY < 1) {
+					System.out.println(String.format(
+							"h = %d, offsetY = %d", h, offsetY));
+					offsetY = h - 1;
+				}
+				
 				y += offsetY;
 				h -= offsetY;
-			} else if (dir.startsWith(S))
-				// otherwise for south operations just adjust h
+			} else if (dir.startsWith(S)) {
+				// otherwise for south operations we only adjust h
+				
+				// here make sure h won't go past the sign border or under 1
+				int by = rt.getBottomEdge();
+				if (by + offsetY > wr.getHeight())
+					offsetY = wr.getHeight() - by;
+				else if (h + offsetY < 1)
+					offsetY = 1 - h;
 				h += offsetY;
+			}
 			
 			if (dir.endsWith(W)) {
-				// for any west operations, increase x and decrease w
+				// for any west operations, we will increase x and decrease w
+				if (x + offsetX < 1)
+					offsetX = 1 - x;
+				else if (w - offsetX < 1) {
+					System.out.println(String.format(
+							"w = %d, offsetX = %d", w, offsetX));
+					offsetX = w - 1;
+				}
+				
 				x += offsetX;
 				w -= offsetX;
-			} else if (dir.endsWith(E))
-				// otherwise for east operations just adjust w
+			} else if (dir.endsWith(E)) {
+				// otherwise for east operations we only adjust w
+				int rx = rt.getRightEdge();
+				if (rx + offsetX > wr.getWidth())
+					offsetX = wr.getWidth() - rx;
+				else if (w + offsetX < 1)
+					offsetX = 1 - w;
 				w += offsetX;
+			}
 			
 			// now set the parameters and update the string
 			rt.setParameters(x, y, w, h);
 			rt.updateString();
 		}
-	}
-	
-	/** Check that the X offset value will not move the rectangle beyond the
-	 *  sign border. If it won't, offsetX is returned unchanged, otherwise the
-	 *  value will be reduced until it will fit on the sign (down to 0).
-	 */
-	public int checkOffsetX(int offsetX)
-			throws NullPointerException {
-		if (wr == null)
-			throw new NullPointerException("Geometry not initialized");
-		if (rt != null) {
-			// first check under, then check over
-			int x = rt.getParamX();
-			int rx = rt.getRightEdge();
-			if (x + offsetX < 1)
-				return 1 - x;
-			else if (rx + offsetX > wr.getWidth())
-				return Math.max(rx - wr.getWidth(), 0);
-			else
-				return offsetX;
-		}
-		return 0;
-	}
-
-	/** Check that the Y offset value will not move the rectangle beyond the
-	 *  sign border. If it won't, offsetY is returned unchanged, otherwise the
-	 *  value will be reduced until it will fit on the sign (down to 0).
-	 */
-	public Integer checkOffsetY(int offsetY)
-			throws NullPointerException {
-		if (wr == null)
-			throw new NullPointerException("Geometry not initialized");
-		if (rt != null) {
-			// first check under, then check over
-			int y = rt.getParamY();
-			int ry = rt.getBottomEdge();
-			if (y + offsetY < 1)
-				return 1 - y;
-			else if (ry + offsetY > wr.getHeight())
-				return Math.max(ry - wr.getHeight(), 0);
-			else
-				return offsetY;
-		}
-		return 0;
 	}
 }
 

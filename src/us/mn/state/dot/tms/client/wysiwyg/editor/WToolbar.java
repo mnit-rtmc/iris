@@ -16,8 +16,15 @@
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import java.awt.Color;
+import java.awt.Insets;
 
+import javax.swing.Box;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JPanel;
+
+import us.mn.state.dot.tms.client.widget.Icons;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Abstract toolbar class for WYSIWYG DMS Message Editor
@@ -28,5 +35,45 @@ import javax.swing.JPanel;
 
 abstract public class WToolbar extends JPanel {
 	
+	/** Handle to the controller */
+	protected WController controller;
+	
+	/** Buttons to move regions (text/color rectangles and graphics forward or
+	 *  backward
+	 */
+	protected JButton moveRegionForward;
+	protected JButton moveRegionBackward;
+	
+	public WToolbar(WController c) {
+		controller = c;
+	}
+	
 	abstract public void setColor(Color c, String mode);
+	
+	protected void addMoveRegionForwardButton() {
+		moveRegionForward = new JButton(controller.moveSelectedRegionForward);
+		ImageIcon moveRectFwIcon = Icons.getIconByPropName(
+				"wysiwyg.epanel.move_region_fw");
+		moveRegionForward.setIcon(moveRectFwIcon);
+		moveRegionForward.setHideActionText(true);
+		moveRegionForward.setToolTipText(
+				I18N.get("wysiwyg.epanel.move_region_fw"));
+		moveRegionForward.setMargin(new Insets(0,0,0,0));
+		add(Box.createHorizontalStrut(30));
+		add(moveRegionForward);
+	}
+	
+	protected void addMoveRegionBackwardButton() {
+		moveRegionBackward = new JButton(
+				controller.moveSelectedRegionBackward);
+		ImageIcon moveRectBwIcon = Icons.getIconByPropName(
+				"wysiwyg.epanel.move_region_bw");
+		moveRegionBackward.setIcon(moveRectBwIcon);
+		moveRegionBackward.setHideActionText(true);
+		moveRegionBackward.setToolTipText(
+				I18N.get("wysiwyg.epanel.move_region_bw"));
+		moveRegionBackward.setMargin(new Insets(0,0,0,0));
+		add(Box.createHorizontalStrut(10));
+		add(moveRegionBackward);
+	}
 }

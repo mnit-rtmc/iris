@@ -15,7 +15,10 @@
 
 package us.mn.state.dot.tms.utils.wysiwyg.token;
 
+import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.utils.Multi;
+import us.mn.state.dot.tms.utils.wysiwyg.WPoint;
 import us.mn.state.dot.tms.utils.wysiwyg.WRenderer;
 import us.mn.state.dot.tms.utils.wysiwyg.WState;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
@@ -25,12 +28,16 @@ import us.mn.state.dot.tms.utils.wysiwyg.WToken.AnchorLoc;
 /** Graphic token for WYSIWYG editor.
  * 
  * @author John L. Stanley - SRF Consulting
+ * @author Gordon Parikh - SRF Consulting
  *
  */
 public class WtGraphic extends WToken {
 
 	int     g_num;
 	String  g_id;
+	
+	/** Keep a handle to the graphic */
+	Graphic graphic;
 
 	/**
 	 * @param g_num
@@ -46,6 +53,7 @@ public class WtGraphic extends WToken {
 		this.g_id   = g_id;
 		anchorLoc = AnchorLoc.NONE;
 		updateString();
+		graphic = GraphicHelper.find(g_num);
 	}
 
 	/** get graphic number */
@@ -53,7 +61,11 @@ public class WtGraphic extends WToken {
 		// TODO Auto-generated method stub
 		return g_num;
 	}
-
+	
+	public Graphic getGraphic() {
+		return graphic;
+	}
+	
 	@Override
 	public boolean isBlank() {
 		return false;
@@ -62,6 +74,45 @@ public class WtGraphic extends WToken {
 	@Override
 	public boolean isText() {
 		return false;
+	}
+	
+	/** Check if the point p is inside (over) this graphic. */
+	@Override
+	public boolean isInside(WPoint p) {
+		// calculate right/bottom edges based on params and graphic dimensions
+		int rX = getRightEdge();
+		int bY = getBottomEdge();
+		boolean inX = (p.getSignX() >= paramX) && (p.getSignX() <= rX);
+		boolean inY = (p.getSignY() >= paramY) && (p.getSignY() <= bY);
+		return inX && inY;
+	}
+	
+	/** Return the graphic's right edge X coordinate in pixels */
+	@Override
+	public Integer getRightEdge() {
+		return paramX + graphic.getWidth() - 1;
+	}
+	
+	/** Return the graphic's bottom edge Y coordinate in pixels */
+	@Override
+	public Integer getBottomEdge() {
+		return paramY + graphic.getHeight() - 1;
+	}
+	
+	/** Return the width of the graphic. Note that this is different from
+	 *  other tokens.
+	 */
+	@Override
+	public Integer getParamW() {
+		return graphic.getWidth();
+	}
+
+	/** Return the height of the graphic. Note that this is different from
+	 *  other tokens.
+	 */
+	@Override
+	public Integer getParamH() {
+		return graphic.getHeight();
 	}
 	
 //	@Override

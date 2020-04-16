@@ -45,69 +45,40 @@ import javax.swing.JLabel;
 
 public class WMsgColorRectangleToolbar extends WToolbar {
 	
-	/** Handle to the controller */
-	private WController controller;
-	
 	/** Color picker button */
-	private JButton color_btn;
+	private JButton colorBtn;
 	
+	/** Current color */
 	private Color color;
 	
-	/** Buttons to move the rectangle forward (up) or backward (down) */
-	private JButton moveRectUp;
-	private JButton moveRectDown;
-	
 	public WMsgColorRectangleToolbar(WController c) {
-		controller = c;
+		super(c);
 
 		// use a FlowLayout with no margins to give more control of separation
 		setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
-		color_btn = new JButton(open_color_picker);
-		color_btn.setToolTipText(
+		colorBtn = new JButton(open_color_picker);
+		colorBtn.setToolTipText(
 				I18N.get("wysiwyg.epanel.color_rect_picker_title"));
 		
 		// default to the controller's current foreground color
 		DmsColor fgc = controller.getForegroundColor();
 		if (fgc != null) {
 			color = fgc.color;
-			color_btn.setIcon(
+			colorBtn.setIcon(
 					WMsgColorChooser.createColorIcon(color, 16, 16));
-			color_btn.setMargin(new Insets(0,0,0,0));
+			colorBtn.setMargin(new Insets(0,0,0,0));
 		}
-		add(color_btn);
+		add(colorBtn);
 		
 		// disable the color button for monochrome or unknown color schemes
 		ColorScheme cs = controller.getMultiConfig().getColorScheme();
 		if (cs == ColorScheme.MONOCHROME_1_BIT || cs == ColorScheme.UNKNOWN) {
-			color_btn.setEnabled(false);
+			colorBtn.setEnabled(false);
 		}
 		
-		// TODO this is the same as the text rectangle toolbar - they may be a
-		// better way
-		moveRectUp = new JButton(controller.moveSelectedRegionUp);
-		ImageIcon moveRectUpIcon = Icons.getIconByPropName(
-				"wysiwyg.epanel.move_rect_up");
-		moveRectUp.setIcon(moveRectUpIcon);
-		moveRectUp.setHideActionText(true);
-		moveRectUp.setToolTipText(I18N.get("wysiwyg.epanel.move_rect_up"));
-		moveRectUp.setMargin(new Insets(0,0,0,0));
-		add(Box.createHorizontalStrut(30));
-		add(moveRectUp);
-		
-		moveRectDown = new JButton(controller.pageMoveUp);
-		ImageIcon moveRectDownIcon = Icons.getIconByPropName(
-				"wysiwyg.epanel.move_rect_down");
-		moveRectDown.setIcon(moveRectDownIcon);
-		moveRectDown.setHideActionText(true);
-		moveRectDown.setToolTipText(I18N.get("wysiwyg.epanel.move_rect_down"));
-		moveRectDown.setMargin(new Insets(0,0,0,0));
-		add(Box.createHorizontalStrut(10));
-		add(moveRectDown);
-		
-		// TODO temporary
-		moveRectUp.setEnabled(false);
-		moveRectDown.setEnabled(false);
+		addMoveRegionForwardButton();
+		addMoveRegionBackwardButton();
 	}
 	
 	WMsgColorRectangleToolbar tb = this;
@@ -133,6 +104,6 @@ public class WMsgColorRectangleToolbar extends WToolbar {
 	public void setColor(Color c, String mode) {
 		color = c;
 		controller.setColorRectangleColor(new DmsColor(color));
-		color_btn.setIcon(WMsgColorChooser.createColorIcon(color, 16, 16));
+		colorBtn.setIcon(WMsgColorChooser.createColorIcon(color, 16, 16));
 	}
 }

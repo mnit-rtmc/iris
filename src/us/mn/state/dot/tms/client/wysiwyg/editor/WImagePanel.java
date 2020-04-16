@@ -33,7 +33,9 @@ import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
+import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 import us.mn.state.dot.tms.utils.wysiwyg.WgRectangle;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtGraphic;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_Rectangle;
 
@@ -67,10 +69,10 @@ public class WImagePanel extends JPanel {
 	private ArrayList<Rectangle> selectRects = new ArrayList<Rectangle>();
 	
 	/** For working with text/color rectangle drawing */
-	private boolean tcRectsOn = false;
-	private ArrayList<Rectangle> tcRects = new ArrayList<Rectangle>();
+	private boolean tcgRectsOn = false;
+	private ArrayList<Rectangle> tcgRects = new ArrayList<Rectangle>();
 	private final static Color tcrColor = Color.LIGHT_GRAY;
-	private Rectangle selectedRectangle;
+	private Rectangle selectedRegion;
 	private ArrayList<Rectangle> srHandles = new ArrayList<Rectangle>();
 	
 	/** For feedback when creating new text/color rectangles */
@@ -125,7 +127,7 @@ public class WImagePanel extends JPanel {
 				drawTextSelection(g);
 			
 			// same with text rectangles
-			if (tcRectsOn)
+			if (tcgRectsOn)
 				drawRectangles(g);
 		}
 	}
@@ -226,10 +228,10 @@ public class WImagePanel extends JPanel {
 		return y;
 	}
 	
-	/** Get a Rectangle in WYSIWYG coordinates from a text or color rectangle
-	 *  token (in sign coordinates).
+	/** Get a Rectangle in WYSIWYG coordinates from a token (generally a text/
+	 *  color rectangle token or graphic token).
 	 */
-	private Rectangle getRectangleFromToken(Wt_Rectangle rTok) {
+	private Rectangle getRectangleFromToken(WToken rTok) {
 		if (rTok != null) {
 			// convert from sign coordinates to image coordinates
 			int tx = rTok.getParamX();
@@ -414,15 +416,30 @@ public class WImagePanel extends JPanel {
 	 */
 	public void setRectangles(ArrayList<WgRectangle> rects) {
 		// turn display of text/color rectangles on and reset before updating
-		tcRectsOn = true;
-		tcRects.clear();
+		tcgRectsOn = true;
+		tcgRects.clear();
 		
-		// loop through the rectangles
 		for (WgRectangle tr: rects) {
 			Wt_Rectangle rTok = tr.getRectToken();
 			Rectangle r = getRectangleFromToken(rTok);
 			if (r != null)
-				tcRects.add(r);
+				tcgRects.add(r);
+		}
+	}
+	
+	/** Create rectangles used to outline graphics based on the list of
+	 *  graphics provided.
+	 */
+	public void setGraphics(WTokenList graphics) {
+		tcgRectsOn = true;
+		tcgRects.clear();
+		
+		for (WToken t: graphics) {
+			if (t.isType(WTokenType.graphic)) {
+				Rectangle r = getRectangleFromToken(t);
+				if (r != null)
+					tcgRects.add(r);
+			}
 		}
 	}
 	
@@ -432,9 +449,9 @@ public class WImagePanel extends JPanel {
 		// dashed)
 		Wt_Rectangle rt = sr.getRectToken();
 		if (rt != null)
-			selectedRectangle = getRectangleFromToken(sr.getRectToken());
+			selectedRegion = getRectangleFromToken(sr.getRectToken());
 		else
-			selectedRectangle = null;
+			selectedRegion = null;
 		
 		// store resize handles for drawing - note that we don't care about
 		// direction here
@@ -445,9 +462,25 @@ public class WImagePanel extends JPanel {
 			srHandles.clear();
 	}
 	
-	public void clearSelectedRectangle() {
-		selectedRectangle = null;
+	public void clearSelectedRegion() {
+		selectedRegion = null;
 		srHandles.clear();
+	}
+	
+	/** Set the selected graphic visually on the panel by outlining it and
+	 *  adding a single handle in the top-left.
+	 */
+	public void setSelectedGraphic(WtGraphic gt) {
+		if (gt != null) {
+			// get a rectangle for drawing from the graphic
+			selectedRegion = getRectangleFromToken(gt);
+			
+			// add a handle
+			srHandles.clear();
+			srHandles.add(WgRectangle.getHandleRectangle(selectedRegion.x,
+					selectedRegion.y, WController.rThreshold));
+		} else
+			clearSelectedRegion();
 	}
 	
 	/** Draw the text/color rectangles on the graphics context. */
@@ -465,18 +498,18 @@ public class WImagePanel extends JPanel {
 		g2d.setColor(tcrColor);
 		
 		// set color to to the text rectangle color and draw
-		for (Rectangle r: tcRects) {
+		for (Rectangle r: tcgRects) {
 			g2d.drawRect(r.x, r.y, r.width, r.height);
 		}
 		
-		// draw the selected rectangle
+		// draw the selected region
 		g2d.setStroke(os);
-		if (selectedRectangle != null) {
-			g2d.drawRect(selectedRectangle.x, selectedRectangle.y,
-					selectedRectangle.width, selectedRectangle.height);
+		if (selectedRegion != null) {
+			g2d.drawRect(selectedRegion.x, selectedRegion.y,
+					selectedRegion.width, selectedRegion.height);
 		}
 		
-		// add handles to the selected rectangle (solid lines & filled)
+		// add handles to the selected region (solid lines & filled)
 		for (Rectangle hr: srHandles) {
 			g2d.drawRect(hr.x, hr.y, hr.width, hr.height);
 			g2d.fillRect(hr.x, hr.y, hr.width, hr.height);
@@ -492,12 +525,12 @@ public class WImagePanel extends JPanel {
 		g.setColor(oc);
 	}
 
-	/** Clear the text/color rectangles and any resize handles. */
+	/** Clear the text/color rectangles or graphics and any resize handles. */
 	public void clearRectangles() {
-		tcRects.clear();
-		selectedRectangle = null;
+		tcgRects.clear();
+		selectedRegion = null;
 		srHandles.clear();
-		tcRectsOn = false;
+		tcgRectsOn = false;
 		repaint();
 	}
 	

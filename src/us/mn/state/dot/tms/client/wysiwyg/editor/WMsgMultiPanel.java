@@ -17,10 +17,12 @@ package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import javax.swing.JPanel;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Iterator;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -28,9 +30,15 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Highlighter;
+import javax.swing.text.Highlighter.HighlightPainter;
 
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.wysiwyg.WEditorError;
+import us.mn.state.dot.tms.utils.wysiwyg.WEditorErrorManager;
 
 /**
  * WYSIWYG DMS Message Editor MULTI Mode Tab for direct editing of MULTI
@@ -115,6 +123,44 @@ public class WMsgMultiPanel extends JPanel {
 				updateBtn.getHeight() + 10));
 		add(toolPanel);
 	}
+	
+	/** Highlight any error-producing tokens */
+	public void highlightErrors(WEditorErrorManager errMan) {
+		if (errMan.hasErrors()) {
+			Highlighter h = textBox.getHighlighter();
+			HighlightPainter hp =
+					new DefaultHighlighter.DefaultHighlightPainter(Color.RED);
+			
+			String txt = textBox.getText();
+			Iterator<WEditorError> it = errMan.iterator();
+			while (it.hasNext()) {
+				WEditorError e = it.next();
+				if (e.hasToken()) {
+					String ts = e.getToken().toString();
+					
+					// if this error has a token, highlight it
+					int a = txt.indexOf(ts);
+					int b = a + ts.length();
+					String s = txt.substring(a, b);
+					
+					// TODO this is highlighting more than it should...
+					// somehow we should incorporate the wmsg to get a more
+					// accurate index for highlighting
+					
+					if (s == ts) {
+						try {
+							h.addHighlight(a, b, hp);
+						} catch (BadLocationException ex) {
+							// just ignore this
+							ex.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+	}
+	
+//	public void clearErrors()
 	
 	/** Action listener for handling check box */
 	private ActionListener handleCheckBox = new ActionListener() {

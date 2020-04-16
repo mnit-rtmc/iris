@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.utils.wysiwyg;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -136,6 +137,8 @@ public class WPage {
 	
 	/** Create WgTextRect objects for this page to assist with GUI operations.
 	 *  Requires that this page's WRaster has had it's WYSIWYG image size set.
+	 *  WgTextRect objects in this list are in reverse order compared to their
+	 *  order in MULTI so that searches happen from front to back.
 	 */
 	public void makeGuiTextRects(int threshold) {
 		// initialize the ArrayList
@@ -161,6 +164,9 @@ public class WPage {
 				tr.addToken(tok);
 		}
 		textRects.add(tr);
+		
+		// reverse the list
+		Collections.reverse(textRects);
 	}
 
 	/** Create WgColorRect objects for this page to assist with GUI
@@ -180,6 +186,8 @@ public class WPage {
 				colorRects.add(cr);
 			}
 		}
+		// reverse the list
+		Collections.reverse(colorRects);
 	}
 	
 	/** Return an ArrayList of WgTextRects that represent the text rectangles
@@ -234,8 +242,26 @@ public class WPage {
 		return tokenList.findClosestTextToken(p, includeNonPrint);
 	}
 	
+	public WTokenList getTokensOfType(WTokenType tokType) {
+		return tokenList.getTokensOfType(tokType);
+	}
+	
 	public WToken findClosestTokenOfType(WPoint p, WTokenType tokType) {
 		return tokenList.findClosestTokenOfType(p, tokType);
+	}
+	
+	/** Return the next token with a type that matches any of the types
+	 *  provided, starting the search at si.
+	 */
+	public WToken findNextTokenOfType(int si, WTokenType... tokTypes) {
+		return tokenList.findNextTokenOfType(si, tokTypes);
+	}
+
+	/** Return the previous token with a type that matches any of the types
+	 *  provided, starting the search at si.
+	 */
+	public WToken findPrevTokenOfType(int si, WTokenType... tokTypes) {
+		return tokenList.findPrevTokenOfType(si, tokTypes);
 	}
 	
 	/** Determine if this is the last token of the page. */

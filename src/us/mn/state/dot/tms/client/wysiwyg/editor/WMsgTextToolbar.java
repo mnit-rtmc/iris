@@ -52,9 +52,6 @@ import us.mn.state.dot.tms.utils.Multi.JustificationPage;
 
 public class WMsgTextToolbar extends WToolbar {
 	
-	/** Handle to the controller */
-	protected WController controller;
-	
 	/** Font option menu */
 	protected JComboBox<Font> fontOptions;
 	
@@ -78,7 +75,7 @@ public class WMsgTextToolbar extends WToolbar {
 	
 	
 	public WMsgTextToolbar(WController c, boolean includeBG) {
-		controller = c;
+		super(c);
 		
 		// use a FlowLayout with no margins to give more control of separation
 		setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));

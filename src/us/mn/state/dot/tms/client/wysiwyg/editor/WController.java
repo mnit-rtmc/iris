@@ -97,7 +97,7 @@ import us.mn.state.dot.tms.utils.MultiString;
 public class WController {
 
 	/** Flag to enable/disable verbose logging output */
-	private final static boolean DEBUG = true; 
+	private final static boolean DEBUG = false; 
 	
 	/** Editing modes */
 	private final static String MODE_TEXT = "text";
@@ -157,7 +157,7 @@ public class WController {
 	
 	/** Click threshold for selecting rectangles/graphics (in WYSIWYG
 	 *  coordinates) */
-	private final static int rThreshold = 3;
+	public final static int rThreshold = 3;
 	
 	/** Text rectangle(s) on the selected page */
 	private ArrayList<WgTextRect> textRects;
@@ -194,8 +194,9 @@ public class WController {
 	/** Graphics on the selected page */
 	private WTokenList graphics = new WTokenList();
 	
-	/** Currently selected graphic */
+	/** Currently selected graphic and index in the list */
 	private WtGraphic selectedGraphic;
+	private int selectedGraphicIndx = -1;
 	
 	/** Token lists for helping with caret placement and stuff */
 	private WTokenList tokensBefore = new WTokenList();
@@ -383,10 +384,12 @@ public class WController {
 		// create a WPoint for this click
 		WPoint p = getWPoint(e);
 		
-		// first set any active rectangles that might have been selected
-		if (inTextRectMode() || inColorRectMode()) {
+		// first set any active rectangles or graphics that might have been
+		// selected
+		if (inTextRectMode() || inColorRectMode())
 			setSelectedRectangle(findRectangle(p));
-		}
+		else if (inGraphicMode())
+			setSelectedGraphic(findGraphic(p));
 		
 		// in text mode place the caret based on the mouse coordinates
 		if (inTextMode())
@@ -429,7 +432,7 @@ public class WController {
 				// first set (or clear) the selected rectangle
 				setSelectedRectangle(findRectangle(p));
 			else if (inGraphicMode())
-				selectedGraphic = findGraphic(p);
+				setSelectedGraphic(findGraphic(p));
 			
 			// set the drag mode given what the user just clicked on and save
 			// these coordinates
@@ -583,38 +586,67 @@ public class WController {
 	
 	/** Update the move operation given the current cursor position. */
 	private void updateMoveOperation(WPoint p) {
+		// try to get the token to move
+		WToken mTok = null;
 		if (inTextRectMode() || inColorRectMode()) {
-			if (selectedRectangle != null && lastPress != null) {
-				// calculate the change in position
-				int offsetX = p.getSignX() - lastPress.getSignX();
-				int offsetY = p.getSignY() - lastPress.getSignY();
-				
-				// move the token (safely)
-				// TODO for some reason text rectangles can't be moved all the
-				// way to the bottom-right... not sure why since CR are fine
-				selectedRectangle.move(offsetX, offsetY);
-				
-				// update the last press
-				lastPress = p;
-			}
-		} else if (inGraphicMode()) {
-			// move the selected graphic(s) to the new point
-			if (selectedGraphic != null && lastPress != null) {
-				// calculate the change in position
-				int offsetX = p.getSignX() - lastPress.getSignX();
-				int offsetY = p.getSignY() - lastPress.getSignY();
-				
-				// move the token
-				// TODO need to make this "safe" like for rectangles
-				selectedGraphic.moveTok(offsetX, offsetY);
-				
-				// update the last press
-				lastPress = p;
-			}
-		}
+			// TODO for some reason text rectangles can't be moved all the way
+			// to the bottom-right... not sure why since CR are fine
+			if (selectedRectangle != null)
+				mTok = selectedRectangle.getRectToken();
+		} else if (inGraphicMode())
+			mTok = selectedGraphic;
 		
+		if (mTok != null && lastPress != null) {
+			// calculate the safe change in position
+			int ox = p.getSignX() - lastPress.getSignX();
+			int oy = p.getSignY() - lastPress.getSignY();
+			int offsetX = checkMoveOffsetX(ox, mTok);
+			int offsetY = checkMoveOffsetY(oy, mTok);
+			
+			// move the token and update the last press
+			mTok.moveTok(offsetX, offsetY);
+			lastPress = p;
+		}
 		// update everything
 		update();
+	}
+	
+	/** Check that the X offset value ox will not move the rectangle or
+	 *  graphic token t beyond the sign border. If it won't, ox is returned
+	 *  unchanged, otherwise the value will be reduced until it will fit on
+	 *  the sign.
+	 */
+	private int checkMoveOffsetX(int ox, WToken t) throws RuntimeException {
+		if (!(t instanceof Wt_Rectangle || t instanceof WtGraphic))
+			throw new RuntimeException("Invalid token type");
+		int x = t.getParamX();
+		int rx = t.getRightEdge();
+		
+		WRaster wr = getActiveRaster();
+		if (x + ox < 1)
+			return 1 - x;
+		else if (rx + ox > wr.getWidth())
+			return Math.max(rx - wr.getWidth(), 0);
+		return ox;
+	}
+		
+	/** Check that the Y offset value oy will not move the rectangle or
+	 *  graphic token t beyond the sign border. If it won't, oy is returned
+	 *  unchanged, otherwise the value will be reduced until it will fit on
+	 *  the sign.
+	 */
+	private int checkMoveOffsetY(int oy, WToken t) throws RuntimeException {
+		if (!(t instanceof Wt_Rectangle || t instanceof WtGraphic))
+			throw new RuntimeException("Invalid token type");
+		int y = t.getParamY();
+		int by = t.getBottomEdge();
+		
+		WRaster wr = getActiveRaster();
+		if (y + oy < 1)
+			return 1 - y;
+		else if (by + oy > wr.getHeight())
+			return Math.max(by - wr.getHeight(), 0);
+		return oy;
 	}
 	
 	/** Update the resize operation given the current cursor position. */
@@ -681,8 +713,10 @@ public class WController {
 			int w = rx - x + 1;
 			int h = by - y + 1;
 			
-			// don't create 0-width/height rectangles (invalid)
-			if (w > 0 && h > 0) {
+			// don't create 1-width/height rectangles (invalid)
+			// note that others will be invalid too, but this is more common
+			// because of coordinate conversion idiosyncrasies
+			if (w > 1 && h > 1) {
 				// create a new rectangle token
 				Wt_Rectangle rt;
 				if (inTextRectMode())
@@ -697,10 +731,6 @@ public class WController {
 				saveState();
 				selectedPage.addToken(rt);
 				
-				// also clear the temporary rectangle we were using for
-				// feedback
-				signPanel.clearRectangleInProgress();
-				
 				// update rectangles and get the WgRectangle object for the
 				// rectangle we just created
 				updateRectangles();
@@ -714,6 +744,10 @@ public class WController {
 				// update so the new rectangle shows up
 				update();
 			}
+			
+			// clear any temporary rectangle we were using for feedback,
+			// whether we were successful or not
+			signPanel.clearRectangleInProgress();
 		}
 	}
 	
@@ -774,13 +808,15 @@ public class WController {
 	
 	/** Find the graphic under the WPoint p. */
 	private WtGraphic findGraphic(WPoint p) {
-//		if (inGraphicMode()) {
-//			for (WToken g: graphics) {
-//				if (g.isInside(p))
-//					println("Found %s", g.toString());
-//					return (WtGraphic) g;
-//			}
-//		}
+		if (inGraphicMode()) {
+			for (WToken t: graphics) {
+				WtGraphic g = (WtGraphic) t;
+				if (g.isInside(p)) {
+					println("Found %s", g.toString());
+					return g;
+				}
+			}
+		}
 		return null;
 	}
 	
@@ -825,8 +861,7 @@ public class WController {
 			}
 		} else if (inGraphicMode()) {
 			// check if we're on a graphic - if so, use the move cursor
-			WtGraphic gt = findGraphic(p);
-			if (gt != null)
+			if (selectedGraphic != null)
 				setCursor(moveCursor);
 			else
 				setCursorFromMode();
@@ -1335,8 +1370,11 @@ public class WController {
 			if (!tokensSelected.isEmpty()) {
 				// if we have a selection, delete the selection
 				deleteSelection(true);
-			} else if (selectedRectangle != null
-					&& tokensAfter.isEmpty() && tokensBefore.isEmpty()) {
+			} else if (inGraphicMode() && selectedGraphic != null) {
+				deleteSelectedGraphic();
+			} else if ((inTextRectMode() || inColorRectMode()) &&
+					selectedRectangle != null && tokensAfter.isEmpty()
+					&& tokensBefore.isEmpty()) {
 				// if we have a selected rectangle and no caret (indicated by
 				// the empty token lists), delete the rectangle
 				deleteSelectedRectangle();
@@ -1395,103 +1433,161 @@ public class WController {
 		updateCaret();
 	}
 	
-	/** Delete the selected rectangle. If the selected rectangle is a text
-	 *  rectangle, the tokens inside the rectangle will be deleted as well.
-	 */
-	private void deleteSelectedRectangle() {
-		if (removeSelectedRectangleTokens(true) != null) {
+	/** Delete the selected graphic. */
+	private void deleteSelectedGraphic() {
+		if (inGraphicMode() && selectedGraphic != null) {
+			saveState();
+			selectedPage.removeToken(selectedGraphic);
 			update();
 			updateCaret();
 		}
 	}
 	
-	/** Move the selected region (rectangle or graphic) up (forwards) on the
-	 *  the page by moving it later in the MULTI string.
+	/** Delete the selected rectangle. If the selected rectangle is a text
+	 *  rectangle, the tokens inside the rectangle will be deleted as well.
 	 */
-	public Action moveSelectedRegionUp = new AbstractAction() {
+	private void deleteSelectedRectangle() {
+		if (inTextRectMode() || inColorRectMode()
+				&& removeSelectedRectangleTokens(true) != null) {
+			update();
+			updateCaret();
+		}
+	}
+	
+	/** Move the selected region (rectangle or graphic) forwards on the page
+	 *  by moving it later in the MULTI string.
+	 */
+	public Action moveSelectedRegionForward = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-//			if (selectedRectangle != null
-//					&& selectedRectangle.getRectToken() != null) {
-//				// first figure out where we will move the tokens to
-//				int newRectIndx = -1;
-//				WToken lastTok = null;
-//				if (selectedRectIndx < modeRects.size()-1) {
-//					// if the rectangle isn't the last of this type of
-//					// rectangle, add it just after the next one
-//					newRectIndx = selectedRectIndx + 1;
-//					lastTok = modeRects.get(newRectIndx).getLastToken();
-//				} else {
-//					// if this is the only type of this rectangle, move it
-//					// to the end (the rectangle index will stay the same)
-//					newRectIndx = selectedRectIndx;
-//				}
-//				
-//				// remove the rectangle tokens from the page so we can add
-//				// them somewhere else
-//				WTokenList rToks = removeSelectedRectangleTokens(true);
-//				
-//				// either insert after the last token of the other rectangle
-//				int newTokIndx;
-//				if (lastTok != null)
-//					newTokIndx = selectedPage.getTokenIndex(lastTok);
-//				else
-//					// or just add them to the end
-//					newTokIndx = selectedPage.getNumTokens() - 1;
-//				
-//				for (WToken rt: rToks)
-//					selectedPage.addToken(++newTokIndx, rt);
-//				
-//				// update to reflect the change
-//				selectedRectIndx = newRectIndx;
-//				update();
-//				updateCaret();
-//			}
+			// get the token that needs to move
+			WToken movTok = null;
+			if (selectedRectangle != null)
+				movTok = selectedRectangle.getRectToken();
+			else if (selectedGraphic != null)
+				movTok = selectedGraphic;
+			
+			if (movTok != null) {
+				// now figure out where to move it - get the index of the next
+				// text rectangle, color rectangle or graphic after this one
+				int ti = selectedPage.getTokenIndex(movTok);
+				WToken nt = selectedPage.findNextTokenOfType(ti + 1,
+						WTokenType.textRectangle, WTokenType.colorRectangle,
+						WTokenType.graphic);
+				
+				println("Moving region %s forward from %d in %s to after %s",
+						movTok.toString(), ti,
+						selectedPage.getTokenList().toString(),
+						nt != null ? nt.toString() : "end");
+				
+				// get the tokens for moving (removing from previous location)
+				// do it now so the indices we get next are correct
+				WTokenList mToks = removeSelectedRegionTokens();
+				println("Moving token(s) %s", mToks.toString());
+				
+				// if there is a next token, move after it
+				int ni = -1;
+				if (nt != null) {
+					if (nt.isType(WTokenType.textRectangle)) {
+						// if it's a text rectangle, we need to get the last
+						// token in that text rectangle
+						for (WgTextRect tr: textRects) {
+							if (tr.getRectToken() == nt) {
+								nt = tr.getLastToken();
+								break;
+							}
+						}
+					}
+					// get the index of the token
+					ni = selectedPage.getTokenIndex(nt);
+				} else
+					// if there isn't, add at the end of the page
+					ni = selectedPage.getNumTokens() - 1;
+				
+				println("Moving to %d in %s \n", ni,
+						selectedPage.getTokenList().toString());
+				
+				// now put them in the new place
+				if (mToks != null && !mToks.isEmpty() && ni != -1) {
+					for (WToken t: mToks)
+						selectedPage.addToken(++ni, t);
+					
+					// update everything
+					updateAfterRegionMove(mToks.get(0));
+				}
+			}
 		}
 	};
 
-	/** Move the selected region (rectangle or graphic) down (backwards) on
-	 *  the page by moving it earlier in the MULTI string.
+	/** Move the selected region (rectangle or graphic) backwards on the page
+	 *  by moving it earlier in the MULTI string.
 	 */
-	public Action moveSelectedRegionDown = new AbstractAction() {
+	public Action moveSelectedRegionBackward = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-//			if (selectedRectangle != null
-//					&& selectedRectangle.getRectToken() != null) {
-//				// first figure out where we will move the tokens to
-//				int newRectIndx = -1;
-//				WToken firstTok = null;
-//				if (selectedRectIndx > 0) {
-//					// if the rectangle isn't the first of this type of
-//					// rectangle, add it just before the previous one
-//					newRectIndx = selectedRectIndx - 1;
-//					firstTok = modeRects.get(newRectIndx).getRectToken();
-//				} else {
-//					// if this is the only type of this rectangle, move it to
-//					// the beginning (the rectangle index will stay the same)
-//					newRectIndx = selectedRectIndx;
-//				}
-//				
-//				// remove the rectangle tokens from the page so we can add
-//				// them somewhere else
-//				WTokenList rToks = removeSelectedRectangleTokens(true);
-//				
-//				// either insert after the last token of the other rectangle
-//				int newTokIndx;
-//				if (firstTok != null)
-//					newTokIndx = selectedPage.getTokenIndex(firstTok) - 1;
-//				else
-//					// or just add them to the beginning
-//					newTokIndx = 0;
-//				
-//				for (WToken rt: rToks)
-//					selectedPage.addToken(newTokIndx++, rt);
-//				
-//				// update to reflect the change
-//				selectedRectIndx = newRectIndx;
-//				update();
-//				updateCaret();
-//			}
+			// get the token that needs to move
+			WToken movTok = null;
+			if (selectedRectangle != null)
+				movTok = selectedRectangle.getRectToken();
+			else if (selectedGraphic != null)
+				movTok = selectedGraphic;
+			
+			if (movTok != null) {
+				// now figure out where to move it - get the index of the next
+				// text rectangle, color rectangle or graphic before this one
+				int ti = selectedPage.getTokenIndex(movTok);
+				WToken pt = selectedPage.findPrevTokenOfType(ti - 1,
+						WTokenType.textRectangle, WTokenType.colorRectangle,
+						WTokenType.graphic);
+
+				println("Moving region %s backward from %d in %s to before %s",
+						movTok.toString(), ti,
+						selectedPage.getTokenList().toString(),
+						pt != null ? pt.toString() : "beginning");
+				
+				// get the tokens for moving (removing from previous location)
+				WTokenList mToks = removeSelectedRegionTokens();
+				println("Moving token(s) %s", mToks.toString());
+				
+				// if there is a previous token, move before it
+				int ni = -1;
+				if (pt != null)
+					// get the index of the token
+					ni = selectedPage.getTokenIndex(pt);
+				else
+					// if there isn't, add at the beginning of the page
+					ni = 0;
+				
+				println("Moving to %d in %s \n", ni,
+						selectedPage.getTokenList().toString());
+				
+				// now put them in the new place
+				if (mToks != null && !mToks.isEmpty() && ni != -1) {
+					for (WToken t: mToks)
+						selectedPage.addToken(ni++, t);
+					
+					// update everything
+					updateAfterRegionMove(mToks.get(0));
+				}
+			}
 		}
 	};
+	
+	/** Remove and return all tokens associated with the currently selected
+	 *  region (rectangle or graphic). Returns a WTokenList of the tokens that
+	 *  were removed, or null if no tokens were removed.
+	 */
+	private WTokenList removeSelectedRegionTokens() {
+		WTokenList mToks = null;
+		if (selectedRectangle != null)
+			// rectangles and stuff inside (also saves state)
+			mToks = removeSelectedRectangleTokens(true);
+		else if (selectedGraphic != null) {
+			saveState();
+			mToks = new WTokenList();
+			mToks.add(selectedGraphic);
+			selectedPage.removeToken(selectedGraphic);
+		}
+		return mToks;
+	}
 	
 	/** Remove and return all tokens associated with the currently selected
 	 *  rectangle. Returns a WTokenList of the tokens that were removed,
@@ -1524,6 +1620,33 @@ public class WController {
 			}
 		}
 		return null;
+	}
+	
+	/** Update the selected rectangle or selected graphic index after moving
+	 *  forward/backward using the text rectangle, color rectangle, or graphic
+	 *  token rt. Also updates everything after finding the new index.
+	 */
+	private void updateAfterRegionMove(WToken rt) {
+		// update the rectangles and graphics on the page so we
+		// can get the updated index
+		updateRectangles();
+		updateGraphics();
+		
+		// use the [tr/cr/g...] token to figure out the new index
+		if (rt instanceof Wt_Rectangle) {
+			// find the WgRectangle for this token
+			for (WgRectangle r: modeRects) {
+				if (r.getRectToken() == rt) {
+					setSelectedRectangle(r);
+					break;
+				}
+			}
+		} else if (rt instanceof WtGraphic)
+			setSelectedGraphic((WtGraphic) rt);
+		
+		// now we can update everything
+		update();
+		updateCaret();
 	}
 	
 	/** Add a single ASCII character to the message at the caret location. */
@@ -2543,8 +2666,13 @@ public class WController {
 	
 	/** Update the MULTI panel with the current MULTI string. */
 	private void updateMultiPanel() {
-		if (multiPanel != null && multiStringText != null)
+		if (multiPanel != null && multiStringText != null) {
 			multiPanel.setText(multiStringText);
+			
+			// highlight any error-producing tokens in the MULTI panel
+			if (errMan.hasErrors())
+				multiPanel.highlightErrors(errMan);
+		}
 	}
 	
 	/** Update the WPageList given the current MULTI string and MultiConfig. */
@@ -2583,7 +2711,10 @@ public class WController {
 			// give focus to the sign panel
 			signPanel.requestFocusInWindow();
 		}
+		
+		// update rectangle and graphics handling for the selected page
 		updateRectangles();
+		updateGraphics();
 	}
 	
 	public WPage getSelectedPage() {
@@ -2631,7 +2762,7 @@ public class WController {
 		if (signPanel != null) {
 			if (modeRects != null && (inTextRectMode() || inColorRectMode()))
 				signPanel.setRectangles(modeRects);
-			else
+			else if (!inGraphicMode())
 				signPanel.clearRectangles();
 		}
 	}
@@ -2678,13 +2809,9 @@ public class WController {
 			selectedRectIndx = -1;
 			selectedRectangle = null;
 			resizeHandles = null;
-			signPanel.clearSelectedRectangle();
+			signPanel.clearSelectedRegion();
 			setSelectedTextRectangle(null);
 		}
-		
-//		String trs = (selectedRectangle != null)
-//				? selectedRectangle.toString() : "null";
-//		println("Selected rectangle: %s", trs);
 	}
 	
 	/** Set the selected/active text rectangle. Also sets the selectedTrIndx
@@ -2700,6 +2827,54 @@ public class WController {
 			selectedTrIndx = -1;
 			selectedTextRect = null;
 			trTokens = new WTokenList();
+		}
+	}
+	
+	/** Update graphic handling on the selected page. */
+	private void updateGraphics() {
+		// get any graphics on the page - reverse the list compared to the
+		// order in MULTI so the search goes from top to bottom
+		graphics = selectedPage.getTokensOfType(WTokenType.graphic);
+		graphics.reverse();
+		
+		// highlight them on the sign panel
+		if (signPanel != null) {
+			if (inGraphicMode())
+				signPanel.setGraphics(graphics);
+			else if (!(inTextRectMode() || inColorRectMode()))
+				signPanel.clearRectangles();
+		}
+		
+		// reset the selected graphic handle based on the index
+		updateSelectedGraphic();
+	}
+	
+	/** Update the selected graphic based on the index. */
+	private void updateSelectedGraphic() {
+		if (inGraphicMode()) {
+			if (selectedGraphicIndx < 0
+					|| selectedGraphicIndx >= graphics.size()) {
+				setSelectedGraphic(null);
+			} else {
+				setSelectedGraphic(
+						(WtGraphic) graphics.get(selectedGraphicIndx));
+			}
+		} else
+			setSelectedGraphic(null);
+	}
+	
+	/** Set the selected graphic */
+	private void setSelectedGraphic(WtGraphic g) {
+		selectedGraphic = g;
+		if (g != null) {
+			selectedGraphicIndx = graphics.indexOf(selectedGraphic);
+			signPanel.setSelectedGraphic(selectedGraphic);
+		} else {
+			selectedGraphic = null;
+			selectedGraphicIndx = -1;
+			
+			if (!(inTextRectMode() || inColorRectMode()))
+				signPanel.clearSelectedRegion();
 		}
 	}
 	

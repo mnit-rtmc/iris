@@ -88,4 +88,30 @@ public class WtTextRectangle extends Wt_Rectangle {
 		sb.append(',');
 		sb.append(paramH);
 	}
+	
+	/** Get the right edge X coordinate of this text rectangle.
+	 * 
+	 *  NOTE for some reason this needs to be adjusted by 1 compared to color
+	 *  rectangles (probably due to some quirk in the renderer...)
+	 */
+	@Override
+	public Integer getRightEdge() {
+		Integer rx = super.getRightEdge();
+		if (rx != null)
+			return rx - 1;
+		return null;
+	}
+	
+	/** Get the bottom edge Y coordinate of this text rectangle.
+	 * 
+	 *  NOTE for some reason this needs to be adjusted by 1 compared to color
+	 *  rectangles (probably due to some quirk in the renderer...)
+	 */
+	@Override
+	public Integer getBottomEdge() {
+		Integer ry = super.getBottomEdge();
+		if (ry != null)
+			return ry - 1;
+		return null;
+	}
 }

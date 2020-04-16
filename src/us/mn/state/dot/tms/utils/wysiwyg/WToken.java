@@ -402,7 +402,7 @@ abstract public class WToken {
 	public Integer getRightEdge() {
 		if (coordX != null && coordW != null)
 			return coordX + coordW;
-		else if (paramX != null && paramW != null)
+		else if (paramX != null && paramW != null) 
 			return paramX + paramW;
 		return null;
 	}
@@ -431,6 +431,7 @@ abstract public class WToken {
 	public void moveTok(int offsetX, int offsetY) {
 		paramX += offsetX;
 		paramY += offsetY;
+		updateString();
 	}
 	
 	//TODO:  Add code for adding & reporting errors/warnings

@@ -867,7 +867,7 @@ public class WRenderer {
 //		println("RENDERERROR: "+mse);
 		
 		// pass the error to the error manager
-		saveError(mse);
+		saveError(mse, null);
 	}
 
 	/**
@@ -877,13 +877,13 @@ public class WRenderer {
 	private void renderError(MultiSyntaxError mse, WToken tok) {
 		tok.addErr(mse);
 //		println("RENDERERROR: "+mse);
-		saveError(mse);
+		saveError(mse, tok);
 	}
 
 	/** Save the error in the error manager */
-	private void saveError(MultiSyntaxError mse) {
+	private void saveError(MultiSyntaxError mse, WToken tok) {
 		if (errMan != null) {
-			errMan.addError(mse);
+			errMan.addError(mse, tok);
 		}
 	}
 	

@@ -56,9 +56,8 @@ public class WTokenList extends ArrayList<WToken> {
 
 	/** Move all tokens in a list by a specified amount. */
 	public void move(int offsetX, int offsetY) {
-		for (WToken tok : this) {
+		for (WToken tok : this)
 			tok.moveTok(offsetX, offsetY);
-		}
 	}
 	
 	/** Slice the list. */
@@ -89,6 +88,11 @@ public class WTokenList extends ArrayList<WToken> {
 		rev.addAll(this);
 		Collections.reverse(rev);
 		return rev;
+	}
+	
+	/** Reverse the list in place. */
+	public void reverse() {
+		Collections.reverse(this);
 	}
 	
 	/** Return the closest text token to the point sx, sy (sign coordinates).
@@ -125,6 +129,16 @@ public class WTokenList extends ArrayList<WToken> {
 			}
 		}
 		return tok;
+	}
+	
+	/** Get the list of all tokens of type tokType in this list. */
+	public WTokenList getTokensOfType(WTokenType tokType) {
+		WTokenList typeList = new WTokenList();
+		for (WToken tok: this) {
+			if (tok.isType(tokType))
+				typeList.add(tok);
+		}
+		return typeList;
 	}
 	
 	public WToken findClosestTokenOfType(WPoint p, WTokenType tokType) {
@@ -216,6 +230,20 @@ public class WTokenList extends ArrayList<WToken> {
 		return getLines().size();
 	}
 	
+	/** Return the next token with a type that matches any of the types
+	 *  provided, starting the search at si.
+	 */
+	public WToken findNextTokenOfType(int si, WTokenType... tokTypes) {
+		for (int i = si; i < size(); ++i) {
+			WToken tok = get(i);
+			for (WTokenType tt: tokTypes) {
+				if (tok.isType(tt))
+					return tok;
+			}
+		}
+		return null;
+	}
+	
 	/** Return the next printable text token in the list after index si 
 	 *  (inclusive - if the token at si is printable text, it is returned).
 	 *  If no tokens are found, null is returned.
@@ -237,13 +265,28 @@ public class WTokenList extends ArrayList<WToken> {
 		return findNextTextToken(0);
 	}
 	
+	/** Return the previous token with a type that matches any of the types
+	 *  provided, starting the search at si.
+	 */
+	public WToken findPrevTokenOfType(int si, WTokenType... tokTypes) {
+		if (si >= size())
+			// clip to the list size
+			si = size() - 1;
+		for (int i = si; i >= 0; --i) {
+			WToken tok = get(i);
+			for (WTokenType tt: tokTypes) {
+				if (tok.isType(tt))
+					return tok;
+			}
+		}
+		return null;
+	}
 	/** Return the previous printable text token in the list after index si
 	 *  (inclusive - if the token at si is printable text, it is returned).
 	 *  If no tokens are found, null is returned.
 	 */
 	public WToken findPrevTextToken(int si) {
 		if (si >= size())
-			// clip to the list size
 			si = size() - 1;
 		for (int i = si; i >= 0; --i) {
 			WToken tok = get(i);

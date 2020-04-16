@@ -76,6 +76,15 @@ public class WEditorError {
 
 	//-------------------------------------------
 	// Get info about token error
+	
+	/** Return whether or not this error has a token associated with it. */
+	public boolean hasToken() {
+		return tok != null;
+	}
+	
+	public WToken getToken() {
+		return tok;
+	}
 
 	/** Get short error description */
 	public String getShortErrStr() {
