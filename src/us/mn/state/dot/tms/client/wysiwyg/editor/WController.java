@@ -97,7 +97,7 @@ import us.mn.state.dot.tms.utils.MultiString;
 public class WController {
 
 	/** Flag to enable/disable verbose logging output */
-	private final static boolean DEBUG = false; 
+	private final static boolean DEBUG = true; 
 	
 	/** Editing modes */
 	private final static String MODE_TEXT = "text";
@@ -1370,14 +1370,14 @@ public class WController {
 			if (!tokensSelected.isEmpty()) {
 				// if we have a selection, delete the selection
 				deleteSelection(true);
-			} else if (inGraphicMode() && selectedGraphic != null) {
-				deleteSelectedGraphic();
 			} else if ((inTextRectMode() || inColorRectMode()) &&
 					selectedRectangle != null && tokensAfter.isEmpty()
 					&& tokensBefore.isEmpty()) {
 				// if we have a selected rectangle and no caret (indicated by
 				// the empty token lists), delete the rectangle
 				deleteSelectedRectangle();
+			} else if (inGraphicMode() && selectedGraphic != null) {
+				deleteSelectedGraphic();
 			} else {
 				// if we don't have any selection, delete the token just
 				// after the caret
@@ -1461,9 +1461,10 @@ public class WController {
 		public void actionPerformed(ActionEvent e) {
 			// get the token that needs to move
 			WToken movTok = null;
-			if (selectedRectangle != null)
+			if (selectedRectangle != null
+					&& (inTextRectMode() || inColorRectMode())) {
 				movTok = selectedRectangle.getRectToken();
-			else if (selectedGraphic != null)
+			} else if (selectedGraphic != null && inGraphicMode())
 				movTok = selectedGraphic;
 			
 			if (movTok != null) {
@@ -1525,9 +1526,10 @@ public class WController {
 		public void actionPerformed(ActionEvent e) {
 			// get the token that needs to move
 			WToken movTok = null;
-			if (selectedRectangle != null)
+			if (selectedRectangle != null
+					&& (inTextRectMode() || inColorRectMode())) {
 				movTok = selectedRectangle.getRectToken();
-			else if (selectedGraphic != null)
+			} else if (selectedGraphic != null && inGraphicMode())
 				movTok = selectedGraphic;
 			
 			if (movTok != null) {
@@ -2780,8 +2782,10 @@ public class WController {
 		// get the WgRectangle object (or null) and set the selected rectangle 
 		if (selectedRectIndx < 0 || selectedRectIndx >= modeRects.size())
 			setSelectedRectangle(null);
-		else
+		else if (inTextMode() || inTextRectMode() || inColorRectMode())
 			setSelectedRectangle(modeRects.get(selectedRectIndx));
+		else
+			setSelectedRectangle(null);
 	}
 	
 	/** Set the selected rectangle (text or color). If in text rectangle mode,
@@ -2865,8 +2869,8 @@ public class WController {
 	
 	/** Set the selected graphic */
 	private void setSelectedGraphic(WtGraphic g) {
-		selectedGraphic = g;
 		if (g != null) {
+			selectedGraphic = g;
 			selectedGraphicIndx = graphics.indexOf(selectedGraphic);
 			signPanel.setSelectedGraphic(selectedGraphic);
 		} else {
