@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.utils.wysiwyg.token;
 
 import us.mn.state.dot.tms.utils.Multi;
+import us.mn.state.dot.tms.utils.wysiwyg.WFont;
 import us.mn.state.dot.tms.utils.wysiwyg.WRenderer;
 import us.mn.state.dot.tms.utils.wysiwyg.WState;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
@@ -34,6 +35,9 @@ public class WtTextChar extends WToken {
 	static String invalidChars = "\t\b\n\r\f";
 
 	static public final char NULL_CHAR = (char)0;
+	
+	private WFont wfont;
+	private int fgColor;
 	
 	/** Standard MULTI-text character.
 	 * @param ch
@@ -139,6 +143,16 @@ public class WtTextChar extends WToken {
 	 */
 	public boolean isNormalizeLine() {
 		return true;
+	}
+	
+	/** Set the font used for this token. Called by the renderer. */
+	public void setFont(WFont wf) {
+		wfont = wf;
+	}
+
+	/** Set the color used for this token. Called by the renderer. */
+	public void setColor(int fg) {
+		fgColor = fg;
 	}
 	
 //	@Override

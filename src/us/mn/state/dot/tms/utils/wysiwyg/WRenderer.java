@@ -796,6 +796,10 @@ public class WRenderer {
 			foreground  = state.fgPixel;
 			wg          = wfont.getGlyph(cp);
 			c_space     = getCharSpacing();
+			
+			// save font and color on the token
+			tok.setFont(wfont);
+			tok.setColor(foreground);
 		}
 
 		/** Null constructor, used for creating AnchorChars */
