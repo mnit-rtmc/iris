@@ -258,7 +258,26 @@ public class WRenderer {
 	public void addLine(WtNewLine tok) {
 		Integer ls = tok.getLineSpacing();
 		Block block = currentBlock();
+		Line pl = block.currentLine();
 		block.addLine(ls);
+		
+		// calculate where the next line will go
+		// first add an anchor character
+		block.addText(new AnchorChar());
+		
+		// top and height of new line
+		Line l = block.currentLine();
+		int nl = block.getNumLines() - 1;
+		int height = l.getHeight();
+		int ntop = block.getTop(block.getExtraHeight())
+				+ nl*(pl.getHeight() + l.getLineSpacing(pl));
+		
+		// get a fragment from the line to get the left
+		Fragment f = block.currentLine().currentFragment();
+		int left = f.getLeft(f.getExtraWidth());
+		
+		// set the parameters of the next line on the token
+		tok.setNextLineParams(ntop, height, left);
 	}
 
 	/** Get the current text block */
@@ -546,6 +565,11 @@ public class WRenderer {
 			if (lines.isEmpty())
 				lines.addLast(new Line(null));
 			return lines.peekLast();
+		}
+		int getNumLines() {
+			if (lines.isEmpty())
+				lines.addLast(new Line(null));
+			return lines.size();
 		}
 		void render() throws InvalidMsgException {
 //			println("Block.render(): lines = "+lines.size());
@@ -899,6 +923,11 @@ public class WRenderer {
 		private int w = 0;
 		private WPage wpage = null;
 
+		/** Construct an empty AnchorChar */
+		public AnchorChar() {
+			
+		}
+		
 		/** construct a generic WToken AnchorChar */
 		public AnchorChar(WToken tok) {
 			this.tok = tok;

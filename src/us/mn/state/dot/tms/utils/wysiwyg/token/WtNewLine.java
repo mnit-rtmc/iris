@@ -29,6 +29,10 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 public class WtNewLine extends WToken {
 
 	Integer spacing;
+	
+	int nextLineTop;
+	int nextLineHeight;
+	int nextLineLeft;
 
 	/**
 	 * @param spacing
@@ -83,5 +87,24 @@ public class WtNewLine extends WToken {
 	public void appendParameters(StringBuilder sb) {
 		if (spacing != null)
 			sb.append(spacing);
+	}
+	
+	/** Set parameters of the next line that is created by this newline. */
+	public void setNextLineParams(int top, int height, int left) {
+		nextLineTop = top;
+		nextLineHeight = height;
+		nextLineLeft = left;
+	}
+	
+	public int getNextLineTop() {
+		return nextLineTop;
+	}
+	
+	public int getNextLineHeight() {
+		return nextLineHeight;
+	}
+	
+	public int getNextLineLeft() {
+		return nextLineLeft;
 	}
 }
