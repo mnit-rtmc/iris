@@ -104,6 +104,7 @@ public class WRenderer {
 	public void setConfig(MultiConfig mcfg) {
 //		this.mcfg       = mcfg;
 		this.raster     = WRaster.create(mcfg);
+		
 		this.startState = new WState(mcfg, fontCache);
 		this.state      = new WState(startState);
 		resetTextRectangle();
@@ -799,7 +800,9 @@ public class WRenderer {
 			
 			// save font and color on the token
 			tok.setFont(wfont);
-			tok.setColor(foreground);
+			int fgpix = (foreground == WRaster.DEFAULT_FG)
+					? raster.defaultFgPixel : foreground;
+			tok.setColor(raster.pixelToColor(fgpix));
 		}
 
 		/** Null constructor, used for creating AnchorChars */

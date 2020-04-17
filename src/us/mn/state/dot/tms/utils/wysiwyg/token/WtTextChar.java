@@ -15,13 +15,13 @@
 
 package us.mn.state.dot.tms.utils.wysiwyg.token;
 
+import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.utils.Multi;
 import us.mn.state.dot.tms.utils.wysiwyg.WFont;
 import us.mn.state.dot.tms.utils.wysiwyg.WRenderer;
 import us.mn.state.dot.tms.utils.wysiwyg.WState;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
-import us.mn.state.dot.tms.utils.wysiwyg.WToken.AnchorLoc;
 
 /** Text character token for WYSIWYG editor.
  * 
@@ -37,7 +37,7 @@ public class WtTextChar extends WToken {
 	static public final char NULL_CHAR = (char)0;
 	
 	private WFont wfont;
-	private int fgColor;
+	private DmsColor fgColor;
 	
 	/** Standard MULTI-text character.
 	 * @param ch
@@ -149,10 +149,20 @@ public class WtTextChar extends WToken {
 	public void setFont(WFont wf) {
 		wfont = wf;
 	}
+	
+	/** Get the font used for this token. */
+	public WFont getFont() {
+		return wfont;
+	}
 
 	/** Set the color used for this token. Called by the renderer. */
-	public void setColor(int fg) {
+	public void setColor(DmsColor fg) {
 		fgColor = fg;
+	}
+	
+	/** Get the color used for this token */
+	public DmsColor getColor() {
+		return fgColor;
 	}
 	
 //	@Override

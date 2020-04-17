@@ -65,6 +65,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WRaster;
 import us.mn.state.dot.tms.utils.wysiwyg.WgRectangle;
 import us.mn.state.dot.tms.utils.wysiwyg.WgTextRect;
 import us.mn.state.dot.tms.utils.wysiwyg.WEditorErrorManager;
+import us.mn.state.dot.tms.utils.wysiwyg.WFont;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenList;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
@@ -553,6 +554,7 @@ public class WController {
 				si = start;
 				ei = end;
 				includeEnd = rightHalf(p, endTok);
+				caretPageIndx = selectedPage.getTokenIndex(startTok);
 			} else {
 				// if they are selecting backwards, we need to use the initial
 				// click and token and reverse the indices
@@ -560,6 +562,7 @@ public class WController {
 				ei = start;
 				includeEnd = rightHalf(lastPress, startTok);
 				forwards = false;
+				caretPageIndx = selectedPage.getTokenIndex(endTok);
 			}
 			
 			// update the token lists
@@ -569,10 +572,7 @@ public class WController {
 			signPanel.setTextSelection(tokensSelected);
 			
 			// move the caret too - do it "manually" to avoid changing token
-			// lists
-			// TODO the caret will always appear at the end of the selection,
-			// regardless of the "direction" - not a big issue but fix if it
-			// comes
+			// lists (the caret page index is set above)
 			caretIndx = si;
 			if (forwards)
 				signPanel.setCaretLocation(tokensSelected.getLast(), true);
@@ -929,7 +929,7 @@ public class WController {
 		// if the page isn't empty, put the caret the first text character
 		// (note that it is always text mode when this is called)
 		if (!trTokens.isEmpty()) {
-			WToken tok = trTokens.findFirstTextToken();
+			WToken tok = trTokens.findFirstTextToken(true);
 			if (tok != null)
 				moveCaret(tok);
 			else
@@ -954,26 +954,6 @@ public class WController {
 		tokensSelected = trTokens.slice(si, ei);
 		
 //		printCaretTokens();
-	}
-
-	/** Return the next printable text token in the list after index si 
-	 *  (inclusive - if the token at si is printable text, it is returned).
-	 *  If no tokens are found, null is returned.
-	 */
-	public WToken findNextTextToken(int si) {
-		if (trTokens != null)
-			return trTokens.findNextTextToken(si);
-		return null;
-	}
-	
-	/** Return the previous printable text token in the list after index si
-	 *  (inclusive - if the token at si is printable text, it is returned).
-	 *  If no tokens are found, null is returned.
-	 */
-	public WToken findPrevTextToken(int si) {
-		if (trTokens != null)
-			return trTokens.findPrevTextToken(si);
-		return null;
 	}
 	
 	/** Move the caret given a mouse pointer coordinate indicated by the
@@ -1137,14 +1117,15 @@ public class WController {
 	/** Action to move caret to left (using left arrow key) */
 	public Action moveCaretLeft = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-			if (!trTokens.isEmpty()) {
+			if (trTokens != null && !trTokens.isEmpty()) {
 				// check the navigation mode
 				if (stepNonTextTags) {  // go through all tokens
 					if (caretIndx >= 1)
 						moveCaret(caretIndx-1);
 				} else {  // skip any non-text tokens
 					int nextIndx = Math.max(caretIndx-1, 0);
-					WToken textTok = findPrevTextToken(nextIndx);
+					WToken textTok = trTokens.findPrevTextToken(
+							nextIndx, true);
 					if (textTok != null)
 						moveCaret(textTok);
 					else
@@ -1158,21 +1139,24 @@ public class WController {
 	/** Action to move caret to right (using right arrow key) */
 	public Action moveCaretRight = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-			if (!trTokens.isEmpty()) {
+			if (trTokens != null && !trTokens.isEmpty()) {
 				// check the navigation mode
 				if (stepNonTextTags) {  // go through all tokens
 					if (caretIndx < trTokens.size())
 						moveCaret(caretIndx+1);
 				} else {  // skip any non-text tokens
 					// find the next text token, if there is one
-					WToken textTok = findNextTextToken(caretIndx+1);
+					WToken textTok = trTokens.findNextTextToken(
+							caretIndx+1, true);
 					println("Found %s", textTok);
 					if (textTok != null)
 						moveCaret(textTok);
-					else if (findNextTextToken(caretIndx) != null)
+					else if (trTokens.findNextTextToken(
+							caretIndx, true) != null) {
 						// if there's nothing remaining, go to the right of
 						// the last text token
 						moveCaret(caretIndx+1);
+					}
 				}
 			}
 		}
@@ -1236,7 +1220,7 @@ public class WController {
 					homeTok = lineTokens.get(0);
 				else
 					// grab the first text token
-					homeTok = lineTokens.findFirstTextToken();
+					homeTok = lineTokens.findFirstTextToken(true);
 				
 				// move the caret to that token
 				moveCaret(homeTok);
@@ -1257,7 +1241,7 @@ public class WController {
 					// grab the last token on the line
 					endTok = lineTokens.get(lineTokens.size()-1);
 				else {
-					endTok = lineTokens.findLastTextToken();
+					endTok = lineTokens.findLastTextToken(true);
 				}
 				
 				// move the caret to the right of that token (unless it's a
@@ -1303,7 +1287,7 @@ public class WController {
 					if (stepNonTextTags)
 						tok = tokensBefore.getLast();
 					else
-						tok = tokensBefore.findLastTextToken();
+						tok = tokensBefore.findLastTextToken(true);
 					
 					if (tok != null) {
 						int i = selectedPage.getTokenIndex(tok);
@@ -1356,7 +1340,7 @@ public class WController {
 					if (stepNonTextTags)
 						tok = tokensAfter.remove(0);
 					else
-						tok = tokensAfter.findFirstTextToken();
+						tok = tokensAfter.findFirstTextToken(true);
 					
 					if (tok != null) {
 						int i = selectedPage.getTokenIndex(tok);
@@ -1795,12 +1779,25 @@ public class WController {
 		// set the font
 		font = f;
 		
-		// create the appropriate font tag token then add it
+		// create the appropriate font tag token
 		// TODO I think it's ok to do this with the font ID
 		WtFont fTok = new WtFont(font.getNumber(),
 				String.valueOf(font.getVersionID()));
-		println("Adding font tag at %d", caretIndx);
-		addTextOptionToken(fTok);
+		
+		// if there is a selection, get the font of the first token after
+		// if there are no tokens after, don't do anything
+		WtFont afTok = null;
+		if (!tokensSelected.isEmpty() && !tokensAfter.isEmpty()) {
+			// get the next text token (not including newlines)
+			WtTextChar tc = (WtTextChar)
+					tokensAfter.findFirstTextToken(false);
+			if (tc != null) {
+				WFont wf = tc.getFont();
+				afTok = new WtFont(wf.getNumber(),
+						String.valueOf(wf.getVersionID()));
+			}
+		}
+		addTextOptionToken(fTok, afTok);
 		
 		// update the toolbar
 		updateTextToolbar();
@@ -1813,10 +1810,23 @@ public class WController {
 		// set the foreground color
 		fgColor = c;
 		
-		// create the appropriate WtColorForeground token then add it
+		// create the appropriate WtColorForeground token
 		WtColorForeground cfTok = new WtColorForeground(
 				c.red, c.green, c.blue);
-		addTextOptionToken(cfTok);
+		
+		// if there is a selection, get the color of the first token after
+		// if there are no tokens after, don't do anything
+		WtColorForeground acfTok = null;
+		if (!tokensSelected.isEmpty() && !tokensAfter.isEmpty()) {
+			// get the next text token (not including newlines)
+			WtTextChar tc = (WtTextChar)
+					tokensAfter.findFirstTextToken(false);
+			if (tc != null) {
+				DmsColor ac = tc.getColor();
+				acfTok = new WtColorForeground(ac.red, ac.green, ac.blue);
+			}
+		}
+		addTextOptionToken(cfTok, acfTok);
 	}
 	
 	/** Add a background color token at the beginning of the page. Uses a page
@@ -2067,7 +2077,7 @@ public class WController {
 		}
 		
 		// now trim any line justification tokens in the immediate vicinity
-		trimTextOptionTokens(WTokenType.justificationLine);
+		trimTextOptionTokens(WTokenType.justificationLine, false);
 	}
 	
 	/** Add a page justify top token at the current location. */
@@ -2158,7 +2168,7 @@ public class WController {
 		}
 		
 		// now trim any page justification tokens in the immediate vicinity
-		trimTextOptionTokens(WTokenType.justificationPage);
+		trimTextOptionTokens(WTokenType.justificationPage, false);
 		
 		// finally, add the token and update everything
 		addToken(jpTok);
@@ -2245,28 +2255,56 @@ public class WController {
 	 *  (otherwise it is just added). Also if any tokens in the current
 	 *  selection are the same type, they are removed (since we assume that's
 	 *  what the user wanted).
+	 *  If a second token is provided, it is added after the current selection
+	 *  (e.g. to change only the font/color in the selection).
      */
-	private void addTextOptionToken(WToken toTok) {
+	private void addTextOptionToken(WToken toTok, WToken afterTok) {
 		// save state here so we can undo this whole process
 		saveState();
 		
 		// trim any tokens of the same type around the current caret location
 		// and/or in the selection
-		trimTextOptionTokens(toTok.getType());
-				
-		// now add the token
-		addToken(toTok);
+		// we will force trimming after too even if there is a selection if we
+		// are going to add a token after the selection
+		boolean trimAfter = afterTok != null;
+		trimTextOptionTokens(toTok.getType(), trimAfter);
+		
+		// add the first token at the caret
+		selectedPage.addToken(caretPageIndx, toTok);
+		++caretIndx;
+		++caretPageIndx;
+		
+		// if there is a selection and we got an afterTok, add that token 
+		// after the selection (to set the option back to what it was before
+		if (!tokensSelected.isEmpty() && afterTok != null)
+			addTokenAfterSelection(afterTok);
+		
+		update();
 	}
 	
 	/** Trim (remove) any tokens of the type tokType that are immediately
 	 *  before the caret. If there is a selection, the selection is cleared of
-	 *  tokens of this type as well. If there is no selection, tokens after
-	 *  the caret will be trimmed instead.
+	 *  tokens of this type as well. If there is no selection or if forceAfter
+	 *  is true, tokens after the caret will be trimmed.
 	 */
-	private void trimTextOptionTokens(WTokenType tokType) {
-		// we will adjust how this works if there is a selection
-		boolean haveSelection = !tokensSelected.isEmpty();
+	private void trimTextOptionTokens(WTokenType tokType, boolean forceAfter) {
+		// trim backwards
+		trimTextOptToksBw(tokType);
 		
+		// if we have a selection, just clear it of these tokens
+		if (!tokensSelected.isEmpty()) {
+			clearSelectionTokenType(tokType);
+			if (forceAfter)
+				trimTextOptToksFw(tokType);
+		} else {
+			trimTextOptToksFw(tokType);
+		}
+	}
+	
+	/** Trim (remove) any tokens of the type tokType that are immediately
+	 *  before the caret.
+	 */
+	private void trimTextOptToksBw(WTokenType tokType) {
 		// check the type of the preceding token to remove all immediately-
 		// preceding tokens of the same type
 		while (tokensBefore.size() > 0 &&
@@ -2287,25 +2325,23 @@ public class WController {
 			if (caretPageIndx > 0)
 				--caretPageIndx;
 		}
-		
-		// if we have a selection, just clear it of these tokens
-		if (!tokensSelected.isEmpty())
-			clearSelectionTokenType(tokType);
-		else {
-			// if not, trim forwards
-			while (tokensAfter.size() > 0 &&
-					tokensAfter.get(0).isType(tokType)) {
-				WToken tok = tokensAfter.get(0);
-				println("Last token: '%s'", tok.toString());
-				
-				// if it's the same, delete it (but don't create a separate
-				// undo step)
-				selectedPage.removeToken(tok);
-				
-				// delete from the tokensAfter too
-				tokensAfter.remove(tok);
-				
-			}
+	}
+	
+	/** Trim (remove) any tokens of the type tokType that are immediately
+	 *  after the caret.
+	 */
+	private void trimTextOptToksFw(WTokenType tokType) {
+		while (tokensAfter.size() > 0 &&
+				tokensAfter.get(0).isType(tokType)) {
+			WToken tok = tokensAfter.get(0);
+			println("Last token: '%s'", tok.toString());
+			
+			// if it's the same, delete it (but don't create a separate
+			// undo step)
+			selectedPage.removeToken(tok);
+			
+			// delete from the tokensAfter too
+			tokensAfter.remove(tok);
 		}
 	}
 	
@@ -2315,7 +2351,7 @@ public class WController {
 //		int pgi = getCaretIndexOnPage(tok.isPrintableText());
 //		int pgi = getCaretIndexOnPage(false);
 		
-		// add the token at this location
+		// add the token at the caret
 		selectedPage.addToken(caretPageIndx, tok);
 		
 		// update then move the caret one more token (just after the
@@ -2330,6 +2366,15 @@ public class WController {
 			if (caretIndx < trTokens.size())
 				moveCaret(caretIndx+1);
 		}
+	}
+	
+	/** Add the token to the selected page after the selection. Does not
+	 *  update anything.
+	 */
+	private void addTokenAfterSelection(WToken tok) {
+		// calculate where the token will be added, then add it
+		selectedPage.addToken(Math.min(caretPageIndx + tokensSelected.size(),
+				selectedPage.getNumTokens()), tok);
 	}
 	
 	/** Save the current state on the stack for undoing. Resets the redo stack. */
