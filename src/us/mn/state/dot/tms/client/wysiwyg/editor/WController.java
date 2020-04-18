@@ -1799,6 +1799,10 @@ public class WController {
 		}
 		addTextOptionToken(fTok, afTok);
 		
+		// TODO update the text selection on the sign panel since the font
+		// size probably changed - we need to update the caret so the tokens
+		// in tokensSelected have the correct sizes
+		
 		// update the toolbar
 		updateTextToolbar();
 	}
