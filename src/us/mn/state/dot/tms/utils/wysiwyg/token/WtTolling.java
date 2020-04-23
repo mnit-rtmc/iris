@@ -63,7 +63,7 @@ public class WtTolling extends Wt_IrisToken {
 				sb.append(zones[i]);
 			}
 		}
-		appendCharCntXParameter(sb);
+//		appendCharCntXParameter(sb);
 	}
 
 	/** Get Tolling Mode */

@@ -65,7 +65,7 @@ public class WtSlowWarning extends Wt_IrisToken {
 			sb.append(',');
 			sb.append(mode);
 		}
-		appendCharCntXParameter(sb);
+//		appendCharCntXParameter(sb);
 	}
 
 	@Override

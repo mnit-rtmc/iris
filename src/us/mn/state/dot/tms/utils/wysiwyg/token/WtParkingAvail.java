@@ -84,7 +84,7 @@ public class WtParkingAvail extends Wt_IrisToken {
 				}
 			}
 		}
-		appendCharCntXParameter(sb);
+//		appendCharCntXParameter(sb);
 	}
 
 	@Override

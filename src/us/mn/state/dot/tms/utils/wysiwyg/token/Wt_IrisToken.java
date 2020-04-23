@@ -54,14 +54,14 @@ abstract public class Wt_IrisToken extends WToken {
 //		wr.addIrisToken(this);
 	}
 
-	/** Append the charCntX parameter to the tag */
-	public void appendCharCntXParameter(StringBuilder sb) {
-		//TODO: Uncomment once both parsers can handle the extra argument
+//	/** Append the charCntX parameter to the tag */
+//	public void appendCharCntXParameter(StringBuilder sb) {
+//		//TODO: Uncomment once both parsers can handle the extra argument
 //		if (charCntX != null) {
 //			sb.append(';');
 //			sb.append(charCntX);
 //		}
-	}
+//	}
 
 	//-------------------------------------------
 	

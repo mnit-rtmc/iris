@@ -70,7 +70,7 @@ public class WtTravelTime extends Wt_IrisToken {
 				sb.append(o_txt);
 			}
 		}
-		appendCharCntXParameter(sb);
+//		appendCharCntXParameter(sb);
 	}
 
 	@Override

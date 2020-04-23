@@ -50,7 +50,7 @@ public class WtSpeedAdvisory extends Wt_IrisToken {
 	@Override
 	public void appendParameters(StringBuilder sb) {
 		; // do nothing
-		appendCharCntXParameter(sb);
+//		appendCharCntXParameter(sb);
 	}
 
 	@Override
