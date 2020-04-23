@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
  * @author John L. Stanley - SRF Consulting
  *
  */
-public class WtParkingAvail extends WToken {
+public class WtParkingAvail extends Wt_IrisToken {
 
 	String pid;
 	String l_txt;
@@ -61,28 +61,11 @@ public class WtParkingAvail extends WToken {
 	}
 
 	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#updateState(us.mn.state.dot.tms.utils.wysiwyg.WState)
-	 */
-	@Override
-	public WState updateState(WState before) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#doMulti(us.mn.state.dot.tms.utils.Multi)
 	 */
 	@Override
 	public void doMulti(Multi cb) {
 		cb.addParking(pid, l_txt, c_txt);
-	}
-
-	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#doRender(us.mn.state.dot.tms.utils.wysiwyg.WRenderer)
-	 */
-	@Override
-	public void doRender(WRenderer wr) {
-		wr.addParking(this);
 	}
 
 	/* (non-Javadoc)
@@ -101,5 +84,13 @@ public class WtParkingAvail extends WToken {
 				}
 			}
 		}
+//		appendCharCntXParameter(sb);
+	}
+
+	@Override
+	public Integer getCharCntX() {
+		int llen = (l_txt == null) ? 0 : l_txt.length();
+		int clen = (c_txt == null) ? 0 : c_txt.length();
+		return Math.max(llen, clen);
 	}
 }

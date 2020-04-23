@@ -35,6 +35,9 @@ public class WFont implements Font {
 	/** ArrayList (indexed by charNum) of glyphs */
 	private ArrayList<WGlyph> glyphList =
 			new ArrayList<WGlyph>();
+	
+	/** Maximum char width in font */
+	private int maxCharWidth;
 
 	/** Pre-expand an ArrayList and pad with nulls. */
 	private void ensureListSize(
@@ -54,6 +57,8 @@ public class WFont implements Font {
 		Glyph g;
 		WGlyph wg;
 		int charNum;
+		int charWidth;
+		maxCharWidth = 0;
 		while (itg.hasNext()) {
 			g = itg.next();
 			if ((g == null) || (g.getFont() != f))
@@ -63,6 +68,9 @@ public class WFont implements Font {
 				charNum = wg.getCharNum();
 				ensureListSize(glyphList, charNum);
 				glyphList.set(charNum, wg);
+				charWidth = wg.width;
+				if (maxCharWidth < charWidth)
+					maxCharWidth = charWidth;
 			}
 			catch (NullPointerException ex) {
 				ex.printStackTrace();
@@ -95,6 +103,11 @@ public class WFont implements Font {
 	 *  in the font ordered by character number */
 	public Iterator<WGlyph> glyphs(int fontNum) {
 		return glyphList.iterator();
+	}
+	
+	/** Get maximum character width in font */
+	public int getMaxCharWidth() {
+		return maxCharWidth;
 	}
 
 	//===========================================

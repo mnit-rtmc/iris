@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
  * @author John L. Stanley - SRF Consulting
  *
  */
-public class WtTolling extends WToken {
+public class WtTolling extends Wt_IrisToken {
 
 	String mode;
 	String[] zones;
@@ -43,28 +43,11 @@ public class WtTolling extends WToken {
 	}
 
 	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#updateState(us.mn.state.dot.tms.utils.wysiwyg.WState)
-	 */
-	@Override
-	public WState updateState(WState before) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#doMulti(us.mn.state.dot.tms.utils.Multi)
 	 */
 	@Override
 	public void doMulti(Multi cb) {
 		cb.addTolling(mode, zones);
-	}
-
-	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#doRender(us.mn.state.dot.tms.utils.wysiwyg.WRenderer)
-	 */
-	@Override
-	public void doRender(WRenderer wr) {
-		wr.addTolling(this);
 	}
 
 	/* (non-Javadoc)
@@ -80,6 +63,7 @@ public class WtTolling extends WToken {
 				sb.append(zones[i]);
 			}
 		}
+//		appendCharCntXParameter(sb);
 	}
 
 	/** Get Tolling Mode */
@@ -90,5 +74,11 @@ public class WtTolling extends WToken {
 	/** Get Tolling zones */
 	public String[] getZones() {
 		return zones;
+	}
+
+	@Override
+	public Integer getCharCntX() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

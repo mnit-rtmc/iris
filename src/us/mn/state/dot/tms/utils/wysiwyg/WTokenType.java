@@ -162,7 +162,7 @@ public enum WTokenType {
 	//=== unsupported tag ===
 
 	// something we don't recognize that looks like a MULTI tag
-	unsupportedTag(          "Unsupported tag"),
+	unsupportedTag,      
 	;
 
 	//-----------------------------------------------------

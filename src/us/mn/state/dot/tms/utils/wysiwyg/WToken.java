@@ -64,22 +64,26 @@ abstract public class WToken {
 
 	//-------------------------------------------
 
-	/** Is this token a MULTI tag? */
+	/** Is this token a MULTI tag? 
+	 *  {WToken default = true} */
 	public boolean isTag() {
 		return true;
 	}
 
-	/** Is this token a rectangle? */
+	/** Is this token a rectangle?
+	 *  {WToken default = false} */
 	public boolean isRect() {
 		return false;
 	}
 
-	/** Is this token not visible? */
+	/** Is this token not visible?
+	 *  {WToken default = true} */
 	public boolean isBlank() {
 		return true;
 	}
 
-	/** Include this in the WMessage.MultiNormalizer() string? */
+	/** Include this in the WMessage.MultiNormalizer() string?
+	 *  {WToken default = false} */
 	public boolean isNormalizeLine() {
 		return false;
 	}
@@ -94,14 +98,15 @@ abstract public class WToken {
 	/** Is this token part of the message-text?
 	 * (WYSIWYG flag.  The only tokens that are
 	 *  not part of the message-text are graphics,
-	 *  text-rectangles, and color-rectangles.) */
+	 *  text-rectangles, and color-rectangles.)
+	 *  {WToken default = true} */
 	public boolean isText() {
 		return true;
 	}
 	
 	/** Is this token a printable text character that is part of the message
 	 *  text? This includes text characters (blank or not) and newlines.
-	 */
+	 *  {WToken default = false} */
 	public boolean isPrintableText() {
 		return false;
 	}
@@ -520,9 +525,6 @@ abstract public class WToken {
 	// abstract methods
 	//===========================================
 
-	/** Have token update a WState in a token-specific manner */
-	abstract public WState updateState(WState before);
-	
 	/** Call token-specific Multi method */
 	abstract public void doMulti(Multi cb);
 

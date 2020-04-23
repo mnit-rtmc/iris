@@ -28,7 +28,8 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
  * @author John L. Stanley - SRF Consulting
  *
  */
-public class WtTravelTime extends WToken {
+//TODO:  [tt s,m,t ]     XX (we would also want to display the prepend/append text if possible)
+public class WtTravelTime extends Wt_IrisToken {
 
 	String sid;
 	OverLimitMode mode; 
@@ -63,28 +64,11 @@ public class WtTravelTime extends WToken {
 	}
 
 	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#updateState(us.mn.state.dot.tms.utils.wysiwyg.WState)
-	 */
-	@Override
-	public WState updateState(WState before) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#doMulti(us.mn.state.dot.tms.utils.Multi)
 	 */
 	@Override
 	public void doMulti(Multi cb) {
 		cb.addTravelTime(sid, mode, o_txt);
-	}
-
-	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#doRender(us.mn.state.dot.tms.utils.wysiwyg.WRenderer)
-	 */
-	@Override
-	public void doRender(WRenderer wr) {
-		wr.addTravelTime(this);
 	}
 
 	/* (non-Javadoc)
@@ -101,5 +85,12 @@ public class WtTravelTime extends WToken {
 				sb.append(o_txt);
 			}
 		}
+//		appendCharCntXParameter(sb);
+	}
+
+	@Override
+	public Integer getCharCntX() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

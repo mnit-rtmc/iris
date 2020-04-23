@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
  * @author John L. Stanley - SRF Consulting
  *
  */
-public class WtSlowWarning extends WToken {
+public class WtSlowWarning extends Wt_IrisToken {
 
 	int spd;
 	int dist;
@@ -61,28 +61,11 @@ public class WtSlowWarning extends WToken {
 	}
 	
 	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#updateState(us.mn.state.dot.tms.utils.wysiwyg.WState)
-	 */
-	@Override
-	public WState updateState(WState before) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#doMulti(us.mn.state.dot.tms.utils.Multi)
 	 */
 	@Override
 	public void doMulti(Multi cb) {
 		cb.addSlowWarning(spd, dist, mode);
-	}
-
-	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#doRender(us.mn.state.dot.tms.utils.wysiwyg.WRenderer)
-	 */
-	@Override
-	public void doRender(WRenderer wr) {
-		wr.addSlowWarning(this);
 	}
 
 	/* (non-Javadoc)
@@ -97,5 +80,29 @@ public class WtSlowWarning extends WToken {
 			sb.append(',');
 			sb.append(mode);
 		}
+//		appendCharCntXParameter(sb);
+	}
+
+	@Override
+	public Integer getCharCntX() {
+		int xx;
+		if ((mode == null)
+		 || "none".equalsIgnoreCase(mode)) {
+			// a blank string
+			return null;
+		}
+		if ("dist".equalsIgnoreCase(mode)) {
+			// distance rounded to nearest mile
+			xx = (int)((dist + 5) / 10);
+		}
+		else if ("speed".equalsIgnoreCase(mode)) {
+			// speed rounded to nearest 5 mph
+			xx = Math.round(spd / 5) * 5;
+		}
+		else {
+			// give them something they can click on to fix the problem
+			return 1;
+		}
+		return Integer.toString(xx).length();
 	}
 }

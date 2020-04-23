@@ -392,6 +392,20 @@ abstract public class WRaster {
 		}
 	}
 
+	/** Draw a solid (filled-in) box onto the WRaster.
+	 * @param pix pixel color of the box.
+	 * @param x0 X-position on raster (0-based).
+	 * @param y0 Y-position on raster (0-based).
+	 * @param w Width of box
+	 * @param h Height of box */
+	public void drawSolidBox(int pix, int x0, int y0, int w, int h) {
+		for (int y = 0; y < h; y++) {
+			for (int x = 0; x < w; x++) {
+					setPixel(x0 + x, y0 + y, pix);
+			}
+		}
+	}
+
 	/** Update the raster by clearing pixels not set in another raster */
 	public void union(WRaster rg) {
 		if (width != rg.width)
