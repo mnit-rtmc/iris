@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
  * @author John L. Stanley - SRF Consulting
  *
  */
-public class WtSpeedAdvisory extends WToken {
+public class WtSpeedAdvisory extends Wt_IrisToken {
 
 	/**
 	 * @param tt
@@ -45,18 +45,17 @@ public class WtSpeedAdvisory extends WToken {
 	}
 
 	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#doRender(us.mn.state.dot.tms.utils.wysiwyg.WRenderer)
-	 */
-	@Override
-	public void doRender(WRenderer wr) {
-		wr.addSpeedAdvisory(this);
-	}
-
-	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#appendParameters(java.lang.StringBuilder)
 	 */
 	@Override
 	public void appendParameters(StringBuilder sb) {
 		; // do nothing
+		appendCharCntXParameter(sb);
+	}
+
+	@Override
+	public Integer getDefaultCharCntX() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

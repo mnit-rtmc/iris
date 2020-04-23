@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
  * @author John L. Stanley - SRF Consulting
  *
  */
-public class WtParkingAvail extends WToken {
+public class WtParkingAvail extends Wt_IrisToken {
 
 	String pid;
 	String l_txt;
@@ -69,14 +69,6 @@ public class WtParkingAvail extends WToken {
 	}
 
 	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#doRender(us.mn.state.dot.tms.utils.wysiwyg.WRenderer)
-	 */
-	@Override
-	public void doRender(WRenderer wr) {
-		wr.addParking(this);
-	}
-
-	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#appendParameters(java.lang.StringBuilder)
 	 */
 	@Override
@@ -92,5 +84,13 @@ public class WtParkingAvail extends WToken {
 				}
 			}
 		}
+		appendCharCntXParameter(sb);
+	}
+
+	@Override
+	public Integer getDefaultCharCntX() {
+		int llen = (l_txt == null) ? 0 : l_txt.length();
+		int clen = (c_txt == null) ? 0 : c_txt.length();
+		return Math.max(llen, clen);
 	}
 }

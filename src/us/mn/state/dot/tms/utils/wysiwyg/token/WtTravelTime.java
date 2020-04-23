@@ -28,7 +28,8 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
  * @author John L. Stanley - SRF Consulting
  *
  */
-public class WtTravelTime extends WToken {
+//TODO:  [tt s,m,t ]     XX (we would also want to display the prepend/append text if possible)
+public class WtTravelTime extends Wt_IrisToken {
 
 	String sid;
 	OverLimitMode mode; 
@@ -56,14 +57,6 @@ public class WtTravelTime extends WToken {
 	}
 
 	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#doRender(us.mn.state.dot.tms.utils.wysiwyg.WRenderer)
-	 */
-	@Override
-	public void doRender(WRenderer wr) {
-		wr.addTravelTime(this);
-	}
-
-	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#appendParameters(java.lang.StringBuilder)
 	 */
 	@Override
@@ -77,5 +70,12 @@ public class WtTravelTime extends WToken {
 				sb.append(o_txt);
 			}
 		}
+		appendCharCntXParameter(sb);
+	}
+
+	@Override
+	public Integer getDefaultCharCntX() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
  * @author John L. Stanley - SRF Consulting
  *
  */
-public class WtSlowWarning extends WToken {
+public class WtSlowWarning extends Wt_IrisToken {
 
 	int spd;
 	int dist;
@@ -54,14 +54,6 @@ public class WtSlowWarning extends WToken {
 	}
 
 	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#doRender(us.mn.state.dot.tms.utils.wysiwyg.WRenderer)
-	 */
-	@Override
-	public void doRender(WRenderer wr) {
-		wr.addSlowWarning(this);
-	}
-
-	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#appendParameters(java.lang.StringBuilder)
 	 */
 	@Override
@@ -73,5 +65,26 @@ public class WtSlowWarning extends WToken {
 			sb.append(',');
 			sb.append(mode);
 		}
+		appendCharCntXParameter(sb);
+	}
+
+	@Override
+	public Integer getDefaultCharCntX() {
+//		int xx;
+//		if ((mode == null)
+//		 || "none".equalsIgnoreCase(mode)) {
+//			// a blank string
+//			return null;
+//		}
+//		if ("dist".equalsIgnoreCase(mode)) {
+//			// distance rounded to nearest mile
+//			xx = (int)((dist + 5) / 10);
+//			return Integer.toString(xx).length();
+//		}
+//		if ("speed".equalsIgnoreCase(mode)) {
+//			// speed rounded to nearest 5 mph
+//		}
+		// give them something they can click on to fix the problem
+		return 1;
 	}
 }
