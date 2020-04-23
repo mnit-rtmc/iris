@@ -88,7 +88,7 @@ public class WtParkingAvail extends Wt_IrisToken {
 	}
 
 	@Override
-	public Integer getDefaultCharCntX() {
+	public Integer getCharCntX() {
 		int llen = (l_txt == null) ? 0 : l_txt.length();
 		int clen = (c_txt == null) ? 0 : c_txt.length();
 		return Math.max(llen, clen);

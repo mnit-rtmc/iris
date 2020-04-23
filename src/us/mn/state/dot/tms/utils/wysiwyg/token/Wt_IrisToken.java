@@ -49,9 +49,10 @@ abstract public class Wt_IrisToken extends WToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		//TODO: Rework once WRenderer is updated to handle it
-		wr.addAnchor(this);
-//		wr.addIrisToken(this);
+		if (renderAsAnchor())
+			wr.addAnchor(this);
+		else
+			wr.addIrisToken(this);
 	}
 
 //	/** Append the charCntX parameter to the tag */
@@ -88,10 +89,17 @@ abstract public class Wt_IrisToken extends WToken {
 //			return getDefaultCharCntX();
 //		return charCntX;
 //	}
+	
+	public boolean renderAsAnchor() {
+		Integer len = getCharCntX();
+		return ((len == null) || (len < 1));
+	}
 
 	//-------------------------------------------
 	// Abstract method for child classes
 	
-	/** Get the default charCntX for the child class */
-	abstract public Integer getDefaultCharCntX();
+	/** Get the charCntX from the child class.
+	 * If a null is returned, the token is hidden,
+	 * but is traversable, like a page-time tag. */
+	abstract public Integer getCharCntX();
 }

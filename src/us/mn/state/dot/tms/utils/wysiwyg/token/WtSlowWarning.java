@@ -69,22 +69,25 @@ public class WtSlowWarning extends Wt_IrisToken {
 	}
 
 	@Override
-	public Integer getDefaultCharCntX() {
-//		int xx;
-//		if ((mode == null)
-//		 || "none".equalsIgnoreCase(mode)) {
-//			// a blank string
-//			return null;
-//		}
-//		if ("dist".equalsIgnoreCase(mode)) {
-//			// distance rounded to nearest mile
-//			xx = (int)((dist + 5) / 10);
-//			return Integer.toString(xx).length();
-//		}
-//		if ("speed".equalsIgnoreCase(mode)) {
-//			// speed rounded to nearest 5 mph
-//		}
-		// give them something they can click on to fix the problem
-		return 1;
+	public Integer getCharCntX() {
+		int xx;
+		if ((mode == null)
+		 || "none".equalsIgnoreCase(mode)) {
+			// a blank string
+			return null;
+		}
+		if ("dist".equalsIgnoreCase(mode)) {
+			// distance rounded to nearest mile
+			xx = (int)((dist + 5) / 10);
+		}
+		else if ("speed".equalsIgnoreCase(mode)) {
+			// speed rounded to nearest 5 mph
+			xx = Math.round(spd / 5) * 5;
+		}
+		else {
+			// give them something they can click on to fix the problem
+			return 1;
+		}
+		return Integer.toString(xx).length();
 	}
 }

@@ -226,6 +226,21 @@ public class WRenderer {
 			renderError(MultiSyntaxError.fontNotDefined, tok);
 	}
 
+	/** Add an Iris-specific token ("action tag")
+	 *  to the current rendering block.
+	 *  To most of the rendering code, this looks
+	 *  like a single, extra-wide, TextChar.
+	 *  (Renders as a solid greenish box.)
+	 * @param wt_Iris
+	 */
+	public void addIrisToken(Wt_IrisToken itok) {
+		IrisTagBox itb = new IrisTagBox(itok);
+		Block block = currentBlock();
+		block.addText((TextChar)itb);
+		if (itb.wfont == null)
+			renderError(MultiSyntaxError.fontNotDefined, itok);
+	}
+
 	/** Add an anchor character. */
 	public void addAnchor(WToken tok) {
 		TextChar tc = new AnchorChar(tok);
@@ -784,8 +799,8 @@ public class WRenderer {
 		private final WtTextChar tok;
 		private final int cp;
 		private final int foreground;
-		private final WFont wfont;
-		private final int c_space;
+		protected final WFont wfont;
+		protected final int c_space;
 		private final WGlyph wg;
 		protected boolean widthErr = false;
 
@@ -814,7 +829,18 @@ public class WRenderer {
 			wg         = null;
 			c_space    = getCharSpacing();
 		}
-		
+
+		/** Extra constructor, used for creating
+		 *  IrisTagBox objects. */
+		private TextChar(int ignored) {
+			this.tok   = null;
+			cp         = 0;
+			wfont      = state.getWFont();
+			foreground = IRIS_TAG_BOX_COLOR;
+			wg         = null;
+			c_space    = getCharSpacing();
+		}
+
 		int getCharSpacing() {
 			if (isCharMatrix())
 				return 0;
@@ -873,6 +899,47 @@ public class WRenderer {
 		}
 	}
 
+	static final int IRIS_TAG_BOX_COLOR =
+		new DmsColor(110, 163, 120).rgb(); // Oxley green
+	
+	/** A solid box, rendered in WYSIWYG mode, which
+	 *  represents an IRIS-specific message-tag like
+	 *  TravelTime, Tolling, etc... */
+	private class IrisTagBox extends TextChar {
+
+		/** Wt_Iris child token */
+		private final Wt_IrisToken itok;
+
+		/** normal TagBox */
+		private IrisTagBox(Wt_IrisToken itok) {
+			super(1);
+			this.itok = itok;
+		}
+
+		/** get pixel width of box */
+		int getWidth() {
+			Integer len =  itok.getCharCntX();
+			if ((len == null) || (len < 1))
+				return 0;
+			int mcw =  wfont.getMaxCharWidth();
+			int csep = c_space;
+			return (len * mcw) + ((len-1) * csep);
+		}
+
+		void render(int x, int base) throws InvalidMsgException {
+			int w = getWidth();
+			int h = getHeight();
+			int y = base - h;
+			int fg = IRIS_TAG_BOX_COLOR;
+			if (widthErr)
+				fg = WRaster.ERROR_PIXEL;
+			drawSolidBox(fg, x, y, w, h);
+
+			w += c_space;
+			itok.setCoordinates(x, y, w, h);
+		}
+	}
+
 	/** Render a glyph onto the raster.
 	 * @param wg WGlyph to render.
 	 * @param fg Foreground color.
@@ -884,6 +951,25 @@ public class WRenderer {
 		y--;
 		try {
 			raster.copy(wg, x, y, fg);
+		}
+		catch (IndexOutOfBoundsException e) {
+			return false;
+		}
+		return true;
+	}
+
+	/** Draw a box onto the raster.
+	 * @param fg Box color.
+	 * @param x X-position on raster (1-based)
+	 * @param y Y-position on raster (1-based)
+	 * @param w Width of box
+	 * @param h Height of box
+	 * @return True if rendered ok.  False if out of bounds. */
+	protected boolean drawSolidBox(int fg, int x, int y, int w, int h) {
+		x--;
+		y--;
+		try {
+			raster.drawSolidBox(fg, x, y, w, h);
 		}
 		catch (IndexOutOfBoundsException e) {
 			return false;
@@ -990,46 +1076,46 @@ public class WRenderer {
 	//TODO: Figure out how to handle these tokens
 	//================================================
 
-	/** Render a WtTravelTime token */
-	public void addTravelTime(WtTravelTime tok) {
-//		String sid;
-//		OverLimitMode mode;
-//		String o_txt;
-		
-		//TODO:  Figure out how to handle this token...
-	}
-
-	/** Render a WtSpeedAdvisory token */
-	public void addSpeedAdvisory(WtSpeedAdvisory tok) {
-		
-		//TODO:  Figure out how to handle this token...
-	}
-
-	/** Render a WtSlowWarning token */
-	public void addSlowWarning(WtSlowWarning tok) {
-//		int    spd  = tok.getSpeed();
-//		int    dist = tok.getDistance();
-//		String mode = tok.getMode();
-		
-		//TODO:  Figure out how to handle this token...
-	}
-
-	/** Render a WtTolling token */
-	public void addTolling(WtTolling tok) {
-//		String   mode  = tok.getMode();
-//		String[] zones = tok.getZones();
-		
-		//TODO:  Figure out how to handle this token...
-	}
-
-	/** Render a WtParkingAvail token */
-	public void addParking(WtParkingAvail tok) {
-//		String pid   = tok.getParkingID();
-//		String l_txt = tok.getParkingLowText();
-//		String c_txt = tok.getClosedText();
-		
-		//TODO:  Figure out how to handle this token...
-	}
+//	/** Render a WtTravelTime token */
+//	public void addTravelTime(WtTravelTime tok) {
+////		String sid;
+////		OverLimitMode mode;
+////		String o_txt;
+//		
+//		//TODO:  Figure out how to handle this token...
+//	}
+//
+//	/** Render a WtSpeedAdvisory token */
+//	public void addSpeedAdvisory(WtSpeedAdvisory tok) {
+//		
+//		//TODO:  Figure out how to handle this token...
+//	}
+//
+//	/** Render a WtSlowWarning token */
+//	public void addSlowWarning(WtSlowWarning tok) {
+////		int    spd  = tok.getSpeed();
+////		int    dist = tok.getDistance();
+////		String mode = tok.getMode();
+//		
+//		//TODO:  Figure out how to handle this token...
+//	}
+//
+//	/** Render a WtTolling token */
+//	public void addTolling(WtTolling tok) {
+////		String   mode  = tok.getMode();
+////		String[] zones = tok.getZones();
+//		
+//		//TODO:  Figure out how to handle this token...
+//	}
+//
+//	/** Render a WtParkingAvail token */
+//	public void addParking(WtParkingAvail tok) {
+////		String pid   = tok.getParkingID();
+////		String l_txt = tok.getParkingLowText();
+////		String c_txt = tok.getClosedText();
+//		
+//		//TODO:  Figure out how to handle this token...
+//	}
 	
 	/** Render a WtFeedMsg token */
 	public void addFeed(WtFeedMsg tok) {

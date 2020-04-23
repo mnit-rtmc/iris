@@ -54,7 +54,7 @@ public class WtSpeedAdvisory extends Wt_IrisToken {
 	}
 
 	@Override
-	public Integer getDefaultCharCntX() {
+	public Integer getCharCntX() {
 		// TODO Auto-generated method stub
 		return null;
 	}
