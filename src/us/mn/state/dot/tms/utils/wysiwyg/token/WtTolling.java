@@ -43,15 +43,6 @@ public class WtTolling extends WToken {
 	}
 
 	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#updateState(us.mn.state.dot.tms.utils.wysiwyg.WState)
-	 */
-	@Override
-	public WState updateState(WState before) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#doMulti(us.mn.state.dot.tms.utils.Multi)
 	 */
 	@Override

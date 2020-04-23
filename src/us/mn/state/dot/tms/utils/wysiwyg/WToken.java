@@ -520,9 +520,6 @@ abstract public class WToken {
 	// abstract methods
 	//===========================================
 
-	/** Have token update a WState in a token-specific manner */
-	abstract public WState updateState(WState before);
-	
 	/** Call token-specific Multi method */
 	abstract public void doMulti(Multi cb);
 
