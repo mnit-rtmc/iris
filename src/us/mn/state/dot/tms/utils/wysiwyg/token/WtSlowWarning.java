@@ -45,6 +45,21 @@ public class WtSlowWarning extends WToken {
 		updateString();
 	}
 
+	/** Get warning speed (in MPH) */
+	public int getWarningSpeed() {
+		return spd;
+	}
+	
+	/** Get warning distance (in tenths of a mile) */
+	public int getWarningDist() {
+		return dist;
+	}	
+	
+	/** Get text replacement mode (empty string, "dist", or "speed") */
+	public String getTextReplMode() {
+		return mode;
+	}
+	
 	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#updateState(us.mn.state.dot.tms.utils.wysiwyg.WState)
 	 */

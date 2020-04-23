@@ -46,6 +46,21 @@ public class WtTravelTime extends WToken {
 		this.o_txt = o_txt;
 		updateString();
 	}
+	
+	/** Get station ID */
+	public String getStationId() {
+		return sid;
+	}
+	
+	/** Get over limit mode */
+	public OverLimitMode getOverLimitMode() {
+		return mode;
+	}
+	
+	/** Get over limit text */
+	public String getOverLimitText() {
+		return o_txt;
+	}
 
 	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#updateState(us.mn.state.dot.tms.utils.wysiwyg.WState)
