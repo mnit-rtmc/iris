@@ -55,7 +55,6 @@ public class WtSpeedAdvisory extends Wt_IrisToken {
 	/** get width of WYSIWYG box */
 	@Override
 	public Integer getBoxWidth() {
-		// TODO Auto-generated method stub
-		return null;
+		return 0;
 	}
 }
