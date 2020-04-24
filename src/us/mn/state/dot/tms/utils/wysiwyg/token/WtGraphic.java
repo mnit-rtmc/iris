@@ -56,10 +56,14 @@ public class WtGraphic extends WToken {
 		graphic = GraphicHelper.find(g_num);
 	}
 
-	/** get graphic number */
+	/** Get graphic number */
 	public int getGraphicNum() {
-		// TODO Auto-generated method stub
 		return g_num;
+	}
+	
+	/** Get graphic version ID */
+	public String getVersionId() {
+		return g_id;
 	}
 	
 	public Graphic getGraphic() {
