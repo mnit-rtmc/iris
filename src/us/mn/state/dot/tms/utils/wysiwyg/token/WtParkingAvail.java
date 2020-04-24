@@ -84,13 +84,13 @@ public class WtParkingAvail extends Wt_IrisToken {
 				}
 			}
 		}
-//		appendCharCntXParameter(sb);
 	}
 
+	/** get width of WYSIWYG box */
 	@Override
-	public Integer getCharCntX() {
-		int llen = (l_txt == null) ? 0 : l_txt.length();
-		int clen = (c_txt == null) ? 0 : c_txt.length();
+	public Integer getBoxWidth() {
+		int llen = wfont.getTextWidth(l_txt);
+		int clen = wfont.getTextWidth(c_txt);
 		return Math.max(llen, clen);
 	}
 }

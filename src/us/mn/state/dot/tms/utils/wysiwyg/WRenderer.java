@@ -910,22 +910,23 @@ public class WRenderer {
 		/** Wt_Iris child token */
 		private final Wt_IrisToken itok;
 
-		/** normal TagBox */
+		/** Construct IrisTagBox */
 		private IrisTagBox(Wt_IrisToken itok) {
 			super(1);
 			this.itok = itok;
+			itok.setFont(state.getWFont());
 		}
 
 		/** get pixel width of box */
+		@Override
 		int getWidth() {
-			Integer len =  itok.getCharCntX();
-			if ((len == null) || (len < 1))
+			Integer wid = itok.getBoxWidth();
+			if ((wid == null) || (wid < 1))
 				return 0;
-			int mcw =  wfont.getMaxCharWidth();
-			int csep = c_space;
-			return (len * mcw) + ((len-1) * csep);
+			return wid;
 		}
 
+		@Override
 		void render(int x, int base) throws InvalidMsgException {
 			int w = getWidth();
 			int h = getHeight();
@@ -933,9 +934,10 @@ public class WRenderer {
 			int fg = IRIS_TAG_BOX_COLOR;
 			if (widthErr)
 				fg = WRaster.ERROR_PIXEL;
-			drawSolidBox(fg, x, y, w, h);
-
-			w += c_space;
+			if (w > 0) {
+				drawSolidBox(fg, x, y, w, h);
+				w += c_space;
+			}
 			itok.setCoordinates(x, y, w, h);
 		}
 	}

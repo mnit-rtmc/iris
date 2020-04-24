@@ -85,11 +85,11 @@ public class WtTravelTime extends Wt_IrisToken {
 				sb.append(o_txt);
 			}
 		}
-//		appendCharCntXParameter(sb);
 	}
 
+	/** get width of WYSIWYG box */
 	@Override
-	public Integer getCharCntX() {
+	public Integer getBoxWidth() {
 		// TODO Auto-generated method stub
 		return null;
 	}

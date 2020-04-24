@@ -50,11 +50,11 @@ public class WtSpeedAdvisory extends Wt_IrisToken {
 	@Override
 	public void appendParameters(StringBuilder sb) {
 		; // do nothing
-//		appendCharCntXParameter(sb);
 	}
 
+	/** get width of WYSIWYG box */
 	@Override
-	public Integer getCharCntX() {
+	public Integer getBoxWidth() {
 		// TODO Auto-generated method stub
 		return null;
 	}

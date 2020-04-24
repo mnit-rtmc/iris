@@ -15,6 +15,7 @@
 
 package us.mn.state.dot.tms.utils.wysiwyg.token;
 
+import us.mn.state.dot.tms.utils.wysiwyg.WFont;
 import us.mn.state.dot.tms.utils.wysiwyg.WRenderer;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
@@ -28,20 +29,17 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
 abstract public class Wt_IrisToken extends WToken {
 
-	/** Number of horizontal characters used to
-	 *  draw this token in WYSIWYG renderer */
-	protected Integer charCntX;
+	/** Font used for this token */
+	protected WFont wfont;
 
 	/** Parent constructor for Iris-tag (a.k.a 
 	 *  "action tag") tokens
 	 *  
 	 * @param tt WtokenType
 	 * @param aPrefix Prefix string for token
-	 * @param charCntX Number of character spaces to use
 	 */
 	public Wt_IrisToken(WTokenType tt, String aPrefix) {
 		super(tt, aPrefix);
-//		this.charCntX = charCntX;
 	}
 
 	/* (non-Javadoc)
@@ -49,21 +47,14 @@ abstract public class Wt_IrisToken extends WToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		if (renderAsAnchor())
-			wr.addAnchor(this);
-		else
-			wr.addIrisToken(this);
+		wr.addIrisToken(this);
 	}
 
-//	/** Append the charCntX parameter to the tag */
-//	public void appendCharCntXParameter(StringBuilder sb) {
-//		//TODO: Uncomment once both parsers can handle the extra argument
-//		if (charCntX != null) {
-//			sb.append(';');
-//			sb.append(charCntX);
-//		}
-//	}
-
+	public boolean renderAsAnchor() {
+		Integer len = getBoxWidth();
+		return ((len == null) || (len < 1));
+	}
+	
 	//-------------------------------------------
 	
 	/** Is this token blank? */
@@ -72,34 +63,18 @@ abstract public class Wt_IrisToken extends WToken {
 		return false;
 	}
 
-//	/** Set the number of horizontal characters
-//	 *  used to draw this token in WYSIWYG
-//	 *  renderer. */
-//	public void setCharCntX(Integer charCntX) {
-//		this.charCntX = charCntX;
-//	}
-//		
-//	/** Get the number of horizontal characters
-//	 *  used to draw this token in WYSIWYG
-//	 *  renderer.  If charCntX is set to null,
-//	 *  this method returns the child-class's
-//	 *  getDefaultCharCntX() value. */
-//	public Integer getCharCntX() {
-//		if (charCntX == null)
-//			return getDefaultCharCntX();
-//		return charCntX;
-//	}
+	//-------------------------------------------
 	
-	public boolean renderAsAnchor() {
-		Integer len = getCharCntX();
-		return ((len == null) || (len < 1));
+	/** Set font.  Called in pre-render phase. */
+	public void setFont(WFont wfont) {
+		this.wfont = wfont;
 	}
 
 	//-------------------------------------------
-	// Abstract method for child classes
-	
-	/** Get the charCntX from the child class.
+	// Abstract methods for child classes
+
+	/** Get the box width from the child class.
 	 * If a null is returned, the token is hidden,
-	 * but is traversable, like a page-time tag. */
-	abstract public Integer getCharCntX();
+	 * but is traversable like a page-time tag. */
+	public abstract Integer getBoxWidth();
 }

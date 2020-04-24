@@ -80,11 +80,10 @@ public class WtSlowWarning extends Wt_IrisToken {
 			sb.append(',');
 			sb.append(mode);
 		}
-//		appendCharCntXParameter(sb);
 	}
 
 	@Override
-	public Integer getCharCntX() {
+	public Integer getBoxWidth() {
 		int xx;
 		if ((mode == null)
 		 || "none".equalsIgnoreCase(mode)) {
@@ -94,15 +93,13 @@ public class WtSlowWarning extends Wt_IrisToken {
 		if ("dist".equalsIgnoreCase(mode)) {
 			// distance rounded to nearest mile
 			xx = (int)((dist + 5) / 10);
+			return wfont.getIntWidth(xx);
 		}
 		else if ("speed".equalsIgnoreCase(mode)) {
 			// speed rounded to nearest 5 mph
 			xx = Math.round(spd / 5) * 5;
+			return wfont.getIntWidth(xx);
 		}
-		else {
-			// give them something they can click on to fix the problem
-			return 1;
-		}
-		return Integer.toString(xx).length();
+		return null;
 	}
 }

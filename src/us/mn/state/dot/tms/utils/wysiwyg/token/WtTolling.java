@@ -63,7 +63,6 @@ public class WtTolling extends Wt_IrisToken {
 				sb.append(zones[i]);
 			}
 		}
-//		appendCharCntXParameter(sb);
 	}
 
 	/** Get Tolling Mode */
@@ -76,8 +75,9 @@ public class WtTolling extends Wt_IrisToken {
 		return zones;
 	}
 
+	/** get width of WYSIWYG box */
 	@Override
-	public Integer getCharCntX() {
+	public Integer getBoxWidth() {
 		// TODO Auto-generated method stub
 		return null;
 	}
