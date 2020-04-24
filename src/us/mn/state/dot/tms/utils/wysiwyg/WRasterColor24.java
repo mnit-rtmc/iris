@@ -62,7 +62,8 @@ public class WRasterColor24 extends WRaster {
 	protected Integer tagvalToPixel2(int[] tagval) {
 		DmsColor c;
 		if (tagval.length == 1) {
-			c = ColorClassic.fromOrdinal(tagval[0]).clr;
+			ColorClassic cc = ColorClassic.fromOrdinal(tagval[0]);
+			c = (cc != null) ? cc.clr : null;
 			if (c == null)
 				return null;
 		}
