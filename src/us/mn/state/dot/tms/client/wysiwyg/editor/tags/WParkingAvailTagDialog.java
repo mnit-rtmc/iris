@@ -24,6 +24,7 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
+import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.ParkingAreaHelper;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WController;
@@ -43,11 +44,11 @@ class WParkingAvailTagDialog extends WMultiTagDialog {
 	private WTagParamSonarObjectField<ParkingArea> pidField;
 	private WTagParamTextField l_txtField;
 	private WTagParamTextField c_txtField;
-	private String pid = "";
+	private String pid;
 	private String pname;
 	private ParkingArea parkingArea;
-	private String l_txt = "";
-	private String c_txt = "";
+	private String l_txt;
+	private String c_txt;
 	
 	public WParkingAvailTagDialog(String title, WController c,
 			WTokenType tokType, WToken tok) {
@@ -110,13 +111,14 @@ class WParkingAvailTagDialog extends WMultiTagDialog {
 	
 	/** Renderer for displaying Parking Areas with "Facility Name: (Name)" */
 	private class ParkingAreaListRenderer
-				implements ListCellRenderer<ParkingArea> {
+				implements ListCellRenderer<SonarObject> {
 		private DefaultListCellRenderer cell = new DefaultListCellRenderer();
 		
 		@Override  
 		public Component getListCellRendererComponent(
-				JList<?extends ParkingArea> list, ParkingArea p,
+				JList<?extends SonarObject> list, SonarObject o,
 		      int index, boolean isSelected, boolean cellHasFocus) {
+			ParkingArea p = (ParkingArea) o;
 			cell.getListCellRendererComponent(
 					list, p, index, isSelected, cellHasFocus);
 			String txt = (p != null) ? String.format("%s (%s)",

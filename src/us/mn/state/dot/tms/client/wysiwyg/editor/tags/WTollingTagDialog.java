@@ -46,11 +46,12 @@ class WTollingTagDialog extends WMultiTagDialog {
 			new ArrayList<WTagParamSonarObjectField<TollZone>>();
 	private String modeStr;
 	private PricingMode mode;
-	private ArrayList<String> tzNames = new ArrayList<String>();
-	private ArrayList<TollZone> tollZones = new ArrayList<TollZone>();
+	protected ArrayList<String> tzNames = new ArrayList<String>();
+	protected ArrayList<TollZone> tollZones = new ArrayList<TollZone>();
 	private TollZone[] allTollZones;
 	private JPanel extraTollZones;
-	private ArrayList<JPanel> extraTollZonePanels = new ArrayList<JPanel>();
+	private final ArrayList<JPanel> extraTollZonePanels =
+			new ArrayList<JPanel>();
 	private JButton addTollZoneBtn;
 	private JButton deleteTollZoneBtn;
 	
@@ -67,6 +68,8 @@ class WTollingTagDialog extends WMultiTagDialog {
 		editTok = (WtTolling) tok;
 		modeStr = editTok.getMode();
 		mode = PricingMode.getEnumFromMode(modeStr);
+		tzNames = new ArrayList<String>();
+		tollZones = new ArrayList<TollZone>();
 		
 		for (String tzs: editTok.getZones()) {
 			tzNames.add(tzs);
@@ -78,6 +81,11 @@ class WTollingTagDialog extends WMultiTagDialog {
 	
 	@Override
 	protected void addTagForm() {
+		// TODO something is weird about the order in which the methods in
+		// this class are called requiring us to call this an extra time
+		if (editTok != null)
+			loadFields(editTok);
+		
 		// add a ComboBox for the mode field
 		modeField = new WTagParamEnumField<PricingMode>(
 				PricingMode.values(), mode, false);
@@ -117,7 +125,8 @@ class WTollingTagDialog extends WMultiTagDialog {
 		// if we have more than 1 tolling zone already, add more fields and
 		// enable the delete button
 		if (tollZones.size() > 1) {
-			for (TollZone tz: tollZones) {
+			for (int i = 1; i < tollZones.size(); ++i) {
+				TollZone tz = tollZones.get(i);
 				addTollingZoneField(tz);
 			}
 			deleteTollZoneBtn.setEnabled(true);
@@ -232,7 +241,8 @@ class WTollingTagDialog extends WMultiTagDialog {
 		
 		public static PricingMode getEnumFromMode(String m) {
 			for (PricingMode e: values()) {
-				if (e.getMode() == m)
+				String em = e.getMode();
+				if (em.equals(m))
 					return e;
 			}
 			return null;

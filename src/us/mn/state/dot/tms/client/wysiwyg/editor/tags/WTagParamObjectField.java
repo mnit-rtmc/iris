@@ -18,37 +18,29 @@ package us.mn.state.dot.tms.client.wysiwyg.editor.tags;
 import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
 
-import us.mn.state.dot.sonar.SonarObject;
-
 /** Tag parameter input class for fields that reference a SONAR object (e.g. a
  *  CommLink or Station).
  */
 @SuppressWarnings("serial")
-class WTagParamSonarObjectField<T extends SonarObject> extends JComboBox<SonarObject>
+class WTagParamObjectField<T> extends JComboBox<T>
 		implements WTagParamComponent {
 	/** Whether or not the parameter taken from this field is required. */
 	public boolean required = true;
 	
 	/** Constructor for taking an array of values */
-	public WTagParamSonarObjectField(
-			SonarObject[] values, SonarObject selected, boolean required) {
+	public WTagParamObjectField(
+			T[] values, T selected, boolean required) {
 		super(values);
 		setSelectedItem(selected);
 		this.required = required;
 	}
 	
 	/** Constructor for taking a model */
-	@SuppressWarnings("unchecked")
-	public WTagParamSonarObjectField(ComboBoxModel<T> model,
-			SonarObject selected, boolean required) {
-		super((ComboBoxModel<SonarObject>) model);
+	public WTagParamObjectField(ComboBoxModel<T> model,
+			T selected, boolean required) {
+		super(model);
 		setSelectedItem(selected);
 		this.required = required;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public void setComboBoxModel(ComboBoxModel<T> model) {
-		setModel((ComboBoxModel<SonarObject>) model);
 	}
 	
 	@Override

@@ -82,7 +82,8 @@ class WIncidentLocatorTagDialog extends WMultiTagDialog {
 		
 		public static LocatorCode getEnumFromMode(String m) {
 			for (LocatorCode e: values()) {
-				if (e.getCode() == m)
+				String em = e.getCode();
+				if (em.equals(m))
 					return e;
 			}
 			return null;

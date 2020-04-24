@@ -24,6 +24,7 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
+import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommLinkHelper;
 import us.mn.state.dot.tms.CommProtocol;
@@ -94,13 +95,14 @@ class WMsgFeedTagDialog extends WMultiTagDialog {
 	}
 	
 	/** Renderer for displaying CommLinks with "Description: (Name)" */
-	private class CommLinkListRenderer implements ListCellRenderer<CommLink> {
+	private class CommLinkListRenderer implements ListCellRenderer<SonarObject> {
 		private DefaultListCellRenderer cell = new DefaultListCellRenderer();
 		
 		@Override  
 		public Component getListCellRendererComponent(
-				JList<?extends CommLink> list, CommLink c,
+				JList<?extends SonarObject> list, SonarObject o,
 		      int index, boolean isSelected, boolean cellHasFocus) {
+			CommLink c = (CommLink) o;
 			cell.getListCellRendererComponent(
 					list, c, index, isSelected, cellHasFocus);
 			String txt = (c != null) ? String.format("%s (%s)",

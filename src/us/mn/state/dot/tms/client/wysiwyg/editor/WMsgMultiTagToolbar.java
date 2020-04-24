@@ -20,6 +20,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JInternalFrame;
 import javax.swing.JList;
 
 import java.awt.Color;
@@ -177,8 +178,11 @@ public class WMsgMultiTagToolbar extends WToolbar {
 			WTokenType tokType = (WTokenType) multiTags.getSelectedItem();
 			WMultiTagDialog d = WMultiTagDialog.construct(
 					controller, tokType, null);
-			if (d != null)
-				controller.getDesktop().show(d);
+			if (d != null) {
+				JInternalFrame f = controller.getDesktop().show(d);
+				f.requestFocusInWindow();
+				d.requestFocusInWindow();
+			}
 		}
 	};
 	

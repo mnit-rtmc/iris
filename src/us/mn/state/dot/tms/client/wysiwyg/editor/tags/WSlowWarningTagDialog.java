@@ -90,7 +90,8 @@ class WSlowWarningTagDialog extends WMultiTagDialog {
 		
 		public static TagReplMode getEnumFromMode(String m) {
 			for (TagReplMode e: values()) {
-				if (e.getMode() == m)
+				String em = e.getMode();
+				if (em.equals(m))
 					return e;
 			}
 			return null;

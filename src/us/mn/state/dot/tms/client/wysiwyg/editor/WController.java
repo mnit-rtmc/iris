@@ -33,6 +33,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.JInternalFrame;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
@@ -1724,8 +1725,11 @@ public class WController {
 				WTokenType tokType = t.getType();
 				WMultiTagDialog d = WMultiTagDialog.construct(
 						wc, tokType, t);
-				if (d != null)
-					desktop.show(d);
+				if (d != null) {
+					JInternalFrame f = desktop.show(d);
+					f.requestFocusInWindow();
+					d.requestFocusInWindow();
+				}
 			}
 		}
 	};
@@ -2389,7 +2393,8 @@ public class WController {
 			selectedPage.addToken(ti, newTok);
 			update();
 			updateCaret();
-		}
+		} else
+			println("%s not found!", oldTok.toString());
 		updateNonTextTagInfo();
 		editor.requestFocusInWindow();
 		signPanel.requestFocusInWindow();
@@ -2709,6 +2714,8 @@ public class WController {
 				if (inMultiTagMode())
 					editor.updateTagEditButton(canEditTag(tok));
 			}
+		} else {
+			editor.updateTagEditButton(false);
 		}
 		editor.updateNonTextTagInfo(s, c);
 	}

@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTravelTime;
 
+import us.mn.state.dot.sonar.SonarObject;
 
 /**
  * WYSIWYG DMS Message Editor dialog form for editing Travel Time action tags.
@@ -50,7 +51,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.token.WtTravelTime;
 class WTravelTimeTagDialog extends WMultiTagDialog {
 	protected WtTravelTime editTok;
 	private DefaultComboBoxModel<CorridorBase<R_Node>> corridorModel;
-	private WTagParamSonarObjectField<CorridorBase<R_Node>> corridors;
+	private WTagParamObjectField<CorridorBase<R_Node>> corridors;
 	private CorridorBase<R_Node> corridor;
 	
 	private DefaultComboBoxModel<Station> stationModel;
@@ -89,7 +90,7 @@ class WTravelTimeTagDialog extends WMultiTagDialog {
 	@Override
 	protected void addTagForm() {
 		// display a ComboBox of corridors
-		corridors = new WTagParamSonarObjectField<CorridorBase<R_Node>>(
+		corridors = new WTagParamObjectField<CorridorBase<R_Node>>(
 				corridorModel, null, true);
 		corridors.addActionListener(setCorridorAction);
 		addField("wysiwyg.travel_time_dialog.corridor", corridors);
@@ -182,7 +183,7 @@ class WTravelTimeTagDialog extends WMultiTagDialog {
 				DefaultComboBoxModel<Station> model = getResult();
 				if (model != null) {
 					stationModel = model;
-					stations.setModel(stationModel);
+					stations.setComboBoxModel(stationModel);
 				}
 			}
 		};
@@ -198,13 +199,14 @@ class WTravelTimeTagDialog extends WMultiTagDialog {
 	
 	/** Renderer for displaying Stations with "Description: (Name)" */
 	private class StationListRenderer
-				implements ListCellRenderer<Station> {
+				implements ListCellRenderer<SonarObject> {
 		private DefaultListCellRenderer cell = new DefaultListCellRenderer();
 		
 		@Override  
 		public Component getListCellRendererComponent(
-				JList<?extends Station> list, Station s,
+				JList<?extends SonarObject> list, SonarObject o,
 		      int index, boolean isSelected, boolean cellHasFocus) {
+			Station s = (Station) o;
 			cell.getListCellRendererComponent(
 					list, s, index, isSelected, cellHasFocus);
 			String txt = (s != null) ? String.format("%s (%s)",
