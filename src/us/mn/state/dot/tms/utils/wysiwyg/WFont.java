@@ -105,9 +105,51 @@ public class WFont implements Font {
 		return glyphList.iterator();
 	}
 	
+	//===========================================
+	// Tools for figuring out pixel-width of
+	// various kinds of text.
+	
 	/** Get maximum character width in font */
 	public int getMaxCharWidth() {
 		return maxCharWidth;
+	}
+
+	/** Get maximum pixel-width of a field that
+	 *  is len characters wide. (The number
+	 *  returned for variable-width fonts may
+	 *  seem large because it uses the widest
+	 *  char in the font to do the math.) */
+	public int getFieldWidth(int len) {
+		int csep = getCharSpacing();
+		int width = (maxCharWidth * len) + (csep * (len - 1));
+		return Math.max(0,  width);
+	}
+
+	/** Get pixel-width of a specified string.
+	 *  Any chars in the string that are not
+	 *  in the font are ignored. */
+	public int getTextWidth(String str) {
+		int len = str.length();
+		if (len < 1)
+			return 0;
+		char ch;
+		WGlyph glyph;
+		int csep = getCharSpacing();
+		int width = 0;
+		for (int i = 0; i < len; i++){
+		    ch = str.charAt(i);
+		    glyph = getGlyph(ch);
+		    if (glyph != null)
+		    	width += glyph.getWidth() + csep;
+		}
+		return Math.max(0, (width - csep));
+	}
+
+	/** Get pixel-width of a specified integer.
+	 *  (converted to a string) */
+	public int getIntWidth(int i) {
+		String str = Integer.toString(i);
+		return getTextWidth(str);
 	}
 
 	//===========================================
