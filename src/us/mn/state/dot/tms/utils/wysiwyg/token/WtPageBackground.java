@@ -20,7 +20,6 @@ import java.awt.Color;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.utils.Multi;
 import us.mn.state.dot.tms.utils.wysiwyg.WRenderer;
-import us.mn.state.dot.tms.utils.wysiwyg.WState;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
@@ -29,11 +28,12 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
  * @author John L. Stanley - SRF Consulting
  *
  */
-public class WtPageBackground extends WToken {
+public class WtPageBackground extends WToken implements Wt_ColorToken {
 
 	Integer z;
 	Integer r; // must be Integer; doubles as 1-or-3-parameter flag
 	int g, b;
+	int[] tagval;
 
 	/**
 	 * @param z
@@ -41,6 +41,7 @@ public class WtPageBackground extends WToken {
 	public WtPageBackground(Integer z) {
 		super(WTokenType.pageBackground, "[pb");
 		this.z = z;
+		tagval = toTagval(z);
 		updateString();
 	}
 
@@ -54,16 +55,15 @@ public class WtPageBackground extends WToken {
 		this.r = r;
 		this.g = g;
 		this.b = b;
+		tagval = toTagval(r,g,b);
 		updateString();
 	}
 
-	/** Get PageBackground tagval */
+	/** Get PageBackground tagval. */
 	public int[] getColorTagval() {
-		return (r == null)
-		      ? toTagval(z)
-		      : toTagval(r, g, b);
+		return tagval;
 	}
-
+	
 	/** Get a DmsColor object in the color of this tag. */
 	public DmsColor getDmsColor() {
 		if (r == null)
@@ -117,5 +117,21 @@ public class WtPageBackground extends WToken {
 			sb.append(',');
 			sb.append(b);
 		}
+	}
+	
+	public Integer getZValue() {
+		return z;
+	}
+	
+	public Integer getRValue() {
+		return r;
+	}
+	
+	public int getGValue() {
+		return g;
+	}
+	
+	public int getBValue() {
+		return b;
 	}
 }

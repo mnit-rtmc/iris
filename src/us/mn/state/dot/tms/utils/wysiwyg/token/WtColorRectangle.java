@@ -16,7 +16,6 @@
 package us.mn.state.dot.tms.utils.wysiwyg.token;
 
 import us.mn.state.dot.tms.utils.Multi;
-import us.mn.state.dot.tms.utils.wysiwyg.WState;
 import us.mn.state.dot.tms.utils.wysiwyg.WRenderer;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
@@ -25,8 +24,11 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
  * @author John L. Stanley - SRF Consulting
  *
  */
-public class WtColorRectangle extends Wt_Rectangle {
-
+public class WtColorRectangle extends Wt_Rectangle implements Wt_ColorToken {
+	
+	Integer z;
+	Integer r; // must be Integer; doubles as 1-or-3-parameter flag
+	int g, b;
 	private int[] tvColor;
 
 	public WtColorRectangle(int x, int y, int w, int h, int z) {
@@ -35,6 +37,7 @@ public class WtColorRectangle extends Wt_Rectangle {
 		this.paramY = y;
 		this.paramW = w;
 		this.paramH = h;
+		this.z = z;
 		this.tvColor = toTagval(z);
 		updateString();
 	}
@@ -45,6 +48,9 @@ public class WtColorRectangle extends Wt_Rectangle {
 		this.paramY = y;
 		this.paramW = w;
 		this.paramH = h;
+		this.r = r;
+		this.g = g;
+		this.b = b;
 		this.tvColor = toTagval(r,g,b);
 		updateString();
 	}
@@ -56,6 +62,9 @@ public class WtColorRectangle extends Wt_Rectangle {
 
 	/** Set the color rectangle's color */
 	public void setColor(int r, int g, int b) {
+		this.r = r;
+		this.g = g;
+		this.b = b;
 		tvColor = toTagval(r,g,b);
 	}
 	
@@ -102,5 +111,21 @@ public class WtColorRectangle extends Wt_Rectangle {
 		sb.append(',');
 		sb.append(paramH);
 		sb.append(toStr(tvColor));
+	}
+
+	public Integer getZValue() {
+		return z;
+	}
+	
+	public Integer getRValue() {
+		return r;
+	}
+	
+	public int getGValue() {
+		return g;
+	}
+	
+	public int getBValue() {
+		return b;
 	}
 }

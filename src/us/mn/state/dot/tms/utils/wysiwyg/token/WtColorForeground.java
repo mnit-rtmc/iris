@@ -20,7 +20,6 @@ import java.awt.Color;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.utils.Multi;
 import us.mn.state.dot.tms.utils.wysiwyg.WRenderer;
-import us.mn.state.dot.tms.utils.wysiwyg.WState;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
@@ -29,7 +28,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
  * @author John L. Stanley - SRF Consulting
  *
  */
-public class WtColorForeground extends WToken {
+public class WtColorForeground extends WToken implements Wt_ColorToken {
 
 	Integer z;
 	Integer r; // must be Integer; doubles as 1-or-3 parameter flag
@@ -120,5 +119,21 @@ public class WtColorForeground extends WToken {
 	 */
 	public boolean isNormalizeLine() {
 		return true;
+	}
+
+	public Integer getZValue() {
+		return z;
+	}
+	
+	public Integer getRValue() {
+		return r;
+	}
+	
+	public int getGValue() {
+		return g;
+	}
+	
+	public int getBValue() {
+		return b;
 	}
 }
