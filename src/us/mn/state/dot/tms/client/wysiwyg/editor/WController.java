@@ -2564,19 +2564,21 @@ public class WController {
 	/** Render the message using the current MULTI String and MultiConfig */
 	private void renderMsg() {
 		// update the WMessage object and re-render if we have a MultiConfig
-//		println("In renderMsg: " + multiStringText);
+//		println("In renderMsg: '%s'", multiStringText);
 		if (wmsg == null) {
-			if  (multiStringText != null)
-//			println("Making wmsg with: " + multiStringText);
+			if  (multiStringText != null) {
+//				println("Making wmsg with: '%s'", multiStringText);
 				wmsg = new WMessage(multiStringText);
+			}
 		} else {
 			// if we already have a WMessage object, use it to update the
 			// MULTI string then use that to re-render
 			multiStringText = wmsg.toString();
-//			println("Remaking wmsg with: " + multiStringText);
-			wmsg = new WMessage(multiStringText);
+//			println("Remaking wmsg with: '%s'", multiStringText);
+//			wmsg = new WMessage(multiStringText);
 		}
-//		System.out.println(multiStringText);
+//		if (wmsg != null)
+//			println("wmsg has: '%s'", wmsg.toString());
 		
 		// clear any errors before re-rendering
 		errMan.clearErrors();
@@ -2670,19 +2672,21 @@ public class WController {
 			saveState();
 		
 		multiStringText = ms;
+//		println("Updating with: '%s'", multiStringText);
 		wmsg.parseMulti(multiStringText);
+//		println("wmsg has: '%s'", wmsg.toString());
 		update();
+//		println("Got back: '%s'", multiStringText);
 	}
 	
 	/** Update everything that needs updating */
 	public void update() {
 //		println("In update: " + multiStringText);
 		renderMsg();
+//		println("After renderMsg: '%s'", multiStringText);
 		updateMultiPanel();
 		updatePageListModel();
 		updateCursor();
-		
-		// TODO add more stuff here eventually
 	}
 	
 	/** Update the text toolbar if one is available. */
