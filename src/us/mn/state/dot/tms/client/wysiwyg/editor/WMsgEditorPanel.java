@@ -88,8 +88,7 @@ public class WMsgEditorPanel extends JPanel {
 		tabPane.add(I18N.get("wysiwyg.epanel.error_tab"), errorPanel);
 		
 		// make it red to catch attention
-		tabPane.setBackgroundAt(ERROR_PANEL_TAB, Color.RED);
-		tabPane.setForegroundAt(ERROR_PANEL_TAB, Color.MAGENTA);
+		tabPane.setForegroundAt(ERROR_PANEL_TAB, Color.RED);
 		
 		// enable the restore button
 		wysiwygPanel.enableRestoreButton();
@@ -122,6 +121,16 @@ public class WMsgEditorPanel extends JPanel {
 	/** Update the text toolbar */
 	public void updateTextToolbar() {
 		wysiwygPanel.updateTextToolbar();
+	}
+	
+	/** Enable or disable tag edit button */
+	public void updateTagEditButton(boolean state) {
+		wysiwygPanel.updateTagEditButton(state);
+	}
+	
+	/** Update the non-text tag button state to */
+	public void updateNonTextTagButton(boolean state) {
+		wysiwygPanel.updateNonTextTagButton(state);
 	}
 	
 	/** Update the non-text tag info label, optionally including a color icon

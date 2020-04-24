@@ -16,24 +16,15 @@
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -43,31 +34,16 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.ListCellRenderer;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsSignGroup;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
-import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.RasterBuilder;
-import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.dms.DMSPanelPager;
-import us.mn.state.dot.tms.client.dms.SignFacePanel;
-import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.Icons;
-import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.wysiwyg.WEditorErrorManager;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 
@@ -459,6 +435,15 @@ public class WMsgEditorForm extends AbstractForm {
 	/** Update the text toolbar */
 	public void updateTextToolbar() {
 		epanel.updateTextToolbar();
+	}
+	
+	public void updateTagEditButton(boolean state) {
+		epanel.updateTagEditButton(state);
+	}
+	
+	/** Update the non-text tag button state to */
+	public void updateNonTextTagButton(boolean state) {
+		epanel.updateNonTextTagButton(state);
 	}
 	
 	/** Update the non-text tag info label, optionally including a color icon

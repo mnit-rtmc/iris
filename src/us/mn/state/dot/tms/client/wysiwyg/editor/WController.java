@@ -56,8 +56,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
-import us.mn.state.dot.tms.utils.wysiwyg.WFontCache;
-import us.mn.state.dot.tms.utils.wysiwyg.WGraphicCache;
+import us.mn.state.dot.tms.client.wysiwyg.editor.tags.WMultiTagDialog;
 import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 import us.mn.state.dot.tms.utils.wysiwyg.WPoint;
@@ -85,7 +84,6 @@ import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Multi.JustificationLine;
 import us.mn.state.dot.tms.utils.Multi.JustificationPage;
 import us.mn.state.dot.tms.utils.MultiConfig;
-import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * WYSIWYG DMS Message Editor Controller for handling exchanges between the
@@ -146,7 +144,6 @@ public class WController {
 	private DMS sign;
 	private SignGroup sg;
 	private QuickMessage qm;
-	private MultiString multiString;
 	private String multiStringText = null;
 	
 	/** MultiConfig for config-related stuff  */
@@ -165,7 +162,6 @@ public class WController {
 	
 	/** Currently selected/active text rectangle (may be the implicit "whole-
 	 *  sign" text rectangle) and the tokens it contains. */
-	private int selectedTrIndx = 0;
 	private WgTextRect selectedTextRect;
 	private WTokenList trTokens;
 
@@ -215,6 +211,9 @@ public class WController {
 	 */
 	private boolean stepNonTextTags = false;
 	
+	/** Keep track of stepNonTextTags outside of MULTI mode */
+	private boolean snttNonMultiMode = false;
+	
 	/** WMessage for working with rendered message */
 	private WMessage wmsg = null;
 	
@@ -228,8 +227,6 @@ public class WController {
 	/** Current and default colors */
 	private DmsColor fgColor;
 	private DmsColor bgColor;
-	private DmsColor fgColorDefault;
-	private DmsColor bgColorDefault;
 	private DmsColor colorRectColor;
 	
 	/** Page list */
@@ -395,7 +392,7 @@ public class WController {
 			setSelectedGraphic(findGraphic(p));
 		
 		// in text mode place the caret based on the mouse coordinates
-		if (inTextMode())
+		if (inTextMode() || inMultiTagMode())
 			moveCaret(p);
 		else if (inTextRectMode()) {
 			// in text rectangle mode, we only place the caret if the user
@@ -589,8 +586,6 @@ public class WController {
 		// try to get the token to move
 		WToken mTok = null;
 		if (inTextRectMode() || inColorRectMode()) {
-			// TODO for some reason text rectangles can't be moved all the way
-			// to the bottom-right... not sure why since CR are fine
 			if (selectedRectangle != null)
 				mTok = selectedRectangle.getRectToken();
 		} else if (inGraphicMode())
@@ -879,11 +874,6 @@ public class WController {
 		
 	}
 	
-	/** Determine if the x-coordinate of p is on the left half of token tok.*/
-	private boolean leftHalf(WPoint p, WToken tok) {
-		return p.getSignX() < tok.getCentroidX();
-	}	
-	
 	/** Determine if the x-coordinate of p is on the right half of token tok.*/
 	private boolean rightHalf(WPoint p, WToken tok) {
 		return p.getSignX() >= tok.getCentroidX();
@@ -892,7 +882,14 @@ public class WController {
 	/** Toggle non-text char mode for handling of non-text tag */
 	public Action toggleNonTextTagMode = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-			stepNonTextTags = !stepNonTextTags;
+			if (!inMultiTagMode()) {
+				stepNonTextTags = !stepNonTextTags;
+				snttNonMultiMode = stepNonTextTags;
+			} else {
+				// in MULTI tag mode we always do this
+				stepNonTextTags = true;
+				editor.updateNonTextTagButton(stepNonTextTags);
+			}
 			updateNonTextTagInfo();
 			signPanel.requestFocusInWindow();
 		}
@@ -903,7 +900,7 @@ public class WController {
 		textCursor = new Cursor(Cursor.TEXT_CURSOR);
 		graphicCursor = new Cursor(Cursor.HAND_CURSOR);
 		newRectCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
-		multiTagCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+		multiTagCursor = new Cursor(Cursor.TEXT_CURSOR);
 		moveCursor = new Cursor(Cursor.MOVE_CURSOR);
 		
 		// initialize resize cursors in a HashMap to make them easy to access
@@ -1102,7 +1099,7 @@ public class WController {
 	/** Get the token associated with the current caret position. This is
 	 *  either the first token after the caret or the last token before
 	 *  the caret, or null if neither is valid. */
-	private WToken getCaretToken() {
+	public WToken getCaretToken() {
 		if (!tokensAfter.isEmpty()) {
 			println("Caret token from after");
 			return tokensAfter.get(0);
@@ -1312,9 +1309,9 @@ public class WController {
 		}
 	};
 	
-	/** Action triggered with the delete key. */
-	public Action delete = new AbstractAction() {
-		public void actionPerformed(ActionEvent e) {
+	/** Action triggered with the delete key (or delete button). */
+	public IAction delete = new IAction("wysiwyg.multi_tag_dialog.delete") {
+		public void doActionPerformed(ActionEvent e) {
 			if (!tokensSelected.isEmpty()) {
 				// if we have a selection, delete the selection
 				println("Deleting selection");
@@ -1700,6 +1697,35 @@ public class WController {
 				
 				wmsg.addPage(selectedPageIndx, pg);
 				update();
+			}
+		}
+	};
+
+	/** Edit tag action */
+	public IAction editTag = new IAction(
+			"wysiwyg.multi_tag_dialog.edit") {
+		protected void doActionPerformed(ActionEvent e)
+				throws Exception
+		{
+			// get the caret token from the controller
+			WToken t = getCaretToken();
+			
+			if (t == null) {
+				// try for a rectangle
+				if (selectedRectangle != null)
+					t = selectedRectangle.getRectToken();
+			}
+			if (t == null)
+				// or a graphic
+				t = selectedGraphic;
+			
+			if (t != null && canEditTag(t)) {
+				// get the token type and open the proper form
+				WTokenType tokType = t.getType();
+				WMultiTagDialog d = WMultiTagDialog.construct(
+						wc, tokType, t);
+				if (d != null)
+					desktop.show(d);
 			}
 		}
 	};
@@ -2203,39 +2229,12 @@ public class WController {
 			}
 		}
 	}
-
-	/** Clear the selected text rectangle of all tokens of type tokType. */
-	private void clearTrTokenType(WTokenType tokType) {
-		// loop over at most the number of tokens in the text rectangle
-		for (int i = 0; i < trTokens.size(); ++i) {
-			if (i >= trTokens.size())
-				// account for the removal of tokens
-				break;
-			
-			// get the token at this index and check the type
-			WToken tok = trTokens.get(i);
-			if (tok.isType(tokType)) {
-				// if it's the same type, remove it from the list and page
-				trTokens.remove(tok);
-				selectedPage.removeToken(tok);
-				
-				// now adjust the caret appropriately
-				if (i < caretIndx)
-					// if we're to the left of the caret, move one to the left
-					moveCaretLeft.actionPerformed(null);
-				else
-					// otherwise just update
-					updateCaret();
-			}
-		}
-	}
 	
 	/** Clear the selected tokens of all tokens of type tokType.
 	 *  @returns the number of tokens removed
 	 */
 	private void clearSelectionTokenType(WTokenType tokType) {
 		// loop over at most the number of tokens in the selection
-		int nRemoved = 0;
 		for (int i = 0; i < tokensSelected.size(); ++i) {
 			if (i >= tokensSelected.size())
 				// account for the removal of tokens
@@ -2350,7 +2349,7 @@ public class WController {
 	}
 	
 	/** Add the token to the selected page at the caret index. */
-	private void addToken(WToken tok) {
+	public void addToken(WToken tok) {
 		// figure out where on the page to add the token
 //		int pgi = getCaretIndexOnPage(tok.isPrintableText());
 //		int pgi = getCaretIndexOnPage(false);
@@ -2370,6 +2369,30 @@ public class WController {
 			if (caretIndx < trTokens.size())
 				moveCaret(caretIndx+1);
 		}
+		updateNonTextTagInfo();
+		editor.requestFocusInWindow();
+		signPanel.requestFocusInWindow();
+	}
+	
+	/** Replace the token oldTok with token newTok. If the first token cannot
+	 *  be found, nothing happens (?).
+	 */
+	public void replaceToken(WToken oldTok, WToken newTok) {
+		println("Replacing %s with %s", oldTok.toString(), newTok.toString());
+		
+		// remove the old token from the page
+		int ti = selectedPage.getTokenIndex(oldTok);
+		
+		if (ti >= 0) {
+			// if it existed remove it then add the new one at ti
+			selectedPage.removeToken(oldTok);
+			selectedPage.addToken(ti, newTok);
+			update();
+			updateCaret();
+		}
+		updateNonTextTagInfo();
+		editor.requestFocusInWindow();
+		signPanel.requestFocusInWindow();
 	}
 	
 	/** Add the token to the selected page after the selection. Does not
@@ -2382,7 +2405,7 @@ public class WController {
 	}
 	
 	/** Save the current state on the stack for undoing. Resets the redo stack. */
-	private void saveState() {
+	public void saveState() {
 		WHistory wh = new WHistory(multiStringText, caretIndx,
 				tokensSelected.size(), selectedPageIndx, fgColor, bgColor);
 		undoStack.add(wh);
@@ -2675,15 +2698,26 @@ public class WController {
 			if (tok != null) {
 				// TODO add methods to token types to provide better description
 				s = tok.getDescription();
-				
 				// check if there is a color we can include too
 				if (tok.isType(WTokenType.colorForeground))
 					c = ((WtColorForeground) tok).getColor();
 				else if (tok.isType(WTokenType.pageBackground))
 					c = ((WtPageBackground) tok).getColor();
+				
+				// if we're in MULTI mode, check the token type and see if we
+				// should enable the Edit Tag button
+				if (inMultiTagMode())
+					editor.updateTagEditButton(canEditTag(tok));
 			}
 		}
 		editor.updateNonTextTagInfo(s, c);
+	}
+	
+	/** Return whether or not this tag can be edited (any tag besides a text
+	 *  character).
+	 */
+	private boolean canEditTag(WToken tok) {
+		return !tok.isPrintableText() || tok.isType(WTokenType.newLine);
 	}
 	
 	/** Update the MULTI panel with the current MULTI string. */
@@ -2795,14 +2829,18 @@ public class WController {
 		if (modeRects != null && selectedRectIndx >= modeRects.size())
 			selectedRectIndx = -1;
 		
-		// in text mode, default to the whole-sign rectangle
-		if (inTextMode() && selectedRectIndx == -1)
+		// in text mode, edit the whole-sign rectangle
+		if (inTextMode())
+			selectedRectIndx = 0;
+		else if (inMultiTagMode() && selectedRectIndx == -1)
+			// in MULTI tag mode default to whole-sign if nothing is selected
 			selectedRectIndx = 0;
 		
 		// get the WgRectangle object (or null) and set the selected rectangle 
 		if (selectedRectIndx < 0 || selectedRectIndx >= modeRects.size())
 			setSelectedRectangle(null);
-		else if (inTextMode() || inTextRectMode() || inColorRectMode())
+		else if (inTextMode() || inMultiTagMode()
+				|| inTextRectMode() || inColorRectMode())
 			setSelectedRectangle(modeRects.get(selectedRectIndx));
 		else
 			setSelectedRectangle(null);
@@ -2844,11 +2882,9 @@ public class WController {
 	private void setSelectedTextRectangle(WgTextRect tr) {
 		selectedTextRect = tr;
 		if (selectedTextRect != null) {
-			selectedTrIndx = textRects.indexOf(selectedTextRect);
 			trTokens = selectedTextRect.getTokenList();
 		} else {
 			// reset the selected text rectangle
-			selectedTrIndx = -1;
 			selectedTextRect = null;
 			trTokens = new WTokenList();
 		}
@@ -3027,6 +3063,11 @@ public class WController {
 		// put the cursor in text mode then update everything
 		editingMode = MODE_TEXT;
 		setCursorFromMode();
+		
+		// set step mode back to previous value (if we were in MULTI mode)
+		stepNonTextTags = snttNonMultiMode;
+		editor.updateNonTextTagButton(stepNonTextTags);
+		
 		update();
 		updateCaret();
 	}
@@ -3039,6 +3080,11 @@ public class WController {
 		// put the cursor in ?? hand ?? mode then update everything
 		editingMode = MODE_GRAPHIC;
 		setCursorFromMode();
+		
+		// set step mode back to previous value (if we were in MULTI mode)
+		stepNonTextTags = snttNonMultiMode;
+		editor.updateNonTextTagButton(stepNonTextTags);
+		
 		update();
 		updateCaret();
 	}
@@ -3051,6 +3097,11 @@ public class WController {
 		// put the cursor in crosshair mode then update everything
 		editingMode = MODE_TEXTRECT;
 		setCursorFromMode();
+		
+		// set step mode back to previous value (if we were in MULTI mode)
+		stepNonTextTags = snttNonMultiMode;
+		editor.updateNonTextTagButton(stepNonTextTags);
+		
 		update();
 		updateCaret();
 	}
@@ -3060,9 +3111,13 @@ public class WController {
 	}
 	
 	public void activateColorRectangleMode() {
-		// put the cursor in crosshair mode then update everything
 		editingMode = MODE_COLORRECT;
 		setCursorFromMode();
+		
+		// set step mode back to previous value (if we were in MULTI mode)
+		stepNonTextTags = snttNonMultiMode;
+		editor.updateNonTextTagButton(stepNonTextTags);
+		
 		update();
 		updateCaret();
 	}
@@ -3072,9 +3127,16 @@ public class WController {
 	}
 	
 	public void activateMultiTagMode() {
-		// put the cursor in ?? default ?? mode then update everything
 		editingMode = MODE_MULTITAG;
 		setCursorFromMode();
+		
+		// check the step mode and save it for later
+		snttNonMultiMode = stepNonTextTags;
+		
+		// in this mode we always step through non-text tags
+		stepNonTextTags = true;
+		editor.updateNonTextTagButton(stepNonTextTags);
+		
 		update();
 		updateCaret();
 	}
@@ -3156,8 +3218,6 @@ public class WController {
 		if (multiConfig != null) {
 			fgColor = multiConfig.getDefaultFG();
 			bgColor = multiConfig.getDefaultBG();
-			fgColorDefault = fgColor;
-			bgColorDefault = bgColor;
 			
 			// use the default foreground color for color rectangles (so we
 			// always have one)

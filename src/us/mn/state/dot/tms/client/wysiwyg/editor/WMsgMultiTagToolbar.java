@@ -15,17 +15,21 @@
 
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
-import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JList;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
-
+import java.awt.event.ActionEvent;
+import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.wysiwyg.editor.tags.WMultiTagDialog;
+import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
 
@@ -39,33 +43,37 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
  */
 @SuppressWarnings("serial")
 
-public class WMsgMultiTagToolbar extends JPanel {
-	
-	/** Handle to the controller */
-	private WController controller;
+public class WMsgMultiTagToolbar extends WToolbar {
 	
 	/** ComboBox containing list of MULTI tags for adding/editing */
 	private JComboBox<WTokenType> multiTags;
 	private DefaultComboBoxModel<WTokenType> multiTagModel;
 	
-	/** Card layout JPanel - what is shown changes based on the tag selected */
-	private JPanel tagParamPnl;
-	
-	/** TODO PLACEHOLDER */
-	private JLabel placeholder;
+	/** Add, edit, and delete buttons (edit and delete buttons are disabled if
+	 *  not next to a tag). */
+	private JButton addBtn;
+	private JButton editBtn;
+	private JButton deleteBtn;
 	
 	public WMsgMultiTagToolbar(WController c) {
-		controller = c;
-
-		// use a FlowLayout with no margins to give more control of separation
-		setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		super(c);
+		
+		System.out.println(controller.toString());
+		
+		// use a left-aligned FlowLayout
+		setLayout(new FlowLayout(FlowLayout.LEFT));
 		
 		// make and add the ComboBox
 		makeMultiTagList();
 		add(multiTags);
 		
-		placeholder = new JLabel("<MULTI TAG OPTIONS>");
-		add(placeholder);
+		// and the buttons
+		addBtn = new JButton(addTag);
+		add(addBtn);
+		editBtn = new JButton(controller.editTag);
+		add(editBtn);
+		deleteBtn = new JButton(controller.delete);
+		add(deleteBtn);
 	}
 	
 	/** Create the model and ComboBox containing the list of MULTI tags. */
@@ -73,26 +81,75 @@ public class WMsgMultiTagToolbar extends JPanel {
 		// initialize the model
 		multiTagModel = new DefaultComboBoxModel<WTokenType>();
 		
-		// go through the WTokenTypes and add all except color rectangles,
-		// text rectangles, and graphics (we won't allow editing those)
+		// add the token types in a specific order, leaving some out
+		//--------------------------------
+		// IRIS Action tags
+		//--------------------------------
+		// Msg-Feed
+		multiTagModel.addElement(WTokenType.feedMsg);
 		
-		// TODO there are other types we want to exclude too...
+		// Parking Area Availability
+		multiTagModel.addElement(WTokenType.parkingAvail);
 		
-		for (WTokenType tt: WTokenType.values()) {
-			if (tt != WTokenType.colorRectangle
-					&& tt != WTokenType.textRectangle
-					&& tt != WTokenType.graphic) {
-				multiTagModel.addElement(tt);
-			}
-		}
+		// Slow Traffic Warning
+		multiTagModel.addElement(WTokenType.slowWarning);
+		
+		// Travel Time
+		multiTagModel.addElement(WTokenType.travelTime);
+		
+		// Toll Zone Pricing
+		multiTagModel.addElement(WTokenType.tolling);
+		
+		// Incident Locator
+		multiTagModel.addElement(WTokenType.incidentLoc);
+		
+		// Variable Speed Advisory
+		multiTagModel.addElement(WTokenType.speedAdvisory);
+		
+		//--------------------------------
+		// Tags NOT implemented elsewhere
+		//--------------------------------
+		// Character Spacing
+		multiTagModel.addElement(WTokenType.spacingChar);
+		
+		//--------------------------------
+		// Tags implemented elsewhere
+		//--------------------------------
+		// New line (for line spacing)
+		multiTagModel.addElement(WTokenType.newLine);
+		
+		// Page timing
+		multiTagModel.addElement(WTokenType.pageTime);
+		
+		// Page background
+		multiTagModel.addElement(WTokenType.pageBackground);
+		
+		// Foreground color
+		multiTagModel.addElement(WTokenType.colorForeground);
+		
+		// Font
+		multiTagModel.addElement(WTokenType.font);
+		
+		// Page justification
+		multiTagModel.addElement(WTokenType.justificationPage);
+		
+		// Line Justification
+		multiTagModel.addElement(WTokenType.justificationLine);
+		
+		// Color Rectangles
+		multiTagModel.addElement(WTokenType.colorRectangle);
+		
+		// Text Rectangles
+		multiTagModel.addElement(WTokenType.textRectangle);
+		
+		// Graphics
+		multiTagModel.addElement(WTokenType.graphic);
 		
 		// make the ComboBox
 		multiTags = new JComboBox<WTokenType>(multiTagModel);
 		
 		// set the renderer to take the name from the label
 		multiTags.setRenderer(new MultiTagListRenderer());
-		
-		// TODO action listener for handling selection
 		
 	}
 	
@@ -108,5 +165,31 @@ public class WMsgMultiTagToolbar extends JPanel {
 			cell.setText(tt.getLabel());
 		    return cell;
 		  }
+	}
+	
+	/** Add tag action */
+	private IAction addTag = new IAction(
+			"wysiwyg.multi_tag_dialog.add") {
+		protected void doActionPerformed(ActionEvent e)
+				throws Exception
+		{
+			// get the token type from the box and open the proper form
+			WTokenType tokType = (WTokenType) multiTags.getSelectedItem();
+			WMultiTagDialog d = WMultiTagDialog.construct(
+					controller, tokType, null);
+			if (d != null)
+				controller.getDesktop().show(d);
+		}
+	};
+	
+	/** Enable or disable tag edit and delete buttons */
+	public void updateTagEditButton(boolean state) {
+		editBtn.setEnabled(state);
+		deleteBtn.setEnabled(state);
+	}
+	
+	@Override
+	public void setColor(Color c, String mode) {
+		// this does nothing in this toolbar
 	}
 }

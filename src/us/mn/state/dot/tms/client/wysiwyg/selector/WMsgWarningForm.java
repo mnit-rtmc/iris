@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.utils.I18N;
 /**
  * WYSIWYG DMS Message Editor Warning Form
  *
- * @author Gordon Parikh, Michael Janson, and John L. Stanley - SRF Consulting
+ * @author Gordon Parikh - SRF Consulting
  */
 @SuppressWarnings("serial")
 public class WMsgWarningForm extends AbstractForm {
@@ -54,8 +54,6 @@ public class WMsgWarningForm extends AbstractForm {
 		
 		cancel_btn = new JButton(cancel);
 		reload_btn = new JButton(reload);
-		
-		// TODO finish this...
 	}
 	
 	/** Initialize the form */

@@ -79,11 +79,13 @@ public class WMsgWysiwygPanel extends JPanel {
 	private WMsgGraphicToolbar graphic_toolbar_pnl;
 	
 	/** Panel for color rectangle toolbar */
-	final static private String COLOR_RECTANGLE_TOOLBAR = "Color Rectangle Toolbar";
+	final static private String COLOR_RECTANGLE_TOOLBAR =
+			"Color Rectangle Toolbar";
 	private WMsgColorRectangleToolbar colorrect_toolbar_pnl;
 	
 	/** Panel for graphics toolbar */
-	final static private String TEXT_RECTANGLE_TOOLBAR = "Text Rectangle Toolbar";
+	final static private String TEXT_RECTANGLE_TOOLBAR =
+			"Text Rectangle Toolbar";
 	private WMsgTextToolbar textrect_toolbar_pnl;
 	
 	/** Panel for graphics toolbar */
@@ -126,9 +128,9 @@ public class WMsgWysiwygPanel extends JPanel {
 		mode_btn_pnl.add(multitag_mode_btn);
 		
 		// add a separator, then a button for enabling/disabling of direct
-		// handling of non-text tags (¶)
+		// handling of non-text tags with a pilcrow (¶)
 		nonTextTagBtn = new JToggleButton(controller.toggleNonTextTagMode);
-		nonTextTagBtn.setText("¶");
+		nonTextTagBtn.setText(String.valueOf('\u00B6'));
 		nonTextTagBtn.setFont(
 				new java.awt.Font("Arial", java.awt.Font.PLAIN, 18));
 		nonTextTagBtn.setToolTipText(
@@ -235,6 +237,16 @@ public class WMsgWysiwygPanel extends JPanel {
 	public void updateTextToolbar() {
 		text_toolbar_pnl.updateToolbar();
 		textrect_toolbar_pnl.updateToolbar();
+	}
+	
+	/** Enable or disable tag edit button */
+	public void updateTagEditButton(boolean state) {
+		multitag_toolbar_pnl.updateTagEditButton(state);
+	}
+	
+	/** Update the non-text tag button state to */
+	public void updateNonTextTagButton(boolean state) {
+		nonTextTagBtn.setSelected(state);
 	}
 	
 	/** Update the non-text tag info label, optionally including a color icon

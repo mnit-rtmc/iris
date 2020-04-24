@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.utils.I18N;
 /**
  * WYSIWYG DMS Message Editor Confirmation Form
  *
- * @author Gordon Parikh, Michael Janson, and John L. Stanley - SRF Consulting
+ * @author Gordon Parikh - SRF Consulting
  */
 @SuppressWarnings("serial")
 public class WMsgConfirmDeleteForm extends AbstractForm {

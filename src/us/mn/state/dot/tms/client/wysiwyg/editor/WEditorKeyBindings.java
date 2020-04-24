@@ -46,7 +46,7 @@ public class WEditorKeyBindings {
 	private ActionMap actionMap;
 	
 	/** Invalid characters that will be discarded */
-	private String invalidChars = "`";
+	private static final String invalidChars = "`";
 	
 	/** Initialize all key bindings in an InputMap/ActionMap pair.
 	 *  To activate key bindings on a panel, use the getInputMap and
@@ -137,6 +137,11 @@ public class WEditorKeyBindings {
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
 				"addNewLine");
 		actionMap.put("addNewLine", wc.addNewLine);
+		
+		/** F2 - Edit non-text tags */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0),
+				"editTag");
+		actionMap.put("editTag", wc.editTag);
 		
 		/* ASCII Text Characters - pass character to controller
 		 * Note that 32 is space, 122 is z, and most things in between are
