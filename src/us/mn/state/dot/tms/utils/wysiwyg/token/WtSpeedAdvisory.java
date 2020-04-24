@@ -15,6 +15,7 @@
 
 package us.mn.state.dot.tms.utils.wysiwyg.token;
 
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.Multi;
 import us.mn.state.dot.tms.utils.wysiwyg.WRenderer;
 import us.mn.state.dot.tms.utils.wysiwyg.WState;
@@ -55,6 +56,8 @@ public class WtSpeedAdvisory extends Wt_IrisToken {
 	/** get width of WYSIWYG box */
 	@Override
 	public Integer getBoxWidth() {
-		return 0;
+		int minSpd = SystemAttrEnum.VSA_MIN_DISPLAY_MPH.getInt();
+		int maxSpd = SystemAttrEnum.VSA_MAX_DISPLAY_MPH.getInt();
+		return wfont.getIntWidth(minSpd, maxSpd);
 	}
 }

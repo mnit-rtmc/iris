@@ -151,7 +151,20 @@ public class WFont implements Font {
 		String str = Integer.toString(i);
 		return getTextWidth(str);
 	}
-
+	
+	/** Get max pixel-width required to display
+	 *  any number in a range of numbers */
+	public int getIntWidth(int imin, int imax) {
+		int wid = 0;
+		int w2;
+		for (int i = imin; (i <= imax); ++i) {
+			w2 = getIntWidth(i);
+			if (wid < w2)
+				wid = w2;
+		}
+		return wid;
+	}
+	
 	//===========================================
 	// Pass-thru methods for accessing the underlying Font
 	
