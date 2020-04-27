@@ -154,14 +154,13 @@ public class WMsgConfigPanel extends IPanel {
 	/** Create a new MULTI-mode panel */
 	public WMsgConfigPanel(WController c) {
 		controller = c;
-//		session = controller.getSession();
 		config = controller.getMultiConfig();
 		
 		// initialize the panel
 		initialize();
 		
-		
-		// TODO try overriding PropConfiguration and replacing the methods with ones that use MultiConfig
+		// TODO try overriding PropConfiguration and replacing the methods
+		// with ones that use MultiConfig
 	}
 	
 	/** Initialize the widgets on the form */
@@ -203,48 +202,52 @@ public class WMsgConfigPanel extends IPanel {
 
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
-		MultiConfig sc = config;
-		f_width_lbl.setText(formatMM(sc.getFaceWidth()));
-		f_height_lbl.setText(formatMM(sc.getFaceHeight()));
-		h_border_lbl.setText(formatMM(sc.getBorderHoriz()));
-		v_border_lbl.setText(formatMM(sc.getBorderVert()));
-		h_pitch_lbl.setText(formatMM(sc.getPitchHoriz()));
-		v_pitch_lbl.setText(formatMM(sc.getPitchVert()));
-		p_width_lbl.setText(formatPixels(sc.getPixelWidth()));
-		p_height_lbl.setText(formatPixels(sc.getPixelHeight()));
-		c_width_lbl.setText(formatPixels(sc.getCharWidth()));
-		c_height_lbl.setText(formatPixels(sc.getCharHeight()));
-		m_foreground_lbl.setText(HexString.format(
-			sc.getDefaultFG().rgb(), 6));
-		m_foreground_lbl.setIcon(new ColorIcon(
-			sc.getDefaultFG().rgb()));
-		m_background_lbl.setText(HexString.format(
-			sc.getDefaultBG().rgb(), 6));
-		m_background_lbl.setIcon(new ColorIcon(
-			sc.getDefaultBG().rgb()));
-		c_scheme_lbl.setText(sc.getColorScheme().description);
-		font_lbl.setText(sc.getDefaultFont().getName());
-		font_height_lbl.setText(calculateFontHeight());
+		if (config != null) {
+			MultiConfig sc = config;
+			f_width_lbl.setText(formatMM(sc.getFaceWidth()));
+			f_height_lbl.setText(formatMM(sc.getFaceHeight()));
+			h_border_lbl.setText(formatMM(sc.getBorderHoriz()));
+			v_border_lbl.setText(formatMM(sc.getBorderVert()));
+			h_pitch_lbl.setText(formatMM(sc.getPitchHoriz()));
+			v_pitch_lbl.setText(formatMM(sc.getPitchVert()));
+			p_width_lbl.setText(formatPixels(sc.getPixelWidth()));
+			p_height_lbl.setText(formatPixels(sc.getPixelHeight()));
+			c_width_lbl.setText(formatPixels(sc.getCharWidth()));
+			c_height_lbl.setText(formatPixels(sc.getCharHeight()));
+			m_foreground_lbl.setText(HexString.format(
+				sc.getDefaultFG().rgb(), 6));
+			m_foreground_lbl.setIcon(new ColorIcon(
+				sc.getDefaultFG().rgb()));
+			m_background_lbl.setText(HexString.format(
+				sc.getDefaultBG().rgb(), 6));
+			m_background_lbl.setIcon(new ColorIcon(
+				sc.getDefaultBG().rgb()));
+			c_scheme_lbl.setText(sc.getColorScheme().description);
+			font_lbl.setText(sc.getDefaultFont().getName());
+			font_height_lbl.setText(calculateFontHeight());
+		}
 	}
 
 	/** Calculate the height of the default font on the sign */
 	private String calculateFontHeight() {
-		MultiConfig sc = config;
-		Font f = sc.getDefaultFont();
-		if (f != null) {
-			int pv = sc.getPitchVert();
-			int h = f.getHeight();
-			if (h > 0 && pv > 0) {
-				float mm = (h - 0.5f) * pv;
-				Distance fh = new Distance(mm, MILLIMETERS);
-				return formatFontHeight(fh);
+		if (config != null) {
+			MultiConfig sc = config;
+			Font f = sc.getDefaultFont();
+			if (f != null) {
+				int pv = sc.getPitchVert();
+				int h = f.getHeight();
+				if (h > 0 && pv > 0) {
+					float mm = (h - 0.5f) * pv;
+					Distance fh = new Distance(mm, MILLIMETERS);
+					return formatFontHeight(fh);
+				}
 			}
 		}
 		return UNKNOWN;
 	}
 
 	/** Format the font height for display */
-	private String formatFontHeight(Distance fh) {
+	private static String formatFontHeight(Distance fh) {
 		Distance.Formatter df = new Distance.Formatter(1);
 		return df.format(fh.convert(distUnitsTiny()));
 	}

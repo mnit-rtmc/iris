@@ -75,6 +75,7 @@ import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -114,6 +115,9 @@ public class WMsgColorChooser extends AbstractForm {
 	private JList<String> classicColorChooser;
 	private DefaultListModel<String> classicColorModel;
 	private Map<String, DmsColor> classicColorMap;
+	private JList<String> mono1ColorChooser;
+	private DefaultListModel<String> mono1ColorModel;
+	private Map<String, DmsColor> mono1ColorMap;
 	private JSlider monochrome8BitSlider;
 
 	/** Buttons */
@@ -128,7 +132,9 @@ public class WMsgColorChooser extends AbstractForm {
 		controller = c;
 		desktop = controller.getDesktop();
 		toolbar = tb;
-		colorScheme = controller.getMultiConfig().getColorScheme();
+		MultiConfig mc = controller.getMultiConfig();
+		colorScheme = (mc != null) ? mc.getColorScheme()
+				: ColorScheme.UNKNOWN;
 		color = col;
 		mode = md;
 		
@@ -162,6 +168,10 @@ public class WMsgColorChooser extends AbstractForm {
 			// for 8-bit monochrome, use a slider from 0 to 255
 			monochrome8BitSlider = new JSlider(0, 255, 127);
 			add(monochrome8BitSlider);
+		} else if (colorScheme == ColorScheme.MONOCHROME_1_BIT) {
+			// for 1-bit monochrome, use a list with 2 colors in it
+			initMono1ColorChooser();
+			add(mono1ColorChooser);
 		}
 	}
 	
@@ -191,36 +201,67 @@ public class WMsgColorChooser extends AbstractForm {
 		classicColorChooser.setSelectionMode(
 				ListSelectionModel.SINGLE_SELECTION);
 		
-		// setup the list cell renderer to include color icons
-		class ClassicColorListCellRenderer extends JLabel implements 
-				ListCellRenderer<String> {
-			public ClassicColorListCellRenderer() {
-				setOpaque(true);
+		classicColorChooser.setCellRenderer(new ColorListCellRenderer());
+	}
+	
+	/** Initialize a color chooser for 1-bit monochrome signs. This just
+	 *  displays a list with 2 options - the sign's default foreground (lit)
+	 *  and background (unlit) colors.
+	 */
+	private void initMono1ColorChooser() {
+		// get the default colors from the MultiConfig
+		MultiConfig mc = controller.getMultiConfig();
+		if (mc != null) {
+			DmsColor lit = mc.getDefaultFG();
+			DmsColor unlit = mc.getDefaultBG();
+			
+			mono1ColorMap = new LinkedHashMap<String, DmsColor>();
+			mono1ColorMap.put("Unlit", lit);
+			mono1ColorMap.put("Lit", unlit);
+			
+			// create the list model and fill it with colors
+			mono1ColorModel = new DefaultListModel<String>();
+			for (Map.Entry<String, DmsColor> el : mono1ColorMap.entrySet()) {
+				mono1ColorModel.addElement(el.getKey());
 			}
 			
-			@Override
-			public Component getListCellRendererComponent(
-					JList<? extends String> list, String cName, int index,
-					boolean isSelected, boolean hasFocus) {
-				// get the DmsColor object from the hash map
-				DmsColor c = classicColorMap.get(cName);
-				
-				// use the color icon and the name of the color in the list
-				setIcon(createColorIcon(c.color, 16,16));
-				setText(cName);
-				
-				// change the color if selected
-				if (isSelected) {
-					setBackground(list.getSelectionBackground());
-					setForeground(list.getSelectionForeground());
-				} else {
-					setBackground(list.getBackground());
-					setForeground(list.getForeground());
-				}
-				return this;
-			}
+			// create the JList with the list model
+			mono1ColorChooser = new JList<String>(mono1ColorModel);
+			mono1ColorChooser.setSelectionMode(
+					ListSelectionModel.SINGLE_SELECTION);
+			
+			mono1ColorChooser.setCellRenderer(new ColorListCellRenderer());
 		}
-		classicColorChooser.setCellRenderer(new ClassicColorListCellRenderer());
+	}
+
+	// setup the list cell renderer to include color icons
+	class ColorListCellRenderer extends JLabel implements 
+			ListCellRenderer<String> {
+		public ColorListCellRenderer() {
+			setOpaque(true);
+		}
+		
+		@Override
+		public Component getListCellRendererComponent(
+				JList<? extends String> list, String cName, int index,
+				boolean isSelected, boolean hasFocus) {
+			// get the DmsColor object from the hash map
+			DmsColor c = classicColorMap.get(cName);
+			
+			// use the color icon and the name of the color in the list
+			setIcon(createColorIcon(c.color, 16,16));
+			setText(cName);
+			
+			// change the color if selected
+			if (isSelected) {
+				setBackground(list.getSelectionBackground());
+				setForeground(list.getSelectionForeground());
+			} else {
+				setBackground(list.getBackground());
+				setForeground(list.getForeground());
+			}
+			return this;
+		}
 	}
 	
 	/** Set the chosen color and close the form. */

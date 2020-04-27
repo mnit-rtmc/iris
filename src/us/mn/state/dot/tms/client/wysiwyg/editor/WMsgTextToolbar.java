@@ -41,6 +41,7 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Multi.JustificationLine;
 import us.mn.state.dot.tms.utils.Multi.JustificationPage;
+import us.mn.state.dot.tms.utils.MultiConfig;
 
 /**
  * WYSIWYG DMS Message Editor Text Option Panel containing buttons with
@@ -118,11 +119,11 @@ public class WMsgTextToolbar extends WToolbar {
 		add(fontOptions);
 		add(Box.createHorizontalStrut(10));
 		
-		// disable color picker buttons for 1-bit and unknown color schemes
-		ColorScheme cs = controller.getMultiConfig().getColorScheme();
-		if (cs == ColorScheme.MONOCHROME_1_BIT || cs == ColorScheme.UNKNOWN) {
+		// disable color picker buttons for unknown color schemes or if no
+		// MultiConfig
+		ColorScheme cs = controller.getColorScheme();
+		if (cs == ColorScheme.UNKNOWN) {
 			fg_color_btn.setEnabled(false);
-			
 			if (includeBG)
 				bg_color_btn.setEnabled(false);
 		}

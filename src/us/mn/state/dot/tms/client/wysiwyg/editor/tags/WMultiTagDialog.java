@@ -247,7 +247,7 @@ abstract public class WMultiTagDialog extends AbstractForm {
 	
 	/** Add new tag action */
 	private final IAction addTag = new IAction(
-			"wysiwyg.multi_tag_dialog.add") {
+			"wysiwyg.multi_tag_dialog.update") {
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception {
 			// validate the form before doing anything
@@ -267,7 +267,7 @@ abstract public class WMultiTagDialog extends AbstractForm {
 
 	/** Edit existing tag action */
 	private final IAction editTag = new IAction(
-			"wysiwyg.multi_tag_dialog.edit") {
+			"wysiwyg.multi_tag_dialog.update") {
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception {
 			if (validateForm()) {

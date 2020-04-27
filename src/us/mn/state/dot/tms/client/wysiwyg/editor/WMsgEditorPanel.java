@@ -15,12 +15,18 @@
 
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.wysiwyg.WEditorErrorManager;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 
@@ -50,6 +56,9 @@ public class WMsgEditorPanel extends JPanel {
 	public WMsgEditorPanel(WController c) {
 		controller = c;
 		
+		// left-aligned FlowLayout
+		setLayout(new BorderLayout());
+		
 		// create the tab pane and the tabs
 		tabPane = new JTabbedPane(JTabbedPane.TOP);
 		
@@ -59,12 +68,27 @@ public class WMsgEditorPanel extends JPanel {
 		configPanel = new WMsgConfigPanel(controller);					// TODO
 		
 		// add the tabs to the pane
-		tabPane.add(I18N.get("wysiwyg.epanel.wysiwyg_tab"), wysiwygPanel);
+		// if we don't have a valid MultiConfig, we can't show the WYSIWYG or
+		// config panels
+		MultiConfig mc = controller.getMultiConfig();
+		boolean mcOK = mc != null && mc.isUseable();
+		if (mcOK)
+			tabPane.add(I18N.get("wysiwyg.epanel.wysiwyg_tab"), wysiwygPanel);
+		
 		tabPane.add(I18N.get("wysiwyg.epanel.multi_tab"), multiPanel);
-		tabPane.add(I18N.get("wysiwyg.epanel.config_tab"), configPanel);
+		
+		if (mcOK)
+			tabPane.add(I18N.get("wysiwyg.epanel.config_tab"), configPanel);
 		
 		// add the tab pane to the panel
-		add(tabPane);
+		add(tabPane, BorderLayout.CENTER);
+	}
+
+	/** Enable or disable functions that correspond to any tags not supported
+	 *  by the MultiConfig provided.
+	 */
+	public void checkSupportedFuncs(MultiConfig mc) {
+		wysiwygPanel.checkSupportedFuncs(mc);
 	}
 	
 	/** Update the main WYSIWYG panel with the currently selected page (called

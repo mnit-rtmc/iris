@@ -28,7 +28,6 @@ import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -41,9 +40,11 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.wysiwyg.WEditorErrorManager;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 
@@ -85,7 +86,8 @@ public class WMsgEditorForm extends AbstractForm {
 	private JCheckBox prefix_chk;
 
 	/* Sign drop-down (only present for groups) */
-	private JComboBox<String> dms_list;
+//	private JComboBox<String> dms_list;
+	private WMultiConfigComboBox multiConfigList;
 	
 	/* Page List */
 	private JPanel page_btn_pnl;
@@ -96,7 +98,10 @@ public class WMsgEditorForm extends AbstractForm {
 	private JList<WPage> page_list;
 	private JScrollPane page_list_pn;
 	
-	/* Main Editor Panel */
+	/** Error label to display when MultiConfig generation fails */
+	private JLabel multiConfigError;
+	
+	/** Main Editor Panel */
 	private WMsgEditorPanel epanel;
 	
 	/** Buttons */
@@ -174,7 +179,7 @@ public class WMsgEditorForm extends AbstractForm {
 		
 		// TODO may want to change these dimensions
 		// OR BETTER YET - figure out how to make it more adaptive...
-		setPreferredSize(new Dimension(1100,600));
+		setPreferredSize(new Dimension(1150,600));
 		
 		/* Menu Bar */
 		menu_bar = new WMsgEditorMenuBar();
@@ -185,7 +190,7 @@ public class WMsgEditorForm extends AbstractForm {
 		
 		/* Sign group drop-down - only present if editing for sign group */
 		if (signGroupMessage()) {
-			dms_list = controller.getSignGroupComboBox();
+			multiConfigList = controller.getConfigComboBox();
 		}
 		
 		/* Page number label (default to 1) */
@@ -243,87 +248,74 @@ public class WMsgEditorForm extends AbstractForm {
 
 		// initialize layout
 		GridBagLayout gbl = new GridBagLayout();
-		JPanel p = new JPanel(gbl);
+		JPanel gbPanel = new JPanel(gbl);
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.NONE;
+		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		gbc.gridheight = 1;
 		gbc.gridwidth = 1;
 		gbc.insets = Widgets.UI.insets();
-		gbc.ipadx = 0;
+		gbc.ipadx = 10;
 		gbc.ipady = 0;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		
-		/** TODO combine check box and label? (label would be on right) **/
-		/* Beacon Label */
+		/* Sign/Group Label and sign name label or MultiConfig drop-down */
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		gbc.gridwidth = 1;
-		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
-		p.add(new JLabel(I18N.get("wysiwyg.editor.beacon")), gbc);
+		JPanel lPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		lPanel.add(new JLabel(getSignLabel()), gbc);
 		
-		/* Beacon Check Box */
-		gbc.gridx = 1;
-		gbc.gridy = 0;
-		p.add(beacon_chk, gbc);
-		
-		/* Prefix Label */
-		gbc.gridx = 2;
-		gbc.gridy = 0;
-		p.add(new JLabel(I18N.get("wysiwyg.editor.prefix")), gbc);
-		
-		/* Prefix Check Box */
-		gbc.gridx = 3;
-		gbc.gridy = 0;
-		p.add(prefix_chk, gbc);
-		
-		/* Sign Label */
-		gbc.gridx = 0;
-		gbc.gridy = 1;
-		p.add(new JLabel(getSignLabel()), gbc);
-		
-		/* Sign Name Label or Group(/Config TODO) Drop-Down */
-		gbc.gridx = 1;
-		gbc.gridy = 1;
+		/* Sign Name Label or Group Drop-Down */
 		if (singleSignMessage())
-			p.add(new JLabel(controller.getSign().getName()), gbc);
-		else if (signGroupMessage())
-			p.add(dms_list, gbc);
+			lPanel.add(new JLabel(controller.getSign().getName()), gbc);
+		else if (signGroupMessage() && multiConfigList != null)
+			lPanel.add(multiConfigList, gbc);
+		gbPanel.add(lPanel, gbc);
+		
+		/* Error label (only appears when a bad MultiConfig is used) */
+		if (signGroupMessage() && multiConfigList == null) {
+			gbc.gridx = 1;
+			gbc.gridy = 0;
+			multiConfigError = new ILabel("wysiwyg.editor.bad_config");
+			multiConfigError.setForeground(Color.RED);
+			gbPanel.add(multiConfigError, gbc);
+		}
 		
 		/* Page # Label */
-		gbc.gridx = 4;
+		gbc.gridx = 1;
 		gbc.gridy = 1;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
-		p.add(pg_num_lbl, gbc);
+		gbPanel.add(pg_num_lbl, gbc);
 		
 		/* Page List Label */
 		gbc.gridx = 0;
-		gbc.gridy = 2;
-		p.add(new JLabel(I18N.get("wysiwyg.editor.page_list")), gbc);
+		gbc.gridy = 1;
+		gbPanel.add(new JLabel(I18N.get("wysiwyg.editor.page_list")), gbc);
 
 		/* Page List */
 		gbc.gridx = 0;
-		gbc.gridy = 3;
-		gbc.gridheight = 1;
-		gbc.gridwidth = 4;
-		gbc.weightx = 0.5;
-		gbc.weighty = 1;
+		gbc.gridy = 2;
+		gbc.weightx = 0.1;
+		gbc.weighty = 0.1;
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		
 		page_list_pn = new JScrollPane(page_list,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		page_list_pn.setPreferredSize(new Dimension(450, 400));
-		p.add(page_list_pn, gbc);
+		Dimension d = page_list_pn.getPreferredSize();
+		d.width = 450;
+		page_list_pn.setPreferredSize(d);
+		page_list_pn.setMinimumSize(d);
+		gbPanel.add(page_list_pn, gbc);
 		
 		/* Page Buttons */
 		gbc.gridx = 0;
-		gbc.gridy = 4;
+		gbc.gridy = 3;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
-		gbc.gridwidth = 4;
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.anchor = GridBagConstraints.CENTER;
 		page_btn_pnl = new JPanel();
@@ -333,45 +325,45 @@ public class WMsgEditorForm extends AbstractForm {
 		page_btn_pnl.add(Box.createHorizontalStrut(10));
 		page_btn_pnl.add(page_mv_up_btn);
 		page_btn_pnl.add(page_mv_down_btn);
-		p.add(page_btn_pnl, gbc);
+		gbPanel.add(page_btn_pnl, gbc);
 		
 		/* Editor (its own panel with multiple tabs) */
-		gbc.gridx = 4;
+		gbc.gridx = 1;
 		gbc.gridy = 2;
-		gbc.gridheight = 3;
-		gbc.gridwidth = 6;
-		gbc.weightx = 0;
-		gbc.weighty = 0;
+		gbc.weightx = 1;
+		gbc.weighty = 1;
 		gbc.fill = GridBagConstraints.BOTH;
-		p.add(epanel, gbc);
+		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+		gbPanel.add(epanel, gbc);
 		
-		/* Cancel Button */
-		gbc.gridheight = 1;
-		gbc.gridwidth = 1;
+		/* Beacon and prefix CheckBoxes */
+		gbc.gridx = 1;
+		gbc.gridy = 3;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
+		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+		JPanel bpPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		bpPanel.add(new ILabel("wysiwyg.editor.beacon"));
+		bpPanel.add(beacon_chk);
+		bpPanel.add(new ILabel("wysiwyg.editor.prefix"));
+		bpPanel.add(prefix_chk);
+		gbPanel.add(bpPanel, gbc);
+		
+		/* Cancel/Preview/Save As/Save Buttons */
+		JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		gbc.gridx = 1;
+		gbc.gridy = 4;
 		gbc.fill = GridBagConstraints.NONE;
 		gbc.anchor = GridBagConstraints.BASELINE_TRAILING;
-		gbc.gridx = 6;
-		gbc.gridy = 5;
-		p.add(cancel_btn, gbc);
+		btnPanel.add(cancel_btn);
+		btnPanel.add(preview_btn);
+		btnPanel.add(save_as_btn);
+		btnPanel.add(save_btn);
+		gbPanel.add(btnPanel, gbc);
 		
-		/* Preview Button */
-		gbc.gridx = 7;
-		gbc.gridy = 5;
-		p.add(preview_btn, gbc);
-		
-		/* Save As Button */
-		gbc.gridx = 8;
-		gbc.gridy = 5;
-		p.add(save_as_btn, gbc);
-		
-		/* Save Button */
-		gbc.gridx = 9;
-		gbc.gridy = 5;
-		p.add(save_btn, gbc);
-		
-		add(p);
+		add(gbPanel);
 		
 		// finish initializing the controller now that everything is in place
 		controller.postInit();
@@ -398,6 +390,13 @@ public class WMsgEditorForm extends AbstractForm {
 	
 	public void setPageNumberLabel(String pnl) {
 		pg_num_lbl.setText(pnl);
+	}
+
+	/** Enable or disable functions that correspond to any tags not supported
+	 *  by the MultiConfig provided.
+	 */
+	public void checkSupportedFuncs(MultiConfig mc) {
+		epanel.checkSupportedFuncs(mc);
 	}
 	
 	/** Set the current page displayed on the WYSIWYG panel. */
@@ -518,11 +517,9 @@ public class WMsgEditorForm extends AbstractForm {
 			return I18N.get("wysiwyg.sign") + ":";
 		else if (signGroupMessage())
 			// "Sign Group {group_name}, Sign: "
-			return I18N.get("wysiwyg.sign_group") + " " + sg.getName() + ", "
-				+ I18N.get("wysiwyg.sign") + ":";
-		// TODO change conditions above to avoid this?
-		else
-			return "";
+			return I18N.get("wysiwyg.sign_group") + ": "
+				+ sg.getName() + "    ";
+		return "";
 	}
 }
 	

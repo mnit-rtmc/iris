@@ -71,11 +71,10 @@ public class WMsgColorRectangleToolbar extends WToolbar {
 		}
 		add(colorBtn);
 		
-		// disable the color button for monochrome or unknown color schemes
-		ColorScheme cs = controller.getMultiConfig().getColorScheme();
-		if (cs == ColorScheme.MONOCHROME_1_BIT || cs == ColorScheme.UNKNOWN) {
+		// disable the color button for unknown color schemes
+		ColorScheme cs = controller.getColorScheme();
+		if (cs == ColorScheme.UNKNOWN)
 			colorBtn.setEnabled(false);
-		}
 		
 		addMoveRegionForwardButton();
 		addMoveRegionBackwardButton();

@@ -44,6 +44,7 @@ import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.DmsSignGroup;
@@ -147,9 +148,16 @@ public class WController {
 	private QuickMessage qm;
 	private String multiStringText = null;
 	
-	/** MultiConfig for config-related stuff  */
+	/** MultiConfigs for config-related stuff  */
+	/** "Active" MultiConfig */
 	private MultiConfig multiConfig;
-
+	
+	/** "Master" Sign Group MultiConfig (largest sign group) */
+	private MultiConfig signGroupMultiConfig;
+	
+	/** MultiConfig ComboBox for sign groups */
+	private WMultiConfigComboBox multiConfigList;
+	
 	/** Currently selected page (defaults to first available) */
 	private int selectedPageIndx = 0;
 	private WPage selectedPage;
@@ -164,8 +172,8 @@ public class WController {
 	/** Currently selected/active text rectangle (may be the implicit "whole-
 	 *  sign" text rectangle) and the tokens it contains. */
 	private WgTextRect selectedTextRect;
-	private WTokenList trTokens;
-
+	private WTokenList trTokens = new WTokenList();
+	
 	/** Color rectangle(s) on the selected page */
 	private ArrayList<WgColorRect> colorRects;
 	
@@ -327,7 +335,7 @@ public class WController {
 		// generate the MultiConfig for the sign
 		if (sign != null) {
 			try {
-				setMultiConfig(MultiConfig.from(sign));
+				initFromMultiConfig(MultiConfig.from(sign));
 			} catch (TMSException e1) {
 				// TODO what to do??
 			}
@@ -343,15 +351,59 @@ public class WController {
 		
 		if (sg != null) {
 			// generate the MultiConfig for the sign group
-			setMultiConfig(MultiConfig.from(sg));
+			signGroupMultiConfig = MultiConfig.from(sg);
 			
-			// generate the list of signs in the group
-			makeSignListForGroup(true);
+			if (signGroupMultiConfig != null) {
+				// use the "primary" MultiConfig to initialize
+				initFromMultiConfig(signGroupMultiConfig);
+				
+				// create the ComboBox for displaying/selecting different
+				// configs and signs
+				multiConfigList = WMultiConfigComboBox.
+						fromSignGroupMultiConfig(signGroupMultiConfig, this);
+				
+				// generate the list of signs in the group
+	//			makeSignListForGroup(true);
+			}
 		} else {
 			multiConfig = null;
 			sign = null;
 		}
 		update();
+	}
+	
+	/** Initialize some necessary defaults from the MultiConfig provided. This
+	 *  sets the "Active" MultiConfig.
+	 */
+	private void initFromMultiConfig(MultiConfig mc) {
+		multiConfig = mc;
+		if (multiConfig != null) {
+			// initialize the font and colors from the MultiConfig
+			font = multiConfig.getDefaultFont();
+			defaultFont = font;
+			
+			fgColor = multiConfig.getDefaultFG();
+			bgColor = multiConfig.getDefaultBG();
+			
+			// use the default foreground color for color rectangles (so we
+			// always have one)
+			colorRectColor = multiConfig.getDefaultFG();
+		}
+	}
+	
+	public WMultiConfigComboBox getConfigComboBox() {
+		return multiConfigList;
+	}
+	
+	/** Set the "active" MultiConfig used for rendering the sign panel. */
+	public void setActiveMultiConfig(MultiConfig mc) {
+		multiConfig = mc;
+		
+		// check functions supported by this MultiConfig
+		editor.checkSupportedFuncs(multiConfig);
+		
+		// TODO should we update here or somewhere else?
+		update(false);
 	}
 	
 	/** Set the quick message being edited */
@@ -926,7 +978,7 @@ public class WController {
 	private void initCaret() {
 		// if the page isn't empty, put the caret the first text character
 		// (note that it is always text mode when this is called)
-		if (!trTokens.isEmpty()) {
+		if (trTokens != null && !trTokens.isEmpty()) {
 			WToken tok = trTokens.findFirstTextToken(true);
 			if (tok != null)
 				moveCaret(tok);
@@ -2679,14 +2731,22 @@ public class WController {
 //		println("Got back: '%s'", multiStringText);
 	}
 	
-	/** Update everything that needs updating */
 	public void update() {
+		update(true);
+	}
+	
+	/** Update everything that needs updating */
+	public void update(boolean focus) {
 //		println("In update: " + multiStringText);
 		renderMsg();
 //		println("After renderMsg: '%s'", multiStringText);
 		updateMultiPanel();
 		updatePageListModel();
 		updateCursor();
+		
+		if (signPanel != null && focus)
+			// give focus to the sign panel if requested
+			signPanel.requestFocusInWindow();
 	}
 	
 	/** Update the text toolbar if one is available. */
@@ -2745,7 +2805,7 @@ public class WController {
 	/** Update the WPageList given the current MULTI string and MultiConfig. */
 	private void updatePageListModel() {
 		// update the page list and the selected page
-		if (pageList != null) {
+		if (pageList != null && multiConfig != null) {
 			pageList.updatePageList(multiStringText, multiConfig);
 			updateSelectedPage();
 		}
@@ -2774,9 +2834,6 @@ public class WController {
 		if (editor != null) {
 			editor.setPageNumberLabel(getPageNumberLabel(selectedPageIndx));
 			editor.setPage(selectedPage);
-			
-			// give focus to the sign panel
-			signPanel.requestFocusInWindow();
 		}
 		
 		// update rectangle and graphics handling for the selected page
@@ -3160,6 +3217,15 @@ public class WController {
 		return multiConfig;
 	}
 	
+	/** Return the color scheme associated with the current MultiConfig. If
+	 *  there is no active MultiConfig, UNKNOWN is returned.
+	 */
+	public ColorScheme getColorScheme() {
+		if (multiConfig != null)
+			return multiConfig.getColorScheme();
+		return ColorScheme.UNKNOWN;
+	}
+	
 	public ProxyListModel<Font> getFontModel() {
 		if (session != null) {
 			return session.getSonarState().getDmsCache().getFontModel();
@@ -3173,21 +3239,24 @@ public class WController {
 	 */
 	public void updateGraphicModel() {
 		// get sign parameters from the MultiConfig
-		int maxHeight = multiConfig.getPixelHeight();
-		int maxWidth = multiConfig.getPixelWidth();
-		int maxColorScheme = multiConfig.getColorScheme().ordinal();
-		
-		// clear the list we have before updating
-		supportedGraphics.removeAllElements();
-		
-		// filter the list of all graphics available to the ones we support
-		Iterator<Graphic> it = GraphicHelper.iterator();
-		while (it.hasNext()) {
-			Graphic g = it.next();
-			if (g.getHeight() <= maxHeight && g.getWidth() <= maxWidth
-					&& g.getColorScheme() <= maxColorScheme)
-				supportedGraphics.addElement(g);
-		}
+		if (multiConfig != null) {
+			int maxHeight = multiConfig.getPixelHeight();
+			int maxWidth = multiConfig.getPixelWidth();
+			int maxColorScheme = multiConfig.getColorScheme().ordinal();
+			
+			// clear the list we have before updating
+			supportedGraphics.removeAllElements();
+			
+			// filter the list of all graphics available to ones we support
+			Iterator<Graphic> it = GraphicHelper.iterator();
+			while (it.hasNext()) {
+				Graphic g = it.next();
+				if (g.getHeight() <= maxHeight && g.getWidth() <= maxWidth
+						&& g.getColorScheme() <= maxColorScheme)
+					supportedGraphics.addElement(g);
+			}
+		} else
+			supportedGraphics.removeAllElements();
 	}
 	
 	public DefaultComboBoxModel<Graphic> getGraphicModel() {
@@ -3210,30 +3279,6 @@ public class WController {
 	public void setSignPanel(WImagePanel sp) {
 		signPanel = sp;
 //		update();
-	}
-	
-	private void setMultiConfig(MultiConfig mc) {
-		multiConfig = mc;
-		setFontFromConfig();
-		setColorsFromConfig();
-	}
-	
-	private void setFontFromConfig() {
-		if (multiConfig != null) {
-			font = multiConfig.getDefaultFont();
-			defaultFont = font;
-		}
-	}
-	
-	private void setColorsFromConfig() {
-		if (multiConfig != null) {
-			fgColor = multiConfig.getDefaultFG();
-			bgColor = multiConfig.getDefaultBG();
-			
-			// use the default foreground color for color rectangles (so we
-			// always have one)
-			colorRectColor = multiConfig.getDefaultFG();
-		}
 	}
 	
 	public DmsColor getForegroundColor() {

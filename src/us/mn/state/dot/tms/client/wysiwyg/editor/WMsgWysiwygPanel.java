@@ -15,6 +15,7 @@
 
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
@@ -33,6 +34,8 @@ import javax.swing.JToggleButton;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.MultiConfig;
+import us.mn.state.dot.tms.utils.MultiTag;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 
 /**
@@ -148,17 +151,10 @@ public class WMsgWysiwygPanel extends JPanel {
 		disableRestoreButton();
 		add(mode_btn_pnl);
 		
-		// disable color rectangle, text rectangle, and graphics buttons for
-		// all signs that aren't full matrix
-		// TODO may need to adjust this for sign groups
-		if (controller.getMultiConfig().getDmsType() != DMSType.VMS_FULL) {
-			graphic_mode_btn.setEnabled(false);
-			colorrect_mode_btn.setEnabled(false);
-			textrect_mode_btn.setEnabled(false);
-		}
-		
-		// TODO temporary
-//		multitag_mode_btn.setEnabled(false);
+		// disable any buttons for unsupported tags
+		MultiConfig mc = controller.getMultiConfig();
+		if (mc != null)
+			checkSupportedFuncs(mc);
 		
 		/** Option Panel - changes depending on the mode */
 		toolbar_pnl = new JPanel(new CardLayout(10,10));
@@ -187,11 +183,10 @@ public class WMsgWysiwygPanel extends JPanel {
 		add(toolbar_pnl);
 		
 		// sign face panel - the main show
-//		pixel_pnl = new SignPixelPanel(250, 550);
-//		controller.setPixelPanel(pixel_pnl);
-//		add(pixel_pnl);
 		signPanel = new WImagePanel(650, 300);
-		add(signPanel);
+		JPanel spPanel = new JPanel(new BorderLayout());
+		spPanel.add(signPanel, BorderLayout.CENTER);
+		add(spPanel);
 		controller.setSignPanel(signPanel);
 		
 		// also add a JLabel for displaying non-text tag info
@@ -210,6 +205,24 @@ public class WMsgWysiwygPanel extends JPanel {
 		editorKeyBindings = new WEditorKeyBindings(controller);
 		editorKeyBindings.setEditorPanelKeyBindings(
 				signPanel, JComponent.WHEN_FOCUSED);
+	}
+	
+	/** Enable or disable functions that correspond to any tags not supported
+	 *  by the MultiConfig provided.
+	 *  
+	 *  TODO we may want to pass this further down the chain (e.g. to some
+	 *  toolbars). 
+	 */
+	public void checkSupportedFuncs(MultiConfig mc) {
+		if (mc != null) {
+			graphic_mode_btn.setEnabled(mc.supportsTag(MultiTag.g));
+			colorrect_mode_btn.setEnabled(mc.supportsTag(MultiTag.cr));
+			textrect_mode_btn.setEnabled(mc.supportsTag(MultiTag.tr));
+		} else {
+			graphic_mode_btn.setEnabled(false);
+			colorrect_mode_btn.setEnabled(false);
+			textrect_mode_btn.setEnabled(false);
+		}
 	}
 	
 	/** Set the currently selected page to display */

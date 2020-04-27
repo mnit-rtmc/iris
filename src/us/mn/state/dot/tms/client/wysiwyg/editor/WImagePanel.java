@@ -20,10 +20,13 @@ import javax.swing.JPanel;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Stroke;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,10 +96,7 @@ public class WImagePanel extends JPanel {
 	public WImagePanel(int w, int h) {
 		width = w;
 		height = h;
-		Dimension d = UI.dimension(width, height);
-		setMinimumSize(d);
-		setMaximumSize(d);
-		setPreferredSize(d);
+		init();
 	}
 
 	// TODO I don't think we should have to do this - we may be able to fix in
@@ -105,10 +105,14 @@ public class WImagePanel extends JPanel {
 		width = w;
 		height = h;
 		preview = usePreviewImg;
-		Dimension d = UI.dimension(width, height);
-		setMinimumSize(d);
-		setMaximumSize(d);
+		init();
+	}
+	
+	private void init() {
+		setLayout(new FlowLayout(FlowLayout.CENTER));
+		Dimension d = new Dimension(width, height);
 		setPreferredSize(d);
+		addComponentListener(new WImagePanelComponentListener());
 	}
 
 	@Override
@@ -166,6 +170,13 @@ public class WImagePanel extends JPanel {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public void setImageSize(int w, int h) {
+		width = w;
+		height = h;
+		setPreferredSize(new Dimension(width, height));
+		repaint();
 	}
 	
 	public int getWidth() {
@@ -542,6 +553,17 @@ public class WImagePanel extends JPanel {
 	public void clearRectangleInProgress() {
 		newRectInProgress = null;
 		repaint();
+	}
+	
+	
+	/** Component listener for handling resize events */
+	private class WImagePanelComponentListener extends ComponentAdapter {
+		public void componentResized(ComponentEvent e) {
+			Dimension d = e.getComponent().getSize();
+//			System.out.println(String.format(
+//					"WImagePanel: %d x %d", d.width, d.height));
+			setImageSize(d.width, d.height);
+		}
 	}
 }
 

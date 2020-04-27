@@ -19,6 +19,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 
 import javax.swing.Box;
@@ -76,7 +77,9 @@ public class WPageListRenderer extends JPanel implements ListCellRenderer<WPage>
 	private void initialize() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBorder(UI.cellRendererBorder());
+		JPanel spPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		signPanel = new WImagePanel(380,120, true);
+		spPanel.add(signPanel);
 		setPreferredSize();
 		title_pnl.setLayout(new BoxLayout(title_pnl, BoxLayout.X_AXIS));
 		title_pnl.add(Box.createHorizontalGlue());
@@ -90,7 +93,7 @@ public class WPageListRenderer extends JPanel implements ListCellRenderer<WPage>
 		info_pnl.add(Box.createHorizontalGlue());
 //		info_pnl.setAlignmentX(Component.LEFT_ALIGNMENT);
 		add(title_pnl, BorderLayout.NORTH);
-		add(signPanel, BorderLayout.CENTER);
+		add(spPanel, BorderLayout.CENTER);
 		add(info_pnl, BorderLayout.SOUTH);
 	}
 
