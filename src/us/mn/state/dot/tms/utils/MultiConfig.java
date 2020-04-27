@@ -652,6 +652,7 @@ public class MultiConfig {
 		MultiConfig mcSignGroup = fromSign(mcConfig.name, SIGNGROUP);
 		mcSignGroup.name = sg.getName();
 		mcSignGroup.configList = mcaConfigs;
+		mcSignGroup.signList = mcaSigns;
 		// Rename config MCs based on position in list
 		int cfgNo = 1;
 		for (MultiConfig mc : mcaConfigs) {
