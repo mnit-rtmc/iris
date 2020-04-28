@@ -105,7 +105,6 @@ public class WMsgEditorForm extends AbstractForm {
 	private WMsgEditorPanel epanel;
 	
 	/** Buttons */
-	private JButton preview_btn;
 	private JButton cancel_btn;
 	private JButton save_as_btn;
 	private JButton save_btn;
@@ -233,13 +232,9 @@ public class WMsgEditorForm extends AbstractForm {
 		epanel = new WMsgEditorPanel(controller);
 		
 		/* Buttons - TODO finish implementing */
-		preview_btn = new JButton(preview);
 		cancel_btn = new JButton(cancel);
 		save_as_btn = new JButton(saveas);
 		save_btn = new JButton(save);
-		
-		// TODO temporary
-		preview_btn.setEnabled(false);
 	}
 
 	/** Initialize the form */
@@ -349,7 +344,7 @@ public class WMsgEditorForm extends AbstractForm {
 		bpPanel.add(prefix_chk);
 		gbPanel.add(bpPanel, gbc);
 		
-		/* Cancel/Preview/Save As/Save Buttons */
+		/* Cancel/Save As/Save Buttons */
 		JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		gbc.weightx = 0;
 		gbc.weighty = 0;
@@ -358,7 +353,6 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.fill = GridBagConstraints.NONE;
 		gbc.anchor = GridBagConstraints.BASELINE_TRAILING;
 		btnPanel.add(cancel_btn);
-		btnPanel.add(preview_btn);
 		btnPanel.add(save_as_btn);
 		btnPanel.add(save_btn);
 		gbPanel.add(btnPanel, gbc);
