@@ -29,10 +29,12 @@ import us.mn.state.dot.tms.utils.wysiwyg.token.WtPageTime;
 public class WPageTimingTagDialog extends WMultiTagDialog {
 	
 	private WtPageTime editTok;
-	private WTagParamIntField pt_onField;
-	private WTagParamIntField pt_offField;
+	private WTagParamDoubleField pt_onField;
+	private WTagParamDoubleField pt_offField;
 	private Integer pt_on;
 	private Integer pt_off;
+	private Double ptOnSec;
+	private Double ptOffSec;
 	
 	public WPageTimingTagDialog(String title, WController c,
 			WTokenType tokType, WToken tok) {
@@ -44,20 +46,34 @@ public class WPageTimingTagDialog extends WMultiTagDialog {
 		editTok = (WtPageTime) tok;
 		pt_on = editTok.getPageOnTime();
 		pt_off = editTok.getPageOffTime();
+		ptOnSec = pt_on.doubleValue()/10;
+		ptOffSec = pt_off.doubleValue()/10;
 	}
 
 	@Override
 	protected void addTagForm() {
-		pt_onField = new WTagParamIntField(pt_on, 10, false);
+		pt_onField = new WTagParamDoubleField(ptOnSec, 10, false);
 		addField("wysiwyg.page_timing_dialog.pt_on", pt_onField);
-		pt_offField = new WTagParamIntField(pt_off, 10, false);
+		pt_offField = new WTagParamDoubleField(ptOffSec, 10, false);
 		addField("wysiwyg.page_timing_dialog.pt_off", pt_offField);
 	}
 
 	@Override
 	protected WtPageTime makeNewTag() {
-		pt_on = pt_onField.getValue();
-		pt_off = pt_offField.getValue();
+		ptOnSec = pt_onField.getValue();
+		if (ptOnSec != null) {
+			Double ptOnDSec = 10*ptOnSec;
+			pt_on = ptOnDSec.intValue();
+		} else
+			pt_on = null;
+		
+		ptOffSec = pt_offField.getValue();
+		if (ptOffSec != null) {
+			Double ptOffDSec = 10*ptOffSec;
+			pt_off = ptOffDSec.intValue();
+		} else
+			pt_off = null;
+		
 		return new WtPageTime(pt_on, pt_off);
 	}
 
