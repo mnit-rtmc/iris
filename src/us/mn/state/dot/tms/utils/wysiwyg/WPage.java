@@ -337,6 +337,9 @@ public class WPage {
 		} else {
 			wr.addAnchor(this, tok);
 		}
+		// update page timing info
+		WState state = wr.getState();
+		setPageTiming(state.pageOn, state.pageOff);
 	}
 	
 	/** Re-render the page */
@@ -455,5 +458,14 @@ public class WPage {
 		String s = String.format("{%4d, %4d, %4d, %4d} <EOP>",
 					eopX, eopY, eopW, eopH);
 		out.println(s);
+	}
+
+	/**
+	 * @param pageOn2
+	 * @param pageOff2
+	 */
+	public void setPageTiming(int pageOn2, int pageOff2) {
+		pageOn = pageOn2;
+		pageOff = pageOff2;
 	}
 }
