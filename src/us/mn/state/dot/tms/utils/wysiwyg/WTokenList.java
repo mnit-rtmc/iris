@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
+import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_IrisToken;
 
 
 /**
@@ -249,20 +250,23 @@ public class WTokenList extends ArrayList<WToken> {
 	 *  If no tokens are found, null is returned. Includes newlines if 
 	 *  includeNewLine is true, otherwise only WtTextChar tokens are included.
 	 */
-	public WToken findNextTextToken(int si, boolean includeNewLine) {
+	public WToken findNextTextToken(int si, boolean includeNewLine,
+			boolean includeIrisTags) {
 		for (int i = si; i < size(); ++i) {
 			WToken tok = get(i);
 			
-			if (tok.isPrintableText()
+			if ((tok.isPrintableText()
 					&& (includeNewLine || tok.isType(WTokenType.textChar)))
+					|| (tok instanceof Wt_IrisToken && includeIrisTags))
 				return tok;
 		}
 		return null;
 	}
 	
 	/** Find the first printable text token in the list. */
-	public WToken findFirstTextToken(boolean includeNewLine) {
-		return findNextTextToken(0, includeNewLine);
+	public WToken findFirstTextToken(boolean includeNewLine,
+			boolean includeIrisTags) {
+		return findNextTextToken(0, includeNewLine, includeIrisTags);
 	}
 	
 	/** Return the previous token with a type that matches any of the types
@@ -285,22 +289,25 @@ public class WTokenList extends ArrayList<WToken> {
 	 *  (inclusive - if the token at si is printable text, it is returned).
 	 *  If no tokens are found, null is returned.
 	 */
-	public WToken findPrevTextToken(int si, boolean includeNewLine) {
+	public WToken findPrevTextToken(int si, boolean includeNewLine,
+			boolean includeIrisTags) {
 		if (si >= size())
 			si = size() - 1;
 		for (int i = si; i >= 0; --i) {
 			WToken tok = get(i);
 			
-			if (tok.isPrintableText()
+			if ((tok.isPrintableText()
 					&& (includeNewLine || tok.isType(WTokenType.textChar)))
+					|| (tok instanceof Wt_IrisToken && includeIrisTags))
 				return tok;
 		}
 		return null;
 	}
 
 	/** Find the last printable text token in the list. */
-	public WToken findLastTextToken(boolean includeNewLine) {
-		return findPrevTextToken(size()-1, includeNewLine);
+	public WToken findLastTextToken(boolean includeNewLine,
+			boolean includeIrisTags) {
+		return findPrevTextToken(size()-1, includeNewLine, includeIrisTags);
 	}
 	
 }
