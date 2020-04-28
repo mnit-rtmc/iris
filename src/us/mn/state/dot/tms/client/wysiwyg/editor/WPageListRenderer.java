@@ -142,11 +142,13 @@ public class WPageListRenderer extends JPanel implements ListCellRenderer<WPage>
 	/** Create the page info label from the page on/off time */
 	private String getPageInfo(WPage sp) {
 		// calculate page on and off time in seconds (WPage gives deciseconds)
-		int pgOnInt = sp.getPageOn()/10;
-		int pgOffInt = sp.getPageOff()/10;
+		double pgOn = ((double) sp.getPageOn())/10;
+		double pgOff = ((double) sp.getPageOff())/10;
 		
-		String pgOnStr = String.format(I18N.get("wysiwyg.editor.page_on"), pgOnInt);
-		String pgOffStr = String.format(I18N.get("wysiwyg.editor.page_off"), pgOffInt);
+		String pgOnStr = String.format(
+				I18N.get("wysiwyg.editor.page_on"), pgOn);
+		String pgOffStr = String.format(
+				I18N.get("wysiwyg.editor.page_off"), pgOff);
 		return String.format("%s   %s", pgOnStr, pgOffStr);
 	}
 }
