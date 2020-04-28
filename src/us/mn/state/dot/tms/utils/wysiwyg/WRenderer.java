@@ -133,6 +133,11 @@ public class WRenderer {
 		state.trH = raster.getHeight();
 	}
 
+	/** Get current render-state */
+	public WState getState() {
+		return state;
+	}
+
 	//---------------------------------
 	// WToken.doRender methods
 
