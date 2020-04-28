@@ -82,8 +82,11 @@ public class WtSlowWarning extends Wt_IrisToken {
 		}
 	}
 
+	/** get width of WYSIWYG box
+	 * @param chsp Character spacing (null = use font default)
+	 */
 	@Override
-	public Integer getBoxWidth() {
+	public Integer getBoxWidth(Integer chsp) {
 		int xx;
 		if ((mode == null)
 		 || "none".equalsIgnoreCase(mode)) {
@@ -91,14 +94,15 @@ public class WtSlowWarning extends Wt_IrisToken {
 			return null;
 		}
 		if ("dist".equalsIgnoreCase(mode)) {
-			// distance rounded to nearest mile
+			// Convert deci-mile distance to
+			// miles and round to nearest mile
 			xx = (int)((dist + 5) / 10);
-			return wfont.getIntWidth(xx);
+			return wfont.getIntWidth(chsp, xx);
 		}
 		else if ("speed".equalsIgnoreCase(mode)) {
 			// speed rounded to nearest 5 mph
 			xx = Math.round(spd / 5) * 5;
-			return wfont.getIntWidth(xx);
+			return wfont.getIntWidth(chsp, xx);
 		}
 		return null;
 	}

@@ -53,11 +53,13 @@ public class WtSpeedAdvisory extends Wt_IrisToken {
 		; // do nothing
 	}
 
-	/** get width of WYSIWYG box */
+	/** get width of WYSIWYG box
+	 * @param chsp Character spacing (null = use font default)
+	 */
 	@Override
-	public Integer getBoxWidth() {
+	public Integer getBoxWidth(Integer chsp) {
 		int minSpd = SystemAttrEnum.VSA_MIN_DISPLAY_MPH.getInt();
 		int maxSpd = SystemAttrEnum.VSA_MAX_DISPLAY_MPH.getInt();
-		return wfont.getIntWidth(minSpd, maxSpd);
+		return wfont.getIntWidth(chsp, minSpd, maxSpd);
 	}
 }

@@ -935,7 +935,7 @@ public class WRenderer {
 		/** get pixel width of box */
 		@Override
 		int getWidth() {
-			Integer wid = itok.getBoxWidth();
+			Integer wid = itok.getBoxWidth(state.charSpacing);
 			if ((wid == null) || (wid < 1))
 				return 0;
 			return wid;

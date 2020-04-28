@@ -87,10 +87,40 @@ public class WtTravelTime extends Wt_IrisToken {
 		}
 	}
 
-	/** get width of WYSIWYG box */
+	/** Max pixel-width of travel-time minutes
+	 *  (without prefix/suffix strings).
+	 * @param chsp Character spacing (null = use font default)
+	 */
+	private int getMaxTravelTimeWidth(Integer chsp) {
+		/* The following is a hack based on the
+		 * idea that the maximum reasonable
+		 * travel-time prediction is 60 minutes.
+		 * AND that travel times are rounded
+		 * to the closest 5 minutes.
+		 */
+		int wid = 0;
+		int w2;
+		for (int curMin = 5; (curMin <= 60); curMin += 5) {
+			w2 = wfont.getTextWidth(chsp, Integer.toString(curMin));
+			if (wid < w2)
+				wid = w2;
+		}
+		return wid;
+	}
+
+	/** get width of WYSIWYG box
+	 * @param chsp Character spacing (null = use font default)
+	 */
 	@Override
-	public Integer getBoxWidth() {
-		// TODO Auto-generated method stub
-		return null;
+	public Integer getBoxWidth(Integer chsp) {
+		if ((mode != null) && (mode == OverLimitMode.blank))
+			return null;
+		String str = o_txt;
+		if ((str == null) || str.isEmpty())
+			str = "OVER ";
+		int charSpacing = wfont.getCharSpacing(chsp);
+		return charSpacing
+		     + wfont.getTextWidth(chsp, str)
+		     + getMaxTravelTimeWidth(chsp);
 	}
 }

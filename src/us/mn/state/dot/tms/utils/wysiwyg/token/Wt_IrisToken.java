@@ -70,6 +70,8 @@ abstract public class Wt_IrisToken extends WToken {
 
 	/** Get the box width from the child class.
 	 * If a null is returned, the token is hidden,
-	 * but is traversable like a page-time tag. */
-	public abstract Integer getBoxWidth();
+	 * but is traversable like a page-time tag.
+	 * @param chsp Character spacing (null = use font default)
+	 */
+	public abstract Integer getBoxWidth(Integer chsp);
 }

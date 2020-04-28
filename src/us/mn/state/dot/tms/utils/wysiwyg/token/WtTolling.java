@@ -15,6 +15,7 @@
 
 package us.mn.state.dot.tms.utils.wysiwyg.token;
 
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.Multi;
 import us.mn.state.dot.tms.utils.wysiwyg.WRenderer;
 import us.mn.state.dot.tms.utils.wysiwyg.WState;
@@ -75,10 +76,33 @@ public class WtTolling extends Wt_IrisToken {
 		return zones;
 	}
 
-	/** get width of WYSIWYG box */
+	/** Calculate max-width of toll price */
+	private int calcMaxPriceWidth(Integer chsp) {
+		String str;
+		int wid = 0;
+		// Get max-width of tolling-price
+		int minPrice = Math.round(SystemAttrEnum.TOLL_MIN_PRICE.getFloat() * 100);
+		int maxPrice = Math.round(SystemAttrEnum.TOLL_MAX_PRICE.getFloat() * 100);
+		int w2;
+		for (int cents = minPrice; (cents <= maxPrice); cents += 25) {
+			str = String.format("%03d", cents);
+			w2 = wfont.getTextWidth(chsp, str);
+			if (wid < w2)
+				wid = w2;
+		}
+		// Add decimal point
+		int charSpacing = wfont.getCharSpacing(chsp);
+		return wid + charSpacing + wfont.getCharWidth('.');
+	}
+	
+	/** get width of WYSIWYG box
+	 * @param chsp Character spacing (null = use font default)
+	 */
 	@Override
-	public Integer getBoxWidth() {
-		// TODO Auto-generated method stub
+	public Integer getBoxWidth(Integer chsp) {
+		if ("p".equals(mode)) // priced
+			return calcMaxPriceWidth(chsp);
+		// for "o" (open), "c" (closed), and anything else
 		return null;
 	}
 }

@@ -38,7 +38,9 @@ public class WFont implements Font {
 	
 	/** Maximum char width in font */
 	private int maxCharWidth;
-
+	
+	//===========================================
+	
 	/** Pre-expand an ArrayList and pad with nulls. */
 	private void ensureListSize(
 			ArrayList<WGlyph> la,
@@ -114,51 +116,81 @@ public class WFont implements Font {
 		return maxCharWidth;
 	}
 
-	/** Get maximum pixel-width of a field that
-	 *  is len characters wide. (The number
-	 *  returned for variable-width fonts may
-	 *  seem large because it uses the widest
-	 *  char in the font to do the math.) */
-	public int getFieldWidth(int len) {
-		int csep = getCharSpacing();
-		int width = (maxCharWidth * len) + (csep * (len - 1));
-		return Math.max(0,  width);
+	/** Get character spacing
+	 * @param chsp Character spacing (null = use font default)
+	 */
+	public int getCharSpacing(Integer chsp) {
+		if (chsp != null)
+			return chsp;
+		return getCharSpacing();
 	}
+
+//	/** Get maximum pixel-width of a field that
+//	 *  is len characters wide. (The number
+//	 *  returned for variable-width fonts may
+//	 *  seem large because it uses the widest
+//	 *  char in the font to do the math.) */
+//	public int getFieldWidth(Integer chsp, int len) {
+//		if (chsp == null)
+//			chsp = getCharSpacing();
+//		int width = (maxCharWidth * len) + (chsp * (len - 1));
+//		return Math.max(0,  width);
+//	}
 
 	/** Get pixel-width of a specified string.
 	 *  Any chars in the string that are not
-	 *  in the font are ignored. */
-	public int getTextWidth(String str) {
+	 *  in the font are ignored.
+	 * @param chsp Character spacing (null = use font default)
+	 * @param str  string to measure
+	 */
+	public int getTextWidth(Integer chsp, String str) {
 		int len = str.length();
 		if (len < 1)
 			return 0;
 		char ch;
 		WGlyph glyph;
-		int csep = getCharSpacing();
+		int charSpacing = getCharSpacing(chsp);
 		int width = 0;
 		for (int i = 0; i < len; i++){
 		    ch = str.charAt(i);
 		    glyph = getGlyph(ch);
 		    if (glyph != null)
-		    	width += glyph.getWidth() + csep;
+		    	width += glyph.getWidth() + charSpacing;
 		}
-		return Math.max(0, (width - csep));
+		return Math.max(0, (width - charSpacing));
+	}
+
+	/** Get pixel-width of a specified char.
+	 *  Any chars that are not in the font
+	 *  return 0.
+	 * @param chsp Character spacing (null = use font default)
+	 */
+	public int getCharWidth(char ch) {
+		WGlyph glyph = getGlyph(ch);
+		return (glyph == null) ? 0 : glyph.getWidth();
 	}
 
 	/** Get pixel-width of a specified integer.
-	 *  (converted to a string) */
-	public int getIntWidth(int i) {
+	 *  (converted to a string).
+	 * @param chsp Character spacing (null = use font default)
+	 * @param i    Number to measure.
+	 */
+	public int getIntWidth(Integer chsp, int i) {
 		String str = Integer.toString(i);
-		return getTextWidth(str);
+		return getTextWidth(chsp, str);
 	}
 	
 	/** Get max pixel-width required to display
-	 *  any number in a range of numbers */
-	public int getIntWidth(int imin, int imax) {
+	 *  any number in a range of numbers.
+	 * @param chsp Character spacing (null = use font default)
+	 * @param imin Minimum number to measure
+	 * @param imax Maximum number to measure
+	 */
+	public int getIntWidth(Integer chsp, int imin, int imax) {
 		int wid = 0;
 		int w2;
 		for (int i = imin; (i <= imax); ++i) {
-			w2 = getIntWidth(i);
+			w2 = getIntWidth(chsp, i);
 			if (wid < w2)
 				wid = w2;
 		}

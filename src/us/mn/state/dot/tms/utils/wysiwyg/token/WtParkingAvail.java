@@ -15,6 +15,8 @@
 
 package us.mn.state.dot.tms.utils.wysiwyg.token;
 
+import us.mn.state.dot.tms.ParkingArea;
+import us.mn.state.dot.tms.ParkingAreaHelper;
 import us.mn.state.dot.tms.utils.Multi;
 import us.mn.state.dot.tms.utils.wysiwyg.WRenderer;
 import us.mn.state.dot.tms.utils.wysiwyg.WState;
@@ -86,11 +88,20 @@ public class WtParkingAvail extends Wt_IrisToken {
 		}
 	}
 
-	/** get width of WYSIWYG box */
+	/** get width of WYSIWYG box
+	 * @param chsp Character spacing (null = use font default)
+	 */
 	@Override
-	public Integer getBoxWidth() {
-		int llen = wfont.getTextWidth(l_txt);
-		int clen = wfont.getTextWidth(c_txt);
-		return Math.max(llen, clen);
+	public Integer getBoxWidth(Integer chsp) {
+		int capacity = 20;  // arbitrary capacity for unknown parking area
+		if (pid != null) {
+			ParkingArea pa = ParkingAreaHelper.lookup(pid);
+			if (pa != null)
+				capacity = pa.getCapacity();
+		}
+		int plen = wfont.getIntWidth(chsp, capacity);
+		int llen = wfont.getTextWidth(chsp, l_txt);
+		int clen = wfont.getTextWidth(chsp, c_txt);
+		return Math.max(Math.max(llen, clen), plen);
 	}
 }
