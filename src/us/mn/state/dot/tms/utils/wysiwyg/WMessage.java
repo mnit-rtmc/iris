@@ -391,14 +391,14 @@ public class WMessage {
 		watchers.remove(watcher);
 	}
 
-	public void rerenderPage(int pageNo, MultiConfig mcfg) {
-		// get the page and re-render it
-		WRenderer wr = new WRenderer(mcfg);
-		WPage pg = getPage(pageNo);
-		pg.doRender(wr);
-		wr.complete();
-		pg.setRaster(wr.getRaster());
-	}
+//	public void rerenderPage(int pageNo, MultiConfig mcfg) {
+//		// get the page and re-render it
+//		WRenderer wr = new WRenderer(mcfg);
+//		WPage pg = getPage(pageNo);
+//		pg.doRender(wr);
+//		wr.complete();
+//		pg.setRaster(wr.getRaster());
+//	}
 	
 	/** Re-render page and then tell watchers */
 	public void pageChanged(int pageNo) {
