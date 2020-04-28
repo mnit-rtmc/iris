@@ -242,11 +242,6 @@ public class WController {
 	/** Page list */
 	private WPageList pageList;
 	
-	/** DMS List (for sign groups) */
-	private Map<String,DMS> dmsList;
-	private JComboBox<String> dms_list;
-	String[] dmsNames;
-	
 	public WController() {
 		// empty controller - everything will be set later as it is available
 	}	
@@ -2806,8 +2801,8 @@ public class WController {
 	/** Update the WPageList given the current MULTI string and MultiConfig. */
 	private void updatePageListModel() {
 		// update the page list and the selected page
-		if (pageList != null && multiConfig != null) {
-			pageList.updatePageList(multiStringText, multiConfig);
+		if (pageList != null && wmsg != null && wmsg.isValid()) {
+			pageList.updatePageList(wmsg);
 			updateSelectedPage();
 		}
 	}
@@ -2819,9 +2814,6 @@ public class WController {
 			selectedPageIndx = pageList.getNumPages()-1;
 		else if (selectedPageIndx < 0)
 			selectedPageIndx = 0;
-		
-		// rerender the messsage and get the page from our wmsg
-		renderMsg();
 		
 		if (wmsg.isValid())
 			setSelectedPage(wmsg.getPage(selectedPageIndx+1));
@@ -3064,64 +3056,6 @@ public class WController {
 	/** Return whether or not we are in new rectangle mode */
 	private boolean inNewRectMode() {
 		return cursor == newRectCursor;
-	}
-	
-	/** Get a JComboBox containing a list of sign names (only applies when
-	 * editing a group).
-	 * TODO same note as with JList above - should maybe abstract this more
-	 * but whatever... 
-	 */
-	public JComboBox<String> getSignGroupComboBox() {
-		if (sg != null) {
-			// generate a list of signs in the sign group
-			makeSignListForGroup(true);
-			
-			// define a selection handler for the combo box
-			class SignSelectionListener implements ActionListener {
-				@SuppressWarnings("unchecked")
-				public void actionPerformed(ActionEvent e) {
-					JComboBox<String> cb = (JComboBox<String>) e.getSource();
-					String dmsName = (String) cb.getSelectedItem();
-					// TODO - do we need to catch any exceptions here?
-					sign = dmsList.get(dmsName);
-					
-					// update the page list and selected page given the change
-					updatePageListModel();
-					updateSelectedPage();
-				}
-			}
-			
-			// setup and return the combo box
-			dms_list = new JComboBox<String>(dmsNames);
-			dms_list.addActionListener(new SignSelectionListener());
-		}
-		return dms_list;
-	}
-	
-	/** Get a list of signs in the group. If setSign is true, the controller's
-	 *  "sign" attribute be set to the first sign in the group.
-	 */
-	public void makeSignListForGroup(boolean setSign) {
-		// get the list of signs in the sign group
-		// look through the DmsSignGroups to find all signs with this group
-		dmsList = new HashMap<String,DMS>();
-		Iterator<DmsSignGroup> dsgit = DmsSignGroupHelper.iterator();
-		while (dsgit.hasNext()) {
-			DmsSignGroup dsg = dsgit.next();
-			if (dsg.getSignGroup() == sg) {
-				DMS dms = dsg.getDms();
-				dmsList.put(dms.getName(), dms);
-			}
-		}
-		
-		// get the list of sign names and sort them alphabetically
-		dmsNames = Arrays.stream(dmsList.keySet().toArray()).
-				toArray(String[]::new);
-		Arrays.sort(dmsNames);
-		
-		// set the current sign to the first one in the group if desired
-		if (setSign && dmsNames.length > 0)
-			sign = dmsList.get(dmsNames[0]);
 	}
 	
 	public boolean inTextMode() {

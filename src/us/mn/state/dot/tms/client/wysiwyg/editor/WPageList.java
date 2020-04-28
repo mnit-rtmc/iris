@@ -75,7 +75,11 @@ public class WPageList extends JList<WPage> {
 	/** Update the page list given the MULTI string and MultiConfig */
 	public void updatePageList(String multiString, MultiConfig mcfg) {
 		// render the message
-		wmsg = new WMessage(multiString);
+		if (wmsg == null)
+			wmsg = new WMessage(multiString);
+		else
+			wmsg.parseMulti(multiString);
+		
 		wmsg.renderMsg(mcfg);
 		
 		// clear the model and refill it with pages (if the message is valid)
@@ -83,6 +87,16 @@ public class WPageList extends JList<WPage> {
 		if (wmsg.isValid()) {
 			for (int i = 1; i <= wmsg.getNumPages(); ++i) {
 				model.addElement(wmsg.getPage(i));
+			}
+		}
+	}
+	
+	/** Update the page list given a rendered WMessage. */
+	public void updatePageList(WMessage wm) {
+		model.clear();
+		if (wm != null && wm.isValid()) {
+			for (int i = 1; i <= wm.getNumPages(); ++i) {
+				model.addElement(wm.getPage(i));
 			}
 		}
 	}
