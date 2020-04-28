@@ -682,12 +682,16 @@ public class WRenderer {
 		void addText(TextChar tc) {
 			Fragment f = new Fragment();
 			Fragment cf = currentFragment();
-			if (f.justl.ordinal() < cf.justl.ordinal()) {
-				renderError(MultiSyntaxError.tagConflict);
-				//TODO: Figure out how to handle this error
+			if (cf.hasTextAndOrBox) {
+				if (f.justl.ordinal() < cf.justl.ordinal()) {
+					renderError(MultiSyntaxError.tagConflict);
+					//TODO: Figure out how to handle this error
+				}
+				if (f.justl.ordinal() > cf.justl.ordinal())
+					fragments.addLast(f);
 			}
-			if (f.justl.ordinal() > cf.justl.ordinal())
-				fragments.addLast(f);
+			else
+				cf.justl = f.justl;
 			currentFragment().addText(tc);
 		}
 		Fragment currentFragment() {
@@ -706,7 +710,8 @@ public class WRenderer {
 	private class Fragment {
 		private final LinkedList<TextChar> textchars
 			= new LinkedList<TextChar>();
-		private final JustificationLine justl = state.justLine;
+		private JustificationLine justl = state.justLine;
+		boolean hasTextAndOrBox = false;
 		int getHeight() {
 			int h = 0;
 			for (TextChar tc: textchars)
@@ -721,6 +726,8 @@ public class WRenderer {
 		}
 		void addText(TextChar ch) {
 			textchars.add(ch);
+			if ((ch instanceof AnchorChar) == false)
+				hasTextAndOrBox = true;
 		}
 		void render(int base) {
 			println("Fragment.render(): textchars = "+textchars.size());
