@@ -297,8 +297,8 @@ public class WMsgEditorForm extends AbstractForm {
 		/* Page List */
 		gbc.gridx = 0;
 		gbc.gridy = 2;
-		gbc.weightx = 0.1;
-		gbc.weighty = 0.1;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		

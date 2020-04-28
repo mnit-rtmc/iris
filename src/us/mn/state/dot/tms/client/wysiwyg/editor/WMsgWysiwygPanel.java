@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.client.wysiwyg.editor;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -183,16 +184,19 @@ public class WMsgWysiwygPanel extends JPanel {
 		add(toolbar_pnl);
 		
 		// sign face panel - the main show
-		signPanel = new WImagePanel(650, 300);
+		signPanel = new WImagePanel(controller, 650, 300);
 		JPanel spPanel = new JPanel(new BorderLayout());
 		spPanel.add(signPanel, BorderLayout.CENTER);
 		add(spPanel);
-		controller.setSignPanel(signPanel);
 		
 		// also add a JLabel for displaying non-text tag info
 		nonTextTagInfo = new JLabel();
 		nonTextTagInfoPnl = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		nonTextTagInfo.setText("TAG");
 		nonTextTagInfoPnl.add(nonTextTagInfo);
+		Dimension d = nonTextTagInfoPnl.getPreferredSize();
+		nonTextTagInfo.setText("");
+		nonTextTagInfoPnl.setPreferredSize(d);
 		add(nonTextTagInfoPnl);
 		
 		// mouse input adapter for handling mouse events

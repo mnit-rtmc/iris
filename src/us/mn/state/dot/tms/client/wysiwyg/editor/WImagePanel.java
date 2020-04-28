@@ -53,6 +53,8 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 public class WImagePanel extends JPanel {
 	
+	private WController controller;
+	
 	private int width;
 	private int height;
 	private WPage pg;
@@ -93,10 +95,12 @@ public class WImagePanel extends JPanel {
     private final static boolean LED_SEP = true;
     private final static boolean LED = false;
 	
-	public WImagePanel(int w, int h) {
+	public WImagePanel(WController c, int w, int h) {
+		controller = c;
 		width = w;
 		height = h;
 		init();
+		controller.setSignPanel(this);
 	}
 
 	// TODO I don't think we should have to do this - we may be able to fix in
@@ -176,6 +180,12 @@ public class WImagePanel extends JPanel {
 		width = w;
 		height = h;
 		setPreferredSize(new Dimension(width, height));
+		
+		if (controller != null) {
+			controller.update();
+			controller.updateCaret();
+		}
+		
 		repaint();
 	}
 	
@@ -560,9 +570,11 @@ public class WImagePanel extends JPanel {
 	private class WImagePanelComponentListener extends ComponentAdapter {
 		public void componentResized(ComponentEvent e) {
 			Dimension d = e.getComponent().getSize();
+			int w = (int) Math.floor(((float) d.width)/10)*10;
+			int h = (int) Math.floor(((float) d.height)/10)*10;
 //			System.out.println(String.format(
-//					"WImagePanel: %d x %d", d.width, d.height));
-			setImageSize(d.width, d.height);
+//					"WImagePanel: %d x %d -> %d x %d", d.width, d.height, w, h));
+			setImageSize(w, h);
 		}
 	}
 }
