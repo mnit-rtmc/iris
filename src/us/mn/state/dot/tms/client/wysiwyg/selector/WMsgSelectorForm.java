@@ -858,9 +858,10 @@ public class WMsgSelectorForm extends AbstractForm {
 		/* Preview Pane */
 		gbc.gridx = 9;
 		gbc.gridy = 1;
-		gbc.gridheight = 3;
-		gbc.weightx = 0.5;
-		gbc.weighty = 0.5;
+		gbc.gridheight = 1;
+		gbc.weightx = 1;
+		gbc.weighty = 1;
+		gbc.fill = GridBagConstraints.BOTH;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		p.add(msg_preview_pn, gbc);
 		
