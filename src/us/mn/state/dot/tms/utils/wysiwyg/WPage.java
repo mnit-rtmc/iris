@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.utils.Multi;
 import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtColorRectangle;
-import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextRectangle;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtUnsupportedTag;
 
