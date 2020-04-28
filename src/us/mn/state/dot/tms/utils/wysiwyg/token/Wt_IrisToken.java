@@ -50,11 +50,6 @@ abstract public class Wt_IrisToken extends WToken {
 		wr.addIrisToken(this);
 	}
 
-	public boolean renderAsAnchor() {
-		Integer len = getBoxWidth();
-		return ((len == null) || (len < 1));
-	}
-	
 	//-------------------------------------------
 	
 	/** Is this token blank? */
