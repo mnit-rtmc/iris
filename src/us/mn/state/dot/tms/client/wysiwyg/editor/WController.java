@@ -2403,10 +2403,6 @@ public class WController {
 	
 	/** Add the token to the selected page at the caret index. */
 	public void addToken(WToken tok) {
-		// figure out where on the page to add the token
-//		int pgi = getCaretIndexOnPage(tok.isPrintableText());
-//		int pgi = getCaretIndexOnPage(false);
-		
 		// add the token at the caret
 		selectedPage.addToken(caretPageIndx, tok);
 		
