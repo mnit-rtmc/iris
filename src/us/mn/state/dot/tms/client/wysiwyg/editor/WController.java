@@ -81,6 +81,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtPageBackground;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextChar;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextRectangle;
+import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_IrisToken;
 import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_Rectangle;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Multi.JustificationLine;
@@ -979,7 +980,7 @@ public class WController {
 		// if the page isn't empty, put the caret the first text character
 		// (note that it is always text mode when this is called)
 		if (trTokens != null && !trTokens.isEmpty()) {
-			WToken tok = trTokens.findFirstTextToken(true);
+			WToken tok = trTokens.findFirstTextToken(true, true);
 			if (tok != null)
 				moveCaret(tok);
 			else
@@ -1175,7 +1176,7 @@ public class WController {
 				} else {  // skip any non-text tokens
 					int nextIndx = Math.max(caretIndx-1, 0);
 					WToken textTok = trTokens.findPrevTextToken(
-							nextIndx, true);
+							nextIndx, true, true);
 					if (textTok != null)
 						moveCaret(textTok);
 					else
@@ -1197,12 +1198,12 @@ public class WController {
 				} else {  // skip any non-text tokens
 					// find the next text token, if there is one
 					WToken textTok = trTokens.findNextTextToken(
-							caretIndx+1, true);
+							caretIndx+1, true, true);
 					println("Found %s", textTok);
 					if (textTok != null)
 						moveCaret(textTok);
 					else if (trTokens.findNextTextToken(
-							caretIndx, true) != null) {
+							caretIndx, true, true) != null) {
 						// if there's nothing remaining, go to the right of
 						// the last text token
 						moveCaret(caretIndx+1);
@@ -1270,7 +1271,7 @@ public class WController {
 					homeTok = lineTokens.get(0);
 				else
 					// grab the first text token
-					homeTok = lineTokens.findFirstTextToken(true);
+					homeTok = lineTokens.findFirstTextToken(true, true);
 				
 				// move the caret to that token
 				moveCaret(homeTok);
@@ -1291,7 +1292,7 @@ public class WController {
 					// grab the last token on the line
 					endTok = lineTokens.get(lineTokens.size()-1);
 				else {
-					endTok = lineTokens.findLastTextToken(true);
+					endTok = lineTokens.findLastTextToken(true, true);
 				}
 				
 				// move the caret to the right of that token (unless it's a
@@ -1337,7 +1338,7 @@ public class WController {
 					if (stepNonTextTags)
 						tok = tokensBefore.getLast();
 					else
-						tok = tokensBefore.findLastTextToken(true);
+						tok = tokensBefore.findLastTextToken(true, false);
 					
 					if (tok != null) {
 						int i = selectedPage.getTokenIndex(tok);
@@ -1390,7 +1391,7 @@ public class WController {
 					if (stepNonTextTags)
 						tok = tokensAfter.remove(0);
 					else
-						tok = tokensAfter.findFirstTextToken(true);
+						tok = tokensAfter.findFirstTextToken(true, false);
 					
 					if (tok != null) {
 						int i = selectedPage.getTokenIndex(tok);
@@ -1872,7 +1873,7 @@ public class WController {
 		if (!tokensSelected.isEmpty() && !tokensAfter.isEmpty()) {
 			// get the next text token (not including newlines)
 			WtTextChar tc = (WtTextChar)
-					tokensAfter.findFirstTextToken(false);
+					tokensAfter.findFirstTextToken(false, false);
 			if (tc != null) {
 				WFont wf = tc.getFont();
 				afTok = new WtFont(wf.getNumber(),
@@ -1906,7 +1907,7 @@ public class WController {
 		if (!tokensSelected.isEmpty() && !tokensAfter.isEmpty()) {
 			// get the next text token (not including newlines)
 			WtTextChar tc = (WtTextChar)
-					tokensAfter.findFirstTextToken(false);
+					tokensAfter.findFirstTextToken(false, false);
 			if (tc != null) {
 				DmsColor ac = tc.getColor();
 				acfTok = new WtColorForeground(ac.red, ac.green, ac.blue);
