@@ -201,8 +201,11 @@ public class WImagePanel extends JPanel {
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WRaster#cvtSignToWysiwygX(int, boolean, boolean)
 	 */
 	private int convertSignToWysiwygX(int x, boolean first, boolean sep) {
-		if (wr != null)
+		if (wr != null) {
+			if (x > wr.getWidth())
+				x = wr.getWidth();
 			return wr.cvtSignToWysiwygX(x, first, sep);
+		}
 		return -1;
 	}
 
@@ -218,8 +221,11 @@ public class WImagePanel extends JPanel {
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WRaster#cvtSignToWysiwygY(int, boolean, boolean)
 	 */
 	private int convertSignToWysiwygY(int y, boolean first, boolean sep) {
-		if (wr != null)
+		if (wr != null) {
+			if (y > wr.getHeight())
+				y = wr.getHeight();
 			return wr.cvtSignToWysiwygY(y, first, sep);
+		}
 		return -1;
 	}
 	
