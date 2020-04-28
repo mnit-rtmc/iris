@@ -1042,7 +1042,6 @@ abstract public class WRaster {
 			throws IndexOutOfBoundsException { 
 		if (coords == null)
 			throw new IndexOutOfBoundsException("Uninitialized WYSIWIG coordinates");
-		int[] wc = new int[2];
 		boolean found = false;
 		--sc;
 		for (int i = 0; i < coords.length; ++i) {
