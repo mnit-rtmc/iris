@@ -1117,7 +1117,13 @@ public class WController {
 				int y = selectedPage.getEOPY();
 				int h = selectedPage.getEOPH();
 				signPanel.setCaretLocation(x, y, h);
-				caretPageIndx = selectedPage.getNumTokens();
+				if (selectedTextRect != null
+						&& selectedTextRect.isWholeSign())
+					// at end of whole-sign text rectangle
+					caretPageIndx = trTokens.size();
+				else
+					// at end of page
+					caretPageIndx = selectedPage.getNumTokens();
 			}
 			caretOn = true;
 			
@@ -2888,11 +2894,12 @@ public class WController {
 			selectedRectIndx = -1;
 		
 		// in text mode, edit the whole-sign rectangle
+		// note that modeRects is reversed, so the whole-sign rect. is last
 		if (inTextMode())
-			selectedRectIndx = 0;
+			selectedRectIndx = modeRects.size()-1;
 		else if (inMultiTagMode() && selectedRectIndx == -1)
 			// in MULTI tag mode default to whole-sign if nothing is selected
-			selectedRectIndx = 0;
+			selectedRectIndx = modeRects.size()-1;
 		
 		// get the WgRectangle object (or null) and set the selected rectangle 
 		if (selectedRectIndx < 0 || selectedRectIndx >= modeRects.size())
