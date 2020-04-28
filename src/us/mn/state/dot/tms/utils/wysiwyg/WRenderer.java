@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.utils.wysiwyg;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Iterator;
@@ -80,6 +81,8 @@ public class WRenderer {
 
 	/** Error manager */
 	private WEditorErrorManager errMan;
+	
+	//-------------------------------------------
 	
 	/**
 	 * Create a new MULTI renderer.
@@ -1161,9 +1164,12 @@ public class WRenderer {
 	//===========================================
 	//TODO: Remove test code.
 	// Test-rendering in IRIS-server context.
-	// (WRrenderer.test() is called from MainServer.main(...).)
-	// Saves rendered page images to local folder as .png files.
+	// (WRrenderer.test() is called from end of
+	// MainServer.main(...).)  Saves rendered page
+	// images to TEST_FOLDER subfolder as .png files.
 
+	private static final String TEST_FOLDER = "./rendertest";
+	
 //	static private int testNo = 1;
 	static private String testName;
 	static private PrintWriter out;
@@ -1262,12 +1268,12 @@ public class WRenderer {
 			try {
 				wr.setWysiwygImageSize(1200, 700);
 				bi = wr.getWysiwygImage();
-				wr.dumpPng(bi, pngName+".png");
+				wr.dumpPng(bi, TEST_FOLDER+"/"+pngName+".png");
 				if (wr.isBlank()) {
 					println("POSSIBLE ERROR:  Blank render image; isValid = "+wmsg.isValid());
 				}
 	//			bi = wr.getPreviewImage();
-	//			wr.dumpPng(bi, pngName+"_preview.png");
+	//			wr.dumpPng(bi, TEST_FOLDER+"/"+pngName+"_preview.png");
 			} catch (InvalidMsgException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1327,6 +1333,9 @@ public class WRenderer {
 			println("ERROR:  Null SignGroup");
 			return;
 		}
+		println("=========");
+		println("Testing group: "+group.getName());
+		println("Message: \""+multiStr+"\"");
 		MultiConfig mcSignGroup = MultiConfig.from(group);
 		if (mcSignGroup == null) {
 			println("ERROR:  Null MultiConfig for SignGroup "+group.getName());
@@ -1336,12 +1345,14 @@ public class WRenderer {
 				(group != null) ? group.getName() : "NULL");
 		String name2;
 		List<MultiConfig> mcaConfigs = mcSignGroup.getConfigList();
+		println("Number of configs: "+mcaConfigs.size());
 		int cfgNum = 1;
 		for (MultiConfig mcfg : mcaConfigs) {
 			if (mcfg == null) {
 				println("ERROR:  Null MultiConfig for config");
 				return;
 			}
+			println("Config: "+mcfg.getName());
 			name2 = String.format("%s.cfg%d", name1, cfgNum++);
 			try {
 				test3(testType, name2, mcfg, multiStr);
@@ -1395,8 +1406,15 @@ public class WRenderer {
 //	}
 
 	static public void test() {
+		File testDir = new File(TEST_FOLDER);
+		if (!testDir.exists())
+			return;
+
 		long start = System.currentTimeMillis();
-		try (PrintWriter tryout = new PrintWriter(new BufferedWriter(new FileWriter("rendertest.txt")))) {
+		try (PrintWriter tryout =
+				new PrintWriter(
+					new BufferedWriter(
+						new FileWriter(TEST_FOLDER+"/"+"rendertest.txt")))) {
 			out = tryout;
 //			// 8x3 char matrix
 //			testSign("V94W05T", "[jp3]TEST[nl]MSG[nl]3");
@@ -1410,25 +1428,27 @@ public class WRenderer {
 //			testGroup("V394W01", "[g21,4,21][tr1,1,53,20][cf255,255,255]SOUTH[tr54,1,217,56][cf255,191,0]DETOUR[nl]FOLLOW[nl]HWY 100 SOUTH");
 //			testGroup("V394W00B", "[g11,1,6][cf255,255,255][tr70,8,80,30][fo7][jp3]OPEN TO[nl6]ALL TRAFFIC");
 //			testGroup("VDL94W90", "I-94 CLOSED[nl]AT FARGO");
-			testGroup("VT94E30", "BLIZZARD WARNING[nl]UNTIL 1 PM");
+//			testGroup("VT94E30", "BLIZZARD WARNING[nl]UNTIL 1 PM");
+//			testGroup("V94W09", "FREEWAY TIME TO[nl][jl2]394[jl4][ttS122,prepend,OVER ] MIN[nl][jl2]100 VIA 394[jl4][ttS318,prepend,OVER ] MIN[np][jl3]CONGESTION[nl]AT 11TH ST EXIT[nl]USE 7TH STREET");
+//			testGroup("V94W09", "FREEWAY TIME TO[nl][jl2]394[jl4][ttS122,prepend,OVER ] MIN[nl][jl2]100 VIA 394[jl4][ttS318,prepend,OVER ] MIN");
 			
-//			Iterator<QuickMessage> itq = QuickMessageHelper.iterator();
-//			QuickMessage qm;
-//			SignGroup group;
-//			while (itq.hasNext()) {
-//				qm = itq.next();
-//				if (qm == null)
-//					continue;
-//				group = qm.getSignGroup();
-//				if (group == null)
-//					continue;
-//				String multiStr = qm.getMulti();
-//				if ((multiStr == null) || multiStr.isEmpty())
-//					continue;
-//				println("##############################");
-//				test(group, multiStr);
-//				msgCnt++;
-//			}
+			Iterator<QuickMessage> itq = QuickMessageHelper.iterator();
+			QuickMessage qm;
+			SignGroup group;
+			while (itq.hasNext()) {
+				qm = itq.next();
+				if (qm == null)
+					continue;
+				group = qm.getSignGroup();
+				if (group == null)
+					continue;
+				String multiStr = qm.getMulti();
+				if ((multiStr == null) || multiStr.isEmpty())
+					continue;
+				println("##############################");
+				test(group, multiStr);
+				msgCnt++;
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("FATAL ERROR: TEST TERMINATED");
