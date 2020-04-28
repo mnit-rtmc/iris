@@ -2335,6 +2335,7 @@ public class WController {
 			addTokenAfterSelection(afterTok);
 		
 		update();
+		updateCaret();
 	}
 	
 	/** Trim (remove) any tokens of the type tokType that are immediately
