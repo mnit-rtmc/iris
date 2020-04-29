@@ -148,6 +148,7 @@ public class WController {
 	private SignGroup sg;
 	private QuickMessage qm;
 	private String multiStringText = null;
+	private boolean prefixPage = false;
 	
 	/** MultiConfigs for config-related stuff  */
 	/** "Active" MultiConfig */
@@ -407,9 +408,10 @@ public class WController {
 		qm = q;
 		
 		// get the MULTI string text from the quick message
-		if (qm != null)
+		if (qm != null) {
 			multiStringText = qm.getMulti();
-		else
+			prefixPage = qm.getPrefixPage();
+		} else
 			multiStringText = "";
 //		println("From QuickMessage: " + multiStringText);
 		
@@ -2668,11 +2670,12 @@ public class WController {
 			// get the MULTI string from the wmsg and save it
 			multiStringText = wmsg.toString();
 			qm.setMulti(multiStringText);
+			qm.setPrefixPage(editor.getPrefixPage());
 		}
 	};
 	
 	/** Save the current MULTI string in the quick message */
-	WController wc = this; // TODO do something better
+	WController wc = this;
 	public Action saveMessageAs = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
 			// open a form to get the new message name
@@ -2697,6 +2700,7 @@ public class WController {
 				getDmsCache().getQuickMessages();
 		HashMap<String, Object> qmAttrs = new HashMap<String, Object>();
 		qmAttrs.put("multi", multiStringText);
+		qmAttrs.put("prefix_page", editor.getPrefixPage());
 		if (sg != null)
 			qmAttrs.put("sign_group", sg);
 		else {
@@ -3240,9 +3244,17 @@ public class WController {
 		return editor;
 	}
 	
-	/* Get the current DMS object */
+	/** Get the current DMS object */
 	public DMS getSign() {
 		return sign;
 	}
 	
+	/** Return whether or not the current message is a prefix page. */
+	public boolean getPrefixPage() {
+		return prefixPage;
+	}
+	
 }
+
+
+

@@ -343,6 +343,7 @@ public class WMsgEditorForm extends AbstractForm {
 		bpPanel.add(new ILabel("wysiwyg.editor.prefix"));
 		bpPanel.add(prefix_chk);
 		gbPanel.add(bpPanel, gbc);
+		prefix_chk.setSelected(controller.getPrefixPage());
 		
 		/* Cancel/Save As/Save Buttons */
 		JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -514,6 +515,11 @@ public class WMsgEditorForm extends AbstractForm {
 			return I18N.get("wysiwyg.sign_group") + ": "
 				+ sg.getName() + "    ";
 		return "";
+	}
+	
+	/** Return the state of the prefix page box. */
+	public boolean getPrefixPage() {
+		return prefix_chk.isSelected();
 	}
 }
 	
