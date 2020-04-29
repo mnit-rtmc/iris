@@ -89,7 +89,7 @@ abstract public class WgRectangle {
 		t = threshold;
 		
 		// create the rectangles for determining relative cursor placement
-		if (rt != null) {
+		if (rt != null && wr != null) {
 			// first get the rectangle coordinates in image space
 			int x = wr.cvtSignToWysiwygX(rt.getParamX(), true, true);
 			int rx = wr.cvtSignToWysiwygX(
