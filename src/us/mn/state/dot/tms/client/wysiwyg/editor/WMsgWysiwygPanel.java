@@ -32,7 +32,6 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 
-import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiConfig;
@@ -188,7 +187,7 @@ public class WMsgWysiwygPanel extends JPanel {
 		JPanel spPanel = new JPanel(new BorderLayout());
 		spPanel.add(signPanel, BorderLayout.CENTER);
 		add(spPanel);
-		
+
 		// also add a JLabel for displaying non-text tag info
 		nonTextTagInfo = new JLabel();
 		nonTextTagInfoPnl = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
