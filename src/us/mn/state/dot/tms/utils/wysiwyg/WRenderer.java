@@ -859,8 +859,6 @@ public class WRenderer {
 		int getCharSpacing() {
 			if (isCharMatrix())
 				return 0;
-			if (state.charSpacing != null)
-				return state.charSpacing;
 			if (wfont != null)
 				return wfont.getCharSpacing();
 			else
