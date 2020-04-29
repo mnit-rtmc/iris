@@ -76,9 +76,11 @@ public class WPoint {
 	/** Convert image coordinates to sign coordinates */
 	private void convertSignCoordinates() {
 		// convert into sign coordinates then make a Point object
-		sx = wr.cvtWysiwygToSignX(wx);
-		sy = wr.cvtWysiwygToSignY(wy);
-		sp = new Point(sx, sy);
+		if (wr != null) {
+			sx = wr.cvtWysiwygToSignX(wx);
+			sy = wr.cvtWysiwygToSignY(wy);
+			sp = new Point(sx, sy);
+		}
 	}
 	
 	public Point getWysiwygPoint() {
