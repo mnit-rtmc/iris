@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import javax.swing.ListCellRenderer;
+import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
@@ -71,6 +72,7 @@ public class WMsgMultiTagToolbar extends WToolbar {
 		// and the buttons
 		addBtn = new JButton(addTag);
 		add(addBtn);
+		add(Box.createHorizontalStrut(50));
 		editBtn = new JButton(controller.editTag);
 		add(editBtn);
 		deleteBtn = new JButton(controller.delete);
