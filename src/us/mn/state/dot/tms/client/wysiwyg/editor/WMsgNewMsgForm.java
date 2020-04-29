@@ -28,15 +28,17 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IWorker;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.client.wysiwyg.selector.WMsgSelectorForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * WYSIWYG DMS Message Editor Confirmation Form
+ * WYSIWYG DMS Message Editor New Message Form
  *
  * @author Gordon Parikh - SRF Consulting
  */
@@ -55,7 +57,7 @@ public class WMsgNewMsgForm extends AbstractForm {
 	private SignGroup signGroup;
 	
 	/** Quick message (for cloning, not always provided) */
-	QuickMessage qm;
+	private QuickMessage qm;
 	
 	/** Info message */
 	private JLabel infoMsg;
@@ -66,6 +68,9 @@ public class WMsgNewMsgForm extends AbstractForm {
 	/** Buttons */
 	private JButton ok_btn;
 	private JButton cancel_btn;
+	
+	/** Amount of time in nanoseconds to wait for a message to be created */
+	private final static long MAX_WAIT = 10000000000L;
 	
 	public WMsgNewMsgForm(Session s, WMsgSelectorForm sForm, DMS d) {
 		super(I18N.get("wysiwyg.new_message.title"), true);
@@ -174,6 +179,13 @@ public class WMsgNewMsgForm extends AbstractForm {
 	private void setWarningText() {
 		infoMsg.setText(I18N.get("wysiwyg.new_message.warning"));
 	}
+
+	/** Add an error to the info text that there was a problem creating the
+	 *  message.
+	 */
+	private void setErrorText() {
+		infoMsg.setText(I18N.get("wysiwyg.new_message.error"));
+	}
 	
 	/** Reset the info label to the original prompt
 	 *  TODO not sure if this is actually needed. */
@@ -195,35 +207,55 @@ public class WMsgNewMsgForm extends AbstractForm {
 	private final IAction createMsg = new IAction(
 			"wysiwyg.new_message.ok") {
 		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception {
+		protected void doActionPerformed(ActionEvent e) {
 			// try to create a new quick message
 			String newMsgName = createNewQuickMessage();
 			
-			// if it works (i.e. there is no existing message with that name)
-			// then open the editor and close this form
+			// create and start a worker if we get one
 			if (newMsgName != null) {
-				if (sign != null)
-					WMsgSelectorForm.CreateMsg(session, sign, newMsgName);
-				else if (signGroup != null)
-					WMsgSelectorForm.CreateMsg(session, signGroup, newMsgName);
-				
-				// TODO maybe don't do this...
-				while (qm == null)
-					qm = QuickMessageHelper.lookup(newMsgName);
-				
-				selectorForm.reloadForm();
-				
-				if (sign != null)
-					WMsgSelectorForm.EditMsg(session,  qm, sign);
-				else if (signGroup != null)
-					WMsgSelectorForm.EditMsg(session, qm, signGroup);
-				
-				close(session.getDesktop());
-			} else {
+				IWorker<QuickMessage> worker = new IWorker<QuickMessage>() {
+					@Override
+					protected QuickMessage doInBackground() {
+						// create the message
+						if (sign != null) {
+							WMsgSelectorForm.CreateMsg(
+									session, sign, newMsgName);
+						} else if (signGroup != null) {
+							WMsgSelectorForm.CreateMsg(
+									session, signGroup, newMsgName);
+						}
+						
+						// wait for SONAR to create the new message
+						QuickMessage q = null;
+						long tStart = System.nanoTime();
+						while (q == null) {
+							q = QuickMessageHelper.lookup(newMsgName);
+							long tElapsed = System.nanoTime() - tStart;
+							if (tElapsed > MAX_WAIT)
+								break;
+						}
+						return q;
+					}
+					
+					@Override
+					public void done() {
+						qm = getResult();
+						if (qm != null) {
+							selectorForm.reloadForm();
+							
+							if (sign != null)
+								WMsgSelectorForm.EditMsg(session, qm, sign);
+							else if (signGroup != null)
+								WMsgSelectorForm.EditMsg(session, qm, signGroup);
+							close(session.getDesktop());
+						} else
+							setErrorText();
+					}
+				};
+				worker.execute();
+			} else
 				// if not, show a warning
 				setWarningText();
-			}
 		}
 	};
 
@@ -235,31 +267,48 @@ public class WMsgNewMsgForm extends AbstractForm {
 				throws Exception {
 			// try to create a new quick message
 			String newMsgName = createNewQuickMessage();
-			
-			// if it works (i.e. there is no existing message with that name)
-			// then open the editor and close this form
+
+			// create and start a worker if we get one
 			if (newMsgName != null) {
-				// the clone operation is the same for signs and groups (we
-				// use the same sign group as the existing quick message)
-				WMsgSelectorForm.CloneMsg(session, qm, newMsgName);
-				
-				// TODO maybe don't do this...
-				qm = QuickMessageHelper.lookup(newMsgName);
-				while (qm == null)
-					qm = QuickMessageHelper.lookup(newMsgName);
-				
-				selectorForm.reloadForm();
-				
-				if (sign != null)
-					WMsgSelectorForm.EditMsg(session,  qm, sign);
-				else if (signGroup != null)
-					WMsgSelectorForm.EditMsg(session, qm, signGroup);
-				
-				close(session.getDesktop());
-			} else {
+				IWorker<QuickMessage> worker = new IWorker<QuickMessage>() {
+					@Override
+					protected QuickMessage doInBackground() {
+						// the clone operation is the same for signs and
+						// groups (we use the same sign group as the existing
+						// quick message)
+						WMsgSelectorForm.CloneMsg(session, qm, newMsgName);
+						
+						// wait for SONAR to create the new message
+						QuickMessage q = null;
+						long tStart = System.nanoTime();
+						while (q == null) {
+							q = QuickMessageHelper.lookup(newMsgName);
+							long tElapsed = System.nanoTime() - tStart;
+							if (tElapsed > MAX_WAIT)
+								break;
+						}
+						return q;
+					}
+					
+					@Override
+					public void done() {
+						qm = getResult();
+						if (qm != null) {
+							selectorForm.reloadForm();
+							
+							if (sign != null)
+								WMsgSelectorForm.EditMsg(session, qm, sign);
+							else if (signGroup != null)
+								WMsgSelectorForm.EditMsg(session, qm, signGroup);
+							close(session.getDesktop());
+						} else
+							setErrorText();
+					}
+				};
+				worker.execute();
+			} else
 				// if not, show a warning
 				setWarningText();
-			}
 		}
 	};
 	

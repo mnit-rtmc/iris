@@ -164,7 +164,8 @@ public class WMsgEditorForm extends AbstractForm {
 	}
 	
 	public void setWindowTitle(QuickMessage q) {
-		frame.setTitle(getWindowTitle(q));
+		title = getWindowTitle(q);
+		frame.setTitle(title);
 	}
 	
 	public static String getWindowTitle(QuickMessage q) {

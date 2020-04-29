@@ -57,6 +57,7 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IWorker;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.wysiwyg.editor.tags.WMultiTagDialog;
 import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
@@ -149,6 +150,9 @@ public class WController {
 	private QuickMessage qm;
 	private String multiStringText = null;
 	private boolean prefixPage = false;
+
+	/** Amount of time in nanoseconds to wait for a message to be created */
+	private final static long MAX_WAIT = 10000000000L;
 	
 	/** MultiConfigs for config-related stuff  */
 	/** "Active" MultiConfig */
@@ -468,9 +472,6 @@ public class WController {
 		
 		// set the drag mode (which sets the mouse cursor)
 		setDragMode(p);
-		
-		// get focus for this component when someone clicks on it
-		signPanel.requestFocusInWindow();
 	}
 	
 	/** Handle a mouse pressed event  */
@@ -2695,29 +2696,59 @@ public class WController {
 		// update the current MULTI string
 		multiStringText = wmsg.toString();
 		
-		// make the quick message
-		TypeCache<QuickMessage> qmCache = session.getSonarState().
-				getDmsCache().getQuickMessages();
-		HashMap<String, Object> qmAttrs = new HashMap<String, Object>();
-		qmAttrs.put("multi", multiStringText);
-		qmAttrs.put("prefix_page", editor.getPrefixPage());
-		if (sg != null)
-			qmAttrs.put("sign_group", sg);
-		else {
-			// if we're not editing a sign group, get the single-sign group
-			SignGroup ssg = SignGroupHelper.lookup(sign.getName());
-			qmAttrs.put("sign_group", ssg);
-		}
-		// save the object, then get the object and set our quick message
-		qmCache.createObject(msgName, qmAttrs);
-		qm = QuickMessageHelper.lookup(msgName);
-		
-		// TODO maybe don't do this...
-		while (qm == null)
-			qm = QuickMessageHelper.lookup(msgName);			
-		
-		// update the window title too
-		editor.setWindowTitle(qm);
+		// use a worker to do this part since it could take a bit
+		IWorker<QuickMessage> worker = new IWorker<QuickMessage>() {
+			@Override
+			protected QuickMessage doInBackground() {
+				// make the quick message
+				TypeCache<QuickMessage> qmCache = session.getSonarState().
+						getDmsCache().getQuickMessages();
+				HashMap<String, Object> qmAttrs =
+						new HashMap<String, Object>();
+				qmAttrs.put("multi", multiStringText);
+				qmAttrs.put("prefix_page", editor.getPrefixPage());
+				if (sg != null)
+					qmAttrs.put("sign_group", sg);
+				else {
+					// if we're not editing a sign group, get the single-sign
+					// group
+					SignGroup ssg = SignGroupHelper.lookup(sign.getName());
+					qmAttrs.put("sign_group", ssg);
+				}
+				// save the object, then get the object and set our quick message
+				qmCache.createObject(msgName, qmAttrs);
+				QuickMessage q = null;
+				
+				// wait for SONAR to create the new message
+				long tStart = System.nanoTime();
+				while (q == null) {
+					q = QuickMessageHelper.lookup(msgName);
+					long tElapsed = System.nanoTime() - tStart;
+					if (tElapsed > MAX_WAIT)
+						break;
+				}
+				return q;
+			}
+			
+			@Override
+			public void done() {
+				QuickMessage q = getResult();
+				if (q != null) {
+					// if we get a quick message, set it as the current one 
+					qm = q;
+					
+					// update the window title too
+					editor.setWindowTitle(qm);
+				} else {
+					// if we didn't, pop up a dialog telling the user that
+					// there was an error and they are still editing the same
+					// message
+					desktop.show(new WMsgErrorDialog(
+							"wysiwyg.new_message.saveas_error"));
+				}
+			}
+		};
+		worker.execute();
 	}
 	
 	/** Update the controller with a MULTI string (this action can be undone) */
