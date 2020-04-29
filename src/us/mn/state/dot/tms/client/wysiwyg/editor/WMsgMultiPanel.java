@@ -194,10 +194,17 @@ public class WMsgMultiPanel extends JPanel {
 				throws Exception
 		{
 			// get the text from the box and remove any newlines or tabs
-			multiText = removeInvalidChars(textBox.getText());
+			multiText = getMulti();
 			controller.setMultiString(multiText, true);
 		}
 	};
+	
+	/** Get the current MULTI string from the text box, removing any newlines
+	 *  or tabs.
+	 */
+	public String getMulti() {
+		return removeInvalidChars(textBox.getText());
+	}
 	
 	private static String removeInvalidChars(String txt) {
 		return txt.replace("\n", "").replace("\r", "").replace("\t", "");

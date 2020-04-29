@@ -354,7 +354,6 @@ public class WMsgTextToolbar extends WToolbar {
 	/** Foreground color picker action */
 	private final IAction open_fg_color_picker =
 			new IAction("wysiwyg.epanel.fg_color_picker_btn") {
-		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
 		{
@@ -369,7 +368,6 @@ public class WMsgTextToolbar extends WToolbar {
 	/** Background color picker action */
 	private final IAction open_bg_color_picker =
 			new IAction("wysiwyg.epanel.bg_color_picker_btn") {
-		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
 		{

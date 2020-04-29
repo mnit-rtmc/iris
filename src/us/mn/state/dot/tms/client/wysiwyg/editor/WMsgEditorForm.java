@@ -22,6 +22,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -33,6 +34,8 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.QuickMessage;
@@ -380,6 +383,19 @@ public class WMsgEditorForm extends AbstractForm {
 		frame = f;
 		frame.setJMenuBar(menu_bar);
 		
+		// add a frame listener to prompt a confirmation dialog when there are
+		// unsaved changes
+		frame.addInternalFrameListener(new InternalFrameAdapter() {
+			@Override
+			public void internalFrameClosing(InternalFrameEvent e) {
+				// call the cancel action to take care of this
+				cancel.actionPerformed(null);
+			}
+		});
+		
+		// disable the default close operation so we can handle it
+		frame.setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);
+		
 		// what the hell, call postInit again
 		controller.postInit();
 	}
@@ -448,32 +464,31 @@ public class WMsgEditorForm extends AbstractForm {
 		epanel.updateNonTextTagInfo(s, c);
 	}
 	
-	/** Preview action */
-	private final IAction preview = new IAction("wysiwyg.editor.preview") {
-		@SuppressWarnings("synthetic-access")
-		protected void doActionPerformed(ActionEvent e)
-			throws Exception
-		{
-			System.out.println("Previewing...");
+	public void close() {
+		if (frame != null) {
+			frame.dispose();
 		}
-	};
+	}
 	
-	/** Cancel action */
+	/** Cancel (close) action */
+	private WMsgEditorForm eForm = this;
 	private final IAction cancel = new IAction("wysiwyg.editor.cancel") {
-		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
-				throws Exception
 		{
-			// close the frame without doing anything else
-			close(session.getDesktop());
+			// check if the current message is saved
+			if (!controller.isMessageSaved()) {
+				// if it's not, show a confirmation dialog
+				session.getDesktop().show(
+						new WConfirmExitForm(session, eForm));
+			} else
+				// if it is, close the frame without doing anything else
+				close();
 		}
 	};
 	
 	/** Save As action */
 	private final IAction saveas = new IAction("wysiwyg.editor.save_as") {
-		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
-				throws Exception
 		{
 			System.out.println("Saving As...");
 			
@@ -484,10 +499,8 @@ public class WMsgEditorForm extends AbstractForm {
 	};
 	
 	/** Save action */
-	private final IAction save = new IAction("wysiwyg.editor.save") {
-		@SuppressWarnings("synthetic-access")
+	public final IAction save = new IAction("wysiwyg.editor.save") {
 		protected void doActionPerformed(ActionEvent e)
-				throws Exception
 		{
 			controller.saveMessage.actionPerformed(e);
 		}
@@ -521,6 +534,10 @@ public class WMsgEditorForm extends AbstractForm {
 	/** Return the state of the prefix page box. */
 	public boolean getPrefixPage() {
 		return prefix_chk.isSelected();
+	}
+
+	public String getMultiPanelContents() {
+		return epanel.getMultiPanelContents();
 	}
 }
 	

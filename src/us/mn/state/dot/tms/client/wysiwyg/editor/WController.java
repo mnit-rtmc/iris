@@ -148,7 +148,7 @@ public class WController {
 	private DMS sign;
 	private SignGroup sg;
 	private QuickMessage qm;
-	private String multiStringText = null;
+	private String multiString = null;
 	private boolean prefixPage = false;
 
 	/** Amount of time in nanoseconds to wait for a message to be created */
@@ -163,6 +163,9 @@ public class WController {
 	
 	/** MultiConfig ComboBox for sign groups */
 	private WMultiConfigComboBox multiConfigList;
+	
+	/** Whether or not MULTI mode is forced */
+	private boolean forceMULTI = false;
 	
 	/** Currently selected page (defaults to first available) */
 	private int selectedPageIndx = 0;
@@ -321,12 +324,15 @@ public class WController {
 		// do an update to render the message and fill the page list, then
 		// initialize the caret and mouse cursors
 		update();
-		initCaret();
-		initCursors();
 		
-		// also give the sign panel focus so the user can immediately start
-		// typing
-		signPanel.requestFocusInWindow();
+		if (!forceMULTI) {
+			initCaret();
+			initCursors();
+			
+			// also give the sign panel focus so the user can immediately start
+			// typing
+			signPanel.requestFocusInWindow();
+		}
 	}
 	
 	/** Set the sign being used */
@@ -362,10 +368,8 @@ public class WController {
 				// configs and signs
 				multiConfigList = WMultiConfigComboBox.
 						fromSignGroupMultiConfig(signGroupMultiConfig, this);
-				
-				// generate the list of signs in the group
-	//			makeSignListForGroup(true);
-			}
+			} else
+				forceMULTI = true;
 		} else {
 			multiConfig = null;
 			sign = null;
@@ -389,7 +393,9 @@ public class WController {
 			// use the default foreground color for color rectangles (so we
 			// always have one)
 			colorRectColor = multiConfig.getDefaultFG();
-		}
+		} else
+			// if our MultiConfig is null, we can't use WYSIWYG mode
+			forceMULTI = true;
 	}
 	
 	public WMultiConfigComboBox getConfigComboBox() {
@@ -413,11 +419,11 @@ public class WController {
 		
 		// get the MULTI string text from the quick message
 		if (qm != null) {
-			multiStringText = qm.getMulti();
+			multiString = qm.getMulti();
 			prefixPage = qm.getPrefixPage();
 		} else
-			multiStringText = "";
-//		println("From QuickMessage: " + multiStringText);
+			multiString = "";
+//		println("From QuickMessage: " + multiString);
 		
 		update();
 	}
@@ -674,10 +680,12 @@ public class WController {
 		int rx = t.getRightEdge();
 		
 		WRaster wr = getActiveRaster();
-		if (x + ox < 1)
-			return 1 - x;
-		else if (rx + ox > wr.getWidth())
-			return Math.max(rx - wr.getWidth(), 0);
+		if (wr != null) {
+			if (x + ox < 1)
+				return 1 - x;
+			else if (rx + ox > wr.getWidth())
+				return Math.max(rx - wr.getWidth(), 0);
+		}
 		return ox;
 	}
 		
@@ -693,10 +701,12 @@ public class WController {
 		int by = t.getBottomEdge();
 		
 		WRaster wr = getActiveRaster();
-		if (y + oy < 1)
-			return 1 - y;
-		else if (by + oy > wr.getHeight())
-			return Math.max(by - wr.getHeight(), 0);
+		if (wr != null) {
+			if (y + oy < 1)
+				return 1 - y;
+			else if (by + oy > wr.getHeight())
+				return Math.max(by - wr.getHeight(), 0);
+		}
 		return oy;
 	}
 	
@@ -2465,7 +2475,7 @@ public class WController {
 	
 	/** Save the current state on the stack for undoing. Resets the redo stack. */
 	public void saveState() {
-		WHistory wh = new WHistory(multiStringText, caretIndx,
+		WHistory wh = new WHistory(multiString, caretIndx,
 				tokensSelected.size(), selectedPageIndx, fgColor, bgColor);
 		undoStack.add(wh);
 		
@@ -2481,7 +2491,7 @@ public class WController {
 			if (!undoStack.isEmpty()) {
 				// save the current state on the redo stack so the action can
 				// be redone
-				WHistory wh = new WHistory(multiStringText, caretIndx,
+				WHistory wh = new WHistory(multiString, caretIndx,
 						tokensSelected.size());
 				redoStack.add(wh);
 				
@@ -2499,7 +2509,7 @@ public class WController {
 			if (!redoStack.isEmpty()) {
 				// put the current state back on the undo stack so the action can
 				// be undone
-				WHistory wh = new WHistory(multiStringText, caretIndx,
+				WHistory wh = new WHistory(multiString, caretIndx,
 						tokensSelected.size());
 				undoStack.add(wh);
 				
@@ -2559,7 +2569,7 @@ public class WController {
 	
 	/** Get any message text in the controller */
 	public String getMultiText() {
-		return multiStringText;
+		return multiString;
 	}
 	
 	public WEditorErrorManager getErrorManager() {
@@ -2618,21 +2628,15 @@ public class WController {
 	/** Render the message using the current MULTI String and MultiConfig */
 	private void renderMsg() {
 		// update the WMessage object and re-render if we have a MultiConfig
-//		println("In renderMsg: '%s'", multiStringText);
 		if (wmsg == null) {
-			if  (multiStringText != null) {
-//				println("Making wmsg with: '%s'", multiStringText);
-				wmsg = new WMessage(multiStringText);
+			if  (multiString != null) {
+				wmsg = new WMessage(multiString);
 			}
 		} else {
 			// if we already have a WMessage object, use it to update the
 			// MULTI string then use that to re-render
-			multiStringText = wmsg.toString();
-//			println("Remaking wmsg with: '%s'", multiStringText);
-//			wmsg = new WMessage(multiStringText);
+			multiString = wmsg.toString();
 		}
-//		if (wmsg != null)
-//			println("wmsg has: '%s'", wmsg.toString());
 		
 		// clear any errors before re-rendering
 		errMan.clearErrors();
@@ -2654,9 +2658,6 @@ public class WController {
 		
 		// check for errors from the renderer
 		if (errMan.hasErrors()) {
-//			println("Renderer errors!");
-//			errMan.printErrors();
-			
 			// show or update the dynamic error panel to tell the user what's
 			// wrong
 			updateErrorPanel();
@@ -2665,12 +2666,38 @@ public class WController {
 			noErrors();
 	}
 	
+	/** Update our current MULTI string, either from the WMessage (in WYSIWYG
+	 *  mode) or from the MULTI panel (if MULTI mode is forced).
+	 */
+	public void updateMultiString() {
+		if (forceMULTI)
+			// get the MULTI string from the MULTI panel
+			multiString = editor.getMultiPanelContents();
+		else
+			// get the MULTI string from the wmsg and save it
+			multiString = wmsg.toString();
+	}
+	
+	/** Return whether or not the current message text has been saved. */
+	public boolean isMessageSaved() {
+		// check the MULTI string against the current QuickMessage
+		updateMultiString();
+		boolean isSaved = multiString.equals(qm.getMulti());
+		
+		// also check prefix flag
+		isSaved = (editor.getPrefixPage() == qm.getPrefixPage()) && isSaved;
+		
+		// TODO beacon flag
+		
+		return isSaved;
+	}
+	
 	/** Save the current MULTI string in the quick message */
 	public Action saveMessage = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-			// get the MULTI string from the wmsg and save it
-			multiStringText = wmsg.toString();
-			qm.setMulti(multiStringText);
+			// update our MULTI string then save the message
+			updateMultiString();
+			qm.setMulti(multiString);
 			qm.setPrefixPage(editor.getPrefixPage());
 		}
 	};
@@ -2693,8 +2720,8 @@ public class WController {
 		// NOTE we know there is a sign/sign group associated with us, so we
 		// don't have to make those
 		
-		// update the current MULTI string
-		multiStringText = wmsg.toString();
+		// first update our MULTI string
+		updateMultiString();
 		
 		// use a worker to do this part since it could take a bit
 		IWorker<QuickMessage> worker = new IWorker<QuickMessage>() {
@@ -2705,7 +2732,7 @@ public class WController {
 						getDmsCache().getQuickMessages();
 				HashMap<String, Object> qmAttrs =
 						new HashMap<String, Object>();
-				qmAttrs.put("multi", multiStringText);
+				qmAttrs.put("multi", multiString);
 				qmAttrs.put("prefix_page", editor.getPrefixPage());
 				if (sg != null)
 					qmAttrs.put("sign_group", sg);
@@ -2757,35 +2784,37 @@ public class WController {
 			// save state to allow undoing
 			saveState();
 		
-		multiStringText = ms;
-//		println("Updating with: '%s'", multiStringText);
-		wmsg.parseMulti(multiStringText);
+		multiString = ms;
+//		println("Updating with: '%s'", multiString);
+		wmsg.parseMulti(multiString);
 //		println("wmsg has: '%s'", wmsg.toString());
 		update();
-//		println("Got back: '%s'", multiStringText);
+//		println("Got back: '%s'", multiString);
 	}
 	
 	public void update() {
 		update(true);
 	}
 	
-	/** Update everything that needs updating */
 	public void update(boolean focus) {
-//		println("In update: " + multiStringText);
+//		println("In update: " + multiString);
 		renderMsg();
-//		println("After renderMsg: '%s'", multiStringText);
+//		println("After renderMsg: '%s'", multiString);
 		updateMultiPanel();
-		updatePageListModel();
-		updateCursor();
 		
-		if (signPanel != null && focus)
-			// give focus to the sign panel if requested
-			signPanel.requestFocusInWindow();
+		if (!forceMULTI) {
+			updatePageListModel();
+			updateCursor();
+			
+			if (signPanel != null && focus)
+				// give focus to the sign panel if requested
+				signPanel.requestFocusInWindow();
+		}
 	}
 	
 	/** Update the text toolbar if one is available. */
 	private void updateTextToolbar() {
-		if (editor != null)
+		if (editor != null && !forceMULTI)
 			editor.updateTextToolbar();
 	}
 	
@@ -2827,8 +2856,8 @@ public class WController {
 	
 	/** Update the MULTI panel with the current MULTI string. */
 	private void updateMultiPanel() {
-		if (multiPanel != null && multiStringText != null) {
-			multiPanel.setText(multiStringText);
+		if (multiPanel != null && multiString != null) {
+			multiPanel.setText(multiString);
 			
 			// highlight any error-producing tokens in the MULTI panel
 			if (errMan.hasErrors())
@@ -2887,7 +2916,7 @@ public class WController {
 			wr = selectedPage.getRaster();
 			
 			// make sure it's initialized
-			if (!wr.isWysiwygInitialized() && signPanel != null)
+			if (wr != null && !wr.isWysiwygInitialized() && signPanel != null)
 				signPanel.initRaster(wr);
 		}
 		return wr;
@@ -3189,6 +3218,10 @@ public class WController {
 	
 	public MultiConfig getMultiConfig() {
 		return multiConfig;
+	}
+	
+	public boolean multiConfigUsable() {
+		return multiConfig != null && multiConfig.isUseable();
 	}
 	
 	/** Return the color scheme associated with the current MultiConfig. If

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2018  SRF Consulting Group
+ * Copyright (C) 2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-package us.mn.state.dot.tms.client.wysiwyg.selector;
+package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -26,34 +26,39 @@ import javax.swing.JPanel;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * WYSIWYG DMS Message Editor Confirmation Form for deleting QuickMessages.
+ * Confirmation form displayed when exiting the WYSIWYG DMS message editor
+ * with unsaved changes.
+ * 
+ * NOTE this could be implemented with a JOptionPane, but this is already
+ * written...
  *
  * @author Gordon Parikh - SRF Consulting
  */
 @SuppressWarnings("serial")
-public class WMsgConfirmDeleteForm extends AbstractForm {
+public class WConfirmExitForm extends AbstractForm {
 
 	/** User session */
 	private final Session session;
-	private WMsgSelectorForm selectorForm;
-	private String messageName;
+	private WMsgEditorForm editorForm;
 	
 	/** Buttons */
-	private JButton yes_btn;
-	private JButton no_btn;
+	private JButton saveBtn;
+	private JButton dontSaveBtn;
+	private JButton cancelBtn;
 	
-	public WMsgConfirmDeleteForm(Session s, WMsgSelectorForm sForm, String mName) {
-		super(I18N.get("wysiwyg.confirm_delete.title"), true);
+	public WConfirmExitForm(Session s, WMsgEditorForm eForm) {
+		super(I18N.get("wysiwyg.editor.confirm_exit.title"), true);
 		session = s;
-		selectorForm = sForm;
-		messageName = mName;
+		editorForm = eForm;
 		
-		no_btn = new JButton(cancel);
-		yes_btn = new JButton(delete);
+		saveBtn = new JButton(save);
+		dontSaveBtn = new JButton(dontSave);
+		cancelBtn = new JButton(cancel);
 	}
 	
 	/** Initialize the form */
@@ -65,7 +70,7 @@ public class WMsgConfirmDeleteForm extends AbstractForm {
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.gridheight = 1;
-		gbc.gridwidth = 2;
+		gbc.gridwidth = 3;
 		gbc.insets = Widgets.UI.insets();
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
@@ -75,42 +80,55 @@ public class WMsgConfirmDeleteForm extends AbstractForm {
 		// warning text
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		p.add(new JLabel(String.format(I18N.get(
-				"wysiwyg.confirm_delete.message"), messageName)), gbc);
+		p.add(new ILabel("wysiwyg.editor.confirm_exit.message"), gbc);
 		
-		/* Yes button */
+		/* Save button */
 		gbc.gridx = 0;
 		gbc.gridy = 1;
 		gbc.gridwidth = 1;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
-		p.add(yes_btn, gbc);
+		p.add(saveBtn, gbc);
 		
-		/* No button */
+		/* Don't Save Button */
 		gbc.gridx = 1;
+		p.add(dontSaveBtn, gbc);
+		
+		/* Cancel button */
+		gbc.gridx = 2;
 		gbc.anchor = GridBagConstraints.BASELINE_TRAILING;
-		p.add(no_btn, gbc);
+		p.add(cancelBtn, gbc);
 		
 		add(p);
 	}
 	
-	/** Cancel action */
-	private final IAction cancel = new IAction(
-		"wysiwyg.confirm_delete.no") {
-		protected void doActionPerformed(ActionEvent e)
-			throws Exception {
+	/** Save action */
+	private final IAction save = new IAction(
+			"wysiwyg.editor.confirm_exit.save") {
+		protected void doActionPerformed(ActionEvent e) {
+			// have the controller save the message, then close both forms
+			editorForm.save.actionPerformed(e);
+			editorForm.close();
 			close(session.getDesktop());
 		}
 	};
 	
-	/** Delete action */
-	private final IAction delete = new IAction(
-			"wysiwyg.confirm_delete.yes") {
-		protected void doActionPerformed(ActionEvent e)
-				throws Exception {
-			// call the selector form's deleteSelectedMessage method then
-			// close the warning
-			selectorForm.deleteSelectedMessage();
+	/** Don't Save action */
+	private final IAction dontSave = new IAction(
+			"wysiwyg.editor.confirm_exit.dont_save") {
+		protected void doActionPerformed(ActionEvent e) {
+			// close the editor form and this form without saving
+			editorForm.close();
 			close(session.getDesktop());
 		}
 	};
+	
+	/** Cancel action */
+	private final IAction cancel = new IAction(
+		"wysiwyg.editor.confirm_exit.cancel") {
+		protected void doActionPerformed(ActionEvent e) {
+			// close this form without doing anything else
+			close(session.getDesktop());
+		}
+	};
+	
 }
