@@ -37,6 +37,7 @@ import java.util.Map;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -51,6 +52,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
+import javax.swing.colorchooser.AbstractColorChooserPanel;
+import javax.swing.colorchooser.ColorSelectionModel;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -155,10 +159,8 @@ public class WMsgColorChooser extends AbstractForm {
 		// for full color, use Swing's JColorChooser which provides a full-
 		// featured color chooser with all the bells and whistles
 		if (colorScheme == ColorScheme.COLOR_24_BIT) {
-			fullColorChooser = new JColorChooser(color);
+			initFullColorChooser();
 			add(fullColorChooser);
-			
-			// TODO add classic color chooser too somehow
 		} else if (colorScheme == ColorScheme.COLOR_CLASSIC) {
 			// for classic color scheme, use a JList filled with the classic
 			// colors as options
@@ -175,9 +177,25 @@ public class WMsgColorChooser extends AbstractForm {
 		}
 	}
 	
-	private void initClassicColorChooser() {
-		// use a hashmap to store classic colors (we use a linked hash map
-		// to preserve order)
+	private void initFullColorChooser() {
+		// start with a JColorChooser
+		fullColorChooser = new JColorChooser(color);
+		
+		// remove everything besides "Swatches" and "RGB"
+		for (AbstractColorChooserPanel c:
+			fullColorChooser.getChooserPanels()) {
+			String n = c.getDisplayName();
+			if (n.equals("Swatches") || n.equals("RGB")) {
+				continue;
+			} else
+				fullColorChooser.removeChooserPanel(c);
+		}
+		
+		initClassicColorMap();
+		fullColorChooser.addChooserPanel(new ClassicColorChooser());
+	}
+	
+	private void initClassicColorMap() {
 		classicColorMap = new LinkedHashMap<String, DmsColor>();
 		classicColorMap.put("Black", DmsColor.BLACK);
 		classicColorMap.put("Red", DmsColor.RED);
@@ -189,19 +207,75 @@ public class WMsgColorChooser extends AbstractForm {
 		classicColorMap.put("White", DmsColor.WHITE);
 		classicColorMap.put("Orange", DmsColor.ORANGE);
 		classicColorMap.put("Amber", DmsColor.AMBER);
+	}
+	
+	private void initClassicColorChooser() {
+		// use a hashmap to store classic colors (we use a linked hash map
+		// to preserve order)
+		initClassicColorMap();
 		
 		// create the list model and fill it with colors
 		classicColorModel = new DefaultListModel<String>();
-		for (Map.Entry<String, DmsColor> el : classicColorMap.entrySet()) {
+		for (Map.Entry<String, DmsColor> el: classicColorMap.entrySet()) {
 			classicColorModel.addElement(el.getKey());
 		}
 		
-		// create the JList with the list model
+		// create the JList with the list model and add a custom renderer
 		classicColorChooser = new JList<String>(classicColorModel);
 		classicColorChooser.setSelectionMode(
 				ListSelectionModel.SINGLE_SELECTION);
-		
 		classicColorChooser.setCellRenderer(new ColorListCellRenderer());
+	}
+	
+	private class ClassicColorChooser extends AbstractColorChooserPanel
+				implements ListSelectionListener {
+		
+		private DefaultListModel<String> ccModel;
+		private JList<String> ccList;
+		
+		@Override
+		protected void buildChooser() {
+			// create the list model and fill it with colors
+			ccModel = new DefaultListModel<String>();
+			for (Map.Entry<String, DmsColor> el: classicColorMap.entrySet())
+				ccModel.addElement(el.getKey());
+			
+			// create the JList with the list model and add a custom renderer
+			ccList = new JList<String>(ccModel);
+			ccList.setSelectionMode(
+					ListSelectionModel.SINGLE_SELECTION);
+			ccList.setCellRenderer(new ColorListCellRenderer());
+			ccList.getSelectionModel().addListSelectionListener(this);
+			
+			// add the list to the panel
+			add(ccList);
+		}
+
+		@Override
+		public String getDisplayName() {
+			return I18N.get("wysiwyg.color_chooser.classic");
+		}
+		
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			if (!e.getValueIsAdjusting()) {
+				ListSelectionModel lsm = (ListSelectionModel) e.getSource();
+				int indx = lsm.getMinSelectionIndex();
+				if (indx != -1) {
+					String cName = ccModel.get(indx);
+					Color c = classicColorMap.get(cName).color;
+					getColorSelectionModel().setSelectedColor(c);
+				}
+			}
+		}
+		
+		/** Currently not used */
+		@Override
+		public Icon getLargeDisplayIcon() { return null; }
+		@Override
+		public Icon getSmallDisplayIcon() { return null; }
+		@Override
+		public void updateChooser() { }
 	}
 	
 	/** Initialize a color chooser for 1-bit monochrome signs. This just
