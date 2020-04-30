@@ -86,19 +86,54 @@ public class WEditorKeyBindings {
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y,
 				KeyEvent.CTRL_DOWN_MASK), "redo");
 		actionMap.put("redo", wc.redo);
+		
+		/* Ctrl + Shift + PgDown - add new page (after selected) */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN,
+				KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK),
+				"pageAdd");
+		actionMap.put("pageAdd", wc.pageAdd);
+	}
+	
+	/** Set key bindings that apply when the page list is in focus. */
+	public void setPageListKeyBindings(WPageList pList, int condition) {
+		inputMap = pList.getInputMap(condition);
+		actionMap = pList.getActionMap();
+		pList.setFocusTraversalKeysEnabled(false);
+		
+		/* F2 - edit page timing */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0),
+				"editPageTiming");
+		actionMap.put("editPageTiming", wc.editPageTimingAction);
+		
+		/* Alt + PgUp - Move page up */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP,
+				KeyEvent.ALT_DOWN_MASK), "pageMoveUp");
+		actionMap.put("pageMoveUp", wc.pageMoveUp);
+		
+		/* Alt + PgDown - Move page down */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN,
+				KeyEvent.ALT_DOWN_MASK), "pageMoveDown");
+		actionMap.put("pageMoveDown", wc.pageMoveDown);
+		
+		/* Ctrl + Shift + PgDown - add new page (after selected) */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN,
+				KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK),
+				"pageAdd");
+		actionMap.put("pageAdd", wc.pageAdd);
+		
+		/* Delete - Delete Page */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0),
+				"pageDelete");
+		actionMap.put("pageDelete", wc.pageDelete);
 	}
 	
 	/** Set key bindings that apply when the editor panel (WImagePanel) is in
 	 *  focus.
 	 */
-	public void setEditorPanelKeyBindings(JComponent comp, int condition) {
-//		System.out.println("Setting up key bindings on component " + comp.toString());
-		inputMap = comp.getInputMap(condition);
-		actionMap = comp.getActionMap();
-		comp.setFocusTraversalKeysEnabled(false);
-		
-//		System.out.println("InputMap: " + inputMap.toString());
-//		System.out.println("ActionMap: " + actionMap.toString());
+	public void setEditorPanelKeyBindings(WImagePanel sPanel, int condition) {
+		inputMap = sPanel.getInputMap(condition);
+		actionMap = sPanel.getActionMap();
+		sPanel.setFocusTraversalKeysEnabled(false);
 		
 		/* Backspace key - delete selected token or token behind caret */
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0),
@@ -165,14 +200,6 @@ public class WEditorKeyBindings {
 				actionMap.put(uc, new KeyAction(uc));
 			}
 		}
-	}
-	
-	public InputMap getInputMap() {
-		return inputMap;
-	}
-	
-	public ActionMap getActionMap() {
-		return actionMap;
 	}
 	
 	private class KeyAction extends AbstractAction {

@@ -315,7 +315,6 @@ public class WMsgNewMsgForm extends AbstractForm {
 	/** Save Message As action */
 	private final IAction saveMsgAs = new IAction(
 			"wysiwyg.new_message.ok") {
-		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception {
 			// try to create a new quick message

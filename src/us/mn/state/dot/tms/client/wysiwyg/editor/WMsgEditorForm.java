@@ -29,6 +29,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -98,7 +99,7 @@ public class WMsgEditorForm extends AbstractForm {
 	private JButton page_del_btn;
 	private JButton page_mv_up_btn;
 	private JButton page_mv_down_btn;
-	private JList<WPage> page_list;
+	private WPageList page_list;
 	private JScrollPane page_list_pn;
 	
 	/** Error label to display when MultiConfig generation fails */
@@ -111,6 +112,9 @@ public class WMsgEditorForm extends AbstractForm {
 	private JButton cancel_btn;
 	private JButton save_as_btn;
 	private JButton save_btn;
+
+	/** Key Bindings */
+	private WEditorKeyBindings editorKeyBindings;
 	
 	public WMsgEditorForm(Session s) {
 		// TODO need to add the message name to the title (somehow...)
@@ -366,6 +370,9 @@ public class WMsgEditorForm extends AbstractForm {
 		
 		// finish initializing the controller now that everything is in place
 		controller.postInit();
+		
+		// also set up key bindings
+		setupKeyBindings();
 	}
 	
 	/** Get the WController for this form */
@@ -398,6 +405,15 @@ public class WMsgEditorForm extends AbstractForm {
 		
 		// what the hell, call postInit again
 		controller.postInit();
+	}
+	
+	/** Setup key bindings for various components in the form. */
+	public void setupKeyBindings() {
+		// initialize key bindings
+		editorKeyBindings = new WEditorKeyBindings(controller);
+		editorKeyBindings.setEditorPanelKeyBindings(getWImagePanel(),
+				JComponent.WHEN_FOCUSED);
+		editorKeyBindings.setPageListKeyBindings(page_list, WHEN_FOCUSED);
 	}
 	
 	public void setPageNumberLabel(String pnl) {

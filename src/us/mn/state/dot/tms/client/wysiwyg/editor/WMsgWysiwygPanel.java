@@ -28,7 +28,6 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 
@@ -98,9 +97,6 @@ public class WMsgWysiwygPanel extends JPanel {
 	/** Sign pixel panel to display the current sign message page */
 //	private SignPixelPanel pixel_pnl;
 	private WImagePanel signPanel;
-	
-	/** Key Bindings active when panel is in focus. */
-	private WEditorKeyBindings editorKeyBindings;
 	
 	public WMsgWysiwygPanel(WController c) {
 		controller = c;
@@ -203,11 +199,6 @@ public class WMsgWysiwygPanel extends JPanel {
 				new WMsgMouseInputAdapter(controller);
 		signPanel.addMouseListener(mouseHandler);
 		signPanel.addMouseMotionListener(mouseHandler);
-		
-		// initialize key bindings and attach to panel
-		editorKeyBindings = new WEditorKeyBindings(controller);
-		editorKeyBindings.setEditorPanelKeyBindings(
-				signPanel, JComponent.WHEN_FOCUSED);
 	}
 	
 	/** Enable or disable functions that correspond to any tags not supported

@@ -70,7 +70,7 @@ public class WMsgEditorPanel extends JPanel {
 		// add the tabs to the pane
 		// if we don't have a valid MultiConfig, we can't show the WYSIWYG or
 		// config panels
-		boolean mcOK = controller.multiConfigUsable();
+		boolean mcOK = controller.multiConfigUseable();
 		if (mcOK)
 			tabPane.add(I18N.get("wysiwyg.epanel.wysiwyg_tab"), wysiwygPanel);
 		

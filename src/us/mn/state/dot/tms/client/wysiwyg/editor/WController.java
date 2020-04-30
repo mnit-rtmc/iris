@@ -19,20 +19,15 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IllegalFormatException;
 import java.util.Iterator;
-import java.util.Map;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
 import javax.swing.JInternalFrame;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -47,8 +42,6 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsColor;
-import us.mn.state.dot.tms.DmsSignGroup;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
@@ -60,6 +53,7 @@ import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IWorker;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.wysiwyg.editor.tags.WMultiTagDialog;
+import us.mn.state.dot.tms.client.wysiwyg.editor.tags.WPageTimingTagDialog;
 import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 import us.mn.state.dot.tms.utils.wysiwyg.WPoint;
@@ -80,9 +74,9 @@ import us.mn.state.dot.tms.utils.wysiwyg.token.WtJustLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtJustPage;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtPageBackground;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtPageTime;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextChar;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextRectangle;
-import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_IrisToken;
 import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_Rectangle;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Multi.JustificationLine;
@@ -318,7 +312,7 @@ public class WController {
 	 *  the editor are in place. Called by the WMsgEditorForm at the end of
 	 *  initialize().
 	 *  
-	 *  TODO/NOTE there is probably a better way to do this.
+	 *  TODO/NOTE there may be a better way to do this.
 	 */
 	public void postInit() {
 		// do an update to render the message and fill the page list, then
@@ -382,7 +376,7 @@ public class WController {
 	 */
 	private void initFromMultiConfig(MultiConfig mc) {
 		multiConfig = mc;
-		if (multiConfig != null) {
+		if (multiConfigUseable()) {
 			// initialize the font and colors from the MultiConfig
 			font = multiConfig.getDefaultFont();
 			defaultFont = font;
@@ -2641,7 +2635,7 @@ public class WController {
 		// clear any errors before re-rendering
 		errMan.clearErrors();
 		
-		if (multiConfig != null && wmsg != null) {
+		if (multiConfigUseable() && wmsg != null) {
 			wmsg.renderMsg(multiConfig, errMan);
 			
 			// set the WYSIWYG image size on the pages
@@ -2900,6 +2894,40 @@ public class WController {
 		updateRectangles();
 		updateGraphics();
 	}
+	
+	/** Edit the page timing for the selected page. Inserts a page timing tag
+	 *  at the beginning of the page (replacing any that existed before).
+	 */
+	public void editSelectedPageTiming() {
+		// move the caret to the beginning of the page
+		caretPageIndx = 0;
+		
+		// find any page timing tokens on the page and clean them up
+		WtPageTime oldTimeTok = null;
+		WTokenList pgTimeToks = selectedPage.getTokensOfType(
+				WTokenType.pageTime);
+		if (!pgTimeToks.isEmpty()) {
+			// get the last one (it's the one that applies)
+			oldTimeTok = (WtPageTime) pgTimeToks.getLast();
+			
+			// remove all from the page and move the active one to the start
+			for (WToken t: pgTimeToks)
+				selectedPage.removeToken(t);
+			selectedPage.addToken(0, oldTimeTok);
+		}
+		
+		// open a tag edit dialog
+		WMultiTagDialog ptDialog = WMultiTagDialog.construct(
+				this, WTokenType.pageTime, oldTimeTok);
+		desktop.show(ptDialog);
+	}
+	
+	/** Action to edit selected page timing */
+	public Action editPageTimingAction = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			editSelectedPageTiming();
+		}
+	};
 	
 	public WPage getSelectedPage() {
 		return selectedPage;
@@ -3220,7 +3248,7 @@ public class WController {
 		return multiConfig;
 	}
 	
-	public boolean multiConfigUsable() {
+	public boolean multiConfigUseable() {
 		return multiConfig != null && multiConfig.isUseable();
 	}
 	
@@ -3228,7 +3256,7 @@ public class WController {
 	 *  there is no active MultiConfig, UNKNOWN is returned.
 	 */
 	public ColorScheme getColorScheme() {
-		if (multiConfig != null)
+		if (multiConfigUseable())
 			return multiConfig.getColorScheme();
 		return ColorScheme.UNKNOWN;
 	}
@@ -3246,7 +3274,7 @@ public class WController {
 	 */
 	public void updateGraphicModel() {
 		// get sign parameters from the MultiConfig
-		if (multiConfig != null) {
+		if (multiConfigUseable()) {
 			int maxHeight = multiConfig.getPixelHeight();
 			int maxWidth = multiConfig.getPixelWidth();
 			int maxColorScheme = multiConfig.getColorScheme().ordinal();
@@ -3319,6 +3347,3 @@ public class WController {
 	}
 	
 }
-
-
-
