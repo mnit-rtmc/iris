@@ -200,8 +200,6 @@ abstract public class WgRectangle {
 				if (y + offsetY < 1)
 					offsetY = 1 - y;
 				else if (h - offsetY < 1) {
-					System.out.println(String.format(
-							"h = %d, offsetY = %d", h, offsetY));
 					offsetY = h - 1;
 				}
 				
@@ -224,8 +222,6 @@ abstract public class WgRectangle {
 				if (x + offsetX < 1)
 					offsetX = 1 - x;
 				else if (w - offsetX < 1) {
-					System.out.println(String.format(
-							"w = %d, offsetX = %d", w, offsetX));
 					offsetX = w - 1;
 				}
 				
