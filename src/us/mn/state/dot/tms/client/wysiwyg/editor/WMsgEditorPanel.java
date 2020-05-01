@@ -48,8 +48,10 @@ public class WMsgEditorPanel extends JPanel {
 	private WMsgConfigPanel configPanel;
 	private WMsgErrorPanel errorPanel;
 	
-	private int CONFIG_PANEL_TAB = 2;
-	private int ERROR_PANEL_TAB = 3;
+	private final static int WYSIWYG_PANEL_TAB = 0;
+	private final static int MULTI_PANEL_TAB = 1;
+	private final static int CONFIG_PANEL_TAB = 2;
+	private final static int ERROR_PANEL_TAB = 3;
 	
 	// TODO - warnings and errors (should be dynamic)
 	
@@ -68,26 +70,12 @@ public class WMsgEditorPanel extends JPanel {
 		configPanel = new WMsgConfigPanel(controller);
 		
 		// add the tabs to the pane
-		// if we don't have a valid MultiConfig, we can't show the WYSIWYG or
-		// config panels
-		boolean mcOK = controller.multiConfigUseable();
-		if (mcOK) {
-			tabPane.add(I18N.get("wysiwyg.epanel.wysiwyg_tab"), wysiwygPanel);
-			CONFIG_PANEL_TAB = 2;
-			ERROR_PANEL_TAB = 3;
-		} else {
-			CONFIG_PANEL_TAB = 1;
-			ERROR_PANEL_TAB = 2;
-		}
-		
+		tabPane.add(I18N.get("wysiwyg.epanel.wysiwyg_tab"), wysiwygPanel);
 		tabPane.add(I18N.get("wysiwyg.epanel.multi_tab"), multiPanel);
 		tabPane.add(I18N.get("wysiwyg.epanel.config_tab"), configPanel);
 		
-		// change the color of the config panel if there are errors/warnings
-		if (configPanel.hasErrors())
-			tabPane.setForegroundAt(CONFIG_PANEL_TAB, Color.RED);
-		else if (configPanel.hasWarnings())
-			tabPane.setForegroundAt(CONFIG_PANEL_TAB, Color.ORANGE);
+		// set the active MultiConfig 
+		setActiveMultiConfig(controller.getMultiConfig());
 		
 		// add the tab pane to the panel
 		add(tabPane, BorderLayout.CENTER);
@@ -117,6 +105,15 @@ public class WMsgEditorPanel extends JPanel {
 			tabPane.setForegroundAt(CONFIG_PANEL_TAB, Color.ORANGE);
 		else
 			tabPane.setForegroundAt(CONFIG_PANEL_TAB, Color.BLACK);
+		
+		// disable the wysiwyg panel if the MultiConfig isn't usable
+		if (mc != null && mc.isUseable()) {
+			tabPane.setEnabledAt(WYSIWYG_PANEL_TAB, true);
+			tabPane.setSelectedIndex(WYSIWYG_PANEL_TAB);
+		} else {
+			tabPane.setEnabledAt(WYSIWYG_PANEL_TAB, false);
+			tabPane.setSelectedIndex(MULTI_PANEL_TAB);
+		}
 	}
 	
 	/** Update the main WYSIWYG panel with the currently selected page (called
