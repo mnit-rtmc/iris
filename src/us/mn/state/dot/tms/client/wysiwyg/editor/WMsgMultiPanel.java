@@ -114,7 +114,7 @@ public class WMsgMultiPanel extends JPanel {
 		toolPanel.add(Box.createHorizontalStrut(10));
 		
 		// disable update button if we get a bad MultiConfig
-		if (controller.getMultiConfig() == null)
+		if (!controller.multiConfigUseable())
 			updateBtn.setEnabled(false);
 		
 		// also add the check box, and enable it by default
