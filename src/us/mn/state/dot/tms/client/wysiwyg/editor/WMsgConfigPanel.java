@@ -316,15 +316,23 @@ public class WMsgConfigPanel extends IPanel {
 			
 			if (!sgmcErrors.isEmpty()) {
 				for (String e: sgmcErrors) {
-					String s = String.format("%s: %s",
-							signGroupMultiConfig.getName(), e);
+					String s;
+					if (signGroupMultiConfig.getName() != null) {
+						s = String.format("%s: %s",
+								signGroupMultiConfig.getName(), e);
+					} else
+						s = e;
 					errorListModel.addElement(s);
 				}
 			}
 			if (!sgmcWarnings.isEmpty()) {
 				for (String w: sgmcWarnings) {
-					String s = String.format("%s: %s",
-							signGroupMultiConfig.getName(), w);
+					String s;
+					if (signGroupMultiConfig.getName() != null) {
+						s = String.format("%s: %s",
+								signGroupMultiConfig.getName(), w);
+					} else
+						s = w;
 					warningListModel.addElement(s);
 				}
 			}
@@ -337,15 +345,23 @@ public class WMsgConfigPanel extends IPanel {
 			
 			if (!mcErrors.isEmpty()) {
 				for (String e: mcErrors) {
-					String s = String.format("%s: %s",
-							multiConfig.getName(), e);
+					String s;
+					if (multiConfig.getName() != null) {
+						s = String.format("%s: %s",
+								multiConfig.getName(), e);
+					} else
+						s = e;
 					errorListModel.addElement(s);
 				}
 			}
 			if (!mcWarnings.isEmpty()) {
 				for (String w: mcWarnings) {
-					String s = String.format("%s: %s",
-							multiConfig.getName(), w);
+					String s;
+					if (multiConfig.getName() != null) {
+						s = String.format("%s: %s",
+								multiConfig.getName(), w);
+					} else
+						s = w;
 					warningListModel.addElement(s);
 				}
 			}
