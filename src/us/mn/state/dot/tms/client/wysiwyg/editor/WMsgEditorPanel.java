@@ -17,12 +17,7 @@ package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JPanel;
@@ -120,6 +115,8 @@ public class WMsgEditorPanel extends JPanel {
 			tabPane.setForegroundAt(CONFIG_PANEL_TAB, Color.RED);
 		else if (configPanel.hasWarnings())
 			tabPane.setForegroundAt(CONFIG_PANEL_TAB, Color.ORANGE);
+		else
+			tabPane.setForegroundAt(CONFIG_PANEL_TAB, Color.BLACK);
 	}
 	
 	/** Update the main WYSIWYG panel with the currently selected page (called
