@@ -379,7 +379,6 @@ public class WMsgEditorForm extends AbstractForm {
 	/** Set the frame (which should be this form's frame. */
 	public void setFrame(JInternalFrame f) {
 		frame = f;
-		frame.setJMenuBar(menu_bar);
 		
 		// add a frame listener to prompt a confirmation dialog when there are
 		// unsaved changes

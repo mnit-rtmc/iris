@@ -111,56 +111,22 @@ public class WMsgConfigPanel extends IPanel {
 	private DefaultListModel<String> warningListModel =
 			new DefaultListModel<String>();
 	
-	/** Sign face width label */
-	private JLabel f_width_lbl = createValueLabel();
-
-	/** Sign face height label */
-	private JLabel f_height_lbl = createValueLabel();
-
-	/** Horizontal border label */
-	private JLabel h_border_lbl = createValueLabel();
-
-	/** Vertical border label */
-	private JLabel v_border_lbl = createValueLabel();
-
-	/** Horizontal pitch label */
-	private JLabel h_pitch_lbl = createValueLabel();
-
-	/** Vertical pitch label */
-	private JLabel v_pitch_lbl = createValueLabel();
-
-	/** Sign width (pixels) label */
-	private JLabel p_width_lbl = createValueLabel();
-
-	/** Sign height (pixels) label */
-	private JLabel p_height_lbl = createValueLabel();
-
-	/** Character width label */
-	private JLabel c_width_lbl = createValueLabel();
-
-	/** Character height label */
-	private JLabel c_height_lbl = createValueLabel();
-
-	/** Monochrome foreground label */
-	private JLabel m_foreground_lbl = createValueLabel();
-
-	/** Monochrome background label */
-	private JLabel m_background_lbl = createValueLabel();
-
-	/** Color scheme label */
-	private JLabel c_scheme_lbl = createValueLabel();
-	
-	/** Default Font label */
-	private JLabel font_lbl = createValueLabel();
-
-	/** Font height label */
-	private JLabel font_height_lbl = IPanel.createValueLabel();
-
 	/** User session */
 //	private Session session;
 	
 	/** Sign Group MultiConfig */
 	private MultiConfig signGroupMultiConfig;
+	
+	/** Panel to display when errors and warnings appear */
+	private JPanel errorsWarningsPanel;
+	
+	/** Panel to display when warnings appear */
+	private JPanel warningsConfigPanel;
+	private IPanel wcp;
+	
+	/** Panel to display when no warnings or errors appear */
+	private JPanel goodConfigPanel;
+	private IPanel gcp;
 	
 	/** Sign Group MultiConfig errors and warnings */
 	private ArrayList<String> sgmcErrors = new ArrayList<String>();
@@ -174,6 +140,7 @@ public class WMsgConfigPanel extends IPanel {
 	private ArrayList<String> mcWarnings = new ArrayList<String>();
 	
 	private JLabel errorLabel;
+	private JLabel eWarningLabel;
 	private JLabel warningLabel;
 	
 	/** Create a new MULTI-mode panel */
@@ -186,22 +153,28 @@ public class WMsgConfigPanel extends IPanel {
 		
 		// default error/warning labels
 		errorLabel = new JLabel(I18N.get("wysiwyg.config.errors"));
+		eWarningLabel = new JLabel(I18N.get("wysiwyg.config.warnings"));
 		warningLabel = new JLabel(I18N.get("wysiwyg.config.warnings"));
 		
-		// check for errors 
+		// check for errors
 		updateErrorsWarnings();
 		
-		if (!sgmcErrors.isEmpty() || !mcErrors.isEmpty()) {
+		initialize();
+		setLayout(new BorderLayout());
+		JPanel p;
+		initErrorsWarnings();
+		initWarningsConfig();
+		initNormalConfig();
+		if (!sgmcErrors.isEmpty() || !mcErrors.isEmpty())
 			// warning and error panel only
-			initErrorsWarnings();
-		} else if (!sgmcWarnings.isEmpty() || !mcWarnings.isEmpty()) {
+			p = errorsWarningsPanel;
+		else if (!sgmcWarnings.isEmpty() || !mcWarnings.isEmpty())
 			// warning and config panel only
-			initWarningsConfig();
-		} else {
+			p = warningsConfigPanel;
+		else
 			// config panel only
-			initNormalConfig();
-		}
-		
+			p = goodConfigPanel;
+		add(p, BorderLayout.CENTER);
 	}
 	
 	public boolean hasErrors() {
@@ -214,16 +187,25 @@ public class WMsgConfigPanel extends IPanel {
 	
 	public void setActiveMultiConfig(MultiConfig mc) {
 		multiConfig = mc;
+		removeAll();
 		updateErrorsWarnings();
-		updateConfigPanel();
+		initErrorsWarnings();
+		initWarningsConfig();
+		initNormalConfig();
+		JPanel p;
+		if (hasErrors())
+			p = errorsWarningsPanel;
+		else if (hasWarnings())
+			p = warningsConfigPanel;
+		else
+			p = goodConfigPanel;
+		add(p, BorderLayout.CENTER);
 	}
 	
 	/** Initialize a panel that shows errors and warnings */
 	public void initErrorsWarnings() {
-		setLayout(new BorderLayout());
-		initialize();
 		GridBagLayout gbl = new GridBagLayout();
-		JPanel p = new JPanel(gbl);
+		errorsWarningsPanel = new JPanel(gbl);
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
@@ -249,24 +231,21 @@ public class WMsgConfigPanel extends IPanel {
 		// add error list
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		p.add(errorLabel, gbc);
+		errorsWarningsPanel.add(errorLabel, gbc);
 		gbc.gridy = 1;
-		p.add(errorPane, gbc);
+		errorsWarningsPanel.add(errorPane, gbc);
 		
 		// warning list beneath it
 		gbc.gridy = 2;
-		p.add(warningLabel, gbc);
+		errorsWarningsPanel.add(eWarningLabel, gbc);
 		gbc.gridy = 3;
-		p.add(warningPane, gbc);
-		add(p, BorderLayout.CENTER);
+		errorsWarningsPanel.add(warningPane, gbc);
 	}
 	
 	/** Initialize a panel that shows warnings and config information */
 	public void initWarningsConfig() {
-		setLayout(new BorderLayout());
-		initialize();
 		GridBagLayout gbl = new GridBagLayout();
-		JPanel p = new JPanel(gbl);
+		warningsConfigPanel = new JPanel(gbl);
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
@@ -285,24 +264,43 @@ public class WMsgConfigPanel extends IPanel {
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		p.add(warningLabel, gbc);
+		warningsConfigPanel.add(warningLabel, gbc);
 		gbc.gridy = 1;
-		p.add(warningPane, gbc);
-		
-		// and the config panel
-		IPanel configPanel = getConfigPanel();
+		warningsConfigPanel.add(warningPane, gbc);
 		
 		// to the right
 		gbc.gridx = 1;
 		gbc.gridy = 0;
-		p.add(new JLabel(I18N.get("wysiwyg.config")), gbc);
+		warningsConfigPanel.add(new JLabel(I18N.get("wysiwyg.config")), gbc);
 		gbc.gridy = 1;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
-		p.add(configPanel, gbc);
-		add(p, BorderLayout.CENTER);
-		updateConfigPanel();
+		wcp = makeConfigPanel(multiConfig);
+		if (wcp != null)
+			warningsConfigPanel.add(wcp, gbc);
 	}
 	
+	/** Initialize a panel that just shows config information */
+	public void initNormalConfig() {
+		GridBagLayout gbl = new GridBagLayout();
+		goodConfigPanel = new JPanel(gbl);
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+		gbc.gridheight = 1;
+		gbc.gridwidth = 1;
+		gbc.insets = Widgets.UI.insets();
+		gbc.ipadx = 0;
+		gbc.ipady = 0;
+		gbc.weightx = 1;
+		gbc.weighty = 1;
+		
+		// and the config panel
+		goodConfigPanel.add(new JLabel(I18N.get("wysiwyg.config")), gbc);
+		gcp = makeConfigPanel(multiConfig);
+		if (gcp != null)
+			goodConfigPanel.add(gcp);
+	}
+
 	private static ArrayList<String> getErrors(MultiConfig mc) {
 		ArrayList<String> errors = new ArrayList<String>();
 		if (mc != null) {
@@ -333,24 +331,12 @@ public class WMsgConfigPanel extends IPanel {
 			
 			if (!mcErrors.isEmpty()) {
 				for (String e: mcErrors) {
-					String s;
-					if (multiConfig.getName() != null) {
-						s = String.format("%s: %s",
-								multiConfig.getName(), e);
-					} else
-						s = e;
-					errorListModel.addElement(s);
+					errorListModel.addElement(e);
 				}
 			}
 			if (!mcWarnings.isEmpty()) {
 				for (String w: mcWarnings) {
-					String s;
-					if (multiConfig.getName() != null) {
-						s = String.format("%s: %s",
-								multiConfig.getName(), w);
-					} else
-						s = w;
-					warningListModel.addElement(s);
+					warningListModel.addElement(w);
 				}
 			}
 		}
@@ -360,90 +346,84 @@ public class WMsgConfigPanel extends IPanel {
 				? multiConfig.getName() : "MultiConfig";
 		warningLabel.setText(n + " --- "
 						+ I18N.get("wysiwyg.config.warnings"));
+		eWarningLabel.setText(n + " --- "
+						+ I18N.get("wysiwyg.config.warnings"));
 		errorLabel.setText(n + " --- " + I18N.get("wysiwyg.config.errors"));
 	}
 	
-	/** Initialize a panel that just shows config information */
-	public void initNormalConfig() {
-		setLayout(new BorderLayout());
-		initialize();
-		
-		// and the config panel
-		add(new JLabel(I18N.get("wysiwyg.config")),
-				BorderLayout.NORTH);
-		IPanel configPanel = getConfigPanel();
-		add(configPanel, BorderLayout.CENTER);
-		updateConfigPanel();
-	}
-
-	private IPanel getConfigPanel() {
-		IPanel configPanel = new IPanel();
-		configPanel.add("dms.face.width");
-		configPanel.add(f_width_lbl, Stretch.LAST);
-		configPanel.add("dms.face.height");
-		configPanel.add(f_height_lbl, Stretch.LAST);
-		configPanel.add("dms.border.horiz");
-		configPanel.add(h_border_lbl, Stretch.LAST);
-		configPanel.add("dms.border.vert");
-		configPanel.add(v_border_lbl, Stretch.LAST);
-		configPanel.add("dms.pitch.horiz");
-		configPanel.add(h_pitch_lbl, Stretch.LAST);
-		configPanel.add("dms.pitch.vert");
-		configPanel.add(v_pitch_lbl, Stretch.LAST);
-		configPanel.add("dms.pixel.width");
-		configPanel.add(p_width_lbl, Stretch.LAST);
-		configPanel.add("dms.pixel.height");
-		configPanel.add(p_height_lbl, Stretch.LAST);
-		configPanel.add("dms.char.width");
-		configPanel.add(c_width_lbl, Stretch.LAST);
-		configPanel.add("dms.char.height");
-		configPanel.add(c_height_lbl, Stretch.LAST);
-		configPanel.add("dms.monochrome.foreground");
-		configPanel.add(m_foreground_lbl, Stretch.LAST);
-		configPanel.add("dms.monochrome.background");
-		configPanel.add(m_background_lbl, Stretch.LAST);
-		configPanel.add("dms.color.scheme");
-		configPanel.add(c_scheme_lbl, Stretch.LAST);
-		configPanel.add("dms.font.default");
-		configPanel.add(font_lbl, Stretch.LAST);
-		configPanel.add("dms.font.height");
-		configPanel.add(font_height_lbl, Stretch.LAST);
-		return configPanel;
-	}
-	
-	/** Update labels on the form tab */
-	public void updateConfigPanel() {
-		updateForm(multiConfig);
-	}
-	
-	/** Update labels on the form tab */
-	public void updateForm(MultiConfig mc) {
-		if (mc != null && mc.isUseable()) {
-			MultiConfig sc = mc;
-			f_width_lbl.setText(formatMM(sc.getFaceWidth()));
-			f_height_lbl.setText(formatMM(sc.getFaceHeight()));
-			h_border_lbl.setText(formatMM(sc.getBorderHoriz()));
-			v_border_lbl.setText(formatMM(sc.getBorderVert()));
-			h_pitch_lbl.setText(formatMM(sc.getPitchHoriz()));
-			v_pitch_lbl.setText(formatMM(sc.getPitchVert()));
-			p_width_lbl.setText(formatPixels(sc.getPixelWidth()));
-			p_height_lbl.setText(formatPixels(sc.getPixelHeight()));
-			c_width_lbl.setText(formatPixels(sc.getCharWidth()));
-			c_height_lbl.setText(formatPixels(sc.getCharHeight()));
-			m_foreground_lbl.setText(HexString.format(
-				sc.getDefaultFG().rgb(), 6));
+	private IPanel makeConfigPanel(MultiConfig sc) {
+		IPanel cp = null;
+		if (sc != null && sc.isUseable()) {
+			cp = new IPanel();
+			JLabel f_width_lbl = createValueLabel(
+					formatMM(sc.getFaceWidth()));
+			JLabel f_height_lbl = createValueLabel(
+					formatMM(sc.getFaceHeight()));
+			JLabel h_border_lbl = createValueLabel(
+					formatMM(sc.getBorderHoriz()));
+			JLabel v_border_lbl = createValueLabel
+					(formatMM(sc.getBorderVert()));
+			JLabel h_pitch_lbl = createValueLabel(
+					formatMM(sc.getPitchHoriz()));
+			JLabel v_pitch_lbl = createValueLabel(
+					formatMM(sc.getPitchVert()));
+			JLabel p_width_lbl = createValueLabel(
+					formatPixels(sc.getPixelWidth()));
+			JLabel p_height_lbl = createValueLabel(
+					formatPixels(sc.getPixelHeight()));
+			JLabel c_width_lbl = createValueLabel(
+					formatPixels(sc.getCharWidth()));
+			JLabel c_height_lbl = createValueLabel(
+					formatPixels(sc.getCharHeight()));
+			JLabel m_foreground_lbl = createValueLabel(HexString.format(
+					sc.getDefaultFG().rgb(), 6));
 			m_foreground_lbl.setIcon(new ColorIcon(
-				sc.getDefaultFG().rgb()));
-			m_background_lbl.setText(HexString.format(
-				sc.getDefaultBG().rgb(), 6));
+					sc.getDefaultFG().rgb()));
+			JLabel m_background_lbl = createValueLabel(HexString.format(
+					sc.getDefaultBG().rgb(), 6));
 			m_background_lbl.setIcon(new ColorIcon(
-				sc.getDefaultBG().rgb()));
-			c_scheme_lbl.setText(sc.getColorScheme().description);
-			font_lbl.setText(sc.getDefaultFont().getName());
-			font_height_lbl.setText(calculateFontHeight());
+					sc.getDefaultBG().rgb()));
+			JLabel c_scheme_lbl = createValueLabel(
+					sc.getColorScheme().description);
+			JLabel font_lbl = createValueLabel(
+					sc.getDefaultFont().getName());
+			JLabel font_height_lbl = createValueLabel(
+					calculateFontHeight());
+			
+			cp.add("dms.face.width");
+			cp.add(f_width_lbl, Stretch.LAST);
+			cp.add("dms.face.height");
+			cp.add(f_height_lbl, Stretch.LAST);
+			cp.add("dms.border.horiz");
+			cp.add(h_border_lbl, Stretch.LAST);
+			cp.add("dms.border.vert");
+			cp.add(v_border_lbl, Stretch.LAST);
+			cp.add("dms.pitch.horiz");
+			cp.add(h_pitch_lbl, Stretch.LAST);
+			cp.add("dms.pitch.vert");
+			cp.add(v_pitch_lbl, Stretch.LAST);
+			cp.add("dms.pixel.width");
+			cp.add(p_width_lbl, Stretch.LAST);
+			cp.add("dms.pixel.height");
+			cp.add(p_height_lbl, Stretch.LAST);
+			cp.add("dms.char.width");
+			cp.add(c_width_lbl, Stretch.LAST);
+			cp.add("dms.char.height");
+			cp.add(c_height_lbl, Stretch.LAST);
+			cp.add("dms.monochrome.foreground");
+			cp.add(m_foreground_lbl, Stretch.LAST);
+			cp.add("dms.monochrome.background");
+			cp.add(m_background_lbl, Stretch.LAST);
+			cp.add("dms.color.scheme");
+			cp.add(c_scheme_lbl, Stretch.LAST);
+			cp.add("dms.font.default");
+			cp.add(font_lbl, Stretch.LAST);
+			cp.add("dms.font.height");
+			cp.add(font_height_lbl, Stretch.LAST);
 		}
+		return cp;
 	}
-
+	
 	/** Calculate the height of the default font on the sign */
 	private String calculateFontHeight() {
 		if (multiConfig != null) {
