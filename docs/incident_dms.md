@@ -86,6 +86,9 @@ Incident type | `CRASH`, `STALL`, `ROAD WORK` or `HAZARD`
 Detail        | usually hazard detail: `animal`, `debris`, `ice`, etc
 Lane Type     | `mainline`, `exit`, `merge` or `CD road`
 
+If the _detail_ field is blank, the _descriptor_ will be used as a fallback for
+incidents which match the other two fields.
+
 ## Locator
 
 A matching _locator_ determines the second line of a suggested message.  The
