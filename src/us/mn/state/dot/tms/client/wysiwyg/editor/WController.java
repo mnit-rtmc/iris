@@ -362,7 +362,16 @@ public class WController {
 			
 			if (signGroupMultiConfig != null) {
 				// use the "primary" MultiConfig to initialize
-				initFromMultiConfig(signGroupMultiConfig);
+				MultiConfig mc = signGroupMultiConfig;
+				if (signGroupMultiConfig != null) {
+					if (signGroupMultiConfig.getConfigList() != null
+							&& !signGroupMultiConfig.getConfigList().isEmpty())
+						mc = signGroupMultiConfig.getConfigList().get(0);
+					else if (signGroupMultiConfig.getSignList() != null
+							&& !signGroupMultiConfig.getSignList().isEmpty())
+						mc = signGroupMultiConfig.getSignList().get(0);
+				}
+				initFromMultiConfig(mc);
 				
 				// create the ComboBox for displaying/selecting different
 				// configs and signs
