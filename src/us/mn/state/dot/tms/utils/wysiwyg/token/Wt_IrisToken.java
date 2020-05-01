@@ -31,6 +31,9 @@ abstract public class Wt_IrisToken extends WToken {
 
 	/** Font used for this token */
 	protected WFont wfont;
+	
+	/** Box width computed when rendering */
+	protected Integer boxWidth;
 
 	/** Parent constructor for Iris-tag (a.k.a 
 	 *  "action tag") tokens
@@ -40,6 +43,7 @@ abstract public class Wt_IrisToken extends WToken {
 	 */
 	public Wt_IrisToken(WTokenType tt, String aPrefix) {
 		super(tt, aPrefix);
+		anchorLoc = AnchorLoc.CONDITIONAL;
 	}
 
 	/* (non-Javadoc)
@@ -55,7 +59,7 @@ abstract public class Wt_IrisToken extends WToken {
 	/** Is this token blank? */
 	@Override
 	public boolean isBlank() {
-		return false;
+		return boxWidth == null;
 	}
 
 	//-------------------------------------------
@@ -63,6 +67,11 @@ abstract public class Wt_IrisToken extends WToken {
 	/** Set font.  Called in pre-render phase. */
 	public void setFont(WFont wfont) {
 		this.wfont = wfont;
+	}
+	
+	/** Set box width. Called during rendering */
+	public void setBoxWidth(Integer w) {
+		boxWidth = w;
 	}
 
 	//-------------------------------------------

@@ -324,6 +324,12 @@ public class WPage {
 				case AFTER:
 					tok.doRender(wr);
 					wr.addAnchor(tok);
+					break;
+				case CONDITIONAL:
+					// only add an anchor if this token is blank
+					tok.doRender(wr);
+					if (tok.isBlank())
+						wr.addAnchor(tok);
 			}
 //			if ((tok instanceof WtColorForeground)
 //			 || (tok instanceof WtNewLine))

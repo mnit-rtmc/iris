@@ -19,7 +19,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
@@ -87,11 +86,40 @@ public class WEditorKeyBindings {
 				KeyEvent.CTRL_DOWN_MASK), "redo");
 		actionMap.put("redo", wc.redo);
 		
-		/* Ctrl + Shift + PgDown - add new page (after selected) */
+		/* Ctrl + Enter OR Ctrl + Shift + PgDown - add new page (after 
+		 * selected) */		
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,
+				KeyEvent.CTRL_DOWN_MASK), "pageAdd");
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN,
 				KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK),
 				"pageAdd");
 		actionMap.put("pageAdd", wc.pageAdd);
+		
+		/* Ctrl + S - save */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+				KeyEvent.CTRL_DOWN_MASK), "save");
+		actionMap.put("save", wc.saveMessage);
+		
+		/* Ctrl + Shift + S - save as */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+			KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK), "saveAs");
+		actionMap.put("saveAs", wc.saveMessageAs);
+		
+		/* F6 - toggle active tab */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0),
+				"toggleActiveTab");
+		actionMap.put("toggleActiveTab",
+				wc.getEditorForm().getEditorPanel().toggleActiveTab);		
+		
+		/* F7 - toggle edit mode */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0),
+				"toggleNonTextTagMode");
+		actionMap.put("toggleNonTextTagMode", wc.toggleNonTextTagMode);
+		
+		/* Ctrl + Tab - toggle focus */		
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB,
+				KeyEvent.CTRL_DOWN_MASK), "toggleFocus");
+		actionMap.put("toggleFocus", wc.toggleFocus);
 	}
 	
 	/** Set key bindings that apply when the page list is in focus. */
@@ -115,7 +143,10 @@ public class WEditorKeyBindings {
 				KeyEvent.ALT_DOWN_MASK), "pageMoveDown");
 		actionMap.put("pageMoveDown", wc.pageMoveDown);
 		
-		/* Ctrl + Shift + PgDown - add new page (after selected) */
+		/* Ctrl + Enter OR Ctrl + Shift + PgDown - add new page (after 
+		 * selected) */		
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,
+				KeyEvent.CTRL_DOWN_MASK), "pageAdd");
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN,
 				KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK),
 				"pageAdd");
@@ -150,16 +181,50 @@ public class WEditorKeyBindings {
 		actionMap.put("moveCaretLeft", wc.moveCaretLeft);
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
 				"moveCaretRight");
-		actionMap.put("moveCaretRight", wc.moveCaretRight);
+		actionMap.put("moveCaretRight", wc.moveCaretRight);		
 		
-		/* Up/Down arrow keys - move caret up/down */
+		/* Ctrl + Left/Right arrow keys - jump caret left/right */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT,
+				KeyEvent.CTRL_DOWN_MASK), "jumpCaretLeft");
+		actionMap.put("jumpCaretLeft", wc.jumpCaretLeft);
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT,
+				KeyEvent.CTRL_DOWN_MASK), "jumpCaretRight");
+		actionMap.put("jumpCaretRight", wc.jumpCaretRight);
+		
+		/* Shift + Left/Right arrow keys - select left/right */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT,
+				KeyEvent.SHIFT_DOWN_MASK), "selectTextLeft");
+		actionMap.put("selectTextLeft", wc.selectTextLeft);
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT,
+				KeyEvent.SHIFT_DOWN_MASK), "selectTextRight");
+		actionMap.put("selectTextRight", wc.selectTextRight);
+		
+		/* Ctrl + Shift + Left/Right arrow keys - select word left/right */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT,
+				KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK),
+				"selectWordLeft");
+		actionMap.put("selectWordLeft", wc.selectWordLeft);
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT,
+				KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK),
+				"selectWordRight");
+		actionMap.put("selectWordRight", wc.selectWordRight);
+		
+		/* Up/Down arrow keys - move caret up/down or change selected region */
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
-				"moveCaretUp");
-		actionMap.put("moveCaretUp", wc.moveCaretUp);
+				"upArrow");
+		actionMap.put("upArrow", wc.upArrow);
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
-				"moveCaretDown");
-		actionMap.put("moveCaretDown", wc.moveCaretDown);
-
+				"downArrow");
+		actionMap.put("downArrow", wc.downArrow);
+		
+		/* Shift + Up/Down arrow keys - select from caret up/down */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 
+				KeyEvent.SHIFT_DOWN_MASK), "selectUp");
+		actionMap.put("selectUp", wc.selectUp);
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 
+				KeyEvent.SHIFT_DOWN_MASK), "selectDown");
+		actionMap.put("selectDown", wc.selectDown);
+		
 		/* Home/End keys - move caret to beginning/end of line */
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0),
 				"moveCaretLineBeginning");
@@ -167,6 +232,37 @@ public class WEditorKeyBindings {
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_END, 0),
 				"moveCaretLineEnd");
 		actionMap.put("moveCaretLineEnd", wc.moveCaretLineEnd);
+		
+		/* Ctrl + Home/End keys - move caret to beginning/end of text rect. */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 
+				KeyEvent.CTRL_DOWN_MASK), "moveCaretTrBeginning");
+		actionMap.put("moveCaretTrBeginning", wc.moveCaretTrBeginning);
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_END, 
+				KeyEvent.CTRL_DOWN_MASK), "moveCaretTrEnd");
+		actionMap.put("moveCaretTrEnd", wc.moveCaretTrEnd);
+		
+		/* Shift + Home/End keys - select to beginning/end of line. */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 
+				KeyEvent.SHIFT_DOWN_MASK), "selectToLineStart");
+		actionMap.put("selectToLineStart", wc.selectToLineStart);
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_END, 
+				KeyEvent.SHIFT_DOWN_MASK), "selectToLineEnd");
+		actionMap.put("selectToLineEnd", wc.selectToLineEnd);
+		
+		/* Ctrl + Shift + Home/End - select to text rect. start/end */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME,
+				KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK),
+				"selectToTrStart");
+		actionMap.put("selectToTrStart", wc.selectToTrStart);
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_END,
+				KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK),
+				"selectToTrEnd");
+		actionMap.put("selectToTrEnd", wc.selectToTrEnd);
+		
+		/* Ctrl + A - select all */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_A, 
+				KeyEvent.CTRL_DOWN_MASK), "selectAll");
+		actionMap.put("selectAll", wc.selectAll);
 		
 		/* Enter key - add newline */
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
@@ -177,6 +273,18 @@ public class WEditorKeyBindings {
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0),
 				"editTag");
 		actionMap.put("editTag", wc.editTag);
+
+		/* Alt + PgUp - Move region forwards */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP,
+				KeyEvent.ALT_DOWN_MASK), "moveSelectedRegionForward");
+		actionMap.put("moveSelectedRegionForward",
+				wc.moveSelectedRegionForward);
+		
+		/* Alt + PgDown - Move region backwards */
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN,
+				KeyEvent.ALT_DOWN_MASK), "moveSelectedRegionBackward");
+		actionMap.put("moveSelectedRegionBackward",
+				wc.moveSelectedRegionBackward);
 		
 		/* ASCII Text Characters - pass character to controller
 		 * Note that 32 is space, 122 is z, and most things in between are

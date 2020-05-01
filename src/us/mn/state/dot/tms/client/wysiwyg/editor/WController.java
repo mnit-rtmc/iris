@@ -53,7 +53,6 @@ import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IWorker;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.wysiwyg.editor.tags.WMultiTagDialog;
-import us.mn.state.dot.tms.client.wysiwyg.editor.tags.WPageTimingTagDialog;
 import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 import us.mn.state.dot.tms.utils.wysiwyg.WPoint;
@@ -108,8 +107,8 @@ public class WController {
 	private Session session;
 	private SmartDesktop desktop;
 	
-	/** Keep a handle to the editor form and sign pixel panel (TODO may 
-	 * change) for any updates we need to make from here */
+	/** Keep a handle to the editor form and sign pixel panel for any updates
+	 *  we need to make from here */
 	private WMsgEditorForm editor;
 	private WImagePanel signPanel;
 	private WMsgMultiPanel multiPanel;
@@ -308,11 +307,9 @@ public class WController {
 		makePageList();
 	}
 	
-	/** Initialize some things that need to take place after other elements of
+	/** Initialize some things that need to take place after all elements of
 	 *  the editor are in place. Called by the WMsgEditorForm at the end of
 	 *  initialize().
-	 *  
-	 *  TODO/NOTE there may be a better way to do this.
 	 */
 	public void postInit() {
 		// do an update to render the message and fill the page list, then
@@ -338,7 +335,7 @@ public class WController {
 			try {
 				initFromMultiConfig(MultiConfig.from(sign));
 			} catch (TMSException e1) {
-				// TODO what to do??
+				// with a null MultiConfig, we will force MULTI mode 
 			}
 		} else {
 			multiConfig = null;
@@ -401,9 +398,8 @@ public class WController {
 		multiConfig = mc;
 		
 		// check functions supported by this MultiConfig
-		editor.checkSupportedFuncs(multiConfig);
+		editor.setActiveMultiConfig(multiConfig);
 		
-		// TODO should we update here or somewhere else?
 		update(false);
 	}
 	
@@ -431,9 +427,6 @@ public class WController {
 	
 	/** Handle a click on the main editor panel */
 	public void handleClick(MouseEvent e) {
-//		int b = e.getButton();
-		
-		// TODO do we need this?
 		update();
 		
 		// create a WPoint for this click
@@ -459,8 +452,6 @@ public class WController {
 		} else if (inColorRectMode() || inGraphicMode())
 			clearCaret();
 		
-		// TODO Graphic mode, MULTI tag mode
-		
 		// get focus for the sign panel when someone clicks on it
 		signPanel.requestFocusInWindow();
 	}
@@ -476,7 +467,6 @@ public class WController {
 	
 	/** Handle a mouse pressed event  */
 	public void handleMousePressed(MouseEvent e) {
-		// TODO only handling left-click drag for now
 		if (e.getButton() == MouseEvent.BUTTON1) {
 			// create a WPoint for this mouse event
 			WPoint p = getWPoint(e);
@@ -506,7 +496,6 @@ public class WController {
 
 	/** Handle a mouse drag event on the main editor panel */
 	public void handleMouseDrag(MouseEvent e) {
-		// TODO only handling left-click drag for now
 		if (SwingUtilities.isLeftMouseButton(e)) {
 			
 			// create a WPoint for this event
@@ -586,6 +575,7 @@ public class WController {
 		resizeDir = null;
 	}
 	
+	/** Update the text selection from mouse movement. */
 	private void updateTextSelection(WPoint p) {
 		endTok = findClosestTextToken(p);
 		
@@ -596,13 +586,14 @@ public class WController {
 			int end = trTokens.indexOf(endTok);
 			
 			boolean includeEnd = false;
-			boolean forwards = true;
+			selectingForwards = true;
 			int si;
 			int ei;
 			if (start < end) {
 				si = start;
 				ei = end;
 				includeEnd = rightHalf(p, endTok);
+				caretIndx = end;
 				caretPageIndx = selectedPage.getTokenIndex(startTok);
 			} else {
 				// if they are selecting backwards, we need to use the initial
@@ -610,27 +601,32 @@ public class WController {
 				si = end;
 				ei = start;
 				includeEnd = rightHalf(lastPress, startTok);
-				forwards = false;
+				selectingForwards = false;
+				caretIndx = si;
 				caretPageIndx = selectedPage.getTokenIndex(endTok);
 			}
-			
-			// update the token lists
-			updateTokenListsSelection(si, ei, includeEnd);
-			
-			// tell the image panel what the selection is
-			signPanel.setTextSelection(tokensSelected);
-			
-			// move the caret too - do it "manually" to avoid changing token
-			// lists (the caret page index is set above)
-			caretIndx = si;
-			if (forwards)
-				signPanel.setCaretLocation(tokensSelected.getLast(), true);
-			else
-				signPanel.setCaretLocation(tokensSelected.get(0), false);
-			
-			// update the toolbar
-			updateTextToolbar();
+			updateTextSelection(si, ei, includeEnd, selectingForwards);
 		}
+	}
+	
+	/** Update the text selection from indices and directions. */
+	private void updateTextSelection(int si, int ei,
+			boolean includeEnd, boolean forwards) {
+		// update the token lists
+		updateTokenListsSelection(si, ei, includeEnd);
+		
+		// tell the image panel what the selection is
+		signPanel.setTextSelection(tokensSelected);
+		
+		// move the caret too - do it "manually" to avoid changing token
+		// lists (the caret page index is set above)
+		if (forwards)
+			signPanel.setCaretLocation(tokensSelected.getLast(), true);
+		else
+			signPanel.setCaretLocation(tokensSelected.get(0), false);
+		
+		// update the toolbar
+		updateTextToolbar();
 	}
 	
 	/** Update the move operation given the current cursor position. */
@@ -713,7 +709,6 @@ public class WController {
 				int offsetY = p.getSignY() - lastPress.getSignY();
 				
 				// resize the rectangle
-				// TODO need to make this safe
 				selectedRectangle.resize(resizeDir, offsetX, offsetY);
 				
 				// update the last press
@@ -944,8 +939,8 @@ public class WController {
 			} else {
 				// in MULTI tag mode we always do this
 				stepNonTextTags = true;
-				editor.updateNonTextTagButton(stepNonTextTags);
 			}
+			editor.updateNonTextTagButton(stepNonTextTags);
 			updateNonTextTagInfo();
 			signPanel.requestFocusInWindow();
 		}
@@ -1137,10 +1132,11 @@ public class WController {
 			// a click resets the selection
 			tokensSelected.clear();
 			signPanel.clearTextSelection();
+			selectingForwards = null;
 			
+			// for debugging (only in effect if DEBUG is true)
 			printCaretTokens();
 			
-			// TODO need to organize this better somehow
 			updateTextToolbar();
 			updateNonTextTagInfo();
 		} else
@@ -1176,7 +1172,9 @@ public class WController {
 	/** Action to move caret to left (using left arrow key) */
 	public Action moveCaretLeft = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-			if (trTokens != null && !trTokens.isEmpty()) {
+			if (!tokensSelected.isEmpty()) {
+				moveCaret(caretIndx);
+			} else if (trTokens != null && !trTokens.isEmpty()) {
 				// check the navigation mode
 				if (stepNonTextTags) {  // go through all tokens
 					if (caretIndx >= 1)
@@ -1198,7 +1196,9 @@ public class WController {
 	/** Action to move caret to right (using right arrow key) */
 	public Action moveCaretRight = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-			if (trTokens != null && !trTokens.isEmpty()) {
+			if (!tokensSelected.isEmpty()) {
+				moveCaret(caretIndx);
+			} else if (trTokens != null && !trTokens.isEmpty()) {
 				// check the navigation mode
 				if (stepNonTextTags) {  // go through all tokens
 					if (caretIndx < trTokens.size())
@@ -1221,91 +1221,827 @@ public class WController {
 		}
 	};
 	
-	/** Action to move caret up one line (using up arrow key) */
-	public Action moveCaretUp = new AbstractAction() {
+	/** Direction of selection (with keyboard) */
+	private Boolean selectingForwards;
+	
+	/** Action to select text to left (using shift + left arrow key) */
+	public Action selectTextLeft = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
+			if (trTokens != null && !trTokens.isEmpty()) {
+				// get the start and end indices
+				int si, ei;
+				if (tokensSelected.isEmpty()) {
+					// use the last token before as the selection end if
+					// there is no selection yet
+					if (!tokensBefore.isEmpty())
+						ei = trTokens.indexOf(tokensBefore.getLast());
+					else
+						ei = 0;
+					
+					// select one token
+					si = ei;
+					
+					// set the selection direction
+					selectingForwards = false;
+				} else {
+					// otherwise use the tokens in the selection
+					// check the direction in which we were going
+					if (!selectingForwards) {
+						// add to selection
+						si = trTokens.indexOf(tokensSelected.get(0)) - 1;
+						if (si < 0)
+							si = 0;
+						ei = trTokens.indexOf(tokensSelected.getLast());
+					} else {
+						// remove from selection
+						si = trTokens.indexOf(tokensSelected.get(0));
+						ei = trTokens.indexOf(tokensSelected.getLast()) - 1;
+					}
+				}
+				
+				// if we pick the last token, use includeEnd
+				if (ei == trTokens.size())
+					--ei;
+				
+				if (ei >= si)
+					updateTextSelection(si, ei, true, selectingForwards);
+				else {
+					updateCaret();
+				}
+			}
+		}
+	};
+	
+	/** Action to select text to right (using shift + right arrow key) */
+	public Action selectTextRight = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (trTokens != null && !trTokens.isEmpty()) {
+				// get the start and end indices
+				int si, ei;
+				if (tokensSelected.isEmpty()) {
+					// use the first token after as the selection start if
+					// there is no selection yet
+					if (!tokensAfter.isEmpty())
+						si = trTokens.indexOf(tokensAfter.get(0));
+					else
+						si = trTokens.size() - 1;
+					
+					// select one token
+					ei = si + 1;
+
+					// set the selection direction
+					selectingForwards = true;
+				} else {
+					// otherwise use the tokens in the selection
+					// check the direction in which we were going
+					if (selectingForwards) {
+						si = trTokens.indexOf(tokensSelected.get(0));
+						ei = trTokens.indexOf(tokensSelected.getLast()) + 2;
+						
+					} else {
+						// remove from selection
+						si = trTokens.indexOf(tokensSelected.get(0)) + 1;
+						ei = trTokens.indexOf(tokensSelected.getLast()) + 1;
+					}
+				}
+				
+				// if we pick the last token, use includeEnd
+				boolean includeEnd = false;
+				if (ei >= trTokens.size()) {
+					ei = trTokens.size() - 1;
+					includeEnd = true;
+				}
+				
+				if (ei > si)
+					updateTextSelection(si, ei, includeEnd, selectingForwards);
+				else {
+					moveCaret(caretIndx);
+				}
+			}
+		}
+	};
+	
+	/** Action to select text to left (using ctrl + shift + left arrow key) */
+	public Action selectWordLeft = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (trTokens != null && !trTokens.isEmpty()) {
+				// get the end index
+				int si, ei;
+				if (tokensSelected.isEmpty()) {
+					// use the first token after as the selection end if
+					// there is no selection yet
+					if (!tokensBefore.isEmpty())
+						ei = trTokens.indexOf(tokensBefore.getLast());
+					else
+						ei = 0;
+
+					// find the previous word searching from the caret
+					si = findWordStartBackwards();
+					
+					// set the selection direction
+					selectingForwards = false;
+				} else {
+					// otherwise use the tokens in the selection
+					// check the direction in which we were going
+					if (!selectingForwards) {
+						// add to selection - hold
+						ei = trTokens.indexOf(tokensSelected.getLast());
+						
+						// find the next word searching before the selection
+						if (!tokensBefore.isEmpty()) {
+							si = findWordStartBackwards(
+									tokensBefore.getLast()) - 1;
+							if (si < 0)
+								si = 0;
+						} else
+							si = 0;
+					} else {
+						// remove from selection
+						si = trTokens.indexOf(tokensSelected.get(0));
+						ei = findWordStartBackwards(tokensSelected.getLast()) - 1;
+					}
+				}
+				
+				if (ei == trTokens.size())
+					--ei;
+				
+				if (ei >= si)
+					updateTextSelection(si, ei, true, selectingForwards);
+				else {
+					updateCaret();
+				}
+			}
+		}
+	};
+	
+	/** Action to select word to right (using ctrl + shift + right arrow key) */
+	public Action selectWordRight = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (trTokens != null && !trTokens.isEmpty()) {
+				// get the start index
+				int si, ei;
+				if (tokensSelected.isEmpty()) {
+					// use the first token after as the selection start if
+					// there is no selection yet
+					if (!tokensAfter.isEmpty())
+						si = trTokens.indexOf(tokensAfter.get(0));
+					else
+						si = trTokens.size() - 1;
+					
+					// find the next word searching from the caret
+					ei = findWordStartForwards();
+					
+					// set the selection direction
+					selectingForwards = true;
+				} else {
+					// otherwise use the tokens in the selection
+					// check the direction in which we were going
+					if (selectingForwards) {
+						// add to selection - hold
+						si = trTokens.indexOf(tokensSelected.get(0));
+						
+						// find the next word searching after the selection
+						if (!tokensAfter.isEmpty())
+							ei = findWordStartForwards(tokensAfter.get(0));
+						else
+							ei = trTokens.size();
+					} else {
+						// remove from selection
+						si = findWordStartForwards(tokensSelected.get(0));
+						ei = trTokens.indexOf(tokensSelected.getLast()) + 1;
+					}
+				}
+				
+				// if we pick the last token, use includeEnd
+				boolean includeEnd = false;
+				if (ei >= trTokens.size()) {
+					ei = trTokens.size() - 1;
+					includeEnd = true;
+				}
+				
+				if (ei > si)
+					updateTextSelection(si, ei, includeEnd, selectingForwards);
+				else {
+					if (!tokensAfter.isEmpty())
+						moveCaret(tokensAfter.get(0));
+					else
+						moveCaret(trTokens.size());
+				}
+			}
+		}
+	};
+	
+	/** Jump the caret to the beginning of the next word */
+	public Action jumpCaretRight = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			int i = findWordStartForwards();
+			if (i != -1)
+				moveCaret(i);
+		}
+	};	
+	
+	/** Jump the caret to the beginning of the previous word */
+	public Action jumpCaretLeft = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			int i = findWordStartBackwards();
+			if (i != -1)
+				moveCaret(i);
+		}
+	};
+	
+	/** Return the index of the token that starts the current or previous word
+	 *  (or the previous tag).
+	 */
+	private int findWordStartBackwards() {
+		if (trTokens != null && !trTokens.isEmpty()) {
 			// get the current token
 			WToken tok = getCaretToken();
-			
+			if (tok != null)
+				return findWordStartBackwards(tok);
+		}
+		return -1;
+	}
+
+	/** Return the index of the token that starts the current or previous word
+	 *  (or the previous tag) searching from the token tok.
+	 */
+	private int findWordStartBackwards(WToken tok) {
+		if (trTokens != null && !trTokens.isEmpty()) {
+			// find the word this token is in
+			WTokenList word = trTokens.getTokenWord(tok);
+			if (word != null) {
+				// check if this is the start of the word or not
+				if (word.indexOf(tok) == 0) {
+					// if it is, go to first token of the previous word
+					// (obeying stepNonTextTags)
+					int wi = trTokens.getWordIndex(word);
+					while (wi >= 1) {
+						WTokenList pWord = trTokens.getWords().get(--wi);
+						if (!pWord.isEmpty()) {
+							WToken pTok = pWord.get(0);
+							if (pTok.isPrintableText() || stepNonTextTags)
+								return trTokens.indexOf(pTok);
+						}
+					}
+				} else {
+					// if it's not, go to the start of this word
+					if (!word.isEmpty())
+						return trTokens.indexOf(word.get(0));
+				}
+			}
+		}
+		return -1;
+	}
+	
+	/** Return the index of the token that starts the current or previous word
+	 *  (or the previous tag).
+	 */
+	private int findWordStartForwards() {
+		if (trTokens != null && !trTokens.isEmpty()) {
+			// get the current token
+			WToken tok = getCaretToken();
+			if (tok != null)
+				return findWordStartForwards(tok);
+		}
+		return -1;
+	}
+	
+	/** Return the index of the token that starts the next word or tag. */
+	private int findWordStartForwards(WToken tok) {
+		if (trTokens != null && !trTokens.isEmpty()) {
+			// find the word this token is in
+			WTokenList word = trTokens.getTokenWord(tok);
+			if (word != null) {
+				// go to first token of the next word (obeying
+				// stepNonTextTags)
+				int wi = trTokens.getWordIndex(word);
+				while (wi < trTokens.getNumWords()-1) {
+					WTokenList nWord = trTokens.getWords().get(++wi);
+					if (!nWord.isEmpty()) {
+						WToken pTok = nWord.get(0);
+						if (pTok.isPrintableText() || stepNonTextTags)
+							return trTokens.indexOf(pTok);
+					}
+				}
+				// if we don't get anything, we need to go to the end of the
+				// last word (which should be the current word)
+				if (!word.isEmpty())
+					return trTokens.indexOf(word.getLast()) + 1;
+			}
+		}
+		return -1;
+	}
+	
+	/** Up Arrow action. */
+	public Action upArrow = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (inTextMode() || (getCaretToken() != null
+					&& (inTextRectMode() || inMultiTagMode()))) {
+				moveCaretUp();
+			} else
+				selectPrevRegion();
+		}
+	};
+	
+	/** Down Arrow action. */
+	public Action downArrow = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (inTextMode() || (getCaretToken() != null
+					&& (inTextRectMode() || inMultiTagMode()))) {
+				moveCaretDown();
+			} else
+				selectNextRegion();
+		}
+	};
+	
+	/** Move caret up one line (using up arrow key) */
+	public void moveCaretUp() {
+		// get the token above the caret - if it's valid, move the caret up
+		// (otherwise do nothing)
+		WToken upTok = getTokenLineUp();
+		if (upTok != null)
+			moveCaret(upTok);
+	}
+
+	/** Select from caret position line above. */
+	public Action selectUp = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (trTokens != null && !trTokens.isEmpty()) {
+				// get the start and end indices
+				int si, ei;
+				if (tokensSelected.isEmpty()) {
+					WToken tok = getCaretToken();
+					WToken upTok = getTokenLineUp();
+					
+					ei = trTokens.indexOf(tok);
+					selectingForwards = false;
+					
+					if (upTok != null)
+						si = trTokens.indexOf(upTok);
+					else
+						// go to beginning of line if nothing above
+						si = 0;
+				} else {
+					if (!selectingForwards) {
+						// have a selection - keep going up
+						ei = trTokens.indexOf(tokensSelected.getLast()) + 1;
+						WToken upTok = getTokenLineUp(tokensSelected.get(0));
+						if (upTok != null)
+							si = trTokens.indexOf(upTok);
+						else
+							si = 0;
+					} else {
+						// remove from selection
+						si = trTokens.indexOf(tokensSelected.get(0));
+						ei = trTokens.indexOf(
+								getTokenLineUp(tokensSelected.getLast()))+1;
+					}
+				}
+				if (ei > trTokens.size() - 1)
+					ei = trTokens.size() - 1;
+				if (ei > si)
+					updateTextSelection(si, ei, false, selectingForwards);
+				else
+					updateCaret();
+			}
+		}
+	};
+	
+	/** Return the token above the caret */
+	private WToken getTokenLineUp() {
+		// get the current token
+		WToken tok = getCaretToken();
+		return getTokenLineUp(tok);
+	}
+	
+	/** Return the token above the token provided */
+	private WToken getTokenLineUp(WToken tok) {
+		if (tok != null) { 
 			// get the line this token is on
 			int li = trTokens.getLineIndex(tok);
 			if (li > 0) {
 				// if this isn't the first line, find the closest token (based
 				// on the X coordinate) on the next line up
-				WToken upTok = getClosestTokenOnLine(li-1, tok.getCoordX());
-				
-				// if we got a valid token, move the caret up (otherwise do
-				// nothing)
-				if (upTok != null) {
-					moveCaret(upTok);
+				return getClosestTokenOnLine(li-1, tok.getCoordX());
+			}
+		}
+		return null;
+	}
+	
+	/** Move caret down one line (using up arrow key) */
+	public void moveCaretDown() {
+		// get the token below the caret - if it's valid, move the caret down
+		// (otherwise do nothing)
+		WToken downTok = getTokenLineDown();
+		if (downTok != null)
+			moveCaret(downTok);
+	}
+
+	/** Select from caret position line below. */
+	public Action selectDown = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (trTokens != null && !trTokens.isEmpty()) {
+				// get the start and end indices
+				int si, ei;
+				if (tokensSelected.isEmpty()) {
+					// get the current token and the one below
+					WToken tok = getCaretToken();
+					WToken downTok = getTokenLineDown();
+					
+					si = trTokens.indexOf(tok);
+					selectingForwards = true;
+					
+					if (downTok != null)
+						ei = trTokens.indexOf(downTok);
+					else
+						// go to end of TR if nothing above
+						ei = trTokens.size() - 1;
+				} else {
+					if (selectingForwards) {
+						// have a selection - keep going down
+						si = trTokens.indexOf(tokensSelected.get(0));
+						WToken downTok = getTokenLineDown(
+								tokensSelected.getLast());
+						if (downTok != null)
+							ei = trTokens.indexOf(downTok);
+						else
+							ei = trTokens.size() - 1;
+					} else {
+						// remove from selection
+						ei = trTokens.indexOf(tokensSelected.getLast());
+						si = trTokens.indexOf(
+								getTokenLineDown(tokensSelected.get(0)));
+					}
+				}
+				if (ei > si)
+					updateTextSelection(si, ei, true, selectingForwards);
+				else {
+					if (!tokensAfter.isEmpty())
+						moveCaret(tokensAfter.get(0));
+					else
+						moveCaret(trTokens.getLast());
 				}
 			}
 		}
 	};
 	
-	/** Action to move caret up one line (using up arrow key) */
-	public Action moveCaretDown = new AbstractAction() {
-		public void actionPerformed(ActionEvent e) {
-			// get the current token
-			WToken tok = getCaretToken();
-			
+	/** Return the token below the caret */
+	private WToken getTokenLineDown() {
+		// get the current token
+		WToken tok = getCaretToken();
+		return getTokenLineDown(tok);
+	}
+	
+	/** Return the token below the token provided */
+	private WToken getTokenLineDown(WToken tok) {
+		if (tok != null) {
 			// get the line this token is on
 			int li = trTokens.getLineIndex(tok);
 			if (li < trTokens.getNumLines()-1) {
 				// if this isn't the last line, find the closest token (based
 				// on the X coordinate) on the next line down
-				WToken downTok = getClosestTokenOnLine(li+1, tok.getCoordX());
-				
-				// if we got a valid token, move the caret up (otherwise do
-				// nothing)
-				if (downTok != null) {
-					moveCaret(downTok);
-				}
+				return getClosestTokenOnLine(li+1, tok.getCoordX());
 			}
 		}
-	};
+		return null;
+	}
+	
+	/** Select the previous region in the region list for the current mode. */
+	public void selectPrevRegion() {
+		println("spr");
+		if (inTextRectMode() || inColorRectMode()) {
+			println("Rect: %d", selectedRectIndx);
+			if (selectedRectIndx > 0) {
+				--selectedRectIndx;
+				updateSelectedRectangle();
+			}
+		} else if (inGraphicMode()) {
+			println("Graphic: %d", selectedGraphicIndx);
+			if (selectedGraphicIndx > 0) {
+				--selectedGraphicIndx;
+				updateSelectedGraphic();
+			}
+		}
+	}
+	
+	/** Select the next region in the region list for the current mode. */
+	public void selectNextRegion() {
+		println("snr");
+		if (inTextRectMode() || inColorRectMode()) {
+			println("Rect: %d", selectedRectIndx);
+			if (selectedRectIndx < modeRects.size()-1) {
+				++selectedRectIndx;
+				updateSelectedRectangle();
+			}
+		} else if (inGraphicMode()) {
+			println("Graphic: %d", selectedGraphicIndx);
+			if (selectedGraphicIndx < graphics.size()-1) {
+				++selectedGraphicIndx;
+				updateSelectedGraphic();
+			}
+		}
+	}
 	
 	/** Action to move caret to the beginning of the current line (home key) */
 	public Action moveCaretLineBeginning = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-			// get the current token and find what line it's on
-			WToken tok = getCaretToken();
-			WTokenList lineTokens = trTokens.getTokenLine(tok);
-			
-			if (lineTokens != null) {
-				WToken homeTok;
-				if (stepNonTextTags)
-					// grab the first token on the line
-					homeTok = lineTokens.get(0);
-				else
-					// grab the first text token
-					homeTok = lineTokens.findFirstTextToken(true, true);
-				
-				// move the caret to that token
+			// get the home token and move there
+			WToken homeTok = getHomeToken();
+			if (homeTok != null)
 				moveCaret(homeTok);
+		}
+	};
+	
+	/** Select from caret position to start of line. */
+	public Action selectToLineStart = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (trTokens != null && !trTokens.isEmpty()) {
+				// get the start and end indices
+				int si, ei;
+				if (tokensSelected.isEmpty()) {
+					if (!tokensBefore.isEmpty())
+						ei = trTokens.indexOf(tokensBefore.getLast());
+					else
+						ei = 0;
+					
+					si = trTokens.indexOf(getHomeToken());
+					
+					// set the selection direction
+					selectingForwards = false;
+				} else {
+					if (!selectingForwards) {
+						// have a selection - go to line start from selection
+						// start
+						ei = trTokens.indexOf(tokensSelected.getLast()) + 1;
+						WToken homeTok = getHomeToken(tokensSelected.get(0));
+						if (homeTok != null)
+							si = trTokens.indexOf(homeTok);
+						else
+							si = 0;
+					} else {
+						// remove from selection
+						si = trTokens.indexOf(tokensSelected.get(0));
+						WToken homeTok = getHomeToken(
+								tokensSelected.getLast());
+						if (homeTok != null)
+							ei = trTokens.indexOf(homeTok);
+						else
+							ei = 0;
+					}
+				}
+				if (ei > trTokens.size() - 1)
+					ei = trTokens.size() - 1;
+				if (ei > si)
+					updateTextSelection(si, ei, true, selectingForwards);
+				else
+					updateCaret();
 			}
 		}
 	};
 	
-	/** Action to move caret to the end of the current line (end key) */
-	public Action moveCaretLineEnd = new AbstractAction() {
-		public void actionPerformed(ActionEvent e) {
-			// get the current token and find what line it's on
-			WToken tok = getCaretToken();
+	/** Return the token at the beginning of this line. */
+	private WToken getHomeToken() {
+		// get the current token and find what line it's on
+		WToken tok = getCaretToken();
+		return getHomeToken(tok);
+	}
+
+	/** Return the token at the beginning of the line on which the provided
+	 *  token is located. */
+	private WToken getHomeToken(WToken tok) {
+		// get the current token and find what line it's on
+		if (tok != null) {
 			WTokenList lineTokens = trTokens.getTokenLine(tok);
 			
 			if (lineTokens != null) {
-				WToken endTok;
 				if (stepNonTextTags)
-					// grab the last token on the line
-					endTok = lineTokens.get(lineTokens.size()-1);
-				else {
-					endTok = lineTokens.findLastTextToken(true, true);
-				}
-				
+					// grab the first token on the line
+					return lineTokens.get(0);
+				else
+					// grab the first text token
+					return lineTokens.findFirstTextToken(true, true);
+			}
+		}
+		return null;
+	}
+	
+	/** Action to move caret to the end of the current line (end key) */
+	public Action moveCaretLineEnd = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			WToken endTok = getEndToken();
+			if (endTok != null)
 				// move the caret to the right of that token (unless it's a
 				// newline)
 				moveCaret(endTok, !endTok.isType(WTokenType.newLine));
+		}
+	};
+	
+	/** Select from caret position to end of line. */
+	public Action selectToLineEnd = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (trTokens != null && !trTokens.isEmpty()) {
+				// get the start and end indices
+				int si, ei;
+				if (tokensSelected.isEmpty()) {
+					if (!tokensAfter.isEmpty())
+						si = trTokens.indexOf(tokensAfter.get(0));
+					else
+						si = 0;
+					
+					ei = trTokens.indexOf(getEndToken());
+					
+					// set the selection direction
+					selectingForwards = true;
+				} else {
+					if (selectingForwards) {
+						// have a selection - go to line end from selection
+						// end
+						si = trTokens.indexOf(tokensSelected.get(0));
+						WToken endTok = getEndToken(tokensSelected.getLast());
+						if (endTok != null)
+							ei = trTokens.indexOf(endTok);
+						else
+							ei = trTokens.size() - 1;
+					} else {
+						// remove from selection
+						ei = trTokens.indexOf(tokensSelected.getLast());
+						WToken endTok = getEndToken(tokensSelected.get(0));
+						if (endTok != null)
+							si = trTokens.indexOf(endTok);
+						else
+							si = trTokens.size() - 1;
+					}
+				}
+				if (ei > si)
+					updateTextSelection(si, ei, true, selectingForwards);
+				else {
+					if (!tokensAfter.isEmpty())
+						moveCaret(tokensAfter.get(0));
+					else
+						moveCaret(trTokens.getLast());
+				}
+			}
+		}
+	};
+	
+	/** Return the token at the end of this line. */
+	private WToken getEndToken() {
+		// get the current token and find what line it's on
+		WToken tok = getCaretToken();
+		return getEndToken(tok);
+	}
+
+	/** Return the token at the end of the line on which the provided token is
+	 *  located. */
+	private WToken getEndToken(WToken tok) {
+		// get the current token and find what line it's on
+		if (tok != null) {
+			WTokenList lineTokens = trTokens.getTokenLine(tok);
+			
+			if (lineTokens != null) {
+				if (stepNonTextTags)
+					// grab the last token on the line
+					return lineTokens.get(lineTokens.size()-1);
+				else {
+					return lineTokens.findLastTextToken(true, true);
+				}
+			}
+		}
+		return null;	
+	}
+	
+	/** Select all text in the current text rectangle. */
+	public Action selectAll = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (!trTokens.isEmpty()) {
+				int si = 0;
+				int ei = trTokens.size() - 1;
+				selectingForwards = true;
+				updateTextSelection(si, ei, true, selectingForwards);
+			}
+		}
+	};
+	
+	/** Select from caret position to start of text rectangle. */
+	public Action selectToTrStart = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (trTokens != null && !trTokens.isEmpty()) {
+				// get the start and end indices
+				int si, ei;
+				
+				WToken firstTok;
+				if (stepNonTextTags)
+					firstTok = trTokens.get(0);
+				else
+					firstTok = trTokens.findFirstTextToken(true, true);
+				
+				if (firstTok != null)
+					si = trTokens.indexOf(firstTok);
+				else
+					si = 0;
+				
+				if (tokensSelected.isEmpty()) {
+					if (!tokensBefore.isEmpty())
+						ei = trTokens.indexOf(tokensBefore.getLast());
+					else
+						ei = 0;
+					
+					// set the selection direction
+					selectingForwards = false;
+				} else {
+					if (!selectingForwards) {
+						// have a selection - go to start from selection end
+						ei = trTokens.indexOf(tokensSelected.getLast()) + 1;
+					} else {
+						// this will deselect all
+						ei = si;
+					}
+				}
+				if (ei > trTokens.size() - 1)
+					ei = trTokens.size() - 1;
+				if (ei > si)
+					updateTextSelection(si, ei, true, selectingForwards);
+				else
+					updateCaret();
+			}
+		}
+	};
+
+	/** Select from caret position to end of text rectangle. */
+	public Action selectToTrEnd = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (trTokens != null && !trTokens.isEmpty()) {
+				// get the start and end indices
+				int si, ei;
+				
+				WToken lastTok;
+				if (stepNonTextTags)
+					lastTok = trTokens.getLast();
+				else
+					lastTok = trTokens.findLastTextToken(true, true);
+				
+				if (lastTok != null)
+					ei = trTokens.indexOf(lastTok);
+				else
+					ei = trTokens.size() - 1;
+				
+				if (tokensSelected.isEmpty()) {
+					if (!tokensAfter.isEmpty())
+						si = trTokens.indexOf(tokensAfter.get(0));
+					else
+						si = 0;
+					
+					// set the selection direction
+					selectingForwards = true;
+				} else {
+					if (selectingForwards) {
+						// have a selection - go to end from selection start
+						si = trTokens.indexOf(tokensSelected.get(0));
+					} else {
+						// this will deselect all
+						si = ei;
+					}
+				}
+				if (ei > si)
+					updateTextSelection(si, ei, true, selectingForwards);
+				else {
+					if (!tokensAfter.isEmpty())
+						moveCaret(tokensAfter.get(0));
+					else
+						moveCaret(trTokens.getLast());
+				}
+			}
+		}
+	};
+	
+	/** Action to move caret to the beginning of the current text rectangle
+	 *  (Ctrl + Home) */
+	public Action moveCaretTrBeginning = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// get the first token in the text rectangle (type depends on mode)
+			if (trTokens.size() > 0) {
+				WToken firstTok;
+				if (stepNonTextTags)
+					firstTok = trTokens.get(0);
+				else
+					firstTok = trTokens.findFirstTextToken(true, true);
+				moveCaret(firstTok);
+			}
+		}
+	};
+	
+	/** Action to move caret to the end of the current text rectangle (Ctrl +
+	 *  End) */
+	public Action moveCaretTrEnd = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// get the first token in the text rectangle (type depends on mode)
+			if (trTokens.size() > 0) {
+				WToken lastTok;
+				if (stepNonTextTags)
+					lastTok = trTokens.getLast();
+				else
+					lastTok = trTokens.findLastTextToken(true, true);
+				moveCaret(lastTok, true);
 			}
 		}
 	};
@@ -1423,15 +2159,19 @@ public class WController {
 	/** Delete all tokens in the selection. If saveForUndo is true, the state
 	 *  is saved before deleting the tokens. */
 	private void deleteSelection(boolean saveForUndo) {
-		// TODO save the selection to reset it after undoing
 		if (saveForUndo)
 			saveState();
 		
 		// now find and delete each token, then clear the selection and update
+		if (!tokensSelected.isEmpty())
+			caretIndx = trTokens.indexOf(tokensSelected.get(0));
 		for (WToken tok: tokensSelected) {
-			int i = selectedPage.getTokenIndex(tok);
-			println("Removing token '%s' from %d", tok.toString(), i);
-			selectedPage.removeToken(i);
+			// pay attention to our current mode
+			if (tok.isPrintableText() || stepNonTextTags) {
+				int i = selectedPage.getTokenIndex(tok);
+				println("Removing token '%s' from %d", tok.toString(), i);
+				selectedPage.removeToken(i);
+			}
 		}
 		tokensSelected.clear();
 		
@@ -1667,8 +2407,6 @@ public class WController {
 		if (selectedTextRect != null) {
 			println("Typed: '%c'", c);
 			
-			// TODO handle overwrite mode somehow (default is insert mode)
-			
 			// save our state so we can undo
 			saveState();
 			
@@ -1689,9 +2427,12 @@ public class WController {
 		public void actionPerformed(ActionEvent e) {
 			// save state to allow undo
 			saveState();
+
+			// if there was a selection, delete it first
+			if (!tokensSelected.isEmpty())
+				deleteSelection(false);
 			
 			// create a newline token
-			// TODO how to deal with spacing?? just doing default for now
 			WtNewLine t = new WtNewLine(null);
 			addToken(t);
 		}
@@ -1846,7 +2587,6 @@ public class WController {
 				WTokenType.font);
 		
 		// use the font number to determine likeness
-		// TODO do we need to include the version ID??
 		int pfNum = (pfTag != null) ? pfTag.getFontNum()
 				: defaultFont.getNumber();
 		
@@ -1871,7 +2611,6 @@ public class WController {
 		font = f;
 		
 		// create the appropriate font tag token
-		// TODO I think it's ok to do this with the font ID
 		WtFont fTok = new WtFont(font.getNumber(),
 				String.valueOf(font.getVersionID()));
 		
@@ -1900,8 +2639,6 @@ public class WController {
 	
 	/** Add a foreground color token at the current location. */
 	public void setForegroundColor(DmsColor c) {
-		// TODO do something with default colors?
-		
 		// set the foreground color
 		fgColor = c;
 		
@@ -1927,8 +2664,6 @@ public class WController {
 	/** Add a background color token at the beginning of the page. Uses a page
 	 *  background color tag and not the deprecated color background tag. */
 	public void setBackgroundColor(DmsColor c) {
-		// TODO do something with default colors?
-		
 		// set the background color
 		bgColor = c;
 		
@@ -2021,35 +2756,6 @@ public class WController {
 		return null;
 	}
 	
-	// TODO will remove this and do something else instead
-	/** Get the active foreground color given the current caret location. Uses
-	 *  foreground color tags in the preceding and/or selected tokens and the
-	 *  default to determine what the "active" color is.
-	 */
-//	public Color getActiveForegroundColor() {
-//		// first look in the preceding tokens
-//		WtColorForeground pcTag = (WtColorForeground) getPrecedingTokenOfType(
-//				WTokenType.colorForeground);
-//		
-//		// the color based on this is either the tag value or the default
-//		Color pfgColor = (pcTag != null) ? pcTag.getColor()
-//				: fgColorDefault.color;
-//		
-//		// now look in the selected tokens
-//		WTokenList selColors = getTokensOfTypeInSelection(
-//				WTokenType.colorForeground);
-//		
-//		// now check that every token is the same type
-//		HashSet<Color> colors = new HashSet<Color>();
-//		colors.add(pfgColor);
-//		for (WToken tok: selColors) {
-//			colors.add(((WtColorForeground) tok).getColor());
-//		}
-//		if (colors.size() == 1)
-//			return pfgColor;
-//		return null;
-//	}
-
 	/** Add a line justify left token at the current location. */
 	public Action lineJustifyLeft = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
@@ -2516,19 +3222,23 @@ public class WController {
 	
 	/** Apply the historical state to the controller. */
 	private void applyHistory(WHistory wh) {
-		// apply the old MULTI string - this will change the re
+		// apply the old MULTI string - this will change the rendering
 		setMultiString(wh.getMultiString(), false);
-		
-		// TODO handle selection and selected page
-		
-		// TODO font
-		
-		// now the color
 		
 		update();
 		
 		moveCaret(wh.getCaretIndex());
 	}
+	
+	/** Toggle focus between editor and page list */
+	public Action toggleFocus = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (signPanel.isFocusOwner())
+				pageList.requestFocusInWindow();
+			else if (pageList.isFocusOwner())
+				signPanel.requestFocusInWindow();
+		}
+	};
 	
 	/** Return a WPageList with selection disabled for previewing a message */
 	public WPageList getPagePreviewList() {
@@ -2644,8 +3354,8 @@ public class WController {
 					wmsg.setWysiwygImageSize(
 							signPanel.getWidth(), signPanel.getHeight());
 				} catch (InvalidMsgException e) {
-					// TODO do something with this?
-					e.printStackTrace();
+					if (DEBUG)
+						e.printStackTrace();
 				}
 			}
 		}
@@ -2680,8 +3390,6 @@ public class WController {
 		
 		// also check prefix flag
 		isSaved = (editor.getPrefixPage() == qm.getPrefixPage()) && isSaved;
-		
-		// TODO beacon flag
 		
 		return isSaved;
 	}
@@ -3248,6 +3956,10 @@ public class WController {
 		return multiConfig;
 	}
 	
+	public MultiConfig getSignGroupMultiConfig() {
+		return signGroupMultiConfig;
+	}
+	
 	public boolean multiConfigUseable() {
 		return multiConfig != null && multiConfig.isUseable();
 	}
@@ -3269,8 +3981,6 @@ public class WController {
 	
 	/** Update the list model of graphics supported by the current MultiConfig
 	 *  based on the dimensions and color scheme of the sign.
-	 *  
-	 *  TODO (as everywhere) - SignGroups... 
 	 */
 	public void updateGraphicModel() {
 		// get sign parameters from the MultiConfig

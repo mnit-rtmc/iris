@@ -102,9 +102,7 @@ public class WImagePanel extends JPanel {
 		init();
 		controller.setSignPanel(this);
 	}
-
-	// TODO I don't think we should have to do this - we may be able to fix in
-	// the renderer
+	
 	public WImagePanel(int w, int h, boolean usePreviewImg) {
 		width = w;
 		height = h;
@@ -156,7 +154,6 @@ public class WImagePanel extends JPanel {
 				}
 				
 			} catch (InvalidMsgException e) {
-				// TODO do something with this
 				image = null;
 				e.printStackTrace();
 			}
@@ -170,7 +167,6 @@ public class WImagePanel extends JPanel {
 			try {
 				r.setWysiwygImageSize(width, height);
 			} catch (InvalidMsgException e) {
-				// TODO do something with this?
 				e.printStackTrace();
 			}
 		}
@@ -296,8 +292,6 @@ public class WImagePanel extends JPanel {
 				x += tok.getCoordW();
 			setCaretLocation(x, y, h);
 		} catch (NullPointerException e) {
-			// TODO not sure why this happens (coords are uninitialized I
-			// think), but for now we'll just ignore it
 			e.printStackTrace();
 		}
 	}
@@ -334,9 +328,7 @@ public class WImagePanel extends JPanel {
 		repaint();
 	}
 	
-	/** Draw the caret on the image at/with the caretX/Y/W/H/color and TODO
-	 *  blink rate values. 
-	 */
+	/** Draw the caret on the image at/with the caretX/Y/W/H/color */
 	private void drawCaret(Graphics g) {
 		// get the original color so we can reset the color
 		Color oc = g.getColor();
@@ -359,7 +351,7 @@ public class WImagePanel extends JPanel {
 		selectRects.clear();
 		
 		// now go through the tokens to make rectangles - we may need more
-		// than one if the selection spans multiple lines or TODO complex tags
+		// than one if the selection spans multiple lines
 		int rx = -1, ry = -1;
 		int rx2 = -1, ry2 = -1;
 		for (WToken tok : tokensSelected) {
@@ -384,7 +376,6 @@ public class WImagePanel extends JPanel {
 			}
 			
 			// if we hit a newline token, start a new rectangle
-			// TODO this needs to handle other types of tags
 			if (tok instanceof WtNewLine) {
 				addSelectRectangle(rx, ry, rx2, ry2);
 				
@@ -487,11 +478,13 @@ public class WImagePanel extends JPanel {
 			srHandles = new ArrayList<Rectangle>(rHandles.values());
 		else
 			srHandles.clear();
+		repaint();
 	}
 	
 	public void clearSelectedRegion() {
 		selectedRegion = null;
 		srHandles.clear();
+		repaint();
 	}
 	
 	/** Set the selected graphic visually on the panel by outlining it and
@@ -508,6 +501,7 @@ public class WImagePanel extends JPanel {
 					selectedRegion.y, WController.rThreshold));
 		} else
 			clearSelectedRegion();
+		repaint();
 	}
 	
 	/** Draw the text/color rectangles on the graphics context. */

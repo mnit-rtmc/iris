@@ -200,7 +200,6 @@ public class WTokenList extends ArrayList<WToken> {
 		}
 		return listLines;
 	}
-	
 
 	/** Get the index of the line on which this token is found.
 	 *  @return the index of the line, or -1 if not found */
@@ -231,6 +230,92 @@ public class WTokenList extends ArrayList<WToken> {
 		return getLines().size();
 	}
 	
+	/** Words in this list */
+	private ArrayList<WTokenList> listWords;
+	
+	/** Return an ArrayList of WTokenLists containing the words of the message
+	 *  in this list. Note that spaces are included at the end of each array.
+	 *  Non-text tags (including newlines) are also considered "words" by
+	 *  themselves.
+	 */
+	public ArrayList<WTokenList> getWords() {
+		// if the message has changed, re-initialize the lines
+		if (listWords == null) {
+			// initialize the ArrayList, then iterate through the tokens to
+			// fill it
+			listWords = new ArrayList<WTokenList>();
+			// initialize a WTokenList to hold the line
+			WTokenList l = new WTokenList();
+			
+			for (WToken t: this) {
+				if (t.isPrintableText() && !t.isType(WTokenType.newLine)) {
+					// collect letters and spaces into the word
+					l.add(t);
+					
+					// start a new word if we hit a space
+					if (t.toString().equals(" ")) {
+						listWords.add(l);
+						l = new WTokenList();
+					}
+				} else {
+					// any other type of tag is it's own word
+					if (!l.isEmpty()) {
+						// save any word we had been collecting (without this
+						// token)
+						listWords.add(l);
+						l = new WTokenList();
+					}
+					// add this token as its own word
+					l.add(t);
+					listWords.add(l);
+					l = new WTokenList();
+				}
+				
+			}
+			
+			// add the last word to the list
+			listWords.add(l);
+		}
+		return listWords;
+	}
+
+	/** Get the index of the word in which this token is found.
+	 *  @return the index of the word, or -1 if not found */
+	public int getWordIndex(WToken tok) {
+		// get the list of words, then try to find the token in one of them
+		ArrayList<WTokenList> words = getWords();
+		for (int i = 0; i < words.size(); ++i) {
+			WTokenList word = words.get(i);
+			if (word.contains(tok)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	/** Get the index of the word represented by the token list provided.
+	 *  @return the index of the word, or -1 if not found */
+	public int getWordIndex(WTokenList word) {
+		// get the list of words, then try to find the token in one of them
+		ArrayList<WTokenList> words = getWords();
+		return words.indexOf(word);
+	}
+	
+	/** Get the line on which this token found.
+	 *  @return the WTokenList representing the line, or null if not found
+	 */
+	public WTokenList getTokenWord(WToken tok) {
+		int wi = getWordIndex(tok);
+		if (wi != -1)
+			return getWords().get(wi);
+		return null;
+	}
+	
+	/** Return the number of lines on the page. */
+	public int getNumWords() {
+		return getWords().size();
+	}
+	
 	/** Return the next token with a type that matches any of the types
 	 *  provided, starting the search at si.
 	 */
@@ -257,7 +342,8 @@ public class WTokenList extends ArrayList<WToken> {
 			
 			if ((tok.isPrintableText()
 					&& (includeNewLine || tok.isType(WTokenType.textChar)))
-					|| (tok instanceof Wt_IrisToken && includeIrisTags))
+					|| (tok instanceof Wt_IrisToken && includeIrisTags
+							&& !tok.isBlank()))
 				return tok;
 		}
 		return null;
@@ -298,7 +384,8 @@ public class WTokenList extends ArrayList<WToken> {
 			
 			if ((tok.isPrintableText()
 					&& (includeNewLine || tok.isType(WTokenType.textChar)))
-					|| (tok instanceof Wt_IrisToken && includeIrisTags))
+					|| (tok instanceof Wt_IrisToken && includeIrisTags
+							&& !tok.isBlank()))
 				return tok;
 		}
 		return null;

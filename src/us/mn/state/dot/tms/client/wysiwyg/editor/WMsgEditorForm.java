@@ -85,8 +85,7 @@ public class WMsgEditorForm extends AbstractForm {
 	/* Menu Bar */
 	private WMsgEditorMenuBar menu_bar;
 	
-	/* Beacon and Prefix Check Boxes */ 
-	private JCheckBox beacon_chk; 
+	/* Prefix Check Boxes */ 
 	private JCheckBox prefix_chk;
 
 	/* Sign drop-down (only present for groups) */
@@ -117,15 +116,11 @@ public class WMsgEditorForm extends AbstractForm {
 	private WEditorKeyBindings editorKeyBindings;
 	
 	public WMsgEditorForm(Session s) {
-		// TODO need to add the message name to the title (somehow...)
 		super(getWindowTitle(null), true);
 		session = s;
 		controller = new WController(this);
 		initForm();
 	}
-	
-	// TODO need to figure out how to deal with new QuickMessages (where/when/
-	// how is name created???)
 	
 	public WMsgEditorForm(Session s, DMS d) {
 		super(getWindowTitle(null), true);
@@ -184,15 +179,12 @@ public class WMsgEditorForm extends AbstractForm {
 	protected void initForm() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		
-		// TODO may want to change these dimensions
-		// OR BETTER YET - figure out how to make it more adaptive...
 		setPreferredSize(new Dimension(1150,600));
 		
 		/* Menu Bar */
 		menu_bar = new WMsgEditorMenuBar();
 		
-		/* Beacon and Prefix Check Boxes */ 
-		beacon_chk = new JCheckBox(); 
+		/* Prefix Check Boxes */ 
 		prefix_chk = new JCheckBox();
 		
 		/* Sign group drop-down - only present if editing for sign group */
@@ -239,7 +231,7 @@ public class WMsgEditorForm extends AbstractForm {
 		/* Main Editor Panel */
 		epanel = new WMsgEditorPanel(controller);
 		
-		/* Buttons - TODO finish implementing */
+		/* Buttons */
 		cancel_btn = new JButton(cancel);
 		save_as_btn = new JButton(saveas);
 		save_btn = new JButton(save);
@@ -345,12 +337,10 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
-		JPanel bpPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		bpPanel.add(new ILabel("wysiwyg.editor.beacon"));
-		bpPanel.add(beacon_chk);
-		bpPanel.add(new ILabel("wysiwyg.editor.prefix"));
-		bpPanel.add(prefix_chk);
-		gbPanel.add(bpPanel, gbc);
+		JPanel pPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		pPanel.add(new ILabel("wysiwyg.editor.prefix"));
+		pPanel.add(prefix_chk);
+		gbPanel.add(pPanel, gbc);
 		prefix_chk.setSelected(controller.getPrefixPage());
 		
 		/* Cancel/Save As/Save Buttons */
@@ -423,8 +413,8 @@ public class WMsgEditorForm extends AbstractForm {
 	/** Enable or disable functions that correspond to any tags not supported
 	 *  by the MultiConfig provided.
 	 */
-	public void checkSupportedFuncs(MultiConfig mc) {
-		epanel.checkSupportedFuncs(mc);
+	public void setActiveMultiConfig(MultiConfig mc) {
+		epanel.setActiveMultiConfig(mc);
 	}
 	
 	/** Set the current page displayed on the WYSIWYG panel. */
@@ -554,6 +544,10 @@ public class WMsgEditorForm extends AbstractForm {
 
 	public String getMultiPanelContents() {
 		return epanel.getMultiPanelContents();
+	}
+	
+	public WMsgEditorPanel getEditorPanel() {
+		return epanel;
 	}
 }
 	

@@ -19,9 +19,12 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
@@ -49,7 +52,9 @@ public class WMsgEditorPanel extends JPanel {
 	private WMsgMultiPanel multiPanel;
 	private WMsgConfigPanel configPanel;
 	private WMsgErrorPanel errorPanel;
-	private final static int ERROR_PANEL_TAB = 3;
+	
+	private int CONFIG_PANEL_TAB = 2;
+	private int ERROR_PANEL_TAB = 3;
 	
 	// TODO - warnings and errors (should be dynamic)
 	
@@ -65,29 +70,56 @@ public class WMsgEditorPanel extends JPanel {
 		// generate each tab
 		wysiwygPanel = new WMsgWysiwygPanel(controller);
 		multiPanel = new WMsgMultiPanel(controller);
-		configPanel = new WMsgConfigPanel(controller);					// TODO
+		configPanel = new WMsgConfigPanel(controller);
 		
 		// add the tabs to the pane
 		// if we don't have a valid MultiConfig, we can't show the WYSIWYG or
 		// config panels
 		boolean mcOK = controller.multiConfigUseable();
-		if (mcOK)
+		if (mcOK) {
 			tabPane.add(I18N.get("wysiwyg.epanel.wysiwyg_tab"), wysiwygPanel);
+			CONFIG_PANEL_TAB = 2;
+			ERROR_PANEL_TAB = 3;
+		} else {
+			CONFIG_PANEL_TAB = 1;
+			ERROR_PANEL_TAB = 2;
+		}
 		
 		tabPane.add(I18N.get("wysiwyg.epanel.multi_tab"), multiPanel);
+		tabPane.add(I18N.get("wysiwyg.epanel.config_tab"), configPanel);
 		
-		if (mcOK)
-			tabPane.add(I18N.get("wysiwyg.epanel.config_tab"), configPanel);
+		// change the color of the config panel if there are errors/warnings
+		if (configPanel.hasErrors())
+			tabPane.setForegroundAt(CONFIG_PANEL_TAB, Color.RED);
+		else if (configPanel.hasWarnings())
+			tabPane.setForegroundAt(CONFIG_PANEL_TAB, Color.ORANGE);
 		
 		// add the tab pane to the panel
 		add(tabPane, BorderLayout.CENTER);
 	}
-
+	
+	/** Toggle active tab between WYSIWYG and MULTI */
+	public Action toggleActiveTab = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			if (controller.multiConfigUseable()) {
+				if (tabPane.getSelectedComponent() == wysiwygPanel)
+					tabPane.setSelectedComponent(multiPanel);
+				else if (tabPane.getSelectedComponent() == multiPanel)
+					tabPane.setSelectedComponent(wysiwygPanel);
+			}
+		}
+	};
+	
 	/** Enable or disable functions that correspond to any tags not supported
 	 *  by the MultiConfig provided.
 	 */
-	public void checkSupportedFuncs(MultiConfig mc) {
+	public void setActiveMultiConfig(MultiConfig mc) {
 		wysiwygPanel.checkSupportedFuncs(mc);
+		configPanel.setActiveMultiConfig(mc);
+		if (configPanel.hasErrors())
+			tabPane.setForegroundAt(CONFIG_PANEL_TAB, Color.RED);
+		else if (configPanel.hasWarnings())
+			tabPane.setForegroundAt(CONFIG_PANEL_TAB, Color.ORANGE);
 	}
 	
 	/** Update the main WYSIWYG panel with the currently selected page (called

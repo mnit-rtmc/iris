@@ -251,7 +251,7 @@ public class WMsgWysiwygPanel extends JPanel {
 		multitag_toolbar_pnl.updateTagEditButton(state);
 	}
 	
-	/** Update the non-text tag button state to */
+	/** Update the non-text tag button state to state */
 	public void updateNonTextTagButton(boolean state) {
 		nonTextTagBtn.setSelected(state);
 	}
@@ -271,8 +271,8 @@ public class WMsgWysiwygPanel extends JPanel {
 	/***** Button Actions *****/
 	
 	/** Text mode action */
-	private final IAction activate_text_mode = new IAction("wysiwyg.epanel.text_mode") {
-		@SuppressWarnings("synthetic-access")
+	private final IAction activate_text_mode = 
+			new IAction("wysiwyg.epanel.text_mode") {
 		protected void doActionPerformed(ActionEvent e)
 			throws Exception
 		{
@@ -291,8 +291,8 @@ public class WMsgWysiwygPanel extends JPanel {
 	};
 	
 	/** Graphic mode action */
-	private final IAction activate_graphic_mode = new IAction("wysiwyg.epanel.graphic_mode") {
-		@SuppressWarnings("synthetic-access")
+	private final IAction activate_graphic_mode = 
+			new IAction("wysiwyg.epanel.graphic_mode") {
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
 		{
@@ -309,8 +309,8 @@ public class WMsgWysiwygPanel extends JPanel {
 	
 	
 	/** Color Rectangle mode action */
-	private final IAction activate_colorrect_mode = new IAction("wysiwyg.epanel.colorrect_mode") {
-		@SuppressWarnings("synthetic-access")
+	private final IAction activate_colorrect_mode = 
+			new IAction("wysiwyg.epanel.colorrect_mode") {
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
 		{
@@ -327,8 +327,8 @@ public class WMsgWysiwygPanel extends JPanel {
 	
 	
 	/** Text Rectangle mode action */
-	private final IAction activate_textrect_mode = new IAction("wysiwyg.epanel.textrect_mode") {
-		@SuppressWarnings("synthetic-access")
+	private final IAction activate_textrect_mode = 
+			new IAction("wysiwyg.epanel.textrect_mode") {
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
 		{
@@ -345,8 +345,8 @@ public class WMsgWysiwygPanel extends JPanel {
 	
 	
 	/** MULTI Tag mode action */
-	private final IAction activate_multitag_mode = new IAction("wysiwyg.epanel.multitag_mode") {
-		@SuppressWarnings("synthetic-access")
+	private final IAction activate_multitag_mode = 
+			new IAction("wysiwyg.epanel.multitag_mode") {
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
 		{

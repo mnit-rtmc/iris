@@ -80,7 +80,8 @@ public class WPageList extends JList<WPage> {
 		else
 			wmsg.parseMulti(multiString);
 		
-		wmsg.renderMsg(mcfg);
+		if (mcfg.isUseable())
+			wmsg.renderMsg(mcfg);
 		
 		// clear the model and refill it with pages (if the message is valid)
 		model.clear();

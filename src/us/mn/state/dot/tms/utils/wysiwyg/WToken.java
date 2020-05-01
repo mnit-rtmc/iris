@@ -462,7 +462,8 @@ abstract public class WToken {
 	public enum AnchorLoc {
 		BEFORE,
 		NONE,
-		AFTER
+		AFTER,
+		CONDITIONAL
 	}
 	
 	protected AnchorLoc anchorLoc =

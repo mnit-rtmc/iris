@@ -135,10 +135,10 @@ class WMultiConfigComboBox extends JComboBox<MultiConfig> {
 						mc.getName(), mc.getConfigList().size(),
 						mc.getSignList().size());
 			} else if (mc.getType() == MultiConfig.CONFIG) {
-				value = String.format("%s: %d Signs",
+				value = String.format("%s",
 						mc.getName(), mc.getSignList().size());
 			} else if (mc.getType() == MultiConfig.SIGN) {
-				value = String.format("Sign: %s", mc.getName());
+				value = String.format("Sign %s", mc.getName());
 			} else
 				value = String.format("<UNKNOWN> %s", mc.getName());
 			
