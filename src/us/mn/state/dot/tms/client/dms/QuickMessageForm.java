@@ -99,12 +99,14 @@ public class QuickMessageForm extends ProxyTableForm<QuickMessage> {
 		}
 		
 		/** Create a WYSIWYG Selector button action */
-		private final IAction wysiwyg_selector = new IAction("wysiwyg.selector.edit") {
+		@SuppressWarnings("serial")
+		private final IAction wysiwyg_selector =
+				new IAction("wysiwyg.selector.edit") {
 			protected void doActionPerformed(ActionEvent e) {
 				// get the selected QuickMessage and SignGroup to pass it to the form
 				QuickMessage qm = getSelectedProxy();
 				SignGroup sg = qm.getSignGroup();
-//				session.getDesktop().show(new WMsgSelectorForm(session, qm, sg));
+				session.getDesktop().show(new WMsgSelectorForm(session, qm, sg));
 			}
 		};
 	}
