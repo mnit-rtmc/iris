@@ -19,7 +19,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.HashMap;
 
-import us.mn.state.dot.tms.client.wysiwyg.editor.WController;
 import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_Rectangle;
 
 /**
