@@ -57,7 +57,7 @@ public class WtLocator extends WToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		wr.addLocator(this);
+		wr.renderLocator(this);
 	}
 
 	/* (non-Javadoc)

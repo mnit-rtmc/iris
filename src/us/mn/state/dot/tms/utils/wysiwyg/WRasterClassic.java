@@ -101,21 +101,4 @@ public class WRasterClassic extends WRaster {
 	public Integer classicColorToPixel(int cco) {
 		return cco;
 	}
-
-//	/* (non-Javadoc)
-//	 * @see us.mn.state.dot.tms.utils.wysiwyg.WRaster#tagToColor(int[])
-//	 */
-//	@Override
-//	public DmsColor tagvalToColor(int[] tag) {
-//		if (tag == null)
-//			return null;
-//		switch (tag.length) {
-//			case 0:
-//				return null;
-//			case 1:
-//				ColorClassic cc = ColorClassic.fromOrdinal(tag[0]);
-//				return cc.clr;
-//		}
-//		return null;
-//	}
 }

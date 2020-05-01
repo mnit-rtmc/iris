@@ -63,7 +63,7 @@ public class WtPageTime extends WToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		wr.setPageTimes(this);
+		wr.renderPageTimes(this);
 	}
 
 	/* (non-Javadoc)

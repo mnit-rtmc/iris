@@ -98,7 +98,7 @@ public class WtPageBackground extends WToken implements Wt_ColorToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		wr.setPageBackground(this);
+		wr.renderPageBackground(this);
 	}
 
 	/* (non-Javadoc)

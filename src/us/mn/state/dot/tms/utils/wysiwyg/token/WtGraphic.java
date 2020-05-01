@@ -137,7 +137,7 @@ public class WtGraphic extends WToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		wr.addGraphic(this);
+		wr.renderGraphic(this);
 	}
 
 	/* (non-Javadoc)

@@ -65,7 +65,7 @@ public class WtColorBackground extends WToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		wr.setColorBackground(this);
+		wr.renderColorBackground(this);
 	}
 
 	/* (non-Javadoc)

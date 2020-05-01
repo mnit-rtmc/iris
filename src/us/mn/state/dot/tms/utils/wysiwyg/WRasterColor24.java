@@ -134,25 +134,6 @@ public class WRasterColor24 extends WRaster {
 		return (cc != null) ? (cc.clr.rgb() & 0x0ffffff) : null;
 	}
 
-//	/* (non-Javadoc)
-//	 * @see us.mn.state.dot.tms.utils.wysiwyg.WRaster#tagToColor(int[])
-//	 */
-//	@Override
-//	public DmsColor tagvalToColor(int[] tag) {
-//		if (tag == null)
-//			return null;
-//		switch (tag.length) {
-//			case 0:
-//				return null;
-//			case 1:
-//				ColorClassic cc = ColorClassic.fromOrdinal(tag[0]);
-//				return cc.clr;
-//			case 3:
-//				return new DmsColor(tag[0], tag[1], tag[2]);
-//		}
-//		return null;
-//	}
-	
 	/** Copy a WRaster into this WRaster.
 	 * Black pixels in the graphic being copied are
 	 * considered transparent.

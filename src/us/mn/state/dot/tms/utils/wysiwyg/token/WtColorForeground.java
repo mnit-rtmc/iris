@@ -93,7 +93,7 @@ public class WtColorForeground extends WToken implements Wt_ColorToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		wr.setColorForeground(this);
+		wr.renderColorForeground(this);
 	}
 
 	/* (non-Javadoc)

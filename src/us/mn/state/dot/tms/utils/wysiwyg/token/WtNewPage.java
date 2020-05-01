@@ -53,8 +53,7 @@ public class WtNewPage extends WToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-//		wr.addPage(this);
-		wr.addPage();
+		wr.renderNewPage();
 	}
 
 	/* (non-Javadoc)

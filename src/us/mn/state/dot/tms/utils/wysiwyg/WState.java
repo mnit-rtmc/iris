@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.utils.MultiRenderer;
  */
 public class WState {
 	
+	/** MultiConfig used to initialize this WState */
 	public MultiConfig mcfg;
 	
 	// colors
@@ -57,27 +58,6 @@ public class WState {
 	public int pageOn;
 	public int pageOff;
 
-	public WToken currentTok;
-	public WTokenList tokensBefore;
-	public WTokenList tokensAfter;
-	
-	public int lastClickX;
-	public int lastClickY;
-	
-	public int mousePosX;
-	public int mousePosY;
-	
-	public boolean mouseButtonLeft;
-	public boolean mouseButtonRight;
-	public boolean mouseButtonMiddle;
-	
-	public int cursorX;
-	public int cursorY;
-	public int cursorW;
-	public int cursorH;
-	
-	
-	
 	//-------------------------------------------
 
 	public static int getDeciseconds(SystemAttrEnum attr) {
@@ -117,7 +97,8 @@ public class WState {
 		charSpacing = old.charSpacing;
 	}
 
-	/** Get initial render-state from a MultiConfig */
+	/** Construct from a MultiConfig
+	 * (Gets the initial render-state) */
 	public WState(MultiConfig mcfg, WFontCache fc) {
 		this.mcfg = mcfg;
 		bgPixel     = WRaster.DEFAULT_BG;
@@ -148,22 +129,11 @@ public class WState {
 		if (wf == null)
 			return false;
 		wfont = wf;
-//		charWidth   = Math.max(wf.getWidth(), 1);
-//		charHeight  = Math.max(wf.getHeight(), 1);
-//		charSpacing = wf.getCharSpacing();
 		return true;
 	}
 	
 	/** Get current font */
 	public WFont getWFont() {
 		return wfont;
-	}
-	
-	/** Set the current token, moving the cursor and stuff */
-	public void setCurrentToken(WToken tok) {
-		currentTok = tok;
-		
-		// fill the tokensBefore and tokensAfter lists
-//		int indx = 
 	}
 }

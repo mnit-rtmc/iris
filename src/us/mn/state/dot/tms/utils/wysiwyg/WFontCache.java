@@ -149,31 +149,5 @@ public class WFontCache {
 	public WGlyph getWGlyph(int fontNum, char ch) {
 		return getWGlyph(fontNum, (int)ch);
 	}
-
-	//TODO: Remove test code.
-//	/**
-//	 * Dump text-map of 'A' glyph for every font to stderr.
-//	 */
-//	public static void test() {
-//		long m1 = Runtime.getRuntime().freeMemory();
-//		WFontCache gc = new WFontCache();
-//		m1 = ObjectSizeCalculator.getObjectSize(gc);
-//		long m2 = Runtime.getRuntime().freeMemory();
-//		System.err.println(""+m1+"\t"+m2+"\t"+(m2-m1));
-//		Font font;
-//		WFont wf;
-//		WGlyph wg1, wg2;
-//		Iterator<Font> itf = gc.fontsByNum();
-//		while (itf.hasNext()) {
-//			font = itf.next();
-//			wf = gc.getWFont(font.getNumber());
-//			wg1 = wf.getGlyph('A');
-//			wg2 = gc.getWGlyph(font.getNumber(), 'A');
-//			if (wg1 != wg2)
-//				System.err.println("Different glyphs: "+font.getNumber()+" - "+font.getName());
-//			if (wg1 != null)
-//				wg1.dump();
-//		}
-//	}
 }
 

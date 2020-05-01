@@ -63,7 +63,7 @@ public class WtTextRectangle extends Wt_Rectangle {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		wr.setTextRectangle(this);
+		wr.renderTextRectangle(this);
 	}
 
 	/* (non-Javadoc)

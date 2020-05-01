@@ -66,25 +66,5 @@ public class WGlyph extends WRasterMono1 {
 			e.printStackTrace();
 		}
 	}
-	
-	//TODO: Remove test code.
-//	/** Dump a text representation of a WGlyph to stderr */
-//	public void dump() {
-//		boolean bPrintable;
-//		char ch = (char)charNum;
-//	    Character.UnicodeBlock block = Character.UnicodeBlock.of(charNum);
-//		bPrintable = !Character.isISOControl(charNum)
-//	               && (ch != KeyEvent.CHAR_UNDEFINED)
-//	               && (block != null)
-//	               && (block != Character.UnicodeBlock.SPECIALS);
-//		System.err.println("----");
-//		StringBuilder sb = new StringBuilder();
-//		sb.append("# Font: \""+font.getName()+"\" ("+fontNum+")");
-//		System.err.println(sb.toString());
-//		System.err.println("[Char_"+charNum+"]");
-//		if (bPrintable)
-//			System.err.println("character='"+(char)charNum+"'");
-//		dumpBW(System.err);
-//	}
 }
 

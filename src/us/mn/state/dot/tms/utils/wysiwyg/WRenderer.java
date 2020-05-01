@@ -48,9 +48,6 @@ import us.mn.state.dot.tms.utils.Multi.JustificationPage;
  */
 public class WRenderer {
 	
-	/** Flag to enable/disable verbose logging output */
-	private final static boolean DEBUG = false; 
-	
 	/** Default line justification */
 	static public JustificationLine defaultJustificationLine() {
 		return JustificationLine.fromOrdinal(SystemAttrEnum
@@ -63,14 +60,16 @@ public class WRenderer {
 			.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
 	}
 
+	/* Font cache */
 	private WFontCache fontCache = new WFontCache();
 	
+	/* Graphics cache */
 	private WGraphicCache graphicCache = new WGraphicCache();
 	
-	// Render state variables
-	/** Sign/group default settings from MultiConfig */
+	/** Message default render-state from MultiConfig */
 	private WState startState;
-	/** Work copy of render state */
+
+	/** Work copy of render-state */
 	private WState state;
 
 	/** List of all blocks within the current text rectangle */
@@ -79,7 +78,8 @@ public class WRenderer {
 	/** Current raster buffer to render into */
 	private WRaster raster;
 
-	/** Error manager */
+	/** Error manager (for passing rendering
+	 *  errors to WYSIWYG editor) */
 	private WEditorErrorManager errMan;
 	
 	//-------------------------------------------
@@ -104,10 +104,9 @@ public class WRenderer {
 		errMan = em;
 	}
 
+	/** Set/change the MultiConfig used for rendering */
 	public void setConfig(MultiConfig mcfg) {
-//		this.mcfg       = mcfg;
 		this.raster     = WRaster.create(mcfg);
-		
 		this.startState = new WState(mcfg, fontCache);
 		this.state      = new WState(startState);
 		resetTextRectangle();
@@ -145,14 +144,14 @@ public class WRenderer {
 	// WToken.doRender methods
 
 	/** Handle an unsupported tag */
-	public void unsupportedTag(WtUnsupportedTag tok) {
-		renderError(MultiSyntaxError.unsupportedTag, tok);
+	public void renderUnsupportedTag(WtUnsupportedTag tok) {
+		reportError(MultiSyntaxError.unsupportedTag, tok);
 	}
 
 	/** Set the page justification.
 	 * Use the sign's default page justification if jp is null. */
 	/** Render a WtJustPage token */
-	public void setJustificationPage(WtJustPage tok) {
+	public void renderJustificationPage(WtJustPage tok) {
 		JustificationPage jp = tok.getJustification();
 		if (jp == null)
 			state.justPage = defaultJustificationPage();
@@ -161,7 +160,7 @@ public class WRenderer {
 		Block block = new Block();
 		Block cb = currentBlock();
 		if (block.justp.ordinal() < cb.justp.ordinal()) {
-			renderError(MultiSyntaxError.tagConflict, tok);
+			reportError(MultiSyntaxError.tagConflict, tok);
 		}
 		else if (block.justp.ordinal() > cb.justp.ordinal())
 			blocks.addLast(block);
@@ -170,7 +169,7 @@ public class WRenderer {
 	/** Set the line justification.
 	 * Use the sign's default line justification if jl is null. */
 	/** Render a WtJustLine token */
-	public void setJustificationLine(WtJustLine tok) {
+	public void renderJustificationLine(WtJustLine tok) {
 		JustificationLine jl = tok.getJustification();
 		if (jl == null)
 			state.justLine = defaultJustificationLine();
@@ -178,45 +177,22 @@ public class WRenderer {
 			state.justLine = jl;
 	}
 
-//	/** Set the font number.
-//	 * @param f_num Font number (1 to 255)
-//	 * @param f_id Font version ID (4-digit hex)
-//	 * Use the sign's default font if f_num is null. */
-//	@Override
-//	public void setFont(Integer f_num, String f_id) {
-//		if (f_num == null)
-//			state.wfont = startState.wfont;
-//		else {
-//			state.setFont(f_num);
-//		}
-//	}
-
 	/** Set the font number using a WtFont token.
 	 * f_num Font number (1 to 255)
 	 * Use the sign's default font if tok or f_num is null. */
 	/** Render a WtFont token */
-	public void setFont(WtFont tok) {
+	public void renderFont(WtFont tok) {
 		Integer fontNum = null;
 		if (tok != null)
 			fontNum = tok.getFontNum();
 		if (!state.setFont(fontNum))
-			renderError(MultiSyntaxError.fontNotDefined, tok);
+			reportError(MultiSyntaxError.fontNotDefined, tok);
 	}
-
-//	/** Set the character spacing.
-//	 * @param sc Character spacing (null means use font spacing) */
-//	@Override
-//	public void setCharSpacing(Integer sc) {
-//		if (sc == null)
-//			state.charSpacing = state.getWFont().getCharSpacing();
-//		else
-//			state.charSpacing = sc;
-//	}
 
 	/** Set the character spacing.
 	 * @param sc Character spacing (null means use font spacing) */
 	/** Render a WtCharSpacing token */
-	public void setCharSpacing(WtCharSpacing tok) {
+	public void renderCharSpacing(WtCharSpacing tok) {
 		Integer sc = tok.getCharSpacing();
 		if (sc != null)
 			state.charSpacing = sc;
@@ -226,12 +202,12 @@ public class WRenderer {
 
 	/** Add a text character. */
 	/** Render a WtTextChar token */
-	public void addText(WtTextChar tok) {
+	public void renderText(WtTextChar tok) {
 		TextChar tc = new TextChar(tok);
 		Block block = currentBlock();
 		block.addText(tc);
 		if (tc.wfont == null)
-			renderError(MultiSyntaxError.fontNotDefined, tok);
+			reportError(MultiSyntaxError.fontNotDefined, tok);
 	}
 
 	/** Add an Iris-specific token ("action tag")
@@ -241,12 +217,12 @@ public class WRenderer {
 	 *  (Renders as a solid greenish box.)
 	 * @param wt_Iris
 	 */
-	public void addIrisToken(Wt_IrisToken itok) {
+	public void renderIrisToken(Wt_IrisToken itok) {
 		IrisTagBox itb = new IrisTagBox(itok);
 		Block block = currentBlock();
 		block.addText((TextChar)itb);
 		if (itb.wfont == null)
-			renderError(MultiSyntaxError.fontNotDefined, itok);
+			reportError(MultiSyntaxError.fontNotDefined, itok);
 	}
 
 	/** Add an anchor character. */
@@ -270,16 +246,9 @@ public class WRenderer {
 		block.addText(tc);
 	}
 
-//	/** Add a new line */
-//	@Override
-//	public void addLine(Integer ls) {
-//		Block block = currentBlock();
-//		block.addLine(ls);
-//	}
-
 	/** Add a new line */
 	/** Render a WtNewLine token */
-	public void addLine(WtNewLine tok) {
+	public void renderNewLine(WtNewLine tok) {
 		Integer ls = tok.getLineSpacing();
 		Block block = currentBlock();
 		Line pl = block.currentLine();
@@ -311,10 +280,9 @@ public class WRenderer {
 		return blocks.peekLast();
 	}
 
-	/** Add a page */
 	/** Render a WtNewPage token */
-	public void addPage() {
-		renderText();
+	public void renderNewPage() {
+		drawText();
 		raster = WRaster.create(raster);
 		fillBackground();
 		resetTextRectangle();
@@ -325,14 +293,14 @@ public class WRenderer {
 	 * x = Background color (0-9; colorClassic value).
 	 * Use sign's default background color if x is null. */
 	/** Render a WtColorBackground token */
-	public void setColorBackground(WtColorBackground tok) {
+	public void renderColorBackground(WtColorBackground tok) {
 		Integer x = tok.getColorBackground();
 		if (x == null)
 			state.bgPixel = raster.defaultBgPixel;
 		else {
 			Integer pix = raster.classicColorToPixel(x);
 			if (pix == null) {
-				renderError(MultiSyntaxError.unsupportedTagValue, tok);
+				reportError(MultiSyntaxError.unsupportedTagValue, tok);
 				return;
 			}
 			state.bgPixel = pix;
@@ -348,11 +316,11 @@ public class WRenderer {
 	 *          (r,g,b for color24bit).
 	 * Use sign's default background color if tagval is null. */
 	/** Render a WtPageBackground token */
-	public void setPageBackground(WtPageBackground tok) {
+	public void renderPageBackground(WtPageBackground tok) {
 		int[] tagval = tok.getColorTagval();
 		Integer pix = raster.tagvalToBgPixel(tagval);
 		if (pix == null) {
-			renderError(MultiSyntaxError.unsupportedTagValue, tok);
+			reportError(MultiSyntaxError.unsupportedTagValue, tok);
 			return;
 		}
 		state.bgPixel = pix;
@@ -373,11 +341,11 @@ public class WRenderer {
 	 *           (r,g,b for color24bit).
 	 * If x is null, use the sign's default foreground color . */
 	/** Render a WtColorForeground token */
-	public void setColorForeground(WtColorForeground tok) {
+	public void renderColorForeground(WtColorForeground tok) {
 		int[] tvColor = tok.getColorTagval();
 		Integer pix = raster.tagvalToFgPixel(tvColor);
 		if (pix == null) {
-			renderError(MultiSyntaxError.unsupportedTagValue, tok);
+			reportError(MultiSyntaxError.unsupportedTagValue, tok);
 			return;
 		}
 		state.fgPixel = pix;
@@ -394,7 +362,7 @@ public class WRenderer {
 	 *           (0-9 for colorClassic &  & color24bit).
 	 *           (r,g,b for color24bit). */
 	/** Render a WtColorRectangle token */
-	public void addColorRectangle(WtColorRectangle tok) {
+	public void renderColorRectangle(WtColorRectangle tok) {
 		int[] tvColor = tok.getColor();
 		Integer pix = raster.tagvalToPixel(tvColor, null);
 		fillRectangle(tok, pix);
@@ -422,7 +390,7 @@ public class WRenderer {
 	 *  Also records rectangle's coordinates in token. */
 	private void fillRectangle(WToken tok, Integer pixel) {
 		if (pixel == null) {
-			renderError(MultiSyntaxError.unsupportedTagValue, tok);
+			reportError(MultiSyntaxError.unsupportedTagValue, tok);
 			return;
 		}
 		Integer x = tok.getParamX();
@@ -435,17 +403,17 @@ public class WRenderer {
 			h = raster.getHeight();
 		tok.setCoordinates(x-1, y-1, w, h);
 		if (!fillRectangle(x, y, w, h, pixel))
-			renderError(MultiSyntaxError.unsupportedTagValue, tok);
+			reportError(MultiSyntaxError.unsupportedTagValue, tok);
 	}
 
 	/** Set the text rectangle */
 	/** Render a WtTextRectangle token */
-	public void setTextRectangle(WtTextRectangle tok) {
+	public void renderTextRectangle(WtTextRectangle tok) {
 		int x = tok.getParamX();
 		int y = tok.getParamY();
 		int w = tok.getParamW();
 		int h = tok.getParamH();
-		renderText();
+		drawText();
 		state.trX = x;
 		state.trY = y;
 		if (w == 0)
@@ -456,34 +424,22 @@ public class WRenderer {
 		state.trH = h;
 		tok.setCoordinates(x, y, w, h);
 		if (state.trX + state.trW > raster.getWidth() + 1)
-			renderError(MultiSyntaxError.unsupportedTagValue, tok);
+			reportError(MultiSyntaxError.unsupportedTagValue, tok);
 		if (state.trY + state.trH > raster.getHeight() + 1)
-			renderError(MultiSyntaxError.unsupportedTagValue, tok);
+			reportError(MultiSyntaxError.unsupportedTagValue, tok);
 	}
 
 	/** Complete the rendering */
 	public void complete() {
-		renderText();
+		drawText();
 	}
 
-//	/** Get the syntax error state */
-//	public MultiSyntaxError getSyntaxError() {
-//		return syntax_err;
-//	}
-
-	/** Render the current text rectangle */
-	private void renderText() {
-//		println("\nrenderText(): blocks = "+blocks.size());
+	/** Draw the current text rectangle */
+	private void drawText() {
 		try {
 			for (Block block: blocks)
 				block.render();
 		}
-//		catch (InvalidMsgException e) {
-//			syntax_err = MultiSyntaxError.characterNotDefined;
-//		}
-//		catch (IndexOutOfBoundsException e) {
-//			syntax_err = MultiSyntaxError.textTooBig;
-//		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -494,7 +450,7 @@ public class WRenderer {
 
 	/** Add a graphic */
 	/** Render a WtGraphic token */
-	public void addGraphic(WtGraphic tok) {
+	public void renderGraphic(WtGraphic tok) {
 		int g_num = tok.getGraphicNum();
 		int x1 = tok.getParamX(1); // 1-based
 		int y1 = tok.getParamY(1); // 1-based
@@ -504,15 +460,15 @@ public class WRenderer {
 			// non-zero width/height so it can be selected in WYSIWYG
 			w = 5;
 			h = 5;
-			renderError(MultiSyntaxError.graphicNotDefined, tok);
+			reportError(MultiSyntaxError.graphicNotDefined, tok);
 		}
 		else {
 			w = wr.getWidth();
 			h = wr.getHeight();
-//&&&&			tok.setCoordinates(x1-1, y1-1, w, h);
-			if (!renderGraphic(wr, state.fgPixel, x1, y1))
+			if (!drawGraphic(wr, state.fgPixel, x1, y1)) {
 				// No MultiSyntaxError for graphic too big
-				renderError(MultiSyntaxError.other, tok);
+				reportError(MultiSyntaxError.other, tok);
+			}
 		}
 		tok.setCoordinates(x1-1, y1-1, w, h);
 	}
@@ -523,7 +479,7 @@ public class WRenderer {
 	 * @param x X-position on raster (1-based)
 	 * @param y Y-position on raster (1-based)
 	 * @return True if successful.  False if graphic too big. */
-	private boolean renderGraphic(WRaster wg, int fg, int x, int y) {
+	private boolean drawGraphic(WRaster wg, int fg, int x, int y) {
 		x--;
 		y--;
 		try {
@@ -547,19 +503,19 @@ public class WRenderer {
 	}
 
 	/** Render a WtPageTime token */
-	public void setPageTimes(WtPageTime tok) {
+	public void renderPageTimes(WtPageTime tok) {
 		Integer pt_on = tok.getPageOnTime();
 		if (pt_on == null)
 			state.pageOn = WState.getIrisDefaultPageOnTime();
 		else if ((pt_on < 1) || (pt_on > 255))
-			renderError(MultiSyntaxError.unsupportedTagValue, tok);
+			reportError(MultiSyntaxError.unsupportedTagValue, tok);
 		else
 			state.pageOn = pt_on;
 		Integer pt_off = tok.getPageOffTime();
 		if (pt_off == null)
 			state.pageOff = WState.getIrisDefaultPageOffTime();
 		else if ((pt_off < 1) || (pt_off > 255))
-			renderError(MultiSyntaxError.unsupportedTagValue, tok);
+			reportError(MultiSyntaxError.unsupportedTagValue, tok);
 		else
 			state.pageOff = pt_off;
 	}
@@ -575,14 +531,6 @@ public class WRenderer {
 			line.addText(tc);
 		}
 		void addLine(Integer ls) {
-//			Line line = currentLine();
-//			if (line.getHeight() == 0) {
-//				// The line height can be zero on full-matrix
-//				// signs when no text has been specified.
-//				// Adding a null TextChar to the line allows
-//				// the height to be taken from the current font.
-//				line.addText(new TextChar());
-//			}
 			lines.addLast(new Line(ls));
 		}
 		Line currentLine() {
@@ -596,22 +544,17 @@ public class WRenderer {
 			return lines.size();
 		}
 		void render() throws InvalidMsgException {
-//			println("Block.render(): lines = "+lines.size());
 			int ex = getExtraHeight();
-//			println("getExtraHeight()="+ex);
 			if (ex < 0) {
-				renderError(MultiSyntaxError.textTooBig);
-				println("TEXT TOO TALL");
+				reportError(MultiSyntaxError.textTooBig);
 				return;
 			}
 			int top = getTop(ex);
-//			println("getTop()="+top);
 			int y = 0;
 			Line pline = null;
 			for (Line line: lines) {
 				y += line.getLineSpacing(pline);
 				y += line.getHeight();
-//				println("line.render: baseline = "+(top + y)+"");
 				line.render(top + y);
 				pline = line;
 			}
@@ -649,6 +592,8 @@ public class WRenderer {
 			return h;
 		}
 	}
+
+	//- - - - - - - - - - - - - - - - - - - - - -
 
 	/** A line of text to be rendered */
 	private class Line {
@@ -692,8 +637,7 @@ public class WRenderer {
 			Fragment cf = currentFragment();
 			if (cf.hasTextAndOrBox) {
 				if (f.justl.ordinal() < cf.justl.ordinal()) {
-					renderError(MultiSyntaxError.tagConflict);
-					//TODO: Figure out how to handle this error
+					reportError(MultiSyntaxError.tagConflict);
 				}
 				if (f.justl.ordinal() > cf.justl.ordinal())
 					fragments.addLast(f);
@@ -708,11 +652,12 @@ public class WRenderer {
 			return fragments.peekLast();
 		}
 		void render(int base) throws InvalidMsgException {
-			println("Line.render(): fragments = "+fragments.size());
 			for (Fragment f: fragments)
 				f.render(base);
 		}
 	}
+
+	//- - - - - - - - - - - - - - - - - - - - - -
 
 	/** A fragment of text to be rendered */
 	private class Fragment {
@@ -738,12 +683,10 @@ public class WRenderer {
 				hasTextAndOrBox = true;
 		}
 		void render(int base) {
-			println("Fragment.render(): textchars = "+textchars.size());
 			boolean widthErr = false;
 			int ex = getExtraWidth();
 			if (ex < 0) {
-				renderError(MultiSyntaxError.textTooBig);
-				println("TEXT TOO WIDE");
+				reportError(MultiSyntaxError.textTooBig);
 				widthErr = true;
 //				return;
 			}
@@ -751,7 +694,6 @@ public class WRenderer {
 			int x = 0;
 			TextChar prevCh = null;
 			for (TextChar ch: textchars) {
-				println("ch.render("+(left + x)+", "+base+")");
 				ch.widthErr = widthErr;
 				if (ch instanceof AnchorChar)
 					try {
@@ -804,10 +746,11 @@ public class WRenderer {
 				w += ch.getCharSpacing(ps) + ch.getWidth();
 				ps = ch;
 			}
-			println("getWidth: "+w+" = "+sb.toString());
 			return w;
 		}
 	}
+
+	//- - - - - - - - - - - - - - - - - - - - - -
 
 	/** A single char in a fragment of text to be rendered */
 	private class TextChar {
@@ -902,134 +845,25 @@ public class WRenderer {
 			if (widthErr)
 				fg = WRaster.ERROR_PIXEL;
 			if (wg == null) {
-				renderError(MultiSyntaxError.characterNotDefined, tok);
+				reportError(MultiSyntaxError.characterNotDefined, tok);
 				w = 0;
 			}
 			else {
 				w = wg.getWidth() + c_space;
-				if (!renderGlyph(wg, fg, x, y)) {
-					renderError(MultiSyntaxError.textTooBig, tok);
-					//TODO: Add code to flag textTooBig if char is outside text rectangle, not just off-sign
+				if (!drawGlyph(wg, fg, x, y)) {
+					reportError(MultiSyntaxError.textTooBig, tok);
 				}
 			}
 			tok.setCoordinates(x, y, w, h);
 		}
 	}
 
-	static final int IRIS_TAG_BOX_COLOR =
-		new DmsColor(110, 163, 120).rgb(); // Oxley green
-	
-	/** A solid box, rendered in WYSIWYG mode, which
-	 *  represents an IRIS-specific message-tag like
-	 *  TravelTime, Tolling, etc... */
-	private class IrisTagBox extends TextChar {
+	//- - - - - - - - - - - - - - - - - - - - - -
 
-		/** Wt_Iris child token */
-		private final Wt_IrisToken itok;
-
-		/** Construct IrisTagBox */
-		private IrisTagBox(Wt_IrisToken itok) {
-			super(1);
-			this.itok = itok;
-			itok.setFont(state.getWFont());
-		}
-
-		/** get pixel width of box */
-		@Override
-		int getWidth() {
-			Integer wid = itok.getBoxWidth(state.charSpacing);
-			itok.setBoxWidth(wid);
-			if ((wid == null) || (wid < 1))
-				return 0;
-			return wid;
-		}
-
-		@Override
-		void render(int x, int base) throws InvalidMsgException {
-			int w = getWidth();
-			int h = getHeight();
-			int y = base - h;
-			int fg = IRIS_TAG_BOX_COLOR;
-			if (widthErr)
-				fg = WRaster.ERROR_PIXEL;
-			if (w > 0) {
-				drawSolidBox(fg, x, y, w, h);
-				w += c_space;
-			}
-			itok.setCoordinates(x, y, w, h);
-		}
-	}
-
-	/** Render a glyph onto the raster.
-	 * @param wg WGlyph to render.
-	 * @param fg Foreground color.
-	 * @param x X-position on raster (1-based)
-	 * @param y Y-position on raster (1-based)
-	 * @return True if rendered ok.  False if out of bounds. */
-	protected boolean renderGlyph(WGlyph wg, int fg, int x, int y) {
-		x--;
-		y--;
-		try {
-			raster.copy(wg, x, y, fg);
-		}
-		catch (IndexOutOfBoundsException e) {
-			return false;
-		}
-		return true;
-	}
-
-	/** Draw a box onto the raster.
-	 * @param fg Box color.
-	 * @param x X-position on raster (1-based)
-	 * @param y Y-position on raster (1-based)
-	 * @param w Width of box
-	 * @param h Height of box
-	 * @return True if rendered ok.  False if out of bounds. */
-	protected boolean drawSolidBox(int fg, int x, int y, int w, int h) {
-		x--;
-		y--;
-		try {
-			raster.drawSolidBox(fg, x, y, w, h);
-		}
-		catch (IndexOutOfBoundsException e) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * @param texttoobig
-	 */
-	public void renderError(MultiSyntaxError mse) {
-//		println("RENDERERROR: "+mse);
-		
-		// pass the error to the error manager
-		saveError(mse, null);
-	}
-
-	/**
-	 * @param tagconflict
-	 * @param tok
-	 */
-	private void renderError(MultiSyntaxError mse, WToken tok) {
-		tok.addErr(mse);
-//		println("RENDERERROR: "+mse);
-		saveError(mse, tok);
-	}
-
-	/** Save the error in the error manager */
-	private void saveError(MultiSyntaxError mse, WToken tok) {
-		if (errMan != null) {
-			errMan.addError(mse, tok);
-		}
-	}
-	
-	//===========================================
-
-	/** AnchorChar: Used as a zero-width TextChar
-	 *  to find the coordinates of MULTI-tags that
-	 *  don't contain WYSIWYG-renderable text, and
-	 *  to find the end-of-page text-cursor
+	/** AnchorChar: A zero-width pseudo TextChar.
+	 *  Used to find the coordinates of MULTI-tags
+	 *  that don't contain WYSIWYG-renderable text,
+	 *  and to find the end-of-page text-cursor
 	 *  location.*/
 	private class AnchorChar extends TextChar {
 		private WToken tok = null;
@@ -1045,12 +879,6 @@ public class WRenderer {
 		public AnchorChar(WToken tok) {
 			this.tok = tok;
 		}
-
-//		/** construct an AnchorChar of width w */
-//		public AnchorChar(WToken tok, int w) {
-//			this.tok = tok;
-//			this.w   = w;
-//		}
 
 		/** construct an end-of-page anchor */
 		public AnchorChar(WPage p) {
@@ -1091,61 +919,134 @@ public class WRenderer {
 		}
 	}
 
+	//- - - - - - - - - - - - - - - - - - - - - -
+
+	static final int IRIS_TAG_BOX_COLOR =
+		new DmsColor(110, 163, 120).rgb(); // Oxley green
+	
+	/** IrisTagBox:  A variable width pseudo TextChar.
+	 *  Used to render a solid box which represents
+	 *  an IRIS-specific message-tag like TravelTime,
+	 *  Tolling, etc... */
+	private class IrisTagBox extends TextChar {
+
+		/** Wt_Iris child token */
+		private final Wt_IrisToken itok;
+
+		/** Construct IrisTagBox */
+		private IrisTagBox(Wt_IrisToken itok) {
+			super(1);
+			this.itok = itok;
+			itok.setFont(state.getWFont());
+		}
+
+		/** get pixel width of box */
+		@Override
+		int getWidth() {
+			Integer wid = itok.getBoxWidth(state.charSpacing);
+			itok.setBoxWidth(wid);
+			if ((wid == null) || (wid < 1))
+				return 0;
+			return wid;
+		}
+
+		@Override
+		void render(int x, int base) throws InvalidMsgException {
+			int w = getWidth();
+			int h = getHeight();
+			int y = base - h;
+			int fg = IRIS_TAG_BOX_COLOR;
+			if (widthErr)
+				fg = WRaster.ERROR_PIXEL;
+			if (w > 0) {
+				drawSolidBox(fg, x, y, w, h);
+				w += c_space;
+			}
+			itok.setCoordinates(x, y, w, h);
+		}
+	}
+
+	//===========================================
+	// support methods for TextChar and IrisTagBox
+
+	/** Render a glyph onto the raster.
+	 * @param wg WGlyph to render.
+	 * @param fg Foreground color.
+	 * @param x X-position on raster (1-based)
+	 * @param y Y-position on raster (1-based)
+	 * @return True if rendered ok.  False if out of bounds. */
+	protected boolean drawGlyph(WGlyph wg, int fg, int x, int y) {
+		x--;
+		y--;
+		try {
+			raster.copy(wg, x, y, fg);
+		}
+		catch (IndexOutOfBoundsException e) {
+			return false;
+		}
+		return true;
+	}
+
+	/** Draw a box onto the raster.
+	 * @param fg Box color.
+	 * @param x X-position on raster (1-based)
+	 * @param y Y-position on raster (1-based)
+	 * @param w Width of box
+	 * @param h Height of box
+	 * @return True if rendered ok.  False if out of bounds. */
+	protected boolean drawSolidBox(int fg, int x, int y, int w, int h) {
+		x--;
+		y--;
+		try {
+			raster.drawSolidBox(fg, x, y, w, h);
+		}
+		catch (IndexOutOfBoundsException e) {
+			return false;
+		}
+		return true;
+	}
+
+	//===========================================
+	// Error manager support methods
+
+	/**
+	 * @param texttoobig
+	 */
+	private void reportError(MultiSyntaxError mse) {
+		// pass the error to the error manager
+		saveError(mse, null);
+	}
+
+	/**
+	 * @param tagconflict
+	 * @param tok
+	 */
+	private void reportError(MultiSyntaxError mse, WToken tok) {
+		tok.addErr(mse);
+		saveError(mse, tok);
+	}
+
+	/** Save the error in the error manager */
+	private void saveError(MultiSyntaxError mse, WToken tok) {
+		if (errMan != null) {
+			errMan.addError(mse, tok);
+		}
+	}
+	
 	//================================================
 	// TBD - tags with indeterminate sign geometries
-	//TODO: Figure out how to handle these tokens
-	//================================================
-
-//	/** Render a WtTravelTime token */
-//	public void addTravelTime(WtTravelTime tok) {
-////		String sid;
-////		OverLimitMode mode;
-////		String o_txt;
-//		
-//		//TODO:  Figure out how to handle this token...
-//	}
-//
-//	/** Render a WtSpeedAdvisory token */
-//	public void addSpeedAdvisory(WtSpeedAdvisory tok) {
-//		
-//		//TODO:  Figure out how to handle this token...
-//	}
-//
-//	/** Render a WtSlowWarning token */
-//	public void addSlowWarning(WtSlowWarning tok) {
-////		int    spd  = tok.getSpeed();
-////		int    dist = tok.getDistance();
-////		String mode = tok.getMode();
-//		
-//		//TODO:  Figure out how to handle this token...
-//	}
-//
-//	/** Render a WtTolling token */
-//	public void addTolling(WtTolling tok) {
-////		String   mode  = tok.getMode();
-////		String[] zones = tok.getZones();
-//		
-//		//TODO:  Figure out how to handle this token...
-//	}
-//
-//	/** Render a WtParkingAvail token */
-//	public void addParking(WtParkingAvail tok) {
-////		String pid   = tok.getParkingID();
-////		String l_txt = tok.getParkingLowText();
-////		String c_txt = tok.getClosedText();
-//		
-//		//TODO:  Figure out how to handle this token...
-//	}
 	
+//TODO: Figure out how to WYSIWYG-represent these tokens
+
 	/** Render a WtFeedMsg token */
-	public void addFeed(WtFeedMsg tok) {
+	public void renderFeed(WtFeedMsg tok) {
 //		String fid = tok.getFeedID();
 		
 		//TODO:  Figure out how to handle this token...
 	}
 
 	/** Render a WtLocator token */
-	public void addLocator(WtLocator tok) {
+	public void renderLocator(WtLocator tok) {
 //		String code = tok.getCode();
 //// idea-code from LocMultiBuilder class
 //		if ("rn".equals(code))
@@ -1161,304 +1062,6 @@ public class WRenderer {
 //		else if ("mi".equals(code))
 //			addMiles();
 
-		//TODO:  Figure out how to handle this token...
-	}
-
-	//===========================================
-	//TODO: Remove test code.
-	// Test-rendering in IRIS-server context.
-	// (WRrenderer.test() is called from end of
-	// MainServer.main(...).)  Saves rendered page
-	// images to TEST_FOLDER subfolder as .png files.
-
-	private static final String TEST_FOLDER = "./rendertest";
-	
-//	static private int testNo = 1;
-	static private String testName;
-	static private PrintWriter out;
-	static private int msgCnt = 0;
-
-	
-	static public void println(String str) {
-		if (DEBUG) {
-			System.out.println(str);
-			if (out != null) {
-				out.println(str);
-			}
-		}
-	}
-	
-//	static public void test2(MultiConfig mcfg, String multiStr) {
-//		println("MULTI: "+multiStr);
-//		if (!mcfg.isUseable()) {
-//			String[] errs = mcfg.getErrors();
-//			for (String err : errs) {
-//				println("Error: "+err);
-//			}
-//			return;
-//		}
-//		String[] warns = mcfg.getWarnings();
-//		for (String warn : warns) {
-//			println("Warning: "+warn);
-//		}
-//		WMessage m = new WMessage(multiStr);
-////		WRenderer r = new WRenderer(mcfg);
-//		m.renderMsg(mcfg);
-//		int len = m.getPageCount();
-//		WPage pg;
-//		BufferedImage bi;
-//		WRaster wr;
-//		String pngName;
-//		for (int i = 1; (i <= len); ++i) {
-//			pngName = testName+".pg"+i;
-//			pg = m.getPage(i);
-//			wr = pg.getRaster();
-//			
-//			println("-----");
-//			pg.dumpTokens(out);
-//			wr.dumpGray(out);
-//
-//			bi = wr.getImage();
-//			wr.dumpPng(bi, pngName+".png");
-//			bi = wr.getPreviewImage();
-//			wr.dumpPng(bi, pngName+"_preview.png");
-//		}
-//	}
-
-	static public void test3(String testType, String name, MultiConfig mcfg, String multiStr) {
-//		if (!"PIXEL_125_WIDE".equals(mcfg.getName()))
-//				return;
-//		testName = "test"+(testNo++);
-		println("==== TESTING: "+testType+"(\""+name+"\", \""+multiStr+"\")");
-//		testName = String.format("%s_%03d", name, ++testNo);
-		testName = name;
-		println("Testname: \""+testName+"\"");
-		if (mcfg == null) {
-			println("ERROR: Null mcfg");
-			return;
-		}
-		println("Config: "+mcfg.genHashKey2());
-		println("MULTI string: "+multiStr);
-		if (!mcfg.isUseable()) {
-			String[] errs = mcfg.getErrors();
-			for (String err : errs) {
-				println("Error: "+err);
-			}
-			return;
-		}
-		String[] warns = mcfg.getWarnings();
-		for (String warn : warns) {
-			println("Warning: "+warn);
-		}
-		WMessage wmsg = new WMessage(multiStr);
-//		WRenderer r = new WRenderer(mcfg);
-		wmsg.renderMsg(mcfg);
-		int len = wmsg.getPageCount();
-		println("Page count: "+len);
-		WPage pg;
-		BufferedImage bi;
-		WRaster wr;
-		String pngName;
-		for (int i = 1; (i <= len); ++i) {
-			pngName = testName+".pg"+i;
-			pg = wmsg.getPage(i);
-			wr = pg.getRaster();
-			
-			println("----- page "+i+" -----");
-			pg.dumpTokens(out);
-			wr.dumpGray(out);
-
-			try {
-				wr.setWysiwygImageSize(1200, 700);
-				bi = wr.getWysiwygImage();
-				wr.dumpPng(bi, TEST_FOLDER+"/"+pngName+".png");
-				if (wr.isBlank()) {
-					println("POSSIBLE ERROR:  Blank render image; isValid = "+wmsg.isValid());
-				}
-	//			bi = wr.getPreviewImage();
-	//			wr.dumpPng(bi, TEST_FOLDER+"/"+pngName+"_preview.png");
-			} catch (InvalidMsgException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-
-	static public void testSign(String signName, String multiStr) {
-		String testType = "testSign";
-		try {
-			MultiConfig mcfg = MultiConfig.fromSign(signName);
-			test3(testType, signName, mcfg, multiStr);
-		} catch (Exception e) {
-			test3(testType, signName, null, multiStr);
-			e.printStackTrace(out);
-		}
-	}
-
-	static public void testGroup(String groupName, String multiStr) {
-		String testType = "testGroup";
-		try {
-			MultiConfig mcfg = MultiConfig.fromSignGroup(groupName);
-			test3(testType, groupName, mcfg, multiStr);
-		} catch (Exception e) {
-			test3(testType, groupName, null, multiStr);
-			e.printStackTrace(out);
-		}
-	}
-
-	static public void test(DMS sign, String multiStr) {
-		String testType = "test<DMS>";
-		String name = (sign == null) ? sign.getName() : "(DMS)<null>";
-		try {
-			MultiConfig mcfg = MultiConfig.from(sign);
-			test3(testType, name, mcfg, multiStr);
-		} catch (Exception e) {
-			test3(testType, name, null, multiStr);
-			e.printStackTrace(out);
-		}
-	}
-
-//	static public void test(SignGroup group, String multiStr) {
-//		String testType = "test<SignGroup>";
-//		String name = (group != null) ? group.getName() : "(SignGroup)<null>";
-//		try {
-//			MultiConfig mcfg = MultiConfig.from(group);
-//			test3(testType, name, mcfg, multiStr);
-//		} catch (Exception e) {
-//			test3(testType, name, null, multiStr);
-//			e.printStackTrace(out);
-//		}
-//	}
-
-	static public void test(SignGroup group, String multiStr) {
-		String testType = "test<SignGroup>";
-		if (group == null) {
-			println("ERROR:  Null SignGroup");
-			return;
-		}
-		println("=========");
-		println("Testing group: "+group.getName());
-		println("Message: \""+multiStr+"\"");
-		MultiConfig mcSignGroup = MultiConfig.from(group);
-		if (mcSignGroup == null) {
-			println("ERROR:  Null MultiConfig for SignGroup "+group.getName());
-			return;
-		}
-		String name1 = String.format("msg%03d.grp%s", msgCnt,
-				(group != null) ? group.getName() : "NULL");
-		String name2;
-		List<MultiConfig> mcaConfigs = mcSignGroup.getConfigList();
-		println("Number of configs: "+mcaConfigs.size());
-		int cfgNum = 1;
-		for (MultiConfig mcfg : mcaConfigs) {
-			if (mcfg == null) {
-				println("ERROR:  Null MultiConfig for config");
-				return;
-			}
-			println("Config: "+mcfg.getName());
-			name2 = String.format("%s.cfg%d", name1, cfgNum++);
-			try {
-				test3(testType, name2, mcfg, multiStr);
-			} catch (Exception e) {
-				test3(testType, name2, null, multiStr);
-				e.printStackTrace(out);
-			}
-		}
-	}
-
-//	static public void testWysiwygSign(String signName, String multiStr) {
-//		MultiConfig mcfg;
-////		testName = "test"+(testNo++);
-//		String title = "testWysiwygSign(\""+signName+"\", \""+multiStr+"\")";
-//		try {
-//			mcfg = MultiConfig.fromSign(signName);
-//		} catch (TMSException e) {
-//			mcfg = null;
-//		}
-//		if (mcfg == null) {
-//			println("Null mcfg for sign: "+signName);
-//			return;
-//		}
-//		println("MultiConfig: "+mcfg.getName());
-//		test3(title, mcfg, multiStr);
-//	}
-//	
-//	static public void testWysiwygGroup(SignGroup group, String multiStr) {
-//		MultiConfig mcfg;
-////		testName = "test"+(testNo++);
-//		testName = String.format("%s_%-3d", group.getName(), ++testNo);
-//		String title = "testGroup(\""+groupName+"\", \""+multiStr+"\")";
-//		println("test: "+group.getName());
-//		mcfg = MultiConfig.from(group);
-//		if (mcfg == null) {
-//			println("Null mcfg for group: "+group.getName());
-//			return;
-//		}
-//		println("MultiConfig: "+mcfg.getName());
-//		test3(mcfg, multiStr);
-//	}
-//	
-//	static public void doTestSign(String signName, String multiStr) {
-////		testSign(signName, multiStr);
-//		testWysiwygSign(signName, multiStr);
-//	}
-//
-//	static public void doTest(SignGroup group, String multiStr) {
-////		testGroup(group, multiStr);
-//		testWysiwygGroup(group, multiStr);
-//	}
-
-	static public void test() {
-		File testDir = new File(TEST_FOLDER);
-		if (!testDir.exists())
-			return;
-
-		long start = System.currentTimeMillis();
-		try (PrintWriter tryout =
-				new PrintWriter(
-					new BufferedWriter(
-						new FileWriter(TEST_FOLDER+"/"+"rendertest.txt")))) {
-			out = tryout;
-//			// 8x3 char matrix
-//			testSign("V94W05T", "[jp3]TEST[nl]MSG[nl]3");
-//			// large color DMS
-//			testSign("V35ES02B", "[g11,1,6][cf255,255,255][tr70,8,80,18][fo3][jl3]OPEN TO ALL[tr70,24,80,18][fo3][jl3]TRAFFIC[g7,70,38]");
-//			testWysiwygSign("V35ES02B", "[g11,1,6][cf255,255,255][tr70,8,80,18][fo3][jl3]OPEN TO ALL[tr70,24,80,18][fo3][jl3]TRAFFIC[g7,70,38]");
-//			testWysiwygSign("VIMAGO", "[pt10o0][tr1,8,80,32][cf255,208,0][jl3]MERGE[g3,26,35][np][tr1,8,80,32][jl3]MERGE[g3,26,35][g3,38,35][np][tr1,8,80,32][jl3]MERGE[g3,26,35][g3,38,35][g3,50,35]");
-//			testGroup("6680_113", "RDWK[nl]BEGINS[nl]JULY 9");
-//			testGroup("V94E11", "[cf255,255,255][tr1,1,56,15][fo7]EAST[g16,7,16][tr57,1,214,56][fo13][cf255,208,0]TEST[nl]TEST[nl]TEST");
-//			testGroup("V94E11", "[tr57,1,214,56][fo13][cf255,208,0]TEST[nl]TEST[nl]TEST");
-//			testGroup("V394W01", "[g21,4,21][tr1,1,53,20][cf255,255,255]SOUTH[tr54,1,217,56][cf255,191,0]DETOUR[nl]FOLLOW[nl]HWY 100 SOUTH");
-//			testGroup("V394W00B", "[g11,1,6][cf255,255,255][tr70,8,80,30][fo7][jp3]OPEN TO[nl6]ALL TRAFFIC");
-//			testGroup("VDL94W90", "I-94 CLOSED[nl]AT FARGO");
-//			testGroup("VT94E30", "BLIZZARD WARNING[nl]UNTIL 1 PM");
-//			testGroup("V94W09", "FREEWAY TIME TO[nl][jl2]394[jl4][ttS122,prepend,OVER ] MIN[nl][jl2]100 VIA 394[jl4][ttS318,prepend,OVER ] MIN[np][jl3]CONGESTION[nl]AT 11TH ST EXIT[nl]USE 7TH STREET");
-//			testGroup("V94W09", "FREEWAY TIME TO[nl][jl2]394[jl4][ttS122,prepend,OVER ] MIN[nl][jl2]100 VIA 394[jl4][ttS318,prepend,OVER ] MIN");
-			
-			Iterator<QuickMessage> itq = QuickMessageHelper.iterator();
-			QuickMessage qm;
-			SignGroup group;
-			while (itq.hasNext()) {
-				qm = itq.next();
-				if (qm == null)
-					continue;
-				group = qm.getSignGroup();
-				if (group == null)
-					continue;
-				String multiStr = qm.getMulti();
-				if ((multiStr == null) || multiStr.isEmpty())
-					continue;
-				println("##############################");
-				test(group, multiStr);
-				msgCnt++;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println("FATAL ERROR: TEST TERMINATED");
-			return;
-		}
-		long end = System.currentTimeMillis();
-		float sec = (end - start) / 1000F;
-		System.err.println("WRenderer.test() done.  "+msgCnt+"msgs, "+sec+" seconds");
+		//TODO:  Figure out how to handle these tokens...
 	}
 }
