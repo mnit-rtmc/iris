@@ -750,7 +750,7 @@ public class MultiConfig {
 				boolean iu1 = mc1.isUseable();
 				boolean iu2 = mc2.isUseable();
 				if (iu1 != iu2)
-					return iu1 ? 1 : -1;
+					return iu1 ? -1 : 1;
 				return mc1.compare2(mc2);
 			}
 		};
@@ -766,7 +766,7 @@ public class MultiConfig {
 				boolean usable1 = mc1.isUseable();
 				boolean usable2 = mc2.isUseable();
 				if (usable1 != usable2)
-					return usable1 ? 1 : -1;
+					return usable1 ? -1 : 1;
 				int s1, s2;
 				if (mc1.signList == null)
 					s1 = 0;
