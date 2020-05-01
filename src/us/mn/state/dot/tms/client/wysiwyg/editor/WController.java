@@ -93,7 +93,7 @@ import us.mn.state.dot.tms.utils.MultiConfig;
 public class WController {
 
 	/** Flag to enable/disable verbose logging output */
-	private final static boolean DEBUG = true; 
+	private final static boolean DEBUG = false; 
 	
 	/** Editing modes */
 	private final static String MODE_TEXT = "text";
@@ -275,7 +275,8 @@ public class WController {
 	
 	/** Print the message to stdout */
 	public static void println(String msg) {
-		System.out.println(msg);
+		if (DEBUG)
+			System.out.println(msg);
 	}
 	
 	/** Print a String.formatted message to stdout */
