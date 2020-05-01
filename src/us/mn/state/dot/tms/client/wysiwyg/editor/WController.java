@@ -337,7 +337,8 @@ public class WController {
 			} catch (Exception e) {
 				// with a null MultiConfig, we will force MULTI mode
 				forceMULTI = true;
-				e.printStackTrace();
+				if (DEBUG)
+					e.printStackTrace();
 			}
 		} else {
 			multiConfig = null;
@@ -355,7 +356,8 @@ public class WController {
 				signGroupMultiConfig = MultiConfig.from(sg);
 			} catch (Exception e) {
 				// with a null MultiConfig, we will force MULTI mode
-				e.printStackTrace();
+				if (DEBUG)
+					e.printStackTrace();
 			}
 			
 			if (signGroupMultiConfig != null) {
