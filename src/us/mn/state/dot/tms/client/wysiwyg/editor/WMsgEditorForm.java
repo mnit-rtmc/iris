@@ -269,13 +269,14 @@ public class WMsgEditorForm extends AbstractForm {
 		gbPanel.add(lPanel, gbc);
 		
 		/* Error label (only appears when a bad MultiConfig is used) */
+		gbc.gridx = 1;
+		gbc.gridy = 0;
+		multiConfigError = new JLabel();
+		multiConfigError.setForeground(Color.RED);
+		gbPanel.add(multiConfigError, gbc);
 		if (signGroupMessage() && multiConfigList == null
 				|| !controller.multiConfigUseable()) {
-			gbc.gridx = 1;
-			gbc.gridy = 0;
-			multiConfigError = new ILabel("wysiwyg.editor.bad_config");
-			multiConfigError.setForeground(Color.RED);
-			gbPanel.add(multiConfigError, gbc);
+			multiConfigError.setText(I18N.get("wysiwyg.editor.bad_config"));
 		}
 		
 		/* Page # Label */
@@ -415,6 +416,12 @@ public class WMsgEditorForm extends AbstractForm {
 	 */
 	public void setActiveMultiConfig(MultiConfig mc) {
 		epanel.setActiveMultiConfig(mc);
+		
+		// show the error label if there is a problem (hide if not)
+		if (mc != null && mc.isUseable())
+			multiConfigError.setText("");
+		else
+			multiConfigError.setText(I18N.get("wysiwyg.editor.bad_config"));
 	}
 	
 	/** Set the current page displayed on the WYSIWYG panel. */
