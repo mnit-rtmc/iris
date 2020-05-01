@@ -78,7 +78,7 @@ public class WtTextChar extends WToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		wr.addText(this);
+		wr.renderText(this);
 	}
 
 	/* (non-Javadoc)

@@ -94,40 +94,5 @@ public class WGraphicCache {
 	public Map<Integer,Graphic> getGraphics() {
 		return graphicMap;
 	}
-
-	//TODO: Remove test code.
-//	/**
-//	 * @throws IOException 
-//	 * 
-//	 */
-//	private static void test2() throws IOException {
-//		try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("WGraphicCache-test.txt")))) {
-//			long m1 = Runtime.getRuntime().freeMemory();
-//			WGraphicCache gc = new WGraphicCache();
-//			m1 = ObjectSizeCalculator.getObjectSize(gc);
-//			long m2 = Runtime.getRuntime().freeMemory();
-//			out.println(""+m1+"\t"+m2+"\t"+(m2-m1));
-//			WRaster wraster;
-//			for (Graphic graphic : gc.getGraphics().values()) {
-//				if (graphic == null)
-//					continue;
-//				wraster = gc.getWRaster(graphic.getGNumber());
-//				if (wraster == null)
-//					continue;
-//				out.println(graphic.getName());
-//				wraster.dumpGray(out);
-//			}
-//		}
-//	}
-//	/**
-//	 * 
-//	 */
-//	public static void test() {
-//		try {
-//			test2();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
 }
 

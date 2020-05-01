@@ -213,7 +213,8 @@ public class MultiConfig {
 	//===========================================
 	// Helper methods
 	
-	/** Convert a grayscale (0-255) and an LED color into a 24bit render-color */
+	/** Convert a grayscale (0-255) and an LED color into
+	 *  a 24bit render-color for rendering 8bitMono signs. */
 	static private DmsColor genMono8bitColor(int iColor, DmsColor baseColor) {
 		if ((0 > iColor) || (iColor > 255))
 			return null;
@@ -223,7 +224,7 @@ public class MultiConfig {
 		return new DmsColor(red, green, blue);
 	}
 
-	/** Convert a DmsColor into a 3-int tag value */
+	/** Convert a DmsColor into a 3-int tag-value */
 	static private int[] genTagVal3(DmsColor c) {
 		return new int[]{
 				c.red,
@@ -231,7 +232,7 @@ public class MultiConfig {
 				c.blue};
 	}
 	
-	/** Convert an integer into a 1-int tag value */
+	/** Convert an integer into a 1-int tag-value */
 	static private int[] genTagVal1(int iTagVal) {
 		return new int[]{iTagVal};
 	}
@@ -308,9 +309,9 @@ public class MultiConfig {
 	// Basic-colors mode
 	//
 	// If we have default-color problems, then:
-	//		render using IRIS default colors (black/amber),
+	//		render using IRIS-basic colors (black/amber),
 	//		prevent use of color tags, and
-	//		deploy messages using only sign-default colors.
+	//		save messages using only sign-default colors.
 
 	private boolean bUsingBasicColorsMode = false;
 
@@ -579,24 +580,29 @@ public class MultiConfig {
 		if (mcaSigns.isEmpty())
 			return fromErrorMsg("Unable to load any configurations for sign group "+sg.getName());
 
-		// Sort and group the sign-MCs, creating a new
-		// config-MC for each set of identical signs.
+		// Sort and group the sign-MultiConfigs,
+		// creating a new config-MultiConfig for
+		// each set of identical signs.
 		ArrayList<MultiConfig> mcaConfigs;
 		mcaConfigs = sortAndGroup(mcaSigns);
 		if (mcaConfigs.isEmpty())
 			return null;
-		// Create a primary SignGroup-MC based on
-		// the most common config in SignGroup.
+
+		// Create a primary SignGroup-MultiConfig
+		// based on the most common config in
+		// in the SignGroup.
 		MultiConfig mcConfig = mcaConfigs.get(0);
 		MultiConfig mcSignGroup = fromSignName(mcConfig.name, SIGNGROUP);
 		mcSignGroup.name = sg.getName();
 		mcSignGroup.configList = mcaConfigs;
 		
+		// Sort final list of sign MultiConfigs by sign name
 		mcaSigns.sort(compareByName);
 		mcSignGroup.signList = mcaSigns;
 
-		// Rename config MCs based on position in list
-		// and number of signs in each config.
+		// Rename config MultiConfigs based on
+		// position in list and number of signs
+		// in each config.
 		int cfgNo = 1;
 		int cnt;
 		String suffix;
@@ -626,7 +632,7 @@ public class MultiConfig {
 
 	/** Compare by DmsType, geometry, and
 	 *  default font. */
-	public int compare1(MultiConfig mc2) {
+	private int compare1(MultiConfig mc2) {
 		if (dmsType == null) {
 			System.out.println("MultiConfig.compare1: dmsType is null");
 			return 0;
@@ -655,7 +661,7 @@ public class MultiConfig {
 
 	/** Compare by DmsType, geometry, default font,
 	 *  and default background/foreground colors. */
-	public int compare2(MultiConfig mc2) {
+	private int compare2(MultiConfig mc2) {
 		if (mc2 == null) {
 			System.out.println("MultiConfig.compare1: mc2 is null");
 			return 0;
@@ -671,7 +677,7 @@ public class MultiConfig {
 
 	/** Comparator to sort MultiConfig(s) by DmsType,
 	 *  geometry, and default font. */
-	public static Comparator<MultiConfig> comparator1 =
+	private static Comparator<MultiConfig> comparator1 =
 		new Comparator<MultiConfig>() {
 			public int compare(MultiConfig mc1, MultiConfig mc2) {
 				return mc1.compare1(mc2);
@@ -679,7 +685,7 @@ public class MultiConfig {
 		};
 		
 	/** Comparator to sort MultiConfig(s) by name */
-	public static Comparator<MultiConfig> compareByName =
+	private static Comparator<MultiConfig> compareByName =
 		new Comparator<MultiConfig>() {
 			public int compare(MultiConfig mc1, MultiConfig mc2) {
 				return mc1.getName().compareTo(mc2.getName());
@@ -688,7 +694,7 @@ public class MultiConfig {
 			
 	/** Comparator to sort MultiConfig(s) by DmsType,
 	 *  geometry, default font, and BG/FG colors. */
-	public static Comparator<MultiConfig> comparator2 =
+	private static Comparator<MultiConfig> comparator2 =
 		new Comparator<MultiConfig>() {
 			public int compare(MultiConfig mc1, MultiConfig mc2) {
 				return mc1.compare2(mc2);
@@ -700,7 +706,7 @@ public class MultiConfig {
 	 *  configurations come before unusable.
 	 *  And largest equally-usable signLists comes
 	 *  before smaller signLists. */
-	public static Comparator<MultiConfig> comparatorSignListSize =
+	private static Comparator<MultiConfig> comparatorSignListSize =
 		new Comparator<MultiConfig>() {
 			public int compare(MultiConfig mc1, MultiConfig mc2) {
 				boolean usable1 = mc1.isUseable();
@@ -723,7 +729,7 @@ public class MultiConfig {
 	/* Generate a hashkey-string containing
 	 * dmsType, sign geometry, and
 	 * default font. */
-	public String genHashKey1() {
+	private String genHashKey1() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(dmsType.ordinal());
 		sb.append('\t');
@@ -742,7 +748,7 @@ public class MultiConfig {
 	/* Generate a hashkey-string containing
 	 * dmsType, sign geometry, default font,
 	 * and default BG/FG colors. */
-	public String genHashKey2() {
+	private String genHashKey2() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(genHashKey1());
 		sb.append('\t');

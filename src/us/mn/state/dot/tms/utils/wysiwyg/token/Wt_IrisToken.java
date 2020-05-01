@@ -51,7 +51,7 @@ abstract public class Wt_IrisToken extends WToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		wr.addIrisToken(this);
+		wr.renderIrisToken(this);
 	}
 
 	//-------------------------------------------

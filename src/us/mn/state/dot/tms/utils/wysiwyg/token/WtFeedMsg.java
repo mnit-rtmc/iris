@@ -58,7 +58,7 @@ public class WtFeedMsg extends WToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		wr.addFeed(this);
+		wr.renderFeed(this);
 	}
 
 	/* (non-Javadoc)

@@ -26,7 +26,6 @@ import us.mn.state.dot.tms.GlyphHelper;
  * 
  * @author John L. Stanley - SRF Consulting
  */
-//TODO:  Test:  Would JIT loading of glyphs be faster?
 public class WFont implements Font {
 
 	/** referenced Font */
@@ -124,18 +123,6 @@ public class WFont implements Font {
 			return chsp;
 		return getCharSpacing();
 	}
-
-//	/** Get maximum pixel-width of a field that
-//	 *  is len characters wide. (The number
-//	 *  returned for variable-width fonts may
-//	 *  seem large because it uses the widest
-//	 *  char in the font to do the math.) */
-//	public int getFieldWidth(Integer chsp, int len) {
-//		if (chsp == null)
-//			chsp = getCharSpacing();
-//		int width = (maxCharWidth * len) + (chsp * (len - 1));
-//		return Math.max(0,  width);
-//	}
 
 	/** Get pixel-width of a specified string.
 	 *  Any chars in the string that are not

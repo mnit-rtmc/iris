@@ -809,33 +809,8 @@ abstract public class WRaster {
 			}
 		}
 		gen.add(SIGN_BORDER, pixelsPerBorder);
-		WRenderer.println("   "+gen.offset);
 		return gen.getArray();
 	}
-//	private int[] genCoordArray(
-//			int arrayLen,
-//			int pixelsPerBorder,
-//			int modulesPerFace,
-//			float pixPerModuleSepX,
-//			int ledsPerModule, 
-//			float pixelsPerLed) {
-//		IntArrayGen gen = new IntArrayGen(arrayLen);
-//		gen.add(SIGN_BORDER, pixelsPerBorder);
-//		int pixNum = 0;
-//		for (int mod = 0; (mod < modulesPerFace); ++mod) {
-//			if (mod > 0)
-//				gen.add(MODULE_SEPARATOR, pixPerModuleSepX);
-//			for (int modPix = 0; (modPix < ledsPerModule); ++modPix) {
-//				if (modPix == 0)
-//					gen.add(PIXEL_SEPARATOR);
-//				gen.add(pixNum++, pixelsPerLed);
-//				gen.add(PIXEL_SEPARATOR);
-//			}
-//		}
-//		gen.add(SIGN_BORDER, pixelsPerBorder);
-////		WRenderer.println("   "+gen.offset);
-//		return gen.getArray();
-//	}
 
 	/** Set width/height for WISIWIG sign-image.
 	 *  (Generates horizontal and vertical

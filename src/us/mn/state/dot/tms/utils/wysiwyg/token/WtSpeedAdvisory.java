@@ -22,9 +22,9 @@ import us.mn.state.dot.tms.utils.wysiwyg.WState;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
-/**
- * @author John L. Stanley - SRF Consulting
+/**  Speed advisory token for WYSIWYG editor.
  *
+ * @author John L. Stanley - SRF Consulting
  */
 public class WtSpeedAdvisory extends Wt_IrisToken {
 

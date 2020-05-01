@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
 /** Parent class for tokens that represent rectangles:
  *      (WtTextRectangle & WtColorRectangle) 
+ *
  * @author John L. Stanley - SRF Consulting
  */
 

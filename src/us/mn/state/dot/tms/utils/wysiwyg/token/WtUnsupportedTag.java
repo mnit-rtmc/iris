@@ -54,7 +54,7 @@ public class WtUnsupportedTag extends WToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		wr.unsupportedTag(this);
+		wr.renderUnsupportedTag(this);
 	}
 
 	/* (non-Javadoc)

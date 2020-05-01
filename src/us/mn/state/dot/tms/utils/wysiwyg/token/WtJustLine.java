@@ -64,7 +64,7 @@ public class WtJustLine extends WToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		wr.setJustificationLine(this);
+		wr.renderJustificationLine(this);
 	}
 
 	/* (non-Javadoc)

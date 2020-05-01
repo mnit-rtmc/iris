@@ -152,12 +152,6 @@ abstract public class WToken {
 		return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
 	}
 	
-//	/** Do we want to use an AnchorChar to
-//	 *  find the coordinates of this token? */
-//	public boolean useAnchor() {
-//		return true;
-//	}
-	
 	//-------------------------------------------
 	// helper methods
 
@@ -197,12 +191,6 @@ abstract public class WToken {
 		errList.add(wte);
 		return wte;
 	}
-
-//	public WEditorError addErr(WTagException ex) {
-//		WEditorError wte = new WEditorError(ex);
-//		errList.add(wte);
-//		return wte;
-//	}
 
 	public List<WEditorError> getErrorList() {
 		return errList;
@@ -276,12 +264,6 @@ abstract public class WToken {
 		return paramW;
 	}
 
-//	/** Get token's W parameter, or a default
-//	 *  value if that parameter is null. */
-//	public int getParamW(int defW) {
-//		return (paramW != null) ? paramW : defW;
-//	}
-
 	/** Set token parameter width in pixels.
 	 * @param the width
 	 */
@@ -295,12 +277,6 @@ abstract public class WToken {
 	public Integer getParamH() {
 		return paramH;
 	}
-
-//	/** Get token's H parameter, or a default
-//	 *  value if that parameter is null. */
-//	public int getParamH(int defH) {
-//		return (paramH != null) ? paramH : defH;
-//	}
 
 	/** Set token parameter height in pixels.
 	 * @param the height

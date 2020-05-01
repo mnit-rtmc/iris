@@ -312,7 +312,6 @@ public class WPage {
 		Iterator<WToken> it = tokenList.iterator();
 		while (it.hasNext()) {
 			tok = it.next();
-//			System.out.println(tok.toString());
 			switch (tok.getAnchorLoc()) {
 				case BEFORE:
 					wr.addAnchor(tok);
@@ -331,10 +330,6 @@ public class WPage {
 					if (tok.isBlank())
 						wr.addAnchor(tok);
 			}
-//			if ((tok instanceof WtColorForeground)
-//			 || (tok instanceof WtNewLine))
-//				wr.addAnchor(tok);
-//			tok.doRender(wr);
 		}
 		// use the token to place the anchor for non-empty pages
 		if (tok == null) {

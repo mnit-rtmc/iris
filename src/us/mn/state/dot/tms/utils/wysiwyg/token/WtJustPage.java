@@ -64,7 +64,7 @@ public class WtJustPage extends WToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		wr.setJustificationPage(this);
+		wr.renderJustificationPage(this);
 	}
 
 	/* (non-Javadoc)

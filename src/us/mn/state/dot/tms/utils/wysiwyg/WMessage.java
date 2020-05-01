@@ -171,7 +171,7 @@ public class WMessage {
 			page = it.next();
 			page.doRender(wr);
 			if (it.hasNext())
-				wr.addPage();
+				wr.renderNewPage();
 		}
 	}
 
@@ -391,15 +391,6 @@ public class WMessage {
 		watchers.remove(watcher);
 	}
 
-//	public void rerenderPage(int pageNo, MultiConfig mcfg) {
-//		// get the page and re-render it
-//		WRenderer wr = new WRenderer(mcfg);
-//		WPage pg = getPage(pageNo);
-//		pg.doRender(wr);
-//		wr.complete();
-//		pg.setRaster(wr.getRaster());
-//	}
-	
 	/** Re-render page and then tell watchers */
 	public void pageChanged(int pageNo) {
 //		rerenderPage(pageNo);
@@ -419,7 +410,7 @@ public class WMessage {
 			pg.doRender(wr);
 			wr.complete();
 			pg.setRaster(wr.getRaster());
-			wr.addPage();
+			wr.renderNewPage();
 		}
 	}
 	
@@ -435,17 +426,4 @@ public class WMessage {
 	public void renderMsg(MultiConfig mcfg) {
 		renderMsg(mcfg, null);
 	}
-	
-//	/** Re-render message and then tell watchers */
-//	public void msgChanged() {
-//		//TODO:  run in worker thread after 1/10th second delay
-//		rerenderMsg();
-//		Iterator<WMsgWatcher> itw = watchers.iterator();
-//		WMsgWatcher watcher;
-//		while (itw.hasNext()) {
-//			watcher = itw.next();
-//			watcher.msgChanged(this);
-//		}
-//	}
-
 }

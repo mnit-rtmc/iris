@@ -68,7 +68,7 @@ public class WtNewLine extends WToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		wr.addLine(this);
+		wr.renderNewLine(this);
 	}
 
 	/* (non-Javadoc)

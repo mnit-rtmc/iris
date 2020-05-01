@@ -114,26 +114,4 @@ public class WRasterMono8 extends WRaster {
 		}
 		return null;
 	}
-	
-
-//	/* (non-Javadoc)
-//	 * @see us.mn.state.dot.tms.utils.wysiwyg.WRaster#tagToColor(int[])
-//	 */
-//	@Override
-//	public DmsColor tagvalToColor(int[] tag) throws InvalidMsgException {
-//		if (tag == null)
-//			return null;
-//		switch (tag.length) {
-//			case 0:
-//				return null;
-//			case 1:
-//				int val = tag[0];
-//				DmsColor c = defaultFG;
-//				int r = (c.red   * val) >> 8;
-//				int g = (c.green * val) >> 8;
-//				int b = (c.blue  * val) >> 8;
-//				return new DmsColor(r, g, b);
-//		}
-//		throw new InvalidMsgException(MultiSyntaxError.unsupportedTagValue.toString());
-//	}
 }

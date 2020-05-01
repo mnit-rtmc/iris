@@ -55,7 +55,7 @@ public class WtFont extends WToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		wr.setFont(this);
+		wr.renderFont(this);
 	}
 
 	/* (non-Javadoc)

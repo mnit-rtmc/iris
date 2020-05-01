@@ -95,7 +95,7 @@ public class WtColorRectangle extends Wt_Rectangle implements Wt_ColorToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-		wr.addColorRectangle(this);
+		wr.renderColorRectangle(this);
 	}
 
 	/* (non-Javadoc)
