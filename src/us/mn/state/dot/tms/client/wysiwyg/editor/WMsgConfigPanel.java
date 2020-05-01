@@ -295,10 +295,13 @@ public class WMsgConfigPanel extends IPanel {
 		gbc.weighty = 1;
 		
 		// and the config panel
+		gbc.gridx = 0;
+		gbc.gridy = 0;
 		goodConfigPanel.add(new JLabel(I18N.get("wysiwyg.config")), gbc);
 		gcp = makeConfigPanel(multiConfig);
+		gbc.gridy = 1;
 		if (gcp != null)
-			goodConfigPanel.add(gcp);
+			goodConfigPanel.add(gcp, gbc);
 	}
 
 	private static ArrayList<String> getErrors(MultiConfig mc) {
@@ -325,7 +328,11 @@ public class WMsgConfigPanel extends IPanel {
 		warningListModel.clear();
 		
 		// show errors and/or warnings from "active" config
+		String name = "MultiConfig";
 		if (multiConfig != null) {
+			if (multiConfig.getName() != null)
+				name = multiConfig.getName();
+			
 			mcErrors = getErrors(multiConfig);
 			mcWarnings = getWarnings(multiConfig);
 			
@@ -342,13 +349,12 @@ public class WMsgConfigPanel extends IPanel {
 		}
 		
 		// update the error labels as needed
-		String n = (multiConfig.getName() != null)
-				? multiConfig.getName() : "MultiConfig";
-		warningLabel.setText(n + " --- "
+		warningLabel.setText(name + " --- "
 						+ I18N.get("wysiwyg.config.warnings"));
-		eWarningLabel.setText(n + " --- "
+		eWarningLabel.setText(name + " --- "
 						+ I18N.get("wysiwyg.config.warnings"));
-		errorLabel.setText(n + " --- " + I18N.get("wysiwyg.config.errors"));
+		errorLabel.setText(name + " --- " 
+						+ I18N.get("wysiwyg.config.errors"));
 	}
 	
 	private IPanel makeConfigPanel(MultiConfig sc) {
