@@ -339,9 +339,27 @@ public class MultiConfig {
 	// SignDetail, or DMS object 
 
 	/* Load SignConfig values */
-	private boolean loadSignConfig(SignConfig signConfig) {
+	private boolean loadSignConfig(DMS dms) {
+		SignConfig signConfig = null;
+		if (dms != null)
+			signConfig = dms.getSignConfig();
 		if (signConfig == null) {
-			logError("Sign configuration info is missing.");
+			logWarning("Sign configuration missing for sign "+dms.getName());
+			logWarning("  Substituting 40x21, mono1");
+			// throw in some default values to let things progress
+			faceWidth    = 3308;
+			faceHeight   = 1721;
+			borderHoriz  = 46;
+			borderVert   = 82;
+			pitchHoriz   = 70;
+			pitchVert    = 70;
+			pixelWidth   = 40;
+			pixelHeight  = 21;
+			charWidth    = 5;
+			charHeight   = 7;
+			monochromeBG = 0;
+			monochromeFG = 16764928;
+			colorScheme  = ColorScheme.MONOCHROME_1_BIT;
 			return false;
 		}
 		faceWidth    = signConfig.getFaceWidth();
@@ -370,15 +388,26 @@ public class MultiConfig {
 			case COLOR_CLASSIC:
 				break; 
 			default:
-				logError("Unknown color scheme = "+signConfig.getColorScheme());
+				logWarning("Unknown color scheme = "+signConfig.getColorScheme()+".  Changed to mono1");
+				colorScheme = ColorScheme.MONOCHROME_1_BIT;
 		}
 		return isUseable();
 	}
 
 	/** Load SignDetail values */
-	private boolean loadSignDetail(SignDetail signDetail) {
+	private boolean loadSignDetail(DMS dms) {
+		SignDetail signDetail = null;
+		if (dms != null)
+			signDetail = dms.getSignDetail();
 		if (signDetail == null) {
-			logError("Sign detail info is missing.");
+			logWarning("Sign detail info is missing for sign "+dms.getName());
+			logWarning("  Substituting basic full-matrix sign");
+			// throw in some default values to let things progress
+			bHasBeacon = false;
+			dmsType = DMSType.VMS_FULL;
+			supportedTags = 0;
+			maxMultiLen = 312;
+			maxPages = 3;
 			return false;
 		}
 
@@ -389,18 +418,18 @@ public class MultiConfig {
 		maxMultiLen   = signDetail.getMaxMultiLen();
 		maxPages      = signDetail.getMaxPages();
 
-		if (dmsType == DMSType.UNKNOWN)
-			logError("Unknown sign type = "+signDetail.getDmsType());
-		if (maxMultiLen <= 0)
-			logError("maxMultiLen = "+maxMultiLen);
-		if (maxPages <= 0)
-			logError("maxPages = "+maxPages);
-
-		// deal with problems in IRIS sign_details table
-		if (maxMultiLen <= 0)
+		if (dmsType == DMSType.UNKNOWN) {
+			logError("Unknown sign type; changed to full-matrix");
+			dmsType = DMSType.VMS_FULL;
+		}
+		if (maxMultiLen <= 0) {
+			logWarning("maxMultiLen = "+maxMultiLen+"; changed to 312");
 			maxMultiLen = 312;
-		if (maxPages <= 0)
+		}
+		if (maxPages <= 0) {
+			logWarning("maxPages = "+maxPages+"; changed to 3");
 			maxPages = 3;
+		}
 		return true;
 	}
 	
@@ -409,12 +438,10 @@ public class MultiConfig {
 	private void loadSign(DMS dms) throws TMSException {
 
 		// Load sign_config values
-		if (!loadSignConfig(dms.getSignConfig()))
-			return;
+		loadSignConfig(dms);
 
 		// Load sign_detail values
-		if (!loadSignDetail(dms.getSignDetail()))
-			return;
+		loadSignDetail(dms);
 
 		genIrisDefaultColors();
 
@@ -515,10 +542,8 @@ public class MultiConfig {
 			mcfg.name = dms.getName();
 			mcfg.type = type;
 			if (!mcfg.isUseable()) {
-				if (type.equals(SIGN))
-					mcfg.logError("Error loading configuration for sign "+dms.getName());
-				else
-					mcfg.logError("Error loading configuration");
+				String typ = type.toLowerCase();
+					mcfg.logError("Error loading configuration for "+typ+" "+dms.getName());
 			}
 			return mcfg;
 		}
@@ -659,6 +684,18 @@ public class MultiConfig {
 		return defaultFontNo - mc2.defaultFontNo;
 	}
 
+	/** Compare two DmsColor values.
+	 *  (also checks for nulls) */
+	private int compareDmsColors(DmsColor dc1, DmsColor dc2) {
+		if (dc1 == dc2)
+			return 0;
+		if (dc1 == null)
+			return -1;
+		if (dc2 == null)
+			return 1;
+		return dc1.rgb() - dc2.rgb();
+	}
+	
 	/** Compare by DmsType, geometry, default font,
 	 *  and default background/foreground colors. */
 	private int compare2(MultiConfig mc2) {
@@ -669,10 +706,11 @@ public class MultiConfig {
 		int cmp = compare1(mc2);
 		if (cmp != 0)
 			return cmp;
-		cmp = defaultBG.rgb() - mc2.defaultBG.rgb();
+		if (defaultBG == null)
+		cmp = compareDmsColors(defaultBG, mc2.defaultBG);
 		if (cmp != 0)
 			return cmp;
-		return defaultFG.rgb() - mc2.defaultFG.rgb();
+		return compareDmsColors(defaultFG, mc2.defaultFG);
 	}
 
 	/** Comparator to sort MultiConfig(s) by DmsType,
@@ -731,7 +769,8 @@ public class MultiConfig {
 	 * default font. */
 	private String genHashKey1() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(dmsType.ordinal());
+		if (dmsType != null)
+			sb.append(dmsType.ordinal());
 		sb.append('\t');
 		sb.append(pixelWidth);
 		sb.append('\t');
@@ -752,8 +791,10 @@ public class MultiConfig {
 		StringBuilder sb = new StringBuilder();
 		sb.append(genHashKey1());
 		sb.append('\t');
-		sb.append(defaultBG.rgb());
+		if (defaultBG != null)
+			sb.append(defaultBG.rgb());
 		sb.append('\t');
+		if (defaultFG != null)
 		sb.append(defaultFG.rgb());
 		sb.append('\t');
 		sb.append(Arrays.toString(defaultBGTagVal));
