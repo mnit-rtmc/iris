@@ -82,7 +82,8 @@ public class WMsgSelectorForm extends AbstractForm {
 
 	/** Device listing */
 	private Map<String,DMS> dmsList = new HashMap<String,DMS>();
-	private Map<String,SignGroup> signGroupList = new HashMap<String,SignGroup>();
+	private Map<String,SignGroup> signGroupList =
+			new HashMap<String,SignGroup>();
 	private ArrayList<String> dmsNames;
 	private ArrayList<String> signGroupNames;
 	private ArrayList<String> messageList = new ArrayList<String>();
