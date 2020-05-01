@@ -269,7 +269,8 @@ public class WMsgEditorForm extends AbstractForm {
 		gbPanel.add(lPanel, gbc);
 		
 		/* Error label (only appears when a bad MultiConfig is used) */
-		if (signGroupMessage() && multiConfigList == null) {
+		if (signGroupMessage() && multiConfigList == null
+				|| !controller.multiConfigUseable()) {
 			gbc.gridx = 1;
 			gbc.gridy = 0;
 			multiConfigError = new ILabel("wysiwyg.editor.bad_config");

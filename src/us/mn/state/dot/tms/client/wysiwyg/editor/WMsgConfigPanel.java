@@ -37,6 +37,7 @@ import javax.swing.JScrollPane;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.units.Distance;
@@ -172,6 +173,8 @@ public class WMsgConfigPanel extends IPanel {
 	private ArrayList<String> mcErrors = new ArrayList<String>();
 	private ArrayList<String> mcWarnings = new ArrayList<String>();
 	
+	private JLabel errorLabel;
+	private JLabel warningLabel;
 	
 	/** Create a new MULTI-mode panel */
 	public WMsgConfigPanel(WController c) {
@@ -180,6 +183,10 @@ public class WMsgConfigPanel extends IPanel {
 		// get MultiConfig(s)
 		signGroupMultiConfig = controller.getSignGroupMultiConfig();
 		multiConfig = controller.getMultiConfig();
+		
+		// default error/warning labels
+		errorLabel = new JLabel(I18N.get("wysiwyg.config.errors"));
+		warningLabel = new JLabel(I18N.get("wysiwyg.config.warnings"));
 		
 		// check for errors 
 		updateErrorsWarnings();
@@ -208,6 +215,7 @@ public class WMsgConfigPanel extends IPanel {
 	public void setActiveMultiConfig(MultiConfig mc) {
 		multiConfig = mc;
 		updateErrorsWarnings();
+		updateConfigPanel();
 	}
 	
 	/** Initialize a panel that shows errors and warnings */
@@ -218,11 +226,11 @@ public class WMsgConfigPanel extends IPanel {
 		JPanel p = new JPanel(gbl);
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.BOTH;
-		gbc.anchor = GridBagConstraints.NORTHWEST;
+		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		gbc.gridheight = 1;
 		gbc.gridwidth = 1;
 		gbc.insets = Widgets.UI.insets();
-		gbc.ipadx = 10;
+		gbc.ipadx = 0;
 		gbc.ipady = 0;
 		gbc.weightx = 1;
 		gbc.weighty = 1;
@@ -241,10 +249,14 @@ public class WMsgConfigPanel extends IPanel {
 		// add error list
 		gbc.gridx = 0;
 		gbc.gridy = 0;
+		p.add(errorLabel, gbc);
+		gbc.gridy = 1;
 		p.add(errorPane, gbc);
 		
 		// warning list beneath it
-		gbc.gridy = 1;
+		gbc.gridy = 2;
+		p.add(warningLabel, gbc);
+		gbc.gridy = 3;
 		p.add(warningPane, gbc);
 		add(p, BorderLayout.CENTER);
 	}
@@ -257,11 +269,11 @@ public class WMsgConfigPanel extends IPanel {
 		JPanel p = new JPanel(gbl);
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.BOTH;
-		gbc.anchor = GridBagConstraints.WEST;
+		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		gbc.gridheight = 1;
 		gbc.gridwidth = 1;
 		gbc.insets = Widgets.UI.insets();
-		gbc.ipadx = 10;
+		gbc.ipadx = 0;
 		gbc.ipady = 0;
 		gbc.weightx = 1;
 		gbc.weighty = 1;
@@ -273,6 +285,8 @@ public class WMsgConfigPanel extends IPanel {
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
+		p.add(warningLabel, gbc);
+		gbc.gridy = 1;
 		p.add(warningPane, gbc);
 		
 		// and the config panel
@@ -280,10 +294,13 @@ public class WMsgConfigPanel extends IPanel {
 		
 		// to the right
 		gbc.gridx = 1;
-		gbc.anchor = GridBagConstraints.EAST;
+		gbc.gridy = 0;
+		p.add(new JLabel(I18N.get("wysiwyg.config")), gbc);
+		gbc.gridy = 1;
+		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		p.add(configPanel, gbc);
 		add(p, BorderLayout.CENTER);
-		updateForm();
+		updateConfigPanel();
 	}
 	
 	private static ArrayList<String> getErrors(MultiConfig mc) {
@@ -309,36 +326,7 @@ public class WMsgConfigPanel extends IPanel {
 		errorListModel.clear();
 		warningListModel.clear();
 		
-		// add errors from the sign group config first
-		if (signGroupMultiConfig != null) {
-			sgmcErrors = getErrors(signGroupMultiConfig);
-			sgmcWarnings = getWarnings(signGroupMultiConfig);
-			
-			if (!sgmcErrors.isEmpty()) {
-				for (String e: sgmcErrors) {
-					String s;
-					if (signGroupMultiConfig.getName() != null) {
-						s = String.format("%s: %s",
-								signGroupMultiConfig.getName(), e);
-					} else
-						s = e;
-					errorListModel.addElement(s);
-				}
-			}
-			if (!sgmcWarnings.isEmpty()) {
-				for (String w: sgmcWarnings) {
-					String s;
-					if (signGroupMultiConfig.getName() != null) {
-						s = String.format("%s: %s",
-								signGroupMultiConfig.getName(), w);
-					} else
-						s = w;
-					warningListModel.addElement(s);
-				}
-			}
-		}
-		
-		// then the "active" config
+		// show errors and/or warnings from "active" config
 		if (multiConfig != null) {
 			mcErrors = getErrors(multiConfig);
 			mcWarnings = getWarnings(multiConfig);
@@ -366,6 +354,13 @@ public class WMsgConfigPanel extends IPanel {
 				}
 			}
 		}
+		
+		// update the error labels as needed
+		String n = (multiConfig.getName() != null)
+				? multiConfig.getName() : "MultiConfig";
+		warningLabel.setText(n + " --- "
+						+ I18N.get("wysiwyg.config.warnings"));
+		errorLabel.setText(n + " --- " + I18N.get("wysiwyg.config.errors"));
 	}
 	
 	/** Initialize a panel that just shows config information */
@@ -374,9 +369,11 @@ public class WMsgConfigPanel extends IPanel {
 		initialize();
 		
 		// and the config panel
+		add(new JLabel(I18N.get("wysiwyg.config")),
+				BorderLayout.NORTH);
 		IPanel configPanel = getConfigPanel();
 		add(configPanel, BorderLayout.CENTER);
-		updateForm();
+		updateConfigPanel();
 	}
 
 	private IPanel getConfigPanel() {
@@ -415,10 +412,14 @@ public class WMsgConfigPanel extends IPanel {
 	}
 	
 	/** Update labels on the form tab */
-	public void updateForm() {
-		multiConfig = controller.getMultiConfig();
-		if (multiConfig != null && multiConfig.isUseable()) {
-			MultiConfig sc = multiConfig;
+	public void updateConfigPanel() {
+		updateForm(multiConfig);
+	}
+	
+	/** Update labels on the form tab */
+	public void updateForm(MultiConfig mc) {
+		if (mc != null && mc.isUseable()) {
+			MultiConfig sc = mc;
 			f_width_lbl.setText(formatMM(sc.getFaceWidth()));
 			f_height_lbl.setText(formatMM(sc.getFaceHeight()));
 			h_border_lbl.setText(formatMM(sc.getBorderHoriz()));
@@ -440,8 +441,6 @@ public class WMsgConfigPanel extends IPanel {
 			c_scheme_lbl.setText(sc.getColorScheme().description);
 			font_lbl.setText(sc.getDefaultFont().getName());
 			font_height_lbl.setText(calculateFontHeight());
-		} else if (multiConfig != null && !multiConfig.isUseable()) {
-			System.out.println("Bad config");
 		}
 	}
 

@@ -196,7 +196,6 @@ public class WMsgNewMsgForm extends AbstractForm {
 	/** Cancel action */
 	private final IAction cancel = new IAction(
 		"wysiwyg.new_message.cancel") {
-		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 			throws Exception {
 			close(session.getDesktop());
@@ -206,7 +205,6 @@ public class WMsgNewMsgForm extends AbstractForm {
 	/** Create Message action */
 	private final IAction createMsg = new IAction(
 			"wysiwyg.new_message.ok") {
-		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e) {
 			// try to create a new quick message
 			String newMsgName = createNewQuickMessage();
@@ -240,16 +238,23 @@ public class WMsgNewMsgForm extends AbstractForm {
 					@Override
 					public void done() {
 						qm = getResult();
-						if (qm != null) {
-							selectorForm.reloadForm();
-							
-							if (sign != null)
-								WMsgSelectorForm.EditMsg(session, qm, sign);
-							else if (signGroup != null)
-								WMsgSelectorForm.EditMsg(session, qm, signGroup);
-							close(session.getDesktop());
-						} else
+						try {
+							if (qm != null) {
+								selectorForm.reloadForm();
+								
+								if (sign != null) {
+									WMsgSelectorForm.EditMsg(
+											session, qm, sign);
+								} else if (signGroup != null) {
+									WMsgSelectorForm.EditMsg(
+											session, qm, signGroup);
+								}
+								close(session.getDesktop());
+							} else
+								setErrorText();
+						} catch (Exception e) {
 							setErrorText();
+						}
 					}
 				};
 				worker.execute();
@@ -262,7 +267,6 @@ public class WMsgNewMsgForm extends AbstractForm {
 	/** Clone Message action */
 	private final IAction cloneMsg = new IAction(
 			"wysiwyg.new_message.ok") {
-		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception {
 			// try to create a new quick message
@@ -293,16 +297,23 @@ public class WMsgNewMsgForm extends AbstractForm {
 					@Override
 					public void done() {
 						qm = getResult();
-						if (qm != null) {
-							selectorForm.reloadForm();
-							
-							if (sign != null)
-								WMsgSelectorForm.EditMsg(session, qm, sign);
-							else if (signGroup != null)
-								WMsgSelectorForm.EditMsg(session, qm, signGroup);
-							close(session.getDesktop());
-						} else
+						try {
+							if (qm != null) {
+								selectorForm.reloadForm();
+								
+								if (sign != null) {
+									WMsgSelectorForm.EditMsg(
+											session, qm, sign);
+								} else if (signGroup != null) {
+									WMsgSelectorForm.EditMsg(
+											session, qm, signGroup);
+								}
+								close(session.getDesktop());
+							} else
+								setErrorText();
+						} catch (Exception e) {
 							setErrorText();
+						}
 					}
 				};
 				worker.execute();
@@ -338,7 +349,8 @@ public class WMsgNewMsgForm extends AbstractForm {
 	private String createNewQuickMessage() {
 		// get the message name from the text input field
 		String newMsgName = msgNameInput.getText().trim();
-		System.out.println(String.format("Creating new QuickMessage '%s' ...", newMsgName));
+		System.out.println(String.format(
+				"Creating new QuickMessage '%s' ...", newMsgName));
 		
 		// check if the message exists already
 		QuickMessage qm = QuickMessageHelper.lookup(newMsgName);

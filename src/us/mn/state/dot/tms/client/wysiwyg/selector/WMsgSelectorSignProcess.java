@@ -134,6 +134,9 @@ public class WMsgSelectorSignProcess extends
 						session, selectorForm, selectedType));
 			}
 		} catch (Exception e) {
+			// if something happens, clear the list (showing an error message)
+			// otherwise something really bad could happen
+			selectorForm.updateMessageList(true);
 			e.printStackTrace();
 		}
 	}	

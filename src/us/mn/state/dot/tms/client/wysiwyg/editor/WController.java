@@ -334,8 +334,9 @@ public class WController {
 		if (sign != null) {
 			try {
 				initFromMultiConfig(MultiConfig.from(sign));
-			} catch (TMSException e1) {
-				// with a null MultiConfig, we will force MULTI mode 
+			} catch (Exception e) {
+				// with a null MultiConfig, we will force MULTI mode
+				forceMULTI = true;
 			}
 		} else {
 			multiConfig = null;
@@ -349,7 +350,11 @@ public class WController {
 		
 		if (sg != null) {
 			// generate the MultiConfig for the sign group
-			signGroupMultiConfig = MultiConfig.from(sg);
+			try {
+				signGroupMultiConfig = MultiConfig.from(sg);
+			} catch (Exception e) {
+				// with a null MultiConfig, we will force MULTI mode
+			}
 			
 			if (signGroupMultiConfig != null) {
 				// use the "primary" MultiConfig to initialize

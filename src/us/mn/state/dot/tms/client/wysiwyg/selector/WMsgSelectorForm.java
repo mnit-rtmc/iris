@@ -280,7 +280,7 @@ public class WMsgSelectorForm extends AbstractForm {
 			controller.setQuickMessage(null);
 			
 			// update the page list
-			if (controller.getMultiConfig() != null)
+			if (controller.multiConfigUseable())
 				msg_preview.updatePageList("", controller.getMultiConfig());
 			else
 				msg_preview.clearPageList();
@@ -320,7 +320,7 @@ public class WMsgSelectorForm extends AbstractForm {
 			controller.setQuickMessage(null);
 			
 			// update the page list
-			if (controller.getMultiConfig() != null)
+			if (controller.multiConfigUseable())
 				msg_preview.updatePageList("", controller.getMultiConfig());
 			else
 				msg_preview.clearPageList();
@@ -546,7 +546,7 @@ public class WMsgSelectorForm extends AbstractForm {
 		msg_list.getSelectionModel().addListSelectionListener(
 				new MessageListSelectionHandler());
 		msg_pn = createScrollPane(msg_list);
-		msg_pn.setPreferredSize(new Dimension(250,200));
+		msg_pn.setPreferredSize(new Dimension(280,200));
 		
 		/* Setup buttons */
 		reload_btn = new JButton(reload);
@@ -920,6 +920,13 @@ public class WMsgSelectorForm extends AbstractForm {
 	public void updateMessageList() {
 		messageList.clear();
 		messageList.add(I18N.get("wysiwyg.selector.select_sign"));
+		msg_list.updateUI();
+	}
+
+	/** Reset the list of messages */
+	public void updateMessageList(boolean error) {
+		messageList.clear();
+		messageList.add(I18N.get("wysiwyg.selector.error"));
 		msg_list.updateUI();
 	}
 	

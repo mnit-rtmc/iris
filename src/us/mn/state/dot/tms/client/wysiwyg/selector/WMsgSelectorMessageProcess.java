@@ -54,9 +54,12 @@ public class WMsgSelectorMessageProcess extends SwingWorker<Boolean,Boolean> {
 		try {
 			Boolean qmExists = get();
 			String selectMsg = I18N.get("wysiwyg.selector.select_sign");
-			if (!qmExists && !messageName.equals(selectMsg)) {
+			String errorMsg = I18N.get("wysiwyg.selector.error");
+			if (!qmExists && !messageName.equals(selectMsg)
+					&& !messageName.equals(errorMsg)) {
 				// if the message doesn't exist, show a warning
-				session.getDesktop().show(new WMsgWarningForm(session, selectorForm, "QuickMessage"));
+				session.getDesktop().show(new WMsgWarningForm(
+						session, selectorForm, "QuickMessage"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
