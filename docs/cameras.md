@@ -26,8 +26,9 @@ For cameras with multiple **fixed-position** _views_, a number can be used to
 identify them.
 
 Field          | Description
----------------|-----------------------------------------------
+---------------|-----------------------------------------------------------
 View Num       | Fixed-position view, usable as a preset number
+Flow stream    | If checked, the stream is a [flow stream] _sink_ from [streambed]
 Encoding       | Stream encoding: `MJPEG`, `MPEG2`, `MPEG4`, `H264`, `AV1`
 Quality        | Resolution and frame rate comparison: `Low` / `Medium` / `High`
 URI scheme     | Scheme part of unicast request URI: `rtsp` / `http`
@@ -55,6 +56,7 @@ Encoder Port      | Port number for unicast streams (overrides scheme default)
 Multicast Address | IP address for [multicast] streams
 Encoder Channel   | Channel number, for encoders which support multiple cameras
 Publish           | Flag to allow public viewing of camera video
+Streamable        | Flag to indicate whether stream is available
 
 ## Pan Tilt and Zoom
 
@@ -91,14 +93,14 @@ tab of the device's properties form.
 If a stream is defined with a _view num_ that matches the _preset num_, that
 stream will be selected instead of a typical PTZ preset.
 
-## Camera Selector Tool
+## Selector Tool
 
-The camera selector tool is on the toolbar just below the map.  It has a text
-entry field with a camera icon and label.  This tool enables quick switching of
-the selected camera.
+The _selector tool_ is on the toolbar just below the map.  It has a text entry
+field with a camera icon and label.  This tool enables quick switching of the
+selected camera.
 
 The keyboard _numpad_ can be used from anywhere within IRIS to control the
-camera selector tool.  When the `Num Lock` key is off, all numpad keystrokes are
+selector tool.  When the `Num Lock` key is off, all numpad keystrokes are
 directed to the tool.  The `+` and `-` keys can select the next and previous
 cameras, respectively.
 
@@ -109,7 +111,7 @@ to [play list] selection mode — the icon will change to a play list.
 ## Camera Keyboards
 
 Dedicated keyboards are supported for easier camera control.  These keyboards
-have joysticks for _pan / tilt / zoom_ control.  Two protocols are supported:
+have joysticks for _pan / tilt / zoom_ control.  Two [protocol]s are supported:
 [Pelco-P] and Panasonic CU-950.
 
 To configure a [Pelco-P] keyboard, a [comm link] using the `pelcop` protocol
@@ -135,12 +137,15 @@ Otherwise, requests will be made directly to the camera's encoder address.
 [comm link]: comm_links.html
 [controller]: controllers.html
 [DMS]: dms.html
+[flow stream]: flow_streams.html
 [iris-client.properties]: client_properties.html
 [MonStream]: video.html#monstream
 [multicast]: https://en.wikipedia.org/wiki/Multicast_address
 [Pelco-P]: comm_links.html#pelcop
 [play list]: video.html#play-lists
+[protocol]: comm_links.html#protocols
 [ramp meter]: ramp_meters.html
 [SDP]: https://en.wikipedia.org/wiki/Session_Description_Protocol
+[streambed]: https://github.com/mnit-rtmc/streambed
 [system attribute]: system_attributes.html
 [video monitor]: video.html

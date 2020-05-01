@@ -8,7 +8,7 @@
 -- CHANNEL: camera, dms, font, glyph, graphic, incident, parking_area,
 --          sign_config, sign_detail, sign_message
 --
--- PAYLOAD: 'publish', 'video_loss' (camera)
+-- PAYLOAD: 'publish ' || name, 'video_loss' (camera)
 --          'msg_current', 'msg_sched', 'expire_time' (dms)
 --          'time_stamp' (parking_area)
 --          name (r_node, any notify_tag in geo_loc)
@@ -127,6 +127,7 @@ action_plan_event_purge_days	90
 alarm_event_purge_days	0
 beacon_event_purge_days	0
 camera_autoplay	true
+camera_blank_url	
 camera_construction_url	
 camera_image_base_url	
 camera_kbd_panasonic_enable	false
@@ -146,7 +147,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	5.10.0
+database_version	5.13.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0
@@ -393,6 +394,7 @@ dms_sign_group
 domain
 encoder_stream
 encoder_type
+flow_stream
 font
 gate_arm
 gate_arm_array
@@ -483,6 +485,7 @@ PRV_0023	beacon_tab	beacon		f
 PRV_0024	camera_admin	camera		t
 PRV_002A	camera_admin	encoder_stream		t
 PRV_0025	camera_admin	encoder_type		t
+PRV_002E	camera_admin	flow_stream		t
 PRV_0026	camera_admin	camera_preset		t
 PRV_0027	camera_admin	video_monitor		t
 PRV_0028	camera_admin	monitor_style		t
@@ -495,6 +498,7 @@ PRV_0032	camera_policy	camera	publish	t
 PRV_0033	camera_policy	camera	storePreset	t
 PRV_003A	camera_tab	encoder_stream		f
 PRV_0034	camera_tab	encoder_type		f
+PRV_003F	camera_tab	flow_stream		f
 PRV_0035	camera_tab	camera		f
 PRV_0036	camera_tab	camera_preset		f
 PRV_0037	camera_tab	video_monitor		f
@@ -1190,6 +1194,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 38	SierraGX
 39	GPS RedLion
 40	Cohu Helios PTZ
+41	Streambed
 \.
 
 CREATE TABLE iris.comm_link (
@@ -1314,6 +1319,19 @@ CREATE TABLE iris._device_io (
 CREATE UNIQUE INDEX _device_io_ctrl_pin ON iris._device_io
 	USING btree (controller, pin);
 
+CREATE FUNCTION iris.device_delete() RETURNS TRIGGER AS
+	$device_delete$
+BEGIN
+	DELETE FROM iris._device_preset WHERE name = OLD.name;
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$device_delete$ LANGUAGE plpgsql;
+
 CREATE VIEW device_controller_view AS
 	SELECT name, controller, pin
 	FROM iris._device_io;
@@ -1375,6 +1393,7 @@ CREATE TABLE iris.encoder_stream (
 	name VARCHAR(8) PRIMARY KEY,
 	encoder_type VARCHAR(8) NOT NULL REFERENCES iris.encoder_type,
 	view_num INTEGER CHECK (view_num > 0 AND view_num <= 12),
+	flow_stream BOOLEAN NOT NULL,
 	encoding INTEGER NOT NULL REFERENCES iris.encoding,
 	quality INTEGER NOT NULL REFERENCES iris.encoding_quality,
 	uri_scheme VARCHAR(8),
@@ -1389,7 +1408,7 @@ ALTER TABLE iris.encoder_stream
 	CHECK ((uri_scheme IS NULL AND uri_path IS NULL) OR mcast_port IS NULL);
 
 CREATE VIEW encoder_stream_view AS
-	SELECT es.name, encoder_type, make, model, config, view_num,
+	SELECT es.name, encoder_type, make, model, config, view_num,flow_stream,
 	       enc.description AS encoding, eq.description AS quality,
 	       uri_scheme, uri_path, mcast_port, latency
 	FROM iris.encoder_stream es
@@ -1409,6 +1428,7 @@ CREATE TABLE iris._camera (
 	enc_mcast INET,
 	enc_channel INTEGER CHECK (enc_channel > 0 AND enc_channel <= 16),
 	publish BOOLEAN NOT NULL,
+	streamable BOOLEAN NOT NULL,
 	video_loss BOOLEAN NOT NULL
 );
 
@@ -1419,7 +1439,7 @@ CREATE FUNCTION iris.camera_notify() RETURNS TRIGGER AS
 	$camera_notify$
 BEGIN
 	IF (NEW.publish IS DISTINCT FROM OLD.publish) THEN
-		NOTIFY camera, 'publish';
+		PERFORM pg_notify('camera', 'publish ' || NEW.name);
 	ELSIF (NEW.video_loss IS DISTINCT FROM OLD.video_loss) THEN
 		NOTIFY camera, 'video_loss';
 	ELSE
@@ -1440,7 +1460,7 @@ CREATE TRIGGER camera_table_notify_trig
 CREATE VIEW iris.camera AS
 	SELECT c.name, geo_loc, controller, pin, notes, cam_num, encoder_type,
 	       enc_address, enc_port, enc_mcast, enc_channel, publish,
-	       video_loss
+	       streamable, video_loss
 	FROM iris._camera c
 	JOIN iris._device_io d ON c.name = d.name;
 
@@ -1451,11 +1471,11 @@ BEGIN
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._camera (name, geo_loc, notes, cam_num, encoder_type,
 	            enc_address, enc_port, enc_mcast, enc_channel, publish,
-	            video_loss)
+	            streamable, video_loss)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.cam_num,
 	             NEW.encoder_type, NEW.enc_address, NEW.enc_port,
 	             NEW.enc_mcast, NEW.enc_channel, NEW.publish,
-	             NEW.video_loss);
+	             NEW.streamable, NEW.video_loss);
 	RETURN NEW;
 END;
 $camera_insert$ LANGUAGE plpgsql;
@@ -1481,6 +1501,7 @@ BEGIN
 	       enc_mcast = NEW.enc_mcast,
 	       enc_channel = NEW.enc_channel,
 	       publish = NEW.publish,
+	       streamable = NEW.streamable,
 	       video_loss = NEW.video_loss
 	 WHERE name = OLD.name;
 	RETURN NEW;
@@ -1491,26 +1512,14 @@ CREATE TRIGGER camera_update_trig
     INSTEAD OF UPDATE ON iris.camera
     FOR EACH ROW EXECUTE PROCEDURE iris.camera_update();
 
-CREATE FUNCTION iris.camera_delete() RETURNS TRIGGER AS
-	$camera_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$camera_delete$ LANGUAGE plpgsql;
-
 CREATE TRIGGER camera_delete_trig
     INSTEAD OF DELETE ON iris.camera
-    FOR EACH ROW EXECUTE PROCEDURE iris.camera_delete();
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
 CREATE VIEW camera_view AS
 	SELECT c.name, cam_num, encoder_type, et.make, et.model, et.config,
 	       c.enc_address, c.enc_port, c.enc_mcast, c.enc_channel, c.publish,
-	       c.video_loss, c.geo_loc,
+	       c.streamable, c.video_loss, c.geo_loc,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.landmark, l.lat, l.lon, l.corridor, l.location,
 	       c.controller, ctr.comm_link, ctr.drop_id, ctr.condition, c.notes
@@ -1787,21 +1796,9 @@ CREATE TRIGGER alarm_update_trig
     INSTEAD OF UPDATE ON iris.alarm
     FOR EACH ROW EXECUTE PROCEDURE iris.alarm_update();
 
-CREATE FUNCTION iris.alarm_delete() RETURNS TRIGGER AS
-	$alarm_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$alarm_delete$ LANGUAGE plpgsql;
-
 CREATE TRIGGER alarm_delete_trig
     INSTEAD OF DELETE ON iris.alarm
-    FOR EACH ROW EXECUTE PROCEDURE iris.alarm_delete();
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
 CREATE VIEW alarm_view AS
 	SELECT a.name, a.description, a.state, a.trigger_time, a.controller,
@@ -1902,22 +1899,9 @@ CREATE TRIGGER beacon_update_trig
     INSTEAD OF UPDATE ON iris.beacon
     FOR EACH ROW EXECUTE PROCEDURE iris.beacon_update();
 
-CREATE FUNCTION iris.beacon_delete() RETURNS TRIGGER AS
-	$beacon_delete$
-BEGIN
-	DELETE FROM iris._device_preset WHERE name = OLD.name;
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$beacon_delete$ LANGUAGE plpgsql;
-
 CREATE TRIGGER beacon_delete_trig
     INSTEAD OF DELETE ON iris.beacon
-    FOR EACH ROW EXECUTE PROCEDURE iris.beacon_delete();
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
 CREATE VIEW beacon_view AS
 	SELECT b.name, b.notes, b.message, p.camera, p.preset_num, b.geo_loc,
@@ -2055,21 +2039,9 @@ CREATE TRIGGER detector_update_trig
     INSTEAD OF UPDATE ON iris.detector
     FOR EACH ROW EXECUTE PROCEDURE iris.detector_update();
 
-CREATE FUNCTION iris.detector_delete() RETURNS TRIGGER AS
-	$detector_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$detector_delete$ LANGUAGE plpgsql;
-
 CREATE TRIGGER detector_delete_trig
     INSTEAD OF DELETE ON iris.detector
-    FOR EACH ROW EXECUTE PROCEDURE iris.detector_delete();
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
 CREATE FUNCTION iris.detector_label(VARCHAR(6), VARCHAR(4), VARCHAR(6),
 	VARCHAR(4), VARCHAR(2), SMALLINT, SMALLINT, BOOLEAN)
@@ -2219,21 +2191,9 @@ CREATE TRIGGER gps_update_trig
 	INSTEAD OF UPDATE ON iris.gps
 	FOR EACH ROW EXECUTE PROCEDURE iris.gps_update();
 
-CREATE FUNCTION iris.gps_delete() RETURNS TRIGGER AS
-	$gps_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$gps_delete$ LANGUAGE plpgsql;
-
 CREATE TRIGGER gps_delete_trig
-	INSTEAD OF DELETE ON iris.gps
-	FOR EACH ROW EXECUTE PROCEDURE iris.gps_delete();
+    INSTEAD OF DELETE ON iris.gps
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
 CREATE VIEW gps_view AS
 	SELECT name, controller, pin, notes, latest_poll, latest_sample,
@@ -2504,6 +2464,66 @@ CREATE TABLE iris.word (
 	allowed BOOLEAN DEFAULT false NOT NULL
 );
 
+CREATE VIEW word_view AS
+	SELECT name, abbr, allowed
+	FROM iris.word;
+GRANT SELECT ON word_view TO PUBLIC;
+
+COPY iris.word (name, abbr, allowed) FROM stdin;
+ACCESS	ACCS	t
+AHEAD	AHD	t
+ALTERNATE	ALT	t
+AT		t
+BLOCKED	BLKD	t
+BRIDGE	BRDG	t
+CANNOT	CANT	t
+CENTER	CNTR	t
+CLEARED	CLRD	t
+CLOSED	CLSD	t
+CONGESTED	CONG	t
+CONGESTION	CONG	t
+CONSTRUCTION	CONST	t
+CROSSING	X-ING	t
+DOWNTOWN	DWNTN	t
+EAST	E	t
+ENTRANCE	ENT	t
+FAILURE	FAIL	t
+FLOODING	FLOOD	t
+FRONTAGE	FRNTG	t
+IN		t
+LANE	LN	t
+LANES	LNS	t
+LEFT	LFT	t
+MAXIMUM	MAX	t
+MILE	MI	t
+MILES	MI	t
+MINIMUM	MIN	t
+NORTH	N	t
+ON		t
+OVERSIZED	OVRSZ	t
+PARKING	PKNG	t
+PAVEMENT	PVMT	t
+PEDESTRIAN	PED	t
+PREPARE	PREP	t
+QUALITY	QLTY	t
+RIGHT	RT	t
+ROAD	RD	t
+ROUTE	RTE	t
+SERVICE	SERV	t
+SHOULDER	SHLDR	t
+SINGLE	SNGL	t
+SLIPPERY	SLIP	t
+SOUTH	S	t
+SPEED	SPD	t
+STALLED	STALL	t
+TEMPORARY	TEMP	t
+TRAFFIC	TRAF	t
+VEHICLE	VEH	t
+VEHICLES	VEHS	t
+WARNING	WARN	t
+WEST	W	t
+\.
+
 CREATE TABLE iris.graphic (
 	name VARCHAR(20) PRIMARY KEY,
 	g_number INTEGER NOT NULL UNIQUE,
@@ -2650,22 +2670,9 @@ CREATE TRIGGER dms_update_trig
     INSTEAD OF UPDATE ON iris.dms
     FOR EACH ROW EXECUTE PROCEDURE iris.dms_update();
 
-CREATE FUNCTION iris.dms_delete() RETURNS TRIGGER AS
-	$dms_delete$
-BEGIN
-	DELETE FROM iris._device_preset WHERE name = OLD.name;
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$dms_delete$ LANGUAGE plpgsql;
-
 CREATE TRIGGER dms_delete_trig
     INSTEAD OF DELETE ON iris.dms
-    FOR EACH ROW EXECUTE PROCEDURE iris.dms_delete();
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
 CREATE VIEW dms_view AS
 	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
@@ -2743,6 +2750,12 @@ CREATE VIEW sign_text_view AS
 	JOIN iris.sign_group sg ON dsg.sign_group = sg.name
 	JOIN iris.sign_text st ON sg.name = st.sign_group;
 GRANT SELECT ON sign_text_view TO PUBLIC;
+
+CREATE VIEW sign_group_text_view AS
+	SELECT sign_group, line, multi, rank
+	FROM iris.sign_group sg
+	JOIN iris.sign_text st ON sg.name = st.sign_group;
+GRANT SELECT ON sign_group_text_view TO PUBLIC;
 
 CREATE TABLE iris.dms_action (
 	name VARCHAR(30) PRIMARY KEY,
@@ -2891,21 +2904,9 @@ CREATE TRIGGER gate_arm_array_update_trig
     INSTEAD OF UPDATE ON iris.gate_arm_array
     FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_array_update();
 
-CREATE FUNCTION iris.gate_arm_array_delete() RETURNS TRIGGER AS
-	$gate_arm_array_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$gate_arm_array_delete$ LANGUAGE plpgsql;
-
 CREATE TRIGGER gate_arm_array_delete_trig
     INSTEAD OF DELETE ON iris.gate_arm_array
-    FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_array_delete();
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
 CREATE VIEW gate_arm_array_view AS
 	SELECT ga.name, ga.notes, ga.geo_loc,
@@ -2937,36 +2938,41 @@ CREATE VIEW iris.gate_arm AS
 	FROM iris._gate_arm JOIN iris._device_io
 	ON _gate_arm.name = _device_io.name;
 
-CREATE FUNCTION iris.gate_arm_update() RETURNS TRIGGER AS $gate_arm_update$
+CREATE FUNCTION iris.gate_arm_insert() RETURNS TRIGGER AS
+	$gate_arm_insert$
 BEGIN
-    IF TG_OP = 'INSERT' THEN
-        INSERT INTO iris._device_io (name, controller, pin)
-            VALUES (NEW.name, NEW.controller, NEW.pin);
-        INSERT INTO iris._gate_arm (name, ga_array, idx, notes)
-            VALUES (NEW.name, NEW.ga_array, NEW.idx, NEW.notes);
-        RETURN NEW;
-    ELSIF TG_OP = 'UPDATE' THEN
-	UPDATE iris._device_io SET controller = NEW.controller, pin = NEW.pin
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._gate_arm (name, ga_array, idx, notes)
+	     VALUES (NEW.name, NEW.ga_array, NEW.idx, NEW.notes);
+	RETURN NEW;
+END;
+$gate_arm_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gate_arm_insert_trig
+    INSTEAD OF INSERT ON iris.gate_arm
+    FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_insert();
+
+CREATE FUNCTION iris.gate_arm_update() RETURNS TRIGGER AS
+	$gate_arm_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller, pin = NEW.pin
 	WHERE name = OLD.name;
-        UPDATE iris._gate_arm SET ga_array = NEW.ga_array, idx = NEW.idx,
-            notes = NEW.notes
+        UPDATE iris._gate_arm
+	   SET ga_array = NEW.ga_array, idx = NEW.idx, notes = NEW.notes
 	WHERE name = OLD.name;
         RETURN NEW;
-    ELSIF TG_OP = 'DELETE' THEN
-        DELETE FROM iris._device_io WHERE name = OLD.name;
-        IF FOUND THEN
-            RETURN OLD;
-        ELSE
-            RETURN NULL;
-	END IF;
-    END IF;
-    RETURN NEW;
 END;
 $gate_arm_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER gate_arm_update_trig
-    INSTEAD OF INSERT OR UPDATE OR DELETE ON iris.gate_arm
+    INSTEAD OF UPDATE ON iris.gate_arm
     FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_update();
+
+CREATE TRIGGER gate_arm_delete_trig
+    INSTEAD OF DELETE ON iris.gate_arm
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
 CREATE VIEW gate_arm_view AS
 	SELECT g.name, g.ga_array, g.notes, ga.geo_loc,
@@ -3019,6 +3025,7 @@ rollover	Rollover
 sgnl_out	Traffic Lights Out
 snow_rmv	Snow Removal
 spill	Spilled Load
+spin_out	Vehicle Spin Out
 test	Test Incident
 veh_fire	Vehicle Fire
 \.
@@ -3164,6 +3171,31 @@ CREATE VIEW inc_descriptor_view AS
 	LEFT JOIN iris.lane_type lt ON id.lane_type = lt.id;
 GRANT SELECT ON inc_descriptor_view TO PUBLIC;
 
+COPY iris.inc_descriptor (name, event_desc_id, detail, lane_type, multi) FROM stdin;
+idsc_00001	21	\N	1	CRASH
+idsc_00002	21	\N	7	CRASH ON EXIT
+idsc_00003	22	\N	1	STALLED VEHICLE
+idsc_00004	23	\N	1	INCIDENT
+idsc_00005	23	animal	1	ANIMAL ON ROAD
+idsc_00006	23	debris	1	DEBRIS ON ROAD
+idsc_00007	23	emrg_veh	1	EMERGENCY VEHICLES
+idsc_00008	23	event	1	EVENT CONGESTION
+idsc_00009	23	event	7	CONGESTION ON RAMP
+idsc_00010	23	flooding	1	FLASH FLOODING
+idsc_00011	23	gr_fire	1	GRASS FIRE
+idsc_00012	23	ice	1	ICE
+idsc_00013	23	pavement	1	PAVEMENT FAILURE
+idsc_00014	23	ped	1	PEDESTRIAN ON ROAD
+idsc_00015	23	rollover	1	CRASH
+idsc_00016	23	snow_rmv	1	SNOW REMOVAL
+idsc_00017	23	spin_out	1	CRASH
+idsc_00018	23	spin_out	7	CRASH ON EXIT
+idsc_00019	23	test	1	TEST
+idsc_00020	23	veh_fire	1	VEHICLE FIRE
+idsc_00021	24	\N	1	ROAD WORK
+idsc_00022	24	\N	7	ROAD WORK ON RAMP
+\.
+
 CREATE TABLE iris.inc_impact (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(24) NOT NULL
@@ -3213,6 +3245,25 @@ CREATE VIEW inc_locator_view AS
 	LEFT JOIN iris.inc_range rng ON il.range = rng.id;
 GRANT SELECT ON inc_locator_view TO PUBLIC;
 
+COPY iris.inc_locator (name, range, branched, picked, multi) FROM stdin;
+iloc_00001	0	f	f	AHEAD
+iloc_00002	0	f	t	AHEAD
+iloc_00003	0	t	f	AHEAD
+iloc_00004	0	t	t	AHEAD
+iloc_00005	1	f	f	[locmi] MILES AHEAD
+iloc_00006	1	f	t	[locmd] [locxn]
+iloc_00007	1	t	f	ON [locrn] [locrd]
+iloc_00008	1	t	t	ON [locrn] [locrd]
+iloc_00009	2	f	f	[locmi] MILES AHEAD
+iloc_00010	2	f	t	[locmd] [locxn]
+iloc_00011	2	t	f	ON [locrn] [locrd]
+iloc_00012	2	t	t	ON [locrn] [locmd] [locxn]
+iloc_00013	3	f	f	[locmi] MILES AHEAD
+iloc_00014	3	f	t	[locmd] [locxn]
+iloc_00015	3	t	f	ON [locrn] [locrd]
+iloc_00016	3	t	t	ON [locrn] [locmd] [locxn]
+\.
+
 CREATE TABLE iris.inc_advice (
 	name VARCHAR(10) PRIMARY KEY,
 	impact INTEGER NOT NULL REFERENCES iris.inc_impact(id),
@@ -3247,6 +3298,115 @@ CREATE VIEW inc_advice_view AS
 	LEFT JOIN iris.inc_range rng ON a.range = rng.id
 	LEFT JOIN iris.lane_type lt ON a.lane_type = lt.id;
 GRANT SELECT ON inc_advice_view TO PUBLIC;
+
+COPY iris.inc_advice (name, impact, lane_type, range, open_lanes, impacted_lanes, multi) FROM stdin;
+iadv_00001	0	1	0	0	\N	ROAD CLOSED
+iadv_00002	0	1	0	\N	\N	LANES CLOSED
+iadv_00003	0	1	1	0	\N	ROAD CLOSED
+iadv_00004	0	1	1	\N	\N	LANES CLOSED
+iadv_00005	0	1	2	\N	1	1 LANE CLOSED
+iadv_00006	0	1	2	\N	2	2 LANES CLOSED
+iadv_00007	0	1	2	\N	3	3 LANES CLOSED
+iadv_00008	0	1	2	0	\N	ROAD CLOSED
+iadv_00009	0	1	2	1	\N	SINGLE LANE
+iadv_00010	0	1	2	\N	\N	LANES CLOSED
+iadv_00011	0	1	3	\N	1	1 LANE CLOSED
+iadv_00012	0	1	3	\N	2	2 LANES CLOSED
+iadv_00013	0	1	3	\N	3	3 LANES CLOSED
+iadv_00014	0	1	3	0	\N	ROAD CLOSED
+iadv_00015	0	1	3	1	\N	SINGLE LANE
+iadv_00016	0	1	3	\N	\N	LANES CLOSED
+iadv_00017	1	1	0	\N	1	LEFT LANE CLOSED
+iadv_00018	1	1	0	\N	2	LEFT 2 LANES CLOSED
+iadv_00019	1	1	0	\N	3	LEFT 3 LANES CLOSED
+iadv_00020	1	1	0	\N	\N	LEFT LANES CLOSED
+iadv_00021	1	1	1	\N	1	LEFT LANE CLOSED
+iadv_00022	1	1	1	\N	2	LEFT 2 LANES CLOSED
+iadv_00023	1	1	1	\N	3	LEFT 3 LANES CLOSED
+iadv_00024	1	1	1	\N	\N	LEFT LANES CLOSED
+iadv_00025	1	1	2	\N	1	LANE CLOSED
+iadv_00026	1	1	2	\N	2	2 LANES CLOSED
+iadv_00027	1	1	2	\N	3	3 LANES CLOSED
+iadv_00028	1	1	2	1	\N	SINGLE LANE
+iadv_00029	1	1	2	\N	\N	LANES CLOSED
+iadv_00030	1	1	3	\N	1	LANE CLOSED
+iadv_00031	1	1	3	\N	2	2 LANES CLOSED
+iadv_00032	1	1	3	\N	3	3 LANES CLOSED
+iadv_00033	1	1	3	1	\N	SINGLE LANE
+iadv_00034	1	1	3	\N	\N	LANES CLOSED
+iadv_00035	2	1	0	\N	1	RIGHT LANE CLOSED
+iadv_00036	2	1	0	\N	2	RIGHT 2 LANES CLOSED
+iadv_00037	2	1	0	\N	3	RIGHT 3 LANES CLOSED
+iadv_00038	2	1	0	\N	\N	RIGHT LANES CLOSED
+iadv_00039	2	1	1	\N	1	RIGHT LANE CLOSED
+iadv_00040	2	1	1	\N	2	RIGHT 2 LANES CLOSED
+iadv_00041	2	1	1	\N	3	RIGHT 3 LANES CLOSED
+iadv_00042	2	1	1	\N	\N	RIGHT LANES CLOSED
+iadv_00043	2	1	2	\N	1	LANE CLOSED
+iadv_00044	2	1	2	\N	2	2 LANES CLOSED
+iadv_00045	2	1	2	\N	3	3 LANES CLOSED
+iadv_00046	2	1	2	1	\N	SINGLE LANE
+iadv_00047	2	1	2	\N	\N	LANES CLOSED
+iadv_00048	2	1	3	\N	1	LANE CLOSED
+iadv_00049	2	1	3	\N	2	2 LANES CLOSED
+iadv_00050	2	1	3	\N	3	3 LANES CLOSED
+iadv_00051	2	1	3	1	\N	SINGLE LANE
+iadv_00052	2	1	3	\N	\N	LANES CLOSED
+iadv_00053	3	1	0	\N	1	CENTER LANE CLOSED
+iadv_00054	3	1	0	\N	\N	CENTER LANES CLOSED
+iadv_00055	3	1	1	\N	1	CENTER LANE CLOSED
+iadv_00056	3	1	1	\N	\N	CENTER LANES CLOSED
+iadv_00057	3	1	2	\N	1	LANE CLOSED
+iadv_00058	3	1	2	\N	2	2 LANES CLOSED
+iadv_00059	3	1	2	\N	3	3 LANES CLOSED
+iadv_00060	3	1	2	\N	\N	LANES CLOSED
+iadv_00061	3	1	3	\N	1	LANE CLOSED
+iadv_00062	3	1	3	\N	2	2 LANES CLOSED
+iadv_00063	3	1	3	\N	3	3 LANES CLOSED
+iadv_00064	3	1	3	\N	\N	LANES CLOSED
+iadv_00065	4	1	0	0	1	IN LANE
+iadv_00066	4	1	0	0	2	IN BOTH LANES
+iadv_00067	4	1	0	0	\N	IN ALL LANES
+iadv_00068	4	1	1	0	1	IN LANE
+iadv_00069	4	1	1	0	2	IN BOTH LANES
+iadv_00070	4	1	1	0	\N	IN ALL LANES
+iadv_00071	5	1	0	\N	1	IN LEFT LANE
+iadv_00072	5	1	0	\N	2	IN LEFT 2 LANES
+iadv_00073	5	1	0	\N	3	IN LEFT 3 LANES
+iadv_00074	5	1	0	\N	4	IN LEFT 4 LANES
+iadv_00075	5	1	0	\N	\N	IN LEFT LANES
+iadv_00076	5	1	1	\N	1	IN LEFT LANE
+iadv_00077	5	1	1	\N	2	IN LEFT 2 LANES
+iadv_00078	5	1	1	\N	3	IN LEFT 3 LANES
+iadv_00079	5	1	1	\N	4	IN LEFT 4 LANES
+iadv_00080	5	1	1	\N	\N	IN LEFT LANES
+iadv_00081	6	1	0	\N	1	IN RIGHT LANE
+iadv_00082	6	1	0	\N	2	IN RIGHT 2 LANES
+iadv_00083	6	1	0	\N	3	IN RIGHT 3 LANES
+iadv_00084	6	1	0	\N	4	IN RIGHT 4 LANES
+iadv_00085	6	1	0	\N	\N	IN RIGHT LANES
+iadv_00086	6	1	1	\N	1	IN RIGHT LANE
+iadv_00087	6	1	1	\N	2	IN RIGHT 2 LANES
+iadv_00088	6	1	1	\N	3	IN RIGHT 3 LANES
+iadv_00089	6	1	1	\N	4	IN RIGHT 4 LANES
+iadv_00090	6	1	1	\N	\N	IN RIGHT LANES
+iadv_00091	7	1	0	\N	1	IN CENTER LANE
+iadv_00092	7	1	0	\N	\N	IN CENTER LANES
+iadv_00093	7	1	1	\N	1	IN CENTER LANE
+iadv_00094	7	1	1	\N	\N	IN CENTER LANES
+iadv_00095	8	1	0	\N	\N	ON BOTH SHOULDERS
+iadv_00096	8	1	1	\N	\N	ON BOTH SHOULDERS
+iadv_00097	9	1	0	\N	\N	ON LEFT SHOULDER
+iadv_00098	9	1	1	\N	\N	ON LEFT SHOULDER
+iadv_00099	10	1	0	\N	\N	ON RIGHT SHOULDER
+iadv_00100	10	1	1	\N	\N	ON RIGHT SHOULDER
+iadv_00101	11	1	0	\N	\N	IN BOTH SHOULDERS
+iadv_00102	11	1	1	\N	\N	IN BOTH SHOULDERS
+iadv_00103	12	1	0	\N	\N	IN LEFT SHOULDER
+iadv_00104	12	1	1	\N	\N	IN LEFT SHOULDER
+iadv_00105	13	1	0	\N	\N	IN RIGHT SHOULDER
+iadv_00106	13	1	1	\N	\N	IN RIGHT SHOULDER
+\.
 
 --
 -- Lane Markings
@@ -3299,21 +3459,9 @@ CREATE TRIGGER lane_marking_update_trig
     INSTEAD OF UPDATE ON iris.lane_marking
     FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_update();
 
-CREATE FUNCTION iris.lane_marking_delete() RETURNS TRIGGER AS
-	$lane_marking_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$lane_marking_delete$ LANGUAGE plpgsql;
-
 CREATE TRIGGER lane_marking_delete_trig
     INSTEAD OF DELETE ON iris.lane_marking
-    FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_delete();
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
 CREATE VIEW lane_marking_view AS
 	SELECT m.name, m.notes, m.geo_loc,
@@ -3396,21 +3544,9 @@ CREATE TRIGGER lcs_array_update_trig
     INSTEAD OF UPDATE ON iris.lcs_array
     FOR EACH ROW EXECUTE PROCEDURE iris.lcs_array_update();
 
-CREATE FUNCTION iris.lcs_array_delete() RETURNS TRIGGER AS
-	$lcs_array_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$lcs_array_delete$ LANGUAGE plpgsql;
-
 CREATE TRIGGER lcs_array_delete_trig
     INSTEAD OF DELETE ON iris.lcs_array
-    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_array_delete();
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
 CREATE VIEW lcs_array_view AS
 	SELECT name, shift, notes, lcs_lock
@@ -3500,21 +3636,9 @@ CREATE TRIGGER lcs_indication_update_trig
     INSTEAD OF UPDATE ON iris.lcs_indication
     FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_update();
 
-CREATE FUNCTION iris.lcs_indication_delete() RETURNS TRIGGER AS
-	$lcs_indication_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$lcs_indication_delete$ LANGUAGE plpgsql;
-
 CREATE TRIGGER lcs_indication_delete_trig
     INSTEAD OF DELETE ON iris.lcs_indication
-    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_delete();
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
 CREATE VIEW lcs_indication_view AS
 	SELECT name, controller, pin, lcs, description AS indication
@@ -3780,22 +3904,9 @@ CREATE TRIGGER ramp_meter_update_trig
     INSTEAD OF UPDATE ON iris.ramp_meter
     FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_update();
 
-CREATE FUNCTION iris.ramp_meter_delete() RETURNS TRIGGER AS
-	$ramp_meter_delete$
-BEGIN
-	DELETE FROM iris._device_preset WHERE name = OLD.name;
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$ramp_meter_delete$ LANGUAGE plpgsql;
-
 CREATE TRIGGER ramp_meter_delete_trig
     INSTEAD OF DELETE ON iris.ramp_meter
-    FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_delete();
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
 CREATE VIEW ramp_meter_view AS
 	SELECT m.name, geo_loc, controller, pin, notes,
@@ -4041,21 +4152,9 @@ CREATE TRIGGER tag_reader_update_trig
     INSTEAD OF UPDATE ON iris.tag_reader
     FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_update();
 
-CREATE FUNCTION iris.tag_reader_delete() RETURNS TRIGGER AS
-	$tag_reader_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$tag_reader_delete$ LANGUAGE plpgsql;
-
 CREATE TRIGGER tag_reader_delete_trig
     INSTEAD OF DELETE ON iris.tag_reader
-    FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_delete();
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
 CREATE VIEW tag_reader_view AS
 	SELECT t.name, t.geo_loc, location, controller, pin, notes, toll_zone,
@@ -4276,21 +4375,9 @@ CREATE TRIGGER video_monitor_update_trig
     INSTEAD OF UPDATE ON iris.video_monitor
     FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_update();
 
-CREATE FUNCTION iris.video_monitor_delete() RETURNS TRIGGER AS
-	$video_monitor_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$video_monitor_delete$ LANGUAGE plpgsql;
-
 CREATE TRIGGER video_monitor_delete_trig
     INSTEAD OF DELETE ON iris.video_monitor
-    FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_delete();
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
 CREATE VIEW video_monitor_view AS
 	SELECT m.name, m.notes, group_n, mon_num, restricted, monitor_style,
@@ -4298,6 +4385,97 @@ CREATE VIEW video_monitor_view AS
 	FROM iris.video_monitor m
 	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
 GRANT SELECT ON video_monitor_view TO PUBLIC;
+
+--
+-- Video Flow Streams
+--
+CREATE TABLE iris.flow_stream_status (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(8) NOT NULL
+);
+
+COPY iris.flow_stream_status (id, description) FROM stdin;
+0	FAILED
+1	STARTING
+2	PLAYING
+\.
+
+CREATE TABLE iris._flow_stream (
+	name VARCHAR(12) PRIMARY KEY,
+	restricted BOOLEAN NOT NULL,
+	loc_overlay BOOLEAN NOT NULL,
+	quality INTEGER NOT NULL REFERENCES iris.encoding_quality,
+	camera VARCHAR(20) REFERENCES iris._camera,
+	mon_num INTEGER,
+	address INET,
+	port INTEGER CHECK (port > 0 AND port <= 65535),
+	status INTEGER NOT NULL REFERENCES iris.flow_stream_status,
+	CONSTRAINT camera_or_monitor CHECK (camera IS NULL OR mon_num IS NULL)
+);
+
+ALTER TABLE iris._flow_stream ADD CONSTRAINT _flow_stream_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.flow_stream AS
+	SELECT f.name, controller, pin, restricted, loc_overlay, quality,
+	       camera, mon_num, address, port, status
+	FROM iris._flow_stream f JOIN iris._device_io d ON f.name = d.name;
+
+CREATE FUNCTION iris.flow_stream_insert() RETURNS TRIGGER AS
+	$flow_stream_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._flow_stream (name, restricted, loc_overlay, quality,
+	                               camera, mon_num, address, port, status)
+	     VALUES (NEW.name, NEW.restricted, NEW.loc_overlay, NEW.quality,
+	             NEW.camera, NEW.mon_num, NEW.address, NEW.port,NEW.status);
+	RETURN NEW;
+END;
+$flow_stream_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER flow_stream_insert_trig
+    INSTEAD OF INSERT ON iris.flow_stream
+    FOR EACH ROW EXECUTE PROCEDURE iris.flow_stream_insert();
+
+CREATE FUNCTION iris.flow_stream_update() RETURNS TRIGGER AS
+	$flow_stream_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._flow_stream
+	   SET restricted = NEW.restricted,
+	       loc_overlay = NEW.loc_overlay,
+	       quality = NEW.quality,
+	       camera = NEW.camera,
+	       mon_num = NEW.mon_num,
+	       address = NEW.address,
+	       port = NEW.port,
+	       status = NEW.status
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$flow_stream_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER flow_stream_update_trig
+    INSTEAD OF UPDATE ON iris.flow_stream
+    FOR EACH ROW EXECUTE PROCEDURE iris.flow_stream_update();
+
+CREATE TRIGGER flow_stream_delete_trig
+    INSTEAD OF DELETE ON iris.flow_stream
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
+
+CREATE VIEW flow_stream_view AS
+	SELECT f.name, f.controller, pin, condition, comm_link, restricted,
+	       loc_overlay, eq.description AS quality, camera, mon_num, address,
+	       port, s.description AS status
+	FROM iris.flow_stream f
+	JOIN iris.flow_stream_status s ON f.status = s.id
+	LEFT JOIN controller_view ctr ON controller = ctr.name
+	LEFT JOIN iris.encoding_quality eq ON f.quality = eq.id;
+GRANT SELECT ON flow_stream_view TO PUBLIC;
 
 --
 -- Weather Sensors
@@ -4365,21 +4543,9 @@ CREATE TRIGGER weather_sensor_update_trig
     INSTEAD OF UPDATE ON iris.weather_sensor
     FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_update();
 
-CREATE FUNCTION iris.weather_sensor_delete() RETURNS TRIGGER AS
-	$weather_sensor_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$weather_sensor_delete$ LANGUAGE plpgsql;
-
 CREATE TRIGGER weather_sensor_delete_trig
     INSTEAD OF DELETE ON iris.weather_sensor
-    FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_delete();
+    FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
 CREATE VIEW weather_sensor_view AS
 	SELECT w.name, w.notes, w.settings, w.sample, w.geo_loc,

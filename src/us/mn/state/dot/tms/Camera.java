@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,6 +74,12 @@ public interface Camera extends Device {
 
 	/** Get flag to allow publishing camera images */
 	boolean getPublish();
+
+	/** Set streamable flag */
+	void setStreamable(boolean s);
+
+	/** Get streamable flag */
+	boolean getStreamable();
 
 	/** Get flag to indicate video loss */
 	boolean getVideoLoss();

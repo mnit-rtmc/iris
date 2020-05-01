@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2019  Minnesota Department of Transportation
+ * Copyright (C) 2004-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,6 @@ import java.sql.ResultSet;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
-import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
@@ -140,8 +138,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	{
 		ControllerImpl oc = controller;
 		Integer vp = verify_pin;
-		if (vp != null && c != null)
-			checkControllerPin(vp);
+		checkControllerPin(c, vp);
 		super.doSetControllerImpl(c);
 		updateVerifyPin(oc, vp, c, vp);
 	}
@@ -255,15 +252,12 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 
 	/** Set the controller I/O verify pin number */
 	public void doSetVerifyPin(Integer p) throws TMSException {
-		if (objectEquals(p, verify_pin))
-			return;
-		if (p != null && (p < 1 || p > Controller.ALL_PINS))
-			throw new ChangeVetoException("Invalid pin: " + p);
-		if (p != null)
-			checkControllerPin(p);
-		store.update(this, "verify_pin", p);
-		updateVerifyPin(controller, verify_pin, controller, p);
-		setVerifyPin(p);
+		if (!objectEquals(p, verify_pin)) {
+			checkControllerPin(controller, p);
+			store.update(this, "verify_pin", p);
+			updateVerifyPin(controller, verify_pin, controller, p);
+			setVerifyPin(p);
+		}
 	}
 
 	/** Get the controller I/O verify pin number */

@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015  Iteris Inc.
+ * Copyright (C) 2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +22,8 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.Word;
 
 /**
- * A word is a character string.
+ * A word which can be allowed or banned for use in DMS messages.
+ *
  * @author Michael Darter
  */
 public class WordImpl extends BaseObjectImpl implements Word {
@@ -43,6 +45,7 @@ public class WordImpl extends BaseObjectImpl implements Word {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -52,11 +55,13 @@ public class WordImpl extends BaseObjectImpl implements Word {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -67,7 +72,7 @@ public class WordImpl extends BaseObjectImpl implements Word {
 	}
 
 	/** Create a word */
-	protected WordImpl(String n, String ab, boolean al) {
+	private WordImpl(String n, String ab, boolean al) {
 		super(n);
 		abbr = ab;
 		allowed = al;
@@ -77,11 +82,13 @@ public class WordImpl extends BaseObjectImpl implements Word {
 	private String abbr;
 
 	/** Get abbreviation */
+	@Override
 	public String getAbbr() {
 		return abbr;
 	}
 
 	/** Set abbreviation */
+	@Override
 	public void setAbbr(String a) {
 		abbr = a;
 	}
@@ -98,11 +105,13 @@ public class WordImpl extends BaseObjectImpl implements Word {
 	private boolean allowed;
 
 	/** Get word type: allowed or banned */
+	@Override
 	public boolean getAllowed() {
 		return allowed;
 	}
 
 	/** Set word type: allowed or banned */
+	@Override
 	public void setAllowed(boolean a) {
 		allowed = a;
 	}
@@ -110,7 +119,7 @@ public class WordImpl extends BaseObjectImpl implements Word {
 	/** Set the allow state
 	 * @param a Allow or disallow. */
 	public void doSetAllowed(boolean a) throws TMSException {
-		if(a != allowed) {
+		if (a != allowed) {
 			store.update(this, "allowed", a);
 			setAllowed(a);
 		}

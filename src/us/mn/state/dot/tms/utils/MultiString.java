@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2019  Minnesota Department of Transportation
+ * Copyright (C) 2006-2020  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  * Copyright (C) 2019-2020  SRF Consulting Group
  *
@@ -765,5 +765,43 @@ public class MultiString {
 		for (int i = 0; i < words.length; ++i)
 			words[i] = words[i].trim();
 		return Arrays.asList(words);
+	}
+
+	/** Check for DMS action / incident locator tags */
+	public boolean isSpecial() {
+		final boolean[] special = new boolean[] { false };
+		parse(new MultiAdapter() {
+			@Override
+			public void addTravelTime(String sid, OverLimitMode me,
+				String o_txt)
+			{
+				special[0] = true;
+			}
+			@Override
+			public void addSpeedAdvisory() {
+				special[0] = true;
+			}
+			@Override
+			public void addSlowWarning(int spd, int dist, String m){
+				special[0] = true;
+			}
+			@Override
+			public void addFeed(String fid) {
+				special[0] = true;
+			}
+			@Override
+			public void addTolling(String mode, String[] zones) {
+				special[0] = true;
+			}
+			@Override
+			public void addParking(String p, String lt, String ct) {
+				special[0] = true;
+			}
+			@Override
+			public void addLocator(String code) {
+				special[0] = true;
+			}
+		});
+		return special[0];
 	}
 }

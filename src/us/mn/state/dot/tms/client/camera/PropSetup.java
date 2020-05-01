@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2019  Minnesota Department of Transportation
+ * Copyright (C) 2014-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,6 +76,9 @@ public class PropSetup extends IPanel {
 	/** Encoder address */
 	private final JTextField enc_address_txt = new JTextField("", 32);
 
+	/** Encoder port text */
+	private final JTextField enc_port_txt = new JTextField("", 8);
+
 	/** Encoder multicast address */
 	private final JTextField enc_mcast_txt = new JTextField("", 32);
 
@@ -90,6 +93,14 @@ public class PropSetup extends IPanel {
 	private final JCheckBox publish_chk = new JCheckBox(new IAction(null) {
 		protected void doActionPerformed(ActionEvent e) {
 			camera.setPublish(publish_chk.isSelected());
+		}
+	});
+
+	/** Checkbox to allow streaming camera images */
+	private final JCheckBox streamable_chk = new JCheckBox(new IAction(null)
+	{
+		protected void doActionPerformed(ActionEvent e) {
+			camera.setStreamable(streamable_chk.isSelected());
 		}
 	});
 
@@ -119,12 +130,16 @@ public class PropSetup extends IPanel {
 		add(enc_type_cbx, Stretch.LAST);
 		add("camera.enc_address");
 		add(enc_address_txt, Stretch.LAST);
+		add("camera.enc_port");
+		add(enc_port_txt, Stretch.LAST);
 		add("camera.enc_mcast");
 		add(enc_mcast_txt, Stretch.LAST);
 		add("camera.enc_channel");
 		add(enc_chn_spn, Stretch.LAST);
 		add("camera.publish");
 		add(publish_chk, Stretch.LAST);
+		add("camera.streamable");
+		add(streamable_chk, Stretch.LAST);
 		createJobs();
 	}
 
@@ -143,6 +158,15 @@ public class PropSetup extends IPanel {
 			public void focusLost(FocusEvent e) {
 			    String a = enc_address_txt.getText().trim();
 			    camera.setEncAddress((a.length() > 0) ? a : null);
+			}
+		});
+		enc_port_txt.addFocusListener(new FocusAdapter() {
+			public void focusLost(FocusEvent e) {
+			    Integer ep = parseInt(enc_port_txt.getText());
+			    enc_port_txt.setText((ep != null)
+			                        ? ep.toString()
+			                        : "");
+			    camera.setEncPort(ep);
 			}
 		});
 		enc_mcast_txt.addFocusListener(new FocusAdapter() {
@@ -168,9 +192,11 @@ public class PropSetup extends IPanel {
 		cam_num_txt.setEnabled(canWrite("camNum"));
 		enc_type_act.setEnabled(canWrite("encoderType"));
 		enc_address_txt.setEnabled(canWrite("encAddress"));
+		enc_port_txt.setEnabled(canWrite("encPort"));
 		enc_mcast_txt.setEnabled(canWrite("encMcast"));
 		enc_chn_spn.setEnabled(canWrite("encChannel"));
 		publish_chk.setEnabled(canWrite("publish"));
+		streamable_chk.setEnabled(canWrite("streamable"));
 	}
 
 	/** Update one attribute on the form tab */
@@ -182,8 +208,12 @@ public class PropSetup extends IPanel {
 		if (a == null || a.equals("encoderType"))
 			enc_type_act.updateSelected();
 		if (a == null || a.equals("encAddress")) {
-			String ea = camera.getEncAddress();
-			enc_address_txt.setText((ea != null) ? ea : "");
+			String ep = camera.getEncAddress();
+			enc_address_txt.setText((ep != null) ? ep : "");
+		}
+		if (a == null || a.equals("encPort")) {
+			Integer ep = camera.getEncPort();
+			enc_port_txt.setText((ep != null) ? ep.toString() : "");
 		}
 		if (a == null || a.equals("encMcast")) {
 			String em = camera.getEncMcast();
@@ -195,6 +225,8 @@ public class PropSetup extends IPanel {
 		}
 		if (a == null || a.equals("publish"))
 			publish_chk.setSelected(camera.getPublish());
+		if (a == null || a.equals("streamable"))
+			streamable_chk.setSelected(camera.getStreamable());
 	}
 
 	/** Check if the user can write an attribute */

@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015  Iteris Inc.
+ * Copyright (C) 2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,10 +25,11 @@ import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
- * Table model for dictionary words.
+ * Table model for allowed/banned words on DMS.
+ *
  * @author Michael Darter
  */
-public class DictTableModel extends ProxyTableModel<Word> {
+public class WordTableModel extends ProxyTableModel<Word> {
 
 	/** Create a proxy descriptor */
 	static public ProxyDescriptor<Word> descriptor(Session s) {
@@ -44,12 +46,12 @@ public class DictTableModel extends ProxyTableModel<Word> {
 	protected ArrayList<ProxyColumn<Word>> createColumns() {
 		ArrayList<ProxyColumn<Word>> cols =
 			new ArrayList<ProxyColumn<Word>>(2);
-		cols.add(new ProxyColumn<Word>("dictionary.word", 140) {
+		cols.add(new ProxyColumn<Word>("word", 140) {
 			public Object getValueAt(Word wo) {
 				return WordHelper.decode(wo.getName());
 			}
 		});
-		cols.add(new ProxyColumn<Word>("dictionary.abbr", 80) {
+		cols.add(new ProxyColumn<Word>("word.abbr", 80) {
 			public Object getValueAt(Word wo) {
 				return wo.getAbbr();
 			}
@@ -65,11 +67,11 @@ public class DictTableModel extends ProxyTableModel<Word> {
 		return cols;
 	}
 
-	/** Constructor
+	/** Create a word table model.
 	 * @param s Session
 	 * @param allowed True if table model is for allowed words else 
 	 * 		  false for banned */
-	public DictTableModel(Session s, boolean allowed) {
+	public WordTableModel(Session s, boolean allowed) {
 		super(s, descriptor(s), 20, 20);
 		allowed_words = allowed;
 	}

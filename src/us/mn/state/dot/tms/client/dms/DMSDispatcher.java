@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2017-2018  Iteris Inc.
  *
@@ -61,7 +61,7 @@ public class DMSDispatcher extends JPanel {
 			return confirmSend(amsg);
 		String imsg = msg + amsg;
 		if (WordHelper.spellCheckEnforced()) {
-			IOptionPane.showError("dictionary.form", imsg);
+			IOptionPane.showError("word.spell.check", imsg);
 			return false;
 		} else if (WordHelper.spellCheckRecommend())
 			return confirmSend(imsg);

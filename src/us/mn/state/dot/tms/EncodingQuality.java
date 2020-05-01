@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ public enum EncodingQuality {
 	HIGH;   /* 2 */
 
 	/** Cached values array */
-	static private final EncodingQuality[] VALUES = values();
+	static public final EncodingQuality[] VALUES = values();
 
 	/** Get an encoding quality from an ordinal value */
 	static public EncodingQuality fromOrdinal(int o) {

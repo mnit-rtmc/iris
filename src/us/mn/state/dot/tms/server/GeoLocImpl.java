@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2019  Minnesota Department of Transportation
+ * Copyright (C) 2005-2020  Minnesota Department of Transportation
  * Copyright (C) 2014       AHMCT, University of California
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
@@ -433,7 +433,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	private GeoLoc findNearest() {
 		SphericalMercatorPosition smp = getPosition(lat, lon);
 		GeoLoc loc = corridors.snapGeoLoc(smp, LaneType.MAINLINE,
-			MAX_DIST);
+			MAX_DIST, Direction.UNKNOWN);
 		return (loc != null) ? findNearest(loc) : null;
 	}
 

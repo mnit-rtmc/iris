@@ -112,13 +112,18 @@ for incidents.
 The external system should respond with an ASCII text file, with one line per
 active incident.
 
-Each line should contain 6 fields, separated by comma characters `,` and
-terminated with a single newline character `\n` (ASCII 0x0A).  The fields are
-**incident ID**, **type**, **incident detail**, **latitude**, **longitude**,
-and **camera ID**.  The type must be `CRASH`, `STALL`, `ROADWORK`, or `HAZARD`.
-The detail may be blank, or one of the _incident detail_ names.  _Latitude_ and
-_longitude_ define coördinates using the WGS 84 datum.  _Camera ID_ may be
-blank, or the ID of a [camera] to view the incident.
+Each line should contain 7 fields, separated by comma characters `,` and
+terminated with a single newline character `\n` (ASCII 0x0A).  The fields are:
+
+1. **incident ID**
+2. **type**: `CRASH`, `STALL`, `ROADWORK` or `HAZARD`
+3. **incident detail**: may be blank, or one of the _incident detail_ names
+4. **latitude**
+5. **longitude**
+6. **camera ID**: may be blank, or the ID of a [camera] to view the incident
+7. **direction**: `NB`, `SB`, `EB` or `WB`
+
+_Latitude_ and _longitude_ define coördinates using the WGS 84 datum.
 
 ### Infinova
 
@@ -275,6 +280,13 @@ The `stc` protocol can be used for [gate arm] control for Smart Touch gate arms.
 The _default scheme_ is `tcp`.  _Multi-drop_ is supported with drops 1 - 99.
 One gate arm can be associated with each [controller], using [IO pin] 1.
 
+### Streambed
+
+The `streambed` protocol is for [flow stream] configuration with a [streambed]
+server.  The _default scheme_ is `tcp`.  _Multi-drop_ is not supported.
+Up to 150 flow streams can be associated with each [controller], using
+[IO pin]s.
+
 ### Vicon
 
 The `vicon` protocol can be used for [PTZ] control of Vicon [camera]s.  The
@@ -294,6 +306,7 @@ camera can be associated with each [controller], using [IO pin] 1.
 [device]: controllers.html#devices
 [DMS]: dms.html
 [DMS action]: action_plans.html#dms-actions
+[flow stream]: flow_streams.html
 [gate arm]: gate_arms.html
 [GPS]: gps.html
 [incidents]: incidents.html
@@ -308,6 +321,7 @@ camera can be associated with each [controller], using [IO pin] 1.
 [ramp meters]: ramp_meters.html
 [RFC 3339]: https://tools.ietf.org/html/rfc3339#section-5.6
 [RWIS]: rwis.html
+[streambed]: https://github.com/mnit-rtmc/streambed
 [system attribute]: system_attributes.html
 [tag readers]: tolling.html#tag-readers
 [vehicle detection]: vehicle_detection.html

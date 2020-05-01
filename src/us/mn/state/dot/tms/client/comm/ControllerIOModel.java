@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2020  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,6 +37,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.FlowStream;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.LaneMarking;
@@ -76,7 +77,7 @@ public class ControllerIOModel extends AbstractTableModel {
 
 	/** Device types which can be associated with controller IO */
 	private enum DeviceType {
-		Alarm, Camera, Detector, DMS, Gate_Arm, Gps,
+		Alarm, Camera, Detector, DMS, Flow_Stream, Gate_Arm, Gps,
 		Lane_Marking, LCSIndication, Ramp_Meter, Beacon,
 		Beacon_Verify, Video_Monitor, Weather_Sensor,
 		Tag_Reader
@@ -91,6 +92,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		IO_TYPE.add(DeviceType.Camera);
 		IO_TYPE.add(DeviceType.Detector);
 		IO_TYPE.add(DeviceType.DMS);
+		IO_TYPE.add(DeviceType.Flow_Stream);
 		IO_TYPE.add(DeviceType.Gate_Arm);
 		IO_TYPE.add(DeviceType.Gps);
 		IO_TYPE.add(DeviceType.Lane_Marking);
@@ -113,6 +115,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			return DeviceType.Detector;
 		else if (cio instanceof DMS)
 			return DeviceType.DMS;
+		else if (cio instanceof FlowStream)
+			return DeviceType.Flow_Stream;
 		else if (cio instanceof GateArm)
 			return DeviceType.Gate_Arm;
 		else if (cio instanceof Gps)
@@ -176,6 +180,9 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Controller IO list for DMSs */
 	private final ControllerIOList dms_list;
 
+	/** Controller IO list for flow streams */
+	private final ControllerIOList flow_list;
+
 	/** Controller IO list for gate arms */
 	private final ControllerIOList gate_list;
 
@@ -216,8 +223,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		state = s.getSonarState();;
 		controller = c;
 		cell_editor = new DeviceCellEditor();
-		io = new ControllerIO[Controller.ALL_PINS];
-		types = new DeviceType[Controller.ALL_PINS];
+		io = new ControllerIO[Controller.ALL_PINS + 1];
+		types = new DeviceType[Controller.ALL_PINS + 1];
 		d_combo.setRenderer(new IListCellRenderer<ControllerIO>() {
 			@Override
 			protected String valueToString(ControllerIO value) {
@@ -230,6 +237,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		dt_list = new ControllerIOList(
 			state.getDetCache().getDetectors());
 		dms_list = new ControllerIOList(state.getDmsCache().getDMSs());
+		flow_list = new ControllerIOList(
+			state.getCamCache().getFlowStreams());
 		gate_list = new ControllerIOList(state.getGateArms());
 		gps_list = new ControllerIOList<Gps>(state.getGpses());
 		lmark_list = new ControllerIOList(state.getLaneMarkings());
@@ -291,6 +300,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		c_list.initialize();
 		dt_list.initialize();
 		dms_list.initialize();
+		flow_list.initialize();
 		gate_list.initialize();
 		gps_list.initialize();
 		lmark_list.initialize();
@@ -309,6 +319,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		c_list.dispose();
 		dt_list.dispose();
 		dms_list.dispose();
+		flow_list.dispose();
 		gate_list.dispose();
 		gps_list.dispose();
 		lmark_list.dispose();
@@ -392,7 +403,6 @@ public class ControllerIOModel extends AbstractTableModel {
 
 	/** Set the device type */
 	private void setDeviceType(int pin, DeviceType io_type) {
-		int row = pin - 1;
 		if (io_type != types[pin]) {
 			clearDevice(pin);
 			types[pin] = io_type;
@@ -508,6 +518,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			return dt_list;
 		case DMS:
 			return dms_list;
+		case Flow_Stream:
+			return flow_list;
 		case Gate_Arm:
 			return gate_list;
 		case Gps:

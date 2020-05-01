@@ -109,7 +109,6 @@ Tag       | Picked | Description
 `[locrd]` | —      | Road direction (NORTH, SOUTH, etc.)
 `[locmd]` | `YES`  | Location modifier (AT, NORTH OF, SOUTH OF, etc.)
 `[locxn]` | `YES`  | Cross-street name
-`[locxa]` | `YES`  | Cross-street abbreviation
 `[locmi]` | `NO`   | Miles from sign to incident
 
 Road and cross-street names are converted to all capital letters.
@@ -117,8 +116,7 @@ Road and cross-street names are converted to all capital letters.
 #### Road Affixes
 
 The _road affix_ table determines how _prefixes_ and _suffixes_ are handled
-within `[locrn]`, `[locxn]` and `[locxa]` tags.  Example suffixes are **AVE**
-and **RD**.
+within `[locrn]` and `[locxn]` tags.  Example suffixes are **AVE** and **RD**.
 
 Field        | Description
 -------------|----------------------------
@@ -129,7 +127,6 @@ Allow Retain | `true` if retaining affix is allowed without fixup
 
 * For the `[locrn]` and `[locxn]` locator tags, matched affixes are replaced
   with the _fixup_ value
-* For the `[locxa]` tag, matching affixes are stripped
 
 ## Advice
 

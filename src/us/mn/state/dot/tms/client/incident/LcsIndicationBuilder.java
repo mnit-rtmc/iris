@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2019  Minnesota Department of Transportation
+ * Copyright (C) 2010-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,13 +40,13 @@ import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 public class LcsIndicationBuilder {
 
 	/** Short distance upstream of incident to deploy devices */
-	static private final Distance DIST_SHORT = new Distance(0.4f, MILES);
+	static private final Distance DIST_SHORT = new Distance(0.6f, MILES);
 
 	/** Medium distance upstream of incident to deploy devices */
-	static private final Distance DIST_MEDIUM = new Distance(0.7f, MILES);
+	static private final Distance DIST_MEDIUM = new Distance(0.9f, MILES);
 
 	/** Long distance upstream of incident to deploy devices */
-	static private final Distance DIST_LONG = new Distance(1.0f, MILES);
+	static private final Distance DIST_LONG = new Distance(1.2f, MILES);
 
 	/** Assign a requested indication to an available indication.
 	 * @param lui Requested lane use indication.

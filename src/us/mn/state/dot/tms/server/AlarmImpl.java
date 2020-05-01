@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2018  Minnesota Department of Transportation
+ * Copyright (C) 2005-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,14 +15,12 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Alarm;
-import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.TMSException;
@@ -35,7 +33,7 @@ import us.mn.state.dot.tms.server.event.AlarmEvent;
  *
  * @author Douglas Lau
  */
-public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
+public class AlarmImpl extends ControllerIoImpl implements Alarm {
 
 	/** Get the event type for the new state */
 	static private EventType getEventType(boolean s) {
@@ -53,14 +51,7 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new AlarmImpl(
-					row.getString(1),	// name
-					row.getString(2),	// description
-					row.getString(3),	// controller
-					row.getInt(4),		// pin
-					row.getBoolean(5),	// state
-					row.getTimestamp(6)	// triggerTime
-				));
+				namespace.addObject(new AlarmImpl(row));
 			}
 		});
 	}
@@ -92,34 +83,30 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 
 	/** Create a new alarm */
 	public AlarmImpl(String n) {
-		super(n);
+		super(n, null, 0);
 		state = false;
 	}
 
 	/** Create a new alarm */
-	private AlarmImpl(String n, String d, ControllerImpl c, int p,
-		boolean s, Date tt)
-	{
-		this(n);
-		description = d;
-		controller = c;
-		pin = p;
-		state = s;
-		triggerTime = stampMillis(tt);
-		initTransients();
+	private AlarmImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),   // name
+		     row.getString(2),   // description
+		     row.getString(3),   // controller
+		     row.getInt(4),      // pin
+		     row.getBoolean(5),  // state
+		     row.getTimestamp(6) // triggerTime
+		);
 	}
 
 	/** Create a new alarm */
 	private AlarmImpl(String n, String d, String c, int p, boolean s,
 		Date tt)
 	{
-		this(n, d, lookupController(c), p, s, tt);
-	}
-
-	/** Initialize the controller for this alarm */
-	@Override
-	public void initTransients() {
-		updateControllerPin(null, 0, controller, pin);
+		super(n, lookupController(c), p);
+		description = d;
+		state = s;
+		triggerTime = stampMillis(tt);
+		initTransients();
 	}
 
 	/** Description of the alarm */
@@ -143,76 +130,6 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 	@Override
 	public String getDescription() {
 		return description;
-	}
-
-	/** Controller associated with this alarm */
-	private ControllerImpl controller;
-
-	/** Update the controller and/or pin.
-	 * @param oc Old controller.
-	 * @param op Old pin.
-	 * @param nc New controller.
-	 * @param np New pin. */
-	private void updateControllerPin(ControllerImpl oc, int op,
-		ControllerImpl nc, int np)
-	{
-		if (oc != null)
-			oc.setIO(op, null);
-		if (nc != null)
-			nc.setIO(np, this);
-	}
-
-	/** Set the controller of the alarm */
-	@Override
-	public void setController(Controller c) {
-		controller = (ControllerImpl)c;
-	}
-
-	/** Set the controller of the alarm */
-	public void doSetController(Controller c) throws TMSException {
-		if (c == controller)
-			return;
-		if (pin < 1 || pin > Controller.ALL_PINS)
-			throw new ChangeVetoException("Invalid pin: " + pin);
-		ControllerImpl oc = controller;
-		store.update(this, "controller", c);
-		setController(c);
-		// Do this last so updateStyles sees updates
-		updateControllerPin(oc, pin, (ControllerImpl) c, pin);
-	}
-
-	/** Get the controller to which this alarm is assigned */
-	@Override
-	public Controller getController() {
-		return controller;
-	}
-
-	/** Controller I/O pin number */
-	private int pin;
-
-	/** Set the controller I/O pin number */
-	@Override
-	public void setPin(int p) {
-		pin = p;
-	}
-
-	/** Set the controller I/O pin number */
-	public void doSetPin(int p) throws TMSException {
-		if (p == pin)
-			return;
-		if (p < 1 || p > Controller.ALL_PINS)
-			throw new ChangeVetoException("Invalid pin: " + p);
-		int op = pin;
-		store.update(this, "pin", p);
-		setPin(p);
-		// Do this last so updateStyles sees updates
-		updateControllerPin(controller, op, controller, p);
-	}
-
-	/** Get the controller I/O pin number */
-	@Override
-	public int getPin() {
-		return pin;
 	}
 
 	/** Current state of the alarm */
@@ -267,26 +184,6 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 		return triggerTime;
 	}
 
-	/** Get item style bits */
-	@Override
-	public long getStyles() {
-		return 0;
-	}
-
-	/** Destroy an alarm */
-	@Override
-	public void doDestroy() throws TMSException {
-		// Don't allow an alarm to be destroyed if it is assigned to
-		// a controller.  This is needed because the Controller io_pins
-		// HashMap will still have a reference to the alarm.
-		if (controller != null) {
-			throw new ChangeVetoException("Alarm must be removed" +
-				" from controller before being destroyed: " +
-				name);
-		}
-		super.doDestroy();
-	}
-
 	/** Request a device operation */
 	public void sendDeviceRequest(DeviceRequest req) {
 		AlarmPoller p = getAlarmPoller();
@@ -307,6 +204,7 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 	}
 
 	/** Perform a periodic poll */
+	@Override
 	public void periodicPoll() {
 		sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 	}

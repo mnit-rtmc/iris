@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ public class EncoderStreamModel extends ProxyTableModel<EncoderStream> {
 	@Override
 	protected ArrayList<ProxyColumn<EncoderStream>> createColumns() {
 		ArrayList<ProxyColumn<EncoderStream>> cols =
-			new ArrayList<ProxyColumn<EncoderStream>>(7);
+			new ArrayList<ProxyColumn<EncoderStream>>(8);
 		cols.add(new ProxyColumn<EncoderStream>(
 			"encoder.stream.view.num", 80, Integer.class)
 		{
@@ -68,6 +68,20 @@ public class EncoderStreamModel extends ProxyTableModel<EncoderStream> {
 					? (Integer) value
 					: null;
 				es.setViewNum(view);
+			}
+		});
+		cols.add(new ProxyColumn<EncoderStream>("encoder.stream.flow",
+			90, Boolean.class)
+		{
+			public Object getValueAt(EncoderStream es) {
+				return es.getFlowStream();
+			}
+			public boolean isEditable(EncoderStream es) {
+				return canWrite(es, "flowStream");
+			}
+			public void setValueAt(EncoderStream es, Object value) {
+				if (value instanceof Boolean)
+					es.setFlowStream((Boolean) value);
 			}
 		});
 		cols.add(new ProxyColumn<EncoderStream>(
@@ -200,7 +214,7 @@ public class EncoderStreamModel extends ProxyTableModel<EncoderStream> {
 			}
 		};
 		sorter.setSortsOnUpdates(true);
-		sorter.setComparator(2, new Comparator<EncodingQuality>() {
+		sorter.setComparator(3, new Comparator<EncodingQuality>() {
 			public int compare(EncodingQuality eq0,
 				EncodingQuality eq1)
 			{
@@ -210,9 +224,9 @@ public class EncoderStreamModel extends ProxyTableModel<EncoderStream> {
 		ArrayList<RowSorter.SortKey> keys =
 			new ArrayList<RowSorter.SortKey>();
 		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
-		keys.add(new RowSorter.SortKey(2, SortOrder.DESCENDING));
-		keys.add(new RowSorter.SortKey(5, SortOrder.DESCENDING));
-		keys.add(new RowSorter.SortKey(4, SortOrder.ASCENDING));
+		keys.add(new RowSorter.SortKey(3, SortOrder.DESCENDING));
+		keys.add(new RowSorter.SortKey(6, SortOrder.DESCENDING));
+		keys.add(new RowSorter.SortKey(5, SortOrder.ASCENDING));
 		sorter.setSortKeys(keys);
 		return sorter;
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2019  Minnesota Department of Transportation
+ * Copyright (C) 2003-2020  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  * Copyright (C) 2015-2018  SRF Consulting Group
  *
@@ -22,7 +22,6 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.EncoderStream;
 import us.mn.state.dot.tms.Encoding;
-import us.mn.state.dot.tms.EncodingQuality;
 import static us.mn.state.dot.tms.utils.URIUtil.create;
 import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
 import static us.mn.state.dot.tms.utils.URIUtil.RTSP;
@@ -204,8 +203,7 @@ public class VideoRequest {
 
 	/** Create a camera encoder URI */
 	public URI getCameraUri(Camera c) {
-		EncoderStream es = CameraHelper.getStream(c,
-			EncodingQuality.LOW, false);
+		EncoderStream es = CameraHelper.getStream(c);
 		return CameraHelper.encoderUri(c, es);
 	}
 
@@ -218,8 +216,7 @@ public class VideoRequest {
 
 	/** Get the encoding for a camera */
 	private Encoding getEncoding(Camera c) {
-		EncoderStream es = CameraHelper.getStream(c,
-			EncodingQuality.LOW, false);
+		EncoderStream es = CameraHelper.getStream(c);
 		Encoding enc = getEncoding(es);
 		if (usingServletProxy() && (enc != Encoding.UNKNOWN))
 			return Encoding.MJPEG;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Minnesota Department of Transportation
+ * Copyright (C) 2017-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ public class VideoMonitorPanel extends ProxyTablePanel<VideoMonitor> {
 	/** User session */
 	private final Session session;
 
-	/** Create a new action plan panel */
+	/** Create a new video monitor panel */
 	public VideoMonitorPanel(Session s) {
 		super(new VideoMonitorModel(s));
 		session = s;

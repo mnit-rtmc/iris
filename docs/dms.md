@@ -108,12 +108,12 @@ page.  Care must be taken to ensure the combined message can be displayed on the
 sign.  This feature could be used, for example, to put a graphic logo on all
 messages displayed on a sign.
 
-## Dictionary
+## Words
 
-Select `View ➔ Message Signs ➔ Dictionary` menu item
+Select `View ➔ Message Signs ➔ Words` menu item
 
-DMS messages can be checked against the dictionary when an operator presses the
-**Send** button.  It uses two word lists: **Allowed** and **Banned**.
+DMS messages can be checked against **allowed** and **banned** word lists when
+an operator presses the **Send** button.
 
 ### Allowed Words
 

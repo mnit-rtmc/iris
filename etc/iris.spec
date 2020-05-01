@@ -24,6 +24,8 @@
 %define _serverdir	%{_serverlink}-%{version}
 %define _clientlink	/var/www/html/iris-client
 %define _clientdir	%{_clientlink}-%{version}
+%define _source_payload w6.xzdio
+%define _binary_payload w6.xzdio
 
 Name:		%{name}
 Summary:	An advanced traffic management system (ATMS)

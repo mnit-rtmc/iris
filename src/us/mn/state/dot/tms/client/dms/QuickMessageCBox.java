@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2019  Minnesota Department of Transportation
+ * Copyright (C) 2008-2020  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
@@ -43,6 +44,12 @@ import us.mn.state.dot.tms.utils.NumericAlphaComparator;
  * @author Douglas Lau
  */
 public class QuickMessageCBox extends JComboBox<QuickMessage> {
+
+	/** Check if a quick message should be included in combo box */
+	static private boolean isValidMulti(QuickMessage qm) {
+		MultiString ms = new MultiString(qm.getMulti());
+		return ms.isValid() && !ms.isSpecial();
+	}
 
 	/** Given a QuickMessage or String, return the cooresponding quick 
 	 * message name or an empty string if none exists. */
@@ -195,8 +202,10 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 					QuickMessageHelper.iterator();
 				while (qit.hasNext()) {
 					QuickMessage qm = qit.next();
-					if (qm.getSignGroup() == sg)
-						msgs.add(qm);
+					if (qm.getSignGroup() == sg) {
+						if (isValidMulti(qm))
+							msgs.add(qm);
+					}
 				}
 			}
 		}

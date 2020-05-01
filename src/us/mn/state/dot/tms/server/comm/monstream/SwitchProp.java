@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2019  Minnesota Department of Transportation
+ * Copyright (C) 2016-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.CtrlCondition;
 import us.mn.state.dot.tms.EncoderStream;
 import us.mn.state.dot.tms.Encoding;
-import us.mn.state.dot.tms.EncodingQuality;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
@@ -34,16 +32,6 @@ import us.mn.state.dot.tms.server.comm.Operation;
  * @author Douglas Lau
  */
 public class SwitchProp extends MonProp {
-
-	/** Get the construction URL */
-	static private String getConstructionUrl() {
-		return SystemAttrEnum.CAMERA_CONSTRUCTION_URL.getString();
-	}
-
-	/** Get the out-of-service URL */
-	static private String getOutOfServiceUrl() {
-		return SystemAttrEnum.CAMERA_OUT_OF_SERVICE_URL.getString();
-	}
 
 	/** Controller pin */
 	private final int pin;
@@ -75,7 +63,7 @@ public class SwitchProp extends MonProp {
 		sb.append(UNIT_SEP);
 		sb.append(getCamNum());
 		sb.append(UNIT_SEP);
-		sb.append(getUri(es));
+		sb.append(getUri());
 		sb.append(UNIT_SEP);
 		sb.append(getEncoding(es));
 		sb.append(UNIT_SEP);
@@ -88,9 +76,13 @@ public class SwitchProp extends MonProp {
 
 	/** Get the best encoder stream */
 	private EncoderStream getEncoderStream() {
-		return (CtrlCondition.ACTIVE == getCondition())
-		    ? CameraHelper.getStream(camera, EncodingQuality.HIGH, true)
-		    : null;
+		return isStreaming() ? CameraHelper.getStream(camera) : null;
+	}
+
+	/** Check if camera is streaming */
+	private boolean isStreaming() {
+		return CameraHelper.isActive(camera)
+		   && !CameraHelper.isBlank(camera);
 	}
 
 	/** Get camera number */
@@ -105,41 +97,8 @@ public class SwitchProp extends MonProp {
 	}
 
 	/** Get the stream URI */
-	private String getUri(EncoderStream es) {
-		if (CameraHelper.isBlank(camera))
-			return "";
-		else {
-			assert camera != null;
-			String cond = getConditionUri();
-			return (cond != null)
-			      ? cond
-			      : CameraHelper.encoderUri(camera, es).toString();
-		}
-	}
-
-	/** Get the condition URI */
-	private String getConditionUri() {
-		switch (getCondition()) {
-		case CONSTRUCTION:
-			return getConstructionUrl();
-		case PLANNED:
-		case REMOVED:
-			return getOutOfServiceUrl();
-		default:
-			return null;
-		}
-	}
-
-	/** Get the camera condition */
-	private CtrlCondition getCondition() {
-		if (camera != null) {
-			Controller c = camera.getController();
-			if (c instanceof ControllerImpl) {
-				return CtrlCondition.fromOrdinal(
-					c.getCondition());
-			}
-		}
-		return CtrlCondition.REMOVED;
+	private String getUri() {
+		return CameraHelper.getUri(camera);
 	}
 
 	/** Get the encoding */

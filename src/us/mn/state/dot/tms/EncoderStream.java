@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,12 @@ public interface EncoderStream extends SonarObject {
 
 	/** Get the view number */
 	Integer getViewNum();
+
+	/** Set the flow stream flag */
+	void setFlowStream(boolean fs);
+
+	/** Get the flow stream flag */
+	boolean getFlowStream();
 
 	/** Set the encoding ordinal */
 	void setEncoding(int e);
