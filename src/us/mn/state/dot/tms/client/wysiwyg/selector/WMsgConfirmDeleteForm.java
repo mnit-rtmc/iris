@@ -46,7 +46,8 @@ public class WMsgConfirmDeleteForm extends AbstractForm {
 	private JButton yes_btn;
 	private JButton no_btn;
 	
-	public WMsgConfirmDeleteForm(Session s, WMsgSelectorForm sForm, String mName) {
+	public WMsgConfirmDeleteForm(Session s,
+			WMsgSelectorForm sForm, String mName) {
 		super(I18N.get("wysiwyg.confirm_delete.title"), true);
 		session = s;
 		selectorForm = sForm;

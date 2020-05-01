@@ -67,14 +67,16 @@ public class WMsgSelectorSignProcess extends
 			dmsConfig = dms.getSignConfig();
 			signOrGroupExists = true;
 			
-			// set the selector form's selectedDMS (this does a bunch of stuff)
+			// set the selector form's selectedDMS (this does a bunch of
+			// stuff)
 			selectorForm.setSelectedDMS(dms);
 		} else {
 			// if the sign doesn't exist, try looking for a sign group
 			sg = SignGroupHelper.lookup(signOrGroupName);
 			
 			if (sg != null) {
-				// sign groups don't have a config, so just set that this exists
+				// sign groups don't have a config, so just set that this
+				// exists
 				signOrGroupExists = true;
 
 				// set the selector form's selectedSignGroup (and other stuff)
@@ -92,13 +94,16 @@ public class WMsgSelectorSignProcess extends
 				
 				// first check if the SignGroup matches
 				SignGroup qmsg = qm.getSignGroup();
-				// if it does, add the message to the list and go to the next one
+				// if it does, add the message to the list and go to the next
+				// one
 				if (qmsg != null && signOrGroupName.equals(qmsg.getName()))
 					qmList.add(qm);
 				else if (dmsConfig != null) {
-					// if the groups don't match but we have a sign config, check if that matches
+					// if the groups don't match but we have a sign config,
+					// check if that matches
 					SignConfig qmsc = qm.getSignConfig();
-					if (qmsc != null && qmsc.getName().equals(dmsConfig.getName()))
+					if (qmsc != null && qmsc.getName().equals(
+							dmsConfig.getName()))
 						qmList.add(qm);
 				}
 			}
@@ -125,7 +130,8 @@ public class WMsgSelectorSignProcess extends
 				else if (selectorForm.getSelectedSignGroup() != null)
 					selectedType = "SignGroup";
 				
-				session.getDesktop().show(new WMsgWarningForm(session, selectorForm, selectedType));
+				session.getDesktop().show(new WMsgWarningForm(
+						session, selectorForm, selectedType));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
