@@ -86,6 +86,10 @@ public class MultiConfig {
 		return errors.isEmpty();
 	}
 	
+	private void clearErrors() {
+		errors = new LinkedHashSet<String>();
+	}
+	
 	//===========================================
 	// "Warnings" = Problems that don't prevent
 	// creating a usable MultiConfig (by using a
@@ -344,8 +348,8 @@ public class MultiConfig {
 		if (dms != null)
 			signConfig = dms.getSignConfig();
 		if (signConfig == null) {
-			logWarning("Sign configuration missing for sign "+dms.getName());
-			logWarning("  Substituting 40x21, mono1");
+			logError("Sign configuration missing for sign "+dms.getName());
+//			logError("  Substituting 40x21, mono1");
 			// throw in some default values to let things progress
 			faceWidth    = 3308;
 			faceHeight   = 1721;
@@ -400,8 +404,8 @@ public class MultiConfig {
 		if (dms != null)
 			signDetail = dms.getSignDetail();
 		if (signDetail == null) {
-			logWarning("Sign detail info is missing for sign "+dms.getName());
-			logWarning("  Substituting basic full-matrix sign");
+			logError("Sign detail info is missing for sign "+dms.getName());
+//			logError("  Substituting basic full-matrix sign");
 			// throw in some default values to let things progress
 			bHasBeacon = false;
 			dmsType = DMSType.VMS_FULL;
@@ -419,11 +423,12 @@ public class MultiConfig {
 		maxPages      = signDetail.getMaxPages();
 
 		if (dmsType == DMSType.UNKNOWN) {
-			logError("Unknown sign type; changed to full-matrix");
+			logWarning("Unknown sign type");
+//			logWarning("Unknown sign type; changed to full-matrix");
 			dmsType = DMSType.VMS_FULL;
 		}
 		if (maxMultiLen <= 0) {
-			logWarning("maxMultiLen = "+maxMultiLen+"; changed to 312");
+			logError("maxMultiLen = "+maxMultiLen+"; changed to 312");
 			maxMultiLen = 312;
 		}
 		if (maxPages <= 0) {
@@ -631,6 +636,7 @@ public class MultiConfig {
 		int cfgNo = 1;
 		int cnt;
 		String suffix;
+		boolean oneGood = false;
 		for (MultiConfig mc : mcaConfigs) {
 			if (mc.signList != null) {
 				cnt = mc.signList.size();
@@ -641,8 +647,14 @@ public class MultiConfig {
 				// This "shouldn't be possible", but...
 				mc.name = CONFIG+"_"+cfgNo+" (no signs)";
 			}
+			if (mc.isUseable())
+				oneGood = true;
 			++cfgNo;
 		}
+		if (oneGood) {
+			mcSignGroup.clearErrors();
+		}
+
 		return mcSignGroup;
 	}
 
@@ -735,6 +747,10 @@ public class MultiConfig {
 	private static Comparator<MultiConfig> comparator2 =
 		new Comparator<MultiConfig>() {
 			public int compare(MultiConfig mc1, MultiConfig mc2) {
+				boolean iu1 = mc1.isUseable();
+				boolean iu2 = mc2.isUseable();
+				if (iu1 != iu2)
+					return iu1 ? 1 : -1;
 				return mc1.compare2(mc2);
 			}
 		};
