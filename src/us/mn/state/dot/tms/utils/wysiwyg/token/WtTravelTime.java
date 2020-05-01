@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
  * @author John L. Stanley - SRF Consulting
  *
  */
-//TODO:  [tt s,m,t ]     XX (we would also want to display the prepend/append text if possible)
+
 public class WtTravelTime extends Wt_IrisToken {
 
 	String sid;
