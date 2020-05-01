@@ -36,13 +36,15 @@ import us.mn.state.dot.tms.client.wysiwyg.selector.WMsgSelectorForm;
  * 
  * @author Gordon Parikh - SRF Consulting
  */
-public class WMsgSelectorSignProcess extends SwingWorker<ArrayList<QuickMessage>,Boolean> {
+public class WMsgSelectorSignProcess extends
+				SwingWorker<ArrayList<QuickMessage>,Boolean> {
 
 	protected final Session session;
 	protected final String signOrGroupName;
 	protected WMsgSelectorForm selectorForm;
 	
-	public WMsgSelectorSignProcess(Session s, String sName, WMsgSelectorForm sForm) {
+	public WMsgSelectorSignProcess(Session s, String sName,
+			WMsgSelectorForm sForm) {
 		this.session = s;
 		this.signOrGroupName = sName;
 		this.selectorForm = sForm;

@@ -164,7 +164,6 @@ public class WMsgSelectorForm extends AbstractForm {
 		session = s;
 		initForm();
 		selectedDMS = sign;
-//		System.out.format("Selected sign: %s\n", selectedDMS.getName());
 		
 		// preselect the given DMS and scroll to it
 		selectDMS(selectedDMS.getName());
@@ -250,7 +249,6 @@ public class WMsgSelectorForm extends AbstractForm {
 		msg_list.ensureIndexIsVisible(indx);
 		
 		// enable the edit/clone/delete buttons
-		System.out.println("selectQuickMessage");
 		enableEditButtons();
 		updateUI();
 	}
@@ -359,9 +357,9 @@ public class WMsgSelectorForm extends AbstractForm {
 			if (signCfg != null)
 				signCfgName = signCfg.getName();
 			int msgLen = selectedMessage.getMulti().length();
-			msgInfo = String.format("Msg: \"%s\", Group: \"%s\", Cfg: \"%s\', " + 
-						"Length: %d", msgName, signGroupName, signCfgName,
-						msgLen);
+			msgInfo = String.format(
+					"Msg: \"%s\", Group: \"%s\", Cfg: \"%s\", Length: %d",
+					msgName, signGroupName, signCfgName, msgLen);
 			
 			if (selectedMessage.getPrefixPage()) {
 				msgInfo += ", {Prefix}";
@@ -410,7 +408,6 @@ public class WMsgSelectorForm extends AbstractForm {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		
 		/** Create sign/sign group lists */
-		// TODO change this to use a table or something to give us more info (?)
 		updateDeviceLists();
 
 		/* Initialize a controller for rendering a preview */
@@ -422,7 +419,10 @@ public class WMsgSelectorForm extends AbstractForm {
 		/** Sign list */
 		ListModel<String> dmsNamesModel = new AbstractListModel<String>() {
 			public int getSize() { return dmsNames.size(); }
-		    public String getElementAt(int index) { return dmsNames.get(index); }
+		    
+			public String getElementAt(int index) {
+		    	return dmsNames.get(index);
+		    	}
 		};
 		
 		dms_list = new JList<String>(dmsNamesModel);
@@ -437,8 +437,8 @@ public class WMsgSelectorForm extends AbstractForm {
 				// don't do anything if the selection is still adjusting
 				if (!e.getValueIsAdjusting()) {
 					// get the list selection model and the selected index
-					// NOTE that we assume the selection mode is SINGLE_SELECTION 
-					ListSelectionModel lsm = (ListSelectionModel) e.getSource();
+					ListSelectionModel lsm =
+							(ListSelectionModel) e.getSource();
 					int indx = lsm.getMinSelectionIndex();
 					
 					if (indx != -1) {
@@ -447,31 +447,34 @@ public class WMsgSelectorForm extends AbstractForm {
 						
 						/* start a background job to check if the sign exists
 						 * and retrieve a list of messages
-						 * TODO/NOTE these processes aren't taking long so we aren't
-						 * worried about canceling them, but that might change
 						 */
-						WMsgSelectorSignProcess proc = new WMsgSelectorSignProcess(
+						WMsgSelectorSignProcess proc = 
+								new WMsgSelectorSignProcess(
 								session, dmsName, sForm);
 						proc.execute();
 					} else {
-						// deselection - disable the buttons and reset the message list
+						// deselection - disable the buttons and reset the
+						// message list
 						setSelectedDMS(null);
 					}
 				}
 			}
 		}
 		
-		dms_list.getSelectionModel().addListSelectionListener(new SignListSelectionHandler());
+		dms_list.getSelectionModel().addListSelectionListener(
+				new SignListSelectionHandler());
 		
 		dms_pn = createScrollPane(dms_list);
-
-		// TODO may want to change these dimensions
 		dms_pn.setPreferredSize(new Dimension(250,200));
 		
 		/** Sign group list - pretty much the same as the sign list */
-		ListModel<String> signGroupNamesModel = new AbstractListModel<String>() {
+		ListModel<String> signGroupNamesModel =
+				new AbstractListModel<String>() {
 			public int getSize() { return signGroupNames.size(); }
-			public String getElementAt(int index) { return signGroupNames.get(index); }
+			
+			public String getElementAt(int index) {
+				return signGroupNames.get(index); 
+			}
 		};
 		sgrp_list = new JList<String>(signGroupNamesModel);
 		sgrp_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -479,12 +482,14 @@ public class WMsgSelectorForm extends AbstractForm {
 		class SignGroupListSelectionHandler implements ListSelectionListener {
 			public void valueChanged(ListSelectionEvent e) {
 				if (!e.getValueIsAdjusting()) {
-					ListSelectionModel lsm = (ListSelectionModel) e.getSource();
+					ListSelectionModel lsm = 
+							(ListSelectionModel) e.getSource();
 					int indx = lsm.getMinSelectionIndex();
 					
 					if (indx != -1) {
 						String signGroupName = signGroupNames.get(indx);
-						WMsgSelectorSignProcess proc = new WMsgSelectorSignProcess(
+						WMsgSelectorSignProcess proc =
+								new WMsgSelectorSignProcess(
 								session, signGroupName, sForm);
 						proc.execute();
 					} else {
@@ -494,7 +499,8 @@ public class WMsgSelectorForm extends AbstractForm {
 			}
 		}
 		
-		sgrp_list.getSelectionModel().addListSelectionListener(new SignGroupListSelectionHandler());
+		sgrp_list.getSelectionModel().addListSelectionListener(
+				new SignGroupListSelectionHandler());
 		sgrp_pn = createScrollPane(sgrp_list);
 		sgrp_pn.setPreferredSize(new Dimension(250,200));
 		tab_pane = new JTabbedPane(JTabbedPane.TOP);
@@ -507,7 +513,10 @@ public class WMsgSelectorForm extends AbstractForm {
 		/* Panes and model for message list */
 		ListModel<String> messageListModel = new AbstractListModel<String>() {
 			public int getSize() { return messageList.size(); }
-		    public String getElementAt(int index) { return messageList.get(index); }
+			
+		    public String getElementAt(int index) {
+		    	return messageList.get(index);
+	    	}
 		};
 		msg_list = new JList<String>(messageListModel);
 		msg_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -515,12 +524,14 @@ public class WMsgSelectorForm extends AbstractForm {
 		class MessageListSelectionHandler implements ListSelectionListener {
 			public void valueChanged(ListSelectionEvent e) {
 				if (!e.getValueIsAdjusting()) {
-					ListSelectionModel lsm = (ListSelectionModel) e.getSource();
+					ListSelectionModel lsm = 
+							(ListSelectionModel) e.getSource();
 					int indx = lsm.getMinSelectionIndex();
 					
 					if (indx != -1) {
 						String messageName = messageList.get(indx);
-						WMsgSelectorMessageProcess proc = new WMsgSelectorMessageProcess(
+						WMsgSelectorMessageProcess proc =
+								new WMsgSelectorMessageProcess(
 								session, messageName, sForm);
 						proc.execute();
 					} else {
@@ -531,7 +542,8 @@ public class WMsgSelectorForm extends AbstractForm {
 			}
 		}
 		
-		msg_list.getSelectionModel().addListSelectionListener(new MessageListSelectionHandler());
+		msg_list.getSelectionModel().addListSelectionListener(
+				new MessageListSelectionHandler());
 		msg_pn = createScrollPane(msg_list);
 		msg_pn.setPreferredSize(new Dimension(250,200));
 		
@@ -574,28 +586,7 @@ public class WMsgSelectorForm extends AbstractForm {
 		msg_list.addMouseListener(mouseListener);
 	}
 	
-	/** Setup key bindings
-	 *
-	 * Global
-                Esc          Close selector
-                Tab         Toggle focus between sign/group list and message list areas
-                Left/Right   Toggle between sign and group tabs
-                Up/Down            Move selection to previous/next item in current list
-                Home    Move selection to top of current list
-                End        Move selection to bottom of current list
-                PgUp/PgDown Move selection up/down the list by page
-                F3           Refresh
-                F4           Create
-	   
-	   While message-list has focus and a message is selected
-                Enter     Edit
-                F5           <reserved>
-                F6           Edit
-                F7           Clone
-                Delete  Delete message (with confirmation)
-                Shift-Delete   Delete message (without confirmation)
-
-	 */
+	/** Setup key bindings */
 	protected void setupKeyBindings() {
 		/** Global Key Bindings */
 		/** Window Input/Action Maps */
@@ -612,7 +603,8 @@ public class WMsgSelectorForm extends AbstractForm {
 		dms_list.setFocusTraversalKeysEnabled(false);
 		sgrp_list.setFocusTraversalKeysEnabled(false);
 		msg_list.setFocusTraversalKeysEnabled(false);
-		wiMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), "swapListFocus");
+		wiMap.put(KeyStroke.getKeyStroke(
+				KeyEvent.VK_TAB, 0), "swapListFocus");
 		waMap.put("swapListFocus", swapListFocus);
 		
 		/* F3 - Reload */
@@ -624,11 +616,13 @@ public class WMsgSelectorForm extends AbstractForm {
 		waMap.put("create", create);
 		
 		/* Left - Toggle Sign/SignGroup tabs left */
-		wiMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0, true), "cycleTabLeft");
+		wiMap.put(KeyStroke.getKeyStroke(
+				KeyEvent.VK_LEFT, 0, true), "cycleTabLeft");
 		waMap.put("cycleTabLeft", cycleTabLeft);
 
 		/* Right - Toggle Sign/SignGroup tabs right */
-		wiMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0, true), "cycleTabRight");
+		wiMap.put(KeyStroke.getKeyStroke(
+				KeyEvent.VK_RIGHT, 0, true), "cycleTabRight");
 		waMap.put("cycleTabRight", cycleTabRight);
 		
 		/** Message-List Key Bindings */
@@ -649,11 +643,13 @@ public class WMsgSelectorForm extends AbstractForm {
 		maMap.put("clone", clone);
 		
 		/* Delete - Delete message with confirmation */
-		miMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "deleteConfirm");
+		miMap.put(KeyStroke.getKeyStroke(
+				KeyEvent.VK_DELETE, 0), "deleteConfirm");
 		maMap.put("deleteConfirm", deleteConfirm);
 
 		/* Shift Delete - Delete message with NO confirmation */
-		miMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, KeyEvent.SHIFT_DOWN_MASK),
+		miMap.put(KeyStroke.getKeyStroke(
+				KeyEvent.VK_DELETE, KeyEvent.SHIFT_DOWN_MASK),
 				"deleteNoConfirm");
 		maMap.put("deleteNoConfirm", deleteNoConfirm);
 	}
@@ -662,11 +658,9 @@ public class WMsgSelectorForm extends AbstractForm {
 	private final IAction cancel = new IAction(
 		"wysiwyg.selector.cancel")
 	{
-		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 			throws Exception
 		{
-			System.out.println("Cancelling...");
 			close(session.getDesktop());
 		}
 	};
@@ -680,7 +674,6 @@ public class WMsgSelectorForm extends AbstractForm {
 			tabIndx += 1;
 			if (tabIndx >= tabCount)
 				tabIndx = 0;
-			System.out.println("Moving RIGHT to tab " + tabIndx);
 			tab_pane.setSelectedIndex(tabIndx);
 		}
 		
@@ -694,7 +687,6 @@ public class WMsgSelectorForm extends AbstractForm {
 			tabIndx -= 1;
 			if (tabIndx < 0)
 				tabIndx = tabCount - 1;
-			System.out.println("Moving LEFT to tab " + tabIndx);
 			tab_pane.setSelectedIndex(tabIndx);
 		}
 		
@@ -704,7 +696,6 @@ public class WMsgSelectorForm extends AbstractForm {
 	private final Action swapListFocus = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
 			// check which component has focus
-			System.out.println("Changing list focus...");
 			if (dms_list.isFocusOwner())
 				// if the DMS list has focus, change focus to the message list
 				msg_list.requestFocusInWindow();
@@ -878,10 +869,13 @@ public class WMsgSelectorForm extends AbstractForm {
 	
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return true; //TODO: substitute check for access to message creation/editing
+		// we'll let anyone use the selector, I guess...
+		return true;
 	}
 	
-	/** Initialize the list of devices - Signs and groups (but not single-sign-groups) */
+	/** Initialize the list of devices - Signs and groups (but not single-
+	 * sign-groups)
+	 */
 	private void updateDeviceLists() {
 		// clear the lists
 		dmsList.clear();
@@ -891,10 +885,6 @@ public class WMsgSelectorForm extends AbstractForm {
 		Iterator<DMS> dit = DMSHelper.iterator();
 		while (dit.hasNext()) {
 			DMS dms = dit.next();
-			
-			// skip any hidden, failed, or otherwise inactive DMS
-//			if (DMSHelper.isHidden(dms) || DMSHelper.isFailed(dms) || !DMSHelper.isActive(dms))
-//				continue;
 			dmsList.put(dms.getName(), dms);
 		}
 		
@@ -944,7 +934,8 @@ public class WMsgSelectorForm extends AbstractForm {
 		
 		// select a message if there is one selected
 		if (selectedMessage != null) {
-			// make sure it's in our list and not a remnant from another DMS/SignGroup
+			// make sure it's in our list and not a remnant from another 
+			// DMS/SignGroup
 			String mName = selectedMessage.getName();
 			if (messageList.contains(mName)) {
 				selectQuickMessage(mName);
@@ -958,11 +949,9 @@ public class WMsgSelectorForm extends AbstractForm {
 	WMsgSelectorForm sForm = this; 
 	/** Reload action */
 	private final IAction reload = new IAction("wysiwyg.selector.reload") {
-		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 			throws Exception
 		{
-			System.out.println("Reloading...");
 			reloadForm();
 		}
 	};
@@ -990,17 +979,18 @@ public class WMsgSelectorForm extends AbstractForm {
 	
 	/** Create action */
 	private final IAction create = new IAction("wysiwyg.selector.create") {
-		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception {
 			// open a form to get the name of the new message and create it
 			if (editMode) {
 				if (selectedDMS != null) {
 					session.getDesktop().show(
-							new WMsgNewMsgForm(session, selectorForm, selectedDMS));
+							new WMsgNewMsgForm(
+									session, selectorForm, selectedDMS));
 				} else if (selectedSignGroup != null) {
 					session.getDesktop().show(
-							new WMsgNewMsgForm(session, selectorForm, selectedSignGroup));
+							new WMsgNewMsgForm(session,
+									selectorForm, selectedSignGroup));
 				}
 			}	
 		}
@@ -1019,7 +1009,6 @@ public class WMsgSelectorForm extends AbstractForm {
 	}
 	
 	private final IAction edit = new IAction("wysiwyg.selector.edit") {
-		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
 		{
@@ -1029,7 +1018,6 @@ public class WMsgSelectorForm extends AbstractForm {
 	
 	/** Clone action */
 	private final IAction clone = new IAction("wysiwyg.selector.clone") {
-		@SuppressWarnings("synthetic-access")
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
 		{
@@ -1059,15 +1047,16 @@ public class WMsgSelectorForm extends AbstractForm {
 	}
 	
 	WMsgSelectorForm selectorForm = this;
-	private final IAction deleteConfirm = new IAction("wysiwyg.selector.delete") {
-		@SuppressWarnings("synthetic-access")
+	private final IAction deleteConfirm = new IAction(
+			"wysiwyg.selector.delete") {
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception
 		{
 			// show the confirmation dialogue
 			String messageName = selectedMessage.getName();
 			session.getDesktop().show(
-					new WMsgConfirmDeleteForm(session, selectorForm, messageName));
+					new WMsgConfirmDeleteForm(
+							session, selectorForm, messageName));
 		}
 	};
 	
@@ -1083,8 +1072,6 @@ public class WMsgSelectorForm extends AbstractForm {
 	
 	/** Create a message for a sign */
 	public static void CreateMsg(Session s, DMS sign, String msgName) {
-		System.out.format("Creating message for sign %s ...\n", sign.getName());
-		
 		// make sure we have a single-sign sign group for this sign
 		SignGroup sg = getSingleSignGroup(s, sign);
 		
@@ -1125,14 +1112,17 @@ public class WMsgSelectorForm extends AbstractForm {
 	
 	/** Create a message for a sign group */
 	public static void CreateMsg(Session s, SignGroup sg, String msgName) {
-		System.out.format("Creating message for sign group %s ...\n", sg.getName());
-		// TODO
+		// create a new quick message
+		TypeCache<QuickMessage> qmCache = s.getSonarState().
+				getDmsCache().getQuickMessages();
+		HashMap<String, Object> qmAttrs = new HashMap<String, Object>();
+		qmAttrs.put("sign_group", sg);
+		qmAttrs.put("multi", "");
+		qmCache.createObject(msgName, qmAttrs);
 	}
 	
 	/** Edit an existing message for a sign */
 	public static void EditMsg(Session s, QuickMessage qm, DMS sign) {
-		System.out.format("Editing message %s for sign %s ...\n", qm.getName(), sign.getName());
-		
 		// launch the editor
 		SmartDesktop desktop = s.getDesktop();
 		WMsgEditorForm editor = new WMsgEditorForm(s, qm, sign);
@@ -1142,8 +1132,6 @@ public class WMsgSelectorForm extends AbstractForm {
 	
 	/** Edit an existing message for a sign group */
 	public static void EditMsg(Session s, QuickMessage qm, SignGroup sg) {
-		System.out.format("Editing message %s for sign group %s ...\n", qm.getName(), sg.getName());
-
 		// launch the editor
 		SmartDesktop desktop = s.getDesktop();
 		WMsgEditorForm editor = new WMsgEditorForm(s, qm, sg);
@@ -1174,7 +1162,6 @@ public class WMsgSelectorForm extends AbstractForm {
 	
 	/** Delete a message */
 	public static void DeleteMsg(QuickMessage qm) {
-		System.out.format("Deleting message %s ...\n", qm.getName());
 		qm.destroy();
 	}
 	
