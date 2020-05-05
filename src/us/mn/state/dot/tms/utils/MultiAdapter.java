@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +20,7 @@ package us.mn.state.dot.tms.utils;
  *
  * @author Douglas Lau
  * @author Michael Darter
+ * @author John Stanley - SRF Consulting
  */
 public class MultiAdapter implements Multi {
 
@@ -36,7 +38,8 @@ public class MultiAdapter implements Multi {
 	@Override
 	public void setPageTimes(Integer pt_on, Integer pt_off) { }
 
-	/** Set the page justification */
+	/** Set the page justification.
+	 * Use the sign's default page justification if jp is null. */
 	@Override
 	public void setJustificationPage(JustificationPage jp) { }
 
@@ -44,22 +47,25 @@ public class MultiAdapter implements Multi {
 	@Override
 	public void addLine(Integer spacing) { }
 
-	/** Set the line justification */
+	/** Set the line justification.
+	 * Use the sign's default line justification if jl is null. */
 	@Override
 	public void setJustificationLine(JustificationLine jl) { }
 
 	/** Set the (deprecated) message background color.
-	 * @param x Background color (0-9; colorClassic value). */
+	 * @param x Background color (0-9; colorClassic value).
+	 * Use the sign's default background color if x is null. */
 	@Override
-	public void setColorBackground(int x) { }
+	public void setColorBackground(Integer x) { }
 
 	/** Set the page background color for monochrome1bit, monochrome8bit,
 	 * and colorClassic color schemes.
-	 * @param z Background color (0-1 for monochrome1bit),
+	 * @param x Background color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
-	 *                           (0-9 for colorClassic). */
+	 *                           (0-9 for colorClassic).
+	 * Use the sign's default background color if x is null. */
 	@Override
-	public void setPageBackground(int z) { }
+	public void setPageBackground(Integer x) { }
 
 	/** Set the page background color for color24bit color scheme.
 	 * @param r Red component (0-255).
@@ -68,13 +74,13 @@ public class MultiAdapter implements Multi {
 	@Override
 	public void setPageBackground(int r, int g, int b) { }
 
-	/** Set the foreground color for monochrome1bit, monochrome8bit, and
-	 * colorClassic color schemes.
+	/** Set the foreground color for single-int color tag.  [cfX]
 	 * @param x Foreground color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
-	 *                           (0-9 for colorClassic). */
+	 *                           (0-9 for colorClassic & color24bit).
+	 * Use the sign's default foreground color if x is null. */
 	@Override
-	public void setColorForeground(int x) { }
+	public void setColorForeground(Integer x) { }
 
 	/** Set the foreground color for color24bit color scheme.
 	 * @param r Red component (0-255).
@@ -113,9 +119,10 @@ public class MultiAdapter implements Multi {
 
 	/** Set the font number.
 	 * @param f_num Font number (1 to 255)
-	 * @param f_id Font version ID (4-digit hex) */
+	 * @param f_id Font version ID (4-digit hex string)
+	 * Use the sign's default font if f_num is null. */
 	@Override
-	public void setFont(int f_num, String f_id) { }
+	public void setFont(Integer f_num, String f_id) { }
 
 	/** Set the character spacing.
 	 * @param sc Character spacing (null means use font spacing) */

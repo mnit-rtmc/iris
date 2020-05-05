@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2006-2018  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +20,7 @@ package us.mn.state.dot.tms.utils;
  * specified in NTCIP 1203.
  *
  * @author Douglas Lau
+ * @author John Stanley - SRF Consulting
  */
 public class MultiBuilder implements Multi {
 
@@ -59,6 +61,12 @@ public class MultiBuilder implements Multi {
 		multi.setLength(0);
 	}
 
+	/** Append an Integer if it isn't null. */
+	public void appendInteger(Integer x) {
+		if (x != null)
+			multi.append(x);
+	}
+
 	/** Handle an unsupported tag */
 	@Override
 	public void unsupportedTag(String tag) {
@@ -75,8 +83,7 @@ public class MultiBuilder implements Multi {
 	@Override
 	public void addLine(Integer spacing) {
 		multi.append("[nl");
-		if (spacing != null)
-			multi.append(spacing);
+		appendInteger(spacing);
 		multi.append("]");
 	}
 
@@ -92,28 +99,34 @@ public class MultiBuilder implements Multi {
 	@Override
 	public void setPageTimes(Integer pt_on, Integer pt_off) {
 		multi.append("[pt");
-		if (pt_on != null)
-			multi.append(pt_on);
+		appendInteger(pt_on);
 		multi.append('o');
-		if (pt_off != null)
-			multi.append(pt_off);
+		appendInteger(pt_off);
 		multi.append("]");
 	}
 
-	/** Set the page justification */
+	/** Set the page justification.
+	 * Use the sign's default page justification if jp is null. */
 	@Override
 	public void setJustificationPage(JustificationPage jp) {
-		if (jp != JustificationPage.UNDEFINED) {
+		if ((jp == null)
+		 || (jp == JustificationPage.UNDEFINED))
+			multi.append("[jp]");
+		 else {
 			multi.append("[jp");
 			multi.append(jp.ordinal());
 			multi.append("]");
 		}
 	}
 
-	/** Set the line justification */
+	/** Set the line justification.
+	 * Use the sign's default line justification if jl is null. */
 	@Override
 	public void setJustificationLine(JustificationLine jl) {
-		if (jl != JustificationLine.UNDEFINED) {
+		if ((jl == null)
+		 || (jl == JustificationLine.UNDEFINED))
+			multi.append("[jl]");
+		 else {
 			multi.append("[jl");
 			multi.append(jl.ordinal());
 			multi.append("]");
@@ -140,11 +153,14 @@ public class MultiBuilder implements Multi {
 		multi.append("]");
 	}
 
-	/** Set a new font number */
+	/** Set the font number.
+	 * @param f_num Font number (1 to 255)
+	 * @param f_id Font version ID (4-digit hex string)
+	 * Use the sign's default font if f_num is null. */
 	@Override
-	public void setFont(int f_num, String f_id) {
+	public void setFont(Integer f_num, String f_id) {
 		multi.append("[fo");
-		multi.append(f_num);
+		appendInteger(f_num);
 		if (f_id != null) {
 			multi.append(',');
 			multi.append(f_id);
@@ -156,33 +172,34 @@ public class MultiBuilder implements Multi {
 	 * @param sc Character spacing (null means use font spacing) */
 	@Override
 	public void setCharSpacing(Integer sc) {
-		multi.append("[");
 		if (sc != null) {
-			multi.append("sc");
+			multi.append("[sc");
 			multi.append(sc);
 		} else
-			multi.append("/sc");
+			multi.append("[/sc");
 		multi.append("]");
 	}
 
 	/** Set the (deprecated) message background color.
-	 * @param x Background color (0-9; colorClassic value). */
+	 * @param x Background color (0-9; colorClassic value).
+	 * Use the sign's default background color if x is null. */
 	@Override
-	public void setColorBackground(int x) {
+	public void setColorBackground(Integer x) {
 		multi.append("[cb");
-		multi.append(x);
+		appendInteger(x);
 		multi.append("]");
 	}
 
 	/** Set the page background color for monochrome1bit, monochrome8bit,
 	 * and colorClassic color schemes.
-	 * @param z Background color (0-1 for monochrome1bit),
+	 * @param x Background color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
-	 *                           (0-9 for colorClassic). */
+	 *                           (0-9 for colorClassic).
+	 * Use the sign's default background color if x is null. */
 	@Override
-	public void setPageBackground(int z) {
+	public void setPageBackground(Integer x) {
 		multi.append("[pb");
-		multi.append(z);
+		appendInteger(x);
 		multi.append("]");
 	}
 
@@ -201,15 +218,15 @@ public class MultiBuilder implements Multi {
 		multi.append("]");
 	}
 
-	/** Set the foreground color for monochrome1bit, monochrome8bit, and
-	 * colorClassic color schemes.
+	/** Set the foreground color for a single-int color tag.  [cfX]
 	 * @param x Foreground color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
-	 *                           (0-9 for colorClassic). */
+	 *                           (0-9 for colorClassic & color24bit).
+	 * Use the sign's default foreground color if x is null. */
 	@Override
-	public void setColorForeground(int x) {
+	public void setColorForeground(Integer x) {
 		multi.append("[cf");
-		multi.append(x);
+		appendInteger(x);
 		multi.append("]");
 	}
 

@@ -89,7 +89,7 @@ public class SmartDesktop extends JDesktopPane {
 	}
 
 	/** Show the specified form */
-	public void show(AbstractForm form) {
+	public JInternalFrame show(AbstractForm form) {
 		JInternalFrame frame = findFrame(form.getTitle());
 		if (frame != null)
 			selectFrame(frame);
@@ -98,6 +98,7 @@ public class SmartDesktop extends JDesktopPane {
 		frame.setLocation(screen.getCenteredLocation(this,
 			frame.getSize()));
 		frame.show();
+		return frame;
 	}
 
 	/** Find a frame with a specific title */
