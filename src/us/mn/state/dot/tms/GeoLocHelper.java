@@ -304,6 +304,29 @@ public class GeoLocHelper extends BaseHelper {
 		return b.toString();
 	}
 
+	/** Get a detailed label (for a detector or a station) */
+	static public String getDetailedLabel(GeoLoc loc) {
+		if (loc == null)
+			return FUTURE;
+		Road roadway = loc.getRoadway();
+		Road cross = loc.getCrossStreet();
+		if (roadway == null || cross == null)
+			return FUTURE;
+		Direction rd = Direction.fromOrdinal(loc.getRoadDir());
+		Direction cd = Direction.fromOrdinal(loc.getCrossDir());
+		LocModifier cm = LocModifier.fromOrdinal(loc.getCrossMod());
+		StringBuilder b = new StringBuilder();
+		b.append(roadway.getName());
+		b.append(" ");
+		b.append(rd.abbrev);
+		b.append(" ");
+		b.append(cm.description);
+		b.append(" ");
+		b.append(cross.getName());
+		b.append(cd.abbrev);
+		return b.toString();
+	}
+
 	/** Get the root label for a parking detector */
 	static public String getParkingRoot(GeoLoc loc) {
 		if (loc == null)

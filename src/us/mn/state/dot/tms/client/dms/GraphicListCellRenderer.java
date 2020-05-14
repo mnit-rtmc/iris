@@ -33,14 +33,14 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 public class GraphicListCellRenderer implements ListCellRenderer<Graphic> {
 
 	/** Create an image */
-	static private BufferedImage createImage(Object value) {
+	static protected BufferedImage createImage(Object value) {
 		return (value instanceof Graphic)
 		      ? GraphicImage.create((Graphic) value)
 		      : null;
 	}
 
 	/** Cell renderer */
-	private final DefaultListCellRenderer cell =
+	protected final DefaultListCellRenderer cell =
 		new DefaultListCellRenderer();
 
 	/** Create a new graphic list cell renderer */

@@ -28,7 +28,7 @@ import javax.swing.JPanel;
 abstract public class AbstractForm extends JPanel {
 
 	/** Form title */
-	private final String title;
+	protected String title;
 
 	/** Form resizable flag */
 	private final boolean resizable;

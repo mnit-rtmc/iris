@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2006-2020  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
+ * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +32,7 @@ import us.mn.state.dot.tms.utils.Multi.OverLimitMode;
  * @author Douglas Lau
  * @author Michael Darter
  * @author Travis Swanston
+ * @author John L. Stanley - SRF Consulting
  */
 public class MultiString {
 
@@ -52,9 +54,9 @@ public class MultiString {
 	static private class LineMultiNormalizer extends MultiNormalizer {
 		// Strip tags which don't associate with a line
 		@Override
-		public void setColorBackground(int x) {}
+		public void setColorBackground(Integer x) {}
 		@Override
-		public void setPageBackground(int z) {}
+		public void setPageBackground(Integer z) {}
 		@Override
 		public void setPageBackground(int r, int g, int b) {}
 		@Override
@@ -157,7 +159,7 @@ public class MultiString {
 		else if (ltag.startsWith("tz"))
 			parseTolling(tag.substring(2), cb);
 		else if (ltag.startsWith("pa"))
-			parseParking(tag, cb);
+			parseParking(tag.substring(2), cb);
 		else if (ltag.startsWith("loc"))
 			parseLocator(tag.substring(3), cb);
 		else
@@ -404,9 +406,9 @@ public class MultiString {
 		multi = m;
 	}
 
-        /** Test if the MULTI string is equal to another MULTI string */
+	/** Test if the MULTI string is equal to another MULTI string */
 	@Override
-        public boolean equals(Object o) {
+	public boolean equals(Object o) {
 		if (o == this)
 			return true;
 		if (o != null) {
@@ -415,8 +417,8 @@ public class MultiString {
 				.normalize().toString();
 			return ms.equals(oms);
 		}
-                return false;
-        }
+		return false;
+	}
 
 	/** Calculate a hash code for the MULTI string */
 	@Override
@@ -554,7 +556,7 @@ public class MultiString {
 	public MultiString stripFonts() {
 		MultiBuilder mb = new MultiBuilder() {
 			@Override
-			public void setFont(int fn, String f_id) {}
+			public void setFont(Integer fn, String f_id) {}
 		};
 		parse(mb);
 		return mb.toMultiString();
@@ -620,8 +622,11 @@ public class MultiString {
 		fonts.add(f_num);
 		parse(new MultiAdapter() {
 			private int font_num = f_num;
-			@Override public void setFont(int fn, String f_id) {
-				font_num = fn;
+			@Override public void setFont(Integer fn, String f_id) {
+				if (fn == null)
+					font_num = f_num;
+				else
+					font_num = fn;
 				fonts.set(fonts.size() - 1, font_num);
 			}
 			@Override public void addPage() {
