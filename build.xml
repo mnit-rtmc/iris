@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- ant build file for IRIS project
-     Copyright (C) 2007-2019  Minnesota Department of Transportation
+     Copyright (C) 2007-2020  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -160,8 +160,8 @@
 		       debug="${debug}"
 		       deprecation="on"
 		       includeantruntime="false"
-		       source="1.7"
-		       target="1.7">
+		       source="1.8"
+		       target="1.8">
 			<classpath refid="classpath"/>
 			<compilerarg value="-Xlint:unchecked"/>
 			<compilerarg value="-Xlint:cast"/>
@@ -428,8 +428,8 @@
 		       debug="true"
 		       deprecation="on"
 		       includeantruntime="true"
-		       source="1.7"
-		       target="1.7">
+		       source="1.8"
+		       target="1.8">
 			<classpath refid="junit.classpath"/>
 		</javac>
 	</target>
