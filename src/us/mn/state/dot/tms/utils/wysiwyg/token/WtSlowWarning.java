@@ -96,7 +96,7 @@ public class WtSlowWarning extends Wt_IrisToken {
 		if ("dist".equalsIgnoreCase(mode)) {
 			// Convert deci-mile distance to
 			// miles and round to nearest mile
-			xx = (int)((dist + 5) / 10);
+			xx = (dist + 5) / 10;
 			return wfont.getIntWidth(chsp, xx);
 		}
 		else if ("speed".equalsIgnoreCase(mode)) {

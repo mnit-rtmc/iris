@@ -77,7 +77,7 @@ public class MultiConfig {
 	}
 
 	public String[] getErrors() {
-		return (String[]) errors.toArray(new String[0]);
+		return errors.toArray(new String[0]);
 	}
 
 	/* Returns true if no errors have been
@@ -104,7 +104,7 @@ public class MultiConfig {
 	}
 
 	public String[] getWarnings() {
-		return (String[]) warnings.toArray(new String[0]);
+		return warnings.toArray(new String[0]);
 	}
 
 	//===========================================
