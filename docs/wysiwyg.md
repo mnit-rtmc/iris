@@ -266,15 +266,11 @@ To insert an *action tag* into your message, first enter any text that will be
 used with it.  For example, for a work zone or other sign to warn drivers that
 there are slow moving vehicles queuing text such as:
 
-<code style='text-align:center;'>
-
+```
 SLOW TRAFFIC
-
 XX MILES
-
 USE CAUTION
-
-</code>
+```
 
 Once your text is entered, click on the `MULTI Tag` button in the editor.
 
