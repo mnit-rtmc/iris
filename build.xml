@@ -173,19 +173,19 @@
 		depends="compile">
 		<jar jarfile="${build.lib}/${common.jar}">
 			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/sched/*.class"/>
+				 includes="us/mn/state/dot/sched/**/*"/>
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/sonar/*.class"/>
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/tms/*.class"/>
 			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/tms/geo/*.class"/>
+				 includes="us/mn/state/dot/tms/geo/**/*"/>
 			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/tms/reports/*.class"/>
+				 includes="us/mn/state/dot/tms/reports/**/*"/>
 			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/tms/units/*.class"/>
+				 includes="us/mn/state/dot/tms/units/**/*"/>
 			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/tms/utils/*.class"/>
+				 includes="us/mn/state/dot/tms/utils/**/*"/>
 			<fileset dir="${build.i18n}"/>
 		</jar>
 	</target>
