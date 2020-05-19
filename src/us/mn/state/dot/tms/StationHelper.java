@@ -44,6 +44,11 @@ public class StationHelper extends BaseHelper {
 	static public String getLabel(Station s) {
 		return GeoLocHelper.getRootLabel(s.getR_Node().getGeoLoc());
 	}
+	
+	/** Get the station description */
+	static public String getDescription(Station s) {
+		return GeoLocHelper.getDetailedLabel(s.getR_Node().getGeoLoc());
+	}
 
 	/** Lookup the GeoLoc for a station ID */
 	static public GeoLoc lookupGeoLoc(String sid) {

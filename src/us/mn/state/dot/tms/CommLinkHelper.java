@@ -42,4 +42,9 @@ public class CommLinkHelper extends BaseHelper {
 		return (cl != null && cl.getPollEnabled())
 		    || !canRead(CommLink.SONAR_TYPE);
 	}
+
+	/** Lookup the CommLink with the specified name */
+	static public CommLink lookup(String name) {
+		return (CommLink) namespace.lookupObject(CommLink.SONAR_TYPE, name);
+	}
 }

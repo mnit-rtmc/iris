@@ -96,10 +96,12 @@ Tag                                           | Description              | Suppo
 ## Quick Messages
 
 A _quick message_ is a fully composed DMS message which can be associated with a
-sign group.  When a DMS is selected, a drop-down list is populated with quick
-messages from sign groups of which that DMS is a member.  Quick messages are
-also used for [DMS actions] as part of an [action plan].  For these messages, it
-is best to leave the sign group blank.
+sign group.  They are created using the [WYSIWYG editor].
+
+When a DMS is selected, a drop-down list is populated with quick messages from
+sign groups of which that DMS is a member.  Quick messages are also used for
+[DMS actions] as part of an [action plan].  For these messages, it is best to
+leave the sign group blank.
 
 **Prefix Page** is a flag which indicates that the quick message can be combined
 with an operator message.  When a DMS action uses a _prefix page_ quick message,
@@ -152,3 +154,4 @@ rejected message.
 [system attribute]: system_attributes.html
 [Travel time]: travel_time.html
 [Variable speed advisories]: vsa.html
+[WYSIWYG editor]: wysiwyg.html

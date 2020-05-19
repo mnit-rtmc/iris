@@ -320,7 +320,7 @@ public class CorridorList extends IPanel {
 	}
 
 	/** Check if an r_node is on the specified corridor */
-	private boolean checkCorridor(CorridorBase<R_Node> cb, GeoLoc loc) {
+	public static boolean checkCorridor(CorridorBase<R_Node> cb, GeoLoc loc) {
 		if (cb == null)
 			return loc != null && loc.getRoadway() == null;
 		else {

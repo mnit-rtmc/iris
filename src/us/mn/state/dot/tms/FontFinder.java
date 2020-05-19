@@ -35,8 +35,9 @@ public class FontFinder {
 	/** MULTI adapter which records font numbers from tags */
 	private final MultiAdapter fontTagFinder = new MultiAdapter() {
 		@Override
-		public void setFont(int f_num, String f_id) {
-			if(!fonts.contains(f_num))
+		public void setFont(Integer f_num, String f_id) {
+			if ((f_num != null)
+			 && !fonts.contains(f_num))
 				fonts.add(f_num);
 		}
 	};

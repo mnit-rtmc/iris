@@ -35,11 +35,19 @@ public final class SwingRunner {
 	static private ExceptionHandler getHandler() {
 		return MainClient.getHandler();
 	}
+	
+	static private long R_Node_Load_Total = 0;
 
 	/** Log a message */
 	static private void log(String msg, long e) {
 		System.err.println("SwingRunner took " + e + " ms");
 		System.err.println("  from: " + msg);
+		
+		if (msg.contains("R_NodeManager")) {
+			R_Node_Load_Total += e;
+			System.err.println("    Total of " + R_Node_Load_Total
+					+ " ms loading R_Nodes...");
+		}
 	}
 
 	/** Run some runnable code */

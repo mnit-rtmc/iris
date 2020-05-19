@@ -384,4 +384,10 @@ public class SignPixelPanel extends JPanel {
 		width_char = Math.max(0, wc);
 		height_line = Math.max(0, hl);
 	}
+	
+	/** Get the AffineTransform object used to translate and scale the graphic
+	 * within the component. */
+	public AffineTransform getTransform() {
+		return transform;
+	}
 }

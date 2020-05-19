@@ -17,6 +17,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.util.Collection;
 import java.util.HashMap;
 import javax.swing.JLabel;
@@ -34,6 +35,8 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyJList;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
+import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.wysiwyg.selector.WMsgSelectorForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -184,6 +187,9 @@ public class DMSManager extends DeviceManager<DMS> {
 		if (blankAction != null) {
 			p.add(blankAction);
 			p.addSeparator();
+			
+			p.add(launchWysiwygSelector(dms));
+			p.addSeparator();
 		}
 	}
 
@@ -207,5 +213,15 @@ public class DMSManager extends DeviceManager<DMS> {
 	@Override
 	protected GeoLoc getGeoLoc(DMS proxy) {
 		return proxy.getGeoLoc();
+	}
+
+	/** Create a WYSIWYG Selector menu item action */
+	private IAction launchWysiwygSelector(DMS dms) {
+		return WMsgSelectorForm.isPermitted(session) ?
+			new IAction("wysiwyg.menu") {
+			protected void doActionPerformed(ActionEvent e) {
+				session.getDesktop().show(new WMsgSelectorForm(session, dms));
+			}
+			} : null;
 	}
 }

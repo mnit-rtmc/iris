@@ -1,5 +1,13 @@
 # IRIS 5.x Release Notes
 
+5.13.0 (14 May 2020)
+ - Added WYSIWYG editor for DMS messages
+   (thanks to John Stanley and Gordon Parikh at SRF!)
+ - Increased minimum required Java version to 1.8
+ - Added sign_group_text_view SQL
+ - For inc_feed protocol, add optional "direction" field
+ - Append camera name when notifying "publish" field changes in PostgreSQL
+
 5.12.0 (23 Mar 2020)
  - Added Camera "streamable" flag
  - Fixed camera encoding quality logic bugs
