@@ -45,16 +45,19 @@ enum Listen {
     ///
     /// * channel name
     All(&'static str),
+
     /// Listen for a single payload.
     ///
     /// * channel name
     /// * payload to include
     Include(&'static str, &'static str),
+
     /// Listen while excluding payloads.
     ///
     /// * channel name
     /// * payloads to exclude
     Exclude(&'static str, &'static [&'static str]),
+
     /// Listen for all payloads on two channels.
     ///
     /// * first channel name
@@ -72,6 +75,7 @@ impl Listen {
             Listen::Two(n0, n1) => vec![n0, n1],
         }
     }
+
     /// Check if listening to a channel
     fn is_listening(&self, chan: &str, payload: &str) -> bool {
         match self {
@@ -85,6 +89,7 @@ impl Listen {
             Listen::Two(n0, n1) => n0 == &chan || n1 == &chan,
         }
     }
+
     /// Check if listening to a channel / payload
     fn is_listening_payload(&self, chan: &str, payload: &str) -> bool {
         if let Listen::Exclude(n, exc) = self {
@@ -102,12 +107,14 @@ enum Resource {
     ///
     /// * Listen specification.
     RNode(Listen),
+
     /// Simple file resource.
     ///
     /// * File name.
     /// * Listen specification.
     /// * SQL query.
     Simple(&'static str, Listen, &'static str),
+
     /// Sign message resource.
     ///
     /// * File name.
@@ -370,6 +377,7 @@ impl Resource {
             Resource::SignMsg(_, lsn, _) => &lsn,
         }
     }
+
     /// Fetch the resource from a connection.
     ///
     /// * `conn` The database connection.
@@ -383,6 +391,7 @@ impl Resource {
             Resource::SignMsg(n, _, _) => self.fetch_sign_msgs(conn, n),
         }
     }
+
     /// Fetch r_node resource from a connection.
     ///
     /// * `conn` The database connection.
@@ -396,6 +405,7 @@ impl Resource {
             fetch_one_node(conn, payload, sender)
         }
     }
+
     /// Fetch a file resource from a connection.
     ///
     /// * `conn` The database connection.
@@ -412,6 +422,7 @@ impl Resource {
         info!("{}: wrote {} rows in {:?}", name, c, t.elapsed());
         Ok(())
     }
+
     /// Fetch to a writer.
     ///
     /// * `conn` The database connection.
@@ -423,6 +434,7 @@ impl Resource {
             Resource::SignMsg(_, _, sql) => fetch_simple(conn, sql, w),
         }
     }
+
     /// Fetch sign messages resource.
     fn fetch_sign_msgs(&self, conn: &Connection, name: &str) -> Result<()> {
         self.fetch_file(conn, name)?;

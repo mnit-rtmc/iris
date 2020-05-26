@@ -1,6 +1,6 @@
 // segments.rs
 //
-// Copyright (C) 2019  Minnesota Department of Transportation
+// Copyright (C) 2019-2020  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -136,6 +136,7 @@ impl GeoLoc {
             _ => None,
         }
     }
+
     /// Get the node position
     fn pos(&self) -> Option<Wgs84Pos> {
         self.latlon().and_then(|(lat, lon)| Some(Wgs84Pos::new(lat, lon)))
@@ -191,6 +192,7 @@ impl RNode {
             notes: row.get(19),
         }
     }
+
     /// Get the corridor ID
     fn cor_id(&self) -> Option<CorridorId> {
         match (&self.loc.roadway, self.loc.road_dir) {
@@ -204,6 +206,7 @@ impl RNode {
             _ => None,
         }
     }
+
     /// Get the lat/lon of the node
     fn latlon(&self) -> Option<(f64, f64)> {
         if self.active {
@@ -212,6 +215,7 @@ impl RNode {
             None
         }
     }
+
     /// Get the node position
     fn pos(&self) -> Option<Wgs84Pos> {
         if self.active {
@@ -230,6 +234,7 @@ impl Corridor {
         let count = 0;
         Corridor { cor_id, nodes, count }
     }
+
     /// Compare lat/lon positions in corridor direction
     fn cmp_dir(&self, lat: f64, lt: f64, lon: f64, ln: f64) -> Option<Ordering>{
         match self.cor_id.travel_dir {
@@ -239,6 +244,7 @@ impl Corridor {
             TravelDir::WB => lon.partial_cmp(&ln),
         }
     }
+
     /// Get index of the first node in corridor direction
     fn first_node(&mut self) -> Option<usize> {
         let mut idx_lt_ln = None; // (node index, lat, lon)
@@ -257,6 +263,7 @@ impl Corridor {
         }
         idx_lt_ln.and_then(|(i, _lt, _ln)| Some(i))
     }
+
     /// Get index of the nearest node after idx
     fn nearest_node(&self, idx: usize) -> Option<usize> {
         let pos = self.nodes.iter().nth(idx)?.pos()?;
@@ -278,6 +285,7 @@ impl Corridor {
         }
         idx_dist.and_then(|(i, _d)| Some(i))
     }
+
     /// Order all nodes
     fn order_nodes(&mut self) {
         self.count = match self.first_node() {
@@ -300,6 +308,7 @@ impl Corridor {
         debug!("order_nodes: {:?}, count: {} of {}", self.cor_id, self.count,
             self.nodes.len());
     }
+
     /// Add a node
     fn add_node(&mut self, node: Box<RNode>, ordered: bool) {
         debug!("add_node {} to {:?} ({} + 1)", &node.name, &self.cor_id,
@@ -309,6 +318,7 @@ impl Corridor {
             self.order_nodes();
         }
     }
+
     /// Update a node
     fn update_node(&mut self, node: Box<RNode>, ordered: bool) {
         debug!("update_node {} to {:?} ({})", &node.name, &self.cor_id,
@@ -321,6 +331,7 @@ impl Corridor {
             self.order_nodes();
         }
     }
+
     /// Remove a node
     fn remove_node(&mut self, name: &str, ordered: bool) {
         debug!("remove_node {} from {:?} ({} - 1)", &name, &self.cor_id,
@@ -345,6 +356,7 @@ impl SegmentState {
         let ordered = false;
         SegmentState { node_cors, corridors, ordered }
     }
+
     /// Add or update a node
     fn add_update_node(&mut self, node: Box<RNode>) {
         match node.cor_id() {
@@ -361,6 +373,7 @@ impl SegmentState {
             _ => debug!("ignoring node: {}", &node.name),
         }
     }
+
     /// Add a node to corridor
     fn add_corridor_node(&mut self, cid: &CorridorId, node: Box<RNode>) {
         match self.corridors.get_mut(&cid) {
@@ -372,6 +385,7 @@ impl SegmentState {
             }
         }
     }
+
     /// Remove a node from a corridor
     fn remove_corridor_node(&mut self, cid: &CorridorId, name: &str) {
         match self.corridors.get_mut(cid) {
@@ -385,6 +399,7 @@ impl SegmentState {
             None => error!("corridor ID not found {:?}", cid),
         }
     }
+
     /// Update a node on a corridor
     fn update_corridor_node(&mut self, cid: &CorridorId, node: Box<RNode>) {
         match self.corridors.get_mut(cid) {
@@ -392,6 +407,7 @@ impl SegmentState {
             None => error!("corridor ID not found {:?}", cid),
         }
     }
+
     /// Remove a node
     fn remove_node(&mut self, name: &str) {
         match self.node_cors.remove(name) {
@@ -399,6 +415,7 @@ impl SegmentState {
             None => error!("corridor not found for node: {}", name),
         }
     }
+
     /// Order all corridors
     fn set_ordered(&mut self, ordered: bool) {
         self.ordered = ordered;
