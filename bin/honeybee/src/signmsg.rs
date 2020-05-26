@@ -1,6 +1,6 @@
 // signmsg.rs
 //
-// Copyright (C) 2018-2019  Minnesota Department of Transportation
+// Copyright (C) 2018-2020  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -141,14 +141,17 @@ impl SignConfig {
         }
         Ok(configs)
     }
+
     /// Get config name
     fn name(&self) -> &str {
         &self.name
     }
+
     /// Get default font
     fn default_font(&self) -> Option<&str> {
         self.default_font.as_ref().map(String::as_str)
     }
+
     /// Get the horizontal border (mm).
     /// Sanity check included in case the sign vendor supplies stupid values.
     fn horizontal_border_mm(&self) -> f32 {
@@ -156,27 +159,33 @@ impl SignConfig {
         let border_horiz = self.border_horiz as f32;
         border_horiz.min(0_f32.max(excess_mm / 2.0))
     }
+
     /// Get the face width (mm)
     fn face_width(&self) -> f32 {
         self.face_width as f32
     }
+
     /// Get the face height (mm)
     fn face_height(&self) -> f32 {
         self.face_height as f32
     }
+
     /// Get the horizontal excess (mm).
     fn horizontal_excess_mm(&self) -> f32 {
         let pixels_mm = (self.pitch_horiz * (self.pixel_width - 1)) as f32;
         self.face_width() - pixels_mm
     }
+
     /// Get the character height
     fn char_height(&self) -> Result<u8> {
         Ok(self.char_height.try_into()?)
     }
+
     /// Get the character width
     fn char_width(&self) -> Result<u8> {
         Ok(self.char_width.try_into()?)
     }
+
     /// Get the horizontal character offset (mm)
     fn char_offset_mm(&self, x: u32) -> f32 {
         if self.char_width > 1 {
@@ -186,6 +195,7 @@ impl SignConfig {
             0.0
         }
     }
+
     /// Get the character gap (mm)
     fn char_gap_mm(&self) -> f32 {
         let excess_mm = self.horizontal_excess_mm();
@@ -197,6 +207,7 @@ impl SignConfig {
             0.0
         }
     }
+
     /// Get the number of gaps between characters
     fn char_gaps(&self) -> i32 {
         if self.char_width > 1 && self.pixel_width > self.char_width {
@@ -205,6 +216,7 @@ impl SignConfig {
             0
         }
     }
+
     /// Get the X-position of a pixel on the sign (from 0 to 1)
     fn pixel_x(&self, x: u32) -> f32 {
         let hb = self.horizontal_border_mm();
@@ -212,6 +224,7 @@ impl SignConfig {
         let pos = hb + co + (self.pitch_horiz * x as i32) as f32;
         pos / self.face_width()
     }
+
     /// Get the vertical border (mm).
     /// Sanity check included in case the sign vendor supplies stupid values.
     fn vertical_border_mm(&self) -> f32 {
@@ -219,11 +232,13 @@ impl SignConfig {
         let border_vert = self.border_vert as f32;
         border_vert.min(0_f32.max(excess_mm / 2.0))
     }
+
     /// Get the vertical excess (mm).
     fn vertical_excess_mm(&self) -> f32 {
         let pixels_mm = (self.pitch_vert * (self.pixel_height - 1)) as f32;
         self.face_height() - pixels_mm
     }
+
     /// Get the number of gaps between lines
     fn line_gaps(&self) -> i32 {
         if self.char_height > 1 && self.pixel_height > self.char_height {
@@ -232,6 +247,7 @@ impl SignConfig {
             0
         }
     }
+
     /// Get the vertical line offset (mm)
     fn line_offset_mm(&self, y: u32) -> f32 {
         if self.char_height > 1 {
@@ -241,6 +257,7 @@ impl SignConfig {
             0.0
         }
     }
+
     /// Get the line gap (mm)
     fn line_gap_mm(&self) -> f32 {
         let excess_mm = self.vertical_excess_mm();
@@ -252,6 +269,7 @@ impl SignConfig {
             0.0
         }
     }
+
     /// Get the Y-position of a pixel on the sign (from 0 to 1)
     fn pixel_y(&self, y: u32) -> f32 {
         let vb = self.vertical_border_mm();
@@ -259,10 +277,12 @@ impl SignConfig {
         let pos = vb + lo + (self.pitch_vert * y as i32) as f32;
         pos / self.face_height()
     }
+
     /// Get the color scheme value
     fn color_scheme(&self) -> ColorScheme {
         self.color_scheme[..].into()
     }
+
     /// Get the default foreground color
     fn foreground_default_rgb(&self) -> (u8, u8, u8) {
         match self.color_scheme() {
@@ -271,6 +291,7 @@ impl SignConfig {
             _ => rgb_from_i32(self.monochrome_foreground),
         }
     }
+
     /// Get the default background color
     fn background_default_rgb(&self) -> (u8, u8, u8) {
         match self.color_scheme() {
@@ -279,12 +300,14 @@ impl SignConfig {
             _ => rgb_from_i32(self.monochrome_background),
         }
     }
+
     /// Get the default text rectangle
     fn text_rect_default(&self) -> Result<Rectangle> {
         let w = self.pixel_width.try_into()?;
         let h = self.pixel_height.try_into()?;
         Ok(Rectangle::new(1, 1, w, h))
     }
+
     /// Render a sign message to a Vec of Frames
     fn render_sign_config(&self, multi: &str, msg_data: &MsgData)
         -> Result<(Preamble, Vec<Frame>)>
@@ -315,6 +338,7 @@ impl SignConfig {
         }
         Ok((preamble, frames))
     }
+
     /// Create default render state for a sign config.
     fn render_state_default(&self, msg_data: &MsgData) -> Result<State> {
         let color_scheme = self.color_scheme();
@@ -343,6 +367,7 @@ impl SignConfig {
                       font_version_id,
         ))
     }
+
     /// Calculate the size of rendered DMS
     fn calculate_size(&self) -> Result<(u16, u16)> {
         let fw = self.face_width();
@@ -358,6 +383,7 @@ impl SignConfig {
             Ok((PIX_WIDTH as u16, PIX_HEIGHT as u16))
         }
     }
+
     /// Make a .gif frame of sign face
     fn make_face_frame(&self, page: Raster<Rgb8>, palette: &mut Palette<Rgb8>,
         w: u16, h: u16, delay: u16) -> Frame
@@ -370,6 +396,7 @@ impl SignConfig {
         image_data.add_data(face.as_u8_slice());
         Frame::new(Some(control), image_desc, None, image_data)
     }
+
     /// Make a raster of sign face
     fn make_face_raster(&self, page: Raster<Rgb8>, palette: &mut Palette<Rgb8>,
         w: u16, h: u16) -> Raster<Gray8>
@@ -443,6 +470,7 @@ impl MsgData {
             graphics,
         })
     }
+
     /// Load DMS attributes from a JSON file
     fn load_dms_attributes(dir: &Path) -> Result<HashMap<String, String>> {
         debug!("load_dms_attributes");
@@ -456,6 +484,7 @@ impl MsgData {
             _ => Err(Error::UnknownResource("DMS attributes".into())),
         }
     }
+
     /// Lookup a config
     fn config(&self, s: &SignMessage) -> Result<&SignConfig> {
         let cfg = &s.sign_config;
@@ -464,6 +493,7 @@ impl MsgData {
             None => Err(Error::UnknownResource(format!("Config: {}", cfg))),
         }
     }
+
     /// Get an attribute (seconds) in u8 deciseconds
     fn get_as_ds(&self, name: &str) -> Option<u8> {
         if let Some(value) = self.attrs.get(name) {
@@ -477,14 +507,17 @@ impl MsgData {
         debug!("MsgData::get_as_ds, {} missing!", name);
         None
     }
+
     /// Get the default page on time
     fn page_on_default_ds(&self) -> u8 {
         self.get_as_ds("dms_page_on_default_secs").unwrap_or(20)
     }
+
     /// Get the default page off time
     fn page_off_default_ds(&self) -> u8 {
         self.get_as_ds("dms_page_off_default_secs").unwrap_or(0)
     }
+
     /// Get the default page justification
     fn page_justification_default(&self) -> JustificationPage {
         const ATTR: &str = "dms_default_justification_page";
@@ -496,6 +529,7 @@ impl MsgData {
         debug!("MsgData::page_justification_default, {} missing!", ATTR);
         JustificationPage::Top
     }
+
     /// Get the default line justification
     fn line_justification_default(&self) -> JustificationLine {
         const ATTR: &str = "dms_default_justification_line";
@@ -507,6 +541,7 @@ impl MsgData {
         debug!("MsgData::line_justification_default, {} missing!", ATTR);
         JustificationLine::Center
     }
+
     /// Get the default font number
     fn font_default(&self, fname: Option<&str>) -> Result<u8> {
         match fname {
@@ -521,10 +556,12 @@ impl MsgData {
             None => Ok(1),
         }
     }
+
     /// Get font mapping
     fn fonts(&self) -> &FontCache {
         &self.fonts
     }
+
     /// Get graphic mapping
     fn graphics(&self) -> &GraphicCache {
         &self.graphics
@@ -541,10 +578,12 @@ impl SignMessage {
         let r = BufReader::new(File::open(&n)?);
         Ok(serde_json::from_reader(r)?)
     }
+
     /// Get the MULTI string
     fn multi(&self) -> &str {
         &self.multi
     }
+
     /// Fetch sign message .gif if it is not in the image cache.
     ///
     /// * `msg_data` Data required to render messages.
@@ -567,6 +606,7 @@ impl SignMessage {
         }
         Ok(())
     }
+
     /// Render into a .gif file
     fn render_sign_msg<W: Write>(&self, msg_data: &MsgData, writer: W)
         -> Result<()>
@@ -587,6 +627,7 @@ impl ImageCache {
         let ext = ext.to_string();
         Ok(ImageCache { img_dir, ext, files })
     }
+
     /// Lookup a listing of files with a given extension
     fn files(img_dir: &Path, ext: &str) -> Result<HashSet<PathBuf>> {
         let mut files = HashSet::new();
@@ -605,6 +646,7 @@ impl ImageCache {
         }
         Ok(files)
     }
+
     /// Make image file name
     fn dir_name(&self, name: &str) -> (&Path, String) {
         let mut n = String::new();
@@ -613,20 +655,24 @@ impl ImageCache {
         n.push_str(&self.ext);
         (&self.img_dir.as_path(), n)
     }
+
     /// Make image file name
     fn make_name(&self, name: &str) -> PathBuf {
         let (dir, n) = self.dir_name(name);
         make_name(dir, &n)
     }
+
     /// Make temp image file name
     fn make_tmp_name(&self, name: &str) -> PathBuf {
         let (dir, n) = self.dir_name(name);
         make_tmp_name(dir, &n)
     }
+
     /// Check if an image exists
     fn contains(&mut self, n: &PathBuf) -> bool {
         self.files.remove(n)
     }
+
     /// Remove expired image files
     fn remove_expired(&mut self) -> Result<()> {
         for p in self.files.drain() {
