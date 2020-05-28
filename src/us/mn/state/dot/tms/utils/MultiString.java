@@ -159,7 +159,7 @@ public class MultiString {
 		else if (ltag.startsWith("tz"))
 			parseTolling(tag.substring(2), cb);
 		else if (ltag.startsWith("pa"))
-			parseParking(tag.substring(2), cb);
+			parseParking(tag, cb);
 		else if (ltag.startsWith("loc"))
 			parseLocator(tag.substring(3), cb);
 		else

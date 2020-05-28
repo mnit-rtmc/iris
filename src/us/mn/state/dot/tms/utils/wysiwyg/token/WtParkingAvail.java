@@ -75,8 +75,8 @@ public class WtParkingAvail extends Wt_IrisToken {
 	 */
 	@Override
 	public void appendParameters(StringBuilder sb) {
-		if (pid != null) {
-			sb.append(pid);
+		if ((pid != null) && pid.startsWith("pa")) {
+			sb.append(pid.substring(2));
 			if (l_txt != null) {
 				sb.append(',');
 				sb.append(l_txt);

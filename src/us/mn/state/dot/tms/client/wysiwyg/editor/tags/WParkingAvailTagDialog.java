@@ -45,7 +45,6 @@ class WParkingAvailTagDialog extends WMultiTagDialog {
 	private WTagParamTextField l_txtField;
 	private WTagParamTextField c_txtField;
 	private String pid;
-	private String pname;
 	private ParkingArea parkingArea;
 	private String l_txt;
 	private String c_txt;
@@ -60,11 +59,8 @@ class WParkingAvailTagDialog extends WMultiTagDialog {
 		editTok = (WtParkingAvail) tok;
 		pid = editTok.getParkingID();
 		
-		// add "pa" to the ID to get the SONAR name, then lookup the object
-		if (pid != null && !pid.isEmpty()) {
-			pname = "pa" + pid;
-			parkingArea = ParkingAreaHelper.lookup(pname);
-		}
+		if (pid != null && pid.startsWith("pa"))
+			parkingArea = ParkingAreaHelper.lookup(pid);
 		
 		l_txt = editTok.getParkingLowText();
 		c_txt = editTok.getClosedText();
@@ -89,8 +85,7 @@ class WParkingAvailTagDialog extends WMultiTagDialog {
 	protected WtParkingAvail makeNewTag() {
 		// remove "pa" from the SONAR name to get the parking area ID
 		parkingArea = pidField.getSelectedItem();
-		pname = parkingArea.getName();
-		pid = pname.replace("pa", "");
+		pid = parkingArea.getName();
 		
 		l_txt = l_txtField.getText();
 		c_txt = c_txtField.getText();
