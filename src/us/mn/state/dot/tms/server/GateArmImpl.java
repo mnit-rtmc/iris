@@ -91,7 +91,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Create a new gate arm with a string name */
 	public GateArmImpl(String n) throws TMSException, SonarException {
 		super(n);
-		GateArmSystem.disable(n, "create");
+		GateArmSystem.disable(n, "create gate arm");
 	}
 
 	/** Create a gate arm */
@@ -138,7 +138,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Destroy an object */
 	@Override
 	public void doDestroy() throws TMSException {
-		GateArmSystem.disable(name, "destroy");
+		GateArmSystem.disable(name, "destroy gate arm");
 		super.doDestroy();
 		setArrayIndex(null);
 	}
@@ -170,7 +170,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	protected void updateControllerPin(ControllerImpl oc, int op,
 		ControllerImpl nc, int np)
 	{
-		GateArmSystem.disable(name, "controller/pin");
+		GateArmSystem.disable(name, "update controller/pin");
 		super.updateControllerPin(oc, op, nc, np);
 	}
 

@@ -81,8 +81,10 @@ public class GateArmSystem {
 			DELETE_FLAG = CONFIG_ENABLE_FILE.delete();
 		if (ENABLED)
 			setEnabled(false);
-		logStderr(CONFIG_ENABLE_FILE.toString() + " " + name + ": " +
-			reason + " " + getAdvice());
+		String msg = reason + ": " + name;
+		logStderr(CONFIG_ENABLE_FILE.toString() + " " + msg +
+			" " + getAdvice());
+		sendEmailAlert("Gate arm system disabled (" + msg + ")");
 	}
 
 	/** Get advice to log */

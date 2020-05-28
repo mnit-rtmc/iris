@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2019  Minnesota Department of Transportation
+ * Copyright (C) 2013-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -181,7 +181,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Set the prerequisite gate arm array */
 	@Override
 	public void setPrereq(String pr) {
-		GateArmSystem.disable(name, "prereq");
+		GateArmSystem.disable(name, "set prereq");
 		prereq = pr;
 	}
 
@@ -210,7 +210,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Set the verification camera */
 	@Override
 	public void setCamera(Camera c) {
-		GateArmSystem.disable(name, "camera");
+		GateArmSystem.disable(name, "set camera");
 		camera = c;
 	}
 
@@ -234,7 +234,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Set the approach camera */
 	@Override
 	public void setApproach(Camera c) {
-		GateArmSystem.disable(name, "approach");
+		GateArmSystem.disable(name, "set approach");
 		approach = c;
 	}
 
@@ -258,7 +258,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Set the action plan */
 	@Override
 	public void setActionPlan(ActionPlan ap) {
-		GateArmSystem.disable(name, "actionPlan");
+		GateArmSystem.disable(name, "set actionPlan");
 		if (ap instanceof ActionPlanImpl)
 			action_plan = (ActionPlanImpl) ap;
 	}
@@ -283,7 +283,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Set the action plan phase for OPEN state */
 	@Override
 	public void setOpenPhase(PlanPhase p) {
-		GateArmSystem.disable(name, "openPhase");
+		GateArmSystem.disable(name, "set openPhase");
 		if (p instanceof PlanPhaseImpl)
 			open_phase = (PlanPhaseImpl) p;
 	}
@@ -308,7 +308,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Set the action plan phase for CLOSED state */
 	@Override
 	public void setClosedPhase(PlanPhase p) {
-		GateArmSystem.disable(name, "closedPhase");
+		GateArmSystem.disable(name, "set closedPhase");
 		if (p instanceof PlanPhaseImpl)
 			closed_phase = (PlanPhaseImpl) p;
 	}

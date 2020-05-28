@@ -182,7 +182,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	/** Set the roadway road */
 	@Override
 	public void setRoadway(Road r) {
-		GateArmSystem.checkDisable(this, "roadway");
+		GateArmSystem.checkDisable(this, "set roadway");
 		roadway = r;
 	}
 
@@ -212,7 +212,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	/** Set the roadway direction */
 	@Override
 	public void setRoadDir(short d) {
-		GateArmSystem.checkDisable(this, "road_dir");
+		GateArmSystem.checkDisable(this, "set road_dir");
 		road_dir = d;
 	}
 

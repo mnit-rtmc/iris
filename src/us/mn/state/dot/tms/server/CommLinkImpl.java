@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -204,7 +204,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Set modem flag */
 	@Override
 	public void setModem(boolean m) {
-		testGateArmDisable(name, "modem");
+		testGateArmDisable(name, "set modem");
 		modem = m;
 		DevicePoller dp = poller;
 		if (dp != null)
@@ -246,7 +246,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Set remote URI for link */
 	@Override
 	public void setUri(String u) {
-		testGateArmDisable(name, "URI");
+		testGateArmDisable(name, "set URI");
 		uri = u;
 	}
 
@@ -274,10 +274,10 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Set the communication protocol */
 	@Override
 	public void setProtocol(short p) {
-		testGateArmDisable(name, "protocol 0");
+		testGateArmDisable(name, "set protocol 0");
 		CommProtocol cp = CommProtocol.fromOrdinal(p);
 		if (isGateArm(cp))
-			GateArmSystem.disable(name, "protocol 1");
+			GateArmSystem.disable(name, "set protocol 1");
 		if (cp != null)
 			protocol = cp;
 	}
@@ -306,7 +306,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Enable or disable polling */
 	@Override
 	public void setPollEnabled(boolean e) {
-		testGateArmDisable(name, "poll_enabled");
+		testGateArmDisable(name, "set poll_enabled");
 		poll_enabled = e;
 	}
 
@@ -331,7 +331,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Set poll period (seconds) */
 	@Override
 	public void setPollPeriod(int s) {
-		testGateArmDisable(name, "poll_period");
+		testGateArmDisable(name, "set poll_period");
 		poll_period = s;
 		createPollJob(s);
 	}
@@ -367,7 +367,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Set the polling timeout (milliseconds) */
 	@Override
 	public void setTimeout(int t) {
-		testGateArmDisable(name, "timeout");
+		testGateArmDisable(name, "set timeout");
 		timeout = t;
 	}
 
