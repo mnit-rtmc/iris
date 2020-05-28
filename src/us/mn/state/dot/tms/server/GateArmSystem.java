@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2018  Minnesota Department of Transportation
+ * Copyright (C) 2013-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,10 +66,10 @@ public class GateArmSystem {
 	static private void setEnabled(boolean e) {
 		ENABLED = e;
 		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			GateArmArray g = it.next();
-			if(g instanceof GateArmArrayImpl) {
-				GateArmArrayImpl ga = (GateArmArrayImpl)g;
+			if (g instanceof GateArmArrayImpl) {
+				GateArmArrayImpl ga = (GateArmArrayImpl) g;
 				ga.setSystemEnable(e);
 			}
 		}
@@ -77,9 +77,9 @@ public class GateArmSystem {
 
 	/** Disable gate arm configuration */
 	static public void disable(String name, String reason) {
-		if(isEnabledFile())
+		if (isEnabledFile())
 			DELETE_FLAG = CONFIG_ENABLE_FILE.delete();
-		if(ENABLED)
+		if (ENABLED)
 			setEnabled(false);
 		logStderr(CONFIG_ENABLE_FILE.toString() + " " + name + ": " +
 			reason + " " + getAdvice());
@@ -93,9 +93,9 @@ public class GateArmSystem {
 
 	/** Check if config is enabled (and enable if required) */
 	static public boolean checkEnabled() {
-		if(ENABLED)
+		if (ENABLED)
 			return true;
-		if(isEnabledFile()) {
+		if (isEnabledFile()) {
 			setEnabled(true);
 			return true;
 		} else
@@ -131,12 +131,12 @@ public class GateArmSystem {
 	static public void checkInterlocks(Road r) {
 		int d = openGateDirection(r);
 		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			GateArmArray g = it.next();
-			if(g instanceof GateArmArrayImpl) {
-				GateArmArrayImpl ga = (GateArmArrayImpl)g;
+			if (g instanceof GateArmArrayImpl) {
+				GateArmArrayImpl ga = (GateArmArrayImpl) g;
 				Road gr = ga.getRoad();
-				if(gr == r)
+				if (gr == r)
 					ga.setOpenDirection(d);
 			}
 		}
@@ -150,15 +150,15 @@ public class GateArmSystem {
 		int d = 0;
 		boolean found = false;
 		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			GateArmArray g = it.next();
-			if(g instanceof GateArmArrayImpl) {
-				GateArmArrayImpl ga = (GateArmArrayImpl)g;
-				if(ga.isPossiblyOpen()) {
+			if (g instanceof GateArmArrayImpl) {
+				GateArmArrayImpl ga = (GateArmArrayImpl) g;
+				if (ga.isPossiblyOpen()) {
 					Road gr = ga.getRoad();
-					if(gr == r) {
+					if (gr == r) {
 						int gd = ga.getRoadDir();
-						if(found && d != gd)
+						if (found && d != gd)
 							return -1;
 						else {
 							found = true;
@@ -182,10 +182,10 @@ public class GateArmSystem {
 	/** Clear dependant open flags for all gate arm arrays */
 	static private void clearDependants() {
 		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			GateArmArray g = it.next();
-			if(g instanceof GateArmArrayImpl) {
-				GateArmArrayImpl ga = (GateArmArrayImpl)g;
+			if (g instanceof GateArmArrayImpl) {
+				GateArmArrayImpl ga = (GateArmArrayImpl) g;
 				ga.clearDependant();
 			}
 		}
@@ -194,10 +194,10 @@ public class GateArmSystem {
 	/** Check dependant open flags for all gate arm arrays */
 	static private void checkDependants() {
 		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			GateArmArray g = it.next();
-			if(g instanceof GateArmArrayImpl) {
-				GateArmArrayImpl ga = (GateArmArrayImpl)g;
+			if (g instanceof GateArmArrayImpl) {
+				GateArmArrayImpl ga = (GateArmArrayImpl) g;
 				ga.checkDependant();
 			}
 		}
@@ -206,10 +206,10 @@ public class GateArmSystem {
 	/** Set dependant open flags for all gate arm arrays */
 	static private void setDependants() {
 		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			GateArmArray g = it.next();
-			if(g instanceof GateArmArrayImpl) {
-				GateArmArrayImpl ga = (GateArmArrayImpl)g;
+			if (g instanceof GateArmArrayImpl) {
+				GateArmArrayImpl ga = (GateArmArrayImpl) g;
 				ga.setDependant();
 			}
 		}
@@ -221,11 +221,11 @@ public class GateArmSystem {
 	 * @param reason Reason for check. */
 	static public void checkDisable(GeoLoc loc, String reason) {
 		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			GateArmArray g = it.next();
-			if(g instanceof GateArmArrayImpl) {
-				GateArmArrayImpl ga = (GateArmArrayImpl)g;
-				if(loc == ga.getGeoLoc()) {
+			if (g instanceof GateArmArrayImpl) {
+				GateArmArrayImpl ga = (GateArmArrayImpl) g;
+				if (loc == ga.getGeoLoc()) {
 					disable(loc.getName(), reason);
 					break;
 				}
