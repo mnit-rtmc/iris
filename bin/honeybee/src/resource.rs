@@ -243,7 +243,7 @@ const TPIMS_STAT_RES: Resource = Resource::Simple(
     SELECT site_id AS \"siteId\", to_char(time_stamp_static AT TIME ZONE 'UTC', \
            'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
            relevant_highway AS \"relevantHighway\", \
-           reference_post AS \"referencePost\", exit_id AS \"exitId\", \
+           reference_post AS \"referencePost\", exit_id AS \"exitID\", \
            road_dir AS \"directionOfTravel\", facility_name AS name, \
            json_build_object('latitude', lat, 'longitude', lon, \
            'streetAdr', street_adr, 'city', city, 'state', state, \
