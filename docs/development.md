@@ -13,14 +13,6 @@ In a suitable development directory, clone the iris git repository.
 git clone https://github.com/mnit-rtmc/iris.git
 ```
 
-Create lib/ directory in iris development repository.
-```
-mkdir iris/lib/
-```
-
-Download the [JavaMail jar] and copy the `javax.mail.jar` file to the lib/
-directory in the iris repository.
-
 Copy `iris-build.properties` from `etc/` to `lib/`.
 Edit `lib/iris-build.properties` file as necessary for your organization.
 

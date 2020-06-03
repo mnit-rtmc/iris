@@ -87,12 +87,9 @@
 	</target>
 
 	<!-- Check for dependencies -->
-	<target name="check">
+	<target name="check-rpm">
 		<antcall target="check-dep">
 			<param name="file.dep" value="iris-build.properties"/>
-		</antcall>
-		<antcall target="check-dep">
-			<param name="file.dep" value="mail.jar"/>
 		</antcall>
 	</target>
 
@@ -153,7 +150,7 @@
 
 	<!-- Compile the source code -->
 	<target name="compile"
-	        depends="check,prepare"
+	        depends="prepare"
 	        description="Compile all of the source files">
 		<javac srcdir="${build.src}"
 		       destdir="${build.classes}"
@@ -344,7 +341,6 @@
 
 	<!-- Create source tarball -->
 	<target name="tarball"
-	        depends="check"
 	        description="Create source tarball">
 		<copy todir="${build.tar}">
 			<fileset dir="${basedir}" excludes="build/**" />
@@ -357,7 +353,7 @@
 
 	<!-- Create an RPM package -->
 	<target name="rpm"
-	        depends="prepare-etc,tarball"
+	        depends="check-rpm,prepare-etc,tarball"
 	        description="Create an RPM package">
 		<mkdir dir="${build.rpm}/BUILD"/>
 		<mkdir dir="${build.rpm}/BUILDROOT"/>
