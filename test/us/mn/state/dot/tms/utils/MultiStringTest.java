@@ -254,7 +254,7 @@ public class MultiStringTest extends TestCase {
 		checkNormalize("ABC[nl3]DEF", "ABC[nl3]DEF");
 		checkNormalize("ABC[np]DEF", "ABC[np]DEF");
 		checkNormalize("ABC[jl4]DEF", "ABC[jl4]DEF");
-		checkNormalize("ABC[jl6]DEF", "ABCDEF");
+		checkNormalize("ABC[jl6]DEF", "ABC[jl]DEF");
 		checkNormalize("ABC[jp4]DEF", "ABC[jp4]DEF");
 		checkNormalize("[fo3]ABC DEF", "[fo3]ABC DEF");
 		checkNormalize("[fo3,beef]ABC DEF", "[fo3,beef]ABC DEF");
