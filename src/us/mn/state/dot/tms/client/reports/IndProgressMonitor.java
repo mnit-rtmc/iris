@@ -22,18 +22,8 @@ import javax.swing.JProgressBar;
 import javax.swing.ProgressMonitor;
 
 /** Similar to a standard Swing ProgressMonitor, but
- *  this shows a bouncing "indeterminate" progress bar.<p>
+ * this shows a bouncing "indeterminate" progress bar.
  *   
- * Usage:<ul>
- *	  m = new IndProgressMonitor(...)<br>
- *	  (optional: Adjust the monitor's parameters.)<br> 
- *       ...<br>
- *    In loop for process:
- *     Call m.update() roughly every 1/2 sec.<br>
- *       ...<br>
- *    When process is complete:
- *     Call m.close().<p></ul>
- * 
  * @see javax.swing.ProgressMonitor
  * 
  * @author John L. Stanley - SRF Consulting
@@ -56,17 +46,17 @@ public class IndProgressMonitor extends ProgressMonitor {
 	/** Update the progress monitor.
 	 * (Retained for compatibility with ProgressMonitor.
 	 *  When using IndProgressMonitor, I recommend calling
-	 *  the update() method instead.)<p>
+	 *  the update() method instead.)
 	 * 
 	 * This or update() should be called occasionally
 	 * (every 1/2 sec is a good interval) while the
 	 * process is running to display the progress
-	 * monitor dialog.<p>
+	 * monitor dialog.
 	 *  
 	 * @param nv an int specifying the current value,
 	 *  between the maximum and minimum specified for
 	 *  this component.  The nv value is mostly ignored,
-	 *  but, if the specified value is >= 100, the
+	 *  but, if the specified value is &gt;= 100, the
 	 *  progress monitor will be closed.
 	 */
 	@Override

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2019  Minnesota Department of Transportation
+ * Copyright (C) 2005-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,11 +97,9 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 		}
 	};
 
-	/** 
-	 * Create a new sign group table model.
-	 * @param s Session
-	 * @param dms DMS proxy object.
-	 */
+	/** Create a new sign group table model.
+	 * @param s Client session.
+	 * @param proxy DMS proxy object. */
 	public SignGroupTableModel(Session s, DMS proxy) {
 		super(s, descriptor(s), 12);
 		dms = proxy;

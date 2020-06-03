@@ -387,6 +387,7 @@
 		         classpathref="classpath"
 			 sourcepath="${src.dir}"
 		         destdir="${build.javadocs}"
+		         additionalparam="-Xdoclint:-missing"
 		         author="true"
 		         version="true"
 			 windowtitle="${name} version ${version} API"

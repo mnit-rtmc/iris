@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.server.BaseObjectImpl;
 import us.mn.state.dot.tms.server.reports.RptGen;
 
 /**
- * A RptConduit is a client<->server communication-channel
+ * A RptConduit is a client&lt;-&gt;server communication-channel
  * for requesting and returning reports.
  * 
  * (Note that a RptConduit is a non-persistent SONAR object.)

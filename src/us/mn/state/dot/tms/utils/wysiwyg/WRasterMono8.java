@@ -41,7 +41,7 @@ public class WRasterMono8 extends WRaster {
 		super(mcfg);
 	}
 
-	/** Constructor for simple WRasterMono8 from width & height.
+	/** Constructor for simple WRasterMono8 from width &amp; height.
 	 *  (Used when cloning a WRaster.) */
 	protected WRasterMono8(int width, int height) {
 		super(width, height);

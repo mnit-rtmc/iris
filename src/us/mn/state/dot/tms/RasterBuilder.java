@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2020  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,10 @@ import us.mn.state.dot.tms.utils.MultiSyntaxError;
 
 /**
  * A raster builder creates raster graphics for DMS display.
- * @see Multi, MultiAdapter, MultiString
+ *
+ * @see us.mn.state.dot.tms.utils.Multi
+ * @see us.mn.state.dot.tms.utils.MultiAdapter
+ * @see us.mn.state.dot.tms.utils.MultiString
  *
  * @author Douglas Lau
  * @author Michael Darter

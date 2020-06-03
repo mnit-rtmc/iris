@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ abstract public class SwingProxyAdapter<T extends SonarObject>
 	}
 
 	/** Add a proxy.
-	 * @see ProxyListener. */
+	 * @see us.mn.state.dot.sonar.client.ProxyListener */
 	@Override
 	public final void proxyAdded(final T proxy) {
 		if (notify) {
@@ -60,7 +60,7 @@ abstract public class SwingProxyAdapter<T extends SonarObject>
 	}
 
 	/** Enumeration of proxies is complete.
-	 * @see ProxyListener. */
+	 * @see us.mn.state.dot.sonar.client.ProxyListener */
 	@Override
 	public final void enumerationComplete() {
 		notify = true;
@@ -73,7 +73,7 @@ abstract public class SwingProxyAdapter<T extends SonarObject>
 	}
 
 	/** Remove a proxy.
-	 * @see ProxyListener. */
+	 * @see us.mn.state.dot.sonar.client.ProxyListener */
 	@Override
 	public final void proxyRemoved(final T proxy) {
 		if (notify) {
@@ -86,7 +86,7 @@ abstract public class SwingProxyAdapter<T extends SonarObject>
 	}
 
 	/** A proxy has been changed.
-	 * @see ProxyListener. */
+	 * @see us.mn.state.dot.sonar.client.ProxyListener */
 	@Override
 	public final void proxyChanged(final T proxy, final String attr) {
 		if (notify && checkAttributeChange(attr)) {

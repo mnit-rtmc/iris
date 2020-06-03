@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ public class URIUtil {
 
 	/** Create a URI with a default scheme.
 	 * @param scheme Default scheme.
-	 * @param uri String specifier.
+	 * @param u String specifier.
 	 * @return Specified URI. */
 	static public URI create(URI scheme, String u) {
 		return scheme.resolve(createOrEmpty(u));

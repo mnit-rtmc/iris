@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,8 @@ import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * DMS page time helper.
- * @see MultiString, PgTimeSpinner, SignMessageComposer
+ *
+ * @see us.mn.state.dot.tms.utils.MultiString
  *
  * @author Douglas Lau
  * @author Michael Darter

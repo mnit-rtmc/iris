@@ -19,7 +19,6 @@ import us.mn.state.dot.tms.utils.MultiConfig;
 
 /** Expanded list of all types of tags supported by IRIS
  * @author John L. Stanley - SRF Consulting
- *
  */
 public enum WTokenType {
 
@@ -216,7 +215,7 @@ public enum WTokenType {
 	}
 
 	/** Is token supported by a specific MultiConfig?
-	 * @param MultiConfig */
+	 * @param cfg MultiConfig */
 	public boolean supportedBy(MultiConfig cfg) {
 		if (bit == SUPPORTED)
 			return true;

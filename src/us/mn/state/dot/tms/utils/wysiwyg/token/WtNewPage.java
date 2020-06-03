@@ -30,10 +30,6 @@ import us.mn.state.dot.tms.utils.wysiwyg.WToken.AnchorLoc;
 
 public class WtNewPage extends WToken {
 
-	/**
-	 * @param tt
-	 * @param aPrefix
-	 */
 	public WtNewPage() {
 		super(WTokenType.newPage, "[np");
 		anchorLoc = AnchorLoc.BEFORE;

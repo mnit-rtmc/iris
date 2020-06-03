@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ abstract public class Work implements Comparable<Work> {
 
 	/** Wait for the work to be completed.
 	 * @param ms Time to wait before giving up.
-	 * @throws TimeoutExcepiton if timeout expires before completion. */
+	 * @throws TimeoutException if timeout expires before completion. */
 	public synchronized final void waitForCompletion(long ms)
 		throws TimeoutException
 	{

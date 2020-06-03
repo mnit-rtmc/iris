@@ -41,7 +41,7 @@ public class WRasterMono1 extends WRaster {
 		super(mcfg);
 	}
 
-	/** Constructor for simple WRasterMono1 from width & height.
+	/** Constructor for simple WRasterMono1 from width &amp; height.
 	 * (Used for cloning a WRaster, WGlyph and NTCIP pixel-error bitmaps.) */
 	protected WRasterMono1(int width, int height) {
 		super(width, height);

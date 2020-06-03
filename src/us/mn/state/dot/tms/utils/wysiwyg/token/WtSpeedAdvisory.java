@@ -28,10 +28,6 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
  */
 public class WtSpeedAdvisory extends Wt_IrisToken {
 
-	/**
-	 * @param tt
-	 * @param aPrefix
-	 */
 	public WtSpeedAdvisory() {
 		super(WTokenType.speedAdvisory, "[vsa");
 		updateString();

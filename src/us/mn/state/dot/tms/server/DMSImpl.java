@@ -1087,7 +1087,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * after the operation completes.  This is necessary to prevent the
 	 * ReaperJob from destroying a SignMessage before it has been sent to
 	 * a sign.
-	 * @see DeviceImpl.acquire */
+	 * @see us.mn.state.dot.tms.server.DeviceImpl#acquire */
 	public void setMsgNext(SignMessage sm) {
 		msg_next = sm;
 	}
@@ -1218,7 +1218,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Get current message expiration time.
 	 * @return Expiration time for the current message (ms since epoch), or
 	 *         null for no expiration.
-	 * @see java.lang.System.currentTimeMillis */
+	 * @see java.lang.System#currentTimeMillis */
 	@Override
 	public Long getExpireTime() {
 		return expire_time;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2019  Minnesota Department of Transportation
+ * Copyright (C) 2010-2020  Minnesota Department of Transportation
  * Copyright (C) 2017       Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -199,7 +199,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	}
 
 	/** Set the dew point temp in C.
-	 * @param dpt Dew point temperature in C (null for missing) */
+	 * @param dp Dew point temperature in C (null for missing) */
 	public void setDewPointTempNotify(Integer dp) {
 		if (!objectEquals(dp, dew_point_temp)) {
 			dew_point_temp = dp;
@@ -289,7 +289,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	}
 
 	/** Set the max wind gust direction in degrees
-	 * @param ws Max wind gust direction in degress or null if missing */
+	 * @param wgd Max wind gust direction in degress or null if missing */
 	public void setMaxWindGustDirNotify(Integer wgd) {
 		if (!objectEquals(wgd, max_wind_gust_dir)) {
 			max_wind_gust_dir = wgd;
@@ -352,7 +352,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	}
 
 	/** Set spot wind speed.
-	 * @param swd Spot wind speed in KPH (null for missing) */
+	 * @param sws Spot wind speed in KPH (null for missing) */
 	public void setSpotWindSpeedNotify(Integer sws) {
 		if (!objectEquals(sws, spot_wind_speed)) {
 			spot_wind_speed = sws;

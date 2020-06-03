@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,11 +49,11 @@ public class DeviceReqButton extends JButton {
 	 * @param pdr Device request for pressed state.
 	 * @param rdr Device request for released state. */
 	public DeviceReqButton(String text_id, CameraPTZ cptz,
-		DeviceRequest pdr, DeviceRequest sdr)
+		DeviceRequest pdr, DeviceRequest rdr)
 	{
 		cam_ptz = cptz;
 		pressed_req = pdr;
-		released_req = sdr;
+		released_req = rdr;
 		setAction(new IAction(text_id) {
 			protected void doActionPerformed(ActionEvent ev) {
 				doReleased();

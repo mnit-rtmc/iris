@@ -42,7 +42,7 @@ public class WRasterClassic extends WRaster {
 		super(mcfg);
 	}
 
-	/** Constructor for simple WRasterClassic from width & height.
+	/** Constructor for simple WRasterClassic from width &amp; height.
 	 *  (Used when cloning a WRaster.) */
 	protected WRasterClassic(int width, int height) {
 		super(width, height);

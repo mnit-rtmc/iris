@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -203,7 +203,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	private int msg_priority;
 
 	/** Set the message priority.
-	 * @param p Priority ranging from 1 (low) to 255 (high).
+	 * @param mp Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DmsMsgPriority */
 	@Override
 	public void setMsgPriority(int mp) {

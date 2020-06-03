@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -169,7 +169,7 @@ public class I18N {
 	}
 
 	/** Return the implied key mnemonic in the specified I18N string.
-	 * For example, if the I18N string is "<html><u>B</u>lank</html>"
+	 * For example, if the I18N string is {@code <html><u>B</u>lank</html>}
 	 * then VK_B is returned.
 	 * @param id Name of I18N string in the bundle.
 	 * @return The KeyEvent code else 0 on failure.
@@ -184,7 +184,7 @@ public class I18N {
 
 	/** Return the implied key mnemonic in the specified I18N
 	 * string as a character. For example, if the I18N string
-	 * is "<html><u>B</u>lank</html>" then 'B' is returned.
+	 * is {@code <html><u>B</u>lank</html>} then 'B' is returned.
 	 * @param id Name of I18N string in the bundle.
 	 * @return The 1st underlined char else '\0' on failure. */
 	static public char getKeyEventChar(String id) {

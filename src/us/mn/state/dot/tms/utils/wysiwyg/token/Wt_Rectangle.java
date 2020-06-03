@@ -19,17 +19,13 @@ import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
 /** Parent class for tokens that represent rectangles:
- *      (WtTextRectangle & WtColorRectangle) 
+ *      (WtTextRectangle &amp; WtColorRectangle)
  *
  * @author John L. Stanley - SRF Consulting
  */
 
 abstract public class Wt_Rectangle extends WToken {
 
-	/**
-	 * @param ty
-	 * @param atoken
-	 */
 	public Wt_Rectangle(WTokenType tt, String aPrefix) {
 		super(tt, aPrefix);
 		anchorLoc = AnchorLoc.NONE;

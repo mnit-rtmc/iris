@@ -87,7 +87,7 @@ public class WRenderer {
 	/**
 	 * Create a new MULTI renderer.
 	 * 
-	 * @param mc MultiConfig for sign or sign-group.
+	 * @param mcfg MultiConfig for sign or sign-group.
 	 */
 	public WRenderer(MultiConfig mcfg) {
 		setConfig(mcfg);
@@ -96,7 +96,7 @@ public class WRenderer {
 	/**
 	 * Create a new MULTI renderer with an error manager.
 	 * 
-	 * @param mc MultiConfig for sign or sign-group.
+	 * @param mcfg MultiConfig for sign or sign-group.
 	 * @param em WRenderErrorManager for collecting errors.
 	 */
 	public WRenderer(MultiConfig mcfg, WEditorErrorManager em) {
@@ -148,8 +148,6 @@ public class WRenderer {
 		reportError(MultiSyntaxError.unsupportedTag, tok);
 	}
 
-	/** Set the page justification.
-	 * Use the sign's default page justification if jp is null. */
 	/** Render a WtJustPage token */
 	public void renderJustificationPage(WtJustPage tok) {
 		JustificationPage jp = tok.getJustification();
@@ -166,8 +164,6 @@ public class WRenderer {
 			blocks.addLast(block);
 	}
 
-	/** Set the line justification.
-	 * Use the sign's default line justification if jl is null. */
 	/** Render a WtJustLine token */
 	public void renderJustificationLine(WtJustLine tok) {
 		JustificationLine jl = tok.getJustification();
@@ -177,9 +173,6 @@ public class WRenderer {
 			state.justLine = jl;
 	}
 
-	/** Set the font number using a WtFont token.
-	 * f_num Font number (1 to 255)
-	 * Use the sign's default font if tok or f_num is null. */
 	/** Render a WtFont token */
 	public void renderFont(WtFont tok) {
 		Integer fontNum = null;
@@ -189,8 +182,6 @@ public class WRenderer {
 			reportError(MultiSyntaxError.fontNotDefined, tok);
 	}
 
-	/** Set the character spacing.
-	 * @param sc Character spacing (null means use font spacing) */
 	/** Render a WtCharSpacing token */
 	public void renderCharSpacing(WtCharSpacing tok) {
 		Integer sc = tok.getCharSpacing();
@@ -200,7 +191,6 @@ public class WRenderer {
 			state.charSpacing = state.getWFont().getCharSpacing();
 	}
 
-	/** Add a text character. */
 	/** Render a WtTextChar token */
 	public void renderText(WtTextChar tok) {
 		TextChar tc = new TextChar(tok);
@@ -215,7 +205,6 @@ public class WRenderer {
 	 *  To most of the rendering code, this looks
 	 *  like a single, extra-wide, TextChar.
 	 *  (Renders as a solid greenish box.)
-	 * @param wt_Iris
 	 */
 	public void renderIrisToken(Wt_IrisToken itok) {
 		IrisTagBox itb = new IrisTagBox(itok);
@@ -351,16 +340,6 @@ public class WRenderer {
 		state.fgPixel = pix;
 	}
 
-	/** Add a color rectangle using a WtColorRectangle token.
-	 *   [crX,Y,W,H,Z] or [crX,Y,W,H,R,G,B]
-	 * @param x X pixel position of upper left corner.
-	 * @param y Y pixel position of upper left corner.
-	 * @param w Width in pixels.
-	 * @param h Height in pixels.
-	 * tvColor = (0-1 for monochrome1bit),
-	 *           (0-255 for monochrome8bit),
-	 *           (0-9 for colorClassic &  & color24bit).
-	 *           (r,g,b for color24bit). */
 	/** Render a WtColorRectangle token */
 	public void renderColorRectangle(WtColorRectangle tok) {
 		int[] tvColor = tok.getColor();
@@ -474,11 +453,10 @@ public class WRenderer {
 	}
 
 	/** Render a graphic onto the raster.
-	 * @param g Graphic to render.
+	 * @param wg Graphic to render.
 	 * @param fg Foreground color.
 	 * @param x X-position on raster (1-based)
-	 * @param y Y-position on raster (1-based)
-	 * @return True if successful.  False if graphic too big. */
+	 * @param y Y-position on raster (1-based) */
 	private boolean drawGraphic(WRaster wg, int fg, int x, int y) {
 		x--;
 		y--;
@@ -973,8 +951,7 @@ public class WRenderer {
 	 * @param wg WGlyph to render.
 	 * @param fg Foreground color.
 	 * @param x X-position on raster (1-based)
-	 * @param y Y-position on raster (1-based)
-	 * @return True if rendered ok.  False if out of bounds. */
+	 * @param y Y-position on raster (1-based) */
 	protected boolean drawGlyph(WGlyph wg, int fg, int x, int y) {
 		x--;
 		y--;
@@ -992,8 +969,7 @@ public class WRenderer {
 	 * @param x X-position on raster (1-based)
 	 * @param y Y-position on raster (1-based)
 	 * @param w Width of box
-	 * @param h Height of box
-	 * @return True if rendered ok.  False if out of bounds. */
+	 * @param h Height of box */
 	protected boolean drawSolidBox(int fg, int x, int y, int w, int h) {
 		x--;
 		y--;
@@ -1009,18 +985,11 @@ public class WRenderer {
 	//===========================================
 	// Error manager support methods
 
-	/**
-	 * @param texttoobig
-	 */
 	private void reportError(MultiSyntaxError mse) {
 		// pass the error to the error manager
 		saveError(mse, null);
 	}
 
-	/**
-	 * @param tagconflict
-	 * @param tok
-	 */
 	private void reportError(MultiSyntaxError mse, WToken tok) {
 		tok.addErr(mse);
 		saveError(mse, tok);

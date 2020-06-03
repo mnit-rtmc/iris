@@ -33,7 +33,6 @@ public class RptDateTime {
 	 * 
 	 * @param dt String datetime value
 	 * @return long epoch value -or- zero if the string is null or blank.
-	 * @throws ParseException
 	 */
 	public static long getLong(String dt) {
 		if ((dt == null) || dt.isEmpty())

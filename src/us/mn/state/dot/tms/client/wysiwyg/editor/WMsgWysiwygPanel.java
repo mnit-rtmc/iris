@@ -126,8 +126,8 @@ public class WMsgWysiwygPanel extends JPanel {
 		mode_btn_pnl.add(textrect_mode_btn);
 		mode_btn_pnl.add(multitag_mode_btn);
 		
-		// add a separator, then a button for enabling/disabling of direct
-		// handling of non-text tags with a pilcrow (¶)
+		// add a separator, then a button for enabling/disabling of
+		// direct handling of non-text tags with a pilcrow
 		nonTextTagBtn = new JToggleButton(controller.toggleNonTextTagMode);
 		nonTextTagBtn.setText(String.valueOf('\u00B6'));
 		nonTextTagBtn.setFont(

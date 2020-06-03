@@ -39,7 +39,9 @@ import us.mn.state.dot.tms.utils.NumericAlphaComparator;
  * selection via this combobox, the dispatcher is flagged that it should update
  * its widgets with the newly selected message.
  *
- * @see DMSDispatcher, QuickMessage
+ * @see us.mn.state.dot.tms.QuickMessage
+ * @see us.mn.state.dot.tms.client.dms.DMSDispatcher
+ *
  * @author Michael Darter
  * @author Douglas Lau
  */
@@ -51,7 +53,7 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 		return ms.isValid() && !ms.isSpecial();
 	}
 
-	/** Given a QuickMessage or String, return the cooresponding quick 
+	/** Given a QuickMessage or String, return the cooresponding quick
 	 * message name or an empty string if none exists. */
 	static private String getQuickLibMsgName(Object obj) {
 		if (obj instanceof String)
@@ -157,7 +159,7 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 		adjusting--;
 	}
 
-	/** Set selected item, but only if it is different from the 
+	/** Set selected item, but only if it is different from the
 	 * currently selected item. Triggers a call to actionPerformed().
 	 * @param obj May be a String, or QuickMessage. */
 	public void setSelectedItem(Object obj) {

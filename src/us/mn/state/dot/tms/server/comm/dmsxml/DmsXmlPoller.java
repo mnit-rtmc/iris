@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  * Copyright (C) 2018  Iteris Inc.
  *
@@ -53,10 +53,12 @@ public class DmsXmlPoller extends ThreadedPoller implements DMSPoller {
 		return new DmsXmlThread(this, queue, scheme, uri, timeout, LOG);
 	}
 
-	/** Send a new message to the sign. Called by DMSImpl.
-	 *  @param dms May be null.
-	 *  @param m Sign message to send, may be null.
-	 *  @see DMSImpl, DMS */
+	/** Send a new message to the sign.
+	 * @param dms May be null.
+	 * @param m Sign message to send, may be null.
+	 *
+	 * @see us.mn.state.dot.tms.DMS
+	 * @see us.mn.state.dot.tms.server.DMSImpl */
 	@SuppressWarnings("unchecked")
 	@Override
 	public void sendMessage(DMSImpl dms, SignMessage m, String owner) {

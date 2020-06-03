@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ public class DmsMessageCRC {
 	/** Calculate the CRC for a message.
 	 * @param multi MULTI string.
 	 * @param beacon_enabled Beacon enabled flag.
-	 * @param src Pixel service enabled flag.
+	 * @param pixel_service_enabled Pixel service enabled flag.
 	 * @return CRC-16 of message. */
 	static public int calculate(String multi, boolean beacon_enabled,
 		boolean pixel_service_enabled)

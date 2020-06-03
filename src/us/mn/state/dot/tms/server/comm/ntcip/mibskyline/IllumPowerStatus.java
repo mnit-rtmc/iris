@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2015  Minnesota Department of Transportation
+ * Copyright (C) 2002-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ public class IllumPowerStatus extends ASN1OctetString {
 	}
 
 	/** Get power status for all power supplies.
-	 * @see DMS.getPowerStatus */
+	 * @see us.mn.state.dot.tms.DMS#getPowerStatus */
 	public String[] getPowerStatus() {
 		byte[] vals = getByteValue();
 		String[] supplies = new String[vals.length];

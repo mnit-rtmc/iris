@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,12 +40,12 @@ public class DmsXmlThread extends CommThread {
 	}
 
 	/** Create a new message for the specified operation.
-	 * @see CommThread.doPoll().
 	 *
 	 * @param m The messenger.
 	 * @param o The controller operation.
 	 * @return A newly created Message.
-	 * @throws IOException */
+	 *
+	 * @see us.mn.state.dot.tms.server.comm.CommThread#doPoll */
 	@Override
 	protected CommMessage createCommMessage(Messenger m, OpController o)
 		throws IOException

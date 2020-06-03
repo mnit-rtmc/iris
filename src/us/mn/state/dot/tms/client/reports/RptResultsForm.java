@@ -49,7 +49,8 @@ import us.mn.state.dot.tms.utils.I18N;
 /**
  * Report results form
  *
- * @author Michael Janson & John L. Stanley - SRF Consulting
+ * @author Michael Janson - SRF Consulting
+ * @author John L. Stanley - SRF Consulting
  */
 @SuppressWarnings("serial")
 public class RptResultsForm extends AbstractForm {

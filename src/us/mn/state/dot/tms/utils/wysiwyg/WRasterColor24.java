@@ -41,7 +41,7 @@ public class WRasterColor24 extends WRaster {
 		super(mcfg);
 	}
 
-	/** Constructor for simple WRasterColor24 from width & height.
+	/** Constructor for simple WRasterColor24 from width &amp; height.
 	 *  (Used when cloning a WRaster.) */
 	protected WRasterColor24(int width, int height) {
 		super(width, height);
@@ -139,8 +139,7 @@ public class WRasterColor24 extends WRaster {
 	 * considered transparent.
 	 * @param wg WRaster to copy.
 	 * @param x0 X-position on raster (0-based).
-	 * @param y0 Y-position on raster (0-based).
-	 * @param fg Foreground color. */
+	 * @param y0 Y-position on raster (0-based). */
 	@Override
 	public void copy(WRaster wg, int x0, int y0) {
 		int w = wg.getWidth();

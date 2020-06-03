@@ -41,7 +41,10 @@ import us.mn.state.dot.tms.utils.MultiString;
 /**
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
  * It contains several other components and keeps their state synchronized.
- * @see SignMessage, DMSPanelPager, SignMessageComposer
+ *
+ * @see us.mn.state.dot.tms.SignMessage
+ * @see us.mn.state.dot.tms.client.dms.DMSPanelPager
+ * @see us.mn.state.dot.tms.client.dms.SignMessageComposer
  *
  * @author Erik Engstrom
  * @author Douglas Lau

@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2019  SRF Consulting Group
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,7 +97,7 @@ public class GpsLocationProperty extends SierraGxProperty {
 	/** Parse three lines from SierraWireless GX modem's four line
 	 *  response.  (This ignores the "Satellite Count=" response
 	 *  line.)
-	 * @param in InputStream from device
+	 * @param resp Response string.
 	 * @return Returns false until we have parsed a full response.
 	 * @throws IOException if a response line is longer than max_chars.
 	 */

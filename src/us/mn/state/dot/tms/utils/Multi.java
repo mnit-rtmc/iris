@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -52,7 +52,7 @@ public interface Multi {
 	/** Set the foreground color for single-int color tag.  [cfX]
 	 * @param x Foreground color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
-	 *                           (0-9 for colorClassic & color24bit).
+	 *                           (0-9 for colorClassic &amp; color24bit).
 	 * Use the sign's default foreground color if x is null. */
 	void setColorForeground(Integer x);
 
@@ -159,7 +159,7 @@ public interface Multi {
 	};
 
 	/** Add a travel time destination.
-	 * @param stat_id Destination station ID.
+	 * @param sid Destination station ID.
 	 * @param mode Over limit mode.
 	 * @param o_txt Over limit text. */
 	void addTravelTime(String sid, OverLimitMode mode, String o_txt);

@@ -150,8 +150,8 @@ public class WMsgSelectorForm extends AbstractForm {
 	private JLabel status_msg;
 	private String msgInfo;
 	
-	/** Default constructor - no selections (from View -> Message Signs ->
-	 * WYSIWYG Message Editor menu)
+	/** Default constructor - no selections
+	 * (from {@code View -> Message Signs -> WYSIWYG Message Editor} menu)
 	 */
 	public WMsgSelectorForm(Session s) {
 		super(I18N.get("wysiwyg.selector.title"), true);
@@ -196,9 +196,8 @@ public class WMsgSelectorForm extends AbstractForm {
 		// TODO
 	}
 	
-	/** Preselected SignGroup and QuickMessage (from View -> Message Signs ->
-	 * Quick Messages menu)
-	 */
+	/** Preselected SignGroup and QuickMessage
+	 * (from {@code View -> Message Signs -> Quick Messages} menu) */
 	public WMsgSelectorForm(Session s, QuickMessage qm, SignGroup sg) {
 		super(I18N.get("wysiwyg.selector.title"), true);
 		session = s;

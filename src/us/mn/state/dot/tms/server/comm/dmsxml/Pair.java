@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2020  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -46,7 +46,7 @@ public class Pair {
 	/**
 	 * Find a Pair in a list by comparing the car of each list
 	 * element with the argument.
-	 * @returns the first item in the list that matches else null
+	 * @return The first item in the list that matches else null
 	 *          if not found.
 	 * @throws IOException if the specified car is not found.
 	 */
@@ -54,8 +54,8 @@ public class Pair {
 	public static Pair findCar(Pair[] list, Comparable argcar)
 		throws IOException
 	{
-		for(Pair i: list) {
-			if(i.car().compareTo(argcar) == 0)
+		for (Pair i: list) {
+			if (i.car().compareTo(argcar) == 0)
 				return i;
 		}
 		throw new IOException("Pair.findCar(" + argcar.toString()

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -311,7 +311,7 @@ public class MultiRenderer extends MultiAdapter {
 	/** Set the page background color using a single-int color tag. [pbZ]
 	 * @param z Background color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
-	 *                           (0-9 for colorClassic & color24bit).
+	 *                           (0-9 for colorClassic &amp; color24bit).
 	 * Use sign's default background color if z is null. */
 	@Override
 	public void setPageBackground(Integer z) {
@@ -353,7 +353,7 @@ public class MultiRenderer extends MultiAdapter {
 	/** Set the foreground color using a single-int color tag.  [cfX]
 	 * @param x Foreground color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
-	 *                           (0-9 for colorClassic &  & color24bit).
+	 *                           (0-9 for colorClassic &amp; color24bit).
 	 * If x is null, use the sign's default foreground color . */
 	@Override
 	public void setColorForeground(Integer x) {
@@ -391,7 +391,8 @@ public class MultiRenderer extends MultiAdapter {
 	 * @param h Height in pixels.
 	 * @param z Color of rectangle (0-1 for monochrome1bit),
 	 *                             (0-255 for monochrome8bit),
-	 *                             (0-9 for colorClassic & color24bit). */
+	 *                             (0-9 for colorClassic &amp; color24bit).
+	 */
 	@Override
 	public void addColorRectangle(int x, int y, int w, int h, int z) {
 		DmsColor clr = schemeColor(z);

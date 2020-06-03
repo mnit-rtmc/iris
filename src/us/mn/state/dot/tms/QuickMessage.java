@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ public interface QuickMessage extends SonarObject {
 	String getMulti();
 
 	/** Set the message MULTI string.
-	 * @multi Message text in MULTI markup.
+	 * @param multi Message text in MULTI markup.
 	 * @see us.mn.state.dot.tms.utils.MultiString */
 	void setMulti(String multi);
 }

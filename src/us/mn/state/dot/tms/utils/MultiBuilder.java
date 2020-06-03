@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2018  Minnesota Department of Transportation
+ * Copyright (C) 2006-2020  Minnesota Department of Transportation
  * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -204,9 +204,9 @@ public class MultiBuilder implements Multi {
 	}
 
 	/** Set the page background color for color24bit color scheme.
-	 * @param r Red component (0-255).
-	 * @param g Green component (0-255).
-	 * @param b Blue component (0-255). */
+	 * @param red Red component (0-255).
+	 * @param green Green component (0-255).
+	 * @param blue Blue component (0-255). */
 	@Override
 	public void setPageBackground(int red, int green, int blue) {
 		multi.append("[pb");
@@ -221,7 +221,7 @@ public class MultiBuilder implements Multi {
 	/** Set the foreground color for a single-int color tag.  [cfX]
 	 * @param x Foreground color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
-	 *                           (0-9 for colorClassic & color24bit).
+	 *                           (0-9 for colorClassic &amp; color24bit).
 	 * Use the sign's default foreground color if x is null. */
 	@Override
 	public void setColorForeground(Integer x) {
@@ -231,9 +231,9 @@ public class MultiBuilder implements Multi {
 	}
 
 	/** Set the foreground color for color24bit color scheme.
-	 * @param r Red component (0-255).
-	 * @param g Green component (0-255).
-	 * @param b Blue component (0-255). */
+	 * @param red Red component (0-255).
+	 * @param green Green component (0-255).
+	 * @param blue Blue component (0-255). */
 	@Override
 	public void setColorForeground(int red, int green, int blue) {
 		multi.append("[cf");
@@ -315,7 +315,7 @@ public class MultiBuilder implements Multi {
 	}
 
 	/** Add a travel time destination.
-	 * @param stat_id Destination station ID.
+	 * @param sid Destination station ID.
 	 * @param mode Over limit mode.
 	 * @param o_txt Over limit text. */
 	@Override

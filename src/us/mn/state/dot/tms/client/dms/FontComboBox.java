@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,10 @@ import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Font combobox.
- * @see FontComboBoxModel, SignMessageComposer
+ *
+ * @see us.mn.state.dot.tms.client.dms.FontComboBoxModel
+ * @see us.mn.state.dot.tms.client.dms.SignMessageComposer
+ *
  * @author Michael Darter
  * @author Douglas Lau
  */
@@ -90,7 +93,7 @@ public class FontComboBox extends JComboBox<Font> implements ActionListener {
 	}
 
 	/** Catch events: enter pressed, cbox item clicked, cursor up/down
-	 * lost focus (e.g. tab pressed). Also called after a 
+	 * lost focus (e.g. tab pressed). Also called after a
 	 * setSelectedItem() call. Defined in interface ActionListener. */
 	@Override
 	public void actionPerformed(ActionEvent e) {

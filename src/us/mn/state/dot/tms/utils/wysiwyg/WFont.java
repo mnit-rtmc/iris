@@ -100,7 +100,7 @@ public class WFont implements Font {
 		return getGlyph((int)ch);
 	}
 	
-	/** Returns an Iterator<WGlyph> for all WGlyphs
+	/** Returns an Iterator&lt;WGlyph&gt; for all WGlyphs
 	 *  in the font ordered by character number */
 	public Iterator<WGlyph> glyphs(int fontNum) {
 		return glyphList.iterator();
@@ -148,9 +148,8 @@ public class WFont implements Font {
 	}
 
 	/** Get pixel-width of a specified char.
-	 *  Any chars that are not in the font
-	 *  return 0.
-	 * @param chsp Character spacing (null = use font default)
+	 *  Any chars that are not in the font return 0.
+	 * @param ch Character number
 	 */
 	public int getCharWidth(char ch) {
 		WGlyph glyph = getGlyph(ch);

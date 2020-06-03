@@ -31,7 +31,7 @@ public class PromptReader extends LineReader {
 	protected String prompt;
 
 	/** Create a new line reader.
-	 * @param r Reader to read.
+	 * @param is Input stream to read.
 	 * @param max_chars Maximum number of characters on a line.
 	 * @param xprompt Response the reader is looking for.
 	 * @throws IOException */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ public class GateArmLockState {
 	private boolean opposing_open = false;
 
 	/** Set flag to indicate opposing direction open.
-	 * @param d True if opposing gate open; false otherwise.
+	 * @param o True if opposing gate open; false otherwise.
 	 * @return True if interlock value changed. */
 	public boolean setOpposingOpen(boolean o) {
 		GateArmInterlock gai = getInterlock();
@@ -51,7 +51,7 @@ public class GateArmLockState {
 	private boolean prereq_closed = false;
 
 	/** Set flag to indicate prerequisite gate arm closed (not fully open).
-	 * @param d True if prerequisite gate closed; false otherwise.
+	 * @param c True if prerequisite gate closed; false otherwise.
 	 * @return True if interlock value changed. */
 	public boolean setPrereqClosed(boolean c) {
 		GateArmInterlock gai = getInterlock();

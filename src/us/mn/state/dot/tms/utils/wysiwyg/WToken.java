@@ -231,15 +231,13 @@ abstract public class WToken {
 	}
 
 	/** Set token X parameter in pixels.
-	 * @param the X parameter
-	 */
+	 * @param tokX the X parameter */
 	public void setParamX(Integer tokX) {
 		this.paramX = tokX;
 	}
 
 	/** Return token Y parameter in pixels.
-	 * @return the Y parameter
-	 */
+	 * @return the Y parameter */
 	public Integer getParamY() {
 		return paramY;
 	}
@@ -251,36 +249,31 @@ abstract public class WToken {
 	}
 
 	/** Set token Y parameter in pixels.
-	 * @param the Y parameter
-	 */
+	 * @param tokY the Y parameter */
 	public void setParamY(Integer tokY) {
 		this.paramY = tokY;
 	}
 
 	/** Return token parameter width in pixels.
-	 * @return the width 
-	 */
+	 * @return the width */
 	public Integer getParamW() {
 		return paramW;
 	}
 
 	/** Set token parameter width in pixels.
-	 * @param the width
-	 */
+	 * @param tokW the width */
 	public void setParamW(Integer tokW) {
 		this.paramW = tokW;
 	}
 
 	/** Return token parameter height in pixels.
-	 * @return the height
-	 */
+	 * @return the height */
 	public Integer getParamH() {
 		return paramH;
 	}
 
 	/** Set token parameter height in pixels.
-	 * @param the height
-	 */
+	 * @param tokH the height */
 	public void setParamH(Integer tokH) {
 		this.paramH = tokH;
 	}
@@ -332,36 +325,31 @@ abstract public class WToken {
 	}
 	
 	/** Return token X coordinate in pixels.
-	 * @return the X coordinate
-	 */
+	 * @return the X coordinate */
 	public Integer getCoordX() {
 		return coordX;
 	}
 	
 	/** Return token Y coordinate in pixels.
-	 * @return the Y coordinate
-	 */
+	 * @return the Y coordinate */
 	public Integer getCoordY() {
 		return coordY;
 	}
 	
 	/** Return token coordinate width in pixels.
-	 * @return the width
-	 */
+	 * @return the width */
 	public Integer getCoordW() {
 		return coordW;
 	}
 	
 	/** Return token coordinate height in pixels.
-	 * @return the height
-	 */
+	 * @return the height */
 	public Integer getCoordH() {
 		return coordH;
 	}
 
 	/** Return token centroid X coordinate in pixels.
-	 * @return the centroid X coordinate
-	 */
+	 * @return the centroid X coordinate */
 	public Integer getCentroidX() {
 		if (centroidX == null)
 			calculateCentroid();
@@ -369,8 +357,7 @@ abstract public class WToken {
 	}
 	
 	/** Return token centroid Y coordinate in pixels.
-	 * @return the centroid Y coordinate
-	 */
+	 * @return the centroid Y coordinate */
 	public Integer getCentroidY() {
 		if (centroidY == null)
 			calculateCentroid();
@@ -378,8 +365,7 @@ abstract public class WToken {
 	}
 	
 	/** Return the token's right edge X coordinate in pixels.
-	 *  @return the token X coordinate plus the token width
-	 */
+	 *  @return the token X coordinate plus the token width */
 	public Integer getRightEdge() {
 		if (coordX != null && coordW != null)
 			return coordX + coordW;
@@ -389,8 +375,7 @@ abstract public class WToken {
 	}
 	
 	/** Return the token's bottom edge Y coordinate in pixels.
-	 *  @return the token Y coordinate plus the token height
-	 */
+	 *  @return the token Y coordinate plus the token height */
 	public Integer getBottomEdge() {
 		if (coordY != null && coordH != null)
 			return coordY + coordH;
@@ -470,7 +455,6 @@ abstract public class WToken {
 	public String toStringVerbose() {
 		return String.format("{%4d, %4d, %4d, %4d} %s",
 				coordX, coordY, coordW, coordH, tokStr);
-//		return "x:"+coordX+", y:"+coordY+", w:"+coordW+", h:"+coordH+", tok:"+tokStr;
 	}
 	
 	/** Return a string providing a human-readable description of the token

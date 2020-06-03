@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -182,7 +182,7 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 	}
 
 	/** Set the message MULTI string.
-	 * @return Message text in MULTI markup.
+	 * @param m Message text in MULTI markup.
 	 * @see us.mn.state.dot.tms.utils.MultiString */
 	@Override
 	public void setMulti(String m) {

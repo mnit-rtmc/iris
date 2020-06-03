@@ -40,7 +40,7 @@ import us.mn.state.dot.tms.utils.MultiConfig;
  * (Parts of this class are structured similarly to the
  *  method-outline used for the earlier RasterGraphic,
  *  BitmapGraphic, and PixmapGraphic classes.)
- * 
+ *
  * One of the 4 WRaster subclasses is obtained by
  * calling one of the WRaster.create methods.  Do
  * not create an instance of a WRaster subclass
@@ -83,7 +83,7 @@ abstract public class WRaster {
 
 	/** Default foreground color */
 	protected DmsColor defaultFG;
-	
+
 	/** Maximum legal pixel value */
 	protected int max_pixel;
 
@@ -100,16 +100,16 @@ abstract public class WRaster {
 	/** LED module pixel height.
 	 *  If full matrix, this equals height. */
 	protected int moduleH;
-	
+
 	/** List of tokens included in this raster */
 	protected List<WToken> tokens = new LinkedList<WToken>();
 
-	// MultiConfig for creating 
+	// MultiConfig for creating
 	private MultiConfig mcfg;
 
 	//===========================================
 	// constants
-			
+
 	/** Generic black colorIndex */
 	public static final int BLACK = 0;
 
@@ -127,9 +127,8 @@ abstract public class WRaster {
 			new DmsColor(255,0,255);  // = Fuschia
 
 	//===========================================
-			
-	/** Create a blank WRaster from a MultiConfig
-	 * @throws InvalidMsgException or IndexOutOfBoundsException */
+
+	/** Create a blank WRaster from a MultiConfig */
 	@SuppressWarnings("incomplete-switch")
 	public static WRaster create(MultiConfig mcfg) {
 		if (mcfg == null)
@@ -149,8 +148,7 @@ abstract public class WRaster {
 		throw new IndexOutOfBoundsException("Unknown color scheme: " + mcfg.colorScheme.toString());
 	}
 
-	/** Create an empty WRaster clone
-	 * @throws InvalidMsgException */
+	/** Create an empty WRaster clone */
 	@SuppressWarnings("incomplete-switch")
 	public static WRaster create(ColorScheme cs, int width, int height) {
 		if (cs == null)
@@ -168,8 +166,7 @@ abstract public class WRaster {
 		throw new IndexOutOfBoundsException("Unknown color scheme: " + cs.toString());
 	}
 
-	/** Create an empty WRaster clone
-	 * @throws InvalidMsgException */
+	/** Create an empty WRaster clone */
 	@SuppressWarnings("incomplete-switch")
 	public static WRaster create(WRaster old) {
 		if (old == null)
@@ -228,7 +225,7 @@ abstract public class WRaster {
 		if (moduleH < 2)
 			moduleH = height;
 	}
-	
+
 	/** Monochrome raster defaults.
 	 * @param w width
 	 * @param h height
@@ -269,7 +266,7 @@ abstract public class WRaster {
 		return Base64.encode(getPixelData());
 	}
 
-	/** Set the graphic from a Base64 string 
+	/** Set the graphic from a Base64 string
 	 * @throws IOException */
 	public void setEncodedPixels(String str) throws IOException {
 		setPixelData(Base64.decode(str));
@@ -314,7 +311,7 @@ abstract public class WRaster {
 	public boolean isLit(int pixel) {
 		return pixel != BLACK;
 	}
-	
+
 	/** Are all pixels in the raster the same color?
 	 *  Also returns true if the raster is zero-sized. */
 	public boolean isBlank() {
@@ -326,7 +323,7 @@ abstract public class WRaster {
 				return false;
 		return true;
 	}
-	
+
 	/** Get the count of lit pixels */
 	public int getLitCount() {
 		int lit = 0;
@@ -358,8 +355,7 @@ abstract public class WRaster {
 	 * considered transparent.
 	 * @param wg WRaster to copy.
 	 * @param x0 X-position on raster (0-based).
-	 * @param y0 Y-position on raster (0-based).
-	 * @param fg Foreground color. */
+	 * @param y0 Y-position on raster (0-based). */
 	public void copy(WRaster wg, int x0, int y0) {
 		int w = wg.getWidth();
 		int h = wg.getHeight();
@@ -375,7 +371,7 @@ abstract public class WRaster {
 	/** Copy a WRaster into this WRaster.
 	 * Black pixels in the raster being copied are
 	 * considered transparent.
-	 * Non-black pixels are placed in the target 
+	 * Non-black pixels are placed in the target
 	 * as the foreground pixel value fg.
 	 * @param wg WRaster to copy.
 	 * @param x0 X-position on raster (0-based).
@@ -433,7 +429,7 @@ abstract public class WRaster {
 	}
 
 	//================================
-	
+
 	/** Get the pixel index for the specified location */
 	protected int pixelIndex(int x, int y) {
 		if (x < 0 || x >= width) {
@@ -482,9 +478,9 @@ abstract public class WRaster {
 
 	//===========================================
 	// methods to generate various image objects
-	
+
 //	/** Get raw rendered image.
-//	 * 
+//	 *
 //	 * This should never be needed.  Use
 //	 * getPreviewImage, getPreviewImageIcon,
 //	 * or getWysiwygImage() instead.
@@ -601,8 +597,7 @@ abstract public class WRaster {
 		return tagval;
 	}
 
-	/** Dump a BW text representation to a buffered writer 
-	 * @throws IOException */
+	/** Dump a BW text representation to a buffered writer */
 	public void dumpBW(PrintWriter out) {
 		int h = getHeight();
 		int w = getWidth();
@@ -619,7 +614,7 @@ abstract public class WRaster {
 			out.println();
 		}
 	}
-	
+
 	static public int dmsToGray(DmsColor dc, int maxGray) {
 //		double gray = (0.2989 * dc.red) + (0.5870 * dc.green) + (0.1140 * dc.blue);
 		double gray = (0.21 * dc.red) + (0.72 * dc.green) + (0.07 * dc.blue);
@@ -627,8 +622,7 @@ abstract public class WRaster {
 	}
 
 	/** Dump a grayscale text representation
-	 *  of raster image to a buffered writer.
-	 * @throws IOException */
+	 *  of raster image to a buffered writer. */
 	public void dumpGray(PrintWriter out) {
 //		String grayStr = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
 		String grayStr = "@%#x+=:-. ";
@@ -684,7 +678,7 @@ abstract public class WRaster {
 
 	//===========================================
 	// Subclass (Color-scheme specific) methods
-	
+
 	/** Initialize all raster variables that have the
 	 * same value for all constructors in that subclass. */
 	abstract protected void setDefaults();
@@ -703,22 +697,22 @@ abstract public class WRaster {
 
 	/** Convert a pixel to a DmsColor */
 	abstract protected DmsColor pixelToColor(int pixel);
-	
+
 	/** Convert a tagval to a pixel value.
 	 * Returns null if tagval can't be converted for this raster. */
 	abstract protected Integer tagvalToPixel2(int[] tagval);
-	
+
 	/** Convert a classic-color int to a pixel int.
 	 * Returns null if specific classic-color value
 	 * can't be converted for this raster. */
 	abstract public Integer classicColorToPixel(int cco);
-	
+
 	//===========================================
 	// Methods to provide WISIWIG-editor sign-images.
 
 	/** Horizontal coordinate mapping array */
 	private int horizCoords[];
-	
+
 	/** Vertical coordinate mapping array */
 	private int vertCoords[];
 
@@ -727,13 +721,13 @@ abstract public class WRaster {
 
 	/** height of sign-image */
 	private int wysiwygImgHeight;
-	
+
 	/** Special mapping-array values */
 	static final int PIXEL_SEPARATOR  = -1; // gap between pixels
 	static final int MODULE_SEPARATOR = -2; // gap between modules
 	static final int SIGN_BORDER      = -3; // sign border
 	static final int OFF_SIGN         = -4; // off edge of sign
-	
+
 	/** class used to generate coordinate arrays */
 	class IntArrayGen {
 		private int[] ia;
@@ -741,7 +735,7 @@ abstract public class WRaster {
 		public int offset = 0;
 		private boolean bError = false;
 		private float excess = 0;
-		
+
 		IntArrayGen(int maxLen) {
 			ia = new int[maxLen];
 			this.maxLen = maxLen;
@@ -786,7 +780,7 @@ abstract public class WRaster {
 			int pixelsPerBorder,
 			int modulesPerFace,
 			float pixPerModuleSepX,
-			int ledsPerModule, 
+			int ledsPerModule,
 			float pixelsPerLed) {
 		IntArrayGen gen = new IntArrayGen(arrayLen);
 		gen.add(SIGN_BORDER, pixelsPerBorder);
@@ -815,11 +809,11 @@ abstract public class WRaster {
 	/** Set width/height for WISIWIG sign-image.
 	 *  (Generates horizontal and vertical
 	 *   coordinate-mapping arrays.)
-	 *  
+	 *
 	 *  In the following, "pix" variables contain the
 	 *  number of bitmap pixels used to draw something
 	 *  (width or height) in the WYSIWIG sign-image.
-	 *  
+	 *
 	 * @param pixWidth  desired sign-image width (in pixels)
 	 * @param pixHeight desired sign-image height (in pixels)
 	 * @throws InvalidMsgException
@@ -841,7 +835,7 @@ abstract public class WRaster {
 		int ledsPerModuleY;
 		int modulesPerFaceX;
 		int modulesPerFaceY;
-		int sepCountX; // total pix reserved for separator lines 
+		int sepCountX; // total pix reserved for separator lines
 		int sepCountY; // total pix reserved for separator lines
 		switch (dmsType) {
 			case VMS_CHAR:
@@ -894,13 +888,13 @@ abstract public class WRaster {
 		float pixPerLed = Math.min(pixPerLedX, pixPerLedY);
 		float pixPerModuleSepX = (float) (pixPerLed * 1.5);
 		float pixPerModuleSepY = (float) (pixPerLed * 4.0);
-			
+
 		horizCoords = genCoordArray(
 				pixWidth,
 				pixBorderHoriz, //4, //int borderLen,
 				modulesPerFaceX,
 				pixPerModuleSepX,
-				ledsPerModuleX, 
+				ledsPerModuleX,
 				pixPerLed
 				);
 		vertCoords = genCoordArray(
@@ -908,16 +902,16 @@ abstract public class WRaster {
 				pixBorderVert, //4, //int borderLen,
 				modulesPerFaceY,
 				pixPerModuleSepY,
-				ledsPerModuleY, 
+				ledsPerModuleY,
 				pixPerLed
 				);
 	}
-	
+
 	/** Return whether or not the WYSIWYG image size has been set. */
 	public boolean isWysiwygInitialized() {
 		return horizCoords != null && vertCoords != null;
 	}
-	
+
 	static final int RGB_BLACK     = Color.BLACK.getRGB();
 	static final int RGB_DARKGRAY  = Color.DARK_GRAY.getRGB();
 	static final int RGB_GRAY      = Color.GRAY.getRGB();
@@ -964,7 +958,7 @@ abstract public class WRaster {
 	// to sign-tag coordinates.  (Used
 	// for WYSIWYG mouse operations.)
 
-	private int findClosestSignCoord(int[] coords, int maxCoord, int wc) 
+	private int findClosestSignCoord(int[] coords, int maxCoord, int wc)
 			throws IndexOutOfBoundsException {
 		if (coords == null)
 			throw new IndexOutOfBoundsException("Uninitialized WYSIWIG coordinates");
@@ -1014,7 +1008,7 @@ abstract public class WRaster {
 	 *  If the coordinate is invalid, -1 is returned.
 	 */
 	private int findWysiwygCoords(int[] coords, int sc, boolean first, boolean sep)
-			throws IndexOutOfBoundsException { 
+			throws IndexOutOfBoundsException {
 		if (coords == null)
 			throw new IndexOutOfBoundsException("Uninitialized WYSIWIG coordinates");
 		boolean found = false;
@@ -1041,7 +1035,7 @@ abstract public class WRaster {
 		}
 		return -1;
 	}
-	
+
 	/** Convert horizontal WYSIWIG coordinate
 	 *  to a sign-tag coordinate.
 	 *  If the x coordinate points to a non-LED
@@ -1055,7 +1049,7 @@ abstract public class WRaster {
 			throws IndexOutOfBoundsException {
 		return findClosestSignCoord(horizCoords, width, x);
 	}
-	
+
 	/** Convert horizontal sign-tag coordinate
 	 *  to WYSIWYG coordinates.
 	 *  Returns either the first or last WYSIWYG X coordinate
@@ -1072,7 +1066,7 @@ abstract public class WRaster {
 			throws IndexOutOfBoundsException {
 		return findWysiwygCoords(horizCoords, x, first, sep);
 	}
-	
+
 	/** Convert vertical WYSIWIG coordinate
 	 *  to a sign-tag coordinate.
 	 *  If the y coordinate points to a non-LED
@@ -1086,13 +1080,13 @@ abstract public class WRaster {
 			throws IndexOutOfBoundsException {
 		return findClosestSignCoord(vertCoords, height, y);
 	}
-	
+
 	/** Convert vertical sign-tag coordinate
 	 *  to WYSIWYG coordinates - convenience method.
 	 *  Returns either the first or last WYSIWYG Y coordinate
 	 *  assigned to the given sign-tag coordinate. If the
 	 *  coordinate is invalid, -1 is returned.
-	 * @param x  1-based horizontal sign-tag coordinate
+	 * @param y  1-based horizontal sign-tag coordinate
 	 * @param first if true, return first matching coordinate, otherwise last
 	 * @param sep return coordinate of LED separators around sign instead
 	 *        of LEDs themselves
@@ -1103,5 +1097,4 @@ abstract public class WRaster {
 			throws IndexOutOfBoundsException {
 		return findWysiwygCoords(vertCoords, y, first, sep);
 	}
-	
 }

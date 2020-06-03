@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,11 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
  * Combobox model for fonts.
- * @see FontComboBox, ProxyListModel, Font, TypeCache
+ *
+ * @see us.mn.state.dot.sonar.client.TypeCache
+ * @see us.mn.state.dot.tms.Font
+ * @see us.mn.state.dot.tms.client.dms.FontComboBox
+ * @see us.mn.state.dot.tms.client.proxy.ProxyListModel
  *
  * @author Michael Darter
  * @author Douglas Lau

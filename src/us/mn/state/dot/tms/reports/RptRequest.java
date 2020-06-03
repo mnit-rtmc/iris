@@ -167,10 +167,8 @@ public class RptRequest {
 	/** Populates all three lists,
 	* clears device name filter,
 	* sets startDateTime to one day ago,
-	* and sets endDateTime to now. 
-	 * @param s */
+	* and sets endDateTime to now. */
 	public void init() {
-//		clientSession = s;
 		RptGenItem.initList(genList);
 		RptDeviceClassItem.initList(devClassList);
 		RptDeviceItem.initList(devList);
@@ -269,7 +267,7 @@ public class RptRequest {
 	protected final String DATETIME   = "datetime";
 
 	/** Convert request to a composite-request String.
-	 * Only serializes items that are both selected & visible. */
+	 * Only serializes items that are both selected &amp; visible. */
 	public String toReqString() {
 		
 		RptStringSet rssGenerators = new RptStringSet(GENERATORS);

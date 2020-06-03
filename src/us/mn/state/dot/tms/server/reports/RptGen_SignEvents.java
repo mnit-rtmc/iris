@@ -33,7 +33,8 @@ import us.mn.state.dot.tms.server.SQLConnection;
 /**
  * Report generator for sign events.
  *
- * @author John L. Stanley & Michael Janson - SRF Consulting
+ * @author John L. Stanley - SRF Consulting
+ * @author Michael Janson - SRF Consulting
  */
 public class RptGen_SignEvents extends RptGen {
 

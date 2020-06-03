@@ -110,8 +110,7 @@ public class LcsIndicationBuilder {
 
 	/** Create a new LCS indication builder.
 	 * @param cf Corridor finder.
-	 * @param inc Incident for deployment.
-	 * @param conf Lane configuration at incident location. */
+	 * @param inc Incident for deployment. */
 	public LcsIndicationBuilder(CorridorFinder cf, Incident inc) {
 		finder = cf;
 		incident = inc;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +25,11 @@ import us.mn.state.dot.tms.TMSException;
 
 /**
  * A system attribute is a name mapped to a string value.
- * @see SystemAttributeHelper, SystemAttribute
+ *
  * @author Douglas Lau
  * @author Michael Darter
+ * @see us.mn.state.dot.tms.SystemAttribute
+ * @see us.mn.state.dot.tms.SystemAttributeHelper
  */
 public class SystemAttributeImpl extends BaseObjectImpl
 	implements SystemAttribute

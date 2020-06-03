@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2019  Minnesota Department of Transportation
+ * Copyright (C) 2010-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ public enum LaneImpact {
 	}
 
 	/** Create a coded impact string from an array.
-	 * @param Array of impact values, one per lane.
+	 * @param imp Array of impact values, one per lane.
 	 * @return Coded string of impact by lane. */
 	static public String fromArray(LaneImpact[] imp) {
 		StringBuilder sb = new StringBuilder();

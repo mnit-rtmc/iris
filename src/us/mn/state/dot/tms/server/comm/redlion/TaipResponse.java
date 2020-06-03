@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2017  SRF Consulting Group
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ public class TaipResponse {
 	 * response formats (RCP, RLN, or RPV).
 	 * Note: TAIP checksum suffix is ignored, if present.
 	 *
-	 * @param r TAIP response.
+	 * @param t TAIP response.
 	 * @return GPS data object, or null if unable to parse. */
 	static public GpsData parse(String t) {
 		// FIXME: Deal with optional TAIP checksum suffix.
