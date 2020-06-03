@@ -400,13 +400,6 @@
 		<delete dir="${dist.client}"/>
 	</target>
 
-	<!-- Clean up everything -->
-	<target name="distclean"
-	        description="Clean to the base repository distribution"
-	        depends="clean">
-		<mkdir dir="${lib.dir}" />
-	</target>
-
 	<!-- init junit dirs-->
 	<target name="init-junit"
 		depends="prepare">
@@ -434,22 +427,22 @@
 	<!-- run junit test cases -->
 	<target name="test" depends="compile-junit"
 		description="Run junit test cases">
-		<junit printsummary="yes" 
-			fork="yes" 
-			haltonfailure="yes" 
-			errorProperty="test.failed" 
-			failureProperty="test.failed">
+		<junit printsummary="yes"
+		       fork="yes"
+		       haltonfailure="yes"
+		       errorProperty="test.failed"
+		       failureProperty="test.failed">
 			<assertions><enable/></assertions>
 			<classpath refid="junit.classpath"/>
 			<formatter type="plain" usefile="false"/>
 			<formatter type="xml" usefile="true"/>
 			<jvmarg value="-Ddebug=true"/>
 			<batchtest todir="${testreports.dir}">
-				<fileset dir="${testbuild.dir}" includes="**/*Test.class"/>
+				<fileset dir="${testbuild.dir}"
+				         includes="**/*Test.class"/>
 			</batchtest>
 		</junit>
 		<fail message="Junit tests failed. Check log and/or reports."
-		       if="test.failed"/>
+		      if="test.failed"/>
 	</target>
-
 </project>
