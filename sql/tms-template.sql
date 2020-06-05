@@ -3257,11 +3257,11 @@ iloc_00008	1	t	t	ON [locrn] [locrd]
 iloc_00009	2	f	f	[locmi] MILES AHEAD
 iloc_00010	2	f	t	[locmd] [locxn]
 iloc_00011	2	t	f	ON [locrn] [locrd]
-iloc_00012	2	t	t	ON [locrn] [locmd] [locxn]
+iloc_00012	2	t	t	ON [locrn] [locrd] [locmd] [locxn]
 iloc_00013	3	f	f	[locmi] MILES AHEAD
 iloc_00014	3	f	t	[locmd] [locxn]
 iloc_00015	3	t	f	ON [locrn] [locrd]
-iloc_00016	3	t	t	ON [locrn] [locmd] [locxn]
+iloc_00016	3	t	t	ON [locrn] [locrd] [locmd] [locxn]
 \.
 
 CREATE TABLE iris.inc_advice (
