@@ -317,20 +317,20 @@ fn fetch_simple<W: Write>(conn: &Connection, sql: &str, mut w: W)
     -> Result<u32>
 {
     let mut c = 0;
-    w.write("[".as_bytes())?;
+    w.write_all(b"[")?;
     for row in &conn.query(sql, &[])? {
         if c > 0 {
-            w.write(",".as_bytes())?;
+            w.write_all(b",")?;
         }
-        w.write("\n".as_bytes())?;
+        w.write_all(b"\n")?;
         let j: String = row.get(0);
-        w.write(j.as_bytes())?;
+        w.write_all(j.as_bytes())?;
         c += 1;
     }
     if c > 0 {
-        w.write("\n".as_bytes())?;
+        w.write_all(b"\n")?;
     }
-    w.write("]\n".as_bytes())?;
+    w.write_all(b"]\n")?;
     Ok(c)
 }
 

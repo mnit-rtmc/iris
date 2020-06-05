@@ -1,6 +1,6 @@
 // fetcher.rs
 //
-// Copyright (C) 2018-2019  Minnesota Department of Transportation
+// Copyright (C) 2018-2020  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ fn create_connection() -> Result<Connection> {
 }
 
 /// Postgres time zone environment variable name
-const PGTZ: &'static str = "PGTZ";
+const PGTZ: &str = "PGTZ";
 
 /// Get time zone name for database connection
 fn time_zone() -> Option<String> {
