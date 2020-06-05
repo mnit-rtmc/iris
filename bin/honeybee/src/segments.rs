@@ -54,7 +54,7 @@ pub struct RNode {
 /// RNode notification message
 pub enum RNodeMsg {
     /// Add or update an RNode
-    AddUpdate(Box<RNode>),
+    AddUpdate(RNode),
     /// Remove an RNode
     Remove(String),
     /// Enable/disable ordering for all RNodes
@@ -63,7 +63,7 @@ pub enum RNodeMsg {
 
 impl From<RNode> for RNodeMsg {
     fn from(node: RNode) -> Self {
-        RNodeMsg::AddUpdate(Box::new(node))
+        RNodeMsg::AddUpdate(node)
     }
 }
 
@@ -113,7 +113,7 @@ struct Corridor {
     /// Corridor ID
     cor_id: CorridorId,
     /// Nodes ordered by corridor direction
-    nodes: Vec<Box<RNode>>,
+    nodes: Vec<RNode>,
     /// Valid node count
     count: usize,
 }
@@ -310,7 +310,7 @@ impl Corridor {
     }
 
     /// Add a node
-    fn add_node(&mut self, node: Box<RNode>, ordered: bool) {
+    fn add_node(&mut self, node: RNode, ordered: bool) {
         debug!("add_node {} to {:?} ({} + 1)", &node.name, &self.cor_id,
             self.nodes.len());
         self.nodes.push(node);
@@ -320,7 +320,7 @@ impl Corridor {
     }
 
     /// Update a node
-    fn update_node(&mut self, node: Box<RNode>, ordered: bool) {
+    fn update_node(&mut self, node: RNode, ordered: bool) {
         debug!("update_node {} to {:?} ({})", &node.name, &self.cor_id,
             self.nodes.len());
         match self.nodes.iter_mut().find(|n| n.name == node.name) {
@@ -358,7 +358,7 @@ impl SegmentState {
     }
 
     /// Add or update a node
-    fn add_update_node(&mut self, node: Box<RNode>) {
+    fn add_update_node(&mut self, node: RNode) {
         match node.cor_id() {
             Some(ref cor_id) => {
                 match self.node_cors.insert(node.name.clone(), cor_id.clone()) {
@@ -375,7 +375,7 @@ impl SegmentState {
     }
 
     /// Add a node to corridor
-    fn add_corridor_node(&mut self, cid: &CorridorId, node: Box<RNode>) {
+    fn add_corridor_node(&mut self, cid: &CorridorId, node: RNode) {
         match self.corridors.get_mut(&cid) {
             Some(cor) => cor.add_node(node, self.ordered),
             None => {
@@ -401,7 +401,7 @@ impl SegmentState {
     }
 
     /// Update a node on a corridor
-    fn update_corridor_node(&mut self, cid: &CorridorId, node: Box<RNode>) {
+    fn update_corridor_node(&mut self, cid: &CorridorId, node: RNode) {
         match self.corridors.get_mut(cid) {
             Some(cor) => cor.update_node(node, self.ordered),
             None => error!("corridor ID not found {:?}", cid),
