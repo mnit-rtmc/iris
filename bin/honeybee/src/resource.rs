@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::Result;
+use crate::Result;
 use crate::segments::{RNode, RNodeMsg};
 use crate::signmsg::render_all;
 use postgres::Connection;

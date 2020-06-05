@@ -12,8 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::Result;
-use crate::resource;
+use crate::{resource, Result};
 use crate::segments::{receive_nodes, RNodeMsg};
 use fallible_iterator::FallibleIterator;
 use postgres::{Connection, TlsMode};

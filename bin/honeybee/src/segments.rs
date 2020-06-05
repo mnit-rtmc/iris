@@ -12,7 +12,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::Result;
 use crate::geo::Wgs84Pos;
 use postgres::rows::Row;
 use std::collections::HashMap;
@@ -428,10 +427,10 @@ impl SegmentState {
 }
 
 /// Receive roadway nodes and update corridor segments
-pub fn receive_nodes(receiver: Receiver<RNodeMsg>) -> Result<()> {
+pub fn receive_nodes(receiver: Receiver<RNodeMsg>) {
     let mut state = SegmentState::new();
     loop {
-        match receiver.recv()? {
+        match receiver.recv().unwrap() {
             RNodeMsg::AddUpdate(node) => state.add_update_node(node),
             RNodeMsg::Remove(name) => state.remove_node(&name),
             RNodeMsg::Order(ordered) => state.set_ordered(ordered),

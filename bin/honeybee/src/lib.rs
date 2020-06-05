@@ -1,6 +1,6 @@
 // lib.rs
 //
-// Copyright (C) 2018-2019  Minnesota Department of Transportation
+// Copyright (C) 2018-2020  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,7 +19,9 @@ extern crate log;
 #[macro_use]
 extern crate serde_derive;
 
-mod error;
+/// Result type
+pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
 pub mod fetcher;
 pub mod geo;
 mod resource;

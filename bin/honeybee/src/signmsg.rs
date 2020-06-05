@@ -18,7 +18,7 @@
 //! and renders to images.  This design allows it to be
 //! used in Web Assembly contexts.
 //!
-use crate::error::{Error, Result};
+use crate::Result;
 use crate::resource::{make_name, make_tmp_name};
 use gift::{Encoder, Step};
 use ntcip::dms::{Font, FontCache, Graphic, GraphicCache, PageSplitter, State};
@@ -29,6 +29,7 @@ use ntcip::dms::multi::{
 use pix::{el::Pixel, gray::{Gray, Gray8}, Palette, Raster, rgb::{Rgb, SRgb8}};
 use std::collections::{HashMap, HashSet};
 use std::convert::TryInto;
+use std::fmt;
 use std::fs::{File, rename, remove_file, read_dir};
 use std::io::{BufReader, BufWriter, Write};
 use std::path::{Path, PathBuf};
@@ -39,6 +40,28 @@ const PIX_WIDTH: f32 = 450.0;
 
 /// Maximum pixel height of DMS images
 const PIX_HEIGHT: f32 = 100.0;
+
+/// Unknown resource error
+#[derive(Debug)]
+pub struct UnknownResourceError(String);
+
+impl fmt::Display for UnknownResourceError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Unknown resource: {}", self.0)
+    }
+}
+
+impl std::error::Error for UnknownResourceError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
+}
+
+impl UnknownResourceError {
+    fn new(msg: String) -> Box<Self> {
+        Box::new(UnknownResourceError(msg))
+    }
+}
 
 /// Sign configuration
 #[derive(Deserialize, Serialize)]
@@ -477,7 +500,7 @@ impl MsgData {
         let mut j: Vec<HashMap<String, String>> = serde_json::from_reader(r)?;
         match j.pop() {
             Some(da) => Ok(da),
-            _ => Err(Error::UnknownResource("DMS attributes".into())),
+            _ => Err(UnknownResourceError::new("DMS attributes".to_string())),
         }
     }
 
@@ -486,7 +509,7 @@ impl MsgData {
         let cfg = &s.sign_config;
         match self.configs.get(cfg) {
             Some(c) => Ok(c),
-            None => Err(Error::UnknownResource(format!("Config: {}", cfg))),
+            None => Err(UnknownResourceError::new(format!("Config: {}", cfg))),
         }
     }
 
@@ -545,7 +568,9 @@ impl MsgData {
                 match self.fonts.lookup_name(fname) {
                     Some(font) => Ok(font.number()),
                     None => {
-                        Err(Error::UnknownResource(format!("Font: {}", fname)))
+                        Err(UnknownResourceError::new(
+                            format!("Font: {}", fname)
+                        ))
                     },
                 }
             },
