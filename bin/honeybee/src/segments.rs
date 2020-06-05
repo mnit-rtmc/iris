@@ -138,7 +138,7 @@ impl GeoLoc {
 
     /// Get the node position
     fn pos(&self) -> Option<Wgs84Pos> {
-        self.latlon().and_then(|(lat, lon)| Some(Wgs84Pos::new(lat, lon)))
+        self.latlon().map(|(lat, lon)| Wgs84Pos::new(lat, lon))
     }
 }
 
@@ -260,12 +260,12 @@ impl Corridor {
                 });
             }
         }
-        idx_lt_ln.and_then(|(i, _lt, _ln)| Some(i))
+        idx_lt_ln.map(|(i, _lt, _ln)| i)
     }
 
     /// Get index of the nearest node after idx
     fn nearest_node(&self, idx: usize) -> Option<usize> {
-        let pos = self.nodes.iter().nth(idx)?.pos()?;
+        let pos = self.nodes.get(idx)?.pos()?;
         let mut idx_dist = None; // (node index, distance)
         for (i, ref n) in self.nodes.iter().enumerate().skip(idx + 1) {
             if let Some(ref p) = n.pos() {
@@ -282,7 +282,7 @@ impl Corridor {
                 });
             }
         }
-        idx_dist.and_then(|(i, _d)| Some(i))
+        idx_dist.map(|(i, _d)| i)
     }
 
     /// Order all nodes
@@ -419,7 +419,7 @@ impl SegmentState {
     fn set_ordered(&mut self, ordered: bool) {
         self.ordered = ordered;
         if ordered {
-            for (_cid, cor) in &mut self.corridors {
+            for cor in self.corridors.values_mut() {
                 cor.order_nodes();
             }
         }

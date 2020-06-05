@@ -139,7 +139,7 @@ struct SignMessage {
 fn rgb_from_i32(rgb: i32) -> (u8, u8, u8) {
     let r = (rgb >> 16) as u8;
     let g = (rgb >> 8) as u8;
-    let b = (rgb >> 0) as u8;
+    let b = rgb as u8;
     (r, g, b)
 }
 
@@ -167,7 +167,7 @@ impl SignConfig {
 
     /// Get default font
     fn default_font(&self) -> Option<&str> {
-        self.default_font.as_ref().map(String::as_str)
+        self.default_font.as_deref()
     }
 
     /// Get the horizontal border (mm).
