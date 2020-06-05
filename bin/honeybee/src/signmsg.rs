@@ -20,18 +20,13 @@
 //!
 use crate::error::{Error, Result};
 use crate::resource::{make_name, make_tmp_name};
-use gift::Encoder;
-use gift::block::{
-    Application, ColorTableConfig, ColorTableExistence, ColorTableOrdering,
-    Frame, GlobalColorTable, GraphicControl, ImageData, ImageDesc,
-    LogicalScreenDesc, Preamble,
-};
+use gift::{Encoder, Step};
 use ntcip::dms::{Font, FontCache, Graphic, GraphicCache, PageSplitter, State};
 use ntcip::dms::multi::{
     ColorClassic, ColorCtx, ColorScheme, JustificationLine,
     JustificationPage, Rectangle
 };
-use pix::{Gray8, Palette, Raster, RasterBuilder, Rgb8};
+use pix::{el::Pixel, gray::{Gray, Gray8}, Palette, Raster, rgb::{Rgb, SRgb8}};
 use std::collections::{HashMap, HashSet};
 use std::convert::TryInto;
 use std::fs::{File, rename, remove_file, read_dir};
@@ -308,14 +303,14 @@ impl SignConfig {
         Ok(Rectangle::new(1, 1, w, h))
     }
 
-    /// Render a sign message to a Vec of Frames
-    fn render_sign_config(&self, multi: &str, msg_data: &MsgData)
-        -> Result<(Preamble, Vec<Frame>)>
+    /// Render a sign message to a Vec of steps
+    fn render_sign_config<W: Write>(&self, mut writer: W, multi: &str,
+        msg_data: &MsgData) -> Result<()>
     {
         let mut palette = Palette::new(256);
         palette.set_threshold_fn(palette_threshold_rgb8_256);
-        palette.set_entry(Rgb8::default());
-        let mut frames = Vec::new();
+        palette.set_entry(SRgb8::default());
+        let mut steps = Vec::new();
         let rs = self.render_state_default(msg_data)?;
         let (w, h) = self.calculate_size()?;
         for page in PageSplitter::new(rs, multi) {
@@ -323,20 +318,25 @@ impl SignConfig {
             let raster = page.render_page(msg_data.fonts(),
                 msg_data.graphics())?;
             let delay = page.page_on_time_ds() * 10;
-            let frame = self.make_face_frame(raster, &mut palette, w, h, delay);
-            frames.push(frame);
+            let step = self.make_face_step(raster, &mut palette, w, h, delay);
+            steps.push(step);
             let t = page.page_off_time_ds() * 10;
             if t > 0 {
                 let raster = page.render_blank();
-                let frame = self.make_face_frame(raster, &mut palette, w, h, t);
-                frames.push(frame);
+                let step = self.make_face_step(raster, &mut palette, w, h, t);
+                steps.push(step);
             }
         }
-        let mut preamble = make_preamble(w, h, palette);
-        if frames.len() > 1 {
-            preamble.loop_count_ext = Some(Application::with_loop_count(0));
+        let mut enc = Encoder::new(&mut writer).into_step_enc();
+        enc = if steps.len() > 1 {
+            enc.with_loop_count(0)
+        } else {
+            enc
+        };
+        for step in steps {
+            enc.encode_step(&step)?;
         }
-        Ok((preamble, frames))
+        Ok(())
     }
 
     /// Create default render state for a sign config.
@@ -384,25 +384,21 @@ impl SignConfig {
         }
     }
 
-    /// Make a .gif frame of sign face
-    fn make_face_frame(&self, page: Raster<Rgb8>, palette: &mut Palette<Rgb8>,
-        w: u16, h: u16, delay: u16) -> Frame
+    /// Make a .gif step of sign face
+    fn make_face_step(&self, page: Raster<SRgb8>, palette: &mut Palette,
+        w: u16, h: u16, delay: u16) -> Step
     {
-        let face = self.make_face_raster(page, palette, w, h);
-        let mut control = GraphicControl::default();
-        control.set_delay_time_cs(delay);
-        let image_desc = ImageDesc::default().with_width(w).with_height(h);
-        let mut image_data = ImageData::new((w * h).into());
-        image_data.add_data(face.as_u8_slice());
-        Frame::new(Some(control), image_desc, None, image_data)
+        let raster = self.make_face_raster(page, palette, w, h);
+        Step::with_indexed(raster, palette.clone())
+            .with_delay_time_cs(Some(delay))
     }
 
     /// Make a raster of sign face
-    fn make_face_raster(&self, page: Raster<Rgb8>, palette: &mut Palette<Rgb8>,
+    fn make_face_raster(&self, page: Raster<SRgb8>, palette: &mut Palette,
         w: u16, h: u16) -> Raster<Gray8>
     {
-        let dark = Rgb8::new(20, 20, 0);
-        let mut face = RasterBuilder::new().with_clear(w.into(), h.into());
+        let dark = SRgb8::new(20, 20, 0);
+        let mut face = Raster::with_clear(w.into(), h.into());
         let ph = page.height();
         let pw = page.width();
         let sx = w as f32 / pw as f32;
@@ -413,11 +409,11 @@ impl SignConfig {
             let py = self.pixel_y(y) * h as f32;
             for x in 0..pw {
                 let px = self.pixel_x(x) * w as f32;
-                let clr = page.pixel(x, y);
-                let sr: u8 = clr.red().max(clr.green()).max(clr.blue()).into();
+                let rgb = page.pixel(x as i32, y as i32);
+                let sr = u8::from(Gray::value(rgb.convert::<Gray8>()));
                 // Clamp radius between 0.6 and 0.8 (blooming)
                 let r = s * (sr as f32 / 255.0).max(0.6).min(0.8);
-                let clr = if sr > 20 { clr } else { dark };
+                let clr = if sr > 20 { rgb } else { dark };
                 render_circle(&mut face, palette, px, py, r, clr);
             }
         }
@@ -432,7 +428,7 @@ fn load_fonts(dir: &Path) -> Result<FontCache> {
     n.push(dir);
     n.push("font");
     let r = BufReader::new(File::open(&n)?);
-    let mut fonts = FontCache::new();
+    let mut fonts = FontCache::default();
     let j: Vec<Font> = serde_json::from_reader(r)?;
     for f in j {
         fonts.insert(f);
@@ -447,7 +443,7 @@ fn load_graphics(dir: &Path) -> Result<GraphicCache> {
     n.push(dir);
     n.push("graphic");
     let r = BufReader::new(File::open(&n)?);
-    let mut graphics = GraphicCache::new();
+    let mut graphics = GraphicCache::default();
     let j: Vec<Graphic> = serde_json::from_reader(r)?;
     for g in j {
         graphics.insert(g);
@@ -612,8 +608,7 @@ impl SignMessage {
         -> Result<()>
     {
         let cfg = msg_data.config(self)?;
-        let (preamble, frames) = cfg.render_sign_config(self.multi(), msg_data)?;
-        write_gif(writer, preamble, frames)
+        cfg.render_sign_config(writer, self.multi(), msg_data)
     }
 }
 
@@ -693,8 +688,8 @@ impl ImageCache {
 /// * `cy` Y-Center of circle.
 /// * `r` Radius of circle.
 /// * `clr` Color of circle.
-fn render_circle(raster: &mut Raster<Gray8>, palette: &mut Palette<Rgb8>,
-    cx: f32, cy: f32, r: f32, clr: Rgb8)
+fn render_circle(raster: &mut Raster<Gray8>, palette: &mut Palette,
+    cx: f32, cy: f32, r: f32, clr: SRgb8)
 {
     let x0 = (cx - r).floor().max(0.0) as u32;
     let x1 = (cx + r).ceil().min(raster.width() as f32) as u32;
@@ -717,14 +712,16 @@ fn render_circle(raster: &mut Raster<Gray8>, palette: &mut Palette<Rgb8>,
             let v = 1.0 - drs.powi(2).min(1.0);
             if v > 0.0 {
                 // blend with existing pixel
-                let i = u8::from(raster.pixel(x, y).value());
+                let i = u8::from(Gray::value(raster.pixel(x as i32, y as i32)));
                 if let Some(p) = palette.entry(i as usize) {
-                    let red = (clr.red() * v).max(p.red());
-                    let green = (clr.green() * v).max(p.green());
-                    let blue = (clr.blue() * v).max(p.blue());
-                    let rgb = Rgb8::new(red, green, blue);
+                    // TODO: add a blending operation for this
+                    let red = (Rgb::red(clr) * v).max(Rgb::red(p));
+                    let green = (Rgb::green(clr) * v).max(Rgb::green(p));
+                    let blue = (Rgb::blue(clr) * v).max(Rgb::blue(p));
+                    let rgb = SRgb8::new(red, green, blue);
                     if let Some(d) = palette.set_entry(rgb) {
-                        raster.set_pixel(x, y, Gray8::new(d as u8));
+                        *raster.pixel_mut(x as i32, y as i32) =
+                            Gray8::new(d as u8);
                     } else {
                         warn!("Blending failed -- color palette full!");
                     }
@@ -736,40 +733,8 @@ fn render_circle(raster: &mut Raster<Gray8>, palette: &mut Palette<Rgb8>,
     }
 }
 
-/// Write a .gif file
-fn write_gif<W: Write>(mut fl: W, preamble: Preamble, frames: Vec<Frame>)
-    -> Result<()>
-{
-    let mut enc = Encoder::new(&mut fl).into_frame_encoder();
-    enc.encode_preamble(&preamble)?;
-    for frame in &frames {
-        enc.encode_frame(frame)?;
-    }
-    enc.encode_trailer()?;
-    Ok(())
-}
-
-/// Make the GIF preamble blocks
-fn make_preamble(w: u16, h: u16, palette: Palette<Rgb8>) -> Preamble {
-    let tbl_cfg = ColorTableConfig::new(ColorTableExistence::Present,
-        ColorTableOrdering::NotSorted, palette.len() as u16);
-    let desc = LogicalScreenDesc::default()
-        .with_screen_width(w)
-        .with_screen_height(h)
-        .with_color_table_config(&tbl_cfg);
-    let mut pal = palette.as_u8_slice().to_vec();
-    while pal.len() < tbl_cfg.size_bytes() {
-        pal.push(0);
-    }
-    let table = GlobalColorTable::with_colors(&pal[..]);
-    let mut preamble = Preamble::default();
-    preamble.logical_screen_desc = desc;
-    preamble.global_color_table = Some(table);
-    preamble
-}
-
-/// Get the difference threshold for Rgb8 with 256 capacity palette
-fn palette_threshold_rgb8_256(v: usize) -> Rgb8 {
+/// Get the difference threshold for SRgb8 with 256 capacity palette
+fn palette_threshold_rgb8_256(v: usize) -> SRgb8 {
     let i = match v as u8 {
         0x00..=0x0F => 0,
         0x10..=0x1E => 1,
@@ -803,7 +768,7 @@ fn palette_threshold_rgb8_256(v: usize) -> Rgb8 {
         0xFE..=0xFE => 29,
         0xFF..=0xFF => 30,
     };
-    Rgb8::new(i * 4, i * 4, i * 5)
+    SRgb8::new(i * 4, i * 4, i * 5)
 }
 
 /// Fetch all sign messages.

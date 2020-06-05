@@ -1,10 +1,9 @@
 // error.rs
 //
-// Copyright (c) 2019  Minnesota Department of Transportation
+// Copyright (c) 2019-2020  Minnesota Department of Transportation
 //
 use base64::DecodeError;
 use crate::segments::RNodeMsg;
-use gift::EncodeError;
 use ntcip::dms::multi::SyntaxError;
 use std::error::Error as _;
 use std::{fmt, io};
@@ -15,7 +14,7 @@ use std::sync::mpsc::{RecvError, SendError};
 #[derive(Debug)]
 pub enum Error {
     Base64Decode(DecodeError),
-    EncodeError(EncodeError),
+    EncodeError(gift::Error),
     Io(io::Error),
     MultiSyntax(SyntaxError),
     MpscRecv(RecvError),
@@ -64,8 +63,8 @@ impl From<DecodeError> for Error {
     }
 }
 
-impl From<EncodeError> for Error {
-    fn from(e: EncodeError) -> Self {
+impl From<gift::Error> for Error {
+    fn from(e: gift::Error) -> Self {
         Error::EncodeError(e)
     }
 }
