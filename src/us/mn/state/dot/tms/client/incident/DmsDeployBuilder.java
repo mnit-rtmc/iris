@@ -18,7 +18,6 @@ import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.CorridorFinder;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncAdvice;
 import us.mn.state.dot.tms.IncAdviceHelper;
@@ -87,8 +86,7 @@ public class DmsDeployBuilder {
 	/** Pick a node within 1 mile of incident */
 	private R_Node pickNode(CorridorFinder finder) {
 		IncidentLoc iloc = new IncidentLoc(inc);
-		String name = GeoLocHelper.getCorridorName(iloc);
-		CorridorBase cb = finder.lookupCorridor(name);
+		CorridorBase cb = finder.lookupCorridor(iloc);
 		if (cb != null) {
 			Float mp = cb.calculateMilePoint(iloc);
 			if (mp != null)

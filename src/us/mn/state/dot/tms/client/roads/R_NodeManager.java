@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2019  Minnesota Department of Transportation
+ * Copyright (C) 2006-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -355,10 +355,18 @@ public class R_NodeManager extends ProxyManager<R_Node>
 		return new ProxyTheme<R_Node>(this, new R_NodeMarker());
 	}
 
-	/** Lookup the corridor by name */
+	/** Lookup a corridor by location */
 	@Override
-	public CorridorBase<R_Node> lookupCorridor(String name) {
-		return (name != null) ? corridors.get(name) : null;
+	public CorridorBase<R_Node> lookupCorridor(GeoLoc loc) {
+		String cid = GeoLocHelper.getCorridorName(loc);
+		return (cid != null) ? corridors.get(cid) : null;
+	}
+
+	/** Lookup a linked corridor */
+	@Override
+	public CorridorBase<R_Node> lookupLinkedCorridor(GeoLoc loc) {
+		String cid = GeoLocHelper.getLinkedName(loc);
+		return (cid != null) ? corridors.get(cid) : null;
 	}
 
 	/** Get the GeoLoc for the specified proxy */

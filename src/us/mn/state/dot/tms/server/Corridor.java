@@ -79,9 +79,9 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 		for (R_NodeImpl r_node: n_points.values()) {
 			if (R_NodeHelper.isCD(r_node)) {
 				GeoLoc l = r_node.getGeoLoc();
-				String c = GeoLocHelper.getLinkedCorridor(l);
-				if (c != null)
-					cds.add(c);
+				String cid = GeoLocHelper.getLinkedName(l);
+				if (cid != null)
+					cds.add(cid);
 			}
 		}
 		return cds.iterator();

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -278,8 +278,7 @@ public class IncidentCreator extends JPanel {
 
 	/** Get the lane count at the incident location */
 	private int getLaneCount(LaneType lt, GeoLoc loc) {
-		String name = GeoLocHelper.getCorridorName(loc);
-		CorridorBase cb = r_node_manager.lookupCorridor(name);
+		CorridorBase cb = r_node_manager.lookupCorridor(loc);
 		return (cb != null) ? cb.getLaneCount(lt, loc) : 0;
 	}
 

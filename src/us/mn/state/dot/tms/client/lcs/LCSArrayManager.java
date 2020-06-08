@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -177,9 +177,8 @@ public class LCSArrayManager extends DeviceManager<LCSArray> {
 	/** Get the lane configuration at an LCS array */
 	public LaneConfiguration laneConfiguration(LCSArray proxy) {
 		GeoLoc loc = LCSArrayHelper.lookupGeoLoc(proxy);
-		String name = GeoLocHelper.getCorridorName(loc);
 		CorridorBase cor = session.getR_NodeManager().lookupCorridor(
-			name);
+			loc);
 		if (cor != null) {
 			Position pos = GeoLocHelper.getWgs84Position(loc);
 			if (pos != null)

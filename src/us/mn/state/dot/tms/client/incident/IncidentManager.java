@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2019  Minnesota Department of Transportation
+ * Copyright (C) 2008-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,8 +115,7 @@ public class IncidentManager extends ProxyManager<Incident>
 	@Override
 	protected IncidentLoc getGeoLoc(Incident proxy) {
 		IncidentLoc loc = new IncidentLoc(proxy);
-		String name = GeoLocHelper.getCorridorName(loc);
-		CorridorBase cb = lookupCorridor(name);
+		CorridorBase cb = lookupCorridor(loc);
 		if (cb != null) {
 			R_Node rnd = cb.findNearest(loc);
 			if (rnd != null)
@@ -125,10 +124,16 @@ public class IncidentManager extends ProxyManager<Incident>
 		return loc;
 	}
 
-	/** Lookup the corridor by name */
+	/** Lookup the corridor */
 	@Override
-	public CorridorBase<R_Node> lookupCorridor(String name) {
-		return session.getR_NodeManager().lookupCorridor(name);
+	public CorridorBase<R_Node> lookupCorridor(GeoLoc loc) {
+		return session.getR_NodeManager().lookupCorridor(loc);
+	}
+
+	/** Lookup the linked corridor */
+	@Override
+	public CorridorBase<R_Node> lookupLinkedCorridor(GeoLoc loc) {
+		return session.getR_NodeManager().lookupLinkedCorridor(loc);
 	}
 
 	/** Get lane configuration at an incident */
@@ -136,13 +141,10 @@ public class IncidentManager extends ProxyManager<Incident>
 		LaneType lt = LaneType.fromOrdinal(inc.getLaneType());
 		if (lt.isRamp())
 			return rampLaneConfiguration(inc);
-		IncidentLoc loc = new IncidentLoc(inc);
-		String name = GeoLocHelper.getCorridorName(loc);
-		CorridorBase cb = lookupCorridor(name);
-		if (cb != null)
-			return cb.laneConfiguration(getWgs84Position(inc));
-		else
-			return new LaneConfiguration(0, 0);
+		CorridorBase cb = lookupCorridor(new IncidentLoc(inc));
+		return (cb != null)
+		      ? cb.laneConfiguration(getWgs84Position(inc))
+		      : new LaneConfiguration(0, 0);
 	}
 
 	/** Get ramp lane configuration at an incident */

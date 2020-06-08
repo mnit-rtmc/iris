@@ -119,8 +119,7 @@ public class LcsIndicationBuilder {
 
 	/** Get lane configuration at a location */
 	private LaneConfiguration laneConfiguration(GeoLoc loc) {
-		String name = GeoLocHelper.getCorridorName(loc);
-		CorridorBase cb = finder.lookupCorridor(name);
+		CorridorBase cb = finder.lookupCorridor(loc);
 		return (cb != null)
 		      ? cb.laneConfiguration(new Position(loc.getLat(),
 				loc.getLon()))

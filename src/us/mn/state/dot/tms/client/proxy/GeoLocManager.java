@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2019  Minnesota Department of Transportation
+ * Copyright (C) 2008-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -117,8 +117,7 @@ public class GeoLocManager {
 	/** Get the normal vector for a location */
 	private MapVector getNormalVector(R_NodeManager n_man, MapGeoLoc mloc) {
 		GeoLoc loc = mloc.getGeoLoc();
-		String name = GeoLocHelper.getCorridorName(loc);
-		CorridorBase c = n_man.lookupCorridor(name);
+		CorridorBase c = n_man.lookupCorridor(loc);
 		if (c != null) {
 			R_Node r_node = c.findNearest(loc);
 			if (r_node != null &&

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2019  Minnesota Department of Transportation
+ * Copyright (C) 2008-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -176,9 +176,11 @@ public class GeoLocHelper extends BaseHelper {
 		      : null;
 	}
 
-	/** Get the linked roadway corridor */
-	static public String getLinkedCorridor(GeoLoc l) {
-		return getCorridorName(l.getCrossStreet(), l.getCrossDir());
+	/** Get the linked corridor name */
+	static public String getLinkedName(GeoLoc l) {
+		return (l != null)
+		      ? getCorridorName(l.getCrossStreet(), l.getCrossDir())
+		      : null;
 	}
 
 	/** Get the latitude of a GeoLoc */

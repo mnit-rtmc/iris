@@ -97,8 +97,7 @@ public class UpstreamDeviceFinder {
 
 		/** Scan the corridor for upstream devices */
 		private void scanUpstream() {
-			String name = getCorridorName();
-			CorridorBase<R_Node> cb = finder.lookupCorridor(name);
+			CorridorBase<R_Node> cb = finder.lookupCorridor(loc);
 			if (cb != null) {
 				Float mp = cb.calculateMilePoint(loc);
 				if (mp != null)
@@ -274,8 +273,7 @@ public class UpstreamDeviceFinder {
 
 	/** Find interchange exit which matches the given location */
 	private void findInterchange(GeoLoc loc, int num_exits, Distance dist) {
-		String name = GeoLocHelper.getLinkedCorridor(loc);
-		CorridorBase<R_Node> cb = finder.lookupCorridor(name);
+		CorridorBase<R_Node> cb = finder.lookupLinkedCorridor(loc);
 		GeoLoc eloc = findExit(cb, loc);
 		if (eloc != null)
 			scanners.add(new CorScanner(eloc, num_exits, dist));

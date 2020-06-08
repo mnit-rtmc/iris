@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +15,15 @@
 package us.mn.state.dot.tms;
 
 /**
- * Interface to lookup corridors by name.
+ * Interface to lookup corridors.
  *
  * @author Douglas Lau
  */
 public interface CorridorFinder<T extends R_Node> {
 
-	/** Lookup a corridor by name */
-	CorridorBase<T> lookupCorridor(String name);
+	/** Lookup a corridor */
+	CorridorBase<T> lookupCorridor(GeoLoc loc);
+
+	/** Lookup a linked corridor */
+	CorridorBase<T> lookupLinkedCorridor(GeoLoc loc);
 }
