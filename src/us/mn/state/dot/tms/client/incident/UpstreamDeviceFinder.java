@@ -43,9 +43,6 @@ import static us.mn.state.dot.tms.client.incident.UpstreamDevice.MAX_GAP_MI;
  */
 public class UpstreamDeviceFinder {
 
-	/** Maximum distance from device to nearest r_node */
-	static private final Distance MAX_DIST = new Distance(2.5, MILES);
-
 	/** Maximum distance from incident to deploy tolling signs */
 	static private final Distance MAX_TOLLING_DEPLOYMENT_DIST =
 		new Distance(1.0, MILES);
@@ -103,7 +100,7 @@ public class UpstreamDeviceFinder {
 			String name = getCorridorName();
 			CorridorBase<R_Node> cb = finder.lookupCorridor(name);
 			if (cb != null) {
-				Float mp = cb.calculateMilePoint(loc, MAX_DIST);
+				Float mp = cb.calculateMilePoint(loc);
 				if (mp != null)
 					findDevices(cb, mp);
 			}

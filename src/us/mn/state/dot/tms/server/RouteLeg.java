@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2019  Minnesota Department of Transportation
+ * Copyright (C) 2016-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,6 @@ import us.mn.state.dot.tms.units.Distance;
  * @author Douglas Lau
  */
 public class RouteLeg {
-
-	/** Maximum distance from origin to a corridor node (in meters) */
-	static private final float MAX_ORIGIN_M = 1000;
 
 	/** Create a new route leg.
 	 * @param c Corridor.
@@ -91,13 +88,7 @@ public class RouteLeg {
 
 	/** Check if the route leg is valid */
 	private boolean isValid() {
-		return isOriginValid() && (o_mi < d_mi) && isContinuous();
-	}
-
-	/** Check if origin is within distance limit to corridor */
-	private boolean isOriginValid() {
-		Distance d = corridor.distanceTo(orig);
-		return (d != null) && (d.m() < MAX_ORIGIN_M);
+		return (o_mi < d_mi) && isContinuous();
 	}
 
 	/** Check if the route leg is continuous */

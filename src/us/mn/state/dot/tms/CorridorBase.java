@@ -26,6 +26,7 @@ import static us.mn.state.dot.tms.GeoLocHelper.segmentDistance;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.METERS;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 
 /**
@@ -34,6 +35,9 @@ import static us.mn.state.dot.tms.units.Distance.Units.MILES;
  * @author Douglas Lau
  */
 public class CorridorBase<T extends R_Node> implements Iterable<T> {
+
+	/** Maximum distance from corridor to location */
+	static private final Distance MAX_DIST = new Distance(1000, METERS);
 
 	/** Adjustment for r_node milepoints falling on exact same spot */
 	static protected float calculateEpsilon(float v) {
@@ -233,14 +237,15 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 
 	/** Calculate the mile point for a location.
 	 * @param loc Location to calculate.
-	 * @param max_dist Maximum distance from corridor.
-	 * @return Mile point for location, or null if no r_nodes exist. */
-	public Float calculateMilePoint(GeoLoc loc, Distance max_dist) {
-		T n = findNearest(loc);
-		if (n != null) {
-			Distance d = nodeDistance(n, loc);
-			if (d.compareTo(max_dist) < 0)
-				return calculateMilePoint(loc);
+	 * @return Mile point for location, or null on error. */
+	public Float calculateMilePoint(GeoLoc loc) {
+		if (loc != null &&
+		    loc.getRoadway() == getRoadway() &&
+		    loc.getRoadDir() == getRoadDir())
+		{
+			Float mp = calculateMilePointNoLimit(loc);
+			if (mp != null && mp <= MAX_DIST.asFloat(MILES))
+				return mp;
 		}
 		return null;
 	}
@@ -248,7 +253,7 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 	/** Calculate the mile point for a location.
 	 * @param loc Location to calculate.
 	 * @return Mile point for location, or null if no r_nodes exist. */
-	public Float calculateMilePoint(GeoLoc loc) {
+	private Float calculateMilePointNoLimit(GeoLoc loc) {
 		if (n_points.isEmpty())
 			return null;
 		T nearest = null;

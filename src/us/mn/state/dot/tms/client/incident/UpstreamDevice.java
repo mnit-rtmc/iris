@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,16 +40,6 @@ public class UpstreamDevice implements Comparable<UpstreamDevice> {
 		return picked ? AHEAD_DIST_MI / 2f : AHEAD_DIST_MI;
 	}
 
-	/** Calculate a mile point for a location on a corridor */
-	static private Float calculateMilePoint(CorridorBase cb, GeoLoc loc) {
-		if (loc != null &&
-		    loc.getRoadway() == cb.getRoadway() &&
-		    loc.getRoadDir() == cb.getRoadDir())
-			return cb.calculateMilePoint(loc);
-		else
-			return null;
-	}
-
 	/** Create upstream device on a corridor.
 	 * @param dev Device.
 	 * @param cb Freeway corridor.
@@ -58,7 +48,7 @@ public class UpstreamDevice implements Comparable<UpstreamDevice> {
 	static public UpstreamDevice create(Device dev, CorridorBase<R_Node> cb,
 		float mp, GeoLoc loc)
 	{
-		Float p = calculateMilePoint(cb, loc);
+		Float p = cb.calculateMilePoint(loc);
 		if (p != null && mp > p) {
 			Integer exits = cb.countExits(p, mp, MAX_GAP_MI);
 			if (exits != null) {
