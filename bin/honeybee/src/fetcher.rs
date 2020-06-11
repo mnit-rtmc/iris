@@ -69,6 +69,7 @@ fn time_zone() -> Option<String> {
 /// Receive PostgreSQL notifications, and fetch needed resources.
 ///
 /// * `conn` The database connection.
+/// * `sender` Sender for RNode messages.
 fn notify_loop(conn: &Connection, sender: Sender<RNodeMsg>) -> Result<()> {
     let nots = conn.notifications();
     let mut ns = HashSet::new();

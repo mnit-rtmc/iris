@@ -337,6 +337,7 @@ fn fetch_simple<W: Write>(conn: &Connection, sql: &str, mut w: W)
 /// Fetch all r_nodes.
 ///
 /// * `conn` The database connection.
+/// * `sender` Sender for RNode messages.
 fn fetch_all_nodes(conn: &Connection, sender: &Sender<RNodeMsg>)
     -> Result<()>
 {
@@ -352,6 +353,8 @@ fn fetch_all_nodes(conn: &Connection, sender: &Sender<RNodeMsg>)
 /// Fetch one r_node.
 ///
 /// * `conn` The database connection.
+/// * `name` RNode name.
+/// * `sender` Sender for RNode messages.
 fn fetch_one_node(conn: &Connection, name: &str, sender: &Sender<RNodeMsg>)
     -> Result<()>
 {
@@ -382,6 +385,7 @@ impl Resource {
     ///
     /// * `conn` The database connection.
     /// * `payload` Postgres NOTIFY payload.
+    /// * `sender` Sender for RNode messages.
     fn fetch(&self, conn: &Connection, payload: &str,
         sender: &Sender<RNodeMsg>) -> Result<()>
     {
@@ -396,6 +400,7 @@ impl Resource {
     ///
     /// * `conn` The database connection.
     /// * `payload` Postgres NOTIFY payload.
+    /// * `sender` Sender for RNode messages.
     fn fetch_nodes(&self, conn: &Connection, payload: &str,
         sender: &Sender<RNodeMsg>) -> Result<()>
     {
@@ -458,6 +463,7 @@ pub fn listen_all(conn: &Connection) -> Result<()> {
 /// Fetch all resources.
 ///
 /// * `conn` The database connection.
+/// * `sender` Sender for RNode messages.
 pub fn fetch_all(conn: &Connection, sender: &Sender<RNodeMsg>) -> Result<()> {
     for r in ALL {
         r.fetch(&conn, "", sender)?;
@@ -470,6 +476,7 @@ pub fn fetch_all(conn: &Connection, sender: &Sender<RNodeMsg>) -> Result<()> {
 /// * `conn` The database connection.
 /// * `chan` Channel name.
 /// * `payload` Notification payload.
+/// * `sender` Sender for RNode messages.
 pub fn notify(conn: &Connection, chan: &str, payload: &str,
     sender: &Sender<RNodeMsg>) -> Result<()>
 {
