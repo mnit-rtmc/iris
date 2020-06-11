@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -604,13 +604,18 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Auto Fail status flag */
 	private boolean auto_fail;
 
+	/** Is auto-fail enabled for this detector? */
+	private boolean isAutoFailEnabled() {
+		return isDetectorAutoFailEnabled() && !getAbandoned();
+	}
+
 	/** Update the auto fail status */
 	private void updateAutoFail() {
 		boolean af = no_hits.triggered
 		          || chatter.triggered
 		          || locked_on.triggered
 		          || no_change.triggered;
-		setAutoFailNotify(af && isDetectorAutoFailEnabled());
+		setAutoFailNotify(af && isAutoFailEnabled());
 	}
 
 	/** Set the Auto Fail status */
