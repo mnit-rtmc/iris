@@ -109,6 +109,7 @@ no hits   | No vehicles counted for a duration determined by [lane type](#lane-t
 chatter   | Unreasonably high vehicle count
 locked on | Occupancy at 100% for a duration determined by [lane type](#lane-type)
 no change | No change in occupancy for 24 hours
+occ spike | Occupancy changes more than 25%
 
 When one of these conditions first occurs and every hour that it persists, an
 event is logged in the `detector_event` database table.  The

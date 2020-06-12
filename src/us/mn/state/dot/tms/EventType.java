@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2019  Minnesota Department of Transportation
+ * Copyright (C) 2008-2020  Minnesota Department of Transportation
  * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@ public enum EventType {
 	DMS_BRIGHT_LOW(101), DMS_BRIGHT_GOOD(102), DMS_BRIGHT_HIGH(103),
 	LCS_DEPLOYED(89), LCS_CLEARED(90),
 	DET_CHATTER(96), DET_LOCKED_ON(95), DET_NO_HITS(94), DET_NO_CHANGE(97),
+	DET_OCC_SPIKE(98),
 	QUEUE_DRAINED(10), POLL_TIMEOUT_ERROR(11), PARSING_ERROR(12),
 	CHECKSUM_ERROR(13), CONTROLLER_ERROR(14), CONNECTION_REFUSED(15),
 	COMM_ERROR(8), COMM_FAILED(65), COMM_RESTORED(9),

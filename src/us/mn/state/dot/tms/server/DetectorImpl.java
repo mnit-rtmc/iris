@@ -167,6 +167,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	static private final Interval NO_CHANGE_THRESHOLD =
 		new Interval(24, Interval.Units.HOURS);
 
+	/** Scan "occ spike" threshold */
+	static private final Interval OCC_SPIKE_THRESHOLD =
+		new Interval(60, SECONDS);
+
 	/** Clear threshold */
 	static private final Interval CLEAR_THRESHOLD =
 		new Interval(24, Interval.Units.HOURS);
@@ -183,6 +187,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Maximum number of scans in 30 seconds */
 	static private final int MAX_C30 = 1800;
+
+	/** Change in occupancy to indicate a spike */
+	static private final int OCC_SPIKE = OccupancySample.MAX / 4;
 
 	/** Sample period for detectors (seconds) */
 	static private final int SAMPLE_PERIOD_SEC = 30;
@@ -383,6 +390,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Auto fail counter for no change (scans) */
 	private transient AutoFailCounter no_change = new AutoFailCounter();
 
+	/** Auto fail counter for occupancy spikes (scans) */
+	private transient AutoFailCounter occ_spike = new AutoFailCounter();
+
 	/** Reset auto fail counters */
 	private void resetAutoFailCounters() {
 		no_hits = new AutoFailCounter(getNoHitThreshold(),
@@ -393,6 +403,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			CLEAR_THRESHOLD);
 		no_change = new AutoFailCounter(getNoChangeThreshold(),
 			FAST_CLEAR_THRESHOLD);
+		occ_spike = new AutoFailCounter(getOccSpikeThreshold(),
+			CLEAR_THRESHOLD);
 		updateAutoFail();
 	}
 
@@ -419,6 +431,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Get the scan "no change" threshold */
 	private Interval getNoChangeThreshold() {
 		return NO_CHANGE_THRESHOLD;
+	}
+
+	/** Get the scan "occ spike" threshold */
+	private Interval getOccSpikeThreshold() {
+		return OCC_SPIKE_THRESHOLD;
 	}
 
 	/** Destroy an object */
@@ -614,7 +631,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		boolean af = no_hits.triggered
 		          || chatter.triggered
 		          || locked_on.triggered
-		          || no_change.triggered;
+		          || no_change.triggered
+		          || occ_spike.triggered;
 		setAutoFailNotify(af && isAutoFailEnabled());
 	}
 
@@ -741,6 +759,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Occupancy value from previous 30-second sample period */
 	private transient int prev_value = MISSING_DATA;
+
+	/** Period to hold occ spike failure */
+	private transient int spike_hold_sec = 0;
 
 	/** Get the current vehicle count */
 	@Override
@@ -974,6 +995,14 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		no_change.updateState(occ.period, v);
 		if (no_change.checkLogging(occ.period))
 			logEvent(EventType.DET_NO_CHANGE);
+		if (occ.value >= 0 && prev_value >= 0) {
+			int spk = Math.abs(occ.value - prev_value) / OCC_SPIKE;
+			spike_hold_sec += occ.period * spk;
+		}
+		occ_spike.updateState(occ.period, spike_hold_sec > 0);
+		if (occ_spike.checkLogging(occ.period))
+			logEvent(EventType.DET_OCC_SPIKE);
+		spike_hold_sec = Math.max(0, spike_hold_sec - occ.period);
 		updateAutoFail();
 	}
 

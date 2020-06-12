@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,8 @@ public class DetAutoFailEvent extends BaseEvent {
 		return EventType.DET_CHATTER == et
 		    || EventType.DET_LOCKED_ON == et
 		    || EventType.DET_NO_HITS == et
-		    || EventType.DET_NO_CHANGE == et;
+		    || EventType.DET_NO_CHANGE == et
+		    || EventType.DET_OCC_SPIKE == et;
 	}
 
 	/** Device ID (if device specific) */

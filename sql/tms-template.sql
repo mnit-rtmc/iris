@@ -64,6 +64,7 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 95	LOCKED ON
 96	CHATTER
 97	NO CHANGE
+98	OCC SPIKE
 101	Sign BRIGHTNESS LOW
 102	Sign BRIGHTNESS GOOD
 103	Sign BRIGHTNESS HIGH
@@ -147,7 +148,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	5.13.0
+database_version	5.14.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0
