@@ -124,9 +124,9 @@ Parking                                           | 2 weeks
 
 ### Chatter
 
-If a detector reports an unreasonably high vehicle count of 38 or more vehicles
-in a 30 second period, this condition will be triggered.  It will be cleared if
-24 hours pass with all data below that threshold.
+If a detector reports an unreasonably high count of 38 vehicles or more in a 30
+second period, this condition will be triggered.  It will be cleared if 24 hours
+pass with all counts below that threshold.
 
 ### Locked On
 
@@ -143,7 +143,7 @@ Parking                                                                | 2 weeks
 
 ### No Change
 
-If occupancy is greater than zero and it does not change for 24 hours, this
+If occupancy is greater than zero and does not change for 24 hours, this
 condition will be triggered.  It will clear immediately if the occupancy
 changes.
 
