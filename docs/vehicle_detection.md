@@ -25,25 +25,25 @@ If a detector is no longer used, it can be marked **abandoned**.
 
 ### Lane Type
 
-Lane Type  | [No Hit](#auto-fail) Threshold | [Locked On](#auto-fail) Threshold
------------|--------------------------------|----------------------------------
-Mainline   | 4 hours                        | 2 minutes
-Auxiliary  | 24 hours                       | 2 minutes
-CD Lane    | 4 hours                        | 2 minutes
-Reversible | 72 hours                       | 2 minutes
-Merge      | 12 hours                       | 30 minutes
-Queue      | 12 hours                       | 30 minutes
-Exit       | 8 hours                        | 30 minutes
-Bypass     | 72 hours                       | 30 minutes
-Passage    | 12 hours                       | 30 minutes
-Velocity   | 4 hours                        | 2 minutes
-Omnibus    | 72 hours                       | 30 minutes
-Green      | 72 hours                       | 30 minutes
-Wrong Way  | 8 hours                        | 30 minutes
-HOV        | 8 hours                        | 2 minutes
-HOT        | 72 hours                       | 2 minutes
-Shoulder   | 72 hours                       | 2 minutes
-Parking    | 2 weeks                        | 2 weeks
+Lane Type  | Description
+-----------|-----------------
+Mainline   | Freeway mainline
+Auxiliary  | Mainline auxiliary (ends within a mile)
+CD Lane    | Collector / Distributor
+Reversible | Reversible mainline
+Merge      | Freeway on-ramp (counts all merging traffic)
+Queue      | Ramp metering queue
+Exit       | Freeway exit-ramp
+Bypass     | Ramp meter bypass
+Passage    | Ramp meter passage
+Velocity   | Mainine speed loop
+Omnibus    | Bus only
+Green      | Ramp meter displayed green count
+Wrong Way  | Exit-ramp wrong way detector
+HOV        | High occupancy vehicles only
+HOT        | High occupancy or tolling only
+Shoulder   | Mainline shoulder
+Parking    | Parking space presence detector
 
 ## Transfer
 
@@ -98,22 +98,62 @@ to the poll [period] of the comm link.
 
 ## Auto Fail
 
-IRIS can check traffic data continuously for common detector failures.  If the
-`detector_auto_fail_enable` [system attribute] is `true`, the **auto fail** flag
-will be set and cleared automatically for all detectors.  These are the failure
-criteria:
+Traffic data is continuously checked for five common failure conditions.  When
+one of these first occurs and every hour that it persists, an event is logged in
+the `detector_event` database table.  The `detector_auto_fail_view` can be used
+to check recent events.
 
-Problem   | Description
-----------|-----------------------------------------------------------
-no hits   | No vehicles counted for a duration determined by [lane type](#lane-type)
-chatter   | Unreasonably high vehicle count
-locked on | Occupancy at 100% for a duration determined by [lane type](#lane-type)
-no change | No change in occupancy for 24 hours
-occ spike | Occupancy changes more than 25%
+If the `detector_auto_fail_enable` [system attribute] is `true`, the **auto
+fail** flag for each detector will be set and cleared automatically whenever
+these conditions change.
 
-When one of these conditions first occurs and every hour that it persists, an
-event is logged in the `detector_event` database table.  The
-`detector_auto_fail_view` can be used to check recent events.
+### No Hits
+
+This failure condition occurs if no vehicles are counted for a duration
+determined by the [lane type](#lane-type).  It clears immediately when a vehicle
+is counted.
+
+Lane Types                                        | Duration
+--------------------------------------------------|----------------
+Mainline, CD Lane, Velocity                       | 4 hours
+Exit, Wrong Way, HOV                              | 8 hours
+Queue, Passage, Merge                             | 12 hours
+Auxiliary                                         | 24 hours
+Bypass, Green, Omnibus, HOT, Reversible, Shoulder | 72 hours
+Parking                                           | 2 weeks
+
+### Chatter
+
+If a detector reports an unreasonably high vehicle count of 38 or more vehicles
+in a 30 second period, this condition will be triggered.  It will be cleared if
+24 hours pass with all data below that threshold.
+
+### Locked On
+
+This condition occurs if the detector reports 100% occupancy for a duration
+determined by [lane type](#lane-type).  It is also sustained if the occupancy
+drops to zero with no intervening values.  The condition will be cleared after
+24 hours of good occupancy data.
+
+Lane Type                                                              | Duration
+-----------------------------------------------------------------------|--------
+Mainline, Auxiliary, CD Lane, Reversible, Velocity, HOV, HOT, Shoulder | 2 minutes
+Merge, Queue, Exit, Bypass, Passage, Omnibus, Green, Wrong Way         | 30 minutes
+Parking                                                                | 2 weeks
+
+### No Change
+
+If occupancy is greater than zero and it does not change for 24 hours, this
+condition will be triggered.  It will clear immediately if the occupancy
+changes.
+
+### Occ Spike
+
+A spike timer is kept for each detector.  For every 25% change in occupancy
+between two consecutive data samples, 30 seconds are added to the timer.  If its
+value ever exceeds 60 seconds, the condidtion is triggered.  After every poll,
+30 seconds are removed from the timer.  The condition will be cleared after 24
+hours of no spikes.
 
 ## Force Fail
 
