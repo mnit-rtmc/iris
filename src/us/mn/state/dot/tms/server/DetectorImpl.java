@@ -174,7 +174,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Scan "occ spike" threshold */
 	static private final Interval OCC_SPIKE_THRESHOLD =
-		new Interval(60, SECONDS);
+		new Interval(30, SECONDS);
+
+	/** Threshold for occ spike timer to trigger auto fail */
+	static private final int OCC_SPIKE_TIMER_THRESHOLD = 60;
 
 	/** Clear threshold */
 	static private final Interval CLEAR_THRESHOLD =
@@ -1004,7 +1007,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			int spk = Math.abs(occ.value - prev_value) / OCC_SPIKE;
 			spike_hold_sec += occ.period * spk;
 		}
-		occ_spike.updateState(occ.period, spike_hold_sec > 0);
+		boolean sf = spike_hold_sec > OCC_SPIKE_TIMER_THRESHOLD;
+		occ_spike.updateState(occ.period, sf);
 		if (occ_spike.checkLogging(occ.period))
 			logEvent(EventType.DET_OCC_SPIKE);
 		spike_hold_sec = Math.max(0, spike_hold_sec - occ.period);
