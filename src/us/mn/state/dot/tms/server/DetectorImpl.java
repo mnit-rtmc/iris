@@ -66,6 +66,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return SystemAttrEnum.DETECTOR_AUTO_FAIL_ENABLE.getBoolean();
 	}
 
+	/** Is detector occupancy spike failure enabled? */
+	static private boolean isOccSpikeEnabled() {
+		return SystemAttrEnum.DETECTOR_OCC_SPIKE_ENABLE.getBoolean();
+	}
+
 	/** Default average detector field length (feet) */
 	static private final float DEFAULT_FIELD_FT = 22.0f;
 
@@ -632,7 +637,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		          || chatter.triggered
 		          || locked_on.triggered
 		          || no_change.triggered
-		          || occ_spike.triggered;
+		          || (occ_spike.triggered && isOccSpikeEnabled());
 		setAutoFailNotify(af && isAutoFailEnabled());
 	}
 
