@@ -94,7 +94,9 @@ impl TravelDir {
 /// Corridor ID
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 struct CorridorId {
+    /// Name of corridor roadway
     roadway: String,
+    /// Travel direction of corridor
     travel_dir: TravelDir,
 }
 
@@ -117,7 +119,7 @@ struct Corridor {
     count: usize,
 }
 
-/// All segments state
+/// State of all segments
 struct SegmentState {
     /// Mapping of node names to corridor IDs
     node_cors: HashMap<String, CorridorId>,
