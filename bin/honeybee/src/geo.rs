@@ -35,7 +35,6 @@ fn limit_value(val: f64, limit: f64) -> f64 {
 }
 
 impl Wgs84Pos {
-
     /// Equatorial radius of Earth as defined by WGS-84
     const EQUATORIAL_RADIUS_M: f64 = 6378137.0;
 
@@ -80,7 +79,6 @@ impl Wgs84Pos {
 }
 
 impl WebMercatorPos {
-
     /// Maximum latitude for web mercator
     const MAX_LATITUDE: f64 = 85.05112878;
 

@@ -12,22 +12,20 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::{resource, Result};
 use crate::segments::{receive_nodes, RNodeMsg};
+use crate::{resource, Result};
 use fallible_iterator::FallibleIterator;
 use postgres::{Connection, TlsMode};
 use std::collections::HashSet;
 use std::env;
+use std::sync::mpsc::Sender;
 use std::thread;
 use std::time::Duration;
-use std::sync::mpsc::Sender;
 
 /// Start receiving notifications and fetching resources.
 pub fn start() -> Result<()> {
     let (sender, receiver) = std::sync::mpsc::channel();
-    thread::spawn(move || {
-        receive_nodes(receiver)
-    });
+    thread::spawn(move || receive_nodes(receiver));
     let conn = create_connection()?;
     resource::listen_all(&conn)?;
     resource::fetch_all(&conn, &sender)?;

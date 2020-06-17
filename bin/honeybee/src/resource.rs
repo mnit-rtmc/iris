@@ -12,11 +12,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::Result;
 use crate::segments::{RNode, RNodeMsg};
 use crate::signmsg::render_all;
+use crate::Result;
 use postgres::Connection;
-use std::fs::{File, rename};
+use std::fs::{rename, File};
 use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
 use std::sync::mpsc::Sender;
@@ -80,12 +80,8 @@ impl Listen {
     fn is_listening(&self, chan: &str, payload: &str) -> bool {
         match self {
             Listen::All(n) => n == &chan,
-            Listen::Include(n, inc) => {
-                n == &chan && inc == &payload
-            }
-            Listen::Exclude(n, exc) => {
-                n == &chan && !exc.contains(&payload)
-            }
+            Listen::Include(n, inc) => n == &chan && inc == &payload,
+            Listen::Exclude(n, exc) => n == &chan && !exc.contains(&payload),
             Listen::Two(n0, n1) => n0 == &chan || n1 == &chan,
         }
     }
@@ -125,8 +121,9 @@ enum Resource {
 
 /// Camera resource
 const CAMERA_RES: Resource = Resource::Simple(
-"camera_pub", Listen::Exclude("camera", &["video_loss"]),
-"SELECT row_to_json(r)::text FROM (\
+    "camera_pub",
+    Listen::Exclude("camera", &["video_loss"]),
+    "SELECT row_to_json(r)::text FROM (\
     SELECT name, publish, streamable, location, lat, lon \
     FROM camera_view \
     ORDER BY name \
@@ -135,15 +132,17 @@ const CAMERA_RES: Resource = Resource::Simple(
 
 /// DMS attribute resource
 const DMS_ATTRIBUTE_RES: Resource = Resource::Simple(
-"dms_attribute", Listen::All("system_attribute"),
-"SELECT jsonb_object_agg(name, value)::text \
+    "dms_attribute",
+    Listen::All("system_attribute"),
+    "SELECT jsonb_object_agg(name, value)::text \
  FROM dms_attribute_view",
 );
 
 /// DMS resource
 const DMS_RES: Resource = Resource::Simple(
-"dms_pub", Listen::Exclude("dms", &["expire_time", "msg_sched", "msg_current"]),
-"SELECT row_to_json(r)::text FROM (\
+    "dms_pub",
+    Listen::Exclude("dms", &["expire_time", "msg_sched", "msg_current"]),
+    "SELECT row_to_json(r)::text FROM (\
     SELECT name, sign_config, sign_detail, roadway, road_dir, cross_street, \
            location, lat, lon \
     FROM dms_view \
@@ -153,8 +152,9 @@ const DMS_RES: Resource = Resource::Simple(
 
 /// DMS message resource
 const DMS_MSG_RES: Resource = Resource::Simple(
-"dms_message", Listen::Include("dms", "msg_current"),
-"SELECT row_to_json(r)::text FROM (\
+    "dms_message",
+    Listen::Include("dms", "msg_current"),
+    "SELECT row_to_json(r)::text FROM (\
     SELECT name, msg_current, sources, duration, expire_time \
     FROM dms_message_view WHERE condition = 'Active' \
     ORDER BY name \
@@ -163,8 +163,9 @@ const DMS_MSG_RES: Resource = Resource::Simple(
 
 /// Font resource
 const FONT_RES: Resource = Resource::Simple(
-"font", Listen::Two("font", "glyph"),
-"SELECT row_to_json(f)::text FROM (\
+    "font",
+    Listen::Two("font", "glyph"),
+    "SELECT row_to_json(f)::text FROM (\
     SELECT f_number AS number, name, height, char_spacing, line_spacing, \
            array(SELECT row_to_json(c) FROM \
                (SELECT code_point AS number, width, replace(pixels, E'\n', '') \
@@ -174,13 +175,14 @@ const FONT_RES: Resource = Resource::Simple(
                 ORDER BY code_point \
                ) AS c) \
            AS characters, version_id \
-    FROM iris.font ft ORDER BY name) AS f"
+    FROM iris.font ft ORDER BY name) AS f",
 );
 
 /// Graphic resource
 const GRAPHIC_RES: Resource = Resource::Simple(
-"graphic", Listen::All("graphic"),
-"SELECT row_to_json(r)::text FROM (\
+    "graphic",
+    Listen::All("graphic"),
+    "SELECT row_to_json(r)::text FROM (\
     SELECT g_number AS number, name, height, width, color_scheme, \
            transparent_color, replace(pixels, E'\n', '') AS bitmap \
     FROM graphic_view \
@@ -190,8 +192,9 @@ const GRAPHIC_RES: Resource = Resource::Simple(
 
 /// Incident resource
 const INCIDENT_RES: Resource = Resource::Simple(
-"incident", Listen::All("incident"),
-"SELECT row_to_json(r)::text FROM (\
+    "incident",
+    Listen::All("incident"),
+    "SELECT row_to_json(r)::text FROM (\
     SELECT name, event_date, description, road, direction, lane_type, \
            impact, confirmed, camera, detail, replaces, lat, lon \
     FROM incident_view \
@@ -204,8 +207,9 @@ const R_NODE_RES: Resource = Resource::RNode(Listen::All("r_node"));
 
 /// Sign configuration resource
 const SIGN_CONFIG_RES: Resource = Resource::Simple(
-"sign_config", Listen::All("sign_config"),
-"SELECT row_to_json(r)::text FROM (\
+    "sign_config",
+    Listen::All("sign_config"),
+    "SELECT row_to_json(r)::text FROM (\
     SELECT name, face_width, face_height, border_horiz, border_vert, \
            pitch_horiz, pitch_vert, pixel_width, pixel_height, \
            char_width, char_height, monochrome_foreground, \
@@ -216,8 +220,9 @@ const SIGN_CONFIG_RES: Resource = Resource::Simple(
 
 /// Sign detail resource
 const SIGN_DETAIL_RES: Resource = Resource::Simple(
-"sign_detail", Listen::All("sign_detail"),
-"SELECT row_to_json(r)::text FROM (\
+    "sign_detail",
+    Listen::All("sign_detail"),
+    "SELECT row_to_json(r)::text FROM (\
     SELECT name, dms_type, portable, technology, sign_access, legend, \
            beacon_type, hardware_make, hardware_model, software_make, \
            software_model, supported_tags, max_pages, max_multi_len \
@@ -227,8 +232,9 @@ const SIGN_DETAIL_RES: Resource = Resource::Simple(
 
 /// Sign message resource
 const SIGN_MSG_RES: Resource = Resource::SignMsg(
-"sign_message", Listen::All("sign_message"),
-"SELECT row_to_json(r)::text FROM (\
+    "sign_message",
+    Listen::All("sign_message"),
+    "SELECT row_to_json(r)::text FROM (\
     SELECT name, sign_config, incident, multi, beacon_enabled, \
            prefix_page, msg_priority, sources, owner, duration \
     FROM sign_message_view \
@@ -260,8 +266,9 @@ const TPIMS_STAT_RES: Resource = Resource::Simple(
 
 /// Dynamic parking area resource
 const TPIMS_DYN_RES: Resource = Resource::Simple(
-"TPIMS_dynamic", Listen::Include("parking_area", "time_stamp"),
-"SELECT row_to_json(r)::text FROM (\
+    "TPIMS_dynamic",
+    Listen::Include("parking_area", "time_stamp"),
+    "SELECT row_to_json(r)::text FROM (\
     SELECT site_id AS \"siteId\", to_char(time_stamp AT TIME ZONE 'UTC', \
            'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
            to_char(time_stamp_static AT TIME ZONE 'UTC', \
@@ -274,8 +281,9 @@ const TPIMS_DYN_RES: Resource = Resource::Simple(
 
 /// Archive parking area resource
 const TPIMS_ARCH_RES: Resource = Resource::Simple(
-"TPIMS_archive", Listen::Include("parking_area", "time_stamp"),
-"SELECT row_to_json(r)::text FROM (\
+    "TPIMS_archive",
+    Listen::Include("parking_area", "time_stamp"),
+    "SELECT row_to_json(r)::text FROM (\
     SELECT site_id AS \"siteId\", to_char(time_stamp AT TIME ZONE 'UTC', \
            'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
            to_char(time_stamp_static AT TIME ZONE 'UTC', \
@@ -313,9 +321,11 @@ const ALL: &[Resource] = &[
 /// * `conn` The database connection.
 /// * `sql` SQL query.
 /// * `w` Writer to output resource.
-fn fetch_simple<W: Write>(conn: &Connection, sql: &str, mut w: W)
-    -> Result<u32>
-{
+fn fetch_simple<W: Write>(
+    conn: &Connection,
+    sql: &str,
+    mut w: W,
+) -> Result<u32> {
     let mut c = 0;
     w.write_all(b"[")?;
     for row in &conn.query(sql, &[])? {
@@ -338,9 +348,7 @@ fn fetch_simple<W: Write>(conn: &Connection, sql: &str, mut w: W)
 ///
 /// * `conn` The database connection.
 /// * `sender` Sender for RNode messages.
-fn fetch_all_nodes(conn: &Connection, sender: &Sender<RNodeMsg>)
-    -> Result<()>
-{
+fn fetch_all_nodes(conn: &Connection, sender: &Sender<RNodeMsg>) -> Result<()> {
     debug!("fetch_all_nodes");
     sender.send(RNodeMsg::Order(false))?;
     for row in &conn.query(RNode::SQL_ALL, &[])? {
@@ -355,9 +363,11 @@ fn fetch_all_nodes(conn: &Connection, sender: &Sender<RNodeMsg>)
 /// * `conn` The database connection.
 /// * `name` RNode name.
 /// * `sender` Sender for RNode messages.
-fn fetch_one_node(conn: &Connection, name: &str, sender: &Sender<RNodeMsg>)
-    -> Result<()>
-{
+fn fetch_one_node(
+    conn: &Connection,
+    name: &str,
+    sender: &Sender<RNodeMsg>,
+) -> Result<()> {
     debug!("fetch_one_node: {}", name);
     let rows = &conn.query(RNode::SQL_ONE, &[&name])?;
     if rows.len() == 1 {
@@ -386,9 +396,12 @@ impl Resource {
     /// * `conn` The database connection.
     /// * `payload` Postgres NOTIFY payload.
     /// * `sender` Sender for RNode messages.
-    fn fetch(&self, conn: &Connection, payload: &str,
-        sender: &Sender<RNodeMsg>) -> Result<()>
-    {
+    fn fetch(
+        &self,
+        conn: &Connection,
+        payload: &str,
+        sender: &Sender<RNodeMsg>,
+    ) -> Result<()> {
         match self {
             Resource::RNode(_) => self.fetch_nodes(conn, payload, sender),
             Resource::Simple(n, _, _) => self.fetch_file(conn, n),
@@ -401,9 +414,12 @@ impl Resource {
     /// * `conn` The database connection.
     /// * `payload` Postgres NOTIFY payload.
     /// * `sender` Sender for RNode messages.
-    fn fetch_nodes(&self, conn: &Connection, payload: &str,
-        sender: &Sender<RNodeMsg>) -> Result<()>
-    {
+    fn fetch_nodes(
+        &self,
+        conn: &Connection,
+        payload: &str,
+        sender: &Sender<RNodeMsg>,
+    ) -> Result<()> {
         if payload == "" {
             fetch_all_nodes(conn, sender)
         } else {
@@ -477,9 +493,12 @@ pub fn fetch_all(conn: &Connection, sender: &Sender<RNodeMsg>) -> Result<()> {
 /// * `chan` Channel name.
 /// * `payload` Notification payload.
 /// * `sender` Sender for RNode messages.
-pub fn notify(conn: &Connection, chan: &str, payload: &str,
-    sender: &Sender<RNodeMsg>) -> Result<()>
-{
+pub fn notify(
+    conn: &Connection,
+    chan: &str,
+    payload: &str,
+    sender: &Sender<RNodeMsg>,
+) -> Result<()> {
     debug!("notify: {}, {}", &chan, &payload);
     let mut found = false;
     for r in ALL {
@@ -498,5 +517,6 @@ pub fn notify(conn: &Connection, chan: &str, payload: &str,
 
 /// Check if any resource is listening to a channel / payload
 pub fn is_listening_payload(chan: &str, payload: &str) -> bool {
-    ALL.iter().any(|r| r.listen().is_listening_payload(chan,  payload))
+    ALL.iter()
+        .any(|r| r.listen().is_listening_payload(chan, payload))
 }

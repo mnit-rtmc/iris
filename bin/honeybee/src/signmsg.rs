@@ -18,19 +18,24 @@
 //! and renders to images.  This design allows it to be
 //! used in Web Assembly contexts.
 //!
-use crate::Result;
 use crate::resource::{make_name, make_tmp_name};
+use crate::Result;
 use gift::{Encoder, Step};
-use ntcip::dms::{Font, FontCache, Graphic, GraphicCache, PageSplitter, State};
 use ntcip::dms::multi::{
-    ColorClassic, ColorCtx, ColorScheme, JustificationLine,
-    JustificationPage, Rectangle
+    ColorClassic, ColorCtx, ColorScheme, JustificationLine, JustificationPage,
+    Rectangle,
 };
-use pix::{el::Pixel, gray::{Gray, Gray8}, Palette, Raster, rgb::{Rgb, SRgb8}};
+use ntcip::dms::{Font, FontCache, Graphic, GraphicCache, PageSplitter, State};
+use pix::{
+    el::Pixel,
+    gray::{Gray, Gray8},
+    rgb::{Rgb, SRgb8},
+    Palette, Raster,
+};
 use std::collections::{HashMap, HashSet};
 use std::convert::TryInto;
 use std::fmt;
-use std::fs::{File, rename, remove_file, read_dir};
+use std::fs::{read_dir, remove_file, rename, File};
 use std::io::{BufReader, BufWriter, Write};
 use std::path::{Path, PathBuf};
 use std::time::Instant;
@@ -66,17 +71,17 @@ impl UnknownResourceError {
 /// Sign configuration
 #[derive(Deserialize, Serialize)]
 struct SignConfig {
-    name        : String,
-    face_width  : i32,
-    face_height : i32,
+    name: String,
+    face_width: i32,
+    face_height: i32,
     border_horiz: i32,
-    border_vert : i32,
-    pitch_horiz : i32,
-    pitch_vert  : i32,
-    pixel_width : i32,
+    border_vert: i32,
+    pitch_horiz: i32,
+    pitch_vert: i32,
+    pixel_width: i32,
     pixel_height: i32,
-    char_width  : i32,
-    char_height : i32,
+    char_width: i32,
+    char_height: i32,
     monochrome_foreground: i32,
     monochrome_background: i32,
     color_scheme: String,
@@ -86,20 +91,20 @@ struct SignConfig {
 /// Sign detail
 #[derive(Deserialize, Serialize)]
 struct SignDetail {
-    name           : String,
-    dms_type       : String,
-    portable       : bool,
-    technology     : String,
-    sign_access    : String,
-    legend         : String,
-    beacon_type    : String,
-    hardware_make  : String,
-    hardware_model : String,
-    software_make  : String,
-    software_model : String,
-    supported_tags : i32,
-    max_pages      : i32,
-    max_multi_len  : i32,
+    name: String,
+    dms_type: String,
+    portable: bool,
+    technology: String,
+    sign_access: String,
+    legend: String,
+    beacon_type: String,
+    hardware_make: String,
+    hardware_model: String,
+    software_make: String,
+    software_model: String,
+    supported_tags: i32,
+    max_pages: i32,
+    max_multi_len: i32,
 }
 
 /// Data needed for rendering sign messages
@@ -123,16 +128,16 @@ struct ImageCache {
 /// Sign message
 #[derive(Deserialize, Serialize)]
 struct SignMessage {
-    name          : String,
-    sign_config   : String,
-    incident      : Option<String>,
-    multi         : String,
+    name: String,
+    sign_config: String,
+    incident: Option<String>,
+    multi: String,
     beacon_enabled: bool,
-    prefix_page   : bool,
-    msg_priority  : i32,
-    sources       : String,
-    owner         : Option<String>,
-    duration      : Option<i32>,
+    prefix_page: bool,
+    msg_priority: i32,
+    sources: String,
+    owner: Option<String>,
+    duration: Option<i32>,
 }
 
 /// Convert a RGB value to an (red, green, blue) tuple
@@ -304,8 +309,9 @@ impl SignConfig {
     /// Get the default foreground color
     fn foreground_default_rgb(&self) -> (u8, u8, u8) {
         match self.color_scheme() {
-            ColorScheme::ColorClassic |
-            ColorScheme::Color24Bit => ColorClassic::Amber.rgb(),
+            ColorScheme::ColorClassic | ColorScheme::Color24Bit => {
+                ColorClassic::Amber.rgb()
+            }
             _ => rgb_from_i32(self.monochrome_foreground),
         }
     }
@@ -313,8 +319,9 @@ impl SignConfig {
     /// Get the default background color
     fn background_default_rgb(&self) -> (u8, u8, u8) {
         match self.color_scheme() {
-            ColorScheme::ColorClassic |
-            ColorScheme::Color24Bit => ColorClassic::Black.rgb(),
+            ColorScheme::ColorClassic | ColorScheme::Color24Bit => {
+                ColorClassic::Black.rgb()
+            }
             _ => rgb_from_i32(self.monochrome_background),
         }
     }
@@ -327,9 +334,12 @@ impl SignConfig {
     }
 
     /// Render a sign message to a Vec of steps
-    fn render_sign_config<W: Write>(&self, mut writer: W, multi: &str,
-        msg_data: &MsgData) -> Result<()>
-    {
+    fn render_sign_config<W: Write>(
+        &self,
+        mut writer: W,
+        multi: &str,
+        msg_data: &MsgData,
+    ) -> Result<()> {
         let mut palette = Palette::new(256);
         palette.set_threshold_fn(palette_threshold_rgb8_256);
         palette.set_entry(SRgb8::default());
@@ -338,8 +348,8 @@ impl SignConfig {
         let (w, h) = self.calculate_size()?;
         for page in PageSplitter::new(rs, multi) {
             let page = page?;
-            let raster = page.render_page(msg_data.fonts(),
-                msg_data.graphics())?;
+            let raster =
+                page.render_page(msg_data.fonts(), msg_data.graphics())?;
             let delay = page.page_on_time_ds() * 10;
             let step = self.make_face_step(raster, &mut palette, w, h, delay);
             steps.push(step);
@@ -378,16 +388,17 @@ impl SignConfig {
         let fname = self.default_font();
         let font_num = msg_data.font_default(fname)?;
         let font_version_id = None;
-        Ok(State::new(color_ctx,
-                      char_width,
-                      char_height,
-                      page_on_time_ds,
-                      page_off_time_ds,
-                      text_rectangle,
-                      just_page,
-                      just_line,
-                      font_num,
-                      font_version_id,
+        Ok(State::new(
+            color_ctx,
+            char_width,
+            char_height,
+            page_on_time_ds,
+            page_off_time_ds,
+            text_rectangle,
+            just_page,
+            just_line,
+            font_num,
+            font_version_id,
         ))
     }
 
@@ -408,18 +419,27 @@ impl SignConfig {
     }
 
     /// Make a .gif step of sign face
-    fn make_face_step(&self, page: Raster<SRgb8>, palette: &mut Palette,
-        w: u16, h: u16, delay: u16) -> Step
-    {
+    fn make_face_step(
+        &self,
+        page: Raster<SRgb8>,
+        palette: &mut Palette,
+        w: u16,
+        h: u16,
+        delay: u16,
+    ) -> Step {
         let raster = self.make_face_raster(page, palette, w, h);
         Step::with_indexed(raster, palette.clone())
             .with_delay_time_cs(Some(delay))
     }
 
     /// Make a raster of sign face
-    fn make_face_raster(&self, page: Raster<SRgb8>, palette: &mut Palette,
-        w: u16, h: u16) -> Raster<Gray8>
-    {
+    fn make_face_raster(
+        &self,
+        page: Raster<SRgb8>,
+        palette: &mut Palette,
+        w: u16,
+        h: u16,
+    ) -> Raster<Gray8> {
         let dark = SRgb8::new(20, 20, 0);
         let mut face = Raster::with_clear(w.into(), h.into());
         let ph = page.height();
@@ -564,14 +584,10 @@ impl MsgData {
     /// Get the default font number
     fn font_default(&self, fname: Option<&str>) -> Result<u8> {
         match fname {
-            Some(fname) => {
-                match self.fonts.lookup_name(fname) {
-                    Some(font) => Ok(font.number()),
-                    None => {
-                        Err(UnknownResourceError::new(
-                            format!("Font: {}", fname)
-                        ))
-                    },
+            Some(fname) => match self.fonts.lookup_name(fname) {
+                Some(font) => Ok(font.number()),
+                None => {
+                    Err(UnknownResourceError::new(format!("Font: {}", fname)))
                 }
             },
             None => Ok(1),
@@ -617,8 +633,10 @@ impl SignMessage {
             let writer = BufWriter::new(File::create(&tmp_name)?);
             let t = Instant::now();
             if let Err(e) = self.render_sign_msg(msg_data, writer) {
-                warn!("{}, cfg={}, multi={} {:?}", &self.name, self.sign_config,
-                    self.multi, e);
+                warn!(
+                    "{}, cfg={}, multi={} {:?}",
+                    &self.name, self.sign_config, self.multi, e
+                );
                 remove_file(&tmp_name)?;
                 return Ok(());
             };
@@ -629,9 +647,11 @@ impl SignMessage {
     }
 
     /// Render into a .gif file
-    fn render_sign_msg<W: Write>(&self, msg_data: &MsgData, writer: W)
-        -> Result<()>
-    {
+    fn render_sign_msg<W: Write>(
+        &self,
+        msg_data: &MsgData,
+        writer: W,
+    ) -> Result<()> {
         let cfg = msg_data.config(self)?;
         cfg.render_sign_config(writer, self.multi(), msg_data)
     }
@@ -645,7 +665,11 @@ impl ImageCache {
         img_dir.push("img");
         let files = ImageCache::files(img_dir.as_path(), ext)?;
         let ext = ext.to_string();
-        Ok(ImageCache { img_dir, ext, files })
+        Ok(ImageCache {
+            img_dir,
+            ext,
+            files,
+        })
     }
 
     /// Lookup a listing of files with a given extension
@@ -713,9 +737,14 @@ impl ImageCache {
 /// * `cy` Y-Center of circle.
 /// * `r` Radius of circle.
 /// * `clr` Color of circle.
-fn render_circle(raster: &mut Raster<Gray8>, palette: &mut Palette,
-    cx: f32, cy: f32, r: f32, clr: SRgb8)
-{
+fn render_circle(
+    raster: &mut Raster<Gray8>,
+    palette: &mut Palette,
+    cx: f32,
+    cy: f32,
+    r: f32,
+    clr: SRgb8,
+) {
     let x0 = (cx - r).floor().max(0.0) as u32;
     let x1 = (cx + r).ceil().min(raster.width() as f32) as u32;
     let y0 = (cy - r).floor().max(0.0) as u32;
