@@ -243,9 +243,22 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 		    loc.getRoadway() == getRoadway() &&
 		    loc.getRoadDir() == getRoadDir())
 		{
-			Float mp = calculateMilePointNoLimit(loc);
-			if (mp != null && mp <= MAX_DIST.asFloat(MILES))
-				return mp;
+			GeoLocDist gld = snapGeoLoc(loc);
+			if (gld != null)
+				return calculateMilePointNoLimit(gld.loc);
+		}
+		return null;
+	}
+
+	/** Snap a geo location to the corridor */
+	private GeoLocDist snapGeoLoc(GeoLoc loc) {
+		Double lat = loc.getLat();
+		Double lon = loc.getLon();
+		if (lat != null && lon != null) {
+			Position pos = new Position(lat, lon);
+			SphericalMercatorPosition smp =
+				 SphericalMercatorPosition.convert(pos);
+			return snapGeoLoc2(smp, LaneType.MAINLINE, MAX_DIST);
 		}
 		return null;
 	}
