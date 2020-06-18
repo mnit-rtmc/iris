@@ -1,11 +1,19 @@
 # IRIS 5.x Release Notes
 
+5.14.0 (18 Jun 2020)
+ - Auto-fail: add OCC SPIKE check and event type
+ - Auto-fail: don't fail abandoned detectors
+ - TPIMS: renamed exitId to exitID
+ - Send email to `GATE_ARM_ALERT` address when system is disabled
+ - Improved corridor mile point calculations
+ - Fixed test build errors
+
 5.13.0 (14 May 2020)
  - Added WYSIWYG editor for DMS messages
    (thanks to John Stanley and Gordon Parikh at SRF!)
  - Increased minimum required Java version to 1.8
- - Added sign_group_text_view SQL
- - For inc_feed protocol, add optional "direction" field
+ - Added `sign_group_text_view` SQL
+ - For `inc_feed` protocol, add optional "direction" field
  - Append camera name when notifying "publish" field changes in PostgreSQL
 
 5.12.0 (23 Mar 2020)
@@ -21,7 +29,7 @@
  - Don't base camera active / failed status on PTZ controller
  - Incident deployment:
    1. Use landmark for [locxn] tag if cross street is blank
-   2. Don't pick r_node if cross street and landmark are both blank
+   2. Don't pick `r_node` if cross street and landmark are both blank
    3. Added sample configuration to template DB
    4. Removed [locxa] locator tag
  - Filter out quick messages containing DMS action tags from Quick Msg combo box
