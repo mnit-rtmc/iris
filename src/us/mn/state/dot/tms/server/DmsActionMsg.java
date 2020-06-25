@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2019  Minnesota Department of Transportation
+ * Copyright (C) 2013-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -492,12 +492,7 @@ public class DmsActionMsg {
 			return fail("No toll zones");
 		switch (mode) {
 		case "p": // priced
-			PriceMessageEvent ev = calculatePriceMessage(zones);
-			if (ev != null) {
-				prices.add(ev);
-				return priceSpan(ev.price);
-			} else
-				return fail("Invalid toll zone");
+			return calculatePriceMessage(zones);
 		case "o": // open
 		case "c": // closed
 			String last_zid = zones[zones.length - 1];
@@ -509,7 +504,7 @@ public class DmsActionMsg {
 	}
 
 	/** Calculate the price for tolling zones */
-	private PriceMessageEvent calculatePriceMessage(String[] zones) {
+	private String calculatePriceMessage(String[] zones) {
 		assert (zones.length > 0);
 		String last_zid = null; // last toll zone
 		String det = null;
@@ -518,14 +513,14 @@ public class DmsActionMsg {
 		for (String zid: zones) {
 			TollZoneImpl tz = lookupZone(zid);
 			if (null == tz)
-				return null;
+				return fail("Toll zone not found: " + zid);
 			VehicleSampler vs = tz.findMaxDensity(dms.getName(),
 				loc);
 			if (null == vs)
-				return null;
+				return fail("Zone sampler not found: " + zid);
 			Float zone_price = tz.getPrice(vs, dms.getName(), loc);
 			if (null == zone_price)
-				return null;
+				return fail("No Zone density: " + zid);
 			last_zid = zid;
 			det = vs.toString();
 			price += zone_price;
@@ -534,7 +529,9 @@ public class DmsActionMsg {
 				max_price = Math.min(max_price, mp);
 		}
 		price = Math.min(price, max_price);
-		return createPriceMessage(last_zid, det, price);
+		PriceMessageEvent ev = createPriceMessage(last_zid, det, price);
+		prices.add(ev);
+		return priceSpan(ev.price);
 	}
 
 	/** Lookup a toll zone by ID */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	}
 
 	/** Get minimum tolling price */
-	static public float min_price() {
+	static private float min_price() {
 		return SystemAttrEnum.TOLL_MIN_PRICE.getFloat();
 	}
 
@@ -406,7 +406,10 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	 * @param o Origin (location of DMS).
 	 * @return VehicleSampler with maximum density. */
 	public VehicleSampler findMaxDensity(String lbl, GeoLoc o) {
-		SamplerSet ss = lookupDetectors(buildRoute(o));
+		Route r = buildRoute(o);
+		if (null == r)
+			return null;
+		SamplerSet ss = lookupDetectors(r);
 		if (isLogging())
 			log(lbl + " use detectors: " + ss);
 		VehicleSampler sampler = findMaxDensity(ss);
