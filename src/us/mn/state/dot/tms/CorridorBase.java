@@ -504,11 +504,6 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 		for (T n: r_nodes) {
 			if (!n.getActive())
 				continue;
-			if (R_NodeHelper.isContinuityBreak(n)) {
-				np = null;
-				lp = null;
-				continue;
-			}
 			GeoLoc l = n.getGeoLoc();
 			if ((lp != null) &&
 			   (!skipExit(lt, np)) &&
@@ -521,8 +516,13 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 					dist = m;
 				}
 			}
-			np = n;
-			lp = l;
+			if (R_NodeHelper.isContinuityBreak(n)) {
+				np = null;
+				lp = null;
+			} else {
+				np = n;
+				lp = l;
+			}
 		}
 		if (l0 != null) {
 			GeoLoc loc = GeoLocHelper.snapSegment(l0, l1, smp);
