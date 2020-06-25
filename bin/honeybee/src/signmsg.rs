@@ -23,9 +23,8 @@ use crate::Result;
 use gift::{Encoder, Step};
 use ntcip::dms::multi::{
     ColorClassic, ColorCtx, ColorScheme, JustificationLine, JustificationPage,
-    Rectangle,
 };
-use ntcip::dms::{Font, FontCache, Graphic, GraphicCache, PageSplitter, State};
+use ntcip::dms::{Font, FontCache, Graphic, GraphicCache, PageBuilder};
 use pix::{
     el::Pixel,
     gray::{Gray, Gray8},
@@ -326,13 +325,6 @@ impl SignConfig {
         }
     }
 
-    /// Get the default text rectangle
-    fn text_rect_default(&self) -> Result<Rectangle> {
-        let w = self.pixel_width.try_into()?;
-        let h = self.pixel_height.try_into()?;
-        Ok(Rectangle::new(1, 1, w, h))
-    }
-
     /// Render a sign message to a Vec of steps
     fn render_sign_config<W: Write>(
         &self,
@@ -344,21 +336,13 @@ impl SignConfig {
         palette.set_threshold_fn(palette_threshold_rgb8_256);
         palette.set_entry(SRgb8::default());
         let mut steps = Vec::new();
-        let rs = self.render_state_default(msg_data)?;
+        let pages = self.page_builder(msg_data)?;
         let (w, h) = self.calculate_size()?;
-        for page in PageSplitter::new(rs, multi) {
-            let page = page?;
-            let raster =
-                page.render_page(msg_data.fonts(), msg_data.graphics())?;
-            let delay = page.page_on_time_ds() * 10;
+        for page in pages.build(multi) {
+            let (raster, delay_ds) = page?;
+            let delay = delay_ds * 10;
             let step = self.make_face_step(raster, &mut palette, w, h, delay);
             steps.push(step);
-            let t = page.page_off_time_ds() * 10;
-            if t > 0 {
-                let raster = page.render_blank();
-                let step = self.make_face_step(raster, &mut palette, w, h, t);
-                steps.push(step);
-            }
         }
         let mut enc = Encoder::new(&mut writer).into_step_enc();
         enc = if steps.len() > 1 {
@@ -372,8 +356,10 @@ impl SignConfig {
         Ok(())
     }
 
-    /// Create default render state for a sign config.
-    fn render_state_default(&self, msg_data: &MsgData) -> Result<State> {
+    /// Create page builder for a sign config.
+    fn page_builder<'a>(&self, msg_data: &'a MsgData) -> Result<PageBuilder<'a>> {
+        let width = self.pixel_width.try_into()?;
+        let height = self.pixel_height.try_into()?;
         let color_scheme = self.color_scheme();
         let fg_default = self.foreground_default_rgb();
         let bg_default = self.background_default_rgb();
@@ -382,24 +368,21 @@ impl SignConfig {
         let char_height = self.char_height()?;
         let page_on_time_ds = msg_data.page_on_default_ds();
         let page_off_time_ds = msg_data.page_off_default_ds();
-        let text_rectangle = self.text_rect_default()?;
         let just_page = msg_data.page_justification_default();
         let just_line = msg_data.line_justification_default();
         let fname = self.default_font();
         let font_num = msg_data.font_default(fname)?;
-        let font_version_id = None;
-        Ok(State::new(
-            color_ctx,
-            char_width,
-            char_height,
-            page_on_time_ds,
-            page_off_time_ds,
-            text_rectangle,
-            just_page,
-            just_line,
-            font_num,
-            font_version_id,
-        ))
+        Ok(PageBuilder::new(width, height)
+            .with_color_ctx(color_ctx)
+            .with_char_size(char_width, char_height)
+            .with_page_on_time_ds(page_on_time_ds)
+            .with_page_off_time_ds(page_off_time_ds)
+            .with_justification_page(just_page)
+            .with_justification_line(just_line)
+            .with_font_num(font_num)
+            .with_fonts(Some(msg_data.fonts()))
+            .with_graphics(Some(msg_data.graphics()))
+        )
     }
 
     /// Calculate the size of rendered DMS

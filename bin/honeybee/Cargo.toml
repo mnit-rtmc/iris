@@ -1,6 +1,6 @@
 [package]
 name = "honeybee"
-version = "0.8.0"
+version = "0.8.1"
 authors = ["Douglas Lau <doug.lau@state.mn.us>"]
 description = "Server for publishing IRIS data as JSON / GIF"
 license = "GPL-2.0-or-later"
@@ -9,10 +9,10 @@ edition = "2018"
 [dependencies]
 base64 = "0.12.1"
 fallible-iterator = "0.1"
-gift = "0.9.0"
+gift = "0.9.1"
 log = "0.4.8"
 mag = "0.3.0"
-ntcip = "0.3.1"
+ntcip = "0.4.0"
 pix = "0.13.1"
 postgres = "0.15.2"
 serde = "1.0"
