@@ -64,6 +64,7 @@
 	<path id="classpath">
 		<fileset dir="${lib.dir}">
 			<include name="mail.jar"/>
+			<include name="**/*.jar"/>
 		</fileset>
 	</path>
 
@@ -90,6 +91,10 @@
 	<target name="check-rpm">
 		<antcall target="check-dep">
 			<param name="file.dep" value="iris-build.properties"/>
+			<param name="file.dep" value="mail.jar"/>
+			<param name="file.dep" value="jna-5.5.0.jar"/>
+			<param name="file.dep" value="jna-platform-5.5.0.jar"/>
+			<param name="file.dep" value="gst1-java-core-1.2.0.jar"/>
 		</antcall>
 	</target>
 
@@ -213,6 +218,7 @@
 		<copy todir="${dist.server}">
 			<fileset dir="${lib.dir}">
 				<include name="mail.jar"/>
+				<include name="**/*.jar"/>
 			</fileset>
 		</copy>
 	</target>
@@ -264,6 +270,7 @@
 		<copy todir="${dist.client}/lib">
 			<fileset dir="${lib.dir}">
 				<include name="mail.jar"/>
+				<include name="**/*.jar"/>
 			</fileset>
 			<fileset dir="${build.lib}">
 				<include name="${common.jar}"/>

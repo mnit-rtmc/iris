@@ -163,7 +163,8 @@ public class CameraDispatcher extends JPanel {
 		session = s;
 		manager = man;
 		props = session.getProperties();
-		String viewer = props.getProperty(UserProperty.VIDEO_EXTVIEWER.name, "");
+		String viewer = props.getProperty(
+				UserProperty.VIDEO_EXTVIEWER.name, "");
 		extViewerDefined = !viewer.isEmpty();
 		video_req = new VideoRequest(props, SIZE);
 		video_req.setSonarSessionId(session.getSessionId());

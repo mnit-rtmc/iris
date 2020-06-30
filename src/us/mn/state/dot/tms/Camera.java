@@ -92,4 +92,10 @@ public interface Camera extends Device {
 
 	/** Recall the specified preset */
 	void setRecallPreset(int preset);
+
+	/** Set the camera template */
+	void setCameraTemplate(CameraTemplate ct);
+	
+	/** Get the camera template */
+	CameraTemplate getCameraTemplate();
 }

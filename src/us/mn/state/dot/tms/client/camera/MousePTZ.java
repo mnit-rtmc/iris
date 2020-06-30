@@ -72,19 +72,19 @@ public class MousePTZ {
 	private final CameraPTZ cam_ptz;
 
 	/** Size of stream panel widget */
-	private final Dimension size;
+	private Dimension size;
 
 	/** Left edge of dead zone */
-	private final int dead_left;
+	private int dead_left;
 
 	/** Right edge of dead zone */
-	private final int dead_right;
+	private int dead_right;
 
 	/** Upper edge of dead zone */
-	private final int dead_up;
+	private int dead_up;
 
 	/** Lower edge of dead zone */
-	private final int dead_down;
+	private int dead_down;
 
 	/** Pan value from last update */
 	private float pan = 0;
@@ -118,15 +118,28 @@ public class MousePTZ {
 	/** Create a new mouse PTZ handler */
 	public MousePTZ(CameraPTZ cptz, Dimension sz, Component c) {
 		cam_ptz = cptz;
-		size = sz;
-		int deadx = sz.width / 12;
-		dead_left = sz.width / 2 - deadx;
-		dead_right = sz.width / 2 + deadx;
-		int deady = sz.height / 12;
-		dead_up = sz.height / 2 - deady;
-		dead_down = sz.height / 2 + deady;
+		resize(sz.width, sz.height);
 		setComponent(c);
 		timer.start();
+	}
+
+	/** Create a new mouse PTZ handler */
+	public MousePTZ(CameraPTZ cptz, int width, int height, Component c) {
+		cam_ptz = cptz;
+		resize(width, height);
+		setComponent(c);
+		timer.start();
+	}
+
+	/** Set size of mouse-PTZ area */
+	public void resize(int width, int height) {
+		size = new Dimension(width, height);
+		int deadx = width / 12;
+		dead_left = width / 2 - deadx;
+		dead_right = width / 2 + deadx;
+		int deady = height / 12;
+		dead_up = height / 2 - deady;
+		dead_down = height / 2 + deady;
 	}
 
 	/** Set the component for mouse events */

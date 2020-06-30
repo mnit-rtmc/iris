@@ -36,6 +36,8 @@ import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconAction;
+import us.mn.state.dot.tms.CameraTemplate;
+import us.mn.state.dot.tms.CameraVidSourceOrder;
 import us.mn.state.dot.tms.DayMatcher;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DmsAction;
@@ -58,6 +60,7 @@ import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TollZone;
+import us.mn.state.dot.tms.VidSourceTemplate;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.Word;
 import us.mn.state.dot.tms.client.camera.CamCache;
@@ -67,6 +70,7 @@ import us.mn.state.dot.tms.client.dms.DmsCache;
 import us.mn.state.dot.tms.client.incident.IncCache;
 import us.mn.state.dot.tms.client.lcs.LcsCache;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
+import us.mn.state.dot.tms.server.CameraVidSourceOrderImpl;
 
 /**
  * Holds the state of the SONAR client
@@ -485,6 +489,33 @@ public class SonarState extends Client {
 		return rpt_conduits;
 	}
 	
+	/** Cache of camera templates */
+	private final TypeCache<CameraTemplate> cam_templates =
+		new TypeCache<CameraTemplate>(CameraTemplate.class, this);
+
+	/** Get the user type cache */
+	public TypeCache<CameraTemplate> getCamTemplates() {
+		return cam_templates;
+	}
+	
+	/** Cache of video source templates */
+	private final TypeCache<VidSourceTemplate> vid_src_templates =
+		new TypeCache<VidSourceTemplate>(VidSourceTemplate.class, this);
+
+	/** Get the user type cache */
+	public TypeCache<VidSourceTemplate> getVidSrcTemplates() {
+		return vid_src_templates;
+	}
+	
+	/** Cache of video source templates */
+	private final TypeCache<CameraVidSourceOrder> cam_vid_src_order =
+		new TypeCache<CameraVidSourceOrder>(CameraVidSourceOrder.class, this);
+
+	/** Get the user type cache */
+	public TypeCache<CameraVidSourceOrder> getCamVidSrcOrder() {
+		return cam_vid_src_order;
+	}
+	
 	/** Create a new Sonar state */
 	public SonarState(Properties props, ExceptionHandler h)
 		throws IOException, ConfigurationError, NoSuchFieldException,
@@ -626,6 +657,9 @@ public class SonarState extends Client {
 			gpses.ignoreAttribute("latestPoll");
 			gpses.ignoreAttribute("latestSample");
 		}
+		populateReadable(cam_templates);
+		populateReadable(vid_src_templates);
+		populateReadable(cam_vid_src_order);
 	}
 
 	/** Look up the specified connection */

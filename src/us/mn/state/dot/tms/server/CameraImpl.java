@@ -24,6 +24,7 @@ import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraTemplate;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -65,7 +66,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"cam_num, encoder_type, enc_address, enc_port, " +
 			"enc_mcast, enc_channel, publish, streamable, " +
-			"video_loss FROM iris." + SONAR_TYPE + ";",
+			"video_loss, cam_template FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -92,6 +93,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		map.put("publish", publish);
 		map.put("streamable", streamable);
 		map.put("video_loss", video_loss);
+		map.put("cam_template", cam_template);
 		return map;
 	}
 
@@ -131,23 +133,26 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		     (Integer) row.getInt(11),   // enc_channel
 		     row.getBoolean(12),         // publish
 		     row.getBoolean(13),         // streamable
-		     row.getBoolean(14)          // video_loss
+		     row.getBoolean(14),         // video_loss
+		     row.getString(15)           // camera template
 		);
 	}
 
 	/** Create a camera */
 	private CameraImpl(String n, String l, String c, int p, String nt,
 		Integer cn, String et, String ea, Integer ep, String em,
-		Integer ec, boolean pb, boolean st, boolean vl)
+		Integer ec, boolean pb, boolean st, boolean vl, String ct)
 	{
 		this(n, lookupGeoLoc(l), lookupController(c), p, nt, cn,
-		     lookupEncoderType(et), ea, ep, em, ec, pb, st, vl);
+		     lookupEncoderType(et), ea, ep, em, ec, pb, st, vl,
+		     lookupCameraTemplate(ct));
 	}
 
 	/** Create a camera */
 	private CameraImpl(String n, GeoLocImpl l, ControllerImpl c, int p,
 		String nt, Integer cn, EncoderType et, String ea, Integer ep,
-		String em, Integer ec, boolean pb, boolean st, boolean vl)
+		String em, Integer ec, boolean pb, boolean st, boolean vl,
+		CameraTemplate ct)
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
@@ -160,6 +165,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		publish = pb;
 		streamable = st;
 		video_loss = vl;
+		cam_template = ct;
 		initTransients();
 	}
 
@@ -560,5 +566,28 @@ public class CameraImpl extends DeviceImpl implements Camera {
 			        formatDouble(pos.getLatitude())));
 		}
 		w.write("/>\n");
+	}
+
+	/** Camera template name */
+	private CameraTemplate cam_template;
+
+	/** Set the camera template */
+	@Override
+	public void setCameraTemplate(CameraTemplate ct) {
+		this.cam_template = ct;
+	}
+
+	/** Set the camera template */
+	public void doSetCameraTemplate(CameraTemplate ct) throws TMSException {
+		if (!ct.equals(cam_template)) {
+			store.update(this, "cam_template", ct);
+			setCameraTemplate(ct);
+		}
+	}
+
+	/** Get the camera template */
+	@Override
+	public CameraTemplate getCameraTemplate() {
+		return cam_template;
 	}
 }
