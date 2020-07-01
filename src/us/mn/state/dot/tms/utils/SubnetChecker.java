@@ -41,6 +41,17 @@ public class SubnetChecker extends Thread {
 	/** A single thread for the checker */
 	static SubnetChecker thread;
 	
+	/** List of ping targets and subnet names.
+	 * Default list uses google.com to detect
+	 * if we have generic internet access.
+	 * This is replaced by system-attribute
+	 * subnet_target_# entries, if any exist.
+	 */
+	private static String[] targets = {
+		"www.google.com=internet",    // icmp ping
+		"www.google.com:80=internet", // tcp ping
+	};
+	
 	/** When SubnetChecker is first referenced,
 	 *  this creates an instance and runs it. */
 	static {
@@ -83,17 +94,6 @@ public class SubnetChecker extends Thread {
 
 	//-------------------------------------------
 
-	/** List of ping targets and subnet names.
-	 * Default list uses google.com to detect
-	 * if we have generic internet access.
-	 * This is replaced by system-attribute
-	 * subnet_target_# entries, if any exist.
-	 */
-	private static String[] targets = {
-		"www.google.com=internet",    // icmp ping
-		"www.google.com:80=internet", // tcp ping
-	};
-
 	//-------------------------------------------
 
 	/** Construct/initialize the subnet checker */
@@ -101,6 +101,7 @@ public class SubnetChecker extends Thread {
 		super("SubnetChecker");
 		loadSubnetTargets();
 		ipAddressList = getAllMyAddresses();
+		
 	}
 
 	/** Load subnet target list.
@@ -115,7 +116,7 @@ public class SubnetChecker extends Thread {
 		int i = 0, gap = 0;
 		String aName, target;
 		List<String> list = new ArrayList<String>();
-		while ((i > 0) && (gap < 10)) {
+		while ((i >= 0) && (gap < 10)) {
 			aName = "subnet_target_"+i;
 			if (aName.length() > SystemAttribute.MAXLEN_ANAME)
 				break; // VERY unlikely
@@ -140,7 +141,7 @@ public class SubnetChecker extends Thread {
 		// Only override default targets if we found
 		// at least one valid subnet_target_# entry.
 		if (list.isEmpty() == false)
-			targets = (String[]) list.toArray();
+			targets = (String[]) list.stream().toArray(String[]::new);
 	}
 		
 	/** Try to load subnet-target attribute.
@@ -333,13 +334,13 @@ public class SubnetChecker extends Thread {
 	//-------------------------------------------
 	
 	/** test */
-	static public void main(String[] args) {
-		try {
-			sleep(10*1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println("Exiting");
-	}	
+//	static public void main(String[] args) {
+//		try {
+//			sleep(10*1000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		System.out.println("Exiting");
+//	}	
 }
