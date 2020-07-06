@@ -357,7 +357,10 @@ impl SignConfig {
     }
 
     /// Create page builder for a sign config.
-    fn page_builder<'a>(&self, msg_data: &'a MsgData) -> Result<PageBuilder<'a>> {
+    fn page_builder<'a>(
+        &self,
+        msg_data: &'a MsgData,
+    ) -> Result<PageBuilder<'a>> {
         let width = self.pixel_width.try_into()?;
         let height = self.pixel_height.try_into()?;
         let color_scheme = self.color_scheme();
@@ -381,8 +384,7 @@ impl SignConfig {
             .with_justification_line(just_line)
             .with_font_num(font_num)
             .with_fonts(Some(msg_data.fonts()))
-            .with_graphics(Some(msg_data.graphics()))
-        )
+            .with_graphics(Some(msg_data.graphics())))
     }
 
     /// Calculate the size of rendered DMS
