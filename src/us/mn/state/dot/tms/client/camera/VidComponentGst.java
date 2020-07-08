@@ -90,7 +90,7 @@ public class VidComponentGst extends javax.swing.JComponent {
 		listener = new AppSinkListener();
 		videosink.connect((AppSink.NEW_SAMPLE) listener);
 		videosink.connect((AppSink.NEW_PREROLL) listener);
-		StringBuilder caps = new StringBuilder("video/x-raw,pixel-aspect-ratio=1/1,");
+		StringBuilder caps = new StringBuilder("video/x-raw,");
 		// JNA creates ByteBuffer using native byte order, set masks according to that.
 		if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
 			caps.append("format=BGRx");
