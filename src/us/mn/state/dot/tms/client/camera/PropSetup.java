@@ -225,6 +225,7 @@ public class PropSetup extends IPanel {
 	public void updateEditMode() {
 		cam_num_txt.setEnabled(canWrite("camNum"));
 		enc_type_act.setEnabled(canWrite("encoderType"));
+		cam_tmplt_cbx.setEnabled(canWrite("cameraTemplate"));
 		enc_address_txt.setEnabled(canWrite("encAddress"));
 		enc_port_txt.setEnabled(canWrite("encPort"));
 		enc_mcast_txt.setEnabled(canWrite("encMcast"));
