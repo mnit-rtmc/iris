@@ -627,11 +627,13 @@ public class VidPanel extends JPanel implements FocusListener {
 				null,
 				SystemAttrEnum.VID_RECONNECT_TIMEOUT_SEC);
 
-//		streamReqList = VidStreamReq.getStreamRequests_test(camera);
 		Session s = Session.getCurrent();
 		streamReqList = VidStreamReq.getVidStreamReqs(camera);
+		streamReqNum = 0;
 		cam_ptz = new CameraPTZ(s);
 		cam_ptz.setCamera(cam);
+		if (mouse_ptz != null)
+			mouse_ptz.dispose();
 		if (isFlagSet(MOUSE_PTZ))
 			mouse_ptz = createMousePTZ(cam_ptz, videoDimension, videoHolder);
 		boolean ret = !streamReqList.isEmpty();

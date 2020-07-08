@@ -71,6 +71,12 @@ public class MousePTZ {
 	/** Camera PTZ control */
 	private final CameraPTZ cam_ptz;
 
+	/** Mouse adapter for reading mouse events */
+	private MouseAdapter mouser;
+	
+	/** Component this mouse PTZ is linked to */
+	private Component component;
+
 	/** Size of stream panel widget */
 	private Dimension size;
 
@@ -114,7 +120,7 @@ public class MousePTZ {
 
 	/** Zoom timer */
 	private final Timer timer = new Timer(ZOOM_TICK, new ZoomTimer());
-
+	
 	/** Create a new mouse PTZ handler */
 	public MousePTZ(CameraPTZ cptz, Dimension sz, Component c) {
 		cam_ptz = cptz;
@@ -144,7 +150,7 @@ public class MousePTZ {
 
 	/** Set the component for mouse events */
 	private void setComponent(final Component c) {
-		MouseAdapter mouser = new MouseAdapter() {
+		mouser = new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				cancelPanTilt();
@@ -180,10 +186,14 @@ public class MousePTZ {
 		c.addMouseListener(mouser);
 		c.addMouseMotionListener(mouser);
 		c.addMouseWheelListener(mouser);
+		component = c;
 	}
 
 	/** Dispose of the mouse PTZ handler */
 	public void dispose() {
+		component.removeMouseListener(mouser);
+		component.removeMouseMotionListener(mouser);
+		component.removeMouseWheelListener(mouser);
 		timer.stop();
 	}
 
