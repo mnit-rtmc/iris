@@ -22,13 +22,14 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 
-import com.sun.jna.NativeLibrary;
 import com.sun.jna.Platform;
 import com.sun.jna.platform.win32.Kernel32;
 
@@ -126,7 +127,6 @@ public class VidStreamMgrGst extends VidStreamMgr {
 			appsink = (AppSink) pipe.getElementByName("appsink");
 			List<Element> elements = pipe.getElements();
 			srcElem = elements.get(0);
-//			dumpElement(srcElem, "Start");
 			gstComponent = new VidComponentGst(appsink, this);
 			appsinkListener = new AppSinkListener();
 			appsink.connect((AppSink.NEW_SAMPLE) appsinkListener);
@@ -141,9 +141,11 @@ public class VidStreamMgrGst extends VidStreamMgr {
 			return true;
 		} catch (GstException e) {
 			setErrorMsg(e, "Unknown GStreamer error");
+			e.printStackTrace();
 			return false;
 		} catch (Exception e) {
 			setErrorMsg(e, "Unknown error");
+			e.printStackTrace();
 			return false;
 		}
 	}
@@ -152,14 +154,25 @@ public class VidStreamMgrGst extends VidStreamMgr {
 	private synchronized void closeStream() {
 		Pipeline p = pipe;
 		if (p != null) {
+			// NOTE - uncomment the lines below to generate debug DOT files of
+			// the GStreamer pipeline. You must have the GST_DEBUG_DUMP_DOT_DIR
+			// environment variable set for this to work.
+//			pipe.debugToDotFile(Bin.DebugGraphDetails.SHOW_ALL,
+//					getDOTFileName());
 			pipe = null;
 			if (appsink == null)
 				System.out.println("appsink is null");
-			appsink.disconnect((AppSink.NEW_SAMPLE) appsinkListener);
-			appsink.disconnect((AppSink.EOS)        appsinkListener);
-			bus.disconnect((Bus.ERROR)  busListener);
-			bus.disconnect((Bus.WARNING)busListener);
-			bus.disconnect((Bus.INFO)   busListener);
+			else {
+				appsink.disconnect((AppSink.NEW_SAMPLE) appsinkListener);
+				appsink.disconnect((AppSink.EOS)        appsinkListener);
+			}
+			if (bus == null)
+				System.out.println("bus is null");
+			else {
+				bus.disconnect((Bus.ERROR)  busListener);
+				bus.disconnect((Bus.WARNING)busListener);
+				bus.disconnect((Bus.INFO)   busListener);
+			}
 			gstComponent.disconnectAll();
 			gstComponent = null;
 //			setComponent(null);
@@ -176,7 +189,15 @@ public class VidStreamMgrGst extends VidStreamMgr {
 //			setStatus("");
 		}
 	}
-
+	
+	/** Generate a DOT filename with the current date and time. */
+	private String getDOTFileName() {
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern(
+				"yyyyMMdd-HHmmss_SSS");
+		return String.format("pipe_dbg_%s", dtf.format
+				(LocalDateTime.now()));
+	}
+	
 	/** Listen for start and stop of video stream */
 	private class AppSinkListener implements AppSink.NEW_SAMPLE, AppSink.EOS {
 
