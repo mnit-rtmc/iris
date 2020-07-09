@@ -120,6 +120,7 @@ struct Corridor {
 }
 
 /// State of all segments
+#[derive(Default)]
 struct SegmentState {
     /// Mapping of node names to corridor IDs
     node_cors: HashMap<String, CorridorId>,
@@ -138,7 +139,7 @@ impl GeoLoc {
         }
     }
 
-    /// Get the node position
+    /// Get the position
     fn pos(&self) -> Option<Wgs84Pos> {
         self.latlon().map(|(lat, lon)| Wgs84Pos::new(lat, lon))
     }
@@ -377,18 +378,6 @@ impl Corridor {
 }
 
 impl SegmentState {
-    /// Create a new segment state
-    fn new() -> Self {
-        let node_cors = HashMap::new();
-        let corridors = HashMap::new();
-        let ordered = false;
-        SegmentState {
-            node_cors,
-            corridors,
-            ordered,
-        }
-    }
-
     /// Add or update a node
     fn add_update_node(&mut self, node: RNode) {
         match node.cor_id() {
@@ -461,7 +450,7 @@ impl SegmentState {
 
 /// Receive roadway nodes and update corridor segments
 pub fn receive_nodes(receiver: Receiver<RNodeMsg>) {
-    let mut state = SegmentState::new();
+    let mut state = SegmentState::default();
     loop {
         match receiver.recv().unwrap() {
             RNodeMsg::AddUpdate(node) => state.add_update_node(node),
