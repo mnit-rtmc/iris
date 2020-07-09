@@ -174,7 +174,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Scan "occ spike" threshold */
 	static private final Interval OCC_SPIKE_THRESHOLD =
-		new Interval(30, SECONDS);
+		new Interval(10, SECONDS);
 
 	/** Threshold for occ spike timer to trigger auto fail */
 	static private final int OCC_SPIKE_TIMER_THRESHOLD = 60;
