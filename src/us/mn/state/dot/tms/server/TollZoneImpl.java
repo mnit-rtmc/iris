@@ -320,42 +320,45 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	}
 
 	/** Build the route for the whole toll zone */
-	private Route buildRoute() {
+	private Route buildRoute(String lbl) {
 		GeoLoc o = StationHelper.lookupGeoLoc(start_id);
 		if (o != null)
-			return buildRoute(o);
+			return buildRoute(lbl, o);
 		else {
 			if (isLogging())
-				log("Invalid zone start: " + start_id);
+				log(lbl, "Invalid zone start: " + start_id);
 			return null;
 		}
 	}
 
 	/** Build the route from an origin.
+	 * @param lbl Sign label for logging.
 	 * @param o Origin geo location.
 	 * @return Route from origin to end of zone, or null */
-	private Route buildRoute(GeoLoc o) {
+	private Route buildRoute(String lbl, GeoLoc o) {
 		GeoLoc d = StationHelper.lookupGeoLoc(end_id);
 		if (d != null)
-			return buildRoute(o, d);
+			return buildRoute(lbl, o, d);
 		else {
 			if (isLogging())
-				log("Invalid zone end: " + end_id);
+				log(lbl, "Invalid zone end: " + end_id);
 			return null;
 		}
 	}
 
 	/** Build a route from an origin to a destination.
+	 * @param lbl Sign label for logging.
 	 * @param o Origin geo location.
 	 * @param d Destination geo location.
 	 * @return Route from origin to destination, or null */
-	private Route buildRoute(GeoLoc o, GeoLoc d) {
+	private Route buildRoute(String lbl, GeoLoc o, GeoLoc d) {
 		long st = TimeSteward.currentTimeMillis();
 		RouteFinder rf = new RouteFinder(BaseObjectImpl.corridors);
 		Route r = rf.findRoute(o, d);
 		if (isLogging()) {
 			long e = TimeSteward.currentTimeMillis() - st;
-			log("ROUTE TO " + end_id + strNot(r) + "FOUND: " + e);
+			log(lbl, "ROUTE TO " + end_id + strNot(r) + "FOUND: " +
+				e);
 		}
 		return r;
 	}
@@ -368,7 +371,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	/** Update density.
 	 * @param np New pricing period (if true). */
 	public synchronized void updateDensity(boolean np) {
-		updateDensityHistory();
+		updateDensityHistory("JOB");
 		for (Map.Entry<VehicleSampler,DensityHist> e:k_hist.entrySet()){
 			double k = e.getKey().getDensity();
 			e.getValue().updateDensity(np, k);
@@ -376,10 +379,10 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	}
 
 	/** Update density history for all detectors in the toll zone */
-	private void updateDensityHistory() {
-		SamplerSet ss = lookupDetectors(buildRoute());
+	private void updateDensityHistory(String lbl) {
+		SamplerSet ss = lookupDetectors(buildRoute(lbl));
 		if (isLogging())
-			log("all detectors: " + ss);
+			log(lbl, "All detectors: " + ss);
 		removeHistoryMappings(ss);
 		addHistoryMappings(ss);
 	}
@@ -406,15 +409,15 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	 * @param o Origin (location of DMS).
 	 * @return VehicleSampler with maximum density. */
 	public VehicleSampler findMaxDensity(String lbl, GeoLoc o) {
-		Route r = buildRoute(o);
+		Route r = buildRoute(lbl, o);
 		if (null == r)
 			return null;
 		SamplerSet ss = lookupDetectors(r);
 		if (isLogging())
-			log(lbl + " use detectors: " + ss);
+			log(lbl, "use detectors: " + ss);
 		VehicleSampler sampler = findMaxDensity(ss);
 		if (isLogging())
-			log(lbl + " max density @ " + sampler);
+			log(lbl, "max density @ " + sampler);
 		return sampler;
 	}
 
@@ -444,15 +447,15 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	}
 
 	/** Get the current toll zone price.
-	 * @param sampler Vehicle sampler with max density.
 	 * @param lbl Sign label for logging.
+	 * @param sampler Vehicle sampler with max density.
 	 * @param o Origin (location of DMS).
 	 * @return Price (dollars). */
-	public Float getPrice(VehicleSampler sampler, String lbl, GeoLoc o) {
+	public Float getPrice(String lbl, VehicleSampler sampler, GeoLoc o) {
 		Double k_hot = getDensity(sampler);
 		Float price = (k_hot != null) ? calculatePricing(k_hot) : null;
 		if (isLogging())
-			log(lbl + " k_hot: " + k_hot + ", price: $" + price);
+			log(lbl, "k_hot: " + k_hot + ", price: $" + price);
 		return price;
 	}
 
@@ -472,7 +475,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	}
 
 	/** Log a toll zone message */
-	private void log(String m) {
-		TOLL_LOG.log(name + ": " + m);
+	private void log(String lbl, String m) {
+		TOLL_LOG.log(name + "(" + lbl + "): " + m);
 	}
 }

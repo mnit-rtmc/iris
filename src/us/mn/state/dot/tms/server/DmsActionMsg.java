@@ -518,7 +518,7 @@ public class DmsActionMsg {
 				loc);
 			if (null == vs)
 				return fail("Zone sampler not found: " + zid);
-			Float zone_price = tz.getPrice(vs, dms.getName(), loc);
+			Float zone_price = tz.getPrice(dms.getName(), vs, loc);
 			if (null == zone_price)
 				return fail("No Zone density: " + zid);
 			last_zid = zid;
