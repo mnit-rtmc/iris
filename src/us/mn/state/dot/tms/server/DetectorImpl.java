@@ -412,7 +412,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		no_change = new AutoFailCounter(getNoChangeThreshold(),
 			FAST_CLEAR_THRESHOLD);
 		occ_spike = new AutoFailCounter(getOccSpikeThreshold(),
-			CLEAR_THRESHOLD);
+			new Interval(1, Interval.Units.HOURS));
 		updateAutoFail();
 	}
 
