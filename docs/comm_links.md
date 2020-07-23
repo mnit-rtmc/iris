@@ -181,9 +181,10 @@ are **DMS name**, [MULTI] **string**, and **expiration time**.  The _DMS name_
 must exactly match one of the DMS as identified by IRIS.  The _MULTI string_
 specifies a message to display on the sign, using the _MULTI_ markup language.
 The _expiration time_ field indicates the date and time that the message should
-expire, in [RFC 3339] format: `yyyy-MM-dd HH:mm:ssZ`.
+expire, in [RFC 3339] format, with `full-date` and `full-time` separated by a
+space instead of `T`.
 ```
-V66E37	CRASH[nl]5 MILES AHEAD[nl]LEFT LANE CLOSED	2019-10-02 11:37:00-0500
+V66E37	CRASH[nl]5 MILES AHEAD[nl]LEFT LANE CLOSED	2019-10-02 11:37:00-05:00
 ```
 
 #### Msg-Feed Action Plan

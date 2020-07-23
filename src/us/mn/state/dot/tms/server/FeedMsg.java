@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2016  Minnesota Department of Transportation
+ * Copyright (C) 2011-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,17 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Douglas Lau
  */
 public class FeedMsg {
+
+	/** Parse a time stamp */
+	static private Date parse_date(String format, String value) {
+		SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.US);
+		try {
+			return sdf.parse(value);
+		}
+		catch (ParseException e) {
+			return null;
+		}
+	}
 
 	/** Feed name */
 	private final String feed;
@@ -76,14 +87,11 @@ public class FeedMsg {
 
 	/** Parse a time stamp */
 	private Date parseTime(String time) {
-		SimpleDateFormat sdf = new SimpleDateFormat(
-			"yyyy-MM-dd HH:mm:ssZ", Locale.US);
-		try {
-			return sdf.parse(time);
-		}
-		catch(ParseException e) {
-			return null;
-		}
+		// NOTE: this format does not expect a colon in the time zone
+		Date date = parse_date("yyyy-MM-dd HH:mm:ssZ", time);
+		return (date != null)
+		      ? date
+		      : parse_date("yyyy-MM-dd HH:mm:ssXXX", time);
 	}
 
 	/** Get a string representation of the feed message */
