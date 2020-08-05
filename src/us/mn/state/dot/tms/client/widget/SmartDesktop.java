@@ -17,12 +17,15 @@
 package us.mn.state.dot.tms.client.widget;
 
 import java.awt.Container;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
-import java.io.IOException;
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
+import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
@@ -100,6 +103,19 @@ public class SmartDesktop extends JDesktopPane {
 		frame.show();
 		return frame;
 	}
+	
+	/** Show the specified form */
+	public void showExtFrame(AbstractForm form) {
+		JFrame frame = addExtForm(form);
+		frame.setVisible(true);
+	}
+	
+	/** Show the specified form */
+	public void showExtFrame(AbstractForm form, int x, int y) {
+		JFrame frame = addExtForm(form);
+		frame.setLocation(new Point(x, y));
+		frame.setVisible(true);
+	}
 
 	/** Find a frame with a specific title */
 	private JInternalFrame findFrame(String title) {
@@ -116,6 +132,32 @@ public class SmartDesktop extends JDesktopPane {
 		JInternalFrame frame = createFrame(form);
 		add(frame, FRAME_LAYER);
 		frame.pack();
+		return frame;
+	}
+	
+	/** Add an abstract form to the desktop pane */
+	private JFrame addExtForm(AbstractForm form) {
+		form.initialize();
+		JFrame frame = createExtFrame(form);
+		frame.pack();
+		return frame;
+	}
+	
+	/** Create a new internal frame */
+	private JFrame createExtFrame(final AbstractForm form) {
+		final JFrame frame = new JFrame();
+		frame.setTitle(form.getTitle());
+		frame.setResizable(form.isResizable());
+		frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+				smartDesktopRequestFocus();	// see note
+				form.dispose();
+				frame.dispose();
+			}
+		});
+		frame.setContentPane(form);	
 		return frame;
 	}
 
@@ -135,6 +177,12 @@ public class SmartDesktop extends JDesktopPane {
 		});
 		frame.setContentPane(form);
 		return frame;
+	}
+	
+	public void setFullScreen(JFrame frame) {
+		frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+		frame.setUndecorated(true);
+		frame.setVisible(true);
 	}
 
 	/** This method is being invoked to solve a subtle problem with

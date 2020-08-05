@@ -40,6 +40,8 @@ public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 		"cabinet_style",
 		"camera",
 		"camera_preset",
+		"camera_template",
+		"cam_vid_src_ord",
 		"capability",
 		"catalog",
 		"comm_link",
@@ -97,6 +99,7 @@ public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 		"toll_zone",
 		"user",
 		"video_monitor",
+		"vid_src_template",
 		"weather_sensor",
 		"word"
 	};

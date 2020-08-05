@@ -53,7 +53,7 @@ public class IListCellRenderer<T> implements ListCellRenderer<T> {
 	}
 
 	/** Get a value as string */
-	private String asText(T value) {
+	protected String asText(T value) {
 		if (value != null) {
 			String v = valueToString(value);
 			if (v.length() > 0)

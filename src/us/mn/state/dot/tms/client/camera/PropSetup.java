@@ -24,9 +24,13 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraTemplate;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.IPanel;
@@ -95,6 +99,29 @@ public class PropSetup extends IPanel {
 			camera.setPublish(publish_chk.isSelected());
 		}
 	});
+	
+	/** Camera Template ComboBox */
+	private final JComboBox<CameraTemplate> cam_tmplt_cbx = 
+			new JComboBox<CameraTemplate>();
+	
+	/** Camera template action */
+	private final IAction cam_tmplt_act = new IAction("camera.template"){
+		protected void doActionPerformed(ActionEvent e) {
+			CameraTemplate ct = getSelectedCameraTemplate();
+		    camera.setCameraTemplate(ct);
+		}
+		@Override
+		protected void doUpdateSelected() {
+			cam_tmplt_cbx.setSelectedItem(camera.getCameraTemplate());
+		}
+	};
+	
+	/** Get the selected camera template */
+	private CameraTemplate getSelectedCameraTemplate() {
+		Object ct = cam_tmplt_cbx.getSelectedItem();
+		return (ct instanceof CameraTemplate) ? (CameraTemplate) ct : null;
+	}
+	
 
 	/** Checkbox to allow streaming camera images */
 	private final JCheckBox streamable_chk = new JCheckBox(new IAction(null)
@@ -120,10 +147,15 @@ public class PropSetup extends IPanel {
 	@Override
 	public void initialize() {
 		super.initialize();
-		enc_type_cbx.setModel(new IComboBoxModel<EncoderType>(session
-			.getSonarState().getCamCache().getEncoderTypeModel()));
+		CamCache cc = session.getSonarState().getCamCache();
+		enc_type_cbx.setModel(new IComboBoxModel<EncoderType>(
+				cc.getEncoderTypeModel()));
 		enc_type_cbx.setAction(enc_type_act);
 		enc_type_cbx.setRenderer(new EncoderTypeRenderer());
+		cam_tmplt_cbx.setModel(new IComboBoxModel<CameraTemplate>(
+				cc.getCameraTemplateModel()));
+		cam_tmplt_cbx.setRenderer(new CameraTemplateRenderer());
+		cam_tmplt_cbx.setAction(cam_tmplt_act);
 		add("camera.num");
 		add(cam_num_txt, Stretch.LAST);
 		add("encoder.type");
@@ -136,6 +168,8 @@ public class PropSetup extends IPanel {
 		add(enc_mcast_txt, Stretch.LAST);
 		add("camera.enc_channel");
 		add(enc_chn_spn, Stretch.LAST);
+		add("camera.template");
+		add(cam_tmplt_cbx, Stretch.LAST);
 		add("camera.publish");
 		add(publish_chk, Stretch.LAST);
 		add("camera.streamable");
@@ -186,11 +220,12 @@ public class PropSetup extends IPanel {
 			}
 		});
 	}
-
+	
 	/** Update the edit mode */
 	public void updateEditMode() {
 		cam_num_txt.setEnabled(canWrite("camNum"));
 		enc_type_act.setEnabled(canWrite("encoderType"));
+		cam_tmplt_cbx.setEnabled(canWrite("cameraTemplate"));
 		enc_address_txt.setEnabled(canWrite("encAddress"));
 		enc_port_txt.setEnabled(canWrite("encPort"));
 		enc_mcast_txt.setEnabled(canWrite("encMcast"));
@@ -227,6 +262,8 @@ public class PropSetup extends IPanel {
 			publish_chk.setSelected(camera.getPublish());
 		if (a == null || a.equals("streamable"))
 			streamable_chk.setSelected(camera.getStreamable());
+		if (a == null || a.equals("cameraTemplate"))
+			cam_tmplt_act.updateSelected();
 	}
 
 	/** Check if the user can write an attribute */

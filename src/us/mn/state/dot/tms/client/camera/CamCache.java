@@ -18,6 +18,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraAction;
 import us.mn.state.dot.tms.CameraPreset;
+import us.mn.state.dot.tms.CameraTemplate;
 import us.mn.state.dot.tms.Catalog;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.EncoderStream;
@@ -56,6 +57,22 @@ public class CamCache {
 	/** Get the encoder type model */
 	public ProxyListModel<EncoderType> getEncoderTypeModel() {
 		return enc_type_mdl;
+	}
+
+	/** Cache of camera templates */
+	private final TypeCache<CameraTemplate> cam_templates;
+
+	/** Get the camera templates object cache */
+	public TypeCache<CameraTemplate> getCameraTemplates() {
+		return cam_templates;
+	}
+
+	/** Camera template model */
+	private final ProxyListModel<CameraTemplate> cam_tmplt_mdl;
+	
+	/** Get the camera template model */
+	public ProxyListModel<CameraTemplate> getCameraTemplateModel() {
+		return cam_tmplt_mdl;
 	}
 
 	/** Cache of encoder streams */
@@ -162,6 +179,9 @@ public class CamCache {
 			client);
 		enc_type_mdl = new ProxyListModel<EncoderType>(encoder_types);
 		enc_type_mdl.initialize();
+		cam_templates = client.getCamTemplates();
+		cam_tmplt_mdl = new ProxyListModel<CameraTemplate>(cam_templates);
+		cam_tmplt_mdl.initialize();
 		encoder_streams = new TypeCache<EncoderStream>(
 			EncoderStream.class, client);
 		cameras = new TypeCache<Camera>(Camera.class, client);
@@ -194,6 +214,7 @@ public class CamCache {
 	/** Populate the type caches */
 	public void populate(SonarState client) {
 		client.populateReadable(encoder_types);
+		client.populateReadable(cam_templates);
 		client.populateReadable(encoder_streams);
 		client.populateReadable(cameras);
 		if (client.canRead(Camera.SONAR_TYPE))

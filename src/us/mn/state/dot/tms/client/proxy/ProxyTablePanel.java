@@ -76,12 +76,10 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 	/** Action to delete the selected proxy */
 	private final IAction del_proxy = new IAction("device.delete") {
 		protected void doActionPerformed(ActionEvent e) {
-			T proxy = getSelectedProxy();
-			if (proxy != null)
-				proxy.destroy();
+			deleteSelectedProxy();
 		}
 	};
-
+	
 	/** Mouse listener for table */
 	private final MouseAdapter mouser = new MouseAdapter() {
 		@Override
@@ -193,23 +191,45 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 	}
-
+	
+	/** Selection listener for triggering events on selection. */
+	protected IListSelectionAdapter selectionListener =
+			new IListSelectionAdapter() {
+		@Override
+		public void valueChanged() {
+			selectProxy();
+		}
+	};
+	
 	/** Create Gui jobs */
 	protected void createJobs() {
 		ListSelectionModel s = table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new IListSelectionAdapter() {
-			@Override
-			public void valueChanged() {
-				selectProxy();
-			}
-		});
+		s.addListSelectionListener(selectionListener);
 		if (model.hasProperties())
 			table.addMouseListener(mouser);
 		if (model.hasCreateDelete()) {
 			add_proxy.setEnabled(model.canAdd());
 			add_txt.setAction(add_proxy);
 		}
+	}
+	
+	/** Disable selection handling on the table (so synthetic selection events
+	 *  don't re-trigger actions. Removes the list selection listener from the
+	 *  selection model. The enableSelectionHandling() method reverses this.
+	 */
+	public void disableSelectionHandling() {
+		ListSelectionModel s = table.getSelectionModel();
+		s.removeListSelectionListener(selectionListener);
+	}
+
+	/** Enable selection handling on the table to allow triggering actions
+	 *  from selection events. Adds the list selection listener to the
+	 *  selection model. The disableSelectionHandling() method reverses this.
+	 */
+	public void enableSelectionHandling() {
+		ListSelectionModel s = table.getSelectionModel();
+		s.addListSelectionListener(selectionListener);
 	}
 
 	/** Initialize the button panel */
@@ -256,6 +276,13 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		add_txt.setText("");
 		model.createObject(name);
 	}
+	
+	/** Delete the selected proxy object */
+	protected void deleteSelectedProxy() {
+		T proxy = getSelectedProxy();
+		if (proxy != null)
+			proxy.destroy();
+	}
 
 	/** Get the currently selected proxy */
 	public T getSelectedProxy() {
@@ -281,6 +308,11 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 				table.getCellRect(row, 0, true));
 		} else
 			s.clearSelection();
+	}
+	
+	/** Check if the table has this proxy */
+	public boolean hasProxy(T proxy) {
+		return model.getIndex(proxy) >= 0;
 	}
 
 	/** Update the button panel */

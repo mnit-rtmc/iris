@@ -15,6 +15,9 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.event.ActionEvent;
+
+import javax.swing.JInternalFrame;
+
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -45,6 +48,8 @@ public class VideoMenu extends IMenu {
 		addItem(createCatalogItem());
 		addItem(createMonitorStyleItem());
 		addItem(createVideoMonitorItem());
+		addItem(createCameraTemplateItem());
+		addItem(createVidSrcTemplateItem());
 		addItem(createFlowStreamItem());
 	}
 
@@ -104,6 +109,29 @@ public class VideoMenu extends IMenu {
 		    new IAction("flow.stream") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new FlowStreamForm(session));
+			}
+		} : null;
+	}
+	
+	/** Create a camera template menu item action */
+	private IAction createCameraTemplateItem() {
+		return CameraTemplateForm.isPermitted(session) ?
+		    new IAction("camera.templates") {
+			protected void doActionPerformed(ActionEvent e) {
+				desktop.show(new CameraTemplateForm(session));
+			}
+	    } : null;
+	}
+	
+	/** Create a video source template menu item action */
+	private IAction createVidSrcTemplateItem() {
+		return VidSourceTemplateEditor.isPermitted(session) ?
+				new IAction("camera.video_source.templates") {
+			protected void doActionPerformed(ActionEvent e) {
+				VidSourceTemplateEditor vste =
+						new VidSourceTemplateEditor(session);
+				JInternalFrame frame = desktop.show(vste);
+				vste.setFrame(frame);
 			}
 		} : null;
 	}

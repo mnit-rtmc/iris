@@ -30,6 +30,32 @@
 	If you attempt to install it without proper privileges, the
 	installation will fail and you will get a "bad installation" error.
 </p>
+<p>
+        For advanced video support, GStreamer version 1.16 or newer must be installed.
+        The IRIS client uses GStreamer to handle video decoding and display.
+        GStreamer is also free and open source software.
+</p>
+<p>
+        For Windows (64-bit and 32-bit) users, GStreamer will be downloaded and installed
+        in your user directory automatically if it is not found. If you want to install it
+        yourself, or if you are using Linux, you can follow the instructions below.
+</p>
+<p>
+        For Windows users, the software is available on the
+        <a href="https://gstreamer.freedesktop.org/download/">GStreamer website</a>.
+        Installing GStreamer must also be done by someone with local admin privileges.
+        Make sure to install the version with the same architecture (32-bit or
+        64-bit) as your installed Java Runtime Environment. When installing, perform a 
+        "complete" installation that includes all components. You will also need to add
+        the directory C:\gstreamer\1.0\x86_64\bin (or C:\gstreamer\1.0\x86\bin if you
+        are using a 32-bit JRE) to your PATH environment variable.
+</p>
+<p>
+        For Linux users, use your distribution's package manager to install GStreamer.
+        Make sure to install all plugins (base, good, bad, and ugly), as well as the
+        libav (FFMPEG) plugins. You may need to make sure that the location it is
+        installed to is in your LD_LIBRARY_PATH environment variable.
+</p>
 <hr width="100%" />
 <h2><a id="joystick"></a>3. Joysticks</h2>
 <p>

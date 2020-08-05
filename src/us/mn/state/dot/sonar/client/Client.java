@@ -74,7 +74,12 @@ public class Client {
 	public void join() throws InterruptedException {
 		thread.join();
 	}
-
+	
+	/** Get the conduit name */
+	public String getName() {
+		return conduit.getName();
+	}
+	
 	/** Get the connection name */
 	public String getConnection() {
 		return conduit.getConnection();

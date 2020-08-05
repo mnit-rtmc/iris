@@ -18,6 +18,9 @@
 	<j2se version="1.8+" max-heap-size="1024m"/>
 	<jar href="lib/iris-client-@@VERSION@@.jar"/>
 	<jar href="lib/iris-common-@@VERSION@@.jar"/>
+	<jar href="lib/jna-5.5.0.jar"/>
+	<jar href="lib/jna-platform-5.5.0.jar"/>
+	<jar href="lib/gst1-java-core-1.2.0.jar"/>
 	<extension name="mail" href="mail.jnlp"/>
     </resources>
     <security>
