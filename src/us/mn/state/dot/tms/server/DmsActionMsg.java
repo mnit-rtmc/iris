@@ -94,8 +94,8 @@ public class DmsActionMsg {
 	}
 
 	/** Log an event */
-	static private void logEvent(EventType et, String d) {
-		final TravelTimeEvent ev = new TravelTimeEvent(et, d);
+	static private void logEvent(EventType et, String d, String sid) {
+		final TravelTimeEvent ev = new TravelTimeEvent(et, d, sid);
 		FLUSH.addJob(new Job() {
 			public void perform() throws TMSException {
 				ev.doStore();
@@ -560,8 +560,8 @@ public class DmsActionMsg {
 		if (r != null && r.legCount() > 0)
 			processTravelTime(r, sid, mode, o_txt);
 		else {
-			logEvent(EventType.TT_NO_ROUTE, dms.getName());
-			fail("No route to destination");
+			logEvent(EventType.TT_NO_ROUTE, dms.getName(), sid);
+			fail("No route to destination: " + sid);
 		}
 	}
 
@@ -586,7 +586,7 @@ public class DmsActionMsg {
 			travel.put(sid, createTravelTime(r, mode, o_txt));
 		}
 		catch (BadRouteException e) {
-			logEvent(e.event_type, dms.getName());
+			logEvent(e.event_type, dms.getName(), e.sid);
 			fail("Invalid route: " + e.getMessage());
 		}
 	}

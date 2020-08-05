@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ public class RouteLegTimer {
 		for (StationData sd: lookupStationData()) {
 			if (pd != null) {
 				if (isSegmentTooLong(pd.mile, sd.mile))
-					throwException(TT_LINK_TOO_LONG);
+					throwException(TT_LINK_TOO_LONG, pd);
 				hours += sd.timeFrom(pd);
 			}
 			pd = sd;
@@ -120,8 +120,8 @@ public class RouteLegTimer {
 					float a = s.getSmoothedAverageSpeed();
 					float l = s.getSmoothedLowSpeed();
 					if (a > 0 && l > 0) {
-						s_data.add(new StationData(m, a,
-						                           l));
+						s_data.add(new StationData(
+							s.getName(), m, a, l));
 					}
 				}
 				return false;
@@ -141,27 +141,29 @@ public class RouteLegTimer {
 			// roads with no detection, for example).
 			float m = leg.getMidPoint();
 			int mph = SystemAttrEnum.TRAVEL_TIME_MIN_MPH.getInt();
-			s_data.add(new StationData(m, mph, mph));
+			s_data.add(new StationData("LEG", m, mph, mph));
 		}
 		StationData sd = s_data.get(0);
 		if (sd.mile > leg.o_mi) {
 			sd = sd.linkBefore();
 			if (sd.mile > leg.o_mi)
-				throwException(TT_NO_ORIGIN_DATA);
+				throwException(TT_NO_ORIGIN_DATA, sd);
 			s_data.add(0, sd);
 		}
 		sd = s_data.get(s_data.size() - 1);
 		if (sd.mile < leg.d_mi) {
 			sd = sd.linkAfter();
 			if (sd.mile < leg.d_mi)
-				throwException(TT_NO_DESTINATION_DATA);
+				throwException(TT_NO_DESTINATION_DATA, sd);
 			s_data.add(sd);
 		}
 	}
 
 	/** Throw a BadRouteException with the specified message */
-	private void throwException(EventType et) throws BadRouteException {
-		throw new BadRouteException(et, leg.toString());
+	private void throwException(EventType et, StationData sd)
+		throws BadRouteException
+	{
+		throw new BadRouteException(et, leg.toString(), sd.sid);
 	}
 
 	/** Check if a milepoint is within the leg "bounds" */
@@ -173,19 +175,23 @@ public class RouteLegTimer {
 
 	/** Station data */
 	private class StationData {
+		private final String sid;
 		private final float mile;
 		private final float avg;
 		private final float low;
-		private StationData(float m, float a, float l) {
+		private StationData(String sid, float m, float a, float l) {
+			this.sid = sid;
 			mile = m;
 			avg = a;
 			low = l;
 		}
 		private StationData linkBefore() {
-			return new StationData(mile - MAX_LINK_LENGTH, avg, low);
+			return new StationData(sid + "-",
+				mile - MAX_LINK_LENGTH, avg, low);
 		}
 		private StationData linkAfter() {
-			return new StationData(mile + MAX_LINK_LENGTH, avg, low);
+			return new StationData(sid + "+",
+				mile + MAX_LINK_LENGTH, avg, low);
 		}
 		private float timeFrom(StationData pd) {
 			assert mile > pd.mile;

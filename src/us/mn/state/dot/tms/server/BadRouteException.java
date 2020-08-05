@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,13 @@ public class BadRouteException extends Exception {
 	/** Event type for logging */
 	public final EventType event_type;
 
+	/** Station ID */
+	public final String sid;
+
 	/** Create a new bad route exception */
-	public BadRouteException(EventType et, String msg) {
+	public BadRouteException(EventType et, String msg, String sid) {
 		super(msg);
 		event_type = et;
+		this.sid = sid;
 	}
 }

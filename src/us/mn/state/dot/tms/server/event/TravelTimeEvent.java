@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,8 +47,11 @@ public class TravelTimeEvent extends BaseEvent {
 	/** Device ID */
 	private final String device_id;
 
+	/** Station ID */
+	private final String station_id;
+
 	/** Create a new travel time event */
-	public TravelTimeEvent(EventType e, String d) {
+	public TravelTimeEvent(EventType e, String d, String sid) {
 		super(e);
 		assert EventType.TT_LINK_TOO_LONG       == e ||
 		       EventType.TT_NO_DATA             == e ||
@@ -56,6 +59,7 @@ public class TravelTimeEvent extends BaseEvent {
 		       EventType.TT_NO_ORIGIN_DATA      == e ||
 		       EventType.TT_NO_ROUTE            == e;
 		device_id = d;
+		station_id = sid;
 	}
 
 	/** Get the database table name */
@@ -71,6 +75,7 @@ public class TravelTimeEvent extends BaseEvent {
 		map.put("event_desc_id", event_type.id);
 		map.put("event_date", event_date);
 		map.put("device_id", device_id);
+		map.put("station_id", station_id);
 		return map;
 	}
 }

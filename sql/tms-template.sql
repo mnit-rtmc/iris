@@ -148,7 +148,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	5.14.0
+database_version	5.15.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_enable	true
@@ -2807,11 +2807,13 @@ CREATE TABLE event.travel_time_event (
 	event_date timestamp WITH time zone NOT NULL,
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),
-	device_id VARCHAR(20)
+	device_id VARCHAR(20),
+	station_id VARCHAR(10)
 );
 
 CREATE VIEW travel_time_event_view AS
-	SELECT event_id, event_date, event_description.description, device_id
+	SELECT event_id, event_date, event_description.description, device_id,
+	       station_id
 	FROM event.travel_time_event
 	JOIN event.event_description
 	ON travel_time_event.event_desc_id = event_description.event_desc_id;
