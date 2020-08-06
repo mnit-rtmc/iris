@@ -66,7 +66,24 @@ public class VidSourceTemplateImpl extends BaseObjectImpl
 		return map;
 	}
 
-	/** Create a VidSourceTemplateImpl object from database fields. */
+	/** Get the database table name */
+	@Override
+	public String getTable() {
+		return "iris." + SONAR_TYPE;
+	}
+
+	/** Get the SONAR type name */
+	@Override
+	public String getTypeName() {
+		return SONAR_TYPE;
+	}
+
+	/** Create a video source template */
+	public VidSourceTemplateImpl(String n) {
+		super(n);
+	}
+
+	/** Create a video source template from a row */
 	private VidSourceTemplateImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),    // name
 		     row.getString(2),    // label
@@ -83,24 +100,7 @@ public class VidSourceTemplateImpl extends BaseObjectImpl
 		     row.getString(13));  // notes
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
-	/** Create a VidSourceTemplate */
-	private VidSourceTemplateImpl(String n) {
-		super(n);
-	}
-
-	/** Create an VidSourceTemplate */
+	/** Create a video source template */
 	private VidSourceTemplateImpl(String sName, String label, String config,
 		Object default_port, String subnets, Object latency,
 		String encoder, String scheme, String codec, Object rez_width,
@@ -109,9 +109,9 @@ public class VidSourceTemplateImpl extends BaseObjectImpl
 		super(sName);
 		this.label = label;
 		this.config = config;
-		this.default_port = (Integer)default_port;
+		this.default_port = (Integer) default_port;
 		this.subnets = subnets;
-		this.latency = (Integer)latency;
+		this.latency = (Integer) latency;
 		this.encoder = encoder;
 		this.scheme = scheme;
 		this.codec = codec;

@@ -71,7 +71,7 @@ public class CameraVidSourceOrderImpl extends BaseObjectImpl
 	}
 
 	/** Create a new camera video source order with a string name */
-	public CameraVidSourceOrderImpl(String n) throws TMSException {
+	public CameraVidSourceOrderImpl(String n) {
 		super(n);
 	}
 

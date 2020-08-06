@@ -65,7 +65,7 @@ public class CameraTemplateImpl extends BaseObjectImpl implements CameraTemplate
 		return SONAR_TYPE;
 	}
 
-	/** Create a CameraTemplate */
+	/** Create a camera template */
 	public CameraTemplateImpl(String n) {
 		super(n);
 	}
