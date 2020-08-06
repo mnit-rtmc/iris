@@ -63,7 +63,6 @@
 	<property name="build.compiler.pedantic" value="true"/>
 	<path id="classpath">
 		<fileset dir="${lib.dir}">
-			<include name="mail.jar"/>
 			<include name="**/*.jar"/>
 		</fileset>
 	</path>
@@ -218,7 +217,6 @@
 		<copy todir="${dist.server}">
 			<fileset dir="${lib.dir}">
 				<include name="mail.jar"/>
-				<include name="**/*.jar"/>
 			</fileset>
 		</copy>
 	</target>
@@ -269,7 +267,6 @@
 		<mkdir dir="${dist.client}/lib"/>
 		<copy todir="${dist.client}/lib">
 			<fileset dir="${lib.dir}">
-				<include name="mail.jar"/>
 				<include name="**/*.jar"/>
 			</fileset>
 			<fileset dir="${build.lib}">
