@@ -19,26 +19,25 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import us.mn.state.dot.tms.VidSourceTemplate;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.VidSourceTemplate;
 
 /** Server-side implementation of video-source-template.
- * 
+ *
  * (See VidSourceTemplate.java and comments later
  *  in this file for more details.)
- * 
+ *
  * @author John L. Stanley - SRF Consulting
  */
-public class VidSourceTemplateImpl extends BaseObjectImpl implements VidSourceTemplate {
-
+public class VidSourceTemplateImpl extends BaseObjectImpl
+	implements VidSourceTemplate
+{
 	/** Load all the stream templates */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, VidSourceTemplateImpl.class);
-		store.query("SELECT name, label, config, "+
-			"default_port, subnets, latency, "+
-			"encoder, scheme, codec, "+
-			"rez_width, rez_height, multicast, "+
-			"notes FROM iris." +
+		store.query("SELECT name, label, config, default_port, " +
+			"subnets, latency, encoder, scheme, codec, " +
+			"rez_width, rez_height, multicast, notes FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -96,20 +95,17 @@ public class VidSourceTemplateImpl extends BaseObjectImpl implements VidSourceTe
 		return SONAR_TYPE;
 	}
 
-	/** Create an VidSourceTemplate */
-	public VidSourceTemplateImpl(String n) {
+	/** Create a VidSourceTemplate */
+	private VidSourceTemplateImpl(String n) {
 		super(n);
-		// TODO Auto-generated constructor stub
 	}
 
 	/** Create an VidSourceTemplate */
-	private VidSourceTemplateImpl(String sName,
-			String label,  String config,
-			Object default_port, String subnets,
-			Object latency, String encoder,
-			String scheme, String codec,
-			Object rez_width, Object rez_height,
-			Object multicast, String notes) {
+	private VidSourceTemplateImpl(String sName, String label, String config,
+		Object default_port, String subnets, Object latency,
+		String encoder, String scheme, String codec, Object rez_width,
+		Object rez_height, Object multicast, String notes)
+	{
 		super(sName);
 		this.label = label;
 		this.config = config;
@@ -119,58 +115,19 @@ public class VidSourceTemplateImpl extends BaseObjectImpl implements VidSourceTe
 		this.encoder = encoder;
 		this.scheme = scheme;
 		this.codec = codec;
-		this.rez_width = (Integer)rez_width;
-		this.rez_height = (Integer)rez_height;
-		this.multicast = (Boolean)multicast;
+		this.rez_width = (Integer) rez_width;
+		this.rez_height = (Integer) rez_height;
+		this.multicast = (Boolean) multicast;
 		this.notes = notes;
 	}
 
-	//---------------------------------
-	
-	private String label;   // source-type identifier shown in video window
-	private String config;
-		// If codec is empty:
-		//   config is a backwards-compatible uri_path string
-		// If codec is not empty:
-		//   config is a gst-launch config string
-		// substitution fields
-		//	{addr} address from camera encoder field
-		//	{port} port from camera encoder field
-		//	{addrport} address[:port] from camera encoder field
-		//	{chan} encoder_channel from camera record
-		//	{name} camera.name modified to not use reserved URI chars.
-		//		(For live555 video proxy.)
-		//	{<other IRIS system property>}
-		//      (Substitute IRIS system-property field into config string.)
-		//	examples
-		//      rtsp://83.244.45.234/{camName}
-		//      http://{addrport}/mpeg4/media.amp
-	private Integer default_port;
-		// If no port specified in camera record, use this value for {port} substitution
-		// If no port specified here or in camera record, and {port} or {mport} is in the config string, don't use this template
-	private String subnets;
-		// Comma separated list of subnet identifiers where source is available.
-		// If empty, the source is available in all subnets.
-	private Integer latency;
-	private String encoder; // Name of manufacturer & model
-	private String scheme;  // (rtsp/http/udp/ftp)
-	private String codec;   // (MJPEG, MPEG2, MPEG4, H264, H265, JPEG, etc)
-	                // If empty, codec is probably MJPEG
-	private Integer rez_width;
-	private Integer rez_height;
-	private Boolean multicast; // (T/F)
-	private String notes;
-	
-	//-- maybe implement later?
-//	String users; // Semicolon separated list of user-groups and users permitted to use that stream.
-//	// If field is blank, stream is usable by all users.
-//	// Stretch: u-g/u identifiers prefixed with '-' are not-permitted.
-	
-	//---------------------------------
-	
+	/** Source-type identifier shown in video window */
+	private String label;
+
 	/**
 	 * @return the label
 	 */
+	@Override
 	public String getLabel() {
 		return label;
 	}
@@ -178,21 +135,44 @@ public class VidSourceTemplateImpl extends BaseObjectImpl implements VidSourceTe
 	/**
 	 * @param label the label to set
 	 */
-	public void setLabel(String label) {
-		this.label = label;
+	@Override
+	public void setLabel(String lbl) {
+		label = lbl;
 	}
 
 	/** Set the template label */
-	public void doSetLabel(String label) throws TMSException {
-		if (label != this.label) {
-			store.update(this, "label", label);
-			setLabel(label);
+	public void doSetLabel(String lbl) throws TMSException {
+		if (!objectEquals(lbl, label)) {
+			store.update(this, "label", lbl);
+			setLabel(lbl);
 		}
 	}
-	
+
+	/**
+	 * Configuration string.
+	 * If codec is empty:
+	 *   config is a backwards-compatible uri_path string
+	 * If codec is not empty:
+	 *   config is a gst-launch config string
+	 * substitution fields
+	 *	{addr} address from camera encoder field
+	 *	{port} port from camera encoder field
+	 *	{addrport} address[:port] from camera encoder field
+	 *	{chan} encoder_channel from camera record
+	 *	{name} camera.name modified to not use reserved URI chars.
+	 *		(For live555 video proxy.)
+	 *	{&lt;other IRIS system property&gt;}
+	 *      (Substitute IRIS system-property field into config string.)
+	 *	examples
+	 *      rtsp://83.244.45.234/{camName}
+	 *      http://{addrport}/mpeg4/media.amp
+	 */
+	private String config;
+
 	/**
 	 * @return the config
 	 */
+	@Override
 	public String getConfig() {
 		return config;
 	}
@@ -200,21 +180,30 @@ public class VidSourceTemplateImpl extends BaseObjectImpl implements VidSourceTe
 	/**
 	 * @param config to set
 	 */
-	public void setConfig(String config) {
-		this.config = config;
+	@Override
+	public void setConfig(String cfg) {
+		config = cfg;
 	}
 
 	/** Set the template config */
-	public void doSetConfig(String config) throws TMSException {
-		if (config != this.config) {
-			store.update(this, "config", config);
-			setConfig(config);
+	public void doSetConfig(String cfg) throws TMSException {
+		if (!objectEquals(cfg, config)) {
+			store.update(this, "config", cfg);
+			setConfig(cfg);
 		}
 	}
-	
+
+	/** Default port.
+	 * If no port specified in camera record, use this value for {port}
+	 * substitution
+	 * If no port specified here or in camera record, and {port} or {mport}
+	 * is in the config string, don't use this template */
+	private Integer default_port;
+
 	/**
 	 * @return the default_port
 	 */
+	@Override
 	public Integer getDefaultPort() {
 		return default_port;
 	}
@@ -222,21 +211,27 @@ public class VidSourceTemplateImpl extends BaseObjectImpl implements VidSourceTe
 	/**
 	 * @param default_port the default_port to set
 	 */
-	public void setDefaultPort(Integer default_port) {
-		this.default_port = default_port;
+	@Override
+	public void setDefaultPort(Integer dport) {
+		default_port = dport;
 	}
 
 	/** Set the template default_port */
-	public void doSetdefault_port(Integer default_port) throws TMSException {
-		if (default_port != this.default_port) {
-			store.update(this, "default_port", default_port);
-			setDefaultPort(default_port);
+	public void doSetdefault_port(Integer dport) throws TMSException {
+		if (!objectEquals(dport, default_port)) {
+			store.update(this, "default_port", dport);
+			setDefaultPort(dport);
 		}
 	}
-	
+
+	/** Comma separated list of subnet identifiers where source is available.
+	 * If empty, the source is available in all subnets. */
+	private String subnets;
+
 	/**
 	 * @return the subnets
 	 */
+	@Override
 	public String getSubnets() {
 		return subnets;
 	}
@@ -244,21 +239,25 @@ public class VidSourceTemplateImpl extends BaseObjectImpl implements VidSourceTe
 	/**
 	 * @param subnets the subnets to set
 	 */
-	public void setSubnets(String subnets) {
-		this.subnets = subnets;
+	@Override
+	public void setSubnets(String snets) {
+		subnets = snets;
 	}
 
 	/** Set the template subnets */
-	public void doSetSubnets(String subnets) throws TMSException {
-		if (subnets != this.subnets) {
-			store.update(this, "subnets", subnets);
-			setSubnets(subnets);
+	public void doSetSubnets(String snets) throws TMSException {
+		if (!objectEquals(snets, subnets)) {
+			store.update(this, "subnets", snets);
+			setSubnets(snets);
 		}
 	}
-	
+
+	private Integer latency;
+
 	/**
 	 * @return the latency
 	 */
+	@Override
 	public Integer getLatency() {
 		return latency;
 	}
@@ -266,17 +265,21 @@ public class VidSourceTemplateImpl extends BaseObjectImpl implements VidSourceTe
 	/**
 	 * @param latency the latency to set
 	 */
-	public void setLatency(Integer latency) {
-		this.latency = latency;
+	@Override
+	public void setLatency(Integer lat) {
+		latency = lat;
 	}
-	
+
 	/** Set the template latency */
-	public void doSetLatency(Integer latency) throws TMSException {
-		if (latency != this.latency) {
-			store.update(this, "latency", latency);
-			setLatency(latency);
+	public void doSetLatency(Integer lat) throws TMSException {
+		if (!objectEquals(lat, latency)) {
+			store.update(this, "latency", lat);
+			setLatency(lat);
 		}
 	}
+
+ 	/** Name of manufacturer &amp; model */
+	private String encoder;
 
 	/**
 	 * @return the encoder
@@ -290,21 +293,25 @@ public class VidSourceTemplateImpl extends BaseObjectImpl implements VidSourceTe
 	 * @param encoder the encoder to set
 	 */
 	@Override
-	public void setEncoder(String encoder) {
-		this.encoder = encoder;
+	public void setEncoder(String enc) {
+		encoder = enc;
 	}
-	
+
 	/** Set the template encoder */
-	public void doSetEncoder(String encoder) throws TMSException {
-		if (encoder != this.encoder) {
-			store.update(this, "encoder", encoder);
-			setEncoder(encoder);
+	public void doSetEncoder(String enc) throws TMSException {
+		if (!objectEquals(enc, encoder)) {
+			store.update(this, "encoder", enc);
+			setEncoder(enc);
 		}
 	}
+
+	/** URI scheme (rtsp/http/udp/ftp) */
+	private String scheme;
 
 	/**
 	 * @return the scheme
 	 */
+	@Override
 	public String getScheme() {
 		return scheme;
 	}
@@ -312,21 +319,27 @@ public class VidSourceTemplateImpl extends BaseObjectImpl implements VidSourceTe
 	/**
 	 * @param scheme the scheme to set
 	 */
-	public void setScheme(String scheme) {
-		this.scheme = scheme;
+	@Override
+	public void setScheme(String scm) {
+		scheme = scm;
 	}
-	
+
 	/** Set the template scheme */
-	public void doSetScheme(String scheme) throws TMSException {
-		if (scheme != this.scheme) {
-			store.update(this, "scheme", scheme);
-			setScheme(scheme);
+	public void doSetScheme(String scm) throws TMSException {
+		if (!objectEquals(scm, scheme)) {
+			store.update(this, "scheme", scm);
+			setScheme(scm);
 		}
 	}
+
+	/** Codec (MJPEG, MPEG2, MPEG4, H264, H265, JPEG, etc).
+	 * If empty, codec is probably MJPEG */
+	private String codec;
 
 	/**
 	 * @return the codec
 	 */
+	@Override
 	public String getCodec() {
 		return codec;
 	}
@@ -334,21 +347,25 @@ public class VidSourceTemplateImpl extends BaseObjectImpl implements VidSourceTe
 	/**
 	 * @param codec the codec to set
 	 */
-	public void setCodec(String codec) {
-		this.codec = codec;
+	@Override
+	public void setCodec(String cdc) {
+		codec = cdc;
 	}
 
 	/** Set the template codec */
-	public void doSetCodec(String codec) throws TMSException {
-		if (codec != this.codec) {
-			store.update(this, "codec", codec);
-			setCodec(codec);
+	public void doSetCodec(String cdc) throws TMSException {
+		if (!objectEquals(cdc, codec)) {
+			store.update(this, "codec", cdc);
+			setCodec(cdc);
 		}
 	}
-	
+
+	private Integer rez_width;
+
 	/**
 	 * @return the rezWidth
 	 */
+	@Override
 	public Integer getRezWidth() {
 		return rez_width;
 	}
@@ -356,21 +373,25 @@ public class VidSourceTemplateImpl extends BaseObjectImpl implements VidSourceTe
 	/**
 	 * @param rezWidth the rezWidth to set
 	 */
-	public void setRezWidth(Integer rezWidth) {
-		this.rez_width = rezWidth;
+	@Override
+	public void setRezWidth(Integer w) {
+		rez_width = w;
 	}
 
 	/** Set the template rez_width */
-	public void doSetRezWidth(Integer rez_width) throws TMSException {
-		if (rez_width != this.rez_width) {
-			store.update(this, "rez_width", rez_width);
-			setRezWidth(rez_width);
+	public void doSetRezWidth(Integer w) throws TMSException {
+		if (!objectEquals(w, rez_width)) {
+			store.update(this, "rez_width", w);
+			setRezWidth(w);
 		}
 	}
-	
+
+	private Integer rez_height;
+
 	/**
 	 * @return the rez_height
 	 */
+	@Override
 	public Integer getRezHeight() {
 		return rez_height;
 	}
@@ -378,21 +399,26 @@ public class VidSourceTemplateImpl extends BaseObjectImpl implements VidSourceTe
 	/**
 	 * @param rez_height the rez_height to set
 	 */
-	public void setRezHeight(Integer rez_height) {
-		this.rez_height = rez_height;
+	@Override
+	public void setRezHeight(Integer h) {
+		rez_height = h;
 	}
 
 	/** Set the template rez_height */
-	public void doSetRezHeight(Integer rez_height) throws TMSException {
-		if (rez_height != this.rez_height) {
-			store.update(this, "rez_height", rez_height);
-			setRezHeight(rez_height);
+	public void doSetRezHeight(Integer h) throws TMSException {
+		if (!objectEquals(h, rez_height)) {
+			store.update(this, "rez_height", h);
+			setRezHeight(h);
 		}
 	}
-	
+
+	/** Multicast (T/F) */
+	private Boolean multicast;
+
 	/**
 	 * @return the multicast
 	 */
+	@Override
 	public Boolean getMulticast() {
 		return multicast;
 	}
@@ -400,33 +426,36 @@ public class VidSourceTemplateImpl extends BaseObjectImpl implements VidSourceTe
 	/**
 	 * @param multicast the multicast to set
 	 */
-	public void setMulticast(Boolean multicast) {
-		this.multicast = multicast;
+	@Override
+	public void setMulticast(Boolean mc) {
+		multicast = mc;
 	}
 
 	/** Set the template multicast */
-	public void doSetMulticast(Boolean multicast) throws TMSException {
-		if (multicast != this.multicast) {
-			store.update(this, "multicast", multicast);
-			setMulticast(multicast);
+	public void doSetMulticast(Boolean mc) throws TMSException {
+		if (!objectEquals(mc, multicast)) {
+			store.update(this, "multicast", mc);
+			setMulticast(mc);
 		}
 	}
-	
+
+	private String notes;
+
 	@Override
 	public String getNotes() {
 		return notes;
 	}
 
 	@Override
-	public void setNotes(String notes) {
-		this.notes = notes;
+	public void setNotes(String nt) {
+		notes = nt;
 	}
 
 	/** Set the template notes */
-	public void doSetNotes(String notes) throws TMSException {
-		if (notes != this.notes) {
-			store.update(this, "notes", notes);
-			setNotes(notes);
+	public void doSetNotes(String nt) throws TMSException {
+		if (!objectEquals(nt, notes)) {
+			store.update(this, "notes", nt);
+			setNotes(nt);
 		}
 	}
 }

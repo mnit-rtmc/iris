@@ -20,11 +20,22 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
  * Helper class for CameraTemplate objects.
- * 
- * @author John L. Stanley - SRF Consulting
  *
+ * @author John L. Stanley - SRF Consulting
  */
 public class CameraTemplateHelper extends BaseHelper {
+
+	/** Name creator */
+	static UniqueNameCreator UNC;
+	static {
+		UNC = new UniqueNameCreator("CAM_TMPLT_%d", (n)->lookup(n));
+		UNC.setMaxLength(20);
+	}
+
+	/** Create a unique camera-template record name */
+	static public String createUniqueName() {
+		return UNC.createUniqueName();
+	}
 
 	/** Don't allow instances to be created */
 	private CameraTemplateHelper() {
@@ -33,25 +44,13 @@ public class CameraTemplateHelper extends BaseHelper {
 
 	/** Lookup the CameraTemplate with the specified name */
 	static public CameraTemplate lookup(String name) {
-		return (CameraTemplate) namespace.lookupObject(CameraTemplate.SONAR_TYPE,
-			name);
+		return (CameraTemplate) namespace.lookupObject(
+			CameraTemplate.SONAR_TYPE, name);
 	}
 
 	/** Get a CameraTemplate iterator */
 	static public Iterator<CameraTemplate> iterator() {
 		return new IteratorWrapper<CameraTemplate>(namespace.iterator(
 			CameraTemplate.SONAR_TYPE));
-	}
-
-	static UniqueNameCreator unc;
-
-	static {
-		unc = new UniqueNameCreator("CAM_TMPLT_%d", (n)->lookup(n));
-		unc.setMaxLength(20);
-	}
-	
-	/** Create a unique camera-template record name */
-	static public String createUniqueName() {
-		return unc.createUniqueName();
 	}
 }

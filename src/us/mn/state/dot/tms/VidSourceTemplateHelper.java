@@ -20,22 +20,32 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
  * @author John L. Stanley - SRF Consulting
- *
  */
 public class VidSourceTemplateHelper extends BaseHelper {
+
+	static UniqueNameCreator UNC;
+	static {
+		UNC = new UniqueNameCreator("VID_SRC_%d", (n)->lookup(n));
+		UNC.setMaxLength(20);
+	}
+
+	/** Create a unique video-source-template record name */
+	static public String createUniqueName() {
+		return UNC.createUniqueName();
+	}
 
 	/** Don't allow instances to be created */
 	private VidSourceTemplateHelper() {
 		assert false;
 	}
 
-	/** Lookup the StreamTemplate with the specified name */
+	/** Lookup the VidSourceTemplate with the specified name */
 	static public VidSourceTemplate lookup(String name) {
-		return (VidSourceTemplate) namespace.lookupObject(VidSourceTemplate.SONAR_TYPE,
-			name);
+		return (VidSourceTemplate) namespace.lookupObject(
+			VidSourceTemplate.SONAR_TYPE, name);
 	}
-	
-	/** Lookup the StreamTemplate with the specified label. */
+
+	/** Lookup the VidSourceTemplate with the specified label. */
 	static public VidSourceTemplate lookupLabel(String label) {
 		Iterator<VidSourceTemplate> it = iterator();
 		while (it.hasNext()) {
@@ -45,22 +55,10 @@ public class VidSourceTemplateHelper extends BaseHelper {
 		}
 		return null;
 	}
-	
+
 	/** Get a StreamTemplate iterator */
 	static public Iterator<VidSourceTemplate> iterator() {
 		return new IteratorWrapper<VidSourceTemplate>(namespace.iterator(
 			VidSourceTemplate.SONAR_TYPE));
-	}
-
-	static UniqueNameCreator unc;
-
-	static {
-		unc = new UniqueNameCreator("VID_SRC_%d", (n)->lookup(n));
-		unc.setMaxLength(20);
-	}
-	
-	/** Create a unique video-source-template record name */
-	static public String createUniqueName() {
-		return unc.createUniqueName();
 	}
 }

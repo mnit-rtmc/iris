@@ -18,9 +18,8 @@ import java.util.Iterator;
 
 /**
  * Helper class for EncoderType objects
- * 
- * @author Gordon Parikh - SRF Consulting
  *
+ * @author Gordon Parikh - SRF Consulting
  */
 public class EncoderTypeHelper extends BaseHelper {
 
@@ -41,4 +40,3 @@ public class EncoderTypeHelper extends BaseHelper {
 				EncoderType.SONAR_TYPE));
 	}
 }
-	

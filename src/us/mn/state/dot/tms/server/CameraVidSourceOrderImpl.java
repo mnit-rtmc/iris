@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,26 +26,29 @@ import us.mn.state.dot.tms.TMSException;
  *
  * @author John L. Stanley - SRF Consulting
  */
-public class CameraVidSourceOrderImpl extends BaseObjectImpl implements CameraVidSourceOrder {
-
-	/** Load all the camera presets */
+public class CameraVidSourceOrderImpl extends BaseObjectImpl
+	implements CameraVidSourceOrder
+{
+	/** Load all the camera video source order mappings */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CameraVidSourceOrderImpl.class);
 		store.query("SELECT name, camera_template, src_order, " +
-			"src_template FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+			"src_template FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new CameraVidSourceOrderImpl(
-					row.getString(1),	// name
-					row.getString(2),	// camera_template
-					row.getInt(3),		// source order
-					row.getString(4)	// source_template
+					row.getString(1), // name
+					row.getString(2), // camera_template
+					row.getInt(3),    // source order
+					row.getString(4)  // source_template
 				));
 			}
 		});
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -56,21 +59,23 @@ public class CameraVidSourceOrderImpl extends BaseObjectImpl implements CameraVi
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
 
-	/** Create a new camera preset with a string name */
+	/** Create a new camera video source order with a string name */
 	public CameraVidSourceOrderImpl(String n) throws TMSException {
 		super(n);
 	}
 
-	/** Create a camera preset */
+	/** Create a camera video source order */
 	public CameraVidSourceOrderImpl(String n, String ct, int so, String st) {
 		super(n);
 		camera_template = ct;
@@ -78,13 +83,13 @@ public class CameraVidSourceOrderImpl extends BaseObjectImpl implements CameraVi
 		src_template = st;
 	}
 
-	/** CCTV Camera */
+	/** Camera template */
 	private String camera_template;
 
 	/** Set the camera template name */
 	@Override
-	public void setCameraTemplate(String cameraTemplate) {
-		this.camera_template = cameraTemplate;
+	public void setCameraTemplate(String ct) {
+		this.camera_template = ct;
 	}
 
 	/** Get the camera template name */
@@ -94,10 +99,10 @@ public class CameraVidSourceOrderImpl extends BaseObjectImpl implements CameraVi
 	}
 	
 	/** Set the template camera_template */
-	public void doSetCameraTemplate(String camera_template) throws TMSException {
-		if (camera_template != this.camera_template) {
-			store.update(this, "camera_template", camera_template);
-			setCameraTemplate(camera_template);
+	public void doSetCameraTemplate(String ct) throws TMSException {
+		if (!objectEquals(ct, camera_template)) {
+			store.update(this, "camera_template", ct);
+			setCameraTemplate(ct);
 		}
 	}
 
@@ -107,7 +112,7 @@ public class CameraVidSourceOrderImpl extends BaseObjectImpl implements CameraVi
 	/** Set the source order number */
 	@Override
 	public void setSourceOrder(int so) {
-		this.src_order = so;
+		src_order = so;
 	}
 
 	/** Get the source order number */
@@ -117,14 +122,14 @@ public class CameraVidSourceOrderImpl extends BaseObjectImpl implements CameraVi
 	}
 	
 	/** Set the template source_order */
-	public void doSetSourceOrder(int src_order) throws TMSException {
-		if (src_order != this.src_order) {
-			store.update(this, "src_order", src_order);
-			setSourceOrder(src_order);
+	public void doSetSourceOrder(int so) throws TMSException {
+		if (so != src_order) {
+			store.update(this, "src_order", so);
+			setSourceOrder(so);
 		}
 	}
 
-	/** name of stream template */
+	/** Name of source template */
 	private String src_template;
 
 	/** Set the source template name */
@@ -140,10 +145,10 @@ public class CameraVidSourceOrderImpl extends BaseObjectImpl implements CameraVi
 	}
 	
 	/** Set the template source_template */
-	public void doSetVidSourceTemplate(String src_template) throws TMSException {
-		if (src_template != this.src_template) {
-			store.update(this, "src_template", src_template);
-			setVidSourceTemplate(src_template);
+	public void doSetVidSourceTemplate(String st) throws TMSException {
+		if (!objectEquals(st, src_template)) {
+			store.update(this, "src_template", st);
+			setVidSourceTemplate(st);
 		}
 	}
 }

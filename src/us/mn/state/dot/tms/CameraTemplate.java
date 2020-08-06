@@ -21,32 +21,31 @@ import us.mn.state.dot.sonar.SonarObject;
  * series of vid-source-templates.  This identifies
  * the various video-streams that can provide video
  * from a camera.
- * 
+ *
  * A camera is assigned a camera-template by
  * setting the camera.camera_template field to
- * the name of the camera-template object.  
- * 
+ * the name of the camera-template object.
+ *
  * The many-to-many links between the
  * camera-template(s) and vid-source-template(s)
  * are saved in a camera-source-order table.
- * 
- * @author John L. Stanley - SRF Consulting
  *
+ * @author John L. Stanley - SRF Consulting
  */
 public interface CameraTemplate extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "camera_template";
-	
+
 	/** Get the label */
-	public String getLabel();
-	
+	String getLabel();
+
 	/** Set the label */
-	public void setLabel(String label);
+	void setLabel(String label);
 
 	/** Get the notes */
-	public String getNotes();
-	
+	String getNotes();
+
 	/** Set the notes */
-	public void setNotes(String notes);
+	void setNotes(String notes);
 }

@@ -20,137 +20,136 @@ import us.mn.state.dot.sonar.SonarObject;
  *  of information needed to open a GStreamer
  *  or MJPEG connection to an RTSP or
  *  UDP-multicast source.
- *  
+ *
  *  Additional information needed to complete
  *  the template comes from the camera record,
  *  the client.properties table, and/or the
  *  system attribute table.
- * 
+ *
  *  The many-to-many links between camera-template(s)
  *  and vid-source-template(s) are saved in the
  *  camera_source_order table.
- * 
- * @author John L. Stanley - SRF Consulting
  *
+ * @author John L. Stanley - SRF Consulting
  */
 public interface VidSourceTemplate extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "vid_src_template";
-	
+
 	/** Get the stream-type label shown in the video window.
 	 * @return the label
 	 */
-	public String getLabel();
+	String getLabel();
 
 	/** Set the stream-type label shown in the video window.
 	 * @param label the label to set
 	 */
-	public void setLabel(String label);
+	void setLabel(String label);
 
 	/** Get the raw config string from the template */
-	public String getConfig();
+	String getConfig();
 
 	/** Set the raw config string in the template */
-	public void setConfig(String c);
+	void setConfig(String c);
 
 	/**
 	 * @return the defaultPort (or null)
 	 */
-	public Integer getDefaultPort();
+	Integer getDefaultPort();
 
 	/**
 	 * @param defaultPort the defaultPort to set (or null)
 	 */
-	public void setDefaultPort(Integer defaultPort);
+	void setDefaultPort(Integer defaultPort);
 
 	/** Get string containing a comma separated list of subnets.
 	 * @return the subnets (or null)
 	 */
-	public String getSubnets();
+	String getSubnets();
 
 	/** Set string containing a comma separated list of subnets.
 	 * @param subnets the subnets to set (or null)
 	 */
-	public void setSubnets(String subnets);
+	void setSubnets(String subnets);
 
 	/** Get the latency
 	 * @return the latency (or null)
 	 */
-	public Integer getLatency();
+	Integer getLatency();
 
 	/** Set the latency.
 	 * @param latency the latency to set (or null)
 	 */
-	public void setLatency(Integer latency);
+	void setLatency(Integer latency);
 
 	/** Get the encoder-type string.
 	 * @return the encoder type (or null)
 	 */
-	public String getEncoder();
+	String getEncoder();
 
 	/** Set the encoder-type string.
 	 * @param encoder the encoder type to set (or null)
 	 */
-	public void setEncoder(String encoder);
+	void setEncoder(String encoder);
 
 	/** Get the transport scheme.
 	 * @return the scheme (or null)
 	 */
-	public String getScheme();
+	String getScheme();
 
 	/** Set the transport scheme.
 	 * @param scheme the scheme to set (or null)
 	 */
-	public void setScheme(String scheme);
+	void setScheme(String scheme);
 
 	/** Get the codec name.
 	 * @return the codec name (or null)
 	 */
-	public String getCodec();
+	String getCodec();
 
 	/** Set the codec name.
 	 * @param codec the codec to set (or null)
 	 */
-	public void setCodec(String codec);
+	void setCodec(String codec);
 
 	/** Get the native pixel width of the stream.
 	 * @return the rezWidth (or null)
 	 */
-	public Integer getRezWidth();
+	Integer getRezWidth();
 
 	/** Set the native pixel width of the stream.
 	 * @param rezWidth the rezWidth to set (or null)
 	 */
-	public void setRezWidth(Integer rezWidth);
+	void setRezWidth(Integer rezWidth);
 
 	/** Get the native pixel height of the stream.
 	 * @return the rezHeight (or null)
 	 */
-	public Integer getRezHeight();
+	Integer getRezHeight();
 
 	/** Set the native pixel height of the stream.
 	 * @param rezHeight the rezHeight to set (or null)
 	 */
-	public void setRezHeight(Integer rezHeight);
+	void setRezHeight(Integer rezHeight);
 
 	/** Get multicast-stream flag.
 	 * @return the multicast flag (or null)
 	 */
-	public Boolean getMulticast();
+	Boolean getMulticast();
 
 	/** Set multicast-stream flag.
 	 * @param multicast the multicast flag to set (or null)
 	 */
-	public void setMulticast(Boolean multicast);
+	void setMulticast(Boolean multicast);
 
 	/** Get the notes for this template.
 	 * @return the notes string (or null)
 	 */
-	public String getNotes();
+	String getNotes();
 
 	/** Set the notes for this template.
 	 * @param notes the notes string (or null)
 	 */
-	public void setNotes(String notes);
+	void setNotes(String notes);
 }
