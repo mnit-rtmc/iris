@@ -1,5 +1,11 @@
 # IRIS 5.x Release Notes
 
+5.15.0 (6 Aug 2020)
+ - Added GStreamer client video enhancements (thanks to SRF)
+ - Added `station_id` to `travel_time_event_view`
+ - Tweaked auto-fail OCC SPIKE thresholds
+ - Fixed corridor calculation bugs
+
 5.14.0 (18 Jun 2020)
  - Auto-fail: add OCC SPIKE check and event type
  - Auto-fail: don't fail abandoned detectors
