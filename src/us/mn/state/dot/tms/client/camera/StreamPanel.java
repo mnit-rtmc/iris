@@ -113,10 +113,58 @@ public class StreamPanel extends JPanel {
 	private final JLabel status_lbl = new JLabel();
 
 	/** Stream control commands */
-	static private enum StreamCommand {
-		STOP,
-		PLAY,
-		PLAY_EXTERNAL;
+	private enum StreamCommand {
+		STOP("camera.stream.stop"),
+		PLAY("camera.stream.play"),
+		PLAY_EXTERNAL("camera.stream.playext");
+
+		/** Command I18n text */
+		private final String text_id;
+
+		/** Create a stream command */
+		private StreamCommand(String tid) {
+			text_id = tid;
+		}
+
+		/** Create a stream-control command button */
+		private JButton createButton(final StreamPanel pnl) {
+			IAction ia = new IAction(text_id) {
+				@Override
+				protected void doActionPerformed(ActionEvent ev) {
+					STREAMER.addJob(new Job() {
+						public void perform() {
+							handleButton(pnl);
+						}
+					});
+				}
+			};
+			final JButton btn = new JButton(ia);
+			btn.setPreferredSize(UI.dimension(40, 28));
+			btn.setMinimumSize(UI.dimension(28, 28));
+			btn.setMargin(new Insets(0, 0, 0, 0));
+			ImageIcon icon = Icons.getIconByPropName(text_id);
+			if (icon != null) {
+				btn.setIcon(icon);
+				btn.setHideActionText(true);
+			}
+			btn.setFocusPainted(false);
+			return btn;
+		}
+
+		/** Handle control button press */
+		private void handleButton(StreamPanel pnl) {
+			switch (this) {
+			case STOP:
+				pnl.stopStream();
+				break;
+			case PLAY:
+				pnl.playStream();
+				break;
+			case PLAY_EXTERNAL:
+				pnl.playExternal();
+				break;
+			}
+		}
 	}
 
 	/** Layout control commands */
@@ -227,12 +275,9 @@ public class StreamPanel extends JPanel {
 	private JPanel createControlPanel(VideoRequest.Size vsz) {
 		JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER,
 			UI.hgap, UI.vgap));
-		stop_button = createControlBtn("camera.stream.stop",
-			StreamCommand.STOP);
-		play_button = createControlBtn("camera.stream.play",
-			StreamCommand.PLAY);
-		playext_button = createControlBtn("camera.stream.playext",
-				StreamCommand.PLAY_EXTERNAL);
+		stop_button = StreamCommand.STOP.createButton(this);
+		play_button = StreamCommand.PLAY.createButton(this);
+		playext_button = StreamCommand.PLAY_EXTERNAL.createButton(this);
 
 		/** Use an editable ComboBox for saving more than one layout */
 		layout_list_model = new DefaultComboBoxModel<String>();
@@ -421,55 +466,12 @@ public class StreamPanel extends JPanel {
 	}
 
 	/**
-	* Create a stream-control button.
-	* @param text_id Text ID
-	* @param sc The StreamCommand to associate with the button
-	* @return The requested JButton.
-	*/
-	private JButton createControlBtn(String text_id,
-		final StreamCommand sc)
-	{
-		final JButton btn;
-		IAction ia = null;
-		ia = new IAction(text_id) {
-			@Override
-			protected void doActionPerformed(ActionEvent ev) {
-				handleControlBtn(sc);
-			}
-		};
-		btn = new JButton(ia);
-		btn.setPreferredSize(UI.dimension(40, 28));
-		btn.setMinimumSize(UI.dimension(28, 28));
-		btn.setMargin(new Insets(0, 0, 0, 0));
-		ImageIcon icon = Icons.getIconByPropName(text_id);
-		if (icon != null) {
-			btn.setIcon(icon);
-			btn.setHideActionText(true);
-		}
-		btn.setFocusPainted(false);
-		return btn;
-	}
-
-	/** Handle control button press */
-	private void handleControlBtn(StreamCommand sc) {
-		if (sc == StreamCommand.STOP) {
-			STREAMER.addJob(new Job() {
-				public void perform() {
-					stopStream();
-				}
-			});
-		}
-		else if (sc == StreamCommand.PLAY) {
-			STREAMER.addJob(new Job() {
-				public void perform() {
-					playStream();
-				}
-			});
-		}
-		else if (sc == StreamCommand.PLAY_EXTERNAL) {
-			stopStream();
-			desktop.showExtFrame(new VidWindow(camera, true, Size.MEDIUM));
-		}
+	 * Stop streaming, if a stream is currently active.
+	 * This is normally called from the streamer thread.
+	 */
+	private void stopStream() {
+	    if (screen_pnl != null)
+			clearStream();
 	}
 
 	/**
@@ -486,13 +488,10 @@ public class StreamPanel extends JPanel {
 		requestStream(camera);
 	}
 
-	/**
-	 * Stop streaming, if a stream is currently active.
-	 * This is normally called from the streamer thread.
-	 */
-	private void stopStream() {
-	    if (screen_pnl != null)
-			clearStream();
+	/** Play stream on external player */
+	private void playExternal() {
+		stopStream();
+		desktop.showExtFrame(new VidWindow(camera, true, Size.MEDIUM));
 	}
 
 	/** Update stream status */
