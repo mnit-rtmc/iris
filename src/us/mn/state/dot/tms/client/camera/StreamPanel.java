@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2017  Minnesota Department of Transportation
+ * Copyright (C) 2002-2020  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -15,11 +15,10 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -63,7 +62,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 public class StreamPanel extends JPanel {
 
 	/** Status panel height */
-	static private final int HEIGHT_STATUS_PNL = 40;
+	static private final int HEIGHT_STATUS_PNL = 20;
 
 	/** Control panel height */
 	static private final int HEIGHT_CONTROL_PNL = 40;
@@ -94,19 +93,19 @@ public class StreamPanel extends JPanel {
 
 	/** Play external button */
 	private JButton playext_button;
-	
+
 	/** Layout ComboBox */
 	private JComboBox<String> layout_list;
-	
+
 	/** Layout ComboBox model */
 	private DefaultComboBoxModel<String> layout_list_model;
-	
+
 	/** Save layout button */
 	private JButton save_layout_button;
-	
+
 	/** Delete layout button */
 	private JButton delete_layout_button;
-	
+
 	/** Restore layout button */
 	private JButton restore_layout_button;
 
@@ -119,14 +118,14 @@ public class StreamPanel extends JPanel {
 		PLAY,
 		PLAY_EXTERNAL;
 	}
-	
+
 	/** Layout control commands */
 	static private enum LayoutCommand {
 		SAVE,
 		RESTORE,
 		DELETE;
 	}
-	
+
 	/** Current Camera */
 	private Camera camera = null;
 
@@ -151,25 +150,27 @@ public class StreamPanel extends JPanel {
 
 	/** Stream progress timer */
 	private final Timer timer = new Timer(STATUS_DELAY, stat_updater);
-	
+
 	/** Stream status listeners to notify on stream status change events */
 	private final Set<StreamStatusListener> ssl_set =
 		new HashSet<StreamStatusListener>();
-	
-    private CameraPTZ ptz;
-    
-    private Session session;
-    
+
+	/** Camera PTZ */
+	private CameraPTZ ptz;
+
+	/** User session */
+	private final Session session;
+
 	/** Smart desktop */
 	private SmartDesktop desktop;
-	
+
 	/** Edit mode listener */
 	private final EditModeListener edit_lsnr = new EditModeListener() {
 		public void editModeChanged() {
 			updateEditMode();
 		}
 	};
-    
+
 	/**
 	 * Create a new stream panel.
 	 * @param req The VideoRequest object to use.
@@ -184,7 +185,7 @@ public class StreamPanel extends JPanel {
 	public StreamPanel(VideoRequest req, CameraPTZ cam_ptz, Session s,
 		boolean ctrl, boolean auto)
 	{
-		super(new GridBagLayout());
+		super(new BorderLayout());
 		video_req = req;
 		external_viewer = (s == null) ? null
 			: UserProperty.getExternalVideoViewer(s.getProperties());
@@ -196,20 +197,17 @@ public class StreamPanel extends JPanel {
 		screen_pnl = new VidPanel(sz);
 		Dimension vpsz = screen_pnl.getPreferredSize();
 		control_pnl = createControlPanel(vsz);
-		GridBagConstraints c = new GridBagConstraints();
-		c.fill = GridBagConstraints.BOTH;
-		c.gridx = 0;
-		c.gridy = GridBagConstraints.RELATIVE;
-		add(screen_pnl, c);
+		add(screen_pnl, BorderLayout.CENTER);
 		if (ctrl)
-			add(control_pnl, c);
+			add(control_pnl, BorderLayout.SOUTH);
+
 		int pnlHeight = vpsz.height + (ctrl ? HEIGHT_CONTROL_PNL : 0);
-		
-		setPreferredSize(UI.dimension(vpsz.width, pnlHeight));
-		setMinimumSize(UI.dimension(vpsz.width, pnlHeight));
-		setMaximumSize(UI.dimension(vpsz.width, pnlHeight));
+		Dimension psz = new Dimension(vsz.width, pnlHeight);
+		setPreferredSize(psz);
+		setMinimumSize(psz);
+		setMaximumSize(psz);
+
 		updateButtonState();
-		
 		if (session != null) {
 			desktop = session.getDesktop();
 			session.addEditModeListener(edit_lsnr);
@@ -224,7 +222,7 @@ public class StreamPanel extends JPanel {
 	public StreamPanel(VideoRequest req) {
 		this(req, null, null, false, true);
 	}
-	
+
 	/** Create the control panel */
 	private JPanel createControlPanel(VideoRequest.Size vsz) {
 		JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER,
@@ -235,18 +233,18 @@ public class StreamPanel extends JPanel {
 			StreamCommand.PLAY);
 		playext_button = createControlBtn("camera.stream.playext",
 				StreamCommand.PLAY_EXTERNAL);
-		
+
 		/** Use an editable ComboBox for saving more than one layout */
 		layout_list_model = new DefaultComboBoxModel<String>();
 		layout_list = new JComboBox<String>(layout_list_model);
 		layout_list.setToolTipText(I18N.get("camera.template.layout"));
 		layout_list.setPreferredSize(UI.dimension(120, 28));
-		
+
 		save_layout_button = createLayoutBtn(
 				"camera.template.save.layout", LayoutCommand.SAVE);
 		restore_layout_button = createLayoutBtn(
 				"camera.template.restore.layout", LayoutCommand.RESTORE);
-		
+
 		// make the delete button a big X (same size as the other buttons)
 		delete_layout_button = new JButton(
 				new IAction("camera.template.delete.layout") {
@@ -268,12 +266,12 @@ public class StreamPanel extends JPanel {
 		margs.left = 0;
 		margs.right = 0;
 		delete_layout_button.setMargin(margs);
-		
+
 		p.add(stop_button);
 		p.add(play_button);
 		p.add(playext_button);
 		p.add(Box.createHorizontalStrut(10));
-		
+
 		p.add(layout_list);
 		p.add(save_layout_button);
 		p.add(delete_layout_button);
@@ -283,24 +281,24 @@ public class StreamPanel extends JPanel {
 		p.setMinimumSize(UI.dimension(vsz.width + 50, HEIGHT_CONTROL_PNL));
 		return p;
 	}
-	
+
 	/** Update the list of layouts based on the current properties */
 	private void updateLayoutList() {
 		Properties p = session.getProperties();
-		
+
 		// get the list of layouts from the properties
 		ArrayList<String> layoutNames = UserProperty.getStreamLayoutNames(p);
-		
+
 		// check what's selected so we can re-select later if possible
 		String layoutName = (String) layout_list.getSelectedItem();
-		
+
 		// clear and update, then try to re-select
 		layout_list_model.removeAllElements();
 		for (String ln: layoutNames)
 			layout_list_model.addElement(ln);
 		layout_list.setSelectedItem(layoutName);
 	}
-	
+
 	/**
 	* Create a layout button.
 	* @param text_id Text ID
@@ -331,15 +329,14 @@ public class StreamPanel extends JPanel {
 		btn.setFocusPainted(false);
 		return btn;
 	}
-	
-	
+
 	/** Handle layout button press */
 	private void handleLayoutBtn(LayoutCommand lc) {
 		Properties p = session.getProperties();
 
 		// get the layout name from the ComboBox
 		String layoutName = (String) layout_list.getSelectedItem();
-		
+
 		// if the layout name is empty, generate a new, unique name
 		if (layoutName == null || layoutName.isEmpty()) {
 			HashSet<String> hSet = new HashSet<String>(
@@ -357,42 +354,40 @@ public class StreamPanel extends JPanel {
 			initializeCameraFrames(p, layoutName);
 		else if (lc == LayoutCommand.DELETE)
 			UserProperty.deleteStreamLayout(p, layoutName);
-		
+
 		// update the ComboBox to reflect any changes
 		updateLayoutList();
 	}
 
-	
 	/** Initialize the camera frames */
 	private void initializeCameraFrames(Properties p, String layoutName) {
-	    HashMap<String, String> hmap =
-	    		UserProperty.getCameraFrames(p, layoutName);
-	    int num_streams = 0;
-	    
-	    if (hmap.get(UserProperty.NUM_STREAM.name) != null) {
-	    	num_streams = Integer.parseInt(
-	    			hmap.get(UserProperty.NUM_STREAM.name));
-	    }
-	    
-	    // get a list of open frames before opening more - we won't open
-	    // duplicates from layouts
-	    Frame[] frames = IrisClient.getFrames();
-	    HashMap<String, Frame> vidFrames = new HashMap<String, Frame>();
-	    for (Frame f: frames) {
-	    	if (f.getTitle().contains("Stream Panel") && f.isVisible())
-	    		vidFrames.put(f.getTitle(), f);
-	    }
-	    
-		for (int i=0; i < num_streams; i++) {
+		HashMap<String, String> hmap =
+			UserProperty.getCameraFrames(p, layoutName);
+		int num_streams = 0;
+
+		if (hmap.get(UserProperty.NUM_STREAM.name) != null) {
+			num_streams = Integer.parseInt(
+				hmap.get(UserProperty.NUM_STREAM.name));
+		}
+
+		// get a list of open frames before opening more - we won't open
+		// duplicates from layouts
+		Frame[] frames = IrisClient.getFrames();
+		HashMap<String, Frame> vidFrames = new HashMap<String, Frame>();
+		for (Frame f: frames) {
+			if (f.getTitle().contains("Stream Panel") && f.isVisible())
+				vidFrames.put(f.getTitle(), f);
+		}
+
+		for (int i = 0; i < num_streams; i++) {
 			String cam_name = hmap.get(UserProperty.STREAM_CCTV.name
 					+ "." + Integer.toString(i));
 			Camera cam = CameraHelper.lookup(cam_name);
-			
-			
+
 			if (cam != null) {
 				// check if we already have this frame open
 				String t = VidWindow.getWindowTitle(cam);
-				
+
 				if (!vidFrames.containsKey(t)) {
 					// if we don't, open it
 					int w = Integer.parseInt(hmap.get(
@@ -402,14 +397,14 @@ public class StreamPanel extends JPanel {
 							UserProperty.STREAM_HEIGHT.name
 							+ "." + Integer.toString(i)));
 					Dimension d = new Dimension(w, h);
-					
+
 					int x = Integer.parseInt(hmap.get(
 							UserProperty.STREAM_X.name
 							+ "." + Integer.toString(i)));
 					int y = Integer.parseInt(hmap.get(
 							UserProperty.STREAM_Y.name
 							+ "." + Integer.toString(i)));
-						
+
 					int strm_num = Integer.parseInt(hmap.get(
 							UserProperty.STREAM_SRC.name
 							+ "." + Integer.toString(i)));
@@ -424,7 +419,7 @@ public class StreamPanel extends JPanel {
 			}
 		}
 	}
-	
+
 	/**
 	* Create a stream-control button.
 	* @param text_id Text ID
@@ -611,7 +606,7 @@ public class StreamPanel extends JPanel {
 		if (ssl != null)
 			ssl_set.remove(ssl);
 	}
-	
+
 	/** Update the edit mode */
 	public void updateEditMode() {
 		boolean editMode = session.getEditMode();

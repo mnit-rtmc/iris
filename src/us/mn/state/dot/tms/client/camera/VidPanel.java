@@ -14,11 +14,10 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -60,16 +59,15 @@ import us.mn.state.dot.tms.client.camera.VideoRequest.Size;
  *   Manages camera name label at top of panel.
  *   Manages status/error label at bottom of panel.
  *   Manages MousePTZ link for panel.
- * 
+ *
  * @author John L. Stanley - SRF Consulting
  */
-
 @SuppressWarnings("serial")
 public class VidPanel extends JPanel implements FocusListener {
 
 	/** Current camera */
 	private Camera camera;
-	
+
 	/** List of available StreamReq(s) for current camera.
 	 * (Only includes those that "should" work in current context.) */
 	private List<VidStreamReq> streamReqList = new ArrayList<VidStreamReq>();
@@ -81,23 +79,20 @@ public class VidPanel extends JPanel implements FocusListener {
 	private VidStreamMgr streamMgr;
 
 	/** placeholder gray panel used while stopped */
-	protected JComponent placeholderComponent;
-	
+	private final JComponent placeholderComponent;
+
 	/** dimension of video */
-	protected Dimension videoDimension;
+	private final Dimension videoDimension;
 
 	/** Camera PTZ control */
 	private CameraPTZ cam_ptz;
-	
+
 	/** Mouse PTZ control */
 	private MousePTZ mouse_ptz;
-	
+
 	/** Label that holds the video component */
-	private JPanel videoHolder;
-	
-	/** Constraint for videoHolder */
-	GridBagConstraints vhc = new GridBagConstraints();
-	
+	private final JPanel videoHolder;
+
 	/** streaming control values */
 	private boolean autostart = true;
 	private boolean failover = true;
@@ -105,10 +100,9 @@ public class VidPanel extends JPanel implements FocusListener {
 	private int     lostTimeoutSec = 10;
 	private boolean autoReconnect = true;
 	private int     reconnectTimeoutSec = 10;
-	
+
 	static private final Color LIGHT_BLUE = new Color(128, 128, 255);
 
-	//-------------------------------------------
 	// Panel status monitor
 
 	static private enum PanelStatus {
@@ -120,19 +114,18 @@ public class VidPanel extends JPanel implements FocusListener {
 	}
 	// STOPPED and FAILED are similar, but they
 	// put different messages in the status line.
-	
+
 	PanelStatus panelStatus = PanelStatus.IDLE;
-	
+
 	private boolean pausePanel = false;
 	private boolean streamError = false;
-	
+
 	private int timeoutSec = 0;
 
 	private boolean repeatStatusMonitor = false;
-	
+
 	/** Status monitor job called once per second */
-	private final Job statusMonitor = new Job(Calendar.SECOND, 1)
-	{
+	private final Job statusMonitor = new Job(Calendar.SECOND, 1) {
 		public void perform2() {
 			int frames = getReceivedFrameCount();
 			switch (panelStatus) {
@@ -185,7 +178,7 @@ public class VidPanel extends JPanel implements FocusListener {
 					}
 			}
 		}
-		
+
 		@Override
 		public void perform() {
 			if (repeatStatusMonitor)
@@ -212,82 +205,45 @@ public class VidPanel extends JPanel implements FocusListener {
 		panelStatus = PanelStatus.IDLE;
 		timeoutSec = 0;
 	}
-	
-	//-------------------------------------------
-	
-	/** Feature constants */
-	public static final int CAM_NAME       = 1;
-	public static final int TEMPLATE_LABEL = 2;
-	public static final int MOUSE_PTZ      = 4;
-
-	public static final int DEFAULT_FLAGS =
-			CAM_NAME + TEMPLATE_LABEL + MOUSE_PTZ;
-	
-	/** Feature flags */
-	protected int flags = DEFAULT_FLAGS;
-	
-	public int getFlags() {
-		return flags;
-	}
-	
-	public boolean isFlagSet(int flag) {
-		return (flags & flag) == flag;
-	}
-	
-	public void enable(int flags) {
-		this.flags |= flags;
-		queueUpdatePanel();
-	}
-
-	public void disable(int flags) {
-		this.flags &= ~flags;
-		queueUpdatePanel();
-	}
-
-	//-------------------------------------------
 
 	/** Create fixed-size video panel */
 	public VidPanel(Size sz) {
 		this(sz.width, sz.height);
 	}
-	
+
 	/** Create fixed-size video panel */
 	public VidPanel(Dimension dim) {
 		this(dim.width, dim.height);
 	}
-	
+
 	/** Create fixed-size video panel with specified stream */
 	public VidPanel(Dimension dim, int strm_num) {
 		this(dim.width, dim.height);
 		streamReqNum = strm_num;
 	}
-	
+
 	/** Create fixed-size video panel */
 	public VidPanel(int width, int height) {
-		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		setLayout(new BorderLayout());
 		setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 		addFocusListener(this);
 
 		videoDimension = new Dimension(width, height);
-		placeholderComponent = new JPanel();
+		placeholderComponent = new JPanel(new BorderLayout());
 		placeholderComponent.setPreferredSize(videoDimension);
 		placeholderComponent.setMinimumSize(videoDimension);
 		placeholderComponent.setBackground(Color.LIGHT_GRAY);
 
-		videoHolder = new JPanel();
+		videoHolder = new JPanel(new BorderLayout());
 		videoHolder.setPreferredSize(videoDimension);
 		videoHolder.setMinimumSize(videoDimension);
 		videoHolder.setBackground(Color.LIGHT_GRAY);
-		videoHolder.setLayout(new GridBagLayout());
-		vhc.fill = GridBagConstraints.BOTH;
-		vhc.weightx = 1;
-		vhc.weighty = 1;
-		videoHolder.add(placeholderComponent, vhc);
+		videoHolder.add(placeholderComponent, BorderLayout.CENTER);
 
-		addLabel(" ");
-		add(videoHolder);
-		addLabel(" ");
-		
+		addTopLabel(" ");
+		add(videoHolder, BorderLayout.CENTER);
+		addBottomLabel(" ");
+
 		// Catch when panel using this is closed and
 		// shut down the stream if it's running.
 		addAncestorListener(new AncestorListener() {
@@ -305,7 +261,7 @@ public class VidPanel extends JPanel implements FocusListener {
 				releaseStream();
 			}
 		});
-		
+
 		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent arg0) {
@@ -325,48 +281,48 @@ public class VidPanel extends JPanel implements FocusListener {
 		setFocusable(true);
 		setupKeyBindings();
 	}
-	
+
 	/** Setup key bindings on the panel */
 	private void setupKeyBindings() {
 		InputMap im = getInputMap(
 				JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		ActionMap am = getActionMap();
-		
+
 		/* Ctrl + Right Arrow - Start next stream */
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT,
 				KeyEvent.ALT_DOWN_MASK), "startNextStream");
 		am.put("startNextStream", startNextStreamAction);
-		
+
 		/* Ctrl + Left Arrow - Start previous stream */
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT,
 				KeyEvent.ALT_DOWN_MASK), "startPreviousStream");
 		am.put("startPreviousStream", startPreviousStreamAction);
-		
+
 		/* Ctrl + F5 - Restart stream */
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F5,
 				KeyEvent.ALT_DOWN_MASK), "restartStream");
 		am.put("restartStream", restartStream);
-		
+
 		/* Ctrl + Space - Pause stream */
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_SLASH,
 				KeyEvent.ALT_DOWN_MASK), "pauseStream");
 		am.put("pauseStream", pauseStream);
 	}
-	
+
 	private Action startNextStreamAction = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			startNextStream();
 		}
 	};
-	
+
 	private Action startPreviousStreamAction = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			startPreviousStream();
 		}
 	};
-	
+
 	/** Restart the stream that is currently playing. */
 	private Action restartStream = new AbstractAction() {
 		@Override
@@ -376,7 +332,7 @@ public class VidPanel extends JPanel implements FocusListener {
 			startCurrentStream();
 		}
 	};
-	
+
 	/** Pause the video playing in the panel. */
 	private Action pauseStream = new AbstractAction() {
 		@Override
@@ -402,15 +358,15 @@ public class VidPanel extends JPanel implements FocusListener {
 			queueUpdatePanel();
 		}
 	};
-	
+
 	public Dimension getVideoDimension() {
 		return videoDimension;
 	}
-	
+
 	VidStreamMgr getStreamMgr() {
 		return streamMgr;
 	}
-	
+
 	//-------------------------------------------
 	// The updatePanel job is run 0.1 seconds
 	// after queueUpdatePanel() is called.  If
@@ -479,59 +435,49 @@ public class VidPanel extends JPanel implements FocusListener {
 
 	/** Add top label line */
 	private void addTopLabel(String txt) {
-		if (isFlagSet(CAM_NAME)) {
-			Color nameColorBG;
-			Color nameColorFG = Color.BLACK;
-			if (VidPanel.this.isFocusOwner())
-				nameColorBG = pausePanel 
-						? Color.BLUE
-						: Color.WHITE;
-			else
-				nameColorBG = pausePanel
-						? LIGHT_BLUE 
-						: Color.LIGHT_GRAY;
-			if (pausePanel) {
-//				if (isNothing(txt))
-//					txt = "<PAUSED>";
-//				else
-//					txt = "<PAUSED>  " + txt;
-				nameColorFG = Color.WHITE;
-			}
-			addLabel(txt, nameColorFG, nameColorBG);
-		}
+		Color nameColorBG;
+		Color nameColorFG = Color.BLACK;
+		if (VidPanel.this.isFocusOwner())
+			nameColorBG = pausePanel
+					? Color.BLUE
+					: Color.WHITE;
+		else
+			nameColorBG = pausePanel
+					? LIGHT_BLUE
+					: Color.LIGHT_GRAY;
+		if (pausePanel)
+			nameColorFG = Color.WHITE;
+		add(createLabel(txt, nameColorFG, nameColorBG),
+			BorderLayout.NORTH);
 	}
 
 	private void addVideo(JComponent vidcomp) {
 		videoHolder.removeAll();
-		videoHolder.add(vidcomp, vhc);
+		videoHolder.add(vidcomp, BorderLayout.CENTER);
 		add(videoHolder);
 	}
 
 	/** Add bottom label line */
 	private void addBottomLabel(String txt) {
-		if (isFlagSet(TEMPLATE_LABEL))
-			addLabel(txt);
+		addBottomLabel(txt, null, null);
 	}
 
 	/** Add bottom label line, with optional colors */
-	private void addBottomLabel(String txt, 
-			Color fgColor, Color bgColor) {
-		if (isFlagSet(TEMPLATE_LABEL))
-			addLabel(txt, fgColor, bgColor);
+	private void addBottomLabel(String txt, Color fgColor, Color bgColor) {
+		add(createLabel(txt, fgColor, bgColor), BorderLayout.SOUTH);
 	}
 
-	/** Add a vpanel-wide label */
-	private void addLabel(String txt) {
-		addLabel(txt, null, null);
+	/** Create a label */
+	private JLabel createLabel(String txt) {
+		return createLabel(txt, null, null);
 	}
 
-	/** Add a full-width label, with text FG & BG color.
+	/** Create a label.
 	 * (Adds a tool-tip if the text is wider than the label */
-	private void addLabel(String txt, 
-			Color fgColor, Color bgColor) {
-		JLabel lbl = makeWideLabel(txt);
-		FontMetrics lblFontMetrics =
-				lbl.getFontMetrics(lbl.getFont());
+	private JLabel createLabel(String txt, Color fgColor, Color bgColor) {
+		JLabel lbl = new JLabel(txt);
+		lbl.setHorizontalAlignment(JLabel.CENTER);
+		FontMetrics lblFontMetrics = lbl.getFontMetrics(lbl.getFont());
 		if (fgColor != null)
 			lbl.setForeground(fgColor);
 		if (bgColor != null) {
@@ -539,29 +485,15 @@ public class VidPanel extends JPanel implements FocusListener {
 			lbl.setBackground(bgColor);
 		}
 		lbl.setAlignmentX(CENTER_ALIGNMENT);
-		add(lbl);
 		int txtWidth = lblFontMetrics.stringWidth(txt) + 2;
 		int lblWidth = lbl.getWidth();
 		if (txtWidth > lblWidth)
 			lbl.setToolTipText(txt);
 		else
 			lbl.setToolTipText(null);
-	}
-
-	private JLabel makeWideLabel(String txt) {
-		JLabel lbl = new JLabel(txt) {
-		    @Override
-		    public Dimension getMaximumSize()
-		    {
-		        Dimension d = super.getMaximumSize();
-		        d.width = Integer.MAX_VALUE;
-		        return d;
-		    }
-		};
-		lbl.setHorizontalAlignment(JLabel.CENTER);
 		return lbl;
 	}
-	
+
 	public void queueUpdatePanel() {
 		PANEL_UPDATE.removeJob(updatePanel);
 		PANEL_UPDATE.addJob(updatePanel);
@@ -587,7 +519,7 @@ public class VidPanel extends JPanel implements FocusListener {
 			return camBool.booleanValue();
 		return deflt.getBoolean();
 	}
-	
+
 	/** Get Integer value from cameraTemplate
 	 *  or an int from SystemAttrEnum value
 	 *  if the CameraTemplate Integer is null.
@@ -597,17 +529,17 @@ public class VidPanel extends JPanel implements FocusListener {
 			return camInt;
 		return deflt.getInt();
 	}
-	
+
 	/** Set camera, initialize sreqList,
 	 *  and start playing first stream.
-	 * 
+	 *
 	 * @param c Camera
 	 * @return true if stream available, false if none available.
 	 */
 	public boolean setCamera(Camera cam) {
 		releaseStream();
 		camera = cam;
-		
+
 		autostart = getCamTempBool(
 				null,
 				SystemAttrEnum.VID_CONNECT_AUTOSTART);
@@ -634,8 +566,7 @@ public class VidPanel extends JPanel implements FocusListener {
 		cam_ptz.setCamera(cam);
 		if (mouse_ptz != null)
 			mouse_ptz.dispose();
-		if (isFlagSet(MOUSE_PTZ))
-			mouse_ptz = createMousePTZ(cam_ptz, videoDimension, videoHolder);
+		mouse_ptz = createMousePTZ(cam_ptz, videoDimension, videoHolder);
 		boolean ret = !streamReqList.isEmpty();
 		panelStatus = PanelStatus.IDLE;
 		if (autostart) {
@@ -649,7 +580,7 @@ public class VidPanel extends JPanel implements FocusListener {
 	}
 
 	/** Create a mouse PTZ */
-	static private MousePTZ createMousePTZ(CameraPTZ cam_ptz, 
+	static private MousePTZ createMousePTZ(CameraPTZ cam_ptz,
 			Dimension sz,
 			JPanel video_pnl)
 	{
@@ -776,32 +707,10 @@ public class VidPanel extends JPanel implements FocusListener {
 		    }
 		}
 	};
-	
+
 	/** Queue job to fire any ChangeListeners */
 	private void queueFireChangeListeners() {
 		PANEL_UPDATE.removeJob(fireChangeListenersJob);
 		PANEL_UPDATE.addJob(fireChangeListenersJob);
 	}
-
-	//-------------------------------------------
-
-// https://stackoverflow.com/questions/8783535/java-swing-loading-animation
-//	private JPanel loadingPanel() {
-//	    JPanel panel = new JPanel();
-//	    BoxLayout layoutMgr = new BoxLayout(panel, BoxLayout.PAGE_AXIS);
-//	    panel.setLayout(layoutMgr);
-//
-//	    ClassLoader cldr = this.getClass().getClassLoader();
-//	    java.net.URL imageURL   = cldr.getResource("img/spinner.gif");
-//	    ImageIcon imageIcon = new ImageIcon(imageURL);
-//	    JLabel iconLabel = new JLabel();
-//	    iconLabel.setIcon(imageIcon);
-//	    imageIcon.setImageObserver(iconLabel);
-//
-//	    JLabel label = new JLabel("Loading...");
-//	    panel.add(iconLabel);
-//	    panel.add(label);
-//	    return panel;
-//	}
-
 }
