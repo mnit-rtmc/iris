@@ -79,7 +79,7 @@ public class VidPanel extends JPanel implements FocusListener {
 	private VidStreamMgr streamMgr;
 
 	/** placeholder gray panel used while stopped */
-	private final JComponent placeholderComponent;
+	protected final JComponent placeholderComponent;
 
 	/** dimension of video */
 	private final Dimension videoDimension;
