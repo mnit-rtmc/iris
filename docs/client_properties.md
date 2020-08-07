@@ -22,7 +22,6 @@ Property               | Description
 `map.tile.url`         | Base URL for map tileset — must end in `/`
 `video.host`           | IP or hostname of video server/proxy
 `video.port`           | TCP port number of video server/proxy
-`video.extviewer`      | External video viewer
 `autologin.username`   | A username to be used for automatic login upon client startup.  Note: use of this property is a security risk
 `autologin.password`   | A password to be used for automatic login upon client startup.  Note: use of this property is a security risk
 `tab.list`             | List specifying the visibility and ordering of the primary UI tabs in the IRIS client.  The default value is: `incident, dms, camera, lcs, ramp.meter, gate.arm, r_node, action.plan, comm`

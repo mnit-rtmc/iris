@@ -86,13 +86,13 @@ public class StreamPanel extends JPanel {
 	private final JPanel control_pnl;
 
 	/** Stop button */
-	private JButton stop_button;
+	private final JButton stop_button;
 
 	/** Play button */
-	private JButton play_button;
+	private final JButton play_button;
 
 	/** Play external button */
-	private JButton playext_button;
+	private final JButton playext_button;
 
 	/** Layout ComboBox */
 	private JComboBox<String> layout_list;
@@ -113,7 +113,7 @@ public class StreamPanel extends JPanel {
 	private final JLabel status_lbl = new JLabel();
 
 	/** Stream control commands */
-	private enum StreamCommand {
+	static private enum StreamCommand {
 		STOP("camera.stream.stop"),
 		PLAY("camera.stream.play"),
 		PLAY_EXTERNAL("camera.stream.playext");
@@ -180,9 +180,6 @@ public class StreamPanel extends JPanel {
 	/** Current video stream */
 	private VideoStream stream = null;
 
-	/** External viewer from user/client properties.  Null means none. */
-	private final String external_viewer;
-
 	/** Most recent streaming state.  State variable for event FSM. */
 	private boolean stream_state = false;
 
@@ -235,11 +232,12 @@ public class StreamPanel extends JPanel {
 	{
 		super(new BorderLayout());
 		video_req = req;
-		external_viewer = (s == null) ? null
-			: UserProperty.getExternalVideoViewer(s.getProperties());
 		autoplay = auto;
 		ptz = cam_ptz;
 		session = s;
+		stop_button = StreamCommand.STOP.createButton(this);
+		play_button = StreamCommand.PLAY.createButton(this);
+		playext_button = StreamCommand.PLAY_EXTERNAL.createButton(this);
 		VideoRequest.Size vsz = req.getSize();
 		Dimension sz = UI.dimension(vsz.width, vsz.height);
 		screen_pnl = new VidPanel(sz);
@@ -275,11 +273,8 @@ public class StreamPanel extends JPanel {
 	private JPanel createControlPanel(VideoRequest.Size vsz) {
 		JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER,
 			UI.hgap, UI.vgap));
-		stop_button = StreamCommand.STOP.createButton(this);
-		play_button = StreamCommand.PLAY.createButton(this);
-		playext_button = StreamCommand.PLAY_EXTERNAL.createButton(this);
 
-		/** Use an editable ComboBox for saving more than one layout */
+		// Use an editable ComboBox for saving more than one layout
 		layout_list_model = new DefaultComboBoxModel<String>();
 		layout_list = new JComboBox<String>(layout_list_model);
 		layout_list.setToolTipText(I18N.get("camera.template.layout"));
@@ -330,11 +325,7 @@ public class StreamPanel extends JPanel {
 	/** Update the list of layouts based on the current properties */
 	private void updateLayoutList() {
 		Properties p = session.getProperties();
-
-		// get the list of layouts from the properties
 		ArrayList<String> layoutNames = UserProperty.getStreamLayoutNames(p);
-
-		// check what's selected so we can re-select later if possible
 		String layoutName = (String) layout_list.getSelectedItem();
 
 		// clear and update, then try to re-select
@@ -345,11 +336,11 @@ public class StreamPanel extends JPanel {
 	}
 
 	/**
-	* Create a layout button.
-	* @param text_id Text ID
-	* @param sc The StreamCommand to associate with the button
-	* @return The requested JButton.
-	*/
+	 * Create a layout button.
+	 * @param text_id Text ID
+	 * @param sc The StreamCommand to associate with the button
+	 * @return The requested JButton.
+	 */
 	private JButton createLayoutBtn(String text_id,
 		final LayoutCommand lc)
 	{
@@ -385,7 +376,7 @@ public class StreamPanel extends JPanel {
 		// if the layout name is empty, generate a new, unique name
 		if (layoutName == null || layoutName.isEmpty()) {
 			HashSet<String> hSet = new HashSet<String>(
-					UserProperty.getStreamLayoutNames(p));
+				UserProperty.getStreamLayoutNames(p));
 			for (int i = 1; i < 999; ++i) {
 				layoutName = "layout_" + Integer.toString(i);
 				if (!hSet.contains(layoutName))
@@ -426,7 +417,7 @@ public class StreamPanel extends JPanel {
 
 		for (int i = 0; i < num_streams; i++) {
 			String cam_name = hmap.get(UserProperty.STREAM_CCTV.name
-					+ "." + Integer.toString(i));
+				+ "." + Integer.toString(i));
 			Camera cam = CameraHelper.lookup(cam_name);
 
 			if (cam != null) {
@@ -470,7 +461,7 @@ public class StreamPanel extends JPanel {
 	 * This is normally called from the streamer thread.
 	 */
 	private void stopStream() {
-	    if (screen_pnl != null)
+		if (screen_pnl != null)
 			clearStream();
 	}
 
@@ -590,17 +581,13 @@ public class StreamPanel extends JPanel {
 		playext_button.setEnabled(true);
 	}
 
-	/**
-	 * Bind a StreamStatusListener to this StreamPanel.
-	 */
+	/** Bind a StreamStatusListener to this StreamPanel. */
 	public void bindStreamStatusListener(StreamStatusListener ssl) {
 		if (ssl != null)
 			ssl_set.add(ssl);
 	}
 
-	/**
-	 * Unbind a StreamStatusListener from this StreamPanel.
-	 */
+	/** Unbind a StreamStatusListener from this StreamPanel. */
 	public void unbindStreamStatusListener(StreamStatusListener ssl) {
 		if (ssl != null)
 			ssl_set.remove(ssl);

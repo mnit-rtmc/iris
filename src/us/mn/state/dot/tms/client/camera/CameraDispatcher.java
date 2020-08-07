@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2019  Minnesota Department of Transportation
+ * Copyright (C) 2005-2020  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -155,17 +155,11 @@ public class CameraDispatcher extends JPanel {
 	/** Joystick PTZ handler */
 	private final JoystickPTZ joy_ptz;
 
-	/** Is an external stream viewer defined? */
-	private final Boolean extViewerDefined;
-
 	/** Create a new camera dispatcher */
 	public CameraDispatcher(Session s, CameraManager man) {
 		session = s;
 		manager = man;
 		props = session.getProperties();
-		String viewer = props.getProperty(
-				UserProperty.VIDEO_EXTVIEWER.name, "");
-		extViewerDefined = !viewer.isEmpty();
 		video_req = new VideoRequest(props, SIZE);
 		video_req.setSonarSessionId(session.getSessionId());
 		setLayout(new BorderLayout());
@@ -203,7 +197,6 @@ public class CameraDispatcher extends JPanel {
 	private StreamPanel createStreamPanel() {
 		boolean controls = SystemAttrEnum.CAMERA_STREAM_CONTROLS_ENABLE
 			.getBoolean();
-		controls |= extViewerDefined;
 		boolean autoplay = SystemAttrEnum.CAMERA_AUTOPLAY
 			.getBoolean();
 		return new StreamPanel(video_req, cam_ptz, session, controls,
@@ -235,12 +228,6 @@ public class CameraDispatcher extends JPanel {
 	 *   <li> the value of the CAMERA_PTZ_BLIND system attribute
 	 *   <li> if a stream is currently active
 	 * </ul>
-	 *
-	 * Note: if the selected camera's EncoderType requires an external
-	 * viewer, the PTZ controls are enabled as long as the user has
-	 * permissions and the camera has a controller.  This is because
-	 * there is currently no practical way for IRIS to determine whether
-	 * an external stream is currently active.
 	 */
 	private void updateCamControls() {
 		if (selected == null) {
