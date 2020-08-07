@@ -35,63 +35,26 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.utils.SubnetChecker;
 
 /** VidStreamReq: Video-stream-request parameters.
- * 
- * Data class that contains the parameters needed
- * to open a video stream.
- * 
- * The VidPanel class uses the static
- * VidStreamReq.getVidStreamReqs(...) generator
- * method to convert a Camera reference to a list
- * of VidStreamReq objects that "should" be able
- * to stream video from that camera to the current
+ *
+ * Data class that contains the parameters needed to open a video stream.
+ *
+ * The VidPanel class uses the static VidStreamReq.getVidStreamReqs(...)
+ * generator method to convert a Camera reference to a list of VidStreamReq
+ * objects that "should" be able to stream video from that camera to the current
  * client.
  *
  * @author John L. Stanley - SRF Consulting
  */
 public class VidStreamReq {
 
-	/** Create a new stream request */
-	private VidStreamReq(VidSourceTemplate vst, String config) {
-		this.vst    = vst;
-		this.config = config;
-	}
-
-	/** source VidSourceTemplate */
-	private final VidSourceTemplate vst;
-	
-	/** Get the source VidSourceTemplate */
-	public VidSourceTemplate getVidSourceTemplate() {
-		return vst;
-	}
-
-	/** expanded config string */
-	private final String config;
-	
-	/** Get the expanded config string */
-	public String getConfig() {
-		return config;
-	}
-	
-	/** is this a GStreamer request? */
-	public boolean isGst() {
-		return config.contains("!");
-	}
-
-	/** is this an old-style MJPEG request? */
-	public boolean isMJPEG() {
-		return !isGst();
-	}
-
-	//-------------------------------------------
-	// static helper methods
-	
 	static private boolean isNothing(String str) {
 		return ((str == null) || str.isEmpty());
 	}
 
 	static boolean isMember(String list, String item) {
+		// an empty list matches everything
 		if (isNothing(list))
-			return true; // an empty list matches everything
+			return true;
 		String[] items = list.split("[,;]");
 		int len = items.length;
 		for (String it : items) {
@@ -102,7 +65,7 @@ public class VidStreamReq {
 		}
 		return false;
 	}
-	
+
 	/** Get address portion of "<addr>[:<port>]" string. */
 	static private String getAddr(String addrport) {
 		if (isNothing(addrport))
@@ -114,7 +77,7 @@ public class VidStreamReq {
 			return null;
 		}
 	}
-	
+
 	/** Get port portion of "<addr>[:<port>]" string.
 	 *  If no port in the string, returns "<defPort>". */
 	static private String getPort(String addrport, Integer defPort) {
@@ -133,10 +96,10 @@ public class VidStreamReq {
 			return null;
 		}
 	}
-	
+
 	/** Get "addr[:port]" portion of "<addr>[:<port>]" string.
-	 *  if string does not have a port and defPort is not null,
-	 *  appends ":<defPort>" to the addr string before returning it.. */
+	 * if string does not have a port and defPort is not null,
+	 * appends ":<defPort>" to the addr string before returning it.. */
 	static private String getAddrPort(String addrport, Integer defPort) {
 		if (isNothing(addrport))
 			return null;
@@ -157,11 +120,13 @@ public class VidStreamReq {
 			return null;
 		}
 	}
-	
-	/** Get "addr[:port]" from an addr string and port integer value. If port
-	 *  is null and defPort is not null, appends ":<defPort>" to the addr
-	 *  string before returning it. */
-	static private String getAddrPort(String addr, Integer port, Integer defPort) {
+
+	/** Get "addr[:port]" from an addr string and port integer value. If
+	 * port is null and defPort is not null, appends ":<defPort>" to the
+	 * addr string before returning it. */
+	static private String getAddrPort(String addr, Integer port,
+		Integer defPort)
+	{
 		if (isNothing(addr))
 			return null;
 		if (port == null && defPort != null)
@@ -193,41 +158,30 @@ public class VidStreamReq {
 		}
 		return newCamName.toString();
 	}
-	
-	//-------------------------------------------
-	// static VidStreamReq creation method
-	
-	static final Pattern pattern = Pattern.compile("\\{(.+?)\\}");
-	
-	/** Create a VidStreamReq from a
-	 *  VidSourceTemplate and Camera.
-	 * 
-	 * Returns an expanded VidStreamReq
-	 * (or a null if expanding the template
-	 *  fails some requirement).
-	 * 
-	 * @param st   VidSourceTemplate
-	 * @param cam  Camera
-	 * @return an expanded VideoReq or 
-	 *         null if the template expansion fails.
+
+	/** Pattern for config parameter */
+	static final Pattern PATTERN = Pattern.compile("\\{(.+?)\\}");
+
+	/** Create a VidStreamReq from a VidSourceTemplate and Camera.
+	 *
+	 * @param st VidSourceTemplate
+	 * @param cam Camera
+	 * @return An expanded VidStreamReq (or null if expanding the template
+	 *         fails some requirement).
 	 */
-	private static VidStreamReq create(VidSourceTemplate st, Camera cam) {
+	static private VidStreamReq create(VidSourceTemplate st, Camera cam) {
 		Session ses = Session.getCurrent();
 		Properties p = ses.getProperties();
 		String config = st.getConfig();
-//		System.out.println("In: "+config);
-//		System.out.println("In: "+st.toString());
-		
+
 		// check subnet
 		String subnets = st.getSubnets();
-		if (!isMember(subnets,
-				SubnetChecker.getSubnetName())) {
-//			System.out.println("Out: (null); not in template subnet");
+		if (!isMember(subnets, SubnetChecker.getSubnetName())) {
 			return null;
 		}
 
 		// expand config replacement-fields
-		Matcher m = pattern.matcher(config);
+		Matcher m = PATTERN.matcher(config);
 		StringBuffer sb = new StringBuffer();
 		String tok, val;
 		while (m.find()) {
@@ -263,44 +217,39 @@ public class VidStreamReq {
 				val = p.getProperty(tok);
 			// ignore a template with an unavailable replacement-field
 			if (isNothing(val)) {
-//				System.out.println("Out: (null); missing substitution for {"+tok+"}");
 				return null;
 			}
 			m.appendReplacement(sb, val);
 		}
 		m.appendTail(sb);
 		config = sb.toString();
-		
+
 		if (VidStreamMgrGst.isOkConfig(config)
 		 || VidStreamMgrMJPEG.isOkConfig(config))
 			return new VidStreamReq(st, config);
 		return null;
 	}
 
-//	private xVideoReq makeTestVR(String cam, String templateName, String codec, String config) {
-//		Camera c = us.mn.state.dot.tms.CameraHelper.lookup(cam);
-//		VidSourceTemplate st = new VidSourceTemplateImpl();
-//	}
-
 	/** Comparator to sort by cameraStreamOrder.order value */
-	public static Comparator<CameraVidSourceOrder> streamOrder =
-		new Comparator<CameraVidSourceOrder>() {
-			public int compare(CameraVidSourceOrder cso1, CameraVidSourceOrder cso2) {
-				return Integer.compare(cso1.getSourceOrder(), cso2.getSourceOrder());
-			}
-		};
+	static private Comparator<CameraVidSourceOrder> STREAM_ORDER =
+		new Comparator<CameraVidSourceOrder>()
+	{
+		public int compare(CameraVidSourceOrder a, CameraVidSourceOrder b) {
+			return Integer.compare(a.getSourceOrder(), b.getSourceOrder());
+		}
+	};
 
 	/** Get list of VidStreamReq(s) for a given camera */
-	public static List<VidStreamReq> getVidStreamReqs(Camera c) {
+	static public List<VidStreamReq> getVidStreamReqs(Camera c) {
 		List<VidStreamReq> vrList = new ArrayList<VidStreamReq>();
-		
+
 		// Get camera's CameraTemplate
 		if (c.getCameraTemplate() == null)
 			return vrList;
-		
+
 		String cstName = c.getCameraTemplate().getName();
 		CameraTemplate ct = CameraTemplateHelper.lookup(cstName);
-		
+
 		if (ct == null)
 			return vrList;
 		// Iterate through CameraStreamOrder(s)
@@ -316,10 +265,10 @@ public class VidStreamReq {
 		if (csoList.size() == 0)
 			return vrList;
 		// sort the resulting list of CSO(s) by stream-order
-		csoList.sort(streamOrder);
+		csoList.sort(STREAM_ORDER);
 		// Iterate through sorted sublist
 		// (collecting VidStreamReq(s) generated from VidSourceTemplate(s))
-		
+
 		itCSO = csoList.iterator();
 		VidStreamReq vsr;
 		VidSourceTemplate vst;
@@ -337,7 +286,7 @@ public class VidStreamReq {
 	}
 
 	/** Get list of CameraVidSourceOrder objects for a given camera template */
-	public static List<CameraVidSourceOrder> getCamVidSrcOrder(CameraTemplate ct) {
+	static public List<CameraVidSourceOrder> getCamVidSrcOrder(CameraTemplate ct) {
 		List<CameraVidSourceOrder> csoList = new ArrayList<CameraVidSourceOrder>();
 		if (ct == null)
 			return csoList;
@@ -353,10 +302,43 @@ public class VidStreamReq {
 		if (csoList.size() == 0)
 			return csoList;
 		// sort the resulting list of CSO(s) by stream-order
-		csoList.sort(streamOrder);
+		csoList.sort(STREAM_ORDER);
 		return csoList;
 	}
-	
+
+	/** Create a new stream request */
+	private VidStreamReq(VidSourceTemplate vst, String config) {
+		this.vst    = vst;
+		this.config = config;
+	}
+
+	/** source VidSourceTemplate */
+	private final VidSourceTemplate vst;
+
+	/** Get the source VidSourceTemplate */
+	public VidSourceTemplate getVidSourceTemplate() {
+		return vst;
+	}
+
+	/** expanded config string */
+	private final String config;
+
+	/** Get the expanded config string */
+	public String getConfig() {
+		return config;
+	}
+
+	/** is this a GStreamer request? */
+	public boolean isGst() {
+		return config.contains("!");
+	}
+
+	/** is this an old-style MJPEG request? */
+	public boolean isMJPEG() {
+		return !isGst();
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(vst.getLabel());
@@ -364,5 +346,4 @@ public class VidStreamReq {
 		sb.append(config);
 		return sb.toString();
 	}
-	
 }
