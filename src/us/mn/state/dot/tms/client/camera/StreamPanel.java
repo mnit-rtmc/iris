@@ -18,12 +18,10 @@ package us.mn.state.dot.tms.client.camera;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Frame;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -38,9 +36,7 @@ import javax.swing.Timer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.client.EditModeListener;
-import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.UserProperty;
 import us.mn.state.dot.tms.client.camera.VideoRequest.Size;
@@ -169,9 +165,56 @@ public class StreamPanel extends JPanel {
 
 	/** Layout control commands */
 	static private enum LayoutCommand {
-		SAVE,
-		RESTORE,
-		DELETE;
+		SAVE("camera.template.save.layout"),
+		RESTORE("camera.template.restore.layout"),
+		// make the delete button a big X
+		DELETE("camera.template.delete.layout");
+
+		/** Command I18n text */
+		private final String text_id;
+
+		/** Create a layout command */
+		private LayoutCommand(String tid) {
+			text_id = tid;
+		}
+
+		/** Create a layout button */
+		private JButton createButton(final StreamPanel pnl) {
+			IAction ia = new IAction(text_id) {
+				@Override
+				protected void doActionPerformed(ActionEvent ev) {
+					STREAMER.addJob(new Job() {
+						public void perform() {
+							handleButton(pnl);
+						}
+					});
+				}
+			};
+			final JButton btn = new JButton(ia);
+			btn.setMargin(new Insets(0, 0, 0, 0));
+			ImageIcon icon = Icons.getIconByPropName(text_id);
+			if (icon != null) {
+				btn.setIcon(icon);
+				btn.setHideActionText(true);
+			}
+			btn.setFocusPainted(false);
+			return btn;
+		}
+
+		/** Handle layout button press */
+		private void handleButton(StreamPanel pnl) {
+			switch (this) {
+			case SAVE:
+				pnl.saveLayout();
+				break;
+			case RESTORE:
+				pnl.restoreLayout();
+				break;
+			case DELETE:
+				pnl.deleteLayout();
+				break;
+			}
+		}
 	}
 
 	/** Current Camera */
@@ -206,6 +249,9 @@ public class StreamPanel extends JPanel {
 	/** User session */
 	private final Session session;
 
+	/** User properties */
+	private final Properties props;
+
 	/** Smart desktop */
 	private SmartDesktop desktop;
 
@@ -235,6 +281,7 @@ public class StreamPanel extends JPanel {
 		autoplay = auto;
 		ptz = cam_ptz;
 		session = s;
+		props = session.getProperties();
 		stop_button = StreamCommand.STOP.createButton(this);
 		play_button = StreamCommand.PLAY.createButton(this);
 		playext_button = StreamCommand.PLAY_EXTERNAL.createButton(this);
@@ -280,32 +327,9 @@ public class StreamPanel extends JPanel {
 		layout_list.setToolTipText(I18N.get("camera.template.layout"));
 		layout_list.setPreferredSize(UI.dimension(120, 28));
 
-		save_layout_button = createLayoutBtn(
-				"camera.template.save.layout", LayoutCommand.SAVE);
-		restore_layout_button = createLayoutBtn(
-				"camera.template.restore.layout", LayoutCommand.RESTORE);
-
-		// make the delete button a big X (same size as the other buttons)
-		delete_layout_button = new JButton(
-				new IAction("camera.template.delete.layout") {
-			@Override
-			protected void doActionPerformed(ActionEvent ev) {
-				handleLayoutBtn(LayoutCommand.DELETE);
-			}
-		});
-		delete_layout_button.setHideActionText(true);
-		String tt = I18N.getSilent("camera.template.delete.layout");
-		if (tt != null)
-			delete_layout_button.setToolTipText(tt);
-		delete_layout_button.setText("X");
-		delete_layout_button.setFont(
-				new java.awt.Font("Arial", java.awt.Font.PLAIN, 18));
-		delete_layout_button.setPreferredSize(
-				save_layout_button.getPreferredSize());
-		Insets margs = delete_layout_button.getMargin();
-		margs.left = 0;
-		margs.right = 0;
-		delete_layout_button.setMargin(margs);
+		save_layout_button = LayoutCommand.SAVE.createButton(this);
+		restore_layout_button = LayoutCommand.RESTORE.createButton(this);
+		delete_layout_button = LayoutCommand.DELETE.createButton(this);
 
 		p.add(stop_button);
 		p.add(play_button);
@@ -322,138 +346,44 @@ public class StreamPanel extends JPanel {
 		return p;
 	}
 
+	/** Save the current layout */
+	private void saveLayout() {
+		UserProperty.saveStreamLayout(props, getLayoutName());
+		updateLayoutList();
+	}
+
+	/** Restore the saved layout */
+	private void restoreLayout() {
+		StreamLayout layout = new StreamLayout(props, getLayoutName());
+		layout.restoreFrames(desktop);
+		updateLayoutList();
+	}
+
+	/** Delete the selected layout */
+	private void deleteLayout() {
+		UserProperty.deleteStreamLayout(props, getLayoutName());
+		updateLayoutList();
+	}
+
+	/** Get the selected layout name */
+	private String getLayoutName() {
+		String name = (String) layout_list.getSelectedItem();
+		return (name != null && !name.isEmpty())
+		      ?	name
+		      : UserProperty.getNextStreamLayoutName(props);
+	}
+
 	/** Update the list of layouts based on the current properties */
 	private void updateLayoutList() {
-		Properties p = session.getProperties();
-		ArrayList<String> layoutNames = UserProperty.getStreamLayoutNames(p);
 		String layoutName = (String) layout_list.getSelectedItem();
 
 		// clear and update, then try to re-select
 		layout_list_model.removeAllElements();
+		ArrayList<String> layoutNames =
+			UserProperty.getStreamLayoutNames(props);
 		for (String ln: layoutNames)
 			layout_list_model.addElement(ln);
 		layout_list.setSelectedItem(layoutName);
-	}
-
-	/**
-	 * Create a layout button.
-	 * @param text_id Text ID
-	 * @param sc The StreamCommand to associate with the button
-	 * @return The requested JButton.
-	 */
-	private JButton createLayoutBtn(String text_id,
-		final LayoutCommand lc)
-	{
-		final JButton btn;
-		IAction ia = null;
-		ia = new IAction(text_id) {
-			@Override
-			protected void doActionPerformed(ActionEvent ev) {
-				handleLayoutBtn(lc);
-			}
-		};
-		btn = new JButton(ia);
-		ImageIcon icon = Icons.getIconByPropName(text_id);
-		if (icon != null) {
-			btn.setIcon(icon);
-			btn.setMargin(new Insets(0, 0, 0, 0));
-			btn.setHideActionText(true);
-			String tt = I18N.getSilent(text_id);
-			if (tt != null)
-				btn.setToolTipText(tt);
-		}
-		btn.setFocusPainted(false);
-		return btn;
-	}
-
-	/** Handle layout button press */
-	private void handleLayoutBtn(LayoutCommand lc) {
-		Properties p = session.getProperties();
-
-		// get the layout name from the ComboBox
-		String layoutName = (String) layout_list.getSelectedItem();
-
-		// if the layout name is empty, generate a new, unique name
-		if (layoutName == null || layoutName.isEmpty()) {
-			HashSet<String> hSet = new HashSet<String>(
-				UserProperty.getStreamLayoutNames(p));
-			for (int i = 1; i < 999; ++i) {
-				layoutName = "layout_" + Integer.toString(i);
-				if (!hSet.contains(layoutName))
-					break;
-			}
-		}
-
-		if (lc == LayoutCommand.SAVE)
-			UserProperty.saveStreamLayout(p, layoutName);
-		else if (lc == LayoutCommand.RESTORE)
-			initializeCameraFrames(p, layoutName);
-		else if (lc == LayoutCommand.DELETE)
-			UserProperty.deleteStreamLayout(p, layoutName);
-
-		// update the ComboBox to reflect any changes
-		updateLayoutList();
-	}
-
-	/** Initialize the camera frames */
-	private void initializeCameraFrames(Properties p, String layoutName) {
-		HashMap<String, String> hmap =
-			UserProperty.getCameraFrames(p, layoutName);
-		int num_streams = 0;
-
-		if (hmap.get(UserProperty.NUM_STREAM.name) != null) {
-			num_streams = Integer.parseInt(
-				hmap.get(UserProperty.NUM_STREAM.name));
-		}
-
-		// get a list of open frames before opening more - we won't open
-		// duplicates from layouts
-		Frame[] frames = IrisClient.getFrames();
-		HashMap<String, Frame> vidFrames = new HashMap<String, Frame>();
-		for (Frame f: frames) {
-			if (f.getTitle().contains("Stream Panel") && f.isVisible())
-				vidFrames.put(f.getTitle(), f);
-		}
-
-		for (int i = 0; i < num_streams; i++) {
-			String cam_name = hmap.get(UserProperty.STREAM_CCTV.name
-				+ "." + Integer.toString(i));
-			Camera cam = CameraHelper.lookup(cam_name);
-
-			if (cam != null) {
-				// check if we already have this frame open
-				String t = VidWindow.getWindowTitle(cam);
-
-				if (!vidFrames.containsKey(t)) {
-					// if we don't, open it
-					int w = Integer.parseInt(hmap.get(
-							UserProperty.STREAM_WIDTH.name
-							+ "." + Integer.toString(i)));
-					int h = Integer.parseInt(hmap.get(
-							UserProperty.STREAM_HEIGHT.name
-							+ "." + Integer.toString(i)));
-					Dimension d = new Dimension(w, h);
-
-					int x = Integer.parseInt(hmap.get(
-							UserProperty.STREAM_X.name
-							+ "." + Integer.toString(i)));
-					int y = Integer.parseInt(hmap.get(
-							UserProperty.STREAM_Y.name
-							+ "." + Integer.toString(i)));
-
-					int strm_num = Integer.parseInt(hmap.get(
-							UserProperty.STREAM_SRC.name
-							+ "." + Integer.toString(i)));
-					desktop.showExtFrame(new VidWindow(
-							cam, true, d, strm_num), x, y);
-				} else {
-					// if we do, bring it to the top
-					Frame f = vidFrames.get(t);
-					f.setVisible(true);
-					f.toFront();
-				}
-			}
-		}
 	}
 
 	/**

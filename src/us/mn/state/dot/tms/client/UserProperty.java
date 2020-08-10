@@ -20,6 +20,7 @@ import java.awt.Frame;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map.Entry;
 import java.io.File;
 import java.io.FileInputStream;
@@ -364,6 +365,19 @@ public enum UserProperty {
 		}
 		layoutNames.sort(String::compareToIgnoreCase);
 		return layoutNames;
+	}
+
+	/** Get the next available stream layout name */
+	static public String getNextStreamLayoutName(Properties p) {
+		HashSet<String> hSet = new HashSet<String>(
+			getStreamLayoutNames(p));
+		for (int i = 1; i < 999; ++i) {
+			String name = "layout_" + i;
+			if (!hSet.contains(name))
+				return name;
+		}
+		assert false;
+		return null;
 	}
 
 	/** Lookup the layout number for the specified layout name. If not found,

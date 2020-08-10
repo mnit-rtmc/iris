@@ -67,6 +67,7 @@ abstract public class IAction extends AbstractAction {
 				char c = I18N.getKeyEventChar(text_id);
 				tt += " (alt-" + c + ")";
 			}
+			// SHORT_DESCRIPTION is used for tool tips
 			putValue(Action.SHORT_DESCRIPTION, tt);
 		}
 	}
