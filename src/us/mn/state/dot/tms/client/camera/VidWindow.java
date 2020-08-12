@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2017  Minnesota Department of Transportation
+ * Copyright (C) 2002-2020  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  * Copyright (C) 2020 SRF Consulting Group
  *
@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.event.ChangeEvent;
@@ -30,7 +31,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * A JPanel that can display a video stream. It includes a status label.
- * 
+ *
  * Derived from the StreamPanel class.
  *
  * @author Timothy Johnson
@@ -46,25 +47,21 @@ public class VidWindow extends AbstractForm {
 	/** Control panel height */
 	static private final int HEIGHT_CONTROL_PNL = 30;
 
+	/** Frame title */
+	static private final String TITLE = "Stream Panel";
+
+	/** Get a window title */
+	static public String getWindowTitle(Camera cam) {
+		return TITLE + ": " + cam.getName();
+	}
+
+	/** Check if a frame is a video window */
+	static public boolean isFrame(Frame f) {
+		return f.getTitle().startsWith(TITLE) && f.isVisible();
+	}
+
 	/** JPanel that renders the video stream */
 	private final VidPanel videoPanel;
-
-
-//	/** Timer listener for updating video status */
-//	private class StatusUpdater implements ActionListener {
-//		public void actionPerformed(ActionEvent e) {
-//			updateStatus();
-//		}
-//	};
-//
-//	/** Timer task for updating video status */
-//	private final StatusUpdater stat_updater = new StatusUpdater();
-//
-//	/** Stream progress timer */
-//	private final Timer timer = new Timer(STATUS_DELAY, stat_updater);
-
-	/** Current Camera */
-	private Camera camera = null;
 
 	/** Most recent streaming state.  State variable for event FSM. */
 	private boolean stream_state = false;
@@ -72,56 +69,43 @@ public class VidWindow extends AbstractForm {
 	/** Stream status listeners to notify on stream status change events */
 	private final Set<StreamStatusListener> ssl_set =
 		new HashSet<StreamStatusListener>();
-	
-//    private static Pipeline pipe;
 
-	/**
-
-	 */
-	@SuppressWarnings("static-access")
-	public VidWindow(Camera cam, Boolean ctrl, VideoRequest.Size vsz)
-	{
+	/** Create a video window */
+	public VidWindow(Camera cam, Boolean ctrl, VideoRequest.Size vsz) {
 		this(cam, ctrl, UI.dimension(vsz.width,
 				vsz.height + HEIGHT_STATUS_PNL
 				+ (ctrl ? HEIGHT_CONTROL_PNL : 0)), 0);
 	}
-	
-	/**
 
-	 */
+	/** Create a video window */
 	public VidWindow(Camera cam, Boolean ctrl, Dimension pdm, int strm_num)
 	{
 		super(getWindowTitle(cam), true);
-		
+
 		setLayout(new BorderLayout());
 
 		Session s = Session.getCurrent();
-		int vidHeight = pdm.height
-					- HEIGHT_STATUS_PNL 
-					- (ctrl ? HEIGHT_CONTROL_PNL : 0);
-		
+		int vidHeight = pdm.height - HEIGHT_STATUS_PNL
+			- (ctrl ? HEIGHT_CONTROL_PNL : 0);
+
 		int vidWidth = pdm.width;
-		
+
 		Dimension sz = UI.dimension(vidWidth, vidHeight);
 		CameraPTZ cam_ptz = new CameraPTZ(s);
 		cam_ptz.setCamera(cam);
 
 		videoPanel = new VidPanel(sz, strm_num);
 		add(videoPanel, BorderLayout.CENTER);
-				
+
 		if (ctrl)
 			add(new PopoutCamControlPanel(cam_ptz), BorderLayout.SOUTH);
-		
+
 		setPreferredSize(UI.dimension(pdm.width, pdm.height));
 		setMinimumSize(UI.dimension(pdm.width, pdm.height));
 		setMaximumSize(UI.dimension(pdm.width, pdm.height));
 
 		videoPanel.addChangeListener(new StateChangeListener());
 		setCamera(cam);
-	}
-	
-	public static String getWindowTitle(Camera cam) {
-		return "Stream Panel: " + cam.getName();
 	}
 
 	/**
@@ -136,7 +120,6 @@ public class VidWindow extends AbstractForm {
 		videoPanel.setCamera(c);
 	}
 
-
 	/** Are we currently streaming? */
 	public boolean isStreaming() {
 		VidPanel vp = videoPanel;
@@ -146,11 +129,11 @@ public class VidWindow extends AbstractForm {
 	}
 
 	class StateChangeListener implements ChangeListener {
-	    public void stateChanged(ChangeEvent e) {
-	    	handleStateChange();
-	    }
+		public void stateChanged(ChangeEvent e) {
+			handleStateChange();
+		}
 	}
-	
+
 	/**
 	 * Handle a possible streaming state change.  If necessary, update
 	 * stream_state, streaming control button status, and notify
@@ -185,5 +168,4 @@ public class VidWindow extends AbstractForm {
 		if (ssl != null)
 			ssl_set.remove(ssl);
 	}
-
 }

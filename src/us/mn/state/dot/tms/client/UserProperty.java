@@ -140,7 +140,7 @@ public enum UserProperty {
 	static private void setProp(Properties p, UserProperty up, String v,
 		int i)
 	{
-		p.setProperty(up.name + "." + Integer.toString(i), v);
+		p.setProperty(up.name + "." + i, v);
 	}
 
 	/** Set an integer property with one integer increment */
@@ -154,8 +154,7 @@ public enum UserProperty {
 	static private void setProp(Properties p, UserProperty up, String v,
 		int i, int j)
 	{
-		p.setProperty(up.name + "." + Integer.toString(i) + "." +
-			Integer.toString(j), v);
+		p.setProperty(up.name + "." + i + "." + j, v);
 	}
 
 	/** Set an integer property with two integer increments */
@@ -172,15 +171,14 @@ public enum UserProperty {
 
 	/** Get a property (with one integer increment) value as a string */
 	static private String getProp(Properties p, UserProperty up, int i) {
-		return p.getProperty(up.name + "." + Integer.toString(i), "").trim();
+		return p.getProperty(up.name + "." + i, "").trim();
 	}
 
 	/** Get a property (with two integer increments) value as a string */
 	static private String getProp(Properties p, UserProperty up, int i,
 		int j)
 	{
-		return p.getProperty(up.name + "." + Integer.toString(i)
-			+ "." + Integer.toString(j), "").trim();
+		return p.getProperty(up.name + "." + i + "." + j, "").trim();
 	}
 
 	/** Get an integer property */
@@ -215,15 +213,14 @@ public enum UserProperty {
 
 	/** Remove the specified property with one integer increment */
 	static private void removeProp(Properties p, UserProperty up, int i) {
-		p.remove(up.name + "." + Integer.toString(i));
+		p.remove(up.name + "." + i);
 	}
 
 	/** Remove the specified property with two integer increments */
 	static private void removeProp(Properties p, UserProperty up, int i,
 		int j)
 	{
-		p.remove(up.name + "." + Integer.toString(i) + "." +
-			Integer.toString(j));
+		p.remove(up.name + "." + i + "." + j);
 	}
 
 	/** Get window position from properties.
@@ -280,17 +277,17 @@ public enum UserProperty {
 			return hmap;
 		hmap.put(NUM_STREAM.name, Integer.toString(num_streams));
 		for (int i = 0; i < num_streams; i++) {
-			hmap.put(STREAM_CCTV.name + "." + Integer.toString(i),
+			hmap.put(STREAM_CCTV.name + "." + i,
 				getProp(p, STREAM_CCTV, lnum, i));
-			hmap.put(STREAM_WIDTH.name + "." + Integer.toString(i),
+			hmap.put(STREAM_WIDTH.name + "." + i,
 				getProp(p, STREAM_WIDTH, lnum, i));
-			hmap.put(STREAM_HEIGHT.name + "." + Integer.toString(i),
+			hmap.put(STREAM_HEIGHT.name + "." + i,
 				getProp(p, STREAM_HEIGHT, lnum, i));
-			hmap.put(STREAM_X.name + "." + Integer.toString(i),
+			hmap.put(STREAM_X.name + "." + i,
 				getProp(p, STREAM_X, lnum, i));
-			hmap.put(STREAM_Y.name + "." + Integer.toString(i),
+			hmap.put(STREAM_Y.name + "." + i,
 				getProp(p, STREAM_Y, lnum, i));
-			hmap.put(STREAM_SRC.name + "." + Integer.toString(i),
+			hmap.put(STREAM_SRC.name + "." + i,
 				getProp(p, STREAM_SRC, lnum, i));
 		}
 		return hmap;
@@ -306,7 +303,7 @@ public enum UserProperty {
 				lnum = 0;
 		}
 
-		Frame [] frames = IrisClient.getFrames();
+		Frame[] frames = IrisClient.getFrames();
 		int j = 0;
 		for (Frame f : frames) {
 			String frame_title = f.getTitle();
@@ -323,7 +320,7 @@ public enum UserProperty {
 			}
 		}
 		setProp(p, NUM_STREAM, j, lnum);
-		setProp(p, NUM_LAYOUT, lnum+1);
+		setProp(p, NUM_LAYOUT, lnum + 1);
 	}
 
 	/** Delete a video stream window layout with the name layoutName. */

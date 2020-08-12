@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2020  Minnesota Department of Transportation
+ * Copyright (C) 2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.UserProperty;
+import static us.mn.state.dot.tms.client.UserProperty.*;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 
 /**
@@ -33,10 +34,8 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
  */
 public class StreamLayout {
 
-	static private final String TITLE = "Stream Panel";
-
 	/** Number of streams */
-	public final int num_streams;
+	private final int num_streams;
 
 	/** Mapping of property names to values */
 	private final HashMap<String, String> props;
@@ -44,24 +43,33 @@ public class StreamLayout {
 	/** Create a new stream layout */
 	public StreamLayout(Properties properties, String name) {
 		props = UserProperty.getCameraFrames(properties, name);
-		if (props.get(UserProperty.NUM_STREAM.name) != null) {
-			num_streams = Integer.parseInt(
-				props.get(UserProperty.NUM_STREAM.name));
-		} else
+		if (props.get(NUM_STREAM.name) != null)
+			num_streams = getPropI(NUM_STREAM.name);
+		else
 			num_streams = 0;
+	}
+
+	/** Get an integer property */
+	private int getPropI(String name) {
+		try {
+			String prop = props.get(name);
+			return (prop != null) ? Integer.parseInt(prop) : 0;
+		}
+		catch (NumberFormatException e) {
+			return 0;
+		}
 	}
 
 	/** Restore the stream frames */
 	public void restoreFrames(SmartDesktop desktop) {
-		HashMap<String, Frame> vidFrames = getOpenFrames();
+		HashMap<String, Frame> frames = getOpenFrames();
 		for (int i = 0; i < num_streams; i++) {
-			String cam_name = props.get(
-				UserProperty.STREAM_CCTV.name + "." + i);
+			String cam_name = props.get(STREAM_CCTV.name + "." + i);
 			Camera cam = CameraHelper.lookup(cam_name);
 			if (cam != null) {
 				String title = VidWindow.getWindowTitle(cam);
-				if (vidFrames.containsKey(title)) {
-					Frame f = vidFrames.get(title);
+				if (frames.containsKey(title)) {
+					Frame f = frames.get(title);
 					f.setVisible(true);
 					f.toFront();
 				} else
@@ -75,7 +83,7 @@ public class StreamLayout {
 		Frame[] frames = IrisClient.getFrames();
 		HashMap<String, Frame> vidFrames = new HashMap<String, Frame>();
 		for (Frame f: frames) {
-			if (f.getTitle().contains(TITLE) && f.isVisible())
+			if (VidWindow.isFrame(f))
 				vidFrames.put(f.getTitle(), f);
 		}
 		return vidFrames;
@@ -83,18 +91,15 @@ public class StreamLayout {
 
 	/** Open a camera stream frame */
 	private void openStreamFrame(SmartDesktop desktop, Camera cam, int i) {
-		int strm_num = Integer.parseInt(props.get(
-			UserProperty.STREAM_SRC.name + "." + i));
-		int w = Integer.parseInt(props.get(
-			UserProperty.STREAM_WIDTH.name + "." + i));
-		int h = Integer.parseInt(props.get(
-			UserProperty.STREAM_HEIGHT.name + "." + i));
-		Dimension d = new Dimension(w, h);
-		VidWindow window = new VidWindow(cam, true, d, strm_num);
-		int x = Integer.parseInt(props.get(
-			UserProperty.STREAM_X.name + "." + i));
-		int y = Integer.parseInt(props.get(
-			UserProperty.STREAM_Y.name + "." + i));
-		desktop.showExtFrame(window, x, y);
+		int src = getPropI(STREAM_SRC.name + "." + i);
+		int w = getPropI(STREAM_WIDTH.name + "." + i);
+		int h = getPropI(STREAM_HEIGHT.name + "." + i);
+		if (w > 0 && h > 0) {
+			Dimension d = new Dimension(w, h);
+			VidWindow window = new VidWindow(cam, true, d, src);
+			int x = getPropI(STREAM_X.name + "." + i);
+			int y = getPropI(STREAM_Y.name + "." + i);
+			desktop.showExtFrame(window, x, y);
+		}
 	}
 }

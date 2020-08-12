@@ -615,7 +615,7 @@ public class VidPanel extends JPanel implements FocusListener {
 
 	/** Start playing previous stream */
 	public boolean startPreviousStream() {
-		return playStream(streamReqNum-1);
+		return playStream(streamReqNum - 1);
 	}
 
 	/** Start/restart playing current stream */
@@ -625,7 +625,7 @@ public class VidPanel extends JPanel implements FocusListener {
 
 	/** Start playing next stream */
 	public boolean startNextStream() {
-		return playStream(streamReqNum+1);
+		return playStream(streamReqNum + 1);
 	}
 
 	/** Stop playing current stream.
