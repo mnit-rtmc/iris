@@ -82,13 +82,13 @@ public class StreamPanel extends JPanel {
 	private final JPanel control_pnl;
 
 	/** Stop button */
-	private final JButton stop_button;
+	private final JButton stop_btn;
 
 	/** Play button */
-	private final JButton play_button;
+	private final JButton play_btn;
 
 	/** Play external button */
-	private final JButton playext_button;
+	private final JButton playext_btn;
 
 	/** Layout ComboBox */
 	private JComboBox<String> layout_list;
@@ -97,13 +97,13 @@ public class StreamPanel extends JPanel {
 	private DefaultComboBoxModel<String> layout_list_model;
 
 	/** Save layout button */
-	private JButton save_layout_button;
+	private JButton save_layout_btn;
 
 	/** Delete layout button */
-	private JButton delete_layout_button;
+	private JButton delete_layout_btn;
 
 	/** Restore layout button */
-	private JButton restore_layout_button;
+	private JButton restore_layout_btn;
 
 	/** JLabel for displaying the stream details (codec, size, framerate) */
 	private final JLabel status_lbl = new JLabel();
@@ -114,8 +114,8 @@ public class StreamPanel extends JPanel {
 		PLAY("camera.stream.play"),
 		PLAY_EXTERNAL("camera.stream.playext"),
 		SAVE_LAYOUT("camera.template.save.layout"),
-		RESTORE_LAYOUT("camera.template.restore.layout"),
-		DELETE_LAYOUT("camera.template.delete.layout");
+		DELETE_LAYOUT("camera.template.delete.layout"),
+		RESTORE_LAYOUT("camera.template.restore.layout");
 
 		/** Command I18n text */
 		private final String text_id;
@@ -163,11 +163,11 @@ public class StreamPanel extends JPanel {
 			case SAVE_LAYOUT:
 				pnl.saveLayout();
 				break;
-			case RESTORE_LAYOUT:
-				pnl.restoreLayout();
-				break;
 			case DELETE_LAYOUT:
 				pnl.deleteLayout();
+				break;
+			case RESTORE_LAYOUT:
+				pnl.restoreLayout();
 				break;
 			}
 		}
@@ -238,9 +238,9 @@ public class StreamPanel extends JPanel {
 		ptz = cam_ptz;
 		session = s;
 		props = session.getProperties();
-		stop_button = StreamCommand.STOP.createButton(this);
-		play_button = StreamCommand.PLAY.createButton(this);
-		playext_button = StreamCommand.PLAY_EXTERNAL.createButton(this);
+		stop_btn = StreamCommand.STOP.createButton(this);
+		play_btn = StreamCommand.PLAY.createButton(this);
+		playext_btn = StreamCommand.PLAY_EXTERNAL.createButton(this);
 		VideoRequest.Size vsz = req.getSize();
 		Dimension sz = UI.dimension(vsz.width, vsz.height);
 		screen_pnl = new VidPanel(sz);
@@ -283,22 +283,20 @@ public class StreamPanel extends JPanel {
 		layout_list.setToolTipText(I18N.get("camera.template.layout"));
 		layout_list.setPreferredSize(UI.dimension(120, 28));
 
-		save_layout_button = StreamCommand.SAVE_LAYOUT
+		save_layout_btn = StreamCommand.SAVE_LAYOUT.createButton(this);
+		delete_layout_btn = StreamCommand.DELETE_LAYOUT
 			.createButton(this);
-		restore_layout_button = StreamCommand.RESTORE_LAYOUT
-			.createButton(this);
-		delete_layout_button = StreamCommand.DELETE_LAYOUT
+		restore_layout_btn = StreamCommand.RESTORE_LAYOUT
 			.createButton(this);
 
-		p.add(stop_button);
-		p.add(play_button);
-		p.add(playext_button);
+		p.add(stop_btn);
+		p.add(play_btn);
+		p.add(playext_btn);
 		p.add(Box.createHorizontalStrut(10));
-
 		p.add(layout_list);
-		p.add(save_layout_button);
-		p.add(delete_layout_button);
-		p.add(restore_layout_button);
+		p.add(save_layout_btn);
+		p.add(delete_layout_btn);
+		p.add(restore_layout_btn);
 		p.setPreferredSize(UI.dimension(vsz.width + 50,
 			HEIGHT_CONTROL_PNL));
 		p.setMinimumSize(UI.dimension(vsz.width + 50, HEIGHT_CONTROL_PNL));
@@ -423,7 +421,7 @@ public class StreamPanel extends JPanel {
 		clearStream();
 		if (session != null)
 			session.removeEditModeListener(edit_lsnr);
-		save_layout_button.setEnabled(false);
+		save_layout_btn.setEnabled(false);
 	}
 
 	/** Set the status label. */
@@ -459,15 +457,15 @@ public class StreamPanel extends JPanel {
 	/** Update the button state */
 	private void updateButtonState() {
 		if (camera == null) {
-			stop_button.setEnabled(false);
-			play_button.setEnabled(false);
-			playext_button.setEnabled(false);
+			stop_btn.setEnabled(false);
+			play_btn.setEnabled(false);
+			playext_btn.setEnabled(false);
 			return;
 		}
 		boolean streaming = isStreaming();
-		stop_button.setEnabled(streaming);
-		play_button.setEnabled(!streaming);
-		playext_button.setEnabled(true);
+		stop_btn.setEnabled(streaming);
+		play_btn.setEnabled(!streaming);
+		playext_btn.setEnabled(true);
 	}
 
 	/** Bind a StreamStatusListener to this StreamPanel. */
@@ -485,8 +483,8 @@ public class StreamPanel extends JPanel {
 	/** Update the edit mode */
 	public void updateEditMode() {
 		boolean editMode = session.getEditMode();
-		save_layout_button.setEnabled(editMode);
-		delete_layout_button.setEnabled(editMode);
+		save_layout_btn.setEnabled(editMode);
+		delete_layout_btn.setEnabled(editMode);
 		layout_list.setEditable(editMode);
 	}
 }
