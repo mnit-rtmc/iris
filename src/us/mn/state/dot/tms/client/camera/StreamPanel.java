@@ -97,13 +97,13 @@ public class StreamPanel extends JPanel {
 	private DefaultComboBoxModel<String> layout_list_model;
 
 	/** Save layout button */
-	private JButton save_layout_btn;
+	private final JButton save_layout_btn;
 
 	/** Delete layout button */
-	private JButton delete_layout_btn;
+	private final JButton delete_layout_btn;
 
 	/** Restore layout button */
-	private JButton restore_layout_btn;
+	private final JButton restore_layout_btn;
 
 	/** JLabel for displaying the stream details (codec, size, framerate) */
 	private final JLabel status_lbl = new JLabel();
@@ -113,9 +113,9 @@ public class StreamPanel extends JPanel {
 		STOP("camera.stream.stop"),
 		PLAY("camera.stream.play"),
 		PLAY_EXTERNAL("camera.stream.playext"),
-		SAVE_LAYOUT("camera.template.save.layout"),
-		DELETE_LAYOUT("camera.template.delete.layout"),
-		RESTORE_LAYOUT("camera.template.restore.layout");
+		SAVE_LAYOUT("camera.layout.save"),
+		DELETE_LAYOUT("camera.layout.delete"),
+		RESTORE_LAYOUT("camera.layout.restore");
 
 		/** Command I18n text */
 		private final String text_id;
@@ -241,6 +241,11 @@ public class StreamPanel extends JPanel {
 		stop_btn = StreamCommand.STOP.createButton(this);
 		play_btn = StreamCommand.PLAY.createButton(this);
 		playext_btn = StreamCommand.PLAY_EXTERNAL.createButton(this);
+		save_layout_btn = StreamCommand.SAVE_LAYOUT.createButton(this);
+		delete_layout_btn = StreamCommand.DELETE_LAYOUT
+			.createButton(this);
+		restore_layout_btn = StreamCommand.RESTORE_LAYOUT
+			.createButton(this);
 		VideoRequest.Size vsz = req.getSize();
 		Dimension sz = UI.dimension(vsz.width, vsz.height);
 		screen_pnl = new VidPanel(sz);
@@ -280,14 +285,8 @@ public class StreamPanel extends JPanel {
 		// Use an editable ComboBox for saving more than one layout
 		layout_list_model = new DefaultComboBoxModel<String>();
 		layout_list = new JComboBox<String>(layout_list_model);
-		layout_list.setToolTipText(I18N.get("camera.template.layout"));
+		layout_list.setToolTipText(I18N.get("camera.layout"));
 		layout_list.setPreferredSize(UI.dimension(120, 28));
-
-		save_layout_btn = StreamCommand.SAVE_LAYOUT.createButton(this);
-		delete_layout_btn = StreamCommand.DELETE_LAYOUT
-			.createButton(this);
-		restore_layout_btn = StreamCommand.RESTORE_LAYOUT
-			.createButton(this);
 
 		p.add(stop_btn);
 		p.add(play_btn);
