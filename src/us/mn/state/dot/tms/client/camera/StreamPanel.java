@@ -112,7 +112,10 @@ public class StreamPanel extends JPanel {
 	static private enum StreamCommand {
 		STOP("camera.stream.stop"),
 		PLAY("camera.stream.play"),
-		PLAY_EXTERNAL("camera.stream.playext");
+		PLAY_EXTERNAL("camera.stream.playext"),
+		SAVE_LAYOUT("camera.template.save.layout"),
+		RESTORE_LAYOUT("camera.template.restore.layout"),
+		DELETE_LAYOUT("camera.template.delete.layout");
 
 		/** Command I18n text */
 		private final String text_id;
@@ -122,7 +125,7 @@ public class StreamPanel extends JPanel {
 			text_id = tid;
 		}
 
-		/** Create a stream-control command button */
+		/** Create a stream command button */
 		private JButton createButton(final StreamPanel pnl) {
 			IAction ia = new IAction(text_id) {
 				@Override
@@ -135,8 +138,6 @@ public class StreamPanel extends JPanel {
 				}
 			};
 			final JButton btn = new JButton(ia);
-			btn.setPreferredSize(UI.dimension(40, 28));
-			btn.setMinimumSize(UI.dimension(28, 28));
 			btn.setMargin(new Insets(0, 0, 0, 0));
 			ImageIcon icon = Icons.getIconByPropName(text_id);
 			if (icon != null) {
@@ -159,58 +160,13 @@ public class StreamPanel extends JPanel {
 			case PLAY_EXTERNAL:
 				pnl.playExternal();
 				break;
-			}
-		}
-	}
-
-	/** Layout control commands */
-	static private enum LayoutCommand {
-		SAVE("camera.template.save.layout"),
-		RESTORE("camera.template.restore.layout"),
-		// make the delete button a big X
-		DELETE("camera.template.delete.layout");
-
-		/** Command I18n text */
-		private final String text_id;
-
-		/** Create a layout command */
-		private LayoutCommand(String tid) {
-			text_id = tid;
-		}
-
-		/** Create a layout button */
-		private JButton createButton(final StreamPanel pnl) {
-			IAction ia = new IAction(text_id) {
-				@Override
-				protected void doActionPerformed(ActionEvent ev) {
-					STREAMER.addJob(new Job() {
-						public void perform() {
-							handleButton(pnl);
-						}
-					});
-				}
-			};
-			final JButton btn = new JButton(ia);
-			btn.setMargin(new Insets(0, 0, 0, 0));
-			ImageIcon icon = Icons.getIconByPropName(text_id);
-			if (icon != null) {
-				btn.setIcon(icon);
-				btn.setHideActionText(true);
-			}
-			btn.setFocusPainted(false);
-			return btn;
-		}
-
-		/** Handle layout button press */
-		private void handleButton(StreamPanel pnl) {
-			switch (this) {
-			case SAVE:
+			case SAVE_LAYOUT:
 				pnl.saveLayout();
 				break;
-			case RESTORE:
+			case RESTORE_LAYOUT:
 				pnl.restoreLayout();
 				break;
-			case DELETE:
+			case DELETE_LAYOUT:
 				pnl.deleteLayout();
 				break;
 			}
@@ -327,9 +283,12 @@ public class StreamPanel extends JPanel {
 		layout_list.setToolTipText(I18N.get("camera.template.layout"));
 		layout_list.setPreferredSize(UI.dimension(120, 28));
 
-		save_layout_button = LayoutCommand.SAVE.createButton(this);
-		restore_layout_button = LayoutCommand.RESTORE.createButton(this);
-		delete_layout_button = LayoutCommand.DELETE.createButton(this);
+		save_layout_button = StreamCommand.SAVE_LAYOUT
+			.createButton(this);
+		restore_layout_button = StreamCommand.RESTORE_LAYOUT
+			.createButton(this);
+		delete_layout_button = StreamCommand.DELETE_LAYOUT
+			.createButton(this);
 
 		p.add(stop_button);
 		p.add(play_button);
