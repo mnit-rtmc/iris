@@ -43,7 +43,7 @@ System Attribute                 | Description
 `comm_event_purge_days`          | Number of days after which communication events will be purged
 `comm_idle_disconnect_dms_sec`   | Number of seconds until an idle [DMS] commlink will be closed.  (0: indefinite)
 `comm_idle_disconnect_gps_sec`   | Number of seconds until an idle GPS commlink will be closed.  (0: indefinite)
-`comm_idle_disconnect_modem_sec` | Number of seconds until an idle modem commlink will be closed.  (0: indefinite)  Takes precidence for any device using a modem commlink
+`comm_idle_disconnect_modem_sec` | Number of seconds until an idle modem commlink will be closed.  (0: indefinite)  Takes precedence for any device using a modem commlink
 `database_version`               | IRIS database version; developer attribute.  **Do not change**.
 `detector_auto_fail_enable`      | Enable "auto fail" of traffic detectors with suspicious data
 `detector_event_purge_days`      | Number of days after which detector events will be purged
