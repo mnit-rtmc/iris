@@ -17,31 +17,18 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
-import javax.swing.Box;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.UserProperty;
 import us.mn.state.dot.tms.client.camera.VideoRequest.Size;
-import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -79,99 +66,10 @@ public class StreamPanel extends JPanel {
 	private final VidPanel screen_pnl;
 
 	/** Stream controls panel and its components */
-	private final JPanel control_pnl;
-
-	/** Stop button */
-	private final JButton stop_btn;
-
-	/** Play button */
-	private final JButton play_btn;
-
-	/** Play external button */
-	private final JButton playext_btn;
-
-	/** Layout ComboBox */
-	private JComboBox<String> layout_list;
-
-	/** Layout ComboBox model */
-	private DefaultComboBoxModel<String> layout_list_model;
-
-	/** Save layout button */
-	private final JButton save_layout_btn;
-
-	/** Delete layout button */
-	private final JButton delete_layout_btn;
-
-	/** Restore layout button */
-	private final JButton restore_layout_btn;
+	private final StreamControlPanel control_pnl;
 
 	/** JLabel for displaying the stream details (codec, size, framerate) */
 	private final JLabel status_lbl = new JLabel();
-
-	/** Stream control commands */
-	static private enum StreamCommand {
-		STOP("camera.stream.stop"),
-		PLAY("camera.stream.play"),
-		PLAY_EXTERNAL("camera.stream.playext"),
-		SAVE_LAYOUT("camera.layout.save"),
-		DELETE_LAYOUT("camera.layout.delete"),
-		RESTORE_LAYOUT("camera.layout.restore");
-
-		/** Command I18n text */
-		private final String text_id;
-
-		/** Create a stream command */
-		private StreamCommand(String tid) {
-			text_id = tid;
-		}
-
-		/** Create a stream command button */
-		private JButton createButton(final StreamPanel pnl) {
-			IAction ia = new IAction(text_id) {
-				@Override
-				protected void doActionPerformed(ActionEvent ev) {
-					STREAMER.addJob(new Job() {
-						public void perform() {
-							handleButton(pnl);
-						}
-					});
-				}
-			};
-			final JButton btn = new JButton(ia);
-			btn.setMargin(new Insets(0, 0, 0, 0));
-			ImageIcon icon = Icons.getIconByPropName(text_id);
-			if (icon != null) {
-				btn.setIcon(icon);
-				btn.setHideActionText(true);
-			}
-			btn.setFocusPainted(false);
-			return btn;
-		}
-
-		/** Handle control button press */
-		private void handleButton(StreamPanel pnl) {
-			switch (this) {
-			case STOP:
-				pnl.stopStream();
-				break;
-			case PLAY:
-				pnl.playStream();
-				break;
-			case PLAY_EXTERNAL:
-				pnl.playExternal();
-				break;
-			case SAVE_LAYOUT:
-				pnl.saveLayout();
-				break;
-			case DELETE_LAYOUT:
-				pnl.deleteLayout();
-				break;
-			case RESTORE_LAYOUT:
-				pnl.restoreLayout();
-				break;
-			}
-		}
-	}
 
 	/** Current Camera */
 	private Camera camera = null;
@@ -202,22 +100,6 @@ public class StreamPanel extends JPanel {
 	/** Camera PTZ */
 	private CameraPTZ ptz;
 
-	/** User session */
-	private final Session session;
-
-	/** User properties */
-	private final Properties props;
-
-	/** Smart desktop */
-	private SmartDesktop desktop;
-
-	/** Edit mode listener */
-	private final EditModeListener edit_lsnr = new EditModeListener() {
-		public void editModeChanged() {
-			updateEditMode();
-		}
-	};
-
 	/**
 	 * Create a new stream panel.
 	 * @param req The VideoRequest object to use.
@@ -236,37 +118,21 @@ public class StreamPanel extends JPanel {
 		video_req = req;
 		autoplay = auto;
 		ptz = cam_ptz;
-		session = s;
-		props = session.getProperties();
-		stop_btn = StreamCommand.STOP.createButton(this);
-		play_btn = StreamCommand.PLAY.createButton(this);
-		playext_btn = StreamCommand.PLAY_EXTERNAL.createButton(this);
-		save_layout_btn = StreamCommand.SAVE_LAYOUT.createButton(this);
-		delete_layout_btn = StreamCommand.DELETE_LAYOUT
-			.createButton(this);
-		restore_layout_btn = StreamCommand.RESTORE_LAYOUT
-			.createButton(this);
 		VideoRequest.Size vsz = req.getSize();
 		Dimension sz = UI.dimension(vsz.width, vsz.height);
 		screen_pnl = new VidPanel(sz);
 		Dimension vpsz = screen_pnl.getPreferredSize();
-		control_pnl = createControlPanel(vsz);
 		add(screen_pnl, BorderLayout.CENTER);
-		if (ctrl)
+		if (ctrl) {
+			control_pnl = new StreamControlPanel(s, this);
 			add(control_pnl, BorderLayout.SOUTH);
-
+		} else
+			control_pnl = null;
 		int pnlHeight = vpsz.height + (ctrl ? HEIGHT_CONTROL_PNL : 0);
 		Dimension psz = new Dimension(vsz.width, pnlHeight);
 		setPreferredSize(psz);
 		setMinimumSize(psz);
 		setMaximumSize(psz);
-
-		updateButtonState();
-		if (session != null) {
-			desktop = session.getDesktop();
-			session.addEditModeListener(edit_lsnr);
-			updateLayoutList();
-		}
 	}
 
 	/**
@@ -277,69 +143,13 @@ public class StreamPanel extends JPanel {
 		this(req, null, null, false, true);
 	}
 
-	/** Create the control panel */
-	private JPanel createControlPanel(VideoRequest.Size vsz) {
-		JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER,
-			UI.hgap, UI.vgap));
-
-		// Use an editable ComboBox for saving more than one layout
-		layout_list_model = new DefaultComboBoxModel<String>();
-		layout_list = new JComboBox<String>(layout_list_model);
-		layout_list.setToolTipText(I18N.get("camera.layout"));
-		layout_list.setPreferredSize(UI.dimension(120, 28));
-
-		p.add(stop_btn);
-		p.add(play_btn);
-		p.add(playext_btn);
-		p.add(Box.createHorizontalStrut(10));
-		p.add(layout_list);
-		p.add(save_layout_btn);
-		p.add(delete_layout_btn);
-		p.add(restore_layout_btn);
-		p.setPreferredSize(UI.dimension(vsz.width + 50,
-			HEIGHT_CONTROL_PNL));
-		p.setMinimumSize(UI.dimension(vsz.width + 50, HEIGHT_CONTROL_PNL));
-		return p;
-	}
-
-	/** Save the current layout */
-	private void saveLayout() {
-		UserProperty.saveStreamLayout(props, getLayoutName());
-		updateLayoutList();
-	}
-
-	/** Restore the saved layout */
-	private void restoreLayout() {
-		StreamLayout layout = new StreamLayout(props, getLayoutName());
-		layout.restoreFrames(desktop);
-		updateLayoutList();
-	}
-
-	/** Delete the selected layout */
-	private void deleteLayout() {
-		UserProperty.deleteStreamLayout(props, getLayoutName());
-		updateLayoutList();
-	}
-
-	/** Get the selected layout name */
-	private String getLayoutName() {
-		String name = (String) layout_list.getSelectedItem();
-		return (name != null && !name.isEmpty())
-		      ?	name
-		      : UserProperty.getNextStreamLayoutName(props);
-	}
-
-	/** Update the list of layouts based on the current properties */
-	private void updateLayoutList() {
-		String layoutName = (String) layout_list.getSelectedItem();
-
-		// clear and update, then try to re-select
-		layout_list_model.removeAllElements();
-		ArrayList<String> layoutNames =
-			UserProperty.getStreamLayoutNames(props);
-		for (String ln: layoutNames)
-			layout_list_model.addElement(ln);
-		layout_list.setSelectedItem(layoutName);
+	/** Scheduler streaming to stop */
+	void schedStopStream() {
+		STREAMER.addJob(new Job() {
+			public void perform() {
+				stopStream();
+			}
+		});
 	}
 
 	/**
@@ -349,6 +159,15 @@ public class StreamPanel extends JPanel {
 	private void stopStream() {
 		if (screen_pnl != null)
 			clearStream();
+	}
+
+	/** Schedule streaming to start */
+	void schedPlayStream() {
+		STREAMER.addJob(new Job() {
+			public void perform() {
+				playStream();
+			}
+		});
 	}
 
 	/**
@@ -365,8 +184,17 @@ public class StreamPanel extends JPanel {
 		requestStream(camera);
 	}
 
+	/** Schedule external streaming to start */
+	void schedPlayExternal(final SmartDesktop desktop) {
+		STREAMER.addJob(new Job() {
+			public void perform() {
+				playExternal(desktop);
+			}
+		});
+	}
+
 	/** Play stream on external player */
-	private void playExternal() {
+	private void playExternal(SmartDesktop desktop) {
 		stopStream();
 		desktop.showExtFrame(new VidWindow(camera, true, Size.MEDIUM));
 	}
@@ -378,6 +206,14 @@ public class StreamPanel extends JPanel {
 				updateButtonState();
 			}
 		});
+	}
+
+	/** Update the button state */
+	private void updateButtonState() {
+		if (control_pnl != null) {
+			control_pnl.updateButtonState(camera != null,
+				isStreaming());
+		}
 	}
 
 	/**
@@ -418,9 +254,6 @@ public class StreamPanel extends JPanel {
 	/** Dispose of the stream panel */
 	public final void dispose() {
 		clearStream();
-		if (session != null)
-			session.removeEditModeListener(edit_lsnr);
-		save_layout_btn.setEnabled(false);
 	}
 
 	/** Set the status label. */
@@ -453,20 +286,6 @@ public class StreamPanel extends JPanel {
 		}
 	}
 
-	/** Update the button state */
-	private void updateButtonState() {
-		if (camera == null) {
-			stop_btn.setEnabled(false);
-			play_btn.setEnabled(false);
-			playext_btn.setEnabled(false);
-			return;
-		}
-		boolean streaming = isStreaming();
-		stop_btn.setEnabled(streaming);
-		play_btn.setEnabled(!streaming);
-		playext_btn.setEnabled(true);
-	}
-
 	/** Bind a StreamStatusListener to this StreamPanel. */
 	public void bindStreamStatusListener(StreamStatusListener ssl) {
 		if (ssl != null)
@@ -477,13 +296,5 @@ public class StreamPanel extends JPanel {
 	public void unbindStreamStatusListener(StreamStatusListener ssl) {
 		if (ssl != null)
 			ssl_set.remove(ssl);
-	}
-
-	/** Update the edit mode */
-	public void updateEditMode() {
-		boolean editMode = session.getEditMode();
-		save_layout_btn.setEnabled(editMode);
-		delete_layout_btn.setEnabled(editMode);
-		layout_list.setEditable(editMode);
 	}
 }
