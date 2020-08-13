@@ -69,7 +69,6 @@ public class VidComponentGst extends javax.swing.JComponent {
 	private BufferedImage currentImage = null;
 	private final Lock bufferLock = new ReentrantLock();
 	private final AppSink videosink;
-//    private Pad videoPad;
 	private RenderComponent renderComponent = new RenderComponent();
 	private boolean keepAspect = true;
 	private Timer resourceTimer;

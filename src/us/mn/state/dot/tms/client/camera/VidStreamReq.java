@@ -223,11 +223,18 @@ public class VidStreamReq {
 		}
 		m.appendTail(sb);
 		config = sb.toString();
+		return isOkConfig(config) ? new VidStreamReq(st, config) : null;
+	}
 
-		if (VidStreamMgrGst.isOkConfig(config)
-		 || VidStreamMgrMJPEG.isOkConfig(config))
-			return new VidStreamReq(st, config);
-		return null;
+	/** Check if config is OK */
+	static private boolean isOkConfig(String config) {
+		try {
+			return VidStreamMgrGst.isOkConfig(config)
+			    || VidStreamMgrMJPEG.isOkConfig(config);
+		}
+		catch (NoClassDefFoundError e) {
+			return false;
+		}
 	}
 
 	/** Comparator to sort by cameraStreamOrder.order value */
