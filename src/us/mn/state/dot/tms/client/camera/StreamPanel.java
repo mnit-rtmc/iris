@@ -68,9 +68,6 @@ public class StreamPanel extends JPanel {
 	/** Stream controls panel and its components */
 	private final StreamControlPanel control_pnl;
 
-	/** JLabel for displaying the stream details (codec, size, framerate) */
-	private final JLabel status_lbl = new JLabel();
-
 	/** Current Camera */
 	private Camera camera = null;
 
@@ -176,12 +173,8 @@ public class StreamPanel extends JPanel {
 	 */
 	private void playStream() {
 		stopStream();
-		if (camera == null) {
-			setStatusText(null);
-			return;
-		}
-		setStatusText(I18N.get("camera.stream.opening"));
-		requestStream(camera);
+		if (camera != null)
+			requestStream(camera);
 	}
 
 	/** Schedule external streaming to start */
@@ -230,7 +223,6 @@ public class StreamPanel extends JPanel {
 				stopStream();
 				camera = c;
 				updateButtonState();
-				setStatusText(null);
 				if (autoplay)
 					playStream();
 			}
@@ -254,11 +246,6 @@ public class StreamPanel extends JPanel {
 	/** Dispose of the stream panel */
 	public final void dispose() {
 		clearStream();
-	}
-
-	/** Set the status label. */
-	private void setStatusText(String s) {
-		status_lbl.setText(s);
 	}
 
 	/** Are we currently streaming? */
