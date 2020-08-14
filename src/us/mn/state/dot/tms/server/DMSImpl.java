@@ -991,12 +991,22 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			return false;
 	}
 
-	/** Update scheduled message */
+	/** Update scheduled message.
+	 *
+	 * This updates the message's expire time, so it should be called on each
+	 * polling period.  Also, if a scheduled message has just expired, it
+	 * will be replaced by the user message. */
 	private void updateSchedMsg() {
 		try {
 			SignMessage usm = getMsgValidated();
-			if (isMsgSource(usm, SignMsgSource.schedule))
-				sendMsg(usm, getOwner(usm, usm.getOwner()));
+			if (isMsgSource(usm, SignMsgSource.schedule) ||
+			   isMsgScheduled())
+			{
+				if (usm != null)
+					sendMsg(usm);
+				else if (msg_queried)
+					blankMsgUser();
+			}
 		}
 		catch (TMSException e) {
 			logError("updateSchedMsg: " + e.getMessage());
@@ -1159,6 +1169,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Compare sign messages for higher priority */
 	private boolean checkPriority(SignMessage sm1, SignMessage sm2) {
 		return sm1.getMsgPriority() > sm2.getMsgPriority();
+	}
+
+	/** Send message to DMS.
+	 * @param sm Sign message. */
+	private void sendMsg(SignMessage sm) throws TMSException {
+		sendMsg(sm, getOwner(sm, sm.getOwner()));
 	}
 
 	/** Send message to DMS.
