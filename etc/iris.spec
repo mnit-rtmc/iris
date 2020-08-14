@@ -139,9 +139,9 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %{_clientdir}/images/iris.png
 %{_clientdir}/images/iris_icon.png
 %{_clientdir}/lib/mail.jar
-%{_clientdir}/lib/jna-5.5.0.jar
-%{_clientdir}/lib/jna-platform-5.5.0.jar
-%{_clientdir}/lib/gst1-java-core-1.2.0.jar
+%{_clientdir}/lib/jna-@@JNA.VERSION@@.jar
+%{_clientdir}/lib/jna-platform-@@JNA.VERSION@@.jar
+%{_clientdir}/lib/gst1-java-core-@@GST.JAVA.VERSION@@.jar
 %{_clientdir}/lib/iris-client-%{version}.jar
 %{_clientdir}/lib/iris-common-%{version}.jar
 %attr(0644,tms,apache) %{_clientdir}/session_ids

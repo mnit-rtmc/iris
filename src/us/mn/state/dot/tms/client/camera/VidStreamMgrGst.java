@@ -388,20 +388,14 @@ public class VidStreamMgrGst extends VidStreamMgr {
 		if (!uIris.canWrite())
 			uIris.mkdirs();
 
-		// check the current OS and architecture - note that we allow different
-		// versions for different OSes
+		// check the current OS and architecture
 		String gstOS = null;
-		String gstVersion = null;
+		String gstVersion = "@@GSTREAMER.VERSION@@";
 
-		if (Platform.isWindows()) {
+		if (Platform.isWindows())
 			gstOS = GST_WIN;
-			gstVersion = SystemAttrEnum.GSTREAMER_VERSION_WINDOWS.getString();
-		} else if (Platform.isLinux()) {
+		else if (Platform.isLinux())
 			gstOS = GST_LINUX;
-			// TODO get working for Linux
-			gstVersion = "";
-//			gstVersion = SystemAttrEnum.GSTREAMER_VERSION_LINUX.getString();
-		}
 		// TODO Mac, BSD
 
 		// TODO no ARM support, maybe later
@@ -413,7 +407,7 @@ public class VidStreamMgrGst extends VidStreamMgr {
 
 		// look for a directory with the files we want (indicated by the name)
 		String gstDirName = GST_BASE + "-" + gstOS
-				+ "-" + gstArch + "-" + gstVersion;
+			+ "-" + gstArch + "-" + gstVersion;
 
 		File gstDir = new File(uIris, gstDirName);
 		String gstPath;

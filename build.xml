@@ -91,9 +91,11 @@
 		<antcall target="check-dep">
 			<param name="file.dep" value="iris-build.properties"/>
 			<param name="file.dep" value="mail.jar"/>
-			<param name="file.dep" value="jna-5.5.0.jar"/>
-			<param name="file.dep" value="jna-platform-5.5.0.jar"/>
-			<param name="file.dep" value="gst1-java-core-1.2.0.jar"/>
+			<param name="file.dep" value="jna-${jna_version}.jar"/>
+			<param name="file.dep"
+			       value="jna-platform-${jna_version}.jar"/>
+			<param name="file.dep"
+			       value="gst1-java-core-${gst_java_version}.jar"/>
 		</antcall>
 	</target>
 
@@ -104,6 +106,10 @@
 			<filterset begintoken="@@" endtoken="@@">
 				<filter token="NAME" value="${name}"/>
 				<filter token="VERSION" value="${version}"/>
+				<filter token="JNA.VERSION"
+				        value="${jna_version}"/>
+				<filter token="GST.JAVA.VERSION"
+				        value="${gst_java_version}"/>
 				<filter token="BUILD.RPM" value="${build.rpm}"/>
 				<filter token="RPM.URL" value="${rpm.url}"/>
 				<filter token="RPM.RELEASE"
@@ -122,6 +128,8 @@
 			<fileset dir="${src.dir}"/>
 			<filterset begintoken="@@" endtoken="@@">
 				<filter token="VERSION" value="${version}"/>
+				<filter token="GSTREAMER.VERSION"
+				        value="${gstreamer_version}"/>
 			</filterset>
 		</copy>
 
