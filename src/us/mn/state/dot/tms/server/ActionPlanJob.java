@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.TMSException;
 public class ActionPlanJob extends Job {
 
 	/** Seconds to offset each poll from start of interval */
-	static private final int OFFSET_SECS = 29;
+	static private final int OFFSET_SECS = 14;
 
 	/** Schedule debug log */
 	static public final DebugLog SCHED_LOG = new DebugLog("sched");
