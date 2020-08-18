@@ -526,7 +526,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get the comm protocol */
-	public CommProtocol getProtocol() {
+	public CommProtocol getCommProtocol() {
 		CommLinkImpl cl = comm_link;
 		return (cl != null)
 		      ? CommProtocol.fromOrdinal(cl.getProtocol())

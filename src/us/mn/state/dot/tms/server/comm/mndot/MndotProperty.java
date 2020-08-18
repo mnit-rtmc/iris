@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2016  Minnesota Department of Transportation
+ * Copyright (C) 2006-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,7 +78,7 @@ abstract public class MndotProperty extends ControllerProperty {
 		throws IOException
 	{
 		int drop = c.getDrop();
-		CommProtocol cp = c.getProtocol();
+		CommProtocol cp = c.getCommProtocol();
 		if (cp == CommProtocol.MNDOT_5) {
 			if (drop < 1 || drop > 31)
 				throw new InvalidAddressException(drop);
@@ -166,7 +166,7 @@ abstract public class MndotProperty extends ControllerProperty {
 		validateChecksum(pkt);
 		if (pkt.length != pkt[OFF_LENGTH] + 3)
 			throw new ParsingException("INVALID LENGTH");
-		CommProtocol cp = c.getProtocol();
+		CommProtocol cp = c.getCommProtocol();
 		if (parseDrop(pkt, cp) != c.getDrop())
 			throw new ParsingException("DROP ADDRESS MISMATCH");
 		parseStatus(parseStat(pkt, cp));
