@@ -79,10 +79,7 @@ public class FeedMsg {
 	/** Return the DMS name or null if it doesn't exist */
 	private String parseDms(String txt) {
 		DMS dms = DMSHelper.lookup(txt.trim());
-		if(dms != null)
-			return dms.getName();
-		else
-			return null;
+		return dms != null ? dms.getName() : null;
 	}
 
 	/** Parse a time stamp */
@@ -95,6 +92,7 @@ public class FeedMsg {
 	}
 
 	/** Get a string representation of the feed message */
+	@Override
 	public String toString() {
 		return "feed: " + feed +  ", dms: " + dms + ", multi: " +
 			multi + ", expire: " + expire;

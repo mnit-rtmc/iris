@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2016  Minnesota Department of Transportation
+ * Copyright (C) 2011-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,10 +29,16 @@ public class FeedBucket {
 	static private final HashMap<String, HashMap<String, FeedMsg>> bucket =
 		new HashMap<String, HashMap<String, FeedMsg>>();
 
-	/** Add a feed message to the bucket */
-	static public synchronized void add(FeedMsg msg) {
+	/** Update a feed message in the bucket */
+	static public synchronized void update(FeedMsg msg) {
 		HashMap<String, FeedMsg> feed = getFeed(msg.getFeed());
-		feed.put(msg.getDms(), msg);
+		String key = msg.getDms();
+		if (key != null) {
+			if (msg.isValid())
+				feed.put(key, msg);
+			else
+				feed.remove(key);
+		}
 	}
 
 	/** Get a feed message from the bucket */
@@ -44,7 +50,7 @@ public class FeedBucket {
 
 	/** Get the specified feed */
 	static private HashMap<String, FeedMsg> getFeed(String fid) {
-		if(bucket.containsKey(fid))
+		if (bucket.containsKey(fid))
 			return bucket.get(fid);
 		else {
 			HashMap<String, FeedMsg> feed =
@@ -56,16 +62,16 @@ public class FeedBucket {
 
 	/** Purge all expired feed messages */
 	static public synchronized void purgeExpired() {
-		for(HashMap<String, FeedMsg> feed: bucket.values())
+		for (HashMap<String, FeedMsg> feed: bucket.values())
 			purgeExpired(feed);
 	}
 
 	/** Purge expired messages in the given feed */
 	static private void purgeExpired(HashMap<String, FeedMsg> feed) {
 		Iterator<String> it = feed.keySet().iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			FeedMsg msg = feed.get(it.next());
-			if(msg.hasExpired())
+			if (msg.hasExpired())
 				it.remove();
 		}
 	}

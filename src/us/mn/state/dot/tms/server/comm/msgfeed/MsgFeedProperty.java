@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,10 +52,10 @@ public class MsgFeedProperty extends ControllerProperty {
 		while (line != null) {
 			MsgFeedPoller.slog("parsing " + line);
 			FeedMsg msg = new FeedMsg(feed, line);
-			if (msg.isValid()) {
-				FeedBucket.add(msg);
+			FeedBucket.update(msg);
+			if (msg.isValid())
 				MsgFeedPoller.slog("VALID " + msg);
-			} else
+			else
 				MsgFeedPoller.slog("INVALID " + msg);
 			line = lr.readLine();
 		}
