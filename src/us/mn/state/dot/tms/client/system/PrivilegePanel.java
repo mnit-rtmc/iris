@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2019  Minnesota Department of Transportation
+ * Copyright (C) 2016-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  */
 public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 
-	/** All sonar type names (matches iris.sonar_types DB table) */
+	/** All sonar type names (FIXME: use iris.sonar_type DB table) */
 	static public final String[] ALL_TYPES = {
 		"action_plan",
 		"alarm",
@@ -39,6 +39,7 @@ public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 		"cabinet",
 		"cabinet_style",
 		"camera",
+		"camera_action",
 		"camera_preset",
 		"camera_template",
 		"cam_vid_src_ord",
@@ -54,7 +55,9 @@ public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 		"dms_action",
 		"dms_sign_group",
 		"domain",
+		"encoder_stream",
 		"encoder_type",
+		"flow_stream",
 		"font",
 		"gate_arm",
 		"gate_arm_array",
@@ -77,6 +80,7 @@ public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 		"meter_action",
 		"modem",
 		"monitor_style",
+		"parking_area",
 		"plan_phase",
 		"play_list",
 		"privilege",
