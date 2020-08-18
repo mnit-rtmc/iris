@@ -920,7 +920,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Get the duration of a DMS action */
 	private int getDurationMins() {
-		return getPollPeriod() * DURATION_PERIODS / 60;
+		return getPollPeriodSec() * DURATION_PERIODS / 60;
 	}
 
 	/** User selected sign message */

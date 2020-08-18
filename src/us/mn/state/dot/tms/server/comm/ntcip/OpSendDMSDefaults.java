@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,7 +121,7 @@ public class OpSendDMSDefaults extends OpDMS {
 
 	/** Get the comm loss threshold for the comm link */
 	private int getLinkCommLossMins() {
-		return controller.getPollPeriod() * COMM_LOSS_PERIODS / 60;
+		return controller.getPollPeriodSec() * COMM_LOSS_PERIODS / 60;
 	}
 
 	/** Phase to set the pixel service schedule */

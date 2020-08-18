@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  * Copyright (C) 2017       Iteris Inc.
  *
@@ -206,7 +206,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
 		// Don't query samples on 5 minute poll
-		if (c.getPollPeriod() == p)
+		if (c.getPollPeriodSec() == p)
 			addOp(new OpQuerySamples(c, p));
 	}
 

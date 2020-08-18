@@ -220,9 +220,9 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 	}
 
 	/** Get the polling period (sec) */
-	protected int getPollPeriod() {
+	protected int getPollPeriodSec() {
 		ControllerImpl c = controller;	// Avoid race
-		return (c != null) ? c.getPollPeriod() : 30;
+		return (c != null) ? c.getPollPeriodSec() : 30;
 	}
 
 	/** Check if link is any type of modem (dial-up or cell) */
@@ -233,7 +233,7 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 
 	/** Check if the polling period is "long", with a modem link */
 	public boolean isLongPeriodModem() {
-		return getPollPeriod() >= PERIOD_LONG_SEC && isModemAny();
+		return getPollPeriodSec() >= PERIOD_LONG_SEC && isModemAny();
 	}
 
 	/** Check if dial-up is required to communicate */

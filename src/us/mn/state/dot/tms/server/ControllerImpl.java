@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -250,7 +250,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get the polling period (sec) */
-	public int getPollPeriod() {
+	public int getPollPeriodSec() {
 		CommLinkImpl cl = comm_link;
 		return (cl != null) ? cl.getPollPeriod() : 30;
 	}

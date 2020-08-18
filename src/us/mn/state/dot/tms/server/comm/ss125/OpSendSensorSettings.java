@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ public class OpSendSensorSettings extends OpSS125 {
 	{
 		super(PriorityLevel.DOWNLOAD, c);
 		restart = r;
-		interval = c.getPollPeriod();
+		interval = c.getPollPeriodSec();
 	}
 
 	/** Create a new operation to send settings to a sensor */

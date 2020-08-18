@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2019  Minnesota Department of Transportation
+ * Copyright (C) 2006-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ public class CanogaPoller extends ThreadedPoller<CanogaProperty>
  	 * @param p Sample period in seconds. */
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
-		if (c.getPollPeriod() == p) {
+		if (c.getPollPeriodSec() == p) {
 			c.binEventSamples(p);
 			updateOpCounters(c);
 		}
