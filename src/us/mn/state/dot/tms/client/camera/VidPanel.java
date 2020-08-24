@@ -310,7 +310,7 @@ public class VidPanel extends JPanel implements FocusListener {
 			@Override
 			public void componentResized(ComponentEvent arg0) {
 				if (mouse_ptz != null) {
-					Dimension sz = getSize();
+					Dimension sz = videoHolder.getSize();
 					mouse_ptz.resize(sz.width, sz.height);
 				}
 			}
