@@ -21,24 +21,25 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.CommConfig;
 import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.CommLinkHelper;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DevicePollerFactory;
-import us.mn.state.dot.tms.units.Interval;
 
 /**
  * The CommLinkImpl class represents a single communication link which is
  * connected with one or more field device controllers.
  *
- * @see us.mn.state.dot.tms.CommProtocol
  * @author Douglas Lau
  * @author John L. Stanley
  */
@@ -50,22 +51,46 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Poller scheduler for repeating jobs */
 	static private final Scheduler POLLER = new Scheduler("poller");
 
-	/** Test if a comm protocol supports gate arm control */
-	static private boolean isGateArm(CommProtocol cp) {
-		return cp == CommProtocol.HYSECURITY_STC;
-	}
-
 	/** Load all the comm links */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CommLinkImpl.class);
-		store.query("SELECT name, description, modem, uri, protocol, " +
-			"poll_enabled, poll_period, timeout FROM iris." +
-			SONAR_TYPE  + ";", new ResultFactory()
+		store.query("SELECT name, description, uri, poll_enabled, " +
+			"comm_config FROM iris." + SONAR_TYPE  + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new CommLinkImpl(row));
 			}
 		});
+	}
+
+	/** Recreate pollers for all links with a comm config */
+	static void recreatePollers(CommConfig cc) {
+		Iterator<CommLink> it = CommLinkHelper.iterator();
+		while (it.hasNext()) {
+			CommLink cl = it.next();
+			if (cl.getCommConfig() == cc &&
+			    cl instanceof CommLinkImpl)
+			{
+				CommLinkImpl link = (CommLinkImpl) cl;
+				link.recreatePoller();
+			}
+		}
+	}
+
+	/** Recreate poll jobs for all links with a comm config */
+	static void recreatePollJobs(CommConfig cc) {
+		int s = cc.getPollPeriodSec();
+		Iterator<CommLink> it = CommLinkHelper.iterator();
+		while (it.hasNext()) {
+			CommLink cl = it.next();
+			if (cl.getCommConfig() == cc &&
+			    cl instanceof CommLinkImpl)
+			{
+				CommLinkImpl link = (CommLinkImpl) cl;
+				link.createPollJob(s);
+			}
+		}
 	}
 
 	/** Get a mapping of the columns */
@@ -74,12 +99,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("description", description);
-		map.put("modem", modem);
 		map.put("uri", uri);
-		map.put("protocol", (short)protocol.ordinal());
 		map.put("poll_enabled", poll_enabled);
-		map.put("poll_period", poll_period);
-		map.put("timeout", timeout);
+		map.put("comm_config", comm_config);
 		return map;
 	}
 
@@ -104,29 +126,21 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	private CommLinkImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
 		     row.getString(2),  // description
-		     row.getBoolean(3), // modem
-		     row.getString(4),  // uri
-		     row.getShort(5),   // protocol
-		     row.getBoolean(6), // poll_enabled
-		     row.getInt(7),     // poll_period
-		     row.getInt(8)      // timeout
+		     row.getString(3),  // uri
+		     row.getBoolean(4), // poll_enabled
+		     row.getString(5)   // comm_config
 		);
 	}
 
 	/** Create a comm link */
-	private CommLinkImpl(String n, String d, boolean m, String u, short p,
-		boolean pe, int pp, int t)
+	private CommLinkImpl(String n, String d, String u, boolean pe,
+		String cc)
 	{
 		super(n);
 		description = d;
-		modem = m;
 		uri = u;
-		CommProtocol cp = CommProtocol.fromOrdinal(p);
-		if (cp != null)
-			protocol = cp;
 		poll_enabled = pe;
-		poll_period = pp;
-		timeout = t;
+		comm_config = lookupCommConfig(cc);
 		recreatePoller();
 		initTransients();
 	}
@@ -134,17 +148,22 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Initialize the transient fields */
 	@Override
 	protected void initTransients() {
-		createPollJob(poll_period);
+		createPollJob(comm_config.getPollPeriodSec());
 	}
 
 	/** Polling job */
 	private transient PollJob poll_job;
 
-	/** Create a new polling job */
-	private void createPollJob(int s) {
+	/** Destroy existing poll job */
+	private void destroyPollJob() {
 		PollJob pj = poll_job;
 		if (pj != null)
 			POLLER.removeJob(pj);
+	}
+
+	/** Create a new polling job */
+	private synchronized void createPollJob(int s) {
+		destroyPollJob();
 		poll_job = new PollJob(s);
 		POLLER.addJob(poll_job);
 	}
@@ -163,12 +182,13 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Destroy an object */
 	@Override
 	public void doDestroy() throws TMSException {
+		destroyPollJob();
 		destroyPoller();
 		super.doDestroy();
 	}
 
 	/** Description of communication link */
-	protected String description = "<New Link>";
+	private String description = "<New Link>";
 
 	/** Set text description */
 	@Override
@@ -178,10 +198,10 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Set text description */
 	public void doSetDescription(String d) throws TMSException {
-		if (d.equals(description))
-			return;
-		store.update(this, "description", d);
-		setDescription(d);
+		if (!objectEquals(d, description)) {
+			store.update(this, "description", d);
+			setDescription(d);
+		}
 	}
 
 	/** Get text description */
@@ -190,44 +210,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return description;
 	}
 
-	/** Test whether gate arm system should be disabled.
-	 * @param name Object name.
-	 * @param reason Reason for disabling. */
-	public void testGateArmDisable(String name, String reason) {
-		if (isGateArm(protocol))
-			GateArmSystem.disable(name, reason);
-	}
-
-	/** Modem flag */
-	private boolean modem;
-
-	/** Set modem flag */
-	@Override
-	public void setModem(boolean m) {
-		testGateArmDisable(name, "set modem");
-		modem = m;
-		DevicePoller dp = poller;
-		if (dp != null)
-			dp.setModem(isModemAny());
-	}
-
-	/** Set the modem flag */
-	public void doSetModem(boolean m) throws TMSException {
-		if (m != modem) {
-			store.update(this, "modem", m);
-			setModem(m);
-		}
-	}
-
-	/** Get modem flag */
-	@Override
-	public boolean getModem() {
-		return modem;
-	}
-
 	/** Check if link is any type of modem (dial-up or cell) */
 	public boolean isModemAny() {
-		return getModem() || isDialUpModem();
+		return comm_config.getModem() || isDialUpModem();
 	}
 
 	/** Check if link is configured for a dial-up modem */
@@ -241,7 +226,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Remote URI for link */
-	protected String uri = "";
+	private String uri = "";
 
 	/** Set remote URI for link */
 	@Override
@@ -252,52 +237,17 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Set remote URI for link */
 	public void doSetUri(String u) throws TMSException {
-		if (u.equals(uri))
-			return;
-		store.update(this, "uri", u);
-		setUri(u);
-		DevicePoller dp = poller;
-		if (dp != null)
-			dp.setUri(u);
-		failControllers();
+		if (!objectEquals(u, uri)) {
+			store.update(this, "uri", u);
+			setUri(u);
+			recreatePoller();
+		}
 	}
 
 	/** Get remote URI for link */
 	@Override
 	public String getUri() {
 		return uri;
-	}
-
-	/** Communication protocol */
-	private CommProtocol protocol = CommProtocol.NTCIP_C;
-
-	/** Set the communication protocol */
-	@Override
-	public void setProtocol(short p) {
-		testGateArmDisable(name, "set protocol 0");
-		CommProtocol cp = CommProtocol.fromOrdinal(p);
-		if (isGateArm(cp))
-			GateArmSystem.disable(name, "set protocol 1");
-		if (cp != null)
-			protocol = cp;
-	}
-
-	/** Set the communication protocol */
-	public void doSetProtocol(short p) throws TMSException {
-		CommProtocol cp = CommProtocol.fromOrdinal(p);
-		if (cp == null)
-			throw new ChangeVetoException("Invalid protocol: " + p);
-		if (cp == protocol)
-			return;
-		store.update(this, "protocol", p);
-		setProtocol(p);
-		recreatePoller();
-	}
-
-	/** Get the communication protocol */
-	@Override
-	public short getProtocol() {
-		return (short) protocol.ordinal();
 	}
 
 	/** Poll enabled/disabled flag */
@@ -312,11 +262,11 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Set the poll enabled/disabled flag */
 	public void doSetPollEnabled(boolean e) throws TMSException {
-		if (e == poll_enabled)
-			return;
-		store.update(this, "poll_enabled", e);
-		setPollEnabled(e);
-		recreatePoller();
+		if (e != poll_enabled) {
+			store.update(this, "poll_enabled", e);
+			setPollEnabled(e);
+			recreatePoller();
+		}
 	}
 
 	/** Get polling enabled/disabled flag */
@@ -325,70 +275,31 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return poll_enabled;
 	}
 
-	/** Polling period (seconds) */
-	private int poll_period = 30;
+	/** Comm configuration */
+	private CommConfigImpl comm_config;
 
-	/** Set poll period (seconds) */
+	/** Set the comm configuration */
 	@Override
-	public void setPollPeriod(int s) {
-		testGateArmDisable(name, "set poll_period");
-		poll_period = s;
-		createPollJob(s);
-	}
-
-	/** Check for valid polling period */
-	private void checkPeriod(int s) throws TMSException {
-		Interval p = new Interval(s);
-		for (Interval per: VALID_PERIODS) {
-			if (per.equals(p))
-				return;
+	public void setCommConfig(CommConfig cc) {
+		if (cc instanceof CommConfigImpl) {
+			testGateArmDisable(name, "set comm_config");
+			comm_config = (CommConfigImpl) cc;
 		}
-		throw new ChangeVetoException("Invalid period: " + s);
 	}
 
-	/** Set the polling period (seconds) */
-	public void doSetPollPeriod(int s) throws TMSException {
-		if (s == poll_period)
-			return;
-		checkPeriod(s);
-		store.update(this, "poll_period", s);
-		setPollPeriod(s);
+	/** Set the comm configuration */
+	public void doSetCommConfig(CommConfig cc) throws TMSException {
+		if (cc != comm_config) {
+			store.update(this, "comm_config", cc);
+			setCommConfig(cc);
+			recreatePoller();
+		}
 	}
 
-	/** Get poll period (seconds) */
+	/** Get the comm configuration */
 	@Override
-	public int getPollPeriod() {
-		return poll_period;
-	}
-
-	/** Polling timeout (milliseconds) */
-	protected int timeout = 750;
-
-	/** Set the polling timeout (milliseconds) */
-	@Override
-	public void setTimeout(int t) {
-		testGateArmDisable(name, "set timeout");
-		timeout = t;
-	}
-
-	/** Set the polling timeout (milliseconds) */
-	public void doSetTimeout(int t) throws TMSException {
-		if (t == timeout)
-			return;
-		if (t < 0 || t > MAX_TIMEOUT_MS)
-			throw new ChangeVetoException("Bad timeout: " + t);
-		store.update(this, "timeout", t);
-		setTimeout(t);
-		DevicePoller dp = poller;
-		if (dp != null)
-			dp.setTimeout(t);
-		failControllers();
-	}
-
-	/** Get the polling timeout (milliseconds) */
-	@Override
-	public int getTimeout() {
-		return timeout;
+	public CommConfig getCommConfig() {
+		return comm_config;
 	}
 
 	/** Device poller */
@@ -421,10 +332,10 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Create the device poller */
 	private synchronized void createPoller() {
-		poller = DevicePollerFactory.create(name, protocol);
+		poller = DevicePollerFactory.create(name, getCommProtocol());
 		if (poller != null) {
 			poller.setUri(uri);
-			poller.setTimeout(timeout);
+			poller.setTimeout(comm_config.getTimeoutMs());
 			poller.setModem(isModemAny());
 		}
 	}
@@ -437,8 +348,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Poll all controllers */
 	private synchronized void pollControllers() {
+		int pp = comm_config.getPollPeriodSec();
 		for (ControllerImpl c: controllers.values())
-			c.pollDevices(poll_period);
+			c.pollDevices(pp);
 	}
 
 	/** Communication link status */
@@ -447,10 +359,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Update the comm link status */
 	private void updateStatus() {
 		DevicePoller dp = poller;
-		if (dp != null)
-			setStatusNotify(dp.getStatus());
-		else
-			setStatusNotify(Constants.UNKNOWN);
+		setStatusNotify((dp != null)
+			? dp.getStatus()
+			: Constants.UNKNOWN);
 	}
 
 	/** Set the communication status */
@@ -500,7 +411,27 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		w.write("<commlink");
 		w.write(createAttribute("name", getName()));
 		w.write(createAttribute("description", getDescription()));
-		w.write(createAttribute("protocol", protocol.toString()));
+		w.write(createAttribute("protocol",
+			getCommProtocol().toString()));
 		w.write("/>\n");
+	}
+
+	/** Get the communication protocol */
+	public CommProtocol getCommProtocol() {
+		CommProtocol cp = CommProtocol.fromOrdinal(
+			comm_config.getProtocol());
+		return (cp != null) ? cp : CommProtocol.NTCIP_C;
+	}
+
+	/** Test whether gate arm system should be disabled.
+	 * @param name Object name.
+	 * @param reason Reason for disabling. */
+	public void testGateArmDisable(String name, String reason) {
+		comm_config.testGateArmDisable(name, reason);
+	}
+
+	/** Get poll period (seconds) */
+	public int getPollPeriodSec() {
+		return comm_config.getPollPeriodSec();
 	}
 }

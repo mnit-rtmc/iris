@@ -12,29 +12,27 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.utils;
 
 /** Helper class for creating
  *  unique SONAR record names.
- * 
+ *
  * @author John L. Stanley - SRF Consulting
  */
-
 public class UniqueNameCreator {
 
 	/** Interface definition for a lambda that
 	 *  takes a string and returns an object. */
 	public interface ILookup {
-	   Object lookup(String n);
+		Object lookup(String n);
 	}
 
 	/** Unique name format */
 	private String nameFormat;
-	
+
 	/** Lambda interface to lookup method.*/
 	private ILookup iLookup;
-	
+
 	/** Minimum index (number part of lowest name tested) */
 	private long minIndex = 1;
 
@@ -51,13 +49,13 @@ public class UniqueNameCreator {
 	private Integer maxLength = null;
 
 	/** Construct a UniqueNameCreator
-	 * 
+	 *
 	 * Note:  The format MUST contain a %d (or
 	 *  similar) integer sprinf-style
 	 *  substitution-field that will be
 	 *  replaced with a unique name index.
 	 * i.e.  "prefix_%d"
-	 * 
+	 *
 	 * @param format Unique name format.
 	 * @param iLookup Lambda interface to helper's
 	 *  lookup method.
@@ -70,7 +68,7 @@ public class UniqueNameCreator {
 		// Make sure format string is valid
 		String.format(nameFormat, 1L);
 	}
-	
+
 	/** Set minimum index.
 	 * if null, minimum is 1. */
 	public void setMinIndex(Long minIndex) {
@@ -82,6 +80,7 @@ public class UniqueNameCreator {
 		}
 		this.curIndex = minIndex - 1;
 	}
+
 	// Add a variant to simplify use.
 	public void setMinIndex(int minIndex) {
 		setMinIndex((long) minIndex);
@@ -94,6 +93,7 @@ public class UniqueNameCreator {
 			assert maxIndex >= 0;
 		this.maxIndex = maxIndex;
 	}
+
 	// Add a variant to simplify use.
 	public void setMaxIndex(int maxIndex) {
 		setMaxIndex((long) maxIndex);
@@ -104,12 +104,14 @@ public class UniqueNameCreator {
 		setMinIndex(minIndex);
 		setMaxIndex(maxIndex);
 	}
+
 	// Add a few variants to simplify use.
 	// (Avoids having to cast small numbers to long.)
 	public void setRange(int minIndex, Long maxIndex) {
 		setMinIndex((long)minIndex);
 		setMaxIndex(maxIndex);
 	}
+
 	public void setRange(int minIndex, int maxIndex) {
 		setMinIndex((long)minIndex);
 		setMaxIndex((long)maxIndex);
@@ -124,7 +126,7 @@ public class UniqueNameCreator {
 	/** Test name for uniqueness.
 	 * @return Returns true if name is used.  False if it is not. */
 	private boolean isAlreadyUsed(String sName) {
-		return (iLookup.lookup(sName) != null);
+		return iLookup.lookup(sName) != null;
 	}
 
 	/** Create the next name */

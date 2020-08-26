@@ -56,6 +56,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		GeoLocImpl.loadAll();
 		MapExtentImpl.loadAll();
 		IncidentDetailImpl.loadAll();
+		CommConfigImpl.loadAll();
 		CommLinkImpl.loadAll();
 		ModemImpl.loadAll();
 		CabinetStyleImpl.loadAll();
@@ -170,6 +171,14 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return (CabinetImpl) so;
 		else
 			return null;
+	}
+
+	/** Lookup a comm config */
+	static protected CommConfigImpl lookupCommConfig(String name) {
+		SonarObject so = lookupObject(CommConfigImpl.SONAR_TYPE, name);
+		return (so instanceof CommConfigImpl)
+		      ? (CommConfigImpl) so
+		      : null;
 	}
 
 	/** Lookup a comm link */

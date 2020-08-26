@@ -185,6 +185,12 @@ public enum CommProtocol {
 		return description;
 	}
 
+	/** Test if a comm protocol supports gate arm control */
+	public boolean isGateArm() {
+		return this == CommProtocol.HYSECURITY_STC ||
+		       this == CommProtocol.GATE_NDOR5;
+	}
+
 	/** Values array */
 	static private final CommProtocol[] VALUES = values();
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2019  Minnesota Department of Transportation
+ * Copyright (C) 2008-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.CommLinkHelper;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
@@ -82,15 +83,8 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 
 	/** Check if drop address is used for a controller */
 	static private boolean isDropUsed(Controller c) {
-		CommProtocol cp = getProtocol(c.getCommLink());
+		CommProtocol cp = CommLinkHelper.getProtocol(c.getCommLink());
 		return (cp == null) || cp.multidrop;
-	}
-
-	/** Get the selected comm protocol */
-	static private CommProtocol getProtocol(CommLink cl) {
-		return (cl != null)
-		      ? CommProtocol.fromOrdinal(cl.getProtocol())
-		      : null;
 	}
 
 	/** Create the columns in the model */

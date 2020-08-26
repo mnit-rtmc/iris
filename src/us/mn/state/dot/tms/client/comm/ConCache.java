@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.comm;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
+import us.mn.state.dot.tms.CommConfig;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Modem;
@@ -52,6 +53,22 @@ public class ConCache {
 	/** Get the cabinet type cache */
 	public TypeCache<Cabinet> getCabinets() {
 		return cabinets;
+	}
+
+	/** Cache of comm configurations */
+	private final TypeCache<CommConfig> comm_configs;
+
+	/** Get the comm config type cache */
+	public TypeCache<CommConfig> getCommConfigs() {
+		return comm_configs;
+	}
+
+	/** Comm config proxy list model */
+	private final ProxyListModel<CommConfig> comm_config_model;
+
+	/** Get the CommConfig list model */
+	public ProxyListModel<CommConfig> getCommConfigModel() {
+		return comm_config_model;
 	}
 
 	/** Cache of comm link proxies */
@@ -96,6 +113,11 @@ public class ConCache {
 			cabinet_styles);
 		cab_style_model.initialize();
 		cabinets = new TypeCache<Cabinet>(Cabinet.class, client);
+		comm_configs = new TypeCache<CommConfig>(CommConfig.class,
+			client);
+		comm_config_model = new ProxyListModel<CommConfig>(
+			comm_configs);
+		comm_config_model.initialize();
 		comm_links = new TypeCache<CommLink>(CommLink.class, client);
 		comm_link_model = new ProxyListModel<CommLink>(comm_links);
 		comm_link_model.initialize();
@@ -108,6 +130,7 @@ public class ConCache {
 	public void populate(SonarState client) {
 		client.populateReadable(cabinet_styles);
 		client.populateReadable(cabinets);
+		client.populateReadable(comm_configs);
 		client.populateReadable(comm_links);
 		client.populateReadable(modems);
 		client.populateReadable(controllers);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,21 +20,21 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.SpinnerListModel;
 import javax.swing.table.TableCellEditor;
-import static us.mn.state.dot.tms.CommLink.VALID_PERIODS;
+import static us.mn.state.dot.tms.CommConfig.VALID_PERIODS;
 
 /**
- * Editor for poll period in a table cell.
+ * Editor for time period in a table cell.
  *
  * @author Douglas Lau
  */
-public class PollPeriodCellEditor extends AbstractCellEditor
+public class PeriodCellEditor extends AbstractCellEditor
 	implements TableCellEditor
 {
 	/** Spinner component */
 	private final JSpinner spinner;
 
-	/** Create a new poll period cell editor */
-	public PollPeriodCellEditor() {
+	/** Create a new period cell editor */
+	public PeriodCellEditor() {
 		spinner = new JSpinner(new SpinnerListModel(VALID_PERIODS));
 	}
 

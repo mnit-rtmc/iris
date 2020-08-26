@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2018  Minnesota Department of Transportation
+ * Copyright (C) 2014-2020  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import static us.mn.state.dot.tms.server.Constants.UNKNOWN;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
@@ -166,7 +167,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 	/** Get the poller status */
 	@Override
 	public synchronized String getStatus() {
-		return (c_thread != null) ? c_thread.getStatus() : "";
+		return (c_thread != null) ? c_thread.getStatus() : UNKNOWN;
 	}
 
 	/** Check if the poller is currently connected */

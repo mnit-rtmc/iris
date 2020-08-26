@@ -393,6 +393,7 @@ camera_template
 cam_vid_src_ord
 capability
 catalog
+comm_config
 comm_link
 connection
 controller
@@ -435,10 +436,10 @@ privilege
 quick_message
 ramp_meter
 r_node
-rpt_conduit
 road
 road_affix
 role
+rpt_conduit
 sign_config
 sign_detail
 sign_group
@@ -523,6 +524,7 @@ PRV_003E	camera_tab	catalog		f
 PRV_003G	camera_tab	camera_template		f
 PRV_003H	camera_tab	cam_vid_src_ord		f
 PRV_003I	camera_tab	vid_src_template		f
+PRV_004A	comm_admin	comm_config		t
 PRV_0039	comm_admin	comm_link		t
 PRV_0040	comm_admin	modem		t
 PRV_0041	comm_admin	cabinet_style		t
@@ -532,6 +534,7 @@ PRV_0044	comm_admin	alarm		t
 PRV_0045	comm_control	controller	condition	t
 PRV_0046	comm_control	controller	download	t
 PRV_0047	comm_control	controller	counters	t
+PRV_004B	comm_tab	comm_config		f
 PRV_0048	comm_tab	comm_link		f
 PRV_0049	comm_tab	modem		f
 PRV_0050	comm_tab	alarm		f
@@ -1215,22 +1218,40 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 41	Streambed
 \.
 
+CREATE TABLE iris.comm_config (
+	name VARCHAR(10) PRIMARY KEY,
+	description VARCHAR(20) NOT NULL UNIQUE,
+	protocol SMALLINT NOT NULL REFERENCES iris.comm_protocol(id),
+	modem BOOLEAN NOT NULL,
+	timeout_ms INTEGER NOT NULL,
+	poll_period_sec INTEGER NOT NULL,
+	idle_disconnect_sec INTEGER NOT NULL,
+	no_response_disconnect_sec INTEGER NOT NULL
+);
+
+CREATE VIEW comm_config_view AS
+	SELECT cc.name, cc.description, cp.description AS protocol, modem,
+	       timeout_ms, poll_period_sec, idle_disconnect_sec,
+	       no_response_disconnect_sec
+	FROM iris.comm_config cc
+	JOIN iris.comm_protocol cp ON cc.protocol = cp.id;
+GRANT SELECT ON comm_config_view TO PUBLIC;
+
 CREATE TABLE iris.comm_link (
 	name VARCHAR(20) PRIMARY KEY,
 	description VARCHAR(32) NOT NULL,
-	modem BOOLEAN NOT NULL,
 	uri VARCHAR(64) NOT NULL,
-	protocol SMALLINT NOT NULL REFERENCES iris.comm_protocol(id),
 	poll_enabled BOOLEAN NOT NULL,
-	poll_period INTEGER NOT NULL,
-	timeout INTEGER NOT NULL
+	comm_config VARCHAR(10) NOT NULL REFERENCES iris.comm_config
 );
 
 CREATE VIEW comm_link_view AS
-	SELECT cl.name, cl.description, modem, uri, cp.description AS protocol,
-	       poll_enabled, poll_period, timeout
+	SELECT cl.name, cl.description, uri, poll_enabled,
+	       cp.description AS protocol, cc.description AS comm_config,
+	       modem, timeout_ms, poll_period_sec
 	FROM iris.comm_link cl
-	JOIN iris.comm_protocol cp ON cl.protocol = cp.id;
+	JOIN iris.comm_config cc ON cl.comm_config = cc.name
+	JOIN iris.comm_protocol cp ON cc.protocol = cp.id;
 GRANT SELECT ON comm_link_view TO PUBLIC;
 
 CREATE TABLE iris.modem (

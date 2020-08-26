@@ -252,7 +252,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get the polling period (sec) */
 	public int getPollPeriodSec() {
 		CommLinkImpl cl = comm_link;
-		return (cl != null) ? cl.getPollPeriod() : 30;
+		return (cl != null) ? cl.getPollPeriodSec() : 30;
 	}
 
 	/** Drop address */
@@ -528,9 +528,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get the comm protocol */
 	public CommProtocol getCommProtocol() {
 		CommLinkImpl cl = comm_link;
-		return (cl != null)
-		      ? CommProtocol.fromOrdinal(cl.getProtocol())
-		      : null;
+		return (cl != null) ? cl.getCommProtocol() : null;
 	}
 
 	/** Get a sample value from an array */

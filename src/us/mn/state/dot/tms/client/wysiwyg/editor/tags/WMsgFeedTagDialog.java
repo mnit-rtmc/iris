@@ -28,6 +28,7 @@ import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommLinkHelper;
 import us.mn.state.dot.tms.CommProtocol;
+import static us.mn.state.dot.tms.CommProtocol.MSG_FEED;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WController;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
@@ -85,9 +86,9 @@ class WMsgFeedTagDialog extends WMultiTagDialog {
 		ArrayList<CommLink> msgFeeds = new ArrayList<CommLink>();
 		Iterator<CommLink> it = CommLinkHelper.iterator();
 		while (it.hasNext()) {
-			CommLink c = it.next();
-			if (c.getProtocol() == CommProtocol.MSG_FEED.ordinal())
-				msgFeeds.add(c);
+			CommLink cl = it.next();
+			if (CommLinkHelper.getProtocol(cl) == MSG_FEED)
+				msgFeeds.add(cl);
 		}
 		CommLink arr[] = new CommLink[msgFeeds.size()];
 		msgFeeds.toArray(arr);
