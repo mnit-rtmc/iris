@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ public class CommListRenderer extends DefaultListCellRenderer {
 			return " ";
 	}
 
-	/** Get the table cell renderer component */
+	/** Get the list cell renderer component */
 	@Override
 	public Component getListCellRendererComponent(JList list, Object value,
 		int index, boolean isSelected, boolean hasFocus)
