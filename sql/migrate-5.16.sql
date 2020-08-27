@@ -17,10 +17,6 @@ CREATE TABLE iris.comm_config (
 	no_response_disconnect_sec INTEGER NOT NULL
 );
 
-ALTER TABLE iris.comm_config
-	ADD CONSTRAINT poll_timeout_ck
-	CHECK (poll_period_sec * 1000 > timeout_ms * 3);
-
 CREATE VIEW comm_config_view AS
 	SELECT cc.name, cc.description, cp.description AS protocol, modem,
 	       timeout_ms, poll_period_sec, idle_disconnect_sec,
@@ -90,8 +86,9 @@ GRANT SELECT ON comm_link_view TO PUBLIC;
 INSERT INTO iris.sonar_type (name) VALUES ('comm_config');
 
 INSERT INTO iris.privilege (name, capability, type_n, obj_n, attr_n, group_n, write)
-VALUES ('PRV_004X', 'comm_admin', 'comm_config', '', '', '', true),
-       ('PRV_004Y', 'comm_tab', 'comm_config', '', '', '', false);
+SELECT name || 'x', capability, 'comm_config', '', '', '', write
+  FROM iris.privilege
+ WHERE type_n = 'comm_link' AND obj_n = '' AND attr_n = '' AND group_n = '';
 
 -- Delete comm_idle_disconnect system attributes
 DELETE FROM iris.system_attribute WHERE name = 'comm_idle_disconnect_dms_sec';
