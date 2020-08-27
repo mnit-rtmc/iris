@@ -92,12 +92,12 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 	protected ArrayList<ProxyColumn<Controller>> createColumns() {
 		ArrayList<ProxyColumn<Controller>> cols =
 			new ArrayList<ProxyColumn<Controller>>(8);
-		cols.add(new ProxyColumn<Controller>("comm.link", 100) {
+		cols.add(new ProxyColumn<Controller>("comm.link", 70) {
 			public Object getValueAt(Controller c) {
 				return c.getCommLink().getName();
 			}
 		});
-		cols.add(new ProxyColumn<Controller>("controller.drop", 54,
+		cols.add(new ProxyColumn<Controller>("controller.drop", 48,
 			Short.class)
 		{
 			public Object getValueAt(Controller c) {
@@ -145,7 +145,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<Controller>("controller.comm", 44,
+		cols.add(new ProxyColumn<Controller>("controller.comm", 32,
 			CommState.class)
 		{
 			public Object getValueAt(Controller c) {
@@ -155,12 +155,12 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 				return new CommCellRenderer();
 			}
 		});
-		cols.add(new ProxyColumn<Controller>("controller.status", 240) {
+		cols.add(new ProxyColumn<Controller>("controller.status", 200) {
 			public Object getValueAt(Controller c) {
 				return c.getStatus();
 			}
 		});
-		cols.add(new ProxyColumn<Controller>("controller.fail", 240,
+		cols.add(new ProxyColumn<Controller>("controller.fail", 180,
 			Long.class)
 		{
 			public Object getValueAt(Controller c) {
@@ -170,7 +170,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 				return new TimeCellRenderer();
 			}
 		});
-		cols.add(new ProxyColumn<Controller>("controller.version", 120){
+		cols.add(new ProxyColumn<Controller>("controller.version", 140){
 			public Object getValueAt(Controller c) {
 				return c.getVersion();
 			}

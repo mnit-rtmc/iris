@@ -18,6 +18,8 @@ import java.awt.event.ActionEvent;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommConfig;
 import us.mn.state.dot.tms.CommLink;
@@ -99,7 +101,14 @@ public class CommLinkForm extends AbstractForm {
 		session = s;
 		comm_links = s.getSonarState().getConCache().getCommLinks();
 		watcher = new ProxyWatcher<CommLink>(comm_links, view, false);
-		link_pnl = new ProxyTablePanel<CommLink>(new CommLinkModel(s)) {
+		CommLinkModel mdl = new CommLinkModel(s);
+		mdl.addTableModelListener(new TableModelListener() {
+			public void tableChanged(TableModelEvent e) {
+				if (e.getType() == TableModelEvent.UPDATE)
+					updateCommConfig();
+			}
+		});
+		link_pnl = new ProxyTablePanel<CommLink>(mdl) {
 			protected void selectProxy() {
 				selectCommLink();
 				super.selectProxy();
@@ -179,12 +188,18 @@ public class CommLinkForm extends AbstractForm {
 		return vg;
 	}
 
+	/** Update the comm config */
+	private void updateCommConfig() {
+		CommLink cl = watcher.getProxy();
+		CommConfig cc = (cl != null) ? cl.getCommConfig() : null;
+		config_pnl.setProxy(cc);
+	}
+
 	/** Change the selected comm link */
 	private void selectCommLink() {
 		CommLink cl = link_pnl.getSelectedProxy();
 		watcher.setProxy(cl);
-		CommConfig cc = (cl != null) ? cl.getCommConfig() : null;
-		config_pnl.setProxy(cc);
+		updateCommConfig();
 		controller_pnl.setCommLink(cl);
 	}
 }

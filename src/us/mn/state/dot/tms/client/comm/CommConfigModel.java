@@ -75,7 +75,7 @@ public class CommConfigModel extends ProxyTableModel<CommConfig> {
 		abstract protected void setPeriodSec(CommConfig cc, int s);
 		@Override
 		protected final TableCellEditor createCellEditor() {
-			return new PeriodCellEditor();
+			return new PeriodCellEditor(periods);
 		}
 	}
 
@@ -145,7 +145,7 @@ public class CommConfigModel extends ProxyTableModel<CommConfig> {
 				return cc.getTimeoutMs();
 			}
 			public boolean isEditable(CommConfig cc) {
-				return canWrite(cc, "timeout");
+				return canWrite(cc, "timeoutMs");
 			}
 			public void setValueAt(CommConfig cc, Object value) {
 				if (value instanceof Integer)

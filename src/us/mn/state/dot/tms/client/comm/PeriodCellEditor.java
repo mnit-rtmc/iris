@@ -20,7 +20,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.SpinnerListModel;
 import javax.swing.table.TableCellEditor;
-import static us.mn.state.dot.tms.CommConfig.VALID_PERIODS;
+import us.mn.state.dot.tms.units.Interval;
 
 /**
  * Editor for time period in a table cell.
@@ -34,8 +34,8 @@ public class PeriodCellEditor extends AbstractCellEditor
 	private final JSpinner spinner;
 
 	/** Create a new period cell editor */
-	public PeriodCellEditor() {
-		spinner = new JSpinner(new SpinnerListModel(VALID_PERIODS));
+	public PeriodCellEditor(Interval[] periods) {
+		spinner = new JSpinner(new SpinnerListModel(periods));
 	}
 
 	/** Get a table cell editor component */

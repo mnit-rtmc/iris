@@ -14,12 +14,7 @@
  */
 package us.mn.state.dot.tms.client.comm;
 
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
-import javax.swing.SpinnerListModel;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.JLabel;
 import us.mn.state.dot.tms.CommConfig;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.client.Session;
@@ -33,31 +28,30 @@ import us.mn.state.dot.tms.units.Interval;
  */
 public class CommConfigPanel extends ProxyPanel<CommConfig> {
 
-	/** Description text field */
-	private final JTextField description_txt = new JTextField(20);
+	/** Filler label */
+	private final JLabel filler_lbl = createValueLabel(
+		"____________________");
 
-	/** Protocol combobox */
-	private final JComboBox<CommProtocol> protocol_cbx =
-		new JComboBox<CommProtocol>(CommProtocol.valuesSorted());
+	/** Description label */
+	private final JLabel description_lbl = createValueLabel();
 
-	/** Modem check box */
-	private final JCheckBox modem_chk = new JCheckBox();
+	/** Protocol label */
+	private final JLabel protocol_lbl = createValueLabel();
 
-	/** Spinner for timeout */
-	private final JSpinner timeout_spn = new JSpinner(
-		new SpinnerNumberModel(0, 0, CommConfig.MAX_TIMEOUT_MS, 50));
+	/** Modem label */
+	private final JLabel modem_lbl = createValueLabel();
 
-	/** Spinner for poll period */
-	private final JSpinner period_spn = new JSpinner(
-		new SpinnerListModel(CommConfig.VALID_PERIODS));
+	/** Timeout label */
+	private final JLabel timeout_lbl = createValueLabel();
 
-	/** Spinner for idle disconnect */
-	private final JSpinner idle_disconnect_spn = new JSpinner(
-		new SpinnerListModel(CommConfig.VALID_DISCONNECT));
+	/** Poll period label */
+	private final JLabel period_lbl = createValueLabel();
 
-	/** Spinner for no response disconnect */
-	private final JSpinner no_response_disconnect_spn = new JSpinner(
-		new SpinnerListModel(CommConfig.VALID_DISCONNECT));
+	/** Idle disconnect label */
+	private final JLabel idle_disconnect_lbl = createValueLabel();
+
+	/** No response disconnect label */
+	private final JLabel no_response_disconnect_lbl = createValueLabel();
 
 	/** User session */
 	private final Session session;
@@ -72,28 +66,24 @@ public class CommConfigPanel extends ProxyPanel<CommConfig> {
 	@Override
 	public void initialize() {
 		super.initialize();
+		filler_lbl.setForeground(filler_lbl.getBackground());
+		add("comm.config", Stretch.CENTER);
+		add(new JLabel());
+		add(filler_lbl, Stretch.LAST);
 		add("device.description");
-		add(description_txt, Stretch.LAST);
+		add(description_lbl, Stretch.LAST);
 		add("comm.config.protocol");
-		add(protocol_cbx, Stretch.LAST);
+		add(protocol_lbl, Stretch.LAST);
 		add("comm.config.modem");
-		add(modem_chk);
+		add(modem_lbl, Stretch.LAST);
 		add("comm.config.timeout_ms");
-		add(timeout_spn, Stretch.LAST);
+		add(timeout_lbl, Stretch.LAST);
 		add("comm.config.poll_period_sec");
-		add(period_spn, Stretch.LAST);
+		add(period_lbl, Stretch.LAST);
 		add("comm.config.idle_disconnect_sec");
-		add(idle_disconnect_spn, Stretch.LAST);
+		add(idle_disconnect_lbl, Stretch.LAST);
 		add("comm.config.no_response_disconnect_sec");
-		add(no_response_disconnect_spn, Stretch.LAST);
-		// Disable all the widgets
-		description_txt.setEnabled(false);
-		protocol_cbx.setEnabled(false);
-		modem_chk.setEnabled(false);
-		timeout_spn.setEnabled(false);
-		period_spn.setEnabled(false);
-		idle_disconnect_spn.setEnabled(false);
-		no_response_disconnect_spn.setEnabled(false);
+		add(no_response_disconnect_lbl, Stretch.LAST);
 	}
 
 	/** Update the edit mode */
@@ -104,39 +94,39 @@ public class CommConfigPanel extends ProxyPanel<CommConfig> {
 	@Override
 	protected void updateAttrib(CommConfig cc, String a) {
 		if (a == null || a.equals("description"))
-			description_txt.setText(cc.getDescription());
+			description_lbl.setText(cc.getDescription());
 		if (a == null || a.equals("protocol")) {
-			protocol_cbx.setSelectedItem(CommProtocol.fromOrdinal(
-				cc.getProtocol()));
+			protocol_lbl.setText(CommProtocol.fromOrdinal(
+				cc.getProtocol()).toString());
 		}
 		if (a == null || a.equals("modem"))
-			modem_chk.setSelected(cc.getModem());
+			modem_lbl.setText(cc.getModem() ? "Yes" : "No");
 		if (a == null || a.equals("timeoutMs"))
-			timeout_spn.setValue(cc.getTimeoutMs());
+			timeout_lbl.setText("" + cc.getTimeoutMs() + " ms");
 		if (a == null || a.equals("pollPeriodSec")) {
 			Interval p = new Interval(cc.getPollPeriodSec());
-			period_spn.setValue(p);
+			period_lbl.setText("" + p);
 		}
 		if (a == null || a.equals("idleDisconnectSec")) {
 			Interval p = new Interval(cc.getIdleDisconnectSec());
-			idle_disconnect_spn.setValue(p);
+			idle_disconnect_lbl.setText("" + p);
 		}
 		if (a == null || a.equals("noResponseDisconnectSec")) {
 			Interval p = new Interval(
 				cc.getNoResponseDisconnectSec());
-			no_response_disconnect_spn.setValue(p);
+			no_response_disconnect_lbl.setText("" + p);
 		}
 	}
 
 	/** Clear the view */
 	@Override
 	protected void clearView() {
-		description_txt.setText("");
-		protocol_cbx.setSelectedIndex(0);
-		modem_chk.setSelected(false);
-		timeout_spn.setValue(0);
-		period_spn.setValue(new Interval(30));
-		idle_disconnect_spn.setValue(new Interval(0));
-		no_response_disconnect_spn.setValue(new Interval(0));
+		description_lbl.setText("");
+		protocol_lbl.setText("");
+		modem_lbl.setText("");
+		timeout_lbl.setText("");
+		period_lbl.setText("");
+		idle_disconnect_lbl.setText("");
+		no_response_disconnect_lbl.setText("");
 	}
 }

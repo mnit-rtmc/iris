@@ -17,7 +17,9 @@ package us.mn.state.dot.tms.client.comm;
 import java.awt.Component;
 import java.util.ArrayList;
 import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
+import javax.swing.JList;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
@@ -38,6 +40,43 @@ import us.mn.state.dot.tms.client.widget.IComboBoxModel;
  */
 public class CommLinkModel extends ProxyTableModel<CommLink> {
 
+	/** Inner class for rendering cells in the comm config list */
+	static private class CommConfigListRenderer
+		extends DefaultListCellRenderer
+	{
+		public Component getListCellRendererComponent(JList list,
+			Object value, int index, boolean isSelected,
+			boolean hasFocus)
+		{
+			return super.getListCellRendererComponent(list,
+				getCommConfigLabel(value), index, isSelected,
+				hasFocus);
+		}
+	}
+
+	/** Inner class for rendering cells in the comm config column */
+	static private class CommConfigTableRenderer
+		extends DefaultTableCellRenderer
+	{
+		public Component getTableCellRendererComponent(JTable table,
+			Object value, boolean isSelected, boolean hasFocus,
+			int row, int column)
+		{
+			return super.getTableCellRendererComponent(table,
+				getCommConfigLabel(value), isSelected,
+				hasFocus, row, column);
+		}
+	}
+
+	/** Get a comm config label (description) */
+	static private Object getCommConfigLabel(Object value) {
+		if (value instanceof CommConfig) {
+			CommConfig cc = (CommConfig) value;
+			return cc.getDescription();
+		} else
+			return value;
+	}
+
 	/** Create a proxy descriptor */
 	static public ProxyDescriptor<CommLink> descriptor(Session s) {
 		return new ProxyDescriptor<CommLink>(
@@ -50,8 +89,8 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 	@Override
 	protected ArrayList<ProxyColumn<CommLink>> createColumns() {
 		ArrayList<ProxyColumn<CommLink>> cols =
-			new ArrayList<ProxyColumn<CommLink>>(9);
-		cols.add(new ProxyColumn<CommLink>("comm.link", 90) {
+			new ArrayList<ProxyColumn<CommLink>>(6);
+		cols.add(new ProxyColumn<CommLink>("comm.link", 80) {
 			public Object getValueAt(CommLink cl) {
 				return cl.getName();
 			}
@@ -100,7 +139,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				return new StatusCellRenderer();
 			}
 		});
-		cols.add(new ProxyColumn<CommLink>("comm.config", 220) {
+		cols.add(new ProxyColumn<CommLink>("comm.config", 180) {
 			public Object getValueAt(CommLink cl) {
 				return cl.getCommConfig();
 			}
@@ -119,35 +158,15 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 					new JComboBox<CommConfig>();
 				cbx.setModel(new IComboBoxModel<CommConfig>(
 					comm_config_mdl));
+				cbx.setRenderer(new CommConfigListRenderer());
 				return new DefaultCellEditor(cbx);
 			}
 			@Override
 			protected TableCellRenderer createCellRenderer() {
-				return new CommConfigCellRenderer();
+				return new CommConfigTableRenderer();
 			}
 		});
 		return cols;
-	}
-
-	/** Inner class for rendering cells in the comm config column */
-	private class CommConfigCellRenderer extends DefaultTableCellRenderer {
-		public Component getTableCellRendererComponent(JTable table,
-			Object value, boolean isSelected, boolean hasFocus,
-			int row, int column)
-		{
-			return super.getTableCellRendererComponent(table,
-				getCommConfigLabel(value), isSelected,
-				hasFocus, row, column);
-		}
-	}
-
-	/** Get a comm config label (description) */
-	private Object getCommConfigLabel(Object value) {
-		if (value instanceof CommConfig) {
-			CommConfig cc = (CommConfig) value;
-			return cc.getDescription();
-		} else
-			return value;
 	}
 
 	/** Comm config proxy list model */
