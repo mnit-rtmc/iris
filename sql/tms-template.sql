@@ -1226,6 +1226,10 @@ CREATE TABLE iris.comm_config (
 	no_response_disconnect_sec INTEGER NOT NULL
 );
 
+ALTER TABLE iris.comm_config
+	ADD CONSTRAINT poll_timeout_ck
+	CHECK (poll_period_sec * 1000 > timeout_ms * 3);
+
 CREATE VIEW comm_config_view AS
 	SELECT cc.name, cc.description, cp.description AS protocol, modem,
 	       timeout_ms, poll_period_sec, idle_disconnect_sec,
