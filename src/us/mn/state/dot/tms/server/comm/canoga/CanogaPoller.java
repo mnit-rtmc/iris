@@ -35,8 +35,8 @@ public class CanogaPoller extends ThreadedPoller<CanogaProperty>
 	static protected final DebugLog CANOGA_LOG = new DebugLog("canoga");
 
 	/** Create a new Canoga poller */
-	public CanogaPoller(String n) {
-		super(n, TCP, CANOGA_LOG);
+	public CanogaPoller(String n, int ids) {
+		super(n, TCP, CANOGA_LOG, ids);
 	}
 
 	/** Mapping of all event data collectors on line */

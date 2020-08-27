@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2020  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,7 +31,6 @@ import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sched.Work;
 import us.mn.state.dot.sched.Worker;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.URIUtil;
@@ -95,8 +94,8 @@ abstract public class BasePoller implements DevicePoller {
 	/** Flag to close channel on timeout */
 	private final boolean close_on_timeout;
 
-	/** COMM_IDLE_DISCONNECT system attribute for this poller */
-	private final SystemAttrEnum attrCommIdleDisconnect;
+	/** Comm idle disconnect seconds */
+	private final int idle_disconnect_sec;
 
 	/** Protocol logger */
 	private final DebugLog logger;
@@ -148,20 +147,15 @@ abstract public class BasePoller implements DevicePoller {
 	private boolean destroyed = false;
 
 	/** Create a base poller */
-	protected BasePoller(String n, URI s, boolean cot) {
+	protected BasePoller(String n, URI s, boolean cot, int ids) {
 		name = n;
 		scheme = s;
 		close_on_timeout = cot;
-		attrCommIdleDisconnect = null;
+		idle_disconnect_sec = ids;
 		logger = new DebugLog(n + ".log");
 		tx_buf = ByteBuffer.allocate(BUF_SZ);
 		rx_buf = ByteBuffer.allocate(BUF_SZ);
 		log("CREATED");
-	}
-
-	/** Create a base poller */
-	protected BasePoller(String n, URI s) {
-		this(n, s, false);
 	}
 
 	/** Destroy the poller */
@@ -377,15 +371,7 @@ abstract public class BasePoller implements DevicePoller {
 	 * (0 indicates indefinite). */
 	@Override
 	public int getIdleDisconnectSec() {
-		SystemAttrEnum attr = getIdleDisconnectAttr();
-		return (attr != null) ? attr.getInt() : 0;
-	}
-
-	/** Get the comm idle disconnect system attribute */
-	private SystemAttrEnum getIdleDisconnectAttr() {
-		return (modem)
-		      ? SystemAttrEnum.COMM_IDLE_DISCONNECT_MODEM_SEC
-		      : attrCommIdleDisconnect;
+		return idle_disconnect_sec;
 	}
 
 	/** Open the channel */

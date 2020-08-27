@@ -145,9 +145,6 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-comm_idle_disconnect_dms_sec	0
-comm_idle_disconnect_gps_sec	5
-comm_idle_disconnect_modem_sec	20
 database_version	5.15.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90

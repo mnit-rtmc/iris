@@ -34,8 +34,8 @@ public class SS105Poller extends ThreadedPoller<SS105Property>
 	static protected final DebugLog SS105_LOG = new DebugLog("ss105");
 
 	/** Create a new SS105 poller */
-	public SS105Poller(String n) {
-		super(n, TCP, SS105_LOG);
+	public SS105Poller(String n, int ids) {
+		super(n, TCP, SS105_LOG, ids);
 	}
 
 	/** Perform a controller reset */

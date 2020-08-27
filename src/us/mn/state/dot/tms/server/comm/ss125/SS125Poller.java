@@ -34,8 +34,8 @@ public class SS125Poller extends ThreadedPoller<SS125Property>
 	static private final DebugLog SS125_LOG = new DebugLog("ss125");
 
 	/** Create a new SS125 poller */
-	public SS125Poller(String n) {
-		super(n, TCP, SS125_LOG);
+	public SS125Poller(String n, int ids) {
+		super(n, TCP, SS125_LOG, ids);
 	}
 
 	/** Perform a controller reset */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ public class E6Poller extends ThreadedPoller<E6Property>
 	static private final DebugLog E6_LOG = new DebugLog("e6");
 
 	/** Create a new E6 poller */
-	public E6Poller(String n) {
-		super(n, UDP, E6_LOG);
+	public E6Poller(String n, int ids) {
+		super(n, UDP, E6_LOG, ids);
 	}
 
 	/** Create a comm thread */

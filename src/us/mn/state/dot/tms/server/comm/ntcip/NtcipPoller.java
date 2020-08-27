@@ -66,9 +66,8 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 	private final CommProtocol protocol;
 
 	/** Create a new Ntcip poller */
-	public NtcipPoller(String n, CommProtocol cp) {
-		super(n, default_uri(cp), NTCIP_LOG,
-			SystemAttrEnum.COMM_IDLE_DISCONNECT_DMS_SEC);
+	public NtcipPoller(String n, CommProtocol cp, int ids) {
+		super(n, default_uri(cp), NTCIP_LOG, ids);
 		protocol = cp;
 	}
 

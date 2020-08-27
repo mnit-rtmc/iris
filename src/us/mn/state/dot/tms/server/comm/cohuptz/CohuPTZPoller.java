@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +37,8 @@ public class CohuPTZPoller extends BasePoller implements CameraPoller {
 	private final CommProtocol protocol;
 
 	/** Create a new Cohu PTZ poller */
-	public CohuPTZPoller(String n, CommProtocol cp) {
-		super(n, TCP);
+	public CohuPTZPoller(String n, CommProtocol cp, int ids) {
+		super(n, TCP, false, ids);
 		protocol = cp;
 	}
 

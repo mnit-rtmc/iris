@@ -52,67 +52,69 @@ import us.mn.state.dot.tms.server.comm.viconptz.ViconPTZPoller;
 public class DevicePollerFactory {
 
 	/** Create a device poller */
-	static public DevicePoller create(String name, CommProtocol protocol) {
+	static public DevicePoller create(String name, CommProtocol protocol,
+		int ids)
+	{
 		switch (protocol) {
 		case AXIS_PTZ:
-			return new AxisPTZPoller(name);
+			return new AxisPTZPoller(name, ids);
 		case BANNER_DXM:
-			return new DXMPoller(name);
+			return new DXMPoller(name, ids);
 		case CANOGA:
-			return new CanogaPoller(name);
+			return new CanogaPoller(name, ids);
 		case CBW:
-			return new CBWPoller(name);
+			return new CBWPoller(name, ids);
 		case COHU_PTZ:
-			return new CohuPTZPoller(name, protocol);
+			return new CohuPTZPoller(name, protocol, ids);
 		case DIN_RELAY:
-			return new DinRelayPoller(name);
+			return new DinRelayPoller(name, ids);
 		case DMSXML:
-			return new DmsXmlPoller(name);
+			return new DmsXmlPoller(name, ids);
 		case DR_500:
-			return new DR500Poller(name);
+			return new DR500Poller(name, ids);
 		case HYSECURITY_STC:
-			return new STCPoller(name);
+			return new STCPoller(name, ids);
 		case INC_FEED:
-			return new IncFeedPoller(name);
+			return new IncFeedPoller(name, ids);
 		case INFINOVA_D_PTZ:
-			return new InfinovaPoller(name);
+			return new InfinovaPoller(name, ids);
 		case MANCHESTER_PTZ:
-			return new ManchesterPoller(name);
+			return new ManchesterPoller(name, ids);
 		case MNDOT_4:
 		case MNDOT_5:
-			return new MndotPoller(name, protocol);
+			return new MndotPoller(name, protocol, ids);
 		case MON_STREAM:
-			return new MonStreamPoller(name);
+			return new MonStreamPoller(name, ids);
 		case MSG_FEED:
-			return new MsgFeedPoller(name);
+			return new MsgFeedPoller(name, ids);
 		case NTCIP_A:
 		case NTCIP_B:
 		case NTCIP_C:
-			return new NtcipPoller(name, protocol);
+			return new NtcipPoller(name, protocol, ids);
 		case ORG_815:
-			return new Org815Poller(name);
+			return new Org815Poller(name, ids);
 		case PELCO_D_PTZ:
-			return new PelcoDPoller(name);
+			return new PelcoDPoller(name, ids);
 		case PELCO_P:
-			return new PelcoPPoller(name);
+			return new PelcoPPoller(name, ids);
 		case RTMS_G4:
-			return new G4Poller(name);
+			return new G4Poller(name, ids);
 		case SS_105:
-			return new SS105Poller(name);
+			return new SS105Poller(name, ids);
 		case SS_125:
-			return new SS125Poller(name);
+			return new SS125Poller(name, ids);
 		case TRANSCORE_E6:
-			return new E6Poller(name);
+			return new E6Poller(name, ids);
 		case VICON_PTZ:
-			return new ViconPTZPoller(name);
+			return new ViconPTZPoller(name, ids);
 		case SIERRA_GX:
-			return new SierraGxPoller(name);
+			return new SierraGxPoller(name, ids);
 		case GPS_REDLION:
-			return new RedLionPoller(name);
+			return new RedLionPoller(name, ids);
 		case COHU_HELIOS_PTZ:
-			return new CohuPTZPoller(name, protocol);
+			return new CohuPTZPoller(name, protocol, ids);
 		case STREAMBED:
-			return new StreambedPoller(name);
+			return new StreambedPoller(name, ids);
 		default:
 			return null;
 		}

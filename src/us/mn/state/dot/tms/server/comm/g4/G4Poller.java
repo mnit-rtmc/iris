@@ -35,8 +35,8 @@ public class G4Poller extends ThreadedPoller<G4Property>
 	static private final DebugLog G4_LOG = new DebugLog("g4");
 
 	/** Create a new G4 poller */
-	public G4Poller(String n) {
-		super(n, TCP, G4_LOG);
+	public G4Poller(String n, int ids) {
+		super(n, TCP, G4_LOG, ids);
 	}
 
 	/** Perform a controller reset */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,8 +34,8 @@ public class IncFeedPoller extends ThreadedPoller<IncFeedProperty> {
 	private final IncidentCache cache;
 
 	/** Create a new poller */
-	public IncFeedPoller(String n) {
-		super(n, HTTP, INC_LOG);
+	public IncFeedPoller(String n, int ids) {
+		super(n, HTTP, INC_LOG, ids);
 		cache = new IncidentCache(n, INC_LOG);
 	}
 

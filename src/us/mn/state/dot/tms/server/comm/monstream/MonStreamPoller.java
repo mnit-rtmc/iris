@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -173,8 +173,8 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 	}
 
 	/** Create a new MonStream poller */
-	public MonStreamPoller(String n) {
-		super(n, UDP);
+	public MonStreamPoller(String n, int ids) {
+		super(n, UDP, false, ids);
 	}
 
 	/** Create an operation */

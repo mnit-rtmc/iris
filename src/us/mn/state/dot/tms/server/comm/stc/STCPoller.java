@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,8 +36,8 @@ public class STCPoller extends ThreadedPoller<STCProperty>
 	static private final DebugLog STC_LOG = new DebugLog("stc");
 
 	/** Create a new STC poller */
-	public STCPoller(String n) {
-		super(n, TCP, STC_LOG);
+	public STCPoller(String n, int ids) {
+		super(n, TCP, STC_LOG, ids);
 	}
 
 	/** Send a device request */

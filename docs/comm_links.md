@@ -5,12 +5,6 @@ Select `View ➔ Maintenance ➔ Comm Links` menu item
 A **comm link** is a network connection to an external [device] or system.  IRIS
 is capable of supporting thousands of simultaneous comm links.
 
-## Modem
-
-The **modem** flag indicates the connection uses a _dial-up_ or _cell_ modem.
-The _comm link_ will be disconnected if communication is idle for longer than
-the value of the `comm_idle_disconnect_modem_sec` [system attribute].
-
 ## URI
 
 The **URI** includes a DNS host name or network IP address, and port number,
@@ -19,6 +13,18 @@ using the standard `host:port` convention.  It can also contain an optional
 present, the scheme will override the _default scheme_ for the selected
 protocol.  For example, to use the [Pelco-D](#pelco-d) protocol over TCP
 (instead of the default UDP), prepend `tcp://` to the URI.
+
+## Poll Enabled
+
+Polling can be disabled using this value.
+
+# Comm Config
+
+Select `View ➔ Maintenance ➔ Comm Config` menu item
+
+## Modem
+
+The **modem** flag indicates the connection uses a _dial-up_ or _cell_ modem.
 
 ## Poll Period
 
@@ -30,6 +36,11 @@ It can range from 5 seconds to 24 hours.
 After a poll, if a response is not received before the **timeout** expires, the
 communicaton will fail.  For each poll, 2 retries will happen before the
 operation is aborted.
+
+## Idle Disconnect Seconds
+
+When this value is greater than zero, the comm link will be disconnected after
+a period of inactivity.  This can reduce charges for modem links.
 
 ## Protocols
 

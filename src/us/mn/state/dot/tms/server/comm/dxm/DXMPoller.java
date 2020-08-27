@@ -30,8 +30,8 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 public class DXMPoller extends BasePoller implements SamplePoller {
 
 	/** Create a new DXM poller */
-	public DXMPoller(String n) {
-		super(n, TCP, true);
+	public DXMPoller(String n, int ids) {
+		super(n, TCP, true, ids);
 	}
 
 	/** Create an operation */

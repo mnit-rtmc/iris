@@ -36,6 +36,24 @@ SELECT 'cfg_' || ROW_NUMBER() OVER (ORDER BY protocol, modem, poll_period),
 FROM iris.comm_link
 GROUP BY (protocol, modem, timeout, poll_period);
 
+-- Set idle_disconnect_sec for DMS protocols
+UPDATE iris.comm_config SET idle_disconnect_sec = sa.value::integer
+  FROM iris.system_attribute sa
+ WHERE protocol IN (0, 7, 9, 11)
+   AND sa.name = 'comm_idle_disconnect_dms_sec';
+
+-- Set idle_disconnect_sec for GPS protocols
+UPDATE iris.comm_config SET idle_disconnect_sec = sa.value::integer
+  FROM iris.system_attribute sa
+ WHERE protocol IN (37, 38, 39)
+   AND sa.name = 'comm_idle_disconnect_gps_sec';
+
+-- Set idle_disconnect_sec for modems
+UPDATE iris.comm_config SET idle_disconnect_sec = sa.value::integer
+  FROM iris.system_attribute sa
+ WHERE modem = true
+   AND sa.name = 'comm_idle_disconnect_modem_sec';
+
 -- Add comm_config column to comm_link table
 ALTER TABLE iris.comm_link
  ADD COLUMN comm_config VARCHAR(10) REFERENCES iris.comm_config;
@@ -70,5 +88,10 @@ INSERT INTO iris.sonar_type (name) VALUES ('comm_config');
 INSERT INTO iris.privilege (name, capability, type_n, obj_n, attr_n, group_n, write)
 VALUES ('PRV_004X', 'comm_admin', 'comm_config', '', '', '', true),
        ('PRV_004Y', 'comm_tab', 'comm_config', '', '', '', false);
+
+-- Delete comm_idle_disconnect system attributes
+DELETE FROM iris.system_attribute WHERE name = 'comm_idle_disconnect_dms_sec';
+DELETE FROM iris.system_attribute WHERE name = 'comm_idle_disconnect_gps_sec';
+DELETE FROM iris.system_attribute WHERE name = 'comm_idle_disconnect_modem_sec';
 
 COMMIT;

@@ -30,8 +30,8 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 public class StreambedPoller extends BasePoller implements FlowStreamPoller {
 
 	/** Create a new Streambed poller */
-	public StreambedPoller(String n) {
-		super(n, TCP);
+	public StreambedPoller(String n, int ids) {
+		super(n, TCP, false, ids);
 	}
 
 	/** Start an operation */

@@ -43,8 +43,8 @@ public class DmsXmlPoller extends ThreadedPoller implements DMSPoller {
 	static protected final DebugLog LOG = new DebugLog("dmsxml");
 
 	/** Create a new dmsxml poller */
-	public DmsXmlPoller(String n) {
-		super(n, TCP, LOG);
+	public DmsXmlPoller(String n, int ids) {
+		super(n, TCP, LOG, ids);
 	}
 
 	/** Create a comm thread */

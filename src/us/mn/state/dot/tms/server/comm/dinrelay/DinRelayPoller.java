@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2016  Minnesota Department of Transportation
+ * Copyright (C) 2012-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +37,8 @@ public class DinRelayPoller extends ThreadedPoller<DinRelayProperty>
 	static final DebugLog DIN_LOG = new DebugLog("dinrelay");
 
 	/** Create a new DIN relay poller */
-	public DinRelayPoller(String n) {
-		super(n, HTTP, DIN_LOG);
+	public DinRelayPoller(String n, int ids) {
+		super(n, HTTP, DIN_LOG, ids);
 	}
 
 	/** Query the outlet status */

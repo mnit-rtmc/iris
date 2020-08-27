@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2017  Minnesota Department of Transportation
+ * Copyright (C) 2007-2020  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,8 +37,8 @@ public class ManchesterPoller extends TransientPoller<ManchesterProperty>
 		new DebugLog("manchester");
 
 	/** Create a new Manchester poller */
-	public ManchesterPoller(String n) {
-		super(n, UDP, MANCHESTER_LOG);
+	public ManchesterPoller(String n, int ids) {
+		super(n, UDP, MANCHESTER_LOG, ids);
 	}
 
 	/** Send a PTZ camera move command */

@@ -33,8 +33,8 @@ public class DR500Poller extends ThreadedPoller<DR500Property>
 	static private final DebugLog DR500_LOG = new DebugLog("dr500");
 
 	/** Create a new DR500 poller */
-	public DR500Poller(String n) {
-		super(n, TCP, DR500_LOG);
+	public DR500Poller(String n, int ids) {
+		super(n, TCP, DR500_LOG, ids);
 	}
 
 	/** Perform a controller reset */

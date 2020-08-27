@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +37,8 @@ public class MsgFeedPoller extends ThreadedPoller<MsgFeedProperty> {
 	}
 
 	/** Create a new poller */
-	public MsgFeedPoller(String n) {
-		super(n, HTTP, FEED_LOG);
+	public MsgFeedPoller(String n, int ids) {
+		super(n, HTTP, FEED_LOG, ids);
 	}
 
 	/** Query message feed */

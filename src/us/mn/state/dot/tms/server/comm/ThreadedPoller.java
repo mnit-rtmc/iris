@@ -20,7 +20,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.server.Constants.UNKNOWN;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
@@ -51,23 +50,16 @@ public class ThreadedPoller<T extends ControllerProperty>
 			logger.log(name + " " + msg);
 	}
 
-	/** COMM_IDLE_DISCONNECT system attribute */
-	private final SystemAttrEnum attrCommIdleDisconnect;
+	/** Comm idle disconnect seconds */
+	private final int idle_disconnect_sec;
 
 	/** Create a threaded device poller */
-	protected ThreadedPoller(String n, URI s, DebugLog l,
-		SystemAttrEnum acid)
-	{
+	protected ThreadedPoller(String n, URI s, DebugLog l, int ids) {
 		name = n;
 		scheme = s;
 		logger = l;
-		attrCommIdleDisconnect = acid;
+		idle_disconnect_sec = ids;
 		log("CREATED");
-	}
-
-	/** Create a threaded device poller */
-	protected ThreadedPoller(String n, URI s, DebugLog l) {
-		this(n, s, l, null);
 	}
 
 	/** Destroy the poller */
@@ -180,15 +172,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 	 * (0 indicates indefinite). */
 	@Override
 	public int getIdleDisconnectSec() {
-		SystemAttrEnum attr = getIdleDisconnectAttr();
-		return (attr != null) ? attr.getInt() : 0;
-	}
-
-	/** Get the comm idle disconnect system attribute */
-	private SystemAttrEnum getIdleDisconnectAttr() {
-		return (modem)
-		      ? SystemAttrEnum.COMM_IDLE_DISCONNECT_MODEM_SEC
-		      : attrCommIdleDisconnect;
+		return idle_disconnect_sec;
 	}
 
 	/** Create the comm thread */

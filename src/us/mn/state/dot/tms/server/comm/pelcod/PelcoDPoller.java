@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2017  Minnesota Department of Transportation
+ * Copyright (C) 2007-2020  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -36,8 +36,8 @@ public class PelcoDPoller extends TransientPoller<PelcoDProperty>
 	static private final DebugLog PELCOD_LOG = new DebugLog("pelcod");
 
 	/** Create a new Pelco poller */
-	public PelcoDPoller(String n) {
-		super(n, UDP, PELCOD_LOG);
+	public PelcoDPoller(String n, int ids) {
+		super(n, UDP, PELCOD_LOG, ids);
 	}
 
 	/** Send a PTZ camera move command */

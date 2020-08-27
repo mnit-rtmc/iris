@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,8 +34,8 @@ public class CBWPoller extends ThreadedPoller<CBWProperty>
 	static final DebugLog CBW_LOG = new DebugLog("cbw");
 
 	/** Create a new CBW relay poller */
-	public CBWPoller(String n) {
-		super(n, HTTP, CBW_LOG);
+	public CBWPoller(String n, int ids) {
+		super(n, HTTP, CBW_LOG, ids);
 	}
 
 	/** Send a device request */

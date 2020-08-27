@@ -332,7 +332,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Create the device poller */
 	private synchronized void createPoller() {
-		poller = DevicePollerFactory.create(name, getCommProtocol());
+		int ids = comm_config.getIdleDisconnectSec();
+		poller = DevicePollerFactory.create(name, getCommProtocol(),
+			ids);
 		if (poller != null) {
 			poller.setUri(uri);
 			poller.setTimeout(comm_config.getTimeoutMs());

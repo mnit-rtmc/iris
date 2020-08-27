@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,8 +38,8 @@ public class InfinovaPoller extends TransientPoller<PelcoDProperty>
 	static public final DebugLog INF_LOG = new DebugLog("infinova");
 
 	/** Create a new infinova poller */
-	public InfinovaPoller(String n) {
-		super(n, TCP, INF_LOG);
+	public InfinovaPoller(String n, int ids) {
+		super(n, TCP, INF_LOG, ids);
 	}
 
 	/** Create a comm thread */
