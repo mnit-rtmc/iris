@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.dr500;
 
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
@@ -33,8 +34,8 @@ public class DR500Poller extends ThreadedPoller<DR500Property>
 	static private final DebugLog DR500_LOG = new DebugLog("dr500");
 
 	/** Create a new DR500 poller */
-	public DR500Poller(String n, int ids) {
-		super(n, TCP, DR500_LOG, ids);
+	public DR500Poller(CommLink link) {
+		super(link, TCP, DR500_LOG);
 	}
 
 	/** Perform a controller reset */

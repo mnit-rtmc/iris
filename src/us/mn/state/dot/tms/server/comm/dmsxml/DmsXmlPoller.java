@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.SignMessage;
@@ -43,8 +44,8 @@ public class DmsXmlPoller extends ThreadedPoller implements DMSPoller {
 	static protected final DebugLog LOG = new DebugLog("dmsxml");
 
 	/** Create a new dmsxml poller */
-	public DmsXmlPoller(String n, int ids) {
-		super(n, TCP, LOG, ids);
+	public DmsXmlPoller(CommLink link) {
+		super(link, TCP, LOG);
 	}
 
 	/** Create a comm thread */

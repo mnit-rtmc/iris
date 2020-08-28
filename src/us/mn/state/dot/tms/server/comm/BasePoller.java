@@ -30,6 +30,8 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sched.Work;
 import us.mn.state.dot.sched.Worker;
+import us.mn.state.dot.tms.CommConfig;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.utils.HexString;
@@ -91,6 +93,12 @@ abstract public class BasePoller implements DevicePoller {
 	/** Default URI scheme */
 	private final URI scheme;
 
+	/** Remote URI */
+	private final String uri;
+
+	/** Receive timeout (ms) */
+	private final int timeout_ms;
+
 	/** Flag to close channel on timeout */
 	private final boolean close_on_timeout;
 
@@ -147,12 +155,15 @@ abstract public class BasePoller implements DevicePoller {
 	private boolean destroyed = false;
 
 	/** Create a base poller */
-	protected BasePoller(String n, URI s, boolean cot, int ids) {
-		name = n;
+	protected BasePoller(CommLink link, URI s, boolean cot) {
+		CommConfig cc = link.getCommConfig();
+		name = link.getName();
 		scheme = s;
+		uri = link.getUri();
+		timeout_ms = cc.getTimeoutMs();
 		close_on_timeout = cot;
-		idle_disconnect_sec = ids;
-		logger = new DebugLog(n + ".log");
+		idle_disconnect_sec = cc.getIdleDisconnectSec();
+		logger = new DebugLog(name + ".log");
 		tx_buf = ByteBuffer.allocate(BUF_SZ);
 		rx_buf = ByteBuffer.allocate(BUF_SZ);
 		log("CREATED");
@@ -184,34 +195,6 @@ abstract public class BasePoller implements DevicePoller {
 	/** Get the receive buffer */
 	public ByteBuffer getRxBuffer() {
 		return rx_buf;
-	}
-
-	/** Remote URI */
-	private String uri = "";
-
-	/** Set the remote URI */
-	@Override
-	public void setUri(String u) {
-		uri = u;
-		closeChannel();
-	}
-
-	/** Receive timeout (ms) */
-	private int timeout;
-
-	/** Set the receive timeout (ms) */
-	@Override
-	public void setTimeout(int rt) {
-		timeout = rt;
-	}
-
-	/** Modem flag */
-	private boolean modem;
-
-	/** Set the modem flag */
-	@Override
-	public void setModem(boolean m) {
-		modem = m;
 	}
 
 	/** Poller status */
@@ -317,7 +300,7 @@ abstract public class BasePoller implements DevicePoller {
 	/** Add an operation to the receive queue */
 	private void addRecvQueue(Operation op) {
 		// r_queue is sorted by expire time
-		op.setRemaining(timeout);
+		op.setRemaining(timeout_ms);
 		synchronized (op_set) {
 			if (!r_queue.add(op)) {
 				// This should never happen
@@ -329,7 +312,7 @@ abstract public class BasePoller implements DevicePoller {
 
 	/** Schedule timeout of operation */
 	private void scheduleTimeout(final Operation op) {
-		COMM.addJob(new Job(timeout) {
+		COMM.addJob(new Job(timeout_ms) {
 			@Override public String getName() {
 				return "scheduleTimeout";
 			}

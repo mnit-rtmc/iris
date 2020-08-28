@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.incfeed;
 
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
@@ -34,9 +35,9 @@ public class IncFeedPoller extends ThreadedPoller<IncFeedProperty> {
 	private final IncidentCache cache;
 
 	/** Create a new poller */
-	public IncFeedPoller(String n, int ids) {
-		super(n, HTTP, INC_LOG, ids);
-		cache = new IncidentCache(n, INC_LOG);
+	public IncFeedPoller(CommLink link) {
+		super(link, HTTP, INC_LOG);
+		cache = new IncidentCache(link.getName(), INC_LOG);
 	}
 
 	/** Query incident feed */

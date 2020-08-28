@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.e6;
 
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.comm.TagReaderPoller;
@@ -33,8 +34,8 @@ public class E6Poller extends ThreadedPoller<E6Property>
 	static private final DebugLog E6_LOG = new DebugLog("e6");
 
 	/** Create a new E6 poller */
-	public E6Poller(String n, int ids) {
-		super(n, UDP, E6_LOG, ids);
+	public E6Poller(CommLink link) {
+		super(link, UDP, E6_LOG);
 	}
 
 	/** Create a comm thread */

@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.server.comm.manchester;
 
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
@@ -37,8 +38,8 @@ public class ManchesterPoller extends TransientPoller<ManchesterProperty>
 		new DebugLog("manchester");
 
 	/** Create a new Manchester poller */
-	public ManchesterPoller(String n, int ids) {
-		super(n, UDP, MANCHESTER_LOG, ids);
+	public ManchesterPoller(CommLink link) {
+		super(link, UDP, MANCHESTER_LOG);
 	}
 
 	/** Send a PTZ camera move command */

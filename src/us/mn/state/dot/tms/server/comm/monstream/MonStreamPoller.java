@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -173,8 +174,8 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 	}
 
 	/** Create a new MonStream poller */
-	public MonStreamPoller(String n, int ids) {
-		super(n, UDP, false, ids);
+	public MonStreamPoller(CommLink link) {
+		super(link, UDP, false);
 	}
 
 	/** Create an operation */

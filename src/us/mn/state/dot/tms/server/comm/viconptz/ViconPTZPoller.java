@@ -15,6 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.BasePoller;
@@ -34,8 +35,8 @@ import static us.mn.state.dot.tms.utils.URIUtil.UDP;
 public class ViconPTZPoller extends BasePoller implements CameraPoller {
 
 	/** Create a new Vicon poller */
-	public ViconPTZPoller(String n, int ids) {
-		super(n, UDP, false, ids);
+	public ViconPTZPoller(CommLink link) {
+		super(link, UDP, false);
 	}
 
 	/** Create an operation */

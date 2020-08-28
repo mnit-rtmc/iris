@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.g4;
 
 import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.comm.ThreadedPoller;
@@ -35,8 +36,8 @@ public class G4Poller extends ThreadedPoller<G4Property>
 	static private final DebugLog G4_LOG = new DebugLog("g4");
 
 	/** Create a new G4 poller */
-	public G4Poller(String n, int ids) {
-		super(n, TCP, G4_LOG, ids);
+	public G4Poller(CommLink link) {
+		super(link, TCP, G4_LOG);
 	}
 
 	/** Perform a controller reset */

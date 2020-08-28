@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ss125;
 
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
@@ -34,8 +35,8 @@ public class SS125Poller extends ThreadedPoller<SS125Property>
 	static private final DebugLog SS125_LOG = new DebugLog("ss125");
 
 	/** Create a new SS125 poller */
-	public SS125Poller(String n, int ids) {
-		super(n, TCP, SS125_LOG, ids);
+	public SS125Poller(CommLink link) {
+		super(link, TCP, SS125_LOG);
 	}
 
 	/** Perform a controller reset */

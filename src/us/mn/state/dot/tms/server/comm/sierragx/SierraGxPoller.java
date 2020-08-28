@@ -15,6 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm.sierragx;
 
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GpsHelper;
@@ -34,8 +35,8 @@ public class SierraGxPoller extends ThreadedPoller<SierraGxProperty>
 	implements GpsPoller
 {
 	/** Create a new RedLion GPS poller */
-	public SierraGxPoller(String n, int ids) {
-		super(n, URIUtil.TCP, GpsImpl.GPS_LOG, ids);
+	public SierraGxPoller(CommLink link) {
+		super(link, URIUtil.TCP, GpsImpl.GPS_LOG);
 	}
 
 	/** Send a request to the GPS */

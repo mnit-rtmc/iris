@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm;
 
 import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.CommLink;
 
 /**
  * TransientPoller is a ThreadedPoller which causes equal operations to be
@@ -28,8 +29,8 @@ public class TransientPoller<T extends ControllerProperty>
 	extends ThreadedPoller<T>
 {
 	/** Create a new transient poller */
-	protected TransientPoller(String name, URI s, DebugLog l, int ids) {
-		super(name, s, l, ids);
+	protected TransientPoller(CommLink link, URI s, DebugLog l) {
+		super(link, s, l);
 	}
 
 	/** Add an operation to the transient poller */

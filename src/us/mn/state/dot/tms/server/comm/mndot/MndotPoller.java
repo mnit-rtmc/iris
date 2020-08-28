@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -54,8 +55,8 @@ public class MndotPoller extends ThreadedPoller<MndotProperty>
 
 	/** Create a new MnDOT 170 poller.
 	 * @param n Comm link name. */
-	public MndotPoller(String n, CommProtocol cp, int ids) {
-		super(n, TCP, MNDOT_LOG, ids);
+	public MndotPoller(CommLink link, CommProtocol cp) {
+		super(link, TCP, MNDOT_LOG);
 		protocol = cp;
 	}
 

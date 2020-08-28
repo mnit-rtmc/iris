@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.CommConfig;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.EventType;
 import static us.mn.state.dot.tms.server.Constants.UNKNOWN;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -38,6 +40,12 @@ public class ThreadedPoller<T extends ControllerProperty>
 	/** Poller (comm link) name */
 	public final String name;
 
+	/** Remote URI */
+	private final String uri;
+
+	/** Receive timeout (ms) */
+	private final int timeout_ms;
+
 	/** Default URI scheme */
 	protected final URI scheme;
 
@@ -54,11 +62,14 @@ public class ThreadedPoller<T extends ControllerProperty>
 	private final int idle_disconnect_sec;
 
 	/** Create a threaded device poller */
-	protected ThreadedPoller(String n, URI s, DebugLog l, int ids) {
-		name = n;
+	protected ThreadedPoller(CommLink link, URI s, DebugLog l) {
+		CommConfig cc = link.getCommConfig();
+		name = link.getName();
 		scheme = s;
 		logger = l;
-		idle_disconnect_sec = ids;
+		uri = link.getUri();
+		timeout_ms = cc.getTimeoutMs();
+		idle_disconnect_sec = cc.getIdleDisconnectSec();
 		log("CREATED");
 	}
 
@@ -124,35 +135,6 @@ public class ThreadedPoller<T extends ControllerProperty>
 		// Subclasses should override this if necessary
 	}
 
-	/** Remote URI */
-	private String uri = "";
-
-	/** Set the remote URI */
-	@Override
-	public synchronized void setUri(String u) {
-		uri = u;
-		disconnect();
-	}
-
-	/** Receive timeout (ms) */
-	private int timeout;
-
-	/** Set the receive timeout (ms) */
-	@Override
-	public synchronized void setTimeout(int rt) {
-		timeout = rt;
-		disconnect();
-	}
-
-	/** Modem flag */
-	private boolean modem;
-
-	/** Set the modem flag */
-	@Override
-	public void setModem(boolean m) {
-		modem = m;
-	}
-
 	/** Comm thread (may be null) */
 	private CommThread c_thread;
 
@@ -177,14 +159,14 @@ public class ThreadedPoller<T extends ControllerProperty>
 
 	/** Create the comm thread */
 	private synchronized void createCommThread() {
-		c_thread = createCommThread(uri, timeout);
+		c_thread = createCommThread(uri, timeout_ms);
 		c_thread.start();
 		log("THREAD START");
 	}
 
 	/** Create a new comm thread */
-	protected CommThread<T> createCommThread(String uri, int timeout) {
-		return new CommThread<T>(this, queue, scheme, uri, timeout,
+	protected CommThread<T> createCommThread(String uri, int timeout_ms) {
+		return new CommThread<T>(this, queue, scheme, uri, timeout_ms,
 			logger);
 	}
 

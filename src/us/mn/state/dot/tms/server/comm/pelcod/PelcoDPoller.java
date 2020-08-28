@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.server.comm.pelcod;
 
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
@@ -36,8 +37,8 @@ public class PelcoDPoller extends TransientPoller<PelcoDProperty>
 	static private final DebugLog PELCOD_LOG = new DebugLog("pelcod");
 
 	/** Create a new Pelco poller */
-	public PelcoDPoller(String n, int ids) {
-		super(n, UDP, PELCOD_LOG, ids);
+	public PelcoDPoller(CommLink link) {
+		super(link, UDP, PELCOD_LOG);
 	}
 
 	/** Send a PTZ camera move command */

@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.canoga;
 
 import java.util.HashMap;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
@@ -35,8 +36,8 @@ public class CanogaPoller extends ThreadedPoller<CanogaProperty>
 	static protected final DebugLog CANOGA_LOG = new DebugLog("canoga");
 
 	/** Create a new Canoga poller */
-	public CanogaPoller(String n, int ids) {
-		super(n, TCP, CANOGA_LOG, ids);
+	public CanogaPoller(CommLink link) {
+		super(link, TCP, CANOGA_LOG);
 	}
 
 	/** Mapping of all event data collectors on line */

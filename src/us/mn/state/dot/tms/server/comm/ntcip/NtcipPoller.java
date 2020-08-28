@@ -20,6 +20,7 @@ import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommProtocol;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
@@ -66,8 +67,8 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 	private final CommProtocol protocol;
 
 	/** Create a new Ntcip poller */
-	public NtcipPoller(String n, CommProtocol cp, int ids) {
-		super(n, default_uri(cp), NTCIP_LOG, ids);
+	public NtcipPoller(CommLink link, CommProtocol cp) {
+		super(link, default_uri(cp), NTCIP_LOG);
 		protocol = cp;
 	}
 

@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.stc;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -36,8 +37,8 @@ public class STCPoller extends ThreadedPoller<STCProperty>
 	static private final DebugLog STC_LOG = new DebugLog("stc");
 
 	/** Create a new STC poller */
-	public STCPoller(String n, int ids) {
-		super(n, TCP, STC_LOG, ids);
+	public STCPoller(CommLink link) {
+		super(link, TCP, STC_LOG);
 	}
 
 	/** Send a device request */

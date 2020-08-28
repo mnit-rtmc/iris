@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2018  Minnesota Department of Transportation
+ * Copyright (C) 2014-2020  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,15 +24,6 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * @author John L. Stanley
  */
 public interface DevicePoller {
-
-	/** Set the remote URI */
-	void setUri(String u);
-
-	/** Set the receive timeout (ms) */
-	void setTimeout(int rt);
-
-	/** Set the modem flag */
-	void setModem(boolean m);
 
 	/** Get the poller status */
 	String getStatus();

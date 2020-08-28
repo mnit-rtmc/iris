@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.org815;
 
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
@@ -34,8 +35,8 @@ public class Org815Poller extends ThreadedPoller<Org815Property>
 	static private final DebugLog ORG815_LOG = new DebugLog("org815");
 
 	/** Create a new ORG-815 poller */
-	public Org815Poller(String n, int ids) {
-		super(n, TCP, ORG815_LOG, ids);
+	public Org815Poller(CommLink link) {
+		super(link, TCP, ORG815_LOG);
 	}
 
 	/** Send a device request */

@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.streambed;
 
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.FlowStreamImpl;
 import us.mn.state.dot.tms.server.comm.BasePoller;
@@ -30,8 +31,8 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 public class StreambedPoller extends BasePoller implements FlowStreamPoller {
 
 	/** Create a new Streambed poller */
-	public StreambedPoller(String n, int ids) {
-		super(n, TCP, false, ids);
+	public StreambedPoller(CommLink link) {
+		super(link, TCP, false);
 	}
 
 	/** Start an operation */

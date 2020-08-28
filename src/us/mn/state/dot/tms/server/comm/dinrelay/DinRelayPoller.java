@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.dinrelay;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -37,8 +38,8 @@ public class DinRelayPoller extends ThreadedPoller<DinRelayProperty>
 	static final DebugLog DIN_LOG = new DebugLog("dinrelay");
 
 	/** Create a new DIN relay poller */
-	public DinRelayPoller(String n, int ids) {
-		super(n, HTTP, DIN_LOG, ids);
+	public DinRelayPoller(CommLink link) {
+		super(link, HTTP, DIN_LOG);
 	}
 
 	/** Query the outlet status */

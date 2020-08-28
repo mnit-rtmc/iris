@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.server.comm.axisptz;
 
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
@@ -77,12 +78,9 @@ public class AxisPTZPoller extends TransientPoller<AxisProp>
 		}
 	}
 
-	/** Create a new Axis PTZ poller.
-	 *
-	 * @param n CommLink name.
-	 */
-	public AxisPTZPoller(String n, int ids) {
-		super(n, HTTP, AXIS_LOG, ids);
+	/** Create a new Axis PTZ poller */
+	public AxisPTZPoller(CommLink link) {
+		super(link, HTTP, AXIS_LOG);
 	}
 
 	/** Send a PTZ camera move command */

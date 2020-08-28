@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.pelcop;
 
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.BasePoller;
@@ -31,8 +32,8 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 public class PelcoPPoller extends BasePoller implements CamKeyboardPoller {
 
 	/** Create a new Pelco P poller */
-	public PelcoPPoller(String n, int ids) {
-		super(n, TCP, true, ids);
+	public PelcoPPoller(CommLink link) {
+		super(link, TCP, true);
 	}
 
 	/** Create a listen operation */

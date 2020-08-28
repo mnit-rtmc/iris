@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.msgfeed;
 
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
@@ -37,8 +38,8 @@ public class MsgFeedPoller extends ThreadedPoller<MsgFeedProperty> {
 	}
 
 	/** Create a new poller */
-	public MsgFeedPoller(String n, int ids) {
-		super(n, HTTP, FEED_LOG, ids);
+	public MsgFeedPoller(CommLink link) {
+		super(link, HTTP, FEED_LOG);
 	}
 
 	/** Query message feed */

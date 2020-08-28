@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.cbw;
 
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -34,8 +35,8 @@ public class CBWPoller extends ThreadedPoller<CBWProperty>
 	static final DebugLog CBW_LOG = new DebugLog("cbw");
 
 	/** Create a new CBW relay poller */
-	public CBWPoller(String n, int ids) {
-		super(n, HTTP, CBW_LOG, ids);
+	public CBWPoller(CommLink link) {
+		super(link, HTTP, CBW_LOG);
 	}
 
 	/** Send a device request */

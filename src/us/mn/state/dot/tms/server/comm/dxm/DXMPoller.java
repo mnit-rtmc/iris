@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.dxm;
 
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.BasePoller;
 import us.mn.state.dot.tms.server.comm.Operation;
@@ -30,8 +31,8 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 public class DXMPoller extends BasePoller implements SamplePoller {
 
 	/** Create a new DXM poller */
-	public DXMPoller(String n, int ids) {
-		super(n, TCP, true, ids);
+	public DXMPoller(CommLink link) {
+		super(link, TCP, true);
 	}
 
 	/** Create an operation */

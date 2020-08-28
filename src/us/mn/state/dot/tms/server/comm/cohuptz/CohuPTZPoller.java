@@ -15,6 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
@@ -37,8 +38,8 @@ public class CohuPTZPoller extends BasePoller implements CameraPoller {
 	private final CommProtocol protocol;
 
 	/** Create a new Cohu PTZ poller */
-	public CohuPTZPoller(String n, CommProtocol cp, int ids) {
-		super(n, TCP, false, ids);
+	public CohuPTZPoller(CommLink link, CommProtocol cp) {
+		super(link, TCP, false);
 		protocol = cp;
 	}
 
