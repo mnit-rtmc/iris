@@ -95,4 +95,8 @@ DELETE FROM iris.system_attribute WHERE name = 'comm_idle_disconnect_dms_sec';
 DELETE FROM iris.system_attribute WHERE name = 'comm_idle_disconnect_gps_sec';
 DELETE FROM iris.system_attribute WHERE name = 'comm_idle_disconnect_modem_sec';
 
+-- Delete DMSXML op timeout system attributes
+DELETE FROM iris.system_attribute WHERE name = 'dmsxml_op_timeout_secs';
+DELETE FROM iris.system_attribute WHERE name = 'dmsxml_modem_op_timeout_secs';
+
 COMMIT;

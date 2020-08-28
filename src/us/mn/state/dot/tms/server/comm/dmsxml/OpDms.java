@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2019  Minnesota Department of Transportation
+ * Copyright (C) 2002-2020  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Random;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.ColorScheme;
+import us.mn.state.dot.tms.CommConfig;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
@@ -112,10 +113,8 @@ abstract class OpDms extends OpDevice {
 
 	/** Get the timeout for this operation */
 	private int calcTimeoutMS() {
-		SystemAttrEnum attr = (m_dms.isModemAny())
-			? SystemAttrEnum.DMSXML_MODEM_OP_TIMEOUT_SECS
-			: SystemAttrEnum.DMSXML_OP_TIMEOUT_SECS;
-		int s = attr.getInt();
+		CommConfig cc = controller.getCommLink().getCommConfig();
+		int s = cc.getNoResponseDisconnectSec();
 		LOG.log("Op timeout is " + s + " secs, dms=" + m_dms);
 		return s * 1000;
 	}

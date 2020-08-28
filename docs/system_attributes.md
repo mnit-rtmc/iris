@@ -75,8 +75,6 @@ System Attribute                 | Description
 `dms_reset_enable`               | Enable button to reset [DMS]
 `dms_send_confirmation_enable`   | Enable a confirmation dialog box when the [DMS] Send button is pressed
 `dms_update_font_table`          | Enable the updating of the [DMS] controller font table to match the font table in IRIS
-`dmsxml_modem_op_timeout_secs`   | Dial-up modem total operation timeout
-`dmsxml_op_timeout_secs`         | Wizard total operation timeout
 `dmsxml_reinit_detect`           | Enable [DMS] reinitialization detection for DMSXML controllers
 `email_rate_limit_hours`         | Hours to wait before sending duplicate emails
 `email_recipient_action_plan`    | Recipient of [action plan] emails
