@@ -189,7 +189,6 @@ email_sender_server
 email_smtp_host	
 gate_arm_alert_timeout_secs	90
 gate_arm_event_purge_days	0
-gstreamer_version_windows	1.16.2
 help_trouble_ticket_enable	false
 help_trouble_ticket_url	
 incident_clear_advice_multi	JUST CLEARED

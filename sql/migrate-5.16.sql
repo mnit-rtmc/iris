@@ -106,4 +106,7 @@ DELETE FROM iris.system_attribute WHERE name = 'comm_idle_disconnect_modem_sec';
 DELETE FROM iris.system_attribute WHERE name = 'dmsxml_op_timeout_secs';
 DELETE FROM iris.system_attribute WHERE name = 'dmsxml_modem_op_timeout_secs';
 
+-- Delete Gstreamer version system attribute
+DELETE FROM iris.system_attribute WHERE name = 'gstreamer_version_windows';
+
 COMMIT;
