@@ -31,6 +31,12 @@ The **modem** flag indicates the connection uses a _dial-up_ or _cell_ modem.
 Poll **period** determines how frequently controllers on a comm link are polled.
 It can range from 5 seconds to 24 hours.
 
+## Long Poll Period
+
+This **period** is for less frequently performed polling operations, determined
+by the protocol.  For modem links with restricted bandwidth, it may be useful if
+both poll periods use the same (long) value, to reduce costs.
+
 ## Timeout
 
 After a poll, if a response is not received before the **timeout** expires, the
