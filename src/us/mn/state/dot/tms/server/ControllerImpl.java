@@ -936,20 +936,22 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Poll controller devices */
-	public void pollDevices(int period) {
+	public void pollDevices(int period, boolean is_long) {
 		if (isConditionActive())
-			pollActiveDevices(period);
+			pollActiveDevices(period, is_long);
 		if (isConditionTesting())
 			startTesting();
 	}
 
 	/** Poll active controller devices */
-	private void pollActiveDevices(int period) {
-		pollController();
+	private void pollActiveDevices(int period, boolean is_long) {
+		if (!is_long)
+			pollController();
 		// Must call getDevices so we don't hold the lock
 		for (ControllerIO io: getDevices())
-			pollDevice(io);
-		if (hasActiveDetector())
+			pollDevice(io, is_long);
+		// Must check hasActiveMeter for green counts (mndot protocol)
+		if (hasActiveDetector() || (is_long && hasActiveMeter()))
 			pollDetectors(period);
 	}
 
@@ -1001,14 +1003,14 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Poll one device */
-	private void pollDevice(ControllerIO io) {
+	private void pollDevice(ControllerIO io, boolean is_long) {
 		if (io instanceof DeviceImpl) {
 			DeviceImpl dev = (DeviceImpl) io;
-			dev.periodicPoll();
+			dev.periodicPoll(is_long);
 		}
 		if (io instanceof AlarmImpl) {
 			AlarmImpl a = (AlarmImpl) io;
-			a.periodicPoll();
+			a.periodicPoll(is_long);
 		}
 	}
 
@@ -1037,7 +1039,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 		// We only want one settings operation per controller,
 		// no matter how many video monitors are connected
-		VideoMonitorImpl vm = getVideoMonitor();
+		VideoMonitorImpl vm = getFirstVideoMonitor();
 		if (vm != null) {
 			int dr = DeviceRequest.SEND_SETTINGS.ordinal();
 			vm.setDeviceRequest(dr);
@@ -1045,7 +1047,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get the first video monitor for the controller */
-	public synchronized VideoMonitorImpl getVideoMonitor() {
+	public synchronized VideoMonitorImpl getFirstVideoMonitor() {
 		int max_pin = getMaxPin();
 		for (int p = 1; p <= max_pin; p++) {
 			ControllerIO io = io_pins.get(p);

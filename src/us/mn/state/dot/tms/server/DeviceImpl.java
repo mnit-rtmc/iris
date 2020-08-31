@@ -258,7 +258,7 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 
 	/** Perform a periodic poll */
 	@Override
-	public void periodicPoll() {
+	public void periodicPoll(boolean is_long) {
 		sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 	}
 }

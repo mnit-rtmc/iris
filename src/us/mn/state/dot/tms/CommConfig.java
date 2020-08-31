@@ -114,6 +114,12 @@ public interface CommConfig extends SonarObject {
 	/** Get poll period (seconds) */
 	int getPollPeriodSec();
 
+	/** Set long poll period (seconds) */
+	void setLongPollPeriodSec(int s);
+
+	/** Get long poll period (seconds) */
+	int getLongPollPeriodSec();
+
 	/** Set idle disconnect (seconds) */
 	void setIdleDisconnectSec(int s);
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -173,8 +173,10 @@ public final class Scheduler {
 
 	/** Remove a job from this scheduler */
 	public synchronized void removeJob(Job job) {
-		toremove.add(job);
-		notify();
+		if (job != null) {
+			toremove.add(job);
+			notify();
+		}
 	}
 
 	/** Remove jobs which need to be removed.  This needs to be done on the

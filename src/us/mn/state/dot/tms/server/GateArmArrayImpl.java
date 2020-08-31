@@ -801,7 +801,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Perform a periodic poll */
 	@Override
-	public void periodicPoll() {
+	public void periodicPoll(boolean is_long) {
 		// handled by individual gate arms
 	}
 }

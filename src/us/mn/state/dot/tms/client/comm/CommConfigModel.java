@@ -83,7 +83,7 @@ public class CommConfigModel extends ProxyTableModel<CommConfig> {
 	@Override
 	protected ArrayList<ProxyColumn<CommConfig>> createColumns() {
 		ArrayList<ProxyColumn<CommConfig>> cols =
-			new ArrayList<ProxyColumn<CommConfig>>(8);
+			new ArrayList<ProxyColumn<CommConfig>>(9);
 		cols.add(new ProxyColumn<CommConfig>("comm.config", 60) {
 			public Object getValueAt(CommConfig cc) {
 				return cc.getName();
@@ -166,6 +166,19 @@ public class CommConfigModel extends ProxyTableModel<CommConfig> {
 			}
 			public boolean isEditable(CommConfig cc) {
 				return canWrite(cc, "pollPeriodSec");
+			}
+		});
+		cols.add(new PeriodColumn("comm.config.long_poll_period_sec",
+			CommConfig.VALID_PERIODS, 92)
+		{
+			protected int getPeriodSec(CommConfig cc) {
+				return cc.getLongPollPeriodSec();
+			}
+			protected void setPeriodSec(CommConfig cc, int s) {
+				cc.setLongPollPeriodSec(s);
+			}
+			public boolean isEditable(CommConfig cc) {
+				return canWrite(cc, "longPollPeriodSec");
 			}
 		});
 		cols.add(new PeriodColumn("comm.config.idle_disconnect_sec",

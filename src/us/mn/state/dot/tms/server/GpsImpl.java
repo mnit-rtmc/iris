@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2016  SRF Consulting Group
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -290,8 +290,8 @@ public class GpsImpl extends DeviceImpl implements Gps {
 
 	/** Perform a periodic poll */
 	@Override
-	public void periodicPoll() {
-		if (isLongPeriodModem())
+	public void periodicPoll(boolean is_long) {
+		if (is_long)
 			sendDeviceRequest(DeviceRequest.QUERY_GPS_LOCATION);
 	}
 

@@ -13,14 +13,20 @@ CREATE TABLE iris.comm_config (
 	modem BOOLEAN NOT NULL,
 	timeout_ms INTEGER NOT NULL,
 	poll_period_sec INTEGER NOT NULL,
+	long_poll_period_sec INTEGER NOT NULL,
 	idle_disconnect_sec INTEGER NOT NULL,
 	no_response_disconnect_sec INTEGER NOT NULL
 );
 
+ALTER TABLE iris.comm_config
+	ADD CONSTRAINT poll_period_ck
+	CHECK (poll_period_sec >= 5
+	       AND long_poll_period_sec >= poll_period_sec);
+
 CREATE VIEW comm_config_view AS
 	SELECT cc.name, cc.description, cp.description AS protocol, modem,
-	       timeout_ms, poll_period_sec, idle_disconnect_sec,
-	       no_response_disconnect_sec
+	       timeout_ms, poll_period_sec, long_poll_period_sec,
+	       idle_disconnect_sec, no_response_disconnect_sec
 	FROM iris.comm_config cc
 	JOIN iris.comm_protocol cp ON cc.protocol = cp.id;
 GRANT SELECT ON comm_config_view TO PUBLIC;

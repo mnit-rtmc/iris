@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -439,7 +439,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Perform a periodic poll */
 	@Override
-	public void periodicPoll() {
+	public void periodicPoll(boolean is_long) {
 		sendDeviceRequest(DeviceRequest.QUERY_MESSAGE);
 	}
 

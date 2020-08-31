@@ -503,9 +503,9 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Perform a periodic poll */
 	@Override
-	public void periodicPoll() {
+	public void periodicPoll(boolean is_long) {
 		ControllerImpl c = controller;
-		if (c != null && c.getVideoMonitor() == this)
+		if (c != null && c.getFirstVideoMonitor() == this)
 			sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 	}
 

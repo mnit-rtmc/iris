@@ -37,14 +37,24 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CommConfigImpl.class);
 		store.query("SELECT name, description, protocol, modem, " +
-			"timeout_ms, poll_period_sec, idle_disconnect_sec, " +
-			"no_response_disconnect_sec FROM iris." + SONAR_TYPE +
-			";", new ResultFactory()
+			"timeout_ms, poll_period_sec, long_poll_period_sec, " +
+			"idle_disconnect_sec, no_response_disconnect_sec " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new CommConfigImpl(row));
 			}
 		});
+	}
+
+	/** Check for valid polling period */
+	static private void checkPeriod(int s) throws TMSException {
+		Interval p = new Interval(s);
+		for (Interval per: VALID_PERIODS) {
+			if (per.equals(p))
+				return;
+		}
+		throw new ChangeVetoException("Invalid period: " + s);
 	}
 
 	/** Get a mapping of the columns */
@@ -57,6 +67,7 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 		map.put("modem", modem);
 		map.put("timeout_ms", timeout_ms);
 		map.put("poll_period_sec", poll_period_sec);
+		map.put("long_poll_period_sec", long_poll_period_sec);
 		map.put("idle_disconnect_sec", idle_disconnect_sec);
 		map.put("no_response_disconnect_sec",
 			no_response_disconnect_sec);
@@ -88,14 +99,15 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 		     row.getBoolean(4), // modem
 		     row.getInt(5),     // timeout_ms
 		     row.getInt(6),     // poll_period_sec
-		     row.getInt(7),     // idle_disconnect_sec
-		     row.getInt(8)      // no_response_disconnect_sec
+		     row.getInt(7),     // long_poll_period_sec
+		     row.getInt(8),     // idle_disconnect_sec
+		     row.getInt(9)      // no_response_disconnect_sec
 		);
 	}
 
 	/** Create a comm config */
 	private CommConfigImpl(String n, String d, short p, boolean m, int t,
-		int pp, int idsc, int nrdsc)
+		int pp, int lpp, int idsc, int nrdsc)
 	{
 		super(n);
 		description = d;
@@ -104,6 +116,7 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 		modem = m;
 		timeout_ms = t;
 		poll_period_sec = pp;
+		long_poll_period_sec = lpp;
 		idle_disconnect_sec = idsc;
 		no_response_disconnect_sec = nrdsc;
 	}
@@ -234,16 +247,6 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 		CommLinkImpl.recreatePollJobs(this);
 	}
 
-	/** Check for valid polling period */
-	private void checkPeriod(int s) throws TMSException {
-		Interval p = new Interval(s);
-		for (Interval per: VALID_PERIODS) {
-			if (per.equals(p))
-				return;
-		}
-		throw new ChangeVetoException("Invalid period: " + s);
-	}
-
 	/** Set the polling period (seconds) */
 	public void doSetPollPeriodSec(int s) throws TMSException {
 		if (s != poll_period_sec) {
@@ -257,6 +260,32 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 	@Override
 	public int getPollPeriodSec() {
 		return poll_period_sec;
+	}
+
+	/** Long polling period (seconds) */
+	private int long_poll_period_sec = 30;
+
+	/** Set long poll period (seconds) */
+	@Override
+	public void setLongPollPeriodSec(int s) {
+		testGateArmDisable(name, "set long_poll_period_sec");
+		long_poll_period_sec = s;
+		CommLinkImpl.recreatePollJobs(this);
+	}
+
+	/** Set the long polling period (seconds) */
+	public void doSetLongPollPeriodSec(int s) throws TMSException {
+		if (s != long_poll_period_sec) {
+			checkPeriod(s);
+			store.update(this, "long_poll_period_sec", s);
+			setLongPollPeriodSec(s);
+		}
+	}
+
+	/** Get long poll period (seconds) */
+	@Override
+	public int getLongPollPeriodSec() {
+		return long_poll_period_sec;
 	}
 
 	/** Idle disconnect (seconds) */

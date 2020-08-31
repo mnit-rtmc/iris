@@ -150,7 +150,7 @@ abstract public class ControllerIoImpl extends BaseObjectImpl
 	}
 
 	/** Perform a periodic poll */
-	public void periodicPoll() {
+	public void periodicPoll(boolean is_long) {
 		// subclasses may override
 	}
 

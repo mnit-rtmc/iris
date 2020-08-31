@@ -205,7 +205,8 @@ public class AlarmImpl extends ControllerIoImpl implements Alarm {
 
 	/** Perform a periodic poll */
 	@Override
-	public void periodicPoll() {
-		sendDeviceRequest(DeviceRequest.QUERY_STATUS);
+	public void periodicPoll(boolean is_long) {
+		if (is_long)
+			sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 	}
 }

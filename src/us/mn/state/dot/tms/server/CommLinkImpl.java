@@ -80,7 +80,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Recreate poll jobs for all links with a comm config */
 	static void recreatePollJobs(CommConfig cc) {
-		int s = cc.getPollPeriodSec();
+		int p = cc.getPollPeriodSec();
+		int lp = cc.getLongPollPeriodSec();
 		Iterator<CommLink> it = CommLinkHelper.iterator();
 		while (it.hasNext()) {
 			CommLink cl = it.next();
@@ -88,7 +89,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			    cl instanceof CommLinkImpl)
 			{
 				CommLinkImpl link = (CommLinkImpl) cl;
-				link.createPollJob(s);
+				link.createPollJobs(p, lp);
 			}
 		}
 	}
@@ -148,41 +149,52 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Initialize the transient fields */
 	@Override
 	protected void initTransients() {
-		createPollJob(comm_config.getPollPeriodSec());
+		createPollJobs(
+			comm_config.getPollPeriodSec(),
+			comm_config.getLongPollPeriodSec()
+		);
 	}
 
 	/** Polling job */
 	private transient PollJob poll_job;
 
-	/** Destroy existing poll job */
-	private void destroyPollJob() {
-		PollJob pj = poll_job;
-		if (pj != null)
-			POLLER.removeJob(pj);
+	/** Long polling job */
+	private transient PollJob long_poll_job;
+
+	/** Destroy existing poll jobs */
+	private void destroyPollJobs() {
+		POLLER.removeJob(poll_job);
+		POLLER.removeJob(long_poll_job);
 	}
 
 	/** Create a new polling job */
-	private synchronized void createPollJob(int s) {
-		destroyPollJob();
-		poll_job = new PollJob(s);
+	private synchronized void createPollJobs(int p, int lp) {
+		destroyPollJobs();
+		poll_job = new PollJob(p, OFFSET_SECS, false);
 		POLLER.addJob(poll_job);
+		long_poll_job = new PollJob(lp, OFFSET_SECS + 2, true);
+		POLLER.addJob(long_poll_job);
 	}
 
 	/** Job for polling a comm link */
 	private class PollJob extends Job {
-		private PollJob(int s) {
-			super(Calendar.SECOND, s, Calendar.SECOND, OFFSET_SECS);
+		private final int period;
+		private final boolean is_long;
+		private PollJob(int p, int o, boolean lng) {
+			super(Calendar.SECOND, p, Calendar.SECOND, o);
+			period = p;
+			is_long = lng;
 		}
 		@Override public void perform() {
 			if (poll_enabled)
-				pollControllers();
+				pollControllers(period, is_long);
 		}
 	}
 
 	/** Destroy an object */
 	@Override
 	public void doDestroy() throws TMSException {
-		destroyPollJob();
+		destroyPollJobs();
 		destroyPoller();
 		super.doDestroy();
 	}
@@ -342,10 +354,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Poll all controllers */
-	private synchronized void pollControllers() {
-		int pp = comm_config.getPollPeriodSec();
+	private synchronized void pollControllers(int period, boolean is_long) {
 		for (ControllerImpl c: controllers.values())
-			c.pollDevices(pp);
+			c.pollDevices(period, is_long);
 	}
 
 	/** Communication link status */

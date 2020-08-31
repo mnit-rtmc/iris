@@ -47,6 +47,9 @@ public class CommConfigPanel extends ProxyPanel<CommConfig> {
 	/** Poll period label */
 	private final JLabel period_lbl = createValueLabel();
 
+	/** Long poll period label */
+	private final JLabel long_period_lbl = createValueLabel();
+
 	/** Idle disconnect label */
 	private final JLabel idle_disconnect_lbl = createValueLabel();
 
@@ -80,6 +83,8 @@ public class CommConfigPanel extends ProxyPanel<CommConfig> {
 		add(timeout_lbl, Stretch.LAST);
 		add("comm.config.poll_period_sec");
 		add(period_lbl, Stretch.LAST);
+		add("comm.config.long_poll_period_sec");
+		add(long_period_lbl, Stretch.LAST);
 		add("comm.config.idle_disconnect_sec");
 		add(idle_disconnect_lbl, Stretch.LAST);
 		add("comm.config.no_response_disconnect_sec");
@@ -107,6 +112,10 @@ public class CommConfigPanel extends ProxyPanel<CommConfig> {
 			Interval p = new Interval(cc.getPollPeriodSec());
 			period_lbl.setText("" + p);
 		}
+		if (a == null || a.equals("longPollPeriodSec")) {
+			Interval p = new Interval(cc.getLongPollPeriodSec());
+			long_period_lbl.setText("" + p);
+		}
 		if (a == null || a.equals("idleDisconnectSec")) {
 			Interval p = new Interval(cc.getIdleDisconnectSec());
 			idle_disconnect_lbl.setText("" + p);
@@ -126,6 +135,7 @@ public class CommConfigPanel extends ProxyPanel<CommConfig> {
 		modem_lbl.setText("");
 		timeout_lbl.setText("");
 		period_lbl.setText("");
+		long_period_lbl.setText("");
 		idle_disconnect_lbl.setText("");
 		no_response_disconnect_lbl.setText("");
 	}
