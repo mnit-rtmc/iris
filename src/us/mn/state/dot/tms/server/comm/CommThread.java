@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2019  Minnesota Department of Transportation
- * Copyright (C) 2017       SRF Consulting Group
+ * Copyright (C) 2017-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * CommThread represents a communication channel with priority-queued polling.
  *
  * @author Douglas Lau
- * @author John L. Stanley
+ * @author John L. Stanley - SRF Consulting
  */
 public class CommThread<T extends ControllerProperty> {
 
@@ -249,7 +249,6 @@ public class CommThread<T extends ControllerProperty> {
 	private void doPoll(Messenger m, final OpController<T> o)
 		throws IOException
 	{
-		final String oname = o.toString();
 		try {
 			o.poll(createCommMessage(m, o));
 		}
@@ -288,6 +287,13 @@ public class CommThread<T extends ControllerProperty> {
 		}
 		catch (SocketException e) {
 			String msg = getMessage(e);
+			if (m instanceof BasicMessenger) {
+				BasicMessenger bm = (BasicMessenger)m;
+				if (bm.hitNoResponseDisconnect()) {
+					o.handleCommError(EventType.POLL_TIMEOUT_ERROR, msg);
+					throw new IOException();
+				}
+			}
 			o.handleCommError(EventType.COMM_ERROR, msg);
 			throw new ReconnectException();
 		}

@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2020  Minnesota Department of Transportation
  * Copyright (C) 2012-2018  Iteris Inc.
  * Copyright (C) 2014       AHMCT, University of California
- * Copyright (C) 2015-2017  SRF Consulting Group
+ * Copyright (C) 2015-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,6 +55,7 @@ public enum SystemAttrEnum {
 	COMM_IDLE_DISCONNECT_DMS_SEC(0, 0, 28800),      // 8-hours max
 	COMM_IDLE_DISCONNECT_GPS_SEC(5, 0, 28800),      // 8-hours max
 	COMM_IDLE_DISCONNECT_MODEM_SEC(20, 0, 28800),   // 8-hours max
+	COMM_NO_RESP_DISCONNECT_SEC(0, 0, 28800),       // 8-hours max
 	DATABASE_VERSION(String.class),
 	DETECTOR_AUTO_FAIL_ENABLE(true),
 	DETECTOR_EVENT_PURGE_DAYS(90, 0),
