@@ -39,7 +39,7 @@ INSERT INTO iris.comm_config (name, description, protocol, modem, timeout_ms,
 	no_response_disconnect_sec)
 SELECT 'cfg_' || ROW_NUMBER() OVER (ORDER BY protocol, modem, poll_period),
        'dsc_' || ROW_NUMBER() OVER (ORDER BY protocol, modem, poll_period),
-       protocol, modem, timeout, poll_period, 300, 0, 0
+       protocol, modem, timeout, poll_period, GREATEST(poll_period, 300), 0, 0
 FROM iris.comm_link
 GROUP BY (protocol, modem, timeout, poll_period);
 
