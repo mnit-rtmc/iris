@@ -201,7 +201,6 @@ public class MainServer {
 	/** Schedule jobs on TIMER thread */
 	static private void scheduleTimerJobs() {
 		TIMER.addJob(new MeteringJob(FLUSH));
-		TIMER.addJob(new SampleQuery5MinJob());
 		TIMER.addJob(new CameraWiperJob());
 		TIMER.addJob(new SendSettingsJob());
 		TIMER.addJob(new SendSettingsJob(500));
