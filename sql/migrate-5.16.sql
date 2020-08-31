@@ -35,10 +35,11 @@ DROP VIEW comm_link_view;
 
 -- Populate comm_config table from existing comm_link records
 INSERT INTO iris.comm_config (name, description, protocol, modem, timeout_ms,
-	poll_period_sec, idle_disconnect_sec, no_response_disconnect_sec)
+	poll_period_sec, long_poll_period_sec, idle_disconnect_sec,
+	no_response_disconnect_sec)
 SELECT 'cfg_' || ROW_NUMBER() OVER (ORDER BY protocol, modem, poll_period),
        'dsc_' || ROW_NUMBER() OVER (ORDER BY protocol, modem, poll_period),
-       protocol, modem, timeout, poll_period, 0, 0
+       protocol, modem, timeout, poll_period, 300, 0, 0
 FROM iris.comm_link
 GROUP BY (protocol, modem, timeout, poll_period);
 
