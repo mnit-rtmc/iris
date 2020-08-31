@@ -222,11 +222,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return description;
 	}
 
-	/** Check if link is any type of modem (dial-up or cell) */
-	public boolean isModemAny() {
-		return comm_config.getModem() || isDialUpModem();
-	}
-
 	/** Check if link is configured for a dial-up modem */
 	private boolean isDialUpModem() {
 		return uri.startsWith("modem:");

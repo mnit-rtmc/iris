@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -200,8 +200,6 @@ public class MainServer {
 
 	/** Schedule jobs on TIMER thread */
 	static private void scheduleTimerJobs() {
-		TIMER.addJob(new DmsQueryStatusJob());
-		TIMER.addJob(new GpsQueryJob());
 		TIMER.addJob(new MeteringJob(FLUSH));
 		TIMER.addJob(new SampleQuery5MinJob());
 		TIMER.addJob(new CameraWiperJob());
