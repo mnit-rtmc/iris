@@ -63,10 +63,10 @@ Successfully initialized the IRIS server
 ## Setup GStreamer Autoinstaller
 
 Client workstations require the native GStreamer video framework to play
-advanced video codecs. While it may be installed manually, doing so requires
-administrator privileges and setting some environment variables. Alternatively
+advanced video codecs.  While it may be installed manually, doing so requires
+administrator privileges and setting some environment variables.  Alternatively
 Windows clients can automatically download the required native code from the
-IRIS server and set up the environment. (Linux clients are still required to
+IRIS server and set up the environment.  (Linux clients are still required to
 install GStreamer via their distribution's pacakage manager.)
 
 To set up the server-side of this process, follow these instructions:
@@ -74,23 +74,22 @@ To set up the server-side of this process, follow these instructions:
 1. From a Windows computer, download the MinGW 64-bit runtime installer for
    the latest version of GStreamer [here](https://gstreamer.freedesktop.org/download/).
 2. Run the installer and perform a "complete" installation, installing all
-   components. You may leave the default installation directory unchanged.
+   components.  You may leave the default installation directory unchanged.
 3. Once the installer is complete, go to the installation directory 
-   (C:\gstreamer\1.0\x86_64 by default). Take all the contents of that
+   (`C:\gstreamer\1.0\x86_64` by default).  Take all the contents of that
    directory (which should include bin, etc, include, lib, libexec, and share
    subdirectories) and zip them into a file named:
    `gstreamer-1.0-mingw-x86_64-<version>.zip` where `<version>` is a version
-   number like "1.16.2".
-4. Repeat this process for the 32-bit installer. This time you will zip the
-   contents of C:\gstreamer\1.0\x86 (unless changed from the default) into a
+   number like `1.16.2`.
+4. Repeat this process for the 32-bit installer.  This time you will zip the
+   contents of `C:\gstreamer\1.0\x86` (unless changed from the default) into a
    file named `gstreamer-1.0-mingw-x86-<version>.zip`.
 5. Copy both of these files to the IRIS server and put them in
-   /var/www/html/iris-client/lib/, alongside the JARs sent to the client. Make
-   sure the file permissions are the same as the other files in this directory
-   (owned by "apache" or a similar user with read-only (444) permissions).
+   `/var/www/html/iris-gstreamer/`.  Make sure the file owner and permissions
+   are suitable (`apache` with read-only (444) permissions).
 6. Set `gstreamer_version` in `project.properties` to the version of
-   GStreamer you installed (e.g. 1.16.2). This allows triggering updates from
-   the server.
+   GStreamer you installed (e.g. `1.16.2`).  After changing this value, you
+   must rebuild and reinstall the IRIS RPM.
    
 Windows clients will now automatically download and unzip these files into
 their `<user_home>/iris/` directory and set the necessary environment variables

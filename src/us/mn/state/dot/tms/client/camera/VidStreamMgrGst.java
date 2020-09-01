@@ -56,7 +56,7 @@ import org.freedesktop.gstreamer.elements.AppSink;
 public class VidStreamMgrGst extends VidStreamMgr {
 
 	/** Location on web server where GStreamer zip files are stored */
-	static private final String GST_SERVER_DIR = "/iris-client/lib/";
+	static private final String GST_SERVER_DIR = "/iris-gstreamer/";
 
 	/** Base file name for gstreamer zip */
 	static private final String GST_BASE = "gstreamer-1.0";
@@ -152,7 +152,7 @@ public class VidStreamMgrGst extends VidStreamMgr {
 			if (path != null) {
 				if (path.isDirectory())
 					checkGstInstallPrivate(path);
-				else if (isRunningJavaWebStart())
+				else
 					startGstDownload(path);
 			}
 		}
@@ -190,30 +190,13 @@ public class VidStreamMgrGst extends VidStreamMgr {
 		return String.join("-", GST_BASE, os, arch, version);
 	}
 
-	/** Test if we're running via Java WebStart */
-	static private boolean isRunningJavaWebStart() {
-		try {
-			Class.forName("javax.jnlp.ServiceManager");
-			System.out.println("Running in WebStart");
-			return true;
-		} catch (ClassNotFoundException ex) {
-			System.out.println("NOT Running in WebStart");
-			return false;
-		}
-	}
-
 	/** Start downloading GStreamer zip file */
 	static private void startGstDownload(File gstPath) {
-		String gstZipFile = gstPath.getName() + ".zip";
-
-		// get the server host from the client properties and
-		// build the URL we will take the host:port from SONAR
-		// and strip off the :port
-		String hostport = Session.getCurrent().getSonarState()
-			.getName();
-		String host = hostport.split(":")[0];
+		String host = getJnlpHost();
+		if (host == null)
+			return;
 		String urlStr = "http://" + host + GST_SERVER_DIR +
-			gstZipFile;
+			gstPath.getName() + ".zip";
 		try {
 			URL url = new URL(urlStr);
 			ZipDownloader zd = new ZipDownloader(
@@ -236,6 +219,38 @@ public class VidStreamMgrGst extends VidStreamMgr {
 			System.out.println("Could not download GStreamer " +
 				"from URL: '" + urlStr + "'");
 		}
+	}
+
+	/** Get Java Network Launcher Protocol (WebStart) host */
+	static private String getJnlpHost() {
+		try {
+			// Use reflection to allow client to run
+			// without using Java WebStart
+			Class<?> service_manager_class = Class.forName(
+				"javax.jnlp.ServiceManager");
+			Class<?> basic_service_class = Class.forName(
+				"javax.jnlp.BasicService");
+			Method lookup = service_manager_class.getDeclaredMethod(
+				"lookup", String.class);
+			Object basic_service = lookup.invoke(null,
+				"javax.jnlp.BasicService");
+			Method get_code_base = basic_service_class
+				.getDeclaredMethod("getCodeBase");
+			Object code_base = get_code_base.invoke(basic_service);
+			if (code_base instanceof URL) {
+				URL url = (URL) code_base;
+				return url.getHost();
+			}
+			System.out.println("Failed to lookup WebStart host");
+		}
+		catch (ClassNotFoundException e) {
+			System.out.println("NOT Running in WebStart");
+		}
+		catch (Exception e) {
+			System.out.println("getServerAddress: " +
+				e.getMessage());
+		}
+		return null;
 	}
 
 	/** Check if private GStreamer library is installed (Windows) */
