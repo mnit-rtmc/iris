@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * streams to monitor then, manages the no-response
  * timer, and adjusts the closing of the Messenger
  * to work with the no-response timer.
- * 
+ *
  * @author John L. Stanley - SRF Consulting
  */
 abstract class BasicMessenger extends Messenger {
@@ -87,7 +87,7 @@ abstract class BasicMessenger extends Messenger {
 
 	protected abstract void close2()
 			throws IOException;
-	
+
 	//----- No-Response-Disconnect code --------------------
 
 	/** Scheduler for no-response jobs */
@@ -139,7 +139,7 @@ abstract class BasicMessenger extends Messenger {
 			super(delaysec * 1000); // convert to milliseconds
 		}
 
-		@Override 
+		@Override
 		public void perform() {
 			if (noRespDisconnectJob != this)
 				return; // only process latest disconnect-job

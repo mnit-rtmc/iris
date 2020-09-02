@@ -18,20 +18,20 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /** InputDetector
- * 
+ *
  * InputStream wrapper used by BasicMessenger
  * to detect when data is received.
- * 
+ *
  * @author John L. Stanley - SRF Consulting
  */
 public class InputDetector extends InputStream {
 
 	/** Messenger that "owns" the input stream */
 	private final BasicMessenger m;
-	
+
 	/** InputStream wrapped by this InputDetector */
 	private final InputStream is;
-	
+
 	/** Create InputDetector */
 	public InputDetector(BasicMessenger m, InputStream is) {
 		this.m  = m;
@@ -47,7 +47,7 @@ public class InputDetector extends InputStream {
 			m.inputDetected();
 		return ret;
 	}
-	
+
 	@Override
 	public int read(byte[] b) throws IOException {
 		int ret = is.read(b);

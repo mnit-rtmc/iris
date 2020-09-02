@@ -18,17 +18,17 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /** OutputDetector
- * 
+ *
  * OutputStream wrapper used by BasicMessenger
  * to detect when data is sent.
- * 
+ *
  * @author John L. Stanley - SRF Consulting
  */
 public class OutputDetector extends OutputStream {
 
 	/** Messenger that "owns" the output stream */
 	private final BasicMessenger m;
-	
+
 	/** OutputStream wrapped by this OutputDetector */
 	private final OutputStream os;
 
