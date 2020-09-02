@@ -43,10 +43,15 @@ After a poll, if a response is not received before the **timeout** expires, the
 communicaton will fail.  For each poll, 2 retries will happen before the
 operation is aborted.
 
-## Idle Disconnect Seconds
+## Idle Disconnect
 
 When this value is greater than zero, the comm link will be disconnected after
 a period of inactivity.  This can reduce charges for modem links.
+
+## No Response Disconnect
+
+When this value is greater than zero, the comm link will be disconnected after
+no response is received from a poll for the specified time.
 
 ## Protocols
 
