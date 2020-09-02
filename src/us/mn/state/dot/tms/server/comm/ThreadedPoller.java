@@ -217,4 +217,9 @@ public class ThreadedPoller<T extends ControllerProperty>
 		if (logger.isOpen())
 			log("TESTING not implemented: " + c);
 	}
+	
+	/** See if the op queue is empty */
+	public boolean queueIsEmpty() {
+		return queue.isEmpty();
+	}
 }
