@@ -61,6 +61,9 @@ public class ThreadedPoller<T extends ControllerProperty>
 	/** Comm idle disconnect seconds */
 	private final int idle_disconnect_sec;
 
+	/** No response disconnect seconds */
+	private final int no_resp_disconnect_sec;
+
 	/** Create a threaded device poller */
 	protected ThreadedPoller(CommLink link, URI s, DebugLog l) {
 		CommConfig cc = link.getCommConfig();
@@ -70,6 +73,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 		uri = link.getUri();
 		timeout_ms = cc.getTimeoutMs();
 		idle_disconnect_sec = cc.getIdleDisconnectSec();
+		no_resp_disconnect_sec = cc.getNoResponseDisconnectSec();
 		log("CREATED");
 	}
 
@@ -159,15 +163,18 @@ public class ThreadedPoller<T extends ControllerProperty>
 
 	/** Create the comm thread */
 	private synchronized void createCommThread() {
-		c_thread = createCommThread(uri, timeout_ms);
+		c_thread = createCommThread(uri, timeout_ms,
+			no_resp_disconnect_sec);
 		c_thread.start();
 		log("THREAD START");
 	}
 
 	/** Create a new comm thread */
-	protected CommThread<T> createCommThread(String uri, int timeout_ms) {
+	protected CommThread<T> createCommThread(String uri, int timeout_ms,
+		int nrd)
+	{
 		return new CommThread<T>(this, queue, scheme, uri, timeout_ms,
-			logger);
+			nrd, logger);
 	}
 
 	/** Disconnect and destroy comm thread */

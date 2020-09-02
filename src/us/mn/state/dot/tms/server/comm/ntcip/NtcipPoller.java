@@ -74,8 +74,10 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 
 	/** Create a comm thread */
 	@Override
-	protected NtcipThread createCommThread(String uri, int timeout) {
-		return new NtcipThread(this, queue, scheme, uri, timeout,
+	protected NtcipThread createCommThread(String uri, int timeout,
+		int nrd)
+	{
+		return new NtcipThread(this, queue, scheme, uri, timeout, nrd,
 			NTCIP_LOG, protocol);
 	}
 

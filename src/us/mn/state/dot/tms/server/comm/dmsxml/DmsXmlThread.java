@@ -34,9 +34,9 @@ public class DmsXmlThread extends CommThread {
 	/** Create a new dmsxml thread */
 	@SuppressWarnings("unchecked")
 	public DmsXmlThread(DmsXmlPoller p, OpQueue q, URI s, String u,
-		int rt, DebugLog log)
+		int rt, int nrd, DebugLog log)
 	{
-		super(p, q, s, u, rt, log);
+		super(p, q, s, u, rt, nrd, log);
 	}
 
 	/** Create a new message for the specified operation.

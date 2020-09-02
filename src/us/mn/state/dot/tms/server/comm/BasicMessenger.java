@@ -20,7 +20,6 @@ import java.io.OutputStream;
 
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
@@ -35,8 +34,12 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  */
 abstract class BasicMessenger extends Messenger {
 
-	protected BasicMessenger() {
-		// Nothing to do here...
+	/** No-response disconnect (sec) */
+	private final int no_resp_disconnect_sec;
+
+	/** Create a new basic messenger */
+	protected BasicMessenger(int nrd) {
+		no_resp_disconnect_sec = nrd;
 	}
 
 	public void close()
@@ -96,20 +99,14 @@ abstract class BasicMessenger extends Messenger {
 	/** Current no-response job for this Messenger */
 	private NoRespDisconnectJob noRespDisconnectJob = null;
 
-	/** Get max seconds a no-response connection should be left open
-	 * (0 indicates indefinite). */
-	private int getNoResponseDisconnectSec() {
-		return SystemAttrEnum.COMM_NO_RESP_DISCONNECT_SEC.getInt();
-	}
-
 	/** Start the no-response timer */
 	public void startNoResponseTimer() {
 		if (noRespDisconnectJob != null)
 			return; // it's already running
-		int delaysec = getNoResponseDisconnectSec();
-		if (delaysec > 0) {
+		if (no_resp_disconnect_sec > 0) {
 			synchronized (NORESPONSE) {
-				noRespDisconnectJob = new NoRespDisconnectJob(delaysec);
+				noRespDisconnectJob = new NoRespDisconnectJob(
+					no_resp_disconnect_sec);
 				NORESPONSE.addJob(noRespDisconnectJob);
 			}
 		}

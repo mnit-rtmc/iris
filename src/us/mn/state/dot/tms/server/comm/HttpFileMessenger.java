@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2020  Minnesota Department of Transportation
  * Copyright (C) 2020       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,11 +39,11 @@ public class HttpFileMessenger extends BasicMessenger {
 	/** Create an HTTP file messenger.
 	 * @param u URI of remote host.
 	 * @param rt Receive timeout (ms). */
-	static protected HttpFileMessenger create(URI u, int rt)
+	static protected HttpFileMessenger create(URI u, int rt, int nrd)
 		throws IOException
 	{
 		assert "http".equals(u.getScheme());
-		return new HttpFileMessenger(u.toURL(), rt);
+		return new HttpFileMessenger(u.toURL(), rt, nrd);
 	}
 
 	/** URL to read */
@@ -63,7 +63,8 @@ public class HttpFileMessenger extends BasicMessenger {
 	/** Create a new HTTP file messenger.
 	 * @param url The URL of the file to read.
 	 * @param rt Read timeout (ms). */
-	private HttpFileMessenger(URL url, int rt) {
+	private HttpFileMessenger(URL url, int rt, int nrd) {
+		super(nrd);
 		this.url = url;
 		timeout = rt;
 	}

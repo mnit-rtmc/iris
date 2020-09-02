@@ -40,8 +40,8 @@ public class E6Poller extends ThreadedPoller<E6Property>
 
 	/** Create a comm thread */
 	@Override
-	public E6Thread createCommThread(String uri, int timeout) {
-		return new E6Thread(this, queue, scheme, uri, timeout);
+	public E6Thread createCommThread(String uri, int timeout, int nrd) {
+		return new E6Thread(this, queue, scheme, uri, timeout, nrd);
 	}
 
 	/** Tag reader */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,17 +32,17 @@ public class InfinovaThread extends CommThread<PelcoDProperty> {
 
 	/** Create a new Infinova thread */
 	public InfinovaThread(InfinovaPoller p, OpQueue<PelcoDProperty> q,
-		URI s, String u, int rt, DebugLog log)
+		URI s, String u, int rt, int nrd, DebugLog log)
 	{
-		super(p, q, s, u, rt, log);
+		super(p, q, s, u, rt, nrd, log);
 	}
 
 	/** Create a messenger */
 	@Override
-	protected Messenger createMessenger(URI s, String u, int rt)
+	protected Messenger createMessenger(URI s, String u, int rt, int nrd)
 		throws MessengerException, IOException
 	{
-		Messenger m = Messenger.create(s, u, rt);
+		Messenger m = Messenger.create(s, u, rt, nrd);
 		return new InfinovaMessenger(m);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2017  Minnesota Department of Transportation
+ * Copyright (C) 2015-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,9 +71,9 @@ public class E6Thread extends CommThread<E6Property> {
 
 	/** Create a new E6 thread */
 	public E6Thread(E6Poller dp, OpQueue<E6Property> q, URI s, String u,
-		int rt)
+		int rt, int nrd)
 	{
-		super(dp, q, s, u, rt, E6_LOG);
+		super(dp, q, s, u, rt, nrd, E6_LOG);
 		poller = dp;
 		timeout = rt;
  		rx_thread = new Thread(RECV, "Recv: " + dp.name) {
@@ -106,7 +106,7 @@ public class E6Thread extends CommThread<E6Property> {
 	 * @return The new messenger.
 	 * @throws MessengerException if the messenger could not be created. */
 	@Override
-	protected Messenger createMessenger(URI s, String u, int rt)
+	protected Messenger createMessenger(URI s, String u, int rt, int nrd)
 		throws MessengerException
 	{
 		PacketMessenger m = PacketMessenger.create(u, rt);

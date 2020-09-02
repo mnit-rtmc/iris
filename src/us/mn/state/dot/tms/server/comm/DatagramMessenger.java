@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  * Copyright (C) 2020       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,11 +38,12 @@ public class DatagramMessenger extends BasicMessenger {
 
 	/** Create a UDP datagram messenger.
 	 * @param u URI of remote host.
-	 * @param rt Receive timeout (ms). */
-	static protected DatagramMessenger create(URI u, int rt)
+	 * @param rt Receive timeout (ms).
+	 * @param nrd No-response disconnect (sec). */
+	static protected DatagramMessenger create(URI u, int rt, int nrd)
 		throws MessengerException, IOException
 	{
-		return new DatagramMessenger(createSocketAddress(u), rt);
+		return new DatagramMessenger(createSocketAddress(u), rt, nrd);
 	}
 
 	/** Local port to bind */
@@ -66,10 +67,12 @@ public class DatagramMessenger extends BasicMessenger {
 	/** Create a new datagram messenger.
 	 * @param p Local port (null for any).
 	 * @param ra Remote socket address.
-	 * @param rt Read timeout (ms). */
-	private DatagramMessenger(Integer p, SocketAddress ra, int rt)
+	 * @param rt Read timeout (ms).
+	 * @param nrd No-response disconnect (sec). */
+	private DatagramMessenger(Integer p, SocketAddress ra, int rt, int nrd)
 		throws IOException
 	{
+		super(nrd);
 		port = p;
 		remote = ra;
 		timeout = rt;
@@ -83,8 +86,10 @@ public class DatagramMessenger extends BasicMessenger {
 	/** Create a new datagram messenger.
 	 * @param ra Remote socket address.
 	 * @param rt Read timeout (ms). */
-	public DatagramMessenger(SocketAddress ra, int rt) throws IOException {
-		this(null, ra, rt);
+	public DatagramMessenger(SocketAddress ra, int rt, int nrd)
+		throws IOException
+	{
+		this(null, ra, rt, nrd);
 	}
 
 	/** Create the socket */

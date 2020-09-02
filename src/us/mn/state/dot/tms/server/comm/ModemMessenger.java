@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2020  Minnesota Department of Transportation
  * Copyright (C) 2020       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -46,12 +46,12 @@ public class ModemMessenger extends Messenger {
 	static private final DebugLog MODEM_LOG = new DebugLog("modem");
 
 	/** Create a modem messenger */
-	static protected ModemMessenger create(URI u, int rt)
+	static protected ModemMessenger create(URI u, int rt, int nrd)
 		throws MessengerException, IOException
 	{
 		ModemImpl modem = acquireModem();
 		if (modem != null)
-			return create(modem, u, rt);
+			return create(modem, u, rt, nrd);
 		else
 			throw new NoModemException();
 	}
@@ -71,14 +71,15 @@ public class ModemMessenger extends Messenger {
 	}
 
 	/** Create a modem messenger */
-	static private ModemMessenger create(ModemImpl modem, URI u, int rt)
-		throws MessengerException, IOException
+	static private ModemMessenger create(ModemImpl modem, URI u, int rt,
+		int nrd) throws MessengerException, IOException
 	{
 		// NOTE: we have acquired the modem, so we must release it
 		//       if the ModemMessenger isn't fully constructed
 		try {
 			URI um = createURI(modem.getUri());
-			return new ModemMessenger(um, rt, modem, u.getHost());
+			return new ModemMessenger(um, rt, nrd, modem,
+				u.getHost());
 		}
 		catch (MessengerException | IOException e) {
 			modem.release();
@@ -119,7 +120,7 @@ public class ModemMessenger extends Messenger {
 	}
 
 	/** Create a new modem messenger */
-	private ModemMessenger(URI um, int rt, ModemImpl mdm,
+	private ModemMessenger(URI um, int rt, int nrd, ModemImpl mdm,
 		String phone) throws MessengerException, IOException
 	{
 		modem = mdm;
@@ -127,7 +128,7 @@ public class ModemMessenger extends Messenger {
 		log("create");
 		try {
 			int ct = mdm.getTimeout();
-			wrapped = StreamMessenger.create(um, rt, ct);
+			wrapped = StreamMessenger.create(um, rt, ct, nrd);
 		}
 		catch (IOException e) {
 			setState(ModemState.open_error);

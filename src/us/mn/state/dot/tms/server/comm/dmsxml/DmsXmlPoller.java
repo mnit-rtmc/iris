@@ -50,8 +50,11 @@ public class DmsXmlPoller extends ThreadedPoller implements DMSPoller {
 
 	/** Create a comm thread */
 	@Override
-	protected DmsXmlThread createCommThread(String uri, int timeout) {
-		return new DmsXmlThread(this, queue, scheme, uri, timeout, LOG);
+	protected DmsXmlThread createCommThread(String uri, int timeout,
+		int nrd)
+	{
+		return new DmsXmlThread(this, queue, scheme, uri, timeout, nrd,
+			LOG);
 	}
 
 	/** Send a new message to the sign.

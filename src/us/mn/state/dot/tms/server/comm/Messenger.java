@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,19 +40,20 @@ abstract public class Messenger implements Closeable {
 	 * @param scheme Default URI scheme.
 	 * @param uri URI of remote host.
 	 * @param rt Receive timeout.
+	 * @param nrd No-response disconnect (sec).
 	 * @throws MessengerException if the messenger could not be created. */
-	static public Messenger create(URI scheme, String uri, int rt)
+	static public Messenger create(URI scheme, String uri, int rt, int nrd)
 		throws MessengerException, IOException
 	{
 		URI u = createURI(scheme, uri);
 		if ("udp".equals(u.getScheme()))
-			return DatagramMessenger.create(u, rt);
+			return DatagramMessenger.create(u, rt, nrd);
 		else if ("tcp".equals(u.getScheme()))
-			return StreamMessenger.create(u, rt, rt);
+			return StreamMessenger.create(u, rt, rt, nrd);
 		else if ("http".equals(u.getScheme()))
-			return HttpFileMessenger.create(u, rt);
+			return HttpFileMessenger.create(u, rt, nrd);
 		else if ("modem".equals(u.getScheme()))
-			return ModemMessenger.create(u, rt);
+			return ModemMessenger.create(u, rt, nrd);
 		else
 			throw INVALID_URI_SCHEME;
 	}

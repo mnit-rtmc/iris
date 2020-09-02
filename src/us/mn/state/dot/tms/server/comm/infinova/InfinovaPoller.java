@@ -45,9 +45,11 @@ public class InfinovaPoller extends TransientPoller<PelcoDProperty>
 
 	/** Create a comm thread */
 	@Override
-	protected InfinovaThread createCommThread(String uri, int timeout) {
+	protected InfinovaThread createCommThread(String uri, int timeout,
+		int nrd)
+	{
 		return new InfinovaThread(this, queue, scheme, uri, timeout,
-			INF_LOG);
+			nrd, INF_LOG);
 	}
 
 	/** Send a PTZ camera move command */

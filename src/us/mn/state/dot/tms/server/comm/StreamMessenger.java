@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2020  Minnesota Department of Transportation
  * Copyright (C) 2020       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -36,11 +36,12 @@ public class StreamMessenger extends BasicMessenger {
 	/** Create a TCP stream messenger.
 	 * @param u URI of remote host.
 	 * @param rt Receive timeout (ms).
-	 * @param ct Connect timeout (ms). */
-	static protected StreamMessenger create(URI u, int rt, int ct)
+	 * @param ct Connect timeout (ms).
+	 * @param nrd No-response disconnect (sec). */
+	static protected StreamMessenger create(URI u, int rt, int ct, int nrd)
 		throws MessengerException, IOException
 	{
-		return new StreamMessenger(createSocketAddress(u), rt, ct);
+		return new StreamMessenger(createSocketAddress(u), rt, ct, nrd);
 	}
 
 	/** Address to connect */
@@ -64,9 +65,10 @@ public class StreamMessenger extends BasicMessenger {
 	/** Create a new stream messenger.
 	 * NOTE: must call setConnected to switch from conn_timeout to
 	 *       recv_timeout. */
-	private StreamMessenger(SocketAddress a, int rt, int ct)
+	private StreamMessenger(SocketAddress a, int rt, int ct, int nrd)
 		throws IOException
 	{
+		super(nrd);
 		address = a;
 		recv_timeout = rt;
 		conn_timeout = ct;

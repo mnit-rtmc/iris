@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,18 +43,18 @@ public class NtcipThread extends CommThread {
 	/** Create a new Ntcip thread */
 	@SuppressWarnings("unchecked")
 	public NtcipThread(NtcipPoller p, OpQueue q, URI s, String u,
-		int rt, DebugLog log, CommProtocol cp)
+		int rt, int nrd, DebugLog log, CommProtocol cp)
 	{
-		super(p, q, s, u, rt, log);
+		super(p, q, s, u, rt, nrd, log);
 		protocol = cp;
 	}
 
 	/** Create a messenger */
 	@Override
-	protected Messenger createMessenger(URI s, String u, int rt)
+	protected Messenger createMessenger(URI s, String u, int rt, int nrd)
 		throws MessengerException, IOException
 	{
-		Messenger m = Messenger.create(s, u, rt);
+		Messenger m = Messenger.create(s, u, rt, nrd);
 		if (protocol == CommProtocol.NTCIP_B)
 			return new HDLCMessenger(m);
 		else
