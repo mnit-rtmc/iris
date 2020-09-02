@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2020       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +22,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.util.Iterator;
@@ -38,6 +38,7 @@ import us.mn.state.dot.tms.server.ModemImpl;
  * (such as StreamMessenger).
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class ModemMessenger extends Messenger {
 
@@ -229,15 +230,17 @@ public class ModemMessenger extends Messenger {
 
 	/** Get the input stream.
 	 * @param path Relative path name.
-	 * @return An input stream for reading from the messenger. */
+	 * @return An input stream for reading from the messenger. 
+	 * @throws IOException */
 	@Override
-	public InputStream getInputStream(String path) {
+	public InputStream getInputStream(String path) throws IOException {
 		return wrapped.getInputStream(path);
 	}
 
-	/** Get the output stream */
+	/** Get the output stream 
+	 * @throws IOException */
 	@Override
-	public OutputStream getOutputStream(ControllerImpl c) {
+	public OutputStream getOutputStream(ControllerImpl c) throws IOException {
 		return wrapped.getOutputStream(c);
 	}
 
@@ -269,7 +272,8 @@ public class ModemMessenger extends Messenger {
 	/** Drain any bytes from the input stream */
 	@Override
 	public void drain() throws IOException {
-		while (getInputStream("").available() > 0)
+		InputStream in = getInputStream("");
+		while (in.available() > 0)
 			readResponse();
 	}
 }
