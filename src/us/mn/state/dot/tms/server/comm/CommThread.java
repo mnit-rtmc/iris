@@ -289,15 +289,18 @@ public class CommThread<T extends ControllerProperty> {
 		catch (SocketTimeoutException e) {
 			String msg = getMessage(e);
 			o.handleCommError(EventType.POLL_TIMEOUT_ERROR, msg);
+			// Not sure if this is needed in addition
+			// to no_response_disconnect feature
 			if ((!o.isSuccess()) && needsReconnect(m))
 				throw new ReconnectException();
 		}
 		catch (SocketException e) {
 			String msg = getMessage(e);
 			if (m instanceof BasicMessenger) {
-				BasicMessenger bm = (BasicMessenger)m;
+				BasicMessenger bm = (BasicMessenger) m;
 				if (bm.hitNoResponseDisconnect()) {
-					o.handleCommError(EventType.POLL_TIMEOUT_ERROR, msg);
+					o.handleCommError(EventType
+						.POLL_TIMEOUT_ERROR, msg);
 					throw new IOException();
 				}
 			}
