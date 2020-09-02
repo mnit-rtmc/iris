@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2020       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +29,9 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * response using a TCP socket connection.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
-public class StreamMessenger extends Messenger {
+public class StreamMessenger extends BasicMessenger {
 
 	/** Create a TCP stream messenger.
 	 * @param u URI of remote host.
@@ -79,13 +81,13 @@ public class StreamMessenger extends Messenger {
 	 * @param path Relative path name.
 	 * @return An input stream for reading from the messenger. */
 	@Override
-	public InputStream getInputStream(String path) {
+	protected InputStream getRawInputStream(String path) {
 		return input;
 	}
 
 	/** Get the output stream */
 	@Override
-	public OutputStream getOutputStream(ControllerImpl c) {
+	protected OutputStream getRawOutputStream(ControllerImpl c) {
 		return output;
 	}
 
@@ -99,7 +101,7 @@ public class StreamMessenger extends Messenger {
 
 	/** Close the stream messenger */
 	@Override
-	public void close() throws IOException {
+	protected void close2() throws IOException {
 		socket.close();
 	}
 

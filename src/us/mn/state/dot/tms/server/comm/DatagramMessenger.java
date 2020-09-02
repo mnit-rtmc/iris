@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2020       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,8 +32,9 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * response using a UDP socket connection.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
-public class DatagramMessenger extends Messenger {
+public class DatagramMessenger extends BasicMessenger {
 
 	/** Create a UDP datagram messenger.
 	 * @param u URI of remote host.
@@ -96,13 +98,13 @@ public class DatagramMessenger extends Messenger {
 	 * @param path Relative path name.
 	 * @return An input stream for reading from the messenger. */
 	@Override
-	public InputStream getInputStream(String path) {
+	protected InputStream getRawInputStream(String path) {
 		return input;
 	}
 
 	/** Get the output stream */
 	@Override
-	public OutputStream getOutputStream(ControllerImpl c) {
+	protected OutputStream getRawOutputStream(ControllerImpl c) {
 		return output;
 	}
 
@@ -116,7 +118,7 @@ public class DatagramMessenger extends Messenger {
 
 	/** Close the datagram messenger */
 	@Override
-	public void close() {
+	protected void close2() {
 		socket.disconnect();
 		socket.close();
 	}
@@ -179,7 +181,7 @@ public class DatagramMessenger extends Messenger {
 			}
 		}
 
-		/** Recvie and buffer a datagram */
+		/** Receive and buffer a datagram */
 		private void receivePacket() throws IOException {
 			packet.setLength(1024);
 			socket.receive(packet);
