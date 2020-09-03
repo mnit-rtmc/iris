@@ -28,6 +28,16 @@ import us.mn.state.dot.tms.units.Interval;
  */
 public class CommConfigPanel extends ProxyPanel<CommConfig> {
 
+	/** Format a period nicely */
+	static private String prettyPeriod(int sec) {
+		Interval p = new Interval(sec);
+		for (Interval per: CommConfig.VALID_PERIODS) {
+			if (p.equals(per))
+				return per.toString();
+		}
+		return p.toString();
+	}
+
 	/** Filler label */
 	private final JLabel filler_lbl = createValueLabel(
 		"____________________");
@@ -108,22 +118,19 @@ public class CommConfigPanel extends ProxyPanel<CommConfig> {
 			modem_lbl.setText(cc.getModem() ? "Yes" : "No");
 		if (a == null || a.equals("timeoutMs"))
 			timeout_lbl.setText("" + cc.getTimeoutMs() + " ms");
-		if (a == null || a.equals("pollPeriodSec")) {
-			Interval p = new Interval(cc.getPollPeriodSec());
-			period_lbl.setText("" + p);
-		}
+		if (a == null || a.equals("pollPeriodSec"))
+			period_lbl.setText(prettyPeriod(cc.getPollPeriodSec()));
 		if (a == null || a.equals("longPollPeriodSec")) {
-			Interval p = new Interval(cc.getLongPollPeriodSec());
-			long_period_lbl.setText("" + p);
+			long_period_lbl.setText(prettyPeriod(
+				cc.getLongPollPeriodSec()));
 		}
 		if (a == null || a.equals("idleDisconnectSec")) {
-			Interval p = new Interval(cc.getIdleDisconnectSec());
-			idle_disconnect_lbl.setText("" + p);
+			idle_disconnect_lbl.setText(prettyPeriod(
+				cc.getIdleDisconnectSec()));
 		}
 		if (a == null || a.equals("noResponseDisconnectSec")) {
-			Interval p = new Interval(
-				cc.getNoResponseDisconnectSec());
-			no_response_disconnect_lbl.setText("" + p);
+			no_response_disconnect_lbl.setText(prettyPeriod(
+				cc.getNoResponseDisconnectSec()));
 		}
 	}
 
