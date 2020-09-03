@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.comm;
 
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.HashMap;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
@@ -177,5 +178,28 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 		super(s, descriptor(s), 8, 24);
 		comm_config_mdl =
 			s.getSonarState().getConCache().getCommConfigModel();
+	}
+
+	/** Create a new comm link */
+	@Override
+	public void createObject(String name) {
+		String n = name.trim();
+		if (n.length() > 0) {
+			HashMap<String, Object> attrs = createAttrs();
+			if (attrs != null)
+				descriptor.cache.createObject(n, attrs);
+		}
+	}
+
+	/** Create a mapping of attributes */
+	private HashMap<String, Object> createAttrs() {
+		if (comm_config_mdl.getSize() > 0) {
+			CommConfig cc = comm_config_mdl.getProxy(0);
+			HashMap<String, Object> attrs =
+				new HashMap<String, Object>();
+			attrs.put("comm_config", cc);
+			return attrs;
+		} else
+			return null;
 	}
 }
