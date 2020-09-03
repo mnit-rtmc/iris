@@ -63,14 +63,6 @@ public class ConCache {
 		return comm_configs;
 	}
 
-	/** Comm config proxy list model */
-	private final ProxyListModel<CommConfig> comm_config_model;
-
-	/** Get the CommConfig list model */
-	public ProxyListModel<CommConfig> getCommConfigModel() {
-		return comm_config_model;
-	}
-
 	/** Cache of comm link proxies */
 	protected final TypeCache<CommLink> comm_links;
 
@@ -115,9 +107,6 @@ public class ConCache {
 		cabinets = new TypeCache<Cabinet>(Cabinet.class, client);
 		comm_configs = new TypeCache<CommConfig>(CommConfig.class,
 			client);
-		comm_config_model = new ProxyListModel<CommConfig>(
-			comm_configs);
-		comm_config_model.initialize();
 		comm_links = new TypeCache<CommLink>(CommLink.class, client);
 		comm_link_model = new ProxyListModel<CommLink>(comm_links);
 		comm_link_model.initialize();

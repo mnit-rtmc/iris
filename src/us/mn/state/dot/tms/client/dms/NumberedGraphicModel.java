@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,13 +33,9 @@ public class NumberedGraphicModel extends ProxyListModel<Graphic> {
 		return mdl;
 	}
 
-	/** User Session */
-	private final Session session;
-
 	/** Create a new numbered graphic model */
 	private NumberedGraphicModel(Session s) {
 		super(s.getSonarState().getGraphics());
-		session = s;
 	}
 
 	/** Get a graphic comparator */

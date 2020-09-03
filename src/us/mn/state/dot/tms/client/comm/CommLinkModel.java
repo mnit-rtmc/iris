@@ -171,13 +171,12 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 	}
 
 	/** Comm config proxy list model */
-	private final ProxyListModel<CommConfig> comm_config_mdl;
+	private final CommConfigListModel comm_config_mdl;
 
 	/** Create a new comm link table model */
 	public CommLinkModel(Session s) {
 		super(s, descriptor(s), 8, 24);
-		comm_config_mdl =
-			s.getSonarState().getConCache().getCommConfigModel();
+		comm_config_mdl = CommConfigListModel.create(s);
 	}
 
 	/** Create a new comm link */
