@@ -1,5 +1,21 @@
 # IRIS 5.x Release Notes
 
+5.16.0 (3 Sep 2020)
+ - Added no-response disconnect feature to comm links
+ - Added `comm_config` table for shared configurations between comm links
+ - Replaced hard-coded 5-minute value with `long_poll_period_sec` column in
+   `comm_config`
+ - Replaced `COMM_IDLE_DISCONNECT_` system attributes with `idle_disconnect_sec`
+   column in `comm_config` table
+ - Replaced `DMSXML_*_OP_TIMEOUT_SECS` system attributes with
+   `no_response_disconnect_sec` column in `comm_config` table
+ - Replaced `GSTREAMER_VERSION_WINDOWS` system attribute with `gstreamer_version`
+   in `project.properties`.  Also added `jna_version` and `gst_java_version`
+ - Changed GStreamer auto-download to request zip files from WebStart host
+   instead of sonar host
+ - Reduce expiration latency for scheduled DMS messages
+ - Fixed `msg_feed` bug preventing messages from expiring normally
+
 5.15.0 (6 Aug 2020)
  - Added GStreamer client video enhancements (thanks to SRF)
  - Added `station_id` to `travel_time_event_view`
