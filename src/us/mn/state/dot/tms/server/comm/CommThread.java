@@ -200,7 +200,7 @@ public class CommThread<T extends ControllerProperty> {
 			catch (NoResponseException e) {
 				String msg = getMessage(e);
 				setStatus(msg);
-				if (poller.queueIsEmpty())
+				if (poller.noMoreOps())
 					break;
 			}
 			catch (IOException e) {
@@ -297,6 +297,7 @@ public class CommThread<T extends ControllerProperty> {
 				BasicMessenger bm = (BasicMessenger)m;
 				if (bm.hitNoResponseDisconnect()) {
 					o.handleCommError(EventType.POLL_TIMEOUT_ERROR, msg);
+					o.setFailed();
 					throw new NoResponseException();
 				}
 			}
