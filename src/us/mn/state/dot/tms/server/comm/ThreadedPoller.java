@@ -191,4 +191,10 @@ public class ThreadedPoller<T extends ControllerProperty>
 		if (logger.isOpen())
 			log("TESTING not implemented: " + c);
 	}
+	
+	/** Check if the poller's queue has any more ops to
+	 *  process.  (Ignores the queue's current work op.) */
+	public synchronized boolean noMoreOps() {
+		return queue.noMoreOps();
+	}
 }

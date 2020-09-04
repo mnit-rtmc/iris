@@ -203,6 +203,12 @@ public class CommThread<T extends ControllerProperty> {
 				if (poller.handleError(CONNECTION_REFUSED, msg))
 					break;
 			}
+			catch (NoResponseException e) {
+				String msg = getMessage(e);
+				setStatus(msg);
+				if (poller.noMoreOps())
+					break;
+			}
 			catch (IOException e) {
 				String msg = getMessage(e);
 				setStatus(msg);
@@ -301,7 +307,8 @@ public class CommThread<T extends ControllerProperty> {
 				if (bm.hitNoResponseDisconnect()) {
 					o.handleCommError(EventType
 						.POLL_TIMEOUT_ERROR, msg);
-					throw new IOException();
+					o.setFailed();
+					throw new NoResponseException();
 				}
 			}
 			o.handleCommError(EventType.COMM_ERROR, msg);
