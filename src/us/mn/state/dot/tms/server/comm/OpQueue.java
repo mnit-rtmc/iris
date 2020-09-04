@@ -63,6 +63,12 @@ public final class OpQueue<T extends ControllerProperty> {
 		return (work == null) && (front == null);
 	}
 
+	/** Check if the queue has any more ops to process.
+	 * (Like isEmpty(), but ignores the current work op.) */
+	public synchronized boolean noMoreOps() {
+		return (front == null);
+	}
+
 	/** Enqueue a new operation */
 	public synchronized boolean enqueue(OpController<T> op) {
 		if (shouldAdd(op)) {
