@@ -46,7 +46,7 @@ under the GPL.
 
 ## Future Plans
 
-Work is underway on a web-based user interface.  The java based interface will
+Work is underway on a [web-based user interface].  The java based interface will
 be fully supported until all features are implemented in the new UI.
 
 ## Coding Style
@@ -102,3 +102,4 @@ their operands by a space.
 [Fedora]: http://fedoraproject.org
 [JavaMail jar]: https://javaee.github.io/javamail/#Download_JavaMail_Release
 [pull request]: https://github.com/mnit-rtmc/iris/pulls
+[web-based user interface]: web_ui.html
