@@ -20,7 +20,7 @@ Bulb is the web front-end for IRIS.  The mapping portion uses the [Leaflet]
 JavaScript library.  The rest of the code is written in Rust, compiled as
 WebAssembly.
 
-## Progress to first-stage DMS control
+## Phase 1 Progress (DMS control)
 
 honeybee
 
@@ -40,6 +40,7 @@ bulb
 - [ ] Integrate leaflet map
 - [ ] Connect to honeybee for SSE
 - [ ] UI for DMS viewing / control
+- [ ] Generate DMS previews and insert into img element using data URI
 
 
 [earthwyrm]: https://github.com/DougLau/earthwyrm
