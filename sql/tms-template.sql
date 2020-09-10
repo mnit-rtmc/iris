@@ -2760,8 +2760,9 @@ CREATE VIEW dms_view AS
 GRANT SELECT ON dms_view TO PUBLIC;
 
 CREATE VIEW dms_message_view AS
-	SELECT d.name, msg_current, cc.description AS condition, multi,
-	       beacon_enabled, prefix_page, msg_priority,
+	SELECT d.name, msg_current, cc.description AS condition,
+	       fail_time IS NOT NULL AS failed, multi, beacon_enabled,
+	       prefix_page, msg_priority,
 	       iris.sign_msg_sources(source) AS sources, duration, expire_time
 	FROM iris.dms d
 	LEFT JOIN iris.controller c ON d.controller = c.name
