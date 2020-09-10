@@ -22,20 +22,20 @@
 <style type="text/css">
 
 rect.backdrop {
-    fill: white;
+    fill: none;
 }
 text{
-    fill: black;
+    fill: white;
 }
 
 circle {
     fill: none;
-    stroke: black;
+    stroke: white;
     stroke-width: 2;
 }
 
 line {
-    stroke: black;
+    stroke: white;
     stroke-width: 2;
     stroke-opacity: 1;
     fill-opacity: 1;
@@ -45,7 +45,7 @@ line {
 
 path {
     fill: none;
-    stroke: black;
+    stroke: white;
     stroke-width: 2;
     stroke-opacity: 1;
     fill-opacity: 1;
@@ -58,13 +58,12 @@ line.dashed {
 }
 
 .fg_fill {
-    fill: black;
+    fill: white;
 }
 
 
 .bg_fill {
-    fill: white;
-    stroke: black;
+    stroke: white;
     stroke-width: 2;
 }
 
