@@ -70,10 +70,10 @@ public class SubnetChecker extends Thread {
 	public final static String UNKNOWN = "unknown";
 
 	/** Current subnet */
-	private static String SUBNET_NAME = UNKNOWN;
+	private static String subnetName = UNKNOWN;
 
 	/** Flag to request a recheck */
-	private static boolean UPDATE_REQ = false;
+	private static boolean updateReq = false;
 
 	/** Time from end of previous update to start
 	 *  of next automatic update. {1 minute} */
@@ -88,12 +88,12 @@ public class SubnetChecker extends Thread {
 
 	/** Get current subnet name */
 	public static String getSubnetName() {
-		return SUBNET_NAME;
+		return subnetName;
 	}
 
 	/** Request an update */
 	public static void reqUpdate() {
-		UPDATE_REQ = true;
+		updateReq = true;
 	}
 
 	/** List of current addresses on this machine */
@@ -174,7 +174,7 @@ public class SubnetChecker extends Thread {
 		// the main checker loop
 		while (true) {
 			doPings();
-			UPDATE_REQ = false;
+			updateReq = false;
 			doWait();
 		}
 	}
@@ -197,27 +197,26 @@ public class SubnetChecker extends Thread {
 			} catch (InterruptedException e) {
 				break;
 			}
-			if (UPDATE_REQ) {
-				System.out.println("Update requested");
+			if (updateReq) {
+				System.out.println("SubnetChecker: Update requested");
 				break;
 			}
 			// time for automatic update?
 			now = System.currentTimeMillis();
 			if (now > end) {
-				System.out.println("Update time");
 				break; // yes
 			}
 			// snooze or time-change detected?
 			delta = Math.abs(now - prev);
 			if (delta > 10000) {
-				System.out.println("Sleep-mode detected: "+delta);
+				System.out.println("SubnetChecker: Sleep-mode detected: "+delta);
 				break;  // yes
 			}
 			// IP address change?
 			tmp = getAllMyAddresses();
 			if (!ipAddressList.equals(tmp)) {
 				ipAddressList = tmp;
-				System.out.println("Address change");
+				System.out.println("SubnetChecker: Address change detected");
 				break;  // yes
 			}
 			prev = now;
@@ -252,12 +251,14 @@ public class SubnetChecker extends Thread {
 				gotPing = doIcmpPing(host);
 			}
 			if (gotPing) {
-				SUBNET_NAME = subnet;
+				if (!subnetName.equals(subnet))
+					System.out.println("SubnetChecker.subnet = "+subnet);
+				subnetName = subnet;
 				return;
 			}
 		}
 		// didn't get any responses...
-		SUBNET_NAME = UNKNOWN;
+		subnetName = UNKNOWN;
 	}
 
 	/** Do an ICMP ping */
