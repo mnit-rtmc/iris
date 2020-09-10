@@ -28,21 +28,21 @@ honeybee
 - [X] Generate GIF images for DMS
 - [ ] Turn into web service (warp)
 - [ ] Send SSE for DMS notifications
-- [ ] generate DMS outlines for osm layer
-- [ ] connect to IRIS server with sonar
-- [ ] authentication using sonar
+- [ ] Generate DMS outlines for osm layer
+- [ ] Connect to IRIS server with sonar
+- [ ] Authentication using sonar
 
 earthwyrm
 - [X] Serve MVT for OpenStreetMap layers
-- [ ] update to user Muon for config
+- [ ] Update to user Muon for config
 
 bulb
-- [ ] integrate leaflet map
-- [ ] connect to honeybee for SSE
-- [ ] ui for DMS viewing / control
+- [ ] Integrate leaflet map
+- [ ] Connect to honeybee for SSE
+- [ ] UI for DMS viewing / control
 
 
 [earthwyrm]: https://github.com/DougLau/earthwyrm
 [Leaflet]: https://github.com/Leaflet/Leaflet
-[MVP]: https://docs.mapbox.com/vector-tiles/reference/
+[MVT]: https://docs.mapbox.com/vector-tiles/reference/
 [OpenStreetMap]: https://www.openstreetmap.org
