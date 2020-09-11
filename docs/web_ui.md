@@ -37,17 +37,14 @@ WebAssembly.
 ### honeybee
 
 - [X] Generate GIF images for DMS
+- [ ] Generate DMS map layer in osm DB
 - [ ] Turn into web service (warp)
 - [ ] Send SSE for DMS notifications
-- [ ] Generate DMS outlines for osm layer
+- [ ] Add endpoints for controlling DMS
 - [ ] Connect to IRIS server with sonar
 - [ ] Authentication using sonar
 
 ## bulb
-
-Bulb is the web front-end for IRIS.  The mapping portion uses the [Leaflet]
-JavaScript library.  The rest of the code is written in Rust, compiled as
-WebAssembly.
 
 - [ ] Connect to honeybee for SSE
 - [ ] UI for DMS viewing / control
