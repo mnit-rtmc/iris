@@ -12,7 +12,7 @@ This document tracks progress on the web-based user interface for IRIS.
 can be made from [OpenStreetMap] data in addition to IRIS devices, such as DMS.
 
 - [X] Serve MVT for OpenStreetMap layers
-- [ ] Update to user Muon for config
+- [ ] Update to use [MuON] for configuration
 
 ### honeybee
 
@@ -53,5 +53,6 @@ WebAssembly.
 
 [earthwyrm]: https://github.com/DougLau/earthwyrm
 [Leaflet]: https://github.com/Leaflet/Leaflet
+[MuON]: https://github.com/muon-data/muon
 [MVT]: https://docs.mapbox.com/vector-tiles/reference/
 [OpenStreetMap]: https://www.openstreetmap.org
