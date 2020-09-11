@@ -20,7 +20,7 @@ Honeybee is a web service for JSON data in addition to rendered GIF images of
 DMS.  It is included in the IRIS repository.
 
 - [X] Generate JSON for cameras, DMS, etc.
-- [ ] Generate segment map layer in osm DB
+- [ ] Generate segment map layer in earthwyrm DB
 
 ## bulb
 
@@ -37,7 +37,7 @@ WebAssembly.
 ### honeybee
 
 - [X] Generate GIF images for DMS
-- [ ] Generate DMS map layer in osm DB
+- [ ] Generate DMS map layer in earthwyrm DB
 - [ ] Turn into web service (warp)
 - [ ] Send SSE for DMS notifications
 - [ ] Add endpoints for controlling DMS
