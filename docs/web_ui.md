@@ -4,7 +4,7 @@ This document tracks progress on the web-based user interface for IRIS.
 
 ![ui architecture](images/ui_architecture.svg)
 
-## Phase 1 Progress (DMS control)
+## Phase 1 — Segment Map
 
 ### earthwyrm
 
@@ -20,6 +20,22 @@ Honeybee is a web service for JSON data in addition to rendered GIF images of
 DMS.  It is included in the IRIS repository.
 
 - [X] Generate JSON for cameras, DMS, etc.
+- [ ] Generate segment map layer in osm DB
+
+## bulb
+
+Bulb is the web front-end for IRIS.  The mapping portion uses the [Leaflet]
+JavaScript library.  The rest of the code is written in Rust, compiled as
+WebAssembly.
+
+- [X] Set up build using wasm-pack
+- [ ] Integrate leaflet map
+- [ ] Style segment layer with detector data
+
+## Phase 2 — DMS control
+
+### honeybee
+
 - [X] Generate GIF images for DMS
 - [ ] Turn into web service (warp)
 - [ ] Send SSE for DMS notifications
@@ -33,8 +49,6 @@ Bulb is the web front-end for IRIS.  The mapping portion uses the [Leaflet]
 JavaScript library.  The rest of the code is written in Rust, compiled as
 WebAssembly.
 
-- [X] Set up build using wasm-pack
-- [ ] Integrate leaflet map
 - [ ] Connect to honeybee for SSE
 - [ ] UI for DMS viewing / control
 - [ ] Generate DMS previews and insert into img element using data URI
