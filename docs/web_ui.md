@@ -29,7 +29,7 @@ JavaScript library.  The rest of the code is written in Rust, compiled as
 WebAssembly.
 
 - [X] Set up build using wasm-pack
-- [ ] Integrate leaflet map
+- [X] Integrate leaflet map
 - [ ] Style segment layer with detector data
 
 ## Phase 2 — DMS control
