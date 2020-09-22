@@ -15,7 +15,7 @@
 	</shortcut>
     </information>
     <resources>
-	<j2se version="1.8+" max-heap-size="1024m"/>
+	<j2se version="1.8+" max-heap-size="1200m"/>
 	<jar href="lib/iris-client-@@VERSION@@.jar"/>
 	<jar href="lib/iris-common-@@VERSION@@.jar"/>
 	<jar href="lib/jna-@@JNA.VERSION@@.jar"/>
