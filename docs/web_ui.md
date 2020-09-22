@@ -12,7 +12,7 @@ This document tracks progress on the web-based user interface for IRIS.
 can be made from [OpenStreetMap] data in addition to IRIS devices, such as DMS.
 
 - [X] Serve MVT for OpenStreetMap layers
-- [ ] Update to use [MuON] for configuration
+- [X] Update to use [MuON] for configuration
 
 ### honeybee
 
