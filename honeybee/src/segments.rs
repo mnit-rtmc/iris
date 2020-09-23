@@ -458,5 +458,6 @@ pub fn receive_nodes(receiver: Receiver<RNodeMsg>) {
             RNodeMsg::Order(ordered) => state.set_ordered(ordered),
         }
         debug!("total corridors: {}", state.corridors.len());
+        // FIXME: if ordered, update segment table in earthwyrm DB
     }
 }

@@ -3,7 +3,7 @@ lib/iris-client.properties
 build/
 iris-server-*
 iris-client-*
-bin/honeybee/target*
+honeybee/target*
 *.rej
 *.orig
 *.swp

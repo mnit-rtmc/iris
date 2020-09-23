@@ -18,7 +18,7 @@ postgres = "0.15.2"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
-whoami = "0.8.1"
+whoami = "0.9.0"
 
 [dependencies.env_logger]
 version = "0.7.1"
