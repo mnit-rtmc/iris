@@ -27,14 +27,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 public class CommConfigListModel extends ProxyListModel<CommConfig> {
 
 	/** Create a new comm config list model */
-	static public CommConfigListModel create(Session s) {
-		CommConfigListModel mdl = new CommConfigListModel(s);
-		mdl.initialize();
-		return mdl;
-	}
-
-	/** Create a new comm config list model */
-	private CommConfigListModel(Session s) {
+	public CommConfigListModel(Session s) {
 		super(s.getSonarState().getConCache().getCommConfigs());
 	}
 

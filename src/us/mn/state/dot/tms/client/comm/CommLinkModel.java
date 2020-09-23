@@ -176,7 +176,21 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 	/** Create a new comm link table model */
 	public CommLinkModel(Session s) {
 		super(s, descriptor(s), 8, 24);
-		comm_config_mdl = CommConfigListModel.create(s);
+		comm_config_mdl = new CommConfigListModel(s);
+	}
+
+	/** Initialize the comm link table model */
+	@Override
+	public void initialize() {
+		super.initialize();
+		comm_config_mdl.initialize();
+	}
+
+	/** Dispose of the comm link table model */
+	@Override
+	public void dispose() {
+		comm_config_mdl.dispose();
+		super.dispose();
 	}
 
 	/** Create a new comm link */
