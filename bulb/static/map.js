@@ -140,7 +140,7 @@ function init_map() {
         if (change) {
             highlight = osm_id;
             osm_layers.setFeatureStyle(highlight, highlight_style);
-            var name = e.layer.properties.name;
+            var name = e.layer.properties.ref || e.layer.properties.name;
             if (typeof name != "undefined") {
                 L.popup({ closeButton: false})
                  .setContent(name)
