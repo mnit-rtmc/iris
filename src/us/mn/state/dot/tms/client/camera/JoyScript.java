@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,31 +20,35 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 /**
- * Joystick script handling. This is needed because java does not allow
- * opening a device node as a file. So, instead we create a temp Python script 
- * and pipe the output of that script. On Linux, the script opens the device
+ * Joystick script handling.  This is needed because java does not allow
+ * opening a device node as a file.  So, instead we create a temp Python script
+ * and pipe the output of that script.  On Linux, the script opens the device
  * node directly, but on other operating systems, PyGame is used.
  *
  * @author Douglas Lau
  */
 public class JoyScript {
 
-	/** Possible locations of Pythn */
-	static protected final String[] PYTHON_PATHS = {
+	/** Possible locations of Python */
+	static private final String[] PYTHON_PATHS = {
 		"/usr/bin/python",
 		"C:\\Python27\\python.exe",
-		"C:\\Python26\\python.exe",
-		"C:\\Python33\\python.exe",
-		"C:\\Python32\\python.exe",
-		"C:\\Python31\\python.exe",
 		"C:\\Python30\\python.exe",
+		"C:\\Python31\\python.exe",
+		"C:\\Python32\\python.exe",
+		"C:\\Python33\\python.exe",
+		"C:\\Python34\\python.exe",
+		"C:\\Python35\\python.exe",
+		"C:\\Python36\\python.exe",
+		"C:\\Python37\\python.exe",
+		"C:\\Python38\\python.exe",
 	};
 
 	/** Locate a Python interpreter */
 	static protected File locatePython() throws IOException {
-		for(String path: PYTHON_PATHS) {
+		for (String path: PYTHON_PATHS) {
 			File f = new File(path);
-			if(f.canExecute())
+			if (f.canExecute())
 				return f;
 		}
 		throw new FileNotFoundException("No Python interpreter");
@@ -63,7 +67,7 @@ public class JoyScript {
 		script.deleteOnExit();
 		FileWriter fw = new FileWriter(script);
 		try {
-			if(isLinux())
+			if (isLinux())
 				createLinuxScript(fw);
 			else
 				createPyGameScript(fw);
