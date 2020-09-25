@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::geo::Wgs84Pos;
+use crate::geo::{WebMercatorPos, Wgs84Pos};
 use postgres::rows::Row;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -27,7 +27,6 @@ struct GeoLoc {
     cross_street: Option<String>,
     cross_dir: Option<i16>,
     lankmark: Option<String>,
-    location: Option<String>,
     lat: Option<f64>,
     lon: Option<f64>,
 }
@@ -174,7 +173,6 @@ impl RNode {
             cross_street: row.get(4),
             cross_dir: row.get(5),
             lankmark: row.get(6),
-            location: None,
             lat: row.get(7),
             lon: row.get(8),
         };
@@ -324,6 +322,29 @@ impl Corridor {
             self.count,
             self.nodes.len()
         );
+        self.generate_segments();
+    }
+
+    /// Generate segments for the corridor in DB table
+    fn generate_segments(&self) {
+        if &self.cor_id.roadway == "I-494"
+            && self.cor_id.travel_dir == TravelDir::NB
+        {
+            info!("ordered corridor: {:?}", self.cor_id);
+            info!("nodes: {}", self.count);
+            for node in &self.nodes {
+                if let Some(pos) = node.pos() {
+                    let wm: WebMercatorPos = pos.into();
+                    match &node.loc.cross_street {
+                        Some(cross_street) => {
+                            info!("{:?} @ {:?}", cross_street, wm)
+                        }
+                        None => info!("___ @ {:?}", wm),
+                    }
+                    // FIXME: calculate normal vectors
+                }
+            }
+        }
     }
 
     /// Add a node
@@ -458,6 +479,5 @@ pub fn receive_nodes(receiver: Receiver<RNodeMsg>) {
             RNodeMsg::Order(ordered) => state.set_ordered(ordered),
         }
         debug!("total corridors: {}", state.corridors.len());
-        // FIXME: if ordered, update segment table in earthwyrm DB
     }
 }

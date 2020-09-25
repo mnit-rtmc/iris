@@ -14,6 +14,7 @@
 //
 
 /// WGS-84 (EPSG:4326) position.
+#[derive(Clone, Copy, Debug)]
 pub struct Wgs84Pos {
     /// Latitude (radians)
     lat: f64,
@@ -22,6 +23,7 @@ pub struct Wgs84Pos {
 }
 
 /// Web mercator (EPSG:3857) position.
+#[derive(Clone, Copy, Debug)]
 pub struct WebMercatorPos {
     /// X coordinate (meters)
     x: f64,
