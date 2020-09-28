@@ -130,6 +130,11 @@ struct SegmentState {
 }
 
 impl GeoLoc {
+    /// Check if the location is valid
+    fn is_valid(&self) -> bool {
+        self.lat.is_some() && self.lon.is_some()
+    }
+
     /// Get the lat/lon of the location
     fn latlon(&self) -> Option<(f64, f64)> {
         match (self.lat, self.lon) {
@@ -208,6 +213,11 @@ impl RNode {
             }
             _ => None,
         }
+    }
+
+    /// Check if active and the location is valid
+    fn is_valid(&self) -> bool {
+        self.active && self.loc.is_valid()
     }
 
     /// Get the lat/lon of the node
@@ -355,8 +365,9 @@ impl Corridor {
             &self.cor_id,
             self.nodes.len()
         );
+        let order = ordered && node.is_valid();
         self.nodes.push(node);
-        if ordered {
+        if order {
             self.order_nodes();
         }
     }
@@ -369,11 +380,16 @@ impl Corridor {
             &self.cor_id,
             self.nodes.len()
         );
+        let valid_after = node.is_valid();
+        let mut valid_before = false;
         match self.nodes.iter_mut().find(|n| n.name == node.name) {
-            Some(n) => *n = node,
+            Some(n) => {
+                valid_before = n.is_valid();
+                *n = node;
+            }
             None => error!("update_node: {} not found", node.name),
         }
-        if ordered {
+        if ordered && (valid_before || valid_after) {
             self.order_nodes();
         }
     }
@@ -388,8 +404,8 @@ impl Corridor {
         );
         match self.nodes.iter().position(|n| n.name == name) {
             Some(idx) => {
-                self.nodes.remove(idx);
-                if ordered {
+                let node = self.nodes.remove(idx);
+                if ordered && node.is_valid() {
                     self.order_nodes();
                 }
             }
