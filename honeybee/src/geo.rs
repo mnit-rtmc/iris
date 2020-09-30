@@ -12,6 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use pointy::Pt64;
 
 /// WGS-84 (EPSG:4326) position.
 #[derive(Clone, Copy, Debug)]
@@ -110,6 +111,12 @@ impl From<WebMercatorPos> for Wgs84Pos {
         debug_assert!(lat >= -WebMercatorPos::MAX_LATITUDE);
         debug_assert!(lat <= WebMercatorPos::MAX_LATITUDE);
         Wgs84Pos::new(lat, lon)
+    }
+}
+
+impl From<WebMercatorPos> for Pt64 {
+    fn from(pos: WebMercatorPos) -> Self {
+        Self(pos.x, pos.y)
     }
 }
 

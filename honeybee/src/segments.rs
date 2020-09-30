@@ -13,6 +13,7 @@
 // GNU General Public License for more details.
 //
 use crate::geo::{WebMercatorPos, Wgs84Pos};
+use pointy::Pt64;
 use postgres::rows::Row;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -114,6 +115,8 @@ struct Corridor {
     cor_id: CorridorId,
     /// Nodes ordered by corridor direction
     nodes: Vec<RNode>,
+    /// Normal angles at each node
+    normals: Vec<f64>,
     /// Valid node count
     count: usize,
 }
@@ -244,10 +247,12 @@ impl Corridor {
     fn new(cor_id: CorridorId) -> Self {
         debug!("Corridor::new {:?}", &cor_id);
         let nodes = vec![];
+        let normals = vec![];
         let count = 0;
         Corridor {
             cor_id,
             nodes,
+            normals,
             count,
         }
     }
@@ -330,34 +335,42 @@ impl Corridor {
             "order_nodes: {:?}, count: {} of {}",
             self.cor_id,
             self.count,
-            self.nodes.len()
+            self.nodes.len(),
         );
-        self.generate_segments();
-    }
-
-    /// Generate segments for the corridor in DB table
-    fn generate_segments(&self) {
-        if &self.cor_id.roadway == "I-494"
-            && self.cor_id.travel_dir == TravelDir::NB
-        {
-            info!("ordered corridor: {:?}", self.cor_id);
-            info!("nodes: {}", self.count);
-            for node in &self.nodes {
-                if let Some(pos) = node.pos() {
-                    let wm: WebMercatorPos = pos.into();
-                    match &node.loc.cross_street {
-                        Some(cross_street) => {
-                            info!("{:?} @ {:?}", cross_street, wm)
-                        }
-                        None => info!("___ @ {:?}", wm),
-                    }
-                    // FIXME: calculate normal vectors
-                }
-            }
+        self.normals = self.calculate_normals();
+        if self.cor_id.roadway == "I-494" {
+            info!(
+                "normals: {:?}, {}",
+                self.cor_id,
+                self.normals.len(),
+            );
         }
     }
 
-    /// Add a node
+    /// Calculate normal angles for corridor nodes
+    fn calculate_normals(&self) -> Vec<f64> {
+        let pts: Vec<Pt64> = self
+            .nodes
+            .iter()
+            .filter_map(|n| n.pos())
+            .map(|p| Pt64::from(WebMercatorPos::from(p)))
+            .collect();
+        let mut norms = vec![];
+        for i in 0..pts.len() {
+            let upstream = vector_upstream(&pts, i);
+            let downstream = vector_downstream(&pts, i);
+            let v0 = match (upstream, downstream) {
+                (Some(up), Some(down)) => (up + down).normalize(),
+                (Some(up), None) => up,
+                (None, Some(down)) => down,
+                (None, None) => todo!("use corridor direction"),
+            };
+            norms.push(v0.left().angle());
+        }
+        norms
+    }
+
+    /// Add a node to corridor
     fn add_node(&mut self, node: RNode, ordered: bool) {
         debug!(
             "add_node {} to {:?} ({} + 1)",
@@ -412,6 +425,28 @@ impl Corridor {
             None => error!("remove_node: {} not found", name),
         }
     }
+}
+
+/// Get vector from upstream point to current point
+fn vector_upstream(pts: &[Pt64], i: usize) -> Option<Pt64> {
+    let current = pts[i];
+    for up in pts[0..i].iter().rev() {
+        if *up != current {
+            return Some((*up - current).normalize());
+        }
+    }
+    None
+}
+
+/// Get vector from current point to downstream point
+fn vector_downstream(pts: &[Pt64], i: usize) -> Option<Pt64> {
+    let current = pts[i];
+    for down in pts[i + 1..].iter() {
+        if *down != current {
+            return Some((current - *down).normalize());
+        }
+    }
+    None
 }
 
 impl SegmentState {

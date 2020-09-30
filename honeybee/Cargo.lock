@@ -161,6 +161,7 @@ dependencies = [
  "mag 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "ntcip 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "pix 0.13.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pointy 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "postgres 0.15.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.115 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.115 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -261,6 +262,11 @@ dependencies = [
 [[package]]
 name = "pix"
 version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "pointy"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -545,6 +551,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum phf 0.7.24 (registry+https://github.com/rust-lang/crates.io-index)" = "b3da44b85f8e8dfaec21adae67f95d93244b2ecf6ad2a692320598dcc8e6dd18"
 "checksum phf_shared 0.7.24 (registry+https://github.com/rust-lang/crates.io-index)" = "234f71a15de2288bcb7e3b6515828d22af7ec8598ee6d24c3b526fa0a80b67a0"
 "checksum pix 0.13.1 (registry+https://github.com/rust-lang/crates.io-index)" = "bea9d5c668f13b4a1b97d848780e00cfabf76eb83538129c264c0c6d6a968047"
+"checksum pointy 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f864eb749012c0042cdfbbd7d9b73bb931a9f02721a836fef20f8160ed7ef7bc"
 "checksum postgres 0.15.2 (registry+https://github.com/rust-lang/crates.io-index)" = "115dde90ef51af573580c035857badbece2aa5cde3de1dfb3c932969ca92a6c5"
 "checksum postgres-protocol 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)" = "2487e66455bf88a1b247bf08a3ce7fe5197ac6d67228d920b0ee6a0e97fd7312"
 "checksum postgres-shared 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "ffac35b3e0029b404c24a3b82149b4e904f293e8ca4a327eefa24d3ca50df36f"
