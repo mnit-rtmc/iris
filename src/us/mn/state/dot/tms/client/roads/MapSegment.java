@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,21 +34,6 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class MapSegment implements MapObject {
-
-	/** Get the scale factor for the road class */
-	static private float roadClassScale(RoadClass rc) {
-		switch (rc) {
-		case ARTERIAL:
-		case EXPRESSWAY:
-			return 4;
-		case FREEWAY:
-			return 6;
-		case CD_ROAD:
-			return 5;
-		default:
-			return 3;
-		}
-	}
 
 	/** Identity transform */
 	static private final AffineTransform IDENTITY_TRANSFORM =
@@ -119,7 +104,7 @@ public class MapSegment implements MapObject {
 	private float roadClassScale() {
 		Road r = getR_Node().getGeoLoc().getRoadway();
 		RoadClass rc = RoadClass.fromOrdinal(r.getRClass());
-		return roadClassScale(rc) * UI.scale;
+		return rc.scale * UI.scale;
 	}
 
 	/** Create a new map segment */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2016  Minnesota Department of Transportation
+ * Copyright (C) 2010-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +23,14 @@ package us.mn.state.dot.tms;
 public enum RoadClass {
 
 	/** Enumerated road class values */
-	NONE(" ", ""),				// 0
-	RESIDENTIAL("Residential", "A"),	// 1
-	BUSINESS("Business", "B"),		// 2
-	COLLECTOR("Collector", "C"),		// 3
-	ARTERIAL("Arterial", "D"),		// 4
-	EXPRESSWAY("Expressway", "E"),		// 5
-	FREEWAY("Freeway", "F"),		// 6
-	CD_ROAD("CD Road", "");			// 7
+	NONE(" ", "", 1f),                   // 0
+	RESIDENTIAL("Residential", "A", 2f), // 1
+	BUSINESS("Business", "B", 3f),       // 2
+	COLLECTOR("Collector", "C", 3f),     // 3
+	ARTERIAL("Arterial", "D", 4f),       // 4
+	EXPRESSWAY("Expressway", "E", 4f),   // 5
+	FREEWAY("Freeway", "F", 6f),         // 6
+	CD_ROAD("CD Road", "", 3.5f);        // 7
 
 	/** Description of road class */
 	public final String description;
@@ -38,10 +38,14 @@ public enum RoadClass {
 	/** Letter Grade */
 	public final String grade;
 
+	/** Scale for map display */
+	public final float scale;
+
 	/** Create a new road class */
-	private RoadClass(String d, String g) {
+	private RoadClass(String d, String g, float s) {
 		description = d;
 		grade = g;
+		scale = s;
 	}
 
 	/** Get the string representation of a road class */

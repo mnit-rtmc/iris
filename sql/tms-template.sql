@@ -761,18 +761,19 @@ COPY iris.direction (id, direction, dir) FROM stdin;
 CREATE TABLE iris.road_class (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(12) NOT NULL,
-	grade CHAR NOT NULL
+	grade CHAR NOT NULL,
+	scale REAL NOT NULL
 );
 
-COPY iris.road_class (id, description, grade) FROM stdin;
-0		
-1	residential	A
-2	business	B
-3	collector	C
-4	arterial	D
-5	expressway	E
-6	freeway	F
-7	CD road	
+COPY iris.road_class (id, description, grade, scale) FROM stdin;
+0			1
+1	residential	A	2
+2	business	B	3
+3	collector	C	3
+4	arterial	D	4
+5	expressway	E	4
+6	freeway	F	6
+7	CD road		3.5
 \.
 
 CREATE TABLE iris.road_modifier (
