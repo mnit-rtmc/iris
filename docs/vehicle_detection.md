@@ -88,7 +88,7 @@ Protocol    | Binning               | Traffic Data
 [MnDOT-170] | 30 seconds            | Count, Scans
 [SS105]     | 5 seconds to 1 month  | Count, Occupancy, Speed, Classification
 [SS125]     | 5 seconds to 1 month  | Count, Occupancy, Speed, Classification
-[G4]        | 10 seconds to 1 hour  | Count, Occupancy, Speed, Classification
+[G4]        | 5 seconds to 1 hour   | Count, Occupancy, Speed, Classification
 [Canoga]    | N/A [vehicle logging] | Timestamp, Speed (double loops)
 [DR-500]    | 30-300? seconds       | Speed
 [DXM]       | N/A (presence)        | Magnetic Field
