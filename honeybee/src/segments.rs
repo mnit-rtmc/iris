@@ -17,6 +17,7 @@ use pointy::Pt64;
 use postgres::rows::Row;
 use std::cmp::Ordering;
 use std::collections::HashMap;
+use std::fmt::{self, Write};
 use std::sync::mpsc::Receiver;
 
 /// Geographic location
@@ -58,6 +59,8 @@ pub enum RNodeMsg {
     Remove(String),
     /// Enable/disable ordering for all RNodes
     Order(bool),
+    /// Road class, direction or scale has changed
+    Road(String),
 }
 
 impl From<RNode> for RNodeMsg {
@@ -115,8 +118,6 @@ struct Corridor {
     cor_id: CorridorId,
     /// Nodes ordered by corridor direction
     nodes: Vec<RNode>,
-    /// Normal angles at each node
-    normals: Vec<f64>,
     /// Valid node count
     count: usize,
 }
@@ -149,6 +150,12 @@ impl GeoLoc {
     /// Get the position
     fn pos(&self) -> Option<Wgs84Pos> {
         self.latlon().map(|(lat, lon)| Wgs84Pos::new(lat, lon))
+    }
+}
+
+impl fmt::Display for CorridorId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} {:?}", self.roadway, self.travel_dir)
     }
 }
 
@@ -247,12 +254,10 @@ impl Corridor {
     fn new(cor_id: CorridorId) -> Self {
         debug!("Corridor::new {:?}", &cor_id);
         let nodes = vec![];
-        let normals = vec![];
         let count = 0;
         Corridor {
             cor_id,
             nodes,
-            normals,
             count,
         }
     }
@@ -337,25 +342,16 @@ impl Corridor {
             self.count,
             self.nodes.len(),
         );
-        self.normals = self.calculate_normals();
         if self.cor_id.roadway == "I-494" {
-            info!(
-                "normals: {:?}, {}",
-                self.cor_id,
-                self.normals.len(),
-            );
+            self.create_segments();
         }
     }
 
-    /// Calculate normal angles for corridor nodes
-    fn calculate_normals(&self) -> Vec<f64> {
-        let pts: Vec<Pt64> = self
-            .nodes
-            .iter()
-            .filter_map(|n| n.pos())
-            .map(|p| Pt64::from(WebMercatorPos::from(p)))
-            .collect();
-        let mut norms = vec![];
+    /// Create segments for all zoom levels
+    fn create_segments(&self) {
+        let pts = self.create_points();
+        info!("{}: {} normals", self.cor_id, pts.len());
+        let mut prev: Option<(Pt64, Pt64)> = None;
         for i in 0..pts.len() {
             let upstream = vector_upstream(&pts, i);
             let downstream = vector_downstream(&pts, i);
@@ -365,9 +361,38 @@ impl Corridor {
                 (None, Some(down)) => down,
                 (None, None) => todo!("use corridor direction"),
             };
-            norms.push(v0.left().angle());
+            let norm = v0.left();
+            let inner = pts[i] + norm * 5.0; // FIXME use road_class scale
+            let outer = pts[i] + norm * 10.0; // FIXME use road_class scale
+            if let Some((pin, pout)) = prev {
+                let mut polygon = String::new();
+                write!(
+                    polygon,
+                    "POLYGON({:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2})",
+                    pin.x(),
+                    pin.y(),
+                    pout.x(),
+                    pout.y(),
+                    outer.x(),
+                    outer.y(),
+                    inner.x(),
+                    inner.y(),
+                )
+                .unwrap();
+                // FIXME: update DB table
+                println!("{}", polygon);
+            }
+            prev = Some((inner, outer));
         }
-        norms
+    }
+
+    /// Create points for corridor nodes
+    fn create_points(&self) -> Vec<Pt64> {
+        self.nodes
+            .iter()
+            .filter_map(|n| n.pos())
+            .map(|p| Pt64::from(WebMercatorPos::from(p)))
+            .collect()
     }
 
     /// Add a node to corridor
@@ -518,6 +543,17 @@ impl SegmentState {
             }
         }
     }
+
+    /// Update a road class or scale
+    fn update_road(&mut self, road: String) {
+        if self.ordered {
+            for cor in self.corridors.values_mut() {
+                if cor.cor_id.roadway == road {
+                    cor.order_nodes();
+                }
+            }
+        }
+    }
 }
 
 /// Receive roadway nodes and update corridor segments
@@ -528,6 +564,7 @@ pub fn receive_nodes(receiver: Receiver<RNodeMsg>) {
             RNodeMsg::AddUpdate(node) => state.add_update_node(node),
             RNodeMsg::Remove(name) => state.remove_node(&name),
             RNodeMsg::Order(ordered) => state.set_ordered(ordered),
+            RNodeMsg::Road(road) => state.update_road(road),
         }
         debug!("total corridors: {}", state.corridors.len());
     }
