@@ -1,5 +1,11 @@
 # IRIS 5.x Release Notes
 
+5.17.0 (2 Oct 2020)
+ - Fixes for no-response disconnect feature
+ - Added `failed` column to `dms_message_view`
+ - Added `scale` column to `road_class` table
+ - Added NOTIFY triggers for `road` and `road_class`
+
 5.16.0 (3 Sep 2020)
  - Added no-response disconnect feature to comm links
  - Added `comm_config` table for shared configurations between comm links
