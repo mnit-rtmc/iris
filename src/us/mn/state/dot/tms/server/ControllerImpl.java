@@ -691,17 +691,17 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the failed status of the controller */
 	private void setFailed(boolean f, String id) {
-		if (f != isFailed()) {
-			if (f) {
-				setFailTime(TimeSteward.currentTimeMillis());
-				logCommEvent(EventType.COMM_FAILED, id);
-			} else {
-				setFailTime(null);
-				logCommEvent(EventType.COMM_RESTORED, id);
-			}
-			notifyAttribute("failTime");
+		if (f == isFailed())
+			return;
+		if (f) {
+			setFailTime(TimeSteward.currentTimeMillis());
+			logCommEvent(EventType.COMM_FAILED, id);
+		} else {
+			setFailTime(null);
+			logCommEvent(EventType.COMM_RESTORED, id);
 		}
 		notifyAttribute("status");
+		notifyAttribute("failTime");
 		updateStyles();
 	}
 
