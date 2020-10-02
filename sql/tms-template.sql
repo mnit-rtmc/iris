@@ -6,12 +6,13 @@
 -- update data (usually blank).
 --
 -- CHANNEL: camera, dms, font, glyph, graphic, incident, parking_area,
---          sign_config, sign_detail, sign_message
+--          road, road_class, sign_config, sign_detail, sign_message
 --
 -- PAYLOAD: 'publish ' || name, 'video_loss' (camera)
 --          'msg_current', 'msg_sched', 'expire_time' (dms)
 --          'time_stamp' (parking_area)
---          name (r_node, any notify_tag in geo_loc)
+--          id (road_class)
+--          name (r_node, road, any notify_tag in geo_loc)
 --
 SET client_encoding = 'UTF8';
 
@@ -776,6 +777,22 @@ COPY iris.road_class (id, description, grade, scale) FROM stdin;
 7	CD road		3.5
 \.
 
+CREATE FUNCTION iris.road_class_notify() RETURNS TRIGGER AS
+	$road_class_notify$
+BEGIN
+	PERFORM pg_notify('road_class', CAST(NEW.id AS TEXT));
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$road_class_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER road_class_notify_trig
+	AFTER UPDATE ON iris.road_class
+	FOR EACH ROW EXECUTE PROCEDURE iris.road_class_notify();
+
+CREATE TRIGGER road_class_table_notify_trig
+	AFTER INSERT OR DELETE ON iris.road_class
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 CREATE TABLE iris.road_modifier (
 	id SMALLINT PRIMARY KEY,
 	modifier text NOT NULL,
@@ -800,6 +817,22 @@ CREATE TABLE iris.road (
 	r_class SMALLINT NOT NULL REFERENCES iris.road_class(id),
 	direction SMALLINT NOT NULL REFERENCES iris.direction(id)
 );
+
+CREATE FUNCTION iris.road_notify() RETURNS TRIGGER AS
+	$road_notify$
+BEGIN
+	PERFORM pg_notify('road', NEW.name);
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$road_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER road_notify_trig
+	AFTER UPDATE ON iris.road
+	FOR EACH ROW EXECUTE PROCEDURE iris.road_notify();
+
+CREATE TRIGGER road_table_notify_trig
+	AFTER INSERT OR DELETE ON iris.road
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW road_view AS
 	SELECT name, abbrev, rcl.description AS r_class, dir.direction

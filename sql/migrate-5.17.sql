@@ -30,4 +30,38 @@ UPDATE iris.road_class SET scale = 6 WHERE id = 6;
 UPDATE iris.road_class SET scale = 3.5 WHERE id = 7;
 ALTER TABLE iris.road_class ALTER COLUMN scale SET NOT NULL;
 
+-- Add road_class NOTIFY trigger
+CREATE FUNCTION iris.road_class_notify() RETURNS TRIGGER AS
+	$road_class_notify$
+BEGIN
+	PERFORM pg_notify('road_class', CAST(NEW.id AS TEXT));
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$road_class_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER road_class_notify_trig
+	AFTER UPDATE ON iris.road_class
+	FOR EACH ROW EXECUTE PROCEDURE iris.road_class_notify();
+
+CREATE TRIGGER road_class_table_notify_trig
+	AFTER INSERT OR DELETE ON iris.road_class
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+-- Add road NOTIFY triggers
+CREATE FUNCTION iris.road_notify() RETURNS TRIGGER AS
+	$road_notify$
+BEGIN
+	PERFORM pg_notify('road', NEW.name);
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$road_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER road_notify_trig
+	AFTER UPDATE ON iris.road
+	FOR EACH ROW EXECUTE PROCEDURE iris.road_notify();
+
+CREATE TRIGGER road_table_notify_trig
+	AFTER INSERT OR DELETE ON iris.road
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 COMMIT;
