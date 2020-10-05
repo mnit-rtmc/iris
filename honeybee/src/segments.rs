@@ -17,7 +17,8 @@ use pointy::Pt64;
 use postgres::rows::Row;
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use std::fmt::{self, Write};
+use std::fmt;
+use std::io::Write;
 use std::sync::mpsc::Receiver;
 
 /// Geographic location
@@ -247,12 +248,35 @@ impl RNode {
             None
         }
     }
+
+    fn write_to<W: Write>(&self, writer: &mut W) -> Result<(), std::io::Error> {
+        let cor_id = self.cor_id().unwrap();
+        write!(writer, "('{}',", cor_id)?;
+        match &self.station_id {
+            Some(sid) => write!(writer, "'{}'", sid)?,
+            None => write!(writer, "NULL")?,
+        }
+        write!(writer, ",ST_GeomFromText('POLYGON((")?;
+        Ok(())
+    }
 }
+
+const SQL_SEGMENTS: &'static str = &"BEGIN;
+DROP TABLE segments;
+CREATE TABLE segments (
+    sid BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name TEXT,
+    station TEXT,
+    detector TEXT,
+    way GEOMETRY (Geometry, 3857)
+);
+INSERT INTO segments (name, station, way) VALUES
+";
 
 impl Corridor {
     /// Create a new corridor
     fn new(cor_id: CorridorId) -> Self {
-        debug!("Corridor::new {:?}", &cor_id);
+        debug!("Corridor::new {}", &cor_id);
         let nodes = vec![];
         let count = 0;
         Corridor {
@@ -337,53 +361,62 @@ impl Corridor {
             None => 0,
         };
         debug!(
-            "order_nodes: {:?}, count: {} of {}",
+            "order_nodes: {}, count: {} of {}",
             self.cor_id,
             self.count,
             self.nodes.len(),
         );
-        if self.cor_id.roadway == "I-494" {
-            self.create_segments();
+        if self.cor_id.roadway == "I-494"
+            && self.cor_id.travel_dir == TravelDir::EB
+        {
+            self.create_segments().unwrap();
         }
     }
 
     /// Create segments for all zoom levels
-    fn create_segments(&self) {
+    fn create_segments(&self) -> Result<(), std::io::Error> {
         let pts = self.create_points();
         info!("{}: {} normals", self.cor_id, pts.len());
-        let mut prev: Option<(Pt64, Pt64)> = None;
-        for i in 0..pts.len() {
-            let upstream = vector_upstream(&pts, i);
-            let downstream = vector_downstream(&pts, i);
-            let v0 = match (upstream, downstream) {
-                (Some(up), Some(down)) => (up + down).normalize(),
-                (Some(up), None) => up,
-                (None, Some(down)) => down,
-                (None, None) => todo!("use corridor direction"),
-            };
-            let norm = v0.left();
-            let inner = pts[i] + norm * 5.0; // FIXME use road_class scale
-            let outer = pts[i] + norm * 10.0; // FIXME use road_class scale
-            if let Some((pin, pout)) = prev {
-                let mut polygon = String::new();
-                write!(
-                    polygon,
-                    "POLYGON({:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2})",
-                    pin.x(),
-                    pin.y(),
-                    pout.x(),
-                    pout.y(),
-                    outer.x(),
-                    outer.y(),
-                    inner.x(),
-                    inner.y(),
-                )
-                .unwrap();
-                // FIXME: update DB table
-                println!("{}", polygon);
-            }
-            prev = Some((inner, outer));
+        if pts.is_empty() {
+            return Ok(());
         }
+        let norms = create_norms(&pts);
+        let mut file = std::fs::File::create("segments.sql")?;
+        let mut poly = Vec::<Pt64>::with_capacity(32);
+        let mut distance = 0.0;
+        let mut sid = None;
+        let nodes = &self.nodes[..];
+        write!(file, "{}", SQL_SEGMENTS)?;
+        for (ref node, (pt, norm)) in nodes.iter().zip(pts.iter().zip(norms)) {
+            let outer = *pt + norm * 100.0; // FIXME use road_class scale
+            let inner = *pt + norm * 5.0; // FIXME use road_class scale
+            if !poly.is_empty() {
+                // FIXME: break segment if distance too far
+                if node.station_id != sid {
+                    write!(file, ",{:.2} {:.2}", outer.x(), outer.y())?;
+                    write!(file, ",{:.2} {:.2}", inner.x(), inner.y())?;
+                    for pt in poly.drain(..).rev() {
+                        write!(file, ",{:.2} {:.2}", pt.x(), pt.y())?;
+                    }
+                    writeln!(file, "))',3857)),")?;
+                }
+            }
+            if poly.is_empty() {
+                node.write_to(&mut file)?;
+                poly.push(outer);
+            } else {
+                write!(file, ",")?;
+            }
+            write!(file, "{:.2} {:.2}", outer.x(), outer.y())?;
+            poly.push(inner);
+            sid = node.station_id.clone();
+        }
+        for pt in poly.drain(..).rev() {
+            write!(file, ",{:.2} {:.2}", pt.x(), pt.y())?;
+        }
+        writeln!(file, "))',3857));")?;
+        writeln!(file, "COMMIT;")?;
+        Ok(())
     }
 
     /// Create points for corridor nodes
@@ -398,7 +431,7 @@ impl Corridor {
     /// Add a node to corridor
     fn add_node(&mut self, node: RNode, ordered: bool) {
         debug!(
-            "add_node {} to {:?} ({} + 1)",
+            "add_node {} to {} ({} + 1)",
             &node.name,
             &self.cor_id,
             self.nodes.len()
@@ -413,7 +446,7 @@ impl Corridor {
     /// Update a node
     fn update_node(&mut self, node: RNode, ordered: bool) {
         debug!(
-            "update_node {} to {:?} ({})",
+            "update_node {} to {} ({})",
             &node.name,
             &self.cor_id,
             self.nodes.len()
@@ -435,7 +468,7 @@ impl Corridor {
     /// Remove a node
     fn remove_node(&mut self, name: &str, ordered: bool) {
         debug!(
-            "remove_node {} from {:?} ({} - 1)",
+            "remove_node {} from {} ({} - 1)",
             &name,
             &self.cor_id,
             self.nodes.len()
@@ -450,6 +483,22 @@ impl Corridor {
             None => error!("remove_node: {} not found", name),
         }
     }
+}
+
+fn create_norms(pts: &[Pt64]) -> Vec<Pt64> {
+    let mut norms = vec![];
+    for i in 0..pts.len() {
+        let upstream = vector_upstream(&pts, i);
+        let downstream = vector_downstream(&pts, i);
+        let v0 = match (upstream, downstream) {
+            (Some(up), Some(down)) => (up + down).normalize(),
+            (Some(up), None) => up,
+            (None, Some(down)) => down,
+            (None, None) => todo!("use corridor direction"),
+        };
+        norms.push(v0.left());
+    }
+    norms
 }
 
 /// Get vector from upstream point to current point
