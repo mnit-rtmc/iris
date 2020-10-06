@@ -243,15 +243,14 @@ impl RNode {
         }
     }
 
-    fn write_to<W: Write>(&self, writer: &mut W) -> Result<(), std::io::Error> {
-        let cor_id = self.cor_id().unwrap();
-        write!(writer, "('{}',", cor_id)?;
-        match &self.station_id {
-            Some(sid) => write!(writer, "'{}'", sid)?,
-            None => write!(writer, "NULL")?,
-        }
-        write!(writer, ",ST_GeomFromText('POLYGON((")?;
-        Ok(())
+    /// Check if node should break segment
+    fn is_break(&self) -> bool {
+        self.station_id.is_some() || self.is_common()
+    }
+
+    /// Check if node is a common section
+    fn is_common(&self) -> bool {
+        self.transition == 6 // COMMON
     }
 }
 
@@ -378,7 +377,8 @@ impl Corridor {
         info!("{}: {} normals", self.cor_id, pts.len());
         if !pts.is_empty() {
             let norms = create_norms(&pts);
-            self.create_segments_zoom(writer, &pts, &norms, 8)?;
+            let meters = self.create_meterpoints();
+            self.create_segments_zoom(writer, &pts, &norms, &meters, 8)?;
         }
         Ok(())
     }
@@ -389,44 +389,38 @@ impl Corridor {
         writer: &mut W,
         pts: &[Pt64],
         norms: &[Pt64],
+        meters: &[f64],
         zoom: u32,
     ) -> Result<(), std::io::Error> {
-        let mut poly = Vec::<Pt64>::with_capacity(16);
-        let mut distance = 0.0;
-        let mut sid = None;
+        let mut poly = Vec::<(Pt64, Pt64)>::with_capacity(16);
+        let mut seg_meter = 0.0;
+        let mut p_meter = 0.0;
+        let mut station_id = None;
         let nodes = &self.nodes[..];
-        for (ref node, (pt, norm)) in nodes.iter().zip(pts.iter().zip(norms)) {
+        for (ref node, (pt, (norm, meter))) in
+            nodes.iter().zip(pts.iter().zip(norms.iter().zip(meters)))
+        {
+            let too_long = *meter >= seg_meter + 2500.0;
             let outer = *pt + *norm * 100.0; // FIXME use road_class scale
             let inner = *pt + *norm * 5.0; // FIXME use road_class scale
-            if let Some(prev) = poly.pop() {
-                if poly.len() > 2 {
-                    write!(writer, ",")?;
-                } else {
-                    node.write_to(writer)?;
+            if node.is_break() || too_long {
+                if *meter < p_meter + 2500.0 {
+                    poly.push((outer, inner));
                 }
-                write!(writer, "{:.2} {:.2}", prev.x(), prev.y())?;
-                poly.push(inner);
-                poly.push(outer);
-                // FIXME: break segment if distance too far
-                if node.station_id != sid {
-                    for pt in poly.drain(..).rev() {
-                        write!(writer, ",{:.2} {:.2}", pt.x(), pt.y())?;
-                    }
-                    writeln!(writer, "))',3857)),")?;
+                if poly.len() > 1 {
+                    self.write_segment(writer, &station_id, &poly)?;
                 }
+                poly.clear();
+                seg_meter = *meter;
+                station_id = node.station_id.clone();
             }
-            if poly.is_empty() {
-                poly.push(outer);
-                poly.push(inner);
-                poly.push(outer);
+            if !node.is_common() {
+                poly.push((outer, inner));
             }
-            sid = node.station_id.clone();
+            p_meter = *meter;
         }
-        if poly.len() > 3 {
-            for pt in poly.drain(..).rev() {
-                write!(writer, ",{:.2} {:.2}", pt.x(), pt.y())?;
-            }
-            writeln!(writer, "))',3857)),")?;
+        if poly.len() > 1 {
+            self.write_segment(writer, &station_id, &poly)?;
         }
         Ok(())
     }
@@ -438,6 +432,53 @@ impl Corridor {
             .filter_map(|n| n.pos())
             .map(|p| Pt64::from(WebMercatorPos::from(p)))
             .collect()
+    }
+
+    /// Create meter-points for corridor nodes
+    fn create_meterpoints(&self) -> Vec<f64> {
+        let mut meters = vec![];
+        let mut meter = 0.0;
+        let mut ppos: Option<Wgs84Pos> = None;
+        for pos in self.nodes.iter().filter_map(|n| n.pos()) {
+            if let Some(ppos) = ppos {
+                meter += pos.distance_haversine(&ppos);
+            }
+            meters.push(meter);
+            ppos = Some(pos);
+        }
+        meters
+    }
+
+    /// Write segment to a writer
+    fn write_segment<W: Write>(
+        &self,
+        writer: &mut W,
+        station_id: &Option<String>,
+        poly: &[(Pt64, Pt64)],
+    ) -> Result<(), std::io::Error> {
+        write!(writer, "('{}',", self.cor_id)?;
+        match station_id {
+            Some(sid) => write!(writer, "'{}'", sid)?,
+            None => write!(writer, "NULL")?,
+        }
+        write!(writer, ",ST_GeomFromText('POLYGON((")?;
+        let mut first = true;
+        for (vtx, _) in poly {
+            if first {
+                first = false;
+            } else {
+                write!(writer, ",")?;
+            }
+            write!(writer, "{:.2} {:.2}", vtx.x(), vtx.y())?;
+        }
+        for (_, vtx) in poly.iter().rev() {
+            write!(writer, ",{:.2} {:.2}", vtx.x(), vtx.y())?;
+        }
+        if let Some((vtx, _)) = poly.iter().next() {
+            write!(writer, ",{:.2} {:.2}", vtx.x(), vtx.y())?;
+        }
+        writeln!(writer, "))',3857)),")?;
+        Ok(())
     }
 
     /// Add a node to corridor
