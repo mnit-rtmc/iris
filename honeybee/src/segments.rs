@@ -261,10 +261,10 @@ impl RNode {
     }
 }
 
-const SQL_SEGMENTS: &'static str = &"BEGIN;
-DROP TABLE segments;
+const SQL_SEGMENTS_BEGIN: &'static str = &"BEGIN;
+DROP TABLE IF EXISTS segments;
 CREATE TABLE segments (
-    sid BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    sid BIGINT GENERATED ALWAYS AS IDENTITY,
     name TEXT,
     station TEXT,
     detector TEXT,
@@ -272,6 +272,13 @@ CREATE TABLE segments (
 );
 INSERT INTO segments (name, station, way) VALUES
 ";
+
+const SQL_SEGMENTS_COMMIT: &'static str = &"
+CREATE INDEX segments_way_idx
+          ON segments
+       USING gist (way)
+        WITH (fillfactor='100');
+COMMIT;";
 
 impl Corridor {
     /// Create a new corridor
@@ -366,56 +373,67 @@ impl Corridor {
             self.count,
             self.nodes.len(),
         );
-        if self.cor_id.roadway == "I-494"
-            && self.cor_id.travel_dir == TravelDir::EB
-        {
-            self.create_segments().unwrap();
-        }
     }
 
     /// Create segments for all zoom levels
-    fn create_segments(&self) -> Result<(), std::io::Error> {
+    fn create_segments<W: Write>(
+        &self,
+        writer: &mut W,
+    ) -> Result<(), std::io::Error> {
         let pts = self.create_points();
         info!("{}: {} normals", self.cor_id, pts.len());
-        if pts.is_empty() {
-            return Ok(());
+        if !pts.is_empty() {
+            let norms = create_norms(&pts);
+            self.create_segments_zoom(writer, &pts, &norms, 8)?;
         }
-        let norms = create_norms(&pts);
-        let mut file = std::fs::File::create("segments.sql")?;
-        let mut poly = Vec::<Pt64>::with_capacity(32);
+        Ok(())
+    }
+
+    /// Create segments for one zoom level
+    fn create_segments_zoom<W: Write>(
+        &self,
+        writer: &mut W,
+        pts: &[Pt64],
+        norms: &[Pt64],
+        zoom: u32,
+    ) -> Result<(), std::io::Error> {
+        let mut poly = Vec::<Pt64>::with_capacity(16);
         let mut distance = 0.0;
         let mut sid = None;
         let nodes = &self.nodes[..];
-        write!(file, "{}", SQL_SEGMENTS)?;
         for (ref node, (pt, norm)) in nodes.iter().zip(pts.iter().zip(norms)) {
-            let outer = *pt + norm * 100.0; // FIXME use road_class scale
-            let inner = *pt + norm * 5.0; // FIXME use road_class scale
-            if !poly.is_empty() {
+            let outer = *pt + *norm * 100.0; // FIXME use road_class scale
+            let inner = *pt + *norm * 5.0; // FIXME use road_class scale
+            if let Some(prev) = poly.pop() {
+                if poly.len() > 2 {
+                    write!(writer, ",")?;
+                } else {
+                    node.write_to(writer)?;
+                }
+                write!(writer, "{:.2} {:.2}", prev.x(), prev.y())?;
+                poly.push(inner);
+                poly.push(outer);
                 // FIXME: break segment if distance too far
                 if node.station_id != sid {
-                    write!(file, ",{:.2} {:.2}", outer.x(), outer.y())?;
-                    write!(file, ",{:.2} {:.2}", inner.x(), inner.y())?;
                     for pt in poly.drain(..).rev() {
-                        write!(file, ",{:.2} {:.2}", pt.x(), pt.y())?;
+                        write!(writer, ",{:.2} {:.2}", pt.x(), pt.y())?;
                     }
-                    writeln!(file, "))',3857)),")?;
+                    writeln!(writer, "))',3857)),")?;
                 }
             }
             if poly.is_empty() {
-                node.write_to(&mut file)?;
                 poly.push(outer);
-            } else {
-                write!(file, ",")?;
+                poly.push(inner);
+                poly.push(outer);
             }
-            write!(file, "{:.2} {:.2}", outer.x(), outer.y())?;
-            poly.push(inner);
             sid = node.station_id.clone();
         }
-        for pt in poly.drain(..).rev() {
-            write!(file, ",{:.2} {:.2}", pt.x(), pt.y())?;
+        if poly.len() > 3 {
+            for pt in poly.drain(..).rev() {
+                write!(writer, ",{:.2} {:.2}", pt.x(), pt.y())?;
+            }
+            writeln!(writer, "))',3857)),")?;
         }
-        writeln!(file, "))',3857));")?;
-        writeln!(file, "COMMIT;")?;
         Ok(())
     }
 
@@ -587,9 +605,13 @@ impl SegmentState {
     fn set_ordered(&mut self, ordered: bool) {
         self.ordered = ordered;
         if ordered {
+            let mut file = std::fs::File::create("segments.sql").unwrap();
+            write!(file, "{}", SQL_SEGMENTS_BEGIN).unwrap();
             for cor in self.corridors.values_mut() {
                 cor.order_nodes();
+                cor.create_segments(&mut file).unwrap();
             }
+            writeln!(file, "{}", SQL_SEGMENTS_COMMIT).unwrap();
         }
     }
 
