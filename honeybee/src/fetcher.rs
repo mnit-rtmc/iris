@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::segments::{receive_nodes, RNodeMsg};
+use crate::segments::{receive_nodes, SegMsg};
 use crate::{resource, Result};
 use fallible_iterator::FallibleIterator;
 use postgres::{Connection, TlsMode};
@@ -67,8 +67,8 @@ fn time_zone() -> Option<String> {
 /// Receive PostgreSQL notifications, and fetch needed resources.
 ///
 /// * `conn` The database connection.
-/// * `sender` Sender for RNode messages.
-fn notify_loop(conn: &Connection, sender: Sender<RNodeMsg>) -> Result<()> {
+/// * `sender` Sender for segment messages.
+fn notify_loop(conn: &Connection, sender: Sender<SegMsg>) -> Result<()> {
     let nots = conn.notifications();
     let mut ns = HashSet::new();
     loop {

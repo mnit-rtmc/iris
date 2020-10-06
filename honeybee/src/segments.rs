@@ -52,22 +52,16 @@ pub struct RNode {
     notes: String,
 }
 
-/// RNode notification message
-pub enum RNodeMsg {
-    /// Add or update an RNode
-    AddUpdate(RNode),
+/// Segment notification message
+pub enum SegMsg {
+    /// Update (or add) an RNode
+    UpdateNode(RNode),
     /// Remove an RNode
-    Remove(String),
+    RemoveNode(String),
     /// Enable/disable ordering for all RNodes
     Order(bool),
     /// Road class, direction or scale has changed
     Road(String),
-}
-
-impl From<RNode> for RNodeMsg {
-    fn from(node: RNode) -> Self {
-        RNodeMsg::AddUpdate(node)
-    }
 }
 
 /// General direction of travel
@@ -542,8 +536,8 @@ fn vector_downstream(pts: &[Pt64], i: usize) -> Option<Pt64> {
 }
 
 impl SegmentState {
-    /// Add or update a node
-    fn add_update_node(&mut self, node: RNode) {
+    /// Update (or add) a node
+    fn update_node(&mut self, node: RNode) {
         match node.cor_id() {
             Some(ref cor_id) => {
                 match self.node_cors.insert(node.name.clone(), cor_id.clone()) {
@@ -627,15 +621,15 @@ impl SegmentState {
     }
 }
 
-/// Receive roadway nodes and update corridor segments
-pub fn receive_nodes(receiver: Receiver<RNodeMsg>) {
+/// Receive segment messages and update corridor segments
+pub fn receive_nodes(receiver: Receiver<SegMsg>) {
     let mut state = SegmentState::default();
     loop {
         match receiver.recv().unwrap() {
-            RNodeMsg::AddUpdate(node) => state.add_update_node(node),
-            RNodeMsg::Remove(name) => state.remove_node(&name),
-            RNodeMsg::Order(ordered) => state.set_ordered(ordered),
-            RNodeMsg::Road(road) => state.update_road(road),
+            SegMsg::UpdateNode(node) => state.update_node(node),
+            SegMsg::RemoveNode(name) => state.remove_node(&name),
+            SegMsg::Order(ordered) => state.set_ordered(ordered),
+            SegMsg::Road(road) => state.update_road(road),
         }
         debug!("total corridors: {}", state.corridors.len());
     }

@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::segments::{RNode, RNodeMsg};
+use crate::segments::{RNode, SegMsg};
 use crate::signmsg::render_all;
 use crate::Result;
 use postgres::Connection;
@@ -347,14 +347,14 @@ fn fetch_simple<W: Write>(
 /// Fetch all r_nodes.
 ///
 /// * `conn` The database connection.
-/// * `sender` Sender for RNode messages.
-fn fetch_all_nodes(conn: &Connection, sender: &Sender<RNodeMsg>) -> Result<()> {
+/// * `sender` Sender for segment messages.
+fn fetch_all_nodes(conn: &Connection, sender: &Sender<SegMsg>) -> Result<()> {
     debug!("fetch_all_nodes");
-    sender.send(RNodeMsg::Order(false))?;
+    sender.send(SegMsg::Order(false))?;
     for row in &conn.query(RNode::SQL_ALL, &[])? {
-        sender.send(RNode::from_row(&row).into())?;
+        sender.send(SegMsg::UpdateNode(RNode::from_row(&row)))?;
     }
-    sender.send(RNodeMsg::Order(true))?;
+    sender.send(SegMsg::Order(true))?;
     Ok(())
 }
 
@@ -362,21 +362,21 @@ fn fetch_all_nodes(conn: &Connection, sender: &Sender<RNodeMsg>) -> Result<()> {
 ///
 /// * `conn` The database connection.
 /// * `name` RNode name.
-/// * `sender` Sender for RNode messages.
+/// * `sender` Sender for segment messages.
 fn fetch_one_node(
     conn: &Connection,
     name: &str,
-    sender: &Sender<RNodeMsg>,
+    sender: &Sender<SegMsg>,
 ) -> Result<()> {
     debug!("fetch_one_node: {}", name);
     let rows = &conn.query(RNode::SQL_ONE, &[&name])?;
     if rows.len() == 1 {
         for row in rows.iter() {
-            sender.send(RNode::from_row(&row).into())?;
+            sender.send(SegMsg::UpdateNode(RNode::from_row(&row)))?;
         }
     } else {
         assert!(rows.is_empty());
-        sender.send(RNodeMsg::Remove(name.to_string()))?;
+        sender.send(SegMsg::RemoveNode(name.to_string()))?;
     }
     Ok(())
 }
@@ -395,12 +395,12 @@ impl Resource {
     ///
     /// * `conn` The database connection.
     /// * `payload` Postgres NOTIFY payload.
-    /// * `sender` Sender for RNode messages.
+    /// * `sender` Sender for segment messages.
     fn fetch(
         &self,
         conn: &Connection,
         payload: &str,
-        sender: &Sender<RNodeMsg>,
+        sender: &Sender<SegMsg>,
     ) -> Result<()> {
         match self {
             Resource::RNode(_) => self.fetch_nodes(conn, payload, sender),
@@ -413,12 +413,12 @@ impl Resource {
     ///
     /// * `conn` The database connection.
     /// * `payload` Postgres NOTIFY payload.
-    /// * `sender` Sender for RNode messages.
+    /// * `sender` Sender for segment messages.
     fn fetch_nodes(
         &self,
         conn: &Connection,
         payload: &str,
-        sender: &Sender<RNodeMsg>,
+        sender: &Sender<SegMsg>,
     ) -> Result<()> {
         if payload == "" {
             fetch_all_nodes(conn, sender)
@@ -479,8 +479,8 @@ pub fn listen_all(conn: &Connection) -> Result<()> {
 /// Fetch all resources.
 ///
 /// * `conn` The database connection.
-/// * `sender` Sender for RNode messages.
-pub fn fetch_all(conn: &Connection, sender: &Sender<RNodeMsg>) -> Result<()> {
+/// * `sender` Sender for segment messages.
+pub fn fetch_all(conn: &Connection, sender: &Sender<SegMsg>) -> Result<()> {
     for r in ALL {
         r.fetch(&conn, "", sender)?;
     }
@@ -492,12 +492,12 @@ pub fn fetch_all(conn: &Connection, sender: &Sender<RNodeMsg>) -> Result<()> {
 /// * `conn` The database connection.
 /// * `chan` Channel name.
 /// * `payload` Notification payload.
-/// * `sender` Sender for RNode messages.
+/// * `sender` Sender for segment messages.
 pub fn notify(
     conn: &Connection,
     chan: &str,
     payload: &str,
-    sender: &Sender<RNodeMsg>,
+    sender: &Sender<SegMsg>,
 ) -> Result<()> {
     debug!("notify: {}, {}", &chan, &payload);
     let mut found = false;
