@@ -1,0 +1,120 @@
+# Example earthwyrm configuration for IRIS
+bind_address: 127.0.0.1:3030
+document_root: /var/local/earthwyrm
+tile_extent: 256
+edge_extent: 6
+query_limit: 500000
+
+table: polygon
+  db_table: planet_osm_polygon
+  id_column: osm_id
+  geom_column: way
+  geom_type: polygon
+
+table: line
+  db_table: planet_osm_line
+  id_column: osm_id
+  geom_column: way
+  geom_type: linestring
+
+table: roads
+  db_table: planet_osm_roads
+  id_column: osm_id
+  geom_column: way
+  geom_type: linestring
+
+table: point
+  db_table: planet_osm_point
+  id_column: osm_id
+  geom_column: way
+  geom_type: point
+
+table: segments
+  db_table: segments
+  id_column: sid
+  zoom_column: zoom
+  geom_column: way
+  geom_type: polygon
+
+layer_group: tile
+  layer: county
+    table: polygon
+    zoom: 4-14
+    tags: boundary=administrative admin_level=6 ?population
+  layer: city
+    table: polygon
+    zoom: 10+
+    tags: boundary=administrative admin_level=8 ?population
+  layer: leisure
+    table: polygon
+    zoom: 13+
+    tags: leisure
+  layer: lake
+    table: polygon
+    zoom: 5+
+    tags: natural=water water=lake|oxbow
+  layer: river
+    table: polygon
+    zoom: 5+
+    tags: natural=water water=river
+  layer: water
+    table: polygon
+    zoom: 12+
+    tags: natural=water water!=lake|oxbow|river|pond
+  layer: pond
+    table: polygon
+    zoom: 14+
+    tags: natural=water water=pond
+  layer: basin
+    table: polygon
+    zoom: 14+
+    tags: landuse=basin
+  layer: wetland
+    table: polygon
+    zoom: 12+
+    tags: natural=wetland
+  layer: retail
+    table: polygon
+    zoom: 14+
+    tags: landuse=retail
+  layer: motorway
+    table: roads
+    zoom: 8+
+    tags: highway=motorway|motorway_link ?ref
+  layer: trunk
+    table: roads
+    zoom: 9+
+    tags: highway=trunk|trunk_link ?ref
+  layer: primary
+    table: roads
+    zoom: 10+
+    tags: highway=primary|primary_link ?ref
+  layer: secondary
+    table: roads
+    zoom: 12+
+    tags: highway=secondary|secondary_link ?ref
+  layer: tertiary
+    table: line
+    zoom: 13+
+    tags: highway=tertiary|tertiary_link ?ref
+  layer: roads
+    table: line
+    zoom: 14+
+    tags: highway=unclassified|residential|living_street|service|road ?ref
+  layer: paths
+    table: line
+    zoom: 15+
+    tags: highway=pedestrian|footway|track|bridleway|steps|corridor|cycleway|path
+  layer: parking
+    table: polygon
+    zoom: 15+
+    tags: amenity=parking
+  layer: building
+    table: polygon
+    zoom: 15+
+    tags: building
+layer_group: tms
+  layer: segments
+    table: segments
+    zoom: 10-18
+    tags: ?station

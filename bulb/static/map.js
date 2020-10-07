@@ -32,7 +32,7 @@ function init_map() {
         zoom: 12,
     });
     var osm_url = "http://127.0.0.1/tile/{z}/{x}/{y}.mvt";
-    var iris_url = "http://127.0.0.1/iris/{z}/{x}/{y}.mvt";
+    var tms_url = "http://127.0.0.1/tms/{z}/{x}/{y}.mvt";
     var highlight_style = {
         fill: true,
         fillColor: 'red',
@@ -73,7 +73,7 @@ function init_map() {
         fillOpacity: 0.7,
         fillColor: "#bca9a9",
         weight: 0.7,
-        color: "#bca9a9",
+        color: "#baa",
     };
     var retail = {
         fill: true,
@@ -85,6 +85,13 @@ function init_map() {
         fill: true,
         fillOpacity: 0.6,
         fillColor: "#cca",
+        stroke: false,
+        weight: 1,
+    };
+    var segments = {
+        fill: true,
+        fillOpacity: 1,
+        fillColor: "#282",
         stroke: false,
     };
     var styles = {
@@ -102,12 +109,12 @@ function init_map() {
         trunk: { color: "#ffe0a9" },
         primary: { color: "#ffeaa9" },
         secondary: { color: "#fff4a9" },
-        tertiary: { color: "#ffffa9" },
-        roads: { color: "#eee", weight: 2 },
+        tertiary: { color: "#ffffa9", weight: 2 },
+        roads: { color: "#eee", weight: 1.5 },
         paths: { color: "#333", weight: 1, dashArray: "1 3" },
         building: building,
         parking: parking,
-
+        segments: segments,
         dms: {
             radius: 4,
             fillColor: '#44d',
@@ -116,30 +123,32 @@ function init_map() {
             weight: 0.1,
             color: '#000',
         },
-
     };
     var options = {
         renderFactory: L.svg.tile,
         interactive: true,
         vectorTileLayerStyles: styles,
         getFeatureId: function(feat) {
-            return feat.properties.osm_id;
+            return feat.properties.osm_id || feat.properties.sid;
         },
         attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
         maxNativeZoom: 18,
     };
     var highlight;
     var osm_layers = L.vectorGrid.protobuf(osm_url, options);
-    osm_layers.on('click', function(e) {
-        var osm_id = e.layer.properties.osm_id;
+    var tms_layers = L.vectorGrid.protobuf(tms_url, options);
+    function on_click(e) {
+        var osm_id = e.layer.properties.osm_id || e.layer.properties.sid;
         var change = (typeof osm_id != "undefined") && (osm_id != highlight);
         if (highlight) {
             osm_layers.resetFeatureStyle(highlight);
+            tms_layers.resetFeatureStyle(highlight);
             highlight = null;
         }
         if (change) {
             highlight = osm_id;
             osm_layers.setFeatureStyle(highlight, highlight_style);
+            tms_layers.setFeatureStyle(highlight, highlight_style);
             var name = e.layer.properties.ref || e.layer.properties.name;
             if (typeof name != "undefined") {
                 L.popup({ closeButton: false})
@@ -151,10 +160,11 @@ function init_map() {
             map.closePopup();
         }
         L.DomEvent.stop(e);
-    });
+    }
+    osm_layers.on('click', on_click);
+    tms_layers.on('click', on_click);
     osm_layers.addTo(map);
-    var iris_layers = L.vectorGrid.protobuf(iris_url, options);
-    iris_layers.addTo(map);
+    tms_layers.addTo(map);
 }
 
 window.onload = init_map;
