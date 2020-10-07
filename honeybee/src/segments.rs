@@ -21,9 +21,19 @@ use std::fmt;
 use std::io::Write;
 use std::sync::mpsc::Receiver;
 
+/// Road definition
+#[derive(Debug)]
+pub struct Road {
+    name: String,
+    abbrev: String,
+    r_class: i16,
+    direction: i16,
+    scale: f32,
+}
+
 /// Geographic location
 #[derive(Debug)]
-struct GeoLoc {
+pub struct GeoLoc {
     roadway: Option<String>,
     road_dir: Option<i16>,
     cross_mod: Option<i16>,
@@ -54,14 +64,14 @@ pub struct RNode {
 
 /// Segment notification message
 pub enum SegMsg {
+    /// Update (or add) a Road
+    UpdateRoad(Road),
     /// Update (or add) an RNode
     UpdateNode(RNode),
     /// Remove an RNode
     RemoveNode(String),
     /// Enable/disable ordering for all RNodes
     Order(bool),
-    /// Road class, direction or scale has changed
-    Road(String),
 }
 
 /// General direction of travel
@@ -111,6 +121,8 @@ struct CorridorId {
 struct Corridor {
     /// Corridor ID
     cor_id: CorridorId,
+    /// Road class scale
+    scale: f64,
     /// Nodes ordered by corridor direction
     nodes: Vec<RNode>,
     /// Valid node count
@@ -120,6 +132,8 @@ struct Corridor {
 /// State of all segments
 #[derive(Default)]
 struct SegmentState {
+    /// Mapping of roads
+    roads: HashMap<String, Road>,
     /// Mapping of node names to corridor IDs
     node_cors: HashMap<String, CorridorId>,
     /// Mapping of corridor IDs to Corridors
@@ -254,6 +268,32 @@ impl RNode {
     }
 }
 
+impl Road {
+    /// SQL query for all Roads
+    pub const SQL_ALL: &'static str =
+        "SELECT name, abbrev, r_class, direction, scale \
+        FROM iris.road \
+        JOIN iris.road_class ON r_class = id";
+
+    /// SQL query for one Road
+    pub const SQL_ONE: &'static str =
+        "SELECT name, abbrev, r_class, direction, scale \
+        FROM iris.road \
+        JOIN iris.road_class ON r_class = id \
+        WHERE name = $1";
+
+    /// Create a Road from a result Row
+    pub fn from_row(row: &Row) -> Self {
+        Road {
+            name: row.get(0),
+            abbrev: row.get(1),
+            r_class: row.get(2),
+            direction: row.get(3),
+            scale: row.get(4),
+        }
+    }
+}
+
 const SQL_SEGMENTS_BEGIN: &'static str = &"BEGIN;
 DROP TABLE IF EXISTS segments;
 CREATE TABLE segments (
@@ -276,12 +316,13 @@ COMMIT;";
 
 impl Corridor {
     /// Create a new corridor
-    fn new(cor_id: CorridorId) -> Self {
+    fn new(cor_id: CorridorId, scale: f64) -> Self {
         debug!("Corridor::new {}", &cor_id);
         let nodes = vec![];
         let count = 0;
         Corridor {
             cor_id,
+            scale,
             nodes,
             count,
         }
@@ -395,6 +436,8 @@ impl Corridor {
         meters: &[f64],
         zoom: u32,
     ) -> Result<(), std::io::Error> {
+        let o_scale = scale_zoom(self.scale * 16.0, zoom);
+        let i_scale = scale_zoom(self.scale, zoom);
         let mut poly = Vec::<(Pt64, Pt64)>::with_capacity(16);
         let mut seg_meter = 0.0;
         let mut p_meter = 0.0;
@@ -404,8 +447,8 @@ impl Corridor {
             nodes.iter().zip(pts.iter().zip(norms.iter().zip(meters)))
         {
             let too_long = *meter >= seg_meter + 2500.0;
-            let outer = *pt + scale_zoom(*norm, 16.0, zoom);
-            let inner = *pt + scale_zoom(*norm, 1.0, zoom);
+            let outer = *pt + *norm * o_scale;
+            let inner = *pt + *norm * i_scale;
             if node.is_break() || too_long {
                 if *meter < p_meter + 2500.0 {
                     poly.push((outer, inner));
@@ -583,14 +626,19 @@ fn vector_downstream(pts: &[Pt64], i: usize) -> Option<Pt64> {
 }
 
 /// Scale a vector normal with zoom level
-fn scale_zoom(norm: Pt64, scale: f64, zoom: u32) -> Pt64 {
-    let zs = f64::from(1 << (16 - 16.min(zoom)));
-    // FIXME use road_class scale
-    let scale = f64::from(scale) * zs;
-    norm * scale
+fn scale_zoom(scale: f64, zoom: u32) -> f64 {
+    scale * f64::from(1 << (16 - 16.min(zoom)))
 }
 
 impl SegmentState {
+    /// Get scale for a road
+    fn scale(&self, road: &str) -> f64 {
+        self.roads
+            .get(road)
+            .map(|r| f64::from(r.scale / 6.0))
+            .unwrap_or(1.0)
+    }
+
     /// Update (or add) a node
     fn update_node(&mut self, node: RNode) {
         match node.cor_id() {
@@ -613,7 +661,8 @@ impl SegmentState {
         match self.corridors.get_mut(&cid) {
             Some(cor) => cor.add_node(node, self.ordered),
             None => {
-                let mut cor = Corridor::new(cid.clone());
+                let scale = self.scale(&cid.roadway);
+                let mut cor = Corridor::new(cid.clone(), scale);
                 cor.add_node(node, self.ordered);
                 self.corridors.insert(cid.clone(), cor);
             }
@@ -665,11 +714,17 @@ impl SegmentState {
     }
 
     /// Update a road class or scale
-    fn update_road(&mut self, road: String) {
+    fn update_road(&mut self, road: Road) {
+        debug!("update_road {}", road.name);
+        let name = road.name.clone();
+        self.roads.insert(name.clone(), road);
         if self.ordered {
+            let scale = self.scale(&name);
             for cor in self.corridors.values_mut() {
-                if cor.cor_id.roadway == road {
+                if cor.cor_id.roadway == name {
+                    cor.scale = scale;
                     cor.order_nodes();
+                    // FIXME: create segments
                 }
             }
         }
@@ -681,10 +736,10 @@ pub fn receive_nodes(receiver: Receiver<SegMsg>) {
     let mut state = SegmentState::default();
     loop {
         match receiver.recv().unwrap() {
+            SegMsg::UpdateRoad(road) => state.update_road(road),
             SegMsg::UpdateNode(node) => state.update_node(node),
             SegMsg::RemoveNode(name) => state.remove_node(&name),
             SegMsg::Order(ordered) => state.set_ordered(ordered),
-            SegMsg::Road(road) => state.update_road(road),
         }
         debug!("total corridors: {}", state.corridors.len());
     }

@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::segments::{RNode, SegMsg};
+use crate::segments::{RNode, Road, SegMsg};
 use crate::signmsg::render_all;
 use crate::Result;
 use postgres::Connection;
@@ -104,6 +104,11 @@ enum Resource {
     /// * Listen specification.
     RNode(Listen),
 
+    /// Road resource.
+    ///
+    /// * Listen specification.
+    Road(Listen),
+
     /// Simple file resource.
     ///
     /// * File name.
@@ -135,7 +140,7 @@ const DMS_ATTRIBUTE_RES: Resource = Resource::Simple(
     "dms_attribute",
     Listen::All("system_attribute"),
     "SELECT jsonb_object_agg(name, value)::text \
- FROM dms_attribute_view",
+    FROM dms_attribute_view",
 );
 
 /// DMS resource
@@ -198,12 +203,15 @@ const INCIDENT_RES: Resource = Resource::Simple(
     SELECT name, event_date, description, road, direction, lane_type, \
            impact, confirmed, camera, detail, replaces, lat, lon \
     FROM incident_view \
-    WHERE cleared = false \
+    WHERE cleared = false\
 ) r",
 );
 
 /// RNode resource
 const R_NODE_RES: Resource = Resource::RNode(Listen::All("r_node"));
+
+/// Road resource
+const ROAD_RES: Resource = Resource::Road(Listen::All("road"));
 
 /// Sign configuration resource
 const SIGN_CONFIG_RES: Resource = Resource::Simple(
@@ -307,6 +315,7 @@ const ALL: &[Resource] = &[
     FONT_RES,
     GRAPHIC_RES,
     INCIDENT_RES,
+    ROAD_RES, // Roads must be loaded before R_Nodes
     R_NODE_RES,
     SIGN_CONFIG_RES,
     SIGN_DETAIL_RES,
@@ -381,11 +390,42 @@ fn fetch_one_node(
     Ok(())
 }
 
+/// Fetch all roads.
+///
+/// * `conn` The database connection.
+/// * `sender` Sender for segment messages.
+fn fetch_all_roads(conn: &Connection, sender: &Sender<SegMsg>) -> Result<()> {
+    debug!("fetch_all_roads");
+    for row in &conn.query(Road::SQL_ALL, &[])? {
+        sender.send(SegMsg::UpdateRoad(Road::from_row(&row)))?;
+    }
+    Ok(())
+}
+
+/// Fetch one road.
+///
+/// * `conn` The database connection.
+/// * `name` Road name.
+/// * `sender` Sender for segment messages.
+fn fetch_one_road(
+    conn: &Connection,
+    name: &str,
+    sender: &Sender<SegMsg>,
+) -> Result<()> {
+    debug!("fetch_one_road: {}", name);
+    let rows = &conn.query(Road::SQL_ONE, &[&name])?;
+    if let Some(row) = rows.iter().next() {
+        sender.send(SegMsg::UpdateRoad(Road::from_row(&row)))?;
+    }
+    Ok(())
+}
+
 impl Resource {
     /// Get the listen value
     fn listen(&self) -> &Listen {
         match self {
             Resource::RNode(lsn) => &lsn,
+            Resource::Road(lsn) => &lsn,
             Resource::Simple(_, lsn, _) => &lsn,
             Resource::SignMsg(_, lsn, _) => &lsn,
         }
@@ -404,6 +444,7 @@ impl Resource {
     ) -> Result<()> {
         match self {
             Resource::RNode(_) => self.fetch_nodes(conn, payload, sender),
+            Resource::Road(_) => self.fetch_roads(conn, payload, sender),
             Resource::Simple(n, _, _) => self.fetch_file(conn, n),
             Resource::SignMsg(n, _, _) => self.fetch_sign_msgs(conn, n),
         }
@@ -424,6 +465,24 @@ impl Resource {
             fetch_all_nodes(conn, sender)
         } else {
             fetch_one_node(conn, payload, sender)
+        }
+    }
+
+    /// Fetch road resource from a connection.
+    ///
+    /// * `conn` The database connection.
+    /// * `payload` Postgres NOTIFY payload.
+    /// * `sender` Sender for segment messages.
+    fn fetch_roads(
+        &self,
+        conn: &Connection,
+        payload: &str,
+        sender: &Sender<SegMsg>,
+    ) -> Result<()> {
+        if payload == "" {
+            fetch_all_roads(conn, sender)
+        } else {
+            fetch_one_road(conn, payload, sender)
         }
     }
 
@@ -451,6 +510,7 @@ impl Resource {
     fn fetch_writer<W: Write>(&self, conn: &Connection, w: W) -> Result<u32> {
         match self {
             Resource::RNode(_) => unreachable!(),
+            Resource::Road(_) => unreachable!(),
             Resource::Simple(_, _, sql) => fetch_simple(conn, sql, w),
             Resource::SignMsg(_, _, sql) => fetch_simple(conn, sql, w),
         }
