@@ -6,17 +6,14 @@ This document tracks progress on the web-based user interface for IRIS.
 
 ## Major Systems
 
-* earthwyrm
-  [Earthwyrm] is a web mapping service for [MVT], or Mapbox Vector Tiles.
-  Layers can be made from [OpenStreetMap] data in addition to IRIS devices,
-  such as DMS.
-* honeybee
-  Honeybee is a web service for JSON data in addition to rendered GIF images of
-  DMS.  It is included in the IRIS repository.
-* bulb
-  Bulb is the web front-end for IRIS.  The mapping portion uses the [Leaflet]
-  JavaScript library.  The rest of the code is written in Rust, compiled as
-  WebAssembly.
+- **earthwyrm** — [Earthwyrm] is a web mapping service for [MVT], or Mapbox
+  Vector Tiles.  Layers can be made from [OpenStreetMap] data in addition to
+  IRIS devices, such as DMS.
+- **honeybee** — Honeybee is a web service for JSON data in addition to rendered
+  GIF images of DMS.  It is included in the IRIS repository.
+- **bulb** — Bulb is the web front-end for IRIS.  The mapping portion uses the
+  [Leaflet] JavaScript library.  The rest of the code is written in Rust,
+  compiled as WebAssembly.
 
 ## Phase 1 — Segment Map
 
