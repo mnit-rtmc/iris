@@ -261,9 +261,10 @@ CREATE TABLE segments (
     name TEXT,
     station TEXT,
     detector TEXT,
+    zoom INTEGER,
     way GEOMETRY (Geometry, 3857)
 );
-INSERT INTO segments (name, station, way) VALUES
+INSERT INTO segments (name, station, zoom, way) VALUES
 ";
 
 const SQL_SEGMENTS_COMMIT: &'static str = &"
@@ -374,11 +375,13 @@ impl Corridor {
         writer: &mut W,
     ) -> Result<(), std::io::Error> {
         let pts = self.create_points();
-        info!("{}: {} normals", self.cor_id, pts.len());
+        info!("{}: {} points", self.cor_id, pts.len());
         if !pts.is_empty() {
             let norms = create_norms(&pts);
             let meters = self.create_meterpoints();
-            self.create_segments_zoom(writer, &pts, &norms, &meters, 8)?;
+            for zoom in 10..=18 {
+                self.create_segments_zoom(writer, &pts, &norms, &meters, zoom)?;
+            }
         }
         Ok(())
     }
@@ -401,14 +404,14 @@ impl Corridor {
             nodes.iter().zip(pts.iter().zip(norms.iter().zip(meters)))
         {
             let too_long = *meter >= seg_meter + 2500.0;
-            let outer = *pt + *norm * 100.0; // FIXME use road_class scale
-            let inner = *pt + *norm * 5.0; // FIXME use road_class scale
+            let outer = *pt + scale_zoom(*norm, 16.0, zoom);
+            let inner = *pt + scale_zoom(*norm, 1.0, zoom);
             if node.is_break() || too_long {
                 if *meter < p_meter + 2500.0 {
                     poly.push((outer, inner));
                 }
                 if poly.len() > 1 {
-                    self.write_segment(writer, &station_id, &poly)?;
+                    self.write_segment(writer, &station_id, &poly, zoom)?;
                 }
                 poly.clear();
                 seg_meter = *meter;
@@ -420,7 +423,7 @@ impl Corridor {
             p_meter = *meter;
         }
         if poly.len() > 1 {
-            self.write_segment(writer, &station_id, &poly)?;
+            self.write_segment(writer, &station_id, &poly, zoom)?;
         }
         Ok(())
     }
@@ -455,12 +458,14 @@ impl Corridor {
         writer: &mut W,
         station_id: &Option<String>,
         poly: &[(Pt64, Pt64)],
+        zoom: u32,
     ) -> Result<(), std::io::Error> {
         write!(writer, "('{}',", self.cor_id)?;
         match station_id {
             Some(sid) => write!(writer, "'{}'", sid)?,
             None => write!(writer, "NULL")?,
         }
+        write!(writer, ",{}", zoom)?;
         write!(writer, ",ST_GeomFromText('POLYGON((")?;
         let mut first = true;
         for (vtx, _) in poly {
@@ -538,6 +543,7 @@ impl Corridor {
     }
 }
 
+/// Create normal vectors for a slice of points
 fn create_norms(pts: &[Pt64]) -> Vec<Pt64> {
     let mut norms = vec![];
     for i in 0..pts.len() {
@@ -574,6 +580,14 @@ fn vector_downstream(pts: &[Pt64], i: usize) -> Option<Pt64> {
         }
     }
     None
+}
+
+/// Scale a vector normal with zoom level
+fn scale_zoom(norm: Pt64, scale: f64, zoom: u32) -> Pt64 {
+    let zs = f64::from(1 << (16 - 16.min(zoom)));
+    // FIXME use road_class scale
+    let scale = f64::from(scale) * zs;
+    norm * scale
 }
 
 impl SegmentState {
