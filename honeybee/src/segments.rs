@@ -19,8 +19,10 @@ use postgis::ewkb::{LineString, Point, Polygon};
 use postgres::types::ToSql;
 use postgres::{Client, Row, Statement, Transaction};
 use std::cmp::Ordering;
+use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::fmt;
+use std::hash::{Hash, Hasher};
 use std::sync::mpsc::Receiver;
 
 /// Road definition
@@ -123,6 +125,8 @@ struct CorridorId {
 struct Corridor {
     /// Corridor ID
     cor_id: CorridorId,
+    /// Base SID
+    base_sid: i64,
     /// Road class scale
     scale: f64,
     /// Nodes ordered by corridor direction
@@ -297,42 +301,15 @@ impl Road {
     }
 }
 
-/// Create the segments table
-fn create_segment_table(trans: &mut Transaction) -> crate::Result<()> {
-    trans.execute("DROP TABLE IF EXISTS segments", &[])?;
-    trans.execute(
-    "CREATE TABLE segments (
-    sid BIGINT GENERATED ALWAYS AS IDENTITY,
-    name TEXT,
-    station TEXT,
-    detector TEXT,
-    zoom INTEGER,
-    way GEOMETRY (Geometry, 3857))",
-        &[],
-    )?;
-    Ok(())
-}
-
-/// Create the segments index
-fn create_segment_index(trans: &mut Transaction) -> crate::Result<()> {
-    trans.execute(
-        "CREATE INDEX segments_way_idx
-    ON segments
-    USING gist (way)
-    WITH (fillfactor='100')",
-        &[],
-    )?;
-    Ok(())
-}
-
 impl Corridor {
     /// Create a new corridor
-    fn new(cor_id: CorridorId, scale: f64) -> Self {
+    fn new(cor_id: CorridorId, base_sid: i64, scale: f64) -> Self {
         debug!("Corridor::new {}", &cor_id);
         let nodes = vec![];
         let count = 0;
         Corridor {
             cor_id,
+            base_sid,
             scale,
             nodes,
             count,
@@ -435,7 +412,14 @@ impl Corridor {
             let meters = self.create_meterpoints();
             for zoom in 10..=18 {
                 self.create_segments_zoom(
-                    trans, statement, &cor_name, &pts, &norms, &meters, zoom,
+                    trans,
+                    statement,
+                    self.base_sid,
+                    &cor_name,
+                    &pts,
+                    &norms,
+                    &meters,
+                    zoom,
                 )?;
             }
         }
@@ -447,6 +431,7 @@ impl Corridor {
         &self,
         trans: &mut Transaction,
         statement: &Statement,
+        mut sid: i64,
         cor_name: &str,
         pts: &[Pt64],
         norms: &[Pt64],
@@ -472,9 +457,10 @@ impl Corridor {
                 }
                 if poly.len() > 1 {
                     let way = self.create_way(&poly);
-                    let params: [&(dyn ToSql + Sync); 4] =
-                        [&cor_name, &station_id, &zoom, &way];
+                    let params: [&(dyn ToSql + Sync); 5] =
+                        [&sid, &cor_name, &station_id, &zoom, &way];
                     trans.execute(statement, &params).unwrap();
+                    sid += 1;
                 }
                 poly.clear();
                 seg_meter = *meter;
@@ -487,8 +473,8 @@ impl Corridor {
         }
         if poly.len() > 1 {
             let way = self.create_way(&poly);
-            let params: [&(dyn ToSql + Sync); 4] =
-                [&cor_name, &station_id, &zoom, &way];
+            let params: [&(dyn ToSql + Sync); 5] =
+                [&sid, &cor_name, &station_id, &zoom, &way];
             trans.execute(statement, &params[..]).unwrap();
         }
         Ok(())
@@ -640,6 +626,11 @@ fn scale_zoom(scale: f64, zoom: i32) -> f64 {
 }
 
 impl SegmentState {
+    /// SQL to insert one segment row
+    const SQL_INSERT: &'static str = "INSERT INTO \
+        segments (sid, name, station, zoom, way) \
+        VALUES ($1, $2, $3, $4, $5)";
+
     /// Create a new segment state
     fn new(client: Client) -> Self {
         SegmentState {
@@ -681,8 +672,14 @@ impl SegmentState {
         match self.corridors.get_mut(&cid) {
             Some(cor) => cor.add_node(node, self.ordered),
             None => {
+                // Leaflet doesn't like it when we use the high bits...
+                let base_sid = 0xFFFF_FFFF_FFFF & {
+                    let mut hasher = DefaultHasher::new();
+                    cid.hash(&mut hasher);
+                    hasher.finish()
+                } as i64;
                 let scale = self.scale(&cid.roadway);
-                let mut cor = Corridor::new(cid.clone(), scale);
+                let mut cor = Corridor::new(cid.clone(), base_sid, scale);
                 cor.add_node(node, self.ordered);
                 self.corridors.insert(cid.clone(), cor);
             }
@@ -724,18 +721,11 @@ impl SegmentState {
         self.ordered = ordered;
         if ordered {
             let mut trans = self.client.transaction().unwrap();
-            create_segment_table(&mut trans).unwrap();
-            let statement = trans
-                .prepare(
-                    "INSERT INTO segments (name, station, zoom, way)
-VALUES ($1, $2, $3, $4)",
-                )
-                .unwrap();
+            let statement = trans.prepare(SegmentState::SQL_INSERT).unwrap();
             for cor in self.corridors.values_mut() {
                 cor.order_nodes();
                 cor.create_segments(&mut trans, &statement).unwrap();
             }
-            create_segment_index(&mut trans).unwrap();
             trans.commit().unwrap();
         }
     }
