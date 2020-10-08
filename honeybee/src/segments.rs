@@ -12,13 +12,15 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::fetcher::create_client;
 use crate::geo::{WebMercatorPos, Wgs84Pos};
 use pointy::Pt64;
-use postgres::Row;
+use postgis::ewkb::{LineString, Point, Polygon};
+use postgres::types::ToSql;
+use postgres::{Client, Row, Statement, Transaction};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::fmt;
-use std::io::Write;
 use std::sync::mpsc::Receiver;
 
 /// Road definition
@@ -130,8 +132,9 @@ struct Corridor {
 }
 
 /// State of all segments
-#[derive(Default)]
 struct SegmentState {
+    /// Postgres DB client
+    client: Client,
     /// Mapping of roads
     roads: HashMap<String, Road>,
     /// Mapping of node names to corridor IDs
@@ -294,25 +297,33 @@ impl Road {
     }
 }
 
-const SQL_SEGMENTS_BEGIN: &str = &"BEGIN;
-DROP TABLE IF EXISTS segments;
-CREATE TABLE segments (
+/// Create the segments table
+fn create_segment_table(trans: &mut Transaction) -> crate::Result<()> {
+    trans.execute("DROP TABLE IF EXISTS segments", &[])?;
+    trans.execute(
+    "CREATE TABLE segments (
     sid BIGINT GENERATED ALWAYS AS IDENTITY,
     name TEXT,
     station TEXT,
     detector TEXT,
     zoom INTEGER,
-    way GEOMETRY (Geometry, 3857)
-);
-INSERT INTO segments (name, station, zoom, way) VALUES
-";
+    way GEOMETRY (Geometry, 3857))",
+        &[],
+    )?;
+    Ok(())
+}
 
-const SQL_SEGMENTS_COMMIT: &str = &"
-CREATE INDEX segments_way_idx
-          ON segments
-       USING gist (way)
-        WITH (fillfactor='100');
-COMMIT;";
+/// Create the segments index
+fn create_segment_index(trans: &mut Transaction) -> crate::Result<()> {
+    trans.execute(
+        "CREATE INDEX segments_way_idx
+    ON segments
+    USING gist (way)
+    WITH (fillfactor='100')",
+        &[],
+    )?;
+    Ok(())
+}
 
 impl Corridor {
     /// Create a new corridor
@@ -411,31 +422,37 @@ impl Corridor {
     }
 
     /// Create segments for all zoom levels
-    fn create_segments<W: Write>(
+    fn create_segments(
         &self,
-        writer: &mut W,
-    ) -> Result<(), std::io::Error> {
+        trans: &mut Transaction,
+        statement: &Statement,
+    ) -> crate::Result<()> {
         let pts = self.create_points();
+        let cor_name = self.cor_id.to_string();
         info!("{}: {} points", self.cor_id, pts.len());
         if !pts.is_empty() {
             let norms = create_norms(&pts);
             let meters = self.create_meterpoints();
             for zoom in 10..=18 {
-                self.create_segments_zoom(writer, &pts, &norms, &meters, zoom)?;
+                self.create_segments_zoom(
+                    trans, statement, &cor_name, &pts, &norms, &meters, zoom,
+                )?;
             }
         }
         Ok(())
     }
 
     /// Create segments for one zoom level
-    fn create_segments_zoom<W: Write>(
+    fn create_segments_zoom(
         &self,
-        writer: &mut W,
+        trans: &mut Transaction,
+        statement: &Statement,
+        cor_name: &str,
         pts: &[Pt64],
         norms: &[Pt64],
         meters: &[f64],
-        zoom: u32,
-    ) -> Result<(), std::io::Error> {
+        zoom: i32,
+    ) -> crate::Result<()> {
         let o_scale = scale_zoom(self.scale * 16.0, zoom);
         let i_scale = scale_zoom(self.scale, zoom);
         let mut poly = Vec::<(Pt64, Pt64)>::with_capacity(16);
@@ -454,7 +471,10 @@ impl Corridor {
                     poly.push((outer, inner));
                 }
                 if poly.len() > 1 {
-                    self.write_segment(writer, &station_id, &poly, zoom)?;
+                    let way = self.create_way(&poly);
+                    let params: [&(dyn ToSql + Sync); 4] =
+                        [&cor_name, &station_id, &zoom, &way];
+                    trans.execute(statement, &params).unwrap();
                 }
                 poly.clear();
                 seg_meter = *meter;
@@ -466,7 +486,10 @@ impl Corridor {
             p_meter = *meter;
         }
         if poly.len() > 1 {
-            self.write_segment(writer, &station_id, &poly, zoom)?;
+            let way = self.create_way(&poly);
+            let params: [&(dyn ToSql + Sync); 4] =
+                [&cor_name, &station_id, &zoom, &way];
+            trans.execute(statement, &params[..]).unwrap();
         }
         Ok(())
     }
@@ -495,38 +518,24 @@ impl Corridor {
         meters
     }
 
-    /// Write segment to a writer
-    fn write_segment<W: Write>(
-        &self,
-        writer: &mut W,
-        station_id: &Option<String>,
-        poly: &[(Pt64, Pt64)],
-        zoom: u32,
-    ) -> Result<(), std::io::Error> {
-        write!(writer, "('{}',", self.cor_id)?;
-        match station_id {
-            Some(sid) => write!(writer, "'{}'", sid)?,
-            None => write!(writer, "NULL")?,
-        }
-        write!(writer, ",{}", zoom)?;
-        write!(writer, ",ST_GeomFromText('POLYGON((")?;
-        let mut first = true;
+    /// Create polygon for way column
+    fn create_way(&self, poly: &[(Pt64, Pt64)]) -> Polygon {
+        let mut points = vec![];
         for (vtx, _) in poly {
-            if first {
-                first = false;
-            } else {
-                write!(writer, ",")?;
-            }
-            write!(writer, "{:.2} {:.2}", vtx.x(), vtx.y())?;
+            points.push(Point::new(vtx.x(), vtx.y(), None));
         }
         for (_, vtx) in poly.iter().rev() {
-            write!(writer, ",{:.2} {:.2}", vtx.x(), vtx.y())?;
+            points.push(Point::new(vtx.x(), vtx.y(), None));
         }
         if let Some((vtx, _)) = poly.iter().next() {
-            write!(writer, ",{:.2} {:.2}", vtx.x(), vtx.y())?;
+            points.push(Point::new(vtx.x(), vtx.y(), None));
         }
-        writeln!(writer, "))',3857)),")?;
-        Ok(())
+        let mut linestring = LineString::new();
+        linestring.points = points;
+        let mut way = Polygon::new();
+        way.rings.push(linestring);
+        way.srid = Some(3857);
+        way
     }
 
     /// Add a node to corridor
@@ -626,11 +635,22 @@ fn vector_downstream(pts: &[Pt64], i: usize) -> Option<Pt64> {
 }
 
 /// Scale a vector normal with zoom level
-fn scale_zoom(scale: f64, zoom: u32) -> f64 {
+fn scale_zoom(scale: f64, zoom: i32) -> f64 {
     scale * f64::from(1 << (16 - 16.min(zoom)))
 }
 
 impl SegmentState {
+    /// Create a new segment state
+    fn new(client: Client) -> Self {
+        SegmentState {
+            client,
+            roads: HashMap::default(),
+            corridors: HashMap::default(),
+            node_cors: HashMap::default(),
+            ordered: false,
+        }
+    }
+
     /// Get scale for a road
     fn scale(&self, road: &str) -> f64 {
         self.roads
@@ -703,13 +723,20 @@ impl SegmentState {
     fn set_ordered(&mut self, ordered: bool) {
         self.ordered = ordered;
         if ordered {
-            let mut file = std::fs::File::create("segments.sql").unwrap();
-            write!(file, "{}", SQL_SEGMENTS_BEGIN).unwrap();
+            let mut trans = self.client.transaction().unwrap();
+            create_segment_table(&mut trans).unwrap();
+            let statement = trans
+                .prepare(
+                    "INSERT INTO segments (name, station, zoom, way)
+VALUES ($1, $2, $3, $4)",
+                )
+                .unwrap();
             for cor in self.corridors.values_mut() {
                 cor.order_nodes();
-                cor.create_segments(&mut file).unwrap();
+                cor.create_segments(&mut trans, &statement).unwrap();
             }
-            writeln!(file, "{}", SQL_SEGMENTS_COMMIT).unwrap();
+            create_segment_index(&mut trans).unwrap();
+            trans.commit().unwrap();
         }
     }
 
@@ -733,7 +760,8 @@ impl SegmentState {
 
 /// Receive segment messages and update corridor segments
 pub fn receive_nodes(receiver: Receiver<SegMsg>) {
-    let mut state = SegmentState::default();
+    let client = create_client("earthwyrm").unwrap();
+    let mut state = SegmentState::new(client);
     loop {
         match receiver.recv().unwrap() {
             SegMsg::UpdateRoad(road) => state.update_road(road),

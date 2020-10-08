@@ -26,17 +26,17 @@ use std::time::Duration;
 pub fn start() -> Result<()> {
     let (sender, receiver) = std::sync::mpsc::channel();
     thread::spawn(move || receive_nodes(receiver));
-    let mut client = create_client()?;
+    let mut client = create_client("tms")?;
     resource::listen_all(&mut client)?;
     resource::fetch_all(&mut client, &sender)?;
     notify_loop(&mut client, sender)
 }
 
 /// Create database client
-fn create_client() -> Result<Client> {
+pub fn create_client(db: &str) -> Result<Client> {
     let username = whoami::username();
     // Format path for unix domain socket -- not worth using percent_encode
-    let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
+    let uds = format!("postgres://{}@%2Frun%2Fpostgresql/{}", username, db);
     let mut client = Client::connect(&uds, NoTls)?;
     // The postgres crate sets the session time zone to UTC.
     // We need to set it back to LOCAL time zone, so that row_to_json
@@ -71,9 +71,9 @@ fn time_zone() -> Option<String> {
 /// * `sender` Sender for segment messages.
 fn notify_loop(client: &mut Client, sender: Sender<SegMsg>) -> Result<()> {
     loop {
-        let mut ns = pending_notifications(client)?;
-        for n in ns.drain() {
-            resource::notify(client, &n.0, &n.1, &sender)?;
+        let mut nots = pending_notifications(client)?;
+        for (channel, payload) in nots.drain() {
+            resource::notify(client, &channel, &payload, &sender)?;
         }
     }
 }
