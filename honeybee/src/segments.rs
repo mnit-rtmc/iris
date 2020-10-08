@@ -14,7 +14,7 @@
 //
 use crate::geo::{WebMercatorPos, Wgs84Pos};
 use pointy::Pt64;
-use postgres::rows::Row;
+use postgres::Row;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::fmt;
@@ -294,7 +294,7 @@ impl Road {
     }
 }
 
-const SQL_SEGMENTS_BEGIN: &'static str = &"BEGIN;
+const SQL_SEGMENTS_BEGIN: &str = &"BEGIN;
 DROP TABLE IF EXISTS segments;
 CREATE TABLE segments (
     sid BIGINT GENERATED ALWAYS AS IDENTITY,
@@ -307,7 +307,7 @@ CREATE TABLE segments (
 INSERT INTO segments (name, station, zoom, way) VALUES
 ";
 
-const SQL_SEGMENTS_COMMIT: &'static str = &"
+const SQL_SEGMENTS_COMMIT: &str = &"
 CREATE INDEX segments_way_idx
           ON segments
        USING gist (way)
