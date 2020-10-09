@@ -483,7 +483,7 @@ impl MsgData {
     /// Load message data from a file path
     fn load(dir: &Path) -> Result<Self> {
         debug!("MsgData::load");
-        let attrs = MsgData::load_dms_attributes(dir)?;
+        let attrs = MsgData::load_system_attributes(dir)?;
         let configs = SignConfig::load(dir)?;
         let fonts = load_fonts(dir)?;
         let graphics = load_graphics(dir)?;
@@ -495,17 +495,19 @@ impl MsgData {
         })
     }
 
-    /// Load DMS attributes from a JSON file
-    fn load_dms_attributes(dir: &Path) -> Result<HashMap<String, String>> {
-        debug!("load_dms_attributes");
+    /// Load system attributes from a JSON file
+    fn load_system_attributes(dir: &Path) -> Result<HashMap<String, String>> {
+        debug!("load_system_attributes");
         let mut n = PathBuf::new();
         n.push(dir);
-        n.push("dms_attribute");
+        n.push("system_attribute");
         let r = BufReader::new(File::open(&n)?);
         let mut j: Vec<HashMap<String, String>> = serde_json::from_reader(r)?;
         match j.pop() {
             Some(da) => Ok(da),
-            _ => Err(UnknownResourceError::new("DMS attributes".to_string())),
+            _ => {
+                Err(UnknownResourceError::new("system attributes".to_string()))
+            }
         }
     }
 

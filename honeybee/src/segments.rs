@@ -325,7 +325,12 @@ impl Road {
 
 impl Corridor {
     /// Create a new corridor
-    fn new(cor_id: CorridorId, base_sid: i64, r_class: i16, scale: f64) -> Self {
+    fn new(
+        cor_id: CorridorId,
+        base_sid: i64,
+        r_class: i16,
+        scale: f64,
+    ) -> Self {
         debug!("Corridor::new {}", &cor_id);
         let nodes = vec![];
         let count = 0;
@@ -635,7 +640,7 @@ fn road_class_zoom(r_class: i16, zoom: i32) -> bool {
         3 => zoom >= 13, // COLLECTOR
         4 => zoom >= 12, // ARTERIAL
         5 => zoom >= 11, // EXPRESSWAY
-        6 => zoom >= 9, // FREEWAY
+        6 => zoom >= 9,  // FREEWAY
         7 => zoom >= 13, // CD ROAD
         _ => false,
     }
@@ -699,10 +704,7 @@ impl SegmentState {
 
     /// Get road class
     fn r_class(&self, road: &str) -> i16 {
-        self.roads
-            .get(road)
-            .map(|r| r.r_class)
-            .unwrap_or(0)
+        self.roads.get(road).map(|r| r.r_class).unwrap_or(0)
     }
 
     /// Get scale for a road
@@ -743,7 +745,8 @@ impl SegmentState {
                 } as i64;
                 let r_class = self.r_class(&cid.roadway);
                 let scale = self.scale(&cid.roadway);
-                let mut cor = Corridor::new(cid.clone(), base_sid, r_class, scale);
+                let mut cor =
+                    Corridor::new(cid.clone(), base_sid, r_class, scale);
                 cor.add_node(node, self.ordered);
                 self.corridors.insert(cid.clone(), cor);
             }
