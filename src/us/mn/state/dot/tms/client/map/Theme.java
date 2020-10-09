@@ -114,4 +114,9 @@ public class Theme {
 	public Icon getLegend(Style sty) {
 		return symbol.getLegend(sty);
 	}
+	
+	/** Get the symbol for this theme */
+	public Symbol getSymbol() {
+		return symbol;
+	}
 }

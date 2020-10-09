@@ -34,6 +34,11 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
 
+	/** Get the proxy manager */
+	public ProxyManager<T> getManager() {
+		return manager;
+	}
+	
 	/** Get the tab ID */
 	public String getTabId() {
 		return manager.getSonarType();
@@ -84,6 +89,11 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 	/** Initialize the map tab */
 	abstract public void initialize();
 
+	/** Perform any operations that need to happen after the tab is added to
+	 *  the ScreenPane. By default this does nothing.
+	 */
+	public void postInit() { }
+	
 	/** Perform any clean up necessary */
 	public void dispose() {
 		ProxySelectionModel<T> mdl = getSelectionModel();
@@ -93,7 +103,7 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 	}
 
 	/** Side panel for this tab */
-	private SidePanel side_pnl;
+	protected SidePanel side_pnl;
 
 	/** Set the side panel */
 	public void setSidePanel(SidePanel p) {
@@ -118,4 +128,9 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 	public boolean isSelectedTab() {
 		return side_pnl.getSelectedTab() == this;
 	}
+	
+	/** Set a proxy for selection. Must be implemented by child classes to do
+	 *  anything.
+	 */
+	public void setSelectedProxy(T proxy) { }
 }

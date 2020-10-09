@@ -42,6 +42,9 @@ import javax.swing.JToolTip;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
+import us.mn.state.dot.tms.client.proxy.ProxyLayer;
+import us.mn.state.dot.tms.client.proxy.ProxyLayerState;
+
 /**
  * The MapBean class is a container for a MapPane which allows the pane to be
  * scrolled and zoomed.  It has several convenience methods giving access to
@@ -218,6 +221,20 @@ public class MapBean extends JComponent {
 	/** Get a list of the layers contained by this Map */
 	public List<LayerState> getLayers() {
 		return model.getLayers();
+	}
+	
+	/** Get the layer corresponding to the type named tname. */
+	public LayerState getTypeLayer(String tname) {
+		ListIterator<LayerState> it = model.getLayerIterator();
+		while (it.hasPrevious()) {
+			LayerState ls = it.previous();
+			if (ls instanceof ProxyLayerState) {
+				ProxyLayerState<?> pls = (ProxyLayerState<?>) ls;
+				if (pls.getManager().getSonarType().equals(tname))
+					return pls;
+			}
+		}
+		return null;
 	}
 
 	/** Transform a point from screen to world coordinates */

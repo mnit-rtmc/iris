@@ -17,6 +17,7 @@
 package us.mn.state.dot.tms.client;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Properties;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.Capability;
@@ -38,6 +39,8 @@ import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.CameraTemplate;
 import us.mn.state.dot.tms.CameraVidSourceOrder;
+import us.mn.state.dot.tms.CapResponseType;
+import us.mn.state.dot.tms.CapUrgency;
 import us.mn.state.dot.tms.DayMatcher;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DmsAction;
@@ -46,12 +49,16 @@ import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.IpawsAlert;
+import us.mn.state.dot.tms.IpawsAlertConfig;
+import us.mn.state.dot.tms.IpawsAlertDeployer;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.PlanPhase;
+import us.mn.state.dot.tms.PushNotification;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.RoadAffix;
@@ -270,6 +277,54 @@ public class SonarState extends Client {
 		return inc_cache;
 	}
 
+	/** Cache of IpawsAlert objects */
+	private final TypeCache<IpawsAlert> ipaws_alert_cache;
+	
+	/** Get the IPAWS cache */
+	public TypeCache<IpawsAlert> getIpawsAlertCache() {
+		return ipaws_alert_cache;
+	}
+	
+	/** Cache of IpawsAlertDeployer objects */
+	private final TypeCache<IpawsAlertDeployer> ipaws_deployer_cache;
+	
+	/** Get the IPAWS Alert Deployer cache */
+	public TypeCache<IpawsAlertDeployer> getIpawsDeployerCache() {
+		return ipaws_deployer_cache;
+	}
+	
+	/** Cache of IpawsAlertConfig objects */
+	private final TypeCache<IpawsAlertConfig> ipaws_config_cache;
+	
+	/** Get the IPAWS Alert Deployer cache */
+	public TypeCache<IpawsAlertConfig> getIpawsConfigCache() {
+		return ipaws_config_cache;
+	}
+	
+	/** Cache of CapResponseType objects */
+	private final TypeCache<CapResponseType> cap_response_type_cache;
+	
+	/** Get the CapUrgency cache */
+	public TypeCache<CapResponseType> getCapResponseTypeCache() {
+		return cap_response_type_cache;
+	}
+	
+	/** Cache of CapUrgency objects */
+	private final TypeCache<CapUrgency> cap_urgency_cache;
+	
+	/** Get the CapUrgency cache */
+	public TypeCache<CapUrgency> getCapUrgencyCache() {
+		return cap_urgency_cache;
+	}
+
+	/** Cache of PushNotification objects */
+	private final TypeCache<PushNotification> push_notification_cache;
+	
+	/** Get the PushNotification cache */
+	public TypeCache<PushNotification> getPushNotificationCache() {
+		return push_notification_cache;
+	}
+	
 	/** Cache of LCS objects */
 	private final LcsCache lcs_cache;
 
@@ -531,6 +586,16 @@ public class SonarState extends Client {
 		det_cache = new DetCache(this);
 		dms_cache = new DmsCache(this);
 		inc_cache = new IncCache(this);
+		ipaws_alert_cache = new TypeCache<IpawsAlert>(IpawsAlert.class, this);
+		ipaws_deployer_cache = new TypeCache<IpawsAlertDeployer>(
+				IpawsAlertDeployer.class, this);
+		ipaws_config_cache = new TypeCache<IpawsAlertConfig>(
+				IpawsAlertConfig.class, this);
+		cap_response_type_cache = new TypeCache<CapResponseType>(
+				CapResponseType.class, this);
+		cap_urgency_cache = new TypeCache<CapUrgency>(CapUrgency.class, this);
+		push_notification_cache = new TypeCache<PushNotification>(
+				PushNotification.class, this);
 		lcs_cache = new LcsCache(this);
 		gate_arm_array_model = new ProxyListModel<GateArmArray>(
 			gate_arm_arrays);
@@ -660,6 +725,12 @@ public class SonarState extends Client {
 		populateReadable(cam_templates);
 		populateReadable(vid_src_templates);
 		populateReadable(cam_vid_src_order);
+		populateReadable(ipaws_alert_cache);
+		populateReadable(ipaws_deployer_cache);
+		populateReadable(ipaws_config_cache);
+		populateReadable(cap_response_type_cache);
+		populateReadable(cap_urgency_cache);
+		populateReadable(push_notification_cache);
 	}
 
 	/** Look up the specified connection */

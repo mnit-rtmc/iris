@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.BaseEvent;
 import us.mn.state.dot.tms.server.comm.cux50.CUx50;
 import us.mn.state.dot.tms.server.comm.cux50.PrServer;
+import us.mn.state.dot.tms.server.comm.ipaws.IpawsReader;
 import us.mn.state.dot.tms.utils.HttpProxySelector;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.PropertyLoader;
@@ -112,7 +113,8 @@ public class MainServer {
 			auth_provider = new IrisProvider();
 			server.addProvider(auth_provider);
 			System.err.println("IRIS Server active");
-			server.join();
+			//IpawsReader.readIpaws();
+			server.join();			
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -208,6 +210,7 @@ public class MainServer {
 		TIMER.addJob(new ParkingAreaJob());
 		TIMER.addJob(new ReaperJob());
 		TIMER.addJob(new ActionPlanJob(TIMER));
+		TIMER.addJob(new IpawsProcJob());
 	}
 
 	/** Schedule jobs on FLUSH thread */

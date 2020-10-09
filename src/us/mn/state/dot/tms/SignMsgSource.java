@@ -21,19 +21,20 @@ package us.mn.state.dot.tms;
  * @author Douglas Lau
  */
 public enum SignMsgSource {
-	blank,		// 0  blank message
-	operator,	// 1  IRIS operator
-	schedule,	// 2  scheduled DMS action
-	tolling,	// 3  DMS action with [tz...] tag
-	gate_arm,	// 4  gate arm system
-	lcs,		// 5  lane-use control signal
-	aws_deprecated, // 6  automated warning system (use external instead)
-	external,	// 7  external system
-	travel_time,	// 8  DMS action with [tt...] tag
-	incident,	// 9  deployed incident
-	slow_warning,	// 10 slow warning with [slow...] tag
-	speed_advisory,	// 11 speed advisory with [vsa] tag
-	parking;	// 12 parking availability with [pa...] tag
+	blank,          //  0 blank message
+	operator,       //  1 IRIS operator
+	schedule,       //  2 scheduled DMS action
+	tolling,        //  3 DMS action with [tz...] tag
+	gate_arm,       //  4 gate arm system
+	lcs,            //  5 lane-use control signal
+	aws_deprecated, //  6 automated warning system (use external instead)
+	external,       //  7 external system
+	travel_time,    //  8 DMS action with [tt...] tag
+	incident,       //  9 deployed incident
+	slow_warning,   // 10 slow warning with [slow...] tag
+	speed_advisory, // 11 speed advisory with [vsa] tag
+	parking,        // 12 parking availability with [pa...] tag
+	ipaws;          // 13 IPAWS alert system
 
 	/** Get the bit for a source */
 	public int bit() {

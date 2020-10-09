@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.utils.Json;
 
 /**
  * Precipitation sensor sample values.

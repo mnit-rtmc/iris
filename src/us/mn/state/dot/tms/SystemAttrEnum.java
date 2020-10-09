@@ -93,6 +93,7 @@ public enum SystemAttrEnum {
 	EMAIL_RECIPIENT_AWS(String.class),
 	EMAIL_RECIPIENT_DMSXML_REINIT(String.class),
 	EMAIL_RECIPIENT_GATE_ARM(String.class),
+	EMAIL_RECIPIENT_IPAWS(String.class),
 	EMAIL_SENDER_SERVER(String.class),
 	EMAIL_SMTP_HOST(String.class),
 	GATE_ARM_ALERT_TIMEOUT_SECS(90, 10),
@@ -101,6 +102,14 @@ public enum SystemAttrEnum {
 	HELP_TROUBLE_TICKET_URL(String.class),
 	INCIDENT_CLEAR_ADVICE_MULTI(String.class),
 	INCIDENT_CLEAR_SECS(600, 0, 3600),
+	IPAWS_ALERT_PURGE_DAYS(1, 1),
+	IPAWS_DEPLOY_AUTO_MODE(false),
+	IPAWS_DEPLOY_AUTO_TIMEOUT_SECS(0, 0, 43200),      // 12-hours max
+	IPAWS_PRIORITY_WEIGHT_URGENCY(1.0f),
+	IPAWS_PRIORITY_WEIGHT_SEVERITY(1.0f),
+	IPAWS_PRIORITY_WEIGHT_CERTAINTY(1.0f),
+	IPAWS_SIGN_THRESH_AUTO_METERS(1000, 0),
+	IPAWS_SIGN_THRESH_OPT_METERS(4000, 0),
 	MAP_EXTENT_NAME_INITIAL("Home"),
 	MAP_ICON_SIZE_SCALE_MAX(30f, 0f, 9000f),
 	MAP_SEGMENT_MAX_METERS(2000, 100, Change.RESTART_CLIENT),
@@ -113,6 +122,7 @@ public enum SystemAttrEnum {
 	MSG_FEED_VERIFY(true),
 	OPERATION_RETRY_THRESHOLD(3, 1, 20),
 	PRICE_MESSAGE_EVENT_PURGE_DAYS(0, 0),
+	PUSH_NOTIFICATION_TIMEOUT_SECS(900, 0, 43200), // 12-hours max, 15-min def
 	ROUTE_MAX_LEGS(8, 1, 20),
 	ROUTE_MAX_MILES(16, 1, 30),
 	RWIS_HIGH_WIND_SPEED_KPH(40, 0),
@@ -222,6 +232,11 @@ public enum SystemAttrEnum {
 	/** Create an Integer attribute with default and min values */
 	private SystemAttrEnum(int d, int mn, Change ca) {
 		this(Integer.class, d, mn, null, ca);
+	}
+	
+	/** Create a Float attribute with a default value */
+	private SystemAttrEnum(float d) {
+		this(Float.class, d, null, null, Change.NONE);
 	}
 
 	/** Create a Float attribute with default, min and max values */

@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.server.comm.g4.G4Poller;
 import us.mn.state.dot.tms.server.comm.redlion.RedLionPoller;
 import us.mn.state.dot.tms.server.comm.incfeed.IncFeedPoller;
 import us.mn.state.dot.tms.server.comm.infinova.InfinovaPoller;
+import us.mn.state.dot.tms.server.comm.ipaws.IpawsPoller;
 import us.mn.state.dot.tms.server.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.server.comm.mndot.MndotPoller;
 import us.mn.state.dot.tms.server.comm.monstream.MonStreamPoller;
@@ -116,6 +117,8 @@ public class DevicePollerFactory {
 			return new CohuPTZPoller(link, protocol);
 		case STREAMBED:
 			return new StreambedPoller(link);
+		case IPAWS:
+			return new IpawsPoller(link);
 		default:
 			return null;
 		}

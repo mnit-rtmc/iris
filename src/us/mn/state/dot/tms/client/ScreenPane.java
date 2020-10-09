@@ -82,7 +82,7 @@ public class ScreenPane extends JPanel {
 		add(side_panel, BorderLayout.WEST);
 		map_bar = new MapToolBar(map);
 		map_bar.setFloatable(false);
-		tool_bar = new IrisToolBar(map);
+		tool_bar = new IrisToolBar(map, this);
 		tool_bar.setFloatable(false);
 		map_panel = createMapPanel();
 		add(map_panel, BorderLayout.CENTER);
@@ -135,7 +135,7 @@ public class ScreenPane extends JPanel {
 			MapExtent me = extents.get(n);
 			map_bar.addButton(createMapButton(me));
 		}
-		tool_bar.createToolPanels(s);
+		tool_bar.createToolPanels(s, map);
 	}
 
 	/** Build a mapping of extent names to map extents */

@@ -20,6 +20,8 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.METERS;
 import us.mn.state.dot.tms.units.Speed;
+import us.mn.state.dot.tms.utils.Json;
+
 import static us.mn.state.dot.tms.units.Speed.Units.KPH;
 import static us.mn.state.dot.tms.units.Speed.Units.MPS;
 

@@ -14,7 +14,11 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.sql.Array;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.Date;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.SonarException;
@@ -118,6 +122,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		WordImpl.loadAll();
 		DMSImpl.updateAllStyles();
 		RptConduitImpl.loadAll();
+		IpawsAlertImpl.loadAll();
+		IpawsAlertConfigImpl.loadAll();
+		IpawsAlertDeployerImpl.loadAll();
+		CapResponseTypeImpl.loadAll();
+		CapUrgencyImpl.loadAll();
+		PushNotificationImpl.loadAll();
 	}
 
 	/** Get the time as a time stamp */
@@ -337,6 +347,24 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		SonarObject so = lookupObject(PlanPhaseImpl.SONAR_TYPE, name);
 		return (so instanceof PlanPhaseImpl) ? (PlanPhaseImpl)so : null;
 	}
+	
+	/** Lookup an IPAWS Alert Deployer */
+	static protected IpawsAlertDeployerImpl
+				lookupIpawsAlertDeployer(String name) {
+		SonarObject so = lookupObject(
+				IpawsAlertDeployerImpl.SONAR_TYPE, name);
+		return (so instanceof IpawsAlertDeployerImpl)
+				? (IpawsAlertDeployerImpl)so : null;
+	}
+	
+	/** Lookup an IPAWS Alert Config */
+	static protected IpawsAlertConfigImpl
+	lookupIpawsAlertConfig(String name) {
+		SonarObject so = lookupObject(
+				IpawsAlertConfigImpl.SONAR_TYPE, name);
+		return (so instanceof IpawsAlertConfigImpl)
+				? (IpawsAlertConfigImpl) so : null;
+	}
 
 	/** Get the primary key name */
 	@Override
@@ -435,7 +463,10 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			s.removeObject(this);
 	}
 
-	/** Notify SONAR clients of a change to an attribute */
+	/** Notify SONAR clients of a change to an attribute. Attribute names
+	 *  should use lower camel case instead of underscores (e.g.
+	 *  "someAttribute" instead of "some_attribute").
+	 */
 	protected void notifyAttribute(String aname) {
 		Server s = MainServer.server;
 		if (s != null)
@@ -457,6 +488,39 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		nf.setMaximumFractionDigits(5);
 		return nf.format(value);
 	}
+	
+	/** Get a Boolean value from a particular column of a ResultSet. Supports
+	 *  returning null values.
+	 */
+	static protected Boolean getBoolean(ResultSet row, int columnIndex)
+			throws SQLException {
+		boolean b = row.getBoolean(columnIndex);
+		if (row.wasNull())
+			return null;
+		return b;
+	}
+	
+	/** Get a String array from a particular column of a ResultSet. Guards
+	 *  against null pointer exceptions.
+	 */
+	static protected String[] getStringArray(ResultSet row, int columnIndex)
+			throws SQLException {
+		Array arr = row.getArray(columnIndex);
+		if (!row.wasNull())
+			return (String[]) arr.getArray();
+		return null;
+	}
+	
+	/** Get an array representation of a string given a string array. If the
+	 *  array provided is null, null is returned (instead of the string "null"
+	 *  returned by Arrays.toString().
+	 */
+	static protected String arrayToString(String[] a) {
+		if (a != null)
+			return Arrays.toString(a).replace("[", "{").replace("]", "}");
+		return null;
+	}
+	
 
 	/** Log an event */
 	static public void logEvent(final BaseEvent ev) {

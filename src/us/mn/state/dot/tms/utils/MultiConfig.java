@@ -428,7 +428,7 @@ public class MultiConfig {
 			dmsType = DMSType.VMS_FULL;
 		}
 		if (maxMultiLen <= 0) {
-			logError("maxMultiLen = "+maxMultiLen+"; changed to 312");
+			logWarning("maxMultiLen = "+maxMultiLen+"; changed to 312");
 			maxMultiLen = 312;
 		}
 		if (maxPages <= 0) {

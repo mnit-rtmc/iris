@@ -160,7 +160,10 @@ public enum CommProtocol {
 	COHU_HELIOS_PTZ("Cohu Helios PTZ"),
 
 	/** Streambed (41) */
-	STREAMBED("Streambed", false);
+	STREAMBED("Streambed", false),
+	
+	/** IPAWS-OPEN Alert System (42) */
+	IPAWS("IPAWS Alerts", false);
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {

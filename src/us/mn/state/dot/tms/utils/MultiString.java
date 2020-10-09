@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.utils.Multi.OverLimitMode;
  * @author Michael Darter
  * @author Travis Swanston
  * @author John L. Stanley - SRF Consulting
+ * @author Gordon Parikh - SRF Consulting
  */
 public class MultiString {
 
@@ -162,6 +163,12 @@ public class MultiString {
 			parseParking(tag, cb);
 		else if (ltag.startsWith("loc"))
 			parseLocator(tag.substring(3), cb);
+		else if (ltag.startsWith("captime"))
+			parseCapTime(tag.substring(7), cb);
+		else if (ltag.startsWith("capresponse"))
+			parseCapResponse(tag.substring(11), cb);
+		else if (ltag.startsWith("capurgency"))
+			parseCapUrgency(tag.substring(10), cb);
 		else
 			cb.unsupportedTag(tag);
 	}
@@ -375,6 +382,46 @@ public class MultiString {
 		    code.equals("xa") ||
 		    code.equals("mi"))
 			cb.addLocator(code);
+	}
+	
+	/** Parse IPAWS CAP time substitution field tag [captimef_txt,a_txt,p_txt].
+	 *  @param tag CAP time substitution field tag.
+	 *  @param cb Callback to set tag.
+	 */
+	static private void parseCapTime(String tag, Multi cb) {
+		String[] args = tag.split(",", 3);
+		String f_txt = (args.length > 0) ? args[0] : "STARTING AT";
+		String a_txt = (args.length > 1) ? args[1] : "IN EFFECT UNTIL";
+		String p_txt = (args.length > 2) ? args[2] : "ALL CLEAR";
+		cb.addCapTime(f_txt, a_txt, p_txt);
+	}
+
+	/** Parse IPAWS CAP response type substitution field tag
+	 *  [capresponse{rt1,rt1,...,rtn}].
+	 *  @param tag CAP response type substitution field tag.
+	 *  @param cb Callback to set tag.
+	 */
+	static private void parseCapResponse(String tag, Multi cb) {
+		String[] rtypes = {};
+		// if we have any arguments, split on commas to get applicable
+		// response types
+		if (tag.length() > 0)
+			rtypes = tag.split(",");
+		cb.addCapResponse(rtypes);
+	}
+
+	/** Parse IPAWS CAP urgency substitution field tag
+	 *  [capurgency{u1,u1,...,un}].
+	 *  @param tag CAP response type substitution field tag.
+	 *  @param cb Callback to set tag.
+	 */
+	static private void parseCapUrgency(String tag, Multi cb) {
+		String[] uvals = {};
+		// if we have any arguments, split on commas to get applicable urgency
+		// values
+		if (tag.length() > 0)
+			uvals = tag.split(",");
+		cb.addCapUrgency(uvals);
 	}
 
 	/** Test if a parsed speed is valid */

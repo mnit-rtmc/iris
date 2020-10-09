@@ -43,7 +43,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 	protected ProxyTableModel<T> model;
 
 	/** Proxy table */
-	private final ITable table;
+	protected final ITable table;
 
 	/** Scroll pane */
 	private final JScrollPane scroll_pn;

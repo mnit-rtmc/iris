@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
-Class-Path: iris-common-@@VERSION@@.jar mail.jar /usr/share/java/postgresql-jdbc.jar
+Class-Path: iris-common-@@VERSION@@.jar mail.jar /usr/share/java/postgresql-jdbc.jar json-@@JSON.VERSION@@.jar postgis-jdbc-@@POSTGIS.VERSION@@.jar postgis-geometry-@@POSTGIS.VERSION@@.jar 
 Main-Class: us.mn.state.dot.tms.server.MainServer

@@ -134,7 +134,14 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		super(n);
 		notify_tag = nt;
 	}
-
+	
+	/** Create a new geo location */
+	public GeoLocImpl(String n, String nt, Double lt, Double ln) {
+		this(n, nt);
+		lat = lt;
+		lon = ln;
+	}
+	
 	/** Create a new geo location */
 	private GeoLocImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),          // name

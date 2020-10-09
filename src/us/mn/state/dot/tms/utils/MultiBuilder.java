@@ -21,6 +21,7 @@ package us.mn.state.dot.tms.utils;
  *
  * @author Douglas Lau
  * @author John Stanley - SRF Consulting
+ * @author Gordon Parikh - SRF Consulting
  */
 public class MultiBuilder implements Multi {
 
@@ -402,6 +403,57 @@ public class MultiBuilder implements Multi {
 	public void addLocator(String code) {
 		multi.append("[loc");
 		multi.append(code);
+		multi.append("]");
+	}
+	
+	/** Add an IPAWS CAP time substitution field. Text fields can include "{}"
+	 *  to automatically substitute in the appropriate time (alert start or
+	 *  end time), with optional formatting (using Java Date Format notation).
+	 *  @param f_txt Pre-alert text.
+	 *  @param a_txt Alert-active prepend text.
+	 *  @param p_txt Post-alert prepend text.
+	 */
+	@Override
+	public void addCapTime(String f_txt, String a_txt, String p_txt) {
+		multi.append("[captime");
+		multi.append(f_txt);
+		multi.append(",");
+		multi.append(a_txt);
+		multi.append(",");
+		multi.append(p_txt);
+		multi.append("]");
+	}
+
+	/** Add an IPAWS CAP response type substitution field.
+	 *  @param rtypes Optional list of response types to consider.
+	 */
+	@Override
+	public void addCapResponse(String[] rtypes) {
+		multi.append("[capresponse");
+		for (String rt: rtypes) {
+			multi.append(rt);
+			multi.append(",");
+		}
+		// remove any trailing comma if one was added 
+		if (multi.charAt(multi.length()-1) == ',')
+			multi.setLength(multi.length()-1);
+		multi.append("]");
+	}
+
+	/** Add an IPAWS CAP urgency substitution field.
+	 *  @param uvals Optional list of urgency values to consider.
+	 */
+	@Override
+	public void addCapUrgency(String[] uvals) {
+		// TODO Auto-generated method stub
+		multi.append("[capurgency");
+		for (String u: uvals) {
+			multi.append(u);
+			multi.append(",");
+		}
+		// remove any trailing comma if one was added 
+		if (multi.charAt(multi.length()-1) == ',')
+			multi.setLength(multi.length()-1);
 		multi.append("]");
 	}
 }

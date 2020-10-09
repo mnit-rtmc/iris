@@ -65,7 +65,10 @@ public enum ItemStyle {
 	CAMERA,
 	LANE,
 	METER,
-	TIME;
+	TIME,
+	/* Alert styles */
+	PAST,
+	PENDING;
 
 	/** Get a string representation of the item style */
 	@Override

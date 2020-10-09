@@ -113,6 +113,9 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %{_serverdir}/iris-server-%{version}.jar
 %{_serverdir}/iris-common-%{version}.jar
 %{_serverdir}/mail.jar
+%{_serverdir}/json-@@JSON.VERSION@@.jar
+%{_serverdir}/postgis-jdbc-@@POSTGIS.VERSION@@.jar
+%{_serverdir}/postgis-geometry-@@POSTGIS.VERSION@@.jar
 
 # /var/lib/iris
 %dir %attr(3775,tms,tms) /var/lib/iris
@@ -142,6 +145,8 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %{_clientdir}/lib/jna-@@JNA.VERSION@@.jar
 %{_clientdir}/lib/jna-platform-@@JNA.VERSION@@.jar
 %{_clientdir}/lib/gst1-java-core-@@GST.JAVA.VERSION@@.jar
+%{_clientdir}/lib/json-@@JSON.VERSION@@.jar
+%{_clientdir}/lib/postgis-geometry-@@POSTGIS.VERSION@@.jar
 %{_clientdir}/lib/iris-client-%{version}.jar
 %{_clientdir}/lib/iris-common-%{version}.jar
 %attr(0644,tms,apache) %{_clientdir}/session_ids

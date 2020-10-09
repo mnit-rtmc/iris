@@ -19,7 +19,7 @@ import java.awt.geom.Point2D;
 import javax.swing.Icon;
 
 /**
- * A symbol is a graphical representaion of a map object.
+ * A symbol is a graphical representation of a map object.
  *
  * @author Douglas Lau
  */

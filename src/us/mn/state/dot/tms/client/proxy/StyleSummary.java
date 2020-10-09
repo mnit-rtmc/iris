@@ -53,16 +53,16 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	}
 
 	/** Style button rows */
-	static private final int STYLE_ROWS = 2;
+	private final int style_rows;
 
 	/** Get the count of style rows */
-	static private int rowCount(int n_buttons) {
-		return Math.min(n_buttons, STYLE_ROWS);
+	private int rowCount(int n_buttons) {
+		return Math.min(n_buttons, style_rows);
 	}
 
 	/** Get the count of style columns */
-	static private int colCount(int n_buttons) {
-		return Math.min(n_buttons, (n_buttons - 1) / STYLE_ROWS + 1);
+	private int colCount(int n_buttons) {
+		return Math.min(n_buttons, (n_buttons - 1) / style_rows + 1);
 	}
 
 	/** Style button */
@@ -100,7 +100,18 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Proxy list */
 	private final ProxyJList<T> p_list;
+	
+	public ProxyJList<T> getPlist() {
+		return p_list;
+	}
 
+	/** Ensure the selected proxy is visible, adjusting scroll offsets if
+	 *  necessary.
+	 */
+	public void ensureSelectedProxyVisible() {
+		p_list.ensureIndexIsVisible(p_list.getSelectedIndex());
+	}
+	
 	/** List scrollpane */
 	private final JScrollPane s_pane;
 
@@ -127,9 +138,10 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Create a new style summary panel.
 	 * @param m ProxyManager.
 	 * @param ds Default style.
-	 * @param enableCellSizeBtns Flag to enable cell size buttons. */
+	 * @param enableCellSizeBtns Flag to enable cell size buttons.
+	 * @param sr Number of style button rows. */
 	public StyleSummary(ProxyManager<T> m, ItemStyle ds,
-		boolean enableCellSizeBtns)
+		boolean enableCellSizeBtns, int sr)
 	{
 		manager = m;
 		def_style = ds;
@@ -137,6 +149,16 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		buttons = createStyleButtons();
 		p_list = manager.createList();
  		s_pane = new JScrollPane(p_list);
+ 		style_rows = sr;
+	}
+	
+	/** Create a new style summary panel with 2 rows of style buttons.
+	 * @param m ProxyManager.
+	 * @param ds Default style.
+	 * @param enableCellSizeBtns Flag to enable cell size buttons. */
+	public StyleSummary(ProxyManager<T> m, ItemStyle ds,
+		boolean enableCellSizeBtns) {
+		this(m, ds, enableCellSizeBtns, 2);
 	}
 
 	/** Create cell size buttons */
@@ -300,7 +322,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	}
 
 	/** Update the count labels for each style status */
-	private void updateCounts() {
+	public void updateCounts() {
 		if (startButtonUpdate()) {
 			IWorker<Void> worker = new IWorker<Void>() {
 				@Override
@@ -385,7 +407,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	}
 
 	/** Set the selected style */
-	private void setStyle(ItemStyle i_style) {
+	public void setStyle(ItemStyle i_style) {
 		for (StyleButton btn : buttons) {
 			if (i_style == btn.i_style) {
 				btn.setSelected(true);

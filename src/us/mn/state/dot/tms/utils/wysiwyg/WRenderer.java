@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.InvalidMsgException;
@@ -772,7 +773,7 @@ public class WRenderer {
 			this.tok   = null;
 			cp         = 0;
 			wfont      = state.getWFont();
-			foreground = IRIS_TAG_BOX_COLOR;
+			foreground = IRIS_TAG_BOX_COLOR_FULL;
 			wg         = null;
 			c_space    = getCharSpacing();
 		}
@@ -899,8 +900,18 @@ public class WRenderer {
 
 	//- - - - - - - - - - - - - - - - - - - - - -
 
-	static final int IRIS_TAG_BOX_COLOR =
-		new DmsColor(110, 163, 120).rgb(); // Oxley green
+	// Oxley green for full-color DMS
+	static final int IRIS_TAG_BOX_COLOR_FULL =
+		new DmsColor(110, 163, 120).rgb();
+	
+	// regular green for classic color DMS (so we don't hit an error)
+	static final int IRIS_TAG_BOX_COLOR_CLASSIC = DmsColor.GREEN.rgb();
+	
+	// 255 for 8-bit monochrome
+	static final int IRIS_TAG_BOX_COLOR_MONO8 = 255;
+	
+	// 1 for 1-bit monochrome
+	static final int IRIS_TAG_BOX_COLOR_MONO1 = 1;
 	
 	/** IrisTagBox:  A variable width pseudo TextChar.
 	 *  Used to render a solid box which represents
@@ -927,13 +938,29 @@ public class WRenderer {
 				return 0;
 			return wid;
 		}
-
+		
+		/** Get the color to use for the box depending on the color scheme. */
+		int getColor() {
+			switch (raster.colorscheme) {
+			case COLOR_24_BIT:
+				return IRIS_TAG_BOX_COLOR_FULL;
+			case COLOR_CLASSIC:
+				return IRIS_TAG_BOX_COLOR_CLASSIC;
+			case MONOCHROME_8_BIT:
+				return IRIS_TAG_BOX_COLOR_MONO8;
+			case MONOCHROME_1_BIT:
+				return IRIS_TAG_BOX_COLOR_MONO1;
+			default:
+				return 0;
+			}
+		}
+		
 		@Override
 		void render(int x, int base) throws InvalidMsgException {
 			int w = getWidth();
 			int h = getHeight();
 			int y = base - h;
-			int fg = IRIS_TAG_BOX_COLOR;
+			int fg = getColor();
 			if (widthErr)
 				fg = WRaster.ERROR_PIXEL;
 			if (w > 0) {

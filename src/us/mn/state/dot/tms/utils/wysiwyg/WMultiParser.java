@@ -268,4 +268,19 @@ public class WMultiParser implements Multi {
 	public void addLocator(String code) {
 		page.addToken(new WtLocator(code));
 	}
+
+	@Override
+	public void addCapTime(String f_txt, String a_txt, String p_txt) {
+		page.addToken(new WtCapTime(f_txt, a_txt, p_txt));
+	}
+
+	@Override
+	public void addCapResponse(String[] rtypes) {
+		page.addToken(new WtCapResponse(rtypes));
+	}
+
+	@Override
+	public void addCapUrgency(String[] uvals) {
+		page.addToken(new WtCapUrgency(uvals));
+	}
 }

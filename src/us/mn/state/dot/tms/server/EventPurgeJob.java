@@ -57,6 +57,7 @@ public class EventPurgeJob extends Job {
 		CommEvent.purgeRecords();
 		DetAutoFailEvent.purgeRecords();
 		GateArmEvent.purgeRecords();
+		IpawsAlertImpl.purgeRecords();  // IPAWS Alerts are stored as events
 		MeterEvent.purgeRecords();
 		PriceMessageEvent.purgeRecords();
 		SignEvent.purgeRecords();

@@ -51,6 +51,11 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	/** Proxy manager */
 	private final ProxyManager<T> manager;
 
+	/** Get the proxy manager */
+	public ProxyManager<T> getManager() {
+		return manager;
+	}
+	
 	/** Proxy selection model */
 	private final ProxySelectionModel<T> model;
 
@@ -122,7 +127,7 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 
 	/** Get the current map scale */
 	@Override
-	protected float getScale() {
+	public float getScale() {
 		return adjustScale(super.getScale());
 	}
 

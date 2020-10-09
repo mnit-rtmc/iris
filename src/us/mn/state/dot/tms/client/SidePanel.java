@@ -21,6 +21,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.client.alert.AlertTab;
 import us.mn.state.dot.tms.client.map.LayerState;
 import us.mn.state.dot.tms.client.map.MapBean;
 import us.mn.state.dot.tms.client.proxy.ProxyLayerState;
@@ -65,7 +67,7 @@ public class SidePanel extends JPanel {
 			}
 		});
 	}
-
+	
 	/** Update the selected tab */
 	private void updateSelectedTab() {
 		map.setPointSelector(null);
@@ -73,6 +75,22 @@ public class SidePanel extends JPanel {
 		if (mt != null) {
 			setSelectedLayer(getHomeProxyLayerState(mt));
 			sel_tab = mt.getTabId();
+			
+			// if the alert tab was selected, change the visibility of the DMS
+			// layer to allow granular control of DMS visibility by alert.
+			// NOTE we're using TypeCaches from SonarState to get type names
+			SonarState ss = Session.getCurrent().getSonarState();
+			
+			LayerState dmsLayer = map.getTypeLayer(
+					ss.getDmsCache().getDMSs().tname);
+			if (sel_tab == AlertTab.getAlertTabId())
+				// force visibility to false (off) - the alert tab will draw
+				// specific DMS when needed
+				dmsLayer.setVisibleForced(false);
+			else
+				// if another tab was selected, change the DMS layer visibility
+				// back to what it was before
+				dmsLayer.clearVisibleForced();
 		}
 	}
 
@@ -113,6 +131,7 @@ public class SidePanel extends JPanel {
 			if (tab_pane.getTabCount() == 1)
 				setSelectedLayer(pls);
 		}
+		mt.postInit();
 	}
 
 	/** Get the home proxy layer state for a map tab */

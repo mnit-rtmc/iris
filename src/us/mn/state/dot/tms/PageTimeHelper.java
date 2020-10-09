@@ -56,7 +56,7 @@ public class PageTimeHelper {
 			SystemAttrEnum.DMS_PAGE_OFF_DEFAULT_SECS.getFloat());
 	}
 
-	/** Valicate a page-on interval.
+	/** Validate a page-on interval.
 	 * @param po Page-on interval.
 	 * @param singlepg True for single page messages.
 	 * @return Validated interval. */

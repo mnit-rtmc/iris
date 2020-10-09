@@ -18,6 +18,8 @@ import java.awt.Component;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JToolBar;
+
+import us.mn.state.dot.tms.client.ScreenPane;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.map.MapBean;
 
@@ -33,15 +35,19 @@ public class IrisToolBar extends JToolBar {
 
 	/** Map widget */
 	private final MapBean map;
+	
+	/** Handle to screen pane */
+	private final ScreenPane pane;
 
 	/** Create a new IRIS toolbar */
-	public IrisToolBar(MapBean m) {
+	public IrisToolBar(MapBean m, ScreenPane p) {
 		map = m;
+		pane = p;
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 	}
 
 	/** Build toolbar components */
-	public void createToolPanels(Session s) {
+	public void createToolPanels(Session s, MapBean map) {
 		if (CamSelectPanel.getIEnabled()) {
 			add(new CamSelectPanel(s));
 			add(Box.createGlue());
@@ -49,6 +55,10 @@ public class IrisToolBar extends JToolBar {
 		if (CoordinatePanel.getIEnabled()) {
 			add(new CoordinatePanel(map));
 			add(Box.createGlue());
+		}
+		if (PushNotificationPanel.getIEnabled()) {
+			add(new PushNotificationPanel(s, map, pane));
+			add(Box.createHorizontalStrut(10));
 		}
 		if (EditModePanel.getIEnabled())
 			add(new EditModePanel(s));
