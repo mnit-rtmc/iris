@@ -133,6 +133,8 @@ struct Corridor {
     cor_id: CorridorId,
     /// Base SID
     base_sid: i64,
+    /// Road class ordinal
+    r_class: i16,
     /// Road class scale
     scale: f64,
     /// Nodes ordered by corridor direction
@@ -323,13 +325,14 @@ impl Road {
 
 impl Corridor {
     /// Create a new corridor
-    fn new(cor_id: CorridorId, base_sid: i64, scale: f64) -> Self {
+    fn new(cor_id: CorridorId, base_sid: i64, r_class: i16, scale: f64) -> Self {
         debug!("Corridor::new {}", &cor_id);
         let nodes = vec![];
         let count = 0;
         Corridor {
             cor_id,
             base_sid,
+            r_class,
             scale,
             nodes,
             count,
@@ -537,9 +540,10 @@ impl<'a> Segments<'a> {
     ) -> crate::Result<()> {
         let params: [&(dyn ToSql + Sync); 1] = [&self.cor_name];
         trans.execute("DELETE FROM segments WHERE name = $1", &params)?;
-        for zoom in 10..=18 {
-            // FIXME: skip zoom levels based on road class
-            self.create_segments_zoom(trans, statement, zoom)?;
+        for zoom in 0..=18 {
+            if road_class_zoom(self.cor.r_class, zoom) {
+                self.create_segments_zoom(trans, statement, zoom)?;
+            }
         }
         Ok(())
     }
@@ -599,7 +603,7 @@ impl<'a> Segments<'a> {
 
     /// Scale a vector normal with zoom level
     fn scale_zoom(&self, scale: f64, zoom: i32) -> f64 {
-        self.cor.scale * scale * f64::from(1 << (16 - 16.min(zoom)))
+        self.cor.scale * scale * f64::from(1 << (16 - 16.min(10.max(zoom))))
     }
 
     /// Create polygon for way column
@@ -620,6 +624,20 @@ impl<'a> Segments<'a> {
         way.rings.push(linestring);
         way.srid = Some(3857);
         way
+    }
+}
+
+/// Check if a road class should appear at a given zoom level
+fn road_class_zoom(r_class: i16, zoom: i32) -> bool {
+    match r_class {
+        1 => zoom >= 15, // RESIDENTIAL
+        2 => zoom >= 14, // BUSINESS
+        3 => zoom >= 13, // COLLECTOR
+        4 => zoom >= 12, // ARTERIAL
+        5 => zoom >= 11, // EXPRESSWAY
+        6 => zoom >= 9, // FREEWAY
+        7 => zoom >= 13, // CD ROAD
+        _ => false,
     }
 }
 
@@ -679,6 +697,14 @@ impl SegmentState {
         }
     }
 
+    /// Get road class
+    fn r_class(&self, road: &str) -> i16 {
+        self.roads
+            .get(road)
+            .map(|r| r.r_class)
+            .unwrap_or(0)
+    }
+
     /// Get scale for a road
     fn scale(&self, road: &str) -> f64 {
         self.roads
@@ -715,8 +741,9 @@ impl SegmentState {
                     cid.hash(&mut hasher);
                     hasher.finish()
                 } as i64;
+                let r_class = self.r_class(&cid.roadway);
                 let scale = self.scale(&cid.roadway);
-                let mut cor = Corridor::new(cid.clone(), base_sid, scale);
+                let mut cor = Corridor::new(cid.clone(), base_sid, r_class, scale);
                 cor.add_node(node, self.ordered);
                 self.corridors.insert(cid.clone(), cor);
             }
