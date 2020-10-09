@@ -529,7 +529,8 @@ impl<'a> Segments<'a> {
         trans: &mut Transaction,
         statement: &Statement,
     ) -> crate::Result<()> {
-        // FIXME: delete existing segments on corridor
+        let params: [&(dyn ToSql + Sync); 1] = [&self.cor_name];
+        trans.execute("DELETE FROM segments WHERE name = $1", &params)?;
         for zoom in 10..=18 {
             // FIXME: skip zoom levels based on road class
             self.create_segments_zoom(trans, statement, zoom)?;
