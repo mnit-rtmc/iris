@@ -25,6 +25,12 @@ use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::sync::mpsc::Receiver;
 
+/// Base segment scale factor
+const BASE_SCALE: f64 = 1.0 / 6.0;
+
+/// Outer segment scale factor
+const OUTER_SCALE: f64 = 16.0 / 6.0;
+
 /// Road definition
 #[derive(Debug)]
 pub struct Road {
@@ -545,8 +551,8 @@ impl<'a> Segments<'a> {
         statement: &Statement,
         zoom: i32,
     ) -> crate::Result<()> {
-        let o_scale = self.scale_zoom(16.0, zoom);
-        let i_scale = self.scale_zoom(1.0, zoom);
+        let o_scale = self.scale_zoom(OUTER_SCALE, zoom);
+        let i_scale = self.scale_zoom(BASE_SCALE, zoom);
         let mut poly = Vec::<(Pt64, Pt64)>::with_capacity(16);
         let mut seg_meter = 0.0; // meter point for the current segment
         let mut p_meter = 0.0; // meter point for the previous point
@@ -677,8 +683,8 @@ impl SegmentState {
     fn scale(&self, road: &str) -> f64 {
         self.roads
             .get(road)
-            .map(|r| f64::from(r.scale / 6.0))
-            .unwrap_or(1.0)
+            .map(|r| f64::from(r.scale))
+            .unwrap_or(BASE_SCALE)
     }
 
     /// Update (or add) a node
