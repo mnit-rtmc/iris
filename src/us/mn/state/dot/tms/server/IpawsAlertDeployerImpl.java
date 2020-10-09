@@ -1125,22 +1125,6 @@ public class IpawsAlertDeployerImpl extends BaseObjectImpl
 							// if the alert makes it to one sign, record that
 							// it was deployed
 							wd = true;
-					}
-					
-					
-					
-					// TODO REMOVE THIS AFTER DEMO!!!!!
-					catch (ChangeVetoException e) {
-						if (e.getMessage().contains("NO ACTIVE POLLER")) {
-							// TODO REMOVE THIS AFTER DEMO!!!!
-							// WE IGNORE THIS HERE BECAUSE WE KNOW THERE ARE
-							// NO ACTIVE DMS AND DON'T CARE, BUT IT SHOULD BE
-							// LOGGED IN PRODUCTION
-						}
-						
-						
-						
-						
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -1176,22 +1160,6 @@ public class IpawsAlertDeployerImpl extends BaseObjectImpl
 					// posted by that alert deployer
 					try {
 						dms.blankIpawsMsg();
-					}
-
-					
-					
-					// TODO REMOVE THIS AFTER DEMO!!!!!
-					catch (ChangeVetoException e) {
-						if (e.getMessage().contains("NO ACTIVE POLLER")) {
-							// TODO REMOVE THIS AFTER DEMO!!!!
-							// WE IGNORE THIS HERE BECAUSE WE KNOW THERE ARE
-							// NO ACTIVE DMS AND DON'T CARE, BUT IT SHOULD BE
-							// LOGGED IN PRODUCTION
-						}
-						
-						
-						
-						
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
