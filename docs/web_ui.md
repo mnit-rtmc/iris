@@ -22,11 +22,13 @@ This document tracks progress on the web-based user interface for IRIS.
   - [X] Update to use [MuON] for configuration
 * Honeybee
   - [X] Generate JSON for cameras, DMS, etc.
-  - [ ] Generate segment map layer in earthwyrm DB
+  - [X] Generate segment map layer in earthwyrm DB
 * Bulb
   - [X] Set up build using wasm-pack
   - [X] Integrate leaflet map
+  - [ ] Set up nginx configuration
   - [ ] Style segment layer with detector data
+  - [ ] Write full installation documentation
 
 ## Phase 2 — Authentication
 
