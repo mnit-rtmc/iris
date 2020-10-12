@@ -26,7 +26,7 @@ This document tracks progress on the web-based user interface for IRIS.
 * Bulb
   - [X] Set up build using wasm-pack
   - [X] Integrate leaflet map
-  - [ ] Set up nginx configuration
+  - [X] Set up nginx configuration
   - [ ] Style segment layer with detector data
   - [ ] Write full installation documentation
 
