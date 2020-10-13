@@ -21,47 +21,23 @@
     <style type="text/css">
       .root {
         position: fixed;
+        width: 100%;
+        height: 100%;
         inset: 0;
+        top: 0;
         display: flex;
       }
       .left {
         flex: 1 1 35%;
-        margin: 0 0.5rem 0 0.5rem;
+        margin: 0 0 0 0.5rem;
         overflow-y: scroll;
       }
       .map {
         flex: 1 1 65%;
       }
-      .menu {
-        position: fixed;
-        visibility: hidden;
-        width: 10rem;
-        padding: 0;
-        margin: 0;
-        box-shadow: 0 4px 5px 3px rgba(0, 0, 0, 0.2);
-        background: #eee;
-        z-index: 500;
-      }
-      .menu ul {
-        list-style: none;
-        padding: 0.1rem;
-        margin: 0.3rem;
-        z-index: 500;
-      }
-      .menu li {
-        padding: 0.3rem;
-        cursor: pointer;
-        z-index: 500;
-      }
     </style>
   </head>
   <body>
-    <div class="menu">
-        <ul>
-            <li>Test</li>
-            <li>Reload</li>
-        </ul>
-    </div>
     <div class="root">
       <div id="sidebar" class="left">
       </div>

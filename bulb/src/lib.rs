@@ -7,7 +7,7 @@ pub fn main() -> Result<(), JsValue> {
     let sidebar = document.get_element_by_id("sidebar").unwrap();
     for _ in 0..20 {
         let p = document.create_element("p")?;
-        p.set_inner_html("paragraph");
+        p.set_inner_html("test");
         sidebar.append_child(&p)?;
     }
     Ok(())

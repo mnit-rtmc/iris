@@ -1,32 +1,5 @@
-var menu;
-let menuVisible = false;
-
-window.onclick = (e) => {
-  if (e.which === 1 && menuVisible) {
-    menu.style.visibility = "hidden";
-    menuVisible = false;
-  }
-};
-
-window.oncontextmenu = (e) => {
-  e.preventDefault();
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  const mw = menu.offsetWidth;
-  const mh = menu.offsetHeight;
-  const x = Math.max(Math.min(e.pageX + mw, w) - mw, 0);
-  const y = Math.max(Math.min(e.pageY + mh, h) - mh, 0);
-  menu.style.left = `${x}px`;
-  menu.style.top = `${y}px`;
-  menu.style.visibility = "visible";
-  menuVisible = true;
-  return false;
-};
-
-
 
 function init_map() {
-    menu = document.querySelector(".menu");
     var map = L.map('mapid', {
         center: [45, -93],
         zoom: 12,
@@ -115,14 +88,6 @@ function init_map() {
         building: building,
         parking: parking,
         segments: segments,
-        dms: {
-            radius: 4,
-            fillColor: '#44d',
-            fillOpacity: 1,
-            fill: true,
-            weight: 0.1,
-            color: '#000',
-        },
     };
     var options = {
         renderFactory: L.svg.tile,
