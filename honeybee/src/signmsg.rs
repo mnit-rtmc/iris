@@ -24,7 +24,7 @@ use gift::{Encoder, Step};
 use ntcip::dms::multi::{
     ColorClassic, ColorCtx, ColorScheme, JustificationLine, JustificationPage,
 };
-use ntcip::dms::{Font, FontCache, Graphic, GraphicCache, PageBuilder};
+use ntcip::dms::{Font, FontCache, Graphic, GraphicCache, Pages};
 use pix::{
     el::Pixel,
     gray::{Gray, Gray8},
@@ -336,9 +336,9 @@ impl SignConfig {
         palette.set_threshold_fn(palette_threshold_rgb8_256);
         palette.set_entry(SRgb8::default());
         let mut steps = Vec::new();
-        let pages = self.page_builder(msg_data)?;
+        let pages = self.pages(msg_data, multi)?;
         let (w, h) = self.calculate_size()?;
-        for page in pages.build(multi) {
+        for page in pages {
             let (raster, delay_ds) = page?;
             let delay = delay_ds * 10;
             let step = self.make_face_step(raster, &mut palette, w, h, delay);
@@ -356,11 +356,12 @@ impl SignConfig {
         Ok(())
     }
 
-    /// Create page builder for a sign config.
-    fn page_builder<'a>(
+    /// Create pages for a sign config.
+    fn pages<'a>(
         &self,
         msg_data: &'a MsgData,
-    ) -> Result<PageBuilder<'a>> {
+        multi: &'a str,
+    ) -> Result<Pages<'a>> {
         let width = self.pixel_width.try_into()?;
         let height = self.pixel_height.try_into()?;
         let color_scheme = self.color_scheme();
@@ -375,7 +376,7 @@ impl SignConfig {
         let just_line = msg_data.line_justification_default();
         let fname = self.default_font();
         let font_num = msg_data.font_default(fname)?;
-        Ok(PageBuilder::new(width, height)
+        Ok(Pages::builder(width, height)
             .with_color_ctx(color_ctx)
             .with_char_size(char_width, char_height)
             .with_page_on_time_ds(page_on_time_ds)
@@ -384,7 +385,8 @@ impl SignConfig {
             .with_justification_line(just_line)
             .with_font_num(font_num)
             .with_fonts(Some(msg_data.fonts()))
-            .with_graphics(Some(msg_data.graphics())))
+            .with_graphics(Some(msg_data.graphics()))
+            .build(multi))
     }
 
     /// Calculate the size of rendered DMS
