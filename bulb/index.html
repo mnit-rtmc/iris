@@ -21,27 +21,27 @@
     <style type="text/css">
       .root {
         position: fixed;
+        top: 0;
+        left: 0;
         width: 100%;
         height: 100%;
-        inset: 0;
-        top: 0;
         display: flex;
       }
-      .left {
+      #sidebar {
         flex: 1 1 35%;
         margin: 0 0 0 0.5rem;
         overflow-y: scroll;
       }
-      .map {
+      #mapid {
         flex: 1 1 65%;
       }
     </style>
   </head>
   <body>
     <div class="root">
-      <div id="sidebar" class="left">
+      <div id="sidebar">
       </div>
-      <div id="mapid" class="map">
+      <div id="mapid">
       </div>
     </div>
   </body>
