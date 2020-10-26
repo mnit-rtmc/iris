@@ -310,7 +310,7 @@ const TPIMS_ARCH_RES: Resource = Resource::Simple(
 /// All defined resources
 const ALL: &[Resource] = &[
     SYSTEM_ATTRIBUTE_RES, // System attributes must be loaded first
-    ROAD_RES, // Roads must be loaded before R_Nodes
+    ROAD_RES,             // Roads must be loaded before R_Nodes
     CAMERA_RES,
     DMS_RES,
     DMS_MSG_RES,
