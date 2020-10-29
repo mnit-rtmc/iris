@@ -135,22 +135,23 @@ public class SString {
 
 	/** Convert boolean to string */
 	static public String booleanToString(boolean b) {
-		return new Boolean(b).toString();
+		return Boolean.valueOf(b).toString();
 	}
 
 	/** Convert double to string with rounding */
 	static public String doubleToString(double d, int numdecplaces) {
 		if (numdecplaces < 0)
-			return new Double(d).toString();
+			return Double.valueOf(d).toString();
 		else if (numdecplaces == 0) {
-			String ret = new Double(Math.round(d)).toString();
+			String ret = Double.valueOf(Math.round(d)).toString();
 			if (ret.endsWith(".0"))
 				return ret.replace(".0","");
 			else
 				return ret;
 		} else {
 			double mult = Math.pow(10, numdecplaces);
-			return new Double(Math.round(d * mult) / mult).toString();
+			return Double.valueOf(Math.round(d * mult) / mult)
+				.toString();
 		}
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2015  Minnesota Department of Transportation
+ * Copyright (C) 2013-2020  Minnesota Department of Transportation
  * Copyright (C) 2017       Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -215,7 +215,7 @@ public final class Speed {
 	/** Get a speed hash code */
 	@Override
 	public int hashCode() {
-		return new Double(kph()).hashCode();
+		return Double.valueOf(kph()).hashCode();
 	}
 
 	/** Get a string representation of a speed */
@@ -228,7 +228,7 @@ public final class Speed {
 	 * @return Speed in tenths of a meter per second or 65535 for 
 	 *         missing. See NTCIP essAvgWindSpeed. */
 	public Integer ntcip() {
-		return new Integer((int)Math.round(kph() * 10));
+		return Integer.valueOf((int) Math.round(kph() * 10));
 	}
 
 	/** Speed formatter */

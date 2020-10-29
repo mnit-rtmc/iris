@@ -144,8 +144,7 @@ abstract class OpDms extends OpDevice {
 	/** generate a unique operation id, which is a long,
 	 *  returned as a string. */
 	static String generateId() {
-		return new Long(System.currentTimeMillis() +
-			m_rand.nextInt()).toString();
+		return "" + (System.currentTimeMillis() + m_rand.nextInt());
 	}
 
 	/** update iris status, called after operation complete */

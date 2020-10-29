@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  * Copyright (C) 2010       AHMCT, University of California
  * Copyright (C) 2018       SRF Consulting Group
  *
@@ -41,7 +41,7 @@ import us.mn.state.dot.tms.client.IrisClient;
 public class SmartDesktop extends JDesktopPane {
 
 	/** Layer which contains all internal frames */
-	static private final Integer FRAME_LAYER = new Integer(1);
+	static private final Integer FRAME_LAYER = Integer.valueOf(1);
 
 	/** Select the given frame */
 	static private void selectFrame(JInternalFrame frame) {

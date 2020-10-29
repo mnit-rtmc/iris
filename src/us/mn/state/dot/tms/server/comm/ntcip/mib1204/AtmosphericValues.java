@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -75,7 +75,7 @@ public class AtmosphericValues {
 			if (tmb != PRESSURE_ERROR_MISSING) {
 				double mb = (double) tmb * 0.1;
 				double pa = mb * 100;
-				return new Integer((int) Math.round(pa));
+				return Integer.valueOf((int) Math.round(pa));
 			}
 		}
 		return null;

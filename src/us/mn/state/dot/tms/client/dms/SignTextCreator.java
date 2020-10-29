@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2019  Minnesota Department of Transportation
+ * Copyright (C) 2008-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,9 +63,9 @@ public class SignTextCreator {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("sign_group", sg);
-			attrs.put("line", new Short(line));
+			attrs.put("line", Short.valueOf(line));
 			attrs.put("multi", multi);
-			attrs.put("rank", new Short(rank));
+			attrs.put("rank", Short.valueOf(rank));
 			sign_text.createObject(name, attrs);
 		}
 	}

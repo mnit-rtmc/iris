@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2017  Minnesota Department of Transportation
+ * Copyright (C) 2014-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -232,7 +232,7 @@ public class PresetModel extends AbstractTableModel {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("camera", camera);
-			attrs.put("preset_num", new Integer(pn));
+			attrs.put("preset_num", Integer.valueOf(pn));
 			cache.createObject(name, attrs);
 		}
 	}

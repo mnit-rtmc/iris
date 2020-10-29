@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.units;
 
 import java.text.NumberFormat;
@@ -134,7 +133,7 @@ final public class Pressure {
 	 * @return Pressure in 1/10ths of millibar, which is also tenths of
 	 *                  a hectoPascal. See NTCIP essAtmosphericPressure. */
 	public Integer ntcip() {
-		return new Integer((int)Math.round(pascals() / (.1 * 100)));
+		return Integer.valueOf((int) Math.round(pascals() / (.1 * 100)));
 	}
 
 	/** Unit formatter */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2015  Minnesota Department of Transportation
+ * Copyright (C) 2013-2020  Minnesota Department of Transportation
  * Copyright (C) 2017       Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -140,7 +140,7 @@ public final class Temperature {
 	/** Get a temperature hash code */
 	@Override
 	public int hashCode() {
-		return new Double(kelvin()).hashCode();
+		return Double.valueOf(kelvin()).hashCode();
 	}
 
 	/** Get a string representation of a temperature */

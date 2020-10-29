@@ -39,7 +39,7 @@ public class GpsLocationProperty extends SierraGxProperty {
 			if (!str.startsWith(prefix))
 				return null;
 			String suf = str.substring(prefix.length());
-			return new Integer(suf);
+			return Integer.valueOf(suf);
 		}
 		catch (NumberFormatException ex) {
 			return null;
@@ -58,7 +58,7 @@ public class GpsLocationProperty extends SierraGxProperty {
 			if (!str.startsWith(prefix))
 				return null;
 			String suf = str.substring(prefix.length());
-			return new Double(suf);
+			return Double.valueOf(suf);
 		}
 		catch (NumberFormatException ex) {
 			return null;

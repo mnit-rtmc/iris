@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@ public class PrecipitationValues {
 		if (rhu != null) {
 			int irhu = rhu.getInteger();
 			if (irhu >= 0 && irhu < HUMIDITY_ERROR_MISSING)
-				return new Integer(irhu);
+				return Integer.valueOf(irhu);
 		}
 		return null;
 	}
@@ -56,7 +56,7 @@ public class PrecipitationValues {
 			int tg = pr.getInteger();
 			if (tg != PRECIP_ERROR_MISSING) {
 				int mmhr = (int) Math.round((double) tg * 0.36);
-				return new Integer(mmhr);
+				return Integer.valueOf(mmhr);
 			}
 		}
 		return null;
@@ -70,7 +70,7 @@ public class PrecipitationValues {
 			int pri = pr.getInteger();
 			if (pri != PRECIP_ERROR_MISSING) {
 				int cp = (int) Math.round((double) pri * 0.1);
-				return new Integer(cp);
+				return Integer.valueOf(cp);
 			}
 		}
 		return null;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2016  Minnesota Department of Transportation
+ * Copyright (C) 2012-2020  Minnesota Department of Transportation
  * Copyright (C) 2017       Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -173,7 +173,7 @@ public final class Distance implements Comparable<Distance> {
 	/** Get a distance hash code */
 	@Override
 	public int hashCode() {
-		return new Double(m()).hashCode();
+		return Double.valueOf(m()).hashCode();
 	}
 
 	/** Get a string representation of a distance */

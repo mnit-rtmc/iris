@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017  Iteris Inc.
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ public class SubSurfaceSensorsTable {
 		if (ms != null) {
 			int ims = ms.getInteger();
 			if (ims >= 0 && ims < MOISTURE_ERROR_MISSING)
-				return new Integer(ims);
+				return Integer.valueOf(ims);
 		}
 		return null;
 	}
