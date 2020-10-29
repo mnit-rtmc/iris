@@ -163,9 +163,6 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	
 	/** Purge old records that have been marked "purgeable". The age of the
 	 *  records is determined based on the expiration_date field.
-	 *  
-	 *  TODO should we have another method that also purges old non-purgeable
-	 *  records??
 	 */
 	static public void purgeRecords() throws TMSException {
 		int age = getPurgeDays();
@@ -174,7 +171,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		if (store != null && age > 0) {
 			store.update("DELETE FROM " + TABLE +
 				" WHERE expiration_date < now() - '" + age +
-				" days'::interval;");
+				" days'::interval AND purgeable=true;");
 		}
 	}
 
