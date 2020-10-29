@@ -61,7 +61,6 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.client.dms.SignMessageCreator;
 import us.mn.state.dot.tms.geo.Position;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
