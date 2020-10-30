@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2019  Minnesota Department of Transportation
+ * Copyright (C) 2007-2020  Minnesota Department of Transportation
  * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,13 +37,26 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.units.Distance;
 
 /**
- * R_NodeImpl is an implementation of the R_Node interface. Each
+ * R_NodeImpl is an implementation of the R_Node interface.  Each
  * object of this class represents one node on the roadway network.
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
 public class R_NodeImpl extends BaseObjectImpl implements R_Node {
+
+	/** Check for a valid station ID */
+	static private boolean isStationIdValid(String s) {
+		if (!s.startsWith("S"))
+			return false;
+		try {
+			int id = Integer.parseInt(s.substring(1));
+			return id > 0;
+		}
+		catch (NumberFormatException e) {
+			return false;
+		}
+	}
 
 	/** Get the minimum roadway speed limit */
 	static public int getMinSpeedLimit() {
@@ -430,7 +443,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	public void doSetStationID(String s) throws TMSException {
 		if (objectEquals(s, station_id))
 			return;
-		if (s != null && s.equals(""))
+		if (s != null && !isStationIdValid(s))
 			throw new ChangeVetoException("Invalid Station ID");
 		store.update(this, "station_id", s);
 		StationImpl stat = createStation(s);

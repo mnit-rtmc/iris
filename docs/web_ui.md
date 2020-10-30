@@ -23,6 +23,8 @@ This document tracks progress on the web-based user interface for IRIS.
 * Honeybee
   - [X] Generate JSON for cameras, DMS, etc.
   - [X] Generate segment map layer in earthwyrm DB
+* IRIS
+  - [ ] Generate JSON for station flow, speed and density
 * Bulb
   - [X] Set up build using wasm-pack
   - [X] Integrate leaflet map

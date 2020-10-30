@@ -419,11 +419,6 @@ public class StationImpl implements Station, VehicleSampler {
 		w.write("/>\n");
 	}
 
-	/** Get the station index */
-	private String getIndex() {
-		return name.startsWith("S") ? name.substring(1) : name;
-	}
-
 	/** Acceleration from previous station */
 	private Float acceleration = null;
 
