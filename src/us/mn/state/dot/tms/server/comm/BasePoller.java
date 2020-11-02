@@ -200,7 +200,8 @@ abstract public class BasePoller implements DevicePoller {
 	/** Poller status */
 	private String status = "INIT";
 
-	/** Get the poller status */
+	/** Get the poller status.
+	 * Any value other than a blank string is considered "failed". */
 	@Override
 	public String getStatus() {
 		return status;
