@@ -151,7 +151,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 	/** Check if the poller is currently connected */
 	@Override
 	public synchronized boolean isConnected() {
-		return (c_thread != null) && !c_thread.isStopped();
+		return (c_thread != null) && !c_thread.isDone();
 	}
 
 	/** Get max seconds an idle connection should be left open

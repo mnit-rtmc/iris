@@ -94,11 +94,14 @@ public class CommThread<T extends ControllerProperty> {
 	/** No response disconnect (sec) */
 	private final int no_resp_disconnect_sec;
 
+	/** Idle disconnect (ms) */
+	private final long idle_disconnect_ms;
+
 	/** Debug log */
 	private final DebugLog logger;
 
-	/** Stopped status */
-	private boolean stopped = false;
+	/** Done state */
+	private boolean done = false;
 
 	/** Thread status */
 	private String status = "";
@@ -136,6 +139,7 @@ public class CommThread<T extends ControllerProperty> {
 		uri = u;
 		timeout = rt;
 		no_resp_disconnect_sec = nrd;
+		idle_disconnect_ms = poller.getIdleDisconnectSec() * 1000L;
 		logger = log;
 	}
 
@@ -144,19 +148,20 @@ public class CommThread<T extends ControllerProperty> {
 		thread.start();
 	}
 
-	/** Check if the thread is stopped */
-	public boolean isStopped() {
-		return stopped;
+	/** Check if the thread is done */
+	public boolean isDone() {
+		return done;
 	}
 
 	/** Destroy the comm thread */
 	public void destroy() {
+		done = true;
 		thread.interrupt();
 	}
 
 	/** Check if the comm thread should continue */
 	private boolean shouldContinue() {
-		return queue.isOpen() && !thread.isInterrupted();
+		return queue.isOpen() && !done;
 	}
 
 	/** Run comm thread operations */
@@ -165,30 +170,31 @@ public class CommThread<T extends ControllerProperty> {
 		try {
 			performOperations();
 		}
-		catch (InterruptedException | MessengerException e) {
+		catch (MessengerException e) {
 			setStatus(getMessage(e));
 		}
 		catch (RuntimeException e) {
 			e.printStackTrace();
 		}
 		finally {
-			stopped = true;
+			done = true;
 			clog("STOPPING");
 			poller.disconnect();
 		}
 	}
 
 	/** Create messenger and perform operations from the poll queue.
-	 * @throws MessengerException if the messenger could not be created.
-	 * @throws InterruptedException when thread is destroyed. */
-	private void performOperations() throws InterruptedException,
-		MessengerException
-	{
+	 * @throws MessengerException if the messenger could not be created. */
+	private void performOperations() throws MessengerException {
 		while (shouldContinue()) {
 			try (Messenger m = createMessenger(scheme, uri,
 				timeout, no_resp_disconnect_sec))
 			{
 				pollQueue(m);
+			}
+			catch (DisconnectException e) {
+				setStatus(getMessage(e));
+				break;
 			}
 			catch (ReconnectException e) {
 				continue;
@@ -234,25 +240,17 @@ public class CommThread<T extends ControllerProperty> {
 	}
 
 	/** Poll the operation queue and perform operations.
-	 * @throws IOException if an unrecoverable IO error happens.
-	 * @throws InterruptedException when thread is destroyed. */
-	private void pollQueue(Messenger m) throws InterruptedException,
+	 * @throws DisconnectException if the link should be disconnected.
+	 * @throws IOException if an unrecoverable IO error happens. */
+	private void pollQueue(Messenger m) throws DisconnectException,
 		IOException
 	{
 		setStatus("");
 		while (shouldContinue()) {
-			long idle_ms = getIdleDisconnectMS();
-			OpController<T> op = queue.next(idle_ms);
+			OpController<T> op = queue.next(idle_disconnect_ms);
 			doPoll(m, op);
 			setStatus("");
 		}
-	}
-
-	/** Get idle disconnect time.
-	 * @return Time (ms) before disconnecting an idle connection (0 to wait
-	 *         indefinitely). */
-	private long getIdleDisconnectMS() {
-		return poller.getIdleDisconnectSec() * 1000L;
 	}
 
 	/** Perform one poll for an operation.

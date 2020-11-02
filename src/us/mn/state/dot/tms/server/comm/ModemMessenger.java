@@ -222,10 +222,10 @@ public class ModemMessenger extends Messenger {
 		char[] buf = new char[64];
 		int n_chars = reader.read(buf, 0, 64);
 		if (n_chars < 0)
-			throw new HangUpException();
+			throw new DisconnectException("HANG UP");
 		String resp = new String(buf, 0, n_chars).trim();
 		if (resp.contains("NO CARRIER"))
-			throw new HangUpException();
+			throw new DisconnectException("NO CARRIER");
 		return resp;
 	}
 
