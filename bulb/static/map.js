@@ -1,19 +1,19 @@
-
-function init_map() {
-    var map = L.map('mapid', {
-        center: [45, -93],
-        zoom: 12,
-    });
-    var osm_url = "http://127.0.0.1/tile/{z}/{x}/{y}.mvt";
-    var tms_url = "http://127.0.0.1/tms/{z}/{x}/{y}.mvt";
-    var highlight_style = {
+function segment_style(properties, zoom) {
+    var opacity = 1;
+    var color = "#282";
+    if (typeof properties.station == "undefined") {
+        opacity = 0.8;
+        color = "#666";
+    }
+    return {
         fill: true,
-        fillColor: 'red',
-        fillOpacity: 0.1,
-        radius: 6,
-        color: 'red',
-        opacity: 0.1,
+        fillOpacity: opacity,
+        fillColor: color,
+        stroke: false,
     };
+}
+
+function make_styles() {
     var boundary = {
         fill: true,
         fillOpacity: 0.2,
@@ -61,12 +61,6 @@ function init_map() {
         stroke: false,
         weight: 1,
     };
-    var segments = {
-        fill: true,
-        fillOpacity: 1,
-        fillColor: "#282",
-        stroke: false,
-    };
     var styles = {
         county: Object.assign(boundary, { fillColor: '#f8f4f2' }),
         city: Object.assign(boundary, { fillColor: '#f1eee8' }),
@@ -87,12 +81,30 @@ function init_map() {
         paths: { color: "#333", weight: 1, dashArray: "1 3" },
         building: building,
         parking: parking,
-        segments: segments,
+        segments: segment_style,
+    };
+    return styles;
+}
+
+function init_map() {
+    var map = L.map('mapid', {
+        center: [45, -93],
+        zoom: 12,
+    });
+    var osm_url = "http://127.0.0.1/tile/{z}/{x}/{y}.mvt";
+    var tms_url = "http://127.0.0.1/tms/{z}/{x}/{y}.mvt";
+    var highlight_style = {
+        fill: true,
+        fillColor: 'red',
+        fillOpacity: 0.1,
+        radius: 6,
+        color: 'red',
+        opacity: 0.1,
     };
     var options = {
         renderFactory: L.svg.tile,
         interactive: true,
-        vectorTileLayerStyles: styles,
+        vectorTileLayerStyles: make_styles(),
         getFeatureId: function(feat) {
             return feat.properties.osm_id || feat.properties.sid;
         },
@@ -116,8 +128,11 @@ function init_map() {
             tms_layers.setFeatureStyle(highlight, highlight_style);
             var name = e.layer.properties.name || e.layer.properties.ref;
             if (typeof name != "undefined") {
+                var content = name;
+                if (typeof e.layer.properties.station != "undefined")
+                    content += "<br/>" + e.layer.properties.station;
                 L.popup({ closeButton: false})
-                 .setContent(name)
+                 .setContent(content)
                  .setLatLng(e.latlng)
                  .openOn(map);
             };
