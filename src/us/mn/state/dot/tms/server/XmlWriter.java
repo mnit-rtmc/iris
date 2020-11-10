@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2014  Minnesota Department of Transportation
+ * Copyright (C) 2005-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.file.AtomicMoveNotSupportedException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.zip.GZIPOutputStream;
+import us.mn.state.dot.tms.utils.FileIO;
 
 /**
  * A simple class for writing out XML documents
@@ -64,7 +61,7 @@ abstract public class XmlWriter {
 
 	/** Create an XML attribute */
 	static public String createAttribute(String name, Object value) {
-		if(value != null) {
+		if (value != null) {
 			StringBuilder sb = new StringBuilder(" ");
 			sb.append(validateElementName(name));
 			sb.append("='");
@@ -86,7 +83,7 @@ abstract public class XmlWriter {
 
 	/** Create a new XML writer */
 	public XmlWriter(String f, boolean gz) {
-		if(gz)
+		if (gz)
 			f = f + ".gz";
 		file = new File(XML_OUTPUT_DIRECTORY, f);
 		temp = new File(file.getAbsolutePath() + "~");
@@ -96,10 +93,7 @@ abstract public class XmlWriter {
 	/** Create the underlying output stream */
 	private OutputStream createOutputStream() throws IOException {
 		OutputStream os = new FileOutputStream(temp);
-		if(gzip)
-			return new GZIPOutputStream(os);
-		else
-			return os;
+		return (gzip) ? new GZIPOutputStream(os) : os;
 	}
 
 	/** Write the XML file */
@@ -114,37 +108,9 @@ abstract public class XmlWriter {
 		finally {
 			os.close();
 		}
-
-		if (!atomicFileMove(temp.toPath(), file.toPath()))
-			throw new IOException("Rename failed: " + file);
+		FileIO.atomicMove(temp.toPath(), file.toPath());
 	}
 
-	/** Atomic file-mover method - uses a newer Java file-moving api
-	 * (Added 2016-06-17)
-	 * 
-	 * @author John L. Stanley - SRF Consulting
-	 */
-	public static boolean atomicFileMove(Path sourcePath, Path targetPath) {
-		try {
-			try {
-				// use atomic file-move if it's supported
-				Files.move(sourcePath, targetPath, 
-						StandardCopyOption.REPLACE_EXISTING, 
-						StandardCopyOption.ATOMIC_MOVE);
-				return true;
-			}
-			catch (AtomicMoveNotSupportedException ex) {
-				// use non-atomic move if atomic isn't supported
-				Files.move(sourcePath, targetPath, 
-						StandardCopyOption.REPLACE_EXISTING);
-				return true;
-			}
-		}
-		catch (IOException ex) {
-			return false;
-		}
-	}
-			
 	/** Write the XML to a writer */
 	abstract protected void write(Writer w) throws IOException;
 }
