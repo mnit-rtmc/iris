@@ -1,9 +1,19 @@
+var stat_sample = null;
+
 function segment_style(properties, zoom) {
-    var opacity = 1;
-    var color = "#282";
-    if (typeof properties.station == "undefined") {
-        opacity = 0.8;
-        color = "#666";
+    let opacity = 0.8;
+    let color = "#666";
+    if (properties.station) {
+        if (stat_sample) {
+            let sample = stat_sample.samples[properties.station];
+            if (sample) {
+                let flow = sample[0];
+                let speed = sample[1];
+                let density = (flow && speed) ? Math.round(flow / speed) : null;
+                opacity = 1;
+                color = density_color(density);
+            }
+        }
     }
     return {
         fill: true,
@@ -13,27 +23,43 @@ function segment_style(properties, zoom) {
     };
 }
 
+function density_color(density) {
+    if (density) {
+        if (density < 30) {
+            return "#292";
+        }
+        if (density < 50) {
+            return "#fc0";
+        }
+        if (density < 200) {
+            return "#d00";
+        }
+        return "#c0f";
+    }
+    return "#666";
+}
+
 function make_styles() {
-    var boundary = {
+    let boundary = {
         fill: true,
         fillOpacity: 0.2,
         weight: 0.1,
         color: '#000000',
         opacity: 0.6,
     };
-    var water = {
+    let water = {
         fill: true,
         fillOpacity: 0.8,
         fillColor: "#b5d0d0",
         stroke: false,
     };
-    var wetland = {
+    let wetland = {
         fill: true,
         fillOpacity: 0.8,
         fillColor: "#b8d0bd",
         stroke: false,
     };
-    var leisure = {
+    let leisure = {
         fill: true,
         fillOpacity: 0.6,
         fillColor: "#88cc88",
@@ -41,27 +67,27 @@ function make_styles() {
         color: '#000000',
         opacity: 0.6,
     };
-    var building = {
+    let building = {
         fill: true,
         fillOpacity: 0.7,
         fillColor: "#bca9a9",
         weight: 0.7,
         color: "#baa",
     };
-    var retail = {
+    let retail = {
         fill: true,
         fillOpacity: 0.25,
         fillColor: "#b99",
         stroke: false,
     };
-    var parking = {
+    let parking = {
         fill: true,
         fillOpacity: 0.6,
         fillColor: "#cca",
         stroke: false,
         weight: 1,
     };
-    var styles = {
+    return {
         county: Object.assign(boundary, { fillColor: '#f8f4f2' }),
         city: Object.assign(boundary, { fillColor: '#f1eee8' }),
         lake: water,
@@ -83,7 +109,6 @@ function make_styles() {
         parking: parking,
         segments: segment_style,
     };
-    return styles;
 }
 
 function init_map() {
@@ -91,9 +116,9 @@ function init_map() {
         center: [45, -93],
         zoom: 12,
     });
-    var osm_url = "http://127.0.0.1/tile/{z}/{x}/{y}.mvt";
-    var tms_url = "http://127.0.0.1/tms/{z}/{x}/{y}.mvt";
-    var highlight_style = {
+    const osm_url = "http://127.0.0.1/tile/{z}/{x}/{y}.mvt";
+    const tms_url = "http://127.0.0.1/tms/{z}/{x}/{y}.mvt";
+    const highlight_style = {
         fill: true,
         fillColor: 'red',
         fillOpacity: 0.1,
@@ -101,7 +126,7 @@ function init_map() {
         color: 'red',
         opacity: 0.1,
     };
-    var options = {
+    let options = {
         renderFactory: L.svg.tile,
         interactive: true,
         vectorTileLayerStyles: make_styles(),
@@ -115,8 +140,8 @@ function init_map() {
     var osm_layers = L.vectorGrid.protobuf(osm_url, options);
     var tms_layers = L.vectorGrid.protobuf(tms_url, options);
     function on_click(e) {
-        var osm_id = e.layer.properties.osm_id || e.layer.properties.sid;
-        var change = (typeof osm_id != "undefined") && (osm_id != highlight);
+        let osm_id = e.layer.properties.osm_id || e.layer.properties.sid;
+        let change = (typeof osm_id != "undefined") && (osm_id != highlight);
         if (highlight) {
             osm_layers.resetFeatureStyle(highlight);
             tms_layers.resetFeatureStyle(highlight);
@@ -126,13 +151,10 @@ function init_map() {
             highlight = osm_id;
             osm_layers.setFeatureStyle(highlight, highlight_style);
             tms_layers.setFeatureStyle(highlight, highlight_style);
-            var name = e.layer.properties.name || e.layer.properties.ref;
-            if (typeof name != "undefined") {
-                var content = name;
-                if (typeof e.layer.properties.station != "undefined")
-                    content += "<br/>" + e.layer.properties.station;
+            let label = event_label(e);
+            if (label) {
                 L.popup({ closeButton: false})
-                 .setContent(content)
+                 .setContent(label)
                  .setLatLng(e.latlng)
                  .openOn(map);
             };
@@ -147,4 +169,43 @@ function init_map() {
     tms_layers.addTo(map);
 }
 
+function event_label(e) {
+    let label = null;
+    let name = e.layer.properties.name || e.layer.properties.ref;
+    if (name) {
+        label = name;
+        let station = e.layer.properties.station;
+        if (station) {
+            label = "<b>" + station + "</b> " + label;
+            if (stat_sample) {
+                let sample = stat_sample.samples[station];
+                if (sample) {
+                    let flow = sample[0];
+                    if (flow)
+                        label += "<br/>&nbsp;<b>" + flow + "</b> veh/h";
+                    let speed = sample[1];
+                    if (speed)
+                        label += "<br/>&nbsp;<b>" + speed + "</b> mi/h";
+                    let density = (flow && speed)
+                                ? Math.round(flow / speed)
+                                : null;
+                    if (density)
+                        label += "<br/>&nbsp;<b>" + density + "</b> veh/lane·mi";
+                }
+            }
+        }
+    }
+    return label;
+}
+
 window.onload = init_map;
+
+fetch('stat_sample.json')
+.then(response => response.json())
+.then(result => {
+    stat_sample = result;
+    console.log('stat_sample: ', stat_sample.time_stamp);
+})
+.catch(error => {
+    console.error('Error fetching stat_sample.json: ', error);
+});
