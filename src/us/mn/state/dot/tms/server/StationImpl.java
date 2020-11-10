@@ -419,6 +419,21 @@ public class StationImpl implements Station, VehicleSampler {
 		w.write("/>\n");
 	}
 
+	/** Write the current sample as a JSON object */
+	public void writeSampleJson(long start, long end, Writer writer)
+		throws IOException
+	{
+		int f = getFlow(start, end);
+		int s = Math.round(getSpeed());
+		writer.write('"');
+		writer.write(name);
+		writer.write("\":[");
+		writer.write((f > MISSING_DATA) ? String.valueOf(f) : "null");
+		writer.write(',');
+		writer.write((s > 0) ? String.valueOf(s) : "null");
+		writer.write(']');
+	}
+
 	/** Acceleration from previous station */
 	private Float acceleration = null;
 
