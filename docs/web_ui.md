@@ -24,12 +24,12 @@ This document tracks progress on the web-based user interface for IRIS.
   - [X] Generate JSON for cameras, DMS, etc.
   - [X] Generate segment map layer in earthwyrm DB
 * IRIS
-  - [ ] Generate JSON for station flow, speed and density
+  - [X] Generate JSON for station flow, speed and density
 * Bulb
   - [X] Set up build using wasm-pack
   - [X] Integrate leaflet map
   - [X] Set up nginx configuration
-  - [ ] Style segment layer with detector data
+  - [X] Style segment layer with detector data
   - [ ] Write full installation documentation
 
 ## Phase 2 — Authentication
