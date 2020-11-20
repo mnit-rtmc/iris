@@ -44,7 +44,7 @@ pub fn create_client(db: &str) -> Result<Client> {
     // the LOCAL and DEFAULT zones are also reset to UTC, so the PGTZ
     // environment variable must be used for this purpose.
     if let Some(tz) = time_zone() {
-        let time_zone = format!("SET TIME ZONE {}", tz);
+        let time_zone = format!("SET TIME ZONE '{}'", tz);
         client.execute(&time_zone[..], &[])?;
     }
     Ok(client)
