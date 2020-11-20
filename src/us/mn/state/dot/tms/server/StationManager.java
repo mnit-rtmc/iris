@@ -114,8 +114,7 @@ class StationManager {
 			Station s = it.next();
 			if (s instanceof StationImpl) {
 				StationImpl si = (StationImpl) s;
-				if (si.getActive()) {
-					si.writeSampleJson(start, end, writer);
+				if (si.writeSampleJson(start, end, writer)) {
 					if (it.hasNext())
 						writer.write(',');
 					writer.write('\n');
