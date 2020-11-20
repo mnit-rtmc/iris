@@ -390,7 +390,8 @@ public class GeoLocHelper extends BaseHelper {
 			MapLineSegment seg = new MapLineSegment(p0.getX(),
 				p0.getY(), p1.getX(), p1.getY());
 			MapVector pnt = seg.snap(smp.getX(), smp.getY());
-			return createTransient(pnt, l0);
+			if (pnt != null)
+				return createTransient(pnt, l0);
 		}
 		return null;
 	}
