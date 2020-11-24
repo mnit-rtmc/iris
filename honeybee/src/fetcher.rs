@@ -12,6 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use anyhow::Context;
 use crate::segments::{receive_nodes, SegMsg};
 use crate::{resource, Result};
 use postgres::fallible_iterator::FallibleIterator;
@@ -37,7 +38,7 @@ pub fn create_client(db: &str) -> Result<Client> {
     let username = whoami::username();
     // Format path for unix domain socket -- not worth using percent_encode
     let uds = format!("postgres://{}@%2Frun%2Fpostgresql/{}", username, db);
-    let mut client = Client::connect(&uds, NoTls)?;
+    let mut client = Client::connect(&uds, NoTls).context("connect to DB")?;
     // The postgres crate sets the session time zone to UTC.
     // We need to set it back to LOCAL time zone, so that row_to_json
     // can format properly (for incidents, etc).  Unfortunately,
@@ -45,7 +46,7 @@ pub fn create_client(db: &str) -> Result<Client> {
     // environment variable must be used for this purpose.
     if let Some(tz) = time_zone() {
         let time_zone = format!("SET TIME ZONE '{}'", tz);
-        client.execute(&time_zone[..], &[])?;
+        client.execute(&time_zone[..], &[]).context("set time zone")?;
     }
     Ok(client)
 }
@@ -87,7 +88,7 @@ fn pending_notifications(
     let mut ns = HashSet::new();
     let mut nots = client.notifications();
     for n in nots.timeout_iter(Duration::from_millis(300)).iterator() {
-        let n = n?;
+        let n = n.context("notification")?;
         // Discard payload if we're not listening for it
         if resource::is_listening_payload(&n.channel(), &n.payload()) {
             ns.insert((n.channel().to_string(), n.payload().to_string()));
