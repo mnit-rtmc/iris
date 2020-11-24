@@ -1,6 +1,14 @@
 -- Script to create segments table in earthwyrm DB
 
+\set ON_ERROR_STOP
+
+SET SESSION AUTHORIZATION 'tms';
 BEGIN;
+
+GRANT SELECT ON planet_osm_polygon TO PUBLIC;
+GRANT SELECT ON planet_osm_line TO PUBLIC;
+GRANT SELECT ON planet_osm_roads TO PUBLIC;
+GRANT SELECT ON planet_osm_point TO PUBLIC;
 
 DROP TABLE IF EXISTS segments;
 
