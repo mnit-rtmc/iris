@@ -12,9 +12,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use anyhow::Context;
 use crate::segments::{receive_nodes, SegMsg};
 use crate::{resource, Result};
+use anyhow::Context;
 use postgres::fallible_iterator::FallibleIterator;
 use postgres::{Client, NoTls};
 use std::collections::HashSet;
@@ -46,7 +46,9 @@ pub fn create_client(db: &str) -> Result<Client> {
     // environment variable must be used for this purpose.
     if let Some(tz) = time_zone() {
         let time_zone = format!("SET TIME ZONE '{}'", tz);
-        client.execute(&time_zone[..], &[]).context("set time zone")?;
+        client
+            .execute(&time_zone[..], &[])
+            .context("set time zone")?;
     }
     Ok(client)
 }
