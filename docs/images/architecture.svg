@@ -30,7 +30,7 @@
     <rect x="0" y="0" width="176" height="104" ry="8"
       style="fill:#ffe6c4;stroke:white;stroke-width:2"/>
     <text>
-      <tspan x="16" y="40">Apache Server</tspan>
+      <tspan x="16" y="40">Nginx Server</tspan>
       <tspan x="24" y="60">- Client JARs</tspan>
       <tspan x="24" y="80">- Map Tiles</tspan>
     </text>

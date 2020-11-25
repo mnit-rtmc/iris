@@ -27,7 +27,7 @@ dnf install iris-{major}.{minor}.{micro}-{build}.noarch.rpm
 ```
 
 This will install dependencies not already installed, including [OpenJDK],
-[PostgreSQL] and [Apache].
+[PostgreSQL] and [nginx].
 
 ## Initialize IRIS
 
@@ -52,7 +52,7 @@ This will perform the following steps:
 5. Create the `osm` databsae (for OpenStreetMap data)
 6. Create the `tms` PostgreSQL user, which IRIS uses to connect to the database
 7. Create the `tms` database and populate it using a template SQL script
-8. Configure the apache (httpd) and IRIS services to start automatically
+8. Configure the nginx (web server) and IRIS services to start automatically
 9. Create symbolic links to the current IRIS software version
 
 The command should finish with the following message:
@@ -86,7 +86,7 @@ To set up the server-side of this process, follow these instructions:
    file named `gstreamer-1.0-mingw-x86-<version>.zip`.
 5. Copy both of these files to the IRIS server and put them in
    `/var/www/html/iris-gstreamer/`.  Make sure the file owner and permissions
-   are suitable (`apache` with read-only (444) permissions).
+   are suitable (`nginx` with read-only (444) permissions).
 6. Set `gstreamer_version` in `project.properties` to the version of
    GStreamer you installed (e.g. `1.16.2`).  After changing this value, you
    must rebuild and reinstall the IRIS RPM.
@@ -177,10 +177,10 @@ login.  After [creating] and logging in with a real administrator account, the
 `admin` user account should be disabled.
 
 
-[Apache]: http://projects.apache.org/projects/http_server.html
 [CIDR]: https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing
 [creating]: user_roles.html
 [Download]: http://iris.dot.state.mn.us/rpms/
 [Fedora]: http://fedoraproject.org
+[ngihnx]: https://nginx.org/en/
 [OpenJDK]: http://openjdk.java.net
 [PostgreSQL]: http://www.postgresql.org

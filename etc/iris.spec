@@ -36,7 +36,7 @@ Source:		%{name}-%{version}.tar.gz
 URL:		@@RPM.URL@@
 BuildArch:	noarch
 Buildroot:	%{buildroot}
-Requires:	java-openjdk, postgresql-server, postgresql-jdbc, httpd, postgis-utils osm2pgsql
+Requires:	java-openjdk, postgresql-server, postgresql-jdbc, postgis-utils osm2pgsql, nginx
 
 %Description
 @@RPM.DESCRIPTION@@
@@ -131,7 +131,7 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %dir %attr(3775,tms,tms) /var/www/html/iris_xml
 
 # client: /var/www/html/iris-client
-%defattr(0444,apache,apache,0755)
+%defattr(0444,nginx,nginx,0755)
 %dir %{_clientdir}
 %dir %{_clientdir}/images
 %dir %{_clientdir}/lib
@@ -148,4 +148,4 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %{_clientdir}/lib/postgis-geometry-@@POSTGIS.VERSION@@.jar
 %{_clientdir}/lib/iris-client-%{version}.jar
 %{_clientdir}/lib/iris-common-%{version}.jar
-%attr(0644,tms,apache) %{_clientdir}/session_ids
+%attr(0644,tms,nginx) %{_clientdir}/session_ids

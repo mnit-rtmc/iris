@@ -370,7 +370,8 @@
 	<target name="tarball"
 	        description="Create source tarball">
 		<copy todir="${build.tar}">
-			<fileset dir="${basedir}" excludes="build/**" />
+			<fileset dir="${basedir}"
+			         excludes="build/**,bulb/target/**,honeybee/target/**" />
 		</copy>
 		<tar destfile="${tar.file}"
 		     basedir="${build.dir}"

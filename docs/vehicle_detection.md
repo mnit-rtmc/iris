@@ -270,7 +270,7 @@ Every 30 seconds, the client will make an HTTP request for the current
 [traffic data](#traffic-data).  The URL to locate that file is declared as a
 property in the `/etc/iris/iris-client.properties` file (on the IRIS server).
 The property is `tdxml.detector.url`, and it should point to the
-`det_sample.xml.gz` [XML file], as made available by apache on the IRIS server.
+`det_sample.xml.gz` [XML file], as made available by nginx on the IRIS server.
 
 The appearance of the _traffic map layer_ changes depending on the current zoom
 level.  If the zoom level is below 10, the layer will not be visible.  At zoom
