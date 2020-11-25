@@ -22,8 +22,7 @@
 %define _installdir	%{_topdir}/BUILDROOT
 %define _serverlink	/usr/share/java/iris-server
 %define _serverdir	%{_serverlink}-%{version}
-%define _clientlink	/var/www/html/iris-client
-%define _clientdir	%{_clientlink}-%{version}
+%define _clientdir	/var/www/html/iris-client
 %define _source_payload w6.xzdio
 %define _binary_payload w6.xzdio
 
@@ -131,7 +130,7 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 # /var/www/html/iris_xml
 %dir %attr(3775,tms,tms) /var/www/html/iris_xml
 
-# client: /var/www/html/iris-client-%{version}
+# client: /var/www/html/iris-client
 %defattr(0444,apache,apache,0755)
 %dir %{_clientdir}
 %dir %{_clientdir}/images

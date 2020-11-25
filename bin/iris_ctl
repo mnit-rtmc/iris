@@ -2,7 +2,7 @@
 #
 # /usr/bin/iris_ctl -- Script for initializing and updating IRIS
 #
-# Copyright (C) 2012-2019  Minnesota Department of Transportation
+# Copyright (C) 2012-2020  Minnesota Department of Transportation
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -124,7 +124,6 @@ function create_links() {
 	host=`hostname -f`
 	ln -snf /usr/share/java/iris-server-$version/iris-server-$version.jar /usr/share/java/iris-server-$version/iris-server.jar
 	ln -snf /usr/share/java/iris-server-$version /usr/share/java/iris-server
-	ln -snf /var/www/html/iris-client-$version /var/www/html/iris-client
 	sed -i ''s,@@WEBSTART.HOST@@,$host,'' /var/www/html/iris-client/iris-client.jnlp /var/www/html/iris-client/mail.jnlp
 	install -o apache -g apache -m 0444 /etc/iris/iris-client.keystore /var/www/html/iris-client/
 	install -o apache -g apache -m 0444 /etc/iris/iris-client.properties /var/www/html/iris-client/

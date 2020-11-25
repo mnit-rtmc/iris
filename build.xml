@@ -33,7 +33,7 @@
 	<property name="manifest.server" value="server-MANIFEST.MF"/>
 	<property name="manifest.client" value="client-MANIFEST.MF"/>
 	<property name="dist.server" value="${name}-server-${version}"/>
-	<property name="dist.client" value="${name}-client-${version}"/>
+	<property name="dist.client" value="${name}-client"/>
 
 	<!-- Build directory configuration -->
 	<property name="build.dir" value="${basedir}/build"/>
