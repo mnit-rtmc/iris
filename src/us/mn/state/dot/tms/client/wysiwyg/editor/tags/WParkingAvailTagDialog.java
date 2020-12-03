@@ -111,15 +111,15 @@ class WParkingAvailTagDialog extends WMultiTagDialog {
 		
 		@Override  
 		public Component getListCellRendererComponent(
-				JList<?extends SonarObject> list, SonarObject o,
-		      int index, boolean isSelected, boolean cellHasFocus) {
+		        JList<?extends SonarObject> list, SonarObject o,
+		        int index, boolean isSelected, boolean cellHasFocus) {
 			ParkingArea p = (ParkingArea) o;
 			cell.getListCellRendererComponent(
 					list, p, index, isSelected, cellHasFocus);
 			String txt = (p != null) ? String.format("%s (%s)",
 					p.getFacilityName(), p.getName()) : "";
 			cell.setText(txt);
-		    return cell;
-		  }
+			return cell;
+		}
 	}
 }

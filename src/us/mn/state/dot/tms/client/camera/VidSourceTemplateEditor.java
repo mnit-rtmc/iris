@@ -470,10 +470,10 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		
 		// add a window listener to capture the close event for confirmation
 		frame.addInternalFrameListener(new InternalFrameAdapter() {
-		    @Override
-		    public void internalFrameClosing(InternalFrameEvent e) {
-		    	cancel.actionPerformed(null);
-		    }
+			@Override
+			public void internalFrameClosing(InternalFrameEvent e) {
+				cancel.actionPerformed(null);
+			}
 		});
 		frame.setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);
 	}

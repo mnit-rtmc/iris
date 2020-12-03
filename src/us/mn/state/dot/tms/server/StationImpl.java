@@ -163,7 +163,7 @@ public class StationImpl implements Station, VehicleSampler {
 		return r_node;
 	}
 
-        /** Create a new station */
+	/** Create a new station */
 	public StationImpl(String station_id, R_NodeImpl n) {
 		name = station_id;
 		r_node = n;
@@ -566,7 +566,7 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Test if the number of intervals is lower than start count */
 	private boolean isBeforeStartCount() {
-	       return n_candidate < SystemAttrEnum.VSA_START_INTERVALS.getInt();
+		   return n_candidate < SystemAttrEnum.VSA_START_INTERVALS.getInt();
 	}
 
 	/** Test if station speed is above the bottleneck id speed */

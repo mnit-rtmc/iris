@@ -328,16 +328,16 @@ public class ZipDownloader extends AbstractForm {
 		try {
 			conn = url.openConnection();
 			if(conn instanceof HttpURLConnection) {
-	            ((HttpURLConnection)conn).setRequestMethod("GET");
-	        }
-	        conn.getInputStream();
-	        return conn.getContentLength();
+				((HttpURLConnection)conn).setRequestMethod("GET");
+			}
+			conn.getInputStream();
+			return conn.getContentLength();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return -1;
 		} finally {
 			if(conn instanceof HttpURLConnection)
-	            ((HttpURLConnection)conn).disconnect();
+				((HttpURLConnection)conn).disconnect();
 		}
 	}
 }

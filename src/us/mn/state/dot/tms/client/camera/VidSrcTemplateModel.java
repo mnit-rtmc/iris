@@ -63,7 +63,7 @@ public class VidSrcTemplateModel extends ProxyTableModel<VidSourceTemplate> {
 	
 	/** Create the columns in the model. Note that these columns are view-
 	 *  only (editing is done in another part of the VidSourceTemplateEditor).
-     */
+	 */
 	@Override
 	protected ArrayList<ProxyColumn<VidSourceTemplate>> createColumns() {
 		ArrayList<ProxyColumn<VidSourceTemplate>> cols =

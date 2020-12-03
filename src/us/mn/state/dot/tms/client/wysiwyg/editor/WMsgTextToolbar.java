@@ -225,7 +225,7 @@ public class WMsgTextToolbar extends WToolbar {
 	/** Set the foreground or background color to c. The color to set is
 	 *  specified by passing "foreground" or "background" in the fgbg 
 	 *  parameter.
-     */
+	 */
 	public void setColor(Color c, String mode) {
 		if (mode.equalsIgnoreCase(WMsgColorChooser.FOREGROUND))
 			setForegroundColor(c);
@@ -244,7 +244,7 @@ public class WMsgTextToolbar extends WToolbar {
 	
 	/** Set the icon color on the foreground color chooser button using our
 	 *  current foreground color.
-     */
+	 */
 	public void applyForegroundColorIcon() {
 		fg_color_btn.setIcon(WMsgColorChooser.createColorIcon(fgColor, 16, 16));
 	}
@@ -260,7 +260,7 @@ public class WMsgTextToolbar extends WToolbar {
 
 	/** Set the icon color on the background color chooser button using our
 	 *  current background color.
-     */
+	 */
 	public void applyBackgroundColorIcon() {
 		if (bg_color_btn != null)
 			bg_color_btn.setIcon(WMsgColorChooser.createColorIcon(bgColor, 16, 16));

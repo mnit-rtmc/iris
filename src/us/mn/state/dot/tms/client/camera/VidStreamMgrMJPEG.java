@@ -225,8 +225,6 @@ public class VidStreamMgrMJPEG extends VidStreamMgr {
 	//-------------------------------------------
 	//-------------------------------------------
 
-//	private int xx;
-	
 	/** Create an image icon from image data */
 	//TODO: change to rescale to current VideoPanel size
 	protected ImageIcon createIcon(byte[] idata) {

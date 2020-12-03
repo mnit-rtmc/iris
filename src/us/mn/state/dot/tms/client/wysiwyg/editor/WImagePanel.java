@@ -85,15 +85,15 @@ public class WImagePanel extends JPanel {
 	
 	/** For drawing dashed lines */
 	private final static float dashA[] = {10.0f};
-    private final static BasicStroke dashed = new BasicStroke(1.0f,
-    		BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashA, 0.0f);
+	private final static BasicStroke dashed = new BasicStroke(1.0f,
+			BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashA, 0.0f);
 	
 	// constants used for converting sign coordinates to WYSIWYG coordinates
-    // (for readability only)
-    private final static boolean PIX_START = true;
-    private final static boolean PIX_END = false;
-    private final static boolean LED_SEP = true;
-    private final static boolean LED = false;
+	// (for readability only)
+	private final static boolean PIX_START = true;
+	private final static boolean PIX_END = false;
+	private final static boolean LED_SEP = true;
+	private final static boolean LED = false;
 	
 	public WImagePanel(WController c, int w, int h) {
 		controller = c;

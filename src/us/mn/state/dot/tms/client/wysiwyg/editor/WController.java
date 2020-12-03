@@ -3050,7 +3050,7 @@ public class WController {
 	 *  what the user wanted).
 	 *  If a second token is provided, it is added after the current selection
 	 *  (e.g. to change only the font/color in the selection).
-     */
+	 */
 	private void addTextOptionToken(WToken toTok, WToken afterTok) {
 		// save state here so we can undo this whole process
 		saveState();

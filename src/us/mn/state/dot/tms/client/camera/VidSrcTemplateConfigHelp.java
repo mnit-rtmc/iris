@@ -131,7 +131,7 @@ public class VidSrcTemplateConfigHelp extends AbstractForm {
 			l.setEditable(false);
 			l.setBackground(UIManager.getColor("Panel.background"));
 			l.setBorder(BorderFactory.createCompoundBorder(border,
-		            BorderFactory.createEmptyBorder(1, 1, 1, 1)));
+			            BorderFactory.createEmptyBorder(1, 1, 1, 1)));
 		}
 		
 		// initialize description labels
@@ -144,7 +144,7 @@ public class VidSrcTemplateConfigHelp extends AbstractForm {
 			d.setLineWrap(true);
 			d.setWrapStyleWord(true);
 			d.setBorder(BorderFactory.createCompoundBorder(border,
-		            BorderFactory.createEmptyBorder(1, 1, 1, 1)));
+			            BorderFactory.createEmptyBorder(1, 1, 1, 1)));
 		}
 	}
 	

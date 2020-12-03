@@ -108,8 +108,8 @@ public class VidSrcTemplConfirmDeleteForm extends AbstractForm {
 				camTemplateModel.addElement(ct.getLabel());
 			
 			camTemplateList.setBorder(BorderFactory.createCompoundBorder(
-					BorderFactory.createLineBorder(Color.GRAY),
-		            BorderFactory.createEmptyBorder(1, 1, 1, 1)));
+			        BorderFactory.createLineBorder(Color.GRAY),
+			        BorderFactory.createEmptyBorder(1, 1, 1, 1)));
 			camTemplateList.setSelectionModel(new DisabledSelectionModel());
 			d = camTemplateList.getPreferredSize();
 			d.width = 250;

@@ -376,13 +376,13 @@ public class WMsgColorChooser extends AbstractForm {
 	public static  ImageIcon createColorIcon(Color c, int width, int height) {
 		BufferedImage image = new BufferedImage(width, height,
 				java.awt.image.BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = image.createGraphics();
-        graphics.setColor(c);
-        graphics.fillRect(0, 0, width, height);
-        graphics.setXORMode(Color.DARK_GRAY);
-        graphics.drawRect(0, 0, width-1, height-1);
-        image.flush();
-        ImageIcon icon = new ImageIcon(image);
-        return icon;
-    }
+		Graphics2D graphics = image.createGraphics();
+		graphics.setColor(c);
+		graphics.fillRect(0, 0, width, height);
+		graphics.setXORMode(Color.DARK_GRAY);
+		graphics.drawRect(0, 0, width-1, height-1);
+		image.flush();
+		ImageIcon icon = new ImageIcon(image);
+		return icon;
+	}
 }

@@ -137,12 +137,12 @@ public class RptSetupForm extends AbstractForm {
 		if (string_date.isEmpty())
 			return 0;
 		try {
-		    Date d = dtFormatter.parse(string_date);
-		    long milliseconds = d.getTime();
-		    return milliseconds;
+			Date d = dtFormatter.parse(string_date);
+			long milliseconds = d.getTime();
+			return milliseconds;
 		} catch (ParseException e) {
-		    e.printStackTrace();
-		    return -1; //TODO: Handle incorrectly entered datetime by user
+			e.printStackTrace();
+			return -1; //TODO: Handle incorrectly entered datetime by user
 		}
 	}
 	
@@ -178,7 +178,7 @@ public class RptSetupForm extends AbstractForm {
 		/** Create device listing */
 		ListModel<String> deviceList = new AbstractListModel<String>() {
 			public int getSize() { return rpt_request.getDeviceList().size(); }
-		    public String getElementAt(int index) { return rpt_request.getDeviceList().get(index).getVisible() ? rpt_request.getDeviceList().get(index).getName() : " "; }
+			public String getElementAt(int index) { return rpt_request.getDeviceList().get(index).getVisible() ? rpt_request.getDeviceList().get(index).getName() : " "; }
 		};
 		device_list = new JList<String>(deviceList);
 		scroll_pn = createScrollPane(device_list);

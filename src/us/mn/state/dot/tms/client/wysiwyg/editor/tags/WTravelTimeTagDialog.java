@@ -204,15 +204,15 @@ class WTravelTimeTagDialog extends WMultiTagDialog {
 		
 		@Override  
 		public Component getListCellRendererComponent(
-				JList<?extends SonarObject> list, SonarObject o,
-		      int index, boolean isSelected, boolean cellHasFocus) {
+		        JList<?extends SonarObject> list, SonarObject o,
+		        int index, boolean isSelected, boolean cellHasFocus) {
 			Station s = (Station) o;
 			cell.getListCellRendererComponent(
 					list, s, index, isSelected, cellHasFocus);
 			String txt = (s != null) ? String.format("%s (%s)",
 					StationHelper.getDescription(s), s.getName()) : "";
 			cell.setText(txt);
-		    return cell;
-		  }
+			return cell;
+		}
 	}
 }

@@ -101,15 +101,15 @@ class WMsgFeedTagDialog extends WMultiTagDialog {
 		
 		@Override  
 		public Component getListCellRendererComponent(
-				JList<?extends SonarObject> list, SonarObject o,
-		      int index, boolean isSelected, boolean cellHasFocus) {
+		        JList<?extends SonarObject> list, SonarObject o,
+		        int index, boolean isSelected, boolean cellHasFocus) {
 			CommLink c = (CommLink) o;
 			cell.getListCellRendererComponent(
 					list, c, index, isSelected, cellHasFocus);
 			String txt = (c != null) ? String.format("%s (%s)",
 					c.getDescription(), c.getName()) : "";
 			cell.setText(txt);
-		    return cell;
-		  }
+			return cell;
+		}
 	}
 }

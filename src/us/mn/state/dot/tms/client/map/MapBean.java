@@ -60,9 +60,9 @@ public class MapBean extends JComponent {
 	static private final Cursor PAN_CURSOR;
 	static {
 		ImageIcon i = new ImageIcon(MapBean.class.getResource(
-                        "/images/pan.png"));
+		                "/images/pan.png"));
 		PAN_CURSOR = Toolkit.getDefaultToolkit().createCustomCursor(
-                        i.getImage(), new Point(6, 6), "Pan");
+		                i.getImage(), new Point(6, 6), "Pan");
 	}
 
 	/** Listeners that listen to this layer state */

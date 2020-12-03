@@ -170,13 +170,13 @@ public class WMsgMultiTagToolbar extends WToolbar {
 		
 		@Override  
 		public Component getListCellRendererComponent(
-				JList<?extends WTokenType> list, WTokenType tt,
-		      int index, boolean isSelected, boolean cellHasFocus) {
+		        JList<?extends WTokenType> list, WTokenType tt,
+		        int index, boolean isSelected, boolean cellHasFocus) {
 			cell.getListCellRendererComponent(
 					list, tt, index, isSelected, cellHasFocus);
 			cell.setText(tt.getLabel());
-		    return cell;
-		  }
+			return cell;
+		}
 	}
 	
 	/** Add tag action */
