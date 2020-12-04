@@ -93,7 +93,6 @@ public enum SystemAttrEnum {
 	EMAIL_RECIPIENT_AWS(String.class),
 	EMAIL_RECIPIENT_DMSXML_REINIT(String.class),
 	EMAIL_RECIPIENT_GATE_ARM(String.class),
-	EMAIL_RECIPIENT_IPAWS(String.class),
 	EMAIL_SENDER_SERVER(String.class),
 	EMAIL_SMTP_HOST(String.class),
 	GATE_ARM_ALERT_TIMEOUT_SECS(90, 10),

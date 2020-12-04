@@ -893,7 +893,7 @@ public class IpawsProcJob extends Job {
 	/** Send an email alert. Generally called when an exception is hit. */
 	static public void sendEmailAlert(String msg) {
 		String recip =
-			SystemAttrEnum.EMAIL_RECIPIENT_IPAWS.getString();
+			SystemAttrEnum.EMAIL_RECIPIENT_AWS.getString();
 		EmailHandler.sendEmail("Error in IRIS IPAWS Processing System",
 				msg, recip);
 	}
