@@ -65,7 +65,7 @@ public class SQLConnection {
 	}
 
 	/** Escape a string constant value for SQL */
-	static private String escapeValue(Object value) {
+	static public String escapeValue(Object value) {
 		return value.toString().replace("'", "''");
 	}
 	
