@@ -116,5 +116,5 @@ layer_group: tile
 layer_group: tms
   layer: segments
     table: segments
-    zoom: 10-18
+    zoom: 9-18
     tags: ?station

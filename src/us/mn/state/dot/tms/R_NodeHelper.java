@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,6 +64,16 @@ public class R_NodeHelper extends BaseHelper {
 		return n.getTransition() == R_NodeTransition.COMMON.ordinal();
 	}
 
+	/** Check if an r_node is an exit with a COMMON transition */
+	static public boolean isCommonExit(R_Node n) {
+		return isCommon(n) && isExit(n);
+	}
+
+	/** Check if an r_node is an entrance with a COMMON transition */
+	static public boolean isCommonEntrance(R_Node n) {
+		return isCommon(n) && isEntrance(n);
+	}
+
 	/** Check if a node is at a station break */
 	static public boolean isStationBreak(R_Node n) {
 		return n.getActive() &&
@@ -80,11 +90,6 @@ public class R_NodeHelper extends BaseHelper {
 				return true;
 		}
 		return false;
-	}
-
-	/** Check if a given node is a continuity break */
-	static public boolean isContinuityBreak(R_Node n) {
-		return isCommon(n);
 	}
 
 	/** Check if a node should be joined with a segment */

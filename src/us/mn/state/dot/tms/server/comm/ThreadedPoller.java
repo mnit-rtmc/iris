@@ -22,7 +22,6 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommConfig;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.EventType;
-import static us.mn.state.dot.tms.server.Constants.UNKNOWN;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
@@ -142,16 +141,17 @@ public class ThreadedPoller<T extends ControllerProperty>
 	/** Comm thread (may be null) */
 	private CommThread c_thread;
 
-	/** Get the poller status */
+	/** Get the poller status.
+	 * Any value other than a blank string is considered "failed". */
 	@Override
 	public synchronized String getStatus() {
-		return (c_thread != null) ? c_thread.getStatus() : UNKNOWN;
+		return (c_thread != null) ? c_thread.getStatus() : "";
 	}
 
 	/** Check if the poller is currently connected */
 	@Override
 	public synchronized boolean isConnected() {
-		return (c_thread != null) && !c_thread.isStopped();
+		return (c_thread != null) && !c_thread.isDone();
 	}
 
 	/** Get max seconds an idle connection should be left open

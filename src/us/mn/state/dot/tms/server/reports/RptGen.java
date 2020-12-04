@@ -115,7 +115,7 @@ public abstract class RptGen {
 //		if (RptGen.class.isAssignableFrom(c)) {
 			Object o;
 			try {
-				o = c.newInstance();
+				o = c.getDeclaredConstructor().newInstance();
 				RptGen gen = (RptGen)o;
 				String key = gen.getGuiName();
 				generatorClasses.put(key, c);
@@ -142,7 +142,7 @@ public abstract class RptGen {
 		populateGeneratorMap();
 		Class<RptGen> c = generatorClasses.get(guiName);
 		try {
-			return c.newInstance();
+			return c.getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

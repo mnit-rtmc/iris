@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2015  Minnesota Department of Transportation
+ * Copyright (C) 2012-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -171,7 +171,7 @@ public final class Interval implements Comparable<Interval> {
 	/** Get an interval hash code */
 	@Override
 	public int hashCode() {
-		return new Double(seconds()).hashCode();
+		return Double.valueOf(seconds()).hashCode();
 	}
 
 	/** Get a string representation of an interval */

@@ -376,25 +376,6 @@ public class GeoLocHelper extends BaseHelper {
 			return null;
 	}
 
-	/** Calculate the distance from a point to a line segment.
-	 * @param l0 First end of line segment.
-	 * @param l1 Second end of line segment.
-	 * @param smp Selected point (spherical mercator position).
-	 * @return Distance from point to segment (spherical mercator "meters").
-	 */
-	static public double segmentDistance(GeoLoc l0, GeoLoc l1,
-		SphericalMercatorPosition smp)
-	{
-		SphericalMercatorPosition p0 = getPosition(l0);
-		SphericalMercatorPosition p1 = getPosition(l1);
-		if (p0 != null && p1 != null) {
-			MapLineSegment seg = new MapLineSegment(p0.getX(),
-				p0.getY(), p1.getX(), p1.getY());
-			return seg.distanceTo(smp.getX(), smp.getY());
-		} else
-			return Double.POSITIVE_INFINITY;
-	}
-
 	/** Snap a point to a line segment on the map.
 	 * @param l0 First end of line segment.
 	 * @param l1 Second end of line segment.
@@ -409,7 +390,8 @@ public class GeoLocHelper extends BaseHelper {
 			MapLineSegment seg = new MapLineSegment(p0.getX(),
 				p0.getY(), p1.getX(), p1.getY());
 			MapVector pnt = seg.snap(smp.getX(), smp.getY());
-			return createTransient(pnt, l0);
+			if (pnt != null)
+				return createTransient(pnt, l0);
 		}
 		return null;
 	}

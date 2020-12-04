@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.server.VideoMonitorImpl;
  */
 public class KeyboardState {
 
-	static private final Integer ZERO = new Integer(0);
+	static private final Integer ZERO = Integer.valueOf(0);
 
 	/** Packet start/end transmit */
 	static private final byte STX = 0x02;

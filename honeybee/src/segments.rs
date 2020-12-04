@@ -25,6 +25,12 @@ use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::sync::mpsc::Receiver;
 
+/// Base segment scale factor
+const BASE_SCALE: f64 = 1.0 / 6.0;
+
+/// Outer segment scale factor
+const OUTER_SCALE: f64 = 16.0 / 6.0;
+
 /// Road definition
 #[derive(Debug)]
 pub struct Road {
@@ -127,12 +133,28 @@ struct Corridor {
     cor_id: CorridorId,
     /// Base SID
     base_sid: i64,
+    /// Road class ordinal
+    r_class: i16,
     /// Road class scale
     scale: f64,
     /// Nodes ordered by corridor direction
     nodes: Vec<RNode>,
     /// Valid node count
     count: usize,
+}
+
+/// Segments for a corridor
+struct Segments<'a> {
+    /// Corridor ref
+    cor: &'a Corridor,
+    /// Name of corridor
+    cor_name: String,
+    /// All points on corridor
+    pts: Vec<Pt64>,
+    /// Normal vectors for all points
+    norms: Vec<Pt64>,
+    /// Meter distance for all points
+    meters: Vec<f64>,
 }
 
 /// State of all segments
@@ -303,13 +325,19 @@ impl Road {
 
 impl Corridor {
     /// Create a new corridor
-    fn new(cor_id: CorridorId, base_sid: i64, scale: f64) -> Self {
+    fn new(
+        cor_id: CorridorId,
+        base_sid: i64,
+        r_class: i16,
+        scale: f64,
+    ) -> Self {
         debug!("Corridor::new {}", &cor_id);
         let nodes = vec![];
         let count = 0;
         Corridor {
             cor_id,
             base_sid,
+            r_class,
             scale,
             nodes,
             count,
@@ -405,77 +433,10 @@ impl Corridor {
         statement: &Statement,
     ) -> crate::Result<()> {
         let pts = self.create_points();
-        let cor_name = self.cor_id.to_string();
         info!("{}: {} points", self.cor_id, pts.len());
         if !pts.is_empty() {
-            let norms = create_norms(&pts);
-            let meters = self.create_meterpoints();
-            for zoom in 10..=18 {
-                self.create_segments_zoom(
-                    trans,
-                    statement,
-                    self.base_sid,
-                    &cor_name,
-                    &pts,
-                    &norms,
-                    &meters,
-                    zoom,
-                )?;
-            }
-        }
-        Ok(())
-    }
-
-    /// Create segments for one zoom level
-    fn create_segments_zoom(
-        &self,
-        trans: &mut Transaction,
-        statement: &Statement,
-        mut sid: i64,
-        cor_name: &str,
-        pts: &[Pt64],
-        norms: &[Pt64],
-        meters: &[f64],
-        zoom: i32,
-    ) -> crate::Result<()> {
-        let o_scale = scale_zoom(self.scale * 16.0, zoom);
-        let i_scale = scale_zoom(self.scale, zoom);
-        let mut poly = Vec::<(Pt64, Pt64)>::with_capacity(16);
-        let mut seg_meter = 0.0;
-        let mut p_meter = 0.0;
-        let mut station_id = None;
-        let nodes = &self.nodes[..];
-        for (ref node, (pt, (norm, meter))) in
-            nodes.iter().zip(pts.iter().zip(norms.iter().zip(meters)))
-        {
-            let too_long = *meter >= seg_meter + 2500.0;
-            let outer = *pt + *norm * o_scale;
-            let inner = *pt + *norm * i_scale;
-            if node.is_break() || too_long {
-                if *meter < p_meter + 2500.0 {
-                    poly.push((outer, inner));
-                }
-                if poly.len() > 1 {
-                    let way = self.create_way(&poly);
-                    let params: [&(dyn ToSql + Sync); 5] =
-                        [&sid, &cor_name, &station_id, &zoom, &way];
-                    trans.execute(statement, &params).unwrap();
-                    sid += 1;
-                }
-                poly.clear();
-                seg_meter = *meter;
-                station_id = node.station_id.clone();
-            }
-            if !node.is_common() {
-                poly.push((outer, inner));
-            }
-            p_meter = *meter;
-        }
-        if poly.len() > 1 {
-            let way = self.create_way(&poly);
-            let params: [&(dyn ToSql + Sync); 5] =
-                [&sid, &cor_name, &station_id, &zoom, &way];
-            trans.execute(statement, &params[..]).unwrap();
+            let segments = Segments::new(self, pts);
+            segments.create_all(trans, statement)?;
         }
         Ok(())
     }
@@ -502,26 +463,6 @@ impl Corridor {
             ppos = Some(pos);
         }
         meters
-    }
-
-    /// Create polygon for way column
-    fn create_way(&self, poly: &[(Pt64, Pt64)]) -> Polygon {
-        let mut points = vec![];
-        for (vtx, _) in poly {
-            points.push(Point::new(vtx.x(), vtx.y(), None));
-        }
-        for (_, vtx) in poly.iter().rev() {
-            points.push(Point::new(vtx.x(), vtx.y(), None));
-        }
-        if let Some((vtx, _)) = poly.iter().next() {
-            points.push(Point::new(vtx.x(), vtx.y(), None));
-        }
-        let mut linestring = LineString::new();
-        linestring.points = points;
-        let mut way = Polygon::new();
-        way.rings.push(linestring);
-        way.srid = Some(3857);
-        way
     }
 
     /// Add a node to corridor
@@ -581,6 +522,130 @@ impl Corridor {
     }
 }
 
+impl<'a> Segments<'a> {
+    /// Create corridor segments
+    fn new(cor: &'a Corridor, pts: Vec<Pt64>) -> Self {
+        let cor_name = cor.cor_id.to_string();
+        let norms = create_norms(&pts);
+        let meters = cor.create_meterpoints();
+        Segments {
+            cor,
+            cor_name,
+            pts,
+            norms,
+            meters,
+        }
+    }
+
+    /// Create segments for all zoom levels
+    fn create_all(
+        &self,
+        trans: &mut Transaction,
+        statement: &Statement,
+    ) -> crate::Result<()> {
+        let params: [&(dyn ToSql + Sync); 1] = [&self.cor_name];
+        trans.execute("DELETE FROM segments WHERE name = $1", &params)?;
+        for zoom in 0..=18 {
+            if road_class_zoom(self.cor.r_class, zoom) {
+                self.create_segments_zoom(trans, statement, zoom)?;
+            }
+        }
+        Ok(())
+    }
+
+    /// Create segments for one zoom level
+    fn create_segments_zoom(
+        &self,
+        trans: &mut Transaction,
+        statement: &Statement,
+        zoom: i32,
+    ) -> crate::Result<()> {
+        let o_scale = self.scale_zoom(OUTER_SCALE, zoom);
+        let i_scale = self.scale_zoom(BASE_SCALE, zoom);
+        let mut poly = Vec::<(Pt64, Pt64)>::with_capacity(16);
+        let mut seg_meter = 0.0; // meter point for the current segment
+        let mut p_meter = 0.0; // meter point for the previous point
+        let mut sid = self.cor.base_sid;
+        let mut station_id = None;
+        let nodes = &self.cor.nodes[..];
+        for (ref node, (pt, (norm, meter))) in nodes.iter().zip(
+            self.pts
+                .iter()
+                .zip(self.norms.iter().zip(self.meters.iter())),
+        ) {
+            // FIXME: use `map_segment_max_meters` system attribute
+            let too_long = *meter >= seg_meter + 2500.0;
+            let outer = *pt + *norm * o_scale;
+            let inner = *pt + *norm * i_scale;
+            if node.is_break() || too_long {
+                if *meter < p_meter + 2500.0 {
+                    poly.push((outer, inner));
+                }
+                if poly.len() > 1 {
+                    let way = self.create_way(&poly);
+                    let params: [&(dyn ToSql + Sync); 5] =
+                        [&sid, &self.cor_name, &station_id, &zoom, &way];
+                    trans.execute(statement, &params).unwrap();
+                    sid += 1;
+                }
+                poly.clear();
+                seg_meter = *meter;
+                station_id = node.station_id.clone();
+            }
+            if !node.is_common() {
+                poly.push((outer, inner));
+            }
+            p_meter = *meter;
+        }
+        if poly.len() > 1 {
+            let way = self.create_way(&poly);
+            let params: [&(dyn ToSql + Sync); 5] =
+                [&sid, &self.cor_name, &station_id, &zoom, &way];
+            trans.execute(statement, &params[..]).unwrap();
+        }
+        Ok(())
+    }
+
+    /// Scale a vector normal with zoom level
+    fn scale_zoom(&self, scale: f64, zoom: i32) -> f64 {
+        self.cor.scale * scale * f64::from(1 << (16 - 16.min(10.max(zoom))))
+    }
+
+    /// Create polygon for way column
+    fn create_way(&self, poly: &[(Pt64, Pt64)]) -> Polygon {
+        let mut points = vec![];
+        for (vtx, _) in poly {
+            points.push(Point::new(vtx.x(), vtx.y(), None));
+        }
+        for (_, vtx) in poly.iter().rev() {
+            points.push(Point::new(vtx.x(), vtx.y(), None));
+        }
+        if let Some((vtx, _)) = poly.iter().next() {
+            points.push(Point::new(vtx.x(), vtx.y(), None));
+        }
+        let mut linestring = LineString::new();
+        linestring.points = points;
+        let mut way = Polygon::new();
+        way.rings.push(linestring);
+        way.srid = Some(3857);
+        way
+    }
+}
+
+/// Check if a road class should appear at a given zoom level
+fn road_class_zoom(r_class: i16, zoom: i32) -> bool {
+    match r_class {
+        1 => zoom >= 15, // RESIDENTIAL
+        2 => zoom >= 14, // BUSINESS
+        3 => zoom >= 13, // COLLECTOR
+        4 => zoom >= 12, // ARTERIAL
+        5 => zoom >= 11, // EXPRESSWAY
+        6 => zoom >= 9,  // FREEWAY
+        7 => zoom >= 13, // CD ROAD
+        _ => false,
+    }
+}
+
 /// Create normal vectors for a slice of points
 fn create_norms(pts: &[Pt64]) -> Vec<Pt64> {
     let mut norms = vec![];
@@ -620,11 +685,6 @@ fn vector_downstream(pts: &[Pt64], i: usize) -> Option<Pt64> {
     None
 }
 
-/// Scale a vector normal with zoom level
-fn scale_zoom(scale: f64, zoom: i32) -> f64 {
-    scale * f64::from(1 << (16 - 16.min(zoom)))
-}
-
 impl SegmentState {
     /// SQL to insert one segment row
     const SQL_INSERT: &'static str = "INSERT INTO \
@@ -642,12 +702,17 @@ impl SegmentState {
         }
     }
 
+    /// Get road class
+    fn r_class(&self, road: &str) -> i16 {
+        self.roads.get(road).map(|r| r.r_class).unwrap_or(0)
+    }
+
     /// Get scale for a road
     fn scale(&self, road: &str) -> f64 {
         self.roads
             .get(road)
-            .map(|r| f64::from(r.scale / 6.0))
-            .unwrap_or(1.0)
+            .map(|r| f64::from(r.scale))
+            .unwrap_or(BASE_SCALE)
     }
 
     /// Update (or add) a node
@@ -678,8 +743,10 @@ impl SegmentState {
                     cid.hash(&mut hasher);
                     hasher.finish()
                 } as i64;
+                let r_class = self.r_class(&cid.roadway);
                 let scale = self.scale(&cid.roadway);
-                let mut cor = Corridor::new(cid.clone(), base_sid, scale);
+                let mut cor =
+                    Corridor::new(cid.clone(), base_sid, r_class, scale);
                 cor.add_node(node, self.ordered);
                 self.corridors.insert(cid.clone(), cor);
             }
@@ -737,13 +804,16 @@ impl SegmentState {
         self.roads.insert(name.clone(), road);
         if self.ordered {
             let scale = self.scale(&name);
+            let mut trans = self.client.transaction().unwrap();
+            let statement = trans.prepare(SegmentState::SQL_INSERT).unwrap();
             for cor in self.corridors.values_mut() {
                 if cor.cor_id.roadway == name {
                     cor.scale = scale;
                     cor.order_nodes();
-                    // FIXME: create segments
+                    cor.create_segments(&mut trans, &statement).unwrap();
                 }
             }
+            trans.commit().unwrap();
         }
     }
 }

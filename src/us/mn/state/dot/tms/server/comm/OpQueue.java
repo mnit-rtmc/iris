@@ -150,19 +150,26 @@ public final class OpQueue<T extends ControllerProperty> {
 
 	/** Get the next operation from the queue (and remove it).
 	 * Waits until an operation is added, the timeout expires or the thread
-	 * is interrupted.
+	 * is interrupted (destroyed).
 	 * @param idle_ms Idle timeout (ms); 0 indicates no timeout.
 	 * @return Operation at front of queue.
-	 * @throws InterruptedException If thread is interrupted or idle timeout
-	 *                              expires. */
+	 * @throws DisconnectException If idle timeout expires or comm thread is
+	 *                             destroyed. */
 	public synchronized OpController<T> next(long idle_ms)
-		throws InterruptedException
+		throws DisconnectException
 	{
 		work = null;
 		while (null == front) {
-			wait(idle_ms);
-			if (idle_ms > 0 && null == front)
-				throw new InterruptedException("Idle timeout");
+			try {
+				wait(idle_ms);
+			}
+			catch (InterruptedException e) {
+				throw new DisconnectException("DESTROYED");
+			}
+			if (idle_ms > 0 && null == front) {
+				// Empty msg (status) doesn't fail controllers
+				throw new DisconnectException("");
+			}
 		}
 		work = front.operation;
 		front = front.next;

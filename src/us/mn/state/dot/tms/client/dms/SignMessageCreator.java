@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  * Copyright (C) 2020       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -190,8 +190,8 @@ public class SignMessageCreator {
 		attrs.put("multi", multi);
 		attrs.put("beacon_enabled", be);
 		attrs.put("prefix_page", pp);
-		attrs.put("msg_priority", new Integer(mp.ordinal()));
-		attrs.put("source", new Integer(src));
+		attrs.put("msg_priority", Integer.valueOf(mp.ordinal()));
+		attrs.put("source", Integer.valueOf(src));
 		if (owner != null)
 			attrs.put("owner", owner);
 		if (duration != null)

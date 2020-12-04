@@ -397,7 +397,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Pull a controller from the link */
 	public synchronized void pullController(ControllerImpl c) {
-		Integer d = new Integer(c.getDrop());
+		Integer d = Integer.valueOf(c.getDrop());
 		controllers.remove(d);
 	}
 

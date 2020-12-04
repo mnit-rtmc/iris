@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2018  Minnesota Department of Transportation
+ * Copyright (C) 2004-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -290,12 +290,11 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Get the average speed using a rolling average of samples */
 	public float getRollingAverageSpeed() {
-		if(isSpeedValid()) {
+		if (isSpeedValid()) {
 			int n_samples = rolling_samples;
-			if(n_samples > 0)
-				return average(rlg_speed, n_samples);
-			else
-				return getSpeedLimit();
+			return (n_samples > 0)
+			      ? average(rlg_speed, n_samples)
+			      : getSpeedLimit();
 		} else
 			return MISSING_DATA;
 	}
@@ -315,10 +314,9 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Calculate the maximum number of samples for rolling average */
 	private int calculateMaxSamples() {
-		if(isSpeedTrending())
-			return 2;
-		else
-			return DensityRank.samples(getDensity());
+		return isSpeedTrending()
+		      ? 2
+		      : DensityRank.samples(getDensity());
 	}
 
 	/** Is the speed trending over the last few time steps? */
@@ -386,10 +384,9 @@ public class StationImpl implements Station, VehicleSampler {
 			if (f > 0) {
 				t_speed += f;
 				n_speed++;
-				if (low == MISSING_DATA)
-					low = f;
-				else
-					low = Math.min(f, low);
+				low = (low == MISSING_DATA)
+				    ? f
+				    : Math.min(f, low);
 			}
 		}
 		occupancy = average(t_occ, n_occ);
@@ -422,12 +419,30 @@ public class StationImpl implements Station, VehicleSampler {
 		w.write("/>\n");
 	}
 
-	/** Get the station index */
-	private String getIndex() {
-		if (name.startsWith("S"))
-			return name.substring(1);
-		else
-			return name;
+	/** Write the current sample as a JSON object */
+	public boolean writeSampleJson(long start, long end, Writer writer)
+		throws IOException
+	{
+		int f = getFlow(start, end);
+		int s = Math.round(getSpeed());
+		if (f > MISSING_DATA || s > 0) {
+			writeSampleJson(f, s, writer);
+			return true;
+		} else
+			return false;
+	}
+
+	/** Write the current sample as a JSON object */
+	private void writeSampleJson(int f, int s, Writer writer)
+		throws IOException
+	{
+		writer.write('"');
+		writer.write(name);
+		writer.write("\":[");
+		writer.write((f > MISSING_DATA) ? String.valueOf(f) : "null");
+		writer.write(',');
+		writer.write((s > 0) ? String.valueOf(s) : "null");
+		writer.write(']');
 	}
 
 	/** Acceleration from previous station */
@@ -498,10 +513,9 @@ public class StationImpl implements Station, VehicleSampler {
 	 * @return acceleration in mphph */
 	private Float calculateAcceleration(float u, float up, float d) {
 		assert d > 0;
-		if (u > 0 && up > 0)
-			return (u * u - up * up) / (2 * d);
-		else
-			return null;
+		return (u > 0 && up > 0)
+		      ? (u * u - up * up) / (2 * d)
+		      : null;
 	}
 
 	/** Check if station is a bottleneck candidate */
@@ -548,10 +562,9 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Get the current deceleration threshold */
 	private int getThreshold() {
-		if (isBeforeStartCount())
-			return getStartThreshold();
-		else
-			return getStopThreshold();
+		return isBeforeStartCount()
+		      ? getStartThreshold()
+		      : getStopThreshold();
 	}
 
 	/** Get the starting deceleration threshold */
@@ -647,10 +660,9 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Check if the (bottleneck) station is in range */
 	private boolean isBottleneckInRange(float d) {
-		if (d > 0)
-			return d < getUpstreamDistance();
-		else
-			return -d < getDownstreamDistance();
+		return (d > 0)
+		      ? d < getUpstreamDistance()
+		      : -d < getDownstreamDistance();
 	}
 
 	/** Get the upstream bottleneck distance */

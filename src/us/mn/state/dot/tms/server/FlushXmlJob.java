@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@ public class FlushXmlJob extends Job {
 	public void perform() throws IOException {
 		writeSampleXml();
 		station_manager.writeSampleXml();
+		station_manager.writeSampleJson();
 	}
 
 	/** Write the sample data out as XML */

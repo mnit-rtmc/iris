@@ -62,6 +62,7 @@ public class CommSelector implements Closeable {
 
 	/** Select and perform ready I/O */
 	private void doSelect() throws IOException {
+		// FIXME: handle idle disconnect
 		selector.select();
 		Iterator<SelectionKey> it = selector.selectedKeys().iterator();
 		while (it.hasNext()) {

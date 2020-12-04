@@ -51,7 +51,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Ordinal value for lock "OFF" */
 	static private final Integer OFF_ORDINAL =
-		new Integer(LCSArrayLock.OFF.ordinal());
+		Integer.valueOf(LCSArrayLock.OFF.ordinal());
 
 	/** Create a message to log LCS sign status event */
 	static private String createLogText(Integer[] ind) {

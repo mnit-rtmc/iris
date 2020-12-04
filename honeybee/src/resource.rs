@@ -135,14 +135,6 @@ const CAMERA_RES: Resource = Resource::Simple(
 ) r",
 );
 
-/// DMS attribute resource
-const DMS_ATTRIBUTE_RES: Resource = Resource::Simple(
-    "dms_attribute",
-    Listen::All("system_attribute"),
-    "SELECT jsonb_object_agg(name, value)::text \
-    FROM dms_attribute_view",
-);
-
 /// DMS resource
 const DMS_RES: Resource = Resource::Simple(
     "dms_pub",
@@ -160,7 +152,7 @@ const DMS_MSG_RES: Resource = Resource::Simple(
     "dms_message",
     Listen::Include("dms", "msg_current"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, msg_current, sources, duration, expire_time \
+    SELECT name, msg_current, failed, sources, duration, expire_time \
     FROM dms_message_view WHERE condition = 'Active' \
     ORDER BY name \
 ) r",
@@ -250,6 +242,15 @@ const SIGN_MSG_RES: Resource = Resource::SignMsg(
 ) r",
 );
 
+/// System attribute resource
+const SYSTEM_ATTRIBUTE_RES: Resource = Resource::Simple(
+    "system_attribute",
+    Listen::All("system_attribute"),
+    "SELECT jsonb_object_agg(name, value)::text \
+    FROM iris.system_attribute \
+    WHERE name LIKE 'dms\\_%' OR name LIKE 'map\\_%'",
+);
+
 /// Static parking area resource
 const TPIMS_STAT_RES: Resource = Resource::Simple(
 "TPIMS_static", Listen::Include("parking_area", "time_stamp_static"),
@@ -308,14 +309,14 @@ const TPIMS_ARCH_RES: Resource = Resource::Simple(
 
 /// All defined resources
 const ALL: &[Resource] = &[
+    SYSTEM_ATTRIBUTE_RES, // System attributes must be loaded first
+    ROAD_RES,             // Roads must be loaded before R_Nodes
     CAMERA_RES,
-    DMS_ATTRIBUTE_RES,
     DMS_RES,
     DMS_MSG_RES,
     FONT_RES,
     GRAPHIC_RES,
     INCIDENT_RES,
-    ROAD_RES, // Roads must be loaded before R_Nodes
     R_NODE_RES,
     SIGN_CONFIG_RES,
     SIGN_DETAIL_RES,

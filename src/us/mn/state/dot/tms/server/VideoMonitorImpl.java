@@ -54,7 +54,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Set camera sequence for a monitor number */
 	static private void setCamSequence(int mn, CamSequence seq) {
-		Integer num = new Integer(mn);
+		Integer num = Integer.valueOf(mn);
 		synchronized (cam_seqs) {
 			if (seq != null)
 				cam_seqs.put(num, seq);
@@ -66,7 +66,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	/** Get camera sequence for a monitor number */
 	static private CamSequence getCamSequence(int mn) {
 		synchronized (cam_seqs) {
-			return cam_seqs.get(new Integer(mn));
+			return cam_seqs.get(Integer.valueOf(mn));
 		}
 	}
 

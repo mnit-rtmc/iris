@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import static us.mn.state.dot.tms.GeoLocHelper.distanceTo;
-import static us.mn.state.dot.tms.GeoLocHelper.segmentDistance;
+import static us.mn.state.dot.tms.GeoLocHelper.snapSegment;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import us.mn.state.dot.tms.units.Distance;
@@ -57,6 +57,63 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 	/** Check if the r_node is valid */
 	static private boolean isValid(R_Node n) {
 		return n.getActive() && !GeoLocHelper.isNull(n.getGeoLoc());
+	}
+
+	/** Check if a segment is valid */
+	static private boolean isSegmentValid(LaneType lt, R_Node np, R_Node n){
+		return isStartValid(lt, np) && isEndValid(lt, n);
+	}
+
+	/** Check if start of a segment is valid */
+	static private boolean isStartValid(LaneType lt, R_Node np) {
+		return (np != null)
+		    && isStartType(lt, np)
+		    && !R_NodeHelper.isCommonExit(np);
+	}
+
+	/** Check if start node matches lane type */
+	static private boolean isStartType(LaneType lt, R_Node np) {
+		return lt != LaneType.EXIT || R_NodeHelper.isExit(np);
+	}
+
+	/** Check if end of a segment is valid */
+	static private boolean isEndValid(LaneType lt, R_Node n) {
+		return (n != null)
+		    && isEndType(lt, n)
+		    && !R_NodeHelper.isCommonEntrance(n);
+	}
+
+	/** Check if end node matches lane type */
+	static private boolean isEndType(LaneType lt, R_Node n) {
+		return lt != LaneType.MERGE || R_NodeHelper.isEntrance(n);
+	}
+
+	/** GeoLoc / distance pair */
+	static public class GeoLocDist {
+		public final GeoLoc loc;
+		public final Distance dist;
+		private GeoLocDist(GeoLoc l, Distance d) {
+			loc = l;
+			dist = d;
+		}
+	}
+
+	/** Compare GeoLoc distance with shortest distance.
+	 * @param pos Position of location to snap.
+	 * @param loc Location snapped to a segment.
+	 * @param gld Shortest location / distance found so far.
+	 * @param max_dist Maximum allowed distance to snap.
+	 * @return Shortest location / distance. */
+	static private GeoLocDist shortestDist(Position pos, GeoLoc loc,
+		GeoLocDist gld, Distance max_dist)
+	{
+		if (loc != null) {
+			Distance m = distanceTo(loc, pos);
+			Distance dist = (gld != null) ? gld.dist : max_dist;
+			if (m.m() < dist.m())
+				return new GeoLocDist(loc, m);
+		}
+		return gld;
 	}
 
 	/** Corridor name */
@@ -496,64 +553,23 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 	private GeoLocDist snapGeoLoc2(SphericalMercatorPosition smp,
 		LaneType lt, Distance max_dist)
 	{
-		double dist = max_dist.m();
-		GeoLoc l0 = null;
-		GeoLoc l1 = null;
-		GeoLoc lp = null;	/* previous location */
-		T np = null;		/* previous node */
+		final Position pos = smp.getPosition();
+		GeoLocDist gld = null; /* location snapped to corridor */
+		GeoLoc lp = null;      /* previous location */
+		T np = null;           /* previous node */
 		for (T n: r_nodes) {
-			if (!n.getActive())
-				continue;
-			GeoLoc l = n.getGeoLoc();
-			if ((lp != null) &&
-			   (!skipExit(lt, np)) &&
-			   (!skipEntrance(lt, n)))
-			{
-				double m = segmentDistance(lp, l, smp);
-				if (m < dist) {
-					l0 = lp;
-					l1 = l;
-					dist = m;
+			if (n.getActive()) {
+				GeoLoc l = n.getGeoLoc();
+				if (isSegmentValid(lt, np, n)) {
+					GeoLoc loc = snapSegment(lp, l, smp);
+					gld = shortestDist(pos, loc, gld,
+						max_dist);
 				}
-			}
-			if (R_NodeHelper.isContinuityBreak(n)) {
-				np = null;
-				lp = null;
-			} else {
 				np = n;
 				lp = l;
 			}
 		}
-		if (l0 != null) {
-			GeoLoc loc = GeoLocHelper.snapSegment(l0, l1, smp);
-			if (loc != null)
-				return new GeoLocDist(loc, new Distance(dist));
-		}
-		return null;
-	}
-
-	/** Check if exit lane type should be skipped */
-	private boolean skipExit(LaneType lt, T n) {
-		return (n != null) &&
-		       (lt == LaneType.EXIT) &&
-		       !R_NodeHelper.isExit(n);
-	}
-
-	/** Check if entrance lane type should be skipped */
-	private boolean skipEntrance(LaneType lt, T n) {
-		assert (n != null);
-		return (lt == LaneType.MERGE) &&
-		       !R_NodeHelper.isEntrance(n);
-	}
-
-	/** GeoLoc / distance pair */
-	static public class GeoLocDist {
-		public final GeoLoc loc;
-		public final Distance dist;
-		private GeoLocDist(GeoLoc l, Distance d) {
-			loc = l;
-			dist = d;
-		}
+		return gld;
 	}
 
 	/** Count the freeway exits between two milepoints */

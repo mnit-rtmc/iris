@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,17 +17,19 @@ package us.mn.state.dot.tms.server.comm;
 import java.io.EOFException;
 
 /**
- * HangUpException is thrown when a modem hangs up.
+ * DisconnectException is thrown when a comm link or modem is disconnected.
  *
  * @author Douglas Lau
  */
-public class HangUpException extends EOFException {
+public class DisconnectException extends EOFException {
 
-	/** Exception Message */
-	static public final String MESSAGE = "HANG UP";
+	/** Create a new disconnect exception */
+	public DisconnectException() {
+		super("DISCONNECT");
+	}
 
-	/** Create a new hang up exception */
-	public HangUpException() {
-		super(MESSAGE);
+	/** Create a new disconnect exception */
+	public DisconnectException(String msg) {
+		super(msg);
 	}
 }

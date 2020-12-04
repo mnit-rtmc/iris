@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2020  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -60,7 +60,7 @@ public class WindSensorValues {
 		if (wd != null) {
 			int iwd = wd.getInteger();
 			if (iwd >= 0 && iwd <= 360)
-				return new Integer(iwd);
+				return Integer.valueOf(iwd);
 		}
 		return null;
 	}

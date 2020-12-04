@@ -25,7 +25,8 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  */
 public interface DevicePoller {
 
-	/** Get the poller status */
+	/** Get the poller status.
+	 * Any value other than a blank string is considered "failed". */
 	String getStatus();
 
 	/** Check if the poller is currently connected */

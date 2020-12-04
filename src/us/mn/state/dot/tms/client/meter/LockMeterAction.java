@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,9 +45,9 @@ public class LockMeterAction extends ProxyAction<RampMeter> {
 		if (proxy != null) {
 			int s = lock_cbx.getSelectedIndex();
 			if (s >= 0) {
-				Integer lk = new Integer(s);
-				if (s == 0)
-					lk = null;
+				Integer lk = (s != 0)
+				       ? Integer.valueOf(s)
+				       : null;
 				proxy.setMLock(lk);
 			}
 		}
