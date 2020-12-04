@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.utils.wysiwyg;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-//import jdk.nashorn.internal.ir.debug.ObjectSizeCalculator;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 

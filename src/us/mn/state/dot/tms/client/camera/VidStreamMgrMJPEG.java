@@ -72,7 +72,6 @@ public class VidStreamMgrMJPEG extends VidStreamMgr {
 	 * (Queued job called from the STREAM_SCHED thread.) */
 	protected void doStartStream() {
 		vcomponentLabel.removeAll();
-//		setComponent(vcomponentLabel);
 		stream = createInputStream();
 		if (stream != null)
 			STREAM_SCHED.addJob(jobReadStream);
@@ -139,11 +138,9 @@ public class VidStreamMgrMJPEG extends VidStreamMgr {
 			return c.getInputStream();
 		}
 		catch (MalformedURLException e) {
-//			e.printStackTrace();
 			setErrorMsg(e, "Malformed URL Error");
 		}
 		catch (IOException e) {
-//			e.printStackTrace();
 			setErrorMsg(e, "Generic IO Error");
 		}
 		return null;
@@ -181,14 +178,6 @@ public class VidStreamMgrMJPEG extends VidStreamMgr {
 	//-------------------------------------------
 	//-------------------------------------------
 
-//	/** Read image from the mjpeg stream */
-//	private void readStream() throws IOException {
-//			byte[] idata = getImage();
-//			vcomponent.setIcon(createIcon(idata));
-//			setComponent(createIcon(idata).getImage());
-//			streamingStarted();
-//	}
-//
 	/**
 	 * @param image
 	 */
@@ -229,7 +218,6 @@ public class VidStreamMgrMJPEG extends VidStreamMgr {
 	//TODO: change to rescale to current VideoPanel size
 	protected ImageIcon createIcon(byte[] idata) {
 		ImageIcon icon = new ImageIcon(idata);
-//		System.out.println("ICON"+(++xx));
 		int vWidth  = videoPanel.getWidth();
 		int vHeight = videoPanel.getHeight();
 		if (icon.getIconWidth() == vWidth &&

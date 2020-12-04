@@ -109,11 +109,10 @@ public class MultiConfig {
 
 	//===========================================
 
-//	final static public String BITMAP    = "Bitmap";
 	final static public String SIGN      = "Sign";
 	final static public String CONFIG    = "Config";
 	final static public String SIGNGROUP = "SignGroup";
-	private String type;  // "Bitmap", "Sign", "Config", or "SignGroup"
+	private String type;  // "Sign", "Config", or "SignGroup"
 	
 	private String name;
 
@@ -349,7 +348,7 @@ public class MultiConfig {
 			signConfig = dms.getSignConfig();
 		if (signConfig == null) {
 			logError("Sign configuration missing for sign "+dms.getName());
-//			logError("  Substituting 40x21, mono1");
+			logError("  Substituting 40x21, mono1");
 			// throw in some default values to let things progress
 			faceWidth    = 3308;
 			faceHeight   = 1721;
@@ -405,7 +404,7 @@ public class MultiConfig {
 			signDetail = dms.getSignDetail();
 		if (signDetail == null) {
 			logError("Sign detail info is missing for sign "+dms.getName());
-//			logError("  Substituting basic full-matrix sign");
+			logError("  Substituting basic full-matrix sign");
 			// throw in some default values to let things progress
 			bHasBeacon = false;
 			dmsType = DMSType.VMS_FULL;
@@ -423,8 +422,7 @@ public class MultiConfig {
 		maxPages      = signDetail.getMaxPages();
 
 		if (dmsType == DMSType.UNKNOWN) {
-			logWarning("Unknown sign type");
-//			logWarning("Unknown sign type; changed to full-matrix");
+			logWarning("Unknown sign type; changed to full-matrix");
 			dmsType = DMSType.VMS_FULL;
 		}
 		if (maxMultiLen <= 0) {

@@ -26,10 +26,10 @@ public interface Gps extends Device {
 	/** SONAR type name */
 	String SONAR_TYPE = "gps";
 
-	/** Get the latest poll date &amp; time */
+	/** Get the latest poll date & time */
 	Long getLatestPoll();
 
-	/** Get the latest sample date &amp; time */
+	/** Get the latest sample date & time */
 	Long getLatestSample();
 
 	/** Get the most recent latitude */

@@ -154,9 +154,4 @@ public class WtTextChar extends WToken {
 	public DmsColor getColor() {
 		return fgColor;
 	}
-	
-//	@Override
-//	public boolean useAnchor() {
-//		return false;
-//	}
 }

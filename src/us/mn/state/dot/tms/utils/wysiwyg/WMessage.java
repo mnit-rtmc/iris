@@ -393,7 +393,6 @@ public class WMessage {
 
 	/** Re-render page and then tell watchers */
 	public void pageChanged(int pageNo) {
-//		rerenderPage(pageNo);
 		Iterator<WMsgWatcher> itw = watchers.iterator();
 		WMsgWatcher watcher;
 		while (itw.hasNext()) {

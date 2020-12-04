@@ -652,7 +652,6 @@ public class WRenderer {
 			if (ex < 0) {
 				reportError(MultiSyntaxError.textTooBig);
 				widthErr = true;
-//				return;
 			}
 			int left = getLeft(ex);
 			int x = 0;
@@ -1017,32 +1016,15 @@ public class WRenderer {
 	//================================================
 	// TBD - tags with indeterminate sign geometries
 	
-//TODO: Figure out how to WYSIWYG-represent these tokens
+	//TODO: Figure out how to WYSIWYG-represent these tokens
 
 	/** Render a WtFeedMsg token */
 	public void renderFeed(WtFeedMsg tok) {
-//		String fid = tok.getFeedID();
-		
 		//TODO:  Figure out how to handle this token...
 	}
 
 	/** Render a WtLocator token */
 	public void renderLocator(WtLocator tok) {
-//		String code = tok.getCode();
-//// idea-code from LocMultiBuilder class
-//		if ("rn".equals(code))
-//			addRoadway();
-//		else if ("rd".equals(code))
-//			addRoadDir();
-//		else if ("md".equals(code))
-//			addModifier();
-//		else if ("xn".equals(code))
-//			addCrossStreet();
-//		else if ("xa".equals(code))
-//			addCrossAbbrev();
-//		else if ("mi".equals(code))
-//			addMiles();
-
 		//TODO:  Figure out how to handle these tokens...
 	}
 }

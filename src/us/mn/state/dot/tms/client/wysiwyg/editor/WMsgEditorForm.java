@@ -76,7 +76,6 @@ public class WMsgEditorForm extends AbstractForm {
 	private WController controller;
 	
 	/* Currently selected page (defaults to first available) */
-//	private WMsgSignPage selectedPage;
 	private JLabel pg_num_lbl;
 	
 	/* Menu Bar */
@@ -86,7 +85,6 @@ public class WMsgEditorForm extends AbstractForm {
 	private JCheckBox prefix_chk;
 
 	/* Sign drop-down (only present for groups) */
-//	private JComboBox<String> dms_list;
 	private WMultiConfigComboBox multiConfigList;
 	
 	/* Page List */

@@ -118,37 +118,30 @@ public enum WTokenType {
 //	 * @param stat_id Destination station ID.
 //	 * @param mode Over limit mode.
 //	 * @param o_txt Over limit text. */
-//	void addTravelTime(String sid, OverLimitMode mode, String o_txt);
 	travelTime(              "Travel Time"),
 
 //	/** Add a speed advisory */
-//	void addSpeedAdvisory();
 	speedAdvisory(           "Speed Advisory"),
 //
 //	/** Add a slow traffic warning.
 //	 * @param spd Highest speed to activate warning.
 //	 * @param dist Distance to search for slow traffic (1/10 mile).
 //	 * @param mode Tag replacement mode (none, dist or speed). */
-//	void addSlowWarning(int spd, int dist, String mode);
 	slowWarning(             "Slow Warning"),
 //
 //	/** Add a feed message */
-//	void addFeed(String fid);
 	feedMsg(                 "Feed Message"),
 //
 //	/** Add a tolling message */
-//	void addTolling(String mode, String[] zones);
 	tolling(                 "Tolling"),
 //
 //	/** Add parking area availability.
 //	 * @param pid Parking area ID.
 //	 * @param l_txt Text for low availability.
 //	 * @param c_txt Text for closed area. */
-//	void addParking(String pid, String l_txt, String c_txt);
 	parkingAvail(            "Parking Availability"),
 //
 //	/** Add an incident locator */
-//	void addLocator(String code);
 	incidentLoc(             "Incident Locator"),
 	
 	/** Add an alert time (start or end) field from a CAP message */

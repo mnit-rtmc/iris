@@ -40,9 +40,4 @@ abstract public class Wt_Rectangle extends WToken {
 	public boolean isText() {
 		return false;
 	}
-
-//	@Override
-//	public boolean useAnchor() {
-//		return false;
-//	}
 }

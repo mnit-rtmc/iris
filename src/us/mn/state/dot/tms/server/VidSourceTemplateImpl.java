@@ -278,7 +278,7 @@ public class VidSourceTemplateImpl extends BaseObjectImpl
 		}
 	}
 
- 	/** Name of manufacturer &amp; model */
+ 	/** Name of manufacturer & model */
 	private String encoder;
 
 	/**

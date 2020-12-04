@@ -409,7 +409,6 @@ public class VidPanel extends JPanel implements FocusListener {
 					// stream manager available
 					JComponent vc = smgr.getComponent();
 					addVideo(vc);
-//					add(placeholderComponent);
 					String lbl = smgr.getLabel();
 					String msg = smgr.getErrorMsg();
 					streamError = !isNothing(msg);

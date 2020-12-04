@@ -478,26 +478,6 @@ abstract public class WRaster {
 	//===========================================
 	// methods to generate various image objects
 
-//	/** Get raw rendered image.
-//	 *
-//	 * This should never be needed.  Use
-//	 * getPreviewImage, getPreviewImageIcon,
-//	 * or getWysiwygImage() instead.
-//	 */
-//	public BufferedImage getImage() {
-//		BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-//		DmsColor dc;
-//		int rgb;
-//		for (int y = 0; (y < height); ++y) {
-//			for (int x = 0; (x < width); ++x) {
-//				dc = getColor(x, y);
-//				rgb = dc.rgb() & 0x0ffffff;
-//				bi.setRGB(x, y, rgb);
-//			}
-//		}
-//		return bi;
-//	}
-
 	/** Generate preview-image with black border and row/column dividers. */
 	public BufferedImage getPreviewImage() {
 		int dividersX = 2;
@@ -615,7 +595,6 @@ abstract public class WRaster {
 	}
 
 	static public int dmsToGray(DmsColor dc, int maxGray) {
-//		double gray = (0.2989 * dc.red) + (0.5870 * dc.green) + (0.1140 * dc.blue);
 		double gray = (0.21 * dc.red) + (0.72 * dc.green) + (0.07 * dc.blue);
 		return (int) Math.round(gray * maxGray / 256);
 	}
@@ -623,7 +602,6 @@ abstract public class WRaster {
 	/** Dump a grayscale text representation
 	 *  of raster image to a buffered writer. */
 	public void dumpGray(PrintWriter out) {
-//		String grayStr = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
 		String grayStr = "@%#x+=:-. ";
 		int h = getHeight();
 		int w = getWidth();
@@ -641,7 +619,6 @@ abstract public class WRaster {
 						out.print(String.format("(%d)", gray));
 					else {
 						ch = grayStr.charAt(gray);
-//						out.print(" "+ch);
 						out.print(""+ch+ch);
 					}
 				}
@@ -663,17 +640,6 @@ abstract public class WRaster {
 			e.printStackTrace();
 		}
 	}
-
-//	//-------------------------------------------
-//	// Token coordinate management
-//
-//	/** Add token to raster. (Coordinates of
-//	 *  token are updated as part of raster
-//	 *  copy operations.) */
-//	public void bindToken(WToken tok) {
-////		tok.clearTokCoordinates();
-//		tokens.add(tok);
-//	}
 
 	//===========================================
 	// Subclass (Color-scheme specific) methods

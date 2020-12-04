@@ -304,12 +304,6 @@ public class WImagePanel extends JPanel {
 		int cY2 = clipY(convertSignToWysiwygY(sy+h-1, PIX_END));
 		caretH = cY2-caretY;
 		
-//		System.out.println(String.format(
-//				"Caret sign at (%d, %d) H = %d", sx, sy, h));
-//		System.out.println(String.format(
-//				"Caret img at (%d, %d) H = %d (cY2 = %d)",
-//				caretX, caretY, caretH, cY2));
-		
 		// set the caret to enabled and repaint everything
 		showCaret();
 		repaint();
@@ -570,8 +564,6 @@ public class WImagePanel extends JPanel {
 			Dimension d = e.getComponent().getSize();
 			int w = (int) Math.floor(((float) d.width)/10)*10;
 			int h = (int) Math.floor(((float) d.height)/10)*10;
-//			System.out.println(String.format(
-//					"WImagePanel: %d x %d -> %d x %d", d.width, d.height, w, h));
 			setImageSize(w, h);
 		}
 	}

@@ -108,9 +108,6 @@ public class WMsgConfigPanel extends IPanel {
 	private DefaultListModel<String> warningListModel =
 			new DefaultListModel<String>();
 	
-	/** User session */
-//	private Session session;
-	
 	/** Sign Group MultiConfig */
 	private MultiConfig signGroupMultiConfig;
 	

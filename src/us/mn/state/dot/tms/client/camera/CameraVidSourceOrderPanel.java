@@ -122,8 +122,6 @@ public class CameraVidSourceOrderPanel extends JPanel
 	});
 	
 	/** Video source info */
-//	private final JTextArea vid_src_info =
-//			new JTextArea(14, 20);
 	private final JPanel vid_src_info;
 	
 	/** Camera video source label */

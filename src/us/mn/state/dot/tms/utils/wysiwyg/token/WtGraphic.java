@@ -117,11 +117,6 @@ public class WtGraphic extends WToken {
 		return graphic.getHeight();
 	}
 	
-//	@Override
-//	public boolean useAnchor() {
-//		return false;
-//	}
-
 	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#doMulti(us.mn.state.dot.tms.utils.Multi)
 	 */

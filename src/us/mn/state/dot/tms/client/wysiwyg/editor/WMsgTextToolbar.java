@@ -267,8 +267,6 @@ public class WMsgTextToolbar extends WToolbar {
 	
 	/** Update the font combo-box given the font number value fNum. */
 	public void updateFontMenu(Integer fNum) {
-//		String s = (fNum != null) ? fNum.toString() : "null";
-//		controller.println("Updating font with: %s", s);
 		// first disable the action listener on the combo-box to avoid
 		// triggering an event when we change the value
 		fontOptions.removeActionListener(setFont);
@@ -293,8 +291,6 @@ public class WMsgTextToolbar extends WToolbar {
 	
 	/** Update the page justification buttons given the value jp. */
 	public void updatePageJustBtns(JustificationPage jp) {
-//		String s = (jp != null) ? jp.toString() : "null";
-//		controller.println("Updating page just with: %s", s);
 		if (jp == JustificationPage.TOP)
 			text_pg_just_top_btn.setSelected(true);
 		else if (jp == JustificationPage.MIDDLE)
@@ -311,8 +307,6 @@ public class WMsgTextToolbar extends WToolbar {
 	
 	/** Update the line justification buttons given the value jl. */
 	public void updateLineJustBtns(JustificationLine jl) {
-//		String s = (jl != null) ? jl.toString() : "null";
-//		controller.println("Updating line just with: %s", s);
 		if (jl == JustificationLine.LEFT)
 			text_ln_just_left_btn.setSelected(true);
 		else if (jl == JustificationLine.CENTER)

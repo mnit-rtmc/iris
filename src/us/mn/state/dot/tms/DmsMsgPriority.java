@@ -42,7 +42,7 @@ public enum DmsMsgPriority {
 	LCS,		/* 15: LCS priority */
 	INCIDENT_LOW,	/* 16: incident low-priority */
 	INCIDENT_MED,	/* 17: incident medium-priority */
-	SCHED_HIGH,	/* 18; scheduled high-priority */
+	SCHED_HIGH,	/* 18: scheduled high-priority */
 	INCIDENT_HIGH,	/* 19: incident high-priority */
 	AWS_HIGH,	/* 20: automated warning system high-priority */
 	OVERRIDE;	/* 21: override priority */

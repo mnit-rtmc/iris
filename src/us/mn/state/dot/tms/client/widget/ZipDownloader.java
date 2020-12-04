@@ -276,7 +276,6 @@ public class ZipDownloader extends AbstractForm {
 		private Path newFile(File destDir, ZipEntry e) throws IOException {
 			Path destPath = Paths.get(
 					destDir.getCanonicalPath(), e.getName());
-//			File destFile = new File(destDir, e.getName());
 			String destDirPath = destDir.getCanonicalPath();
 			String newFilePath = destPath.toString();
 			if (!newFilePath.startsWith(destDirPath + File.separator)) {

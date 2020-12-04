@@ -212,7 +212,6 @@ public class WController {
 	private int caretIndx = 0;
 	private int caretPageIndx = 0;
 	private boolean caretOn = true;
-//	private boolean caretAtEnd = false;
 	public final static int CARET_EOP = -1;
 	
 	/** Toggle for how non-text tags are handled. If false (default), non-text
@@ -431,7 +430,6 @@ public class WController {
 			prefixPage = qm.getPrefixPage();
 		} else
 			multiString = "";
-//		println("From QuickMessage: " + multiString);
 		
 		update();
 	}
@@ -1018,8 +1016,6 @@ public class WController {
 		tokensBefore = trTokens.slice(0, si);
 		tokensAfter = trTokens.slice(ei, trTokens.size());
 		tokensSelected = trTokens.slice(si, ei);
-		
-//		printCaretTokens();
 	}
 	
 	/** Move the caret given a mouse pointer coordinate indicated by the
@@ -2111,11 +2107,6 @@ public class WController {
 						saveState();
 						selectedPage.removeToken(i);
 						
-						// NOTE that we don't need to mess with finding the
-						// "next" token - whatever happens next will deal
-//						if (caretIndx > 0)
-//							--caretIndx;
-						
 						// update everything
 						update();
 						moveCaret(caretIndx-1);
@@ -2192,9 +2183,6 @@ public class WController {
 			}
 		}
 		tokensSelected.clear();
-		
-		// figure out where to put the caret
-//		caretIndx = getCaretIndexInTextRect();
 		
 		// update then move the caret
 		update();
@@ -2562,7 +2550,6 @@ public class WController {
 	public WToken getPrecedingTokenOfType(WTokenType tokType) {
 		// get the list of tokens before the caret anywhere on the page (since
 		// the tags we're looking for persist across text rectangles)
-//		int pgi = getCaretIndexOnPage(false);
 		int pgi = caretPageIndx;
 		if (pgi >= selectedPage.getNumTokens())
 			pgi = selectedPage.getNumTokens() - 1;
@@ -2753,8 +2740,6 @@ public class WController {
 		WtJustLine pjTag = (WtJustLine) getPrecedingTokenOfType(
 				WTokenType.justificationLine);
 		
-//		println("Preceding token: %s", (pjTag != null) ? pjTag.toString() : "null");
-		
 		// the just. based on this is either the tag value or the default
 		JustificationLine pj = (pjTag != null) ? pjTag.getJustification()
 				: JustificationLine.CENTER;
@@ -2843,8 +2828,6 @@ public class WController {
 			
 			WToken tok = tokensBefore.reversed().get(i);
 
-//					println("BEFORE - on token: %s", tok.toString());
-			
 			// if we hit a newline, stop immediately
 			if (tok.isType(WTokenType.newLine))
 				break;
@@ -3205,7 +3188,6 @@ public class WController {
 	/** Undo the last message change by reverting to the previous MULTI string. */
 	public Action undo = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-//			println("Starting undo...");
 			if (!undoStack.isEmpty()) {
 				// save the current state on the redo stack so the action can
 				// be redone
@@ -3223,7 +3205,6 @@ public class WController {
 	/** Redo the last message change by reverting to the previous MULTI string. */
 	public Action redo = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
-//			println("Starting redo...");
 			if (!redoStack.isEmpty()) {
 				// put the current state back on the undo stack so the action can
 				// be undone
@@ -3322,7 +3303,6 @@ public class WController {
 		// update the index of the last good state (the current size of the
 		// undo stack)
 		lastGoodState = undoStack.size();
-//		println("No errors at %d", lastGoodState);
 	}
 	
 	/** An action to restore the last good state of the editor (i.e. the last
@@ -3505,11 +3485,8 @@ public class WController {
 			saveState();
 		
 		multiString = ms;
-//		println("Updating with: '%s'", multiString);
 		wmsg.parseMulti(multiString);
-//		println("wmsg has: '%s'", wmsg.toString());
 		update();
-//		println("Got back: '%s'", multiString);
 	}
 	
 	public void update() {
@@ -3517,9 +3494,7 @@ public class WController {
 	}
 	
 	public void update(boolean focus) {
-//		println("In update: " + multiString);
 		renderMsg();
-//		println("After renderMsg: '%s'", multiString);
 		updateMultiPanel();
 		
 		if (!forceMULTI) {
@@ -4041,7 +4016,6 @@ public class WController {
 	
 	public void setSignPanel(WImagePanel sp) {
 		signPanel = sp;
-//		update();
 	}
 	
 	public DmsColor getForegroundColor() {

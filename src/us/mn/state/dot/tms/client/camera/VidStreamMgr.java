@@ -36,16 +36,10 @@ public abstract class VidStreamMgr {
 	protected static Scheduler STREAM_SCHED = new Scheduler("StreamMgr");
 
 	/** Default timeout for direct URL Connections */
-//	static protected final int TIMEOUT_DIRECT = 5 * 1000;
 	static protected final int TIMEOUT_DIRECT = 500 * 1000;
 
 	/** Milliseconds between updates to the status */
 	static protected final int STATUS_DELAY = 1000;
-
-//	static protected final Size baseSize = Size.SMALL;
-//
-//	static protected final Dimension baseDimension =
-//			new Dimension(baseSize.width, baseSize.height);
 
 	//-------------------------------------------
 	// Data fields
@@ -104,9 +98,7 @@ public abstract class VidStreamMgr {
 
 	/** Queue a start stream operation */
 	protected void queueStartStream() {
-//		System.out.println("VidStreamMgr.queueStartStream()");
 		setStatus(I18N.get("camera.stream.opening"));
-//		setStatus("Starting "+vreq.getVidSourceTemplate().getLabel());
 		bStreamingStarted = false;
 		STREAM_SCHED.addJob(jobStartStream);
 	}
@@ -115,7 +107,6 @@ public abstract class VidStreamMgr {
 	  * (Called from the STREAM_SCHED thread.) */
 	private final Job jobStartStream = new Job(300) {
 		public void perform() {
-//			System.out.println("VidStreamMgr.jobStartStream.perform()");
 			clearErrorMsg();
 			doStartStream();
 		}
@@ -153,8 +144,6 @@ public abstract class VidStreamMgr {
 		public void perform() {
 			System.out.println("VidStreamMgr.jobStopStream.perform()");
 			doStopStream();
-//			if (disposing)
-//				STREAM_SCHED.dispose();
 		}
 	};
 
@@ -170,7 +159,6 @@ public abstract class VidStreamMgr {
 
 	/** Set the status. */
 	protected void setStatus(String stat) {
-//		System.out.println("== VidStreamMgr.SetStatus(\""+stat+"\")");
 		if (stat == null)
 			stat = "";
 		if (sStatus.equals(stat))
@@ -242,11 +230,6 @@ public abstract class VidStreamMgr {
 
 	/** Set the video component. */
 	protected void setComponent(JComponent vc) {
-//		String tmp = "<null>";
-//		if (vc != null)
-//			tmp = vc.toString();
-//		System.out.println("== VidStreamMgr.setComponent(\""+tmp+"\")");
-
 		if (vc == null)
 			vc = videoPanel.placeholderComponent;
 		if (!vc.equals(vcomponent)) {

@@ -65,9 +65,6 @@ public class IpawsReader {
 	private static final String dtFormat = "yyyy-MM-dd'T'HH:mm:ssX";
 	private static final SimpleDateFormat dtFormatter =
 			new SimpleDateFormat(dtFormat);
-	
-//	/** Cache of IPAWS alert proxy objects */
-//	private final TypeCache<IpawsAlert> cache;
 
 	/** Read alerts from a directory containing XML files. */
 	public static void readIpaws(String dirPath) throws IOException {

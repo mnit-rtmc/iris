@@ -61,15 +61,4 @@ class WTagParamSonarObjectField<T extends SonarObject> extends JComboBox<SonarOb
 	public T getSelectedItem() {
 		return (T) super.getSelectedItem();
 	}
-	
-//	/** Set the selected object based on the name */
-//	public void setSelectedObject(SonarObject so) {
-//		// try to find the object in the list
-//		ComboBoxModel<SonarObject> model = getModel();
-//		for (int i = 0; i < model.getSize(); ++i) {
-//			SonarObject o = model.getElementAt(i);
-//			if (o.getName() == so.getName())
-//				
-//		}
-//	}
 }
