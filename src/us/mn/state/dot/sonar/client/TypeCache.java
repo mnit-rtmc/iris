@@ -343,12 +343,6 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 		}
 	}
 
-	public LinkedList<ProxyListener<T>> getProxyListeners() {
-		synchronized (this) {
-			return listeners;
-		}
-	}
-	
 	/** Remove a ProxyListener */
 	public void removeProxyListener(ProxyListener<T> l) {
 		synchronized (this) {
