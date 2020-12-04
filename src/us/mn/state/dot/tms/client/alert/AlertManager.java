@@ -14,51 +14,36 @@
  */
 package us.mn.state.dot.tms.client.alert;
 
-import java.awt.Dimension;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
-import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.IpawsAlert;
-import us.mn.state.dot.tms.IpawsAlertConfig;
-import us.mn.state.dot.tms.IpawsAlertConfigHelper;
 import us.mn.state.dot.tms.IpawsAlertHelper;
 import us.mn.state.dot.tms.IpawsAlertDeployer;
 import us.mn.state.dot.tms.IpawsAlertDeployerHelper;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.DMSManager;
-import us.mn.state.dot.tms.client.incident.IncidentMarker;
 import us.mn.state.dot.tms.client.map.LayerState;
 import us.mn.state.dot.tms.client.map.MapBean;
 import us.mn.state.dot.tms.client.map.MapObject;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
-import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
-import us.mn.state.dot.tms.client.proxy.ProxyJList;
 import us.mn.state.dot.tms.client.proxy.ProxyLayer;
 import us.mn.state.dot.tms.client.proxy.ProxyLayerState;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
-import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.geo.ZoomLevel;

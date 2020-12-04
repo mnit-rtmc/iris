@@ -33,7 +33,6 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.NoninvertibleTransformException;
-import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.ListIterator;
 import javax.swing.ImageIcon;
@@ -42,7 +41,6 @@ import javax.swing.JToolTip;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
-import us.mn.state.dot.tms.client.proxy.ProxyLayer;
 import us.mn.state.dot.tms.client.proxy.ProxyLayerState;
 
 /**

@@ -15,12 +15,9 @@
 
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
-import java.awt.Dimension;
-
 import javax.swing.DefaultListModel;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JList;
-import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionListener;
 

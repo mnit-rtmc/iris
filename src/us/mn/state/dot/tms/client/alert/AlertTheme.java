@@ -19,21 +19,13 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
-import java.awt.geom.PathIterator;
 import java.util.ArrayList;
-
-import org.postgis.MultiPolygon;
-import org.postgis.Point;
-import org.postgis.Polygon;
-
 
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.IpawsAlert;
 import us.mn.state.dot.tms.IpawsAlertDeployer;
 import us.mn.state.dot.tms.IpawsAlertDeployerHelper;
@@ -41,20 +33,13 @@ import us.mn.state.dot.tms.IpawsAlertHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.DMSManager;
-import us.mn.state.dot.tms.client.dms.DmsMarker;
 import us.mn.state.dot.tms.client.dms.DmsTheme;
-import us.mn.state.dot.tms.client.incident.IncidentMarker;
-import us.mn.state.dot.tms.client.map.LayerState;
 import us.mn.state.dot.tms.client.map.MapObject;
 import us.mn.state.dot.tms.client.map.Style;
-import us.mn.state.dot.tms.client.map.Symbol;
 import us.mn.state.dot.tms.client.map.VectorSymbol;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
-import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.geo.Position;
-import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 
 /**
  * Theme for alert objects on the map.

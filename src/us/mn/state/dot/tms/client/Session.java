@@ -16,7 +16,6 @@
  */
 package us.mn.state.dot.tms.client;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;

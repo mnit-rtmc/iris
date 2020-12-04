@@ -19,7 +19,6 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import static us.mn.state.dot.tms.CorridorBase.nodeDistance;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;

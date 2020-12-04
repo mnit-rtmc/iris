@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
 import us.mn.state.dot.tms.client.widget.IMenu;

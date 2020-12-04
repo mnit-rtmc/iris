@@ -22,7 +22,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Map;
@@ -67,10 +66,8 @@ import us.mn.state.dot.tms.client.wysiwyg.selector.WMsgSelectorSignProcess;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WMsgEditorForm;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WMsgNewMsgForm;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WPageList;
-import us.mn.state.dot.tms.client.wysiwyg.editor.WPagePanel;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WController;
 import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 
 /**
  * WYSIWYG DMS Message Editor Selector Form

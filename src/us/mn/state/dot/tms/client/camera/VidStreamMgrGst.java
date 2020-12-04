@@ -32,7 +32,6 @@ import javax.swing.JOptionPane;
 import com.sun.jna.Platform;
 import com.sun.jna.platform.win32.Kernel32;
 
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.UserProperty;
 import us.mn.state.dot.tms.client.widget.ZipDownloader;

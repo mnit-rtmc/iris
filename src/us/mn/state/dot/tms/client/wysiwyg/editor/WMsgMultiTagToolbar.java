@@ -30,8 +30,6 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.wysiwyg.editor.tags.WMultiTagDialog;
-import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
 

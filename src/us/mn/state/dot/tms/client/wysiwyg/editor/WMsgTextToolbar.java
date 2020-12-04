@@ -41,7 +41,6 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Multi.JustificationLine;
 import us.mn.state.dot.tms.utils.Multi.JustificationPage;
-import us.mn.state.dot.tms.utils.MultiConfig;
 
 /**
  * WYSIWYG DMS Message Editor Text Option Panel containing buttons with

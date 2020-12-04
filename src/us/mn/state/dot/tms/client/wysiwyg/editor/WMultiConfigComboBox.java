@@ -26,7 +26,6 @@ import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
-import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.utils.MultiConfig;
 
 /**

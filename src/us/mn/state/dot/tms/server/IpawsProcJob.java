@@ -17,18 +17,14 @@ package us.mn.state.dot.tms.server;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IllegalFormatException;
 import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

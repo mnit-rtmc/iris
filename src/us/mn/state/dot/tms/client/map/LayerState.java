@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.map;
 
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;

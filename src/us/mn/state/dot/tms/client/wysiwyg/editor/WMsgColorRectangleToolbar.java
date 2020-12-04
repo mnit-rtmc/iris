@@ -15,12 +15,9 @@
 
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
-import javax.swing.JPanel;
-
 import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -29,11 +26,7 @@ import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
-import javax.swing.Box;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
-// TODO TEMPORARY
-import javax.swing.JLabel;
 
 /**
  * WYSIWYG DMS Message Editor Color Rectangle Option Panel containing buttons

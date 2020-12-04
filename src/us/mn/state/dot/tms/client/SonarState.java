@@ -17,7 +17,6 @@
 package us.mn.state.dot.tms.client;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Properties;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.Capability;
@@ -77,7 +76,6 @@ import us.mn.state.dot.tms.client.dms.DmsCache;
 import us.mn.state.dot.tms.client.incident.IncCache;
 import us.mn.state.dot.tms.client.lcs.LcsCache;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
-import us.mn.state.dot.tms.server.CameraVidSourceOrderImpl;
 
 /**
  * Holds the state of the SONAR client

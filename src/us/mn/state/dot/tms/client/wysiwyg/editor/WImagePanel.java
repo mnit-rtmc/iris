@@ -42,8 +42,6 @@ import us.mn.state.dot.tms.utils.wysiwyg.token.WtGraphic;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_Rectangle;
 
-import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-
 /**
  * Panel for displaying a WYSIWYG DMS image.
  *

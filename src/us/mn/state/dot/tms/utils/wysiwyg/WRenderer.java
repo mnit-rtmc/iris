@@ -15,25 +15,10 @@
 
 package us.mn.state.dot.tms.utils.wysiwyg;
 
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
-
-import us.mn.state.dot.tms.ColorScheme;
-import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.InvalidMsgException;
-import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.QuickMessageHelper;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.MultiSyntaxError;
 import us.mn.state.dot.tms.utils.wysiwyg.token.*;

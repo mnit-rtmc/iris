@@ -20,8 +20,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListCellRenderer;
@@ -30,10 +28,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 

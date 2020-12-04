@@ -18,13 +18,9 @@ package us.mn.state.dot.tms.client.toolbar;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Iterator;
-
 import javax.swing.JButton;
-import javax.swing.JInternalFrame;
 import javax.swing.Timer;
 
-import us.mn.state.dot.tms.PushNotification;
 import us.mn.state.dot.tms.client.ScreenPane;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.map.MapBean;

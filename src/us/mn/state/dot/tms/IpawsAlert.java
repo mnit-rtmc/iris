@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import org.postgis.MultiPolygon;

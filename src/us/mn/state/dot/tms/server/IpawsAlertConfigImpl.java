@@ -17,12 +17,8 @@ package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
 import us.mn.state.dot.tms.IpawsAlertConfig;
 import us.mn.state.dot.tms.TMSException;
 

@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Date;
-import java.util.List;
-
 import us.mn.state.dot.sonar.SonarObject;
 
 /**

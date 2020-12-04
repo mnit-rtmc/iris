@@ -17,8 +17,6 @@ package us.mn.state.dot.tms.client.notification;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javax.swing.JButton;
-
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.PushNotification;

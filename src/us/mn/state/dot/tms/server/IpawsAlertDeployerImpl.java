@@ -23,14 +23,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.IpawsAlertDeployer;
 import us.mn.state.dot.tms.IpawsAlertDeployerHelper;
-import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;;
 

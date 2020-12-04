@@ -27,7 +27,6 @@ import javax.swing.ListCellRenderer;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommLinkHelper;
-import us.mn.state.dot.tms.CommProtocol;
 import static us.mn.state.dot.tms.CommProtocol.MSG_FEED;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WController;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;

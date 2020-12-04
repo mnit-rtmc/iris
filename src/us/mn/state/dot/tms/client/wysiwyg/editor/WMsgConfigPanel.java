@@ -26,7 +26,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
 
-import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -36,8 +35,6 @@ import javax.swing.JScrollPane;
 
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.units.Distance;
