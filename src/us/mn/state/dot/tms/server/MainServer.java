@@ -111,8 +111,7 @@ public class MainServer {
 			auth_provider = new IrisProvider();
 			server.addProvider(auth_provider);
 			System.err.println("IRIS Server active");
-			//IpawsReader.readIpaws();
-			server.join();			
+			server.join();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
