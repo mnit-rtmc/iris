@@ -36,6 +36,9 @@ public class URIUtil {
 	/** Default scheme for HTTP */
 	static public final URI HTTP = createScheme("http");
 
+	/** Default scheme for HTTPS */
+	static public final URI HTTPS = createScheme("https");
+
 	/** Default scheme for RTSP */
 	static public final URI RTSP = createScheme("rtsp");
 

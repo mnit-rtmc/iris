@@ -33,7 +33,6 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.NoninvertibleTransformException;
-import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.ListIterator;
 import javax.swing.ImageIcon;
@@ -41,6 +40,8 @@ import javax.swing.JComponent;
 import javax.swing.JToolTip;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
+
+import us.mn.state.dot.tms.client.proxy.ProxyLayerState;
 
 /**
  * The MapBean class is a container for a MapPane which allows the pane to be
@@ -57,9 +58,9 @@ public class MapBean extends JComponent {
 	static private final Cursor PAN_CURSOR;
 	static {
 		ImageIcon i = new ImageIcon(MapBean.class.getResource(
-                        "/images/pan.png"));
+		                "/images/pan.png"));
 		PAN_CURSOR = Toolkit.getDefaultToolkit().createCustomCursor(
-                        i.getImage(), new Point(6, 6), "Pan");
+		                i.getImage(), new Point(6, 6), "Pan");
 	}
 
 	/** Listeners that listen to this layer state */
@@ -218,6 +219,20 @@ public class MapBean extends JComponent {
 	/** Get a list of the layers contained by this Map */
 	public List<LayerState> getLayers() {
 		return model.getLayers();
+	}
+	
+	/** Get the layer corresponding to the type named tname. */
+	public LayerState getTypeLayer(String tname) {
+		ListIterator<LayerState> it = model.getLayerIterator();
+		while (it.hasPrevious()) {
+			LayerState ls = it.previous();
+			if (ls instanceof ProxyLayerState) {
+				ProxyLayerState<?> pls = (ProxyLayerState<?>) ls;
+				if (pls.getManager().getSonarType().equals(tname))
+					return pls;
+			}
+		}
+		return null;
 	}
 
 	/** Transform a point from screen to world coordinates */

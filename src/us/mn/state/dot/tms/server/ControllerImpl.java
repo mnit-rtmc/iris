@@ -44,6 +44,7 @@ import us.mn.state.dot.tms.server.comm.CamKeyboardPoller;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.comm.incfeed.IncFeedPoller;
+import us.mn.state.dot.tms.server.comm.ipaws.IpawsPoller;
 import us.mn.state.dot.tms.server.comm.msgfeed.MsgFeedPoller;
 import us.mn.state.dot.tms.server.event.CommEvent;
 import us.mn.state.dot.tms.utils.SString;
@@ -959,6 +960,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	private void pollController() {
 		queryIncFeed();
 		queryMsgFeed();
+		queryIpaws();
 		queryCamKeyboard();
 	}
 
@@ -977,6 +979,15 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		if (dp instanceof MsgFeedPoller) {
 			MsgFeedPoller mfp = (MsgFeedPoller) dp;
 			mfp.queryMessages(this);
+		}
+	}
+	
+	/** Query IPAWS alerts */
+	private void queryIpaws() {
+		DevicePoller dp = getPoller();
+		if (dp instanceof IpawsPoller) {
+			IpawsPoller ip = (IpawsPoller) dp;
+			ip.queryMessages(this);
 		}
 	}
 

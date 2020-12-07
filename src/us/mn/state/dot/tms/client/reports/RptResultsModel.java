@@ -40,25 +40,6 @@ import us.mn.state.dot.tms.utils.I18N;
 @SuppressWarnings("serial")
 public class RptResultsModel extends AbstractTableModel {
 	
-//	public enum COLUMNS {
-//		DEV_NAME(   120, "report.field.device"),
-//		DATETIME(   120, "report.field.datetime"),
-//		USER(        80, "report.field.user"),
-//		DESCRIPTION(420, "report.field.description");
-//
-//		public final int    iPref;
-//		public final String sI18N;
-//
-//		COLUMNS(int pr, String sID) {
-//			this.iPref = pr;
-//			this.sI18N = sID;
-//		}
-//
-//		public int getValue() { return ordinal(); }
-//		public int getPref()  { return iPref; }
-//		public String getID() { return sI18N; }
-//	}
-	
 	/** Count of columns in table model */
 	static protected final int COLUMN_COUNT = 4;
 
@@ -73,9 +54,6 @@ public class RptResultsModel extends AbstractTableModel {
 	
 	/** Report description column number */
 	static protected final int COL_DESCRIPTION = 3;
-
-//	/** Report blankspace column number */
-//	static protected final int COL_BLANKSPACE = 4;
 
 	/** Maximum description length in pixels */
 	private int desc_col_width;
@@ -102,7 +80,6 @@ public class RptResultsModel extends AbstractTableModel {
 	/** Create a new report table model with results */
 	public RptResultsModel(RptResults rpts) {
 		reportResults = rpts;
-//		max_desc_length = rpts.getMaxDescriptionLength()*7; //convert from characters to pixels //
 		desc_col_width = calcDescriptionColumnWidth() + 10;
 	}
 

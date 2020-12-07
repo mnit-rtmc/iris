@@ -23,7 +23,6 @@ import java.io.PrintStream;
 import java.net.Authenticator;
 import java.net.ProxySelector;
 import java.net.UnknownHostException;
-import java.util.Date;
 import java.util.Properties;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Scheduler;
@@ -127,26 +126,26 @@ public class MainServer {
 		checkAssert();
 	}
 
-    /** Redirect the standard output and error streams to log files */
-    static private void redirectStdStreams() throws IOException {
+	/** Redirect the standard output and error streams to log files */
+	static private void redirectStdStreams() throws IOException {
 
-       // Developer option to NOT redirect console out/err
-       // to a logfile when running in Eclipse...:
-       // To use, in Eclipse, go to Run > Run Configurations
-       // > (MainServer or MainClient) > Arguments, and add
-       // "-DrunInEclipse=true" (without the quotes) to the
-       // VM arguments box.
-
-       String inEclipseStr = System.getProperty("runInEclipse");
-       if ((inEclipseStr == null) || !inEclipseStr.equalsIgnoreCase("true")) {
-              System.setOut(createPrintStream(STD_OUT));
-              System.setErr(createPrintStream(STD_ERR));
-              String msg = "IRIS @@VERSION@@ restarted @ " +
-                    TimeSteward.getDateInstance();
-              System.out.println(msg);
-              System.err.println(msg);
-       }
-    }
+		// Developer option to NOT redirect console out/err
+		// to a logfile when running in Eclipse...:
+		// To use, in Eclipse, go to Run > Run Configurations
+		// > (MainServer or MainClient) > Arguments, and add
+		// "-DrunInEclipse=true" (without the quotes) to the
+		// VM arguments box.
+		
+		String inEclipseStr = System.getProperty("runInEclipse");
+		if ((inEclipseStr == null) || !inEclipseStr.equalsIgnoreCase("true")) {
+			System.setOut(createPrintStream(STD_OUT));
+			System.setErr(createPrintStream(STD_ERR));
+			String msg = "IRIS @@VERSION@@ restarted @ " +
+			      TimeSteward.getDateInstance();
+			System.out.println(msg);
+			System.err.println(msg);
+		}
+	}
 
 
 	/** Create a buffered print stream to a log file */
@@ -208,6 +207,7 @@ public class MainServer {
 		TIMER.addJob(new ParkingAreaJob());
 		TIMER.addJob(new ReaperJob());
 		TIMER.addJob(new ActionPlanJob(TIMER));
+		TIMER.addJob(new IpawsProcJob());
 	}
 
 	/** Schedule jobs on FLUSH thread */

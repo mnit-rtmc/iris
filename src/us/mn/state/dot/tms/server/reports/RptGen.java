@@ -15,10 +15,7 @@
 
 package us.mn.state.dot.tms.server.reports;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Iterator;
-
 import us.mn.state.dot.tms.RptGenEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.reports.RptRequest;

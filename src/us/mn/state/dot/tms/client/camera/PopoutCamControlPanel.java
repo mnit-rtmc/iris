@@ -114,7 +114,7 @@ public class PopoutCamControlPanel extends JPanel {
 		monitor_cbx.setRenderer(new MonComboRendererLong());
 		monitor_cbx.setAction(monitor_act);
 		vm_cache = session.getSonarState().getCamCache()
-                .getVideoMonitors();
+		        .getVideoMonitors();
 		watcher = new ProxyWatcher<VideoMonitor>(vm_cache,vm_view,true);
 		watcher.initialize();
 		layoutPanel();

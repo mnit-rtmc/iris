@@ -232,7 +232,6 @@ public class VidComponentGst extends javax.swing.JComponent {
 			g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
 					RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 			if (currentImage != null) {
-//				GraphicsConfiguration gc = getGraphicsConfiguration();
 				render(g2d, 0, 0, width, height);
 			} else {
 				g2d.setColor(getBackground());
@@ -410,16 +409,6 @@ public class VidComponentGst extends javax.swing.JComponent {
 				bufferLock.unlock();
 			}
 
-//			int scaledWidth = currentImage.getWidth();
-//			if (keepAspect) {
-//				// Scale width according to pixel aspect ratio.
-//				Caps videoCaps = videoPad.getNegotiatedCaps();
-//				Structure capsStruct = videoCaps.getStructure(0);
-//				if (capsStruct.hasField("pixel-aspect-ratio")) {
-//					Fraction pixelAspectRatio = capsStruct.getFraction("pixel-aspect-ratio");
-//					scaledWidth = scaledWidth * pixelAspectRatio.getNumerator() / pixelAspectRatio.getDenominator();
-//				}
-//			}
 			// Tell swing to use the new buffer
 			update(currentImage.getWidth(), currentImage.getHeight());
 		}

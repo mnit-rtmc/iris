@@ -34,15 +34,11 @@ public class WEditorErrorManager {
 	
 	/** Log an error with the manager */
 	public void addError(MultiSyntaxError mse) {
-		// for now print it
-//		System.out.println("RENDERERROR: "+mse);
 		errors.add(new WEditorError(mse));
 	}
 	
 	/** Log an error with a token with the manager */
 	public void addError(MultiSyntaxError mse, WToken tok) {
-		// for now print it
-//		System.out.println("RENDERERROR: "+mse);
 		errors.add(new WEditorError(mse, tok));
 	}
 	

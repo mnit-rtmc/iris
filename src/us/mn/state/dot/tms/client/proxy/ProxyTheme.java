@@ -125,6 +125,18 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 		}
 		return getDefaultStyle();
 	}
+	
+	/** Get the Style for the the given ItemStyle */
+	public Style getStyle(ItemStyle is) {
+		if (is != null) {
+			for (Style sty: getStyles()) {
+				ItemStyle s = ItemStyle.lookupStyle(sty.toString());
+				if (is.equals(s))
+					return sty;
+			}
+		}
+		return getDefaultStyle();
+	}
 
 	/** Get tooltip text for the given map object */
 	@Override

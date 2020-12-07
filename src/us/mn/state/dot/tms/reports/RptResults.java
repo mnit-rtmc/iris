@@ -166,7 +166,6 @@ public class RptResults {
 				key = "row" + row;
 			}
 			this.sortcol = SORTonDATETIME;
-//			this.compareResults = compareResults;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

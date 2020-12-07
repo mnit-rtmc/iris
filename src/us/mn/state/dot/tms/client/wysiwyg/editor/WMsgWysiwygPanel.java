@@ -95,7 +95,6 @@ public class WMsgWysiwygPanel extends JPanel {
 	private WMsgMultiTagToolbar multitag_toolbar_pnl;
 	
 	/** Sign pixel panel to display the current sign message page */
-//	private SignPixelPanel pixel_pnl;
 	private WImagePanel signPanel;
 	
 	public WMsgWysiwygPanel(WController c) {

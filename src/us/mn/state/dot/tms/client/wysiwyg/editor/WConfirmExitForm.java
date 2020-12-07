@@ -20,7 +20,6 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import us.mn.state.dot.tms.client.Session;

@@ -16,7 +16,6 @@
  */
 package us.mn.state.dot.tms.client;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +25,7 @@ import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.client.alert.AlertManager;
 import us.mn.state.dot.tms.client.beacon.BeaconManager;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.comm.ControllerManager;
@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.client.map.MapModel;
 import us.mn.state.dot.tms.client.map.TileLayer;
 import us.mn.state.dot.tms.client.marking.LaneMarkingManager;
 import us.mn.state.dot.tms.client.meter.MeterManager;
+import us.mn.state.dot.tms.client.notification.PushNotificationManager;
 import us.mn.state.dot.tms.client.parking.ParkingAreaManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
@@ -116,6 +117,11 @@ public class Session {
 	/** Location manager */
 	private final GeoLocManager loc_manager;
 
+	/** Get the location manager */
+	public GeoLocManager getGeoLocManager() {
+		return loc_manager;
+	}
+	
 	/** List of proxy managers */
 	private final LinkedList<ProxyManager<?>> managers;
 
@@ -157,6 +163,14 @@ public class Session {
 	/** Get the LCS array manager */
 	public LCSArrayManager getLCSArrayManager() {
 		return lcs_array_manager;
+	}
+	
+	/** Push notification manager */
+	private final PushNotificationManager push_notif_manager;
+	
+	/** Get the push notification Manager */
+	public PushNotificationManager getPushNotificationManager() {
+		return push_notif_manager;
 	}
 
 	/** Mapping of all tabs */
@@ -201,6 +215,9 @@ public class Session {
 		managers.add(new ParkingAreaManager(this, loc_manager));
 		managers.add(inc_manager);
 		managers.add(new PlanManager(this, loc_manager));
+		managers.add(new AlertManager(this, loc_manager));
+		push_notif_manager = new PushNotificationManager(this, loc_manager);
+		managers.add(push_notif_manager);
 		tile_layer = createTileLayer(props.getProperty("map.tile.url"));
 		setCurrent(this, null);
 	}
@@ -351,7 +368,7 @@ public class Session {
 	 * @param tname Type name of attribute to check.
 	 * @param can_edit Flag to allow editing.
 	 * @return true if user can write the attribute */
-	private boolean canWrite(String tname, boolean can_edit) {
+	public boolean canWrite(String tname, boolean can_edit) {
 		return canWrite(tname, "aname", can_edit);
 	}
 

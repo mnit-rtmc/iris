@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.WeatherSensor;
+import us.mn.state.dot.tms.client.alert.AlertMenu;
 import us.mn.state.dot.tms.client.camera.VideoMenu;
 import us.mn.state.dot.tms.client.comm.MaintenanceMenu;
 import us.mn.state.dot.tms.client.detector.DetectorForm;
@@ -57,6 +58,7 @@ public class ViewMenu extends IMenu {
 		addMenu(new SignMenu(session));
 		addMenu(new IncidentMenu(session));
 		addMenu(new LaneUseMenu(session));
+		addMenu(new AlertMenu(session));
 		addItem(createDetectorItem());
 		addItem(createStationItem());
 		addItem(session.createTableAction(RampMeter.SONAR_TYPE));

@@ -32,7 +32,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -249,9 +248,9 @@ public class VidPanel extends JPanel implements FocusListener {
 		addAncestorListener(new AncestorListener() {
 			@Override
 			public void ancestorAdded(AncestorEvent event) {
-		    	startStatusMonitor();
-		    	if (autostart)
-		    		startCurrentStream();
+				startStatusMonitor();
+				if (autostart)
+					startCurrentStream();
 			}
 			@Override
 			public void ancestorMoved(AncestorEvent event) {}
@@ -410,7 +409,6 @@ public class VidPanel extends JPanel implements FocusListener {
 					// stream manager available
 					JComponent vc = smgr.getComponent();
 					addVideo(vc);
-//					add(placeholderComponent);
 					String lbl = smgr.getLabel();
 					String msg = smgr.getErrorMsg();
 					streamError = !isNothing(msg);
@@ -687,24 +685,24 @@ public class VidPanel extends JPanel implements FocusListener {
 	// Include a ChangeListener interface
 
 	public void addChangeListener(ChangeListener listener) {
-	    listenerList.add(ChangeListener.class, listener);
+		listenerList.add(ChangeListener.class, listener);
 	}
 
 	public void removeChangeListener(ChangeListener listener) {
-	    listenerList.remove(ChangeListener.class, listener);
+		listenerList.remove(ChangeListener.class, listener);
 	}
 
 	public ChangeListener[] getChangeListeners() {
-	    return listenerList.getListeners(ChangeListener.class);
+		return listenerList.getListeners(ChangeListener.class);
 	}
 
 	/** Job to call any ChangeListeners */
 	private final Job fireChangeListenersJob = new Job(100) {
 		public void perform() {
-		    ChangeEvent event = new ChangeEvent(this);
-		    for (ChangeListener listener : getChangeListeners()) {
-		        listener.stateChanged(event);
-		    }
+			ChangeEvent event = new ChangeEvent(this);
+			for (ChangeListener listener : getChangeListeners()) {
+				listener.stateChanged(event);
+			}
 		}
 	};
 

@@ -27,7 +27,6 @@ import javax.swing.ListCellRenderer;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommLinkHelper;
-import us.mn.state.dot.tms.CommProtocol;
 import static us.mn.state.dot.tms.CommProtocol.MSG_FEED;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WController;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
@@ -101,15 +100,15 @@ class WMsgFeedTagDialog extends WMultiTagDialog {
 		
 		@Override  
 		public Component getListCellRendererComponent(
-				JList<?extends SonarObject> list, SonarObject o,
-		      int index, boolean isSelected, boolean cellHasFocus) {
+		        JList<?extends SonarObject> list, SonarObject o,
+		        int index, boolean isSelected, boolean cellHasFocus) {
 			CommLink c = (CommLink) o;
 			cell.getListCellRendererComponent(
 					list, c, index, isSelected, cellHasFocus);
 			String txt = (c != null) ? String.format("%s (%s)",
 					c.getDescription(), c.getName()) : "";
 			cell.setText(txt);
-		    return cell;
-		  }
+			return cell;
+		}
 	}
 }

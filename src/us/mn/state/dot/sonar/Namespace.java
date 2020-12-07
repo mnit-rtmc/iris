@@ -16,7 +16,16 @@ package us.mn.state.dot.sonar;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
+
+import org.postgis.MultiPolygon;
 
 /**
  * A namespace is a mapping of names to objects.
@@ -27,6 +36,10 @@ abstract public class Namespace {
 
 	/** NULL REF string */
 	static private String NULL_STR = String.valueOf(Message.NULL_REF.code);
+	
+	/** Date formatter for formatting/parsing dates in ISO 8601 format */
+	static private final SimpleDateFormat iso8601 =
+			new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
 	/** Get the name of a SONAR type */
 	static public String typeName(Class t)
@@ -56,7 +69,11 @@ abstract public class Namespace {
 		if (v instanceof SonarObject) {
 			SonarObject o = (SonarObject) v;
 			return o.getName();
-		} else if (v != null)
+		} else if (v instanceof Date) {
+			String dt = iso8601.format(v);
+			return dt;
+		}
+		else if (v != null)
 			return v.toString();
 		else
 			return NULL_STR;
@@ -72,7 +89,7 @@ abstract public class Namespace {
 		return values;
 	}
 
-	/** Unmarshall a parameter value string into a java object */
+	/** Unmarshall a parameter value string into a java object   */
 	public Object unmarshall(Class t, String p) throws ProtocolError {
 		if (NULL_STR.equals(p))
 			return null;
@@ -91,14 +108,21 @@ abstract public class Namespace {
 				return Long.valueOf(p);
 			else if (t == Double.TYPE || t == Double.class)
 				return Double.valueOf(p);
+			else if (t == List.class || t == ArrayList.class)
+				return Arrays.asList(p);
+			else if (t == Date.class)
+				return iso8601.parse(p);
+			else if (t == MultiPolygon.class)
+				return new MultiPolygon(p);
 		}
-		catch (NumberFormatException e) {
+		catch (NumberFormatException|SQLException|ParseException e) {
 			throw ProtocolError.invalidParameter();
 		}
 		if (SonarObject.class.isAssignableFrom(t))
 			return unmarshallObject(t, p);
-		else
+		else {
 			throw ProtocolError.invalidParameter();
+		}
 	}
 
 	/** Unmarshall a SONAR object reference */

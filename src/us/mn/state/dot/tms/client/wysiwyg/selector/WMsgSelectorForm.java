@@ -22,7 +22,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Map;
@@ -67,10 +66,8 @@ import us.mn.state.dot.tms.client.wysiwyg.selector.WMsgSelectorSignProcess;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WMsgEditorForm;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WMsgNewMsgForm;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WPageList;
-import us.mn.state.dot.tms.client.wysiwyg.editor.WPagePanel;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WController;
 import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 
 /**
  * WYSIWYG DMS Message Editor Selector Form
@@ -120,7 +117,7 @@ public class WMsgSelectorForm extends AbstractForm {
 	/** Use the page list as the message preview */
 	private WPageList msg_preview;
 	private JScrollPane msg_preview_pn;
-    
+	
 	/** Buttons */
 	private JButton reload_btn;
 	private JButton create_btn;
@@ -419,10 +416,10 @@ public class WMsgSelectorForm extends AbstractForm {
 		/** Sign list */
 		ListModel<String> dmsNamesModel = new AbstractListModel<String>() {
 			public int getSize() { return dmsNames.size(); }
-		    
+
 			public String getElementAt(int index) {
-		    	return dmsNames.get(index);
-		    	}
+				return dmsNames.get(index);
+			}
 		};
 		
 		dms_list = new JList<String>(dmsNamesModel);
@@ -513,10 +510,10 @@ public class WMsgSelectorForm extends AbstractForm {
 		/* Panes and model for message list */
 		ListModel<String> messageListModel = new AbstractListModel<String>() {
 			public int getSize() { return messageList.size(); }
-			
-		    public String getElementAt(int index) {
-		    	return messageList.get(index);
-	    	}
+
+			public String getElementAt(int index) {
+				return messageList.get(index);
+			}
 		};
 		msg_list = new JList<String>(messageListModel);
 		msg_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

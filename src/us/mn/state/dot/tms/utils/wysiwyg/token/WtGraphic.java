@@ -20,10 +20,8 @@ import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.utils.Multi;
 import us.mn.state.dot.tms.utils.wysiwyg.WPoint;
 import us.mn.state.dot.tms.utils.wysiwyg.WRenderer;
-import us.mn.state.dot.tms.utils.wysiwyg.WState;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
-import us.mn.state.dot.tms.utils.wysiwyg.WToken.AnchorLoc;
 
 /** Graphic token for WYSIWYG editor.
  * 
@@ -119,11 +117,6 @@ public class WtGraphic extends WToken {
 		return graphic.getHeight();
 	}
 	
-//	@Override
-//	public boolean useAnchor() {
-//		return false;
-//	}
-
 	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#doMulti(us.mn.state.dot.tms.utils.Multi)
 	 */

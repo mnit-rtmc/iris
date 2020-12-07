@@ -25,6 +25,9 @@ ALTER SCHEMA iris OWNER TO tms;
 CREATE SCHEMA event;
 ALTER SCHEMA event OWNER TO tms;
 
+-- Enable PostGIS extension
+CREATE EXTENSION postgis;
+
 SET SESSION AUTHORIZATION 'tms';
 
 SET search_path = public, pg_catalog;
@@ -194,6 +197,13 @@ help_trouble_ticket_enable	false
 help_trouble_ticket_url	
 incident_clear_advice_multi	JUST CLEARED
 incident_clear_secs	600
+ipaws_deploy_auto_mode	false
+ipaws_deploy_auto_timeout_secs	0
+ipaws_priority_weight_urgency	1.0
+ipaws_priority_weight_severity	1.0
+ipaws_priority_weight_certainty	1.0
+ipaws_sign_thresh_auto_meters	1000
+ipaws_sign_thresh_opt_meters	4000
 map_extent_name_initial	Home
 map_icon_size_scale_max	30
 map_segment_max_meters	2000
@@ -206,6 +216,7 @@ meter_yellow_secs	0.7
 msg_feed_verify	true
 operation_retry_threshold	3
 price_message_event_purge_days	0
+push_notification_timeout_secs	900
 route_max_legs	8
 route_max_miles	16
 rwis_high_wind_speed_kph	40
@@ -351,6 +362,9 @@ gate_arm_tab	t
 incident_admin	t
 incident_control	t
 incident_tab	t
+ipaws_admin	t
+ipaws_deploy	t
+ipaws_tab	t
 lcs_admin	t
 lcs_control	t
 lcs_tab	t
@@ -371,7 +385,7 @@ parking_tab	t
 \.
 
 CREATE TABLE iris.sonar_type (
-	name VARCHAR(16) PRIMARY KEY
+	name VARCHAR(32) PRIMARY KEY
 );
 
 COPY iris.sonar_type (name) FROM stdin;
@@ -386,6 +400,8 @@ camera_action
 camera_preset
 camera_template
 cam_vid_src_ord
+cap_response_type
+cap_urgency
 capability
 catalog
 comm_config
@@ -414,6 +430,9 @@ inc_descriptor
 incident
 incident_detail
 inc_locator
+ipaws
+ipaws_alert_config
+ipaws_alert_deployer
 lane_action
 lane_marking
 lane_use_multi
@@ -428,6 +447,7 @@ parking_area
 plan_phase
 play_list
 privilege
+push_notification
 quick_message
 ramp_meter
 r_node
@@ -455,7 +475,7 @@ word
 CREATE TABLE iris.privilege (
 	name VARCHAR(8) PRIMARY KEY,
 	capability VARCHAR(16) NOT NULL REFERENCES iris.capability,
-	type_n VARCHAR(16) NOT NULL REFERENCES iris.sonar_type,
+	type_n VARCHAR(32) NOT NULL REFERENCES iris.sonar_type,
 	obj_n VARCHAR(16) DEFAULT ''::VARCHAR NOT NULL,
 	group_n VARCHAR(16) DEFAULT ''::VARCHAR NOT NULL,
 	attr_n VARCHAR(16) DEFAULT ''::VARCHAR NOT NULL,
@@ -476,6 +496,8 @@ PRV_000B	base	road_affix		f
 PRV_0009	base	geo_loc		f
 PRV_0010	base	cabinet		f
 PRV_0011	base	controller		f
+PRV_001C	base	push_notification		f
+PRV_001D	base	push_notification		t
 PRV_0012	base_admin	user		t
 PRV_0013	base_admin	role		t
 PRV_001A	base_admin	domain		t
@@ -582,6 +604,17 @@ PRV_0093	incident_tab	incident_detail		f
 PRV_0094	incident_tab	inc_descriptor		f
 PRV_0095	incident_tab	inc_locator		f
 PRV_0096	incident_tab	inc_advice		f
+PRV_009A	ipaws_admin	ipaws		t
+PRV_009B	ipaws_admin	ipaws_alert_deployer		t
+PRV_009C	ipaws_admin	ipaws_alert_config		t
+PRV_009D	ipaws_admin	cap_response_type		t
+PRV_009E	ipaws_admin	cap_urgency		t
+PRV_009F	ipaws_deploy	ipaws_alert_deployer		t
+PRV_009G	ipaws_tab	ipaws		f
+PRV_009H	ipaws_tab	ipaws_alert_deployer		f
+PRV_009I	ipaws_tab	ipaws_alert_config		f
+PRV_009J	ipaws_tab	cap_response_type		f
+PRV_009K	ipaws_tab	cap_urgency		f
 PRV_0097	lcs_admin	lane_use_multi		t
 PRV_0098	lcs_admin	lcs		t
 PRV_0099	lcs_admin	lcs_array		t
@@ -677,6 +710,8 @@ administrator	gate_arm_tab
 administrator	incident_admin
 administrator	incident_control
 administrator	incident_tab
+administrator	ipaws_admin
+administrator	ipaws_tab
 administrator	lcs_admin
 administrator	lcs_control
 administrator	lcs_tab
@@ -704,6 +739,8 @@ operator	dms_tab
 operator	gate_arm_tab
 operator	incident_control
 operator	incident_tab
+operator	ipaws_deploy
+operator	ipaws_tab
 operator	lcs_control
 operator	lcs_tab
 operator	meter_control
@@ -1244,6 +1281,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 39	GPS RedLion
 40	Cohu Helios PTZ
 41	Streambed
+42	IPAWS Alert
 \.
 
 CREATE TABLE iris.comm_config (
@@ -1274,7 +1312,7 @@ GRANT SELECT ON comm_config_view TO PUBLIC;
 CREATE TABLE iris.comm_link (
 	name VARCHAR(20) PRIMARY KEY,
 	description VARCHAR(32) NOT NULL,
-	uri VARCHAR(64) NOT NULL,
+	uri VARCHAR(256) NOT NULL,
 	poll_enabled BOOLEAN NOT NULL,
 	comm_config VARCHAR(10) NOT NULL REFERENCES iris.comm_config
 );
@@ -2513,6 +2551,7 @@ COPY iris.sign_msg_source (bit, source) FROM stdin;
 10	slow warning
 11	speed advisory
 12	parking
+13	ipaws
 \.
 
 CREATE FUNCTION iris.sign_msg_sources(INTEGER) RETURNS TEXT
@@ -3516,6 +3555,98 @@ iadv_00106	13	1	1	\N	\N	IN RIGHT SHOULDER
 \.
 
 --
+-- IPAWS Alerts
+--
+-- IPAWS Alert Event table
+CREATE TABLE event.ipaws (
+    name text PRIMARY KEY,
+    identifier text,
+    sender text,
+    sent_date timestamp with time zone,
+    status text,
+    message_type text,
+    scope text,
+    codes text[],
+    note text,
+    alert_references text[],
+    incidents text[],
+    categories text[],
+    event text,
+    response_types text[],
+    urgency text,
+    severity text,
+    certainty text,
+    audience text,
+    effective_date timestamp with time zone,
+    onset_date timestamp with time zone,
+    expiration_date timestamp with time zone,
+    sender_name text,
+    headline text,
+    alert_description text,
+    instruction text,
+    parameters jsonb,
+    area jsonb,
+    geo_poly geography(multipolygon),
+	geo_loc varchar(20),
+    purgeable boolean,
+	last_processed timestamp with time zone
+);
+
+-- IPAWS Alert Deployer table
+CREATE TABLE event.ipaws_alert_deployer (
+	name varchar(20) PRIMARY KEY,
+	gen_time timestamp with time zone,
+	approved_time timestamp with time zone,
+	alert_id text REFERENCES event.ipaws(name),
+	geo_loc varchar(20),
+	alert_start timestamp with time zone,
+	alert_end timestamp with time zone,
+	config varchar(24),
+	sign_group varchar(20),
+	quick_message varchar(20),
+	pre_alert_time integer,
+	post_alert_time integer,
+	auto_dms text[],
+	optional_dms text[],
+	deployed_dms text[],
+	area_threshold double precision,
+	auto_multi text,
+	deployed_multi text,
+	msg_priority integer,
+	approved_by varchar(15),
+	deployed boolean,
+	was_deployed boolean,
+	active boolean DEFAULT false,
+	replaces varchar(24)
+);
+
+-- IPAWS Alert Config table
+CREATE TABLE iris.ipaws_alert_config (
+	name varchar(24) PRIMARY KEY,
+	event text,
+	sign_group varchar(20) REFERENCES iris.sign_group(name),
+	quick_message varchar(20) REFERENCES iris.quick_message(name),
+	pre_alert_time integer DEFAULT 6,
+	post_alert_time integer DEFAULT 0
+);
+
+-- CAP response types table
+CREATE TABLE iris.cap_response_type (
+	name varchar(24) PRIMARY KEY,
+	event text,
+	response_type text,
+	multi text
+);
+
+-- CAP urgency values table
+CREATE TABLE iris.cap_urgency (
+	name varchar(24) PRIMARY KEY,
+	event text,
+	urgency text,
+	multi text
+);
+
+--
 -- Lane Markings
 --
 CREATE TABLE iris._lane_marking (
@@ -3882,6 +4013,23 @@ CREATE VIEW parking_area_view AS
 	LEFT JOIN geo_loc_view l ON pa.geo_loc = l.name
 	LEFT JOIN iris.system_attribute sa ON sa.name = 'camera_image_base_url';
 GRANT SELECT ON parking_area_view TO PUBLIC;
+
+--
+-- Push Notifications
+--
+-- NOTE that we don't have a foreign key linking addressed_by to the i_user
+-- table so we can put 'auto' in there
+CREATE TABLE event.push_notification (
+	name varchar(30) PRIMARY KEY,
+	ref_object_type varchar(32) REFERENCES iris.sonar_type(name),
+	ref_object_name text,
+	needs_write boolean,
+	sent_time timestamp with time zone,
+	title text,
+	description text,
+	addressed_by varchar(15),
+	addressed_time timestamp with time zone
+);
 
 --
 -- Ramp Meters

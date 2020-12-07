@@ -20,8 +20,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListCellRenderer;
@@ -30,10 +28,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 
@@ -55,8 +49,6 @@ public class WPageListRenderer extends JPanel implements ListCellRenderer<WPage>
 	private final JLabel pgnum_lbl = new JLabel();
 
 	/** Image panel to display sign message */
-	
-//	private final SignPixelPanel pixel_pnl = new SignPixelPanel(50, 200);
 	private WImagePanel signPanel;
 	
 	/** Location panel */
@@ -85,13 +77,10 @@ public class WPageListRenderer extends JPanel implements ListCellRenderer<WPage>
 		title_pnl.add(Box.createHorizontalGlue());
 		title_pnl.add(pgnum_lbl);
 		title_pnl.add(Box.createHorizontalGlue());
-//		title_pnl.setAlignmentX(Component.LEFT_ALIGNMENT);
-//		pgnum_lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 		info_pnl.setLayout(new BoxLayout(info_pnl, BoxLayout.X_AXIS));
 		info_pnl.add(Box.createHorizontalGlue());
 		info_pnl.add(info_lbl);
 		info_pnl.add(Box.createHorizontalGlue());
-//		info_pnl.setAlignmentX(Component.LEFT_ALIGNMENT);
 		add(title_pnl, BorderLayout.NORTH);
 		add(spPanel, BorderLayout.CENTER);
 		add(info_pnl, BorderLayout.SOUTH);
@@ -104,7 +93,6 @@ public class WPageListRenderer extends JPanel implements ListCellRenderer<WPage>
 		// labels
 		pgnum_lbl.setText("Page 1");
 		int height = 2*pgnum_lbl.getPreferredSize().height+10 + pix_pnl_size.height;
-//		System.out.println(String.format("Width = %d, Height = %d", width, height));
 		Dimension d = new Dimension(width, height);
 		setMinimumSize(d);
 		setPreferredSize(d);
@@ -120,13 +108,11 @@ public class WPageListRenderer extends JPanel implements ListCellRenderer<WPage>
 			signPanel.setBackground(list.getSelectionBackground());
 			info_pnl.setBackground(list.getSelectionBackground());
 			setBackground(list.getSelectionBackground());
-//			title_pnl.setForeground(list.getSelectionForeground());
 		} else {
 			title_pnl.setBackground(pgnum_lbl.getBackground());
 			signPanel.setBackground(pgnum_lbl.getBackground());
 			info_pnl.setBackground(pgnum_lbl.getBackground());
 			setBackground(pgnum_lbl.getBackground());
-//			title_pnl.setForeground(pgnum_lbl.getForeground());
 		}
 		pgnum_lbl.setText(WController.getPageNumberLabel(index));
 		renderSignPage(sp);

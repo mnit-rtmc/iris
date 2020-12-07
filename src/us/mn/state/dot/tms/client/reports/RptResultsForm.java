@@ -160,11 +160,9 @@ public class RptResultsForm extends AbstractForm {
 	/** Create a new report results form with unique title based on datetime */
 	public RptResultsForm(RptResults res) {
 		super(I18N.get("report.results.title") + " - " + TimeSteward.currentTimeShortString(), true);
-//		setLayout(new LayoutManager BoxLayout(this, BoxLayout.Y_AXIS));
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		updateForm();
 		results = res;
-//		invalidate();
 		queueUpdateForm();
 	}
 	
@@ -218,19 +216,6 @@ public class RptResultsForm extends AbstractForm {
 		pnl.add(Box.createRigidArea(new Dimension(1, btnHeight)));
 		return pnl;
 	}
-
-//	/** Create the button panel */
-//	private JPanel createButtonPanel() {
-//		JPanel pnl = new JPanel();
-//		pnl.setLayout(new BoxLayout(pnl, BoxLayout.X_AXIS));
-////		pnl.add(Box.createHorizontalStrut(500));
-//		pnl.add(Box.createHorizontalGlue());
-//		pnl.add(new JButton(copy_clipboard));
-//		pnl.add(new JButton(export_csv));
-//		Dimension minsize = pnl.getMinimumSize();
-//		pnl.setMaximumSize(new Dimension(Integer.MAX_VALUE, minsize.height));
-//		return pnl;
-//	}
 	
 	//-------------------------------------------
 	

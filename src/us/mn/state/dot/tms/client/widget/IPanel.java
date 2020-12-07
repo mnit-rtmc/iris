@@ -100,10 +100,10 @@ public class IPanel extends JPanel {
 	}
 
 	/** Current row on the form */
-	private int row = 0;
+	protected int row = 0;
 
 	/** Current column on the form */
-	private int col = 0;
+	protected int col = 0;
 
 	/** Create a new panel */
 	public IPanel() {
@@ -147,7 +147,13 @@ public class IPanel extends JPanel {
 			col += s.width;
 		return bag;
 	}
-
+	
+	/** Set the current row and column on the form. */
+	protected void setRowCol(int r, int c) {
+		row = r;
+		col = c;
+	}
+	
 	/** Add a label to the current row */
 	public void add(String msg, Stretch s) {
 		add(new ILabel(msg), s);

@@ -190,7 +190,7 @@ public class VideoRequest {
 		// Are we using an SRF Live555 video proxy?
 		if (usingLive555Proxy()) {
 			return create(RTSP, base_url +
-		                        "/" + getLive555CamName(cam));
+			            "/" + getLive555CamName(cam));
 		}
 		// No, we're using a MnDOT Servlet video proxy.
 		return create(HTTP, base_url +

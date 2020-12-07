@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.map;
 
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -113,5 +112,10 @@ public class Theme {
 	/** Get a legend icon for a style */
 	public Icon getLegend(Style sty) {
 		return symbol.getLegend(sty);
+	}
+	
+	/** Get the symbol for this theme */
+	public Symbol getSymbol() {
+		return symbol;
 	}
 }

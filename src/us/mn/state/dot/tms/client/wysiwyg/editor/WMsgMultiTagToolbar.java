@@ -30,8 +30,6 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.wysiwyg.editor.tags.WMultiTagDialog;
-import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
 
@@ -109,6 +107,15 @@ public class WMsgMultiTagToolbar extends WToolbar {
 		// Variable Speed Advisory
 		multiTagModel.addElement(WTokenType.speedAdvisory);
 		
+		// IPAWS CAP Time substitution
+		multiTagModel.addElement(WTokenType.capTime);
+		
+		// IPAWS CAP Response Type substitution
+		multiTagModel.addElement(WTokenType.capResponse);
+		
+		// IPAWS CAP Urgency substitution
+		multiTagModel.addElement(WTokenType.capUrgency);
+		
 		//--------------------------------
 		// Tags NOT implemented elsewhere
 		//--------------------------------
@@ -161,13 +168,13 @@ public class WMsgMultiTagToolbar extends WToolbar {
 		
 		@Override  
 		public Component getListCellRendererComponent(
-				JList<?extends WTokenType> list, WTokenType tt,
-		      int index, boolean isSelected, boolean cellHasFocus) {
+		        JList<?extends WTokenType> list, WTokenType tt,
+		        int index, boolean isSelected, boolean cellHasFocus) {
 			cell.getListCellRendererComponent(
 					list, tt, index, isSelected, cellHasFocus);
 			cell.setText(tt.getLabel());
-		    return cell;
-		  }
+			return cell;
+		}
 	}
 	
 	/** Add tag action */

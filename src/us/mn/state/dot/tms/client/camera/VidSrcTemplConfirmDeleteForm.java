@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -108,8 +107,8 @@ public class VidSrcTemplConfirmDeleteForm extends AbstractForm {
 				camTemplateModel.addElement(ct.getLabel());
 			
 			camTemplateList.setBorder(BorderFactory.createCompoundBorder(
-					BorderFactory.createLineBorder(Color.GRAY),
-		            BorderFactory.createEmptyBorder(1, 1, 1, 1)));
+			        BorderFactory.createLineBorder(Color.GRAY),
+			        BorderFactory.createEmptyBorder(1, 1, 1, 1)));
 			camTemplateList.setSelectionModel(new DisabledSelectionModel());
 			d = camTemplateList.getPreferredSize();
 			d.width = 250;

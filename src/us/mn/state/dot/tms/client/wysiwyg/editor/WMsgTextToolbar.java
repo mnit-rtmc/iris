@@ -41,7 +41,6 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Multi.JustificationLine;
 import us.mn.state.dot.tms.utils.Multi.JustificationPage;
-import us.mn.state.dot.tms.utils.MultiConfig;
 
 /**
  * WYSIWYG DMS Message Editor Text Option Panel containing buttons with
@@ -225,7 +224,7 @@ public class WMsgTextToolbar extends WToolbar {
 	/** Set the foreground or background color to c. The color to set is
 	 *  specified by passing "foreground" or "background" in the fgbg 
 	 *  parameter.
-     */
+	 */
 	public void setColor(Color c, String mode) {
 		if (mode.equalsIgnoreCase(WMsgColorChooser.FOREGROUND))
 			setForegroundColor(c);
@@ -244,7 +243,7 @@ public class WMsgTextToolbar extends WToolbar {
 	
 	/** Set the icon color on the foreground color chooser button using our
 	 *  current foreground color.
-     */
+	 */
 	public void applyForegroundColorIcon() {
 		fg_color_btn.setIcon(WMsgColorChooser.createColorIcon(fgColor, 16, 16));
 	}
@@ -260,7 +259,7 @@ public class WMsgTextToolbar extends WToolbar {
 
 	/** Set the icon color on the background color chooser button using our
 	 *  current background color.
-     */
+	 */
 	public void applyBackgroundColorIcon() {
 		if (bg_color_btn != null)
 			bg_color_btn.setIcon(WMsgColorChooser.createColorIcon(bgColor, 16, 16));
@@ -268,8 +267,6 @@ public class WMsgTextToolbar extends WToolbar {
 	
 	/** Update the font combo-box given the font number value fNum. */
 	public void updateFontMenu(Integer fNum) {
-//		String s = (fNum != null) ? fNum.toString() : "null";
-//		controller.println("Updating font with: %s", s);
 		// first disable the action listener on the combo-box to avoid
 		// triggering an event when we change the value
 		fontOptions.removeActionListener(setFont);
@@ -294,8 +291,6 @@ public class WMsgTextToolbar extends WToolbar {
 	
 	/** Update the page justification buttons given the value jp. */
 	public void updatePageJustBtns(JustificationPage jp) {
-//		String s = (jp != null) ? jp.toString() : "null";
-//		controller.println("Updating page just with: %s", s);
 		if (jp == JustificationPage.TOP)
 			text_pg_just_top_btn.setSelected(true);
 		else if (jp == JustificationPage.MIDDLE)
@@ -312,8 +307,6 @@ public class WMsgTextToolbar extends WToolbar {
 	
 	/** Update the line justification buttons given the value jl. */
 	public void updateLineJustBtns(JustificationLine jl) {
-//		String s = (jl != null) ? jl.toString() : "null";
-//		controller.println("Updating line just with: %s", s);
 		if (jl == JustificationLine.LEFT)
 			text_ln_just_left_btn.setSelected(true);
 		else if (jl == JustificationLine.CENTER)

@@ -71,7 +71,7 @@ public class SegmentLayerState extends ProxyLayerState<R_Node> {
 
 	/** Get the current map scale */
 	@Override
-	protected float getScale() {
+	public float getScale() {
 		// Don't adjust scale for segments
 		return (float) map.getScale();
 	}

@@ -42,7 +42,6 @@ public class WState {
 	public int        charWidth;
 	public int        charHeight;
 	public Integer    charSpacing;
-//	public int lineHeight;
 
 	// text rectangle area (1-based coordinates)
 	public int trX;

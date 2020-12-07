@@ -16,7 +16,6 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import us.mn.state.dot.tms.RptConduit;

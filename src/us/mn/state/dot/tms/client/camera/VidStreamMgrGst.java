@@ -32,7 +32,6 @@ import javax.swing.JOptionPane;
 import com.sun.jna.Platform;
 import com.sun.jna.platform.win32.Kernel32;
 
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.UserProperty;
 import us.mn.state.dot.tms.client.widget.ZipDownloader;
@@ -318,8 +317,6 @@ public class VidStreamMgrGst extends VidStreamMgr {
 	 */
 	protected VidStreamMgrGst(VidPanel vp, VidStreamReq vr) {
 		super(vp, vr);
-//		Gst.init("StreamMgrGst");
-//		setComponent(createScreenPanel());
 	}
 
 	@Override
@@ -407,9 +404,6 @@ public class VidStreamMgrGst extends VidStreamMgr {
 			}
 			gstComponent.disconnectAll();
 			gstComponent = null;
-//			setComponent(null);
-//			p.stop();
-//			p.close();
 			try {
 				p.setState(State.NULL);
 				p.getState();
@@ -418,7 +412,6 @@ public class VidStreamMgrGst extends VidStreamMgr {
 			catch (java.lang.IllegalStateException e) {
 				e.printStackTrace();
 			}
-//			setStatus("");
 		}
 	}
 
@@ -444,8 +437,6 @@ public class VidStreamMgrGst extends VidStreamMgr {
 			if (bStreaming) {
 				streamingStopped();
 				System.out.println("### EOS");
-//				dumpElement(elem, "EOS");
-//				dumpElement(srcElem, "End");
 				bStreaming = false;
 			}
 		}

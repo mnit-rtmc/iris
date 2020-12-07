@@ -139,6 +139,11 @@ abstract public class ProxyManager<T extends SonarObject> {
 	public void setScreenPane(ScreenPane sp) {
 		s_pane = sp;
 	}
+	
+	/** Get the screen pane */
+	public ScreenPane getScreenPane() {
+		return s_pane;
+	}
 
 	/** Create a new proxy manager.
 	 * @param s Session.
@@ -180,7 +185,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	}
 
 	/** Create a layer for this proxy type */
-	private ProxyLayer<T> createLayer() {
+	protected ProxyLayer<T> createLayer() {
 		return new ProxyLayer<T>(this);
 	}
 
@@ -231,7 +236,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 		}
 	}
 
-	/** Update layer extend */
+	/** Update layer extent */
 	public final void updateExtent() {
 		if (layer != null) {
 			runQueued(new Invokable() {
@@ -304,9 +309,18 @@ abstract public class ProxyManager<T extends SonarObject> {
 		return l == layer;
 	}
 
+	/** Keep a handle to this layer state. */
+	private LayerState layerState;
+	
 	/** Create layer state for a map bean */
 	public LayerState createState(MapBean mb) {
-		return layer.createState(mb);
+		layerState = layer.createState(mb);
+		return layerState;
+	}
+	
+	/** Return the layer state used by this manager */
+	public LayerState getLayerState() {
+		return layerState;
 	}
 
 	/** Get the proxy selection model */
@@ -314,11 +328,19 @@ abstract public class ProxyManager<T extends SonarObject> {
 		return sel_mdl;
 	}
 
-	/** Create a new style summary.
+	/** Create a new style summary with 2 rows of buttons.
 	 * @param size_btns Enable buttons to change cell size.
 	 * @return A style summary for the proxy type T. */
 	public StyleSummary<T> createStyleSummary(boolean size_btns) {
 		return new StyleSummary<T>(this, def_style, size_btns);
+	}
+	
+	/** Create a new style summary.
+	 * @param size_btns Enable buttons to change cell size.
+	 * @param sr Number of rows of style buttons.
+	 * @return A style summary for the proxy type T. */
+	public StyleSummary<T> createStyleSummary(boolean size_btns, int sr) {
+		return new StyleSummary<T>(this, def_style, size_btns, sr);
 	}
 
 	/** Get the specified style list model */
@@ -353,6 +375,14 @@ abstract public class ProxyManager<T extends SonarObject> {
 		return false;
 	}
 
+	/** Get the ItemStyle of a proxy */
+	public ItemStyle getItemStyle(T proxy) {
+		Style style = getStyle(proxy);
+		if (style != null)
+			return ItemStyle.lookupStyle(style.toString());
+		return null;
+	}
+	
 	/** Get the style of a proxy */
 	public Style getStyle(T proxy) {
 		return theme.getStyle(proxy);
@@ -518,5 +548,10 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Check if manager has a layer to display */
 	public final boolean hasLayer() {
 		return canRead() && (zoom_threshold > 0);
+	}
+	
+	/** Force a map update */
+	public void updateMap() {
+		s_pane.getMap().repaint();
 	}
 }

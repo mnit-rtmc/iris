@@ -17,9 +17,6 @@ package us.mn.state.dot.tms.utils.wysiwyg.token;
 
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.Multi;
-import us.mn.state.dot.tms.utils.wysiwyg.WRenderer;
-import us.mn.state.dot.tms.utils.wysiwyg.WState;
-import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
 /**  Speed advisory token for WYSIWYG editor.

@@ -22,8 +22,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ComponentAdapter;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -32,7 +30,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.InternalFrameAdapter;
@@ -79,7 +76,6 @@ public class WMsgEditorForm extends AbstractForm {
 	private WController controller;
 	
 	/* Currently selected page (defaults to first available) */
-//	private WMsgSignPage selectedPage;
 	private JLabel pg_num_lbl;
 	
 	/* Menu Bar */
@@ -89,7 +85,6 @@ public class WMsgEditorForm extends AbstractForm {
 	private JCheckBox prefix_chk;
 
 	/* Sign drop-down (only present for groups) */
-//	private JComboBox<String> dms_list;
 	private WMultiConfigComboBox multiConfigList;
 	
 	/* Page List */

@@ -149,9 +149,9 @@ public class SmartDesktop extends JDesktopPane {
 		frame.setTitle(form.getTitle());
 		frame.setResizable(form.isResizable());
 		frame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e)
-            {
+			@Override
+			public void windowClosing(WindowEvent e)
+			{
 				smartDesktopRequestFocus();	// see note
 				form.dispose();
 				frame.dispose();

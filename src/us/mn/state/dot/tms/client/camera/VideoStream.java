@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.camera;
 
 import javax.swing.JComponent;
-import us.mn.state.dot.tms.Camera;
 
 /**
  * A video stream displays a video on a swing component.

@@ -17,70 +17,35 @@ package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.colorchooser.AbstractColorChooserPanel;
-import javax.swing.colorchooser.ColorSelectionModel;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import us.mn.state.dot.tms.ColorScheme;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsColor;
-import us.mn.state.dot.tms.DmsSignGroup;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
-import us.mn.state.dot.tms.InvalidMsgException;
-import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.RasterBuilder;
-import us.mn.state.dot.tms.RasterGraphic;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.dms.DMSPanelPager;
-import us.mn.state.dot.tms.client.dms.SignFacePanel;
-import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
-import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiConfig;
-import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * WYSIWYG DMS Message Editor Color Chooser
@@ -376,13 +341,13 @@ public class WMsgColorChooser extends AbstractForm {
 	public static  ImageIcon createColorIcon(Color c, int width, int height) {
 		BufferedImage image = new BufferedImage(width, height,
 				java.awt.image.BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = image.createGraphics();
-        graphics.setColor(c);
-        graphics.fillRect(0, 0, width, height);
-        graphics.setXORMode(Color.DARK_GRAY);
-        graphics.drawRect(0, 0, width-1, height-1);
-        image.flush();
-        ImageIcon icon = new ImageIcon(image);
-        return icon;
-    }
+		Graphics2D graphics = image.createGraphics();
+		graphics.setColor(c);
+		graphics.fillRect(0, 0, width, height);
+		graphics.setXORMode(Color.DARK_GRAY);
+		graphics.drawRect(0, 0, width-1, height-1);
+		image.flush();
+		ImageIcon icon = new ImageIcon(image);
+		return icon;
+	}
 }

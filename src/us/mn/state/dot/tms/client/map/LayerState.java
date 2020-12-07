@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.map;
 
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -101,6 +100,16 @@ abstract public class LayerState {
 
 	/** Visibility flag (null means automatic) */
 	private Boolean visible = null;
+
+	/** Forced visibility flag (for overriding visibility). True if a
+	 *  visibility state is being forced, false otherwise.
+	 */
+	private boolean visibleForced = false;
+
+	/** "Saved" visibility flag for returning to previous state when
+	 *  visibility is forced.
+	 */
+	private Boolean visibleSaved = null;
 
 	/** Create a new layer state.
 	 * @param layer Layer this state is based upon.
@@ -216,7 +225,7 @@ abstract public class LayerState {
 	}
 
 	/** Get the current map scale */
-	protected float getScale() {
+	public float getScale() {
 		return (float) map.getScale();
 	}
 
@@ -236,9 +245,39 @@ abstract public class LayerState {
 	 *          null means automatic. */
 	public void setVisible(Boolean v) {
 		boolean pv = isVisible();
-		visible = v;
+		
+		// check if we're forcing visibility and set the appropriate value
+		if (!visibleForced)
+			visible = v;
+		else
+			visibleSaved = v;
+		
 		if (pv != isVisible())
 			fireLayerChanged(LayerChange.visibility);
+	}
+	
+	/** Set a forced visibility of the layer, which overrides any manual
+	 *  setting (controlled with setVisible(). Layers can be returned to
+	 *  their previous visibility state with clearVisibleForced().
+	 */
+	public void setVisibleForced(Boolean v) {
+		// only change if we're not already forcing visibility
+		if (!visibleForced) {
+			// changing from not forced to forced
+			// save the current visibility flag then set it to what we got
+			visibleSaved = visible;
+			visible = v;
+			visibleForced = true;
+		}
+	}
+	
+	/** Clear any forced visibility state. */
+	public void clearVisibleForced() {
+		if (visibleForced) {
+			// set the visibility flag to the saved value, then disable forcing
+			visible = visibleSaved;
+			visibleForced = false;
+		}
 	}
 
 	/** Get the appropriate tool tip text for the specified point */

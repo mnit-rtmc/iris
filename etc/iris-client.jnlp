@@ -21,6 +21,8 @@
 	<jar href="lib/jna-@@JNA.VERSION@@.jar"/>
 	<jar href="lib/jna-platform-@@JNA.VERSION@@.jar"/>
 	<jar href="lib/gst1-java-core-@@GST.JAVA.VERSION@@.jar"/>
+	<jar href="lib/json-@@JSON.VERSION@@.jar"/>
+	<jar href="lib/postgis-geometry-@@POSTGIS.VERSION@@.jar"/>
 	<extension name="mail" href="mail.jnlp"/>
     </resources>
     <security>

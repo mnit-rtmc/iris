@@ -17,10 +17,8 @@ package us.mn.state.dot.tms.utils.wysiwyg;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
-import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_IrisToken;
 
 

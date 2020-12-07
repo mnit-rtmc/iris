@@ -44,7 +44,6 @@ import us.mn.state.dot.tms.client.widget.ScreenLayout;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.client.widget.Widgets;
-import us.mn.state.dot.tms.geo.ZoomLevel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**

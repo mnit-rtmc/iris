@@ -42,8 +42,6 @@ import us.mn.state.dot.tms.utils.wysiwyg.token.WtGraphic;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewLine;
 import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_Rectangle;
 
-import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-
 /**
  * Panel for displaying a WYSIWYG DMS image.
  *
@@ -85,15 +83,15 @@ public class WImagePanel extends JPanel {
 	
 	/** For drawing dashed lines */
 	private final static float dashA[] = {10.0f};
-    private final static BasicStroke dashed = new BasicStroke(1.0f,
-    		BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashA, 0.0f);
+	private final static BasicStroke dashed = new BasicStroke(1.0f,
+			BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashA, 0.0f);
 	
 	// constants used for converting sign coordinates to WYSIWYG coordinates
-    // (for readability only)
-    private final static boolean PIX_START = true;
-    private final static boolean PIX_END = false;
-    private final static boolean LED_SEP = true;
-    private final static boolean LED = false;
+	// (for readability only)
+	private final static boolean PIX_START = true;
+	private final static boolean PIX_END = false;
+	private final static boolean LED_SEP = true;
+	private final static boolean LED = false;
 	
 	public WImagePanel(WController c, int w, int h) {
 		controller = c;
@@ -305,12 +303,6 @@ public class WImagePanel extends JPanel {
 		caretY = clipY(convertSignToWysiwygY(sy, PIX_START));
 		int cY2 = clipY(convertSignToWysiwygY(sy+h-1, PIX_END));
 		caretH = cY2-caretY;
-		
-//		System.out.println(String.format(
-//				"Caret sign at (%d, %d) H = %d", sx, sy, h));
-//		System.out.println(String.format(
-//				"Caret img at (%d, %d) H = %d (cY2 = %d)",
-//				caretX, caretY, caretH, cY2));
 		
 		// set the caret to enabled and repaint everything
 		showCaret();
@@ -572,8 +564,6 @@ public class WImagePanel extends JPanel {
 			Dimension d = e.getComponent().getSize();
 			int w = (int) Math.floor(((float) d.width)/10)*10;
 			int h = (int) Math.floor(((float) d.height)/10)*10;
-//			System.out.println(String.format(
-//					"WImagePanel: %d x %d -> %d x %d", d.width, d.height, w, h));
 			setImageSize(w, h);
 		}
 	}

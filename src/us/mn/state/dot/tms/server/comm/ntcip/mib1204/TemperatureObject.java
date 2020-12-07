@@ -17,6 +17,8 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 import java.text.NumberFormat;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.units.Temperature;
+import us.mn.state.dot.tms.utils.Json;
+
 import static us.mn.state.dot.tms.units.Temperature.Units.CELSIUS;
 
 /**

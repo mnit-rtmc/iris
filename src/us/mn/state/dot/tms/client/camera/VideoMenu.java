@@ -60,7 +60,7 @@ public class VideoMenu extends IMenu {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new EncoderTypeForm(session));
 			}
-		    } : null;
+		} : null;
 	}
 
 	/** Create a play list menu item action */
@@ -120,7 +120,7 @@ public class VideoMenu extends IMenu {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new CameraTemplateForm(session));
 			}
-	    } : null;
+		} : null;
 	}
 	
 	/** Create a video source template menu item action */

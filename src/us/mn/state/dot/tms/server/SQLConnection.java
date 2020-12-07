@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -64,8 +65,17 @@ public class SQLConnection {
 	}
 
 	/** Escape a string constant value for SQL */
-	static private String escapeValue(Object value) {
+	static public String escapeValue(Object value) {
 		return value.toString().replace("'", "''");
+	}
+	
+	/** Prepare a string array for SQL */
+	static private String prepareArray(Object value) {
+		if (value != null && (value.getClass().isArray()
+				|| value instanceof List<?>)) {
+			return value.toString().replace("[", "{").replace("]", "}");
+		}
+		return value.toString();
 	}
 
 	/** Location of database server */
@@ -202,10 +212,11 @@ public class SQLConnection {
 			updateNull(s, field, key);
 			return;
 		}
-		String v = escapeValue(value);
-		validateValue(v);
+		String av = prepareArray(value);
+		String ev = escapeValue(av);
+		validateValue(ev);
 		update("UPDATE " + s.getTable() +
-		      " SET " + field + " = '" + v + "'" +
+		      " SET " + field + " = '" + ev + "'" +
 		      " WHERE " + s.getKeyName() + " = '" + key + "';");
 	}
 
@@ -230,10 +241,12 @@ public class SQLConnection {
 				validateIdentifier(field);
 				keys.append(field);
 				keys.append(",");
-				String val = escapeValue(value);
-				validateValue(val);
+				String av = prepareArray(value);
+				String ev = escapeValue(av);
+				
+				validateValue(ev);
 				values.append("'");
-				values.append(val);
+				values.append(ev);
 				values.append("',");
 			}
 		}
@@ -246,7 +259,8 @@ public class SQLConnection {
 
 	/** Destroy one storable record */
 	public void destroy(Storable s) throws TMSException {
-		String val = escapeValue(s.getKey());
+		String esc_val = escapeValue(s.getKey());
+		String val = prepareArray(esc_val);
 		validateValue(val);
 		update("DELETE FROM " + s.getTable() +
 		      " WHERE " + s.getKeyName() + " = '" + val + "';");

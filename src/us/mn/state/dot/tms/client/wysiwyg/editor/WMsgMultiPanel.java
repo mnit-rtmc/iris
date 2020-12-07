@@ -144,6 +144,8 @@ public class WMsgMultiPanel extends JPanel {
 					
 					// if this error has a token, highlight it
 					int a = txt.indexOf(ts);
+					if (a < 0)
+						continue;
 					int b = a + ts.length();
 					String s = txt.substring(a, b);
 					
@@ -216,11 +218,11 @@ public class WMsgMultiPanel extends JPanel {
 	 *  happen, but it would be nice...).
 	 */
 	private static String addNewlines(String txt) {
-		// replace [[ and ]] (escaped [ and ]) with { or } (invalid characters)
+		// replace [[ and ]] (escaped [ and ]) with ` or ~ (invalid characters)
 		// as a hack to NOT add newlines there, then add newlines, then add [[
 		// and ]] back
-		return txt.replace("]]", "}").replace("[[", "{").replace("]", "]\n")
-				.replace("[", "\n[").replace("}", "]]").replace("{", "[[")
+		return txt.replace("]]", "~").replace("[[", "`").replace("]", "]\n")
+				.replace("[", "\n[").replace("~", "]]").replace("`", "[[")
 				.replace("\n\n", "\n").trim();
 	}
 	

@@ -49,6 +49,8 @@ public class TableMapping {
 
 	/** Create an SQL lookup query */
 	private String createLookup(String key) {
+		if (key.contains("'"))
+			key = SQLConnection.escapeValue(key);
 		return "SELECT " + table1 +
 		      " FROM " + name +
 		      " WHERE " + table0 + " = '" + key + "';";

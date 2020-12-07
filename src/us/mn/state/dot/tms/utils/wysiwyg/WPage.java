@@ -414,7 +414,6 @@ public class WPage {
 				case AFTER:  s = "> "; break;
 				default:     s = "  ";
 			}
-//			s = tok.useAnchor() ? "@ " : "  ";
 			out.println(s+tok.toStringVerbose());
 			List<WEditorError> errors = tok.getErrorList();
 			for (WEditorError err : errors) {

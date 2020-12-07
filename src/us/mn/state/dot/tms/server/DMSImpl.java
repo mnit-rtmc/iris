@@ -3,7 +3,7 @@
  * Copyright (C) 2000-2020  Minnesota Department of Transportation
  * Copyright (C) 2010       AHMCT, University of California
  * Copyright (C) 2012       Iteris Inc.
- * Copyright (C) 2016-2017  SRF Consulting Group
+ * Copyright (C) 2016-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,6 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.geo.Position;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
-import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.event.BrightnessSample;
@@ -77,7 +76,7 @@ import us.mn.state.dot.tms.utils.MultiString;
  *
  * @author Douglas Lau
  * @author Michael Darter
- * @author John L. Stanley
+ * @author John L. Stanley - SRF Consulting
  */
 public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
@@ -88,6 +87,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Get the owner of a sign message */
 	static private String getOwner(SignMessage sm, String user) {
+		if (isMsgSource(sm, SignMsgSource.ipaws))
+			return "IPAWS";
 		StringBuilder sb = new StringBuilder();
 		if (isMsgSource(sm, SignMsgSource.operator) ||
 		    isMsgSource(sm, SignMsgSource.blank))
@@ -1198,6 +1199,62 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		if (isMsgSource(sm, SignMsgSource.tolling))
 		    logPriceMessages(EventType.PRICE_DEPLOYED);
 		p.sendMessage(this, sm, owner);
+	}
+
+	/** Create a new (IPAWS) sign-message. */
+	public SignMessage createIpawsMsg(String multi,
+			int priority, Integer duration) {
+		DmsMsgPriority mp = 
+			DmsMsgPriority.fromOrdinal(priority);
+		int src = SignMsgSource.ipaws.bit();
+		String owner = "IPAWS";
+		return findOrCreateMsg(null, multi, false,
+				false, mp, src,	owner, duration);
+	}
+
+	/** Send IPAWS message to sign.
+	 * Creates and sends a new Ipaws SignMessage
+	 * to the sign if priority is equal to or
+	 * greater than priority of the current
+	 * user-message.
+	 *  
+	 * @param msg Message MULTI string.
+	 * @param priority Message priority.
+	 * @param duration Message duration in minutes;
+	 *                 null for indefinite.
+	 * @return true if message queued to be sent.
+	 *         false if new priority is below the
+	 *         priority of the current message or
+	 *         we're unable to create the message.
+	 * @throws TMSException if there is some other
+	 *         problem.
+	 **/
+	public boolean sendIpawsMsg(String multi,
+			int priority, Integer duration)
+					throws TMSException {
+		SignMessage sm = msg_user;
+		if ((sm != null)
+		 && (sm.getMsgPriority() > priority))
+			return false;
+		sm = createIpawsMsg(multi, priority, duration);
+		if (sm == null)
+			return false;
+		doSetMsgUser(sm);
+		return true;
+	}
+
+	/** Remove IPAWS message from sign.
+	 * (Will only blank the sign if the current
+	 *  user-message is an IPAWS message.) */
+	public boolean blankIpawsMsg() throws ChangeVetoException {
+		SignMessage sm = msg_user;
+		if (sm != null) {
+			// If it's not an ipaws message, don't blank it.
+			if (!SignMsgSource.ipaws.checkBit(sm.getSource()))
+				return false;
+		}
+		blankMsgUser();
+		return true;
 	}
 
 	/** Check if the sign has a reference to a sign message */

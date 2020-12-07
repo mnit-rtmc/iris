@@ -76,7 +76,7 @@ public enum UserProperty {
 	static private final String TAB_LIST_DEF
 		= "incident, dms, camera, lcs, ramp.meter, gate.arm, "
 		+ "parking.area, r_node, beacon, tag.reader, action.plan, "
-		+ "comm, weather_sensor";
+		+ "comm, weather_sensor, alert";
 
 	/** Get the directory to store user properties */
 	static public File getDir() {
