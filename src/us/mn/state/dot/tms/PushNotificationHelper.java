@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms;
 
 import java.time.Duration;
@@ -21,13 +20,12 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Iterator;
-
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
- * Helper class for Push Notifications. Used on the client and server.
+ * Helper class for Push Notifications.  Used on the client and server.
  *
  * @author Gordon Parikh
  */
@@ -55,7 +53,7 @@ public class PushNotificationHelper extends BaseHelper {
 		return (PushNotification) namespace.lookupObject(
 				PushNotification.SONAR_TYPE, name);
 	}
-	
+
 	/** Address all outstanding PushNotification objects associated with the
 	 *  given reference object.
 	 */
@@ -77,7 +75,7 @@ public class PushNotificationHelper extends BaseHelper {
 		if (changed)
 			s.getPushNotificationManager().checkStopBlinkBG();
 	}
-	
+
 	/** Address all outstanding PushNotification objects. */
 	static public void addressAll(Session s) {
 		Iterator<PushNotification> it = iterator();
@@ -95,7 +93,7 @@ public class PushNotificationHelper extends BaseHelper {
 		System.out.println("Addressed " + n + " notifications");
 		s.getPushNotificationManager().checkStopBlinkBG();
 	}
-	
+
 	/** Find a PushNotification object associated with the given reference
 	 *  object. Only returns one object.
 	 */
@@ -112,13 +110,13 @@ public class PushNotificationHelper extends BaseHelper {
 		}
 		return null;
 	}
-	
+
 	/** Get an PushNotification object iterator */
 	static public Iterator<PushNotification> iterator() {
 		return new IteratorWrapper<PushNotification>(namespace.iterator(
 				PushNotification.SONAR_TYPE));
 	}
-	
+
 	/** Check if the user can see this notification based on their privileges
 	 *  and whether the notification has been addressed. If pastOk is True,
 	 *  recently-addressed notifications are also included.
@@ -127,7 +125,7 @@ public class PushNotificationHelper extends BaseHelper {
 			PushNotification pn, boolean pastOk) {
 		return checkPrivileges(s, pn) && checkAddressed(pn, pastOk);
 	}
-	
+
 	/** Check if the user can see this notification based on their privileges.
 	 *  If needs_write is true, the user must be able to write objects of this
 	 *  type, otherwise they must be able to read them. Note that this
@@ -141,7 +139,7 @@ public class PushNotificationHelper extends BaseHelper {
 		}
 		return false;
 	}
-	
+
 	/** Check if this notification has not yet been addressed. If pastOk is
 	 *  true, the the time since this notification has been addressed is
 	 *  checked against a system attribute, otherwise this only checks if the
@@ -163,9 +161,9 @@ public class PushNotificationHelper extends BaseHelper {
 		}
 		return false;
 	}
-	
+
 	/** Make a human-readable duration string from a Date object and the
-	 *  current date/time. Effectively calls Duration.between(d, now), 
+	 *  current date/time. Effectively calls Duration.between(d, now),
 	 *  but works with LocalDateTime objects (using the system's time zone to
 	 *  convert from the Date object). This truncates to seconds (no
 	 *  milliseconds are shown).
@@ -181,7 +179,7 @@ public class PushNotificationHelper extends BaseHelper {
 		}
 		return "";
 	}
-	
+
 	/** Make a human-readable duration string from a Duration object. This
 	 *  truncates to seconds (no milliseconds are shown).
 	 */

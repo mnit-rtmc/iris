@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms;
 
 import java.util.ArrayList;
@@ -34,20 +33,20 @@ public class CapUrgencyHelper extends BaseHelper {
 	private CapUrgencyHelper() {
 		assert false;
 	}
-	
+
 	/** Lookup the urgency substitution value with the specified name */
 	static public CapUrgency lookup(String name) {
 		return (CapUrgency) namespace.lookupObject(
 				CapUrgency.SONAR_TYPE, name);
 	}
-	
+
 	/** Lookup the urgency substitution value corresponding to the given event
 	 *  and urgency value.
 	 */
 	static public CapUrgency lookupFor(String event, String urg) {
 		if (event == null || urg == null)
 			return null;
-		
+
 		Iterator<CapUrgency> it = iterator();
 		while (it.hasNext()) {
 			CapUrgency cu = it.next();
@@ -56,7 +55,7 @@ public class CapUrgencyHelper extends BaseHelper {
 		}
 		return null;
 	}
-	
+
 	/** Get an CapResponseType object iterator */
 	static public Iterator<CapUrgency> iterator() {
 		return new IteratorWrapper<CapUrgency>(namespace.iterator(
@@ -71,7 +70,7 @@ public class CapUrgencyHelper extends BaseHelper {
 		HashSet<String> uvs = null;
 		if (uvals.length > 0)
 			uvs = new HashSet<String>(Arrays.asList(uvals));
-		
+
 		// go through all urgency value substitution MULTI strings
 		ArrayList<String> multiStrs = new ArrayList<String>();
 		Iterator<CapUrgency> it = iterator();
@@ -85,7 +84,7 @@ public class CapUrgencyHelper extends BaseHelper {
 		}
 		return multiStrs;
 	}
-	
+
 	/** Name creator */
 	static UniqueNameCreator UNC;
 	static {

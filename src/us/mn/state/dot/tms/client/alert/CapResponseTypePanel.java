@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.alert;
 
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -32,12 +31,11 @@ public class CapResponseTypePanel extends ProxyTablePanel<CapResponseType> {
 
 	/** TypeCache for looking up objects after creation */
 	private final TypeCache<CapResponseType> cache;
-	
+
 	public CapResponseTypePanel(ProxyTableModel<CapResponseType> m) {
 		super(m);
 		cache = m.getSession().getSonarState().getCapResponseTypeCache();
 	}
-	
 
 	/** Create a new response type substitution value. Uses the text in the
 	 *  field as the event type and creates a new unique name for the
@@ -48,14 +46,14 @@ public class CapResponseTypePanel extends ProxyTablePanel<CapResponseType> {
 		// get the event from the text box and reset the text
 		String ev = add_txt.getText().trim();
 		add_txt.setText("");
-		
+
 		// if the event is empty, use default
 		if (ev.isEmpty())
 			ev = CapResponseType.DEFAULT_EVENT;
-		
+
 		// generate a new unique name
 		String name = CapResponseTypeHelper.createUniqueName();
-		
+
 		// create the object with the unique name then set the label
 		cache.createObject(name);
 		CapResponseType crt = cache.lookupObjectWait(name);
@@ -63,5 +61,4 @@ public class CapResponseTypePanel extends ProxyTablePanel<CapResponseType> {
 			crt.setEvent(ev);
 		// TODO do something if null
 	}
-	
 }

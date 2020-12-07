@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms;
 
 import java.util.ArrayList;
@@ -34,20 +33,20 @@ public class CapResponseTypeHelper extends BaseHelper {
 	private CapResponseTypeHelper() {
 		assert false;
 	}
-	
+
 	/** Lookup the response type substitution value with the specified name */
 	static public CapResponseType lookup(String name) {
 		return (CapResponseType) namespace.lookupObject(
 				CapResponseType.SONAR_TYPE, name);
 	}
-	
+
 	/** Lookup the response type substitution value corresponding to the given
 	 *  event and response type.
 	 */
 	static public CapResponseType lookupFor(String event, String rType) {
 		if (event == null || rType == null)
 			return null;
-		
+
 		Iterator<CapResponseType> it = iterator();
 		while (it.hasNext()) {
 			CapResponseType crt = it.next();
@@ -58,7 +57,7 @@ public class CapResponseTypeHelper extends BaseHelper {
 		}
 		return null;
 	}
-	
+
 	/** Get an CapResponseType object iterator */
 	static public Iterator<CapResponseType> iterator() {
 		return new IteratorWrapper<CapResponseType>(namespace.iterator(
@@ -73,7 +72,7 @@ public class CapResponseTypeHelper extends BaseHelper {
 		HashSet<String> rts = null;
 		if (rtypes.length > 0)
 			rts = new HashSet<String>(Arrays.asList(rtypes));
-		
+
 		// go through all response type substitution MULTI strings
 		ArrayList<String> multiStrs = new ArrayList<String>();
 		Iterator<CapResponseType> it = iterator();
@@ -87,7 +86,7 @@ public class CapResponseTypeHelper extends BaseHelper {
 		}
 		return multiStrs;
 	}
-	
+
 	/** Name creator */
 	static UniqueNameCreator UNC;
 	static {

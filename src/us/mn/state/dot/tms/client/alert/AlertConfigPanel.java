@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.alert;
 
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -32,12 +31,12 @@ public class AlertConfigPanel extends ProxyTablePanel<IpawsAlertConfig> {
 
 	/** TypeCache for looking up objects after creation */
 	private final TypeCache<IpawsAlertConfig> cache;
-	
+
 	public AlertConfigPanel(ProxyTableModel<IpawsAlertConfig> m) {
 		super(m);
 		cache = m.getSession().getSonarState().getIpawsConfigCache();
 	}
-	
+
 	/** Create a new alert configuration. Uses the text in the field as the
 	 *  event type and creates a new unique name for the alert config.
 	 */
@@ -46,14 +45,13 @@ public class AlertConfigPanel extends ProxyTablePanel<IpawsAlertConfig> {
 		// get the event from the text box and reset the text
 		String ev = add_txt.getText().trim();
 		add_txt.setText("");
-		
+
 		// generate a new unique name
 		String name = IpawsAlertConfigHelper.createUniqueName();
-		
+
 		// create the object with the unique name then set the label
 		cache.createObject(name);
 		IpawsAlertConfig ct = cache.lookupObjectWait(name);
 		ct.setEvent(ev);
 	}
-	
 }

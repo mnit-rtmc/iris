@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
@@ -31,10 +30,10 @@ import us.mn.state.dot.tms.TMSException;
  * @author Gordon Parikh
  */
 public class CapUrgencyImpl extends BaseObjectImpl implements CapUrgency {
-	
+
 	/** Database table name */
 	static private final String TABLE = "iris.cap_urgency";
-	
+
 	public CapUrgencyImpl(String n) {
 		super(n);
 	}
@@ -73,7 +72,7 @@ public class CapUrgencyImpl extends BaseObjectImpl implements CapUrgency {
 			}
 		});
 	}
-	
+
 	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
@@ -85,12 +84,12 @@ public class CapUrgencyImpl extends BaseObjectImpl implements CapUrgency {
 	}
 
 	private CapUrgencyImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),			// name
-			row.getString(2),			// event
-			row.getString(3),			// urgency
-			row.getString(4));			// MULTI
+		this(row.getString(1),  // name
+		     row.getString(2),  // event
+		     row.getString(3),  // urgency
+		     row.getString(4)); // MULTI
 	}
-	
+
 	/** Applicable alert event type */
 	private String event;
 
@@ -107,7 +106,7 @@ public class CapUrgencyImpl extends BaseObjectImpl implements CapUrgency {
 			setEvent(ev);
 		}
 	}
-	
+
 	/** Get the applicable alert event type */
 	@Override
 	public String getEvent() {
@@ -116,7 +115,7 @@ public class CapUrgencyImpl extends BaseObjectImpl implements CapUrgency {
 
 	/** Applicable urgency value */
 	private String urgency;
-	
+
 	/** Set the applicable urgency value */
 	@Override
 	public void setUrgency(String u) {
@@ -130,7 +129,7 @@ public class CapUrgencyImpl extends BaseObjectImpl implements CapUrgency {
 			setUrgency(u);
 		}
 	}
-	
+
 	/** Set the applicable urgency value */
 	@Override
 	public String getUrgency() {
@@ -139,7 +138,7 @@ public class CapUrgencyImpl extends BaseObjectImpl implements CapUrgency {
 
 	/** MULTI string that will be substituted into the message */
 	private String multi;
-	
+
 	/** Set the MULTI string that will be substituted into the message */
 	@Override
 	public void setMulti(String m) {
@@ -153,7 +152,7 @@ public class CapUrgencyImpl extends BaseObjectImpl implements CapUrgency {
 			setMulti(m);
 		}
 	}
-	
+
 	/** Get the MULTI string that will be substituted into the message */
 	@Override
 	public String getMulti() {

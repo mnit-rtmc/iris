@@ -52,14 +52,14 @@ import us.mn.state.dot.tms.utils.Json;
 /**
  * Integrated Public Alert and Warning System (IPAWS) alert reader. Reads and
  * parses IPAWS CAP XMLs into IpawsAlert objects and saves them to the
- * database. 
+ * database.
  *
  * @author Michael Janson
  * @author Gordon Parikh
  */
 
 public class IpawsReader {
-	
+
 	/** Date formatters */
 	// 2020-05-12T21:59:23-00:00
 	private static final String dtFormat = "yyyy-MM-dd'T'HH:mm:ssX";
@@ -71,7 +71,7 @@ public class IpawsReader {
 		File folder = new File(dirPath);
 
 		File[] files = folder.listFiles();
-		
+
 		DocumentBuilderFactory dbFactory =
 				DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
@@ -92,7 +92,7 @@ public class IpawsReader {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/** Read alerts from an InputStream (live feed). */
 	public static void readIpaws(InputStream is) throws IOException {
 		// make a copy of the input stream - if we hit an exception we will
@@ -105,7 +105,7 @@ public class IpawsReader {
 			baos.write(buf, 0, len);
 		baos.flush();
 		InputStream is1 = new ByteArrayInputStream(baos.toByteArray());
-		
+
 		DocumentBuilderFactory dbFactory =
 				DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
@@ -122,7 +122,7 @@ public class IpawsReader {
 				| TMSException | SonarException e)
 		{
 			e.printStackTrace();
-			
+
 			// save the XML contents to a file
 			DateTimeFormatter dtf = DateTimeFormatter.ofPattern(
 					"yyyyMMdd-HHmmss");
@@ -131,26 +131,26 @@ public class IpawsReader {
 					"/var/log/iris/IpawsAlert_err_%s.xml", dts);
 			OutputStream xmlos = new FileOutputStream(fn);
 			baos.writeTo(xmlos);
-			
+
 			// send an email alert
 			IpawsProcJob.sendEmailAlert("Error encountered in IPAWS alert " +
-				"parsing system. Check the server logs for details. " + 
+				"parsing system. Check the server logs for details. " +
 				"The alert that produced the error was saved on the server " +
 				"in the file:  " + fn);
 		}
 	}
-	
+
 	private static void getIpawsAlert(Node node)
 			throws ParseException, SonarException, TMSException {
 		if (node.getNodeType() == Node.ELEMENT_NODE) {
 			Element element = (Element) node;
-			
+
 			// check if the alert exists
 			String n = getTagValue("identifier", element);
 			String name = n;
 			IpawsAlertImpl ia =
 					(IpawsAlertImpl) IpawsAlertHelper.lookup(name);
-			
+
 			// if it doesn't, create a new one
 			if (ia == null) {
 				IpawsProcJob.log("Creating new alert with name: " + name);
@@ -158,7 +158,7 @@ public class IpawsReader {
 				ia.notifyCreate();
 			} else
 				IpawsProcJob.log("Updating alert with name: " + name);
-			
+
 			// either way set all the values
 			ia.doSetIdentifier(getTagValue("identifier", element));
 			ia.doSetSender(getTagValue("sender", element));
@@ -189,28 +189,28 @@ public class IpawsReader {
 		}
 
 	}
-	
+
 	private static Date parseDate(String dte) {
 		try {
 			return dtFormatter.parse(dte);
 		} catch(ParseException | NullPointerException e) {
 			return null;
 		}
-	}  		
-			
-	private static String getTagValue(String tag, Element element) {  
+	}
+
+	private static String getTagValue(String tag, Element element) {
 		// Check if tag exists
 		if (element.getElementsByTagName(tag).getLength() > 0)
 			return element.getElementsByTagName(tag).item(0).getTextContent();
-		else 
+		else
 			return null;
 	}
-	   
+
 	private static List<String> getTagValueArray(String tag, Element element) {
 		List<String> tag_values = new ArrayList<String>();
-		
+
 		// Check if tag exists
-		if (element.getElementsByTagName(tag).getLength() > 0) {       
+		if (element.getElementsByTagName(tag).getLength() > 0) {
 			NodeList nodeList = element.getElementsByTagName(tag);
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				Node node = nodeList.item(i);
@@ -219,15 +219,14 @@ public class IpawsReader {
 		}
 		return tag_values;
 	}
-	
-	
+
 	private static String getValuePairJson(String tag, Element element) {
-		
+
 		// store key/value pairs in a HashMap of ArrayLists to allow for
 		// multiple instances of the same key
 		HashMap<String,ArrayList<String>> kvPairs =
 				new HashMap<String,ArrayList<String>>();
-		if (element.getElementsByTagName(tag).getLength() > 0) {       
+		if (element.getElementsByTagName(tag).getLength() > 0) {
 			NodeList nodeList = element.getElementsByTagName(tag);
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				Element childElement = (Element)  nodeList.item(i);
@@ -241,14 +240,14 @@ public class IpawsReader {
 				vals.add(value);
 			}
 		}
-		
+
 		// make a JSON string with all the key/value pairs
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
-		
+
 		for (String key: kvPairs.keySet()) {
 			ArrayList<String> vals = kvPairs.get(key);
-			
+
 			// FIXME the && !"UGC".equals(key) is a hack to make sure we
 			// always get UGC codes as an array (it works well enough though)
 			if (vals.size() > 1 || "UGC".equals(key)) {
@@ -257,20 +256,20 @@ public class IpawsReader {
 			} else
 				sb.append(Json.str(key, vals.get(0)));
 		}
-		
+
 		// remove trailing comma
 		if (sb.charAt(sb.length() - 1) == ',')
 			sb.setLength(sb.length() - 1);
 		sb.append("}");
 		return sb.toString();
 	}
-	
+
 	private static String getAreaJson(String tag, Element element) {
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
-		
+
 		// Check if tag exists
-		if (element.getElementsByTagName(tag).getLength() > 0) {       
+		if (element.getElementsByTagName(tag).getLength() > 0) {
 			NodeList areaNodeList = element.getElementsByTagName(tag);
 
 			// Loop through areas
@@ -287,7 +286,7 @@ public class IpawsReader {
 				}
 			}
 		}
-		
+
 		// remove trailing comma
 		if (sb.charAt(sb.length() - 1) == ',')
 			sb.setLength(sb.length() - 1);
@@ -295,10 +294,9 @@ public class IpawsReader {
 		return sb.toString();
 	}
 
-	
 	private static void appendElementJson(String tag,
 			Element element, StringBuilder sb, boolean forceKV) {
-		if (element.getElementsByTagName(tag).getLength() == 1 && !forceKV)      
+		if (element.getElementsByTagName(tag).getLength() == 1 && !forceKV)
 			sb.append(Json.str(tag, element.getElementsByTagName(tag)
 					.item(0).getTextContent()));
 		// TODO this won't handle multiple <area> or <polygon> blocks
@@ -307,7 +305,4 @@ public class IpawsReader {
 		else if (element.getElementsByTagName(tag).getLength() > 1 || forceKV)
 			sb.append(Json.sub(tag, getValuePairJson(tag, element)));
 	}
-	
-
 }
-	

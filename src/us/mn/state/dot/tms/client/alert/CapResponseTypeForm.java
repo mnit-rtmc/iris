@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.alert;
 
 import us.mn.state.dot.tms.CapResponseType;
@@ -32,7 +31,7 @@ public class CapResponseTypeForm extends ProxyTableForm<CapResponseType> {
 	static public boolean isPermitted(Session s) {
 		return s.isWritePermitted(CapResponseType.SONAR_TYPE);
 	}
-	
+
 	/** Create a new CAP response type form */
 	public CapResponseTypeForm(Session s) {
 		super(I18N.get("alert.cap.response_type_substitutions"),

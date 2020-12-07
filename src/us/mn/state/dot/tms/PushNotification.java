@@ -15,11 +15,10 @@
 package us.mn.state.dot.tms;
 
 import java.util.Date;
-
 import us.mn.state.dot.sonar.SonarObject;
 
-/** 
- * SonarObject for sending push notifications out to clients. PushNotification
+/**
+ * SonarObject for sending push notifications out to clients.  PushNotification
  * objects contain a reference to another SonarObject that requires a user's
  * attention, along with the notification time and a title/description.
  *
@@ -29,16 +28,16 @@ public interface PushNotification extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "push_notification";
-	
+
 	/** Set the type of the object that is being referenced */
 	void setRefObjectType(String rt);
-	
+
 	/** Get the type of the object that is being referenced */
 	String getRefObjectType();
 
 	/** Set the SONAR name of the object that is being referenced */
 	void setRefObjectName(String rn);
-	
+
 	/** Get the SONAR name of the object that is being referenced */
 	String getRefObjectName();
 
@@ -51,34 +50,34 @@ public interface PushNotification extends SonarObject {
 	 *  this notification.
 	 */
 	boolean getNeedsWrite();
-	
+
 	/** Set the time the notification was generated/sent */
 	void setSentTime(Date st);
-	
+
 	/** Get the time the notification was generated/sent */
 	Date getSentTime();
-	
+
 	/** Set the notification title */
 	void setTitle(String t);
-	
+
 	/** Get the notification title */
 	String getTitle();
-	
+
 	/** Set the notification description */
 	void setDescription(String d);
-	
+
 	/** Get the notification description */
 	String getDescription();
-	
+
 	/** Set the name of the user who addressed this notification */
 	void setAddressedBy(String u);
-	
+
 	/** Get the name of the user who addressed this notification */
 	String getAddressedBy();
-	
+
 	/** Set the time at which this notification was addressed */
 	void setAddressedTime(Date at);
-	
+
 	/** Get the time at which this notification was addressed */
 	Date getAddressedTime();
 }

@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
  * @author Douglas Lau
  */
 public class IpawsProperty extends ControllerProperty {
-	
+
 	/** Feed name */
 	private final String alertFeed;
 

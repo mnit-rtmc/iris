@@ -50,13 +50,13 @@ public class IpawsPoller extends ThreadedPoller<IpawsProperty> {
 		slog("creating OpReadIpaws: " + c);
 		addOp(new OpReadIpaws(c, name));
 	}
-	
+
 	/** Run a test of the IPAWS Alert processing system. Note that this does
 	 *  not test communication with the IPAWS system itself, which is assumed
 	 *  to be working and relatively easy to verify/debug, but instead tests
 	 *  the machinery in IRIS to read, parse, process, and deploy these alerts
 	 *  to DMS.
-	 *  
+	 *
 	 *  This functionality may also change as development on this system
 	 *  continues.
 	 */

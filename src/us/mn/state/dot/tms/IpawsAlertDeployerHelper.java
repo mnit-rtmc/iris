@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms;
 
 import java.time.Duration;
@@ -28,17 +27,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Helper class for IPAWS Alert Deployers. Used on the client and server.
+ * Helper class for IPAWS Alert Deployers.  Used on the client and server.
  *
  * @author Gordon Parikh
  */
 public class IpawsAlertDeployerHelper extends BaseHelper {
-	
+
 	/** Don't instantiate */
 	private IpawsAlertDeployerHelper() {
 		assert false;
 	}
-	
+
 	/** Lookup the alert deployer with the specified name */
 	static public IpawsAlertDeployer lookup(String name) {
 		return (IpawsAlertDeployer) namespace.lookupObject(
@@ -56,7 +55,7 @@ public class IpawsAlertDeployerHelper extends BaseHelper {
 			return deployers.get(0);
 		return null;
 	}
-	
+
 	/** Lookup an alert deployer object for the specified IpawsAlert name and
 	 *  config name. Returns the most recent active deployer for the alert and
 	 *  config.
@@ -70,25 +69,25 @@ public class IpawsAlertDeployerHelper extends BaseHelper {
 			return deployers.get(0);
 		return null;
 	}
-	
+
 	/** Comparator to sort IpawsAlertDeployers by genTime. */
 	static private class DeployerGenTimeComparator
 				implements Comparator<IpawsAlertDeployer> {
-		
+
 		/** Multiplier to sort ascending (+1) or descending (-1) */
 		private int ascMult = 1;
-		
+
 		public DeployerGenTimeComparator(boolean ascending) {
 			if (!ascending)
 				ascMult = -1;
 		}
-		
+
 		@Override
 		public int compare(IpawsAlertDeployer o1, IpawsAlertDeployer o2) {
 			// get genTimes
 			Date gt0 = o1.getGenTime();
 			Date gt1 = o2.getGenTime();
-			
+
 			// check for nulls (just in case) - the non-null one should
 			// be higher
 			if (gt0 == null && gt1 != null)
@@ -97,13 +96,12 @@ public class IpawsAlertDeployerHelper extends BaseHelper {
 				return -1;
 			else if (gt0 == null && gt1 == null)
 				return 0;
-			
+
 			// no nulls - compare dates and apply multiplier
 			return ascMult * gt0.compareTo(gt1);
 		}
-		
 	}
-	
+
 	/** Get a list of all active deployers associated with the alert ID and
 	 *  config provided. If configName is null, all matching active alerts are
 	 *  returned. Objects are sorted from newest to oldest.
@@ -112,7 +110,7 @@ public class IpawsAlertDeployerHelper extends BaseHelper {
 					getDeployerList(String alertId, String configName) {
 		return getDeployerList(alertId, configName, false);
 	}
-	
+
 	/** Get a list of all "deployed" deployers associated with the alert ID and
 	 *  config provided. If configName is null, all matching active alerts are
 	 *  returned. Objects are sorted from newest to oldest unless ascending
@@ -123,7 +121,7 @@ public class IpawsAlertDeployerHelper extends BaseHelper {
 					boolean ascending) {
 		ArrayList<IpawsAlertDeployer> deployers =
 				new ArrayList<IpawsAlertDeployer>();
-		
+
 		// find all deployers associated with this alert
 		Iterator<IpawsAlertDeployer> it = iterator();
 		while (it.hasNext()) {
@@ -133,12 +131,12 @@ public class IpawsAlertDeployerHelper extends BaseHelper {
 					&& Boolean.TRUE.equals(iad.getDeployed()))
 				deployers.add(iad);
 		}
-		
+
 		// sort the list using a custom comparator
 		deployers.sort(new DeployerGenTimeComparator(ascending));
 		return deployers;
 	}
-	
+
 	/** Get a list of deployers associated with the given deployer (i.e. with
 	 *  the same alert ID and alert config replacing the given deployer). If
 	 *  allowPending is true, this includes any pending alerts (i.e. with
@@ -151,7 +149,7 @@ public class IpawsAlertDeployerHelper extends BaseHelper {
 			boolean ascending) {
 		ArrayList<IpawsAlertDeployer> deployers =
 				new ArrayList<IpawsAlertDeployer>();
-		
+
 		// find all deployers associated with this alert
 		Iterator<IpawsAlertDeployer> it = iterator();
 		while (it.hasNext()) {
@@ -163,25 +161,25 @@ public class IpawsAlertDeployerHelper extends BaseHelper {
 						|| (iad.getDeployed() == null && allowPending)))
 				deployers.add(iad);
 		}
-		
+
 		// sort the list using a custom comparator
 		deployers.sort(new DeployerGenTimeComparator(ascending));
 		return deployers;
 	}
-	
+
 	/** Get an IpawsAlertDeployer object iterator */
 	static public Iterator<IpawsAlertDeployer> iterator() {
 		return new IteratorWrapper<IpawsAlertDeployer>(namespace.iterator(
 				IpawsAlertDeployer.SONAR_TYPE));
 	}
-	
+
 	/** Default time format string (hour and AM/PM) for CAP time tags. */
 	private final static DateTimeFormatter DEFAULT_TIME_FMT =
 			DateTimeFormatter.ofPattern("h a");
-	
+
 	/** Regex pattern for extracting time format string */
 	private final static Pattern TMSUB = Pattern.compile("\\{([^}]*)\\}");
-	
+
 	/** Process time format substitution fields, substituting in the time
 	 *  value provided.
 	 */
@@ -193,7 +191,7 @@ public class IpawsAlertDeployerHelper extends BaseHelper {
 			String tmfmt = m.group(1);
 			String subst;
 			DateTimeFormatter dtFmt;
-			
+
 			// get the full string for replacement and a DateTimeFormatter
 			if (tmfmt.trim().isEmpty()) {
 				dtFmt = DEFAULT_TIME_FMT;
@@ -202,21 +200,21 @@ public class IpawsAlertDeployerHelper extends BaseHelper {
 				dtFmt = DateTimeFormatter.ofPattern(tmfmt);
 				subst = "{" + tmfmt + "}";
 			}
-			
+
 			// format the time string and swap it in
 			String tmstr = dt.format(dtFmt);
 			str = str.replace(subst, tmstr);
 		}
 		return str;
 	}
-	
+
 	/** Get the time since the alert deployer was generated in seconds. */
 	public static long getTimeSinceGenerated(IpawsAlertDeployer iad) {
 		LocalDateTime at = iad.getGenTime().toInstant().atZone(
 				ZoneId.systemDefault()).toLocalDateTime();
 		return Duration.between(at, LocalDateTime.now()).getSeconds();
 	}
-	
+
 	/** Check if the current time is past the allowed post alert time given
 	 *  the deployer's alert end time.
 	 */
@@ -230,5 +228,4 @@ public class IpawsAlertDeployerHelper extends BaseHelper {
 		}
 		return false;
 	}
-	
 }

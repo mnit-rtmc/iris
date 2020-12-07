@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
@@ -26,7 +25,7 @@ import us.mn.state.dot.tms.TMSException;
  * IPAWS Alert Configuration object server-side implementation. Connects a
  * particular alert type ("event" field) to a number of sign group/quick
  * message pairs to control which signs are eligible for inclusion in an alert
- * and which message template to use. 
+ * and which message template to use.
  *
  * @author Gordon Parikh
  */
@@ -40,7 +39,7 @@ public class IpawsAlertConfigImpl extends BaseObjectImpl
 	public static IpawsAlertConfigImpl lookupConfigImpl(String name) {
 		return lookupIpawsAlertConfig(name);
 	}
-	
+
 	private IpawsAlertConfigImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),		// name
 			row.getString(2),		// event
@@ -50,7 +49,7 @@ public class IpawsAlertConfigImpl extends BaseObjectImpl
 			row.getInt(6)			// post alert time
 		);
 	}
-	
+
 	public IpawsAlertConfigImpl(String n) {
 		super(n);
 	}
@@ -64,7 +63,7 @@ public class IpawsAlertConfigImpl extends BaseObjectImpl
 		pre_alert_time = preh;
 		post_alert_time = posth;
 	}
-	
+
 	/** Get the SONAR type name */
 	@Override
 	public String getTypeName() {
@@ -96,7 +95,7 @@ public class IpawsAlertConfigImpl extends BaseObjectImpl
 			}
 		});
 	}
-	
+
 	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
@@ -177,12 +176,12 @@ public class IpawsAlertConfigImpl extends BaseObjectImpl
 	public String getQuickMessage() {
 		return quick_message;
 	}
-	
+
 	/** Amount of time (in hours) to display a pre-alert message before an
 	 *  alert becomes active.
 	 */
 	private int pre_alert_time = 6;
-	
+
 	/** Set amount of time (in hours) to display a pre-alert message before
 	 *  the alert becomes active.
 	 */
@@ -190,7 +189,7 @@ public class IpawsAlertConfigImpl extends BaseObjectImpl
 	public void setPreAlertTime(int hours) {
 		pre_alert_time = hours;
 	}
-	
+
 	/** Set amount of time (in hours) to display a pre-alert message before
 	 *  the alert becomes active.
 	 */
@@ -200,7 +199,7 @@ public class IpawsAlertConfigImpl extends BaseObjectImpl
 			setPreAlertTime(hours);
 		}
 	}
-	
+
 	/** Get amount of time (in hours) to display a pre-alert message before
 	 *  the alert becomes active.
 	 */
@@ -208,7 +207,7 @@ public class IpawsAlertConfigImpl extends BaseObjectImpl
 	public int getPreAlertTime() {
 		return pre_alert_time;
 	}
-	
+
 	/** Amount of time (in hours) to display a post-alert message after an
 	 *  alert expires or an AllClear response type is sent via IPAWS. Default
 	 *  is 0.

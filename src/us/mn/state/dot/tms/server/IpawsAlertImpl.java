@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
@@ -23,10 +22,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.json.JSONObject;
 import org.postgis.MultiPolygon;
-
 import us.mn.state.dot.tms.CapResponseTypeEnum;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.IpawsAlert;
@@ -42,34 +39,59 @@ import us.mn.state.dot.tms.TMSException;
  * @author Gordon Parikh
  */
 public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
-	
+
 	/** Database table name */
 	static private final String TABLE = "event.ipaws";
-	
+
 	/** Load all the IPAWS alerts */
 	static public void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IpawsAlertImpl.class);
-		store.query("SELECT name, identifier, sender, sent_date, status, " +
-			"message_type, scope, codes, note, alert_references, incidents, " +
-			"categories, event, response_types, urgency, severity, " +
-			"certainty, audience, effective_date, onset_date, " +
-			"expiration_date, sender_name, headline, alert_description, " + 
-			"instruction, parameters, area, ST_AsText(geo_poly), geo_loc, " +
-			"purgeable, last_processed FROM event." + SONAR_TYPE + ";",
+		store.query("SELECT name, identifier, sender, sent_date, " +
+			"status, message_type, scope, codes, note, " +
+			"alert_references, incidents, categories, event, " +
+			"response_types, urgency, severity, certainty, " +
+			"audience, effective_date, onset_date, " +
+			"expiration_date, sender_name, headline, " +
+			"alert_description, instruction, parameters, area, " +
+			"ST_AsText(geo_poly), geo_loc, purgeable, " +
+			"last_processed FROM event." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				try {
-					namespace.addObject(new IpawsAlertImpl(row));
-				} catch(Exception e) {
-					System.out.println("Error adding: " + row.getString(1));
+					namespace.addObject(new IpawsAlertImpl(
+						row));
+				} catch (Exception e) {
+					System.out.println("Error adding: " +
+						row.getString(1));
 					e.printStackTrace();
 				}
 			}
 		});
 	}
 
-	
+	/** Compare the two list values, protecting against null pointers and
+	 *  whitespace issues.
+	 */
+	static private boolean listEq(List<?> l1, List<?> l2) {
+		// TODO whitespace is making checking for equality here
+		//      difficult - this works around that
+		String s1 = l1 != null ? l1.toString().replace(", ", ",") : null;
+		String s2 = l2 != null ? l2.toString().replace(", ", ",") : null;
+		return objectEquals(s1, s2);
+	}
+
+	/** Compare the two JSON-formatted strings. */
+	static private boolean jsonStrEq(String js1, String js2) {
+		String j1 = (js1 != null && !js1.isEmpty())
+		          ? new JSONObject(js1).toString()
+		          : null;
+		String j2 = (js2 != null && !js2.isEmpty())
+		          ? new JSONObject(js2).toString()
+		          : null;
+		return objectEquals(j1, j2);
+	}
+
 	/** Get a mapping of the columns */
 	@Override
 	public Map<String, Object> getColumns() {
@@ -119,40 +141,40 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
-	
-	/** Create an incident advice */
+
+	/** Create an IPAWS alert */
 	private IpawsAlertImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),			// name
-			row.getString(2),			// identifier
-			row.getString(3),			// sender
-			row.getTimestamp(4),		// sent date
-			row.getString(5),			// status
-			row.getString(6),			// message type
-			row.getString(7),			// scope
-			getStringArray(row, 8),		// codes
-			row.getString(9),			// note
-			getStringArray(row, 10),	// alert references
-			getStringArray(row, 11),	// incidents
-			getStringArray(row, 12),	// categories
-			row.getString(13),			// event
-			getStringArray(row, 14),	// response types
-			row.getString(15),			// urgency
-			row.getString(16),			// severity
-			row.getString(17),			// certainty
-			row.getString(18), 			// audience
-			row.getTimestamp(19),		// effective date
-			row.getTimestamp(20),		// onset date
-			row.getTimestamp(21),		// expiration date
-			row.getString(22),			// sender name
-			row.getString(23),			// headline
-			row.getString(24), 			// alert description
-			row.getString(25), 			// instruction
-			row.getString(26),			// parameters
-			row.getString(27),			// area
-			row.getString(28),			// geo_poly
-			row.getString(29),			// geo_loc
-			getBoolean(row, 30), 		// purgeable flag
-			row.getTimestamp(31)		// last processed
+		this(row.getString(1),        // name
+		     row.getString(2),        // identifier
+		     row.getString(3),        // sender
+		     row.getTimestamp(4),     // sent date
+		     row.getString(5),        // status
+		     row.getString(6),        // message type
+		     row.getString(7),        // scope
+		     getStringArray(row, 8),  // codes
+		     row.getString(9),        // note
+		     getStringArray(row, 10), // alert references
+		     getStringArray(row, 11), // incidents
+		     getStringArray(row, 12), // categories
+		     row.getString(13),       // event
+		     getStringArray(row, 14), // response types
+		     row.getString(15),       // urgency
+		     row.getString(16),       // severity
+		     row.getString(17),       // certainty
+		     row.getString(18),       // audience
+		     row.getTimestamp(19),    // effective date
+		     row.getTimestamp(20),    // onset date
+		     row.getTimestamp(21),    // expiration date
+		     row.getString(22),       // sender name
+		     row.getString(23),       // headline
+		     row.getString(24),       // alert description
+		     row.getString(25),       // instruction
+		     row.getString(26),       // parameters
+		     row.getString(27),       // area
+		     row.getString(28),       // geo_poly
+		     row.getString(29),       // geo_loc
+		     getBoolean(row, 30),     // purgeable flag
+		     row.getTimestamp(31)     // last processed
 		);
 	}
 
@@ -160,7 +182,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	static private int getPurgeDays() {
 		return SystemAttrEnum.IPAWS_ALERT_PURGE_DAYS.getInt();
 	}
-	
+
 	/** Purge old records that have been marked "purgeable". The age of the
 	 *  records is determined based on the expiration_date field.
 	 */
@@ -179,17 +201,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return new IteratorWrapper<IpawsAlertImpl>(namespace.iterator(
 				IpawsAlertImpl.SONAR_TYPE));
 	}
-	
+
 	public IpawsAlertImpl(String n) throws TMSException {
 		super(n);
 	}
-	
-	public IpawsAlertImpl(String n, String i, String se, Date sd, String sta, 
-			String mt, String sc, String[] cd, String nt, String[]ref,
-			String[] inc, String[] ct, String ev, String[] rt, String u, 
-			String sv, String cy, String au, Date efd, Date od, Date exd, 
-			String sn, String hl, String ades, String in, String par, 
-			String ar, String gp, String gl, Boolean p, Date pt) 
+
+	public IpawsAlertImpl(String n, String i, String se, Date sd,
+		String sta, String mt, String sc, String[] cd, String nt,
+		String[] ref, String[] inc, String[] ct, String ev, String[] rt,
+		String u, String sv, String cy, String au, Date efd, Date od,
+		Date exd, String sn, String hl, String ades, String in,
+		String par, String ar, String gp, String gl, Boolean p, Date pt)
 	{
 		super(n);
 		identifier = i;
@@ -231,10 +253,10 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		last_processed = pt;
 	}
 
-	/** Notify SONAR clients of a change to an attribute. Clears the purgeable
-	 *  flag to trigger reprocessing of the alert.
-	 *  
-	 *  Attribute names should use lower camel case instead of underscores 
+	/** Notify SONAR clients of a change to an attribute.  Clears the
+	 *  purgeable flag to trigger reprocessing of the alert.
+	 *
+	 *  Attribute names should use lower camel case instead of underscores
 	 *  (e.g. "someAttribute" instead of "some_attribute").
 	 */
 	@Override
@@ -242,16 +264,16 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		notifyAttribute(aname, true);
 	}
 
-	/** Notify SONAR clients of a change to an attribute. If clearPurgeable is
-	 *  true, the the purgeable flag is cleared to trigger reprocessing of the
-	 *  alert.
+	/** Notify SONAR clients of a change to an attribute.  If clearPurgeable
+	 *  is true, the the purgeable flag is cleared to trigger reprocessing
+	 *  of the alert.
 	 */
 	protected void notifyAttribute(String aname, boolean clearPurgeable) {
 		// notify clients about the change
 		super.notifyAttribute(aname);
-		
-		// clear the purgeable flag so the alert gets reprocessed (since this
-		// only gets called when the alert changes)
+
+		// clear the purgeable flag so the alert gets reprocessed (since
+		// this only gets called when the alert changes)
 		if (clearPurgeable) {
 			try {
 				doSetPurgeable(null);
@@ -261,27 +283,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			}
 		}
 	}
-	
-	/** Compare the two list values, protecting against null pointers and
-	 *  whitespace issues.
-	 */
-	private boolean listEq(List<?> l1, List<?> l2) {
-		// TODO whitespace is making checking for equality here difficult - 
-		// this works around that
-		String s1 = l1 != null ? l1.toString().replace(", ", ",") : null;
-		String s2 = l2 != null ? l2.toString().replace(", ", ",") : null;
-		return objectEquals(s1, s2);
-	}
-	
-	/** Compare the two JSON-formatted strings. */
-	private boolean jsonStrEq(String js1, String js2) {
-		String j1 = (js1 != null && !js1.isEmpty())
-				? new JSONObject(js1).toString() : null;
-		String j2 = (js2 != null && !js2.isEmpty())
-				? new JSONObject(js2).toString() : null;
-		return objectEquals(j1, j2);
-	}
-	
+
 	/** Identifier for the alert */
 	private String identifier;
 
@@ -308,7 +310,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Alert sender */
 	private String sender;
-	
+
 	/** Set the sender */
 	@Override
 	public void setSender(String se) {
@@ -323,7 +325,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("sender");
 		}
 	}
-	
+
 	/** Get the sender */
 	@Override
 	public String getSender() {
@@ -332,7 +334,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Sent date of alert */
 	private Date sent_date;
-	
+
 	/** Set the sent date */
 	@Override
 	public void setSentDate(Date sd) {
@@ -356,7 +358,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Status of alert */
 	private String status;
-	
+
 	/** Set the status */
 	@Override
 	public void setStatus(String sta) {
@@ -371,7 +373,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("status");
 		}
 	}
-	
+
 	/** Get the status */
 	@Override
 	public String getStatus() {
@@ -380,7 +382,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Alert message type */
 	private String message_type;
-	
+
 	/** Set the message type */
 	@Override
 	public void setMsgType(String mt) {
@@ -395,7 +397,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("msgType");
 		}
 	}
-	
+
 	/** Get the message type */
 	@Override
 	public String getMsgType() {
@@ -404,7 +406,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Alert scope */
 	private String scope;
-	
+
 	/** Set the scope */
 	@Override
 	public void setScope(String sc) {
@@ -419,7 +421,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("scope");
 		}
 	}
-	
+
 	/** Get the scope */
 	@Override
 	public String getScope() {
@@ -428,7 +430,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Alert codes */
 	private List<String> codes;
-	
+
 	/** Set the codes */
 	@Override
 	public void setCodes(List<String> cd) {
@@ -443,7 +445,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("codes");
 		}
 	}
-	
+
 	/** Get the codes */
 	@Override
 	public List<String> getCodes() {
@@ -452,7 +454,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Alert note */
 	private String note;
-	
+
 	/** Set the note */
 	@Override
 	public void setNote(String nt) {
@@ -467,16 +469,16 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("note");
 		}
 	}
-	
+
 	/** Get the note */
 	@Override
 	public String getNote() {
 		return note;
 	}
-	
+
 	/** Alert references */
 	private List<String> alert_references;
-	
+
 	/** Set the alert references */
 	@Override
 	public void setAlertReferences(List<String> ref) {
@@ -491,7 +493,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("alertReferences");
 		}
 	}
-	
+
 	/** Get the alert references */
 	@Override
 	public List<String> getAlertReferences() {
@@ -499,7 +501,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	}
 	/** Alert incidents */
 	private List<String> incidents;
-	
+
 	/** Set the incidents */
 	@Override
 	public void setIncidents(List<String> inc) {
@@ -523,7 +525,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Categories of alert */
 	private List<String> categories;
-	
+
 	/** Set the categories */
 	@Override
 	public void setCategories(List<String> ct) {
@@ -544,7 +546,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	public List<String> getCategories() {
 		return categories;
 	}
-	
+
 	/** Alert event */
 	private String event;
 
@@ -562,16 +564,16 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("event");
 		}
 	}
-	
+
 	/** Get the event */
 	@Override
 	public String getEvent() {
 		return event;
 	}
-	
+
 	/** Alert response types */
 	private List<String> response_types;
-	
+
 	/** Set the response types */
 	@Override
 	public void setResponseTypes(List<String> rt) {
@@ -592,7 +594,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	public List<String> getResponseTypes() {
 		return response_types;
 	}
-	
+
 	/** Get the highest-priority response type */
 	public String getPriorityResponseType() {
 		// go through all response types to get the one with the highest
@@ -605,7 +607,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		}
 		return maxRT.value;
 	}
-	
+
 	/** Urgency of alert */
 	private String urgency;
 
@@ -623,16 +625,16 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("urgency");
 		}
 	}
-	
+
 	/** Get the urgency */
 	@Override
 	public String getUrgency() {
 		return urgency;
 	}
-	
+
 	/** Severity of the alert */
 	private String severity;
-	
+
 	/** Set the severity */
 	@Override
 	public void setSeverity(String sv) {
@@ -647,7 +649,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("severity");
 		}
 	}
-	
+
 	/** Get the severity */
 	@Override
 	public String getSeverity() {
@@ -656,7 +658,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Certainty of the alert */
 	private String certainty;
-	
+
 	/** Set the certainty */
 	@Override
 	public void setCertainty(String cy) {
@@ -671,16 +673,16 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("certainty");
 		}
 	}
-	
+
 	/** Get the certainty */
 	@Override
 	public String getCertainty() {
 		return certainty;
 	}
-	
+
 	/** Audience for the alert */
 	private String audience;
-	
+
 	/** Set the audience */
 	@Override
 	public void setAudience(String au) {
@@ -695,16 +697,16 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("audience");
 		}
 	}
-	
+
 	/** Get the audience */
 	@Override
 	public String getAudience() {
 		return audience;
-	}	
+	}
 
 	/** Effective date of the alert */
 	private Date effective_date;
-	
+
 	/** Set the effective date */
 	@Override
 	public void setEffectiveDate(Date efd) {
@@ -719,16 +721,16 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("effectiveDate");
 		}
 	}
-	
+
 	/** Get the effective date */
 	@Override
 	public Date getEffectiveDate() {
 		return effective_date;
 	}
-	
+
 	/** Onset date for alert */
 	private Date onset_date;
-	
+
 	/** Set the onset date */
 	@Override
 	public void setOnsetDate(Date od) {
@@ -752,7 +754,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Expiration date for alert */
 	private Date expiration_date;
-	
+
 	/** Set the expiration date*/
 	@Override
 	public void setExpirationDate(Date exd) {
@@ -773,7 +775,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	public Date getExpirationDate() {
 		return expiration_date;
 	}
-	
+
 	/** The alert sender's name */
 	private String sender_name;
 
@@ -791,7 +793,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("senderName");
 		}
 	}
-	
+
 	/** Get the sender's name */
 	@Override
 	public String getSenderName() {
@@ -800,7 +802,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Headline for the alert */
 	private String headline;
-	
+
 	/** Set the alert headline */
 	@Override
 	public void setHeadline(String hl) {
@@ -815,16 +817,16 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("headline");
 		}
 	}
-	
+
 	/** Get the alert headline */
 	@Override
 	public String getHeadline() {
 		return headline;
 	}
-	
+
 	/** Description of alert */
 	private String alert_description;
-	
+
 	/** Set the description */
 	@Override
 	public void setAlertDescription(String ad) {
@@ -839,16 +841,16 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("alertDescription");
 		}
 	}
-	
+
 	/** Get the description */
 	@Override
 	public String getAlertDescription() {
 		return alert_description;
 	}
-	
+
 	/** Alert instruction */
 	private String instruction;
-	
+
 	/** Set the instruction */
 	@Override
 	public void setInstruction(String in) {
@@ -863,16 +865,16 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("instruction");
 		}
 	}
-	
+
 	/** Get the description */
 	@Override
 	public String getInstruction() {
 		return instruction;
 	}
-	
+
 	/** Parameters */
 	private String parameters;
-	
+
 	/** Set the parameters */
 	@Override
 	public void setParameters(String par) {
@@ -887,16 +889,16 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("parameters");
 		}
 	}
-	
+
 	/** Get the parameters */
 	@Override
 	public String getParameters() {
 		return parameters;
 	}
-	
+
 	/** Area */
 	private String area;
-	
+
 	/** Set the area */
 	@Override
 	public void setArea(String ar) {
@@ -917,22 +919,22 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	public String getArea() {
 		return area;
 	}
-	
+
 	/** Get the geographic polygon representing the area. */
 	@Override
 	public MultiPolygon getGeoPoly() {
 		return geo_poly;
 	}
-	
+
 	/** Geographic MultiPolygon */
 	private MultiPolygon geo_poly;
-	
+
 	/** Set the area */
 	@Override
 	public void setGeoPoly(MultiPolygon gp) {
 		geo_poly = gp;
 	}
-	
+
 	/** Set the area */
 	public void doSetGeoPoly(MultiPolygon gp) throws TMSException {
 		if (!objectEquals(geo_poly, gp)) {
@@ -941,7 +943,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("geoPoly", false);
 		}
 	}
-	
+
 	/** Set the area from a string */
 	@Override
 	public void setGeoPoly(String gpstr) {
@@ -952,7 +954,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/** Set the area from a string */
 	public void doSetGeoPoly(String gpstr) throws TMSException {
 		if (!objectEquals(geo_poly.toString(), gpstr)) {
@@ -965,13 +967,13 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** GeoLoc for this alert (the alert area's centroid). */
 	private GeoLoc geo_loc;
-	
+
 	/** Set the GeoLoc, which is the alert area's centroid */
 	@Override
 	public void setGeoLoc(GeoLoc gl) {
 		geo_loc = gl;
 	}
-	
+
 	/** Set the GeoLoc, which is the alert area's centroid */
 	public void doSetGeoLoc(GeoLoc gl) throws TMSException {
 		if (!objectEquals(geo_loc, gl)) {
@@ -981,19 +983,20 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		}
 		geo_loc = gl;
 	}
-	
+
 	/** Get the GeoLoc, which is the alert area's centroid */
 	@Override
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
 	}
-	
+
 	/** Purgeable flag. Null if the alert has not yet been processed, true if
 	 *  alert is determined to be irrelevant to this system's users.
 	 */
 	private Boolean purgeable;
-	
+
 	/** Set if this alert is purgeable (irrelevant to us) */
+	@Override
 	public void setPurgeable(Boolean p) {
 		purgeable = p;
 	}
@@ -1010,15 +1013,16 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			notifyAttribute("purgeable", false);
 		}
 	}
-	
+
 	/** Return if this alert is purgeable (irrelevant to us) */
+	@Override
 	public Boolean getPurgeable() {
 		return purgeable;
 	}
 
 	/** Last processing time of the alert */
 	private Date last_processed;
-	
+
 	/** Set the last processing time of the alert */
 	@Override
 	public void setLastProcessed(Date pt) {

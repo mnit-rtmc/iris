@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms;
 
 /**
@@ -31,18 +30,18 @@ public enum CapUrgencyEnum {
 	EXPECTED("Expected",
 			"Reponsive action SHOULD be taken soon (within next hour)"),
 	IMMEDIATE("Immediate", "Responsive action SHOULD be taken immediately");
-	
+
 	/** Value used in CAP messages */
 	public final String value;
-	
+
 	/** Description of value from CAP standard */
 	public final String description;
-	
+
 	private CapUrgencyEnum(String v, String d) {
 		value = v;
 		description = d;
 	}
-	
+
 	/** Return the CapUrgencyEnum from the value provided. */
 	static public CapUrgencyEnum fromValue(String v) {
 		for (CapUrgencyEnum e: values()) {
@@ -51,7 +50,7 @@ public enum CapUrgencyEnum {
 		}
 		return UNKNOWN;
 	}
-	
+
 	/** Return an array of the string values (i.e. the ones seen in a CAP
 	 *  message).
 	 */
@@ -62,7 +61,7 @@ public enum CapUrgencyEnum {
 			svals[i] = evals[i].value;
 		return svals;
 	}
-	
+
 	/** Return the number of possible values. */
 	static public int nValues() {
 		return values().length;

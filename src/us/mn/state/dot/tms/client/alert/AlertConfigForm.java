@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.alert;
 
 import us.mn.state.dot.tms.IpawsAlertConfig;
@@ -32,7 +31,7 @@ public class AlertConfigForm extends ProxyTableForm<IpawsAlertConfig> {
 	static public boolean isPermitted(Session s) {
 		return s.isWritePermitted(IpawsAlertConfig.SONAR_TYPE);
 	}
-	
+
 	/** Create a new alert config form */
 	public AlertConfigForm(Session s) {
 		super(I18N.get("alert.config"), new AlertConfigPanel(

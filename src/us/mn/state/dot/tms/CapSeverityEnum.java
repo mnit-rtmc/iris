@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms;
 
 /**
@@ -33,15 +32,15 @@ public enum CapSeverityEnum {
 
 	/** Value used in CAP messages */
 	public final String value;
-	
+
 	/** Description of value from CAP standard */
 	public final String description;
-	
+
 	private CapSeverityEnum(String v, String d) {
 		value = v;
 		description = d;
 	}
-	
+
 	/** Return the CapSeverityEnum from the value provided. */
 	static public CapSeverityEnum fromValue(String v) {
 		for (CapSeverityEnum e: values()) {
@@ -50,7 +49,7 @@ public enum CapSeverityEnum {
 		}
 		return UNKNOWN;
 	}
-	
+
 	/** Return an array of the string values (i.e. the ones seen in a CAP
 	 *  message).
 	 */

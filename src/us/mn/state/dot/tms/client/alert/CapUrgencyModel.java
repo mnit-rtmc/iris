@@ -12,15 +12,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.alert;
 
 import java.util.ArrayList;
-
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
-
 import us.mn.state.dot.tms.CapUrgency;
 import us.mn.state.dot.tms.CapUrgencyEnum;
 import us.mn.state.dot.tms.client.Session;
@@ -97,5 +94,4 @@ public class CapUrgencyModel extends ProxyTableModel<CapUrgency> {
 	public CapUrgencyModel(Session s) {
 		super(s, descriptor(s), 12);
 	}
-	
 }

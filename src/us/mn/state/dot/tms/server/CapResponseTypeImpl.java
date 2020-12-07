@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
@@ -35,7 +34,7 @@ public class CapResponseTypeImpl extends BaseObjectImpl
 
 	/** Database table name */
 	static private final String TABLE = "iris.cap_response_type";
-	
+
 	public CapResponseTypeImpl(String n) {
 		super(n);
 	}
@@ -56,7 +55,7 @@ public class CapResponseTypeImpl extends BaseObjectImpl
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
-	
+
 	/** Load all the CAP response type substitution values */
 	static public void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CapResponseTypeImpl.class);
@@ -74,7 +73,7 @@ public class CapResponseTypeImpl extends BaseObjectImpl
 			}
 		});
 	}
-	
+
 	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
@@ -86,15 +85,15 @@ public class CapResponseTypeImpl extends BaseObjectImpl
 	}
 
 	private CapResponseTypeImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),			// name
-			row.getString(2),			// event
-			row.getString(3),			// response type
-			row.getString(4));			// MULTI
+		this(row.getString(1),  // name
+		     row.getString(2),  // event
+		     row.getString(3),  // response type
+		     row.getString(4)); // MULTI
 	}
-	
+
 	/** Applicable alert event type */
 	private String event;
-	
+
 	/** Set the applicable alert event type */
 	@Override
 	public void setEvent(String ev) {
@@ -108,7 +107,7 @@ public class CapResponseTypeImpl extends BaseObjectImpl
 			setEvent(ev);
 		}
 	}
-	
+
 	/** Get the applicable alert event type */
 	@Override
 	public String getEvent() {
@@ -117,7 +116,7 @@ public class CapResponseTypeImpl extends BaseObjectImpl
 
 	/** Applicable response type */
 	private String response_type;
-	
+
 	/** Set the applicable response type */
 	@Override
 	public void setResponseType(String rt) {
@@ -131,7 +130,7 @@ public class CapResponseTypeImpl extends BaseObjectImpl
 			setResponseType(rt);
 		}
 	}
-	
+
 	/** Get the applicable response type */
 	@Override
 	public String getResponseType() {
@@ -140,7 +139,7 @@ public class CapResponseTypeImpl extends BaseObjectImpl
 
 	/** MULTI string that will be substituted into the message */
 	private String multi;
-	
+
 	/** Set the MULTI string that will be substituted into the message */
 	@Override
 	public void setMulti(String m) {
@@ -154,7 +153,7 @@ public class CapResponseTypeImpl extends BaseObjectImpl
 			setMulti(m);
 		}
 	}
-	
+
 	/** Get the MULTI string that will be substituted into the message */
 	@Override
 	public String getMulti() {

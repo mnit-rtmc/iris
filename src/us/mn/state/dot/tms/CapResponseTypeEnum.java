@@ -12,13 +12,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms;
 
 /**
  * Common Alerting Protocol (CAP) response type field value enum. Used for
  * IPAWS alert processing for generating messages for posting to DMS. Values
- * are taken from the OASIS CAP Standard v1.2. 
+ * are taken from the OASIS CAP Standard v1.2.
  *
  * @author Gordon Parikh
  */
@@ -34,24 +33,24 @@ public enum CapResponseTypeEnum {
 	PREPARE("Prepare", "Make preparations per the <instruction>"),
 	EVACUATE("Evacuate", "Relocate as instructed in the <instruction>"),
 	SHELTER("Shelter", "Take shelter in place or per <instruction>");
-	
+
 	// NOTE the following is included in the CAP standard but is advised to
 	// not be used for public warning applications and should not be enabled
 	// here
 	// ASSESS("Assess", "Evaluate the information in this message. (This " +
 	// 	"value SHOULD NOT be used in public warning applications.)");
-	
+
 	/** Value used in CAP messages */
 	public final String value;
 
 	/** Description of value from CAP standard */
 	public final String description;
-	
+
 	private CapResponseTypeEnum(String v, String d) {
 		value = v;
 		description = d;
 	}
-	
+
 	/** Return the CapResponseTypeEnum from the value provided. */
 	static public CapResponseTypeEnum fromValue(String v) {
 		for (CapResponseTypeEnum e: values()) {
@@ -60,7 +59,7 @@ public enum CapResponseTypeEnum {
 		}
 		return NONE;
 	}
-	
+
 	/** Return an array of the string values (i.e. the ones seen in a CAP
 	 *  message).
 	 */

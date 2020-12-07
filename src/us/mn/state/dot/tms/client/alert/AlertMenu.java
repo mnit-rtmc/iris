@@ -12,11 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.alert;
 
 import java.awt.event.ActionEvent;
-
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IMenu;
@@ -29,10 +27,10 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
  */
 @SuppressWarnings("serial")
 public class AlertMenu extends IMenu {
-	
+
 	/** User Session */
 	private final Session session;
-	
+
 	/** Desktop */
 	private final SmartDesktop desktop;
 
@@ -40,7 +38,7 @@ public class AlertMenu extends IMenu {
 		super("alert");
 		session = s;
 		desktop = s.getDesktop();
-		
+
 		addItem(createAlertConfigItem());
 		addItem(createCapResponseTypeItem());
 		addItem(createCapUrgencyItem());
@@ -56,7 +54,7 @@ public class AlertMenu extends IMenu {
 			}
 		} : null;
 	}
-	
+
 	/** Create a CAP response type substitution value menu item action */
 	private IAction createCapResponseTypeItem() {
 		return AlertConfigForm.isPermitted(session) ?
@@ -66,7 +64,7 @@ public class AlertMenu extends IMenu {
 			}
 		} : null;
 	}
-	
+
 	/** Create a CAP urgency substitution value menu item action */
 	private IAction createCapUrgencyItem() {
 		return AlertConfigForm.isPermitted(session) ?

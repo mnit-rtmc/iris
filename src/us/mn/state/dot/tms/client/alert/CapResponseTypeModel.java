@@ -12,15 +12,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.alert;
 
 import java.util.ArrayList;
-
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
-
 import us.mn.state.dot.tms.CapResponseType;
 import us.mn.state.dot.tms.CapResponseTypeEnum;
 import us.mn.state.dot.tms.client.Session;
@@ -41,7 +38,7 @@ public class CapResponseTypeModel extends ProxyTableModel<CapResponseType> {
 		return new ProxyDescriptor<CapResponseType>(
 				s.getSonarState().getCapResponseTypeCache(), true);
 	}
-	
+
 	/** Create the columns in the model */
 	@Override
 	protected ArrayList<ProxyColumn<CapResponseType>> createColumns() {
@@ -97,5 +94,4 @@ public class CapResponseTypeModel extends ProxyTableModel<CapResponseType> {
 	public CapResponseTypeModel(Session s) {
 		super(s, descriptor(s), 12);
 	}
-	
 }

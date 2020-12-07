@@ -12,37 +12,35 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
- * Helper class for IPAWS Alert Deployers. Used on the client and server.
+ * Helper class for IPAWS Alert Deployers.  Used on the client and server.
  *
  * @author Gordon Parikh
  */
 public class IpawsAlertConfigHelper extends BaseHelper {
-	
+
 	/** Don't instantiate */
 	private IpawsAlertConfigHelper() {
 		assert false;
 	}
-	
+
 	/** Lookup the alert config with the specified name */
 	static public IpawsAlertConfig lookup(String name) {
 		return (IpawsAlertConfig) namespace.lookupObject(
 				IpawsAlertConfig.SONAR_TYPE, name);
 	}
-	
+
 	/** Get an IpawsAlertConfig object iterator */
 	static public Iterator<IpawsAlertConfig> iterator() {
 		return new IteratorWrapper<IpawsAlertConfig>(namespace.iterator(
 				IpawsAlertConfig.SONAR_TYPE));
 	}
-	
+
 	/** Name creator */
 	static UniqueNameCreator UNC;
 	static {

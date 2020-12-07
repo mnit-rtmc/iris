@@ -55,7 +55,7 @@ public class OpTestIpaws extends OpReadIpaws {
 			// TODO make this path a system attribute
 			File testAlert = new File("/var/log/iris/Ipaws_Test_Alert.xml");
 			InputStream is = new FileInputStream(testAlert);
-			
+
 			// call IpawsReader.readIpaws directly
 			IpawsReader.readIpaws(is);
 			return null;

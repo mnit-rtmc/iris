@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.alert;
 
 import us.mn.state.dot.tms.CapUrgency;
@@ -32,7 +31,7 @@ public class CapUrgencyForm extends ProxyTableForm<CapUrgency> {
 	static public boolean isPermitted(Session s) {
 		return s.isWritePermitted(CapUrgency.SONAR_TYPE);
 	}
-	
+
 	/** Create a new CAP urgency form */
 	public CapUrgencyForm(Session s) {
 		super(I18N.get("alert.cap.urgency_substitutions"),

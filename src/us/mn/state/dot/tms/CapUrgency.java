@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms;
 
 import us.mn.state.dot.sonar.SonarObject;
@@ -30,23 +29,22 @@ public interface CapUrgency extends SonarObject {
 
 	/** Default Event (for use if no other matching event found) */
 	String DEFAULT_EVENT = "<default>";
-	
+
 	/** Set the applicable alert event type */
 	void setEvent(String ev);
-	
+
 	/** Get the applicable alert event type */
 	String getEvent();
 
 	/** Set the applicable urgency value */
 	void setUrgency(String u);
-	
+
 	/** Get the applicable urgency value */
 	String getUrgency();
-	
+
 	/** Set the MULTI string that will be substituted into the message */
 	void setMulti(String m);
-	
+
 	/** Get the MULTI string that will be substituted into the message */
 	String getMulti();
-	
 }

@@ -38,7 +38,7 @@ public class OpReadIpaws extends OpController<IpawsProperty> {
 	protected OpReadIpaws(ControllerImpl c, String fid) {
 		this(PriorityLevel.DATA_30_SEC, c, fid);
 	}
-	
+
 	/** Create a new operation to read alert feed with custom priority level.
 	 */
 	protected OpReadIpaws(PriorityLevel p, ControllerImpl c, String fid) {

@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.alert;
 
 import java.util.ArrayList;
@@ -38,16 +37,16 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 @SuppressWarnings("serial")
 public class AlertConfigModel extends ProxyTableModel<IpawsAlertConfig> {
-	
+
 	/** Create a proxy descriptor */
 	static public ProxyDescriptor<IpawsAlertConfig> descriptor(Session s) {
 		return new ProxyDescriptor<IpawsAlertConfig>(
 				s.getSonarState().getIpawsConfigCache(), false, true, true);
 	}
-	
+
 	/** List of sign groups */
 	ArrayList<String> sgl;
-	
+
 	/** Create the columns in the model */
 	@Override
 	protected ArrayList<ProxyColumn<IpawsAlertConfig>> createColumns() {
@@ -146,7 +145,7 @@ public class AlertConfigModel extends ProxyTableModel<IpawsAlertConfig> {
 		});
 		return cols;
 	}
-	
+
 	/** Create a new alert config table model */
 	public AlertConfigModel(Session s) {
 		super(s, descriptor(s), 12);

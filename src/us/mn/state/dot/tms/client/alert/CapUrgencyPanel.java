@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.alert;
 
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -32,12 +31,12 @@ public class CapUrgencyPanel extends ProxyTablePanel<CapUrgency> {
 
 	/** TypeCache for looking up objects after creation */
 	private final TypeCache<CapUrgency> cache;
-	
+
 	public CapUrgencyPanel(ProxyTableModel<CapUrgency> m) {
 		super(m);
 		cache = m.getSession().getSonarState().getCapUrgencyCache();
 	}
-	
+
 	/** Create a new urgency substitution value. Uses the text in the
 	 *  field as the event type and creates a new unique name for the
 	 *  substitution value.
@@ -51,10 +50,10 @@ public class CapUrgencyPanel extends ProxyTablePanel<CapUrgency> {
 		// if the event is empty, use default
 		if (ev.isEmpty())
 			ev = CapUrgency.DEFAULT_EVENT;
-		
+
 		// generate a new unique name
 		String name = CapUrgencyHelper.createUniqueName();
-		
+
 		// create the object with the unique name then set the label
 		cache.createObject(name);
 		CapUrgency cu = cache.lookupObjectWait(name);
@@ -62,5 +61,4 @@ public class CapUrgencyPanel extends ProxyTablePanel<CapUrgency> {
 			cu.setEvent(ev);
 		// TODO do something if null
 	}
-	
 }

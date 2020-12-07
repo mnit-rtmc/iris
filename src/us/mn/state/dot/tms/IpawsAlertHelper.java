@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms;
 
 import java.awt.Shape;
@@ -20,11 +19,9 @@ import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
-
 import org.postgis.MultiPolygon;
 import org.postgis.Point;
 import org.postgis.Polygon;
-
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 
@@ -34,12 +31,12 @@ import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
  * @author Gordon Parikh
  */
 public class IpawsAlertHelper extends BaseHelper {
-	
+
 	/** Don't instantiate */
 	private IpawsAlertHelper() {
 		assert false;
 	}
-	
+
 	/** Lookup the alert with the specified name */
 	static public IpawsAlert lookup(String name) {
 		return (IpawsAlert) namespace.lookupObject(IpawsAlert.SONAR_TYPE, name);
@@ -50,7 +47,7 @@ public class IpawsAlertHelper extends BaseHelper {
 		return new IteratorWrapper<IpawsAlert>(namespace.iterator(
 				IpawsAlert.SONAR_TYPE));
 	}
-	
+
 	/** Get the start date/time for an alert. Checks onset time first, then
 	 *  effective time, and finally sent time (which is required).
 	 */
@@ -65,7 +62,7 @@ public class IpawsAlertHelper extends BaseHelper {
 		}
 		return alertStart;
 	}
-	
+
 	/** Build awt.Shape objects from a MultiPolygon, returning a list of Shape
 	 *  objects with each representing a polygon.
 	 */
@@ -74,7 +71,7 @@ public class IpawsAlertHelper extends BaseHelper {
 		if (ia == null || ia.getGeoPoly() == null)
 			return paths;
 		MultiPolygon mp = ia.getGeoPoly();
-		
+
 		// iterate over the polygons and points
 		for (Polygon poly: mp.getPolygons()) {
 			// draw a path of each polygon

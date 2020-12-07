@@ -57,93 +57,93 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Gordon Parikh
  */
 public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
-	
+
 	/** IpawsAlertDeployer cache */
 	private final TypeCache<IpawsAlertDeployer> adcache;
 
 	/** IpawsAlert cache */
 	private final TypeCache<IpawsAlert> acache;
-	
+
 	/** Keep a handle to the tab */
 	private AlertTab tab;
-	
+
 	/** Keep a handle to the theme */
 	private AlertTheme theme;
-	
+
 	/** Keep track of the currently selected alert */
 	private IpawsAlertDeployer selectedAlertDepl;
-	
+
 	/** Set the currently selected alert. */
 	public void setSelectedAlert(IpawsAlertDeployer iad) {
 		selectedAlertDepl = iad;
 	}
-	
+
 	/** Get the currently selected alert */
 	public IpawsAlertDeployer getSelectedAlert() {
 		return selectedAlertDepl;
 	}
-	
+
 	/** Keep track of alert editing state for communicating between various
 	 *  alert components
 	 */
 	private boolean isEditing = false;
-	
+
 	/** Set the editing state */
 	public void setEditing(boolean e) {
 		isEditing = e;
 	}
-	
+
 	/** Get the editing state */
 	public boolean getEditing() {
 		return isEditing;
 	}
-	
+
 	/** Whether or not the user wants to see all DMS in the selected alert
 	 *  deployer's sign group.
 	 */
 	private boolean showAllDms = false;
-	
+
 	/** Set the show all DMS flag. */
 	public void setShowAllDms(boolean s) {
 		showAllDms = s;
 	}
-	
+
 	/** Get the show all DMS flag. */
 	public boolean getShowAllDms() {
 		return showAllDms;
 	}
-	
+
 	/** Proxy listener for SONAR updates */
-	private final SwingProxyAdapter<IpawsAlertDeployer> listener = 
+	private final SwingProxyAdapter<IpawsAlertDeployer> listener =
 			new SwingProxyAdapter<IpawsAlertDeployer>() {
 		@Override
 		protected void proxyAddedSwing(IpawsAlertDeployer iad) {
 			if (tab != null)
 				tab.updateStyleCounts();
 		}
-		
+
 		@Override
 		protected void proxyChangedSwing(IpawsAlertDeployer iad, String attr) {
 			if (tab != null)
 				tab.updateStyleCounts();
 		}
 	};
-	
+
 	/** Create a proxy descriptor. */
 	static private ProxyDescriptor<IpawsAlertDeployer> descriptor(Session s) {
 		return new ProxyDescriptor<IpawsAlertDeployer>(
 			s.getSonarState().getIpawsDeployerCache(), false);
 	}
-	
+
 	public AlertManager(Session s, GeoLocManager lm) {
 		super(s, lm, descriptor(s), 10);
-		
+
 		// add the listener to the cache
 		adcache = s.getSonarState().getIpawsDeployerCache();
 		adcache.addProxyListener(listener);
 		acache = s.getSonarState().getIpawsAlertCache();
 	}
-	
+
 	/** Create an alert tab */
 	public AlertTab createTab() {
 		tab = new AlertTab(session, this);
@@ -155,7 +155,7 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 		theme = new AlertTheme(this, session);
 		return theme;
 	}
-	
+
 	/** Override createLayer to let us provide a modified ProxyLayerState. */
 	@Override
 	protected ProxyLayer<IpawsAlertDeployer> createLayer() {
@@ -172,7 +172,7 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 						DMSManager dm = session.getDMSManager();
 						selectDmsInTable(dm.findProxy(
 								dm.getLayerState().search(p)));
-						
+
 						// check if they clicked out of the alert area
 						System.out.println(o);
 						if (o == null)
@@ -185,7 +185,7 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 			}
 		};
 	}
-	
+
 	/** Put a custom entry in the popup menu ("Center map" will look weird,
 	 *  we want zoom-to-boundary instead).
 	 */
@@ -203,7 +203,7 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 		});
 		return p;
 	}
-	
+
 	@Override
 	public String getDescription(IpawsAlertDeployer proxy) {
 		IpawsAlert ia = acache.lookupObject(proxy.getAlertId());
@@ -216,7 +216,7 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 			return name + " - " + ia.getEvent();
 		return name;
 	}
-	
+
 	@Override
 	public boolean checkStyle(ItemStyle is, IpawsAlertDeployer proxy) {
 		Integer t = checkAlertTimes(proxy);
@@ -248,7 +248,7 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 			return false;
 		}
 	}
-	
+
 	/** Check if a style is visible. All alert styles are visible (only
 	 *  selected alerts are drawn).
 	 */
@@ -256,17 +256,17 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 	protected boolean isStyleVisible(IpawsAlertDeployer proxy) {
 		return true;
 	}
-	
+
 	/** Update the counts in the style summary */
 	public void updateStyleCounts() {
 		if (tab != null)
 			tab.updateStyleCounts();
 	}
-	
+
 	/** Check when this alert will start relative to the current time. Returns
 	 *  -1 if this alert has not yet started, 0 if the alert is currently
 	 *  active, and 1 if the alert is in the past. If the time fields are not
-	 *  filled, null is returned. 
+	 *  filled, null is returned.
 	 */
 	private Integer checkAlertTimes(IpawsAlertDeployer iad) {
 		if (iad.getAlertStart() != null && iad.getAlertEnd() != null) {
@@ -299,10 +299,10 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 			return iad.getGeoLoc();
 		return null;
 	}
-	
+
 	/** Selected DMS (for communicating between theme and dispatcher) */
 	private DMS selectedDms;
-	
+
 	/** Set the selected DMS. */
 	public void setSelectedDms(DMS dms) {
 		selectedDms = dms;
@@ -312,7 +312,7 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 	public DMS getSelectedDms() {
 		return selectedDms;
 	}
-	
+
 	/** Center the map on the DMS provided at the given zoom threshold. */
 	public void centerMap(DMS dms, int zt) {
 		ZoomLevel zoom = ZoomLevel.fromOrdinal(zt > 15 ? zt : 15);
@@ -322,7 +322,7 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 		if (lat != null && lon != null)
 			s_pane.setMapExtent(zoom, lat.floatValue(), lon.floatValue());
 	}
-	
+
 	/** Zoom to the selected alert area, showing the entire area on the map.*/
 	public void zoomToAlertArea() {
 		if (selectedAlertDepl != null) {
@@ -330,7 +330,7 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 			IpawsAlert ia = IpawsAlertHelper.lookup(
 					selectedAlertDepl.getAlertId());
 			ArrayList<Shape> shapes = IpawsAlertHelper.getShapes(ia);
-			
+
 			// find the min and max x and y points
 			ArrayList<Double> xPoints = new ArrayList<Double>();
 			ArrayList<Double> yPoints = new ArrayList<Double>();
@@ -349,13 +349,13 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 			double maxY = yPoints.get(yPoints.size()-1);
 			double w = maxX - minX;
 			double h = maxY - minY;
-			
+
 			// set the map extents to the outer bounds of all polygons
 			s_pane.getMap().getModel().setExtent(
 					minX, minY, w, h);
 		}
 	}
-	
+
 	/** Select a DMS in the AlertDmsDispatcher table */
 	public void selectDmsInTable(DMS d) {
 		tab.getDmsDispatcher().selectDmsInTable(d);

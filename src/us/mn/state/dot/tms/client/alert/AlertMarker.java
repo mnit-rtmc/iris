@@ -27,17 +27,16 @@ public class AlertMarker extends Marker {
 	/** Size in pixels to render marker */
 	static private final int MARKER_SIZE_PIX = UI.scaled(36);
 
-	/** Create a new incident marker */
+	/** Create a new alert marker */
 	public AlertMarker() {
 		super(6);
-		
 		float size = MARKER_SIZE_PIX;
 		float half = size / 2;
 		float quarter = size / 4;
 		path.moveTo(0, 0);
 		path.lineTo(half, size);
 		path.lineTo(size, 0);
-		path.lineTo(size-quarter, 0);
+		path.lineTo(size - quarter, 0);
 		path.lineTo(half, half);
 		path.lineTo(quarter, 0);
 		path.closePath();
