@@ -51,7 +51,7 @@ import us.mn.state.dot.tms.IpawsAlertConfigHelper;
 import us.mn.state.dot.tms.IpawsAlertDeployer;
 import us.mn.state.dot.tms.IpawsAlertDeployerHelper;
 import us.mn.state.dot.tms.IpawsAlertHelper;
-import us.mn.state.dot.tms.PushNotificationHelper;
+import us.mn.state.dot.tms.NotificationHelper;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -568,7 +568,7 @@ public class IpawsProcJob extends Job {
 
 		// generate and send the notification - the static method handles
 		// the content of the notification based on the mode and timeout
-		PushNotificationImpl pn = getNotification(ia.getEvent(),
+		NotificationImpl pn = getNotification(ia.getEvent(),
 				autoMode, timeout, iad.getName());
 
 		// process the alert deployment/notification updates
@@ -616,7 +616,7 @@ public class IpawsProcJob extends Job {
 	 *  deployment mode (auto/manual), timeout, and the name of the deployer
 	 *  object.
 	 */
-	private static PushNotificationImpl getNotification(String event,
+	private static NotificationImpl getNotification(String event,
 			boolean autoMode, int timeout, String dName)
 				throws TMSException, SonarException {
 		// substitute the event type into the notification title
@@ -645,7 +645,7 @@ public class IpawsProcJob extends Job {
 		// create the notification object with the values we got
 		// note that users must be able to write alert deployer objects to see
 		// these (otherwise they won't be able to to approve them)
-		PushNotificationImpl pn = new PushNotificationImpl(
+		NotificationImpl pn = new NotificationImpl(
 				IpawsAlertDeployer.SONAR_TYPE, dName,
 				true, title, description);
 		log("Sending notification " + pn.getName());
@@ -672,7 +672,7 @@ public class IpawsProcJob extends Job {
 	 */
 	private static String getTimeoutString(String event, int secs) {
 		// use the time value to create a duration string
-		String dur = PushNotificationHelper.getDurationString(
+		String dur = NotificationHelper.getDurationString(
 				Duration.ofSeconds(secs));
 
 		// add the string

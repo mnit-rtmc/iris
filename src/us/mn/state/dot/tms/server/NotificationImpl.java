@@ -20,20 +20,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import us.mn.state.dot.tms.PushNotification;
-import us.mn.state.dot.tms.PushNotificationHelper;
+import us.mn.state.dot.tms.Notification;
+import us.mn.state.dot.tms.NotificationHelper;
 import us.mn.state.dot.tms.TMSException;
 
 /**
  * SonarObject for sending push notifications out to clients - server-side
- * implementation. PushNotification objects contain a reference to another
+ * implementation.  Notification objects contain a reference to another
  * SonarObject that requires a user's attention, along with the notification
  * time and a title/description.
  *
  * @author Gordon Parikh
  */
-public class PushNotificationImpl extends BaseObjectImpl
-	implements PushNotification {
+public class NotificationImpl extends BaseObjectImpl implements Notification {
 
 	/** Get the SONAR type name */
 	@Override
@@ -49,16 +48,16 @@ public class PushNotificationImpl extends BaseObjectImpl
 
 	/** Load all the push notifications */
 	static public void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, PushNotificationImpl.class);
+		namespace.registerType(SONAR_TYPE, NotificationImpl.class);
 		store.query("SELECT name, ref_object_type, ref_object_name, " +
-			"needs_write, sent_time, title, description, addressed_by, " +
-			"addressed_time FROM event." + SONAR_TYPE +
-			";", new ResultFactory()
+			"needs_write, sent_time, title, description, " +
+			"addressed_by, addressed_time FROM event." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			@Override
 			public void create(ResultSet row) throws Exception {
 				try {
-					namespace.addObject(new PushNotificationImpl(row));
+					namespace.addObject(new NotificationImpl(row));
 				} catch (Exception e) {
 					System.out.println("Error adding: " + row.getString(1));
 					e.printStackTrace();
@@ -82,7 +81,7 @@ public class PushNotificationImpl extends BaseObjectImpl
 		return map;
 	}
 
-	private PushNotificationImpl(ResultSet row) throws SQLException {
+	private NotificationImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),    // name
 		     row.getString(2),    // ref_object_type
 		     row.getString(3),    // ref_object_name
@@ -95,20 +94,20 @@ public class PushNotificationImpl extends BaseObjectImpl
 		);
 	}
 
-	public PushNotificationImpl(String n) {
+	public NotificationImpl(String n) {
 		super(n);
 	}
 
-	/** Create a new PushNotification. Automatically generates a new unique
+	/** Create a new Notification.  Automatically generates a new unique
 	 *  SONAR name and sets the sent time.
 	 */
-	public PushNotificationImpl(String rt, String rn, boolean nw,
+	public NotificationImpl(String rt, String rn, boolean nw,
 			String t, String d) {
-		this(PushNotificationHelper.createUniqueName(),
+		this(NotificationHelper.createUniqueName(),
 				rt, rn, nw, new Date(), t, d, null, null);
 	}
 
-	public PushNotificationImpl(String n, String rt, String rn, boolean nw,
+	public NotificationImpl(String n, String rt, String rn, boolean nw,
 			Date st, String t, String d, String u, Date at) {
 		super(n);
 		ref_object_type = rt;

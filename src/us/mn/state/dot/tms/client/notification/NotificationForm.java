@@ -12,19 +12,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.notification;
 
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-
-import us.mn.state.dot.tms.PushNotification;
-import us.mn.state.dot.tms.PushNotificationHelper;
+import us.mn.state.dot.tms.Notification;
+import us.mn.state.dot.tms.NotificationHelper;
 import us.mn.state.dot.tms.client.ScreenPane;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.map.MapBean;
@@ -39,11 +36,11 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Gordon Parikh
  */
 @SuppressWarnings("serial")
-public class PushNotificationForm extends ProxyTableForm<PushNotification> {
-	
+public class NotificationForm extends ProxyTableForm<Notification> {
+
 	/** Button to address all notifications */
 	private JButton addressAllBtn;
-	
+
 	/** Action to address all notifications */
 	private final IAction addressAll =
 			new IAction("notification.address_all") {
@@ -57,24 +54,23 @@ public class PushNotificationForm extends ProxyTableForm<PushNotification> {
 					JOptionPane.YES_NO_OPTION);
 			System.out.println("Got: " + ret);
 			if (ret == 0)
-				PushNotificationHelper.addressAll(Session.getCurrent());
+				NotificationHelper.addressAll(Session.getCurrent());
 		}
-		
 	};
-	
+
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.canRead(PushNotification.SONAR_TYPE);
+		return s.canRead(Notification.SONAR_TYPE);
 	}
-	
+
 	/** Create a new Push Notification form */
-	public PushNotificationForm(Session s, MapBean map, ScreenPane p) {
-		super(I18N.get("notification"), new PushNotificationProxyPanel(
-				new PushNotificationModel(s), map, p));
-		((PushNotificationProxyPanel) panel).setForm(this);
+	public NotificationForm(Session s, MapBean map, ScreenPane p) {
+		super(I18N.get("notification"), new NotificationProxyPanel(
+			new NotificationModel(s), map, p));
+		((NotificationProxyPanel) panel).setForm(this);
 		addressAllBtn = new JButton(addressAll);
 	}
-	
+
 	/** Initialize the form */
 	@Override
 	public void initialize() {

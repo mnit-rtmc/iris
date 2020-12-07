@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2020  Minnesota Department of Transportation
  * Copyright (C) 2015       Iteris Inc.
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
@@ -55,9 +55,9 @@ import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.MeterAction;
+import us.mn.state.dot.tms.Notification;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.PlanPhase;
-import us.mn.state.dot.tms.PushNotification;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.RoadAffix;
@@ -315,12 +315,12 @@ public class SonarState extends Client {
 		return cap_urgency_cache;
 	}
 
-	/** Cache of PushNotification objects */
-	private final TypeCache<PushNotification> push_notification_cache;
+	/** Cache of Notification objects */
+	private final TypeCache<Notification> notification_cache;
 	
-	/** Get the PushNotification cache */
-	public TypeCache<PushNotification> getPushNotificationCache() {
-		return push_notification_cache;
+	/** Get the Notification cache */
+	public TypeCache<Notification> getNotificationCache() {
+		return notification_cache;
 	}
 	
 	/** Cache of LCS objects */
@@ -591,9 +591,10 @@ public class SonarState extends Client {
 				IpawsAlertConfig.class, this);
 		cap_response_type_cache = new TypeCache<CapResponseType>(
 				CapResponseType.class, this);
-		cap_urgency_cache = new TypeCache<CapUrgency>(CapUrgency.class, this);
-		push_notification_cache = new TypeCache<PushNotification>(
-				PushNotification.class, this);
+		cap_urgency_cache = new TypeCache<CapUrgency>(CapUrgency.class,
+			this);
+		notification_cache = new TypeCache<Notification>(
+			Notification.class, this);
 		lcs_cache = new LcsCache(this);
 		gate_arm_array_model = new ProxyListModel<GateArmArray>(
 			gate_arm_arrays);
@@ -728,7 +729,7 @@ public class SonarState extends Client {
 		populateReadable(ipaws_config_cache);
 		populateReadable(cap_response_type_cache);
 		populateReadable(cap_urgency_cache);
-		populateReadable(push_notification_cache);
+		populateReadable(notification_cache);
 	}
 
 	/** Look up the specified connection */

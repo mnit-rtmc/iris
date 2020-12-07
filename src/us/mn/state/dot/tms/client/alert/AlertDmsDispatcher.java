@@ -55,7 +55,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.IpawsAlert;
 import us.mn.state.dot.tms.IpawsAlertDeployer;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.PushNotificationHelper;
+import us.mn.state.dot.tms.NotificationHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.DmsImagePanel;
@@ -476,7 +476,8 @@ public class AlertDmsDispatcher extends IPanel {
 
 			// check if there are any notifications that haven't been addressed
 			// and address them
-			PushNotificationHelper.addressAllRef(selectedAlertDepl, session);
+			NotificationHelper.addressAllRef(selectedAlertDepl,
+				session);
 		}
 		manager.setEditing(false);
 	}
@@ -486,9 +487,10 @@ public class AlertDmsDispatcher extends IPanel {
 		// set deployed to false to trigger the cancel
 		if (selectedAlertDepl != null) {
 			selectedAlertDepl.setDeployed(false);
-			// check if there are any notifications that haven't been addressed
-			// and address them
-			PushNotificationHelper.addressAllRef(selectedAlertDepl, session);
+			// check if there are any notifications that haven't
+			// been addressed and address them
+			NotificationHelper.addressAllRef(selectedAlertDepl,
+				session);
 		}
 		manager.updateStyleCounts();
 	}

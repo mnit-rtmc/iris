@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.notification;
 
 import java.awt.Component;
@@ -23,8 +22,8 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-import us.mn.state.dot.tms.PushNotification;
-import us.mn.state.dot.tms.PushNotificationHelper;
+import us.mn.state.dot.tms.Notification;
+import us.mn.state.dot.tms.NotificationHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -37,23 +36,23 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Gordon Parikh
  */
 @SuppressWarnings("serial")
-public class PushNotificationModel extends ProxyTableModel<PushNotification> {
-	
+public class NotificationModel extends ProxyTableModel<Notification> {
+
 	/** Create a proxy descriptor */
-	static public ProxyDescriptor<PushNotification> descriptor(Session s) {
-		return new ProxyDescriptor<PushNotification>(
-				s.getSonarState().getPushNotificationCache(),
+	static public ProxyDescriptor<Notification> descriptor(Session s) {
+		return new ProxyDescriptor<Notification>(
+				s.getSonarState().getNotificationCache(),
 				false, false, false);
 	}
-	
+
 	/** Create the columns in the model */
 	@Override
-	protected ArrayList<ProxyColumn<PushNotification>> createColumns() {
-		ArrayList<ProxyColumn<PushNotification>> cols =
-				new ArrayList<ProxyColumn<PushNotification>>();
-		cols.add(new ProxyColumn<PushNotification>("notification.title", 150) {
+	protected ArrayList<ProxyColumn<Notification>> createColumns() {
+		ArrayList<ProxyColumn<Notification>> cols =
+				new ArrayList<ProxyColumn<Notification>>();
+		cols.add(new ProxyColumn<Notification>("notification.title", 150) {
 			@Override
-			public Object getValueAt(PushNotification pn) {
+			public Object getValueAt(Notification pn) {
 				return pn.getTitle();
 			}
 			@Override
@@ -61,10 +60,10 @@ public class PushNotificationModel extends ProxyTableModel<PushNotification> {
 				return new ValueCellRenderer();
 			}
 		});
-		cols.add(new ProxyColumn<PushNotification>(
+		cols.add(new ProxyColumn<Notification>(
 				"notification.description", 400) {
 			@Override
-			public Object getValueAt(PushNotification pn) {
+			public Object getValueAt(Notification pn) {
 				return pn.getDescription();
 			}
 			@Override
@@ -72,31 +71,31 @@ public class PushNotificationModel extends ProxyTableModel<PushNotification> {
 				return new ValueCellRenderer();
 			}
 		});
-		cols.add(new ProxyColumn<PushNotification>("notification.sent", 150) {
+		cols.add(new ProxyColumn<Notification>("notification.sent", 150) {
 			@Override
-			public Object getValueAt(PushNotification pn) {
+			public Object getValueAt(Notification pn) {
 				// show the time since the notification was sent
 				Date sentTime = pn.getSentTime();
 				if (sentTime != null)
-					return PushNotificationHelper.getDurationString(sentTime);
+					return NotificationHelper.getDurationString(sentTime);
 				return "";
 			}
 		});
-		cols.add(new ProxyColumn<PushNotification>(
+		cols.add(new ProxyColumn<Notification>(
 				"notification.addressed_time", 150) {
 			@Override
-			public Object getValueAt(PushNotification pn) {
+			public Object getValueAt(Notification pn) {
 				// show the time since the notification was sent
 				Date addrTime = pn.getAddressedTime();
 				if (addrTime != null)
-					return PushNotificationHelper.getDurationString(addrTime);
+					return NotificationHelper.getDurationString(addrTime);
 				return "";
 			}
 		});
-		cols.add(new ProxyColumn<PushNotification>(
+		cols.add(new ProxyColumn<Notification>(
 				"notification.addressed_by", 100) {
 			@Override
-			public Object getValueAt(PushNotification pn) {
+			public Object getValueAt(Notification pn) {
 				return pn.getAddressedBy();
 			}
 		});
@@ -104,7 +103,7 @@ public class PushNotificationModel extends ProxyTableModel<PushNotification> {
 		// in the title/description if needed)
 		return cols;
 	}
-	
+
 	protected class ValueCellRenderer extends DefaultTableCellRenderer {
 		public Component getTableCellRendererComponent(JTable table,
 			Object value, boolean isSelected, boolean hasFocus,
@@ -119,20 +118,20 @@ public class PushNotificationModel extends ProxyTableModel<PushNotification> {
 			return label;
 		}
 	}
-	
+
 	/** Check if this notification should be included in the list.
 	 *  Notifications are only included if the user can see them (based on
 	 *  whether they can read or write the object type referenced in the
 	 *  notification, depending on the state of needs_write) and if they
 	 *  either haven't been addressed yet or were addressed recently
-	 *  (determined by the PUSH_NOTIFICATION_TIMEOUT_SECS system attribute).
+	 *  (determined by the NOTIFICATION_TIMEOUT_SECS system attribute).
 	 */
 	@Override
-	protected boolean check(PushNotification pn) {
-		return PushNotificationHelper.check(session, pn, true);
+	protected boolean check(Notification pn) {
+		return NotificationHelper.check(session, pn, true);
 	}
-	
-	public PushNotificationModel(Session s) {
+
+	public NotificationModel(Session s) {
 		super(s, descriptor(s), 12, 36);
 	}
 }

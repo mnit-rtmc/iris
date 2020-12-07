@@ -214,9 +214,9 @@ meter_max_red_secs	13.0
 meter_min_red_secs	0.1
 meter_yellow_secs	0.7
 msg_feed_verify	true
+notification_timeout_secs	900
 operation_retry_threshold	3
 price_message_event_purge_days	0
-push_notification_timeout_secs	900
 route_max_legs	8
 route_max_miles	16
 rwis_high_wind_speed_kph	40
@@ -443,11 +443,11 @@ map_extent
 meter_action
 modem
 monitor_style
+notification
 parking_area
 plan_phase
 play_list
 privilege
-push_notification
 quick_message
 ramp_meter
 r_node
@@ -496,8 +496,8 @@ PRV_000B	base	road_affix		f
 PRV_0009	base	geo_loc		f
 PRV_0010	base	cabinet		f
 PRV_0011	base	controller		f
-PRV_001C	base	push_notification		f
-PRV_001D	base	push_notification		t
+PRV_001C	base	notification		f
+PRV_001D	base	notification		t
 PRV_0012	base_admin	user		t
 PRV_0013	base_admin	role		t
 PRV_001A	base_admin	domain		t
@@ -4019,7 +4019,7 @@ GRANT SELECT ON parking_area_view TO PUBLIC;
 --
 -- NOTE that we don't have a foreign key linking addressed_by to the i_user
 -- table so we can put 'auto' in there
-CREATE TABLE event.push_notification (
+CREATE TABLE event.notification (
 	name varchar(30) PRIMARY KEY,
 	ref_object_type varchar(32) REFERENCES iris.sonar_type(name),
 	ref_object_name text,

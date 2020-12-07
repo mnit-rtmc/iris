@@ -29,41 +29,41 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
  *
  * @author Gordon Parikh
  */
-public class PushNotificationHelper extends BaseHelper {
+public class NotificationHelper extends BaseHelper {
 
 	/** Don't instantiate */
-	private PushNotificationHelper() {
+	private NotificationHelper() {
 		assert false;
 	}
 
 	/** Name creator */
 	static UniqueNameCreator UNC;
 	static {
-		UNC = new UniqueNameCreator("push_notif_%d", (n)->lookup(n));
+		UNC = new UniqueNameCreator("notif_%d", (n)->lookup(n));
 		UNC.setMaxLength(30);
 	}
 
-	/** Create a unique PushNotification record name */
+	/** Create a unique Notification record name */
 	static public String createUniqueName() {
 		return UNC.createUniqueName();
 	}
 
-	/** Lookup the PushNotification with the specified name */
-	static public PushNotification lookup(String name) {
-		return (PushNotification) namespace.lookupObject(
-				PushNotification.SONAR_TYPE, name);
+	/** Lookup the Notification with the specified name */
+	static public Notification lookup(String name) {
+		return (Notification) namespace.lookupObject(
+			Notification.SONAR_TYPE, name);
 	}
 
-	/** Address all outstanding PushNotification objects associated with the
+	/** Address all outstanding Notification objects associated with the
 	 *  given reference object.
 	 */
 	static public void addressAllRef(SonarObject refObject, Session s) {
 		if (refObject == null)
 			return;
-		Iterator<PushNotification> it = iterator();
+		Iterator<Notification> it = iterator();
 		boolean changed = false;
 		while (it.hasNext()) {
-			PushNotification pn = it.next();
+			Notification pn = it.next();
 			if (refObject.getTypeName().equals(pn.getRefObjectType())
 					&& refObject.getName().equals(pn.getRefObjectName())
 					&& pn.getAddressedTime() == null) {
@@ -73,17 +73,17 @@ public class PushNotificationHelper extends BaseHelper {
 			}
 		}
 		if (changed)
-			s.getPushNotificationManager().checkStopBlinkBG();
+			s.getNotificationManager().checkStopBlinkBG();
 	}
 
-	/** Address all outstanding PushNotification objects. */
+	/** Address all outstanding Notification objects. */
 	static public void addressAll(Session s) {
-		Iterator<PushNotification> it = iterator();
+		Iterator<Notification> it = iterator();
 		int n = 0;
 		while (it.hasNext()) {
-			PushNotification pn = it.next();
-			// make sure the user can see this notification and it hasn't been
-			// addressed
+			Notification pn = it.next();
+			// make sure the user can see this notification and it
+			// hasn't been addressed
 			if (checkPrivileges(s, pn) && checkAddressed(pn, false)) {
 				pn.setAddressedBy(s.getUser().getName());
 				pn.setAddressedTime(new Date());
@@ -91,18 +91,18 @@ public class PushNotificationHelper extends BaseHelper {
 			}
 		}
 		System.out.println("Addressed " + n + " notifications");
-		s.getPushNotificationManager().checkStopBlinkBG();
+		s.getNotificationManager().checkStopBlinkBG();
 	}
 
-	/** Find a PushNotification object associated with the given reference
+	/** Find a Notification object associated with the given reference
 	 *  object. Only returns one object.
 	 */
-	static public PushNotification lookup(SonarObject refObject) {
+	static public Notification lookup(SonarObject refObject) {
 		if (refObject == null)
 			return null;
-		Iterator<PushNotification> it = iterator();
+		Iterator<Notification> it = iterator();
 		while (it.hasNext()) {
-			PushNotification pn = it.next();
+			Notification pn = it.next();
 			if (refObject.getTypeName().equals(pn.getRefObjectType())
 					&& refObject.getName().equals(pn.getRefObjectName())) {
 				return pn;
@@ -111,18 +111,17 @@ public class PushNotificationHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Get an PushNotification object iterator */
-	static public Iterator<PushNotification> iterator() {
-		return new IteratorWrapper<PushNotification>(namespace.iterator(
-				PushNotification.SONAR_TYPE));
+	/** Get a Notification object iterator */
+	static public Iterator<Notification> iterator() {
+		return new IteratorWrapper<Notification>(namespace.iterator(
+			Notification.SONAR_TYPE));
 	}
 
 	/** Check if the user can see this notification based on their privileges
 	 *  and whether the notification has been addressed. If pastOk is True,
 	 *  recently-addressed notifications are also included.
 	 */
-	static public boolean check(Session s,
-			PushNotification pn, boolean pastOk) {
+	static public boolean check(Session s, Notification pn, boolean pastOk) {
 		return checkPrivileges(s, pn) && checkAddressed(pn, pastOk);
 	}
 
@@ -131,7 +130,7 @@ public class PushNotificationHelper extends BaseHelper {
 	 *  type, otherwise they must be able to read them. Note that this
 	 *  overrides edit mode.
 	  */
-	static public boolean checkPrivileges(Session s, PushNotification pn) {
+	static public boolean checkPrivileges(Session s, Notification pn) {
 		String tname = (pn != null) ? pn.getRefObjectType() : null;
 		if (tname != null) {
 			return pn.getNeedsWrite() ? s.canWrite(tname, true)
@@ -145,7 +144,7 @@ public class PushNotificationHelper extends BaseHelper {
 	 *  checked against a system attribute, otherwise this only checks if the
 	 *  addressed_time attribute has been set (if so returning false).
 	 */
-	static public boolean checkAddressed(PushNotification pn, boolean pastOk) {
+	static public boolean checkAddressed(Notification pn, boolean pastOk) {
 		if (pn != null) {
 			Date addrTime = pn.getAddressedTime();
 			if (!pastOk)
@@ -154,7 +153,7 @@ public class PushNotificationHelper extends BaseHelper {
 				LocalDateTime at = addrTime.toInstant().atZone(
 						ZoneId.systemDefault()).toLocalDateTime();
 				return Duration.between(at, LocalDateTime.now()).getSeconds()
-					<= SystemAttrEnum.PUSH_NOTIFICATION_TIMEOUT_SECS.getInt();
+					<= SystemAttrEnum.NOTIFICATION_TIMEOUT_SECS.getInt();
 			} else
 				// if hasn't been addressed, show it
 				return true;

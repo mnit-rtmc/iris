@@ -8,26 +8,26 @@ SET SESSION AUTHORIZATION 'tms';
 
 -- Add System Attributes
 INSERT INTO iris.system_attribute (name, value) VALUES
-		('ipaws_priority_weight_urgency', 1.0),
-		('ipaws_priority_weight_severity', 1.0),
-		('ipaws_priority_weight_certainty', 1.0),
-		('ipaws_deploy_auto_mode', false),
-		('ipaws_deploy_auto_timeout_secs', 0),
-		('ipaws_sign_thresh_auto_meters', 1000),
-		('ipaws_sign_thresh_opt_meters', 4000),
-		('push_notification_timeout_secs', 900);
+	('ipaws_priority_weight_urgency', 1.0),
+	('ipaws_priority_weight_severity', 1.0),
+	('ipaws_priority_weight_certainty', 1.0),
+	('ipaws_deploy_auto_mode', false),
+	('ipaws_deploy_auto_timeout_secs', 0),
+	('ipaws_sign_thresh_auto_meters', 1000),
+	('ipaws_sign_thresh_opt_meters', 4000),
+	('notification_timeout_secs', 900);
 
 -- Extend sonar_type field to allow longer names
 ALTER TABLE iris.sonar_type ALTER COLUMN name TYPE varchar(32);
 
 -- Add new SONAR types
 INSERT INTO iris.sonar_type (name) VALUES
-		('cap_response_type'),
-		('cap_urgency'),
-		('ipaws'),
-		('ipaws_alert_config'),
-		('ipaws_alert_deployer'),
-		('push_notification');
+	('cap_response_type'),
+	('cap_urgency'),
+	('ipaws'),
+	('ipaws_alert_config'),
+	('ipaws_alert_deployer'),
+	('notification');
 
 -- Add IPAWS sign message source
 INSERT INTO iris.sign_msg_source (bit, source) VALUES (13, 'ipaws');
@@ -144,7 +144,7 @@ CREATE TABLE iris.cap_urgency (
 -- Push Notification table
 -- NOTE that we don't have a foreign key linking addressed_by to the i_user
 -- table so we can put 'auto' in there
-CREATE TABLE event.push_notification (
+CREATE TABLE event.notification (
 	name varchar(30) PRIMARY KEY,
 	ref_object_type varchar(32) REFERENCES iris.sonar_type(name),
 	ref_object_name text,
@@ -158,9 +158,9 @@ CREATE TABLE event.push_notification (
 
 -- Add capability and privileges
 INSERT INTO iris.capability (name, enabled) VALUES
-		('ipaws_admin', true),
-		('ipaws_deploy', true),
-		('ipaws_tab', true);
+	('ipaws_admin', true),
+	('ipaws_deploy', true),
+	('ipaws_tab', true);
 
 -- Drop role privilege view to modify type_n field length
 DROP VIEW public.role_privilege_view;
@@ -179,25 +179,25 @@ CREATE VIEW role_privilege_view AS
 GRANT SELECT ON role_privilege_view TO PUBLIC;
 
 INSERT INTO iris.privilege (name,capability,type_n,obj_n,attr_n,group_n,write) VALUES
-						   ('PRV_001C','base','push_notification','','','',false),
-						   ('PRV_001D','base','push_notification','','','',true),
-						   ('PRV_009A','ipaws_admin','cap_response_type','','','',true),
-						   ('PRV_009B','ipaws_admin','cap_urgency','','','',true),
-						   ('PRV_009C','ipaws_admin','ipaws','','','',true),
-						   ('PRV_009D','ipaws_admin','ipaws_alert_deployer','','','',true),
-						   ('PRV_009E','ipaws_admin','ipaws_alert_config','','','',true),
-						   ('PRV_009F','ipaws_deploy','ipaws_alert_deployer','','','',true),
-						   ('PRV_009G','ipaws_tab','cap_response_type','','','',false),
-						   ('PRV_009H','ipaws_tab','cap_urgency','','','',false),
-						   ('PRV_009I','ipaws_tab','ipaws','','','',false),
-						   ('PRV_009J','ipaws_tab','ipaws_alert_deployer','','','',false),
-						   ('PRV_009K','ipaws_tab','ipaws_alert_config','','','',false);
+	('PRV_001C','base','notification','','','',false),
+	('PRV_001D','base','notification','','','',true),
+	('PRV_009A','ipaws_admin','cap_response_type','','','',true),
+	('PRV_009B','ipaws_admin','cap_urgency','','','',true),
+	('PRV_009C','ipaws_admin','ipaws','','','',true),
+	('PRV_009D','ipaws_admin','ipaws_alert_deployer','','','',true),
+	('PRV_009E','ipaws_admin','ipaws_alert_config','','','',true),
+	('PRV_009F','ipaws_deploy','ipaws_alert_deployer','','','',true),
+	('PRV_009G','ipaws_tab','cap_response_type','','','',false),
+	('PRV_009H','ipaws_tab','cap_urgency','','','',false),
+	('PRV_009I','ipaws_tab','ipaws','','','',false),
+	('PRV_009J','ipaws_tab','ipaws_alert_deployer','','','',false),
+	('PRV_009K','ipaws_tab','ipaws_alert_config','','','',false);
 
 INSERT INTO iris.role_capability (role, capability) VALUES
-		('administrator', 'ipaws_admin'),
-        ('administrator', 'ipaws_tab'),
-        ('operator', 'ipaws_deploy'),
-        ('operator', 'ipaws_tab');
+	('administrator', 'ipaws_admin'),
+	('administrator', 'ipaws_tab'),
+	('operator', 'ipaws_deploy'),
+	('operator', 'ipaws_tab');
 
 -- Commit changes
 COMMIT;

@@ -18,16 +18,16 @@ import java.util.Date;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * SonarObject for sending push notifications out to clients.  PushNotification
+ * SonarObject for sending push notifications out to clients.  Notification
  * objects contain a reference to another SonarObject that requires a user's
  * attention, along with the notification time and a title/description.
  *
  * @author Gordon Parikh
  */
-public interface PushNotification extends SonarObject {
+public interface Notification extends SonarObject {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "push_notification";
+	String SONAR_TYPE = "notification";
 
 	/** Set the type of the object that is being referenced */
 	void setRefObjectType(String rt);

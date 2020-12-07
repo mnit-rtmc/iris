@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2020  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  * Copyright (C) 2019  SRF Consulting Group
  *
@@ -39,7 +39,7 @@ import us.mn.state.dot.tms.client.map.MapModel;
 import us.mn.state.dot.tms.client.map.TileLayer;
 import us.mn.state.dot.tms.client.marking.LaneMarkingManager;
 import us.mn.state.dot.tms.client.meter.MeterManager;
-import us.mn.state.dot.tms.client.notification.PushNotificationManager;
+import us.mn.state.dot.tms.client.notification.NotificationManager;
 import us.mn.state.dot.tms.client.parking.ParkingAreaManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
@@ -166,11 +166,11 @@ public class Session {
 	}
 	
 	/** Push notification manager */
-	private final PushNotificationManager push_notif_manager;
+	private final NotificationManager notif_manager;
 	
 	/** Get the push notification Manager */
-	public PushNotificationManager getPushNotificationManager() {
-		return push_notif_manager;
+	public NotificationManager getNotificationManager() {
+		return notif_manager;
 	}
 
 	/** Mapping of all tabs */
@@ -216,8 +216,8 @@ public class Session {
 		managers.add(inc_manager);
 		managers.add(new PlanManager(this, loc_manager));
 		managers.add(new AlertManager(this, loc_manager));
-		push_notif_manager = new PushNotificationManager(this, loc_manager);
-		managers.add(push_notif_manager);
+		notif_manager = new NotificationManager(this, loc_manager);
+		managers.add(notif_manager);
 		tile_layer = createTileLayer(props.getProperty("map.tile.url"));
 		setCurrent(this, null);
 	}
