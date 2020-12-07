@@ -213,7 +213,7 @@ public class IpawsReader {
 		if (element.getElementsByTagName(tag).getLength() > 0) {       
 			NodeList nodeList = element.getElementsByTagName(tag);
 			for (int i = 0; i < nodeList.getLength(); i++) {
-				Node node = (Node) nodeList.item(i);
+				Node node = nodeList.item(i);
 				tag_values.add(node.getTextContent());
 			}
 		}

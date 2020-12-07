@@ -340,7 +340,7 @@ public class IpawsProcJob extends Job {
 				+ " * " + sf + " + " + wc + " * " + cf + " = " + score);
 		
 		// convert the score to an index and return one of the allowed values
-		int i = (int) Math.round(score * ALLOWED_PRIORITIES.length);
+		int i = Math.round(score * ALLOWED_PRIORITIES.length);
 		if (i >= ALLOWED_PRIORITIES.length)
 			i = ALLOWED_PRIORITIES.length - 1;
 		else if (i < 0)

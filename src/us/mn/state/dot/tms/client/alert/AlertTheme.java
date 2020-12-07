@@ -228,7 +228,7 @@ public class AlertTheme extends ProxyTheme<IpawsAlertDeployer> {
 		// user will be able to opt to draw all DMS as all
 		
 		// set the scale on the theme before getting the symbol
-		float scale = (float) dManager.getLayerState().getScale();
+		float scale = dManager.getLayerState().getScale();
 		dmsTheme.setScale(scale);
 		dmsSymbol = (VectorSymbol) dmsTheme.getSymbol();
 		if (alertState == ItemStyle.PENDING || (aManager.getEditing() &&
