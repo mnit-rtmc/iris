@@ -1,10 +1,12 @@
 \set ON_ERROR_STOP
-BEGIN;
 
 -- Enable PostGIS extension
 CREATE EXTENSION postgis;
 
 SET SESSION AUTHORIZATION 'tms';
+BEGIN;
+
+SELECT iris.update_version('5.17.0', '5.18.0');
 
 -- Add System Attributes
 INSERT INTO iris.system_attribute (name, value) VALUES
@@ -36,7 +38,7 @@ INSERT INTO iris.comm_protocol (id, description) VALUES (42, 'IPAWS Alert');
 DROP VIEW public.comm_link_view;
 
 -- Extend allowed length of URI field in comm_link table
-ALTER TABLE iris.comm_link ALTER COLUMN uri TYPE character varying(256);
+ALTER TABLE iris.comm_link ALTER COLUMN uri TYPE VARCHAR(256);
 
 -- Recreate comm_link_view with the altered table
 CREATE VIEW comm_link_view AS
