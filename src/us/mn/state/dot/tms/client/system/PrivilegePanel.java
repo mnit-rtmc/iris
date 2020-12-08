@@ -73,7 +73,7 @@ public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 		"incident",
 		"incident_detail",
 		"inc_locator",
-		"ipaws",
+		"ipaws_alert",
 		"ipaws_config",
 		"ipaws_deployer",
 		"lane_action",

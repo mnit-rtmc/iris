@@ -28,7 +28,7 @@ import us.mn.state.dot.sonar.SonarObject;
 public interface IpawsAlert extends SonarObject {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "ipaws";
+	String SONAR_TYPE = "ipaws_alert";
 
 	/** Set the identifier */
 	void setIdentifier(String i);

@@ -430,7 +430,7 @@ inc_descriptor
 incident
 incident_detail
 inc_locator
-ipaws
+ipaws_alert
 ipaws_config
 ipaws_deployer
 lane_action
@@ -603,14 +603,14 @@ PRV_0093	incident_tab	incident_detail		f
 PRV_0094	incident_tab	inc_descriptor		f
 PRV_0095	incident_tab	inc_locator		f
 PRV_0096	incident_tab	inc_advice		f
-PRV_009A	ipaws_admin	ipaws		t
+PRV_009A	ipaws_admin	ipaws_alert		t
 PRV_009B	ipaws_admin	ipaws_deployer		t
 PRV_009C	ipaws_admin	ipaws_config		t
 PRV_009D	ipaws_admin	cap_response		t
 PRV_009E	ipaws_admin	cap_urgency		t
 PRV_009F	ipaws_deploy	ipaws_deployer		t
 PRV_009L	ipaws_deploy	notification		t
-PRV_009G	ipaws_tab	ipaws		f
+PRV_009G	ipaws_tab	ipaws_alert		f
 PRV_009H	ipaws_tab	ipaws_deployer		f
 PRV_009I	ipaws_tab	ipaws_config		f
 PRV_009J	ipaws_tab	cap_response		f
@@ -2544,14 +2544,13 @@ COPY iris.sign_msg_source (bit, source) FROM stdin;
 3	tolling
 4	gate arm
 5	lcs
-6	aws
+6	ipaws
 7	external
 8	travel time
 9	incident
 10	slow warning
 11	speed advisory
 12	parking
-13	ipaws
 \.
 
 CREATE FUNCTION iris.sign_msg_sources(INTEGER) RETURNS TEXT
@@ -3558,7 +3557,7 @@ iadv_00106	13	1	1	\N	\N	IN RIGHT SHOULDER
 -- IPAWS Alerts
 --
 -- IPAWS Alert Event table
-CREATE TABLE event.ipaws (
+CREATE TABLE event.ipaws_alert (
 	name text PRIMARY KEY,
 	identifier text,
 	sender text,
@@ -3597,7 +3596,7 @@ CREATE TABLE event.ipaws_deployer (
 	name varchar(20) PRIMARY KEY,
 	gen_time timestamp with time zone,
 	approved_time timestamp with time zone,
-	alert_id text REFERENCES event.ipaws(name),
+	alert_id text REFERENCES event.ipaws_alert(name),
 	geo_loc varchar(20),
 	alert_start timestamp with time zone,
 	alert_end timestamp with time zone,

@@ -40,9 +40,6 @@ import us.mn.state.dot.tms.TMSException;
  */
 public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
-	/** Database table name */
-	static private final String TABLE = "event.ipaws";
-
 	/** Load all the IPAWS alerts */
 	static public void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IpawsAlertImpl.class);
@@ -191,7 +188,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		IpawsProcJob.log("Purging purgeable IPAWS alert records older " +
 				"than " + age + " days...");
 		if (store != null && age > 0) {
-			store.update("DELETE FROM " + TABLE +
+			store.update("DELETE FROM event." + SONAR_TYPE +
 				" WHERE expiration_date < now() - '" + age +
 				" days'::interval AND purgeable=true;");
 		}

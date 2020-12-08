@@ -21,13 +21,13 @@ INSERT INTO iris.system_attribute (name, value) VALUES
 INSERT INTO iris.sonar_type (name) VALUES
 	('cap_response'),
 	('cap_urgency'),
-	('ipaws'),
+	('ipaws_alert'),
 	('ipaws_config'),
 	('ipaws_deployer'),
 	('notification');
 
--- Add IPAWS sign message source
-INSERT INTO iris.sign_msg_source (bit, source) VALUES (13, 'ipaws');
+-- Change AWS sign message source to IPAWS
+UPDATE iris.sign_msg_source SET source = 'ipaws' WHERE bit = 6;
 
 -- Reserve IPAWS Alert comm protocol value
 INSERT INTO iris.comm_protocol (id, description) VALUES (42, 'IPAWS Alert');
@@ -49,7 +49,7 @@ CREATE VIEW comm_link_view AS
 GRANT SELECT ON comm_link_view TO PUBLIC;
 
 -- IPAWS Alert Event table
-CREATE TABLE event.ipaws (
+CREATE TABLE event.ipaws_alert (
 	name text PRIMARY KEY,
 	identifier text,
 	sender text,
@@ -88,7 +88,7 @@ CREATE TABLE event.ipaws_deployer (
 	name varchar(20) PRIMARY KEY,
 	gen_time timestamp with time zone,
 	approved_time timestamp with time zone,
-	alert_id text REFERENCES event.ipaws(name),
+	alert_id text REFERENCES event.ipaws_alert(name),
 	geo_loc varchar(20),
 	alert_start timestamp with time zone,
 	alert_end timestamp with time zone,
@@ -161,14 +161,14 @@ INSERT INTO iris.capability (name, enabled) VALUES
 INSERT INTO iris.privilege (name, capability, type_n, write)
 VALUES	('PRV_009A','ipaws_admin','cap_response',true),
 	('PRV_009B','ipaws_admin','cap_urgency',true),
-	('PRV_009C','ipaws_admin','ipaws',true),
+	('PRV_009C','ipaws_admin','ipaws_alert',true),
 	('PRV_009D','ipaws_admin','ipaws_deployer',true),
 	('PRV_009E','ipaws_admin','ipaws_config',true),
 	('PRV_009F','ipaws_deploy','ipaws_deployer',true),
 	('PRV_009L','ipaws_deploy','notification',true),
 	('PRV_009G','ipaws_tab','cap_response',false),
 	('PRV_009H','ipaws_tab','cap_urgency',false),
-	('PRV_009I','ipaws_tab','ipaws',false),
+	('PRV_009I','ipaws_tab','ipaws_alert',false),
 	('PRV_009J','ipaws_tab','ipaws_deployer',false),
 	('PRV_009K','ipaws_tab','ipaws_config',false);
 
