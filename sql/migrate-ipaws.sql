@@ -17,9 +17,6 @@ INSERT INTO iris.system_attribute (name, value) VALUES
 	('ipaws_sign_thresh_opt_meters', 4000),
 	('notification_timeout_secs', 900);
 
--- Extend sonar_type field to allow longer names
-ALTER TABLE iris.sonar_type ALTER COLUMN name TYPE varchar(32);
-
 -- Add new SONAR types
 INSERT INTO iris.sonar_type (name) VALUES
 	('cap_response'),
@@ -52,38 +49,37 @@ CREATE VIEW comm_link_view AS
 GRANT SELECT ON comm_link_view TO PUBLIC;
 
 -- IPAWS Alert Event table
-CREATE TABLE event.ipaws
-(
-    name text PRIMARY KEY,
-    identifier text,
-    sender text,
-    sent_date timestamp with time zone,
-    status text,
-    message_type text,
-    scope text,
-    codes text[],
-    note text,
-    alert_references text[],
-    incidents text[],
-    categories text[],
-    event text,
-    response_types text[],
-    urgency text,
-    severity text,
-    certainty text,
-    audience text,
-    effective_date timestamp with time zone,
-    onset_date timestamp with time zone,
-    expiration_date timestamp with time zone,
-    sender_name text,
-    headline text,
-    alert_description text,
-    instruction text,
-    parameters jsonb,
-    area jsonb,
-    geo_poly geography(multipolygon),
+CREATE TABLE event.ipaws (
+	name text PRIMARY KEY,
+	identifier text,
+	sender text,
+	sent_date timestamp with time zone,
+	status text,
+	message_type text,
+	scope text,
+	codes text[],
+	note text,
+	alert_references text[],
+	incidents text[],
+	categories text[],
+	event text,
+	response_types text[],
+	urgency text,
+	severity text,
+	certainty text,
+	audience text,
+	effective_date timestamp with time zone,
+	onset_date timestamp with time zone,
+	expiration_date timestamp with time zone,
+	sender_name text,
+	headline text,
+	alert_description text,
+	instruction text,
+	parameters jsonb,
+	area jsonb,
+	geo_poly geography(multipolygon),
 	geo_loc varchar(20),
-    purgeable boolean,
+	purgeable boolean,
 	last_processed timestamp with time zone
 );
 
@@ -146,7 +142,7 @@ CREATE TABLE iris.cap_urgency (
 -- table so we can put 'auto' in there
 CREATE TABLE event.notification (
 	name varchar(30) PRIMARY KEY,
-	ref_object_type varchar(32) REFERENCES iris.sonar_type(name),
+	ref_object_type varchar(16) REFERENCES iris.sonar_type(name),
 	ref_object_name text,
 	needs_write boolean,
 	sent_time timestamp with time zone,
@@ -161,22 +157,6 @@ INSERT INTO iris.capability (name, enabled) VALUES
 	('ipaws_admin', true),
 	('ipaws_deploy', true),
 	('ipaws_tab', true);
-
--- Drop role privilege view to modify type_n field length
-DROP VIEW public.role_privilege_view;
-
-ALTER TABLE iris.privilege ALTER COLUMN type_n TYPE varchar(32);
-
--- Recreate view
-CREATE VIEW role_privilege_view AS
-	SELECT role, role_capability.capability, type_n, obj_n, group_n, attr_n,
-	       write
-	FROM iris.role
-	JOIN iris.role_capability ON role.name = role_capability.role
-	JOIN iris.capability ON role_capability.capability = capability.name
-	JOIN iris.privilege ON privilege.capability = capability.name
-	WHERE role.enabled = 't' AND capability.enabled = 't';
-GRANT SELECT ON role_privilege_view TO PUBLIC;
 
 INSERT INTO iris.privilege (name, capability, type_n, obj_n, attr_n, group_n,
                             write)

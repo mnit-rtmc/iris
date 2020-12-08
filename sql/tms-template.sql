@@ -385,7 +385,7 @@ parking_tab	t
 \.
 
 CREATE TABLE iris.sonar_type (
-	name VARCHAR(32) PRIMARY KEY
+	name VARCHAR(16) PRIMARY KEY
 );
 
 COPY iris.sonar_type (name) FROM stdin;
@@ -475,7 +475,7 @@ word
 CREATE TABLE iris.privilege (
 	name VARCHAR(8) PRIMARY KEY,
 	capability VARCHAR(16) NOT NULL REFERENCES iris.capability,
-	type_n VARCHAR(32) NOT NULL REFERENCES iris.sonar_type,
+	type_n VARCHAR(16) NOT NULL REFERENCES iris.sonar_type,
 	obj_n VARCHAR(16) DEFAULT ''::VARCHAR NOT NULL,
 	group_n VARCHAR(16) DEFAULT ''::VARCHAR NOT NULL,
 	attr_n VARCHAR(16) DEFAULT ''::VARCHAR NOT NULL,
@@ -3559,36 +3559,36 @@ iadv_00106	13	1	1	\N	\N	IN RIGHT SHOULDER
 --
 -- IPAWS Alert Event table
 CREATE TABLE event.ipaws (
-    name text PRIMARY KEY,
-    identifier text,
-    sender text,
-    sent_date timestamp with time zone,
-    status text,
-    message_type text,
-    scope text,
-    codes text[],
-    note text,
-    alert_references text[],
-    incidents text[],
-    categories text[],
-    event text,
-    response_types text[],
-    urgency text,
-    severity text,
-    certainty text,
-    audience text,
-    effective_date timestamp with time zone,
-    onset_date timestamp with time zone,
-    expiration_date timestamp with time zone,
-    sender_name text,
-    headline text,
-    alert_description text,
-    instruction text,
-    parameters jsonb,
-    area jsonb,
-    geo_poly geography(multipolygon),
+	name text PRIMARY KEY,
+	identifier text,
+	sender text,
+	sent_date timestamp with time zone,
+	status text,
+	message_type text,
+	scope text,
+	codes text[],
+	note text,
+	alert_references text[],
+	incidents text[],
+	categories text[],
+	event text,
+	response_types text[],
+	urgency text,
+	severity text,
+	certainty text,
+	audience text,
+	effective_date timestamp with time zone,
+	onset_date timestamp with time zone,
+	expiration_date timestamp with time zone,
+	sender_name text,
+	headline text,
+	alert_description text,
+	instruction text,
+	parameters jsonb,
+	area jsonb,
+	geo_poly geography(multipolygon),
 	geo_loc varchar(20),
-    purgeable boolean,
+	purgeable boolean,
 	last_processed timestamp with time zone
 );
 
@@ -4021,7 +4021,7 @@ GRANT SELECT ON parking_area_view TO PUBLIC;
 -- table so we can put 'auto' in there
 CREATE TABLE event.notification (
 	name varchar(30) PRIMARY KEY,
-	ref_object_type varchar(32) REFERENCES iris.sonar_type(name),
+	ref_object_type varchar(16) REFERENCES iris.sonar_type(name),
 	ref_object_name text,
 	needs_write boolean,
 	sent_time timestamp with time zone,
