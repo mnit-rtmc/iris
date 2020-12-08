@@ -23,9 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-
 import javax.swing.JPopupMenu;
-
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLoc;
@@ -34,6 +32,7 @@ import us.mn.state.dot.tms.IpawsAlertHelper;
 import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.IpawsDeployerHelper;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.TransGeoLoc;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.map.LayerState;
@@ -294,9 +293,14 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 
 	@Override
 	protected GeoLoc getGeoLoc(IpawsDeployer iad) {
-		// return the GeoLoc for this deployer
-		if (iad != null)
-			return iad.getGeoLoc();
+		if (iad != null) {
+			Double lat = iad.getLat();
+			Double lon = iad.getLon();
+			if (lat != null && lon != null) {
+				return new TransGeoLoc(lat.floatValue(),
+					lon.floatValue());
+			}
+		}
 		return null;
 	}
 

@@ -51,11 +51,11 @@ public interface IpawsDeployer extends SonarObject {
 	/** Get the Alert ID. */
 	String getAlertId();
 
-	/** Set the deployer GeoLoc. */
-	void setGeoLoc(GeoLoc gl);
+	/** Get the latitude of the alert area's centroid */
+	Double getLat();
 
-	/** Get the deployer GeoLoc. */
-	GeoLoc getGeoLoc();
+	/** Get the longitude of the alert area's centroid */
+	Double getLon();
 
 	/** Set the alert start time */
 	void setAlertStart(Date t);

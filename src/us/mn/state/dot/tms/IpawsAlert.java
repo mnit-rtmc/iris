@@ -195,11 +195,11 @@ public interface IpawsAlert extends SonarObject {
 	/** Get the areas */
 	MultiPolygon getGeoPoly();
 
-	/** Set the GeoLoc, which is the alert area's centroid */
-	void setGeoLoc(GeoLoc gl);
+	/** Get the latitude of the alert area's centroid */
+	Double getLat();
 
-	/** Get the GeoLoc, which is the alert area's centroid */
-	GeoLoc getGeoLoc();
+	/** Get the longitude of the alert area's centroid */
+	Double getLon();
 
 	/** Set if this alert is purgeable (irrelevant to us).  Also acts as a
 	 *  flag to indicate whether an alert has been processed or not (null if

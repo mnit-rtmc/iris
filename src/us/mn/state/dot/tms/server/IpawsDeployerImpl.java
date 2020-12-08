@@ -21,9 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import us.mn.state.dot.tms.DmsMsgPriority;
-import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.IpawsDeployerHelper;
 import us.mn.state.dot.tms.TMSException;
@@ -76,12 +74,13 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	static public void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IpawsDeployerImpl.class);
 		store.query("SELECT name, gen_time, approved_time, alert_id, " +
-			"geo_loc, alert_start, alert_end, config, sign_group, " +
-			"quick_message, pre_alert_time, post_alert_time, auto_dms, " +
-			"optional_dms, deployed_dms, area_threshold, auto_multi, " +
-			"deployed_multi, msg_priority, approved_by, deployed, " +
-			"was_deployed, active, replaces FROM event." + SONAR_TYPE + ";",
-			new ResultFactory()
+			"lat, lon, alert_start, alert_end, config, " +
+			"sign_group, quick_message, pre_alert_time, " +
+			"post_alert_time, auto_dms, optional_dms, " +
+			"deployed_dms, area_threshold, auto_multi, " +
+			"deployed_multi, msg_priority, approved_by, " +
+			"deployed, was_deployed, active, replaces FROM event." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			@Override
 			public void create(ResultSet row) throws Exception {
@@ -103,7 +102,8 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		map.put("gen_time", gen_time);
 		map.put("approved_time", approved_time);
 		map.put("alert_id", alert_id);
-		map.put("geo_loc", geo_loc);
+		map.put("lat", lat);
+		map.put("lon", lon);
 		map.put("alert_start", alert_start);
 		map.put("alert_end", alert_end);
 		map.put("config", config);
@@ -138,31 +138,32 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	}
 
 	private IpawsDeployerImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),			// name
-			row.getTimestamp(2),		// generated time
-			row.getTimestamp(3),		// approval time
-			row.getString(4),		// alert identifier
-			row.getString(5),		// geo_loc
-			row.getTimestamp(6),		// alert start
-			row.getTimestamp(7),		// alert end
-			row.getString(8),		// config
-			row.getString(9),		// sign group
-			row.getString(10),		// quick message
-			row.getInt(11),			// pre-alert time
-			row.getInt(12),			// post-alert time
-			getStringArray(row, 13),	// auto DMS list
-			getStringArray(row, 14),	// optional DMS list
-			getStringArray(row, 15),	// deployed DMS list
-			row.getDouble(16),		// area threshold
-			row.getString(17),		// auto MULTI
-			row.getString(18),		// deployed MULTI
-			row.getInt(19),			// message priority
-			row.getString(20),		// approving user
-			row.getBoolean(21),		// deployed
-			row.getBoolean(22),		// was_deployed
-			row.getBoolean(23),		// active
-			row.getString(24)		// replaces
-		 );
+		this(row.getString(1),          // name
+		     row.getTimestamp(2),       // generated time
+		     row.getTimestamp(3),       // approval time
+		     row.getString(4),          // alert identifier
+		     (Double) row.getObject(5), // lat
+		     (Double) row.getObject(6), // lon
+		     row.getTimestamp(7),       // alert start
+		     row.getTimestamp(8),       // alert end
+		     row.getString(9),          // config
+		     row.getString(10),         // sign group
+		     row.getString(11),         // quick message
+		     row.getInt(12),            // pre-alert time
+		     row.getInt(13),            // post-alert time
+		     getStringArray(row, 14),   // auto DMS list
+		     getStringArray(row, 15),   // optional DMS list
+		     getStringArray(row, 16),   // deployed DMS list
+		     row.getDouble(17),         // area threshold
+		     row.getString(18),         // auto MULTI
+		     row.getString(19),         // deployed MULTI
+		     row.getInt(20),            // message priority
+		     row.getString(21),         // approving user
+		     row.getBoolean(22),        // deployed
+		     row.getBoolean(23),        // was_deployed
+		     row.getBoolean(24),        // active
+		     row.getString(25)          // replaces
+		);
 	}
 
 	public IpawsDeployerImpl(String n, String aid)  {
@@ -188,13 +189,14 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		gen_time = new Date();
 	}
 
-	public IpawsDeployerImpl(String n, String aid, GeoLoc gl,
+	public IpawsDeployerImpl(String n, String aid, Double lt, Double ln,
 			Date as, Date ae, String c, String sg, String[] adms,
 			String[] ddms, String qm, String m, int mp, int preh,
 			int posth, String r) {
 		super(n);
 		alert_id = aid;
-		geo_loc = gl;
+		lat = lt;
+		lon = ln;
 		alert_start = as;
 		alert_end = ae;
 		config = c;
@@ -211,15 +213,17 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	}
 
 	public IpawsDeployerImpl(String n, Date gt, Date at, String aid,
-			String gl, Date as, Date ae, String c, String sg, String qm,
-			int preh, int posth, String[] adms, String[] odms, String[] ddms,
-			Double t, String am, String dm, int mp, String u, Boolean d,
-			Boolean wd, boolean a, String r) {
+		Double lt, Double ln, Date as, Date ae, String c, String sg,
+		String qm, int preh, int posth, String[] adms, String[] odms,
+		String[] ddms, Double t, String am, String dm, int mp, String u,
+		Boolean d, Boolean wd, boolean a, String r)
+	{
 		super(n);
 		gen_time = gt;
 		approved_time = at;
 		alert_id = aid;
-		geo_loc = lookupGeoLoc(gl);
+		lat = lt;
+		lon = ln;
 		alert_start = as;
 		alert_end = ae;
 		config = c;
@@ -245,7 +249,8 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	 *  contained in this alert deployer.
 	 */
 	public boolean autoValsEqual(Date aStart, Date aEnd,
-			String[] adms, String aMulti, int mp) {
+		String[] adms, String aMulti, int mp)
+	{
 		boolean startEq = objectEquals(aStart, alert_start);
 		boolean endEq = objectEquals(aEnd, alert_end);
 		boolean dmsEq = Arrays.equals(auto_dms, adms);
@@ -323,27 +328,22 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		return alert_id;
 	}
 
-	/** GeoLoc of this deployer */
-	private GeoLoc geo_loc;
+	/** Latitude */
+	private Double lat;
 
-	/** Set the deployer GeoLoc. */
+	/** Get the latitude of the alert area's centroid */
 	@Override
-	public void setGeoLoc(GeoLoc gl) {
-		geo_loc = gl;
+	public Double getLat() {
+		return lat;
 	}
 
-	/** Set the Alert ID. */
-	public void doSetGeoLoc(GeoLoc gl) throws TMSException {
-		if (!objectEquals(gl, geo_loc)) {
-			store.update(this, "geo_loc", gl);
-			setGeoLoc(gl);
-		}
-	}
+	/** Longitude */
+	private Double lon;
 
-	/** Get the deployer GeoLoc. */
+	/** Get the longitude of the alert area's centroid */
 	@Override
-	public GeoLoc getGeoLoc() {
-		return geo_loc;
+	public Double getLon() {
+		return lon;
 	}
 
 	/** Start time of alert (stored here for convenience) */

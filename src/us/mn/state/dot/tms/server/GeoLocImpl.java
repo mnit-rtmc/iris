@@ -68,13 +68,13 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	}
 
 	/** Check a latitude for validity */
-	static private void checkLat(Double lt) throws TMSException {
+	static void checkLat(Double lt) throws TMSException {
 		if (lt != null && (lt < -85 || lt > 85))
 			throw new ChangeVetoException("Invalid latitude");
 	}
 
 	/** Check a longitude for validity */
-	static private void checkLon(Double ln) throws TMSException {
+	static void checkLon(Double ln) throws TMSException {
 		if (ln != null && (ln < -180 || ln > 180))
 			throw new ChangeVetoException("Invalid longitude");
 	}
@@ -373,7 +373,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 
 	/** Set the latitude */
 	public void doSetLat(Double lt) throws TMSException {
-		if (lt != lat) {
+		if (!objectEquals(lt, lat)) {
 			checkLat(lt);
 			store.update(this, "lat", lt);
 			setLat(lt);
@@ -403,7 +403,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 
 	/** Set the longitude */
 	public void doSetLon(Double ln) throws TMSException {
-		if (ln != lon) {
+		if (!objectEquals(ln, lon)) {
 			checkLon(ln);
 			store.update(this, "lon", ln);
 			setLon(ln);

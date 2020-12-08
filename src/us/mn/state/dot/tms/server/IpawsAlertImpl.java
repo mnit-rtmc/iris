@@ -25,7 +25,6 @@ import java.util.Map;
 import org.json.JSONObject;
 import org.postgis.MultiPolygon;
 import us.mn.state.dot.tms.CapResponseEnum;
-import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.IpawsAlert;
 import us.mn.state.dot.tms.IteratorWrapper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -50,7 +49,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			"audience, effective_date, onset_date, " +
 			"expiration_date, sender_name, headline, " +
 			"alert_description, instruction, parameters, area, " +
-			"ST_AsText(geo_poly), geo_loc, purgeable, " +
+			"ST_AsText(geo_poly), lat, lon, purgeable, " +
 			"last_processed FROM event." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
@@ -121,7 +120,8 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		map.put("parameters", parameters);
 		map.put("area", area);
 		map.put("geo_poly", geo_poly);
-		map.put("geo_loc", geo_loc);
+		map.put("lat", lat);
+		map.put("lon", lon);
 		map.put("purgeable", purgeable);
 		map.put("last_processed", last_processed);
 		return map;
@@ -169,9 +169,10 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		     row.getString(26),       // parameters
 		     row.getString(27),       // area
 		     row.getString(28),       // geo_poly
-		     row.getString(29),       // geo_loc
-		     getBoolean(row, 30),     // purgeable flag
-		     row.getTimestamp(31)     // last processed
+		     (Double) row.getObject(29), // lat
+		     (Double) row.getObject(30), // lon
+		     getBoolean(row, 31),     // purgeable flag
+		     row.getTimestamp(32)     // last processed
 		);
 	}
 
@@ -196,7 +197,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	static public Iterator<IpawsAlertImpl> iterator() {
 		return new IteratorWrapper<IpawsAlertImpl>(namespace.iterator(
-				IpawsAlertImpl.SONAR_TYPE));
+			IpawsAlertImpl.SONAR_TYPE));
 	}
 
 	public IpawsAlertImpl(String n) throws TMSException {
@@ -208,7 +209,8 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		String[] ref, String[] inc, String[] ct, String ev, String[] rt,
 		String u, String sv, String cy, String au, Date efd, Date od,
 		Date exd, String sn, String hl, String ades, String in,
-		String par, String ar, String gp, String gl, Boolean p, Date pt)
+		String par, String ar, String gp, Double lt, Double ln,
+		Boolean p, Date pt)
 	{
 		super(n);
 		identifier = i;
@@ -245,7 +247,8 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 				e.printStackTrace();
 			}
 		}
-		geo_loc = lookupGeoLoc(gl);
+		lat = lt;
+		lon = ln;
 		purgeable = p;
 		last_processed = pt;
 	}
@@ -962,29 +965,42 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		}
 	}
 
-	/** GeoLoc for this alert (the alert area's centroid). */
-	private GeoLoc geo_loc;
+	/** Latitude */
+	private Double lat;
 
-	/** Set the GeoLoc, which is the alert area's centroid */
-	@Override
-	public void setGeoLoc(GeoLoc gl) {
-		geo_loc = gl;
-	}
-
-	/** Set the GeoLoc, which is the alert area's centroid */
-	public void doSetGeoLoc(GeoLoc gl) throws TMSException {
-		if (!objectEquals(geo_loc, gl)) {
-			store.update(this, "geo_loc", gl);
-			setGeoLoc(gl);
-			notifyAttribute("geoLoc", false);
+	/** Set the latitude of the alert area's centroid, and notify */
+	public void setLatNotify(Double lt) throws TMSException {
+		if (!objectEquals(lt, lat)) {
+			GeoLocImpl.checkLat(lt);
+			store.update(this, "lat", lt);
+			lat = lt;
+			notifyAttribute("lat");
 		}
-		geo_loc = gl;
 	}
 
-	/** Get the GeoLoc, which is the alert area's centroid */
+	/** Get the latitude of the alert area's centroid */
 	@Override
-	public GeoLoc getGeoLoc() {
-		return geo_loc;
+	public Double getLat() {
+		return lat;
+	}
+
+	/** Longitude */
+	private Double lon;
+
+	/** Set the longitude and notify clients */
+	public void setLonNotify(Double ln) throws TMSException {
+		if (!objectEquals(ln, lon)) {
+			GeoLocImpl.checkLon(ln);
+			store.update(this, "lon", ln);
+			lon = ln;
+			notifyAttribute("lon");
+		}
+	}
+
+	/** Get the longitude of the alert area's centroid */
+	@Override
+	public Double getLon() {
+		return lon;
 	}
 
 	/** Purgeable flag. Null if the alert has not yet been processed, true if

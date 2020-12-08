@@ -155,9 +155,8 @@ public class IpawsProcJob extends Job {
 			if (ia.getGeoPoly() == null)
 				return;
 
-			// generate a GeoLoc for the alert (the alert area's
-			// centroid)
-			getGeoLoc(ia);
+			// update the alert area's centroid
+			updateCentroid(ia);
 
 			// find DMS in the polygon and generate an alert
 			// deployer object this will complete all processing of
@@ -487,12 +486,8 @@ public class IpawsProcJob extends Job {
 			// if they have, or we didn't get one, make a new one
 			String name = IpawsDeployerImpl.createUniqueName();
 
-			// make a new GeoLoc based on the alert's
-			GeoLoc igl = ia.getGeoLoc();
-			GeoLocImpl gl = new GeoLocImpl(name,
-				IpawsDeployer.SONAR_TYPE, igl.getLat(),
-				igl.getLon());
-			gl.notifyCreate();
+			Double lat = ia.getLat();
+			Double lon = ia.getLon();
 
 			// make sure to note that this is a replacement - when
 			// this is eventually deployed that will be used to
@@ -515,10 +510,11 @@ public class IpawsProcJob extends Job {
 
 			log("Creating new deployer " + name +
 					" replacing " + replaces);
-			iad = new IpawsDeployerImpl(name, ia.getName(), gl, aStart,
-					aEnd, iac.getName(), iac.getSignGroup(), adms, ddms,
-					iac.getQuickMessage(), autoMulti, priority, preAlert,
-					postAlert, replaces);
+
+			iad = new IpawsDeployerImpl(name, ia.getName(), lat,lon,
+				aStart, aEnd, iac.getName(), iac.getSignGroup(),
+				adms, ddms, iac.getQuickMessage(), autoMulti,
+				priority, preAlert, postAlert, replaces);
 
 			// notify so clients receive the new object
 			iad.notifyCreate();
@@ -829,51 +825,35 @@ public class IpawsProcJob extends Job {
 		}
 	}
 
-	/** Name creator for GeoLoc */
-	static UniqueNameCreator UNC;
-	static {
-		UNC = new UniqueNameCreator("ipaws_gl_%d",
-				(n)->GeoLocHelper.lookup(n));
-		UNC.setMaxLength(20);
-	}
-
-	/** Create a unique GeoLoc record name */
-	static public String createUniqueName() {
-		return UNC.createUniqueName();
-	}
-
-	/** Generate a GeoLoc for the alert as the alert area's centroid. */
-	private void getGeoLoc(IpawsAlertImpl ia) throws TMSException {
-		// generate a GeoLoc for the alert (the alert's centroid)
-		IpawsAlertImpl.store.query(
-		"SELECT ST_AsText(ST_Centroid(geo_poly)) FROM event." +
-		IpawsAlert.SONAR_TYPE + " WHERE name='" + ia.getName() + "';",
-		new ResultFactory() {
-			@Override
-			public void create(ResultSet row) throws Exception {
-				// strip out the lat/long from the POINT(lon lat) string
-				String pStr = row.getString(1);
-				String llStr = pStr.replace("POINT(", "").replace(")", "");
-				String[] ll = llStr.split(" ");
-				if (ll.length == 2) {
-					Double lon = Double.valueOf(ll[0]);
-					Double lat = Double.valueOf(ll[1]);
-
-					// construct or update a GeoLoc that will be associated
-					// with the deployer object
-					GeoLocImpl gl = GeoLocImpl.lookupGeoLoc(ia.getName());
-					if (gl == null) {
-						gl = new GeoLocImpl(createUniqueName(),
-								IpawsAlert.SONAR_TYPE, lat, lon);
-						gl.notifyCreate();
-					} else {
-						gl.setLatNotify(lat);
-						gl.setLonNotify(lon);
-					}
-					ia.doSetGeoLoc(gl);
+	/** Update the centroid of an alert area */
+	private void updateCentroid(IpawsAlertImpl ia) throws TMSException {
+		IpawsAlertImpl.store.query("SELECT ST_AsText(ST_Centroid(" +
+			"geo_poly)) FROM event." + IpawsAlert.SONAR_TYPE +
+			" WHERE name='" + ia.getName() + "';",
+			new ResultFactory() {
+				@Override public void create(ResultSet row)
+					throws Exception
+				{
+					updateCentroid(ia, row);
 				}
 			}
-		});
+		);
+	}
+
+	/** Update the centroid of an IPAWS alert from a row with a POINT */
+	private void updateCentroid(IpawsAlertImpl ia, ResultSet row)
+		throws Exception
+	{
+		// parse out the lat/long from the POINT(lon lat) string
+		String pStr = row.getString(1);
+		String llStr = pStr.replace("POINT(", "").replace(")", "");
+		String[] ll = llStr.split(" ");
+		if (ll.length == 2) {
+			Double lon = Double.valueOf(ll[0]);
+			Double lat = Double.valueOf(ll[1]);
+			ia.setLatNotify(lat);
+			ia.setLonNotify(lon);
+		}
 	}
 
 	/** Reformat the text taken from the polygon section of a CAP alert's

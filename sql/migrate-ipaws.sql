@@ -78,7 +78,8 @@ CREATE TABLE event.ipaws_alert (
 	parameters jsonb,
 	area jsonb,
 	geo_poly geography(multipolygon),
-	geo_loc varchar(20),
+	lat double precision,
+	lon double precision,
 	purgeable boolean,
 	last_processed timestamp with time zone
 );
@@ -89,7 +90,8 @@ CREATE TABLE event.ipaws_deployer (
 	gen_time timestamp with time zone,
 	approved_time timestamp with time zone,
 	alert_id text REFERENCES event.ipaws_alert(name),
-	geo_loc varchar(20),
+	lat double precision,
+	lon double precision,
 	alert_start timestamp with time zone,
 	alert_end timestamp with time zone,
 	config varchar(24),

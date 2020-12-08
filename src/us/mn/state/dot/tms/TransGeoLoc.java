@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,16 @@ public class TransGeoLoc implements GeoLoc {
 	public TransGeoLoc(Road road, short rd, float lt, float ln) {
 		roadway = road;
 		road_dir = rd;
+		lat = lt;
+		lon = ln;
+	}
+
+	/** Create a transient location.
+	 * @param lt Latitude.
+	 * @param ln Longitude. */
+	public TransGeoLoc(float lt, float ln) {
+		roadway = null;
+		road_dir = 0;
 		lat = lt;
 		lon = ln;
 	}
