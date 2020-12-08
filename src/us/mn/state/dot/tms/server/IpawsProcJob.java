@@ -94,6 +94,14 @@ public class IpawsProcJob extends Job {
 	 */
 	static private final int OFFSET_SECS = 30;
 
+	/** Allowed DMS Message Priority values */
+	static private final DmsMsgPriority[] ALLOWED_PRIORITIES = {
+		DmsMsgPriority.PSA,
+		DmsMsgPriority.ALERT,
+		DmsMsgPriority.AWS,
+		DmsMsgPriority.AWS_HIGH
+	};
+
 	/** Log an IPAWS message */
 	static public void log(String msg) {
 		if (IPAWS_LOG.isOpen())
@@ -314,21 +322,14 @@ public class IpawsProcJob extends Job {
 			return ms.toString();
 		}
 
-		// return null if we couldn't generate a valid message (nothing else
-		// will happen)
+		// return null if we couldn't generate a valid message (nothing
+		// else will happen)
 		return null;
 	}
 
-	/** Allowed DMS Message Priority values */
-	private final static DmsMsgPriority[] ALLOWED_PRIORITIES = {
-			DmsMsgPriority.PSA,
-			DmsMsgPriority.ALERT,
-			DmsMsgPriority.AWS,
-			DmsMsgPriority.AWS_HIGH
-	};
-
 	/** Calculate the message priority for an alert given the urgency,
-	 *  severity, and certainty values and weights stored as system attributes.
+	 *  severity, and certainty values and weights stored as system
+	 *  attributes.
 	 */
 	private DmsMsgPriority calculateMsgPriority(IpawsAlertImpl ia) {
 		// get the weights
@@ -389,7 +390,7 @@ public class IpawsProcJob extends Job {
 		// collect alert deployers that have been created so we can notify
 		// clients about them
 		ArrayList<IpawsDeployerImpl> iadList =
-				new ArrayList<IpawsDeployerImpl>();
+			new ArrayList<IpawsDeployerImpl>();
 
 		while (it.hasNext()) {
 			IpawsConfig iac = it.next();
@@ -434,8 +435,8 @@ public class IpawsProcJob extends Job {
 		// note that the alert has been processed - if no deployers were
 		// created, the alert can be purged
 		if (iadList.isEmpty() && ia.getPurgeable() == null) {
-			log("No alert deployers created for " +
-					ia.getName() + ", marking alert as purgeable");
+			log("No alert deployers created for " + ia.getName() +
+				", marking alert as purgeable");
 			ia.doSetPurgeable(true);
 		} else if (!iadList.isEmpty())
 			ia.doSetPurgeable(false);
@@ -447,25 +448,27 @@ public class IpawsProcJob extends Job {
 	 *  and other object creating housekeeping.
 	 */
 	private IpawsDeployerImpl createDeployer(IpawsAlertImpl ia,
-			String[] adms, IpawsConfig iac)
-			throws SonarException, TMSException {
+		String[] adms, IpawsConfig iac) throws SonarException,
+		TMSException
+	{
 		// try to look up the most recent deployer object for this alert
-		IpawsDeployerImpl iad =
-				IpawsDeployerImpl.lookupFromAlert(
-						ia.getName(), iac.getName());
+		IpawsDeployerImpl iad = IpawsDeployerImpl.lookupFromAlert(
+			ia.getName(), iac.getName());
 
 		// get alert start/end times
 		Date aStart = IpawsAlertHelper.getAlertStart(ia);
 		Date aEnd = ia.getExpirationDate();
 
-		// check the time against the alert deployer - if it's past the after
-		// alert time, don't make a deployer and cancel any previous one
+		// check the time against the alert deployer - if it's past the
+		// after alert time, don't make a deployer and cancel any
+		// previous one
 		if (iad != null && iad.isPastPostAlertTime(aEnd)) {
 			log("Past alert display end time. Canceling any " +
-					"existing messages and not posting any more.");
+				"existing messages and not posting any more.");
 			iad.setDeployedNotify(false);
 
-			// mark the alert as non-purgeable - we want to keep it for records
+			// mark the alert as non-purgeable - we want to keep it
+			// for records
 			ia.doSetPurgeable(false);
 			return null;
 		}
@@ -476,8 +479,8 @@ public class IpawsProcJob extends Job {
 		// if we got a message, calculate priority
 		int priority = calculateMsgPriority(ia).ordinal();
 
-		// check if any attributes have changed from this last deployer (if we
-		// got one)
+		// check if any attributes have changed from this last deployer
+		// (if we got one)
 		boolean updated = iad != null && !iad.autoValsEqual(
 				aStart, aEnd, adms, autoMulti, priority);
 		if (iad == null || updated) {
@@ -486,12 +489,14 @@ public class IpawsProcJob extends Job {
 
 			// make a new GeoLoc based on the alert's
 			GeoLoc igl = ia.getGeoLoc();
-			GeoLocImpl gl = new GeoLocImpl(name, IpawsDeployer.SONAR_TYPE,
-					igl.getLat(), igl.getLon());
+			GeoLocImpl gl = new GeoLocImpl(name,
+				IpawsDeployer.SONAR_TYPE, igl.getLat(),
+				igl.getLon());
 			gl.notifyCreate();
 
-			// make sure to note that this is a replacement - when this is
-			// eventually deployed that will be used to cancel the old alert
+			// make sure to note that this is a replacement - when
+			// this is eventually deployed that will be used to
+			// cancel the old alert
 			String replaces = null;
 			String[] ddms = null;
 			int preAlert = iac.getPreAlertTime();
@@ -566,54 +571,65 @@ public class IpawsProcJob extends Job {
 	}
 
 	/** Process the alert for deploying, checking the mode (auto or manual)
-	 *  first. In manual mode, this sends a push notification to clients to
-	 *  request a user to review and approve the alert. In auto mode, this
-	 *  either deploys the alert then sends a notification indicating the
-	 *  new alert, or (if a non-zero timeout is configured) sends a
+	 *  first.  In manual mode, this sends a push notification to clients
+	 *  to request a user to review and approve the alert.  In auto mode,
+	 *  this either deploys the alert then sends a notification indicating
+	 *  the new alert, or (if a non-zero timeout is configured) sends a
 	 *  notification then waits until the timeout has elapsed and (if a user
 	 *  hasn't deployed it manually) deploys the alert.
 	 */
 	private void deployAlert(IpawsDeployerImpl iad, IpawsAlertImpl ia)
-					throws TMSException, SonarException {
+		throws TMSException, SonarException
+	{
 		// check the deploy mode and timeouts in system attributes
 		boolean autoMode = SystemAttrEnum.IPAWS_DEPLOY_AUTO_MODE.getBoolean();
 		int timeout = SystemAttrEnum.IPAWS_DEPLOY_AUTO_TIMEOUT_SECS.getInt();
 
-		// generate and send the notification - the static method handles
-		// the content of the notification based on the mode and timeout
-		NotificationImpl pn = getNotification(ia.getEvent(),
-				autoMode, timeout, iad.getName());
+		// generate and send the notification - the static method
+		// handles the content of the notification based on the mode
+		// and timeout
+		NotificationImpl pn = getNotification(ia.getEvent(), autoMode,
+			timeout, iad.getName());
 
 		// process the alert deployment/notification updates
 		if (autoMode) {
 			// auto mode - check timeout first
 			if (timeout > 0) {
-				// non-zero timeout - wait for timeout to pass. NOTE that this
-				// is already happening in it's own thread, so we will just
-				// wait here
+				// non-zero timeout - wait for timeout to pass.
+				// NOTE that this is already happening in it's
+				// own thread, so we will just wait here
 				for (int i = 0; i < timeout; i++) {
 					// wait a second
 					try { Thread.sleep(1000); }
-					catch (InterruptedException e) { /* Ignore */ }
+					catch (InterruptedException e) {
+						/* Ignore */
+					}
 
-					// update the notification with a new message (so the user
-					// knows how much time they have before the alert deploys)
+					// update the notification with a new
+					// message (so the user knows how much
+					// time they have before the alert
+					// deploys)
 					pn.setDescriptionNotify(getTimeoutString(
 							ia.getEvent(), timeout - i));
 				}
 
-				// after timeout passes, check if the alert has been deployed
+				// after timeout passes, check if the alert has
+				// been deployed
 				if (iad.getDeployed() == null) {
-					// if it hasn't, deploy it (if it has, we're done!)
+					// if it hasn't, deploy it (if it has,
+					// we're done!)
 					iad.setDeployedNotify(true);
 
-					// change the description - use the no-timeout description
+					// change the description - use the
+					// no-timeout description
 					pn.setDescriptionNotify(getNoTimeoutDescription(
 							ia.getEvent()));
 
-					// also record that it was addressed automatically so the
-					// notification goes away
-					// TODO may want to make this an option to force reviewing
+					// also record that it was addressed
+					// automatically so the notification
+					// goes away
+					// TODO may want to make this an option
+					// to force reviewing
 					pn.setAddressedByNotify("auto");
 					pn.setAddressedTimeNotify(new Date());
 				}
@@ -629,9 +645,10 @@ public class IpawsProcJob extends Job {
 	 *  deployment mode (auto/manual), timeout, and the name of the deployer
 	 *  object.
 	 */
-	private static NotificationImpl getNotification(String event,
-			boolean autoMode, int timeout, String dName)
-				throws TMSException, SonarException {
+	static private NotificationImpl getNotification(String event,
+		boolean autoMode, int timeout, String dName)
+		throws TMSException, SonarException
+	{
 		// substitute the event type into the notification title
 		String title;
 		try {
@@ -656,11 +673,12 @@ public class IpawsProcJob extends Job {
 			}
 		}
 		// create the notification object with the values we got
-		// note that users must be able to write alert deployer objects to see
-		// these (otherwise they won't be able to to approve them)
+		// note that users must be able to write alert deployer objects
+		// to see these (otherwise they won't be able to to approve
+		// them)
 		NotificationImpl pn = new NotificationImpl(
-				IpawsDeployer.SONAR_TYPE, dName,
-				true, title, description);
+			IpawsDeployer.SONAR_TYPE, dName, true, title,
+			description);
 		log("Sending notification " + pn.getName());
 
 		// notify clients of the creation so they receive it, then return

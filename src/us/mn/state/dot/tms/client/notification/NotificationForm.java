@@ -31,37 +31,39 @@ import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Form for displaying push notifications indicating something requiring user
- * interaction. Note that none of these fields are editable.
+ * interaction.  Note that none of these fields are editable.
  *
  * @author Gordon Parikh
  */
 @SuppressWarnings("serial")
 public class NotificationForm extends ProxyTableForm<Notification> {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(Notification.SONAR_TYPE);
+	}
+
 	/** Button to address all notifications */
-	private JButton addressAllBtn;
+	private final JButton addressAllBtn;
 
 	/** Action to address all notifications */
-	private final IAction addressAll =
-			new IAction("notification.address_all") {
+	private final IAction addressAll = new IAction(
+		"notification.address_all")
+	{
 		@Override
-		protected void doActionPerformed(ActionEvent ev) throws Exception {
-			// show a dialog asking for confirmation
+		protected void doActionPerformed(ActionEvent ev)
+			throws Exception
+		{
 			int ret = JOptionPane.showConfirmDialog(
-					Session.getCurrent().getDesktop(),
-					I18N.get("notification.address_all_msg"),
-					I18N.get("notification.address_all_title"),
-					JOptionPane.YES_NO_OPTION);
+				Session.getCurrent().getDesktop(),
+				I18N.get("notification.address_all_msg"),
+				I18N.get("notification.address_all_title"),
+				JOptionPane.YES_NO_OPTION);
 			System.out.println("Got: " + ret);
 			if (ret == 0)
 				NotificationHelper.addressAll(Session.getCurrent());
 		}
 	};
-
-	/** Check if the user is permitted to use the form */
-	static public boolean isPermitted(Session s) {
-		return s.canRead(Notification.SONAR_TYPE);
-	}
 
 	/** Create a new Push Notification form */
 	public NotificationForm(Session s, MapBean map, ScreenPane p) {

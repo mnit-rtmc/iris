@@ -23,9 +23,9 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Notification;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.ScreenPane;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.map.LayerState;
 import us.mn.state.dot.tms.client.map.MapBean;
-import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyLayerState;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
@@ -151,21 +151,3 @@ public class NotificationProxyPanel extends ProxyTablePanel<Notification> {
 			session.getDesktop().closeForm(form);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
