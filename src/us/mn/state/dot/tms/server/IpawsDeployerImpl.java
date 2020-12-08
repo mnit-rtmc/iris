@@ -58,7 +58,7 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	static private TimeUnit prePostTimeUnits = TimeUnit.HOURS;
 
 	/** Lookup an IpawsDeployerImpl given and IpawsAlert identifier/name
-	 *  and an IpawsAlertConfig name. Returns the most recent active deployer
+	 *  and an IpawsConfig name. Returns the most recent active deployer
 	 *  for the alert with a matching config.
 	 */
 	static public IpawsDeployerImpl lookupFromAlert(
@@ -392,7 +392,7 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		return alert_end;
 	}
 
-	/** IpawsAlertConfig used for this deployment */
+	/** IpawsConfig used for this deployment */
 	private String config;
 
 	/** Set the config used for this deployment */

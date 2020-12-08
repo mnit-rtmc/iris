@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.alert;
 
-import us.mn.state.dot.tms.IpawsAlertConfig;
+import us.mn.state.dot.tms.IpawsConfig;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.utils.I18N;
@@ -25,11 +25,11 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Gordon Parikh
  */
 @SuppressWarnings("serial")
-public class AlertConfigForm extends ProxyTableForm<IpawsAlertConfig> {
+public class AlertConfigForm extends ProxyTableForm<IpawsConfig> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.isWritePermitted(IpawsAlertConfig.SONAR_TYPE);
+		return s.isWritePermitted(IpawsConfig.SONAR_TYPE);
 	}
 
 	/** Create a new alert config form */

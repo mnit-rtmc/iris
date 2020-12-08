@@ -46,9 +46,9 @@ import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.IpawsAlert;
-import us.mn.state.dot.tms.IpawsAlertConfig;
-import us.mn.state.dot.tms.IpawsAlertConfigHelper;
 import us.mn.state.dot.tms.IpawsAlertHelper;
+import us.mn.state.dot.tms.IpawsConfig;
+import us.mn.state.dot.tms.IpawsConfigHelper;
 import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.IpawsDeployerHelper;
 import us.mn.state.dot.tms.NotificationHelper;
@@ -201,7 +201,7 @@ public class IpawsProcJob extends Job {
 	}
 
 	/** Generate a MULTI message from an alert and alert config. */
-	private String generateMulti(IpawsAlertImpl ia, IpawsAlertConfig iac,
+	private String generateMulti(IpawsAlertImpl ia, IpawsConfig iac,
 			Date alertStart, Date alertEnd) {
 		// get the message template from the alert config
 		String qmn = iac.getQuickMessage();
@@ -350,7 +350,7 @@ public class IpawsProcJob extends Job {
 
 	/** Check the IpawsAlert provided for relevance to this system and (if
 	 *  relevant) process it for posting. Relevance is determined based on
-	 *  whether there is one or more existing IpawsAlertConfig objects that
+	 *  whether there is one or more existing IpawsConfig objects that
 	 *  match the event in the alert and whether the alert area(s) encompass
 	 *  any DMS known to the system.
 	 *
@@ -365,13 +365,13 @@ public class IpawsProcJob extends Job {
 	 *  If no signs are found, no deployer object is created and the IpawsAlert
 	 *  object is marked purgeable.
 	 *
-	 *  One deployer object is created for each matching IpawsAlertConfig,
+	 *  One deployer object is created for each matching IpawsConfig,
 	 *  allowing different messages to be posted to different sign types.
 	 */
 	private void processAlert(IpawsAlertImpl ia) throws TMSException {
 		// get alert configs for this event type
 		String event = ia.getEvent();
-		Iterator<IpawsAlertConfig> it = IpawsAlertConfigHelper.iterator();
+		Iterator<IpawsConfig> it = IpawsConfigHelper.iterator();
 
 		// collect alert deployers that have been created so we can notify
 		// clients about them
@@ -379,7 +379,7 @@ public class IpawsProcJob extends Job {
 				new ArrayList<IpawsDeployerImpl>();
 
 		while (it.hasNext()) {
-			IpawsAlertConfig iac = it.next();
+			IpawsConfig iac = it.next();
 			if (event.equals(iac.getEvent())) {
 				// query the list of DMS that falls within the MultiPolygon
 				// for this alert - use array_agg to get one array instead of
@@ -434,7 +434,7 @@ public class IpawsProcJob extends Job {
 	 *  and other object creating housekeeping.
 	 */
 	private IpawsDeployerImpl createDeployer(IpawsAlertImpl ia,
-			String[] adms, IpawsAlertConfig iac)
+			String[] adms, IpawsConfig iac)
 			throws SonarException, TMSException {
 		// try to look up the most recent deployer object for this alert
 		IpawsDeployerImpl iad =

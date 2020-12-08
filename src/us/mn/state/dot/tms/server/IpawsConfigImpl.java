@@ -18,7 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.tms.IpawsAlertConfig;
+import us.mn.state.dot.tms.IpawsConfig;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -29,18 +29,14 @@ import us.mn.state.dot.tms.TMSException;
  *
  * @author Gordon Parikh
  */
-public class IpawsAlertConfigImpl extends BaseObjectImpl
-	implements IpawsAlertConfig {
+public class IpawsConfigImpl extends BaseObjectImpl implements IpawsConfig {
 
-	/** Database table name */
-	static private final String TABLE = "iris.ipaws_alert_config";
-
-	/** Lookup the IpawsAlertConfigImpl object with the given name. */
-	public static IpawsAlertConfigImpl lookupConfigImpl(String name) {
-		return lookupIpawsAlertConfig(name);
+	/** Lookup the IpawsConfigImpl object with the given name. */
+	public static IpawsConfigImpl lookupConfigImpl(String name) {
+		return lookupIpawsConfig(name);
 	}
 
-	private IpawsAlertConfigImpl(ResultSet row) throws SQLException {
+	private IpawsConfigImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),		// name
 			row.getString(2),		// event
 			row.getString(3),		// sign group
@@ -50,11 +46,11 @@ public class IpawsAlertConfigImpl extends BaseObjectImpl
 		);
 	}
 
-	public IpawsAlertConfigImpl(String n) {
+	public IpawsConfigImpl(String n) {
 		super(n);
 	}
 
-	public IpawsAlertConfigImpl(String n, String ev, String sg,
+	public IpawsConfigImpl(String n, String ev, String sg,
 			String qm, int preh, int posth) {
 		super(n);
 		event = ev;
@@ -78,7 +74,7 @@ public class IpawsAlertConfigImpl extends BaseObjectImpl
 
 	/** Load all the IPAWS alert config objects */
 	static public void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, IpawsAlertConfigImpl.class);
+		namespace.registerType(SONAR_TYPE, IpawsConfigImpl.class);
 		store.query("SELECT name, event, sign_group, quick_message, " +
 				"pre_alert_time, post_alert_time FROM iris." +
 				SONAR_TYPE + ";", new ResultFactory()
@@ -86,7 +82,7 @@ public class IpawsAlertConfigImpl extends BaseObjectImpl
 			@Override
 			public void create(ResultSet row) throws Exception {
 				try {
-					namespace.addObject(new IpawsAlertConfigImpl(row));
+					namespace.addObject(new IpawsConfigImpl(row));
 				} catch (Exception e) {
 					// TODO do we need/want this??
 					System.out.println(row.getString(1));

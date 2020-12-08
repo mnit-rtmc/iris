@@ -22,7 +22,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
 
-import us.mn.state.dot.tms.IpawsAlertConfig;
+import us.mn.state.dot.tms.IpawsConfig;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.Session;
@@ -36,11 +36,11 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Gordon Parikh
  */
 @SuppressWarnings("serial")
-public class AlertConfigModel extends ProxyTableModel<IpawsAlertConfig> {
+public class AlertConfigModel extends ProxyTableModel<IpawsConfig> {
 
 	/** Create a proxy descriptor */
-	static public ProxyDescriptor<IpawsAlertConfig> descriptor(Session s) {
-		return new ProxyDescriptor<IpawsAlertConfig>(
+	static public ProxyDescriptor<IpawsConfig> descriptor(Session s) {
+		return new ProxyDescriptor<IpawsConfig>(
 				s.getSonarState().getIpawsConfigCache(), false, true, true);
 	}
 
@@ -49,29 +49,29 @@ public class AlertConfigModel extends ProxyTableModel<IpawsAlertConfig> {
 
 	/** Create the columns in the model */
 	@Override
-	protected ArrayList<ProxyColumn<IpawsAlertConfig>> createColumns() {
-		ArrayList<ProxyColumn<IpawsAlertConfig>> cols =
-				new ArrayList<ProxyColumn<IpawsAlertConfig>>(3);
-		cols.add(new ProxyColumn<IpawsAlertConfig>("alert.config.event", 300) {
-			public Object getValueAt(IpawsAlertConfig iac) {
+	protected ArrayList<ProxyColumn<IpawsConfig>> createColumns() {
+		ArrayList<ProxyColumn<IpawsConfig>> cols =
+				new ArrayList<ProxyColumn<IpawsConfig>>(3);
+		cols.add(new ProxyColumn<IpawsConfig>("alert.config.event", 300) {
+			public Object getValueAt(IpawsConfig iac) {
 				return iac.getEvent();
 			}
-			public boolean isEditable(IpawsAlertConfig iac) {
+			public boolean isEditable(IpawsConfig iac) {
 				return canWrite(iac);
 			}
-			public void setValueAt(IpawsAlertConfig iac, Object value) {
+			public void setValueAt(IpawsConfig iac, Object value) {
 				iac.setEvent(value.toString());
 			}
 		});
-		cols.add(new ProxyColumn<IpawsAlertConfig>(
+		cols.add(new ProxyColumn<IpawsConfig>(
 				"alert.config.sign_group", 200) {
-			public Object getValueAt(IpawsAlertConfig iac) {
+			public Object getValueAt(IpawsConfig iac) {
 				return iac.getSignGroup();
 			}
-			public boolean isEditable(IpawsAlertConfig iac) {
+			public boolean isEditable(IpawsConfig iac) {
 				return canWrite(iac);
 			}
-			public void setValueAt(IpawsAlertConfig iac, Object value) {
+			public void setValueAt(IpawsConfig iac, Object value) {
 				iac.setSignGroup((String) value);
 			}
 			protected TableCellEditor createCellEditor() {
@@ -87,15 +87,15 @@ public class AlertConfigModel extends ProxyTableModel<IpawsAlertConfig> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<IpawsAlertConfig>(
+		cols.add(new ProxyColumn<IpawsConfig>(
 				"alert.config.quick_message", 200) {
-			public Object getValueAt(IpawsAlertConfig iac) {
+			public Object getValueAt(IpawsConfig iac) {
 				return iac.getQuickMessage();
 			}
-			public boolean isEditable(IpawsAlertConfig iac) {
+			public boolean isEditable(IpawsConfig iac) {
 				return canWrite(iac);
 			}
-			public void setValueAt(IpawsAlertConfig iac, Object value) {
+			public void setValueAt(IpawsConfig iac, Object value) {
 				iac.setQuickMessage((String) value);
 			}
 			protected TableCellEditor createCellEditor() {
@@ -111,15 +111,15 @@ public class AlertConfigModel extends ProxyTableModel<IpawsAlertConfig> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<IpawsAlertConfig>(
+		cols.add(new ProxyColumn<IpawsConfig>(
 				"alert.config.pre_alert_time", 100) {
-			public Object getValueAt(IpawsAlertConfig iac) {
+			public Object getValueAt(IpawsConfig iac) {
 				return iac.getPreAlertTime();
 			}
-			public boolean isEditable(IpawsAlertConfig iac) {
+			public boolean isEditable(IpawsConfig iac) {
 				return canWrite(iac);
 			}
-			public void setValueAt(IpawsAlertConfig iac, Object value) {
+			public void setValueAt(IpawsConfig iac, Object value) {
 				try {
 					iac.setPreAlertTime(Integer.valueOf(value.toString()));
 				} catch (NumberFormatException e) {
@@ -127,15 +127,15 @@ public class AlertConfigModel extends ProxyTableModel<IpawsAlertConfig> {
 				}
 			}
 		});
-		cols.add(new ProxyColumn<IpawsAlertConfig>(
+		cols.add(new ProxyColumn<IpawsConfig>(
 				"alert.config.post_alert_time", 100) {
-			public Object getValueAt(IpawsAlertConfig iac) {
+			public Object getValueAt(IpawsConfig iac) {
 				return iac.getPostAlertTime();
 			}
-			public boolean isEditable(IpawsAlertConfig iac) {
+			public boolean isEditable(IpawsConfig iac) {
 				return canWrite(iac);
 			}
-			public void setValueAt(IpawsAlertConfig iac, Object value) {
+			public void setValueAt(IpawsConfig iac, Object value) {
 				try {
 					iac.setPostAlertTime(Integer.valueOf(value.toString()));
 				} catch (NumberFormatException e) {

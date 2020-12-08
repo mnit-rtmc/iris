@@ -49,7 +49,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.IpawsAlert;
-import us.mn.state.dot.tms.IpawsAlertConfig;
+import us.mn.state.dot.tms.IpawsConfig;
 import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
@@ -291,11 +291,11 @@ public class SonarState extends Client {
 		return ipaws_deployer_cache;
 	}
 	
-	/** Cache of IpawsAlertConfig objects */
-	private final TypeCache<IpawsAlertConfig> ipaws_config_cache;
+	/** Cache of IpawsConfig objects */
+	private final TypeCache<IpawsConfig> ipaws_config_cache;
 	
 	/** Get the IPAWS Alert Deployer cache */
-	public TypeCache<IpawsAlertConfig> getIpawsConfigCache() {
+	public TypeCache<IpawsConfig> getIpawsConfigCache() {
 		return ipaws_config_cache;
 	}
 	
@@ -589,10 +589,10 @@ public class SonarState extends Client {
 			this);
 		ipaws_deployer_cache = new TypeCache<IpawsDeployer>(
 			IpawsDeployer.class, this);
-		ipaws_config_cache = new TypeCache<IpawsAlertConfig>(
-				IpawsAlertConfig.class, this);
+		ipaws_config_cache = new TypeCache<IpawsConfig>(
+			IpawsConfig.class, this);
 		cap_response_type_cache = new TypeCache<CapResponseType>(
-				CapResponseType.class, this);
+			CapResponseType.class, this);
 		cap_urgency_cache = new TypeCache<CapUrgency>(CapUrgency.class,
 			this);
 		notification_cache = new TypeCache<Notification>(

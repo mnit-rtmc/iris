@@ -17,16 +17,16 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * IPAWS Alert Configuration object. Connects a particular alert type ("event"
+ * IPAWS Alert Configuration object.  Connects a particular alert type ("event"
  * field) to a number of sign group/quick message pairs to control which signs
  * are eligible for inclusion in an alert and which message template to use.
  *
  * @author Gordon Parikh
  */
-public interface IpawsAlertConfig extends SonarObject {
+public interface IpawsConfig extends SonarObject {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "ipaws_alert_config";
+	String SONAR_TYPE = "ipaws_config";
 
 	/** Set the alert event type */
 	void setEvent(String ev);

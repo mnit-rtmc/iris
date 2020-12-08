@@ -123,7 +123,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		DMSImpl.updateAllStyles();
 		RptConduitImpl.loadAll();
 		IpawsAlertImpl.loadAll();
-		IpawsAlertConfigImpl.loadAll();
+		IpawsConfigImpl.loadAll();
 		IpawsDeployerImpl.loadAll();
 		CapResponseTypeImpl.loadAll();
 		CapUrgencyImpl.loadAll();
@@ -357,12 +357,10 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	}
 	
 	/** Lookup an IPAWS Alert Config */
-	static protected IpawsAlertConfigImpl
-	lookupIpawsAlertConfig(String name) {
-		SonarObject so = lookupObject(
-				IpawsAlertConfigImpl.SONAR_TYPE, name);
-		return (so instanceof IpawsAlertConfigImpl)
-				? (IpawsAlertConfigImpl) so : null;
+	static protected IpawsConfigImpl lookupIpawsConfig(String name) {
+		SonarObject so = lookupObject(IpawsConfigImpl.SONAR_TYPE, name);
+		return (so instanceof IpawsConfigImpl)
+			? (IpawsConfigImpl) so : null;
 	}
 
 	/** Get the primary key name */

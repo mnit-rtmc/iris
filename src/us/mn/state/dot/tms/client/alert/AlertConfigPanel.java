@@ -15,11 +15,10 @@
 package us.mn.state.dot.tms.client.alert;
 
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.IpawsAlertConfig;
-import us.mn.state.dot.tms.IpawsAlertConfigHelper;
+import us.mn.state.dot.tms.IpawsConfig;
+import us.mn.state.dot.tms.IpawsConfigHelper;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
-
 
 /**
  * A panel for displaying and editing (IPAWS) alert configurations.
@@ -27,12 +26,12 @@ import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
  * @author Gordon Parikh
  */
 @SuppressWarnings("serial")
-public class AlertConfigPanel extends ProxyTablePanel<IpawsAlertConfig> {
+public class AlertConfigPanel extends ProxyTablePanel<IpawsConfig> {
 
 	/** TypeCache for looking up objects after creation */
-	private final TypeCache<IpawsAlertConfig> cache;
+	private final TypeCache<IpawsConfig> cache;
 
-	public AlertConfigPanel(ProxyTableModel<IpawsAlertConfig> m) {
+	public AlertConfigPanel(ProxyTableModel<IpawsConfig> m) {
 		super(m);
 		cache = m.getSession().getSonarState().getIpawsConfigCache();
 	}
@@ -47,11 +46,11 @@ public class AlertConfigPanel extends ProxyTablePanel<IpawsAlertConfig> {
 		add_txt.setText("");
 
 		// generate a new unique name
-		String name = IpawsAlertConfigHelper.createUniqueName();
+		String name = IpawsConfigHelper.createUniqueName();
 
 		// create the object with the unique name then set the label
 		cache.createObject(name);
-		IpawsAlertConfig ct = cache.lookupObjectWait(name);
+		IpawsConfig ct = cache.lookupObjectWait(name);
 		ct.setEvent(ev);
 	}
 }

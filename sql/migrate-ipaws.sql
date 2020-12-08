@@ -25,7 +25,7 @@ INSERT INTO iris.sonar_type (name) VALUES
 	('cap_response_type'),
 	('cap_urgency'),
 	('ipaws'),
-	('ipaws_alert_config'),
+	('ipaws_config'),
 	('ipaws_deployer'),
 	('notification');
 
@@ -116,7 +116,7 @@ CREATE TABLE event.ipaws_deployer (
 );
 
 -- IPAWS Alert Config table
-CREATE TABLE iris.ipaws_alert_config (
+CREATE TABLE iris.ipaws_config (
 	name varchar(24) PRIMARY KEY,
 	event text,
 	sign_group varchar(20) REFERENCES iris.sign_group(name),
@@ -169,7 +169,7 @@ ALTER TABLE iris.privilege ALTER COLUMN type_n TYPE varchar(32);
 
 -- Recreate view
 CREATE VIEW role_privilege_view AS
-    SELECT role, role_capability.capability, type_n, obj_n, group_n, attr_n,
+	SELECT role, role_capability.capability, type_n, obj_n, group_n, attr_n,
 	       write
 	FROM iris.role
 	JOIN iris.role_capability ON role.name = role_capability.role
@@ -178,20 +178,21 @@ CREATE VIEW role_privilege_view AS
 	WHERE role.enabled = 't' AND capability.enabled = 't';
 GRANT SELECT ON role_privilege_view TO PUBLIC;
 
-INSERT INTO iris.privilege (name,capability,type_n,obj_n,attr_n,group_n,write) VALUES
-	('PRV_001C','base','notification','','','',false),
+INSERT INTO iris.privilege (name, capability, type_n, obj_n, attr_n, group_n,
+                            write)
+VALUES	('PRV_001C','base','notification','','','',false),
 	('PRV_001D','base','notification','','','',true),
 	('PRV_009A','ipaws_admin','cap_response_type','','','',true),
 	('PRV_009B','ipaws_admin','cap_urgency','','','',true),
 	('PRV_009C','ipaws_admin','ipaws','','','',true),
 	('PRV_009D','ipaws_admin','ipaws_deployer','','','',true),
-	('PRV_009E','ipaws_admin','ipaws_alert_config','','','',true),
+	('PRV_009E','ipaws_admin','ipaws_config','','','',true),
 	('PRV_009F','ipaws_deploy','ipaws_deployer','','','',true),
 	('PRV_009G','ipaws_tab','cap_response_type','','','',false),
 	('PRV_009H','ipaws_tab','cap_urgency','','','',false),
 	('PRV_009I','ipaws_tab','ipaws','','','',false),
 	('PRV_009J','ipaws_tab','ipaws_deployer','','','',false),
-	('PRV_009K','ipaws_tab','ipaws_alert_config','','','',false);
+	('PRV_009K','ipaws_tab','ipaws_config','','','',false);
 
 INSERT INTO iris.role_capability (role, capability) VALUES
 	('administrator', 'ipaws_admin'),

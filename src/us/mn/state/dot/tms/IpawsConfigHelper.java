@@ -22,23 +22,23 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
  *
  * @author Gordon Parikh
  */
-public class IpawsAlertConfigHelper extends BaseHelper {
+public class IpawsConfigHelper extends BaseHelper {
 
 	/** Don't instantiate */
-	private IpawsAlertConfigHelper() {
+	private IpawsConfigHelper() {
 		assert false;
 	}
 
 	/** Lookup the alert config with the specified name */
-	static public IpawsAlertConfig lookup(String name) {
-		return (IpawsAlertConfig) namespace.lookupObject(
-				IpawsAlertConfig.SONAR_TYPE, name);
+	static public IpawsConfig lookup(String name) {
+		return (IpawsConfig) namespace.lookupObject(
+				IpawsConfig.SONAR_TYPE, name);
 	}
 
-	/** Get an IpawsAlertConfig object iterator */
-	static public Iterator<IpawsAlertConfig> iterator() {
-		return new IteratorWrapper<IpawsAlertConfig>(namespace.iterator(
-				IpawsAlertConfig.SONAR_TYPE));
+	/** Get an IpawsConfig object iterator */
+	static public Iterator<IpawsConfig> iterator() {
+		return new IteratorWrapper<IpawsConfig>(namespace.iterator(
+				IpawsConfig.SONAR_TYPE));
 	}
 
 	/** Name creator */
@@ -48,7 +48,7 @@ public class IpawsAlertConfigHelper extends BaseHelper {
 		UNC.setMaxLength(24);
 	}
 
-	/** Create a unique IpawsAlertConfig record name */
+	/** Create a unique IpawsConfig record name */
 	static public String createUniqueName() {
 		return UNC.createUniqueName();
 	}
