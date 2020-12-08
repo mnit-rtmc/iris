@@ -66,6 +66,9 @@ public class MainServer {
 	/** Flush thread for disk writing jobs */
 	static public final Scheduler FLUSH = new Scheduler("flush");
 
+	/** Timer thread for IPAWS jobs */
+	static private final Scheduler IPAWS = new Scheduler("ipaws");
+
 	/** Sample archive factory */
 	static public final SampleArchiveFactoryImpl a_factory =
 		new SampleArchiveFactoryImpl();
@@ -147,7 +150,6 @@ public class MainServer {
 		}
 	}
 
-
 	/** Create a buffered print stream to a log file */
 	static private PrintStream createPrintStream(String fname)
 		throws IOException
@@ -207,7 +209,7 @@ public class MainServer {
 		TIMER.addJob(new ParkingAreaJob());
 		TIMER.addJob(new ReaperJob());
 		TIMER.addJob(new ActionPlanJob(TIMER));
-		TIMER.addJob(new IpawsProcJob());
+		IPAWS.addJob(new IpawsProcJob());
 	}
 
 	/** Schedule jobs on FLUSH thread */

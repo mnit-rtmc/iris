@@ -109,94 +109,107 @@ public class IpawsProcJob extends Job {
 	@Override
 	public void perform() throws Exception {
 		try {
-			// go through all alerts
-			Iterator<IpawsAlertImpl> it = IpawsAlertImpl.iterator();
-			while (it.hasNext()) {
-				IpawsAlertImpl ia = it.next();
-
-				if (ia.getPurgeable() == null) {
-					log("Processing IPAWS " + "alert: " + ia.getName());
-
-					String area = ia.getArea();
-					log(area);
-
-					// normalize the geometry and get a geographic object
-					// (sets the polygon on the alert object for us, or marks
-					// purgeable if we have to stop
-					getGeogPoly(ia);
-
-					// if we couldn't get any geometry, we have to stop
-					if (ia.getGeoPoly() == null)
-						continue;
-
-					// generate a GeoLoc for the alert (the alert area's
-					// centroid)
-					getGeoLoc(ia);
-
-					// find DMS in the polygon and generate an alert deployer
-					// object this will complete all processing of this alert
-					// for this cycle
-					processAlert(ia);
-				} else if (Boolean.FALSE.equals(ia.getPurgeable())) {
-					// alert has already been processed - check if it has
-					// changed phases and if re-check the alert
-					Date start = IpawsAlertHelper.getAlertStart(ia);
-					Date end = ia.getExpirationDate();
-					Date proc = ia.getLastProcessed();
-					Date now = new Date();
-					if (proc == null)
-						// should never get here, but to guard against nulls
-						ia.doSetPurgeable(null);
-					else if (proc.before(start) && (now.after(start) ||
-								now.equals(start)) && now.before(end)) {
-						// alert hasn't been processed since before alert
-						// start time and alert is now active - reprocess to
-						// create a deployer with the appropriate message
-						log("Alert " + ia.getName() +
-								" is starting");
-						processAlert(ia);
-					} else if (proc.before(end) && (now.after(end)
-							|| now.equals(end))) {
-						// deployer was for during alert - reprocess to create
-						// a new deployer for post-alert (which may blank the
-						// signs)
-						log("Alert " + ia.getName() +
-								" is ending");
-						processAlert(ia);
-					} else {
-						// if the phase isn't changing, get active/approved
-						// alert deployers and try to (re)post messages
-						ArrayList<IpawsDeployer> deployers =
-								IpawsDeployerHelper.getDeployerList(
-										ia.getName(), null, true);
-						for (IpawsDeployer iadp: deployers) {
-							IpawsDeployerImpl iad =
-									IpawsDeployerImpl.
-									lookupIpawsDeployer(iadp.getName());
-
-							if (iad != null && Boolean.TRUE.equals(
-									iad.getDeployed())){
-								// note that this will check the pre/post
-								// alert times and activate/repost/cancel the
-								// alert as appropriate
-								// also note that we call it with the update
-								// flag off - it's only an update if it comes
-								// from the client (otherwise any replaced
-								// deployers are canceled separately)
-								boolean deployed =
-										iad.checkDeployCancel(false);
-								if (!deployed)
-									iad.doSetDeployedSilent(false);
-							}
-						}
-					}
-				}
-			}
+			processAllAlerts();
 		} catch (Exception e) {
 			// if we hit any exceptions, send an email alert
 			e.printStackTrace();
 			sendEmailAlert("Error encountered in IPAWS alert processing " +
 				"system. Check the server logs for details.");
+		}
+	}
+
+	/** Process all alerts */
+	private void processAllAlerts() throws SQLException, TMSException,
+		NoSuchFieldException
+	{
+		Iterator<IpawsAlertImpl> it = IpawsAlertImpl.iterator();
+		while (it.hasNext()) {
+			checkAlert(it.next());
+		}
+	}
+
+	/** Check an IPAWS alert for action needed */
+	private void checkAlert(IpawsAlertImpl ia) throws SQLException,
+		TMSException, NoSuchFieldException
+	{
+		if (ia.getPurgeable() == null) {
+			log("Processing IPAWS " + "alert: " + ia.getName());
+
+			String area = ia.getArea();
+			log(area);
+
+			// normalize the geometry and get a geographic object
+			// (sets the polygon on the alert object for us, or
+			// marks purgeable if we have to stop
+			getGeogPoly(ia);
+
+			// if we couldn't get any geometry, we have to stop
+			if (ia.getGeoPoly() == null)
+				return;
+
+			// generate a GeoLoc for the alert (the alert area's
+			// centroid)
+			getGeoLoc(ia);
+
+			// find DMS in the polygon and generate an alert
+			// deployer object this will complete all processing of
+			// this alert for this cycle
+			processAlert(ia);
+		} else if (Boolean.FALSE.equals(ia.getPurgeable())) {
+			// alert has already been processed - check if it has
+			// changed phases and if re-check the alert
+			Date start = IpawsAlertHelper.getAlertStart(ia);
+			Date end = ia.getExpirationDate();
+			Date proc = ia.getLastProcessed();
+			Date now = new Date();
+			if (proc == null) {
+				// should never get here, but to guard against
+				// nulls
+				ia.doSetPurgeable(null);
+			} else if (proc.before(start) && (now.after(start) ||
+				now.equals(start)) && now.before(end))
+			{
+				// alert hasn't been processed since before
+				// alert start time and alert is now active
+				// - reprocess to create a deployer with the
+				// appropriate message
+				log("Alert " + ia.getName() + " is starting");
+				processAlert(ia);
+			} else if (proc.before(end) && (now.after(end)
+				|| now.equals(end)))
+			{
+				// deployer was for during alert - reprocess to
+				// create a new deployer for post-alert (which
+				// may blank the signs)
+				log("Alert " + ia.getName() + " is ending");
+				processAlert(ia);
+			} else {
+				tryPostAlert(ia);
+			}
+		}
+	}
+
+	/** If the phase isn't changing, get active/approved alert deployers and
+	 *  try to (re)post messages */
+	private void tryPostAlert(IpawsAlertImpl ia) throws TMSException {
+		ArrayList<IpawsDeployer> deployers = IpawsDeployerHelper
+			.getDeployerList(ia.getName(), null, true);
+		for (IpawsDeployer iadp: deployers) {
+			IpawsDeployerImpl iad = IpawsDeployerImpl.
+				lookupIpawsDeployer(iadp.getName());
+			if (iad != null && Boolean.TRUE.equals(
+				iad.getDeployed()))
+			{
+				// note that this will check the pre/post alert
+				// times and activate/repost/cancel the alert as
+				// appropriate also note that we call it with
+				// the update flag off - it's only an update if
+				// it comes from the client (otherwise any
+				// replaced deployers are canceled separately)
+				boolean deployed = iad.checkDeployCancel(false);
+				if (!deployed)
+					iad.doSetDeployedSilent(false);
+			}
 		}
 	}
 
@@ -349,21 +362,21 @@ public class IpawsProcJob extends Job {
 	}
 
 	/** Check the IpawsAlert provided for relevance to this system and (if
-	 *  relevant) process it for posting. Relevance is determined based on
+	 *  relevant) process it for posting.  Relevance is determined based on
 	 *  whether there is one or more existing IpawsConfig objects that
 	 *  match the event in the alert and whether the alert area(s) encompass
 	 *  any DMS known to the system.
 	 *
-	 *  DMS selection uses PostGIS to handle the geospatial operations. This
-	 *  method must be called after getGeoPoly() is used to create a polygon
-	 *  object from the alert's area field, and after that polygon is written
-	 *  to the database with the alert's doSetGeoPoly() method.
+	 *  DMS selection uses PostGIS to handle the geospatial operations.
+	 *  This method must be called after getGeoPoly() is used to create a
+	 *  polygon object from the alert's area field, and after that polygon
+	 *  is written to the database with the alert's doSetGeoPoly() method.
 	 *
-	 *  If at least one sign is selected, an IpawsDeployer object is
-	 *  created to deploy the alert and optionally notify clients for approval.
+	 *  If at least one sign is selected, an IpawsDeployer object is created
+	 *  to deploy the alert and optionally notify clients for approval.
 	 *
-	 *  If no signs are found, no deployer object is created and the IpawsAlert
-	 *  object is marked purgeable.
+	 *  If no signs are found, no deployer object is created and the
+	 *  IpawsAlert object is marked purgeable.
 	 *
 	 *  One deployer object is created for each matching IpawsConfig,
 	 *  allowing different messages to be posted to different sign types.
