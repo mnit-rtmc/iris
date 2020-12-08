@@ -53,7 +53,7 @@ import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.IpawsAlert;
-import us.mn.state.dot.tms.IpawsAlertDeployer;
+import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.NotificationHelper;
 import us.mn.state.dot.tms.TMSException;
@@ -80,7 +80,7 @@ public class AlertDmsDispatcher extends IPanel {
 	private final AlertManager manager;
 
 	/** Currently selected alert (deployer) */
-	private IpawsAlertDeployer selectedAlertDepl;
+	private IpawsDeployer selectedAlertDepl;
 
 	/** Currently selected alert */
 	private IpawsAlert selectedAlert;
@@ -386,7 +386,7 @@ public class AlertDmsDispatcher extends IPanel {
 	}
 
 	/** Set the selected alert, updating the list of DMS. */
-	public void setSelectedAlert(IpawsAlertDeployer iad, IpawsAlert ia) {
+	public void setSelectedAlert(IpawsDeployer iad, IpawsAlert ia) {
 		selectedAlertDepl = iad;
 		selectedAlert = ia;
 

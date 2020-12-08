@@ -18,8 +18,8 @@ import java.util.Date;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * An IpawsAlertDeployer is an object for notifying clients about new or
- * updated alerts from the Integrated Public Alert and Warning System (IPAWS).
+ * An IpawsDeployer is an object for notifying clients about new or updated
+ * alerts from the Integrated Public Alert and Warning System (IPAWS).
  *
  * These objects contain a reference to the alert (via the alert_id), the list
  * of DMS that were selected based on the alert area, the MULTI of the message
@@ -28,10 +28,10 @@ import us.mn.state.dot.sonar.SonarObject;
  *
  * @author Gordon Parikh
  */
-public interface IpawsAlertDeployer extends SonarObject {
+public interface IpawsDeployer extends SonarObject {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "ipaws_alert_deployer";
+	String SONAR_TYPE = "ipaws_deployer";
 
 	/** Set the generation time of this deployer object */
 	void setGenTime(Date gt);

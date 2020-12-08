@@ -27,8 +27,8 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.IpawsAlert;
-import us.mn.state.dot.tms.IpawsAlertDeployer;
-import us.mn.state.dot.tms.IpawsAlertDeployerHelper;
+import us.mn.state.dot.tms.IpawsDeployer;
+import us.mn.state.dot.tms.IpawsDeployerHelper;
 import us.mn.state.dot.tms.IpawsAlertHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
@@ -46,7 +46,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
  *
  * @author Gordon Parikh
  */
-public class AlertTheme extends ProxyTheme<IpawsAlertDeployer> {
+public class AlertTheme extends ProxyTheme<IpawsDeployer> {
 
 	/** Current session */
 	private final Session session;
@@ -137,7 +137,7 @@ public class AlertTheme extends ProxyTheme<IpawsAlertDeployer> {
 			// make sure this is the same deployer
 			MapGeoLoc mgl = (MapGeoLoc) mo;
 			GeoLoc gl = mgl.getGeoLoc();
-			IpawsAlertDeployer iad = IpawsAlertDeployerHelper.
+			IpawsDeployer iad = IpawsDeployerHelper.
 					lookup(gl.getName());
 
 			// if not do whatever
@@ -167,7 +167,7 @@ public class AlertTheme extends ProxyTheme<IpawsAlertDeployer> {
 			// get the GeoLoc from the object and use it to lookup the deployer
 			MapGeoLoc mgl = (MapGeoLoc) mo;
 			GeoLoc gl = mgl.getGeoLoc();
-			IpawsAlertDeployer iad = IpawsAlertDeployerHelper.
+			IpawsDeployer iad = IpawsDeployerHelper.
 					lookup(gl.getName());
 
 			// draw the deployer/alert
@@ -176,7 +176,7 @@ public class AlertTheme extends ProxyTheme<IpawsAlertDeployer> {
 	}
 
 	/** Draw an alert deployer. */
-	private void drawAlert(Graphics2D g, IpawsAlertDeployer iad) {
+	private void drawAlert(Graphics2D g, IpawsDeployer iad) {
 		// save the current transform before drawing anything
 		AffineTransform t = g.getTransform();
 

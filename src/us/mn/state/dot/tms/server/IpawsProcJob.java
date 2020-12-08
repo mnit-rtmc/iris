@@ -48,9 +48,9 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.IpawsAlert;
 import us.mn.state.dot.tms.IpawsAlertConfig;
 import us.mn.state.dot.tms.IpawsAlertConfigHelper;
-import us.mn.state.dot.tms.IpawsAlertDeployer;
-import us.mn.state.dot.tms.IpawsAlertDeployerHelper;
 import us.mn.state.dot.tms.IpawsAlertHelper;
+import us.mn.state.dot.tms.IpawsDeployer;
+import us.mn.state.dot.tms.IpawsDeployerHelper;
 import us.mn.state.dot.tms.NotificationHelper;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
@@ -166,13 +166,13 @@ public class IpawsProcJob extends Job {
 					} else {
 						// if the phase isn't changing, get active/approved
 						// alert deployers and try to (re)post messages
-						ArrayList<IpawsAlertDeployer> deployers =
-								IpawsAlertDeployerHelper.getDeployerList(
+						ArrayList<IpawsDeployer> deployers =
+								IpawsDeployerHelper.getDeployerList(
 										ia.getName(), null, true);
-						for (IpawsAlertDeployer iadp: deployers) {
-							IpawsAlertDeployerImpl iad =
-									IpawsAlertDeployerImpl.
-									lookupIpawsAlertDeployer(iadp.getName());
+						for (IpawsDeployer iadp: deployers) {
+							IpawsDeployerImpl iad =
+									IpawsDeployerImpl.
+									lookupIpawsDeployer(iadp.getName());
 
 							if (iad != null && Boolean.TRUE.equals(
 									iad.getDeployed())){
@@ -234,7 +234,7 @@ public class IpawsProcJob extends Job {
 				}
 
 				// format any time strings in the text and add to the msg
-				String s = IpawsAlertDeployerHelper.replaceTimeFmt(tmplt,
+				String s = IpawsDeployerHelper.replaceTimeFmt(tmplt,
 						dt.toInstant().atZone(ZoneId.systemDefault())
 						.toLocalDateTime());
 				addSpan(s);
@@ -359,7 +359,7 @@ public class IpawsProcJob extends Job {
 	 *  object from the alert's area field, and after that polygon is written
 	 *  to the database with the alert's doSetGeoPoly() method.
 	 *
-	 *  If at least one sign is selected, an IpawsAlertDeployer object is
+	 *  If at least one sign is selected, an IpawsDeployer object is
 	 *  created to deploy the alert and optionally notify clients for approval.
 	 *
 	 *  If no signs are found, no deployer object is created and the IpawsAlert
@@ -375,8 +375,8 @@ public class IpawsProcJob extends Job {
 
 		// collect alert deployers that have been created so we can notify
 		// clients about them
-		ArrayList<IpawsAlertDeployerImpl> iadList =
-				new ArrayList<IpawsAlertDeployerImpl>();
+		ArrayList<IpawsDeployerImpl> iadList =
+				new ArrayList<IpawsDeployerImpl>();
 
 		while (it.hasNext()) {
 			IpawsAlertConfig iac = it.next();
@@ -405,8 +405,8 @@ public class IpawsProcJob extends Job {
 							log("Found " + dms.length + " signs");
 							if (dms.length > 0) {
 								// if we did, finish processing the alert
-								IpawsAlertDeployerImpl iad =
-										createAlertDeployer(ia, dms, iac);
+								IpawsDeployerImpl iad =
+										createDeployer(ia, dms, iac);
 								if (iad != null)
 									iadList.add(iad);
 							}
@@ -433,12 +433,12 @@ public class IpawsProcJob extends Job {
 	 *  for relevant DMS (only if some were found). Handles generating MULTI
 	 *  and other object creating housekeeping.
 	 */
-	private IpawsAlertDeployerImpl createAlertDeployer(IpawsAlertImpl ia,
+	private IpawsDeployerImpl createDeployer(IpawsAlertImpl ia,
 			String[] adms, IpawsAlertConfig iac)
 			throws SonarException, TMSException {
 		// try to look up the most recent deployer object for this alert
-		IpawsAlertDeployerImpl iad =
-				IpawsAlertDeployerImpl.lookupFromAlert(
+		IpawsDeployerImpl iad =
+				IpawsDeployerImpl.lookupFromAlert(
 						ia.getName(), iac.getName());
 
 		// get alert start/end times
@@ -469,11 +469,11 @@ public class IpawsProcJob extends Job {
 				aStart, aEnd, adms, autoMulti, priority);
 		if (iad == null || updated) {
 			// if they have, or we didn't get one, make a new one
-			String name = IpawsAlertDeployerImpl.createUniqueName();
+			String name = IpawsDeployerImpl.createUniqueName();
 
 			// make a new GeoLoc based on the alert's
 			GeoLoc igl = ia.getGeoLoc();
-			GeoLocImpl gl = new GeoLocImpl(name, IpawsAlertDeployer.SONAR_TYPE,
+			GeoLocImpl gl = new GeoLocImpl(name, IpawsDeployer.SONAR_TYPE,
 					igl.getLat(), igl.getLon());
 			gl.notifyCreate();
 
@@ -497,7 +497,7 @@ public class IpawsProcJob extends Job {
 
 			log("Creating new deployer " + name +
 					" replacing " + replaces);
-			iad = new IpawsAlertDeployerImpl(name, ia.getName(), gl, aStart,
+			iad = new IpawsDeployerImpl(name, ia.getName(), gl, aStart,
 					aEnd, iac.getName(), iac.getSignGroup(), adms, ddms,
 					iac.getQuickMessage(), autoMulti, priority, preAlert,
 					postAlert, replaces);
@@ -520,7 +520,7 @@ public class IpawsProcJob extends Job {
 	/** Add optional DMS for suggesting to the user for inclusion in the alert
 	 *  (in addition to the auto-selected messages) to the alert deployer.
 	 */
-	private void addOptionalDms(IpawsAlertDeployerImpl iad,
+	private void addOptionalDms(IpawsDeployerImpl iad,
 			IpawsAlertImpl ia) throws TMSException {
 		// add the auto threshold to the suggested threshold to get the total
 		// threshold we will use
@@ -560,7 +560,7 @@ public class IpawsProcJob extends Job {
 	 *  notification then waits until the timeout has elapsed and (if a user
 	 *  hasn't deployed it manually) deploys the alert.
 	 */
-	private void deployAlert(IpawsAlertDeployerImpl iad, IpawsAlertImpl ia)
+	private void deployAlert(IpawsDeployerImpl iad, IpawsAlertImpl ia)
 					throws TMSException, SonarException {
 		// check the deploy mode and timeouts in system attributes
 		boolean autoMode = SystemAttrEnum.IPAWS_DEPLOY_AUTO_MODE.getBoolean();
@@ -604,12 +604,12 @@ public class IpawsProcJob extends Job {
 					pn.setAddressedByNotify("auto");
 					pn.setAddressedTimeNotify(new Date());
 				}
-				// NOTE: alert canceling handled in IpawsAlertDeployerImpl
+				// NOTE: alert canceling handled in IpawsDeployerImpl
 			} else
 				// no timeout - just deploy it
 				iad.setDeployedNotify(true);
 		}
-		// NOTE: manual deployment triggered in IpawsAlertDeployerImpl
+		// NOTE: manual deployment triggered in IpawsDeployerImpl
 	}
 
 	/** Create a notification for an alert deployer given the event type,
@@ -646,7 +646,7 @@ public class IpawsProcJob extends Job {
 		// note that users must be able to write alert deployer objects to see
 		// these (otherwise they won't be able to to approve them)
 		NotificationImpl pn = new NotificationImpl(
-				IpawsAlertDeployer.SONAR_TYPE, dName,
+				IpawsDeployer.SONAR_TYPE, dName,
 				true, title, description);
 		log("Sending notification " + pn.getName());
 

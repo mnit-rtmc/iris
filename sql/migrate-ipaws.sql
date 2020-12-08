@@ -26,7 +26,7 @@ INSERT INTO iris.sonar_type (name) VALUES
 	('cap_urgency'),
 	('ipaws'),
 	('ipaws_alert_config'),
-	('ipaws_alert_deployer'),
+	('ipaws_deployer'),
 	('notification');
 
 -- Add IPAWS sign message source
@@ -88,7 +88,7 @@ CREATE TABLE event.ipaws
 );
 
 -- IPAWS Alert Deployer table
-CREATE TABLE event.ipaws_alert_deployer (
+CREATE TABLE event.ipaws_deployer (
 	name varchar(20) PRIMARY KEY,
 	gen_time timestamp with time zone,
 	approved_time timestamp with time zone,
@@ -184,13 +184,13 @@ INSERT INTO iris.privilege (name,capability,type_n,obj_n,attr_n,group_n,write) V
 	('PRV_009A','ipaws_admin','cap_response_type','','','',true),
 	('PRV_009B','ipaws_admin','cap_urgency','','','',true),
 	('PRV_009C','ipaws_admin','ipaws','','','',true),
-	('PRV_009D','ipaws_admin','ipaws_alert_deployer','','','',true),
+	('PRV_009D','ipaws_admin','ipaws_deployer','','','',true),
 	('PRV_009E','ipaws_admin','ipaws_alert_config','','','',true),
-	('PRV_009F','ipaws_deploy','ipaws_alert_deployer','','','',true),
+	('PRV_009F','ipaws_deploy','ipaws_deployer','','','',true),
 	('PRV_009G','ipaws_tab','cap_response_type','','','',false),
 	('PRV_009H','ipaws_tab','cap_urgency','','','',false),
 	('PRV_009I','ipaws_tab','ipaws','','','',false),
-	('PRV_009J','ipaws_tab','ipaws_alert_deployer','','','',false),
+	('PRV_009J','ipaws_tab','ipaws_deployer','','','',false),
 	('PRV_009K','ipaws_tab','ipaws_alert_config','','','',false);
 
 INSERT INTO iris.role_capability (role, capability) VALUES

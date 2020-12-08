@@ -50,7 +50,7 @@ import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.IpawsAlert;
 import us.mn.state.dot.tms.IpawsAlertConfig;
-import us.mn.state.dot.tms.IpawsAlertDeployer;
+import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MapExtent;
@@ -283,11 +283,11 @@ public class SonarState extends Client {
 		return ipaws_alert_cache;
 	}
 	
-	/** Cache of IpawsAlertDeployer objects */
-	private final TypeCache<IpawsAlertDeployer> ipaws_deployer_cache;
+	/** Cache of IpawsDeployer objects */
+	private final TypeCache<IpawsDeployer> ipaws_deployer_cache;
 	
 	/** Get the IPAWS Alert Deployer cache */
-	public TypeCache<IpawsAlertDeployer> getIpawsDeployerCache() {
+	public TypeCache<IpawsDeployer> getIpawsDeployerCache() {
 		return ipaws_deployer_cache;
 	}
 	
@@ -562,7 +562,8 @@ public class SonarState extends Client {
 	
 	/** Cache of video source templates */
 	private final TypeCache<CameraVidSourceOrder> cam_vid_src_order =
-		new TypeCache<CameraVidSourceOrder>(CameraVidSourceOrder.class, this);
+		new TypeCache<CameraVidSourceOrder>(CameraVidSourceOrder.class,
+		this);
 
 	/** Get the user type cache */
 	public TypeCache<CameraVidSourceOrder> getCamVidSrcOrder() {
@@ -584,9 +585,10 @@ public class SonarState extends Client {
 		det_cache = new DetCache(this);
 		dms_cache = new DmsCache(this);
 		inc_cache = new IncCache(this);
-		ipaws_alert_cache = new TypeCache<IpawsAlert>(IpawsAlert.class, this);
-		ipaws_deployer_cache = new TypeCache<IpawsAlertDeployer>(
-				IpawsAlertDeployer.class, this);
+		ipaws_alert_cache = new TypeCache<IpawsAlert>(IpawsAlert.class,
+			this);
+		ipaws_deployer_cache = new TypeCache<IpawsDeployer>(
+			IpawsDeployer.class, this);
 		ipaws_config_cache = new TypeCache<IpawsAlertConfig>(
 				IpawsAlertConfig.class, this);
 		cap_response_type_cache = new TypeCache<CapResponseType>(

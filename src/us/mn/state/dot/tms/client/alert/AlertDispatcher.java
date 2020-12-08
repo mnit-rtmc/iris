@@ -26,8 +26,8 @@ import org.json.JSONObject;
 
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.IpawsAlert;
-import us.mn.state.dot.tms.IpawsAlertDeployer;
-import us.mn.state.dot.tms.IpawsAlertDeployerHelper;
+import us.mn.state.dot.tms.IpawsDeployer;
+import us.mn.state.dot.tms.IpawsDeployerHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
@@ -58,7 +58,7 @@ public class AlertDispatcher extends IPanel {
 	private final AlertManager manager;
 
 	/** Alert selection model */
-	private final ProxySelectionModel<IpawsAlertDeployer> alertSelMdl;
+	private final ProxySelectionModel<IpawsDeployer> alertSelMdl;
 
 	/** Alert selection listener */
 	private final ProxySelectionListener alertSelLstnr =
@@ -69,7 +69,7 @@ public class AlertDispatcher extends IPanel {
 	};
 
 	/** Currently selected alert (deployer) */
-	private IpawsAlertDeployer selectedAlertDepl;
+	private IpawsDeployer selectedAlertDepl;
 
 	/** Currently selected alert */
 	private IpawsAlert selectedAlert;
@@ -227,18 +227,18 @@ public class AlertDispatcher extends IPanel {
 	};
 
 	/** Set the selected alert in the list (for calling from other code). */
-	public void selectAlert(IpawsAlertDeployer iad) {
+	public void selectAlert(IpawsDeployer iad) {
 		alertSelMdl.setSelected(iad);
 	}
 
 	/** Update the display to reflect the alert selected. */
 	private void selectAlert() {
-		Set<IpawsAlertDeployer> sel = alertSelMdl.getSelected();
+		Set<IpawsDeployer> sel = alertSelMdl.getSelected();
 		if (sel.size() == 0)
 			clearSelectedAlert();
 		else {
 			// we should only have one alert (multiple selection is disabled)
-			for (IpawsAlertDeployer iad: sel) {
+			for (IpawsDeployer iad: sel) {
 				if (iad != null) {
 					setSelectedAlert(iad);
 					break;
@@ -248,7 +248,7 @@ public class AlertDispatcher extends IPanel {
 	}
 
 	/** Set the selected alert. */
-	private void setSelectedAlert(IpawsAlertDeployer iad) {
+	private void setSelectedAlert(IpawsDeployer iad) {
 		// set the selected alert and deployer
 		selectedAlertDepl = iad;
 		selectedAlert = alertCache.lookupObject(
@@ -303,7 +303,7 @@ public class AlertDispatcher extends IPanel {
 
 		// set the button text and disable buttons if alert is in past
 		setEditDeployBtnText();
-		boolean npast = !IpawsAlertDeployerHelper.
+		boolean npast = !IpawsDeployerHelper.
 				isPastPostAlertTime(selectedAlertDepl);
 		editDeployBtn.setEnabled(npast);
 		cancelBtn.setEnabled(npast);

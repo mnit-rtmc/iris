@@ -31,8 +31,8 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.IpawsAlert;
 import us.mn.state.dot.tms.IpawsAlertHelper;
-import us.mn.state.dot.tms.IpawsAlertDeployer;
-import us.mn.state.dot.tms.IpawsAlertDeployerHelper;
+import us.mn.state.dot.tms.IpawsDeployer;
+import us.mn.state.dot.tms.IpawsDeployerHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.DMSManager;
@@ -50,16 +50,16 @@ import us.mn.state.dot.tms.geo.ZoomLevel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * An (IPAWS) AlertManager is a container for SONAR IpawsAlertDeployer Objects.
+ * An (IPAWS) AlertManager is a container for SONAR IpawsDeployer Objects.
  * NOTE this would need some changes to let alert tab handle other types of
  * alerts.
  *
  * @author Gordon Parikh
  */
-public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
+public class AlertManager extends ProxyManager<IpawsDeployer> {
 
-	/** IpawsAlertDeployer cache */
-	private final TypeCache<IpawsAlertDeployer> adcache;
+	/** IpawsDeployer cache */
+	private final TypeCache<IpawsDeployer> adcache;
 
 	/** IpawsAlert cache */
 	private final TypeCache<IpawsAlert> acache;
@@ -71,15 +71,15 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 	private AlertTheme theme;
 
 	/** Keep track of the currently selected alert */
-	private IpawsAlertDeployer selectedAlertDepl;
+	private IpawsDeployer selectedAlertDepl;
 
 	/** Set the currently selected alert. */
-	public void setSelectedAlert(IpawsAlertDeployer iad) {
+	public void setSelectedAlert(IpawsDeployer iad) {
 		selectedAlertDepl = iad;
 	}
 
 	/** Get the currently selected alert */
-	public IpawsAlertDeployer getSelectedAlert() {
+	public IpawsDeployer getSelectedAlert() {
 		return selectedAlertDepl;
 	}
 
@@ -114,24 +114,24 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 	}
 
 	/** Proxy listener for SONAR updates */
-	private final SwingProxyAdapter<IpawsAlertDeployer> listener =
-			new SwingProxyAdapter<IpawsAlertDeployer>() {
+	private final SwingProxyAdapter<IpawsDeployer> listener =
+			new SwingProxyAdapter<IpawsDeployer>() {
 		@Override
-		protected void proxyAddedSwing(IpawsAlertDeployer iad) {
+		protected void proxyAddedSwing(IpawsDeployer iad) {
 			if (tab != null)
 				tab.updateStyleCounts();
 		}
 
 		@Override
-		protected void proxyChangedSwing(IpawsAlertDeployer iad, String attr) {
+		protected void proxyChangedSwing(IpawsDeployer iad, String attr) {
 			if (tab != null)
 				tab.updateStyleCounts();
 		}
 	};
 
 	/** Create a proxy descriptor. */
-	static private ProxyDescriptor<IpawsAlertDeployer> descriptor(Session s) {
-		return new ProxyDescriptor<IpawsAlertDeployer>(
+	static private ProxyDescriptor<IpawsDeployer> descriptor(Session s) {
+		return new ProxyDescriptor<IpawsDeployer>(
 			s.getSonarState().getIpawsDeployerCache(), false);
 	}
 
@@ -158,12 +158,12 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 
 	/** Override createLayer to let us provide a modified ProxyLayerState. */
 	@Override
-	protected ProxyLayer<IpawsAlertDeployer> createLayer() {
-		return new ProxyLayer<IpawsAlertDeployer>(this) {
+	protected ProxyLayer<IpawsDeployer> createLayer() {
+		return new ProxyLayer<IpawsDeployer>(this) {
 			@Override
 			public LayerState createState(MapBean mb) {
 				LayerState s = new ProxyLayerState<
-						IpawsAlertDeployer>(this, mb) {
+						IpawsDeployer>(this, mb) {
 					@Override
 					protected void doLeftClick(MouseEvent e, MapObject o) {
 						// search for DMS - use the map to transform the point
@@ -191,7 +191,7 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 	 */
 	@SuppressWarnings("serial")
 	@Override
-	protected JPopupMenu createPopupSingle(IpawsAlertDeployer proxy) {
+	protected JPopupMenu createPopupSingle(IpawsDeployer proxy) {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
 		p.addSeparator();
@@ -205,7 +205,7 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 	}
 
 	@Override
-	public String getDescription(IpawsAlertDeployer proxy) {
+	public String getDescription(IpawsDeployer proxy) {
 		IpawsAlert ia = acache.lookupObject(proxy.getAlertId());
 		String name = proxy.getName();
 		if (name.contains("ipaws_dplr_")) {
@@ -218,9 +218,9 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 	}
 
 	@Override
-	public boolean checkStyle(ItemStyle is, IpawsAlertDeployer proxy) {
+	public boolean checkStyle(ItemStyle is, IpawsDeployer proxy) {
 		Integer t = checkAlertTimes(proxy);
-		boolean past = IpawsAlertDeployerHelper.isPastPostAlertTime(proxy);
+		boolean past = IpawsDeployerHelper.isPastPostAlertTime(proxy);
 		if (t == null)
 			// problem with the dates
 			return false;
@@ -253,7 +253,7 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 	 *  selected alerts are drawn).
 	 */
 	@Override
-	protected boolean isStyleVisible(IpawsAlertDeployer proxy) {
+	protected boolean isStyleVisible(IpawsDeployer proxy) {
 		return true;
 	}
 
@@ -268,7 +268,7 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 	 *  active, and 1 if the alert is in the past. If the time fields are not
 	 *  filled, null is returned.
 	 */
-	private Integer checkAlertTimes(IpawsAlertDeployer iad) {
+	private Integer checkAlertTimes(IpawsDeployer iad) {
 		if (iad.getAlertStart() != null && iad.getAlertEnd() != null) {
 			// check the time of the alert relative to now
 			Date now = new Date();
@@ -293,7 +293,7 @@ public class AlertManager extends ProxyManager<IpawsAlertDeployer> {
 	}
 
 	@Override
-	protected GeoLoc getGeoLoc(IpawsAlertDeployer iad) {
+	protected GeoLoc getGeoLoc(IpawsDeployer iad) {
 		// return the GeoLoc for this deployer
 		if (iad != null)
 			return iad.getGeoLoc();

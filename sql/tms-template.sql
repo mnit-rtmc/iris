@@ -432,7 +432,7 @@ incident_detail
 inc_locator
 ipaws
 ipaws_alert_config
-ipaws_alert_deployer
+ipaws_deployer
 lane_action
 lane_marking
 lane_use_multi
@@ -605,13 +605,13 @@ PRV_0094	incident_tab	inc_descriptor		f
 PRV_0095	incident_tab	inc_locator		f
 PRV_0096	incident_tab	inc_advice		f
 PRV_009A	ipaws_admin	ipaws		t
-PRV_009B	ipaws_admin	ipaws_alert_deployer		t
+PRV_009B	ipaws_admin	ipaws_deployer		t
 PRV_009C	ipaws_admin	ipaws_alert_config		t
 PRV_009D	ipaws_admin	cap_response_type		t
 PRV_009E	ipaws_admin	cap_urgency		t
-PRV_009F	ipaws_deploy	ipaws_alert_deployer		t
+PRV_009F	ipaws_deploy	ipaws_deployer		t
 PRV_009G	ipaws_tab	ipaws		f
-PRV_009H	ipaws_tab	ipaws_alert_deployer		f
+PRV_009H	ipaws_tab	ipaws_deployer		f
 PRV_009I	ipaws_tab	ipaws_alert_config		f
 PRV_009J	ipaws_tab	cap_response_type		f
 PRV_009K	ipaws_tab	cap_urgency		f
@@ -3593,7 +3593,7 @@ CREATE TABLE event.ipaws (
 );
 
 -- IPAWS Alert Deployer table
-CREATE TABLE event.ipaws_alert_deployer (
+CREATE TABLE event.ipaws_deployer (
 	name varchar(20) PRIMARY KEY,
 	gen_time timestamp with time zone,
 	approved_time timestamp with time zone,

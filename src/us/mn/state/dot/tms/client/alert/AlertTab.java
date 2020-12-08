@@ -24,7 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.Timer;
 
-import us.mn.state.dot.tms.IpawsAlertDeployer;
+import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
@@ -41,10 +41,10 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
  * @author Gordon Parikh
  */
 @SuppressWarnings("serial")
-public class AlertTab extends MapTab<IpawsAlertDeployer> {
+public class AlertTab extends MapTab<IpawsDeployer> {
 
 	/** Summary of alerts */
-	private final StyleSummary<IpawsAlertDeployer> summary;
+	private final StyleSummary<IpawsDeployer> summary;
 
 	/** Alert dispatcher for dispatching and reviewing alerts */
 	private final AlertDispatcher dispatcher;
@@ -110,7 +110,7 @@ public class AlertTab extends MapTab<IpawsAlertDeployer> {
 
 	/** Select an alert in the tab */
 	@Override
-	public void setSelectedProxy(IpawsAlertDeployer proxy) {
+	public void setSelectedProxy(IpawsDeployer proxy) {
 		// check the style of the alert and select the appropriate one
 		ItemStyle style = manager.getItemStyle(proxy);
 		if (style != null)

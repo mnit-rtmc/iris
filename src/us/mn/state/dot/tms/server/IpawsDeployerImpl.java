@@ -24,8 +24,8 @@ import java.util.concurrent.TimeUnit;
 
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.IpawsAlertDeployer;
-import us.mn.state.dot.tms.IpawsAlertDeployerHelper;
+import us.mn.state.dot.tms.IpawsDeployer;
+import us.mn.state.dot.tms.IpawsDeployerHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;;
 
@@ -35,21 +35,17 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;;
  *
  * @author Gordon Parikh
  */
-public class IpawsAlertDeployerImpl extends BaseObjectImpl
-	implements IpawsAlertDeployer {
-
-	/** Database table name */
-	static private final String TABLE = "event.ipaws_alert_deployer";
+public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 
 	/** Name creator */
 	static UniqueNameCreator UNC;
 	static {
 		UNC = new UniqueNameCreator("ipaws_dplr_%d",
-				(n)->lookupIpawsAlertDeployer(n));
+				(n)->lookupIpawsDeployer(n));
 		UNC.setMaxLength(20);
 	}
 
-	/** Create a unique IpawsAlertDeployer record name */
+	/** Create a unique IpawsDeployer record name */
 	static public String createUniqueName() {
 		return UNC.createUniqueName();
 	}
@@ -61,24 +57,24 @@ public class IpawsAlertDeployerImpl extends BaseObjectImpl
 	 */
 	static private TimeUnit prePostTimeUnits = TimeUnit.HOURS;
 
-	/** Lookup an IpawsAlertDeployerImpl given and IpawsAlert identifier/name
+	/** Lookup an IpawsDeployerImpl given and IpawsAlert identifier/name
 	 *  and an IpawsAlertConfig name. Returns the most recent active deployer
 	 *  for the alert with a matching config.
 	 */
-	static public IpawsAlertDeployerImpl lookupFromAlert(
+	static public IpawsDeployerImpl lookupFromAlert(
 			String name, String cname) {
-		// ask the helper to find the IpawsAlertDeployer object for this alert
-		IpawsAlertDeployer ian =
-				IpawsAlertDeployerHelper.lookupDeployerFromAlert(name, cname);
+		// ask the helper to find the IpawsDeployer object for this alert
+		IpawsDeployer ian =
+				IpawsDeployerHelper.lookupDeployerFromAlert(name, cname);
 		if (ian != null)
-			// lookup the IpawsAlertDeployerImpl object using the name
-			return lookupIpawsAlertDeployer(ian.getName());
+			// lookup the IpawsDeployerImpl object using the name
+			return lookupIpawsDeployer(ian.getName());
 		return null;
 	}
 
 	/** Load all the IPAWS alert deployers */
 	static public void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, IpawsAlertDeployerImpl.class);
+		namespace.registerType(SONAR_TYPE, IpawsDeployerImpl.class);
 		store.query("SELECT name, gen_time, approved_time, alert_id, " +
 			"geo_loc, alert_start, alert_end, config, sign_group, " +
 			"quick_message, pre_alert_time, post_alert_time, auto_dms, " +
@@ -90,7 +86,7 @@ public class IpawsAlertDeployerImpl extends BaseObjectImpl
 			@Override
 			public void create(ResultSet row) throws Exception {
 				try {
-					namespace.addObject(new IpawsAlertDeployerImpl(row));
+					namespace.addObject(new IpawsDeployerImpl(row));
 				} catch (Exception e) {
 					IpawsProcJob.log("Error adding: " + row.getString(1));
 					e.printStackTrace();
@@ -141,48 +137,48 @@ public class IpawsAlertDeployerImpl extends BaseObjectImpl
 		return SONAR_TYPE;
 	}
 
-	private IpawsAlertDeployerImpl(ResultSet row) throws SQLException {
+	private IpawsDeployerImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),			// name
 			row.getTimestamp(2),		// generated time
 			row.getTimestamp(3),		// approval time
-			row.getString(4),			// alert identifier
-			row.getString(5),			// geo_loc
+			row.getString(4),		// alert identifier
+			row.getString(5),		// geo_loc
 			row.getTimestamp(6),		// alert start
 			row.getTimestamp(7),		// alert end
-			row.getString(8),			// config
-			row.getString(9),			// sign group
-			row.getString(10),			// quick message
-			row.getInt(11),				// pre-alert time
-			row.getInt(12),				// post-alert time
+			row.getString(8),		// config
+			row.getString(9),		// sign group
+			row.getString(10),		// quick message
+			row.getInt(11),			// pre-alert time
+			row.getInt(12),			// post-alert time
 			getStringArray(row, 13),	// auto DMS list
 			getStringArray(row, 14),	// optional DMS list
 			getStringArray(row, 15),	// deployed DMS list
-			row.getDouble(16),			// area threshold
-			row.getString(17),			// auto MULTI
-			row.getString(18),			// deployed MULTI
-			row.getInt(19),				// message priority
-			row.getString(20),			// approving user
-			row.getBoolean(21),			// deployed
-			row.getBoolean(22),			// was_deployed
-			row.getBoolean(23),			// active
-			row.getString(24)			// replaces
+			row.getDouble(16),		// area threshold
+			row.getString(17),		// auto MULTI
+			row.getString(18),		// deployed MULTI
+			row.getInt(19),			// message priority
+			row.getString(20),		// approving user
+			row.getBoolean(21),		// deployed
+			row.getBoolean(22),		// was_deployed
+			row.getBoolean(23),		// active
+			row.getString(24)		// replaces
 		 );
 	}
 
-	public IpawsAlertDeployerImpl(String n, String aid)  {
+	public IpawsDeployerImpl(String n, String aid)  {
 		super(n);
 		alert_id = aid;
 		gen_time = new Date();
 	}
 
-	public IpawsAlertDeployerImpl(String n, String aid, String[] dms) {
+	public IpawsDeployerImpl(String n, String aid, String[] dms) {
 		super(n);
 		alert_id = aid;
 		auto_dms = dms;
 		gen_time = new Date();
 	}
 
-	public IpawsAlertDeployerImpl(String n, String aid, String[] dms,
+	public IpawsDeployerImpl(String n, String aid, String[] dms,
 			String m, String u) {
 		super(n);
 		alert_id = aid;
@@ -192,7 +188,7 @@ public class IpawsAlertDeployerImpl extends BaseObjectImpl
 		gen_time = new Date();
 	}
 
-	public IpawsAlertDeployerImpl(String n, String aid, GeoLoc gl,
+	public IpawsDeployerImpl(String n, String aid, GeoLoc gl,
 			Date as, Date ae, String c, String sg, String[] adms,
 			String[] ddms, String qm, String m, int mp, int preh,
 			int posth, String r) {
@@ -214,7 +210,7 @@ public class IpawsAlertDeployerImpl extends BaseObjectImpl
 		gen_time = new Date();
 	}
 
-	public IpawsAlertDeployerImpl(String n, Date gt, Date at, String aid,
+	public IpawsDeployerImpl(String n, Date gt, Date at, String aid,
 			String gl, Date as, Date ae, String c, String sg, String qm,
 			int preh, int posth, String[] adms, String[] odms, String[] ddms,
 			Double t, String am, String dm, int mp, String u, Boolean d,
@@ -1087,8 +1083,8 @@ public class IpawsAlertDeployerImpl extends BaseObjectImpl
 			// if this deployer is replacing another one that is still
 			// deployed, make sure to cancel that one
 			if (replaces != null) {
-				IpawsAlertDeployerImpl old =
-						lookupIpawsAlertDeployer(replaces);
+				IpawsDeployerImpl old =
+						lookupIpawsDeployer(replaces);
 				if (old != null && Boolean.TRUE.equals(old.getDeployed())) {
 					IpawsProcJob.log("Canceling old deployer " +
 						old.getName() + " for alert " + old.getAlertId());
