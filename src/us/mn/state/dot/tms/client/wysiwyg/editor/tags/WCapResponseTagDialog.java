@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.wysiwyg.editor.tags;
 
 import java.awt.Dimension;
@@ -24,7 +23,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import us.mn.state.dot.tms.CapResponseTypeEnum;
+import us.mn.state.dot.tms.CapResponseEnum;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WController;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
@@ -40,11 +39,11 @@ import us.mn.state.dot.tms.utils.wysiwyg.token.WtCapResponse;
 @SuppressWarnings("serial")
 class WCapResponseTagDialog extends WMultiTagDialog {
 	protected WtCapResponse editTok;
-	private ArrayList<CapResponseTypeEnum> responseTypes =
-			new ArrayList<CapResponseTypeEnum>();
+	private ArrayList<CapResponseEnum> responseTypes =
+			new ArrayList<CapResponseEnum>();
 	private ArrayList<String> responseTypeStrs = new ArrayList<String>();
-	private ArrayList<WTagParamEnumField<CapResponseTypeEnum>> rTypeFields =
-			new ArrayList<WTagParamEnumField<CapResponseTypeEnum>>();
+	private ArrayList<WTagParamEnumField<CapResponseEnum>> rTypeFields =
+			new ArrayList<WTagParamEnumField<CapResponseEnum>>();
 	private JPanel rTypePanel;
 	private final ArrayList<JPanel> rTypePanels =
 			new ArrayList<JPanel>();
@@ -59,12 +58,12 @@ class WCapResponseTagDialog extends WMultiTagDialog {
 	@Override
 	protected void loadFields(WToken tok) {
 		editTok = (WtCapResponse) tok;
-		responseTypes = new ArrayList<CapResponseTypeEnum>();
+		responseTypes = new ArrayList<CapResponseEnum>();
 		responseTypeStrs = new ArrayList<String>();
 		
 		for (String rt: editTok.getResponseTypes()) {
 			responseTypeStrs.add(rt);
-			CapResponseTypeEnum crte = CapResponseTypeEnum.fromValue(rt);
+			CapResponseEnum crte = CapResponseEnum.fromValue(rt);
 			if (crte != null)
 				responseTypes.add(crte);
 		}
@@ -100,7 +99,7 @@ class WCapResponseTagDialog extends WMultiTagDialog {
 		// if we already have response type values, add more fields and enable
 		// the delete button
 		if (responseTypes.size() > 0) {
-			for (CapResponseTypeEnum crt: responseTypes)
+			for (CapResponseEnum crt: responseTypes)
 				addResponseTypeField(crt);
 			deleteFieldBtn.setEnabled(true);
 		} else
@@ -113,14 +112,14 @@ class WCapResponseTagDialog extends WMultiTagDialog {
 	}
 	
 	/** Add a new response type field. */
-	private void addResponseTypeField(CapResponseTypeEnum crt) {
+	private void addResponseTypeField(CapResponseEnum crt) {
 		// make a new field and add it to the panel
-		WTagParamEnumField<CapResponseTypeEnum> crtf =
-				new WTagParamEnumField<CapResponseTypeEnum>(
-						CapResponseTypeEnum.values(), crt, true);
+		WTagParamEnumField<CapResponseEnum> crtf =
+				new WTagParamEnumField<CapResponseEnum>(
+						CapResponseEnum.values(), crt, true);
 		rTypeFields.add(crtf);
 		JPanel p = makeFieldPanel(
-				"wysiwyg.cap_response_tag_dialog.response_type",  crtf);
+			"wysiwyg.cap_response_tag_dialog.response", crtf);
 		rTypePanels.add(p);
 		rTypePanel.add(p);
 		refresh();
@@ -168,8 +167,8 @@ class WCapResponseTagDialog extends WMultiTagDialog {
 		// get any/all response fields and pack them into an array
 		responseTypes.clear();
 		responseTypeStrs.clear();
-		for (WTagParamEnumField<CapResponseTypeEnum> crtf: rTypeFields) {
-			CapResponseTypeEnum crt = crtf.getSelectedItem();
+		for (WTagParamEnumField<CapResponseEnum> crtf: rTypeFields) {
+			CapResponseEnum crt = crtf.getSelectedItem();
 			responseTypes.add(crt);
 			responseTypeStrs.add(crt.value);
 		}

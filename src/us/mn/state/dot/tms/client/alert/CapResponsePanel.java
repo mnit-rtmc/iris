@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.client.alert;
 
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.CapResponseType;
-import us.mn.state.dot.tms.CapResponseTypeHelper;
+import us.mn.state.dot.tms.CapResponse;
+import us.mn.state.dot.tms.CapResponseHelper;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 
@@ -27,14 +27,14 @@ import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
  * @author Gordon Parikh
  */
 @SuppressWarnings("serial")
-public class CapResponseTypePanel extends ProxyTablePanel<CapResponseType> {
+public class CapResponsePanel extends ProxyTablePanel<CapResponse> {
 
 	/** TypeCache for looking up objects after creation */
-	private final TypeCache<CapResponseType> cache;
+	private final TypeCache<CapResponse> cache;
 
-	public CapResponseTypePanel(ProxyTableModel<CapResponseType> m) {
+	public CapResponsePanel(ProxyTableModel<CapResponse> m) {
 		super(m);
-		cache = m.getSession().getSonarState().getCapResponseTypeCache();
+		cache = m.getSession().getSonarState().getCapResponseCache();
 	}
 
 	/** Create a new response type substitution value. Uses the text in the
@@ -49,14 +49,14 @@ public class CapResponseTypePanel extends ProxyTablePanel<CapResponseType> {
 
 		// if the event is empty, use default
 		if (ev.isEmpty())
-			ev = CapResponseType.DEFAULT_EVENT;
+			ev = CapResponse.DEFAULT_EVENT;
 
 		// generate a new unique name
-		String name = CapResponseTypeHelper.createUniqueName();
+		String name = CapResponseHelper.createUniqueName();
 
 		// create the object with the unique name then set the label
 		cache.createObject(name);
-		CapResponseType crt = cache.lookupObjectWait(name);
+		CapResponse crt = cache.lookupObjectWait(name);
 		if (crt != null)
 			crt.setEvent(ev);
 		// TODO do something if null

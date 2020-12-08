@@ -400,7 +400,7 @@ camera_action
 camera_preset
 camera_template
 cam_vid_src_ord
-cap_response_type
+cap_response
 cap_urgency
 capability
 catalog
@@ -607,13 +607,13 @@ PRV_0096	incident_tab	inc_advice		f
 PRV_009A	ipaws_admin	ipaws		t
 PRV_009B	ipaws_admin	ipaws_deployer		t
 PRV_009C	ipaws_admin	ipaws_config		t
-PRV_009D	ipaws_admin	cap_response_type		t
+PRV_009D	ipaws_admin	cap_response		t
 PRV_009E	ipaws_admin	cap_urgency		t
 PRV_009F	ipaws_deploy	ipaws_deployer		t
 PRV_009G	ipaws_tab	ipaws		f
 PRV_009H	ipaws_tab	ipaws_deployer		f
 PRV_009I	ipaws_tab	ipaws_config		f
-PRV_009J	ipaws_tab	cap_response_type		f
+PRV_009J	ipaws_tab	cap_response		f
 PRV_009K	ipaws_tab	cap_urgency		f
 PRV_0097	lcs_admin	lane_use_multi		t
 PRV_0098	lcs_admin	lcs		t
@@ -3631,7 +3631,7 @@ CREATE TABLE iris.ipaws_config (
 );
 
 -- CAP response types table
-CREATE TABLE iris.cap_response_type (
+CREATE TABLE iris.cap_response (
 	name varchar(24) PRIMARY KEY,
 	event text,
 	response_type text,

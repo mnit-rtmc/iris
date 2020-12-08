@@ -40,7 +40,7 @@ public class AlertMenu extends IMenu {
 		desktop = s.getDesktop();
 
 		addItem(createAlertConfigItem());
-		addItem(createCapResponseTypeItem());
+		addItem(createCapResponseItem());
 		addItem(createCapUrgencyItem());
 		// TODO more items will come
 	}
@@ -56,11 +56,11 @@ public class AlertMenu extends IMenu {
 	}
 
 	/** Create a CAP response type substitution value menu item action */
-	private IAction createCapResponseTypeItem() {
+	private IAction createCapResponseItem() {
 		return AlertConfigForm.isPermitted(session) ?
-				new IAction("alert.cap.response_type_substitutions") {
+				new IAction("alert.cap.response_substitutions") {
 			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new CapResponseTypeForm(session));
+				desktop.show(new CapResponseForm(session));
 			}
 		} : null;
 	}

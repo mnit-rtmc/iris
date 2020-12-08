@@ -22,10 +22,10 @@ import us.mn.state.dot.sonar.SonarObject;
  *
  * @author Gordon Parikh
  */
-public interface CapResponseType extends SonarObject {
+public interface CapResponse extends SonarObject {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "cap_response_type";
+	String SONAR_TYPE = "cap_response";
 
 	/** Default Event (for use if no other matching event found) */
 	String DEFAULT_EVENT = "<default>";

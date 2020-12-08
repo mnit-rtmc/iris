@@ -19,27 +19,23 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import us.mn.state.dot.tms.CapResponseType;
+import us.mn.state.dot.tms.CapResponse;
 import us.mn.state.dot.tms.TMSException;
 
 /**
  * Common Alerting Protocol (CAP) response type field substitution value
- * server-side implementation. Used for IPAWS alert processing for generating
+ * server-side implementation.  Used for IPAWS alert processing for generating
  * messages for posting to DMS.
  *
  * @author Gordon Parikh
  */
-public class CapResponseTypeImpl extends BaseObjectImpl
-	implements CapResponseType {
+public class CapResponseImpl extends BaseObjectImpl implements CapResponse {
 
-	/** Database table name */
-	static private final String TABLE = "iris.cap_response_type";
-
-	public CapResponseTypeImpl(String n) {
+	public CapResponseImpl(String n) {
 		super(n);
 	}
 
-	public CapResponseTypeImpl(String n, String ev, String rt, String m) {
+	public CapResponseImpl(String n, String ev, String rt, String m) {
 		super(n);
 		event = ev;
 		response_type = rt;
@@ -58,14 +54,14 @@ public class CapResponseTypeImpl extends BaseObjectImpl
 
 	/** Load all the CAP response type substitution values */
 	static public void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, CapResponseTypeImpl.class);
+		namespace.registerType(SONAR_TYPE, CapResponseImpl.class);
 		store.query("SELECT name, event, response_type, multi FROM iris." +
 				SONAR_TYPE + ";", new ResultFactory()
 		{
 			@Override
 			public void create(ResultSet row) throws Exception {
 				try {
-					namespace.addObject(new CapResponseTypeImpl(row));
+					namespace.addObject(new CapResponseImpl(row));
 				} catch (Exception e) {
 					System.out.println("Error adding: " + row.getString(1));
 					e.printStackTrace();
@@ -84,7 +80,7 @@ public class CapResponseTypeImpl extends BaseObjectImpl
 		return map;
 	}
 
-	private CapResponseTypeImpl(ResultSet row) throws SQLException {
+	private CapResponseImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
 		     row.getString(2),  // event
 		     row.getString(3),  // response type

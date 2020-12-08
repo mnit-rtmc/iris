@@ -125,7 +125,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		IpawsAlertImpl.loadAll();
 		IpawsConfigImpl.loadAll();
 		IpawsDeployerImpl.loadAll();
-		CapResponseTypeImpl.loadAll();
+		CapResponseImpl.loadAll();
 		CapUrgencyImpl.loadAll();
 		NotificationImpl.loadAll();
 	}

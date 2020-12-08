@@ -34,9 +34,9 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.CapCertaintyEnum;
-import us.mn.state.dot.tms.CapResponseType;
-import us.mn.state.dot.tms.CapResponseTypeEnum;
-import us.mn.state.dot.tms.CapResponseTypeHelper;
+import us.mn.state.dot.tms.CapResponse;
+import us.mn.state.dot.tms.CapResponseEnum;
+import us.mn.state.dot.tms.CapResponseHelper;
 import us.mn.state.dot.tms.CapSeverityEnum;
 import us.mn.state.dot.tms.CapUrgency;
 import us.mn.state.dot.tms.CapUrgencyEnum;
@@ -248,17 +248,17 @@ public class IpawsProcJob extends Job {
 
 				// check the response types in the alert to see if we should
 				// substitute anything, taking the highest priority one
-				CapResponseTypeEnum maxRT = CapResponseTypeEnum.NONE;
-				CapResponseType rtSub = null;
+				CapResponseEnum maxRT = CapResponseEnum.NONE;
+				CapResponse rtSub = null;
 				for (String rt: ia.getResponseTypes()) {
 					if (rtSet.contains(rt)) {
 						// make sure we have a matching substitution value too
-						CapResponseType crt = CapResponseTypeHelper.lookupFor(
+						CapResponse crt = CapResponseHelper.lookupFor(
 								ia.getEvent(), rt);
 
 						if (crt != null) {
-							CapResponseTypeEnum crte =
-									CapResponseTypeEnum.fromValue(rt);
+							CapResponseEnum crte =
+									CapResponseEnum.fromValue(rt);
 							if (crte.ordinal() > maxRT.ordinal()) {
 								maxRT = crte;
 								rtSub = crt;

@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import org.json.JSONObject;
 import org.postgis.MultiPolygon;
-import us.mn.state.dot.tms.CapResponseTypeEnum;
+import us.mn.state.dot.tms.CapResponseEnum;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.IpawsAlert;
 import us.mn.state.dot.tms.IteratorWrapper;
@@ -599,9 +599,9 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	public String getPriorityResponseType() {
 		// go through all response types to get the one with the highest
 		// ordinal
-		CapResponseTypeEnum maxRT = CapResponseTypeEnum.NONE;
+		CapResponseEnum maxRT = CapResponseEnum.NONE;
 		for (String rts: response_types) {
-			CapResponseTypeEnum crte = CapResponseTypeEnum.fromValue(rts);
+			CapResponseEnum crte = CapResponseEnum.fromValue(rts);
 			if (crte.ordinal() > maxRT.ordinal())
 				maxRT = crte;
 		}

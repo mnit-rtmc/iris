@@ -21,7 +21,7 @@ package us.mn.state.dot.tms;
  *
  * @author Gordon Parikh
  */
-public enum CapResponseTypeEnum {
+public enum CapResponseEnum {
 	NONE("None", "No action recommended"),
 	ALL_CLEAR("All Clear", "The subject event no longer poses a threat or " +
 			"concern and any follow on action is described in <instruction>"),
@@ -46,14 +46,14 @@ public enum CapResponseTypeEnum {
 	/** Description of value from CAP standard */
 	public final String description;
 
-	private CapResponseTypeEnum(String v, String d) {
+	private CapResponseEnum(String v, String d) {
 		value = v;
 		description = d;
 	}
 
-	/** Return the CapResponseTypeEnum from the value provided. */
-	static public CapResponseTypeEnum fromValue(String v) {
-		for (CapResponseTypeEnum e: values()) {
+	/** Return the CapResponseEnum from the value provided. */
+	static public CapResponseEnum fromValue(String v) {
+		for (CapResponseEnum e: values()) {
 			if (e.value.equals(v))
 				return e;
 		}
@@ -64,7 +64,7 @@ public enum CapResponseTypeEnum {
 	 *  message).
 	 */
 	static public String[] stringValues() {
-		CapResponseTypeEnum[] evals = values();
+		CapResponseEnum[] evals = values();
 		String[] svals = new String[evals.length];
 		for (int i = 0; i < evals.length; ++i)
 			svals[i] = evals[i].value;

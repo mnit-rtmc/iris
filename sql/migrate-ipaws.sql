@@ -22,7 +22,7 @@ ALTER TABLE iris.sonar_type ALTER COLUMN name TYPE varchar(32);
 
 -- Add new SONAR types
 INSERT INTO iris.sonar_type (name) VALUES
-	('cap_response_type'),
+	('cap_response'),
 	('cap_urgency'),
 	('ipaws'),
 	('ipaws_config'),
@@ -126,7 +126,7 @@ CREATE TABLE iris.ipaws_config (
 );
 
 -- CAP response types table
-CREATE TABLE iris.cap_response_type (
+CREATE TABLE iris.cap_response (
 	name varchar(24) PRIMARY KEY,
 	event text,
 	response_type text,
@@ -182,13 +182,13 @@ INSERT INTO iris.privilege (name, capability, type_n, obj_n, attr_n, group_n,
                             write)
 VALUES	('PRV_001C','base','notification','','','',false),
 	('PRV_001D','base','notification','','','',true),
-	('PRV_009A','ipaws_admin','cap_response_type','','','',true),
+	('PRV_009A','ipaws_admin','cap_response','','','',true),
 	('PRV_009B','ipaws_admin','cap_urgency','','','',true),
 	('PRV_009C','ipaws_admin','ipaws','','','',true),
 	('PRV_009D','ipaws_admin','ipaws_deployer','','','',true),
 	('PRV_009E','ipaws_admin','ipaws_config','','','',true),
 	('PRV_009F','ipaws_deploy','ipaws_deployer','','','',true),
-	('PRV_009G','ipaws_tab','cap_response_type','','','',false),
+	('PRV_009G','ipaws_tab','cap_response','','','',false),
 	('PRV_009H','ipaws_tab','cap_urgency','','','',false),
 	('PRV_009I','ipaws_tab','ipaws','','','',false),
 	('PRV_009J','ipaws_tab','ipaws_deployer','','','',false),

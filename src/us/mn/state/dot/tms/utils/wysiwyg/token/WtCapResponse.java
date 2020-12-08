@@ -14,17 +14,14 @@
  */
 package us.mn.state.dot.tms.utils.wysiwyg.token;
 
-
 import java.util.ArrayList;
-
-import us.mn.state.dot.tms.CapResponseTypeHelper;
+import us.mn.state.dot.tms.CapResponseHelper;
 import us.mn.state.dot.tms.utils.Multi;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
 /** CAP response type substitution field token for WYSIWYG editor.
  * 
  * @author Gordon Parikh - SRF Consulting
- *
  */
 public class WtCapResponse extends Wt_IrisToken {
 
@@ -47,7 +44,7 @@ public class WtCapResponse extends Wt_IrisToken {
 	@Override
 	public Integer getBoxWidth(Integer chsp) {
 		// get all response type substitution MULTI strings
-		ArrayList<String> multiStrs = CapResponseTypeHelper.getMaxLen(rtypes);
+		ArrayList<String> multiStrs = CapResponseHelper.getMaxLen(rtypes);
 		
 		// find the maximum width string (in pixels given the current font)
 		int maxWidth = 0;

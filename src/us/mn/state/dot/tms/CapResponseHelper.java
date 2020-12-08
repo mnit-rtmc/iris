@@ -22,34 +22,34 @@ import java.util.Iterator;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
- * Helper class for CAP response type substitution values. Used on the client
+ * Helper class for CAP response type substitution values.  Used on the client
  * and server.
  *
  * @author Gordon Parikh
  */
-public class CapResponseTypeHelper extends BaseHelper {
+public class CapResponseHelper extends BaseHelper {
 
 	/** Don't instantiate */
-	private CapResponseTypeHelper() {
+	private CapResponseHelper() {
 		assert false;
 	}
 
 	/** Lookup the response type substitution value with the specified name */
-	static public CapResponseType lookup(String name) {
-		return (CapResponseType) namespace.lookupObject(
-				CapResponseType.SONAR_TYPE, name);
+	static public CapResponse lookup(String name) {
+		return (CapResponse) namespace.lookupObject(
+			CapResponse.SONAR_TYPE, name);
 	}
 
-	/** Lookup the response type substitution value corresponding to the given
-	 *  event and response type.
+	/** Lookup the response type substitution value corresponding to the
+	 *  given event and response type.
 	 */
-	static public CapResponseType lookupFor(String event, String rType) {
+	static public CapResponse lookupFor(String event, String rType) {
 		if (event == null || rType == null)
 			return null;
 
-		Iterator<CapResponseType> it = iterator();
+		Iterator<CapResponse> it = iterator();
 		while (it.hasNext()) {
-			CapResponseType crt = it.next();
+			CapResponse crt = it.next();
 			if (event.equals(crt.getEvent())
 					&& rType.equals(crt.getResponseType())) {
 				return crt;
@@ -58,10 +58,10 @@ public class CapResponseTypeHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Get an CapResponseType object iterator */
-	static public Iterator<CapResponseType> iterator() {
-		return new IteratorWrapper<CapResponseType>(namespace.iterator(
-				CapResponseType.SONAR_TYPE));
+	/** Get an CapResponse object iterator */
+	static public Iterator<CapResponse> iterator() {
+		return new IteratorWrapper<CapResponse>(namespace.iterator(
+			CapResponse.SONAR_TYPE));
 	}
 
 	/** Return all known response type substitution MULTI strings that match
@@ -75,9 +75,9 @@ public class CapResponseTypeHelper extends BaseHelper {
 
 		// go through all response type substitution MULTI strings
 		ArrayList<String> multiStrs = new ArrayList<String>();
-		Iterator<CapResponseType> it = iterator();
+		Iterator<CapResponse> it = iterator();
 		while (it.hasNext()) {
-			CapResponseType crt = it.next();
+			CapResponse crt = it.next();
 			if (rts == null || rts.contains(crt.getResponseType())) {
 				String multi = crt.getMulti();
 				if (multi != null)
@@ -94,7 +94,7 @@ public class CapResponseTypeHelper extends BaseHelper {
 		UNC.setMaxLength(24);
 	}
 
-	/** Create a unique CapResponseType record name */
+	/** Create a unique CapResponse record name */
 	static public String createUniqueName() {
 		return UNC.createUniqueName();
 	}

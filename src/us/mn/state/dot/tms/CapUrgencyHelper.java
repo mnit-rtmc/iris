@@ -56,7 +56,7 @@ public class CapUrgencyHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Get an CapResponseType object iterator */
+	/** Get an CapUrgency object iterator */
 	static public Iterator<CapUrgency> iterator() {
 		return new IteratorWrapper<CapUrgency>(namespace.iterator(
 				CapUrgency.SONAR_TYPE));
@@ -92,7 +92,7 @@ public class CapUrgencyHelper extends BaseHelper {
 		UNC.setMaxLength(24);
 	}
 
-	/** Create a unique CapResponseType record name */
+	/** Create a unique CapUrgency record name */
 	static public String createUniqueName() {
 		return UNC.createUniqueName();
 	}

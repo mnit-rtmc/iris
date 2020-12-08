@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
-import us.mn.state.dot.tms.CapResponseType;
-import us.mn.state.dot.tms.CapResponseTypeEnum;
+import us.mn.state.dot.tms.CapResponse;
+import us.mn.state.dot.tms.CapResponseEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -31,59 +31,58 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Gordon Parikh
  */
 @SuppressWarnings("serial")
-public class CapResponseTypeModel extends ProxyTableModel<CapResponseType> {
+public class CapResponseModel extends ProxyTableModel<CapResponse> {
 
 	/** Create a proxy descriptor */
-	static public ProxyDescriptor<CapResponseType> descriptor(Session s) {
-		return new ProxyDescriptor<CapResponseType>(
-				s.getSonarState().getCapResponseTypeCache(), true);
+	static public ProxyDescriptor<CapResponse> descriptor(Session s) {
+		return new ProxyDescriptor<CapResponse>(
+				s.getSonarState().getCapResponseCache(), true);
 	}
 
 	/** Create the columns in the model */
 	@Override
-	protected ArrayList<ProxyColumn<CapResponseType>> createColumns() {
-		ArrayList<ProxyColumn<CapResponseType>> cols =
-				new ArrayList<ProxyColumn<CapResponseType>>(3);
-		cols.add(new ProxyColumn<CapResponseType>("alert.cap.event", 300) {
-			public Object getValueAt(CapResponseType crt) {
+	protected ArrayList<ProxyColumn<CapResponse>> createColumns() {
+		ArrayList<ProxyColumn<CapResponse>> cols =
+				new ArrayList<ProxyColumn<CapResponse>>(3);
+		cols.add(new ProxyColumn<CapResponse>("alert.cap.event", 300) {
+			public Object getValueAt(CapResponse crt) {
 				return crt.getEvent();
 			}
-			public boolean isEditable(CapResponseType crt) {
+			public boolean isEditable(CapResponse crt) {
 				return canWrite(crt);
 			}
-			public void setValueAt(CapResponseType crt, Object value) {
+			public void setValueAt(CapResponse crt, Object value) {
 				String ev = value.toString();
 				if (ev == null || ev.isEmpty())
-					crt.setEvent(CapResponseType.DEFAULT_EVENT);
+					crt.setEvent(CapResponse.DEFAULT_EVENT);
 				else
 					crt.setEvent(ev);
 			}
 		});
-		cols.add(new ProxyColumn<CapResponseType>(
-				"alert.cap.response_type", 300) {
-			public Object getValueAt(CapResponseType crt) {
+		cols.add(new ProxyColumn<CapResponse>("alert.cap.response",300){
+			public Object getValueAt(CapResponse crt) {
 				return crt.getResponseType();
 			}
-			public boolean isEditable(CapResponseType crt) {
+			public boolean isEditable(CapResponse crt) {
 				return canWrite(crt);
 			}
-			public void setValueAt(CapResponseType crt, Object value) {
+			public void setValueAt(CapResponse crt, Object value) {
 				crt.setResponseType(value.toString());
 			}
 			protected TableCellEditor createCellEditor() {
 				JComboBox<String> cbx = new JComboBox<String>(
-						CapResponseTypeEnum.stringValues());
+						CapResponseEnum.stringValues());
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<CapResponseType>("alert.cap.multi", 300) {
-			public Object getValueAt(CapResponseType crt) {
+		cols.add(new ProxyColumn<CapResponse>("alert.cap.multi", 300) {
+			public Object getValueAt(CapResponse crt) {
 				return crt.getMulti();
 			}
-			public boolean isEditable(CapResponseType crt) {
+			public boolean isEditable(CapResponse crt) {
 				return canWrite(crt);
 			}
-			public void setValueAt(CapResponseType crt, Object value) {
+			public void setValueAt(CapResponse crt, Object value) {
 				// TODO validate MULTI
 				crt.setMulti(value.toString());
 			}
@@ -91,7 +90,7 @@ public class CapResponseTypeModel extends ProxyTableModel<CapResponseType> {
 		return cols;
 	}
 
-	public CapResponseTypeModel(Session s) {
+	public CapResponseModel(Session s) {
 		super(s, descriptor(s), 12);
 	}
 }

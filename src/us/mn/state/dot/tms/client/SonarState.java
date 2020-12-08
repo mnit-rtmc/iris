@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.CameraTemplate;
 import us.mn.state.dot.tms.CameraVidSourceOrder;
-import us.mn.state.dot.tms.CapResponseType;
+import us.mn.state.dot.tms.CapResponse;
 import us.mn.state.dot.tms.CapUrgency;
 import us.mn.state.dot.tms.DayMatcher;
 import us.mn.state.dot.tms.DayPlan;
@@ -299,12 +299,12 @@ public class SonarState extends Client {
 		return ipaws_config_cache;
 	}
 	
-	/** Cache of CapResponseType objects */
-	private final TypeCache<CapResponseType> cap_response_type_cache;
+	/** Cache of CapResponse objects */
+	private final TypeCache<CapResponse> cap_response_cache;
 	
 	/** Get the CapUrgency cache */
-	public TypeCache<CapResponseType> getCapResponseTypeCache() {
-		return cap_response_type_cache;
+	public TypeCache<CapResponse> getCapResponseCache() {
+		return cap_response_cache;
 	}
 	
 	/** Cache of CapUrgency objects */
@@ -591,8 +591,8 @@ public class SonarState extends Client {
 			IpawsDeployer.class, this);
 		ipaws_config_cache = new TypeCache<IpawsConfig>(
 			IpawsConfig.class, this);
-		cap_response_type_cache = new TypeCache<CapResponseType>(
-			CapResponseType.class, this);
+		cap_response_cache = new TypeCache<CapResponse>(
+			CapResponse.class, this);
 		cap_urgency_cache = new TypeCache<CapUrgency>(CapUrgency.class,
 			this);
 		notification_cache = new TypeCache<Notification>(
@@ -729,7 +729,7 @@ public class SonarState extends Client {
 		populateReadable(ipaws_alert_cache);
 		populateReadable(ipaws_deployer_cache);
 		populateReadable(ipaws_config_cache);
-		populateReadable(cap_response_type_cache);
+		populateReadable(cap_response_cache);
 		populateReadable(cap_urgency_cache);
 		populateReadable(notification_cache);
 	}

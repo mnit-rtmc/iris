@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.alert;
 
-import us.mn.state.dot.tms.CapResponseType;
+import us.mn.state.dot.tms.CapResponse;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.utils.I18N;
@@ -25,16 +25,16 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Gordon Parikh
  */
 @SuppressWarnings("serial")
-public class CapResponseTypeForm extends ProxyTableForm<CapResponseType> {
+public class CapResponseForm extends ProxyTableForm<CapResponse> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.isWritePermitted(CapResponseType.SONAR_TYPE);
+		return s.isWritePermitted(CapResponse.SONAR_TYPE);
 	}
 
 	/** Create a new CAP response type form */
-	public CapResponseTypeForm(Session s) {
-		super(I18N.get("alert.cap.response_type_substitutions"),
-				new CapResponseTypePanel(new CapResponseTypeModel(s)));
+	public CapResponseForm(Session s) {
+		super(I18N.get("alert.cap.response_substitutions"),
+			new CapResponsePanel(new CapResponseModel(s)));
 	}
 }
