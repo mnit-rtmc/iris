@@ -497,7 +497,6 @@ PRV_0009	base	geo_loc		f
 PRV_0010	base	cabinet		f
 PRV_0011	base	controller		f
 PRV_001C	base	notification		f
-PRV_001D	base	notification		t
 PRV_0012	base_admin	user		t
 PRV_0013	base_admin	role		t
 PRV_001A	base_admin	domain		t
@@ -610,6 +609,7 @@ PRV_009C	ipaws_admin	ipaws_config		t
 PRV_009D	ipaws_admin	cap_response		t
 PRV_009E	ipaws_admin	cap_urgency		t
 PRV_009F	ipaws_deploy	ipaws_deployer		t
+PRV_009L	ipaws_deploy	notification		t
 PRV_009G	ipaws_tab	ipaws		f
 PRV_009H	ipaws_tab	ipaws_deployer		f
 PRV_009I	ipaws_tab	ipaws_config		f

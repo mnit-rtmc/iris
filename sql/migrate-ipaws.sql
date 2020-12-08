@@ -158,21 +158,26 @@ INSERT INTO iris.capability (name, enabled) VALUES
 	('ipaws_deploy', true),
 	('ipaws_tab', true);
 
-INSERT INTO iris.privilege (name, capability, type_n, obj_n, attr_n, group_n,
-                            write)
-VALUES	('PRV_001C','base','notification','','','',false),
-	('PRV_001D','base','notification','','','',true),
-	('PRV_009A','ipaws_admin','cap_response','','','',true),
-	('PRV_009B','ipaws_admin','cap_urgency','','','',true),
-	('PRV_009C','ipaws_admin','ipaws','','','',true),
-	('PRV_009D','ipaws_admin','ipaws_deployer','','','',true),
-	('PRV_009E','ipaws_admin','ipaws_config','','','',true),
-	('PRV_009F','ipaws_deploy','ipaws_deployer','','','',true),
-	('PRV_009G','ipaws_tab','cap_response','','','',false),
-	('PRV_009H','ipaws_tab','cap_urgency','','','',false),
-	('PRV_009I','ipaws_tab','ipaws','','','',false),
-	('PRV_009J','ipaws_tab','ipaws_deployer','','','',false),
-	('PRV_009K','ipaws_tab','ipaws_config','','','',false);
+INSERT INTO iris.privilege (name, capability, type_n, write)
+VALUES	('PRV_009A','ipaws_admin','cap_response',true),
+	('PRV_009B','ipaws_admin','cap_urgency',true),
+	('PRV_009C','ipaws_admin','ipaws',true),
+	('PRV_009D','ipaws_admin','ipaws_deployer',true),
+	('PRV_009E','ipaws_admin','ipaws_config',true),
+	('PRV_009F','ipaws_deploy','ipaws_deployer',true),
+	('PRV_009L','ipaws_deploy','notification',true),
+	('PRV_009G','ipaws_tab','cap_response',false),
+	('PRV_009H','ipaws_tab','cap_urgency',false),
+	('PRV_009I','ipaws_tab','ipaws',false),
+	('PRV_009J','ipaws_tab','ipaws_deployer',false),
+	('PRV_009K','ipaws_tab','ipaws_config',false);
+
+-- Add "base" capability read privilege for notification
+INSERT INTO iris.privilege (name, capability, type_n, write)
+	(SELECT 'prv_not' || ROW_NUMBER() OVER (ORDER BY name), capability,
+	 'notification', false
+	 FROM iris.privilege
+	 WHERE type_n = 'road' AND write = false);
 
 INSERT INTO iris.role_capability (role, capability) VALUES
 	('administrator', 'ipaws_admin'),
