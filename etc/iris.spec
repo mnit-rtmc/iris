@@ -97,10 +97,10 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %defattr(0644,root,root)
 %{_unitdir}/iris.service
 
-# /etc/nginx/conf.d
+# /etc/nginx/
 %defattr(0644,root,root)
-/etc/nginx/conf.d/earthwyrm-iris-cache.conf
-/etc/nginx/default.d/earthwyrm-iris-proxy.conf
+/etc/nginx/conf.d/nginx-iris-cache.conf
+/etc/nginx/default.d/nginx-iris.conf
 
 # /etc/security/limits.d
 %defattr(0644,root,root)

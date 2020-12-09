@@ -361,11 +361,11 @@
 		</copy>
 
 		<copy todir="${install.dir}/etc/nginx/conf.d">
-			<fileset file="${build.etc}/earthwyrm-iris-cache.conf"/>
+			<fileset file="${build.etc}/nginx-iris-cache.conf"/>
 		</copy>
 
 		<copy todir="${install.dir}/etc/nginx/default.d">
-			<fileset file="${build.etc}/earthwyrm-iris-proxy.conf"/>
+			<fileset file="${build.etc}/nginx-iris.conf"/>
 		</copy>
 
 		<copy todir="${install.dir}/var/www/html/${dist.client}">
