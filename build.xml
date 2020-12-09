@@ -346,6 +346,7 @@
 		<mkdir dir="${install.dir}/var/lib/iris/meter"/>
 		<mkdir dir="${install.dir}/var/lib/iris/traffic"/>
 		<mkdir dir="${install.dir}/var/log/iris"/>
+		<mkdir dir="${install.dir}/var/www/html/bulb"/>
 		<mkdir dir="${install.dir}/var/www/html/iris"/>
 		<mkdir dir="${install.dir}/var/www/html/iris/img"/>
 		<mkdir dir="${install.dir}/var/www/html/iris-gstreamer"/>

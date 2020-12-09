@@ -116,8 +116,8 @@ function init_map() {
         center: [45, -93],
         zoom: 12,
     });
-    const osm_url = "http://127.0.0.1/tile/{z}/{x}/{y}.mvt";
-    const tms_url = "http://127.0.0.1/tms/{z}/{x}/{y}.mvt";
+    const osm_url = "/tile/{z}/{x}/{y}.mvt";
+    const tms_url = "/tms/{z}/{x}/{y}.mvt";
     const highlight_style = {
         fill: true,
         fillColor: 'red',
@@ -200,7 +200,7 @@ function event_label(e) {
 
 window.onload = init_map;
 
-fetch('stat_sample.json')
+fetch('/iris/stat_sample')
 .then(response => response.json())
 .then(result => {
     stat_sample = result;
