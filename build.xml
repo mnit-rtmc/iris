@@ -32,7 +32,7 @@
 	<!-- File locations -->
 	<property name="manifest.server" value="server-MANIFEST.MF"/>
 	<property name="manifest.client" value="client-MANIFEST.MF"/>
-	<property name="dist.server" value="${name}-server-${version}"/>
+	<property name="dist.server" value="${name}-server"/>
 	<property name="dist.client" value="${name}-client"/>
 
 	<!-- Build directory configuration -->
@@ -346,7 +346,11 @@
 		<mkdir dir="${install.dir}/var/lib/iris/meter"/>
 		<mkdir dir="${install.dir}/var/lib/iris/traffic"/>
 		<mkdir dir="${install.dir}/var/log/iris"/>
+		<mkdir dir="${install.dir}/var/www/html/iris"/>
+		<mkdir dir="${install.dir}/var/www/html/iris/img"/>
+		<mkdir dir="${install.dir}/var/www/html/iris-gstreamer"/>
 		<mkdir dir="${install.dir}/var/www/html/iris_xml"/>
+		<mkdir dir="${install.dir}/var/cache/nginx/earthwyrm-iris"/>
 
 		<copy todir="${install.dir}/usr/share/java/${dist.server}">
 			<fileset dir="${dist.server}"/>
@@ -356,8 +360,12 @@
 			<fileset file="${build.etc}/99-tms.conf"/>
 		</copy>
 
-		<copy todir="${install.dir}/etc/httpd/conf.d">
-			<fileset file="${build.etc}/iris.conf"/>
+		<copy todir="${install.dir}/etc/nginx/conf.d">
+			<fileset file="${build.etc}/earthwyrm-iris-cache.conf"/>
+		</copy>
+
+		<copy todir="${install.dir}/etc/nginx/default.d">
+			<fileset file="${build.etc}/earthwyrm-iris-proxy.conf"/>
 		</copy>
 
 		<copy todir="${install.dir}/var/www/html/${dist.client}">

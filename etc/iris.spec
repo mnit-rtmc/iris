@@ -20,8 +20,7 @@
 %define version		@@VERSION@@
 %define _topdir		@@BUILD.RPM@@
 %define _installdir	%{_topdir}/BUILDROOT
-%define _serverlink	/usr/share/java/iris-server
-%define _serverdir	%{_serverlink}-%{version}
+%define _serverdir	/usr/share/java/iris-server
 %define _clientdir	/var/www/html/iris-client
 %define _source_payload w6.xzdio
 %define _binary_payload w6.xzdio
@@ -98,15 +97,16 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %defattr(0644,root,root)
 %{_unitdir}/iris.service
 
-# /etc/httpd/conf.d
+# /etc/nginx/conf.d
 %defattr(0644,root,root)
-/etc/httpd/conf.d/iris.conf
+/etc/nginx/conf.d/earthwyrm-iris-cache.conf
+/etc/nginx/default.d/earthwyrm-iris-proxy.conf
 
 # /etc/security/limits.d
 %defattr(0644,root,root)
 /etc/security/limits.d/99-tms.conf
 
-# /usr/share/java/iris-server-%{version}
+# /usr/share/java/iris-server
 %defattr(0644,root,root,0755)
 %dir %{_serverdir}
 %{_serverdir}/iris-server-%{version}.jar
@@ -115,6 +115,10 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %{_serverdir}/json-@@JSON.VERSION@@.jar
 %{_serverdir}/postgis-jdbc-@@POSTGIS.VERSION@@.jar
 %{_serverdir}/postgis-geometry-@@POSTGIS.VERSION@@.jar
+
+# /var/cache/nginx/earthwyrm-iris
+%dir %attr(0755,nginx,nginx) /var/cache/nginx
+%dir %attr(0755,nginx,nginx) /var/cache/nginx/earthwyrm-iris
 
 # /var/lib/iris
 %dir %attr(3775,tms,tms) /var/lib/iris
@@ -127,11 +131,14 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 # /var/log/iris
 %dir %attr(3775,tms,tms) /var/log/iris
 
-# /var/www/html/iris_xml
+# /var/www/html/
+%dir %attr(3775,tms,tms) /var/www/html/iris
+%dir %attr(3775,tms,tms) /var/www/html/iris/img
 %dir %attr(3775,tms,tms) /var/www/html/iris_xml
+%dir %attr(3775,tms,tms) /var/www/html/iris-gstreamer
 
 # client: /var/www/html/iris-client
-%defattr(0444,nginx,nginx,0755)
+%defattr(0444,root,root,0755)
 %dir %{_clientdir}
 %dir %{_clientdir}/images
 %dir %{_clientdir}/lib
@@ -148,4 +155,4 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %{_clientdir}/lib/postgis-geometry-@@POSTGIS.VERSION@@.jar
 %{_clientdir}/lib/iris-client-%{version}.jar
 %{_clientdir}/lib/iris-common-%{version}.jar
-%attr(0644,tms,nginx) %{_clientdir}/session_ids
+%attr(0644,tms,tms) %{_clientdir}/session_ids

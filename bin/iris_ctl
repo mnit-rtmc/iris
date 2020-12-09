@@ -77,9 +77,9 @@ function init_db() {
 	systemctl start postgresql.service
 }
 
-function create_osm_database() {
-	echo "Creating osm database"
-	create_db="createdb osm; psql osm -c 'CREATE EXTENSION postgis;'"
+function create_earthwyrm_database() {
+	echo "Creating earthwyrm database"
+	create_db="createdb earthwyrm; psql earthwyrm -c 'CREATE EXTENSION postgis;'"
 	su --login postgres -c "$create_db"
 }
 
@@ -99,17 +99,23 @@ function create_tms_database() {
 	su --login postgres -c "$create_db"
 }
 
-function configure_services() {
-	echo "Configuring services"
-	systemctl enable httpd.service
-	systemctl start httpd.service
-	systemctl enable iris.service
+function configure_selinux() {
+	echo "Configuring SELinux for nginx"
+	semanage port -a -t http_port_t -p tcp 3030
+	setsebool -P httpd_can_network_connect true
 }
 
 function configure_firewall() {
 	echo "Configuring firewall"
 	firewall-cmd --permanent --add-port=1037/tcp
 	firewall-cmd --reload
+}
+
+function configure_services() {
+	echo "Configuring services"
+	systemctl enable nginx.service
+	systemctl start nginx.service
+	systemctl enable iris.service
 }
 
 function echo_success() {
@@ -122,8 +128,7 @@ function create_links() {
 	version="@@VERSION@@"
 	echo "Creating IRIS links for verion $version"
 	host=`hostname -f`
-	ln -snf /usr/share/java/iris-server-$version/iris-server-$version.jar /usr/share/java/iris-server-$version/iris-server.jar
-	ln -snf /usr/share/java/iris-server-$version /usr/share/java/iris-server
+	ln -snf /usr/share/java/iris-server/iris-server-$version.jar /usr/share/java/iris-server/iris-server.jar
 	sed -i ''s,@@WEBSTART.HOST@@,$host,'' /var/www/html/iris-client/iris-client.jnlp /var/www/html/iris-client/mail.jnlp
 	install -o nginx -g nginx -m 0444 /etc/iris/iris-client.keystore /var/www/html/iris-client/
 	install -o nginx -g nginx -m 0444 /etc/iris/iris-client.properties /var/www/html/iris-client/
@@ -142,11 +147,12 @@ case "$1" in
 		update_client_properties
 		create_keystores
 		init_db
-		create_osm_database
+		create_earthwyrm_database
 		create_tms_user
 		create_tms_database
-		configure_services
+		configure_selinux
 		configure_firewall
+		configure_services
 		create_links
 		echo_success
 		;;
