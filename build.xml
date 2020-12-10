@@ -244,7 +244,7 @@
 	        depends="compile"
 	        description="Create the iris-client jar">
 		<jar jarfile="${build.lib}/${client.jar}"
-		     manifest="${build.etc}/${manifest.client}">
+		     manifest="${build.etc}/client/${manifest.client}">
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/sonar/client/**/*"/>
 			<fileset dir="${build.classes}"
@@ -259,7 +259,7 @@
 	        description="Create the iris client distribution">
 		<mkdir dir="${dist.client}"/>
 		<copy todir="${dist.client}">
-			<fileset dir="${build.etc}">
+			<fileset dir="${build.etc}/client">
 				<include name="*.jnlp"/>
 				<include name="index.html"/>
 			</fileset>
@@ -329,8 +329,8 @@
 		<chmod file="${install.dir}/usr/bin/iris_ctl" perm="755"/>
 
 		<copy todir="${install.dir}/etc/iris">
-			<fileset file="${etc.dir}/iris-client.properties"/>
-			<fileset file="${etc.dir}/iris-server.properties"/>
+			<fileset file="${build.etc}/client/iris-client.properties"/>
+			<fileset file="${build.etc}/iris-server.properties"/>
 		</copy>
 		<chmod file="${install.dir}/etc/iris/*" perm="660"/>
 
