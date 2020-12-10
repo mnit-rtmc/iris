@@ -1,5 +1,14 @@
 # IRIS 5.x Release Notes
 
+5.18.0 (10 Dec 2020)
+
+Upgrade checklist:
+ - [ ] Shut off and disable apache server (httpd)
+ - [ ] Remove `/usr/share/java/iris-server` symlink
+ - [ ] Remove `/var/www/html/iris-client` symlink
+ - [ ] For nginx, run: `semanage port -a -t http_port_t -p tcp 3030`
+ - [ ] For nginx, run: `setsebool -P httpd_can_network_connect true`
+
 5.17.0 (2 Oct 2020)
  - Fixes for no-response disconnect feature
  - Added `failed` column to `dms_message_view`
