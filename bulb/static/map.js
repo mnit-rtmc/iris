@@ -200,12 +200,12 @@ function event_label(e) {
 
 window.onload = init_map;
 
-fetch('/iris/stat_sample')
+fetch('/iris/station_sample')
 .then(response => response.json())
 .then(result => {
     stat_sample = result;
-    console.log('stat_sample: ', stat_sample.time_stamp);
+    console.log('station_sample: ', stat_sample.time_stamp);
 })
 .catch(error => {
-    console.error('Error fetching stat_sample.json: ', error);
+    console.error('Error fetching station_sample: ', error);
 });
