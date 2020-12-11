@@ -27,6 +27,7 @@ public class TransGeoLoc implements GeoLoc {
 	 * @param lt Latitude.
 	 * @param ln Longitude. */
 	public TransGeoLoc(Road road, short rd, float lt, float ln) {
+		name = "trans_geo_loc";
 		roadway = road;
 		road_dir = rd;
 		lat = lt;
@@ -37,6 +38,18 @@ public class TransGeoLoc implements GeoLoc {
 	 * @param lt Latitude.
 	 * @param ln Longitude. */
 	public TransGeoLoc(float lt, float ln) {
+		name = "trans_geo_loc";
+		roadway = null;
+		road_dir = 0;
+		lat = lt;
+		lon = ln;
+	}
+
+	/** Create a transient location.
+	 * @param lt Latitude.
+	 * @param ln Longitude. */
+	public TransGeoLoc(String n, float lt, float ln) {
+		name = n;
 		roadway = null;
 		road_dir = 0;
 		lat = lt;
@@ -49,10 +62,13 @@ public class TransGeoLoc implements GeoLoc {
 		return "trans_geo_loc";
 	}
 
+	/** Object name */
+	private final String name;
+
 	/** Get the name */
 	@Override
 	public String getName() {
-		return "trans_geo_loc";
+		return name;
 	}
 
 	/** Destroy the loc */
