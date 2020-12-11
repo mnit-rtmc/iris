@@ -22,6 +22,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -39,6 +40,7 @@ import us.mn.state.dot.tms.client.map.LayerState;
 import us.mn.state.dot.tms.client.map.MapBean;
 import us.mn.state.dot.tms.client.map.MapObject;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyLayer;
 import us.mn.state.dot.tms.client.proxy.ProxyLayerState;
@@ -293,6 +295,7 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 		return null;
 	}
 
+	/** Get the GeoLoc for the specified proxy */
 	@Override
 	protected GeoLoc getGeoLoc(IpawsDeployer iad) {
 		if (iad != null) {
@@ -304,6 +307,24 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 			}
 		}
 		return null;
+	}
+
+	/** Location mapping */
+	private final HashMap<String, MapGeoLoc> locations =
+		new HashMap<String, MapGeoLoc>();
+
+	/** Find the map geo location for a proxy */
+	@Override
+	public MapGeoLoc findGeoLoc(IpawsDeployer iad) {
+		String name = iad.getName();
+		if (locations.containsKey(name))
+			return locations.get(name);
+		MapGeoLoc loc = new MapGeoLoc(getGeoLoc(iad));
+		loc.setManager(this);
+		loc.doUpdate();
+		locations.put(name, loc);
+		// FIXME: MapGeoLoc objects are never removed from locations
+		return loc;
 	}
 
 	/** Selected DMS (for communicating between theme and dispatcher) */
