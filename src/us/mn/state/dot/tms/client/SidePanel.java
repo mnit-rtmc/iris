@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2020  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.alert.AlertTab;
 import us.mn.state.dot.tms.client.map.LayerState;
 import us.mn.state.dot.tms.client.map.MapBean;
@@ -74,21 +75,19 @@ public class SidePanel extends JPanel {
 			setSelectedLayer(getHomeProxyLayerState(mt));
 			sel_tab = mt.getTabId();
 			
-			// if the alert tab was selected, change the visibility of the DMS
-			// layer to allow granular control of DMS visibility by alert.
-			// NOTE we're using TypeCaches from SonarState to get type names
-			SonarState ss = Session.getCurrent().getSonarState();
-			
-			LayerState dmsLayer = map.getTypeLayer(
-					ss.getDmsCache().getDMSs().tname);
-			if (sel_tab == AlertTab.getAlertTabId())
-				// force visibility to false (off) - the alert tab will draw
-				// specific DMS when needed
+			// if the alert tab was selected, change the visibility
+			// of the DMS layer to allow granular control of DMS
+			// visibility by alert.
+			LayerState dmsLayer = map.getTypeLayer(DMS.SONAR_TYPE);
+			if (sel_tab == AlertTab.getAlertTabId()) {
+				// force visibility to false (off) - the alert
+				// tab will draw specific DMS when needed
 				dmsLayer.setVisibleForced(false);
-			else
-				// if another tab was selected, change the DMS layer visibility
-				// back to what it was before
+			} else {
+				// if another tab was selected, change the DMS
+				// layer visibility back to what it was before
 				dmsLayer.clearVisibleForced();
+			}
 		}
 	}
 
