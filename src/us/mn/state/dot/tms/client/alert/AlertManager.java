@@ -165,17 +165,19 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 						IpawsDeployer>(this, mb) {
 					@Override
 					protected void doLeftClick(MouseEvent e, MapObject o) {
-						// search for DMS - use the map to transform the point
-						// then use the DMS manager to search
-						Point2D p = map.transformPoint(e.getPoint());
-						DMSManager dm = session.getDMSManager();
-						selectDmsInTable(dm.findProxy(
-								dm.getLayerState().search(p)));
+						if (tab.getAlertDispatcher().
+								getSelectedAlert() != null) {
+							// search for DMS - use the map to transform the point
+							// then use the DMS manager to search
+							Point2D p = map.transformPoint(e.getPoint());
+							DMSManager dm = session.getDMSManager();
+							selectDmsInTable(dm.findProxy(
+									dm.getLayerState().search(p)));
 
-						// check if they clicked out of the alert area
-						System.out.println(o);
-						if (o == null)
-							tab.getAlertDispatcher().selectAlert(null);
+							// check if they clicked out of the alert area
+							if (o == null)
+								tab.getAlertDispatcher().selectAlert(null);
+						}
 					}
 				};
 				s.addTheme(theme);
