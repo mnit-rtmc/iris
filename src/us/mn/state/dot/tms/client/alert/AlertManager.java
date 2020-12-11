@@ -302,8 +302,8 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 			Double lat = iad.getLat();
 			Double lon = iad.getLon();
 			if (lat != null && lon != null) {
-				return new TransGeoLoc(lat.floatValue(),
-					lon.floatValue());
+				return new TransGeoLoc(iad.getName(),
+					lat.floatValue(), lon.floatValue());
 			}
 		}
 		return null;
@@ -316,15 +316,22 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 	/** Find the map geo location for a proxy */
 	@Override
 	public MapGeoLoc findGeoLoc(IpawsDeployer iad) {
-		String name = iad.getName();
-		if (locations.containsKey(name))
-			return locations.get(name);
-		MapGeoLoc loc = new MapGeoLoc(getGeoLoc(iad));
-		loc.setManager(this);
-		loc.doUpdate();
-		locations.put(name, loc);
-		// FIXME: MapGeoLoc objects are never removed from locations
-		return loc;
+		if (iad != null) {
+			String name = iad.getName();
+			if (locations.containsKey(name))
+				return locations.get(name);
+
+			GeoLoc gl = getGeoLoc(iad);
+			if (gl != null) {
+				MapGeoLoc loc = new MapGeoLoc(getGeoLoc(iad));
+				loc.setManager(this);
+				loc.doUpdate();
+				locations.put(name, loc);
+				// FIXME: MapGeoLoc objects are never removed from locations
+				return loc;
+			}
+		}
+		return null;
 	}
 
 	/** Selected DMS (for communicating between theme and dispatcher) */
