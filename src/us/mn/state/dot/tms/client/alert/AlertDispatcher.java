@@ -338,6 +338,10 @@ public class AlertDispatcher extends IPanel {
 		areaDescLbl.setText("");
 	}
 
+	public IpawsDeployer getSelectedAlert() {
+		return selectedAlertDepl;
+	}
+
 	/** Get the AlertDmsDispatcher */
 	public AlertDmsDispatcher getDmsDispatcher() {
 		return dmsDispatcher;
