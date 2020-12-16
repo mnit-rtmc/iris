@@ -424,7 +424,7 @@ public class IpawsProcJob extends Job {
 									iadList.add(iad);
 							}
 						} catch (Exception e) {
-							e.printStackTrace();
+							log("No DMS found for alert.");
 						}
 					}
 				});
@@ -560,7 +560,7 @@ public class IpawsProcJob extends Job {
 					String[] dms = (String[]) row.getArray(1).getArray();
 					iad.setOptionalDmsNotify(dms);
 				} catch (Exception e) {
-					e.printStackTrace();
+					log("No optional DMS found for alert.");
 				}
 			}
 		});
