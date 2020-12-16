@@ -216,7 +216,7 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 					I18N.get("ipaws_deployer") + " ");
 		}
 		if (ia != null)
-			return name + " - " + ia.getEvent();
+			return name + " - " + ia.getEvent() + " - " + proxy.getSignGroup();
 		return name;
 	}
 
