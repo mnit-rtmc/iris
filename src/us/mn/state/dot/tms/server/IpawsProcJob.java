@@ -396,7 +396,7 @@ public class IpawsProcJob extends Job {
 			if (event.equals(iac.getEvent())) {
 				// query the list of DMS that falls within the MultiPolygon
 				// for this alert - use array_agg to get one array instead of
-				// multiple rows do this once for each sign group
+				// multiple rows, do this once for each sign group
 				log("Searching for DMS in group " + iac.getSignGroup() +
 						" for alert " + ia.getName());
 				int t = SystemAttrEnum.IPAWS_SIGN_THRESH_AUTO_METERS.getInt();
