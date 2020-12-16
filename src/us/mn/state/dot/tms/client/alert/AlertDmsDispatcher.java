@@ -468,8 +468,12 @@ public class AlertDmsDispatcher extends IPanel {
 			selectedAlertDepl.setApprovedTime(new Date());
 			selectedAlertDepl.setApprovedBy(session.getUser().getName());
 
-			// set the deployed state - this triggers the deployment/update
-			selectedAlertDepl.setDeployed(true);
+			// if not currently deployed, set the alert as deployed
+			if (!Boolean.TRUE.equals(selectedAlertDepl.getDeployed()))
+				selectedAlertDepl.setDeployed(true);
+			else
+				// if already deployed, trigger an update
+				selectedAlertDepl.setUpdate(true);
 
 			// update the style counts in case the alert was pending
 			manager.updateStyleCounts();
