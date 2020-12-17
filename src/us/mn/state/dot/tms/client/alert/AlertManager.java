@@ -211,15 +211,17 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 	/** Get the description of a proxy */
 	@Override
 	public String getDescription(IpawsDeployer proxy) {
-		IpawsAlert ia = acache.lookupObject(proxy.getAlertId());
 		String name = proxy.getName();
 		if (name.contains("ipaws_dplr_")) {
 			name = name.replace("ipaws_dplr_",
 					I18N.get("ipaws_deployer") + " ");
 		}
-		if (ia != null)
-			return name + " - " + ia.getEvent() + " - " + proxy.getSignGroup();
-		return name;
+		IpawsAlert ia = acache.lookupObject(proxy.getAlertId());
+		if (ia != null) {
+			return name + " - " + ia.getEvent() + " - " +
+				proxy.getSignGroup();
+		} else
+			return name;
 	}
 
 	/** Check the style of the specified proxy */
