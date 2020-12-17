@@ -111,6 +111,9 @@ public interface IpawsDeployer extends SonarObject {
 	 */
 	int getPostAlertTime();
 
+	/** Whether the current time is past the post alert time */
+	boolean getPastPostAlertTime();
+
 	/** Set the list of DMS (represented as a string array) automatically
 	 *  selected for deploying alert messages.
 	 */

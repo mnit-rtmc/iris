@@ -117,6 +117,7 @@ public class IpawsProcJob extends Job {
 	@Override
 	public void perform() throws Exception {
 		try {
+			processAllDeployers();
 			processAllAlerts();
 		} catch (Exception e) {
 			// if we hit any exceptions, send an email alert
@@ -124,6 +125,21 @@ public class IpawsProcJob extends Job {
 			sendEmailAlert("Error encountered in IPAWS alert processing " +
 				"system. Check the server logs for details.");
 		}
+	}
+
+	/** Process all alert deployers */
+	private void processAllDeployers() throws SQLException, TMSException,
+		NoSuchFieldException
+	{
+		Iterator<IpawsDeployerImpl> it = IpawsDeployerImpl.iterator();
+		while (it.hasNext()) {
+			checkDeployer(it.next());
+		}
+	}
+
+	/** Check an IPAWS deployer for action needed */
+	private void checkDeployer(IpawsDeployerImpl iad) {
+		iad.updatePastPostAlertTimeNotify();
 	}
 
 	/** Process all alerts */
@@ -464,6 +480,8 @@ public class IpawsProcJob extends Job {
 		if (iad != null && iad.isPastPostAlertTime(aEnd)) {
 			log("Past alert display end time. Canceling any " +
 				"existing messages and not posting any more.");
+			iad.updatePastPostAlertTimeNotify();
+
 			iad.setDeployedNotify(false);
 
 			// mark the alert as non-purgeable - we want to keep it

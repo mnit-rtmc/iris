@@ -19,11 +19,13 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.IpawsDeployerHelper;
+import us.mn.state.dot.tms.IteratorWrapper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;;
 
@@ -68,6 +70,11 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 			// lookup the IpawsDeployerImpl object using the name
 			return lookupIpawsDeployer(ian.getName());
 		return null;
+	}
+
+	static public Iterator<IpawsDeployerImpl> iterator() {
+		return new IteratorWrapper<IpawsDeployerImpl>(
+			namespace.iterator(SONAR_TYPE));
 	}
 
 	/** Load all the IPAWS alert deployers */
@@ -555,6 +562,24 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	@Override
 	public int getPostAlertTime() {
 		return post_alert_time;
+	}
+
+	/** Whether it's past the post alert time */
+	private transient boolean past_post_alert_time;
+
+	/** Whether the current time is past the post alert time */
+	@Override
+	public boolean getPastPostAlertTime() {
+		return past_post_alert_time;
+	}
+
+	/** Notify clients that the post alert time is past */
+	public void updatePastPostAlertTimeNotify() {
+		boolean past = isPastPostAlertTime();
+		if (past_post_alert_time != past) {
+			past_post_alert_time = past;
+			notifyAttribute("pastPostAlertTime");
+		}
 	}
 
 	/** Check if the current time is past the allowed post alert time given
