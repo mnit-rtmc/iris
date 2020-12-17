@@ -24,8 +24,6 @@ import org.json.JSONObject;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.IpawsAlert;
 import us.mn.state.dot.tms.IpawsDeployer;
-import us.mn.state.dot.tms.IpawsDeployerHelper;
-import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
@@ -299,8 +297,7 @@ public class AlertDispatcher extends IPanel {
 
 		// set the button text and disable buttons if alert is in past
 		setEditDeployBtnText();
-		boolean npast = !IpawsDeployerHelper.
-				isPastPostAlertTime(selectedAlertDepl);
+		boolean npast = !iad.getPastPostAlertTime();
 		editDeployBtn.setEnabled(npast);
 		cancelBtn.setEnabled(npast);
 	}

@@ -480,9 +480,6 @@ public class AlertDmsDispatcher extends IPanel {
 			// if already deployed, trigger an update
 			iad.setUpdate(true);
 
-		// update the style counts in case the alert was pending
-		manager.updateStyleCounts();
-
 		// check if there are any notifications that haven't been
 		// addressed and address them
 		NotificationHelper.addressAllRef(iad, session);
@@ -498,7 +495,6 @@ public class AlertDmsDispatcher extends IPanel {
 			NotificationHelper.addressAllRef(selectedAlertDepl,
 				session);
 		}
-		manager.updateStyleCounts();
 	}
 
 	/** Start editing the selected alert. */

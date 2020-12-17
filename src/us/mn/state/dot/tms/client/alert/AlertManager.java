@@ -21,9 +21,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
@@ -58,9 +56,6 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Gordon Parikh
  */
 public class AlertManager extends ProxyManager<IpawsDeployer> {
-
-	/** IpawsDeployer cache */
-	private final TypeCache<IpawsDeployer> adcache;
 
 	/** IpawsAlert cache */
 	private final TypeCache<IpawsAlert> acache;
@@ -114,22 +109,6 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 		return showAllDms;
 	}
 
-	/** Proxy listener for SONAR updates */
-	private final SwingProxyAdapter<IpawsDeployer> listener =
-			new SwingProxyAdapter<IpawsDeployer>() {
-		@Override
-		protected void proxyAddedSwing(IpawsDeployer iad) {
-			if (tab != null)
-				tab.updateStyleCounts();
-		}
-
-		@Override
-		protected void proxyChangedSwing(IpawsDeployer iad, String attr) {
-			if (tab != null)
-				tab.updateStyleCounts();
-		}
-	};
-
 	/** Create a proxy descriptor. */
 	static private ProxyDescriptor<IpawsDeployer> descriptor(Session s) {
 		return new ProxyDescriptor<IpawsDeployer>(
@@ -138,10 +117,6 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 
 	public AlertManager(Session s, GeoLocManager lm) {
 		super(s, lm, descriptor(s), 10);
-
-		// add the listener to the cache
-		adcache = s.getSonarState().getIpawsDeployerCache();
-		adcache.addProxyListener(listener);
 		acache = s.getSonarState().getIpawsAlertCache();
 	}
 
@@ -224,33 +199,38 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 			return name;
 	}
 
+	/** Check if a given attribute affects a proxy style */
+	@Override
+	public boolean isStyleAttrib(String a) {
+		return "deployed".equals(a) || "active".equals(a) ||
+		       "pastPostAlertTime".equals(a);
+	}
+
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, IpawsDeployer proxy) {
-		Integer t = checkAlertTimes(proxy);
-		boolean past = IpawsDeployerHelper.isPastPostAlertTime(proxy);
-		if (t == null)
-			// problem with the dates
-			return false;
+		Boolean deployed = proxy.getDeployed();
+		boolean active = proxy.getActive();
+		boolean past = proxy.getPastPostAlertTime();
 		switch (is) {
 		case PENDING:
-			return proxy.getDeployed() == null && !past;
+			return deployed == null && !past;
 		case SCHEDULED:
-			// scheduled alerts are deployed (i.e. approved) but not active
-			return Boolean.TRUE.equals(proxy.getDeployed())
-				&& !proxy.getActive() && !past;
+			// scheduled alerts are deployed (i.e. approved)
+			// but not active
+			return Boolean.TRUE.equals(deployed) && !active &&
+			       !past;
 		case ACTIVE:
-			return Boolean.TRUE.equals(proxy.getDeployed())
-				&& proxy.getActive() && !past;
+			return Boolean.TRUE.equals(deployed) && active && !past;
 		case INACTIVE:
-			return Boolean.FALSE.equals(proxy.getDeployed())
-				&& !proxy.getActive() && !past;
+			return Boolean.FALSE.equals(deployed) && !active &&
+			       !past;
 		case PAST:
-			return Boolean.FALSE.equals(proxy.getDeployed())
-				&& !proxy.getActive() && past;
+			return Boolean.FALSE.equals(deployed) && !active &&
+			       past;
 		case ALL:
-			// TODO some alerts are slipping through here but not in other
-			// categories...
+			// TODO some alerts are slipping through here,
+			//      but not in other categories...
 			return true;
 		default:
 			return false;
@@ -263,41 +243,6 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 	@Override
 	protected boolean isStyleVisible(IpawsDeployer proxy) {
 		return true;
-	}
-
-	/** Update the counts in the style summary */
-	public void updateStyleCounts() {
-		if (tab != null)
-			tab.updateStyleCounts();
-	}
-
-	/** Check when this alert will start relative to the current time. Returns
-	 *  -1 if this alert has not yet started, 0 if the alert is currently
-	 *  active, and 1 if the alert is in the past. If the time fields are not
-	 *  filled, null is returned.
-	 */
-	private Integer checkAlertTimes(IpawsDeployer iad) {
-		if (iad.getAlertStart() != null && iad.getAlertEnd() != null) {
-			// check the time of the alert relative to now
-			Date now = new Date();
-			if (now.before(iad.getAlertStart()))
-				return -1;
-			else if (now.after(iad.getAlertStart())
-					&& now.before(iad.getAlertEnd()))
-				return 0;
-			else if (now.after(iad.getAlertEnd())) {
-				// if after end time, check post alert time
-				long t = now.getTime() - iad.getAlertEnd().getTime();
-				int mins = (int) TimeUnit.HOURS.convert(
-						t, TimeUnit.MILLISECONDS);
-				if (mins < iad.getPostAlertTime())
-					return 0;
-				return 1;
-			}
-			return 1;
-		}
-		// missing alert times - return null
-		return null;
 	}
 
 	/** Get the GeoLoc for the specified proxy */

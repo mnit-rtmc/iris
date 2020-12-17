@@ -22,7 +22,6 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.Timer;
 
 import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.ItemStyle;
@@ -118,20 +117,6 @@ public class AlertTab extends MapTab<IpawsDeployer> {
 
 		dispatcher.selectAlert(proxy);
 		summary.ensureSelectedProxyVisible();
-	}
-
-	/** Update the counts in the style summary */
-	public void updateStyleCounts() {
-		System.out.println("Updating style counts");
-
-		// use a timer to fire this in just a bit
-		Timer t = new Timer(100, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				summary.updateCounts();
-			}
-		});
-		t.start();
 	}
 
 	/** Get the AlertDispatcher */

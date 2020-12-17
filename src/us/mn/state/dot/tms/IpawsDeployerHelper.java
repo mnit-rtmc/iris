@@ -214,18 +214,4 @@ public class IpawsDeployerHelper extends BaseHelper {
 				ZoneId.systemDefault()).toLocalDateTime();
 		return Duration.between(at, LocalDateTime.now()).getSeconds();
 	}
-
-	/** Check if the current time is past the allowed post alert time given
-	 *  the deployer's alert end time.
-	 */
-	static public boolean isPastPostAlertTime(IpawsDeployer iad) {
-		Date now = new Date();
-		if (now.after(iad.getAlertEnd())) {
-			long t = now.getTime() - iad.getAlertEnd().getTime();
-			int units = (int) TimeUnit.HOURS.convert(
-					t, TimeUnit.MILLISECONDS);
-			return units >= iad.getPostAlertTime();
-		}
-		return false;
-	}
 }
