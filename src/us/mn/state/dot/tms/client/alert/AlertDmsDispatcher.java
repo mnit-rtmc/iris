@@ -427,61 +427,65 @@ public class AlertDmsDispatcher extends IPanel {
 
 	/** Deploy (or update) the selected alert. */
 	private void deployAlert() {
-		if (selectedAlert != null && selectedAlertDepl != null
-				&& !manager.checkStyle(ItemStyle.PAST,  selectedAlertDepl)) {
+		if (selectedAlert != null && selectedAlertDepl != null &&
+		    !manager.checkStyle(ItemStyle.PAST, selectedAlertDepl))
+		{
 			System.out.println("Deploying alert " +
-					selectedAlert.getName() + "...");
-
-			// get the selected DMS and set the deployed DMS
-			ArrayList<String> selectedDms = new ArrayList<String>();
-			for (DMS d: dmsSuggestions.keySet()) {
-				if (dmsSuggestions.get(d))
-					selectedDms.add(d.getName());
-			}
-			String[] dms = selectedDms.toArray(new String[0]);
-			selectedAlertDepl.setDeployedDms(dms);
-
-			// try to update MULTI and pre/post alert times
-			String newMulti = multiBox.getText();
-			if (newMulti != null && !newMulti.isEmpty())
-				selectedAlertDepl.setDeployedMulti(multiBox.getText());
-			int preAlertTime = -1;
-			try {
-				preAlertTime = Integer.valueOf(preAlertTimeBx.getText());
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
-			}
-			if (preAlertTime >= 0)
-				selectedAlertDepl.setPreAlertTime(preAlertTime);
-			int postAlertTime = -1;
-			try {
-				postAlertTime = Integer.valueOf(postAlertTimeBx.getText());
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
-			}
-			if (postAlertTime >= 0)
-				selectedAlertDepl.setPostAlertTime(postAlertTime);
-
-			// update approval time/user
-			selectedAlertDepl.setApprovedTime(new Date());
-			selectedAlertDepl.setApprovedBy(session.getUser().getName());
-
-			// if not currently deployed, set the alert as deployed
-			if (!Boolean.TRUE.equals(selectedAlertDepl.getDeployed()))
-				selectedAlertDepl.setDeployed(true);
-			else
-				// if already deployed, trigger an update
-				selectedAlertDepl.setUpdate(true);
-
-			// update the style counts in case the alert was pending
-			manager.updateStyleCounts();
-
-			// check if there are any notifications that haven't been addressed
-			// and address them
-			NotificationHelper.addressAllRef(selectedAlertDepl,
-				session);
+				selectedAlert.getName() + "...");
+			deployAlert(selectedAlertDepl);
 		}
 		manager.setEditing(false);
+	}
+
+	/** Deploy (or update) the selected alert. */
+	private void deployAlert(IpawsDeployer iad) {
+		// get the selected DMS and set the deployed DMS
+		ArrayList<String> selectedDms = new ArrayList<String>();
+		for (DMS d: dmsSuggestions.keySet()) {
+			if (dmsSuggestions.get(d))
+				selectedDms.add(d.getName());
+		}
+		String[] dms = selectedDms.toArray(new String[0]);
+		iad.setDeployedDms(dms);
+
+		// try to update MULTI and pre/post alert times
+		String newMulti = multiBox.getText();
+		if (newMulti != null && !newMulti.isEmpty())
+			iad.setDeployedMulti(multiBox.getText());
+		int preAlertTime = -1;
+		try {
+			preAlertTime = Integer.valueOf(preAlertTimeBx.getText());
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		}
+		if (preAlertTime >= 0)
+			iad.setPreAlertTime(preAlertTime);
+		int postAlertTime = -1;
+		try {
+			postAlertTime = Integer.valueOf(postAlertTimeBx.getText());
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		}
+		if (postAlertTime >= 0)
+			iad.setPostAlertTime(postAlertTime);
+
+		// update approval time/user
+		iad.setApprovedTime(new Date());
+		iad.setApprovedBy(session.getUser().getName());
+
+		// if not currently deployed, set the alert as deployed
+		if (!Boolean.TRUE.equals(iad.getDeployed()))
+			iad.setDeployed(true);
+		else
+			// if already deployed, trigger an update
+			iad.setUpdate(true);
+
+		// update the style counts in case the alert was pending
+		manager.updateStyleCounts();
+
+		// check if there are any notifications that haven't been
+		// addressed and address them
+		NotificationHelper.addressAllRef(iad, session);
 	}
 
 	/** Cancel the selected alert (removing it from signs) */
@@ -743,18 +747,3 @@ public class AlertDmsDispatcher extends IPanel {
 		}
 	};
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
