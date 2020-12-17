@@ -185,6 +185,12 @@ public interface IpawsDeployer extends SonarObject {
 	 *  deployed). */
 	Boolean getDeployed();
 
+	/** Trigger a manual update to the alert. Does not affect the database. */
+	void setUpdate(boolean u);
+
+	/** Check if a manual update is currently underway. */
+	boolean getUpdate();
+
 	/** Set whether this alert deployer was ever deployed or not. Note that
 	 *  this will be true if an alert message is successfully sent to at
 	 *  least one sign. */

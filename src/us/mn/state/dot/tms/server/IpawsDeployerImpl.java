@@ -882,6 +882,37 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		}
 	}
 
+	/** Current state of any manual update. True if an update is currently
+	 *  underway, and false if not.
+	 */
+	private boolean is_updating = false;
+
+	/** Trigger a manual update to the alert. Does not affect the database. */
+	public void setUpdate(boolean u) {
+		is_updating = u;
+	}
+
+	/** Trigger a manual update to the alert. Does not affect the database. */
+	public void doSetUpdate(boolean u) throws TMSException {
+		if (u) {
+			// log the update then process it
+			IpawsProcJob.log("Starting manual update to alert deployer " + name);
+			boolean d = checkDeployCancel(Boolean.TRUE.equals(deployed));
+
+			// make sure the deployed flag is correct
+			store.update(this, "deployed", d);
+			setDeployed(d);
+		}
+		// after the update, reset the flag to allow future updates
+		setUpdate(false);
+		notifyAttribute("update");
+	}
+
+	/** Check if a manual update is currently underway. */
+	public boolean getUpdate() {
+		return is_updating;
+	}
+
 	/** Check the alert against the pre-/post-alert times and either repost
 	 *  or cancel the alert as needed. Returns false if the alert was canceled
 	 *  and true otherwise.
@@ -909,8 +940,8 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		return true;
 	}
 
-	/** Set the deployed state of this alert (whether it was ever deployed),
-	 *  notifying clients if it has changed.
+	/** Set the deployed state of this alert, notifying clients if it has
+	 *  changed.
 	 */
 	public void setDeployedNotify(Boolean d) throws TMSException {
 		Boolean dlast = deployed;
