@@ -1202,10 +1202,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Create a new (IPAWS) sign-message. */
-	public SignMessage createIpawsMsg(String multi,
-			int priority, Integer duration) {
-		DmsMsgPriority mp = 
-			DmsMsgPriority.fromOrdinal(priority);
+	public SignMessage createIpawsMsg(String multi, int priority,
+		Integer duration)
+	{
+		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(priority);
 		int src = SignMsgSource.ipaws.bit();
 		String owner = "IPAWS";
 		return findOrCreateMsg(null, multi, false,
@@ -1229,12 +1229,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @throws TMSException if there is some other
 	 *         problem.
 	 **/
-	public boolean sendIpawsMsg(String multi,
-			int priority, Integer duration)
-					throws TMSException {
+	public boolean sendIpawsMsg(String multi, int priority,
+		Integer duration) throws TMSException
+	{
 		SignMessage sm = msg_user;
-		if ((sm != null)
-		 && (sm.getMsgPriority() > priority))
+		if ((sm != null) && (sm.getMsgPriority() > priority))
 			return false;
 		sm = createIpawsMsg(multi, priority, duration);
 		if (sm == null)
@@ -1402,6 +1401,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return isMsgSource(getMsgCurrent(), SignMsgSource.external);
 	}
 
+	/** Test if the current message source contains "ipaws" */
+	private boolean isMsgIpaws() {
+		return isMsgSource(getMsgCurrent(), SignMsgSource.ipaws);
+	}
+
 	/** Test if the current message has beacon enabled */
 	private boolean isMsgBeacon() {
 		SignMessage sm = getMsgCurrent();
@@ -1426,6 +1430,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Test if a DMS has been deployed by an external system */
 	private boolean isExternalDeployed() {
 		return isMsgDeployed() && isMsgExternal();
+	}
+
+	/** Test if a DMS has been deployed by IPAWS */
+	private boolean isIpawsDeployed() {
+		return isMsgDeployed() && isMsgIpaws();
 	}
 
 	/** Test if DMS needs maintenance */
@@ -1459,7 +1468,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 		if (isScheduleDeployed())
 			s |= ItemStyle.SCHEDULED.bit();
-		if (isExternalDeployed())
+		if (isExternalDeployed() || isIpawsDeployed())
 			s |= ItemStyle.EXTERNAL.bit();
 		if (isOnline() && needsMaintenance())
 			s |= ItemStyle.MAINTENANCE.bit();
