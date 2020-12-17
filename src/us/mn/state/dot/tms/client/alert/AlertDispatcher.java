@@ -17,13 +17,10 @@ package us.mn.state.dot.tms.client.alert;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.Set;
-
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
-
 import org.json.JSONObject;
-
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.IpawsAlert;
 import us.mn.state.dot.tms.IpawsDeployer;

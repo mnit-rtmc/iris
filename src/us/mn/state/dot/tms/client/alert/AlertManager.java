@@ -146,6 +146,7 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 	}
 
 	/** Create an alert tab */
+	@Override
 	public AlertTab createTab() {
 		tab = new AlertTab(session, this);
 		return tab;
@@ -200,13 +201,14 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 		p.addSeparator();
 		p.add(new IAction("alert.zoom_area") {
 			@Override
-			protected void doActionPerformed(ActionEvent ev) throws Exception {
+			protected void doActionPerformed(ActionEvent ev) {
 				zoomToAlertArea();
 			}
 		});
 		return p;
 	}
 
+	/** Get the description of a proxy */
 	@Override
 	public String getDescription(IpawsDeployer proxy) {
 		IpawsAlert ia = acache.lookupObject(proxy.getAlertId());
@@ -220,6 +222,7 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 		return name;
 	}
 
+	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, IpawsDeployer proxy) {
 		Integer t = checkAlertTimes(proxy);

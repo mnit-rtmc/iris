@@ -101,7 +101,7 @@ public interface IpawsDeployer extends SonarObject {
 
 	/** Set amount of time (in hours) to display a post-alert message after
 	 *  an alert expires or an AllClear response type is sent via IPAWS.
-	 *  First  set from the config, then can be changed for each alert.
+	 *  First set from the config, then can be changed for each alert.
 	 */
 	void setPostAlertTime(int hours);
 

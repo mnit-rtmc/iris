@@ -415,10 +415,8 @@ public class AlertDmsDispatcher extends IPanel {
 	 */
 	public void processEditDeploy() {
 		if (manager.getEditing())
-			// deploy or update the alert
 			deployAlert();
 		else
-			// start editing the alert
 			editAlert();
 
 		// update the DMS list, message parameters, and map
@@ -501,8 +499,8 @@ public class AlertDmsDispatcher extends IPanel {
 
 	/** Start editing the selected alert. */
 	private void editAlert() {
-		// make sure the alert is not in the past and that the user can write
-		// (this) alert
+		// make sure the alert is not in the past
+		// and that the user can write (this) alert
 		if (!manager.checkStyle(ItemStyle.PAST, selectedAlertDepl)
 				&& session.isWritePermitted(selectedAlertDepl)) {
 			// if they can, set edit mode

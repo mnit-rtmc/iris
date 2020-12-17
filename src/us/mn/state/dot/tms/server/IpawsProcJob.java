@@ -386,8 +386,8 @@ public class IpawsProcJob extends Job {
 		String event = ia.getEvent();
 		Iterator<IpawsConfig> it = IpawsConfigHelper.iterator();
 
-		// collect alert deployers that have been created so we can notify
-		// clients about them
+		// collect alert deployers that have been created
+		// so we can notify clients about them
 		ArrayList<IpawsDeployerImpl> iadList =
 			new ArrayList<IpawsDeployerImpl>();
 
@@ -526,8 +526,8 @@ public class IpawsProcJob extends Job {
 			deployAlert(iad, ia);
 		}
 
-		// return the deployer that was created for collecting and handling
-		// the user notification
+		// return the deployer that was created for collecting
+		// and handling the user notification
 		return iad;
 	}
 

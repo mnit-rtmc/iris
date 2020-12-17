@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2019  Minnesota Department of Transportation
+ * Copyright (C) 2004-2020  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -99,10 +99,6 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Proxy list */
 	private final ProxyJList<T> p_list;
-	
-	public ProxyJList<T> getPlist() {
-		return p_list;
-	}
 
 	/** Ensure the selected proxy is visible, adjusting scroll offsets if
 	 *  necessary.
@@ -110,7 +106,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	public void ensureSelectedProxyVisible() {
 		p_list.ensureIndexIsVisible(p_list.getSelectedIndex());
 	}
-	
+
 	/** List scrollpane */
 	private final JScrollPane s_pane;
 
@@ -150,7 +146,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
  		s_pane = new JScrollPane(p_list);
  		style_rows = sr;
 	}
-	
+
 	/** Create a new style summary panel with 2 rows of style buttons.
 	 * @param m ProxyManager.
 	 * @param ds Default style.
