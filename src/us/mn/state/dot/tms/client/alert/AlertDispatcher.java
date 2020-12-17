@@ -248,9 +248,8 @@ public class AlertDispatcher extends IPanel {
 	private void setSelectedAlert(IpawsDeployer iad) {
 		// set the selected alert and deployer
 		selectedAlertDepl = iad;
-		selectedAlert = alertCache.lookupObject(
-				selectedAlertDepl.getAlertId());
-		manager.setSelectedAlert(selectedAlertDepl);
+		selectedAlert = alertCache.lookupObject(iad.getAlertId());
+		manager.setSelectedAlert(iad);
 
 		// fill out the value labels
 		// FIXME this way of wrapping is kind of hacky
@@ -270,21 +269,21 @@ public class AlertDispatcher extends IPanel {
 
 		// add the current deployment status
 		String status = "";
-		if (selectedAlertDepl.getDeployed() == null)
+		if (iad.getDeployed() == null)
 			status = I18N.get("alert.status.pending");
-		else if (selectedAlertDepl.getDeployed().equals(Boolean.TRUE)) {
-			if (selectedAlertDepl.getActive())
+		else if (iad.getDeployed().equals(Boolean.TRUE)) {
+			if (iad.getActive())
 				// if deployed and active, say "deployed"
 				status = I18N.get("alert.status.deployed");
 			else
 				// if deployed and not active, say "scheduled"
 				status = I18N.get("alert.status.scheduled");
-		} else if (selectedAlertDepl.getDeployed().equals(Boolean.FALSE))
+		} else if (iad.getDeployed().equals(Boolean.FALSE))
 			status = I18N.get("alert.status.not_deployed");
 		statusLbl.setText(status);
 
-		onsetLbl.setText(selectedAlertDepl.getAlertStart().toString());
-		expiresLbl.setText(selectedAlertDepl.getAlertEnd().toString());
+		onsetLbl.setText(iad.getAlertStart().toString());
+		expiresLbl.setText(iad.getAlertEnd().toString());
 
 		// get a JSON object from the area string (which is in JSON syntax)
 		String area = selectedAlert.getArea();
@@ -296,7 +295,7 @@ public class AlertDispatcher extends IPanel {
 				areaDesc + "</div></html>");
 
 		// set the alert in the DMS dispatcher so sign list updates
-		dmsDispatcher.setSelectedAlert(selectedAlertDepl, selectedAlert);
+		dmsDispatcher.setSelectedAlert(iad, selectedAlert);
 
 		// set the button text and disable buttons if alert is in past
 		setEditDeployBtnText();
