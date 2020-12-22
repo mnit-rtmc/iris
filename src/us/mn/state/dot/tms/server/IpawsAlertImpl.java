@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.postgis.MultiPolygon;
 import us.mn.state.dot.tms.CapResponseEnum;
@@ -79,13 +80,20 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Compare the two JSON-formatted strings. */
 	static private boolean jsonStrEq(String js1, String js2) {
-		String j1 = (js1 != null && !js1.isEmpty())
-		          ? new JSONObject(js1).toString()
-		          : null;
-		String j2 = (js2 != null && !js2.isEmpty())
-		          ? new JSONObject(js2).toString()
-		          : null;
-		return objectEquals(j1, j2);
+		try {
+			String j1 = (js1 != null && !js1.isEmpty())
+				  ? new JSONObject(js1).toString()
+				  : null;
+			String j2 = (js2 != null && !js2.isEmpty())
+				  ? new JSONObject(js2).toString()
+				  : null;
+			return objectEquals(j1, j2);
+		}
+		// Stupidly, this is an unchecked exception
+		catch (JSONException e) {
+			// invalid JSON
+			return false;
+		}
 	}
 
 	/** Get a mapping of the columns */
