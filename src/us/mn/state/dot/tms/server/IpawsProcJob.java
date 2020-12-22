@@ -160,7 +160,8 @@ public class IpawsProcJob extends Job {
 			log("Processing IPAWS " + "alert: " + ia.getName());
 
 			String area = ia.getArea();
-			log(area);
+			if (area != null)
+				log(area);
 
 			// normalize the geometry and get a geographic object
 			// (sets the polygon on the alert object for us, or
@@ -744,10 +745,11 @@ public class IpawsProcJob extends Job {
 		// syntax)
 		JSONObject jo = null;
 		String ps = null;
-		if (ia.getArea() != null) {
+		String area = ia.getArea();
+		if (area != null) {
 			try {
-				log(ia.getArea());
-				jo = new JSONObject(ia.getArea());
+				log(area);
+				jo = new JSONObject(area);
 				// get the "polygon" section
 				if (jo.has("polygon"))
 					ps = jo.getString("polygon");
