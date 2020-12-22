@@ -193,7 +193,7 @@ public class IpawsReader {
 	private static Date parseDate(String dte) {
 		try {
 			return dtFormatter.parse(dte);
-		} catch(ParseException | NullPointerException e) {
+		} catch (ParseException | NullPointerException e) {
 			return null;
 		}
 	}
@@ -221,25 +221,8 @@ public class IpawsReader {
 	}
 
 	private static String getValuePairJson(String tag, Element element) {
-
-		// store key/value pairs in a HashMap of ArrayLists to allow for
-		// multiple instances of the same key
-		HashMap<String,ArrayList<String>> kvPairs =
-				new HashMap<String,ArrayList<String>>();
-		if (element.getElementsByTagName(tag).getLength() > 0) {
-			NodeList nodeList = element.getElementsByTagName(tag);
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				Element childElement = (Element)  nodeList.item(i);
-				String key = childElement.getElementsByTagName("valueName")
-				        .item(0).getTextContent();
-				String value = childElement.getElementsByTagName("value")
-				        .item(0).getTextContent();
-				if (!kvPairs.containsKey(key))
-					kvPairs.put(key, new ArrayList<String>());
-				ArrayList<String> vals = kvPairs.get(key);
-				vals.add(value);
-			}
-		}
+		HashMap<String, ArrayList<String>> kvPairs =
+			getChildElements(tag, element);
 
 		// make a JSON string with all the key/value pairs
 		StringBuilder sb = new StringBuilder();
@@ -247,9 +230,9 @@ public class IpawsReader {
 
 		for (String key: kvPairs.keySet()) {
 			ArrayList<String> vals = kvPairs.get(key);
-
-			// FIXME the && !"UGC".equals(key) is a hack to make sure we
-			// always get UGC codes as an array (it works well enough though)
+			// FIXME the && !"UGC".equals(key) is a hack to make
+			//       sure we always get UGC codes as an array (it
+			//       works well enough though)
 			if (vals.size() > 1 || "UGC".equals(key)) {
 				String[] valsArr = vals.toArray(new String[0]);
 				sb.append(Json.arr(key, valsArr));
@@ -262,6 +245,32 @@ public class IpawsReader {
 			sb.setLength(sb.length() - 1);
 		sb.append("}");
 		return sb.toString();
+	}
+
+	/** Store key/value pairs in a HashMap of ArrayLists to allow
+	 * for multiple instances of the same key */
+	static private HashMap<String, ArrayList<String>> getChildElements(
+		String tag, Element element)
+	{
+		HashMap<String, ArrayList<String>> kvPairs =
+			new HashMap<String, ArrayList<String>>();
+		NodeList nodes = element.getElementsByTagName(tag);
+		for (int i = 0; i < nodes.getLength(); i++) {
+			Element child = (Element) nodes.item(i);
+			Node keyNode = child.getElementsByTagName(
+				"valueName").item(0);
+			Node valueNode = child.getElementsByTagName("value")
+				.item(0);
+			if (keyNode != null && valueNode != null) {
+				String key = keyNode.getTextContent();
+				String value = valueNode.getTextContent();
+				if (!kvPairs.containsKey(key))
+					kvPairs.put(key, new ArrayList<String>());
+				ArrayList<String> vals = kvPairs.get(key);
+				vals.add(value);
+			}
+		}
+		return kvPairs;
 	}
 
 	private static String getAreaJson(String tag, Element element) {
