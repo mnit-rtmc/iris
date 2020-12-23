@@ -65,6 +65,7 @@ Filename               | Description
 `feed`                 | [Msg-Feed] protocol
 `g4`                   | [G4] protocol
 `infinova`             | [Infinova] protocol
+`ipaws`                | [IPAWS Alerts] protocol
 `kadaptive`            | K Adaptive metering algorithm
 `manchester`           | [Manchester] protocol
 `meter`                | Ramp meter configuration errors
