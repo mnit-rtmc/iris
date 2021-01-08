@@ -86,7 +86,7 @@ public class IpawsProcJob extends Job {
 	 *  / updated from the NWS by going to this website and importing the
 	 *  shapefile into PostGIS: https://www.weather.gov/gis/PublicZones.
 	 */
-	static private final String GEOMETRY_TABLE = "iris.nws_zones_10nv20";
+	static private final String GEOMETRY_TABLE = "iris.nws_zones";
 
 	/** Seconds to offset this job from the start of interval.
 	 *  Alerts will generally be polled at the top of each minute, so we will
