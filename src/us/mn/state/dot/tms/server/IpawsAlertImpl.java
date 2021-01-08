@@ -1041,7 +1041,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	public void doSetPurgeable(Boolean p) throws TMSException {
 		if (!objectEquals(purgeable, p)) {
 			IpawsProcJob.log("Setting purgeable flag of alert " +
-					name + " to " + p);
+				name + " to " + p);
 			store.update(this, "purgeable", p);
 			setPurgeable(p);
 			notifyAttribute("purgeable", false);

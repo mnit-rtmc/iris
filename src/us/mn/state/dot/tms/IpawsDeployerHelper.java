@@ -51,7 +51,7 @@ public class IpawsDeployerHelper extends BaseHelper {
 	static public IpawsDeployer lookupDeployerFromAlert(String alertId) {
 		// get list of deployers for this alert sorted newest to oldest
 		ArrayList<IpawsDeployer> deployers =
-				getDeployerList(alertId, null);
+			getDeployerList(alertId, null);
 		if (deployers.size() > 0)
 			return deployers.get(0);
 		return null;

@@ -157,7 +157,7 @@ public class IpawsProcJob extends Job {
 		TMSException, NoSuchFieldException
 	{
 		if (ia.getPurgeable() == null) {
-			log("Processing IPAWS " + "alert: " + ia.getName());
+			log("Processing IPAWS alert: " + ia.getName());
 
 			String area = ia.getArea();
 			if (area != null)
@@ -217,7 +217,7 @@ public class IpawsProcJob extends Job {
 	 *  try to (re)post messages */
 	private void tryPostAlert(IpawsAlertImpl ia) throws TMSException {
 		ArrayList<IpawsDeployer> deployers = IpawsDeployerHelper
-			.getDeployerList(ia.getName(), null, true);
+			.getDeployerList(ia.getIdentifier(), null, true);
 		for (IpawsDeployer iadp: deployers) {
 			IpawsDeployerImpl iad = IpawsDeployerImpl.
 				lookupIpawsDeployer(iadp.getName());
@@ -415,7 +415,7 @@ public class IpawsProcJob extends Job {
 				// for this alert - use array_agg to get one array instead of
 				// multiple rows, do this once for each sign group
 				log("Searching for DMS in group " + iac.getSignGroup() +
-						" for alert " + ia.getName());
+					" for alert " + ia.getName());
 				int t = SystemAttrEnum.IPAWS_SIGN_THRESH_AUTO_METERS.getInt();
 				IpawsAlertImpl.store.query(
 				"SELECT array_agg(d.name) FROM iris." + DMS.SONAR_TYPE + " d" +
@@ -527,13 +527,14 @@ public class IpawsProcJob extends Job {
 				postAlert = iad.getPostAlertTime();
 			}
 
-			log("Creating new deployer " + name +
-					" replacing " + replaces);
+			log("Creating new deployer " + name + " replacing " +
+				replaces);
 
-			iad = new IpawsDeployerImpl(name, ia.getName(), lat,lon,
-				aStart, aEnd, iac.getName(), iac.getSignGroup(),
-				adms, ddms, iac.getQuickMessage(), autoMulti,
-				priority, preAlert, postAlert, replaces);
+			iad = new IpawsDeployerImpl(name, ia.getIdentifier(),
+				lat, lon, aStart, aEnd, iac.getName(),
+				iac.getSignGroup(), adms, ddms,
+				iac.getQuickMessage(), autoMulti, priority,
+				preAlert, postAlert, replaces);
 
 			// notify so clients receive the new object
 			iad.notifyCreate();
@@ -840,7 +841,7 @@ public class IpawsProcJob extends Job {
 		}
 		if (ia.getGeoPoly() == null) {
 			log("No polygon found, marking alert " +
-					ia.getName() + " as purgeable");
+				ia.getName() + " as purgeable");
 			ia.doSetPurgeable(true);
 		}
 	}
@@ -850,7 +851,8 @@ public class IpawsProcJob extends Job {
 		IpawsAlertImpl.store.query("SELECT ST_AsText(ST_Centroid(" +
 			"geo_poly)) FROM event." + IpawsAlert.SONAR_TYPE +
 			" WHERE name='" + ia.getName() + "';",
-			new ResultFactory() {
+			new ResultFactory()
+		{
 				@Override public void create(ResultSet row)
 					throws Exception
 				{

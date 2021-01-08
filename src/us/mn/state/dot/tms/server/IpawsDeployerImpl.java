@@ -883,8 +883,8 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	 */
 	public void doSetDeployed(Boolean d) throws TMSException {
 		if (d != null) {	// don't allow setting back to null
-			IpawsProcJob.log("Setting deployed on deployer " +
-						name + " to " + d);
+			IpawsProcJob.log("Setting deployed on deployer " + name +
+				" to " + d);
 			if (Boolean.TRUE.equals(d))
 				// call with flag if it's already deployed (then it's an
 				// update)
@@ -1140,7 +1140,7 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 			// deployed, make sure to cancel that one
 			if (replaces != null) {
 				IpawsDeployerImpl old =
-						lookupIpawsDeployer(replaces);
+					lookupIpawsDeployer(replaces);
 				if (old != null && Boolean.TRUE.equals(old.getDeployed())) {
 					IpawsProcJob.log("Canceling old deployer " +
 						old.getName() + " for alert " + old.getAlertId());
@@ -1195,9 +1195,9 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	/** Cancel an alert on the specified list of DMS. */
 	private void cancelAlert(String[] dmsList) throws TMSException {
 		if (dmsList != null && dmsList.length > 0) {
-			IpawsProcJob.log("Canceling deployment " + name
-					+ " of alert " + alert_id + " on " + dmsList.length +
-					" DMS...");
+			IpawsProcJob.log("Canceling deployment " + name +
+				" of alert " + alert_id + " on " +
+				dmsList.length + " DMS...");
 			for (String dmsName: dmsList) {
 				DMSImpl dms = lookupDMS(dmsName);
 				if (dms != null) {
