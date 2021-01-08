@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.IpawsAlert;
 import us.mn.state.dot.tms.IteratorWrapper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
  * Integrated Public Alert and Warning System (IPAWS) Alert object
@@ -39,6 +40,19 @@ import us.mn.state.dot.tms.TMSException;
  * @author Gordon Parikh
  */
 public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
+
+	/** Name creator */
+	static UniqueNameCreator UNC;
+	static {
+		UNC = new UniqueNameCreator("ipaws_alert_%d",
+			(n)->lookupIpawsDeployer(n));
+		UNC.setMaxLength(20);
+	}
+
+	/** Create a unique IpawsAlert record name */
+	static public String createUniqueName() {
+		return UNC.createUniqueName();
+	}
 
 	/** Load all the IPAWS alerts */
 	static public void loadAll() throws TMSException {
@@ -296,8 +310,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	private String identifier;
 
 	/** Set the identifier */
-	@Override
-	public void setIdentifier(String i) {
+	private void setIdentifier(String i) {
 		identifier = i;
 	}
 

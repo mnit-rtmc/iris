@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.IpawsAlert;
@@ -56,9 +55,6 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Gordon Parikh
  */
 public class AlertManager extends ProxyManager<IpawsDeployer> {
-
-	/** IpawsAlert cache */
-	private final TypeCache<IpawsAlert> acache;
 
 	/** Keep a handle to the tab */
 	private AlertTab tab;
@@ -117,7 +113,6 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 
 	public AlertManager(Session s, GeoLocManager lm) {
 		super(s, lm, descriptor(s), 10);
-		acache = s.getSonarState().getIpawsAlertCache();
 	}
 
 	/** Create an alert tab */
@@ -191,7 +186,8 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 			name = name.replace("ipaws_dplr_",
 					I18N.get("ipaws_deployer") + " ");
 		}
-		IpawsAlert ia = acache.lookupObject(proxy.getAlertId());
+		IpawsAlert ia = IpawsAlertHelper.lookupByIdentifier(
+			proxy.getAlertId());
 		if (ia != null) {
 			return name + " - " + ia.getEvent() + " - " +
 				proxy.getSignGroup();
@@ -311,8 +307,8 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 	public void zoomToAlertArea() {
 		if (selectedAlertDepl != null) {
 			// get shapes representing the alert area
-			IpawsAlert ia = IpawsAlertHelper.lookup(
-					selectedAlertDepl.getAlertId());
+			IpawsAlert ia = IpawsAlertHelper.lookupByIdentifier(
+				selectedAlertDepl.getAlertId());
 			ArrayList<Shape> shapes = IpawsAlertHelper.getShapes(ia);
 
 			// find the min and max x and y points

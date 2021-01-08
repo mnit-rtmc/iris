@@ -44,8 +44,9 @@ public class IpawsDeployerHelper extends BaseHelper {
 				IpawsDeployer.SONAR_TYPE, name);
 	}
 
-	/** Lookup an alert deployer object for the specified IpawsAlert name.
-	 *  Returns the most recent active deployer for this alert.
+	/** Lookup an alert deployer object for the specified IpawsAlert
+	 *  identifier.
+	 *  @return The most recent active deployer for this alert.
 	 */
 	static public IpawsDeployer lookupDeployerFromAlert(String alertId) {
 		// get list of deployers for this alert sorted newest to oldest
@@ -56,9 +57,9 @@ public class IpawsDeployerHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Lookup an alert deployer object for the specified IpawsAlert name
-	 *  and config name.  Returns the most recent active deployer for the
-	 *  alert and config.
+	/** Lookup an alert deployer object for the specified IpawsAlert
+	 *  identifier and config name.
+	 *  @return the most recent active deployer for the alert and config.
 	 */
 	static public IpawsDeployer lookupDeployerFromAlert(String alertId,
 		String configName)

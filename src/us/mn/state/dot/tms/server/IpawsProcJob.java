@@ -469,7 +469,7 @@ public class IpawsProcJob extends Job {
 	{
 		// try to look up the most recent deployer object for this alert
 		IpawsDeployerImpl iad = IpawsDeployerImpl.lookupFromAlert(
-			ia.getName(), iac.getName());
+			ia.getIdentifier(), iac.getName());
 
 		// get alert start/end times
 		Date aStart = IpawsAlertHelper.getAlertStart(ia);

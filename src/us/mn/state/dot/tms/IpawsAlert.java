@@ -30,9 +30,6 @@ public interface IpawsAlert extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "ipaws_alert";
 
-	/** Set the identifier */
-	void setIdentifier(String i);
-
 	/** Get the identifier */
 	String getIdentifier();
 

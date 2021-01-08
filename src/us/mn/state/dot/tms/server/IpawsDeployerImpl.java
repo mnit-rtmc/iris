@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.IpawsDeployerHelper;
 import us.mn.state.dot.tms.IteratorWrapper;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.utils.UniqueNameCreator;;
+import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
  * Integrated Public Alert and Warning System (IPAWS) Alert deployer object
@@ -57,19 +57,19 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	 */
 	static private TimeUnit prePostTimeUnits = TimeUnit.HOURS;
 
-	/** Lookup an IpawsDeployerImpl given and IpawsAlert identifier/name
-	 *  and an IpawsConfig name. Returns the most recent active deployer
-	 *  for the alert with a matching config.
+	/** Lookup an IpawsDeployerImpl given an IpawsAlert identifier and an
+	 *  IpawsConfig name.
+	 *  @return The most recent active deployer for the alert with a
+	 *          matching config.
 	 */
-	static public IpawsDeployerImpl lookupFromAlert(
-			String name, String cname) {
-		// ask the helper to find the IpawsDeployer object for this alert
-		IpawsDeployer ian =
-				IpawsDeployerHelper.lookupDeployerFromAlert(name, cname);
-		if (ian != null)
-			// lookup the IpawsDeployerImpl object using the name
-			return lookupIpawsDeployer(ian.getName());
-		return null;
+	static public IpawsDeployerImpl lookupFromAlert(String alertId,
+		String cname)
+	{
+		IpawsDeployer iad = IpawsDeployerHelper.lookupDeployerFromAlert(
+			alertId, cname);
+		return (iad instanceof IpawsDeployerImpl)
+		      ? (IpawsDeployerImpl) iad
+		      : null;
 	}
 
 	static public Iterator<IpawsDeployerImpl> iterator() {

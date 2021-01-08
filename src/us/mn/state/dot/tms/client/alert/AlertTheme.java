@@ -145,8 +145,8 @@ public class AlertTheme extends ProxyTheme<IpawsDeployer> {
 				return super.hit(p, mo);
 
 			// lookup the alert to get the area shapes
-			IpawsAlert ia = IpawsAlertHelper.lookup(
-					aManager.getSelectedAlert().getAlertId());
+			IpawsAlert ia = IpawsAlertHelper.lookupByIdentifier(
+				aManager.getSelectedAlert().getAlertId());
 
 			// get shapes and transform the point
 			ArrayList<Shape> shapes = IpawsAlertHelper.getShapes(ia);
@@ -181,7 +181,8 @@ public class AlertTheme extends ProxyTheme<IpawsDeployer> {
 		AffineTransform t = g.getTransform();
 
 		// lookup the alert to get the area polygon
-		IpawsAlert ia = IpawsAlertHelper.lookup(iad.getAlertId());
+		IpawsAlert ia = IpawsAlertHelper.lookupByIdentifier(
+			iad.getAlertId());
 
 		// create a set of Shape objects from the MultiPolygon in the alert
 		// TODO need to make sure the PostGIS JAR makes it to the client

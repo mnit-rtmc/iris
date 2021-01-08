@@ -37,15 +37,21 @@ public class IpawsAlertHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Lookup the alert with the specified name */
-	static public IpawsAlert lookup(String name) {
-		return (IpawsAlert) namespace.lookupObject(IpawsAlert.SONAR_TYPE, name);
-	}
-
 	/** Get an IpawsAlert object iterator */
 	static public Iterator<IpawsAlert> iterator() {
 		return new IteratorWrapper<IpawsAlert>(namespace.iterator(
 				IpawsAlert.SONAR_TYPE));
+	}
+
+	/** Lookup an alert by identifier */
+	static public IpawsAlert lookupByIdentifier(String alertId) {
+		Iterator<IpawsAlert> it = iterator();
+		while (it.hasNext()) {
+			IpawsAlert ia = it.next();
+			if (ia.getIdentifier().equals(alertId))
+				return ia;
+		}
+		return null;
 	}
 
 	/** Get the start date/time for an alert. Checks onset time first, then

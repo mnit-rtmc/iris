@@ -148,7 +148,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.18.0
+database_version	5.19.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_enable	true
@@ -3558,7 +3558,7 @@ iadv_00106	13	1	1	\N	\N	IN RIGHT SHOULDER
 -- IPAWS Alert Event table
 CREATE TABLE event.ipaws_alert (
 	name text PRIMARY KEY,
-	identifier text,
+	identifier text UNIQUE NOT NULL,
 	sender text,
 	sent_date timestamp with time zone,
 	status text,
@@ -3596,7 +3596,7 @@ CREATE TABLE event.ipaws_deployer (
 	name varchar(20) PRIMARY KEY,
 	gen_time timestamp with time zone,
 	approved_time timestamp with time zone,
-	alert_id text REFERENCES event.ipaws_alert(name),
+	alert_id text REFERENCES event.ipaws_alert(identifier),
 	lat double precision,
 	lon double precision,
 	alert_start timestamp with time zone,

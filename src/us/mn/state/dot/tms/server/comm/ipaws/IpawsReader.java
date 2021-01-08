@@ -43,6 +43,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.tms.IpawsAlert;
 import us.mn.state.dot.tms.IpawsAlertHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.IpawsAlertImpl;
@@ -140,24 +141,34 @@ public class IpawsReader {
 		}
 	}
 
+	/** Lookup or create an IPAWS alert */
+	static private IpawsAlertImpl lookupOrCreateAlert(String alertId)
+		throws TMSException, SonarException
+	{
+		IpawsAlert xa = IpawsAlertHelper.lookupByIdentifier(alertId);
+		if (xa instanceof IpawsAlertImpl) {
+			IpawsProcJob.log("Updating alert with name: " +
+				xa.getName());
+			return (IpawsAlertImpl) xa;
+		} else {
+			// if it doesn't exist, create a new one
+			String name = IpawsAlertImpl.createUniqueName();
+			IpawsProcJob.log("Creating alert with name: " +
+				name);
+			IpawsAlertImpl ia = new IpawsAlertImpl(name);
+			ia.notifyCreate();
+			return ia;
+		}
+	}
+
 	private static void getIpawsAlert(Node node)
 			throws ParseException, SonarException, TMSException {
 		if (node.getNodeType() == Node.ELEMENT_NODE) {
 			Element element = (Element) node;
 
 			// check if the alert exists
-			String n = getTagValue("identifier", element);
-			String name = n;
-			IpawsAlertImpl ia =
-					(IpawsAlertImpl) IpawsAlertHelper.lookup(name);
-
-			// if it doesn't, create a new one
-			if (ia == null) {
-				IpawsProcJob.log("Creating new alert with name: " + name);
-				ia = new IpawsAlertImpl(name);
-				ia.notifyCreate();
-			} else
-				IpawsProcJob.log("Updating alert with name: " + name);
+			String alertId = getTagValue("identifier", element);
+			IpawsAlertImpl ia = lookupOrCreateAlert(alertId);
 
 			// either way set all the values
 			ia.doSetIdentifier(getTagValue("identifier", element));
