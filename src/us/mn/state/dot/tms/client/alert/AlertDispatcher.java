@@ -21,8 +21,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import org.json.JSONObject;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.IpawsAlert;
+import us.mn.state.dot.tms.IpawsAlertHelper;
 import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
@@ -63,14 +63,8 @@ public class AlertDispatcher extends IPanel {
 		}
 	};
 
-	/** Currently selected alert (deployer) */
-	private IpawsDeployer selectedAlertDepl;
-
 	/** Currently selected alert */
 	private IpawsAlert selectedAlert;
-
-	/** Cache of IPAWS alerts */
-	private final TypeCache<IpawsAlert> alertCache;
 
 	/** Labels */
 	/** Name label */
@@ -128,7 +122,6 @@ public class AlertDispatcher extends IPanel {
 		manager = m;
 		alertSelMdl = manager.getSelectionModel();
 		alertSelMdl.setAllowMultiple(false);
-		alertCache = session.getSonarState().getIpawsAlertCache();
 		alertSelMdl.addProxySelectionListener(alertSelLstnr);
 		areaDescKeyLbl = new ILabel("alert.area_desc");
 		editDeployBtn = new JButton(editDeploy);
@@ -228,25 +221,21 @@ public class AlertDispatcher extends IPanel {
 
 	/** Update the display to reflect the alert selected. */
 	private void selectAlert() {
-		Set<IpawsDeployer> sel = alertSelMdl.getSelected();
-		if (sel.size() == 0)
-			clearSelectedAlert();
-		else {
-			// we should only have one alert (multiple selection is disabled)
-			for (IpawsDeployer iad: sel) {
-				if (iad != null) {
-					setSelectedAlert(iad);
-					break;
-				}
+		IpawsDeployer iad = alertSelMdl.getSingleSelection();
+		if (iad != null) {
+			IpawsAlert ia = IpawsAlertHelper.lookupByIdentifier(
+				iad.getAlertId());
+			if (ia != null) {
+				setSelectedAlert(iad, ia);
+				return;
 			}
 		}
+		clearSelectedAlert();
 	}
 
-	/** Set the selected alert. */
-	private void setSelectedAlert(IpawsDeployer iad) {
-		// set the selected alert and deployer
-		selectedAlertDepl = iad;
-		selectedAlert = alertCache.lookupObject(iad.getAlertId());
+	/** Set the selected alert */
+	private void setSelectedAlert(IpawsDeployer iad, IpawsAlert ia) {
+		selectedAlert = ia;
 		manager.setSelectedAlert(iad);
 
 		// fill out the value labels
@@ -304,8 +293,7 @@ public class AlertDispatcher extends IPanel {
 
 	/** Clear the selected alert. */
 	private void clearSelectedAlert() {
-		// null the selected alert and deployer
-		selectedAlertDepl = null;
+		// null the selected alert
 		selectedAlert = null;
 		manager.setSelectedAlert(null);
 
@@ -331,8 +319,9 @@ public class AlertDispatcher extends IPanel {
 		areaDescLbl.setText("");
 	}
 
-	public IpawsDeployer getSelectedAlert() {
-		return selectedAlertDepl;
+	/** Get the selected alert */
+	public IpawsAlert getSelectedAlert() {
+		return selectedAlert;
 	}
 
 	/** Get the AlertDmsDispatcher */
