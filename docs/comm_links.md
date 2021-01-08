@@ -156,10 +156,9 @@ One camera can be associated with each [controller], using [IO pin] 1.
 ### IPAWS Alerts
 
 The `IPAWS Alerts` protocol is used for polling the [Integrated Public Alert
-and Warning System (IPAWS)](integrated-public-alert-and-warning-system-ipaws-integration)
-to allow automated posting of weather and other alerts to Dynamic Message
-Signs. This requires an `HTTPS` URI provided by the Federal Emergency
-Management Agency and a [controller] set to `ACTIVE` condition.
+and Warning System (IPAWS)] to allow automated posting of weather and other
+alerts to Dynamic Message Signs.  This requires an `HTTPS` URI provided by the
+Federal Emergency Management Agency and a [controller] set to `ACTIVE` condition.
 
 ### Manchester
 
@@ -343,6 +342,7 @@ camera can be associated with each [controller], using [IO pin] 1.
 [incidents]: incidents.html
 [indications]: lcs.html#indications
 [IO pin]: controllers.html#io-pins
+[Integrated Public Alert and Warning System (IPAWS)]: ipaws.html
 [LCS]: lcs.html
 [monstream]: video.html#monstream
 [MULTI]: dms.html#multi
