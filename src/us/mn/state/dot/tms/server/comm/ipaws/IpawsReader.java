@@ -155,7 +155,7 @@ public class IpawsReader {
 			String name = IpawsAlertImpl.createUniqueName();
 			IpawsProcJob.log("Creating alert with name: " +
 				name);
-			IpawsAlertImpl ia = new IpawsAlertImpl(name);
+			IpawsAlertImpl ia = new IpawsAlertImpl(name, alertId);
 			ia.notifyCreate();
 			return ia;
 		}
@@ -171,7 +171,6 @@ public class IpawsReader {
 			IpawsAlertImpl ia = lookupOrCreateAlert(alertId);
 
 			// either way set all the values
-			ia.doSetIdentifier(getTagValue("identifier", element));
 			ia.doSetSender(getTagValue("sender", element));
 			ia.doSetSentDate(parseDate(getTagValue("sent", element)));
 			ia.doSetStatus(getTagValue("status", element));

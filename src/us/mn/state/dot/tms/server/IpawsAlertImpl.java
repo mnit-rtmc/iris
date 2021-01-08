@@ -222,8 +222,9 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			IpawsAlertImpl.SONAR_TYPE));
 	}
 
-	public IpawsAlertImpl(String n) throws TMSException {
+	public IpawsAlertImpl(String n, String i) throws TMSException {
 		super(n);
+		identifier = i;
 	}
 
 	public IpawsAlertImpl(String n, String i, String se, Date sd,
@@ -308,20 +309,6 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Identifier for the alert */
 	private String identifier;
-
-	/** Set the identifier */
-	private void setIdentifier(String i) {
-		identifier = i;
-	}
-
-	/** Set the identifier */
-	public void doSetIdentifier(String i) throws TMSException {
-		if (!objectEquals(i, identifier)) {
-			store.update(this, "identifier", i);
-			setIdentifier(i);
-			notifyAttribute("identifier");
-		}
-	}
 
 	/** Get the identifier */
 	@Override
