@@ -1,5 +1,8 @@
 # IRIS 5.x Release Notes
 
+5.19.0 (8 Jan 2021)
+ - Fixed various IPAWS bugs
+
 5.18.0 (10 Dec 2020)
  - Added IPAWS support for DMS blizzard messages (contributed by SRF)
  - Map segments created by honeybee after any `r_node` changes
