@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +59,6 @@ import us.mn.state.dot.tms.utils.Json;
  * @author Michael Janson
  * @author Gordon Parikh
  */
-
 public class IpawsReader {
 
 	/** Date formatters */
@@ -67,37 +67,10 @@ public class IpawsReader {
 	private static final SimpleDateFormat dtFormatter =
 			new SimpleDateFormat(dtFormat);
 
-	/** Read alerts from a directory containing XML files. */
-	public static void readIpaws(String dirPath) throws IOException {
-		File folder = new File(dirPath);
-
-		File[] files = folder.listFiles();
-
-		DocumentBuilderFactory dbFactory =
-				DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder;
-		try {
-			dBuilder = dbFactory.newDocumentBuilder();
-			for (File xmlFile : files) {
-					InputStream in = new GZIPInputStream(
-					        new FileInputStream(xmlFile));
-					Document doc = dBuilder.parse(in);
-					doc.getDocumentElement().normalize();
-
-					NodeList nodeList = doc.getElementsByTagName("alert");
-					for (int i = 0; i < nodeList.getLength(); i++)
-						getIpawsAlert(nodeList.item(i));
-			}
-		} catch(ParserConfigurationException | SAXException | SonarException
-				| ParseException | TMSException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/** Read alerts from an InputStream (live feed). */
-	public static void readIpaws(InputStream is) throws IOException {
-		// make a copy of the input stream - if we hit an exception we will
-		// save the XML and the text of the exception on the server
+	/** Read alerts from an InputStream */
+	static public void readIpaws(InputStream is) throws IOException {
+		// make a copy of the input stream - if we hit an exception we
+		// will save the XML and the text of the exception on the server
 		// TODO make these controllable with a system attribute
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		byte[] buf = new byte[1024];
@@ -117,10 +90,12 @@ public class IpawsReader {
 
 			NodeList nodeList = doc.getElementsByTagName("alert");
 			for (int i = 0; i < nodeList.getLength(); i++) {
-				getIpawsAlert(nodeList.item(i));
+				Node node = nodeList.item(i);
+				if (node.getNodeType() == Node.ELEMENT_NODE)
+					parseAlert((Element) node);
 			}
-		} catch (ParserConfigurationException | SAXException | ParseException
-				| TMSException | SonarException e)
+		} catch (ParserConfigurationException | SAXException |
+			ParseException | TMSException | SonarException e)
 		{
 			e.printStackTrace();
 
@@ -161,46 +136,49 @@ public class IpawsReader {
 		}
 	}
 
-	private static void getIpawsAlert(Node node)
-			throws ParseException, SonarException, TMSException {
-		if (node.getNodeType() == Node.ELEMENT_NODE) {
-			Element element = (Element) node;
+	/** Parse an IPAWS alert element */
+	static private void parseAlert(Element element) throws ParseException,
+		SonarException, TMSException
+	{
+		// check if the alert exists
+		String alertId = getTagValue("identifier", element);
+		IpawsAlertImpl ia = lookupOrCreateAlert(alertId);
 
-			// check if the alert exists
-			String alertId = getTagValue("identifier", element);
-			IpawsAlertImpl ia = lookupOrCreateAlert(alertId);
-
-			// either way set all the values
-			ia.doSetSender(getTagValue("sender", element));
-			ia.doSetSentDate(parseDate(getTagValue("sent", element)));
-			ia.doSetStatus(getTagValue("status", element));
-			ia.doSetMsgType(getTagValue("msgType", element));
-			ia.doSetScope(getTagValue("scope", element));
-			ia.doSetCodes(getTagValueArray("code", element));
-			ia.doSetNote(getTagValue("note", element));
-			ia.doSetAlertReferences(getTagValueArray("references", element));
-			ia.doSetIncidents(getTagValueArray("incidents", element));
-			ia.doSetCategories(getTagValueArray("category", element));
-			ia.doSetEvent(getTagValue("event", element));
-			ia.doSetResponseTypes(getTagValueArray("responseType", element));
-			ia.doSetUrgency(getTagValue("urgency", element));
-			ia.doSetSeverity(getTagValue("severity", element));
-			ia.doSetCertainty(getTagValue("certainty", element));
-			ia.doSetAudience(getTagValue("audience", element));
-			ia.doSetEffectiveDate(parseDate(getTagValue("effective", element)));
-			ia.doSetOnsetDate(parseDate(getTagValue("onset", element)));
-			ia.doSetExpirationDate(parseDate(getTagValue("expires", element)));
-			ia.doSetSenderName(getTagValue("senderName", element));
-			ia.doSetHeadline(getTagValue("headline", element));
-			ia.doSetAlertDescription(getTagValue("description", element));
-			ia.doSetInstruction(getTagValue("instruction", element));
-			ia.doSetParameters(getValuePairJson("parameter", element));
-			ia.doSetArea(getAreaJson("area", element));
-		}
-
+		// either way set all the values
+		ia.setSenderNotify(getTagValue("sender", element));
+		ia.setSentDateNotify(parseDate(getTagValue("sent", element)));
+		ia.setStatusNotify(getTagValue("status", element));
+		ia.setMsgTypeNotify(getTagValue("msgType", element));
+		ia.setScopeNotify(getTagValue("scope", element));
+		ia.setCodesNotify(getTagValueArray("code", element));
+		ia.setNoteNotify(getTagValue("note", element));
+		ia.setAlertReferencesNotify(getTagValueArray("references",
+			element));
+		ia.setIncidentsNotify(getTagValueArray("incidents", element));
+		ia.setCategoriesNotify(getTagValueArray("category", element));
+		ia.setEventNotify(getTagValue("event", element));
+		ia.setResponseTypesNotify(getTagValueArray("responseType",
+			element));
+		ia.setUrgencyNotify(getTagValue("urgency", element));
+		ia.setSeverityNotify(getTagValue("severity", element));
+		ia.setCertaintyNotify(getTagValue("certainty", element));
+		ia.setAudienceNotify(getTagValue("audience", element));
+		ia.setEffectiveDateNotify(parseDate(getTagValue("effective",
+			element)));
+		ia.setOnsetDateNotify(parseDate(getTagValue("onset", element)));
+		ia.setExpirationDateNotify(parseDate(getTagValue("expires",
+			element)));
+		ia.setSenderNameNotify(getTagValue("senderName", element));
+		ia.setHeadlineNotify(getTagValue("headline", element));
+		ia.setAlertDescriptionNotify(getTagValue("description",
+			element));
+		ia.setInstructionNotify(getTagValue("instruction", element));
+		ia.setParametersNotify(getValuePairJson("parameter", element));
+		ia.setAreaNotify(getAreaJson("area", element));
 	}
 
-	private static Date parseDate(String dte) {
+	/** Parse a date from an XML value */
+	static private Date parseDate(String dte) {
 		try {
 			return dtFormatter.parse(dte);
 		} catch (ParseException | NullPointerException e) {
@@ -208,24 +186,23 @@ public class IpawsReader {
 		}
 	}
 
-	private static String getTagValue(String tag, Element element) {
-		// Check if tag exists
-		if (element.getElementsByTagName(tag).getLength() > 0)
-			return element.getElementsByTagName(tag).item(0).getTextContent();
+	/** Get an XML tag value */
+	static private String getTagValue(String tag, Element element) {
+		NodeList nodeList = element.getElementsByTagName(tag);
+		if (nodeList.getLength() > 0)
+			return nodeList.item(0).getTextContent();
 		else
 			return null;
 	}
 
-	private static List<String> getTagValueArray(String tag, Element element) {
+	static private List<String> getTagValueArray(String tag,
+		Element element)
+	{
 		List<String> tag_values = new ArrayList<String>();
-
-		// Check if tag exists
-		if (element.getElementsByTagName(tag).getLength() > 0) {
-			NodeList nodeList = element.getElementsByTagName(tag);
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				Node node = nodeList.item(i);
-				tag_values.add(node.getTextContent());
-			}
+		NodeList nodeList = element.getElementsByTagName(tag);
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			Node node = nodeList.item(i);
+			tag_values.add(node.getTextContent());
 		}
 		return tag_values;
 	}
@@ -313,14 +290,15 @@ public class IpawsReader {
 		return sb.toString();
 	}
 
-	private static void appendElementJson(String tag,
-			Element element, StringBuilder sb, boolean forceKV) {
+	private static void appendElementJson(String tag, Element element,
+		StringBuilder sb, boolean forceKV)
+	{
 		if (element.getElementsByTagName(tag).getLength() == 1 && !forceKV)
 			sb.append(Json.str(tag, element.getElementsByTagName(tag)
 					.item(0).getTextContent()));
 		// TODO this won't handle multiple <area> or <polygon> blocks
-		// correctly, but those seem to be rare (NWS doesn't seem to use them
-		// even though CAP/IPAWS allows them)
+		// correctly, but those seem to be rare (NWS doesn't seem to use
+		// them even though CAP/IPAWS allows them)
 		else if (element.getElementsByTagName(tag).getLength() > 1 || forceKV)
 			sb.append(Json.sub(tag, getValuePairJson(tag, element)));
 	}

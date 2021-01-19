@@ -33,163 +33,82 @@ public interface IpawsAlert extends SonarObject {
 	/** Get the identifier */
 	String getIdentifier();
 
-	/** Set the sender */
-	void setSender(String se);
-
 	/** Get the sender */
 	String getSender();
-
-	/** Set the sent date */
-	void setSentDate(Date sd);
 
 	/** Get the sent date */
 	Date getSentDate();
 
-	/** Set the status */
-	void setStatus(String sta);
-
 	/** Get the status */
 	String getStatus();
-
-	/** Set the message type */
-	void setMsgType(String mt);
 
 	/** Get the message type */
 	String getMsgType();
 
-	/** Set the scope */
-	void setScope(String sc);
-
 	/** Get the scope */
 	String getScope();
-
-	/** Set the codes */
-	void setCodes(List<String> cd);
 
 	/** Get the codes */
 	List<String> getCodes();
 
-	/** Set the note */
-	void setNote(String nt);
-
 	/** Get the note */
 	String getNote();
-
-	/** Set the alert references */
-	void setAlertReferences(List<String> ref);
 
 	/** Get the alert references */
 	List<String> getAlertReferences();
 
-	/** Set the incidents */
-	void setIncidents(List<String> inc);
-
 	/** Get the incidents */
 	List<String> getIncidents();
-
-	/** Set the categories */
-	void setCategories(List<String> ct);
 
 	/** Get the categories */
 	List<String> getCategories();
 
-	/** Set the event */
-	void setEvent(String ev);
-
 	/** Get the event */
 	String getEvent();
-
-	/** Set the response types */
-	void setResponseTypes(List<String> rt);
 
 	/** Get the response types */
 	List<String> getResponseTypes();
 
-	/** Set the urgency */
-	void setUrgency(String u);
-
 	/** Get the urgency */
 	String getUrgency();
-
-	/** Set the severity */
-	void setSeverity(String sv);
 
 	/** Get the severity */
 	String getSeverity();
 
-	/** Set the certainty */
-	void setCertainty(String cy);
-
 	/** Get the certainty */
 	String getCertainty();
-
-	/** Set the audience */
-	void setAudience(String au);
 
 	/** Get the audience */
 	String getAudience();
 
-	/** Set the effective date */
-	void setEffectiveDate(Date efd);
-
 	/** Get the effective date */
 	Date getEffectiveDate();
-
-	/** Set the onset date */
-	void setOnsetDate(Date od);
 
 	/** Get the onset date */
 	Date getOnsetDate();
 
-	/** Set the expiration date */
-	void setExpirationDate(Date exd);
-
 	/** Get the expiration date */
 	Date getExpirationDate();
-
-	/** Set the sender name */
-	void setSenderName(String sn);
 
 	/** Get the sender name */
 	String getSenderName();
 
-	/** Set the headline */
-	void setHeadline(String hl);
-
 	/** Get the headline */
 	String getHeadline();
-
-	/** Set the alert description */
-	void setAlertDescription(String ad);
 
 	/** Get the alert description */
 	String getAlertDescription();
 
-	/** Set the alert instruction */
-	void setInstruction(String in);
-
 	/** Get the alert instruction */
 	String getInstruction();
-
-	/** Set the parameters */
-	void setParameters(String par);
 
 	/** Get the parameters */
 	String getParameters();
 
-	/** Set the areas */
-	void setArea(String ar);
-
 	/** Get the areas */
 	String getArea();
 
-	/** Set the alert polygon */
-	void setGeoPoly(MultiPolygon gp);
-
-	/** Set the alert polygon from a string */
-	void setGeoPoly(String gpstr);
-
-	/** Get the areas */
+	/** Get the geographic polygon of the area */
 	MultiPolygon getGeoPoly();
 
 	/** Get the latitude of the alert area's centroid */
@@ -198,17 +117,8 @@ public interface IpawsAlert extends SonarObject {
 	/** Get the longitude of the alert area's centroid */
 	Double getLon();
 
-	/** Set if this alert is purgeable (irrelevant to us).  Also acts as a
-	 *  flag to indicate whether an alert has been processed or not (null if
-	 *  not processed yet).
-	 */
-	void setPurgeable(Boolean p);
-
-	/** Return if this alert is purgeable (irrelevant to us) */
+	/** Flag indicating if this alert is purgeable (irrelevant to us) */
 	Boolean getPurgeable();
-
-	/** Set the last processing time of the alert */
-	void setLastProcessed(Date pt);
 
 	/** Get the last processing time of the alert */
 	Date getLastProcessed();

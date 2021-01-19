@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -299,9 +300,8 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		// this only gets called when the alert changes)
 		if (clearPurgeable) {
 			try {
-				doSetPurgeable(null);
+				setPurgeableNotify(null);
 			} catch (TMSException e) {
-				setPurgeable(null);
 				e.printStackTrace();
 			}
 		}
@@ -319,44 +319,23 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	/** Alert sender */
 	private String sender;
 
-	/** Set the sender */
-	@Override
-	public void setSender(String se) {
-		sender = se;
-	}
-
-	/** Set the sender */
-	public void doSetSender(String se) throws TMSException {
-		if (!objectEquals(se, sender)) {
-			store.update(this, "sender", se);
-			setSender(se);
-			notifyAttribute("sender");
-		}
-	}
-
 	/** Get the sender */
 	@Override
 	public String getSender() {
 		return sender;
 	}
 
-	/** Sent date of alert */
-	private Date sent_date;
-
-	/** Set the sent date */
-	@Override
-	public void setSentDate(Date sd) {
-		sent_date = sd;
-	}
-
-	/** Set the sent date */
-	public void doSetSentDate(Date sd) throws TMSException {
-		if (!objectEquals(sd, sent_date)) {
-			store.update(this, "sent_date", sd);
-			setSentDate(sd);
-			notifyAttribute("sentDate");
+	/** Set the sender */
+	public void setSenderNotify(String se) throws TMSException {
+		if (!objectEquals(se, sender)) {
+			store.update(this, "sender", se);
+			sender = se;
+			notifyAttribute("sender");
 		}
 	}
+
+	/** Sent date of alert */
+	private Date sent_date;
 
 	/** Get the sent date */
 	@Override
@@ -364,23 +343,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return sent_date;
 	}
 
-	/** Status of alert */
-	private String status;
-
-	/** Set the status */
-	@Override
-	public void setStatus(String sta) {
-		status = sta;
-	}
-
-	/** Set the status */
-	public void doSetStatus(String sta) throws TMSException {
-		if (!objectEquals(status, sta)) {
-			store.update(this, "status", sta);
-			setStatus(sta);
-			notifyAttribute("status");
+	/** Set the sent date */
+	public void setSentDateNotify(Date sd) throws TMSException {
+		if (!objectEquals(sd, sent_date)) {
+			store.update(this, "sent_date", sd);
+			sent_date = sd;
+			notifyAttribute("sentDate");
 		}
 	}
+
+	/** Status of alert */
+	private String status;
 
 	/** Get the status */
 	@Override
@@ -388,23 +361,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return status;
 	}
 
-	/** Alert message type */
-	private String message_type;
-
-	/** Set the message type */
-	@Override
-	public void setMsgType(String mt) {
-		message_type = mt;
-	}
-
-	/** Set the message type */
-	public void doSetMsgType(String mt) throws TMSException {
-		if (!objectEquals(message_type, mt)) {
-			store.update(this, "message_type", mt);
-			setMsgType(mt);
-			notifyAttribute("msgType");
+	/** Set the status */
+	public void setStatusNotify(String sta) throws TMSException {
+		if (!objectEquals(status, sta)) {
+			store.update(this, "status", sta);
+			status = sta;
+			notifyAttribute("status");
 		}
 	}
+
+	/** Alert message type */
+	private String message_type;
 
 	/** Get the message type */
 	@Override
@@ -412,23 +379,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return message_type;
 	}
 
-	/** Alert scope */
-	private String scope;
-
-	/** Set the scope */
-	@Override
-	public void setScope(String sc) {
-		scope = sc;
-	}
-
-	/** Set the scope */
-	public void doSetScope(String sc) throws TMSException {
-		if (!objectEquals(scope, sc)) {
-			store.update(this, "scope", sc);
-			setScope(sc);
-			notifyAttribute("scope");
+	/** Set the message type */
+	public void setMsgTypeNotify(String mt) throws TMSException {
+		if (!objectEquals(message_type, mt)) {
+			store.update(this, "message_type", mt);
+			message_type = mt;
+			notifyAttribute("msgType");
 		}
 	}
+
+	/** Alert scope */
+	private String scope;
 
 	/** Get the scope */
 	@Override
@@ -436,23 +397,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return scope;
 	}
 
-	/** Alert codes */
-	private List<String> codes;
-
-	/** Set the codes */
-	@Override
-	public void setCodes(List<String> cd) {
-		codes = cd;
-	}
-
-	/** Set the codes */
-	public void doSetCodes(List<String> cd) throws TMSException {
-		if (!listEq(codes, cd)) {
-			store.update(this, "codes", cd);
-			setCodes(cd);
-			notifyAttribute("codes");
+	/** Set the scope */
+	public void setScopeNotify(String sc) throws TMSException {
+		if (!objectEquals(scope, sc)) {
+			store.update(this, "scope", sc);
+			scope = sc;
+			notifyAttribute("scope");
 		}
 	}
+
+	/** Alert codes */
+	private List<String> codes;
 
 	/** Get the codes */
 	@Override
@@ -460,23 +415,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return codes;
 	}
 
-	/** Alert note */
-	private String note;
-
-	/** Set the note */
-	@Override
-	public void setNote(String nt) {
-		note = nt;
-	}
-
-	/** Set the note */
-	public void doSetNote(String nt) throws TMSException {
-		if (!objectEquals(note, nt)) {
-			store.update(this, "note", nt);
-			setNote(nt);
-			notifyAttribute("note");
+	/** Set the codes */
+	public void setCodesNotify(List<String> cd) throws TMSException {
+		if (!listEq(codes, cd)) {
+			store.update(this, "codes", cd);
+			codes = cd;
+			notifyAttribute("codes");
 		}
 	}
+
+	/** Alert note */
+	private String note;
 
 	/** Get the note */
 	@Override
@@ -484,46 +433,37 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return note;
 	}
 
-	/** Alert references */
-	private List<String> alert_references;
-
-	/** Set the alert references */
-	@Override
-	public void setAlertReferences(List<String> ref) {
-		alert_references = ref;
-	}
-
-	/** Set the alert references */
-	public void doSetAlertReferences(List<String> ref) throws TMSException {
-		if (!listEq(alert_references, ref)) {
-			store.update(this, "alert_references", ref);
-			setAlertReferences(ref);
-			notifyAttribute("alertReferences");
+	/** Set the note */
+	public void setNoteNotify(String nt) throws TMSException {
+		if (!objectEquals(note, nt)) {
+			store.update(this, "note", nt);
+			note = nt;
+			notifyAttribute("note");
 		}
 	}
+
+	/** Alert references */
+	private List<String> alert_references;
 
 	/** Get the alert references */
 	@Override
 	public List<String> getAlertReferences() {
 		return alert_references;
 	}
-	/** Alert incidents */
-	private List<String> incidents;
 
-	/** Set the incidents */
-	@Override
-	public void setIncidents(List<String> inc) {
-		incidents = inc;
-	}
-
-	/** Set the incidents */
-	public void doSetIncidents(List<String> inc) throws TMSException {
-		if (!listEq(incidents, inc)) {
-			store.update(this, "incidents", inc);
-			setIncidents(inc);
-			notifyAttribute("incidents");
+	/** Set the alert references */
+	public void setAlertReferencesNotify(List<String> ref)
+		throws TMSException
+	{
+		if (!listEq(alert_references, ref)) {
+			store.update(this, "alert_references", ref);
+			alert_references = ref;
+			notifyAttribute("alertReferences");
 		}
 	}
+
+	/** Alert incidents */
+	private List<String> incidents;
 
 	/** Get the incidents */
 	@Override
@@ -531,23 +471,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return incidents;
 	}
 
-	/** Categories of alert */
-	private List<String> categories;
-
-	/** Set the categories */
-	@Override
-	public void setCategories(List<String> ct) {
-		categories = ct;
-	}
-
-	/** Set the categories */
-	public void doSetCategories(List<String> ct) throws TMSException {
-		if (!listEq(categories, ct)) {
-			store.update(this, "categories", ct);
-			setCategories(ct);
-			notifyAttribute("categories");
+	/** Set the incidents */
+	public void setIncidentsNotify(List<String> inc) throws TMSException {
+		if (!listEq(incidents, inc)) {
+			store.update(this, "incidents", inc);
+			incidents = inc;
+			notifyAttribute("incidents");
 		}
 	}
+
+	/** Categories of alert */
+	private List<String> categories;
 
 	/** Get the categories */
 	@Override
@@ -555,23 +489,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return categories;
 	}
 
-	/** Alert event */
-	private String event;
-
-	/** Set the event */
-	@Override
-	public void setEvent(String ev) {
-		event = ev;
-	}
-
-	/** Set the event */
-	public void doSetEvent(String ev) throws TMSException {
-		if (!objectEquals(event, ev)) {
-			store.update(this, "event", ev);
-			setEvent(ev);
-			notifyAttribute("event");
+	/** Set the categories */
+	public void setCategoriesNotify(List<String> ct) throws TMSException {
+		if (!listEq(categories, ct)) {
+			store.update(this, "categories", ct);
+			categories = ct;
+			notifyAttribute("categories");
 		}
 	}
+
+	/** Alert event */
+	private String event;
 
 	/** Get the event */
 	@Override
@@ -579,28 +507,33 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return event;
 	}
 
-	/** Alert response types */
-	private List<String> response_types;
-
-	/** Set the response types */
-	@Override
-	public void setResponseTypes(List<String> rt) {
-		response_types = rt;
-	}
-
-	/** Set the response types */
-	public void doSetResponseTypes(List<String> rt) throws TMSException {
-		if (!listEq(response_types, rt)) {
-			store.update(this, "response_types", rt);
-			setResponseTypes(rt);
-			notifyAttribute("responseTypes");
+	/** Set the event */
+	public void setEventNotify(String ev) throws TMSException {
+		if (!objectEquals(event, ev)) {
+			store.update(this, "event", ev);
+			event = ev;
+			notifyAttribute("event");
 		}
 	}
+
+	/** Alert response types */
+	private List<String> response_types;
 
 	/** Get the response type(s) */
 	@Override
 	public List<String> getResponseTypes() {
 		return response_types;
+	}
+
+	/** Set the response types */
+	public void setResponseTypesNotify(List<String> rt)
+		throws TMSException
+	{
+		if (!listEq(response_types, rt)) {
+			store.update(this, "response_types", rt);
+			response_types = rt;
+			notifyAttribute("responseTypes");
+		}
 	}
 
 	/** Get the highest-priority response type */
@@ -619,44 +552,23 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	/** Urgency of alert */
 	private String urgency;
 
-	/** Set the urgency */
-	@Override
-	public void setUrgency(String u) {
-		urgency = u;
-	}
-
-	/** Set the urgency */
-	public void doSetUrgency(String u) throws TMSException {
-		if (!objectEquals(urgency, u)) {
-			store.update(this, "urgency", u);
-			setUrgency(u);
-			notifyAttribute("urgency");
-		}
-	}
-
 	/** Get the urgency */
 	@Override
 	public String getUrgency() {
 		return urgency;
 	}
 
-	/** Severity of the alert */
-	private String severity;
-
-	/** Set the severity */
-	@Override
-	public void setSeverity(String sv) {
-		severity = sv;
-	}
-
-	/** Set the severity */
-	public void doSetSeverity(String sv) throws TMSException {
-		if (!objectEquals(severity, sv)) {
-			store.update(this, "severity", sv);
-			setSeverity(sv);
-			notifyAttribute("severity");
+	/** Set the urgency */
+	public void setUrgencyNotify(String u) throws TMSException {
+		if (!objectEquals(urgency, u)) {
+			store.update(this, "urgency", u);
+			urgency = u;
+			notifyAttribute("urgency");
 		}
 	}
+
+	/** Severity of the alert */
+	private String severity;
 
 	/** Get the severity */
 	@Override
@@ -664,23 +576,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return severity;
 	}
 
-	/** Certainty of the alert */
-	private String certainty;
-
-	/** Set the certainty */
-	@Override
-	public void setCertainty(String cy) {
-		certainty = cy;
-	}
-
-	/** Set the certainty */
-	public void doSetCertainty(String cy) throws TMSException {
-		if (!objectEquals(certainty, cy)) {
-			store.update(this, "certainty", cy);
-			setCertainty(cy);
-			notifyAttribute("certainty");
+	/** Set the severity */
+	public void setSeverityNotify(String sv) throws TMSException {
+		if (!objectEquals(severity, sv)) {
+			store.update(this, "severity", sv);
+			severity = sv;
+			notifyAttribute("severity");
 		}
 	}
+
+	/** Certainty of the alert */
+	private String certainty;
 
 	/** Get the certainty */
 	@Override
@@ -688,23 +594,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return certainty;
 	}
 
-	/** Audience for the alert */
-	private String audience;
-
-	/** Set the audience */
-	@Override
-	public void setAudience(String au) {
-		audience = au;
-	}
-
-	/** Set the audience */
-	public void doSetAudience(String au) throws TMSException {
-		if (!objectEquals(audience, au)) {
-			store.update(this, "audience", au);
-			setAudience(au);
-			notifyAttribute("audience");
+	/** Set the certainty */
+	public void setCertaintyNotify(String cy) throws TMSException {
+		if (!objectEquals(certainty, cy)) {
+			store.update(this, "certainty", cy);
+			certainty = cy;
+			notifyAttribute("certainty");
 		}
 	}
+
+	/** Audience for the alert */
+	private String audience;
 
 	/** Get the audience */
 	@Override
@@ -712,23 +612,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return audience;
 	}
 
-	/** Effective date of the alert */
-	private Date effective_date;
-
-	/** Set the effective date */
-	@Override
-	public void setEffectiveDate(Date efd) {
-		effective_date = efd;
-	}
-
-	/** Set the effective date */
-	public void doSetEffectiveDate(Date efd) throws TMSException {
-		if (!objectEquals(efd, effective_date)) {
-			store.update(this, "effective_date", efd);
-			setEffectiveDate(efd);
-			notifyAttribute("effectiveDate");
+	/** Set the audience */
+	public void setAudienceNotify(String au) throws TMSException {
+		if (!objectEquals(audience, au)) {
+			store.update(this, "audience", au);
+			audience = au;
+			notifyAttribute("audience");
 		}
 	}
+
+	/** Effective date of the alert */
+	private Date effective_date;
 
 	/** Get the effective date */
 	@Override
@@ -736,23 +630,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return effective_date;
 	}
 
-	/** Onset date for alert */
-	private Date onset_date;
-
-	/** Set the onset date */
-	@Override
-	public void setOnsetDate(Date od) {
-		onset_date = od;
-	}
-
-	/** Set the onset date */
-	public void doSetOnsetDate(Date od) throws TMSException {
-		if (!objectEquals(od, onset_date)) {
-			store.update(this, "onset_date", od);
-			setOnsetDate(od);
-			notifyAttribute("onsetDate");
+	/** Set the effective date */
+	public void setEffectiveDateNotify(Date efd) throws TMSException {
+		if (!objectEquals(efd, effective_date)) {
+			store.update(this, "effective_date", efd);
+			effective_date = efd;
+			notifyAttribute("effectiveDate");
 		}
 	}
+
+	/** Onset date for alert */
+	private Date onset_date;
 
 	/** Get the onset date */
 	@Override
@@ -760,23 +648,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return onset_date;
 	}
 
-	/** Expiration date for alert */
-	private Date expiration_date;
-
-	/** Set the expiration date*/
-	@Override
-	public void setExpirationDate(Date exd) {
-		expiration_date = exd;
-	}
-
-	/** Set the expiration date */
-	public void doSetExpirationDate(Date exd) throws TMSException {
-		if (!objectEquals(exd, expiration_date)) {
-			store.update(this, "expiration_date", exd);
-			setExpirationDate(exd);
-			notifyAttribute("expirationDate");
+	/** Set the onset date */
+	public void setOnsetDateNotify(Date od) throws TMSException {
+		if (!objectEquals(od, onset_date)) {
+			store.update(this, "onset_date", od);
+			onset_date = od;
+			notifyAttribute("onsetDate");
 		}
 	}
+
+	/** Expiration date for alert */
+	private Date expiration_date;
 
 	/** Get the expiration date */
 	@Override
@@ -784,23 +666,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return expiration_date;
 	}
 
-	/** The alert sender's name */
-	private String sender_name;
-
-	/** Set the sender's name */
-	@Override
-	public void setSenderName(String sn) {
-		sender_name = sn;
-	}
-
-	/** Set the sender's name */
-	public void doSetSenderName(String sn) throws TMSException {
-		if (!objectEquals(sender_name, sn)) {
-			store.update(this, "sender_name", sn);
-			setSenderName(sn);
-			notifyAttribute("senderName");
+	/** Set the expiration date */
+	public void setExpirationDateNotify(Date exd) throws TMSException {
+		if (!objectEquals(exd, expiration_date)) {
+			store.update(this, "expiration_date", exd);
+			expiration_date = exd;
+			notifyAttribute("expirationDate");
 		}
 	}
+
+	/** The alert sender's name */
+	private String sender_name;
 
 	/** Get the sender's name */
 	@Override
@@ -808,23 +684,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return sender_name;
 	}
 
-	/** Headline for the alert */
-	private String headline;
-
-	/** Set the alert headline */
-	@Override
-	public void setHeadline(String hl) {
-		headline = hl;
-	}
-
-	/** Set the alert headline */
-	public void doSetHeadline(String hl) throws TMSException {
-		if (!objectEquals(headline, hl)) {
-			store.update(this, "headline", hl);
-			setHeadline(hl);
-			notifyAttribute("headline");
+	/** Set the sender's name */
+	public void setSenderNameNotify(String sn) throws TMSException {
+		if (!objectEquals(sender_name, sn)) {
+			store.update(this, "sender_name", sn);
+			sender_name = sn;
+			notifyAttribute("senderName");
 		}
 	}
+
+	/** Headline for the alert */
+	private String headline;
 
 	/** Get the alert headline */
 	@Override
@@ -832,23 +702,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return headline;
 	}
 
-	/** Description of alert */
-	private String alert_description;
-
-	/** Set the description */
-	@Override
-	public void setAlertDescription(String ad) {
-		alert_description = ad;
-	}
-
-	/** Set the alert description */
-	public void doSetAlertDescription(String ad) throws TMSException {
-		if (!objectEquals(alert_description, ad)) {
-			store.update(this, "alert_description", ad);
-			setAlertDescription(ad);
-			notifyAttribute("alertDescription");
+	/** Set the alert headline */
+	public void setHeadlineNotify(String hl) throws TMSException {
+		if (!objectEquals(headline, hl)) {
+			store.update(this, "headline", hl);
+			headline = hl;
+			notifyAttribute("headline");
 		}
 	}
+
+	/** Description of alert */
+	private String alert_description;
 
 	/** Get the description */
 	@Override
@@ -856,47 +720,35 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return alert_description;
 	}
 
-	/** Alert instruction */
-	private String instruction;
-
-	/** Set the instruction */
-	@Override
-	public void setInstruction(String in) {
-		instruction = in;
-	}
-
-	/** Set the instruction */
-	public void doSetInstruction(String in) throws TMSException {
-		if (!objectEquals(instruction, in)) {
-			store.update(this, "instruction", in);
-			setInstruction(in);
-			notifyAttribute("instruction");
+	/** Set the alert description */
+	public void setAlertDescriptionNotify(String ad) throws TMSException {
+		if (!objectEquals(alert_description, ad)) {
+			store.update(this, "alert_description", ad);
+			alert_description = ad;
+			notifyAttribute("alertDescription");
 		}
 	}
 
-	/** Get the description */
+	/** Alert instruction */
+	private String instruction;
+
+	/** Get the alert instruction */
 	@Override
 	public String getInstruction() {
 		return instruction;
 	}
 
-	/** Parameters */
-	private String parameters;
-
-	/** Set the parameters */
-	@Override
-	public void setParameters(String par) {
-		parameters = par;
-	}
-
-	/** Set the parameters */
-	public void doSetParameters(String par) throws TMSException {
-		if (!jsonStrEq(parameters, par)) {
-			store.update(this, "parameters", par);
-			setParameters(par);
-			notifyAttribute("parameters");
+	/** Set the instruction */
+	public void setInstructionNotify(String in) throws TMSException {
+		if (!objectEquals(instruction, in)) {
+			store.update(this, "instruction", in);
+			instruction = in;
+			notifyAttribute("instruction");
 		}
 	}
+
+	/** Parameters */
+	private String parameters;
 
 	/** Get the parameters */
 	@Override
@@ -904,23 +756,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return parameters;
 	}
 
-	/** Area */
-	private String area;
-
-	/** Set the area */
-	@Override
-	public void setArea(String ar) {
-		area = ar;
-	}
-
-	/** Set the area */
-	public void doSetArea(String ar) throws TMSException {
-		if (!jsonStrEq(area, ar)) {
-			store.update(this, "area", ar);
-			setArea(ar);
-			notifyAttribute("area");
+	/** Set the parameters */
+	public void setParametersNotify(String par) throws TMSException {
+		if (!jsonStrEq(parameters, par)) {
+			store.update(this, "parameters", par);
+			parameters = par;
+			notifyAttribute("parameters");
 		}
 	}
+
+	/** Area */
+	private String area;
 
 	/** Get the area */
 	@Override
@@ -928,47 +774,29 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return area;
 	}
 
-	/** Get the geographic polygon representing the area. */
-	@Override
-	public MultiPolygon getGeoPoly() {
-		return geo_poly;
+	/** Set the area */
+	public void setAreaNotify(String ar) throws TMSException {
+		if (!jsonStrEq(area, ar)) {
+			store.update(this, "area", ar);
+			area = ar;
+			notifyAttribute("area");
+		}
 	}
 
 	/** Geographic MultiPolygon */
 	private MultiPolygon geo_poly;
 
-	/** Set the area */
+	/** Get the geographic polygon of the area */
 	@Override
-	public void setGeoPoly(MultiPolygon gp) {
-		geo_poly = gp;
+	public MultiPolygon getGeoPoly() {
+		return geo_poly;
 	}
 
-	/** Set the area */
-	public void doSetGeoPoly(MultiPolygon gp) throws TMSException {
+	/** Set the geographic polygon of the area */
+	public void setGeoPolyNotify(MultiPolygon gp) throws TMSException {
 		if (!objectEquals(geo_poly, gp)) {
 			store.update(this, "geo_poly", gp);
-			setGeoPoly(gp);
-			notifyAttribute("geoPoly", false);
-		}
-	}
-
-	/** Set the area from a string */
-	@Override
-	public void setGeoPoly(String gpstr) {
-		try {
-			geo_poly = new MultiPolygon(gpstr);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	/** Set the area from a string */
-	public void doSetGeoPoly(String gpstr) throws TMSException {
-		if (!objectEquals(geo_poly.toString(), gpstr)) {
-			// NOTE need to use setGeoPoly first, then store.update
-			setGeoPoly(gpstr);
-			store.update(this, "geo_poly", geo_poly);
+			geo_poly = gp;
 			notifyAttribute("geoPoly", false);
 		}
 	}
@@ -1011,57 +839,42 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return lon;
 	}
 
-	/** Purgeable flag. Null if the alert has not yet been processed, true if
-	 *  alert is determined to be irrelevant to this system's users.
-	 */
+	/** Purgeable flag.  Null if the alert has not yet been processed, true
+	 *  if alert is determined to be irrelevant to this system's users. */
 	private Boolean purgeable;
 
-	/** Set if this alert is purgeable (irrelevant to us) */
-	@Override
-	public void setPurgeable(Boolean p) {
-		purgeable = p;
-	}
-
-	/** Set if this alert is purgeable (irrelevant to us). Notifies clients of
-	 *  the change.
-	 */
-	public void doSetPurgeable(Boolean p) throws TMSException {
-		if (!objectEquals(purgeable, p)) {
-			IpawsProcJob.log("Setting purgeable flag of alert " +
-				name + " to " + p);
-			store.update(this, "purgeable", p);
-			setPurgeable(p);
-			notifyAttribute("purgeable", false);
-		}
-	}
-
-	/** Return if this alert is purgeable (irrelevant to us) */
+	/** Flag indicating if this alert is purgeable (irrelevant to us) */
 	@Override
 	public Boolean getPurgeable() {
 		return purgeable;
 	}
 
-	/** Last processing time of the alert */
-	private Date last_processed;
-
-	/** Set the last processing time of the alert */
-	@Override
-	public void setLastProcessed(Date pt) {
-		last_processed = pt;
-	}
-
-	/** Set the last processing time of the alert */
-	public void doSetLastProcessed(Date pt) throws TMSException {
-		if (!objectEquals(pt, last_processed)) {
-			store.update(this, "last_processed", pt);
-			setLastProcessed(pt);
-			notifyAttribute("lastProcessed", false);
+	/** Set purgeable flag and notify clients */
+	public void setPurgeableNotify(Boolean p) throws TMSException {
+		if (!objectEquals(purgeable, p)) {
+			IpawsProcJob.log("Setting purgeable flag of alert " +
+				name + " to " + p);
+			store.update(this, "purgeable", p);
+			purgeable = p;
+			notifyAttribute("purgeable", false);
 		}
 	}
+
+	/** Last processing time of the alert */
+	private Date last_processed;
 
 	/** Get the last processing time of the alert */
 	@Override
 	public Date getLastProcessed() {
 		return last_processed;
+	}
+
+	/** Set the last processing time of the alert */
+	public void setLastProcessedNotify(Date pt) throws TMSException {
+		if (!objectEquals(pt, last_processed)) {
+			store.update(this, "last_processed", pt);
+			last_processed = pt;
+			notifyAttribute("lastProcessed", false);
+		}
 	}
 }
