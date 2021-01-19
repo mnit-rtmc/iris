@@ -189,7 +189,7 @@ public class IpawsProcJob extends Job {
 			if (proc == null) {
 				// should never get here, but to guard against
 				// nulls
-				ia.doSetPurgeable(null);
+				ia.setPurgeableNotify(null);
 			} else if (proc.before(start) && (now.after(start) ||
 				now.equals(start)) && now.before(end))
 			{
@@ -387,7 +387,8 @@ public class IpawsProcJob extends Job {
 	 *  DMS selection uses PostGIS to handle the geospatial operations.
 	 *  This method must be called after getGeoPoly() is used to create a
 	 *  polygon object from the alert's area field, and after that polygon
-	 *  is written to the database with the alert's doSetGeoPoly() method.
+	 *  is written to the database with the alert's setGeoPolyNotify()
+	 *  method.
 	 *
 	 *  If at least one sign is selected, an IpawsDeployer object is created
 	 *  to deploy the alert and optionally notify clients for approval.
@@ -453,10 +454,10 @@ public class IpawsProcJob extends Job {
 		if (iadList.isEmpty() && ia.getPurgeable() == null) {
 			log("No alert deployers created for " + ia.getName() +
 				", marking alert as purgeable");
-			ia.doSetPurgeable(true);
+			ia.setPurgeableNotify(true);
 		} else if (!iadList.isEmpty())
-			ia.doSetPurgeable(false);
-		ia.doSetLastProcessed(new Date());
+			ia.setPurgeableNotify(false);
+		ia.setLastProcessedNotify(new Date());
 	}
 
 	/** Create an alert deployer for this alert. Called after querying PostGIS
@@ -487,7 +488,7 @@ public class IpawsProcJob extends Job {
 
 			// mark the alert as non-purgeable - we want to keep it
 			// for records
-			ia.doSetPurgeable(false);
+			ia.setPurgeableNotify(false);
 			return null;
 		}
 
@@ -756,11 +757,11 @@ public class IpawsProcJob extends Job {
 					ps = jo.getString("polygon");
 			} catch (JSONException e) {
 				e.printStackTrace();
-				ia.doSetPurgeable(true);
+				ia.setPurgeableNotify(true);
 				return;
 			}
 		} else {
-			ia.doSetPurgeable(true);
+			ia.setPurgeableNotify(true);
 			return;
 		}
 
@@ -777,7 +778,7 @@ public class IpawsProcJob extends Job {
 				// no geocode field or not a JSONObject, not
 				// much we can do
 				e.printStackTrace();
-				ia.doSetPurgeable(true);
+				ia.setPurgeableNotify(true);
 				return;
 			}
 
@@ -789,7 +790,7 @@ public class IpawsProcJob extends Job {
 				// no UGC fields or not a JSONArray, not much we
 				// can do
 				e.printStackTrace();
-				ia.doSetPurgeable(true);
+				ia.setPurgeableNotify(true);
 				return;
 			}
 
@@ -826,7 +827,7 @@ public class IpawsProcJob extends Job {
 					String polystr = row.getString(1);
 					if (polystr != null && !polystr.isEmpty()) {
 						MultiPolygon mp = new MultiPolygon(polystr);
-						ia.doSetGeoPoly(mp);
+						ia.setGeoPolyNotify(mp);
 					} else
 						log("No polygon found for UGC codes!");
 				}
@@ -837,12 +838,12 @@ public class IpawsProcJob extends Job {
 			log("Got polygon: " + ps);
 			String pgps = formatMultiPolyStr(ps);
 			MultiPolygon mp = new MultiPolygon(pgps);
-			ia.doSetGeoPoly(mp);
+			ia.setGeoPolyNotify(mp);
 		}
 		if (ia.getGeoPoly() == null) {
 			log("No polygon found, marking alert " +
 				ia.getName() + " as purgeable");
-			ia.doSetPurgeable(true);
+			ia.setPurgeableNotify(true);
 		}
 	}
 
