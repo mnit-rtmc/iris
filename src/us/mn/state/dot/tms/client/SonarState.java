@@ -2,7 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2007-2020  Minnesota Department of Transportation
  * Copyright (C) 2015       Iteris Inc.
- * Copyright (C) 2016-2017  SRF Consulting Group
+ * Copyright (C) 2016-2021  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,6 +76,7 @@ import us.mn.state.dot.tms.client.dms.DmsCache;
 import us.mn.state.dot.tms.client.incident.IncCache;
 import us.mn.state.dot.tms.client.lcs.LcsCache;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
+import us.mn.state.dot.tms.utils.SubnetChecker;
 
 /**
  * Holds the state of the SONAR client
@@ -664,6 +665,7 @@ public class SonarState extends Client {
 		// FIXME: this is a hack ...
 		BaseHelper.user = user;
 		populate(system_attributes, true);
+		SubnetChecker.start();
 		populate(map_extents, true);
 		populate(roads);
 		populate(road_affixes);
