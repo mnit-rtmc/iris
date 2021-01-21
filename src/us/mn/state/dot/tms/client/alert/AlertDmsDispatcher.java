@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,16 +47,17 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
-import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.AlertState;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.IpawsAlert;
 import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.NotificationHelper;
+import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.DmsImagePanel;
@@ -84,9 +86,6 @@ public class AlertDmsDispatcher extends IPanel {
 
 	/** Currently selected alert */
 	private IpawsAlert selectedAlert;
-
-	/** Cache of DMS */
-	private final TypeCache<DMS> dmsCache;
 
 	/** List of DMS included in this alert */
 	private final ArrayList<DMS> dmsList = new ArrayList<DMS>();
@@ -286,8 +285,6 @@ public class AlertDmsDispatcher extends IPanel {
 		manager = m;
 
 		// setup DMS table
-		dmsCache = session.getSonarState().getDmsCache().getDMSs();
-
 		dmsTableModel = new DmsTableModel();
 		dmsTable = new JTable(dmsTableModel);
 		Dimension d = new Dimension(dmsTable.getPreferredSize().width,
@@ -396,8 +393,8 @@ public class AlertDmsDispatcher extends IPanel {
 				&& session.isWritePermitted(iad)) {
 			// if it is, automatically turn on edit mode
 			manager.setEditing(true);
-		} else if (manager.checkStyle(ItemStyle.PAST, iad))
-			// if the alert is in the past, force edit mode to off
+		} else if (manager.checkStyle(ItemStyle.EXPIRED, iad))
+			// if the alert is expired, force edit mode to off
 			manager.setEditing(false);
 
 		// uncheck the "show all DMS" button
@@ -428,7 +425,7 @@ public class AlertDmsDispatcher extends IPanel {
 	/** Deploy (or update) the selected alert. */
 	private void deployAlert() {
 		if (selectedAlert != null && selectedAlertDepl != null &&
-		    !manager.checkStyle(ItemStyle.PAST, selectedAlertDepl))
+		    !manager.checkStyle(ItemStyle.EXPIRED, selectedAlertDepl))
 		{
 			System.out.println("Deploying alert " +
 				selectedAlert.getName() + "...");
@@ -439,14 +436,14 @@ public class AlertDmsDispatcher extends IPanel {
 
 	/** Deploy (or update) the selected alert. */
 	private void deployAlert(IpawsDeployer iad) {
-		// get the selected DMS and set the deployed DMS
+		// get the selected DMS and set the requested DMS
 		ArrayList<String> selectedDms = new ArrayList<String>();
 		for (DMS d: dmsSuggestions.keySet()) {
 			if (dmsSuggestions.get(d))
 				selectedDms.add(d.getName());
 		}
 		String[] dms = selectedDms.toArray(new String[0]);
-		iad.setDeployedDms(dms);
+		iad.setRequestedDms(dms);
 
 		// try to update MULTI and pre/post alert times
 		String newMulti = multiBox.getText();
@@ -472,13 +469,7 @@ public class AlertDmsDispatcher extends IPanel {
 		// update approval time/user
 		iad.setApprovedTime(new Date());
 		iad.setApprovedBy(session.getUser().getName());
-
-		// if not currently deployed, set the alert as deployed
-		if (!Boolean.TRUE.equals(iad.getDeployed()))
-			iad.setDeployed(true);
-		else
-			// if already deployed, trigger an update
-			iad.setUpdate(true);
+		iad.setAlertStateReq(AlertState.APPROVE_REQ.ordinal());
 
 		// check if there are any notifications that haven't been
 		// addressed and address them
@@ -487,22 +478,22 @@ public class AlertDmsDispatcher extends IPanel {
 
 	/** Cancel the selected alert (removing it from signs) */
 	public void cancelAlert() {
-		// set deployed to false to trigger the cancel
-		if (selectedAlertDepl != null) {
-			selectedAlertDepl.setDeployed(false);
-			// check if there are any notifications that haven't
-			// been addressed and address them
-			NotificationHelper.addressAllRef(selectedAlertDepl,
-				session);
+		IpawsDeployer iad = selectedAlertDepl;
+		if (iad != null) {
+			iad.setAlertStateReq(AlertState.CANCEL_REQ.ordinal());
+			// check if there are any notifications that
+			// haven't been addressed and address them
+			NotificationHelper.addressAllRef(iad, session);
 		}
 	}
 
 	/** Start editing the selected alert. */
 	private void editAlert() {
-		// make sure the alert is not in the past
+		// make sure the alert is not expired
 		// and that the user can write (this) alert
-		if (!manager.checkStyle(ItemStyle.PAST, selectedAlertDepl)
-				&& session.isWritePermitted(selectedAlertDepl)) {
+		if (!manager.checkStyle(ItemStyle.EXPIRED, selectedAlertDepl)
+			&& session.isWritePermitted(selectedAlertDepl))
+		{
 			// if they can, set edit mode
 			manager.setEditing(true);
 		} else
@@ -535,80 +526,24 @@ public class AlertDmsDispatcher extends IPanel {
 		// clear the suggestions before starting the worker
 		dmsSuggestions.clear();
 
-		// get the DMS list from the alert - do it in a worker thread since
-		// it might take a second
-		IWorker<HashMap<DMS,Boolean>> dmsWorker =
-				new IWorker<HashMap<DMS,Boolean>>() {
+		// get the DMS list from the alert - do it in a worker thread
+		// since it might take a second
+		IWorker<HashMap<DMS, Boolean>> dmsWorker =
+			new IWorker<HashMap<DMS, Boolean>>()
+		{
 			@Override
-			protected HashMap<DMS,Boolean> doInBackground()
-					throws Exception {
+			protected HashMap<DMS, Boolean> doInBackground()
+				throws Exception
+			{
 				// wait a bit before updating
 				Thread.sleep(200);
-
-				// use a HashMap to support a check box for controlling
-				// inclusion in the alert and a list to control sorting
-				HashMap<DMS,Boolean> dm = new HashMap<DMS,Boolean>();
-
-				// if edit mode is on, show a list of auto and optional DMS
-				if (manager.getEditing()) {
-					String[] dmsAuto = selectedAlertDepl.getAutoDms();
-					String[] dmsOptional = selectedAlertDepl.getOptionalDms();
-
-					// if deployed already, preserve inclusion
-					String[] dmsDeployed = selectedAlertDepl.getDeployedDms();
-					HashSet<String> include = new HashSet<String>();
-					for (String n: dmsDeployed) {
-						if (n != null)
-							include.add(n);
-					}
-
-					// add all the auto DMS
-					for (String n: dmsAuto) {
-						if (n != null) {
-							DMS d = dmsCache.lookupObject(n);
-							if (d != null) {
-								dm.put(d, include.isEmpty()
-										|| include.contains(n));
-							}
-						}
-					}
-
-					// add any optional DMS not already included
-					for (String n: dmsOptional) {
-						if (n != null) {
-							DMS d = dmsCache.lookupObject(n);
-							if (!dm.containsKey(d) && (d != null))
-								dm.put(d, include.contains(n));
-						}
-					}
-
-					// if the "show all" check box is checked, add all DMS in
-					// the group
-					if (showAllDmsChk.isSelected() &&
-							selectedAlertDepl.getSignGroup() != null) {
-						ArrayList<DMS> groupDms = DmsSignGroupHelper.
-							getSignsInGroup(selectedAlertDepl.getSignGroup());
-						for (DMS d: groupDms) {
-							if (!dm.containsKey(d))
-								dm.put(d, include.contains(d.getName()));
-						}
-					}
-				} else {
-					// if edit mode is off, show a list of deployed DMS
-					for (String n: selectedAlertDepl.getDeployedDms()) {
-						if (n != null) {
-							DMS d = dmsCache.lookupObject(n);
-							if (d != null)
-								dm.put(d, true);
-						}
-					}
-				}
-				return dm;
+				return lookupDmsList();
 			}
 
 			@Override
 			public void done() {
-				// get the map, get a list of DMS from it, then sort by name
+				// get the map, get a list of DMS from it, then
+				// sort by name
 				dmsSuggestions = getResult();
 
 				if (dmsSuggestions != null) {
@@ -631,6 +566,68 @@ public class AlertDmsDispatcher extends IPanel {
 		dmsWorker.execute();
 	}
 
+	/** Lookup DMS list for alert */
+	private HashMap<DMS, Boolean> lookupDmsList() {
+		// use a HashMap to support a check box for controlling
+		// inclusion in the alert and a list to control sorting
+		HashMap<DMS, Boolean> dm = new HashMap<DMS, Boolean>();
+
+		// if edit mode is on, show a list of auto and optional DMS
+		if (manager.getEditing()) {
+			String[] dmsAuto = selectedAlertDepl.getAutoDms();
+			String[] dmsOptional = selectedAlertDepl.getOptionalDms();
+
+			// if deployed already, preserve inclusion
+			String[] dmsDeployed = selectedAlertDepl.getDeployedDms();
+			HashSet<String> include = new HashSet<String>();
+			for (String n: dmsDeployed) {
+				if (n != null)
+					include.add(n);
+			}
+
+			// add all the auto DMS
+			for (String n: dmsAuto) {
+				if (n != null) {
+					DMS d = DMSHelper.lookup(n);
+					if (d != null) {
+						dm.put(d, include.isEmpty() ||
+							  include.contains(n));
+					}
+				}
+			}
+
+			// add any optional DMS not already included
+			for (String n: dmsOptional) {
+				if (n != null) {
+					DMS d = DMSHelper.lookup(n);
+					if (!dm.containsKey(d) && (d != null))
+						dm.put(d, include.contains(n));
+				}
+			}
+
+			// if the "show all" check box is
+			// checked, add all DMS in the group
+			SignGroup sg = selectedAlertDepl.getConfig()
+				.getSignGroup();
+			if (showAllDmsChk.isSelected() && sg != null) {
+				for (DMS d: SignGroupHelper.getAllSigns(sg)) {
+					if (!dm.containsKey(d))
+						dm.put(d, include.contains(d.getName()));
+				}
+			}
+		} else {
+			// if edit mode is off, show a list of deployed DMS
+			for (String n: selectedAlertDepl.getDeployedDms()) {
+				if (n != null) {
+					DMS d = DMSHelper.lookup(n);
+					if (d != null)
+						dm.put(d, true);
+				}
+			}
+		}
+		return dm;
+	}
+
 	/** Get the most appropriate MULTI string for the selected alert. This is
 	 *  either the deployed MULTI (if not empty) or the auto-generated MULTI.
 	 */
@@ -645,8 +642,10 @@ public class AlertDmsDispatcher extends IPanel {
 	private void updateMsgParams() {
 		boolean allowEdit = false;
 		if (selectedAlertDepl != null) {
+			SignGroup sg = selectedAlertDepl.getConfig()
+				.getSignGroup();
 			showAllDmsChk.setText(I18N.get("alert.dms.show_all") +
-					" " + selectedAlertDepl.getSignGroup());
+				" " + sg);
 
 			// set the text in the MULTI box - use the deployed MULTI if we
 			// have it, otherwise the auto-generated MULTI
@@ -668,7 +667,7 @@ public class AlertDmsDispatcher extends IPanel {
 			// if this alert is in the past or editing is off, disable the
 			// editing features (we still show them for information)
 			allowEdit = manager.getEditing() && !manager.checkStyle(
-					ItemStyle.PAST, selectedAlertDepl);
+				ItemStyle.EXPIRED, selectedAlertDepl);
 
 		} else {
 			showAllDmsChk.setText(I18N.get("alert.dms.show_all"));

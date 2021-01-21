@@ -35,16 +35,16 @@ public interface IpawsConfig extends SonarObject {
 	String getEvent();
 
 	/** Set the sign group */
-	void setSignGroup(String sg);
+	void setSignGroup(SignGroup sg);
 
 	/** Get the sign group */
-	String getSignGroup();
+	SignGroup getSignGroup();
 
 	/** Set the quick message (template) */
-	void setQuickMessage(String qm);
+	void setQuickMessage(QuickMessage qm);
 
 	/** Set the quick message (template) */
-	String getQuickMessage();
+	QuickMessage getQuickMessage();
 
 	/** Set amount of time (in hours) to display a pre-alert message before
 	 *  the alert becomes active.

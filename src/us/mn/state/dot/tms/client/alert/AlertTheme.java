@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,13 +25,14 @@ import java.util.ArrayList;
 
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.IpawsAlert;
 import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.IpawsDeployerHelper;
 import us.mn.state.dot.tms.IpawsAlertHelper;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.dms.DmsTheme;
@@ -95,11 +97,12 @@ public class AlertTheme extends ProxyTheme<IpawsDeployer> {
 	static private final Color SCHEDULED_ALERT_FILL =
 			new Color(255, 128, 0, 40);
 
-	/** Past alert area outline color */
-	static private final Color PAST_ALERT_COLOR = Color.DARK_GRAY;
+	/** Expired alert area outline color */
+	static private final Color EXPIRED_ALERT_COLOR = Color.DARK_GRAY;
 
-	/** Past alert area fill color */
-	static private final Color PAST_ALERT_FILL = new Color(105,105,105,40);
+	/** Expired alert area fill color */
+	static private final Color EXPIRED_ALERT_FILL = new Color(105, 105, 105,
+		40);
 
 	public AlertTheme(AlertManager m, Session s) {
 		super(m, new AlertMarker());
@@ -118,7 +121,7 @@ public class AlertTheme extends ProxyTheme<IpawsDeployer> {
 		addStyle(ItemStyle.SCHEDULED, SCHEDULED_ALERT_COLOR);
 		addStyle(ItemStyle.ACTIVE, ACTIVE_ALERT_COLOR);
 		addStyle(ItemStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE);
-		addStyle(ItemStyle.PAST, PAST_ALERT_COLOR);
+		addStyle(ItemStyle.EXPIRED, EXPIRED_ALERT_COLOR);
 		addStyle(ItemStyle.ALL, Color.WHITE);
 	}
 
@@ -189,11 +192,11 @@ public class AlertTheme extends ProxyTheme<IpawsDeployer> {
 		// (and actually works) in WebStart
 		ArrayList<Shape> shapes = IpawsAlertHelper.getShapes(ia);
 
-		// check the style with the deployer - past alerts will be a
-		// different color and alert style will trigger different behavior
-		// past and inactive alerts are gray
-		Color outline = PAST_ALERT_COLOR;
-		Color fill = PAST_ALERT_FILL;
+		// check the style with the deployer - expired alerts will be a
+		// different color and alert style will trigger different
+		// behavior expired and inactive alerts are gray
+		Color outline = EXPIRED_ALERT_COLOR;
+		Color fill = EXPIRED_ALERT_FILL;
 		ItemStyle alertState = null;
 		if (manager.checkStyle(ItemStyle.ACTIVE, iad)) {
 			// active alerts are red
@@ -232,17 +235,21 @@ public class AlertTheme extends ProxyTheme<IpawsDeployer> {
 		float scale = dManager.getLayerState().getScale();
 		dmsTheme.setScale(scale);
 		dmsSymbol = (VectorSymbol) dmsTheme.getSymbol();
-		if (alertState == ItemStyle.PENDING || (aManager.getEditing() &&
-				(alertState == ItemStyle.ACTIVE
-				|| alertState == ItemStyle.SCHEDULED))) {
-			// draw all DMS in group (if requested), then optional DMS,
-			// then auto DMS (in that order so the styles look right)
-			if (aManager.getShowAllDms() && iad.getSignGroup() != null) {
-				for (DMS d: DmsSignGroupHelper.getSignsInGroup(
-						iad.getSignGroup()))
+		if (alertState == ItemStyle.PENDING ||
+			(aManager.getEditing() &&
+			    (alertState == ItemStyle.ACTIVE ||
+			     alertState == ItemStyle.SCHEDULED)
+			)
+		   )
+		{
+			// draw all DMS in group (if requested), then optional
+			// DMS, then auto DMS (in that order so the styles look
+			// right)
+			SignGroup sg = iad.getConfig().getSignGroup();
+			if (aManager.getShowAllDms() && sg != null) {
+				for (DMS d: SignGroupHelper.getAllSigns(sg))
 					drawDms(g, d.getName(), dmsAllStyle, t);
 			}
-
 			for (String dmsName: iad.getOptionalDms())
 				drawDms(g, dmsName, dmsAvailableStyle, t);
 			for (String dmsName: iad.getAutoDms())
@@ -253,8 +260,8 @@ public class AlertTheme extends ProxyTheme<IpawsDeployer> {
 			for (String dmsName: iad.getDeployedDms())
 				drawDms(g, dmsName, dmsDeployedStyle, t);
 		} else {
-			// for past and inactive alerts draw only deployed DMS but using
-			// "all" style
+			// for past and inactive alerts draw only deployed DMS
+			// but using "all" style
 			for (String dmsName: iad.getDeployedDms())
 				drawDms(g, dmsName, dmsAllStyle, t);
 		}
@@ -263,13 +270,15 @@ public class AlertTheme extends ProxyTheme<IpawsDeployer> {
 	/** Draw the DMS with the given name on the graphics context using the
 	 *  specified style, resetting the transform to t afterwards.
 	 */
-	private void drawDms(Graphics2D g, String dmsName,
-			Style style, AffineTransform t) {
+	private void drawDms(Graphics2D g, String dmsName, Style style,
+		AffineTransform t)
+	{
 		DMS dms = DMSHelper.lookup(dmsName);
 		if (dms == null || dms.getGeoLoc() == null)
 			return;
 
-		// get a map object for this DMS and draw (potentially as selected)
+		// get a map object for this DMS and draw
+		// (potentially as selected)
 		MapGeoLoc dmgl = glManager.findMapGeoLoc(dms.getGeoLoc());
 		if (dms == aManager.getSelectedDms()) {
 			dmsSymbol.drawSelected(g, dmgl, style);

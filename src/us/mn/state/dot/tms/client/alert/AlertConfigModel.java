@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +25,9 @@ import javax.swing.table.TableCellEditor;
 
 import us.mn.state.dot.tms.IpawsConfig;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -44,9 +47,6 @@ public class AlertConfigModel extends ProxyTableModel<IpawsConfig> {
 				s.getSonarState().getIpawsConfigCache(), false, true, true);
 	}
 
-	/** List of sign groups */
-	ArrayList<String> sgl;
-
 	/** Create the columns in the model */
 	@Override
 	protected ArrayList<ProxyColumn<IpawsConfig>> createColumns() {
@@ -63,8 +63,9 @@ public class AlertConfigModel extends ProxyTableModel<IpawsConfig> {
 				iac.setEvent(value.toString());
 			}
 		});
-		cols.add(new ProxyColumn<IpawsConfig>(
-				"alert.config.sign_group", 200) {
+		cols.add(new ProxyColumn<IpawsConfig>("alert.config.sign_group",
+			200)
+		{
 			public Object getValueAt(IpawsConfig iac) {
 				return iac.getSignGroup();
 			}
@@ -72,18 +73,20 @@ public class AlertConfigModel extends ProxyTableModel<IpawsConfig> {
 				return canWrite(iac);
 			}
 			public void setValueAt(IpawsConfig iac, Object value) {
-				iac.setSignGroup((String) value);
+				iac.setSignGroup((value instanceof SignGroup)
+					? (SignGroup) value
+					: null);
 			}
 			protected TableCellEditor createCellEditor() {
-				Iterator<SignGroup> it = session.getSonarState()
-						.getDmsCache().getSignGroups().iterator();
-				sgl = new ArrayList<String>();
+				ArrayList<SignGroup> sgl =
+					new ArrayList<SignGroup>();
+				Iterator<SignGroup> it = SignGroupHelper.iterator();
 				while (it.hasNext())
-					sgl.add(it.next().getName());
-				sgl.sort(String::compareToIgnoreCase);
-				JComboBox<String> cbx = new JComboBox<String>(
-						new DefaultComboBoxModel<String>(
-								sgl.toArray(new String[0])));
+					sgl.add(it.next());
+
+				JComboBox<SignGroup> cbx = new JComboBox<SignGroup>(
+					new DefaultComboBoxModel<SignGroup>(
+						sgl.toArray(new SignGroup[0])));
 				return new DefaultCellEditor(cbx);
 			}
 		});
@@ -96,18 +99,23 @@ public class AlertConfigModel extends ProxyTableModel<IpawsConfig> {
 				return canWrite(iac);
 			}
 			public void setValueAt(IpawsConfig iac, Object value) {
-				iac.setQuickMessage((String) value);
+				iac.setQuickMessage(
+					(value instanceof QuickMessage)
+					? (QuickMessage) value
+					: null
+				);
 			}
 			protected TableCellEditor createCellEditor() {
-				Iterator<QuickMessage> it = session.getSonarState()
-						.getDmsCache().getQuickMessages().iterator();
-				ArrayList<String> qml = new ArrayList<String>();
+				ArrayList<QuickMessage> qml =
+					new ArrayList<QuickMessage>();
+				Iterator<QuickMessage> it = QuickMessageHelper
+					.iterator();
 				while (it.hasNext())
-					qml.add(it.next().getName());
-				qml.sort(String::compareToIgnoreCase);
-				JComboBox<String> cbx = new JComboBox<String>(
-						new DefaultComboBoxModel<String>(
-								qml.toArray(new String[0])));
+					qml.add(it.next());
+				JComboBox<QuickMessage> cbx = new JComboBox
+					<QuickMessage>(new DefaultComboBoxModel
+<QuickMessage>(
+						qml.toArray(new QuickMessage[0])));
 				return new DefaultCellEditor(cbx);
 			}
 		});

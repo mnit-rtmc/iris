@@ -3555,6 +3555,32 @@ iadv_00106	13	1	1	\N	\N	IN RIGHT SHOULDER
 --
 -- IPAWS Alerts
 --
+-- CAP response types table
+CREATE TABLE iris.cap_response (
+	name VARCHAR(24) PRIMARY KEY,
+	event text,
+	response_type text,
+	multi text
+);
+
+-- CAP urgency values table
+CREATE TABLE iris.cap_urgency (
+	name VARCHAR(24) PRIMARY KEY,
+	event text,
+	urgency text,
+	multi text
+);
+
+-- IPAWS Alert Config table
+CREATE TABLE iris.ipaws_config (
+	name VARCHAR(24) PRIMARY KEY,
+	event text,
+	sign_group VARCHAR(20) REFERENCES iris.sign_group(name),
+	quick_message VARCHAR(20) REFERENCES iris.quick_message(name),
+	pre_alert_time INTEGER DEFAULT 6,
+	post_alert_time INTEGER DEFAULT 0
+);
+
 -- IPAWS Alert Event table
 CREATE TABLE event.ipaws_alert (
 	name text PRIMARY KEY,
@@ -3587,63 +3613,32 @@ CREATE TABLE event.ipaws_alert (
 	geo_poly geography(multipolygon),
 	lat double precision,
 	lon double precision,
-	purgeable boolean,
+	purgeable BOOLEAN,
 	last_processed timestamp with time zone
 );
 
 -- IPAWS Alert Deployer table
 CREATE TABLE event.ipaws_deployer (
-	name varchar(20) PRIMARY KEY,
+	name VARCHAR(20) PRIMARY KEY,
 	gen_time timestamp with time zone,
 	approved_time timestamp with time zone,
 	alert_id text REFERENCES event.ipaws_alert(identifier),
-	lat double precision,
-	lon double precision,
 	alert_start timestamp with time zone,
 	alert_end timestamp with time zone,
-	config varchar(24),
-	sign_group varchar(20),
-	quick_message varchar(20),
-	pre_alert_time integer,
-	post_alert_time integer,
+	config VARCHAR(24) NOT NULL REFERENCES iris.ipaws_config,
+	pre_alert_time INTEGER NOT NULL,
+	post_alert_time INTEGER NOT NULL,
 	auto_dms text[],
 	optional_dms text[],
 	deployed_dms text[],
-	area_threshold double precision,
 	auto_multi text,
 	deployed_multi text,
-	msg_priority integer,
-	approved_by varchar(15),
-	deployed boolean,
-	was_deployed boolean,
-	active boolean DEFAULT false,
-	replaces varchar(24)
-);
-
--- IPAWS Alert Config table
-CREATE TABLE iris.ipaws_config (
-	name varchar(24) PRIMARY KEY,
-	event text,
-	sign_group varchar(20) REFERENCES iris.sign_group(name),
-	quick_message varchar(20) REFERENCES iris.quick_message(name),
-	pre_alert_time integer DEFAULT 6,
-	post_alert_time integer DEFAULT 0
-);
-
--- CAP response types table
-CREATE TABLE iris.cap_response (
-	name varchar(24) PRIMARY KEY,
-	event text,
-	response_type text,
-	multi text
-);
-
--- CAP urgency values table
-CREATE TABLE iris.cap_urgency (
-	name varchar(24) PRIMARY KEY,
-	event text,
-	urgency text,
-	multi text
+	msg_priority INTEGER NOT NULL,
+	approved_by VARCHAR(15),
+	deployed BOOLEAN,
+	was_deployed BOOLEAN NOT NULL,
+	active BOOLEAN DEFAULT false,
+	replaces VARCHAR(24)
 );
 
 --

@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -35,18 +34,6 @@ public class DmsSignGroupHelper extends BaseHelper {
 	static public Iterator<DmsSignGroup> iterator() {
 		return new IteratorWrapper<DmsSignGroup>(namespace.iterator(
 			DmsSignGroup.SONAR_TYPE));
-	}
-
-	/** Get an ArrayList of all signs in a sign group */
-	static public ArrayList<DMS> getSignsInGroup(String sgn) {
-		ArrayList<DMS> groupDms = new ArrayList<DMS>();
-		Iterator<DmsSignGroup> it = iterator();
-		while (it.hasNext()) {
-			DmsSignGroup dsg = it.next();
-			if (dsg.getSignGroup().getName().equals(sgn))
-				groupDms.add(dsg.getDms());
-		}
-		return groupDms;
 	}
 	
 	/** Find all sign groups for a DMS */
