@@ -508,16 +508,14 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		return null;
 	}
 	
-	/** Get an array representation of a string given a string array. If the
-	 *  array provided is null, null is returned (instead of the string "null"
-	 *  returned by Arrays.toString().
-	 */
+	/** Get an array representation of a string given a string array.  If
+	 *  the array provided is null, null is returned (instead of the string
+	 *  "null" returned by Arrays.toString(). */
 	static protected String arrayToString(String[] a) {
-		if (a != null)
-			return Arrays.toString(a).replace("[", "{").replace("]", "}");
-		return null;
+		return (a != null)
+		      ? Arrays.toString(a).replace("[", "{").replace("]", "}")
+		      : null;
 	}
-	
 
 	/** Log an event */
 	static public void logEvent(final BaseEvent ev) {

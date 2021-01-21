@@ -19,6 +19,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.IpawsConfig;
+import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -31,33 +33,43 @@ import us.mn.state.dot.tms.TMSException;
  */
 public class IpawsConfigImpl extends BaseObjectImpl implements IpawsConfig {
 
-	/** Lookup the IpawsConfigImpl object with the given name. */
-	public static IpawsConfigImpl lookupConfigImpl(String name) {
-		return lookupIpawsConfig(name);
+	/** Load all the IPAWS alert config objects */
+	static public void loadAll() throws TMSException {
+		namespace.registerType(SONAR_TYPE, IpawsConfigImpl.class);
+		store.query("SELECT name, event, sign_group, quick_message, " +
+			"pre_alert_time, post_alert_time FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
+		{
+			@Override
+			public void create(ResultSet row) throws Exception {
+				namespace.addObject(new IpawsConfigImpl(row));
+			}
+		});
 	}
 
 	private IpawsConfigImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),		// name
-			row.getString(2),		// event
-			row.getString(3),		// sign group
-			row.getString(4),		// quick message
-			row.getInt(5),			// pre alert time
-			row.getInt(6)			// post alert time
+		this(row.getString(1), // name
+		     row.getString(2), // event
+		     row.getString(3), // sign group
+		     row.getString(4), // quick message
+		     row.getInt(5),    // pre alert time
+		     row.getInt(6)     // post alert time
 		);
+	}
+
+	private IpawsConfigImpl(String n, String ev, String sg,
+		String qm, int preh, int posth)
+	{
+		super(n);
+		event = ev;
+		sign_group = lookupSignGroup(sg);
+		quick_message = lookupQuickMessage(qm);
+		pre_alert_time = preh;
+		post_alert_time = posth;
 	}
 
 	public IpawsConfigImpl(String n) {
 		super(n);
-	}
-
-	public IpawsConfigImpl(String n, String ev, String sg,
-			String qm, int preh, int posth) {
-		super(n);
-		event = ev;
-		sign_group = sg;
-		quick_message = qm;
-		pre_alert_time = preh;
-		post_alert_time = posth;
 	}
 
 	/** Get the SONAR type name */
@@ -70,26 +82,6 @@ public class IpawsConfigImpl extends BaseObjectImpl implements IpawsConfig {
 	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
-	}
-
-	/** Load all the IPAWS alert config objects */
-	static public void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, IpawsConfigImpl.class);
-		store.query("SELECT name, event, sign_group, quick_message, " +
-				"pre_alert_time, post_alert_time FROM iris." +
-				SONAR_TYPE + ";", new ResultFactory()
-		{
-			@Override
-			public void create(ResultSet row) throws Exception {
-				try {
-					namespace.addObject(new IpawsConfigImpl(row));
-				} catch (Exception e) {
-					// TODO do we need/want this??
-					System.out.println(row.getString(1));
-					e.printStackTrace();
-				}
-			}
-		});
 	}
 
 	@Override
@@ -128,16 +120,16 @@ public class IpawsConfigImpl extends BaseObjectImpl implements IpawsConfig {
 	}
 
 	/** Sign group */
-	private String sign_group;
+	private SignGroup sign_group;
 
 	/** Set the sign group */
 	@Override
-	public void setSignGroup(String sg) {
+	public void setSignGroup(SignGroup sg) {
 		sign_group = sg;
 	}
 
 	/** Set the sign group */
-	public void doSetSignGroup(String sg) throws TMSException {
+	public void doSetSignGroup(SignGroup sg) throws TMSException {
 		if (sg != sign_group) {
 			store.update(this, "sign_group", sg);
 			setSignGroup(sg);
@@ -146,21 +138,21 @@ public class IpawsConfigImpl extends BaseObjectImpl implements IpawsConfig {
 
 	/** Get the sign group */
 	@Override
-	public String getSignGroup() {
+	public SignGroup getSignGroup() {
 		return sign_group;
 	}
 
 	/** Quick message (template) */
-	private String quick_message;
+	private QuickMessage quick_message;
 
 	/** Set the quick message (template) */
 	@Override
-	public void setQuickMessage(String qm) {
+	public void setQuickMessage(QuickMessage qm) {
 		quick_message = qm;
 	}
 
 	/** Set the quick message (template) */
-	public void doSetQuickMessage(String qm) throws TMSException {
+	public void doSetQuickMessage(QuickMessage qm) throws TMSException {
 		if (qm != quick_message) {
 			store.update(this, "quick_message", qm);
 			setQuickMessage(qm);
@@ -169,7 +161,7 @@ public class IpawsConfigImpl extends BaseObjectImpl implements IpawsConfig {
 
 	/** Get the quick message (template) */
 	@Override
-	public String getQuickMessage() {
+	public QuickMessage getQuickMessage() {
 		return quick_message;
 	}
 

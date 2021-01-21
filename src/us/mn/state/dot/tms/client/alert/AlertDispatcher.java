@@ -21,6 +21,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import org.json.JSONObject;
+import us.mn.state.dot.tms.AlertState;
 import us.mn.state.dot.tms.IpawsAlert;
 import us.mn.state.dot.tms.IpawsAlertHelper;
 import us.mn.state.dot.tms.IpawsDeployer;
@@ -254,20 +255,8 @@ public class AlertDispatcher extends IPanel {
 		instructionLbl.setText("<html><div style=\"width:200px;\">" +
 			selectedAlert.getInstruction() + "</div></html>");
 
-		// add the current deployment status
-		String status = "";
-		if (iad.getDeployed() == null)
-			status = I18N.get("alert.status.pending");
-		else if (iad.getDeployed().equals(Boolean.TRUE)) {
-			if (iad.getActive())
-				// if deployed and active, say "deployed"
-				status = I18N.get("alert.status.deployed");
-			else
-				// if deployed and not active, say "scheduled"
-				status = I18N.get("alert.status.scheduled");
-		} else if (iad.getDeployed().equals(Boolean.FALSE))
-			status = I18N.get("alert.status.not_deployed");
-		statusLbl.setText(status);
+		AlertState state = AlertState.fromOrdinal(iad.getAlertState());
+		statusLbl.setText(getState(state));
 
 		onsetLbl.setText(iad.getAlertStart().toString());
 		expiresLbl.setText(iad.getAlertEnd().toString());
@@ -286,9 +275,23 @@ public class AlertDispatcher extends IPanel {
 
 		// set the button text and disable buttons if alert is in past
 		setEditDeployBtnText();
-		boolean npast = !iad.getPastPostAlertTime();
+		boolean npast = state != AlertState.EXPIRED;
 		editDeployBtn.setEnabled(npast);
 		cancelBtn.setEnabled(npast);
+	}
+
+	/** Get the alert state */
+	static private String getState(AlertState st) {
+		switch (st) {
+			case PENDING:
+				return I18N.get("alert.status.pending");
+			case DEPLOYED:
+				return I18N.get("alert.status.deployed");
+			case INACTIVE:
+				return I18N.get("alert.status.scheduled");
+			default:
+				return I18N.get("alert.status.not_deployed");
+		}
 	}
 
 	/** Clear the selected alert. */

@@ -54,21 +54,6 @@ public class IpawsAlertHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Get the start date/time for an alert. Checks onset time first, then
-	 *  effective time, and finally sent time (which is required).
-	 */
-	static public Date getAlertStart(IpawsAlert ia) {
-		Date alertStart = null;
-		if (ia != null) {
-			alertStart = ia.getOnsetDate();
-			if (alertStart == null)
-				alertStart = ia.getEffectiveDate();
-			if (alertStart == null)
-				alertStart = ia.getSentDate();
-		}
-		return alertStart;
-	}
-
 	/** Build awt.Shape objects from a MultiPolygon, returning a list of Shape
 	 *  objects with each representing a polygon.
 	 */

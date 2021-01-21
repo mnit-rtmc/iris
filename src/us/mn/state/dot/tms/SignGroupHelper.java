@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
@@ -60,5 +61,17 @@ public class SignGroupHelper extends BaseHelper {
 				return true;
 		}
 		return false;
+	}
+
+	/** Get an ArrayList of all signs in a sign group */
+	static public ArrayList<DMS> getAllSigns(SignGroup sg) {
+		ArrayList<DMS> signs = new ArrayList<DMS>();
+		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
+		while (it.hasNext()) {
+			DmsSignGroup dsg = it.next();
+			if (dsg.getSignGroup() == sg)
+				signs.add(dsg.getDms());
+		}
+		return signs;
 	}
 }

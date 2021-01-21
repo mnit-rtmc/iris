@@ -33,68 +33,34 @@ public interface IpawsDeployer extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "ipaws_deployer";
 
-	/** Set the generation time of this deployer object */
-	void setGenTime(Date gt);
-
 	/** Get the generation time of this deployer object */
 	Date getGenTime();
-
-	/** Set the approval time of this deployer object */
-	void setApprovedTime(Date at);
-
-	/** Get the approval time of this deployer object */
-	Date getApprovedTime();
-
-	/** Set the Alert ID. */
-	void setAlertId(String aid);
 
 	/** Get the Alert ID. */
 	String getAlertId();
 
-	/** Get the latitude of the alert area's centroid */
-	Double getLat();
-
-	/** Get the longitude of the alert area's centroid */
-	Double getLon();
-
-	/** Set the alert start time */
-	void setAlertStart(Date t);
+	/** Get the alert deployer that this replaces (if any).  Note that
+	 *  updates to alerts trigger creation of a new deployer (not an
+	 *  update). */
+	String getReplaces();
 
 	/** Get the alert start time */
 	Date getAlertStart();
 
-	/** Set the alert end time */
-	void setAlertEnd(Date t);
-
 	/** Get the alert end time */
 	Date getAlertEnd();
 
-	/** Set the config used for this deployment */
-	void setConfig(String c);
-
 	/** Get the config used for this deployment */
-	String getConfig();
-
-	/** Set the sign group used for this deployment */
-	void setSignGroup(String sg);
-
-	/** Get the sign group used for this deployment */
-	String getSignGroup();
-
-	/** Set the quick message (template) used for this deployment */
-	void setQuickMessage(String qm);
-
-	/** Get the quick message (template) used for this deployment */
-	String getQuickMessage();
+	IpawsConfig getConfig();
 
 	/** Set amount of time (in hours) to display a pre-alert message before
-	 *  the alert becomes active. First set from the config, then can be
+	 *  the alert becomes active.  First set from the config, then can be
 	 *  changed for each alert.
 	 */
 	void setPreAlertTime(int hours);
 
 	/** Get amount of time (in hours) to display a pre-alert message before
-	 *  the alert becomes active. First set from the config, then can be
+	 *  the alert becomes active.  First set from the config, then can be
 	 *  changed for each alert.
 	 */
 	int getPreAlertTime();
@@ -111,51 +77,21 @@ public interface IpawsDeployer extends SonarObject {
 	 */
 	int getPostAlertTime();
 
-	/** Whether the current time is past the post alert time */
-	boolean getPastPostAlertTime();
-
-	/** Set the list of DMS (represented as a string array) automatically
-	 *  selected for deploying alert messages.
-	 */
-	void setAutoDms(String[] dms);
-
 	/** Get the list of DMS (represented as a string array) automatically
-	 *  selected for deploying alert messages.
-	 */
+	 *  selected for deploying alert messages. */
 	String[] getAutoDms();
 
-	/** Set the list of DMS suggested automatically by the system as
-	 *  optional DMS that users may want to include for the deployment.
-	 */
-	void setOptionalDms(String[] dms);
-
-	/** Get the list of DMS suggested automatically by the system as
-	 *  optional DMS that users may want to include for the deployment.
-	 */
+	/** Get the list of DMS suggested automatically as optional DMS that
+	 *  users may want to include for the deployment. */
 	String[] getOptionalDms();
 
-	/** Set the list of DMS actually used to deploy the message. */
-	void setDeployedDms(String[] dms);
-
-	/** Get the list of DMS actually used to deploy the message. */
+	/** Get the list of DMS actually used to deploy the alert */
 	String[] getDeployedDms();
 
-	/** Set area threshold used for including DMS outside the alert area.
-	 *  TODO this may become editable per-alert. */
-	void setAreaThreshold(Double t);
+	/** Set the list of DMS requested to deploy the alert */
+	void setRequestedDms(String[] dms);
 
-	/** Get area threshold used for including DMS outside the alert area.
-	 *  TODO this may become editable per-alert. */
-	Double getAreaThreshold();
-
-	/** Set the MULTI generated automatically by the system for deploying to
-	 *  DMS.
-	 */
-	void setAutoMulti(String m);
-
-	/** Get the MULTI generated automatically by the system for deploying to
-	 *  DMS.
-	 */
+	/** Get the MULTI generated automatically for deploying to DMS */
 	String getAutoMulti();
 
 	/** Set the MULTI actually deployed to DMS. */
@@ -164,11 +100,15 @@ public interface IpawsDeployer extends SonarObject {
 	/** Get the MULTI actually deployed to DMS. */
 	String getDeployedMulti();
 
-	/** Set the message priority */
-	void setMsgPriority(Integer p);
+	/** Set the message priority.
+	 * @param p Priority ranging from 1 (low) to 255 (high).
+	 * @see us.mn.state.dot.tms.DmsMsgPriority */
+	void setMsgPriority(int p);
 
-	/** Get the message priority */
-	Integer getMsgPriorty();
+	/** Get the message priority.
+	 * @return Priority ranging from 1 (low) to 255 (high).
+	 * @see us.mn.state.dot.tms.DmsMsgPriority */
+	int getMsgPriorty();
 
 	/** Set the approving user. */
 	void setApprovedBy(String u);
@@ -176,52 +116,15 @@ public interface IpawsDeployer extends SonarObject {
 	/** Get the approving user. */
 	String getApprovedBy();
 
-	/** Set the deployed state of this alert (whether it is currently
-	 *  deployed). This value is null if no action has been taken (i.e.
-	 *  approval is required but has not yet been given). Changing this to
-	 *  true triggers deployments or updates, and changing it to false
-	 *  triggers canceling of an alert deployment.
-	 */
-	void setDeployed(Boolean d);
+	/** Set the approval time of this deployer object */
+	void setApprovedTime(Date at);
 
-	/** Get the deployed state of this alert (whether it is currently
-	 *  deployed). */
-	Boolean getDeployed();
+	/** Get the approval time of this deployer object */
+	Date getApprovedTime();
 
-	/** Trigger a manual update to the alert. Does not affect the database. */
-	void setUpdate(boolean u);
+	/** Get alert state (ordinal of AlertState) */
+	int getAlertState();
 
-	/** Check if a manual update is currently underway. */
-	boolean getUpdate();
-
-	/** Set whether this alert deployer was ever deployed or not. Note that
-	 *  this will be true if an alert message is successfully sent to at
-	 *  least one sign. */
-	void setWasDeployed(boolean wd);
-
-	/** Get whether this alert deployer was ever deployed or not. */
-	boolean getWasDeployed();
-
-	/** Set whether this alert deployment is currently active (i.e. visible
-	 *  on DMS).  Alerts can be deployed but not active if they have been
-	 *  approved for deployment but the pre-alert time value indicates that
-	 *  they should not be deployed yet.
-	 */
-	void setActive(boolean a);
-
-	/** Get whether this alert deployment is currently active (i.e. visible
-	 *  on DMS).  Alerts can be deployed but not active if they have been
-	 *  approved for deployment but the pre-alert time value indicates that
-	 *  they should not be deployed yet.
-	 */
-	boolean getActive();
-
-	/** Set the alert deployer that this replaces (if any).  Note that
-	 *  updates to alerts trigger creation of a new deployer (not an
-	 *  update).
-	 */
-	void setReplaces(String r);
-
-	/** Get the alert deployer that this replaces (if any). */
-	String getReplaces();
+	/** Set alert state request (ordinal of AlertState) */
+	void setAlertStateReq(int st);
 }

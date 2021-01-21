@@ -1201,59 +1201,46 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		p.sendMessage(this, sm, owner);
 	}
 
-	/** Create a new (IPAWS) sign-message. */
-	public SignMessage createIpawsMsg(String multi, int priority,
-		Integer duration)
-	{
-		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(priority);
-		int src = SignMsgSource.ipaws.bit();
-		String owner = "IPAWS";
-		return findOrCreateMsg(null, multi, false,
-				false, mp, src,	owner, duration);
-	}
-
 	/** Send IPAWS message to sign.
-	 * Creates and sends a new Ipaws SignMessage
-	 * to the sign if priority is equal to or
-	 * greater than priority of the current
-	 * user-message.
-	 *  
-	 * @param msg Message MULTI string.
+	 * Create and send a new IPAWS SignMessage to the sign if priority is
+	 * equal to or greater than priority of the current user-message.
+	 *
+	 * @param multi Message MULTI string.
 	 * @param priority Message priority.
-	 * @param duration Message duration in minutes;
-	 *                 null for indefinite.
+	 * @param duration Message duration in minutes; null for indefinite.
 	 * @return true if message queued to be sent.
-	 *         false if new priority is below the
-	 *         priority of the current message or
-	 *         we're unable to create the message.
-	 * @throws TMSException if there is some other
-	 *         problem.
-	 **/
+	 *         false if new priority is below the priority of the current
+	 *         message or we're unable to create the message. */
 	public boolean sendIpawsMsg(String multi, int priority,
-		Integer duration) throws TMSException
+		Integer duration)
 	{
 		SignMessage sm = msg_user;
 		if ((sm != null) && (sm.getMsgPriority() > priority))
 			return false;
-		sm = createIpawsMsg(multi, priority, duration);
-		if (sm == null)
-			return false;
-		doSetMsgUser(sm);
-		return true;
+		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(priority);
+		sm = findOrCreateMsg(null, multi, false, false, mp,
+			SignMsgSource.ipaws.bit(), "IPAWS", duration);
+		if (sm != null) {
+			try {
+				doSetMsgUser(sm);
+				return true;
+			}
+			catch (TMSException e) {
+				IpawsProcJob.log("Failed to send IPAWS msg " +
+					multi + " to " + getName() + ": " +
+					e.getMessage());
+			}
+		}
+		return false;
 	}
 
 	/** Remove IPAWS message from sign.
 	 * (Will only blank the sign if the current
 	 *  user-message is an IPAWS message.) */
-	public boolean blankIpawsMsg() throws ChangeVetoException {
+	public void blankIpawsMsg() {
 		SignMessage sm = msg_user;
-		if (sm != null) {
-			// If it's not an ipaws message, don't blank it.
-			if (!SignMsgSource.ipaws.checkBit(sm.getSource()))
-				return false;
-		}
-		blankMsgUser();
-		return true;
+		if (sm != null && SignMsgSource.ipaws.checkBit(sm.getSource()))
+			blankMsgUser();
 	}
 
 	/** Check if the sign has a reference to a sign message */

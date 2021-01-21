@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,10 +24,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import javax.swing.JPopupMenu;
+import us.mn.state.dot.tms.AlertState;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.IpawsAlert;
 import us.mn.state.dot.tms.IpawsAlertHelper;
+import us.mn.state.dot.tms.IpawsConfig;
 import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.IpawsDeployerHelper;
 import us.mn.state.dot.tms.ItemStyle;
@@ -181,18 +184,17 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 	/** Get the description of a proxy */
 	@Override
 	public String getDescription(IpawsDeployer proxy) {
-		String name = proxy.getName();
-		if (name.contains("ipaws_dplr_")) {
-			name = name.replace("ipaws_dplr_",
-					I18N.get("ipaws_deployer") + " ");
-		}
+		StringBuilder desc = new StringBuilder();
+		desc.append(proxy.getName().replace("ipaws_dplr_",
+			I18N.get("ipaws_deployer") + " "));
 		IpawsAlert ia = IpawsAlertHelper.lookupByIdentifier(
 			proxy.getAlertId());
-		if (ia != null) {
-			return name + " - " + ia.getEvent() + " - " +
-				proxy.getSignGroup();
-		} else
-			return name;
+		if (ia != null)
+			desc.append(" - " + ia.getEvent());
+		IpawsConfig cfg = proxy.getConfig();
+		if (cfg != null)
+			desc.append(" - " + cfg.getSignGroup());
+		return desc.toString();
 	}
 
 	/** Check if a given attribute affects a proxy style */
@@ -205,28 +207,19 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, IpawsDeployer proxy) {
-		Boolean deployed = proxy.getDeployed();
-		boolean active = proxy.getActive();
-		boolean past = proxy.getPastPostAlertTime();
+		AlertState st = AlertState.fromOrdinal(proxy.getAlertState());
 		switch (is) {
 		case PENDING:
-			return deployed == null && !past;
+			return st == AlertState.PENDING;
 		case SCHEDULED:
-			// scheduled alerts are deployed (i.e. approved)
-			// but not active
-			return Boolean.TRUE.equals(deployed) && !active &&
-			       !past;
+			return st == AlertState.APPROVED;
 		case ACTIVE:
-			return Boolean.TRUE.equals(deployed) && active && !past;
+			return st == AlertState.DEPLOYED;
 		case INACTIVE:
-			return Boolean.FALSE.equals(deployed) && !active &&
-			       !past;
-		case PAST:
-			return Boolean.FALSE.equals(deployed) && !active &&
-			       past;
+			return st == AlertState.INACTIVE;
+		case EXPIRED:
+			return st == AlertState.EXPIRED;
 		case ALL:
-			// TODO some alerts are slipping through here,
-			//      but not in other categories...
 			return true;
 		default:
 			return false;
@@ -245,11 +238,16 @@ public class AlertManager extends ProxyManager<IpawsDeployer> {
 	@Override
 	protected GeoLoc getGeoLoc(IpawsDeployer iad) {
 		if (iad != null) {
-			Double lat = iad.getLat();
-			Double lon = iad.getLon();
-			if (lat != null && lon != null) {
-				return new TransGeoLoc(iad.getName(),
-					lat.floatValue(), lon.floatValue());
+			IpawsAlert ia = IpawsAlertHelper.lookupByIdentifier(
+				iad.getAlertId());
+			if (ia != null) {
+				Double lat = ia.getLat();
+				Double lon = ia.getLon();
+				if (lat != null && lon != null) {
+					return new TransGeoLoc(iad.getName(),
+						lat.floatValue(),
+						lon.floatValue());
+				}
 			}
 		}
 		return null;
