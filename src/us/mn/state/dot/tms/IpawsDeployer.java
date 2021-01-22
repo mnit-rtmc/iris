@@ -85,19 +85,19 @@ public interface IpawsDeployer extends SonarObject {
 	 *  users may want to include for the deployment. */
 	String[] getOptionalDms();
 
-	/** Get the list of DMS actually used to deploy the alert */
-	String[] getDeployedDms();
-
-	/** Set the list of DMS requested to deploy the alert */
+	/** Set the list of DMS requested to deploy */
 	void setRequestedDms(String[] dms);
+
+	/** Get the list of DMS actually deployed */
+	String[] getDeployedDms();
 
 	/** Get the MULTI generated automatically for deploying to DMS */
 	String getAutoMulti();
 
-	/** Set the MULTI actually deployed to DMS. */
-	void setDeployedMulti(String m);
+	/** Set the MULTI requested to deploy to DMS */
+	void setRequestedMulti(String m);
 
-	/** Get the MULTI actually deployed to DMS. */
+	/** Get the MULTI actually deployed to DMS */
 	String getDeployedMulti();
 
 	/** Set the message priority.
