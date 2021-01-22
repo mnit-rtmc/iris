@@ -17,12 +17,15 @@ package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.IllegalFormatException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.AlertState;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DmsMsgPriority;
@@ -30,7 +33,10 @@ import us.mn.state.dot.tms.IpawsConfig;
 import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.IpawsDeployerHelper;
 import us.mn.state.dot.tms.IteratorWrapper;
+import us.mn.state.dot.tms.NotificationHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
@@ -38,6 +44,7 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
  * server-side implementation.
  *
  * @author Gordon Parikh
+ * @author Douglas Lau
  */
 public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 
@@ -50,7 +57,7 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	}
 
 	/** Create a unique IpawsDeployer record name */
-	static public String createUniqueName() {
+	static private String createUniqueName() {
 		return UNC.createUniqueName();
 	}
 
@@ -171,18 +178,19 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		replaces = rep;
 	}
 
-	public IpawsDeployerImpl(String n, String aid, Date as, Date ae,
-		IpawsConfig cfg, String[] adms, String[] ddms, String m, int mp,
+	public IpawsDeployerImpl(String aid, Date as, Date ae, IpawsConfig cfg,
+		String[] adms, String[] odms, String[] ddms, String am, int mp,
 		int preh, int posth, String rep)
 	{
-		super(n);
+		super(createUniqueName());
 		alert_id = aid;
 		alert_start = as;
 		alert_end = ae;
 		config = cfg;
 		auto_dms = adms;
+		optional_dms = odms;
 		deployed_dms = ddms;
-		auto_multi = m;
+		auto_multi = am;
 		msg_priority = mp;
 		pre_alert_time = preh;
 		post_alert_time = posth;
@@ -388,7 +396,7 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		if (now.after(alertEnd)) {
 			long t = now.getTime() - alertEnd.getTime();
 			int units = (int) prePostTimeUnits.convert(
-					t, TimeUnit.MILLISECONDS);
+				t, TimeUnit.MILLISECONDS);
 			return units >= post_alert_time;
 		}
 		return false;
@@ -408,17 +416,6 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	/** List of DMS suggested automatically as optional DMS that users may
 	 *  want to include in the deployment. */
 	private String[] optional_dms;
-
-	/** Set the list of DMS suggested automatically by the system as
-	 *  optional DMS that users may want to include for the deployment,
-	 *  notifying clients. */
-	public void setOptionalDmsNotify(String[] dms) throws TMSException {
-		if (!Arrays.deepEquals(dms, optional_dms)) {
-			store.update(this, "optional_dms", arrayToString(dms));
-			optional_dms = dms;
-			notifyAttribute("optionalDms");
-		}
-	}
 
 	/** Get the list of DMS suggested automatically by the system as optional
 	 *  DMS that users may want to include for the deployment.
@@ -562,7 +559,7 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	}
 
 	/** Set alert state (ordinal of AlertState) */
-	public void setAlertStateNotify(int st) throws TMSException {
+	private void setAlertStateNotify(int st) throws TMSException {
 		if (st != getAlertState()) {
 			store.update(this, "alert_state", st);
 			alert_state = AlertState.fromOrdinal(st);
@@ -659,7 +656,7 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 			} else if (now.after(alert_end)) {
 				// use time between now and end + post_alert_time
 				long postMillis = TimeUnit.MILLISECONDS.convert(
-						post_alert_time, prePostTimeUnits);
+					post_alert_time, prePostTimeUnits);
 				Date msgEnd = new Date(alert_end.getTime() + postMillis);
 				dm = msgEnd.getTime() - now.getTime();
 			}
@@ -742,6 +739,156 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 				if (dms != null)
 					dms.blankIpawsMsg();
 			}
+		}
+	}
+
+	/** Process the alert for deploying, checking the mode (auto or manual)
+	 *  first.  In manual mode, this sends a push notification to clients
+	 *  to request a user to review and approve the alert.  In auto mode,
+	 *  this either deploys the alert then sends a notification indicating
+	 *  the new alert, or (if a non-zero timeout is configured) sends a
+	 *  notification then waits until the timeout has elapsed and (if a user
+	 *  hasn't deployed it manually) deploys the alert.
+	 */
+	public void createNotification(String event) throws TMSException {
+		// check the deploy mode and timeouts in system attributes
+		boolean autoMode = SystemAttrEnum.IPAWS_DEPLOY_AUTO_MODE.getBoolean();
+		int timeout = SystemAttrEnum.IPAWS_DEPLOY_AUTO_TIMEOUT_SECS.getInt();
+
+		// generate and send the notification - the static method
+		// handles the content of the notification based on the mode
+		// and timeout
+		NotificationImpl pn = createNotification(event, autoMode,
+			timeout, getName());
+
+		// NOTE: manual deployment triggered in IpawsDeployerImpl
+		if (!autoMode)
+			return;
+
+		// auto mode - check timeout first
+		if (timeout > 0) {
+			// non-zero timeout - wait for timeout to pass.
+			// NOTE that this is already happening in it's
+			// own thread, so we will just wait here
+			for (int i = 0; i < timeout; i++) {
+				// wait a second
+				try { Thread.sleep(1000); }
+				catch (InterruptedException e) {
+					/* Ignore */
+				}
+
+				// update the notification with a new
+				// message (so the user knows how much
+				// time they have before the alert
+				// deploys)
+				pn.setDescriptionNotify(getTimeoutString(
+					event, timeout - i));
+			}
+
+			// after timeout passes, check if the alert has
+			// been deployed
+			if (getAlertState() == AlertState.PENDING.ordinal()) {
+				// if it hasn't, deploy it (if it has,
+				// we're done!)
+				setAlertStateNotify(AlertState.DEPLOYED
+					.ordinal());
+
+				// change the description - use the
+				// no-timeout description
+				pn.setDescriptionNotify(getNoTimeoutDescription(
+					event));
+
+				// also record that it was addressed
+				// automatically so the notification
+				// goes away
+				// TODO may want to make this an option
+				// to force reviewing
+				pn.setAddressedByNotify("auto");
+				pn.setAddressedTimeNotify(new Date());
+			}
+			// NOTE: alert canceling handled in IpawsDeployerImpl
+		} else
+			// no timeout - just deploy it
+			setAlertStateNotify(AlertState.DEPLOYED.ordinal());
+	}
+
+	/** Create a notification for an alert deployer given the event type,
+	 *  deployment mode (auto/manual), timeout, and the name of the deployer
+	 *  object.
+	 */
+	static private NotificationImpl createNotification(String event,
+		boolean autoMode, int timeout, String dName)
+		throws TMSException
+	{
+		// substitute the event type into the notification title
+		String title;
+		try {
+			title = String.format(I18N.get("ipaws.notification.title"), event);
+		} catch (IllegalFormatException e) {
+			title = String.format("New %s Alert", event);
+		}
+		// same with the description
+		String description;
+		if (autoMode) {
+			if (timeout == 0)
+				description = getNoTimeoutDescription(event);
+			else
+				description = getTimeoutString(event, timeout);
+		} else {
+			try {
+				description = String.format(I18N.get(
+					"ipaws.notification.description.manual"), event);
+			} catch (IllegalFormatException e) {
+				description = String.format("New %s alert received from " +
+					"IPAWS. Please review it for deployment.", event);
+			}
+		}
+		// create the notification object with the values we got
+		// note that users must be able to write alert deployer objects
+		// to see these (otherwise they won't be able to to approve
+		// them)
+		NotificationImpl pn = new NotificationImpl(
+			IpawsDeployer.SONAR_TYPE, dName, true, title,
+			description);
+		IpawsProcJob.log("sending notification " + pn.getName());
+		try {
+			pn.notifyCreate();
+		}
+		catch (SonarException e) {
+			IpawsProcJob.log("notify create failed, " +
+				e.getMessage());
+		}
+		return pn;
+	}
+
+	/** Get an alert description string for auto-deploy, no-timeout cases. */
+	static private String getNoTimeoutDescription(String event) {
+		try {
+			return String.format(I18N.get(
+				"ipaws.notification.description.auto.no_timeout"), event);
+		} catch (IllegalFormatException e) {
+			return String.format("New %s alert received from IPAWS. " +
+				"This alert has been automatically deployed.", event);
+		}
+	}
+
+	/** Get the alert description string containing the amount of time until
+	 *  the timeout expires (for auto deployment mode) given an event type
+	 *  and the time in seconds. */
+	static private String getTimeoutString(String event, int secs) {
+		// use the time value to create a duration string
+		String dur = NotificationHelper.getDurationString(
+			Duration.ofSeconds(secs));
+
+		// add the string
+		String dFormat = I18N.get(
+			"ipaws.notification.description.auto.timeout");
+		try {
+			return String.format(dFormat, event, dur);
+		} catch (IllegalFormatException e) {
+			return String.format("New %s alert received from IPAWS. This " +
+				"alert will be automatically deployed in %s if no action " +
+				"is taken.", event, dur);
 		}
 	}
 }

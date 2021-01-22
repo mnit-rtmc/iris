@@ -25,7 +25,7 @@ public enum AlertState {
 	APPROVED,    // 1  approved but not deployed
 	INACTIVE,    // 2  deployed but not active on any DMS
 	DEPLOYED,    // 3  deployed and active on one or more DMS
-	EXPIRED,     // 4  past post-alert time
+	EXPIRED,     // 4  past expiration time or replaced
 	APPROVE_REQ, // 5  user approve or update request
 	CANCEL_REQ;  // 6  user cancel request
 
