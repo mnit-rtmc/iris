@@ -17,17 +17,16 @@ package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.Duration;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IllegalFormatException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.postgis.MultiPolygon;
@@ -50,12 +49,10 @@ import us.mn.state.dot.tms.IpawsConfigHelper;
 import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.IpawsDeployerHelper;
 import us.mn.state.dot.tms.IteratorWrapper;
-import us.mn.state.dot.tms.NotificationHelper;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
@@ -66,8 +63,26 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
  *
  * @author Michael Janson
  * @author Gordon Parikh
+ * @author Douglas Lau
  */
 public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
+
+	/** Table containing NWS Forecast Zone Geometries.  This can be obtained
+	 *  / updated from the NWS by going to this website and importing the
+	 *  shapefile into PostGIS: https://www.weather.gov/gis/PublicZones.
+	 */
+	static private final String GEOMETRY_TABLE = "iris.nws_zones";
+
+	/** Get the distance threshold for auto DMS */
+	static private int autoDmsMeters() {
+		return SystemAttrEnum.IPAWS_SIGN_THRESH_AUTO_METERS.getInt();
+	}
+
+	/** Get the distance threshold for optional DMS */
+	static private int optionalDmsMeters() {
+		return SystemAttrEnum.IPAWS_SIGN_THRESH_AUTO_METERS.getInt() +
+		       SystemAttrEnum.IPAWS_SIGN_THRESH_OPT_METERS.getInt();
+	}
 
 	/** Name creator */
 	static UniqueNameCreator UNC;
@@ -89,12 +104,6 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		DmsMsgPriority.AWS,
 		DmsMsgPriority.AWS_HIGH
 	};
-
-	/** Time units to use for calculating pre/post alert deployment times.
-	 *  This is provided for convenience when testing, where changing to
-	 *  TimeUnit.MINUTES will generally allow for easier testing than the
-	 *  value of TimeUnit.HOURS that is used in production. */
-	static private TimeUnit TIME_UNIT = TimeUnit.HOURS;
 
 	/** Load all the IPAWS alerts */
 	static public void loadAll() throws TMSException {
@@ -154,7 +163,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Lookup the most recent IpawsDeployerImpl given an alert
 	 *  identifier and an IpawsConfig. */
-	static private IpawsDeployerImpl lookupFromAlert(String alertId,
+	static private IpawsDeployerImpl lookupDeployer(String alertId,
 		IpawsConfig cfg)
 	{
 		IpawsDeployerImpl iad = null;
@@ -272,13 +281,13 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return SystemAttrEnum.IPAWS_ALERT_PURGE_DAYS.getInt();
 	}
 
-	/** Purge old records that have been marked "purgeable". The age of the
+	/** Purge old records that have been marked "purgeable".  The age of the
 	 *  records is determined based on the expiration_date field.
 	 */
 	static public void purgeRecords() throws TMSException {
 		int age = getPurgeDays();
-		IpawsProcJob.log("Purging purgeable IPAWS alert records older " +
-				"than " + age + " days...");
+		IpawsProcJob.log("Purging purgeable IPAWS alert records " +
+			"older than " + age + " days");
 		if (store != null && age > 0) {
 			store.update("DELETE FROM event." + SONAR_TYPE +
 				" WHERE expiration_date < now() - '" + age +
@@ -361,16 +370,11 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		notifyAttribute(aname, true);
 	}
 
-	/** Notify SONAR clients of a change to an attribute.  If clearPurgeable
-	 *  is true, the the purgeable flag is cleared to trigger reprocessing
-	 *  of the alert.
-	 */
+	/** Notify SONAR clients of a change to an attribute.
+	 *  If clearPurgeable is true, the the purgeable flag is cleared to
+	 *  trigger reprocessing of the alert. */
 	protected void notifyAttribute(String aname, boolean clearPurgeable) {
-		// notify clients about the change
 		super.notifyAttribute(aname);
-
-		// clear the purgeable flag so the alert gets reprocessed (since
-		// this only gets called when the alert changes)
 		if (clearPurgeable) {
 			try {
 				setPurgeableNotify(null);
@@ -423,6 +427,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			sent_date = sd;
 			notifyAttribute("sentDate");
 		}
+	}
+
+	/** Get the start date/time for an alert.  Checks onset time first, then
+	 *  effective time, and finally sent time (which is required). */
+	private Date getAlertStart() {
+		Date alertStart = getOnsetDate();
+		if (alertStart == null)
+			alertStart = getEffectiveDate();
+		if (alertStart == null)
+			alertStart = getSentDate();
+		return alertStart;
 	}
 
 	/** Status of alert */
@@ -866,7 +881,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	}
 
 	/** Set the geographic polygon of the area */
-	public void setGeoPolyNotify(MultiPolygon gp) throws TMSException {
+	private void setGeoPolyNotify(MultiPolygon gp) throws TMSException {
 		if (!objectEquals(geo_poly, gp)) {
 			store.update(this, "geo_poly", gp);
 			geo_poly = gp;
@@ -923,7 +938,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	}
 
 	/** Set purgeable flag and notify clients */
-	public void setPurgeableNotify(Boolean p) throws TMSException {
+	private void setPurgeableNotify(Boolean p) throws TMSException {
 		if (!objectEquals(purgeable, p)) {
 			log("setting purgeable flag to " + p);
 			store.update(this, "purgeable", p);
@@ -942,7 +957,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	}
 
 	/** Set the last processing time of the alert */
-	public void setLastProcessedNotify(Date pt) throws TMSException {
+	private void setLastProcessedNotify(Date pt) throws TMSException {
 		if (!objectEquals(pt, last_processed)) {
 			store.update(this, "last_processed", pt);
 			last_processed = pt;
@@ -971,99 +986,136 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	 *  One deployer object is created for each matching IpawsConfig,
 	 *  allowing different messages to be posted to different sign types.
 	 */
-	public void processAlert() throws TMSException {
-		if (isAfterExpirationTime()) {
-			log("past expiration time");
-			return;
+	public void processAlert() throws SQLException, TMSException,
+		NoSuchFieldException
+	{
+		if (getPurgeable() == null)
+			processNewAlert();
+		processPhase();
+	}
+
+	/** Process a new IPAWS alert */
+	private void processNewAlert() throws SQLException, TMSException,
+		NoSuchFieldException
+	{
+		log("processing new alert");
+		createGeogPoly();
+		if (getGeoPoly() != null)
+			updateCentroid();
+		else {
+			log("no polygon found");
+			setPurgeableNotify(true);
 		}
+	}
+
+	/** Check if alert has changed phases.
+	 *  New deployers are created for each phase. */
+	private void processPhase() throws TMSException {
+		if (Boolean.TRUE.equals(getPurgeable()))
+			return;
+		Date proc = getLastProcessed();
+		if (proc == null) {
+			log("phase new");
+			createDeployers();
+		} else {
+			Date start = getAlertStart();
+			Date end = getExpirationDate();
+			Date now = new Date();
+			if (proc.before(start) && now.after(start) &&
+				now.before(end))
+			{
+				log("phase starting");
+				createDeployers();
+			} else if (proc.before(end) && now.after(end)) {
+				log("phase ending");
+				createDeployers();
+			}
+		}
+		setLastProcessedNotify(new Date());
+	}
+
+	/** Create deployers for alert */
+	private void createDeployers() throws TMSException {
 		int deployers = 0;
 		String event = getEvent();
 		Iterator<IpawsConfig> it = IpawsConfigHelper.iterator();
 		while (it.hasNext()) {
-			IpawsConfig iac = it.next();
-			if (event.equals(iac.getEvent()))
-				deployers += createDeployers(iac);
+			IpawsConfig cfg = it.next();
+			if (event.equals(cfg.getEvent()))
+				deployers += createDeployer(cfg);
 		}
-		if (deployers == 0 && getPurgeable() == null) {
-			log("no deployers created, marking as purgeable");
-			setPurgeableNotify(true);
-		} else if (deployers > 0)
+		if (deployers > 0)
 			setPurgeableNotify(false);
-		setLastProcessedNotify(new Date());
+		else if (getPurgeable() == null) {
+			log("no deployers created");
+			// FIXME: on updates, purgeable can be reset to null.
+			//        It may have been deployed before then.
+			setPurgeableNotify(true);
+		}
 	}
 
-	/** Check if it's after the alert expiration time */
-	private boolean isAfterExpirationTime() {
-		Date now = new Date();
-		return now.after(getExpirationDate());
+	/** Create deployer for an alert config */
+	private int createDeployer(IpawsConfig cfg) throws TMSException {
+		log("searching for DMS in group " + cfg.getSignGroup());
+		String[] adms = findDMS(cfg, autoDmsMeters());
+		if (adms.length > 0) {
+			log("found " + adms.length + " auto signs");
+			String[] odms = findDMS(cfg, optionalDmsMeters());
+			log("found " + odms.length + " optional signs");
+			if (createDeployer(cfg, adms, odms) != null)
+				return 1;
+		}
+		return 0;
 	}
 
-	/** Create deployers for an alert config */
-	private int createDeployers(IpawsConfig iac) throws TMSException {
-		final int[] deployers = new int[1];
-		log("searching for DMS in group " + iac.getSignGroup());
-		store.query(buildDMSQuery(iac), new ResultFactory() {
-			@Override
-			public void create(ResultSet row) {
+	/** Find all DMS within given alert area threshold */
+	private String[] findDMS(IpawsConfig cfg, int th) throws TMSException {
+		ArrayList<String> dms = new ArrayList<String>();
+		store.query(buildDMSQuery(cfg, th), new ResultFactory() {
+			@Override public void create(ResultSet row) {
 				try {
-					deployers[0] += createDeployer(iac, row);
+					dms.add(row.getString(1));
 				} catch (Exception e) {
-					log("no DMS found");
+					log("querying DMS, " + e.getMessage());
 				}
 			}
 		});
-		return deployers[0];
+		return dms.toArray(new String[0]);
 	}
 
 	/** Build DMS query for an IPAWS config.
 	 *
-	 * Query the list of DMS that falls within the MultiPolygon for this
-	 * alert - use array_agg to get one array instead of multiple rows */
-	private String buildDMSQuery(IpawsConfig cfg) {
-		int t = SystemAttrEnum.IPAWS_SIGN_THRESH_AUTO_METERS.getInt();
-		return "SELECT array_agg(d.name) " +
+	 * Query the DMS that fall within the MultiPolygon for this alert */
+	private String buildDMSQuery(IpawsConfig cfg, int th) {
+		return "SELECT d.name " +
 			"FROM iris." + DMS.SONAR_TYPE + " d " +
 			"JOIN iris." + GeoLoc.SONAR_TYPE + " g " +
 			"ON d.geo_loc=g.name " +
 			"WHERE ST_DWithin((" +
 				"SELECT geo_poly FROM " + getTable() + " " +
 				"WHERE name='" + getName() + "')," +
-				"ST_Point(g.lon,g.lat)::geography," + t + ") " +
+				"ST_Point(g.lon,g.lat)::geography," + th + ") "+
 			"AND d.name IN (" +
 				"SELECT dms FROM iris.dms_sign_group " +
 				"WHERE sign_group='" + cfg.getSignGroup() +
 			"');";
 	}
 
-	/** Create an IPAWS deployer */
-	private int createDeployer(IpawsConfig iac, ResultSet row)
-		throws SQLException, SonarException, TMSException
-	{
-		String[] dms = (String[]) row.getArray(1).getArray();
-		log("found " + dms.length + " signs");
-		if (dms.length > 0) {
-			IpawsDeployerImpl iad = createDeployer(iac, dms);
-			if (iad != null)
-				return 1;
-		}
-		return 0;
-	}
-
-	/** Create an alert deployer for this alert.  Called after querying
-	 *  PostGIS for relevant DMS (only if some were found).  Handles
-	 *  generating MULTI and other object creating housekeeping.
+	/** Create a deployer for this alert.
+	 *
+	 *  @param cfg IPAWS config
+	 *  @param adms Suggested auto-deploy DMS list
+	 *  @param odms Suggested optional-deploy DMS list
 	 */
-	private IpawsDeployerImpl createDeployer(IpawsConfig iac, String[] adms) 
-		throws SonarException, TMSException
+	private IpawsDeployerImpl createDeployer(IpawsConfig cfg, String[] adms,
+		String[] odms) throws TMSException
 	{
-		// try to look up the most recent deployer object for this alert
-		IpawsDeployerImpl iad = lookupFromAlert(getIdentifier(), iac);
+		IpawsDeployerImpl iad = lookupDeployer(getIdentifier(), cfg);
 
-		// get alert start/end times
 		Date aStart = getAlertStart();
 		Date aEnd = getExpirationDate();
 
-		String autoMulti = generateMulti(iac, aStart, aEnd);
+		String autoMulti = generateMulti(cfg, aStart, aEnd);
 		int priority = calculateMsgPriority().ordinal();
 
 		// check if any attributes have changed from this last deployer
@@ -1072,16 +1124,13 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			aEnd, adms, autoMulti, priority);
 
 		if (iad == null || updated) {
-			// if they have, or we didn't get one, make a new one
-			String dp_name = IpawsDeployerImpl.createUniqueName();
-
 			// make sure to note that this is a replacement - when
 			// this is eventually deployed that will be used to
 			// cancel the old alert
 			String replaces = null;
 			String[] ddms = null;
-			int preAlert = iac.getPreAlertTime();
-			int postAlert = iac.getPostAlertTime();
+			int preAlert = cfg.getPreAlertTime();
+			int postAlert = cfg.getPostAlertTime();
 			if (updated) {
 				replaces = iad.getName();
 				ddms = iad.getDeployedDms();
@@ -1089,28 +1138,21 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 				postAlert = iad.getPostAlertTime();
 			}
 
-			log("creating deployer " + dp_name + " replacing " +
-				replaces);
-
-			iad = new IpawsDeployerImpl(dp_name, getIdentifier(),
-				aStart, aEnd, iac, adms, ddms, autoMulti,
+			iad = new IpawsDeployerImpl(getIdentifier(), aStart,
+				aEnd, cfg, adms, odms, ddms, autoMulti,
 				priority, preAlert, postAlert, replaces);
-			iad.notifyCreate();
-			addOptionalDms(iad);
-			deployAlert(iad);
+			log("created deployer " + iad.getName() +
+				" replacing " + replaces);
+			try {
+				iad.notifyCreate();
+			}
+			catch (SonarException e) {
+				log("deployer notify create failed, " +
+					e.getMessage());
+			}
+			iad.createNotification(getEvent());
 		}
 		return iad;
-	}
-
-	/** Get the start date/time for an alert.  Checks onset time first, then
-	 *  effective time, and finally sent time (which is required). */
-	public Date getAlertStart() {
-		Date alertStart = getOnsetDate();
-		if (alertStart == null)
-			alertStart = getEffectiveDate();
-		if (alertStart == null)
-			alertStart = getSentDate();
-		return alertStart;
 	}
 
 	/** Generate a MULTI message from an alert config */
@@ -1155,7 +1197,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			public void addCapResponse(String[] rtypes) {
 				// make a HashSet of the allowed response types
 				HashSet<String> rtSet = new HashSet<String>(
-						Arrays.asList(rtypes));
+					Arrays.asList(rtypes));
 
 				// check the response types in the alert to see if we should
 				// substitute anything, taking the highest priority one
@@ -1165,7 +1207,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 					if (rtSet.contains(rt)) {
 						// make sure we have a matching substitution value too
 						CapResponse crt = CapResponseHelper.lookupFor(
-								getEvent(), rt);
+							getEvent(), rt);
 
 						if (crt != null) {
 							CapResponseEnum crte =
@@ -1186,7 +1228,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			public void addCapUrgency(String[] uvals) {
 				// make a HashSet of the allowed urgency values
 				HashSet<String> urgSet = new HashSet<String>(
-						Arrays.asList(uvals));
+					Arrays.asList(uvals));
 
 				// check the urgency value in the alert to see if we should
 				// substitute anything
@@ -1215,40 +1257,6 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		// return null if we couldn't generate a valid message (nothing
 		// else will happen)
 		return null;
-	}
-
-	/** Add optional DMS for suggesting to the user for inclusion in the alert
-	 *  (in addition to the auto-selected messages) to the alert deployer.
-	 */
-	private void addOptionalDms(IpawsDeployerImpl iad) throws TMSException {
-		// add the auto threshold to the suggested threshold to get the
-		// total threshold we will use
-		int t = SystemAttrEnum.IPAWS_SIGN_THRESH_AUTO_METERS.getInt() +
-			SystemAttrEnum.IPAWS_SIGN_THRESH_OPT_METERS.getInt();
-		SignGroup sg = iad.getConfig().getSignGroup();
-
-		// query the signs in the same group as the deployer within the
-		// threshold from the alert area
-		IpawsAlertImpl.store.query(
-		"SELECT array_agg(d.name) FROM iris." + DMS.SONAR_TYPE + " d" +
-		" JOIN iris." + GeoLoc.SONAR_TYPE + " g ON d.geo_loc=g.name" +
-		" WHERE ST_DWithin((SELECT geo_poly FROM " + getTable() +
-		" WHERE name='" + getName() + "'), ST_Point(g.lon," +
-		" g.lat)::geography, " + t + ") AND d.name IN (SELECT dms" +
-		" FROM iris.dms_sign_group WHERE sign_group='" + sg + "');",
-		new ResultFactory() {
-			@Override
-			public void create(ResultSet row) throws Exception {
-				try {
-					// if we get a result, set the list of
-					// optional DMS in the deployer
-					String[] dms = (String[]) row.getArray(1).getArray();
-					iad.setOptionalDmsNotify(dms);
-				} catch (Exception e) {
-					log("no optional DMS found");
-				}
-			}
-		});
 	}
 
 	/** Calculate the message priority for an alert given the urgency,
@@ -1286,152 +1294,186 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return ALLOWED_PRIORITIES[i];
 	}
 
-	/** Process the alert for deploying, checking the mode (auto or manual)
-	 *  first.  In manual mode, this sends a push notification to clients
-	 *  to request a user to review and approve the alert.  In auto mode,
-	 *  this either deploys the alert then sends a notification indicating
-	 *  the new alert, or (if a non-zero timeout is configured) sends a
-	 *  notification then waits until the timeout has elapsed and (if a user
-	 *  hasn't deployed it manually) deploys the alert.
-	 */
-	private void deployAlert(IpawsDeployerImpl iad) throws SonarException,
-		TMSException
+	/** Use the area section of an IPAWS alert to creating a PostGIS
+	 *  MultiPolygon geography object.
+	 *
+	 *  If a polygon section is found, it is used to create a MultiPolygon
+	 *  object (one for each polygon).  If there is no polygon, the other
+	 *  location information is used to look up one or more polygons. */
+	private void createGeogPoly() throws TMSException, SQLException,
+		NoSuchFieldException
 	{
-		// check the deploy mode and timeouts in system attributes
-		boolean autoMode = SystemAttrEnum.IPAWS_DEPLOY_AUTO_MODE.getBoolean();
-		int timeout = SystemAttrEnum.IPAWS_DEPLOY_AUTO_TIMEOUT_SECS.getInt();
-
-		// generate and send the notification - the static method
-		// handles the content of the notification based on the mode
-		// and timeout
-		NotificationImpl pn = createNotification(getEvent(),
-			autoMode, timeout, iad.getName());
-
-		// NOTE: manual deployment triggered in IpawsDeployerImpl
-		if (!autoMode)
+		// get a JSON object from the area string
+		// (which is in JSON syntax)
+		JSONObject jo = null;
+		String ps = null;
+		String area = getArea();
+		if (area != null) {
+			try {
+				log(area);
+				jo = new JSONObject(area);
+				// get the "polygon" section
+				if (jo.has("polygon"))
+					ps = jo.getString("polygon");
+			} catch (JSONException e) {
+				e.printStackTrace();
+				return;
+			}
+		} else
 			return;
 
-		// auto mode - check timeout first
-		if (timeout > 0) {
-			// non-zero timeout - wait for timeout to pass.
-			// NOTE that this is already happening in it's
-			// own thread, so we will just wait here
-			for (int i = 0; i < timeout; i++) {
-				// wait a second
-				try { Thread.sleep(1000); }
-				catch (InterruptedException e) {
-					/* Ignore */
-				}
+		// if we didn't get a polygon, check the other fields in the
+		// area to find one we can use to lookup a geographical area
+		if (ps == null) {
+			log("No polygon, trying UGC codes...");
 
-				// update the notification with a new
-				// message (so the user knows how much
-				// time they have before the alert
-				// deploys)
-				pn.setDescriptionNotify(getTimeoutString(
-					getEvent(), timeout - i));
-			}
-
-			// after timeout passes, check if the alert has
-			// been deployed
-			if (iad.getAlertState() == AlertState.PENDING.ordinal()) {
-				// if it hasn't, deploy it (if it has,
-				// we're done!)
-				iad.setAlertStateNotify(AlertState.DEPLOYED
-					.ordinal());
-
-				// change the description - use the
-				// no-timeout description
-				pn.setDescriptionNotify(getNoTimeoutDescription(
-					getEvent()));
-
-				// also record that it was addressed
-				// automatically so the notification
-				// goes away
-				// TODO may want to make this an option
-				// to force reviewing
-				pn.setAddressedByNotify("auto");
-				pn.setAddressedTimeNotify(new Date());
-			}
-			// NOTE: alert canceling handled in IpawsDeployerImpl
-		} else
-			// no timeout - just deploy it
-			iad.setAlertStateNotify(AlertState.DEPLOYED.ordinal());
-	}
-
-	/** Create a notification for an alert deployer given the event type,
-	 *  deployment mode (auto/manual), timeout, and the name of the deployer
-	 *  object.
-	 */
-	static private NotificationImpl createNotification(String event,
-		boolean autoMode, int timeout, String dName)
-		throws SonarException, TMSException
-	{
-		// substitute the event type into the notification title
-		String title;
-		try {
-			title = String.format(I18N.get("ipaws.notification.title"), event);
-		} catch (IllegalFormatException e) {
-			title = String.format("New %s Alert", event);
-		}
-		// same with the description
-		String description;
-		if (autoMode) {
-			if (timeout == 0)
-				description = getNoTimeoutDescription(event);
-			else
-				description = getTimeoutString(event, timeout);
-		} else {
+			// look for geocode fields in the area section
+			JSONObject gj;
 			try {
-				description = String.format(I18N.get(
-					"ipaws.notification.description.manual"), event);
-			} catch (IllegalFormatException e) {
-				description = String.format("New %s alert received from " +
-					"IPAWS. Please review it for deployment.", event);
+				gj = jo.getJSONObject("geocode");
+			} catch (JSONException e) {
+				// no geocode field or not a JSONObject, not
+				// much we can do
+				e.printStackTrace();
+				return;
 			}
-		}
-		// create the notification object with the values we got
-		// note that users must be able to write alert deployer objects
-		// to see these (otherwise they won't be able to to approve
-		// them)
-		NotificationImpl pn = new NotificationImpl(
-			IpawsDeployer.SONAR_TYPE, dName, true, title,
-			description);
-		IpawsProcJob.log("Sending notification " + pn.getName());
 
-		// notify clients of the creation so they receive it, then return
-		pn.notifyCreate();
-		return pn;
+			// look for UGC fields
+			JSONArray ugcj;
+			try {
+				ugcj = gj.getJSONArray("UGC");
+			} catch (JSONException e) {
+				// no UGC fields or not a JSONArray, not much we
+				// can do
+				e.printStackTrace();
+				return;
+			}
+
+			// UGC fields will come in as "<STATE>Z<CODE>", e.g.
+			// "MNZ060"
+			// we want "<STATE><CODE>" (e.g. "MN060") which matches
+			// the data from the NWS
+			// we also want a string for an array in an SQL statement
+			StringBuilder sb = new StringBuilder();
+			sb.append("('");
+			for (int i = 0; i < ugcj.length(); ++i) {
+				String iugc = ugcj.getString(i);
+				String state = iugc.substring(0, 2);
+				String code = iugc.substring(3);
+				sb.append(state + code);
+				sb.append("','");
+			}
+			// remove trailing comma/quote and add closing
+			// parenthesis
+			if (",'".equals(sb.substring(sb.length() - 2)))
+				sb.setLength(sb.length() - 2);
+			sb.append(")");
+			String arrStr = sb.toString();
+			log("Got codes: " + arrStr);
+
+			// query the database for the result
+			IpawsAlertImpl.store.query(
+			"SELECT ST_AsText(ST_Multi(ST_Union(geom))) FROM " +
+			GEOMETRY_TABLE + " WHERE state_zone IN " + arrStr + ";",
+			new ResultFactory() {
+				@Override
+				public void create(ResultSet row) throws Exception {
+					// we should get back a MultiPolygon string
+					String polystr = row.getString(1);
+					if (polystr != null && !polystr.isEmpty()) {
+						MultiPolygon mp = new MultiPolygon(polystr);
+						setGeoPolyNotify(mp);
+					} else
+						log("No polygon found for UGC codes!");
+				}
+			});
+		} else {
+			// reformat the string so PostGIS will accept it
+			// create and set the MultiPolygon on the alert object
+			log("Got polygon: " + ps);
+			String pgps = formatMultiPolyStr(ps);
+			MultiPolygon mp = new MultiPolygon(pgps);
+			setGeoPolyNotify(mp);
+		}
 	}
 
-	/** Get an alert description string for auto-deploy, no-timeout cases. */
-	static private String getNoTimeoutDescription(String event) {
-		try {
-			return String.format(I18N.get(
-				"ipaws.notification.description.auto.no_timeout"), event);
-		} catch (IllegalFormatException e) {
-			return String.format("New %s alert received from IPAWS. " +
-				"This alert has been automatically deployed.", event);
-		}
-	}
-
-	/** Get the alert description string containing the amount of time until
-	 *  the timeout expires (for auto deployment mode) given an event type and
-	 *  the time in seconds.
+	/** Reformat the text taken from the polygon section of a CAP alert's
+	 *  area section to match the WKT syntax used by PostGIS.
+	 *
+	 *  TODO this would need some changes to work with multiple <polygon>
+	 *  blocks, but NWS doesn't seem to use those.
 	 */
-	static private String getTimeoutString(String event, int secs) {
-		// use the time value to create a duration string
-		String dur = NotificationHelper.getDurationString(
-			Duration.ofSeconds(secs));
+	static private String formatMultiPolyStr(String capPolyStr)
+		throws NoSuchFieldException
+	{
+		// the string comes in as space-delimited coordinate pairs (which
+		// themselves are separated by commas) in lat, lon order,
+		// e.g.: 45.0,-93.0 45.0,-93.1 ...
+		// we need something that looks like this (note coordinates are in
+		// lon, lat order (which is x, y)
+		// MULTIPOLYGON(((-93.0 45.0, -93.1 45.0, ...), (...)))
 
-		// add the string
-		String dFormat = I18N.get(
-			"ipaws.notification.description.auto.timeout");
-		try {
-			return String.format(dFormat, event, dur);
-		} catch (IllegalFormatException e) {
-			return String.format("New %s alert received from IPAWS. This " +
-				"alert will be automatically deployed in %s if no action " +
-				"is taken.", event, dur);
+		// start a StringBuilder
+		StringBuilder sb = new StringBuilder();
+
+		// TODO this would need to change to handle multiple <polygon> blocks
+		sb.append("MULTIPOLYGON(((");
+
+		// split the polygon string on spaces to get coordinate pairs
+		String coords[] = capPolyStr.split(" ");
+		for (String c: coords) {
+			String clatlon[] = c.split(",");
+			String lat, lon;
+			if (clatlon.length == 2) {
+				lat = clatlon[0];
+				lon = clatlon[1];
+			} else {
+				throw new NoSuchFieldException(
+					"Problem decoding polygon field");
+			}
+			// add the coordinates to the string as "lon lat"
+			sb.append(lon);
+			sb.append(" ");
+			sb.append(lat);
+			sb.append(", ");
+		}
+
+		// remove the trailing comma
+		if (sb.substring(sb.length()-2).equals(", "))
+			sb.setLength(sb.length()-2);
+
+		// TODO change this when fixing for multiple polygons
+		sb.append(")))");
+
+		return sb.toString();
+	}
+
+	/** Update the centroid of an alert area */
+	private void updateCentroid() throws TMSException {
+		store.query("SELECT ST_AsText(ST_Centroid(geo_poly)) " +
+			"FROM event." + SONAR_TYPE + " WHERE name='" +
+			getName() + "';", new ResultFactory()
+		{
+				@Override public void create(ResultSet row)
+					throws Exception
+				{
+					updateCentroid(row);
+				}
+			}
+		);
+	}
+
+	/** Update the centroid of an IPAWS alert from a row with a POINT */
+	private void updateCentroid(ResultSet row) throws Exception {
+		// parse out the lat/long from the POINT(lon lat) string
+		String pStr = row.getString(1);
+		String llStr = pStr.replace("POINT(", "").replace(")", "");
+		String[] ll = llStr.split(" ");
+		if (ll.length == 2) {
+			double lon = Double.parseDouble(ll[0]);
+			double lat = Double.parseDouble(ll[1]);
+			setLatNotify(lat);
+			setLonNotify(lon);
 		}
 	}
 }
