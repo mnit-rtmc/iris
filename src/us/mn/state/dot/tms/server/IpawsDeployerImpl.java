@@ -21,7 +21,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.IllegalFormatException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -820,14 +819,7 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		boolean autoMode, int timeout, String dName)
 		throws TMSException
 	{
-		// substitute the event type into the notification title
-		String title;
-		try {
-			title = String.format(I18N.get("ipaws.notification.title"), event);
-		} catch (IllegalFormatException e) {
-			title = String.format("New %s Alert", event);
-		}
-		// same with the description
+		String title = I18N.format("ipaws.notification.title", event);
 		String description;
 		if (autoMode) {
 			if (timeout == 0)
@@ -835,21 +827,15 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 			else
 				description = getTimeoutString(event, timeout);
 		} else {
-			try {
-				description = String.format(I18N.get(
-					"ipaws.notification.description.manual"), event);
-			} catch (IllegalFormatException e) {
-				description = String.format("New %s alert received from " +
-					"IPAWS. Please review it for deployment.", event);
-			}
+			description = I18N.format(
+				"ipaws.notification.description.manual", event);
 		}
 		// create the notification object with the values we got
 		// note that users must be able to write alert deployer objects
 		// to see these (otherwise they won't be able to to approve
 		// them)
-		NotificationImpl pn = new NotificationImpl(
-			IpawsDeployer.SONAR_TYPE, dName, true, title,
-			description);
+		NotificationImpl pn = new NotificationImpl(SONAR_TYPE, dName,
+			true, title, description);
 		IpawsProcJob.log("sending notification " + pn.getName());
 		try {
 			pn.notifyCreate();
@@ -863,13 +849,9 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 
 	/** Get an alert description string for auto-deploy, no-timeout cases. */
 	static private String getNoTimeoutDescription(String event) {
-		try {
-			return String.format(I18N.get(
-				"ipaws.notification.description.auto.no_timeout"), event);
-		} catch (IllegalFormatException e) {
-			return String.format("New %s alert received from IPAWS. " +
-				"This alert has been automatically deployed.", event);
-		}
+		return I18N.format(
+			"ipaws.notification.description.auto.no_timeout",
+			event);
 	}
 
 	/** Get the alert description string containing the amount of time until
@@ -879,16 +861,8 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		// use the time value to create a duration string
 		String dur = NotificationHelper.getDurationString(
 			Duration.ofSeconds(secs));
-
-		// add the string
-		String dFormat = I18N.get(
-			"ipaws.notification.description.auto.timeout");
-		try {
-			return String.format(dFormat, event, dur);
-		} catch (IllegalFormatException e) {
-			return String.format("New %s alert received from IPAWS. This " +
-				"alert will be automatically deployed in %s if no action " +
-				"is taken.", event, dur);
-		}
+		return I18N.format(
+			"ipaws.notification.description.auto.timeout", event,
+			dur);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2020  Minnesota Department of Transportation
+ * Copyright (C) 2007-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.utils;
 
 import java.awt.event.KeyEvent;
+import java.util.IllegalFormatException;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.Properties;
@@ -37,6 +38,9 @@ public class I18N {
 
 	/** Value returned for error reading message */
 	static private final String NOT_READ = "Message bundle not read";
+
+	/** Value returned for error formatting message */
+	static private final String FORMAT_ERR = "Message format error";
 
 	/** Key code to use for lookup failure */
 	static private final int FAILURE_CODE = 0;
@@ -166,6 +170,27 @@ public class I18N {
 			}
 		}
 		return null;
+	}
+
+	/** Get the specified message and format it.
+	 * @param id Name of I18N string in the bundle.
+	 * @param args Arguments for format string.
+	 * @return The I18N string cooresponding to id, else error message */
+	static public String format(String id, Object... args) {
+		if (id == null || id.isEmpty())
+			return UNDEFINED;
+		String fmt = I18N.getSilent(id);
+		if (fmt != null) {
+			try {
+				return String.format(fmt, args);
+			}
+			catch (IllegalFormatException e) {
+				System.err.println("I18N: format error (" +
+					e.getMessage() + ") for " + id);
+				return FORMAT_ERR;
+			}
+		}
+		return NOT_READ;
 	}
 
 	/** Return the implied key mnemonic in the specified I18N string.
