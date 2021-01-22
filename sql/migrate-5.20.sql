@@ -10,6 +10,8 @@ ALTER TABLE event.ipaws_deployer DROP COLUMN lon;
 ALTER TABLE event.ipaws_deployer DROP COLUMN area_threshold;
 ALTER TABLE event.ipaws_deployer DROP COLUMN sign_group;
 ALTER TABLE event.ipaws_deployer DROP COLUMN quick_message;
+ALTER TABLE event.ipaws_deployer DROP COLUMN deployed;
+ALTER TABLE event.ipaws_deployer DROP COLUMN active;
 
 UPDATE event.ipaws_deployer SET pre_alert_time = 0
 	WHERE pre_alert_time IS NULL;

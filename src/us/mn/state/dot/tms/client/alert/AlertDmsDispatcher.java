@@ -466,8 +466,7 @@ public class AlertDmsDispatcher extends IPanel {
 		if (postAlertTime >= 0)
 			iad.setPostAlertTime(postAlertTime);
 
-		// update approval time/user
-		iad.setApprovedTime(new Date());
+		// update approval user
 		iad.setApprovedBy(session.getUser().getName());
 		iad.setAlertStateReq(AlertState.APPROVE_REQ.ordinal());
 

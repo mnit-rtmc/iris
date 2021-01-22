@@ -97,7 +97,6 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("gen_time", gen_time);
-		map.put("approved_time", approved_time);
 		map.put("alert_id", alert_id);
 		map.put("alert_start", alert_start);
 		map.put("alert_end", alert_end);
@@ -111,6 +110,7 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		map.put("deployed_multi", deployed_multi);
 		map.put("msg_priority", msg_priority);
 		map.put("approved_by", approved_by);
+		map.put("approved_time", approved_time);
 		map.put("alert_state", getAlertState());
 		map.put("was_deployed", was_deployed);
 		map.put("replaces", replaces);
@@ -194,6 +194,7 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		msg_priority = mp;
 		pre_alert_time = preh;
 		post_alert_time = posth;
+		approved_by = null;
 		alert_state = AlertState.PENDING;
 		was_deployed = false;
 		replaces = rep;
@@ -227,24 +228,18 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	/** Approved time of alert deployer */
 	private Date approved_time;
 
-	/** Set the approval time of this deployer object */
-	@Override
-	public void setApprovedTime(Date at) {
-		approved_time = at;
-	}
-
-	/** Set the approval time of this deployer object */
-	public void doSetApprovedTime(Date at) throws TMSException {
-		if (!objectEquals(at, approved_time)) {
-			store.update(this, "approved_time", at);
-			setApprovedTime(at);
-		}
-	}
-
 	/** Get the approval time of this deployer object */
 	@Override
 	public Date getApprovedTime() {
 		return approved_time;
+	}
+
+	/** Set the approval time of this deployer object */
+	private void setApprovedTimeNotify() throws TMSException {
+		Date now = new Date();
+		store.update(this, "approved_time", now);
+		approved_time = now;
+		notifyAttribute("approvedTime");
 	}
 
 	/** Identifier of the alert triggering this notification. */
@@ -534,24 +529,25 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		return msg_priority;
 	}
 
-	/** User that approved the alert message posting (may be null or "AUTO"). */
+	/** User that approved the alert message posting */
 	private String approved_by;
 
-	/** Set the approving user. */
+	/** Set the approving user */
 	@Override
 	public void setApprovedBy(String u) {
 		approved_by = u;
 	}
 
-	/** Set the approving user. */
+	/** Set the approving user */
 	public void doSetApprovedBy(String u) throws TMSException {
 		if (!objectEquals(u, approved_by)) {
 			store.update(this, "approved_by", u);
 			setApprovedBy(u);
+			setApprovedTimeNotify();
 		}
 	}
 
-	/** Get the approving user. */
+	/** Get the approving user */
 	@Override
 	public String getApprovedBy() {
 		return approved_by;
