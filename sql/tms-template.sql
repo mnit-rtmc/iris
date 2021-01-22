@@ -3621,7 +3621,6 @@ CREATE TABLE event.ipaws_alert (
 CREATE TABLE event.ipaws_deployer (
 	name VARCHAR(20) PRIMARY KEY,
 	gen_time timestamp with time zone,
-	approved_time timestamp with time zone,
 	alert_id text REFERENCES event.ipaws_alert(identifier),
 	alert_start timestamp with time zone,
 	alert_end timestamp with time zone,
@@ -3635,9 +3634,8 @@ CREATE TABLE event.ipaws_deployer (
 	deployed_multi text,
 	msg_priority INTEGER NOT NULL,
 	approved_by VARCHAR(15),
-	deployed BOOLEAN,
+	approved_time timestamp with time zone,
 	was_deployed BOOLEAN NOT NULL,
-	active BOOLEAN DEFAULT false,
 	replaces VARCHAR(24)
 );
 

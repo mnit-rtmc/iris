@@ -116,9 +116,6 @@ public interface IpawsDeployer extends SonarObject {
 	/** Get the approving user. */
 	String getApprovedBy();
 
-	/** Set the approval time of this deployer object */
-	void setApprovedTime(Date at);
-
 	/** Get the approval time of this deployer object */
 	Date getApprovedTime();
 
