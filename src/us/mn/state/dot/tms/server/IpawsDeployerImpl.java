@@ -139,9 +139,9 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		     row.getString(7),          // config
 		     row.getInt(8),             // pre-alert time
 		     row.getInt(9),             // post-alert time
-		     getStringArray(row, 10),   // auto DMS list
-		     getStringArray(row, 11),   // optional DMS list
-		     getStringArray(row, 12),   // deployed DMS list
+		     getStringArray(row, 10),   // auto_dms
+		     getStringArray(row, 11),   // optional_dms
+		     getStringArray(row, 12),   // deployed_dms
 		     row.getString(13),         // auto MULTI
 		     row.getString(14),         // deployed MULTI
 		     row.getInt(15),            // message priority
@@ -179,8 +179,8 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	}
 
 	public IpawsDeployerImpl(String aid, Date as, Date ae, IpawsConfig cfg,
-		String[] adms, String[] odms, String[] ddms, String am, int mp,
-		int preh, int posth, String rep)
+		String[] adms, String[] odms, String am, int mp, int preh,
+		int posth, String rep)
 	{
 		super(createUniqueName());
 		alert_id = aid;
@@ -189,7 +189,7 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		config = cfg;
 		auto_dms = adms;
 		optional_dms = odms;
-		deployed_dms = ddms;
+		deployed_dms = null;
 		auto_multi = am;
 		msg_priority = mp;
 		pre_alert_time = preh;
@@ -443,13 +443,20 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		}
 	}
 
-	/** List of DMS requested to deploy the alert */
+	/** List of DMS requested to deploy */
 	private String[] requested_dms;
 
-	/** Set the list of DMS requested to deploy the alert */
+	/** Set the list of DMS requested to deploy */
 	@Override
 	public void setRequestedDms(String[] dms) {
 		requested_dms = dms;
+	}
+
+	/** Get the list of DMS requested to deploy */
+	private String[] getRequestedDms() {
+		String[] rdms = requested_dms;
+		// use the auto DMS if we don't have requested DMS
+		return (rdms != null && rdms.length > 0) ? rdms : auto_dms;
 	}
 
 	/** MULTI generated automatically for to deploying to DMS */
@@ -461,35 +468,39 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		return auto_multi;
 	}
 
-	/** MULTI actually deployed to DMS. */
+	/** MULTI requested to deploy to DMS */
+	private String requested_multi;
+
+	/** Set the MULTI requested to deploy to DMS */
+	@Override
+	public void setRequestedMulti(String m) {
+		requested_multi = m;
+	}
+
+	/** Get the MULTI requested to deploy to DMS */
+	private String getRequestedMulti() {
+		String rmulti = requested_multi;
+		return (rmulti != null && !rmulti.isEmpty())
+		      ? rmulti
+		      : auto_multi;
+	}
+
+	/** MULTI actually deployed to DMS */
 	private String deployed_multi;
 
-	/** Set the MULTI actually deployed to DMS. */
-	@Override
-	public void setDeployedMulti(String m) {
-		deployed_multi = m;
-	}
-
-	/** Set the MULTI actually deployed to DMS. */
-	public void doSetDeployedMulti(String m) throws TMSException {
-		if (!objectEquals(m, deployed_multi)) {
-			store.update(this, "deployed_multi", m);
-			setDeployedMulti(m);
-		}
-	}
-
-	/** Set the MULTI actually deployed to DMS, notifying clients. */
-	public void setDeployedMultiNotify(String m) throws TMSException {
-		if (!objectEquals(m, deployed_multi)) {
-			doSetDeployedMulti(m);
-			notifyAttribute("deployedMulti");
-		}
-	}
-
-	/** Get the MULTI actually deployed to DMS. */
+	/** Get the MULTI actually deployed to DMS */
 	@Override
 	public String getDeployedMulti() {
 		return deployed_multi;
+	}
+
+	/** Set the MULTI actually deployed to DMS, notifying clients. */
+	private void setDeployedMultiNotify(String m) throws TMSException {
+		if (!objectEquals(m, deployed_multi)) {
+			store.update(this, "deployed_multi", m);
+			deployed_multi = m;
+			notifyAttribute("deployedMulti");
+		}
 	}
 
 	/** Message priority calculated from alert fields (can be overridden by
@@ -671,21 +682,18 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	 *  If the alert is already deployed, the deployment is updated to
 	 *  reflect any changes that have been made. */
 	private void deployAlert() throws TMSException {
-		if (deployed_multi == null || deployed_multi.isEmpty()) {
-			// deployed MULTI not set yet - use auto
-			setDeployedMultiNotify(auto_multi);
-		}
+		String rmulti = getRequestedMulti();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(msg_priority);
 		int duration = calculateMsgDuration();
-		if (deployed_multi != null && !deployed_multi.isEmpty()
+		if (rmulti != null && !rmulti.isEmpty()
 			&& mp != DmsMsgPriority.INVALID && duration != -1)
 		{
-			deployAlert(mp, duration);
+			deployAlert(rmulti, mp, duration);
 		}
 	}
 
 	/** Go through all the DMS and deploy */
-	private void deployAlert(DmsMsgPriority mp, int duration)
+	private void deployAlert(String rmulti, DmsMsgPriority mp, int duration)
 		throws TMSException
 	{
 		// if this deployer is replacing another one that is still
@@ -703,26 +711,22 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 					.ordinal());
 			}
 		}
-
 		cancelAlert();
 
-		// use the auto DMS if we don't have requested DMS
-		if (requested_dms == null || requested_dms.length == 0)
-			setRequestedDms(auto_dms);
-
+		String[] rdms = getRequestedDms();
 		IpawsProcJob.log("Deploying alert " + alert_id +
-			" with message " + deployed_multi + ", priority " +
+			" with message " + rmulti + ", priority " +
 			mp.toString() + ", and duration " + duration + " to " +
-			requested_dms.length + " DMS from deployer " + name);
+			rdms.length + " DMS from deployer " + name);
 
-		boolean wd = false;
-		for (String dmsName: requested_dms) {
-			DMSImpl dms = lookupDMS(dmsName);
-			// if the alert makes it to one sign,
-			// record that it was deployed
-			wd |= (dms != null) && dms.sendIpawsMsg(deployed_multi,
+		boolean wd = false; // was deployed to a sign?
+		for (String dms_name: rdms) {
+			DMSImpl dms = lookupDMS(dms_name);
+			wd |= (dms != null) && dms.sendIpawsMsg(rmulti,
 				msg_priority, duration);
 		}
+		setDeployedDmsNotify(rdms);
+		setDeployedMultiNotify(rmulti);
 		if (wd)
 			setWasDeployed(wd);
 		setAlertStateNotify(AlertState.DEPLOYED.ordinal());
@@ -734,8 +738,8 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		if (dmsList != null && dmsList.length > 0) {
 			IpawsProcJob.log("Canceling " + name + " on alert " +
 				alert_id + " for " + dmsList.length + " DMS");
-			for (String dmsName: dmsList) {
-				DMSImpl dms = lookupDMS(dmsName);
+			for (String dms_name: dmsList) {
+				DMSImpl dms = lookupDMS(dms_name);
 				if (dms != null)
 					dms.blankIpawsMsg();
 			}

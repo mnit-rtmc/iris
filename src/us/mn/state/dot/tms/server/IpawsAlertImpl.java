@@ -17,12 +17,10 @@ package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,13 +31,9 @@ import org.postgis.MultiPolygon;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.AlertState;
 import us.mn.state.dot.tms.CapCertaintyEnum;
-import us.mn.state.dot.tms.CapResponse;
 import us.mn.state.dot.tms.CapResponseEnum;
-import us.mn.state.dot.tms.CapResponseHelper;
 import us.mn.state.dot.tms.CapSeverityEnum;
-import us.mn.state.dot.tms.CapUrgency;
 import us.mn.state.dot.tms.CapUrgencyEnum;
-import us.mn.state.dot.tms.CapUrgencyHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.GeoLoc;
@@ -53,7 +47,6 @@ import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
@@ -431,7 +424,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Get the start date/time for an alert.  Checks onset time first, then
 	 *  effective time, and finally sent time (which is required). */
-	private Date getAlertStart() {
+	public Date getAlertStart() {
 		Date alertStart = getOnsetDate();
 		if (alertStart == null)
 			alertStart = getEffectiveDate();
@@ -1115,7 +1108,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		Date aStart = getAlertStart();
 		Date aEnd = getExpirationDate();
 
-		String autoMulti = generateMulti(cfg, aStart, aEnd);
+		String autoMulti = generateMulti(cfg);
 		int priority = calculateMsgPriority().ordinal();
 
 		// check if any attributes have changed from this last deployer
@@ -1128,19 +1121,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			// this is eventually deployed that will be used to
 			// cancel the old alert
 			String replaces = null;
-			String[] ddms = null;
 			int preAlert = cfg.getPreAlertTime();
 			int postAlert = cfg.getPostAlertTime();
 			if (updated) {
 				replaces = iad.getName();
-				ddms = iad.getDeployedDms();
 				preAlert = iad.getPreAlertTime();
 				postAlert = iad.getPostAlertTime();
 			}
 
 			iad = new IpawsDeployerImpl(getIdentifier(), aStart,
-				aEnd, cfg, adms, odms, ddms, autoMulti,
-				priority, preAlert, postAlert, replaces);
+				aEnd, cfg, adms, odms, autoMulti, priority,
+				preAlert, postAlert, replaces);
 			log("created deployer " + iad.getName() +
 				" replacing " + replaces);
 			try {
@@ -1156,107 +1147,15 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	}
 
 	/** Generate a MULTI message from an alert config */
-	private String generateMulti(IpawsConfig iac, Date alertStart,
-		Date alertEnd)
-	{
+	private String generateMulti(IpawsConfig iac) {
 		QuickMessage qm = iac.getQuickMessage();
 		String qmMulti = (qm != null) ? qm.getMulti() : "";
 		log("got message template: " + qmMulti);
-
-		// use a MultiBuilder to process cap action tags
-		MultiBuilder builder = new MultiBuilder() {
-			@Override
-			public void addCapTime(String f_txt, String a_txt, String p_txt) {
-				// check the alert times against the current time to know
-				// which text and time fields to use
-				Date now = new Date();
-				String tmplt;
-				Date dt;
-				if (now.before(alertStart)) {
-					// alert hasn't started yet
-					tmplt = f_txt;
-					dt = alertStart;
-				} else if (now.before(alertEnd)) {
-					// alert is currently active
-					tmplt = a_txt;
-					dt = alertEnd;
-				} else {
-					// alert has expired
-					tmplt = p_txt;
-					dt = alertEnd;
-				}
-
-				// format any time strings in the text and add to the msg
-				String s = IpawsDeployerHelper.replaceTimeFmt(tmplt,
-					dt.toInstant().atZone(ZoneId.systemDefault())
-					.toLocalDateTime());
-				addSpan(s);
-			}
-
-			@Override
-			public void addCapResponse(String[] rtypes) {
-				// make a HashSet of the allowed response types
-				HashSet<String> rtSet = new HashSet<String>(
-					Arrays.asList(rtypes));
-
-				// check the response types in the alert to see if we should
-				// substitute anything, taking the highest priority one
-				CapResponseEnum maxRT = CapResponseEnum.NONE;
-				CapResponse rtSub = null;
-				for (String rt: getResponseTypes()) {
-					if (rtSet.contains(rt)) {
-						// make sure we have a matching substitution value too
-						CapResponse crt = CapResponseHelper.lookupFor(
-							getEvent(), rt);
-
-						if (crt != null) {
-							CapResponseEnum crte =
-									CapResponseEnum.fromValue(rt);
-							if (crte.ordinal() > maxRT.ordinal()) {
-								maxRT = crte;
-								rtSub = crt;
-							}
-						}
-					}
-				}
-
-				// if we had a match add the MULTI, otherwise leave it blank
-				addSpan(rtSub != null ? rtSub.getMulti() : "");
-			}
-
-			@Override
-			public void addCapUrgency(String[] uvals) {
-				// make a HashSet of the allowed urgency values
-				HashSet<String> urgSet = new HashSet<String>(
-					Arrays.asList(uvals));
-
-				// check the urgency value in the alert to see if we should
-				// substitute anything
-				String urg = getUrgency();
-				String multi = "";
-				if (urgSet.contains(urg)) {
-					CapUrgency subst = CapUrgencyHelper.lookupFor(
-						getEvent(), urg);
-					if (subst != null)
-						multi = subst.getMulti();
-				}
-				addSpan(multi);
-			}
-		};
-
-		// process the QuickMessage with the MultiBuilder
+		CapMultiBuilder builder = new CapMultiBuilder(this);
 		new MultiString(qmMulti).parse(builder);
 		MultiString ms = builder.toMultiString();
 		log("MULTI: " + ms.toString());
-
-		// return the MULTI if it's valid and not blank
-		if (ms.isValid() && !ms.isBlank()) {
-			return ms.toString();
-		}
-
-		// return null if we couldn't generate a valid message (nothing
-		// else will happen)
-		return null;
+		return (ms.isValid() && !ms.isBlank()) ? ms.toString() : null;
 	}
 
 	/** Calculate the message priority for an alert given the urgency,

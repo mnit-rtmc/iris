@@ -448,7 +448,7 @@ public class AlertDmsDispatcher extends IPanel {
 		// try to update MULTI and pre/post alert times
 		String newMulti = multiBox.getText();
 		if (newMulti != null && !newMulti.isEmpty())
-			iad.setDeployedMulti(multiBox.getText());
+			iad.setRequestedMulti(multiBox.getText());
 		int preAlertTime = -1;
 		try {
 			preAlertTime = Integer.valueOf(preAlertTimeBx.getText());
