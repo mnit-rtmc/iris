@@ -42,11 +42,8 @@ public class IpawsConfigHelper extends BaseHelper {
 	}
 
 	/** Name creator */
-	static UniqueNameCreator UNC;
-	static {
-		UNC = new UniqueNameCreator("ipaws_cfg_%d", (n)->lookup(n));
-		UNC.setMaxLength(24);
-	}
+	static private final UniqueNameCreator UNC = new UniqueNameCreator(
+		"ipaws_cfg_%d", 24, (n)->lookup(n));
 
 	/** Create a unique IpawsConfig record name */
 	static public String createUniqueName() {

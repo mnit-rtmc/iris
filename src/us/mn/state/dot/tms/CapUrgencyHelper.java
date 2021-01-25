@@ -86,11 +86,8 @@ public class CapUrgencyHelper extends BaseHelper {
 	}
 
 	/** Name creator */
-	static UniqueNameCreator UNC;
-	static {
-		UNC = new UniqueNameCreator("cap_urgency_%d", (n)->lookup(n));
-		UNC.setMaxLength(24);
-	}
+	static private final UniqueNameCreator UNC = new UniqueNameCreator(
+		"cap_urgency_%d", 24, (n)->lookup(n));
 
 	/** Create a unique CapUrgency record name */
 	static public String createUniqueName() {

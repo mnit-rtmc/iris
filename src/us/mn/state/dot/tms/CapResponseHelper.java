@@ -88,11 +88,8 @@ public class CapResponseHelper extends BaseHelper {
 	}
 
 	/** Name creator */
-	static UniqueNameCreator UNC;
-	static {
-		UNC = new UniqueNameCreator("cap_resp_type_%d", (n)->lookup(n));
-		UNC.setMaxLength(24);
-	}
+	static private final UniqueNameCreator UNC = new UniqueNameCreator(
+		"cap_resp_type_%d", 24, (n)->lookup(n));
 
 	/** Create a unique CapResponse record name */
 	static public String createUniqueName() {

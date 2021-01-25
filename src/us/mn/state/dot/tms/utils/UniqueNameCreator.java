@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +15,7 @@
  */
 package us.mn.state.dot.tms.utils;
 
-/** Helper class for creating
- *  unique SONAR record names.
+/** Helper class for creating unique SONAR record names.
  *
  * @author John L. Stanley - SRF Consulting
  */
@@ -28,10 +28,13 @@ public class UniqueNameCreator {
 	}
 
 	/** Unique name format */
-	private String nameFormat;
+	private final String nameFormat;
 
-	/** Lambda interface to lookup method.*/
-	private ILookup iLookup;
+	/** Maximum name length */
+	private final int maxLength;
+
+	/** Lambda interface to lookup method */
+	private final ILookup iLookup;
 
 	/** Minimum index (number part of lowest name tested) */
 	private long minIndex = 1;
@@ -44,36 +47,31 @@ public class UniqueNameCreator {
 	/** Index of most recent name generated */
 	private long curIndex = 0;
 
-	/** Maximum name length
-	 * if null, no maximum length. */
-	private Integer maxLength = null;
-
 	/** Construct a UniqueNameCreator
 	 *
-	 * Note:  The format MUST contain a %d (or
-	 *  similar) integer sprinf-style
-	 *  substitution-field that will be
-	 *  replaced with a unique name index.
-	 * i.e.  "prefix_%d"
+	 * Note:  The format MUST contain a %d (or similar) integer sprinf-style
+	 *        substitution-field that will be replaced with a unique name
+	 *        index, i.e. "prefix_%d"
 	 *
 	 * @param format Unique name format.
-	 * @param iLookup Lambda interface to helper's
-	 *  lookup method.
+	 * @param ml Maximum name length.
+	 * @param iLookup Lambda interface to helper's lookup method.
 	 * @throws IllegalFormatException if the format is invalid.
 	 */
-	public UniqueNameCreator(String format, ILookup iLookup) {
-		this.nameFormat = format;
+	public UniqueNameCreator(String format, int ml, ILookup iLookup) {
+		nameFormat = format;
+		maxLength = ml;
 		this.iLookup = iLookup;
 
 		// Make sure format string is valid
-		String.format(nameFormat, 1L);
+		String.format(nameFormat, 1);
 	}
 
 	/** Set minimum index.
 	 * if null, minimum is 1. */
 	public void setMinIndex(Long minIndex) {
 		if (minIndex == null)
-			this.minIndex = 1L;
+			this.minIndex = 1;
 		else {
 			assert minIndex >= 0;
 			this.minIndex = minIndex;
@@ -108,19 +106,13 @@ public class UniqueNameCreator {
 	// Add a few variants to simplify use.
 	// (Avoids having to cast small numbers to long.)
 	public void setRange(int minIndex, Long maxIndex) {
-		setMinIndex((long)minIndex);
+		setMinIndex((long) minIndex);
 		setMaxIndex(maxIndex);
 	}
 
 	public void setRange(int minIndex, int maxIndex) {
-		setMinIndex((long)minIndex);
-		setMaxIndex((long)maxIndex);
-	}
-
-	/** Set the maximum name length.
-	 * if null, no maximum length. */
-	public void setMaxLength(Integer maxLength) {
-		this.maxLength = maxLength;
+		setMinIndex((long) minIndex);
+		setMaxIndex((long) maxIndex);
 	}
 
 	/** Test name for uniqueness.
@@ -137,7 +129,7 @@ public class UniqueNameCreator {
 		else if (curIndex < 0)
 			curIndex = minIndex;
 		String n = String.format(nameFormat, curIndex);
-		if ((maxLength != null) && (n.length() > maxLength)) {
+		if (n.length() > maxLength) {
 			curIndex = minIndex;
 			n = String.format(nameFormat, curIndex);
 		}

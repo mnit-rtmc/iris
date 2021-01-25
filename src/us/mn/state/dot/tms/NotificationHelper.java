@@ -37,11 +37,8 @@ public class NotificationHelper extends BaseHelper {
 	}
 
 	/** Name creator */
-	static UniqueNameCreator UNC;
-	static {
-		UNC = new UniqueNameCreator("notif_%d", (n)->lookup(n));
-		UNC.setMaxLength(30);
-	}
+	static private final UniqueNameCreator UNC = new UniqueNameCreator(
+		"notif_%d", 30, (n)->lookup(n));
 
 	/** Create a unique Notification record name */
 	static public String createUniqueName() {

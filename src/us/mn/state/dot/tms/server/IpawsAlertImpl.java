@@ -78,12 +78,8 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	}
 
 	/** Name creator */
-	static UniqueNameCreator UNC;
-	static {
-		UNC = new UniqueNameCreator("ipaws_alert_%d",
-			(n)->lookupIpawsDeployer(n));
-		UNC.setMaxLength(20);
-	}
+	static private final UniqueNameCreator UNC = new UniqueNameCreator(
+		"ipaws_alert_%d", 20, (n)->lookupIpawsDeployer(n));
 
 	/** Create a unique IpawsAlert record name */
 	static public String createUniqueName() {
