@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +18,7 @@ package us.mn.state.dot.tms.server.comm.ipaws;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.comm.FeedPoller;
 import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.HTTPS;
 
@@ -30,8 +32,9 @@ import static us.mn.state.dot.tms.utils.URIUtil.HTTPS;
  * @author Gordon Parikh
  * @author Douglas Lau
  */
-public class IpawsPoller extends ThreadedPoller<IpawsProperty> {
-
+public class IpawsPoller extends ThreadedPoller<IpawsProperty>
+	implements FeedPoller
+{
 	/** IPAWS debug log */
 	static private final DebugLog IPAWS_LOG = new DebugLog("ipaws");
 
@@ -46,7 +49,8 @@ public class IpawsPoller extends ThreadedPoller<IpawsProperty> {
 	}
 
 	/** Query IPAWS for alert messages */
-	public void queryMessages(ControllerImpl c) {
+	@Override
+	public void queryFeed(ControllerImpl c) {
 		slog("creating OpReadIpaws: " + c);
 		addOp(new OpReadIpaws(c, name));
 	}
@@ -62,6 +66,6 @@ public class IpawsPoller extends ThreadedPoller<IpawsProperty> {
 	 */
 	public void startTesting(ControllerImpl c) {
 		slog("creating OpTestIpaws: " + c);
-		 addOp(new OpTestIpaws(c, name));
+		addOp(new OpTestIpaws(c, name));
 	}
 }
