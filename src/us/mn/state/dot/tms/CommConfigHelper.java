@@ -25,8 +25,8 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
 public class CommConfigHelper extends BaseHelper {
 
 	/** Name creator */
-	static final UniqueNameCreator UNC =
-		new UniqueNameCreator("cfg_%d", (n)->lookup(n));
+	static private final UniqueNameCreator UNC = new UniqueNameCreator(
+		"cfg_%d", 10, (n)->lookup(n));
 
 	/** Create a unique comm_config record name */
 	static public String createUniqueName() {

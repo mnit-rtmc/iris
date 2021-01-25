@@ -50,12 +50,8 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
 public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 
 	/** Name creator */
-	static UniqueNameCreator UNC;
-	static {
-		UNC = new UniqueNameCreator("ipaws_dplr_%d",
-			(n)->lookupIpawsDeployer(n));
-		UNC.setMaxLength(20);
-	}
+	static private final UniqueNameCreator UNC = new UniqueNameCreator(
+		"ipaws_dplr_%d", 20, (n)->lookupIpawsDeployer(n));
 
 	/** Create a unique IpawsDeployer record name */
 	static private String createUniqueName() {

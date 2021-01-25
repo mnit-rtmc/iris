@@ -23,11 +23,8 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
  */
 public class VidSourceTemplateHelper extends BaseHelper {
 
-	static UniqueNameCreator UNC;
-	static {
-		UNC = new UniqueNameCreator("VID_SRC_%d", (n)->lookup(n));
-		UNC.setMaxLength(20);
-	}
+	static private final UniqueNameCreator UNC = new UniqueNameCreator(
+		"VID_SRC_%d", 20, (n)->lookup(n));
 
 	/** Create a unique video-source-template record name */
 	static public String createUniqueName() {

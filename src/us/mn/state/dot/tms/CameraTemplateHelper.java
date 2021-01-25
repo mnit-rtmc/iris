@@ -26,11 +26,8 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
 public class CameraTemplateHelper extends BaseHelper {
 
 	/** Name creator */
-	static UniqueNameCreator UNC;
-	static {
-		UNC = new UniqueNameCreator("CAM_TMPLT_%d", (n)->lookup(n));
-		UNC.setMaxLength(20);
-	}
+	static private final UniqueNameCreator UNC = new UniqueNameCreator(
+		"CAM_TMPLT_%d", 20, (n)->lookup(n));
 
 	/** Create a unique camera-template record name */
 	static public String createUniqueName() {
