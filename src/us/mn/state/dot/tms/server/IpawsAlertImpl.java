@@ -63,9 +63,8 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Table containing NWS Forecast Zone Geometries.  This can be obtained
 	 *  / updated from the NWS by going to this website and importing the
-	 *  shapefile into PostGIS: https://www.weather.gov/gis/PublicZones.
-	 */
-	static private final String GEOMETRY_TABLE = "iris.nws_zones";
+	 *  shapefile into PostGIS: https://www.weather.gov/gis/PublicZones. */
+	static private final String NWS_ZONE_TABLE = "iris.nws_zones";
 
 	/** Get the distance threshold for auto DMS */
 	static private int autoDmsMeters() {
@@ -99,6 +98,66 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		DmsMsgPriority.AWS_HIGH
 	};
 
+	/** Parse the polygon section of a CAP alert's area section and format
+	 *  as WKT syntax used by PostGIS.
+	 *
+	 *  The string comes in as space-delimited coordinate pairs
+	 *  (which themselves are separated by commas) in lat, lon order,
+	 *  e.g.: 45.0,-93.0 45.0,-93.1 ...
+	 *  We need something that looks like this (note coordinates are in
+	 *  lon, lat order (which is x, y)
+	 *  MULTIPOLYGON(((-93.0 45.0, -93.1 45.0, ...), (...)))
+	 *
+	 *  TODO this would need some changes to work with multiple <polygon>
+	 *       blocks, but NWS doesn't seem to use those.
+	 */
+	static private String parseCapPolygon(String capPolyStr) {
+		StringBuilder sb = new StringBuilder();
+		// TODO this would need to change to handle
+		//      multiple <polygon> blocks
+		sb.append("MULTIPOLYGON(((");
+		String coords[] = capPolyStr.split(" ");
+		for (String c: coords) {
+			String clatlon[] = c.split(",");
+			String lat, lon;
+			if (clatlon.length == 2) {
+				lat = clatlon[0];
+				lon = clatlon[1];
+			} else
+				return null;
+			// add the coordinates to the string as "lon lat"
+			sb.append(lon);
+			sb.append(" ");
+			sb.append(lat);
+			sb.append(", ");
+		}
+		if (sb.substring(sb.length() - 2).equals(", "))
+			sb.setLength(sb.length() - 2);
+		// TODO change this when fixing for multiple polygons
+		sb.append(")))");
+		return sb.toString();
+	}
+
+	/** Format UGC codes as a string for an array in an SQL statement */
+	static private String formatUGC(JSONArray ugcj) {
+		// UGC fields will come in as "<STATE>Z<CODE>", e.g. "MNZ060"
+		// we want "<STATE><CODE>" (e.g. "MN060") which matches
+		// the data from the NWS
+		StringBuilder sb = new StringBuilder();
+		sb.append("('");
+		for (int i = 0; i < ugcj.length(); ++i) {
+			String iugc = ugcj.getString(i);
+			String state = iugc.substring(0, 2);
+			String code = iugc.substring(3);
+			sb.append(state + code);
+			sb.append("','");
+		}
+		if (",'".equals(sb.substring(sb.length() - 2)))
+			sb.setLength(sb.length() - 2);
+		sb.append(")");
+		return sb.toString();
+	}
+
 	/** Load all the IPAWS alerts */
 	static public void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IpawsAlertImpl.class);
@@ -114,14 +173,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				try {
-					namespace.addObject(new IpawsAlertImpl(
-						row));
-				} catch (Exception e) {
-					System.out.println("Error adding: " +
-						row.getString(1));
-					e.printStackTrace();
-				}
+				namespace.addObject(new IpawsAlertImpl(row));
 			}
 		});
 	}
@@ -338,8 +390,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			try {
 				geo_poly = new MultiPolygon(gp);
 			} catch (SQLException e) {
-				System.out.println("Error generating polygon from: " + gp);
-				e.printStackTrace();
+				log("error generating polygon from: " + gp);
 			}
 		}
 		lat = lt;
@@ -980,20 +1031,16 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	 *  One deployer object is created for each matching IpawsConfig,
 	 *  allowing different messages to be posted to different sign types.
 	 */
-	public void processAlert() throws SQLException, TMSException,
-		NoSuchFieldException
-	{
+	public void processAlert() throws SQLException, TMSException {
 		if (getPurgeable() == null)
 			processNewAlert();
 		processPhase();
 	}
 
 	/** Process a new IPAWS alert */
-	private void processNewAlert() throws SQLException, TMSException,
-		NoSuchFieldException
-	{
+	private void processNewAlert() throws SQLException, TMSException {
 		log("processing new alert");
-		createGeogPoly();
+		createGeoPoly();
 		if (getGeoPoly() != null)
 			updateCentroid();
 		else {
@@ -1194,158 +1241,79 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return ALLOWED_PRIORITIES[i];
 	}
 
-	/** Use the area section of an IPAWS alert to creating a PostGIS
-	 *  MultiPolygon geography object.
-	 *
-	 *  If a polygon section is found, it is used to create a MultiPolygon
-	 *  object (one for each polygon).  If there is no polygon, the other
-	 *  location information is used to look up one or more polygons. */
-	private void createGeogPoly() throws TMSException, SQLException,
-		NoSuchFieldException
-	{
-		// get a JSON object from the area string
-		// (which is in JSON syntax)
-		JSONObject jo = null;
-		String ps = null;
+	/** Create the geoPoly attribute using the area section of the alert */
+	private void createGeoPoly() throws TMSException, SQLException {
 		String area = getArea();
 		if (area != null) {
-			try {
-				log(area);
-				jo = new JSONObject(area);
-				// get the "polygon" section
-				if (jo.has("polygon"))
-					ps = jo.getString("polygon");
-			} catch (JSONException e) {
-				e.printStackTrace();
-				return;
-			}
-		} else
-			return;
-
-		// if we didn't get a polygon, check the other fields in the
-		// area to find one we can use to lookup a geographical area
-		if (ps == null) {
-			log("No polygon, trying UGC codes...");
-
-			// look for geocode fields in the area section
-			JSONObject gj;
-			try {
-				gj = jo.getJSONObject("geocode");
-			} catch (JSONException e) {
-				// no geocode field or not a JSONObject, not
-				// much we can do
-				e.printStackTrace();
-				return;
-			}
-
-			// look for UGC fields
-			JSONArray ugcj;
-			try {
-				ugcj = gj.getJSONArray("UGC");
-			} catch (JSONException e) {
-				// no UGC fields or not a JSONArray, not much we
-				// can do
-				e.printStackTrace();
-				return;
-			}
-
-			// UGC fields will come in as "<STATE>Z<CODE>", e.g.
-			// "MNZ060"
-			// we want "<STATE><CODE>" (e.g. "MN060") which matches
-			// the data from the NWS
-			// we also want a string for an array in an SQL statement
-			StringBuilder sb = new StringBuilder();
-			sb.append("('");
-			for (int i = 0; i < ugcj.length(); ++i) {
-				String iugc = ugcj.getString(i);
-				String state = iugc.substring(0, 2);
-				String code = iugc.substring(3);
-				sb.append(state + code);
-				sb.append("','");
-			}
-			// remove trailing comma/quote and add closing
-			// parenthesis
-			if (",'".equals(sb.substring(sb.length() - 2)))
-				sb.setLength(sb.length() - 2);
-			sb.append(")");
-			String arrStr = sb.toString();
-			log("Got codes: " + arrStr);
-
-			// query the database for the result
-			IpawsAlertImpl.store.query(
-			"SELECT ST_AsText(ST_Multi(ST_Union(geom))) FROM " +
-			GEOMETRY_TABLE + " WHERE state_zone IN " + arrStr + ";",
-			new ResultFactory() {
-				@Override
-				public void create(ResultSet row) throws Exception {
-					// we should get back a MultiPolygon string
-					String polystr = row.getString(1);
-					if (polystr != null && !polystr.isEmpty()) {
-						MultiPolygon mp = new MultiPolygon(polystr);
-						setGeoPolyNotify(mp);
-					} else
-						log("No polygon found for UGC codes!");
-				}
-			});
-		} else {
-			// reformat the string so PostGIS will accept it
-			// create and set the MultiPolygon on the alert object
-			log("Got polygon: " + ps);
-			String pgps = formatMultiPolyStr(ps);
-			MultiPolygon mp = new MultiPolygon(pgps);
+			MultiPolygon mp = createGeoPoly(area);
 			setGeoPolyNotify(mp);
 		}
 	}
 
-	/** Reformat the text taken from the polygon section of a CAP alert's
-	 *  area section to match the WKT syntax used by PostGIS.
-	 *
-	 *  TODO this would need some changes to work with multiple <polygon>
-	 *  blocks, but NWS doesn't seem to use those.
-	 */
-	static private String formatMultiPolyStr(String capPolyStr)
-		throws NoSuchFieldException
-	{
-		// the string comes in as space-delimited coordinate pairs (which
-		// themselves are separated by commas) in lat, lon order,
-		// e.g.: 45.0,-93.0 45.0,-93.1 ...
-		// we need something that looks like this (note coordinates are in
-		// lon, lat order (which is x, y)
-		// MULTIPOLYGON(((-93.0 45.0, -93.1 45.0, ...), (...)))
-
-		// start a StringBuilder
-		StringBuilder sb = new StringBuilder();
-
-		// TODO this would need to change to handle multiple <polygon> blocks
-		sb.append("MULTIPOLYGON(((");
-
-		// split the polygon string on spaces to get coordinate pairs
-		String coords[] = capPolyStr.split(" ");
-		for (String c: coords) {
-			String clatlon[] = c.split(",");
-			String lat, lon;
-			if (clatlon.length == 2) {
-				lat = clatlon[0];
-				lon = clatlon[1];
-			} else {
-				throw new NoSuchFieldException(
-					"Problem decoding polygon field");
-			}
-			// add the coordinates to the string as "lon lat"
-			sb.append(lon);
-			sb.append(" ");
-			sb.append(lat);
-			sb.append(", ");
+	/** Create a MultiPolygon geography object from a given area section
+	 *  from the alert. */
+	private MultiPolygon createGeoPoly(String area) {
+		try {
+			log("area: " + area);
+			String ps = createGeoPoly(new JSONObject(area));
+			if (ps != null)
+				return new MultiPolygon(ps);
 		}
+		catch (JSONException e) {
+			log("invalid area JSON: " + e.getMessage());
+		}
+		catch (SQLException e) {
+			log("error creating geo_poly: " + e.getMessage());
+		}
+		catch (TMSException e) {
+			log("error looking up UGC codes: " + e.getMessage());
+		}
+		return null;
+	}
 
-		// remove the trailing comma
-		if (sb.substring(sb.length()-2).equals(", "))
-			sb.setLength(sb.length()-2);
+	/** Create a MultiPolygon geography object from a given area section
+	 *  from the alert.
+	 *
+	 *  If a polygon section is found, it is used to create a MultiPolygon
+	 *  object (one for each polygon).  If there is no polygon, the other
+	 *  location information is used to look up one or more polygons. */
+	private String createGeoPoly(JSONObject area) throws JSONException,
+		TMSException
+	{
+		if (area.has("polygon")) {
+			String ps = area.getString("polygon");
+			log("got polygon: " + ps);
+			String mp = parseCapPolygon(ps);
+			if (mp == null)
+				log("invalid polygon object!");
+			return mp;
+		} else {
+			// if we didn't get a polygon, check the other fields
+			// to find one we can use to lookup a geographical area
+			log("no polygon, trying UGC codes");
+			JSONObject gj = area.getJSONObject("geocode");
+			JSONArray ugcj = gj.getJSONArray("UGC");
+			String ugc = formatUGC(ugcj);
+			log("got UGC codes: " + ugc);
+			String mp = lookupUGC(ugc);
+			if (mp == null)
+				log("no polygon found for UGC codes!");
+			return mp;
+		}
+	}
 
-		// TODO change this when fixing for multiple polygons
-		sb.append(")))");
-
-		return sb.toString();
+	/** Lookup UGC polygons from NWS zone table */
+	private String lookupUGC(String ugc) throws TMSException {
+		String[] ps = new String[1];
+		store.query("SELECT ST_AsText(ST_Multi(ST_Union(geom))) FROM " +
+			NWS_ZONE_TABLE + " WHERE state_zone IN " + ugc + ";",
+		new ResultFactory() {
+			@Override
+			public void create(ResultSet row) throws SQLException {
+				ps[0] = row.getString(1);
+			}
+		});
+		return ps[0];
 	}
 
 	/** Update the centroid of an alert area */
@@ -1374,6 +1342,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			double lat = Double.parseDouble(ll[1]);
 			setLatNotify(lat);
 			setLonNotify(lon);
-		}
+		} else
+			log("invalid point: " + llStr);
 	}
 }
