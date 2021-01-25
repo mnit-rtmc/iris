@@ -42,10 +42,8 @@ import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.CamKeyboardPoller;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
+import us.mn.state.dot.tms.server.comm.FeedPoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
-import us.mn.state.dot.tms.server.comm.incfeed.IncFeedPoller;
-import us.mn.state.dot.tms.server.comm.ipaws.IpawsPoller;
-import us.mn.state.dot.tms.server.comm.msgfeed.MsgFeedPoller;
 import us.mn.state.dot.tms.server.event.CommEvent;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -958,36 +956,16 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Poll controller for protocols with no devices */
 	private void pollController() {
-		queryIncFeed();
-		queryMsgFeed();
-		queryIpaws();
+		queryFeed();
 		queryCamKeyboard();
 	}
 
-	/** Query incident feed */
-	private void queryIncFeed() {
+	/** Query a feed */
+	private void queryFeed() {
 		DevicePoller dp = getPoller();
-		if (dp instanceof IncFeedPoller) {
-			IncFeedPoller ifp = (IncFeedPoller) dp;
-			ifp.queryIncidents(this);
-		}
-	}
-
-	/** Query msg feed */
-	private void queryMsgFeed() {
-		DevicePoller dp = getPoller();
-		if (dp instanceof MsgFeedPoller) {
-			MsgFeedPoller mfp = (MsgFeedPoller) dp;
-			mfp.queryMessages(this);
-		}
-	}
-	
-	/** Query IPAWS alerts */
-	private void queryIpaws() {
-		DevicePoller dp = getPoller();
-		if (dp instanceof IpawsPoller) {
-			IpawsPoller ip = (IpawsPoller) dp;
-			ip.queryMessages(this);
+		if (dp instanceof FeedPoller) {
+			FeedPoller fp = (FeedPoller) dp;
+			fp.queryFeed(this);
 		}
 	}
 
