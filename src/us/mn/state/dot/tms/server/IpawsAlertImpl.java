@@ -28,6 +28,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.postgis.MultiPolygon;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.AlertState;
 import us.mn.state.dot.tms.CapCertaintyEnum;
@@ -1013,7 +1014,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		} else {
 			Date start = getAlertStart();
 			Date end = getExpirationDate();
-			Date now = new Date();
+			Date now = TimeSteward.getDateInstance();
 			if (proc.before(start) && now.after(start) &&
 				now.before(end))
 			{
@@ -1024,7 +1025,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 				createDeployers();
 			}
 		}
-		setLastProcessedNotify(new Date());
+		setLastProcessedNotify(TimeSteward.getDateInstance());
 	}
 
 	/** Create deployers for alert */

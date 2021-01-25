@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.AlertState;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -35,6 +35,8 @@ import us.mn.state.dot.tms.IteratorWrapper;
 import us.mn.state.dot.tms.NotificationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.HOURS;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
@@ -60,12 +62,8 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		return UNC.createUniqueName();
 	}
 
-	/** Time units to use for calculating pre/post alert deployment times.
-	 *  This is provided for convenience when testing, where changing to
-	 *  TimeUnit.MINUTES will generally allow for easier testing than the
-	 *  value of TimeUnit.HOURS that is used in production.
-	 */
-	static private TimeUnit prePostTimeUnits = TimeUnit.HOURS;
+	/** Interval value of one hour (ms) */
+	static private final long HOUR_MS = new Interval(1, HOURS).ms();
 
 	static public Iterator<IpawsDeployerImpl> iterator() {
 		return new IteratorWrapper<IpawsDeployerImpl>(
@@ -197,22 +195,20 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		alert_state = AlertState.PENDING;
 		was_deployed = false;
 		replaces = rep;
-		gen_time = new Date();
+		gen_time = TimeSteward.getDateInstance();
 	}
 
 	/** Check if the provided values (alert start, alert end, auto-suggested
 	 *  DMS, and auto-generated MULTI) are equal to the corresponding values
-	 *  contained in this alert deployer.
-	 */
+	 *  contained in this alert deployer. */
 	public boolean autoValsEqual(Date aStart, Date aEnd, String[] adms,
 		String aMulti, int mp)
 	{
-		boolean startEq = objectEquals(aStart, alert_start);
-		boolean endEq = objectEquals(aEnd, alert_end);
-		boolean dmsEq = Arrays.equals(auto_dms, adms);
-		boolean multiEq = objectEquals(aMulti, auto_multi);
-		boolean mpEq = (msg_priority == mp);
-		return startEq && endEq && dmsEq && multiEq && mpEq;
+		return objectEquals(aStart, alert_start) &&
+		       objectEquals(aEnd, alert_end) &&
+		       Arrays.equals(auto_dms, adms) &&
+		       objectEquals(aMulti, auto_multi) &&
+		       (msg_priority == mp);
 	}
 
 	/** Generation time of alert deployer */
@@ -235,7 +231,7 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 
 	/** Set the approval time of this deployer object */
 	private void setApprovedTimeNotify() throws TMSException {
-		Date now = new Date();
+		Date now = TimeSteward.getDateInstance();
 		store.update(this, "approved_time", now);
 		approved_time = now;
 		notifyAttribute("approvedTime");
@@ -311,51 +307,26 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		return pre_alert_time;
 	}
 
-	/** Check if the current time is past the allowed pre alert time given
-	 *  the deployer's alert start time. If this returns true, it generally
-	 *  means the deployment should be started (assuming it is inactive).
-	 */
-	public boolean isPastPreAlertTime() {
-		return isPastPreAlertTime(alert_start);
-	}
-
-	/** Check if the current time is past the allowed pre alert time given
-	 *  the time provided (which should be an alert start time).  Using this
-	 *  is advised when processing updates to handle changes to an alert's
-	 *  onset time.  If this returns true, it generally means the deployment
-	 *  should be started (assuming it is active).
-	 */
-	public boolean isPastPreAlertTime(Date alertStart) {
-		Date now = new Date();
-
-		if (now.before(alertStart)) {
-			long t = alertStart.getTime() - now.getTime();
-			int units = (int) prePostTimeUnits.convert(
-				t, TimeUnit.MILLISECONDS);
-			return units < pre_alert_time;
-		}
-		// if after the alert start, we must be past the pre-alert time
-		return true;
+	/** Get the pre-alert start time (ms) */
+	private long getPreAlertTimeMs() {
+		return alert_start.getTime() - (pre_alert_time * HOUR_MS);
 	}
 
 	/** Amount of time (in hours) to display a post-alert message after an
-	 *  alert expires or an AllClear response type is sent via IPAWS. First
-	 *  set from the config, then can be changed for each alert.
-	 */
+	 *  alert expires or an AllClear response type is sent via IPAWS.  First
+	 *  set from the config, then can be changed for each alert. */
 	private int post_alert_time;
 
 	/** Set amount of time (in hours) to display a post-alert message after
 	 *  an alert expires or an AllClear response type is sent via IPAWS.
-	 *  First set from the config, then can be changed for each alert.
-	 */
+	 *  First set from the config, then can be changed for each alert. */
 	@Override
 	public void setPostAlertTime(int hours) {
 		post_alert_time = hours;
 	}
 
 	/** Set amount of time (in hours) to display a post-alert message after
-	 *  an alert expires or an AllClear response type is sent via IPAWS.
-	 */
+	 *  an alert expires or an AllClear response type is sent via IPAWS. */
 	public void doSetPostAlertTime(int hours) throws TMSException {
 		if (hours != post_alert_time) {
 			store.update(this, "post_alert_time", hours);
@@ -364,36 +335,15 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	}
 
 	/** Get amount of time (in hours) to display a post-alert message after
-	 *  an alert expires or an AllClear response type is sent via IPAWS.
-	 */
+	 *  an alert expires or an AllClear response type is sent via IPAWS. */
 	@Override
 	public int getPostAlertTime() {
 		return post_alert_time;
 	}
 
-	/** Check if the current time is past the allowed post alert time given
-	 *  the deployer's alert end time. If this returns true, it generally
-	 *  means the deployment should be canceled.
-	 */
-	public boolean isPastPostAlertTime() {
-		return isPastPostAlertTime(alert_end);
-	}
-
-	/** Check if the current time is past the allowed post alert time given
-	 *  the time provided (which should be an alert end time). Using this is
-	 *  advised when processing updates to handle changes to an alert's
-	 *  expiration time. If this returns true, it generally means the
-	 *  deployment should be canceled.
-	 */
-	public boolean isPastPostAlertTime(Date alertEnd) {
-		Date now = new Date();
-		if (now.after(alertEnd)) {
-			long t = now.getTime() - alertEnd.getTime();
-			int units = (int) prePostTimeUnits.convert(
-				t, TimeUnit.MILLISECONDS);
-			return units >= post_alert_time;
-		}
-		return false;
+	/** Get the post-alert end time (ms) */
+	private long getPostAlertTimeMs() {
+		return alert_end.getTime() + (post_alert_time * HOUR_MS);
 	}
 
 	/** List of DMS automatically selected for this alert. */
@@ -599,27 +549,18 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 
 	/** Check the alert against the pre-/post-alert times and either repost
 	 *  or cancel the alert as needed. */
-	public boolean checkStateChange() throws TMSException {
-		boolean pastPre = isPastPreAlertTime();
-		boolean pastPost = isPastPostAlertTime();
-		if (pastPre && !pastPost) {
-			deployAlert();
-			return true;
-		} else if (pastPre && pastPost) {
-			// if past post-alert time but we were told to deploy,
-			// we need to cancel
+	public void checkStateChange() throws TMSException {
+		long now = TimeSteward.currentTimeMillis();
+		long pre_alert_time_ms = getPreAlertTimeMs();
+		long post_alert_time_ms = getPostAlertTimeMs();
+		if (now > post_alert_time_ms)
 			cancelAlert();
-			return false;
-		} else if (!pastPre) {
-			// if before the pre-alert time, we're waiting
-			int millis = (int) TimeUnit.MILLISECONDS.convert(
-				pre_alert_time, prePostTimeUnits);
-			Date start = new Date(alert_start.getTime() - millis);
-			IpawsProcJob.log("Waiting until " + start +
-				" for alert to start...");
-			return true;
-		} else
-			return false;
+		else if (now > pre_alert_time_ms)
+			deployAlert();
+		else {
+			IpawsProcJob.log("Waiting until " +
+				new Date(pre_alert_time_ms) + " to start");
+		}
 	}
 
 	/** Whether this alert deployer was ever deployed or not. */
@@ -646,31 +587,20 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 		return replaces;
 	}
 
-	/** Calculate the duration of a message based on the current time and
-	 *  the alert start/end time.  */
-	private int calculateMsgDuration() {
-		if (alert_start != null && alert_end != null) {
-			// check the time of the alert relative to now
-			Date now = new Date();
-			long dm = -1;
-			if (now.before(alert_start)) {
-				// use time between now and start
-				dm = alert_start.getTime() - now.getTime();
-			} else if (now.after(alert_start) && now.before(alert_end)) {
-				// use time between now and end
-				dm = alert_end.getTime() - now.getTime();
-			} else if (now.after(alert_end)) {
-				// use time between now and end + post_alert_time
-				long postMillis = TimeUnit.MILLISECONDS.convert(
-					post_alert_time, prePostTimeUnits);
-				Date msgEnd = new Date(alert_end.getTime() + postMillis);
-				dm = msgEnd.getTime() - now.getTime();
-			}
-			if (dm != -1)
-				return (int) dm / 1000;
-		}
-		// if alert is in past or duration could not be calculated
-		return -1;
+	/** Calculate the duration of a message (ms) */
+	private long calculateMsgDurationMs() {
+		long now = TimeSteward.currentTimeMillis();
+		long start = alert_start.getTime();
+		long end = alert_end.getTime();
+		long post_end = getPostAlertTimeMs();
+		if (now < start)
+			return start - now;
+		else if (now < end)
+			return end - now;
+		else if (now < post_end)
+			return post_end - now;
+		else
+			return 0;
 	}
 
 	/** Deploy an alert with all the parameters we have in this deployer.
@@ -679,9 +609,9 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 	private void deployAlert() throws TMSException {
 		String rmulti = getRequestedMulti();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(msg_priority);
-		int duration = calculateMsgDuration();
+		int duration = (int) (calculateMsgDurationMs() / 60000L);
 		if (rmulti != null && !rmulti.isEmpty()
-			&& mp != DmsMsgPriority.INVALID && duration != -1)
+			&& mp != DmsMsgPriority.INVALID && duration > 0)
 		{
 			deployAlert(rmulti, mp, duration);
 		}
@@ -803,7 +733,8 @@ public class IpawsDeployerImpl extends BaseObjectImpl implements IpawsDeployer {
 				// TODO may want to make this an option
 				// to force reviewing
 				pn.setAddressedByNotify("auto");
-				pn.setAddressedTimeNotify(new Date());
+				pn.setAddressedTimeNotify(
+					TimeSteward.getDateInstance());
 			}
 			// NOTE: alert canceling handled in IpawsDeployerImpl
 		} else

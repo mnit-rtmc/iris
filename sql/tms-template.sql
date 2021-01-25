@@ -762,7 +762,7 @@ GRANT SELECT ON role_privilege_view TO PUBLIC;
 
 CREATE TABLE event.client_event (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp WITH time zone NOT NULL,
+	event_date TIMESTAMP WITH time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	host_port VARCHAR(64) NOT NULL,
@@ -2944,7 +2944,7 @@ GRANT SELECT ON recent_sign_event_view TO PUBLIC;
 
 CREATE TABLE event.travel_time_event (
 	event_id SERIAL PRIMARY KEY,
-	event_date timestamp WITH time zone NOT NULL,
+	event_date TIMESTAMP WITH time zone NOT NULL,
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	device_id VARCHAR(20),
@@ -3586,7 +3586,7 @@ CREATE TABLE event.ipaws_alert (
 	name text PRIMARY KEY,
 	identifier text UNIQUE NOT NULL,
 	sender text,
-	sent_date timestamp with time zone,
+	sent_date TIMESTAMP WITH time zone,
 	status text,
 	message_type text,
 	scope text,
@@ -3601,9 +3601,9 @@ CREATE TABLE event.ipaws_alert (
 	severity text,
 	certainty text,
 	audience text,
-	effective_date timestamp with time zone,
-	onset_date timestamp with time zone,
-	expiration_date timestamp with time zone,
+	effective_date TIMESTAMP WITH time zone,
+	onset_date TIMESTAMP WITH time zone,
+	expiration_date TIMESTAMP WITH time zone,
 	sender_name text,
 	headline text,
 	alert_description text,
@@ -3614,16 +3614,16 @@ CREATE TABLE event.ipaws_alert (
 	lat double precision,
 	lon double precision,
 	purgeable BOOLEAN,
-	last_processed timestamp with time zone
+	last_processed TIMESTAMP WITH time zone
 );
 
 -- IPAWS Alert Deployer table
 CREATE TABLE event.ipaws_deployer (
 	name VARCHAR(20) PRIMARY KEY,
-	gen_time timestamp with time zone,
+	gen_time TIMESTAMP WITH time zone NOT NULL,
 	alert_id text REFERENCES event.ipaws_alert(identifier),
-	alert_start timestamp with time zone,
-	alert_end timestamp with time zone,
+	alert_start TIMESTAMP WITH time zone NOT NULL,
+	alert_end TIMESTAMP WITH time zone NOT NULL,
 	config VARCHAR(24) NOT NULL REFERENCES iris.ipaws_config,
 	pre_alert_time INTEGER NOT NULL,
 	post_alert_time INTEGER NOT NULL,
@@ -3634,7 +3634,8 @@ CREATE TABLE event.ipaws_deployer (
 	deployed_multi text,
 	msg_priority INTEGER NOT NULL,
 	approved_by VARCHAR(15),
-	approved_time timestamp with time zone,
+	approved_time TIMESTAMP WITH time zone,
+	alert_state INTEGER NOT NULL,
 	was_deployed BOOLEAN NOT NULL,
 	replaces VARCHAR(24)
 );
@@ -3915,7 +3916,7 @@ CREATE TABLE iris.parking_area (
 	low_threshold INTEGER,
 	amenities INTEGER,
 	-- dynamic site data
-	time_stamp timestamp WITH time zone,
+	time_stamp TIMESTAMP WITH time zone,
 	reported_available VARCHAR(8),
 	true_available INTEGER,
 	trend VARCHAR(8),
@@ -4016,12 +4017,12 @@ CREATE TABLE event.notification (
 	name varchar(30) PRIMARY KEY,
 	ref_object_type varchar(16) REFERENCES iris.sonar_type(name),
 	ref_object_name text,
-	needs_write boolean,
-	sent_time timestamp with time zone,
+	needs_write BOOLEAN,
+	sent_time TIMESTAMP WITH time zone,
 	title text,
 	description text,
-	addressed_by varchar(15),
-	addressed_time timestamp with time zone
+	addressed_by VARCHAR(15),
+	addressed_time TIMESTAMP WITH time zone
 );
 
 --
@@ -4442,7 +4443,7 @@ COPY event.tag_type (id, description) FROM stdin;
 
 CREATE TABLE event.tag_read_event (
 	event_id SERIAL PRIMARY KEY,
-	event_date timestamp WITH time zone NOT NULL,
+	event_date TIMESTAMP WITH time zone NOT NULL,
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	tag_type INTEGER NOT NULL REFERENCES event.tag_type,
@@ -4488,7 +4489,7 @@ CREATE TRIGGER tag_read_event_view_update_trig
 
 CREATE TABLE event.price_message_event (
 	event_id SERIAL PRIMARY KEY,
-	event_date timestamp WITH time zone NOT NULL,
+	event_date TIMESTAMP WITH time zone NOT NULL,
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	device_id VARCHAR(20) NOT NULL,
