@@ -28,6 +28,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.postgis.MultiPolygon;
+import org.postgis.Polygon;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.AlertState;
@@ -94,25 +95,22 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		DmsMsgPriority.AWS_HIGH
 	};
 
-	/** Parse the polygon section of a CAP alert's area section and format
-	 *  as WKT syntax used by PostGIS.
+	/** Parse a CAP alert polygon section and format as WKT syntax used by
+	 *  PostGIS.
 	 *
 	 *  The string comes in as space-delimited coordinate pairs
 	 *  (which themselves are separated by commas) in lat, lon order,
 	 *  e.g.: 45.0,-93.0 45.0,-93.1 ...
 	 *  We need something that looks like this (note coordinates are in
 	 *  lon, lat order (which is x, y)
-	 *  MULTIPOLYGON(((-93.0 45.0, -93.1 45.0, ...), (...)))
-	 *
-	 *  TODO this would need some changes to work with multiple <polygon>
-	 *       blocks, but NWS doesn't seem to use those.
+	 *  POLYGON((-93.0 45.0, -93.1 45.0, ...))
 	 */
-	static private String parseCapPolygon(String capPolyStr) {
+	static private Polygon parseCapPolygon(String cap_poly)
+		throws SQLException
+	{
 		StringBuilder sb = new StringBuilder();
-		// TODO this would need to change to handle
-		//      multiple <polygon> blocks
-		sb.append("MULTIPOLYGON(((");
-		String coords[] = capPolyStr.split(" ");
+		sb.append("POLYGON((");
+		String coords[] = cap_poly.split(" ");
 		for (String c: coords) {
 			String clatlon[] = c.split(",");
 			String lat, lon;
@@ -129,9 +127,8 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		}
 		if (sb.substring(sb.length() - 2).equals(", "))
 			sb.setLength(sb.length() - 2);
-		// TODO change this when fixing for multiple polygons
-		sb.append(")))");
-		return sb.toString();
+		sb.append("))");
+		return new Polygon(sb.toString());
 	}
 
 	/** Format UGC codes as a string for an array in an SQL statement */
@@ -1251,9 +1248,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	private MultiPolygon createGeoPoly(String ar) {
 		try {
 			log("area: " + ar);
-			String ps = createGeoPoly(new JSONObject(ar));
-			if (ps != null)
-				return new MultiPolygon(ps);
+			return createGeoPoly(new JSONObject(ar));
 		}
 		catch (JSONException e) {
 			log("invalid area JSON: " + e.getMessage());
@@ -1273,34 +1268,42 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	 *  If a polygon section is found, it is used to create a MultiPolygon
 	 *  object (one for each polygon).  If there is no polygon, the other
 	 *  location information is used to look up one or more polygons. */
-	private String createGeoPoly(JSONObject jarea) throws JSONException,
-		TMSException
+	private MultiPolygon createGeoPoly(JSONObject jarea)
+		throws JSONException, SQLException, TMSException
 	{
-		if (jarea.has("polygon")) {
-			JSONArray polys = jarea.getJSONArray("polygon");
-			if (polys.length() > 0) {
-				// FIXME: handle multiple polygons
-				if (polys.length() > 1)
-					log("ignoring extra polygons");
-				String ps = polys.getString(0);
-				log("got polygon: " + ps);
-				String mp = parseCapPolygon(ps);
-				if (mp == null)
-					log("invalid polygon object!");
-				return mp;
-			}
+		JSONArray polygon = jarea.getJSONArray("polygon");
+		if (polygon != null && polygon.length() > 0)
+			return createMultiPolygon(polygon);
+		else {
+			// if we didn't get a polygon, check the other fields
+			// to find one we can use to lookup a geographical area
+			log("no polygon, trying UGC codes");
+			JSONObject gj = jarea.getJSONObject("geocode");
+			JSONArray ugcj = gj.getJSONArray("UGC");
+			String ugc = formatUGC(ugcj);
+			log("got UGC codes: " + ugc);
+			String mp = lookupUGC(ugc);
+			if (mp == null)
+				log("no polygon found for UGC codes!");
+			return new MultiPolygon(mp);
 		}
-		// if we didn't get a polygon, check the other fields
-		// to find one we can use to lookup a geographical area
-		log("no polygon, trying UGC codes");
-		JSONObject gj = jarea.getJSONObject("geocode");
-		JSONArray ugcj = gj.getJSONArray("UGC");
-		String ugc = formatUGC(ugcj);
-		log("got UGC codes: " + ugc);
-		String mp = lookupUGC(ugc);
-		if (mp == null)
-			log("no polygon found for UGC codes!");
-		return mp;
+	}
+
+	/** Create a MultiPolygon geography object from a polygon JSON array */
+	private MultiPolygon createMultiPolygon(JSONArray polygon)
+		throws JSONException, SQLException
+	{
+		ArrayList<Polygon> polys = new ArrayList<Polygon>();
+		for (int i = 0; i < polygon.length(); i++) {
+			String ps = polygon.getString(i);
+			log("got polygon: " + ps);
+			Polygon pg = parseCapPolygon(ps);
+			if (pg != null)
+				polys.add(pg);
+			else
+				log("invalid polygon!");
+		}
+		return new MultiPolygon(polys.toArray(new Polygon[0]));
 	}
 
 	/** Lookup UGC polygons from NWS zone table */
