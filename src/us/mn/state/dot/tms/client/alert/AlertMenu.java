@@ -58,19 +58,21 @@ public class AlertMenu extends IMenu {
 	/** Create a CAP response type substitution value menu item action */
 	private IAction createCapResponseItem() {
 		return AlertConfigForm.isPermitted(session) ?
-				new IAction("alert.cap.response_substitutions") {
+			new IAction("alert.cap.response_substitutions")
+		{
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new CapResponseForm(session));
 			}
 		} : null;
 	}
 
-	/** Create a CAP urgency substitution value menu item action */
+	/** Create a CAP urgency field substitution value menu item action */
 	private IAction createCapUrgencyItem() {
 		return AlertConfigForm.isPermitted(session) ?
-				new IAction("alert.cap.urgency_substitutions") {
+			new IAction("alert.cap.urgency_substitutions")
+		{
 			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new CapUrgencyForm(session));
+				desktop.show(new CapUrgencyFieldForm(session));
 			}
 		} : null;
 	}

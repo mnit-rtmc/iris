@@ -14,23 +14,20 @@
  */
 package us.mn.state.dot.tms.utils.wysiwyg.token;
 
-
 import java.util.ArrayList;
-
-import us.mn.state.dot.tms.CapUrgencyHelper;
+import us.mn.state.dot.tms.CapUrgencyFieldHelper;
 import us.mn.state.dot.tms.utils.Multi;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
 /** CAP urgency substitution field token for WYSIWYG editor.
- * 
- * @author Gordon Parikh - SRF Consulting
  *
+ * @author Gordon Parikh - SRF Consulting
  */
-public class WtCapUrgency extends Wt_IrisToken {
+public class WtCapUrgencyField extends Wt_IrisToken {
 
 	String[] uvals;
-	
-	public WtCapUrgency(String[] uvals) {
+
+	public WtCapUrgencyField(String[] uvals) {
 		super(WTokenType.capUrgency, "[capurgency");
 		this.uvals = uvals;
 		updateString();
@@ -40,16 +37,18 @@ public class WtCapUrgency extends Wt_IrisToken {
 	public String[] getResponseTypes() {
 		return uvals;
 	}
-	
+
 	/** Get width of WYSIWYG box
 	 * @param chsp Character spacing (null = use font default)
 	 */
 	@Override
 	public Integer getBoxWidth(Integer chsp) {
 		// get the maximum urgency substitution MULTI string length
-		ArrayList<String> multiStrs = CapUrgencyHelper.getMaxLen(uvals);
-		
-		// find the maximum width string (in pixels given the current font)
+		ArrayList<String> multiStrs = CapUrgencyFieldHelper.getMaxLen(
+			uvals);
+
+		// find the maximum width stringi
+		// (in pixels given the current font)
 		int maxWidth = 0;
 		for (String ms: multiStrs) {
 			int w = wfont.getTextWidth(chsp, ms);
@@ -58,7 +57,7 @@ public class WtCapUrgency extends Wt_IrisToken {
 		}
 		return maxWidth;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#doMulti(us.mn.state.dot.tms.utils.Multi)
 	 */
@@ -76,9 +75,8 @@ public class WtCapUrgency extends Wt_IrisToken {
 			sb.append(u);
 			sb.append(",");
 		}
-		// remove any trailing comma if one was added 
-		if (sb.charAt(sb.length()-1) == ',')
-			sb.setLength(sb.length()-1);
+		// remove any trailing comma if one was added
+		if (sb.charAt(sb.length() - 1) == ',')
+			sb.setLength(sb.length() - 1);
 	}
-	
 }

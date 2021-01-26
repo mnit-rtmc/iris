@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.alert;
 
-import us.mn.state.dot.tms.CapUrgency;
+import us.mn.state.dot.tms.CapUrgencyField;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.utils.I18N;
@@ -25,16 +25,16 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Gordon Parikh
  */
 @SuppressWarnings("serial")
-public class CapUrgencyForm extends ProxyTableForm<CapUrgency> {
+public class CapUrgencyFieldForm extends ProxyTableForm<CapUrgencyField> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.isWritePermitted(CapUrgency.SONAR_TYPE);
+		return s.isWritePermitted(CapUrgencyField.SONAR_TYPE);
 	}
 
 	/** Create a new CAP urgency form */
-	public CapUrgencyForm(Session s) {
+	public CapUrgencyFieldForm(Session s) {
 		super(I18N.get("alert.cap.urgency_substitutions"),
-				new CapUrgencyPanel(new CapUrgencyModel(s)));
+			new CapUrgencyFieldPanel(new CapUrgencyFieldModel(s)));
 	}
 }

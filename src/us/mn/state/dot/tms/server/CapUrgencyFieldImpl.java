@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,26 +20,38 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import us.mn.state.dot.tms.CapUrgency;
+import us.mn.state.dot.tms.CapUrgencyField;
 import us.mn.state.dot.tms.TMSException;
 
 /**
  * Common Alerting Protocol (CAP) urgency field substitution value server-side
- * implementation. Used for IPAWS alert processing for generating messages for
+ * implementation.  Used for IPAWS alert processing for generating messages for
  * posting to DMS.
  *
  * @author Gordon Parikh
+ * @author Douglas Lau
  */
-public class CapUrgencyImpl extends BaseObjectImpl implements CapUrgency {
+public class CapUrgencyFieldImpl extends BaseObjectImpl
+	implements CapUrgencyField
+{
+	/** Load all the CAP urgency substitution values */
+	static public void loadAll() throws TMSException {
+		namespace.registerType(SONAR_TYPE, CapUrgencyFieldImpl.class);
+		store.query("SELECT name, event, urgency, multi FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
+		{
+			@Override
+			public void create(ResultSet row) throws Exception {
+				namespace.addObject(new CapUrgencyFieldImpl(row));
+			}
+		});
+	}
 
-	/** Database table name */
-	static private final String TABLE = "iris.cap_urgency";
-
-	public CapUrgencyImpl(String n) {
+	public CapUrgencyFieldImpl(String n) {
 		super(n);
 	}
 
-	public CapUrgencyImpl(String n, String ev, String u, String m) {
+	public CapUrgencyFieldImpl(String n, String ev, int u, String m) {
 		super(n);
 		event = ev;
 		urgency = u;
@@ -55,24 +68,6 @@ public class CapUrgencyImpl extends BaseObjectImpl implements CapUrgency {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Load all the CAP urgency substitution values */
-	static public void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, CapUrgencyImpl.class);
-		store.query("SELECT name, event, urgency, multi FROM iris." +
-				SONAR_TYPE + ";", new ResultFactory()
-		{
-			@Override
-			public void create(ResultSet row) throws Exception {
-				try {
-					namespace.addObject(new CapUrgencyImpl(row));
-				} catch (Exception e) {
-					System.out.println("Error adding: " + row.getString(1));
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
 	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
@@ -83,10 +78,10 @@ public class CapUrgencyImpl extends BaseObjectImpl implements CapUrgency {
 		return map;
 	}
 
-	private CapUrgencyImpl(ResultSet row) throws SQLException {
+	private CapUrgencyFieldImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
 		     row.getString(2),  // event
-		     row.getString(3),  // urgency
+		     row.getInt(3),     // urgency
 		     row.getString(4)); // MULTI
 	}
 
@@ -113,26 +108,26 @@ public class CapUrgencyImpl extends BaseObjectImpl implements CapUrgency {
 		return event;
 	}
 
-	/** Applicable urgency value */
-	private String urgency;
+	/** Urgency ordinal value */
+	private int urgency;
 
-	/** Set the applicable urgency value */
+	/** Set the urgency ordinal value */
 	@Override
-	public void setUrgency(String u) {
+	public void setUrgency(int u) {
 		urgency = u;
 	}
 
-	/** Set the applicable alert event type */
-	public void doSetUrgency(String u) throws TMSException {
+	/** Set the urgency ordinal value */
+	public void doSetUrgency(int u) throws TMSException {
 		if (u != urgency) {
 			store.update(this, "urgency", u);
 			setUrgency(u);
 		}
 	}
 
-	/** Set the applicable urgency value */
+	/** Get the urgency ordinal value */
 	@Override
-	public String getUrgency() {
+	public int getUrgency() {
 		return urgency;
 	}
 

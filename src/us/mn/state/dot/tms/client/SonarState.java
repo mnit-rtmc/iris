@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2020  Minnesota Department of Transportation
+ * Copyright (C) 2007-2021  Minnesota Department of Transportation
  * Copyright (C) 2015       Iteris Inc.
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
@@ -39,7 +39,7 @@ import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.CameraTemplate;
 import us.mn.state.dot.tms.CameraVidSourceOrder;
 import us.mn.state.dot.tms.CapResponse;
-import us.mn.state.dot.tms.CapUrgency;
+import us.mn.state.dot.tms.CapUrgencyField;
 import us.mn.state.dot.tms.DayMatcher;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DmsAction;
@@ -302,16 +302,16 @@ public class SonarState extends Client {
 	/** Cache of CapResponse objects */
 	private final TypeCache<CapResponse> cap_response_cache;
 	
-	/** Get the CapUrgency cache */
+	/** Get the CapResponse cache */
 	public TypeCache<CapResponse> getCapResponseCache() {
 		return cap_response_cache;
 	}
 	
-	/** Cache of CapUrgency objects */
-	private final TypeCache<CapUrgency> cap_urgency_cache;
+	/** Cache of CapUrgencyField objects */
+	private final TypeCache<CapUrgencyField> cap_urgency_cache;
 	
-	/** Get the CapUrgency cache */
-	public TypeCache<CapUrgency> getCapUrgencyCache() {
+	/** Get the CapUrgencyField cache */
+	public TypeCache<CapUrgencyField> getCapUrgencyFieldCache() {
 		return cap_urgency_cache;
 	}
 
@@ -593,8 +593,8 @@ public class SonarState extends Client {
 			IpawsConfig.class, this);
 		cap_response_cache = new TypeCache<CapResponse>(
 			CapResponse.class, this);
-		cap_urgency_cache = new TypeCache<CapUrgency>(CapUrgency.class,
-			this);
+		cap_urgency_cache = new TypeCache<CapUrgencyField>(
+			CapUrgencyField.class, this);
 		notification_cache = new TypeCache<Notification>(
 			Notification.class, this);
 		lcs_cache = new LcsCache(this);

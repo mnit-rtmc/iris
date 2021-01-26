@@ -19,7 +19,7 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.CapUrgency;
-import us.mn.state.dot.tms.CapUrgencyEnum;
+import us.mn.state.dot.tms.CapUrgencyField;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -31,59 +31,71 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Gordon Parikh
  */
 @SuppressWarnings("serial")
-public class CapUrgencyModel extends ProxyTableModel<CapUrgency> {
+public class CapUrgencyFieldModel extends ProxyTableModel<CapUrgencyField> {
 
 	/** Create a proxy descriptor */
-	static public ProxyDescriptor<CapUrgency> descriptor(Session s) {
-		return new ProxyDescriptor<CapUrgency>(
-				s.getSonarState().getCapUrgencyCache(), true);
+	static public ProxyDescriptor<CapUrgencyField> descriptor(Session s) {
+		return new ProxyDescriptor<CapUrgencyField>(
+			s.getSonarState().getCapUrgencyFieldCache(), true);
 	}
 
 	/** Create the columns in the model */
 	@Override
-	protected ArrayList<ProxyColumn<CapUrgency>> createColumns() {
-		ArrayList<ProxyColumn<CapUrgency>> cols =
-				new ArrayList<ProxyColumn<CapUrgency>>(3);
-		cols.add(new ProxyColumn<CapUrgency>("alert.cap.event", 300) {
-			public Object getValueAt(CapUrgency cu) {
+	protected ArrayList<ProxyColumn<CapUrgencyField>> createColumns() {
+		ArrayList<ProxyColumn<CapUrgencyField>> cols =
+			new ArrayList<ProxyColumn<CapUrgencyField>>(3);
+		cols.add(new ProxyColumn<CapUrgencyField>("alert.cap.event",
+			300)
+		{
+			public Object getValueAt(CapUrgencyField cu) {
 				return cu.getEvent();
 			}
-			public boolean isEditable(CapUrgency cu) {
+			public boolean isEditable(CapUrgencyField cu) {
 				return canWrite(cu);
 			}
-			public void setValueAt(CapUrgency cu, Object value) {
+			public void setValueAt(CapUrgencyField cu, Object value) {
 				String ev = value.toString();
 				if (ev == null || ev.isEmpty())
-					cu.setEvent(CapUrgency.DEFAULT_EVENT);
+					cu.setEvent(CapUrgencyField.DEFAULT_EVENT);
 				else
 					cu.setEvent(ev);
 			}
 		});
-		cols.add(new ProxyColumn<CapUrgency>(
-				"alert.cap.urgency", 300) {
-			public Object getValueAt(CapUrgency crt) {
-				return crt.getUrgency();
+		cols.add(new ProxyColumn<CapUrgencyField>("alert.cap.urgency",
+			300)
+		{
+			public Object getValueAt(CapUrgencyField crt) {
+				return CapUrgency.fromOrdinal(
+					crt.getUrgency());
 			}
-			public boolean isEditable(CapUrgency crt) {
+			public boolean isEditable(CapUrgencyField crt) {
 				return canWrite(crt);
 			}
-			public void setValueAt(CapUrgency crt, Object value) {
-				crt.setUrgency(value.toString());
+			public void setValueAt(CapUrgencyField crt,
+				Object value)
+			{
+				int u = (value instanceof CapUrgency)
+				      ?	((CapUrgency) value).ordinal()
+				      : CapUrgency.UNKNOWN.ordinal();
+				crt.setUrgency(u);
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox<String> cbx = new JComboBox<String>(
-						CapUrgencyEnum.stringValues());
+				JComboBox<CapUrgency> cbx =
+					new JComboBox<CapUrgency>(
+					CapUrgency.values());
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<CapUrgency>("alert.cap.multi", 300) {
-			public Object getValueAt(CapUrgency crt) {
+		cols.add(new ProxyColumn<CapUrgencyField>("alert.cap.multi",
+			300)
+		{
+			public Object getValueAt(CapUrgencyField crt) {
 				return crt.getMulti();
 			}
-			public boolean isEditable(CapUrgency crt) {
+			public boolean isEditable(CapUrgencyField crt) {
 				return canWrite(crt);
 			}
-			public void setValueAt(CapUrgency crt, Object value) {
+			public void setValueAt(CapUrgencyField crt, Object value) {
 				// TODO validate MULTI
 				crt.setMulti(value.toString());
 			}
@@ -91,7 +103,7 @@ public class CapUrgencyModel extends ProxyTableModel<CapUrgency> {
 		return cols;
 	}
 
-	public CapUrgencyModel(Session s) {
+	public CapUrgencyFieldModel(Session s) {
 		super(s, descriptor(s), 12);
 	}
 }

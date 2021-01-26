@@ -22,8 +22,8 @@ import java.util.HashSet;
 import us.mn.state.dot.tms.CapResponse;
 import us.mn.state.dot.tms.CapResponseEnum;
 import us.mn.state.dot.tms.CapResponseHelper;
-import us.mn.state.dot.tms.CapUrgency;
-import us.mn.state.dot.tms.CapUrgencyHelper;
+import us.mn.state.dot.tms.CapUrgencyField;
+import us.mn.state.dot.tms.CapUrgencyFieldHelper;
 import us.mn.state.dot.tms.IpawsDeployerHelper;
 import us.mn.state.dot.tms.utils.MultiBuilder;
 
@@ -126,7 +126,7 @@ public class CapMultiBuilder extends MultiBuilder {
 		String urg = alert.getUrgency();
 		String multi = "";
 		if (urgSet.contains(urg)) {
-			CapUrgency subst = CapUrgencyHelper.lookupFor(
+			CapUrgencyField subst = CapUrgencyFieldHelper.lookupFor(
 				alert.getEvent(), urg);
 			if (subst != null)
 				multi = subst.getMulti();

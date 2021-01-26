@@ -32,10 +32,7 @@ import org.postgis.Polygon;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.AlertState;
-import us.mn.state.dot.tms.CapCertaintyEnum;
 import us.mn.state.dot.tms.CapResponseEnum;
-import us.mn.state.dot.tms.CapSeverityEnum;
-import us.mn.state.dot.tms.CapUrgencyEnum;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.GeoLoc;
@@ -86,14 +83,6 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	static private String createUniqueName() {
 		return UNC.createUniqueName();
 	}
-
-	/** Allowed DMS Message Priority values */
-	static private final DmsMsgPriority[] ALLOWED_PRIORITIES = {
-		DmsMsgPriority.PSA,
-		DmsMsgPriority.ALERT,
-		DmsMsgPriority.AWS,
-		DmsMsgPriority.AWS_HIGH
-	};
 
 	/** Parse a CAP alert polygon section and format as WKT syntax used by
 	 *  PostGIS.
@@ -1204,34 +1193,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	 *  attributes.
 	 */
 	private DmsMsgPriority calculateMsgPriority() {
-		// get the weights
-		float wu = SystemAttrEnum.IPAWS_PRIORITY_WEIGHT_URGENCY.getFloat();
-		float ws = SystemAttrEnum.IPAWS_PRIORITY_WEIGHT_SEVERITY.getFloat();
-		float wc = SystemAttrEnum.IPAWS_PRIORITY_WEIGHT_CERTAINTY.getFloat();
-
-		// get the urgency, severity, and certainty values
-		CapUrgencyEnum u = CapUrgencyEnum.fromValue(getUrgency());
-		CapSeverityEnum s = CapSeverityEnum.fromValue(getSeverity());
-		CapCertaintyEnum c = CapCertaintyEnum.fromValue(getCertainty());
-
-		// convert those values to decimals
-		float uf = (float) u.ordinal() / (float) CapUrgencyEnum.nValues();
-		float sf = (float) s.ordinal() / (float) CapSeverityEnum.nValues();
-		float cf = (float) c.ordinal() / (float) CapCertaintyEnum.nValues();
-
-		// calculate a priority "score" (higher = more important)
-		float score = wu * uf + ws * sf + wc * cf;
-
-		log("priority score: " + wu + " * " + uf + " + " + ws
-			+ " * " + sf + " + " + wc + " * " + cf + " = " + score);
-
-		// convert the score to an index and return one of the allowed values
-		int i = Math.round(score * ALLOWED_PRIORITIES.length);
-		if (i >= ALLOWED_PRIORITIES.length)
-			i = ALLOWED_PRIORITIES.length - 1;
-		else if (i < 0)
-			i = 0;
-		return ALLOWED_PRIORITIES[i];
+		return DmsMsgPriority.ALERT;
 	}
 
 	/** Create the geoPoly attribute using the area section of the alert */
