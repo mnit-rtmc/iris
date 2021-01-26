@@ -61,11 +61,27 @@ import us.mn.state.dot.tms.utils.Json;
  */
 public class IpawsReader {
 
+	/** Email message text for errors */
+	static private final String EMAIL_MSG =
+		"Error encountered in IPAWS alert parsing system.  " +
+		"Check the server logs for details.  " +
+		"The alert that produced the error was saved on the server " +
+		"in the file: ";
+
 	/** Date formatters */
 	// 2020-05-12T21:59:23-00:00
-	private static final String dtFormat = "yyyy-MM-dd'T'HH:mm:ssX";
-	private static final SimpleDateFormat dtFormatter =
+	static private final String dtFormat = "yyyy-MM-dd'T'HH:mm:ssX";
+	static private final SimpleDateFormat dtFormatter =
 			new SimpleDateFormat(dtFormat);
+
+	/** Parse a date from an XML value */
+	static private Date parseDate(String dte) {
+		try {
+			return dtFormatter.parse(dte);
+		} catch (ParseException | NullPointerException e) {
+			return null;
+		}
+	}
 
 	/** Read alerts from an InputStream */
 	static public void readIpaws(InputStream is) throws IOException {
@@ -81,7 +97,7 @@ public class IpawsReader {
 		InputStream is1 = new ByteArrayInputStream(baos.toByteArray());
 
 		DocumentBuilderFactory dbFactory =
-				DocumentBuilderFactory.newInstance();
+			DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
 		try {
 			dBuilder = dbFactory.newDocumentBuilder();
@@ -101,18 +117,14 @@ public class IpawsReader {
 
 			// save the XML contents to a file
 			DateTimeFormatter dtf = DateTimeFormatter.ofPattern(
-					"yyyyMMdd-HHmmss");
+				"yyyyMMdd-HHmmss");
 			String dts = dtf.format(LocalDateTime.now());
 			String fn = String.format(
-					"/var/log/iris/IpawsAlert_err_%s.xml", dts);
+				"/var/log/iris/IpawsAlert_err_%s.xml", dts);
 			OutputStream xmlos = new FileOutputStream(fn);
 			baos.writeTo(xmlos);
 
-			// send an email alert
-			IpawsProcJob.sendEmailAlert("Error encountered in IPAWS alert " +
-				"parsing system. Check the server logs for details. " +
-				"The alert that produced the error was saved on the server " +
-				"in the file:  " + fn);
+			IpawsProcJob.sendEmailAlert(EMAIL_MSG + fn);
 		}
 	}
 
@@ -174,16 +186,7 @@ public class IpawsReader {
 			element));
 		ia.setInstructionNotify(getTagValue("instruction", element));
 		ia.setParametersNotify(getValuePairJson("parameter", element));
-		ia.setAreaNotify(getAreaJson("area", element));
-	}
-
-	/** Parse a date from an XML value */
-	static private Date parseDate(String dte) {
-		try {
-			return dtFormatter.parse(dte);
-		} catch (ParseException | NullPointerException e) {
-			return null;
-		}
+		ia.setAreaNotify(getAreaJson(element));
 	}
 
 	/** Get an XML tag value */
@@ -195,6 +198,7 @@ public class IpawsReader {
 			return null;
 	}
 
+	/** Get an XML tag value as an array */
 	static private List<String> getTagValueArray(String tag,
 		Element element)
 	{
@@ -207,14 +211,13 @@ public class IpawsReader {
 		return tag_values;
 	}
 
-	private static String getValuePairJson(String tag, Element element) {
+	/** Get key/value pairs as JSON */
+	static private String getValuePairJson(String tag, Element element) {
 		HashMap<String, ArrayList<String>> kvPairs =
 			getChildElements(tag, element);
 
-		// make a JSON string with all the key/value pairs
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
-
 		for (String key: kvPairs.keySet()) {
 			ArrayList<String> vals = kvPairs.get(key);
 			// FIXME the && !"UGC".equals(key) is a hack to make
@@ -226,8 +229,6 @@ public class IpawsReader {
 			} else
 				sb.append(Json.str(key, vals.get(0)));
 		}
-
-		// remove trailing comma
 		if (sb.charAt(sb.length() - 1) == ',')
 			sb.setLength(sb.length() - 1);
 		sb.append("}");
@@ -260,42 +261,40 @@ public class IpawsReader {
 		return kvPairs;
 	}
 
-	private static String getAreaJson(String tag, Element element) {
+	/** Area child elements */
+	static private final String[] AREA_ELEMENTS = {"areaDesc", "polygon",
+	          "circle", "geocode", "altitude", "ceiling"};
+
+	/** Get area element as JSON */
+	static private String getAreaJson(Element element) {
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
 
-		// Check if tag exists
-		if (element.getElementsByTagName(tag).getLength() > 0) {
-			NodeList areaNodeList = element.getElementsByTagName(tag);
-
-			// Loop through areas
-			for (int i = 0; i < areaNodeList.getLength(); i++) {
-				Element areaElement = (Element) areaNodeList.item(i);
-
-				String [] element_list = {"areaDesc","polygon",
-				          "circle","geocode","altitude","ceiling"};
-				for (String ce: element_list) {
-					if ("geocode".equals(ce))
-						appendElementJson(ce, areaElement, sb, true);
-					else
-						appendElementJson(ce, areaElement, sb, false);
-				}
+		// Loop through area elements
+		NodeList nodeList = element.getElementsByTagName("area");
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			Element area = (Element) nodeList.item(i);
+			// FIXME, no comma with areaDesc
+			for (String ce: AREA_ELEMENTS) {
+				if ("geocode".equals(ce))
+					appendElementJson(ce, area, sb, true);
+				else
+					appendElementJson(ce, area, sb, false);
 			}
 		}
-
-		// remove trailing comma
 		if (sb.charAt(sb.length() - 1) == ',')
 			sb.setLength(sb.length() - 1);
 		sb.append("}");
 		return sb.toString();
 	}
 
-	private static void appendElementJson(String tag, Element element,
+	/** Append an element to JSON buffer */
+	static private void appendElementJson(String tag, Element element,
 		StringBuilder sb, boolean forceKV)
 	{
 		if (element.getElementsByTagName(tag).getLength() == 1 && !forceKV)
 			sb.append(Json.str(tag, element.getElementsByTagName(tag)
-					.item(0).getTextContent()));
+				.item(0).getTextContent()));
 		// TODO this won't handle multiple <area> or <polygon> blocks
 		// correctly, but those seem to be rare (NWS doesn't seem to use
 		// them even though CAP/IPAWS allows them)

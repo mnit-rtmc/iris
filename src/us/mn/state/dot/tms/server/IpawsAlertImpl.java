@@ -1238,7 +1238,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	}
 
 	/** Create the geoPoly attribute using the area section of the alert */
-	private void createGeoPoly() throws TMSException, SQLException {
+	private void createGeoPoly() throws TMSException {
 		String area = getArea();
 		if (area != null) {
 			MultiPolygon mp = createGeoPoly(area);
