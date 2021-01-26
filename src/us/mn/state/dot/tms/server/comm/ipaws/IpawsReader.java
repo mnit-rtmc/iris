@@ -95,22 +95,10 @@ public class IpawsReader {
 			baos.write(buf, 0, len);
 		baos.flush();
 		InputStream is1 = new ByteArrayInputStream(baos.toByteArray());
-
-		DocumentBuilderFactory dbFactory =
-			DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder;
 		try {
-			dBuilder = dbFactory.newDocumentBuilder();
-			Document doc = dBuilder.parse(is1);
-			doc.getDocumentElement().normalize();
-
-			NodeList nodeList = doc.getElementsByTagName("alert");
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				Node node = nodeList.item(i);
-				if (node.getNodeType() == Node.ELEMENT_NODE)
-					parseAlert((Element) node);
-			}
-		} catch (ParserConfigurationException | SAXException |
+			parseAlerts(is1);
+		}
+		catch (ParserConfigurationException | SAXException |
 			ParseException | TMSException | SonarException e)
 		{
 			e.printStackTrace();
@@ -128,20 +116,37 @@ public class IpawsReader {
 		}
 	}
 
+	/** Parse alerts from an input stream as an XML document */
+	static private void parseAlerts(InputStream is) throws IOException,
+		ParseException, ParserConfigurationException, SAXException,
+		SonarException, TMSException
+	{
+		DocumentBuilderFactory dbFactory =
+			DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+		Document doc = dBuilder.parse(is);
+		doc.getDocumentElement().normalize();
+
+		NodeList nodes = doc.getElementsByTagName("alert");
+		for (int i = 0; i < nodes.getLength(); i++) {
+			Node node = nodes.item(i);
+			if (node.getNodeType() == Node.ELEMENT_NODE)
+				parseAlert((Element) node);
+		}
+	}
+
 	/** Lookup or create an IPAWS alert */
 	static private IpawsAlertImpl lookupOrCreateAlert(String alertId)
 		throws TMSException, SonarException
 	{
 		IpawsAlert xa = IpawsAlertHelper.lookupByIdentifier(alertId);
 		if (xa instanceof IpawsAlertImpl) {
-			IpawsProcJob.log("Updating alert with name: " +
+			IpawsProcJob.log("updating alert with name: " +
 				xa.getName());
 			return (IpawsAlertImpl) xa;
 		} else {
-			// if it doesn't exist, create a new one
 			String name = IpawsAlertImpl.createUniqueName();
-			IpawsProcJob.log("Creating alert with name: " +
-				name);
+			IpawsProcJob.log("creating alert with name: " + name);
 			IpawsAlertImpl ia = new IpawsAlertImpl(name, alertId);
 			ia.notifyCreate();
 			return ia;
@@ -189,26 +194,24 @@ public class IpawsReader {
 		ia.setAreaNotify(getAreaJson(element));
 	}
 
-	/** Get an XML tag value */
+	/** Get the first child element with a given tag name */
 	static private String getTagValue(String tag, Element element) {
-		NodeList nodeList = element.getElementsByTagName(tag);
-		if (nodeList.getLength() > 0)
-			return nodeList.item(0).getTextContent();
-		else
-			return null;
+		NodeList nodes = element.getElementsByTagName(tag);
+		return (nodes.getLength() > 0)
+		      ? nodes.item(0).getTextContent()
+		      : null;
 	}
 
-	/** Get an XML tag value as an array */
+	/** Get all child elements with a given tag name as an array */
 	static private List<String> getTagValueArray(String tag,
 		Element element)
 	{
-		List<String> tag_values = new ArrayList<String>();
-		NodeList nodeList = element.getElementsByTagName(tag);
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node node = nodeList.item(i);
-			tag_values.add(node.getTextContent());
+		List<String> values = new ArrayList<String>();
+		NodeList nodes = element.getElementsByTagName(tag);
+		for (int i = 0; i < nodes.getLength(); i++) {
+			values.add(nodes.item(i).getTextContent());
 		}
-		return tag_values;
+		return values;
 	}
 
 	/** Get key/value pairs as JSON */
@@ -271,10 +274,9 @@ public class IpawsReader {
 		sb.append('{');
 
 		// Loop through area elements
-		NodeList nodeList = element.getElementsByTagName("area");
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Element area = (Element) nodeList.item(i);
-			// FIXME, no comma with areaDesc
+		NodeList nodes = element.getElementsByTagName("area");
+		for (int i = 0; i < nodes.getLength(); i++) {
+			Element area = (Element) nodes.item(i);
 			for (String ce: AREA_ELEMENTS) {
 				if ("geocode".equals(ce))
 					appendElementJson(ce, area, sb, true);
@@ -288,17 +290,20 @@ public class IpawsReader {
 		return sb.toString();
 	}
 
-	/** Append an element to JSON buffer */
+	/** Append an element to JSON buffer.
+	 *
+	 *  TODO this won't handle multiple <area> or <polygon> blocks
+	 *       correctly, but those seem to be rare (NWS doesn't seem to use
+	 *       them even though CAP/IPAWS allows them) */
 	static private void appendElementJson(String tag, Element element,
 		StringBuilder sb, boolean forceKV)
 	{
-		if (element.getElementsByTagName(tag).getLength() == 1 && !forceKV)
-			sb.append(Json.str(tag, element.getElementsByTagName(tag)
-				.item(0).getTextContent()));
-		// TODO this won't handle multiple <area> or <polygon> blocks
-		// correctly, but those seem to be rare (NWS doesn't seem to use
-		// them even though CAP/IPAWS allows them)
-		else if (element.getElementsByTagName(tag).getLength() > 1 || forceKV)
+		NodeList nodes = element.getElementsByTagName(tag);
+		if (nodes.getLength() == 1 && !forceKV) {
+			sb.append(Json.str(tag, nodes.item(0).getTextContent()));
+		} else if (nodes.getLength() > 1 || forceKV) {
 			sb.append(Json.sub(tag, getValuePairJson(tag, element)));
+			sb.append(',');
+		}
 	}
 }
