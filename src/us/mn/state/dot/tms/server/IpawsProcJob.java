@@ -43,9 +43,12 @@ public class IpawsProcJob extends Job {
 	/** Send an IPAWS email alert */
 	static public void sendEmailAlert(String msg) {
 		String recip = SystemAttrEnum.EMAIL_RECIPIENT_AWS.getString();
-		EmailHandler.sendEmail("Error in IRIS IPAWS Processing System",
-			msg, recip);
+		EmailHandler.sendEmail(EMAIL_SUB, msg, recip);
 	}
+
+	/** Email subject for alert errors */
+	static private final String EMAIL_SUB =
+		"Error in IRIS IPAWS Processing System";
 
 	/** Email message for alert errors */
 	static private final String EMAIL_MSG =
