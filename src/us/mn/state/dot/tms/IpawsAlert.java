@@ -102,10 +102,10 @@ public interface IpawsAlert extends SonarObject {
 	/** Get the alert instruction */
 	String getInstruction();
 
-	/** Get the parameters */
+	/** Get the parameters as JSON value */
 	String getParameters();
 
-	/** Get the areas */
+	/** Get the areas as JSON value */
 	String getArea();
 
 	/** Get the geographic polygon of the area */

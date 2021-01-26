@@ -17,8 +17,6 @@ package us.mn.state.dot.tms.server.comm.ipaws;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -58,6 +56,7 @@ import us.mn.state.dot.tms.utils.Json;
  *
  * @author Michael Janson
  * @author Gordon Parikh
+ * @author Douglas Lau
  */
 public class IpawsReader {
 
@@ -141,13 +140,12 @@ public class IpawsReader {
 	{
 		IpawsAlert xa = IpawsAlertHelper.lookupByIdentifier(alertId);
 		if (xa instanceof IpawsAlertImpl) {
-			IpawsProcJob.log("updating alert with name: " +
-				xa.getName());
-			return (IpawsAlertImpl) xa;
+			IpawsAlertImpl ia = (IpawsAlertImpl) xa;
+			ia.log("updating alert");
+			return ia;
 		} else {
-			String name = IpawsAlertImpl.createUniqueName();
-			IpawsProcJob.log("creating alert with name: " + name);
-			IpawsAlertImpl ia = new IpawsAlertImpl(name, alertId);
+			IpawsAlertImpl ia = new IpawsAlertImpl(alertId);
+			ia.log("created alert");
 			ia.notifyCreate();
 			return ia;
 		}
@@ -190,7 +188,7 @@ public class IpawsReader {
 		ia.setAlertDescriptionNotify(getTagValue("description",
 			element));
 		ia.setInstructionNotify(getTagValue("instruction", element));
-		ia.setParametersNotify(getValuePairJson("parameter", element));
+		ia.setParametersNotify(getParameterJson(element));
 		ia.setAreaNotify(getAreaJson(element));
 	}
 
@@ -214,23 +212,40 @@ public class IpawsReader {
 		return values;
 	}
 
-	/** Get key/value pairs as JSON */
-	static private String getValuePairJson(String tag, Element element) {
-		HashMap<String, ArrayList<String>> kvPairs =
-			getChildElements(tag, element);
+	/** Get map of "valueName"/"value" within child elements.
+	 *
+	 * NOTE: this can be used for "parameter", "eventCode" and "geocode"
+	 *       elements from the CAP standard. */
+	static private Map<String, List<String>> getKeyValueMap(
+		String tag, Element element)
+	{
+		Map<String, List<String>> kv_map =
+			new HashMap<String, List<String>>();
+		NodeList nodes = element.getElementsByTagName(tag);
+		for (int i = 0; i < nodes.getLength(); i++) {
+			Element child = (Element) nodes.item(i);
+			String key = getTagValue("valueName", child);
+			String value = getTagValue("value", child);
+			if (key != null && value != null) {
+				if (!kv_map.containsKey(key))
+					kv_map.put(key, new ArrayList<String>());
+				List<String> vals = kv_map.get(key);
+				vals.add(value);
+			}
+		}
+		return kv_map;
+	}
 
+	/** Format key/value map as JSON */
+	static private String formatKeyValueJson(
+		Map<String, List<String>> kv_map)
+	{
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
-		for (String key: kvPairs.keySet()) {
-			ArrayList<String> vals = kvPairs.get(key);
-			// FIXME the && !"UGC".equals(key) is a hack to make
-			//       sure we always get UGC codes as an array (it
-			//       works well enough though)
-			if (vals.size() > 1 || "UGC".equals(key)) {
-				String[] valsArr = vals.toArray(new String[0]);
-				sb.append(Json.arr(key, valsArr));
-			} else
-				sb.append(Json.str(key, vals.get(0)));
+		for (String key: kv_map.keySet()) {
+			List<String> vals = kv_map.get(key);
+			String[] valsArr = vals.toArray(new String[0]);
+			sb.append(Json.arr(key, valsArr));
 		}
 		if (sb.charAt(sb.length() - 1) == ',')
 			sb.setLength(sb.length() - 1);
@@ -238,72 +253,36 @@ public class IpawsReader {
 		return sb.toString();
 	}
 
-	/** Store key/value pairs in a HashMap of ArrayLists to allow
-	 * for multiple instances of the same key */
-	static private HashMap<String, ArrayList<String>> getChildElements(
-		String tag, Element element)
-	{
-		HashMap<String, ArrayList<String>> kvPairs =
-			new HashMap<String, ArrayList<String>>();
-		NodeList nodes = element.getElementsByTagName(tag);
-		for (int i = 0; i < nodes.getLength(); i++) {
-			Element child = (Element) nodes.item(i);
-			Node keyNode = child.getElementsByTagName(
-				"valueName").item(0);
-			Node valueNode = child.getElementsByTagName("value")
-				.item(0);
-			if (keyNode != null && valueNode != null) {
-				String key = keyNode.getTextContent();
-				String value = valueNode.getTextContent();
-				if (!kvPairs.containsKey(key))
-					kvPairs.put(key, new ArrayList<String>());
-				ArrayList<String> vals = kvPairs.get(key);
-				vals.add(value);
-			}
-		}
-		return kvPairs;
+	/** Get parameter element as JSON */
+	static private String getParameterJson(Element element) {
+		return formatKeyValueJson(getKeyValueMap("parameter", element));
 	}
 
-	/** Area child elements */
-	static private final String[] AREA_ELEMENTS = {"areaDesc", "polygon",
-	          "circle", "geocode", "altitude", "ceiling"};
+	/** Area child elements (except for geocode) */
+	static private final String[] AREA_SUB_ELEMENTS = {"areaDesc",
+		"polygon", "circle", "altitude", "ceiling"};
 
 	/** Get area element as JSON */
 	static private String getAreaJson(Element element) {
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
-
-		// Loop through area elements
-		NodeList nodes = element.getElementsByTagName("area");
-		for (int i = 0; i < nodes.getLength(); i++) {
-			Element area = (Element) nodes.item(i);
-			for (String ce: AREA_ELEMENTS) {
-				if ("geocode".equals(ce))
-					appendElementJson(ce, area, sb, true);
-				else
-					appendElementJson(ce, area, sb, false);
-			}
+		for (String tag: AREA_SUB_ELEMENTS) {
+			List<String> values = getTagValueArray(tag, element);
+			sb.append(Json.arr(tag, values.toArray(new String[0])));
 		}
+		sb.append(getGeoCode(element));
 		if (sb.charAt(sb.length() - 1) == ',')
 			sb.setLength(sb.length() - 1);
 		sb.append("}");
 		return sb.toString();
 	}
 
-	/** Append an element to JSON buffer.
-	 *
-	 *  TODO this won't handle multiple <area> or <polygon> blocks
-	 *       correctly, but those seem to be rare (NWS doesn't seem to use
-	 *       them even though CAP/IPAWS allows them) */
-	static private void appendElementJson(String tag, Element element,
-		StringBuilder sb, boolean forceKV)
-	{
-		NodeList nodes = element.getElementsByTagName(tag);
-		if (nodes.getLength() == 1 && !forceKV) {
-			sb.append(Json.str(tag, nodes.item(0).getTextContent()));
-		} else if (nodes.getLength() > 1 || forceKV) {
-			sb.append(Json.sub(tag, getValuePairJson(tag, element)));
-			sb.append(',');
-		}
+	/** Get geocode elements and format as a JSON object */
+	static private String getGeoCode(Element element) {
+		Map<String, List<String>> kv_map = getKeyValueMap("geocode",
+			element);
+		return (kv_map.size() > 0)
+		      ? Json.sub("geocode", formatKeyValueJson(kv_map))
+		      : "";
 	}
 }
