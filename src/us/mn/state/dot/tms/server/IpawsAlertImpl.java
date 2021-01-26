@@ -82,7 +82,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		"ipaws_alert_%d", 20, (n)->lookupIpawsDeployer(n));
 
 	/** Create a unique IpawsAlert record name */
-	static public String createUniqueName() {
+	static private String createUniqueName() {
 		return UNC.createUniqueName();
 	}
 
@@ -342,8 +342,8 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 			IpawsAlertImpl.SONAR_TYPE));
 	}
 
-	public IpawsAlertImpl(String n, String i) throws TMSException {
-		super(n);
+	public IpawsAlertImpl(String i) throws TMSException {
+		super(createUniqueName());
 		identifier = i;
 	}
 
@@ -396,7 +396,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	}
 
 	/** Log a message for the alert */
-	private void log(String msg) {
+	public void log(String msg) {
 		IpawsProcJob.log("Alert " + name + ": " + msg);
 	}
 
@@ -876,10 +876,10 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		}
 	}
 
-	/** Parameters */
+	/** Parameters as JSON value */
 	private String parameters;
 
-	/** Get the parameters */
+	/** Get the parameters as JSON value */
 	@Override
 	public String getParameters() {
 		return parameters;
@@ -894,10 +894,10 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		}
 	}
 
-	/** Area */
+	/** Area as JSON value */
 	private String area;
 
-	/** Get the area */
+	/** Get the areas as JSON value */
 	@Override
 	public String getArea() {
 		return area;
@@ -1239,19 +1239,19 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 
 	/** Create the geoPoly attribute using the area section of the alert */
 	private void createGeoPoly() throws TMSException {
-		String area = getArea();
-		if (area != null) {
-			MultiPolygon mp = createGeoPoly(area);
+		String ar = getArea();
+		if (ar != null) {
+			MultiPolygon mp = createGeoPoly(ar);
 			setGeoPolyNotify(mp);
 		}
 	}
 
 	/** Create a MultiPolygon geography object from a given area section
 	 *  from the alert. */
-	private MultiPolygon createGeoPoly(String area) {
+	private MultiPolygon createGeoPoly(String ar) {
 		try {
-			log("area: " + area);
-			String ps = createGeoPoly(new JSONObject(area));
+			log("area: " + ar);
+			String ps = createGeoPoly(new JSONObject(ar));
 			if (ps != null)
 				return new MultiPolygon(ps);
 		}
@@ -1273,29 +1273,34 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	 *  If a polygon section is found, it is used to create a MultiPolygon
 	 *  object (one for each polygon).  If there is no polygon, the other
 	 *  location information is used to look up one or more polygons. */
-	private String createGeoPoly(JSONObject area) throws JSONException,
+	private String createGeoPoly(JSONObject jarea) throws JSONException,
 		TMSException
 	{
-		if (area.has("polygon")) {
-			String ps = area.getString("polygon");
-			log("got polygon: " + ps);
-			String mp = parseCapPolygon(ps);
-			if (mp == null)
-				log("invalid polygon object!");
-			return mp;
-		} else {
-			// if we didn't get a polygon, check the other fields
-			// to find one we can use to lookup a geographical area
-			log("no polygon, trying UGC codes");
-			JSONObject gj = area.getJSONObject("geocode");
-			JSONArray ugcj = gj.getJSONArray("UGC");
-			String ugc = formatUGC(ugcj);
-			log("got UGC codes: " + ugc);
-			String mp = lookupUGC(ugc);
-			if (mp == null)
-				log("no polygon found for UGC codes!");
-			return mp;
+		if (jarea.has("polygon")) {
+			JSONArray polys = jarea.getJSONArray("polygon");
+			if (polys.length() > 0) {
+				// FIXME: handle multiple polygons
+				if (polys.length() > 1)
+					log("ignoring extra polygons");
+				String ps = polys.getString(0);
+				log("got polygon: " + ps);
+				String mp = parseCapPolygon(ps);
+				if (mp == null)
+					log("invalid polygon object!");
+				return mp;
+			}
 		}
+		// if we didn't get a polygon, check the other fields
+		// to find one we can use to lookup a geographical area
+		log("no polygon, trying UGC codes");
+		JSONObject gj = jarea.getJSONObject("geocode");
+		JSONArray ugcj = gj.getJSONArray("UGC");
+		String ugc = formatUGC(ugcj);
+		log("got UGC codes: " + ugc);
+		String mp = lookupUGC(ugc);
+		if (mp == null)
+			log("no polygon found for UGC codes!");
+		return mp;
 	}
 
 	/** Lookup UGC polygons from NWS zone table */
