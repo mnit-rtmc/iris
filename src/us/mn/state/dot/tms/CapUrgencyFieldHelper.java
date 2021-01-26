@@ -18,48 +18,46 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
-
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
- * Helper class for CAP response type substitution values. Used on the client
+ * Helper class for CAP response type substitution values.  Used on the client
  * and server.
  *
  * @author Gordon Parikh
  */
-public class CapUrgencyHelper extends BaseHelper {
+public class CapUrgencyFieldHelper extends BaseHelper {
 
 	/** Don't instantiate */
-	private CapUrgencyHelper() {
+	private CapUrgencyFieldHelper() {
 		assert false;
 	}
 
 	/** Lookup the urgency substitution value with the specified name */
-	static public CapUrgency lookup(String name) {
-		return (CapUrgency) namespace.lookupObject(
-				CapUrgency.SONAR_TYPE, name);
+	static public CapUrgencyField lookup(String name) {
+		return (CapUrgencyField) namespace.lookupObject(
+			CapUrgencyField.SONAR_TYPE, name);
 	}
 
-	/** Lookup the urgency substitution value corresponding to the given event
-	 *  and urgency value.
-	 */
-	static public CapUrgency lookupFor(String event, String urg) {
+	/** Lookup the urgency substitution value corresponding to the given
+	 *  event and urgency value. */
+	static public CapUrgencyField lookupFor(String event, String urg) {
 		if (event == null || urg == null)
 			return null;
-
-		Iterator<CapUrgency> it = iterator();
+		Iterator<CapUrgencyField> it = iterator();
 		while (it.hasNext()) {
-			CapUrgency cu = it.next();
-			if (event.equals(cu.getEvent()) && urg.equals(cu.getUrgency()))
+			CapUrgencyField cu = it.next();
+			if (event.equals(cu.getEvent()) &&
+			    urg.equals(cu.getUrgency()))
 				return cu;
 		}
 		return null;
 	}
 
-	/** Get an CapUrgency object iterator */
-	static public Iterator<CapUrgency> iterator() {
-		return new IteratorWrapper<CapUrgency>(namespace.iterator(
-				CapUrgency.SONAR_TYPE));
+	/** Get an CapUrgencyField object iterator */
+	static public Iterator<CapUrgencyField> iterator() {
+		return new IteratorWrapper<CapUrgencyField>(namespace.iterator(
+			CapUrgencyField.SONAR_TYPE));
 	}
 
 	/** All known urgency substitution MULTI strings that match the given
@@ -73,9 +71,9 @@ public class CapUrgencyHelper extends BaseHelper {
 
 		// go through all urgency value substitution MULTI strings
 		ArrayList<String> multiStrs = new ArrayList<String>();
-		Iterator<CapUrgency> it = iterator();
+		Iterator<CapUrgencyField> it = iterator();
 		while (it.hasNext()) {
-			CapUrgency cu = it.next();
+			CapUrgencyField cu = it.next();
 			if (uvs == null || uvs.contains(cu.getUrgency())) {
 				String multi = cu.getMulti();
 				if (multi != null)
@@ -87,9 +85,9 @@ public class CapUrgencyHelper extends BaseHelper {
 
 	/** Name creator */
 	static private final UniqueNameCreator UNC = new UniqueNameCreator(
-		"cap_urgency_%d", 24, (n)->lookup(n));
+		"cap_urg_field_%d", 24, (n)->lookup(n));
 
-	/** Create a unique CapUrgency record name */
+	/** Create a unique CapUrgencyField record name */
 	static public String createUniqueName() {
 		return UNC.createUniqueName();
 	}

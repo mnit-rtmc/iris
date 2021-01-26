@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.wysiwyg.editor.tags;
 
 import java.awt.Dimension;
@@ -24,12 +23,12 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import us.mn.state.dot.tms.CapUrgencyEnum;
+import us.mn.state.dot.tms.CapUrgency;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WController;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
-import us.mn.state.dot.tms.utils.wysiwyg.token.WtCapUrgency;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtCapUrgencyField;
 
 /**
  * WYSIWYG DMS Message Editor dialog form for editing IPAWS alert CAP urgency
@@ -39,18 +38,18 @@ import us.mn.state.dot.tms.utils.wysiwyg.token.WtCapUrgency;
  */
 @SuppressWarnings("serial")
 class WCapUrgencyTagDialog extends WMultiTagDialog {
-	protected WtCapUrgency editTok;
-	private ArrayList<CapUrgencyEnum> urgencyValues =
-			new ArrayList<CapUrgencyEnum>();
+	protected WtCapUrgencyField editTok;
+	private ArrayList<CapUrgency> urgencyValues =
+		new ArrayList<CapUrgency>();
 	private ArrayList<String> urgencyValStrs = new ArrayList<String>();
-	private ArrayList<WTagParamEnumField<CapUrgencyEnum>> rTypeFields =
-			new ArrayList<WTagParamEnumField<CapUrgencyEnum>>();
+	private ArrayList<WTagParamEnumField<CapUrgency>> rTypeFields =
+		new ArrayList<WTagParamEnumField<CapUrgency>>();
 	private JPanel uValPanel;
 	private final ArrayList<JPanel> uValPanels =
 			new ArrayList<JPanel>();
 	private JButton addFieldBtn;
 	private JButton deleteFieldBtn;
-	
+
 	public WCapUrgencyTagDialog(String title, WController c,
 			WTokenType tokType, WToken tok) {
 		super(title, c, tokType, tok);
@@ -58,13 +57,13 @@ class WCapUrgencyTagDialog extends WMultiTagDialog {
 
 	@Override
 	protected void loadFields(WToken tok) {
-		editTok = (WtCapUrgency) tok;
-		urgencyValues = new ArrayList<CapUrgencyEnum>();
+		editTok = (WtCapUrgencyField) tok;
+		urgencyValues = new ArrayList<CapUrgency>();
 		urgencyValStrs = new ArrayList<String>();
-		
+
 		for (String rt: editTok.getResponseTypes()) {
 			urgencyValStrs.add(rt);
-			CapUrgencyEnum crte = CapUrgencyEnum.fromValue(rt);
+			CapUrgency crte = CapUrgency.fromValue(rt);
 			if (crte != null)
 				urgencyValues.add(crte);
 		}
@@ -76,19 +75,19 @@ class WCapUrgencyTagDialog extends WMultiTagDialog {
 		// this class are called requiring us to call this an extra time
 		if (editTok != null)
 			loadFields(editTok);
-		
+
 		// by default there are no fields, but the user can add some
 		// add an empty panel so we can add urgency fields later
 		uValPanel = new JPanel();
 		uValPanel.setLayout(new BoxLayout(uValPanel, BoxLayout.Y_AXIS));
-		
+
 		// set the preferred height of this panel to several fields (this is
 		// easier than figuring out how to get the whole frame to resize)
 		Dimension d = uValPanel.getPreferredSize();
 		d.height = 200;
 		uValPanel.setPreferredSize(d);
 		add(uValPanel);
-		
+
 		// add buttons to trigger adding or deleting fields
 		addFieldBtn = new JButton(addUrgencyFieldAction);
 		deleteFieldBtn = new JButton(deleteResponseTypeFieldAction);
@@ -96,39 +95,39 @@ class WCapUrgencyTagDialog extends WMultiTagDialog {
 		p.add(addFieldBtn);
 		p.add(deleteFieldBtn);
 		add(p);
-		
+
 		// if we already have urgency values, add more fields and enable the
 		// delete button
 		if (urgencyValues.size() > 0) {
-			for (CapUrgencyEnum crt: urgencyValues)
+			for (CapUrgency crt: urgencyValues)
 				addUrgencyField(crt);
 			deleteFieldBtn.setEnabled(true);
 		} else
 			deleteFieldBtn.setEnabled(false);
 	}
-	
+
 	private void refresh() {
 		revalidate();
 		repaint();
 	}
-	
+
 	/** Add a new urgency field. */
-	private void addUrgencyField(CapUrgencyEnum crt) {
+	private void addUrgencyField(CapUrgency crt) {
 		// make a new field and add it to the panel
-		WTagParamEnumField<CapUrgencyEnum> crtf =
-				new WTagParamEnumField<CapUrgencyEnum>(
-						CapUrgencyEnum.values(), crt, true);
+		WTagParamEnumField<CapUrgency> crtf =
+			new WTagParamEnumField<CapUrgency>(
+				CapUrgency.values(), crt, true);
 		rTypeFields.add(crtf);
 		JPanel p = makeFieldPanel(
-				"wysiwyg.cap_urgency_dialog.urgency",  crtf);
+			"wysiwyg.cap_urgency_dialog.urgency",  crtf);
 		uValPanels.add(p);
 		uValPanel.add(p);
 		refresh();
-		
+
 		// make sure the delete button is enabled
 		deleteFieldBtn.setEnabled(true);
 	}
-	
+
 	/** Action to add a new urgency field. */
 	private final IAction addUrgencyFieldAction = new IAction(
 			"wysiwyg.cap_urgency_dialog.add_field") {
@@ -137,7 +136,7 @@ class WCapUrgencyTagDialog extends WMultiTagDialog {
 			addUrgencyField(null);
 		}
 	};
-	
+
 	/** Action to delete a urgency field. */
 	private final IAction deleteResponseTypeFieldAction = new IAction(
 			"wysiwyg.cap_urgency_dialog.delete_field") {
@@ -146,36 +145,35 @@ class WCapUrgencyTagDialog extends WMultiTagDialog {
 			// check the number of fields
 			if (rTypeFields.size() > 0) {
 				// if we have any, delete the last one
-				rTypeFields.remove(rTypeFields.size()-1);
+				rTypeFields.remove(rTypeFields.size() - 1);
 				uValPanel.remove(uValPanels.remove(uValPanels.size()-1));
 			}
-			
+
 			// disable the delete button once all fields are gone
 			if (rTypeFields.size() == 0)
 				deleteFieldBtn.setEnabled(false);
-			
+
 			refresh();
 		}
 	};
-	
+
 	@Override
 	protected boolean validateForm() {
 		return validateFields(new ArrayList<WTagParamComponent>(rTypeFields));
 	}
-	
+
 	@Override
 	protected WToken makeNewTag() {
 		// get any/all urgency fields and pack them into an array
 		urgencyValues.clear();
 		urgencyValStrs.clear();
-		for (WTagParamEnumField<CapUrgencyEnum> crtf: rTypeFields) {
-			CapUrgencyEnum crt = crtf.getSelectedItem();
+		for (WTagParamEnumField<CapUrgency> crtf: rTypeFields) {
+			CapUrgency crt = crtf.getSelectedItem();
 			urgencyValues.add(crt);
-			urgencyValStrs.add(crt.value);
+			urgencyValStrs.add(crt.name());
 		}
 		String rtypes[] = new String[urgencyValStrs.size()];
 		urgencyValStrs.toArray(rtypes);
-		return new WtCapUrgency(rtypes);
+		return new WtCapUrgencyField(rtypes);
 	}
-	
 }

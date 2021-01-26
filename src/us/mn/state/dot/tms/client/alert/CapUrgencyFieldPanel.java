@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.client.alert;
 
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.CapUrgency;
-import us.mn.state.dot.tms.CapUrgencyHelper;
+import us.mn.state.dot.tms.CapUrgencyField;
+import us.mn.state.dot.tms.CapUrgencyFieldHelper;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 
@@ -27,14 +27,14 @@ import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
  * @author Gordon Parikh
  */
 @SuppressWarnings("serial")
-public class CapUrgencyPanel extends ProxyTablePanel<CapUrgency> {
+public class CapUrgencyFieldPanel extends ProxyTablePanel<CapUrgencyField> {
 
 	/** TypeCache for looking up objects after creation */
-	private final TypeCache<CapUrgency> cache;
+	private final TypeCache<CapUrgencyField> cache;
 
-	public CapUrgencyPanel(ProxyTableModel<CapUrgency> m) {
+	public CapUrgencyFieldPanel(ProxyTableModel<CapUrgencyField> m) {
 		super(m);
-		cache = m.getSession().getSonarState().getCapUrgencyCache();
+		cache = m.getSession().getSonarState().getCapUrgencyFieldCache();
 	}
 
 	/** Create a new urgency substitution value. Uses the text in the
@@ -49,14 +49,14 @@ public class CapUrgencyPanel extends ProxyTablePanel<CapUrgency> {
 
 		// if the event is empty, use default
 		if (ev.isEmpty())
-			ev = CapUrgency.DEFAULT_EVENT;
+			ev = CapUrgencyField.DEFAULT_EVENT;
 
 		// generate a new unique name
-		String name = CapUrgencyHelper.createUniqueName();
+		String name = CapUrgencyFieldHelper.createUniqueName();
 
 		// create the object with the unique name then set the label
 		cache.createObject(name);
-		CapUrgency cu = cache.lookupObjectWait(name);
+		CapUrgencyField cu = cache.lookupObjectWait(name);
 		if (cu != null)
 			cu.setEvent(ev);
 		// TODO do something if null

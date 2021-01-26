@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.utils.wysiwyg;
 
 import us.mn.state.dot.tms.utils.Multi;
@@ -281,6 +280,6 @@ public class WMultiParser implements Multi {
 
 	@Override
 	public void addCapUrgency(String[] uvals) {
-		page.addToken(new WtCapUrgency(uvals));
+		page.addToken(new WtCapUrgencyField(uvals));
 	}
 }

@@ -37,4 +37,34 @@ ALTER TABLE event.ipaws_deployer ADD COLUMN alert_state INTEGER;
 UPDATE event.ipaws_deployer SET alert_state = 4; -- expired
 ALTER TABLE event.ipaws_deployer ALTER COLUMN alert_state SET NOT NULL;
 
+DROP TABLE iris.cap_urgency;
+
+CREATE TABLE iris.cap_urgency (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(10) NOT NULL
+);
+
+COPY iris.cap_urgency (id, description) FROM stdin;
+0	unknown
+1	past
+2	future
+3	expected
+4	immediate
+\.
+
+CREATE TABLE iris.cap_urgency_field (
+	name VARCHAR(24) PRIMARY KEY,
+	event text,
+	urgency INTEGER NOT NULL REFERENCES iris.cap_urgency,
+	multi text
+);
+
+DELETE FROM iris.sonar_type WHERE name = 'cap_urgency';
+INSERT INTO iris.sonar_type (name) VALUES
+	('cap_urgency_field');
+
+UPDATE iris.privilege
+	SET type_n = 'cap_urgency_field'
+	WHERE type_n = 'cap_urgency';
+
 COMMIT;

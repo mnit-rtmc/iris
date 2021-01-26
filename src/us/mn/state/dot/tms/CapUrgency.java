@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,37 +15,39 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.SonarObject;
-
 /**
- * Common Alerting Protocol (CAP) urgency field substitution values. Used for
- * IPAWS alert processing for generating messages for posting to DMS.
+ * Common Alerting Protocol (CAP) urgency enum.
+ *
+ * Used for IPAWS alert processing for generating messages for posting to DMS.
+ * Values are taken from the OASIS CAP Standard v1.2.  Values are ordered from
+ * least (Unknown/Past) to most (Immediate) emphatic
+ * The ordinal values correspond to the records in the iris.cap_urgency look-up
+ * table.
  *
  * @author Gordon Parikh
+ * @author Douglas Lau
  */
-public interface CapUrgency extends SonarObject {
+public enum CapUrgency {
+	UNKNOWN,
+	PAST,
+	FUTURE,
+	EXPECTED,
+	IMMEDIATE;
 
-	/** SONAR type name */
-	String SONAR_TYPE = "cap_urgency";
+	/** Values array */
+	static private final CapUrgency[] VALUES = values();
 
-	/** Default Event (for use if no other matching event found) */
-	String DEFAULT_EVENT = "<default>";
+	/** Get a CapUrgency from an ordinal value */
+	static public CapUrgency fromOrdinal(int o) {
+		return (o >= 0 && o < VALUES.length) ? VALUES[o] : null;
+	}
 
-	/** Set the applicable alert event type */
-	void setEvent(String ev);
-
-	/** Get the applicable alert event type */
-	String getEvent();
-
-	/** Set the applicable urgency value */
-	void setUrgency(String u);
-
-	/** Get the applicable urgency value */
-	String getUrgency();
-
-	/** Set the MULTI string that will be substituted into the message */
-	void setMulti(String m);
-
-	/** Get the MULTI string that will be substituted into the message */
-	String getMulti();
+	/** Get the CapUrgency from the value provided */
+	static public CapUrgency fromValue(String v) {
+		for (CapUrgency e: VALUES) {
+			if (e.name().equalsIgnoreCase(v))
+				return e;
+		}
+		return UNKNOWN;
+	}
 }
