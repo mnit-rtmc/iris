@@ -400,7 +400,7 @@ camera_preset
 camera_template
 cam_vid_src_ord
 cap_response
-cap_urgency_field
+cap_urgency_fld
 capability
 catalog
 comm_config
@@ -606,14 +606,14 @@ PRV_009A	ipaws_admin	ipaws_alert		t
 PRV_009B	ipaws_admin	ipaws_deployer		t
 PRV_009C	ipaws_admin	ipaws_config		t
 PRV_009D	ipaws_admin	cap_response		t
-PRV_009E	ipaws_admin	cap_urgency_field		t
+PRV_009E	ipaws_admin	cap_urgency_fld		t
 PRV_009F	ipaws_deploy	ipaws_deployer		t
 PRV_009L	ipaws_deploy	notification		t
 PRV_009G	ipaws_tab	ipaws_alert		f
 PRV_009H	ipaws_tab	ipaws_deployer		f
 PRV_009I	ipaws_tab	ipaws_config		f
 PRV_009J	ipaws_tab	cap_response		f
-PRV_009K	ipaws_tab	cap_urgency_field		f
+PRV_009K	ipaws_tab	cap_urgency_fld		f
 PRV_0097	lcs_admin	lane_use_multi		t
 PRV_0098	lcs_admin	lcs		t
 PRV_0099	lcs_admin	lcs_array		t
@@ -3568,7 +3568,20 @@ COPY iris.cap_urgency (id, description) FROM stdin;
 4	immediate
 \.
 
-CREATE TABLE iris.cap_urgency_field (
+CREATE TABLE iris.cap_severity (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(10) NOT NULL
+);
+
+COPY iris.cap_severity(id, description) FROM stdin;
+0	unknown
+1	minor
+2	moderate
+3	severe
+4	extreme
+\.
+
+CREATE TABLE iris.cap_urgency_fld (
 	name VARCHAR(24) PRIMARY KEY,
 	event text,
 	urgency INTEGER NOT NULL REFERENCES iris.cap_urgency,
@@ -3610,7 +3623,7 @@ CREATE TABLE event.ipaws_alert (
 	event text,
 	response_types text[],
 	urgency INTEGER NOT NULL REFERENCES iris.cap_urgency,
-	severity text,
+	severity INTEGER NOT NULL REFERENCES iris.cap_severity,
 	certainty text,
 	audience text,
 	effective_date TIMESTAMP WITH time zone,

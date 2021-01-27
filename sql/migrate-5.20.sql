@@ -52,7 +52,20 @@ COPY iris.cap_urgency (id, description) FROM stdin;
 4	immediate
 \.
 
-CREATE TABLE iris.cap_urgency_field (
+CREATE TABLE iris.cap_severity (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(10) NOT NULL
+);
+
+COPY iris.cap_severity(id, description) FROM stdin;
+0	unknown
+1	minor
+2	moderate
+3	severe
+4	extreme
+\.
+
+CREATE TABLE iris.cap_urgency_fld (
 	name VARCHAR(24) PRIMARY KEY,
 	event text,
 	urgency INTEGER NOT NULL REFERENCES iris.cap_urgency,
@@ -60,11 +73,10 @@ CREATE TABLE iris.cap_urgency_field (
 );
 
 DELETE FROM iris.sonar_type WHERE name = 'cap_urgency';
-INSERT INTO iris.sonar_type (name) VALUES
-	('cap_urgency_field');
+INSERT INTO iris.sonar_type (name) VALUES ('cap_urgency_fld');
 
 UPDATE iris.privilege
-	SET type_n = 'cap_urgency_field'
+	SET type_n = 'cap_urgency_fld'
 	WHERE type_n = 'cap_urgency';
 
 ALTER TABLE iris.ipaws_alert DROP COLUMN urgency;
@@ -72,5 +84,11 @@ ALTER TABLE iris.ipaws_alert
 	ADD COLUMN urgency INTEGER REFERENCES iris.cap_urgency;
 UPDATE iris.ipaws_alert SET urgency = 0;
 ALTER TABLE iris.ipaws_alert ALTER COLUMN urgency SET NOT NULL;
+
+ALTER TABLE iris.ipaws_alert DROP COLUMN severity;
+ALTER TABLE iris.ipaws_alert
+	ADD COLUMN severity INTEGER REFERENCES iris.cap_severity;
+UPDATE iris.ipaws_alert SET severity = 0;
+ALTER TABLE iris.ipaws_alert ALTER COLUMN severity SET NOT NULL;
 
 COMMIT;

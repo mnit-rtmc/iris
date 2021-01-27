@@ -27,7 +27,7 @@ import us.mn.state.dot.sonar.SonarObject;
 public interface CapUrgencyField extends SonarObject {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "cap_urgency";
+	String SONAR_TYPE = "cap_urgency_fld";
 
 	/** Default Event (for use if no other matching event found) */
 	String DEFAULT_EVENT = "<default>";
