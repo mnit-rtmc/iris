@@ -3581,6 +3581,19 @@ COPY iris.cap_severity(id, description) FROM stdin;
 4	extreme
 \.
 
+CREATE TABLE iris.cap_certainty (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(10) NOT NULL
+);
+
+COPY iris.cap_certainty(id, description) FROM stdin;
+0	unknown
+1	unlikely
+2	possible
+3	likely
+4	observed
+\.
+
 CREATE TABLE iris.cap_urgency_fld (
 	name VARCHAR(24) PRIMARY KEY,
 	event text,
@@ -3624,7 +3637,7 @@ CREATE TABLE event.ipaws_alert (
 	response_types text[],
 	urgency INTEGER NOT NULL REFERENCES iris.cap_urgency,
 	severity INTEGER NOT NULL REFERENCES iris.cap_severity,
-	certainty text,
+	certainty INTEGER NOT NULL REFERENCES iris.cap_certainty,
 	audience text,
 	effective_date TIMESTAMP WITH time zone,
 	onset_date TIMESTAMP WITH time zone,

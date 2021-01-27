@@ -285,7 +285,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		     getStringArray(row, 14), // response types
 		     row.getInt(15),          // urgency
 		     row.getInt(16),          // severity
-		     row.getString(17),       // certainty
+		     row.getInt(17),          // certainty
 		     row.getString(18),       // audience
 		     row.getTimestamp(19),    // effective date
 		     row.getTimestamp(20),    // onset date
@@ -336,10 +336,9 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	public IpawsAlertImpl(String n, String i, String se, Date sd,
 		String sta, String mt, String sc, String[] cd, String nt,
 		String[] ref, String[] inc, String[] ct, String ev, String[] rt,
-		int u, int sv, String cy, String au, Date efd, Date od,
-		Date exd, String sn, String hl, String ades, String in,
-		String par, String ar, String gp, Double lt, Double ln,
-		Boolean p, Date pt)
+		int ur, int sv, int cy, String au, Date efd, Date od, Date exd,
+		String sn, String hl, String ades, String in, String par,
+		String ar, String gp, Double lt, Double ln, Boolean p, Date pt)
 	{
 		super(n);
 		identifier = i;
@@ -355,7 +354,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		categories = Arrays.asList(ct);
 		event = ev;
 		response_types = Arrays.asList(rt);
-		urgency = u;
+		urgency = ur;
 		severity = sv;
 		certainty = cy;
 		audience = au;
@@ -674,10 +673,10 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	}
 
 	/** Set the urgency */
-	public void setUrgencyNotify(int u) throws TMSException {
-		if (u != urgency) {
-			store.update(this, "urgency", u);
-			urgency = u;
+	public void setUrgencyNotify(int ur) throws TMSException {
+		if (ur != urgency) {
+			store.update(this, "urgency", ur);
+			urgency = ur;
 			notifyAttribute("urgency");
 		}
 	}
@@ -701,17 +700,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	}
 
 	/** Certainty of the alert */
-	private String certainty;
+	private int certainty;
 
 	/** Get the certainty */
 	@Override
-	public String getCertainty() {
+	public int getCertainty() {
 		return certainty;
 	}
 
 	/** Set the certainty */
-	public void setCertaintyNotify(String cy) throws TMSException {
-		if (!objectEquals(certainty, cy)) {
+	public void setCertaintyNotify(int cy) throws TMSException {
+		if (cy != certainty) {
 			store.update(this, "certainty", cy);
 			certainty = cy;
 			notifyAttribute("certainty");
@@ -1139,7 +1138,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		Date aEnd = getExpirationDate();
 
 		String autoMulti = generateMulti(cfg);
-		int priority = calculateMsgPriority().ordinal();
+		int priority = DmsMsgPriority.ALERT.ordinal();
 
 		// check if any attributes have changed from this last deployer
 		// (if we got one)
@@ -1186,14 +1185,6 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		MultiString ms = builder.toMultiString();
 		log("MULTI: " + ms.toString());
 		return (ms.isValid() && !ms.isBlank()) ? ms.toString() : null;
-	}
-
-	/** Calculate the message priority for an alert given the urgency,
-	 *  severity, and certainty values and weights stored as system
-	 *  attributes.
-	 */
-	private DmsMsgPriority calculateMsgPriority() {
-		return DmsMsgPriority.ALERT;
 	}
 
 	/** Create the geoPoly attribute using the area section of the alert */

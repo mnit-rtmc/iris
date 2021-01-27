@@ -76,7 +76,7 @@ public interface IpawsAlert extends SonarObject {
 	int getSeverity();
 
 	/** Get the certainty */
-	String getCertainty();
+	int getCertainty();
 
 	/** Get the audience */
 	String getAudience();

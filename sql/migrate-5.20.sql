@@ -65,6 +65,19 @@ COPY iris.cap_severity(id, description) FROM stdin;
 4	extreme
 \.
 
+CREATE TABLE iris.cap_certainty (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(10) NOT NULL
+);
+
+COPY iris.cap_certainty(id, description) FROM stdin;
+0	unknown
+1	unlikely
+2	possible
+3	likely
+4	observed
+\.
+
 CREATE TABLE iris.cap_urgency_fld (
 	name VARCHAR(24) PRIMARY KEY,
 	event text,
@@ -90,5 +103,11 @@ ALTER TABLE iris.ipaws_alert
 	ADD COLUMN severity INTEGER REFERENCES iris.cap_severity;
 UPDATE iris.ipaws_alert SET severity = 0;
 ALTER TABLE iris.ipaws_alert ALTER COLUMN severity SET NOT NULL;
+
+ALTER TABLE iris.ipaws_alert DROP COLUMN certainty;
+ALTER TABLE iris.ipaws_alert
+	ADD COLUMN certainty INTEGER REFERENCES iris.cap_certainty;
+UPDATE iris.ipaws_alert SET certainty = 0;
+ALTER TABLE iris.ipaws_alert ALTER COLUMN certainty SET NOT NULL;
 
 COMMIT;

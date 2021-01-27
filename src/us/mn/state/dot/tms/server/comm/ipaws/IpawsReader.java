@@ -39,6 +39,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.tms.CapCertainty;
 import us.mn.state.dot.tms.CapSeverity;
 import us.mn.state.dot.tms.CapUrgency;
 import us.mn.state.dot.tms.IpawsAlert;
@@ -177,7 +178,8 @@ public class IpawsReader {
 			element)).ordinal());
 		ia.setSeverityNotify(CapSeverity.fromValue(getTagValue(
 			"severity", element)).ordinal());
-		ia.setCertaintyNotify(getTagValue("certainty", element));
+		ia.setCertaintyNotify(CapCertainty.fromValue(getTagValue(
+			"certainty", element)).ordinal());
 		ia.setAudienceNotify(getTagValue("audience", element));
 		ia.setEffectiveDateNotify(parseDate(getTagValue("effective",
 			element)));
