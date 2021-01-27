@@ -283,7 +283,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		     getStringArray(row, 12), // categories
 		     row.getString(13),       // event
 		     getStringArray(row, 14), // response types
-		     row.getString(15),       // urgency
+		     row.getInt(15),          // urgency
 		     row.getString(16),       // severity
 		     row.getString(17),       // certainty
 		     row.getString(18),       // audience
@@ -336,7 +336,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	public IpawsAlertImpl(String n, String i, String se, Date sd,
 		String sta, String mt, String sc, String[] cd, String nt,
 		String[] ref, String[] inc, String[] ct, String ev, String[] rt,
-		String u, String sv, String cy, String au, Date efd, Date od,
+		int u, String sv, String cy, String au, Date efd, Date od,
 		Date exd, String sn, String hl, String ades, String in,
 		String par, String ar, String gp, Double lt, Double ln,
 		Boolean p, Date pt)
@@ -665,17 +665,17 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	}
 
 	/** Urgency of alert */
-	private String urgency;
+	private int urgency;
 
 	/** Get the urgency */
 	@Override
-	public String getUrgency() {
+	public int getUrgency() {
 		return urgency;
 	}
 
 	/** Set the urgency */
-	public void setUrgencyNotify(String u) throws TMSException {
-		if (!objectEquals(urgency, u)) {
+	public void setUrgencyNotify(int u) throws TMSException {
+		if (u != urgency) {
 			store.update(this, "urgency", u);
 			urgency = u;
 			notifyAttribute("urgency");

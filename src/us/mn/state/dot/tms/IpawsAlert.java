@@ -70,7 +70,7 @@ public interface IpawsAlert extends SonarObject {
 	List<String> getResponseTypes();
 
 	/** Get the urgency */
-	String getUrgency();
+	int getUrgency();
 
 	/** Get the severity */
 	String getSeverity();

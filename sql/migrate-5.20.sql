@@ -56,7 +56,7 @@ CREATE TABLE iris.cap_urgency_field (
 	name VARCHAR(24) PRIMARY KEY,
 	event text,
 	urgency INTEGER NOT NULL REFERENCES iris.cap_urgency,
-	multi text
+	multi VARCHAR(64)
 );
 
 DELETE FROM iris.sonar_type WHERE name = 'cap_urgency';
@@ -66,5 +66,11 @@ INSERT INTO iris.sonar_type (name) VALUES
 UPDATE iris.privilege
 	SET type_n = 'cap_urgency_field'
 	WHERE type_n = 'cap_urgency';
+
+ALTER TABLE iris.ipaws_alert DROP COLUMN urgency;
+ALTER TABLE iris.ipaws_alert
+	ADD COLUMN urgency INTEGER REFERENCES iris.cap_urgency;
+UPDATE iris.ipaws_alert SET urgency = 0;
+ALTER TABLE iris.ipaws_alert ALTER COLUMN urgency SET NOT NULL;
 
 COMMIT;

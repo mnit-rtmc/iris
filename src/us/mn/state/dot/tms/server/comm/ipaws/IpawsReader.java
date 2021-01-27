@@ -42,6 +42,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.tms.CapUrgency;
 import us.mn.state.dot.tms.IpawsAlert;
 import us.mn.state.dot.tms.IpawsAlertHelper;
 import us.mn.state.dot.tms.TMSException;
@@ -174,7 +175,8 @@ public class IpawsReader {
 		ia.setEventNotify(getTagValue("event", element));
 		ia.setResponseTypesNotify(getTagValueArray("responseType",
 			element));
-		ia.setUrgencyNotify(getTagValue("urgency", element));
+		ia.setUrgencyNotify(CapUrgency.fromValue(getTagValue("urgency",
+			element)).ordinal());
 		ia.setSeverityNotify(getTagValue("severity", element));
 		ia.setCertaintyNotify(getTagValue("certainty", element));
 		ia.setAudienceNotify(getTagValue("audience", element));
