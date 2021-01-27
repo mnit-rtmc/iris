@@ -41,6 +41,7 @@ import org.xml.sax.SAXException;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.CapCertainty;
 import us.mn.state.dot.tms.CapMsgType;
+import us.mn.state.dot.tms.CapScope;
 import us.mn.state.dot.tms.CapSeverity;
 import us.mn.state.dot.tms.CapStatus;
 import us.mn.state.dot.tms.CapUrgency;
@@ -168,7 +169,8 @@ public class IpawsReader {
 			element)).ordinal());
 		ia.setMsgTypeNotify(CapMsgType.fromValue(getTagValue("msgType",
 			element)).ordinal());
-		ia.setScopeNotify(getTagValue("scope", element));
+		ia.setScopeNotify(CapScope.fromValue(getTagValue("scope",
+			element)).ordinal());
 		ia.setCodesNotify(getTagValueArray("code", element));
 		ia.setNoteNotify(getTagValue("note", element));
 		ia.setAlertReferencesNotify(getTagValueArray("references",

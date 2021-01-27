@@ -70,6 +70,18 @@ COPY cap.msg_type (id, description) FROM stdin;
 5	error
 \.
 
+CREATE TABLE cap.scope (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(10) NOT NULL
+);
+
+COPY cap.scope (id, description) FROM stdin;
+0	unknown
+1	public
+2	restricted
+3	private
+\.
+
 CREATE TABLE cap.urgency (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(10) NOT NULL
@@ -133,7 +145,7 @@ CREATE TABLE event.ipaws_alert (
 	sent_date TIMESTAMP WITH time zone,
 	status INTEGER NOT NULL REFERENCES cap.status,
 	msg_type INTEGER NOT NULL REFERENCES cap.msg_type,
-	scope text,
+	scope INTEGER NOT NULL REFERENCES cap.scope,
 	codes text[],
 	note text,
 	alert_references text[],

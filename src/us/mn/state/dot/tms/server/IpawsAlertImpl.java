@@ -275,7 +275,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		     row.getTimestamp(4),     // sent date
 		     row.getInt(5),           // status
 		     row.getInt(6),           // msg_type
-		     row.getString(7),        // scope
+		     row.getInt(7),           // scope
 		     getStringArray(row, 8),  // codes
 		     row.getString(9),        // note
 		     getStringArray(row, 10), // alert references
@@ -334,9 +334,9 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	}
 
 	public IpawsAlertImpl(String n, String i, String se, Date sd,
-		int sta, int mt, String sc, String[] cd, String nt,
-		String[] ref, String[] inc, String[] ct, String ev, String[] rt,
-		int ur, int sv, int cy, String au, Date efd, Date od, Date exd,
+		int sta, int mt, int sc, String[] cd, String nt, String[] ref,
+		String[] inc, String[] ct, String ev, String[] rt, int ur,
+		int sv, int cy, String au, Date efd, Date od, Date exd,
 		String sn, String hl, String ades, String in, String par,
 		String ar, String gp, Double lt, Double ln, Boolean p, Date pt)
 	{
@@ -502,18 +502,18 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		}
 	}
 
-	/** Alert scope */
-	private String scope;
+	/** CAP scope */
+	private int scope;
 
-	/** Get the scope */
+	/** Get the CAP scope (CapScope ordinal) */
 	@Override
-	public String getScope() {
+	public int getScope() {
 		return scope;
 	}
 
 	/** Set the scope */
-	public void setScopeNotify(String sc) throws TMSException {
-		if (!objectEquals(scope, sc)) {
+	public void setScopeNotify(int sc) throws TMSException {
+		if (sc != scope) {
 			store.update(this, "scope", sc);
 			scope = sc;
 			notifyAttribute("scope");
