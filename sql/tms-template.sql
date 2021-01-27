@@ -3555,6 +3555,20 @@ iadv_00106	13	1	1	\N	\N	IN RIGHT SHOULDER
 --
 -- IPAWS Alerts
 --
+CREATE TABLE iris.cap_status (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(10) NOT NULL
+);
+
+COPY iris.cap_status (id, description) FROM stdin;
+0	unknown
+1	actual
+2	exercise
+3	system
+4	test
+5	draft
+\.
+
 CREATE TABLE iris.cap_urgency (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(10) NOT NULL
@@ -3625,7 +3639,7 @@ CREATE TABLE event.ipaws_alert (
 	identifier text UNIQUE NOT NULL,
 	sender text,
 	sent_date TIMESTAMP WITH time zone,
-	status text,
+	status INTEGER NOT NULL REFERENCES iris.cap_status,
 	message_type text,
 	scope text,
 	codes text[],

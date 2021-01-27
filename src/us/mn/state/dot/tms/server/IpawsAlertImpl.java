@@ -273,7 +273,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		     row.getString(2),        // identifier
 		     row.getString(3),        // sender
 		     row.getTimestamp(4),     // sent date
-		     row.getString(5),        // status
+		     row.getInt(5),           // status
 		     row.getString(6),        // message type
 		     row.getString(7),        // scope
 		     getStringArray(row, 8),  // codes
@@ -334,7 +334,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	}
 
 	public IpawsAlertImpl(String n, String i, String se, Date sd,
-		String sta, String mt, String sc, String[] cd, String nt,
+		int sta, String mt, String sc, String[] cd, String nt,
 		String[] ref, String[] inc, String[] ct, String ev, String[] rt,
 		int ur, int sv, int cy, String au, Date efd, Date od, Date exd,
 		String sn, String hl, String ades, String in, String par,
@@ -466,18 +466,18 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return alertStart;
 	}
 
-	/** Status of alert */
-	private String status;
+	/** CAP status */
+	private int status;
 
-	/** Get the status */
+	/** Get the CAP status (CapStatus ordinal) */
 	@Override
-	public String getStatus() {
+	public int getStatus() {
 		return status;
 	}
 
 	/** Set the status */
-	public void setStatusNotify(String sta) throws TMSException {
-		if (!objectEquals(status, sta)) {
+	public void setStatusNotify(int sta) throws TMSException {
+		if (sta != status) {
 			store.update(this, "status", sta);
 			status = sta;
 			notifyAttribute("status");
@@ -663,10 +663,10 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		return maxRT.value;
 	}
 
-	/** Urgency of alert */
+	/** CAP urgency */
 	private int urgency;
 
-	/** Get the urgency */
+	/** Get the CAP urgency (CapUrgency ordinal) */
 	@Override
 	public int getUrgency() {
 		return urgency;
@@ -681,10 +681,10 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		}
 	}
 
-	/** Severity of the alert */
+	/** CAP severity */
 	private int severity;
 
-	/** Get the severity */
+	/** Get the CAP severity (CapSeverity ordinal) */
 	@Override
 	public int getSeverity() {
 		return severity;
@@ -699,10 +699,10 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		}
 	}
 
-	/** Certainty of the alert */
+	/** CAP certainty */
 	private int certainty;
 
-	/** Get the certainty */
+	/** Get the CAP certainty (CapCertainty ordinal) */
 	@Override
 	public int getCertainty() {
 		return certainty;
@@ -1013,6 +1013,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	 *  allowing different messages to be posted to different sign types.
 	 */
 	public void processAlert() throws SQLException, TMSException {
+		// FIXME: check CAP status
 		if (getPurgeable() == null)
 			processNewAlert();
 		processPhase();

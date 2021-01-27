@@ -39,8 +39,8 @@ public interface IpawsAlert extends SonarObject {
 	/** Get the sent date */
 	Date getSentDate();
 
-	/** Get the status */
-	String getStatus();
+	/** Get the CAP status (CapStatus ordinal) */
+	int getStatus();
 
 	/** Get the message type */
 	String getMsgType();
@@ -69,13 +69,13 @@ public interface IpawsAlert extends SonarObject {
 	/** Get the response types */
 	List<String> getResponseTypes();
 
-	/** Get the urgency */
+	/** Get the CAP urgency (CapUrgency ordinal) */
 	int getUrgency();
 
-	/** Get the severity */
+	/** Get the CAP severity (CapSeverity ordinal) */
 	int getSeverity();
 
-	/** Get the certainty */
+	/** Get the CAP certainty (CapCertainty ordinal) */
 	int getCertainty();
 
 	/** Get the audience */

@@ -37,6 +37,20 @@ ALTER TABLE event.ipaws_deployer ADD COLUMN alert_state INTEGER;
 UPDATE event.ipaws_deployer SET alert_state = 4; -- expired
 ALTER TABLE event.ipaws_deployer ALTER COLUMN alert_state SET NOT NULL;
 
+CREATE TABLE iris.cap_status (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(10) NOT NULL
+);
+
+COPY iris.cap_status (id, description) FROM stdin;
+0	unknown
+1	actual
+2	exercise
+3	system
+4	test
+5	draft
+\.
+
 DROP TABLE iris.cap_urgency;
 
 CREATE TABLE iris.cap_urgency (
@@ -109,5 +123,11 @@ ALTER TABLE iris.ipaws_alert
 	ADD COLUMN certainty INTEGER REFERENCES iris.cap_certainty;
 UPDATE iris.ipaws_alert SET certainty = 0;
 ALTER TABLE iris.ipaws_alert ALTER COLUMN certainty SET NOT NULL;
+
+ALTER TABLE iris.ipaws_alert DROP COLUMN status;
+ALTER TABLE iris.ipaws_alert
+	ADD COLUMN status INTEGER REFERENCES iris.cap_status;
+UPDATE iris.ipaws_alert SET status = 0;
+ALTER TABLE iris.ipaws_alert ALTER COLUMN status SET NOT NULL;
 
 COMMIT;
