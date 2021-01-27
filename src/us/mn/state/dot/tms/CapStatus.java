@@ -17,8 +17,7 @@ package us.mn.state.dot.tms;
 /**
  * Common Alerting Protocol (CAP) status enum.
  *
- * The ordinal values correspond to the records in the iris.cap_status look-up
- * table.
+ * The ordinal values correspond to the records in the cap.status look-up table.
  *
  * @author Douglas Lau
  */

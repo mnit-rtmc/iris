@@ -25,6 +25,9 @@ ALTER SCHEMA iris OWNER TO tms;
 CREATE SCHEMA event;
 ALTER SCHEMA event OWNER TO tms;
 
+CREATE SCHEMA cap;
+ALTER SCHEMA cap OWNER TO tms;
+
 CREATE EXTENSION postgis;
 
 SET SESSION AUTHORIZATION 'tms';
@@ -3555,12 +3558,12 @@ iadv_00106	13	1	1	\N	\N	IN RIGHT SHOULDER
 --
 -- IPAWS Alerts
 --
-CREATE TABLE iris.cap_status (
+CREATE TABLE cap.status (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(10) NOT NULL
 );
 
-COPY iris.cap_status (id, description) FROM stdin;
+COPY cap.status (id, description) FROM stdin;
 0	unknown
 1	actual
 2	exercise
@@ -3569,12 +3572,12 @@ COPY iris.cap_status (id, description) FROM stdin;
 5	draft
 \.
 
-CREATE TABLE iris.cap_msg_type (
+CREATE TABLE cap.msg_type (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(10) NOT NULL
 );
 
-COPY iris.cap_msg_type (id, description) FROM stdin;
+COPY cap.msg_type (id, description) FROM stdin;
 0	unknown
 1	alert
 2	update
@@ -3583,12 +3586,12 @@ COPY iris.cap_msg_type (id, description) FROM stdin;
 5	error
 \.
 
-CREATE TABLE iris.cap_urgency (
+CREATE TABLE cap.urgency (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(10) NOT NULL
 );
 
-COPY iris.cap_urgency (id, description) FROM stdin;
+COPY cap.urgency (id, description) FROM stdin;
 0	unknown
 1	past
 2	future
@@ -3596,12 +3599,12 @@ COPY iris.cap_urgency (id, description) FROM stdin;
 4	immediate
 \.
 
-CREATE TABLE iris.cap_severity (
+CREATE TABLE cap.severity (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(10) NOT NULL
 );
 
-COPY iris.cap_severity(id, description) FROM stdin;
+COPY cap.severity(id, description) FROM stdin;
 0	unknown
 1	minor
 2	moderate
@@ -3609,12 +3612,12 @@ COPY iris.cap_severity(id, description) FROM stdin;
 4	extreme
 \.
 
-CREATE TABLE iris.cap_certainty (
+CREATE TABLE cap.certainty (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(10) NOT NULL
 );
 
-COPY iris.cap_certainty(id, description) FROM stdin;
+COPY cap.certainty(id, description) FROM stdin;
 0	unknown
 1	unlikely
 2	possible
@@ -3625,7 +3628,7 @@ COPY iris.cap_certainty(id, description) FROM stdin;
 CREATE TABLE iris.cap_urgency_fld (
 	name VARCHAR(24) PRIMARY KEY,
 	event text,
-	urgency INTEGER NOT NULL REFERENCES iris.cap_urgency,
+	urgency INTEGER NOT NULL REFERENCES cap.urgency,
 	multi VARCHAR(64)
 );
 
@@ -3653,8 +3656,8 @@ CREATE TABLE event.ipaws_alert (
 	identifier text UNIQUE NOT NULL,
 	sender text,
 	sent_date TIMESTAMP WITH time zone,
-	status INTEGER NOT NULL REFERENCES iris.cap_status,
-	msg_type INTEGER NOT NULL REFERENCES iris.cap_msg_type,
+	status INTEGER NOT NULL REFERENCES cap.status,
+	msg_type INTEGER NOT NULL REFERENCES cap.msg_type,
 	scope text,
 	codes text[],
 	note text,
@@ -3663,9 +3666,9 @@ CREATE TABLE event.ipaws_alert (
 	categories text[],
 	event text,
 	response_types text[],
-	urgency INTEGER NOT NULL REFERENCES iris.cap_urgency,
-	severity INTEGER NOT NULL REFERENCES iris.cap_severity,
-	certainty INTEGER NOT NULL REFERENCES iris.cap_certainty,
+	urgency INTEGER NOT NULL REFERENCES cap.urgency,
+	severity INTEGER NOT NULL REFERENCES cap.severity,
+	certainty INTEGER NOT NULL REFERENCES cap.certainty,
 	audience text,
 	effective_date TIMESTAMP WITH time zone,
 	onset_date TIMESTAMP WITH time zone,

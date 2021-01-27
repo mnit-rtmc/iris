@@ -21,7 +21,7 @@ package us.mn.state.dot.tms;
  * Used for IPAWS alert processing for generating messages for posting to DMS.
  * Values are taken from the OASIS CAP Standard v1.2.  Values are ordered from
  * least (Unknown/Past) to most (Immediate) emphatic
- * The ordinal values correspond to the records in the iris.cap_urgency look-up
+ * The ordinal values correspond to the records in the cap.urgency look-up
  * table.
  *
  * @author Gordon Parikh

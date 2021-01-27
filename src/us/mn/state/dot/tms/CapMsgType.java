@@ -17,7 +17,7 @@ package us.mn.state.dot.tms;
 /**
  * Common Alerting Protocol (CAP) message type enum.
  *
- * The ordinal values correspond to the records in the iris.cap_msg_type look-up
+ * The ordinal values correspond to the records in the cap.msg_type look-up
  * table.
  *
  * @author Douglas Lau

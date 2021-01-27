@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2020  Minnesota Department of Transportation
+ * Copyright (C) 2016-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 		"camera_template",
 		"cam_vid_src_ord",
 		"cap_response",
-		"cap_urgency",
+		"cap_urgency_fld",
 		"capability",
 		"catalog",
 		"comm_config",
