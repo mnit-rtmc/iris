@@ -144,7 +144,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	static public void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IpawsAlertImpl.class);
 		store.query("SELECT name, identifier, sender, sent_date, " +
-			"status, message_type, scope, codes, note, " +
+			"status, msg_type, scope, codes, note, " +
 			"alert_references, incidents, categories, event, " +
 			"response_types, urgency, severity, certainty, " +
 			"audience, effective_date, onset_date, " +
@@ -225,7 +225,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		map.put("sender", sender);
 		map.put("sent_date", sent_date);
 		map.put("status", status);
-		map.put("message_type", message_type);
+		map.put("msg_type", msg_type);
 		map.put("scope", scope);
 		map.put("codes", codes);
 		map.put("note", note);
@@ -274,7 +274,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		     row.getString(3),        // sender
 		     row.getTimestamp(4),     // sent date
 		     row.getInt(5),           // status
-		     row.getString(6),        // message type
+		     row.getInt(6),           // msg_type
 		     row.getString(7),        // scope
 		     getStringArray(row, 8),  // codes
 		     row.getString(9),        // note
@@ -334,7 +334,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 	}
 
 	public IpawsAlertImpl(String n, String i, String se, Date sd,
-		int sta, String mt, String sc, String[] cd, String nt,
+		int sta, int mt, String sc, String[] cd, String nt,
 		String[] ref, String[] inc, String[] ct, String ev, String[] rt,
 		int ur, int sv, int cy, String au, Date efd, Date od, Date exd,
 		String sn, String hl, String ades, String in, String par,
@@ -345,7 +345,7 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		sender = se;
 		sent_date = sd;
 		status = sta;
-		message_type = mt;
+		msg_type = mt;
 		scope = sc;
 		codes = Arrays.asList(cd);
 		note = nt;
@@ -484,20 +484,20 @@ public class IpawsAlertImpl extends BaseObjectImpl implements IpawsAlert {
 		}
 	}
 
-	/** Alert message type */
-	private String message_type;
+	/** CAP message type */
+	private int msg_type;
 
-	/** Get the message type */
+	/** Get the CAP message type (CapMsgType ordinal) */
 	@Override
-	public String getMsgType() {
-		return message_type;
+	public int getMsgType() {
+		return msg_type;
 	}
 
 	/** Set the message type */
-	public void setMsgTypeNotify(String mt) throws TMSException {
-		if (!objectEquals(message_type, mt)) {
-			store.update(this, "message_type", mt);
-			message_type = mt;
+	public void setMsgTypeNotify(int mt) throws TMSException {
+		if (mt != msg_type) {
+			store.update(this, "msg_type", mt);
+			msg_type = mt;
 			notifyAttribute("msgType");
 		}
 	}

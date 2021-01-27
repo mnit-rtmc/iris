@@ -42,8 +42,8 @@ public interface IpawsAlert extends SonarObject {
 	/** Get the CAP status (CapStatus ordinal) */
 	int getStatus();
 
-	/** Get the message type */
-	String getMsgType();
+	/** Get the CAP message type (CapMsgType ordinal) */
+	int getMsgType();
 
 	/** Get the scope */
 	String getScope();

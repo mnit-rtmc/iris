@@ -51,6 +51,20 @@ COPY iris.cap_status (id, description) FROM stdin;
 5	draft
 \.
 
+CREATE TABLE iris.cap_msg_type (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(10) NOT NULL
+);
+
+COPY iris.cap_msg_type (id, description) FROM stdin;
+0	unknown
+1	alert
+2	update
+3	cancel
+4	ack
+5	error
+\.
+
 DROP TABLE iris.cap_urgency;
 
 CREATE TABLE iris.cap_urgency (
@@ -106,28 +120,42 @@ UPDATE iris.privilege
 	SET type_n = 'cap_urgency_fld'
 	WHERE type_n = 'cap_urgency';
 
-ALTER TABLE iris.ipaws_alert DROP COLUMN urgency;
-ALTER TABLE iris.ipaws_alert
-	ADD COLUMN urgency INTEGER REFERENCES iris.cap_urgency;
-UPDATE iris.ipaws_alert SET urgency = 0;
-ALTER TABLE iris.ipaws_alert ALTER COLUMN urgency SET NOT NULL;
+DROP TABLE event.ipaws_alert;
 
-ALTER TABLE iris.ipaws_alert DROP COLUMN severity;
-ALTER TABLE iris.ipaws_alert
-	ADD COLUMN severity INTEGER REFERENCES iris.cap_severity;
-UPDATE iris.ipaws_alert SET severity = 0;
-ALTER TABLE iris.ipaws_alert ALTER COLUMN severity SET NOT NULL;
-
-ALTER TABLE iris.ipaws_alert DROP COLUMN certainty;
-ALTER TABLE iris.ipaws_alert
-	ADD COLUMN certainty INTEGER REFERENCES iris.cap_certainty;
-UPDATE iris.ipaws_alert SET certainty = 0;
-ALTER TABLE iris.ipaws_alert ALTER COLUMN certainty SET NOT NULL;
-
-ALTER TABLE iris.ipaws_alert DROP COLUMN status;
-ALTER TABLE iris.ipaws_alert
-	ADD COLUMN status INTEGER REFERENCES iris.cap_status;
-UPDATE iris.ipaws_alert SET status = 0;
-ALTER TABLE iris.ipaws_alert ALTER COLUMN status SET NOT NULL;
+-- IPAWS Alert Event table
+CREATE TABLE event.ipaws_alert (
+	name text PRIMARY KEY,
+	identifier text UNIQUE NOT NULL,
+	sender text,
+	sent_date TIMESTAMP WITH time zone,
+	status INTEGER NOT NULL REFERENCES iris.cap_status,
+	msg_type INTEGER NOT NULL REFERENCES iris.cap_msg_type,
+	scope text,
+	codes text[],
+	note text,
+	alert_references text[],
+	incidents text[],
+	categories text[],
+	event text,
+	response_types text[],
+	urgency INTEGER NOT NULL REFERENCES iris.cap_urgency,
+	severity INTEGER NOT NULL REFERENCES iris.cap_severity,
+	certainty INTEGER NOT NULL REFERENCES iris.cap_certainty,
+	audience text,
+	effective_date TIMESTAMP WITH time zone,
+	onset_date TIMESTAMP WITH time zone,
+	expiration_date TIMESTAMP WITH time zone,
+	sender_name text,
+	headline text,
+	alert_description text,
+	instruction text,
+	parameters jsonb,
+	area jsonb,
+	geo_poly geography(multipolygon),
+	lat double precision,
+	lon double precision,
+	purgeable BOOLEAN,
+	last_processed TIMESTAMP WITH time zone
+);
 
 COMMIT;

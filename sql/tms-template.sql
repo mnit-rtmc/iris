@@ -3569,6 +3569,20 @@ COPY iris.cap_status (id, description) FROM stdin;
 5	draft
 \.
 
+CREATE TABLE iris.cap_msg_type (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(10) NOT NULL
+);
+
+COPY iris.cap_msg_type (id, description) FROM stdin;
+0	unknown
+1	alert
+2	update
+3	cancel
+4	ack
+5	error
+\.
+
 CREATE TABLE iris.cap_urgency (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(10) NOT NULL
@@ -3640,7 +3654,7 @@ CREATE TABLE event.ipaws_alert (
 	sender text,
 	sent_date TIMESTAMP WITH time zone,
 	status INTEGER NOT NULL REFERENCES iris.cap_status,
-	message_type text,
+	msg_type INTEGER NOT NULL REFERENCES iris.cap_msg_type,
 	scope text,
 	codes text[],
 	note text,

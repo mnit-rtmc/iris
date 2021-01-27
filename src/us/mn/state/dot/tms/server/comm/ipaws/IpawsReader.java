@@ -40,6 +40,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.CapCertainty;
+import us.mn.state.dot.tms.CapMsgType;
 import us.mn.state.dot.tms.CapSeverity;
 import us.mn.state.dot.tms.CapStatus;
 import us.mn.state.dot.tms.CapUrgency;
@@ -165,7 +166,8 @@ public class IpawsReader {
 		ia.setSentDateNotify(parseDate(getTagValue("sent", element)));
 		ia.setStatusNotify(CapStatus.fromValue(getTagValue("status",
 			element)).ordinal());
-		ia.setMsgTypeNotify(getTagValue("msgType", element));
+		ia.setMsgTypeNotify(CapMsgType.fromValue(getTagValue("msgType",
+			element)).ordinal());
 		ia.setScopeNotify(getTagValue("scope", element));
 		ia.setCodesNotify(getTagValueArray("code", element));
 		ia.setNoteNotify(getTagValue("note", element));
