@@ -3572,7 +3572,7 @@ CREATE TABLE iris.cap_urgency_field (
 	name VARCHAR(24) PRIMARY KEY,
 	event text,
 	urgency INTEGER NOT NULL REFERENCES iris.cap_urgency,
-	multi text
+	multi VARCHAR(64)
 );
 
 -- CAP response types table
@@ -3580,7 +3580,7 @@ CREATE TABLE iris.cap_response (
 	name VARCHAR(24) PRIMARY KEY,
 	event text,
 	response_type text,
-	multi text
+	multi VARCHAR(64)
 );
 
 -- IPAWS Alert Config table
@@ -3609,7 +3609,7 @@ CREATE TABLE event.ipaws_alert (
 	categories text[],
 	event text,
 	response_types text[],
-	urgency text,
+	urgency INTEGER NOT NULL REFERENCES iris.cap_urgency,
 	severity text,
 	certainty text,
 	audience text,

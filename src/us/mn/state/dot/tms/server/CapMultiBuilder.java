@@ -22,6 +22,7 @@ import java.util.HashSet;
 import us.mn.state.dot.tms.CapResponse;
 import us.mn.state.dot.tms.CapResponseEnum;
 import us.mn.state.dot.tms.CapResponseHelper;
+import us.mn.state.dot.tms.CapUrgency;
 import us.mn.state.dot.tms.CapUrgencyField;
 import us.mn.state.dot.tms.CapUrgencyFieldHelper;
 import us.mn.state.dot.tms.IpawsDeployerHelper;
@@ -118,19 +119,18 @@ public class CapMultiBuilder extends MultiBuilder {
 	 */
 	@Override
 	public void addCapUrgency(String[] uvals) {
-		HashSet<String> urgSet = new HashSet<String>(
-			Arrays.asList(uvals));
-
 		// check the urgency value in the alert to see if we should
 		// substitute anything
-		String urg = alert.getUrgency();
-		String multi = "";
-		if (urgSet.contains(urg)) {
-			CapUrgencyField subst = CapUrgencyFieldHelper.lookupFor(
-				alert.getEvent(), urg);
-			if (subst != null)
-				multi = subst.getMulti();
+		String urg = CapUrgency.fromOrdinal(alert.getUrgency()).name();
+		for (String uval: uvals) {
+			if (uval.equalsIgnoreCase(urg)) {
+				CapUrgencyField subst = CapUrgencyFieldHelper
+					.lookupFor(alert.getEvent(), urg);
+				if (subst != null) {
+					addSpan(subst.getMulti());
+					break;
+				}
+			}
 		}
-		addSpan(multi);
 	}
 }

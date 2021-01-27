@@ -417,8 +417,8 @@ public class MultiString {
 	 */
 	static private void parseCapUrgency(String tag, Multi cb) {
 		String[] uvals = {};
-		// if we have any arguments, split on commas to get applicable urgency
-		// values
+		// if we have any arguments, split on commas to get applicable
+		// urgency values
 		if (tag.length() > 0)
 			uvals = tag.split(",");
 		cb.addCapUrgency(uvals);
