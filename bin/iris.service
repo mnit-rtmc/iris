@@ -4,7 +4,7 @@ After=postgresql.service
 StartLimitIntervalSec=0
 
 [Service]
-ExecStart=/usr/bin/java -server -Xmx1024m -XX:+UseG1GC -jar /usr/share/java/iris-server/iris-server.jar
+ExecStart=/usr/bin/java -server -Xmx4G -XX:+UseG1GC -jar /usr/share/java/iris-server/iris-server.jar
 Type=simple
 Restart=always
 RestartSec=2
