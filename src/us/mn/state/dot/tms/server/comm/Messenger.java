@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2020  Minnesota Department of Transportation
+ * Copyright (C) 2007-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,24 +37,25 @@ abstract public class Messenger implements Closeable {
 		new MessengerException("INVALID URI SCHEME");
 
 	/** Create a messenger.
-	 * @param scheme Default URI scheme.
+	 * @param dscheme Default URI scheme.
 	 * @param uri URI of remote host.
 	 * @param rt Receive timeout.
 	 * @param nrd No-response disconnect (sec).
 	 * @throws MessengerException if the messenger could not be created. */
-	static public Messenger create(URI scheme, String uri, int rt, int nrd)
+	static public Messenger create(URI dscheme, String uri, int rt, int nrd)
 		throws MessengerException, IOException
 	{
-		URI u = createURI(scheme, uri);
-		if ("udp".equals(u.getScheme()))
+		URI u = createURI(dscheme, uri);
+		String scheme = u.getScheme();
+		if ("udp".equals(scheme))
 			return DatagramMessenger.create(u, rt, nrd);
-		else if ("tcp".equals(u.getScheme()))
+		else if ("tcp".equals(scheme))
 			return StreamMessenger.create(u, rt, rt, nrd);
-		else if ("http".equals(u.getScheme()))
+		else if ("http".equals(scheme))
 			return HttpFileMessenger.create(u, rt, nrd);
-		else if ("https".equals(u.getScheme()))
-			return HttpsFileMessenger.create(u, rt, nrd);
-		else if ("modem".equals(u.getScheme()))
+		else if ("https".equals(scheme))
+			return HttpFileMessenger.create(u, rt, nrd);
+		else if ("modem".equals(scheme))
 			return ModemMessenger.create(u, rt, nrd);
 		else
 			throw INVALID_URI_SCHEME;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2020  Minnesota Department of Transportation
+ * Copyright (C) 2007-2021  Minnesota Department of Transportation
  * Copyright (C) 2020       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,8 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.utils.Base64;
 
 /**
- * A HttpFileMessenger is a class which reads a file from a URL using http.
+ * A HttpFileMessenger is a class which reads a file from a URL using HTTP or
+ * HTTPS.
  *
  * @author Douglas Lau
  * @author Michael Darter
@@ -42,7 +43,8 @@ public class HttpFileMessenger extends BasicMessenger {
 	static protected HttpFileMessenger create(URI u, int rt, int nrd)
 		throws IOException
 	{
-		assert "http".equals(u.getScheme());
+		assert "http".equals(u.getScheme())
+		    || "https".equals(u.getScheme());
 		return new HttpFileMessenger(u.toURL(), rt, nrd);
 	}
 
