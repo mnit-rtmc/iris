@@ -81,7 +81,7 @@ public class VidPanel extends JPanel implements FocusListener {
 	protected final JComponent placeholderComponent;
 
 	/** dimension of video */
-	private final Dimension videoDimension;
+	private Dimension videoDimension;
 
 	/** Camera PTZ control */
 	private CameraPTZ cam_ptz;
@@ -564,6 +564,7 @@ public class VidPanel extends JPanel implements FocusListener {
 		cam_ptz.setCamera(cam);
 		if (mouse_ptz != null)
 			mouse_ptz.dispose();
+		videoDimension = videoHolder.getSize();
 		mouse_ptz = createMousePTZ(cam_ptz, videoDimension, videoHolder);
 		boolean ret = !streamReqList.isEmpty();
 		panelStatus = PanelStatus.IDLE;
