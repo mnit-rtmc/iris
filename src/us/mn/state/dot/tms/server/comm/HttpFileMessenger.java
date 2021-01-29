@@ -30,6 +30,8 @@ import us.mn.state.dot.tms.utils.Base64;
 /**
  * A HttpFileMessenger is a class which reads a file from a URL using HTTP or
  * HTTPS.
+ * FIXME: this could just extend Messenger, since it doesn't reuse the
+ *        connection -- it doesn't need "no response disconnect" features.
  *
  * @author Douglas Lau
  * @author Michael Darter

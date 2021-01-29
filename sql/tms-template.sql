@@ -206,6 +206,7 @@ ipaws_priority_weight_severity	1.0
 ipaws_priority_weight_certainty	1.0
 ipaws_sign_thresh_auto_meters	1000
 ipaws_sign_thresh_opt_meters	4000
+ipaws_xml_save_enable	true
 map_extent_name_initial	Home
 map_icon_size_scale_max	30
 map_segment_max_meters	2000

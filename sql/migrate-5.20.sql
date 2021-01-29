@@ -39,6 +39,9 @@ ALTER TABLE event.ipaws_deployer ALTER COLUMN alert_end SET NOT NULL;
 ALTER TABLE event.ipaws_deployer ADD COLUMN alert_state INTEGER;
 UPDATE event.ipaws_deployer SET alert_state = 4; -- expired
 ALTER TABLE event.ipaws_deployer ALTER COLUMN alert_state SET NOT NULL;
+-- Add System Attributes
+INSERT INTO iris.system_attribute (name, value) VALUES
+	('ipaws_xml_save_enable', true);
 
 DROP TABLE iris.cap_urgency;
 

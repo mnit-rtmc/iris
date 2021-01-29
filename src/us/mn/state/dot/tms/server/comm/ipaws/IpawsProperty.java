@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,8 +39,10 @@ public class IpawsProperty extends ControllerProperty {
 	/** Decode a QUERY response */
 	@Override
 	public void decodeQuery(ControllerImpl c, InputStream is)
-			throws IOException {
-		IpawsReader.readIpaws(is);
+		throws IOException
+	{
+		CapReader reader = new CapReader(is);
+		reader.parse();
 	}
 
 	/** Get a string representation of the property */

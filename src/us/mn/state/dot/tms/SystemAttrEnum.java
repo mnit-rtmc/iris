@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  * Copyright (C) 2012-2018  Iteris Inc.
  * Copyright (C) 2014       AHMCT, University of California
  * Copyright (C) 2015-2020  SRF Consulting Group
@@ -109,6 +109,7 @@ public enum SystemAttrEnum {
 	IPAWS_PRIORITY_WEIGHT_CERTAINTY(1.0f),
 	IPAWS_SIGN_THRESH_AUTO_METERS(1000, 0),
 	IPAWS_SIGN_THRESH_OPT_METERS(4000, 0),
+	IPAWS_XML_SAVE_ENABLE(true),
 	MAP_EXTENT_NAME_INITIAL("Home"),
 	MAP_ICON_SIZE_SCALE_MAX(30f, 0f, 9000f),
 	MAP_SEGMENT_MAX_METERS(2000, 100, Change.RESTART_CLIENT),

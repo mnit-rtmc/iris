@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +23,7 @@ import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
- * This operation reads alerts from the IPAWS system and parses them for
- * storage in the IPAWS Alert Bucket.
+ * This operation reads alerts from the IPAWS system.
  *
  * @author Douglas Lau
  * @author Gordon Parikh
@@ -33,8 +33,7 @@ public class OpReadIpaws extends OpController<IpawsProperty> {
 	/** Alert feed name */
 	protected final String alertFeed;
 
-	/** Create a new operation to read alert feed with default priority level.
-	 */
+	/** Create a new operation to read alert feed */
 	protected OpReadIpaws(ControllerImpl c, String fid) {
 		this(PriorityLevel.DATA_30_SEC, c, fid);
 	}
@@ -59,7 +58,7 @@ public class OpReadIpaws extends OpController<IpawsProperty> {
 		protected Phase<IpawsProperty> poll(
 			CommMessage<IpawsProperty> mess) throws IOException
 		{
-			IpawsPoller.slog("Polling IPAWS alert feed " + alertFeed);
+			IpawsPoller.slog("polling feed " + alertFeed);
 			mess.add(new IpawsProperty(alertFeed));
 			mess.queryProps();
 			return null;
@@ -76,7 +75,7 @@ public class OpReadIpaws extends OpController<IpawsProperty> {
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		IpawsPoller.slog("Finished IPAWS alert feed " + alertFeed);
+		IpawsPoller.slog("finished feed " + alertFeed);
 		super.cleanup();
 	}
 }

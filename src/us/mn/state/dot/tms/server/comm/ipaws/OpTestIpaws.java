@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +19,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -32,6 +32,11 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Gordon Parikh
  */
 public class OpTestIpaws extends OpReadIpaws {
+
+	/** Path to test file.
+	 * TODO make this path a system attribute */
+	static private final String TEST_FILE =
+		"/var/log/iris/Ipaws_Test_Alert.xml";
 
 	/** Create a new operation to read alert feed */
 	protected OpTestIpaws(ControllerImpl c, String fid) {
@@ -51,13 +56,10 @@ public class OpTestIpaws extends OpReadIpaws {
 		protected Phase<IpawsProperty> poll(
 			CommMessage<IpawsProperty> mess) throws IOException
 		{
-			// read the test alert from a file
-			// TODO make this path a system attribute
-			File testAlert = new File("/var/log/iris/Ipaws_Test_Alert.xml");
+			File testAlert = new File(TEST_FILE);
 			InputStream is = new FileInputStream(testAlert);
-
-			// call IpawsReader.readIpaws directly
-			IpawsReader.readIpaws(is);
+			CapReader reader = new CapReader(is);
+			reader.parse();
 			return null;
 		}
 	}
@@ -65,14 +67,14 @@ public class OpTestIpaws extends OpReadIpaws {
 	/** Handle a communication error */
 	@Override
 	public void handleCommError(EventType et, String msg) {
-		IpawsPoller.slog("ERROR DURING TEST: " + msg);
+		IpawsPoller.slog("TEST ERROR: " + msg);
 		super.handleCommError(et, msg);
 	}
 
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		IpawsPoller.slog("Finished IPAWS alert test " + alertFeed);
+		IpawsPoller.slog("finished test " + alertFeed);
 		super.cleanup();
 	}
 }
