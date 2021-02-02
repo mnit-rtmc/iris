@@ -35,7 +35,7 @@ public class CameraTemplateForm extends ProxyTableForm<CameraTemplate> {
 		return s.canRead(CameraTemplate.SONAR_TYPE);
 	}
 
-	/** Create a new incident detail form */
+	/** Create a new camera template form */
 	public CameraTemplateForm(Session s) {
 		super(I18N.get("camera.templates"), 
 				new CameraTemplatePanel(
