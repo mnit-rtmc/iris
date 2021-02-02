@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.camera;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -197,8 +198,7 @@ public class VidSourceTemplateEditor extends AbstractForm {
 	private JTextArea vsNotesField;
 	
 	/** Field tooltips (indicate required/optional-functional/info-only) */
-	private String ttRequired;
-	private String ttOptFunc;
+	private String msgRequiredOptional;
 	private String ttInfoOnly;
 	
 	/** Separator size between fields on the same line */
@@ -244,6 +244,7 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		// disable selection on the list of camera templates associated with
 		// the selected video source
 		camTemplateList.setSelectionModel(new DisabledSelectionModel());
+		camTemplateList.setBackground(getBackground());
 		
 		// get the camera cache for encoder types
 		CamCache cc = session.getSonarState().getCamCache();
@@ -252,63 +253,67 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		cache = session.getSonarState().getVidSrcTemplates();
 		
 		// instantiate the video source edit fields/labels
-		vsNameLbl = new JLabel(I18N.get(
-				"camera.video_source.template.name") + "*:");
+		vsNameLbl = new JLabel("<html>" + I18N.get(
+				"camera.video_source.template.name") +
+				"<sup>\u2731</sup></html>");
 		vsNameField = new JTextField(10);
+
+		vsConfigLbl = new JLabel("<html>" + I18N.get(
+			"camera.video_source.template.config") +
+			"<sup>\u2731</sup><br>&nbsp;</html>");
+		vsConfigField = new JTextArea(2, 58);
+		vsConfigField.setLineWrap(true);
+		vsConfigField.setWrapStyleWord(true);
+
+		vsSubnetsLbl = new JLabel("<html>" + I18N.get(
+				"camera.video_source.template.subnets") +
+				"<sup>†</sup></html>");
+		vsSubnetsField = new JTextArea(1, 46);
+		vsSubnetsField.setLineWrap(true);
+		vsSubnetsField.setWrapStyleWord(true);
+
+		vsDefPortLbl = new JLabel("<html>" + I18N.get(
+				"camera.video_source.template.default_port") +
+				"<sup>†</sup></html>");
+		vsDefPortField = new JTextField(6);
 		
 		vsCodecLbl = new JLabel(I18N.get(
-				"camera.video_source.template.codec") + ":");
+				"camera.video_source.template.codec"));
 		vsCodecField = new JTextField(10);
 		
 		vsEncoderLbl = new JLabel(I18N.get(
-				"camera.video_source.template.encoder") + ":");
+				"camera.video_source.template.encoder"));
 		vsEncoderModel = new IComboBoxModel<EncoderType>(
 				cc.getEncoderTypeModel());
 		vsEncoderField = new JComboBox<EncoderType>(vsEncoderModel);
 		vsEncoderField.setRenderer(new EncoderTypeRenderer());
 		
 		vsSchemeLbl = new JLabel(I18N.get(
-				"camera.video_source.template.scheme") + ":");
+				"camera.video_source.template.scheme"));
 		vsSchemeField = new JTextField(10);
 		
-		vsLatencyLbl = new JLabel(I18N.get(
-				"camera.video_source.template.latency") + ":");
-		vsLatencyField = new JTextField(10);
-
-		vsDefPortLbl = new JLabel(I18N.get(
-				"camera.video_source.template.default_port") + ":");
-		vsDefPortField = new JTextField(6);
-		
 		vsRezWidthLbl = new JLabel(I18N.get(
-				"camera.video_source.template.rez_width") + ":");
+				"camera.video_source.template.rez_width"));
 		vsRezWidthField = new JTextField(6);
 		
 		vsRezHeightLbl = new JLabel(I18N.get(
-				"camera.video_source.template.rez_height") + ":");
+				"camera.video_source.template.rez_height"));
 		vsRezHeightField = new JTextField(6);
-		
-		vsSubnetsLbl = new JLabel(I18N.get(
-				"camera.video_source.template.subnets") + ":");
-		vsSubnetsField = new JTextArea(1, 46);
-		vsSubnetsField.setLineWrap(true);
-		vsSubnetsField.setWrapStyleWord(true);
-		
-		vsConfigLbl = new JLabel("<html>" + I18N.get(
-			"camera.video_source.template.config") + "*:<br>&nbsp;</html>");
-		vsConfigField = new JTextArea(2, 58);
-		vsConfigField.setLineWrap(true);
-		vsConfigField.setWrapStyleWord(true);
-		
+
+		vsLatencyLbl = new JLabel(I18N.get(
+				"camera.video_source.template.latency"));
+		vsLatencyField = new JTextField(10);
+
 		vsNotesLbl = new JLabel("<html>" +I18N.get(
-			"camera.video_source.template.notes") + ":<br><br>&nbsp;</html>");
+			"camera.video_source.template.notes") + "<br><br>&nbsp;</html>");
 		vsNotesField = new JTextArea(3, 62);
 		vsNotesField.setLineWrap(true);
 		vsNotesField.setWrapStyleWord(true);
 		
 		// get messages for tooltips on each of the field to help indicate
 		// which fields are required, optional-functional, or information-only
-		ttRequired = I18N.get("camera.video_source.template.required");
-		ttOptFunc = I18N.get("camera.video_source.template.optional_functional");
+		msgRequiredOptional = I18N.get(
+				"camera.video_source.template.required_optional_msg");
 		ttInfoOnly = I18N.get("camera.video_source.template.information_only");
 		
 		// instantiate the buttons (TODO ACTIONS)
@@ -339,8 +344,8 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		gbc.insets = Widgets.UI.insets();
 		gbc.ipadx = 10;
 		gbc.ipady = 0;
-		gbc.weightx = 1;
-		gbc.weighty = 1;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
 		
 		/* Video Source Template Label */
 		gbc.gridx = 0;
@@ -354,6 +359,8 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		/* Video Source Template Table (ProxyTableForm) */
 		gbc.gridx = 0;
 		gbc.gridy = 1;
+		gbc.weightx = 1;
+		gbc.weighty = 1;
 		gbc.fill = GridBagConstraints.BOTH;
 		vidSrcTemplates.initialize();
 		cache.addProxyListener(listener);
@@ -377,6 +384,8 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		gbc.gridx = 0;
 		gbc.gridy = 2;
 		gbc.gridwidth = 2;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
 		gbc.fill = GridBagConstraints.NONE;
 		gbPanel.add(vidSrcEditFieldLbl, gbc);
 		
@@ -391,28 +400,35 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		fRow1.setAlignmentY(TOP_ALIGNMENT);
 		fRow1.add(vsNameLbl);
 		fRow1.add(vsNameField);
-		vsNameLbl.setToolTipText(ttRequired);
-		vsNameField.setToolTipText(ttRequired);
+		String nameTT = I18N.get("camera.video_source.template.name.tooltip");
+		vsNameLbl.setToolTipText(nameTT);
+		vsNameField.setToolTipText(nameTT);
 		
 		JPanel fRow2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		fRow2.setAlignmentY(TOP_ALIGNMENT);
 		fRow2.add(vsConfigLbl);
 		fRow2.add(vsConfigField);
-		vsConfigLbl.setToolTipText(ttRequired);
-		vsConfigField.setToolTipText(ttRequired);
+		String configTT = I18N.get(
+				"camera.video_source.template.config.tooltip");
+		vsConfigLbl.setToolTipText(configTT);
+		vsConfigField.setToolTipText(configTT);
 
 		JPanel fRow3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		fRow3.setAlignmentY(TOP_ALIGNMENT);
 		fRow3.add(vsSubnetsLbl);
 		fRow3.add(vsSubnetsField);
-		vsSubnetsLbl.setToolTipText(ttOptFunc);
-		vsSubnetsField.setToolTipText(ttOptFunc);
+		String subnetsTT = I18N.get(
+				"camera.video_source.template.subnets.tooltip");
+		vsSubnetsLbl.setToolTipText(subnetsTT);
+		vsSubnetsField.setToolTipText(subnetsTT);
 		fRow3.add(Box.createHorizontalStrut(hGap));
 		
 		fRow3.add(vsDefPortLbl);
 		fRow3.add(vsDefPortField);
-		vsDefPortLbl.setToolTipText(ttOptFunc);
-		vsDefPortField.setToolTipText(ttOptFunc);
+		String defaultPortTT = I18N.get(
+				"camera.video_source.template.default_port.tooltip");
+		vsDefPortLbl.setToolTipText(defaultPortTT);
+		vsDefPortField.setToolTipText(defaultPortTT);
 		
 		JPanel fRow4 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		fRow4.add(vsCodecLbl);
@@ -457,6 +473,12 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		fRow6.add(vsNotesField);
 		vsNotesLbl.setToolTipText(ttInfoOnly);
 		vsNotesField.setToolTipText(ttInfoOnly);
+
+		// also add some messages
+		JPanel fRow7 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel mroLbl = new JLabel(msgRequiredOptional);
+		mroLbl.setFont(new Font(mroLbl.getFont().getName(), Font.ITALIC, 11));
+		fRow7.add(mroLbl);
 		
 		// add the rows of fields to the panel
 		vidSrcEditFieldPnl.add(fRow1);
@@ -465,9 +487,11 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		vidSrcEditFieldPnl.add(fRow4);
 		vidSrcEditFieldPnl.add(fRow5);
 		vidSrcEditFieldPnl.add(fRow6);
+		vidSrcEditFieldPnl.add(fRow7);
 		
-		gbc.fill = GridBagConstraints.BOTH;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.gridy = 3;
+		gbc.anchor = GridBagConstraints.BASELINE;
 		gbPanel.add(vidSrcEditFieldPnl, gbc);
 		
 		/* Button panel */
