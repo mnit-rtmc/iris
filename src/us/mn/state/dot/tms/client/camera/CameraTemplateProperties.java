@@ -34,7 +34,7 @@ public class CameraTemplateProperties extends SonarObjectForm<CameraTemplate> {
 
 	/** Create a new camera template properties form */
 	public CameraTemplateProperties(Session s, CameraTemplate ct) {
-		super(I18N.get("camera.template") + ": ", s, ct);
+		super(I18N.get("camera.template.editor") + ": ", s, ct);
 		cam_vid_src_ord_pnl = new CameraVidSourceOrderPanel(s, ct);
 	}
 
