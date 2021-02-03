@@ -36,6 +36,7 @@ public class CameraTemplateProperties extends SonarObjectForm<CameraTemplate> {
 	public CameraTemplateProperties(Session s, CameraTemplate ct) {
 		super(I18N.get("camera.template.editor") + ": ", s, ct);
 		cam_vid_src_ord_pnl = new CameraVidSourceOrderPanel(s, ct);
+		setTitle(I18N.get("camera.template.editor") + ": " + ct.getLabel());
 	}
 
 	/** Get the SONAR type cache */
