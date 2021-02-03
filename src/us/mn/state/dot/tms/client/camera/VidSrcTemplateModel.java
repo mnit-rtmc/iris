@@ -39,7 +39,7 @@ public class VidSrcTemplateModel extends ProxyTableModel<VidSourceTemplate> {
 
 	/** Create a new camera table model */
 	public VidSrcTemplateModel(Session s) {
-		super(s, descriptor(s), 12);
+		super(s, descriptor(s), 10);
 	}
 	
 	/** Create a proxy descriptor */
@@ -88,7 +88,7 @@ public class VidSrcTemplateModel extends ProxyTableModel<VidSourceTemplate> {
 		});
 		cols.add(new ProxyColumn<VidSourceTemplate>(
 				"camera.video_source.template.default_port",
-				50, Integer.class) {
+				80, Integer.class) {
 			public Object getValueAt(VidSourceTemplate vst) {
 				return vst.getDefaultPort();
 			}
