@@ -380,8 +380,6 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		
 		/* Video Source Edit Fields Label */
 		vidSrcEditFieldLblPrfx = I18N.get("camera.video_source.edit_fields");
-//		vidSrcEditFieldLbl = new JLabel(vidSrcEditFieldLblPrfx);
-//		gbPanel.add(vidSrcEditFieldLbl, gbc);
 		
 		/* Video source Edit Fields Panel */
 		vidSrcEditFieldPnl = new JPanel();
