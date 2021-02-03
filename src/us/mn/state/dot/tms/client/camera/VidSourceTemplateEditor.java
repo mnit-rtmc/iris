@@ -24,6 +24,8 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Objects;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -229,10 +231,10 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		super(I18N.get("camera.video_source.template_editor"), true);
 		session = s;
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setPreferredSize(new Dimension(900, 700));
+		setPreferredSize(new Dimension(900, 600));
 		vidSrcModel = new VidSrcTemplateModel(session);
 		vidSrcTemplates = new ProxyTablePanel<VidSourceTemplate>(
-				vidSrcModel) {
+				vidSrcModel, true) {
 			/** Set the selected video source template when clicked on. */
 			@Override
 			protected void selectProxy() {
@@ -268,7 +270,7 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		vsSubnetsLbl = new JLabel("<html>" + I18N.get(
 				"camera.video_source.template.subnets") +
 				"<sup>†</sup></html>");
-		vsSubnetsField = new JTextArea(1, 46);
+		vsSubnetsField = new JTextArea(1, 42);
 		vsSubnetsField.setLineWrap(true);
 		vsSubnetsField.setWrapStyleWord(true);
 
@@ -305,8 +307,8 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		vsLatencyField = new JTextField(10);
 
 		vsNotesLbl = new JLabel("<html>" +I18N.get(
-			"camera.video_source.template.notes") + "<br><br>&nbsp;</html>");
-		vsNotesField = new JTextArea(3, 62);
+			"camera.video_source.template.notes") + "<br>&nbsp;</html>");
+		vsNotesField = new JTextArea(2, 62);
 		vsNotesField.setLineWrap(true);
 		vsNotesField.setWrapStyleWord(true);
 		
@@ -338,9 +340,9 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		JPanel gbPanel = new JPanel(gbl);
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.NONE;
-		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+		gbc.anchor = GridBagConstraints.BASELINE;
 		gbc.gridheight = 1;
-		gbc.gridwidth = 1;
+		gbc.gridwidth = 2;
 		gbc.insets = Widgets.UI.insets();
 		gbc.ipadx = 10;
 		gbc.ipady = 0;
@@ -353,52 +355,47 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		gbPanel.add(new ILabel("camera.video_source.templates"), gbc);
 		
 		/* Camera Templates Using Source Label */
-		gbc.gridx = 1;
+		gbc.gridx = 2;
 		gbPanel.add(new ILabel("camera.video_source.camera_templates"), gbc);
 		
 		/* Video Source Template Table (ProxyTableForm) */
 		gbc.gridx = 0;
 		gbc.gridy = 1;
-		gbc.weightx = 1;
+		gbc.weightx = 0.9;
 		gbc.weighty = 1;
 		gbc.fill = GridBagConstraints.BOTH;
 		vidSrcTemplates.initialize();
 		cache.addProxyListener(listener);
-		JScrollPane vstPn = new JScrollPane(vidSrcTemplates,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		vstPn.setMinimumSize(new Dimension(700, 200));
-		gbPanel.add(vstPn, gbc);
+		gbPanel.add(vidSrcTemplates, gbc);
 		
 		/* Camera Template Table */
-		gbc.gridx = 1;
+		gbc.gridx = 2;
+		gbc.weightx = 0.1;
 		JScrollPane ctPn = new JScrollPane(camTemplateList,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		ctPn.setMinimumSize(new Dimension(150, 200));
+		ctPn.setMinimumSize(new Dimension(150, 160));
+		ctPn.setPreferredSize(new Dimension(150, 200));
 		gbPanel.add(ctPn, gbc);
 		
 		/* Video Source Edit Fields Label */
 		vidSrcEditFieldLblPrfx = I18N.get("camera.video_source.edit_fields");
-		vidSrcEditFieldLbl = new JLabel(vidSrcEditFieldLblPrfx);
-		gbc.gridx = 0;
-		gbc.gridy = 2;
-		gbc.gridwidth = 2;
-		gbc.weightx = 0;
-		gbc.weighty = 0;
-		gbc.fill = GridBagConstraints.NONE;
-		gbPanel.add(vidSrcEditFieldLbl, gbc);
+//		vidSrcEditFieldLbl = new JLabel(vidSrcEditFieldLblPrfx);
+//		gbPanel.add(vidSrcEditFieldLbl, gbc);
 		
 		/* Video source Edit Fields Panel */
 		vidSrcEditFieldPnl = new JPanel();
 		vidSrcEditFieldPnl.setLayout(new BoxLayout(
 				vidSrcEditFieldPnl, BoxLayout.Y_AXIS));
 		vidSrcEditFieldPnl.setPreferredSize(new Dimension(550,350));
+		vidSrcEditFieldPnl.setBorder(BorderFactory.createTitledBorder(
+				vidSrcEditFieldLblPrfx));
 		
 		// add fields to the panel (in rows of panels)
 		JPanel fRow1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		fRow1.setAlignmentY(TOP_ALIGNMENT);
 		fRow1.add(vsNameLbl);
+		fRow1.add(Box.createHorizontalStrut(38));
 		fRow1.add(vsNameField);
 		String nameTT = I18N.get("camera.video_source.template.name.tooltip");
 		vsNameLbl.setToolTipText(nameTT);
@@ -479,18 +476,52 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		JLabel mroLbl = new JLabel(msgRequiredOptional);
 		mroLbl.setFont(new Font(mroLbl.getFont().getName(), Font.ITALIC, 11));
 		fRow7.add(mroLbl);
+		Dimension d = fRow7.getPreferredSize();
+		d.width = 750;
+		fRow7.setMinimumSize(d);
+		fRow7.setPreferredSize(d);
+		fRow7.setMaximumSize(d);
 		
 		// add the rows of fields to the panel
-		vidSrcEditFieldPnl.add(fRow1);
-		vidSrcEditFieldPnl.add(fRow2);
-		vidSrcEditFieldPnl.add(fRow3);
-		vidSrcEditFieldPnl.add(fRow4);
-		vidSrcEditFieldPnl.add(fRow5);
-		vidSrcEditFieldPnl.add(fRow6);
-		vidSrcEditFieldPnl.add(fRow7);
+		JPanel vidSrcFuncFieldPnl = new JPanel();
+		vidSrcFuncFieldPnl.setLayout(new BoxLayout(
+				vidSrcFuncFieldPnl, BoxLayout.Y_AXIS));
+		vidSrcFuncFieldPnl.add(fRow1);
+		vidSrcFuncFieldPnl.add(fRow2);
+		vidSrcFuncFieldPnl.add(fRow3);
+		d = vidSrcFuncFieldPnl.getPreferredSize();
+		d.width = 750;
+		vidSrcFuncFieldPnl.setMaximumSize(d);
 		
+		// information-only fields
+		JPanel vidSrcInfoFieldPnl = new JPanel();
+		vidSrcInfoFieldPnl.setLayout(new BoxLayout(
+				vidSrcInfoFieldPnl, BoxLayout.Y_AXIS));
+		vidSrcInfoFieldPnl.add(fRow4);
+		vidSrcInfoFieldPnl.add(fRow5);
+		vidSrcInfoFieldPnl.add(fRow6);
+		d = vidSrcInfoFieldPnl.getPreferredSize();
+		d.width = 750;
+		vidSrcInfoFieldPnl.setMaximumSize(d);
+		
+		// put a border around the panel
+		vidSrcInfoFieldPnl.setBorder(
+				BorderFactory.createTitledBorder("For Information Only"));
+
+		vidSrcEditFieldPnl.add(vidSrcFuncFieldPnl);
+		vidSrcEditFieldPnl.add(Box.createVerticalStrut(20));
+		vidSrcEditFieldPnl.add(vidSrcInfoFieldPnl);
+		vidSrcEditFieldPnl.add(fRow7);
+		d = vidSrcEditFieldPnl.getPreferredSize();
+		d.width = 760;
+		vidSrcEditFieldPnl.setMaximumSize(d);
+		
+		gbc.gridwidth = 3;
+		gbc.weightx = 0.1;
+		gbc.weighty = 0;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.gridy = 3;
+		gbc.gridx = 1;
+		gbc.gridy = 2;
 		gbc.anchor = GridBagConstraints.BASELINE;
 		gbPanel.add(vidSrcEditFieldPnl, gbc);
 		
@@ -515,7 +546,7 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		
 		buttonPnl.add(cloneBtn);
 		
-		gbc.gridy = 4;
+		gbc.gridy = 3;
 		gbPanel.add(buttonPnl, gbc);
 		add(gbPanel);
 		session.addEditModeListener(edit_lsnr);
@@ -604,10 +635,12 @@ public class VidSourceTemplateEditor extends AbstractForm {
 	 */
 	private void updateVidSrcLabel() {
 		if (selectedVidSource != null) {
-			vidSrcEditFieldLbl.setText(vidSrcEditFieldLblPrfx +
-					" " + selectedVidSource.getLabel());
-		} else
-			vidSrcEditFieldLbl.setText(vidSrcEditFieldLblPrfx);
+			vidSrcEditFieldPnl.setBorder(BorderFactory.createTitledBorder(
+				vidSrcEditFieldLblPrfx + ": " + selectedVidSource.getLabel()));
+		} else {
+			vidSrcEditFieldPnl.setBorder(BorderFactory.
+					createTitledBorder(vidSrcEditFieldLblPrfx));
+		}
 	}
 	
 	/** Update buttons based on the selected video source template. */
@@ -733,12 +766,19 @@ public class VidSourceTemplateEditor extends AbstractForm {
 	}
 	
 	/** Convert an Integer value to a string. If the value is null, an empty
-	 *  string is returned (instead of "null"
+	 *  string is returned (instead of "null");
 	 */
 	private static String getString(Integer i) {
 		if (i != null)
 			return String.valueOf(i);
 		return "";
+	}
+
+	/** Get a String from an object. If the object is null, an empty string is
+	 *  returned (instead of "null");
+	 */
+	private static String getString(Object o) {
+		return Objects.toString(o, "");
 	}
 	
 	private VidSourceTemplateEditor form = this;
@@ -1124,17 +1164,17 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		String defPort = getString(selectedVidSource.getDefaultPort());
 		String rezWidth = getString(selectedVidSource.getRezWidth());
 		String rezHeight = getString(selectedVidSource.getRezHeight());
-		return !vsNameField.getText().equals(selectedVidSource.getLabel())
-			|| !vsCodecField.getText().equals(selectedVidSource.getCodec())
+		return !vsNameField.getText().equals(getString(selectedVidSource.getLabel()))
+			|| !vsCodecField.getText().equals(getString(selectedVidSource.getCodec()))
 			|| !etEq
-			|| !vsSchemeField.getText().equals(selectedVidSource.getScheme())
+			|| !vsSchemeField.getText().equals(getString(selectedVidSource.getScheme()))
 			|| !vsLatencyField.getText().equals(latency)
 			|| !vsDefPortField.getText().equals(defPort)
 			|| !vsRezWidthField.getText().equals(rezWidth)
 			|| !vsRezHeightField.getText().equals(rezHeight)
-			|| !vsSubnetsField.getText().equals(selectedVidSource.getSubnets())
-			|| !vsConfigField.getText().equals(selectedVidSource.getConfig())
-			|| !vsNotesField.getText().equals(selectedVidSource.getNotes());
+			|| !vsSubnetsField.getText().equals(getString(selectedVidSource.getSubnets()))
+			|| !vsConfigField.getText().equals(getString(selectedVidSource.getConfig()))
+			|| !vsNotesField.getText().equals(getString(selectedVidSource.getNotes()));
 	}
 	
 	/** Clear all fields in the form and deselect any selected template. */
