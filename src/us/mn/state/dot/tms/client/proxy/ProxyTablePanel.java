@@ -21,6 +21,7 @@ import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import static javax.swing.LayoutStyle.ComponentPlacement.RELATED;
 import javax.swing.ListSelectionModel;
@@ -101,6 +102,15 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		model = m;
 		table = createTable(m);
 		scroll_pn = createScrollPane(table);
+	}
+
+	/** Create a new proxy table panel. If hscroll is true, horizontal
+	 *  scrolling will be allowed.
+	 */
+	public ProxyTablePanel(ProxyTableModel<T> m, boolean hscroll) {
+		model = m;
+		table = createTable(m);
+		scroll_pn = createScrollPane(table, hscroll);
 	}
 
 	/** Initialise the panel */
@@ -185,11 +195,24 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		}
 	}
 
-	/** Create a scroll pane */
+	/** Create a scroll pane (vertical only) */
 	private JScrollPane createScrollPane(ITable t) {
 		return new JScrollPane(t,
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+	}
+
+	/** Create a scroll pane (vertical and, if hscroll is true, horizontal).
+	 *  If horizontal scrolling is allowed, column resizing is disabled.
+	 */
+	private JScrollPane createScrollPane(ITable t, boolean hscroll) {
+		int hs = JScrollPane.HORIZONTAL_SCROLLBAR_NEVER;
+		if (hscroll) {
+			t.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+			hs = JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED;
+		}
+		return new JScrollPane(t,
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, hs);
 	}
 	
 	/** Selection listener for triggering events on selection. */
