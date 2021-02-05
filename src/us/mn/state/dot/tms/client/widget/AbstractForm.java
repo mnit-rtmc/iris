@@ -49,6 +49,11 @@ abstract public class AbstractForm extends JPanel {
 	public String getTitle() {
 		return title;
 	}
+	
+	/** Set the title of the form after creation. */
+	public void setTitle(String t) {
+		title = t;
+	}
 
 	/** Get the resizable flag for the form */
 	public boolean isResizable() {

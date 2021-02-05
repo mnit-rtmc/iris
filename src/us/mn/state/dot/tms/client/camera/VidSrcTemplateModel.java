@@ -39,7 +39,7 @@ public class VidSrcTemplateModel extends ProxyTableModel<VidSourceTemplate> {
 
 	/** Create a new camera table model */
 	public VidSrcTemplateModel(Session s) {
-		super(s, descriptor(s), 12);
+		super(s, descriptor(s), 10);
 	}
 	
 	/** Create a proxy descriptor */
@@ -81,6 +81,19 @@ public class VidSrcTemplateModel extends ProxyTableModel<VidSourceTemplate> {
 			}
 		});
 		cols.add(new ProxyColumn<VidSourceTemplate>(
+				"camera.video_source.template.subnets", 100) {
+			public Object getValueAt(VidSourceTemplate vst) {
+				return vst.getSubnets();
+			}
+		});
+		cols.add(new ProxyColumn<VidSourceTemplate>(
+				"camera.video_source.template.default_port",
+				80, Integer.class) {
+			public Object getValueAt(VidSourceTemplate vst) {
+				return vst.getDefaultPort();
+			}
+		});
+		cols.add(new ProxyColumn<VidSourceTemplate>(
 				"camera.video_source.template.codec", 50) {
 			public Object getValueAt(VidSourceTemplate vst) {
 				return vst.getCodec();
@@ -97,34 +110,15 @@ public class VidSrcTemplateModel extends ProxyTableModel<VidSourceTemplate> {
 			}
 		});
 		cols.add(new ProxyColumn<VidSourceTemplate>(
-				"camera.video_source.template.notes", 200) {
-			public Object getValueAt(VidSourceTemplate vst) {
-				return vst.getNotes();
-			}
-		});
-		cols.add(new ProxyColumn<VidSourceTemplate>(
 				"camera.video_source.template.scheme", 50) {
 			public Object getValueAt(VidSourceTemplate vst) {
 				return vst.getScheme();
 			}
 		});
 		cols.add(new ProxyColumn<VidSourceTemplate>(
-				"camera.video_source.template.subnets", 100) {
+				"camera.video_source.template.rez_width", 50, Integer.class) {
 			public Object getValueAt(VidSourceTemplate vst) {
-				return vst.getSubnets();
-			}
-		});
-		cols.add(new ProxyColumn<VidSourceTemplate>(
-				"camera.video_source.template.default_port",
-				50, Integer.class) {
-			public Object getValueAt(VidSourceTemplate vst) {
-				return vst.getDefaultPort();
-			}
-		});
-		cols.add(new ProxyColumn<VidSourceTemplate>(
-				"camera.video_source.template.latency", 50, Integer.class) {
-			public Object getValueAt(VidSourceTemplate vst) {
-				return vst.getLatency();
+				return vst.getRezWidth();
 			}
 		});
 		cols.add(new ProxyColumn<VidSourceTemplate>(
@@ -134,9 +128,15 @@ public class VidSrcTemplateModel extends ProxyTableModel<VidSourceTemplate> {
 			}
 		});
 		cols.add(new ProxyColumn<VidSourceTemplate>(
-				"camera.video_source.template.rez_width", 50, Integer.class) {
+				"camera.video_source.template.latency", 50, Integer.class) {
 			public Object getValueAt(VidSourceTemplate vst) {
-				return vst.getRezWidth();
+				return vst.getLatency();
+			}
+		});
+		cols.add(new ProxyColumn<VidSourceTemplate>(
+				"camera.video_source.template.notes", 200) {
+			public Object getValueAt(VidSourceTemplate vst) {
+				return vst.getNotes();
 			}
 		});
 		return cols;

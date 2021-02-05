@@ -58,8 +58,8 @@ import us.mn.state.dot.tms.utils.I18N;
  * CameraVidSourceOrder is a UI for editing the video source templates
  * assigned to camera templates and their respective priority
  *
- * @author Douglas Lau
  * @author Michael Janson
+ * @author Gordon Parikh
  */
 @SuppressWarnings("serial")
 public class CameraVidSourceOrderPanel extends JPanel
@@ -277,7 +277,7 @@ public class CameraVidSourceOrderPanel extends JPanel
 	/** Subnets Label and Field */
 	private final JLabel vsSubnetsLbl = new JLabel(I18N.get(
 			"camera.video_source.template.subnets") + ":");
-	private final JTextArea vsSubnetsField = new JTextArea(1, 52);
+	private final JTextArea vsSubnetsField = new JTextArea(1, 30);
 
 	/** (GStreamer) Configuration Label and Field */
 	private final JLabel vsConfigLbl = new JLabel("<html>" + I18N.get(
@@ -438,50 +438,50 @@ public class CameraVidSourceOrderPanel extends JPanel
 		fRow1.setAlignmentY(TOP_ALIGNMENT);
 		fRow1.add(vsNameLbl);
 		fRow1.add(vsNameField);
-		fRow1.add(Box.createHorizontalStrut(hGap));
-		
-		fRow1.add(vsCodecLbl);
-		fRow1.add(vsCodecField);
-		fRow1.add(Box.createHorizontalStrut(hGap));
-		
-		fRow1.add(vsEncoderLbl);
-		fRow1.add(vsEncoderField);
-		fRow1.add(Box.createHorizontalStrut(3*hGap));
-		
-		fRow1.add(vsSchemeLbl);
-		fRow1.add(vsSchemeField);
 		
 		JPanel fRow2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		fRow2.setAlignmentY(TOP_ALIGNMENT);
-		fRow2.add(vsLatencyLbl);
-		fRow2.add(vsLatencyField);
-		fRow2.add(Box.createHorizontalStrut(hGap));
-		
-		fRow2.add(vsDefPortLbl);
-		fRow2.add(vsDefPortField);
-		fRow2.add(Box.createHorizontalStrut(hGap));
-		
-		fRow2.add(vsRezWidthLbl);
-		fRow2.add(vsRezWidthField);
-		fRow2.add(Box.createHorizontalStrut(hGap));
-		
-		fRow2.add(vsRezHeightLbl);
-		fRow2.add(vsRezHeightField);
-		
+		fRow2.add(vsConfigLbl);
+		fRow2.add(vsConfigField);
+
 		JPanel fRow3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		fRow3.setAlignmentY(TOP_ALIGNMENT);
 		fRow3.add(vsSubnetsLbl);
 		fRow3.add(vsSubnetsField);
+		fRow3.add(Box.createHorizontalStrut(hGap));
+		
+		fRow3.add(vsDefPortLbl);
+		fRow3.add(vsDefPortField);
 		
 		JPanel fRow4 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		fRow4.setAlignmentY(TOP_ALIGNMENT);
-		fRow4.add(vsConfigLbl);
-		fRow4.add(vsConfigField);
+		fRow4.add(vsCodecLbl);
+		fRow4.add(vsCodecField);
+		fRow4.add(Box.createHorizontalStrut(hGap));
 		
+		fRow4.add(vsEncoderLbl);
+		fRow4.add(vsEncoderField);
+		fRow4.add(Box.createHorizontalStrut(3*hGap));
+		
+		fRow4.add(vsSchemeLbl);
+		fRow4.add(vsSchemeField);
+
 		JPanel fRow5 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		fRow5.setAlignmentY(TOP_ALIGNMENT);
-		fRow5.add(vsNotesLbl);
-		fRow5.add(vsNotesField);
+		fRow5.add(vsRezWidthLbl);
+		fRow5.add(vsRezWidthField);
+		fRow5.add(Box.createHorizontalStrut(hGap));
+		
+		fRow5.add(vsRezHeightLbl);
+		fRow5.add(vsRezHeightField);
+		fRow5.add(Box.createHorizontalStrut(hGap));
+		
+		fRow5.add(vsLatencyLbl);
+		fRow5.add(vsLatencyField);
+		
+		JPanel fRow6 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		fRow6.setAlignmentY(TOP_ALIGNMENT);
+		fRow6.add(vsNotesLbl);
+		fRow6.add(vsNotesField);
 		
 		// add the rows of fields to the panel
 		vid_src_info.add(fRow1);
@@ -489,6 +489,7 @@ public class CameraVidSourceOrderPanel extends JPanel
 		vid_src_info.add(fRow3);
 		vid_src_info.add(fRow4);
 		vid_src_info.add(fRow5);
+		vid_src_info.add(fRow6);
 	}
 	
 	/** Layout the panel */
@@ -507,14 +508,14 @@ public class CameraVidSourceOrderPanel extends JPanel
 	/** Create the horizontal group */
 	private GroupLayout.Group createHorizontalGroup(GroupLayout gl) {
 		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
-		
+
 		GroupLayout.ParallelGroup p1 = gl.createParallelGroup(
-			GroupLayout.Alignment.CENTER);
-		p1.addComponent(cam_vid_src_lbl);
-		p1.addComponent(cam_vid_src_scrl);
-		gl.linkSize(SwingConstants.HORIZONTAL, cam_vid_src_scrl);
+				GroupLayout.Alignment.CENTER);
+		p1.addComponent(avail_vid_src_lbl);
+		p1.addComponent(vid_src_scrl);
+		gl.linkSize(SwingConstants.HORIZONTAL, vid_src_scrl);
 		hg.addGroup(p1);
-		
+
 		hg.addGap(UI.hgap);
 
 		GroupLayout.ParallelGroup p2 = gl.createParallelGroup(
@@ -524,22 +525,22 @@ public class CameraVidSourceOrderPanel extends JPanel
 		p2.addComponent(remove_btn);
 		p2.addComponent(down_btn);
 		hg.addGroup(p2);
-		
+
 		hg.addGap(UI.hgap);
 
 		GroupLayout.ParallelGroup p3 = gl.createParallelGroup(
-				GroupLayout.Alignment.CENTER);
-		p3.addComponent(avail_vid_src_lbl);
-		p3.addComponent(vid_src_scrl);
-		gl.linkSize(SwingConstants.HORIZONTAL, vid_src_scrl);
+			GroupLayout.Alignment.CENTER);
+		p3.addComponent(cam_vid_src_lbl);
+		p3.addComponent(cam_vid_src_scrl);
+		gl.linkSize(SwingConstants.HORIZONTAL, cam_vid_src_scrl);
 		hg.addGroup(p3);
-		
+
 		GroupLayout.ParallelGroup pg = gl.createParallelGroup(
 				GroupLayout.Alignment.LEADING);
 		pg.addComponent(vid_src_info_lbl);
 		pg.addComponent(vid_src_info);
 		pg.addGroup(hg);
-		
+
 		return pg;
 	}
 
