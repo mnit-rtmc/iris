@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2011-2021  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
+ * Copyright (C) 2012-2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@ import us.mn.state.dot.tms.server.comm.axisptz.AxisPTZPoller;
 import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
 import us.mn.state.dot.tms.server.comm.cap.CapPoller;
 import us.mn.state.dot.tms.server.comm.cbw.CBWPoller;
+import us.mn.state.dot.tms.server.comm.clearguide.ClearGuidePoller;
 import us.mn.state.dot.tms.server.comm.cohuptz.CohuPTZPoller;
 import us.mn.state.dot.tms.server.comm.dinrelay.DinRelayPoller;
 import us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller;
@@ -119,6 +121,8 @@ public class DevicePollerFactory {
 			return new StreambedPoller(link);
 		case CAP:
 			return new CapPoller(link);
+		case CLEARGUIDE:
+			return new ClearGuidePoller(link);
 		default:
 			return null;
 		}

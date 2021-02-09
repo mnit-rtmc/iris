@@ -1,7 +1,9 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009  AHMCT, University of California
  * Copyright (C) 2019-2020  SRF Consulting Group
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -167,6 +169,15 @@ public interface Multi {
 
 	/** Add a speed advisory */
 	void addSpeedAdvisory();
+
+	/** Add a ClearGuide advisory
+	 * @param dms DMS name
+	 * @param rid CG route id
+	 * @param tsp Threshold speed
+	 * @param mode Variable to use: e.g. tt, delay
+	 * @param ridx Route index, zero based */
+	void addClearGuideAdvisory(
+		String dms, int rid, int tsp, String mode, int ridx);
 
 	/** Add a slow traffic warning.
 	 * @param spd Highest speed to activate warning.

@@ -228,6 +228,16 @@ public class WMultiParser implements Multi {
 	}
 
 	/* (non-Javadoc)
+	 * @see us.mn.state.dot.tms.utils.Multi#addClearGuideAdvisory()
+	 */
+	@Override
+	public void addClearGuideAdvisory(
+		String dms, int wid, int tsp, String mode, int ridx)
+	{
+		// TODO
+	}
+
+	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.Multi#addSlowWarning(int, int, java.lang.String)
 	 */
 	@Override

@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2021  Minnesota Department of Transportation
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +20,7 @@ package us.mn.state.dot.tms;
  * in the iris.sign_msg_source look-up table.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public enum SignMsgSource {
 	blank,          //  0 blank message
@@ -33,7 +35,8 @@ public enum SignMsgSource {
 	incident,       //  9 deployed incident
 	slow_warning,   // 10 slow warning with [slow...] tag
 	speed_advisory, // 11 speed advisory with [vsa] tag
-	parking;        // 12 parking availability with [pa...] tag
+	parking,        // 12 parking availability with [pa...] tag
+	clearguide;     // 13 ClearGuide advisory with [cg...] tag
 
 	/** Get the bit for a source */
 	public int bit() {

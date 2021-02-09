@@ -37,6 +37,7 @@ System Attribute                 | Description
 `camera_switch_event_purge_days` | Number of days after which [camera] switch events will be purged
 `camera_video_event_purge_days`  | Number of days after which [camera] video events will be purged
 `camera_wiper_precip_mm_hr`      | Precipitation rate to activate [camera] wipers (mm/hour)
+`clearguide_key`                 | ClearGuide customer key
 `client_event_purge_days`        | Number of days after which client events will be purged
 `client_units_si`                | `true` for the client to display units using the International System of Units (SI) or `false` for customary (US) units
 `comm_event_enable`              | Enable logging communication events to database

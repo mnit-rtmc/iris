@@ -1,8 +1,8 @@
 /*
  * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2009-2015  AHMCT, University of California
  * Copyright (C) 2009-2021  Minnesota Department of Transportation
- * Copyright (C) 2012-2018  Iteris Inc.
- * Copyright (C) 2014       AHMCT, University of California
+ * Copyright (C) 2012-2021  Iteris Inc.
  * Copyright (C) 2015-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -51,6 +51,7 @@ public enum SystemAttrEnum {
 	CAMERA_SWITCH_EVENT_PURGE_DAYS(30, 0),
 	CAMERA_VIDEO_EVENT_PURGE_DAYS(14, 0),
 	CAMERA_WIPER_PRECIP_MM_HR(8, 1, 100),
+	CLEARGUIDE_KEY("mndot"),
 	CAP_ALERT_PURGE_DAYS(7, 1),
 	CAP_XML_SAVE_ENABLE(true),
 	CLIENT_EVENT_PURGE_DAYS(0, 0),

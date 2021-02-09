@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2021  Minnesota Department of Transportation
  * Copyright (C) 2019-2020  SRF Consulting Group
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -149,6 +150,11 @@ public class MultiAdapter implements Multi {
 	/** Add a speed advisory */
 	@Override
 	public void addSpeedAdvisory() { }
+
+	/** Add a ClearGuide advisory */
+	@Override
+	public void addClearGuideAdvisory(
+		String dms, int wid, int tsp, String mode, int ridx) {}
 
 	/** Add a slow traffic warning.
 	 * @param spd Highest speed to activate warning.

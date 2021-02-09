@@ -3,6 +3,7 @@
  * Copyright (C) 2006-2021  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  * Copyright (C) 2019-2020  SRF Consulting Group
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -153,6 +154,8 @@ public class MultiString {
 			parseTravelTime(tag.substring(2), cb);
 		else if (ltag.startsWith("vsa"))
 			cb.addSpeedAdvisory();
+		else if (ltag.startsWith("cg"))
+			parseClearGuideAdvisory(tag.substring(2), cb);
 		else if (ltag.startsWith("slow"))
 			parseSlowWarning(tag.substring(4), cb);
 		else if (ltag.startsWith("feed"))
@@ -318,6 +321,32 @@ public class MultiString {
 		String o_txt = (args.length > 2) ? args[2] : "OVER ";
 		if (sid != null)
 			cb.addTravelTime(sid, mode, o_txt);
+	}
+
+	/** Parse ClearGuide advisory args from tag
+	 * @param v Tag [cg dms_name,cg_route_id,statistic_min,mode,route_num]
+	 * @param cb Callback to add tag */
+	static private void parseClearGuideAdvisory(String v, Multi cb) {
+		String[] args = v.split(",", 5);
+		String dms = safeGet(args, 0);
+		int wid = safeGetInt(args, 1);
+		int tsp = safeGetInt(args, 2);
+		String mode = safeGet(args, 3);
+		int ridx = safeGetInt(args, 4);  // optional, defaults to 0
+		cb.addClearGuideAdvisory(dms, wid, tsp, mode, ridx);
+	}
+
+	/** Get the nth (zero-based) element or empty string
+	 * @return Trimmed never null element idx */
+	static private String safeGet(String[] args, int idx) {
+		return (args.length > idx ? args[idx] : "").trim();
+	}
+
+	/** Get the nth (zero-based) element or empty string
+	 * @return Trimmed element idx as integer */
+	static private int safeGetInt(String[] args, int idx) {
+		String stri = safeGet(args, idx);
+		return !stri.isEmpty() ? Integer.parseInt(stri) : 0;
 	}
 
 	/** Parse a over limit mode value */

@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013-2021  Minnesota Department of Transportation
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +41,7 @@ import us.mn.state.dot.tms.TollZoneHelper;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import us.mn.state.dot.tms.server.event.PriceMessageEvent;
 import us.mn.state.dot.tms.server.event.TravelTimeEvent;
+import us.mn.state.dot.tms.server.comm.clearguide.ClearGuidePoller;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
@@ -54,6 +56,7 @@ import us.mn.state.dot.tms.utils.MultiString;
  * but processed before sending to the sign.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class DmsActionMsg {
 
@@ -243,6 +246,11 @@ public class DmsActionMsg {
 		}
 		@Override public void addSpeedAdvisory() {
 			addSpan(speedAdvisorySpan());
+		}
+		@Override public void addClearGuideAdvisory(
+			String dms, int rid, int tsp, String mode, int ridx)
+		{
+			addSpan(clearGuideSpan(dms, rid, tsp, mode, ridx));
 		}
 		@Override public void addSlowWarning(int spd, int dist,
 			String mode)
@@ -728,5 +736,46 @@ public class DmsActionMsg {
 				return a.toString();
 		} else
 			return fail("Invalid parking area: " + pid);
+	}
+
+	/** Calculate ClearGuide advisory span
+	 * @param dms DMS name
+	 * @param rid Route id
+	 * @param min Min statistic value, 0 to ignore.
+	 * @param mode Variable to use: tt, delay
+	 * @param ridx Route index, zero based */
+	private String clearGuideSpan(
+		String dms, int rid, int min, String mode, int ridx)
+	{
+		addSrc(SignMsgSource.clearguide);
+		return calcClearGuideAdvisory(dms, rid, min, mode, ridx);
+	}
+
+	/** Calculate the span
+	 * @param dms DMS name
+	 * @param rid Route id
+	 * @param min Min statistic value, 0 to ignore.
+	 * @param mode Variable to use: tt, delay
+	 * @param ridx Route index, zero based
+	 * @return Span or empty string on error */
+	private String calcClearGuideAdvisory(
+		String dms, int rid, int min, String mode, int ridx)
+	{
+		Integer stat = ClearGuidePoller.cg_dms.getStat(
+			dms, rid, min, mode, ridx);
+		if (dlog.isOpen()) {
+			dlog.log("DmsActionMsg.calcClearGuideAdvisory:" +
+				" dms=" + dms + " rid=" + rid +
+				" min=" + min + " mode=" + mode +
+				" ridx=" + ridx + " stat=" + stat);
+		}
+		if (stat != null) {
+			return Integer.toString(Math.round(stat));
+		} else {
+			String msg = "No ClearGuide statistic match";
+			if (dlog.isOpen())
+				dlog.log("calcClearGuideAdvisory: " + msg);
+			return fail(msg);
+		}
 	}
 }

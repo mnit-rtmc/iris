@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2006-2021  Minnesota Department of Transportation
  * Copyright (C) 2019-2020  SRF Consulting Group
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@ package us.mn.state.dot.tms.utils;
  * @author Douglas Lau
  * @author John Stanley - SRF Consulting
  * @author Gordon Parikh - SRF Consulting
+ * @author Michael Darter
  */
 public class MultiBuilder implements Multi {
 
@@ -338,6 +340,25 @@ public class MultiBuilder implements Multi {
 	@Override
 	public void addSpeedAdvisory() {
 		multi.append("[vsa]");
+	}
+
+	/** Add a ClearGuide advisory
+	 * @param dms DMS name
+	 * @param wid Workzone id
+	 * @param tsp Threshold speed
+	 * @param mode Variable to use: tt, delay
+	 * @param ridx Route index, zero based */
+	@Override
+	public void addClearGuideAdvisory(
+		String dms, int wid, int tsp, String mode, int ridx)
+	{
+		multi.append("[cg");
+		multi.append(dms).append(",");
+		multi.append(wid).append(",");
+		multi.append(tsp).append(",");
+		multi.append(mode).append(",");
+		multi.append(ridx);
+		multi.append("]");
 	}
 
 	/** Add a slow traffic warning.

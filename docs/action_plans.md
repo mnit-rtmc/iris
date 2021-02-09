@@ -45,8 +45,9 @@ Tag                             | Description
 `[pa` *i,l,c* `]`               | [Parking area] availability
 `[slow` *s,d,mode* `]`          | [Slow traffic] warning
 `[tt` *s,m,t* `]`               | [Travel time]
-`[tz *{p,o,c},{tz0},…{tzn}* `]` | [Toll zone] pricing
+`[tz` *{p,o,c},{tz0},…{tzn}* `]`| [Toll zone] pricing
 `[vsa]`                         | [Variable speed advisory]
+`[cg` *dms,wid,min,mode,i* `]`  | [ClearGuide data element]
 
 ## Meter Actions
 
@@ -108,6 +109,7 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 [ramp meter]: ramp_meters.html
 [Slow traffic]: slow_warning.html
 [Variable speed advisory]: vsa.html
+[ClearGuide data element]: clearguide.html
 [Toll zone]: tolling.html
 [Travel time]: travel_time.html
 [system attribute]: system_attributes.html
