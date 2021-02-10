@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2020  Minnesota Department of Transportation
+ * Copyright (C) 2005-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.util.HashMap;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -135,18 +136,9 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 			return dms.getName().equals(group.getName());
 	}
 
-	/** Lookup a DMS sign group */
-	private DmsSignGroup lookupDmsSignGroup(SignGroup group) {
-		for (DmsSignGroup g: dms_sign_groups) {
-			if (g.getSignGroup() == group && g.getDms() == dms)
-				return g;
-		}
-		return null;
-	}
-
 	/** Test if the DMS is a member of a sign group */
 	private boolean isSignGroupMember(SignGroup group) {
-		return lookupDmsSignGroup(group) != null;
+		return DmsSignGroupHelper.find(dms, group) != null;
 	}
 
 	/** Check if the user is allowed to add / destroy a DMS sign group */
@@ -185,7 +177,7 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 
 	/** Destroy a DMS sign group */
 	private void destroyDmsSignGroup(SignGroup g) {
-		DmsSignGroup dsg = lookupDmsSignGroup(g);
+		DmsSignGroup dsg = DmsSignGroupHelper.find(dms, g);
 		if (dsg != null)
 			dsg.destroy();
 	}

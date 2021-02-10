@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.schedule;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import javax.swing.DefaultCellEditor;
@@ -59,11 +58,12 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	static private final DmsMsgPriority[] PRIORITIES = {
 		DmsMsgPriority.PSA,
 		DmsMsgPriority.TRAVEL_TIME,
-		DmsMsgPriority.ALERT,
+		DmsMsgPriority.ALERT_LOW,
 		DmsMsgPriority.SCHED_A,
 		DmsMsgPriority.SCHED_B,
 		DmsMsgPriority.SCHED_C,
 		DmsMsgPriority.SCHED_D,
+		DmsMsgPriority.ALERT_MED,
 		DmsMsgPriority.GATE_ARM,
 		DmsMsgPriority.SCHED_HIGH
 	};

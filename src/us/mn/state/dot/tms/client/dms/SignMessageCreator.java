@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  * Copyright (C) 2020       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -143,26 +143,6 @@ public class SignMessageCreator {
 			              owner, duration);
 		} else
 			return null;
-	}
-
-	/** Create a new (IPAWS) sign message.
-	 *
-	 * @param name Sign message name.
-	 * @param sc Sign configuration.
-	 * @param multi MULTI text.
-	 * @param priority Message priority.
-	 * @param src Sign message source bits.
-	 * @param owner User name.
-	 * @param duration Message duration; null for indefinite.
-	 * @return Proxy of new sign message, or null on error.
-	 */
-	public SignMessage create(String name, SignConfig sc,
-			String multi, int priority, int src,
-			String owner, Integer duration) {
-		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(priority);
-		return create(name, sc, null,
-			multi, false, false, mp,
-			src, owner, duration);
 	}
 
 	/** Create a new sign message.

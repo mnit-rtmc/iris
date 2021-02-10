@@ -16,146 +16,107 @@
 package us.mn.state.dot.tms.client.alert;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-
-import javax.swing.DefaultCellEditor;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.table.TableCellEditor;
-
-import us.mn.state.dot.tms.IpawsConfig;
-import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.QuickMessageHelper;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignGroupHelper;
+import java.util.Comparator;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
+import javax.swing.table.TableRowSorter;
+import us.mn.state.dot.tms.AlertConfig;
+import us.mn.state.dot.tms.AlertConfigHelper;
+import us.mn.state.dot.tms.CapResponseType;
+import us.mn.state.dot.tms.CapUrgency;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
- * Table model for (IPAWS) alert configurations.
+ * Table model for alert configurations.
  *
  * @author Gordon Parikh
+ * @author Douglas Lau
  */
-@SuppressWarnings("serial")
-public class AlertConfigModel extends ProxyTableModel<IpawsConfig> {
+public class AlertConfigModel extends ProxyTableModel<AlertConfig> {
 
 	/** Create a proxy descriptor */
-	static public ProxyDescriptor<IpawsConfig> descriptor(Session s) {
-		return new ProxyDescriptor<IpawsConfig>(
-				s.getSonarState().getIpawsConfigCache(), false, true, true);
+	static public ProxyDescriptor<AlertConfig> descriptor(Session s) {
+		return new ProxyDescriptor<AlertConfig>(
+			s.getSonarState().getAlertConfigs(),
+			false,  /* has_properties */
+			true,   /* has_create_delete */
+			false   /* has_name */
+		);
 	}
 
 	/** Create the columns in the model */
 	@Override
-	protected ArrayList<ProxyColumn<IpawsConfig>> createColumns() {
-		ArrayList<ProxyColumn<IpawsConfig>> cols =
-				new ArrayList<ProxyColumn<IpawsConfig>>(3);
-		cols.add(new ProxyColumn<IpawsConfig>("alert.config.event", 300) {
-			public Object getValueAt(IpawsConfig iac) {
-				return iac.getEvent();
-			}
-			public boolean isEditable(IpawsConfig iac) {
-				return canWrite(iac);
-			}
-			public void setValueAt(IpawsConfig iac, Object value) {
-				iac.setEvent(value.toString());
+	protected ArrayList<ProxyColumn<AlertConfig>> createColumns() {
+		ArrayList<ProxyColumn<AlertConfig>> cols =
+			new ArrayList<ProxyColumn<AlertConfig>>(3);
+		cols.add(new ProxyColumn<AlertConfig>("alert.cap.event", 80) {
+			public Object getValueAt(AlertConfig cfg) {
+				return cfg.getEvent();
 			}
 		});
-		cols.add(new ProxyColumn<IpawsConfig>("alert.config.sign_group",
-			200)
+		cols.add(new ProxyColumn<AlertConfig>("alert.cap.response", 120)
 		{
-			public Object getValueAt(IpawsConfig iac) {
-				return iac.getSignGroup();
-			}
-			public boolean isEditable(IpawsConfig iac) {
-				return canWrite(iac);
-			}
-			public void setValueAt(IpawsConfig iac, Object value) {
-				iac.setSignGroup((value instanceof SignGroup)
-					? (SignGroup) value
-					: null);
-			}
-			protected TableCellEditor createCellEditor() {
-				ArrayList<SignGroup> sgl =
-					new ArrayList<SignGroup>();
-				Iterator<SignGroup> it = SignGroupHelper.iterator();
-				while (it.hasNext())
-					sgl.add(it.next());
-
-				JComboBox<SignGroup> cbx = new JComboBox<SignGroup>(
-					new DefaultComboBoxModel<SignGroup>(
-						sgl.toArray(new SignGroup[0])));
-				return new DefaultCellEditor(cbx);
+			public Object getValueAt(AlertConfig cfg) {
+				return CapResponseType.fromOrdinal(
+					cfg.getResponseType());
 			}
 		});
-		cols.add(new ProxyColumn<IpawsConfig>(
-				"alert.config.quick_message", 200) {
-			public Object getValueAt(IpawsConfig iac) {
-				return iac.getQuickMessage();
-			}
-			public boolean isEditable(IpawsConfig iac) {
-				return canWrite(iac);
-			}
-			public void setValueAt(IpawsConfig iac, Object value) {
-				iac.setQuickMessage(
-					(value instanceof QuickMessage)
-					? (QuickMessage) value
-					: null
-				);
-			}
-			protected TableCellEditor createCellEditor() {
-				ArrayList<QuickMessage> qml =
-					new ArrayList<QuickMessage>();
-				Iterator<QuickMessage> it = QuickMessageHelper
-					.iterator();
-				while (it.hasNext())
-					qml.add(it.next());
-				JComboBox<QuickMessage> cbx = new JComboBox
-					<QuickMessage>(new DefaultComboBoxModel
-<QuickMessage>(
-						qml.toArray(new QuickMessage[0])));
-				return new DefaultCellEditor(cbx);
-			}
-		});
-		cols.add(new ProxyColumn<IpawsConfig>(
-				"alert.config.pre_alert_time", 100) {
-			public Object getValueAt(IpawsConfig iac) {
-				return iac.getPreAlertTime();
-			}
-			public boolean isEditable(IpawsConfig iac) {
-				return canWrite(iac);
-			}
-			public void setValueAt(IpawsConfig iac, Object value) {
-				try {
-					iac.setPreAlertTime(Integer.valueOf(value.toString()));
-				} catch (NumberFormatException e) {
-					e.printStackTrace();
-				}
-			}
-		});
-		cols.add(new ProxyColumn<IpawsConfig>(
-				"alert.config.post_alert_time", 100) {
-			public Object getValueAt(IpawsConfig iac) {
-				return iac.getPostAlertTime();
-			}
-			public boolean isEditable(IpawsConfig iac) {
-				return canWrite(iac);
-			}
-			public void setValueAt(IpawsConfig iac, Object value) {
-				try {
-					iac.setPostAlertTime(Integer.valueOf(value.toString()));
-				} catch (NumberFormatException e) {
-					e.printStackTrace();
-				}
+		cols.add(new ProxyColumn<AlertConfig>("alert.cap.urgency", 80) {
+			public Object getValueAt(AlertConfig cfg) {
+				return CapUrgency.fromOrdinal(cfg.getUrgency());
 			}
 		});
 		return cols;
 	}
 
+	/** Get a table row sorter */
+	@Override
+	public RowSorter<ProxyTableModel<AlertConfig>> createSorter() {
+		TableRowSorter<ProxyTableModel<AlertConfig>> sorter =
+			new TableRowSorter<ProxyTableModel<AlertConfig>>(this)
+		{
+			@Override public boolean isSortable(int c) {
+				return true;
+			}
+		};
+		sorter.setComparator(1, new Comparator<CapResponseType>() {
+			public int compare(CapResponseType o0,
+				CapResponseType o1)
+			{
+				return Integer.compare(o0.ordinal(),
+					o1.ordinal());
+			}
+		});
+		sorter.setComparator(2, new Comparator<CapUrgency>() {
+			public int compare(CapUrgency o0, CapUrgency o1)
+			{
+				return Integer.compare(o0.ordinal(),
+					o1.ordinal());
+			}
+		});
+		sorter.setSortsOnUpdates(true);
+		ArrayList<RowSorter.SortKey> keys =
+			new ArrayList<RowSorter.SortKey>();
+		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+		keys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
+		keys.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
+		sorter.setSortKeys(keys);
+		return sorter;
+	}
+
 	/** Create a new alert config table model */
 	public AlertConfigModel(Session s) {
 		super(s, descriptor(s), 12);
+	}
+
+	/** Create an object */
+	@Override
+	public void createObject(String name) {
+		// ignore the provided name
+		String n = AlertConfigHelper.createUniqueName();
+		descriptor.cache.createObject(n);
 	}
 }

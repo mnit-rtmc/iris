@@ -27,6 +27,7 @@ public enum ItemStyle {
 	/* Generic item styles */
 	ALL,
 	ACTIVE,
+	CLEARED,
 	/* Generic device styles */
 	AVAILABLE,
 	DEPLOYED,
@@ -37,7 +38,6 @@ public enum ItemStyle {
 	PURPOSE,
 	HIDDEN,
 	/* Incident styles */
-	CLEARED,
 	CRASH,
 	STALL,
 	ROADWORK,
@@ -67,8 +67,7 @@ public enum ItemStyle {
 	METER,
 	TIME,
 	/* Alert styles */
-	PENDING,
-	EXPIRED;
+	PENDING;
 
 	/** Get a string representation of the item style */
 	@Override

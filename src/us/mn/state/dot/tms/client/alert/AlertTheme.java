@@ -20,16 +20,23 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-
+import java.util.Collections;
+import java.util.Set;
+import org.postgis.MultiPolygon;
+import org.postgis.Point;
+import org.postgis.Polygon;
+import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.AlertInfo;
+import us.mn.state.dot.tms.AlertInfoHelper;
+import us.mn.state.dot.tms.AlertState;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.IpawsAlert;
-import us.mn.state.dot.tms.IpawsDeployer;
-import us.mn.state.dot.tms.IpawsDeployerHelper;
-import us.mn.state.dot.tms.IpawsAlertHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
@@ -42,18 +49,80 @@ import us.mn.state.dot.tms.client.map.VectorSymbol;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
+import us.mn.state.dot.tms.geo.Position;
+import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 
 /**
  * Theme for alert objects on the map.
  *
  * @author Gordon Parikh
+ * @author Douglas Lau
  */
-public class AlertTheme extends ProxyTheme<IpawsDeployer> {
+public class AlertTheme extends ProxyTheme<AlertInfo> {
+
+	/** Solid stroke line */
+	static private final BasicStroke LINE_SOLID = new BasicStroke(8,
+		BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+
+	/** Pending alert area outline color */
+	static private final Color PENDING_ALERT_COLOR = Color.MAGENTA;
+
+	/** Pending alert area fill color */
+	static private final Color PENDING_ALERT_FILL =
+		new Color(205, 51, 139, 40);
+
+	/** Active alert area outline color */
+	static private final Color ACTIVE_ALERT_COLOR = Color.ORANGE;
+
+	/** Active alert area fill color */
+	static private final Color ACTIVE_ALERT_FILL =
+		new Color(255, 128, 0, 40);
+
+	/** Cleared alert area outline color */
+	static private final Color CLEARED_ALERT_COLOR = Color.DARK_GRAY;
+
+	/** Cleared alert area fill color */
+	static private final Color CLEARED_ALERT_FILL = new Color(105, 105, 105,
+		40);
+
+	/** Build awt.Shape objects from a MultiPolygon, returning a list of
+	 *  Shape objects with each representing a polygon. */
+	static private ArrayList<Shape> getShapes(AlertInfo ai) {
+		ArrayList<Shape> paths = new ArrayList<Shape>();
+		if (ai == null)
+			return paths;
+		MultiPolygon mp = ai.getGeoPoly();
+		for (Polygon poly: mp.getPolygons()) {
+			// draw a path of each polygon
+			GeneralPath path = new GeneralPath();
+			Point p = poly.getFirstPoint();
+			if (p != null) {
+				SphericalMercatorPosition smp =
+					getSphereMercatorPos(p);
+				path.moveTo(smp.getX(), smp.getY());
+			}
+			for (int i = 1; i < poly.numPoints(); i++) {
+				p = poly.getPoint(i);
+				SphericalMercatorPosition smp =
+					getSphereMercatorPos(p);
+				path.lineTo(smp.getX(), smp.getY());
+			}
+			path.closePath();
+			paths.add(path);
+		}
+		return paths;
+	}
+
+	/** Convert a PostGIS Point to a SphericalMercatorPosition object. */
+	static private SphericalMercatorPosition getSphereMercatorPos(Point p) {
+		Position pos = new Position(p.y, p.x);
+		return SphericalMercatorPosition.convert(pos);
+	}
 
 	/** Current session */
 	private final Session session;
 
-	/** Handle to the alert manager (just manager cast to AlertManager type)*/
+	/** Handle to the alert manager */
 	private final AlertManager aManager;
 
 	/** Handle to GeoLoc Manager */
@@ -63,7 +132,7 @@ public class AlertTheme extends ProxyTheme<IpawsDeployer> {
 	private final DMSManager dManager;
 
 	/** Handle to DMS theme object */
-	private DmsTheme dmsTheme;
+	private final DmsTheme dmsTheme;
 
 	/** Handle to DMS symbol object */
 	private VectorSymbol dmsSymbol;
@@ -73,38 +142,7 @@ public class AlertTheme extends ProxyTheme<IpawsDeployer> {
 	private final Style dmsAvailableStyle;
 	private final Style dmsAllStyle;
 
-	/** Solid stroke line */
-	static private final BasicStroke LINE_SOLID = new BasicStroke(8,
-		BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-
-	/** Active alert area outline color */
-	static private final Color ACTIVE_ALERT_COLOR = Color.RED;
-
-	/** Active alert area fill color */
-	static private final Color ACTIVE_ALERT_FILL = new Color(255,0,0,40);
-
-	/** Pending alert area outline color */
-	static private final Color PENDING_ALERT_COLOR = Color.MAGENTA;
-
-	/** Pending alert area fill color */
-	static private final Color PENDING_ALERT_FILL =
-			new Color(205, 51, 139, 40);
-
-	/** Scheduled alert area outline color */
-	static private final Color SCHEDULED_ALERT_COLOR = Color.ORANGE;
-
-	/** Scheduled alert area fill color */
-	static private final Color SCHEDULED_ALERT_FILL =
-			new Color(255, 128, 0, 40);
-
-	/** Expired alert area outline color */
-	static private final Color EXPIRED_ALERT_COLOR = Color.DARK_GRAY;
-
-	/** Expired alert area fill color */
-	static private final Color EXPIRED_ALERT_FILL = new Color(105, 105, 105,
-		40);
-
-	public AlertTheme(AlertManager m, Session s) {
+	public AlertTheme(Session s, AlertManager m) {
 		super(m, new AlertMarker());
 
 		// get handles to things we will use when drawing DMS
@@ -112,47 +150,41 @@ public class AlertTheme extends ProxyTheme<IpawsDeployer> {
 		aManager = m;
 		dManager = session.getDMSManager();
 		dmsTheme = (DmsTheme) dManager.getTheme();
-		dmsDeployedStyle = dmsTheme.getStyle(ItemStyle.DEPLOYED);
+		dmsDeployedStyle = dmsTheme.getStyle(ItemStyle.EXTERNAL);
 		dmsAvailableStyle = dmsTheme.getStyle(ItemStyle.AVAILABLE);
 		dmsAllStyle = dmsTheme.getStyle(ItemStyle.ALL);
 		glManager = session.getGeoLocManager();
 
 		addStyle(ItemStyle.PENDING, PENDING_ALERT_COLOR);
-		addStyle(ItemStyle.SCHEDULED, SCHEDULED_ALERT_COLOR);
 		addStyle(ItemStyle.ACTIVE, ACTIVE_ALERT_COLOR);
-		addStyle(ItemStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE);
-		addStyle(ItemStyle.EXPIRED, EXPIRED_ALERT_COLOR);
+		addStyle(ItemStyle.CLEARED, CLEARED_ALERT_COLOR);
 		addStyle(ItemStyle.ALL, Color.WHITE);
 	}
 
-	/** Draw the specified map object. Overridden to do nothing so only
-	 *  selected alerts are drawn.
-	 */
+	/** Draw the specified map object.  Overridden to do nothing so only
+	 *  selected alerts are drawn.  */
 	@Override
 	public void draw(Graphics2D g, MapObject mo) { }
 
 	/** Hit-test an alert */
 	@Override
 	public boolean hit(Point2D p, MapObject mo) {
-		// if we have a selected alert already, don't deselect if the user
-		// clicked inside the alert area
-		if (aManager.getSelectedAlert() != null && mo instanceof MapGeoLoc) {
-			// make sure this is the same deployer
+		AlertInfo sel = aManager.getSelectionModel()
+			.getSingleSelection();
+		// if we have a selected alert already, don't deselect if the
+		// user clicked inside the alert area
+		if (sel != null && mo instanceof MapGeoLoc) {
+			// make sure this is the same alert
 			MapGeoLoc mgl = (MapGeoLoc) mo;
 			GeoLoc gl = mgl.getGeoLoc();
-			IpawsDeployer iad = IpawsDeployerHelper.
-					lookup(gl.getName());
+			AlertInfo ai = AlertInfoHelper.lookup(gl.getName());
 
 			// if not do whatever
-			if (!aManager.getSelectedAlert().getName().equals(iad.getName()))
+			if (!sel.getName().equals(ai.getName()))
 				return super.hit(p, mo);
 
-			// lookup the alert to get the area shapes
-			IpawsAlert ia = IpawsAlertHelper.lookupByIdentifier(
-				aManager.getSelectedAlert().getAlertId());
-
 			// get shapes and transform the point
-			ArrayList<Shape> shapes = IpawsAlertHelper.getShapes(ia);
+			ArrayList<Shape> shapes = getShapes(ai);
 			for (Shape shp: shapes)
 				// return if they clicked inside an alert
 				return shp.contains(p);
@@ -160,121 +192,90 @@ public class AlertTheme extends ProxyTheme<IpawsDeployer> {
 		return super.hit(p, mo);
 	}
 
-	/** Draw the alert on the map. The GeoLoc is the centroid of the alert and
-	 *  is not drawn (really just kind of a hack to get this method to fire).
+	/** Draw the alert on the map.  The GeoLoc is the centroid of the alert
+	 *  and is not drawn (really just kind of a hack to get this method to
+	 *  fire).
+	 *
 	 *  The alert area is drawn, along with DMS selected for the alert.
 	 */
 	@Override
 	public void drawSelected(Graphics2D g, MapObject mo) {
 		if (mo instanceof MapGeoLoc) {
-			// get the GeoLoc from the object and use it to lookup the deployer
+			// get the GeoLoc from the object
+			// and use it to lookup the alert
 			MapGeoLoc mgl = (MapGeoLoc) mo;
 			GeoLoc gl = mgl.getGeoLoc();
-			IpawsDeployer iad = IpawsDeployerHelper.
-					lookup(gl.getName());
-
-			// draw the deployer/alert
-			drawAlert(g, iad);
+			AlertInfo ai = AlertInfoHelper.lookup(gl.getName());
+			drawAlert(g, ai);
 		}
 	}
 
-	/** Draw an alert deployer. */
-	private void drawAlert(Graphics2D g, IpawsDeployer iad) {
+	/** Draw an alert */
+	private void drawAlert(Graphics2D g, AlertInfo ai) {
 		// save the current transform before drawing anything
 		AffineTransform t = g.getTransform();
 
-		// lookup the alert to get the area polygon
-		IpawsAlert ia = IpawsAlertHelper.lookupByIdentifier(
-			iad.getAlertId());
-
-		// create a set of Shape objects from the MultiPolygon in the alert
-		// TODO need to make sure the PostGIS JAR makes it to the client
-		// (and actually works) in WebStart
-		ArrayList<Shape> shapes = IpawsAlertHelper.getShapes(ia);
-
-		// check the style with the deployer - expired alerts will be a
-		// different color and alert style will trigger different
-		// behavior expired and inactive alerts are gray
-		Color outline = EXPIRED_ALERT_COLOR;
-		Color fill = EXPIRED_ALERT_FILL;
-		ItemStyle alertState = null;
-		if (manager.checkStyle(ItemStyle.ACTIVE, iad)) {
-			// active alerts are red
-			outline = ACTIVE_ALERT_COLOR;
-			fill = ACTIVE_ALERT_FILL;
-			alertState = ItemStyle.ACTIVE;
-		} else if (manager.checkStyle(ItemStyle.PENDING, iad)) {
-			// pending alerts are orange
+		// use alert state to set outline and fill color
+		Color outline = CLEARED_ALERT_COLOR;
+		Color fill = CLEARED_ALERT_FILL;
+		AlertState st = AlertState.fromOrdinal(ai.getAlertState());
+		switch (st) {
+		case PENDING:
 			outline = PENDING_ALERT_COLOR;
 			fill = PENDING_ALERT_FILL;
-			alertState = ItemStyle.PENDING;
-		} else if (manager.checkStyle(ItemStyle.SCHEDULED, iad)) {
-			// pending alerts are orange
-			outline = SCHEDULED_ALERT_COLOR;
-			fill = SCHEDULED_ALERT_FILL;
-			alertState = ItemStyle.SCHEDULED;
+			break;
+		case ACTIVE:
+			outline = ACTIVE_ALERT_COLOR;
+			fill = ACTIVE_ALERT_FILL;
+			break;
 		}
 
 		// draw the polygons on the graphics context
 		g.setStroke(LINE_SOLID);
+		ArrayList<Shape> shapes = getShapes(ai);
 		for (Shape shp: shapes) {
-			// draw the outline as a solid color
 			g.setColor(outline);
 			g.draw(shp);
-
-			// fill with semi-transparent color
 			g.setColor(fill);
 			g.fill(shp);
 		}
-
-		// if an alert is pending or active and in edit mode, we will
-		// draw auto DMS as deployed, optional DMS as available, and the
-		// user will be able to opt to draw all DMS as all
 
 		// set the scale on the theme before getting the symbol
 		float scale = dManager.getLayerState().getScale();
 		dmsTheme.setScale(scale);
 		dmsSymbol = (VectorSymbol) dmsTheme.getSymbol();
-		if (alertState == ItemStyle.PENDING ||
-			(aManager.getEditing() &&
-			    (alertState == ItemStyle.ACTIVE ||
-			     alertState == ItemStyle.SCHEDULED)
-			)
-		   )
-		{
-			// draw all DMS in group (if requested), then optional
-			// DMS, then auto DMS (in that order so the styles look
-			// right)
-			SignGroup sg = iad.getConfig().getSignGroup();
-			if (aManager.getShowAllDms() && sg != null) {
-				for (DMS d: SignGroupHelper.getAllSigns(sg))
-					drawDms(g, d.getName(), dmsAllStyle, t);
-			}
-			for (String dmsName: iad.getOptionalDms())
-				drawDms(g, dmsName, dmsAvailableStyle, t);
-			for (String dmsName: iad.getAutoDms())
-				drawDms(g, dmsName, dmsDeployedStyle, t);
-		} else if (alertState == ItemStyle.ACTIVE
-				|| alertState == ItemStyle.SCHEDULED) {
-			// for active alerts not in edit mode, draw only deployed DMS
-			for (String dmsName: iad.getDeployedDms())
-				drawDms(g, dmsName, dmsDeployedStyle, t);
+		if (st == AlertState.PENDING) {
+			// draw all DMS in group, then auto DMS
+			// (in that order so the styles look right)
+			SignGroup sg = ai.getSignGroup();
+			for (DMS d: SignGroupHelper.getAllSigns(sg))
+				drawDms(g, d, dmsAvailableStyle, t);
+			for (DMS d: findPlanSigns(ai))
+				drawDms(g, d, dmsDeployedStyle, t);
+		} else if (st == AlertState.ACTIVE) {
+			// for active alerts draw only deployed DMS
+			for (DMS d: findPlanSigns(ai))
+				drawDms(g, d, dmsDeployedStyle, t);
 		} else {
-			// for past and inactive alerts draw only deployed DMS
+			// for cleared alerts draw only deployed DMS
 			// but using "all" style
-			for (String dmsName: iad.getDeployedDms())
-				drawDms(g, dmsName, dmsAllStyle, t);
+			for (DMS d: findPlanSigns(ai))
+				drawDms(g, d, dmsAllStyle, t);
 		}
 	}
 
+	/** Find signs in action plan */
+	private Set<DMS> findPlanSigns(AlertInfo ai) {
+		ActionPlan plan = ai.getActionPlan();
+		return DmsActionHelper.findSigns(plan);
+	}
+
 	/** Draw the DMS with the given name on the graphics context using the
-	 *  specified style, resetting the transform to t afterwards.
-	 */
-	private void drawDms(Graphics2D g, String dmsName, Style style,
+	 *  specified style, resetting the transform to t afterwards. */
+	private void drawDms(Graphics2D g, DMS dms, Style style,
 		AffineTransform t)
 	{
-		DMS dms = DMSHelper.lookup(dmsName);
-		if (dms == null || dms.getGeoLoc() == null)
+		if (dms.getGeoLoc() == null)
 			return;
 
 		// get a map object for this DMS and draw
@@ -282,13 +283,36 @@ public class AlertTheme extends ProxyTheme<IpawsDeployer> {
 		MapGeoLoc dmgl = glManager.findMapGeoLoc(dms.getGeoLoc());
 		if (dms == aManager.getSelectedDms()) {
 			dmsSymbol.drawSelected(g, dmgl, style);
-
-			// FIXME not sure why selected DMS don't have the right style
 			g.setTransform(t); // reset transform
-			dmsSymbol.draw(g, dmgl, style);
-		} else
-			dmsSymbol.draw(g, dmgl, style);
-
+		}
+		dmsSymbol.draw(g, dmgl, style);
 		g.setTransform(t); // reset transform
+	}
+
+	/** Zoom to the selected alert area, showing the entire area on the map.*/
+	public void zoomToAlertArea(AlertInfo ai) {
+		ArrayList<Shape> shapes = getShapes(ai);
+
+		// find the min and max x and y points
+		ArrayList<Double> xPoints = new ArrayList<Double>();
+		ArrayList<Double> yPoints = new ArrayList<Double>();
+		for (Shape shp: shapes) {
+			Rectangle2D r = shp.getBounds2D();
+			xPoints.add(r.getMinX());
+			xPoints.add(r.getMaxX());
+			yPoints.add(r.getMinY());
+			yPoints.add(r.getMaxY());
+		}
+		Collections.sort(xPoints);
+		Collections.sort(yPoints);
+		double minX = xPoints.get(0);
+		double maxX = xPoints.get(xPoints.size() - 1);
+		double minY = yPoints.get(0);
+		double maxY = yPoints.get(yPoints.size() - 1);
+		double w = maxX - minX;
+		double h = maxY - minY;
+
+		aManager.getScreenPane().getMap().getModel().setExtent(minX,
+			minY, w, h);
 	}
 }

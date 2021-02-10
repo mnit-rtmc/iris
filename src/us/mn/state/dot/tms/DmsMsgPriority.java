@@ -29,7 +29,7 @@ public enum DmsMsgPriority {
 	RESERVED,	/* 2: reserved for future use */
 	PSA,		/* 3: public service announcement */
 	TRAVEL_TIME,	/* 4: travel time priority */
-	ALERT,		/* 5: alert priority (AMBER alerts, etc.) */
+	ALERT_LOW,	/* 5: low alert priority */
 	SCHED_A,	/* 6: scheduled priority A (planned events) */
 	SCHED_B,	/* 7: scheduled priority B */
 	SCHED_C,	/* 8: scheduled priority C */
@@ -37,14 +37,14 @@ public enum DmsMsgPriority {
 	OTHER_SYSTEM,	/* 10: other system priority */
 	RESERVED_2,	/* 11: reserved for future use */
 	OPERATOR,	/* 12: operator priority */
-	AWS,		/* 13: automated warning system priority */
+	ALERT_MED,	/* 13: medium alert priority */
 	GATE_ARM,	/* 14: gate-arm priority */
 	LCS,		/* 15: LCS priority */
 	INCIDENT_LOW,	/* 16: incident low-priority */
 	INCIDENT_MED,	/* 17: incident medium-priority */
 	SCHED_HIGH,	/* 18: scheduled high-priority */
 	INCIDENT_HIGH,	/* 19: incident high-priority */
-	AWS_HIGH,	/* 20: automated warning system high-priority */
+	ALERT_HIGH,	/* 20: high alert priority */
 	OVERRIDE;	/* 21: override priority */
 
 	/** Values array */
@@ -68,7 +68,6 @@ public enum DmsMsgPriority {
 			return SignMsgSource.toBits(SignMsgSource.schedule,
 			                            SignMsgSource.travel_time);
 		case PSA:
-		case ALERT:
 		case SCHED_A:
 		case SCHED_B:
 		case SCHED_C:
@@ -88,8 +87,11 @@ public enum DmsMsgPriority {
 		case INCIDENT_HIGH:
 			return SignMsgSource.toBits(SignMsgSource.operator,
 			                            SignMsgSource.incident);
-		case AWS:
-		case AWS_HIGH:
+		case ALERT_LOW:
+		case ALERT_MED:
+		case ALERT_HIGH:
+			return SignMsgSource.toBits(SignMsgSource.schedule,
+			                            SignMsgSource.alert);
 		case OTHER_SYSTEM:
 			return SignMsgSource.external.bit();
 		default:

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import java.util.Calendar;
 import javax.swing.JPanel;
 
 /**
- * ZTable is a simple JTable extension which adds a setVisibleRowCount method
+ * A calendar widget to select dates.
  *
  * @author Douglas Lau
  */

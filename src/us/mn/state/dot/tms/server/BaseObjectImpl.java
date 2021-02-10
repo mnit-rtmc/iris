@@ -40,7 +40,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	static public ServerNamespace namespace;
 
 	/** SQL connection to database */
-	static protected SQLConnection store;
+	static SQLConnection store;
 
 	/** Corridor manager */
 	static public final CorridorManager corridors = new CorridorManager();
@@ -122,12 +122,8 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		WordImpl.loadAll();
 		DMSImpl.updateAllStyles();
 		RptConduitImpl.loadAll();
-		IpawsAlertImpl.loadAll();
-		IpawsConfigImpl.loadAll();
-		IpawsDeployerImpl.loadAll();
-		CapResponseImpl.loadAll();
-		CapUrgencyFieldImpl.loadAll();
-		NotificationImpl.loadAll();
+		AlertConfigImpl.loadAll();
+		AlertInfoImpl.loadAll();
 	}
 
 	/** Get the time as a time stamp */
@@ -299,10 +295,26 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		return (so instanceof DMSImpl) ? (DMSImpl) so : null;
 	}
 
+	/** Lookup a sign config */
+	static protected SignConfigImpl lookupSignConfig(String name) {
+		SonarObject so = lookupObject(SignConfigImpl.SONAR_TYPE, name);
+		return (so instanceof SignConfigImpl)
+		      ? (SignConfigImpl) so
+		      : null;
+	}
+
 	/** Lookup a sign group */
 	static protected SignGroupImpl lookupSignGroup(String name) {
 		SonarObject so = lookupObject(SignGroupImpl.SONAR_TYPE, name);
 		return (so instanceof SignGroupImpl) ? (SignGroupImpl)so : null;
+	}
+
+	/** Lookup a DMS sign group */
+	static protected DmsSignGroupImpl lookupDmsSignGroup(String name) {
+		SonarObject so = lookupObject(DmsSignGroupImpl.SONAR_TYPE,name);
+		return (so instanceof DmsSignGroupImpl)
+		      ? (DmsSignGroupImpl) so
+		      : null;
 	}
 
 	/** Lookup a quick message */
@@ -347,20 +359,37 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		SonarObject so = lookupObject(PlanPhaseImpl.SONAR_TYPE, name);
 		return (so instanceof PlanPhaseImpl) ? (PlanPhaseImpl)so : null;
 	}
-	
-	/** Lookup an IPAWS Alert Deployer */
-	static protected IpawsDeployerImpl lookupIpawsDeployer(String name) {
-		SonarObject so = lookupObject(IpawsDeployerImpl.SONAR_TYPE,
-			name);
-		return (so instanceof IpawsDeployerImpl)
-			? (IpawsDeployerImpl) so : null;
+
+	/** Lookup a time action */
+	static protected TimeActionImpl lookupTimeAction(String name) {
+		SonarObject so = lookupObject(TimeActionImpl.SONAR_TYPE, name);
+		return (so instanceof TimeActionImpl)
+		      ? (TimeActionImpl) so
+		      : null;
 	}
-	
-	/** Lookup an IPAWS Alert Config */
-	static protected IpawsConfigImpl lookupIpawsConfig(String name) {
-		SonarObject so = lookupObject(IpawsConfigImpl.SONAR_TYPE, name);
-		return (so instanceof IpawsConfigImpl)
-			? (IpawsConfigImpl) so : null;
+
+	/** Lookup a DMS action */
+	static protected DmsActionImpl lookupDmsAction(String name) {
+		SonarObject so = lookupObject(DmsActionImpl.SONAR_TYPE, name);
+		return (so instanceof DmsActionImpl)
+		      ? (DmsActionImpl) so
+		      : null;
+	}
+
+	/** Lookup an alert config */
+	static protected AlertConfigImpl lookupAlertConfig(String name) {
+		SonarObject so = lookupObject(AlertConfigImpl.SONAR_TYPE, name);
+		return (so instanceof AlertConfigImpl)
+		      ? (AlertConfigImpl) so
+		      : null;
+	}
+
+	/** Lookup an alert info */
+	static protected AlertInfoImpl lookupAlertInfo(String name) {
+		SonarObject so = lookupObject(AlertInfoImpl.SONAR_TYPE, name);
+		return (so instanceof AlertInfoImpl)
+		      ? (AlertInfoImpl) so
+		      : null;
 	}
 
 	/** Get the primary key name */
@@ -485,7 +514,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		nf.setMaximumFractionDigits(5);
 		return nf.format(value);
 	}
-	
+
 	/** Get a Boolean value from a particular column of a ResultSet. Supports
 	 *  returning null values.
 	 */
@@ -496,7 +525,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return null;
 		return b;
 	}
-	
+
 	/** Get a String array from a particular column of a ResultSet. Guards
 	 *  against null pointer exceptions.
 	 */
@@ -507,7 +536,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return (String[]) arr.getArray();
 		return null;
 	}
-	
+
 	/** Get an array representation of a string given a string array.  If
 	 *  the array provided is null, null is returned (instead of the string
 	 *  "null" returned by Arrays.toString(). */

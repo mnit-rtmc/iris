@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.utils.wysiwyg.token.*;
  * WToken objects.
  * 
  * @author John L. Stanley - SRF Consulting
- *
  */
 public class WMultiParser implements Multi {
 
@@ -269,17 +268,7 @@ public class WMultiParser implements Multi {
 	}
 
 	@Override
-	public void addCapTime(String f_txt, String a_txt, String p_txt) {
-		page.addToken(new WtCapTime(f_txt, a_txt, p_txt));
-	}
-
-	@Override
-	public void addCapResponse(String[] rtypes) {
-		page.addToken(new WtCapResponse(rtypes));
-	}
-
-	@Override
-	public void addCapUrgency(String[] uvals) {
-		page.addToken(new WtCapUrgencyField(uvals));
+	public void addCapTime(String b_txt, String d_txt, String a_txt) {
+		page.addToken(new WtCapTime(b_txt, d_txt, a_txt));
 	}
 }

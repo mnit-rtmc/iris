@@ -188,27 +188,17 @@ public interface Multi {
 
 	/** Add an incident locator */
 	void addLocator(String code);
-	
-	/* IRIS-specific quick message tags for use in the IPAWS alert processing
+
+	/* IRIS-specific quick message tags for use in the alert processing
 	 * system (not part of MULTI).
 	 */
-	
-	/** Add an IPAWS CAP time substitution field. Text fields can include "{}"
-	 *  to automatically substitute in the appropriate time (alert start or
-	 *  end time), with optional formatting (using Java Date Format notation).
-	 *  @param f_txt Pre-alert text.
-	 *  @param a_txt Alert-active prepend text.
-	 *  @param p_txt Post-alert prepend text.
-	 */
-	void addCapTime(String f_txt, String a_txt, String p_txt);
-	
-	/** Add an IPAWS CAP response type substitution field.
-	 *  @param rtypes Optional list of response types to consider.
-	 */
-	void addCapResponse(String[] rtypes);
-	
-	/** Add an IPAWS CAP urgency substitution field.
-	 *  @param uvals Optional list of urgency values to consider.
-	 */
-	void addCapUrgency(String[] uvals);
+
+	/** Add a CAP time substitution field.
+	 *  Text fields can include "{}" to automatically substitute in the
+	 *  appropriate time (alert start or end time), with optional formatting
+	 *  (using Java Date Format notation).
+	 *  @param b_txt Before alert prepend text.
+	 *  @param d_txt During-alert prepend text.
+	 *  @param a_txt After-alert prepend text. */
+	void addCapTime(String b_txt, String d_txt, String a_txt);
 }

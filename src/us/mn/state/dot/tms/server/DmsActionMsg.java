@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2020  Minnesota Department of Transportation
+ * Copyright (C) 2013-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.DmsAction;
-import static us.mn.state.dot.tms.DmsMsgPriority.GATE_ARM;
+import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
@@ -267,6 +267,8 @@ public class DmsActionMsg {
 		addSrc(SignMsgSource.schedule);
 		if (isGateArm())
 			addSrc(SignMsgSource.gate_arm);
+		if (isAlert())
+			addSrc(SignMsgSource.alert);
 		new MultiString(ms).parse(builder);
 		MultiString _multi = builder.toMultiString();
 		if (isBlank(_multi))
@@ -277,7 +279,14 @@ public class DmsActionMsg {
 
 	/** Check if the action has gate arm priority */
 	private boolean isGateArm() {
-		return action.getMsgPriority() == GATE_ARM.ordinal();
+		return SignMsgSource.gate_arm.checkBit(DmsMsgPriority
+			.fromOrdinal(action.getMsgPriority()).getSource());
+	}
+
+	/** Check if the action has alert priority */
+	private boolean isAlert() {
+		return SignMsgSource.alert.checkBit(DmsMsgPriority.fromOrdinal(
+			action.getMsgPriority()).getSource());
 	}
 
 	/** Check if message is blank */

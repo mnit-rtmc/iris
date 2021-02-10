@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -176,25 +176,13 @@ public class MultiAdapter implements Multi {
 	@Override
 	public void addLocator(String code) { }
 
-	/** Add an IPAWS CAP time substitution field. Text fields can include "{}"
-	 *  to automatically substitute in the appropriate time (alert start or
-	 *  end time), with optional formatting (using Java Date Format notation).
-	 *  @param f_txt Pre-alert text.
-	 *  @param a_txt Alert-active prepend text.
-	 *  @param p_txt Post-alert prepend text.
-	 */
+	/** Add a CAP time substitution field.
+	 *  Text fields can include "{}" to automatically substitute in the
+	 *  appropriate time (alert start or end time), with optional formatting
+	 *  (using Java Date Format notation).
+	 *  @param b_txt Before alert prepend text.
+	 *  @param d_txt During-alert prepend text.
+	 *  @param a_txt After-alert prepend text. */
 	@Override
-	public void addCapTime(String f_txt, String a_txt, String p_txt) { }
-
-	/** Add an IPAWS CAP response type substitution field.
-	 *  @param rtypes Optional list of response types to consider.
-	 */
-	@Override
-	public void addCapResponse(String[] rtypes) { }
-
-	/** Add an IPAWS CAP urgency substitution field.
-	 *  @param uvals Optional list of urgency values to consider.
-	 */
-	@Override
-	public void addCapUrgency(String[] uvals) { }
+	public void addCapTime(String b_txt, String d_txt, String a_txt) { }
 }

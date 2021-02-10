@@ -25,54 +25,52 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 /** CAP time substitution field token for WYSIWYG editor.
  * 
  * @author Gordon Parikh - SRF Consulting
- *
  */
 public class WtCapTime extends Wt_IrisToken {
 
-	String f_txt;
+	String b_txt;
+	String d_txt;
 	String a_txt;
-	String p_txt;
 	
 	/** Date object that should take up the max number of characters */
 	private static final LocalDateTime BIG_DATE =
-			LocalDateTime.of(2020, 12, 31, 23, 59, 59);
+		LocalDateTime.of(2020, 12, 31, 23, 59, 59);
 	
-	/** Default time format string (hour and AM/PM). TODO may want to put this
-	 *  somewhere else...
-	 */
-	private final static DateTimeFormatter DEFAULT_TIME_FMT =
-			DateTimeFormatter.ofPattern("h a");
+	/** Default time format string (hour and AM/PM).
+	 *  TODO may want to put this somewhere else... */
+	static private final DateTimeFormatter DEFAULT_TIME_FMT =
+		DateTimeFormatter.ofPattern("h a");
 	
 	/** Regex pattern for extracting time format string */
 	private final static Pattern TMSUB = Pattern.compile("\\{([^}]*)\\}");
 	
-	public WtCapTime(String f_txt, String a_txt, String p_txt) {
+	public WtCapTime(String b_txt, String d_txt, String a_txt) {
 		super(WTokenType.capTime, "[captime");
-		this.f_txt = f_txt;
+		this.b_txt = b_txt;
+		this.d_txt = d_txt;
 		this.a_txt = a_txt;
-		this.p_txt = p_txt;
 		updateString();
 	}
 
 	/** Get pre-alert text (when alert is in the future) */
 	public String getFutureText() {
-		return f_txt;
+		return b_txt;
 	}
 	
 	/** Get alert-active text (when alert is currently active) */
 	public String getActiveText() {
-		return a_txt;
+		return d_txt;
 	}
 	
 	/** Get post-alert text (when alert has expired) */
 	public String getPastText() {
-		return p_txt;
+		return a_txt;
 	}
 	
-	/** Process time format substitution fields, substituting in a large time
-	 *  value (i.e. one that will take up a lot of characters).
+	/** Process time format substitution fields, substituting in a large
+	 *  time value (i.e. one that will take up a lot of characters).
 	 */
-	private static String replaceTimeFmt(String tmplt) {
+	static private String replaceTimeFmt(String tmplt) {
 		// use regex to find match groups in curly braces
 		Matcher m = TMSUB.matcher(tmplt);
 		String str = tmplt;
@@ -102,12 +100,12 @@ public class WtCapTime extends Wt_IrisToken {
 	 */
 	@Override
 	public Integer getBoxWidth(Integer chsp) {
-		// go through different text options to determine potential lengths
-		// and return the max width
+		// go through different text options to determine potential
+		// lengths and return the max width
 		int maxWidth = 0;
-		for (String tmplt: new String[] {f_txt, a_txt, p_txt}) {
-			// replace any time format strings in the text and get the width
-			// of the resulting text
+		for (String tmplt: new String[] {b_txt, d_txt, a_txt}) {
+			// replace any time format strings in the text
+			// and get the width of the resulting text
 			String str = replaceTimeFmt(tmplt);
 			int w = wfont.getTextWidth(chsp, str);
 			if (w > maxWidth)
@@ -121,7 +119,7 @@ public class WtCapTime extends Wt_IrisToken {
 	 */
 	@Override
 	public void doMulti(Multi cb) {
-		cb.addCapTime(f_txt, a_txt, p_txt);
+		cb.addCapTime(b_txt, d_txt, a_txt);
 	}
 
 	/* (non-Javadoc)
@@ -129,11 +127,10 @@ public class WtCapTime extends Wt_IrisToken {
 	 */
 	@Override
 	public void appendParameters(StringBuilder sb) {
-		sb.append(f_txt);
+		sb.append(b_txt);
+		sb.append(',');
+		sb.append(d_txt);
 		sb.append(',');
 		sb.append(a_txt);
-		sb.append(',');
-		sb.append(p_txt);
 	}
-	
 }

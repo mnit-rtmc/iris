@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  * Copyright (C) 2019  SRF Consulting Group
  *
@@ -39,7 +39,6 @@ import us.mn.state.dot.tms.client.map.MapModel;
 import us.mn.state.dot.tms.client.map.TileLayer;
 import us.mn.state.dot.tms.client.marking.LaneMarkingManager;
 import us.mn.state.dot.tms.client.meter.MeterManager;
-import us.mn.state.dot.tms.client.notification.NotificationManager;
 import us.mn.state.dot.tms.client.parking.ParkingAreaManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
@@ -61,10 +60,10 @@ public class Session {
 
 	/** Session User */
 	private final User user;
-	
+
 	/** Global current session */
 	static private Session curSession;
-	
+
 	/** Sync object for changing current session */
 	static private Object mySync = new Object();
 
@@ -81,7 +80,7 @@ public class Session {
 		edit_mode = m;
 		fireEditModeChange();
 	}
-	
+
 	/** Get the edit mode */
 	public boolean getEditMode() {
 		return edit_mode;
@@ -121,7 +120,7 @@ public class Session {
 	public GeoLocManager getGeoLocManager() {
 		return loc_manager;
 	}
-	
+
 	/** List of proxy managers */
 	private final LinkedList<ProxyManager<?>> managers;
 
@@ -157,20 +156,20 @@ public class Session {
 		return inc_manager;
 	}
 
+	/** Alert manager */
+	private final AlertManager alert_manager;
+
+	/** Get the alert manager */
+	public AlertManager getAlertManager() {
+		return alert_manager;
+	}
+
 	/** LCS array manager */
 	private final LCSArrayManager lcs_array_manager;
 
 	/** Get the LCS array manager */
 	public LCSArrayManager getLCSArrayManager() {
 		return lcs_array_manager;
-	}
-	
-	/** Push notification manager */
-	private final NotificationManager notif_manager;
-	
-	/** Get the push notification Manager */
-	public NotificationManager getNotificationManager() {
-		return notif_manager;
 	}
 
 	/** Mapping of all tabs */
@@ -198,6 +197,7 @@ public class Session {
 		cam_manager = new CameraManager(this, loc_manager);
 		dms_manager = new DMSManager(this, loc_manager);
 		inc_manager = new IncidentManager(this, loc_manager);
+		alert_manager = new AlertManager(this, loc_manager);
 		lcs_array_manager = new LCSArrayManager(this, loc_manager);
 		managers = new LinkedList<ProxyManager<?>>();
 		managers.add(r_node_manager);
@@ -215,9 +215,7 @@ public class Session {
 		managers.add(new ParkingAreaManager(this, loc_manager));
 		managers.add(inc_manager);
 		managers.add(new PlanManager(this, loc_manager));
-		managers.add(new AlertManager(this, loc_manager));
-		notif_manager = new NotificationManager(this, loc_manager);
-		managers.add(notif_manager);
+		managers.add(alert_manager);
 		tile_layer = createTileLayer(props.getProperty("map.tile.url"));
 		setCurrent(this, null);
 	}
@@ -459,7 +457,7 @@ public class Session {
 		for (EditModeListener l: listeners)
 			l.editModeChanged();
 	}
-	
+
 	/** Set current session */
 	static private void setCurrent(Session newSes, Session oldSes) {
 		synchronized (mySync) {
@@ -467,7 +465,7 @@ public class Session {
 				curSession = newSes;
 		}
 	}
-	
+
 	/** Get current session.
 	 * Returns current session or null if not logged in. */
 	static public Session getCurrent() {

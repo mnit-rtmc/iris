@@ -107,14 +107,8 @@ public class WMsgMultiTagToolbar extends WToolbar {
 		// Variable Speed Advisory
 		multiTagModel.addElement(WTokenType.speedAdvisory);
 		
-		// IPAWS CAP Time substitution
+		// CAP Time substitution
 		multiTagModel.addElement(WTokenType.capTime);
-		
-		// IPAWS CAP Response Type substitution
-		multiTagModel.addElement(WTokenType.capResponse);
-		
-		// IPAWS CAP Urgency substitution
-		multiTagModel.addElement(WTokenType.capUrgency);
 		
 		//--------------------------------
 		// Tags NOT implemented elsewhere

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2019  Minnesota Department of Transportation
+ * Copyright (C) 2008-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
  * A sign group is an arbitrary collection of dynamic message signs (DMS).
@@ -26,6 +27,13 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class SignGroupImpl extends BaseObjectImpl implements SignGroup {
+
+	/** Create a unique SignGroup record name */
+	static public String createUniqueName(String template) {
+		UniqueNameCreator unc = new UniqueNameCreator(template, 20,
+			(n)->lookupSignGroup(n));
+		return unc.createUniqueName();
+	}
 
 	/** Load all the sign groups */
 	static protected void loadAll() throws TMSException {

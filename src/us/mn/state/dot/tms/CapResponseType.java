@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2020  SRF Consulting Group, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,25 +16,39 @@
 package us.mn.state.dot.tms;
 
 /**
- * Alert States
+ * Common Alerting Protocol (CAP) response type enum.
  *
- * The ordinal values correspond to the records in the iris.alert_state look-up
+ * The ordinal values correspond to the records in the cap.response_type look-up
  * table.
  *
  * @author Douglas Lau
+ * @author Gordon Parikh
  */
-public enum AlertState {
-	PENDING,     // 0  Pending approval by user
-	ACTIVE,      // 1  Scheduled and active
-	CLEARED,     // 2  Expired or cleared by user
-	ACTIVE_REQ,  // 3  User activate request
-	CLEARED_REQ; // 4  User cleared request
+public enum CapResponseType {
+	SHELTER,
+	EVACUATE,
+	PREPARE,
+	EXECUTE,
+	AVOID,
+	MONITOR,
+	ASSESS, // NOTE: not to be used for public applications
+	ALLCLEAR,
+	NONE;
 
 	/** Values array */
-	static private final AlertState[] VALUES = values();
+	static private final CapResponseType[] VALUES = values();
 
-	/** Get a AlertState from an ordinal value */
-	static public AlertState fromOrdinal(int o) {
+	/** Get a CapResponseType from an ordinal value */
+	static public CapResponseType fromOrdinal(int o) {
 		return (o >= 0 && o < VALUES.length) ? VALUES[o] : null;
+	}
+
+	/** Get the CapResponseType from the value provided */
+	static public CapResponseType fromValue(String v) {
+		for (CapResponseType e: VALUES) {
+			if (e.name().equalsIgnoreCase(v))
+				return e;
+		}
+		return NONE;
 	}
 }

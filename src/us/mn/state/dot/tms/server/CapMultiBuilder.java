@@ -15,17 +15,13 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Arrays;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.HashSet;
-import us.mn.state.dot.tms.CapResponse;
-import us.mn.state.dot.tms.CapResponseEnum;
-import us.mn.state.dot.tms.CapResponseHelper;
-import us.mn.state.dot.tms.CapUrgency;
-import us.mn.state.dot.tms.CapUrgencyField;
-import us.mn.state.dot.tms.CapUrgencyFieldHelper;
-import us.mn.state.dot.tms.IpawsDeployerHelper;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import us.mn.state.dot.tms.AlertInfoHelper;
 import us.mn.state.dot.tms.utils.MultiBuilder;
 
 /**
@@ -37,100 +33,93 @@ import us.mn.state.dot.tms.utils.MultiBuilder;
  */
 public class CapMultiBuilder extends MultiBuilder {
 
-	private final IpawsAlertImpl alert;
+	/** Default time format string (hour and AM/PM) for CAP time tags. */
+	static private final DateTimeFormatter DEFAULT_TIME_FMT =
+		DateTimeFormatter.ofPattern("h a");
 
-	/** Create a new CAP MULTI builder */
-	public CapMultiBuilder(IpawsAlertImpl a) {
-		alert = a;
+	/** Regex pattern for extracting time format string */
+	static private final Pattern TMSUB = Pattern.compile("\\{([^}]*)\\}");
+
+	/** Process time format substitution fields,
+	 *  substituting in the time value provided. */
+	static private String replaceTimeFmt(String tmplt, LocalDateTime dt) {
+		// use regex to find match groups in curly braces
+		Matcher m = TMSUB.matcher(tmplt);
+		String str = tmplt;
+		while (m.find()) {
+			String tmfmt = m.group(1);
+			String subst;
+			DateTimeFormatter dtFmt;
+
+			// get the full string for replacement and a
+			// DateTimeFormatter
+			if (tmfmt.trim().isEmpty()) {
+				dtFmt = DEFAULT_TIME_FMT;
+				subst = "{}";
+			} else {
+				dtFmt = DateTimeFormatter.ofPattern(tmfmt);
+				subst = "{" + tmfmt + "}";
+			}
+
+			// format the time string and swap it in
+			String tmstr = dt.format(dtFmt);
+			str = str.replace(subst, tmstr);
+		}
+		return str;
 	}
 
-	/** Add an IPAWS CAP time substitution field.  Text fields can include
-	 *  "{}" to automatically substitute in the appropriate time (alert
-	 *  start or end time), with optional formatting (using Java Date Format
-	 *  notation).
-	 *  @param f_txt Pre-alert text.
-	 *  @param a_txt Alert-active prepend text.
-	 *  @param p_txt Post-alert prepend text.
-	 */
+	/** CAP alert period */
+	static public enum Period {
+		BEFORE, // before alert start time
+		DURING, // between start and end times
+		AFTER;  // after end time
+	}
+
+	/** Period to generate */
+	private final Period period;
+
+	/** Alert start date */
+	private final Date start_date;
+
+	/** Alert end date */
+	private final Date end_date;
+
+	/** Create a new CAP MULTI builder */
+	public CapMultiBuilder(Period p, Date sd, Date ed) {
+		period = p;
+		start_date = sd;
+		end_date = ed;
+	}
+
+	/** Add a CAP time substitution field.
+	 *  Text fields can include "{}" to automatically substitute in the
+	 *  appropriate time (alert start or end time), with optional formatting
+	 *  (using Java Date Format notation).
+	 *  @param b_txt Before alert prepend text.
+	 *  @param d_txt During-alert prepend text.
+	 *  @param a_txt After-alert prepend text. */
 	@Override
-	public void addCapTime(String f_txt, String a_txt, String p_txt) {
-		Date alert_start = alert.getAlertStart();
-		Date alert_end = alert.getExpirationDate();
-		Date now = new Date();
-		String tmplt;
-		Date dt;
-		if (now.before(alert_start)) {
-			// alert hasn't started yet
-			tmplt = f_txt;
-			dt = alert_start;
-		} else if (now.before(alert_end)) {
-			// alert is currently active
+	public void addCapTime(String b_txt, String d_txt, String a_txt) {
+		String tmplt = "";
+		Date dt = new Date();
+		switch (period) {
+		case BEFORE:
+			tmplt = b_txt;
+			dt = start_date;
+			break;
+		case DURING:
+			tmplt = d_txt;
+			dt = end_date;
+			break;
+		case AFTER:
 			tmplt = a_txt;
-			dt = alert_end;
-		} else {
-			// alert has expired
-			tmplt = p_txt;
-			dt = alert_end;
+			dt = end_date;
+			break;
 		}
 
 		// format any time strings in the text and add to the msg
-		String s = IpawsDeployerHelper.replaceTimeFmt(tmplt,
-			dt.toInstant().atZone(ZoneId.systemDefault())
-			.toLocalDateTime());
+		String s = replaceTimeFmt(tmplt, dt.toInstant().atZone(
+			ZoneId.systemDefault()).toLocalDateTime());
 		addSpan(s);
-	}
-
-	/** Add an IPAWS CAP response type substitution field.
-	 *  @param rtypes Optional list of response types to consider.
-	 */
-	@Override
-	public void addCapResponse(String[] rtypes) {
-		// make a HashSet of the allowed response types
-		HashSet<String> rtSet = new HashSet<String>(
-			Arrays.asList(rtypes));
-
-		// check the response types in the alert to see if we should
-		// substitute anything, taking the highest priority one
-		CapResponseEnum maxRT = CapResponseEnum.NONE;
-		CapResponse rtSub = null;
-		for (String rt: alert.getResponseTypes()) {
-			if (rtSet.contains(rt)) {
-				// make sure we have a matching substitution
-				// value too
-				CapResponse crt = CapResponseHelper.lookupFor(
-					alert.getEvent(), rt);
-				if (crt != null) {
-					CapResponseEnum crte =
-						CapResponseEnum.fromValue(rt);
-					if (crte.ordinal() > maxRT.ordinal()) {
-						maxRT = crte;
-						rtSub = crt;
-					}
-				}
-			}
-		}
-
-		// if we had a match add the MULTI, otherwise leave it blank
-		addSpan(rtSub != null ? rtSub.getMulti() : "");
-	}
-
-	/** Add an IPAWS CAP urgency substitution field.
-	 *  @param uvals Optional list of urgency values to consider.
-	 */
-	@Override
-	public void addCapUrgency(String[] uvals) {
-		// check the urgency value in the alert to see if we should
-		// substitute anything
-		String urg = CapUrgency.fromOrdinal(alert.getUrgency()).name();
-		for (String uval: uvals) {
-			if (uval.equalsIgnoreCase(urg)) {
-				CapUrgencyField subst = CapUrgencyFieldHelper
-					.lookupFor(alert.getEvent(), urg);
-				if (subst != null) {
-					addSpan(subst.getMulti());
-					break;
-				}
-			}
-		}
 	}
 }

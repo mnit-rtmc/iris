@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,7 +118,7 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 		if (v.length() > 0) {
 			SignGroup sg = SignGroupHelper.lookup(v);
 			if (null == sg)
-				showHint("quick.message.sign.group.hint");
+				showHint("dms.group.unknown.hint");
 			return sg;
 		} else
 			return null;

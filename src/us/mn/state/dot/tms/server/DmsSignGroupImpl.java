@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,15 +75,15 @@ public class DmsSignGroupImpl extends BaseObjectImpl implements DmsSignGroup {
 	}
 
 	/** Create a new DMS sign group */
-	private DmsSignGroupImpl(String n, DMS d, SignGroup g) {
-		super(n);
-		dms = d;
-		sign_group = g;
+	private DmsSignGroupImpl(String n, String d, String g) {
+		this(n, lookupDMS(d), lookupSignGroup(g));
 	}
 
 	/** Create a new DMS sign group */
-	private DmsSignGroupImpl(String n, String d, String g) {
-		this(n, lookupDMS(d), lookupSignGroup(g));
+	public DmsSignGroupImpl(String n, DMS d, SignGroup g) {
+		super(n);
+		dms = d;
+		sign_group = g;
 	}
 
 	/** DMS name */

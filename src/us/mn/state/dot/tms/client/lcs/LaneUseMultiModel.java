@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.lcs;
 import java.awt.Component;
 import java.util.ArrayList;
 import javax.swing.JComboBox;
-import javax.swing.JTable;
 import javax.swing.DefaultCellEditor;
 import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.LaneUseIndication;

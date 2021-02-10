@@ -68,7 +68,7 @@ public class GpsPanel extends IPanel implements ProxyView<Gps> {
 
 	/** Date/time formatter */
 	private final SimpleDateFormat dt_format =
-			new SimpleDateFormat("yyyy/MM/dd HH:mm");
+		new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
 	/** User session */
 	private final Session session;

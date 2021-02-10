@@ -36,7 +36,8 @@ public class AlertHandler extends DefaultHandler {
 		// "alert" element and sub-elements
 		"alert", "identifier", "sender", "sent", "status", "msgType",
 		"source", "scope", "restriction", "addresses", "code", "note",
-		// IGNORE: "references", "incidents",
+		"references",
+		// IGNORE: "incidents",
 		// "info" element and sub-elements
 		"info", "language", "category", "event", "responseType",
 		"urgency", "severity", "certainty", "audience", "eventCode",
@@ -60,7 +61,15 @@ public class AlertHandler extends DefaultHandler {
 	).collect(Collectors.toCollection(HashSet::new));
 
 	/** Element stack */
-	private ArrayDeque<Object> stack = new ArrayDeque<Object>();
+	private final ArrayDeque<Object> stack = new ArrayDeque<Object>();
+
+	/** Alert processor */
+	private final AlertProcessor processor;
+
+	/** Create an alert handler */
+	public AlertHandler(AlertProcessor p) {
+		processor = p;
+	}
 
 	/** Start an XML element.
 	 *
@@ -79,22 +88,13 @@ public class AlertHandler extends DefaultHandler {
 	public void characters(char[] ch, int start, int length)
 		throws SAXException
 	{
-		addContent(ch, start, length);
-	}
-
-	/** Handle ignorable whitespace in current node */
-	@Override
-	public void ignorableWhitespace(char[] ch, int start, int length)
-		throws SAXException
-	{
-		addContent(ch, start, length);
+		String content = new String(ch, start, length).trim();
+		if (!content.isEmpty())
+			addContent(content);
 	}
 
 	/** Add text content to the leaf node */
-	private void addContent(char[] ch, int start, int length)
-		throws SAXException
-	{
-		String content = new String(ch, start, length);
+	private void addContent(String content) throws SAXException {
 		Object obj = stack.pop();
 		if (obj instanceof JSONObject) {
 			JSONObject jo = (JSONObject) obj;
@@ -120,7 +120,7 @@ public class AlertHandler extends DefaultHandler {
 		Object obj = stack.pop();
 		if (qName.equals("alert")) {
 			if (obj instanceof JSONObject)
-				storeAlert((JSONObject) obj);
+				processAlert((JSONObject) obj);
 		} else if (ELEMENTS.contains(qName)) {
 			Object parent = stack.peek();
 			if (parent instanceof JSONObject) {
@@ -133,8 +133,8 @@ public class AlertHandler extends DefaultHandler {
 		}
 	}
 
-	/** Store alert in database */
-	private void storeAlert(JSONObject alert) {
-		// FIXME
+	/** Process a received alert */
+	private void processAlert(JSONObject alert) {
+		processor.processAlert(alert);
 	}
 }

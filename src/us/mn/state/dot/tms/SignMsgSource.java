@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2020  Minnesota Department of Transportation
+ * Copyright (C) 2015-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ public enum SignMsgSource {
 	tolling,        //  3 DMS action with [tz...] tag
 	gate_arm,       //  4 gate arm system
 	lcs,            //  5 lane-use control signal
-	ipaws,          //  6 Integrated Public Alert and Warning System
+	alert,          //  6 alert system (IPAWS or other)
 	external,       //  7 external system
 	travel_time,    //  8 DMS action with [tt...] tag
 	incident,       //  9 deployed incident

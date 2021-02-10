@@ -1,5 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2020  SRF Consulting Group, Inc.
  * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
@@ -14,26 +15,30 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Iterator;
+
 /**
- * Alert States
+ * Helper class for AlertInfo.
  *
- * The ordinal values correspond to the records in the iris.alert_state look-up
- * table.
- *
+ * @author Gordon Parikh
  * @author Douglas Lau
  */
-public enum AlertState {
-	PENDING,     // 0  Pending approval by user
-	ACTIVE,      // 1  Scheduled and active
-	CLEARED,     // 2  Expired or cleared by user
-	ACTIVE_REQ,  // 3  User activate request
-	CLEARED_REQ; // 4  User cleared request
+public class AlertInfoHelper extends BaseHelper {
 
-	/** Values array */
-	static private final AlertState[] VALUES = values();
+	/** Don't instantiate */
+	private AlertInfoHelper() {
+		assert false;
+	}
 
-	/** Get a AlertState from an ordinal value */
-	static public AlertState fromOrdinal(int o) {
-		return (o >= 0 && o < VALUES.length) ? VALUES[o] : null;
+	/** Lookup the AlertInfo with the specified name */
+	static public AlertInfo lookup(String name) {
+		return (AlertInfo) namespace.lookupObject(AlertInfo.SONAR_TYPE,
+			name);
+	}
+
+	/** Get an AlertInfo object iterator */
+	static public Iterator<AlertInfo> iterator() {
+		return new IteratorWrapper<AlertInfo>(namespace.iterator(
+			AlertInfo.SONAR_TYPE));
 	}
 }

@@ -194,7 +194,8 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 	
 	/** Selection listener for triggering events on selection. */
 	protected IListSelectionAdapter selectionListener =
-			new IListSelectionAdapter() {
+		new IListSelectionAdapter()
+	{
 		@Override
 		public void valueChanged() {
 			selectProxy();

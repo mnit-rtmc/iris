@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -41,9 +42,12 @@ import us.mn.state.dot.tms.MeterActionHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.TimeAction;
+import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.ActionPlanEvent;
 import static us.mn.state.dot.tms.server.ActionPlanSystem.sendEmailAlert;
+import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
  * An action plan is a set of actions which can be deployed together.
@@ -52,6 +56,13 @@ import static us.mn.state.dot.tms.server.ActionPlanSystem.sendEmailAlert;
  * @author Michael Darter
  */
 public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
+
+	/** Create a unique ActionPlan record name */
+	static public String createUniqueName(String template) {
+		UniqueNameCreator unc = new UniqueNameCreator(template, 16,
+			(n)->lookupActionPlan(n));
+		return unc.createUniqueName();
+	}
 
 	/** Load all the action plans */
 	static protected void loadAll() throws TMSException {
@@ -122,7 +133,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Create an action plan */
-	private ActionPlanImpl(String n, String dsc, String gn, boolean sa,
+	public ActionPlanImpl(String n, String dsc, String gn, boolean sa,
 		boolean st, boolean a, PlanPhase dp, PlanPhase p)
 	{
 		this(n);
@@ -249,6 +260,33 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			store.update(this, "active", a);
 			setActive(a);
 		}
+	}
+
+	/** Set active and schedule phase */
+	public void setActiveScheduledNotify(boolean a) throws TMSException {
+		if (a)
+			setPhaseNotify(getScheduledPhase());
+		if (a != active) {
+			store.update(this, "active", a);
+			setActive(a);
+			notifyAttribute("active");
+		}
+	}
+
+	/** Get the currently scheduled phase */
+	private PlanPhase getScheduledPhase() {
+		// Use time from one minute ago to avoid missing time actions
+		long now = TimeSteward.currentTimeMillis() - 60 * 1000;
+		PlanPhase p = default_phase;
+		for (TimeAction ta: TimeActionHelper.getScheduled(this)) {
+			Date dt = TimeActionHelper.getScheduledDate(ta);
+			if (dt != null) {
+				if (dt.getTime() > now)
+					break;
+				p = ta.getPhase();
+			}
+		}
+		return p;
 	}
 
 	/** Get the active status */

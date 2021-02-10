@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.event;
 
 import java.util.Date;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.SQLConnection;
@@ -44,15 +45,17 @@ abstract public class BaseEvent implements Storable {
 
 	/** Create a new base event */
 	protected BaseEvent(EventType et) {
-		this(et, new Date());
+		this(et, TimeSteward.getDateInstance());
 	}
 
 	/** Get the primary key name */
+	@Override
 	public String getKeyName() {
 		return "name";
 	}
 
 	/** Get the primary key */
+	@Override
 	public String getKey() {
 		return null;
 	}

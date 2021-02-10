@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2019  Minnesota Department of Transportation
+ * Copyright (C) 2014-2021  Minnesota Department of Transportation
  * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -53,11 +53,11 @@ public class EventPurgeJob extends Job {
 		BeaconEvent.purgeRecords();
 		CameraSwitchEvent.purgeRecords();
 		CameraVideoEvent.purgeRecords();
+		CapAlert.purgeRecords();
 		ClientEvent.purgeRecords();
 		CommEvent.purgeRecords();
 		DetAutoFailEvent.purgeRecords();
 		GateArmEvent.purgeRecords();
-		IpawsAlertImpl.purgeRecords();  // IPAWS Alerts are stored as events
 		MeterEvent.purgeRecords();
 		PriceMessageEvent.purgeRecords();
 		SignEvent.purgeRecords();

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
  * Action for sending a message to a DMS sign group triggered by an action plan.
@@ -33,6 +34,13 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
+
+	/** Create a unique DmsAction record name */
+	static public String createUniqueName(String template) {
+		UniqueNameCreator unc = new UniqueNameCreator(template, 30,
+			(n)->lookupDmsAction(n));
+		return unc.createUniqueName();
+	}
 
 	/** Load all the DMS actions */
 	static protected void loadAll() throws TMSException {
@@ -100,7 +108,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	}
 
 	/** Create a DMS action */
-	private DmsActionImpl(String n, ActionPlan a, SignGroup sg, PlanPhase p,
+	public DmsActionImpl(String n, ActionPlan a, SignGroup sg, PlanPhase p,
 		QuickMessage qm, boolean be, int mp)
 	{
 		this(n);

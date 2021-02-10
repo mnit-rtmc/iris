@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +22,10 @@ import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignConfig;
-import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.MultiString;
+import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
  * A quick message is a sign message which consists of a MULTI string.
@@ -34,6 +34,13 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Douglas Lau
  */
 public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
+
+	/** Create a unique QuickMessage record name */
+	static public String createUniqueName(String template) {
+		UniqueNameCreator unc = new UniqueNameCreator(template, 20,
+			(n)->lookupQuickMessage(n));
+		return unc.createUniqueName();
+	}
 
 	/** Load all the quick messages */
 	static protected void loadAll() throws TMSException {
@@ -91,9 +98,16 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 	private QuickMessageImpl(String n, String sg, String sc, boolean pp,
 		String m)
 	{
+		this(n, lookupSignGroup(sg), lookupSignConfig(sc), pp, m);
+	}
+
+	/** Create a quick message */
+	public QuickMessageImpl(String n, SignGroup sg, SignConfig sc,
+		boolean pp, String m)
+	{
 		super(n);
-		sign_group = lookupSignGroup(sg);
-		sign_config = SignConfigHelper.lookup(sc);
+		sign_group = sg;
+		sign_config = sc;
 		prefix_page = pp;
 		multi = m;
 	}

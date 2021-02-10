@@ -47,6 +47,7 @@ public enum CapCertainty {
 			if (e.name().equalsIgnoreCase(v))
 				return e;
 		}
-		return UNKNOWN;
+		// NOTE: "Very Likely" is a deprecated value from CAP 1.0
+		return v.equalsIgnoreCase("Very Likely") ? LIKELY : UNKNOWN;
 	}
 }

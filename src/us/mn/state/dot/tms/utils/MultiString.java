@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2020  Minnesota Department of Transportation
+ * Copyright (C) 2006-2021  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  * Copyright (C) 2019-2020  SRF Consulting Group
  *
@@ -165,10 +165,6 @@ public class MultiString {
 			parseLocator(tag.substring(3), cb);
 		else if (ltag.startsWith("captime"))
 			parseCapTime(tag.substring(7), cb);
-		else if (ltag.startsWith("capresponse"))
-			parseCapResponse(tag.substring(11), cb);
-		else if (ltag.startsWith("capurgency"))
-			parseCapUrgency(tag.substring(10), cb);
 		else
 			cb.unsupportedTag(tag);
 	}
@@ -383,45 +379,16 @@ public class MultiString {
 		    code.equals("mi"))
 			cb.addLocator(code);
 	}
-	
-	/** Parse IPAWS CAP time substitution field tag [captimef_txt,a_txt,p_txt].
+
+	/** Parse CAP time substitution field tag [captimeb_txt,d_txt,a_txt].
 	 *  @param tag CAP time substitution field tag.
-	 *  @param cb Callback to set tag.
-	 */
+	 *  @param cb Callback to set tag.  */
 	static private void parseCapTime(String tag, Multi cb) {
 		String[] args = tag.split(",", 3);
-		String f_txt = (args.length > 0) ? args[0] : "STARTING AT";
-		String a_txt = (args.length > 1) ? args[1] : "IN EFFECT UNTIL";
-		String p_txt = (args.length > 2) ? args[2] : "ALL CLEAR";
-		cb.addCapTime(f_txt, a_txt, p_txt);
-	}
-
-	/** Parse IPAWS CAP response type substitution field tag
-	 *  [capresponse{rt1,rt1,...,rtn}].
-	 *  @param tag CAP response type substitution field tag.
-	 *  @param cb Callback to set tag.
-	 */
-	static private void parseCapResponse(String tag, Multi cb) {
-		String[] rtypes = {};
-		// if we have any arguments, split on commas to get applicable
-		// response types
-		if (tag.length() > 0)
-			rtypes = tag.split(",");
-		cb.addCapResponse(rtypes);
-	}
-
-	/** Parse IPAWS CAP urgency substitution field tag
-	 *  [capurgency{u1,u1,...,un}].
-	 *  @param tag CAP response type substitution field tag.
-	 *  @param cb Callback to set tag.
-	 */
-	static private void parseCapUrgency(String tag, Multi cb) {
-		String[] uvals = {};
-		// if we have any arguments, split on commas to get applicable
-		// urgency values
-		if (tag.length() > 0)
-			uvals = tag.split(",");
-		cb.addCapUrgency(uvals);
+		String b_txt = (args.length > 0) ? args[0] : "STARTING AT";
+		String d_txt = (args.length > 1) ? args[1] : "IN EFFECT UNTIL";
+		String a_txt = (args.length > 2) ? args[2] : "ALL CLEAR";
+		cb.addCapTime(b_txt, d_txt, a_txt);
 	}
 
 	/** Test if a parsed speed is valid */

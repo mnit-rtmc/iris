@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,20 +15,26 @@
  */
 package us.mn.state.dot.tms.client.alert;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.util.Set;
+import java.text.SimpleDateFormat;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import org.json.JSONObject;
+import javax.swing.JTextArea;
+import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.AlertInfo;
+import us.mn.state.dot.tms.AlertInfoHelper;
 import us.mn.state.dot.tms.AlertState;
-import us.mn.state.dot.tms.IpawsAlert;
-import us.mn.state.dot.tms.IpawsAlertHelper;
-import us.mn.state.dot.tms.IpawsDeployer;
+import us.mn.state.dot.tms.CapCertainty;
+import us.mn.state.dot.tms.CapEvent;
+import us.mn.state.dot.tms.CapResponseType;
+import us.mn.state.dot.tms.CapSeverity;
+import us.mn.state.dot.tms.CapUrgency;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.proxy.ProxyView;
+import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.IPanel;
@@ -38,14 +45,14 @@ import us.mn.state.dot.tms.utils.I18N;
  * An alert dispatcher is a GUI panel for dispatching and reviewing automated
  * alerts for deployment on DMS.
  *
- * NOTE this would need changing to let the alert tab handle other types of
- * alerts (we would need a new Alert parent SONAR object - not sure what that
- * would look like yet).
- *
  * @author Gordon Parikh
+ * @author Douglas Lau
  */
-@SuppressWarnings("serial")
 public class AlertDispatcher extends IPanel {
+
+	/** Date/time formatter */
+	private final SimpleDateFormat dt_format =
+		new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
 	/** Client session */
 	private final Session session;
@@ -53,65 +60,113 @@ public class AlertDispatcher extends IPanel {
 	/** Alert manager */
 	private final AlertManager manager;
 
+	/** Proxy watcher */
+	private final ProxyWatcher<AlertInfo> watcher;
+
 	/** Alert selection model */
-	private final ProxySelectionModel<IpawsDeployer> alertSelMdl;
+	private final ProxySelectionModel<AlertInfo> sel_mdl;
 
 	/** Alert selection listener */
 	private final ProxySelectionListener alertSelLstnr =
-			new ProxySelectionListener() {
+		new ProxySelectionListener()
+	{
 		public void selectionChanged() {
 			selectAlert();
 		}
 	};
 
-	/** Currently selected alert */
-	private IpawsAlert selectedAlert;
-
-	/** Labels */
-	/** Name label */
-	private final JLabel idLbl = createValueLabel();
-
-	/** Event label */
-	private final JLabel eventLbl = createValueLabel();
-
-	/** Combined urgency/severity/certainty label */
-	private final JLabel urgSevCertLbl = createValueLabel();
-
 	/** Headline label */
-	private final JLabel headlineLbl = createValueLabel();
+	private final JLabel headline_lbl = createValueLabel();
 
-	/** Description label */
-	private final JLabel descriptionLbl = createValueLabel();
+	/** Response type label */
+	private final JLabel resp_lbl = createValueLabel();
 
-	/** Instruction label */
-	private final JLabel instructionLbl = createValueLabel();
+	/** Urgency label */
+	private final JLabel urgency_lbl = createValueLabel();
 
-	/** Status label */
-	private final JLabel statusLbl = createValueLabel();
+	/** Severity label */
+	private final JLabel severity_lbl = createValueLabel();
 
-	/** Onset label */
-	private final JLabel onsetLbl = createValueLabel();
+	/** Certainty label */
+	private final JLabel certainty_lbl = createValueLabel();
 
-	/** Expires label */
-	private final JLabel expiresLbl = createValueLabel();
+	/** Start date label */
+	private final JLabel start_date_lbl = createValueLabel();
 
-	/** Treat the area description label label a little differently */
-	private final ILabel areaDescKeyLbl;
+	/** End date label */
+	private final JLabel end_date_lbl = createValueLabel();
 
 	/** Area description label */
-	private final JLabel areaDescLbl = createValueLabel();
+	private final JLabel area_lbl = createValueLabel();
 
-	/** Available width for area description label */
-	private Integer longLblWidth;
+	/** Description text */
+	private final JTextArea description_txt = new JTextArea(2, 24);
 
-	/** Edit deployment button */
-	private JButton editDeployBtn;
+	/** Instruction text */
+	private final JTextArea instruction_txt = new JTextArea(2, 24);
 
-	/** Discard edits button */
-	private JButton discardBtn;
+	/** Action to deploy alert */
+	private final IAction deploy_act = new IAction("alert.deploy") {
+		protected void doActionPerformed(ActionEvent e) {
+			AlertInfo ai = sel_mdl.getSingleSelection();
+			if (ai != null) {
+				ai.setAlertStateReq(AlertState.ACTIVE_REQ
+					.ordinal());
+			}
+		}
+	};
 
-	/** Cancel deployment button */
-	private JButton cancelBtn;
+	/** Action to clear an alert */
+	private final IAction clear_act = new IAction("alert.clear") {
+		protected void doActionPerformed(ActionEvent e) {
+			AlertInfo ai = sel_mdl.getSingleSelection();
+			if (ai != null) {
+				ai.setAlertStateReq(clear_btn.isSelected()
+					? AlertState.CLEARED_REQ.ordinal()
+					: AlertState.ACTIVE_REQ.ordinal());
+			}
+		}
+	};
+
+	/** Button to clear an alert */
+	private final JCheckBox clear_btn = new JCheckBox(clear_act);
+
+	/** Proxy view */
+	private final ProxyView<AlertInfo> view = new ProxyView<AlertInfo>() {
+		private AlertInfo alert_info;
+		@Override public void enumerationComplete() { }
+		@Override public void update(AlertInfo ai, String a) {
+			if (a == null) {
+				alert_info = ai;
+				setSelectedAlert(ai);
+			}
+			if (a == null || a.equals("alertState")) {
+				AlertState st = AlertState.fromOrdinal(
+					ai.getAlertState());
+				deploy_act.setEnabled(st == AlertState.PENDING
+					&& isWritePermitted());
+				// temporarily disable action
+				clear_act.setEnabled(false);
+				clear_btn.setSelected(st == AlertState.CLEARED);
+				clear_act.setEnabled(isWritePermitted());
+			}
+		}
+		@Override public void clear() {
+			alert_info = null;
+			headline_lbl.setText("");
+			resp_lbl.setText("");
+			urgency_lbl.setText("");
+			severity_lbl.setText("");
+			certainty_lbl.setText("");
+			start_date_lbl.setText("");
+			end_date_lbl.setText("");
+			area_lbl.setText("");
+			description_txt.setText("");
+			instruction_txt.setText("");
+			deploy_act.setEnabled(false);
+			clear_act.setEnabled(false);
+		}
+	};
 
 	/** Alert DMS dispatcher for deploying/reviewing DMS used for this alert*/
 	private final AlertDmsDispatcher dmsDispatcher;
@@ -121,210 +176,92 @@ public class AlertDispatcher extends IPanel {
 		super();
 		session = s;
 		manager = m;
-		alertSelMdl = manager.getSelectionModel();
-		alertSelMdl.setAllowMultiple(false);
-		alertSelMdl.addProxySelectionListener(alertSelLstnr);
-		areaDescKeyLbl = new ILabel("alert.area_desc");
-		editDeployBtn = new JButton(editDeploy);
-		discardBtn = new JButton(discardEdits);
-		cancelBtn = new JButton(cancelAlert);
-
-		// make all buttons the same size (it looks nicer...)
-		editDeployBtn.setPreferredSize(discardBtn.getPreferredSize());
-		cancelBtn.setPreferredSize(discardBtn.getPreferredSize());
-
-		// buttons are disabled by default
-		editDeployBtn.setEnabled(false);
-		discardBtn.setEnabled(false);
-		cancelBtn.setEnabled(false);
-
-		dmsDispatcher = new AlertDmsDispatcher(session, manager);
+		sel_mdl = manager.getSelectionModel();
+		sel_mdl.setAllowMultiple(false);
+		sel_mdl.addProxySelectionListener(alertSelLstnr);
+		TypeCache<AlertInfo> cache = s.getSonarState().getAlertInfos();
+		watcher = new ProxyWatcher<AlertInfo>(cache, view, false);
+		dmsDispatcher = new AlertDmsDispatcher(s, m);
 	}
 
 	/** Initialize the widgets on the panel */
 	@Override
 	public void initialize() {
 		super.initialize();
-		setTitle(I18N.get("alert.selected"));
-		add(editDeployBtn, Stretch.TALL);
-		add("alert.id");
-		add(idLbl, Stretch.LAST);
-		add(discardBtn, Stretch.TALL);
-		add("alert.event");
-		add(eventLbl, Stretch.LAST);
-		add(cancelBtn, Stretch.TALL);
-		add(new JLabel(I18N.get("alert.urgency") + "/" +
-				I18N.get("alert.severity") + "/" +
-				I18N.get("alert.certainty")), Stretch.NONE);
-		add(urgSevCertLbl, Stretch.LAST);
-		add("alert.status");
-		add(statusLbl, Stretch.LAST);
-		add("alert.onset");
-		add(onsetLbl, Stretch.LAST);
-		add("alert.expires");
-		add(expiresLbl, Stretch.LAST);
-		add(areaDescKeyLbl, Stretch.NONE);
-		add(areaDescLbl, Stretch.LAST);
-		add("alert.headline");
-		add(headlineLbl, Stretch.LAST);
-		add("alert.description");
-		add(descriptionLbl, Stretch.LAST);
-		add("alert.instruction");
-		add(instructionLbl, Stretch.LAST);
-
 		dmsDispatcher.initialize();
-		add(dmsDispatcher, Stretch.DOUBLE);
-
-		alertSelMdl.addProxySelectionListener(alertSelLstnr);
+		setTitle(I18N.get("alert.selected"));
+		add(headline_lbl, Stretch.CENTER);
+		add("alert.response");
+		add(resp_lbl);
+		add("alert.urgency");
+		add(urgency_lbl, Stretch.LAST);
+		add("alert.severity");
+		add(severity_lbl);
+		add("alert.certainty");
+		add(certainty_lbl, Stretch.LAST);
+		add("alert.start.date");
+		add(start_date_lbl);
+		add("alert.end.date");
+		add(end_date_lbl, Stretch.LAST);
+		add("alert.area_desc");
+		add(area_lbl, Stretch.LAST);
+		add("alert.description");
+		add(description_txt, Stretch.TEXT);
+		add("alert.instruction");
+		add(instruction_txt, Stretch.TEXT);
+		add(new JLabel());
+		add(new JButton(deploy_act));
+		add(clear_btn, Stretch.LAST);
+		add(dmsDispatcher, Stretch.FULL);
+		description_txt.setEnabled(false);
+		instruction_txt.setEnabled(false);
+		view.clear();
+		watcher.initialize();
 	}
 
-	/** Action to edit or deploy an alert. */
-	private IAction editDeploy = new IAction("alert.deploy.edit") {
-		@Override
-		protected void doActionPerformed(ActionEvent ev) throws Exception {
-			dmsDispatcher.processEditDeploy();
-			setEditDeployBtnText();
-
-			// enable the discard button if in edit mode
-			discardBtn.setEnabled(manager.getEditing());
-		}
-	};
-
-	private void setEditDeployBtnText() {
-		if (manager.getEditing())
-			editDeployBtn.setText(I18N.get("alert.deploy.deploy"));
-		else
-			editDeployBtn.setText(I18N.get("alert.deploy.edit"));
-	}
-
-	/** Action to cancel editing an alert deployment. */
-	private IAction discardEdits = new IAction("alert.deploy.discard_edit") {
-		@Override
-		protected void doActionPerformed(ActionEvent ev) throws Exception {
-			dmsDispatcher.cancelEdit();
-			setEditDeployBtnText();
-			discardBtn.setEnabled(manager.getEditing());
-		}
-	};
-
-	/** Action to cancel an alert deployment. */
-	private IAction cancelAlert = new IAction("alert.deploy.cancel_alert") {
-		@Override
-		protected void doActionPerformed(ActionEvent ev) throws Exception {
-			dmsDispatcher.cancelAlert();
-		}
-	};
-
-	/** Set the selected alert in the list (for calling from other code). */
-	public void selectAlert(IpawsDeployer iad) {
-		alertSelMdl.setSelected(iad);
+	/** Dispose of the widgets */
+	@Override
+	public void dispose() {
+		view.clear();
+		watcher.dispose();
+		super.dispose();
 	}
 
 	/** Update the display to reflect the alert selected. */
 	private void selectAlert() {
-		IpawsDeployer iad = alertSelMdl.getSingleSelection();
-		if (iad != null) {
-			IpawsAlert ia = IpawsAlertHelper.lookupByIdentifier(
-				iad.getAlertId());
-			if (ia != null) {
-				setSelectedAlert(iad, ia);
-				return;
-			}
+		AlertInfo ai = sel_mdl.getSingleSelection();
+		if (ai != null)
+			watcher.setProxy(ai);
+		else {
+			watcher.setProxy(null);
+			dmsDispatcher.clearSelectedAlert();
 		}
-		clearSelectedAlert();
 	}
 
 	/** Set the selected alert */
-	private void setSelectedAlert(IpawsDeployer iad, IpawsAlert ia) {
-		selectedAlert = ia;
-		manager.setSelectedAlert(iad);
-
-		// fill out the value labels
-		// FIXME this way of wrapping is kind of hacky
-		idLbl.setText("<html><div style=\"width:200px;\">" +
-				selectedAlert.getIdentifier() + "</div></html>");
-		idLbl.setText("<html><div style=\"width:200px;\">" +
-				selectedAlert.getIdentifier() + "</div></html>");
-		eventLbl.setText(selectedAlert.getEvent());
-		headlineLbl.setText("<html><div style=\"width:200px;\">" +
-				selectedAlert.getHeadline() + "</div></html>");
-		urgSevCertLbl.setText(selectedAlert.getUrgency() + "/" +
-			selectedAlert.getSeverity() + "/" + selectedAlert.getCertainty());
-		descriptionLbl.setText("<html><div style=\"width:200px;\">" +
-			selectedAlert.getAlertDescription() + "</div></html>");
-		instructionLbl.setText("<html><div style=\"width:200px;\">" +
-			selectedAlert.getInstruction() + "</div></html>");
-
-		AlertState state = AlertState.fromOrdinal(iad.getAlertState());
-		statusLbl.setText(getState(state));
-
-		onsetLbl.setText(iad.getAlertStart().toString());
-		expiresLbl.setText(iad.getAlertEnd().toString());
-
-		// get a JSON object from the area string (which is in JSON syntax)
-		String area = selectedAlert.getArea();
-		JSONObject jo = new JSONObject(area);
-		String areaDesc = jo.has("areaDesc") ? jo.getString("areaDesc") : "";
-
-		// make long labels wrap
-		areaDescLbl.setText("<html><div style=\"width:200px;\">" +
-				areaDesc + "</div></html>");
-
-		// set the alert in the DMS dispatcher so sign list updates
-		dmsDispatcher.setSelectedAlert(iad, selectedAlert);
-
-		// set the button text and disable buttons if alert is in past
-		setEditDeployBtnText();
-		boolean npast = state != AlertState.EXPIRED;
-		editDeployBtn.setEnabled(npast);
-		cancelBtn.setEnabled(npast);
+	private void setSelectedAlert(AlertInfo ai) {
+		headline_lbl.setText(ai.getHeadline());
+		resp_lbl.setText(CapResponseType.fromOrdinal(
+			ai.getResponseType()).toString());
+		urgency_lbl.setText(CapUrgency.fromOrdinal(ai.getUrgency())
+			.toString());
+		severity_lbl.setText(CapSeverity.fromOrdinal(ai.getSeverity())
+			.toString());
+		certainty_lbl.setText(CapCertainty.fromOrdinal(
+			ai.getCertainty()).toString());
+		start_date_lbl.setText(dt_format.format(ai.getStartDate()));
+		end_date_lbl.setText(dt_format.format(ai.getEndDate()));
+		area_lbl.setText(ai.getAreaDesc());
+		description_txt.setText(ai.getDescription());
+		instruction_txt.setText(ai.getInstruction());
+		deploy_act.setEnabled(isWritePermitted());
+		clear_act.setEnabled(isWritePermitted());
+		dmsDispatcher.setSelectedAlert(ai);
 	}
 
-	/** Get the alert state */
-	static private String getState(AlertState st) {
-		switch (st) {
-			case PENDING:
-				return I18N.get("alert.status.pending");
-			case DEPLOYED:
-				return I18N.get("alert.status.deployed");
-			case INACTIVE:
-				return I18N.get("alert.status.scheduled");
-			default:
-				return I18N.get("alert.status.not_deployed");
-		}
-	}
-
-	/** Clear the selected alert. */
-	private void clearSelectedAlert() {
-		// null the selected alert
-		selectedAlert = null;
-		manager.setSelectedAlert(null);
-
-		// make sure editing is off and tell the DMS dispatcher
-		manager.setEditing(false);
-		dmsDispatcher.clearSelectedAlert();
-
-		// disable the buttons
-		editDeployBtn.setEnabled(false);
-		discardBtn.setEnabled(false);
-		cancelBtn.setEnabled(false);
-
-		// clear the value labels
-		idLbl.setText("");
-		eventLbl.setText("");
-		urgSevCertLbl.setText("");
-		headlineLbl.setText("");
-		descriptionLbl.setText("");
-		instructionLbl.setText("");
-		statusLbl.setText("");
-		onsetLbl.setText("");
-		expiresLbl.setText("");
-		areaDescLbl.setText("");
-	}
-
-	/** Get the selected alert */
-	public IpawsAlert getSelectedAlert() {
-		return selectedAlert;
+	/** Check if the user is permitted to write to alert infos */
+	private boolean isWritePermitted() {
+		return session.isWritePermitted(AlertInfo.SONAR_TYPE);
 	}
 
 	/** Get the AlertDmsDispatcher */

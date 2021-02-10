@@ -132,6 +132,9 @@ COPY iris.system_attribute (name, value) FROM stdin;
 action_plan_alert_list	
 action_plan_event_purge_days	90
 alarm_event_purge_days	0
+alert_clear_secs	300
+alert_sign_thresh_auto_meters	1000
+alert_sign_thresh_opt_meters	4000
 beacon_event_purge_days	0
 camera_autoplay	true
 camera_blank_url	
@@ -147,11 +150,13 @@ camera_stream_controls_enable	false
 camera_switch_event_purge_days	30
 camera_video_event_purge_days	14
 camera_wiper_precip_mm_hr	8
+cap_alert_purge_days	7
+cap_xml_save_enable	true
 client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.19.0
+database_version	5.20.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_enable	true
@@ -198,15 +203,7 @@ gate_arm_event_purge_days	0
 help_trouble_ticket_enable	false
 help_trouble_ticket_url	
 incident_clear_advice_multi	JUST CLEARED
-incident_clear_secs	600
-ipaws_deploy_auto_mode	false
-ipaws_deploy_auto_timeout_secs	0
-ipaws_priority_weight_urgency	1.0
-ipaws_priority_weight_severity	1.0
-ipaws_priority_weight_certainty	1.0
-ipaws_sign_thresh_auto_meters	1000
-ipaws_sign_thresh_opt_meters	4000
-ipaws_xml_save_enable	true
+incident_clear_secs	300
 map_extent_name_initial	Home
 map_icon_size_scale_max	30
 map_segment_max_meters	2000
@@ -342,6 +339,9 @@ CREATE TABLE iris.capability (
 );
 
 COPY iris.capability (name, enabled) FROM stdin;
+alert_admin	t
+alert_deploy	t
+alert_tab	t
 base	t
 base_admin	t
 base_policy	t
@@ -365,9 +365,6 @@ gate_arm_tab	t
 incident_admin	t
 incident_control	t
 incident_tab	t
-ipaws_admin	t
-ipaws_deploy	t
-ipaws_tab	t
 lcs_admin	t
 lcs_control	t
 lcs_tab	t
@@ -394,6 +391,8 @@ CREATE TABLE iris.sonar_type (
 COPY iris.sonar_type (name) FROM stdin;
 action_plan
 alarm
+alert_config
+alert_info
 beacon
 beacon_action
 cabinet
@@ -403,8 +402,6 @@ camera_action
 camera_preset
 camera_template
 cam_vid_src_ord
-cap_response
-cap_urgency_fld
 capability
 catalog
 comm_config
@@ -433,9 +430,6 @@ inc_descriptor
 incident
 incident_detail
 inc_locator
-ipaws_alert
-ipaws_config
-ipaws_deployer
 lane_action
 lane_marking
 lane_use_multi
@@ -446,7 +440,6 @@ map_extent
 meter_action
 modem
 monitor_style
-notification
 parking_area
 plan_phase
 play_list
@@ -499,7 +492,6 @@ PRV_000B	base	road_affix		f
 PRV_0009	base	geo_loc		f
 PRV_0010	base	cabinet		f
 PRV_0011	base	controller		f
-PRV_001C	base	notification		f
 PRV_0012	base_admin	user		t
 PRV_0013	base_admin	role		t
 PRV_001A	base_admin	domain		t
@@ -606,18 +598,10 @@ PRV_0093	incident_tab	incident_detail		f
 PRV_0094	incident_tab	inc_descriptor		f
 PRV_0095	incident_tab	inc_locator		f
 PRV_0096	incident_tab	inc_advice		f
-PRV_009A	ipaws_admin	ipaws_alert		t
-PRV_009B	ipaws_admin	ipaws_deployer		t
-PRV_009C	ipaws_admin	ipaws_config		t
-PRV_009D	ipaws_admin	cap_response		t
-PRV_009E	ipaws_admin	cap_urgency_fld		t
-PRV_009F	ipaws_deploy	ipaws_deployer		t
-PRV_009L	ipaws_deploy	notification		t
-PRV_009G	ipaws_tab	ipaws_alert		f
-PRV_009H	ipaws_tab	ipaws_deployer		f
-PRV_009I	ipaws_tab	ipaws_config		f
-PRV_009J	ipaws_tab	cap_response		f
-PRV_009K	ipaws_tab	cap_urgency_fld		f
+PRV_009A	alert_admin	alert_config		t
+PRV_009B	alert_deploy	alert_info		t
+PRV_009C	alert_tab	alert_config		f
+PRV_009D	alert_tab	alert_info		f
 PRV_0097	lcs_admin	lane_use_multi		t
 PRV_0098	lcs_admin	lcs		t
 PRV_0099	lcs_admin	lcs_array		t
@@ -690,6 +674,8 @@ CREATE TABLE iris.role_capability (
 ALTER TABLE iris.role_capability ADD PRIMARY KEY (role, capability);
 
 COPY iris.role_capability (role, capability) FROM stdin;
+administrator	alert_admin
+administrator	alert_tab
 administrator	base
 administrator	base_admin
 administrator	base_policy
@@ -713,8 +699,6 @@ administrator	gate_arm_tab
 administrator	incident_admin
 administrator	incident_control
 administrator	incident_tab
-administrator	ipaws_admin
-administrator	ipaws_tab
 administrator	lcs_admin
 administrator	lcs_control
 administrator	lcs_tab
@@ -732,6 +716,8 @@ administrator	toll_tab
 administrator	parking_admin
 administrator	parking_tab
 administrator	report_admin
+operator	alert_deploy
+operator	alert_tab
 operator	base
 operator	beacon_control
 operator	beacon_tab
@@ -742,8 +728,6 @@ operator	dms_tab
 operator	gate_arm_tab
 operator	incident_control
 operator	incident_tab
-operator	ipaws_deploy
-operator	ipaws_tab
 operator	lcs_control
 operator	lcs_tab
 operator	meter_control
@@ -1180,6 +1164,9 @@ CREATE TABLE iris.plan_phase (
 COPY iris.plan_phase (name, hold_time, next_phase) FROM stdin;
 deployed	0	\N
 undeployed	0	\N
+alert_before	0	\N
+alert_during	0	\N
+alert_after	0	\N
 \.
 
 CREATE TABLE iris.action_plan (
@@ -2547,7 +2534,7 @@ COPY iris.sign_msg_source (bit, source) FROM stdin;
 3	tolling
 4	gate arm
 5	lcs
-6	ipaws
+6	alert
 7	external
 8	travel time
 9	incident
@@ -2869,6 +2856,7 @@ GRANT SELECT ON dms_sign_group_view TO PUBLIC;
 
 CREATE TABLE iris.quick_message (
 	name VARCHAR(20) PRIMARY KEY,
+	-- FIXME: drop sign_group?
 	sign_group VARCHAR(20) REFERENCES iris.sign_group,
 	sign_config VARCHAR(12) REFERENCES iris.sign_config,
 	prefix_page BOOLEAN NOT NULL,
@@ -3557,7 +3545,7 @@ iadv_00106	13	1	1	\N	\N	IN RIGHT SHOULDER
 \.
 
 --
--- IPAWS Alerts
+-- Alerts
 --
 CREATE TABLE cap.status (
 	id INTEGER PRIMARY KEY,
@@ -3599,6 +3587,126 @@ COPY cap.scope (id, description) FROM stdin;
 3	private
 \.
 
+CREATE TABLE cap.category (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(10) NOT NULL
+);
+
+COPY cap.category (id, description) FROM stdin;
+0	geo
+1	met
+2	safety
+3	security
+4	rescue
+5	fire
+6	health
+7	env
+8	transport
+9	infra
+10	CBRNE
+11	other
+\.
+
+CREATE TABLE cap.event (
+	code VARCHAR(3) PRIMARY KEY,
+	description VARCHAR(32) NOT NULL
+);
+
+COPY cap.event (code, description) FROM stdin;
+ADR	Administrative Message
+AVA	Avalanche Watch
+AVW	Avalanche Warning
+BLU	Blue Alert
+BZW	Blizzard Warning
+BWY	Brisk Wind Advisory
+CAE	Child Abduction Emergency
+CDW	Civil Danger Warning
+CEM	Civil Emergency Message
+CFA	Coastal Flood Watch
+CFW	Coastal Flood Warning
+DMO	Practice/Demo Warning
+DSW	Dust Storm Warning
+EAN	Emergency Action Notification
+EAT	Emergency Action Termination
+EQW	Earthquake Warning
+EVI	Evacuation Immediate
+EWW	Extreme Wind Warning
+FFA	Flash Flood Watch
+FFS	Flash Flood Statement
+FFW	Flash Flood Warning
+FGY	Dense Fog Advisory
+FLA	Flood Watch
+FLS	Flood Statement
+FLW	Flood Warning
+FLY	Flood Advisory
+FRW	Fire Warning
+FSW	Flash Freeze Warning
+FZW	Freeze Warning
+GLA	Gale Watch
+GLW	Gale Warning
+HLS	Hurricane Statement
+HMW	Hazardous Materials Warning
+HUA	Hurricane Watch
+HUW	Hurricane Warning
+HWA	High Wind Watch
+HWW	High Wind Warning
+LAE	Local Area Emergency
+LEW	Law Enforcement Warning
+MWS	Marine Weather Statement
+NAT	National Audible Test
+NIC	National Information Center
+NMN	Network Message Notification
+NPT	National Periodic Test
+NUW	Nuclear Power Plant Warning
+NST	National Silent Test
+RHW	Radiological Hazard Warning
+RMT	Required Monthly Test
+RPS	Rip Current Statement
+RWT	Required Weekly Test
+SCY	Small Craft Advisory
+SMW	Special Marine Warning
+SPS	Special Weather Statement
+SPW	Shelter in Place Warning
+SQW	Snowsquall Warning
+SSA	Storm Surge Watch
+SSW	Storm Surge Warning
+SUW	High Surf Warning
+SUY	High Surf Advisory
+SVA	Severe Thunderstorm Watch
+SVR	Severe Thunderstorm Warning
+SVS	Severe Weather Statement
+TOA	Tornado Watch
+TOE	911 Telephone Outage Emergency
+TOR	Tornado Warning
+TRA	Tropical Storm Watch
+TRW	Tropical Storm Warning
+TSA	Tsunami Watch
+TSW	Tsunami Warning
+VOW	Volcano Warning
+WCY	Wind Chill Advisory
+WIY	Wind Advisory
+WSA	Winter Storm Watch
+WSW	Winter Storm Warning
+WWY	Winter Weather Advisory
+\.
+
+CREATE TABLE cap.response_type (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(10) NOT NULL
+);
+
+COPY cap.response_type (id, description) FROM stdin;
+0	shelter
+1	evacuate
+2	prepare
+3	execute
+4	avoid
+5	monitor
+6	assess
+7	allclear
+8	none
+\.
+
 CREATE TABLE cap.urgency (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(10) NOT NULL
@@ -3638,88 +3746,69 @@ COPY cap.certainty(id, description) FROM stdin;
 4	observed
 \.
 
-CREATE TABLE iris.cap_urgency_fld (
-	name VARCHAR(24) PRIMARY KEY,
-	event text,
-	urgency INTEGER NOT NULL REFERENCES cap.urgency,
-	multi VARCHAR(64)
-);
-
--- CAP response types table
-CREATE TABLE iris.cap_response (
-	name VARCHAR(24) PRIMARY KEY,
-	event text,
-	response_type text,
-	multi VARCHAR(64)
-);
-
--- IPAWS Alert Config table
-CREATE TABLE iris.ipaws_config (
-	name VARCHAR(24) PRIMARY KEY,
-	event text,
-	sign_group VARCHAR(20) REFERENCES iris.sign_group(name),
+CREATE TABLE iris.alert_config (
+	name VARCHAR(20) PRIMARY KEY,
+	event VARCHAR(3) REFERENCES cap.event,
+	response_type INTEGER REFERENCES cap.response_type,
+	urgency INTEGER REFERENCES cap.urgency,
+	sign_group VARCHAR(20) REFERENCES iris.sign_group,
 	quick_message VARCHAR(20) REFERENCES iris.quick_message(name),
-	pre_alert_time INTEGER DEFAULT 6,
-	post_alert_time INTEGER DEFAULT 0
+	pre_alert_hours INTEGER NOT NULL,
+	post_alert_hours INTEGER NOT NULL,
+	auto_deploy BOOLEAN NOT NULL
 );
 
--- IPAWS Alert Event table
-CREATE TABLE event.ipaws_alert (
-	name text PRIMARY KEY,
-	identifier text UNIQUE NOT NULL,
-	sender text,
-	sent_date TIMESTAMP WITH time zone,
-	status INTEGER NOT NULL REFERENCES cap.status,
-	msg_type INTEGER NOT NULL REFERENCES cap.msg_type,
-	scope INTEGER NOT NULL REFERENCES cap.scope,
-	codes text[],
-	note text,
-	alert_references text[],
-	incidents text[],
-	categories text[],
-	event text,
-	response_types text[],
+CREATE VIEW alert_config_view AS
+	SELECT c.name, c.event, ev.description AS event_description,
+	       rt.description AS response_type, urg.description AS urgency,
+	       sign_group, quick_message, pre_alert_hours, post_alert_hours,
+	       auto_deploy
+	FROM iris.alert_config c
+	JOIN cap.event ev ON c.event = ev.code
+	JOIN cap.response_type rt ON c.response_type = rt.id
+	JOIN cap.urgency urg ON c.urgency = urg.id;
+GRANT SELECT ON alert_config_view TO PUBLIC;
+
+CREATE TABLE cap.alert (
+	identifier VARCHAR(128) PRIMARY KEY,
+	alert JSONB NOT NULL,
+	receive_date TIMESTAMP WITH time zone NOT NULL
+);
+
+CREATE TABLE iris.alert_state (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(12) NOT NULL
+);
+
+COPY iris.alert_state(id, description) FROM stdin;
+0	pending
+1	active
+2	cleared
+3	active_req
+4	cleared_req
+\.
+
+CREATE TABLE cap.alert_info (
+	name VARCHAR(20) PRIMARY KEY,
+	alert VARCHAR(128) NOT NULL REFERENCES cap.alert(identifier),
+	replaces VARCHAR(24) REFERENCES cap.alert_info,
+	start_date TIMESTAMP WITH time zone,
+	end_date TIMESTAMP WITH time zone,
+	event VARCHAR(3) NOT NULL REFERENCES cap.event,
+	response_type INTEGER NOT NULL REFERENCES cap.response_type,
 	urgency INTEGER NOT NULL REFERENCES cap.urgency,
 	severity INTEGER NOT NULL REFERENCES cap.severity,
 	certainty INTEGER NOT NULL REFERENCES cap.certainty,
-	audience text,
-	effective_date TIMESTAMP WITH time zone,
-	onset_date TIMESTAMP WITH time zone,
-	expiration_date TIMESTAMP WITH time zone,
-	sender_name text,
-	headline text,
-	alert_description text,
-	instruction text,
-	parameters jsonb,
-	area jsonb,
-	geo_poly geography(multipolygon),
-	lat double precision,
-	lon double precision,
-	purgeable BOOLEAN,
-	last_processed TIMESTAMP WITH time zone
-);
-
--- IPAWS Alert Deployer table
-CREATE TABLE event.ipaws_deployer (
-	name VARCHAR(20) PRIMARY KEY,
-	gen_time TIMESTAMP WITH time zone NOT NULL,
-	alert_id text REFERENCES event.ipaws_alert(identifier),
-	alert_start TIMESTAMP WITH time zone NOT NULL,
-	alert_end TIMESTAMP WITH time zone NOT NULL,
-	config VARCHAR(24) NOT NULL REFERENCES iris.ipaws_config,
-	pre_alert_time INTEGER NOT NULL,
-	post_alert_time INTEGER NOT NULL,
-	auto_dms text[],
-	optional_dms text[],
-	deployed_dms text[],
-	auto_multi text,
-	deployed_multi text,
-	msg_priority INTEGER NOT NULL,
-	approved_by VARCHAR(15),
-	approved_time TIMESTAMP WITH time zone,
-	alert_state INTEGER NOT NULL,
-	was_deployed BOOLEAN NOT NULL,
-	replaces VARCHAR(24)
+	headline VARCHAR(256),
+	description VARCHAR(4096),
+	instruction VARCHAR(4096),
+	area_desc VARCHAR(256) NOT NULL,
+	geo_poly geometry(multipolygon) NOT NULL,
+	lat double precision NOT NULL,
+	lon double precision NOT NULL,
+	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
+	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+	alert_state INTEGER NOT NULL REFERENCES iris.alert_state
 );
 
 --
@@ -4089,23 +4178,6 @@ CREATE VIEW parking_area_view AS
 	LEFT JOIN geo_loc_view l ON pa.geo_loc = l.name
 	LEFT JOIN iris.system_attribute sa ON sa.name = 'camera_image_base_url';
 GRANT SELECT ON parking_area_view TO PUBLIC;
-
---
--- Push Notifications
---
--- NOTE that we don't have a foreign key linking addressed_by to the i_user
--- table so we can put 'auto' in there
-CREATE TABLE event.notification (
-	name varchar(30) PRIMARY KEY,
-	ref_object_type varchar(16) REFERENCES iris.sonar_type(name),
-	ref_object_name text,
-	needs_write BOOLEAN,
-	sent_time TIMESTAMP WITH time zone,
-	title text,
-	description text,
-	addressed_by VARCHAR(15),
-	addressed_time TIMESTAMP WITH time zone
-);
 
 --
 -- Ramp Meters

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.TreeSet;
 
 /**
@@ -43,9 +44,9 @@ public class DmsActionHelper extends BaseHelper {
 			DmsAction.SONAR_TYPE));
 	}
 
-	/** Get an iterator of DMS controlled by an action plan */
-	static public Iterator<DMS> findSigns(ActionPlan p) {
-		HashSet<SignGroup> plan_groups = findGroups(p);
+	/** Get set of DMS controlled by an action plan */
+	static public TreeSet<DMS> findSigns(ActionPlan ap) {
+		HashSet<SignGroup> plan_groups = findGroups(ap);
 		TreeSet<DMS> plan_signs =new TreeSet<DMS>(new Comparator<DMS>(){
 			public int compare(DMS a, DMS b) {
 				return a.getName().compareTo(b.getName());
@@ -57,16 +58,16 @@ public class DmsActionHelper extends BaseHelper {
 			if (plan_groups.contains(dsg.getSignGroup()))
 				plan_signs.add(dsg.getDms());
 		}
-		return plan_signs.iterator();
+		return plan_signs;
 	}
 
 	/** Find all sign groups associated with an action plan */
-	static private HashSet<SignGroup> findGroups(ActionPlan p) {
+	static public HashSet<SignGroup> findGroups(ActionPlan ap) {
 		HashSet<SignGroup> plan_groups = new HashSet<SignGroup>();
 		Iterator<DmsAction> dit = iterator();
 		while (dit.hasNext()) {
 			DmsAction da = dit.next();
-			if (da.getActionPlan() == p)
+			if (da.getActionPlan() == ap)
 				plan_groups.add(da.getSignGroup());
 		}
 		return plan_groups;

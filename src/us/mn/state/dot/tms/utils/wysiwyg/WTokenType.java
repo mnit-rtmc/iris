@@ -146,12 +146,6 @@ public enum WTokenType {
 	
 	/** Add an alert time (start or end) field from a CAP message */
 	capTime(                 "CAP Time"),
-	
-	/** Add an alert response type field from a CAP message */
-	capResponse(             "CAP Response Type"),
-	
-	/** Add an alert urgency field from a CAP message */
-	capUrgency(              "CAP Urgency"),
 
 	//-------------------------------------
 	//=== Special WYSIWYG-editor tokens ===

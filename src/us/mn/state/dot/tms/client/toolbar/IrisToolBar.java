@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2020  Minnesota Department of Transportation
+ * Copyright (C) 2008-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,8 +56,8 @@ public class IrisToolBar extends JToolBar {
 			add(new CoordinatePanel(map));
 			add(Box.createGlue());
 		}
-		if (NotificationPanel.getIEnabled()) {
-			add(new NotificationPanel(s, map, pane));
+		if (AttentionPanel.getIEnabled()) {
+			add(new AttentionPanel(s));
 			add(Box.createHorizontalStrut(10));
 		}
 		if (EditModePanel.getIEnabled())

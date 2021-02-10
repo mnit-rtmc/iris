@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ipaws;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommLink;
+import static us.mn.state.dot.tms.server.CapAlert.LOG;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.FeedPoller;
@@ -36,17 +37,14 @@ import static us.mn.state.dot.tms.utils.URIUtil.HTTPS;
 public class IpawsPoller extends ThreadedPoller<IpawsProperty>
 	implements FeedPoller
 {
-	/** IPAWS debug log */
-	static private final DebugLog IPAWS_LOG = new DebugLog("ipaws");
-
 	/** Log a message to the debug log */
 	static public void slog(String msg) {
-		IPAWS_LOG.log(msg);
+		LOG.log(msg);
 	}
 
 	/** Create a new poller */
 	public IpawsPoller(CommLink link) {
-		super(link, HTTPS, IPAWS_LOG);
+		super(link, HTTPS, LOG);
 	}
 
 	/** Create a comm thread */
@@ -54,7 +52,7 @@ public class IpawsPoller extends ThreadedPoller<IpawsProperty>
 	protected IpawsThread createCommThread(String uri, int timeout, int nrd)
 	{
 		return new IpawsThread(this, queue, scheme, uri, timeout, nrd,
-			IPAWS_LOG);
+			LOG);
 	}
 
 	/** Query IPAWS for alert messages */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
  * Action for triggering an action plan to be deployed or undeployed.
@@ -34,6 +35,13 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
+
+	/** Create a unique TimeAction record name */
+	static public String createUniqueName(String template) {
+		UniqueNameCreator unc = new UniqueNameCreator(template, 30,
+			(n)->lookupTimeAction(n));
+		return unc.createUniqueName();
+	}
 
 	/** Load all the time actions */
 	static protected void loadAll() throws TMSException {
@@ -90,13 +98,13 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	protected TimeActionImpl(Namespace ns, String n, String a, String d,
 		Date sd, Date tod, String p)
 	{
-		this(n, (ActionPlan) ns.lookupObject(ActionPlan.SONAR_TYPE, a),
+		this(n, lookupActionPlan(a),
 		     (DayPlan) ns.lookupObject(DayPlan.SONAR_TYPE, d), sd, tod,
 		     lookupPlanPhase(p));
 	}
 
 	/** Create a new time action */
-	protected TimeActionImpl(String n, ActionPlan a, DayPlan d, Date sd,
+	public TimeActionImpl(String n, ActionPlan a, DayPlan d, Date sd,
 		Date tod, PlanPhase p)
 	{
 		this(n);

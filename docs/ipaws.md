@@ -175,143 +175,27 @@ If this tag is used in a message for an alert that starts at 2 AM and ends at
 1 PM, the message posted to the sign will substitute text in place of that tag
 as follows:
 
-Alert Phase                       | Message Text
-----------------------------------|--------------------------------------------
-Before alert start time           | STARTING AT 2 AM
-Between alert start and end times | IN EFFECT UNTIL 1 PM
-After alert end time              | ALL CLEAR
-
-#### CAP Response Type Tag
-
-The `[capresponse...]` tag allows substituting a value corresponding to the
-response type field sent in the alert CAP message. This tag allows specifying
-zero or more response type values that will be used to filter which response
-types will trigger a substitution corresponding to the alert event.
-
-Response type substitution fields must be configured in the
-`View ➔ Alerts ➔ CAP Response Type Substitutions` dialog. To create one, enter
-an event type into the text box in this dialog and press Create. Then select a
-response type from the drop down and enter a MULTI string that will be
-substituted for any `[capresponse...]` tag encountered in a message template
-for alerts of that event type.
-
-If no parameters are provided, the tag will use the response type substitution
-configurations for any response type encountered in the alert CAP message.
-You may optionally include one or more response type values (separated by
-commas in the MULTI tag) to limit which response type values are substituted.
-
-##### Example
-
-Consider the following tag:
-
-```
-[capresponseShelter,Prepare]
-```
-
-If this tag is used in a template and an alert with the event "Winter Storm
-Warning" and a response type of "Shelter" is received, the tag will be replaced
-by the CAP Response Type Substitution value corresponding to "Winter Storm
-Warning" events and "Shelter" response types. The tag will behave similarly if
-an alert with the response type "Prepare" is received, however if the response
-type is "Monitor" (or any other value), text will not be substituted.
-
-If the tag is used without arguments, like this:
-
-```
-[capresponse]
-```
-
-and an alert with any response type is received, the tag will be substituted
-with the "CAP Response Type Substitution" value corresponding to that response
-type and the alert's event field if one exists, otherwise no text will be
-substituted.
-
-#### CAP Urgency Tag
-
-The `[capurgency...]` tag allows substituting a value corresponding to the
-urgency field sent in the alert CAP message. This tag allows specifying
-zero or more urgency values that will be used to filter which urgency values
-will trigger a substitution corresponding to the alert event.
-
-Urgency substitution fields must be configured in the
-`View ➔ Alerts ➔ CAP Urgency Substitutions` dialog. To create one, enter
-an event type into the text box in this dialog and press Create. Then select an
-urgency value from the drop down and enter a MULTI string that will be
-substituted for any `[capurgency...]` tag encountered in a message template
-for alerts of that event type.
-
-If no parameters are provided, the tag will use the urgency substitution
-configurations for any urgency value encountered in the alert CAP message.
-You may optionally include one or more urgency values (separated by commas
-in the MULTI tag) to limit which urgency values are substituted.
-
-##### Example
-
-Consider the following tag:
-
-```
-[capurgencyImmediate,Expected]
-```
-
-If this tag is used in a template and an alert with the event "Winter Storm
-Warning" and a urgency value of "Immediate" is received, the tag will be
-replaced by the CAP Urgency Substitution value corresponding to "Winter Storm
-Warning" events and "Immediate" urgency values. The tag will behave similarly
-if an alert with the urgency value "Expected" is received, however if the
-urgency value is "Future" (or any other value), text will not be substituted.
-
-If the tag is used without arguments, like this:
-
-```
-[capurgency]
-```
-
-and an alert with any urgency value is received, the tag will be substituted
-with the "CAP Urgency Substitution" value corresponding to that urgency value
-and the alert's event field if one exists, otherwise no text will be
-substituted.
+Alert Phase             | Message Text
+------------------------|--------------------------------------------
+Before alert start time | STARTING AT 2 AM
+During alert time       | IN EFFECT UNTIL 1 PM
+After alert end time    | ALL CLEAR
 
 ### Pre- and Post-Alert Times
 
 Messages may be posted to DMS before an alert has started or after an alert has
-ended. This is controlled via the "Pre-Alert" and "Post-Alert" times in an
-alert configuration, respectively, which are specified in hours. For a new
+ended.  This is controlled via the "Pre-Alert" and "Post-Alert" times in an
+alert configuration, respectively, which are specified in hours.  For a new
 configuration, the default pre-alert time is 6 hours, and the default post-
 alert time is 0 hours (meaning no message will be posted after the alert
-expires). These can be changed for each alert configuration, and can also be
+expires).  These can be changed for each alert configuration, and can also be
 changed for each alert from the Alert Tab.
-
-## Alert Message Priorities
-
-Messages generated for alerts are automatically given a message priority based
-on the urgency, severity, and certainty values contained in the alert CAP
-message, which collectively describe the seriousness of an alert. The possible
-values that may be seen in an alert XML, ranked from least to most emphatic,
-are as follows:
-
-Field     | Possible Values
-----------|-----------------------------------------------
-Urgency   | Unknown, Past, Future, Expected, Immediate
-Severity  | Unknown, Minor, Moderate, Severe, Extreme
-Certainty | Unknown, Unlikely, Possible, Likely, Observed
-
-To translate these three values into a single message priority, IRIS transforms
-each value to a number on a scale from 0 to 1 based on its relative place in
-the list of possible values. It then weights each value by multiplying it by
-the value contained in the corresponding system attribute (either
-`ipaws_priority_weight_urgency`, `ipaws_priority_weight_severity`, or
-`ipaws_priority_weight_certainty`) and sums them all together. The resulting
-"priority score" is then used to select from one of the allowed message
-priority values (`PSA`, `ALERT`, `AWS`, and `AWS_HIGH`).
-
-By default, these system attribute weights are all set to 1.0, however they
-may be adjusted.
 
 ## Operating the System
 
-The IPAWS system is managed in the Alert tab of the IRIS client. This tab lists
+The IPAWS system is managed in the Alert tab of the IRIS client.  This tab lists
 all relevant alert deployments (i.e. those with matching configurations and DMS
-in the alert area) that have been processed by the IRIS server. Alert
+in the alert area) that have been processed by the IRIS server.  Alert
 deployments are grouped into the following styles:
 
 Style     | Description

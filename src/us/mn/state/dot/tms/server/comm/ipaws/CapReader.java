@@ -40,24 +40,27 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  */
 public class CapReader {
 
-	/** Date formatter for formatting/parsing dates in ISO 8601 format */
-	static public final SimpleDateFormat ISO8601 =
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+	/** Date formatter for formatting error file names */
+	static private final SimpleDateFormat DT_FMT =
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
 	/** Most recent successful request date
 	 *  (at startup, initialize to an hour ago) */
 	static private Date REQ_SUCCESS = new Date(
 		TimeSteward.currentTimeMillis() - 60 * 60 * 1000);
 
-	/** Get date for REST API request */
-	static public String getReqDate() {
-		return ISO8601.format(REQ_SUCCESS);
+	/** Get most recent successful request date */
+	static public Date getReqDate() {
+		return REQ_SUCCESS;
 	}
 
 	/** Get XML save enabled setting */
 	static private boolean getXmlSaveEnabled() {
-		return SystemAttrEnum.IPAWS_XML_SAVE_ENABLE.getBoolean();
+		return SystemAttrEnum.CAP_XML_SAVE_ENABLE.getBoolean();
 	}
+
+	/** Alert processor */
+	static private final AlertProcessor PROCESSOR = new AlertProcessor();
 
 	/** Input stream */
 	private final InputStream input;
@@ -66,11 +69,12 @@ public class CapReader {
 	private final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 	/** Alert handler */
-	private final AlertHandler handler = new AlertHandler();
+	private final AlertHandler handler;
 
 	/** Create a new CAP reader */
 	public CapReader(InputStream is) {
 		input = is;
+		handler = new AlertHandler(PROCESSOR);
 	}
 
 	/** Parse alerts */
@@ -107,7 +111,7 @@ public class CapReader {
 	/** Save the XML contents to a file */
 	private void saveXmlFile() throws IOException {
 		if (getXmlSaveEnabled()) {
-			String fn = "/var/log/iris/ipaws_err_" + ISO8601.format(
+			String fn = "/var/log/iris/ipaws_err_" + DT_FMT.format(
 				TimeSteward.getDateInstance()) + ".xml";
 			baos.writeTo(new FileOutputStream(fn));
 		}

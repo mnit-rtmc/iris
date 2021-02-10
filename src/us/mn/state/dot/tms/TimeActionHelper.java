@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,11 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.TreeMap;
 
 /**
  * Helper class for time actions.
@@ -125,5 +128,42 @@ public class TimeActionHelper extends BaseHelper {
 			return f.format(tod);
 		} else
 			return null;
+	}
+
+	/** Get all scheduled time actions for a plan */
+	static public Collection<TimeAction> getScheduled(ActionPlan plan) {
+		TreeMap<Date, TimeAction> sched =
+			new TreeMap<Date, TimeAction>();
+		Iterator<TimeAction> it = iterator();
+		while (it.hasNext()) {
+			TimeAction ta = it.next();
+			if (ta.getActionPlan() == plan) {
+				Date dt = getScheduledDate(ta);
+				if (dt != null)
+					sched.put(dt, ta);
+			}
+		}
+		return sched.values();
+	}
+
+	/** Get scheduled date, or null for repeating actions */
+	static public Date getScheduledDate(TimeAction ta) {
+		String sched = ta.getSchedDate();
+		String tod = ta.getTimeOfDay();
+		if (sched == null || tod == null)
+			return null;
+		Date sd = parseDate(sched);
+		Date st = parseTime(tod);
+		if (sd == null || st == null)
+			return null;
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(sd);
+		Calendar todc = Calendar.getInstance();
+		todc.setTime(st);
+		cal.set(Calendar.HOUR_OF_DAY, todc.get(Calendar.HOUR_OF_DAY));
+		cal.set(Calendar.MINUTE, todc.get(Calendar.MINUTE));
+		cal.set(Calendar.SECOND, todc.get(Calendar.SECOND));
+		cal.set(Calendar.MILLISECOND, 0);
+		return cal.getTime();
 	}
 }

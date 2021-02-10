@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  * Copyright (C) 2010       AHMCT, University of California
  * Copyright (C) 2012       Iteris Inc.
  * Copyright (C) 2016-2020  SRF Consulting Group
@@ -87,8 +87,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Get the owner of a sign message */
 	static private String getOwner(SignMessage sm, String user) {
-		if (isMsgSource(sm, SignMsgSource.ipaws))
-			return "IPAWS";
+		if (isMsgSource(sm, SignMsgSource.alert))
+			return "ALERT";
 		StringBuilder sb = new StringBuilder();
 		if (isMsgSource(sm, SignMsgSource.operator) ||
 		    isMsgSource(sm, SignMsgSource.blank))
@@ -1201,48 +1201,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		p.sendMessage(this, sm, owner);
 	}
 
-	/** Send IPAWS message to sign.
-	 * Create and send a new IPAWS SignMessage to the sign if priority is
-	 * equal to or greater than priority of the current user-message.
-	 *
-	 * @param multi Message MULTI string.
-	 * @param priority Message priority.
-	 * @param duration Message duration in minutes; null for indefinite.
-	 * @return true if message queued to be sent.
-	 *         false if new priority is below the priority of the current
-	 *         message or we're unable to create the message. */
-	public boolean sendIpawsMsg(String multi, int priority,
-		Integer duration)
-	{
-		SignMessage sm = msg_user;
-		if ((sm != null) && (sm.getMsgPriority() > priority))
-			return false;
-		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(priority);
-		sm = findOrCreateMsg(null, multi, false, false, mp,
-			SignMsgSource.ipaws.bit(), "IPAWS", duration);
-		if (sm != null) {
-			try {
-				doSetMsgUser(sm);
-				return true;
-			}
-			catch (TMSException e) {
-				IpawsProcJob.log("Failed to send IPAWS msg " +
-					multi + " to " + getName() + ": " +
-					e.getMessage());
-			}
-		}
-		return false;
-	}
-
-	/** Remove IPAWS message from sign.
-	 * (Will only blank the sign if the current
-	 *  user-message is an IPAWS message.) */
-	public void blankIpawsMsg() {
-		SignMessage sm = msg_user;
-		if (sm != null && SignMsgSource.ipaws.checkBit(sm.getSource()))
-			blankMsgUser();
-	}
-
 	/** Check if the sign has a reference to a sign message */
 	public boolean hasReference(final SignMessage sm) {
 		return sm == msg_user ||
@@ -1388,9 +1346,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return isMsgSource(getMsgCurrent(), SignMsgSource.external);
 	}
 
-	/** Test if the current message source contains "ipaws" */
-	private boolean isMsgIpaws() {
-		return isMsgSource(getMsgCurrent(), SignMsgSource.ipaws);
+	/** Test if the current message source contains "alert" */
+	private boolean isMsgAlert() {
+		return isMsgSource(getMsgCurrent(), SignMsgSource.alert);
 	}
 
 	/** Test if the current message has beacon enabled */
@@ -1419,9 +1377,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return isMsgDeployed() && isMsgExternal();
 	}
 
-	/** Test if a DMS has been deployed by IPAWS */
-	private boolean isIpawsDeployed() {
-		return isMsgDeployed() && isMsgIpaws();
+	/** Test if a DMS has been deployed by alert system */
+	private boolean isAlertDeployed() {
+		return isMsgDeployed() && isMsgAlert();
 	}
 
 	/** Test if DMS needs maintenance */
@@ -1455,7 +1413,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 		if (isScheduleDeployed())
 			s |= ItemStyle.SCHEDULED.bit();
-		if (isExternalDeployed() || isIpawsDeployed())
+		if (isExternalDeployed() || isAlertDeployed())
 			s |= ItemStyle.EXTERNAL.bit();
 		if (isOnline() && needsMaintenance())
 			s |= ItemStyle.MAINTENANCE.bit();

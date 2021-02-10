@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,108 +16,54 @@
 package us.mn.state.dot.tms.client.alert;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-
-import us.mn.state.dot.tms.IpawsDeployer;
+import us.mn.state.dot.tms.AlertInfo;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
 
 /**
- * The AlertTab class provides the GUI for working with automated alert
- * objects, e.g. weather (and other) alerts from IPAWS.
- *
- * NOTE this would need changing to let the alert tab handle other types of
- * alerts (we would need a new Alert parent SONAR object - not sure what that
- * would look like yet).
+ * The AlertTab class provides the GUI for working with automated alert objects.
  *
  * @author Gordon Parikh
+ * @author Douglas Lau
  */
-@SuppressWarnings("serial")
-public class AlertTab extends MapTab<IpawsDeployer> {
+public class AlertTab extends MapTab<AlertInfo> {
 
 	/** Summary of alerts */
-	private final StyleSummary<IpawsDeployer> summary;
+	private final StyleSummary<AlertInfo> summary;
 
 	/** Alert dispatcher for dispatching and reviewing alerts */
 	private final AlertDispatcher dispatcher;
 
-	/** JScrollPane that contains all the elements of the tab (since it can
-	 *  get big).
-	 */
-	private JScrollPane sp;
-
-	/** Component adapter for handling resize events. */
-	private ComponentAdapter resizeHandler = new ComponentAdapter() {
-		@Override
-		public void componentResized(ComponentEvent e) {
-			Dimension d = sp.getPreferredSize();
-			d.height = side_pnl.getSize().height - 80;
-			sp.setPreferredSize(d);
-		}
-	};
-
-	protected AlertTab(Session session, AlertManager man) {
+	/** Create an alert tab */
+	public AlertTab(Session session, AlertManager man) {
 		super(man);
-		summary = man.createStyleSummary(false, 2);
+		summary = man.createStyleSummary(false, 1);
 		dispatcher = new AlertDispatcher(session, man);
-		addComponentListener(resizeHandler);
 	}
 
-	/** Initialize the alert tab. */
+	/** Initialize the alert tab */
 	@Override
 	public void initialize() {
 		summary.initialize();
 		dispatcher.initialize();
-		JPanel p = new JPanel(new BorderLayout());
-		p.add(summary, BorderLayout.NORTH);
-		p.add(dispatcher, BorderLayout.CENTER);
-		sp = new JScrollPane(p, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		add(sp, BorderLayout.NORTH);
+		add(summary, BorderLayout.NORTH);
+		add(dispatcher, BorderLayout.CENTER);
 	}
 
-	@Override
-	public void postInit() {
-		Dimension d = sp.getPreferredSize();
-		d.height = side_pnl.getSize().height - 80;
-		sp.setPreferredSize(d);
-	}
-
-	/** Dispose of the alert tab. */
+	/** Dispose of the alert tab */
 	@Override
 	public void dispose() {
 		super.dispose();
+		dispatcher.dispose();
 		summary.dispose();
 	}
 
-	/** Get the alert tab ID. Overridden to generalize name. */
+	/** Get the alert tab ID */
 	@Override
 	public String getTabId() {
-		return getAlertTabId();
-	}
-
-	public static String getAlertTabId() {
 		return "alert";
-	}
-
-	/** Select an alert in the tab */
-	@Override
-	public void setSelectedProxy(IpawsDeployer proxy) {
-		// check the style of the alert and select the appropriate one
-		ItemStyle style = manager.getItemStyle(proxy);
-		if (style != null)
-			summary.setStyle(style);
-
-		dispatcher.selectAlert(proxy);
-		summary.ensureSelectedProxyVisible();
 	}
 
 	/** Get the AlertDispatcher */

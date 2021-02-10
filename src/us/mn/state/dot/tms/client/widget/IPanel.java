@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,6 +56,8 @@ public class IPanel extends JPanel {
 			GridBagConstraints.CENTER, 0, 0),
 		FULL(GridBagConstraints.BOTH, GridBagConstraints.REMAINDER, 1,
 			GridBagConstraints.CENTER, 1, 1),
+		TEXT(GridBagConstraints.BOTH, GridBagConstraints.REMAINDER, 1,
+			GridBagConstraints.WEST, 0.15f, 0.15f),
 		LEFT(GridBagConstraints.NONE, GridBagConstraints.REMAINDER, 1,
 			GridBagConstraints.WEST, 1, 0),
 		RIGHT(GridBagConstraints.NONE, GridBagConstraints.REMAINDER, 1,
@@ -147,13 +149,7 @@ public class IPanel extends JPanel {
 			col += s.width;
 		return bag;
 	}
-	
-	/** Set the current row and column on the form. */
-	protected void setRowCol(int r, int c) {
-		row = r;
-		col = c;
-	}
-	
+
 	/** Add a label to the current row */
 	public void add(String msg, Stretch s) {
 		add(new ILabel(msg), s);

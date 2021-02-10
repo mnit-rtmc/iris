@@ -15,332 +15,193 @@
  */
 package us.mn.state.dot.tms.client.alert;
 
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import java.util.Iterator;
+import java.util.TreeSet;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
-
-import us.mn.state.dot.tms.AlertState;
+import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.AlertInfo;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsMsgPriority;
+import us.mn.state.dot.tms.DmsActionHelper;
+import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.IpawsAlert;
-import us.mn.state.dot.tms.IpawsDeployer;
-import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.NotificationHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
-import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.dms.DmsImagePanel;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.dms.DMSManager;
+import us.mn.state.dot.tms.client.map.MapObject;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IWorker;
+import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.MultiConfig;
 
 /**
- * An alert DMS dispatcher is a GUI panel for dispatching and reviewing
- * DMS involved in an automated alert deployment.
+ * An alert DMS dispatcher is a GUI panel for dispatching and reviewing DMS
+ * involved in an automated alert deployment.
  *
  * @author Gordon Parikh
+ * @author Douglas Lau
  */
-@SuppressWarnings("serial")
 public class AlertDmsDispatcher extends IPanel {
-	/** Client session */
-	private final Session session;
 
 	/** Alert manager */
 	private final AlertManager manager;
 
-	/** Currently selected alert (deployer) */
-	private IpawsDeployer selectedAlertDepl;
+	/** DMS manager */
+	private final DMSManager dms_manager;
 
-	/** Currently selected alert */
-	private IpawsAlert selectedAlert;
-
-	/** List of DMS included in this alert */
-	private final ArrayList<DMS> dmsList = new ArrayList<DMS>();
+	/** DMS sign group type cache */
+	private final TypeCache<DmsSignGroup> dms_sign_groups;
 
 	/** Table of DMS included in this alert */
-	private final JTable dmsTable;
+	private final ZTable dms_tbl;
 
-	/** A simple table model for DMS inclusion. Just supports 3 columns - the
-	 *  DMS name, location, and whether or not it will be included in the
-	 *  alert.
-	 */
-	private class DmsTableModel extends DefaultTableModel {
-
-		public DmsTableModel() {
+	/** A simple table model for DMS inclusion.  Just supports 3 columns -
+	 *  the DMS name, location, and whether or not it will be included in
+	 *  the alert.  */
+	private class DmsIncludedModel extends DefaultTableModel {
+		public DmsIncludedModel() {
 			addColumn(I18N.get("dms"));
 			addColumn(I18N.get("location"));
 			addColumn(I18N.get("alert.dms.included"));
 		}
 
 		@Override
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public Class getColumnClass(int col) {
-			switch (col) {
-			case 2:		// included
-				return Boolean.class;
-			default:	// name/location
-				return String.class;
-			}
+		public Class<?> getColumnClass(int col) {
+			return (col == 2) ?  Boolean.class : Object.class;
 		}
 
 		@Override
 		public boolean isCellEditable(int row, int col) {
-			switch (col) {
-			case 2:		// included
-				return manager.getEditing();
-			default:	// name/location
-				return false;
-			}
-		}
-
-		@Override
-		public Object getValueAt(int row, int col) {
-			// get the DMS object from the list
-			if (row >= 0 && row < dmsList.size()) {
-				DMS dms = dmsList.get(row);
-				switch (col) {
-				case 0:		// name
-					return dms.getName();
-				case 1:		// location
-					return GeoLocHelper.getLocation(dms.getGeoLoc());
-				case 2:		// inclusion
-					return dmsSuggestions.get(dms);
-				}
-			}
-			return null;
+			return col == 2;
 		}
 
 		@Override
 		public void setValueAt(Object value, int row, int col) {
-			// get the DMS object from the list - note that we can only set
-			// column 2 (inclusion)
-			if (row >= 0 && row < dmsList.size() && col == 2) {
-				DMS dms = dmsList.get(row);
-				dmsSuggestions.put(dms, !dmsSuggestions.get(dms));
+			super.setValueAt(value, row, col);
+			if (value instanceof Boolean) {
+				boolean selected = (Boolean) value;
+				DMS dms = (DMS) dms_mdl.getValueAt(row, 0);
+				if (selected)
+					addToGroup(dms);
+				else
+					removeFromGroup(dms);
 			}
 		}
 	}
 
-	/** DMS table model */
-	private final DmsTableModel dmsTableModel;
+	/** Find an active sign group for the alert */
+	private SignGroup findActiveGroup() {
+		AlertInfo ai = manager.getSelectionModel().getSingleSelection();
+		if (ai != null) {
+			HashSet<SignGroup> groups = DmsActionHelper.findGroups(
+				ai.getActionPlan());
+			Iterator<SignGroup> it = groups.iterator();
+			if (it.hasNext())
+				return it.next();
+		}
+		return null;
+	}
 
-	/** Fire for DMS list selection changes */
-	private boolean fireSelectionChange = true;
+	/** Add a DMS to the active sign group */
+	private void addToGroup(DMS dms) {
+		SignGroup sg = findActiveGroup();
+		if (sg != null)
+			createDmsSignGroup(dms, sg);
+	}
+
+	/** Create a new DMS sign group */
+	private void createDmsSignGroup(DMS dms, SignGroup sg) {
+		String tmpl = sg.getName() + "_%d";
+		String oname = DmsSignGroupHelper.createUniqueName(tmpl);
+		HashMap<String, Object> attrs = new HashMap<String, Object>();
+		attrs.put("dms", dms);
+		attrs.put("sign_group", sg);
+		dms_sign_groups.createObject(oname, attrs);
+	}
+
+	/** Remove a DMS from the active sign group */
+	private void removeFromGroup(DMS dms) {
+		SignGroup sg = findActiveGroup();
+		if (sg != null)
+			removeDmsSignGroup(dms, sg);
+	}
+
+	/** Remove a DMS sign group */
+	private void removeDmsSignGroup(DMS dms, SignGroup sg) {
+		DmsSignGroup dsg = DmsSignGroupHelper.find(dms, sg);
+		if (dsg != null)
+			dsg.destroy();
+	}
+
+	/** Included DMS table model */
+	private final DmsIncludedModel dms_mdl;
 
 	/** DMS selection listener */
 	private final ListSelectionListener dmsSelectionListener =
-			new ListSelectionListener() {
+		new ListSelectionListener()
+	{
 		public void valueChanged(ListSelectionEvent e) {
-			if (e.getValueIsAdjusting() || !fireSelectionChange)
+			if (e.getValueIsAdjusting())
 				return;
-			int indx = dmsTable.getSelectedRow();
-			if (indx >= 0 && indx < dmsList.size())
-				setSelectedDms(dmsList.get(indx));
-			else
-				setSelectedDms(null);
+			int row = dms_tbl.getSelectedRow();
+			if (row >= 0 && row < dms_mdl.getRowCount()) {
+				DMS dms = (DMS) dms_mdl.getValueAt(row, 0);
+				setSelectedDms(dms);
+				return;
+			}
+			setSelectedDms(null);
 		}
 	};
-
-	/** Select a DMS in the table */
-	public void selectDmsInTable(DMS d) {
-		int i = dmsList.indexOf(d);
-		if (i != -1) {
-			dmsTable.setRowSelectionInterval(i, i);
-			dmsTable.scrollRectToVisible(new Rectangle(
-					dmsTable.getCellRect(i, 0, true)));
-		} else
-			dmsTable.clearSelection();
-	}
 
 	/** DMS double-click listener (for centering map) */
 	private MouseAdapter dmsMouseAdapter = new MouseAdapter() {
 		public void mousePressed(MouseEvent e) {
-			JTable t = (JTable) e.getSource();
+			ZTable t = (ZTable) e.getSource();
 			Point p = e.getPoint();
-			int row = t.rowAtPoint(p);
-			if (e.getClickCount() == 2 && t.getSelectedRow() != -1) {
-				// center the map on the DMS
-				DMS dms = dmsList.get(row);
+			int row = t.getSelectedRow();
+			if (e.getClickCount() == 2 && row >= 0) {
+				DMS dms = (DMS) dms_mdl.getValueAt(row, 0);
 				manager.centerMap(dms, 15);
 			}
 		}
 	};
-
-	/** Check box for controlling DMS visibility in edit mode */
-	private JCheckBox showAllDmsChk;
-
-	/** Text Box for MULTI string */
-	private JTextArea multiBox;
-
-	/** Button to preview message */
-	private JButton previewBtn;
-
-	/** Button to discard any changes made to the message text. */
-	private JButton revertBtn;
-
-	/** Label for message priority box */
-	private JLabel msgPriorityLbl;
-
-	/** Drop down for message priority */
-	private JComboBox<DmsMsgPriority> msgPriorityCBox;
-
-	/** i in circle character appended to pre/post alert time field labels
-	 *  since they have tooltips
-	 */
-	private static final char TOOLTIP_ICON_CHAR = '\u24D8';
-
-	/** Pre-alert time label */
-	private JLabel preAlertTimeLbl;
-
-	/** Pre-alert time text box */
-	private JTextField preAlertTimeBx;
-
-	/** Post-alert time label */
-	private JLabel postAlertTimeLbl;
-
-	/** Post-alert time text box */
-	private JTextField postAlertTimeBx;
-
-	/** Tab pane containing DMS renderings */
-	private JTabbedPane dmsPane;
-
-	/** Sign Image panel width */
-	private static final int DMS_PNL_W = 200;
-
-	/** Sign Image panel height */
-	private static final int DMS_PNL_H = 80;
-
-	/** Image panel for current message on sign */
-	private DmsImagePanel currentMsgPnl;
-
-	/** Image panel for alert message */
-	private DmsImagePanel alertMsgPnl;
-
-	/** Currently selected DMS */
-	private DMS selectedDms;
-
-	/** Map of displayed DMS and whether or not they are selected for
-	 *  inclusion in the alert.
-	 */
-	private HashMap<DMS,Boolean> dmsSuggestions = new HashMap<DMS, Boolean>();
 
 	/** Comparator for sorting list of DMS by name (case insensitive). */
 	private class DmsComparator implements Comparator<DMS> {
 		@Override
 		public int compare(DMS dms0, DMS dms1) {
 			return String.CASE_INSENSITIVE_ORDER.compare(
-					dms0.getName(), dms1.getName());
+				dms0.getName(), dms1.getName());
 		}
 	}
 
-	/** Action triggered with the "show all DMS" check box */
-	private IAction showAllDms = new IAction("alert.dms.show_all") {
-		@Override
-		protected void doActionPerformed(ActionEvent ev) throws Exception {
-			// update the DMS list - it will handle everything
-			updateDmsList();
-
-			// also tell the manager so the map gets updated
-			manager.setShowAllDms(showAllDmsChk.isSelected());
-			manager.updateMap();
-		}
-	};
-
 	/** Create a new alert DMS dispatcher */
 	public AlertDmsDispatcher(Session s, AlertManager m) {
-		session = s;
 		manager = m;
-
-		// setup DMS table
-		dmsTableModel = new DmsTableModel();
-		dmsTable = new JTable(dmsTableModel);
-		Dimension d = new Dimension(dmsTable.getPreferredSize().width,
-				dmsTable.getRowHeight() * 10);
-		dmsTable.setPreferredScrollableViewportSize(d);
-		dmsTable.getSelectionModel().addListSelectionListener(
-				dmsSelectionListener);
-
-		dmsTable.addMouseListener(dmsMouseAdapter);
-
-		// DMS/message control options (disabled until alert selected)
-		showAllDmsChk = new JCheckBox(showAllDms);
-		multiBox = new JTextArea(2,28);
-		multiBox.setLineWrap(true);
-		multiBox.setWrapStyleWord(true);
-		previewBtn = new JButton(previewMsg);
-		revertBtn = new JButton(revertMsg);
-		previewBtn.setToolTipText(I18N.get("alert.dms.preview.tooltip"));
-		revertBtn.setToolTipText(I18N.get("alert.dms.revert.tooltip"));
-		msgPriorityLbl = new JLabel(I18N.get("alert.dms.msg_priority"));
-
-		showAllDmsChk.setEnabled(false);
-		multiBox.setEnabled(false);
-		previewBtn.setEnabled(false);
-		revertBtn.setEnabled(false);
-
-		// show message priority values from highest to lowest
-		List<DmsMsgPriority> mpList = Arrays.asList(DmsMsgPriority.values());
-		Collections.reverse(mpList);
-		DmsMsgPriority[] mpValues = mpList.toArray(new DmsMsgPriority[0]);
-		msgPriorityCBox = new JComboBox<DmsMsgPriority>(mpValues);
-		msgPriorityCBox.setSelectedIndex(-1);
-		msgPriorityCBox.setEnabled(false);
-
-		// pre/post alert time boxes
-		preAlertTimeLbl = new JLabel(I18N.get("alert.config.pre_alert_time")
-				+ TOOLTIP_ICON_CHAR);
-		preAlertTimeLbl.setToolTipText(
-				I18N.get("alert.pre_alert_time.tooltip"));
-		preAlertTimeBx = new JTextField(2);
-		postAlertTimeLbl = new JLabel(I18N.get(
-				"alert.config.post_alert_time") + TOOLTIP_ICON_CHAR);
-		postAlertTimeLbl.setToolTipText(
-				I18N.get("alert.post_alert_time.tooltip"));
-		postAlertTimeBx = new JTextField(2);
-		preAlertTimeBx.setEnabled(false);
-		postAlertTimeBx.setEnabled(false);
-
-		// setup image panels for rendering DMS
-		dmsPane = new JTabbedPane();
-		currentMsgPnl = new DmsImagePanel(DMS_PNL_W, DMS_PNL_H, true);
-		alertMsgPnl = new DmsImagePanel(DMS_PNL_W, DMS_PNL_H, true);
-
-		// TODO these should be centered
-		dmsPane.add(I18N.get("alert.dms.current_msg"), currentMsgPnl);
-		dmsPane.add(I18N.get("alert.dms.alert_msg"), alertMsgPnl);
+		dms_manager = s.getDMSManager();
+		dms_sign_groups = s.getSonarState().getDmsCache()
+			.getDmsSignGroups();
+		dms_tbl = new ZTable();
+		dms_tbl.setAutoCreateColumnsFromModel(true);
+		dms_tbl.setVisibleRowCount(8);
+		dms_tbl.getSelectionModel().addListSelectionListener(
+			dmsSelectionListener);
+		dms_tbl.addMouseListener(dmsMouseAdapter);
+		dms_mdl = new DmsIncludedModel();
+		dms_tbl.setModel(dms_mdl);
 	}
 
 	/** Initialize the widgets on the panel */
@@ -348,396 +209,100 @@ public class AlertDmsDispatcher extends IPanel {
 	public void initialize() {
 		super.initialize();
 		setTitle(I18N.get("alert.dms"));
-		add(new JScrollPane(dmsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), Stretch.DOUBLE);
-
-		JPanel p = new JPanel();
-		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-		JPanel p2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		p2.add(showAllDmsChk);
-		p.add(p2);
-		p2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		p2.add(new JScrollPane(multiBox,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
-		p2.add(previewBtn);
-		p.add(p2);
-		p2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		p2.add(msgPriorityLbl);
-		p2.add(msgPriorityCBox);
-		p2.add(preAlertTimeLbl);
-		p2.add(preAlertTimeBx);
-		p2.add(postAlertTimeLbl);
-		p2.add(postAlertTimeBx);
-		p.add(p2);
-		setRowCol(row+1, 0);
-		add(p, Stretch.DOUBLE);
-
-		p = new JPanel();
-		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-		p.setBorder(BorderFactory.createTitledBorder(
-				I18N.get("alert.dms.selected")));
-		p.add(dmsPane);
-		setRowCol(row+1, 0);
-		add(p, Stretch.DOUBLE);
+		add(dms_tbl, Stretch.FULL);
 	}
 
 	/** Set the selected alert, updating the list of DMS. */
-	public void setSelectedAlert(IpawsDeployer iad, IpawsAlert ia) {
-		selectedAlertDepl = iad;
-		selectedAlert = ia;
-
-		// check the style of the alert deployer to see if it's pending (and
-		// that the user has permission to write alerts)
-		if (manager.checkStyle(ItemStyle.PENDING, iad)
-				&& session.isWritePermitted(iad)) {
-			// if it is, automatically turn on edit mode
-			manager.setEditing(true);
-		} else if (manager.checkStyle(ItemStyle.EXPIRED, iad))
-			// if the alert is expired, force edit mode to off
-			manager.setEditing(false);
-
-		// uncheck the "show all DMS" button
-		showAllDmsChk.setSelected(false);
-
-		// update the DMS list given the selected alert and edit mode state
-		updateDmsList();
-
-		// update message parameters from the alert deployer
-		updateMsgParams();
-	}
-
-	/** Process a press of the edit/deploy button, starting edit mode or
-	 *  deploying the alert.
-	 */
-	public void processEditDeploy() {
-		if (manager.getEditing())
-			deployAlert();
-		else
-			editAlert();
-
-		// update the DMS list, message parameters, and map
-		updateDmsList();
-		updateMsgParams();
-		manager.updateMap();
-	}
-
-	/** Deploy (or update) the selected alert. */
-	private void deployAlert() {
-		if (selectedAlert != null && selectedAlertDepl != null &&
-		    !manager.checkStyle(ItemStyle.EXPIRED, selectedAlertDepl))
-		{
-			System.out.println("Deploying alert " +
-				selectedAlert.getName() + "...");
-			deployAlert(selectedAlertDepl);
-		}
-		manager.setEditing(false);
-	}
-
-	/** Deploy (or update) the selected alert. */
-	private void deployAlert(IpawsDeployer iad) {
-		// get the selected DMS and set the requested DMS
-		ArrayList<String> selectedDms = new ArrayList<String>();
-		for (DMS d: dmsSuggestions.keySet()) {
-			if (dmsSuggestions.get(d))
-				selectedDms.add(d.getName());
-		}
-		String[] dms = selectedDms.toArray(new String[0]);
-		iad.setRequestedDms(dms);
-
-		// try to update MULTI and pre/post alert times
-		String newMulti = multiBox.getText();
-		if (newMulti != null && !newMulti.isEmpty())
-			iad.setRequestedMulti(multiBox.getText());
-		int preAlertTime = -1;
-		try {
-			preAlertTime = Integer.valueOf(preAlertTimeBx.getText());
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		}
-		if (preAlertTime >= 0)
-			iad.setPreAlertTime(preAlertTime);
-		int postAlertTime = -1;
-		try {
-			postAlertTime = Integer.valueOf(postAlertTimeBx.getText());
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		}
-		if (postAlertTime >= 0)
-			iad.setPostAlertTime(postAlertTime);
-
-		// update approval user
-		iad.setApprovedBy(session.getUser().getName());
-		iad.setAlertStateReq(AlertState.APPROVE_REQ.ordinal());
-
-		// check if there are any notifications that haven't been
-		// addressed and address them
-		NotificationHelper.addressAllRef(iad, session);
-	}
-
-	/** Cancel the selected alert (removing it from signs) */
-	public void cancelAlert() {
-		IpawsDeployer iad = selectedAlertDepl;
-		if (iad != null) {
-			iad.setAlertStateReq(AlertState.CANCEL_REQ.ordinal());
-			// check if there are any notifications that
-			// haven't been addressed and address them
-			NotificationHelper.addressAllRef(iad, session);
-		}
-	}
-
-	/** Start editing the selected alert. */
-	private void editAlert() {
-		// make sure the alert is not expired
-		// and that the user can write (this) alert
-		if (!manager.checkStyle(ItemStyle.EXPIRED, selectedAlertDepl)
-			&& session.isWritePermitted(selectedAlertDepl))
-		{
-			// if they can, set edit mode
-			manager.setEditing(true);
-		} else
-			manager.setEditing(false);
-	}
-
-	/** Cancel editing of an alert. */
-	public void cancelEdit() {
-		manager.setEditing(false);
-		updateDmsList();
-		updateMsgParams();
-		manager.updateMap();
+	public void setSelectedAlert(AlertInfo ai) {
+		if (ai != null)
+			updateDmsList(ai);
 	}
 
 	/** Clear the selected alert. */
 	public void clearSelectedAlert() {
-		selectedAlertDepl = null;
-		selectedAlert = null;
-
-		// empty the DMS table, clear the msg params, and update the map
-		dmsTableModel.setRowCount(0);
-		updateMsgParams();
+		dms_mdl.setRowCount(0);
 		manager.updateMap();
 	}
 
-	/** Update the DMS list model with the list of DMS provided. Runs a
-	 *  SwingWorker to get DMS info before updating the GUI.
-	 */
-	private void updateDmsList() {
-		// clear the suggestions before starting the worker
-		dmsSuggestions.clear();
-
-		// get the DMS list from the alert - do it in a worker thread
-		// since it might take a second
+	/** Update the DMS list model with the list of DMS provided.  Runs a
+	 *  SwingWorker to get DMS info before updating the GUI. */
+	private void updateDmsList(AlertInfo ai) {
 		IWorker<HashMap<DMS, Boolean>> dmsWorker =
 			new IWorker<HashMap<DMS, Boolean>>()
 		{
 			@Override
-			protected HashMap<DMS, Boolean> doInBackground()
-				throws Exception
-			{
-				// wait a bit before updating
-				Thread.sleep(200);
-				return lookupDmsList();
+			protected HashMap<DMS, Boolean> doInBackground() {
+				return lookupDmsMap(ai);
 			}
 
 			@Override
 			public void done() {
-				// get the map, get a list of DMS from it, then
-				// sort by name
-				dmsSuggestions = getResult();
-
-				if (dmsSuggestions != null) {
-					// use a separate list to sort by name
-					dmsList.clear();
-					for (DMS d: dmsSuggestions.keySet())
-						dmsList.add(d);
-					dmsList.sort(new DmsComparator());
-
-					// fill the list and table model
-					for (DMS d: dmsList) {
-						Object[] r = {d};
-						dmsTableModel.addRow(r);
-					}
-					dmsTableModel.setRowCount(dmsList.size());
-					dmsTableModel.fireTableDataChanged();
-				}
+				HashMap<DMS, Boolean> dm = getResult();
+				if (dm != null)
+					finishUpdateDmsList(dm);
 			}
 		};
 		dmsWorker.execute();
 	}
 
-	/** Lookup DMS list for alert */
-	private HashMap<DMS, Boolean> lookupDmsList() {
+	/** Lookup DMS for alert */
+	private HashMap<DMS, Boolean> lookupDmsMap(AlertInfo ai) {
 		// use a HashMap to support a check box for controlling
 		// inclusion in the alert and a list to control sorting
 		HashMap<DMS, Boolean> dm = new HashMap<DMS, Boolean>();
-
-		// if edit mode is on, show a list of auto and optional DMS
-		if (manager.getEditing()) {
-			String[] dmsAuto = selectedAlertDepl.getAutoDms();
-			String[] dmsOptional = selectedAlertDepl.getOptionalDms();
-
-			// if deployed already, preserve inclusion
-			String[] dmsDeployed = selectedAlertDepl.getDeployedDms();
-			HashSet<String> include = new HashSet<String>();
-			for (String n: dmsDeployed) {
-				if (n != null)
-					include.add(n);
-			}
-
-			// add all the auto DMS
-			for (String n: dmsAuto) {
-				if (n != null) {
-					DMS d = DMSHelper.lookup(n);
-					if (d != null) {
-						dm.put(d, include.isEmpty() ||
-							  include.contains(n));
-					}
-				}
-			}
-
-			// add any optional DMS not already included
-			for (String n: dmsOptional) {
-				if (n != null) {
-					DMS d = DMSHelper.lookup(n);
-					if (!dm.containsKey(d) && (d != null))
-						dm.put(d, include.contains(n));
-				}
-			}
-
-			// if the "show all" check box is
-			// checked, add all DMS in the group
-			SignGroup sg = selectedAlertDepl.getConfig()
-				.getSignGroup();
-			if (showAllDmsChk.isSelected() && sg != null) {
-				for (DMS d: SignGroupHelper.getAllSigns(sg)) {
-					if (!dm.containsKey(d))
-						dm.put(d, include.contains(d.getName()));
-				}
-			}
-		} else {
-			// if edit mode is off, show a list of deployed DMS
-			for (String n: selectedAlertDepl.getDeployedDms()) {
-				if (n != null) {
-					DMS d = DMSHelper.lookup(n);
-					if (d != null)
-						dm.put(d, true);
-				}
-			}
+		if (ai != null) {
+			// Find all DMS included in action plan
+			ActionPlan plan = ai.getActionPlan();
+			TreeSet<DMS> included = DmsActionHelper.findSigns(plan);
+			// Find all DMS for alert info
+			SignGroup sg = ai.getSignGroup();
+			for (DMS d: SignGroupHelper.getAllSigns(sg))
+				dm.put(d, included.contains(d));
 		}
 		return dm;
 	}
 
-	/** Get the most appropriate MULTI string for the selected alert. This is
-	 *  either the deployed MULTI (if not empty) or the auto-generated MULTI.
-	 */
-	private String getAlertMulti() {
-		String deplMulti = selectedAlertDepl.getDeployedMulti();
-		if (deplMulti != null && !deplMulti.isEmpty())
-			return deplMulti;
-		return selectedAlertDepl.getAutoMulti();
-	}
-
-	/** Update the message parameters from the selected alert deployer. */
-	private void updateMsgParams() {
-		boolean allowEdit = false;
-		if (selectedAlertDepl != null) {
-			SignGroup sg = selectedAlertDepl.getConfig()
-				.getSignGroup();
-			showAllDmsChk.setText(I18N.get("alert.dms.show_all") +
-				" " + sg);
-
-			// set the text in the MULTI box - use the deployed MULTI if we
-			// have it, otherwise the auto-generated MULTI
-			multiBox.setText(getAlertMulti());
-
-			// set the message priority
-			Integer mpi = selectedAlertDepl.getMsgPriorty();
-			if (mpi != null) {
-				DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(mpi);
-				msgPriorityCBox.setSelectedItem(mp);
-			}
-
-			// set the pre/post alert times
-			preAlertTimeBx.setText(String.valueOf(
-					selectedAlertDepl.getPreAlertTime()));
-			postAlertTimeBx.setText(String.valueOf(
-					selectedAlertDepl.getPostAlertTime()));
-
-			// if this alert is in the past or editing is off, disable the
-			// editing features (we still show them for information)
-			allowEdit = manager.getEditing() && !manager.checkStyle(
-				ItemStyle.EXPIRED, selectedAlertDepl);
-
-		} else {
-			showAllDmsChk.setText(I18N.get("alert.dms.show_all"));
-			multiBox.setText("");
-			msgPriorityCBox.setSelectedIndex(-1);
-			preAlertTimeBx.setText("");
-			postAlertTimeBx.setText("");
+	/** Finish updating the DMS list */
+	private void finishUpdateDmsList(HashMap<DMS, Boolean> dm) {
+		ArrayList<DMS> dms_list = new ArrayList<DMS>();
+		for (DMS dms: dm.keySet())
+			dms_list.add(dms);
+		dms_list.sort(new DmsComparator());
+		for (DMS dms: dms_list) {
+			Object[] row = {
+				dms,
+				GeoLocHelper.getLocation(dms.getGeoLoc()),
+				dm.get(dms),
+			};
+			dms_mdl.addRow(row);
 		}
-		showAllDmsChk.setEnabled(allowEdit);
-		multiBox.setEnabled(allowEdit);
-		previewBtn.setEnabled(allowEdit);
-		msgPriorityCBox.setEnabled(allowEdit);
-		preAlertTimeBx.setEnabled(allowEdit);
-		postAlertTimeBx.setEnabled(allowEdit);
+		dms_mdl.fireTableDataChanged();
 	}
 
 	/** Set the selected DMS */
 	public void setSelectedDms(DMS dms) {
-		selectedDms = dms;
-		if (selectedDms != null) {
-			// set the image on the DMS panels
-			try {
-				// first set the MultiConfig for this sign
-				MultiConfig mc = MultiConfig.from(selectedDms);
-				currentMsgPnl.setMultiConfig(mc);
-				alertMsgPnl.setMultiConfig(mc);
-
-				// then set the MULTI of the message (both current and alert)
-				currentMsgPnl.setMulti(DMSHelper.getMultiString(selectedDms));
-
-				// use the text in the MULTI box in case the user has edited
-				// it (allows them to flip through signs more quickly)
-				alertMsgPnl.setMulti(multiBox.getText());
-			} catch (TMSException e1) {
-				e1.printStackTrace();
-			}
-		} else {
-			// if deselected, clear
-			currentMsgPnl.clearMultiConfig();
-			currentMsgPnl.clearMulti();
-			alertMsgPnl.clearMultiConfig();
-			alertMsgPnl.clearMulti();
-		}
-
-		// update the map to show the selected DMS
-		manager.setSelectedDms(selectedDms);
+		manager.setSelectedDms(dms);
 		manager.updateMap();
 	}
 
-	/** Action to preview a message entered into the MULTI box. Switches the
-	 *  DMS Pane to the "Alert Msg" pane and sets the MULTI on that panel.
-	 */
-	private IAction previewMsg = new IAction("alert.dms.preview") {
-		@Override
-		protected void doActionPerformed(ActionEvent ev) throws Exception {
-			dmsPane.setSelectedComponent(alertMsgPnl);
-			String multi = multiBox.getText();
-			alertMsgPnl.setMulti(multi);
-		}
-	};
+	/** Select a DMS at the specified point */
+	public void selectDmsInTable(Point2D p) {
+		MapObject mo = dms_manager.getLayerState().search(p);
+		DMS dms = dms_manager.findProxy(mo);
+		selectDmsInTable(dms);
+	}
 
-	/** Action to revert the message in the MULTI box back to the original
-	 *  MULTI (either deployed or auto).
-	 */
-	private IAction revertMsg = new IAction("alert.dms.revert") {
-		@Override
-		protected void doActionPerformed(ActionEvent ev) throws Exception {
-			dmsPane.setSelectedComponent(alertMsgPnl);
-			String multi = getAlertMulti();
-			multiBox.setText(multi);
-			alertMsgPnl.setMulti(multi);
+	/** Select a DMS in the table */
+	private void selectDmsInTable(DMS dms) {
+		for (int row = 0; row < dms_mdl.getRowCount(); row++) {
+			Object qd = dms_mdl.getValueAt(row, 0);
+			if (qd.equals(dms)) {
+				dms_tbl.setRowSelectionInterval(row, row);
+				dms_tbl.scrollRectToVisible(new Rectangle(
+					dms_tbl.getCellRect(row, 0, true)));
+				return;
+			}
 		}
-	};
+		dms_tbl.clearSelection();
+	}
 }

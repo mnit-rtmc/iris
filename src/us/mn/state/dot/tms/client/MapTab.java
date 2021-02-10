@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 	public ProxyManager<T> getManager() {
 		return manager;
 	}
-	
+
 	/** Get the tab ID */
 	public String getTabId() {
 		return manager.getSonarType();
@@ -89,11 +89,6 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 	/** Initialize the map tab */
 	abstract public void initialize();
 
-	/** Perform any operations that need to happen after the tab is added to
-	 *  the ScreenPane. By default this does nothing.
-	 */
-	public void postInit() { }
-	
 	/** Perform any clean up necessary */
 	public void dispose() {
 		ProxySelectionModel<T> mdl = getSelectionModel();
@@ -128,9 +123,4 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 	public boolean isSelectedTab() {
 		return side_pnl.getSelectedTab() == this;
 	}
-	
-	/** Set a proxy for selection. Must be implemented by child classes to do
-	 *  anything.
-	 */
-	public void setSelectedProxy(T proxy) { }
 }

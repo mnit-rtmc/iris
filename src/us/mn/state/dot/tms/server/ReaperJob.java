@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,9 @@ import java.util.Calendar;
 import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.AlertInfo;
+import us.mn.state.dot.tms.AlertInfoHelper;
+import us.mn.state.dot.tms.AlertState;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Incident;
@@ -34,9 +37,15 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  */
 public class ReaperJob extends Job {
 
-	/** Get the incident clear time threshold (ms) */
+	/** Get the incident reap time threshold (ms) */
 	static private long getIncidentClearThreshold() {
 		int secs = SystemAttrEnum.INCIDENT_CLEAR_SECS.getInt();
+		return secs * (long) 1000;
+	}
+
+	/** Get the alert reap time threshold (ms) */
+	static private long getAlertClearThreshold() {
+		int secs = SystemAttrEnum.ALERT_CLEAR_SECS.getInt();
 		return secs * (long) 1000;
 	}
 
@@ -49,11 +58,15 @@ public class ReaperJob extends Job {
 	/** List of zombie incidents */
 	private final ArrayList<IncidentImpl> zombie_incs;
 
+	/** List of zombie alerts */
+	private final ArrayList<AlertInfoImpl> zombie_alerts;
+
 	/** Create a new job to reap dead stuff */
 	public ReaperJob() {
 		super(Calendar.MINUTE, 1, Calendar.SECOND, OFFSET_SECS);
 		zombie_msgs = new ArrayList<SignMessageImpl>();
 		zombie_incs = new ArrayList<IncidentImpl>();
+		zombie_alerts = new ArrayList<AlertInfoImpl>();
 	}
 
 	/** Perform the reaper job */
@@ -61,6 +74,7 @@ public class ReaperJob extends Job {
 	public void perform() {
 		reapSignMessages();
 		reapIncidents();
+		reapAlerts();
 		FeedBucket.purgeExpired();
 	}
 
@@ -177,5 +191,58 @@ public class ReaperJob extends Job {
 		Incident i = IncidentHelper.lookup(inc.getName());
 		if ((i == inc) && isReapable(inc))
 			inc.notifyRemove();
+	}
+
+	/** Reap alerts which have been cleared for awhile */
+	private void reapAlerts() {
+		if (zombie_alerts.isEmpty())
+			findReapableAlerts();
+		else {
+			for (AlertInfoImpl ai: zombie_alerts)
+				reapAlert(ai);
+			zombie_alerts.clear();
+		}
+	}
+
+	/** Find all reapable alerts */
+	private void findReapableAlerts() {
+		Iterator<AlertInfo> it = AlertInfoHelper.iterator();
+		while (it.hasNext()) {
+			AlertInfo ai = it.next();
+			if (ai instanceof AlertInfoImpl) {
+				AlertInfoImpl aii = (AlertInfoImpl) ai;
+				if (isReapable(aii))
+					zombie_alerts.add(aii);
+			}
+		}
+	}
+
+	/** Check if an alert is reapable */
+	private boolean isReapable(AlertInfoImpl ai) {
+		return ai.getAlertState() == AlertState.CLEARED.ordinal()
+		    && isPastReapTime(ai);
+	}
+
+	/** Check if it is past the time an alert may be reaped */
+	private boolean isPastReapTime(AlertInfoImpl ai) {
+		return getReapTime(ai) < TimeSteward.currentTimeMillis();
+	}
+
+	/** Get the time when alert may be reaped */
+	private long getReapTime(AlertInfoImpl ai) {
+		return ai.getClearTime() + getAlertClearThreshold();
+	}
+
+	/** Reap an alert */
+	private void reapAlert(AlertInfoImpl ai) {
+		// Make sure the alert has not already been
+		// reaped by looking it up in the namespace.
+		// This is needed because objects are removed
+		// asynchronously from the namespace.
+		AlertInfo a = AlertInfoHelper.lookup(ai.getName());
+		if ((a == ai) && isReapable(ai))
+			ai.notifyRemove();
+		// FIXME: also reap alert's action plan, sign groups, quick
+		// 	  msgs, time actions and dms actions
 	}
 }

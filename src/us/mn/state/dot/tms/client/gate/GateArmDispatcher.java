@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2019  Minnesota Department of Transportation
+ * Copyright (C) 2013-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Iterator;
+import java.util.TreeSet;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -369,15 +370,9 @@ public class GateArmDispatcher extends IPanel
 	/** Update the action plan */
 	private void updateActionPlan(GateArmArray ga) {
 		ActionPlan ap = ga.getActionPlan();
-		Iterator<DMS> it = (ap != null)
-		                 ? DmsActionHelper.findSigns(ap)
-		                 : null;
-		warn_dms_1.setSelected((it != null && it.hasNext())
-		                      ? it.next()
-		                      : null);
-		warn_dms_2.setSelected((it != null && it.hasNext())
-		                      ? it.next()
-		                      : null);
+		TreeSet<DMS> signs = DmsActionHelper.findSigns(ap);
+		warn_dms_1.setSelected(signs.pollFirst());
+		warn_dms_2.setSelected(signs.pollFirst());
 	}
 
 	/** Update the interlock label */

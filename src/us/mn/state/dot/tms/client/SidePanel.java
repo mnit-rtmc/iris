@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2020  Minnesota Department of Transportation
+ * Copyright (C) 2007-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,12 +74,12 @@ public class SidePanel extends JPanel {
 		if (mt != null) {
 			setSelectedLayer(getHomeProxyLayerState(mt));
 			sel_tab = mt.getTabId();
-			
+
 			// if the alert tab was selected, change the visibility
 			// of the DMS layer to allow granular control of DMS
 			// visibility by alert.
 			LayerState dmsLayer = map.getTypeLayer(DMS.SONAR_TYPE);
-			if (sel_tab == AlertTab.getAlertTabId()) {
+			if (mt instanceof AlertTab) {
 				// force visibility to false (off) - the alert
 				// tab will draw specific DMS when needed
 				dmsLayer.setVisibleForced(false);
@@ -128,7 +128,6 @@ public class SidePanel extends JPanel {
 			if (tab_pane.getTabCount() == 1)
 				setSelectedLayer(pls);
 		}
-		mt.postInit();
 	}
 
 	/** Get the home proxy layer state for a map tab */

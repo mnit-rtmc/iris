@@ -33,13 +33,13 @@ import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Alarm;
+import us.mn.state.dot.tms.AlertConfig;
+import us.mn.state.dot.tms.AlertInfo;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.CameraTemplate;
 import us.mn.state.dot.tms.CameraVidSourceOrder;
-import us.mn.state.dot.tms.CapResponse;
-import us.mn.state.dot.tms.CapUrgencyField;
 import us.mn.state.dot.tms.DayMatcher;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DmsAction;
@@ -48,14 +48,10 @@ import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.IpawsAlert;
-import us.mn.state.dot.tms.IpawsConfig;
-import us.mn.state.dot.tms.IpawsDeployer;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.MeterAction;
-import us.mn.state.dot.tms.Notification;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
@@ -275,54 +271,22 @@ public class SonarState extends Client {
 		return inc_cache;
 	}
 
-	/** Cache of IpawsAlert objects */
-	private final TypeCache<IpawsAlert> ipaws_alert_cache;
-	
-	/** Get the IPAWS cache */
-	public TypeCache<IpawsAlert> getIpawsAlertCache() {
-		return ipaws_alert_cache;
-	}
-	
-	/** Cache of IpawsDeployer objects */
-	private final TypeCache<IpawsDeployer> ipaws_deployer_cache;
-	
-	/** Get the IPAWS Alert Deployer cache */
-	public TypeCache<IpawsDeployer> getIpawsDeployerCache() {
-		return ipaws_deployer_cache;
-	}
-	
-	/** Cache of IpawsConfig objects */
-	private final TypeCache<IpawsConfig> ipaws_config_cache;
-	
-	/** Get the IPAWS Alert Deployer cache */
-	public TypeCache<IpawsConfig> getIpawsConfigCache() {
-		return ipaws_config_cache;
-	}
-	
-	/** Cache of CapResponse objects */
-	private final TypeCache<CapResponse> cap_response_cache;
-	
-	/** Get the CapResponse cache */
-	public TypeCache<CapResponse> getCapResponseCache() {
-		return cap_response_cache;
-	}
-	
-	/** Cache of CapUrgencyField objects */
-	private final TypeCache<CapUrgencyField> cap_urgency_cache;
-	
-	/** Get the CapUrgencyField cache */
-	public TypeCache<CapUrgencyField> getCapUrgencyFieldCache() {
-		return cap_urgency_cache;
+	/** Cache of alert config objects */
+	private final TypeCache<AlertConfig> alert_configs;
+
+	/** Get the alert config cache */
+	public TypeCache<AlertConfig> getAlertConfigs() {
+		return alert_configs;
 	}
 
-	/** Cache of Notification objects */
-	private final TypeCache<Notification> notification_cache;
-	
-	/** Get the Notification cache */
-	public TypeCache<Notification> getNotificationCache() {
-		return notification_cache;
+	/** Cache of alert info objects */
+	private final TypeCache<AlertInfo> alert_infos;
+
+	/** Get the alert info cache */
+	public TypeCache<AlertInfo> getAlertInfos() {
+		return alert_infos;
 	}
-	
+
 	/** Cache of LCS objects */
 	private final LcsCache lcs_cache;
 
@@ -516,7 +480,7 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of words */
-	private final TypeCache<Word> words = 
+	private final TypeCache<Word> words =
 		new TypeCache<Word>(Word.class, this);
 
 	/** Get the weather sensor cache */
@@ -541,7 +505,7 @@ public class SonarState extends Client {
 	public TypeCache<RptConduit> getRptConduits() {
 		return rpt_conduits;
 	}
-	
+
 	/** Cache of camera templates */
 	private final TypeCache<CameraTemplate> cam_templates =
 		new TypeCache<CameraTemplate>(CameraTemplate.class, this);
@@ -550,7 +514,7 @@ public class SonarState extends Client {
 	public TypeCache<CameraTemplate> getCamTemplates() {
 		return cam_templates;
 	}
-	
+
 	/** Cache of video source templates */
 	private final TypeCache<VidSourceTemplate> vid_src_templates =
 		new TypeCache<VidSourceTemplate>(VidSourceTemplate.class, this);
@@ -559,7 +523,7 @@ public class SonarState extends Client {
 	public TypeCache<VidSourceTemplate> getVidSrcTemplates() {
 		return vid_src_templates;
 	}
-	
+
 	/** Cache of video source templates */
 	private final TypeCache<CameraVidSourceOrder> cam_vid_src_order =
 		new TypeCache<CameraVidSourceOrder>(CameraVidSourceOrder.class,
@@ -569,7 +533,7 @@ public class SonarState extends Client {
 	public TypeCache<CameraVidSourceOrder> getCamVidSrcOrder() {
 		return cam_vid_src_order;
 	}
-	
+
 	/** Create a new Sonar state */
 	public SonarState(Properties props, ExceptionHandler h)
 		throws IOException, ConfigurationError, NoSuchFieldException,
@@ -585,18 +549,10 @@ public class SonarState extends Client {
 		det_cache = new DetCache(this);
 		dms_cache = new DmsCache(this);
 		inc_cache = new IncCache(this);
-		ipaws_alert_cache = new TypeCache<IpawsAlert>(IpawsAlert.class,
+		alert_configs = new TypeCache<AlertConfig>(AlertConfig.class,
 			this);
-		ipaws_deployer_cache = new TypeCache<IpawsDeployer>(
-			IpawsDeployer.class, this);
-		ipaws_config_cache = new TypeCache<IpawsConfig>(
-			IpawsConfig.class, this);
-		cap_response_cache = new TypeCache<CapResponse>(
-			CapResponse.class, this);
-		cap_urgency_cache = new TypeCache<CapUrgencyField>(
-			CapUrgencyField.class, this);
-		notification_cache = new TypeCache<Notification>(
-			Notification.class, this);
+		alert_infos = new TypeCache<AlertInfo>(AlertInfo.class,
+			this);
 		lcs_cache = new LcsCache(this);
 		gate_arm_array_model = new ProxyListModel<GateArmArray>(
 			gate_arm_arrays);
@@ -726,12 +682,8 @@ public class SonarState extends Client {
 		populateReadable(cam_templates);
 		populateReadable(vid_src_templates);
 		populateReadable(cam_vid_src_order);
-		populateReadable(ipaws_alert_cache);
-		populateReadable(ipaws_deployer_cache);
-		populateReadable(ipaws_config_cache);
-		populateReadable(cap_response_cache);
-		populateReadable(cap_urgency_cache);
-		populateReadable(notification_cache);
+		populateReadable(alert_configs);
+		populateReadable(alert_infos);
 	}
 
 	/** Look up the specified connection */

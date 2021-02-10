@@ -16,6 +16,10 @@ package us.mn.state.dot.tms.server.comm.ipaws;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -29,6 +33,13 @@ import us.mn.state.dot.tms.server.comm.OpQueue;
  */
 public class IpawsThread extends CommThread<IpawsProperty> {
 
+	/** Date formatter for formatting dates in IPAWS format */
+	static private final SimpleDateFormat IPAWS_FORMAT =
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+	static {
+		IPAWS_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+	}
+
 	/** Create a new IPAWS thread */
 	public IpawsThread(IpawsPoller p, OpQueue<IpawsProperty> q, URI s,
 		String u, int rt, int nrd, DebugLog log)
@@ -41,14 +52,31 @@ public class IpawsThread extends CommThread<IpawsProperty> {
 	protected Messenger createMessenger(URI s, String u, int rt, int nrd)
 		throws MessengerException, IOException
 	{
-		String path = s.getPath();
-		if (path.endsWith("/")) {
-			// Add date since last successful response
-			s = new URI(s.getScheme(), s.getAuthority(),
-				path + CapReader.getReqDate(), s.getQuery(),
-				s.getFragment());
+		try {
+			String uri = createURI_IPAWS(u).toString();
+			IpawsPoller.slog("URI: " + uri);
+			return Messenger.create(s, uri, rt, nrd);
 		}
-		IpawsPoller.slog("URI: " + s);
-		return Messenger.create(s, u, rt, nrd);
+		catch (URISyntaxException e) {
+			throw new MessengerException(e);
+		}
+	}
+
+	/** Add date since last successful response to URI path.
+	 *
+	 * This date format is used by the IPAWS system. */
+	private URI createURI_IPAWS(String uri) throws URISyntaxException {
+		URI u = new URI(uri);
+		if (u.getPath().endsWith("/")) {
+			return new URI(u.getScheme(), u.getAuthority(),
+				u.getPath() + getReqDate(),
+				u.getQuery(), u.getFragment());
+		} else
+			return u;
+	}
+
+	/** Get date for IPAWS path API request */
+	static private String getReqDate() {
+		return IPAWS_FORMAT.format(CapReader.getReqDate());
 	}
 }
