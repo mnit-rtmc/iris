@@ -18,9 +18,9 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * IPAWS Alert Configuration object.
+ * Alert Configuration object.
  *
- * Connects a particular alert type ("event" field) to a number of sign
+ * Associates alert parameters ("event", "response type", "urgency") to sign
  * group/quick message pairs to control which signs are eligible for inclusion
  * in an alert and which message template to use.
  *

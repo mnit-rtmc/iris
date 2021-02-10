@@ -13,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ipaws;
+package us.mn.state.dot.tms.server.comm.cap;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,18 +21,18 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
- * Container for IPAWS alert property.
+ * Container for a CAP property.
  *
  * @author Gordon Parikh
  * @author Douglas Lau
  */
-public class IpawsProperty extends ControllerProperty {
+public class CapProperty extends ControllerProperty {
 
 	/** Feed name */
 	private final String alertFeed;
 
-	/** Create a new IPAWS property */
-	public IpawsProperty(String afd) {
+	/** Create a new CAP property */
+	public CapProperty(String afd) {
 		alertFeed = afd;
 	}
 

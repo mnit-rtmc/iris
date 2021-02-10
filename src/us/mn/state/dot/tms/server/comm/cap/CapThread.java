@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ipaws;
+package us.mn.state.dot.tms.server.comm.cap;
 
 import java.io.IOException;
 import java.net.URI;
@@ -27,11 +27,11 @@ import us.mn.state.dot.tms.server.comm.MessengerException;
 import us.mn.state.dot.tms.server.comm.OpQueue;
 
 /**
- * IPAWS thread, used to provide a Messenger with date for REST API.
+ * CAP thread, used to provide a Messenger with date required by IPAWS-OPEN.
  *
  * @author Douglas Lau
  */
-public class IpawsThread extends CommThread<IpawsProperty> {
+public class CapThread extends CommThread<CapProperty> {
 
 	/** Date formatter for formatting dates in IPAWS format */
 	static private final SimpleDateFormat IPAWS_FORMAT =
@@ -40,8 +40,8 @@ public class IpawsThread extends CommThread<IpawsProperty> {
 		IPAWS_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
 
-	/** Create a new IPAWS thread */
-	public IpawsThread(IpawsPoller p, OpQueue<IpawsProperty> q, URI s,
+	/** Create a new CAP thread */
+	public CapThread(CapPoller p, OpQueue<CapProperty> q, URI s,
 		String u, int rt, int nrd, DebugLog log)
 	{
 		super(p, q, s, u, rt, nrd, log);
@@ -54,7 +54,7 @@ public class IpawsThread extends CommThread<IpawsProperty> {
 	{
 		try {
 			String uri = createURI_IPAWS(u).toString();
-			IpawsPoller.slog("URI: " + uri);
+			CapPoller.slog("URI: " + uri);
 			return Messenger.create(s, uri, rt, nrd);
 		}
 		catch (URISyntaxException e) {

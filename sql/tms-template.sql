@@ -1271,7 +1271,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 39	GPS RedLion
 40	Cohu Helios PTZ
 41	Streambed
-42	IPAWS Alert
+42	CAP Feed
 \.
 
 CREATE TABLE iris.comm_config (

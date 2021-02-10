@@ -41,7 +41,7 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 	/** Interval value of one hour (ms) */
 	static private final long HOUR_MS = 60 * 60 * 1000;
 
-	/** Load all the IPAWS alert config objects */
+	/** Load all the alert config objects */
 	static public void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, AlertConfigImpl.class);
 		store.query("SELECT name, event, response_type, urgency, " +

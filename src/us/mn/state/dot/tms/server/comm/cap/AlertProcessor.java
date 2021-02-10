@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ipaws;
+package us.mn.state.dot.tms.server.comm.cap;
 
 import org.json.JSONObject;
 import us.mn.state.dot.sched.Job;
@@ -26,8 +26,8 @@ import us.mn.state.dot.tms.server.CapAlert;
  */
 public class AlertProcessor {
 
-	/** Timer thread for IPAWS jobs */
-	static private final Scheduler SCHED = new Scheduler("ipaws");
+	/** Timer thread for CAP jobs */
+	static private final Scheduler SCHED = new Scheduler("cap");
 
 	/** Process one alert */
 	public void processAlert(JSONObject ja) {
@@ -40,6 +40,6 @@ public class AlertProcessor {
 				}
 			});
 		} else
-			IpawsPoller.slog("identifier not found!");
+			CapPoller.slog("identifier not found!");
 	}
 }

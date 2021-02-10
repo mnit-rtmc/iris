@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -162,8 +162,8 @@ public enum CommProtocol {
 	/** Streambed (41) */
 	STREAMBED("Streambed", false),
 	
-	/** IPAWS-OPEN Alert System (42) */
-	IPAWS("IPAWS Alerts", false);
+	/** CAP feed (such as IPAWS-OPEN) (42) */
+	CAP("CAP Feed", false);
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {

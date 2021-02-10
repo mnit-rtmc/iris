@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ipaws;
+package us.mn.state.dot.tms.server.comm.cap;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;

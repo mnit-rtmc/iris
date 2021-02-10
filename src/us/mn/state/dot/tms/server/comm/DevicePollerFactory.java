@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2020  Minnesota Department of Transportation
+ * Copyright (C) 2011-2021  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.CommLinkHelper;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.server.comm.axisptz.AxisPTZPoller;
 import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
+import us.mn.state.dot.tms.server.comm.cap.CapPoller;
 import us.mn.state.dot.tms.server.comm.cbw.CBWPoller;
 import us.mn.state.dot.tms.server.comm.cohuptz.CohuPTZPoller;
 import us.mn.state.dot.tms.server.comm.dinrelay.DinRelayPoller;
@@ -31,7 +32,6 @@ import us.mn.state.dot.tms.server.comm.g4.G4Poller;
 import us.mn.state.dot.tms.server.comm.redlion.RedLionPoller;
 import us.mn.state.dot.tms.server.comm.incfeed.IncFeedPoller;
 import us.mn.state.dot.tms.server.comm.infinova.InfinovaPoller;
-import us.mn.state.dot.tms.server.comm.ipaws.IpawsPoller;
 import us.mn.state.dot.tms.server.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.server.comm.mndot.MndotPoller;
 import us.mn.state.dot.tms.server.comm.monstream.MonStreamPoller;
@@ -117,8 +117,8 @@ public class DevicePollerFactory {
 			return new CohuPTZPoller(link, protocol);
 		case STREAMBED:
 			return new StreambedPoller(link);
-		case IPAWS:
-			return new IpawsPoller(link);
+		case CAP:
+			return new CapPoller(link);
 		default:
 			return null;
 		}

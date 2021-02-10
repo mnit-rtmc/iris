@@ -13,53 +13,54 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ipaws;
+package us.mn.state.dot.tms.server.comm.cap;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
- * This operation reads alerts from the IPAWS system and parses them for
- * storage in the IPAWS Alert Bucket.
+ * This operation reads alerts from a CAP feed.
  *
  * @author Douglas Lau
  * @author Gordon Parikh
  */
-public class OpTestIpaws extends OpReadIpaws {
+public class OpReadCap extends OpController<CapProperty> {
 
-	/** Path to test file.
-	 * TODO make this path a system attribute */
-	static private final String TEST_FILE =
-		"/var/log/iris/Ipaws_Test_Alert.xml";
+	/** Alert feed name */
+	protected final String alertFeed;
 
 	/** Create a new operation to read alert feed */
-	protected OpTestIpaws(ControllerImpl c, String fid) {
-		super(PriorityLevel.DIAGNOSTIC, c, fid);
+	protected OpReadCap(ControllerImpl c, String fid) {
+		this(PriorityLevel.DATA_30_SEC, c, fid);
+	}
+
+	/** Create a new operation to read alert feed with custom priority level.
+	 */
+	protected OpReadCap(PriorityLevel p, ControllerImpl c, String fid) {
+		super(p, c);
+		alertFeed = fid;
 	}
 
 	/** Create the first phase of the operation */
 	@Override
-	protected Phase<IpawsProperty> phaseOne() {
-		return new PhaseTestIpaws();
+	protected Phase<CapProperty> phaseOne() {
+		return new PhaseReadCap();
 	}
 
-	/** Phase to read the test alert */
-	protected class PhaseTestIpaws extends Phase<IpawsProperty> {
+	/** Phase to read the alert feed */
+	protected class PhaseReadCap extends Phase<CapProperty> {
 
 		/** Execute the phase */
-		protected Phase<IpawsProperty> poll(
-			CommMessage<IpawsProperty> mess) throws IOException
+		protected Phase<CapProperty> poll(
+			CommMessage<CapProperty> mess) throws IOException
 		{
-			File testAlert = new File(TEST_FILE);
-			InputStream is = new FileInputStream(testAlert);
-			CapReader reader = new CapReader(is);
-			reader.parse();
+			CapPoller.slog("polling feed " + alertFeed);
+			mess.add(new CapProperty(alertFeed));
+			mess.queryProps();
 			return null;
 		}
 	}
@@ -67,14 +68,14 @@ public class OpTestIpaws extends OpReadIpaws {
 	/** Handle a communication error */
 	@Override
 	public void handleCommError(EventType et, String msg) {
-		IpawsPoller.slog("TEST ERROR: " + msg);
+		CapPoller.slog("ERROR: " + msg);
 		super.handleCommError(et, msg);
 	}
 
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		IpawsPoller.slog("finished test " + alertFeed);
+		CapPoller.slog("finished feed " + alertFeed);
 		super.cleanup();
 	}
 }

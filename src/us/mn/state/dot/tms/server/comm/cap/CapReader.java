@@ -13,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ipaws;
+package us.mn.state.dot.tms.server.comm.cap;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -87,7 +87,7 @@ public class CapReader {
 			REQ_SUCCESS = now;
 		}
 		catch (ParserConfigurationException | SAXException e) {
-			IpawsPoller.slog("parse error: " + e.getMessage());
+			CapPoller.slog("parse error: " + e.getMessage());
 			saveXmlFile();
 		}
 	}
@@ -111,7 +111,7 @@ public class CapReader {
 	/** Save the XML contents to a file */
 	private void saveXmlFile() throws IOException {
 		if (getXmlSaveEnabled()) {
-			String fn = "/var/log/iris/ipaws_err_" + DT_FMT.format(
+			String fn = "/var/log/iris/cap_err_" + DT_FMT.format(
 				TimeSteward.getDateInstance()) + ".xml";
 			baos.writeTo(new FileOutputStream(fn));
 		}

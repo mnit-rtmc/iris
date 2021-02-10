@@ -323,4 +323,6 @@ INSERT INTO iris.plan_phase (name, hold_time) VALUES
 	('alert_during', 0),
 	('alert_after', 0);
 
+UPDATE iris.comm_protocol SET description = 'CAP Feed' WHERE id = 42;
+
 COMMIT;

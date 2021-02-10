@@ -54,6 +54,7 @@ have enough disk space available.
 Filename               | Description
 -----------------------|-----------------
 `{comm-link-name}.log` | Comm link log
+`alert`                | Alert information, including [CAP] protocol
 `bottleneck`           | Bottleneck calculation for VSA algorithm
 `canoga`               | [Canoga] protocol
 `cbw`                  | [CBW] protocol
@@ -65,7 +66,6 @@ Filename               | Description
 `feed`                 | [Msg-Feed] protocol
 `g4`                   | [G4] protocol
 `infinova`             | [Infinova] protocol
-`ipaws`                | [IPAWS Alerts] protocol
 `kadaptive`            | K Adaptive metering algorithm
 `manchester`           | [Manchester] protocol
 `meter`                | Ramp meter configuration errors
@@ -92,6 +92,7 @@ Filename               | Description
 
 
 [Canoga]: comm_links.html#canoga
+[CAP]: comm_links.html#cap
 [CBW]: comm_links.html#cbw
 [DIN-Relay]: comm_links.html#din-relay
 [district]: installation.html#server-properties

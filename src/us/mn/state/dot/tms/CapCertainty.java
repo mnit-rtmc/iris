@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +18,7 @@ package us.mn.state.dot.tms;
 /**
  * Common Alerting Protocol (CAP) certainty field value enum.
  *
- * Used for IPAWS alert processing for generating messages for posting to DMS.
+ * Used for alert processing for generating messages for posting to DMS.
  * Values are taken from the OASIS CAP Standard v1.2.  Values are ordered from
  * least (Unknown/Unlikely) to most (Observed) emphatic.
  * The ordinal values correspond to the records in the cap.certainty look-up

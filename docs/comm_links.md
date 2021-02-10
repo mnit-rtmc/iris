@@ -72,6 +72,14 @@ The `canoga` protocol can collect [vehicle detection] data, with
 _Multi-drop_ is supported with drops 1 - 255.  Up to 4 detectors can be
 associated with each [controller], using [IO pin]s 1 - 4.
 
+### CAP
+
+The Common Alerting Protocol [CAP] is used for polling feeds such as the
+Integrated Public Alert and Warning System [IPAWS].  Alerts can be used to
+automatically post weather and other messages to Dynamic Message Signs.  For
+IPAWS, this requires an `HTTPS` URI provided by the Federal Emergency Management
+Agency and a [controller] set to `ACTIVE` condition.
+
 ### CBW
 
 The `cbw` protocol can be used for [beacons], using a Control-By-Web controller.
@@ -152,13 +160,6 @@ _Latitude_ and _longitude_ define coördinates using the WGS 84 datum.
 The `infinova` protocol can be used for [PTZ] control of Infinova [camera]s.
 The _default scheme_ is `tcp`.  _Multi-drop_ is supported with drops 1 - 254.
 One camera can be associated with each [controller], using [IO pin] 1.
-
-### IPAWS Alerts
-
-The `IPAWS Alerts` protocol is used for polling the [Integrated Public Alert
-and Warning System (IPAWS)] to allow automated posting of weather and other
-alerts to Dynamic Message Signs.  This requires an `HTTPS` URI provided by the
-Federal Emergency Management Agency and a [controller] set to `ACTIVE` condition.
 
 ### Manchester
 
@@ -331,6 +332,7 @@ camera can be associated with each [controller], using [IO pin] 1.
 [binned data]: vehicle_detection.html#binned-data
 [camera]: cameras.html
 [camera keyboard]: cameras.html#camera-keyboards
+[CAP]: cap.html
 [changeable LCS]: lcs.html#changeable-lcs
 [controller]: controllers.html
 [device]: controllers.html#devices
@@ -342,7 +344,7 @@ camera can be associated with each [controller], using [IO pin] 1.
 [incidents]: incidents.html
 [indications]: lcs.html#indications
 [IO pin]: controllers.html#io-pins
-[Integrated Public Alert and Warning System (IPAWS)]: ipaws.html
+[IPAWS]: https://www.fema.gov/emergency-managers/practitioners/integrated-public-alert-warning-system
 [LCS]: lcs.html
 [monstream]: video.html#monstream
 [MULTI]: dms.html#multi
