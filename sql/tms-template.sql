@@ -3685,6 +3685,7 @@ TRA	Tropical Storm Watch
 TRW	Tropical Storm Warning
 TSA	Tsunami Watch
 TSW	Tsunami Warning
+UPY	Heavy Freezing Spray Advisory
 VOW	Volcano Warning
 WCY	Wind Chill Advisory
 WIY	Wind Advisory
