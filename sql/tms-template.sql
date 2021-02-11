@@ -152,6 +152,7 @@ camera_video_event_purge_days	14
 camera_wiper_precip_mm_hr	8
 cap_alert_purge_days	7
 cap_xml_save_enable	true
+clearguide_key	
 client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
@@ -1272,6 +1273,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 40	Cohu Helios PTZ
 41	Streambed
 42	CAP Feed
+43	ClearGuide
 \.
 
 CREATE TABLE iris.comm_config (
@@ -2541,6 +2543,7 @@ COPY iris.sign_msg_source (bit, source) FROM stdin;
 10	slow warning
 11	speed advisory
 12	parking
+13	clearguide
 \.
 
 CREATE FUNCTION iris.sign_msg_sources(INTEGER) RETURNS TEXT

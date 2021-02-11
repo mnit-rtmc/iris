@@ -13,7 +13,8 @@ INSERT INTO iris.system_attribute (name, value) VALUES
 	('alert_sign_thresh_auto_meters', '1000'),
 	('alert_sign_thresh_opt_meters', '4000'),
 	('cap_alert_purge_days', '7'),
-	('cap_xml_save_enable', 'true');
+	('cap_xml_save_enable', 'true'),
+	('clearguide_key', '');
 DELETE FROM iris.system_attribute WHERE name LIKE 'ipaws_%';
 
 DROP TABLE iris.cap_response;
@@ -53,6 +54,7 @@ INSERT INTO iris.role_capability (role, capability) VALUES
 	('operator', 'alert_tab');
 
 UPDATE iris.sign_msg_source SET source = 'alert' WHERE bit = 6;
+INSERT INTO iris.sign_msg_source (bit, source) VALUES (13, 'clearguide');
 
 CREATE TABLE cap.status (
 	id INTEGER PRIMARY KEY,
@@ -324,5 +326,6 @@ INSERT INTO iris.plan_phase (name, hold_time) VALUES
 	('alert_after', 0);
 
 UPDATE iris.comm_protocol SET description = 'CAP Feed' WHERE id = 42;
+INSERT INTO iris.comm_protocol(id, description) VALUES (43, 'ClearGuide');
 
 COMMIT;

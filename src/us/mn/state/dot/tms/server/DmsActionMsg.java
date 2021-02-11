@@ -748,6 +748,7 @@ public class DmsActionMsg {
 		String dms, int rid, int min, String mode, int ridx)
 	{
 		addSrc(SignMsgSource.clearguide);
+		addSrc(SignMsgSource.external);
 		return calcClearGuideAdvisory(dms, rid, min, mode, ridx);
 	}
 

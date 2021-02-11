@@ -93,7 +93,7 @@ public class Tokens {
 	/** Get tokens age in seconds */
 	protected int getAge() {
 		final long now_ms = System.currentTimeMillis();
-		return new Long(now_ms - auth_time).intValue() / 1000;
+		return Long.valueOf(now_ms - auth_time).intValue() / 1000;
 	}
 
 	/** To string */
