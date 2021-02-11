@@ -116,7 +116,7 @@ PostGIS provides both command-line and graphical tools to import shapefiles.
 To import the file via the command line, execute the following command on the
 server:
 ```
-shp2pgsql -G <nws_shapefile>.shp iris.nws_zones | psql tms
+shp2pgsql -G <nws_shapefile>.shp cap.nws_zones | psql tms
 ```
 
 To import the file via the graphical utility, open the "PostGIS Shapefile
@@ -127,7 +127,7 @@ and make sure the box next to "Load into GEOGRAPHY" column is selected, then
 click "OK." Finally, click the "Import" button and the file should be imported.
 
 NOTE: When using the graphical method you may need to change the name and/or
-schema of the table to iris.nws_zones using another tool (e.g. psql or pgAdmin).
+schema of the table to cap.nws_zones using another tool (e.g. psql or pgAdmin).
 
 NOTE: Alert areas may change (NWS updates the file roughly every six months
 or), so it is important to keep them updated. Administrators should keep
