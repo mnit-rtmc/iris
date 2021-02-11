@@ -219,8 +219,9 @@ public class ReaperJob extends Job {
 
 	/** Check if an alert is reapable */
 	private boolean isReapable(AlertInfoImpl ai) {
-		return ai.getAlertState() == AlertState.CLEARED.ordinal()
-		    && isPastReapTime(ai);
+		// FIXME: also check if ACTIVE + past post-alert time
+		return isPastReapTime(ai) &&
+			ai.getAlertState() != AlertState.ACTIVE.ordinal();
 	}
 
 	/** Check if it is past the time an alert may be reaped */
