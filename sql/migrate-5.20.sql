@@ -1,10 +1,12 @@
 \set ON_ERROR_STOP
 
-SET SESSION AUTHORIZATION 'tms';
 BEGIN;
-
 CREATE SCHEMA cap;
 ALTER SCHEMA cap OWNER TO tms;
+COMMIT;
+
+SET SESSION AUTHORIZATION 'tms';
+BEGIN;
 
 SELECT iris.update_version('5.19.0', '5.20.0');
 
@@ -24,18 +26,18 @@ DROP TABLE event.ipaws_deployer;
 DROP TABLE event.ipaws_alert;
 DROP TABLE event.notification;
 
-DELETE FROM iris.sonar_type
-	WHERE name IN ('cap_response', 'cap_urgency', 'ipaws_alert',
-	               'ipaws_config', 'ipaws_deployer', 'notification');
-
-INSERT INTO iris.sonar_type (name) VALUES ('alert_config'), ('alert_info');
-
 DELETE FROM iris.role_capability WHERE capability = 'ipaws_admin';
 DELETE FROM iris.role_capability WHERE capability = 'ipaws_deploy';
 DELETE FROM iris.role_capability WHERE capability = 'ipaws_tab';
 
 DELETE FROM iris.privilege WHERE capability LIKE 'ipaws_%';
 DELETE FROM iris.privilege WHERE type_n = 'notification';
+
+DELETE FROM iris.sonar_type
+	WHERE name IN ('cap_response', 'cap_urgency', 'ipaws_alert',
+	               'ipaws_config', 'ipaws_deployer', 'notification');
+
+INSERT INTO iris.sonar_type (name) VALUES ('alert_config'), ('alert_info');
 
 UPDATE iris.capability SET name = 'alert_admin' WHERE name = 'ipaws_admin';
 UPDATE iris.capability SET name = 'alert_deploy' WHERE name = 'ipaws_deploy';
