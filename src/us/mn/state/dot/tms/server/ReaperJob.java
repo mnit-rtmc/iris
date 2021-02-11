@@ -242,7 +242,5 @@ public class ReaperJob extends Job {
 		AlertInfo a = AlertInfoHelper.lookup(ai.getName());
 		if ((a == ai) && isReapable(ai))
 			ai.notifyRemove();
-		// FIXME: also reap alert's action plan, sign groups, quick
-		// 	  msgs, time actions and dms actions
 	}
 }

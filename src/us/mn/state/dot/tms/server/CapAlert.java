@@ -779,8 +779,7 @@ public class CapAlert implements Storable {
 		ActionPlanImpl plan) throws SonarException
 	{
 		SignGroup sign_group = createSignGroup(plan, "ALL", all_dms);
-		String aname = AlertInfoImpl.createUniqueName("ALERT_" +
-			data.event.name() + "_%d");
+		String aname = AlertInfoImpl.createUniqueName();
 		String replaces = null; // FIXME
 		int st = (plan.getActive())
 		       ? AlertState.ACTIVE.ordinal()

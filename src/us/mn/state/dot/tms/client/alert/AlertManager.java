@@ -121,10 +121,9 @@ public class AlertManager extends ProxyManager<AlertInfo> {
 	@Override
 	public String getDescription(AlertInfo proxy) {
 		StringBuilder desc = new StringBuilder();
-		desc.append(proxy.getName().replace("alert_info_",
-			I18N.get("alert") + " "));
-		desc.append(" - " + CapEvent.fromCode(
-			proxy.getEvent()).description);
+		desc.append(CapEvent.fromCode(proxy.getEvent()).description);
+		desc.append(" - ");
+		desc.append(proxy.getAlert());
 		return desc.toString();
 	}
 

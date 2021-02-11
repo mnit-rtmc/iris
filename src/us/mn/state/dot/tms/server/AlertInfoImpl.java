@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,11 +43,12 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
  */
 public class AlertInfoImpl extends BaseObjectImpl implements AlertInfo {
 
-	/** Create a unique AlertInfo record name */
-	static public String createUniqueName(String template) {
-		UniqueNameCreator unc = new UniqueNameCreator(template, 20,
-			(n)->lookupAlertInfo(n));
-		return unc.createUniqueName();
+	/** Create a unique AlertInfo name */
+	static public String createUniqueName() {
+		// Use date/time because records persist in DB after destroyed
+		SimpleDateFormat f = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+		String name = f.format(TimeSteward.currentTimeMillis());
+		return "ai_" + name.substring(0, 16);
 	}
 
 	/** Load all the alert infos */
@@ -166,6 +168,15 @@ public class AlertInfoImpl extends BaseObjectImpl implements AlertInfo {
 		sign_group = grp;
 		action_plan = pln;
 		alert_state = st;
+	}
+
+	/** Destroy an object */
+	public void doDestroy() throws TMSException {
+		// This happens when the SONAR object is being destroyed.
+		// Alerts are stored in the cap schema, and should never
+		// be DELETEd.  Just clear the alert, and it won't get loaded
+		// on the next server restart.
+		clear();
 	}
 
 	/** Log a message for the alert */
@@ -373,7 +384,6 @@ public class AlertInfoImpl extends BaseObjectImpl implements AlertInfo {
 	private void clear() throws TMSException {
 		setAlertStateNotify(AlertState.CLEARED.ordinal());
 		setActiveScheduled(false);
-		clear_time = TimeSteward.currentTimeMillis();
 	}
 
 	/** Set action plan active/scheduled */
@@ -390,6 +400,8 @@ public class AlertInfoImpl extends BaseObjectImpl implements AlertInfo {
 			store.update(this, "alert_state", st);
 			alert_state = st;
 			notifyAttribute("alertState");
+			if (st == AlertState.CLEARED.ordinal())
+				clear_time = TimeSteward.currentTimeMillis();
 		}
 	}
 
@@ -398,6 +410,7 @@ public class AlertInfoImpl extends BaseObjectImpl implements AlertInfo {
 
 	/** Get the time the alert was cleared */
 	public long getClearTime() {
-		return clear_time;
+		long end = end_date.getTime();
+		return (end < clear_time) ? clear_time : end;
 	}
 }
