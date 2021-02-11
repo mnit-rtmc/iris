@@ -105,13 +105,13 @@ group.
 
 Signs that are inside the alert area will be automatically used to display
 messages describing the alert, unless an operator decides to exclude them.
-If the `ipaws_sign_thresh_auto_meters` system attribute is set to a non-zero
-value, signs within `ipaws_sign_thresh_auto_meters` meters of the alert area
+If the `alert_sign_thresh_auto_meters` system attribute is set to a non-zero
+value, signs within `alert_sign_thresh_auto_meters` meters of the alert area
 will also be included.
 
-If the `ipaws_sign_thresh_opt_meters` system attribute is set to a non-zero
-value, signs within the sum of `ipaws_sign_thresh_auto_meters` and
-`ipaws_sign_thresh_opt_meters` will be suggested for inclusion in the alert
+If the `alert_sign_thresh_opt_meters` system attribute is set to a non-zero
+value, signs within the sum of `alert_sign_thresh_auto_meters` and
+`alert_sign_thresh_opt_meters` will be suggested for inclusion in the alert
 deployment when reviewed in the deployment dialog.
 
 ### Message Templates
