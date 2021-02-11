@@ -27,9 +27,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.postgis.Geometry;
 import org.postgis.MultiPolygon;
-import org.postgis.PGgeometry;
 import org.postgis.Polygon;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
@@ -516,22 +514,20 @@ public class CapAlert implements Storable {
 		}
 		String codes = String.join(",", zones);
 		log("got UGC codes: " + codes);
-		BaseObjectImpl.store.query("SELECT geom FROM " + NWS_ZONE_TABLE +
-			" WHERE state_zone IN (" + codes + ");",
+		BaseObjectImpl.store.query("SELECT geom FROM " + NWS_ZONE_TABLE
+			+ " WHERE state_zone IN (" + codes + ");",
 			new ResultFactory()
 		{
 			@Override
 			public void create(ResultSet row) throws SQLException {
-				PGgeometry geom = (PGgeometry) row.getObject(1);
-				int gt = geom.getGeoType();
-				if (gt == Geometry.MULTIPOLYGON) {
-					MultiPolygon mp = (MultiPolygon) geom
-						.getGeometry();
+				MultiPolygon mp = SQLConnection.multiPolygon(
+					row.getObject(1));
+				if (mp != null) {
 					Polygon[] pgons = mp.getPolygons();
 					for (int i = 0; i < pgons.length; i++)
 						polys.add(pgons[i]);
 				} else
-					log("wrong geometry type: " + gt);
+					log("invalid geom in zone table!");
 			}
 		});
 	}

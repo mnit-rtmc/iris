@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2016  Minnesota Department of Transportation
+ * Copyright (C) 2005-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import org.postgis.MultiPolygon;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.TMSException;
@@ -76,6 +78,24 @@ public class SQLConnection {
 			return value.toString().replace("[", "{").replace("]", "}");
 		}
 		return value.toString();
+	}
+
+	/** Get a PostGIS MultiPolygon from a DB query object.
+	 *
+	 * This uses runtime reflection so that the postgres jar is not
+	 * required at build time. */
+	static public MultiPolygon multiPolygon(Object gp) {
+		try {
+			Class<?> cls = gp.getClass();
+			Method getGeometry = cls.getMethod("getGeometry");
+			Object mp = getGeometry.invoke(gp);
+			if (mp instanceof MultiPolygon)
+				return (MultiPolygon) mp;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	/** Location of database server */

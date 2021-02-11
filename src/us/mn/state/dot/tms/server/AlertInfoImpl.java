@@ -21,9 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import org.postgis.Geometry;
 import org.postgis.MultiPolygon;
-import org.postgis.PGgeometry;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.AlertInfo;
@@ -49,15 +47,6 @@ public class AlertInfoImpl extends BaseObjectImpl implements AlertInfo {
 		UniqueNameCreator unc = new UniqueNameCreator(template, 20,
 			(n)->lookupAlertInfo(n));
 		return unc.createUniqueName();
-	}
-
-	/** Get a MultiPolygon from a DB query object */
-	static private MultiPolygon multiPolygon(Object gp) {
-		PGgeometry geom = (PGgeometry) gp;
-		if (geom.getGeoType() == Geometry.MULTIPOLYGON)
-			return (MultiPolygon) geom.getGeometry();
-		else
-			return null;
 	}
 
 	/** Load all the alert infos */
@@ -147,8 +136,8 @@ public class AlertInfoImpl extends BaseObjectImpl implements AlertInfo {
 		double ln, String grp, String pln, int st)
 	{
 		this(n, al, rpl, sd, ed, ev, rt, ur, sv, cy, hl, dsc, ins, adsc,
-		     multiPolygon(gp), lt, ln, lookupSignGroup(grp),
-		     lookupActionPlan(pln), st);
+		     SQLConnection.multiPolygon(gp), lt, ln,
+		     lookupSignGroup(grp), lookupActionPlan(pln), st);
 	}
 
 	/** Create an alert info */
