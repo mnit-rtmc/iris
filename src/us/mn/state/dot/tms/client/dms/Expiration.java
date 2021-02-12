@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +19,7 @@ package us.mn.state.dot.tms.client.dms;
  * An enum of possible expiration times.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public enum Expiration {
 
@@ -40,17 +42,21 @@ public enum Expiration {
 	_10_HOURS("10 Hours", 600),
 	_12_HOURS("12 Hours", 720),
 	_14_HOURS("14 Hours", 840),
-	_16_HOURS("16 Hours", 960);
+	_16_HOURS("16 Hours", 960),
+	_24_HOURS("24 Hours", 1440),
+	_36_HOURS("36 Hours", 2160);
 
+	/** UI label */
 	public final String label;
 
+	/** Duration in minutes */
 	public final Integer duration;
 
 	/**
 	 * Create a new Expiration.
 	 *
-	 * @param l the expiration label
-	 * @param d number of minutes of duration; null indicates no expiration
+	 * @param l The expiration label
+	 * @param d Number of minutes of duration; null indicates no expiration
 	 */
 	private Expiration(String l, Integer d) {
 		label = l;
