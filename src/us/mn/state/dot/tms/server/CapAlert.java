@@ -433,12 +433,14 @@ public class CapAlert implements Storable {
 	private CapResponseType lookupResponseType(JSONObject info)
 		throws JSONException
 	{
-		JSONArray rts = info.getJSONArray("responseType");
-		for (int i = 0; i < rts.length(); i++) {
-			CapResponseType crt = CapResponseType.fromValue(
-				rts.getString(i));
-			if (crt != CapResponseType.NONE)
-				return crt;
+		if (info.has("responseType")) {
+			JSONArray rts = info.getJSONArray("responseType");
+			for (int i = 0; i < rts.length(); i++) {
+				CapResponseType crt = CapResponseType.fromValue(
+					rts.getString(i));
+				if (crt != CapResponseType.NONE)
+					return crt;
+			}
 		}
 		return CapResponseType.NONE;
 	}
