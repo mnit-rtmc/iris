@@ -3687,11 +3687,13 @@ TSA	Tsunami Watch
 TSW	Tsunami Warning
 UPY	Heavy Freezing Spray Advisory
 VOW	Volcano Warning
+WCW	Wind Chill Warning
 WCY	Wind Chill Advisory
 WIY	Wind Advisory
 WSA	Winter Storm Watch
 WSW	Winter Storm Warning
 WWY	Winter Weather Advisory
+ZFY	Freezing Fog Advisory
 \.
 
 CREATE TABLE cap.response_type (
