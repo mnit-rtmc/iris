@@ -268,6 +268,7 @@ public class AlertDmsDispatcher extends IPanel {
 		for (DMS dms: dm.keySet())
 			dms_list.add(dms);
 		dms_list.sort(new DmsComparator());
+		dms_mdl.setRowCount(0);
 		for (DMS dms: dms_list) {
 			Object[] row = {
 				dms,
