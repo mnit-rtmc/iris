@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2016  Minnesota Department of Transportation
+ * Copyright (C) 2011-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,6 +110,8 @@ public class TileLayerState extends LayerState {
 
 	/** Create a worker to lookup one tile */
 	private void createTileWorker(final String tile) {
+		// FIXME: if tile lookup hangs, this ends up stalling all the
+		//        swing threads (10 by default, I think)
 		SwingWorker worker = new SwingWorker<String, Void>() {
 			@Override
 			public String doInBackground() {
