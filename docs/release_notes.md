@@ -1,5 +1,10 @@
 # IRIS 5.x Release Notes
 
+5.20.0 (12 Feb 2021)
+ - Reworked alert processing and user interface (IPAWS)
+ - Added ClearGuide protocol driver (contributed by Iteris)
+ - Fixes and cleanups to client video handling (contributed by SRF)
+
 5.19.0 (8 Jan 2021)
  - Fixed various IPAWS bugs
 
