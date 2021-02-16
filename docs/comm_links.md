@@ -75,7 +75,7 @@ associated with each [controller], using [IO pin]s 1 - 4.
 ### CAP
 
 The Common Alerting Protocol [CAP] is used for polling feeds such as the
-Integrated Public Alert and Warning System [IPAWS].  Alerts can be used to
+Integrated Public Alert and Warning System [IPAWS].  [Alerts] can be used to
 automatically post weather and other messages to Dynamic Message Signs.  For
 IPAWS, this requires an `HTTPS` URI provided by the Federal Emergency Management
 Agency and a [controller] set to `ACTIVE` condition.
@@ -328,11 +328,12 @@ camera can be associated with each [controller], using [IO pin] 1.
 [action plan]: action_plans.html
 [action tag]: action_plans.html#dms-action-tags
 [alarms]: alarms.html
+[alerts]: alerts.html
 [beacons]: beacons.html
 [binned data]: vehicle_detection.html#binned-data
 [camera]: cameras.html
 [camera keyboard]: cameras.html#camera-keyboards
-[CAP]: cap.html
+[CAP]: http://docs.oasis-open.org/emergency/cap/v1.2/CAP-v1.2.html
 [changeable LCS]: lcs.html#changeable-lcs
 [controller]: controllers.html
 [device]: controllers.html#devices

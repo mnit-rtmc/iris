@@ -95,45 +95,6 @@ Windows clients will now automatically download and unzip these files into
 their `<user_home>/iris/` directory and set the necessary environment variables
 at runtime when the GStreamer library is needed.
 
-## Initialize Automated Warning System
-
-IRIS can receive weather and other emergency alerts from the Integrated Public
-Alert and Warning System (IPAWS) and automatically post them on Dynamic Message
-Signs. For IPAWS alerts the PostGIS extension must be installed and enabled in
-the `tms` database used by IRIS, which should be done by the `iris_ctl init`
-command.
-
-### Alert Area Geometry
-
-In addition to the PostGIS extension, the system also requires alert area
-geometry, in particular the National Weather Service's (NWS) Forecast Zones.
-This information can be obtained in shapefile format from NWS and loaded into
-the `tms` database.
-
-To load geometry data, download the latest ["Public Forecast Zones" shapefile]
-(https://www.weather.gov/gis/PublicZones) to the IRIS server and unzip it.
-PostGIS provides both command-line and graphical tools to import shapefiles.
-To import the file via the command line, execute the following command on the
-server:
-```
-shp2pgsql -G <nws_shapefile>.shp cap.nws_zones | psql tms
-```
-
-To import the file via the graphical utility, open the "PostGIS Shapefile
-Import/Export Manager." Click the "View connection details..." button, enter
-the database connection information and press OK. Click the "Add File" button,
-and select the shapefile containing forecast zones. Click the "Options" button
-and make sure the box next to "Load into GEOGRAPHY" column is selected, then
-click "OK." Finally, click the "Import" button and the file should be imported.
-
-NOTE: When using the graphical method you may need to change the name and/or
-schema of the table to cap.nws_zones using another tool (e.g. psql or pgAdmin).
-
-NOTE: Alert areas may change (NWS updates the file roughly every six months
-or), so it is important to keep them updated. Administrators should keep
-records of when this information was last updated and maintain the latest
-information in the database.
-
 ## Server Properties
 
 The IRIS server has a configuration file which controls some of its basic

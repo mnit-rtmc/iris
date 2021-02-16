@@ -1,4 +1,4 @@
-# Common Alerting Protocol (CAP) Integration
+# Alerts - Weather / Emergency
 
 IRIS can poll weather and other emergency alerts from feeds using the Common
 Alerting Protocol [CAP], and automatically post messages on Dynamic Message
@@ -11,6 +11,11 @@ system requires access to the IPAWS Open Platform for Emergency Networks
 to post messages relating to weather alerts issued by the National Weather
 Service, however it is possible to use the system to post information for other
 alert types in IRIS by creating the proper [alert configuration].
+
+IPAWS collects a wide variety of public alerts and warnings that originate from
+over 1,500 alerting authorities.  As only a subset of these will typically be
+of interest to a particular organization, IRIS provides a detailed framework
+for configuring the response to each alert.
 
 When configured properly, the system will perform the following functions:
 
@@ -44,28 +49,42 @@ has been executed, the URL required to access IPAWS-OPEN will be provided.
 
 ## Setting Up CAP Interface
 
-The interface with IPAWS-OPEN is configured via a [comm link]. This comm_link
-must use the `CAP` protocol and contain a valid IPAWS-OPEN URL provided by FEMA.
-A polling period of 60 seconds is recommended, but you may use longer polling
-periods if desired.  Also, set `idle_disconnect_sec` in the comm configuration
-to 10 seconds.
+The interface with IPAWS-OPEN is configured via a [comm link].  This `comm link`
+must use the `CAP` protocol and contain the URL for a valid CAP feed.  A polling
+period of 60 seconds is recommended, but you may use longer periods if desired.
+Also, set `idle_disconnect_sec` in the comm configuration to 10 seconds.
 
-A CAP comm_link requires a [controller] in `ACTIVE` condition to operate.  With
-polling enabled and the controller in active condition, IRIS will poll the URL
-provided at the configured polling period.  Each polling cycle will check for
-new or updated alerts, parse and process them to determine if they are relevant
-and, if appropriate, create messages for deployment.  This processing is
-controlled by [Alert Configurations].
+A CAP `comm link` requires a [controller] in `ACTIVE` condition to operate.
+With polling enabled and the controller in active condition, IRIS will poll the
+URL provided at the configured polling period.  Each polling cycle will check
+for new or updated alerts, parse and process them to determine if they are
+relevant and, if appropriate, create messages for deployment.  This processing
+is controlled by [alert configuration]s.
+
+## Forecast Zones
+
+Alerts from the National Weather Service use special codes to define GIS
+forecast zones.  This information can be obtained in shapefile format from NWS
+and loaded into the `tms` database.
+
+To load geometry data, download the latest [Public Forecast Zones] shapefile
+to the IRIS server and unzip it.  To import the file, execute the following
+command on the
+server:
+```
+shp2pgsql -G <nws_shapefile>.shp cap.nws_zones | psql tms
+```
+
+NOTE: Alert areas may change (NWS updates the file roughly every six months
+or), so it is important to keep them updated. Administrators should keep
+records of when this information was last updated and maintain the latest
+information in the database.
 
 ## Alert Configurations
 
-IPAWS collects a wide variety of public alerts and warnings that originate from
-over 1,500 alerting authorities.  As only a subset of these will typically be
-of interest to a particular organization, IRIS provides a detailed framework
-for configuring the response to each alert.
+Select the `View ➔ Alerts ➔ Alert Configurations` menu item.
 
-Alert configurations can be accessed from the `View ➔ Alerts ➔ Alert Configurations`
-menu item. This dialog displays the list of existing alert configurations and
+This dialog displays the list of existing alert configurations and
 allows creating new ones. Alert configurations link a specific alert "Event"
 with one or more sign groups that may be used for posting messages. Each alert
 event and sign group requires a message template stored as a quick message.
@@ -140,9 +159,9 @@ parameters, separated by commas:
 
 Each of these parameters can include a set of curly braces (`{}`) that will be
 substituted with either the alert start or end time. By default the time will
-be formatted in `h a` format (e.g. `2 PM`), however you may specify a
-[Java DateTimeFormatter pattern](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html)
-inside the curly braces to change this (e.g. `{h:mm a}`).
+be formatted in `h a` format (e.g. `2 PM`), however you may specify a Java
+[DateTimeFormatter] pattern inside the curly braces to change this (e.g.
+`{h:mm a}`).
 
 Before the alert begins, the pre-alert text will be substituted in place of the
 tag. If a time substitution field (curly braces) is included in the text, the
@@ -257,32 +276,38 @@ pending mode.
 
 ## Testing the System
 
-Because the IPAWS system requires alert CAP messages in order to function, it
-can be challenging to test. To address this, IRIS provides a testing mechanism
-that allows testing the system with a mocked-up CAP message. To use this, first
+Because the alert system requires alert CAP messages in order to function, it
+can be challenging to test.  To address this, IRIS provides a testing mechanism
+that allows testing the system with a mocked-up CAP message.  To use this, first
 a CAP XML message must be crafted with:
 
  - An event type configured in IRIS (which can be a custom "Test" event)
  - An alert area that contains signs suitable for testing
  - Alert start and end times corresponding to a suitable testing period
 
-To do this, it is best to start with a real CAP message taken from
-IPAWS-OPEN (e.g. one that is old or targets a different area) and replace the
-values with ones suitable for testing. This must be done with care to ensure
-the [CAP] standard is followed and the message can be parsed.
+To do this, it is best to start with a real CAP message taken from IPAWS-OPEN
+(e.g. one that is old or targets a different area) and replace the values with
+ones suitable for testing.  This must be done with care to ensure the [CAP]
+standard is followed and the message can be parsed.
 
 After a CAP message is created, it can be fed into IRIS in one of two ways.
 
 1. The file can be hosted on an arbitrary HTTPS server (including the IRIS
-server itself if HTTPS is supported). IRIS can then be configured with a comm
+server itself if HTTPS is supported).  IRIS can then be configured with a comm
 link that points to this file on that server.
-2. The file can be placed in `/var/log/iris/Ipaws_Test_Alert.xml` on the IRIS
-server itself, and an existing IPAWS comm link can be put into the `TESTING`
-condition.
+2. The file can be placed in `/var/log/iris/cap_test.xml` on the IRIS server
+itself, and the controller of an existing CAP `comm link` can be put into the
+`TESTING` condition.
 
 In either case IRIS will read this file and process the alert as if it were a
-real alert. Note that in a production environment this may activate real signs,
+real alert.  Note that in a production environment this may activate real signs,
 so care must be taken to ensure the testing is done in a controlled manner.
 
+
+[alert configurations]: #alert_configurations
+[comm link]: comm_links.html
+[controller]: controllers.html
+[DateTimeFormatter]: https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
 [CAP]: http://docs.oasis-open.org/emergency/cap/v1.2/CAP-v1.2.html
 [IPAWS]: https://www.fema.gov/emergency-managers/practitioners/integrated-public-alert-warning-system
+[Public Forecast Zones]: https://www.weather.gov/gis/PublicZones
