@@ -59,7 +59,7 @@ With polling enabled and the controller in active condition, IRIS will poll the
 URL provided at the configured polling period.  Each polling cycle will check
 for new or updated alerts, parse and process them to determine if they are
 relevant and, if appropriate, create messages for deployment.  This processing
-is controlled by [alert configuration]s.
+is controlled by [alert configurations](#alert-configurations).
 
 ## Forecast Zones
 
@@ -75,37 +75,34 @@ server:
 shp2pgsql -G <nws_shapefile>.shp cap.nws_zones | psql tms
 ```
 
-NOTE: Alert areas may change (NWS updates the file roughly every six months
-or), so it is important to keep them updated. Administrators should keep
-records of when this information was last updated and maintain the latest
-information in the database.
+NOTE: Alert areas may change (NWS updates the file roughly every six months), so
+it is important to keep them updated.  Administrators should keep records of
+when this information was last updated and maintain the latest information in
+the database.
 
 ## Alert Configurations
 
 Select the `View ➔ Alerts ➔ Alert Configurations` menu item.
 
-This dialog displays the list of existing alert configurations and
-allows creating new ones. Alert configurations link a specific alert "Event"
-with one or more sign groups that may be used for posting messages. Each alert
-event and sign group requires a message template stored as a quick message.
+This dialog displays the alert configurations and allows creating new ones.
+Alert configurations link specific alert properties with one or more sign groups
+and associated quick message templates.
 
-To create a new alert configuration, enter an event type in the text box of the
-Alert Configurations dialog and press "Create." The new configuration will then
-appear in the list. Select a sign group and quick message for the new
-configuration using the drop downs. If desired, you may change the [Pre- or
-Post-Alert time values](#pre--and-post-alert-times).
+To create a new alert configuration, press the "Create" button.  After the new
+configuration appears in the list, select it and assign the desired alert
+properties to match.  Also, select one or more sign groups and quick messages.
 
 ### Event Types
 
 Each alert will contain an "Event" field to describe the subject of the alert.
 Some of the more common events that may be observed include:
 
+ - BZW, Blizzard Warning
  - FLW, Flood Warning
  - WWY, Winter Weather Advisory
  - WSW, Winter Storm Warning
- - SVR, Severe Thunderstorm Warning
- - BZW, Blizzard Warning
- - TOR, Tornado Warning
+ - SVW, Severe Thunderstorm Warning
+ - TOW, Tornado Warning
  - WIY, Wind Advisory
 
 A list of possible events that may be encountered is available on the alert
