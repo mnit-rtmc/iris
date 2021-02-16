@@ -3617,83 +3617,102 @@ CREATE TABLE cap.event (
 
 COPY cap.event (code, description) FROM stdin;
 ADR	Administrative Message
-AVA	Avalanche Watch
+SAB	Avalanche Advisory
 AVW	Avalanche Warning
-BLU	Blue Alert
+AVA	Avalanche Watch
+BHS	Beach Hazards Statement
 BZW	Blizzard Warning
+DUY	Blowing Dust Advisory
+BLU	Blue Alert
 BWY	Brisk Wind Advisory
 CAE	Child Abduction Emergency
 CDW	Civil Danger Warning
 CEM	Civil Emergency Message
-CFA	Coastal Flood Watch
 CFW	Coastal Flood Warning
-DMO	Practice/Demo Warning
+CFA	Coastal Flood Watch
+CFY	Coastal Flood Advisory
+FGY	Dense Fog Advisory
+MFY	Dense Fog Advisory
+DSY	Dust Advisory
 DSW	Dust Storm Warning
+EQW	Earthquake Warning
 EAN	Emergency Action Notification
 EAT	Emergency Action Termination
-EQW	Earthquake Warning
 EVI	Evacuation Immediate
 EWW	Extreme Wind Warning
-FFA	Flash Flood Watch
+FRW	Fire Warning
 FFS	Flash Flood Statement
 FFW	Flash Flood Warning
-FGY	Dense Fog Advisory
-FLA	Flood Watch
-FLS	Flood Statement
-FLW	Flood Warning
-FLY	Flood Advisory
-FRW	Fire Warning
+FFA	Flash Flood Watch
 FSW	Flash Freeze Warning
+FAY	Flood Advisory
+FLY	Flood Advisory
+FLS	Flood Statement
+FAW	Flood Warning
+FLW	Flood Warning
+FAA	Flood Watch
+FLA	Flood Watch
 FZW	Freeze Warning
-GLA	Gale Watch
+FZA	Freeze Watch
+ZFY	Freezing Fog Advisory
 GLW	Gale Warning
-HLS	Hurricane Statement
+GLA	Gale Watch
+HZW	Hard Freeze Warning
+HZA	Hard Freeze Watch
 HMW	Hazardous Materials Warning
-HUA	Hurricane Watch
-HUW	Hurricane Warning
-HWA	High Wind Watch
+SEW	Hazardous Seas Warning
+SEA	Hazardous Seas Watch
+UPY	Heavy Freezing Spray Advisory
+SUY	High Surf Advisory
+SUW	High Surf Warning
 HWW	High Wind Warning
-LAE	Local Area Emergency
+HWA	High Wind Watch
+HLS	Hurricane Statement
+HUW	Hurricane Warning
+HUA	Hurricane Watch
+ISW	Ice Storm Warning
 LEW	Law Enforcement Warning
+LWY	Lake Wind Advisory
+LAE	Local Area Emergency
+LOY	Low Water Advisory
 MWS	Marine Weather Statement
 NAT	National Audible Test
 NIC	National Information Center
-NMN	Network Message Notification
 NPT	National Periodic Test
-NUW	Nuclear Power Plant Warning
 NST	National Silent Test
+NMN	Network Message Notification
+NUW	Nuclear Power Plant Warning
+DMO	Practice/Demo Warning
 RHW	Radiological Hazard Warning
 RMT	Required Monthly Test
-RPS	Rip Current Statement
 RWT	Required Weekly Test
-SCY	Small Craft Advisory
-SMW	Special Marine Warning
-SPS	Special Weather Statement
-SPW	Shelter in Place Warning
-SQW	Snowsquall Warning
-SSA	Storm Surge Watch
-SSW	Storm Surge Warning
-SUW	High Surf Warning
-SUY	High Surf Advisory
+RPS	Rip Current Statement
+SVW	Severe Thunderstorm Warning
 SVA	Severe Thunderstorm Watch
-SVR	Severe Thunderstorm Warning
 SVS	Severe Weather Statement
-TOA	Tornado Watch
+SPW	Shelter in Place Warning
+SCY	Small Craft Advisory
+SQW	Snowsquall Warning
+MAW	Special Marine Warning
+SPS	Special Weather Statement
+SRW	Storm Warning
+SSW	Storm Surge Warning
+SSA	Storm Surge Watch
 TOE	911 Telephone Outage Emergency
-TOR	Tornado Warning
-TRA	Tropical Storm Watch
+TOW	Tornado Warning
+TOA	Tornado Watch
 TRW	Tropical Storm Warning
-TSA	Tsunami Watch
+TRA	Tropical Storm Watch
 TSW	Tsunami Warning
-UPY	Heavy Freezing Spray Advisory
+TSA	Tsunami Watch
 VOW	Volcano Warning
-WCW	Wind Chill Warning
-WCY	Wind Chill Advisory
 WIY	Wind Advisory
-WSA	Winter Storm Watch
+WCY	Wind Chill Advisory
+WCW	Wind Chill Warning
+WCA	Wind Chill Watch
 WSW	Winter Storm Warning
+WSA	Winter Storm Watch
 WWY	Winter Weather Advisory
-ZFY	Freezing Fog Advisory
 \.
 
 CREATE TABLE cap.response_type (
