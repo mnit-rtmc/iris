@@ -20,8 +20,10 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeSet;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.AlertConfig;
+import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
@@ -38,16 +40,29 @@ import us.mn.state.dot.tms.TMSException;
  */
 public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 
+	/** Alert Config / Quick Message table mapping */
+	static private TableMapping mapping;
+
 	/** Interval value of one hour (ms) */
 	static private final long HOUR_MS = 60 * 60 * 1000;
 
 	/** Load all the alert config objects */
 	static public void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, AlertConfigImpl.class);
-		store.query("SELECT name, event, response_type, urgency, " +
-			"sign_group, quick_message, pre_alert_hours, " +
-			"post_alert_hours, auto_deploy FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+		mapping = new TableMapping(store, "iris", SONAR_TYPE,
+			QuickMessage.SONAR_TYPE);
+		store.query("SELECT name, event, response_shelter, " +
+			"response_evacuate, response_prepare, " +
+			"response_execute, response_avoid, response_monitor, " +
+			"response_all_clear, response_none, urgency_unknown, " +
+			"urgency_past, urgency_future, urgency_expected, " +
+			"urgency_immediate, severity_unknown, severity_minor, "+
+			"severity_moderate, severity_severe, " +
+			"severity_extreme, certainty_unknown, " +
+			"certainty_unlikely, certainty_possible, " +
+			"certainty_likely, certainty_observed, " +
+			"pre_alert_hours, post_alert_hours, auto_deploy " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			@Override
 			public void create(ResultSet row) throws Exception {
@@ -56,35 +71,96 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		});
 	}
 
-	private AlertConfigImpl(ResultSet row) throws SQLException {
-		this(row.getString(1), // name
-		     row.getString(2), // event
-		     row.getInt(3),    // response_type
-		     row.getInt(4),    // urgency
-		     row.getString(5), // sign_group
-		     row.getString(6), // quick_message
-		     row.getInt(7),    // pre_alert_hours
-		     row.getInt(8),    // post_alert_hours
-		     row.getBoolean(9) // auto_deploy
+	/** Create an alert config */
+	private AlertConfigImpl(ResultSet row) throws SQLException, TMSException
+	{
+		this(row.getString(1),   // name
+		     row.getString(2),   // event
+		     row.getBoolean(3),  // response_shelter
+		     row.getBoolean(4),  // response_evacuate
+		     row.getBoolean(5),  // response_prepare
+		     row.getBoolean(6),  // response_execute
+		     row.getBoolean(7),  // response_avoid
+		     row.getBoolean(8),  // response_monitor
+		     row.getBoolean(9),  // response_all_clear
+		     row.getBoolean(10), // response_none
+		     row.getBoolean(11), // urgency_unknown
+		     row.getBoolean(12), // urgency_past
+		     row.getBoolean(13), // urgency_future
+		     row.getBoolean(14), // urgency_expected
+		     row.getBoolean(15), // urgency_immediate
+		     row.getBoolean(16), // severity_unknown
+		     row.getBoolean(17), // severity_minor
+		     row.getBoolean(18), // severity_moderate
+		     row.getBoolean(19), // severity_severe
+		     row.getBoolean(20), // severity_extreme
+		     row.getBoolean(21), // certainty_unknown
+		     row.getBoolean(22), // certainty_unlikely
+		     row.getBoolean(23), // certainty_possible
+		     row.getBoolean(24), // certainty_likely
+		     row.getBoolean(25), // certainty_observed
+		     row.getInt(26),     // pre_alert_hours
+		     row.getInt(27),     // post_alert_hours
+		     row.getBoolean(28)  // auto_deploy
 		);
 	}
 
-	private AlertConfigImpl(String n, String ev, int rt, int urg, String sg,
-		String qm, int preh, int posth, boolean ad)
+	/** Create an alert config */
+	private AlertConfigImpl(String n, String ev, boolean rs, boolean re,
+		boolean rp, boolean rx, boolean ra, boolean rm, boolean rc,
+		boolean rn, boolean uu, boolean up, boolean uf, boolean ue,
+		boolean ui, boolean su, boolean sm, boolean sd, boolean ss,
+		boolean se, boolean cu, boolean cy, boolean cp, boolean cl,
+		boolean co, int preh, int posth, boolean ad) throws TMSException
 	{
 		super(n);
 		event = ev;
-		response_type = rt;
-		urgency = urg;
-		sign_group = lookupSignGroup(sg);
-		quick_message = lookupQuickMessage(qm);
+		response_shelter = rs;
+		response_evacuate = re;
+		response_prepare = rp;
+		response_execute = rx;
+		response_avoid = ra;
+		response_monitor = rm;
+		response_all_clear = rc;
+		response_none = rn;
+		urgency_unknown = uu;
+		urgency_past = up;
+		urgency_future = uf;
+		urgency_expected = ue;
+		urgency_immediate = ui;
+		severity_unknown = su;
+		severity_minor = sm;
+		severity_moderate = sd;
+		severity_severe = ss;
+		severity_extreme = se;
+		certainty_unknown = cu;
+		certainty_unlikely = cy;
+		certainty_possible = cp;
+		certainty_likely = cl;
+		certainty_observed = co;
 		pre_alert_hours = preh;
 		post_alert_hours = posth;
 		auto_deploy = ad;
+		qms = lookupQuickMessageMapping();
 	}
 
+	/** Create an alert config */
 	public AlertConfigImpl(String n) {
 		super(n);
+	}
+
+	/** Lookup mapping of quick messages */
+	private QuickMessageImpl[] lookupQuickMessageMapping()
+		throws TMSException
+	{
+		TreeSet<QuickMessageImpl> qm_set =
+			new TreeSet<QuickMessageImpl>();
+		for (String q: mapping.lookup(this)) {
+			QuickMessageImpl qm = lookupQuickMessage(q);
+			if (qm != null)
+				qm_set.add(qm);
+		}
+		return qm_set.toArray(new QuickMessageImpl[0]);
 	}
 
 	/** Get the SONAR type name */
@@ -99,15 +175,35 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		return "iris." + SONAR_TYPE;
 	}
 
+	/** Get a mapping of the columns */
 	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("event", event);
-		map.put("response_type", response_type);
-		map.put("urgency", urgency);
-		map.put("sign_group", sign_group);
-		map.put("quick_message", quick_message);
+		map.put("response_shelter", response_shelter);
+		map.put("response_evacuate", response_evacuate);
+		map.put("response_prepare", response_prepare);
+		map.put("response_execute", response_execute);
+		map.put("response_avoid", response_avoid);
+		map.put("response_monitor", response_monitor);
+		map.put("response_all_clear", response_all_clear);
+		map.put("response_none", response_none);
+		map.put("urgency_unknown", urgency_unknown);
+		map.put("urgency_past", urgency_past);
+		map.put("urgency_future", urgency_future);
+		map.put("urgency_expected", urgency_expected);
+		map.put("urgency_immediate", urgency_immediate);
+		map.put("severity_unknown", severity_unknown);
+		map.put("severity_minor", severity_minor);
+		map.put("severity_moderate", severity_moderate);
+		map.put("severity_severe", severity_severe);
+		map.put("severity_extreme", severity_extreme);
+		map.put("certainty_unknown", certainty_unknown);
+		map.put("certainty_unlikely", certainty_unlikely);
+		map.put("certainty_possible", certainty_possible);
+		map.put("certainty_likely", certainty_likely);
+		map.put("certainty_observed", certainty_observed);
 		map.put("pre_alert_hours", pre_alert_hours);
 		map.put("post_alert_hours", post_alert_hours);
 		map.put("auto_deploy", auto_deploy);
@@ -137,96 +233,533 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		return event;
 	}
 
-	/** Response type (ordinal of CapResponseType enum) */
-	private int response_type;
+	/** Response shelter flag */
+	private boolean response_shelter;
 
-	/** Set the response type (ordinal of CapResponseType enum) */
+	/** Set the response shelter flag */
 	@Override
-	public void setResponseType(int rt) {
-		response_type = rt;
+	public void setResponseShelter(boolean fl) {
+		response_shelter = fl;
 	}
 
-	/** Set the response type (ordinal of CapResponseType enum) */
-	public void doSetResponseType(int rt) throws TMSException {
-		if (rt != response_type) {
-			store.update(this, "response_type", rt);
-			setResponseType(rt);
+	/** Set the response shelter flag */
+	public void doSetResponseShelter(boolean fl) throws TMSException {
+		if (fl != response_shelter) {
+			store.update(this, "response_shelter", fl);
+			setResponseShelter(fl);
 		}
 	}
 
-	/** Get the response type (ordinal of CapResponseType enum) */
+	/** Get the response shelter flag */
 	@Override
-	public int getResponseType() {
-		return response_type;
+	public boolean getResponseShelter() {
+		return response_shelter;
 	}
 
-	/** Urgency (ordinal of CapUrgency enum) */
-	private int urgency;
+	/** Response evacuate flag */
+	private boolean response_evacuate;
 
-	/** Set the urgency (ordinal of CapUrgency enum) */
+	/** Set the response evacuate flag */
 	@Override
-	public void setUrgency(int u) {
-		urgency = u;
+	public void setResponseEvacuate(boolean fl) {
+		response_evacuate = fl;
 	}
 
-	/** Set the urgency (ordinal of CapUrgency enum) */
-	public void doSetUrgency(int u) throws TMSException {
-		if (u != urgency) {
-			store.update(this, "urgency", u);
-			setUrgency(u);
+	/** Set the response evacuate flag */
+	public void doSetResponseEvacuate(boolean fl) throws TMSException {
+		if (fl != response_evacuate) {
+			store.update(this, "response_evacuate", fl);
+			setResponseEvacuate(fl);
 		}
 	}
 
-	/** Get the urgency (ordinal of CapUrgency enum) */
+	/** Get the response evacuate flag */
 	@Override
-	public int getUrgency() {
-		return urgency;
+	public boolean getResponseEvacuate() {
+		return response_evacuate;
 	}
 
-	/** Sign group */
-	private SignGroup sign_group;
+	/** Response prepare flag */
+	private boolean response_prepare;
 
-	/** Set the sign group */
+	/** Set the response prepare flag */
 	@Override
-	public void setSignGroup(SignGroup sg) {
-		sign_group = sg;
+	public void setResponsePrepare(boolean fl) {
+		response_prepare = fl;
 	}
 
-	/** Set the sign group */
-	public void doSetSignGroup(SignGroup sg) throws TMSException {
-		if (sg != sign_group) {
-			store.update(this, "sign_group", sg);
-			setSignGroup(sg);
+	/** Set the response prepare flag */
+	public void doSetResponsePrepare(boolean fl) throws TMSException {
+		if (fl != response_prepare) {
+			store.update(this, "response_prepare", fl);
+			setResponsePrepare(fl);
 		}
 	}
 
-	/** Get the sign group */
+	/** Get the response prepare flag */
 	@Override
-	public SignGroup getSignGroup() {
-		return sign_group;
+	public boolean getResponsePrepare() {
+		return response_prepare;
 	}
 
-	/** Quick message (template) */
-	private QuickMessage quick_message;
+	/** Response execute flag */
+	private boolean response_execute;
 
-	/** Set the quick message (template) */
+	/** Set the response execute flag */
 	@Override
-	public void setQuickMessage(QuickMessage qm) {
-		quick_message = qm;
+	public void setResponseExecute(boolean fl) {
+		response_execute = fl;
 	}
 
-	/** Set the quick message (template) */
-	public void doSetQuickMessage(QuickMessage qm) throws TMSException {
-		if (qm != quick_message) {
-			store.update(this, "quick_message", qm);
-			setQuickMessage(qm);
+	/** Set the response execute flag */
+	public void doSetResponseExecute(boolean fl) throws TMSException {
+		if (fl != response_execute) {
+			store.update(this, "response_execute", fl);
+			setResponseExecute(fl);
 		}
 	}
 
-	/** Get the quick message (template) */
+	/** Get the response execute flag */
 	@Override
-	public QuickMessage getQuickMessage() {
-		return quick_message;
+	public boolean getResponseExecute() {
+		return response_execute;
+	}
+
+	/** Response avoid flag */
+	private boolean response_avoid;
+
+	/** Set the response avoid flag */
+	@Override
+	public void setResponseAvoid(boolean fl) {
+		response_avoid = fl;
+	}
+
+	/** Set the response avoid flag */
+	public void doSetResponseAvoid(boolean fl) throws TMSException {
+		if (fl != response_avoid) {
+			store.update(this, "response_avoid", fl);
+			setResponseAvoid(fl);
+		}
+	}
+
+	/** Get the response avoid flag */
+	@Override
+	public boolean getResponseAvoid() {
+		return response_avoid;
+	}
+
+	/** Response monitor flag */
+	private boolean response_monitor;
+
+	/** Set the response monitor flag */
+	@Override
+	public void setResponseMonitor(boolean fl) {
+		response_monitor = fl;
+	}
+
+	/** Set the response monitor flag */
+	public void doSetResponseMonitor(boolean fl) throws TMSException {
+		if (fl != response_monitor) {
+			store.update(this, "response_monitor", fl);
+			setResponseMonitor(fl);
+		}
+	}
+
+	/** Get the response monitor flag */
+	@Override
+	public boolean getResponseMonitor() {
+		return response_monitor;
+	}
+
+	/** Response all clear flag */
+	private boolean response_all_clear;
+
+	/** Set the response all clear flag */
+	@Override
+	public void setResponseAllClear(boolean fl) {
+		response_all_clear = fl;
+	}
+
+	/** Set the response all clear flag */
+	public void doSetResponseAllClear(boolean fl) throws TMSException {
+		if (fl != response_all_clear) {
+			store.update(this, "response_all_clear", fl);
+			setResponseAllClear(fl);
+		}
+	}
+
+	/** Get the response all clear flag */
+	@Override
+	public boolean getResponseAllClear() {
+		return response_all_clear;
+	}
+
+	/** Response none flag */
+	private boolean response_none;
+
+	/** Set the response none flag */
+	@Override
+	public void setResponseNone(boolean fl) {
+		response_none = fl;
+	}
+
+	/** Set the response none flag */
+	public void doSetResponseNone(boolean fl) throws TMSException {
+		if (fl != response_none) {
+			store.update(this, "response_none", fl);
+			setResponseNone(fl);
+		}
+	}
+
+	/** Get the response none flag */
+	@Override
+	public boolean getResponseNone() {
+		return response_none;
+	}
+
+	/** Urgency unknown flag */
+	private boolean urgency_unknown;
+
+	/** Set the urgency unknown flag */
+	@Override
+	public void setUrgencyUnknown(boolean fl) {
+		urgency_unknown = fl;
+	}
+
+	/** Set the urgency unknown flag */
+	public void doSetUrgencyUnknown(boolean fl) throws TMSException {
+		if (fl != urgency_unknown) {
+			store.update(this, "urgency_unknown", fl);
+			setUrgencyUnknown(fl);
+		}
+	}
+
+	/** Get the urgency unknown flag */
+	@Override
+	public boolean getUrgencyUnknown() {
+		return urgency_unknown;
+	}
+
+	/** Urgency past flag */
+	private boolean urgency_past;
+
+	/** Set the urgency past flag */
+	@Override
+	public void setUrgencyPast(boolean fl) {
+		urgency_past = fl;
+	}
+
+	/** Set the urgency past flag */
+	public void doSetUrgencyPast(boolean fl) throws TMSException {
+		if (fl != urgency_past) {
+			store.update(this, "urgency_past", fl);
+			setUrgencyPast(fl);
+		}
+	}
+
+	/** Get the urgency past flag */
+	@Override
+	public boolean getUrgencyPast() {
+		return urgency_past;
+	}
+
+	/** Urgency future flag */
+	private boolean urgency_future;
+
+	/** Set the urgency future flag */
+	@Override
+	public void setUrgencyFuture(boolean fl) {
+		urgency_future = fl;
+	}
+
+	/** Set the urgency future flag */
+	public void doSetUrgencyFuture(boolean fl) throws TMSException {
+		if (fl != urgency_future) {
+			store.update(this, "urgency_future", fl);
+			setUrgencyFuture(fl);
+		}
+	}
+
+	/** Get the urgency future flag */
+	@Override
+	public boolean getUrgencyFuture() {
+		return urgency_future;
+	}
+
+	/** Urgency expected flag */
+	private boolean urgency_expected;
+
+	/** Set the urgency expected flag */
+	@Override
+	public void setUrgencyExpected(boolean fl) {
+		urgency_expected = fl;
+	}
+
+	/** Set the urgency expected flag */
+	public void doSetUrgencyExpected(boolean fl) throws TMSException {
+		if (fl != urgency_expected) {
+			store.update(this, "urgency_expected", fl);
+			setUrgencyExpected(fl);
+		}
+	}
+
+	/** Get the urgency expected flag */
+	@Override
+	public boolean getUrgencyExpected() {
+		return urgency_expected;
+	}
+
+	/** Urgency immediate flag */
+	private boolean urgency_immediate;
+
+	/** Set the urgency immediate flag */
+	@Override
+	public void setUrgencyImmediate(boolean fl) {
+		urgency_immediate = fl;
+	}
+
+	/** Set the urgency immediate flag */
+	public void doSetUrgencyImmediate(boolean fl) throws TMSException {
+		if (fl != urgency_immediate) {
+			store.update(this, "urgency_immediate", fl);
+			setUrgencyImmediate(fl);
+		}
+	}
+
+	/** Get the urgency immediate flag */
+	@Override
+	public boolean getUrgencyImmediate() {
+		return urgency_immediate;
+	}
+
+	/** Severity unknown flag */
+	private boolean severity_unknown;
+
+	/** Set the severity unknown flag */
+	@Override
+	public void setSeverityUnknown(boolean fl) {
+		severity_unknown = fl;
+	}
+
+	/** Set the severity unknown flag */
+	public void doSetSeverityUnknown(boolean fl) throws TMSException {
+		if (fl != severity_unknown) {
+			store.update(this, "severity_unknown", fl);
+			setSeverityUnknown(fl);
+		}
+	}
+
+	/** Get the severity unknown flag */
+	@Override
+	public boolean getSeverityUnknown() {
+		return severity_unknown;
+	}
+
+	/** Severity minor flag */
+	private boolean severity_minor;
+
+	/** Set the severity minor flag */
+	@Override
+	public void setSeverityMinor(boolean fl) {
+		severity_minor = fl;
+	}
+
+	/** Set the severity minor flag */
+	public void doSetSeverityMinor(boolean fl) throws TMSException {
+		if (fl != severity_minor) {
+			store.update(this, "severity_minor", fl);
+			setSeverityMinor(fl);
+		}
+	}
+
+	/** Get the severity minor flag */
+	@Override
+	public boolean getSeverityMinor() {
+		return severity_minor;
+	}
+
+	/** Severity moderate flag */
+	private boolean severity_moderate;
+
+	/** Set the severity moderate flag */
+	@Override
+	public void setSeverityModerate(boolean fl) {
+		severity_moderate = fl;
+	}
+
+	/** Set the severity moderate flag */
+	public void doSetSeverityModerate(boolean fl) throws TMSException {
+		if (fl != severity_moderate) {
+			store.update(this, "severity_moderate", fl);
+			setSeverityModerate(fl);
+		}
+	}
+
+	/** Get the severity moderate flag */
+	@Override
+	public boolean getSeverityModerate() {
+		return severity_moderate;
+	}
+
+	/** Severity severe flag */
+	private boolean severity_severe;
+
+	/** Set the severity severe flag */
+	@Override
+	public void setSeveritySevere(boolean fl) {
+		severity_severe = fl;
+	}
+
+	/** Set the severity severe flag */
+	public void doSetSeveritySevere(boolean fl) throws TMSException {
+		if (fl != severity_severe) {
+			store.update(this, "severity_severe", fl);
+			setSeveritySevere(fl);
+		}
+	}
+
+	/** Get the severity severe flag */
+	@Override
+	public boolean getSeveritySevere() {
+		return severity_severe;
+	}
+
+	/** Severity extreme flag */
+	private boolean severity_extreme;
+
+	/** Set the severity extreme flag */
+	@Override
+	public void setSeverityExtreme(boolean fl) {
+		severity_extreme = fl;
+	}
+
+	/** Set the severity extreme flag */
+	public void doSetSeverityExtreme(boolean fl) throws TMSException {
+		if (fl != severity_extreme) {
+			store.update(this, "severity_extreme", fl);
+			setSeverityExtreme(fl);
+		}
+	}
+
+	/** Get the severity extreme flag */
+	@Override
+	public boolean getSeverityExtreme() {
+		return severity_extreme;
+	}
+
+	/** Certainty unknown flag */
+	private boolean certainty_unknown;
+
+	/** Set the certainty unknown flag */
+	@Override
+	public void setCertaintyUnknown(boolean fl) {
+		certainty_unknown = fl;
+	}
+
+	/** Set the certainty unknown flag */
+	public void doSetCertaintyUnknown(boolean fl) throws TMSException {
+		if (fl != certainty_unknown) {
+			store.update(this, "certainty_unknown", fl);
+			setCertaintyUnknown(fl);
+		}
+	}
+
+	/** Get the certainty unknown flag */
+	@Override
+	public boolean getCertaintyUnknown() {
+		return certainty_unknown;
+	}
+
+	/** Certainty unlikely flag */
+	private boolean certainty_unlikely;
+
+	/** Set the certainty unlikely flag */
+	@Override
+	public void setCertaintyUnlikely(boolean fl) {
+		certainty_unlikely = fl;
+	}
+
+	/** Set the certainty unlikely flag */
+	public void doSetCertaintyUnlikely(boolean fl) throws TMSException {
+		if (fl != certainty_unlikely) {
+			store.update(this, "certainty_unlikely", fl);
+			setCertaintyUnlikely(fl);
+		}
+	}
+
+	/** Get the certainty unlikely flag */
+	@Override
+	public boolean getCertaintyUnlikely() {
+		return certainty_unlikely;
+	}
+
+	/** Certainty possible flag */
+	private boolean certainty_possible;
+
+	/** Set the certainty possible flag */
+	@Override
+	public void setCertaintyPossible(boolean fl) {
+		certainty_possible = fl;
+	}
+
+	/** Set the certainty possible flag */
+	public void doSetCertaintyPossible(boolean fl) throws TMSException {
+		if (fl != certainty_possible) {
+			store.update(this, "certainty_possible", fl);
+			setCertaintyPossible(fl);
+		}
+	}
+
+	/** Get the certainty possible flag */
+	@Override
+	public boolean getCertaintyPossible() {
+		return certainty_possible;
+	}
+
+	/** Certainty likely flag */
+	private boolean certainty_likely;
+
+	/** Set the certainty likely flag */
+	@Override
+	public void setCertaintyLikely(boolean fl) {
+		certainty_likely = fl;
+	}
+
+	/** Set the certainty likely flag */
+	public void doSetCertaintyLikely(boolean fl) throws TMSException {
+		if (fl != certainty_likely) {
+			store.update(this, "certainty_likely", fl);
+			setCertaintyLikely(fl);
+		}
+	}
+
+	/** Get the certainty likely flag */
+	@Override
+	public boolean getCertaintyLikely() {
+		return certainty_likely;
+	}
+
+	/** Certainty observed flag */
+	private boolean certainty_observed;
+
+	/** Set the certainty observed flag */
+	@Override
+	public void setCertaintyObserved(boolean fl) {
+		certainty_observed = fl;
+	}
+
+	/** Set the certainty observed flag */
+	public void doSetCertaintyObserved(boolean fl) throws TMSException {
+		if (fl != certainty_observed) {
+			store.update(this, "certainty_observed", fl);
+			setCertaintyObserved(fl);
+		}
+	}
+
+	/** Get the certainty observed flag */
+	@Override
+	public boolean getCertaintyObserved() {
+		return certainty_observed;
 	}
 
 	/** Number of hours to display a pre-alert message before the alert
@@ -324,5 +857,46 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 			return "alert_after";
 		else
 			return "undeployed";
+	}
+
+	/** Quick messages */
+	private QuickMessageImpl[] qms = new QuickMessageImpl[0];
+
+	/** Set the quick messages assigned to the configuration */
+	@Override
+	public void setQuickMessages(QuickMessage[] qm) {
+		qms = makeQuickMessageArray(qm);
+	}
+
+	/** Make an ordered array of quick messages */
+	private QuickMessageImpl[] makeQuickMessageArray(QuickMessage[] qm) {
+		TreeSet<QuickMessageImpl> qm_set =
+			new TreeSet<QuickMessageImpl>();
+		for (QuickMessage q: qm) {
+			if (q instanceof QuickMessageImpl)
+				qm_set.add((QuickMessageImpl) q);
+		}
+		return qm_set.toArray(new QuickMessageImpl[0]);
+	}
+
+	/** Set the quick messages assigned to the alert */
+	public void doSetQuickMessages(QuickMessage[] qm) throws TMSException {
+		TreeSet<Storable> qm_set = new TreeSet<Storable>();
+		for (QuickMessage q: qm) {
+			if (q instanceof QuickMessageImpl)
+				qm_set.add((QuickMessageImpl) q);
+			else {
+				throw new ChangeVetoException(
+					"Invalid Quick Msg");
+			}
+		}
+		mapping.update(this, qm_set);
+		setQuickMessages(qm);
+	}
+
+	/** Get the quick messages assigned to the alert */
+	@Override
+	public QuickMessage[] getQuickMessages() {
+		return qms;
 	}
 }

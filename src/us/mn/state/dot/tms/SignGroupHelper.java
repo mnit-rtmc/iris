@@ -14,8 +14,9 @@
  */
 package us.mn.state.dot.tms;
 
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Helper class for sign groups.
@@ -63,9 +64,9 @@ public class SignGroupHelper extends BaseHelper {
 		return false;
 	}
 
-	/** Get an ArrayList of all signs in a sign group */
-	static public ArrayList<DMS> getAllSigns(SignGroup sg) {
-		ArrayList<DMS> signs = new ArrayList<DMS>();
+	/** Get a set of all signs in a sign group */
+	static public Set<DMS> getAllSigns(SignGroup sg) {
+		TreeSet<DMS> signs = new TreeSet<DMS>();
 		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
 		while (it.hasNext()) {
 			DmsSignGroup dsg = it.next();

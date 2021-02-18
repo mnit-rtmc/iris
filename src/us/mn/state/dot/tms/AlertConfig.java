@@ -38,29 +38,143 @@ public interface AlertConfig extends SonarObject {
 	/** Set the alert event code */
 	String getEvent();
 
-	/** Set the response type (ordinal of CapResponseType enum) */
-	void setResponseType(int rt);
+	/** Set the response shelter flag */
+	void setResponseShelter(boolean fl);
 
-	/** Get the response type (ordinal of CapResponseType enum) */
-	int getResponseType();
+	/** Get the response shelter flag */
+	boolean getResponseShelter();
 
-	/** Set the urgency (ordinal of CapUrgency enum) */
-	void setUrgency(int urg);
+	/** Set the response evacuate flag */
+	void setResponseEvacuate(boolean fl);
 
-	/** Get the urgency (ordinal of CapUrgency enum) */
-	int getUrgency();
+	/** Get the response evacuate flag */
+	boolean getResponseEvacuate();
 
-	/** Set the sign group */
-	void setSignGroup(SignGroup sg);
+	/** Set the response prepare flag */
+	void setResponsePrepare(boolean fl);
 
-	/** Get the sign group */
-	SignGroup getSignGroup();
+	/** Get the response prepare flag */
+	boolean getResponsePrepare();
 
-	/** Set the quick message (template) */
-	void setQuickMessage(QuickMessage qm);
+	/** Set the response execute flag */
+	void setResponseExecute(boolean fl);
 
-	/** Set the quick message (template) */
-	QuickMessage getQuickMessage();
+	/** Get the response execute flag */
+	boolean getResponseExecute();
+
+	/** Set the response avoid flag */
+	void setResponseAvoid(boolean fl);
+
+	/** Get the response avoid flag */
+	boolean getResponseAvoid();
+
+	/** Set the response monitor flag */
+	void setResponseMonitor(boolean fl);
+
+	/** Get the response monitor flag */
+	boolean getResponseMonitor();
+
+	/** Set the response all clear flag */
+	void setResponseAllClear(boolean fl);
+
+	/** Get the response all clear flag */
+	boolean getResponseAllClear();
+
+	/** Set the response none flag */
+	void setResponseNone(boolean fl);
+
+	/** Get the response none flag */
+	boolean getResponseNone();
+
+	/** Set the urgency unknown flag */
+	void setUrgencyUnknown(boolean fl);
+
+	/** Get the urgency unknown flag */
+	boolean getUrgencyUnknown();
+
+	/** Set the urgency past flag */
+	void setUrgencyPast(boolean fl);
+
+	/** Get the urgency past flag */
+	boolean getUrgencyPast();
+
+	/** Set the urgency future flag */
+	void setUrgencyFuture(boolean fl);
+
+	/** Get the urgency future flag */
+	boolean getUrgencyFuture();
+
+	/** Set the urgency expected flag */
+	void setUrgencyExpected(boolean fl);
+
+	/** Get the urgency expected flag */
+	boolean getUrgencyExpected();
+
+	/** Set the urgency immediate flag */
+	void setUrgencyImmediate(boolean fl);
+
+	/** Get the urgency immediate flag */
+	boolean getUrgencyImmediate();
+
+	/** Set the severity unknown flag */
+	void setSeverityUnknown(boolean fl);
+
+	/** Get the severity unknown flag */
+	boolean getSeverityUnknown();
+
+	/** Set the severity minor flag */
+	void setSeverityMinor(boolean fl);
+
+	/** Get the severity minor flag */
+	boolean getSeverityMinor();
+
+	/** Set the severity moderate flag */
+	void setSeverityModerate(boolean fl);
+
+	/** Get the severity moderate flag */
+	boolean getSeverityModerate();
+
+	/** Set the severity severe flag */
+	void setSeveritySevere(boolean fl);
+
+	/** Get the severity severe flag */
+	boolean getSeveritySevere();
+
+	/** Set the severity extreme flag */
+	void setSeverityExtreme(boolean fl);
+
+	/** Get the severity extreme flag */
+	boolean getSeverityExtreme();
+
+	/** Set the certainty unknown flag */
+	void setCertaintyUnknown(boolean fl);
+
+	/** Get the certainty unknown flag */
+	boolean getCertaintyUnknown();
+
+	/** Set the certainty unlikely flag */
+	void setCertaintyUnlikely(boolean fl);
+
+	/** Get the certainty unlikely flag */
+	boolean getCertaintyUnlikely();
+
+	/** Set the certainty possible flag */
+	void setCertaintyPossible(boolean fl);
+
+	/** Get the certainty possible flag */
+	boolean getCertaintyPossible();
+
+	/** Set the certainty likely flag */
+	void setCertaintyLikely(boolean fl);
+
+	/** Get the certainty likely flag */
+	boolean getCertaintyLikely();
+
+	/** Set the certainty observed flag */
+	void setCertaintyObserved(boolean fl);
+
+	/** Get the certainty observed flag */
+	boolean getCertaintyObserved();
 
 	/** Set the number of hours to display a pre-alert message before the
 	 *  alert becomes active. */
@@ -83,4 +197,10 @@ public interface AlertConfig extends SonarObject {
 
 	/** Get auto deploy enabled state */
 	boolean getAutoDeploy();
+
+	/** Set the quick message templates */
+	void setQuickMessages(QuickMessage[] qm);
+
+	/** Set the quick message templates */
+	QuickMessage[] getQuickMessages();
 }

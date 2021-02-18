@@ -15,7 +15,7 @@
  */
 package us.mn.state.dot.tms.client.alert;
 
-import java.awt.GridLayout;
+import java.awt.FlowLayout;
 import us.mn.state.dot.tms.AlertConfig;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
@@ -65,7 +65,7 @@ public class AlertConfigForm extends ProxyTableForm<AlertConfig> {
 	@Override
 	public void initialize() {
 		super.initialize();
-		setLayout(new GridLayout(1, 2));
+		setLayout(new FlowLayout());
 		add(((TablePanel) panel).pnl);
 	}
 }

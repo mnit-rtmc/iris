@@ -15,15 +15,18 @@
  */
 package us.mn.state.dot.tms.client.alert;
 
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Comparator;
+import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.AlertConfig;
 import us.mn.state.dot.tms.AlertConfigHelper;
-import us.mn.state.dot.tms.CapResponseType;
-import us.mn.state.dot.tms.CapUrgency;
+import us.mn.state.dot.tms.CapEvent;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -51,22 +54,13 @@ public class AlertConfigModel extends ProxyTableModel<AlertConfig> {
 	@Override
 	protected ArrayList<ProxyColumn<AlertConfig>> createColumns() {
 		ArrayList<ProxyColumn<AlertConfig>> cols =
-			new ArrayList<ProxyColumn<AlertConfig>>(3);
-		cols.add(new ProxyColumn<AlertConfig>("alert.cap.event", 80) {
+			new ArrayList<ProxyColumn<AlertConfig>>(1);
+		cols.add(new ProxyColumn<AlertConfig>("alert.event", 260) {
 			public Object getValueAt(AlertConfig cfg) {
 				return cfg.getEvent();
 			}
-		});
-		cols.add(new ProxyColumn<AlertConfig>("alert.cap.response", 120)
-		{
-			public Object getValueAt(AlertConfig cfg) {
-				return CapResponseType.fromOrdinal(
-					cfg.getResponseType());
-			}
-		});
-		cols.add(new ProxyColumn<AlertConfig>("alert.cap.urgency", 80) {
-			public Object getValueAt(AlertConfig cfg) {
-				return CapUrgency.fromOrdinal(cfg.getUrgency());
+			protected TableCellRenderer createCellRenderer() {
+				return new EventRenderer();
 			}
 		});
 		return cols;
@@ -82,34 +76,17 @@ public class AlertConfigModel extends ProxyTableModel<AlertConfig> {
 				return true;
 			}
 		};
-		sorter.setComparator(1, new Comparator<CapResponseType>() {
-			public int compare(CapResponseType o0,
-				CapResponseType o1)
-			{
-				return Integer.compare(o0.ordinal(),
-					o1.ordinal());
-			}
-		});
-		sorter.setComparator(2, new Comparator<CapUrgency>() {
-			public int compare(CapUrgency o0, CapUrgency o1)
-			{
-				return Integer.compare(o0.ordinal(),
-					o1.ordinal());
-			}
-		});
 		sorter.setSortsOnUpdates(true);
 		ArrayList<RowSorter.SortKey> keys =
 			new ArrayList<RowSorter.SortKey>();
 		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
-		keys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
-		keys.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
 		sorter.setSortKeys(keys);
 		return sorter;
 	}
 
 	/** Create a new alert config table model */
 	public AlertConfigModel(Session s) {
-		super(s, descriptor(s), 12);
+		super(s, descriptor(s), 16);
 	}
 
 	/** Create an object */
@@ -118,5 +95,23 @@ public class AlertConfigModel extends ProxyTableModel<AlertConfig> {
 		// ignore the provided name
 		String n = AlertConfigHelper.createUniqueName();
 		descriptor.cache.createObject(n);
+	}
+
+	/** Renderer for CAP event in a table cell */
+	static private class EventRenderer extends DefaultTableCellRenderer {
+		public Component getTableCellRendererComponent(JTable table,
+			Object value, boolean isSelected, boolean hasFocus,
+			int row, int column)
+		{
+			if (value instanceof String) {
+				CapEvent ev = CapEvent.fromCode((String) value);
+				if (ev != null) {
+					value = ev.description + " (" +
+						ev.name() + ")";
+				}
+			}
+			return super.getTableCellRendererComponent(table, value,
+				isSelected, hasFocus, row, column);
+		}
 	}
 }

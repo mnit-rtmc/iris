@@ -14,12 +14,17 @@
  */
 package us.mn.state.dot.tms.client.alert;
 
+import java.awt.Component;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
@@ -28,8 +33,6 @@ import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.AlertConfig;
 import us.mn.state.dot.tms.CapEvent;
-import us.mn.state.dot.tms.CapResponseType;
-import us.mn.state.dot.tms.CapUrgency;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
@@ -41,6 +44,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.IOptionPane.showHint;
 import us.mn.state.dot.tms.client.widget.IPanel;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * A panel for editing the properties of an alert config.
@@ -48,6 +52,23 @@ import us.mn.state.dot.tms.client.widget.IPanel;
  * @author Douglas Lau
  */
 public class AlertConfigPanel extends IPanel {
+
+	/** Inner class for rendering cells in the event combo box*/
+	static private class EventCellRenderer extends DefaultListCellRenderer {
+		@Override
+		public Component getListCellRendererComponent(JList list,
+			Object value, int index, boolean isSelected,
+			boolean hasFocus)
+		{
+			String v = "";
+			if (value instanceof CapEvent) {
+				CapEvent ev = (CapEvent) value;
+				v = ev.description + " (" + ev.name() + ")";
+			}
+			return super.getListCellRendererComponent(list, v,
+				index, isSelected, hasFocus);
+		}
+	}
 
 	/** AlertConfig action */
 	abstract private class CAction extends IAction {
@@ -63,7 +84,7 @@ public class AlertConfigPanel extends IPanel {
 	}
 
 	/** Event action */
-	private final CAction event_act = new CAction("alert.cap.event") {
+	private final CAction event_act = new CAction("alert.event") {
 		protected void do_perform(AlertConfig cfg) {
 			Object ev = event_cbx.getSelectedItem();
 			cfg.setEvent((ev instanceof CapEvent)
@@ -76,12 +97,10 @@ public class AlertConfigPanel extends IPanel {
 				CapEvent ev = CapEvent.fromCode(cfg.getEvent());
 				if (ev != null) {
 					event_cbx.setSelectedItem(ev);
-					event_lbl.setText(ev.description);
 					return;
 				}
 			}
 			event_cbx.setSelectedItem(null);
-			event_lbl.setText("");
 		}
 	};
 
@@ -89,80 +108,212 @@ public class AlertConfigPanel extends IPanel {
 	private final JComboBox<CapEvent> event_cbx =
 		new JComboBox<CapEvent>(CapEvent.values());
 
-	/** Event description label */
-	private final JLabel event_lbl = createValueLabel();
-
-	/** Response type action */
-	private final CAction resp_act = new CAction("alert.cap.response") {
+	/** Response shelter check box */
+	private final JCheckBox resp_shelter_chk = new JCheckBox(
+		new CAction("alert.response.shelter")
+	{
 		protected void do_perform(AlertConfig cfg) {
-			Object rt = resp_cbx.getSelectedItem();
-			cfg.setResponseType((rt instanceof CapResponseType)
-				? ((CapResponseType) rt).ordinal()
-				: null);
+			cfg.setResponseShelter(resp_shelter_chk.isSelected());
 		}
-		@Override protected void doUpdateSelected() {
-			AlertConfig cfg = alert_cfg;
-			CapResponseType rt = (cfg != null)
-			    ? CapResponseType.fromOrdinal(cfg.getResponseType())
-			    : null;
-			resp_cbx.setSelectedItem(rt);
-		}
-	};
+	});
 
-	/** Response type combobox */
-	private final JComboBox<CapResponseType> resp_cbx =
-		new JComboBox<CapResponseType>(CapResponseType.values());
-
-	/** Urgency action */
-	private final CAction urg_act = new CAction("alert.cap.urgency") {
+	/** Response evacuate check box */
+	private final JCheckBox resp_evacuate_chk = new JCheckBox(
+		new CAction("alert.response.evacuate")
+	{
 		protected void do_perform(AlertConfig cfg) {
-			Object urg = urg_cbx.getSelectedItem();
-			cfg.setUrgency((urg instanceof CapUrgency)
-				? ((CapUrgency) urg).ordinal()
-				: null);
+			cfg.setResponseEvacuate(resp_evacuate_chk.isSelected());
 		}
-		@Override protected void doUpdateSelected() {
-			AlertConfig cfg = alert_cfg;
-			CapUrgency urg = (cfg != null)
-			          ? CapUrgency.fromOrdinal(cfg.getUrgency())
-			          : null;
-			urg_cbx.setSelectedItem(urg);
+	});
+
+	/** Response prepare check box */
+	private final JCheckBox resp_prepare_chk = new JCheckBox(
+		new CAction("alert.response.prepare")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setResponsePrepare(resp_prepare_chk.isSelected());
 		}
-	};
+	});
 
-	/** Urgency combobox */
-	private final JComboBox<CapUrgency> urg_cbx =
-		new JComboBox<CapUrgency>(CapUrgency.values());
+	/** Response execute check box */
+	private final JCheckBox resp_execute_chk = new JCheckBox(
+		new CAction("alert.response.execute")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setResponseExecute(resp_execute_chk.isSelected());
+		}
+	});
 
-	/** Sign group text field */
-	private final JTextField group_txt = new JTextField(20);
+	/** Response avoid check box */
+	private final JCheckBox resp_avoid_chk = new JCheckBox(
+		new CAction("alert.response.avoid")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setResponseAvoid(resp_avoid_chk.isSelected());
+		}
+	});
 
-	/** Lookup a sign group */
-	private SignGroup lookupSignGroup() {
-		String v = group_txt.getText().trim();
-		if (v.length() > 0) {
-			SignGroup sg = SignGroupHelper.lookup(v);
-			if (null == sg)
-				showHint("dms.group.unknown.hint");
-			return sg;
-		} else
-			return null;
-	}
+	/** Response monitor check box */
+	private final JCheckBox resp_monitor_chk = new JCheckBox(
+		new CAction("alert.response.monitor")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setResponseMonitor(resp_monitor_chk.isSelected());
+		}
+	});
 
-	/** Quick message text field */
-	private final JTextField qm_txt = new JTextField(20);
+	/** Response all clear check box */
+	private final JCheckBox resp_all_clear_chk = new JCheckBox(
+		new CAction("alert.response.all_clear")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setResponseAllClear(resp_all_clear_chk.isSelected());
+		}
+	});
 
-	/** Lookup a quick message */
-	private QuickMessage lookupQuickMessage() {
-		String v = qm_txt.getText().trim();
-		if (v.length() > 0) {
-			QuickMessage qm = QuickMessageHelper.lookup(v);
-			if (null == qm)
-				showHint("quick.message.unknown.hint");
-			return qm;
-		} else
-			return null;
-	}
+	/** Response none check box */
+	private final JCheckBox resp_none_chk = new JCheckBox(
+		new CAction("alert.response.none")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setResponseNone(resp_none_chk.isSelected());
+		}
+	});
+
+	/** Urgency unknown check box */
+	private final JCheckBox urg_unknown_chk = new JCheckBox(
+		new CAction("alert.urgency.unknown")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setUrgencyUnknown(urg_unknown_chk.isSelected());
+		}
+	});
+
+	/** Urgency past check box */
+	private final JCheckBox urg_past_chk = new JCheckBox(
+		new CAction("alert.urgency.past")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setUrgencyPast(urg_past_chk.isSelected());
+		}
+	});
+
+	/** Urgency future check box */
+	private final JCheckBox urg_future_chk = new JCheckBox(
+		new CAction("alert.urgency.future")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setUrgencyFuture(urg_future_chk.isSelected());
+		}
+	});
+
+	/** Urgency expected check box */
+	private final JCheckBox urg_expected_chk = new JCheckBox(
+		new CAction("alert.urgency.expected")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setUrgencyExpected(urg_expected_chk.isSelected());
+		}
+	});
+
+	/** Urgency immediate check box */
+	private final JCheckBox urg_immediate_chk = new JCheckBox(
+		new CAction("alert.urgency.immediate")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setUrgencyImmediate(urg_immediate_chk.isSelected());
+		}
+	});
+
+	/** Severity unknown check box */
+	private final JCheckBox sev_unknown_chk = new JCheckBox(
+		new CAction("alert.severity.unknown")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setSeverityUnknown(sev_unknown_chk.isSelected());
+		}
+	});
+
+	/** Severity minor check box */
+	private final JCheckBox sev_minor_chk = new JCheckBox(
+		new CAction("alert.severity.minor")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setSeverityMinor(sev_minor_chk.isSelected());
+		}
+	});
+
+	/** Severity moderate check box */
+	private final JCheckBox sev_moderate_chk = new JCheckBox(
+		new CAction("alert.severity.moderate")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setSeverityModerate(sev_moderate_chk.isSelected());
+		}
+	});
+
+	/** Severity severe check box */
+	private final JCheckBox sev_severe_chk = new JCheckBox(
+		new CAction("alert.severity.severe")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setSeveritySevere(sev_severe_chk.isSelected());
+		}
+	});
+
+	/** Severity extreme check box */
+	private final JCheckBox sev_extreme_chk = new JCheckBox(
+		new CAction("alert.severity.extreme")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setSeverityExtreme(sev_extreme_chk.isSelected());
+		}
+	});
+
+	/** Certainty unknown check box */
+	private final JCheckBox cer_unknown_chk = new JCheckBox(
+		new CAction("alert.certainty.unknown")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setCertaintyUnknown(cer_unknown_chk.isSelected());
+		}
+	});
+
+	/** Certainty unlikely check box */
+	private final JCheckBox cer_unlikely_chk = new JCheckBox(
+		new CAction("alert.certainty.unlikely")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setCertaintyUnlikely(cer_unlikely_chk.isSelected());
+		}
+	});
+
+	/** Certainty possible check box */
+	private final JCheckBox cer_possible_chk = new JCheckBox(
+		new CAction("alert.certainty.possible")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setCertaintyPossible(cer_possible_chk.isSelected());
+		}
+	});
+
+	/** Certainty likely check box */
+	private final JCheckBox cer_likely_chk = new JCheckBox(
+		new CAction("alert.certainty.likely")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setCertaintyLikely(cer_likely_chk.isSelected());
+		}
+	});
+
+	/** Certainty observed check box */
+	private final JCheckBox cer_observed_chk = new JCheckBox(
+		new CAction("alert.certainty.observed")
+	{
+		protected void do_perform(AlertConfig cfg) {
+			cfg.setCertaintyObserved(cer_observed_chk.isSelected());
+		}
+	});
 
 	/** Spinner for pre-alert hours */
 	private final JSpinner pre_spn = new JSpinner(
@@ -195,21 +346,97 @@ public class AlertConfigPanel extends IPanel {
 			}
 			if (a == null || a.equals("event"))
 				event_act.updateSelected();
-			if (a == null || a.equals("responseType"))
-				resp_act.updateSelected();
-			if (a == null || a.equals("urgency"))
-				urg_act.updateSelected();
-			if (a == null || a.equals("signGroup")) {
-				SignGroup sg = cfg.getSignGroup();
-				group_txt.setText((sg != null)
-					? sg.getName()
-					: "");
+			if (a == null || a.equals("responseShelter")) {
+				resp_shelter_chk.setSelected(
+					cfg.getResponseShelter());
 			}
-			if (a == null || a.equals("quickMessage")) {
-				QuickMessage qm = cfg.getQuickMessage();
-				qm_txt.setText((qm != null)
-					? qm.getName()
-					: "");
+			if (a == null || a.equals("responseEvacuate")) {
+				resp_evacuate_chk.setSelected(
+					cfg.getResponseEvacuate());
+			}
+			if (a == null || a.equals("responsePrepare")) {
+				resp_prepare_chk.setSelected(
+					cfg.getResponsePrepare());
+			}
+			if (a == null || a.equals("responseExecute")) {
+				resp_execute_chk.setSelected(
+					cfg.getResponseExecute());
+			}
+			if (a == null || a.equals("responseAvoid")) {
+				resp_avoid_chk.setSelected(
+					cfg.getResponseAvoid());
+			}
+			if (a == null || a.equals("responseMonitor")) {
+				resp_monitor_chk.setSelected(
+					cfg.getResponseMonitor());
+			}
+			if (a == null || a.equals("responseAllClear")) {
+				resp_all_clear_chk.setSelected(
+					cfg.getResponseAllClear());
+			}
+			if (a == null || a.equals("responseNone")) {
+				resp_none_chk.setSelected(
+					cfg.getResponseNone());
+			}
+			if (a == null || a.equals("urgencyUnknown")) {
+				urg_unknown_chk.setSelected(
+					cfg.getUrgencyUnknown());
+			}
+			if (a == null || a.equals("urgencyPast")) {
+				urg_past_chk.setSelected(
+					cfg.getUrgencyPast());
+			}
+			if (a == null || a.equals("urgencyFuture")) {
+				urg_future_chk.setSelected(
+					cfg.getUrgencyFuture());
+			}
+			if (a == null || a.equals("urgencyExpected")) {
+				urg_expected_chk.setSelected(
+					cfg.getUrgencyExpected());
+			}
+			if (a == null || a.equals("urgencyImmediate")) {
+				urg_immediate_chk.setSelected(
+					cfg.getUrgencyImmediate());
+			}
+			if (a == null || a.equals("severityUnknown")) {
+				sev_unknown_chk.setSelected(
+					cfg.getSeverityUnknown());
+			}
+			if (a == null || a.equals("severityMinor")) {
+				sev_minor_chk.setSelected(
+					cfg.getSeverityMinor());
+			}
+			if (a == null || a.equals("severityModerate")) {
+				sev_moderate_chk.setSelected(
+					cfg.getSeverityModerate());
+			}
+			if (a == null || a.equals("severitySevere")) {
+				sev_severe_chk.setSelected(
+					cfg.getSeveritySevere());
+			}
+			if (a == null || a.equals("severityExtreme")) {
+				sev_extreme_chk.setSelected(
+					cfg.getSeverityExtreme());
+			}
+			if (a == null || a.equals("certaintyUnknown")) {
+				cer_unknown_chk.setSelected(
+					cfg.getCertaintyUnknown());
+			}
+			if (a == null || a.equals("certaintyUnlikely")) {
+				cer_unlikely_chk.setSelected(
+					cfg.getCertaintyUnlikely());
+			}
+			if (a == null || a.equals("certaintyPossible")) {
+				cer_possible_chk.setSelected(
+					cfg.getCertaintyPossible());
+			}
+			if (a == null || a.equals("certaintyLikely")) {
+				cer_likely_chk.setSelected(
+					cfg.getCertaintyLikely());
+			}
+			if (a == null || a.equals("certaintyObserved")) {
+				cer_observed_chk.setSelected(
+					cfg.getCertaintyObserved());
 			}
 			if (a == null || a.equals("preAlertHours"))
 				pre_spn.setValue(cfg.getPreAlertHours());
@@ -222,15 +449,53 @@ public class AlertConfigPanel extends IPanel {
 			alert_cfg = null;
 			event_act.setEnabled(false);
 			event_cbx.setSelectedItem(null);
-			event_lbl.setText("");
-			resp_act.setEnabled(false);
-			resp_cbx.setSelectedItem(null);
-			urg_act.setEnabled(false);
-			urg_cbx.setSelectedItem(null);
-			group_txt.setEnabled(false);
-			group_txt.setText("");
-			qm_txt.setEnabled(false);
-			qm_txt.setText("");
+			event_cbx.setRenderer(new EventCellRenderer());
+			resp_shelter_chk.setEnabled(false);
+			resp_shelter_chk.setSelected(false);
+			resp_evacuate_chk.setEnabled(false);
+			resp_evacuate_chk.setSelected(false);
+			resp_prepare_chk.setEnabled(false);
+			resp_prepare_chk.setSelected(false);
+			resp_execute_chk.setEnabled(false);
+			resp_execute_chk.setSelected(false);
+			resp_avoid_chk.setEnabled(false);
+			resp_avoid_chk.setSelected(false);
+			resp_monitor_chk.setEnabled(false);
+			resp_monitor_chk.setSelected(false);
+			resp_all_clear_chk.setEnabled(false);
+			resp_all_clear_chk.setSelected(false);
+			resp_none_chk.setEnabled(false);
+			resp_none_chk.setSelected(false);
+			urg_unknown_chk.setEnabled(false);
+			urg_unknown_chk.setSelected(false);
+			urg_past_chk.setEnabled(false);
+			urg_past_chk.setSelected(false);
+			urg_future_chk.setEnabled(false);
+			urg_future_chk.setSelected(false);
+			urg_expected_chk.setEnabled(false);
+			urg_expected_chk.setSelected(false);
+			urg_immediate_chk.setEnabled(false);
+			urg_immediate_chk.setSelected(false);
+			sev_unknown_chk.setEnabled(false);
+			sev_unknown_chk.setSelected(false);
+			sev_minor_chk.setEnabled(false);
+			sev_minor_chk.setSelected(false);
+			sev_moderate_chk.setEnabled(false);
+			sev_moderate_chk.setSelected(false);
+			sev_severe_chk.setEnabled(false);
+			sev_severe_chk.setSelected(false);
+			sev_extreme_chk.setEnabled(false);
+			sev_extreme_chk.setSelected(false);
+			cer_unknown_chk.setEnabled(false);
+			cer_unknown_chk.setSelected(false);
+			cer_unlikely_chk.setEnabled(false);
+			cer_unlikely_chk.setSelected(false);
+			cer_possible_chk.setEnabled(false);
+			cer_possible_chk.setSelected(false);
+			cer_likely_chk.setEnabled(false);
+			cer_likely_chk.setSelected(false);
+			cer_observed_chk.setEnabled(false);
+			cer_observed_chk.setSelected(false);
 			pre_spn.setEnabled(false);
 			pre_spn.setValue(0);
 			post_spn.setEnabled(false);
@@ -271,25 +536,53 @@ public class AlertConfigPanel extends IPanel {
 	public void initialize() {
 		super.initialize();
 		event_cbx.setAction(event_act);
-		resp_cbx.setAction(resp_act);
-		urg_cbx.setAction(urg_act);
-		add("alert.cap.event");
-		add(event_cbx);
-		add(event_lbl, Stretch.LAST);
-		add("alert.cap.response");
-		add(resp_cbx, Stretch.LAST);
-		add("alert.cap.urgency");
-		add(urg_cbx, Stretch.LAST);
-		add("dms.group");
-		add(group_txt, Stretch.END);
-		add("dms.quick.message");
-		add(qm_txt, Stretch.END);
+		add("alert.event");
+		add(event_cbx, Stretch.LAST);
+		add("alert.response");
+		JPanel p = new JPanel(new GridLayout(4, 2));
+		p.setBorder(UI.buttonBorder());
+		p.add(resp_shelter_chk);
+		p.add(resp_evacuate_chk);
+		p.add(resp_prepare_chk);
+		p.add(resp_execute_chk);
+		p.add(resp_avoid_chk);
+		p.add(resp_monitor_chk);
+		p.add(resp_all_clear_chk);
+		p.add(resp_none_chk);
+		add(p);
+		add("alert.urgency");
+		p = new JPanel(new GridLayout(3, 2));
+		p.setBorder(UI.buttonBorder());
+		p.add(urg_unknown_chk);
+		p.add(urg_past_chk);
+		p.add(urg_future_chk);
+		p.add(urg_expected_chk);
+		p.add(urg_immediate_chk);
+		add(p, Stretch.LAST);
+		add("alert.severity");
+		p = new JPanel(new GridLayout(3, 2));
+		p.setBorder(UI.buttonBorder());
+		p.add(sev_unknown_chk);
+		p.add(sev_minor_chk);
+		p.add(sev_moderate_chk);
+		p.add(sev_severe_chk);
+		p.add(sev_extreme_chk);
+		add(p);
+		add("alert.certainty");
+		p = new JPanel(new GridLayout(3, 2));
+		p.setBorder(UI.buttonBorder());
+		p.add(cer_unknown_chk);
+		p.add(cer_unlikely_chk);
+		p.add(cer_possible_chk);
+		p.add(cer_likely_chk);
+		p.add(cer_observed_chk);
+		add(p, Stretch.LAST);
 		add("alert.pre_alert_hours");
-		add(pre_spn, Stretch.LAST);
+		add(pre_spn);
 		add("alert.post_alert_hours");
 		add(post_spn, Stretch.LAST);
 		add("alert.config.auto_deploy");
-		add(auto_deploy_chk);
+		add(auto_deploy_chk, Stretch.LAST);
 		createJobs();
 		watcher.initialize();
 		view.clear();
@@ -298,16 +591,6 @@ public class AlertConfigPanel extends IPanel {
 
 	/** Create the jobs */
 	private void createJobs() {
-		group_txt.addFocusListener(new FocusAdapter() {
-			@Override public void focusLost(FocusEvent e) {
-				setSignGroup();
-			}
-		});
-		qm_txt.addFocusListener(new FocusAdapter() {
-			@Override public void focusLost(FocusEvent e) {
-				setQuickMessage();
-			}
-		});
 		pre_spn.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				Number h = (Number) pre_spn.getValue();
@@ -320,20 +603,6 @@ public class AlertConfigPanel extends IPanel {
 				setPostAlertHours(h.intValue());
 			}
 		});
-	}
-
-	/** Set the sign group */
-	private void setSignGroup() {
-		AlertConfig cfg = alert_cfg;
-		if (cfg != null)
-			cfg.setSignGroup(lookupSignGroup());
-	}
-
-	/** Set the quick message */
-	private void setQuickMessage() {
-		AlertConfig cfg = alert_cfg;
-		if (cfg != null)
-			cfg.setQuickMessage(lookupQuickMessage());
 	}
 
 	/** Set the pre-alert hours */
@@ -362,13 +631,33 @@ public class AlertConfigPanel extends IPanel {
 	/** Update the edit mode */
 	public void updateEditMode() {
 		AlertConfig cfg = alert_cfg;
-		event_act.setEnabled(session.canWrite(cfg, "event"));
-		resp_act.setEnabled(session.canWrite(cfg, "responseType"));
-		urg_act.setEnabled(session.canWrite(cfg, "urgency"));
-		group_txt.setEnabled(session.canWrite(cfg, "signGroup"));
-		qm_txt.setEnabled(session.canWrite(cfg, "quickMessage"));
-		pre_spn.setEnabled(session.canWrite(cfg, "preAlertHours"));
-		post_spn.setEnabled(session.canWrite(cfg, "postAlertHours"));
-		auto_deploy_chk.setEnabled(session.canWrite(cfg, "autoDeploy"));
+		boolean write = session.canWrite(cfg, "event");
+		event_act.setEnabled(write);
+		resp_shelter_chk.setEnabled(write);
+		resp_evacuate_chk.setEnabled(write);
+		resp_prepare_chk.setEnabled(write);
+		resp_execute_chk.setEnabled(write);
+		resp_avoid_chk.setEnabled(write);
+		resp_monitor_chk.setEnabled(write);
+		resp_all_clear_chk.setEnabled(write);
+		resp_none_chk.setEnabled(write);
+		urg_unknown_chk.setEnabled(write);
+		urg_past_chk.setEnabled(write);
+		urg_future_chk.setEnabled(write);
+		urg_expected_chk.setEnabled(write);
+		urg_immediate_chk.setEnabled(write);
+		sev_unknown_chk.setEnabled(write);
+		sev_minor_chk.setEnabled(write);
+		sev_moderate_chk.setEnabled(write);
+		sev_severe_chk.setEnabled(write);
+		sev_extreme_chk.setEnabled(write);
+		cer_unknown_chk.setEnabled(write);
+		cer_unlikely_chk.setEnabled(write);
+		cer_possible_chk.setEnabled(write);
+		cer_likely_chk.setEnabled(write);
+		cer_observed_chk.setEnabled(write);
+		pre_spn.setEnabled(write);
+		post_spn.setEnabled(write);
+		auto_deploy_chk.setEnabled(write);
 	}
 }

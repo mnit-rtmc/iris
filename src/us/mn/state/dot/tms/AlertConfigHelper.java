@@ -18,6 +18,8 @@ package us.mn.state.dot.tms;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
@@ -56,21 +58,88 @@ public class AlertConfigHelper extends BaseHelper {
 
 	/** Find matching alert configs */
 	static public List<AlertConfig> findMatching(CapEvent ev,
-		CapResponseType rt, CapUrgency urg)
+		CapResponseType rt, CapUrgency urg, CapSeverity sev,
+		CapCertainty cer)
 	{
 		ArrayList<AlertConfig> cfgs = new ArrayList<AlertConfig>();
 		Iterator<AlertConfig> it = iterator();
 		while (it.hasNext()) {
 			AlertConfig cfg = it.next();
 			CapEvent event = CapEvent.fromCode(cfg.getEvent());
-			CapResponseType response_type = CapResponseType
-				.fromOrdinal(cfg.getResponseType());
-			CapUrgency urgency = CapUrgency.fromOrdinal(
-				cfg.getUrgency());
-			if (ev == event && rt == response_type &&
-			    urg == urgency)
+			if (checkResponse(cfg, rt) && checkUrgency(cfg, urg) &&
+			    checkSeverity(cfg, sev) && checkCertainty(cfg, cer))
 				cfgs.add(cfg);
 		}
 		return cfgs;
+	}
+
+	/** Check a config for a matching response type */
+	static private boolean checkResponse(AlertConfig cfg,
+		CapResponseType rt)
+	{
+		switch (rt) {
+		case SHELTER: return cfg.getResponseShelter();
+		case EVACUATE: return cfg.getResponseEvacuate();
+		case PREPARE: return cfg.getResponsePrepare();
+		case EXECUTE: return cfg.getResponseExecute();
+		case AVOID: return cfg.getResponseAvoid();
+		case MONITOR: return cfg.getResponseMonitor();
+		case ALLCLEAR: return cfg.getResponseAllClear();
+		case NONE: return cfg.getResponseNone();
+		default: return false;
+		}
+	}
+
+	/** Check a config for a matching urgency */
+	static private boolean checkUrgency(AlertConfig cfg,
+		CapUrgency urg)
+	{
+		switch (urg) {
+		case UNKNOWN: return cfg.getUrgencyUnknown();
+		case PAST: return cfg.getUrgencyPast();
+		case FUTURE: return cfg.getUrgencyFuture();
+		case EXPECTED: return cfg.getUrgencyExpected();
+		case IMMEDIATE: return cfg.getUrgencyImmediate();
+		default: return false;
+		}
+	}
+
+	/** Check a config for a matching severity */
+	static private boolean checkSeverity(AlertConfig cfg,
+		CapSeverity sev)
+	{
+		switch (sev) {
+		case UNKNOWN: return cfg.getSeverityUnknown();
+		case MINOR: return cfg.getSeverityMinor();
+		case MODERATE: return cfg.getSeverityModerate();
+		case SEVERE: return cfg.getSeveritySevere();
+		case EXTREME: return cfg.getSeverityExtreme();
+		default: return false;
+		}
+	}
+
+	/** Check a config for a matching certainty */
+	static private boolean checkCertainty(AlertConfig cfg,
+		CapCertainty cer)
+	{
+		switch (cer) {
+		case UNKNOWN: return cfg.getCertaintyUnknown();
+		case UNLIKELY: return cfg.getCertaintyUnlikely();
+		case POSSIBLE: return cfg.getCertaintyPossible();
+		case LIKELY: return cfg.getCertaintyLikely();
+		case OBSERVED: return cfg.getCertaintyObserved();
+		default: return false;
+		}
+	}
+
+	/** Get the set of all signs for an alert configuration */
+	static public Set<DMS> getAllSigns(AlertConfig cfg) {
+		TreeSet<DMS> all_dms = new TreeSet<DMS>();
+		for (QuickMessage qm: cfg.getQuickMessages()) {
+			SignGroup sg = qm.getSignGroup();
+			if (sg != null)
+				all_dms.addAll(SignGroupHelper.getAllSigns(sg));
+		}
+		return all_dms;
 	}
 }
