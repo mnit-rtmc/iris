@@ -220,11 +220,14 @@ V66E37	CRASH[nl]5 MILES AHEAD[nl]LEFT LANE CLOSED	2019-10-02 11:37:00-05:00
 #### Msg-Feed Action Plan
 
 An [action plan] is required to associate a [DMS action] with the feed.  The
-_DMS action_ must have a [quick message] with a `feed` [action tag].  So, if the
-_message feed_ is on a _Comm Link_ called `LFEED`, then the quick message
-[MULTI] string must be `[feedLFEED]`.  Also, the _action plan_ must be active
-and deployed.  This requirement allows only administrator-approved DMS to be
-controlled by the message feed.
+_DMS action_ must have a [quick message] with a `feed` [action tag]:
+
+`[feed` *n* `]`
+
+So, if the _message feed_ is on a _Comm Link_ called `LFEED`, then the quick
+message [MULTI] string must be `[feedLFEED]`.  Also, the _action plan_ must be
+active and deployed.  This requirement allows only administrator-approved DMS to
+be controlled by the message feed.
 
 #### Msg-Feed Text
 

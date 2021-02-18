@@ -37,17 +37,18 @@ If **activate beacon** is selected, the sign beacon will also be activated.
 ### DMS Action Tags
 
 Some *[MULTI]-like* tags are supported in [quick message]s used by DMS actions.
-These tags are interpreted by IRIS before sending the message to the DMS.
+These tags are interpreted by IRIS before sending the message to the DMS.  NOTE:
+they are **only** usable in action plan messages - not operator-selected ones.
 
-Tag                             | Description
---------------------------------|-------------------
-`[feed` *n* `]`                 | [Msg-Feed] message
-`[pa` *i,l,c* `]`               | [Parking area] availability
-`[slow` *s,d,mode* `]`          | [Slow traffic] warning
-`[tt` *s,m,t* `]`               | [Travel time]
-`[tz` *{p,o,c},{tz0},…{tzn}* `]`| [Toll zone] pricing
-`[vsa]`                         | [Variable speed advisory]
-`[cg` *dms,wid,min,mode,i* `]`  | [ClearGuide data element]
+Tag              | Description
+-----------------|------------------
+`[cg` *…* `]`    | [ClearGuide] data
+`[feed` *…* `]`  | [Msg-Feed] message
+`[pa` *…* `]`    | [Parking area] availability
+`[slow` *…* `]`  | [Slow traffic] warning
+`[tt` *…* `]`    | [Travel time] estimation
+`[tz` *…* `]`    | [Toll zone] pricing
+`[vsa]`          | [Variable speed advisory]
 
 ## Meter Actions
 
@@ -100,6 +101,7 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 
 [beacon]: beacons.html
 [camera]: cameras.html
+[ClearGuide]: clearguide.html
 [DMS]: dms.html
 [Msg-Feed]: comm_links.html#msg-feed
 [MULTI]: dms.html#multi
@@ -109,7 +111,6 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 [ramp meter]: ramp_meters.html
 [Slow traffic]: slow_warning.html
 [Variable speed advisory]: vsa.html
-[ClearGuide data element]: clearguide.html
 [Toll zone]: tolling.html
 [Travel time]: travel_time.html
 [system attribute]: system_attributes.html

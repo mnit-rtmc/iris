@@ -10,18 +10,23 @@ name.
 
 ## ClearGuide Action Tag
 
-The `[cg]` [action tag] is used to embed real-time ClearGuide data into DMS
-messages and has this format:
+Real-time ClearGuide data can be embedded in DMS messages using [DMS actions].
+A `[cg` *…* `]` [action tag] in the [quick message] will be replaced by the
+appropriate value.  It has the following format:
 
 `[cg` *dms,wid,min,mode,idx* `]`
 
 **Parameters**
 
-* `dms`: Name of DMS associated with the workzone defined in ClearGuide
-* `wid`: The workzone ID defined in ClearGuide
-* `min`: The minimum acceptable value for the statistic read from ClearGuide
-* `mode`: An identifier for the desired ClearGuide statistic: tt=workzone travel time, delay=workzone delay
-* `idx`: The zero-based index of the workzone associated with the DMS. This only applies for DMS with more than 1 associated workzone. It is optional and defaults to zero.
+1. `dms`: Name of DMS associated with the workzone defined in ClearGuide
+2. `wid`: The workzone ID defined in ClearGuide
+3. `min`: The minimum acceptable value for the statistic read from ClearGuide
+4. `mode`: An identifier for the desired ClearGuide statistic:
+   - `tt`: workzone travel time
+   - `delay`: workzone delay
+5. `idx`: The zero-based index of the workzone associated with the DMS. This only applies for DMS with more than 1 associated workzone. It is optional and defaults to zero.
 
-[action tag]: action_plans.html#clearguide
 
+[action tag]: action_plans.html#dms-action-tags
+[DMS actions]: action_plans.html#dms-actions
+[quick message]: dms.html#quick-messages

@@ -4,35 +4,6 @@ The current **travel time** from a DMS to a downstream [station] can be
 estimated and displayed on the sign.  A new estimate is made every 30 seconds,
 based on speed data from [vehicle detection systems].
 
-A `[tt…]` [action tag] can be used to specify a travel time within a
-[quick message].  When the message is deployed, the tag will be replaced by the
-estimated travel time, in minutes.  The tag has three parameters, separated by
-commas.
-
- 1. Destination [station ID]
- 2. **Over limit** mode (`prepend` if omitted)
-    - `blank`: do not display travel time when over limit
-    - `prepend`: prepend over limit text before travel time
-    - `append`: append over limit text after travel time
- 3. Over limit text (`OVER ` if omitted)
-
-NOTE: multiple destinations can be included on the same message by specifying
-multiple `[tt…]` tags.
-
-## Examples
-
-```
-FREEWAY TIME TO[nl][jl2]I-94[jl4][ttS100,prepend,OVER ] MIN
-```
-
-```
-TIME TO[nl][jl2]I-35W[jl4][ttS200,append,+] MIN
-```
-
-```
-DOWNTN[nl][ttS300,blank] MIN
-```
-
 ## Route Pathfinding
 
 This feature requires that the [road topology] is configured for the entire
@@ -40,12 +11,12 @@ route.  Using this topology, the shortest route is found from the DMS to the
 destination [station].
 
 A route consists of one or more _[corridor] trips_.  Each corridor trip has an
-_origin_ and a _destination_, which are r_nodes associated with a single freeway
-corridor.  For the first corridor trip, the origin is the DMS location.  A route
-can only branch if an r_node with _exit_ [node type] is matched with an
-_entrance_ r_node.  In order to match, the **roadway / direction** for the exit
-r_node must equal the **cross street / direction** for the entrance, and vice
-versa.
+_origin_ and a _destination_, which are `r_nodes` associated with a single
+freeway corridor.  For the first corridor trip, the origin is the DMS location.
+A route can only branch if an `r_node` with _exit_ [node type] is matched with
+an _entrance_ `r_node`.  In order to match, the **roadway / direction** for the
+exit `r_node` must equal the **cross street / direction** for the entrance, and
+vice versa.
 
 Two [system attribute]s control route pathfinding.  `route_max_legs` is the
 maximum number of corridors to branch.  `route_max_miles` is the maximum total
@@ -90,9 +61,44 @@ If the calculated travel time is over the travel time limit, the message will be
 Otherwise, the tag will be replaced with the travel time limit, with the over
 limit text either prepended or appended.
 
+## Travel Time Action Tag
+
+The estimated travel time (in minutes) can be displayed in DMS messages using
+[DMS actions].  A `[tt` *…* `]` [action tag] in the [quick message] will be
+replaced with the appropriate value.  It has the following format:
+
+`[tt` *dest,mode,over* `]`
+
+**Parameters**
+
+1. `dest`: Destination [station ID]
+2. `mode`: **Over limit** mode (`prepend` if omitted)
+   - `blank`: do not display travel time when over limit
+   - `prepend`: prepend over limit text before travel time
+   - `append`: append over limit text after travel time
+3. `over`: Over limit text (`OVER ` if omitted)
+
+NOTE: multiple destinations can be included on the same message by specifying
+multiple `[tt…]` tags.
+
+## Examples
+
+```
+FREEWAY TIME TO[nl][jl2]I-94[jl4][ttS100,prepend,OVER ] MIN
+```
+
+```
+TIME TO[nl][jl2]I-35W[jl4][ttS200,append,+] MIN
+```
+
+```
+DOWNTN[nl][ttS300,blank] MIN
+```
+
 
 [action tag]: action_plans.html#dms-action-tags
 [corridor]: road_topology.html#corridors
+[DMS actions]: action_plans.html#dms-actions
 [node type]: road_topology.html#r_node-types
 [quick message]: dms.html#quick-messages
 [road topology]: road_topology.html

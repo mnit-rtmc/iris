@@ -12,11 +12,17 @@ parking space.  If applicable, lanes 3 (front) and 4 (rear) are for the _tail_.
 
 ## Parking Area Action Tag
 
-A `[pa…]` [action tag] is replaced with the number of available parking spaces
-to be displayed on a DMS.  The tag has three parameters, separated by commas.
- - Parking area ID
- - Text to display if available spaces is below the low threshold
- - Text to display if parking area is closed
+The number of available parking spaces can be displayed in DMS messages using
+[DMS actions].  A `[pa` *…* `]` [action tag] in the [quick message] will be
+replaced with the appropriate value.  It has the following format:
+
+`[pa` *id,low,closed* `]`
+
+**Parameters**
+
+1. `id`: Parking area ID
+2. `low`: Text to display if available spaces is below the low threshold
+3. `closed`: Text to display if parking area is closed
 
 ### Example
 
@@ -27,3 +33,5 @@ REST AREA 2 MILES[nl]PARKING [pa1,LOW,CLOSED]
 
 [action tag]: action_plans.html#dms-action-tags
 [corridor]: road_topology.html#corridors
+[DMS actions]: action_plans.html#dms-actions
+[quick message]: dms.html#quick-messages
