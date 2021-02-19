@@ -16,12 +16,17 @@
 package us.mn.state.dot.tms.server;
 
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.DMSHelper;
@@ -35,6 +40,7 @@ import us.mn.state.dot.tms.SignTextHelper;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.TollZoneHelper;
@@ -267,6 +273,9 @@ public class DmsActionMsg {
 			String c_txt)
 		{
 			addSpan(parkingSpan(pid, l_txt, c_txt));
+		}
+		@Override public void addSched(String dir, String format) {
+			addSpan(schedSpan(dir, format));
 		}
 	};
 
@@ -778,5 +787,25 @@ public class DmsActionMsg {
 				dlog.log("calcClearGuideAdvisory: " + msg);
 			return fail(msg);
 		}
+	}
+
+	/** Calculate sched time action span */
+	private String schedSpan(String dir, String format) {
+		ActionPlan plan = action.getActionPlan();
+		Date dt = getDateDir(plan, dir);
+		if (dt != null) {
+			LocalDateTime ldt = dt.toInstant().atZone(
+				ZoneId.systemDefault()).toLocalDateTime();
+			return ldt.format(DateTimeFormatter.ofPattern(format));
+		} else
+			return fail("Scheduled time action not found");
+	}
+
+	/** Get scheduled date that's most recent or soonest from now */
+	private Date getDateDir(ActionPlan plan, String dir) {
+		Date now = TimeSteward.getDateInstance();
+		return ("before".equals(dir))
+			? TimeActionHelper.getMostRecent(plan, now)
+			: TimeActionHelper.getSoonest(plan, now);
 	}
 }

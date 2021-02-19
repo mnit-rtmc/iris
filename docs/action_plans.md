@@ -45,6 +45,7 @@ Tag              | Description
 `[cg` *…* `]`    | [ClearGuide] data
 `[feed` *…* `]`  | [Msg-Feed] message
 `[pa` *…* `]`    | [Parking area] availability
+`[sched` *…* `]` | Scheduled [time actions](#sched-action-tag)
 `[slow` *…* `]`  | [Slow traffic] warning
 `[tt` *…* `]`    | [Travel time] estimation
 `[tz` *…* `]`    | [Toll zone] pricing
@@ -74,6 +75,69 @@ These events are scheduled using either a [day plan](#day-plans) or a specific
 date (but not both).  A time of day must also be specified (HH:MM in 24-hour
 format).  Whenever the scheduled time occurs, the action plan will be changed to
 the specified phase.
+
+## Sched Action Tag
+
+The time of a scheduled **time action** can be displayed in DMS messages using
+[DMS actions](#dms-actions) within the same action plan.  A `[sched` *…* `]`
+[action tag](#dms-action-tag) in the [quick message] will be replaced with the
+appropriate value.  It has the following format:
+
+`[sched` *dir*,*format* `]`
+
+**Parameters**
+
+1. `dir`: Chronological direction
+   - `after`: Scheduled *time action* **after** the current time
+   - `before`: Scheduled *time action* **before** the current time
+2. `format`: Time format pattern (`h a` if omitted)
+
+The format parameter is specified using a Java [DateTimeFormatter] pattern,
+summarized in this table:
+
+Symbol | Meaning
+-------|------------
+h      | hour (1-12)
+H      | hour of day (0-23)
+mm     | minute (00-59)
+a      | AM or PM
+E      | weekday (*e.g.* Mon)
+EEEE   | full weekday (*e.g.* Monday)
+d      | day of month (1-31)
+M      | month number (1-12)
+L      | month (*e.g.* Jan)
+LLLL   | full month (*e.g.* January)
+
+The default pattern, `h a`, would format a time at 2 in the afternoon as `2 PM`.
+To include minutes, `h:mm a` could be used instead.
+
+### Example 1
+
+```
+ROAD WORK[nl]STARTING AT [schedafter,h:mm a]
+```
+
+If next scheduled time action is at 2:30 AM, the resulting message will be:
+
+```
+ROAD WORK
+STARTING AT 2:30 AM
+```
+
+### Example 2
+
+```
+BLIZZARD WARNING[nl]FROM [schedbefore][nl]UNTIL [schedafter]
+```
+
+If the time is between two scheduled time actions, 4 AM to 10 PM, the message
+will be:
+
+```
+BLIZZARD WARNING
+FROM 4 AM
+UNTIL 10 PM
+```
 
 ## Day Plans
 

@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import javax.swing.ListCellRenderer;
@@ -107,8 +106,8 @@ public class WMsgMultiTagToolbar extends WToolbar {
 		// Variable Speed Advisory
 		multiTagModel.addElement(WTokenType.speedAdvisory);
 		
-		// CAP Time substitution
-		multiTagModel.addElement(WTokenType.capTime);
+		// Scheduled Time substitution
+		multiTagModel.addElement(WTokenType.sched);
 		
 		//--------------------------------
 		// Tags NOT implemented elsewhere

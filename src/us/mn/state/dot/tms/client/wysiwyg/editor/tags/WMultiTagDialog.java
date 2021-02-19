@@ -136,8 +136,8 @@ abstract public class WMultiTagDialog extends AbstractForm {
 			return new WTextRectangleTagDialog(t, c, tokType, tok);
 		case graphic:
 			return new WGraphicTagDialog(t, c, tokType, tok);
-		case capTime:
-			return new WCapTimeTagDialog(t, c, tokType, tok);
+		case sched:
+			return new WSchedTagDialog(t, c, tokType, tok);
 		default:
 			return null;
 		}

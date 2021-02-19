@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2019-2020  SRF Consulting Group
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -270,15 +271,18 @@ public class WMultiParser implements Multi {
 	}
 
 	/* (non-Javadoc)
+	 * @see us.mn.state.dot.tms.utils.Multi#addSched(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public void addSched(String dir, String format) {
+		page.addToken(new WtSched(dir, format));
+	}
+
+	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.Multi#addLocator(java.lang.String)
 	 */
 	@Override
 	public void addLocator(String code) {
 		page.addToken(new WtLocator(code));
-	}
-
-	@Override
-	public void addCapTime(String b_txt, String d_txt, String a_txt) {
-		page.addToken(new WtCapTime(b_txt, d_txt, a_txt));
 	}
 }

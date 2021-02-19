@@ -419,29 +419,28 @@ public class MultiBuilder implements Multi {
 		}
 	}
 
+	/** Add a sched time substitution field.
+	 *  @param dir Chronoligical direction (after or before).
+	 *  @param format Format pattern (DateTimeFormattter). */
+	@Override
+	public void addSched(String dir, String format) {
+		multi.append("[sched");
+		if ("before".equalsIgnoreCase(dir))
+			multi.append("before");
+		else
+			multi.append("after");
+		if (format != null) {
+			multi.append(',');
+			multi.append(format);
+		}
+		multi.append("]");
+	}
+
 	/** Add an incident locator */
 	@Override
 	public void addLocator(String code) {
 		multi.append("[loc");
 		multi.append(code);
-		multi.append("]");
-	}
-
-	/** Add a CAP time substitution field.
-	 *  Text fields can include "{}" to automatically substitute in the
-	 *  appropriate time (alert start or end time), with optional formatting
-	 *  (using Java Date Format notation).
-	 *  @param b_txt Before alert prepend text.
-	 *  @param d_txt During-alert prepend text.
-	 *  @param a_txt After-alert prepend text. */
-	@Override
-	public void addCapTime(String b_txt, String d_txt, String a_txt) {
-		multi.append("[captime");
-		multi.append(b_txt);
-		multi.append(",");
-		multi.append(d_txt);
-		multi.append(",");
-		multi.append(a_txt);
 		multi.append("]");
 	}
 }

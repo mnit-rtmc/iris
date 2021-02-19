@@ -533,37 +533,24 @@ public class AlertData {
 		// Create "before" DMS action
 		int pre_hours = cfg.getPreAlertHours();
 		if (pre_hours > 0) {
-			String b_multi = generateMulti(multi,
-				CapMultiBuilder.Period.BEFORE);
+			String b_multi = ""; // FIXME
 			QuickMessage b_qm = createQuickMsg(plan, grp_act,
 				sign_cfg, b_multi);
 			createDmsAction(plan, grp_act, "alert_before", b_qm);
 		}
 		// Create "during" DMS action
-		String d_multi = generateMulti(multi,
-			CapMultiBuilder.Period.DURING);
+		String d_multi = ""; // FIXME
 		QuickMessage d_qm = createQuickMsg(plan, grp_act, sign_cfg,
 			d_multi);
 		createDmsAction(plan, grp_act, "alert_during", d_qm);
 		// Create "after" DMS action
 		int post_hours = cfg.getPostAlertHours();
 		if (post_hours > 0) {
-			String a_multi = generateMulti(multi,
-				CapMultiBuilder.Period.AFTER);
+			String a_multi = ""; // FIXME
 			QuickMessage a_qm = createQuickMsg(plan, grp_act,
 				sign_cfg, a_multi);
 			createDmsAction(plan, grp_act, "alert_after", a_qm);
 		}
-	}
-
-	/** Generate a MULTI message from an alert config */
-	private String generateMulti(String multi, CapMultiBuilder.Period per) {
-		CapMultiBuilder builder = new CapMultiBuilder(per, start_date,
-			end_date);
-		new MultiString(multi).parse(builder);
-		MultiString ms = builder.toMultiString();
-		log("" + per + ": " + ms.toString());
-		return ms.toString();
 	}
 
 	/** Create a sign group for an action plan */

@@ -1,4 +1,4 @@
-# Alerts - Weather / Emergency
+# Alerts and Warnings
 
 IRIS can poll weather and other emergency alerts from feeds using the Common
 Alerting Protocol [CAP], and automatically post messages on Dynamic Message
@@ -133,66 +133,14 @@ deployment when reviewed in the deployment dialog.
 ### Message Templates
 
 Messages will be automatically generated for each alert based on a predefined
-message template, stored as a quick message. These message templates support
-the use of IRIS DMS Action Tags to allow dynamically displaying information
+message template, stored as a quick message.  These message templates support
+the use of [DMS action tags] to allow dynamically displaying information
 from the alert CAP message in the message displayed on the DMS.
 
-Message templates can be created using the [WYSIWYG editor]. To create a
+Message templates can be created using the [WYSIWYG editor].  To create a
 message template, use the message selector to create a new message for the sign
-group for use in the alert deployment. In the message editor, enter any static
-elements of the message as text. Then use `MULTI Tag` mode to add CAP Time, CAP
-Response Type, or CAP Urgency tags as needed. In the WYSIWYG rendering, these
-tags will be displayed as rectangular boxes to indicate the maximum width of
-the text that will be placed at that location in the message.
-
-#### CAP Time Tag
-
-The `[captime...]` tag will dynamically substitute a time-dependent sequence of
-text or time field from an alert CAP message into a message. This tag has three
-parameters, separated by commas:
- - Pre-alert text
- - Alert-active text
- - Post-alert text
-
-Each of these parameters can include a set of curly braces (`{}`) that will be
-substituted with either the alert start or end time. By default the time will
-be formatted in `h a` format (e.g. `2 PM`), however you may specify a Java
-[DateTimeFormatter] pattern inside the curly braces to change this (e.g.
-`{h:mm a}`).
-
-Before the alert begins, the pre-alert text will be substituted in place of the
-tag. If a time substitution field (curly braces) is included in the text, the
-alert **start** time will be substituted in its place.
-
-After the alert has started but before it has expired, the alert-active text
-will be substituted in place of the tag. If a time substitution field (curly
-braces) is included in the text, the alert **end** time will be substituted
-in its place.
-
-After the alert has expired, the post-alert text will be substituted in place
-of the tag. If a time substitution field (curly braces) is included in the
-text, the alert **end** time will be substituted in its place.
-
-Multiple `[captime...]` tags may be included in a message to allow time-
-dependent text to be spread across multiple lines or pages.
-
-##### Example
-
-Consider the following tag:
-
-```
-[captimeSTARTING AT {},IN EFFECT UNTIL {},ALL CLEAR]
-```
-
-If this tag is used in a message for an alert that starts at 2 AM and ends at
-1 PM, the message posted to the sign will substitute text in place of that tag
-as follows:
-
-Alert Phase             | Message Text
-------------------------|--------------------------------------------
-Before alert start time | STARTING AT 2 AM
-During alert time       | IN EFFECT UNTIL 1 PM
-After alert end time    | ALL CLEAR
+group for use in the alert deployment.  In the message editor, enter any static
+elements of the message as text.
 
 ### Pre- and Post-Alert Times
 
@@ -301,7 +249,7 @@ real alert.  Note that in a production environment this may activate real signs,
 so care must be taken to ensure the testing is done in a controlled manner.
 
 
-[alert configurations]: #alert_configurations
+[alert configurations]: #alert-configurations
 [comm link]: comm_links.html
 [controller]: controllers.html
 [DateTimeFormatter]: https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html

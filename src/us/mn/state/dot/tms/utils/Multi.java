@@ -197,19 +197,11 @@ public interface Multi {
 	 * @param c_txt Text for closed area. */
 	void addParking(String pid, String l_txt, String c_txt);
 
+	/** Add a sched time substitution field.
+	 *  @param dir Chronoligical direction (after or before).
+	 *  @param format Format pattern (DateTimeFormattter). */
+	void addSched(String dir, String format);
+
 	/** Add an incident locator */
 	void addLocator(String code);
-
-	/* IRIS-specific quick message tags for use in the alert processing
-	 * system (not part of MULTI).
-	 */
-
-	/** Add a CAP time substitution field.
-	 *  Text fields can include "{}" to automatically substitute in the
-	 *  appropriate time (alert start or end time), with optional formatting
-	 *  (using Java Date Format notation).
-	 *  @param b_txt Before alert prepend text.
-	 *  @param d_txt During-alert prepend text.
-	 *  @param a_txt After-alert prepend text. */
-	void addCapTime(String b_txt, String d_txt, String a_txt);
 }

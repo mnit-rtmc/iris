@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.utils.wysiwyg;
 
 import us.mn.state.dot.tms.utils.MultiConfig;
@@ -69,7 +68,7 @@ public enum WTokenType {
 
 	// [scN] [/sc]
 	spacingChar(         13, "Character spacing"),
-	
+
 // Field-data tags - (not supported by current version of IRIS)
 	//	[f1] [f1,Y]
 //	localTime12hr(       14, "Local hour - 12hr"),
@@ -140,24 +139,24 @@ public enum WTokenType {
 //	 * @param l_txt Text for low availability.
 //	 * @param c_txt Text for closed area. */
 	parkingAvail(            "Parking Availability"),
+
+//	/** Add a scheduled time */
+	sched(                   "Sched Time"),
 //
 //	/** Add an incident locator */
 	incidentLoc(             "Incident Locator"),
-	
-	/** Add an alert time (start or end) field from a CAP message */
-	capTime(                 "CAP Time"),
 
 	//-------------------------------------
 	//=== Special WYSIWYG-editor tokens ===
 
 	// one character in a span of text
 	textChar(                "Text Character"),
-	
+
 	//-------------------------------------
 	//=== unsupported tag ===
 
 	// something we don't recognize that looks like a MULTI tag
-	unsupportedTag,      
+	unsupportedTag,
 	;
 
 	//-----------------------------------------------------
@@ -183,7 +182,7 @@ public enum WTokenType {
 		bit = UNSUPPORTED;
 		label = "Unsupported Tag";
 	}
-	
+
 	/** Standard MULTI tags */
 	private WTokenType(int abit, String alabel) {
 		bit = abit;
@@ -198,7 +197,7 @@ public enum WTokenType {
 	}
 
 	//-----------------------------------------------------
-	
+
 	/** Values array */
 	static private final WTokenType[] VALUES = values();
 
@@ -220,11 +219,10 @@ public enum WTokenType {
 		int mask = 1 << bit;
 		return (cfg.getSupportedTags() & mask) != 0;
 	}
-	
+
 	//-----------------------------------------------------
-	
+
 	public String getLabel() {
 		return label;
 	}
 }
-

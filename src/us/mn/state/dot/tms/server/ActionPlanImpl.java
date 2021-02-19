@@ -275,18 +275,11 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Get the currently scheduled phase */
 	private PlanPhase getScheduledPhase() {
-		// Use time from one minute ago to avoid missing time actions
-		long now = TimeSteward.currentTimeMillis() - 60 * 1000;
-		PlanPhase p = default_phase;
-		for (TimeAction ta: TimeActionHelper.getScheduled(this)) {
-			Date dt = TimeActionHelper.getScheduledDate(ta);
-			if (dt != null) {
-				if (dt.getTime() > now)
-					break;
-				p = ta.getPhase();
-			}
-		}
-		return p;
+		// Use time in thirty seconds to avoid missing time actions
+		long now = TimeSteward.currentTimeMillis() + 30 * 1000;
+		TimeAction ta = TimeActionHelper.getMostRecentAction(this,
+			new Date(now));
+		return (ta != null) ? ta.getPhase() : default_phase;
 	}
 
 	/** Get the active status */

@@ -164,10 +164,10 @@ public class MultiString {
 			parseTolling(tag.substring(2), cb);
 		else if (ltag.startsWith("pa"))
 			parseParking(tag, cb);
+		else if (ltag.startsWith("sched"))
+			parseSched(tag.substring(5), cb);
 		else if (ltag.startsWith("loc"))
 			parseLocator(tag.substring(3), cb);
-		else if (ltag.startsWith("captime"))
-			parseCapTime(tag.substring(7), cb);
 		else
 			cb.unsupportedTag(tag);
 	}
@@ -396,6 +396,16 @@ public class MultiString {
 		cb.addParking(pid, l_txt, c_txt);
 	}
 
+	/** Parse sched time tag [scheddir,format].
+	 *  @param tag Sched time time tag.
+	 *  @param cb Callback to set tag.  */
+	static private void parseSched(String tag, Multi cb) {
+		String[] args = tag.split(",", 2);
+		String dir = (args.length > 0) ? args[0] : "after";
+		String format = (args.length > 1) ? args[1] : "h a";
+		cb.addSched(dir, format);
+	}
+
 	/** Parse locator tag [loc{rn,rd,md,xn,xa,mi}].
 	 * @param code Locator tag code ({rn,rd,md,xn,xa,mi}).
 	 * @param cb Callback to set tag. */
@@ -407,17 +417,6 @@ public class MultiString {
 		    code.equals("xa") ||
 		    code.equals("mi"))
 			cb.addLocator(code);
-	}
-
-	/** Parse CAP time substitution field tag [captimeb_txt,d_txt,a_txt].
-	 *  @param tag CAP time substitution field tag.
-	 *  @param cb Callback to set tag.  */
-	static private void parseCapTime(String tag, Multi cb) {
-		String[] args = tag.split(",", 3);
-		String b_txt = (args.length > 0) ? args[0] : "STARTING AT";
-		String d_txt = (args.length > 1) ? args[1] : "IN EFFECT UNTIL";
-		String a_txt = (args.length > 2) ? args[2] : "ALL CLEAR";
-		cb.addCapTime(b_txt, d_txt, a_txt);
 	}
 
 	/** Test if a parsed speed is valid */

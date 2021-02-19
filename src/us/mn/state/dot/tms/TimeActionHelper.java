@@ -87,11 +87,11 @@ public class TimeActionHelper extends BaseHelper {
 
 	/** Parse a date string */
 	static public Date parseDate(String t) {
-		for(DateFormat df: DATE_FORMATS) {
+		for (DateFormat df: DATE_FORMATS) {
 			try {
 				return df.parse(t);
 			}
-			catch(ParseException e) {
+			catch (ParseException e) {
 				// Ignore
 			}
 		}
@@ -108,12 +108,12 @@ public class TimeActionHelper extends BaseHelper {
 	}
 
 	/** Parse a time string in one of the supported formats.
-	 * @param t Time string.
+	 * @param tod Time string.
 	 * @return Date object, or null if time could not be parsed. */
-	static public Date parseTime(String t) {
+	static public Date parseTime(String tod) {
 		for (DateFormat df: TIME_FORMATS) {
 			try {
-				return df.parse(t);
+				return df.parse(tod);
 			}
 			catch (ParseException e) { /* ignore */ }
 			catch (NumberFormatException e) { /* ignore */ }
@@ -123,47 +123,139 @@ public class TimeActionHelper extends BaseHelper {
 
 	/** Convert date to time string */
 	static public String formatTime(Date tod) {
-		if(tod != null) {
+		if (tod != null) {
 			SimpleDateFormat f = new SimpleDateFormat("H:mm");
 			return f.format(tod);
 		} else
 			return null;
 	}
 
-	/** Get all scheduled time actions for a plan */
-	static public Collection<TimeAction> getScheduled(ActionPlan plan) {
-		TreeMap<Date, TimeAction> sched =
-			new TreeMap<Date, TimeAction>();
+	/** Interface to filter dates */
+	static private interface DateFilter {
+		boolean check(Date date, TimeAction ta);
+	}
+
+	/** Get most recent action before now from an action plan */
+	static public TimeAction getMostRecentAction(ActionPlan plan, Date now){
+		final Date[] best = new Date[1];
+		final TimeAction[] act = new TimeAction[1];
+		filterSchedule(plan, new DateFilter() {
+			@Override
+			public boolean check(Date dt, TimeAction ta) {
+				// Most recent time before now
+				boolean res = dt.before(now) &&
+				    (best[0] == null || dt.after(best[0]));
+				if (res) {
+					best[0] = dt;
+					act[0] = ta;
+				}
+				return res;
+			}
+		});
+		return act[0];
+	}
+
+	/** Get most recent scheduled date from an action plan */
+	static public Date getMostRecent(ActionPlan plan, Date now) {
+		final Date[] best = new Date[1];
+		filterSchedule(plan, new DateFilter() {
+			@Override
+			public boolean check(Date dt, TimeAction ta) {
+				// Most recent time before now
+				boolean res = dt.before(now) &&
+				    (best[0] == null || dt.after(best[0]));
+				if (res)
+					best[0] = dt;
+				return res;
+			}
+		});
+		return best[0];
+	}
+
+	/** Get soonest scheduled date from an action plan */
+	static public Date getSoonest(ActionPlan plan, Date now) {
+		final Date[] best = new Date[1];
+		filterSchedule(plan, new DateFilter() {
+			@Override
+			public boolean check(Date dt, TimeAction ta) {
+				// Soonest time after now
+				boolean res = dt.after(now) &&
+				    (best[0] == null || dt.before(best[0]));
+				if (res)
+					best[0] = dt;
+				return res;
+			}
+		});
+		return best[0];
+	}
+
+	/** Filter scheduled times in an action plan */
+	static private void filterSchedule(ActionPlan plan, DateFilter filter){
 		Iterator<TimeAction> it = iterator();
 		while (it.hasNext()) {
 			TimeAction ta = it.next();
-			if (ta.getActionPlan() == plan) {
-				Date dt = getScheduledDate(ta);
-				if (dt != null)
-					sched.put(dt, ta);
-			}
+			if (ta.getActionPlan() == plan)
+				filterSchedule(ta, filter);
 		}
-		return sched.values();
 	}
 
-	/** Get scheduled date, or null for repeating actions */
-	static public Date getScheduledDate(TimeAction ta) {
-		String sched = ta.getSchedDate();
-		String tod = ta.getTimeOfDay();
-		if (sched == null || tod == null)
-			return null;
-		Date sd = parseDate(sched);
-		Date st = parseTime(tod);
-		if (sd == null || st == null)
-			return null;
+	/** Filter scheduled time action */
+	static private void filterSchedule(TimeAction ta, DateFilter filter) {
+		Date tod = parseTime(ta.getTimeOfDay());
+		if (tod != null) {
+			String sched = ta.getSchedDate();
+			if (sched != null)
+				filterSchedule(ta, sched, tod, filter);
+			else {
+				DayPlan dp = ta.getDayPlan();
+				if (dp != null)
+					filterSchedule(ta, dp, tod, filter);
+			}
+		}
+	}
+
+	/** Filter scheduled day of year / time of day */
+	static private void filterSchedule(TimeAction ta, String sched,
+		Date tod, DateFilter filter)
+	{
+		Date doy = parseDate(sched);
+		if (doy != null)
+			filter.check(getScheduledDate(doy, tod), ta);
+	}
+
+	/** Get scheduled date and time */
+	static private Date getScheduledDate(Date doy, Date tod) {
 		Calendar cal = Calendar.getInstance();
-		cal.setTime(sd);
+		cal.setTime(doy);
 		Calendar todc = Calendar.getInstance();
-		todc.setTime(st);
+		todc.setTime(tod);
 		cal.set(Calendar.HOUR_OF_DAY, todc.get(Calendar.HOUR_OF_DAY));
 		cal.set(Calendar.MINUTE, todc.get(Calendar.MINUTE));
 		cal.set(Calendar.SECOND, todc.get(Calendar.SECOND));
 		cal.set(Calendar.MILLISECOND, 0);
 		return cal.getTime();
+	}
+
+	/** Filter scheduled day plan / time of day */
+	static private void filterSchedule(TimeAction ta, DayPlan dp, Date tod,
+		DateFilter filter)
+	{
+		Calendar fut = Calendar.getInstance();
+		fut.setTime(tod);
+		if (!DayPlanHelper.isHoliday(dp, fut))
+			filter.check(fut.getTime(), ta);
+		Calendar pst = Calendar.getInstance();
+		pst.setTime(tod);
+		// Check a week in both directions
+		for (int i = 0; i < 7; i++) {
+			// Another day in the future
+			fut.add(Calendar.DATE, 1);
+			if (!DayPlanHelper.isHoliday(dp, fut))
+				filter.check(fut.getTime(), ta);
+			// Another day in the past
+			pst.add(Calendar.DATE, -1);
+			if (!DayPlanHelper.isHoliday(dp, pst))
+				filter.check(pst.getTime(), ta);
+		}
 	}
 }
