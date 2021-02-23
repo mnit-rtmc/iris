@@ -22,7 +22,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -55,6 +57,7 @@ import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.MultiString;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * Alert Data processed from JSON info section.
@@ -443,7 +446,7 @@ public class AlertData {
 		if (!signs.isEmpty()) {
 			ActionPlanImpl plan = createPlan(cfg);
 			if (plan != null)
-				createAlertInfo(signs, plan);
+				createAlertInfo(plan, signs);
 		} else
 			log("no signs found for " + cfg.getName());
 	}
@@ -469,8 +472,14 @@ public class AlertData {
 		log("created plan " + pname);
 		plan.notifyCreate();
 		createTimeActions(cfg, plan);
-		for (AlertMessage msg: msgs)
-			createDmsActions(cfg, plan, msg);
+		Map<SignGroup, SignGroup> act_groups = createActiveGroups(plan,
+			msgs);
+		for (AlertMessage msg: msgs) {
+			SignGroup sg = msg.getSignGroup();
+			SignGroup asg = act_groups.get(sg);
+			if (asg != null)
+				createDmsActions(cfg, plan, msg, asg);
+		}
 		return plan;
 	}
 
@@ -525,46 +534,31 @@ public class AlertData {
 		ta.notifyCreate();
 	}
 
-	/** Create sign groups and DMS actions */
-	private void createDmsActions(AlertConfig cfg, ActionPlanImpl plan,
-		AlertMessage msg) throws SonarException
+	/** Create sign groups for active signs */
+	private Map<SignGroup, SignGroup> createActiveGroups(
+		ActionPlanImpl plan, Set<AlertMessage> msgs)
+		throws SonarException
 	{
-		AlertPeriod ap = AlertPeriod.fromOrdinal(msg.getAlertPeriod());
-		SignGroup sg = msg.getSignGroup();
-		QuickMessage qm = msg.getQuickMessage();
-		if (ap == null || sg == null || qm == null) {
-			log("invalid alert message: " + msg);
-			return;
+		TreeMap<SignGroup, SignGroup> act_groups =
+			new TreeMap<SignGroup, SignGroup>(
+			new NumericAlphaComparator<SignGroup>());
+		for (AlertMessage msg: msgs) {
+			SignGroup sg = msg.getSignGroup();
+			if (!act_groups.containsKey(sg)) {
+				SignGroup asg = makeActiveGroup(plan, sg);
+				act_groups.put(sg, asg);
+			}
 		}
-		switch (ap) {
-		case BEFORE:
-			if (cfg.getBeforePeriodHours() > 0)
-				makeActiveAction(plan, sg, "alert_before", qm);
-			break;
-		case DURING:
-			makeActiveAction(plan, sg, "alert_during", qm);
-			break;
-		case AFTER:
-			if (cfg.getAfterPeriodHours() > 0)
-				makeActiveAction(plan, sg, "alert_after", qm);
-			break;
-		}
+		return act_groups;
 	}
 
-	/** Make "active" sign group and DMS action */
-	private void makeActiveAction(ActionPlanImpl plan, SignGroup sg,
-		String ph, QuickMessage qm) throws SonarException
+	/** Make "active" sign group */
+	private SignGroup makeActiveGroup(ActionPlanImpl plan, SignGroup sg)
+		throws SonarException
 	{
-		SignGroup grp = createSignGroup(plan, "ACT", findAutoSigns(sg));
-		createDmsAction(plan, grp, ph, qm);
-	}
-
-	/** Find all "auto" signs in a group */
-	private Set<DMS> findAutoSigns(SignGroup sg) {
-		Set<DMS> signs = new TreeSet<DMS>();
-		signs.addAll(SignGroupHelper.getAllSigns(sg));
+		Set<DMS> signs = SignGroupHelper.getAllSigns(sg);
 		signs.retainAll(auto_dms);
-		return signs;
+		return createSignGroup(plan, "ACT", signs);
 	}
 
 	/** Create a sign group for an action plan */
@@ -584,6 +578,31 @@ public class AlertData {
 		return sg;
 	}
 
+	/** Create DMS actions */
+	private void createDmsActions(AlertConfig cfg, ActionPlanImpl plan,
+		AlertMessage msg, SignGroup grp) throws SonarException
+	{
+		AlertPeriod ap = AlertPeriod.fromOrdinal(msg.getAlertPeriod());
+		QuickMessage qm = msg.getQuickMessage();
+		if (ap == null || qm == null) {
+			log("invalid alert message: " + msg);
+			return;
+		}
+		switch (ap) {
+		case BEFORE:
+			if (cfg.getBeforePeriodHours() > 0)
+				createDmsAction(plan, grp, "alert_before", qm);
+			break;
+		case DURING:
+			createDmsAction(plan, grp, "alert_during", qm);
+			break;
+		case AFTER:
+			if (cfg.getAfterPeriodHours() > 0)
+				createDmsAction(plan, grp, "alert_after", qm);
+			break;
+		}
+	}
+
 	/** Create a DMS action for an action plan */
 	private void createDmsAction(ActionPlanImpl plan, SignGroup sg,
 		String ph, QuickMessage qm) throws SonarException
@@ -601,7 +620,7 @@ public class AlertData {
 	}
 
 	/** Create an alert info */
-	private void createAlertInfo(Set<DMS> signs, ActionPlanImpl plan)
+	private void createAlertInfo(ActionPlanImpl plan, Set<DMS> signs)
 		throws SonarException
 	{
 		SignGroup sign_group = createSignGroup(plan, "ALL", signs);
