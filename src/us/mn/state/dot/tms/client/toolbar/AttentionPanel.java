@@ -102,7 +102,9 @@ public class AttentionPanel extends ToolPanel {
 		protected void proxyAddedSwing(AlertInfo proxy) {
 			checkShouldBlink();
 		}
-		protected void proxyRemovedSwing(AlertInfo proxy) { }
+		protected void proxyRemovedSwing(AlertInfo proxy) {
+			checkShouldBlink();
+		}
 		protected boolean checkAttributeChange(String attr) {
 			return true;
 		}
