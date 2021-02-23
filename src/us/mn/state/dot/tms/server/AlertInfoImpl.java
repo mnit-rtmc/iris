@@ -174,9 +174,12 @@ public class AlertInfoImpl extends BaseObjectImpl implements AlertInfo {
 	public void doDestroy() throws TMSException {
 		// This happens when the SONAR object is being destroyed.
 		// Alerts are stored in the cap schema, and should never
-		// be DELETEd.  Just clear the alert, and it won't get loaded
-		// on the next server restart.
-		clear();
+		// be DELETEd.  As long as alert_state is CLEARED, it won't get
+		// loaded on the next server restart.
+		if (alert_state != AlertState.CLEARED.ordinal()) {
+			System.err.println("AlertInfoImpl.doDestroy: " + name +
+				", " + alert_state);
+		}
 	}
 
 	/** Log a message for the alert */
@@ -381,7 +384,7 @@ public class AlertInfoImpl extends BaseObjectImpl implements AlertInfo {
 	}
 
 	/** Clear the alert */
-	private void clear() throws TMSException {
+	public void clear() throws TMSException {
 		setAlertStateNotify(AlertState.CLEARED.ordinal());
 		setActiveScheduled(false);
 	}

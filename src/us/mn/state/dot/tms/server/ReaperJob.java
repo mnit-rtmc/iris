@@ -19,6 +19,7 @@ import java.util.Calendar;
 import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.AlertInfo;
 import us.mn.state.dot.tms.AlertInfoHelper;
 import us.mn.state.dot.tms.AlertState;
@@ -26,9 +27,11 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.TMSException;
 
 /**
  * Job to periodically reap dead stuff.
@@ -219,14 +222,18 @@ public class ReaperJob extends Job {
 
 	/** Check if an alert is reapable */
 	private boolean isReapable(AlertInfoImpl ai) {
-		// FIXME: also check if ACTIVE + past post-alert time
-		return isPastReapTime(ai) &&
-			ai.getAlertState() != AlertState.ACTIVE.ordinal();
+		return isPastReapTime(ai) && isReapable(ai.getActionPlan());
 	}
 
 	/** Check if it is past the time an alert may be reaped */
 	private boolean isPastReapTime(AlertInfoImpl ai) {
 		return getReapTime(ai) < TimeSteward.currentTimeMillis();
+	}
+
+	/** Check if an action plan is reapable */
+	private boolean isReapable(ActionPlan plan) {
+		return (plan.getPhase().getName() == PlanPhase.UNDEPLOYED) ||
+		       !plan.getActive();
 	}
 
 	/** Get the time when alert may be reaped */
@@ -241,7 +248,16 @@ public class ReaperJob extends Job {
 		// This is needed because objects are removed
 		// asynchronously from the namespace.
 		AlertInfo a = AlertInfoHelper.lookup(ai.getName());
-		if ((a == ai) && isReapable(ai))
-			ai.notifyRemove();
+		if ((a == ai) && isReapable(ai)) {
+			if (ai.getAlertState() != AlertState.CLEARED.ordinal()){
+				try {
+					ai.clear();
+				}
+				catch (TMSException e) {
+					e.printStackTrace();
+				}
+			} else
+				ai.notifyRemove();
+		}
 	}
 }
