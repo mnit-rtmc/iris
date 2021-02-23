@@ -197,10 +197,10 @@ public interface Multi {
 	 * @param c_txt Text for closed area. */
 	void addParking(String pid, String l_txt, String c_txt);
 
-	/** Add a sched time substitution field.
-	 *  @param dir Chronoligical direction (after or before).
+	/** Add a time action substitution field.
+	 *  @param dir Chronoligical direction ("n" or "p").
 	 *  @param format Format pattern (DateTimeFormattter). */
-	void addSched(String dir, String format);
+	void addTimeAction(String dir, String format);
 
 	/** Add an incident locator */
 	void addLocator(String code);

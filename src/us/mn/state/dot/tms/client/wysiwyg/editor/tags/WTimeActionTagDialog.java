@@ -17,32 +17,32 @@ package us.mn.state.dot.tms.client.wysiwyg.editor.tags;
 import us.mn.state.dot.tms.client.wysiwyg.editor.WController;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
-import us.mn.state.dot.tms.utils.wysiwyg.token.WtSched;
+import us.mn.state.dot.tms.utils.wysiwyg.token.WtTimeAction;
 
 /**
- * WYSIWYG DMS Message Editor dialog form for editing schedule time action
- * substitution fields.
+ * WYSIWYG DMS Message Editor dialog form for editing time action substitution
+ * fields.
  *
  * @author Gordon Parikh - SRF Consulting
  * @author Douglas Lau
  */
 @SuppressWarnings("serial")
-class WSchedTagDialog extends WMultiTagDialog {
-	protected WtSched editTok;
+class WTimeActionTagDialog extends WMultiTagDialog {
+	protected WtTimeAction editTok;
 	private WTagParamField dirField;
 	private WTagParamField formatField;
 	private String dir;
 	private String format;
 
-	public WSchedTagDialog(String title, WController c, WTokenType tokType,
-		WToken tok)
+	public WTimeActionTagDialog(String title, WController c,
+		WTokenType tokType, WToken tok)
 	{
 		super(title, c, tokType, tok);
 	}
 
 	@Override
 	protected void loadFields(WToken tok) {
-		editTok = (WtSched) tok;
+		editTok = (WtTimeAction) tok;
 		dir = editTok.getDir();
 		format = editTok.getFormat();
 	}
@@ -50,15 +50,16 @@ class WSchedTagDialog extends WMultiTagDialog {
 	@Override
 	protected void addTagForm() {
 		dirField = new WTagParamField(dir, 20, true);
-		addField("wysiwyg.sched_tag_dialog.dir_txt", dirField);
+		addField("wysiwyg.time_action_tag_dialog.dir_txt", dirField);
 		formatField = new WTagParamField(format, 20, true);
-		addField("wysiwyg.sched_tag_dialog.format_txt", formatField);
+		addField("wysiwyg.time_action_tag_dialog.format_txt",
+			formatField);
 	}
 
 	@Override
-	protected WtSched makeNewTag() {
+	protected WtTimeAction makeNewTag() {
 		dir = dirField.getText();
 		format = formatField.getText();
-		return new WtSched(dir, format);
+		return new WtTimeAction(dir, format);
 	}
 }

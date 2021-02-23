@@ -106,8 +106,8 @@ public class WMsgMultiTagToolbar extends WToolbar {
 		// Variable Speed Advisory
 		multiTagModel.addElement(WTokenType.speedAdvisory);
 		
-		// Scheduled Time substitution
-		multiTagModel.addElement(WTokenType.sched);
+		// Time Action substitution
+		multiTagModel.addElement(WTokenType.timeAction);
 		
 		//--------------------------------
 		// Tags NOT implemented elsewhere

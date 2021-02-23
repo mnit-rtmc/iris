@@ -274,8 +274,8 @@ public class DmsActionMsg {
 		{
 			addSpan(parkingSpan(pid, l_txt, c_txt));
 		}
-		@Override public void addSched(String dir, String format) {
-			addSpan(schedSpan(dir, format));
+		@Override public void addTimeAction(String dir, String format) {
+			addSpan(timeActionSpan(dir, format));
 		}
 	};
 
@@ -789,8 +789,8 @@ public class DmsActionMsg {
 		}
 	}
 
-	/** Calculate sched time action span */
-	private String schedSpan(String dir, String format) {
+	/** Calculate time action span */
+	private String timeActionSpan(String dir, String format) {
 		ActionPlan plan = action.getActionPlan();
 		Date dt = getDateDir(plan, dir);
 		if (dt != null) {
@@ -804,7 +804,7 @@ public class DmsActionMsg {
 	/** Get scheduled date that's most recent or soonest from now */
 	private Date getDateDir(ActionPlan plan, String dir) {
 		Date now = TimeSteward.getDateInstance();
-		return ("before".equals(dir))
+		return ("p".equals(dir))
 			? TimeActionHelper.getMostRecent(plan, now)
 			: TimeActionHelper.getSoonest(plan, now);
 	}

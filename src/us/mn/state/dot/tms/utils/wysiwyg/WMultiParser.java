@@ -271,11 +271,11 @@ public class WMultiParser implements Multi {
 	}
 
 	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.Multi#addSched(java.lang.String, java.lang.String)
+	 * @see us.mn.state.dot.tms.utils.Multi#addTimeAction(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public void addSched(String dir, String format) {
-		page.addToken(new WtSched(dir, format));
+	public void addTimeAction(String dir, String format) {
+		page.addToken(new WtTimeAction(dir, format));
 	}
 
 	/* (non-Javadoc)

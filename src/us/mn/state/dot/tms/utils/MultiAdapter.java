@@ -178,11 +178,11 @@ public class MultiAdapter implements Multi {
 	@Override
 	public void addParking(String pid, String l_txt, String c_txt) { }
 
-	/** Add a sched time substitution field.
-	 *  @param dir Chronoligical direction (after or before).
+	/** Add a time action substitution field.
+	 *  @param dir Chronoligical direction ("n" or "p").
 	 *  @param format Format pattern (DateTimeFormattter). */
 	@Override
-	public void addSched(String dir, String format) { }
+	public void addTimeAction(String dir, String format) { }
 
 	/** Add an incident locator */
 	@Override

@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.wysiwyg.editor.tags;
 
 import java.awt.Color;
@@ -110,6 +109,8 @@ abstract public class WMultiTagDialog extends AbstractForm {
 			return new WTravelTimeTagDialog(t, c, tokType, tok);
 		case tolling:
 			return new WTollingTagDialog(t, c, tokType, tok);
+		case timeAction:
+			return new WTimeActionTagDialog(t, c, tokType, tok);
 		case incidentLoc:
 			return new WIncidentLocatorTagDialog(t, c, tokType, tok);
 		case speedAdvisory:
@@ -136,8 +137,6 @@ abstract public class WMultiTagDialog extends AbstractForm {
 			return new WTextRectangleTagDialog(t, c, tokType, tok);
 		case graphic:
 			return new WGraphicTagDialog(t, c, tokType, tok);
-		case sched:
-			return new WSchedTagDialog(t, c, tokType, tok);
 		default:
 			return null;
 		}

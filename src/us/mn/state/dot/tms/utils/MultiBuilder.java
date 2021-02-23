@@ -419,16 +419,16 @@ public class MultiBuilder implements Multi {
 		}
 	}
 
-	/** Add a sched time substitution field.
-	 *  @param dir Chronoligical direction (after or before).
+	/** Add a time action substitution field.
+	 *  @param dir Chronoligical direction ("n" or "p").
 	 *  @param format Format pattern (DateTimeFormattter). */
 	@Override
-	public void addSched(String dir, String format) {
-		multi.append("[sched");
-		if ("before".equalsIgnoreCase(dir))
-			multi.append("before");
+	public void addTimeAction(String dir, String format) {
+		multi.append("[ta");
+		if ("p".equalsIgnoreCase(dir))
+			multi.append("p");
 		else
-			multi.append("after");
+			multi.append("n");
 		if (format != null) {
 			multi.append(',');
 			multi.append(format);

@@ -20,12 +20,12 @@ import java.time.format.DateTimeFormatter;
 import us.mn.state.dot.tms.utils.Multi;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
-/** Time schedule substitution field token for WYSIWYG editor.
+/** Time action substitution field token for WYSIWYG editor.
  *
  * @author Gordon Parikh - SRF Consulting
  * @author Douglas Lau
  */
-public class WtSched extends Wt_IrisToken {
+public class WtTimeAction extends Wt_IrisToken {
 
 	/** Date object that should take up the max number of characters */
 	private static final LocalDateTime BIG_DATE =
@@ -34,14 +34,14 @@ public class WtSched extends Wt_IrisToken {
 	private String dir;
 	private String format;
 
-	public WtSched(String dir, String format) {
-		super(WTokenType.sched, "[sched");
+	public WtTimeAction(String dir, String format) {
+		super(WTokenType.timeAction, "[ta");
 		this.dir = dir;
 		this.format = format;
 		updateString();
 	}
 
-	/** Get chronological direction (after or before) */
+	/** Get chronological direction ("n" or "p") */
 	public String getDir() {
 		return dir;
 	}
@@ -68,7 +68,7 @@ public class WtSched extends Wt_IrisToken {
 	 */
 	@Override
 	public void doMulti(Multi cb) {
-		cb.addSched(dir, format);
+		cb.addTimeAction(dir, format);
 	}
 
 	/* (non-Javadoc)

@@ -45,8 +45,8 @@ Tag              | Description
 `[cg` *…* `]`    | [ClearGuide] data
 `[feed` *…* `]`  | [Msg-Feed] message
 `[pa` *…* `]`    | [Parking area] availability
-`[sched` *…* `]` | Scheduled [time actions](#sched-action-tag)
 `[slow` *…* `]`  | [Slow traffic] warning
+`[ta` *…* `]`    | Scheduled [time actions](#time-action-tag)
 `[tt` *…* `]`    | [Travel time] estimation
 `[tz` *…* `]`    | [Toll zone] pricing
 `[vsa]`          | [Variable speed advisory]
@@ -76,20 +76,20 @@ date (but not both).  A time of day must also be specified (HH:MM in 24-hour
 format).  Whenever the scheduled time occurs, the action plan will be changed to
 the specified phase.
 
-## Sched Action Tag
+## Time Action Tag
 
 The time of a scheduled **time action** can be displayed in DMS messages using
-[DMS actions](#dms-actions) within the same action plan.  A `[sched` *…* `]`
+[DMS actions](#dms-actions) within the same action plan.  A `[ta` *…* `]`
 [action tag](#dms-action-tag) in the [quick message] will be replaced with the
 appropriate value.  It has the following format:
 
-`[sched` *dir*,*format* `]`
+`[ta` *dir*,*format* `]`
 
 **Parameters**
 
 1. `dir`: Chronological direction
-   - `after`: Scheduled *time action* **after** the current time
-   - `before`: Scheduled *time action* **before** the current time
+   - `n`: **Next** scheduled *time action* after the current time
+   - `p`: **Previous** scheduled *time action* before the current time
 2. `format`: Time format pattern (`h a` if omitted)
 
 The format parameter is specified using a Java [DateTimeFormatter] pattern,
@@ -114,7 +114,7 @@ To include minutes, `h:mm a` could be used instead.
 ### Example 1
 
 ```
-ROAD WORK[nl]STARTING AT [schedafter,h:mm a]
+ROAD WORK[nl]STARTING AT [tan,h:mm a]
 ```
 
 If next scheduled time action is at 2:30 AM, the resulting message will be:
@@ -127,7 +127,7 @@ STARTING AT 2:30 AM
 ### Example 2
 
 ```
-BLIZZARD WARNING[nl]FROM [schedbefore][nl]UNTIL [schedafter]
+BLIZZARD WARNING[nl]FROM [tap][nl]UNTIL [tan]
 ```
 
 If the time is between two scheduled time actions, 4 AM to 10 PM, the message

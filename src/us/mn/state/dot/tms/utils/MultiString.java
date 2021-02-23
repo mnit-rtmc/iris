@@ -164,8 +164,8 @@ public class MultiString {
 			parseTolling(tag.substring(2), cb);
 		else if (ltag.startsWith("pa"))
 			parseParking(tag, cb);
-		else if (ltag.startsWith("sched"))
-			parseSched(tag.substring(5), cb);
+		else if (ltag.startsWith("ta"))
+			parseTimeAction(tag.substring(2), cb);
 		else if (ltag.startsWith("loc"))
 			parseLocator(tag.substring(3), cb);
 		else
@@ -396,14 +396,14 @@ public class MultiString {
 		cb.addParking(pid, l_txt, c_txt);
 	}
 
-	/** Parse sched time tag [scheddir,format].
-	 *  @param tag Sched time time tag.
+	/** Parse time action tag [tadir,format].
+	 *  @param tag Time action tag.
 	 *  @param cb Callback to set tag.  */
-	static private void parseSched(String tag, Multi cb) {
+	static private void parseTimeAction(String tag, Multi cb) {
 		String[] args = tag.split(",", 2);
-		String dir = (args.length > 0) ? args[0] : "after";
+		String dir = (args.length > 0) ? args[0] : "n";
 		String format = (args.length > 1) ? args[1] : "h a";
-		cb.addSched(dir, format);
+		cb.addTimeAction(dir, format);
 	}
 
 	/** Parse locator tag [loc{rn,rd,md,xn,xa,mi}].

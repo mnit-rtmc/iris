@@ -140,8 +140,8 @@ public enum WTokenType {
 //	 * @param c_txt Text for closed area. */
 	parkingAvail(            "Parking Availability"),
 
-//	/** Add a scheduled time */
-	sched(                   "Sched Time"),
+//	/** Add time action substitution field. */
+	timeAction(              "Time Action"),
 //
 //	/** Add an incident locator */
 	incidentLoc(             "Incident Locator"),
