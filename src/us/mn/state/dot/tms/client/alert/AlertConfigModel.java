@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.alert;
 
 import java.awt.Component;
 import java.util.ArrayList;
-import java.util.Comparator;
 import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
@@ -70,12 +69,7 @@ public class AlertConfigModel extends ProxyTableModel<AlertConfig> {
 	@Override
 	public RowSorter<ProxyTableModel<AlertConfig>> createSorter() {
 		TableRowSorter<ProxyTableModel<AlertConfig>> sorter =
-			new TableRowSorter<ProxyTableModel<AlertConfig>>(this)
-		{
-			@Override public boolean isSortable(int c) {
-				return true;
-			}
-		};
+			new TableRowSorter<ProxyTableModel<AlertConfig>>(this);
 		sorter.setSortsOnUpdates(true);
 		ArrayList<RowSorter.SortKey> keys =
 			new ArrayList<RowSorter.SortKey>();

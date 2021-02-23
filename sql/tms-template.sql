@@ -157,7 +157,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.20.0
+database_version	5.21.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_enable	true
@@ -394,6 +394,7 @@ action_plan
 alarm
 alert_config
 alert_info
+alert_message
 beacon
 beacon_action
 cabinet
@@ -600,9 +601,11 @@ PRV_0094	incident_tab	inc_descriptor		f
 PRV_0095	incident_tab	inc_locator		f
 PRV_0096	incident_tab	inc_advice		f
 PRV_009A	alert_admin	alert_config		t
+PRV_009E	alert_admin	alert_message		t
 PRV_009B	alert_deploy	alert_info		t
 PRV_009C	alert_tab	alert_config		f
 PRV_009D	alert_tab	alert_info		f
+PRV_009F	alert_tab	alert_message		f
 PRV_0097	lcs_admin	lane_use_multi		t
 PRV_0098	lcs_admin	lcs		t
 PRV_0099	lcs_admin	lcs_array		t
@@ -3797,17 +3800,29 @@ CREATE TABLE iris.alert_config (
 	certainty_possible BOOLEAN NOT NULL,
 	certainty_likely BOOLEAN NOT NULL,
 	certainty_observed BOOLEAN NOT NULL,
-	pre_alert_hours INTEGER NOT NULL,
-	post_alert_hours INTEGER NOT NULL,
 	auto_deploy BOOLEAN NOT NULL
+	before_period_hours INTEGER NOT NULL,
+	after_period_hours INTEGER NOT NULL,
 );
 
-CREATE TABLE iris.alert_config_quick_message (
-	alert_config VARCHAR(20) NOT NULL REFERENCES iris.alert_config,
-	quick_message VARCHAR(20) NOT NULL REFERENCES iris.quick_message
+CREATE TABLE iris.alert_period (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(10) NOT NULL
 );
-ALTER TABLE iris.alert_config_quick_message
-	ADD PRIMARY KEY (alert_config, quick_message);
+
+COPY iris.alert_period(id, description) FROM stdin;
+0	before
+1	during
+2	after
+\.
+
+CREATE TABLE iris.alert_message (
+	name VARCHAR(20) PRIMARY KEY,
+	alert_config VARCHAR(20) NOT NULL REFERENCES iris.alert_config,
+	alert_period INTEGER NOT NULL REFERENCES iris.alert_period,
+	sign_group VARCHAR(20) REFERENCES iris.sign_group,
+	quick_message VARCHAR(20) REFERENCES iris.quick_message
+);
 
 CREATE TABLE cap.alert (
 	identifier VARCHAR(128) PRIMARY KEY,

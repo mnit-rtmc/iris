@@ -135,9 +135,9 @@ public class AlertConfigHelper extends BaseHelper {
 	/** Get the set of all signs for an alert configuration */
 	static public Set<DMS> getAllSigns(AlertConfig cfg) {
 		TreeSet<DMS> all_dms = new TreeSet<DMS>();
-		for (QuickMessage qm: cfg.getQuickMessages()) {
-			SignGroup sg = qm.getSignGroup();
-			if (sg != null)
+		for (AlertMessage msg: AlertMessageHelper.getAllMessages(cfg)) {
+			SignGroup sg = msg.getSignGroup();
+			if (sg != null && msg.getQuickMessage() != null)
 				all_dms.addAll(SignGroupHelper.getAllSigns(sg));
 		}
 		return all_dms;

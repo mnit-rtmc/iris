@@ -17,21 +17,18 @@ package us.mn.state.dot.tms.client.alert;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
-import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.AlertConfig;
+import us.mn.state.dot.tms.AlertMessage;
 import us.mn.state.dot.tms.CapEvent;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
@@ -39,10 +36,10 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.IAction;
-import static us.mn.state.dot.tms.client.widget.IOptionPane.showHint;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
@@ -315,14 +312,6 @@ public class AlertConfigPanel extends IPanel {
 		}
 	});
 
-	/** Spinner for pre-alert hours */
-	private final JSpinner pre_spn = new JSpinner(
-		new SpinnerNumberModel(0, 0, 24, 1));
-
-	/** Spinner for post-alert hours */
-	private final JSpinner post_spn = new JSpinner(
-		new SpinnerNumberModel(0, 0, 24, 1));
-
 	/** Auto-deploy check box */
 	private final JCheckBox auto_deploy_chk = new JCheckBox(
 		new CAction(null)
@@ -331,6 +320,17 @@ public class AlertConfigPanel extends IPanel {
 			cfg.setAutoDeploy(auto_deploy_chk.isSelected());
 		}
 	});
+
+	/** Spinner for before period hours */
+	private final JSpinner bfr_spn = new JSpinner(
+		new SpinnerNumberModel(0, 0, 24, 1));
+
+	/** Spinner for after period hours */
+	private final JSpinner aft_spn = new JSpinner(
+		new SpinnerNumberModel(0, 0, 24, 1));
+
+	/** Alert message table panel */
+	private final ProxyTablePanel<AlertMessage> msg_panel;
 
 	/** User session */
 	private final Session session;
@@ -438,12 +438,12 @@ public class AlertConfigPanel extends IPanel {
 				cer_observed_chk.setSelected(
 					cfg.getCertaintyObserved());
 			}
-			if (a == null || a.equals("preAlertHours"))
-				pre_spn.setValue(cfg.getPreAlertHours());
-			if (a == null || a.equals("postAlertHours"))
-				post_spn.setValue(cfg.getPostAlertHours());
 			if (a == null || a.equals("autoDeploy"))
 				auto_deploy_chk.setSelected(cfg.getAutoDeploy());
+			if (a == null || a.equals("beforePeriodHours"))
+				bfr_spn.setValue(cfg.getBeforePeriodHours());
+			if (a == null || a.equals("afterPeriodHours"))
+				aft_spn.setValue(cfg.getAfterPeriodHours());
 		}
 		@Override public void clear() {
 			alert_cfg = null;
@@ -496,12 +496,12 @@ public class AlertConfigPanel extends IPanel {
 			cer_likely_chk.setSelected(false);
 			cer_observed_chk.setEnabled(false);
 			cer_observed_chk.setSelected(false);
-			pre_spn.setEnabled(false);
-			pre_spn.setValue(0);
-			post_spn.setEnabled(false);
-			post_spn.setValue(0);
 			auto_deploy_chk.setEnabled(false);
 			auto_deploy_chk.setSelected(false);
+			bfr_spn.setEnabled(false);
+			bfr_spn.setValue(0);
+			aft_spn.setEnabled(false);
+			aft_spn.setValue(0);
 		}
 	};
 
@@ -521,6 +521,7 @@ public class AlertConfigPanel extends IPanel {
 	/** Set the alert config */
 	public void setAlertConfig(AlertConfig cfg) {
 		watcher.setProxy(cfg);
+		msg_panel.setModel(new AlertMessageModel(session, cfg));
 	}
 
 	/** Create the alert config panel */
@@ -528,6 +529,8 @@ public class AlertConfigPanel extends IPanel {
 		session = s;
 		TypeCache<AlertConfig> cache =
 			s.getSonarState().getAlertConfigs();
+		msg_panel = new ProxyTablePanel<AlertMessage>(
+			new AlertMessageModel(s, null));
 		watcher = new ProxyWatcher<AlertConfig>(cache, view, false);
 	}
 
@@ -577,46 +580,48 @@ public class AlertConfigPanel extends IPanel {
 		p.add(cer_likely_chk);
 		p.add(cer_observed_chk);
 		add(p, Stretch.LAST);
-		add("alert.pre_alert_hours");
-		add(pre_spn);
-		add("alert.post_alert_hours");
-		add(post_spn, Stretch.LAST);
 		add("alert.config.auto_deploy");
 		add(auto_deploy_chk, Stretch.LAST);
+		add("alert.before_period_hours");
+		add(bfr_spn);
+		add("alert.after_period_hours");
+		add(aft_spn, Stretch.LAST);
+		add(msg_panel, Stretch.FULL);
 		createJobs();
 		watcher.initialize();
 		view.clear();
+		msg_panel.initialize();
 		session.addEditModeListener(edit_lsnr);
 	}
 
 	/** Create the jobs */
 	private void createJobs() {
-		pre_spn.addChangeListener(new ChangeListener() {
+		bfr_spn.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				Number h = (Number) pre_spn.getValue();
-				setPreAlertHours(h.intValue());
+				Number h = (Number) bfr_spn.getValue();
+				setBeforePeriodHours(h.intValue());
 			}
 		});
-		post_spn.addChangeListener(new ChangeListener() {
+		aft_spn.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				Number h = (Number) post_spn.getValue();
-				setPostAlertHours(h.intValue());
+				Number h = (Number) aft_spn.getValue();
+				setAfterPeriodHours(h.intValue());
 			}
 		});
 	}
 
-	/** Set the pre-alert hours */
-	private void setPreAlertHours(int h) {
+	/** Set the before period hours */
+	private void setBeforePeriodHours(int h) {
 		AlertConfig cfg = alert_cfg;
 		if (cfg != null)
-			cfg.setPreAlertHours(h);
+			cfg.setBeforePeriodHours(h);
 	}
 
-	/** Set the post-alert hours */
-	private void setPostAlertHours(int h) {
+	/** Set the after period hours */
+	private void setAfterPeriodHours(int h) {
 		AlertConfig cfg = alert_cfg;
 		if (cfg != null)
-			cfg.setPostAlertHours(h);
+			cfg.setAfterPeriodHours(h);
 	}
 
 	/** Dispose of the panel */
@@ -656,8 +661,8 @@ public class AlertConfigPanel extends IPanel {
 		cer_possible_chk.setEnabled(write);
 		cer_likely_chk.setEnabled(write);
 		cer_observed_chk.setEnabled(write);
-		pre_spn.setEnabled(write);
-		post_spn.setEnabled(write);
 		auto_deploy_chk.setEnabled(write);
+		bfr_spn.setEnabled(write);
+		aft_spn.setEnabled(write);
 	}
 }

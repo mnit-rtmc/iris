@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.AlertConfig;
 import us.mn.state.dot.tms.AlertInfo;
+import us.mn.state.dot.tms.AlertMessage;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconAction;
@@ -278,6 +279,14 @@ public class SonarState extends Client {
 	/** Get the alert config cache */
 	public TypeCache<AlertConfig> getAlertConfigs() {
 		return alert_configs;
+	}
+
+	/** Cache of alert message objects */
+	private final TypeCache<AlertMessage> alert_messages;
+
+	/** Get the alert message cache */
+	public TypeCache<AlertMessage> getAlertMessages() {
+		return alert_messages;
 	}
 
 	/** Cache of alert info objects */
@@ -552,6 +561,8 @@ public class SonarState extends Client {
 		inc_cache = new IncCache(this);
 		alert_configs = new TypeCache<AlertConfig>(AlertConfig.class,
 			this);
+		alert_messages = new TypeCache<AlertMessage>(AlertMessage.class,
+			this);
 		alert_infos = new TypeCache<AlertInfo>(AlertInfo.class,
 			this);
 		lcs_cache = new LcsCache(this);
@@ -685,6 +696,7 @@ public class SonarState extends Client {
 		populateReadable(vid_src_templates);
 		populateReadable(cam_vid_src_order);
 		populateReadable(alert_configs);
+		populateReadable(alert_messages);
 		populateReadable(alert_infos);
 	}
 

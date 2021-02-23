@@ -32,6 +32,9 @@ import org.postgis.Polygon;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.AlertConfig;
 import us.mn.state.dot.tms.AlertConfigHelper;
+import us.mn.state.dot.tms.AlertMessage;
+import us.mn.state.dot.tms.AlertMessageHelper;
+import us.mn.state.dot.tms.AlertPeriod;
 import us.mn.state.dot.tms.AlertState;
 import us.mn.state.dot.tms.CapCertainty;
 import us.mn.state.dot.tms.CapEvent;
@@ -388,21 +391,26 @@ public class AlertData {
 		List<AlertConfig> configs = AlertConfigHelper.findMatching(
 			event, response_type, urgency, severity, certainty);
 		if (!configs.isEmpty()) {
-			findSigns();
-			for (AlertConfig cfg: configs)
-				createAlertInfo(cfg);
+			if (findSigns()) {
+				for (AlertConfig cfg: configs)
+					createAlertInfo(cfg);
+			}
 		} else
 			log("no matching configurations");
 	}
 
 	/** Find signs within the alert area */
-	private void findSigns() throws TMSException {
+	private boolean findSigns() throws TMSException {
 		log("searching for DMS");
-		findSigns(auto_dms, autoDmsMeters());
-		if (auto_dms.size() > 0) {
-			log("found " + auto_dms.size() + " auto signs");
-			findSigns(all_dms, optionalDmsMeters());
+		findSigns(all_dms, optionalDmsMeters());
+		if (all_dms.size() > 0) {
 			log("found " + all_dms.size() + " auto+opt signs");
+			findSigns(auto_dms, autoDmsMeters());
+			log("found " + auto_dms.size() + " auto signs");
+			return true;
+		} else {
+			log("no signs found");
+			return false;
 		}
 	}
 
@@ -443,9 +451,10 @@ public class AlertData {
 	/** Create an action plan for this alert */
 	private ActionPlanImpl createPlan(AlertConfig cfg) throws SonarException
 	{
-		QuickMessage[] qms = cfg.getQuickMessages();
-		if (qms.length == 0) {
-			log("no quick messages for " + cfg.getName());
+		Set<AlertMessage> msgs = AlertMessageHelper
+			.getValidMessages(cfg);
+		if (msgs.isEmpty()) {
+			log("no messages for " + cfg.getName());
 			return null;
 		}
 		// Create action plan
@@ -460,8 +469,8 @@ public class AlertData {
 		log("created plan " + pname);
 		plan.notifyCreate();
 		createTimeActions(cfg, plan);
-		for (QuickMessage qm: qms)
-			createDmsActions(cfg, plan, qm);
+		for (AlertMessage msg: msgs)
+			createDmsActions(cfg, plan, msg);
 		return plan;
 	}
 
@@ -483,21 +492,21 @@ public class AlertData {
 		throws SonarException
 	{
 		// Create "before" action
-		int pre_hours = cfg.getPreAlertHours();
-		if (pre_hours > 0) {
+		int before_hours = cfg.getBeforePeriodHours();
+		if (before_hours > 0) {
 			long sd = start_date.getTime();
-			Date before = new Date(sd - pre_hours * HOUR_MS);
+			Date before = new Date(sd - before_hours * HOUR_MS);
 			createTimeAction(plan, before, "alert_before");
 		}
 		// Create "during" action
 		createTimeAction(plan, start_date, "alert_during");
 		// Create "after" action
-		int post_hours = cfg.getPostAlertHours();
-		if (post_hours > 0)
+		int after_hours = cfg.getAfterPeriodHours();
+		if (after_hours > 0)
 			createTimeAction(plan, end_date, "alert_after");
 		// Create final time action
 		long ed = end_date.getTime();
-		Date after = new Date(ed + post_hours * HOUR_MS);
+		Date after = new Date(ed + after_hours * HOUR_MS);
 		createTimeAction(plan, after, "undeployed");
 	}
 
@@ -516,41 +525,46 @@ public class AlertData {
 		ta.notifyCreate();
 	}
 
-	/** Create DMS actions, sign groups and quick messages */
+	/** Create sign groups and DMS actions */
 	private void createDmsActions(AlertConfig cfg, ActionPlanImpl plan,
-		QuickMessage qm) throws SonarException
+		AlertMessage msg) throws SonarException
 	{
-		SignConfig sign_cfg = qm.getSignConfig();
-		String multi = qm.getMulti();
-		log("message template: " + multi);
-		// Create an active sign group
-		Set<DMS> act_dms = new TreeSet<DMS>();
-		SignGroup sg = qm.getSignGroup();
-		if (sg != null)
-			act_dms.addAll(SignGroupHelper.getAllSigns(sg));
-		act_dms.retainAll(auto_dms);
-		SignGroup grp_act = createSignGroup(plan, "ACT", act_dms);
-		// Create "before" DMS action
-		int pre_hours = cfg.getPreAlertHours();
-		if (pre_hours > 0) {
-			String b_multi = ""; // FIXME
-			QuickMessage b_qm = createQuickMsg(plan, grp_act,
-				sign_cfg, b_multi);
-			createDmsAction(plan, grp_act, "alert_before", b_qm);
+		AlertPeriod ap = AlertPeriod.fromOrdinal(msg.getAlertPeriod());
+		SignGroup sg = msg.getSignGroup();
+		QuickMessage qm = msg.getQuickMessage();
+		if (ap == null || sg == null || qm == null) {
+			log("invalid alert message: " + msg);
+			return;
 		}
-		// Create "during" DMS action
-		String d_multi = ""; // FIXME
-		QuickMessage d_qm = createQuickMsg(plan, grp_act, sign_cfg,
-			d_multi);
-		createDmsAction(plan, grp_act, "alert_during", d_qm);
-		// Create "after" DMS action
-		int post_hours = cfg.getPostAlertHours();
-		if (post_hours > 0) {
-			String a_multi = ""; // FIXME
-			QuickMessage a_qm = createQuickMsg(plan, grp_act,
-				sign_cfg, a_multi);
-			createDmsAction(plan, grp_act, "alert_after", a_qm);
+		switch (ap) {
+		case BEFORE:
+			if (cfg.getBeforePeriodHours() > 0)
+				makeActiveAction(plan, sg, "alert_before", qm);
+			break;
+		case DURING:
+			makeActiveAction(plan, sg, "alert_during", qm);
+			break;
+		case AFTER:
+			if (cfg.getAfterPeriodHours() > 0)
+				makeActiveAction(plan, sg, "alert_after", qm);
+			break;
 		}
+	}
+
+	/** Make "active" sign group and DMS action */
+	private void makeActiveAction(ActionPlanImpl plan, SignGroup sg,
+		String ph, QuickMessage qm) throws SonarException
+	{
+		SignGroup grp = createSignGroup(plan, "ACT", findAutoSigns(sg));
+		createDmsAction(plan, grp, ph, qm);
+	}
+
+	/** Find all "auto" signs in a group */
+	private Set<DMS> findAutoSigns(SignGroup sg) {
+		Set<DMS> signs = new TreeSet<DMS>();
+		signs.addAll(SignGroupHelper.getAllSigns(sg));
+		signs.retainAll(auto_dms);
+		return signs;
 	}
 
 	/** Create a sign group for an action plan */
@@ -568,19 +582,6 @@ public class AlertData {
 		}
 		log("created sign group " + gname);
 		return sg;
-	}
-
-	/** Create a quick message for an action plan */
-	private QuickMessage createQuickMsg(ActionPlanImpl plan, SignGroup grp,
-		SignConfig sign_cfg, String multi) throws SonarException
-	{
-		String tmpl = plan.getName() + "_%d";
-		String qname = QuickMessageImpl.createUniqueName(tmpl);
-		QuickMessageImpl qm = new QuickMessageImpl(qname, grp, sign_cfg,
-			false, multi);
-		qm.notifyCreate();
-		log("created quick message " + qname);
-		return qm;
 	}
 
 	/** Create a DMS action for an action plan */

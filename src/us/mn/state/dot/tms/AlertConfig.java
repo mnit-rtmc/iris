@@ -20,9 +20,8 @@ import us.mn.state.dot.sonar.SonarObject;
 /**
  * Alert Configuration object.
  *
- * Associates alert parameters ("event", "response type", "urgency") to sign
- * group/quick message pairs to control which signs are eligible for inclusion
- * in an alert and which message template to use.
+ * Contains parameters ("event", "response type", "urgency", "severity",
+ * "certainty") to filter alerts which can trigger AlertMessage deployments.
  *
  * @author Gordon Parikh
  * @author Douglas Lau
@@ -35,7 +34,7 @@ public interface AlertConfig extends SonarObject {
 	/** Set the alert event code */
 	void setEvent(String ev);
 
-	/** Set the alert event code */
+	/** Get the alert event code */
 	String getEvent();
 
 	/** Set the response shelter flag */
@@ -176,31 +175,21 @@ public interface AlertConfig extends SonarObject {
 	/** Get the certainty observed flag */
 	boolean getCertaintyObserved();
 
-	/** Set the number of hours to display a pre-alert message before the
-	 *  alert becomes active. */
-	void setPreAlertHours(int hours);
-
-	/** Get the number of hours to display a pre-alert message before the
-	 *  alert becomes active. */
-	int getPreAlertHours();
-
-	/** Set the number of hours to display a post-alert message after an
-	 *  alert expires or is cleared. */
-	void setPostAlertHours(int hours);
-
-	/** Get the number of hours to display a post-alert message after an
-	 *  alert expires or is cleared. */
-	int getPostAlertHours();
-
 	/** Enable/disable auto deploy */
 	void setAutoDeploy(boolean ad);
 
 	/** Get auto deploy enabled state */
 	boolean getAutoDeploy();
 
-	/** Set the quick message templates */
-	void setQuickMessages(QuickMessage[] qm);
+	/** Set the duration in hours for the "before" alert period */
+	void setBeforePeriodHours(int hours);
 
-	/** Set the quick message templates */
-	QuickMessage[] getQuickMessages();
+	/** Get the duration in hours for the "before" alert period */
+	int getBeforePeriodHours();
+
+	/** Set the duration in hours for the "after" alert period */
+	void setAfterPeriodHours(int hours);
+
+	/** Get the duration in hours for the "after" alert period */
+	int getAfterPeriodHours();
 }

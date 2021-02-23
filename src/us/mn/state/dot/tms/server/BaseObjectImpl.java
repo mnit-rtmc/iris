@@ -123,6 +123,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		DMSImpl.updateAllStyles();
 		RptConduitImpl.loadAll();
 		AlertConfigImpl.loadAll();
+		AlertMessageImpl.loadAll();
 		AlertInfoImpl.loadAll();
 	}
 
@@ -389,6 +390,14 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		SonarObject so = lookupObject(AlertInfoImpl.SONAR_TYPE, name);
 		return (so instanceof AlertInfoImpl)
 		      ? (AlertInfoImpl) so
+		      : null;
+	}
+
+	/** Lookup an alert message */
+	static protected AlertMessageImpl lookupAlertMessage(String name) {
+		SonarObject so = lookupObject(AlertMessageImpl.SONAR_TYPE,name);
+		return (so instanceof AlertMessageImpl)
+		      ? (AlertMessageImpl) so
 		      : null;
 	}
 

@@ -20,12 +20,8 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeSet;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.AlertConfig;
-import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -40,17 +36,12 @@ import us.mn.state.dot.tms.TMSException;
  */
 public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 
-	/** Alert Config / Quick Message table mapping */
-	static private TableMapping mapping;
-
 	/** Interval value of one hour (ms) */
 	static private final long HOUR_MS = 60 * 60 * 1000;
 
 	/** Load all the alert config objects */
 	static public void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, AlertConfigImpl.class);
-		mapping = new TableMapping(store, "iris", SONAR_TYPE,
-			QuickMessage.SONAR_TYPE);
 		store.query("SELECT name, event, response_shelter, " +
 			"response_evacuate, response_prepare, " +
 			"response_execute, response_avoid, response_monitor, " +
@@ -60,9 +51,9 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 			"severity_moderate, severity_severe, " +
 			"severity_extreme, certainty_unknown, " +
 			"certainty_unlikely, certainty_possible, " +
-			"certainty_likely, certainty_observed, " +
-			"pre_alert_hours, post_alert_hours, auto_deploy " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+			"certainty_likely, certainty_observed, auto_deploy, " +
+			"before_period_hours, after_period_hours FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			@Override
 			public void create(ResultSet row) throws Exception {
@@ -99,9 +90,9 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		     row.getBoolean(23), // certainty_possible
 		     row.getBoolean(24), // certainty_likely
 		     row.getBoolean(25), // certainty_observed
-		     row.getInt(26),     // pre_alert_hours
-		     row.getInt(27),     // post_alert_hours
-		     row.getBoolean(28)  // auto_deploy
+		     row.getBoolean(26), // auto_deploy
+		     row.getInt(27),     // before_period_hours
+		     row.getInt(28)      // after_period_hours
 		);
 	}
 
@@ -111,7 +102,7 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		boolean rn, boolean uu, boolean up, boolean uf, boolean ue,
 		boolean ui, boolean su, boolean sm, boolean sd, boolean ss,
 		boolean se, boolean cu, boolean cy, boolean cp, boolean cl,
-		boolean co, int preh, int posth, boolean ad) throws TMSException
+		boolean co, boolean ad, int bfrh, int afth) throws TMSException
 	{
 		super(n);
 		event = ev;
@@ -138,29 +129,14 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		certainty_possible = cp;
 		certainty_likely = cl;
 		certainty_observed = co;
-		pre_alert_hours = preh;
-		post_alert_hours = posth;
 		auto_deploy = ad;
-		qms = lookupQuickMessageMapping();
+		before_period_hours = bfrh;
+		after_period_hours = afth;
 	}
 
 	/** Create an alert config */
 	public AlertConfigImpl(String n) {
 		super(n);
-	}
-
-	/** Lookup mapping of quick messages */
-	private QuickMessageImpl[] lookupQuickMessageMapping()
-		throws TMSException
-	{
-		TreeSet<QuickMessageImpl> qm_set =
-			new TreeSet<QuickMessageImpl>();
-		for (String q: mapping.lookup(this)) {
-			QuickMessageImpl qm = lookupQuickMessage(q);
-			if (qm != null)
-				qm_set.add(qm);
-		}
-		return qm_set.toArray(new QuickMessageImpl[0]);
 	}
 
 	/** Get the SONAR type name */
@@ -204,9 +180,9 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		map.put("certainty_possible", certainty_possible);
 		map.put("certainty_likely", certainty_likely);
 		map.put("certainty_observed", certainty_observed);
-		map.put("pre_alert_hours", pre_alert_hours);
-		map.put("post_alert_hours", post_alert_hours);
 		map.put("auto_deploy", auto_deploy);
+		map.put("before_period_hours", before_period_hours);
+		map.put("after_period_hours", after_period_hours);
 		return map;
 	}
 
@@ -762,60 +738,6 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		return certainty_observed;
 	}
 
-	/** Number of hours to display a pre-alert message before the alert
-	 *  becomes active. */
-	private int pre_alert_hours = 6;
-
-	/** Set the number of hours to display a pre-alert message before the
-	 *  alert becomes active. */
-	@Override
-	public void setPreAlertHours(int hours) {
-		pre_alert_hours = hours;
-	}
-
-	/** Set the number of hours to display a pre-alert message before the
-	 *  alert becomes active. */
-	public void doSetPreAlertHours(int hours) throws TMSException {
-		if (hours != pre_alert_hours) {
-			store.update(this, "pre_alert_hours", hours);
-			setPreAlertHours(hours);
-		}
-	}
-
-	/** Get the number of hours to display a pre-alert message before the
-	 *  alert becomes active. */
-	@Override
-	public int getPreAlertHours() {
-		return pre_alert_hours;
-	}
-
-	/** Number of hours to display a post-alert message after an alert
-	 *  expires or is cleared. */
-	private int post_alert_hours = 0;
-
-	/** Set the number of hours to display a post-alert message after an
-	 *  alert expires or is cleared. */
-	@Override
-	public void setPostAlertHours(int hours) {
-		post_alert_hours = hours;
-	}
-
-	/** Set the number of hours to display a post-alert message after an
-	 *  alert expires or is cleared. */
-	public void doSetPostAlertHours(int hours) throws TMSException {
-		if (hours != post_alert_hours) {
-			store.update(this, "post_alert_hours", hours);
-			setPostAlertHours(hours);
-		}
-	}
-
-	/** Get the number of hours to display a post-alert message after an
-	 *  alert expires or is cleared. */
-	@Override
-	public int getPostAlertHours() {
-		return post_alert_hours;
-	}
-
 	/** Auto-deploy enabled */
 	private boolean auto_deploy;
 
@@ -839,64 +761,69 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		return auto_deploy;
 	}
 
+	/** Duration in hours for the "before" alert period */
+	private int before_period_hours = 6;
+
+	/** Set the duration in hours for the "before" alert period */
+	@Override
+	public void setBeforePeriodHours(int hours) {
+		before_period_hours = hours;
+	}
+
+	/** Set the duration in hours for the "before" alert period */
+	public void doSetBeforePeriodHours(int hours) throws TMSException {
+		if (hours != before_period_hours) {
+			store.update(this, "before_period_hours", hours);
+			setBeforePeriodHours(hours);
+		}
+	}
+
+	/** Get the duration in hours for the "before" alert period */
+	@Override
+	public int getBeforePeriodHours() {
+		return before_period_hours;
+	}
+
+	/** Duration in hours for the "after" alert period */
+	private int after_period_hours = 0;
+
+	/** Set the duration in hours for the "after" alert period */
+	@Override
+	public void setAfterPeriodHours(int hours) {
+		after_period_hours = hours;
+	}
+
+	/** Set the duration in hours for the "after" alert period */
+	public void doSetAfterPeriodHours(int hours) throws TMSException {
+		if (hours != after_period_hours) {
+			store.update(this, "after_period_hours", hours);
+			setAfterPeriodHours(hours);
+		}
+	}
+
+	/** Get the duration in hours for the "after" alert period */
+	@Override
+	public int getAfterPeriodHours() {
+		return after_period_hours;
+	}
+
 	/** Lookup the current plan phase name */
 	public String getCurrentPhase(Date start_date, Date end_date) {
-		// Use time from one minute ago to avoid missing time actions
-		long now = TimeSteward.currentTimeMillis() - 60 * 1000;
+		// Use time in thirty seconds to avoid missing time actions
+		long now = TimeSteward.currentTimeMillis() + 30 * 1000;
 		long sd = start_date.getTime();
-		long pre_ms = getPreAlertHours() * HOUR_MS;
+		long bfr_ms = getBeforePeriodHours() * HOUR_MS;
 		long ed = end_date.getTime();
-		long post_ms = getPostAlertHours() * HOUR_MS;
-		if (now < sd - pre_ms)
+		long aft_ms = getAfterPeriodHours() * HOUR_MS;
+		if (now < sd - bfr_ms)
 			return "undeployed";
 		else if (now < sd)
 			return "alert_before";
 		else if (now < ed)
 			return "alert_during";
-		else if (now < ed + post_ms)
+		else if (now < ed + aft_ms)
 			return "alert_after";
 		else
 			return "undeployed";
-	}
-
-	/** Quick messages */
-	private QuickMessageImpl[] qms = new QuickMessageImpl[0];
-
-	/** Set the quick messages assigned to the configuration */
-	@Override
-	public void setQuickMessages(QuickMessage[] qm) {
-		qms = makeQuickMessageArray(qm);
-	}
-
-	/** Make an ordered array of quick messages */
-	private QuickMessageImpl[] makeQuickMessageArray(QuickMessage[] qm) {
-		TreeSet<QuickMessageImpl> qm_set =
-			new TreeSet<QuickMessageImpl>();
-		for (QuickMessage q: qm) {
-			if (q instanceof QuickMessageImpl)
-				qm_set.add((QuickMessageImpl) q);
-		}
-		return qm_set.toArray(new QuickMessageImpl[0]);
-	}
-
-	/** Set the quick messages assigned to the alert */
-	public void doSetQuickMessages(QuickMessage[] qm) throws TMSException {
-		TreeSet<Storable> qm_set = new TreeSet<Storable>();
-		for (QuickMessage q: qm) {
-			if (q instanceof QuickMessageImpl)
-				qm_set.add((QuickMessageImpl) q);
-			else {
-				throw new ChangeVetoException(
-					"Invalid Quick Msg");
-			}
-		}
-		mapping.update(this, qm_set);
-		setQuickMessages(qm);
-	}
-
-	/** Get the quick messages assigned to the alert */
-	@Override
-	public QuickMessage[] getQuickMessages() {
-		return qms;
 	}
 }
