@@ -461,7 +461,7 @@ public class AlertData {
 		String pname = ActionPlanImpl.createUniqueName("ALERT_" +
 			event.name() + "_%d");
 		String dsc = "Alert: " + event.description;
-		PlanPhase undep = PlanPhaseHelper.lookup("undeployed");
+		PlanPhase undep = PlanPhaseHelper.lookup(PlanPhase.UNDEPLOYED);
 		PlanPhase phase = PlanPhaseHelper.lookup(lookupCurrentPhase(
 			cfg));
 		ActionPlanImpl plan = new ActionPlanImpl(pname, dsc, "alert",
@@ -481,7 +481,7 @@ public class AlertData {
 			if (ac.getAutoDeploy())
 				return ac.getCurrentPhase(start_date, end_date);
 		}
-		return "undeployed";
+		return PlanPhase.UNDEPLOYED;
 	}
 
 	/** Interval value of one hour (ms) */
@@ -507,7 +507,7 @@ public class AlertData {
 		// Create final time action
 		long ed = end_date.getTime();
 		Date after = new Date(ed + after_hours * HOUR_MS);
-		createTimeAction(plan, after, "undeployed");
+		createTimeAction(plan, after, PlanPhase.UNDEPLOYED);
 	}
 
 	/** Create a time action for an action plan */

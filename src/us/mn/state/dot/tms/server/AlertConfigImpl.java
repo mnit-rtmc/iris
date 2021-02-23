@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.AlertConfig;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -816,7 +817,7 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		long ed = end_date.getTime();
 		long aft_ms = getAfterPeriodHours() * HOUR_MS;
 		if (now < sd - bfr_ms)
-			return "undeployed";
+			return PlanPhase.UNDEPLOYED;
 		else if (now < sd)
 			return "alert_before";
 		else if (now < ed)
@@ -824,6 +825,6 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		else if (now < ed + aft_ms)
 			return "alert_after";
 		else
-			return "undeployed";
+			return PlanPhase.UNDEPLOYED;
 	}
 }
