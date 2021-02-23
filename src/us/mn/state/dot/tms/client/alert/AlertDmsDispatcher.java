@@ -21,7 +21,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,6 +45,7 @@ import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IWorker;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * An alert DMS dispatcher is a GUI panel for dispatching and reviewing DMS
@@ -179,15 +179,6 @@ public class AlertDmsDispatcher extends IPanel {
 		}
 	};
 
-	/** Comparator for sorting list of DMS by name (case insensitive). */
-	private class DmsComparator implements Comparator<DMS> {
-		@Override
-		public int compare(DMS dms0, DMS dms1) {
-			return String.CASE_INSENSITIVE_ORDER.compare(
-				dms0.getName(), dms1.getName());
-		}
-	}
-
 	/** Create a new alert DMS dispatcher */
 	public AlertDmsDispatcher(Session s, AlertManager m) {
 		manager = m;
@@ -267,7 +258,7 @@ public class AlertDmsDispatcher extends IPanel {
 		ArrayList<DMS> dms_list = new ArrayList<DMS>();
 		for (DMS dms: dm.keySet())
 			dms_list.add(dms);
-		dms_list.sort(new DmsComparator());
+		dms_list.sort(new NumericAlphaComparator<DMS>());
 		dms_mdl.setRowCount(0);
 		for (DMS dms: dms_list) {
 			Object[] row = {

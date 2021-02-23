@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import javax.swing.ComboBoxModel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * SignGroup combo box model.
@@ -48,19 +49,7 @@ public class SignGroupComboBoxModel extends ProxyListModel<SignGroup>
 	/** Get a proxy comparator */
 	@Override
 	protected Comparator<SignGroup> comparator() {
-		return new Comparator<SignGroup>() {
-			public int compare(SignGroup sg0, SignGroup sg1) {
-				String s0 = sg0.getName();
-				String s1 = sg1.getName();
-				return s0.compareTo(s1);
-			}
-			public boolean equals(Object o) {
-				return o == this;
-			}
-			public int hashCode() {
-				return super.hashCode();
-			}
-		};
+		return new NumericAlphaComparator<SignGroup>();
 	}
 
 	/**

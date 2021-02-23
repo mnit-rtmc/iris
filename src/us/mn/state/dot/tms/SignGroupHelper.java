@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * Helper class for sign groups.
@@ -66,7 +67,8 @@ public class SignGroupHelper extends BaseHelper {
 
 	/** Get a set of all signs in a sign group */
 	static public Set<DMS> getAllSigns(SignGroup sg) {
-		TreeSet<DMS> signs = new TreeSet<DMS>();
+		TreeSet<DMS> signs = new TreeSet<DMS>(
+			new NumericAlphaComparator<DMS>());
 		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
 		while (it.hasNext()) {
 			DmsSignGroup dsg = it.next();

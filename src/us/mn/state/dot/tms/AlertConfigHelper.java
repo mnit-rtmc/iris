@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
@@ -134,7 +135,8 @@ public class AlertConfigHelper extends BaseHelper {
 
 	/** Get the set of all signs for an alert configuration */
 	static public Set<DMS> getAllSigns(AlertConfig cfg) {
-		TreeSet<DMS> all_dms = new TreeSet<DMS>();
+		TreeSet<DMS> all_dms = new TreeSet<DMS>(
+			new NumericAlphaComparator<DMS>());
 		for (AlertMessage msg: AlertMessageHelper.getAllMessages(cfg)) {
 			SignGroup sg = msg.getSignGroup();
 			if (sg != null && msg.getQuickMessage() != null)

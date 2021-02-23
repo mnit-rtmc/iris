@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
@@ -54,7 +55,8 @@ public class AlertMessageHelper extends BaseHelper {
 
 	/** Get the set of all messages for an alert configuration */
 	static public Set<AlertMessage> getAllMessages(AlertConfig cfg) {
-		TreeSet<AlertMessage> msgs = new TreeSet<AlertMessage>();
+		TreeSet<AlertMessage> msgs = new TreeSet<AlertMessage>(
+			new NumericAlphaComparator<AlertMessage>());
 		Iterator<AlertMessage> it = iterator();
 		while (it.hasNext()) {
 			AlertMessage msg = it.next();
@@ -66,7 +68,8 @@ public class AlertMessageHelper extends BaseHelper {
 
 	/** Get the set of valid messages for an alert configuration */
 	static public Set<AlertMessage> getValidMessages(AlertConfig cfg) {
-		TreeSet<AlertMessage> msgs = new TreeSet<AlertMessage>();
+		TreeSet<AlertMessage> msgs = new TreeSet<AlertMessage>(
+			new NumericAlphaComparator<AlertMessage>());
 		Iterator<AlertMessage> it = iterator();
 		while (it.hasNext()) {
 			AlertMessage msg = it.next();
