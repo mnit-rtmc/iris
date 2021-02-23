@@ -22,8 +22,8 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.TreeSet;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -103,21 +104,24 @@ public class AlertDmsDispatcher extends IPanel {
 	}
 
 	/** Find an active sign group for the alert */
-	private SignGroup findActiveGroup() {
+	private SignGroup findActiveGroup(DMS dms) {
 		AlertInfo ai = manager.getSelectionModel().getSingleSelection();
-		if (ai != null) {
-			HashSet<SignGroup> groups = DmsActionHelper.findGroups(
-				ai.getActionPlan());
-			Iterator<SignGroup> it = groups.iterator();
-			if (it.hasNext())
-				return it.next();
-		}
-		return null;
+		SignConfig cfg = dms.getSignConfig();
+		return (ai != null && cfg != null)
+		      ? findActiveGroup(ai.getActionPlan(), cfg)
+		      : null;
 	}
 
-	/** Add a DMS to the active sign group */
+	/** Find an active sign group for the alert */
+	private SignGroup findActiveGroup(ActionPlan plan, SignConfig cfg) {
+		Set<SignGroup> groups = DmsActionHelper.findGroups(plan, cfg);
+		Iterator<SignGroup> it = groups.iterator();
+		return it.hasNext() ? it.next() : null;
+	}
+
+	/** Add a DMS to its active sign group */
 	private void addToGroup(DMS dms) {
-		SignGroup sg = findActiveGroup();
+		SignGroup sg = findActiveGroup(dms);
 		if (sg != null)
 			createDmsSignGroup(dms, sg);
 	}
@@ -132,9 +136,9 @@ public class AlertDmsDispatcher extends IPanel {
 		dms_sign_groups.createObject(oname, attrs);
 	}
 
-	/** Remove a DMS from the active sign group */
+	/** Remove a DMS from its active sign group */
 	private void removeFromGroup(DMS dms) {
-		SignGroup sg = findActiveGroup();
+		SignGroup sg = findActiveGroup(dms);
 		if (sg != null)
 			removeDmsSignGroup(dms, sg);
 	}
@@ -244,7 +248,7 @@ public class AlertDmsDispatcher extends IPanel {
 		if (ai != null) {
 			// Find all DMS included in action plan
 			ActionPlan plan = ai.getActionPlan();
-			TreeSet<DMS> included = DmsActionHelper.findSigns(plan);
+			Set<DMS> included = DmsActionHelper.findSigns(plan);
 			// Find all DMS for alert info
 			SignGroup sg = ai.getSignGroup();
 			for (DMS d: SignGroupHelper.getAllSigns(sg))

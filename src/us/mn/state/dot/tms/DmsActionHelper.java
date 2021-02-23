@@ -14,11 +14,11 @@
  */
 package us.mn.state.dot.tms;
 
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * Helper class for DMS actions.
@@ -46,12 +46,9 @@ public class DmsActionHelper extends BaseHelper {
 
 	/** Get set of DMS controlled by an action plan */
 	static public TreeSet<DMS> findSigns(ActionPlan ap) {
-		HashSet<SignGroup> plan_groups = findGroups(ap);
-		TreeSet<DMS> plan_signs =new TreeSet<DMS>(new Comparator<DMS>(){
-			public int compare(DMS a, DMS b) {
-				return a.getName().compareTo(b.getName());
-			}
-		});
+		Set<SignGroup> plan_groups = findGroups(ap);
+		TreeSet<DMS> plan_signs = new TreeSet<DMS>(
+			new NumericAlphaComparator<DMS>());
 		Iterator<DmsSignGroup> git = DmsSignGroupHelper.iterator();
 		while (git.hasNext()) {
 			DmsSignGroup dsg = git.next();
@@ -62,7 +59,7 @@ public class DmsActionHelper extends BaseHelper {
 	}
 
 	/** Find all sign groups associated with an action plan */
-	static public HashSet<SignGroup> findGroups(ActionPlan ap) {
+	static public Set<SignGroup> findGroups(ActionPlan ap) {
 		HashSet<SignGroup> plan_groups = new HashSet<SignGroup>();
 		Iterator<DmsAction> dit = iterator();
 		while (dit.hasNext()) {
@@ -71,5 +68,20 @@ public class DmsActionHelper extends BaseHelper {
 				plan_groups.add(da.getSignGroup());
 		}
 		return plan_groups;
+	}
+
+	/** Find sign groups associated with an action plan and sign config */
+	static public Set<SignGroup> findGroups(ActionPlan ap, SignConfig cfg) {
+		HashSet<SignGroup> groups = new HashSet<SignGroup>();
+		Iterator<DmsAction> dit = iterator();
+		while (dit.hasNext()) {
+			DmsAction da = dit.next();
+			if (da.getActionPlan() == ap) {
+				QuickMessage qm = da.getQuickMessage();
+				if (qm.getSignConfig() == cfg)
+					groups.add(da.getSignGroup());
+			}
+		}
+		return groups;
 	}
 }
