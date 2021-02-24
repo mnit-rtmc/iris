@@ -105,6 +105,9 @@ public class AlertDispatcher extends IPanel {
 	/** Instruction text */
 	private final JTextArea instruction_txt = new JTextArea(2, 24);
 
+	/** Action plan label */
+	private final JLabel plan_lbl = createValueLabel();
+
 	/** Action to deploy alert */
 	private final IAction deploy_act = new IAction("alert.deploy") {
 		protected void doActionPerformed(ActionEvent e) {
@@ -163,15 +166,16 @@ public class AlertDispatcher extends IPanel {
 			area_lbl.setText("");
 			description_txt.setText("");
 			instruction_txt.setText("");
+			plan_lbl.setText("");
 			deploy_act.setEnabled(false);
 			clear_act.setEnabled(false);
 		}
 	};
 
-	/** Alert DMS dispatcher for deploying/reviewing DMS used for this alert*/
+	/** Dispatcher for deploying/reviewing DMS used for this alert */
 	private final AlertDmsDispatcher dmsDispatcher;
 
-	/** Create a new alert dispatcher. */
+	/** Create a new alert dispatcher */
 	public AlertDispatcher(Session s, AlertManager m) {
 		super();
 		session = s;
@@ -209,7 +213,7 @@ public class AlertDispatcher extends IPanel {
 		add(description_txt, Stretch.TEXT);
 		add("alert.instruction");
 		add(instruction_txt, Stretch.TEXT);
-		add(new JLabel());
+		add(plan_lbl);
 		add(new JButton(deploy_act));
 		add(clear_btn, Stretch.LAST);
 		add(dmsDispatcher, Stretch.FULL);
@@ -254,6 +258,7 @@ public class AlertDispatcher extends IPanel {
 		area_lbl.setText(ai.getAreaDesc());
 		description_txt.setText(ai.getDescription());
 		instruction_txt.setText(ai.getInstruction());
+		plan_lbl.setText(ai.getActionPlan().getName());
 		deploy_act.setEnabled(isWritePermitted());
 		clear_act.setEnabled(isWritePermitted());
 		dmsDispatcher.setSelectedAlert(ai);
