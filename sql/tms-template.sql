@@ -3800,9 +3800,10 @@ CREATE TABLE iris.alert_config (
 	certainty_possible BOOLEAN NOT NULL,
 	certainty_likely BOOLEAN NOT NULL,
 	certainty_observed BOOLEAN NOT NULL,
-	auto_deploy BOOLEAN NOT NULL
+	auto_deploy BOOLEAN NOT NULL,
 	before_period_hours INTEGER NOT NULL,
 	after_period_hours INTEGER NOT NULL,
+	sign_group VARCHAR(20) REFERENCES iris.sign_group
 );
 
 CREATE TABLE iris.alert_period (
@@ -3820,7 +3821,6 @@ CREATE TABLE iris.alert_message (
 	name VARCHAR(20) PRIMARY KEY,
 	alert_config VARCHAR(20) NOT NULL REFERENCES iris.alert_config,
 	alert_period INTEGER NOT NULL REFERENCES iris.alert_period,
-	sign_group VARCHAR(20) REFERENCES iris.sign_group,
 	quick_message VARCHAR(20) REFERENCES iris.quick_message
 );
 

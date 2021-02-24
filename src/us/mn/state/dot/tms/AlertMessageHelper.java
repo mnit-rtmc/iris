@@ -74,7 +74,6 @@ public class AlertMessageHelper extends BaseHelper {
 		while (it.hasNext()) {
 			AlertMessage msg = it.next();
 			if (msg.getAlertConfig() == cfg &&
-			    msg.getSignGroup() != null &&
 			    msg.getQuickMessage() != null)
 				msgs.add(msg);
 		}

@@ -21,7 +21,6 @@ import java.util.Map;
 import us.mn.state.dot.tms.AlertConfig;
 import us.mn.state.dot.tms.AlertMessage;
 import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -35,8 +34,8 @@ public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, AlertMessageImpl.class);
 		store.query("SELECT name, alert_config, alert_period, " +
-			"sign_group, quick_message FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+			"quick_message FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new AlertMessageImpl(row));
@@ -51,7 +50,6 @@ public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage {
 		map.put("name", name);
 		map.put("alert_config", alert_config);
 		map.put("alert_period", alert_period);
-		map.put("sign_group", sign_group);
 		map.put("quick_message", quick_message);
 		return map;
 	}
@@ -78,27 +76,22 @@ public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage {
 		this(row.getString(1),  // name
 		     row.getString(2),  // alert_config
 		     row.getInt(3),     // alert_period
-		     row.getString(4),  // sign_group
-		     row.getString(5)   // quick_message
+		     row.getString(4)   // quick_message
 		);
 	}
 
 	/** Create an alert message */
-	private AlertMessageImpl(String n, String ac, int ap, String sg,
-		String qm)
-	{
-		this(n, lookupAlertConfig(ac), ap, lookupSignGroup(sg),
-		    lookupQuickMessage(qm));
+	private AlertMessageImpl(String n, String ac, int ap, String qm) {
+		this(n, lookupAlertConfig(ac), ap, lookupQuickMessage(qm));
 	}
 
 	/** Create an alert message */
-	public AlertMessageImpl(String n, AlertConfig ac, int ap, SignGroup sg,
+	public AlertMessageImpl(String n, AlertConfig ac, int ap,
 		QuickMessage qm)
 	{
 		this(n);
 		alert_config = ac;
 		alert_period = ap;
-		sign_group = sg;
 		quick_message = qm;
 	}
 
@@ -132,29 +125,6 @@ public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage {
 	@Override
 	public int getAlertPeriod() {
 		return alert_period;
-	}
-
-	/** Sign group */
-	private SignGroup sign_group;
-
-	/** Set the sign group */
-	@Override
-	public void setSignGroup(SignGroup sg) {
-		sign_group = sg;
-	}
-
-	/** Set the sign group */
-	public void doSetSignGroup(SignGroup sg) throws TMSException {
-		if (sg != sign_group) {
-			store.update(this, "sign_group", sg);
-			setSignGroup(sg);
-		}
-	}
-
-	/** Get the sign group */
-	@Override
-	public SignGroup getSignGroup() {
-		return sign_group;
 	}
 
 	/** Quick message to send when action happens */

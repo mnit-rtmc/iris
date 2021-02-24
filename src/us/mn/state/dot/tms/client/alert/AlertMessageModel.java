@@ -14,21 +14,14 @@
  */
 package us.mn.state.dot.tms.client.alert;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.AlertConfig;
 import us.mn.state.dot.tms.AlertMessage;
@@ -64,18 +57,6 @@ public class AlertMessageModel extends ProxyTableModel<AlertMessage> {
 		);
 	}
 
-	/** Lookup a sign group */
-	static private SignGroup lookupSignGroup(Object value) {
-		String v = value.toString().trim();
-		if (v.length() > 0) {
-			SignGroup sg = SignGroupHelper.lookup(v);
-			if (null == sg)
-				showHint("dms.group.unknown.hint");
-			return sg;
-		} else
-			return null;
-	}
-
 	/** Lookup a quick message */
 	static private QuickMessage lookupQuickMessage(Object value) {
 		String v = value.toString().trim();
@@ -92,7 +73,7 @@ public class AlertMessageModel extends ProxyTableModel<AlertMessage> {
 	@Override
 	protected ArrayList<ProxyColumn<AlertMessage>> createColumns() {
 		ArrayList<ProxyColumn<AlertMessage>> cols =
-			new ArrayList<ProxyColumn<AlertMessage>>(4);
+			new ArrayList<ProxyColumn<AlertMessage>>(3);
 		cols.add(new ProxyColumn<AlertMessage>("alert.period", 100) {
 			public Object getValueAt(AlertMessage am) {
 				return AlertPeriod.fromOrdinal(
@@ -112,17 +93,6 @@ public class AlertMessageModel extends ProxyTableModel<AlertMessage> {
 					<AlertPeriod>(AlertPeriod.VALUES));
 			}
 		});
-		cols.add(new ProxyColumn<AlertMessage>("alert.group", 120) {
-			public Object getValueAt(AlertMessage am) {
-				return am.getSignGroup();
-			}
-			public boolean isEditable(AlertMessage am) {
-				return canWrite(am);
-			}
-			public void setValueAt(AlertMessage am, Object value) {
-				am.setSignGroup(lookupSignGroup(value));
-			}
-		});
 		cols.add(new ProxyColumn<AlertMessage>("alert.quick.message",
 			120)
 		{
@@ -136,32 +106,30 @@ public class AlertMessageModel extends ProxyTableModel<AlertMessage> {
 				am.setQuickMessage(lookupQuickMessage(value));
 			}
 		});
-		cols.add(new ProxyColumn<AlertMessage>("alert.msg.check", 40) {
+		cols.add(new ProxyColumn<AlertMessage>("alert.msg.count", 40) {
 			public Object getValueAt(AlertMessage am) {
-				return checkMessage(am);
-			}
-			protected TableCellRenderer createCellRenderer() {
-				return new CheckRenderer();
+				return countSigns(am);
 			}
 		});
 		return cols;
 	}
 
-	/** Check if an alert message is OK */
-	private boolean checkMessage(AlertMessage am) {
-		SignGroup sg = am.getSignGroup();
+	/** Count signs for an alert message */
+	private int countSigns(AlertMessage am) {
+		SignGroup sg = cfg.getSignGroup();
 		QuickMessage qm = am.getQuickMessage();
 		if (sg != null && qm != null) {
 			SignConfig sc = qm.getSignConfig();
 			if (sc != null) {
+				int count = 0;
 				for (DMS dms: SignGroupHelper.getAllSigns(sg)) {
-					if (dms.getSignConfig() != sc)
-						return false;
+					if (dms.getSignConfig() == sc)
+						count += 1;
 				}
-				return true;
+				return count;
 			}
 		}
-		return false;
+		return 0;
 	}
 
 	/** Get a table row sorter */
@@ -213,30 +181,6 @@ public class AlertMessageModel extends ProxyTableModel<AlertMessage> {
 			attrs.put("alert_config", cfg);
 			attrs.put("alert_period", AlertPeriod.DURING.ordinal());
 			descriptor.cache.createObject(name, attrs);
-		}
-	}
-
-	/** Renderer for check value in a table cell */
-	protected class CheckRenderer extends DefaultTableCellRenderer {
-		public Component getTableCellRendererComponent(JTable table,
-			Object value, boolean isSelected, boolean hasFocus,
-			int row, int column)
-		{
-			JLabel label = (JLabel)
-				super.getTableCellRendererComponent(table,
-				value, isSelected, hasFocus, row, column);
-			boolean v = (Boolean) value;
-			if (v) {
-				label.setForeground(null);
-				label.setText(I18N.get("alert.msg.check.ok"));
-			} else {
-				Font f = label.getFont();
-				label.setFont(f.deriveFont(
-					f.getStyle() | Font.BOLD));
-				label.setForeground(Color.RED);
-				label.setText(I18N.get("alert.msg.check.err"));
-			}
-			return label;
 		}
 	}
 }

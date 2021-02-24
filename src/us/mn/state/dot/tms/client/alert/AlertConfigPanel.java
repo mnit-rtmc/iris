@@ -17,12 +17,15 @@ package us.mn.state.dot.tms.client.alert;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
+import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -42,6 +45,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
+import static us.mn.state.dot.tms.client.widget.IOptionPane.showHint;
 
 /**
  * A panel for editing the properties of an alert config.
@@ -65,6 +69,18 @@ public class AlertConfigPanel extends IPanel {
 			return super.getListCellRendererComponent(list, v,
 				index, isSelected, hasFocus);
 		}
+	}
+
+	/** Lookup a sign group */
+	static private SignGroup lookupSignGroup(Object value) {
+		String v = value.toString().trim();
+		if (v.length() > 0) {
+			SignGroup sg = SignGroupHelper.lookup(v);
+			if (null == sg)
+				showHint("dms.group.unknown.hint");
+			return sg;
+		} else
+			return null;
 	}
 
 	/** AlertConfig action */
@@ -329,6 +345,9 @@ public class AlertConfigPanel extends IPanel {
 	private final JSpinner aft_spn = new JSpinner(
 		new SpinnerNumberModel(0, 0, 24, 1));
 
+	/** Sign group text field */
+	private final JTextField group_txt = new JTextField(20);
+
 	/** Alert message table panel */
 	private final ProxyTablePanel<AlertMessage> msg_panel;
 
@@ -444,6 +463,11 @@ public class AlertConfigPanel extends IPanel {
 				bfr_spn.setValue(cfg.getBeforePeriodHours());
 			if (a == null || a.equals("afterPeriodHours"))
 				aft_spn.setValue(cfg.getAfterPeriodHours());
+			if (a == null || a.equals("signGroup")) {
+				SignGroup sg = cfg.getSignGroup();
+				group_txt.setText(
+					(sg != null) ? sg.getName() : "");
+			}
 		}
 		@Override public void clear() {
 			alert_cfg = null;
@@ -502,6 +526,8 @@ public class AlertConfigPanel extends IPanel {
 			bfr_spn.setValue(0);
 			aft_spn.setEnabled(false);
 			aft_spn.setValue(0);
+			group_txt.setEnabled(false);
+			group_txt.setText("");
 		}
 	};
 
@@ -586,6 +612,8 @@ public class AlertConfigPanel extends IPanel {
 		add(bfr_spn);
 		add("alert.after_period_hours");
 		add(aft_spn, Stretch.LAST);
+		add("alert.group");
+		add(group_txt, Stretch.LAST);
 		add(msg_panel, Stretch.FULL);
 		createJobs();
 		watcher.initialize();
@@ -608,6 +636,11 @@ public class AlertConfigPanel extends IPanel {
 				setAfterPeriodHours(h.intValue());
 			}
 		});
+		group_txt.addFocusListener(new FocusAdapter() {
+			public void focusLost(FocusEvent e) {
+				setSignGroup(group_txt.getText());
+			}
+		});
 	}
 
 	/** Set the before period hours */
@@ -622,6 +655,13 @@ public class AlertConfigPanel extends IPanel {
 		AlertConfig cfg = alert_cfg;
 		if (cfg != null)
 			cfg.setAfterPeriodHours(h);
+	}
+
+	/** Set the sign group */
+	private void setSignGroup(Object v) {
+		AlertConfig cfg = alert_cfg;
+		if (cfg != null)
+			cfg.setSignGroup(lookupSignGroup(v));
 	}
 
 	/** Dispose of the panel */
@@ -664,5 +704,6 @@ public class AlertConfigPanel extends IPanel {
 		auto_deploy_chk.setEnabled(write);
 		bfr_spn.setEnabled(write);
 		aft_spn.setEnabled(write);
+		group_txt.setEnabled(write);
 	}
 }

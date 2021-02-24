@@ -52,6 +52,7 @@ import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -441,7 +442,10 @@ public class AlertData {
 	private void createAlertInfo(AlertConfig cfg) throws SonarException,
 		TMSException
 	{
-		Set<DMS> signs = AlertConfigHelper.getAllSigns(cfg);
+		SignGroup sign_group = cfg.getSignGroup();
+		if (sign_group == null)
+			return;
+		Set<DMS> signs = SignGroupHelper.getAllSigns(sign_group);
 		signs.retainAll(all_dms);
 		if (!signs.isEmpty()) {
 			ActionPlanImpl plan = createPlan(cfg);
@@ -472,11 +476,14 @@ public class AlertData {
 		log("created plan " + pname);
 		plan.notifyCreate();
 		createTimeActions(cfg, plan);
-		Map<SignGroup, SignGroup> act_groups = createActiveGroups(plan,
+		Map<SignConfig, SignGroup> act_groups = createActiveGroups(plan,
 			msgs);
 		for (AlertMessage msg: msgs) {
-			SignGroup sg = msg.getSignGroup();
-			SignGroup asg = act_groups.get(sg);
+			QuickMessage qm = msg.getQuickMessage();
+			SignConfig sc = (qm != null)
+				? qm.getSignConfig()
+				: null;
+			SignGroup asg = act_groups.get(sc);
 			if (asg != null)
 				createDmsActions(cfg, plan, msg, asg);
 		}
@@ -534,29 +541,32 @@ public class AlertData {
 		ta.notifyCreate();
 	}
 
-	/** Create sign groups for active signs */
-	private Map<SignGroup, SignGroup> createActiveGroups(
+	/** Create sign groups for active sign configs */
+	private Map<SignConfig, SignGroup> createActiveGroups(
 		ActionPlanImpl plan, Set<AlertMessage> msgs)
 		throws SonarException
 	{
-		TreeMap<SignGroup, SignGroup> act_groups =
-			new TreeMap<SignGroup, SignGroup>(
-			new NumericAlphaComparator<SignGroup>());
+		TreeMap<SignConfig, SignGroup> act_groups =
+			new TreeMap<SignConfig, SignGroup>(
+			new NumericAlphaComparator<SignConfig>());
 		for (AlertMessage msg: msgs) {
-			SignGroup sg = msg.getSignGroup();
-			if (!act_groups.containsKey(sg)) {
-				SignGroup asg = makeActiveGroup(plan, sg);
-				act_groups.put(sg, asg);
+			QuickMessage qm = msg.getQuickMessage();
+			SignConfig sc = (qm != null)
+				? qm.getSignConfig()
+				: null;
+			if (sc != null && !act_groups.containsKey(sc)) {
+				SignGroup sg = makeActiveGroup(plan, sc);
+				act_groups.put(sc, sg);
 			}
 		}
 		return act_groups;
 	}
 
 	/** Make "active" sign group */
-	private SignGroup makeActiveGroup(ActionPlanImpl plan, SignGroup sg)
+	private SignGroup makeActiveGroup(ActionPlanImpl plan, SignConfig sc)
 		throws SonarException
 	{
-		Set<DMS> signs = SignGroupHelper.getAllSigns(sg);
+		Set<DMS> signs = SignConfigHelper.getAllSigns(sc);
 		signs.retainAll(auto_dms);
 		return createSignGroup(plan, "ACT", signs);
 	}

@@ -192,4 +192,10 @@ public interface AlertConfig extends SonarObject {
 
 	/** Get the duration in hours for the "after" alert period */
 	int getAfterPeriodHours();
+
+	/** Set the sign group */
+	void setSignGroup(SignGroup sg);
+
+	/** Get the sign group */
+	SignGroup getSignGroup();
 }

@@ -41,12 +41,6 @@ public interface AlertMessage extends SonarObject {
 	/** Get the alert period (ordinal of AlertPeriod enum) */
 	int getAlertPeriod();
 
-	/** Set the sign group */
-	void setSignGroup(SignGroup sg);
-
-	/** Get the sign group */
-	SignGroup getSignGroup();
-
 	/** Set the quick message template */
 	void setQuickMessage(QuickMessage qm);
 

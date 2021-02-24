@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2019  Minnesota Department of Transportation
+ * Copyright (C) 2016-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,9 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * Helper for dealing with sign configurations.
@@ -125,5 +128,18 @@ public class SignConfigHelper extends BaseHelper {
 	/** Check for full-matrix sign */
 	static private boolean isFullMatrix(SignConfig sc) {
 		return sc.getCharHeight() <= 0;
+	}
+
+	/** Get a set of all signs in with a sign config */
+	static public Set<DMS> getAllSigns(SignConfig sc) {
+		TreeSet<DMS> signs = new TreeSet<DMS>(
+			new NumericAlphaComparator<DMS>());
+		Iterator<DMS> it = DMSHelper.iterator();
+		while (it.hasNext()) {
+			DMS dms = it.next();
+			if (dms.getSignConfig() == sc)
+				signs.add(dms);
+		}
+		return signs;
 	}
 }
