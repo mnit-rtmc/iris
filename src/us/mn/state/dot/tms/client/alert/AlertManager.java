@@ -61,6 +61,7 @@ public class AlertManager extends ProxyManager<AlertInfo> {
 			s.getSonarState().getAlertInfos(), false);
 	}
 
+	/** Create an alert manager */
 	public AlertManager(Session s, GeoLocManager lm) {
 		super(s, lm, descriptor(s), 10);
 		tab = new AlertTab(session, this);
