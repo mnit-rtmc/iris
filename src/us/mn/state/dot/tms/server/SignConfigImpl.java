@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2019  Minnesota Department of Transportation
+ * Copyright (C) 2016-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
  * A sign configuration defines the type and dimensions of a sign.
@@ -33,6 +34,13 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
+
+	/** Create a unique sign config name */
+	static private String createUniqueName(String template) {
+		UniqueNameCreator unc = new UniqueNameCreator(template, 16,
+			(n)->lookupSignConfig(n));
+		return unc.createUniqueName();
+	}
 
 	/** Find existing or create a new sign config.
 	 * @param fw Face width (mm).
@@ -62,7 +70,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		if (sc instanceof SignConfigImpl)
 			return (SignConfigImpl) sc;
 		else {
-			String n = createUniqueName();
+			String template = "sc_" + pxw + "x" + pxh + "_%d";
+			String n = createUniqueName(template);
 			SignConfigImpl sci = new SignConfigImpl(n, fw, fh, bh,
 				bv, ph, pv, pxw, pxh, cw, ch, mf, mb, cs, "");
 			return createNotify(sci);
@@ -86,26 +95,6 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		return findOrCreate(600, 600, 1, 1, 1, 1, 1, 1, 0, 0,
 			ColorScheme.MONOCHROME_1_BIT.ordinal(),
 			DmsColor.AMBER.rgb(), DmsColor.BLACK.rgb());
-	}
-
-	/** Last allocated sign config ID */
-	static private int last_id = 0;
-
-	/** Create a unique sign config name */
-	static private synchronized String createUniqueName() {
-		String n = createNextName();
-		while (namespace.lookupObject(SONAR_TYPE, n) != null)
-			n = createNextName();
-		return n;
-	}
-
-	/** Create the next system config name */
-	static private String createNextName() {
-		last_id++;
-		// Check if the ID has rolled over to negative numbers
-		if (last_id < 0)
-			last_id = 0;
-		return "cfg_" + last_id;
 	}
 
 	/** Load all the sign configs */

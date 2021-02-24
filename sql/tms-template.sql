@@ -2495,7 +2495,7 @@ CREATE VIEW sign_detail_view AS
 GRANT SELECT ON sign_detail_view TO PUBLIC;
 
 CREATE TABLE iris.sign_config (
-	name VARCHAR(12) PRIMARY KEY,
+	name VARCHAR(16) PRIMARY KEY,
 	face_width INTEGER NOT NULL,
 	face_height INTEGER NOT NULL,
 	border_horiz INTEGER NOT NULL,
@@ -2574,7 +2574,7 @@ $sign_msg_sources$ LANGUAGE plpgsql;
 
 CREATE TABLE iris.sign_message (
 	name VARCHAR(20) PRIMARY KEY,
-	sign_config VARCHAR(12) NOT NULL REFERENCES iris.sign_config,
+	sign_config VARCHAR(16) NOT NULL REFERENCES iris.sign_config,
 	incident VARCHAR(16),
 	multi VARCHAR(1024) NOT NULL,
 	beacon_enabled BOOLEAN NOT NULL,
@@ -2702,7 +2702,7 @@ CREATE TABLE iris._dms (
 	purpose INTEGER NOT NULL REFERENCES iris.device_purpose,
 	hidden BOOLEAN NOT NULL,
 	beacon VARCHAR(20) REFERENCES iris._beacon,
-	sign_config VARCHAR(12) REFERENCES iris.sign_config,
+	sign_config VARCHAR(16) REFERENCES iris.sign_config,
 	sign_detail VARCHAR(12) REFERENCES iris.sign_detail,
 	override_font VARCHAR(16) REFERENCES iris.font,
 	override_foreground INTEGER,
@@ -2864,7 +2864,7 @@ CREATE TABLE iris.quick_message (
 	name VARCHAR(20) PRIMARY KEY,
 	-- FIXME: drop sign_group?
 	sign_group VARCHAR(20) REFERENCES iris.sign_group,
-	sign_config VARCHAR(12) REFERENCES iris.sign_config,
+	sign_config VARCHAR(16) REFERENCES iris.sign_config,
 	prefix_page BOOLEAN NOT NULL,
 	multi VARCHAR(1024) NOT NULL
 );
