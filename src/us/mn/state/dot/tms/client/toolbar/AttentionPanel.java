@@ -83,7 +83,8 @@ public class AttentionPanel extends ToolPanel {
 
 	/** Create an action to select an alert info */
 	private IAction createAction(AlertInfo ai) {
-		return new IAction("alert_info", ai.getName()) {
+		String desc = session.getAlertManager().getDescription(ai);
+		return new IAction(null, desc) {
 			@Override
 			protected void doActionPerformed(ActionEvent ev) {
 				session.getAlertManager().getSelectionModel().
