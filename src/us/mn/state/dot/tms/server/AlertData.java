@@ -21,6 +21,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,12 +35,15 @@ import org.postgis.Polygon;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.AlertConfig;
 import us.mn.state.dot.tms.AlertConfigHelper;
+import us.mn.state.dot.tms.AlertInfo;
+import us.mn.state.dot.tms.AlertInfoHelper;
 import us.mn.state.dot.tms.AlertMessage;
 import us.mn.state.dot.tms.AlertMessageHelper;
 import us.mn.state.dot.tms.AlertPeriod;
 import us.mn.state.dot.tms.AlertState;
 import us.mn.state.dot.tms.CapCertainty;
 import us.mn.state.dot.tms.CapEvent;
+import us.mn.state.dot.tms.CapMsgType;
 import us.mn.state.dot.tms.CapResponseType;
 import us.mn.state.dot.tms.CapSeverity;
 import us.mn.state.dot.tms.CapUrgency;
@@ -294,6 +298,12 @@ public class AlertData {
 	/** Alert identifier */
 	private final String identifier;
 
+	/** CAP message type */
+	private final CapMsgType msg_type;
+
+	/** Message references */
+	private final String references;
+
 	/** CAP event */
 	private final CapEvent event;
 
@@ -340,11 +350,13 @@ public class AlertData {
 	private final TreeSet<DMS> all_dms = new TreeSet<DMS>();
 
 	/** Create alert data from JSON info */
-	public AlertData(String id, JSONObject info, String sent)
-		throws JSONException, ParseException, SonarException,
-		SQLException, TMSException
+	public AlertData(String id, CapMsgType mt, String ref, String sent,
+		JSONObject info) throws JSONException, ParseException,
+		SonarException, SQLException, TMSException
 	{
 		identifier = id;
+		msg_type = mt;
+		references = ref;
 		event = lookupEvent(info);
 		response_type = lookupResponseType(info);
 		urgency = CapUrgency.fromValue(info.getString("urgency"));
@@ -390,8 +402,22 @@ public class AlertData {
 			log("invalid point: " + lonlat);
 	}
 
+	/** Process alert data */
+	public void process() throws SonarException, TMSException {
+		switch (msg_type) {
+		case ALERT:
+		case UPDATE:
+			createAlertInfos();
+			return;
+		case CANCEL:
+		case ERROR:
+			cancelAlertInfos();
+			return;
+		}
+	}
+
 	/** Create alert info for all matching configurations */
-	public void createAlertInfos() throws SonarException, TMSException {
+	private void createAlertInfos() throws SonarException, TMSException {
 		List<AlertConfig> configs = AlertConfigHelper.findMatching(
 			event, response_type, urgency, severity, certainty);
 		if (!configs.isEmpty()) {
@@ -647,5 +673,35 @@ public class AlertData {
 			centroid[0], centroid[1], sign_group, plan, st);
 		log("created alert info " + aname);
 		ai.notifyCreate();
+	}
+
+	/** Cancel alert infos with matching identifiers */
+	private void cancelAlertInfos() throws SonarException, TMSException {
+		log("cancelling alert " + references);
+		List<String> refs = parseRefs();
+		Iterator<AlertInfo> it = AlertInfoHelper.iterator();
+		while (it.hasNext()) {
+			AlertInfo ai = it.next();
+			if (refs.contains(ai.getAlert()) &&
+			    ai instanceof AlertInfoImpl)
+			{
+				AlertInfoImpl aii = (AlertInfoImpl) ai;
+				aii.clear();
+				log("cancelling alert info " + ai.getName());
+			}
+		}
+	}
+
+	/** Parse reference identifiers */
+	private List<String> parseRefs() {
+		ArrayList<String> refs = new ArrayList<String>();
+		// Refernces are separated by whitespace
+		for (String ref: references.split("\\s+")) {
+			// Reference format: sender,identifier,sent
+			String[] vals = ref.split(",", 3);
+			if (vals.length >= 2)
+				refs.add(vals[1]);
+		}
+		return refs;
 	}
 }

@@ -137,24 +137,8 @@ public class CapAlert implements Storable {
 	 */
 	public void process() {
 		log("processing");
-		if (storeAlert() && checkStatus() && checkScope()) {
-			CapMsgType msg_type = getMsgType();
-			switch (msg_type) {
-			case ALERT:
-				createAlertInfos();
-				return;
-			case UPDATE:
-				// FIXME: update existing alert infos
-				createAlertInfos();
-				return;
-			case CANCEL:
-			case ERROR:
-				// FIXME: cancel existing alert infos
-				return;
-			default:
-				return;
-			}
-		}
+		if (storeAlert() && checkStatus() && checkScope())
+			processData();
 	}
 
 	/** Store the alert in the database */
@@ -202,36 +186,25 @@ public class CapAlert implements Storable {
 		}
 	}
 
-	/** Get the message type */
-	private CapMsgType getMsgType() {
+	/** Process alert data */
+	private void processData() {
 		try {
 			CapMsgType msg_type = CapMsgType.fromValue(
 				alert.getString("msgType"));
-			log("msgType " + msg_type);
-			return msg_type;
-		}
-		catch (JSONException e) {
-			log("get msgType, " + e.getMessage());
-			return CapMsgType.UNKNOWN;
-		}
-	}
-
-	/** Create alert info records */
-	private void createAlertInfos() {
-		try {
+			String references = alert.optString("references", "");
 			String sent = alert.getString("sent");
 			JSONArray infos = alert.getJSONArray("info");
 			for (int i = 0; i < infos.length(); i++) {
 				JSONObject info = infos.getJSONObject(i);
-				AlertData data = new AlertData(identifier, info,
-					sent);
-				data.createAlertInfos();
+				AlertData data = new AlertData(identifier,
+					msg_type, references, sent, info);
+				data.process();
 			}
 		}
 		catch (JSONException | ParseException | SonarException |
 		       SQLException | TMSException e)
 		{
-			log("create infos failed, " + e.getMessage());
+			log("processData failed, " + e.getMessage());
 		}
 	}
 }
