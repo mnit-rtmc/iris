@@ -27,18 +27,13 @@ import us.mn.state.dot.tms.AlertConfig;
 import us.mn.state.dot.tms.AlertMessage;
 import us.mn.state.dot.tms.AlertMessageHelper;
 import us.mn.state.dot.tms.AlertPeriod;
-import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
-import us.mn.state.dot.tms.SignConfig;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import static us.mn.state.dot.tms.client.widget.IOptionPane.showHint;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Table model for alert config messages.
@@ -73,7 +68,7 @@ public class AlertMessageModel extends ProxyTableModel<AlertMessage> {
 	@Override
 	protected ArrayList<ProxyColumn<AlertMessage>> createColumns() {
 		ArrayList<ProxyColumn<AlertMessage>> cols =
-			new ArrayList<ProxyColumn<AlertMessage>>(3);
+			new ArrayList<ProxyColumn<AlertMessage>>(2);
 		cols.add(new ProxyColumn<AlertMessage>("alert.period", 100) {
 			public Object getValueAt(AlertMessage am) {
 				return AlertPeriod.fromOrdinal(
@@ -106,30 +101,7 @@ public class AlertMessageModel extends ProxyTableModel<AlertMessage> {
 				am.setQuickMessage(lookupQuickMessage(value));
 			}
 		});
-		cols.add(new ProxyColumn<AlertMessage>("alert.msg.count", 40) {
-			public Object getValueAt(AlertMessage am) {
-				return countSigns(am);
-			}
-		});
 		return cols;
-	}
-
-	/** Count signs for an alert message */
-	private int countSigns(AlertMessage am) {
-		SignGroup sg = cfg.getSignGroup();
-		QuickMessage qm = am.getQuickMessage();
-		if (sg != null && qm != null) {
-			SignConfig sc = qm.getSignConfig();
-			if (sc != null) {
-				int count = 0;
-				for (DMS dms: SignGroupHelper.getAllSigns(sg)) {
-					if (dms.getSignConfig() == sc)
-						count += 1;
-				}
-				return count;
-			}
-		}
-		return 0;
 	}
 
 	/** Get a table row sorter */
