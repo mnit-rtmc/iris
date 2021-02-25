@@ -7,7 +7,7 @@ Signs (DMS).
 In the US, the system operated by the Federal Emergency Management Agency (FEMA)
 is called Integrated Public Alert and Warning System [IPAWS].  Use of this
 system requires access to the IPAWS Open Platform for Emergency Networks
-(IPAWS-OPEN) which must be approved by FEMA.  This system was largely designed
+(IPAWS-OPEN), which must be approved by FEMA.  This system was largely designed
 to post messages relating to weather alerts issued by the National Weather
 Service, however it is possible to use the system to post information for other
 alert types in IRIS by creating the proper [alert configuration].
@@ -19,9 +19,8 @@ for configuring the response to each alert.
 
 When configured properly, the system will perform the following functions:
 
-1. Poll a feed for alerts and parse the Common Alerting Protocol (CAP) XML alert
-   information.
-2. Process alerts with event types that have been configured in the system.
+1. Poll a feed and parse the Common Alerting Protocol (CAP) XML information.
+2. Process alerts with configured event types.
 3. Identify DMS within the alert area.
 4. Generate DMS messages based on predefined message templates.
 5. Post messages to signs automatically or after operator approval.
@@ -49,10 +48,15 @@ has been executed, the URL required to access IPAWS-OPEN will be provided.
 
 ## Setting Up CAP Interface
 
-The interface with IPAWS-OPEN is configured via a [comm link].  This `comm link`
-must use the `CAP` protocol and contain the URL for a valid CAP feed.  A polling
-period of 60 seconds is recommended, but you may use longer periods if desired.
-Also, set `idle_disconnect_sec` in the comm configuration to 10 seconds.
+The IPAWS-OPEN interface is configured via a [comm link].  The [comm config]
+must use the `CAP` protocol, with a `timeout` of 8 seconds and `idle disconnect` 
+time of 10 seconds.  A polling period of 60 seconds is recommended, but you may
+use longer periods if desired.
+
+The `comm link` must contain the URL for a valid CAP feed.  For IPAWS-OPEN, the
+`path` ends with `recent/`, followed by a date/time stamp.  IRIS will add the
+date/time to each request if the provided URL ends with `/`.  The URL must also
+contain a query string with a your pin (*e.g.* `?pin=ABC123`).
 
 A CAP `comm link` requires a [controller] in `ACTIVE` condition to operate.
 With polling enabled and the controller in active condition, IRIS will poll the
@@ -85,39 +89,56 @@ the database.
 Select the `View ➔ Alerts ➔ Alert Configurations` menu item.
 
 This dialog displays the alert configurations and allows creating new ones.
-Alert configurations link specific alert properties with one or more sign groups
-and associated quick message templates.
+A configuration links specific alert properties with a sign group and one or
+more alert messages.
 
-To create a new alert configuration, press the "Create" button.  After the new
-configuration appears in the list, select it and assign the desired alert
-properties to match.  Also, select one or more sign groups and quick messages.
+To create a new alert configuration, press the `Create` button.  After the new
+configuration appears in the list, select it and assign the desired properties
+to match.  Also, select a sign group and create one or more messages.
 
 ### Event Types
 
-Each alert will contain an "Event" field to describe the subject of the alert.
+Each alert will contain an `event` field to describe the subject of the alert.
 Some of the more common events that may be observed include:
 
- - BZW, Blizzard Warning
- - FLW, Flood Warning
- - WWY, Winter Weather Advisory
- - WSW, Winter Storm Warning
- - SVW, Severe Thunderstorm Warning
- - TOW, Tornado Warning
- - WIY, Wind Advisory
+ - Blizzard Warning (BZW)
+ - Flood Warning (FLW)
+ - Tornado Warning (TOW)
+ - Severe Thunderstorm Warning (SVW)
+ - Wind Chill Warning (WCW)
+ - Winter Storm Warning (WSW)
+ - Winter Weather Advisory (WWY)
 
-A list of possible events that may be encountered is available on the alert
-config panel.
+### Selection
+
+Alerts can be selected in a configuration based on four parameters:
+**responseType**, **urgency**, **severity** and **certainty**.  An alert will
+only be selected if all four of these parameters match the configuration.
+
+* Response Types: `Shelter`, `Evacuate`, `Prepare`, `Execute`, `Avoid`, `Monitor`, `All Clear`, `None`
+* Urgency: `Unknown`, `Past`, `Future`, `Expected`, `Immediate`
+* Severity: `Unknown`, `Minor`, `Moderate`, `Severe`, `Extreme`
+* Certainty: `Unknown`, `Unlikely`, `Possible`, `Likely`, `Observed`
+
+### Auto Deploy
+
+An alert configuration can be flagged to automatically deploy when it is matched
+with an incoming alert.  In this case, operator approval is not required, and
+signs will be deployed with no intervention.
+
+### Hours Before and Hours After
+
+Additional messages may be posted `BEFORE` an alert has started or `AFTER` it
+has ended.  The duration of these periods is controlled via the "Hours Before"
+and "Hours After" times, respectively.  A value of 0 will disable that period
+for the configuration.
 
 ### Sign Groups
 
-Signs that are eligible for inclusion in an alert deployment should be
-collected into a sign group. When an alert of a recognized event type is
-received, IRIS will use any sign groups associated with that event (based on
-the existing alert configurations) to search for signs in the group that are
-within or near the area defined in the alert CAP message. A single event type
-may be used in more than one alert configuration and associated with more than
-one sign group, allowing the use of different message templates for each sign
-group.
+Signs that are eligible for inclusion in an alert configuration should be
+collected into a single sign group.  When an alert matches the configuration,
+only signs from that group will be considered when searching the area defined by
+the alert CAP message.
 
 Signs that are inside the alert area will be automatically used to display
 messages describing the alert, unless an operator decides to exclude them.
@@ -130,33 +151,16 @@ value, signs within the sum of `alert_sign_thresh_auto_meters` and
 `alert_sign_thresh_opt_meters` will be suggested for inclusion in the alert
 deployment when reviewed in the deployment dialog.
 
-### Message Templates
+### Alert Messages
 
-Messages will be automatically generated for each alert based on a predefined
-message template, stored as a quick message.  These message templates support
-the use of [DMS action tags] to allow dynamically displaying information
-from the alert CAP message in the message displayed on the DMS.
+An alert message defines an *alert period* and a [quick message].  The period
+can be `BEFORE`, `DURING` or `AFTER`, and selects the time relative to the start
+and end of the alert.  The *quick message* will be displayed on signs with a
+matching **sign config** during the associated period.
 
-Message templates can be created using the [WYSIWYG editor].  To create a
-message template, use the message selector to create a new message for the sign
-group for use in the alert deployment.  In the message editor, enter any static
-elements of the message as text.
-
-### Pre- and Post-Alert Times
-
-Messages may be posted to DMS before an alert has started or after an alert has
-ended.  This is controlled via the "Pre-Alert" and "Post-Alert" times in an
-alert configuration, respectively, which are specified in hours.  For a new
-configuration, the default pre-alert time is 6 hours, and the default post-
-alert time is 0 hours (meaning no message will be posted after the alert
-expires).  These can be changed for each alert configuration, and can also be
-changed for each alert from the Alert Tab.
-
-### Auto Deploy
-
-An alert configuration can be flagged to automatically deploy when it is matched
-with an incoming alert.  In this case, operator approval is not required, and
-signs will be deployed with no intervention.
+A quick message can contain DMS [action tags], since alerts are deployed as
+action plans.  Specifically, the [time action tag] is useful for displaying the
+the alert start or end time as part of a message.
 
 ## Operating the System
 
@@ -216,7 +220,7 @@ corner of the interface.  Clicking this button will open a menu containing
 pending alerts, and selecting one will open the Alert tab and select the
 corresponding alert.
 
-The "Attention" button will continue to blink until the alert has changes from
+The "Attention" button will continue to blink until the alert has changed from
 pending mode.
 
 ## Testing the System
@@ -249,10 +253,14 @@ real alert.  Note that in a production environment this may activate real signs,
 so care must be taken to ensure the testing is done in a controlled manner.
 
 
+[action tags]: action_plans.html#dms-action-tags
 [alert configurations]: #alert-configurations
+[comm config]: comm_links.html#comm-config
 [comm link]: comm_links.html
 [controller]: controllers.html
 [DateTimeFormatter]: https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
 [CAP]: http://docs.oasis-open.org/emergency/cap/v1.2/CAP-v1.2.html
 [IPAWS]: https://www.fema.gov/emergency-managers/practitioners/integrated-public-alert-warning-system
 [Public Forecast Zones]: https://www.weather.gov/gis/PublicZones
+[quick message]: dms.html#quick-messages
+[time action tag]: action_plans.html#time-action-tag
