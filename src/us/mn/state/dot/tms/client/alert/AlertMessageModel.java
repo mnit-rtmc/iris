@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import static us.mn.state.dot.tms.client.widget.IOptionPane.showHint;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * Table model for alert config messages.
@@ -115,6 +116,8 @@ public class AlertMessageModel extends ProxyTableModel<AlertMessage> {
 				return Integer.compare(a.ordinal(), b.ordinal());
 			}
 		});
+		sorter.setComparator(1,
+			new NumericAlphaComparator<QuickMessage>());
 		ArrayList<RowSorter.SortKey> keys =
 			new ArrayList<RowSorter.SortKey>();
 		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
