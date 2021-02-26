@@ -166,6 +166,7 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 [beacon]: beacons.html
 [camera]: cameras.html
 [ClearGuide]: clearguide.html
+[DateTimeFormatter]: https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
 [DMS]: dms.html
 [Msg-Feed]: comm_links.html#msg-feed
 [MULTI]: dms.html#multi

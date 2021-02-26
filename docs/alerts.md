@@ -1,44 +1,37 @@
 # Alerts and Warnings
 
 IRIS can poll weather and other emergency alerts from feeds using the Common
-Alerting Protocol [CAP], and automatically post messages on Dynamic Message
-Signs (DMS).
-
-In the US, the system operated by the Federal Emergency Management Agency (FEMA)
-is called Integrated Public Alert and Warning System [IPAWS].  Use of this
-system requires access to the IPAWS Open Platform for Emergency Networks
-(IPAWS-OPEN), which must be approved by FEMA.  This system was largely designed
-to post messages relating to weather alerts issued by the National Weather
-Service, however it is possible to use the system to post information for other
-alert types in IRIS by creating the proper [alert configuration].
-
-IPAWS collects a wide variety of public alerts and warnings that originate from
-over 1,500 alerting authorities.  As only a subset of these will typically be
-of interest to a particular organization, IRIS provides a detailed framework
-for configuring the response to each alert.
+Alerting Protocol [CAP], and post messages on Dynamic Message Signs (DMS).
 
 When configured properly, the system will perform the following functions:
 
-1. Poll a feed and parse the Common Alerting Protocol (CAP) XML information.
+1. Poll a feed and parse the CAP alerts.
 2. Process alerts with configured event types.
 3. Identify DMS within the alert area.
-4. Generate DMS messages based on predefined message templates.
-5. Post messages to signs automatically or after operator approval.
-6. Update messages on signs when alerts become active, expire, or when changes
-   are issued by the alerting authority automatically or with minimal operator
-   interaction.
-7. Automatically remove messages from signs after an alert expires.
+4. Post messages to signs.
+5. Update messages on signs when alerts become active, expire, or when changes
+   are issued by the alerting authority.
+6. Remove messages from signs after an alert expires.
 
 The system can operate in either automatic mode, where alert messages are
-posted with no human interaction, or in approval mode, where operator approval
-is required before messages are posted or updated.  The alert system is managed
+posted with no human interaction, or in approval mode, where an operator must
+confirm messages before they are posted or updated.  The alert system is managed
 from the "Alert" tab and other dialogs and system attributes.
 
-## Obtaining Access
+## IPAWS
 
-Access to IPAWS-OPEN is managed by FEMA, requiring approval by the agency and
-a signed Memorandum of Understanding (MOU). Each organization running IRIS must
-obtain their own authorization and may not share it with other organizations.
+In the US, the Integrated Public Alert and Warning System [IPAWS] collects and
+distributes a wide variety of public alerts and warnings that originate from
+over 1,500 alerting authorities.  The most common alerts are weather related,
+and are issued by the National Weather Service.
+
+### Obtaining Access
+
+The IPAWS Open Platform for Emergency Networks (IPAWS-OPEN) is operated by the
+Federal Emergency Management Agency (FEMA).  Access to IPAWS-OPEN is managed by
+FEMA, requiring approval by the agency and a signed Memorandum of Understanding
+(MOU).  Each organization running IRIS must obtain their own authorization and
+may not share it with other organizations.
 
 The authorization process can be initiated by sending a request to
 [IPAWS@FEMA.DHS.GOV](mailto:IPAWS@FEMA.DHS.GOV), after which the IPAWS Program
@@ -46,12 +39,12 @@ Office will send the necessary forms for completion. After the completed forms
 have been returned, an MOU will be provided for signature. Once the signed MOU
 has been executed, the URL required to access IPAWS-OPEN will be provided.
 
-## Setting Up CAP Interface
+## CAP Feed
 
-The IPAWS-OPEN interface is configured via a [comm link].  The [comm config]
-must use the `CAP` protocol, with a `timeout` of 8 seconds and `idle disconnect` 
-time of 10 seconds.  A polling period of 60 seconds is recommended, but you may
-use longer periods if desired.
+A CAP feed is configured via a [comm link].  The [comm config] must use the
+`CAP` protocol, with a `timeout` of 8 seconds and `idle disconnect` time of 10
+seconds.  A polling period of 60 seconds is recommended, but you may use longer
+periods if desired.
 
 The `comm link` must contain the URL for a valid CAP feed.  For IPAWS-OPEN, the
 `path` ends with `recent/`, followed by a date/time stamp.  IRIS will add the
@@ -63,7 +56,7 @@ With polling enabled and the controller in active condition, IRIS will poll the
 URL provided at the configured polling period.  Each polling cycle will check
 for new or updated alerts, parse and process them to determine if they are
 relevant and, if appropriate, create messages for deployment.  This processing
-is controlled by [alert configurations](#alert-configurations).
+is controlled by [alert configuration](#alert-configuration)s.
 
 ## Forecast Zones
 
@@ -84,7 +77,11 @@ it is important to keep them updated.  Administrators should keep records of
 when this information was last updated and maintain the latest information in
 the database.
 
-## Alert Configurations
+## Alert Configuration
+
+As only a subset of alerts will typically be of interest to a particular
+organization, IRIS provides a detailed framework for configuring the response to
+each alert.
 
 Select the `View ➔ Alerts ➔ Alert Configurations` menu item.
 
@@ -254,11 +251,10 @@ so care must be taken to ensure the testing is done in a controlled manner.
 
 
 [action tags]: action_plans.html#dms-action-tags
-[alert configurations]: #alert-configurations
+[alert configuration]: #alert-configuration
 [comm config]: comm_links.html#comm-config
 [comm link]: comm_links.html
 [controller]: controllers.html
-[DateTimeFormatter]: https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
 [CAP]: http://docs.oasis-open.org/emergency/cap/v1.2/CAP-v1.2.html
 [IPAWS]: https://www.fema.gov/emergency-managers/practitioners/integrated-public-alert-warning-system
 [Public Forecast Zones]: https://www.weather.gov/gis/PublicZones
