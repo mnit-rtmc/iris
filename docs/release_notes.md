@@ -1,5 +1,11 @@
 # IRIS 5.x Release Notes
 
+5.21.0 (26 Feb 2021)
+ - Reworked alert configuration (IPAWS)
+ - Added `[ta]` DMS action tag (scheduled time actions)
+ - Improved sign config names
+ - Added sign group form to make it easier to manage members
+
 5.20.0 (12 Feb 2021)
  - Reworked alert processing and user interface (IPAWS)
  - Added ClearGuide protocol driver (contributed by Iteris)
