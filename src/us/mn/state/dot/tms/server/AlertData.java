@@ -83,13 +83,15 @@ public class AlertData {
 		throws JSONException
 	{
 		CapEvent ev = CapEvent.fromDescription(info.getString("event"));
-		JSONArray codes = info.getJSONArray("eventCode");
-		for (int i = 0; i < codes.length(); i++) {
-			JSONObject code = codes.getJSONObject(i);
-			String value = code.getString("value");
-			CapEvent cev = CapEvent.fromCode(value);
-			if (ev == null || ev == cev)
-				return cev;
+		if (info.has("eventCode")) {
+			JSONArray codes = info.getJSONArray("eventCode");
+			for (int i = 0; i < codes.length(); i++) {
+				JSONObject code = codes.getJSONObject(i);
+				String value = code.getString("value");
+				CapEvent cev = CapEvent.fromCode(value);
+				if (ev == null || ev == cev)
+					return cev;
+			}
 		}
 		return ev;
 	}
@@ -149,10 +151,12 @@ public class AlertData {
 	static private String getAreaDesc(JSONObject info)
 		throws JSONException
 	{
-		JSONArray areas = info.getJSONArray("area");
-		for (int i = 0; i < areas.length(); i++) {
-			JSONObject area = areas.getJSONObject(i);
-			return area.getString("areaDesc");
+		if (info.has("area")) {
+			JSONArray areas = info.getJSONArray("area");
+			for (int i = 0; i < areas.length(); i++) {
+				JSONObject area = areas.getJSONObject(i);
+				return area.getString("areaDesc");
+			}
 		}
 		return null;
 	}
@@ -162,9 +166,11 @@ public class AlertData {
 		throws JSONException, SQLException, TMSException
 	{
 		ArrayList<Polygon> polys = new ArrayList<Polygon>();
-		JSONArray areas = info.getJSONArray("area");
-		for (int i = 0; i < areas.length(); i++)
-			createPolygons(areas.getJSONObject(i), polys);
+		if (info.has("area")) {
+			JSONArray areas = info.getJSONArray("area");
+			for (int i = 0; i < areas.length(); i++)
+				createPolygons(areas.getJSONObject(i), polys);
+		}
 		return polys.size() > 0
 		      ? new MultiPolygon(polys.toArray(new Polygon[0]))
 		      : null;
@@ -364,9 +370,9 @@ public class AlertData {
 		certainty = CapCertainty.fromValue(info.getString("certainty"));
 		start_date = getStartDate(info, sent);
 		end_date = getEndDate(info);
-		headline = info.getString("headline");
-		description = info.getString("description");
-		instruction = info.getString("instruction");
+		headline = info.optString("headline", "");
+		description = info.optString("description", "");
+		instruction = info.optString("instruction", "");
 		area_desc = getAreaDesc(info);
 		geo_poly = createPolygons(info);
 		if (geo_poly != null) {
