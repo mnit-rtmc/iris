@@ -296,6 +296,10 @@ public class ClearGuideProperty extends ControllerProperty {
 
 	/** Get credentials as a string or null on error */
 	private String getCreds() {
+		if (auth_uname == null || auth_pword == null) {
+			log("getCreds: username/password null");
+			return null;
+		}
 		StringBuffer sb = new StringBuffer();
 		sb.append("username=");
 		try {
