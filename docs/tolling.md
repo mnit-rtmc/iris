@@ -83,5 +83,7 @@ These records are purged automatically when older than the value of the
 
 
 [action tag]: action_plans.html#dms-action-tags
+[DMS actions]: action_plans.html#dms-actions
+[quick message]: dms.html#quick-messages
 [station]: road_topology.html#r_node-types
 [system attribute]: system_attributes.html

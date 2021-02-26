@@ -28,10 +28,10 @@ and are issued by the National Weather Service.
 ### Obtaining Access
 
 The IPAWS Open Platform for Emergency Networks (IPAWS-OPEN) is operated by the
-Federal Emergency Management Agency (FEMA).  Access to IPAWS-OPEN is managed by
-FEMA, requiring approval by the agency and a signed Memorandum of Understanding
-(MOU).  Each organization running IRIS must obtain their own authorization and
-may not share it with other organizations.
+Federal Emergency Management Agency (FEMA).  Obtaining access requires approval
+by the agency and a signed Memorandum of Understanding (MOU).  Each organization
+running IRIS must obtain their own authorization and may not share it with other
+organizations.
 
 The authorization process can be initiated by sending a request to
 [IPAWS@FEMA.DHS.GOV](mailto:IPAWS@FEMA.DHS.GOV), after which the IPAWS Program
