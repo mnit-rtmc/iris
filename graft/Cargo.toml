@@ -5,6 +5,7 @@ authors = ["Douglas Lau <doug.lau@state.mn.us>"]
 edition = "2018"
 
 [dependencies]
+anyhow = "1.0"
 async-std = "1.5"
 rustls = { version="0.19", features=["dangerous_configuration"] }
 webpki = "0.21"
