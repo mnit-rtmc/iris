@@ -588,7 +588,8 @@ public class AlertData {
 				: null;
 			if (sc != null && !act_groups.containsKey(sc)) {
 				SignGroup sg = makeActiveGroup(plan, sc);
-				act_groups.put(sc, sg);
+				if (sg != null)
+					act_groups.put(sc, sg);
 			}
 		}
 		return act_groups;
@@ -599,8 +600,12 @@ public class AlertData {
 		throws SonarException
 	{
 		Set<DMS> signs = SignConfigHelper.getAllSigns(sc);
-		signs.retainAll(auto_dms);
-		return createSignGroup(plan, "ACT", signs);
+		signs.retainAll(all_dms);
+		if (!signs.isEmpty()) {
+			signs.retainAll(auto_dms);
+			return createSignGroup(plan, "ACT", signs);
+		} else
+			return null;
 	}
 
 	/** Create a sign group for an action plan */
