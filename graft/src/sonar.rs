@@ -197,8 +197,21 @@ impl Connection {
                     self.consume(c);
                     return r;
                 }
-                None => self.read().await?,
+                None => io::timeout(self.timeout, self.read()).await?,
             }
+        }
+    }
+
+    /// Check for an error message from the server
+    async fn check_error(&mut self) -> Result<()> {
+        match io::timeout(Duration::from_millis(10), self.read()).await {
+            Err(ref e) if e.kind() == io::ErrorKind::TimedOut => Ok(()),
+            Err(e) => Err(e),
+            Ok(()) => Ok(()),
+        }?;
+        match Message::decode(self.received()) {
+            Some((res, _c)) => bail!("{:?}", res),
+            None => Ok(()),
         }
     }
 
@@ -219,12 +232,9 @@ impl Connection {
     }
 
     /// Read data from the server
-    async fn read(&mut self) -> Result<()> {
+    async fn read(&mut self) -> io::Result<()> {
         let offset = self.offset;
-        self.count += io::timeout(self.timeout, async {
-            self.tls_stream.read(&mut self.buf[offset..]).await
-        })
-        .await?;
+        self.count += self.tls_stream.read(&mut self.buf[offset..]).await?;
         Ok(())
     }
 
@@ -254,12 +264,8 @@ impl Connection {
     pub async fn create_object(&mut self, nm: &str) -> Result<()> {
         let mut buf = vec![];
         Message::Object(nm).encode(&mut buf);
+        self.check_error().await?;
         self.send(&buf[..]).await?;
-        self.recv(|m| match m {
-            Message::Show(txt) => bail!("{}", txt),
-            _ => Ok(()),
-        })
-        .await?;
         Ok(())
     }
 
@@ -267,12 +273,8 @@ impl Connection {
     pub async fn remove_object(&mut self, nm: &str) -> Result<()> {
         let mut buf = vec![];
         Message::Remove(nm).encode(&mut buf);
+        self.check_error().await?;
         self.send(&buf[..]).await?;
-        self.recv(|m| match m {
-            Message::Show(txt) => bail!("{}", txt),
-            _ => Ok(()),
-        })
-        .await?;
         Ok(())
     }
 }

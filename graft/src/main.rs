@@ -10,7 +10,10 @@ fn main() -> Result<()> {
         let mut c = sonar::Connection::new(HOST, 1037).await?;
         let msg = c.login("admin", "atms_242").await?;
         println!("Logged in from {}", msg);
-        c.create_object("comm_config/test").await?;
-        c.remove_object("comm_config/test").await
+        let nm = "comm_config/test";
+        println!("creating {}", nm);
+        c.create_object(nm).await?;
+        println!("removing {}", nm);
+        c.remove_object(nm).await
     })
 }
