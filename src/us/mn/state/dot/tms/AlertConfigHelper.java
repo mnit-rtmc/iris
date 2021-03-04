@@ -64,8 +64,9 @@ public class AlertConfigHelper extends BaseHelper {
 		while (it.hasNext()) {
 			AlertConfig cfg = it.next();
 			CapEvent event = CapEvent.fromCode(cfg.getEvent());
-			if (checkResponse(cfg, rt) && checkUrgency(cfg, urg) &&
-			    checkSeverity(cfg, sev) && checkCertainty(cfg, cer))
+			if (event == ev && checkResponse(cfg, rt) &&
+			    checkUrgency(cfg, urg) && checkSeverity(cfg, sev) &&
+			    checkCertainty(cfg, cer))
 				cfgs.add(cfg);
 		}
 		return cfgs;
