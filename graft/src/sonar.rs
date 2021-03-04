@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use async_std::io;
 use async_std::net::{TcpStream, ToSocketAddrs};
 use async_std::prelude::*;
@@ -29,26 +29,39 @@ impl ServerCertVerifier for Verifier {
 #[allow(dead_code)]
 #[derive(Debug)]
 pub enum Message<'a> {
+    /// Client login request
     Login(&'a str, &'a str),
+    /// Client quit request
     Quit(),
+    /// Client enumerate request
     Enumerate(&'a str),
+    /// Client ignore request
     Ignore(&'a str),
+    /// Client password change request
     Password(&'a str, &'a str),
+    /// Object create request (client) / list (server)
     Object(&'a str),
+    /// Attribute set request (client) / change (server)
     Attribute(&'a str, &'a str),
+    /// Object remove request (client) / change (server)
     Remove(&'a str),
+    /// Server type change
     Type(&'a str),
+    /// Server show message
     Show(&'a str),
 }
 
+/// Connection to a sonar server
 pub struct Connection {
     tls_stream: TlsStream<TcpStream>,
+    timeout: Duration,
     buf: Vec<u8>,
     offset: usize,
     count: usize,
 }
 
 impl<'a> Message<'a> {
+    /// Decode message in a buffer
     pub fn decode(buf: &'a [u8]) -> Option<(Self, usize)> {
         if let Some(rec_sep) = buf.iter().position(|b| *b == b'\x1E') {
             if let Some(msg) = Self::decode_one(&buf[..rec_sep]) {
@@ -58,6 +71,7 @@ impl<'a> Message<'a> {
         None
     }
 
+    /// Decode one message
     fn decode_one(buf: &'a [u8]) -> Option<Self> {
         let msg: Vec<&[u8]> = buf.split(|b| *b == b'\x1F').collect();
         if msg.len() < 1 {
@@ -65,24 +79,33 @@ impl<'a> Message<'a> {
         }
         let code = msg[0];
         match code {
-            b"l" if msg.len() == 3 => {
-                let name = std::str::from_utf8(msg[1]).unwrap();
-                let pword = std::str::from_utf8(msg[2]).unwrap();
-                Some(Message::Login(name, pword))
+            b"s" if msg.len() == 2 => {
+                let txt = std::str::from_utf8(msg[1]).unwrap();
+                Some(Message::Show(txt))
             }
             b"t" if msg.len() == 1 => Some(Message::Type("")),
             b"t" if msg.len() == 2 => {
                 let nm = std::str::from_utf8(msg[1]).unwrap();
                 Some(Message::Type(nm))
             }
-            b"s" if msg.len() == 2 => {
-                let txt = std::str::from_utf8(msg[1]).unwrap();
-                Some(Message::Show(txt))
+            b"o" if msg.len() == 2 => {
+                let nm = std::str::from_utf8(msg[1]).unwrap();
+                Some(Message::Object(nm))
+            }
+            b"a" if msg.len() == 3 => {
+                let nm = std::str::from_utf8(msg[1]).unwrap();
+                let a = std::str::from_utf8(msg[2]).unwrap();
+                Some(Message::Attribute(nm, a))
+            }
+            b"r" if msg.len() == 2 => {
+                let nm = std::str::from_utf8(msg[1]).unwrap();
+                Some(Message::Remove(nm))
             }
             _ => None,
         }
     }
 
+    /// Encode the message to a buffer
     pub fn encode(&'a self, buf: &mut Vec<u8>) {
         match self {
             Message::Login(name, pword) => {
@@ -110,11 +133,6 @@ impl<'a> Message<'a> {
                 buf.push(b'\x1F');
                 buf.extend(nm.as_bytes());
             }
-            Message::Type(nm) => {
-                buf.push(b't');
-                buf.push(b'\x1F');
-                buf.extend(nm.as_bytes());
-            }
             Message::Object(nm) => {
                 buf.push(b'o');
                 buf.push(b'\x1F');
@@ -132,17 +150,14 @@ impl<'a> Message<'a> {
                 buf.push(b'\x1F');
                 buf.extend(nm.as_bytes());
             }
-            Message::Show(msg) => {
-                buf.push(b's');
-                buf.push(b'\x1F');
-                buf.extend(msg.as_bytes());
-            }
+            _ => unimplemented!(),
         }
         buf.push(b'\x1E');
     }
 }
 
 impl Connection {
+    /// Create a new connection to a sonar server
     pub async fn new(host: &str, port: u16) -> Result<Self> {
         let addr = (host, port)
             .to_socket_addrs()
@@ -157,42 +172,107 @@ impl Connection {
         let tls_stream = connector.connect(host, tcp_stream).await?;
         Ok(Connection {
             tls_stream,
+            timeout: Duration::from_secs(5),
             buf: vec![0; 32768],
             offset: 0,
             count: 0,
         })
     }
 
+    /// Send a message to the server
     pub async fn send(&mut self, req: &[u8]) -> Result<()> {
         self.tls_stream.write_all(req).await?;
         Ok(())
     }
 
-    pub async fn recv(
-        &mut self,
-        callback: fn(Message) -> Result<()>,
-    ) -> Result<()> {
+    /// Receive a message from the server
+    pub async fn recv<F>(&mut self, mut callback: F) -> Result<()>
+    where
+        F: FnMut(Message) -> Result<()>,
+    {
         loop {
-            let buf = &self.buf[self.offset..self.offset + self.count];
-            match Message::decode(&buf) {
+            match Message::decode(self.received()) {
                 Some((res, c)) => {
-                    callback(res)?;
-                    self.count -= c;
-                    if self.count > 0 {
-                        self.offset += c + 1;
-                    } else {
-                        self.offset = 0;
-                    }
-                    return Ok(());
+                    let r = callback(res);
+                    self.consume(c);
+                    return r;
                 }
-                None => {
-                    let offset = self.offset;
-                    self.count += io::timeout(Duration::from_secs(5), async {
-                        self.tls_stream.read(&mut self.buf[offset..]).await
-                    })
-                    .await?;
-                }
+                None => self.read().await?,
             }
         }
+    }
+
+    /// Get buffer of received data
+    fn received(&self) -> &[u8] {
+        &self.buf[self.offset..self.offset + self.count]
+    }
+
+    /// Consume buffered data
+    fn consume(&mut self, c: usize) {
+        if c < self.count {
+            self.count -= c;
+            self.offset += c + 1;
+        } else {
+            self.count = 0;
+            self.offset = 0;
+        }
+    }
+
+    /// Read data from the server
+    async fn read(&mut self) -> Result<()> {
+        let offset = self.offset;
+        self.count += io::timeout(self.timeout, async {
+            self.tls_stream.read(&mut self.buf[offset..]).await
+        })
+        .await?;
+        Ok(())
+    }
+
+    /// Login to the server
+    pub async fn login(&mut self, name: &str, pword: &str) -> Result<String> {
+        let mut msg = String::new();
+        let mut buf = vec![];
+        Message::Login(name, pword).encode(&mut buf);
+        self.send(&buf[..]).await?;
+        self.recv(|m| match m {
+            Message::Type("") => Ok(()),
+            _ => bail!("Expected `Type` message"),
+        })
+        .await?;
+        self.recv(|m| match m {
+            Message::Show(txt) => {
+                msg.push_str(txt);
+                Ok(())
+            }
+            _ => bail!("Expected `Show` message"),
+        })
+        .await?;
+        Ok(msg)
+    }
+
+    /// Create an object
+    pub async fn create_object(&mut self, nm: &str) -> Result<()> {
+        let mut buf = vec![];
+        Message::Object(nm).encode(&mut buf);
+        self.send(&buf[..]).await?;
+        self.recv(|m| match m {
+            Message::Show(txt) => bail!("{}", txt),
+            _ => Ok(()),
+        })
+        .await?;
+        Ok(())
+    }
+
+    /// Remove an object
+    pub async fn remove_object(&mut self, nm: &str) -> Result<()> {
+        let mut buf = vec![];
+        Message::Remove(nm).encode(&mut buf);
+        self.send(&buf[..]).await?;
+        self.recv(|m| match m {
+            Message::Show(txt) => bail!("{}", txt),
+            _ => Ok(()),
+        })
+        .await?;
+        Ok(())
     }
 }
