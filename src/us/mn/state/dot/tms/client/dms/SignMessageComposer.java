@@ -1,7 +1,8 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2019  Minnesota Department of Transportation
- * Copyright (C) 2009-2014  AHMCT, University of California
+ * Copyright (C) 2008-2014  AHMCT, University of California
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,6 +67,9 @@ public class SignMessageComposer extends JPanel {
 
 	/** Default font number */
 	private int default_font = FontHelper.DEFAULT_FONT_NUM;
+
+	/** Exclude font number */
+	private int exclude_font = -1;
 
 	/** Sign text model for the selected sign */
 	private SignTextModel st_model;
@@ -183,6 +187,7 @@ public class SignMessageComposer extends JPanel {
 		n_lines = DMSHelper.getLineCount(proxy);
 		n_pages = calculateSignPages(stm);
 		default_font = DMSHelper.getDefaultFontNumber(proxy);
+		exclude_font = DMSHelper.getExcludeFontNumber(proxy);
 		initializeWidgets();
 		for (ComposerPagePanel pg: pages) {
 			pg.setModels(stm);

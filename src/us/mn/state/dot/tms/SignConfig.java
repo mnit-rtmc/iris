@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2016-2019  Minnesota Department of Transportation
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +21,7 @@ import us.mn.state.dot.sonar.SonarObject;
  * A sign configuration defines the dimensions of a sign.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public interface SignConfig extends SonarObject {
 
@@ -70,4 +72,10 @@ public interface SignConfig extends SonarObject {
 
 	/** Get the default font */
 	Font getDefaultFont();
+
+	/** Set the exclude font */
+	void setExcludeFont(Font f);
+
+	/** Get the exclude font */
+	Font getExcludeFont();
 }

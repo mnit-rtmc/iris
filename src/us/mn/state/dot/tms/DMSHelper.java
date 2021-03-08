@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2019  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -154,6 +155,24 @@ public class DMSHelper extends BaseHelper {
 			SignConfig sc = dms.getSignConfig();
 			if (sc != null)
 				return sc.getDefaultFont();
+		}
+		return null;
+	}
+
+	/** Get the exclude font number for a DMS
+	 * @return Exclude font number or -1 if not found */
+	static public int getExcludeFontNumber(DMS dms) {
+		Font f = getExcludeFont(dms);
+		return (f != null) ? f.getNumber() : -1;
+	}
+
+	/** Get the exclude font for a DMS
+	 * @return Exclude font or null if not found */
+	static public Font getExcludeFont(DMS dms) {
+		if (dms != null) {
+			SignConfig sc = dms.getSignConfig();
+			if (sc != null)
+				return sc.getExcludeFont();
 		}
 		return null;
 	}
