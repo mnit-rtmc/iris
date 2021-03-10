@@ -2509,7 +2509,8 @@ CREATE TABLE iris.sign_config (
 	monochrome_foreground INTEGER NOT NULL,
 	monochrome_background INTEGER NOT NULL,
 	color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
-	default_font VARCHAR(16) REFERENCES iris.font
+	default_font VARCHAR(16) REFERENCES iris.font,
+	exclude_font VARCHAR(16) REFERENCES iris.font
 );
 
 CREATE TRIGGER sign_config_notify_trig
@@ -2520,7 +2521,7 @@ CREATE VIEW sign_config_view AS
 	SELECT name, face_width, face_height, border_horiz, border_vert,
 	       pitch_horiz, pitch_vert, pixel_width, pixel_height, char_width,
 	       char_height, monochrome_foreground, monochrome_background,
-	       cs.description AS color_scheme, default_font
+	       cs.description AS color_scheme, default_font, exclude_font
 	FROM iris.sign_config
 	JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
 GRANT SELECT ON sign_config_view TO PUBLIC;
@@ -2816,7 +2817,7 @@ CREATE VIEW dms_view AS
 	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
 	       d.static_graphic, dp.description AS purpose, d.hidden, d.beacon,
 	       p.camera, p.preset_num, d.sign_config, d.sign_detail,
-	       default_font, override_font, override_foreground,
+	       default_font, exclude_font, override_font, override_foreground,
 	       override_background, msg_sched, msg_current, expire_time,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.landmark, l.lat, l.lon, l.corridor, l.location
