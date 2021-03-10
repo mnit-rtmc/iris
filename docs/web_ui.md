@@ -52,7 +52,7 @@ This document tracks progress on the web-based user interface for IRIS.
   - [ ] Add controller pages
   - [ ] Send SSE for update notifications
 * bulb
-  - [ ] Connect to honeybee for SSE
+  - [ ] Connect to graft for SSE
 
 ## Phase 4 — DMS control
 
