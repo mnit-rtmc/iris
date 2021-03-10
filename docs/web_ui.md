@@ -9,8 +9,11 @@ This document tracks progress on the web-based user interface for IRIS.
 - **earthwyrm** — [Earthwyrm] is a web mapping service for [MVT], or Mapbox
   Vector Tiles.  Layers can be made from [OpenStreetMap] data in addition to
   IRIS devices, such as DMS.
-- **honeybee** — Honeybee is a web service for JSON data in addition to rendered
-  GIF images of DMS.  It is included in the IRIS repository.
+- **honeybee** — Honeybee is a service for public JSON endpoints in addition to
+  rendered GIF images of DMS.  It is included in the IRIS repository.
+- **graft** — Graft is a web service for handling authenticated endpoints,
+  including non-public data and writable data.  It is included in the IRIS
+  repository.
 - **bulb** — Bulb is the web front-end for IRIS.  The mapping portion uses the
   [Leaflet] JavaScript library.  The rest of the code is written in Rust,
   compiled as WebAssembly.
@@ -34,16 +37,16 @@ This document tracks progress on the web-based user interface for IRIS.
 
 ## Phase 2 — Authentication
 
-* honeybee
-  - [ ] Turn into web service (actix-web)
-  - [ ] Connect to IRIS server with sonar
+* graft
+  - [X] Connect to IRIS server with sonar
+  - [ ] Add web service using tide
   - [ ] Authentication endpoint using tokens
 * bulb
   - [ ] Handle authentication page
 
 ## Phase 3 — Comm Link Administation
 
-* honeybee
+* graft
   - [ ] Add comm config pages
   - [ ] Add comm link pages
   - [ ] Add controller pages
@@ -56,6 +59,7 @@ This document tracks progress on the web-based user interface for IRIS.
 * honeybee
   - [X] Generate GIF images for DMS
   - [ ] Generate DMS map layer in earthwyrm DB
+* graft
   - [ ] Add endpoints for controlling DMS
 * bulb
   - [ ] UI for DMS viewing / control

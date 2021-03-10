@@ -11,9 +11,10 @@ fn main() -> Result<()> {
         let msg = c.login("admin", "atms_242").await?;
         println!("Logged in from {}", msg);
         let nm = "comm_config/test";
-        println!("creating {}", nm);
         c.create_object(nm).await?;
-        println!("removing {}", nm);
-        c.remove_object(nm).await
+        println!("created {}", nm);
+        c.remove_object(nm).await?;
+        println!("removed {}", nm);
+        Ok(())
     })
 }

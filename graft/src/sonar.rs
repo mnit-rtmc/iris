@@ -246,6 +246,7 @@ impl Connection {
         self.send(&buf[..]).await?;
         self.recv(|m| match m {
             Message::Type("") => Ok(()),
+            Message::Show(txt) => bail!("{}", txt),
             _ => bail!("Expected `Type` message"),
         })
         .await?;
