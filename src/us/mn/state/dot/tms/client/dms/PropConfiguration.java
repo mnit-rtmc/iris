@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +41,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * form.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class PropConfiguration extends IPanel {
 
@@ -141,6 +143,9 @@ public class PropConfiguration extends IPanel {
 	/** Font height label */
 	private final JLabel font_height_lbl = IPanel.createValueLabel();
 
+	/** Exclude font combo box */
+	private final JComboBox<Font> ex_font_cbx = new JComboBox<Font>();
+
 	/** User session */
 	private final Session session;
 
@@ -187,6 +192,8 @@ public class PropConfiguration extends IPanel {
 		add(font_cbx, Stretch.LAST);
 		add("dms.font.height");
 		add(font_height_lbl, Stretch.LAST);
+		add("dms.font.exclude");
+		add(ex_font_cbx, Stretch.LAST);
 		font_cbx.setAction(new IAction("font") {
 			protected void doActionPerformed(ActionEvent e) {
 				config.setDefaultFont(
@@ -195,12 +202,21 @@ public class PropConfiguration extends IPanel {
 		});
 		font_cbx.setModel(new IComboBoxModel<Font>(
 			session.getSonarState().getDmsCache().getFontModel()));
+		ex_font_cbx.setAction(new IAction(null) {
+			protected void doActionPerformed(ActionEvent e) {
+				config.setExcludeFont(
+					(Font) ex_font_cbx.getSelectedItem());
+			}
+		});
+		ex_font_cbx.setModel(new IComboBoxModel<Font>(
+			session.getSonarState().getDmsCache().getFontModel()));
 		updateAttribute(null);
 	}
 
 	/** Update the edit mode */
 	public void updateEditMode() {
 		font_cbx.setEnabled(canWrite("defaultFont"));
+		ex_font_cbx.setEnabled(canWrite("excludeFont"));
 	}
 
 	/** Update one attribute on the form tab */
@@ -233,6 +249,8 @@ public class PropConfiguration extends IPanel {
 			font_cbx.setSelectedItem(sc.getDefaultFont());
 			font_height_lbl.setText(calculateFontHeight());
 		}
+		if (null == a || a.equals("excludeFont"))
+			ex_font_cbx.setSelectedItem(sc.getExcludeFont());
 	}
 
 	/** Calculate the height of the default font on the sign */
