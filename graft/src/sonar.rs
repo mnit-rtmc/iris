@@ -278,4 +278,35 @@ impl Connection {
         self.send(&buf[..]).await?;
         Ok(())
     }
+
+    /// Enumerate an object
+    pub async fn enumerate_object<F>(
+        &mut self,
+        nm: &str,
+        mut callback: F,
+    ) -> Result<()>
+    where
+        F: FnMut(&str, &str) -> Result<()>,
+    {
+        let mut buf = vec![];
+        Message::Enumerate(nm).encode(&mut buf);
+        self.check_error().await?;
+        self.send(&buf[..]).await?;
+        let mut done = false;
+        while !done {
+            self.recv(|m| match m {
+                Message::Attribute(attr, v) => {
+                    let att = attr.rsplit('/').nth(0).unwrap();
+                    callback(att, v)
+                }
+                Message::Object(_) => {
+                    done = true;
+                    Ok(())
+                }
+                _ => bail!("Unexpected message: {:?}", m),
+            })
+            .await?;
+        }
+        Ok(())
+    }
 }

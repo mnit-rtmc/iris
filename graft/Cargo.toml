@@ -6,8 +6,11 @@ edition = "2018"
 
 [dependencies]
 anyhow = "1.0"
-async-std = "1.5"
+async-std = { version="1.8", features=["attributes"] }
+convert_case = "0.4"
+json = "0.12"
 rustls = { version="0.19", features=["dangerous_configuration"] }
+tide = "0.16"
 webpki = "0.21"
 
 [dependencies.async-tls]

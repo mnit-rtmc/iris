@@ -39,7 +39,7 @@ This document tracks progress on the web-based user interface for IRIS.
 
 * graft
   - [X] Connect to IRIS server with sonar
-  - [ ] Add web service using tide
+  - [X] Add web service using tide
   - [ ] Authentication endpoint using tokens
 * bulb
   - [ ] Handle authentication page
