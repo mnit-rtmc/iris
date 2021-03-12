@@ -781,6 +781,7 @@ dependencies = [
  "convert_case",
  "json",
  "rustls",
+ "thiserror",
  "tide",
  "webpki",
 ]

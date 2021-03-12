@@ -1,4 +1,3 @@
-use anyhow::{bail, Result};
 use async_std::io;
 use async_std::net::{TcpStream, ToSocketAddrs};
 use async_std::prelude::*;
@@ -9,7 +8,24 @@ use rustls::{
 };
 use std::sync::Arc;
 use std::time::Duration;
+use thiserror::Error;
 use webpki::DNSNameRef;
+
+#[derive(Debug, Error)]
+pub enum SonarError {
+    #[error("unexpected response")]
+    UnexpectedResponse,
+    #[error("unexpected message")]
+    UnexpectedMessage,
+    #[error("{0}")]
+    Msg(String),
+    #[error("I/O {0}")]
+    IO(#[from] std::io::Error),
+    #[error("`name` missing from query")]
+    NameMissing,
+}
+
+pub type Result<T> = std::result::Result<T, SonarError>;
 
 struct Verifier {}
 
@@ -181,7 +197,7 @@ impl Connection {
 
     /// Send a message to the server
     pub async fn send(&mut self, req: &[u8]) -> Result<()> {
-        self.tls_stream.write_all(req).await?;
+        io::timeout(self.timeout, self.tls_stream.write_all(req)).await?;
         Ok(())
     }
 
@@ -210,7 +226,10 @@ impl Connection {
             Ok(()) => Ok(()),
         }?;
         match Message::decode(self.received()) {
-            Some((res, _c)) => bail!("{:?}", res),
+            Some((Message::Show(txt), _)) => {
+                Err(SonarError::Msg(txt.to_string()))
+            }
+            Some((_res, _c)) => Err(SonarError::UnexpectedResponse),
             None => Ok(()),
         }
     }
@@ -246,8 +265,8 @@ impl Connection {
         self.send(&buf[..]).await?;
         self.recv(|m| match m {
             Message::Type("") => Ok(()),
-            Message::Show(txt) => bail!("{}", txt),
-            _ => bail!("Expected `Type` message"),
+            Message::Show(txt) => Err(SonarError::Msg(txt.to_string())),
+            _ => Err(SonarError::UnexpectedMessage),
         })
         .await?;
         self.recv(|m| match m {
@@ -255,7 +274,7 @@ impl Connection {
                 msg.push_str(txt);
                 Ok(())
             }
-            _ => bail!("Expected `Show` message"),
+            _ => Err(SonarError::UnexpectedMessage),
         })
         .await?;
         Ok(msg)
@@ -267,6 +286,7 @@ impl Connection {
         Message::Object(nm).encode(&mut buf);
         self.check_error().await?;
         self.send(&buf[..]).await?;
+        self.check_error().await?;
         Ok(())
     }
 
@@ -303,7 +323,7 @@ impl Connection {
                     done = true;
                     Ok(())
                 }
-                _ => bail!("Unexpected message: {:?}", m),
+                _ => Err(SonarError::UnexpectedMessage),
             })
             .await?;
         }
