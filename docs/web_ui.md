@@ -6,17 +6,15 @@ This document tracks progress on the web-based user interface for IRIS.
 
 ## Major Systems
 
-- **earthwyrm** — [Earthwyrm] is a web mapping service for [MVT], or Mapbox
-  Vector Tiles.  Layers can be made from [OpenStreetMap] data in addition to
-  IRIS devices, such as DMS.
-- **honeybee** — [Honeybee] is a service for public JSON endpoints in addition
-  to rendered GIF images of DMS.  It is included in the IRIS repository.
-- **graft** — [Graft] is a web service for handling authenticated endpoints,
-  including non-public data and writable data.  It is included in the IRIS
-  repository.
-- **bulb** — Bulb is the web front-end for IRIS.  The mapping portion uses the
-  [Leaflet] JavaScript library.  The rest of the code is written in Rust,
-  compiled as WebAssembly.
+- [earthwyrm] — web mapping service for Mapbox Vector Tiles [MVT].  Layers can
+  be made from [OpenStreetMap] data in addition to IRIS devices, such as DMS.
+- [honeybee] — service for generating public JSON endpoints in addition to
+  rendered GIF images of DMS.  It is included in the IRIS repository.
+- [graft] — web service for proxying IRIS sonar objects, used for non-public and
+  and writable values.  It is included in the IRIS repository.
+- [bulb] — the web front-end for IRIS.  The mapping portion uses the [Leaflet]
+  JavaScript library.  The rest of the code is written in Rust, compiled as
+  WebAssembly.
 
 ## Phase 1 — Segment Map
 
@@ -70,6 +68,7 @@ This document tracks progress on the web-based user interface for IRIS.
   - [ ] Write full installation documentation
 
 
+[bulb]: https://github.com/mnit-rtmc/iris/tree/master/bulb
 [earthwyrm]: https://github.com/DougLau/earthwyrm
 [graft]: https://github.com/mnit-rtmc/iris/tree/master/graft
 [honeybee]: https://github.com/mnit-rtmc/iris/tree/master/honeybee
