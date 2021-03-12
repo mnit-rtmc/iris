@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2017  SRF Consulting Group
- * Copyright (C) 2017	    Iteris Inc.
+ * Copyright (C) 2017-2021  Iteris Inc.
  * Copyright (C) 2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
@@ -49,6 +49,7 @@ public enum MIB1204 {
 	      essPrecipitationTwelveHours	(essBufrPrecip, 22),
 	      essPrecipitation24Hours		(essBufrPrecip, 23),
 	    essBufrRadiation			(essBufr, 14),
+	      essTotalSun			(essBufrRadiation, 31),
 	  essNtcip				(ess, 2),
 	    essNtcipIdentification		(essNtcip, 1),
 	      essNtcipCategory			(essNtcipIdentification, 1),
@@ -80,6 +81,9 @@ public enum MIB1204 {
 	          windSensorGustSpeed		(windSensorEntry, 8), // V2
 	          windSensorGustDirection	(windSensorEntry, 9), // V2
 	          windSensorSituation		(windSensorEntry, 10), // V2
+	      windSensorAvgDirectionV2		(essNtcipWind, 4),
+	      windSensorSpotDirectionV2		(essNtcipWind, 5),
+	      windSensorGustDirectionV2		(essNtcipWind, 6),
 	    essNtcipTemperature			(essNtcip, 5),
 	      essNumTemperatureSensors		(essNtcipTemperature, 1),
 	      essTemperatureSensorTable		(essNtcipTemperature, 2),
@@ -101,7 +105,10 @@ public enum MIB1204 {
 	      essIceThickness			(essNtcipPrecip, 7),
 	      essPrecipitationStartTime		(essNtcipPrecip, 8),
 	      essPrecipitationEndTime		(essNtcipPrecip, 9),
+	      precipitationSensorModelInformation(essNtcipPrecip, 10),
+	      waterLevelSensorTableNumSensors	(essNtcipPrecip, 11),
 	    essNtcipRadiation			(essNtcip, 7),
+	      essCloudCoverSituation		(essNtcipRadiation, 1),
 	    essNtcipVisibility			(essNtcip, 8),
 	      essVisibility			(essNtcipVisibility, 1),
 	      essVisibilitySituation		(essNtcipVisibility, 3),
@@ -124,6 +131,10 @@ public enum MIB1204 {
 	          essSurfaceFreezePoint		(essPavementSensorEntry, 13),
 	          essSurfaceBlackIceSignal	(essPavementSensorEntry, 14),
 	          essPavementSensorError	(essPavementSensorEntry, 15),
+	          essSurfaceIceOrWaterDepth	(essPavementSensorEntry, 16),
+	          essSurfaceConductivityV2	(essPavementSensorEntry, 17),
+		  pavementSensorModelInformation(essPavementSensorEntry, 18),
+		  pavementSensorTemperatureDepth(essPavementSensorEntry, 19),
               numEssSubSurfaceSensors		(essNtcipPavement, 3),
 	      essSubSurfaceSensorTable		(essNtcipPavement, 4),
 	        essSubSurfaceSensorEntry	(essSubSurfaceSensorTable, 1),
@@ -135,6 +146,7 @@ public enum MIB1204 {
 	          essSubSurfaceMoisture		(essSubSurfaceSensorEntry, 7),
 	          essSubSurfaceSensorError	(essSubSurfaceSensorEntry, 8),
 	    essNtcipMobile			(essNtcip, 10),
+	      essMobileFriction			(essNtcipMobile, 1),
 	    essNtcipInstrumentation		(essNtcip, 15),
 	      essDoorStatus			(essNtcipInstrumentation, 1),
 	      essBatteryStatus			(essNtcipInstrumentation, 2),
