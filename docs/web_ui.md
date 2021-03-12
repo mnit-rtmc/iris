@@ -9,9 +9,9 @@ This document tracks progress on the web-based user interface for IRIS.
 - **earthwyrm** — [Earthwyrm] is a web mapping service for [MVT], or Mapbox
   Vector Tiles.  Layers can be made from [OpenStreetMap] data in addition to
   IRIS devices, such as DMS.
-- **honeybee** — Honeybee is a service for public JSON endpoints in addition to
-  rendered GIF images of DMS.  It is included in the IRIS repository.
-- **graft** — Graft is a web service for handling authenticated endpoints,
+- **honeybee** — [Honeybee] is a service for public JSON endpoints in addition
+  to rendered GIF images of DMS.  It is included in the IRIS repository.
+- **graft** — [Graft] is a web service for handling authenticated endpoints,
   including non-public data and writable data.  It is included in the IRIS
   repository.
 - **bulb** — Bulb is the web front-end for IRIS.  The mapping portion uses the
@@ -71,6 +71,8 @@ This document tracks progress on the web-based user interface for IRIS.
 
 
 [earthwyrm]: https://github.com/DougLau/earthwyrm
+[graft]: https://github.com/mnit-rtmc/iris/tree/master/graft
+[honeybee]: https://github.com/mnit-rtmc/iris/tree/master/honeybee
 [Leaflet]: https://github.com/Leaflet/Leaflet
 [MuON]: https://github.com/muon-data/muon
 [MVT]: https://docs.mapbox.com/vector-tiles/reference/
