@@ -33,7 +33,6 @@ This document tracks progress on the web-based user interface for IRIS.
   - [X] Integrate leaflet map
   - [X] Set up nginx configuration
   - [X] Style segment layer with detector data
-  - [ ] Write full installation documentation
 
 ## Phase 2 — Authentication
 
@@ -47,11 +46,14 @@ This document tracks progress on the web-based user interface for IRIS.
 ## Phase 3 — Comm Link Administation
 
 * graft
+  - [X] Add comm config endpoints
+  - [X] Add comm link endpoints
+  - [X] Add controller endpoints
+  - [ ] Send SSE for update notifications
+* bulb
   - [ ] Add comm config pages
   - [ ] Add comm link pages
   - [ ] Add controller pages
-  - [ ] Send SSE for update notifications
-* bulb
   - [ ] Connect to graft for SSE
 
 ## Phase 4 — DMS control
@@ -61,9 +63,11 @@ This document tracks progress on the web-based user interface for IRIS.
   - [ ] Generate DMS map layer in earthwyrm DB
 * graft
   - [ ] Add endpoints for controlling DMS
+  - [ ] Write full installation documentation
 * bulb
   - [ ] UI for DMS viewing / control
   - [ ] Generate DMS previews and insert into img element using data URI
+  - [ ] Write full installation documentation
 
 
 [earthwyrm]: https://github.com/DougLau/earthwyrm

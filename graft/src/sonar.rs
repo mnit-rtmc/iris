@@ -277,6 +277,7 @@ impl Connection {
             _ => Err(SonarError::UnexpectedMessage),
         })
         .await?;
+        info!("Logged in from {}", msg);
         Ok(msg)
     }
 

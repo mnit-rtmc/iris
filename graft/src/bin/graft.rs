@@ -1,3 +1,19 @@
+// graft.rs
+//
+// Copyright (C) 2021  Minnesota Department of Transportation
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+#![forbid(unsafe_code)]
+
 use async_std::io::ErrorKind::TimedOut;
 use convert_case::{Case, Casing};
 use graft::sonar::{Connection, Result, SonarError};
@@ -44,6 +60,7 @@ macro_rules! add_routes {
 
 #[async_std::main]
 async fn main() -> tide::Result<()> {
+    env_logger::builder().format_timestamp(None).init();
     let mut app = tide::new();
     add_routes!(app, "comm_config");
     add_routes!(app, "comm_link");
@@ -56,8 +73,7 @@ const HOST: &str = &"localhost.localdomain";
 
 async fn connection(_req: &Request<()>) -> Result<Connection> {
     let mut c = Connection::new(HOST, 1037).await?;
-    let msg = c.login("admin", "atms_242").await?;
-    println!("Logged in from {}", msg);
+    c.login("admin", "atms_242").await?;
     Ok(c)
 }
 

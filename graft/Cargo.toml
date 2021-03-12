@@ -2,6 +2,8 @@
 name = "graft"
 version = "0.1.0"
 authors = ["Douglas Lau <doug.lau@state.mn.us>"]
+description = "Web Server for proxying IRIS sonar objects"
+license = "GPL-2.0-or-later"
 edition = "2018"
 
 [dependencies]
@@ -9,6 +11,7 @@ anyhow = "1.0"
 async-std = { version="1.8", features=["attributes"] }
 convert_case = "0.4"
 json = "0.12"
+log = "0.4"
 rustls = { version="0.19", features=["dangerous_configuration"] }
 thiserror = "1.0"
 tide = "0.16"
@@ -18,3 +21,8 @@ webpki = "0.21"
 version = "0.11"
 default-features = false
 features = ["client"]
+
+[dependencies.env_logger]
+version = "0.8"
+default-features = false
+features = ["atty", "humantime"]
