@@ -11,7 +11,7 @@ This document tracks progress on the web-based user interface for IRIS.
 - [honeybee] — service for generating public JSON endpoints in addition to
   rendered GIF images of DMS.  It is included in the IRIS repository.
 - [graft] — web service for proxying IRIS sonar objects, used for non-public and
-  and writable values.  It is included in the IRIS repository.
+  writable values.  It is included in the IRIS repository.
 - [bulb] — the web front-end for IRIS.  The mapping portion uses the [Leaflet]
   JavaScript library.  The rest of the code is written in Rust, compiled as
   WebAssembly.
