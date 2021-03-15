@@ -1,3 +1,17 @@
+// sonar.rs
+//
+// Copyright (C) 2021  Minnesota Department of Transportation
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
 use async_std::io;
 use async_std::net::{TcpStream, ToSocketAddrs};
 use async_std::prelude::*;
@@ -11,22 +25,30 @@ use std::time::Duration;
 use thiserror::Error;
 use webpki::DNSNameRef;
 
+/// Sonar protocol error
 #[derive(Debug, Error)]
 pub enum SonarError {
+    /// Unexpected response to a message
     #[error("unexpected response")]
     UnexpectedResponse,
+    /// Unexpected message received
     #[error("unexpected message")]
     UnexpectedMessage,
+    /// Message received from server (SHOW)
     #[error("{0}")]
     Msg(String),
+    /// I/O error
     #[error("I/O {0}")]
     IO(#[from] std::io::Error),
+    /// Invalid Query
     #[error("`name` missing from query")]
     NameMissing,
 }
 
+/// Sonar result
 pub type Result<T> = std::result::Result<T, SonarError>;
 
+/// TLS certificate verifier for IRIS server
 struct Verifier {}
 
 impl ServerCertVerifier for Verifier {
@@ -42,6 +64,7 @@ impl ServerCertVerifier for Verifier {
     }
 }
 
+/// Sonar message
 #[allow(dead_code)]
 #[derive(Debug)]
 pub enum Message<'a> {

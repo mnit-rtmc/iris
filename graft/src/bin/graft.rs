@@ -19,6 +19,7 @@ use convert_case::{Case, Casing};
 use graft::sonar::{Connection, Result, SonarError};
 use tide::{Request, Response, StatusCode};
 
+/// Trait to get HTTP status code from an error
 trait ErrorStatus {
     fn status_code(&self) -> StatusCode;
 }
@@ -34,6 +35,7 @@ impl ErrorStatus for SonarError {
     }
 }
 
+/// Convert a Sonar result to a Response
 macro_rules! resp {
     ($res:expr) => {
         match $res {
@@ -47,6 +49,7 @@ macro_rules! resp {
     };
 }
 
+/// Add GET/PUT/DELETE routes for a Sonar object type
 macro_rules! add_routes {
     ($app:expr, $tp:expr) => {
         $app.at(concat!("/", $tp))
@@ -54,10 +57,11 @@ macro_rules! add_routes {
         $app.at(concat!("/", $tp))
             .post(|req| create_sonar_object($tp, req));
         $app.at(concat!("/", $tp))
-            .delete(|req| delete_sonar_object($tp, req));
+            .delete(|req| remove_sonar_object($tp, req));
     };
 }
 
+/// Main entry point
 #[async_std::main]
 async fn main() -> tide::Result<()> {
     env_logger::builder().format_timestamp(None).init();
@@ -69,14 +73,17 @@ async fn main() -> tide::Result<()> {
     Ok(())
 }
 
+/// IRIS host name
 const HOST: &str = &"localhost.localdomain";
 
+/// Create a Sonar connection for a request
 async fn connection(_req: &Request<()>) -> Result<Connection> {
     let mut c = Connection::new(HOST, 1037).await?;
     c.login("admin", "atms_242").await?;
     Ok(c)
 }
 
+/// Get Sonar type name from a request
 fn req_name(tp: &str, req: &Request<()>) -> Result<String> {
     for pair in req.url().query_pairs() {
         if pair.0 == "name" {
@@ -86,6 +93,7 @@ fn req_name(tp: &str, req: &Request<()>) -> Result<String> {
     Err(SonarError::NameMissing)
 }
 
+/// GET a Sonar object and return JSON result
 async fn get_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
     let mut c = resp!(connection(&req).await);
     let nm = resp!(req_name(tp, &req));
@@ -104,6 +112,7 @@ async fn get_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
         .build())
 }
 
+/// Create a Sonar object from a PUT request
 async fn create_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
     let nm = resp!(req_name(tp, &req));
     let mut c = resp!(connection(&req).await);
@@ -111,7 +120,8 @@ async fn create_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
     Ok(Response::builder(StatusCode::Created).build())
 }
 
-async fn delete_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
+/// Remove a Sonar object from a DELETE request
+async fn remove_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
     let nm = resp!(req_name(tp, &req));
     let mut c = resp!(connection(&req).await);
     resp!(c.remove_object(&nm).await);
