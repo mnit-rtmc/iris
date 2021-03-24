@@ -18,7 +18,24 @@
       import init from './bulb.js';
       init();
     </script>
+    <script>
+function expand() {
+    document.getElementById("sidebar").setAttribute("style", "flex: 0 0 20rem;");
+}
+function shrink() {
+    document.getElementById("sidebar").setAttribute("style", "flex: 0 0 1px;");
+}
+    </script>
     <style type="text/css">
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background-color: #dce;
+      }
+      legend {
+        padding: 3px 6px;
+      }
       .root {
         position: fixed;
         top: 0;
@@ -27,21 +44,44 @@
         height: 100%;
         display: flex;
       }
-      #sidebar {
-        flex: 1 1 auto;
-        margin: 0 0 0 0.5rem;
-        overflow-y: scroll;
-      }
       #mapid {
-        flex: 2 2 auto;
+        flex: 6 1 auto;
+      }
+      #divider {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+      }
+      #divider button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        padding: 0;
+        margin: 0.5rem 0.1rem;
+        background-color: transparent;
+        border-radius: 0.2rem;
+      }
+      #divider button:hover {
+        background-color: #eee;
+      }
+      #sidebar {
+        flex: 0 0 1px;
+        margin: 0;
+        overflow-y: scroll;
+        transition: all 250ms;
       }
     </style>
   </head>
   <body>
     <div class="root">
-      <div id="sidebar">
-      </div>
       <div id="mapid">
+      </div>
+      <div id="divider">
+        <button type="button" onclick="expand()">🡄</button>
+        <button type="button" onclick="shrink()">🡆</button>
+      </div>
+      <div id="sidebar">
       </div>
     </div>
   </body>
