@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- ant build file for IRIS project
-     Copyright (C) 2007-2020  Minnesota Department of Transportation
+     Copyright (C) 2007-2021  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -385,7 +385,7 @@
 	        description="Create source tarball">
 		<copy todir="${build.tar}">
 			<fileset dir="${basedir}"
-			         excludes="build/**,bulb/target/**,honeybee/target/**" />
+			         excludes="build/**,bulb/target/**,graft/target/**,honeybee/target/**" />
 		</copy>
 		<tar destfile="${tar.file}"
 		     basedir="${build.dir}"
