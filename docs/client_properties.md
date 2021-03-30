@@ -18,6 +18,7 @@ Property               | Description
 `keystore.password`    | Password for the client keystore
 `sonar.host`           | IP or hostname of the SONAR server
 `sonar.port`           | TCP port number of the SONAR server
+`sonar.cipher.suites`  | Cipher suite names to enable (regex)
 `tdxml.detector.url`   | URL for XML detector stream
 `map.tile.url`         | Base URL for map tileset — must end in `/`
 `video.host`           | IP or hostname of video server/proxy

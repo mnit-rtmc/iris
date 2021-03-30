@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2018  Minnesota Department of Transportation
+ * Copyright (C) 2006-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,9 @@ package us.mn.state.dot.sonar;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Properties;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
@@ -34,6 +37,49 @@ public class SSLState {
 
 	/** Size (in bytes) of network buffers */
 	static private final int NETWORK_SIZE = 1 << 16;
+
+	/** Default cipher suites */
+	static private final String DEFAULT_SUITES = "TLS_.*AES_256.*";
+
+	/** Create a SSL engine */
+	static private SSLEngine createSSLEngine(SSLContext context,
+		Properties props)
+	{
+		SSLEngine engine = context.createSSLEngine();
+		String regex = props.getProperty("sonar.cipher.suites",
+			DEFAULT_SUITES);
+		engine.setEnabledProtocols(getProtocols(engine));
+		engine.setEnabledCipherSuites(getCipherSuites(engine, regex));
+		return engine;
+	}
+
+	/** Get an array of protocol versions to enable */
+	static private String[] getProtocols(SSLEngine engine) {
+		ArrayList<String> protocols = new ArrayList<String>();
+		for (String sp: engine.getSupportedProtocols()) {
+			if (sp.equals("TLSv1.2") || sp.equals("TLSv1.3")) {
+				protocols.add(sp);
+				DEBUG_TLS.log("protocol enabled: " + sp);
+			} else
+				DEBUG_TLS.log("protocol disabled: " + sp);
+		}
+		return protocols.toArray(new String[0]);
+	}
+
+	/** Get an array of cipher suites which match a regex */
+	static private String[] getCipherSuites(SSLEngine engine,
+		String regex)
+	{
+		ArrayList<String> suites = new ArrayList<String>();
+		for (String cs: engine.getSupportedCipherSuites()) {
+			if (cs.matches(regex)) {
+				DEBUG_TLS.log("suite enabled: " + cs);
+				suites.add(cs);
+			} else
+				DEBUG_TLS.log("suite disabled: " + cs);
+		}
+		return suites.toArray(new String[0]);
+	}
 
 	/** Conduit */
 	private final Conduit conduit;
@@ -63,11 +109,12 @@ public class SSLState {
 	public final MessageEncoder encoder;
 
 	/** Create a new SONAR SSL state */
-	public SSLState(Conduit c, SSLEngine e) throws SSLException,
-		IOException
+	public SSLState(Conduit c, SSLContext context, Properties props,
+		boolean client) throws SSLException, IOException
 	{
 		conduit = c;
-		engine = e;
+		engine = createSSLEngine(context, props);
+		engine.setUseClientMode(client);
 		SSLSession session = engine.getSession();
 		int p_size = session.getPacketBufferSize();
 		int a_size = session.getApplicationBufferSize();

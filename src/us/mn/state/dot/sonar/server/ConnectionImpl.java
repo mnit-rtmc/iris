@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2018  Minnesota Department of Transportation
+ * Copyright (C) 2006-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -162,7 +162,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		namespace = processor.getNamespace();
 		skey = k;
 		channel = c;
-		state = new SSLState(this, processor.createSSLEngine());
+		state = processor.createSSLState(this);
 		address = c.socket().getInetAddress();
 		StringBuilder h = new StringBuilder();
 		h.append(address.getHostAddress());

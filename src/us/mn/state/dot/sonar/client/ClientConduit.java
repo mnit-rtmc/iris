@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2018  Minnesota Department of Transportation
+ * Copyright (C) 2006-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
 import javax.naming.AuthenticationException;
-import javax.net.ssl.SSLEngine;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.ConfigurationError;
@@ -34,6 +33,7 @@ import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.Props;
 import us.mn.state.dot.sonar.ProtocolError;
+import us.mn.state.dot.sonar.Security;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SSLState;
 
@@ -138,14 +138,13 @@ class ClientConduit extends Conduit {
 
 	/** Create a new client conduit */
 	public ClientConduit(Properties props, Client c, Selector selector,
-		SSLEngine engine, ExceptionHandler h)
-		throws ConfigurationError, IOException
+		ExceptionHandler h) throws ConfigurationError, IOException
 	{
 		channel = createChannel(props);
 		client = c;
 		key = channel.register(selector, SelectionKey.OP_CONNECT);
-		engine.setUseClientMode(true);
-		state = new SSLState(this, engine);
+		state = new SSLState(this, Security.createContext(props),
+			props, true);
 		namespace = new ClientNamespace();
 		handler = h;
 		connected = false;

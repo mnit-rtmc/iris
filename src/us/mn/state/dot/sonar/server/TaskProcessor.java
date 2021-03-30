@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2019  Minnesota Department of Transportation
+ * Copyright (C) 2006-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.ExceptionHandler;
@@ -41,6 +40,7 @@ import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.Security;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.sonar.SSLState;
 import us.mn.state.dot.sonar.User;
 
 /**
@@ -112,18 +112,11 @@ public class TaskProcessor {
 		abstract protected void doPerform() throws Exception;
 	}
 
-	/** Get an array of protocol versions to enable */
-	static private String[] getProtocols(SSLEngine engine) {
-		ArrayList<String> enabled = new ArrayList<String>();
-		for (String sp: engine.getSupportedProtocols()) {
-			if (sp.startsWith("TLS"))
-				enabled.add(sp);
-		}
-		return enabled.toArray(new String[0]);
-	}
-
 	/** SONAR namespace being served */
 	private final ServerNamespace namespace;
+
+	/** Server properties */
+	private final Properties props;
 
 	/** Access monitor */
 	private final AccessMonitor access_monitor;
@@ -162,17 +155,15 @@ public class TaskProcessor {
 	/** File to write session list */
 	private final String session_file;
 
-	/** Regex to match cipher suites */
-	private final String cipher_suites;
-
 	/** User for current message processing */
 	private String proc_user = null;
 
 	/** Create a task processor */
-	public TaskProcessor(ServerNamespace n, Properties props,
+	public TaskProcessor(ServerNamespace n, Properties p,
 		AccessMonitor am) throws IOException, ConfigurationError
 	{
 		namespace = n;
+		props = p;
 		access_monitor = am;
 		authenticator = new Authenticator(this);
 		context = Security.createContext(props);
@@ -183,7 +174,13 @@ public class TaskProcessor {
 				addProvider(new LDAPProvider(url));
 		}
 		session_file = props.getProperty("sonar.session.file");
-		cipher_suites = props.getProperty("sonar.cipher.suites");
+	}
+
+	/** Create SSL state */
+	public SSLState createSSLState(ConnectionImpl conn) throws IOException,
+		SSLException
+	{
+		return new SSLState(conn, context, props, false);
 	}
 
 	/** Add an authentication provider */
@@ -409,27 +406,6 @@ public class TaskProcessor {
 					c.getUserName());
 			}
 		});
-	}
-
-	/** Create an SSL engine in the server context */
-	public SSLEngine createSSLEngine() {
-		SSLEngine engine = context.createSSLEngine();
-		if (cipher_suites != null) {
-			engine.setEnabledProtocols(getProtocols(engine));
-			engine.setEnabledCipherSuites(getCipherSuites(engine));
-		}
-		engine.setUseClientMode(false);
-		return engine;
-	}
-
-	/** Get an array of cipher suites which should be enabled */
-	private String[] getCipherSuites(SSLEngine engine) {
-		ArrayList<String> enabled = new ArrayList<String>();
-		for (String cs: engine.getEnabledCipherSuites()) {
-			if (cs.matches(cipher_suites))
-				enabled.add(cs);
-		}
-		return enabled.toArray(new String[0]);
 	}
 
 	/** Lookup the client connection for a selection key */

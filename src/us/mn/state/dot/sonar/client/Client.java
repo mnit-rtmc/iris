@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2016  Minnesota Department of Transportation
+ * Copyright (C) 2006-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,6 @@ import java.nio.channels.Selector;
 import java.util.Properties;
 import java.util.Map;
 import java.util.Set;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
@@ -46,9 +44,6 @@ public class Client {
 
 	/** Selector for non-blocking I/O */
 	private final Selector selector;
-
-	/** SSL context */
-	private final SSLContext context;
 
 	/** Client conduit */
 	private final ClientConduit conduit;
@@ -95,9 +90,7 @@ public class Client {
 		throws IOException, ConfigurationError
 	{
 		selector = Selector.open();
-		context = Security.createContext(props);
-		conduit = new ClientConduit(props, this, selector,
-			createSSLEngine(), h);
+		conduit = new ClientConduit(props, this, selector, h);
 		handler = new ExceptionHandler() {
 			public boolean handle(Exception e) {
 				conduit.disconnect();
@@ -107,13 +100,6 @@ public class Client {
 		processor = new Scheduler("sonar_proc", handler);
 		thread.setDaemon(true);
 		thread.setPriority(Thread.MAX_PRIORITY);
-	}
-
-	/** Create an SSL engine in the client context */
-	private SSLEngine createSSLEngine() {
-		SSLEngine engine = context.createSSLEngine();
-		engine.setUseClientMode(true);
-		return engine;
 	}
 
 	/** Client loop to perfrom socket I/O */
