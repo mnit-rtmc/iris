@@ -2,7 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010-2019  Minnesota Department of Transportation
  * Copyright (C) 2011  AHMCT, University of California
- * Copyright (C) 2017  Iteris Inc.
+ * Copyright (C) 2017-2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,18 @@ public interface WeatherSensor extends Device {
 
 	/** Get the device location */
 	GeoLoc getGeoLoc();
+
+	/** Get the site id */
+	String getSiteId();
+
+	/** Set the site id */
+	void setSiteId(String sid);
+
+	/** Get the alt id */
+	String getAltId();
+
+	/** Set the alt id */
+	void setAltId(String aid);
 
 	/** Get air temp in C (null for missing) */
 	Integer getAirTemp();
