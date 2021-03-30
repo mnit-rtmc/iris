@@ -1,0 +1,4 @@
+#/bin/sh
+
+javac Ciphers.java
+jar cfmv ciphers.jar MANIFEST.MF Ciphers.class
