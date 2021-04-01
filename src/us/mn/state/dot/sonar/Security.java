@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2017  Minnesota Department of Transportation
+ * Copyright (C) 2006-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ import javax.net.ssl.TrustManagerFactory;
  */
 public class Security {
 
-	/** Load a KeyStore in the jks format */
+	/** Load a KeyStore in the JKS format */
 	static private KeyStore loadKeyStore(String keystore)
 		throws GeneralSecurityException, ConfigurationError
 	{
@@ -57,7 +57,7 @@ public class Security {
 			return new URL(keystore);
 	}
 
-	/** Load a KeyStore from an InputStream in the jks format */
+	/** Load a KeyStore from an InputStream in the JKS format */
 	static private KeyStore loadKeyStore(InputStream is)
 		throws IOException, GeneralSecurityException
 	{

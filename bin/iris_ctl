@@ -2,7 +2,7 @@
 #
 # /usr/bin/iris_ctl -- Script for initializing and updating IRIS
 #
-# Copyright (C) 2012-2020  Minnesota Department of Transportation
+# Copyright (C) 2012-2021  Minnesota Department of Transportation
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,14 +42,15 @@ function create_keystores() {
 	k_cert=/etc/iris/iris-sonar-public.cert
 	k_server=/etc/iris/iris-server.keystore
 	k_client=/etc/iris/iris-client.keystore
-	k_sopts="$k_opts -keystore $k_server -storepass $k_pws -keypass $k_pws"
-	k_copts="$k_opts -keystore $k_client -storepass $k_pwc -keypass $k_pwc"
-	k_gopts="-genkeypair -keyalg rsa -keysize 2048 -validity 1825"
+	k_sopts="$k_opts -keystore $k_server -storetype JKS -storepass $k_pws -keypass $k_pws"
+	k_copts="$k_opts -keystore $k_client -storetype JKS -storepass $k_pwc -keypass $k_pwc"
+	k_gopts="-genkeypair -keyalg RSA -keysize 2048 -validity 1825"
 	d_name="CN=iris_ctl"
 	umask 0037
-	keytool $k_sopts $k_gopts -dname "$d_name"
-	keytool $k_sopts -export -file $k_cert
-	keytool $k_copts -import -file $k_cert
+	/usr/bin/rm -f $k_cert $k_server $k_client
+	/usr/bin/keytool $k_sopts $k_gopts -dname "$d_name"
+	/usr/bin/keytool $k_sopts -export -file $k_cert
+	/usr/bin/keytool $k_copts -import -file $k_cert
 	chown tms.tms $k_server $k_cert $k_client
 	p_server=/etc/iris/iris-server.properties
 	p_client=/etc/iris/iris-client.properties
@@ -157,7 +158,6 @@ case "$1" in
 		echo_success
 		;;
 	cert)
-		check_initialized
 		create_keystores
 		;;
 	update)

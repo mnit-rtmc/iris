@@ -60,8 +60,7 @@ public class SSLState {
 			if (sp.equals("TLSv1.2") || sp.equals("TLSv1.3")) {
 				protocols.add(sp);
 				DEBUG_TLS.log("protocol enabled: " + sp);
-			} else
-				DEBUG_TLS.log("protocol disabled: " + sp);
+			}
 		}
 		return protocols.toArray(new String[0]);
 	}
@@ -75,8 +74,7 @@ public class SSLState {
 			if (cs.matches(regex)) {
 				DEBUG_TLS.log("suite enabled: " + cs);
 				suites.add(cs);
-			} else
-				DEBUG_TLS.log("suite disabled: " + cs);
+			}
 		}
 		return suites.toArray(new String[0]);
 	}
