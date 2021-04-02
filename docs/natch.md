@@ -86,12 +86,12 @@ Value | Description
 5     | Start up green time (0.1 sec)
 6     | Start up yellow time (0.1 sec)
 7     | Turn on output pin (usually 2 or 3)
-8     | Red output pin, head 1
-9     | Yellow output pin, head 1
-10    | Green output pin, head 1
-11    | Red output pin, head 2
-12    | Yellow output pin, head 2
-13    | Green output pin, head 2
+8     | Red output pin, left head
+9     | Yellow output pin, left head
+10    | Green output pin, left head
+11    | Red output pin, right head
+12    | Yellow output pin, right head
+13    | Green output pin, right head
 
 ```
 MC,0150,0,2,13,7,2,4,5,6,7,8,9
