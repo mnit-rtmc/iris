@@ -24,7 +24,6 @@ detector messages use a sequence number which increments automatically.
 
 Code | Descripton
 -----|----------------
-CC   | Clock configure
 CS   | Clock status
 DC   | Detector configure
 DS   | Detector status
@@ -33,24 +32,16 @@ MS   | Meter status
 PS   | Pin status
 SC   | System command (restart)
 
-### CC - Clock Configure
-
-The third value is date and time formatted according to [RFC 3339].  If
-successful, the response uses __cc__, with the date and time requested.
-
-```
-CC,00AB,2021-04-01T12:34:56-05:00
-cc,00AB,2021-04-01T12:34:56-05:00
-```
-
 ### CS - Clock Status
 
-The poll contains only 2 values, __code__ and __message id__.  The response has
-a third value, the date and time.
+The third value is date and time formatted according to [RFC 3339].  If the
+third value is omitted, the response contains the current time.
 
 ```
+CS,00AB,2021-04-01T12:34:56-05:00
+cs,00AB,2021-04-01T12:34:56-05:00
 CS,00AC
-cs,00AC,2021-04-01T12:34:56-05:00
+cs,00AC,2021-04-01T12:34:59-05:00
 ```
 
 ### DC - Detector Configure
@@ -63,8 +54,8 @@ treated as a *query*, and the response includes the currently configured pin.
 ```
 DC,00AD,0,39
 dc,00AD,0,39
-DC,00AD,0
-dc,00AD,0,39
+DC,00AE,0
+dc,00AE,0,39
 ```
 
 ### DS - Detector Status
@@ -104,9 +95,11 @@ Value | Description
 
 ```
 MC,0150,0,2,13,7,2,4,5,6,7,8,9
-dc,0150,0,2,13,7,2,4,5,6,7,8,9
-MC,0151,1,0
-mc,0151,1,0
+mc,0150,0,2,13,7,2,4,5,6,7,8,9
+MC,0151,0
+mc,0151,0,2,13,7,2,4,5,6,7,8,9
+MC,0152,1,0
+mc,0152,1,0
 ```
 
 ### MS - Meter Status
@@ -121,7 +114,7 @@ ms,00AC,0,45
 
 ### PS - Pin Status
 
-The third value is the pin number.  The fourth, if included is the value to set
+The third value is the pin number.  The fourth, if included, is the value to set
 an output pin (0 or 1).
 
 ```
@@ -133,7 +126,8 @@ ps,0251,19,1
 
 ### SC - System Command
 
-The third value is the command.
+The third value is the command.  `restart` causes the controller program to be
+restarted.
 
 ```
 SC,05c1,restart
