@@ -3656,6 +3656,7 @@ FAW	Flood Warning
 FLW	Flood Warning
 FAA	Flood Watch
 FLA	Flood Watch
+FWW	Red Flag Warning
 FZW	Freeze Warning
 FZA	Freeze Watch
 ZFY	Freezing Fog Advisory

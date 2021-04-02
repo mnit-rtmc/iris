@@ -35,4 +35,7 @@ CREATE VIEW dms_view AS
 	LEFT JOIN sign_config_view sc ON d.sign_config = sc.name;
 GRANT SELECT ON dms_view TO PUBLIC;
 
+INSERT INTO cap.event (code, description) VALUES
+	('FWW', 'Red Flag Warning');
+
 COMMIT;

@@ -90,6 +90,7 @@ public enum CapEvent {
 	NUW("Nuclear Power Plant Warning"),
 	DMO("Practice/Demo Warning"),
 	RHW("Radiological Hazard Warning"),
+	FWW("Red Flag Warning"),
 	RMT("Required Monthly Test"),
 	RWT("Required Weekly Test"),
 	RPS("Rip Current Statement"),
