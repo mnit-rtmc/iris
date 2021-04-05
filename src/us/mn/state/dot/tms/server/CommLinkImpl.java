@@ -167,7 +167,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		POLLER.removeJob(long_poll_job);
 	}
 
-	/** Create a new polling job */
+	/** Create polling jobs */
 	private synchronized void createPollJobs(int p, int lp) {
 		destroyPollJobs();
 		poll_job = new PollJob(p, OFFSET_SECS, false);
@@ -300,6 +300,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			store.update(this, "comm_config", cc);
 			setCommConfig(cc);
 			recreatePoller();
+			int p = cc.getPollPeriodSec();
+			int lp = cc.getLongPollPeriodSec();
+			createPollJobs(p, lp);
 		}
 	}
 
