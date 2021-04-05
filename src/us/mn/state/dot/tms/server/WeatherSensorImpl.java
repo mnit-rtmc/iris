@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2020  Minnesota Department of Transportation
+ * Copyright (C) 2010-2021  Minnesota Department of Transportation
  * Copyright (C) 2017-2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -735,6 +735,13 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		WeatherPoller p = getWeatherPoller();
 		if (p != null)
 			p.sendRequest(this, dr);
+	}
+
+	/** Perform a periodic poll */
+	@Override
+	public void periodicPoll(boolean is_long) {
+		if (!is_long)
+			sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 	}
 
 	/** Flush buffered sample data to disk */
