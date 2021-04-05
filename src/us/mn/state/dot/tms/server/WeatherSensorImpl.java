@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010-2020  Minnesota Department of Transportation
- * Copyright (C) 2017       Iteris Inc.
+ * Copyright (C) 2017-2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,8 +69,9 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Load all the weather sensors */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, WeatherSensorImpl.class);
-		store.query("SELECT name, geo_loc, controller, pin, notes " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, geo_loc, controller, pin, notes, " +
+			"site_id, alt_id FROM iris." + SONAR_TYPE + ";", 
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new WeatherSensorImpl(row));
@@ -87,6 +88,8 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
+		map.put("site_id", site_id);
+		map.put("alt_id", alt_id);
 		return map;
 	}
 
@@ -108,15 +111,19 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		     row.getString(2),		// geo_loc
 		     row.getString(3),		// controller
 		     row.getInt(4),		// pin
-		     row.getString(5)		// notes
+		     row.getString(5),		// notes
+		     row.getString(6),		// site_id
+		     row.getString(7)		// alt_id
 		);
 	}
 
 	/** Create a weather sensor */
 	private WeatherSensorImpl(String n, String l, String c, int p,
-		String nt)
+		String nt, String sid, String aid)
 	{
 		super(n, lookupController(c), p, nt);
+		site_id = sid;
+		alt_id = aid;
 		geo_loc = lookupGeoLoc(l);
 		cache = new PeriodicSampleCache(PeriodicSampleType.PRECIP_RATE);
 		pt_cache = new PeriodicSampleCache(
@@ -151,6 +158,54 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	@Override
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
+	}
+
+	/** Site id (null for missing) */
+	private transient String site_id;
+
+	/** Get the site id (null for missing) */
+	@Override
+	public String getSiteId() {
+		return site_id;
+	}
+
+	/** Set the site id.
+	 * @param sid Site id (null for missing) */
+	public void setSiteId(String sid) {
+		site_id = sid;
+	}
+
+	/** Set the site id.
+	 * @param sid Site id (null for missing) */
+	public void doSetSiteId(String sid) throws TMSException {
+		if (sid != site_id) {
+			store.update(this, "site_id", sid);
+			setSiteId(sid);
+		}
+	}
+
+	/** Alt id (null for missing) */
+	private transient String alt_id;
+
+	/** Get the alt id (null for missing) */
+	@Override
+	public String getAltId() {
+		return alt_id;
+	}
+
+	/** Set the alt id.
+ 	 * @param aid Alt id (null for missing) */
+	public void setAltId(String aid) {
+		alt_id = aid;
+	}
+
+	/** Set the alt id.
+	 * @param aid (null for missing) */
+	public void doSetAltId(String aid) throws TMSException {
+		if (aid != alt_id) {
+			store.update(this, "alt_id", aid);
+			setAltId(aid);
+		}
 	}
 
 	/** Air temp in C (null for missing) */
@@ -699,6 +754,8 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		StringBuilder sb = new StringBuilder();
 		sb.append("(WeatherSensor: name=").append(name);
 		sb.append(" time_stamp=").append(getStampString());
+		sb.append(" siteId=").append(getSiteId());
+		sb.append(" altId=").append(getAltId());
 		sb.append(" airTemp_c=").append(getAirTemp());
 		sb.append(" dewPointTemp_c=").append(getDewPointTemp());
 		sb.append(" maxTemp_c=").append(getMaxTemp());
@@ -738,6 +795,8 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 			w.write(createAttribute("lat",
 				formatDouble(pos.getLatitude())));
 		}
+		w.write(createAttribute("site_id", getSiteId()));
+		w.write(createAttribute("alt_id", getAltId()));
 		w.write(createAttribute("air_temp_c", getAirTemp()));
 		w.write(createAttribute("humidity_perc", getHumidity()));
 		w.write(createAttribute("dew_point_temp_c", 

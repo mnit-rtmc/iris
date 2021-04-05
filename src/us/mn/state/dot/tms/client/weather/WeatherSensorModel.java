@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010-2019  Minnesota Department of Transportation
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +26,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * Table model for weather sensors.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class WeatherSensorModel extends ProxyTableModel<WeatherSensor> {
 
@@ -36,6 +38,20 @@ public class WeatherSensorModel extends ProxyTableModel<WeatherSensor> {
 		cols.add(new ProxyColumn<WeatherSensor>("weather_sensor", 120) {
 			public Object getValueAt(WeatherSensor ws) {
 				return ws.getName();
+			}
+		});
+		cols.add(new ProxyColumn<WeatherSensor>(
+			"weather_sensor.siteid", 120) 
+		{
+			public Object getValueAt(WeatherSensor ws) {
+				return ws.getSiteId();
+			}
+		});
+		cols.add(new ProxyColumn<WeatherSensor>(
+			"weather_sensor.altid", 120) 
+		{
+			public Object getValueAt(WeatherSensor ws) {
+				return ws.getAltId();
 			}
 		});
 		cols.add(new ProxyColumn<WeatherSensor>("location", 300) {

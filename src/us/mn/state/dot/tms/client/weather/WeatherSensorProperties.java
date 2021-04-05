@@ -42,6 +42,12 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	/** Location panel */
 	private final LocationPanel loc_pnl;
 
+	/** Site id text area */
+	private final JTextArea site_id_txt = new JTextArea(1, 24);
+
+	/** Alt id text area */
+	private final JTextArea alt_id_txt = new JTextArea(1, 24);
+
 	/** Notes text area */
 	private final JTextArea notes_txt = new JTextArea(3, 24);
 
@@ -84,6 +90,10 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	/** Create the location panel */
 	private JPanel createLocationPanel() {
 		loc_pnl.initialize();
+		loc_pnl.add("weather_sensor.siteid");
+		loc_pnl.add(site_id_txt, Stretch.FULL);
+		loc_pnl.add("weather_sensor.altid");
+		loc_pnl.add(alt_id_txt, Stretch.FULL);
 		loc_pnl.add("device.notes");
 		loc_pnl.add(notes_txt, Stretch.FULL);
 		loc_pnl.add(new JButton(controller), Stretch.RIGHT);
@@ -93,6 +103,18 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 
 	/** Create the widget jobs */
 	private void createUpdateJobs() {
+		site_id_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				proxy.setSiteId(site_id_txt.getText());
+			}
+		});
+		alt_id_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				proxy.setAltId(alt_id_txt.getText());
+			}
+		});
 		notes_txt.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
@@ -112,6 +134,8 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	@Override
 	protected void updateEditMode() {
 		loc_pnl.updateEditMode();
+		site_id_txt.setEnabled(canWrite("site_id"));
+		alt_id_txt.setEnabled(canWrite("alt_id"));
 		notes_txt.setEnabled(canWrite("notes"));
 	}
 
@@ -120,6 +144,10 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	protected void doUpdateAttribute(String a) {
 		if (a == null || a.equals("controller"))
 			controller.setEnabled(proxy.getController() != null);
+		if (a == null || a.equals("site_id"))
+			site_id_txt.setText(proxy.getSiteId());
+		if (a == null || a.equals("alt_id"))
+			alt_id_txt.setText(proxy.getAltId());
 		if (a == null || a.equals("notes"))
 			notes_txt.setText(proxy.getNotes());
 	}
