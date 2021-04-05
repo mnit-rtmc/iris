@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -139,7 +139,7 @@ public final class Scheduler {
 		boolean op = slog.isOpen();
 		try {
 			if (op)
-				slog.log("Starting " + job.getName());
+				slog.log("Starting " + job);
 			job.performTask();
 		}
 		catch (Exception e) {
@@ -153,7 +153,7 @@ public final class Scheduler {
 		}
 		finally {
 			if (op)
-				slog.log("Finished " + job.getName());
+				slog.log("Finished " + job);
 		}
 	}
 
