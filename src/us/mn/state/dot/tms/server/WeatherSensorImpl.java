@@ -178,7 +178,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Set the site id.
 	 * @param sid Site id (null for missing) */
 	public void doSetSiteId(String sid) throws TMSException {
-		if (sid != site_id) {
+		if (!objectEquals(sid, site_id)) {
 			store.update(this, "site_id", sid);
 			setSiteId(sid);
 		}
@@ -202,7 +202,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Set the alt id.
 	 * @param aid (null for missing) */
 	public void doSetAltId(String aid) throws TMSException {
-		if (aid != alt_id) {
+		if (!objectEquals(aid, alt_id)) {
 			store.update(this, "alt_id", aid);
 			setAltId(aid);
 		}
