@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -589,7 +589,7 @@ public class MultiStringTest extends TestCase {
 		assertTrue(new MultiString("!\"#$%&\'()*+,-./").isValid());
 		assertTrue(new MultiString(":;<=>?@\\^_`{|}~").isValid());
 
-		assertFalse(new MultiString("ABC[tag]DEF").isValid());
+		assertFalse(new MultiString("ABC[zzz]DEF").isValid());
 		assertFalse(new MultiString("[").isValid());
 		assertFalse(new MultiString("]").isValid());
 		assertFalse(new MultiString("\t\b\n\r\f").isValid());
