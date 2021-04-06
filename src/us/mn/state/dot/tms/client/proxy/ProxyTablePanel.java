@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +38,7 @@ import us.mn.state.dot.tms.client.widget.ITable;
  * A proxy table panel is a UI for displaying a table of proxy objects.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 
@@ -178,6 +180,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 	/** Create the table */
 	private ITable createTable(ProxyTableModel<T> m) {
 		ITable t = new ITable(m);
+		t.setAutoCreateRowSorter(true);
 		t.setAutoCreateColumnsFromModel(false);
 		t.setColumnModel(m.createColumnModel());
 		t.setModel(m);
