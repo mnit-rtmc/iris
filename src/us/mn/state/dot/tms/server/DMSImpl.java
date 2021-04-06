@@ -1419,7 +1419,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			s |= ItemStyle.MAINTENANCE.bit();
 		if (isActive() && isFailed())
 			s |= ItemStyle.FAILED.bit();
-		if (purpose != DevicePurpose.GENERAL)
+		if (isActive() && purpose != DevicePurpose.GENERAL)
 			s |= ItemStyle.PURPOSE.bit();
 		return s;
 	}
