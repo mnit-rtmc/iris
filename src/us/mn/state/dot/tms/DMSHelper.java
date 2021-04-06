@@ -74,6 +74,16 @@ public class DMSHelper extends BaseHelper {
 		return ControllerHelper.getStatus(proxy.getController());
 	}
 
+	/** Return non-null string */
+	static private String safe(String str) {
+		return (str != null ? str : "");
+	}
+
+	/** Case-insensitive contains */
+	static private boolean noCaseContains(String s1, String s2) {
+		return safe(s1).toLowerCase().contains(safe(s2).toLowerCase());
+	}
+
 	/** Test if a DMS is active */
 	static public boolean isActive(DMS proxy) {
 		return ItemStyle.ACTIVE.checkBit(proxy.getStyles());
@@ -529,5 +539,34 @@ public class DMSHelper extends BaseHelper {
 			}
 		}
 		return null;
+	}
+
+	/** Determine if the hardware make and model match specified values */
+	static private boolean makeVersionMatch(
+		DMS dms, String make, String version) 
+	{
+		if (dms != null) {
+			SignDetail sd = dms.getSignDetail();
+			return sd != null &&
+				noCaseContains(sd.getHardwareMake(), make) && 
+				noCaseContains(dms.getVersion(), version);
+		} else 
+			return false;
+	}
+
+	/** Detect if the sign config indicates the DMS ADDCO default 
+	 * font issue is present. If the default font is set to any 
+	 * font other than #1 or #2, older ADDCO DMS go into an invalid 
+	 * state where they reject all new messages as invalid with no 
+	 * corresponding error description. The work-around solution is 
+	 * to set font #1 as the default. ADDCO didn't supply firmware 
+	 * versions effected by this problem, so individual versions 
+	 * known to have the problem are listed below. Addco says all 
+	 * versions of the SC5 controllers have 4 fonts loaded in the 
+	 * factory configuration.
+	 * @return True if the sign detail indicates the DMS is effected 
+	 * 	   by condition else false */
+	static public boolean addcoFontIssue(DMS dms) {
+		return makeVersionMatch(dms, "addco", "3.4.21");
 	}
 }
