@@ -2,7 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2020  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
- * Copyright (C) 2017       Iteris Inc.
+ * Copyright (C) 2017-2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,6 +93,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 			addOp(new OpQueryDMSFonts(dms));
 			break;
 		case SEND_SETTINGS:
+			dms.requestConfigure(); //required before sending fonts
 			if (SystemAttrEnum.DMS_UPDATE_FONT_TABLE.getBoolean())
 				addOp(new OpSendDMSFonts(dms));
 			addOp(new OpSendDMSDefaults(dms));

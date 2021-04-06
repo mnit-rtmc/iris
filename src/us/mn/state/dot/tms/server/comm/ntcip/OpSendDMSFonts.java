@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +46,7 @@ import us.mn.state.dot.tms.utils.Base64;
  * Operation to send a set of fonts to a DMS controller.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class OpSendDMSFonts extends OpDMS {
 
@@ -86,7 +88,7 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Time in seconds to allow for calculating font ID */
 	static private final int CALCULATING_ID_SECS = 15;
 
-	/** Number of fonts supported */
+	/** Number of fonts already in the sign */
 	private final ASN1Integer num_fonts = numFonts.makeInt();
 
 	/** Maximum number of characters in a font */
@@ -678,14 +680,28 @@ public class OpSendDMSFonts extends OpDMS {
 			frow = fr;
 		}
 
-		/** Set the default font numbmer */
+		/** Set the default font number */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
+			int fnum;
+			if (!DMSHelper.addcoFontIssue(dms))
+				fnum = frow.f_num;
+			else {
+				// Workaround for older Addco signs with
+				// the set default font issue. Font #1
+				// is a built-in 5x7 font.
+				fnum = 1;
+				log("Addco: forced default font to " + fnum);
+			}
 			ASN1Integer dfont = defaultFont.makeInt();
-			dfont.setInteger(frow.f_num);
+			dfont.setInteger(fnum);
 			mess.add(dfont);
 			logStore(dfont);
-			mess.storeProps();
+			try {
+				mess.storeProps();
+			} catch (Exception ex) {
+				log("OpSendDMSFonts.SetDefaultFont: ex=" + ex);
+			}
 			return nextFontPhase();
 		}
 	}

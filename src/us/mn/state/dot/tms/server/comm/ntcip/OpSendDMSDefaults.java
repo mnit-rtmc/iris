@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2019-2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +46,7 @@ import us.mn.state.dot.tms.utils.Multi.JustificationPage;
  * Operation to send default parameters to a DMS.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class OpSendDMSDefaults extends OpDMS {
 
@@ -325,7 +327,12 @@ public class OpSendDMSDefaults extends OpDMS {
 				mess.add(v_border);
 				mess.add(h_pitch);
 				mess.add(v_pitch);
-				mess.storeProps();
+				try {
+					mess.storeProps();
+				} catch (NoSuchName ex) {
+					// ADDCO VSL ver: 3.4.x throws this exception (21r7)
+					log("ADDCO: ignored ex=" + ex);
+				}
 				logStore(h_border);
 				logStore(v_border);
 				logStore(h_pitch);
