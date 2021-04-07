@@ -9,11 +9,11 @@ simply called **detectors**.
 ## Configuration
 
 To create a detector, first select the [r_node] at the proper location.  Then
-select the **Detectors** tab for that r_node.  Enter the detector **Name** and
-press the **Create** button.
+select the **Detectors** tab for that `r_node`.  Enter the detector **Name**
+and press the **Create** button.
 
-After selecting a detector in the r_node detector table, its properties, such as
-**lane type** and **lane #** can be changed.  Lanes are numbered from
+After selecting a detector in the `r_node` detector table, its properties, such
+as **lane type** and **lane #** can be changed.  Lanes are numbered from
 _right-to-left_, starting with the right lane as 1.  A **label** will be created
 from this information, including abbreviations of the [roads] associated with
 the [r_node].
@@ -47,32 +47,28 @@ Parking    | Parking space presence detector
 
 ## Transfer
 
-It is possible to move a detector to another r_node.  Select the target r_node
-and enter the detector **Name**.  The current label for that detector will
-appear on the right.  To move it to the current r_node, press the **Transfer**
-button.
+It is possible to move a detector to another `r_node`.  Select the target
+`r_node` and enter the detector **Name**.  The current label for that detector
+will appear on the right.  To move it to the current `r_node`, press the
+**Transfer** button.
 
 ## Traffic Data
 
-Most detectors sample traffic data in fixed time intervals and put it into
-[bins](#binned-data).  IRIS can store these types of binned traffic data:
+The preferred method of collecting traffic data, supported by newer detectors,
+is to log every [vehicle](#vehicle-logging) that passes by the detection area.
+Older detectors use fixed time intervals and put data into [bins](#binned-data).
 
-Sample Type      | Description                              | Code | Sample Size
------------------|------------------------------------------|------|------------
-Vehicle Count    | Count of vehicles detected               | v    | 8 bits
-Motorcycle Count | Count of vehicles up to 7 feet           | vmc  | 8 bits
-Small Count      | Count of vehicles between 7 and 20 feet  | vs   | 8 bits
-Medium Count     | Count of vehicles between 20 and 43 feet | vm   | 8 bits
-Large Count      | Number of vehicles 43 feet or longer     | vl   | 8 bits
-Occupancy        | Percent _occupancy_ count (0 to 100.00)  | op   | 16 bits
-Scans            | Scan _occupancy_ count (0 to 1800)       | c    | 16 bits
-Speed            | Average speed (mph) of detected vehicles | s    | 8 bits
+IRIS can collect these types of binned traffic data:
 
-Instead of binning, some detectors can record a [vehicle log](#vehicle-logging),
-with information about each detected vehicle, such as headway and speed.
+Sample Type   | Description                              | Code | Sample Size
+--------------|------------------------------------------|------|------------
+Vehicle Count | Count of vehicles detected               | v    | 8 bits
+Occupancy     | Percent _occupancy_ count (0 to 100.00)  | op   | 16 bits
+Scans         | Scan _occupancy_ count (0 to 1800)       | c    | 16 bits
+Speed         | Average speed (mph) of detected vehicles | s    | 8 bits
 
 Every 30 seconds, an XML file is generated containing the most recent sample
-data from all defined detectors.  The file is called `det_sample.xml.gz`, and it
+data from all online detectors.  The file is called `det_sample.xml.gz`, and it
 is written to the [XML output directory].
 
 ## Detector Protocols
@@ -82,16 +78,16 @@ detection systems.  The protocol used depends on the [comm link] of the
 [controller] to which it is assigned.  The following table summarizes features
 of each protocol.
 
-Protocol    | Binning               | Traffic Data
-------------|-----------------------|-----------------
-[NTCIP]     | 0-255 seconds         | Count, Occupancy
-[MnDOT-170] | 30 seconds            | Count, Scans
-[SS105]     | 5 seconds to 1 month  | Count, Occupancy, Speed, Classification
-[SS125]     | 5 seconds to 1 month  | Count, Occupancy, Speed, Classification
-[G4]        | 5 seconds to 1 hour   | Count, Occupancy, Speed, Classification
-[Canoga]    | N/A [vehicle logging] | Timestamp, Speed (double loops)
-[DR-500]    | 30-300? seconds       | Speed
-[DXM]       | N/A (presence)        | Magnetic Field
+Protocol    | Binning           | Traffic Data
+------------|-------------------|-----------------
+[NTCIP]     | 0-255 sec         | Count, Occupancy
+[MnDOT-170] | 30 sec            | Count, Scans
+[SS105]     | 5 sec to 1 month  | Count, Occupancy, Speed, Class
+[SS125]     | 5 sec to 1 month  | [vlog], Count, Occupancy, Speed, Class
+[G4]        | 5 sec to 1 hour   | [vlog], Count, Occupancy, Speed, Class
+[Canoga]    | N/A               | [vlog]
+[DR-500]    | 30-300? sec       | Speed
+[DXM]       | N/A (presence)    | Magnetic Field
 
 For protocols which allow the binning intereval to be adjusted, it will be set
 to the poll [period] of the comm link.
@@ -230,15 +226,17 @@ considered _bad_.
 The `.vlog` format is a comma-separated text log with one line for each vehicle
 detected.  Each line ends with a newline `\n` (ASCII 0x0A).  If present,
 **duration**, **headway**, and **speed** are positive integer values.  Missing
-duration or headway values are represented by a `?` character.  A gap in
-sampling data is represented by `*` on a line by itself.
+duration or headway values are represented by a `?` character.
 
 Column | Name       | Description
 -------|------------|---------------------------------------------------------
 1      | Duration   | Number of milliseconds the vehicle occupied the detector
 2      | Headway    | Number of milliseconds bewteen vehicle start times
-3      | Time stamp | 24-hour `HH:MM:SS` format (may be omitted if headway is valid)
+3      | Time stamp | Local 24-hour `HH:MM:SS` format (omitted if headway is valid)
 4      | Speed      | Speed in miles per hour (if available)
+
+A gap in sampling data due to communication errors is represented by `*` on a
+line by itself.
 
 ### Example Log
 
@@ -304,6 +302,6 @@ maximum downstream distance for associating station data with a segment.
 [station]: road_topology.html#r_node-types
 [system attribute]: system_attributes.html
 [travel time]: travel_time.html
-[vehicle logging]: #vehicle-logging
+[vlog]: #vehicle-logging
 [XML file]: troubleshooting.html#xml-output
 [XML output directory]: troubleshooting.html#xml-output
