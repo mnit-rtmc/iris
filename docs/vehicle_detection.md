@@ -170,27 +170,26 @@ with the 8-digit base name and a `.traffic` extension.
 
 ## Vehicle Logging
 
-The `.vlog` format is a comma-separated text log with one line for each vehicle
-detected.  Each line ends with a newline `\n` (U+000A).
+The `.vlog` format is a comma-separated text log.  Each vehicle event is
+recorded as a single line of values, ending with a newline `\n` (U+000A).
 
 Column | Name     | Description
--------|----------|---------------------------------
-1      | Duration | Detector area occupied time (ms)
+-------|----------|----------------------------------------
+1      | Duration | How long vehicle occupied detector (ms)
 2      | Headway  | Time since previous vehicle (ms)
 3      | Time     | Local 24-hour `HH:MM:SS` format
 4      | Speed    | Vehicle speed (mph)
 5      | Length   | Vehicle length (ft)
 
 **Duration** is the time a vehicle occupied the detector area, between 1 and
-60000 ms.  An invalid or missing value is represented by a `?` character.
+60000 ms.  An invalid or missing value is represented by a `?` (U+003F).
 
 **Headway** is the difference in arrival time from the previous vehicle to the
 current one.  It is a positive integer between 1 and 3600000 ms (1 hour).  An
-invalid or missing value is represented by a `?` character.
+invalid or missing value is represented by a `?` (U+003F).
 
-**Time** is the time the vehicle left the detection area.  It is only included
-when the headway is invalid or missing.  When not included, the value is left
-empty.
+**Time** is when the vehicle left the detection area.  It is included only when
+the headway is invalid or missing, otherwise it is left empty.
 
 **Speed** is the measured vehicle speed.  It is a positive integer value from 5
 to 120 mph.  An invalid or missing value is left empty.
@@ -202,8 +201,8 @@ All trailing commas at the end of a line are removed.  This means that an event
 with only duration and headway would only contain the two values, separated by
 one comma.
 
-A gap in sampling data due to communication errors is represented by `*` on a
-line by itself.
+A gap in sampling data due to communication errors is represented by `*`
+(U+002A) on a line by itself.
 
 ### Example Log
 
@@ -214,7 +213,7 @@ Log Data            | Duration | Headway | Time     | Speed | Length
 `296,9930,17:49:36` | 296      | 9930    | 17:49:36 |       |
 `231,14069`         | 231      | 14069   | 17:49:50 |       |
 `240,453,,45,18`    | 240      | 453     | 17:49:50 | 45    | 18
-`296,23510,,53,25`  | 296      | 23510   | 17:50:14 | 53    | 25
+`496,23510,,53,62`  | 496      | 23510   | 17:50:14 | 53    | 62
 `259,1321`          | 259      | 1321    | 17:50:15 |       |
 `?,?`               | ?        | ?       |          |       |
 `249,?`             | 249      | ?       | 17:50:24 |       |
