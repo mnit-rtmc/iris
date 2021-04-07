@@ -224,16 +224,36 @@ considered _bad_.
 ## Vehicle Logging
 
 The `.vlog` format is a comma-separated text log with one line for each vehicle
-detected.  Each line ends with a newline `\n` (ASCII 0x0A).  If present,
-**duration**, **headway**, and **speed** are positive integer values.  Missing
-duration or headway values are represented by a `?` character.
+detected.  Each line ends with a newline `\n` (U+000A).
 
-Column | Name       | Description
--------|------------|---------------------------------------------------------
-1      | Duration   | Number of milliseconds the vehicle occupied the detector
-2      | Headway    | Number of milliseconds bewteen vehicle start times
-3      | Time stamp | Local 24-hour `HH:MM:SS` format (omitted if headway is valid)
-4      | Speed      | Speed in miles per hour (if available)
+Column | Name     | Description
+-------|----------|---------------------------------
+1      | Duration | Detector area occupied time (ms)
+2      | Headway  | Time since previous vehicle (ms)
+3      | Time     | Local 24-hour `HH:MM:SS` format
+4      | Speed    | Vehicle speed (mph)
+5      | Length   | Vehicle length (ft)
+
+**Duration** is the time a vehicle occupied the detector area, between 1 and
+60000 ms.  An invalid or missing value is represented by a `?` character.
+
+**Headway** is the difference in arrival time from the previous vehicle to the
+current one.  It is a positive integer between 1 and 3600000 ms (1 hour).  An
+invalid or missing value is represented by a `?` character.
+
+**Time** is the time the vehicle left the detection area.  It is only included
+when the headway is invalid or missing.  When not included, the value is left
+empty.
+
+**Speed** is the measured vehicle speed.  It is a positive integer value from 5
+to 120 mph.  An invalid or missing value is left empty.
+
+**Length** is the measured vehicle length.  It is a positive integer value from
+1 to 255 ft.  An invalid or missing value is left empty.
+
+All trailing commas at the end of a line are removed.  This means that an event
+with only duration and headway would only contain the two values, separated by
+one comma.
 
 A gap in sampling data due to communication errors is represented by `*` on a
 line by itself.
@@ -242,19 +262,19 @@ line by itself.
 
 Interpreting example `.vlog` data for 11 vehicles:
 
-Log Data            | Duration | Headway | Time     | Speed
---------------------|----------|---------|----------|-------
-`296,9930,17:49:36` | 296      | 9930    | 17:49:36 | ?
-`231,14069`         | 231      | 14069   | 17:49:50 | ?
-`240,453,,45`       | 240      | 453     | 17:49:50 | 45
-`296,23510,,53`     | 296      | 23510   | 17:50:14 | 53
-`259,1321`          | 259      | 1321    | 17:50:15 | ?
-`?,?`               | ?        | ?       | ?        | ?
-`249,?`             | 249      | ?       | 17:50:24 | ?
-`323,4638,17:50:28` | 323      | 4638    | 17:50:28 | ?
-`258,5967`          | 258      | 5967    | 17:50:33 | ?
-`111,1542`          | 111      | 1542    | 17:50:35 | ?
-`304,12029`         | 304      | 12029   | 17:50:47 | ?
+Log Data            | Duration | Headway | Time     | Speed | Length
+--------------------|----------|---------|----------|-------|-------
+`296,9930,17:49:36` | 296      | 9930    | 17:49:36 |       |
+`231,14069`         | 231      | 14069   | 17:49:50 |       |
+`240,453,,45,18`    | 240      | 453     | 17:49:50 | 45    | 18
+`296,23510,,53,25`  | 296      | 23510   | 17:50:14 | 53    | 25
+`259,1321`          | 259      | 1321    | 17:50:15 |       |
+`?,?`               | ?        | ?       |          |       |
+`249,?`             | 249      | ?       | 17:50:24 |       |
+`323,4638,17:50:28` | 323      | 4638    | 17:50:28 |       |
+`258,5967,55`       | 258      | 5967    | 17:50:33 | 55    |
+`111,1542`          | 111      | 1542    | 17:50:35 |       |
+`304,12029`         | 304      | 12029   | 17:50:47 |       |
 
 ## Traffic Layer
 
