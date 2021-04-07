@@ -9,27 +9,23 @@ import pgdb
 
 def read_font(conn, font):
 	cursor = conn.cursor()
-	cursor.execute("SELECT name, f_number, height, line_spacing, "
+	cursor.execute("SELECT name, f_number, height, width, line_spacing, "
 		"char_spacing FROM iris.font WHERE name = '%s';" % font)
-	name, f_num, height, line_spacing, char_spacing = cursor.fetchone()
-	print '[FontInfo]'
-	print 'FontName=%s' % name
-	print 'FontHeight=%s' % height
-	print 'CharSpacing=%s' % char_spacing
-	print 'LineSpacing=%s' % line_spacing
-	cursor.execute("SELECT max(code_point) FROM iris.glyph WHERE "
-		"font = '%s';" % font)
-	print 'MaxCharNumber=%s' % cursor.fetchone()[0]
-	print
+	name, f_num, height, width, line_spacing, char_spacing = cursor.fetchone()
+	print('name: %s' % name)
+	print('height: %s' % height)
+	print('width: %s' % width)
+	print('char_spacing: %s' % char_spacing)
+	print('line_spacing: %s' % line_spacing)
+	print()
 	cursor.execute("SELECT code_point, width, pixels FROM iris.glyph "
 		"WHERE font = '%s' ORDER BY code_point;" % font)
 	for row in range(cursor.rowcount):
 		cp, width, pixels = cursor.fetchone()
 		bmap = b64decode(pixels)
-		print '[Char_%s]' % cp
-		print "Character='%s'" % chr(cp)
+		print('codepoint: %s %s' % (cp, chr(cp)))
 		print_char(height, width, bmap)
-		print
+		print()
 	cursor.close()
 
 def print_char(height, width, bmap):
@@ -37,22 +33,21 @@ def print_char(height, width, bmap):
 		print_row(row, width, bmap)
 
 def print_row(row, width, bmap):
-	print 'row%02d=' % (row + 1),
 	for col in range(width):
 		if lit_pixel(bmap, width, row, col):
-			print 'X',
+			print('X', end='')
 		else:
-			print '.',
-	print
+			print('.', end='')
+	print()
 
 def lit_pixel(bmap, width, row, col):
 	pos = row * width + col
 	b8 = pos // 8
 	bit = 7 - pos % 8
-	return (ord(bmap[b8]) >> bit) & 1
+	return (bmap[b8] >> bit) & 1
 
 if len(argv) != 2:
-	print "Usage:\n%s [font-name]\n" % argv[0]
+	print("Usage:\n%s [font-name]\n" % argv[0])
 	exit(1)
 connection = pgdb.connect(database='tms')
 read_font(connection, argv[1])
