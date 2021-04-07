@@ -58,15 +58,6 @@ The preferred method of collecting traffic data, supported by newer detectors,
 is to log every [vehicle](#vehicle-logging) that passes by the detection area.
 Older detectors use fixed time intervals and put data into [bins](#binned-data).
 
-IRIS can collect these types of binned traffic data:
-
-Sample Type   | Description                              | Code | Sample Size
---------------|------------------------------------------|------|------------
-Vehicle Count | Count of vehicles detected               | v    | 8 bits
-Occupancy     | Percent _occupancy_ count (0 to 100.00)  | op   | 16 bits
-Scans         | Scan _occupancy_ count (0 to 1800)       | c    | 16 bits
-Speed         | Average speed (mph) of detected vehicles | s    | 8 bits
-
 Every 30 seconds, an XML file is generated containing the most recent sample
 data from all online detectors.  The file is called `det_sample.xml.gz`, and it
 is written to the [XML output directory].
@@ -177,50 +168,6 @@ As data is collected, a new subdirectory is created every day — the name is
 At 10 PM, all traffic data from the previous day is moved into a single ZIP file
 with the 8-digit base name and a `.traffic` extension.
 
-## Binned Data
-
-A binned sample file consists of some number of periods of equal duration.  The
-first period begins (and the last period ends) at midnight.  The **binning
-interval** determines the number of samples collected per day — a shorter
-interval results in more samples.  If the period is longer than 30 seconds, the
-samples are allocated evenly into 30-second bins for storage.
-
-Period | Binning Interval | Samples | Stored Bins
--------|------------------|---------|------------
-5      | 5 seconds        | 17280   | 5 seconds
-6      | 6 seconds        | 14400   | 6 seconds
-10     | 10 seconds       | 8640    | 10 seconds
-15     | 15 seconds       | 5760    | 15 seconds
-20     | 20 seconds       | 4320    | 20 seconds
-30     | 30 seconds       | 2880    | 30 seconds
-60     | 60 seconds       | 1440    | 30 seconds
-90     | 90 seconds       | 960     | 30 seconds
-120    | 2 minutes        | 720     | 30 seconds
-240    | 4 minutes        | 360     | 30 seconds
-300    | 5 minutes        | 288     | 30 seconds
-600    | 10 minutes       | 144     | 30 seconds
-900    | 15 minutes       | 96      | 30 seconds
-1200   | 20 minutes       | 72      | 30 seconds
-1800   | 30 minutes       | 48      | 30 seconds
-3600   | 60 minutes       | 24      | 30 seconds
-7200   | 2 hours          | 12      | 30 seconds
-14400  | 4 hours          | 6       | 30 seconds
-28800  | 8 hours          | 3       | 30 seconds
-43200  | 12 hours         | 2       | 30 seconds
-86400  | 24 hours         | 1       | 30 seconds
-
-For each detector, a binned sample file is created for each
-[traffic data](#traffic-data) **sample type**.  The base file name is the
-detector name.  The extension is the traffic data **code** followed by the
-**period** (in seconds).  For example, 60-second vehicle count samples collected
-from detector 100 would be stored in a file called `100.v60`, containing 2880
-bins.
-
-Each data sample is either an 8- or 16-bit signed integer, depending on the
-sample type.  16-bit samples are in high-byte first order.  A negative value
-(-1) indicates a missing sample.  Any data outside the valid ranges should be
-considered _bad_.
-
 ## Vehicle Logging
 
 The `.vlog` format is a comma-separated text log with one line for each vehicle
@@ -275,6 +222,59 @@ Log Data            | Duration | Headway | Time     | Speed | Length
 `258,5967,55`       | 258      | 5967    | 17:50:33 | 55    |
 `111,1542`          | 111      | 1542    | 17:50:35 |       |
 `304,12029`         | 304      | 12029   | 17:50:47 |       |
+
+## Binned Data
+
+IRIS can collect these types of binned traffic data:
+
+Sample Type   | Description                              | Code | Sample Size
+--------------|------------------------------------------|------|------------
+Vehicle Count | Count of vehicles detected               | v    | 8 bits
+Occupancy     | Percent _occupancy_ count (0 to 100.00)  | op   | 16 bits
+Scans         | Scan _occupancy_ count (0 to 1800)       | c    | 16 bits
+Speed         | Average speed (mph) of detected vehicles | s    | 8 bits
+
+A binned sample file consists of some number of periods of equal duration.  The
+first period begins (and the last period ends) at midnight.  The **binning
+interval** determines the number of samples collected per day — a shorter
+interval results in more samples.  If the period is longer than 30 seconds, the
+samples are allocated evenly into 30-second bins for storage.
+
+Period | Binning Interval | Samples | Stored Bins
+-------|------------------|---------|------------
+5      | 5 seconds        | 17280   | 5 seconds
+6      | 6 seconds        | 14400   | 6 seconds
+10     | 10 seconds       | 8640    | 10 seconds
+15     | 15 seconds       | 5760    | 15 seconds
+20     | 20 seconds       | 4320    | 20 seconds
+30     | 30 seconds       | 2880    | 30 seconds
+60     | 60 seconds       | 1440    | 30 seconds
+90     | 90 seconds       | 960     | 30 seconds
+120    | 2 minutes        | 720     | 30 seconds
+240    | 4 minutes        | 360     | 30 seconds
+300    | 5 minutes        | 288     | 30 seconds
+600    | 10 minutes       | 144     | 30 seconds
+900    | 15 minutes       | 96      | 30 seconds
+1200   | 20 minutes       | 72      | 30 seconds
+1800   | 30 minutes       | 48      | 30 seconds
+3600   | 60 minutes       | 24      | 30 seconds
+7200   | 2 hours          | 12      | 30 seconds
+14400  | 4 hours          | 6       | 30 seconds
+28800  | 8 hours          | 3       | 30 seconds
+43200  | 12 hours         | 2       | 30 seconds
+86400  | 24 hours         | 1       | 30 seconds
+
+For each detector, a binned sample file is created for each
+[traffic data](#traffic-data) **sample type**.  The base file name is the
+detector name.  The extension is the traffic data **code** followed by the
+**period** (in seconds).  For example, 60-second vehicle count samples collected
+from detector 100 would be stored in a file called `100.v60`, containing 2880
+bins.
+
+Each data sample is either an 8- or 16-bit signed integer, depending on the
+sample type.  16-bit samples are in high-byte first order.  A negative value
+(-1) indicates a missing sample.  Any data outside the valid ranges should be
+considered _bad_.
 
 ## Traffic Layer
 
