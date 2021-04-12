@@ -575,8 +575,9 @@ public class OpQueryDMSStatus extends OpDMS {
 		int se = shortError.getInteger();
 		// PIXEL errors are only reported if pixelFailureTableNumRows.0
 		// is greater than dms_pixel_maint_threshold system attribute.
+		final int pmt = pixelMaintThreshold();
 		return ShortErrorStatus.PIXEL.isSet(se)
-		    && getPixelErrorCount() > pixelMaintThreshold();
+		    && getPixelErrorCount() > pmt && pmt >= 0;
 	}
 
 	/** Format the new error status */
