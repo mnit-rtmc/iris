@@ -43,26 +43,26 @@ database, use psql:
 psql tms -f [font file]
 ```
 
-Number | Font Name    | Description
--------|--------------|---------------------
-1      | 07_char      | 7x5 character matrix
-2      | 07_line      | 7 pixel high line-matrix
-3      | 08_full      | 8 pixel high full-matrix
-4      | 09_full      | 9 pixel high full-matrix
-5      | 10_full      | 10 pixel high full-matrix
-6      | 11_full      | 11 pixel high full-matrix
-7      | 12_full      | 12 pixel high full-matrix
-8      | 12_full_bold | 12 pixel high full-matrix bold
-9      | 13_full      | 13 pixel high full-matrix
-11     | 14_full      | 14 pixel high full-matrix
-12     | 14_full_thin | 14 pixel high full-matrix
-21     | 15_full      | 15 pixel high full-matrix
-13     | 16_full      | 16 pixel high full-matrix
-14     | 18_full      | 18 pixel high full-matrix
-15     | 20_full      | 20 pixel high full-matrix (numerals only)
-16     | 24_full      | 24 pixel high full-matrix (numerals only)
-20     | 26_full      | 26 pixel high full-matrix<
-17     | _09_full_12  | 9 pixel high (12 with lower case descenders)
+Number | Font Name      | Description
+-------|----------------|---------------------
+1      | `07_char`      | 7x5 character matrix
+2      | `07_line`      | 7 pixel high line-matrix
+3      | `08_full`      | 8 pixel high full-matrix
+4      | `09_full`      | 9 pixel high full-matrix
+5      | `10_full`      | 10 pixel high full-matrix
+6      | `11_full`      | 11 pixel high full-matrix
+7      | `12_full`      | 12 pixel high full-matrix
+8      | `12_full_bold` | 12 pixel high full-matrix bold
+9      | `13_full`      | 13 pixel high full-matrix
+11     | `14_full`      | 14 pixel high full-matrix
+12     | `14_full_thin` | 14 pixel high full-matrix
+21     | `15_full`      | 15 pixel high full-matrix
+13     | `16_full`      | 16 pixel high full-matrix
+14     | `18_full`      | 18 pixel high full-matrix
+15     | `20_full`      | 20 pixel high full-matrix (numerals only)
+16     | `24_full`      | 24 pixel high full-matrix (numerals only)
+20     | `26_full`      | 26 pixel high full-matrix
+17     | `_09_full_12`  | 9 pixel high (12 with lower case descenders)
 
 The IRIS client also contains a font editor which can be used to design new DMS
 fonts.
