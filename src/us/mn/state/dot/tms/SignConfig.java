@@ -78,4 +78,16 @@ public interface SignConfig extends SonarObject {
 
 	/** Get the exclude font */
 	Font getExcludeFont();
+
+	/** Get module width (pixels) */
+	int getModuleWidth();
+
+	/** Set module width(pixels) */
+	void setModuleWidth(int mw);
+
+	/** Get module height (pixels) */
+	int getModuleHeight();
+
+	/** Set module height (pixels) */
+	void setModuleHeight(int mh);
 }
