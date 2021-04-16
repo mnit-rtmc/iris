@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +17,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -32,6 +34,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  * Pixel panel renders a representation of the pixels on a sign.
  *
  * @author Douglas Lau
+ * @author Deb Behera
  */
 public class SignPixelPanel extends JPanel {
 
@@ -56,6 +59,9 @@ public class SignPixelPanel extends JPanel {
 		else
 			return null;
 	}
+
+	/** Draw the pixel modules */
+	private boolean draw_modules = false;
 
 	/** Color of sign face */
 	private Color face_color;
@@ -87,6 +93,12 @@ public class SignPixelPanel extends JPanel {
 	/** Sign pixel height */
 	private int height_pix = 0;
 
+	/** Pixel module width (pixels) */
+	private int mwidth_pix = 0;
+
+	/** Pixel module height (pixels) */
+	private int mheight_pix = 0;
+
 	/** Width of characters (pixels), zero for variable */
 	private int width_char;
 
@@ -115,6 +127,60 @@ public class SignPixelPanel extends JPanel {
 		repaint();
 	}
 
+	/** Specify if modules should be rendered */
+	public void setDrawModules(boolean draw) {
+		draw_modules = draw;
+	}
+
+	/** Draw  vertical pixel module lines.
+	 * @param g Graphics to draw the line */
+	private void drawVerticalLines(Graphics2D g) {
+		if (mwidth_pix <= 0 || width_pix % mwidth_pix != 0)
+			return;
+		int num_vertical_lines = width_pix / mwidth_pix;
+		int width_part_mm = width_mm / num_vertical_lines;
+		int x_mp = width_part_mm / 2;
+		for (int x = 1; x <= num_vertical_lines; x++) {
+			int xlines_mm = width_mm - (x * width_part_mm);
+			g.setColor(Color.WHITE);
+			g.drawLine(xlines_mm, 0, xlines_mm, height_mm);
+			g.drawString(String.valueOf(x), x_mp, 0);
+			g.drawString(String.valueOf(x), x_mp, height_mm);
+			x_mp += width_part_mm;
+		}
+
+	}
+
+	/** Draw  hotizontal lines pixel module lines.
+	 * @param g Graphics to draw the line */
+	private void drawHorizontalLines(Graphics2D g) {
+		if (mheight_pix <= 0 || height_pix % mheight_pix != 0)
+			return;
+		int num_horizontal_lines = height_pix / mheight_pix;
+		int height_part_mm = height_mm / num_horizontal_lines;
+		int y_mp = height_part_mm / 2;
+		for (int y = 1; y <= num_horizontal_lines; y++) {
+			int ylines_mm = height_mm - (y * height_part_mm);
+			g.setColor(Color.WHITE);
+			g.drawLine(0, ylines_mm, width_mm, ylines_mm);
+			g.drawString(String.valueOf(y), 0, y_mp);
+			g.setColor(Color.DARK_GRAY);
+			g.drawString(String.valueOf(y), width_mm + 10,  y_mp);
+			y_mp += height_part_mm;
+		}
+	}
+
+	/** Draw the pixel modules.
+	 * @param g Graphics to draw the line */
+	private void drawPixelLines(Graphics2D g) {
+		if (draw_modules) {
+			Font font = new Font("Serif", Font.PLAIN, 100);
+			g.setFont(font);
+			drawVerticalLines(g);
+			drawHorizontalLines(g);
+		}
+	}
+
 	/** Set the sign filter color.
 	 * @param fc Filter color of sign. */
 	public void setFilterColor(Color fc) {
@@ -138,6 +204,7 @@ public class SignPixelPanel extends JPanel {
 	/** Paint this on the screen */
 	@Override
 	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
 		rescale();
 		doPaint((Graphics2D) g, graphic);
 	}
@@ -177,6 +244,7 @@ public class SignPixelPanel extends JPanel {
 			g.transform(t);
 			g.setColor(face_color);
 			g.fillRect(0, 0, width_mm, height_mm);
+			drawPixelLines(g);
 			if (rg != null)
 				paintPixels(g, rg);
 			Color fc = filter_color;
@@ -372,19 +440,30 @@ public class SignPixelPanel extends JPanel {
 			int ph = sc.getPixelHeight();
 			int cw = sc.getCharWidth();
 			int ch = sc.getCharHeight();
-			setLogicalDimensions(pw, ph, cw, ch);
+			int mw = sc.getModuleWidth();
+			int mh = sc.getModuleHeight();
+			setLogicalDimensions(pw, ph, cw, ch, mw, mh);
 		} else
-			setLogicalDimensions(0, 0, 0, 0);
+			setLogicalDimensions(0, 0, 0, 0, 0, 0);
 	}
 
 	/** Set the logical sign dimensions */
-	public void setLogicalDimensions(int w, int h, int wc, int hl) {
+	public void setLogicalDimensions(int w, int h, int wc, int hl,
+		int mw, int mh)
+	{
 		width_pix = Math.max(0, w);
 		height_pix = Math.max(0, h);
 		width_char = Math.max(0, wc);
 		height_line = Math.max(0, hl);
+		mwidth_pix = Math.max(0, mw);
+		mheight_pix = Math.max(0, mh);
 	}
-	
+
+	/** Set the logical sign dimensions */
+	public void setLogicalDimensions(int w, int h, int wc, int hl) {
+		setLogicalDimensions(w, h, wc, hl, 0, 0);
+	}
+
 	/** Get the AffineTransform object used to translate and scale the graphic
 	 * within the component. */
 	public AffineTransform getTransform() {
