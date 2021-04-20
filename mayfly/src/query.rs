@@ -159,6 +159,21 @@ pub trait TrafficData {
 
     /// Length of binned data
     fn len() -> u64;
+
+    /// Build JSON body from binned data
+    fn build_body(data: Vec<u8>) -> Result<Body> {
+        let mut body = Body::default();
+        for value in data {
+            let value = value as i8;
+            let value = if value >= 0 {
+                Some(value)
+            } else {
+                None
+            };
+            body.push(value)?;
+        }
+        Ok(body)
+    }
 }
 
 /// Binned vehicle count data
@@ -205,7 +220,26 @@ impl TrafficData for OccupancyData {
 
     /// Length of binned data
     fn len() -> u64 {
-        5760
+        2880 * 2
+    }
+
+    /// Build JSON body from binned data
+    fn build_body(data: Vec<u8>) -> Result<Body> {
+        let mut body = Body::default();
+        for val in data.chunks(2) {
+            let value = (u16::from(val[0]) << 8 | u16::from(val[1])) as i16;
+            if value < 0 {
+                body.push::<Option<f32>>(None)?;
+            } else if value % 18 == 0 {
+                // Whole number; use integer to prevent .0 at end
+                let occ = i32::from(value) * 100 / 1800;
+                body.push(occ)?;
+            } else {
+                let occ = (value as f32 * 100.0 / 18.0).round() / 100.0;
+                body.push(occ)?;
+            }
+        }
+        Ok(body)
     }
 }
 
@@ -404,12 +438,7 @@ impl<T: TrafficData> TrafficQuery<T> {
             Ok(data) => data,
             Err(_) => self.read_from_file().await?,
         };
-        let mut body = Body::default();
-        // FIXME: add method to TrafficData
-        for value in data {
-            body.push(value)?;
-        }
-        Ok(body)
+        T::build_body(data)
     }
 
     /// Read archived data from a zip file
