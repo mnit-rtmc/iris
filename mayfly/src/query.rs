@@ -12,6 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use chrono::{Duration, Local, NaiveDate};
 use crate::common::{Body, Error, Result};
 use async_std::fs::{read_dir, File};
 use async_std::io::ReadExt;
@@ -161,8 +162,8 @@ pub trait TrafficData {
     fn len() -> u64;
 
     /// Build JSON body from binned data
-    fn build_body(data: Vec<u8>) -> Result<Body> {
-        let mut body = Body::default();
+    fn build_body(data: Vec<u8>, max_age: Option<u64>) -> Result<Body> {
+        let mut body = Body::default().with_max_age(max_age);
         for value in data {
             let value = value as i8;
             let value = if value >= 0 {
@@ -224,9 +225,9 @@ impl TrafficData for OccupancyData {
     }
 
     /// Build JSON body from binned data
-    fn build_body(data: Vec<u8>) -> Result<Body> {
-        let mut body = Body::default();
-        for val in data.chunks(2) {
+    fn build_body(data: Vec<u8>, max_age: Option<u64>) -> Result<Body> {
+        let mut body = Body::default().with_max_age(max_age);
+        for val in data.chunks_exact(2) {
             let value = (u16::from(val[0]) << 8 | u16::from(val[1])) as i16;
             if value < 0 {
                 body.push::<Option<f32>>(None)?;
@@ -267,7 +268,7 @@ pub struct TrafficQuery<T: TrafficData> {
 }
 
 /// Parse year parameter
-fn parse_year(year: &str) -> Result<u32> {
+fn parse_year(year: &str) -> Result<i32> {
     match year.parse() {
         Ok(y) if y >= 1900 && y <= 9999 => Ok(y),
         _ => Err(Error::InvalidDate),
@@ -291,16 +292,16 @@ fn parse_day(day: &str) -> Result<u32> {
 }
 
 /// Check if a date is valid
-fn parse_date(date: &str) -> Result<(u32, u32, u32)> {
+fn parse_date(date: &str) -> Result<NaiveDate> {
     if date.len() == 8 {
-        Ok((
-            parse_year(&date[..4])?,
-            parse_month(&date[4..6])?,
-            parse_day(&date[6..8])?,
-        ))
-    } else {
-        Err(Error::InvalidDate)
+        let year = parse_year(&date[..4])?;
+        let month = parse_month(&date[4..6])?;
+        let day = parse_day(&date[6..8])?;
+        if let Some(date) = NaiveDate::from_ymd_opt(year, month, day) {
+            return Ok(date);
+        }
     }
+    Err(Error::InvalidDate)
 }
 
 impl DistrictQuery {
@@ -438,7 +439,21 @@ impl<T: TrafficData> TrafficQuery<T> {
             Ok(data) => data,
             Err(_) => self.read_from_file().await?,
         };
-        T::build_body(data)
+        T::build_body(data, self.max_age())
+    }
+
+    /// Get max age for caching
+    fn max_age(&self) -> Option<u64> {
+        if let Ok(date) = parse_date(&self.date) {
+            let today = Local::today().naive_local();
+            if today > date + Duration::days(2) {
+                Some(7 * 24 * 60 * 60)
+            } else {
+                Some(30)
+            }
+        } else {
+            None
+        }
     }
 
     /// Read archived data from a zip file

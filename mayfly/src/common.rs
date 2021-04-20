@@ -48,6 +48,9 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// JSON body (array of values)
 #[derive(Default)]
 pub struct Body {
+    /// Max age in seconds
+    max_age: Option<u64>,
+    /// Response body
     body: String,
 }
 
@@ -73,6 +76,13 @@ impl From<Error> for tide::Result {
 
 /// Build JSON response from data
 impl Body {
+    /// Set the max-age
+    pub fn with_max_age(mut self, max_age: Option<u64>) -> Self {
+        self.max_age = max_age;
+        self
+    }
+
+    /// Push a value to end of body
     pub fn push<T: Serialize>(&mut self, value: T) -> Result<()> {
         if self.body.len() > 0 {
             self.body.push(',');
@@ -99,9 +109,17 @@ impl From<Body> for String {
 
 impl From<Body> for tide::Result {
     fn from(body: Body) -> Self {
-        Ok(Response::builder(StatusCode::Ok)
-            .content_type("application/json")
-            .body(String::from(body))
-            .build())
+        if let Some(max_age) = body.max_age {
+            Ok(Response::builder(StatusCode::Ok)
+                .content_type("application/json")
+                .body(String::from(body))
+                .header("cache-control", &format!("max-age={}", max_age))
+                .build())
+        } else {
+            Ok(Response::builder(StatusCode::Ok)
+                .content_type("application/json")
+                .body(String::from(body))
+                .build())
+        }
     }
 }
