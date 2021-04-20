@@ -572,7 +572,12 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.add(char_bitmap);
 			logStore(char_width);
 			logStore(char_bitmap);
-			mess.storeProps();
+			try {
+				mess.storeProps();
+			} catch (NoSuchName ex) {
+				// SESA char matrix V20170904: 
+				// ignore bad characterWidth
+			}
 			count++;
 			if (count % 20 == 0 && !controller.isFailed())
 				setSuccess(true);
