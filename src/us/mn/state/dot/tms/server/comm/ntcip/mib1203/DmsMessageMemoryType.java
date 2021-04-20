@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +19,7 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
  * Enumeration of memory types.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public enum DmsMessageMemoryType {
 	undefined	(false),
@@ -25,7 +27,8 @@ public enum DmsMessageMemoryType {
 	permanent	(true),
 	changeable	(true),
 	_volatile	(true),
-	currentBuffer	(false),
+	currentBuffer	(true), // Changed to true to support message 
+				// restore after Skyline power cycle events
 	schedule	(true),
 	blank		(true);
 
