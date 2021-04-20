@@ -69,7 +69,7 @@ async fn main() -> tide::Result<()> {
     add_routes!(app, "comm_config");
     add_routes!(app, "comm_link");
     add_routes!(app, "controller");
-    app.listen("127.0.0.1:8080").await?;
+    app.listen("127.0.0.1:3737").await?;
     Ok(())
 }
 
