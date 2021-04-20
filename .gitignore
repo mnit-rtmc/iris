@@ -3,8 +3,6 @@ lib/iris-client.properties
 build/
 iris-server*
 iris-client*
-graft/target*
-honeybee/target*
 *.rej
 *.orig
 *.swp
