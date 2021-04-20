@@ -2510,7 +2510,9 @@ CREATE TABLE iris.sign_config (
 	monochrome_background INTEGER NOT NULL,
 	color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
 	default_font VARCHAR(16) REFERENCES iris.font,
-	exclude_font VARCHAR(16) REFERENCES iris.font
+	exclude_font VARCHAR(16) REFERENCES iris.font,
+	module_width INTEGER,
+	module_height INTEGER,
 );
 
 CREATE TRIGGER sign_config_notify_trig
@@ -2521,7 +2523,8 @@ CREATE VIEW sign_config_view AS
 	SELECT name, face_width, face_height, border_horiz, border_vert,
 	       pitch_horiz, pitch_vert, pixel_width, pixel_height, char_width,
 	       char_height, monochrome_foreground, monochrome_background,
-	       cs.description AS color_scheme, default_font, exclude_font
+	       cs.description AS color_scheme, default_font, exclude_font,
+	       module_width, module_height
 	FROM iris.sign_config
 	JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
 GRANT SELECT ON sign_config_view TO PUBLIC;
