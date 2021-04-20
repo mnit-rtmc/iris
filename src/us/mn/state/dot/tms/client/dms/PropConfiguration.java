@@ -19,9 +19,12 @@ import java.awt.Component;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JTextField;
 import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.SignConfig;
@@ -35,6 +38,7 @@ import us.mn.state.dot.tms.utils.HexString;
 import static us.mn.state.dot.tms.units.Distance.Units.INCHES;
 import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * PropConfiguration is a GUI panel for displaying sign configuration on a
@@ -146,6 +150,12 @@ public class PropConfiguration extends IPanel {
 	/** Exclude font combo box */
 	private final JComboBox<Font> ex_font_cbx = new JComboBox<Font>();
 
+	/** Module width edit field */
+	private final JTextField module_width_txt = new JTextField(4);
+
+	/** Module height edit field */
+	private final JTextField module_height_txt = new JTextField(4);
+
 	/** User session */
 	private final Session session;
 
@@ -194,6 +204,10 @@ public class PropConfiguration extends IPanel {
 		add(font_height_lbl, Stretch.LAST);
 		add("dms.font.exclude");
 		add(ex_font_cbx, Stretch.LAST);
+		add("dms.module.width");
+		add(module_width_txt, Stretch.LAST);
+		add("dms.module.height");
+		add(module_height_txt, Stretch.LAST);
 		font_cbx.setAction(new IAction("font") {
 			protected void doActionPerformed(ActionEvent e) {
 				config.setDefaultFont(
@@ -210,6 +224,20 @@ public class PropConfiguration extends IPanel {
 		});
 		ex_font_cbx.setModel(new IComboBoxModel<Font>(
 			session.getSonarState().getDmsCache().getFontModel()));
+		module_width_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				config.setModuleWidth(SString.stringToInt(
+					module_width_txt.getText()));
+			}
+		});
+		module_height_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				config.setModuleHeight(SString.stringToInt(
+					module_height_txt.getText()));
+			}
+		});
 		updateAttribute(null);
 	}
 
@@ -217,6 +245,8 @@ public class PropConfiguration extends IPanel {
 	public void updateEditMode() {
 		font_cbx.setEnabled(canWrite("defaultFont"));
 		ex_font_cbx.setEnabled(canWrite("excludeFont"));
+		module_width_txt.setEnabled(canWrite("moduleWidth"));
+		module_height_txt.setEnabled(canWrite("moduleHeight"));
 	}
 
 	/** Update one attribute on the form tab */
@@ -251,6 +281,14 @@ public class PropConfiguration extends IPanel {
 		}
 		if (null == a || a.equals("excludeFont"))
 			ex_font_cbx.setSelectedItem(sc.getExcludeFont());
+		if (null == a || a.equals("moduleHeight")) {
+			module_height_txt.setText(
+				SString.intToString(sc.getModuleHeight()));
+		}
+		if (null == a || a.equals("moduleWidth")) {
+			module_width_txt.setText(
+				SString.intToString(sc.getModuleWidth()));
+		}
 	}
 
 	/** Calculate the height of the default font on the sign */

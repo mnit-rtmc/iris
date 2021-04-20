@@ -75,7 +75,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 			String template = "sc_" + pxw + "x" + pxh + "_%d";
 			String n = createUniqueName(template);
 			SignConfigImpl sci = new SignConfigImpl(n, fw, fh, bh,
-				bv, ph, pv, pxw, pxh, cw, ch, mf, mb, cs, "", "");
+				bv, ph, pv, pxw, pxh, cw, ch, mf, mb, cs, 
+				"", "", 0, 0);
 			return createNotify(sci);
 		}
 	}
@@ -106,7 +107,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 			"border_horiz, border_vert, pitch_horiz, pitch_vert, " +
 			"pixel_width, pixel_height, char_width, char_height, " +
 			"monochrome_foreground, monochrome_background, " +
-			"color_scheme, default_font, exclude_font FROM iris." +
+			"color_scheme, default_font, exclude_font, " +
+			"module_width, module_height FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -135,6 +137,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		map.put("color_scheme", color_scheme.ordinal());
 		map.put("default_font", default_font);
 		map.put("exclude_font", exclude_font);
+		map.put("module_width", module_width);
+		map.put("module_height", module_height);
 		return map;
 	}
 
@@ -167,14 +171,16 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		     row.getInt(13),     // monochrome_background
 		     row.getInt(14),     // color_scheme
 		     row.getString(15),  // default_font
-		     row.getString(16)   // exclude_font
+		     row.getString(16),  // exclude_font
+		     row.getInt(17),     // module_width
+		     row.getInt(18)      // module_height
 		);
 	}
 
 	/** Create a sign config */
 	private SignConfigImpl(String n, int fw, int fh, int bh, int bv, int ph,
 		int pv, int pxw, int pxh, int cw, int ch, int mf, int mb,
-		int cs, String df, String ef)
+		int cs, String df, String ef, int mw, int mh)
 	{
 		super(n);
 		face_width = fw;
@@ -192,6 +198,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		color_scheme = ColorScheme.fromOrdinal(cs);
 		default_font = FontHelper.lookup(df);
 		exclude_font = FontHelper.lookup(ef);
+		module_width = mw;
+		module_height = mh;
 	}
 
 	/** Width of the sign face (mm) */
@@ -355,5 +363,51 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 	@Override
 	public Font getExcludeFont() {
 		return exclude_font;
+	}
+
+	/** Module width (pixels) */
+	private int module_width;
+
+	/** Get module width (pixels) */
+	@Override
+	public int getModuleWidth() {
+		return module_width;
+	}
+
+	/** Set the module width (pixels) */
+	@Override
+	public void setModuleWidth(int mw) {
+		module_width = mw;
+	}
+
+	/** Set the module width (pixels) */
+	public void doSetModuleWidth(int mw) throws TMSException {
+		if (mw != module_width) {
+			store.update(this, "module_width", mw);
+			setModuleWidth(mw);
+		}
+	}
+
+	/** Module height (pixels) */
+	private int module_height;
+
+	/** Get height of the sign face (mm) */
+	@Override
+	public int getModuleHeight() {
+		return module_height;
+	}
+
+	/** Set the module height (pixels) */
+	@Override
+	public void setModuleHeight(int mh) {
+		module_height = mh;
+	}
+
+	/** Set the module height (pixels) */
+	public void doSetModuleHeight(int mh) throws TMSException {
+		if (mh != module_height) {
+			store.update(this, "module_height", mh);
+			setModuleHeight(mh);
+		}
 	}
 }
