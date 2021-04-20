@@ -1,0 +1,13 @@
+[Unit]
+Description=Mayfly (Traffic Data)
+StartLimitIntervalSec=0
+
+[Service]
+Environment=RUST_LOG=warn
+ExecStart=/usr/local/bin/mayfly
+Restart=always
+RestartSec=2
+User=tms
+
+[Install]
+WantedBy=multi-user.target

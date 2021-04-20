@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Mayfly - IRIS Traffic Data</title>
+    <link rel="stylesheet" href="mayfly.css">
+</head>
+
+<body>
+<h2>Mayfly - Traffic Data Archive</h2>
+<p>
+    This site is for the distribution of traffic data collected by the IRIS
+    traffic management system.  All response bodies are JSON arrays.
+</p>
+
+<table>
+  <tr>
+    <th>Path</th>
+    <th>Response Body</th>
+  </tr>
+  <tr>
+    <td class="path">/mayfly/districts</td>
+    <td>List of districts in the archive</td>
+  </tr>
+  <tr>
+    <td class="path">/mayfly/years</td>
+    <td>List of years with traffic data</td>
+  </tr>
+  <tr>
+    <td class="path">/mayfly/dates</td>
+    <td>List of dates with traffic data in a year</td>
+  </tr>
+  <tr>
+    <td class="path">/mayfly/corridors</td>
+    <td>(unimplemented) List of corridors configured on a given date</td>
+  </tr>
+  <tr>
+    <td class="path">/mayfly/nodes</td>
+    <td>(unimplemented) List of nodes on a corridor on a given date</td>
+  </tr>
+  <tr>
+    <td class="path">/mayfly/detectors</td>
+    <td>List of detectors with traffic data on a given date</td>
+  </tr>
+  <tr>
+    <td class="path">/mayfly/vehicles</td>
+    <td>Vehicle count data for one detector on a given date</td>
+  </tr>
+  <tr>
+    <td class="path">/mayfly/speed</td>
+    <td>Speed data for one detector on a given date</td>
+  </tr>
+  <tr>
+    <td class="path">/mayfly/occupancy</td>
+    <td>Occupancy data for one detector on a given date</td>
+  </tr>
+</table>
+
+<hr>
+
+<table>
+  <tr>
+    <th>Path</th>
+    <td class="path">/mayfly/districts</td>
+  </tr>
+  <tr>
+    <th>Query Params</th>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <th>Example URI</th>
+    <td class="example">/mayfly/districts</td>
+  </tr>
+</table>
+
+<hr>
+
+<table>
+  <tr>
+    <th>Path</th>
+    <td class="path" colspan="2">/mayfly/years</td>
+  </tr>
+  <tr>
+    <th>Query Params</th>
+    <td>district</td><td class="example">default tms</td>
+  </tr>
+  <tr>
+    <th>Example URI</th>
+    <td class="example" colspan="2">/mayfly/years?district=d3</td>
+  </tr>
+</table>
+
+<hr>
+
+<table>
+  <tr>
+    <th>Path</th>
+    <td class="path" colspan="2">/mayfly/dates</td>
+  </tr>
+  <tr>
+    <th rowspan="2">Query Params</th>
+    <td>district</td><td class="example">default tms</td>
+  </tr>
+  <tr>
+    <td>year</td><td class="example">4 digits</td>
+  </tr>
+  <tr>
+    <th>Example URI</th>
+    <td class="example" colspan="2">/mayfly/dates?year=2021</td>
+  </tr>
+</table>
+
+<hr>
+
+<table>
+  <tr>
+    <th>Path</th>
+    <td class="path" colspan="2">/mayfly/corridors</td>
+  </tr>
+  <tr>
+    <th rowspan="2">Query Params</th>
+    <td>district</td><td class="example">default tms</td>
+  </tr>
+  <tr>
+    <td>date</td><td class="example">8 digits yyyyMMdd</td>
+  </tr>
+  <tr>
+    <th>Example URI</th>
+    <td class="example" colspan="2">/mayfly/corridors?date=20210109</td>
+  </tr>
+</table>
+
+<hr>
+
+<table>
+  <tr>
+    <th>Path</th>
+    <td class="path" colspan="2">/mayfly/nodes</td>
+  </tr>
+  <tr>
+    <th rowspan="3">Query Params</th>
+    <td>district</td><td class="example">default tms</td>
+  </tr>
+  <tr>
+    <td>date</td><td class="example">8 digits yyyyMMdd</td>
+  </tr>
+  <tr>
+    <td>corridor</td><td class="example">identifier</td>
+  </tr>
+  <tr>
+    <th>Example URI</th>
+    <td class="example" colspan="2">/mayfly/nodes?date=20210415&amp;corridor=94EB</td>
+  </tr>
+</table>
+
+<hr>
+
+<table>
+  <tr>
+    <th>Path</th>
+    <td class="path" colspan="2">/mayfly/detectors</td>
+  </tr>
+  <tr>
+    <th rowspan="2">Query Params</th>
+    <td>district</td><td class="example">default tms</td>
+  </tr>
+  <tr>
+    <td>date</td><td class="example">8 digits yyyyMMdd</td>
+  </tr>
+  <tr>
+    <th>Example URI</th>
+    <td class="example" colspan="2">/mayfly/detectors?date=20210314</td>
+  </tr>
+</table>
+
+<hr>
+
+<table>
+  <tr>
+    <th>Path</th>
+    <td class="path" colspan="2">/mayfly/vehicles</td>
+  </tr>
+  <tr>
+    <th rowspan="4">Query Params</th>
+    <td>district</td><td class="example">default tms</td>
+  </tr>
+  <tr>
+    <td>date</td><td class="example">8 digits yyyyMMdd</td>
+  </tr>
+  <tr>
+    <td>detector</td><td class="example">identifier</td>
+  </tr>
+  <tr>
+    <th>Example URI</th>
+    <td class="example" colspan="2">/mayfly/vehicles?date=20210225&amp;detector=363</td>
+  </tr>
+</table>
+
+<hr>
+
+<table>
+  <tr>
+    <th>Path</th>
+    <td class="path" colspan="2">/mayfly/speed</td>
+  </tr>
+  <tr>
+    <th rowspan="4">Query Params</th>
+    <td>district</td><td class="example">default tms</td>
+  </tr>
+  <tr>
+    <td>date</td><td class="example">8 digits yyyyMMdd</td>
+  </tr>
+  <tr>
+    <td>detector</td><td class="example">identifier</td>
+  </tr>
+  <tr>
+    <th>Example URI</th>
+    <td class="example" colspan="2">/mayfly/speed?date=20210225&amp;detector=363</td>
+  </tr>
+</table>
+
+<hr>
+
+<table>
+  <tr>
+    <th>Path</th>
+    <td class="path" colspan="2">/mayfly/occupancy</td>
+  </tr>
+  <tr>
+    <th rowspan="4">Query Params</th>
+    <td>district</td><td class="example">default tms</td>
+  </tr>
+  <tr>
+    <td>date</td><td class="example">8 digits yyyyMMdd</td>
+  </tr>
+  <tr>
+    <td>detector</td><td class="example">identifier</td>
+  </tr>
+  <tr>
+    <th>Example URI</th>
+    <td class="example" colspan="2">/mayfly/occupancy?date=20210225&amp;detector=363</td>
+  </tr>
+</table>
+
+</body>
+</html>
