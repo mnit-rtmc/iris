@@ -12,12 +12,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use chrono::{Duration, Local, NaiveDate};
 use crate::common::{Body, Error, Result};
 use async_std::fs::{read_dir, File};
 use async_std::io::ReadExt;
 use async_std::path::{Path, PathBuf};
 use async_std::stream::StreamExt;
+use chrono::{Duration, Local, NaiveDate};
 use serde::Deserialize;
 use std::io::Read as _;
 use std::marker::PhantomData;
@@ -53,7 +53,7 @@ fn year_path(district: &Option<String>, year: &str) -> PathBuf {
 /// Get path to a date directory (async_std PathBuf)
 fn date_path(district: &Option<String>, date: &str) -> PathBuf {
     assert_eq!(date.len(), 8);
-    let mut path = year_path(district, &date[..4]);
+    let mut path = year_path(district, date.get(..4).unwrap_or(""));
     path.push(date);
     path
 }
@@ -64,7 +64,7 @@ fn zip_path(district: &Option<String>, date: &str) -> std::path::PathBuf {
     let mut path = std::path::PathBuf::from(BASE_PATH);
     let district = district.as_deref().unwrap_or(DISTRICT_DEFAULT);
     path.push(district);
-    path.push(&date[..4]); // year
+    path.push(date.get(..4).unwrap_or("")); // year
     path.push(date);
     path.set_extension(EXT);
     path
@@ -166,11 +166,7 @@ pub trait TrafficData {
         let mut body = Body::default().with_max_age(max_age);
         for value in data {
             let value = value as i8;
-            let value = if value >= 0 {
-                Some(value)
-            } else {
-                None
-            };
+            let value = if value >= 0 { Some(value) } else { None };
             body.push(value)?;
         }
         Ok(body)
@@ -294,9 +290,9 @@ fn parse_day(day: &str) -> Result<u32> {
 /// Check if a date is valid
 fn parse_date(date: &str) -> Result<NaiveDate> {
     if date.len() == 8 {
-        let year = parse_year(&date[..4])?;
-        let month = parse_month(&date[4..6])?;
-        let day = parse_day(&date[6..8])?;
+        let year = parse_year(date.get(..4).unwrap_or(""))?;
+        let month = parse_month(date.get(4..6).unwrap_or(""))?;
+        let day = parse_day(date.get(6..8).unwrap_or(""))?;
         if let Some(date) = NaiveDate::from_ymd_opt(year, month, day) {
             return Ok(date);
         }
@@ -358,7 +354,7 @@ fn check_date(name: &str, dir: bool) -> Option<String> {
     let dt = if dir {
         name
     } else if name.len() == 16 && name.ends_with(DEXT) {
-        &name[..8]
+        name.get(..8).unwrap_or("")
     } else {
         &""
     };
