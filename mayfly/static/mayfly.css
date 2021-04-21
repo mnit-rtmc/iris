@@ -30,3 +30,13 @@ td {
     font-family: monospace;
     background: #e0e0f0;
 }
+.upath {
+    white-space: nowrap;
+    font-family: monospace;
+    text-decoration: line-through;
+    background: #e99;
+}
+.unimplemented {
+    text-decoration: line-through;
+    background: #e99;
+}
