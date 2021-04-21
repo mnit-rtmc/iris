@@ -175,7 +175,7 @@ pub trait TrafficData {
 
 /// Binned vehicle count data
 #[derive(Clone, Copy)]
-pub struct VehicleData;
+pub struct CountData;
 
 /// Binned speed data
 #[derive(Clone, Copy)]
@@ -185,7 +185,7 @@ pub struct SpeedData;
 #[derive(Clone, Copy)]
 pub struct OccupancyData;
 
-impl TrafficData for VehicleData {
+impl TrafficData for CountData {
     /// Archive file extension
     fn ext() -> &'static str {
         "v30"
