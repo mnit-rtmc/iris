@@ -35,6 +35,99 @@ const DEXT: &str = ".traffic";
 /// Traffic file extension without dot
 const EXT: &str = "traffic";
 
+/// Query for districts in archive
+#[derive(Default, Deserialize)]
+pub struct DistrictQuery {}
+
+/// Query for years with archived data
+#[derive(Deserialize)]
+pub struct YearQuery {
+    /// District ID
+    district: Option<String>,
+}
+
+/// Query for dates with archived data
+#[derive(Deserialize)]
+pub struct DateQuery {
+    /// District ID
+    district: Option<String>,
+    /// Year to query
+    year: String,
+}
+
+/// Query for detectors with archived data
+#[derive(Deserialize)]
+pub struct DetectorQuery {
+    /// District ID
+    pub district: Option<String>,
+    /// Date (8-character yyyyMMdd)
+    pub date: String,
+}
+
+/// Traffic data type
+pub trait TrafficData {
+    /// Archive file extension
+    fn ext() -> &'static str;
+
+    /// Check file length
+    fn check_len(len: u64) -> Result<()> {
+        if len == Self::len() {
+            Ok(())
+        } else {
+            Err(Error::InvalidData)
+        }
+    }
+
+    /// Length of binned data
+    fn len() -> u64;
+
+    /// Build JSON body from binned data
+    fn build_body(data: Vec<u8>, max_age: Option<u64>) -> Result<Body> {
+        let mut body = Body::default().with_max_age(max_age);
+        for value in data {
+            let value = value as i8;
+            let value = if value >= 0 { Some(value) } else { None };
+            body.push(value)?;
+        }
+        Ok(body)
+    }
+}
+
+/// Binned vehicle count data
+#[derive(Clone, Copy)]
+pub struct CountData;
+
+/// Binned speed data
+#[derive(Clone, Copy)]
+pub struct SpeedData;
+
+/// Binned occupancy data
+#[derive(Clone, Copy)]
+pub struct OccupancyData;
+
+/// Query for archived traffic data
+#[derive(Deserialize)]
+pub struct TrafficQuery<T: TrafficData> {
+    /// Traffic data type
+    _data: Option<PhantomData<T>>,
+    /// District ID
+    district: Option<String>,
+    /// Date (8-character yyyyMMdd)
+    date: String,
+    /// Detector ID
+    detector: String,
+    /// Binning interval
+    _bin_secs: Option<u32>,
+    /// Minimum vehicle length (logged vehicles)
+    _length_ft_min: Option<u32>,
+    /// Maximum vehicle length (logged vehicles)
+    _length_ft_max: Option<u32>,
+    /// Minimum recorded speed (logged vehicles)
+    _speed_mph_min: Option<u32>,
+    /// Maximum recorded speed (logged vehicles)
+    _speed_mph_max: Option<u32>,
+}
+
 /// Get path to district directory (async_std PathBuf)
 fn district_path(district: &Option<String>) -> PathBuf {
     let mut path = PathBuf::from(BASE_PATH);
@@ -113,154 +206,6 @@ fn scan_zip(
         }
     }
     Ok(())
-}
-
-/// Query for districts in archive
-#[derive(Default, Deserialize)]
-pub struct DistrictQuery {}
-
-/// Query for years with archived data
-#[derive(Deserialize)]
-pub struct YearQuery {
-    /// District ID
-    district: Option<String>,
-}
-
-/// Query for dates with archived data
-#[derive(Deserialize)]
-pub struct DateQuery {
-    /// District ID
-    district: Option<String>,
-    /// Year to query
-    year: String,
-}
-
-/// Query for detectors with archived data
-#[derive(Deserialize)]
-pub struct DetectorQuery {
-    /// District ID
-    pub district: Option<String>,
-    /// Date (8-character yyyyMMdd)
-    pub date: String,
-}
-
-/// Traffic data type
-pub trait TrafficData {
-    /// Archive file extension
-    fn ext() -> &'static str;
-
-    /// Check file length
-    fn check_len(len: u64) -> Result<()> {
-        if len == Self::len() {
-            Ok(())
-        } else {
-            Err(Error::InvalidData)
-        }
-    }
-
-    /// Length of binned data
-    fn len() -> u64;
-
-    /// Build JSON body from binned data
-    fn build_body(data: Vec<u8>, max_age: Option<u64>) -> Result<Body> {
-        let mut body = Body::default().with_max_age(max_age);
-        for value in data {
-            let value = value as i8;
-            let value = if value >= 0 { Some(value) } else { None };
-            body.push(value)?;
-        }
-        Ok(body)
-    }
-}
-
-/// Binned vehicle count data
-#[derive(Clone, Copy)]
-pub struct CountData;
-
-/// Binned speed data
-#[derive(Clone, Copy)]
-pub struct SpeedData;
-
-/// Binned occupancy data
-#[derive(Clone, Copy)]
-pub struct OccupancyData;
-
-impl TrafficData for CountData {
-    /// Archive file extension
-    fn ext() -> &'static str {
-        "v30"
-    }
-
-    /// Length of binned data
-    fn len() -> u64 {
-        2880
-    }
-}
-
-impl TrafficData for SpeedData {
-    /// Archive file extension
-    fn ext() -> &'static str {
-        "s30"
-    }
-
-    /// Length of binned data
-    fn len() -> u64 {
-        2880
-    }
-}
-
-impl TrafficData for OccupancyData {
-    /// Archive file extension
-    fn ext() -> &'static str {
-        "c30"
-    }
-
-    /// Length of binned data
-    fn len() -> u64 {
-        2880 * 2
-    }
-
-    /// Build JSON body from binned data
-    fn build_body(data: Vec<u8>, max_age: Option<u64>) -> Result<Body> {
-        let mut body = Body::default().with_max_age(max_age);
-        for val in data.chunks_exact(2) {
-            let value = (u16::from(val[0]) << 8 | u16::from(val[1])) as i16;
-            if value < 0 {
-                body.push::<Option<f32>>(None)?;
-            } else if value % 18 == 0 {
-                // Whole number; use integer to prevent .0 at end
-                let occ = i32::from(value) * 100 / 1800;
-                body.push(occ)?;
-            } else {
-                let occ = (value as f32 * 100.0 / 18.0).round() / 100.0;
-                body.push(occ)?;
-            }
-        }
-        Ok(body)
-    }
-}
-
-/// Query for archived traffic data
-#[derive(Deserialize)]
-pub struct TrafficQuery<T: TrafficData> {
-    /// Traffic data type
-    _data: Option<PhantomData<T>>,
-    /// District ID
-    district: Option<String>,
-    /// Date (8-character yyyyMMdd)
-    date: String,
-    /// Detector ID
-    detector: String,
-    /// Binning interval
-    _bin_secs: Option<u32>,
-    /// Minimum vehicle length (logged vehicles)
-    _length_ft_min: Option<u32>,
-    /// Maximum vehicle length (logged vehicles)
-    _length_ft_max: Option<u32>,
-    /// Minimum recorded speed (logged vehicles)
-    _speed_mph_min: Option<u32>,
-    /// Maximum recorded speed (logged vehicles)
-    _speed_mph_max: Option<u32>,
 }
 
 /// Parse year parameter
@@ -409,6 +354,61 @@ fn file_ext(ext: &str) -> Option<&str> {
         Some(ext)
     } else {
         None
+    }
+}
+
+impl TrafficData for CountData {
+    /// Archive file extension
+    fn ext() -> &'static str {
+        "v30"
+    }
+
+    /// Length of binned data
+    fn len() -> u64 {
+        2880
+    }
+}
+
+impl TrafficData for SpeedData {
+    /// Archive file extension
+    fn ext() -> &'static str {
+        "s30"
+    }
+
+    /// Length of binned data
+    fn len() -> u64 {
+        2880
+    }
+}
+
+impl TrafficData for OccupancyData {
+    /// Archive file extension
+    fn ext() -> &'static str {
+        "c30"
+    }
+
+    /// Length of binned data
+    fn len() -> u64 {
+        2880 * 2
+    }
+
+    /// Build JSON body from binned data
+    fn build_body(data: Vec<u8>, max_age: Option<u64>) -> Result<Body> {
+        let mut body = Body::default().with_max_age(max_age);
+        for val in data.chunks_exact(2) {
+            let value = (u16::from(val[0]) << 8 | u16::from(val[1])) as i16;
+            if value < 0 {
+                body.push::<Option<f32>>(None)?;
+            } else if value % 18 == 0 {
+                // Whole number; use integer to prevent .0 at end
+                let occ = i32::from(value) * 100 / 1800;
+                body.push(occ)?;
+            } else {
+                let occ = (value as f32 * 100.0 / 18.0).round() / 100.0;
+                body.push(occ)?;
+            }
+        }
+        Ok(body)
     }
 }
 
