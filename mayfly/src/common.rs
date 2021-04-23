@@ -13,7 +13,6 @@
 // GNU General Public License for more details.
 //
 use async_std::io;
-use serde::Serialize;
 use tide::{Response, StatusCode};
 use zip::result::ZipError;
 
@@ -23,9 +22,6 @@ pub enum Error {
     /// I/O error
     #[error("I/O {0}")]
     Io(#[from] io::Error),
-    /// Serde JSON error
-    #[error("JSON serialization")]
-    Json(#[from] serde_json::Error),
     /// Invalid query
     #[error("Invalid query")]
     InvalidQuery,
@@ -83,15 +79,13 @@ impl Body {
     }
 
     /// Push a value to end of body
-    pub fn push<T: Serialize>(&mut self, value: T) -> Result<()> {
+    pub fn push(&mut self, value: String) {
         if self.body.len() > 0 {
             self.body.push(',');
         } else {
             self.body.push('[');
         }
-        let j = serde_json::to_string(&value)?;
-        self.body.push_str(&j);
-        Ok(())
+        self.body.push_str(&value);
     }
 }
 

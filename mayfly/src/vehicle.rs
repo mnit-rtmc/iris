@@ -19,19 +19,19 @@ use crate::query::TrafficData;
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct VehicleEvent {
     /// Duration vehicle was detected (ms)
-    duration: Option<u32>,
+    pub duration: Option<u32>,
 
     /// Headway from start of previous vehicle to this one (ms)
-    headway: Option<u32>,
+    pub headway: Option<u32>,
 
     /// Time stamp (ms of day; 0 - 86.4 million)
-    stamp: Option<u32>,
+    pub stamp: Option<u32>,
 
     /// Vehicle speed (mph)
-    speed: Option<u32>,
+    pub speed: Option<u32>,
 
     /// Vehicle length (ft)
-    length: Option<u32>,
+    pub length: Option<u32>,
 }
 
 /// Event from vehicle log
@@ -182,18 +182,6 @@ impl Event {
             }
         }
     }
-
-    /// Ensure time stamps don't go backward
-    fn check_order(&self, latest: Option<u32>) -> Result<()> {
-        if let Some(latest) = latest {
-            if let Some(stamp) = self.stamp() {
-                if stamp < latest {
-                    return Err(Error::InvalidData);
-                }
-            }
-        }
-        Ok(())
-    }
 }
 
 impl Log {
@@ -205,7 +193,15 @@ impl Log {
         }
         let mut ev = Event::new(line)?;
         ev.propogate_stamp(self.previous);
-        ev.check_order(self.latest)?;
+        // Add Reset if time stamp went backwards
+        if let Some(latest) = self.latest {
+            if let Some(stamp) = ev.stamp() {
+                if stamp < latest {
+                    self.events.push(Event::Reset);
+                    self.latest = Some(stamp);
+                }
+            }
+        }
         self.previous = ev.stamp();
         if self.previous.is_some() {
             self.latest = self.previous;
@@ -303,18 +299,31 @@ impl<T: TrafficData> Bin<T> {
         match veh.stamp {
             Some(stamp) => {
                 let per = period_30_second(stamp);
-                if per + 1 < self.periods.len() || per >= 2880 {
+                if per >= 2880 {
                     return Err(Error::InvalidData);
                 }
                 while self.periods.len() <= per {
-                    self.periods.push(T::new(self.reset));
+                    let mut data = T::default();
+                    if self.reset {
+                        data.reset();
+                    }
+                    self.periods.push(data);
                 }
                 let data = &mut self.periods[per];
                 data.vehicle(veh);
                 self.reset = false;
                 Ok(())
             }
-            None => Err(Error::InvalidData),
+            None => {
+                // No timestamp; add to last period and hope for the best!
+                let len = self.periods.len();
+                if len > 0 {
+                    let data = &mut self.periods[len - 1];
+                    data.vehicle(veh);
+                    data.reset();
+                }
+                Ok(())
+            }
         }
     }
 
@@ -322,7 +331,11 @@ impl<T: TrafficData> Bin<T> {
     fn finish(self) -> Vec<T> {
         let mut periods = self.periods;
         while periods.len() < 2880 {
-            periods.push(T::new(self.reset));
+            let mut data = T::default();
+            if self.reset {
+                data.reset();
+            }
+            periods.push(data);
         }
         periods
     }

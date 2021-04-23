@@ -89,35 +89,43 @@ pub trait TrafficData: Default {
         debug_assert_eq!(val.len(), Self::bin_bytes());
         let value = val[0] as i8;
         if value >= 0 {
-            Ok(serde_json::to_string(&value)?)
+            Ok(format!("{}", value))
         } else {
-            Ok(serde_json::to_string(&None::<i32>)?)
+            Ok("null".to_owned())
         }
     }
 
-    /// Create a new traffic data value
-    fn new(reset: bool) -> Self;
+    /// Set reset for traffic data
+    fn reset(&mut self);
 
     /// Add a vehicle to traffic data
     fn vehicle(&mut self, veh: &VehicleEvent);
 
     /// Get traffic data value as JSON
-    fn as_json(&self) -> String {
-        String::new()
-    }
+    fn as_json(&self) -> String;
 }
 
 /// Binned vehicle count data
 #[derive(Clone, Copy, Default)]
-pub struct CountData;
+pub struct CountData {
+    reset: bool,
+    count: u32,
+}
 
 /// Binned speed data
 #[derive(Clone, Copy, Default)]
-pub struct SpeedData;
+pub struct SpeedData {
+    reset: bool,
+    total: u32,
+    count: u32,
+}
 
 /// Binned occupancy data
 #[derive(Clone, Copy, Default)]
-pub struct OccupancyData;
+pub struct OccupancyData {
+    reset: bool,
+    duration: u32,
+}
 
 /// Query for archived traffic data
 #[derive(Deserialize)]
@@ -190,7 +198,7 @@ async fn scan_dir(
                 if !tp.is_symlink() {
                     if let Some(name) = entry.file_name().to_str() {
                         if let Some(value) = check(name, tp.is_dir()) {
-                            body.push(value)?;
+                            body.push(value);
                         }
                     }
                 }
@@ -214,7 +222,7 @@ fn scan_zip(
         if let Some(name) = ent.file_name() {
             if let Some(name) = name.to_str() {
                 if let Some(e) = check(name, false) {
-                    body.push(e)?;
+                    body.push(e);
                 }
             }
         }
@@ -396,13 +404,24 @@ impl TrafficData for CountData {
         1
     }
 
-    /// Create a new count data value
-    fn new(reset: bool) -> Self {
-        CountData {}
+    /// Set reset for count data
+    fn reset(&mut self) {
+        self.reset = true;
     }
 
     /// Add a vehicle to count data
-    fn vehicle(&mut self, veh: &VehicleEvent) {}
+    fn vehicle(&mut self, _veh: &VehicleEvent) {
+        self.count += 1;
+    }
+
+    /// Get count data value as JSON
+    fn as_json(&self) -> String {
+        if self.reset {
+            "null".to_owned()
+        } else {
+            format!("{}", self.count)
+        }
+    }
 }
 
 impl TrafficData for SpeedData {
@@ -416,13 +435,28 @@ impl TrafficData for SpeedData {
         1
     }
 
-    /// Create a new speed data value
-    fn new(reset: bool) -> Self {
-        SpeedData {}
+    /// Set reset for speed data
+    fn reset(&mut self) {
+        self.reset = true;
     }
 
     /// Add a vehicle to speed data
-    fn vehicle(&mut self, veh: &VehicleEvent) {}
+    fn vehicle(&mut self, veh: &VehicleEvent) {
+        if let Some(speed) = veh.speed {
+            self.total += speed;
+            self.count += 1;
+        }
+    }
+
+    /// Get speed data value as JSON
+    fn as_json(&self) -> String {
+        if self.reset || self.count == 0 {
+            "null".to_owned()
+        } else {
+            let speed = (self.total as f32 / self.count as f32).round();
+            format!("{}", speed as u32)
+        }
+    }
 }
 
 impl TrafficData for OccupancyData {
@@ -441,24 +475,42 @@ impl TrafficData for OccupancyData {
         debug_assert_eq!(val.len(), Self::bin_bytes());
         let value = (u16::from(val[0]) << 8 | u16::from(val[1])) as i16;
         if value < 0 {
-            Ok(serde_json::to_string(&None::<Option<i32>>)?)
+            Ok("null".to_owned())
         } else if value % 18 == 0 {
             // Whole number; use integer to prevent .0 at end
-            let occ = i32::from(value) * 100 / 1800;
-            Ok(serde_json::to_string(&occ)?)
+            Ok(format!("{}", value / 18))
         } else {
-            let occ = (value as f32 * 100.0 / 18.0).round() / 100.0;
-            Ok(serde_json::to_string(&occ)?)
+            Ok(format!("{:.2}", value as f32 / 18.0))
         }
     }
 
-    /// Create a new occupancy data value
-    fn new(reset: bool) -> Self {
-        OccupancyData {}
+    /// Set reset for occupancy data
+    fn reset(&mut self) {
+        self.reset = true;
     }
 
     /// Add a vehicle to occupancy data
-    fn vehicle(&mut self, veh: &VehicleEvent) {}
+    fn vehicle(&mut self, veh: &VehicleEvent) {
+        if let Some(duration) = veh.duration {
+            self.duration += duration;
+        }
+    }
+
+    /// Get occupancy data value as JSON
+    fn as_json(&self) -> String {
+        if self.reset {
+            "null".to_owned()
+        } else {
+            // Ranges from 0 - 30_000 (100%)
+            let val = self.duration;
+            if val % 300 == 0 {
+                // Whole number; use integer to prevent .0 at end
+                format!("{}", val / 300)
+            } else {
+                format!("{:.2}", val as f32 / 300.0)
+            }
+        }
+    }
 }
 
 impl<T: TrafficData> TrafficQuery<T> {
@@ -480,7 +532,7 @@ impl<T: TrafficData> TrafficQuery<T> {
         };
         let mut body = Body::default().with_max_age(max_age(&self.date));
         for val in data {
-            body.push(val)?;
+            body.push(val);
         }
         Ok(body)
     }
@@ -492,6 +544,7 @@ impl<T: TrafficData> TrafficQuery<T> {
             if let Ok(mut zip) = ZipArchive::new(file) {
                 let name = self.vlog_file_name();
                 if let Ok(zf) = zip.by_name(&name) {
+                    log::info!("opened {} in {}.{}", name, self.date, EXT);
                     let mut log = vehicle::Log::default();
                     let mut lines = std::io::BufReader::new(zf).lines();
                     while let Some(line) = lines.next() {
@@ -537,7 +590,7 @@ impl<T: TrafficData> TrafficQuery<T> {
         };
         let mut body = Body::default().with_max_age(max_age(&self.date));
         for val in data.chunks_exact(T::bin_bytes()) {
-            body.push(T::unpack(val)?)?;
+            body.push(T::unpack(val)?);
         }
         Ok(body)
     }
