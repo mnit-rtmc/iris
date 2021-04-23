@@ -273,5 +273,43 @@
   </tr>
 </table>
 
+<hr>
+
+<p>
+    Additional query filter parameters are available for the following paths:
+</p>
+<ul>
+    <li class="path">/mayfly/counts</li>
+    <li class="path">/mayfly/speed</li>
+    <li class="path">/mayfly/occupancy</li>
+    <li class="path">/mayfly/length</li>
+</ul>
+
+<table>
+  <tr>
+    <th rowspan="4">Query Params</th>
+    <td>length_min_ft</td>
+    <td class="example">Minimum vehicle length filter</td>
+  </tr>
+  <tr>
+    <td>length_max_ft</td>
+    <td class="example">Maximum vehicle length filter (non-inclusive)</td>
+  </tr>
+  <tr>
+    <td>speed_min_mph</td>
+    <td class="example">Minimum vehicle speed filter</td>
+  </tr>
+  <tr>
+    <td>speed_max_mph</td>
+    <td class="example">Maximum vehicle speed filter (non-inclusive)</td>
+  </tr>
+</table>
+
+<p>
+    These can be used, for example, for vehicle classification.
+    Adding <span class="path">length_min_ft=7&amp;length_max_ft=19</span> to
+    a query will return data for vehicles in that length range.
+</p>
+
 </body>
 </html>

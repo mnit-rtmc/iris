@@ -13,7 +13,7 @@
 // GNU General Public License for more details.
 //
 use crate::common::{Body, Error, Result};
-use crate::vehicle::{self, VehicleEvent};
+use crate::vehicle::{self, VehicleEvent, VehicleFilter};
 use async_std::fs::{read_dir, File};
 use async_std::io::{BufReader, ReadExt};
 use async_std::path::{Path, PathBuf};
@@ -144,16 +144,16 @@ pub struct TrafficQuery<T: TrafficData> {
     date: String,
     /// Detector ID
     detector: String,
-    /// Binning interval
-    _bin_secs: Option<u32>,
     /// Minimum vehicle length (logged vehicles)
-    _length_ft_min: Option<u32>,
+    length_ft_min: Option<u32>,
     /// Maximum vehicle length (logged vehicles)
-    _length_ft_max: Option<u32>,
+    length_ft_max: Option<u32>,
     /// Minimum recorded speed (logged vehicles)
-    _speed_mph_min: Option<u32>,
+    speed_mph_min: Option<u32>,
     /// Maximum recorded speed (logged vehicles)
-    _speed_mph_max: Option<u32>,
+    speed_mph_max: Option<u32>,
+    /// Binning interval (TODO)
+    _bin_secs: Option<u32>,
 }
 
 /// Get path to district directory (async_std PathBuf)
@@ -595,7 +595,7 @@ impl<T: TrafficData> TrafficQuery<T> {
                         log.append(&line?)?;
                     }
                     log.finish();
-                    let bin = log.bin_30_seconds::<T>()?;
+                    let bin = log.bin_30_seconds::<T>(self.filter())?;
                     return Ok(bin.iter().map(|d| d.as_json()).collect());
                 }
             }
@@ -614,11 +614,20 @@ impl<T: TrafficData> TrafficQuery<T> {
                 log.append(&line?)?;
             }
             log.finish();
-            let bin = log.bin_30_seconds::<T>()?;
+            let bin = log.bin_30_seconds::<T>(self.filter())?;
             Ok(bin.iter().map(|d| d.as_json()).collect())
         } else {
             Err(Error::NotFound)
         }
+    }
+
+    /// Create a vehicle filter
+    fn filter(&self) -> VehicleFilter {
+        VehicleFilter::default()
+            .with_length_ft_min(self.length_ft_min)
+            .with_length_ft_max(self.length_ft_max)
+            .with_speed_mph_min(self.speed_mph_min)
+            .with_speed_mph_max(self.speed_mph_max)
     }
 
     /// Get vehicle log file name

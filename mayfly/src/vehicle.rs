@@ -54,6 +54,31 @@ pub struct Log {
     latest: Option<u32>,
 }
 
+/// Vehicle event filter
+#[derive(Clone, Debug, Default)]
+pub struct VehicleFilter {
+    /// Minimum vehicle length (ft)
+    length_ft_min: Option<u32>,
+
+    /// Maximum vehicle length (ft)
+    length_ft_max: Option<u32>,
+
+    /// Minimum vehicle speed (mph)
+    speed_mph_min: Option<u32>,
+
+    /// Maximum vehicle speed (mph)
+    speed_mph_max: Option<u32>,
+}
+
+/// Vehicle event data binning
+#[derive(Default)]
+pub struct Bin<T: TrafficData> {
+    /// Reset on previous event
+    reset: bool,
+    /// Binned traffic data periods
+    periods: Vec<T>,
+}
+
 /// Parse an integer from a vehicle log
 fn parse_u32(v: &str) -> Result<u32> {
     match v.parse() {
@@ -267,25 +292,78 @@ impl Log {
     }
 
     /// Put vehicle events into 30 second bins
-    pub fn bin_30_seconds<T: TrafficData>(&self) -> Result<Vec<T>> {
+    pub fn bin_30_seconds<T: TrafficData>(
+        &self,
+        filter: VehicleFilter,
+    ) -> Result<Vec<T>> {
         let mut bin = Bin::default();
         for ev in &self.events {
             match ev {
                 Event::Reset => bin.reset(),
-                Event::Vehicle(veh) => bin.vehicle(veh)?,
+                Event::Vehicle(veh) => {
+                    if filter.check(veh) {
+                        bin.vehicle(veh)?;
+                    }
+                }
             }
         }
         Ok(bin.finish())
     }
 }
 
-/// Vehicle event data binning
-#[derive(Default)]
-pub struct Bin<T: TrafficData> {
-    /// Reset on previous event
-    reset: bool,
-    /// Binned traffic data periods
-    periods: Vec<T>,
+impl VehicleFilter {
+    /// Set minimum vehicle length (ft)
+    pub fn with_length_ft_min(mut self, m: Option<u32>) -> Self {
+        self.length_ft_min = m;
+        self
+    }
+
+    /// Set maximum vehicle length (ft)
+    pub fn with_length_ft_max(mut self, m: Option<u32>) -> Self {
+        self.length_ft_max = m;
+        self
+    }
+
+    /// Set minimum vehicle speed (mph)
+    pub fn with_speed_mph_min(mut self, m: Option<u32>) -> Self {
+        self.speed_mph_min = m;
+        self
+    }
+
+    /// Set maximum vehicle speed (mph)
+    pub fn with_speed_mph_max(mut self, m: Option<u32>) -> Self {
+        self.speed_mph_max = m;
+        self
+    }
+
+    /// Check if vehicle should be binned
+    fn check(&self, veh: &VehicleEvent) -> bool {
+        if let Some(length) = veh.length {
+            if let Some(m) = self.length_ft_min {
+                if length < m {
+                    return false;
+                }
+            }
+            if let Some(m) = self.length_ft_max {
+                if length >= m {
+                    return false;
+                }
+            }
+        }
+        if let Some(speed) = veh.speed {
+            if let Some(m) = self.speed_mph_min {
+                if speed < m {
+                    return false;
+                }
+            }
+            if let Some(m) = self.speed_mph_max {
+                if speed >= m {
+                    return false;
+                }
+            }
+        }
+        true
+    }
 }
 
 impl<T: TrafficData> Bin<T> {
