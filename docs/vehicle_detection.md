@@ -188,8 +188,10 @@ Column | Name     | Description
 current one.  It is a positive integer between 1 and 3600000 ms (1 hour).  An
 invalid or missing value is represented by a `?` (U+003F).
 
-**Time** is when the vehicle left the detection area.  It is included only when
-the headway is invalid or missing, otherwise it is left empty.
+**Time** is when the vehicle left the detection area.  It is included when the
+headway is invalid or missing, otherwise it may be left empty.  The first event
+after the beginning of each hour should include a time field.  Changes due to
+daylight saving time are not recorded.
 
 **Speed** is the measured vehicle speed.  It is a positive integer value from 5
 to 120 mph.  An invalid or missing value is left empty.
@@ -218,7 +220,7 @@ Log Data            | Duration | Headway | Time     | Speed | Length
 `?,?`               | ?        | ?       |          |       |
 `249,?`             | 249      | ?       | 17:50:24 |       |
 `323,4638,17:50:28` | 323      | 4638    | 17:50:28 |       |
-`258,5967,55`       | 258      | 5967    | 17:50:33 | 55    |
+`258,5967,,55`      | 258      | 5967    | 17:50:33 | 55    |
 `111,1542`          | 111      | 1542    | 17:50:35 |       |
 `304,12029`         | 304      | 12029   | 17:50:47 |       |
 

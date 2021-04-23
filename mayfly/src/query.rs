@@ -608,6 +608,7 @@ impl<T: TrafficData> TrafficQuery<T> {
         let mut path = self.date_path();
         path.push(self.vlog_file_name());
         if let Ok(file) = File::open(&path).await {
+            log::info!("opened {:?}", &path);
             let mut log = vehicle::Log::default();
             let mut lines = BufReader::new(file).lines();
             while let Some(line) = lines.next().await {
@@ -655,6 +656,7 @@ impl<T: TrafficData> TrafficQuery<T> {
             if let Ok(mut zip) = ZipArchive::new(file) {
                 let name = self.binned_file_name();
                 if let Ok(mut zf) = zip.by_name(&name) {
+                    log::info!("opened {} in {}.{}", name, self.date, EXT);
                     let len = zf.size();
                     T::check_len(len)?;
                     let mut data = vec![0; len as usize];
@@ -681,6 +683,7 @@ impl<T: TrafficData> TrafficQuery<T> {
         let mut path = self.date_path();
         path.push(self.binned_file_name());
         if let Ok(mut file) = File::open(&path).await {
+            log::info!("opened {:?}", &path);
             if let Ok(metadata) = file.metadata().await {
                 let len = metadata.len();
                 T::check_len(len)?;
