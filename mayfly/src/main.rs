@@ -20,8 +20,8 @@ mod vehicle;
 
 use common::Error;
 use query::{
-    CountData, DateQuery, DetectorQuery, DistrictQuery, OccupancyData,
-    SpeedData, TrafficQuery, YearQuery,
+    CountData, DateQuery, DetectorQuery, DistrictQuery, LengthData,
+    OccupancyData, SpeedData, TrafficQuery, YearQuery,
 };
 use tide::{Request, Response, StatusCode};
 
@@ -41,6 +41,7 @@ async fn main() -> tide::Result<()> {
     root.at("counts").get(|req| handle_counts(req));
     root.at("speed").get(|req| handle_speed(req));
     root.at("occupancy").get(|req| handle_occupancy(req));
+    root.at("length").get(|req| handle_length(req));
     app.listen("127.0.0.1:3131").await?;
     Ok(())
 }
@@ -116,4 +117,9 @@ async fn handle_speed(req: Request<()>) -> tide::Result {
 /// Handle a request for occupancy data
 async fn handle_occupancy(req: Request<()>) -> tide::Result {
     handle_query!(req, TrafficQuery<OccupancyData>)
+}
+
+/// Handle a request for length data
+async fn handle_length(req: Request<()>) -> tide::Result {
+    handle_query!(req, TrafficQuery<LengthData>)
 }

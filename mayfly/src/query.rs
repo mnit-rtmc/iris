@@ -85,13 +85,13 @@ pub trait TrafficData: Default {
     }
 
     /// Unpack one binned value
-    fn unpack(val: &[u8]) -> Result<String> {
-        debug_assert_eq!(val.len(), Self::bin_bytes());
+    fn unpack(val: &[u8]) -> String {
+        assert_eq!(val.len(), Self::bin_bytes());
         let value = val[0] as i8;
         if value >= 0 {
-            Ok(format!("{}", value))
+            format!("{}", value)
         } else {
-            Ok("null".to_owned())
+            "null".to_owned()
         }
     }
 
@@ -115,7 +115,6 @@ pub struct CountData {
 /// Binned speed data
 #[derive(Clone, Copy, Default)]
 pub struct SpeedData {
-    reset: bool,
     total: u32,
     count: u32,
 }
@@ -125,6 +124,13 @@ pub struct SpeedData {
 pub struct OccupancyData {
     reset: bool,
     duration: u32,
+}
+
+/// Binned length data
+#[derive(Clone, Copy, Default)]
+pub struct LengthData {
+    total: u32,
+    count: u32,
 }
 
 /// Query for archived traffic data
@@ -436,9 +442,7 @@ impl TrafficData for SpeedData {
     }
 
     /// Set reset for speed data
-    fn reset(&mut self) {
-        self.reset = true;
-    }
+    fn reset(&mut self) {}
 
     /// Add a vehicle to speed data
     fn vehicle(&mut self, veh: &VehicleEvent) {
@@ -450,11 +454,11 @@ impl TrafficData for SpeedData {
 
     /// Get speed data value as JSON
     fn as_json(&self) -> String {
-        if self.reset || self.count == 0 {
-            "null".to_owned()
-        } else {
+        if self.count > 0 {
             let speed = (self.total as f32 / self.count as f32).round();
             format!("{}", speed as u32)
+        } else {
+            "null".to_owned()
         }
     }
 }
@@ -471,16 +475,16 @@ impl TrafficData for OccupancyData {
     }
 
     /// Unpack one binned value
-    fn unpack(val: &[u8]) -> Result<String> {
-        debug_assert_eq!(val.len(), Self::bin_bytes());
+    fn unpack(val: &[u8]) -> String {
+        assert_eq!(val.len(), Self::bin_bytes());
         let value = (u16::from(val[0]) << 8 | u16::from(val[1])) as i16;
         if value < 0 {
-            Ok("null".to_owned())
+            "null".to_owned()
         } else if value % 18 == 0 {
             // Whole number; use integer to prevent .0 at end
-            Ok(format!("{}", value / 18))
+            format!("{}", value / 18)
         } else {
-            Ok(format!("{:.2}", value as f32 / 18.0))
+            format!("{:.2}", value as f32 / 18.0)
         }
     }
 
@@ -509,6 +513,46 @@ impl TrafficData for OccupancyData {
             } else {
                 format!("{:.2}", val as f32 / 300.0)
             }
+        }
+    }
+}
+
+impl TrafficData for LengthData {
+    /// Binned file extension
+    fn binned_ext() -> &'static str {
+        "L30"
+    }
+
+    /// Number of bytes per binned value
+    fn bin_bytes() -> usize {
+        1
+    }
+
+    /// Unpack one binned value
+    fn unpack(val: &[u8]) -> String {
+        assert_eq!(val.len(), Self::bin_bytes());
+        // There is no binned length format!
+        "null".to_owned()
+    }
+
+    /// Set reset for length data
+    fn reset(&mut self) {}
+
+    /// Add a vehicle to length data
+    fn vehicle(&mut self, veh: &VehicleEvent) {
+        if let Some(length) = veh.length {
+            self.total += length;
+            self.count += 1;
+        }
+    }
+
+    /// Get length data value as JSON
+    fn as_json(&self) -> String {
+        if self.count > 0 {
+            let length = (self.total as f32 / self.count as f32).round();
+            format!("{}", length as u32)
+        } else {
+            "null".to_owned()
         }
     }
 }
@@ -590,7 +634,7 @@ impl<T: TrafficData> TrafficQuery<T> {
         };
         let mut body = Body::default().with_max_age(max_age(&self.date));
         for val in data.chunks_exact(T::bin_bytes()) {
-            body.push(T::unpack(val)?);
+            body.push(T::unpack(val));
         }
         Ok(body)
     }

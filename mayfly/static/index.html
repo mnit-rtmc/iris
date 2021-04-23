@@ -10,7 +10,7 @@
 <h2>Mayfly - Traffic Data Archive</h2>
 <p>
     This site is for the distribution of traffic data collected by the IRIS
-    traffic management system.  All response bodies are JSON arrays.
+    traffic management system.
 </p>
 
 <table>
@@ -48,13 +48,21 @@
   </tr>
   <tr>
     <td class="path">/mayfly/speed</td>
-    <td>Speed data for one detector on a given date</td>
+    <td>Speed data (mph) for one detector on a given date</td>
   </tr>
   <tr>
     <td class="path">/mayfly/occupancy</td>
-    <td>Occupancy data for one detector on a given date</td>
+    <td>Occupancy data (%) for one detector on a given date</td>
+  </tr>
+  <tr>
+    <td class="path">/mayfly/length</td>
+    <td>Length data (ft) for one detector on a given date</td>
   </tr>
 </table>
+
+<p>
+    All response bodies are JSON arrays.
+</p>
 
 <hr>
 
@@ -239,6 +247,29 @@
   <tr>
     <th>Example URI</th>
     <td class="example" colspan="2">/mayfly/occupancy?date=20210225&amp;detector=363</td>
+  </tr>
+</table>
+
+<hr>
+
+<table>
+  <tr>
+    <th>Path</th>
+    <td class="path" colspan="2">/mayfly/length</td>
+  </tr>
+  <tr>
+    <th rowspan="4">Query Params</th>
+    <td>district</td><td class="example">default tms</td>
+  </tr>
+  <tr>
+    <td>date</td><td class="example">8 digits yyyyMMdd</td>
+  </tr>
+  <tr>
+    <td>detector</td><td class="example">identifier</td>
+  </tr>
+  <tr>
+    <th>Example URI</th>
+    <td class="example" colspan="2">/mayfly/length?date=20210225&amp;detector=363</td>
   </tr>
 </table>
 
