@@ -13,12 +13,15 @@
 // GNU General Public License for more details.
 //
 use crate::common::{Body, Error, Result};
+use crate::vehicle::{self, VehicleEvent};
 use async_std::fs::{read_dir, File};
-use async_std::io::ReadExt;
+use async_std::io::{BufReader, ReadExt};
 use async_std::path::{Path, PathBuf};
+use async_std::prelude::*;
 use async_std::stream::StreamExt;
 use chrono::{Duration, Local, NaiveDate};
 use serde::Deserialize;
+use std::io::BufRead as _;
 use std::io::Read as _;
 use std::marker::PhantomData;
 use zip::ZipArchive;
@@ -65,44 +68,55 @@ pub struct DetectorQuery {
 }
 
 /// Traffic data type
-pub trait TrafficData {
-    /// Archive file extension
-    fn ext() -> &'static str;
+pub trait TrafficData: Default {
+    /// Binned file extension
+    fn binned_ext() -> &'static str;
 
-    /// Check file length
+    /// Number of bytes per binned value
+    fn bin_bytes() -> usize;
+
+    /// Check binned data length
     fn check_len(len: u64) -> Result<()> {
-        if len == Self::len() {
+        if len == 2880 * Self::bin_bytes() as u64 {
             Ok(())
         } else {
             Err(Error::InvalidData)
         }
     }
 
-    /// Length of binned data
-    fn len() -> u64;
-
-    /// Build JSON body from binned data
-    fn build_body(data: Vec<u8>, max_age: Option<u64>) -> Result<Body> {
-        let mut body = Body::default().with_max_age(max_age);
-        for value in data {
-            let value = value as i8;
-            let value = if value >= 0 { Some(value) } else { None };
-            body.push(value)?;
+    /// Unpack one binned value
+    fn unpack(val: &[u8]) -> Result<String> {
+        debug_assert_eq!(val.len(), Self::bin_bytes());
+        let value = val[0] as i8;
+        if value >= 0 {
+            Ok(serde_json::to_string(&value)?)
+        } else {
+            Ok(serde_json::to_string(&None::<i32>)?)
         }
-        Ok(body)
+    }
+
+    /// Create a new traffic data value
+    fn new(reset: bool) -> Self;
+
+    /// Add a vehicle to traffic data
+    fn vehicle(&mut self, veh: &VehicleEvent);
+
+    /// Get traffic data value as JSON
+    fn as_json(&self) -> String {
+        String::new()
     }
 }
 
 /// Binned vehicle count data
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct CountData;
 
 /// Binned speed data
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct SpeedData;
 
 /// Binned occupancy data
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct OccupancyData;
 
 /// Query for archived traffic data
@@ -245,6 +259,20 @@ fn parse_date(date: &str) -> Result<NaiveDate> {
     Err(Error::InvalidDate)
 }
 
+/// Get max age for cache control heder
+fn max_age(date: &str) -> Option<u64> {
+    if let Ok(date) = parse_date(date) {
+        let today = Local::today().naive_local();
+        if today > date + Duration::days(2) {
+            Some(7 * 24 * 60 * 60)
+        } else {
+            Some(30)
+        }
+    } else {
+        None
+    }
+}
+
 impl DistrictQuery {
     /// Lookup all districts in archive
     pub async fn lookup(&self) -> Result<Body> {
@@ -358,106 +386,168 @@ fn file_ext(ext: &str) -> Option<&str> {
 }
 
 impl TrafficData for CountData {
-    /// Archive file extension
-    fn ext() -> &'static str {
+    /// Binned file extension
+    fn binned_ext() -> &'static str {
         "v30"
     }
 
-    /// Length of binned data
-    fn len() -> u64 {
-        2880
+    /// Number of bytes per binned value
+    fn bin_bytes() -> usize {
+        1
     }
+
+    /// Create a new count data value
+    fn new(reset: bool) -> Self {
+        CountData {}
+    }
+
+    /// Add a vehicle to count data
+    fn vehicle(&mut self, veh: &VehicleEvent) {}
 }
 
 impl TrafficData for SpeedData {
-    /// Archive file extension
-    fn ext() -> &'static str {
+    /// Binned file extension
+    fn binned_ext() -> &'static str {
         "s30"
     }
 
-    /// Length of binned data
-    fn len() -> u64 {
-        2880
+    /// Number of bytes per binned value
+    fn bin_bytes() -> usize {
+        1
     }
+
+    /// Create a new speed data value
+    fn new(reset: bool) -> Self {
+        SpeedData {}
+    }
+
+    /// Add a vehicle to speed data
+    fn vehicle(&mut self, veh: &VehicleEvent) {}
 }
 
 impl TrafficData for OccupancyData {
-    /// Archive file extension
-    fn ext() -> &'static str {
+    /// Binned file extension
+    fn binned_ext() -> &'static str {
         "c30"
     }
 
-    /// Length of binned data
-    fn len() -> u64 {
-        2880 * 2
+    /// Number of bytes per binned value
+    fn bin_bytes() -> usize {
+        2
     }
 
-    /// Build JSON body from binned data
-    fn build_body(data: Vec<u8>, max_age: Option<u64>) -> Result<Body> {
-        let mut body = Body::default().with_max_age(max_age);
-        for val in data.chunks_exact(2) {
-            let value = (u16::from(val[0]) << 8 | u16::from(val[1])) as i16;
-            if value < 0 {
-                body.push::<Option<f32>>(None)?;
-            } else if value % 18 == 0 {
-                // Whole number; use integer to prevent .0 at end
-                let occ = i32::from(value) * 100 / 1800;
-                body.push(occ)?;
-            } else {
-                let occ = (value as f32 * 100.0 / 18.0).round() / 100.0;
-                body.push(occ)?;
-            }
+    /// Unpack one binned value
+    fn unpack(val: &[u8]) -> Result<String> {
+        debug_assert_eq!(val.len(), Self::bin_bytes());
+        let value = (u16::from(val[0]) << 8 | u16::from(val[1])) as i16;
+        if value < 0 {
+            Ok(serde_json::to_string(&None::<Option<i32>>)?)
+        } else if value % 18 == 0 {
+            // Whole number; use integer to prevent .0 at end
+            let occ = i32::from(value) * 100 / 1800;
+            Ok(serde_json::to_string(&occ)?)
+        } else {
+            let occ = (value as f32 * 100.0 / 18.0).round() / 100.0;
+            Ok(serde_json::to_string(&occ)?)
         }
-        Ok(body)
     }
+
+    /// Create a new occupancy data value
+    fn new(reset: bool) -> Self {
+        OccupancyData {}
+    }
+
+    /// Add a vehicle to occupancy data
+    fn vehicle(&mut self, veh: &VehicleEvent) {}
 }
 
 impl<T: TrafficData> TrafficQuery<T> {
     /// Lookup archived traffic data
     pub async fn lookup(&self) -> Result<Body> {
         parse_date(&self.date)?;
-        match self.lookup_from_vlog().await {
+        match self.lookup_vlog().await {
             Ok(body) => Ok(body),
-            Err(Error::NotFound) => self.lookup_from_binned().await,
+            Err(Error::NotFound) => self.lookup_binned().await,
             Err(e) => Err(e),
         }
     }
 
     /// Lookup archived data from vehicle log
-    async fn lookup_from_vlog(&self) -> Result<Body> {
-        // FIXME: check .traffic, then open .vlog
-        Err(Error::NotFound)
-    }
-
-    /// Lookup archived data from 30-second binned data
-    async fn lookup_from_binned(&self) -> Result<Body> {
-        let data = match self.read_from_zip() {
+    async fn lookup_vlog(&self) -> Result<Body> {
+        let data = match self.read_vlog_zip() {
             Ok(data) => data,
-            Err(_) => self.read_from_file().await?,
+            Err(_) => self.read_vlog_file().await?,
         };
-        T::build_body(data, self.max_age())
-    }
-
-    /// Get max age for caching
-    fn max_age(&self) -> Option<u64> {
-        if let Ok(date) = parse_date(&self.date) {
-            let today = Local::today().naive_local();
-            if today > date + Duration::days(2) {
-                Some(7 * 24 * 60 * 60)
-            } else {
-                Some(30)
-            }
-        } else {
-            None
+        let mut body = Body::default().with_max_age(max_age(&self.date));
+        for val in data {
+            body.push(val)?;
         }
+        Ok(body)
     }
 
-    /// Read archived data from a zip file
-    fn read_from_zip(&self) -> Result<Vec<u8>> {
+    /// Read vehicle log data from a zip file
+    fn read_vlog_zip(&self) -> Result<Vec<String>> {
         let path = self.zip_path();
         if let Ok(file) = std::fs::File::open(path) {
             if let Ok(mut zip) = ZipArchive::new(file) {
-                let name = self.file_name();
+                let name = self.vlog_file_name();
+                if let Ok(zf) = zip.by_name(&name) {
+                    let mut log = vehicle::Log::default();
+                    let mut lines = std::io::BufReader::new(zf).lines();
+                    while let Some(line) = lines.next() {
+                        log.append(&line?)?;
+                    }
+                    log.finish();
+                    let bin = log.bin_30_seconds::<T>()?;
+                    return Ok(bin.iter().map(|d| d.as_json()).collect());
+                }
+            }
+        }
+        Err(Error::NotFound)
+    }
+
+    /// Read vehicle log data from a file
+    async fn read_vlog_file(&self) -> Result<Vec<String>> {
+        let mut path = self.date_path();
+        path.push(self.vlog_file_name());
+        if let Ok(file) = File::open(&path).await {
+            let mut log = vehicle::Log::default();
+            let mut lines = BufReader::new(file).lines();
+            while let Some(line) = lines.next().await {
+                log.append(&line?)?;
+            }
+            log.finish();
+            let bin = log.bin_30_seconds::<T>()?;
+            Ok(bin.iter().map(|d| d.as_json()).collect())
+        } else {
+            Err(Error::NotFound)
+        }
+    }
+
+    /// Get vehicle log file name
+    fn vlog_file_name(&self) -> String {
+        format!("{}.vlog", self.detector)
+    }
+
+    /// Lookup archived data from 30-second binned data
+    async fn lookup_binned(&self) -> Result<Body> {
+        let data = match self.read_binned_zip() {
+            Ok(data) => data,
+            Err(_) => self.read_binned_file().await?,
+        };
+        let mut body = Body::default().with_max_age(max_age(&self.date));
+        for val in data.chunks_exact(T::bin_bytes()) {
+            body.push(T::unpack(val)?)?;
+        }
+        Ok(body)
+    }
+
+    /// Read binned data from a zip file
+    fn read_binned_zip(&self) -> Result<Vec<u8>> {
+        let path = self.zip_path();
+        if let Ok(file) = std::fs::File::open(path) {
+            if let Ok(mut zip) = ZipArchive::new(file) {
+                let name = self.binned_file_name();
                 if let Ok(mut zf) = zip.by_name(&name) {
                     let len = zf.size();
                     T::check_len(len)?;
@@ -475,15 +565,15 @@ impl<T: TrafficData> TrafficQuery<T> {
         zip_path(&self.district, &self.date)
     }
 
-    /// Get file name
-    fn file_name(&self) -> String {
-        format!("{}.{}", self.detector, T::ext())
+    /// Get binned file name
+    fn binned_file_name(&self) -> String {
+        format!("{}.{}", self.detector, T::binned_ext())
     }
 
-    /// Read archived data from a file
-    async fn read_from_file(&self) -> Result<Vec<u8>> {
+    /// Read binned data from a file
+    async fn read_binned_file(&self) -> Result<Vec<u8>> {
         let mut path = self.date_path();
-        path.push(self.file_name());
+        path.push(self.binned_file_name());
         if let Ok(mut file) = File::open(&path).await {
             if let Ok(metadata) = file.metadata().await {
                 let len = metadata.len();

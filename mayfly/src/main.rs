@@ -16,6 +16,7 @@
 
 mod common;
 mod query;
+mod vehicle;
 
 use common::Error;
 use query::{
