@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ public class IntervalDataProperty extends SS125Property {
 		return (stamp > now - valid_ms) && (stamp < now + valid_ms);
 	}
 
-	/** Clear the sample data */
+	/** Clear the interval data */
 	public void clear() {
 		setComplete(false);
 		interval = 0;
@@ -152,10 +152,10 @@ public class IntervalDataProperty extends SS125Property {
 	/** Interval number */
 	private int interval;
 
-	/** Timestamp at end of sample interval */
+	/** Timestamp at end of interval */
 	private long stamp;
 
-	/** Get timestamp at end of sample interval */
+	/** Get timestamp at end of interval */
 	public long getTime() {
 		return stamp;
 	}
