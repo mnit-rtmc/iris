@@ -79,7 +79,7 @@ impl Body {
     }
 
     /// Push a value to end of body
-    pub fn push(&mut self, value: String) {
+    pub fn push(&mut self, value: &str) {
         if self.body.len() > 0 {
             self.body.push(',');
         } else {

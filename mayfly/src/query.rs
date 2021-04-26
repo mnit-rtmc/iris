@@ -204,7 +204,7 @@ async fn scan_dir(
                 if !tp.is_symlink() {
                     if let Some(name) = entry.file_name().to_str() {
                         if let Some(value) = check(name, tp.is_dir()) {
-                            body.push(value);
+                            body.push(&format!("\"{}\"", value));
                         }
                     }
                 }
@@ -227,8 +227,8 @@ fn scan_zip(
         let ent = std::path::Path::new(zf.name());
         if let Some(name) = ent.file_name() {
             if let Some(name) = name.to_str() {
-                if let Some(e) = check(name, false) {
-                    body.push(e);
+                if let Some(value) = check(name, false) {
+                    body.push(&format!("\"{}\"", value));
                 }
             }
         }
@@ -576,7 +576,7 @@ impl<T: TrafficData> TrafficQuery<T> {
         };
         let mut body = Body::default().with_max_age(max_age(&self.date));
         for val in data {
-            body.push(val);
+            body.push(&val);
         }
         Ok(body)
     }
@@ -644,7 +644,7 @@ impl<T: TrafficData> TrafficQuery<T> {
         };
         let mut body = Body::default().with_max_age(max_age(&self.date));
         for val in data.chunks_exact(T::bin_bytes()) {
-            body.push(T::unpack(val));
+            body.push(&T::unpack(val));
         }
         Ok(body)
     }
