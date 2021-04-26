@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +19,7 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.RoadClass;
@@ -32,6 +34,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * A segment is the shape of a roadway segment on a map.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class MapSegment implements MapObject {
 
@@ -171,6 +174,13 @@ public class MapSegment implements MapObject {
 		String label = segment.getLabel(lane);
 		if (label != null)
 			sb.append(label);
+		String lm = getLandmark();
+		if (lm != null) {
+			sb.append("\n ");
+			sb.append(I18N.get("location.landmark"));
+			sb.append(" = ");
+			sb.append(lm);
+		}
 		Integer flow = getFlow();
 		if (flow != null) {
 			sb.append("\n ");
@@ -196,6 +206,18 @@ public class MapSegment implements MapObject {
 			return sb.toString();
 		else
 			return null;
+	}
+
+	/** Get the landmark for the associated r_node.
+	 * @return Landmark for associated geoloc or null. */
+	private String getLandmark() {
+		R_Node proxy = getR_Node();
+		if (proxy != null) {
+			GeoLoc gl = proxy.getGeoLoc();
+			if (gl != null)
+				return(gl.getLandmark());
+		}
+		return null;
 	}
 
 	/** Get the segment flow */
