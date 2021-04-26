@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2019  Minnesota Department of Transportation
+ * Copyright (C) 2006-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ public class VehicleEventLog {
 
 	/** Log a vehicle detection event */
 	public void logVehicle(final Calendar stamp, final int duration,
-		final int headway, final int speed)
+		final int headway, final int speed, final int length)
 	{
 		ev_vehicles++;
 		ev_duration += duration;
@@ -84,7 +84,8 @@ public class VehicleEventLog {
 			FLUSH.addJob(new Job() {
 				public void perform() throws IOException {
 					appendEvent(stamp, formatEvent(stamp,
-						duration, headway, speed));
+						duration, headway, speed,
+						length));
 				}
 			});
 		}
@@ -124,7 +125,7 @@ public class VehicleEventLog {
 
 	/** Format a vehicle detection event */
 	private String formatEvent(Calendar stamp, int duration, int headway,
-		int speed)
+		int speed, int length)
 	{
 		boolean log_stamp = false;
 		StringBuilder b = new StringBuilder();
@@ -133,6 +134,14 @@ public class VehicleEventLog {
 		else
 			b.append('?');
 		b.append(',');
+		if (headway == 0 && p_stamp != null && stamp != null) {
+			long h = stamp.getTimeInMillis() -
+				p_stamp.getTimeInMillis();
+			if (h >= 0)
+				headway = (int) h;
+			else
+				logGap();
+		}
 		if (headway > 0 && headway <= MAX_HEADWAY)
 			b.append(headway);
 		else {
@@ -156,6 +165,9 @@ public class VehicleEventLog {
 		b.append(',');
 		if (speed > 0)
 			b.append(speed);
+		b.append(',');
+		if (length > 0)
+			b.append(length);
 		while (b.charAt(b.length() - 1) == ',')
 			b.setLength(b.length() - 1);
 		b.append('\n');

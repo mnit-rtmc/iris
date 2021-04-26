@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1048,11 +1048,12 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	 * @param stamp Timestamp of detection event.
 	 * @param duration Event duration in milliseconds.
 	 * @param headway Headway since last event in milliseconds.
-	 * @param speed Speed in miles per hour. */
+	 * @param speed Speed in miles per hour.
+	 * @param length Length in feet. */
 	public void logVehicle(Calendar stamp, int duration, int headway,
-		int speed)
+		int speed, int length)
 	{
-		v_log.logVehicle(stamp, duration, headway, speed);
+		v_log.logVehicle(stamp, duration, headway, speed, length);
 	}
 
 	/** Log a gap in vehicle events */

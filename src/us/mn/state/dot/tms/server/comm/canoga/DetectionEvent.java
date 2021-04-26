@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -155,7 +155,7 @@ public class DetectionEvent {
 		if (isHeadwayValid(prev)) {
 			int missed = calculateMissed(prev);
 			for (int i = 0; i < missed; i++)
-				det.logVehicle(stamp, 0, 0, 0);
+				det.logVehicle(stamp, 0, 0, 0, 0);
 			// If no vehicles were missed, log headway
 			if (missed == 0)
 				headway = calculateElapsed(prev);
@@ -163,7 +163,7 @@ public class DetectionEvent {
 			// There is a gap in vehicle event log
 			det.logGap();
 		}
-		det.logVehicle(stamp, duration, headway, speed);
+		det.logVehicle(stamp, duration, headway, speed, 0);
 	}
 
 	/** Test if headway from previous event is valid */
