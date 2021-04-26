@@ -194,7 +194,7 @@ fn zip_path(district: &Option<String>, date: &str) -> std::path::PathBuf {
 /// Scan entries in a directory
 async fn scan_dir(
     path: &Path,
-    check: fn(&str, bool) -> Option<String>,
+    check: fn(&str, bool) -> Option<&str>,
     body: &mut Body,
 ) -> Result<()> {
     let mut entries = read_dir(path).await.or(Err(Error::NotFound))?;
@@ -217,7 +217,7 @@ async fn scan_dir(
 /// Get a list of entries in a zip file
 fn scan_zip(
     path: &std::path::Path,
-    check: fn(&str, bool) -> Option<String>,
+    check: fn(&str, bool) -> Option<&str>,
     body: &mut Body,
 ) -> Result<()> {
     let file = std::fs::File::open(path)?;
@@ -298,9 +298,9 @@ impl DistrictQuery {
 }
 
 /// Check for valid district
-fn check_district(name: &str, dir: bool) -> Option<String> {
+fn check_district(name: &str, dir: bool) -> Option<&str> {
     if dir {
-        Some(name.to_string())
+        Some(name)
     } else {
         None
     }
@@ -317,9 +317,9 @@ impl YearQuery {
 }
 
 /// Check for valid year
-fn check_year(name: &str, dir: bool) -> Option<String> {
+fn check_year(name: &str, dir: bool) -> Option<&str> {
     if dir {
-        parse_year(name).ok().and_then(|_| Some(name.to_string()))
+        parse_year(name).ok().and_then(|_| Some(name))
     } else {
         None
     }
@@ -337,7 +337,7 @@ impl DateQuery {
 }
 
 /// Check for valid date files
-fn check_date(name: &str, dir: bool) -> Option<String> {
+fn check_date(name: &str, dir: bool) -> Option<&str> {
     let dt = if dir {
         name
     } else if name.len() == 16 && name.ends_with(DEXT) {
@@ -345,7 +345,7 @@ fn check_date(name: &str, dir: bool) -> Option<String> {
     } else {
         &""
     };
-    parse_date(dt).ok().and_then(|_| Some(dt.to_string()))
+    parse_date(dt).ok().and_then(|_| Some(dt))
 }
 
 impl DetectorQuery {
@@ -375,7 +375,7 @@ impl DetectorQuery {
 }
 
 /// Check for detector IDs
-fn check_detector(name: &str, dir: bool) -> Option<String> {
+fn check_detector(name: &str, dir: bool) -> Option<&str> {
     if !dir {
         let path = Path::new(name);
         path.extension()
@@ -383,7 +383,7 @@ fn check_detector(name: &str, dir: bool) -> Option<String> {
             .and_then(|ext| file_ext(ext))
             .and_then(|_| path.file_stem())
             .and_then(|f| f.to_str())
-            .and_then(|f| Some(f.to_string()))
+            .and_then(|f| Some(f))
     } else {
         None
     }
