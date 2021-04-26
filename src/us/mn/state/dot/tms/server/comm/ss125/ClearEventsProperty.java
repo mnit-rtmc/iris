@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,25 +14,19 @@
  */
 package us.mn.state.dot.tms.server.comm.ss125;
 
-import java.io.InputStream;
 import java.io.IOException;
-import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
- * Flash Configuration Property.
+ * Clear Event FIFO property.
  *
  * @author Douglas Lau
  */
-public class FlashConfigProperty extends SS125Property {
+public class ClearEventsProperty extends SS125Property {
 
-	/** Delay time to wait for FLASH memory to be written */
-	static private final int FLASH_WRITE_MS = 4000;
-
-	/** Message ID for flash config request */
+	/** Message ID for clear event FIFO request */
 	@Override
 	protected MessageID msgId() {
-		return MessageID.FLASH_CONFIG;
+		return MessageID.CLEAR_EVENT_FIFO;
 	}
 
 	/** Format a STORE request */
@@ -43,18 +37,9 @@ public class FlashConfigProperty extends SS125Property {
 		return body;
 	}
 
-	/** Decode a STORE response */
-	@Override
-	public void decodeStore(ControllerImpl c, InputStream is)
-		throws IOException
-	{
-		TimeSteward.sleep_well(FLASH_WRITE_MS);
-		super.decodeStore(c, is);
-	}
-
 	/** Get a string representation of the property */
 	@Override
 	public String toString() {
-		return "flash_config";
+		return "clear_event_FIFO";
 	}
 }

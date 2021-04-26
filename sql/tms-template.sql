@@ -1252,7 +1252,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 16	Infinova D PTZ
 17	RTMS G4
 18	RTMS
-19	Infotek Wizard
+19	SmartSensor 125 vlog
 20	Sensys
 21	PeMS
 22	SSI

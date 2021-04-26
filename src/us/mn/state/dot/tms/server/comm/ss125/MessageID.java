@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ public enum MessageID {
 	EVENT_BULK(0x63),
 	CLEAR_NV(0x64),
 	EVENT_PUSH(0x65),
-	ACTIVE_EVENTS(0x67),
+	ACTIVE_EVENT(0x67),
 	PRESENCE(0x68),
 	PRESENCE_PUSH(0x69),
 	CLEAR_EVENT_FIFO(0x6D),
@@ -52,8 +52,8 @@ public enum MessageID {
 
 	/** Lookup a message ID from value */
 	static public MessageID fromCode(int i) {
-		for(MessageID mid: MessageID.values()) {
-			if(mid.id == i)
+		for (MessageID mid: MessageID.values()) {
+			if (mid.id == i)
 				return mid;
 		}
 		return UNKNOWN;

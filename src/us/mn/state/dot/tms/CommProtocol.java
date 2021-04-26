@@ -85,9 +85,8 @@ public enum CommProtocol {
 	@Deprecated
 	RTMS("RTMS"),
 
-	/** Infotek Wizard (19) */
-	@Deprecated
-	INFOTEK_WIZARD("Infotek Wizard"),
+	/** Wavetronix SmartSensor 125 Vehicle logging (19) */
+	SS_125_VLOG("SmartSensor 125 vlog"),
 
 	/** Sensys (20) */
 	@Deprecated

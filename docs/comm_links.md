@@ -299,14 +299,17 @@ associated with each [controller], using [IO pin] 1.
 
 ### SmartSensor
 
-The SmartSensor (`SS105`) and SmartSensor HD (`SS125`) protocols can collect
-[vehicle detection] data, including _vehicle counts_, _occupancy_, _speed_ and
-_vehicle classification_.  The _default scheme_ is `tcp` for both.
+There are three SmartSensor protocols for collecting [vehicle detection] data
+from Wavetronix sensors.  The `105` and `125 HD` protocols collect binned
+_vehicle counts_, _occupancy_, _speed_ and _vehicle classification_.  The
+`125 vlog` protocol logs event data for every vehicle.  The _default scheme_ is
+`tcp`.
 
-Protocol | Multi-Drop | `#` | [IO Pin]s
----------|------------|-----|----------
-`SS105`  | 1 - 9999   | 8   | 1 - 8
-`SS125`  | 0 - 65535  | 8   | 1 - 8
+Protocol               | Multi-Drop | `#` | [IO Pin]s
+-----------------------|------------|-----|----------
+`SmartSensor 105`      | 1 - 9999   | 8   | 1 - 8
+`SmartSensor 125 HD`   | 0 - 65535  | 8   | 1 - 8
+`SmartSensor 125 vlog` | 0 - 65535  | 8   | 1 - 8
 
 ### STC
 

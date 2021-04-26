@@ -69,16 +69,17 @@ detection systems.  The protocol used depends on the [comm link] of the
 [controller] to which it is assigned.  The following table summarizes features
 of each protocol.
 
-Protocol    | Binning           | Traffic Data
-------------|-------------------|-----------------
-[NTCIP]     | 0-255 sec         | Count, Occupancy
-[MnDOT-170] | 30 sec            | Count, Scans
-[SS105]     | 5 sec to 1 month  | Count, Occupancy, Speed, Class
-[SS125]     | 5 sec to 1 month  | [vlog], Count, Occupancy, Speed, Class
-[G4]        | 5 sec to 1 hour   | [vlog], Count, Occupancy, Speed, Class
-[Canoga]    | N/A               | [vlog]
-[DR-500]    | 30-300? sec       | Speed
-[DXM]       | N/A (presence)    | Magnetic Field
+Protocol               | Binning           | Traffic Data
+-----------------------|-------------------|-----------------
+[NTCIP]                | 0-255 sec         | Count, Occupancy
+[MnDOT-170]            | 30 sec            | Count, Scans
+[SmartSensor] 105      | 5 sec to 1 month  | Count, Occupancy, Speed, Class
+[SmartSensor] 125 HD   | 5 sec to 1 month  | Count, Occupancy, Speed, Class
+[SmartSensor] 125 vlog | N/A               | [vlog]
+[G4]                   | 5 sec to 1 hour   | [vlog], Count, Occupancy, Speed, Class
+[Canoga]               | N/A               | [vlog]
+[DR-500]               | 30-300? sec       | Speed
+[DXM]                  | N/A (presence)    | Magnetic Field
 
 For protocols which allow the binning intereval to be adjusted, it will be set
 to the poll [period] of the comm link.
@@ -316,8 +317,7 @@ maximum downstream distance for associating station data with a segment.
 [ramp metering]: ramp_meters.html
 [road topology]: road_topology.html
 [roads]: road_topology.html#roads
-[SS105]: comm_links.html#smartsensor
-[SS125]: comm_links.html#smartsensor
+[SmartSensor]: comm_links.html#smartsensor
 [station]: road_topology.html#r_node-types
 [system attribute]: system_attributes.html
 [travel time]: travel_time.html

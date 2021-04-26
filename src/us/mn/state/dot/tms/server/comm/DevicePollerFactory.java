@@ -106,7 +106,8 @@ public class DevicePollerFactory {
 		case SS_105:
 			return new SS105Poller(link);
 		case SS_125:
-			return new SS125Poller(link);
+		case SS_125_VLOG:
+			return new SS125Poller(link, protocol);
 		case TRANSCORE_E6:
 			return new E6Poller(link);
 		case VICON_PTZ:

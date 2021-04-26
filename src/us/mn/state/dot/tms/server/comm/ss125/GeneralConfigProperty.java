@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,13 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 public class GeneralConfigProperty extends SS125Property {
 
 	/** Message ID for general config request */
+	@Override
 	protected MessageID msgId() {
 		return MessageID.GENERAL_CONFIG;
 	}
 
 	/** Format a QUERY request */
+	@Override
 	protected byte[] formatQuery() throws IOException {
 		byte[] body = new byte[4];
 		formatBody(body, MessageType.READ);
@@ -37,6 +39,7 @@ public class GeneralConfigProperty extends SS125Property {
 	}
 
 	/** Format a STORE request */
+	@Override
 	protected byte[] formatStore() throws IOException {
 		byte[] body = new byte[87];
 		formatBody(body, MessageType.WRITE);
@@ -49,6 +52,7 @@ public class GeneralConfigProperty extends SS125Property {
 	}
 
 	/** Parse a QUERY response */
+	@Override
 	protected void parseQuery(byte[] body) throws IOException {
 		if(body.length != 87)
 			throw new ParsingException("BODY LENGTH");
@@ -110,6 +114,7 @@ public class GeneralConfigProperty extends SS125Property {
 	}
 
 	/** Get a string representation of the property */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("orientation:");
