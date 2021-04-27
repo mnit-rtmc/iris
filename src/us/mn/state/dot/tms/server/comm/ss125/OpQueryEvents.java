@@ -101,9 +101,9 @@ public class OpQueryEvents extends OpSS125 {
 	/** Log a vehicle detection event */
 	private void logGap() {
 		for (int i = 0; i < 10; i++) {
-			DetectorImpl det = controller.getDetectorAtPin(i);
+			DetectorImpl det = controller.getDetectorAtPin(i + 1);
 			if (det != null)
-				det.logGap();
+				det.logGap(0);
 		}
 	}
 }

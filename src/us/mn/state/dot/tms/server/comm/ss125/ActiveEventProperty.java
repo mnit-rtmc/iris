@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.ss125;
 
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.Date;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -132,11 +131,9 @@ public class ActiveEventProperty extends SS125Property {
 	public void logVehicle(ControllerImpl controller) {
 		DetectorImpl det = controller.getDetectorAtPin(lane_id + 1);
 		if (det != null) {
-			Calendar cal = TimeSteward.getCalendarInstance();
-			cal.setTimeInMillis(stamp);
 			int sp = (speed != null) ? Math.round(speed) : 0;
 			int len = Math.round(length);
-			det.logVehicle(cal, duration, 0, sp, len);
+			det.logVehicle(duration, 0, stamp, sp, len);
 		}
 	}
 }

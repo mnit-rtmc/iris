@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -1045,20 +1044,20 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	}
 
 	/** Log a vehicle detection event.
-	 * @param stamp Timestamp of detection event.
 	 * @param duration Event duration in milliseconds.
 	 * @param headway Headway since last event in milliseconds.
+	 * @param stamp Timestamp of detection event.
 	 * @param speed Speed in miles per hour.
 	 * @param length Length in feet. */
-	public void logVehicle(Calendar stamp, int duration, int headway,
+	public void logVehicle(int duration, int headway, long stamp,
 		int speed, int length)
 	{
-		v_log.logVehicle(stamp, duration, headway, speed, length);
+		v_log.logVehicle(duration, headway, stamp, speed, length);
 	}
 
 	/** Log a gap in vehicle events */
-	public void logGap() {
-		v_log.logGap();
+	public void logGap(long stamp) {
+		v_log.logGap(stamp);
 	}
 
 	/** Bin sample data to the specified period */

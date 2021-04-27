@@ -31,8 +31,8 @@ import static us.mn.state.dot.tms.server.MainServer.FLUSH;
  */
 public class VehicleEventLog {
 
-	/** Maximum logged headway is 90 seconds */
-	static private final int MAX_HEADWAY = 90 * 1000;
+	/** Maximum logged headway is 1 hour */
+	static private final int MAX_HEADWAY = 60 * 60 * 1000;
 
 	/** Is archiving enabled? */
 	static private boolean isArchiveEnabled() {
@@ -40,10 +40,60 @@ public class VehicleEventLog {
 	}
 
 	/** Get milliseconds for a given timestamp */
-	static private long getStampMillis(Calendar stamp) {
-		return (stamp != null)
-		      ? stamp.getTimeInMillis()
-		      : TimeSteward.currentTimeMillis();
+	static private long getStampMillis(long stamp) {
+		return (stamp > 0) ? stamp : TimeSteward.currentTimeMillis();
+	}
+
+	/** Get the hour for a given timestamp */
+	static private int getHour(long stamp) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(stamp);
+		return cal.get(Calendar.HOUR);
+	}
+
+	/** Calculate headway if necessary */
+	static private int calculateHeadway(int headway, long stamp, long ps) {
+		if (headway <= 0 && ps > 0 && stamp > ps)
+			headway = (int) (stamp - ps);
+		return (headway > 0 && headway <= MAX_HEADWAY) ? headway : 0;
+	}
+
+	/** Should time stamp be logged */
+	static private boolean shouldLogStamp(int headway, long stamp, long ps){
+		return (stamp > 0) && (
+			(headway <= 0) ||
+			(ps <= 0) ||
+			(getHour(stamp) != getHour(ps))
+		);
+	}
+
+	/** Format a vehicle detection event */
+	static private String formatEvent(int duration, int headway, long stamp,
+		int speed, int length)
+	{
+		StringBuilder b = new StringBuilder();
+		if (duration > 0)
+			b.append(duration);
+		else
+			b.append('?');
+		b.append(',');
+		if (headway > 0)
+			b.append(headway);
+		else
+			b.append('?');
+		b.append(',');
+		if (stamp > 0)
+			b.append(TimeSteward.timeShortString(stamp));
+		b.append(',');
+		if (speed > 0)
+			b.append(speed);
+		b.append(',');
+		if (length > 0)
+			b.append(length);
+		while (b.charAt(b.length() - 1) == ',')
+			b.setLength(b.length() - 1);
+		b.append('\n');
+		return b.toString();
 	}
 
 	/** Sample archive factory */
@@ -71,8 +121,8 @@ public class VehicleEventLog {
 	}
 
 	/** Log a vehicle detection event */
-	public void logVehicle(final Calendar stamp, final int duration,
-		final int headway, final int speed, final int length)
+	public void logVehicle(final int duration, final int headway,
+		final long stamp, final int speed, final int length)
 	{
 		ev_vehicles++;
 		ev_duration += duration;
@@ -81,20 +131,26 @@ public class VehicleEventLog {
 			ev_speed += speed;
 		}
 		if (isArchiveEnabled()) {
+			// Check if clock went backwards
+			if (stamp > 0 && stamp < p_stamp)
+				logGap(stamp);
+			int head = calculateHeadway(headway, stamp, p_stamp);
+			long st = shouldLogStamp(head, stamp, p_stamp)
+			        ? stamp
+			        : 0;
+			final String ev = formatEvent(duration, head, st, speed,
+				length);
+			p_stamp = stamp;
 			FLUSH.addJob(new Job() {
 				public void perform() throws IOException {
-					appendEvent(stamp, formatEvent(stamp,
-						duration, headway, speed,
-						length));
+					appendEvent(stamp, ev);
 				}
 			});
 		}
 	}
 
 	/** Append an event to the log */
-	private void appendEvent(Calendar stamp, String line)
-		throws IOException
-	{
+	private void appendEvent(long stamp, String line) throws IOException {
 		File file = factory.createFile(sensor_id, "vlog",
 			getStampMillis(stamp));
 		if (file != null) {
@@ -109,70 +165,19 @@ public class VehicleEventLog {
 	}
 
 	/** Log a gap in vehicle events */
-	public void logGap() {
-		p_stamp = null;
+	public void logGap(long stamp) {
 		if (isArchiveEnabled()) {
+			p_stamp = 0;
 			FLUSH.addJob(new Job() {
 				public void perform() throws IOException {
-					appendEvent(null, "*\n");
+					appendEvent(stamp, "*\n");
 				}
 			});
 		}
 	}
 
 	/** Time stamp of most recent vehicle event */
-	private transient Calendar p_stamp;
-
-	/** Format a vehicle detection event */
-	private String formatEvent(Calendar stamp, int duration, int headway,
-		int speed, int length)
-	{
-		boolean log_stamp = false;
-		StringBuilder b = new StringBuilder();
-		if (duration > 0)
-			b.append(duration);
-		else
-			b.append('?');
-		b.append(',');
-		if (headway == 0 && p_stamp != null && stamp != null) {
-			long h = stamp.getTimeInMillis() -
-				p_stamp.getTimeInMillis();
-			if (h >= 0)
-				headway = (int) h;
-			else
-				logGap();
-		}
-		if (headway > 0 && headway <= MAX_HEADWAY)
-			b.append(headway);
-		else {
-			b.append('?');
-			log_stamp = true;
-		}
-		if (p_stamp == null || (stamp.get(Calendar.HOUR) !=
-			p_stamp.get(Calendar.HOUR)))
-		{
-			log_stamp = true;
-		}
-		b.append(',');
-		p_stamp = stamp;
-		if (log_stamp) {
-			if (headway > 0 || duration > 0) {
-				long st = stamp.getTimeInMillis();
-				b.append(TimeSteward.timeShortString(st));
-			} else
-				p_stamp = null;
-		}
-		b.append(',');
-		if (speed > 0)
-			b.append(speed);
-		b.append(',');
-		if (length > 0)
-			b.append(length);
-		while (b.charAt(b.length() - 1) == ',')
-			b.setLength(b.length() - 1);
-		b.append('\n');
-		return b.toString();
-	}
+	private transient long p_stamp;
 
 	/** Bin 30-second sample data */
 	public void binEventSamples() {

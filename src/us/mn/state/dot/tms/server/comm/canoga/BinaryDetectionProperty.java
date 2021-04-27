@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2018  Minnesota Department of Transportation
+ * Copyright (C) 2006-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.canoga;
 
 import java.io.IOException;
-import java.util.Calendar;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DetectorImpl;
@@ -110,9 +109,8 @@ public class BinaryDetectionProperty extends CanogaProperty {
 		if (getEventMillis() > VEH_COUNT_WRAP)
 			addGap();
 		event_time = TimeSteward.currentTimeMillis();
-		Calendar stamp = TimeSteward.getCalendarInstance();
 		for (int i = 0; i < 4; i++)
-			logEvent(controller, stamp, i);
+			logEvent(controller, event_time, i);
 	}
 
 	/** Add a gap in vehicle detection */
@@ -122,7 +120,7 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	}
 
 	/** Log a new vehicle detection event for one input */
-	protected void logEvent(ControllerImpl controller, Calendar stamp,
+	protected void logEvent(ControllerImpl controller, long stamp,
 		int inp)
 	{
 		DetectionEvent pe = p_events[inp];

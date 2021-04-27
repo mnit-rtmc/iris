@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.canoga;
 
-import java.util.Calendar;
 import us.mn.state.dot.tms.server.DetectorImpl;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.FEET;
@@ -148,22 +147,22 @@ public class DetectionEvent {
 	}
 
 	/** Log the current event in the detection log */
-	public void logEvent(Calendar stamp, DetectorImpl det,
+	public void logEvent(long stamp, DetectorImpl det,
 		DetectionEvent prev, int speed)
 	{
 		int headway = 0;
 		if (isHeadwayValid(prev)) {
 			int missed = calculateMissed(prev);
 			for (int i = 0; i < missed; i++)
-				det.logVehicle(stamp, 0, 0, 0, 0);
+				det.logVehicle(0, 0, 0, 0, 0);
 			// If no vehicles were missed, log headway
 			if (missed == 0)
 				headway = calculateElapsed(prev);
 		} else {
 			// There is a gap in vehicle event log
-			det.logGap();
+			det.logGap(stamp);
 		}
-		det.logVehicle(stamp, duration, headway, speed, 0);
+		det.logVehicle(duration, headway, stamp, speed, 0);
 	}
 
 	/** Test if headway from previous event is valid */
