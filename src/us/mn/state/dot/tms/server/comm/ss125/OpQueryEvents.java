@@ -29,12 +29,16 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQueryEvents extends OpSS125 {
 
+	/** Polling period */
+	private final int period;
+
 	/** Time to stop checking for new events */
 	private final long expire;
 
 	/** Create a new "query events" operation */
 	public OpQueryEvents(ControllerImpl c, int p) {
 		super(PriorityLevel.DATA_30_SEC, c);
+		period = p;
 		expire = TimeSteward.currentTimeMillis() + (p * 1000);
 	}
 
@@ -54,15 +58,15 @@ public class OpQueryEvents extends OpSS125 {
 			ActiveEventProperty ev = new ActiveEventProperty();
 			mess.add(ev);
 			mess.queryProps();
-			if (ev.isValidEvent()) {
-				if (ev.isValidStamp())
-					ev.logVehicle(controller);
-				else {
-					logGap();
-					mess.logError("BAD TIMESTAMP: " +
-						new Date(ev.getTime()));
-					return new SendDateTime();
-				}
+			if (!ev.isValidEvent())
+				return null;
+			if (ev.isValidStamp())
+				ev.logVehicle(controller);
+			else {
+				logGap();
+				mess.logError("BAD TIMESTAMP: " +
+					new Date(ev.getTime()));
+				return new SendDateTime();
 			}
 			return (TimeSteward.currentTimeMillis() < expire)
 			      ? this
@@ -105,5 +109,13 @@ public class OpQueryEvents extends OpSS125 {
 			if (det != null)
 				det.logGap(0);
 		}
+	}
+
+	/** Cleanup the operation */
+	@Override
+	public void cleanup() {
+		if (isSuccess())
+			controller.binEventSamples(period);
+		super.cleanup();
 	}
 }

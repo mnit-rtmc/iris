@@ -69,10 +69,9 @@ public class G4Poller extends ThreadedPoller<G4Property>
 	public void querySamples(ControllerImpl c, int p) {
 		if (c.getPollPeriodSec() == p) {
 			if (protocol == CommProtocol.RTMS_G4_VLOG) {
-				c.binEventSamples(p);
 				OpPerVehicle opv = getVehicleOp(c);
 				if (opv != null)
-					opv.updateCounters();
+					opv.updateCounters(p);
 			} else
 				addOp(new OpQueryStats(c, p));
 		}

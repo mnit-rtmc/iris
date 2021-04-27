@@ -68,10 +68,9 @@ public class CanogaPoller extends ThreadedPoller<CanogaProperty>
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
 		if (c.getPollPeriodSec() == p) {
-			c.binEventSamples(p);
 			OpQueryEventSamples qes = getEventOp(c);
 			if (qes != null)
-				qes.updateCounters();
+				qes.updateCounters(p);
 		}
 	}
 

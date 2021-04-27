@@ -179,8 +179,17 @@ public class VehicleEventLog {
 	/** Time stamp of most recent vehicle event */
 	private transient long p_stamp;
 
+	/** Binning flag */
+	private transient boolean binning;
+
+	/** Is vehicle log binning? */
+	public boolean isBinning() {
+		return binning;
+	}
+
 	/** Bin 30-second sample data */
-	public void binEventSamples() {
+	public void setBinning(boolean b) {
+		binning = b;
 		ev_vehicles = 0;
 		ev_duration = 0;
 		ev_n_speed = 0;

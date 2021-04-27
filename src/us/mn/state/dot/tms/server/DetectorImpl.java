@@ -1023,13 +1023,16 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Flush buffered data to disk */
 	public void flush(PeriodicSampleWriter writer) {
-		writer.flush(veh_cache, name);
-		writer.flush(scn_cache, name);
-		writer.flush(spd_cache, name);
-		writer.flush(mc_count_cache, name);
-		writer.flush(s_count_cache, name);
-		writer.flush(m_count_cache, name);
-		writer.flush(l_count_cache, name);
+		if (!v_log.isBinning()) {
+			writer.flush(veh_cache, name);
+			writer.flush(scn_cache, name);
+			writer.flush(spd_cache, name);
+			writer.flush(mc_count_cache, name);
+			writer.flush(s_count_cache, name);
+			writer.flush(m_count_cache, name);
+			writer.flush(l_count_cache, name);
+		}
+		v_log.setBinning(false);
 	}
 
 	/** Purge all samples before a given stamp. */
@@ -1066,7 +1069,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		storeVehCount(v_log.getVehCount(end, p));
 		storeOccupancy(v_log.getOccupancy(end, p));
 		storeSpeed(v_log.getSpeed(end, p));
-		v_log.binEventSamples();
+		v_log.setBinning(true);
 	}
 
 	/** Write a single detector as an XML element */
