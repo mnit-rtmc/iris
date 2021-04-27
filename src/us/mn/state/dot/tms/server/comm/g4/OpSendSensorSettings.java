@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.g4;
 
 import java.io.IOException;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.ControllerHelper;
 import static us.mn.state.dot.tms.units.Distance.Units.DECIMETERS;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -29,11 +30,14 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpSendSensorSettings extends OpG4 {
 
+	/** Error threshold for setting date / time */
+	static private final int TIME_THRESHOLD = 5000;
+
 	/** Binning interval (seconds) */
 	private final int interval;
 
-	/** Error threshold for setting date / time */
-	static private final int TIME_THRESHOLD = 5000;
+	/** Communication protocol */
+	private final CommProtocol protocol;
 
 	/** Flag to perform a controller restart */
 	private final boolean restart;
@@ -51,9 +55,12 @@ public class OpSendSensorSettings extends OpG4 {
 	private final RTCProperty rtc = new RTCProperty();
 
 	/** Create a new operation to send settings to a sensor */
-	public OpSendSensorSettings(ControllerImpl c, boolean r) {
+	public OpSendSensorSettings(ControllerImpl c, CommProtocol cp,
+		boolean r)
+	{
 		super(PriorityLevel.DOWNLOAD, c);
 		interval = c.getPollPeriodSec();
+		protocol = cp;
 		restart = r;
 	}
 
@@ -96,7 +103,7 @@ public class OpSendSensorSettings extends OpG4 {
 	/** Check if the setup information should be updated */
 	private boolean shouldUpdateSetupInfo() {
 		return isConfigWrong() || isPeriodWrong() ||
-		       isCompWrong() || areFlagsWrong();
+		       isCompositionWrong() || areFlagsWrong();
 	}
 
 	/** Check if the port config is wrong */
@@ -107,9 +114,16 @@ public class OpSendSensorSettings extends OpG4 {
 	}
 
 	/** Check if one port config is wrong */
-	static boolean isPortConfigWrong(PortConfig pc) {
+	private boolean isPortConfigWrong(PortConfig pc) {
 		return pc.isX3() || !pc.isHighOccupancy() ||
-		       pc.getMode() != PortConfig.Mode.POLLED;
+		       pc.getMode() != operatingMode();
+	}
+
+	/** Get the operating mode for the selected comm protocol */
+	private PortConfig.Mode operatingMode() {
+		return (protocol == CommProtocol.RTMS_G4_VLOG)
+		      ?	PortConfig.Mode.PER_VEHICLE
+		      : PortConfig.Mode.POLLED;
 	}
 
 	/** Check if period is wrong */
@@ -118,7 +132,7 @@ public class OpSendSensorSettings extends OpG4 {
 	}
 
 	/** Check if msg composition is wrong */
-	private boolean isCompWrong() {
+	private boolean isCompositionWrong() {
 		StatComposition comp = setup_info.getComp();
 		return comp.hasGap() || comp.hasHeadway() ||
 		       comp.hasSpeed85() || comp.getClassCount() != 4;
@@ -145,8 +159,8 @@ public class OpSendSensorSettings extends OpG4 {
 	}
 
 	/** Create an update port config */
-	static private PortConfig updatePortConfig(PortConfig pc) {
-		return new PortConfig(pc.getPort(), PortConfig.Mode.POLLED,
+	private PortConfig updatePortConfig(PortConfig pc) {
+		return new PortConfig(pc.getPort(), operatingMode(),
 			pc.isRS4xx(), pc.isRTSCTS(), pc.getBaudRate());
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2014  Minnesota Department of Transportation
+ * Copyright (C) 2012-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,8 +105,8 @@ public class RTCProperty extends G4Property {
 	private void parseRTC(byte[] data) throws ParsingException {
 		if (data.length != 14)
 			throw new ParsingException("INVALID RTC LENGTH");
-		stamp = parseStamp(data, 0);
-		reset_stamp = parseStamp(data, 7);
+		stamp = parseStamp(data, 0, 0);
+		reset_stamp = parseStamp(data, 7, 0);
 	}
 
 	/** Get a string representation of the RTC property */

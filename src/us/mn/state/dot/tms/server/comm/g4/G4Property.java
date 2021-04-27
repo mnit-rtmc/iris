@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2016  Minnesota Department of Transportation
+ * Copyright (C) 2012-2021  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -92,6 +92,17 @@ abstract public class G4Property extends ControllerProperty {
 		formatBCD2(data, pos + 6, cal.get(Calendar.YEAR) % 100);
 	}
 
+	/** Create a time stamp */
+	static private long createStamp(int year, int month, int day, int hour,
+		int minute, int second, int ms)
+	{
+		TimeZone utc = TimeZone.getTimeZone("GMT");
+		Calendar cal = Calendar.getInstance(utc);
+		cal.set(year, month - 1, day, hour, minute, second);
+		cal.set(Calendar.MILLISECOND, ms);
+		return cal.getTimeInMillis();
+	}
+
 	/** Parse one frame.
 	 * @param is Input stream to read from.
 	 * @param drop Sensor ID (drop address). */
@@ -131,7 +142,9 @@ abstract public class G4Property extends ControllerProperty {
 	}
 
 	/** Parse a time stamp */
-	protected long parseStamp(byte[] data, int pos) throws ParsingException{
+	protected long parseStamp(byte[] data, int pos, int ms)
+		throws ParsingException
+	{
 		int second = parseBCD2(data, pos);
 		int minute = parseBCD2(data, pos + 1);
 		int hour = parseBCD2(data, pos + 2);
@@ -143,10 +156,14 @@ abstract public class G4Property extends ControllerProperty {
 		//       weekday, since it contains no additional information?
 		//       Or simply add one more byte, ffs!
 		int year = 2000 + parseBCD2(data, pos + 6);
-		TimeZone utc = TimeZone.getTimeZone("GMT");
-		Calendar cal = Calendar.getInstance(utc);
-		cal.set(year, month - 1, day, hour, minute, second);
-		cal.set(Calendar.MILLISECOND, 0);
-		return cal.getTimeInMillis();
+		return createStamp(year, month, day, hour, minute, second, ms);
+	}
+
+	/** Parse a time stamp with milliseconds */
+	protected long parseStampMs(byte[] data, int pos)
+		throws ParsingException
+	{
+		int ms = parseBCD2(data, pos);
+		return parseStamp(data, pos + 1, ms);
 	}
 }

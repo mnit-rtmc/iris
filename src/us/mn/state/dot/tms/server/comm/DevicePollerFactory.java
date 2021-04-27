@@ -102,7 +102,8 @@ public class DevicePollerFactory {
 		case PELCO_P:
 			return new PelcoPPoller(link);
 		case RTMS_G4:
-			return new G4Poller(link);
+		case RTMS_G4_VLOG:
+			return new G4Poller(link, protocol);
 		case SS_105:
 			return new SS105Poller(link);
 		case SS_125:

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2019  Minnesota Department of Transportation
+ * Copyright (C) 2012-2021  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -329,7 +329,7 @@ public class StatProperty extends G4Property {
 		msg_num = parse8(data, OFF_MSG_NUM);
 		page_num = parse16(data, OFF_PAGE_NUM);
 		stat_flags = new StatusFlags(parse8(data, OFF_STAT_FLAGS));
-		stamp = parseStamp(data, OFF_STAMP);
+		stamp = parseStamp(data, OFF_STAMP, 0);
 		n_zones = parse8(data, OFF_ZONES);
 		msg_comp = new StatComposition(parse8(data, OFF_COMP));
 		if (msg_comp.getClassCount() == 0)

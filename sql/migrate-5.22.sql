@@ -109,6 +109,7 @@ CREATE VIEW weather_sensor_view AS
 	LEFT JOIN controller_view ctr ON w.controller = ctr.name;
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
 
+UPDATE iris.comm_protocol SET description = 'RTMS G4 vlog' WHERE id = 18;
 UPDATE iris.comm_protocol SET description = 'SmartSensor 125 vlog'
 	WHERE id = 19;
 

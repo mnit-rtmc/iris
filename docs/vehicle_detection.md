@@ -76,7 +76,8 @@ Protocol               | Binning           | Traffic Data
 [SmartSensor] 105      | 5 sec to 1 month  | Count, Occupancy, Speed, Class
 [SmartSensor] 125 HD   | 5 sec to 1 month  | Count, Occupancy, Speed, Class
 [SmartSensor] 125 vlog | N/A               | [vlog]
-[G4]                   | 5 sec to 1 hour   | [vlog], Count, Occupancy, Speed, Class
+RTMS [G4]              | 5 sec to 1 hour   | Count, Occupancy, Speed, Class
+RTMS [G4] vlog         | N/A               | [vlog]
 [Canoga]               | N/A               | [vlog]
 [DR-500]               | 30-300? sec       | Speed
 [DXM]                  | N/A (presence)    | Magnetic Field

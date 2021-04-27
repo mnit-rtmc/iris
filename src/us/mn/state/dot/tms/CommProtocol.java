@@ -81,9 +81,8 @@ public enum CommProtocol {
 	/** RTMS G4 (17) */
 	RTMS_G4("RTMS G4"),
 
-	/** RTMS (18) */
-	@Deprecated
-	RTMS("RTMS"),
+	/** RTMS G4 Vehicle logging (18) */
+	RTMS_G4_VLOG("RTMS G4 vlog"),
 
 	/** Wavetronix SmartSensor 125 Vehicle logging (19) */
 	SS_125_VLOG("SmartSensor 125 vlog"),

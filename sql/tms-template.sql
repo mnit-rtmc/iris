@@ -1251,7 +1251,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 15	OSi ORG-815
 16	Infinova D PTZ
 17	RTMS G4
-18	RTMS
+18	RTMS G4 vlog
 19	SmartSensor 125 vlog
 20	Sensys
 21	PeMS

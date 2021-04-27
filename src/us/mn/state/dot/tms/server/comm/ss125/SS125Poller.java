@@ -68,9 +68,10 @@ public class SS125Poller extends ThreadedPoller<SS125Property>
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
 		if (c.getPollPeriodSec() == p) {
-			if (protocol == CommProtocol.SS_125_VLOG)
+			if (protocol == CommProtocol.SS_125_VLOG) {
+				c.binEventSamples(p);
 				addOp(new OpQueryEvents(c, p));
-			else
+			} else
 				addOp(new OpQueryBinned(c, p));
 		}
 	}
