@@ -157,7 +157,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.21.0
+database_version	5.22.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_enable	true
@@ -2512,7 +2512,7 @@ CREATE TABLE iris.sign_config (
 	default_font VARCHAR(16) REFERENCES iris.font,
 	exclude_font VARCHAR(16) REFERENCES iris.font,
 	module_width INTEGER,
-	module_height INTEGER,
+	module_height INTEGER
 );
 
 CREATE TRIGGER sign_config_notify_trig
