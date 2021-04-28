@@ -102,7 +102,7 @@ public class IntervalDataProperty extends SS125Property {
 	{
 		while (!isComplete()) {
 			super.decodeQuery(c, is);
-			msg_sub_id = (byte)(msg_sub_id + 1);
+			msg_sub_id = (byte) (msg_sub_id + 1);
 		}
 	}
 

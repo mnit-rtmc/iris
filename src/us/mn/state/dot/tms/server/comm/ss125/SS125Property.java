@@ -297,9 +297,7 @@ abstract public class SS125Property extends ControllerProperty {
 		MessageID mid = MessageID.fromCode(parse8(rbody, OFF_MSG_ID));
 		if(mid != msgId())
 			throw new ParsingException("MESSAGE ID");
-		int sid = parse8(rbody, OFF_MSG_SUB_ID);
-		if(sid != msgSubId())
-			throw new ParsingException("MESSAGE SUB ID: " + sid);
+		msg_sub_id = parse8(rbody, OFF_MSG_SUB_ID);
 		MessageType rmt = MessageType.fromCode(parse8(rbody,
 			OFF_MSG_TYPE));
 		if(rmt == MessageType.RESULT) {

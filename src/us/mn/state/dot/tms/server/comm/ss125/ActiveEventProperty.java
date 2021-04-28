@@ -85,7 +85,7 @@ public class ActiveEventProperty extends SS125Property {
 	protected void parseQuery(byte[] body) throws IOException {
 		if (body.length == 6)
 			parseResult(body);
-		if (body.length != 23)
+		if (body.length != 24)
 			throw new ParsingException("BODY LENGTH");
 		int is_event = parse8(body, OFF_MSG_SUB_ID);
 		valid = (is_event == 1);
