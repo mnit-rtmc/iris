@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2019  Minnesota Department of Transportation
+ * Copyright (C) 2008-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ public enum LaneType {
 	AUXILIARY("Auxiliary", "A", new Interval(24, HOURS), true, false),
 
 	/** Collector/Distributor lane type (3) */
-	CD_LANE("CD Lane", "CD", new Interval(4, HOURS), true, false),
+	CD_LANE("CD Lane", "C", new Interval(4, HOURS), true, false),
 
 	/** Reversible lane type (4) */
 	REVERSIBLE("Reversible", "R", new Interval(72, HOURS), true, false),
@@ -73,13 +73,13 @@ public enum LaneType {
 	HOV("HOV", "H", new Interval(8, HOURS), true, false),
 
 	/** High Occupancy / Toll (HOT) lane type (15) */
-	HOT("HOT", "HT", new Interval(72, HOURS), true, false),
+	HOT("HOT", "T", new Interval(72, HOURS), true, false),
 
 	/** Dynamic shoulder lane type (16) */
 	SHOULDER("Shoulder", "D", new Interval(72, HOURS), true, false),
 
 	/** Parking lane type (17) */
-	PARKING("Parking", "PK", new Interval(2, WEEKS), false, false);
+	PARKING("Parking", "K", new Interval(2, WEEKS), false, false);
 
 	/** Create a new lane type */
 	private LaneType(String d, String s, Interval nht, boolean ml,

@@ -113,4 +113,8 @@ UPDATE iris.comm_protocol SET description = 'RTMS G4 vlog' WHERE id = 18;
 UPDATE iris.comm_protocol SET description = 'SmartSensor 125 vlog'
 	WHERE id = 19;
 
+UPDATE iris.lane_type SET dcode = 'C' WHERE id = 3;
+UPDATE iris.lane_type SET dcode = 'T' WHERE id = 15;
+UPDATE iris.lane_type SET dcode = 'K' WHERE id = 17;
+
 COMMIT;

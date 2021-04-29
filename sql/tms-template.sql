@@ -2088,7 +2088,7 @@ COPY iris.lane_type (id, description, dcode) FROM stdin;
 0		
 1	Mainline	
 2	Auxiliary	A
-3	CD Lane	CD
+3	CD Lane	C
 4	Reversible	R
 5	Merge	M
 6	Queue	Q
@@ -2100,9 +2100,9 @@ COPY iris.lane_type (id, description, dcode) FROM stdin;
 12	Green	G
 13	Wrong Way	Y
 14	HOV	H
-15	HOT	HT
+15	HOT	T
 16	Shoulder	D
-17	Parking	PK
+17	Parking	K
 \.
 
 CREATE VIEW lane_type_view AS
