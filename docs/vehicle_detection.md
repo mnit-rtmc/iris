@@ -1,10 +1,19 @@
 # Vehicle Detection Systems
 
-There are several types of **vehicle detection systems** (VDS).  The earliest of
-these is the _inductive loop_, which is a wire looped under the road surface.
-Some systems use _radar_ mounted on the side of the road.  _Video detection_
-uses a camera and computer vision software.  Collectively, these systems are
-simply called **detectors**.
+Real time vehicle data is used for several purposes:
+- [Traffic maps](#traffic-layer)
+- [Travel time]s
+- [Ramp metering]
+- [Parking area] availability
+- [Variable speed advisories]
+
+Different techonlogies, such as _inductive loops_, _magnetometers_, _radar_ and
+_video_ are available for detecting vehicles.  Collectively, these systems are
+called **detectors**.
+
+Every 30 seconds, the most recent collected data from all online detectors is
+written to files.  An [XML file] called `det_sample.xml.gz` and a JSON file
+called `station_sample` are generated.
 
 ## Configuration
 
@@ -45,42 +54,33 @@ HOT        | High occupancy or tolling only
 Shoulder   | Mainline shoulder
 Parking    | Parking space presence detector
 
-## Transfer
+### Transfer
 
-It is possible to move a detector to another `r_node`.  Select the target
-`r_node` and enter the detector **Name**.  The current label for that detector
-will appear on the right.  To move it to the current `r_node`, press the
-**Transfer** button.
-
-## Traffic Data
-
-The preferred method of collecting traffic data, supported by newer detectors,
-is to log every [vehicle](#vehicle-logging) that passes by the detection area.
-Older detectors use fixed time intervals and put data into [bins](#binned-data).
-
-Every 30 seconds, an XML file is generated containing the most recent collected
-data from all online detectors.  The file is called `det_sample.xml.gz`, and it
-is written to the [XML output directory].
+To move a detector to another `r_node`, select the target `r_node` and enter the
+detector **Name**.  The current label for that detector will appear on the
+right.  To move it to the current `r_node`, press the **Transfer** button.
 
 ## Detector Protocols
 
 IRIS supports several different [protocols] for communicating with vehicle
 detection systems.  The protocol used depends on the [comm link] of the
-[controller] to which it is assigned.  The following table summarizes features
-of each protocol.
+[controller] to which a detector is assigned.
 
-Protocol               | Binning           | Traffic Data
------------------------|-------------------|-----------------
-[NTCIP]                | 0-255 sec         | Count, Occupancy
-[MnDOT-170]            | 30 sec            | Count, Scans
-[SmartSensor] 105      | 5 sec to 1 month  | Count, Occupancy, Speed, Class
-[SmartSensor] 125 HD   | 5 sec to 1 month  | Count, Occupancy, Speed, Class
-[SmartSensor] 125 vlog | N/A               | [vlog]
-RTMS [G4]              | 5 sec to 1 hour   | Count, Occupancy, Speed, Class
-RTMS [G4] vlog         | N/A               | [vlog]
-[Canoga]               | N/A               | [vlog]
-[DR-500]               | 30-300? sec       | Speed
-[DXM]                  | N/A (presence)    | Magnetic Field
+Traffic data can be collected in two ways: [vehicle logging](#vehicle-logging)
+and [binning](#binned-data) in fixed time periods.
+
+Protocol               | Binning         | Traffic Data
+-----------------------|-----------------|------------------------
+[SmartSensor] 125 HD   | 5 sec to 1 hour | Count, Occupancy, Speed
+[SmartSensor] 125 vlog | N/A             | [vlog]
+[SmartSensor] 105      | 5 sec to 1 hour | Count, Occupancy, Speed
+RTMS [G4]              | 5 sec to 1 hour | Count, Occupancy, Speed
+RTMS [G4] vlog         | N/A             | [vlog]
+[MnDOT-170]            | 30 sec          | Count, Occupancy
+[Canoga]               | N/A             | [vlog]
+[DR-500]               | 30-300? sec     | Speed
+[DXM]                  | N/A (presence)  | Magnetic Field
+[NTCIP]                | 0-255 sec       | Count, Occupancy
 
 For protocols which allow the binning intereval to be adjusted, it will be set
 to the poll [period] of the comm link.
@@ -158,6 +158,30 @@ detection can be used — this field can contain one or more other detector name
 separated by spaces.  The average density or speed of those detectors (which are
 not also failed) will be used instead.
 
+## Traffic Layer
+
+The IRIS client user interface includes a _traffic map layer_ which is created
+automatically from the [road topology].  By default, this layer uses traffic
+**density** to determine the color of each **segment**.  Other themes are
+available for **speed** and **flow**.  The **Legend** menu at the top of the map
+can be used to view the thresholds used for each color in a theme.
+
+Every 30 seconds, the client will make an HTTP request for the current
+[XML file].  The URL to locate that file is declared as a property in the
+`/etc/iris/iris-client.properties` file (on the IRIS server).  The property is
+`tdxml.detector.url`, and it should point to the `det_sample.xml.gz` [XML file],
+as made available by `nginx` on the IRIS server.
+
+The appearance of the _traffic map layer_ changes depending on the current zoom
+level.  If the zoom level is below 10, the layer will not be visible.  At zoom
+levels 10 through 13, the layer will display segments as aggregate of all
+detectors in each mainline [station].  At zoom level 14 or above, each mainline
+detector will be displayed as a separate segment.
+
+The maximum distance between adjacent [station]s to draw segments on the map is
+specified by the `map_segment_max_meters` [system attribute].  It is also the
+maximum downstream distance for associating station data with a segment.
+
 ## Traffic Data Archiving
 
 Collected data is archived only if the `sample_archive_enable`
@@ -233,7 +257,7 @@ IRIS can collect these types of binned traffic data:
 Data Type     | Description                              | Code | Size
 --------------|------------------------------------------|------|------------
 Vehicle Count | Count of vehicles detected               | v    | 8 bits
-Scans         | Scan _occupancy_ count (0 to 1800)       | c    | 16 bits
+Occupancy     | 30-second scan count (0 to 1800)         | c    | 16 bits
 Speed         | Average speed (mph) of detected vehicles | s    | 8 bits
 
 A binned data file consists of some number of periods of equal duration.  The
@@ -250,56 +274,16 @@ Period | Binning Interval | Values | Stored Bins
 15     | 15 seconds       | 5760   | 15 seconds
 20     | 20 seconds       | 4320   | 20 seconds
 30     | 30 seconds       | 2880   | 30 seconds
-60     | 60 seconds       | 1440   | 30 seconds
-90     | 90 seconds       | 960    | 30 seconds
-120    | 2 minutes        | 720    | 30 seconds
-240    | 4 minutes        | 360    | 30 seconds
-300    | 5 minutes        | 288    | 30 seconds
-600    | 10 minutes       | 144    | 30 seconds
-900    | 15 minutes       | 96     | 30 seconds
-1200   | 20 minutes       | 72     | 30 seconds
-1800   | 30 minutes       | 48     | 30 seconds
-3600   | 60 minutes       | 24     | 30 seconds
-7200   | 2 hours          | 12     | 30 seconds
-14400  | 4 hours          | 6      | 30 seconds
-28800  | 8 hours          | 3      | 30 seconds
-43200  | 12 hours         | 2      | 30 seconds
-86400  | 24 hours         | 1      | 30 seconds
 
-For each detector, a binned data file is created for each
-[traffic data](#traffic-data) **data type**.  The base file name is the
-detector name.  The extension is the traffic data **code** followed by the
+For each detector, a binned data file is created for each **data type**.  The
+base file name is the detector name.  The file extension is the **code** and
 **period** (in seconds).  For example, 60-second vehicle counts collected from
 detector 100 would be stored in a file called `100.v60`, containing 2880 bins.
 
 Each data value is either an 8- or 16-bit signed integer, depending on the
 data type.  16-bit value are in high-byte first order.  A negative value (-1)
 indicates missing data.  Any data outside the valid ranges should be considered
-_bad_.
-
-## Traffic Layer
-
-The IRIS client user interface includes a _traffic map layer_ which is created
-automatically from the [road topology].  By default, this layer uses traffic
-**density** to determine the color of each **segment**.  Other themes are
-available for **speed** and **flow**.  The **Legend** menu at the top of the map
-can be used to view the thresholds used for each color in a theme.
-
-Every 30 seconds, the client will make an HTTP request for the current
-[traffic data](#traffic-data).  The URL to locate that file is declared as a
-property in the `/etc/iris/iris-client.properties` file (on the IRIS server).
-The property is `tdxml.detector.url`, and it should point to the
-`det_sample.xml.gz` [XML file], as made available by nginx on the IRIS server.
-
-The appearance of the _traffic map layer_ changes depending on the current zoom
-level.  If the zoom level is below 10, the layer will not be visible.  At zoom
-levels 10 through 13, the layer will display segments as aggregate of all
-detectors in each mainline [station].  At zoom level 14 or above, each mainline
-detector will be displayed as a separate segment.
-
-The maximum distance between adjacent [station]s to draw segments on the map is
-specified by the `map_segment_max_meters` [system attribute].  It is also the
-maximum downstream distance for associating station data with a segment.
+_missing_.
 
 
 [Canoga]: comm_links.html#canoga
@@ -312,16 +296,17 @@ maximum downstream distance for associating station data with a segment.
 [IO pins]: controllers.html#io-pins
 [MnDOT-170]: comm_links.html#mndot-170
 [NTCIP]: comm_links.html#ntcip
+[Parking area]: parking_areas.html
 [period]: comm_links.html#poll-period
 [protocols]: comm_links.html#protocols
 [r_node]: road_topology.html#r_nodes
-[ramp metering]: ramp_meters.html
+[Ramp metering]: ramp_meters.html
 [road topology]: road_topology.html
 [roads]: road_topology.html#roads
 [SmartSensor]: comm_links.html#smartsensor
 [station]: road_topology.html#r_node-types
 [system attribute]: system_attributes.html
-[travel time]: travel_time.html
+[Travel time]: travel_time.html
+[Variable speed advisories]: vsa.html
 [vlog]: #vehicle-logging
 [XML file]: troubleshooting.html#xml-output
-[XML output directory]: troubleshooting.html#xml-output
