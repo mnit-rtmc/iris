@@ -1,6 +1,6 @@
 // resource.rs
 //
-// Copyright (C) 2018-2020  Minnesota Department of Transportation
+// Copyright (C) 2018-2021  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -462,7 +462,7 @@ impl Resource {
         payload: &str,
         sender: &Sender<SegMsg>,
     ) -> Result<()> {
-        if payload == "" {
+        if payload.is_empty() {
             fetch_all_nodes(client, sender)
         } else {
             fetch_one_node(client, payload, sender)
@@ -480,7 +480,7 @@ impl Resource {
         payload: &str,
         sender: &Sender<SegMsg>,
     ) -> Result<()> {
-        if payload == "" {
+        if payload.is_empty() {
             fetch_all_roads(client, sender)
         } else {
             fetch_one_road(client, payload, sender)

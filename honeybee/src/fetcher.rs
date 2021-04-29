@@ -1,6 +1,6 @@
 // fetcher.rs
 //
-// Copyright (C) 2018-2020  Minnesota Department of Transportation
+// Copyright (C) 2018-2021  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ use std::time::Duration;
 /// Start receiving notifications and fetching resources.
 pub fn start() -> Result<()> {
     let (sender, receiver) = std::sync::mpsc::channel();
-    thread::spawn(move || receive_nodes(receiver));
+    thread::spawn(move || receive_nodes(receiver).unwrap());
     let mut client = create_client("tms")?;
     resource::listen_all(&mut client)?;
     resource::fetch_all(&mut client, &sender)?;

@@ -1,6 +1,6 @@
 // signmsg.rs
 //
-// Copyright (C) 2018-2020  Minnesota Department of Transportation
+// Copyright (C) 2018-2021  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -337,7 +337,7 @@ impl SignConfig {
         palette.set_entry(SRgb8::default());
         let mut steps = Vec::new();
         let pages = self.pages(msg_data, multi)?;
-        let (w, h) = self.calculate_size()?;
+        let (w, h) = self.calculate_size();
         for page in pages {
             let (raster, delay_ds) = page?;
             let delay = delay_ds * 10;
@@ -390,7 +390,7 @@ impl SignConfig {
     }
 
     /// Calculate the size of rendered DMS
-    fn calculate_size(&self) -> Result<(u16, u16)> {
+    fn calculate_size(&self) -> (u16, u16) {
         let fw = self.face_width();
         let fh = self.face_height();
         if fw > 0.0 && fh > 0.0 {
@@ -399,9 +399,9 @@ impl SignConfig {
             let s = sx.min(sy);
             let w = (fw * s).round() as u16;
             let h = (fh * s).round() as u16;
-            Ok((w, h))
+            (w, h)
         } else {
-            Ok((PIX_WIDTH as u16, PIX_HEIGHT as u16))
+            (PIX_WIDTH as u16, PIX_HEIGHT as u16)
         }
     }
 
@@ -527,7 +527,7 @@ impl MsgData {
         if let Some(value) = self.attrs.get(name) {
             if let Ok(sec) = value.parse::<f32>() {
                 let ds = sec * 10.0;
-                if ds >= 0.0 && ds <= 255.0 {
+                if (0.0..=255.0).contains(&ds) {
                     return Some(ds as u8);
                 }
             }
@@ -702,19 +702,18 @@ impl ImageCache {
     }
 
     /// Check if an image exists
-    fn contains(&mut self, n: &PathBuf) -> bool {
+    fn contains(&mut self, n: &Path) -> bool {
         self.files.remove(n)
     }
 
     /// Remove expired image files
-    fn remove_expired(&mut self) -> Result<()> {
+    fn remove_expired(&mut self) {
         for p in self.files.drain() {
             info!("remove_expired: {:?}", &p);
             if let Err(e) = remove_file(&p) {
                 error!("{:?}", e);
             }
         }
-        Ok(())
     }
 }
 
@@ -824,6 +823,6 @@ pub fn render_all(dir: &Path) -> Result<()> {
     for sign_msg in sign_msgs {
         sign_msg.fetch(&msg_data, &mut images)?;
     }
-    images.remove_expired()?;
+    images.remove_expired();
     Ok(())
 }

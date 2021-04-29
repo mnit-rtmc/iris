@@ -1,6 +1,6 @@
 // segments.rs
 //
-// Copyright (C) 2019-2020  Minnesota Department of Transportation
+// Copyright (C) 2019-2021  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,6 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::Result;
 use crate::fetcher::create_client;
 use crate::geo::{WebMercatorPos, Wgs84Pos};
 use pointy::Pt64;
@@ -88,22 +89,22 @@ pub enum SegMsg {
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 enum TravelDir {
     /// Northbound
-    NB,
+    Nb,
     /// Southbound
-    SB,
+    Sb,
     /// Eastbound
-    EB,
+    Eb,
     /// Westbound
-    WB,
+    Wb,
 }
 
 impl TravelDir {
     fn from_i16(dir: i16) -> Option<Self> {
         match dir {
-            1 => Some(TravelDir::NB),
-            2 => Some(TravelDir::SB),
-            3 => Some(TravelDir::EB),
-            4 => Some(TravelDir::WB),
+            1 => Some(TravelDir::Nb),
+            2 => Some(TravelDir::Sb),
+            3 => Some(TravelDir::Eb),
+            4 => Some(TravelDir::Wb),
             _ => None,
         }
     }
@@ -353,10 +354,10 @@ impl Corridor {
         ln: f64,
     ) -> Option<Ordering> {
         match self.cor_id.travel_dir {
-            TravelDir::NB => lt.partial_cmp(&lat),
-            TravelDir::SB => lat.partial_cmp(&lt),
-            TravelDir::EB => ln.partial_cmp(&lon),
-            TravelDir::WB => lon.partial_cmp(&ln),
+            TravelDir::Nb => lt.partial_cmp(&lat),
+            TravelDir::Sb => lat.partial_cmp(&lt),
+            TravelDir::Eb => ln.partial_cmp(&lon),
+            TravelDir::Wb => lon.partial_cmp(&ln),
         }
     }
 
@@ -431,7 +432,7 @@ impl Corridor {
         &self,
         trans: &mut Transaction,
         statement: &Statement,
-    ) -> crate::Result<()> {
+    ) -> Result<()> {
         let pts = self.create_points();
         info!("{}: {} points", self.cor_id, pts.len());
         if !pts.is_empty() {
@@ -585,7 +586,7 @@ impl<'a> Segments<'a> {
                     let way = self.create_way(&poly);
                     let params: [&(dyn ToSql + Sync); 5] =
                         [&sid, &self.cor_name, &station_id, &zoom, &way];
-                    trans.execute(statement, &params).unwrap();
+                    trans.execute(statement, &params)?;
                     sid += 1;
                 }
                 poly.clear();
@@ -601,7 +602,7 @@ impl<'a> Segments<'a> {
             let way = self.create_way(&poly);
             let params: [&(dyn ToSql + Sync); 5] =
                 [&sid, &self.cor_name, &station_id, &zoom, &way];
-            trans.execute(statement, &params[..]).unwrap();
+            trans.execute(statement, &params[..])?;
         }
         Ok(())
     }
@@ -784,50 +785,52 @@ impl SegmentState {
     }
 
     /// Order all corridors
-    fn set_ordered(&mut self, ordered: bool) {
+    fn set_ordered(&mut self, ordered: bool) -> Result<()> {
         self.ordered = ordered;
         if ordered {
-            let mut trans = self.client.transaction().unwrap();
-            let statement = trans.prepare(SegmentState::SQL_INSERT).unwrap();
+            let mut trans = self.client.transaction()?;
+            let statement = trans.prepare(SegmentState::SQL_INSERT)?;
             for cor in self.corridors.values_mut() {
                 cor.order_nodes();
-                cor.create_segments(&mut trans, &statement).unwrap();
+                cor.create_segments(&mut trans, &statement)?;
             }
-            trans.commit().unwrap();
+            trans.commit()?;
         }
+        Ok(())
     }
 
     /// Update a road class or scale
-    fn update_road(&mut self, road: Road) {
+    fn update_road(&mut self, road: Road) -> Result<()> {
         debug!("update_road {}", road.name);
         let name = road.name.clone();
         self.roads.insert(name.clone(), road);
         if self.ordered {
             let scale = self.scale(&name);
-            let mut trans = self.client.transaction().unwrap();
-            let statement = trans.prepare(SegmentState::SQL_INSERT).unwrap();
+            let mut trans = self.client.transaction()?;
+            let statement = trans.prepare(SegmentState::SQL_INSERT)?;
             for cor in self.corridors.values_mut() {
                 if cor.cor_id.roadway == name {
                     cor.scale = scale;
                     cor.order_nodes();
-                    cor.create_segments(&mut trans, &statement).unwrap();
+                    cor.create_segments(&mut trans, &statement)?;
                 }
             }
-            trans.commit().unwrap();
+            trans.commit()?;
         }
+        Ok(())
     }
 }
 
 /// Receive segment messages and update corridor segments
-pub fn receive_nodes(receiver: Receiver<SegMsg>) {
-    let client = create_client("earthwyrm").unwrap();
+pub fn receive_nodes(receiver: Receiver<SegMsg>) -> Result<()> {
+    let client = create_client("earthwyrm")?;
     let mut state = SegmentState::new(client);
     loop {
-        match receiver.recv().unwrap() {
-            SegMsg::UpdateRoad(road) => state.update_road(road),
+        match receiver.recv()? {
+            SegMsg::UpdateRoad(road) => state.update_road(road)?,
             SegMsg::UpdateNode(node) => state.update_node(node),
             SegMsg::RemoveNode(name) => state.remove_node(&name),
-            SegMsg::Order(ordered) => state.set_ordered(ordered),
+            SegMsg::Order(ordered) => state.set_ordered(ordered)?,
         }
         debug!("total corridors: {}", state.corridors.len());
     }
