@@ -135,6 +135,17 @@ const CAMERA_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Detector resource
+const DETECTOR_RES: Resource = Resource::Simple(
+    "detector_pub",
+    Listen::Exclude("detector", &["auto_fail"]),
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT name, r_node, cor_id, lane_number, field_length, lane_code, \
+           abandoned, force_fail \
+    FROM detector_view \
+) r",
+);
+
 /// DMS resource
 const DMS_RES: Resource = Resource::Simple(
     "dms_pub",
@@ -318,6 +329,7 @@ const ALL: &[Resource] = &[
     GRAPHIC_RES,
     INCIDENT_RES,
     R_NODE_RES,
+    DETECTOR_RES,
     SIGN_CONFIG_RES,
     SIGN_DETAIL_RES,
     SIGN_MSG_RES,

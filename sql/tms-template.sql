@@ -5,10 +5,11 @@
 -- The channel is determined by the table, and the payload is for specific
 -- update data (usually blank).
 --
--- CHANNEL: camera, dms, font, glyph, graphic, incident, parking_area,
+-- CHANNEL: camera, detector, dms, font, glyph, graphic, incident, parking_area,
 --          road, road_class, sign_config, sign_detail, sign_message
 --
 -- PAYLOAD: 'publish ' || name, 'video_loss' (camera)
+--          'auto_fail' (detector)
 --          'msg_current', 'msg_sched', 'expire_time' (dms)
 --          'time_stamp' (parking_area)
 --          id (road_class)
@@ -2180,6 +2181,22 @@ CREATE TRIGGER detector_delete_trig
     INSTEAD OF DELETE ON iris.detector
     FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
+CREATE FUNCTION iris.detector_notify() RETURNS TRIGGER AS
+	$detector_notify$
+BEGIN
+	IF (NEW.auto_fail IS DISTINCT FROM OLD.auto_fail) THEN
+		NOTIFY detector, 'auto_fail';
+	ELSE
+		NOTIFY detector;
+	END IF;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$detector_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER detector_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.detector
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.detector_notify();
+
 CREATE FUNCTION iris.detector_label(VARCHAR(6), VARCHAR(4), VARCHAR(6),
 	VARCHAR(4), VARCHAR(2), SMALLINT, SMALLINT, BOOLEAN)
 	RETURNS TEXT AS $detector_label$
@@ -2240,10 +2257,11 @@ CREATE VIEW detector_view AS
 	SELECT d.name, d.r_node, d.controller, c.comm_link, c.drop_id, d.pin,
 	       iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
 	       d.lane_type, d.lane_number, d.abandoned) AS label,
-	       rnd.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
-	       l.cross_dir, d.lane_number, d.field_length,
-	       ln.description AS lane_type, d.abandoned, d.force_fail,
-	       d.auto_fail, c.condition, d.fake, d.notes
+	       rnd.geo_loc, l.rd || '_' || l.road_dir AS cor_id,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       d.lane_number, d.field_length, ln.description AS lane_type,
+	       ln.dcode AS lane_code, d.abandoned, d.force_fail, d.auto_fail,
+	       c.condition, d.fake, d.notes
 	FROM iris.detector d
 	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
 	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name

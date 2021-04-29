@@ -117,4 +117,37 @@ UPDATE iris.lane_type SET dcode = 'C' WHERE id = 3;
 UPDATE iris.lane_type SET dcode = 'T' WHERE id = 15;
 UPDATE iris.lane_type SET dcode = 'K' WHERE id = 17;
 
+CREATE FUNCTION iris.detector_notify() RETURNS TRIGGER AS
+	$detector_notify$
+BEGIN
+	IF (NEW.auto_fail IS DISTINCT FROM OLD.auto_fail) THEN
+		NOTIFY detector, 'auto_fail';
+	ELSE
+		NOTIFY detector;
+	END IF;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$detector_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER detector_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.detector
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.detector_notify();
+
+DROP VIEW detector_view;
+CREATE VIEW detector_view AS
+	SELECT d.name, d.r_node, d.controller, c.comm_link, c.drop_id, d.pin,
+	       iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
+	       d.lane_type, d.lane_number, d.abandoned) AS label,
+	       rnd.geo_loc, l.rd || '_' || l.road_dir AS cor_id,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       d.lane_number, d.field_length, ln.description AS lane_type,
+	       ln.dcode AS lane_code, d.abandoned, d.force_fail, d.auto_fail,
+	       c.condition, d.fake, d.notes
+	FROM iris.detector d
+	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
+	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name
+	LEFT JOIN iris.lane_type ln ON d.lane_type = ln.id
+	LEFT JOIN controller_view c ON d.controller = c.name;
+GRANT SELECT ON detector_view TO PUBLIC;
+
 COMMIT;
