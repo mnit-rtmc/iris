@@ -90,7 +90,6 @@ pub struct RNode {
     active: bool,
     station_id: Option<String>,
     speed_limit: i32,
-    notes: String,
 }
 
 /// Segment notification message
@@ -288,8 +287,7 @@ impl RNode {
     pub const SQL_ALL: &'static str =
         "SELECT n.name, roadway, road_dir, cross_mod, cross_street, cross_dir, \
                 landmark, lat, lon, node_type, pickable, above, transition, \
-                lanes, attach_side, shift, active, station_id, speed_limit, \
-                notes \
+                lanes, attach_side, shift, active, station_id, speed_limit \
         FROM iris.r_node n \
         JOIN iris.geo_loc g ON n.geo_loc = g.name";
 
@@ -297,8 +295,7 @@ impl RNode {
     pub const SQL_ONE: &'static str =
         "SELECT n.name, roadway, road_dir, cross_mod, cross_street, cross_dir, \
                 landmark, lat, lon, node_type, pickable, above, transition, \
-                lanes, attach_side, shift, active, station_id, speed_limit, \
-                notes \
+                lanes, attach_side, shift, active, station_id, speed_limit \
         FROM iris.r_node n \
         JOIN iris.geo_loc g ON n.geo_loc = g.name \
         WHERE n.name = $1";
@@ -328,7 +325,6 @@ impl RNode {
             active: row.get(16),
             station_id: row.get(17),
             speed_limit: row.get(18),
-            notes: row.get(19),
         }
     }
 
