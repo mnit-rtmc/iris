@@ -19,6 +19,7 @@ use pointy::Pt64;
 use postgis::ewkb::{LineString, Point, Polygon};
 use postgres::types::ToSql;
 use postgres::{Client, Row, Statement, Transaction};
+use serde::Serializer;
 use std::cmp::Ordering;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
@@ -54,8 +55,24 @@ pub struct GeoLoc {
     cross_street: Option<String>,
     cross_dir: Option<i16>,
     lankmark: Option<String>,
+    #[serde(serialize_with = "serialize_latlon")]
     lat: Option<f64>,
+    #[serde(serialize_with = "serialize_latlon")]
     lon: Option<f64>,
+}
+
+/// Serialize lat/lon values with f32 precision for smaller JSON
+fn serialize_latlon<S>(
+    x: &Option<f64>,
+    s: S,
+) -> std::result::Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    match x {
+        Some(x) => s.serialize_f32(*x as f32),
+        None => s.serialize_none(),
+    }
 }
 
 /// Roadway node
