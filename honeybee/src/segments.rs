@@ -12,9 +12,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::Result;
 use crate::fetcher::create_client;
 use crate::geo::{WebMercatorPos, Wgs84Pos};
+use crate::Result;
 use pointy::Pt64;
 use postgis::ewkb::{LineString, Point, Polygon};
 use postgres::types::ToSql;
@@ -23,7 +23,10 @@ use std::cmp::Ordering;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::fmt;
+use std::fs::{create_dir_all, rename, File};
 use std::hash::{Hash, Hasher};
+use std::io::BufWriter;
+use std::path::{Path, PathBuf};
 use std::sync::mpsc::Receiver;
 
 /// Base segment scale factor
@@ -43,7 +46,7 @@ pub struct Road {
 }
 
 /// Geographic location
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct GeoLoc {
     roadway: Option<String>,
     road_dir: Option<i16>,
@@ -56,7 +59,7 @@ pub struct GeoLoc {
 }
 
 /// Roadway node
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct RNode {
     name: String,
     loc: GeoLoc,
@@ -98,6 +101,57 @@ enum TravelDir {
     Wb,
 }
 
+/// A file which is written, then renamed atomically
+struct AtomicFile<'a> {
+    /// Directory to store file
+    dir: &'a Path,
+    /// File name
+    name: &'a str,
+}
+
+impl<'a> AtomicFile<'a> {
+    /// Create a new atomic file
+    fn new(dir: &'a Path, name: &'a str) -> Result<Self> {
+        debug!("AtomicFile::new {:?}", name);
+        if !dir.is_dir() {
+            create_dir_all(dir)?;
+        }
+        Ok(AtomicFile { dir, name })
+    }
+
+    /// Create the file and get writer
+    fn writer(&self) -> Result<BufWriter<File>> {
+        Ok(BufWriter::new(File::create(self.tmp_path())?))
+    }
+
+    /// Get path to temp file
+    fn tmp_path(&self) -> PathBuf {
+        let mut path = PathBuf::new();
+        path.push(self.dir);
+        path.push(".".to_owned() + self.name);
+        path
+    }
+
+    /// Get path to final file
+    fn path(&self) -> PathBuf {
+        let mut path = PathBuf::new();
+        path.push(self.dir);
+        path.push(self.name);
+        path
+    }
+}
+
+impl Drop for AtomicFile<'_> {
+    fn drop(&mut self) {
+        debug!("AtomicFile::drop: {:?}", &self.name);
+        let tmp = &self.tmp_path();
+        let path = &self.path();
+        if let Err(e) = rename(tmp, path) {
+            error!("rename: {:?}", e);
+        }
+    }
+}
+
 impl TravelDir {
     fn from_i16(dir: i16) -> Option<Self> {
         match dir {
@@ -115,6 +169,8 @@ impl TravelDir {
 struct CorridorId {
     /// Name of corridor roadway
     roadway: String,
+    /// Corridor road abbreviation
+    abbrev: String,
     /// Travel direction of corridor
     travel_dir: TravelDir,
 }
@@ -192,9 +248,21 @@ impl GeoLoc {
     }
 }
 
+impl fmt::Display for TravelDir {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let dir = match self {
+            TravelDir::Nb => "NB",
+            TravelDir::Sb => "SB",
+            TravelDir::Eb => "EB",
+            TravelDir::Wb => "WB",
+        };
+        write!(f, "{}", dir)
+    }
+}
+
 impl fmt::Display for CorridorId {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} {:?}", self.roadway, self.travel_dir)
+        write!(f, "{} {}", self.roadway, self.travel_dir)
     }
 }
 
@@ -248,13 +316,18 @@ impl RNode {
     }
 
     /// Get the corridor ID
-    fn cor_id(&self) -> Option<CorridorId> {
+    fn cor_id(&self, roads: &HashMap<String, Road>) -> Option<CorridorId> {
         match (&self.loc.roadway, self.loc.road_dir) {
             (Some(roadway), Some(road_dir)) => {
                 let roadway = roadway.clone();
+                let abbrev = roads
+                    .get(&roadway)
+                    .map(|r| r.abbrev.clone())
+                    .unwrap_or("".to_owned());
                 match TravelDir::from_i16(road_dir) {
                     Some(travel_dir) => Some(CorridorId {
                         roadway,
+                        abbrev,
                         travel_dir,
                     }),
                     None => None,
@@ -521,6 +594,17 @@ impl Corridor {
             None => error!("remove_node: {} not found", name),
         }
     }
+
+    /// Write corridor nodes to a file
+    fn write_file(&self) -> Result<()> {
+        let dir = Path::new("corridors");
+        let cor_name =
+            format!("{}_{}", self.cor_id.abbrev, self.cor_id.travel_dir);
+        let file = AtomicFile::new(&dir, &cor_name)?;
+        let writer = file.writer()?;
+        serde_json::to_writer(writer, &self.nodes)?;
+        Ok(())
+    }
 }
 
 impl<'a> Segments<'a> {
@@ -543,7 +627,7 @@ impl<'a> Segments<'a> {
         &self,
         trans: &mut Transaction,
         statement: &Statement,
-    ) -> crate::Result<()> {
+    ) -> Result<()> {
         let params: [&(dyn ToSql + Sync); 1] = [&self.cor_name];
         trans.execute("DELETE FROM segments WHERE name = $1", &params)?;
         for zoom in 0..=18 {
@@ -718,7 +802,7 @@ impl SegmentState {
 
     /// Update (or add) a node
     fn update_node(&mut self, node: RNode) {
-        match node.cor_id() {
+        match node.cor_id(&self.roads) {
             Some(ref cor_id) => {
                 match self.node_cors.insert(node.name.clone(), cor_id.clone()) {
                     None => self.add_corridor_node(&cor_id, node),
@@ -793,6 +877,7 @@ impl SegmentState {
             for cor in self.corridors.values_mut() {
                 cor.order_nodes();
                 cor.create_segments(&mut trans, &statement)?;
+                cor.write_file()?;
             }
             trans.commit()?;
         }
@@ -813,6 +898,7 @@ impl SegmentState {
                     cor.scale = scale;
                     cor.order_nodes();
                     cor.create_segments(&mut trans, &statement)?;
+                    cor.write_file()?;
                 }
             }
             trans.commit()?;
