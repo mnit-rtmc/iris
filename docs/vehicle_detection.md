@@ -1,4 +1,4 @@
-# Vehicle Detection Systems
+# Vehicle Detection
 
 Real time vehicle data is used for several purposes:
 - [Traffic maps](#traffic-layer)
@@ -185,9 +185,12 @@ maximum downstream distance for associating station data with a segment.
 ## Traffic Data Archiving
 
 Collected data is archived only if the `sample_archive_enable`
-[system attribute] is `true`.  Files are stored in `/var/lib/iris/traffic`, in a
-directory with the [district] name.  Within that directory a new subdirectory is
-created for each year, with a 4-digit name (`1994`-`9999`).
+[system attribute] is `true`.  The [Mayfly] service can be installed to make
+this data available on the web.
+
+Traffic data are stored in `/var/lib/iris/traffic`, in a directory with the
+[district] name.  Within that directory a new subdirectory is created for each
+year, with a 4-digit name (`1994`-`9999`).
 
 As data is collected, a new subdirectory is created every day — the name is
 8-digits: _year_ `1994`-`9999`, _month_ `01`-`12` and _day-of-month_ `01`-`31`.
@@ -294,6 +297,7 @@ _missing_.
 [DXM]: comm_links.html#dxm
 [G4]: comm_links.html#g4
 [IO pins]: controllers.html#io-pins
+[Mayfly]: https://github.com/mnit-rtmc/iris/tree/master/mayfly
 [MnDOT-170]: comm_links.html#mndot-170
 [NTCIP]: comm_links.html#ntcip
 [Parking area]: parking_areas.html
