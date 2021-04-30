@@ -58,6 +58,15 @@ pub struct DateQuery {
     year: String,
 }
 
+/// Query for corridors with detectors
+#[derive(Deserialize)]
+pub struct CorridorQuery {
+    /// District ID
+    pub district: Option<String>,
+    /// Date (8-character yyyyMMdd)
+    pub date: String,
+}
+
 /// Query for detectors with archived data
 #[derive(Deserialize)]
 pub struct DetectorQuery {
@@ -220,7 +229,7 @@ fn scan_zip(
     check: fn(&str, bool) -> Option<&str>,
     body: &mut Body,
 ) -> Result<()> {
-    let file = std::fs::File::open(path)?;
+    let file = std::fs::File::open(path).or(Err(Error::NotFound))?;
     let mut zip = ZipArchive::new(file)?;
     for i in 0..zip.len() {
         let zf = zip.by_index(i)?;
@@ -348,6 +357,46 @@ fn check_date(name: &str, dir: bool) -> Option<&str> {
     parse_date(dt).ok().and_then(|_| Some(dt))
 }
 
+impl CorridorQuery {
+    /// Lookup corridors with detectors
+    pub async fn lookup(&self) -> Result<Body> {
+        parse_date(&self.date)?;
+        let mut body = Body::default();
+        match scan_dir(&self.date_path(), check_corridor, &mut body).await {
+            Ok(_) | Err(Error::NotFound) => {
+                // NOTE: the zip crate requires blocking calls
+                match scan_zip(&self.zip_path(), check_corridor, &mut body) {
+                    Ok(_) | Err(Error::NotFound) => (),
+                    Err(e) => Err(e)?,
+                }
+            }
+            Err(e) => Err(e)?,
+        }
+        Ok(body)
+    }
+
+    /// Get path to directory containing archived data
+    fn date_path(&self) -> PathBuf {
+        let mut path = date_path(&self.district, &self.date);
+        path.push("corridors");
+        path
+    }
+
+    /// Get path to (zip) file (std PathBuf)
+    fn zip_path(&self) -> std::path::PathBuf {
+        zip_path(&self.district, &self.date)
+    }
+}
+
+/// Check for corridor IDs
+fn check_corridor(name: &str, dir: bool) -> Option<&str> {
+    if !dir && !name.contains('.') && name.contains('_') {
+        Some(name)
+    } else {
+        None
+    }
+}
+
 impl DetectorQuery {
     /// Lookup detectors with archived data
     pub async fn lookup(&self) -> Result<Body> {
@@ -356,7 +405,10 @@ impl DetectorQuery {
         match scan_dir(&self.date_path(), check_detector, &mut body).await {
             Ok(_) | Err(Error::NotFound) => {
                 // NOTE: the zip crate requires blocking calls
-                scan_zip(&self.zip_path(), check_detector, &mut body)?;
+                match scan_zip(&self.zip_path(), check_detector, &mut body) {
+                    Ok(_) | Err(Error::NotFound) => (),
+                    Err(e) => Err(e)?,
+                }
             }
             Err(e) => Err(e)?,
         }

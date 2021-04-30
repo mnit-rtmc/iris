@@ -1,6 +1,6 @@
 [package]
 name = "mayfly"
-version = "0.0.0"
+version = "0.1.0"
 authors = ["Douglas Lau <doug.lau@state.mn.us>"]
 edition = "2018"
 
