@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2019  Minnesota Department of Transportation
+ * Copyright (C) 2018-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,12 @@ import us.mn.state.dot.tms.utils.Base64;
 public class OpQueryDMSFonts extends OpDMS {
 
 	/** Directory to store font files */
-	static private final String FONT_FILE_DIR = "/var/log/iris/";
+	static private final String FONT_FILE_DIR = "/var/log/iris/fonts/";
+	static {
+		File dir = new File(FONT_FILE_DIR);
+		if (!dir.exists())
+			dir.mkdirs();
+	}
 
 	/** Maximum character size */
 	private final ASN1Integer max_char_sz = fontMaxCharacterSize.makeInt();
