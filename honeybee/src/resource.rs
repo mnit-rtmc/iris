@@ -137,11 +137,10 @@ const CAMERA_RES: Resource = Resource::Simple(
 
 /// Detector resource
 const DETECTOR_RES: Resource = Resource::Simple(
-    "detector_pub",
+    "detector",
     Listen::Exclude("detector", &["auto_fail"]),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, r_node, cor_id, lane_number, field_length, lane_code, \
-           abandoned, force_fail \
+    SELECT name, r_node, cor_id, lane_number, lane_code, field_length \
     FROM detector_view \
 ) r",
 );

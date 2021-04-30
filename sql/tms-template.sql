@@ -2082,6 +2082,7 @@ GRANT SELECT ON beacon_event_view TO PUBLIC;
 CREATE TABLE iris.lane_type (
 	id SMALLINT PRIMARY KEY,
 	description VARCHAR(12) NOT NULL,
+	-- FIXME: should be CHAR(1) PRIMARY KEY
 	dcode VARCHAR(2) NOT NULL
 );
 
