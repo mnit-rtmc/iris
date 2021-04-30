@@ -46,21 +46,6 @@ pub struct Road {
     scale: f32,
 }
 
-/// Geographic location
-#[derive(Debug, Deserialize, Serialize)]
-pub struct GeoLoc {
-    roadway: Option<String>,
-    road_dir: Option<i16>,
-    cross_mod: Option<i16>,
-    cross_street: Option<String>,
-    cross_dir: Option<i16>,
-    lankmark: Option<String>,
-    #[serde(serialize_with = "serialize_latlon")]
-    lat: Option<f64>,
-    #[serde(serialize_with = "serialize_latlon")]
-    lon: Option<f64>,
-}
-
 /// Serialize lat/lon values with f32 precision for smaller JSON
 fn serialize_latlon<S>(
     x: &Option<f64>,
@@ -79,13 +64,17 @@ where
 #[derive(Debug, Deserialize, Serialize)]
 pub struct RNode {
     name: String,
-    loc: GeoLoc,
-    node_type: i32,
-    pickable: bool,
-    above: bool,
-    transition: i32,
+    #[serde(skip_serializing)]
+    roadway: Option<String>,
+    #[serde(skip_serializing)]
+    road_dir: Option<String>,
+    location: Option<String>,
+    #[serde(serialize_with = "serialize_latlon")]
+    lat: Option<f64>,
+    #[serde(serialize_with = "serialize_latlon")]
+    lon: Option<f64>,
+    transition: String,
     lanes: i32,
-    attach_side: bool,
     shift: i32,
     active: bool,
     station_id: Option<String>,
@@ -169,12 +158,12 @@ impl Drop for AtomicFile<'_> {
 }
 
 impl TravelDir {
-    fn from_i16(dir: i16) -> Option<Self> {
+    fn from_str(dir: &str) -> Option<Self> {
         match dir {
-            1 => Some(TravelDir::Nb),
-            2 => Some(TravelDir::Sb),
-            3 => Some(TravelDir::Eb),
-            4 => Some(TravelDir::Wb),
+            "NB" => Some(TravelDir::Nb),
+            "SB" => Some(TravelDir::Sb),
+            "EB" => Some(TravelDir::Eb),
+            "WB" => Some(TravelDir::Wb),
             _ => None,
         }
     }
@@ -244,26 +233,6 @@ struct SegmentState {
     ordered: bool,
 }
 
-impl GeoLoc {
-    /// Check if the location is valid
-    fn is_valid(&self) -> bool {
-        self.lat.is_some() && self.lon.is_some()
-    }
-
-    /// Get the lat/lon of the location
-    fn latlon(&self) -> Option<(f64, f64)> {
-        match (self.lat, self.lon) {
-            (Some(lat), Some(lon)) => Some((lat, lon)),
-            _ => None,
-        }
-    }
-
-    /// Get the position
-    fn pos(&self) -> Option<Wgs84Pos> {
-        self.latlon().map(|(lat, lon)| Wgs84Pos::new(lat, lon))
-    }
-}
-
 impl fmt::Display for TravelDir {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let dir = match self {
@@ -285,59 +254,45 @@ impl fmt::Display for CorridorId {
 impl RNode {
     /// SQL query for all RNodes
     pub const SQL_ALL: &'static str =
-        "SELECT n.name, roadway, road_dir, cross_mod, cross_street, cross_dir, \
-                landmark, lat, lon, node_type, pickable, above, transition, \
-                lanes, attach_side, shift, active, station_id, speed_limit \
-        FROM iris.r_node n \
-        JOIN iris.geo_loc g ON n.geo_loc = g.name";
+        "SELECT name, roadway, road_dir, location, lat, lon, transition, \
+                lanes, shift, active, station_id, speed_limit \
+        FROM r_node_view";
 
     /// SQL query for one RNode
     pub const SQL_ONE: &'static str =
-        "SELECT n.name, roadway, road_dir, cross_mod, cross_street, cross_dir, \
-                landmark, lat, lon, node_type, pickable, above, transition, \
-                lanes, attach_side, shift, active, station_id, speed_limit \
-        FROM iris.r_node n \
-        JOIN iris.geo_loc g ON n.geo_loc = g.name \
+        "SELECT name, roadway, road_dir, location, lat, lon, transition, \
+                lanes, shift, active, station_id, speed_limit \
+        FROM r_node_view n \
         WHERE n.name = $1";
 
     /// Create an RNode from a result Row
     pub fn from_row(row: &Row) -> Self {
-        let loc = GeoLoc {
-            roadway: row.get(1),
-            road_dir: row.get(2),
-            cross_mod: row.get(3),
-            cross_street: row.get(4),
-            cross_dir: row.get(5),
-            lankmark: row.get(6),
-            lat: row.get(7),
-            lon: row.get(8),
-        };
         RNode {
             name: row.get(0),
-            loc,
-            node_type: row.get(9),
-            pickable: row.get(10),
-            above: row.get(11),
-            transition: row.get(12),
-            lanes: row.get(13),
-            attach_side: row.get(14),
-            shift: row.get(15),
-            active: row.get(16),
-            station_id: row.get(17),
-            speed_limit: row.get(18),
+            roadway: row.get(1),
+            road_dir: row.get(2),
+            location: row.get(3),
+            lat: row.get(4),
+            lon: row.get(5),
+            transition: row.get(6),
+            lanes: row.get(7),
+            shift: row.get(8),
+            active: row.get(9),
+            station_id: row.get(10),
+            speed_limit: row.get(11),
         }
     }
 
     /// Get the corridor ID
     fn cor_id(&self, roads: &HashMap<String, Road>) -> Option<CorridorId> {
-        match (&self.loc.roadway, self.loc.road_dir) {
+        match (&self.roadway, &self.road_dir) {
             (Some(roadway), Some(road_dir)) => {
                 let roadway = roadway.clone();
                 let abbrev = roads
                     .get(&roadway)
                     .map(|r| r.abbrev.clone())
                     .unwrap_or("".to_owned());
-                match TravelDir::from_i16(road_dir) {
+                match TravelDir::from_str(road_dir) {
                     Some(travel_dir) => Some(CorridorId {
                         roadway,
                         abbrev,
@@ -352,13 +307,16 @@ impl RNode {
 
     /// Check if active and the location is valid
     fn is_valid(&self) -> bool {
-        self.active && self.loc.is_valid()
+        self.active && self.latlon().is_some()
     }
 
     /// Get the lat/lon of the node
     fn latlon(&self) -> Option<(f64, f64)> {
         if self.active {
-            self.loc.latlon()
+            match (self.lat, self.lon) {
+                (Some(lat), Some(lon)) => Some((lat, lon)),
+                _ => None,
+            }
         } else {
             None
         }
@@ -367,7 +325,7 @@ impl RNode {
     /// Get the node position
     fn pos(&self) -> Option<Wgs84Pos> {
         if self.active {
-            self.loc.pos()
+            self.latlon().map(|(lat, lon)| Wgs84Pos::new(lat, lon))
         } else {
             None
         }
@@ -380,7 +338,7 @@ impl RNode {
 
     /// Check if node is a common section
     fn is_common(&self) -> bool {
-        self.transition == 6 // COMMON
+        self.transition == "common"
     }
 }
 
