@@ -1,5 +1,18 @@
 # IRIS 5.x Release Notes
 
+5.22.0 (30 Apr 2021)
+ - Added vehicle length to vlog file format
+ - Added vehicle logging mode for Wavetronix HD protocol
+ - Added vehicle logging mode for RTMS G4 protocol
+ - Add settings to sign config to exclude fonts and pixel module sizes
+ - Add `site_id` and `alt_id` to weather sensors
+ - Improved NTCIP compatibility for some vendors
+ - Fixed JKS keystore loading problem in newer Java versions
+ - Fixed minor alert bugs
+ - Write corridor and detector JSON files in honeybee
+ - Started mayfly project for serving traffic data
+ - Started graft project for serving web client
+
 5.21.0 (26 Feb 2021)
  - Reworked alert configuration (IPAWS)
  - Added `[ta]` DMS action tag (scheduled time actions)
