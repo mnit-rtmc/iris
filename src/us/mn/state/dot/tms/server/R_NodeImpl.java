@@ -58,7 +58,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Parse a station ID number */
 	static private int parseId(String v) {
 		try {
-			return Integer.parseId(v);
+			return Integer.parseInt(v);
 		}
 		catch (NumberFormatException e) {
 			return 0;
