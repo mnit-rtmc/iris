@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.ss125;
 
 import java.io.IOException;
 import java.util.Date;
-import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DetectorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -29,17 +29,20 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQueryEvents extends OpSS125 {
 
-	/** Polling period */
-	private final int period;
-
-	/** Time to stop checking for new events */
-	private final long expire;
+	/** Maximum number of lanes */
+	static private final int MAX_LANES = 10;
 
 	/** Create a new "query events" operation */
-	public OpQueryEvents(ControllerImpl c, int p) {
+	public OpQueryEvents(ControllerImpl c) {
 		super(PriorityLevel.DATA_30_SEC, c);
-		period = p;
-		expire = TimeSteward.currentTimeMillis() + (p * 1000);
+		setSuccess(false);
+	}
+
+	/** Handle a communication error */
+	@Override
+	public void handleCommError(EventType et, String msg) {
+		setSuccess(false);
+		super.handleCommError(et, msg);
 	}
 
 	/** Create the first phase of the operation */
@@ -58,19 +61,29 @@ public class OpQueryEvents extends OpSS125 {
 			ActiveEventProperty ev = new ActiveEventProperty();
 			mess.add(ev);
 			mess.queryProps();
-			if (!ev.isValidEvent())
-				return null;
-			if (ev.isValidStamp())
-				ev.logVehicle(controller);
-			else {
-				logGap();
-				mess.logError("BAD TIMESTAMP: " +
-					new Date(ev.getTime()));
-				return new SendDateTime();
+			setSuccess(true);
+			if (ev.isValidEvent()) {
+				if (ev.isValidStamp())
+					ev.logVehicle(controller);
+				else {
+					logGap();
+					mess.logError("BAD TIMESTAMP: " +
+						new Date(ev.getTime()));
+					return new SendDateTime();
+				}
 			}
-			return (TimeSteward.currentTimeMillis() < expire)
+			return controller.hasActiveDetector()
 			      ? this
 			      : null;
+		}
+	}
+
+	/** Log a vehicle detection gap */
+	private void logGap() {
+		for (int i = 0; i < MAX_LANES; i++) {
+			DetectorImpl det = controller.getDetectorAtPin(i + 1);
+			if (det != null)
+				det.logGap(0);
 		}
 	}
 
@@ -98,24 +111,20 @@ public class OpQueryEvents extends OpSS125 {
 			ClearEventsProperty clear = new ClearEventsProperty();
 			mess.add(clear);
 			mess.storeProps();
-			return null;
+			return phaseOne();
 		}
 	}
 
-	/** Log a vehicle detection gap */
-	private void logGap() {
-		for (int i = 0; i < 10; i++) {
-			DetectorImpl det = controller.getDetectorAtPin(i + 1);
-			if (det != null)
-				det.logGap(0);
-		}
-	}
-
-	/** Cleanup the operation */
+	/** Get the error retry threshold */
 	@Override
-	public void cleanup() {
+	public int getRetryThreshold() {
+		return Integer.MAX_VALUE;
+	}
+
+	/** Update the controller operation counters */
+	public void updateCounters(int p) {
 		if (isSuccess())
-			controller.binEventSamples(period);
-		super.cleanup();
+			controller.binEventSamples(p);
+		controller.completeOperation(id, isSuccess());
 	}
 }

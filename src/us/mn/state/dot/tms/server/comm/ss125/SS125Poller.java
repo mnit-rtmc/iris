@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ss125;
 
+import java.util.HashMap;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
@@ -37,6 +38,10 @@ public class SS125Poller extends ThreadedPoller<SS125Property>
 
 	/** Communication protocol */
 	private final CommProtocol protocol;
+
+	/** Mapping of all query event data collectors on line */
+	private final HashMap<ControllerImpl, OpQueryEvents> collectors =
+		new HashMap<ControllerImpl, OpQueryEvents>();
 
 	/** Create a new SS125 poller */
 	public SS125Poller(CommLink link, CommProtocol cp) {
@@ -68,10 +73,23 @@ public class SS125Poller extends ThreadedPoller<SS125Property>
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
 		if (c.getPollPeriodSec() == p) {
-			if (protocol == CommProtocol.SS_125_VLOG)
-				addOp(new OpQueryEvents(c, p));
-			else
+			if (protocol == CommProtocol.SS_125_VLOG) {
+				OpQueryEvents oqe = getVehicleOp(c);
+				if (oqe != null)
+					oqe.updateCounters(p);
+			} else
 				addOp(new OpQueryBinned(c, p));
 		}
+	}
+
+	/** Get query vehicle event operation for a controller */
+	private synchronized OpQueryEvents getVehicleOp(ControllerImpl c) {
+		final OpQueryEvents oqe = collectors.get(c);
+		if (oqe == null || oqe.isDone()) {
+			OpQueryEvents op = new OpQueryEvents(c);
+			collectors.put(c, op);
+			addOp(op);
+		}
+		return oqe;
 	}
 }
