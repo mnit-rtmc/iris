@@ -786,6 +786,7 @@ COPY iris.direction (id, direction, dir) FROM stdin;
 4	WB	W
 5	N-S	NS
 6	E-W	EW
+7	SUR	SUR
 \.
 
 CREATE TABLE iris.road_class (

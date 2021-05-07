@@ -29,7 +29,8 @@ public enum Direction {
 	EAST("Eastbound", "EB", "E"),           // 3
 	WEST("Westbound", "WB", "W"),           // 4
 	NORTH_SOUTH("North-South", "NS", "NS"), // 5
-	EAST_WEST("East-West", "EW", "EW");     // 6
+	EAST_WEST("East-West", "EW", "EW"),     // 6
+	SURFACE("Surface", "SUR", "SUR");       // 7 Roadway Surface
 
 	/** Direction description */
 	public final String description;
