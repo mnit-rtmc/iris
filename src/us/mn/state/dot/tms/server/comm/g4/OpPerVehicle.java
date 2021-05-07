@@ -97,7 +97,7 @@ public class OpPerVehicle extends OpG4 {
 			rtc.setStamp(TimeSteward.currentTimeMillis());
 			mess.add(rtc);
 			mess.storeProps();
-			return new VehicleEvent();
+			return phaseOne();
 		}
 	}
 

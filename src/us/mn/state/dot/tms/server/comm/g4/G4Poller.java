@@ -15,7 +15,6 @@
  */
 package us.mn.state.dot.tms.server.comm.g4;
 
-import java.io.IOException;
 import java.util.HashMap;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommLink;
