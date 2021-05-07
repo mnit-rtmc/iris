@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2020  Minnesota Department of Transportation
+ * Copyright (C) 2007-2021  Minnesota Department of Transportation
  * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -47,14 +47,21 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Check for a valid station ID */
 	static private boolean isStationIdValid(String s) {
-		if (!s.startsWith("S"))
+		if (s.startsWith("ST"))
+			return parseId(s.substring(2)) > 0;
+		else if (s.startsWith("S"))
+			return parseId(s.substring(1)) > 0;
+		else
 			return false;
+	}
+
+	/** Parse a station ID number */
+	static private int parseId(String v) {
 		try {
-			int id = Integer.parseInt(s.substring(1));
-			return id > 0;
+			return Integer.parseId(v);
 		}
 		catch (NumberFormatException e) {
-			return false;
+			return 0;
 		}
 	}
 

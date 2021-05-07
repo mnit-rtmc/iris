@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2020  Minnesota Department of Transportation
+ * Copyright (C) 2007-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,6 +48,9 @@ public class R_NodeDetectorPanel extends JPanel {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < n.length(); i++) {
 			char c = n.charAt(i);
+			// Allow names starting with T for temporary
+			if (i == 0 && (c == 'T' || c == 'R'))
+				sb.append(c);
 			if (c >= '0' && c <= '9')
 				sb.append(c);
 			if (sb.length() >= max_len)
