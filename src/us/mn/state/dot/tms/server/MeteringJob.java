@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,11 @@ import us.mn.state.dot.tms.RampMeterHelper;
  */
 public class MeteringJob extends Job {
 
-	/** Seconds to offset each poll from start of interval */
-	static private final int OFFSET_SECS = 29;
+	/** Seconds to offset from start of interval.
+	 *
+	 * This must be *after* binned detector data has been collected, to
+	 * enable station data calculation. */
+	static private final int OFFSET_SECS = 26;
 
 	/** FLUSH Scheduler for writing XML (I/O to disk) */
 	private final Scheduler flush;
