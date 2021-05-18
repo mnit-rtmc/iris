@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -611,11 +611,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 	}
 
-	/** Bin sample data to the specified period */
-	public synchronized void binEventSamples(int p) {
+	/** Bin event data to the specified period */
+	public synchronized void binEventData(int p) {
 		for (ControllerIO io: io_pins.values()) {
 			if (io instanceof DetectorImpl)
-				((DetectorImpl) io).binEventSamples(p);
+				((DetectorImpl) io).binEventData(p);
 		}
 	}
 

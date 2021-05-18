@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2020  Minnesota Department of Transportation
+ * Copyright (C) 2004-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -207,12 +207,12 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Get a vehicle count */
 	@Override
-	public int getVehCount(long start, long end) {
+	public int getVehCount(long stamp, int period) {
 		int total = 0;
 		int n_count = 0;
 		for (DetectorImpl det: r_node.getDetectors()) {
 			if (isValidStation(det)) {
-				int c = det.getVehCount(start, end);
+				int c = det.getVehCount(stamp, period);
 				if (c >= 0) {
 					total += c;
 					n_count++;
@@ -224,12 +224,12 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Get the average station flow */
 	@Override
-	public int getFlow(long start, long end) {
+	public int getFlow(long stamp, int period) {
 		int t_flow = 0;
 		int n_flow = 0;
 		for (DetectorImpl det: r_node.getDetectors()) {
 			if (isValidStation(det)) {
-				int f = det.getFlow(start, end);
+				int f = det.getFlow(stamp, period);
 				if (f >= 0) {
 					t_flow += f;
 					n_flow++;
@@ -244,7 +244,7 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Get the average station density */
 	@Override
-	public float getDensity() {
+	public float getDensity(long stamp, int period) {
 		return density;
 	}
 
@@ -253,7 +253,7 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Get the average station speed */
 	@Override
-	public float getSpeed() {
+	public float getSpeed(long stamp, int period) {
 		return speed;
 	}
 
@@ -316,7 +316,7 @@ public class StationImpl implements Station, VehicleSampler {
 	private int calculateMaxSamples() {
 		return isSpeedTrending()
 		      ? 2
-		      : DensityRank.samples(getDensity());
+		      : DensityRank.samples(density);
 	}
 
 	/** Is the speed trending over the last few time steps? */
@@ -358,7 +358,7 @@ public class StationImpl implements Station, VehicleSampler {
 	}
 
 	/** Calculate the current station data */
-	public void calculateData() {
+	public void calculateData(long stamp, int period) {
 		updateRollingSamples();
 		float low = MISSING_DATA;
 		float t_occ = 0;
@@ -370,17 +370,17 @@ public class StationImpl implements Station, VehicleSampler {
 		for (DetectorImpl det: r_node.getDetectors()) {
 			if (!isValidStation(det))
 				continue;
-			float f = det.getOccupancy();
+			float f = det.getOccupancy(stamp, period);
 			if (f != MISSING_DATA) {
 				t_occ += f;
 				n_occ++;
 			}
-			f = det.getDensity();
+			f = det.getDensity(stamp, period);
 			if (f != MISSING_DATA) {
 				t_density += f;
 				n_density++;
 			}
-			f = det.getSpeed();
+			f = det.getSpeed(stamp, period);
 			if (f > 0) {
 				t_speed += f;
 				n_speed++;
@@ -398,13 +398,13 @@ public class StationImpl implements Station, VehicleSampler {
 	}
 
 	/** Write the current sample as an XML element */
-	public void writeSampleXml(Writer w) throws IOException {
+	public void writeSampleXml(Writer w, long stamp, int period)
+		throws IOException
+	{
 		if (!getActive())
 			return;
-		long end = DetectorImpl.calculateEndTime();
-		long start = end - DetectorImpl.SAMPLE_PERIOD_MS;
-		int f = getFlow(start, end);
-		int s = Math.round(getSpeed());
+		int f = getFlow(stamp, period);
+		int s = Math.round(getSpeed(stamp, period));
 		float o = occupancy;
 		w.write("\t<sample");
 		w.write(createAttribute("sensor", name));
@@ -420,11 +420,11 @@ public class StationImpl implements Station, VehicleSampler {
 	}
 
 	/** Write the current sample as a JSON object */
-	public boolean writeSampleJson(long start, long end, Writer writer)
+	public boolean writeSampleJson(long stamp, int period, Writer writer)
 		throws IOException
 	{
-		int f = getFlow(start, end);
-		int s = Math.round(getSpeed());
+		int f = getFlow(stamp, period);
+		int s = Math.round(getSpeed(stamp, period));
 		if (f > MISSING_DATA || s > 0) {
 			writeSampleJson(f, s, writer);
 			return true;

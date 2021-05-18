@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@ package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Date;
 import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 
@@ -43,19 +43,19 @@ public class FlushXmlJob extends Job {
 	/** Perform flush XML data to disk */
 	@Override
 	public void perform() throws IOException {
-		writeSampleXml();
+		writeSampleXml(station_manager.getStamp());
 		station_manager.writeSampleXml();
 		station_manager.writeSampleJson();
 	}
 
 	/** Write the sample data out as XML */
-	private void writeSampleXml() throws IOException {
+	private void writeSampleXml(long stamp) throws IOException {
 		XmlWriter w = new XmlWriter(SAMPLE_XML, true) {
 			@Override protected void write(Writer w)
 				throws IOException
 			{
 				writeSampleXmlHead(w);
-				writeSampleXmlBody(w);
+				writeSampleXmlBody(w, stamp);
 				writeSampleXmlTail(w);
 			}
 		};
@@ -67,7 +67,8 @@ public class FlushXmlJob extends Job {
 		w.write(XmlWriter.XML_DECLARATION);
 		writeDtd(w);
 		w.write("<traffic_sample time_stamp='" +
-			TimeSteward.getDateInstance() + "' period='30'>\n");
+			new Date(station_manager.getStamp()) +
+			"' period='30'>\n");
 	}
 
 	/** Write the DTD */
@@ -86,13 +87,16 @@ public class FlushXmlJob extends Job {
 	}
 
 	/** Write the body of the detector sample XML file */
-	private void writeSampleXmlBody(Writer w) throws IOException {
+	private void writeSampleXmlBody(Writer w, long stamp)
+		throws IOException
+	{
+		int period = DetectorImpl.BIN_PERIOD_MS;
 		Iterator<Detector> it = DetectorHelper.iterator();
 		while (it.hasNext()) {
 			Detector d = it.next();
 			if (d instanceof DetectorImpl) {
 				DetectorImpl det = (DetectorImpl) d;
-				det.writeSampleXml(w);
+				det.writeSampleXml(w, stamp, period);
 			}
 		}
 	}

@@ -196,7 +196,7 @@ public class VehicleEventLog {
 		ev_speed = 0;
 	}
 
-	/** Get the vehicle count sample for a given period */
+	/** Get the vehicle count for a given period */
 	public PeriodicSample getVehCount(long stamp, int period) {
 		return new PeriodicSample(stamp, period, ev_vehicles);
 	}

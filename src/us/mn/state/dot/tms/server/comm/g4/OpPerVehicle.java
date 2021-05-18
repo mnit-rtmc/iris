@@ -110,7 +110,7 @@ public class OpPerVehicle extends OpG4 {
 	/** Update the controller operation counters */
 	public void updateCounters(int p) {
 		if (isSuccess())
-			controller.binEventSamples(p);
+			controller.binEventData(p);
 		controller.completeOperation(id, isSuccess());
 	}
 }

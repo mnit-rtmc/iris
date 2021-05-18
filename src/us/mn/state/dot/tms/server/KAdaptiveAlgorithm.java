@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2018  Minnesota Department of Transportation
+ * Copyright (C) 2001-2021  Minnesota Department of Transportation
  * Copyright (C) 2011-2012  University of Minnesota Duluth (NATSRL)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -56,7 +56,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	static private final int STEP_SECONDS = 30;
 
 	/** Number of milliseconds for one time step */
-	static private final long STEP_MS = new Interval(STEP_SECONDS).ms();
+	static private final int PERIOD_MS =
+		(int) new Interval(STEP_SECONDS).ms();
 
 	/** Calculate steps per hour */
 	static private final double STEP_HOUR =
@@ -209,22 +210,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Process one interval for all K adaptive algorithm states */
 	static public void processAllStates() {
+		long stamp = DetectorImpl.calculateEndTime(PERIOD_MS);
 		Iterator<KAdaptiveAlgorithm> it =
 			ALL_ALGS.values().iterator();
 		while (it.hasNext()) {
 			KAdaptiveAlgorithm alg = it.next();
-			alg.updateStations();
+			alg.updateStations(stamp);
 			if (alg.isDone()) {
 				alg.log("isDone: removing");
 				it.remove();
 			}
 		}
-	}
-
-	/** Calculate the end time of previous period */
-	static private long calculateEndTime() {
-		long stamp = TimeSteward.currentTimeMillis();
-		return stamp / STEP_MS * STEP_MS;
 	}
 
 	/** Metering corridor */
@@ -357,11 +353,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	}
 
 	/** Update the station nodes for the current interval */
-	private void updateStations() {
+	private void updateStations(long stamp) {
 		for (StationNode sn = firstStation(); sn != null;
 		    sn = sn.downstreamStation())
 		{
-			sn.updateState();
+			sn.updateState(stamp);
 		}
 	}
 
@@ -479,20 +475,20 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Update station state */
-		private void updateState() {
-			density_hist.push(getStationDensity());
-			speed_hist.push(getStationSpeed());
+		private void updateState(long stamp) {
+			density_hist.push(getStationDensity(stamp));
+			speed_hist.push(getStationSpeed(stamp));
 		}
 
 		/** Get the current station density */
-		private Double getStationDensity() {
-			float d = station.getDensity();
+		private Double getStationDensity(long stamp) {
+			float d = station.getDensity(stamp, PERIOD_MS);
 			return (d >= 0) ? (double) d : null;
 		}
 
 		/** Get the current station speed */
-		private Double getStationSpeed() {
-			float s = station.getSpeed();
+		private Double getStationSpeed(long stamp) {
+			float s = station.getSpeed(stamp, PERIOD_MS);
 			return (s >= 0) ? (double) s : null;
 		}
 
@@ -680,6 +676,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private MinimumRateLimit limit_control =
 			MinimumRateLimit.target_min;
 
+		/** End time stamp */
+		private long stamp;
+
 		/** Segment density history (vehicles / mile) */
 		private final BoundedSampleHistory segment_k_hist =
 			new BoundedSampleHistory(MAX_STEPS);
@@ -748,13 +747,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 *   - Update demand flow and accumulator.
 		 *   - Calculate metering rate. */
 		private void validate() {
-			long end = calculateEndTime();
-			long start = end - STEP_MS;
+			stamp = DetectorImpl.calculateEndTime(PERIOD_MS);
 			// NOTE: these must happen in proper order
 			checkQueueBackedUp();
 			checkQueueEmpty();
-			updatePassageState(start, end);
-			updateDemandState(start, end);
+			updatePassageState();
+			updateDemandState();
 			min_rate = filterRate(calculateMinimumRate());
 			max_rate = filterRate(calculateMaximumRate());
 			if (s_node != null)
@@ -765,7 +763,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private void checkQueueBackedUp() {
 			if (isQueueOccupancyHigh()) {
 				queue_backup_secs += STEP_SECONDS;
-				backup_occ += queue.getMaxOccupancy();
+				backup_occ += queue.getMaxOccupancy(stamp,
+					PERIOD_MS);
 			} else {
 				queue_backup_secs = 0;
 				backup_occ = 0;
@@ -785,27 +784,27 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Update ramp passage output state */
-		private void updatePassageState(long start, long end) {
-			int passage_vol = calculatePassageCount(start, end);
+		private void updatePassageState() {
+			int passage_vol = calculatePassageCount();
 			passage_hist.push(flowRate(passage_vol));
 			if (passage_vol >= 0)
 				passage_accum += passage_vol;
 			else
 				passage_good = false;
-			int green_vol = green.getVehCount(start, end);
+			int green_vol = green.getVehCount(stamp, PERIOD_MS);
 			if (green_vol > 0)
 				green_accum += green_vol;
 		}
 
 		/** Calculate passage count (vehicles).
 		 * @return Passage vehicle count */
-		private int calculatePassageCount(long start, long end) {
-			int vol = passage.getVehCount(start, end);
+		private int calculatePassageCount() {
+			int vol = passage.getVehCount(stamp, PERIOD_MS);
 			if (vol >= 0)
 				return vol;
-			vol = merge.getVehCount(start, end);
+			vol = merge.getVehCount(stamp, PERIOD_MS);
 			if (vol >= 0) {
-				int b = bypass.getVehCount(start, end);
+				int b = bypass.getVehCount(stamp, PERIOD_MS);
 				if (b > 0) {
 					vol -= b;
 					if (vol < 0)
@@ -817,8 +816,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Update ramp queue demand state */
-		private void updateDemandState(long start, long end) {
-			float dem_veh = queueDemandCount(start, end);
+		private void updateDemandState() {
+			float dem_veh = queueDemandCount();
 			float da = demand_accum;
 			// Calculate demand without adjustment
 			demand_accum += dem_veh;
@@ -832,8 +831,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Get queue demand count for the current period */
-		private float queueDemandCount(long start, long end) {
-			float vol = queue.getVehCount(start, end);
+		private float queueDemandCount() {
+			float vol = queue.getVehCount(stamp, PERIOD_MS);
 			if (vol >= 0)
 				return vol;
 			else {
@@ -867,7 +866,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * QUEUE_OCC_THRESHOLD and 100% to a range of 0 and 1.
 		 * @return Ratio from 0 to 1. */
 		private float queueOccRatio() {
-			float o = queue.getMaxOccupancy() - QUEUE_OCC_THRESHOLD;
+			float o = queue.getMaxOccupancy(stamp, PERIOD_MS)
+				- QUEUE_OCC_THRESHOLD;
 			return (o > 0)
 			     ? Math.min(o / (100 - QUEUE_OCC_THRESHOLD), 1)
 			     : 0;
@@ -940,7 +940,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Check if queue occupancy is above threshold */
 		private boolean isQueueOccupancyHigh() {
-			return queue.getMaxOccupancy() > QUEUE_OCC_THRESHOLD;
+			float occ = queue.getMaxOccupancy(stamp, PERIOD_MS);
+			return occ > QUEUE_OCC_THRESHOLD;
 		}
 
 		/** Check if cumulative passage is below cumulative green */

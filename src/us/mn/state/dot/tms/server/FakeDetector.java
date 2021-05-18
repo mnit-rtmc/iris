@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2018  Minnesota Department of Transportation
+ * Copyright (C) 2002-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,10 +59,10 @@ public class FakeDetector implements VehicleSampler {
 
 	/** Get a vehicle count */
 	@Override
-	public int getVehCount(long start, long end) {
+	public int getVehCount(long stamp, int period) {
 		int count = 0;
 		for (int i = 0; i < dets.length; i++) {
-			int c = dets[i].getVehCount(start, end);
+			int c = dets[i].getVehCount(stamp, period);
 			if (c < 0)
 				return MISSING_DATA;
 			count += c;
@@ -72,10 +72,10 @@ public class FakeDetector implements VehicleSampler {
 
 	/** Get total flow rate */
 	@Override
-	public int getFlow(long start, long end) {
+	public int getFlow(long stamp, int period) {
 		int flow = 0;
 		for (int i = 0; i < dets.length; i++) {
-			int f = dets[i].getFlowRaw(start, end);
+			int f = dets[i].getFlowRaw(stamp, period);
 			if (f < 0)
 				return MISSING_DATA;
 			flow += f;
@@ -85,11 +85,11 @@ public class FakeDetector implements VehicleSampler {
 
 	/** Get the fake density (vehicle per mile) */
 	@Override
-	public float getDensity() {
+	public float getDensity(long stamp, int period) {
 		float t_density = 0;
 		int n_density = 0;
 		for (DetectorImpl det: dets) {
-			float k = det.getDensityRaw();
+			float k = det.getDensityRaw(stamp, period);
 			if (k >= 0) {
 				t_density += k;
 				n_density++;
@@ -100,11 +100,11 @@ public class FakeDetector implements VehicleSampler {
 
 	/** Get the fake speed (miles per hour) */
 	@Override
-	public float getSpeed() {
+	public float getSpeed(long stamp, int period) {
 		float t_speed = 0;
 		int n_speed = 0;
 		for (DetectorImpl det: dets) {
-			float s = det.getSpeedRaw();
+			float s = det.getSpeedRaw(stamp, period);
 			if (s > 0) {
 				t_speed += s;
 				n_speed++;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2020  Minnesota Department of Transportation
+ * Copyright (C) 2004-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.utils.FileIO;
@@ -47,14 +47,24 @@ class StationManager {
 	/** Name of station sample JSON file */
 	static private final String SAMPLE_JSON = "station_sample";
 
+	/** Time stamp at end of interval */
+	private long stamp;
+
+	/** Get the time stamp at end of interval */
+	public long getStamp() {
+		return stamp;
+	}
+
 	/** Calculate the current data for all stations */
 	public void calculateData() {
+		int period = DetectorImpl.BIN_PERIOD_MS;
+		stamp = DetectorImpl.calculateEndTime(period);
 		Iterator<Station> it = StationHelper.iterator();
 		while (it.hasNext()) {
 			Station s = it.next();
 			if (s instanceof StationImpl) {
 				StationImpl si = (StationImpl) s;
-				si.calculateData();
+				si.calculateData(stamp, period);
 			}
 		}
 	}
@@ -101,11 +111,10 @@ class StationManager {
 
 	/** Write the station sample data out as JSON */
 	private void writeSampleJson(BufferedWriter writer) throws IOException {
-		long end = DetectorImpl.calculateEndTime();
-		long start = end - DetectorImpl.SAMPLE_PERIOD_MS;
+		int period = DetectorImpl.BIN_PERIOD_MS;
 		writer.write("{\n");
 		writer.write("\"time_stamp\":\"");
-		writer.write(RFC3339.format(TimeSteward.getDateInstance()));
+		writer.write(RFC3339.format(new Date(stamp)));
 		writer.write("\",\n");
 		writer.write("\"period\":30,\n");
 		writer.write("\"samples\":{\n");
@@ -114,7 +123,7 @@ class StationManager {
 			Station s = it.next();
 			if (s instanceof StationImpl) {
 				StationImpl si = (StationImpl) s;
-				if (si.writeSampleJson(start, end, writer)) {
+				if (si.writeSampleJson(stamp, period, writer)) {
 					if (it.hasNext())
 						writer.write(',');
 					writer.write('\n');
@@ -129,8 +138,8 @@ class StationManager {
 	private void writeSampleXmlHead(Writer w) throws IOException {
 		w.write(XmlWriter.XML_DECLARATION);
 		writeDtd(w);
-		w.write("<traffic_sample time_stamp='" +
-			TimeSteward.getDateInstance() + "' period='30'>\n");
+		w.write("<traffic_sample time_stamp='" + new Date(stamp) +
+			"' period='30'>\n");
 	}
 
 	/** Print the DTD */
@@ -150,12 +159,13 @@ class StationManager {
 
 	/** Print the body of the station sample XML file */
 	private void writeSampleXmlBody(Writer w) throws IOException {
+		int period = DetectorImpl.BIN_PERIOD_MS;
 		Iterator<Station> it = StationHelper.iterator();
 		while (it.hasNext()) {
 			Station s = it.next();
 			if (s instanceof StationImpl) {
 				StationImpl si = (StationImpl) s;
-				si.writeSampleXml(w);
+				si.writeSampleXml(w, stamp, period);
 			}
 		}
 	}

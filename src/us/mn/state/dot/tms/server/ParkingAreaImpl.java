@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.TMSException;
-import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
 
@@ -40,6 +39,9 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 
 	/** Sample period (30 seconds) */
 	static private final Interval SAMPLE_PERIOD = new Interval(30);
+
+	/** Sample period (ms) */
+	static private int PERIOD_MS = (int) SAMPLE_PERIOD.ms();
 
 	/** History period (30 minutes) */
 	static private final Interval HIST_PERIOD = new Interval(30, MINUTES);
@@ -135,7 +137,8 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 	 *         null If not a parking space or not sampling. */
 	static private Boolean getParkingAvailable2(SamplerSet ss, boolean tail){
 		ss = ss.filter(new ParkingFilter(tail));
-		float mo = ss.getMaxOccupancy(MISSING_DATA);
+		long stamp = DetectorImpl.calculateEndTime(PERIOD_MS);
+		float mo = ss.getMaxOccupancy(stamp, PERIOD_MS);
 		return (mo >= 0) ? (mo < PARK_AVAIL_OCC) : null;
 	}
 
