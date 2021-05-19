@@ -530,7 +530,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return (cl != null) ? cl.getCommProtocol() : null;
 	}
 
-	/** Get a sample value from an array */
+	/** Get a value from an array */
 	static private int sampleValue(int[] values, int i) {
 		if (values != null && i >= 0 && i < values.length)
 			return values[i];
@@ -538,7 +538,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			return MISSING_DATA;
 	}
 
-	/** Store vehicle count sample data.
+	/** Store vehicle count data.
 	 * @param stamp Timestamp in milliseconds since epoch.
 	 * @param period Sampling period in seconds.
 	 * @param start_pin Start pin on controller I/O.
@@ -549,7 +549,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		storeVehCount(stamp, period, start_pin, veh_count, null);
 	}
 
-	/** Store vehicle count sample data.
+	/** Store vehicle count data.
 	 * @param stamp Timestamp in milliseconds since epoch.
 	 * @param period Sampling period in seconds.
 	 * @param start_pin Start pin on controller I/O.
@@ -570,7 +570,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 	}
 
-	/** Store occupancy sample data.
+	/** Store occupancy data.
 	 * @param stamp Timestamp in milliseconds since epoch.
 	 * @param period Sampling period in seconds.
 	 * @param start_pin Start pin on controller I/O.
@@ -591,7 +591,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 	}
 
-	/** Store speed sample data.
+	/** Store speed data.
 	 * @param stamp Timestamp in milliseconds since epoch.
 	 * @param period Sampling period in seconds.
 	 * @param start_pin Start pin on controller I/O.
@@ -1010,7 +1010,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			p.querySamples(this, period);
 	}
 
-	/** Get a sample poller */
+	/** Get a data collection poller */
 	private SamplePoller getSamplePoller() {
 		DevicePoller dp = getPoller();
 		return (dp instanceof SamplePoller) ? (SamplePoller) dp : null;

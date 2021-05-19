@@ -186,7 +186,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	static private final Interval FAST_CLEAR_THRESHOLD =
 		new Interval(30, SECONDS);
 
-	/** Maximum "realistic" vehicle count for a 30-second sample */
+	/** Maximum "realistic" vehicle count for a 30-second period */
 	static private final int MAX_VEH_COUNT_30 = 37;
 
 	/** Maximum occupancy value (100%) */
@@ -741,31 +741,31 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return fake;
 	}
 
-	/** Periodic vehicle count sample cache */
+	/** Periodic vehicle count cache */
 	private transient final PeriodicSampleCache veh_cache;
 
-	/** Periodic scan sample cache */
+	/** Periodic scan cache */
 	private transient final PeriodicSampleCache scn_cache;
 
-	/** Periodic speed sample cache */
+	/** Periodic speed cache */
 	private transient final PeriodicSampleCache spd_cache;
 
-	/** Periodic MOTORCYCLE class count sample cache */
+	/** Periodic MOTORCYCLE class count cache */
 	private transient final PeriodicSampleCache mc_count_cache;
 
-	/** Periodic SHORT class count sample cache */
+	/** Periodic SHORT class count cache */
 	private transient final PeriodicSampleCache s_count_cache;
 
-	/** Periodic MEDIUM class count sample cache */
+	/** Periodic MEDIUM class count cache */
 	private transient final PeriodicSampleCache m_count_cache;
 
-	/** Periodic LONG class count sample cache */
+	/** Periodic LONG class count cache */
 	private transient final PeriodicSampleCache l_count_cache;
 
 	/** Vehicle event log */
 	private transient final VehicleEventLog v_log;
 
-	/** Occupancy value from previous 30-second sample period */
+	/** Occupancy value from previous 30-second period */
 	private transient int prev_value = MISSING_DATA;
 
 	/** Period to hold occ spike failure */
@@ -894,7 +894,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		logEvent(new DetAutoFailEvent(event_type, getName()));
 	}
 
-	/** Store one vehicle count sample for this detector.
+	/** Store vehicle count for one binning interval.
 	 * @param v PeriodicSample containing vehicle count data.
 	 * @param vc Vehicle class. */
 	public void storeVehCount(PeriodicSample v, VehLengthClass vc) {
@@ -918,7 +918,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		}
 	}
 
-	/** Store one vehicle count sample for this detector.
+	/** Store vehicle count for one binning interval.
 	 * @param v PeriodicSample containing vehicle count data. */
 	public void storeVehCount(PeriodicSample v) {
 		if (v != null) {
@@ -929,7 +929,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		}
 	}
 
-	/** Test a vehicle count sample with error detecting algorithms */
+	/** Test vehicle count with error detecting algorithms */
 	private void testVehCount(PeriodicSample vs) {
 		chatter.updateState(vs.period, vs.value > MAX_VEH_COUNT_30);
 		if (chatter.checkLogging(vs.period))
@@ -952,8 +952,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return false;
 	}
 
-	/** Store one occupancy sample for this detector.
-	 * @param occ Occupancy sample data. */
+	/** Store occupancy for one binning interval.
+	 * @param occ Occupancy data. */
 	public void storeOccupancy(OccupancySample occ) {
 		if (occ != null) {
 			int n_scans = occ.as60HzScans();
@@ -967,11 +967,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			prev_value = MISSING_DATA;
 	}
 
-	/** Test an occupancy sample with error detecting algorithms */
+	/** Test binned occupancy with error detecting algorithms */
 	private void testScans(OccupancySample occ) {
 		boolean lock = occ.value >= OccupancySample.MAX;
 		// Locked-on counter should be cleared only with good
-		// non-zero samples.  This helps when the duration of
+		// non-zero data.  This helps when the duration of
 		// occupancy spikes is shorter than the threshold time
 		// and interspersed with zeroes.
 		boolean hold = locked_on.failed && (occ.value == 0);
@@ -994,7 +994,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		updateAutoFail();
 	}
 
-	/** Store one speed sample for this detector.
+	/** Store speed for one binning interval.
 	 * @param speed PeriodicSample containing speed data. */
 	public void storeSpeed(PeriodicSample speed) {
 		if (speed != null)
@@ -1015,7 +1015,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		v_log.setBinning(false);
 	}
 
-	/** Purge all samples before a given stamp. */
+	/** Purge all binned data before a given stamp. */
 	public void purge(long before) {
 		veh_cache.purge(before);
 		scn_cache.purge(before);
@@ -1076,7 +1076,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		w.write("/>\n");
 	}
 
-	/** Print the current sample as an XML element */
+	/** Print binned data as an XML element */
 	public void writeSampleXml(Writer w, long stamp, int period)
 		throws IOException
 	{

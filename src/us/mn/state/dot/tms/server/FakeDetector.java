@@ -26,7 +26,7 @@ import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
  */
 public class FakeDetector implements VehicleSampler {
 
-	/** Calculate the average from a total and sample count */
+	/** Calculate the average from a total and count */
 	static private float calculateAverage(float total, int count) {
 		return (count > 0) ? total / count : MISSING_DATA;
 	}

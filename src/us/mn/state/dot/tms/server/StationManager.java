@@ -41,10 +41,10 @@ class StationManager {
 	static private final File JSON_OUTPUT_DIRECTORY =
 		new File("/var/www/html/iris/");
 
-	/** Location of station sample XML file */
+	/** Location of station XML file */
 	static private final String SAMPLE_XML = "stat_sample.xml";
 
-	/** Name of station sample JSON file */
+	/** Name of station JSON file */
 	static private final String SAMPLE_JSON = "station_sample";
 
 	/** Time stamp at end of interval */
@@ -69,7 +69,7 @@ class StationManager {
 		}
 	}
 
-	/** Write the station sample data out as XML */
+	/** Write the station data out as XML */
 	public void writeSampleXml() throws IOException {
 		XmlWriter w = new XmlWriter(SAMPLE_XML, true) {
 			@Override protected void write(Writer w)
@@ -83,7 +83,7 @@ class StationManager {
 		w.write();
 	}
 
-	/** Write the station sample data out as JSON */
+	/** Write the station data out as JSON */
 	public void writeSampleJson() throws IOException {
 		File file = new File(JSON_OUTPUT_DIRECTORY, SAMPLE_JSON);
 		File temp = new File(file.getAbsolutePath() + "~");
@@ -98,7 +98,7 @@ class StationManager {
 		FileIO.atomicMove(temp.toPath(), file.toPath());
 	}
 
-	/** Write the station sample data out as JSON */
+	/** Write the station data out as JSON */
 	private void writeSampleJson(FileWriter writer) throws IOException {
 		BufferedWriter buf_writer = new BufferedWriter(writer);
 		try {
@@ -109,7 +109,7 @@ class StationManager {
 		}
 	}
 
-	/** Write the station sample data out as JSON */
+	/** Write the station data out as JSON */
 	private void writeSampleJson(BufferedWriter writer) throws IOException {
 		int period = DetectorImpl.BIN_PERIOD_MS;
 		writer.write("{\n");
@@ -134,7 +134,7 @@ class StationManager {
 		writer.write("}\n");
 	}
 
-	/** Print the header of the station sample XML file */
+	/** Print the header of the station XML file */
 	private void writeSampleXmlHead(Writer w) throws IOException {
 		w.write(XmlWriter.XML_DECLARATION);
 		writeDtd(w);
@@ -157,7 +157,7 @@ class StationManager {
 		w.write("]>\n");
 	}
 
-	/** Print the body of the station sample XML file */
+	/** Print the body of the station XML file */
 	private void writeSampleXmlBody(Writer w) throws IOException {
 		int period = DetectorImpl.BIN_PERIOD_MS;
 		Iterator<Station> it = StationHelper.iterator();
@@ -170,7 +170,7 @@ class StationManager {
 		}
 	}
 
-	/** Print the tail of the station sample XML file */
+	/** Print the tail of the station XML file */
 	private void writeSampleXmlTail(Writer w) throws IOException {
 		w.write("</traffic_sample>\n");
 	}

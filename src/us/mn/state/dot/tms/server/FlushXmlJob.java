@@ -23,13 +23,13 @@ import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 
 /**
- * Job to flush XML sample data
+ * Job to flush XML data
  *
  * @author Douglas Lau
  */
 public class FlushXmlJob extends Job {
 
-	/** Detector sample file */
+	/** Detector data file */
 	static private final String SAMPLE_XML = "det_sample.xml";
 
 	/** Station manager */
@@ -48,7 +48,7 @@ public class FlushXmlJob extends Job {
 		station_manager.writeSampleJson();
 	}
 
-	/** Write the sample data out as XML */
+	/** Write the detector data out as XML */
 	private void writeSampleXml() throws IOException {
 		XmlWriter w = new XmlWriter(SAMPLE_XML, true) {
 			@Override protected void write(Writer w)
@@ -62,7 +62,7 @@ public class FlushXmlJob extends Job {
 		w.write();
 	}
 
-	/** Write the header of the detector sample XML file */
+	/** Write the header of the detector XML file */
 	private void writeSampleXmlHead(Writer w) throws IOException {
 		long stamp = station_manager.getStamp();
 		w.write(XmlWriter.XML_DECLARATION);
@@ -86,7 +86,7 @@ public class FlushXmlJob extends Job {
 		w.write("]>\n");
 	}
 
-	/** Write the body of the detector sample XML file */
+	/** Write the body of the detector XML file */
 	private void writeSampleXmlBody(Writer w) throws IOException {
 		long stamp = station_manager.getStamp();
 		int period = DetectorImpl.BIN_PERIOD_MS;
@@ -100,7 +100,7 @@ public class FlushXmlJob extends Job {
 		}
 	}
 
-	/** Write the tail of the detector sample XML file */
+	/** Write the tail of the detector XML file */
 	private void writeSampleXmlTail(Writer w) throws IOException {
 		w.write("</traffic_sample>\n");
 	}
