@@ -612,10 +612,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Bin event data to the specified period */
-	public synchronized void binEventData(int p) {
+	public synchronized void binEventData(int p, boolean success) {
 		for (ControllerIO io: io_pins.values()) {
 			if (io instanceof DetectorImpl)
-				((DetectorImpl) io).binEventData(p);
+				((DetectorImpl) io).binEventData(p, success);
 		}
 	}
 

@@ -1047,11 +1047,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	}
 
 	/** Bin event data to the specified period */
-	public void binEventData(int period) {
-		long stamp = calculateEndTime(period);
-		storeVehCount(v_log.getVehCount(stamp, period));
-		storeOccupancy(v_log.getOccupancy(stamp, period));
-		storeSpeed(v_log.getSpeed(stamp, period));
+	public void binEventData(int period, boolean success) {
+		if (success) {
+			long stamp = calculateEndTime(period);
+			storeVehCount(v_log.getVehCount(stamp, period));
+			storeOccupancy(v_log.getOccupancy(stamp, period));
+			storeSpeed(v_log.getSpeed(stamp, period));
+		}
 		v_log.clear();
 		v_log.setBinning(true);
 	}

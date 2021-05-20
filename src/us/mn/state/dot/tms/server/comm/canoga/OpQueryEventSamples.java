@@ -76,8 +76,7 @@ public class OpQueryEventSamples extends OpCanoga {
 
 	/** Update the controller operation counters */
 	public void updateCounters(int p) {
-		if (isSuccess())
-			controller.binEventData(p);
+		controller.binEventData(p, isSuccess());
 		controller.completeOperation(id, isSuccess());
 	}
 }
