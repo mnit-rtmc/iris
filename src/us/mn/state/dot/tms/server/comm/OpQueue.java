@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -179,6 +179,11 @@ public final class OpQueue<T extends ControllerProperty> {
 	/** Get the next operation from the queue (and remove it).
 	 * If there's no op in the queue, immediately return null. */
 	public synchronized OpController<T> tryNext() {
+		OpController<T> w = work;
+		if (w != null) {
+			work = null;
+			return w;
+		}
 		OpController<T> op = null;
 		if (front != null) {
 			op = front.operation;
