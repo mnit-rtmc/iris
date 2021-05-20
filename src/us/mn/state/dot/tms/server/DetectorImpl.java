@@ -1003,7 +1003,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Flush buffered data to disk */
 	public void flush(PeriodicSampleWriter writer) {
-		if (!v_log.isBinning()) {
+		// Clear binning flag on each flush; it will be set on each call
+		// to binEventData as long as vehicle events are being logged
+		if (v_log.isBinning())
+			v_log.setBinning(false);
+		else {
 			writer.flush(veh_cache, name);
 			writer.flush(scn_cache, name);
 			writer.flush(spd_cache, name);
@@ -1012,7 +1016,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			writer.flush(m_count_cache, name);
 			writer.flush(l_count_cache, name);
 		}
-		v_log.setBinning(false);
 	}
 
 	/** Purge all binned data before a given stamp. */
@@ -1049,6 +1052,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		storeVehCount(v_log.getVehCount(stamp, period));
 		storeOccupancy(v_log.getOccupancy(stamp, period));
 		storeSpeed(v_log.getSpeed(stamp, period));
+		v_log.clear();
 		v_log.setBinning(true);
 	}
 
