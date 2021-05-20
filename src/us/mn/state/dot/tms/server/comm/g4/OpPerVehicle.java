@@ -19,7 +19,6 @@ import java.util.Date;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.DetectorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -29,9 +28,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 public class OpPerVehicle extends OpG4 {
-
-	/** Maximum number of lanes */
-	static private final int MAX_LANES = 12;
 
 	/** Create a new "per vehicle" operation */
 	public OpPerVehicle(ControllerImpl c) {
@@ -69,20 +65,11 @@ public class OpPerVehicle extends OpG4 {
 				      ? this
 				      : null;
 			} else {
-				logGap();
+				controller.logGap();
 				mess.logError("BAD TIMESTAMP: " +
 					new Date(ev.getStamp()));
 				return new StoreRTC();
 			}
-		}
-	}
-
-	/** Log a vehicle detection gap */
-	private void logGap() {
-		for (int i = 0; i < MAX_LANES; i++) {
-			DetectorImpl det = controller.getDetectorAtPin(i + 1);
-			if (det != null)
-				det.logGap(0);
 		}
 	}
 
@@ -109,7 +96,10 @@ public class OpPerVehicle extends OpG4 {
 
 	/** Update the controller operation counters */
 	public void updateCounters(int p) {
-		controller.binEventData(p, isSuccess());
-		controller.completeOperation(id, isSuccess());
+		boolean s = isSuccess();
+		if (!s)
+			controller.logGap();
+		controller.binEventData(p, s);
+		controller.completeOperation(id, s);
 	}
 }

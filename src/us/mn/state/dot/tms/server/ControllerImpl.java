@@ -619,6 +619,14 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 	}
 
+	/** Log vehicle detection gap for all detectors */
+	public synchronized void logGap() {
+		for (ControllerIO io: io_pins.values()) {
+			if (io instanceof DetectorImpl)
+				((DetectorImpl) io).logGap(0);
+		}
+	}
+
 	/** Controller firmware version */
 	private String version;
 

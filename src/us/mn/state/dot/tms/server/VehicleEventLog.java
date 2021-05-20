@@ -141,6 +141,7 @@ public class VehicleEventLog {
 			final String ev = formatEvent(duration, head, st, speed,
 				length);
 			p_stamp = stamp;
+			gap = false;
 			FLUSH.addJob(new Job() {
 				public void perform() throws IOException {
 					appendEvent(stamp, ev);
@@ -166,8 +167,9 @@ public class VehicleEventLog {
 
 	/** Log a gap in vehicle events */
 	public void logGap(long stamp) {
-		if (isArchiveEnabled()) {
+		if (isArchiveEnabled() && !gap) {
 			p_stamp = 0;
+			gap = true;
 			FLUSH.addJob(new Job() {
 				public void perform() throws IOException {
 					appendEvent(stamp, "*\n");
@@ -178,6 +180,9 @@ public class VehicleEventLog {
 
 	/** Time stamp of most recent vehicle event */
 	private transient long p_stamp;
+
+	/** Flag indicating gap as most recent event */
+	private transient boolean gap;
 
 	/** Binning flag */
 	private transient boolean binning;
