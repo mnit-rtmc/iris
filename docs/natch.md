@@ -81,11 +81,11 @@ more messages in the ring buffer, the oldest one is then sent.
 
 On NAK, the oldest status message is sent again.
 
-The third through sixth values are __duration__, __headway__, __time__ and
-__speed__.  See [vehicle logging] for details.
+The third value is the detector number (0-31).  The fourth through sixth values
+are __duration__, __headway__ and __time__.  See [vehicle logging] for details.
 
 ```
-ds,01a5,323,4638,17:50:28
+ds,01a5,3,323,4638,17:50:28
 DS,01a5
 ```
 
