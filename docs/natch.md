@@ -162,6 +162,9 @@ The third value is the pin number.  The fourth is the pin status (0 or 1).  If
 omitted in a poll, it is treated as a *query*, and the response includes the
 current status.
 
+__Note__: pins associated with meters (Meter Configure) cannot be controlled
+with this command.
+
 ```
 PS,0250,70
 ps,0250,70,0
