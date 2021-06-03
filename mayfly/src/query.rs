@@ -248,7 +248,7 @@ fn scan_zip(
 /// Parse year parameter
 fn parse_year(year: &str) -> Result<i32> {
     match year.parse() {
-        Ok(y) if y >= 1900 && y <= 9999 => Ok(y),
+        Ok(y) if (1900..=9999).contains(&y) => Ok(y),
         _ => Err(Error::InvalidDate),
     }
 }
@@ -256,7 +256,7 @@ fn parse_year(year: &str) -> Result<i32> {
 /// Parse month parameter
 fn parse_month(month: &str) -> Result<u32> {
     match month.parse() {
-        Ok(m) if m >= 1 && m <= 12 => Ok(m),
+        Ok(m) if (1..=12).contains(&m) => Ok(m),
         _ => Err(Error::InvalidDate),
     }
 }
@@ -264,7 +264,7 @@ fn parse_month(month: &str) -> Result<u32> {
 /// Parse day parameter
 fn parse_day(day: &str) -> Result<u32> {
     match day.parse() {
-        Ok(d) if d >= 1 && d <= 31 => Ok(d),
+        Ok(d) if (1..=31).contains(&d) => Ok(d),
         _ => Err(Error::InvalidDate),
     }
 }
@@ -328,7 +328,7 @@ impl YearQuery {
 /// Check for valid year
 fn check_year(name: &str, dir: bool) -> Option<&str> {
     if dir {
-        parse_year(name).ok().and_then(|_| Some(name))
+        parse_year(name).ok().map(|_| name)
     } else {
         None
     }
@@ -354,7 +354,7 @@ fn check_date(name: &str, dir: bool) -> Option<&str> {
     } else {
         &""
     };
-    parse_date(dt).ok().and_then(|_| Some(dt))
+    parse_date(dt).ok().map(|_| dt)
 }
 
 impl CorridorQuery {
@@ -367,10 +367,10 @@ impl CorridorQuery {
                 // NOTE: the zip crate requires blocking calls
                 match scan_zip(&self.zip_path(), check_corridor, &mut body) {
                     Ok(_) | Err(Error::NotFound) => (),
-                    Err(e) => Err(e)?,
+                    Err(e) => return Err(e),
                 }
             }
-            Err(e) => Err(e)?,
+            Err(e) => return Err(e),
         }
         Ok(body)
     }
@@ -407,10 +407,10 @@ impl DetectorQuery {
                 // NOTE: the zip crate requires blocking calls
                 match scan_zip(&self.zip_path(), check_detector, &mut body) {
                     Ok(_) | Err(Error::NotFound) => (),
-                    Err(e) => Err(e)?,
+                    Err(e) => return Err(e),
                 }
             }
-            Err(e) => Err(e)?,
+            Err(e) => return Err(e),
         }
         Ok(body)
     }
@@ -435,7 +435,6 @@ fn check_detector(name: &str, dir: bool) -> Option<&str> {
             .and_then(|ext| file_ext(ext))
             .and_then(|_| path.file_stem())
             .and_then(|f| f.to_str())
-            .and_then(|f| Some(f))
     } else {
         None
     }
@@ -642,8 +641,7 @@ impl<T: TrafficData> TrafficQuery<T> {
                 if let Ok(zf) = zip.by_name(&name) {
                     log::info!("opened {} in {}.{}", name, self.date, EXT);
                     let mut log = vehicle::Log::default();
-                    let mut lines = std::io::BufReader::new(zf).lines();
-                    while let Some(line) = lines.next() {
+                    for line in std::io::BufReader::new(zf).lines() {
                         log.append(&line?)?;
                     }
                     log.finish();
