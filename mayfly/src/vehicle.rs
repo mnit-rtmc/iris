@@ -343,28 +343,28 @@ impl VehicleFilter {
 
     /// Check if vehicle should be binned
     fn check(&self, veh: &VehicleEvent) -> bool {
-        if let Some(length) = veh.length {
-            if let Some(m) = self.length_ft_min {
-                if length < m {
-                    return false;
-                }
-            }
-            if let Some(m) = self.length_ft_max {
-                if length >= m {
-                    return false;
-                }
+        if let Some(m) = self.length_ft_min {
+            // use 0 for unknown length
+            if veh.length.unwrap_or(0) < m {
+                return false;
             }
         }
-        if let Some(speed) = veh.speed {
-            if let Some(m) = self.speed_mph_min {
-                if speed < m {
-                    return false;
-                }
+        if let Some(m) = self.length_ft_max {
+            // use MAX value for unknown length
+            if veh.length.unwrap_or(u32::MAX) >= m {
+                return false;
             }
-            if let Some(m) = self.speed_mph_max {
-                if speed >= m {
-                    return false;
-                }
+        }
+        if let Some(m) = self.speed_mph_min {
+            // use 0 for unknown speed
+            if veh.speed.unwrap_or(0) < m {
+                return false;
+            }
+        }
+        if let Some(m) = self.speed_mph_max {
+            // use MAX value for unknown speed
+            if veh.speed.unwrap_or(u32::MAX) >= m {
+                return false;
             }
         }
         true
