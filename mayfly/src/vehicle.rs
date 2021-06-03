@@ -55,7 +55,7 @@ pub struct Log {
 }
 
 /// Vehicle event filter
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct VehicleFilter {
     /// Minimum vehicle length (ft)
     length_ft_min: Option<u32>,
@@ -312,6 +312,11 @@ impl Log {
 }
 
 impl VehicleFilter {
+    /// Check if any filters are in effect
+    pub fn is_filtered(&self) -> bool {
+        self != &Self::default()
+    }
+
     /// Set minimum vehicle length (ft)
     pub fn with_length_ft_min(mut self, m: Option<u32>) -> Self {
         self.length_ft_min = m;
