@@ -34,15 +34,15 @@ async fn main() -> tide::Result<()> {
     root.at("").get(|_| handle_index());
     root.at("index.html").get(|_| handle_index());
     root.at("mayfly.css").get(|_| handle_css());
-    root.at("districts").get(|req| handle_districts(req));
-    root.at("years").get(|req| handle_years(req));
-    root.at("dates").get(|req| handle_dates(req));
-    root.at("corridors").get(|req| handle_corridors(req));
-    root.at("detectors").get(|req| handle_detectors(req));
-    root.at("counts").get(|req| handle_counts(req));
-    root.at("speed").get(|req| handle_speed(req));
-    root.at("occupancy").get(|req| handle_occupancy(req));
-    root.at("length").get(|req| handle_length(req));
+    root.at("districts").get(handle_districts);
+    root.at("years").get(handle_years);
+    root.at("dates").get(handle_dates);
+    root.at("corridors").get(handle_corridors);
+    root.at("detectors").get(handle_detectors);
+    root.at("counts").get(handle_counts);
+    root.at("speed").get(handle_speed);
+    root.at("occupancy").get(handle_occupancy);
+    root.at("length").get(handle_length);
     app.listen("127.0.0.1:3131").await?;
     Ok(())
 }
