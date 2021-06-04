@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,8 +44,8 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
  * @author Douglas Lau
  */
 public class MndotPoller extends ThreadedPoller<MndotProperty>
-	implements LCSPoller, AlarmPoller, MeterPoller, SamplePoller,
-	BeaconPoller, LaneMarkingPoller
+	implements AlarmPoller, BeaconPoller, LaneMarkingPoller, LCSPoller,
+	MeterPoller, SamplePoller
 {
 	/** MnDOT 170 debug log */
 	static private final DebugLog MNDOT_LOG = new DebugLog("mndot170");
@@ -53,8 +53,7 @@ public class MndotPoller extends ThreadedPoller<MndotProperty>
 	/** Communication protocol */
 	private final CommProtocol protocol;
 
-	/** Create a new MnDOT 170 poller.
-	 * @param n Comm link name. */
+	/** Create a new MnDOT 170 poller */
 	public MndotPoller(CommLink link, CommProtocol cp) {
 		super(link, TCP, MNDOT_LOG);
 		protocol = cp;
@@ -162,12 +161,6 @@ public class MndotPoller extends ThreadedPoller<MndotProperty>
 		}
 	}
 
-	/** Set the deployed status of a lane marking */
-	@Override
-	public void setDeployed(LaneMarkingImpl dev, boolean d) {
-		addOp(new OpDeployLaneMarking(dev, d));
-	}
-
 	/** Send new indications to an LCS array.
 	 * @param lcs_array LCS array.
 	 * @param ind New lane use indications.
@@ -177,6 +170,12 @@ public class MndotPoller extends ThreadedPoller<MndotProperty>
 		User o)
 	{
 		addOp(new OpSendLCSIndications(lcs_array, ind, o));
+	}
+
+	/** Set the deployed status of a lane marking */
+	@Override
+	public void setDeployed(LaneMarkingImpl dev, boolean d) {
+		addOp(new OpDeployLaneMarking(dev, d));
 	}
 
 	/** Send a device request to an alarm */
