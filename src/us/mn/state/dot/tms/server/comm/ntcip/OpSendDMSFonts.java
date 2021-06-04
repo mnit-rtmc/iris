@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,8 +17,8 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 import us.mn.state.dot.sched.TimeSteward;
@@ -94,8 +94,8 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Maximum number of characters in a font */
 	private final ASN1Integer max_characters = maxFontCharacters.makeInt();
 
-	/** List of matching fonts */
-	private final LinkedList<Font> fonts;
+	/** Deque of matching fonts */
+	private final Deque<Font> fonts;
 
 	/** Mapping of rows to font values in font table */
 	private final TreeMap<Integer, FontRow> rows =

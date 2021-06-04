@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -102,8 +102,8 @@ public class SNMP extends BER {
 		public final int request_id;
 
 		/** List of objects set or get with this message */
-		private final LinkedList<ASN1Object> mos =
-			new LinkedList<ASN1Object>();
+		private final ArrayList<ASN1Object> mos =
+			new ArrayList<ASN1Object>();
 
 		/** Create a new SNMP message */
 		public Message(OutputStream o, InputStream i, String c) {
