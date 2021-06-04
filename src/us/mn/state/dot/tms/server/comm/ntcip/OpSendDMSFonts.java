@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -94,8 +93,8 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Maximum number of characters in a font */
 	private final ASN1Integer max_characters = maxFontCharacters.makeInt();
 
-	/** Deque of matching fonts */
-	private final Deque<Font> fonts;
+	/** Map of matching font numbers to fonts */
+	private final TreeMap<Integer, Font> fonts;
 
 	/** Mapping of rows to font values in font table */
 	private final TreeMap<Integer, FontRow> rows =
@@ -200,20 +199,9 @@ public class OpSendDMSFonts extends OpDMS {
 	 * @param row Row number in font table.
 	 * @param f_num Font number in font table. */
 	private void addRow(int row, int f_num) {
-		rows.put(row, new FontRow(row, f_num, findFont(f_num)));
-	}
-
-	/** Find and remove matching font */
-	private Font findFont(int f_num) {
-		Iterator<Font> it = fonts.iterator();
-		while (it.hasNext()) {
-			Font f = it.next();
-			if (f.getNumber() == f_num) {
-				it.remove();
-				return f;
-			}
-		}
-		return null;
+		Font f = fonts.remove(f_num);
+		// Reserve the row even if that number has no associated font
+		rows.put(row, new FontRow(row, f_num, f));
 	}
 
 	/** Get the first phase of the first font */
@@ -228,28 +216,32 @@ public class OpSendDMSFonts extends OpDMS {
 		// Start at the last row in the table -- some old firmwares
 		// treat the first row or two as special permanent fonts.
 		for (int row = num_fonts.getInteger(); row > 0; row--) {
-			if (fonts.size() < 1)
-				break;
-			if (rows.containsKey(row))
-				rows.put(row, populateRow(rows.remove(row)));
+			if (rows.containsKey(row)) {
+				FontRow fr = populateRow(rows.remove(row));
+				if (fr != null)
+					rows.put(row, fr);
+				else
+					break;
+			}
 		}
 	}
 
 	/** Populate a FontRow with an unassigned font */
 	private FontRow populateRow(FontRow fr) {
-		assert fonts.size() > 0;
 		if (fr.font != null)
 			return fr;
-		else {
-			Font f = fonts.pollFirst();
+		Map.Entry<Integer, Font> ent = fonts.pollLastEntry();
+		if (ent != null) {
+			Font f = ent.getValue();
 			int f_num = fontNum(fr.row, f.getNumber());
 			return new FontRow(fr.row, f_num, f);
 		}
+		return null;
 	}
 
 	/** Print warning if unable to send fonts */
 	private void warnTableFull() {
-		for (Font f : fonts)
+		for (Font f : fonts.values())
 			abortUpload(new FontRow(f), "Table full");
 	}
 

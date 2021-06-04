@@ -15,7 +15,9 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.TreeMap;
 import us.mn.state.dot.tms.utils.MultiAdapter;
 import us.mn.state.dot.tms.utils.MultiString;
 
@@ -27,43 +29,43 @@ import us.mn.state.dot.tms.utils.MultiString;
 public class FontFinder {
 
 	/** List of all sign groups for the DMS */
-	private final LinkedList<SignGroup> groups;
+	private final ArrayList<SignGroup> groups;
 
-	/** List of fonts numbers found */
-	private final LinkedList<Integer> fonts = new LinkedList<Integer>();
+	/** Set of font numbers found */
+	private final HashSet<Integer> font_nums = new HashSet<Integer>();
 
 	/** MULTI adapter which records font numbers from tags */
 	private final MultiAdapter fontTagFinder = new MultiAdapter() {
 		@Override
 		public void setFont(Integer f_num, String f_id) {
-			if ((f_num != null) && !fonts.contains(f_num))
-				fonts.add(f_num);
+			if (f_num != null)
+				font_nums.add(f_num);
 		}
 	};
 
 	/** Create a font finder for a DMS */
 	public FontFinder(DMS dms) {
-		fonts.add(DMSHelper.getDefaultFontNumber(dms));
+		font_nums.add(DMSHelper.getDefaultFontNumber(dms));
 		groups = findGroups(dms);
 		findQuickMessageTags();
 		findSignTextTags();
 		findDmsActionTags();
 	}
 
-	/** Get a list of all fonts found */
-	public LinkedList<Font> getFonts() {
-		LinkedList<Font> _fonts = new LinkedList<Font>();
-		for (Integer fn: fonts) {
+	/** Get a map of all fonts found */
+	public TreeMap<Integer, Font> getFonts() {
+		TreeMap<Integer, Font> fonts = new TreeMap<Integer, Font>();
+		for (Integer fn: font_nums) {
 			Font f = FontHelper.find(fn);
 			if (f != null)
-				_fonts.add(f);
+				fonts.put(fn, f);
 		}
-		return _fonts;
+		return fonts;
 	}
 
 	/** Find all sign groups for the DMS */
-	private LinkedList<SignGroup> findGroups(DMS dms) {
-		LinkedList<SignGroup> g = new LinkedList<SignGroup>();
+	private ArrayList<SignGroup> findGroups(DMS dms) {
+		ArrayList<SignGroup> g = new ArrayList<SignGroup>();
 		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
 		while (it.hasNext()) {
 			DmsSignGroup dsg = it.next();
