@@ -21,6 +21,7 @@ use async_std::prelude::*;
 use async_std::stream::StreamExt;
 use chrono::{Duration, Local, NaiveDate};
 use serde::Deserialize;
+use std::collections::HashSet;
 use std::io::BufRead as _;
 use std::io::Read as _;
 use std::marker::PhantomData;
@@ -207,23 +208,27 @@ async fn scan_dir(
     body: &mut Body,
 ) -> Result<()> {
     let mut entries = read_dir(path).await.or(Err(Error::NotFound))?;
+    let mut names = HashSet::new();
     while let Some(entry) = entries.next().await {
         if let Ok(entry) = entry {
             if let Ok(tp) = entry.file_type().await {
                 if !tp.is_symlink() {
                     if let Some(name) = entry.file_name().to_str() {
                         if let Some(value) = check(name, tp.is_dir()) {
-                            body.push(&format!("\"{}\"", value));
+                            names.insert(format!("\"{}\"", value));
                         }
                     }
                 }
             }
         }
     }
+    for name in names {
+        body.push(&name);
+    }
     Ok(())
 }
 
-/// Get a list of entries in a zip file
+/// Scan entries in a zip file
 fn scan_zip(
     path: &std::path::Path,
     check: fn(&str, bool) -> Option<&str>,
@@ -231,16 +236,20 @@ fn scan_zip(
 ) -> Result<()> {
     let file = std::fs::File::open(path).or(Err(Error::NotFound))?;
     let mut zip = ZipArchive::new(file)?;
+    let mut names = HashSet::new();
     for i in 0..zip.len() {
         let zf = zip.by_index(i)?;
         let ent = std::path::Path::new(zf.name());
         if let Some(name) = ent.file_name() {
             if let Some(name) = name.to_str() {
                 if let Some(value) = check(name, false) {
-                    body.push(&format!("\"{}\"", value));
+                    names.insert(format!("\"{}\"", value));
                 }
             }
         }
+    }
+    for name in names {
+        body.push(&name);
     }
     Ok(())
 }
@@ -363,16 +372,16 @@ impl CorridorQuery {
         parse_date(&self.date)?;
         let mut body = Body::default();
         match scan_dir(&self.date_path(), check_corridor, &mut body).await {
-            Ok(_) | Err(Error::NotFound) => {
+            Err(Error::NotFound) => {
                 // NOTE: the zip crate requires blocking calls
                 match scan_zip(&self.zip_path(), check_corridor, &mut body) {
-                    Ok(_) | Err(Error::NotFound) => (),
-                    Err(e) => return Err(e),
+                    Ok(_) | Err(Error::NotFound) => Ok(body),
+                    Err(e) => Err(e),
                 }
             }
-            Err(e) => return Err(e),
+            Ok(_) => Ok(body),
+            Err(e) => Err(e),
         }
-        Ok(body)
     }
 
     /// Get path to directory containing archived data
@@ -403,16 +412,16 @@ impl DetectorQuery {
         parse_date(&self.date)?;
         let mut body = Body::default();
         match scan_dir(&self.date_path(), check_detector, &mut body).await {
-            Ok(_) | Err(Error::NotFound) => {
+            Err(Error::NotFound) => {
                 // NOTE: the zip crate requires blocking calls
                 match scan_zip(&self.zip_path(), check_detector, &mut body) {
-                    Ok(_) | Err(Error::NotFound) => (),
-                    Err(e) => return Err(e),
+                    Ok(_) | Err(Error::NotFound) => Ok(body),
+                    Err(e) => Err(e),
                 }
             }
-            Err(e) => return Err(e),
+            Ok(_) => Ok(body),
+            Err(e) => Err(e),
         }
-        Ok(body)
     }
 
     /// Get path to directory containing archived data
