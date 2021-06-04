@@ -152,6 +152,14 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
+	/** Update the device item styles */
+	@Override
+	public void updateStyles() {
+		super.updateStyles();
+		if (isFailed())
+			msg_user = null;
+	}
+
 	/** Get a mapping of the columns */
 	@Override
 	public Map<String, Object> getColumns() {
@@ -924,7 +932,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return getPollPeriodSec() * DURATION_PERIODS / 60;
 	}
 
-	/** User selected sign message */
+	/** User selected sign message.
+	 *
+	 * This is cached to allow combining with scheduled messages in
+	 * getMsgUserSched().  It must be cleared on communication failure (in
+	 * updateStyles()), to prevent the message from popping up days later,
+	 * after communication is restored. */
 	private transient SignMessage msg_user;
 
 	/** Set the user selected sign message */
@@ -994,9 +1007,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Update scheduled message.
 	 *
-	 * This updates the message's expire time, so it should be called on each
-	 * polling period.  Also, if a scheduled message has just expired, it
-	 * will be replaced by the user message. */
+	 * This updates the message's expire time, so it should be called on
+	 * each polling period.  Also, if a scheduled message has just expired,
+	 * it will be replaced by the user message. */
 	private void updateSchedMsg() {
 		try {
 			SignMessage usm = getMsgValidated();
