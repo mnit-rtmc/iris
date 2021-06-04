@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2017  Minnesota Department of Transportation
+ * Copyright (C) 2011-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,8 +36,7 @@ public class FontFinder {
 	private final MultiAdapter fontTagFinder = new MultiAdapter() {
 		@Override
 		public void setFont(Integer f_num, String f_id) {
-			if ((f_num != null)
-			 && !fonts.contains(f_num))
+			if ((f_num != null) && !fonts.contains(f_num))
 				fonts.add(f_num);
 		}
 	};
@@ -54,9 +53,9 @@ public class FontFinder {
 	/** Get a list of all fonts found */
 	public LinkedList<Font> getFonts() {
 		LinkedList<Font> _fonts = new LinkedList<Font>();
-		for(Integer fn: fonts) {
+		for (Integer fn: fonts) {
 			Font f = FontHelper.find(fn);
-			if(f != null)
+			if (f != null)
 				_fonts.add(f);
 		}
 		return _fonts;
@@ -66,9 +65,9 @@ public class FontFinder {
 	private LinkedList<SignGroup> findGroups(DMS dms) {
 		LinkedList<SignGroup> g = new LinkedList<SignGroup>();
 		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			DmsSignGroup dsg = it.next();
-			if(dsg.getDms() == dms)
+			if (dsg.getDms() == dms)
 				g.add(dsg.getSignGroup());
 		}
 		return g;
@@ -77,10 +76,10 @@ public class FontFinder {
 	/** Find font tags in all quick messages for the sign's groups */
 	private void findQuickMessageTags() {
 		Iterator<QuickMessage> it = QuickMessageHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			QuickMessage qm = it.next();
 			SignGroup sg = qm.getSignGroup();
-			if(sg != null && groups.contains(sg))
+			if (sg != null && groups.contains(sg))
 				findFontTags(qm.getMulti());
 		}
 	}
@@ -88,9 +87,9 @@ public class FontFinder {
 	/** Find font tags in all SignText for the sign's groups */
 	private void findSignTextTags() {
 		Iterator<SignText> it = SignTextHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			SignText st = it.next();
-			if(groups.contains(st.getSignGroup()))
+			if (groups.contains(st.getSignGroup()))
 				findFontTags(st.getMulti());
 		}
 	}
@@ -98,11 +97,11 @@ public class FontFinder {
 	/** Find font tags in all DMS actions for the sign's groups */
 	private void findDmsActionTags() {
 		Iterator<DmsAction> it = DmsActionHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			DmsAction da = it.next();
 			SignGroup sg = da.getSignGroup();
 			QuickMessage qm = da.getQuickMessage();
-			if(sg != null && qm != null && groups.contains(sg))
+			if (sg != null && qm != null && groups.contains(sg))
 				findFontTags(qm.getMulti());
 		}
 	}
