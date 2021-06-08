@@ -130,9 +130,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"gps, static_graphic, purpose, hidden, beacon, " +
 			"preset, sign_config, sign_detail, override_font, " +
-			"override_foreground, override_background, msg_sched, " +
-			"msg_current, expire_time FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+			"override_foreground, override_background, " +
+			"msg_user, msg_sched, msg_current, expire_time " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DMSImpl(row));
@@ -157,7 +157,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void updateStyles() {
 		super.updateStyles();
 		if (isFailed())
-			msg_user = null;
+			setMsgUserNull();
 	}
 
 	/** Get a mapping of the columns */
@@ -180,6 +180,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("override_font", override_font);
 		map.put("override_foreground", override_foreground);
 		map.put("override_background", override_background);
+		map.put("msg_user", msg_user);
 		map.put("msg_sched", msg_sched);
 		map.put("msg_current", msg_current);
 		map.put("expire_time", asTimestamp(expire_time));
@@ -231,9 +232,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getString(14),           // override_font
 		     (Integer) row.getObject(15), // override_foreground
 		     (Integer) row.getObject(16), // override_background
-		     row.getString(17),           // msg_sched
-		     row.getString(18),           // msg_current
-		     row.getTimestamp(19)         // expire_time
+		     row.getString(17),           // msg_user
+		     row.getString(18),           // msg_sched
+		     row.getString(19),           // msg_current
+		     row.getTimestamp(20)         // expire_time
 		);
 	}
 
@@ -241,23 +243,23 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private DMSImpl(String n, String loc, String c, int p, String nt,
 		String g, String sg, int dp, boolean h, String b, String cp,
 		String sc, String sd, String of, Integer fg, Integer bg,
-		String ms, String mc, Date et)
+		String mu, String ms, String mc, Date et)
 	{
 		this(n, lookupGeoLoc(loc), lookupController(c), p, nt,
 		     lookupGps(g), lookupGraphic(sg),
 		     DevicePurpose.fromOrdinal(dp), h, lookupBeacon(b),
 		     lookupPreset(cp), SignConfigHelper.lookup(sc),
 		     SignDetailHelper.lookup(sd), FontHelper.lookup(of), fg, bg,
-		     SignMessageHelper.lookup(ms), SignMessageHelper.lookup(mc),
-		     et);
+		     SignMessageHelper.lookup(mu), SignMessageHelper.lookup(ms),
+		     SignMessageHelper.lookup(mc), et);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
 		int p, String nt, GpsImpl g, Graphic sg, DevicePurpose dp,
 		boolean h, Beacon b, CameraPreset cp, SignConfig sc,
-		SignDetail sd, Font of, Integer fg, Integer bg, SignMessage ms,
-		SignMessage mc, Date et)
+		SignDetail sd, Font of, Integer fg, Integer bg, SignMessage mu,
+		SignMessage ms, SignMessage mc, Date et)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
@@ -272,6 +274,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		override_font = of;
 		override_foreground = fg;
 		override_background = bg;
+		msg_user = mu;
 		msg_sched = ms;
 		msg_current = mc;
 		expire_time = stampMillis(et);
@@ -538,10 +541,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Reset sign state (and notify clients) */
 	public void resetStateNotify() {
-		msg_user = null;
-		setMsgSchedNotify(null);
-		setMsgCurrentNotify(null, "RESET");
 		setPixelStatusNotify(null);
+		setMsgSchedNotify(null);
+		setMsgUserNull();
+		setMsgCurrentNotify(null, "RESET");
 	}
 
 	/** Override font */
@@ -935,10 +938,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** User selected sign message.
 	 *
 	 * This is cached to allow combining with scheduled messages in
-	 * getMsgUserSched().  It must be cleared on communication failure (in
-	 * updateStyles()), to prevent the message from popping up days later,
-	 * after communication is restored. */
-	private transient SignMessage msg_user;
+	 * getMsgUserSched().
+	 *
+	 * A null value indicates that the user message is unknown.  It is
+	 * nulled on communication failure (in updateStyles()), to prevent the
+	 * message from popping up days later, after communication is restored.
+	 */
+	private SignMessage msg_user;
 
 	/** Set the user selected sign message */
 	@Override
@@ -948,19 +954,24 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set the user selected sign message */
 	public void doSetMsgUser(SignMessage sm) throws TMSException {
-		SignMessageHelper.validate(sm, this);
-		setMsgUser(sm);
-		sm = getMsgValidated();
-		sendMsg(sm, getOwner(sm, getProcUser()));
+		if (!objectEquals(msg_user, sm)) {
+			SignMessageHelper.validate(sm, this);
+			store.update(this, "msg_user", sm);
+			setMsgUser(sm);
+			sm = getMsgValidated();
+			sendMsg(sm, getOwner(sm, getProcUser()));
+		}
 	}
 
-	/** Blank the user selected sign message */
-	private void blankMsgUser() {
+	/** Set the user selected sign message to null, without sending
+	 *  anything to the sign. */
+	private void setMsgUserNull() {
 		try {
-			doSetMsgUser(createMsgBlank());
+			store.update(this, "msg_user", null);
+			setMsgUser(null);
 		}
 		catch (TMSException e) {
-			logError("blankMsgUser: " + e.getMessage());
+			logError("setMsgUserNull: " + e.getMessage());
 		}
 	}
 
@@ -1012,14 +1023,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * it will be replaced by the user message. */
 	private void updateSchedMsg() {
 		try {
-			SignMessage usm = getMsgValidated();
-			if (isMsgSource(usm, SignMsgSource.schedule) ||
-			   isMsgScheduled())
-			{
-				if (usm != null)
+			if (isMsgScheduled() || msg_sched != null) {
+				SignMessage usm = getMsgValidated();
+				if (isMsgSource(usm, SignMsgSource.schedule) ||
+				    isMsgScheduled())
+				{
 					sendMsg(usm);
-				else if (msg_queried)
-					blankMsgUser();
+				}
 			}
 		}
 		catch (TMSException e) {
@@ -1117,11 +1127,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Get validated user/scheduled sign message.
-	 * @return Validated sign message, or null. */
+	 * @return Validated sign message. */
 	private SignMessage getMsgValidated() throws TMSException {
 		SignMessage sm = getMsgUserSched();
-		if (sm != null)
-			SignMessageHelper.validate(sm, this);
+		if (null == sm)
+			sm = createMsgBlank();
+		SignMessageHelper.validate(sm, this);
 		return sm;
 	}
 
@@ -1129,8 +1140,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @return The appropriate sign message, or null. */
 	private SignMessage getMsgUserSched() {
 		SignMessage user = msg_user;	// Avoid race
-		if (!msg_queried)
-			return user;
 		SignMessage sched = msg_sched;	// Avoid race
 		if (null == user)
 			return sched;
@@ -1186,13 +1195,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Send message to DMS.
-	 * @param sm Sign message. */
+	 * @param sm Sign message (not null). */
 	private void sendMsg(SignMessage sm) throws TMSException {
 		sendMsg(sm, getOwner(sm, sm.getOwner()));
 	}
 
 	/** Send message to DMS.
-	 * @param sm Sign message.
+	 * @param sm Sign message (not null).
 	 * @param owner Message owner. */
 	private void sendMsg(SignMessage sm, String owner) throws TMSException {
 		DMSPoller p = getDMSPoller();
@@ -1206,7 +1215,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set the next sign message.
 	 * @param p DMS poller.
-	 * @param sm Sign message.
+	 * @param sm Sign message (not null).
 	 * @param owner Message owner. */
 	private void sendMsg(DMSPoller p, SignMessage sm, String owner) {
 		if (isMsgSource(sm, SignMsgSource.tolling))
@@ -1502,7 +1511,17 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		if (et != null) {
 			long now = TimeSteward.currentTimeMillis();
 			if (now >= et)
-				blankMsgUser();
+				setMsgUserBlank();
+		}
+	}
+
+	/** Blank the user selected sign message */
+	private void setMsgUserBlank() {
+		try {
+			doSetMsgUser(createMsgBlank());
+		}
+		catch (TMSException e) {
+			logError("setMsgUserBlank: " + e.getMessage());
 		}
 	}
 
@@ -1549,13 +1568,5 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Does sign have pixel service object support? */
 	public boolean getSupportsPixelServiceObject() {
 		return supports_pixel_service_object;
-	}
-
-	/** Was message queried since startup? */
-	private transient boolean msg_queried = false;
-
-	/** Message was queried since startup */
-	public void msgQueried() {
-		msg_queried = true;
 	}
 }

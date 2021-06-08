@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -523,13 +523,5 @@ class OpQueryMsg extends OpDms {
 					return this;
 			return null;
 		}
-	}
-
-	/** Cleanup the operation */
-	@Override
-	public void cleanup() {
-		if (isSuccess())
-			m_dms.msgQueried();
-		super.cleanup();
 	}
 }
