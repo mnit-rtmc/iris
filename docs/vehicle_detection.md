@@ -190,7 +190,7 @@ this data available on the web.
 
 Traffic data are stored in `/var/lib/iris/traffic`, in a directory with the
 [district] name.  Within that directory a new subdirectory is created for each
-year, with a 4-digit name (`1994`-`9999`).
+year, with a 4-digit name (*e.g.* `2021`).
 
 As data is collected, a new subdirectory is created every day — the name is
 8-digits: _year_ `1994`-`9999`, _month_ `01`-`12` and _day-of-month_ `01`-`31`.
