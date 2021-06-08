@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2019  Minnesota Department of Transportation
+ * Copyright (C) 2010-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ public class OpQueryConditions extends OpOrg815 {
 
 	/** Create a new operation to query conditions */
 	public OpQueryConditions(WeatherSensorImpl ws) {
-		super(PriorityLevel.DATA_30_SEC, ws);
+		super(PriorityLevel.SHORT_POLL, ws);
 	}
 
 	/** Create the second phase of the operation */

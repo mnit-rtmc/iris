@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ public class OpReadIncFeed extends OpController<IncFeedProperty> {
 
 	/** Create a new operation to read incident feed */
 	protected OpReadIncFeed(ControllerImpl c, IncidentCache ic) {
-		super(PriorityLevel.DATA_30_SEC, c);
+		super(PriorityLevel.SHORT_POLL, c);
 		cache = ic;
 	}
 

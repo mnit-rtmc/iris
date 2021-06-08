@@ -30,7 +30,7 @@ public class OpQueryEvents extends OpSS125 {
 
 	/** Create a new "query events" operation */
 	public OpQueryEvents(ControllerImpl c) {
-		super(PriorityLevel.DATA_30_SEC, c);
+		super(PriorityLevel.SHORT_POLL, c);
 		setSuccess(false);
 	}
 

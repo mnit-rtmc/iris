@@ -33,7 +33,7 @@ public class OpQueryEventSamples extends OpCanoga {
 
 	/** Create a new operation to query detector event samples */
 	public OpQueryEventSamples(ControllerImpl c) {
-		super(PriorityLevel.DATA_5_MIN, c);
+		super(PriorityLevel.LONG_POLL, c);
 		setSuccess(false);
 	}
 
