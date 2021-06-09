@@ -291,12 +291,15 @@ fn parse_date(date: &str) -> Result<NaiveDate> {
     Err(Error::InvalidDate)
 }
 
+/// Max age for caching resources (100 weeks)
+const MAX_AGE: u64 = 100 * 7 * 24 * 60 * 60;
+
 /// Get max age for cache control heder
 fn max_age(date: &str) -> Option<u64> {
     if let Ok(date) = parse_date(date) {
         let today = Local::today().naive_local();
         if today > date + Duration::days(2) {
-            Some(7 * 24 * 60 * 60)
+            Some(MAX_AGE)
         } else {
             Some(30)
         }
