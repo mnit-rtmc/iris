@@ -965,7 +965,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set the user selected sign message to null, without sending
 	 *  anything to the sign. */
-	private void setMsgUserNull() {
+	public void setMsgUserNull() {
 		try {
 			store.update(this, "msg_user", null);
 			setMsgUser(null);

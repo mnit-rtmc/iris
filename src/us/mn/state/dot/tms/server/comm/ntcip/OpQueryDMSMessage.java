@@ -95,9 +95,9 @@ public class OpQueryDMSMessage extends OpDMS {
 			.isOperatorExpiring(dms.getMsgCurrent());
 		SignMessage sm = dms.createMsgBlank();
 		setMsgCurrent(sm, (oper_expire) ? "EXPIRED" : "FIELD BLANK");
-		/* User msg just expired -- set it to blank */
+		/* User msg just expired -- set it to null */
 		if (oper_expire)
-			dms.setMsgUser(sm);
+			dms.setMsgUserNull();
 		return null;
 	}
 
@@ -229,12 +229,9 @@ public class OpQueryDMSMessage extends OpDMS {
 
 	/** Set the current message on the sign */
 	private void setMsgCurrent(SignMessage sm, String owner) {
-		if (sm != null) {
+		if (sm != null)
 			dms.setMsgCurrentNotify(sm, owner);
-			/* IRIS may have restarted -- recover user msg */
-			if (sm.getSource() == SignMsgSource.operator.bit())
-				dms.setMsgUser(sm);
-		} else
+		else
 			setErrorStatus("MSG RENDER FAILED");
 	}
 }
