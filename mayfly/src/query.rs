@@ -700,23 +700,24 @@ impl<T: TrafficData> TrafficQuery<T> {
 
     /// Lookup archived data from 30-second binned data
     async fn lookup_binned(&self) -> Result<Body> {
-        let is_filtered = self.filter().is_filtered();
-        let data = match self.read_binned_zip() {
-            Ok(data) => data,
-            Err(_) => self.read_binned_file().await?,
-        };
-        let mut body = Body::default().with_max_age(max_age(&self.date));
-        if is_filtered {
-            // Cannot filter by length/speed when already binned
+        // Cannot filter by length/speed when already binned
+        if self.filter().is_filtered() {
+            let mut body = Body::default().with_max_age(Some(MAX_AGE));
             for _ in 0..2880 {
                 body.push("null");
             }
+            Ok(body)
         } else {
+            let data = match self.read_binned_zip() {
+                Ok(data) => data,
+                Err(_) => self.read_binned_file().await?,
+            };
+            let mut body = Body::default().with_max_age(max_age(&self.date));
             for val in data.chunks_exact(T::bin_bytes()) {
                 body.push(&T::unpack(val));
             }
+            Ok(body)
         }
-        Ok(body)
     }
 
     /// Read binned data from a zip file
