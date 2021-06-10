@@ -131,6 +131,13 @@ pub struct SpeedData {
     count: u32,
 }
 
+/// Binned headway data
+#[derive(Clone, Copy, Default)]
+pub struct HeadwayData {
+    total: u32,
+    count: u32,
+}
+
 /// Binned occupancy data
 #[derive(Clone, Copy, Default)]
 pub struct OccupancyData {
@@ -509,6 +516,31 @@ impl TrafficData for SpeedData {
         if self.count > 0 {
             let speed = (self.total as f32 / self.count as f32).round();
             format!("{}", speed as u32)
+        } else {
+            "null".to_owned()
+        }
+    }
+}
+
+impl TrafficData for HeadwayData {
+    /// Binned file extension
+    fn binned_ext() -> &'static str {
+        "h30"
+    }
+
+    /// Add a vehicle to headway data
+    fn vehicle(&mut self, veh: &VehicleEvent) {
+        if let Some(headway) = veh.headway {
+            self.total += headway;
+            self.count += 1;
+        }
+    }
+
+    /// Get headway data value as JSON
+    fn as_json(&self) -> String {
+        if self.count > 0 {
+            let headway = (self.total as f32 / self.count as f32).round();
+            format!("{}", headway as u32)
         } else {
             "null".to_owned()
         }

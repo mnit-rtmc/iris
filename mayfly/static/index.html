@@ -51,6 +51,10 @@
     <td>Speed data (mph) for one detector on a given date</td>
   </tr>
   <tr>
+    <td class="path">/mayfly/headway</td>
+    <td>Headway data (ms) for one detector on a given date</td>
+  </tr>
+  <tr>
     <td class="path">/mayfly/occupancy</td>
     <td>Occupancy data (%) for one detector on a given date</td>
   </tr>
@@ -232,6 +236,29 @@
 <table>
   <tr>
     <th>Path</th>
+    <td class="path" colspan="2">/mayfly/headway</td>
+  </tr>
+  <tr>
+    <th rowspan="4">Query Params</th>
+    <td>district</td><td class="example">default tms</td>
+  </tr>
+  <tr>
+    <td>date</td><td class="example">8 digits yyyyMMdd</td>
+  </tr>
+  <tr>
+    <td>detector</td><td class="example">identifier</td>
+  </tr>
+  <tr>
+    <th>Example URI</th>
+    <td class="example" colspan="2">/mayfly/headway?date=20210225&amp;detector=363</td>
+  </tr>
+</table>
+
+<hr>
+
+<table>
+  <tr>
+    <th>Path</th>
     <td class="path" colspan="2">/mayfly/occupancy</td>
   </tr>
   <tr>
@@ -281,6 +308,7 @@
 <ul>
     <li class="path">/mayfly/counts</li>
     <li class="path">/mayfly/speed</li>
+    <li class="path">/mayfly/headway</li>
     <li class="path">/mayfly/occupancy</li>
     <li class="path">/mayfly/length</li>
 </ul>
