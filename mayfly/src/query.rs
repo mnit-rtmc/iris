@@ -171,6 +171,10 @@ pub struct TrafficQuery<T: TrafficData> {
     speed_mph_min: Option<u32>,
     /// Maximum recorded speed (logged vehicles)
     speed_mph_max: Option<u32>,
+    /// Minimum headway (logged vehicles)
+    headway_sec_min: Option<f32>,
+    /// Maximum headway (logged vehicles)
+    headway_sec_max: Option<f32>,
     /// Binning interval (TODO)
     _bin_secs: Option<u32>,
 }
@@ -697,6 +701,8 @@ impl<T: TrafficData> TrafficQuery<T> {
             .with_length_ft_max(self.length_ft_max)
             .with_speed_mph_min(self.speed_mph_min)
             .with_speed_mph_max(self.speed_mph_max)
+            .with_headway_sec_min(self.headway_sec_min)
+            .with_headway_sec_max(self.headway_sec_max)
     }
 
     /// Get vehicle log file name

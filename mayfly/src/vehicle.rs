@@ -68,6 +68,12 @@ pub struct VehicleFilter {
 
     /// Maximum vehicle speed (mph)
     speed_mph_max: Option<u32>,
+
+    /// Minimum headway (ms)
+    headway_ms_min: Option<u32>,
+
+    /// Maximum headway (ms)
+    headway_ms_max: Option<u32>,
 }
 
 /// Vehicle event data binning
@@ -341,6 +347,18 @@ impl VehicleFilter {
         self
     }
 
+    /// Set minimum headway (sec)
+    pub fn with_headway_sec_min(mut self, m: Option<f32>) -> Self {
+        self.headway_ms_min = m.map(sec_to_ms);
+        self
+    }
+
+    /// Set maximum headway (sec)
+    pub fn with_headway_sec_max(mut self, m: Option<f32>) -> Self {
+        self.headway_ms_max = m.map(sec_to_ms);
+        self
+    }
+
     /// Check if vehicle should be binned
     fn check(&self, veh: &VehicleEvent) -> bool {
         if let Some(m) = self.length_ft_min {
@@ -367,8 +385,25 @@ impl VehicleFilter {
                 return false;
             }
         }
+        if let Some(m) = self.headway_ms_min {
+            // use 0 for unknown headway
+            if veh.headway.unwrap_or(0) < m {
+                return false;
+            }
+        }
+        if let Some(m) = self.headway_ms_max {
+            // use MAX value for unknown headway
+            if veh.headway.unwrap_or(u32::MAX) >= m {
+                return false;
+            }
+        }
         true
     }
+}
+
+/// Convert a value in seconds to milliseconds
+fn sec_to_ms(m: f32) -> u32 {
+    (m * 1000.0).round() as u32
 }
 
 impl<T: TrafficData> Bin<T> {
