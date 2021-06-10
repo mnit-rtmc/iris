@@ -83,7 +83,9 @@ pub trait TrafficData: Default {
     fn binned_ext() -> &'static str;
 
     /// Number of bytes per binned value
-    fn bin_bytes() -> usize;
+    fn bin_bytes() -> usize {
+        1
+    }
 
     /// Check binned data length
     fn check_len(len: u64) -> Result<()> {
@@ -106,7 +108,7 @@ pub trait TrafficData: Default {
     }
 
     /// Set reset for traffic data
-    fn reset(&mut self);
+    fn reset(&mut self) {}
 
     /// Add a vehicle to traffic data
     fn vehicle(&mut self, veh: &VehicleEvent);
@@ -468,11 +470,6 @@ impl TrafficData for CountData {
         "v30"
     }
 
-    /// Number of bytes per binned value
-    fn bin_bytes() -> usize {
-        1
-    }
-
     /// Set reset for count data
     fn reset(&mut self) {
         self.reset = true;
@@ -498,14 +495,6 @@ impl TrafficData for SpeedData {
     fn binned_ext() -> &'static str {
         "s30"
     }
-
-    /// Number of bytes per binned value
-    fn bin_bytes() -> usize {
-        1
-    }
-
-    /// Set reset for speed data
-    fn reset(&mut self) {}
 
     /// Add a vehicle to speed data
     fn vehicle(&mut self, veh: &VehicleEvent) {
@@ -585,21 +574,6 @@ impl TrafficData for LengthData {
     fn binned_ext() -> &'static str {
         "L30"
     }
-
-    /// Number of bytes per binned value
-    fn bin_bytes() -> usize {
-        1
-    }
-
-    /// Unpack one binned value
-    fn unpack(val: &[u8]) -> String {
-        assert_eq!(val.len(), Self::bin_bytes());
-        // There is no binned length format!
-        "null".to_owned()
-    }
-
-    /// Set reset for length data
-    fn reset(&mut self) {}
 
     /// Add a vehicle to length data
     fn vehicle(&mut self, veh: &VehicleEvent) {
