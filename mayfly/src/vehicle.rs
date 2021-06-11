@@ -14,24 +14,25 @@
 //
 use crate::common::{Error, Result};
 use crate::query::TrafficData;
+use std::num::NonZeroU32;
 
 /// Single logged vehicle event
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct VehicleEvent {
     /// Duration vehicle was detected (ms)
-    pub duration: Option<u32>,
+    duration: Option<NonZeroU32>,
 
     /// Headway from start of previous vehicle to this one (ms)
-    pub headway: Option<u32>,
+    headway: Option<NonZeroU32>,
 
     /// Time stamp (ms of day; 0 - 86.4 million)
-    pub stamp: Option<u32>,
+    stamp: Option<u32>,
 
     /// Vehicle speed (mph)
-    pub speed: Option<u32>,
+    speed: Option<NonZeroU32>,
 
     /// Vehicle length (ft)
-    pub length: Option<u32>,
+    length: Option<NonZeroU32>,
 }
 
 /// Event from vehicle log
@@ -85,10 +86,10 @@ pub struct Bin<T: TrafficData> {
     periods: Vec<T>,
 }
 
-/// Parse an integer from a vehicle log
-fn parse_u32(v: &str) -> Result<u32> {
+/// Parse a non-zero integer from a vehicle log
+fn parse_non_zero_u32(v: &str) -> Result<NonZeroU32> {
     match v.parse() {
-        Ok(v) => Ok(v),
+        Ok(i) => Ok(i),
         _ => Err(Error::InvalidData),
     }
 }
@@ -133,7 +134,7 @@ impl VehicleEvent {
         match val.next() {
             Some(dur) => {
                 if dur != "?" {
-                    veh.duration = Some(parse_u32(dur)?);
+                    veh.duration = Some(parse_non_zero_u32(dur)?);
                 }
             }
             None => return Err(Error::InvalidData),
@@ -141,7 +142,7 @@ impl VehicleEvent {
         match val.next() {
             Some(hdw) => {
                 if hdw != "?" {
-                    veh.headway = Some(parse_u32(hdw)?);
+                    veh.headway = Some(parse_non_zero_u32(hdw)?);
                 }
             }
             None => return Err(Error::InvalidData),
@@ -153,12 +154,12 @@ impl VehicleEvent {
         }
         if let Some(speed) = val.next() {
             if !speed.is_empty() {
-                veh.speed = Some(parse_u32(speed)?);
+                veh.speed = Some(parse_non_zero_u32(speed)?);
             }
         }
         if let Some(length) = val.next() {
             if !length.is_empty() {
-                veh.length = Some(parse_u32(length)?);
+                veh.length = Some(parse_non_zero_u32(length)?);
             }
         }
         Ok(veh)
@@ -166,7 +167,7 @@ impl VehicleEvent {
 
     /// Get a (near) time stamp for the previous vehicle event
     fn previous(&self) -> Option<u32> {
-        if let (Some(headway), Some(stamp)) = (self.headway, self.stamp) {
+        if let (Some(headway), Some(stamp)) = (self.headway(), self.stamp) {
             if stamp >= headway {
                 return Some(stamp - headway);
             }
@@ -176,13 +177,33 @@ impl VehicleEvent {
 
     /// Set time stamp or headway from previous stamp
     fn set_previous(&mut self, st: u32) {
-        match (self.headway, self.stamp) {
+        match (self.headway(), self.stamp) {
             (Some(headway), None) => self.stamp = Some(st + headway),
             (None, Some(stamp)) if stamp >= st => {
-                self.headway = Some(stamp - st)
+                self.headway = NonZeroU32::new(stamp - st)
             }
             _ => (),
         }
+    }
+
+    /// Get the duration (ms)
+    pub fn duration(&self) -> Option<u32> {
+        self.duration.map(|d| d.get())
+    }
+
+    /// Get the headway (ms)
+    pub fn headway(&self) -> Option<u32> {
+        self.headway.map(|h| h.get())
+    }
+
+    /// Get the speed (mph)
+    pub fn speed(&self) -> Option<u32> {
+        self.speed.map(|s| s.get())
+    }
+
+    /// Get the length (ft)
+    pub fn length(&self) -> Option<u32> {
+        self.length.map(|f| f.get())
     }
 }
 
@@ -284,7 +305,7 @@ impl Log {
                         for j in b..i {
                             if let Event::Vehicle(v) = &mut self.events[j + 1] {
                                 if v.headway.is_none() {
-                                    v.headway = Some(headway);
+                                    v.headway = NonZeroU32::new(headway);
                                 }
                                 v.set_previous(st);
                             }
@@ -363,37 +384,37 @@ impl VehicleFilter {
     fn check(&self, veh: &VehicleEvent) -> bool {
         if let Some(m) = self.length_ft_min {
             // use 0 for unknown length
-            if veh.length.unwrap_or(0) < m {
+            if veh.length().unwrap_or(0) < m {
                 return false;
             }
         }
         if let Some(m) = self.length_ft_max {
             // use MAX value for unknown length
-            if veh.length.unwrap_or(u32::MAX) >= m {
+            if veh.length().unwrap_or(u32::MAX) >= m {
                 return false;
             }
         }
         if let Some(m) = self.speed_mph_min {
             // use 0 for unknown speed
-            if veh.speed.unwrap_or(0) < m {
+            if veh.speed().unwrap_or(0) < m {
                 return false;
             }
         }
         if let Some(m) = self.speed_mph_max {
             // use MAX value for unknown speed
-            if veh.speed.unwrap_or(u32::MAX) >= m {
+            if veh.speed().unwrap_or(u32::MAX) >= m {
                 return false;
             }
         }
         if let Some(m) = self.headway_ms_min {
             // use 0 for unknown headway
-            if veh.headway.unwrap_or(0) < m {
+            if veh.headway().unwrap_or(0) < m {
                 return false;
             }
         }
         if let Some(m) = self.headway_ms_max {
             // use MAX value for unknown headway
-            if veh.headway.unwrap_or(u32::MAX) >= m {
+            if veh.headway().unwrap_or(u32::MAX) >= m {
                 return false;
             }
         }
@@ -472,24 +493,24 @@ mod test {
     fn veh_events() {
         let mut veh = VehicleEvent::default();
         assert_eq!(VehicleEvent::new("?,?").unwrap(), veh);
-        veh.duration = Some(37);
+        veh.duration = NonZeroU32::new(37);
         assert_eq!(VehicleEvent::new("37,?").unwrap(), veh);
         let mut veh = VehicleEvent::default();
-        veh.headway = Some(666);
+        veh.headway = NonZeroU32::new(666);
         assert_eq!(VehicleEvent::new("?,666").unwrap(), veh);
         let mut veh = VehicleEvent::default();
-        veh.duration = Some(55);
+        veh.duration = NonZeroU32::new(55);
         veh.stamp = Some(45_296_000);
         assert_eq!(VehicleEvent::new("55,?,12:34:56").unwrap(), veh);
         let mut veh = VehicleEvent::default();
-        veh.duration = Some(74);
-        veh.headway = Some(1234);
-        veh.speed = Some(61);
+        veh.duration = NonZeroU32::new(74);
+        veh.headway = NonZeroU32::new(1234);
+        veh.speed = NonZeroU32::new(61);
         assert_eq!(VehicleEvent::new("74,1234,,61").unwrap(), veh);
         let mut veh = VehicleEvent::default();
-        veh.duration = Some(1);
-        veh.headway = Some(4321);
-        veh.length = Some(19);
+        veh.duration = NonZeroU32::new(1);
+        veh.headway = NonZeroU32::new(4321);
+        veh.length = NonZeroU32::new(19);
         assert_eq!(VehicleEvent::new("1,4321,,,19").unwrap(), veh);
     }
 
@@ -515,7 +536,7 @@ mod test {
         assert_eq!(Event::new("\t*  ").unwrap(), ev);
         assert_eq!(Event::new("*\n").unwrap(), ev);
         let mut veh = VehicleEvent::default();
-        veh.duration = Some(37);
+        veh.duration = NonZeroU32::new(37);
         let ev = Event::Vehicle(veh);
         assert_eq!(Event::new("37,?").unwrap(), ev);
     }
@@ -543,71 +564,63 @@ mod test {
         log.finish();
         assert_eq!(log.events[0], Event::Reset);
         let mut veh = VehicleEvent::default();
-        veh.duration = Some(296);
-        veh.headway = Some(9930);
+        veh.duration = NonZeroU32::new(296);
+        veh.headway = NonZeroU32::new(9930);
         veh.stamp = Some(64_176_000);
         assert_eq!(log.events[1], Event::Vehicle(veh));
         let mut veh = VehicleEvent::default();
-        veh.duration = Some(231);
-        veh.headway = Some(14_069);
+        veh.duration = NonZeroU32::new(231);
+        veh.headway = NonZeroU32::new(14_069);
         veh.stamp = Some(64_190_069);
         assert_eq!(log.events[2], Event::Vehicle(veh));
         let mut veh = VehicleEvent::default();
-        veh.duration = Some(240);
-        veh.headway = Some(453);
+        veh.duration = NonZeroU32::new(240);
+        veh.headway = NonZeroU32::new(453);
         veh.stamp = Some(64_190_522);
-        veh.speed = Some(45);
-        veh.length = Some(18);
+        veh.speed = NonZeroU32::new(45);
+        veh.length = NonZeroU32::new(18);
         assert_eq!(log.events[3], Event::Vehicle(veh));
         let mut veh = VehicleEvent::default();
-        veh.duration = Some(496);
-        veh.headway = Some(23_510);
+        veh.duration = NonZeroU32::new(496);
+        veh.headway = NonZeroU32::new(23_510);
         veh.stamp = Some(64_214_032);
-        veh.speed = Some(53);
-        veh.length = Some(62);
+        veh.speed = NonZeroU32::new(53);
+        veh.length = NonZeroU32::new(62);
         assert_eq!(log.events[4], Event::Vehicle(veh));
         let mut veh = VehicleEvent::default();
-        veh.duration = Some(259);
-        veh.headway = Some(1321);
+        veh.duration = NonZeroU32::new(259);
+        veh.headway = NonZeroU32::new(1321);
         veh.stamp = Some(64_215_353);
         assert_eq!(log.events[5], Event::Vehicle(veh));
         let mut veh = VehicleEvent::default();
-        veh.headway = Some(4004);
+        veh.headway = NonZeroU32::new(4004);
         veh.stamp = Some(64_219_357);
         assert_eq!(log.events[6], Event::Vehicle(veh));
         let mut veh = VehicleEvent::default();
-        veh.duration = Some(249);
-        veh.headway = Some(4004);
+        veh.duration = NonZeroU32::new(249);
+        veh.headway = NonZeroU32::new(4004);
         veh.stamp = Some(64_223_362);
         assert_eq!(log.events[7], Event::Vehicle(veh));
         let mut veh = VehicleEvent::default();
-        veh.duration = Some(323);
-        veh.headway = Some(4638);
+        veh.duration = NonZeroU32::new(323);
+        veh.headway = NonZeroU32::new(4638);
         veh.stamp = Some(64_228_000);
         assert_eq!(log.events[8], Event::Vehicle(veh));
         let mut veh = VehicleEvent::default();
-        veh.duration = Some(258);
-        veh.headway = Some(5967);
+        veh.duration = NonZeroU32::new(258);
+        veh.headway = NonZeroU32::new(5967);
         veh.stamp = Some(64_233_967);
-        veh.speed = Some(55);
+        veh.speed = NonZeroU32::new(55);
         assert_eq!(log.events[9], Event::Vehicle(veh));
         let mut veh = VehicleEvent::default();
-        veh.duration = Some(111);
-        veh.headway = Some(1542);
+        veh.duration = NonZeroU32::new(111);
+        veh.headway = NonZeroU32::new(1542);
         veh.stamp = Some(64_235_509);
         assert_eq!(log.events[10], Event::Vehicle(veh));
         let mut veh = VehicleEvent::default();
-        veh.duration = Some(304);
-        veh.headway = Some(12_029);
+        veh.duration = NonZeroU32::new(304);
+        veh.headway = NonZeroU32::new(12_029);
         veh.stamp = Some(64_247_538);
         assert_eq!(log.events[11], Event::Vehicle(veh));
-    }
-
-    #[test]
-    fn log_bad() {
-        let mut log = Log::default();
-        assert!(log.append("296,9930,17:49:36").is_ok());
-        assert!(log.append("231,1234,17:45:00").is_err());
-        log.finish();
     }
 }

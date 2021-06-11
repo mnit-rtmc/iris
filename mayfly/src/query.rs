@@ -509,7 +509,7 @@ impl TrafficData for SpeedData {
 
     /// Add a vehicle to speed data
     fn vehicle(&mut self, veh: &VehicleEvent) {
-        if let Some(speed) = veh.speed {
+        if let Some(speed) = veh.speed() {
             self.total += speed;
             self.count += 1;
         }
@@ -534,7 +534,7 @@ impl TrafficData for HeadwayData {
 
     /// Add a vehicle to headway data
     fn vehicle(&mut self, veh: &VehicleEvent) {
-        if let Some(headway) = veh.headway {
+        if let Some(headway) = veh.headway() {
             self.total += headway;
             self.count += 1;
         }
@@ -583,7 +583,7 @@ impl TrafficData for OccupancyData {
 
     /// Add a vehicle to occupancy data
     fn vehicle(&mut self, veh: &VehicleEvent) {
-        if let Some(duration) = veh.duration {
+        if let Some(duration) = veh.duration() {
             self.duration += duration;
         }
     }
@@ -613,7 +613,7 @@ impl TrafficData for LengthData {
 
     /// Add a vehicle to length data
     fn vehicle(&mut self, veh: &VehicleEvent) {
-        if let Some(length) = veh.length {
+        if let Some(length) = veh.length() {
             self.total += length;
             self.count += 1;
         }
