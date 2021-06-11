@@ -451,7 +451,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		if (objectEquals(s, station_id))
 			return;
 		if (s != null && !isStationIdValid(s))
-			throw new ChangeVetoException("Invalid Station ID");
+			throw new ChangeVetoException("Format: S1, S100, ...");
 		store.update(this, "station_id", s);
 		StationImpl stat = createStation(s);
 		updateStation(station, stat);
