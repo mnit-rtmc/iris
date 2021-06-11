@@ -19,14 +19,14 @@ use std::num::NonZeroU32;
 /// Single logged vehicle event
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct VehicleEvent {
-    /// Duration vehicle was detected (ms)
-    duration: Option<NonZeroU32>,
+    /// Time stamp (ms of day; 0 - 86.4 million)
+    stamp: Option<u32>,
 
     /// Headway from start of previous vehicle to this one (ms)
     headway: Option<NonZeroU32>,
 
-    /// Time stamp (ms of day; 0 - 86.4 million)
-    stamp: Option<u32>,
+    /// Duration vehicle was detected (ms)
+    duration: Option<NonZeroU32>,
 
     /// Vehicle speed (mph)
     speed: Option<NonZeroU32>,
@@ -37,7 +37,7 @@ pub struct VehicleEvent {
 
 /// Event from vehicle log
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum Event {
+enum Event {
     /// Collection data reset
     Reset,
     /// Vehicle event
@@ -46,7 +46,7 @@ pub enum Event {
 
 /// Vehicle event log for one detector on one day
 #[derive(Default)]
-pub struct Log {
+pub struct EventLog {
     /// All events in the log
     events: Vec<Event>,
     /// Previous event time stamp
@@ -236,7 +236,7 @@ impl Event {
     }
 }
 
-impl Log {
+impl EventLog {
     /// Append an event to the log
     pub fn append(&mut self, line: &str) -> Result<()> {
         let line = line.trim();
@@ -539,6 +539,7 @@ mod test {
         veh.duration = NonZeroU32::new(37);
         let ev = Event::Vehicle(veh);
         assert_eq!(Event::new("37,?").unwrap(), ev);
+        assert_eq!(std::mem::size_of::<Event>(), 24);
     }
 
     const LOG: &str = "*
@@ -557,7 +558,7 @@ mod test {
 
     #[test]
     fn log() {
-        let mut log = Log::default();
+        let mut log = EventLog::default();
         for line in LOG.split('\n') {
             log.append(line).unwrap();
         }

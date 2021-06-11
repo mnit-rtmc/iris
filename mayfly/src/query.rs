@@ -13,7 +13,7 @@
 // GNU General Public License for more details.
 //
 use crate::common::{Body, Error, Result};
-use crate::vehicle::{self, VehicleEvent, VehicleFilter};
+use crate::vehicle::{EventLog, VehicleEvent, VehicleFilter};
 use async_std::fs::{read_dir, File};
 use async_std::io::{BufReader, ReadExt};
 use async_std::path::{Path, PathBuf};
@@ -662,7 +662,7 @@ impl<T: TrafficData> TrafficQuery<T> {
                 let name = self.vlog_file_name();
                 if let Ok(zf) = zip.by_name(&name) {
                     log::info!("opened {} in {}.{}", name, self.date, EXT);
-                    let mut log = vehicle::Log::default();
+                    let mut log = EventLog::default();
                     for line in std::io::BufReader::new(zf).lines() {
                         log.append(&line?)?;
                     }
@@ -681,7 +681,7 @@ impl<T: TrafficData> TrafficQuery<T> {
         path.push(self.vlog_file_name());
         if let Ok(file) = File::open(&path).await {
             log::info!("opened {:?}", &path);
-            let mut log = vehicle::Log::default();
+            let mut log = EventLog::default();
             let mut lines = BufReader::new(file).lines();
             while let Some(line) = lines.next().await {
                 log.append(&line?)?;
