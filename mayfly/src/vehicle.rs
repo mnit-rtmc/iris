@@ -17,14 +17,15 @@ use crate::query::TrafficData;
 use std::num::{NonZeroU16, NonZeroU32, NonZeroU8};
 use std::str::FromStr;
 
+/// Time stamp
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct Stamp(u32);
+
 /// Single logged vehicle event
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct VehicleEvent {
-    /// Reset flag
-    reset: bool,
-
-    /// Time stamp (ms of day; 0 - 86.4 million)
-    stamp: Option<u32>,
+    /// Time stamp
+    stamp: Stamp,
 
     /// Headway from start of previous vehicle to this one (ms)
     headway: Option<NonZeroU32>,
@@ -106,18 +107,67 @@ fn parse_min_sec(min_sec: &str) -> Result<u32> {
 }
 
 /// Parse a time stamp from a vehicle log
-fn parse_stamp(stamp: &str) -> Result<u32> {
-    if stamp.len() == 8
-        && stamp.get(2..3) == Some(":")
-        && stamp.get(5..6) == Some(":")
-    {
-        let hour = parse_hour(stamp.get(..2).unwrap_or(""))?;
-        let minute = parse_min_sec(stamp.get(3..5).unwrap_or(""))?;
-        let second = parse_min_sec(stamp.get(6..).unwrap_or(""))?;
-        let sec = hour * 3600 + minute * 60 + second;
-        Ok(sec * 1000)
-    } else {
-        Err(Error::InvalidData)
+impl FromStr for Stamp {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        if s.len() == 8
+            && s.get(2..3) == Some(":")
+            && s.get(5..6) == Some(":")
+        {
+            let hour = parse_hour(s.get(..2).unwrap_or(""))?;
+            let minute = parse_min_sec(s.get(3..5).unwrap_or(""))?;
+            let second = parse_min_sec(s.get(6..).unwrap_or(""))?;
+            let sec = hour * 3600 + minute * 60 + second;
+            Stamp::new(sec * 1000)
+        } else {
+            Err(Error::InvalidData)
+        }
+    }
+}
+
+impl Default for Stamp {
+    fn default() -> Self {
+        Stamp(Stamp::NONE)
+    }
+}
+
+impl Stamp {
+    const MIDNIGHT: u32 = 24 * 60 * 60 * 1000;
+    const NONE: u32 = u32::MAX;
+    const RESET: u32 = u32::MAX - 1;
+
+    /// Create a new time stamp
+    fn new(value: u32) -> Result<Self> {
+        if value < Stamp::MIDNIGHT {
+            Ok(Stamp(value))
+        } else {
+            Err(Error::InvalidData)
+        }
+    }
+
+    /// Create a new reset stamp
+    fn new_reset() -> Self {
+        Stamp(Stamp::RESET)
+    }
+
+    /// Check for reset
+    fn is_reset(self) -> bool {
+        self.0 == Stamp::RESET
+    }
+
+    /// Check for none
+    fn is_none(self) -> bool {
+        self.0 == Stamp::NONE
+    }
+
+    /// Get time stamp
+    fn stamp(self) -> Option<u32> {
+        if self.0 < Stamp::MIDNIGHT {
+            Some(self.0)
+        } else {
+            None
+        }
     }
 }
 
@@ -126,7 +176,7 @@ impl VehicleEvent {
     /// Create a new reset event
     fn new_reset() -> Self {
         let mut ev = Self::default();
-        ev.reset = true;
+        ev.stamp = Stamp::new_reset();
         ev
     }
 
@@ -156,7 +206,7 @@ impl VehicleEvent {
         }
         if let Some(stamp) = val.next() {
             if !stamp.is_empty() {
-                ev.stamp = Some(parse_stamp(stamp)?);
+                ev.stamp = stamp.parse()?;
             }
         }
         if let Some(speed) = val.next() {
@@ -174,7 +224,9 @@ impl VehicleEvent {
 
     /// Set the stamp
     pub fn with_stamp(mut self, stamp: u32) -> Self {
-        self.stamp = Some(stamp);
+        if let Ok(stamp) = Stamp::new(stamp) {
+            self.stamp = stamp;
+        }
         self
     }
 
@@ -204,23 +256,27 @@ impl VehicleEvent {
 
     /// Check for reset event
     fn is_reset(&self) -> bool {
-        self.reset
+        self.stamp.is_reset()
     }
 
     /// Get a (near) time stamp for the previous vehicle event
-    fn previous(&self) -> Option<u32> {
+    fn previous(&self) -> Stamp {
         if let (Some(headway), Some(stamp)) = (self.headway(), self.stamp()) {
             if stamp >= headway {
-                return Some(stamp - headway);
+                if let Ok(stamp) = Stamp::new(stamp - headway) {
+                    return stamp;
+                }
             }
         }
-        None
+        Stamp::default()
     }
 
     /// Set time stamp or headway from previous stamp
     fn set_previous(&mut self, st: u32) {
         match (self.headway(), self.stamp()) {
-            (Some(headway), None) => self.stamp = Some(st + headway),
+            (Some(headway), None) => {
+                self.stamp = Stamp::new(st + headway).unwrap();
+            }
             (None, Some(stamp)) if stamp >= st => {
                 self.headway = NonZeroU32::new(stamp - st)
             }
@@ -239,11 +295,7 @@ impl VehicleEvent {
 
     /// Get event time stamp
     fn stamp(&self) -> Option<u32> {
-        if self.is_reset() {
-            None
-        } else {
-            self.stamp
-        }
+        self.stamp.stamp()
     }
 
     /// Get the duration (ms)
@@ -301,11 +353,11 @@ impl EventLog {
 
     /// Propogate timestamps backward to previous events
     fn propogate_backward(&mut self) {
-        let mut stamp = None;
+        let mut stamp = Stamp::default();
         let mut it = self.events.iter_mut();
         while let Some(ev) = it.next_back() {
             if ev.is_reset() {
-                stamp = None;
+                stamp = Stamp::default();
             } else {
                 if ev.stamp.is_none() {
                     ev.stamp = stamp;
@@ -563,7 +615,7 @@ mod test {
         assert_eq!(VehicleEvent::new("*\n").unwrap(), ev);
         let ev = VehicleEvent::default().with_duration(37);
         assert_eq!(VehicleEvent::new("37,?").unwrap(), ev);
-        assert_eq!(std::mem::size_of::<VehicleEvent>(), 20);
+        assert_eq!(std::mem::size_of::<VehicleEvent>(), 12);
     }
 
     const LOG: &str = "*
