@@ -111,9 +111,7 @@ impl FromStr for Stamp {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self> {
-        if s.len() == 8
-            && s.get(2..3) == Some(":")
-            && s.get(5..6) == Some(":")
+        if s.len() == 8 && s.get(2..3) == Some(":") && s.get(5..6) == Some(":")
         {
             let hour = parse_hour(s.get(..2).unwrap_or(""))?;
             let minute = parse_min_sec(s.get(3..5).unwrap_or(""))?;
@@ -133,8 +131,13 @@ impl Default for Stamp {
 }
 
 impl Stamp {
+    /// Valid time stamps range from 0 to MIDNIGHT
     const MIDNIGHT: u32 = 24 * 60 * 60 * 1000;
+
+    /// Value indicating missing time stamp
     const NONE: u32 = u32::MAX;
+
+    /// Value indicating logging reset event
     const RESET: u32 = u32::MAX - 1;
 
     /// Create a new time stamp
@@ -161,7 +164,7 @@ impl Stamp {
         self.0 == Stamp::NONE
     }
 
-    /// Get time stamp
+    /// Get time stamp, if valid
     fn stamp(self) -> Option<u32> {
         if self.0 < Stamp::MIDNIGHT {
             Some(self.0)
@@ -571,26 +574,35 @@ mod test {
 
     #[test]
     fn veh_events() {
-        let ev = VehicleEvent::default();
-        assert_eq!(VehicleEvent::new("?,?").unwrap(), ev);
-        let ev = VehicleEvent::default().with_duration(37);
-        assert_eq!(VehicleEvent::new("37,?").unwrap(), ev);
-        let ev = VehicleEvent::default().with_headway(666);
-        assert_eq!(VehicleEvent::new("?,666").unwrap(), ev);
-        let ev = VehicleEvent::default()
-            .with_stamp(45_296_000)
-            .with_duration(55);
-        assert_eq!(VehicleEvent::new("55,?,12:34:56").unwrap(), ev);
-        let ev = VehicleEvent::default()
-            .with_duration(74)
-            .with_headway(1234)
-            .with_speed(61);
-        assert_eq!(VehicleEvent::new("74,1234,,61").unwrap(), ev);
-        let ev = VehicleEvent::default()
-            .with_duration(1)
-            .with_headway(4321)
-            .with_length(19);
-        assert_eq!(VehicleEvent::new("1,4321,,,19").unwrap(), ev);
+        assert_eq!(VehicleEvent::new("?,?").unwrap(), VehicleEvent::default());
+        assert_eq!(
+            VehicleEvent::new("37,?").unwrap(),
+            VehicleEvent::default().with_duration(37)
+        );
+        assert_eq!(
+            VehicleEvent::new("?,666").unwrap(),
+            VehicleEvent::default().with_headway(666)
+        );
+        assert_eq!(
+            VehicleEvent::new("55,?,12:34:56").unwrap(),
+            VehicleEvent::default()
+                .with_stamp(45_296_000)
+                .with_duration(55)
+        );
+        assert_eq!(
+            VehicleEvent::new("74,1234,,61").unwrap(),
+            VehicleEvent::default()
+                .with_duration(74)
+                .with_headway(1234)
+                .with_speed(61)
+        );
+        assert_eq!(
+            VehicleEvent::new("1,4321,,,19").unwrap(),
+            VehicleEvent::default()
+                .with_duration(1)
+                .with_headway(4321)
+                .with_length(19)
+        );
     }
 
     #[test]
@@ -613,8 +625,10 @@ mod test {
         assert_eq!(VehicleEvent::new("*").unwrap(), ev);
         assert_eq!(VehicleEvent::new("\t*  ").unwrap(), ev);
         assert_eq!(VehicleEvent::new("*\n").unwrap(), ev);
-        let ev = VehicleEvent::default().with_duration(37);
-        assert_eq!(VehicleEvent::new("37,?").unwrap(), ev);
+        assert_eq!(
+            VehicleEvent::new("37,?").unwrap(),
+            VehicleEvent::default().with_duration(37)
+        );
         assert_eq!(std::mem::size_of::<VehicleEvent>(), 12);
     }
 
@@ -640,64 +654,86 @@ mod test {
         }
         log.finish();
         assert_eq!(log.events[0], VehicleEvent::new_reset());
-        let ev = VehicleEvent::default()
-            .with_stamp(64_176_000)
-            .with_duration(296)
-            .with_headway(9930);
-        assert_eq!(log.events[1], ev);
-        let ev = VehicleEvent::default()
-            .with_stamp(64_190_069)
-            .with_duration(231)
-            .with_headway(14_069);
-        assert_eq!(log.events[2], ev);
-        let ev = VehicleEvent::default()
-            .with_stamp(64_190_522)
-            .with_duration(240)
-            .with_headway(453)
-            .with_speed(45)
-            .with_length(18);
-        assert_eq!(log.events[3], ev);
-        let ev = VehicleEvent::default()
-            .with_stamp(64_214_032)
-            .with_duration(496)
-            .with_headway(23_510)
-            .with_speed(53)
-            .with_length(62);
-        assert_eq!(log.events[4], ev);
-        let ev = VehicleEvent::default()
-            .with_stamp(64_215_353)
-            .with_duration(259)
-            .with_headway(1321);
-        assert_eq!(log.events[5], ev);
-        let ev = VehicleEvent::default()
-            .with_stamp(64_219_357)
-            .with_headway(4004);
-        assert_eq!(log.events[6], ev);
-        let ev = VehicleEvent::default()
-            .with_stamp(64_223_362)
-            .with_duration(249)
-            .with_headway(4004);
-        assert_eq!(log.events[7], ev);
-        let ev = VehicleEvent::default()
-            .with_stamp(64_228_000)
-            .with_duration(323)
-            .with_headway(4638);
-        assert_eq!(log.events[8], ev);
-        let ev = VehicleEvent::default()
-            .with_stamp(64_233_967)
-            .with_duration(258)
-            .with_headway(5967)
-            .with_speed(55);
-        assert_eq!(log.events[9], ev);
-        let ev = VehicleEvent::default()
-            .with_stamp(64_235_509)
-            .with_duration(111)
-            .with_headway(1542);
-        assert_eq!(log.events[10], ev);
-        let ev = VehicleEvent::default()
-            .with_stamp(64_247_538)
-            .with_duration(304)
-            .with_headway(12_029);
-        assert_eq!(log.events[11], ev);
+        assert_eq!(
+            log.events[1],
+            VehicleEvent::default()
+                .with_stamp(64_176_000)
+                .with_duration(296)
+                .with_headway(9930)
+        );
+        assert_eq!(
+            log.events[2],
+            VehicleEvent::default()
+                .with_stamp(64_190_069)
+                .with_duration(231)
+                .with_headway(14_069)
+        );
+        assert_eq!(
+            log.events[3],
+            VehicleEvent::default()
+                .with_stamp(64_190_522)
+                .with_duration(240)
+                .with_headway(453)
+                .with_speed(45)
+                .with_length(18)
+        );
+        assert_eq!(
+            log.events[4],
+            VehicleEvent::default()
+                .with_stamp(64_214_032)
+                .with_duration(496)
+                .with_headway(23_510)
+                .with_speed(53)
+                .with_length(62)
+        );
+        assert_eq!(
+            log.events[5],
+            VehicleEvent::default()
+                .with_stamp(64_215_353)
+                .with_duration(259)
+                .with_headway(1321)
+        );
+        assert_eq!(
+            log.events[6],
+            VehicleEvent::default()
+                .with_stamp(64_219_357)
+                .with_headway(4004)
+        );
+        assert_eq!(
+            log.events[7],
+            VehicleEvent::default()
+                .with_stamp(64_223_362)
+                .with_duration(249)
+                .with_headway(4004)
+        );
+        assert_eq!(
+            log.events[8],
+            VehicleEvent::default()
+                .with_stamp(64_228_000)
+                .with_duration(323)
+                .with_headway(4638)
+        );
+        assert_eq!(
+            log.events[9],
+            VehicleEvent::default()
+                .with_stamp(64_233_967)
+                .with_duration(258)
+                .with_headway(5967)
+                .with_speed(55)
+        );
+        assert_eq!(
+            log.events[10],
+            VehicleEvent::default()
+                .with_stamp(64_235_509)
+                .with_duration(111)
+                .with_headway(1542)
+        );
+        assert_eq!(
+            log.events[11],
+            VehicleEvent::default()
+                .with_stamp(64_247_538)
+                .with_duration(304)
+                .with_headway(12_029)
+        );
     }
 }
