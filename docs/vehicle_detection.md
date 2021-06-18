@@ -4,6 +4,7 @@ Real time vehicle data is used for several purposes:
 - [Traffic maps](#traffic-layer)
 - [Travel time]s
 - [Ramp metering]
+- [Tolling] rate calculation
 - [Parking area] availability
 - [Variable speed advisories]
 
@@ -14,6 +15,31 @@ called **detectors**.
 Every 30 seconds, the most recent collected data from all online detectors is
 written to files.  An [XML file] called `det_sample.xml.gz` and a JSON file
 called `station_sample` are generated.
+
+## Traffic Data
+
+Detectors can collect several different types of data:
+
+- **Count**: The number of vehicles in a period of time
+- **Duration**: Interval of time a vehicle occupied a detector (ms)
+- **Occupancy**: Percentage of time period detector was occupied
+- **Speed**: Vehicle speed (mph)
+- **Headway**: Interval of time between the start of consecutive vehicles (ms)
+- **Length**: Physical length of vehicle (ft)
+
+Some data can be _derived_ from collected data:
+
+- **Flow**: Rate of vehicles travelling past a detector (vehicles per hour)
+- **Density**: The number of vehicles per mile in a segment of road (one lane)
+- **Speed**: If not collected, can be derived from flow divided by density
+
+**Flow** is calculated by multiplying vehicle count by the number of time
+periods in an hour.  For example, a count of 10 vehicles in 30 seconds equals
+a flow rate of 1200, because there are 120 periods of 30 seconds in an hour.
+
+**Density** can be derived by dividing **flow** (vehicles per hour) by **speed**
+(miles per hour).  For detectors which cannot collect speed data, density can
+be estimated using just **occupancy** and _field length_ (see below).
 
 ## Configuration
 
@@ -27,8 +53,9 @@ _right-to-left_, starting with the right lane as 1.  A **label** will be created
 from this information, including abbreviations of the [roads] associated with
 the [r_node].
 
-The **field length** of a detector determines how density and speed are
-estimated from counts and occupancy.  It is in units of feet.
+**Field length** (ft) is the detection "field" of an average vehicle.  It is
+used to derive density from occupancy, for detectors which cannot measure speed
+directly.
 
 If a detector is no longer used, it can be marked **abandoned**.
 
@@ -310,6 +337,7 @@ _missing_.
 [SmartSensor]: comm_links.html#smartsensor
 [station]: road_topology.html#r_node-types
 [system attribute]: system_attributes.html
+[Tolling]: tolling.html
 [Travel time]: travel_time.html
 [Variable speed advisories]: vsa.html
 [vlog]: #vehicle-logging
