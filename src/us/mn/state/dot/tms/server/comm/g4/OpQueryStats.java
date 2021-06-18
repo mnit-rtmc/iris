@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2019  Minnesota Department of Transportation
+ * Copyright (C) 2012-2021  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@ public class OpQueryStats extends OpG4 {
 
 	/** Create a new "query binned samples" operation */
 	public OpQueryStats(ControllerImpl c, int p) {
-		super(PriorityLevel.DATA_30_SEC, c);
+		super(PriorityLevel.SHORT_POLL, c);
 		stat = new StatProperty(p);
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2019  Minnesota Department of Transportation
+ * Copyright (C) 2015-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ public class OpQuerySpeed extends OpDR500 {
 
 	/** Create a new query speed operation */
 	public OpQuerySpeed(ControllerImpl c, int p) {
-		super(PriorityLevel.DATA_30_SEC, c);
+		super(PriorityLevel.SHORT_POLL, c);
 		period = p;
 	}
 

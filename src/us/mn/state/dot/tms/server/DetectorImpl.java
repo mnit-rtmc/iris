@@ -186,7 +186,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	static private final Interval FAST_CLEAR_THRESHOLD =
 		new Interval(30, SECONDS);
 
-	/** Maximum "realistic" vehicle count for a 30-second sample */
+	/** Maximum "realistic" vehicle count for a 30-second period */
 	static private final int MAX_VEH_COUNT_30 = 37;
 
 	/** Maximum occupancy value (100%) */
@@ -198,17 +198,18 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Change in occupancy to indicate a spike */
 	static private final int OCC_SPIKE = OccupancySample.MAX / 4;
 
-	/** Sample period for detectors (seconds) */
-	static private final int SAMPLE_PERIOD_SEC = 30;
+	/** Binning period for detectors (seconds) */
+	static private final int BIN_PERIOD_SEC = 30;
 
-	/** Sample period for detectors (ms) */
-	static public final long SAMPLE_PERIOD_MS = new Interval(
-		SAMPLE_PERIOD_SEC).ms();
+	/** Binning period for detectors (ms) */
+	static public final int BIN_PERIOD_MS =
+		(int) new Interval(BIN_PERIOD_SEC).ms();
 
 	/** Calculate the end time of previous period */
-	static public long calculateEndTime() {
+	static public long calculateEndTime(int period) {
 		long stamp = TimeSteward.currentTimeMillis();
-		return stamp / SAMPLE_PERIOD_MS * SAMPLE_PERIOD_MS;
+		long p = period;
+		return stamp / p * p;
 	}
 
 	/** Load all the detectors */
@@ -740,55 +741,48 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return fake;
 	}
 
-	/** Periodic vehicle count sample cache */
+	/** Periodic vehicle count cache */
 	private transient final PeriodicSampleCache veh_cache;
 
-	/** Periodic scan sample cache */
+	/** Periodic scan cache */
 	private transient final PeriodicSampleCache scn_cache;
 
-	/** Periodic speed sample cache */
+	/** Periodic speed cache */
 	private transient final PeriodicSampleCache spd_cache;
 
-	/** Periodic MOTORCYCLE class count sample cache */
+	/** Periodic MOTORCYCLE class count cache */
 	private transient final PeriodicSampleCache mc_count_cache;
 
-	/** Periodic SHORT class count sample cache */
+	/** Periodic SHORT class count cache */
 	private transient final PeriodicSampleCache s_count_cache;
 
-	/** Periodic MEDIUM class count sample cache */
+	/** Periodic MEDIUM class count cache */
 	private transient final PeriodicSampleCache m_count_cache;
 
-	/** Periodic LONG class count sample cache */
+	/** Periodic LONG class count cache */
 	private transient final PeriodicSampleCache l_count_cache;
 
 	/** Vehicle event log */
 	private transient final VehicleEventLog v_log;
 
-	/** Occupancy value from previous 30-second sample period */
+	/** Occupancy value from previous 30-second period */
 	private transient int prev_value = MISSING_DATA;
 
 	/** Period to hold occ spike failure */
 	private transient int spike_hold_sec = 0;
 
-	/** Get the current vehicle count */
+	/** Get vehicle count */
 	@Override
-	public int getVehCount(long start, long end) {
+	public int getVehCount(long stamp, int period) {
 		return isSampling()
-		      ? veh_cache.getValue(start, end)
+		      ? veh_cache.getValue(stamp - period, stamp)
 		      : MISSING_DATA;
 	}
 
-	/** Get the current occupancy */
-	public float getOccupancy() {
-		long end = calculateEndTime();
-		long start = end - SAMPLE_PERIOD_MS;
-		return getOccupancy(start, end);
-	}
-
-	/** Get the current occupancy */
-	private float getOccupancy(long start, long end) {
+	/** Get the occupancy for an interval */
+	protected float getOccupancy(long stamp, int period) {
 		int scn = isSampling()
-		       ? scn_cache.getValue(start, end)
+		       ? scn_cache.getValue(stamp - period, stamp)
 		       : MISSING_DATA;
 		return (scn != MISSING_DATA)
 		      ? MAX_OCCUPANCY * (float) scn / MAX_C30
@@ -797,49 +791,42 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get a flow rate (vehicles per hour) */
 	@Override
-	public int getFlow(long start, long end) {
-		int flow = getFlowRaw(start, end);
-		return (flow >= 0) ? flow : getFlowFake(start, end);
+	public int getFlow(long stamp, int period) {
+		int flow = getFlowRaw(stamp, period);
+		return (flow >= 0) ? flow : getFlowFake(stamp, period);
 	}
 
 	/** Get a raw (non-faked) flow rate (vehicles per hour) */
-	protected int getFlowRaw(long start, long end) {
-		int v = getVehCount(start, end);
-		float ph = new Interval(end - start, MILLISECONDS).per(HOUR);
+	protected int getFlowRaw(long stamp, int period) {
+		int v = getVehCount(stamp, period);
+		float ph = new Interval(period, MILLISECONDS).per(HOUR);
 		return (v >= 0) ? Math.round(v * ph) : MISSING_DATA;
 	}
 
-	/** Get the current raw (non-faked) flow rate (vehicles per hour) */
-	private int getFlowRaw() {
-		long end = calculateEndTime();
-		long start = end - SAMPLE_PERIOD_MS;
-		return getFlowRaw(start, end);
-	}
-
 	/** Get a fake flow rate (vehicles per hour) */
-	private int getFlowFake(long start, long end) {
+	private int getFlowFake(long stamp, int period) {
 		FakeDetector f = fake_det;
-		return (f != null) ? f.getFlow(start, end) : MISSING_DATA;
+		return (f != null) ? f.getFlow(stamp, period) : MISSING_DATA;
 	}
 
-	/** Get the current density (vehicles per mile) */
+	/** Get the density (vehicles per mile) */
 	@Override
-	public float getDensity() {
-		float k = getDensityRaw();
-		return (k >= 0) ? k : getDensityFake();
+	public float getDensity(long stamp, int period) {
+		float k = getDensityRaw(stamp, period);
+		return (k >= 0) ? k : getDensityFake(stamp, period);
 	}
 
 	/** Get the current raw (non-faked) density (vehicles per mile) */
-	protected float getDensityRaw() {
-		float k = getDensityFromFlowSpeed();
-		return (k >= 0) ? k : getDensityFromOccupancy();
+	protected float getDensityRaw(long stamp, int period) {
+		float k = getDensityFromFlowSpeed(stamp, period);
+		return (k >= 0) ? k : getDensityFromOccupancy(stamp, period);
 	}
 
 	/** Get the density from flow and speed (vehicles per mile) */
-	private float getDensityFromFlowSpeed() {
-		float speed = getSpeedRaw();
+	private float getDensityFromFlowSpeed(long stamp, int period) {
+		float speed = getSpeedRaw(stamp, period);
 		if (speed > 0) {
-			int flow = getFlowRaw();
+			int flow = getFlowRaw(stamp, period);
 			if (flow > MISSING_DATA)
 				return flow / speed;
 		}
@@ -847,8 +834,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	}
 
 	/** Get the density from occupancy (vehicles per mile) */
-	private float getDensityFromOccupancy() {
-		float occ = getOccupancy();
+	private float getDensityFromOccupancy(long stamp, int period) {
+		float occ = getOccupancy(stamp, period);
 		if (occ >= 0 && field_length > 0) {
 			Distance fl = new Distance(field_length, FEET);
 			return occ / (fl.asFloat(MILES) * MAX_OCCUPANCY);
@@ -857,54 +844,47 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	}
 
 	/** Get fake density (vehicles per mile) */
-	private float getDensityFake() {
+	private float getDensityFake(long stamp, int period) {
 		FakeDetector f = fake_det;
-		return (f != null) ? f.getDensity() : MISSING_DATA;
+		return (f != null) ? f.getDensity(stamp, period) : MISSING_DATA;
 	}
 
-	/** Get the current speed (miles per hour) */
+	/** Get recorded speed (miles per hour) */
 	@Override
-	public float getSpeed() {
-		float speed = getSpeedRaw();
+	public float getSpeed(long stamp, int period) {
+		float speed = getSpeedRaw(stamp, period);
 		if (speed > 0)
 			return speed;
-		speed = getSpeedEstimate();
+		speed = getSpeedEstimate(stamp, period);
 		if (speed > 0)
 			return speed;
 		else
-			return getSpeedFake();
-	}
-
-	/** Get the current raw (non-faked) speed (miles per hour) */
-	protected float getSpeedRaw() {
-		long end = calculateEndTime();
-		long start = end - SAMPLE_PERIOD_MS;
-		return getSpeedRaw(start, end);
+			return getSpeedFake(stamp, period);
 	}
 
 	/** Get the raw (non-faked) speed (MPH) */
-	private float getSpeedRaw(long start, long end) {
+	protected float getSpeedRaw(long stamp, int period) {
 		return isSampling()
-		      ? spd_cache.getValue(start, end)
+		      ? spd_cache.getValue(stamp - period, stamp)
 		      : MISSING_DATA;
 	}
 
 	/** Get speed estimate based on flow / density */
-	private float getSpeedEstimate() {
-		int flow = getFlowRaw();
+	private float getSpeedEstimate(long stamp, int period) {
+		int flow = getFlowRaw(stamp, period);
 		if (flow <= 0)
 			return MISSING_DATA;
-		float density = getDensityFromOccupancy();
+		float density = getDensityFromOccupancy(stamp, period);
 		if (density <= DENSITY_THRESHOLD)
 			return MISSING_DATA;
 		return flow / density;
 	}
 
 	/** Get fake speed (miles per hour) */
-	private float getSpeedFake() {
+	private float getSpeedFake(long stamp, int period) {
 		FakeDetector f = fake_det;
 		if (f != null)
-			return f.getSpeed();
+			return f.getSpeed(stamp, period);
 		else
 			return MISSING_DATA;
 	}
@@ -914,7 +894,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		logEvent(new DetAutoFailEvent(event_type, getName()));
 	}
 
-	/** Store one vehicle count sample for this detector.
+	/** Store vehicle count for one binning interval.
 	 * @param v PeriodicSample containing vehicle count data.
 	 * @param vc Vehicle class. */
 	public void storeVehCount(PeriodicSample v, VehLengthClass vc) {
@@ -938,18 +918,18 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		}
 	}
 
-	/** Store one vehicle count sample for this detector.
+	/** Store vehicle count for one binning interval.
 	 * @param v PeriodicSample containing vehicle count data. */
 	public void storeVehCount(PeriodicSample v) {
 		if (v != null) {
 			if (lane_type != LaneType.GREEN &&
-			    v.period == SAMPLE_PERIOD_SEC)
+			    v.period == BIN_PERIOD_SEC)
 				testVehCount(v);
 			veh_cache.add(v, name);
 		}
 	}
 
-	/** Test a vehicle count sample with error detecting algorithms */
+	/** Test vehicle count with error detecting algorithms */
 	private void testVehCount(PeriodicSample vs) {
 		chatter.updateState(vs.period, vs.value > MAX_VEH_COUNT_30);
 		if (chatter.checkLogging(vs.period))
@@ -972,12 +952,12 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return false;
 	}
 
-	/** Store one occupancy sample for this detector.
-	 * @param occ Occupancy sample data. */
+	/** Store occupancy for one binning interval.
+	 * @param occ Occupancy data. */
 	public void storeOccupancy(OccupancySample occ) {
 		if (occ != null) {
 			int n_scans = occ.as60HzScans();
-			if (occ.period == SAMPLE_PERIOD_SEC) {
+			if (occ.period == BIN_PERIOD_SEC) {
 				testScans(occ);
 				prev_value = occ.value;
 			}
@@ -987,11 +967,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			prev_value = MISSING_DATA;
 	}
 
-	/** Test an occupancy sample with error detecting algorithms */
+	/** Test binned occupancy with error detecting algorithms */
 	private void testScans(OccupancySample occ) {
 		boolean lock = occ.value >= OccupancySample.MAX;
 		// Locked-on counter should be cleared only with good
-		// non-zero samples.  This helps when the duration of
+		// non-zero data.  This helps when the duration of
 		// occupancy spikes is shorter than the threshold time
 		// and interspersed with zeroes.
 		boolean hold = locked_on.failed && (occ.value == 0);
@@ -1014,7 +994,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		updateAutoFail();
 	}
 
-	/** Store one speed sample for this detector.
+	/** Store speed for one binning interval.
 	 * @param speed PeriodicSample containing speed data. */
 	public void storeSpeed(PeriodicSample speed) {
 		if (speed != null)
@@ -1023,7 +1003,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Flush buffered data to disk */
 	public void flush(PeriodicSampleWriter writer) {
-		if (!v_log.isBinning()) {
+		// Clear binning flag on each flush; it will be set on each call
+		// to binEventData as long as vehicle events are being logged
+		if (v_log.isBinning())
+			v_log.setBinning(false);
+		else {
 			writer.flush(veh_cache, name);
 			writer.flush(scn_cache, name);
 			writer.flush(spd_cache, name);
@@ -1032,10 +1016,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			writer.flush(m_count_cache, name);
 			writer.flush(l_count_cache, name);
 		}
-		v_log.setBinning(false);
 	}
 
-	/** Purge all samples before a given stamp. */
+	/** Purge all binned data before a given stamp. */
 	public void purge(long before) {
 		veh_cache.purge(before);
 		scn_cache.purge(before);
@@ -1063,12 +1046,15 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		v_log.logGap(stamp);
 	}
 
-	/** Bin sample data to the specified period */
-	public void binEventSamples(int p) {
-		long end = calculateEndTime();
-		storeVehCount(v_log.getVehCount(end, p));
-		storeOccupancy(v_log.getOccupancy(end, p));
-		storeSpeed(v_log.getSpeed(end, p));
+	/** Bin event data to the specified period */
+	public void binEventData(int period, boolean success) {
+		if (success) {
+			long stamp = calculateEndTime(period);
+			storeVehCount(v_log.getVehCount(stamp, period));
+			storeOccupancy(v_log.getOccupancy(stamp, period));
+			storeSpeed(v_log.getSpeed(stamp, period));
+		}
+		v_log.clear();
 		v_log.setBinning(true);
 	}
 
@@ -1096,13 +1082,15 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		w.write("/>\n");
 	}
 
-	/** Print the current sample as an XML element */
-	public void writeSampleXml(Writer w) throws IOException {
+	/** Print binned data as an XML element */
+	public void writeSampleXml(Writer w, long stamp, int period)
+		throws IOException
+	{
 		if (abandoned || !isSampling())
 			return;
-		int flow = getFlowRaw();
-		int speed = Math.round(getSpeed());
-		float occ = getOccupancy();
+		int flow = getFlowRaw(stamp, period);
+		int speed = Math.round(getSpeed(stamp, period));
+		float occ = getOccupancy(stamp, period);
 		w.write("\t<sample");
 		w.write(createAttribute("sensor", name));
 		if (flow != MISSING_DATA)

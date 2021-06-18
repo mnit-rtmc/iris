@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2020  Minnesota Department of Transportation
+ * Copyright (C) 2004-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.utils.FileIO;
@@ -41,25 +41,35 @@ class StationManager {
 	static private final File JSON_OUTPUT_DIRECTORY =
 		new File("/var/www/html/iris/");
 
-	/** Location of station sample XML file */
+	/** Location of station XML file */
 	static private final String SAMPLE_XML = "stat_sample.xml";
 
-	/** Name of station sample JSON file */
+	/** Name of station JSON file */
 	static private final String SAMPLE_JSON = "station_sample";
+
+	/** Time stamp at end of interval */
+	private long stamp;
+
+	/** Get the time stamp at end of interval */
+	public long getStamp() {
+		return stamp;
+	}
 
 	/** Calculate the current data for all stations */
 	public void calculateData() {
+		int period = DetectorImpl.BIN_PERIOD_MS;
+		stamp = DetectorImpl.calculateEndTime(period);
 		Iterator<Station> it = StationHelper.iterator();
 		while (it.hasNext()) {
 			Station s = it.next();
 			if (s instanceof StationImpl) {
 				StationImpl si = (StationImpl) s;
-				si.calculateData();
+				si.calculateData(stamp, period);
 			}
 		}
 	}
 
-	/** Write the station sample data out as XML */
+	/** Write the station data out as XML */
 	public void writeSampleXml() throws IOException {
 		XmlWriter w = new XmlWriter(SAMPLE_XML, true) {
 			@Override protected void write(Writer w)
@@ -73,7 +83,7 @@ class StationManager {
 		w.write();
 	}
 
-	/** Write the station sample data out as JSON */
+	/** Write the station data out as JSON */
 	public void writeSampleJson() throws IOException {
 		File file = new File(JSON_OUTPUT_DIRECTORY, SAMPLE_JSON);
 		File temp = new File(file.getAbsolutePath() + "~");
@@ -88,7 +98,7 @@ class StationManager {
 		FileIO.atomicMove(temp.toPath(), file.toPath());
 	}
 
-	/** Write the station sample data out as JSON */
+	/** Write the station data out as JSON */
 	private void writeSampleJson(FileWriter writer) throws IOException {
 		BufferedWriter buf_writer = new BufferedWriter(writer);
 		try {
@@ -99,13 +109,12 @@ class StationManager {
 		}
 	}
 
-	/** Write the station sample data out as JSON */
+	/** Write the station data out as JSON */
 	private void writeSampleJson(BufferedWriter writer) throws IOException {
-		long end = DetectorImpl.calculateEndTime();
-		long start = end - DetectorImpl.SAMPLE_PERIOD_MS;
+		int period = DetectorImpl.BIN_PERIOD_MS;
 		writer.write("{\n");
 		writer.write("\"time_stamp\":\"");
-		writer.write(RFC3339.format(TimeSteward.getDateInstance()));
+		writer.write(RFC3339.format(new Date(stamp)));
 		writer.write("\",\n");
 		writer.write("\"period\":30,\n");
 		writer.write("\"samples\":{\n");
@@ -114,7 +123,7 @@ class StationManager {
 			Station s = it.next();
 			if (s instanceof StationImpl) {
 				StationImpl si = (StationImpl) s;
-				if (si.writeSampleJson(start, end, writer)) {
+				if (si.writeSampleJson(stamp, period, writer)) {
 					if (it.hasNext())
 						writer.write(',');
 					writer.write('\n');
@@ -125,12 +134,12 @@ class StationManager {
 		writer.write("}\n");
 	}
 
-	/** Print the header of the station sample XML file */
+	/** Print the header of the station XML file */
 	private void writeSampleXmlHead(Writer w) throws IOException {
 		w.write(XmlWriter.XML_DECLARATION);
 		writeDtd(w);
-		w.write("<traffic_sample time_stamp='" +
-			TimeSteward.getDateInstance() + "' period='30'>\n");
+		w.write("<traffic_sample time_stamp='" + new Date(stamp) +
+			"' period='30'>\n");
 	}
 
 	/** Print the DTD */
@@ -148,19 +157,20 @@ class StationManager {
 		w.write("]>\n");
 	}
 
-	/** Print the body of the station sample XML file */
+	/** Print the body of the station XML file */
 	private void writeSampleXmlBody(Writer w) throws IOException {
+		int period = DetectorImpl.BIN_PERIOD_MS;
 		Iterator<Station> it = StationHelper.iterator();
 		while (it.hasNext()) {
 			Station s = it.next();
 			if (s instanceof StationImpl) {
 				StationImpl si = (StationImpl) s;
-				si.writeSampleXml(w);
+				si.writeSampleXml(w, stamp, period);
 			}
 		}
 	}
 
-	/** Print the tail of the station sample XML file */
+	/** Print the tail of the station XML file */
 	private void writeSampleXmlTail(Writer w) throws IOException {
 		w.write("</traffic_sample>\n");
 	}

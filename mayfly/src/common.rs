@@ -80,10 +80,10 @@ impl Body {
 
     /// Push a value to end of body
     pub fn push(&mut self, value: &str) {
-        if self.body.len() > 0 {
-            self.body.push(',');
-        } else {
+        if self.body.is_empty() {
             self.body.push('[');
+        } else {
+            self.body.push(',');
         }
         self.body.push_str(&value);
     }
@@ -92,10 +92,10 @@ impl Body {
 impl From<Body> for String {
     fn from(body: Body) -> Self {
         let mut v = body.body;
-        if v.len() > 0 {
-            v.push(']');
-        } else {
+        if v.is_empty() {
             v.push_str("[]");
+        } else {
+            v.push(']');
         }
         v
     }

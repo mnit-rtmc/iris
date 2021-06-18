@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -846,8 +846,10 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Check if traffic is backed up over merge detector */
 	private boolean isMergeBackedUp() {
-		return merge_set.isPerfect()
-		   && (merge_set.getMaxOccupancy() >= MERGE_BACKUP_OCC);
+		int period = DetectorImpl.BIN_PERIOD_MS;
+		long stamp = DetectorImpl.calculateEndTime(period);
+		float occ = merge_set.getMaxOccupancy(stamp, period);
+		return merge_set.isPerfect() && occ >= MERGE_BACKUP_OCC;
 	}
 
 	/** Green count detector */

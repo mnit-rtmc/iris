@@ -308,8 +308,8 @@ _vehicle counts_, _occupancy_, _speed_ and _vehicle classification_.  The
 Protocol               | Multi-Drop | `#` | [IO Pin]s
 -----------------------|------------|-----|----------
 `SmartSensor 105`      | 1 - 9999   | 8   | 1 - 8
-`SmartSensor 125 HD`   | 0 - 65535  | 8   | 1 - 8
-`SmartSensor 125 vlog` | 0 - 65535  | 8   | 1 - 8
+`SmartSensor 125 HD`   | 1 - 65534  | 8   | 1 - 8
+`SmartSensor 125 vlog` | 1 - 65534  | 8   | 1 - 8
 
 ### STC
 

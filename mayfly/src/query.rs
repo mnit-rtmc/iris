@@ -13,7 +13,7 @@
 // GNU General Public License for more details.
 //
 use crate::common::{Body, Error, Result};
-use crate::vehicle::{self, VehicleEvent, VehicleFilter};
+use crate::vehicle::{EventLog, VehicleEvent, VehicleFilter};
 use async_std::fs::{read_dir, File};
 use async_std::io::{BufReader, ReadExt};
 use async_std::path::{Path, PathBuf};
@@ -21,6 +21,7 @@ use async_std::prelude::*;
 use async_std::stream::StreamExt;
 use chrono::{Duration, Local, NaiveDate};
 use serde::Deserialize;
+use std::collections::HashSet;
 use std::io::BufRead as _;
 use std::io::Read as _;
 use std::marker::PhantomData;
@@ -82,7 +83,9 @@ pub trait TrafficData: Default {
     fn binned_ext() -> &'static str;
 
     /// Number of bytes per binned value
-    fn bin_bytes() -> usize;
+    fn bin_bytes() -> usize {
+        1
+    }
 
     /// Check binned data length
     fn check_len(len: u64) -> Result<()> {
@@ -105,7 +108,7 @@ pub trait TrafficData: Default {
     }
 
     /// Set reset for traffic data
-    fn reset(&mut self);
+    fn reset(&mut self) {}
 
     /// Add a vehicle to traffic data
     fn vehicle(&mut self, veh: &VehicleEvent);
@@ -124,6 +127,13 @@ pub struct CountData {
 /// Binned speed data
 #[derive(Clone, Copy, Default)]
 pub struct SpeedData {
+    total: u32,
+    count: u32,
+}
+
+/// Binned headway data
+#[derive(Clone, Copy, Default)]
+pub struct HeadwayData {
     total: u32,
     count: u32,
 }
@@ -161,6 +171,10 @@ pub struct TrafficQuery<T: TrafficData> {
     speed_mph_min: Option<u32>,
     /// Maximum recorded speed (logged vehicles)
     speed_mph_max: Option<u32>,
+    /// Minimum headway (logged vehicles)
+    headway_sec_min: Option<f32>,
+    /// Maximum headway (logged vehicles)
+    headway_sec_max: Option<f32>,
     /// Binning interval (TODO)
     _bin_secs: Option<u32>,
 }
@@ -207,23 +221,27 @@ async fn scan_dir(
     body: &mut Body,
 ) -> Result<()> {
     let mut entries = read_dir(path).await.or(Err(Error::NotFound))?;
+    let mut names = HashSet::new();
     while let Some(entry) = entries.next().await {
         if let Ok(entry) = entry {
             if let Ok(tp) = entry.file_type().await {
                 if !tp.is_symlink() {
                     if let Some(name) = entry.file_name().to_str() {
                         if let Some(value) = check(name, tp.is_dir()) {
-                            body.push(&format!("\"{}\"", value));
+                            names.insert(format!("\"{}\"", value));
                         }
                     }
                 }
             }
         }
     }
+    for name in names {
+        body.push(&name);
+    }
     Ok(())
 }
 
-/// Get a list of entries in a zip file
+/// Scan entries in a zip file
 fn scan_zip(
     path: &std::path::Path,
     check: fn(&str, bool) -> Option<&str>,
@@ -231,16 +249,20 @@ fn scan_zip(
 ) -> Result<()> {
     let file = std::fs::File::open(path).or(Err(Error::NotFound))?;
     let mut zip = ZipArchive::new(file)?;
+    let mut names = HashSet::new();
     for i in 0..zip.len() {
         let zf = zip.by_index(i)?;
         let ent = std::path::Path::new(zf.name());
         if let Some(name) = ent.file_name() {
             if let Some(name) = name.to_str() {
                 if let Some(value) = check(name, false) {
-                    body.push(&format!("\"{}\"", value));
+                    names.insert(format!("\"{}\"", value));
                 }
             }
         }
+    }
+    for name in names {
+        body.push(&name);
     }
     Ok(())
 }
@@ -248,7 +270,7 @@ fn scan_zip(
 /// Parse year parameter
 fn parse_year(year: &str) -> Result<i32> {
     match year.parse() {
-        Ok(y) if y >= 1900 && y <= 9999 => Ok(y),
+        Ok(y) if (1900..=9999).contains(&y) => Ok(y),
         _ => Err(Error::InvalidDate),
     }
 }
@@ -256,7 +278,7 @@ fn parse_year(year: &str) -> Result<i32> {
 /// Parse month parameter
 fn parse_month(month: &str) -> Result<u32> {
     match month.parse() {
-        Ok(m) if m >= 1 && m <= 12 => Ok(m),
+        Ok(m) if (1..=12).contains(&m) => Ok(m),
         _ => Err(Error::InvalidDate),
     }
 }
@@ -264,7 +286,7 @@ fn parse_month(month: &str) -> Result<u32> {
 /// Parse day parameter
 fn parse_day(day: &str) -> Result<u32> {
     match day.parse() {
-        Ok(d) if d >= 1 && d <= 31 => Ok(d),
+        Ok(d) if (1..=31).contains(&d) => Ok(d),
         _ => Err(Error::InvalidDate),
     }
 }
@@ -282,12 +304,15 @@ fn parse_date(date: &str) -> Result<NaiveDate> {
     Err(Error::InvalidDate)
 }
 
+/// Max age for caching resources (100 weeks)
+const MAX_AGE: u64 = 100 * 7 * 24 * 60 * 60;
+
 /// Get max age for cache control heder
 fn max_age(date: &str) -> Option<u64> {
     if let Ok(date) = parse_date(date) {
         let today = Local::today().naive_local();
         if today > date + Duration::days(2) {
-            Some(7 * 24 * 60 * 60)
+            Some(MAX_AGE)
         } else {
             Some(30)
         }
@@ -328,7 +353,7 @@ impl YearQuery {
 /// Check for valid year
 fn check_year(name: &str, dir: bool) -> Option<&str> {
     if dir {
-        parse_year(name).ok().and_then(|_| Some(name))
+        parse_year(name).ok().map(|_| name)
     } else {
         None
     }
@@ -354,7 +379,7 @@ fn check_date(name: &str, dir: bool) -> Option<&str> {
     } else {
         &""
     };
-    parse_date(dt).ok().and_then(|_| Some(dt))
+    parse_date(dt).ok().map(|_| dt)
 }
 
 impl CorridorQuery {
@@ -363,16 +388,16 @@ impl CorridorQuery {
         parse_date(&self.date)?;
         let mut body = Body::default();
         match scan_dir(&self.date_path(), check_corridor, &mut body).await {
-            Ok(_) | Err(Error::NotFound) => {
+            Err(Error::NotFound) => {
                 // NOTE: the zip crate requires blocking calls
                 match scan_zip(&self.zip_path(), check_corridor, &mut body) {
-                    Ok(_) | Err(Error::NotFound) => (),
-                    Err(e) => Err(e)?,
+                    Ok(_) | Err(Error::NotFound) => Ok(body),
+                    Err(e) => Err(e),
                 }
             }
-            Err(e) => Err(e)?,
+            Ok(_) => Ok(body),
+            Err(e) => Err(e),
         }
-        Ok(body)
     }
 
     /// Get path to directory containing archived data
@@ -403,16 +428,16 @@ impl DetectorQuery {
         parse_date(&self.date)?;
         let mut body = Body::default();
         match scan_dir(&self.date_path(), check_detector, &mut body).await {
-            Ok(_) | Err(Error::NotFound) => {
+            Err(Error::NotFound) => {
                 // NOTE: the zip crate requires blocking calls
                 match scan_zip(&self.zip_path(), check_detector, &mut body) {
-                    Ok(_) | Err(Error::NotFound) => (),
-                    Err(e) => Err(e)?,
+                    Ok(_) | Err(Error::NotFound) => Ok(body),
+                    Err(e) => Err(e),
                 }
             }
-            Err(e) => Err(e)?,
+            Ok(_) => Ok(body),
+            Err(e) => Err(e),
         }
-        Ok(body)
     }
 
     /// Get path to directory containing archived data
@@ -435,7 +460,6 @@ fn check_detector(name: &str, dir: bool) -> Option<&str> {
             .and_then(|ext| file_ext(ext))
             .and_then(|_| path.file_stem())
             .and_then(|f| f.to_str())
-            .and_then(|f| Some(f))
     } else {
         None
     }
@@ -455,11 +479,6 @@ impl TrafficData for CountData {
     /// Binned file extension
     fn binned_ext() -> &'static str {
         "v30"
-    }
-
-    /// Number of bytes per binned value
-    fn bin_bytes() -> usize {
-        1
     }
 
     /// Set reset for count data
@@ -488,17 +507,9 @@ impl TrafficData for SpeedData {
         "s30"
     }
 
-    /// Number of bytes per binned value
-    fn bin_bytes() -> usize {
-        1
-    }
-
-    /// Set reset for speed data
-    fn reset(&mut self) {}
-
     /// Add a vehicle to speed data
     fn vehicle(&mut self, veh: &VehicleEvent) {
-        if let Some(speed) = veh.speed {
+        if let Some(speed) = veh.speed() {
             self.total += speed;
             self.count += 1;
         }
@@ -509,6 +520,31 @@ impl TrafficData for SpeedData {
         if self.count > 0 {
             let speed = (self.total as f32 / self.count as f32).round();
             format!("{}", speed as u32)
+        } else {
+            "null".to_owned()
+        }
+    }
+}
+
+impl TrafficData for HeadwayData {
+    /// Binned file extension
+    fn binned_ext() -> &'static str {
+        "h30"
+    }
+
+    /// Add a vehicle to headway data
+    fn vehicle(&mut self, veh: &VehicleEvent) {
+        if let Some(headway) = veh.headway() {
+            self.total += headway;
+            self.count += 1;
+        }
+    }
+
+    /// Get headway data value as JSON
+    fn as_json(&self) -> String {
+        if self.count > 0 {
+            let headway = (self.total as f32 / self.count as f32).round();
+            format!("{}", headway as u32)
         } else {
             "null".to_owned()
         }
@@ -547,7 +583,7 @@ impl TrafficData for OccupancyData {
 
     /// Add a vehicle to occupancy data
     fn vehicle(&mut self, veh: &VehicleEvent) {
-        if let Some(duration) = veh.duration {
+        if let Some(duration) = veh.duration() {
             self.duration += duration;
         }
     }
@@ -575,24 +611,9 @@ impl TrafficData for LengthData {
         "L30"
     }
 
-    /// Number of bytes per binned value
-    fn bin_bytes() -> usize {
-        1
-    }
-
-    /// Unpack one binned value
-    fn unpack(val: &[u8]) -> String {
-        assert_eq!(val.len(), Self::bin_bytes());
-        // There is no binned length format!
-        "null".to_owned()
-    }
-
-    /// Set reset for length data
-    fn reset(&mut self) {}
-
     /// Add a vehicle to length data
     fn vehicle(&mut self, veh: &VehicleEvent) {
-        if let Some(length) = veh.length {
+        if let Some(length) = veh.length() {
             self.total += length;
             self.count += 1;
         }
@@ -641,9 +662,8 @@ impl<T: TrafficData> TrafficQuery<T> {
                 let name = self.vlog_file_name();
                 if let Ok(zf) = zip.by_name(&name) {
                     log::info!("opened {} in {}.{}", name, self.date, EXT);
-                    let mut log = vehicle::Log::default();
-                    let mut lines = std::io::BufReader::new(zf).lines();
-                    while let Some(line) = lines.next() {
+                    let mut log = EventLog::default();
+                    for line in std::io::BufReader::new(zf).lines() {
                         log.append(&line?)?;
                     }
                     log.finish();
@@ -661,7 +681,7 @@ impl<T: TrafficData> TrafficQuery<T> {
         path.push(self.vlog_file_name());
         if let Ok(file) = File::open(&path).await {
             log::info!("opened {:?}", &path);
-            let mut log = vehicle::Log::default();
+            let mut log = EventLog::default();
             let mut lines = BufReader::new(file).lines();
             while let Some(line) = lines.next().await {
                 log.append(&line?)?;
@@ -681,6 +701,8 @@ impl<T: TrafficData> TrafficQuery<T> {
             .with_length_ft_max(self.length_ft_max)
             .with_speed_mph_min(self.speed_mph_min)
             .with_speed_mph_max(self.speed_mph_max)
+            .with_headway_sec_min(self.headway_sec_min)
+            .with_headway_sec_max(self.headway_sec_max)
     }
 
     /// Get vehicle log file name
@@ -690,15 +712,24 @@ impl<T: TrafficData> TrafficQuery<T> {
 
     /// Lookup archived data from 30-second binned data
     async fn lookup_binned(&self) -> Result<Body> {
-        let data = match self.read_binned_zip() {
-            Ok(data) => data,
-            Err(_) => self.read_binned_file().await?,
-        };
-        let mut body = Body::default().with_max_age(max_age(&self.date));
-        for val in data.chunks_exact(T::bin_bytes()) {
-            body.push(&T::unpack(val));
+        // Cannot filter by length/speed when already binned
+        if self.filter().is_filtered() {
+            let mut body = Body::default().with_max_age(Some(MAX_AGE));
+            for _ in 0..2880 {
+                body.push("null");
+            }
+            Ok(body)
+        } else {
+            let data = match self.read_binned_zip() {
+                Ok(data) => data,
+                Err(_) => self.read_binned_file().await?,
+            };
+            let mut body = Body::default().with_max_age(max_age(&self.date));
+            for val in data.chunks_exact(T::bin_bytes()) {
+                body.push(&T::unpack(val));
+            }
+            Ok(body)
         }
-        Ok(body)
     }
 
     /// Read binned data from a zip file

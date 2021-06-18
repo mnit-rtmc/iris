@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2020  Minnesota Department of Transportation
+ * Copyright (C) 2015-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -371,9 +371,11 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	/** Update density.
 	 * @param np New pricing period (if true). */
 	public synchronized void updateDensity(boolean np) {
+		int period = DetectorImpl.BIN_PERIOD_MS;
+		long stamp = DetectorImpl.calculateEndTime(period);
 		updateDensityHistory("JOB");
 		for (Map.Entry<VehicleSampler,DensityHist> e:k_hist.entrySet()){
-			double k = e.getKey().getDensity();
+			double k = e.getKey().getDensity(stamp, period);
 			e.getValue().updateDensity(np, k);
 		}
 	}

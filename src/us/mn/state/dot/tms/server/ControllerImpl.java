@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -530,7 +530,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return (cl != null) ? cl.getCommProtocol() : null;
 	}
 
-	/** Get a sample value from an array */
+	/** Get a value from an array */
 	static private int sampleValue(int[] values, int i) {
 		if (values != null && i >= 0 && i < values.length)
 			return values[i];
@@ -538,7 +538,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			return MISSING_DATA;
 	}
 
-	/** Store vehicle count sample data.
+	/** Store vehicle count data.
 	 * @param stamp Timestamp in milliseconds since epoch.
 	 * @param period Sampling period in seconds.
 	 * @param start_pin Start pin on controller I/O.
@@ -549,7 +549,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		storeVehCount(stamp, period, start_pin, veh_count, null);
 	}
 
-	/** Store vehicle count sample data.
+	/** Store vehicle count data.
 	 * @param stamp Timestamp in milliseconds since epoch.
 	 * @param period Sampling period in seconds.
 	 * @param start_pin Start pin on controller I/O.
@@ -570,7 +570,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 	}
 
-	/** Store occupancy sample data.
+	/** Store occupancy data.
 	 * @param stamp Timestamp in milliseconds since epoch.
 	 * @param period Sampling period in seconds.
 	 * @param start_pin Start pin on controller I/O.
@@ -591,7 +591,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 	}
 
-	/** Store speed sample data.
+	/** Store speed data.
 	 * @param stamp Timestamp in milliseconds since epoch.
 	 * @param period Sampling period in seconds.
 	 * @param start_pin Start pin on controller I/O.
@@ -611,11 +611,19 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 	}
 
-	/** Bin sample data to the specified period */
-	public synchronized void binEventSamples(int p) {
+	/** Bin event data to the specified period */
+	public synchronized void binEventData(int p, boolean success) {
 		for (ControllerIO io: io_pins.values()) {
 			if (io instanceof DetectorImpl)
-				((DetectorImpl) io).binEventSamples(p);
+				((DetectorImpl) io).binEventData(p, success);
+		}
+	}
+
+	/** Log vehicle detection gap for all detectors */
+	public synchronized void logGap() {
+		for (ControllerIO io: io_pins.values()) {
+			if (io instanceof DetectorImpl)
+				((DetectorImpl) io).logGap(0);
 		}
 	}
 
@@ -1010,7 +1018,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			p.querySamples(this, period);
 	}
 
-	/** Get a sample poller */
+	/** Get a data collection poller */
 	private SamplePoller getSamplePoller() {
 		DevicePoller dp = getPoller();
 		return (dp instanceof SamplePoller) ? (SamplePoller) dp : null;

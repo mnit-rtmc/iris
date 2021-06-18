@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.Date;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.DetectorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -29,12 +28,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQueryEvents extends OpSS125 {
 
-	/** Maximum number of lanes */
-	static private final int MAX_LANES = 10;
-
 	/** Create a new "query events" operation */
 	public OpQueryEvents(ControllerImpl c) {
-		super(PriorityLevel.DATA_30_SEC, c);
+		super(PriorityLevel.SHORT_POLL, c);
 		setSuccess(false);
 	}
 
@@ -66,7 +62,7 @@ public class OpQueryEvents extends OpSS125 {
 				if (ev.isValidStamp())
 					ev.logVehicle(controller);
 				else {
-					logGap();
+					controller.logGap();
 					mess.logError("BAD TIMESTAMP: " +
 						new Date(ev.getTime()));
 					return new SendDateTime();
@@ -75,15 +71,6 @@ public class OpQueryEvents extends OpSS125 {
 			return controller.hasActiveDetector()
 			      ? this
 			      : null;
-		}
-	}
-
-	/** Log a vehicle detection gap */
-	private void logGap() {
-		for (int i = 0; i < MAX_LANES; i++) {
-			DetectorImpl det = controller.getDetectorAtPin(i + 1);
-			if (det != null)
-				det.logGap(0);
 		}
 	}
 
@@ -123,8 +110,10 @@ public class OpQueryEvents extends OpSS125 {
 
 	/** Update the controller operation counters */
 	public void updateCounters(int p) {
-		if (isSuccess())
-			controller.binEventSamples(p);
-		controller.completeOperation(id, isSuccess());
+		boolean s = isSuccess();
+		if (!s)
+			controller.logGap();
+		controller.binEventData(p, s);
+		controller.completeOperation(id, s);
 	}
 }

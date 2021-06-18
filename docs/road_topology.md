@@ -92,8 +92,9 @@ which corresponds to the leftmost lane along the entire corridor.
 
 #### Station ID
 
-A unique identifier for the [detectors] associated with a _station_ r_node.
-It is displayed on the [traffic layer].
+An identifier for the [detectors] associated with a _station_ r_node.  It is
+displayed on the [traffic layer].  It must start with the letter `S`, followed
+by a unique number.
 
 #### Speed Limit
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,11 +113,11 @@ public class SamplerSet implements VehicleSampler {
 
 	/** Get a vehicle count */
 	@Override
-	public int getVehCount(long start, long end) {
+	public int getVehCount(long stamp, int period) {
 		int count = 0;
 		int n_count = 0;
 		for (VehicleSampler vs: samplers) {
-			int c = vs.getVehCount(start, end);
+			int c = vs.getVehCount(stamp, period);
 			if (c >= 0) {
 				count += c;
 				n_count++;
@@ -129,11 +129,11 @@ public class SamplerSet implements VehicleSampler {
 
 	/** Get a total flow rate */
 	@Override
-	public int getFlow(long start, long end) {
+	public int getFlow(long stamp, int period) {
 		int flow = 0;
 		int n_flow = 0;
 		for (VehicleSampler vs: samplers) {
-			int f = vs.getFlow(start, end);
+			int f = vs.getFlow(stamp, period);
 			if (f >= 0) {
 				flow += f;
 				n_flow++;
@@ -145,11 +145,11 @@ public class SamplerSet implements VehicleSampler {
 
 	/** Get the current density (vehicle per mile) */
 	@Override
-	public float getDensity() {
+	public float getDensity(long stamp, int period) {
 		float t_density = 0;
 		int n_density = 0;
 		for (VehicleSampler vs: samplers) {
-			float k = vs.getDensity();
+			float k = vs.getDensity(stamp, period);
 			if (k >= 0) {
 				t_density += k;
 				n_density++;
@@ -160,11 +160,11 @@ public class SamplerSet implements VehicleSampler {
 
 	/** Get the current average speed */
 	@Override
-	public float getSpeed() {
+	public float getSpeed(long stamp, int period) {
 		float t_speed = 0;
 		int n_speed = 0;
 		for (VehicleSampler vs: samplers) {
-			float s = vs.getSpeed();
+			float s = vs.getSpeed(stamp, period);
 			if (s > 0) {
 				t_speed += s;
 				n_speed++;
@@ -174,16 +174,13 @@ public class SamplerSet implements VehicleSampler {
 	}
 
 	/** Get the maximum occupancy */
-	public float getMaxOccupancy() {
-		return getMaxOccupancy(0);
-	}
-
-	/** Get the maximum occupancy */
-	public float getMaxOccupancy(float occ) {
+	public float getMaxOccupancy(long stamp, int period) {
+		float occ = MISSING_DATA;
 		for (VehicleSampler vs: samplers) {
 			if (vs instanceof DetectorImpl) {
 				DetectorImpl det = (DetectorImpl) vs;
-				occ = Math.max(det.getOccupancy(), occ);
+				float o = det.getOccupancy(stamp, period);
+				occ = Math.max(o, occ);
 			}
 		}
 		return occ;

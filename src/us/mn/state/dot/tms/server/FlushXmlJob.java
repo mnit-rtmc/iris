@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,20 +16,20 @@ package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Date;
 import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 
 /**
- * Job to flush XML sample data
+ * Job to flush XML data
  *
  * @author Douglas Lau
  */
 public class FlushXmlJob extends Job {
 
-	/** Detector sample file */
+	/** Detector data file */
 	static private final String SAMPLE_XML = "det_sample.xml";
 
 	/** Station manager */
@@ -48,7 +48,7 @@ public class FlushXmlJob extends Job {
 		station_manager.writeSampleJson();
 	}
 
-	/** Write the sample data out as XML */
+	/** Write the detector data out as XML */
 	private void writeSampleXml() throws IOException {
 		XmlWriter w = new XmlWriter(SAMPLE_XML, true) {
 			@Override protected void write(Writer w)
@@ -62,12 +62,13 @@ public class FlushXmlJob extends Job {
 		w.write();
 	}
 
-	/** Write the header of the detector sample XML file */
+	/** Write the header of the detector XML file */
 	private void writeSampleXmlHead(Writer w) throws IOException {
+		long stamp = station_manager.getStamp();
 		w.write(XmlWriter.XML_DECLARATION);
 		writeDtd(w);
-		w.write("<traffic_sample time_stamp='" +
-			TimeSteward.getDateInstance() + "' period='30'>\n");
+		w.write("<traffic_sample time_stamp='" + new Date(stamp) +
+			"' period='30'>\n");
 	}
 
 	/** Write the DTD */
@@ -85,19 +86,21 @@ public class FlushXmlJob extends Job {
 		w.write("]>\n");
 	}
 
-	/** Write the body of the detector sample XML file */
+	/** Write the body of the detector XML file */
 	private void writeSampleXmlBody(Writer w) throws IOException {
+		long stamp = station_manager.getStamp();
+		int period = DetectorImpl.BIN_PERIOD_MS;
 		Iterator<Detector> it = DetectorHelper.iterator();
 		while (it.hasNext()) {
 			Detector d = it.next();
 			if (d instanceof DetectorImpl) {
 				DetectorImpl det = (DetectorImpl) d;
-				det.writeSampleXml(w);
+				det.writeSampleXml(w, stamp, period);
 			}
 		}
 	}
 
-	/** Write the tail of the detector sample XML file */
+	/** Write the tail of the detector XML file */
 	private void writeSampleXmlTail(Writer w) throws IOException {
 		w.write("</traffic_sample>\n");
 	}

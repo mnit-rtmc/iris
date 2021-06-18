@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Create a new operation to query the LCS */
 	public OpQueryLCSIndications(LCSArrayImpl l) {
-		super(PriorityLevel.DATA_30_SEC, l);
+		super(PriorityLevel.SHORT_POLL, l);
 	}
 
 	/** Create the second phase of the operation */

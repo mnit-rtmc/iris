@@ -141,6 +141,7 @@ public class VehicleEventLog {
 			final String ev = formatEvent(duration, head, st, speed,
 				length);
 			p_stamp = stamp;
+			gap = false;
 			FLUSH.addJob(new Job() {
 				public void perform() throws IOException {
 					appendEvent(stamp, ev);
@@ -166,8 +167,9 @@ public class VehicleEventLog {
 
 	/** Log a gap in vehicle events */
 	public void logGap(long stamp) {
-		if (isArchiveEnabled()) {
+		if (isArchiveEnabled() && !gap) {
 			p_stamp = 0;
+			gap = true;
 			FLUSH.addJob(new Job() {
 				public void perform() throws IOException {
 					appendEvent(stamp, "*\n");
@@ -179,24 +181,31 @@ public class VehicleEventLog {
 	/** Time stamp of most recent vehicle event */
 	private transient long p_stamp;
 
+	/** Flag indicating gap as most recent event */
+	private transient boolean gap;
+
 	/** Binning flag */
 	private transient boolean binning;
 
-	/** Is vehicle log binning? */
+	/** Are vehicle events being binned? */
 	public boolean isBinning() {
 		return binning;
 	}
 
-	/** Bin 30-second sample data */
+	/** Set flag indicating events are being binned */
 	public void setBinning(boolean b) {
 		binning = b;
+	}
+
+	/** Clear binned counts */
+	public void clear() {
 		ev_vehicles = 0;
 		ev_duration = 0;
 		ev_n_speed = 0;
 		ev_speed = 0;
 	}
 
-	/** Get the vehicle count sample for a given period */
+	/** Get the vehicle count for a given period */
 	public PeriodicSample getVehCount(long stamp, int period) {
 		return new PeriodicSample(stamp, period, ev_vehicles);
 	}
