@@ -14,6 +14,10 @@
 //
 use crate::common::{Error, Result};
 use crate::query::TrafficData;
+use async_std::io::{BufReader, ReadExt};
+use async_std::prelude::*;
+use std::io::BufRead as _;
+use std::io::Read as BlockingRead;
 use std::num::{NonZeroU16, NonZeroU32, NonZeroU8};
 use std::str::FromStr;
 
@@ -323,8 +327,35 @@ impl VehicleEvent {
 }
 
 impl VehLog {
+    /// Create a vehicle event log from an async reader
+    pub async fn from_async_reader<R>(reader: R) -> Result<Self>
+    where
+        R: ReadExt + Unpin,
+    {
+        let mut log = Self::default();
+        let mut lines = BufReader::new(reader).lines();
+        while let Some(line) = lines.next().await {
+            log.append(&line?)?;
+        }
+        log.finish();
+        Ok(log)
+    }
+
+    /// Create a vehicle event log from a blocking reader
+    pub fn from_blocking_reader<R>(reader: R) -> Result<Self>
+    where
+        R: BlockingRead,
+    {
+        let mut log = Self::default();
+        for line in std::io::BufReader::new(reader).lines() {
+            log.append(&line?)?;
+        }
+        log.finish();
+        Ok(log)
+    }
+
     /// Append an event to the log
-    pub fn append(&mut self, line: &str) -> Result<()> {
+    fn append(&mut self, line: &str) -> Result<()> {
         let line = line.trim();
         if line.is_empty() {
             return Ok(());
@@ -349,7 +380,7 @@ impl VehLog {
     }
 
     /// Fill in event gaps
-    pub fn finish(&mut self) {
+    fn finish(&mut self) {
         self.propogate_backward();
         self.interpolate_missing_stamps();
     }

@@ -15,14 +15,12 @@
 use crate::common::{Body, Error, Result};
 use crate::vehicle::{VehLog, VehicleEvent, VehicleFilter};
 use async_std::fs::{read_dir, File};
-use async_std::io::{BufReader, ReadExt};
+use async_std::io::ReadExt;
 use async_std::path::{Path, PathBuf};
-use async_std::prelude::*;
 use async_std::stream::StreamExt;
 use chrono::{Duration, Local, NaiveDate};
 use serde::Deserialize;
 use std::collections::HashSet;
-use std::io::BufRead as _;
 use std::io::Read as _;
 use std::marker::PhantomData;
 use zip::ZipArchive;
@@ -662,11 +660,7 @@ impl<T: TrafficData> TrafficQuery<T> {
                 let name = self.vlog_file_name();
                 if let Ok(zf) = zip.by_name(&name) {
                     log::info!("opened {} in {}.{}", name, self.date, EXT);
-                    let mut log = VehLog::default();
-                    for line in std::io::BufReader::new(zf).lines() {
-                        log.append(&line?)?;
-                    }
-                    log.finish();
+                    let log = VehLog::from_blocking_reader(zf)?;
                     let bin = log.bin_30_seconds::<T>(self.filter())?;
                     return Ok(bin.iter().map(|d| d.as_json()).collect());
                 }
@@ -681,12 +675,7 @@ impl<T: TrafficData> TrafficQuery<T> {
         path.push(self.vlog_file_name());
         if let Ok(file) = File::open(&path).await {
             log::info!("opened {:?}", &path);
-            let mut log = VehLog::default();
-            let mut lines = BufReader::new(file).lines();
-            while let Some(line) = lines.next().await {
-                log.append(&line?)?;
-            }
-            log.finish();
+            let log = VehLog::from_async_reader(file).await?;
             let bin = log.bin_30_seconds::<T>(self.filter())?;
             Ok(bin.iter().map(|d| d.as_json()).collect())
         } else {
