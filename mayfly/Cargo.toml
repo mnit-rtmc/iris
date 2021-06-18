@@ -1,8 +1,8 @@
 [package]
 name = "mayfly"
 version = "0.1.6"
-authors = ["Douglas Lau <doug.lau@state.mn.us>"]
 edition = "2018"
+default-run = "mayfly"
 
 [dependencies]
 async-std = { version = "1.8", features = ["attributes"] }

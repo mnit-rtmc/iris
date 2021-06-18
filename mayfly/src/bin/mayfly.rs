@@ -14,12 +14,8 @@
 //
 #![forbid(unsafe_code)]
 
-mod common;
-mod query;
-mod vehicle;
-
-use common::Error;
-use query::{
+use mayfly::common::Error;
+use mayfly::query::{
     CorridorQuery, CountData, DateQuery, DetectorQuery, DistrictQuery,
     HeadwayData, LengthData, OccupancyData, SpeedData, TrafficQuery, YearQuery,
 };

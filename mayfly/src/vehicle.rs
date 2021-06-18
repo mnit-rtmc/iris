@@ -42,7 +42,7 @@ pub struct VehicleEvent {
 
 /// Vehicle event log for one detector on one day
 #[derive(Default)]
-pub struct EventLog {
+pub struct VehLog {
     /// All events in the log
     events: Vec<VehicleEvent>,
     /// Previous event time stamp
@@ -135,10 +135,10 @@ impl Stamp {
     const MIDNIGHT: u32 = 24 * 60 * 60 * 1000;
 
     /// Value indicating missing time stamp
-    const NONE: u32 = u32::MAX;
+    const NONE: u32 = u32::MAX - 1;
 
     /// Value indicating logging reset event
-    const RESET: u32 = u32::MAX - 1;
+    const RESET: u32 = u32::MAX;
 
     /// Create a new time stamp
     fn new(value: u32) -> Result<Self> {
@@ -322,7 +322,7 @@ impl VehicleEvent {
     }
 }
 
-impl EventLog {
+impl VehLog {
     /// Append an event to the log
     pub fn append(&mut self, line: &str) -> Result<()> {
         let line = line.trim();
@@ -648,7 +648,7 @@ mod test {
 
     #[test]
     fn log() {
-        let mut log = EventLog::default();
+        let mut log = VehLog::default();
         for line in LOG.split('\n') {
             log.append(line).unwrap();
         }

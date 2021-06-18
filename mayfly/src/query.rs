@@ -13,7 +13,7 @@
 // GNU General Public License for more details.
 //
 use crate::common::{Body, Error, Result};
-use crate::vehicle::{EventLog, VehicleEvent, VehicleFilter};
+use crate::vehicle::{VehLog, VehicleEvent, VehicleFilter};
 use async_std::fs::{read_dir, File};
 use async_std::io::{BufReader, ReadExt};
 use async_std::path::{Path, PathBuf};
@@ -305,14 +305,14 @@ fn parse_date(date: &str) -> Result<NaiveDate> {
 }
 
 /// Max age for caching resources (100 weeks)
-const MAX_AGE: u64 = 100 * 7 * 24 * 60 * 60;
+const MAX_AGE_SEC: u64 = 100 * 7 * 24 * 60 * 60;
 
 /// Get max age for cache control heder
 fn max_age(date: &str) -> Option<u64> {
     if let Ok(date) = parse_date(date) {
         let today = Local::today().naive_local();
         if today > date + Duration::days(2) {
-            Some(MAX_AGE)
+            Some(MAX_AGE_SEC)
         } else {
             Some(30)
         }
@@ -662,7 +662,7 @@ impl<T: TrafficData> TrafficQuery<T> {
                 let name = self.vlog_file_name();
                 if let Ok(zf) = zip.by_name(&name) {
                     log::info!("opened {} in {}.{}", name, self.date, EXT);
-                    let mut log = EventLog::default();
+                    let mut log = VehLog::default();
                     for line in std::io::BufReader::new(zf).lines() {
                         log.append(&line?)?;
                     }
@@ -681,7 +681,7 @@ impl<T: TrafficData> TrafficQuery<T> {
         path.push(self.vlog_file_name());
         if let Ok(file) = File::open(&path).await {
             log::info!("opened {:?}", &path);
-            let mut log = EventLog::default();
+            let mut log = VehLog::default();
             let mut lines = BufReader::new(file).lines();
             while let Some(line) = lines.next().await {
                 log.append(&line?)?;
@@ -714,7 +714,7 @@ impl<T: TrafficData> TrafficQuery<T> {
     async fn lookup_binned(&self) -> Result<Body> {
         // Cannot filter by length/speed when already binned
         if self.filter().is_filtered() {
-            let mut body = Body::default().with_max_age(Some(MAX_AGE));
+            let mut body = Body::default().with_max_age(Some(MAX_AGE_SEC));
             for _ in 0..2880 {
                 body.push("null");
             }
