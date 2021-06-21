@@ -130,6 +130,8 @@ public class VidStreamMgrGst extends VidStreamMgr {
 	static private boolean isGstInstalled() {
 		if (!GST_INSTALLED)
 			checkGstInstall();
+		else
+			initGst();
 		return GST_INSTALLED;
 	}
 
