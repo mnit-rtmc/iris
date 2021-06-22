@@ -270,7 +270,7 @@ public class VidSourceTemplateEditor extends AbstractForm {
 		vsSubnetsLbl = new JLabel("<html>" + I18N.get(
 				"camera.video_source.template.subnets") +
 				"<sup>†</sup></html>");
-		vsSubnetsField = new JTextArea(1, 42);
+		vsSubnetsField = new JTextArea(1, 40);
 		vsSubnetsField.setLineWrap(true);
 		vsSubnetsField.setWrapStyleWord(true);
 

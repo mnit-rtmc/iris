@@ -69,6 +69,18 @@ public class VidSrcTemplateConfigHelp extends AbstractForm {
 	private final JTextArea vscMAddrPortLbl = new JTextArea(1, 15);
 	private final JTextArea vscMAddrPortDesc = new JTextArea(1, 35);
 	
+	/** {un} field */
+	private final JTextArea vscUsernameLbl = new JTextArea(1, 15);
+	private final JTextArea vscUsernameDesc = new JTextArea(1, 35);	
+
+	/** {pw} field */
+	private final JTextArea vscPasswordLbl = new JTextArea(1, 15);
+	private final JTextArea vscPasswordDesc = new JTextArea(1, 35);
+
+	/** {unpw@addr} field */
+	private final JTextArea vscUnPwAddrLbl = new JTextArea(3, 15);
+	private final JTextArea vscUnPwAddrDesc = new JTextArea(3, 35);
+
 	/** {chan} field */
 	private final JTextArea vscChanLbl = new JTextArea(1, 15);
 	private final JTextArea vscChanDesc = new JTextArea(1, 35);
@@ -113,12 +125,13 @@ public class VidSrcTemplateConfigHelp extends AbstractForm {
 	private void initLabels() {
 		JTextArea labels[] = {vscFieldLbl, vscAddrLbl, vscPortLbl,
 				vscAddrPortLbl, vscMAddrLbl, vscMPortLbl, vscMAddrPortLbl,
-				vscChanLbl, vscNameLbl, vscDistLbl, vscSIdLbl, vscPNameLbl,
-				vscMiscLbl};
+				vscUsernameLbl, vscPasswordLbl, vscUnPwAddrLbl, vscChanLbl,
+				vscNameLbl, vscDistLbl, vscSIdLbl, vscPNameLbl, vscMiscLbl};
 		JTextArea descriptions[] = {vscFieldDesc, vscAddrDesc, vscPortDesc,
 				vscAddrPortDesc, vscMAddrDesc, vscMPortDesc, vscMAddrPortDesc,
-				vscChanDesc, vscNameDesc, vscDistDesc, vscSIdDesc,
-				vscPNameDesc, vscMiscDesc, note1, note2};
+				vscUsernameDesc, vscPasswordDesc, vscUnPwAddrDesc, vscChanDesc,
+				vscNameDesc, vscDistDesc, vscSIdDesc, vscPNameDesc,
+				vscMiscDesc, note1, note2};
 		
 		// draw a border to make it look like a table
 		Border border = BorderFactory.createLineBorder(Color.GRAY);
@@ -165,6 +178,9 @@ public class VidSrcTemplateConfigHelp extends AbstractForm {
 		vscMAddrLbl.setText("{maddr}");
 		vscMPortLbl.setText("{mport}");
 		vscMAddrPortLbl.setText("{maddrport}");
+		vscUsernameLbl.setText("{un}");
+		vscPasswordLbl.setText("{pw}");
+		vscUnPwAddrLbl.setText("{unpw@addr}");
 		vscChanLbl.setText("{chan}");
 		vscNameLbl.setText("{name}");
 		vscDistLbl.setText("{dist}");
@@ -186,6 +202,12 @@ public class VidSrcTemplateConfigHelp extends AbstractForm {
 				"camera.video_source.template.config.mport"));
 		vscMAddrPortDesc.setText(I18N.get(
 				"camera.video_source.template.config.maddrport"));
+		vscUsernameDesc.setText(I18N.get(
+				"camera.video_source.template.config.un"));
+		vscPasswordDesc.setText(I18N.get(
+				"camera.video_source.template.config.pw"));
+		vscUnPwAddrDesc.setText(I18N.get(
+				"camera.video_source.template.config.unpwaddr"));
 		vscChanDesc.setText(I18N.get(
 				"camera.video_source.template.config.chan"));
 		vscNameDesc.setText(I18N.get(
@@ -259,6 +281,21 @@ public class VidSrcTemplateConfigHelp extends AbstractForm {
 		row = new JPanel(flayout);
 		row.add(vscChanLbl);
 		row.add(vscChanDesc);
+		p.add(row);
+		
+		row = new JPanel(flayout);
+		row.add(vscUsernameLbl);
+		row.add(vscUsernameDesc);
+		p.add(row);
+		
+		row = new JPanel(flayout);
+		row.add(vscPasswordLbl);
+		row.add(vscPasswordDesc);
+		p.add(row);
+		
+		row = new JPanel(flayout);
+		row.add(vscUnPwAddrLbl);
+		row.add(vscUnPwAddrDesc);
 		p.add(row);
 		
 		row = new JPanel(flayout);

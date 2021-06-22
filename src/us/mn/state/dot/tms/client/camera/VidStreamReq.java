@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2020  SRF Consulting Group
+ * Copyright (C) 2019-2021  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraVidSourceOrder;
 import us.mn.state.dot.tms.CameraVidSourceOrderHelper;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.CameraTemplate;
 import us.mn.state.dot.tms.CameraTemplateHelper;
 import us.mn.state.dot.tms.VidSourceTemplate;
@@ -136,6 +137,59 @@ public class VidStreamReq {
 		return addr;
 	}
 
+	/** Get username from controller password field.
+	 * Returns null if the password string is null,
+	 * empty, or doesn't have a colon separator.
+	 */
+	static private String getUsername(String unpw) {
+		if (isNothing(unpw))
+			return null;
+		String[] parts = unpw.split(":", 2);
+		if (parts.length < 2)
+			return null;
+		return parts[0];
+	}
+	
+	/** Get password from controller password field.
+	 * Returns null if the password string is null or empty.
+	 */
+	static private String getPassword(String unpw) {
+		if (isNothing(unpw))
+			return null;
+		String[] parts = unpw.split(":", 2);
+		switch (parts.length) {
+			case 0:
+				return null;
+			case 1:
+				return parts[1];
+		}
+		return parts[2];
+	}
+
+	/** Get an RFC-2396 compliant un + pw + address + port
+	 *  string in the form "{un}:{pw}@{addr}:{port}", with
+	 *  appropriate reformatting if certain fields are null.
+	 *  Returns null if there's no address or if there's a
+	 *  password but no username.
+	 */
+	static private String getUnPwAddr(String unpw, String addr, Integer port,
+			Integer defPort) {
+		String addrport = getAddrPort(addr, port, defPort);
+		if (isNothing(addrport))
+			return null; // no address
+		if (isNothing(unpw))
+			return addrport;   // no un or pw
+		String[] parts = unpw.split(":", 2);
+		switch (parts.length) {
+			case 0: // no un or pw
+				return addrport;
+			case 1: // found pw, but no un
+				return null;
+		}
+		// username and password
+		return parts[0] + ":" + parts[1] + "@" + addrport;
+	}
+	
 	/** Get camera name modified for use with
 	  * a live555 videoProxy rtsp uri string */
 	static private String getLive555CamName(Camera cam) {
@@ -173,6 +227,8 @@ public class VidStreamReq {
 		Session ses = Session.getCurrent();
 		Properties p = ses.getProperties();
 		String config = st.getConfig();
+		Controller con = cam.getController();
+		String unpw = (con == null) ? null : con.getPassword();
 
 		// check subnet
 		String subnets = st.getSubnets();
@@ -180,13 +236,24 @@ public class VidStreamReq {
 			return null;
 		}
 
-		// expand config replacement-fields
+		// expand substitution-fields...
 		Matcher m = PATTERN.matcher(config);
 		StringBuffer sb = new StringBuffer();
-		String tok, val;
+		String tok, val, defVal;
+		String[] ds;
 		while (m.find()) {
 			tok = m.group(1);
 			val = null;
+			
+			// parse default value from substitution field
+			ds = tok.split("=", 2);
+			defVal = null;
+			if (ds.length == 2) {
+				tok = ds[0];
+				defVal = ds[1];
+			}
+
+			// find value for substitution field
 			if (tok.equalsIgnoreCase("addr"))
 				val = cam.getEncAddress();
 			else if (tok.equalsIgnoreCase("port")) {
@@ -213,12 +280,24 @@ public class VidStreamReq {
 				val = getLive555CamName(cam);
 			else if (tok.equalsIgnoreCase("sizecode"))
 				val = "s"; //TODO: change when panel is resized
-			else
-				val = p.getProperty(tok);
-			// ignore a template with an unavailable replacement-field
-			if (isNothing(val)) {
-				return null;
+			else if (tok.equalsIgnoreCase("unpw@addr")) {
+				val = getUnPwAddr(unpw, cam.getEncAddress(),
+						cam.getEncPort(), st.getDefaultPort());
 			}
+			else if (tok.equalsIgnoreCase("un"))
+				val = getUsername(unpw);
+			else if (tok.equalsIgnoreCase("pw"))
+				val = getPassword(unpw);
+			else // look in the iris-client.properties file
+				val = p.getProperty(tok);
+
+			// If we couldn't find a value...
+			if (isNothing(val)) {
+				if (defVal == null)
+					return null; // ignore template
+				val = defVal; // use default value
+			}
+
 			m.appendReplacement(sb, val);
 		}
 		m.appendTail(sb);
