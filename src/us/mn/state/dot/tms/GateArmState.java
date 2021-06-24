@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2015-2021  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +21,7 @@ package us.mn.state.dot.tms;
  * arm arrays.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public enum GateArmState {
 
@@ -31,13 +33,59 @@ public enum GateArmState {
 	WARN_CLOSE,	/* gate open, DMS warn	user: CLOSING or OPENING */
 	CLOSING,	/* close in progress	system: CLOSED or FAULT */
 	CLOSED,		/* gate closed		user: OPENING */
-	TIMEOUT;	/* comm. timeout	no change allowed */
+	TIMEOUT, 	/* comm. timeout	no change allowed */
+
+	// Additional Nebraska gate-arm states
+	BEACON_ON,      /* gate-arm & beacon lights on, waiting
+	                   for  gate-controlled pre-close delay */
+	STILL_CLOSED,   /* Never moved from closed */
+	OPENING_FAIL,   /* Failed moving from closed to open */
+	STILL_OPEN,     /* Never moved from open */
+	CLOSING_FAIL,   /* Failed moving from open to closed */
+	NOT_CONFIGURED, /* Requested gate-arm is not configured */
+	ARM_LIGHT_ERROR,/* Gate arm lights are not working correctly */
+	SIGN_ERROR;     /* Gate sign is not working correctly */
+
+	/** Static array of GateArmState values */
+	private static final GateArmState[] VALUES = values();
 
 	/** Get gate arm state from an ordinal value */
 	static public GateArmState fromOrdinal(int o) {
-		if (o >= 0 && o < values().length)
-			return values()[o];
-		else
-			return UNKNOWN;
+		return ((o >= 0) && (o < VALUES.length)) ? VALUES[o] : UNKNOWN;
+	}
+	
+	/** Test for operation fault */
+	public boolean isFault() {
+		switch (this) {
+			case FAULT:
+			case STILL_CLOSED:
+			case OPENING_FAIL:
+			case STILL_OPEN:
+			case CLOSING_FAIL:
+			case NOT_CONFIGURED:
+			case ARM_LIGHT_ERROR:
+			case SIGN_ERROR:
+				return true;
+		}
+		return false;
+	}
+
+	public boolean isMoving() {
+		switch (this) {
+			case OPENING:
+			case BEACON_ON:
+			case CLOSING:
+				return true;
+		}
+		return false;
+	}
+
+	public boolean isDone() {
+		switch (this) {
+			case OPEN:
+			case CLOSED:
+				return true;
+		}
+		return false;
 	}
 }
