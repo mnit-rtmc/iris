@@ -178,7 +178,7 @@ abstract public class OpController<T extends ControllerProperty> {
 
 	/** Get a string description of the operation */
 	@Override
-	public final String toString() {
+	public String toString() {
 		return stripToLastDot(phaseClass().getName()) + " (" + id + ")";
 	}
 
