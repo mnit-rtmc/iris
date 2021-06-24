@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013-2020  Minnesota Department of Transportation
+ * Copyright (C) 2015-2021  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +31,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GateArmState;
+import us.mn.state.dot.tms.GateStyle;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.PlanPhase;
@@ -45,6 +47,7 @@ import static us.mn.state.dot.tms.server.MainServer.TIMER;
  * All gate arms in an array are always controlled as a group.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
@@ -417,22 +420,41 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		if (rs == GateArmState.OPENING) {
 			if (lock_state.isOpenDenied())
 				throw INTERLOCK_CONFLICT;
-			if (cs == GateArmState.CLOSED ||
-			   cs == GateArmState.WARN_CLOSE)
+			if (GateStyle.isNDOT()) {
+				// Nebraska gates
+				if (cs == GateArmState.CLOSED
+				 || cs.isFault())
+					return rs;
+			}
+			else {
+				// Minnesota gates (default)
+				if (cs == GateArmState.CLOSED
+				 || cs == GateArmState.WARN_CLOSE)
 				return rs;
+			}
 		}
 		if (rs == GateArmState.WARN_CLOSE) {
 			if (lock_state.isCloseDenied())
 				throw INTERLOCK_CONFLICT;
-			if (cs == GateArmState.OPEN)
+			if (GateStyle.isMnDOT()
+			 && (cs == GateArmState.OPEN))
 				return rs;
 		}
 		if (rs == GateArmState.CLOSING) {
 			if (lock_state.isCloseDenied())
 				throw INTERLOCK_CONFLICT;
-			if (cs == GateArmState.WARN_CLOSE ||
-			   cs == GateArmState.FAULT)
+			if (GateStyle.isNDOT()) {
+				// Nebraska gates
+				if (cs == GateArmState.OPEN
+				 || cs.isFault())
 				return rs;
+			}
+			else {
+				// Minnesota Gates (default)
+				if (cs == GateArmState.WARN_CLOSE
+				 || cs == GateArmState.FAULT)
+					return rs;
+			}
 		}
 		throw new ChangeVetoException("INVALID STATE CHANGE: " + cs +
 			" to " + rs);
@@ -529,28 +551,31 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			GateArmImpl ga = getArm(i);
 			if (ga != null && ga.isActive()) {
 				GateArmState gas = ga.getArmStateEnum();
-				switch (gas) {
-				case UNKNOWN:
-					unknown = true;
-					break;
-				case FAULT:
+				if (gas.isFault())
 					fault = true;
-					break;
-				case OPENING:
-					opening = true;
-					break;
-				case OPEN:
-					open = true;
-					break;
-				case CLOSING:
-					closing = true;
-					break;
-				case CLOSED:
-					closed = true;
-					break;
-				case TIMEOUT:
-					timeout = true;
-					break;
+				else switch (gas) {
+					case UNKNOWN:
+						unknown = true;
+						break;
+					case OPENING:
+						opening = true;
+						break;
+					case OPEN:
+						open = true;
+						break;
+					case BEACON_ON:
+						if (GateStyle.isNDOT())
+							closing = true;
+						break;
+					case CLOSING:
+						closing = true;
+						break;
+					case CLOSED:
+						closed = true;
+						break;
+					case TIMEOUT:
+						timeout = true;
+						break;
 				}
 			}
 		}
@@ -786,7 +811,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Test if gate arm needs maintenance */
 	@Override
 	protected boolean needsMaintenance() {
-		return arm_state == GateArmState.FAULT;
+		return arm_state.isFault();
 	}
 
 	/** Send a device request operation */
