@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013-2021  Minnesota Department of Transportation
+ * Copyright (C) 2015-2021  SRF Consulting
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +38,7 @@ import static us.mn.state.dot.tms.GateArmArray.MAX_ARMS;
 import us.mn.state.dot.tms.GateArmHelper;
 import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
+import us.mn.state.dot.tms.GateStyle;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
@@ -57,6 +59,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * GateArmDispatcher is a GUI component for deploying gate arms.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class GateArmDispatcher extends IPanel
 	implements ProxyView<GateArmArray>
@@ -342,6 +345,8 @@ public class GateArmDispatcher extends IPanel
 		if (null == a || a.equals("armState")) {
 			arm_state_lbl.setText(" " + GateArmState.fromOrdinal(
 				ga.getArmState()).toString() + " ");
+			if (GateStyle.isNDOT())
+				updateGateArms(ga);
 		}
 		if (null == a || a.equals("interlock"))
 			updateInterlock(ga);
@@ -421,13 +426,23 @@ public class GateArmDispatcher extends IPanel
 	private void updateButtons(GateArmArray ga) {
 		boolean e = session.isWritePermitted(ga, "armStateNext");
 		GateArmState gas = GateArmState.fromOrdinal(ga.getArmState());
-		open_arm.setEnabled(e && (gas == GateArmState.CLOSED
-		                       || gas == GateArmState.WARN_CLOSE)
-			&& isOpenAllowed(ga));
-		warn_close_arm.setEnabled(e && gas == GateArmState.OPEN &&
-			isCloseAllowed(ga));
-		close_arm.setEnabled(e && isClosePossible(gas) &&
-			isCloseAllowed(ga));
+		if (e == false) {
+			// gate control disabled
+			open_arm.setEnabled(false);
+			warn_close_arm.setEnabled(false);
+			close_arm.setEnabled(false);
+		}
+		else  {
+			open_arm.setEnabled(isOpenPossible(gas)
+			                 && isOpenAllowed(ga));
+			if (GateStyle.isNDOT())
+				warn_close_arm.setEnabled(false);
+			else
+				warn_close_arm.setEnabled(gas == GateArmState.OPEN
+				                       && isCloseAllowed(ga));
+			close_arm.setEnabled(isClosePossible(gas)
+			                  && isCloseAllowed(ga));
+		}
 	}
 
 	/** Check if gate arm open is allowed */
@@ -439,6 +454,19 @@ public class GateArmDispatcher extends IPanel
 			return false;
 		default:
 			return true;
+		}
+	}
+
+	/** Check if gate arm open is possible */
+	private boolean isOpenPossible(GateArmState gas) {
+		if (GateStyle.isNDOT() && gas.isFault())
+			return true;
+		switch (gas) {
+		case CLOSED:
+		case WARN_CLOSE:
+			return true;
+		default:
+			return false;
 		}
 	}
 
@@ -456,10 +484,14 @@ public class GateArmDispatcher extends IPanel
 
 	/** Check if gate arm close is possible */
 	private boolean isClosePossible(GateArmState gas) {
+		if (gas.isFault())
+			return true;
 		switch (gas) {
-		case FAULT:
 		case WARN_CLOSE:
 			return true;
+		case OPEN:
+			if (GateStyle.isNDOT())
+				return true;
 		default:
 			return false;
 		}
@@ -529,25 +561,39 @@ public class GateArmDispatcher extends IPanel
 
 	/** Get one gate arm state */
 	private String getArmState(GateArm ga) {
-		String cs = ControllerHelper.getStatus(ga.getController());
+		Controller c = ga.getController();
+		String cs = ControllerHelper.getStatus(c);
+		GateArmState gas = GateArmState.fromOrdinal(ga.getArmState());
+		String gass = gas.toString();
+		boolean ndotCustom = GateStyle.isNDOT() && (c != null);
+		if (ndotCustom && gas.isMoving())
+			return gass;
 		if (cs.length() > 0)
 			return cs;
-		String ms = ControllerHelper.getMaintenance(ga.getController());
+		String ms = ControllerHelper.getMaintenance(c);
 		if (ms.length() > 0)
 			return ms;
-		return GateArmState.fromOrdinal(ga.getArmState()).toString();
+		return gass;
 	}
 
 	/** Update the status widgets */
 	private void updateStateColor(GateArm ga, int i) {
 		Controller c = ga.getController();
-		if (ControllerHelper.isFailed(c)) {
+		GateArmState gas = GateArmState.fromOrdinal(ga.getArmState());
+		boolean ndotCustom = GateStyle.isNDOT() && (c != null);
+		if (ndotCustom && gas.isMoving()) {
+			state_lbl[i].setForeground(DARK_BLUE);
+			state_lbl[i].setBackground(null);
+		} else if (ControllerHelper.isFailed(c) && GateStyle.isMnDOT()) {
 			state_lbl[i].setForeground(Color.WHITE);
 			state_lbl[i].setBackground(Color.GRAY);
 		} else if (ControllerHelper.getStatus(c).length() > 0) {
 			state_lbl[i].setForeground(Color.WHITE);
 			state_lbl[i].setBackground(Color.BLACK);
 		} else if (ControllerHelper.getMaintenance(c).length() > 0) {
+			state_lbl[i].setForeground(Color.BLACK);
+			state_lbl[i].setBackground(Color.YELLOW);
+		} else if (ndotCustom && gas.isFault()) {
 			state_lbl[i].setForeground(Color.BLACK);
 			state_lbl[i].setBackground(Color.YELLOW);
 		} else {

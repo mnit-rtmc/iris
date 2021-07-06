@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GateArmState;
+import us.mn.state.dot.tms.GateStyle;
 import static us.mn.state.dot.tms.GateArmState.TIMEOUT;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
@@ -35,6 +36,7 @@ import us.mn.state.dot.tms.server.event.GateArmEvent;
  * A Gate Arm is a device for restricting access to a ramp on a road.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class GateArmImpl extends DeviceImpl implements GateArm {
 
@@ -252,6 +254,12 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 			logEvent(new GateArmEvent(gas, name, owner));
 			arm_state = gas;
 			notifyAttribute("armState");
+
+			if (GateStyle.isNDOT()) {
+				// Send gate-array style-change notification
+				// to trigger an arm-state update in client GUI.
+				ga_array.notifyAttribute("styles");
+			}
 		}
 		ga_array.updateArmState();
 	}
@@ -282,5 +290,15 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	 * when active or fail state changes. */
 	public void updateStyles() {
 		ga_array.updateStyles();
+	}
+	
+	protected boolean bBeaconOn = false;
+
+	public boolean getBeaconOn() {
+		return bBeaconOn;
+	}
+	
+	public void setBeaconOn(boolean bVal) {
+		bBeaconOn = bVal;
 	}
 }

@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013-2018  Minnesota Department of Transportation
+ * Copyright (C) 2021       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +26,7 @@ import us.mn.state.dot.tms.TMSException;
  * This is a class for logging gate arm state change events to a database.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class GateArmEvent extends BaseEvent {
 
@@ -48,9 +50,9 @@ public class GateArmEvent extends BaseEvent {
 
 	/** Get corresponding event type for a gate arm state */
 	static private EventType gateArmStateEventType(GateArmState gas) {
-		switch(gas) {
-		case FAULT:
+		if (gas.isFault())
 			return EventType.GATE_ARM_FAULT;
+		switch(gas) {
 		case OPENING:
 			return EventType.GATE_ARM_OPENING;
 		case OPEN:

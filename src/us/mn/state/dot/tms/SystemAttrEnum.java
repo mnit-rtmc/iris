@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2015  AHMCT, University of California
  * Copyright (C) 2009-2021  Minnesota Department of Transportation
  * Copyright (C) 2012-2021  Iteris Inc.
- * Copyright (C) 2015-2020  SRF Consulting Group
+ * Copyright (C) 2015-2021  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,6 +103,7 @@ public enum SystemAttrEnum {
 	EMAIL_SMTP_HOST(String.class),
 	GATE_ARM_ALERT_TIMEOUT_SECS(90, 10),
 	GATE_ARM_EVENT_PURGE_DAYS(0, 0),
+	GATE_STYLE(1, 0, 2, Change.RESTART_SERVER),
 	HELP_TROUBLE_TICKET_ENABLE(false),
 	HELP_TROUBLE_TICKET_URL(String.class),
 	INCIDENT_CLEAR_ADVICE_MULTI(String.class),
@@ -160,7 +161,8 @@ public enum SystemAttrEnum {
 	 *  take after changing a system attribute. */
 	enum Change {
 		RESTART_CLIENT("Restart the client after changing."),
-		NONE("A change takes effect immediately.");
+		NONE("A change takes effect immediately."),
+		RESTART_SERVER("Restart the server after changing.");
 
 		/** Change message for user. */
 		private final String m_msg;
