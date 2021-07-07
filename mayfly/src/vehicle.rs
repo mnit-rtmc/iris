@@ -98,7 +98,7 @@ fn parse_int<T: FromStr>(v: &str) -> Result<T> {
 fn parse_hour(hour: &str) -> Result<u32> {
     match hour.parse() {
         Ok(h) if h < 24 => Ok(h),
-        _ => Err(Error::InvalidData),
+        _ => Err(Error::InvalidStamp),
     }
 }
 
@@ -106,7 +106,7 @@ fn parse_hour(hour: &str) -> Result<u32> {
 fn parse_min_sec(min_sec: &str) -> Result<u32> {
     match min_sec.parse() {
         Ok(ms) if ms < 60 => Ok(ms),
-        _ => Err(Error::InvalidData),
+        _ => Err(Error::InvalidStamp),
     }
 }
 
@@ -123,7 +123,7 @@ impl FromStr for Stamp {
             let sec = hour * 3600 + minute * 60 + second;
             Stamp::new(sec * 1000)
         } else {
-            Err(Error::InvalidData)
+            Err(Error::InvalidStamp)
         }
     }
 }
@@ -149,7 +149,7 @@ impl Stamp {
         if value < Stamp::MIDNIGHT {
             Ok(Stamp(value))
         } else {
-            Err(Error::InvalidData)
+            Err(Error::InvalidStamp)
         }
     }
 
@@ -553,7 +553,7 @@ impl<T: TrafficData> Bin<T> {
             Some(stamp) => {
                 let per = period_30_second(stamp);
                 if per >= 2880 {
-                    return Err(Error::InvalidData);
+                    return Err(Error::InvalidStamp);
                 }
                 while self.periods.len() <= per {
                     let mut data = T::default();

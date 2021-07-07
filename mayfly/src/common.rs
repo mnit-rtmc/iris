@@ -31,6 +31,9 @@ pub enum Error {
     /// Invalid data
     #[error("Invalid data")]
     InvalidData,
+    /// Invalid stamp
+    #[error("Invalid stamp")]
+    InvalidStamp,
     /// Not found
     #[error("Not Found")]
     NotFound,
