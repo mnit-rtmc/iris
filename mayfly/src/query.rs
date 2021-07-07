@@ -246,7 +246,8 @@ fn scan_zip(
     body: &mut Body,
 ) -> Result<()> {
     let file = std::fs::File::open(path).or(Err(Error::NotFound))?;
-    let mut zip = ZipArchive::new(file)?;
+    let buf = std::io::BufReader::new(file);
+    let mut zip = ZipArchive::new(buf)?;
     let mut names = HashSet::new();
     for i in 0..zip.len() {
         let zf = zip.by_index(i)?;
@@ -656,7 +657,8 @@ impl<T: TrafficData> TrafficQuery<T> {
     fn read_vlog_zip(&self) -> Result<Vec<String>> {
         let path = self.zip_path();
         if let Ok(file) = std::fs::File::open(path) {
-            if let Ok(mut zip) = ZipArchive::new(file) {
+            let buf = std::io::BufReader::new(file);
+            if let Ok(mut zip) = ZipArchive::new(buf) {
                 let name = self.vlog_file_name();
                 if let Ok(zf) = zip.by_name(&name) {
                     log::info!("opened {} in {}.{}", name, self.date, EXT);
@@ -725,7 +727,8 @@ impl<T: TrafficData> TrafficQuery<T> {
     fn read_binned_zip(&self) -> Result<Vec<u8>> {
         let path = self.zip_path();
         if let Ok(file) = std::fs::File::open(path) {
-            if let Ok(mut zip) = ZipArchive::new(file) {
+            let buf = std::io::BufReader::new(file);
+            if let Ok(mut zip) = ZipArchive::new(buf) {
                 let name = self.binned_file_name();
                 if let Ok(mut zf) = zip.by_name(&name) {
                     log::info!("opened {} in {}.{}", name, self.date, EXT);
