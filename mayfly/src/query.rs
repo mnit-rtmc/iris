@@ -247,21 +247,20 @@ fn scan_zip(
 ) -> Result<()> {
     let file = std::fs::File::open(path).or(Err(Error::NotFound))?;
     let buf = std::io::BufReader::new(file);
-    let mut zip = ZipArchive::new(buf)?;
+    let zip = ZipArchive::new(buf)?;
     let mut names = HashSet::new();
-    for i in 0..zip.len() {
-        let zf = zip.by_index(i)?;
-        let ent = std::path::Path::new(zf.name());
+    for name in zip.file_names() {
+        let ent = std::path::Path::new(name);
         if let Some(name) = ent.file_name() {
             if let Some(name) = name.to_str() {
-                if let Some(value) = check(name, false) {
-                    names.insert(format!("\"{}\"", value));
+                if let Some(name) = check(name, false) {
+                    names.insert(name);
                 }
             }
         }
     }
     for name in names {
-        body.push(&name);
+        body.push(&format!("\"{}\"", name));
     }
     Ok(())
 }
