@@ -86,14 +86,6 @@ pub struct Bin<T: TrafficData> {
     periods: Vec<T>,
 }
 
-/// Parse an integer from a vehicle log
-fn parse_int<T: FromStr>(v: &str) -> Result<T> {
-    match v.parse() {
-        Ok(i) => Ok(i),
-        _ => Err(Error::InvalidData),
-    }
-}
-
 /// Parse an hour from a time stamp
 fn parse_hour(hour: &str) -> Result<u32> {
     match hour.parse() {
@@ -198,7 +190,7 @@ impl VehicleEvent {
         match val.next() {
             Some(dur) => {
                 if dur != "?" {
-                    ev.duration = Some(parse_int(dur)?);
+                    ev.duration = dur.parse().ok();
                 }
             }
             None => return Err(Error::InvalidData),
@@ -206,7 +198,7 @@ impl VehicleEvent {
         match val.next() {
             Some(hdw) => {
                 if hdw != "?" {
-                    ev.headway = Some(parse_int(hdw)?);
+                    ev.headway = hdw.parse().ok();
                 }
             }
             None => return Err(Error::InvalidData),
@@ -218,12 +210,12 @@ impl VehicleEvent {
         }
         if let Some(speed) = val.next() {
             if !speed.is_empty() {
-                ev.speed = Some(parse_int(speed)?);
+                ev.speed = speed.parse().ok();
             }
         }
         if let Some(length) = val.next() {
             if !length.is_empty() {
-                ev.length = Some(parse_int(length)?);
+                ev.length = length.parse().ok();
             }
         }
         Ok(ev)

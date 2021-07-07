@@ -1,4 +1,4 @@
-// main.rs
+// mayfly.rs
 //
 // Copyright (c) 2019-2021  Minnesota Department of Transportation
 //
@@ -25,6 +25,11 @@ use tide::{Request, Response, StatusCode};
 #[async_std::main]
 async fn main() -> tide::Result<()> {
     env_logger::builder().format_timestamp(None).init();
+    run_service().await
+}
+
+/// Run as a web service
+async fn run_service() -> tide::Result<()> {
     let mut app = tide::new();
     let mut root = app.at("/mayfly/");
     root.at("").get(|_| handle_index());
