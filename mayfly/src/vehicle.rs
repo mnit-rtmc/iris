@@ -12,8 +12,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::binned::TrafficData;
 use crate::common::{Error, Result};
-use crate::query::TrafficData;
 use async_std::io::{BufReader, ReadExt};
 use async_std::prelude::*;
 use std::io::BufRead as _;
@@ -632,14 +632,10 @@ mod test {
     fn bad_veh_events() {
         assert!(VehicleEvent::new("").is_err());
         assert!(VehicleEvent::new("1").is_err());
-        assert!(VehicleEvent::new("?,").is_err());
-        assert!(VehicleEvent::new(",?").is_err());
         assert!(VehicleEvent::new("?,?,?").is_err());
         assert!(VehicleEvent::new("10,?,24:59:59").is_err());
         assert!(VehicleEvent::new("15,?,23:60:59").is_err());
         assert!(VehicleEvent::new("25,?,23:59:60").is_err());
-        assert!(VehicleEvent::new("25,50,,-5").is_err());
-        assert!(VehicleEvent::new("25,50,,,X").is_err());
     }
 
     #[test]

@@ -14,6 +14,7 @@
 //
 #![forbid(unsafe_code)]
 
+pub mod binned;
 pub mod common;
 pub mod query;
 pub mod vehicle;

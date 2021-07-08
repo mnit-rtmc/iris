@@ -14,10 +14,13 @@
 //
 #![forbid(unsafe_code)]
 
+use mayfly::binned::{
+    CountData, HeadwayData, LengthData, OccupancyData, SpeedData,
+};
 use mayfly::common::Error;
 use mayfly::query::{
-    CorridorQuery, CountData, DateQuery, DetectorQuery, DistrictQuery,
-    HeadwayData, LengthData, OccupancyData, SpeedData, TrafficQuery, YearQuery,
+    CorridorQuery, DateQuery, DetectorQuery, DistrictQuery, TrafficQuery,
+    YearQuery,
 };
 use tide::{Request, Response, StatusCode};
 
