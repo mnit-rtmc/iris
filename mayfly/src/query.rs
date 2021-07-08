@@ -412,19 +412,19 @@ impl<T: TrafficData> TrafficQuery<T> {
 
     /// Lookup archived data from vehicle log
     async fn lookup_vlog(&self) -> Result<Body> {
-        let data = match self.read_vlog_zip() {
-            Ok(data) => data,
-            Err(_) => self.read_vlog_file().await?,
-        };
-        let mut body = Body::default().with_max_age(max_age(&self.date));
-        for val in data {
-            body.push(&val);
+        match self.read_vlog_zip() {
+            Ok(body) => Ok(body),
+            Err(_) => Ok(self.read_vlog_file().await?),
         }
-        Ok(body)
+    }
+
+    /// Make a JSON result body
+    fn make_body(&self) -> Body {
+        Body::default().with_max_age(max_age(&self.date))
     }
 
     /// Read vehicle log data from a zip file
-    fn read_vlog_zip(&self) -> Result<Vec<String>> {
+    fn read_vlog_zip(&self) -> Result<Body> {
         let path = self.zip_path();
         if let Ok(file) = std::fs::File::open(path) {
             let buf = std::io::BufReader::new(file);
@@ -433,8 +433,11 @@ impl<T: TrafficData> TrafficQuery<T> {
                 if let Ok(zf) = zip.by_name(&name) {
                     log::info!("opened {} in {}.{}", name, self.date, EXT);
                     let log = VehLog::from_blocking_reader(zf)?;
-                    let bin = log.bin_30_seconds::<T>(self.filter())?;
-                    return Ok(bin.iter().map(|d| d.as_json()).collect());
+                    let mut body = self.make_body();
+                    for val in log.into_binned::<T>(30, self.filter()) {
+                        body.push(&val.as_json());
+                    }
+                    return Ok(body);
                 }
             }
         }
@@ -442,14 +445,17 @@ impl<T: TrafficData> TrafficQuery<T> {
     }
 
     /// Read vehicle log data from a file
-    async fn read_vlog_file(&self) -> Result<Vec<String>> {
+    async fn read_vlog_file(&self) -> Result<Body> {
         let mut path = self.date_path();
         path.push(self.vlog_file_name());
         if let Ok(file) = File::open(&path).await {
             log::info!("opened {:?}", &path);
             let log = VehLog::from_async_reader(file).await?;
-            let bin = log.bin_30_seconds::<T>(self.filter())?;
-            Ok(bin.iter().map(|d| d.as_json()).collect())
+            let mut body = self.make_body();
+            for val in log.into_binned::<T>(30, self.filter()) {
+                body.push(&val.as_json());
+            }
+            Ok(body)
         } else {
             Err(Error::NotFound)
         }
@@ -485,7 +491,7 @@ impl<T: TrafficData> TrafficQuery<T> {
                 Ok(data) => data,
                 Err(_) => self.read_binned_file().await?,
             };
-            let mut body = Body::default().with_max_age(max_age(&self.date));
+            let mut body = self.make_body();
             for val in data.chunks_exact(T::bin_bytes()) {
                 body.push(&T::unpack(val).as_json());
             }

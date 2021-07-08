@@ -18,6 +18,7 @@ use async_std::io::{BufReader, ReadExt};
 use async_std::prelude::*;
 use std::io::BufRead as _;
 use std::io::Read as BlockingRead;
+use std::marker::PhantomData;
 use std::num::{NonZeroU16, NonZeroU32, NonZeroU8};
 use std::str::FromStr;
 
@@ -77,13 +78,22 @@ pub struct VehicleFilter {
     headway_ms_max: Option<u32>,
 }
 
-/// Vehicle event data binning
-#[derive(Default)]
-pub struct Bin<T: TrafficData> {
+/// Vehicle event binning iterator
+pub struct BinIter<T: TrafficData> {
+    /// Traffic data type
+    _data: PhantomData<T>,
+    /// Remaining vehicle events
+    event_iter: std::vec::IntoIter<VehicleEvent>,
+    /// Most recent event
+    ev: Option<VehicleEvent>,
+    /// Vehicle event filter
+    filter: VehicleFilter,
+    /// Binning period (s)
+    period: usize,
+    /// Current binning interval
+    interval: usize,
     /// Reset on previous event
     reset: bool,
-    /// Binned traffic data periods
-    periods: Vec<T>,
 }
 
 /// Parse an hour from a time stamp
@@ -428,19 +438,12 @@ impl VehLog {
     }
 
     /// Put vehicle events into 30 second bins
-    pub fn bin_30_seconds<T: TrafficData>(
-        &self,
+    pub fn into_binned<T: TrafficData>(
+        self,
+        period: usize,
         filter: VehicleFilter,
-    ) -> Result<Vec<T>> {
-        let mut bin = Bin::default();
-        for ev in &self.events {
-            if ev.is_reset() {
-                bin.reset();
-            } else if filter.check(ev) {
-                bin.vehicle(ev)?;
-            }
-        }
-        Ok(bin.finish())
+    ) -> BinIter<T> {
+        BinIter::new(period, self, filter)
     }
 }
 
@@ -533,62 +536,95 @@ fn sec_to_ms(m: f32) -> u32 {
     (m * 1000.0).round() as u32
 }
 
-impl<T: TrafficData> Bin<T> {
-    /// Reset event log
-    fn reset(&mut self) {
-        self.reset = true;
-    }
+impl<T: TrafficData> Iterator for BinIter<T> {
+    type Item = T;
 
-    /// Add a vehicle event
-    fn vehicle(&mut self, ev: &VehicleEvent) -> Result<()> {
-        match ev.stamp() {
-            Some(stamp) => {
-                let per = period_30_second(stamp);
-                if per >= 2880 {
-                    return Err(Error::InvalidStamp);
-                }
-                while self.periods.len() <= per {
-                    let mut data = T::default();
-                    if self.reset {
-                        data.reset();
-                    }
-                    self.periods.push(data);
-                }
-                let data = &mut self.periods[per];
-                data.vehicle(ev);
-                self.reset = false;
-                Ok(())
-            }
-            None => {
-                // No timestamp; add to last period and hope for the best!
-                let len = self.periods.len();
-                if len > 0 {
-                    let data = &mut self.periods[len - 1];
-                    data.vehicle(ev);
-                    data.reset();
-                }
-                Ok(())
-            }
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.interval < self.max_interval() {
+            let data = self.interval_data();
+            self.interval += 1;
+            Some(data)
+        } else {
+            None
         }
-    }
-
-    /// Finish binning
-    fn finish(self) -> Vec<T> {
-        let mut periods = self.periods;
-        while periods.len() < 2880 {
-            let mut data = T::default();
-            if self.reset {
-                data.reset();
-            }
-            periods.push(data);
-        }
-        periods
     }
 }
 
-/// Get the 30-second period for the given timestamp (ms)
-fn period_30_second(ms: u32) -> usize {
-    (ms as usize) / 30_000
+impl<T: TrafficData> BinIter<T> {
+    /// Create a new binning iterator
+    fn new(period: usize, log: VehLog, filter: VehicleFilter) -> Self {
+        BinIter {
+            _data: PhantomData,
+            event_iter: log.events.into_iter(),
+            ev: None,
+            filter,
+            period,
+            interval: 0,
+            reset: false,
+        }
+    }
+
+    /// Get the maximum interval number
+    fn max_interval(&self) -> usize {
+        (24 * 60 * 60) / self.period
+    }
+
+    /// Get the interval number for an event
+    fn event_interval(&self, ev: &VehicleEvent) -> Option<usize> {
+        if let Some(stamp) = ev.stamp() {
+            let interval = (stamp as usize) / (self.period * 1000);
+            if interval < self.max_interval() {
+                return Some(interval);
+            }
+        }
+        None
+    }
+
+    /// Get the current interval data
+    fn interval_data(&mut self) -> T {
+        let mut data = self.make_data();
+        if let Some(ev) = &self.ev {
+            if self.is_future_event(&ev) {
+                return data;
+            } else {
+                data.bin_vehicle(&ev);
+            }
+        }
+        self.ev = None;
+        while let Some(ev) = self.event_iter.next() {
+            if ev.is_reset() {
+                self.reset = true;
+                data.reset();
+            } else {
+                self.reset = false;
+                if self.is_future_event(&ev) {
+                    self.ev = Some(ev);
+                    break;
+                }
+                if self.filter.check(&ev) {
+                    data.bin_vehicle(&ev);
+                }
+            }
+        }
+        data
+    }
+
+    /// Make binned traffic data
+    fn make_data(&self) -> T {
+        let mut data = T::default();
+        if self.reset {
+            data.reset();
+        }
+        data
+    }
+
+    /// Check if an event is for a future interval
+    fn is_future_event(&self, ev: &VehicleEvent) -> bool {
+        match self.event_interval(ev) {
+            Some(interval) => interval > self.interval,
+            None => false,
+        }
+    }
 }
 
 #[cfg(test)]

@@ -41,8 +41,8 @@ pub trait TrafficData: Default {
     /// Set reset for traffic data
     fn reset(&mut self) {}
 
-    /// Add a vehicle to traffic data
-    fn vehicle(&mut self, veh: &VehicleEvent);
+    /// Bin a vehicle to traffic data
+    fn bin_vehicle(&mut self, veh: &VehicleEvent);
 
     /// Get traffic data value as JSON
     fn as_json(&self) -> String;
@@ -104,8 +104,8 @@ impl TrafficData for CountData {
         self.reset = true;
     }
 
-    /// Add a vehicle to count data
-    fn vehicle(&mut self, _veh: &VehicleEvent) {
+    /// Bin a vehicle to count data
+    fn bin_vehicle(&mut self, _veh: &VehicleEvent) {
         self.count += 1;
     }
 
@@ -134,8 +134,8 @@ impl TrafficData for SpeedData {
         SpeedData { total, count }
     }
 
-    /// Add a vehicle to speed data
-    fn vehicle(&mut self, veh: &VehicleEvent) {
+    /// Bin a vehicle to speed data
+    fn bin_vehicle(&mut self, veh: &VehicleEvent) {
         if let Some(speed) = veh.speed() {
             self.total += speed;
             self.count += 1;
@@ -168,8 +168,8 @@ impl TrafficData for HeadwayData {
         HeadwayData { total, count }
     }
 
-    /// Add a vehicle to headway data
-    fn vehicle(&mut self, veh: &VehicleEvent) {
+    /// Bin a vehicle to headway data
+    fn bin_vehicle(&mut self, veh: &VehicleEvent) {
         if let Some(headway) = veh.headway() {
             self.total += headway;
             self.count += 1;
@@ -214,8 +214,8 @@ impl TrafficData for OccupancyData {
         self.reset = true;
     }
 
-    /// Add a vehicle to occupancy data
-    fn vehicle(&mut self, veh: &VehicleEvent) {
+    /// Bin a vehicle to occupancy data
+    fn bin_vehicle(&mut self, veh: &VehicleEvent) {
         if let Some(duration) = veh.duration() {
             self.duration += duration;
         }
@@ -253,8 +253,8 @@ impl TrafficData for LengthData {
         LengthData { total, count }
     }
 
-    /// Add a vehicle to length data
-    fn vehicle(&mut self, veh: &VehicleEvent) {
+    /// Bin a vehicle to length data
+    fn bin_vehicle(&mut self, veh: &VehicleEvent) {
         if let Some(length) = veh.length() {
             self.total += length;
             self.count += 1;
