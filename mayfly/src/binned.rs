@@ -12,7 +12,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::common::{Error, Result};
 use crate::vehicle::VehicleEvent;
 use std::convert::TryFrom;
 
@@ -24,15 +23,6 @@ pub trait TrafficData: Default {
     /// Number of bytes per binned value
     fn bin_bytes() -> usize {
         1
-    }
-
-    /// Check binned data length
-    fn check_len(len: u64) -> Result<()> {
-        if len == 2880 * Self::bin_bytes() as u64 {
-            Ok(())
-        } else {
-            Err(Error::InvalidData)
-        }
     }
 
     /// Unpack one binned value

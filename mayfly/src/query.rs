@@ -509,14 +509,22 @@ impl<T: TrafficData> TrafficQuery<T> {
                 if let Ok(mut zf) = zip.by_name(&name) {
                     log::info!("opened {} in {}.{}", name, self.date, EXT);
                     let len = zf.size();
-                    T::check_len(len)?;
-                    let mut data = vec![0; len as usize];
+                    let mut data = Self::make_buffer(len)?;
                     zf.read_exact(&mut data)?;
                     return Ok(data);
                 }
             }
         }
         Err(Error::NotFound)
+    }
+
+    /// Make buffer to hold 30-second binned data
+    fn make_buffer(len: u64) -> Result<Vec<u8>> {
+        if len == 2880 * T::bin_bytes() as u64 {
+            Ok(vec![0; len as usize])
+        } else {
+            Err(Error::InvalidData)
+        }
     }
 
     /// Get path to (zip) file (std PathBuf)
@@ -537,8 +545,7 @@ impl<T: TrafficData> TrafficQuery<T> {
             log::info!("opened {:?}", &path);
             if let Ok(metadata) = file.metadata().await {
                 let len = metadata.len();
-                T::check_len(len)?;
-                let mut data = vec![0; len as usize];
+                let mut data = Self::make_buffer(len)?;
                 file.read_exact(&mut data).await?;
                 return Ok(data);
             }
