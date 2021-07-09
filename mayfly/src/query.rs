@@ -26,6 +26,8 @@ use std::io::Read as _;
 use std::marker::PhantomData;
 use zip::ZipArchive;
 
+type Archive = ZipArchive<std::io::BufReader<std::fs::File>>;
+
 /// Base traffic archive path
 const BASE_PATH: &str = "/var/lib/iris/traffic";
 
@@ -406,63 +408,99 @@ impl<T: TrafficData> TrafficQuery<T> {
     /// vehicle event log.
     pub async fn lookup(&self) -> Result<Body> {
         parse_date(&self.date)?;
+        match self.open_zip_archive() {
+            Some(archive) => self.lookup_zipped(archive),
+            None => self.lookup_unzipped().await,
+        }
+    }
+
+    /// Open the zip archive for the selected date
+    fn open_zip_archive(&self) -> Option<Archive> {
+        let path = self.zip_path();
+        if let Ok(file) = std::fs::File::open(path) {
+            let buf = std::io::BufReader::new(file);
+            if let Ok(zip) = ZipArchive::new(buf) {
+                return Some(zip);
+            }
+        }
+        None
+    }
+
+    /// Lookup data from a zip archive
+    fn lookup_zipped(&self, mut archive: Archive) -> Result<Body> {
         if !self.filter().is_filtered() {
-            match self.lookup_binned().await {
+            match self.lookup_zipped_bin(&mut archive) {
                 Err(Error::NotFound) => (),
                 res => return res,
             }
         }
-        self.lookup_vlog().await
+        self.lookup_zipped_vlog(&mut archive)
     }
 
-    /// Lookup archived data from vehicle log
-    async fn lookup_vlog(&self) -> Result<Body> {
-        match self.read_vlog_zip() {
-            Ok(body) => Ok(body),
-            Err(_) => Ok(self.read_vlog_file().await?),
+    /// Lookup archived data from 30-second binned data
+    fn lookup_zipped_bin(&self, archive: &mut Archive) -> Result<Body> {
+        let name = self.binned_file_name();
+        match archive.by_name(&name) {
+            Ok(mut zf) => {
+                log::info!("opened {} in {}.{}", name, self.date, EXT);
+                let mut buf = Self::make_buffer(zf.size())?;
+                zf.read_exact(&mut buf)?;
+                Ok(self.make_binned_body(buf))
+            }
+            _ => Err(Error::NotFound),
         }
     }
 
-    /// Make a JSON result body
-    fn make_body(&self) -> Body {
-        Body::default().with_max_age(max_age(&self.date))
+    /// Read vehicle log data from a zip file
+    fn lookup_zipped_vlog(&self, archive: &mut Archive) -> Result<Body> {
+        let name = self.vlog_file_name();
+        match archive.by_name(&name) {
+            Ok(zf) => {
+                log::info!("opened {} in {}.{}", name, self.date, EXT);
+                let vlog = VehLog::from_blocking_reader(zf)?;
+                Ok(self.make_vlog_body(vlog))
+            }
+            _ => Err(Error::NotFound),
+        }
     }
 
-    /// Read vehicle log data from a zip file
-    fn read_vlog_zip(&self) -> Result<Body> {
-        let path = self.zip_path();
-        if let Ok(file) = std::fs::File::open(path) {
-            let buf = std::io::BufReader::new(file);
-            if let Ok(mut zip) = ZipArchive::new(buf) {
-                let name = self.vlog_file_name();
-                if let Ok(zf) = zip.by_name(&name) {
-                    log::info!("opened {} in {}.{}", name, self.date, EXT);
-                    let log = VehLog::from_blocking_reader(zf)?;
-                    let mut body = self.make_body();
-                    for val in log.binned_iter::<T>(30, self.filter()) {
-                        body.push(&format!("{}", val));
-                    }
-                    return Ok(body);
-                }
+    /// Lookup data from file system (unzipped)
+    async fn lookup_unzipped(&self) -> Result<Body> {
+        if !self.filter().is_filtered() {
+            match self.lookup_unzipped_bin().await {
+                Err(Error::NotFound) => (),
+                res => return res,
+            }
+        }
+        self.lookup_unzipped_vlog().await
+    }
+
+    /// Lookup unzipped data from 30-second binned data
+    async fn lookup_unzipped_bin(&self) -> Result<Body> {
+        let mut path = self.date_path();
+        path.push(self.binned_file_name());
+        if let Ok(mut file) = File::open(&path).await {
+            if let Ok(metadata) = file.metadata().await {
+                log::info!("opened {:?}", &path);
+                let mut buf = Self::make_buffer(metadata.len())?;
+                file.read_exact(&mut buf).await?;
+                return Ok(self.make_binned_body(buf));
             }
         }
         Err(Error::NotFound)
     }
 
-    /// Read vehicle log data from a file
-    async fn read_vlog_file(&self) -> Result<Body> {
+    /// Lookup unzipped data from vehicle log file
+    async fn lookup_unzipped_vlog(&self) -> Result<Body> {
         let mut path = self.date_path();
         path.push(self.vlog_file_name());
-        if let Ok(file) = File::open(&path).await {
-            log::info!("opened {:?}", &path);
-            let log = VehLog::from_async_reader(file).await?;
-            let mut body = self.make_body();
-            for val in log.binned_iter::<T>(30, self.filter()) {
-                body.push(&format!("{}", val));
+        match File::open(&path).await {
+            Ok(file) => {
+                log::info!("opened {:?}", &path);
+                let vlog = VehLog::from_async_reader(file).await?;
+                Ok(self.make_vlog_body(vlog))
             }
-            Ok(body)
-        } else {
-            Err(Error::NotFound)
+            _ => Err(Error::NotFound),
         }
     }
 
@@ -482,37 +520,6 @@ impl<T: TrafficData> TrafficQuery<T> {
         format!("{}.vlog", self.detector)
     }
 
-    /// Lookup archived data from 30-second binned data
-    async fn lookup_binned(&self) -> Result<Body> {
-        let data = match self.read_binned_zip() {
-            Ok(data) => data,
-            Err(_) => self.read_binned_file().await?,
-        };
-        let mut body = self.make_body();
-        for val in data.chunks_exact(T::bin_bytes()) {
-            body.push(&format!("{}", T::unpack(val)));
-        }
-        Ok(body)
-    }
-
-    /// Read binned data from a zip file
-    fn read_binned_zip(&self) -> Result<Vec<u8>> {
-        let path = self.zip_path();
-        if let Ok(file) = std::fs::File::open(path) {
-            let buf = std::io::BufReader::new(file);
-            if let Ok(mut zip) = ZipArchive::new(buf) {
-                let name = self.binned_file_name();
-                if let Ok(mut zf) = zip.by_name(&name) {
-                    log::info!("opened {} in {}.{}", name, self.date, EXT);
-                    let mut data = Self::make_buffer(zf.size())?;
-                    zf.read_exact(&mut data)?;
-                    return Ok(data);
-                }
-            }
-        }
-        Err(Error::NotFound)
-    }
-
     /// Make buffer to hold 30-second binned data
     fn make_buffer(len: u64) -> Result<Vec<u8>> {
         let sz = 2880 * T::bin_bytes();
@@ -523,6 +530,29 @@ impl<T: TrafficData> TrafficQuery<T> {
         }
     }
 
+    /// Make a JSON result body
+    fn make_body(&self) -> Body {
+        Body::default().with_max_age(max_age(&self.date))
+    }
+
+    /// Make body from binned buffer
+    fn make_binned_body(&self, buf: Vec<u8>) -> Body {
+        let mut body = self.make_body();
+        for val in buf.chunks_exact(T::bin_bytes()) {
+            body.push(&format!("{}", T::unpack(val)));
+        }
+        body
+    }
+
+    /// Make body from vehicle log
+    fn make_vlog_body(&self, vlog: VehLog) -> Body {
+        let mut body = self.make_body();
+        for val in vlog.binned_iter::<T>(30, self.filter()) {
+            body.push(&format!("{}", val));
+        }
+        body
+    }
+
     /// Get path to (zip) file (std PathBuf)
     fn zip_path(&self) -> std::path::PathBuf {
         zip_path(&self.district, &self.date)
@@ -531,21 +561,6 @@ impl<T: TrafficData> TrafficQuery<T> {
     /// Get binned file name
     fn binned_file_name(&self) -> String {
         format!("{}.{}", self.detector, T::binned_ext())
-    }
-
-    /// Read binned data from a file
-    async fn read_binned_file(&self) -> Result<Vec<u8>> {
-        let mut path = self.date_path();
-        path.push(self.binned_file_name());
-        if let Ok(mut file) = File::open(&path).await {
-            if let Ok(metadata) = file.metadata().await {
-                log::info!("opened {:?}", &path);
-                let mut data = Self::make_buffer(metadata.len())?;
-                file.read_exact(&mut data).await?;
-                return Ok(data);
-            }
-        }
-        Err(Error::NotFound)
     }
 
     /// Get path containing archive data for one date
