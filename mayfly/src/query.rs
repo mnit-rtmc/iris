@@ -400,14 +400,19 @@ fn file_ext(ext: &str) -> Option<&str> {
 }
 
 impl<T: TrafficData> TrafficQuery<T> {
-    /// Lookup archived traffic data
+    /// Lookup archived traffic data.
+    ///
+    /// Check for binned data first, since it will be faster than scanning a
+    /// vehicle event log.
     pub async fn lookup(&self) -> Result<Body> {
         parse_date(&self.date)?;
-        match self.lookup_vlog().await {
-            Ok(body) => Ok(body),
-            Err(Error::NotFound) => self.lookup_binned().await,
-            Err(e) => Err(e),
+        if !self.filter().is_filtered() {
+            match self.lookup_binned().await {
+                Err(Error::NotFound) => (),
+                res => return res,
+            }
         }
+        self.lookup_vlog().await
     }
 
     /// Lookup archived data from vehicle log
@@ -479,24 +484,15 @@ impl<T: TrafficData> TrafficQuery<T> {
 
     /// Lookup archived data from 30-second binned data
     async fn lookup_binned(&self) -> Result<Body> {
-        // Cannot filter by length/speed when already binned
-        if self.filter().is_filtered() {
-            let mut body = Body::default().with_max_age(Some(MAX_AGE_SEC));
-            for _ in 0..2880 {
-                body.push("null");
-            }
-            Ok(body)
-        } else {
-            let data = match self.read_binned_zip() {
-                Ok(data) => data,
-                Err(_) => self.read_binned_file().await?,
-            };
-            let mut body = self.make_body();
-            for val in data.chunks_exact(T::bin_bytes()) {
-                body.push(&format!("{}", T::unpack(val)));
-            }
-            Ok(body)
+        let data = match self.read_binned_zip() {
+            Ok(data) => data,
+            Err(_) => self.read_binned_file().await?,
+        };
+        let mut body = self.make_body();
+        for val in data.chunks_exact(T::bin_bytes()) {
+            body.push(&format!("{}", T::unpack(val)));
         }
+        Ok(body)
     }
 
     /// Read binned data from a zip file
@@ -519,8 +515,9 @@ impl<T: TrafficData> TrafficQuery<T> {
 
     /// Make buffer to hold 30-second binned data
     fn make_buffer(len: u64) -> Result<Vec<u8>> {
-        if len == 2880 * T::bin_bytes() as u64 {
-            Ok(vec![0; len as usize])
+        let sz = 2880 * T::bin_bytes();
+        if len == sz as u64 {
+            Ok(vec![0; sz])
         } else {
             Err(Error::InvalidData)
         }
@@ -541,8 +538,8 @@ impl<T: TrafficData> TrafficQuery<T> {
         let mut path = self.date_path();
         path.push(self.binned_file_name());
         if let Ok(mut file) = File::open(&path).await {
-            log::info!("opened {:?}", &path);
             if let Ok(metadata) = file.metadata().await {
+                log::info!("opened {:?}", &path);
                 let mut data = Self::make_buffer(metadata.len())?;
                 file.read_exact(&mut data).await?;
                 return Ok(data);
