@@ -79,13 +79,13 @@ pub struct VehicleFilter {
 }
 
 /// Vehicle event binning iterator
-pub struct BinIter<T: TrafficData> {
+pub struct BinIter<'a, T: TrafficData> {
     /// Traffic data type
     _data: PhantomData<T>,
     /// Remaining vehicle events
-    event_iter: std::vec::IntoIter<VehicleEvent>,
+    event_iter: std::slice::Iter<'a, VehicleEvent>,
     /// Most recent event
-    ev: Option<VehicleEvent>,
+    ev: Option<&'a VehicleEvent>,
     /// Vehicle event filter
     filter: VehicleFilter,
     /// Binning period (s)
@@ -437,13 +437,13 @@ impl VehLog {
         }
     }
 
-    /// Put vehicle events into 30 second bins
-    pub fn into_binned<T: TrafficData>(
-        self,
+    /// Put vehicle events into periodic bins
+    pub fn binned_iter<T: TrafficData>(
+        &self,
         period: usize,
         filter: VehicleFilter,
     ) -> BinIter<T> {
-        BinIter::new(period, self, filter)
+        BinIter::new(period, &self, filter)
     }
 }
 
@@ -536,7 +536,7 @@ fn sec_to_ms(m: f32) -> u32 {
     (m * 1000.0).round() as u32
 }
 
-impl<T: TrafficData> Iterator for BinIter<T> {
+impl<'a, T: TrafficData> Iterator for BinIter<'a, T> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -550,12 +550,12 @@ impl<T: TrafficData> Iterator for BinIter<T> {
     }
 }
 
-impl<T: TrafficData> BinIter<T> {
+impl<'a, T: TrafficData> BinIter<'a, T> {
     /// Create a new binning iterator
-    fn new(period: usize, log: VehLog, filter: VehicleFilter) -> Self {
+    fn new(period: usize, log: &'a VehLog, filter: VehicleFilter) -> Self {
         BinIter {
             _data: PhantomData,
-            event_iter: log.events.into_iter(),
+            event_iter: log.events[..].iter(),
             ev: None,
             filter,
             period,

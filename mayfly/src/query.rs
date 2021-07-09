@@ -434,7 +434,7 @@ impl<T: TrafficData> TrafficQuery<T> {
                     log::info!("opened {} in {}.{}", name, self.date, EXT);
                     let log = VehLog::from_blocking_reader(zf)?;
                     let mut body = self.make_body();
-                    for val in log.into_binned::<T>(30, self.filter()) {
+                    for val in log.binned_iter::<T>(30, self.filter()) {
                         body.push(&format!("{}", val));
                     }
                     return Ok(body);
@@ -452,7 +452,7 @@ impl<T: TrafficData> TrafficQuery<T> {
             log::info!("opened {:?}", &path);
             let log = VehLog::from_async_reader(file).await?;
             let mut body = self.make_body();
-            for val in log.into_binned::<T>(30, self.filter()) {
+            for val in log.binned_iter::<T>(30, self.filter()) {
                 body.push(&format!("{}", val));
             }
             Ok(body)

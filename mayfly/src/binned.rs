@@ -29,6 +29,9 @@ pub trait TrafficData: Default + fmt::Display {
     /// Unpack one binned value
     fn unpack(val: &[u8]) -> Self;
 
+    /// Pack one binned value
+    fn pack(&self, buf: &mut Vec<u8>);
+
     /// Set reset for traffic data
     fn reset(&mut self) {}
 
@@ -87,6 +90,15 @@ impl TrafficData for CountData {
         CountData { reset, count }
     }
 
+    /// Pack one binned value
+    fn pack(&self, buf: &mut Vec<u8>) {
+        if self.reset {
+            buf.push(0xFF);
+        } else {
+            buf.push(self.count as u8);
+        }
+    }
+
     /// Set reset for count data
     fn reset(&mut self) {
         self.reset = true;
@@ -123,6 +135,15 @@ impl TrafficData for SpeedData {
         SpeedData { total, count }
     }
 
+    /// Pack one binned value
+    fn pack(&self, buf: &mut Vec<u8>) {
+        if self.count > 0 {
+            buf.push(self.total as u8);
+        } else {
+            buf.push(0xFF);
+        }
+    }
+
     /// Bin a vehicle to speed data
     fn bin_vehicle(&mut self, veh: &VehicleEvent) {
         if let Some(speed) = veh.speed() {
@@ -156,6 +177,15 @@ impl TrafficData for HeadwayData {
         let total = u32::try_from(value).unwrap_or(0);
         let count = total.min(1);
         HeadwayData { total, count }
+    }
+
+    /// Pack one binned value
+    fn pack(&self, buf: &mut Vec<u8>) {
+        if self.count > 0 {
+            buf.push(self.total as u8);
+        } else {
+            buf.push(0xFF);
+        }
     }
 
     /// Bin a vehicle to headway data
@@ -198,6 +228,19 @@ impl TrafficData for OccupancyData {
         let percent = scans.max(0) as f32 / 1_800.0;
         let duration = (percent * 30_000.0).round() as u32;
         OccupancyData { reset, duration }
+    }
+
+    /// Pack one binned value
+    fn pack(&self, buf: &mut Vec<u8>) {
+        if self.reset {
+            buf.push(0xFF);
+            buf.push(0xFF);
+        } else {
+            let percent = (self.duration as f32) / 30_000.0;
+            let scans = (percent * 1_800.0).round() as u16;
+            buf.push(((scans >> 8) & 0xFF) as u8);
+            buf.push((scans & 0xFF) as u8);
+        }
     }
 
     /// Set reset for occupancy data
@@ -243,6 +286,15 @@ impl TrafficData for LengthData {
         let total = u32::try_from(value).unwrap_or(0);
         let count = total.min(1);
         LengthData { total, count }
+    }
+
+    /// Pack one binned value
+    fn pack(&self, buf: &mut Vec<u8>) {
+        if self.count > 0 {
+            buf.push(self.total as u8);
+        } else {
+            buf.push(0xFF);
+        }
     }
 
     /// Bin a vehicle to length data
