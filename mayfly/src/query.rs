@@ -435,7 +435,7 @@ impl<T: TrafficData> TrafficQuery<T> {
                     let log = VehLog::from_blocking_reader(zf)?;
                     let mut body = self.make_body();
                     for val in log.into_binned::<T>(30, self.filter()) {
-                        body.push(&val.as_json());
+                        body.push(&format!("{}", val));
                     }
                     return Ok(body);
                 }
@@ -453,7 +453,7 @@ impl<T: TrafficData> TrafficQuery<T> {
             let log = VehLog::from_async_reader(file).await?;
             let mut body = self.make_body();
             for val in log.into_binned::<T>(30, self.filter()) {
-                body.push(&val.as_json());
+                body.push(&format!("{}", val));
             }
             Ok(body)
         } else {
@@ -493,7 +493,7 @@ impl<T: TrafficData> TrafficQuery<T> {
             };
             let mut body = self.make_body();
             for val in data.chunks_exact(T::bin_bytes()) {
-                body.push(&T::unpack(val).as_json());
+                body.push(&format!("{}", T::unpack(val)));
             }
             Ok(body)
         }
@@ -508,8 +508,7 @@ impl<T: TrafficData> TrafficQuery<T> {
                 let name = self.binned_file_name();
                 if let Ok(mut zf) = zip.by_name(&name) {
                     log::info!("opened {} in {}.{}", name, self.date, EXT);
-                    let len = zf.size();
-                    let mut data = Self::make_buffer(len)?;
+                    let mut data = Self::make_buffer(zf.size())?;
                     zf.read_exact(&mut data)?;
                     return Ok(data);
                 }
@@ -544,8 +543,7 @@ impl<T: TrafficData> TrafficQuery<T> {
         if let Ok(mut file) = File::open(&path).await {
             log::info!("opened {:?}", &path);
             if let Ok(metadata) = file.metadata().await {
-                let len = metadata.len();
-                let mut data = Self::make_buffer(len)?;
+                let mut data = Self::make_buffer(metadata.len())?;
                 file.read_exact(&mut data).await?;
                 return Ok(data);
             }

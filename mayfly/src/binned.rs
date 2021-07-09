@@ -14,9 +14,10 @@
 //
 use crate::vehicle::VehicleEvent;
 use std::convert::TryFrom;
+use std::fmt;
 
 /// Traffic data type
-pub trait TrafficData: Default {
+pub trait TrafficData: Default + fmt::Display {
     /// Binned file extension
     fn binned_ext() -> &'static str;
 
@@ -33,9 +34,6 @@ pub trait TrafficData: Default {
 
     /// Bin a vehicle to traffic data
     fn bin_vehicle(&mut self, veh: &VehicleEvent);
-
-    /// Get traffic data value as JSON
-    fn as_json(&self) -> String;
 }
 
 /// Binned vehicle count data
@@ -98,13 +96,14 @@ impl TrafficData for CountData {
     fn bin_vehicle(&mut self, _veh: &VehicleEvent) {
         self.count += 1;
     }
+}
 
-    /// Get count data value as JSON
-    fn as_json(&self) -> String {
+impl fmt::Display for CountData {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.reset {
-            "null".to_owned()
+            write!(f, "null")
         } else {
-            format!("{}", self.count)
+            write!(f, "{}", self.count)
         }
     }
 }
@@ -131,14 +130,15 @@ impl TrafficData for SpeedData {
             self.count += 1;
         }
     }
+}
 
-    /// Get speed data value as JSON
-    fn as_json(&self) -> String {
+impl fmt::Display for SpeedData {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.count > 0 {
             let speed = (self.total as f32 / self.count as f32).round();
-            format!("{}", speed as u32)
+            write!(f, "{}", speed as u32)
         } else {
-            "null".to_owned()
+            write!(f, "null")
         }
     }
 }
@@ -165,14 +165,15 @@ impl TrafficData for HeadwayData {
             self.count += 1;
         }
     }
+}
 
-    /// Get headway data value as JSON
-    fn as_json(&self) -> String {
+impl fmt::Display for HeadwayData {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.count > 0 {
             let headway = (self.total as f32 / self.count as f32).round();
-            format!("{}", headway as u32)
+            write!(f, "{}", headway as u32)
         } else {
-            "null".to_owned()
+            write!(f, "null")
         }
     }
 }
@@ -210,19 +211,20 @@ impl TrafficData for OccupancyData {
             self.duration += duration;
         }
     }
+}
 
-    /// Get occupancy data value as JSON
-    fn as_json(&self) -> String {
+impl fmt::Display for OccupancyData {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.reset {
-            "null".to_owned()
+            write!(f, "null")
         } else {
             // Ranges from 0 - 30_000 (100%)
             let val = self.duration;
             if val % 300 == 0 {
                 // Whole number; use integer to prevent .0 at end
-                format!("{}", val / 300)
+                write!(f, "{}", val / 300)
             } else {
-                format!("{:.2}", val as f32 / 300.0)
+                write!(f, "{:.2}", val as f32 / 300.0)
             }
         }
     }
@@ -250,14 +252,15 @@ impl TrafficData for LengthData {
             self.count += 1;
         }
     }
+}
 
-    /// Get length data value as JSON
-    fn as_json(&self) -> String {
+impl fmt::Display for LengthData {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.count > 0 {
             let length = (self.total as f32 / self.count as f32).round();
-            format!("{}", length as u32)
+            write!(f, "{}", length as u32)
         } else {
-            "null".to_owned()
+            write!(f, "null")
         }
     }
 }
