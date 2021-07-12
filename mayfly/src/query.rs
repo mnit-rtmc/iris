@@ -324,15 +324,16 @@ impl CorridorQuery {
     pub async fn lookup(&self) -> Result<Body> {
         parse_date(&self.date)?;
         let mut body = Body::default();
-        match scan_dir(&self.date_path(), check_corridor, &mut body).await {
+        match scan_zip(&self.zip_path(), check_corridor, &mut body) {
+            Ok(_) => Ok(body),
             Err(Error::NotFound) => {
-                // NOTE: the zip crate requires blocking calls
-                match scan_zip(&self.zip_path(), check_corridor, &mut body) {
+                match scan_dir(&self.date_path(), check_corridor, &mut body)
+                    .await
+                {
                     Ok(_) | Err(Error::NotFound) => Ok(body),
                     Err(e) => Err(e),
                 }
             }
-            Ok(_) => Ok(body),
             Err(e) => Err(e),
         }
     }
@@ -364,15 +365,16 @@ impl DetectorQuery {
     pub async fn lookup(&self) -> Result<Body> {
         parse_date(&self.date)?;
         let mut body = Body::default();
-        match scan_dir(&self.date_path(), check_detector, &mut body).await {
+        match scan_zip(&self.zip_path(), check_detector, &mut body) {
+            Ok(_) => Ok(body),
             Err(Error::NotFound) => {
-                // NOTE: the zip crate requires blocking calls
-                match scan_zip(&self.zip_path(), check_detector, &mut body) {
+                match scan_dir(&self.date_path(), check_detector, &mut body)
+                    .await
+                {
                     Ok(_) | Err(Error::NotFound) => Ok(body),
                     Err(e) => Err(e),
                 }
             }
-            Ok(_) => Ok(body),
             Err(e) => Err(e),
         }
     }
