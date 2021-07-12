@@ -26,8 +26,6 @@ use std::io::Read as _;
 use std::marker::PhantomData;
 use zip::ZipArchive;
 
-type Archive = ZipArchive<std::io::BufReader<std::fs::File>>;
-
 /// Base traffic archive path
 const BASE_PATH: &str = "/var/lib/iris/traffic";
 
@@ -39,6 +37,11 @@ const DEXT: &str = ".traffic";
 
 /// Traffic file extension without dot
 const EXT: &str = "traffic";
+
+/// Zip archive
+struct Archive {
+    zip: ZipArchive<std::io::BufReader<std::fs::File>>,
+}
 
 /// Query for districts in archive
 #[derive(Default, Deserialize)]
@@ -167,17 +170,25 @@ async fn scan_dir(
     Ok(())
 }
 
+impl Archive {
+    /// Open a zip archive
+    fn open(path: &std::path::Path) -> Result<Self> {
+        let file = std::fs::File::open(path).or(Err(Error::NotFound))?;
+        let buf = std::io::BufReader::new(file);
+        let zip = ZipArchive::new(buf)?;
+        Ok(Archive { zip })
+    }
+}
+
 /// Scan entries in a zip file
 fn scan_zip(
     path: &std::path::Path,
     check: fn(&str, bool) -> Option<&str>,
     body: &mut Body,
 ) -> Result<()> {
-    let file = std::fs::File::open(path).or(Err(Error::NotFound))?;
-    let buf = std::io::BufReader::new(file);
-    let zip = ZipArchive::new(buf)?;
+    let archive = Archive::open(path)?;
     let mut names = HashSet::new();
-    for name in zip.file_names() {
+    for name in archive.zip.file_names() {
         let ent = std::path::Path::new(name);
         if let Some(name) = ent.file_name() {
             if let Some(name) = name.to_str() {
@@ -408,22 +419,10 @@ impl<T: TrafficData> TrafficQuery<T> {
     /// vehicle event log.
     pub async fn lookup(&self) -> Result<Body> {
         parse_date(&self.date)?;
-        match self.open_zip_archive() {
-            Some(archive) => self.lookup_zipped(archive),
-            None => self.lookup_unzipped().await,
+        match Archive::open(&self.zip_path()) {
+            Ok(archive) => self.lookup_zipped(archive),
+            _ => self.lookup_unzipped().await,
         }
-    }
-
-    /// Open the zip archive for the selected date
-    fn open_zip_archive(&self) -> Option<Archive> {
-        let path = self.zip_path();
-        if let Ok(file) = std::fs::File::open(path) {
-            let buf = std::io::BufReader::new(file);
-            if let Ok(zip) = ZipArchive::new(buf) {
-                return Some(zip);
-            }
-        }
-        None
     }
 
     /// Lookup data from a zip archive
@@ -440,7 +439,7 @@ impl<T: TrafficData> TrafficQuery<T> {
     /// Lookup archived data from 30-second binned data
     fn lookup_zipped_bin(&self, archive: &mut Archive) -> Result<Body> {
         let name = self.binned_file_name();
-        match archive.by_name(&name) {
+        match archive.zip.by_name(&name) {
             Ok(mut zf) => {
                 log::info!("opened {} in {}.{}", name, self.date, EXT);
                 let mut buf = Self::make_buffer(zf.size())?;
@@ -454,7 +453,7 @@ impl<T: TrafficData> TrafficQuery<T> {
     /// Read vehicle log data from a zip file
     fn lookup_zipped_vlog(&self, archive: &mut Archive) -> Result<Body> {
         let name = self.vlog_file_name();
-        match archive.by_name(&name) {
+        match archive.zip.by_name(&name) {
             Ok(zf) => {
                 log::info!("opened {} in {}.{}", name, self.date, EXT);
                 let vlog = VehLog::from_blocking_reader(zf)?;
