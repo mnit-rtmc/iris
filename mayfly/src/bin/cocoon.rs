@@ -17,15 +17,16 @@
 use argh::FromArgs;
 use log::{debug, info};
 use mayfly::binned::{CountData, OccupancyData, SpeedData, TrafficData};
-use mayfly::common::{Error, Result};
+use mayfly::common::Result;
+use mayfly::traffic::Traffic;
 use mayfly::vehicle::{VehLog, VehicleFilter};
-use std::collections::HashMap;
-use std::ffi::{OsStr, OsString};
+use std::collections::HashSet;
+use std::ffi::OsString;
 use std::fs::File;
-use std::io::{BufReader, BufWriter, Write};
-use std::path::{Path, PathBuf};
+use std::io::{BufWriter, Write};
+use std::path::Path;
 use zip::write::FileOptions;
-use zip::{DateTime, ZipArchive, ZipWriter};
+use zip::{DateTime, ZipWriter};
 
 /// List of traffic files to convert
 #[derive(FromArgs)]
@@ -34,182 +35,137 @@ struct Files {
     files: Vec<OsString>,
 }
 
-/// Traffic data for one detector
-#[derive(Default)]
-struct DetData {
-    /// Flag for 30-second scans
-    c30: bool,
+/// Traffic archive copier
+struct Copier {
+    /// Set of files in archive
+    files: HashSet<String>,
 
-    /// Flag for 30-second speed
-    s30: bool,
-
-    /// Flag for 30-second vehicle counts
-    v30: bool,
-}
-
-impl DetData {
-    /// Set flag when binned extensions are found
-    fn add_ext(&mut self, ext: Option<&str>) -> bool {
-        match ext {
-            Some("c30") => {
-                let ret = self.c30;
-                self.c30 = true;
-                ret
-            }
-            Some("s30") => {
-                let ret = self.s30;
-                self.s30 = true;
-                ret
-            }
-            Some("v30") => {
-                let ret = self.v30;
-                self.v30 = true;
-                ret
-            }
-            _ => false,
-        }
-    }
-}
-
-/// One daily traffic file
-struct Traffic {
-    /// Path to traffic archive
-    path: PathBuf,
-
-    /// Original zip archive
-    archive: ZipArchive<BufReader<File>>,
-
-    /// Mapping of (vlog) detector IDs to data
-    vlogs: HashMap<OsString, DetData>,
+    /// Destination archive
+    writer: ZipWriter<BufWriter<File>>,
 }
 
 impl Files {
     /// Convert traffic files
     fn convert(self) -> Result<()> {
         for file in self.files {
-            let mut traffic = Traffic::new(&file)?;
-            if traffic.check_vlogs() {
-                traffic.convert()?;
+            let traffic = Traffic::new(&file)?;
+            if traffic.has_vlog() {
+                let mut copier = Copier::new(&traffic)?;
+                copier.convert(traffic)?;
             }
         }
         Ok(())
     }
 }
 
-impl Traffic {
-    /// Open a traffic archive
-    fn new(fname: &OsStr) -> Result<Self> {
-        info!("Traffic::new: {:?}", fname);
-        let path = PathBuf::from(fname);
-        let file = File::open(&path).or(Err(Error::NotFound))?;
-        let buf = BufReader::new(file);
-        let archive = ZipArchive::new(buf)?;
-        let vlogs = HashMap::new();
-        Ok(Traffic {
-            path,
-            archive,
-            vlogs,
-        })
+impl Copier {
+    /// Create a new traffic archive copier
+    fn new(traffic: &Traffic) -> Result<Self> {
+        let files = traffic.find_file_names();
+        let writer = make_writer(traffic.path())?;
+        Ok(Copier { files, writer })
     }
 
-    /// Check for vlog entries
-    fn check_vlogs(&mut self) -> bool {
-        debug!("Traffic::check_vlogs: {:?}", self.path);
-        self.vlogs.clear();
-        for name in self.archive.file_names() {
-            debug!("  entry: {:?}", name);
-            let ent = Path::new(name);
-            if let Some(ext) = ent.extension() {
-                if ext == "vlog" {
-                    if let Some(stem) = ent.file_stem() {
-                        self.vlogs
-                            .insert(stem.to_os_string(), DetData::default());
-                    }
+    /// Copy archive
+    fn convert(&mut self, mut traffic: Traffic) -> Result<()> {
+        let mut n_binned = 0;
+        for i in 0..traffic.len() {
+            let zf = traffic.by_index(i)?;
+            match self.vlog_det_id(zf.name()) {
+                Some(det_id) => {
+                    let mtime = zf.last_modified();
+                    let vlog = VehLog::from_blocking_reader(zf)?;
+                    n_binned += self.write_binned::<OccupancyData>(
+                        det_id.to_string() + ".c30",
+                        &vlog,
+                        &mtime,
+                    )?;
+                    n_binned += self.write_binned::<SpeedData>(
+                        det_id.to_string() + ".s30",
+                        &vlog,
+                        &mtime,
+                    )?;
+                    n_binned += self.write_binned::<CountData>(
+                        det_id.to_string() + ".v30",
+                        &vlog,
+                        &mtime,
+                    )?;
+                    let zf = traffic.by_index(i)?;
+                    self.writer.raw_copy_file(zf)?;
                 }
+                None => self.writer.raw_copy_file(zf)?,
             }
         }
-        !self.vlogs.is_empty()
-    }
-
-    /// Make a zip archive for writing
-    fn make_writer(&self) -> Result<ZipWriter<BufWriter<File>>> {
-        let mut path = self.path.clone();
-        path.set_file_name("cocoon.traffic");
-        let file = File::create(path)?;
-        let buf = BufWriter::new(file);
-        Ok(ZipWriter::new(buf))
-    }
-
-    /// Convert vlog entries
-    fn convert(&mut self) -> Result<()> {
-        info!("Traffic::convert: {:?}", self.path);
-        let mut writer = self.make_writer()?;
-        for i in 0..self.archive.len() {
-            let zf = self.archive.by_index(i)?;
-            let ent = Path::new(zf.name());
-            if let (Some(stem), Some(ext)) = (ent.file_stem(), ent.extension())
-            {
-                if let Some(data) = self.vlogs.get_mut(stem) {
-                    if ext == "vlog" {
-                        let stem = stem.to_str().unwrap().to_owned();
-                        let mtime = zf.last_modified();
-                        let vlog = VehLog::from_blocking_reader(zf)?;
-                        if !data.add_ext(Some("c30")) {
-                            write_binned::<OccupancyData>(
-                                &mut writer,
-                                stem.to_string() + ".c30",
-                                &vlog,
-                                &mtime,
-                            )?;
-                        }
-                        if !data.add_ext(Some("s30")) {
-                            write_binned::<SpeedData>(
-                                &mut writer,
-                                stem.to_string() + ".s30",
-                                &vlog,
-                                &mtime,
-                            )?;
-                        }
-                        if !data.add_ext(Some("v30")) {
-                            write_binned::<CountData>(
-                                &mut writer,
-                                stem.to_string() + ".v30",
-                                &vlog,
-                                &mtime,
-                            )?;
-                        }
-                        debug!("Converting vlog: {:?}", stem);
-                        // Replace vlog with vehicle event (ve)
-                        continue;
-                    }
-                    if data.add_ext(ext.to_str()) {
-                        info!("Found {:?} after vlog, ignoring", ent);
-                        continue;
-                    }
-                }
-            }
-            writer.raw_copy_file(zf)?;
-        }
-        writer.finish()?;
+        self.writer.finish()?;
+        info!(
+            "converted: {:?}  {} files, {} binned",
+            traffic.path(),
+            traffic.len(),
+            n_binned
+        );
         // Rename old file and replace with new file
         Ok(())
     }
+
+    /// Check if a file is a vlog which needs binning
+    fn vlog_det_id(&self, name: &str) -> Option<String> {
+        let ent = Path::new(name);
+        if let (Some(stem), Some(ext)) = (ent.file_stem(), ent.extension()) {
+            if ext == "vlog" {
+                if let Some(det_id) = stem.to_str() {
+                    if !self.contains(&(det_id.to_owned() + ".c30"))
+                        && !self.contains(&(det_id.to_owned() + ".s30"))
+                        && !self.contains(&(det_id.to_owned() + ".v30"))
+                    {
+                        return Some(det_id.to_owned());
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    /// Check if archive contains a file
+    fn contains(&self, name: &str) -> bool {
+        let path = Path::new(name);
+        if let Some(name) = path.file_name() {
+            if let Some(name) = name.to_str() {
+                return self.files.contains(name);
+            }
+        }
+        false
+    }
+
+    /// Write 30-second binned data
+    fn write_binned<T: TrafficData>(
+        &mut self,
+        name: String,
+        vlog: &VehLog,
+        mtime: &DateTime,
+    ) -> Result<u32> {
+        if self.contains(&name) {
+            return Ok(0);
+        }
+        if let Some(buf) = pack_binned::<T>(&vlog) {
+            debug!("Binning {:?}", name);
+            let options =
+                FileOptions::default().last_modified_time(mtime.clone());
+            self.writer.start_file(name, options)?;
+            self.writer.write(&buf[..])?;
+            Ok(1)
+        } else {
+            Ok(0)
+        }
+    }
 }
 
-/// Write 30-second binned data
-fn write_binned<T: TrafficData>(
-    writer: &mut ZipWriter<BufWriter<File>>,
-    name: String,
-    vlog: &VehLog,
-    mtime: &DateTime,
-) -> Result<()> {
-    if let Some(buf) = pack_binned::<T>(&vlog) {
-        debug!("Binning {:?}", name);
-        let options = FileOptions::default().last_modified_time(mtime.clone());
-        writer.start_file(name, options)?;
-        writer.write(&buf[..])?;
-    }
-    Ok(())
+/// Make a zip archive for writing
+fn make_writer(path: &Path) -> Result<ZipWriter<BufWriter<File>>> {
+    let mut path = path.to_path_buf();
+    path.set_file_name("cocoon.traffic");
+    let file = File::create(path)?;
+    let buf = BufWriter::new(file);
+    Ok(ZipWriter::new(buf))
 }
 
 /// Pack traffic data into 30-second bins
