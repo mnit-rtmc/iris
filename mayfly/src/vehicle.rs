@@ -123,10 +123,12 @@ impl FromStr for Stamp {
             let minute = parse_min_sec(s.get(3..5).unwrap_or(""))?;
             let second = parse_min_sec(s.get(6..).unwrap_or(""))?;
             let sec = hour * 3600 + minute * 60 + second;
-            Stamp::new(sec * 1000)
-        } else {
-            Err(Error::InvalidStamp)
+            let st = Stamp::new(sec * 1000);
+            if st != Stamp::default() {
+                return Ok(st);
+            }
         }
+        Err(Error::InvalidStamp)
     }
 }
 
@@ -147,11 +149,11 @@ impl Stamp {
     const RESET: u32 = u32::MAX;
 
     /// Create a new time stamp
-    fn new(value: u32) -> Result<Self> {
+    fn new(value: u32) -> Self {
         if value < Stamp::MIDNIGHT {
-            Ok(Stamp(value))
+            Stamp(value)
         } else {
-            Err(Error::InvalidStamp)
+            Stamp::default()
         }
     }
 
@@ -234,9 +236,7 @@ impl VehicleEvent {
 
     /// Set the stamp
     pub fn with_stamp(mut self, stamp: u32) -> Self {
-        if let Ok(stamp) = Stamp::new(stamp) {
-            self.stamp = stamp;
-        }
+        self.stamp = Stamp::new(stamp);
         self
     }
 
@@ -273,9 +273,7 @@ impl VehicleEvent {
     fn previous(&self) -> Stamp {
         if let (Some(headway), Some(stamp)) = (self.headway(), self.stamp()) {
             if stamp >= headway {
-                if let Ok(stamp) = Stamp::new(stamp - headway) {
-                    return stamp;
-                }
+                return Stamp::new(stamp - headway);
             }
         }
         Stamp::default()
@@ -285,7 +283,7 @@ impl VehicleEvent {
     fn set_previous(&mut self, st: u32) {
         match (self.headway(), self.stamp()) {
             (Some(headway), None) => {
-                self.stamp = Stamp::new(st + headway).unwrap();
+                self.stamp = Stamp::new(st + headway);
             }
             (None, Some(stamp)) if stamp >= st => {
                 self.headway = NonZeroU32::new(stamp - st)
