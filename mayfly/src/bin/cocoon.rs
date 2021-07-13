@@ -31,11 +31,27 @@ use zip::{DateTime, ZipWriter};
 /// Traffic archive backup path
 const BACKUP_PATH: &str = "/var/lib/iris/backup";
 
-/// List of traffic archives
-#[derive(FromArgs)]
-struct Archives {
+/// Command-line arguments
+#[derive(FromArgs, PartialEq, Debug)]
+struct Args {
+    #[argh(subcommand)]
+    cmd: Command,
+}
+
+/// Sub-command enum
+#[derive(FromArgs, PartialEq, Debug)]
+#[argh(subcommand)]
+enum Command {
+    Bin(BinCommand),
+}
+
+/// Create 30-second binned data from vehicle event logs
+#[derive(FromArgs, PartialEq, Debug)]
+#[argh(subcommand, name = "bin")]
+struct BinCommand {
+    /// traffic archives to "bin" from vehicle event logs
     #[argh(positional)]
-    archives: Vec<OsString>,
+    traffic_files: Vec<OsString>,
 }
 
 /// Traffic archive binner
@@ -50,10 +66,19 @@ struct Binner {
     writer: ZipWriter<BufWriter<File>>,
 }
 
-impl Archives {
-    /// Add binned files to traffic archives
-    fn add_binned(self) -> Result<()> {
-        for file in self.archives {
+impl Args {
+    /// Run the selected sub-command
+    fn run(self) -> Result<()> {
+        match self.cmd {
+            Command::Bin(cmd) => Ok(cmd.run()?),
+        }
+    }
+}
+
+impl BinCommand {
+    /// Run the bin sub-command
+    fn run(self) -> Result<()> {
+        for file in self.traffic_files {
             let traffic = Traffic::new(&file)?;
             let n_files = traffic.len();
             if traffic.needs_binning() {
@@ -218,7 +243,7 @@ fn pack_binned<T: TrafficData>(vlog: &VehLog) -> Option<Vec<u8>> {
 #[async_std::main]
 async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
-    let archives: Archives = argh::from_env();
-    archives.add_binned()?;
+    let args: Args = argh::from_env();
+    args.run()?;
     Ok(())
 }
