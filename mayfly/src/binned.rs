@@ -138,7 +138,9 @@ impl TrafficData for SpeedData {
     /// Pack one binned value
     fn pack(&self, buf: &mut Vec<u8>) {
         if self.count > 0 {
-            buf.push(self.total as u8);
+            let speed = (self.total as f32 / self.count as f32).round() as i32;
+            let speed = u8::try_from(speed).unwrap_or(0xFF);
+            buf.push(speed);
         } else {
             buf.push(0xFF);
         }
@@ -182,7 +184,10 @@ impl TrafficData for HeadwayData {
     /// Pack one binned value
     fn pack(&self, buf: &mut Vec<u8>) {
         if self.count > 0 {
-            buf.push(self.total as u8);
+            let headway =
+                (self.total as f32 / self.count as f32).round() as i32;
+            let headway = u8::try_from(headway).unwrap_or(0xFF);
+            buf.push(headway);
         } else {
             buf.push(0xFF);
         }
@@ -291,7 +296,9 @@ impl TrafficData for LengthData {
     /// Pack one binned value
     fn pack(&self, buf: &mut Vec<u8>) {
         if self.count > 0 {
-            buf.push(self.total as u8);
+            let length = (self.total as f32 / self.count as f32).round() as i32;
+            let length = u8::try_from(length).unwrap_or(0xFF);
+            buf.push(length);
         } else {
             buf.push(0xFF);
         }

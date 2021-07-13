@@ -86,9 +86,7 @@ impl BinCommand {
                 let n_binned = copier.add_binned(traffic)?;
                 info!(
                     "archive: {:?} {} files, {} binned",
-                    file,
-                    n_files,
-                    n_binned
+                    file, n_files, n_binned
                 );
                 std::fs::rename(&file, copier.backup)?;
                 std::fs::rename(temp_path(&file), file)?;
@@ -106,7 +104,11 @@ impl Binner {
         let files = traffic.find_file_names();
         let backup = backup_path(traffic.path())?;
         let writer = make_writer(&traffic.path())?;
-        Ok(Binner { files, backup, writer })
+        Ok(Binner {
+            files,
+            backup,
+            writer,
+        })
     }
 
     /// Add binned files to archive
