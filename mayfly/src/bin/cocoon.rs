@@ -186,10 +186,9 @@ impl Binner {
         }
         if let Some(buf) = pack_binned::<T>(&vlog) {
             debug!("Binning {:?}", name);
-            let options =
-                FileOptions::default().last_modified_time(mtime.clone());
+            let options = FileOptions::default().last_modified_time(*mtime);
             self.writer.start_file(name, options)?;
-            self.writer.write(&buf[..])?;
+            self.writer.write_all(&buf[..])?;
             Ok(1)
         } else {
             Ok(0)

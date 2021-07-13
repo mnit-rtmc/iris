@@ -184,9 +184,10 @@ impl Stamp {
 impl VehicleEvent {
     /// Create a new reset event
     fn new_reset() -> Self {
-        let mut ev = Self::default();
-        ev.stamp = Stamp::new_reset();
-        ev
+        VehicleEvent {
+            stamp: Stamp::new_reset(),
+            ..Default::default()
+        }
     }
 
     /// Create a new vehicle event

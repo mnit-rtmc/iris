@@ -111,8 +111,13 @@ impl Traffic {
         self.archive.len()
     }
 
+    /// Check if archive is empty
+    pub fn is_empty(&self) -> bool {
+        self.archive.is_empty()
+    }
+
     /// Get an archive entry by index
-    pub fn by_index<'a>(&'a mut self, i: usize) -> Result<ZipFile<'a>> {
+    pub fn by_index(&mut self, i: usize) -> Result<ZipFile> {
         Ok(self.archive.by_index(i)?)
     }
 
