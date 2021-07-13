@@ -15,7 +15,6 @@
 use crate::common::{Error, Result};
 use log::debug;
 use std::collections::HashSet;
-use std::ffi::OsStr;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
@@ -32,9 +31,13 @@ pub struct Traffic {
 }
 
 impl Traffic {
+    /// Create a traffic archive
+    pub fn new(fname: &impl AsRef<Path>) -> Result<Self> {
+        Traffic::open(PathBuf::from(fname.as_ref()))
+    }
+
     /// Open a traffic archive
-    pub fn new(fname: &OsStr) -> Result<Self> {
-        let path = PathBuf::from(fname);
+    fn open(path: PathBuf) -> Result<Self> {
         let file = File::open(&path).or(Err(Error::NotFound))?;
         let buf = BufReader::new(file);
         let archive = ZipArchive::new(buf)?;
@@ -74,6 +77,26 @@ impl Traffic {
         files
     }
 
+    /// Find checked files in archive
+    pub fn find_files_checked(
+        &self,
+        check: fn(&str, bool) -> Option<&str>,
+    ) -> HashSet<String> {
+        let mut files = HashSet::new();
+        for name in self.archive.file_names() {
+            let path = Path::new(name);
+            if let Some(name) = path.file_name() {
+                if let Some(name) = name.to_str() {
+                    if let Some(name) = check(name, false) {
+                        files.insert(name.to_owned());
+                    }
+                }
+            }
+        }
+        debug!("found {} files in {:?}", files.len(), self.path);
+        files
+    }
+
     /// Get the number of files in the archive
     pub fn len(&self) -> usize {
         self.archive.len()
@@ -81,7 +104,11 @@ impl Traffic {
 
     /// Get an archive entry by index
     pub fn by_index<'a>(&'a mut self, i: usize) -> Result<ZipFile<'a>> {
-        let zf = self.archive.by_index(i)?;
-        Ok(zf)
+        Ok(self.archive.by_index(i)?)
+    }
+
+    /// Get an archive entry by name
+    pub fn by_name<'a>(&'a mut self, nm: &str) -> Result<ZipFile<'a>> {
+        Ok(self.archive.by_name(nm)?)
     }
 }

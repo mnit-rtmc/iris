@@ -14,6 +14,7 @@
 //
 use crate::binned::TrafficData;
 use crate::common::{Body, Error, Result};
+use crate::traffic::Traffic;
 use crate::vehicle::{VehLog, VehicleFilter};
 use async_std::fs::{read_dir, File};
 use async_std::io::ReadExt;
@@ -24,7 +25,6 @@ use serde::Deserialize;
 use std::collections::HashSet;
 use std::io::Read as _;
 use std::marker::PhantomData;
-use zip::ZipArchive;
 
 /// Base traffic archive path
 const BASE_PATH: &str = "/var/lib/iris/traffic";
@@ -37,11 +37,6 @@ const DEXT: &str = ".traffic";
 
 /// Traffic file extension without dot
 const EXT: &str = "traffic";
-
-/// Zip archive
-struct Archive {
-    zip: ZipArchive<std::io::BufReader<std::fs::File>>,
-}
 
 /// Query for districts in archive
 #[derive(Default, Deserialize)]
@@ -170,34 +165,14 @@ async fn scan_dir(
     Ok(())
 }
 
-impl Archive {
-    /// Open a zip archive
-    fn open(path: &std::path::Path) -> Result<Self> {
-        let file = std::fs::File::open(path).or(Err(Error::NotFound))?;
-        let buf = std::io::BufReader::new(file);
-        let zip = ZipArchive::new(buf)?;
-        Ok(Archive { zip })
-    }
-}
-
 /// Scan entries in a zip file
 fn scan_zip(
-    path: &std::path::Path,
+    path: &impl AsRef<std::path::Path>,
     check: fn(&str, bool) -> Option<&str>,
     body: &mut Body,
 ) -> Result<()> {
-    let archive = Archive::open(path)?;
-    let mut names = HashSet::new();
-    for name in archive.zip.file_names() {
-        let ent = std::path::Path::new(name);
-        if let Some(name) = ent.file_name() {
-            if let Some(name) = name.to_str() {
-                if let Some(name) = check(name, false) {
-                    names.insert(name);
-                }
-            }
-        }
-    }
+    let traffic = Traffic::new(path)?;
+    let names = traffic.find_files_checked(check);
     for name in names {
         body.push(&format!("\"{}\"", name));
     }
@@ -421,27 +396,27 @@ impl<T: TrafficData> TrafficQuery<T> {
     /// vehicle event log.
     pub async fn lookup(&self) -> Result<Body> {
         parse_date(&self.date)?;
-        match Archive::open(&self.zip_path()) {
-            Ok(archive) => self.lookup_zipped(archive),
+        match Traffic::new(&self.zip_path()) {
+            Ok(traffic) => self.lookup_zipped(traffic),
             _ => self.lookup_unzipped().await,
         }
     }
 
     /// Lookup data from a zip archive
-    fn lookup_zipped(&self, mut archive: Archive) -> Result<Body> {
+    fn lookup_zipped(&self, mut traffic: Traffic) -> Result<Body> {
         if !self.filter().is_filtered() {
-            match self.lookup_zipped_bin(&mut archive) {
+            match self.lookup_zipped_bin(&mut traffic) {
                 Err(Error::NotFound) => (),
                 res => return res,
             }
         }
-        self.lookup_zipped_vlog(&mut archive)
+        self.lookup_zipped_vlog(&mut traffic)
     }
 
     /// Lookup archived data from 30-second binned data
-    fn lookup_zipped_bin(&self, archive: &mut Archive) -> Result<Body> {
+    fn lookup_zipped_bin(&self, traffic: &mut Traffic) -> Result<Body> {
         let name = self.binned_file_name();
-        match archive.zip.by_name(&name) {
+        match traffic.by_name(&name) {
             Ok(mut zf) => {
                 log::info!("opened {} in {}.{}", name, self.date, EXT);
                 let mut buf = Self::make_buffer(zf.size())?;
@@ -453,9 +428,9 @@ impl<T: TrafficData> TrafficQuery<T> {
     }
 
     /// Read vehicle log data from a zip file
-    fn lookup_zipped_vlog(&self, archive: &mut Archive) -> Result<Body> {
+    fn lookup_zipped_vlog(&self, traffic: &mut Traffic) -> Result<Body> {
         let name = self.vlog_file_name();
-        match archive.zip.by_name(&name) {
+        match traffic.by_name(&name) {
             Ok(zf) => {
                 log::info!("opened {} in {}.{}", name, self.date, EXT);
                 let vlog = VehLog::from_blocking_reader(zf)?;
