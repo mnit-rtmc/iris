@@ -35,8 +35,11 @@ pub enum Error {
     #[error("Invalid stamp")]
     InvalidStamp,
     /// Not found
-    #[error("Not Found")]
+    #[error("Not found")]
     NotFound,
+    /// File exists
+    #[error("File exists")]
+    FileExists,
     /// Zip error
     #[error("Zip error")]
     Zip(#[from] ZipError),

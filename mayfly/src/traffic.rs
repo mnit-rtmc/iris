@@ -49,17 +49,26 @@ impl Traffic {
         &self.path
     }
 
-    /// Check for vlog entries
-    pub fn has_vlog(&self) -> bool {
+    /// Check if any vehicle log needs binning
+    pub fn needs_binning(&self) -> bool {
+        let mut det_ids = HashSet::new();
         for name in self.archive.file_names() {
             let p = Path::new(name);
-            if let (Some(_), Some(ext)) = (p.file_stem(), p.extension()) {
+            if let (Some(det_id), Some(ext)) = (p.file_stem(), p.extension()) {
                 if ext == "vlog" {
-                    return true;
+                    det_ids.insert(det_id);
                 }
             }
         }
-        false
+        for name in self.archive.file_names() {
+            let p = Path::new(name);
+            if let (Some(det_id), Some(ext)) = (p.file_stem(), p.extension()) {
+                if ext == "v30" {
+                    det_ids.remove(det_id);
+                }
+            }
+        }
+        !det_ids.is_empty()
     }
 
     /// Find files in archive

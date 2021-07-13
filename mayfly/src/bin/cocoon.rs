@@ -17,57 +17,75 @@
 use argh::FromArgs;
 use log::{debug, info};
 use mayfly::binned::{CountData, OccupancyData, SpeedData, TrafficData};
-use mayfly::common::Result;
+use mayfly::common::{Error, Result};
 use mayfly::traffic::Traffic;
 use mayfly::vehicle::{VehLog, VehicleFilter};
 use std::collections::HashSet;
 use std::ffi::OsString;
 use std::fs::File;
 use std::io::{BufWriter, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use zip::write::FileOptions;
 use zip::{DateTime, ZipWriter};
 
-/// List of traffic files to convert
+/// Traffic archive backup path
+const BACKUP_PATH: &str = "/var/lib/iris/backup";
+
+/// List of traffic archives
 #[derive(FromArgs)]
-struct Files {
+struct Archives {
     #[argh(positional)]
-    files: Vec<OsString>,
+    archives: Vec<OsString>,
 }
 
-/// Traffic archive copier
-struct Copier {
+/// Traffic archive binner
+struct Binner {
     /// Set of files in archive
     files: HashSet<String>,
+
+    /// Backup file path
+    backup: PathBuf,
 
     /// Destination archive
     writer: ZipWriter<BufWriter<File>>,
 }
 
-impl Files {
-    /// Convert traffic files
-    fn convert(self) -> Result<()> {
-        for file in self.files {
+impl Archives {
+    /// Add binned files to traffic archives
+    fn add_binned(self) -> Result<()> {
+        for file in self.archives {
             let traffic = Traffic::new(&file)?;
-            if traffic.has_vlog() {
-                let mut copier = Copier::new(&traffic)?;
-                copier.convert(traffic)?;
+            let n_files = traffic.len();
+            if traffic.needs_binning() {
+                let mut copier = Binner::new(&traffic)?;
+                let n_binned = copier.add_binned(traffic)?;
+                info!(
+                    "archive: {:?} {} files, {} binned",
+                    file,
+                    n_files,
+                    n_binned
+                );
+                std::fs::rename(&file, copier.backup)?;
+                std::fs::rename(temp_path(&file), file)?;
+            } else {
+                info!("archive: {:?} {} files, skipping", file, n_files);
             }
         }
         Ok(())
     }
 }
 
-impl Copier {
-    /// Create a new traffic archive copier
+impl Binner {
+    /// Create a new traffic archive binner
     fn new(traffic: &Traffic) -> Result<Self> {
         let files = traffic.find_file_names();
-        let writer = make_writer(traffic.path())?;
-        Ok(Copier { files, writer })
+        let backup = backup_path(traffic.path())?;
+        let writer = make_writer(&traffic.path())?;
+        Ok(Binner { files, backup, writer })
     }
 
-    /// Copy archive
-    fn convert(&mut self, mut traffic: Traffic) -> Result<()> {
+    /// Add binned files to archive
+    fn add_binned(&mut self, mut traffic: Traffic) -> Result<u32> {
         let mut n_binned = 0;
         for i in 0..traffic.len() {
             let zf = traffic.by_index(i)?;
@@ -97,14 +115,7 @@ impl Copier {
             }
         }
         self.writer.finish()?;
-        info!(
-            "converted: {:?}  {} files, {} binned",
-            traffic.path(),
-            traffic.len(),
-            n_binned
-        );
-        // Rename old file and replace with new file
-        Ok(())
+        Ok(n_binned)
     }
 
     /// Check if a file is a vlog which needs binning
@@ -159,11 +170,32 @@ impl Copier {
     }
 }
 
-/// Make a zip archive for writing
-fn make_writer(path: &Path) -> Result<ZipWriter<BufWriter<File>>> {
-    let mut path = path.to_path_buf();
+/// Make backup path name
+fn backup_path(path: &Path) -> Result<PathBuf> {
+    let mut backup = PathBuf::from(BACKUP_PATH);
+    if backup.is_dir() {
+        if let Some(name) = path.file_name() {
+            backup.push(name);
+            if backup.is_file() {
+                return Err(Error::FileExists);
+            } else {
+                return Ok(backup);
+            }
+        }
+    }
+    Err(Error::NotFound)
+}
+
+/// Make temp path name
+fn temp_path(path: &impl AsRef<Path>) -> PathBuf {
+    let mut path = PathBuf::from(path.as_ref());
     path.set_file_name("cocoon.traffic");
-    let file = File::create(path)?;
+    path
+}
+
+/// Make a zip archive for writing
+fn make_writer(path: &impl AsRef<Path>) -> Result<ZipWriter<BufWriter<File>>> {
+    let file = File::create(temp_path(path))?;
     let buf = BufWriter::new(file);
     Ok(ZipWriter::new(buf))
 }
@@ -186,7 +218,7 @@ fn pack_binned<T: TrafficData>(vlog: &VehLog) -> Option<Vec<u8>> {
 #[async_std::main]
 async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
-    let files: Files = argh::from_env();
-    files.convert()?;
+    let archives: Archives = argh::from_env();
+    archives.add_binned()?;
     Ok(())
 }

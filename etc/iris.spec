@@ -127,6 +127,7 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %dir %attr(0755,root,root) /var/lib/iris/sql/fonts
 %dir %attr(3775,tms,tms) /var/lib/iris/meter
 %dir %attr(3775,tms,tms) /var/lib/iris/traffic
+%dir %attr(3775,tms,tms) /var/lib/iris/backup
 
 # /var/log/iris
 %dir %attr(3775,tms,tms) /var/log/iris
