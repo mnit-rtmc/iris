@@ -11,14 +11,14 @@ handled by the IRIS server.
 ```
 git clone https://github.com/mnit-rtmc/iris.git
 cd iris/mayfly/
-cargo build --release --target x86_64-unknown-linux-musl
+cargo build --release
 ```
 
 ## Installation
 
 As root:
 ```
-cp ./target/release/mayfly /usr/local/bin
+cp ./target/x86_64-unknown-linux-musl/release/mayfly /usr/local/bin
 cp mayfly.service /etc/systemd/system
 systemctl enable mayfly.service
 systemctl start mayfly.service
@@ -33,4 +33,5 @@ Cocoon is a command-line program to add 30-second binned data to .traffic
 archive files.  This enables backward-compatibility for the older `trafdat`
 service, and also improves performance for some mayfly requests.
 
-After building, it is located at `target/release/cocoon`.
+After building, it is located at
+`./target/x86_64-unknown-linux-musl/release/cocoon`.
