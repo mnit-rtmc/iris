@@ -138,15 +138,19 @@ public class SignPixelPanel extends JPanel {
 		if (mwidth_pix <= 0 || width_pix % mwidth_pix != 0)
 			return;
 		int num_vertical_lines = width_pix / mwidth_pix;
-		int width_part_mm = width_mm / num_vertical_lines;
-		int x_mp = width_part_mm / 2;
+		int fsize = 100 * (int)(num_vertical_lines > 9 ? 2 : 2.5);
+		Font font = new Font("Serif", Font.PLAIN, fsize);
+		g.setFont(font);
+
+		g.setColor(Color.WHITE);
+		int wid_part = width_mm / num_vertical_lines;
 		for (int x = 1; x <= num_vertical_lines; x++) {
-			int xlines_mm = width_mm - (x * width_part_mm);
-			g.setColor(Color.WHITE);
-			g.drawLine(xlines_mm, 0, xlines_mm, height_mm);
-			g.drawString(String.valueOf(x), x_mp, 0);
-			g.drawString(String.valueOf(x), x_mp, height_mm);
-			x_mp += width_part_mm;
+			int xloc = x * wid_part - wid_part;
+			g.drawLine(xloc, 0, xloc, height_mm);
+			String label = String.valueOf(x);
+			int twid = g.getFontMetrics().stringWidth(label);
+			int fx = xloc + wid_part / 2 - twid / 2;
+			g.drawString(String.valueOf(x), fx, height_mm);
 		}
 
 	}
@@ -157,16 +161,15 @@ public class SignPixelPanel extends JPanel {
 		if (mheight_pix <= 0 || height_pix % mheight_pix != 0)
 			return;
 		int num_horizontal_lines = height_pix / mheight_pix;
-		int height_part_mm = height_mm / num_horizontal_lines;
-		int y_mp = height_part_mm / 2;
+		int hgh_part = height_mm / num_horizontal_lines;
+		int fh = g.getFontMetrics().getHeight();
 		for (int y = 1; y <= num_horizontal_lines; y++) {
-			int ylines_mm = height_mm - (y * height_part_mm);
+			int yloc = y * hgh_part - hgh_part;
 			g.setColor(Color.WHITE);
-			g.drawLine(0, ylines_mm, width_mm, ylines_mm);
-			g.drawString(String.valueOf(y), 0, y_mp);
+			g.drawLine(0, yloc, width_mm, yloc);
 			g.setColor(Color.DARK_GRAY);
-			g.drawString(String.valueOf(y), width_mm + 10,  y_mp);
-			y_mp += height_part_mm;
+			int fy = yloc + hgh_part / 2 + fh / 4;
+			g.drawString(String.valueOf(y), width_mm + 10,  fy);
 		}
 	}
 
@@ -244,7 +247,6 @@ public class SignPixelPanel extends JPanel {
 			g.transform(t);
 			g.setColor(face_color);
 			g.fillRect(0, 0, width_mm, height_mm);
-			drawPixelLines(g);
 			if (rg != null)
 				paintPixels(g, rg);
 			Color fc = filter_color;
@@ -252,6 +254,7 @@ public class SignPixelPanel extends JPanel {
 				g.setColor(fc);
 				g.fillRect(0, 0, width_mm, height_mm);
 			}
+			drawPixelLines(g);
 		}
 	}
 
