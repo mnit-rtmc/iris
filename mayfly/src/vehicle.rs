@@ -585,7 +585,8 @@ impl<'a, T: TrafficData> BinIter<'a, T> {
         if let Some(ev) = &self.ev {
             if self.is_future_event(&ev) {
                 return data;
-            } else {
+            }
+            if self.filter.check(&ev) {
                 data.bin_vehicle(&ev);
             }
         }
