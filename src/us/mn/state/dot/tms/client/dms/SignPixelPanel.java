@@ -177,7 +177,6 @@ public class SignPixelPanel extends JPanel {
 	 * @param g Graphics to draw the line */
 	private void drawPixelLines(Graphics2D g) {
 		if (draw_modules) {
-			Font font = new Font("Serif", Font.PLAIN, 100);
 			g.setFont(font);
 			drawVerticalLines(g);
 			drawHorizontalLines(g);
