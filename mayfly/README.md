@@ -35,3 +35,15 @@ service, and also improves performance for some mayfly requests.
 
 After building, it is located at
 `./target/x86_64-unknown-linux-musl/release/cocoon`.
+
+### Running
+
+To process data from 2021/07/13:
+```
+cocoon bin /var/lib/iris/traffic/tms/2021/20210713.traffic
+```
+
+To process data from yesterday, use this command:
+```
+cocoon bin `date -d yesterday +/var/lib/iris/traffic/tms/%Y/%Y%m%d.traffic`
+```
