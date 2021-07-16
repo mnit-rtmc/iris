@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.event;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
@@ -84,7 +85,7 @@ public class SignEvent extends BaseEvent {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("event_desc_id", event_type.id);
-		map.put("event_date", event_date);
+		map.put("event_date", new Timestamp(event_date.getTime()));
 		map.put("device_id", device_id);
 		map.put("message", message);
 		map.put("owner", owner);
