@@ -221,7 +221,7 @@ public class SignMessageHelper extends BaseHelper {
 		for (BitmapGraphic s : stuck) {
 			// This should never happen
 			if (s.length() != bg.length())
-				throw new InvalidMsgException("stuck size");
+				throw new InvalidMsgException("stuck size", true);
 		}
 		BitmapGraphic temp = bg.createBlankCopy();
 		temp.setPixelData(bg.getPixelData());
@@ -230,7 +230,7 @@ public class SignMessageHelper extends BaseHelper {
 		int off_lim = SystemAttrEnum.DMS_PIXEL_OFF_LIMIT.getInt();
 		if (off_lim >= 0 && n_off > off_lim) {
 			throw new InvalidMsgException(
-				"Too many stuck off pixels: " + n_off);
+				"Too many stuck off pixels: " + n_off, true);
 		}
 		temp.setPixelData(bg.getPixelData());
 		temp.outline();
@@ -239,7 +239,7 @@ public class SignMessageHelper extends BaseHelper {
 		int on_lim = SystemAttrEnum.DMS_PIXEL_ON_LIMIT.getInt();
 		if (on_lim >= 0 && n_on > on_lim) {
 			throw new InvalidMsgException(
-				"Too many stuck on pixels: " + n_on);
+				"Too many stuck on pixels: " + n_on, true);
 		}
 	}
 

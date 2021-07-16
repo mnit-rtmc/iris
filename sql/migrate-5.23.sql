@@ -115,4 +115,10 @@ CREATE VIEW dms_message_view AS
 	LEFT JOIN iris.sign_message s ON d.msg_current = s.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
 
+-- Add DMS ERROR event types
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (81, 'DMS MSG ERROR');
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (82, 'DMS PIXEL ERROR');
+
 COMMIT;

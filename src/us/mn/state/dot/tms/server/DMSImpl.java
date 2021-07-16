@@ -48,6 +48,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
@@ -955,7 +956,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Set the user selected sign message */
 	public void doSetMsgUser(SignMessage sm) throws TMSException {
 		if (!objectEquals(msg_user, sm)) {
-			SignMessageHelper.validate(sm, this);
+			validateMsg(sm);
 			store.update(this, "msg_user", sm);
 			setMsgUser(sm);
 			sm = getMsgValidated();
@@ -1132,8 +1133,24 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		SignMessage sm = getMsgUserSched();
 		if (null == sm)
 			sm = createMsgBlank();
-		SignMessageHelper.validate(sm, this);
+		validateMsg(sm);
 		return sm;
+	}
+
+	/** Validate a sign message */
+	private void validateMsg(SignMessage sm) throws InvalidMsgException {
+		try {
+			SignMessageHelper.validate(sm, this);
+		}
+		catch (InvalidMsgException e) {
+			logEvent(new SignEvent(
+				e.getEventType(),
+				name,
+				sm.getMulti(),
+				sm.getOwner()
+			));
+			throw e;
+		}
 	}
 
 	/** Get user and/or scheduled sign message.
@@ -1146,12 +1163,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		boolean is_blank = SignMessageHelper.isBlank(user);
 		if (isPrefixPage(sched) && !is_blank) {
 			SignMessage sm = createMsgUserSched(user, sched);
-			if (sm != null && isMsgValid(sm))
+			if (sm != null)
 				return sm;
 		}
-		return (isMsgValid(sched) && checkPriority(sched, user))
-		      ? sched
-		      : user;
+		return checkPriority(sched, user) ? sched : user;
 	}
 
 	/** Is scheduled message using prefix page? */
@@ -1175,23 +1190,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return createMsg(inc, ms, be, false, mp, src, o, dur);
 	}
 
-	/** Check if a sign message is valid */
-	private boolean isMsgValid(SignMessage sm) {
-		if (null == sm)
-			return false;
-		try {
-			SignMessageHelper.validate(sm, this);
-			return true;
-		}
-		catch (TMSException e) {
-			logError("msg invalid: " + e.getMessage());
-			return false;
-		}
-	}
-
 	/** Compare sign messages for higher priority */
 	private boolean checkPriority(SignMessage sm1, SignMessage sm2) {
-		return sm1.getMsgPriority() > sm2.getMsgPriority();
+		return (sm1 != null) &&
+		       (sm2 != null) &&
+		       (sm1.getMsgPriority() > sm2.getMsgPriority());
 	}
 
 	/** Send message to DMS.

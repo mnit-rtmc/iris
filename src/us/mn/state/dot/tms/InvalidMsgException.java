@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,24 @@ package us.mn.state.dot.tms;
  */
 public class InvalidMsgException extends TMSException {
 
+	/** Event type for logging */
+	private final EventType event_type;
+
+	/** Get the event type for logging */
+	public EventType getEventType() {
+		return event_type;
+	}
+
+	/** Create a new invalid message exception */
+	public InvalidMsgException(String msg, boolean pixel) {
+		super("INVALID MSG: " + msg);
+		event_type = (pixel)
+			? EventType.DMS_PIXEL_ERROR
+		        : EventType.DMS_MSG_ERROR;
+	}
+
 	/** Create a new invalid message exception */
 	public InvalidMsgException(String msg) {
-		super("INVALID MSG: " + msg);
+		this(msg, false);
 	}
 }

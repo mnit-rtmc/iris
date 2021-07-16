@@ -63,6 +63,8 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 24	Incident ROADWORK
 29	Incident IMPACT
 65	Comm FAILED
+81	DMS MSG ERROR
+82	DMS PIXEL ERROR
 89	LCS DEPLOYED
 90	LCS CLEARED
 91	Sign DEPLOYED
