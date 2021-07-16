@@ -13,6 +13,7 @@
 // GNU General Public License for more details.
 //
 use async_std::io;
+use std::fmt::{Display, Write};
 use tide::{Response, StatusCode};
 use zip::result::ZipError;
 
@@ -84,14 +85,23 @@ impl Body {
         self
     }
 
-    /// Push a value to end of body
-    pub fn push(&mut self, value: &str) {
+    /// Start a new JSON value
+    pub fn start_value(&mut self) {
         if self.body.is_empty() {
-            self.body.push('[');
+            self.push('[');
         } else {
-            self.body.push(',');
+            self.push(',');
         }
-        self.body.push_str(&value);
+    }
+
+    /// Push a char
+    pub fn push(&mut self, c: char) {
+        self.body.push(c);
+    }
+
+    /// Write to body
+    pub fn write<T: Display>(&mut self, value: T) {
+        write!(self.body, "{}", value).unwrap();
     }
 }
 

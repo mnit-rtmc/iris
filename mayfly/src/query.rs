@@ -151,8 +151,8 @@ async fn scan_dir(
             if let Ok(tp) = entry.file_type().await {
                 if !tp.is_symlink() {
                     if let Some(name) = entry.file_name().to_str() {
-                        if let Some(value) = check(name, tp.is_dir()) {
-                            names.insert(format!("\"{}\"", value));
+                        if let Some(name) = check(name, tp.is_dir()) {
+                            names.insert(name.to_owned());
                         }
                     }
                 }
@@ -160,7 +160,10 @@ async fn scan_dir(
         }
     }
     for name in names {
-        body.push(&name);
+        body.start_value();
+        body.push('\"');
+        body.write(name);
+        body.push('\"');
     }
     Ok(())
 }
@@ -174,7 +177,10 @@ fn scan_zip(
     let traffic = Traffic::new(path)?;
     let names = traffic.find_files_checked(check);
     for name in names {
-        body.push(&format!("\"{}\"", name));
+        body.start_value();
+        body.push('\"');
+        body.write(name);
+        body.push('\"');
     }
     Ok(())
 }
@@ -515,7 +521,8 @@ impl<T: TrafficData> TrafficQuery<T> {
     fn make_binned_body(&self, buf: Vec<u8>) -> Body {
         let mut body = self.make_body();
         for val in buf.chunks_exact(T::bin_bytes()) {
-            body.push(&format!("{}", T::unpack(val)));
+            body.start_value();
+            body.write(T::unpack(val));
         }
         body
     }
@@ -524,7 +531,8 @@ impl<T: TrafficData> TrafficQuery<T> {
     fn make_vlog_body(&self, vlog: VehLog) -> Body {
         let mut body = self.make_body();
         for val in vlog.binned_iter::<T>(30, self.filter()) {
-            body.push(&format!("{}", val));
+            body.start_value();
+            body.write(val);
         }
         body
     }

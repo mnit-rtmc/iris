@@ -90,14 +90,14 @@ impl Traffic {
     pub fn find_files_checked(
         &self,
         check: fn(&str, bool) -> Option<&str>,
-    ) -> HashSet<String> {
+    ) -> HashSet<&str> {
         let mut files = HashSet::new();
         for name in self.archive.file_names() {
             let path = Path::new(name);
             if let Some(name) = path.file_name() {
                 if let Some(name) = name.to_str() {
                     if let Some(name) = check(name, false) {
-                        files.insert(name.to_owned());
+                        files.insert(name);
                     }
                 }
             }
