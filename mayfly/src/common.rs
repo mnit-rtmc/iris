@@ -49,6 +49,8 @@ pub enum Error {
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// JSON body (array of values)
+///
+/// TODO: Use tide::Body::from_reader -- to make fast!
 pub struct Body {
     /// Max age in seconds
     max_age: Option<u64>,
