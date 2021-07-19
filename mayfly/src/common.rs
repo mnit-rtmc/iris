@@ -49,7 +49,6 @@ pub enum Error {
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// JSON body (array of values)
-#[derive(Default)]
 pub struct Body {
     /// Max age in seconds
     max_age: Option<u64>,
@@ -74,6 +73,13 @@ impl From<Error> for tide::Result {
         Ok(Response::builder(err.status_code())
             .body(err.to_string())
             .build())
+    }
+}
+
+impl Default for Body {
+    fn default() -> Self {
+        let body = String::with_capacity(2880 * 4);
+        Body { max_age: None, body }
     }
 }
 
