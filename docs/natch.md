@@ -27,6 +27,7 @@ Code | Descripton
 CS   | Clock status
 DC   | Detector configure
 DS   | Detector status
+MA   | Mater attributes
 MC   | Meter configure
 MS   | Meter status
 MT   | Meter timing table
@@ -89,6 +90,26 @@ ds,01a5,3,323,4638,17:50:28
 DS,01a5
 ```
 
+### MA - Meter Attributes
+
+These attributes apply to all meters.  If only the code and identifier are
+included in the poll, it is treated as a *query*, and the response includes the
+current attributes.
+
+Value | Description
+------|------------------------------------------
+3     | Start up green time (0.1 sec), default 80
+4     | Start up yellow time (0.1 sec), default 50
+5     | Metering green time (0.1 sec), default 13
+6     | Metering yellow time (0.1 sec), default 7
+
+```
+MA,0291
+ma,0291,80,50,13,7
+MA,0292,80,50,12,8
+ma,0292,80,50,12,8
+```
+
 ### MC - Meter Configure
 
 The third value is the meter number (0-3).  The fourth value is the number of
@@ -99,22 +120,21 @@ treated as a *query*, and the response includes the current meter configuration.
 Value | Description
 ------|-------------------
 3     | Meter number (0-3)
-4     | Heads (0-2)
-5     | Start up green time (0.1 sec)
-6     | Start up yellow time (0.1 sec)
-7     | Turn on output pin (usually 2 or 3)
-8     | Red output pin, left head
-9     | Yellow output pin, left head
-10    | Green output pin, left head
-11    | Red output pin, right head
-12    | Yellow output pin, right head
-13    | Green output pin, right head
+4     | Heads (0: deleted, 1: single, 2: dual)
+5     | Release (0: alternating, 1: simultaneous / drag-race)
+6     | Turn on output pin (usually 2 or 3)
+7     | Red output pin, left head
+8     | Yellow output pin, left head
+9     | Green output pin, left head
+10    | Red output pin, right head
+11    | Yellow output pin, right head
+12    | Green output pin, right head
 
 ```
-MC,0150,0,2,13,7,2,4,5,6,7,8,9
-mc,0150,0,2,13,7,2,4,5,6,7,8,9
+MC,0150,0,2,0,2,4,5,6,7,8,9
+mc,0150,0,2,0,2,4,5,6,7,8,9
 MC,0151,0
-mc,0151,0,2,13,7,2,4,5,6,7,8,9
+mc,0151,0,2,0,2,4,5,6,7,8,9
 MC,0152,1,0
 mc,0152,1,0
 ```
