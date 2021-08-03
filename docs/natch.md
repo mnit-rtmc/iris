@@ -20,25 +20,28 @@ Parameter | Description
 2         | Message ID
 …         | Remaining parameters
 
-The __code__ indicates the message type.  For a poll (from IRIS) these codes are
-upper-case.  For responses or asynchronous detector counts (from the
-controller), the codes are lower-case.
+__Code__ indicates the message type.  For polls (from IRIS) these are
+upper-case, but for responses or asynchronous detector counts (from the
+controller), they are lower-case.
 
-Code | Descripton
------|----------------
-`CS` | Clock status
-`DC` | Detector configure
-`DS` | Detector status
-`MC` | Meter configure
-`MS` | Meter status
-`MT` | Meter timing table
-`PS` | Pin status
-`SA` | System attributes
-`SC` | System command
+Code        | Descripton
+------------|----------------
+`CS` / `cs` | Clock status
+`DC` / `dc` | Detector configure
+`DS` / `ds` | Detector status
+`MC` / `mc` | Meter configure
+`MS` / `ms` | Meter status
+`MT` / `mt` | Meter timing table
+`PS` / `ps` | Pin status
+`SA` / `sa` | System attributes
+`SC` / `sc` | System command
 
-The __message identifier__ is used to match polls with responses, but is
-otherwise not interpreted by the controller (except for `ds` messages, see
-below).
+__Message ID__ is used to match polls with responses, but is otherwise not
+interpreted by the controller (except for `ds` messages, see below).
+
+Polls for most message types have two forms: __store__ and __query__.  A store
+includes all possible parameters, but a query leaves out all parameters marked
+with a dagger (†).  The response for both poll forms include __all__ parameters.
 
 ### CS - Clock Status
 
@@ -46,10 +49,9 @@ Parameter | Description
 ----------|------------------
 1         | Code: `CS` / `cs`
 2         | Message ID
-3         | Date/time
+3 †       | Date/time
 
-The date/time is formatted according to [RFC 3339].  If it is omitted in a poll,
-the response contains the current time.
+The date/time is formatted according to [RFC 3339].
 
 ```
 CS,00AB,2021-04-01T12:34:56-05:00
@@ -65,15 +67,12 @@ Parameter | Description
 1         | Code: `DC` / `dc`
 2         | Message ID
 3         | Detector Number (0-31)
-4         | Input Pin Number (0 means deleted)
+4 †       | Input Pin Number (0 means deleted)
 
 If the pin number is not a valid input pin, the detector is *deleted*, and this
 is indicated in the response.
 
-If the fourth parameter is omitted in a poll, it is treated as a *query*, and
-the response includes the currently configured pin.
-
-The fourth parameter can also be set to a ramp meter output pin (2 or 3).  In
+The input pin number can also be set to a ramp meter output pin (2 or 3).  In
 this case, whenever a green indication (on either head) is displayed, it
 generates a detector status event.
 
@@ -90,22 +89,22 @@ Parameter | Description
 ----------|------------------
 1         | Code: `DS` / `ds`
 2         | Message ID
-3         | Detector Number (0-31)
-4         | Duration (ms)
-5         | Headway (ms)
-6         | Time (`HH:MM:SS`, local 24-hour)
+3 †       | Detector Number (0-31)
+4 †       | Duration (ms)
+5 †       | Headway (ms)
+6 †       | Time (`HH:MM:SS`, local 24-hour)
 
 When a vehicle leaves a detector, a detector status messages is added to a
-fixed-size ring buffer, with head and tail pointers.  The __message identifier__
-is incremented as a 16-bit hex value.
+fixed-size ring buffer, with head and tail pointers.  The __message ID__ is
+incremented as a 16-bit hex value.
 
 When this happens, the oldest message is sent by the controller, unless waiting
 for an ACK from a previous message.
 
-When a poll is received, the __message identifier__ is compared with the last
-sent status message.  If it matches, the poll is an ACK, otherwise it is a NAK.
+When a poll is received, the __message ID__ is compared with the last sent
+status message.  If it matches, the poll is an ACK, otherwise it is a NAK.
 
-On ACK, the tail pointer is incremented, "deleting" the message.  If there are
+On ACK, the tail pointer is incremented, *deleting* the message.  If there are
 more messages in the ring buffer, the oldest one is then sent.
 
 On NAK, the oldest status message is sent again.
@@ -124,20 +123,18 @@ Parameter | Description
 1         | Code: `MC` / `mc`
 2         | Message ID
 3         | Meter number (0-3)
-4         | Heads (0: deleted, 1: single, 2: dual)
-5         | Release (0: alternating, 1: simultaneous / drag-race)
-6         | Turn on output pin (usually 2 or 3)
-7         | Red output pin, left head
-8         | Yellow output pin, left head
-9         | Green output pin, left head
-10        | Red output pin, right head
-11        | Yellow output pin, right head
-12        | Green output pin, right head
+4 †       | Heads (0: deleted, 1: single, 2: dual)
+5 †       | Release (0: alternating, 1: simultaneous / drag-race)
+6 †       | Turn on output pin (usually 2 or 3)
+7 †       | Red output pin, left head
+8 †       | Yellow output pin, left head
+9 †       | Green output pin, left head
+10 †      | Red output pin, right head
+11 †      | Yellow output pin, right head
+12 †      | Green output pin, right head
 
 If any of the parameters are not valid, the meter is *deleted*, zeroing out
-values 4-12, and the response indicates this.  If there are only three
-parameters in the poll, it is treated as a *query*, and the response includes
-the current meter configuration.
+values 4-12, and the response indicates this.
 
 ```
 MC,0150,0,2,0,2,4,5,6,7,8,9
@@ -155,11 +152,9 @@ Parameter | Description
 1         | Code: `MS` / `ms`
 2         | Message ID
 3         | Meter number (0-3)
-4         | Red dwell time (0.1 sec), 
+4 †       | Red dwell time (0.1 sec)
 
-If red dwell time is set to zero, metering is disabled.  If there are only
-three parameters in a poll, it is treated as a *query*, and the response
-includes the current red dwell time.
+If red dwell time is set to zero, metering is disabled.
 
 ```
 MS,00AC,0
@@ -173,15 +168,13 @@ Parameter | Description
 1         | Code: `MT` / `mt`
 2         | Message ID
 3         | Table entry number (0-15)
-4         | Meter number (0-3)
-5         | Start time (minute of day; 0-1439)
-6         | Stop time (minute of day; 0-1439)
-7         | Red dwell time (0.1 sec)
+4 †       | Meter number (0-3)
+5 †       | Start time (minute of day; 0-1439)
+6 †       | Stop time (minute of day; 0-1439)
+7 †       | Red dwell time (0.1 sec)
 
 If any of the parameters are not valid, the table entry is *deleted*, zeroing
-out values 4-7, and the response indicates this.  If there are only three
-parameters in the poll, it is treated as a *query*, and the response includes
-the current table entry configuration.
+out values 4-7, and the response indicates this.
 
 These meter timing values take effect when there has been no successful
 communication for longer than the **Comm fail time** system attribute.
@@ -202,13 +195,10 @@ Parameter | Description
 1         | Code: `PS` / `ps`
 2         | Message ID
 3         | Pin number
-4         | Pin status (0 or 1)
+4 †       | Pin status (0 or 1)
 
-If there are only three parameters in a poll, it is treated as a *query*, and
-the response includes the current status.
-
-__Note__: pins associated with meters (Meter Configure) cannot be controlled
-with this command.
+__Note__: Input pins and pins associated with meters (Meter Configure) cannot be
+controlled with this command.
 
 ```
 PS,0250,70
@@ -223,15 +213,13 @@ Parameter | Description
 ----------|------------------------------------------
 1         | Code: `SA` / `sa`
 2         | Message ID
-3         | Comm fail time (0.1 sec), default 1800
-4         | Start up green time (0.1 sec), default 80
-5         | Start up yellow time (0.1 sec), default 50
-6         | Metering green time (0.1 sec), default 13
-7         | Metering yellow time (0.1 sec), default 7
+3 †       | Comm fail time (0.1 sec), default 1800
+4 †       | Start up green time (0.1 sec), default 80
+5 †       | Start up yellow time (0.1 sec), default 50
+6 †       | Metering green time (0.1 sec), default 13
+7 †       | Metering yellow time (0.1 sec), default 7
 
-The meter timing attributes apply to all meters.  If only the code and
-identifier are included in the poll, it is treated as a *query*, and the
-response includes the current attributes.
+The meter timing attributes apply to all meters.
 
 ```
 SA,0291
