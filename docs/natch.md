@@ -27,11 +27,11 @@ Code | Descripton
 CS   | Clock status
 DC   | Detector configure
 DS   | Detector status
-MA   | Mater attributes
 MC   | Meter configure
 MS   | Meter status
 MT   | Meter timing table
 PS   | Pin status
+SA   | System attributes
 SC   | System command (restart)
 
 ### CS - Clock Status
@@ -90,26 +90,6 @@ ds,01a5,3,323,4638,17:50:28
 DS,01a5
 ```
 
-### MA - Meter Attributes
-
-These attributes apply to all meters.  If only the code and identifier are
-included in the poll, it is treated as a *query*, and the response includes the
-current attributes.
-
-Value | Description
-------|------------------------------------------
-3     | Start up green time (0.1 sec), default 80
-4     | Start up yellow time (0.1 sec), default 50
-5     | Metering green time (0.1 sec), default 13
-6     | Metering yellow time (0.1 sec), default 7
-
-```
-MA,0291
-ma,0291,80,50,13,7
-MA,0292,80,50,12,8
-ma,0292,80,50,12,8
-```
-
 ### MC - Meter Configure
 
 The third value is the meter number (0-3).  The fourth value is the number of
@@ -159,6 +139,9 @@ zeroing out values 4-7, and the response indicates this.  If there are only
 three values in the poll, it is treated as a *query*, and the response includes
 the current table entry configuration.
 
+These meter timing values take effect when there has been no successful
+communication for longer than the **Comm fail time** system attribute.
+
 Value | Description
 ------|--------------------------
 3     | Table entry number (0-15)
@@ -190,6 +173,27 @@ PS,0250,70
 ps,0250,70,0
 PS,0251,19,1
 ps,0251,19,1
+```
+
+### SA - System Attributes
+
+The meter timing attributes apply to all meters.  If only the code and
+identifier are included in the poll, it is treated as a *query*, and the
+response includes the current attributes.
+
+Value | Description
+------|------------------------------------------
+3     | Comm fail time (0.1 sec), default 1800
+4     | Start up green time (0.1 sec), default 80
+5     | Start up yellow time (0.1 sec), default 50
+6     | Metering green time (0.1 sec), default 13
+7     | Metering yellow time (0.1 sec), default 7
+
+```
+SA,0291
+sa,0291,1800,80,50,13,7
+SA,0292,1200,80,50,12,8
+sa,0292,1200,80,50,12,8
 ```
 
 ### SC - System Command
