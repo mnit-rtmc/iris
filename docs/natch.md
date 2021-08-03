@@ -39,9 +39,9 @@ Code        | Descripton
 __Message ID__ is used to match polls with responses, but is otherwise not
 interpreted by the controller (except for `ds` messages, see below).
 
-Polls for most message types have two forms: __store__ and __query__.  A store
-includes all possible parameters, but a query leaves out all parameters marked
-with a dagger (†).  The response for both poll forms include __all__ parameters.
+Polls can be made in two forms: __store__ and __query__.  A store includes all
+parameters, but a query omits all marked with a dagger (†).  All parameters are
+included in responses for both poll forms.
 
 ### CS - Clock Status
 
@@ -69,8 +69,8 @@ Parameter | Description
 3         | Detector Number (0-31)
 4 †       | Input Pin Number (0 means deleted)
 
-If the pin number is not a valid input pin, the detector is *deleted*, and this
-is indicated in the response.
+If the input pin number is not valid, the detector is *deleted*, and this is
+indicated in the response.
 
 The input pin number can also be set to a ramp meter output pin (2 or 3).  In
 this case, whenever a green indication (on either head) is displayed, it
