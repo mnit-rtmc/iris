@@ -34,7 +34,7 @@ Code | Descripton
 `MT` | Meter timing table
 `PS` | Pin status
 `SA` | System attributes
-`SC` | System command (restart)
+`SC` | System command
 
 The __message identifier__ is used to match polls with responses, but is
 otherwise not interpreted by the controller (except for `ds` messages, see
@@ -48,8 +48,8 @@ Parameter | Description
 2         | Message ID
 3         | Date/time
 
-The date/time is formatted according to [RFC 3339].  If the third parameter is
-omittet in a poll, the response contains the current time.
+The date/time is formatted according to [RFC 3339].  If it is omitted in a poll,
+the response contains the current time.
 
 ```
 CS,00AB,2021-04-01T12:34:56-05:00
@@ -145,7 +145,7 @@ mc,0150,0,2,0,2,4,5,6,7,8,9
 MC,0151,0
 mc,0151,0,2,0,2,4,5,6,7,8,9
 MC,0152,1,0
-mc,0152,1,0
+mc,0152,1,0,0,0,0,0,0,0,0,0
 ```
 
 ### MS - Meter Status
