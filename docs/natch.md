@@ -11,33 +11,45 @@ controller.  These include ramp meter and detector configuration.
 
 ## Messages
 
-Each message is a single line of comma-separated values (UTF-8), terminated
-with a newline character `\n` (U+000A).
+Each message is a single line of comma-separated parameters (UTF-8), terminated
+with a newline character `\n` (U+000A).  General message format:
 
-The first value in a message is a __code__ indicating a message type.  For a
-poll (from IRIS) these codes are upper-case.  For responses or asynchronous
-detector counts (from the controller), the codes are lower-case.
+Parameter | Description
+----------|------------
+1         | Code
+2         | Message ID
+…         | Remaining parameters
 
-The second value is a __message identifier__.  It is used to match polls with
-responses, but is otherwise not interpreted by the controller.  Asynchronous
-detector messages use a sequence number which increments automatically.
+The __code__ indicates the message type.  For a poll (from IRIS) these codes are
+upper-case.  For responses or asynchronous detector counts (from the
+controller), the codes are lower-case.
 
 Code | Descripton
 -----|----------------
-CS   | Clock status
-DC   | Detector configure
-DS   | Detector status
-MC   | Meter configure
-MS   | Meter status
-MT   | Meter timing table
-PS   | Pin status
-SA   | System attributes
-SC   | System command (restart)
+`CS` | Clock status
+`DC` | Detector configure
+`DS` | Detector status
+`MC` | Meter configure
+`MS` | Meter status
+`MT` | Meter timing table
+`PS` | Pin status
+`SA` | System attributes
+`SC` | System command (restart)
+
+The __message identifier__ is used to match polls with responses, but is
+otherwise not interpreted by the controller (except for `ds` messages, see
+below).
 
 ### CS - Clock Status
 
-The third value is date and time formatted according to [RFC 3339].  If the
-third value is omittet in a poll, the response contains the current time.
+Parameter | Description
+----------|------------------
+1         | Code: `CS` / `cs`
+2         | Message ID
+3         | Date/time
+
+The date/time is formatted according to [RFC 3339].  If the third parameter is
+omittet in a poll, the response contains the current time.
 
 ```
 CS,00AB,2021-04-01T12:34:56-05:00
@@ -48,15 +60,22 @@ cs,00AC,2021-04-01T12:34:59-05:00
 
 ### DC - Detector Configure
 
-The third value is the detector number (0-31).  The fourth value is the input
-pin.  If the pin is not a valid input pin, the detector is *deleted*, and the
-response indicates this with pin 0.  If the fourth value is omitted in a poll,
-it is treated as a *query*, and the response includes the currently configured
-pin.
+Parameter | Description
+----------|------------------
+1         | Code: `DC` / `dc`
+2         | Message ID
+3         | Detector Number (0-31)
+4         | Input Pin Number (0 means deleted)
 
-The fourth value can also be set to a ramp meter output pin (2 or 3).  In this
-case, whenever a green indication (on either head) is displayed, it generates a
-detector status event.
+If the pin number is not a valid input pin, the detector is *deleted*, and this
+is indicated in the response.
+
+If the fourth parameter is omitted in a poll, it is treated as a *query*, and
+the response includes the currently configured pin.
+
+The fourth parameter can also be set to a ramp meter output pin (2 or 3).  In
+this case, whenever a green indication (on either head) is displayed, it
+generates a detector status event.
 
 ```
 DC,00AD,0,39
@@ -66,6 +85,15 @@ dc,00AE,0,39
 ```
 
 ### DS - Detector Status
+
+Parameter | Description
+----------|------------------
+1         | Code: `DS` / `ds`
+2         | Message ID
+3         | Detector Number (0-31)
+4         | Duration (ms)
+5         | Headway (ms)
+6         | Time (`HH:MM:SS`, local 24-hour)
 
 When a vehicle leaves a detector, a detector status messages is added to a
 fixed-size ring buffer, with head and tail pointers.  The __message identifier__
@@ -82,8 +110,7 @@ more messages in the ring buffer, the oldest one is then sent.
 
 On NAK, the oldest status message is sent again.
 
-The third value is the detector number (0-31).  The fourth through sixth values
-are __duration__, __headway__ and __time__.  See [vehicle logging] for details.
+See [vehicle logging] for details on __duration__, __headway__ and __time__.
 
 ```
 ds,01a5,3,323,4638,17:50:28
@@ -92,23 +119,25 @@ DS,01a5
 
 ### MC - Meter Configure
 
-The third value is the meter number (0-3).  The fourth value is the number of
-meter heads.  If any of the values are not valid, the meter is *deleted*, and
-the response indicates this.  If there are only three values in the poll, it is
-treated as a *query*, and the response includes the current meter configuration.
+Parameter | Description
+----------|-------------------
+1         | Code: `MC` / `mc`
+2         | Message ID
+3         | Meter number (0-3)
+4         | Heads (0: deleted, 1: single, 2: dual)
+5         | Release (0: alternating, 1: simultaneous / drag-race)
+6         | Turn on output pin (usually 2 or 3)
+7         | Red output pin, left head
+8         | Yellow output pin, left head
+9         | Green output pin, left head
+10        | Red output pin, right head
+11        | Yellow output pin, right head
+12        | Green output pin, right head
 
-Value | Description
-------|-------------------
-3     | Meter number (0-3)
-4     | Heads (0: deleted, 1: single, 2: dual)
-5     | Release (0: alternating, 1: simultaneous / drag-race)
-6     | Turn on output pin (usually 2 or 3)
-7     | Red output pin, left head
-8     | Yellow output pin, left head
-9     | Green output pin, left head
-10    | Red output pin, right head
-11    | Yellow output pin, right head
-12    | Green output pin, right head
+If any of the parameters are not valid, the meter is *deleted*, zeroing out
+values 4-12, and the response indicates this.  If there are only three
+parameters in the poll, it is treated as a *query*, and the response includes
+the current meter configuration.
 
 ```
 MC,0150,0,2,0,2,4,5,6,7,8,9
@@ -121,10 +150,16 @@ mc,0152,1,0
 
 ### MS - Meter Status
 
-The third value is the meter number.  The fourth is the red dwell time, in 0.1
-second increments.  If set to zero, metering is disabled.  If there are only
-three values in a poll, it is treated as a *query*, and the response includes
-the current red dwell time.
+Parameter | Description
+----------|-------------------
+1         | Code: `MS` / `ms`
+2         | Message ID
+3         | Meter number (0-3)
+4         | Red dwell time (0.1 sec), 
+
+If red dwell time is set to zero, metering is disabled.  If there are only
+three parameters in a poll, it is treated as a *query*, and the response
+includes the current red dwell time.
 
 ```
 MS,00AC,0
@@ -133,22 +168,23 @@ ms,00AC,0,45
 
 ### MT - Meter Timing Table
 
-The third value is the table entry number (0-15).  The fourth value is the meter
-number (0-3).  If any of the values are not valid, the table entry is *deleted*,
-zeroing out values 4-7, and the response indicates this.  If there are only
-three values in the poll, it is treated as a *query*, and the response includes
+Parameter | Description
+----------|--------------------------
+1         | Code: `MT` / `mt`
+2         | Message ID
+3         | Table entry number (0-15)
+4         | Meter number (0-3)
+5         | Start time (minute of day; 0-1439)
+6         | Stop time (minute of day; 0-1439)
+7         | Red dwell time (0.1 sec)
+
+If any of the parameters are not valid, the table entry is *deleted*, zeroing
+out values 4-7, and the response indicates this.  If there are only three
+parameters in the poll, it is treated as a *query*, and the response includes
 the current table entry configuration.
 
 These meter timing values take effect when there has been no successful
 communication for longer than the **Comm fail time** system attribute.
-
-Value | Description
-------|--------------------------
-3     | Table entry number (0-15)
-4     | Meter number (0-3)
-5     | Start time (minute of day; 0-1439)
-6     | Stop time (minute of day; 0-1439)
-7     | Red dwell time (0.1 sec)
 
 ```
 MT,0234,0
@@ -161,9 +197,15 @@ mt,0235,2,0,0,0,0
 
 ### PS - Pin Status
 
-The third value is the pin number.  The fourth is the pin status (0 or 1).  If
-omitted in a poll, it is treated as a *query*, and the response includes the
-current status.
+Parameter | Description
+----------|--------------------------
+1         | Code: `PS` / `ps`
+2         | Message ID
+3         | Pin number
+4         | Pin status (0 or 1)
+
+If there are only three parameters in a poll, it is treated as a *query*, and
+the response includes the current status.
 
 __Note__: pins associated with meters (Meter Configure) cannot be controlled
 with this command.
@@ -177,17 +219,19 @@ ps,0251,19,1
 
 ### SA - System Attributes
 
+Parameter | Description
+----------|------------------------------------------
+1         | Code: `SA` / `sa`
+2         | Message ID
+3         | Comm fail time (0.1 sec), default 1800
+4         | Start up green time (0.1 sec), default 80
+5         | Start up yellow time (0.1 sec), default 50
+6         | Metering green time (0.1 sec), default 13
+7         | Metering yellow time (0.1 sec), default 7
+
 The meter timing attributes apply to all meters.  If only the code and
 identifier are included in the poll, it is treated as a *query*, and the
 response includes the current attributes.
-
-Value | Description
-------|------------------------------------------
-3     | Comm fail time (0.1 sec), default 1800
-4     | Start up green time (0.1 sec), default 80
-5     | Start up yellow time (0.1 sec), default 50
-6     | Metering green time (0.1 sec), default 13
-7     | Metering yellow time (0.1 sec), default 7
 
 ```
 SA,0291
@@ -198,8 +242,13 @@ sa,0292,1200,80,50,12,8
 
 ### SC - System Command
 
-The third value is the command.  `restart` causes the controller program to be
-restarted.
+Parameter | Description
+----------|------------------------------------------
+1         | Code: `SC` / `sc`
+2         | Message ID
+3         | Command
+
+The command `restart` causes the controller program to be restarted.
 
 ```
 SC,05c1,restart
