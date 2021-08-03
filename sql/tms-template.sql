@@ -160,7 +160,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.22.0
+database_version	5.23.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_enable	true
@@ -1256,7 +1256,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 17	RTMS G4
 18	RTMS G4 vlog
 19	SmartSensor 125 vlog
-20	Sensys
+20	Natch
 21	PeMS
 22	SSI
 23	CHP Incidents

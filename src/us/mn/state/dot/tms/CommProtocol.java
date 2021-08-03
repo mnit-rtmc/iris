@@ -87,9 +87,8 @@ public enum CommProtocol {
 	/** Wavetronix SmartSensor 125 Vehicle logging (19) */
 	SS_125_VLOG("SmartSensor 125 vlog"),
 
-	/** Sensys (20) */
-	@Deprecated
-	SENSYS("Sensys"),
+	/** Natch (20) */
+	NATCH("Natch"),
 
 	/** PeMS (21) */
 	@Deprecated

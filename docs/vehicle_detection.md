@@ -103,6 +103,7 @@ Protocol               | Binning         | Traffic Data
 [SmartSensor] 105      | 5 sec to 1 hour | Count, Occupancy, Speed
 RTMS [G4]              | 5 sec to 1 hour | Count, Occupancy, Speed
 RTMS [G4] vlog         | N/A             | [vlog]
+[Natch]                | N/A             | [vlog]
 [MnDOT-170]            | 30 sec          | Count, Occupancy
 [Canoga]               | N/A             | [vlog]
 [DR-500]               | 30-300? sec     | Speed
@@ -326,6 +327,7 @@ _missing_.
 [IO pins]: controllers.html#io-pins
 [Mayfly]: https://github.com/mnit-rtmc/iris/tree/master/mayfly
 [MnDOT-170]: comm_links.html#mndot-170
+[Natch]: comm_links.html#natch
 [NTCIP]: comm_links.html#ntcip
 [Parking area]: parking_areas.html
 [period]: comm_links.html#poll-period

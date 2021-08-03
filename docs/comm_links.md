@@ -247,6 +247,17 @@ messages with deactivated beacons.  There is no way to control which message
 feed is executed first, so each message feed must list each DMS and at least one
 of the message feeds must contain a blank _MULTI_ for each DMS.
 
+### Natch
+
+Advanced Traffic Controllers (ATC) using the [Natch protocol] can support
+several types of [device]s:
+
+- [alarms]
+- [beacons]
+- [changeable LCS]
+- [ramp meters]
+- [vehicle detection]
+
 ### NTCIP
 
 _National Transportation Communications for Intelligent transportation system
@@ -355,6 +366,7 @@ camera can be associated with each [controller], using [IO pin] 1.
 [LCS]: lcs.html
 [monstream]: video.html#monstream
 [MULTI]: dms.html#multi
+[Natch protocol]: natch.html
 [parking area]: parking_areas.html
 [PTZ]: cameras.html#pan-tilt-and-zoom
 [quick message]: dms.html#quick-messages

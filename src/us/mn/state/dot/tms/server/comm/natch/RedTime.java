@@ -12,9 +12,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.mndot;
+package us.mn.state.dot.tms.server.comm.natch;
 
-import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.units.Interval;
 
@@ -27,12 +26,9 @@ public class RedTime {
 
 	/** Calculate red time from a release rate.
 	 * @param rate Release rate (vehicles per hour).
-	 * @param mt Ordinal of ramp meter type.
 	 * @return Red time (tenths of a second). */
-	static public int fromReleaseRate(int rate, int mt) {
+	static public int fromReleaseRate(int rate) {
 		float secs_per_veh = Interval.HOUR.divide(rate);
-		if (mt == RampMeterType.SINGLE.ordinal())
-			secs_per_veh /= 2;
 		float green = SystemAttrEnum.METER_GREEN_SECS.getFloat();
 		float yellow = SystemAttrEnum.METER_YELLOW_SECS.getFloat();
 		float min_red = SystemAttrEnum.METER_MIN_RED_SECS.getFloat();
@@ -43,15 +39,12 @@ public class RedTime {
 
 	/** Calculate release rate from a red time.
 	 * @param red_time Red time (tenths of a second).
-	 * @param mt Ordinal of ramp meter type.
 	 * @return Release rate (vehicles per hour). */
-	static public int toReleaseRate(int red_time, int mt) {
+	static public int toReleaseRate(int red_time) {
 		float red_secs = red_time / 10.0f;
 		float green = SystemAttrEnum.METER_GREEN_SECS.getFloat();
 		float yellow = SystemAttrEnum.METER_YELLOW_SECS.getFloat();
 		float secs_per_veh = red_secs + yellow + green;
-		if (mt == RampMeterType.SINGLE.ordinal())
-			secs_per_veh *= 2;
 		Interval rate = new Interval(secs_per_veh);
 		return Math.round(rate.per(Interval.HOUR));
 	}

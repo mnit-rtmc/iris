@@ -31,17 +31,18 @@ import us.mn.state.dot.tms.server.comm.dr500.DR500Poller;
 import us.mn.state.dot.tms.server.comm.dxm.DXMPoller;
 import us.mn.state.dot.tms.server.comm.e6.E6Poller;
 import us.mn.state.dot.tms.server.comm.g4.G4Poller;
-import us.mn.state.dot.tms.server.comm.redlion.RedLionPoller;
 import us.mn.state.dot.tms.server.comm.incfeed.IncFeedPoller;
 import us.mn.state.dot.tms.server.comm.infinova.InfinovaPoller;
 import us.mn.state.dot.tms.server.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.server.comm.mndot.MndotPoller;
 import us.mn.state.dot.tms.server.comm.monstream.MonStreamPoller;
 import us.mn.state.dot.tms.server.comm.msgfeed.MsgFeedPoller;
+import us.mn.state.dot.tms.server.comm.natch.NatchPoller;
 import us.mn.state.dot.tms.server.comm.ntcip.NtcipPoller;
 import us.mn.state.dot.tms.server.comm.org815.Org815Poller;
 import us.mn.state.dot.tms.server.comm.pelcod.PelcoDPoller;
 import us.mn.state.dot.tms.server.comm.pelcop.PelcoPPoller;
+import us.mn.state.dot.tms.server.comm.redlion.RedLionPoller;
 import us.mn.state.dot.tms.server.comm.sierragx.SierraGxPoller;
 import us.mn.state.dot.tms.server.comm.ss105.SS105Poller;
 import us.mn.state.dot.tms.server.comm.ss125.SS125Poller;
@@ -91,6 +92,8 @@ public class DevicePollerFactory {
 			return new MonStreamPoller(link);
 		case MSG_FEED:
 			return new MsgFeedPoller(link);
+		case NATCH:
+			return new NatchPoller(link);
 		case NTCIP_A:
 		case NTCIP_B:
 		case NTCIP_C:

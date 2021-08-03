@@ -121,4 +121,6 @@ INSERT INTO event.event_description (event_desc_id, description)
 INSERT INTO event.event_description (event_desc_id, description)
 	VALUES (82, 'DMS PIXEL ERROR');
 
+UPDATE iris.comm_protocol SET description = 'Natch' WHERE id = 20;
+
 COMMIT;
