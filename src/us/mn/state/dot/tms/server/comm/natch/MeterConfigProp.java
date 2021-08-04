@@ -53,7 +53,7 @@ public class MeterConfigProp extends MeterProp {
 		// 334 cabinets use these outputs for first meter
 		case 2: return "4,5,6,7,8,9";
 		// 334-Z style cabinets can have two meters
-		case 3: return "12,13,14,15,16,17";
+		case 3: return "12,13,15,16,17,18";
 		// Pin must be 2 or 3
 		default: return "0,0,0,0,0,0";
 		}

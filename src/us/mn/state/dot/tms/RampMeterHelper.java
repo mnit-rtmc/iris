@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,35 @@ public class RampMeterHelper extends BaseHelper {
 	static public Iterator<RampMeter> iterator() {
 		return new IteratorWrapper<RampMeter>(namespace.iterator(
 			RampMeter.SONAR_TYPE));
+	}
+
+	/** Lookup the police panel pin for a ramp meter */
+	static public int lookupPolicePanelPin(RampMeter meter) {
+		String sty = lookupCabinetStyle(meter);
+		if (sty != null) {
+			// Original 334Z cabinet used pin 82 for both meters
+			if (sty.equals("334Z"))
+				return 82;
+			// 334Z-94 or later pin 81 (ramp 1) and 82 (ramp 2)
+			if (sty.startsWith("334Z"))
+				return (meter.getPin() == 2) ? 81 : 82;
+		}
+		// older cabinets used pin 80
+		return 80;
+	}
+
+	/** Lookup cabinet style for a ramp meter */
+	static private String lookupCabinetStyle(RampMeter meter) {
+		Controller ctrl = meter.getController();
+		if (ctrl != null) {
+			Cabinet cab = ctrl.getCabinet();
+			if (cab != null) {
+				CabinetStyle cs = cab.getStyle();
+				if (cs != null)
+					return cs.getName();
+			}
+		}
+		return null;
 	}
 
 	/** Lookup the preset for a ramp meter */

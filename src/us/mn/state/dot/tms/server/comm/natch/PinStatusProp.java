@@ -43,6 +43,12 @@ public class PinStatusProp extends NatchProp {
 		status = st;
 	}
 
+	/** Create a new pin status property */
+	public PinStatusProp(Counter c, int p) {
+		super(c);
+		pin = Integer.toString(p);
+	}
+
 	/** Encode a STORE request */
 	@Override
 	public void encodeStore(Operation op, ByteBuffer tx_buf)

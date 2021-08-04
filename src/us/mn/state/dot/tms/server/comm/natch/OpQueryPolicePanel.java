@@ -16,31 +16,29 @@ package us.mn.state.dot.tms.server.comm.natch;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
- * Operation to query a ramp meter
+ * Operation to query a police panel switch
  *
  * @author Douglas Lau
  */
-public class OpQueryMeterStatus extends OpStep {
-
-	/** Message ID counter */
-	private final Counter counter;
+public class OpQueryPolicePanel extends OpStep {
 
 	/** Ramp meter device */
 	private final RampMeterImpl meter;
 
-	/** Meter status property */
-	private final MeterStatusProp prop;
+	/** Pin status property */
+	private final PinStatusProp prop;
 
-	/** Create a new query meter status step */
-	public OpQueryMeterStatus(Counter c, RampMeterImpl m) {
-		counter = c;
+	/** Create a new query police panel step */
+	public OpQueryPolicePanel(Counter c, RampMeterImpl m) {
 		meter = m;
-		prop = new MeterStatusProp(c, meter);
+		int pin = RampMeterHelper.lookupPolicePanelPin(m);
+		prop = new PinStatusProp(c, pin);
 	}
 
 	/** Poll the controller */
@@ -54,14 +52,6 @@ public class OpQueryMeterStatus extends OpStep {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeQuery(op, rx_buf);
-		int red = prop.getRed();
-		Integer rate = (red > 0) ? RedTime.toReleaseRate(red) : null;
-		meter.setRateNotify(rate);
-	}
-
-	/** Get the next step */
-	@Override
-	public OpStep next() {
-		return new OpQueryPolicePanel(counter, meter);
+		meter.setPolicePanel(prop.getStatus());
 	}
 }
