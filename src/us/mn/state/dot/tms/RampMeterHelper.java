@@ -43,31 +43,32 @@ public class RampMeterHelper extends BaseHelper {
 
 	/** Lookup the police panel pin for a ramp meter */
 	static public int lookupPolicePanelPin(RampMeter meter) {
-		String sty = lookupCabinetStyle(meter);
-		if (sty != null) {
-			// Original 334Z cabinet used pin 82 for both meters
-			if (sty.equals("334Z"))
-				return 82;
+		// only care about first two dip switches
+		int dip = lookupDips(meter) & 0x03;
+		switch (dip) {
+			// 334Z, 334DZ, S334Z use pin 82 for both meters
+			case 1: return 82;
 			// 334Z-94 or later pin 81 (ramp 1) and 82 (ramp 2)
-			if (sty.startsWith("334Z"))
-				return (meter.getPin() == 2) ? 81 : 82;
+			case 3: return (meter.getPin() == 2) ? 81 : 82;
+			// 334D cabinets used pin 80
+			default: return 80;
 		}
-		// older cabinets used pin 80
-		return 80;
 	}
 
-	/** Lookup cabinet style for a ramp meter */
-	static private String lookupCabinetStyle(RampMeter meter) {
+	/** Lookup cabinet DIP switches for a ramp meter */
+	static private int lookupDips(RampMeter meter) {
 		Controller ctrl = meter.getController();
 		if (ctrl != null) {
 			Cabinet cab = ctrl.getCabinet();
 			if (cab != null) {
 				CabinetStyle cs = cab.getStyle();
-				if (cs != null)
-					return cs.getName();
+				if (cs != null) {
+					Integer dip = cs.getDip();
+					return (dip != null) ? dip : 0;
+				}
 			}
 		}
-		return null;
+		return 0;
 	}
 
 	/** Lookup the preset for a ramp meter */
