@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.natch;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.Device;
+import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.AlarmImpl;
 import us.mn.state.dot.tms.server.BeaconImpl;
@@ -52,8 +52,8 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 	}
 
 	/** Create an operation */
-	private void createOp(String n, Device d, OpStep s) {
-		Controller c = d.getController();
+	private void createOp(String n, ControllerIO cio, OpStep s) {
+		Controller c = cio.getController();
 		if (c instanceof ControllerImpl) {
 			ControllerImpl ci = (ControllerImpl) c;
 			Operation op = new Operation(n, ci, s);
@@ -148,7 +148,15 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 	/** Send a device request to an alarm */
 	@Override
 	public void sendRequest(AlarmImpl alarm, DeviceRequest r) {
-		// FIXME
+		switch (r) {
+		case QUERY_STATUS:
+			createOp("alarm.op.query.state", alarm,
+				new OpQueryAlarmState(counter, alarm));
+			break;
+		default:
+			// Ignore other requests
+			break;
+		}
 	}
 
 	/** Start communication test */

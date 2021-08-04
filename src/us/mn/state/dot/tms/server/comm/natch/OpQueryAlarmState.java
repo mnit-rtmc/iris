@@ -16,27 +16,27 @@ package us.mn.state.dot.tms.server.comm.natch;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import us.mn.state.dot.tms.server.BeaconImpl;
+import us.mn.state.dot.tms.server.AlarmImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
- * Operation to query a beacon
+ * Operation to query an alarm
  *
  * @author Douglas Lau
  */
-public class OpQueryBeaconState extends OpStep {
+public class OpQueryAlarmState extends OpStep {
 
-	/** Beacon device */
-	private final BeaconImpl beacon;
+	/** Alarm device */
+	private final AlarmImpl alarm;
 
 	/** Pin status property */
 	private final PinStatusProp prop;
 
-	/** Create a new query beacon state step */
-	public OpQueryBeaconState(Counter c, BeaconImpl b) {
-		beacon = b;
-		prop = new PinStatusProp(c, beacon.getPin());
+	/** Create a new query alarm state step */
+	public OpQueryAlarmState(Counter c, AlarmImpl b) {
+		alarm = b;
+		prop = new PinStatusProp(c, alarm.getPin());
 	}
 
 	/** Poll the controller */
@@ -50,6 +50,6 @@ public class OpQueryBeaconState extends OpStep {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeQuery(op, rx_buf);
-		beacon.setFlashingNotify(prop.getStatus());
+		alarm.setStateNotify(prop.getStatus());
 	}
 }
