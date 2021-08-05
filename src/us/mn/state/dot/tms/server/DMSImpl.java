@@ -104,6 +104,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return sb.toString();
 	}
 
+	/** Comm fail time threshold to blank user message */
+	static private final long COMM_FAIL_BLANK_THRESHOLD_MS = 5 * 60 * 1000;
+
 	/** Minimum duration of a DMS action (minutes) */
 	static private final int DURATION_MINIMUM_MINS = 1;
 
@@ -151,14 +154,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				dms.updateStyles();
 			}
 		}
-	}
-
-	/** Update the device item styles */
-	@Override
-	public void updateStyles() {
-		super.updateStyles();
-		if (isFailed())
-			setMsgUserNull();
 	}
 
 	/** Get a mapping of the columns */
@@ -311,6 +306,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 *  @param c Set to true to indicate the DMS is configured. */
 	public void setConfigure(boolean c) {
 		configure = c;
+		ControllerImpl ctrl = controller;
+		if (ctrl != null && !c) {
+			long ms = ctrl.getFailMillis();
+			if (ms >= COMM_FAIL_BLANK_THRESHOLD_MS)
+				setMsgUserNull();
+		}
 	}
 
 	/** Get the configure flag.
