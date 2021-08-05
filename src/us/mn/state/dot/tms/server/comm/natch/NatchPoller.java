@@ -79,7 +79,12 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
  	 * @param p Sample period in seconds. */
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
-		// FIXME
+		if (c.getPollPeriodSec() == p) {
+			Operation op = new Operation("detector.op.query.data",
+				c, new OpDetectorStatus(counter));
+			op.setPriority(PriorityLevel.DEVICE_DATA);
+			addOp(op);
+		}
 	}
 
 	/** Send a device request to a ramp meter */
