@@ -942,9 +942,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * This is cached to allow combining with scheduled messages in
 	 * getMsgUserSched().
 	 *
-	 * A null value indicates that the user message is unknown.  It is
-	 * nulled on communication failure (in updateStyles()), to prevent the
-	 * message from popping up days later, after communication is restored.
+	 * A null value indicates that the user message is unknown.  After comm
+	 * failure, it is nulled after COMM_FAIL_BLANK_THRESHOLD_MS (in
+	 * setConfigure()), to * prevent the message from popping up days later,
+	 * after communication is restored.
 	 */
 	private SignMessage msg_user;
 
