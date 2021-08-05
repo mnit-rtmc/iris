@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
- * Operation to query a police panel switch
+ * Step to query a police panel switch
  *
  * @author Douglas Lau
  */

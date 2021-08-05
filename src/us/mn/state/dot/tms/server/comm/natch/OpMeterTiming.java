@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
- * Operation to send ramp meter timing table
+ * Step to send ramp meter timing table
  *
  * @author Douglas Lau
  */

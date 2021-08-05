@@ -21,7 +21,7 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
- * Operation to query an alarm
+ * Step to query an alarm
  *
  * @author Douglas Lau
  */
@@ -34,8 +34,8 @@ public class OpQueryAlarmState extends OpStep {
 	private final PinStatusProp prop;
 
 	/** Create a new query alarm state step */
-	public OpQueryAlarmState(Counter c, AlarmImpl b) {
-		alarm = b;
+	public OpQueryAlarmState(Counter c, AlarmImpl a) {
+		alarm = a;
 		prop = new PinStatusProp(c, alarm.getPin());
 	}
 

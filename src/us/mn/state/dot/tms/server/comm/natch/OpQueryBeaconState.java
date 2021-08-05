@@ -21,7 +21,7 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
- * Operation to query a beacon
+ * Step to query a beacon
  *
  * @author Douglas Lau
  */

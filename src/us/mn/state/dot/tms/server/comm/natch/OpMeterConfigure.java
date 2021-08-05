@@ -21,7 +21,7 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
- * Operation to configure a ramp meter
+ * Step to configure a ramp meter
  *
  * @author Douglas Lau
  */
