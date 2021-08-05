@@ -218,7 +218,6 @@ meter_max_red_secs	13.0
 meter_min_red_secs	0.1
 meter_yellow_secs	0.7
 msg_feed_verify	true
-notification_timeout_secs	900
 operation_retry_threshold	3
 price_message_event_purge_days	0
 route_max_legs	8

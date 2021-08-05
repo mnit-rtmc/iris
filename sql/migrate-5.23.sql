@@ -123,4 +123,6 @@ INSERT INTO event.event_description (event_desc_id, description)
 
 UPDATE iris.comm_protocol SET description = 'Natch' WHERE id = 20;
 
+DELETE FROM iris.system_attribute WHERE name = 'notification_timeout_secs';
+
 COMMIT;
