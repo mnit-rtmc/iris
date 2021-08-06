@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -183,6 +183,12 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 		// FIXME: check if comm link connected
 		//        needs status update to work properly
 		return (c == null) || c.isFailed();
+	}
+
+	/** Get the number of milliseconds communication has been failed */
+	public long getFailMillis() {
+		ControllerImpl c = controller;	// Avoid race
+		return (c != null) ? c.getFailMillis() : Long.MAX_VALUE;
 	}
 
 	/** Test if device is online (active and not failed) */

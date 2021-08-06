@@ -306,12 +306,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 *  @param c Set to true to indicate the DMS is configured. */
 	public void setConfigure(boolean c) {
 		configure = c;
-		ControllerImpl ctrl = controller;
-		if (ctrl != null && !c) {
-			long ms = ctrl.getFailMillis();
-			if (ms >= COMM_FAIL_BLANK_THRESHOLD_MS)
-				setMsgUserNull();
-		}
+		// Since this is called after every failed operation, check if
+		// communication has been failed too long.  If so, clear the
+		// user message to prevent it from popping up days later, after
+		// communication is restored.
+		if (!c && getFailMillis() >= COMM_FAIL_BLANK_THRESHOLD_MS)
+			setMsgUserNull();
 	}
 
 	/** Get the configure flag.
@@ -942,11 +942,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * This is cached to allow combining with scheduled messages in
 	 * getMsgUserSched().
 	 *
-	 * A null value indicates that the user message is unknown.  After comm
-	 * failure, it is nulled after COMM_FAIL_BLANK_THRESHOLD_MS (in
-	 * setConfigure()), to * prevent the message from popping up days later,
-	 * after communication is restored.
-	 */
+	 * A null value indicates that the user message is unknown. */
 	private SignMessage msg_user;
 
 	/** Set the user selected sign message */

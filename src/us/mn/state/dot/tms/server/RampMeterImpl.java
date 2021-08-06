@@ -701,12 +701,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return getFailMillis() < MeterPoller.COMM_FAIL_THRESHOLD_MS;
 	}
 
-	/** Get the number of milliseconds the meter has been failed */
-	private long getFailMillis() {
-		ControllerImpl c = controller;	// Avoid race
-		return (c != null) ? c.getFailMillis() : Long.MAX_VALUE;
-	}
-
 	/** Get current minimum release rate (vehicles per hour) */
 	private int getMinimum() {
 		return (isFailed()) ? getMaxRelease() : getMinRelease();

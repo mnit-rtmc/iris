@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2020  Minnesota Department of Transportation
+ * Copyright (C) 2013-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -210,11 +210,8 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Check for comm timeout */
 	public void checkTimeout() {
-		ControllerImpl c = (ControllerImpl)getController();
-		if (c != null) {
-			if (c.getFailMillis() > failTimeoutMS())
-				setArmStateNotify(TIMEOUT, null);
-		}
+		if (getFailMillis() > failTimeoutMS())
+			setArmStateNotify(TIMEOUT, null);
 	}
 
 	/** Send gate arm interlock settings.  Do not test checkEnabled since
