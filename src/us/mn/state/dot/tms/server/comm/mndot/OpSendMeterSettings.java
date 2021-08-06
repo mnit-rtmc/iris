@@ -21,7 +21,6 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
 import us.mn.state.dot.tms.MeterAlgorithm;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.server.RampMeterImpl;
@@ -44,18 +43,6 @@ public class OpSendMeterSettings extends Op170Device {
 
 	/** PM midpoint time (minute-of-day; HHMM format) */
 	static private final int PM_MID_TIME = 1630;
-
-	/** Get the system meter green time (tenths of a second) */
-	static private int getGreenTime() {
-		float g = SystemAttrEnum.METER_GREEN_SECS.getFloat();
-		return Math.round(g * 10);
-	}
-
-	/** Get the system meter yellow time (tenths of a second) */
-	static private int getYellowTime() {
-		float g = SystemAttrEnum.METER_YELLOW_SECS.getFloat();
-		return Math.round(g * 10);
-	}
 
 	/** Convert minute-of-day (0-1440) to HHMM format */
 	static private int minuteHHMM(int v) {
@@ -222,8 +209,8 @@ public class OpSendMeterSettings extends Op170Device {
 		for (int t = Calendar.AM; t <= Calendar.PM; t++) {
 			p.formatBCD4(MeterPoller.STARTUP_GREEN);
 			p.formatBCD4(MeterPoller.STARTUP_YELLOW);
-			p.formatBCD4(getGreenTime());
-			p.formatBCD4(getYellowTime());
+			p.formatBCD4(MeterPoller.getGreenTime());
+			p.formatBCD4(MeterPoller.getYellowTime());
 			p.format16(HOV_PREEMPT);
 			for (int i = 0; i < 6; i++)
 				p.formatBCD4(table_red[t]);

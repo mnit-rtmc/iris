@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm;
 
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 
 /**
@@ -24,6 +25,18 @@ import us.mn.state.dot.tms.server.RampMeterImpl;
  * @author Douglas Lau
  */
 public interface MeterPoller {
+
+	/** Get the system meter green time (tenths of a second) */
+	static int getGreenTime() {
+		float g = SystemAttrEnum.METER_GREEN_SECS.getFloat();
+		return Math.round(g * 10);
+	}
+
+	/** Get the system meter yellow time (tenths of a second) */
+	static int getYellowTime() {
+		float y = SystemAttrEnum.METER_YELLOW_SECS.getFloat();
+		return Math.round(y * 10);
+	}
 
 	/** Threshold to fail communication (minutes) */
 	int COMM_FAIL_THRESHOLD = 3;
