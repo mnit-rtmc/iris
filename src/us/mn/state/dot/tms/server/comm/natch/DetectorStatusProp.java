@@ -29,16 +29,6 @@ import us.mn.state.dot.tms.server.comm.Operation;
  */
 public class DetectorStatusProp extends NatchProp {
 
-	/** Parse a positive integer value */
-	static private int parseInt(String v) {
-		try {
-			return Integer.parseInt(v);
-		}
-		catch (NumberFormatException e) {
-			return -1;
-		}
-	}
-
 	/** Parse a timestamp */
 	static private long parseStamp(String v) {
 		if (v.length() == 8 &&

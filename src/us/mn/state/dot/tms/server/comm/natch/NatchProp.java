@@ -32,6 +32,16 @@ abstract public class NatchProp extends ControllerProp {
 	/** UTF-8 charset */
 	static protected final Charset UTF8 = Charset.forName("UTF-8");
 
+	/** Parse a positive integer value */
+	static protected int parseInt(String v) {
+		try {
+			return Integer.parseInt(v);
+		}
+		catch (NumberFormatException e) {
+			return -1;
+		}
+	}
+
 	/** Message ID */
 	protected final String message_id;
 

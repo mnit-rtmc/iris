@@ -83,11 +83,8 @@ public class MeterStatusProp extends MeterProp {
 		    param[1].equals(message_id) &&
 		    param[2].equals(Integer.toString(getMeterNumber())))
 		{
-			try {
-				red = Integer.parseInt(param[3]);
-				return true;
-			}
-			catch (NumberFormatException e) { }
+			red = parseInt(param[3]);
+			return red >= 0;
 		}
 		return false;
 	}
