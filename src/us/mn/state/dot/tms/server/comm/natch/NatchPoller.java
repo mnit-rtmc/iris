@@ -71,7 +71,8 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 	/** Send settings to a controller */
 	@Override
 	public void sendSettings(ControllerImpl c) {
-		// FIXME: store CS
+		createSettingsOp("clock.status.op", c,
+			new OpClockStatus(counter));
 		createSettingsOp("system.attribute.op", c,
 			new OpSystemAttributes(counter));
 		createSettingsOp("detector.op.configure", c,

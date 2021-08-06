@@ -16,25 +16,32 @@ package us.mn.state.dot.tms.server.comm.natch;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import static us.mn.state.dot.tms.server.comm.MeterPoller.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.comm.Operation;
 
 /**
- * System attributes property
+ * Clock status property
  *
  * @author Douglas Lau
  */
-public class SystemAttributesProp extends NatchProp {
+public class ClockStatusProp extends NatchProp {
 
-	/** Get SA / sa message */
+	/** Date formatter for RFC 3339 */
+	static private final String RFC3339 = "yyyy-MM-dd'T'HH:mm:ssXXX";
+
+	/** Get CS / cs message */
 	private String getMessage(String code) {
-		return code + ',' + message_id + ',' + COMM_FAIL_THRESHOLD_MS +
-			',' + STARTUP_GREEN + ',' + STARTUP_YELLOW + ',' +
-			getGreenTime() + ',' + getYellowTime();
+		return code + ',' + message_id + ',' +
+			new SimpleDateFormat(RFC3339).format(new Date(stamp));
 	}
 
-	/** Create a new system attributes property */
-	public SystemAttributesProp(Counter c) {
+	/** Time stamp */
+	private long stamp;
+
+	/** Create a new clock status property */
+	public ClockStatusProp(Counter c) {
 		super(c);
 	}
 
@@ -43,7 +50,8 @@ public class SystemAttributesProp extends NatchProp {
 	public void encodeStore(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		String msg = getMessage("SA") + '\n';
+		stamp = TimeSteward.currentTimeMillis();
+		String msg = getMessage("CS") + '\n';
 		tx_buf.put(msg.getBytes(UTF8));
 	}
 
@@ -52,13 +60,13 @@ public class SystemAttributesProp extends NatchProp {
 	public void encodeQuery(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		String msg = "SA," + message_id + '\n';
+		String msg = "CS," + message_id + '\n';
 		tx_buf.put(msg.getBytes(UTF8));
 	}
 
 	/** Parse received message */
 	@Override
 	protected boolean parseMsg(String msg) throws IOException {
-		return msg.equals(getMessage("sa"));
+		return msg.equals(getMessage("cs"));
 	}
 }
