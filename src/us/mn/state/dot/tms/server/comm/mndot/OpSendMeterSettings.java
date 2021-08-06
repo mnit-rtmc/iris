@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,12 +35,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 public class OpSendMeterSettings extends Op170Device {
-
-	/** Startup green time (tenths of a second; BCD) */
-	static private final int STARTUP_GREEN = 0x0080;
-
-	/** Startup yellow time (tenths of a second; BCD) */
-	static private final int STARTUP_YELLOW = 0x0050;
 
 	/** HOV preempt time (tenths of a second; BCD) (obsolete) */
 	static private final int HOV_PREEMPT = 0x0080;
@@ -226,8 +220,8 @@ public class OpSendMeterSettings extends Op170Device {
 	/** Format a timing table with BCD values */
 	private void formatTimingTable(MemoryProperty p) throws IOException {
 		for (int t = Calendar.AM; t <= Calendar.PM; t++) {
-			p.format16(STARTUP_GREEN);
-			p.format16(STARTUP_YELLOW);
+			p.formatBCD4(MeterPoller.STARTUP_GREEN);
+			p.formatBCD4(MeterPoller.STARTUP_YELLOW);
 			p.formatBCD4(getGreenTime());
 			p.formatBCD4(getYellowTime());
 			p.format16(HOV_PREEMPT);
