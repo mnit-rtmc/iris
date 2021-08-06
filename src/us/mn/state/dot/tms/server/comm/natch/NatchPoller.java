@@ -65,7 +65,8 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 	/** Perform a controller reset */
 	@Override
 	public void resetController(ControllerImpl c) {
-		// FIXME
+		createSettingsOp("system.command.op", c,
+			new OpSystemCommand(counter));
 	}
 
 	/** Send settings to a controller */
