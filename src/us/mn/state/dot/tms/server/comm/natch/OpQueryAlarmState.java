@@ -33,6 +33,9 @@ public class OpQueryAlarmState extends OpStep {
 	/** Pin status property */
 	private final PinStatusProp prop;
 
+	/** Was successfully received */
+	private boolean success = false;
+
 	/** Create a new query alarm state step */
 	public OpQueryAlarmState(Counter c, AlarmImpl a) {
 		alarm = a;
@@ -51,5 +54,12 @@ public class OpQueryAlarmState extends OpStep {
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeQuery(op, rx_buf);
 		alarm.setStateNotify(prop.getStatus());
+		success = true;
+	}
+
+	/** Get the next step */
+	@Override
+	public OpStep next() {
+		return success ? null : this;
 	}
 }

@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.Operation;
  *
  * @author Douglas Lau
  */
-public class DetectorStatusProp extends NatchProp {
+public class DetectorStatusProp extends DetectorProp {
 
 	/** Parse a timestamp */
 	static private long parseStamp(String v) {
@@ -55,14 +55,6 @@ public class DetectorStatusProp extends NatchProp {
 		return 0;
 	}
 
-	/** Detector number */
-	private int detector_num;
-
-	/** Get the detector number */
-	public int getDetectorNum() {
-		return detector_num;
-	}
-
 	/** Duration (ms) */
 	private int duration;
 
@@ -84,7 +76,7 @@ public class DetectorStatusProp extends NatchProp {
 
 	/** Log vehicle event */
 	public boolean logEvent(ControllerImpl ctrl) {
-		int pin = lookupDetectorPin();
+		int pin = lookupPin(ctrl);
 		if (pin > 0 && stamp > 0) {
 			DetectorImpl det = ctrl.getDetectorAtPin(pin);
 			if (det != null) {
@@ -95,17 +87,9 @@ public class DetectorStatusProp extends NatchProp {
 		return false;
 	}
 
-	/** Lookup the input pin for a detector */
-	private int lookupDetectorPin() {
-		if (detector_num >= 0 && detector_num < 32)
-			return detector_num + 39;
-		else
-			return 0;
-	}
-
 	/** Create a new detector status property */
 	public DetectorStatusProp(Counter c) {
-		super(c);
+		super(c, -1);
 	}
 
 	/** Encode a QUERY request */
@@ -132,7 +116,9 @@ public class DetectorStatusProp extends NatchProp {
 
 	/** Parse received message */
 	@Override
-	protected boolean parseMsg(String msg) throws IOException {
+	protected boolean parseMsg(Operation op, String msg)
+		throws IOException
+	{
 		String[] param = msg.split(",");
 		if (param.length == 6 &&
 		    param[0].equals("ds") &&

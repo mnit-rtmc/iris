@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.natch;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 
 /**
@@ -23,32 +24,11 @@ import us.mn.state.dot.tms.server.comm.Operation;
  *
  * @author Douglas Lau
  */
-public class DetectorConfigProp extends NatchProp {
-
-	/** Detector number (0-31) */
-	private int detector_num;
-
-	/** Advance to the next detector */
-	public void nextDetector() {
-		detector_num++;
-	}
-
-	/** Check if done */
-	public boolean isDone() {
-		return detector_num > 31;
-	}
-
-	/** Lookup the input pin for a detector */
-	private int lookupDetectorPin() {
-		if (detector_num >= 0 && detector_num < 32)
-			return detector_num + 39;
-		else
-			return 0;
-	}
+public class DetectorConfigProp extends DetectorProp {
 
 	/** Create a new detector configuration property */
-	public DetectorConfigProp(Counter c) {
-		super(c);
+	public DetectorConfigProp(Counter c, int dn) {
+		super(c, dn);
 	}
 
 	/** Encode a STORE request */
@@ -62,7 +42,7 @@ public class DetectorConfigProp extends NatchProp {
 		sb.append(',');
 		sb.append(detector_num);
 		sb.append(',');
-		sb.append(lookupDetectorPin());
+		sb.append(lookupPin(op.getController()));
 		sb.append('\n');
 		tx_buf.put(sb.toString().getBytes(UTF8));
 	}
@@ -83,8 +63,10 @@ public class DetectorConfigProp extends NatchProp {
 
 	/** Parse received message */
 	@Override
-	protected boolean parseMsg(String msg) throws IOException {
+	protected boolean parseMsg(Operation op, String msg)
+		throws IOException
+	{
 		return msg.equals("dc," + message_id + ',' + detector_num +
-			',' + lookupDetectorPin());
+			',' + lookupPin(op.getController()));
 	}
 }

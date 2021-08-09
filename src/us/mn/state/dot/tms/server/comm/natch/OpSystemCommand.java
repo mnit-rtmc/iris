@@ -29,6 +29,9 @@ public class OpSystemCommand extends OpStep {
 	/** System command property */
 	private final SystemCommandProp prop;
 
+	/** Was successfully received */
+	private boolean success = false;
+
 	/** Create a new system command step */
 	public OpSystemCommand(Counter c) {
 		prop = new SystemCommandProp(c);
@@ -45,5 +48,12 @@ public class OpSystemCommand extends OpStep {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeStore(op, rx_buf);
+		success = true;
+	}
+
+	/** Get the next step */
+	@Override
+	public OpStep next() {
+		return success ? null : this;
 	}
 }

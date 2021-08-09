@@ -29,6 +29,9 @@ public class OpSystemAttributes extends OpStep {
 	/** System attributes property */
 	private final SystemAttributesProp prop;
 
+	/** Was successfully received */
+	private boolean success = false;
+
 	/** Create a new system attributes step */
 	public OpSystemAttributes(Counter c) {
 		prop = new SystemAttributesProp(c);
@@ -45,5 +48,12 @@ public class OpSystemAttributes extends OpStep {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeStore(op, rx_buf);
+		success = true;
+	}
+
+	/** Get the next step */
+	@Override
+	public OpStep next() {
+		return success ? null : this;
 	}
 }

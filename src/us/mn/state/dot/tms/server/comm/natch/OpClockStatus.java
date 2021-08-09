@@ -29,6 +29,9 @@ public class OpClockStatus extends OpStep {
 	/** Clock status property */
 	private final ClockStatusProp prop;
 
+	/** Was successfully received */
+	private boolean success = false;
+
 	/** Create a new clock status step */
 	public OpClockStatus(Counter c) {
 		prop = new ClockStatusProp(c);
@@ -45,5 +48,12 @@ public class OpClockStatus extends OpStep {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeStore(op, rx_buf);
+		success = true;
+	}
+
+	/** Get the next step */
+	@Override
+	public OpStep next() {
+		return success ? null : this;
 	}
 }

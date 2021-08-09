@@ -33,6 +33,9 @@ public class OpSendBeaconState extends OpStep {
 	/** Pin status property */
 	private final PinStatusProp prop;
 
+	/** Was successfully received */
+	private boolean success = false;
+
 	/** Create a new send beacon state step */
 	public OpSendBeaconState(Counter c, BeaconImpl b,
 		boolean flashing)
@@ -53,5 +56,12 @@ public class OpSendBeaconState extends OpStep {
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeStore(op, rx_buf);
 		beacon.setFlashingNotify(prop.getStatus());
+		success = true;
+	}
+
+	/** Get the next step */
+	@Override
+	public OpStep next() {
+		return success ? null : this;
 	}
 }

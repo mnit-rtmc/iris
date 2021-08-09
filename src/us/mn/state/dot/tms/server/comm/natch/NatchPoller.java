@@ -77,7 +77,7 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 		createSettingsOp("system.attribute.op", c,
 			new OpSystemAttributes(counter));
 		createSettingsOp("detector.op.configure", c,
-			new OpDetectorConfigure(counter));
+			new OpDetectorConfigure(counter, 0));
 	}
 
 	/** Create a settings operation */

@@ -66,7 +66,9 @@ public class ClockStatusProp extends NatchProp {
 
 	/** Parse received message */
 	@Override
-	protected boolean parseMsg(String msg) throws IOException {
+	protected boolean parseMsg(Operation op, String msg)
+		throws IOException
+	{
 		return msg.equals(getMessage("cs"));
 	}
 }

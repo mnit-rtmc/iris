@@ -72,8 +72,31 @@ public class TimingTable {
 		}
 	}
 
-	/** Get an iterator of minute-of-day to start boolean mappings */
-	public Set<Map.Entry<Integer, Boolean>> events() {
-		return events.entrySet();
+	/** Lookup start time */
+	public int lookupStart(int entry) {
+		int e = 0;
+		for (Map.Entry<Integer, Boolean> ev: events.entrySet()) {
+			boolean is_start = ev.getValue();
+			if (is_start) {
+				if (e == entry)
+					return ev.getKey();
+			} else
+				e++;
+		}
+		return 0;
+	}
+
+	/** Lookup stop time */
+	public int lookupStop(int entry) {
+		int e = 0;
+		for (Map.Entry<Integer, Boolean> ev: events.entrySet()) {
+			boolean is_start = ev.getValue();
+			if (!is_start) {
+				if (e == entry)
+					return ev.getKey();
+				e++;
+			}
+		}
+		return 0;
 	}
 }

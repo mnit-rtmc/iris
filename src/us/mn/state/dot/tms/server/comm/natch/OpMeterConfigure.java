@@ -36,6 +36,9 @@ public class OpMeterConfigure extends OpStep {
 	/** Meter config property */
 	private final MeterConfigProp prop;
 
+	/** Was successfully received */
+	private boolean success = false;
+
 	/** Create a new configure ramp meter step */
 	public OpMeterConfigure(Counter c, RampMeterImpl m) {
 		counter = c;
@@ -54,11 +57,12 @@ public class OpMeterConfigure extends OpStep {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeStore(op, rx_buf);
+		success = true;
 	}
 
 	/** Get the next step */
 	@Override
 	public OpStep next() {
-		return new OpMeterTiming(counter, meter);
+		return success ? new OpMeterTiming(counter, meter, 0) : this;
 	}
 }

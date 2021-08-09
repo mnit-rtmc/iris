@@ -14,36 +14,31 @@
  */
 package us.mn.state.dot.tms.server.comm.natch;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import us.mn.state.dot.tms.server.comm.Operation;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
- * System command property
+ * Detector property
  *
  * @author Douglas Lau
  */
-public class SystemCommandProp extends NatchProp {
+abstract public class DetectorProp extends NatchProp {
 
-	/** Create a new system command property */
-	public SystemCommandProp(Counter c) {
+	/** Detector number (0-31) */
+	public int detector_num;
+
+	/** Lookup the input pin for the detector */
+	protected int lookupPin(ControllerImpl ctrl) {
+		if (detector_num >= 0 && detector_num < 32) {
+			int pin = detector_num + 39;
+			if (ctrl.getDetectorAtPin(pin) != null)
+				return pin;
+		}
+		return 0;
+	}
+
+	/** Create a new detector property */
+	protected DetectorProp(Counter c, int dn) {
 		super(c);
-	}
-
-	/** Encode a STORE request */
-	@Override
-	public void encodeStore(Operation op, ByteBuffer tx_buf)
-		throws IOException
-	{
-		String msg = "SC," + message_id + ",restart\n";
-		tx_buf.put(msg.getBytes(UTF8));
-	}
-
-	/** Parse received message */
-	@Override
-	protected boolean parseMsg(Operation op, String msg)
-		throws IOException
-	{
-		return msg.equals("sc," + message_id + ",restart");
+		detector_num = dn;
 	}
 }

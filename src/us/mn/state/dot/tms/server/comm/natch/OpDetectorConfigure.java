@@ -32,10 +32,13 @@ public class OpDetectorConfigure extends OpStep {
 	/** Detector config property */
 	private final DetectorConfigProp prop;
 
+	/** Was successfully received */
+	private boolean success = false;
+
 	/** Create a new configure detector step */
-	public OpDetectorConfigure(Counter c) {
+	public OpDetectorConfigure(Counter c, int dn) {
 		counter = c;
-		prop = new DetectorConfigProp(c);
+		prop = new DetectorConfigProp(c, dn);
 	}
 
 	/** Poll the controller */
@@ -49,13 +52,18 @@ public class OpDetectorConfigure extends OpStep {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeStore(op, rx_buf);
-		prop.nextDetector();
-		setPolling(true);
+		success = true;
 	}
 
 	/** Get the next step */
 	@Override
 	public OpStep next() {
-		return prop.isDone() ? null : this;
+		if (success) {
+			int dn = prop.detector_num + 1;
+			return (dn < 32)
+			      ? new OpDetectorConfigure(counter, dn)
+			      : null;
+		} else
+			return this;
 	}
 }

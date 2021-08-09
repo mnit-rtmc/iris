@@ -111,7 +111,9 @@ public class MeterTimingProp extends MeterProp {
 
 	/** Parse received message */
 	@Override
-	protected boolean parseMsg(String msg) throws IOException {
+	protected boolean parseMsg(Operation op, String msg)
+		throws IOException
+	{
 		String[] param = msg.split(",");
 		if (param.length == 7 &&
 		    param[0].equals("mt") &&

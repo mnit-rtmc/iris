@@ -33,6 +33,9 @@ public class OpSendMeterStatus extends OpStep {
 	/** Meter status property */
 	private final MeterStatusProp prop;
 
+	/** Was successfully received */
+	private boolean success = false;
+
 	/** Create a new send meter status step */
 	public OpSendMeterStatus(Counter c, RampMeterImpl m, Integer rate) {
 		meter = m;
@@ -55,5 +58,12 @@ public class OpSendMeterStatus extends OpStep {
 		int red = prop.getRed();
 		Integer rate = (red > 0) ? RedTime.toReleaseRate(red) : null;
 		meter.setRateNotify(rate);
+		success = true;
+	}
+
+	/** Get the next step */
+	@Override
+	public OpStep next() {
+		return success ? null : this;
 	}
 }

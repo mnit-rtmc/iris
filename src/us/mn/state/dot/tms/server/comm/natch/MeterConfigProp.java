@@ -102,7 +102,9 @@ public class MeterConfigProp extends MeterProp {
 
 	/** Parse received message */
 	@Override
-	protected boolean parseMsg(String msg) throws IOException {
+	protected boolean parseMsg(Operation op, String msg)
+		throws IOException
+	{
 		String[] param = msg.split(",");
 		return (param.length == 12 &&
 		    param[0].equals("mc") &&

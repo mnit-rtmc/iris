@@ -36,6 +36,9 @@ public class OpQueryMeterStatus extends OpStep {
 	/** Meter status property */
 	private final MeterStatusProp prop;
 
+	/** Was successfully received */
+	private boolean success = false;
+
 	/** Create a new query meter status step */
 	public OpQueryMeterStatus(Counter c, RampMeterImpl m) {
 		counter = c;
@@ -57,11 +60,12 @@ public class OpQueryMeterStatus extends OpStep {
 		int red = prop.getRed();
 		Integer rate = (red > 0) ? RedTime.toReleaseRate(red) : null;
 		meter.setRateNotify(rate);
+		success = true;
 	}
 
 	/** Get the next step */
 	@Override
 	public OpStep next() {
-		return new OpQueryPolicePanel(counter, meter);
+		return success ? new OpQueryPolicePanel(counter, meter) : this;
 	}
 }

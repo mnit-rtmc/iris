@@ -57,7 +57,7 @@ abstract public class NatchProp extends ControllerProp {
 	{
 		byte[] buf = new byte[rx_buf.remaining()];
 		rx_buf.get(buf);
-		doRecv(new String(buf, UTF8));
+		doRecv(op, new String(buf, UTF8));
 	}
 
 	/** Decode a QUERY response */
@@ -67,19 +67,20 @@ abstract public class NatchProp extends ControllerProp {
 	{
 		byte[] buf = new byte[rx_buf.remaining()];
 		rx_buf.get(buf);
-		doRecv(new String(buf, UTF8));
+		doRecv(op, new String(buf, UTF8));
 	}
 
 	/** Parse received message */
-	private void doRecv(String msgs) throws IOException {
+	private void doRecv(Operation op, String msgs) throws IOException {
 		boolean received = false;
 		for (String msg : msgs.split("\n")) {
-			received |= parseMsg(msg);
+			received |= parseMsg(op, msg);
 		}
 		if (!received)
 			throw new ParsingException("Invalid response");
 	}
 
 	/** Parse one received message */
-	abstract protected boolean parseMsg(String msg) throws IOException;
+	abstract protected boolean parseMsg(Operation op, String msg)
+		throws IOException;
 }

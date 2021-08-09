@@ -34,6 +34,9 @@ public class OpQueryPolicePanel extends OpStep {
 	/** Pin status property */
 	private final PinStatusProp prop;
 
+	/** Was successfully received */
+	private boolean success = false;
+
 	/** Create a new query police panel step */
 	public OpQueryPolicePanel(Counter c, RampMeterImpl m) {
 		meter = m;
@@ -53,5 +56,12 @@ public class OpQueryPolicePanel extends OpStep {
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeQuery(op, rx_buf);
 		meter.setPolicePanel(prop.getStatus());
+		success = true;
+	}
+
+	/** Get the next step */
+	@Override
+	public OpStep next() {
+		return success ? null : this;
 	}
 }

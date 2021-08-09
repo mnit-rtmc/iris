@@ -36,42 +36,30 @@ public class OpMeterTiming extends OpStep {
 	/** Ramp meter */
 	private final RampMeterImpl meter;
 
-	/** Timing table start times */
-	private final int[] start = { 0, 0, 0, 0 };
+	/** Timing table start time */
+	private final int start;
 
-	/** Timing table stop times */
-	private final int[] stop = { 0, 0, 0, 0 };
+	/** Timing table stop time */
+	private final int stop;
 
 	/** Meter table entry number (0-3) */
-	private int entry = 0;
+	private final int entry;
 
 	/** Meter timing property */
 	private final MeterTimingProp prop;
 
+	/** Was successfully received */
+	private boolean success = false;
+
 	/** Create a new ramp meter timing step */
-	public OpMeterTiming(Counter c, RampMeterImpl m) {
+	public OpMeterTiming(Counter c, RampMeterImpl m, int e) {
 		counter = c;
 		meter = m;
+		entry = e;
 		prop = new MeterTimingProp(c, meter);
-		createTable();
-	}
-
-	/** Create timing table */
-	private void createTable() {
-		int e = 0;
 		TimingTable table = new TimingTable(meter);
-		for (Map.Entry<Integer, Boolean> ent: table.events()) {
-			int min = ent.getKey();
-			if (ent.getValue())
-				start[e] = min;
-			else {
-				stop[e] = min;
-				e++;
-				// Four entries per meter
-				if (e >= 4)
-					break;
-			}
-		}
+		start = table.lookupStart(entry);
+		stop = table.lookupStop(entry);
 	}
 
 	/** Get the red time for a time of day */
@@ -95,10 +83,10 @@ public class OpMeterTiming extends OpStep {
 	@Override
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
 		prop.setEntry(entry);
-		if (stop[entry] > start[entry]) {
-			prop.setStart(start[entry]);
-			prop.setStop(stop[entry]);
-			prop.setRed(getRed(start[entry]));
+		if (stop > start) {
+			prop.setStart(start);
+			prop.setStop(stop);
+			prop.setRed(getRed(start));
 		} else {
 			prop.setStart(0);
 			prop.setStop(0);
@@ -112,12 +100,17 @@ public class OpMeterTiming extends OpStep {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeStore(op, rx_buf);
+		success = true;
 	}
 
 	/** Get the next step */
 	@Override
 	public OpStep next() {
-		entry++;
-		return (entry < 4) ? this : null;
+		if (success) {
+			return (entry < 3)
+			      ? new OpMeterTiming(counter, meter, entry + 1)
+			      : null;
+		} else
+			return this;
 	}
 }

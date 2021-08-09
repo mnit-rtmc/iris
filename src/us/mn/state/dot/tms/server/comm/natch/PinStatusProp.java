@@ -81,7 +81,9 @@ public class PinStatusProp extends NatchProp {
 
 	/** Parse received message */
 	@Override
-	protected boolean parseMsg(String msg) throws IOException {
+	protected boolean parseMsg(Operation op, String msg)
+		throws IOException
+	{
 		String[] param = msg.split(",");
 		if (param.length == 4 &&
 		    param[0].equals("ps") &&
