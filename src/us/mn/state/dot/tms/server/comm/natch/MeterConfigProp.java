@@ -69,21 +69,10 @@ public class MeterConfigProp extends MeterProp {
 	public void encodeStore(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("MC,");
-		sb.append(message_id);
-		sb.append(',');
-		sb.append(getMeterNumber());
-		sb.append(',');
-		sb.append(getHeads());
-		sb.append(',');
-		sb.append(getRelease());
-		sb.append(',');
-		sb.append(getPin());
-		sb.append(',');
-		sb.append(getOutputPins());
-		sb.append('\n');
-		tx_buf.put(sb.toString().getBytes(UTF8));
+		String msg = "MC," + message_id + ',' + getMeterNumber() + ',' +
+			getHeads() + ',' + getRelease() + ',' + getPin() + ',' +
+			getOutputPins() + '\n';
+		tx_buf.put(msg.getBytes(UTF8));
 	}
 
 	/** Encode a QUERY request */
@@ -91,24 +80,25 @@ public class MeterConfigProp extends MeterProp {
 	public void encodeQuery(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("MC,");
-		sb.append(message_id);
-		sb.append(',');
-		sb.append(getMeterNumber());
-		sb.append('\n');
-		tx_buf.put(sb.toString().getBytes(UTF8));
+		String msg = "MC," + message_id + ',' + getMeterNumber() + '\n';
+		tx_buf.put(msg.getBytes(UTF8));
 	}
 
-	/** Parse received message */
+	/** Get the message code */
 	@Override
-	protected boolean parseMsg(Operation op, String msg)
-		throws IOException
-	{
-		String[] param = msg.split(",");
-		return (param.length == 12 &&
-		    param[0].equals("mc") &&
-		    param[1].equals(message_id) &&
-		    param[2].equals(Integer.toString(getMeterNumber())));
+	protected String code() {
+		return "mc";
+	}
+
+	/** Get the number of response parameters */
+	@Override
+	protected int parameters() {
+		return 12;
+	}
+
+	/** Parse parameters for a received message */
+	@Override
+	protected boolean parseParams(String[] param) {
+		return param[2].equals(Integer.toString(getMeterNumber()));
 	}
 }

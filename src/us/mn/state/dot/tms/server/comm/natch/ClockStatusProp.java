@@ -28,9 +28,6 @@ import us.mn.state.dot.tms.server.comm.Operation;
  */
 public class ClockStatusProp extends NatchProp {
 
-	/** Date formatter for RFC 3339 */
-	static private final String RFC3339 = "yyyy-MM-dd'T'HH:mm:ssXXX";
-
 	/** Get CS / cs message */
 	private String getMessage(String code) {
 		return code + ',' + message_id + ',' +
@@ -64,11 +61,22 @@ public class ClockStatusProp extends NatchProp {
 		tx_buf.put(msg.getBytes(UTF8));
 	}
 
-	/** Parse received message */
+	/** Get the message code */
 	@Override
-	protected boolean parseMsg(Operation op, String msg)
-		throws IOException
-	{
-		return msg.equals(getMessage("cs"));
+	protected String code() {
+		return "cs";
+	}
+
+	/** Get the number of response parameters */
+	@Override
+	protected int parameters() {
+		return 3;
+	}
+
+	/** Parse parameters for a received message */
+	@Override
+	protected boolean parseParams(String[] param) {
+		stamp = parseStamp(param[2]);
+		return true;
 	}
 }

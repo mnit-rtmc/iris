@@ -29,8 +29,8 @@ import us.mn.state.dot.tms.server.comm.Operation;
  */
 public class DetectorStatusProp extends DetectorProp {
 
-	/** Parse a timestamp */
-	static private long parseStamp(String v) {
+	/** Parse a time */
+	static private long parseTime(String v) {
 		if (v.length() == 8 &&
 		    v.charAt(2) == ':' &&
 		    v.charAt(5) == ':')
@@ -97,11 +97,8 @@ public class DetectorStatusProp extends DetectorProp {
 	public void encodeQuery(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("DS,");
-		sb.append(message_id);
-		sb.append('\n');
-		tx_buf.put(sb.toString().getBytes(UTF8));
+		String msg = "DS," + message_id + '\n';
+		tx_buf.put(msg.getBytes(UTF8));
 	}
 
 	/** Decode a QUERY response */
@@ -114,21 +111,25 @@ public class DetectorStatusProp extends DetectorProp {
 		super.decodeQuery(op, rx_buf);
 	}
 
-	/** Parse received message */
+	/** Get the message code */
 	@Override
-	protected boolean parseMsg(Operation op, String msg)
-		throws IOException
-	{
-		String[] param = msg.split(",");
-		if (param.length == 6 &&
-		    param[0].equals("ds") &&
-		    param[1].equals(message_id))
-		{
-			detector_num = parseInt(param[2]);
-			duration = parseInt(param[3]);
-			headway = parseInt(param[4]);
-			stamp = parseStamp(param[5]);
-		}
-		return true;
+	protected String code() {
+		return "ds";
+	}
+
+	/** Get the number of response parameters */
+	@Override
+	protected int parameters() {
+		return 6;
+	}
+
+	/** Parse parameters for a received message */
+	@Override
+	protected boolean parseParams(String[] param) {
+		detector_num = parseInt(param[2]);
+		duration = parseInt(param[3]);
+		headway = parseInt(param[4]);
+		stamp = parseTime(param[5]);
+		return detector_num >= 0 && detector_num < 32;
 	}
 }

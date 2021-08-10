@@ -49,15 +49,9 @@ public class MeterStatusProp extends MeterProp {
 	public void encodeStore(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("MS,");
-		sb.append(message_id);
-		sb.append(',');
-		sb.append(getMeterNumber());
-		sb.append(',');
-		sb.append(red);
-		sb.append('\n');
-		tx_buf.put(sb.toString().getBytes(UTF8));
+		String msg = "MS," + message_id + ',' + getMeterNumber() + ',' +
+			red + '\n';
+		tx_buf.put(msg.getBytes(UTF8));
 	}
 
 	/** Encode a QUERY request */
@@ -65,29 +59,29 @@ public class MeterStatusProp extends MeterProp {
 	public void encodeQuery(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("MS,");
-		sb.append(message_id);
-		sb.append(',');
-		sb.append(getMeterNumber());
-		sb.append('\n');
-		tx_buf.put(sb.toString().getBytes(UTF8));
+		String msg = "MS," + message_id + ',' + getMeterNumber() + '\n';
+		tx_buf.put(msg.getBytes(UTF8));
 	}
 
-	/** Parse received message */
+	/** Get the message code */
 	@Override
-	protected boolean parseMsg(Operation op, String msg)
-		throws IOException
-	{
-		String[] param = msg.split(",");
-		if (param.length == 4 &&
-		    param[0].equals("ms") &&
-		    param[1].equals(message_id) &&
-		    param[2].equals(Integer.toString(getMeterNumber())))
-		{
+	protected String code() {
+		return "ms";
+	}
+
+	/** Get the number of response parameters */
+	@Override
+	protected int parameters() {
+		return 4;
+	}
+
+	/** Parse parameters for a received message */
+	@Override
+	protected boolean parseParams(String[] param) {
+		if (param[2].equals(Integer.toString(getMeterNumber()))) {
 			red = parseInt(param[3]);
 			return red >= 0;
-		}
-		return false;
+		} else
+			return false;
 	}
 }

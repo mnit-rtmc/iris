@@ -26,6 +26,9 @@ import us.mn.state.dot.tms.server.comm.Operation;
  */
 public class DetectorConfigProp extends DetectorProp {
 
+	/** Input pin */
+	private int pin;
+
 	/** Create a new detector configuration property */
 	public DetectorConfigProp(Counter c, int dn) {
 		super(c, dn);
@@ -36,15 +39,10 @@ public class DetectorConfigProp extends DetectorProp {
 	public void encodeStore(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("DC,");
-		sb.append(message_id);
-		sb.append(',');
-		sb.append(detector_num);
-		sb.append(',');
-		sb.append(lookupPin(op.getController()));
-		sb.append('\n');
-		tx_buf.put(sb.toString().getBytes(UTF8));
+		pin = lookupPin(op.getController());
+		String msg = "DC," + message_id + ',' + detector_num + ',' +
+			pin + '\n';
+		tx_buf.put(msg.getBytes(UTF8));
 	}
 
 	/** Encode a QUERY request */
@@ -52,21 +50,29 @@ public class DetectorConfigProp extends DetectorProp {
 	public void encodeQuery(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("DC,");
-		sb.append(message_id);
-		sb.append(',');
-		sb.append(detector_num);
-		sb.append('\n');
-		tx_buf.put(sb.toString().getBytes(UTF8));
+		String msg = "DC," + message_id + ',' + detector_num + '\n';
+		tx_buf.put(msg.getBytes(UTF8));
 	}
 
-	/** Parse received message */
+	/** Get the message code */
 	@Override
-	protected boolean parseMsg(Operation op, String msg)
-		throws IOException
-	{
-		return msg.equals("dc," + message_id + ',' + detector_num +
-			',' + lookupPin(op.getController()));
+	protected String code() {
+		return "dc";
+	}
+
+	/** Get the number of response parameters */
+	@Override
+	protected int parameters() {
+		return 4;
+	}
+
+	/** Parse parameters for a received message */
+	@Override
+	protected boolean parseParams(String[] param) {
+		if (detector_num == parseInt(param[2])) {
+			pin = parseInt(param[3]);
+			return true;
+		} else
+			return false;
 	}
 }

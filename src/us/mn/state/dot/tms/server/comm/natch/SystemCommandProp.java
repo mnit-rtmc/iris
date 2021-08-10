@@ -39,11 +39,21 @@ public class SystemCommandProp extends NatchProp {
 		tx_buf.put(msg.getBytes(UTF8));
 	}
 
-	/** Parse received message */
+	/** Get the message code */
 	@Override
-	protected boolean parseMsg(Operation op, String msg)
-		throws IOException
-	{
-		return msg.equals("sc," + message_id + ",restart");
+	protected String code() {
+		return "sc";
+	}
+
+	/** Get the number of response parameters */
+	@Override
+	protected int parameters() {
+		return 3;
+	}
+
+	/** Parse parameters for a received message */
+	@Override
+	protected boolean parseParams(String[] param) {
+		return "restart".equals(param[2]);
 	}
 }

@@ -54,15 +54,9 @@ public class PinStatusProp extends NatchProp {
 	public void encodeStore(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("PS,");
-		sb.append(message_id);
-		sb.append(',');
-		sb.append(pin);
-		sb.append(',');
-		sb.append(status ? '1' : '0');
-		sb.append('\n');
-		tx_buf.put(sb.toString().getBytes(UTF8));
+		char st = status ? '1' : '0';
+		String msg = "PS," + message_id + ',' + pin + ',' + st + '\n';
+		tx_buf.put(msg.getBytes(UTF8));
 	}
 
 	/** Encode a QUERY request */
@@ -70,29 +64,29 @@ public class PinStatusProp extends NatchProp {
 	public void encodeQuery(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("PS,");
-		sb.append(message_id);
-		sb.append(',');
-		sb.append(pin);
-		sb.append('\n');
-		tx_buf.put(sb.toString().getBytes(UTF8));
+		String msg = "PS," + message_id + ',' + pin + '\n';
+		tx_buf.put(msg.getBytes(UTF8));
 	}
 
-	/** Parse received message */
+	/** Get the message code */
 	@Override
-	protected boolean parseMsg(Operation op, String msg)
-		throws IOException
-	{
-		String[] param = msg.split(",");
-		if (param.length == 4 &&
-		    param[0].equals("ps") &&
-		    param[1].equals(message_id) &&
-		    param[2].equals(pin))
-		{
-			status = param[3].equals("1");
+	protected String code() {
+		return "ps";
+	}
+
+	/** Get the number of response parameters */
+	@Override
+	protected int parameters() {
+		return 4;
+	}
+
+	/** Parse parameters for a received message */
+	@Override
+	protected boolean parseParams(String[] param) {
+		if (param[2].equals(pin)) {
+			status = parseBool(param[3]);
 			return true;
-		}
-		return false;
+		} else
+			return false;
 	}
 }

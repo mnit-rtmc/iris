@@ -78,21 +78,10 @@ public class MeterTimingProp extends MeterProp {
 	public void encodeStore(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("MT,");
-		sb.append(message_id);
-		sb.append(',');
-		sb.append(getEntryNumber());
-		sb.append(',');
-		sb.append(getMeterNumber());
-		sb.append(',');
-		sb.append(Integer.toString(start));
-		sb.append(',');
-		sb.append(Integer.toString(stop));
-		sb.append(',');
-		sb.append(Integer.toString(red));
-		sb.append('\n');
-		tx_buf.put(sb.toString().getBytes(UTF8));
+		String msg = "MT," + message_id + ',' + getEntryNumber() + ',' +
+			getMeterNumber() + ',' + start + ',' + stop + ',' +
+			red + '\n';
+		tx_buf.put(msg.getBytes(UTF8));
 	}
 
 	/** Encode a QUERY request */
@@ -100,35 +89,33 @@ public class MeterTimingProp extends MeterProp {
 	public void encodeQuery(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("MT,");
-		sb.append(message_id);
-		sb.append(',');
-		sb.append(getEntryNumber());
-		sb.append('\n');
-		tx_buf.put(sb.toString().getBytes(UTF8));
+		String msg = "MT," + message_id + ',' + getEntryNumber() + '\n';
+		tx_buf.put(msg.getBytes(UTF8));
 	}
 
-	/** Parse received message */
+	/** Get the message code */
 	@Override
-	protected boolean parseMsg(Operation op, String msg)
-		throws IOException
-	{
-		String[] param = msg.split(",");
-		if (param.length == 7 &&
-		    param[0].equals("mt") &&
-		    param[1].equals(message_id) &&
-		    param[2].equals(getEntryNumber()) &&
+	protected String code() {
+		return "mt";
+	}
+
+	/** Get the number of response parameters */
+	@Override
+	protected int parameters() {
+		return 7;
+	}
+
+	/** Parse parameters for a received message */
+	@Override
+	protected boolean parseParams(String[] param) {
+		if (param[2].equals(getEntryNumber()) &&
 		    param[3].equals(Integer.toString(getMeterNumber())))
 		{
-			try {
-				start = Integer.parseInt(param[4]);
-				stop = Integer.parseInt(param[5]);
-				red = Integer.parseInt(param[6]);
-				return true;
-			}
-			catch (NumberFormatException e) { }
-		}
-		return false;
+			start = parseInt(param[4]);
+			stop = parseInt(param[5]);
+			red = parseInt(param[6]);
+			return true;
+		} else
+			return false;
 	}
 }

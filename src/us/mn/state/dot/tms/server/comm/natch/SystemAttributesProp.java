@@ -26,13 +26,6 @@ import us.mn.state.dot.tms.server.comm.Operation;
  */
 public class SystemAttributesProp extends NatchProp {
 
-	/** Get SA / sa message */
-	private String getMessage(String code) {
-		return code + ',' + message_id + ',' + COMM_FAIL_THRESHOLD_MS +
-			',' + STARTUP_GREEN + ',' + STARTUP_YELLOW + ',' +
-			getGreenTime() + ',' + getYellowTime();
-	}
-
 	/** Create a new system attributes property */
 	public SystemAttributesProp(Counter c) {
 		super(c);
@@ -43,7 +36,9 @@ public class SystemAttributesProp extends NatchProp {
 	public void encodeStore(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		String msg = getMessage("SA") + '\n';
+		String msg = "SA," + message_id + ',' + COMM_FAIL_THRESHOLD_MS +
+			',' + STARTUP_GREEN + ',' + STARTUP_YELLOW + ',' +
+			getGreenTime() + ',' + getYellowTime() + '\n';
 		tx_buf.put(msg.getBytes(UTF8));
 	}
 
@@ -56,11 +51,22 @@ public class SystemAttributesProp extends NatchProp {
 		tx_buf.put(msg.getBytes(UTF8));
 	}
 
-	/** Parse received message */
+	/** Get the message code */
 	@Override
-	protected boolean parseMsg(Operation op, String msg)
-		throws IOException
-	{
-		return msg.equals(getMessage("sa"));
+	protected String code() {
+		return "sa";
+	}
+
+	/** Get the number of response parameters */
+	@Override
+	protected int parameters() {
+		return 7;
+	}
+
+	/** Parse parameters for a received message */
+	@Override
+	protected boolean parseParams(String[] param) {
+		// not implemented
+		return true;
 	}
 }
