@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import us.mn.state.dot.tms.server.comm.ControllerProp;
+import us.mn.state.dot.tms.server.comm.NotReceivedException;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.utils.HexString;
@@ -97,7 +98,7 @@ abstract public class NatchProp extends ControllerProp {
 			received |= parseMsg(op, msg);
 		}
 		if (!received)
-			throw new ParsingException("Invalid response");
+			throw new NotReceivedException();
 	}
 
 	/** Parse one received message */

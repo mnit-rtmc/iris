@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2020  Minnesota Department of Transportation
+ * Copyright (C) 2016-2021  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,9 +21,12 @@ import java.net.URISyntaxException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.PriorityQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Job;
@@ -49,7 +52,7 @@ abstract public class BasePoller implements DevicePoller {
 	static private final String TIMEOUT = "READ TIMED OUT";
 
 	/** Drain an operation queue */
-	static private void drainQueue(PriorityQueue<Operation> queue) {
+	static private void drainQueue(Collection<Operation> queue) {
 		for (Operation op: queue) {
 			op.handleEvent(EventType.QUEUE_DRAINED, "DRAINED");
 			op.destroy();
@@ -130,9 +133,9 @@ abstract public class BasePoller implements DevicePoller {
 		}
 	});
 
-	/** Receive queue.  All access must be guarded by the op_set lock. */
-	private final PriorityQueue<Operation> r_queue =
-		new PriorityQueue<Operation>(11, new Comparator<Operation>()
+	/** Receive queue of operations */
+	private final ConcurrentSkipListSet<Operation> r_queue =
+		new ConcurrentSkipListSet<Operation>(new Comparator<Operation>()
 	{
 		@Override public int compare(Operation a, Operation b) {
 			// NOTE: the expire time should not change
@@ -229,7 +232,7 @@ abstract public class BasePoller implements DevicePoller {
 		if (addWorking(op)) {
 			if (logger.isOpen())
 				log("ADDING " + op);
-			addQueue(op);
+			tryAddQueue(op);
 		} else {
 			if (logger.isOpen())
 				log("SKIPPING " + op);
@@ -244,8 +247,8 @@ abstract public class BasePoller implements DevicePoller {
 		}
 	}
 
-	/** Add an operation to a queue */
-	private void addQueue(Operation op) {
+	/** Try to add an operation to a queue */
+	private void tryAddQueue(Operation op) {
 		if (shouldDrop(op))
 			drop(op);
 		else {
@@ -302,11 +305,9 @@ abstract public class BasePoller implements DevicePoller {
 	private void addRecvQueue(Operation op) {
 		// r_queue is sorted by expire time
 		op.setRemaining(timeout_ms);
-		synchronized (op_set) {
-			if (!r_queue.add(op)) {
-				// This should never happen
-				elog("ERR RECV " + op);
-			}
+		if (!r_queue.add(op)) {
+			// This should never happen
+			elog("ERR RECV " + op);
 		}
 		scheduleTimeout(op);
 	}
@@ -326,13 +327,13 @@ abstract public class BasePoller implements DevicePoller {
 	/** Check if an operation has timed out */
 	private void checkTimeout(Operation op) {
 		long rt = op.getRemaining();
-		if (rt <= 0 && removeRecv(op)) {
+		if (rt <= 0 && r_queue.remove(op)) {
 			op.handleEvent(EventType.POLL_TIMEOUT_ERROR, TIMEOUT);
 			if (close_on_timeout && op.isDone()) {
 				elog("CLOSE DUE TO TIMEOUT");
 				closeChannel();
 			}
-			addQueue(op);
+			tryAddQueue(op);
 		}
 	}
 
@@ -399,6 +400,8 @@ abstract public class BasePoller implements DevicePoller {
 	/** Clear the receive buffer */
 	private void clearRxBuf() {
 		synchronized (rx_buf) {
+			if (logger.isOpen())
+				log("RECV " + formatBuf(rx_buf, 0));
 			rx_buf.clear();
 		}
 	}
@@ -526,7 +529,7 @@ abstract public class BasePoller implements DevicePoller {
 			closeChannel();
 		}
 		finally {
-			addQueue(op);
+			tryAddQueue(op);
 		}
 	}
 
@@ -569,15 +572,6 @@ abstract public class BasePoller implements DevicePoller {
 		return (skey.interestOps() & SelectionKey.OP_CONNECT) != 0;
 	}
 
-	/** Remove an operation from the receive queue.
-	 * @param op Operation to remove.
-	 * @return true if operation was in queue. */
-	private boolean removeRecv(Operation op) {
-		synchronized (op_set) {
-			return r_queue.remove(op);
-		}
-	}
-
 	/** Check for data in receive buffer */
 	public void checkReceive() {
 		COMM.addJob(new Job() {
@@ -592,57 +586,55 @@ abstract public class BasePoller implements DevicePoller {
 
 	/** Parse data in receive buffer */
 	private void parseReceive() {
-		Operation op = recvQueue();
-		if (op != null)
-			recvOperation(op);
-		else if (logger.isOpen()) {
-			synchronized (rx_buf) {
-				log("RECV (no op) " + formatBuf(rx_buf, 0));
+		Iterator<Operation> it = r_queue.iterator();
+		while (it.hasNext()) {
+			Operation op = it.next();
+			if (recvOperation(op)) {
+				it.remove();
+				tryAddQueue(op);
+				break;
 			}
 		}
 		clearRxBuf();
 	}
 
-	/** Get the first operation on the receive queue */
-	private Operation recvQueue() {
-		synchronized (op_set) {
-			return r_queue.poll();
-		}
-	}
-
 	/** Parse received data */
-	private void recvOperation(Operation op) {
+	private boolean recvOperation(Operation op) {
 		try {
 			synchronized (rx_buf) {
-				if (logger.isOpen())
-					log("RECV " + formatBuf(rx_buf, 0));
-				rx_buf.flip();
-				op.recv(rx_buf);
-				rx_buf.compact();
+				ByteBuffer rx = rx_buf.asReadOnlyBuffer();
+				rx.flip();
+				op.recv(rx);
 			}
+			return true;
+		}
+		catch (NotReceivedException e) {
+			return false;
 		}
 		catch (ProtocolException e) {
 			op.setFailed();
 			op.setMaintStatus(ex_msg(e));
+			return false;
 		}
 		catch (ChecksumException e) {
 			op.handleEvent(EventType.CHECKSUM_ERROR, ex_msg(e));
+			return true;
 		}
 		catch (ParsingException e) {
 			op.handleEvent(EventType.PARSING_ERROR, ex_msg(e));
+			return true;
 		}
 		catch (ControllerException e) {
 			String msg = ex_msg(e);
 			op.handleEvent(EventType.CONTROLLER_ERROR, msg);
 			op.setFailed();
 			op.setMaintStatus(msg);
+			return true;
 		}
 		catch (IOException e) {
 			op.handleEvent(EventType.COMM_ERROR, ex_msg(e));
 			closeChannel();
-		}
-		finally {
-			addQueue(op);
+			return true;
 		}
 	}
 
@@ -650,13 +642,6 @@ abstract public class BasePoller implements DevicePoller {
 	private boolean isPollEmpty() {
 		synchronized (op_set) {
 			return p_queue.isEmpty();
-		}
-	}
-
-	/** Check if the recv queue is empty */
-	private boolean isRecvEmpty() {
-		synchronized (op_set) {
-			return r_queue.isEmpty();
 		}
 	}
 
