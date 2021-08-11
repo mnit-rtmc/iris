@@ -50,9 +50,9 @@ Parameter | Description
 ----------|------------------
 1         | Code: `CS` / `cs`
 2         | Message ID
-3 †       | Date/time
+3 †       | Date / time
 
-The date/time is formatted according to [RFC 3339].
+The date / time is formatted according to [RFC 3339].
 
 ```
 CS,00AB,2021-04-01T12:34:56-05:00
@@ -68,7 +68,7 @@ Parameter | Description
 1         | Code: `DC` / `dc`
 2         | Message ID
 3         | Detector Number (0-31)
-4 †       | Input Pin Number (0 means deleted)
+4 †       | Input Pin Number (0-108; 0 means deleted)
 
 If the input pin number is not valid, the detector is *deleted*, and this is
 indicated in the response.
@@ -127,12 +127,12 @@ Parameter | Description
 4 †       | Heads (0: deleted, 1: single, 2: dual)
 5 †       | Release (0: alternating, 1: simultaneous / drag-race)
 6 †       | Turn on output pin (usually 2 or 3)
-7 †       | Red output pin, left head
-8 †       | Yellow output pin, left head
-9 †       | Green output pin, left head
-10 †      | Red output pin, right head
-11 †      | Yellow output pin, right head
-12 †      | Green output pin, right head
+7 †       | Left head, red output pin (1-108)
+8 †       | Left head, yellow output pin (1-108)
+9 †       | Left head, green output pin (1-108)
+10 †      | Right head, red output pin (1-108)
+11 †      | Right head, yellow output pin (1-108)
+12 †      | Right head, green output pin (1-108)
 
 If any of the parameters are not valid, the meter is *deleted*, zeroing out
 values 4-12, and the response indicates this.
@@ -196,17 +196,13 @@ Parameter | Description
 1         | Code: `PC` / `pc`
 2         | Message ID
 3         | Pin Number (1-108)
-4 †       | I/O (`I` / `O` or ` `)
-5 †       | Function Text Label
-
-NOTE: this configuration is for display purposes only -- it is not possible to
-change an input pin to output, or vice versa.
+4 †       | Function Label (text)
 
 ```
 PC,02B1,82
-pc,02B1,82,I,
-PC,02B2,82,I,Police Panel
-pc,02B2,82,I,Police Panel
+pc,02B1,82,Unassigned
+PC,02B2,82,Police Panel
+pc,02B2,82,Police Panel
 ```
 
 ### PS - Pin Status
