@@ -400,8 +400,11 @@ abstract public class BasePoller implements DevicePoller {
 	/** Clear the receive buffer */
 	private void clearRxBuf() {
 		synchronized (rx_buf) {
-			if (logger.isOpen())
-				log("RECV " + formatBuf(rx_buf, 0));
+			if (logger.isOpen() && rx_buf.position() > 0) {
+				String hex = HexString.format(rx_buf.array(), 0,
+					rx_buf.position(), ':');
+				log("RECV " + hex);
+			}
 			rx_buf.clear();
 		}
 	}
@@ -586,13 +589,14 @@ abstract public class BasePoller implements DevicePoller {
 
 	/** Parse data in receive buffer */
 	private void parseReceive() {
+		// Always iterate through all operations
+		// in case rx_buf contains multiple unrelated packets
 		Iterator<Operation> it = r_queue.iterator();
 		while (it.hasNext()) {
 			Operation op = it.next();
 			if (recvOperation(op)) {
 				it.remove();
 				tryAddQueue(op);
-				break;
 			}
 		}
 		clearRxBuf();
