@@ -32,6 +32,7 @@ Code        | Descripton
 `MC` / `mc` | Meter configure
 `MS` / `ms` | Meter status
 `MT` / `mt` | Meter timing table
+`PC` / `pc` | Pin configure
 `PS` / `ps` | Pin status
 `SA` / `sa` | System attributes
 `SC` / `sc` | System command
@@ -188,13 +189,33 @@ MT,0236,2,XX
 mt,0235,2,0,0,0,0
 ```
 
+### PC - Pin Configure
+
+Parameter | Description
+----------|------------------
+1         | Code: `PC` / `pc`
+2         | Message ID
+3         | Pin Number (1-108)
+4 †       | I/O (`I` / `O` or ` `)
+5 †       | Function Text Label
+
+NOTE: this configuration is for display purposes only -- it is not possible to
+change an input pin to output, or vice versa.
+
+```
+PC,02B1,82
+pc,02B1,82,I,
+PC,02B2,82,I,Police Panel
+pc,02B2,82,I,Police Panel
+```
+
 ### PS - Pin Status
 
 Parameter | Description
 ----------|--------------------------
 1         | Code: `PS` / `ps`
 2         | Message ID
-3         | Pin number
+3         | Pin number (1-108)
 4 †       | Pin status (0 or 1)
 
 __Note__: Input pins and pins associated with meters (Meter Configure) cannot be
