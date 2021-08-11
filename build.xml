@@ -334,6 +334,7 @@
 		</copy>
 		<chmod file="${install.dir}/etc/iris/*" perm="660"/>
 
+		<mkdir dir="${install.dir}/var/lib/iris/backup"/>
 		<mkdir dir="${install.dir}/var/lib/iris/sql"/>
 		<copy todir="${install.dir}/var/lib/iris/sql">
 			<fileset file="${sql.dir}/tms-template.sql"/>

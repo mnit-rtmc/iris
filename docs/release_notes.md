@@ -1,6 +1,6 @@
 # IRIS 5.x Release Notes
 
-5.23.0 (unreleased)
+5.23.0 (11 Aug 2021)
  - Added natch protocol for ATC devices
  - Store user messages in DB for DMS
  - Many enhancements to Mayfly server
