@@ -485,6 +485,8 @@ public class OpSendDMSMessage extends OpDMS {
 				return new QueryMultiSyntaxErr();
 			case other:
 				setErrorStatus(error.toString());
+				if (isAmericanSignal())
+					return null;
 				return new QueryLedstarActivateErr();
 			case messageMemoryType:
 				// For original 1203v1, blank memory type was

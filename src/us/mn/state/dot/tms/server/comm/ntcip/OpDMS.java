@@ -77,4 +77,15 @@ abstract public class OpDMS extends OpNtcip {
 			dms.setConfigure(false);
 		super.cleanup();
 	}
+
+	/** Check if this is an American Signal sign */
+	public boolean isAmericanSignal() {
+		SignDetail det = dms.getSignDetail();
+		if (det == null)
+			return false;
+		String make = det.getSoftwareMake();
+		if (make == null)
+			return false;
+		return make.equals("American Signal");
+	}
 }
