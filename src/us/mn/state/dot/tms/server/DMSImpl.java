@@ -863,7 +863,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		boolean pp, DmsMsgPriority mp, int src, String o, Integer d)
 	{
 		SignMessage esm = SignMessageHelper.find(sign_config, inc, m,
-			be, mp, src, o, d);
+			be, pp, mp, src, o, d);
 		if (esm != null)
 			return esm;
 		else
@@ -940,7 +940,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** User selected sign message.
 	 *
 	 * This is cached to allow combining with scheduled messages in
-	 * getMsgUserSched().
+	 * getMsgCombined().
 	 *
 	 * A null value indicates that the user message is unknown. */
 	private SignMessage msg_user;
@@ -1128,7 +1128,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Get validated user/scheduled sign message.
 	 * @return Validated sign message. */
 	private SignMessage getMsgValidated() throws TMSException {
-		SignMessage sm = getMsgUserSched();
+		SignMessage sm = getMsgCombined();
 		if (null == sm)
 			sm = createMsgBlank();
 		validateMsg(sm);
@@ -1151,9 +1151,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
-	/** Get user and/or scheduled sign message.
+	/** Get combined user / scheduled sign message.
 	 * @return The appropriate sign message, or null. */
-	private SignMessage getMsgUserSched() {
+	private SignMessage getMsgCombined() {
 		SignMessage user = msg_user;	// Avoid race
 		SignMessage sched = msg_sched;	// Avoid race
 		if (null == user)

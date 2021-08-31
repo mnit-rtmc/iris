@@ -132,8 +132,8 @@ public class SignMessageCreator {
 		Integer duration)
 	{
 		boolean pp = false; // Operators cannot enable prefix page
-		SignMessage sm = SignMessageHelper.find(sc, inc, multi, pp, mp,
-			src, owner, duration);
+		SignMessage sm = SignMessageHelper.find(sc, inc, multi, be, pp,
+			mp, src, owner, duration);
 		String prefix = createPrefix(src);
 		if (sm != null && sm.getName().startsWith(prefix))
 			return sm;
