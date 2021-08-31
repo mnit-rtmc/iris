@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2018  Minnesota Department of Transportation
+ * Copyright (C) 2014-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.event;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
@@ -117,7 +118,7 @@ public class MeterEvent extends BaseEvent {
 	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("event_date", event_date);
+		map.put("event_date", new Timestamp(event_date.getTime()));
 		map.put("event_desc_id", event_type.id);
 		map.put("ramp_meter", ramp_meter);
 		map.put("phase", phase);
