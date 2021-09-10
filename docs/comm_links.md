@@ -69,8 +69,9 @@ associated with each [controller], using [IO pin] 1.
 
 The `canoga` protocol can collect [vehicle detection] data, with
 [vehicle logging] instead of [binned data].  The _default scheme_ is `tcp`.
-_Multi-drop_ is supported with drops 1 - 255.  Up to 4 detectors can be
-associated with each [controller], using [IO pin]s 1 - 4.
+_Multi-drop_ is supported with drops 0 - 15 (backplane) or 128 - 255 (EEPROM).
+Up to 4 detectors can be associated with each [controller], using [IO pin]s
+1 - 4.
 
 ### CAP
 
