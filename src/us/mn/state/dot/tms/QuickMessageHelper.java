@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ public class QuickMessageHelper extends BaseHelper {
 
 	/** Lookup the quick message with the specified name */
 	static public QuickMessage lookup(String name) {
-		return (QuickMessage)namespace.lookupObject(
+		return (QuickMessage) namespace.lookupObject(
 			QuickMessage.SONAR_TYPE, name);
 	}
 
@@ -45,12 +45,12 @@ public class QuickMessageHelper extends BaseHelper {
 	 * @param ms MULTI string.
 	 * @return A matching quick message or null if no match is found. */
 	static public QuickMessage find(String ms) {
-		if(ms != null) {
+		if (ms != null && !ms.isEmpty()) {
 			MultiString multi = new MultiString(ms);
 			Iterator<QuickMessage> it = iterator();
-			while(it.hasNext()) {
+			while (it.hasNext()) {
 				QuickMessage qm = it.next();
-				if(multi.equals(qm.getMulti()))
+				if (multi.equals(qm.getMulti()))
 					return qm;
 			}
 		}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2020  Minnesota Department of Transportation
+ * Copyright (C) 2008-2021  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * The quick message combobox is a widget which allows the user to select
- * a precomposed "quick" message. When the user changes a quick message
+ * a precomposed "quick" message.  When the user changes a quick message
  * selection via this combobox, the dispatcher is flagged that it should update
  * its widgets with the newly selected message.
  *
@@ -53,15 +53,15 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 		return ms.isValid() && !ms.isSpecial();
 	}
 
-	/** Given a QuickMessage or String, return the cooresponding quick
-	 * message name or an empty string if none exists. */
-	static private String getQuickLibMsgName(Object obj) {
-		if (obj instanceof String)
-			return (String) obj;
-		else if (obj instanceof QuickMessage)
-			return ((QuickMessage) obj).getName();
+	/** Lookup a quick message by name, or QuickMessage object.
+	 * @return Quick message or null if not found. */
+	static private QuickMessage lookupQuickMsg(Object obj) {
+		if (obj instanceof QuickMessage)
+			return (QuickMessage) obj;
+		else if (obj instanceof String)
+			return QuickMessageHelper.lookup((String) obj);
 		else
-			return "";
+			return null;
 	}
 
 	/** Combo box model for quick messages */
@@ -116,7 +116,7 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 	private void handleEditorFocusLost(String item) {
 		String name = item.replace(" ", "");
 		getEditor().setItem(name);
-		QuickMessage qm = QuickMessageHelper.lookup(name);
+		QuickMessage qm = lookupQuickMsg(name);
 		if (qm != null) {
 			model.setSelectedItem(qm);
 			updateDispatcher(qm);
@@ -132,11 +132,10 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 
 	/** Get the currently selected proxy */
 	private QuickMessage getSelectedProxy() {
-		Object obj = getSelectedItem();
-		if (obj instanceof QuickMessage)
-			return (QuickMessage) obj;
-		else
-			return null;
+		Object item = getSelectedItem();
+		return (item instanceof QuickMessage)
+		      ? (QuickMessage) item
+		      : null;
 	}
 
 	/** Update the dispatcher with the specified quick message */
@@ -152,33 +151,18 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 	/** Set the composed MULTI string */
 	public void setComposedMulti(String ms) {
 		adjusting++;
-		if (ms.isEmpty())
-			setSelectedItem(null);
-		else
-			setSelectedItem(QuickMessageHelper.find(ms));
+		setSelectedItem(QuickMessageHelper.find(ms));
 		adjusting--;
 	}
 
 	/** Set selected item, but only if it is different from the
-	 * currently selected item. Triggers a call to actionPerformed().
+	 * currently selected item.  Triggers a call to actionPerformed().
 	 * @param obj May be a String, or QuickMessage. */
+	@Override
 	public void setSelectedItem(Object obj) {
-		String nametoset = getQuickLibMsgName(obj);
-		String namecur = getSelectedName();
-		if (!namecur.equals(nametoset)) {
-			if (nametoset.isEmpty())
-				super.setSelectedItem(null);
-			else {
-				QuickMessage qm = QuickMessageHelper.lookup(
-					nametoset);
-				super.setSelectedItem(qm);
-			}
-		}
-	}
-
-	/** Get the name of the currently selected quick message */
-	private String getSelectedName() {
-		return getQuickLibMsgName(getSelectedItem());
+		QuickMessage qm = lookupQuickMsg(obj);
+		if (qm != getSelectedProxy())
+			super.setSelectedItem(qm);
 	}
 
 	/** Populate the quick message model, with sorted quick messages */

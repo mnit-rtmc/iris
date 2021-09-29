@@ -93,8 +93,7 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<QuickMessage>("dms.msg.combining", 100)
-		{
+		cols.add(new ProxyColumn<QuickMessage>("dms.msg.combining", 90){
 			public Object getValueAt(QuickMessage qm) {
 				int mc = qm.getMsgCombining();
 				return MsgCombining.fromOrdinal(mc);
