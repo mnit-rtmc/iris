@@ -160,7 +160,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.23.0
+database_version	5.24.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_enable	true
@@ -2549,6 +2549,17 @@ CREATE VIEW sign_config_view AS
 	JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
 GRANT SELECT ON sign_config_view TO PUBLIC;
 
+CREATE TABLE iris.msg_combining (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(8) NOT NULL
+);
+
+COPY iris.msg_combining (id, description) FROM stdin;
+0	none
+1	after
+2	before
+\.
+
 CREATE TABLE iris.sign_msg_source (
 	bit INTEGER PRIMARY KEY,
 	source VARCHAR(16) NOT NULL
@@ -2602,7 +2613,7 @@ CREATE TABLE iris.sign_message (
 	incident VARCHAR(16),
 	multi VARCHAR(1024) NOT NULL,
 	beacon_enabled BOOLEAN NOT NULL,
-	prefix_page BOOLEAN NOT NULL,
+	msg_combining INTEGER NOT NULL REFERENCES iris.msg_combining,
 	msg_priority INTEGER NOT NULL,
 	source INTEGER NOT NULL,
 	owner VARCHAR(16),
@@ -2614,10 +2625,11 @@ CREATE TRIGGER sign_message_notify_trig
 	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW sign_message_view AS
-	SELECT name, sign_config, incident, multi, beacon_enabled, prefix_page,
-	       msg_priority, iris.sign_msg_sources(source) AS sources, owner,
-	       duration
-	FROM iris.sign_message;
+	SELECT name, sign_config, incident, multi, beacon_enabled,
+	       mc.description AS msg_combining, msg_priority,
+	       iris.sign_msg_sources(source) AS sources, owner, duration
+	FROM iris.sign_message sm
+	LEFT JOIN iris.msg_combining mc ON sm.msg_combining = mc.id;
 GRANT SELECT ON sign_message_view TO PUBLIC;
 
 CREATE TABLE iris.word (
@@ -2857,12 +2869,13 @@ GRANT SELECT ON dms_view TO PUBLIC;
 CREATE VIEW dms_message_view AS
 	SELECT d.name, msg_current, cc.description AS condition,
 	       fail_time IS NOT NULL AS failed, multi, beacon_enabled,
-	       prefix_page, msg_priority,
+	       mc.description AS msg_combining, msg_priority,
 	       iris.sign_msg_sources(source) AS sources, duration, expire_time
 	FROM iris.dms d
 	LEFT JOIN iris.controller c ON d.controller = c.name
 	LEFT JOIN iris.condition cc ON c.condition = cc.id
-	LEFT JOIN iris.sign_message s ON d.msg_current = s.name;
+	LEFT JOIN iris.sign_message sm ON d.msg_current = sm.name
+	LEFT JOIN iris.msg_combining mc ON sm.msg_combining = mc.id;
 GRANT SELECT ON dms_message_view TO PUBLIC;
 
 CREATE TABLE iris.sign_group (
@@ -2892,13 +2905,15 @@ CREATE TABLE iris.quick_message (
 	-- FIXME: drop sign_group?
 	sign_group VARCHAR(20) REFERENCES iris.sign_group,
 	sign_config VARCHAR(16) REFERENCES iris.sign_config,
-	prefix_page BOOLEAN NOT NULL,
+	msg_combining INTEGER NOT NULL REFERENCES iris.msg_combining,
 	multi VARCHAR(1024) NOT NULL
 );
 
 CREATE VIEW quick_message_view AS
-	SELECT name, sign_group, sign_config, prefix_page, multi
-	FROM iris.quick_message;
+	SELECT name, sign_group, sign_config, mc.description AS msg_combining,
+	       multi
+	FROM iris.quick_message qm
+	LEFT JOIN iris.msg_combining mc ON qm.msg_combining = mc.id;
 GRANT SELECT ON quick_message_view TO PUBLIC;
 
 CREATE TABLE iris.sign_text (

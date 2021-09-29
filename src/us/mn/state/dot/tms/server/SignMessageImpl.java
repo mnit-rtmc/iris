@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,8 +65,8 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, SignMessageImpl.class);
 		store.query("SELECT name, sign_config, incident, multi, " +
-			"beacon_enabled, prefix_page, msg_priority, source, " +
-			"owner, duration FROM iris." + SONAR_TYPE + ";",
+			"beacon_enabled, msg_combining, msg_priority, " +
+			"source, owner, duration FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -84,7 +84,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		map.put("incident", incident);
 		map.put("multi", multi);
 		map.put("beacon_enabled", beacon_enabled);
-		map.put("prefix_page", prefix_page);
+		map.put("msg_combining", msg_combining);
 		map.put("msg_priority", msg_priority);
 		map.put("source", source);
 		map.put("owner", owner);
@@ -117,7 +117,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		     row.getString(3),           // incident
 		     row.getString(4),           // multi
 		     row.getBoolean(5),          // beacon_enabled
-		     row.getBoolean(6),          // prefix_page
+		     row.getInt(6),              // msg_combining
 		     row.getInt(7),              // msg_priority
 		     row.getInt(8),              // source
 		     row.getString(9),           // owner
@@ -127,14 +127,14 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Create a sign message */
 	private SignMessageImpl(String n, String sc, String inc, String m,
-		boolean be, boolean pp, int mp, int s, String o, Integer d)
+		boolean be, int mc, int mp, int s, String o, Integer d)
 	{
 		super(n);
 		sign_config = SignConfigHelper.lookup(sc);
 		incident = inc;
 		multi = m;
 		beacon_enabled = be;
-		prefix_page = pp;
+		msg_combining = mc;
 		msg_priority = mp;
 		source = s;
 		owner = o;
@@ -143,14 +143,14 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Create a new sign message (by IRIS) */
 	public SignMessageImpl(SignConfig sc, String inc, String m, boolean be,
-		boolean pp, DmsMsgPriority mp, int s, String o, Integer d)
+		int mc, DmsMsgPriority mp, int s, String o, Integer d)
 	{
 		super(createUniqueName());
 		sign_config = sc;
 		incident = inc;
 		multi = m;
 		beacon_enabled = be;
-		prefix_page = pp;
+		msg_combining = mc;
 		msg_priority = mp.ordinal();
 		source = s;
 		owner = o;
@@ -202,13 +202,14 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		return beacon_enabled;
 	}
 
-	/** Prefix page flag */
-	private boolean prefix_page;
+	/** Message combining value */
+	private int msg_combining;
 
-	/** Get prefix page flag */
+	/** Get message combining value.
+	 * @see us.mn.state.dot.tms.MsgCombining */
 	@Override
-	public boolean getPrefixPage() {
-		return prefix_page;
+	public int getMsgCombining() {
+		return msg_combining;
 	}
 
 	/** Message priority */
@@ -259,7 +260,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		w.write(createAttribute("dms", dms.getName()));
 		w.write(createAttribute("status", DMSHelper.getAllStyles(dms)));
 		w.write(createAttribute("beacon_enabled", beacon_enabled));
-		w.write(createAttribute("prefix_page", prefix_page));
+		w.write(createAttribute("msg_combining", msg_combining));
 		w.write(createAttribute("run_priority", msg_priority));
 		w.write(createAttribute("act_priority", msg_priority));
 		w.write(createAttribute("source", getSource()));

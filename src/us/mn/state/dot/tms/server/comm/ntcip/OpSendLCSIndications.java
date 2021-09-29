@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import static us.mn.state.dot.tms.DmsMsgPriority.LCS;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
+import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
@@ -99,7 +100,8 @@ public class OpSendLCSIndications extends OpLCS {
 		if (multi.isBlank())
 			return dms.createMsgBlank();
 		else {
-			return dms.createMsg(ms, false, false, LCS, lcs.bit(),
+			int mc = MsgCombining.NONE.ordinal();
+			return dms.createMsg(ms, false, mc, LCS, lcs.bit(),
 			                     user.getName(), null);
 		}
 	}

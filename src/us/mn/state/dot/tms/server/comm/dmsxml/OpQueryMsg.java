@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.IrisUserHelper;
+import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignMessageImpl;
@@ -242,7 +243,8 @@ class OpQueryMsg extends OpDms {
 		if (rpri == DmsMsgPriority.INVALID)
 			rpri = DmsMsgPriority.OTHER_SYSTEM;
 
-		return (SignMessageImpl) m_dms.createMsg(multi, false, false,
+		int mc = MsgCombining.NONE.ordinal();
+		return (SignMessageImpl) m_dms.createMsg(multi, false, mc,
 			rpri, EXT_OPER, null, duration);
 	}
 
@@ -428,6 +430,8 @@ class OpQueryMsg extends OpDms {
 			Integer duramins = calcMsgDuration(useont,
 				useofft, ont, offt);
 
+			int mc = MsgCombining.NONE.ordinal();
+
 			// have text
 			if(txtavail) {
 				// update page on-time in MULTI with value
@@ -436,7 +440,7 @@ class OpQueryMsg extends OpDms {
 				// MULTI string.
 				msgtext = updatePageOnTime(msgtext, pgOnTime);
 				SignMessageImpl sm = (SignMessageImpl)
-					m_dms.createMsg(msgtext, false, false,
+					m_dms.createMsg(msgtext, false, mc,
 					rpri, EXT_OPER, iuser, duramins);
 				if (sm != null)
 					m_dms.setMsgCurrentNotify(sm, iuser);
@@ -456,8 +460,8 @@ class OpQueryMsg extends OpDms {
 				}
 				if (sm == null) {
 					sm = (SignMessageImpl) m_dms.createMsg(
-						"", false, false, rpri,
-						 EXT_OPER, iuser, null);
+						"", false, mc, rpri, EXT_OPER,
+						iuser, null);
 					if (sm != null) {
 						m_dms.setMsgCurrentNotify(sm,
 							iuser);

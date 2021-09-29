@@ -100,15 +100,23 @@ sign group.  They are created using the [WYSIWYG editor].
 
 When a DMS is selected, a drop-down list is populated with quick messages from
 sign groups of which that DMS is a member.  Quick messages are also used for
-[DMS actions] as part of an [action plan].  For these messages, it is best to
+[DMS action]s as part of an [action plan].  For these messages, it is best to
 leave the sign group blank.
 
-**Prefix Page** is a flag which indicates that the quick message can be combined
-with an operator message.  When a DMS action uses a _prefix page_ quick message,
-operator messages will be modified by prepending the quick message before each
-page.  Care must be taken to ensure the combined message can be displayed on the
-sign.  This feature could be used, for example, to put a graphic logo on all
-messages displayed on a sign.
+**Combining** allows the quick message to be combined with other messages.  For
+example, this feature could be used to put a graphic logo on all messages
+displayed on a sign.
+
+Combining | Description
+----------|-----------------------------------------
+None      | Will not be combined with other messages
+After     | Other message may be combined after the message
+Before    | Other message may be combined before the message
+
+When a [DMS action] uses a quick message with _after_ combining, operator
+messages will be modified by prepending the quick message before each page.
+Typically, this is done by ending the message with a `[tr…]` [MULTI] tag
+defining a rectangle for the operator message.
 
 ## Words
 
@@ -148,7 +156,7 @@ rejected message.
 [abbreviation]: incident_dms.html#abbreviation
 [action plan]: action_plans.html
 [beacon]: beacons.html
-[DMS actions]: action_plans.html#dms-actions
+[DMS action]: action_plans.html#dms-actions
 [fonts]: fonts.html
 [Slow traffic]: slow_warning.html
 [system attribute]: system_attributes.html

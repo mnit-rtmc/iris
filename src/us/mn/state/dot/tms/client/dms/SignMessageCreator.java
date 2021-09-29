@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.client.dms;
 import java.util.HashMap;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DmsMsgPriority;
+import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
@@ -131,15 +132,15 @@ public class SignMessageCreator {
 		boolean be, DmsMsgPriority mp, int src, String owner,
 		Integer duration)
 	{
-		boolean pp = false; // Operators cannot enable prefix page
-		SignMessage sm = SignMessageHelper.find(sc, inc, multi, be, pp,
+		int mc = MsgCombining.BEFORE.ordinal();
+		SignMessage sm = SignMessageHelper.find(sc, inc, multi, be, mc,
 			mp, src, owner, duration);
 		String prefix = createPrefix(src);
 		if (sm != null && sm.getName().startsWith(prefix))
 			return sm;
 		String name = createName(prefix);
 		if (name != null) {
-			return create(name, sc, inc, multi, be, pp, mp, src,
+			return create(name, sc, inc, multi, be, mc, mp, src,
 			              owner, duration);
 		} else
 			return null;
@@ -152,7 +153,7 @@ public class SignMessageCreator {
 	 * @param inc Associated incident (original name).
 	 * @param multi MULTI text.
 	 * @param be Beacon enabled.
-	 * @param pp Prefix page.
+	 * @param mc Message combining value.
 	 * @param mp Message priority.
 	 * @param src Sign message source bits.
 	 * @param owner User name.
@@ -160,7 +161,7 @@ public class SignMessageCreator {
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage create(String name, SignConfig sc, String inc,
-		String multi, boolean be, boolean pp, DmsMsgPriority mp,
+		String multi, boolean be, int mc, DmsMsgPriority mp,
 		int src, String owner, Integer duration)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
@@ -169,7 +170,7 @@ public class SignMessageCreator {
 			attrs.put("incident", inc);
 		attrs.put("multi", multi);
 		attrs.put("beacon_enabled", be);
-		attrs.put("prefix_page", pp);
+		attrs.put("msg_combining", mc);
 		attrs.put("msg_priority", Integer.valueOf(mp.ordinal()));
 		attrs.put("source", Integer.valueOf(src));
 		if (owner != null)

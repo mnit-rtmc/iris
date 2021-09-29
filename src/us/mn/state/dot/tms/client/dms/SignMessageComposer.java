@@ -281,14 +281,14 @@ public class SignMessageComposer extends JPanel {
 				p = i + 1;
 			fn = pages[i].getFontNumber();
 		}
-		return combinePages(mess, p);
+		return concatenatePages(mess, p);
 	}
 
-	/** Build a MULTI string from an array of page strings.
+	/** Concatenate an array of MULTI pages together.
 	 * @param mess Array of page MULTI strings.
 	 * @param p Number of non-blank pages.
 	 * @return Combined MULTI string for all pages. */
-	private String combinePages(MultiString[] mess, int p) {
+	private String concatenatePages(MultiString[] mess, int p) {
 		MultiBuilder mb = new MultiBuilder();
 		for (int i = 0; i < p; i++) {
 			if (i == 0) {

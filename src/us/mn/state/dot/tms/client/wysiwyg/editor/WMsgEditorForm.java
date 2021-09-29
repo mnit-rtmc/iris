@@ -27,6 +27,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
@@ -36,6 +37,7 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.Session;
@@ -81,8 +83,9 @@ public class WMsgEditorForm extends AbstractForm {
 	/* Menu Bar */
 	private WMsgEditorMenuBar menu_bar;
 	
-	/* Prefix Check Boxes */ 
-	private JCheckBox prefix_chk;
+	/* Message combining combo box */ 
+	private final JComboBox<MsgCombining> combining_cbx =
+		new JComboBox<MsgCombining>(MsgCombining.values());
 
 	/* Sign drop-down (only present for groups) */
 	private WMultiConfigComboBox multiConfigList;
@@ -175,13 +178,10 @@ public class WMsgEditorForm extends AbstractForm {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		
 		setPreferredSize(new Dimension(1150,600));
-		
+
 		/* Menu Bar */
 		menu_bar = new WMsgEditorMenuBar();
-		
-		/* Prefix Check Boxes */ 
-		prefix_chk = new JCheckBox();
-		
+
 		/* Sign group drop-down - only present if editing for sign group */
 		if (signGroupMessage()) {
 			multiConfigList = controller.getConfigComboBox();
@@ -328,7 +328,7 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		gbPanel.add(epanel, gbc);
 		
-		/* Beacon and prefix CheckBoxes */
+		/* Beacon and combining */
 		gbc.gridx = 1;
 		gbc.gridy = 3;
 		gbc.weightx = 0;
@@ -336,9 +336,9 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		JPanel pPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		pPanel.add(new ILabel("wysiwyg.editor.prefix"));
-		pPanel.add(prefix_chk);
+		pPanel.add(combining_cbx);
 		gbPanel.add(pPanel, gbc);
-		prefix_chk.setSelected(controller.getPrefixPage());
+		combining_cbx.setSelectedIndex(controller.getMsgCombining());
 		
 		/* Cancel/Save As/Save Buttons */
 		JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -539,9 +539,9 @@ public class WMsgEditorForm extends AbstractForm {
 		return "";
 	}
 	
-	/** Return the state of the prefix page box. */
-	public boolean getPrefixPage() {
-		return prefix_chk.isSelected();
+	/** Return the message combining value */
+	public int getMsgCombining() {
+		return combining_cbx.getSelectedIndex();
 	}
 
 	public String getMultiPanelContents() {

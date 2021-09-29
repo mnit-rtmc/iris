@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
+import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignGroup;
@@ -92,18 +93,26 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<QuickMessage>(
-			"quick.message.prefix.page", 100, Boolean.class)
+		cols.add(new ProxyColumn<QuickMessage>("dms.msg.combining", 100)
 		{
 			public Object getValueAt(QuickMessage qm) {
-				return qm.getPrefixPage();
+				int mc = qm.getMsgCombining();
+				return MsgCombining.fromOrdinal(mc);
 			}
 			public boolean isEditable(QuickMessage qm) {
 				return canWrite(qm);
 			}
 			public void setValueAt(QuickMessage qm, Object value) {
-				if (value instanceof Boolean)
-					qm.setPrefixPage((Boolean) value);
+				if (value instanceof MsgCombining) {
+					MsgCombining mc = (MsgCombining) value;
+					qm.setMsgCombining(mc.ordinal());
+				}
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox<MsgCombining> cbx =
+					new JComboBox<MsgCombining>(
+					MsgCombining.values());
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		return cols;

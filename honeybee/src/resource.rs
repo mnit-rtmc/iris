@@ -246,7 +246,7 @@ const SIGN_MSG_RES: Resource = Resource::SignMsg(
     Listen::All("sign_message"),
     "SELECT row_to_json(r)::text FROM (\
     SELECT name, sign_config, incident, multi, beacon_enabled, \
-           prefix_page, msg_priority, sources, owner, duration \
+           msg_combining, msg_priority, sources, owner, duration \
     FROM sign_message_view \
     ORDER BY name \
 ) r",

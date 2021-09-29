@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2017-2018  Iteris Inc.
  *
@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.WordHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -165,19 +166,16 @@ public class DMSDispatcher extends JPanel {
 	/** Get the preview MULTI string */
 	public String getPreviewMulti(DMS dms) {
 		String ms = getComposedMulti(dms);
-		String prefix = getPagePrefix();
-		if (prefix.isEmpty())
-			return ms;
-		else
-			return new MultiString(ms).addPagePrefix(prefix);
+		String c_multi = getCombiningMulti();
+		return new MultiString(ms).makeCombined(c_multi);
 	}
 
-	/** Get page prefix MULTI string from scheduled message (if any) */
-	private String getPagePrefix() {
+	/** Get MULTI string from scheduled message (if combining after) */
+	private String getCombiningMulti() {
 		DMS dms = getSingleSelection();
 		if (dms != null) {
 			SignMessage sm = dms.getMsgSched();
-			if (sm != null && sm.getPrefixPage())
+			if (SignMessageHelper.isMsgCombiningAfter(sm))
 				return sm.getMulti();
 		}
 		return "";

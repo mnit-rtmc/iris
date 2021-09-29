@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.DmsMsgPriority;
+import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgSource;
@@ -198,11 +199,12 @@ public class OpQueryDMSMessage extends OpDMS {
 	/** Set the current message on the sign */
 	private void setMsgCurrent() {
 		if (status.getEnum() == DmsMessageStatus.valid) {
-			Integer duration = parseDuration(time.getInteger());
-			DmsMsgPriority rp = getMsgPriority();
 			boolean be = (beacon.getInteger() == 1);
+			int mc = MsgCombining.NONE.ordinal();
+			DmsMsgPriority rp = getMsgPriority();
 			int src = rp.getSource();
-			SignMessage sm = dms.createMsg(ms.getValue(), be, false,
+			Integer duration = parseDuration(time.getInteger());
+			SignMessage sm = dms.createMsg(ms.getValue(), be, mc,
 				rp, src, "OTHER SYSTEM", duration);
 			setMsgCurrent(sm, "OTHER SYSTEM");
 		} else

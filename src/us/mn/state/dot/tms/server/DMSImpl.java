@@ -53,6 +53,7 @@ import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSHelper;
+import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
@@ -814,79 +815,80 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Create a blank message for the sign */
 	public SignMessage createMsgBlank() {
-		return findOrCreateMsg(null, "", false, false, BLANK,
+		return findOrCreateMsg(null, "", false,
+			MsgCombining.NONE.ordinal(), BLANK,
 			SignMsgSource.blank.bit(), null, null);
 	}
 
 	/** Create a message for the sign.
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
-	 * @param pp Prefix page flag.
+	 * @param mc Message combining value.
 	 * @param mp Message priority.
 	 * @param src Message source.
 	 * @param o Message owner.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	public SignMessage createMsg(String m, boolean be, boolean pp,
+	public SignMessage createMsg(String m, boolean be, int mc,
 		DmsMsgPriority mp, int src, String o, Integer d)
 	{
-		return createMsg(null, m, be, pp, mp, src, o, d);
+		return createMsg(null, m, be, mc, mp, src, o, d);
 	}
 
 	/** Create a message for the sign.
 	 * @param inc Associated incident (original name).
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
-	 * @param pp Prefix page flag.
+	 * @param mc Message combining value.
 	 * @param mp Message priority.
 	 * @param src Message source.
 	 * @param o Message owner.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage createMsg(String inc, String m, boolean be,
-		boolean pp, DmsMsgPriority mp, int src, String o, Integer d)
+		int mc, DmsMsgPriority mp, int src, String o, Integer d)
 	{
-		return findOrCreateMsg(inc, m, be, pp, mp, src, o, d);
+		return findOrCreateMsg(inc, m, be, mc, mp, src, o, d);
 	}
 
 	/** Find or create a sign message.
 	 * @param inc Associated incident (original name).
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
-	 * @param pp Prefix page flag.
+	 * @param mc Message combining value.
 	 * @param mp Message priority.
 	 * @param src Message source.
 	 * @param o Message owner.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage findOrCreateMsg(String inc, String m, boolean be,
-		boolean pp, DmsMsgPriority mp, int src, String o, Integer d)
+		int mc, DmsMsgPriority mp, int src, String o, Integer d)
 	{
 		SignMessage esm = SignMessageHelper.find(sign_config, inc, m,
-			be, pp, mp, src, o, d);
+			be, mc, mp, src, o, d);
 		if (esm != null)
 			return esm;
 		else
-			return createMsgNotify(inc, m, be, pp, mp, src, o, d);
+			return createMsgNotify(inc, m, be, mc, mp, src, o, d);
 	}
 
 	/** Create a new sign message and notify clients.
 	 * @param inc Associated incident (original name).
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
-	 * @param pp Prefix page flag.
+	 * @param mc Message combining value.
 	 * @param mp Message priority.
 	 * @param src Message source.
 	 * @param o Message owner.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage createMsgNotify(String inc, String m, boolean be,
-		boolean pp, DmsMsgPriority mp, int src, String o, Integer d)
+		int mc, DmsMsgPriority mp, int src, String o, Integer d)
 	{
 		SignConfig sc = sign_config;
 		if (null == sc)
 			return null;
-		SignMessageImpl sm = new SignMessageImpl(sc, inc, m, be, pp, mp,
+		SignMessageImpl sm = new SignMessageImpl(sc, inc, m, be, mc, mp,
 			src, o, d);
 		try {
 			sm.notifyCreate();
@@ -910,11 +912,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		DmsAction da = amsg.action;
 		boolean be = da.getBeaconEnabled();
 		QuickMessage qm = da.getQuickMessage();
-		boolean pp = (qm != null) ? qm.getPrefixPage() : false;
+		int mc = (qm != null)
+		       ? qm.getMsgCombining()
+		       : MsgCombining.NONE.ordinal();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			da.getMsgPriority());
 		String o = da.getActionPlan().getName();
-		return createMsg(amsg.getMulti(), be, pp, mp, amsg.getSrc(), o,
+		return createMsg(amsg.getMulti(), be, mc, mp, amsg.getSrc(), o,
 			getDuration(da));
 	}
 
@@ -1154,45 +1158,40 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Get combined user / scheduled sign message.
 	 * @return The appropriate sign message, or null. */
 	private SignMessage getMsgCombined() {
-		SignMessage user = msg_user;	// Avoid race
 		SignMessage sched = msg_sched;	// Avoid race
-		if (null == user)
-			return sched;
-		boolean is_blank = SignMessageHelper.isBlank(user);
-		if (isPrefixPage(sched) && !is_blank) {
-			SignMessage sm = createMsgUserSched(user, sched);
+		SignMessage user = msg_user;	// Avoid race
+		if (SignMessageHelper.isMsgCombiningAfter(sched) &&
+		    SignMessageHelper.isMsgCombiningBefore(user))
+		{
+			SignMessage sm = createMsgCombined(user, sched);
 			if (sm != null)
 				return sm;
 		}
 		return checkPriority(sched, user) ? sched : user;
 	}
 
-	/** Is scheduled message using prefix page? */
-	private boolean isPrefixPage(SignMessage sm) {
-		return (sm != null) && sm.getPrefixPage();
-	}
-
-	/** Create a user/scheduled composite sign message. */
-	private SignMessage createMsgUserSched(SignMessage user,
+	/** Create a combined sign message. */
+	private SignMessage createMsgCombined(SignMessage user,
 		SignMessage sched)
 	{
 		MultiString multi = new MultiString(user.getMulti());
-		String ms = multi.addPagePrefix(sched.getMulti());
+		String ms = multi.makeCombined(sched.getMulti());
 		boolean be = user.getBeaconEnabled();
+		int mc = MsgCombining.NONE.ordinal();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			user.getMsgPriority());
 		String inc = user.getIncident();
 		int src = user.getSource() | sched.getSource();
 		String o = user.getOwner();
 		Integer dur = user.getDuration();
-		return createMsg(inc, ms, be, false, mp, src, o, dur);
+		return createMsg(inc, ms, be, mc, mp, src, o, dur);
 	}
 
 	/** Compare sign messages for higher priority */
 	private boolean checkPriority(SignMessage sm1, SignMessage sm2) {
-		return (sm1 != null) &&
-		       (sm2 != null) &&
-		       (sm1.getMsgPriority() > sm2.getMsgPriority());
+		return (sm2 == null) ||
+		       (sm1 != null &&
+		        sm1.getMsgPriority() > sm2.getMsgPriority());
 	}
 
 	/** Send message to DMS.

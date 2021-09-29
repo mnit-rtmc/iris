@@ -54,14 +54,14 @@ public class SignMessageHelper extends BaseHelper {
 	 * @param inc Associated incident (original name).
 	 * @param multi MULTI string.
 	 * @param be Beacon enabled flag.
-	 * @param pp Prefix page flag.
+	 * @param mc Message combining.
 	 * @param mp Message priority.
 	 * @param src Message source.
 	 * @param owner Use name (null for any).
 	 * @param d Duration (null for indefinite).
 	 * @return Matching sign message, or null if not found. */
 	static public SignMessage find(SignConfig sc, String inc, String multi,
-		boolean be, boolean pp, DmsMsgPriority mp, int src,
+		boolean be, int mc, DmsMsgPriority mp, int src,
 		String owner, Integer d)
 	{
 		int mpi = mp.ordinal();
@@ -72,7 +72,7 @@ public class SignMessageHelper extends BaseHelper {
 			    objectEquals(inc, sm.getIncident()) &&
 			    multi.equals(sm.getMulti()) &&
 			    be == sm.getBeaconEnabled() &&
-			    pp == sm.getPrefixPage() &&
+			    mc == sm.getMsgCombining() &&
 			    mpi == sm.getMsgPriority() &&
 			    sourceEquals(src, sm) &&
 			    objectEquals(owner, sm.getOwner()) &&
@@ -80,6 +80,18 @@ public class SignMessageHelper extends BaseHelper {
 				return sm;
 		}
 		return null;
+	}
+
+	/** Is message combining allowed after a message? */
+	static public boolean isMsgCombiningAfter(SignMessage sm) {
+		return sm != null &&
+		       sm.getMsgCombining() == MsgCombining.AFTER.ordinal();
+	}
+
+	/** Is message combining allowed before a message? */
+	static public boolean isMsgCombiningBefore(SignMessage sm) {
+		return sm != null &&
+		       sm.getMsgCombining() == MsgCombining.BEFORE.ordinal();
 	}
 
 	/** Sign msg source bits to ignore */

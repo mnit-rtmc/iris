@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,8 +43,9 @@ public interface SignMessage extends SonarObject {
 	/** Get beacon enabled flag */
 	boolean getBeaconEnabled();
 
-	/** Get prefix page flag */
-	boolean getPrefixPage();
+	/** Get message combining value.
+	 * @see us.mn.state.dot.tms.MsgCombining */
+	int getMsgCombining();
 
 	/** Get the message priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).

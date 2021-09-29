@@ -52,6 +52,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignGroup;
@@ -353,14 +354,14 @@ public class WMsgSelectorForm extends AbstractForm {
 			SignConfig signCfg = selectedMessage.getSignConfig();
 			if (signCfg != null)
 				signCfgName = signCfg.getName();
+			MsgCombining mc = MsgCombining.fromOrdinal(
+				selectedMessage.getMsgCombining());
 			int msgLen = selectedMessage.getMulti().length();
 			msgInfo = String.format(
-					"Msg: \"%s\", Group: \"%s\", Cfg: \"%s\", Length: %d",
-					msgName, signGroupName, signCfgName, msgLen);
-			
-			if (selectedMessage.getPrefixPage()) {
-				msgInfo += ", {Prefix}";
-			}
+				"Msg: \"%s\", Group: \"%s\", Cfg: \"%s\", " +
+				"Length: %d, Combining: \"%s\"",
+				msgName, signGroupName, signCfgName, msgLen, mc
+			);
 
 			// update the controller
 			controller.setQuickMessage(selectedMessage);

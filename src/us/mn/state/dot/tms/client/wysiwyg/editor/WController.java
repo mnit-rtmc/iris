@@ -42,6 +42,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsColor;
+import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
@@ -141,7 +142,7 @@ public class WController {
 	private SignGroup sg;
 	private QuickMessage qm;
 	private String multiString = null;
-	private boolean prefixPage = false;
+	private int msgCombining = MsgCombining.NONE.ordinal();
 
 	/** Amount of time in nanoseconds to wait for a message to be created */
 	private final static long MAX_WAIT = 10000000000L;
@@ -427,7 +428,7 @@ public class WController {
 		// get the MULTI string text from the quick message
 		if (qm != null) {
 			multiString = qm.getMulti();
-			prefixPage = qm.getPrefixPage();
+			msgCombining = qm.getMsgCombining();
 		} else
 			multiString = "";
 		
@@ -3384,12 +3385,8 @@ public class WController {
 	public boolean isMessageSaved() {
 		// check the MULTI string against the current QuickMessage
 		updateMultiString();
-		boolean isSaved = multiString.equals(qm.getMulti());
-		
-		// also check prefix flag
-		isSaved = (editor.getPrefixPage() == qm.getPrefixPage()) && isSaved;
-		
-		return isSaved;
+		return multiString.equals(qm.getMulti()) &&
+			(editor.getMsgCombining() == qm.getMsgCombining());
 	}
 	
 	/** Save the current MULTI string in the quick message */
@@ -3398,7 +3395,7 @@ public class WController {
 			// update our MULTI string then save the message
 			updateMultiString();
 			qm.setMulti(multiString);
-			qm.setPrefixPage(editor.getPrefixPage());
+			qm.setMsgCombining(editor.getMsgCombining());
 		}
 	};
 	
@@ -3433,7 +3430,7 @@ public class WController {
 				HashMap<String, Object> qmAttrs =
 						new HashMap<String, Object>();
 				qmAttrs.put("multi", multiString);
-				qmAttrs.put("prefix_page", editor.getPrefixPage());
+				qmAttrs.put("msg_combining", editor.getMsgCombining());
 				if (sg != null)
 					qmAttrs.put("sign_group", sg);
 				else {
@@ -4043,9 +4040,9 @@ public class WController {
 		return sign;
 	}
 	
-	/** Return whether or not the current message is a prefix page. */
-	public boolean getPrefixPage() {
-		return prefixPage;
+	/** Return message combining value. */
+	public int getMsgCombining() {
+		return msgCombining;
 	}
 	
 }

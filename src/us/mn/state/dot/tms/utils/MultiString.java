@@ -736,8 +736,8 @@ public class MultiString {
 		return multi.split("\\[np\\]");
 	}
 
-	/** Add a prefix to each page of a MULTI string */
-	public String addPagePrefix(String prefix) {
+	/** Make a combined MULTI string by adding a prefix to each page */
+	public String makeCombined(String prefix) {
 		final MultiString pf = new MultiString(prefix);
 		MultiBuilder mb = new MultiBuilder(prefix) {
 			@Override

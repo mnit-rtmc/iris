@@ -46,7 +46,7 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, QuickMessageImpl.class);
 		store.query("SELECT name, sign_group, sign_config, " +
-			"prefix_page, multi FROM iris." + SONAR_TYPE + ";",
+			"msg_combining, multi FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -62,7 +62,7 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 		map.put("name", name);
 		map.put("sign_group", sign_group);
 		map.put("sign_config", sign_config);
-		map.put("prefix_page", prefix_page);
+		map.put("msg_combining", msg_combining);
 		map.put("multi", multi);
 		return map;
 	}
@@ -89,26 +89,26 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 		this(row.getString(1),  // name
 		     row.getString(2),  // sign_group
 		     row.getString(3),  // sign_config
-		     row.getBoolean(4), // prefix_page
+		     row.getInt(4),     // msg_combining
 		     row.getString(5)   // multi
 		);
 	}
 
 	/** Create a quick message */
-	private QuickMessageImpl(String n, String sg, String sc, boolean pp,
+	private QuickMessageImpl(String n, String sg, String sc, int mc,
 		String m)
 	{
-		this(n, lookupSignGroup(sg), lookupSignConfig(sc), pp, m);
+		this(n, lookupSignGroup(sg), lookupSignConfig(sc), mc, m);
 	}
 
 	/** Create a quick message */
-	public QuickMessageImpl(String n, SignGroup sg, SignConfig sc,
-		boolean pp, String m)
+	public QuickMessageImpl(String n, SignGroup sg, SignConfig sc, int mc,
+		String m)
 	{
 		super(n);
 		sign_group = sg;
 		sign_config = sc;
-		prefix_page = pp;
+		msg_combining = mc;
 		multi = m;
 	}
 
@@ -161,27 +161,29 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 		}
 	}
 
-	/** Prefix page flag */
-	private boolean prefix_page;
+	/** Message combining value */
+	private int msg_combining;
 
-	/** Set prefix page flag */
+	/** Set message combining value.
+	 * @see us.mn.state.dot.tms.MsgCombining */
 	@Override
-	public void setPrefixPage(boolean pp) {
-		prefix_page = pp;
+	public void setMsgCombining(int mc) {
+		msg_combining = mc;
 	}
 
-	/** Set prefix page flag */
-	public void doSetPrefixPage(boolean pp) throws TMSException {
-		if (pp != prefix_page) {
-			store.update(this, "prefix_page", pp);
-			setPrefixPage(pp);
+	/** Set message combining value */
+	public void doSetMsgCombining(int mc) throws TMSException {
+		if (mc != msg_combining) {
+			store.update(this, "msg_combining", mc);
+			setMsgCombining(mc);
 		}
 	}
 
-	/** Get prefix page flag */
+	/** Get message combining value.
+	 * @see us.mn.state.dot.tms.MsgCombining */
 	@Override
-	public boolean getPrefixPage() {
-		return prefix_page;
+	public int getMsgCombining() {
+		return msg_combining;
 	}
 
 	/** Message MULTI string, contains message text for all pages */

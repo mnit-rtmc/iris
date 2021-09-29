@@ -132,7 +132,7 @@ struct SignMessage {
     incident: Option<String>,
     multi: String,
     beacon_enabled: bool,
-    prefix_page: bool,
+    msg_combining: String,
     msg_priority: i32,
     sources: String,
     owner: Option<String>,
