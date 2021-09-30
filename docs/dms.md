@@ -103,20 +103,39 @@ sign groups of which that DMS is a member.  Quick messages are also used for
 [DMS action]s as part of an [action plan].  For these messages, it is best to
 leave the sign group blank.
 
-**Combining** allows the quick message to be combined with other messages.  For
-example, this feature could be used to put a graphic logo on all messages
-displayed on a sign.
+## Message Combining
+
+It is sometimes necessary to display two messages at the same time.  _Message
+Combining_ controls which other messages can be combined with a quick message.
 
 Combining | Description
-----------|-----------------------------------------
-None      | Will not be combined with other messages
-After     | Other message may be combined after the message
-Before    | Other message may be combined before the message
+----------|----------------------------------------
+Disable   | May not be combined with other messages
+Operator  | May be combined with an operator or [incident] message
+Action    | May be combined with a [DMS action] message
 
-When a [DMS action] uses a quick message with _after_ combining, operator
-messages will be modified by prepending the quick message before each page.
-Typically, this is done by ending the message with a `[tr…]` [MULTI] tag
-defining a rectangle for the operator message.
+NOTE: two messages from [DMS action]s cannot be combined with each other, even
+if both are configured with _Action_ combining.  Instead, the highest priority
+message will be selected.
+
+There are two methods of combining messages:
+
+1. ![](images/msg_combined_shared.gif)
+   **Shared**: Partitioning the sign into two regions, displayed simultaneously.
+   In this case, the MULTI string of the first message will be prepended to each
+   page of the second message.
+   - The first message must end with a `[tr…]` (text rectangle) tag.
+   - The first message must contain no `[np]` tags.
+   - The second message must contain no `[tr…]` tags.
+   - Neither message must contain no `[cb…]` or `[pb…]` tags.
+2. ![](images/msg_combined_sequenced.gif)
+   **Sequenced**: One message after another in a repeating sequence of pages.
+   In this case, the messages will be joined with an `[np]` tag.
+
+Before the second message, tags will be reset to the default values with this
+[MULTI] string:
+
+`[cf][fo][jl][jp]`
 
 ## Words
 
@@ -136,7 +155,7 @@ attribute]:
 `1`                   | Suggest replacement of words not in allowed list
 `2`                   | Reject messages containing words not in allowed list
 
-This list is also used for [abbreviation] of incident DMS messages.
+This list is also used for [abbreviation] of [incident] messages.
 
 ### Banned Words
 
@@ -158,6 +177,7 @@ rejected message.
 [beacon]: beacons.html
 [DMS action]: action_plans.html#dms-actions
 [fonts]: fonts.html
+[incident]: incident_dms.html
 [Slow traffic]: slow_warning.html
 [system attribute]: system_attributes.html
 [Travel time]: travel_time.html
