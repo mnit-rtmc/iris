@@ -112,30 +112,37 @@ Combining | Description
 ----------|----------------------------------------
 Disable   | May not be combined with other messages
 Operator  | May be combined with an operator or [incident] message
-Action    | May be combined with a [DMS action] message
+Schedule  | May be combined with a [DMS action] message
 
-When combining, the first message is usually _Action_, but may be _Operator_ if
-the quick message selector is used.  The second is either _Operator_ or
-_Incident_.  NOTE: two _Action_ messages cannot be combined, even if both are
-configured with _Action_ combining.  Instead, the highest priority message will
-be selected.
+Messages can only be combined in specific cases, depending on the sources:
+
+Case | First Message Source       | Second Message Source
+-----|----------------------------|----------------------
+1    | `schedule`                 | `operator` (composed)
+2    | `schedule`                 | `operator` (quick message)
+3    | `schedule`                 | `incident`
+4    | `operator` (quick message) | `operator` (composed)
+
+NOTE: two `schedule` messages cannot be combined, even if both are configured
+with _Schedule_ combining.  Instead, the highest priority message will be
+selected.
 
 There are two methods of combining messages:
 
 1. **Shared**: The sign is partitioned into two regions, with messages displayed
-   simultaneously.  In this case, the first message will be prepended to each
-   page of the second message.
+   simultaneously.  The first message is prepended to each page of the second
+   message.
    ![](images/msg_combined_shared.gif)
    - The first message must end with a `[tr…]` (text rectangle) tag.
    - The first message must contain no `[np]` tags.
    - The second message must contain no `[tr…]` tags.
    - Neither message must not contain `[cb…]` or `[pb…]` tags.
 2. **Sequenced**: One message is displayed after another in a repeating sequence
-   of pages.  In this case, the messages will be joined with an `[np]` tag.
+   of pages.  The messages are separated by an `[np]` tag.
    ![](images/msg_combined_sequenced.gif)
 
-Before the second message, tags will be reset to the default values with this
-MULTI string:
+In both methods, tags are reset to the default values with this MULTI string
+before the second message:
 
 `[cf][fo][jl][jp]`
 
