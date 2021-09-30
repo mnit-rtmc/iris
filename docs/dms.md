@@ -106,26 +106,24 @@ leave the sign group blank.
 ## Message Combining
 
 It is sometimes necessary to display two messages on a sign at the same time.
-This can be controlled with the quick message _Combining_ field:
+How this can happen is controlled with the quick message _Combining_ field:
 
-Combining | May combine with messages…
-----------|---------------------------
-Disable   | N/A
-Operator  | …from operator (or [incident]) source
-Schedule  | …from schedule ([DMS action]) source
+Combining | Description
+----------|--------------------
+Disable   | May not be combined
+First     | May combine as first message
+Second    | May combine as second message
+Either    | May combine as first or second message
 
-Messages can only be combined in specific cases, depending on the sources:
+The second message is selected by an operator, and combining depends on the
+selection method:
 
-Case | First Message Source       | Second Message Source
------|----------------------------|----------------------
-1    | `schedule`                 | `operator` (composed)
-2    | `schedule`                 | `operator` (quick message)
-3    | `schedule`                 | `incident`
-4    | `operator` (quick message) | `operator` (composed)
-
-NOTE: two messages with `schedule` source cannot be combined, even if both are
-configured with _Schedule_ combining.  Instead, the highest priority message
-will be selected.
+Selection Method | First Message
+-----------------|------------------------------------
+Composed         | `operator` (quick message selector)
+Composed         | `schedule`
+Quick Message    | `schedule`
+Incident Deploy  | `schedule`
 
 There are two methods of combining messages:
 
