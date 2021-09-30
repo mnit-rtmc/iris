@@ -108,11 +108,11 @@ leave the sign group blank.
 It is sometimes necessary to display two messages on a sign at the same time.
 This can be controlled with the quick message _Combining_ field:
 
-Combining | Description
-----------|----------------------------------------
-Disable   | May not be combined with other messages
-Operator  | May be combined with an operator or [incident] message
-Schedule  | May be combined with a [DMS action] message
+Combining | May combine with messages…
+----------|---------------------------
+Disable   | N/A
+Operator  | …from operator (or [incident]) source
+Schedule  | …from schedule ([DMS action]) source
 
 Messages can only be combined in specific cases, depending on the sources:
 
@@ -123,9 +123,9 @@ Case | First Message Source       | Second Message Source
 3    | `schedule`                 | `incident`
 4    | `operator` (quick message) | `operator` (composed)
 
-NOTE: two `schedule` messages cannot be combined, even if both are configured
-with _Schedule_ combining.  Instead, the highest priority message will be
-selected.
+NOTE: two messages with `schedule` source cannot be combined, even if both are
+configured with _Schedule_ combining.  Instead, the highest priority message
+will be selected.
 
 There are two methods of combining messages:
 
@@ -136,15 +136,13 @@ There are two methods of combining messages:
    - The first message must end with a `[tr…]` (text rectangle) tag.
    - The first message must contain no `[np]` tags.
    - The second message must contain no `[tr…]` tags.
-   - Neither message must not contain `[cb…]` or `[pb…]` tags.
+   - Both messages must contain no `[cb…]` or `[pb…]` tags.
 2. **Sequenced**: One message is displayed after another in a repeating sequence
    of pages.  The messages are separated by an `[np]` tag.
    ![](images/msg_combined_sequenced.gif)
 
-In both methods, tags are reset to the default values with this MULTI string
-before the second message:
-
-`[cf][fo][jl][jp]`
+In both methods, the foreground color, font, and justification tags are reset to
+the default values with `[cf][fo][jl][jp]` before the second message.
 
 ## Words
 
