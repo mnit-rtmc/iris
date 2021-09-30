@@ -106,7 +106,7 @@ leave the sign group blank.
 ## Message Combining
 
 It is sometimes necessary to display two messages on a sign at the same time.
-How this can happen is controlled with the quick message _Combining_ field:
+This is controlled with the quick message _Combining_ field:
 
 Combining | Description
 ----------|--------------------
@@ -115,15 +115,12 @@ First     | May combine as first message
 Second    | May combine as second message
 Either    | May combine as first or second message
 
-The second message is selected by an operator, and combining depends on the
-selection method:
-
-Selection Method | First Message
------------------|------------------------------------
-Composed         | `operator` (quick message selector)
-Composed         | `schedule`
-Quick Message    | `schedule`
-Incident Deploy  | `schedule`
+The first message is either scheduled by a [DMS action] or selected by the
+operator using the quick message selector.  The second message is selected by
+the operator, and may be:
+- composed (line-by-line)
+- a quick message
+- incident deploy message
 
 There are two methods of combining messages:
 
