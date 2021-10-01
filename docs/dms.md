@@ -76,15 +76,15 @@ Tag                                           | Description              | Suppo
 ----------------------------------------------|--------------------------|----------
 `[cb`_x_`]`                                   | Message background color | Yes
 `[pb`_z_`]` `[pb`_r,g,b_`]`                   | Page background color    | Yes
-`[cf`_x_`]` `[cf`_r,g,b_`]`                   | Foreground color         | Yes
+`[cf]` `[cf`_x_`]` `[cf`_r,g,b_`]`            | Foreground color         | Yes
 `[cr`_x,y,w,h,z_`]` `[cr`_x,y,w,h,r,g,b_`]`   | Color rectangle          | Yes
 `[f`_x,y_`]`                                  | Field data               | No
 `[flt`_x_`o`_y_`]` `[flo`_y_`t`_x_`]`         | Flashing text            | No
-`[fo`_x_`]` `[fo`_x,cccc_`]`                  | Change font              | Yes
+`[fo]` `[fo`_x_`]` `[fo`_x,cccc_`]`           | Change font              | Yes
 `[g`_n_`]` `[g`_n,x,y_`]` `[g`_n,x,y,cccc_`]` | Place graphic            | Yes
 `[hc`_n_`]`                                   | Hexadecimal character    | No
-`[jl`_n_`]`                                   | Line justification       | Yes
-`[jp`_n_`]`                                   | Page justification       | Yes
+`[jl]` `[jl`_n_`]`                            | Line justification       | Yes
+`[jp]` `[jp`_n_`]`                            | Page justification       | Yes
 `[ms`_x,y_`]`                                 | Manufacturer specific    | No
 `[mv`_…_`]`                                   | Moving text              | No
 `[nl]` `[nl`_s_`]`                            | New line                 | Yes
@@ -121,16 +121,15 @@ There are two cases where messages can be combined:
 - Both messages are selected by an operator, the first being a quick message and
   the second composed (line-by-line).
 
-Whenever messages are combined, the foreground color, font, and justification
-tags are reset to the default values with `[cf][fo][jl][jp]` before the second
-message.
+When messages are combined, the foreground color, font, and justification tags
+are reset to default values with `[cf][fo][jl][jp]` before the second message.
 
 There are two methods of combining messages: **Shared** and **Sequenced**.
 
 ### Shared Message Combining
 
-With this method, the sign is partitioned into two regions, with messages
-displayed simultaneously.
+With this method, the sign is partitioned into two regions, displaying both
+messages simultaneously.
 
 - The first message must end with a `[tr…]` (text rectangle) tag.
 - The first message must contain no `[np]` tags.
