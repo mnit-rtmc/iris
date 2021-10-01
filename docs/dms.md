@@ -123,29 +123,41 @@ the operator, and may be:
 - incident deploy message
 
 Whenever messages are combined, the foreground color, font, and justification
-tags are reset to the default values with `[cf][fo][jl][jp]` before the second
-message.
+tags are reset to the default values with `[cf]` `[fo]` `[jl]` `[jp]` before the
+second message.
 
-There are two methods of combining messages:
+There are two methods of combining messages: **Shared** and **Sequenced**.
 
-1. **Shared**: The sign is partitioned into two regions, with messages displayed
-   simultaneously.  The first message is prepended to each page of the second
-   message.
-   - The first message must end with a `[tr…]` (text rectangle) tag.
-   - The first message must contain no `[np]` tags.
-   - The second message must contain no `[tr…]` tags.
-   - Both messages must contain no `[cb…]` or `[pb…]` tags.
-   Shared example:  
-   - First message: `[cr1,1,240,24,1,23,9]` `[cf250,250,250]` `[fo13]`
-     `[tr1,5,240,18]` `[jl3]` `EXPRESS LANE` `[tr1,31,240,40]` `OPEN TO ALL`
-     `[nl6]` `TRAFFIC` `[g7,110,75]` `[cr241,1,2,96,255,255,255]`
-     `[tr243,1,350,96]`
-   - Second message:
-     `STALLED VEHICLE` `[nl]` `IN RIGHT LANE` `[nl]` `USE CAUTION`
-   ![](images/msg_combined_shared.gif)
-2. **Sequenced**: One message is displayed after another in a repeating sequence
-   of pages.  The messages are separated by an `[np]` tag.
-   ![](images/msg_combined_sequenced.gif)
+### Shared Message Combining
+
+With this method, the sign is partitioned into two regions, with messages
+displayed simultaneously.  The first message is prepended to each page of the
+second message.
+
+- The first message must end with a `[tr…]` (text rectangle) tag.
+- The first message must contain no `[np]` tags.
+- The second message must contain no `[tr…]` tags.
+- Both messages must contain no `[cb…]` or `[pb…]` tags.
+
+If the resulting combined message cannot be displayed on the sign, the second
+message will be used with **NO** combining.
+
+Example:  
+- First message: `[cr1,1,240,24,1,23,9]` `[cf250,250,250]` `[fo13]`
+  `[tr1,5,240,18]` `[jl3]` `EXPRESS LANE` `[tr1,31,240,40]` `OPEN TO ALL`
+  `[nl6]` `TRAFFIC` `[g7,110,75]` `[cr241,1,2,96,255,255,255]`
+  `[tr243,1,350,96]`
+- Second message:
+  `STALLED VEHICLE` `[nl]` `IN RIGHT LANE` `[nl]` `USE CAUTION`
+
+![](images/msg_combined_shared.gif)
+
+### Sequenced Message Combining
+
+When the criteria for shared combining are not met, the messages are combined in
+a repeating _sequence_ of pages.  The messages are separated by an `[np]` tag.
+
+![](images/msg_combined_sequenced.gif)
 
 ## Words
 
