@@ -21,9 +21,10 @@ package us.mn.state.dot.tms;
  * @author Douglas Lau
  */
 public enum MsgCombining {
-	NONE,	/* 0: message may not be combined */
-	AFTER,	/* 1: may be combined with a message after */
-	BEFORE;	/* 2: may be combined with a message before */
+	DISABLE, /* 0: may not be combined */
+	FIRST,   /* 1: may combine as first message */
+	SECOND,  /* 2: may combine as second message */
+	EITHER;  /* 3: may combine as first or second message */
 
 	/** Values array */
 	static private final MsgCombining[] VALUES = values();
@@ -33,6 +34,6 @@ public enum MsgCombining {
 		if (o >= 0 && o < VALUES.length)
 			return VALUES[o];
 		else
-			return NONE;
+			return DISABLE;
 	}
 }

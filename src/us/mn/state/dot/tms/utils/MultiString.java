@@ -42,6 +42,10 @@ public class MultiString {
 	static private final Pattern SPAN = Pattern.compile(
 		"[ !\"#$%&'()*+,-./0-9:;<=>?@A-Z\\[\\\\\\]^_`a-z{|}~]*");
 
+	/** Regular expression to match message ending with a text rectangle */
+	static private final Pattern ENDS_WITH_TR = Pattern.compile(
+		".*\\[tr\\d+,\\d+,\\d+,\\d+\\]");
+
 	/** A MULTI builder for normalizing spans and removing invalid tags */
 	static private class MultiNormalizer extends MultiBuilder {
 		@Override
@@ -200,8 +204,7 @@ public class MultiString {
 		String[] args = v.split(",", 3);
 		if (args.length == 1) {
 			Integer x = parseInt(args, 0);
-			if (x != null)
-				cb.setColorForeground(x);
+			cb.setColorForeground(x);
 		} else {
 			Integer r = parseInt(args, 0);
 			Integer g = parseInt(args, 1);
@@ -240,8 +243,7 @@ public class MultiString {
 		String[] args = f.split(",", 2);
 		Integer f_num = parseInt(args, 0);
 		String f_id = (args.length > 1) ? args[1] : null;
-		if (f_num != null)
-			cb.setFont(f_num, f_id);
+		cb.setFont(f_num, f_id);
 	}
 
 	/** Parse a graphic number from a [gn] or [gn,x,y] or [gn,x,y,cccc] tag.
@@ -434,6 +436,45 @@ public class MultiString {
 		return ("dist".equals(param) || "speed".equals(param))
 		      ? param
 		      : null;
+	}
+
+	/** Make a combined message (either shared or sequenced) */
+	static public String makeCombined(String first, String second) {
+		final MultiString ms1 = new MultiString(first);
+		final MultiString ms2 = new MultiString(second);
+		if (ms1.isValidSharedFirst() && ms2.isValidSharedSecond()) {
+			// Prepend first message before each page of second
+			MultiBuilder mb = new MultiBuilder(first) {
+				@Override
+				public void addPage() {
+					super.addPage();
+					// Add first message to next page
+					append(ms1);
+					// Reset these to default values
+					setColorForeground(null);
+					setFont(null, null);
+					setJustificationLine(null);
+					setJustificationPage(null);
+				}
+			};
+			mb.setColorForeground(null);
+			mb.setFont(null, null);
+			mb.setJustificationLine(null);
+			mb.setJustificationPage(null);
+			ms2.parse(mb);
+			return mb.toString();
+		} else {
+			MultiBuilder mb = new MultiBuilder(first);
+			// Reset these to default values
+			mb.setColorForeground(null);
+			mb.setFont(null, null);
+			mb.setJustificationLine(null);
+			mb.setJustificationPage(null);
+			// Add second page
+			mb.addPage();
+			mb.append(ms2);
+			return mb.toString();
+		}
 	}
 
 	/** MULTI string buffer */
@@ -736,20 +777,6 @@ public class MultiString {
 		return multi.split("\\[np\\]");
 	}
 
-	/** Make a combined MULTI string by adding a prefix to each page */
-	public String makeCombined(String prefix) {
-		final MultiString pf = new MultiString(prefix);
-		MultiBuilder mb = new MultiBuilder(prefix) {
-			@Override
-			public void addPage() {
-				super.addPage();
-				append(pf);
-			}
-		};
-		parse(mb);
-		return mb.toString();
-	}
-
 	/** Get message lines as an array of strings (with tags).
 	 * Every n_lines elements in the returned array represent one page.
 	 * @param n_lines Number of lines per page.
@@ -845,5 +872,36 @@ public class MultiString {
 			}
 		});
 		return special[0];
+	}
+
+	/** Check if valid shared first (for combining) */
+	private boolean isValidSharedFirst() {
+		if (!endsWithTextRect())
+			return false;
+		final boolean[] valid = new boolean[] { true };
+		parse(new MultiAdapter() {
+			@Override
+			public void addPage() {
+				valid[0] = false;
+			}
+		});
+		return valid[0];
+	}
+
+	/** Check if a message ends with a text rectangle */
+	private boolean endsWithTextRect() {
+		return ENDS_WITH_TR.matcher(multi).matches();
+	}
+
+	/** Check if valid shared second (for combining) */
+	private boolean isValidSharedSecond() {
+		final boolean[] valid = new boolean[] { true };
+		parse(new MultiAdapter() {
+			@Override
+			public void setTextRectangle(int x, int y, int w,int h){
+				valid[0] = false;
+			}
+		});
+		return valid[0];
 	}
 }

@@ -166,19 +166,21 @@ public class DMSDispatcher extends JPanel {
 	/** Get the preview MULTI string */
 	public String getPreviewMulti(DMS dms) {
 		String ms = getComposedMulti(dms);
-		String c_multi = getCombiningMulti();
-		return new MultiString(ms).makeCombined(c_multi);
+		String first = getCombiningFirst();
+		return (first != null)
+		      ? MultiString.makeCombined(first, ms)
+		      : ms;
 	}
 
-	/** Get MULTI string from scheduled message (if combining after) */
-	private String getCombiningMulti() {
+	/** Get MULTI string from combining first message */
+	private String getCombiningFirst() {
 		DMS dms = getSingleSelection();
 		if (dms != null) {
 			SignMessage sm = dms.getMsgSched();
-			if (SignMessageHelper.isMsgCombiningAfter(sm))
+			if (SignMessageHelper.isMsgCombiningFirst(sm))
 				return sm.getMulti();
 		}
-		return "";
+		return null;
 	}
 
 	/** Get the single selected DMS */

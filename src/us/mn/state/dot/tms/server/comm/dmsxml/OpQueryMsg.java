@@ -243,7 +243,7 @@ class OpQueryMsg extends OpDms {
 		if (rpri == DmsMsgPriority.INVALID)
 			rpri = DmsMsgPriority.OTHER_SYSTEM;
 
-		int mc = MsgCombining.NONE.ordinal();
+		int mc = MsgCombining.DISABLE.ordinal();
 		return (SignMessageImpl) m_dms.createMsg(multi, false, mc,
 			rpri, EXT_OPER, null, duration);
 	}
@@ -430,7 +430,7 @@ class OpQueryMsg extends OpDms {
 			Integer duramins = calcMsgDuration(useont,
 				useofft, ont, offt);
 
-			int mc = MsgCombining.NONE.ordinal();
+			int mc = MsgCombining.DISABLE.ordinal();
 
 			// have text
 			if(txtavail) {

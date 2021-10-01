@@ -816,7 +816,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Create a blank message for the sign */
 	public SignMessage createMsgBlank() {
 		return findOrCreateMsg(null, "", false,
-			MsgCombining.NONE.ordinal(), BLANK,
+			MsgCombining.DISABLE.ordinal(), BLANK,
 			SignMsgSource.blank.bit(), null, null);
 	}
 
@@ -914,7 +914,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		QuickMessage qm = da.getQuickMessage();
 		int mc = (qm != null)
 		       ? qm.getMsgCombining()
-		       : MsgCombining.NONE.ordinal();
+		       : MsgCombining.DISABLE.ordinal();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			da.getMsgPriority());
 		String o = da.getActionPlan().getName();
@@ -1160,12 +1160,20 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage getMsgCombined() {
 		SignMessage sched = msg_sched;	// Avoid race
 		SignMessage user = msg_user;	// Avoid race
-		if (SignMessageHelper.isMsgCombiningAfter(sched) &&
-		    SignMessageHelper.isMsgCombiningBefore(user))
+		if (SignMessageHelper.isMsgCombiningFirst(sched) &&
+		    SignMessageHelper.isMsgCombiningSecond(user))
 		{
 			SignMessage sm = createMsgCombined(user, sched);
-			if (sm != null)
-				return sm;
+			if (sm != null) {
+				// Check whether combined message fits on sign
+				try {
+					SignMessageHelper.validate(sm, this);
+					return sm;
+				}
+				catch (InvalidMsgException e) {
+					// combined message does not fit!
+				}
+			}
 		}
 		return checkPriority(sched, user) ? sched : user;
 	}
@@ -1174,13 +1182,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage createMsgCombined(SignMessage user,
 		SignMessage sched)
 	{
-		MultiString multi = new MultiString(user.getMulti());
-		String ms = multi.makeCombined(sched.getMulti());
+		String inc = user.getIncident();
+		String ms = MultiString.makeCombined(sched.getMulti(),
+			user.getMulti());
 		boolean be = user.getBeaconEnabled();
-		int mc = MsgCombining.NONE.ordinal();
+		int mc = MsgCombining.DISABLE.ordinal();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			user.getMsgPriority());
-		String inc = user.getIncident();
 		int src = user.getSource() | sched.getSource();
 		String o = user.getOwner();
 		Integer dur = user.getDuration();

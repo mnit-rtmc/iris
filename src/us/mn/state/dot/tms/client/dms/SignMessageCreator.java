@@ -132,7 +132,7 @@ public class SignMessageCreator {
 		boolean be, DmsMsgPriority mp, int src, String owner,
 		Integer duration)
 	{
-		int mc = MsgCombining.BEFORE.ordinal();
+		int mc = MsgCombining.EITHER.ordinal();
 		SignMessage sm = SignMessageHelper.find(sc, inc, multi, be, mc,
 			mp, src, owner, duration);
 		String prefix = createPrefix(src);

@@ -82,16 +82,18 @@ public class SignMessageHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Is message combining allowed after a message? */
-	static public boolean isMsgCombiningAfter(SignMessage sm) {
+	/** Is message allowed to combine first? */
+	static public boolean isMsgCombiningFirst(SignMessage sm) {
 		return sm != null &&
-		       sm.getMsgCombining() == MsgCombining.AFTER.ordinal();
+		      (sm.getMsgCombining() == MsgCombining.FIRST.ordinal() ||
+		       sm.getMsgCombining() == MsgCombining.EITHER.ordinal());
 	}
 
-	/** Is message combining allowed before a message? */
-	static public boolean isMsgCombiningBefore(SignMessage sm) {
+	/** Is message allowed to combined second? */
+	static public boolean isMsgCombiningSecond(SignMessage sm) {
 		return sm != null &&
-		       sm.getMsgCombining() == MsgCombining.BEFORE.ordinal();
+		      (sm.getMsgCombining() == MsgCombining.SECOND.ordinal() ||
+		       sm.getMsgCombining() == MsgCombining.EITHER.ordinal());
 	}
 
 	/** Sign msg source bits to ignore */

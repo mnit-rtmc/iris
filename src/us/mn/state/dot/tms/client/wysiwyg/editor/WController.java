@@ -142,7 +142,7 @@ public class WController {
 	private SignGroup sg;
 	private QuickMessage qm;
 	private String multiString = null;
-	private int msgCombining = MsgCombining.NONE.ordinal();
+	private int msgCombining = MsgCombining.DISABLE.ordinal();
 
 	/** Amount of time in nanoseconds to wait for a message to be created */
 	private final static long MAX_WAIT = 10000000000L;
@@ -429,8 +429,10 @@ public class WController {
 		if (qm != null) {
 			multiString = qm.getMulti();
 			msgCombining = qm.getMsgCombining();
-		} else
+		} else {
 			multiString = "";
+			msgCombining = MsgCombining.DISABLE.ordinal();
+		}
 		
 		update();
 	}

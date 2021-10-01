@@ -479,19 +479,38 @@ public class MultiStringTest extends TestCase {
 		assertTrue(cms.equals(ms2.toString()));
 	}
 
-	public void testPagePrefix() {
-		checkPrefix("", "", "");
-		checkPrefix("", "PREFIX", "PREFIX");
-		checkPrefix("AAA", "PREFIX", "PREFIXAAA");
-		checkPrefix("[np]", "PREFIX", "PREFIX[np]PREFIX");
-		checkPrefix("AAA[np]BBB", "PREFIX", "PREFIXAAA[np]PREFIXBBB");
-		checkPrefix("[np][np]", "PREFIX", "PREFIX[np]PREFIX[np]PREFIX");
-		checkPrefix("A[np]B[np]C", "PF", "PFA[np]PFB[np]PFC");
+	public void testCombineShared() {
+		checkCombine("P[tr1,10,50,20]", "A",
+			"P[tr1,10,50,20][cf][fo][jl][jp]A");
+		checkCombine("P[tr1,10,50,20]", "A[np]B",
+			"P[tr1,10,50,20][cf][fo][jl][jp]A[np]" +
+			"P[tr1,10,50,20][cf][fo][jl][jp]B");
+		checkCombine("P[tr1,10,50,20]", "A[np]B[np]C",
+			"P[tr1,10,50,20][cf][fo][jl][jp]A[np]" +
+			"P[tr1,10,50,20][cf][fo][jl][jp]B[np]" +
+			"P[tr1,10,50,20][cf][fo][jl][jp]C");
 	}
 
-	private void checkPrefix(String ms, String pf, String rs) {
-		assertTrue(new MultiString(ms).addPagePrefix(pf).toString()
-		          .equals(rs));
+	public void testCombineSequenced() {
+		checkCombine("", "", "[cf][fo][jl][jp][np]");
+		checkCombine("AAA", "", "AAA[cf][fo][jl][jp][np]");
+		checkCombine("AAA", "BBB", "AAA[cf][fo][jl][jp][np]BBB");
+	}
+
+	public void testCombineNotShared() {
+		// invalid text rectangle tag
+		checkCombine("P[tr1,10,50]", "A",
+			"P[tr1,10,50][cf][fo][jl][jp][np]A");
+		// new page not allowed in first message for shared
+		checkCombine("P[np]Q[tr1,10,50,20]", "A",
+			"P[np]Q[tr1,10,50,20][cf][fo][jl][jp][np]A");
+		// text rectangle not allowed in second message for shared
+		checkCombine("P[tr1,10,50,20]", "A[tr51,1,50,20]B",
+			"P[tr1,10,50,20][cf][fo][jl][jp][np]A[tr51,1,50,20]B");
+	}
+
+	private void checkCombine(String ms1, String ms2, String rs) {
+		assertTrue(MultiString.makeCombined(ms1, ms2).equals(rs));
 	}
 
 	public void testGetFonts() {

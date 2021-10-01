@@ -100,7 +100,7 @@ public class OpSendLCSIndications extends OpLCS {
 		if (multi.isBlank())
 			return dms.createMsgBlank();
 		else {
-			int mc = MsgCombining.NONE.ordinal();
+			int mc = MsgCombining.DISABLE.ordinal();
 			return dms.createMsg(ms, false, mc, LCS, lcs.bit(),
 			                     user.getName(), null);
 		}

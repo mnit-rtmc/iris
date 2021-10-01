@@ -200,7 +200,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	private void setMsgCurrent() {
 		if (status.getEnum() == DmsMessageStatus.valid) {
 			boolean be = (beacon.getInteger() == 1);
-			int mc = MsgCombining.NONE.ordinal();
+			int mc = MsgCombining.DISABLE.ordinal();
 			DmsMsgPriority rp = getMsgPriority();
 			int src = rp.getSource();
 			Integer duration = parseDuration(time.getInteger());

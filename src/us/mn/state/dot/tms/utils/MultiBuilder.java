@@ -65,7 +65,7 @@ public class MultiBuilder implements Multi {
 	}
 
 	/** Append an Integer if it isn't null. */
-	public void appendInteger(Integer x) {
+	private void appendInteger(Integer x) {
 		if (x != null)
 			multi.append(x);
 	}
@@ -112,28 +112,20 @@ public class MultiBuilder implements Multi {
 	 * Use the sign's default page justification if jp is null. */
 	@Override
 	public void setJustificationPage(JustificationPage jp) {
-		if ((jp == null)
-		 || (jp == JustificationPage.UNDEFINED))
-			multi.append("[jp]");
-		 else {
-			multi.append("[jp");
+		multi.append("[jp");
+		if (jp != null && jp != JustificationPage.UNDEFINED)
 			multi.append(jp.ordinal());
-			multi.append("]");
-		}
+		multi.append("]");
 	}
 
 	/** Set the line justification.
 	 * Use the sign's default line justification if jl is null. */
 	@Override
 	public void setJustificationLine(JustificationLine jl) {
-		if ((jl == null)
-		 || (jl == JustificationLine.UNDEFINED))
-			multi.append("[jl]");
-		 else {
-			multi.append("[jl");
+		multi.append("[jl");
+		if (jl != null && jl != JustificationLine.UNDEFINED)
 			multi.append(jl.ordinal());
-			multi.append("]");
-		}
+		multi.append("]");
 	}
 
 	/** Add a graphic */
@@ -164,7 +156,7 @@ public class MultiBuilder implements Multi {
 	public void setFont(Integer f_num, String f_id) {
 		multi.append("[fo");
 		appendInteger(f_num);
-		if (f_id != null) {
+		if (f_num != null && f_id != null) {
 			multi.append(',');
 			multi.append(f_id);
 		}

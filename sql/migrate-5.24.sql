@@ -12,9 +12,10 @@ CREATE TABLE iris.msg_combining (
 );
 
 COPY iris.msg_combining (id, description) FROM stdin;
-0	none
-1	after
-2	before
+0	disable
+1	first
+2	second
+3	either
 \.
 
 DROP VIEW quick_message_view;
