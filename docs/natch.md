@@ -155,11 +155,14 @@ Parameter | Description
 3         | Meter number (0-3)
 4 †       | Red dwell time (0.1 sec)
 
-If red dwell time is set to zero, metering is disabled.
+If red dwell time is set to zero, metering is disabled.  If the meter is not
+configured, red dwell time in a response will be `INV` (invalid).
 
 ```
 MS,00AC,0
 ms,00AC,0,45
+MS,00AD,1
+ms,00AD,1,INV
 ```
 
 ### MT - Meter Timing Table
