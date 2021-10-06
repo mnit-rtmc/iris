@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.natch;
 
+import java.util.HashMap;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
@@ -45,6 +46,10 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 {
 	/** Counter for message IDs */
 	private final Counter counter = new Counter();
+
+	/** Mapping of all detector status operation collectors on line */
+	private final HashMap<ControllerImpl, Operation> collectors =
+		new HashMap<ControllerImpl, Operation>();
 
 	/** Create a new Natch poller */
 	public NatchPoller(CommLink link) {
@@ -93,11 +98,32 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
 		if (c.getPollPeriodSec() == p) {
+			Operation ds = getDetectorStatusOp(c);
+			if (ds != null)
+				updateCounters(c, ds, p);
+		}
+	}
+
+	/** Update the controller operation counters */
+	private void updateCounters(ControllerImpl c, Operation ds, int p) {
+		boolean s = ds.isSuccess();
+		if (!s)
+			c.logGap();
+		c.binEventData(p, s);
+		c.completeOperation(ds.getId(), s);
+	}
+
+	/** Get detector status operation for a controller */
+	private synchronized Operation getDetectorStatusOp(ControllerImpl c) {
+		final Operation ds = collectors.get(c);
+		if (ds == null || ds.isDone()) {
 			Operation op = new Operation("detector.op.query.data",
 				c, new OpDetectorStatus(counter));
 			op.setPriority(PriorityLevel.DEVICE_DATA);
+			collectors.put(c, op);
 			addOp(op);
 		}
+		return ds;
 	}
 
 	/** Send a device request to a ramp meter */
