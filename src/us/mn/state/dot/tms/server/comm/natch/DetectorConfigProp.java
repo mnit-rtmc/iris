@@ -75,4 +75,9 @@ public class DetectorConfigProp extends DetectorProp {
 		} else
 			return false;
 	}
+
+	/** Check if pin is correct for an operation */
+	public boolean isPinCorrect(Operation op) {
+		return pin == lookupPin(op.getController());
+	}
 }

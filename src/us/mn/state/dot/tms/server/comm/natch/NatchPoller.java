@@ -101,6 +101,12 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 			Operation ds = getDetectorStatusOp(c);
 			if (ds != null)
 				updateCounters(c, ds, p);
+		} else {
+			// Long polling period, check detector configs
+			Operation op = new Operation("detector.op.query.config",
+				c, new OpDetConfigQuery(counter, 0));
+			op.setPriority(PriorityLevel.DEVICE_DATA);
+			addOp(op);
 		}
 	}
 
