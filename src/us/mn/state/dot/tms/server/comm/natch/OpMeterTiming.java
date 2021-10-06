@@ -109,7 +109,7 @@ public class OpMeterTiming extends OpStep {
 		if (success) {
 			return (entry < 3)
 			      ? new OpMeterTiming(counter, meter, entry + 1)
-			      : null;
+			      : new OpMeterWatchdogReset(counter, meter);
 		} else
 			return this;
 	}
