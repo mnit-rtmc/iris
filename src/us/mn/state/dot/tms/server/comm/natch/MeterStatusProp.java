@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.Operation;
 public class MeterStatusProp extends MeterProp {
 
 	/** Red dwell time */
-	private int red;
+	private Integer red;
 
 	/** Set the red dwell time */
 	public void setRed(int r) {
@@ -35,7 +35,7 @@ public class MeterStatusProp extends MeterProp {
 	}
 
 	/** Get the red dwell time */
-	public int getRed() {
+	public Integer getRed() {
 		return red;
 	}
 
@@ -80,7 +80,7 @@ public class MeterStatusProp extends MeterProp {
 	protected boolean parseParams(String[] param) {
 		if (param[2].equals(Integer.toString(getMeterNumber()))) {
 			red = parseInt(param[3]);
-			return red >= 0;
+			return (red >= 0) || "INV".equals(param[3]);
 		} else
 			return false;
 	}

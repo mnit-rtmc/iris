@@ -55,8 +55,10 @@ public class OpSendMeterStatus extends OpStep {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeStore(op, rx_buf);
-		int red = prop.getRed();
-		Integer rate = (red > 0) ? RedTime.toReleaseRate(red) : null;
+		Integer red = prop.getRed();
+		Integer rate = (red != null && red > 0)
+			? RedTime.toReleaseRate(red)
+			: null;
 		meter.setRateNotify(rate);
 		success = true;
 	}

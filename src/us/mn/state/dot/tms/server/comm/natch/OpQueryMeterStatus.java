@@ -57,8 +57,10 @@ public class OpQueryMeterStatus extends OpStep {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeQuery(op, rx_buf);
-		int red = prop.getRed();
-		Integer rate = (red > 0) ? RedTime.toReleaseRate(red) : null;
+		Integer red = prop.getRed();
+		Integer rate = (red != null && red > 0)
+			? RedTime.toReleaseRate(red)
+			: null;
 		meter.setRateNotify(rate);
 		success = true;
 	}
@@ -66,6 +68,12 @@ public class OpQueryMeterStatus extends OpStep {
 	/** Get the next step */
 	@Override
 	public OpStep next() {
-		return success ? new OpQueryPolicePanel(counter, meter) : this;
+		if (success) {
+			// If red is null, we got an INV response
+			return (prop.getRed() != null)
+			      ? new OpQueryPolicePanel(counter, meter)
+			      : new OpMeterConfigure(counter, meter);
+		} else
+			return this;
 	}
 }
