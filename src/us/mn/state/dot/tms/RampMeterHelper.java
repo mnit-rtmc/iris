@@ -42,33 +42,42 @@ public class RampMeterHelper extends BaseHelper {
 	}
 
 	/** Lookup the police panel pin for a ramp meter */
-	static public int lookupPolicePanelPin(RampMeter meter) {
-		// only care about first two dip switches
-		int dip = lookupDips(meter) & 0x03;
-		switch (dip) {
-			// 334Z, 334DZ, S334Z use pin 82 for both meters
-			case 1: return 82;
-			// 334Z-94 or later pin 81 (ramp 1) and 82 (ramp 2)
-			case 3: return (meter.getPin() == 2) ? 81 : 82;
-			// 334D cabinets used pin 80
-			default: return 80;
+	static public Integer lookupPolicePanelPin(RampMeter meter) {
+		CabinetStyle cs = lookupCabinetStyle(meter);
+		if (cs != null) {
+			switch (meter.getPin()) {
+			case 2: // meter 1
+				return cs.getPolicePanelPin1();
+			case 3: // meter 2
+				return cs.getPolicePanelPin2();
+			}
 		}
+		return null;
 	}
 
-	/** Lookup cabinet DIP switches for a ramp meter */
-	static private int lookupDips(RampMeter meter) {
+	/** Lookup the watchdog monitor reset pin for a ramp meter */
+	static public Integer lookupWatchdogResetPin(RampMeter meter) {
+		CabinetStyle cs = lookupCabinetStyle(meter);
+		if (cs != null) {
+			switch (meter.getPin()) {
+			case 2: // meter 1
+				return cs.getWatchdogResetPin1();
+			case 3: // meter 2
+				return cs.getWatchdogResetPin2();
+			}
+		}
+		return null;
+	}
+
+	/** Lookup cabinet style for a ramp meter */
+	static private CabinetStyle lookupCabinetStyle(RampMeter meter) {
 		Controller ctrl = meter.getController();
 		if (ctrl != null) {
 			Cabinet cab = ctrl.getCabinet();
-			if (cab != null) {
-				CabinetStyle cs = cab.getStyle();
-				if (cs != null) {
-					Integer dip = cs.getDip();
-					return (dip != null) ? dip : 0;
-				}
-			}
+			if (cab != null)
+				return cab.getStyle();
 		}
-		return 0;
+		return null;
 	}
 
 	/** Lookup the preset for a ramp meter */
@@ -81,7 +90,7 @@ public class RampMeterHelper extends BaseHelper {
 
 	/** Format the meter release rate */
 	static public String formatRelease(Integer rate) {
-		if(rate !=  null) {
+		if (rate !=  null) {
 			return rate.toString() + " " +
 				I18N.get("units.vehicles.per.hour");
 		} else
@@ -90,7 +99,7 @@ public class RampMeterHelper extends BaseHelper {
 
 	/** Format the meter cycle time from the given release rate */
 	static public String formatCycle(Integer rate) {
-		if(rate != null) {
+		if (rate != null) {
 			int c = Math.round(36000f / rate);
 			return "" + (c / 10) + "." + (c % 10) + " " +
 				I18N.get("units.s");

@@ -1338,8 +1338,18 @@ GRANT SELECT ON modem_view TO PUBLIC;
 
 CREATE TABLE iris.cabinet_style (
 	name VARCHAR(20) PRIMARY KEY,
+	police_panel_pin_1 INTEGER,
+	police_panel_pin_2 INTEGER,
+	watchdog_reset_pin_1 INTEGER,
+	watchdog_reset_pin_2 INTEGER,
 	dip INTEGER
 );
+
+CREATE VIEW cabinet_style_view AS
+	SELECT name, police_panel_pin_1, police_panel_pin_2,
+	       watchdog_reset_pin_1, watchdog_reset_pin_2, dip
+	FROM iris.cabinet_style;
+GRANT SELECT ON cabinet_style_view TO PUBLIC;
 
 CREATE TABLE iris.cabinet (
 	name VARCHAR(20) PRIMARY KEY,

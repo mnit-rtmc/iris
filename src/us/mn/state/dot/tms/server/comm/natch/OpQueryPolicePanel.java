@@ -40,8 +40,8 @@ public class OpQueryPolicePanel extends OpStep {
 	/** Create a new query police panel step */
 	public OpQueryPolicePanel(Counter c, RampMeterImpl m) {
 		meter = m;
-		int pin = RampMeterHelper.lookupPolicePanelPin(m);
-		prop = new PinStatusProp(c, pin);
+		Integer pin = RampMeterHelper.lookupPolicePanelPin(m);
+		prop = new PinStatusProp(c, (pin != null) ? pin : 0);
 	}
 
 	/** Poll the controller */

@@ -65,4 +65,33 @@ CREATE VIEW quick_message_view AS
 	LEFT JOIN iris.msg_combining mc ON qm.msg_combining = mc.id;
 GRANT SELECT ON quick_message_view TO PUBLIC;
 
+ALTER TABLE iris.cabinet_style ADD COLUMN police_panel_pin_1 INTEGER;
+ALTER TABLE iris.cabinet_style ADD COLUMN police_panel_pin_2 INTEGER;
+ALTER TABLE iris.cabinet_style ADD COLUMN watchdog_reset_pin_1 INTEGER;
+ALTER TABLE iris.cabinet_style ADD COLUMN watchdog_reset_pin_2 INTEGER;
+
+UPDATE iris.cabinet_style SET police_panel_pin_1 = 82, police_panel_pin_2 = 82
+	WHERE name IN ('334Z', '334DZ', 'S334Z');
+UPDATE iris.cabinet_style SET police_panel_pin_1 = 81, police_panel_pin_2 = 82
+	WHERE name IN ('334Z-94', '334Z-99', '334Z-00', '334ZP', '334Z-05',
+	               '334Z-08', '334Z-14', 'MN340', 'MN340-14');
+UPDATE iris.cabinet_style SET police_panel_pin_1 = 80
+	WHERE name IN ('334', '334D', 'Prehistoric');
+
+UPDATE iris.cabinet_style SET watchdog_reset_pin_1 = 37,
+	                      watchdog_reset_pin_2 = 38
+	WHERE name IN ('334Z', '334DZ', 'S334Z');
+UPDATE iris.cabinet_style SET watchdog_reset_pin_1 = 37,
+	                      watchdog_reset_pin_2 = 38
+	WHERE name IN ('334Z-94', '334Z-99', '334Z-00', '334ZP', '334Z-05',
+	               '334Z-08', '334Z-14', 'MN340', 'MN340-14');
+UPDATE iris.cabinet_style SET watchdog_reset_pin_1 = 38
+	WHERE name IN ('334', '334D', 'Prehistoric');
+
+CREATE VIEW cabinet_style_view AS
+	SELECT name, police_panel_pin_1, police_panel_pin_2,
+	       watchdog_reset_pin_1, watchdog_reset_pin_2, dip
+	FROM iris.cabinet_style;
+GRANT SELECT ON cabinet_style_view TO PUBLIC;
+
 COMMIT;

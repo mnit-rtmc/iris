@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,30 @@ public interface CabinetStyle extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "cabinet_style";
+
+	/** Set the police panel input pin for meter 1 */
+	void setPolicePanelPin1(Integer p);
+
+	/** Get the police panel input pin for meter 1 */
+	Integer getPolicePanelPin1();
+
+	/** Set the police panel input pin for meter 2 */
+	void setPolicePanelPin2(Integer p);
+
+	/** Get the police panel input pin for meter 2 */
+	Integer getPolicePanelPin2();
+
+	/** Set the watchdog reset pin for meter 1 */
+	void setWatchdogResetPin1(Integer p);
+
+	/** Get the watchdog reset pin for meter 1 */
+	Integer getWatchdogResetPin1();
+
+	/** Set the watchdog reset pin for meter 2 */
+	void setWatchdogResetPin2(Integer p);
+
+	/** Get the watchdog reset pin for meter 2 */
+	Integer getWatchdogResetPin2();
 
 	/** Set the DIP switch value */
 	void setDip(Integer d);
