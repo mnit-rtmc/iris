@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2020  Minnesota Department of Transportation
+ * Copyright (C) 2008-2021  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -192,6 +192,13 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		}
 	};
 
+	/** Send settings action */
+	private final IAction settings = new IAction("device.send.settings") {
+		protected void doActionPerformed(ActionEvent e) {
+			proxy.setDownload(false);
+		}
+	};
+
 	/** Reset action */
 	private final IAction reset = new IAction("controller.reset") {
 		protected void doActionPerformed(ActionEvent e) {
@@ -238,6 +245,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		createSetupJobs();
 		if (!canRequest()) {
 			clear_err.setEnabled(false);
+			settings.setEnabled(false);
 			reset.setEnabled(false);
 		}
 		setBackground(Color.LIGHT_GRAY);
@@ -348,6 +356,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	private JPanel createStatusPanel() {
 		JPanel buttonPnl = new JPanel();
 		buttonPnl.add(new JButton(clear_err));
+		buttonPnl.add(new JButton(settings));
 		buttonPnl.add(new JButton(reset));
 		IPanel p = new IPanel();
 		p.add("controller.version");
