@@ -44,6 +44,12 @@ public class OpDetectorStatus extends OpStep {
 		setPolling(false);
 	}
 
+	/** Is this step waiting indefinitely */
+	@Override
+	public boolean isWaitingIndefinitely() {
+		return !isPolling();
+	}
+
 	/** Parse data received from controller */
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {

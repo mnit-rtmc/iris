@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,11 @@ abstract public class OpStep {
 	/** Poll the controller */
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
 		// subclasses may override
+	}
+
+	/** Is this step waiting indefinitely */
+	public boolean isWaitingIndefinitely() {
+		return false;
 	}
 
 	/** Parse data received from controller */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2017  Minnesota Department of Transportation
+ * Copyright (C) 2005-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,9 @@ public final class Operation implements Comparable<Operation> {
 	static private int systemRetryThreshold() {
 		return SystemAttrEnum.OPERATION_RETRY_THRESHOLD.getInt();
 	}
+
+	/** Expire time for steps which wait indefinitely */
+	static private final int EXPIRE_INDEFINITE_MS = 24 * 60 * 60 * 1000;
 
 	/** Maximum message length */
 	static private final int MAX_MSG_LEN = 64;
@@ -205,6 +208,9 @@ public final class Operation implements Comparable<Operation> {
 
 	/** Set the remaining time (ms) */
 	public void setRemaining(int rt) {
+		OpStep s = step;
+		if (s != null && s.isWaitingIndefinitely())
+			rt = EXPIRE_INDEFINITE_MS;
 		expire = TimeSteward.currentTimeMillis() + rt;
 	}
 
