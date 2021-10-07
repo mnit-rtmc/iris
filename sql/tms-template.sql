@@ -163,7 +163,7 @@ comm_event_purge_days	14
 database_version	5.24.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
-detector_occ_spike_enable	true
+detector_occ_spike_secs	60
 dict_allowed_scheme	0
 dict_banned_scheme	0
 dms_brightness_enable	true

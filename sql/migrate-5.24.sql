@@ -94,4 +94,10 @@ CREATE VIEW cabinet_style_view AS
 	FROM iris.cabinet_style;
 GRANT SELECT ON cabinet_style_view TO PUBLIC;
 
+-- Replace occ spike enable attribute
+UPDATE iris.system_attribute SET name = 'detector_occ_spike_secs', value = '60'
+	WHERE name = 'detector_occ_spike_enable' AND value = 'true';
+UPDATE iris.system_attribute SET name = 'detector_occ_spike_secs', value = '0'
+	WHERE name = 'detector_occ_spike_enable';
+
 COMMIT;

@@ -65,9 +65,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return SystemAttrEnum.DETECTOR_AUTO_FAIL_ENABLE.getBoolean();
 	}
 
-	/** Is detector occupancy spike failure enabled? */
-	static private boolean isOccSpikeEnabled() {
-		return SystemAttrEnum.DETECTOR_OCC_SPIKE_ENABLE.getBoolean();
+	/** Get the occupancy spike duration threshold */
+	static private int getOccSpikeSecs() {
+		return SystemAttrEnum.DETECTOR_OCC_SPIKE_SECS.getInt();
 	}
 
 	/** Default average detector field length (feet) */
@@ -171,12 +171,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	static private final Interval NO_CHANGE_THRESHOLD =
 		new Interval(24, Interval.Units.HOURS);
 
-	/** Scan "occ spike" threshold */
+	/** Scan "occ spike" trigger threshold */
 	static private final Interval OCC_SPIKE_THRESHOLD =
-		new Interval(10, SECONDS);
-
-	/** Threshold for occ spike timer to trigger auto fail */
-	static private final int OCC_SPIKE_TIMER_THRESHOLD = 60;
+		new Interval(29, SECONDS);
 
 	/** Clear threshold */
 	static private final Interval CLEAR_THRESHOLD =
@@ -185,6 +182,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Fast clear threshold */
 	static private final Interval FAST_CLEAR_THRESHOLD =
 		new Interval(30, SECONDS);
+
+	/** Occupancy spike clear threshold */
+	static private final Interval OCC_SPIKE_CLEAR_THRESHOLD =
+		new Interval(1, Interval.Units.HOURS);
 
 	/** Maximum "realistic" vehicle count for a 30-second period */
 	static private final int MAX_VEH_COUNT_30 = 37;
@@ -411,8 +412,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			CLEAR_THRESHOLD);
 		no_change = new AutoFailCounter(getNoChangeThreshold(),
 			FAST_CLEAR_THRESHOLD);
-		occ_spike = new AutoFailCounter(getOccSpikeThreshold(),
-			new Interval(1, Interval.Units.HOURS));
+		occ_spike = new AutoFailCounter(getOccSpikeTriggerThreshold(),
+			OCC_SPIKE_CLEAR_THRESHOLD);
 		updateAutoFail();
 	}
 
@@ -441,8 +442,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return NO_CHANGE_THRESHOLD;
 	}
 
-	/** Get the scan "occ spike" threshold */
-	private Interval getOccSpikeThreshold() {
+	/** Get the scan "occ spike" trigger threshold */
+	private Interval getOccSpikeTriggerThreshold() {
 		return OCC_SPIKE_THRESHOLD;
 	}
 
@@ -640,7 +641,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		          || chatter.triggered
 		          || locked_on.triggered
 		          || no_change.triggered
-		          || (occ_spike.triggered && isOccSpikeEnabled());
+		          || occ_spike.triggered;
 		setAutoFailNotify(af && isAutoFailEnabled());
 	}
 
@@ -986,7 +987,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			int spk = Math.abs(occ.value - prev_value) / OCC_SPIKE;
 			spike_hold_sec += occ.period * spk;
 		}
-		boolean sf = spike_hold_sec > OCC_SPIKE_TIMER_THRESHOLD;
+		int threshold = getOccSpikeSecs();
+		boolean sf = (threshold > 0) && (spike_hold_sec > threshold);
 		occ_spike.updateState(occ.period, sf);
 		if (occ_spike.checkLogging(occ.period))
 			logEvent(EventType.DET_OCC_SPIKE);
