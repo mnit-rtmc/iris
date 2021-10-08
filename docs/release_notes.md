@@ -1,5 +1,14 @@
 # IRIS 5.x Release Notes
 
+5.24.0 (unreleased)
+ - Added DMS [message combining](dms.md#message-combining) feature
+ - Added "Send Settings" button to controller form
+ - Added `DETECTOR_OCC_SPIKE_SECS` system attribute
+ - Added some pin configuration fields to cabinet style table
+ - Fixed rendering of default MULTI tags, like `[cf]`, `[jl]`, `[jp]`, `[fo]`
+ - Fixed issues with natch protocol
+ - Fixed time zone bug for event stamps
+
 5.23.0 (11 Aug 2021)
  - Added natch protocol for ATC devices
  - Store user messages in DB for DMS
