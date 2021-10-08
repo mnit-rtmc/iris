@@ -56,4 +56,18 @@ public class QuickMessageHelper extends BaseHelper {
 		}
 		return null;
 	}
+
+	/** Is message allowed to combine first? */
+	static public boolean isMsgCombiningFirst(QuickMessage qm) {
+		return qm != null &&
+		      (qm.getMsgCombining() == MsgCombining.FIRST.ordinal() ||
+		       qm.getMsgCombining() == MsgCombining.EITHER.ordinal());
+	}
+
+	/** Is message allowed to combine second? */
+	static public boolean isMsgCombiningSecond(QuickMessage qm) {
+		return qm != null &&
+		      (qm.getMsgCombining() == MsgCombining.SECOND.ordinal() ||
+		       qm.getMsgCombining() == MsgCombining.EITHER.ordinal());
+	}
 }

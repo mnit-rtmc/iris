@@ -117,42 +117,24 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 		String name = item.replace(" ", "");
 		getEditor().setItem(name);
 		QuickMessage qm = lookupQuickMsg(name);
-		if (qm != null) {
-			model.setSelectedItem(qm);
-			updateDispatcher(qm);
-		}
+		if (qm != null)
+			setSelectedItem(qm);
 	}
 
 	/** Update the dispatcher with the selected quick message */
 	private void updateDispatcher() {
-		QuickMessage qm = getSelectedProxy();
-		if (qm != null)
-			updateDispatcher(qm);
-	}
-
-	/** Get the currently selected proxy */
-	private QuickMessage getSelectedProxy() {
-		Object item = getSelectedItem();
-		return (item instanceof QuickMessage)
-		      ? (QuickMessage) item
-		      : null;
-	}
-
-	/** Update the dispatcher with the specified quick message */
-	private void updateDispatcher(QuickMessage qm) {
-		String ms = qm.getMulti();
-		if (adjusting == 0 && !ms.isEmpty()) {
-			dispatcher.setComposedMulti(ms);
-			dispatcher.unlinkIncident();
+		if (adjusting == 0) {
+			dispatcher.setQuickMessage(getSelectedMessage());
 			dispatcher.selectPreview(true);
 		}
 	}
 
-	/** Set the composed MULTI string */
-	public void setComposedMulti(String ms) {
-		adjusting++;
-		setSelectedItem(QuickMessageHelper.find(ms));
-		adjusting--;
+	/** Get the currently selected quick message */
+	public QuickMessage getSelectedMessage() {
+		Object item = getSelectedItem();
+		return (item instanceof QuickMessage)
+		      ? (QuickMessage) item
+		      : null;
 	}
 
 	/** Set selected item, but only if it is different from the
@@ -161,7 +143,7 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 	@Override
 	public void setSelectedItem(Object obj) {
 		QuickMessage qm = lookupQuickMsg(obj);
-		if (qm != getSelectedProxy())
+		if (qm != getSelectedMessage())
 			super.setSelectedItem(qm);
 	}
 
@@ -170,6 +152,7 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 		TreeSet<QuickMessage> msgs = createMessageSet(dms);
 		adjusting++;
 		model.removeAllElements();
+		model.addElement(null);
 		for (QuickMessage qm: msgs)
 			model.addElement(qm);
 		adjusting--;

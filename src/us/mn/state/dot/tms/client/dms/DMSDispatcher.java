@@ -26,6 +26,8 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
+import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
@@ -38,6 +40,7 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.IOptionPane;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiString;
+import static us.mn.state.dot.tms.utils.MultiString.makeCombined;
 
 /**
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
@@ -110,6 +113,9 @@ public class DMSDispatcher extends JPanel {
 	/** Composed MULTI string */
 	private String multi = "";
 
+	/** Selected quick message */
+	private QuickMessage quick_msg = null;
+
 	/** Linked incident */
 	private Incident incident;
 
@@ -147,6 +153,7 @@ public class DMSDispatcher extends JPanel {
 		String ms = DMSHelper.getOperatorMulti(dms);
 		composer.setComposedMulti(ms);
 		multi = composer.getComposedMulti();
+		quick_msg = null;
 		incident = DMSHelper.lookupIncident(dms);
 	}
 
@@ -158,22 +165,55 @@ public class DMSDispatcher extends JPanel {
 		singleTab.setMessage();
 	}
 
+	/** Set the quick message */
+	public void setQuickMessage(QuickMessage qm) {
+		quick_msg = qm;
+		unlinkIncident();
+		if (!QuickMessageHelper.isMsgCombiningFirst(qm))
+			setComposedMulti("");
+		else
+			singleTab.setMessage();
+	}
+
 	/** Get the composed MULTI string */
 	private String getComposedMulti(DMS dms) {
 		return DMSHelper.adjustMulti(dms, multi);
 	}
 
 	/** Get the preview MULTI string */
-	public String getPreviewMulti(DMS dms) {
+	public String getPreviewMulti(DMS dms, boolean combining) {
 		String ms = getComposedMulti(dms);
-		String first = getCombiningFirst();
-		return (first != null)
-		      ? MultiString.makeCombined(first, ms)
-		      : ms;
+		if (new MultiString(ms).isBlank())
+			return getPreviewBlank(combining);
+		if (combining) {
+			String sched = getSchedCombining();
+			if (sched != null)
+				return makeCombined(sched, ms);
+			String quick = getQuickMsgFirst();
+			if (quick != null)
+				return makeCombined(quick, ms);
+		}
+		return ms;
 	}
 
-	/** Get MULTI string from combining first message */
-	private String getCombiningFirst() {
+	/** Get preview with blank composed message */
+	private String getPreviewBlank(boolean combining) {
+		if (combining) {
+			String quick = getQuickMsgSecond();
+			String sched = getSchedCombining();
+			if (quick != null && sched != null)
+				return makeCombined(sched, quick);
+			else if (quick != null)
+				return quick;
+			else if (sched != null)
+				return sched;
+		}
+		String quick = getQuickMsg();
+		return (quick != null) ? quick : "";
+	}
+
+	/** Get MULTI string from scheduled combining message */
+	private String getSchedCombining() {
 		DMS dms = getSingleSelection();
 		if (dms != null) {
 			SignMessage sm = dms.getMsgSched();
@@ -181,6 +221,43 @@ public class DMSDispatcher extends JPanel {
 				return sm.getMulti();
 		}
 		return null;
+	}
+
+	/** Get the finished MULTI string (with combining quick message) */
+	private String getFinishedMulti(DMS dms) {
+		String ms = getComposedMulti(dms);
+		if (new MultiString(ms).isBlank()) {
+			String quick = getQuickMsg();
+			if (quick != null)
+				return quick;
+		} else {
+			String quick = getQuickMsgFirst();
+			if (quick != null)
+				return makeCombined(quick, ms);
+		}
+		return ms;
+	}
+
+	/** Get quick message */
+	private String getQuickMsg() {
+		QuickMessage qm = quick_msg;
+		return (qm != null) ? qm.getMulti() : null;
+	}
+
+	/** Get combining quick message (if first) */
+	private String getQuickMsgFirst() {
+		QuickMessage qm = quick_msg;
+		return QuickMessageHelper.isMsgCombiningFirst(qm)
+		      ? qm.getMulti()
+		      : null;
+	}
+
+	/** Get combining quick message (if second) */
+	private String getQuickMsgSecond() {
+		QuickMessage qm = quick_msg;
+		return QuickMessageHelper.isMsgCombiningSecond(qm)
+		      ? qm.getMulti()
+		      : null;
 	}
 
 	/** Get the single selected DMS */
@@ -274,7 +351,7 @@ public class DMSDispatcher extends JPanel {
 	/** Create a new message from the widgets.
 	 * @return A SignMessage from composer selection, or null on error. */
 	private SignMessage createMessage(DMS dms) {
-		return createMessage(dms, incident, getComposedMulti(dms));
+		return createMessage(dms, incident, getFinishedMulti(dms));
 	}
 
 	/** Create a new message using the specified MULTI */
@@ -364,6 +441,7 @@ public class DMSDispatcher extends JPanel {
 		setEnabled(false);
 		composer.setSign(null);
 		setComposedMulti("");
+		quick_msg = null;
 		unlinkIncident();
 		singleTab.setSelected(null);
 	}
