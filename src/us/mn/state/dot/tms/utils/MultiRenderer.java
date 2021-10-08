@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.utils;
 
 import java.util.LinkedList;
+import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
@@ -35,8 +36,6 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  */
 public class MultiRenderer extends MultiAdapter {
 
-	private MultiConfig mcfg = null;
-	
 	/** Default line justification */
 	static public JustificationLine defaultJustificationLine() {
 		return JustificationLine.fromOrdinal(SystemAttrEnum
@@ -49,47 +48,6 @@ public class MultiRenderer extends MultiAdapter {
 			.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
 	}
 
-	/** Get a tag color for the color scheme.
-	 * (Used for all tags with single-int colors
-	 *  except the depreciated [bgX] tag.) 
-	 * @param x Color value.
-	 * @return DmsColor or null for invalid color. */
-	@SuppressWarnings("incomplete-switch")
-	private DmsColor schemeColor(int x) {
-		ColorClassic cc;
-		if (mcfg == null) {
-			cc = ColorClassic.fromOrdinal(x);
-			return (cc != null) ? cc.clr : null;
-		}
-		switch (mcfg.getColorScheme()) {
-			case MONOCHROME_1_BIT:
-				switch (x) {
-					case 0:
-						return mcfg.getDefaultBG();
-					case 1:
-						return mcfg.getDefaultFG();
-				}
-				break;
-
-			case MONOCHROME_8_BIT:
-				if ((0 > x) || (x > 255))
-					break;
-				DmsColor c = mcfg.getDefaultFG();
-				int r = (c.red   * x) >> 8;
-				int g = (c.green * x) >> 8;
-				int b = (c.blue  * x) >> 8;
-				return new DmsColor(r, g, b);
-
-			case COLOR_CLASSIC:
-			case COLOR_24_BIT:	// <- Per NTCIP 1203 v03-04 - section 5.5.22
-				cc = ColorClassic.fromOrdinal(x);
-				if (cc != null)
-					return cc.clr;
-		}
-		syntax_err = MultiSyntaxError.unsupportedTagValue;
-		return null;
-	}
-
 	/** Raster graphic factory */
 	private final RasterGraphic.Factory factory;
 
@@ -100,6 +58,12 @@ public class MultiRenderer extends MultiAdapter {
 	/** Character height (pixels) for character- or line-matrix signs.
 	 * Set to 1 for full-matrix signs. */
 	private final int c_height;
+
+	/** Default font number */
+	private final int font_def;
+
+	/** Color scheme */
+	private final ColorScheme scheme;
 
 	/** MULTI syntax error */
 	private MultiSyntaxError syntax_err = MultiSyntaxError.none;
@@ -135,10 +99,10 @@ public class MultiRenderer extends MultiAdapter {
 	private int font_num;
 
 	/** Page background color */
-	private DmsColor background_clr = DmsColor.BLACK;
+	private DmsColor background_clr;
 
 	/** Foreground color */
-	private DmsColor foreground_clr = DmsColor.AMBER;
+	private DmsColor foreground_clr;
 
 	/**
 	 * Create a new MULTI renderer.
@@ -148,33 +112,23 @@ public class MultiRenderer extends MultiAdapter {
 	 * @param ch Character height (pixels) for character- or line-matrix
 	 *           signs.  Use 0 for full-matrix signs.
 	 * @param f Default font number.
+	 * @param cs Color scheme.
 	 */
-	public MultiRenderer(RasterGraphic.Factory fct, int cw, int ch, int f) {
+	public MultiRenderer(RasterGraphic.Factory fct, int cw, int ch, int f,
+		ColorScheme cs)
+	{
 		factory = fct;
 		raster = factory.create();
 		c_width = (cw > 0) ? cw : 1;
 		c_height = (ch > 0) ? ch : 1;
+		font_def = f;
 		font_num = f;
+		scheme = cs;
+		background_clr = scheme.getDefaultBackground();
+		foreground_clr = scheme.getDefaultForeground();
 		resetTextRectangle();
 	}
 
-	/**
-	 * Create a new MULTI renderer.
-	 * @param fct Raster graphic factory.
-	 * @param mc MultiConfig for sign or sign-group.
-	 */
-	public MultiRenderer(RasterGraphic.Factory fct, MultiConfig mc) {
-		factory = fct;
-		raster  = factory.create();
-		mcfg    = mc;
-		background_clr = mcfg.getDefaultBG();
-		foreground_clr = mcfg.getDefaultFG();
-		c_width        = Math.max(mcfg.getCharWidth(), 1);
-		c_height       = Math.max(mcfg.getCharHeight(), 1);
-		font_num       = mcfg.getDefaultFontNum();
-		resetTextRectangle();
-	}
-	
 	/** Check for character-matrix sign */
 	private boolean isCharMatrix() {
 		return c_width > 1;
@@ -231,15 +185,7 @@ public class MultiRenderer extends MultiAdapter {
 	 * Use the sign's default font if f_num is null. */
 	@Override
 	public void setFont(Integer f_num, String f_id) {
-		if (f_num == null)
-			if (mcfg == null) {
-				// need mcfg to use "default value" tags
-				syntax_err = MultiSyntaxError.unsupportedTagValue;
-			}
-			else
-				font_num = mcfg.getDefaultFontNum();
-		else
-			font_num = f_num;
+		font_num = (f_num != null) ? f_num : font_def;
 	}
 
 	/** Set the character spacing.
@@ -289,22 +235,14 @@ public class MultiRenderer extends MultiAdapter {
 	 * If x is null, use the sign's default background color. */
 	@Override
 	public void setColorBackground(Integer x) {
-		if (x == null) {
-			if (mcfg == null) {
-				// need mcfg to use "default value" tags
+		if (x != null) {
+			DmsColor clr = scheme.getColor(x);
+			if (clr != null)
+				background_clr = clr;
+			else
 				syntax_err = MultiSyntaxError.unsupportedTagValue;
-				return;
-			}
-			background_clr = mcfg.getDefaultBG();
-		}
-		else {
-			ColorClassic cc = ColorClassic.fromOrdinal(x);
-			if (cc == null) {
-				syntax_err = MultiSyntaxError.unsupportedTagValue;
-				return;
-			}
-			background_clr = cc.clr;
-		}
+		} else
+			background_clr = scheme.getDefaultBackground();
 		fillBackground();
 	}
 
@@ -315,22 +253,14 @@ public class MultiRenderer extends MultiAdapter {
 	 * Use sign's default background color if z is null. */
 	@Override
 	public void setPageBackground(Integer z) {
-		if (z == null) {
-			if (mcfg == null) {
-				// need mcfg to use "default value" tags
+		if (z != null) {
+			DmsColor clr = scheme.getColor(z);
+			if (clr != null)
+				background_clr = clr;
+			else
 				syntax_err = MultiSyntaxError.unsupportedTagValue;
-				return;
-			}
-			background_clr = mcfg.getDefaultBG();
-		}
-		else {
-			DmsColor clr = schemeColor(z);
-			if (clr == null) {
-				syntax_err = MultiSyntaxError.unsupportedTagValue;
-				return;
-			}
-			background_clr = clr;
-		}
+		} else
+			background_clr = scheme.getDefaultBackground();
 		fillBackground();
 	}
 
@@ -354,25 +284,17 @@ public class MultiRenderer extends MultiAdapter {
 	 * @param x Foreground color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
 	 *                           (0-9 for colorClassic &amp; color24bit).
-	 * If x is null, use the sign's default foreground color . */
+	 * If x is null, use the sign's default foreground color. */
 	@Override
 	public void setColorForeground(Integer x) {
-		if (x == null) {
-			if (mcfg == null) {
-				// need mcfg to use "default value" tags
+		if (x != null) {
+			DmsColor clr = scheme.getColor(x);
+			if (clr != null)
+				foreground_clr = clr;
+			else
 				syntax_err = MultiSyntaxError.unsupportedTagValue;
-				return;
-			}
-			foreground_clr = mcfg.getDefaultFG();
-		}
-		else {
-			DmsColor clr = schemeColor(x);
-			if (clr == null) {
-				syntax_err = MultiSyntaxError.unsupportedTagValue;
-				return;
-			}
-			foreground_clr = clr;
-		}
+		} else
+			foreground_clr = scheme.getDefaultForeground();
 	}
 
 	/** Set the foreground color for color24bit color scheme.
@@ -395,9 +317,11 @@ public class MultiRenderer extends MultiAdapter {
 	 */
 	@Override
 	public void addColorRectangle(int x, int y, int w, int h, int z) {
-		DmsColor clr = schemeColor(z);
+		DmsColor clr = scheme.getColor(z);
 		if (clr != null)
 			fillRectangle(x, y, w, h, clr);
+		else
+			syntax_err = MultiSyntaxError.unsupportedTagValue;
 	}
 
 	/** Add a color rectangle for color24bit color scheme.

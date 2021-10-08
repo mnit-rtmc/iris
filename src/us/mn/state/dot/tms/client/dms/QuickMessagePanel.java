@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2019  Minnesota Department of Transportation
+ * Copyright (C) 2018-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.InvalidMsgException;
@@ -153,7 +154,8 @@ public class QuickMessagePanel extends IPanel
 		int df = (f != null)
 		       ? f.getNumber()
 		       : FontHelper.DEFAULT_FONT_NUM;
-		RasterBuilder rb = new RasterBuilder(pw, ph, cw, ch, df);
+		ColorScheme cs = ColorScheme.fromOrdinal(sc.getColorScheme());
+		RasterBuilder rb = new RasterBuilder(pw, ph, cw, ch, df, cs);
 		try {
 			RasterGraphic[] rg = rb.createPixmaps(multi);
 			if (rg != null) {

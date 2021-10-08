@@ -243,8 +243,8 @@ public class MultiConfig {
 	/** Generate IRIS-default BG/FG colors */
 	@SuppressWarnings("incomplete-switch")
 	private void genIrisDefaultColors() {
-		byte[] bgBytes = DMSHelper.getDefaultBackgroundBytes(colorScheme);
-		byte[] fgBytes = DMSHelper.getDefaultForegroundBytes(colorScheme);
+		byte[] bgBytes = colorScheme.getDefaultBackgroundBytes();
+		byte[] fgBytes = colorScheme.getDefaultForegroundBytes();
 		int bg0 = bgBytes[0] & 0x0ff;
 		int fg0 = fgBytes[0] & 0x0ff;
 		DmsColor bgMonoColor;

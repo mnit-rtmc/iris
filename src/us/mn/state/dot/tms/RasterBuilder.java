@@ -49,6 +49,9 @@ public class RasterBuilder {
 	/** Default font number */
 	private final int default_font;
 
+	/** Color scheme */
+	private final ColorScheme scheme;
+
 	/**
 	 * Create a new raster builder.
 	 * @param w Sign width in pixels.
@@ -58,13 +61,17 @@ public class RasterBuilder {
 	 * @param ch Character height (pixels) for character- or line-matrix
 	 *           signs.  Use 0 for full-matrix signs.
 	 * @param df Default font number.
+	 * @param cs Color scheme.
 	 */
-	public RasterBuilder(int w, int h, int cw, int ch, int df) {
+	public RasterBuilder(int w, int h, int cw, int ch, int df,
+		ColorScheme cs)
+	{
 		width = w;
 		height = h;
 		c_width = cw;
 		c_height = ch;
 		default_font = df;
+		scheme = cs;
 	}
 
 	/** Get the optimal line height (pixels) */
@@ -136,7 +143,7 @@ public class RasterBuilder {
 		throws InvalidMsgException
 	{
 		MultiRenderer mr = new MultiRenderer(factory, c_width, c_height,
-			default_font);
+			default_font, scheme);
 		MultiString multi = DMSHelper.ignoreFilter(ms);
 		multi.parse(mr);
 		mr.complete();

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2019  Minnesota Department of Transportation
+ * Copyright (C) 2008-2021  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -17,15 +17,12 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import static us.mn.state.dot.tms.DmsColor.AMBER;
-import static us.mn.state.dot.tms.DmsColor.BLACK;
-import us.mn.state.dot.tms.utils.ColorClassic;
 import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
- * Helper class for DMS. Used on the client and server.
+ * Helper class for DMS.  Used on the client and server.
  *
  * @author Douglas Lau
  * @author Michael Darter
@@ -193,76 +190,14 @@ public class DMSHelper extends BaseHelper {
 		return (f != null) ? f.getNumber() : getDefaultFontNumber(dms);
 	}
 
-	/** Byte array for background 1-bit monochrome color */
-	static private final byte[] MONO_1_BACKGROUND = new byte[] { 0 };
-
-	/** Byte array for background 8-bit monochrome color */
-	static private final byte[] MONO_8_BACKGROUND = new byte[] { 0 };
-
-	/** Byte array for background classic color */
-	static private final byte[] COLOR_CLASSIC_BACKGROUND = new byte[] {
-		(byte) ColorClassic.black.ordinal()
-	};
-
-	/** Byte array for background 24-bit color */
-	static private final byte[] COLOR_24_BACKGROUND = new byte[] {
-		(byte) BLACK.red, (byte) BLACK.green, (byte) BLACK.blue
-	};
-
-	/** Get the default background color for a color scheme */
-	static public byte[] getDefaultBackgroundBytes(ColorScheme scheme) {
-		switch (scheme) {
-		case MONOCHROME_1_BIT:
-			return MONO_1_BACKGROUND;
-		case MONOCHROME_8_BIT:
-			return MONO_8_BACKGROUND;
-		case COLOR_CLASSIC:
-			return COLOR_CLASSIC_BACKGROUND;
-		default:
-			return COLOR_24_BACKGROUND;
-		}
-	}
-
 	/** Get the default background color for a DMS */
 	static public byte[] getDefaultBackgroundBytes(DMS dms) {
-		return getDefaultBackgroundBytes(getColorScheme(dms));
-	}
-
-	/** Byte array for foreground 1-bit monochrome color */
-	static private final byte[] MONO_1_FOREGROUND = new byte[] { 1 };
-
-	/** Byte array for foreground 8-bit monochrome color */
-	static private final byte[] MONO_8_FOREGROUND = new byte[] {
-		(byte) 255
-	};
-
-	/** Byte array for foreground classic color */
-	static private final byte[] COLOR_CLASSIC_FOREGROUND = new byte[] {
-		(byte) ColorClassic.amber.ordinal()
-	};
-
-	/** Byte array for foreground 24-bit color */
-	static private final byte[] COLOR_24_FOREGROUND = new byte[] {
-		(byte) AMBER.red, (byte) AMBER.green, (byte) AMBER.blue
-	};
-
-	/** Get the default foreground color for a color scheme */
-	static public byte[] getDefaultForegroundBytes(ColorScheme scheme) {
-		switch (scheme) {
-		case MONOCHROME_1_BIT:
-			return MONO_1_FOREGROUND;
-		case MONOCHROME_8_BIT:
-			return MONO_8_FOREGROUND;
-		case COLOR_CLASSIC:
-			return COLOR_CLASSIC_FOREGROUND;
-		default:
-			return COLOR_24_FOREGROUND;
-		}
+		return getColorScheme(dms).getDefaultBackgroundBytes();
 	}
 
 	/** Get the default foreground color for a DMS */
 	static public byte[] getDefaultForegroundBytes(DMS dms) {
-		return getDefaultForegroundBytes(getColorScheme(dms));
+		return getColorScheme(dms).getDefaultForegroundBytes();
 	}
 
 	/** Get the color scheme for a DMS */
@@ -333,7 +268,9 @@ public class DMSHelper extends BaseHelper {
 			int cw = sc.getCharWidth();
 			int ch = sc.getCharHeight();
 			int f = getFontNumber(dms);
-			return new RasterBuilder(w, h, cw, ch, f);
+			ColorScheme cs = ColorScheme.fromOrdinal(
+				sc.getColorScheme());
+			return new RasterBuilder(w, h, cw, ch, f, cs);
 		} else
 			return null;
 	}

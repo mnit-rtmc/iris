@@ -263,10 +263,10 @@ public class MultiString {
 	 * @param v Line justification tag value.
 	 * @param cb Callback to set line justification. */
 	static private void parseJustificationLine(String v, Multi cb) {
-		Multi.JustificationLine jl = Multi.JustificationLine.UNDEFINED;
 		Integer j = parseInt(v);
-		if (j != null)
-			jl = Multi.JustificationLine.fromOrdinal(j);
+		Multi.JustificationLine jl = (j != null)
+			? Multi.JustificationLine.fromOrdinal(j)
+			: null;
 		cb.setJustificationLine(jl);
 	}
 
@@ -274,10 +274,10 @@ public class MultiString {
 	 * @param v Page justification tag value.
 	 * @param cb Callback to set page justification. */
 	static private void parseJustificationPage(String v, Multi cb) {
-		Multi.JustificationPage jp = Multi.JustificationPage.UNDEFINED;
 		Integer j = parseInt(v);
-		if (j != null)
-			jp = Multi.JustificationPage.fromOrdinal(j);
+		Multi.JustificationPage jp = (j != null)
+			? Multi.JustificationPage.fromOrdinal(j)
+			: null;
 		cb.setJustificationPage(jp);
 	}
 

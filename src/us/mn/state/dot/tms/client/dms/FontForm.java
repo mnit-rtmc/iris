@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListModel;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
@@ -322,7 +323,8 @@ public class FontForm extends AbstractForm {
 		int cw = fontWidth(f);
 		int w = pangram_width(f, cw);
 		int df = f.getNumber();
-		RasterBuilder b = new RasterBuilder(w, h, cw, 0, df);
+		ColorScheme cs = ColorScheme.MONOCHROME_1_BIT;
+		RasterBuilder b = new RasterBuilder(w, h, cw, 0, df, cs);
 		try {
 			return b.createPixmaps(ms);
 		}
