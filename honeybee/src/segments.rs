@@ -291,15 +291,12 @@ impl RNode {
                 let abbrev = roads
                     .get(&roadway)
                     .map(|r| r.abbrev.clone())
-                    .unwrap_or("".to_owned());
-                match TravelDir::from_str(road_dir) {
-                    Some(travel_dir) => Some(CorridorId {
-                        roadway,
-                        abbrev,
-                        travel_dir,
-                    }),
-                    None => None,
-                }
+                    .unwrap_or_else(|| "".to_owned());
+                TravelDir::from_str(road_dir).map(|travel_dir| CorridorId {
+                    roadway,
+                    abbrev,
+                    travel_dir,
+                })
             }
             _ => None,
         }
@@ -408,7 +405,7 @@ impl Corridor {
     /// Get index of the first node in corridor direction
     fn first_node(&mut self) -> Option<usize> {
         let mut idx_lt_ln = None; // (node index, lat, lon)
-        for (i, ref n) in self.nodes.iter().enumerate() {
+        for (i, n) in self.nodes.iter().enumerate() {
             if let Some((lat, lon)) = n.latlon() {
                 idx_lt_ln = Some(match idx_lt_ln {
                     None => (i, lat, lon),
@@ -426,7 +423,7 @@ impl Corridor {
     fn nearest_node(&self, idx: usize) -> Option<usize> {
         let pos = self.nodes.get(idx)?.pos()?;
         let mut idx_dist = None; // (node index, distance)
-        for (i, ref n) in self.nodes.iter().enumerate().skip(idx + 1) {
+        for (i, n) in self.nodes.iter().enumerate().skip(idx + 1) {
             if let Some(ref p) = n.pos() {
                 let i_dist = (i, pos.distance_haversine(p));
                 idx_dist = Some(match idx_dist {
@@ -571,7 +568,7 @@ impl Corridor {
         let dir = Path::new("corridors");
         let cor_name =
             format!("{}_{}", self.cor_id.abbrev, self.cor_id.travel_dir);
-        let file = AtomicFile::new(&dir, &cor_name)?;
+        let file = AtomicFile::new(dir, &cor_name)?;
         let writer = file.writer()?;
         serde_json::to_writer(writer, &self.nodes)?;
         Ok(())
@@ -776,7 +773,7 @@ impl SegmentState {
         match node.cor_id(&self.roads) {
             Some(ref cor_id) => {
                 match self.node_cors.insert(node.name.clone(), cor_id.clone()) {
-                    None => self.add_corridor_node(&cor_id, node),
+                    None => self.add_corridor_node(cor_id, node),
                     Some(ref cid) if cid != cor_id => {
                         self.remove_corridor_node(cid, &node.name);
                         self.add_corridor_node(cor_id, node);
@@ -790,7 +787,7 @@ impl SegmentState {
 
     /// Add a node to corridor
     fn add_corridor_node(&mut self, cid: &CorridorId, node: RNode) {
-        match self.corridors.get_mut(&cid) {
+        match self.corridors.get_mut(cid) {
             Some(cor) => cor.add_node(node, self.ordered),
             None => {
                 // Leaflet doesn't like it when we use the high bits...

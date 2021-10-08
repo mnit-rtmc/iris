@@ -373,7 +373,7 @@ fn fetch_all_nodes(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
     debug!("fetch_all_nodes");
     sender.send(SegMsg::Order(false))?;
     for row in &client.query(RNode::SQL_ALL, &[])? {
-        sender.send(SegMsg::UpdateNode(RNode::from_row(&row)))?;
+        sender.send(SegMsg::UpdateNode(RNode::from_row(row)))?;
     }
     sender.send(SegMsg::Order(true))?;
     Ok(())
@@ -393,7 +393,7 @@ fn fetch_one_node(
     let rows = &client.query(RNode::SQL_ONE, &[&name])?;
     if rows.len() == 1 {
         for row in rows.iter() {
-            sender.send(SegMsg::UpdateNode(RNode::from_row(&row)))?;
+            sender.send(SegMsg::UpdateNode(RNode::from_row(row)))?;
         }
     } else {
         assert!(rows.is_empty());
@@ -409,7 +409,7 @@ fn fetch_one_node(
 fn fetch_all_roads(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
     debug!("fetch_all_roads");
     for row in &client.query(Road::SQL_ALL, &[])? {
-        sender.send(SegMsg::UpdateRoad(Road::from_row(&row)))?;
+        sender.send(SegMsg::UpdateRoad(Road::from_row(row)))?;
     }
     Ok(())
 }
@@ -427,7 +427,7 @@ fn fetch_one_road(
     debug!("fetch_one_road: {}", name);
     let rows = &client.query(Road::SQL_ONE, &[&name])?;
     if let Some(row) = rows.iter().next() {
-        sender.send(SegMsg::UpdateRoad(Road::from_row(&row)))?;
+        sender.send(SegMsg::UpdateRoad(Road::from_row(row)))?;
     }
     Ok(())
 }
@@ -436,10 +436,10 @@ impl Resource {
     /// Get the listen value
     fn listen(&self) -> &Listen {
         match self {
-            Resource::RNode(lsn) => &lsn,
-            Resource::Road(lsn) => &lsn,
-            Resource::Simple(_, lsn, _) => &lsn,
-            Resource::SignMsg(_, lsn, _) => &lsn,
+            Resource::RNode(lsn) => lsn,
+            Resource::Road(lsn) => lsn,
+            Resource::Simple(_, lsn, _) => lsn,
+            Resource::SignMsg(_, lsn, _) => lsn,
         }
     }
 

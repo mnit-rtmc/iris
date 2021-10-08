@@ -92,7 +92,7 @@ fn pending_notifications(
     for n in nots.timeout_iter(Duration::from_millis(300)).iterator() {
         let n = n.context("notification")?;
         // Discard payload if we're not listening for it
-        if resource::is_listening_payload(&n.channel(), &n.payload()) {
+        if resource::is_listening_payload(n.channel(), n.payload()) {
             ns.insert((n.channel().to_string(), n.payload().to_string()));
         } else {
             ns.insert((n.channel().to_string(), "".to_string()));

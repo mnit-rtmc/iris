@@ -550,7 +550,7 @@ impl MsgData {
     fn page_justification_default(&self) -> JustificationPage {
         const ATTR: &str = "dms_default_justification_page";
         if let Some(value) = self.attrs.get(ATTR) {
-            if let Some(pj) = JustificationPage::new(&value) {
+            if let Some(pj) = JustificationPage::new(value) {
                 return pj;
             }
         }
@@ -562,7 +562,7 @@ impl MsgData {
     fn line_justification_default(&self) -> JustificationLine {
         const ATTR: &str = "dms_default_justification_line";
         if let Some(value) = self.attrs.get(ATTR) {
-            if let Some(lj) = JustificationLine::new(&value) {
+            if let Some(lj) = JustificationLine::new(value) {
                 return lj;
             }
         }
@@ -686,7 +686,7 @@ impl ImageCache {
         n.push_str(name);
         n.push('.');
         n.push_str(&self.ext);
-        (&self.img_dir.as_path(), n)
+        (self.img_dir.as_path(), n)
     }
 
     /// Make image file name
