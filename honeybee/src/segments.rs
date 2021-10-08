@@ -15,7 +15,7 @@
 use crate::fetcher::create_client;
 use crate::geo::{WebMercatorPos, Wgs84Pos};
 use crate::Result;
-use pointy::Pt64;
+use pointy::{Float, Pt};
 use postgis::ewkb::{LineString, Point, Polygon};
 use postgres::types::ToSql;
 use postgres::{Client, Row, Statement, Transaction};
@@ -212,9 +212,9 @@ struct Segments<'a> {
     /// Name of corridor
     cor_name: String,
     /// All points on corridor
-    pts: Vec<Pt64>,
+    pts: Vec<Pt<f64>>,
     /// Normal vectors for all points
-    norms: Vec<Pt64>,
+    norms: Vec<Pt<f64>>,
     /// Meter distance for all points
     meters: Vec<f64>,
 }
@@ -487,11 +487,11 @@ impl Corridor {
     }
 
     /// Create points for corridor nodes
-    fn create_points(&self) -> Vec<Pt64> {
+    fn create_points(&self) -> Vec<Pt<f64>> {
         self.nodes
             .iter()
             .filter_map(|n| n.pos())
-            .map(|p| Pt64::from(WebMercatorPos::from(p)))
+            .map(|p| Pt::from(WebMercatorPos::from(p)))
             .collect()
     }
 
@@ -580,7 +580,7 @@ impl Corridor {
 
 impl<'a> Segments<'a> {
     /// Create corridor segments
-    fn new(cor: &'a Corridor, pts: Vec<Pt64>) -> Self {
+    fn new(cor: &'a Corridor, pts: Vec<Pt<f64>>) -> Self {
         let cor_name = cor.cor_id.to_string();
         let norms = create_norms(&pts);
         let meters = cor.create_meterpoints();
@@ -618,13 +618,13 @@ impl<'a> Segments<'a> {
     ) -> crate::Result<()> {
         let o_scale = self.scale_zoom(OUTER_SCALE, zoom);
         let i_scale = self.scale_zoom(BASE_SCALE, zoom);
-        let mut poly = Vec::<(Pt64, Pt64)>::with_capacity(16);
+        let mut poly = Vec::<(Pt<f64>, Pt<f64>)>::with_capacity(16);
         let mut seg_meter = 0.0; // meter point for the current segment
         let mut p_meter = 0.0; // meter point for the previous point
         let mut sid = self.cor.base_sid;
         let mut station_id = None;
         let nodes = &self.cor.nodes[..];
-        for (ref node, (pt, (norm, meter))) in nodes.iter().zip(
+        for (node, (pt, (norm, meter))) in nodes.iter().zip(
             self.pts
                 .iter()
                 .zip(self.norms.iter().zip(self.meters.iter())),
@@ -668,7 +668,7 @@ impl<'a> Segments<'a> {
     }
 
     /// Create polygon for way column
-    fn create_way(&self, poly: &[(Pt64, Pt64)]) -> Polygon {
+    fn create_way(&self, poly: &[(Pt<f64>, Pt<f64>)]) -> Polygon {
         let mut points = vec![];
         for (vtx, _) in poly {
             points.push(Point::new(vtx.x(), vtx.y(), None));
@@ -703,11 +703,11 @@ fn road_class_zoom(r_class: i16, zoom: i32) -> bool {
 }
 
 /// Create normal vectors for a slice of points
-fn create_norms(pts: &[Pt64]) -> Vec<Pt64> {
+fn create_norms<T: Float>(pts: &[Pt<T>]) -> Vec<Pt<T>> {
     let mut norms = vec![];
     for i in 0..pts.len() {
-        let upstream = vector_upstream(&pts, i);
-        let downstream = vector_downstream(&pts, i);
+        let upstream = vector_upstream(pts, i);
+        let downstream = vector_downstream(pts, i);
         let v0 = match (upstream, downstream) {
             (Some(up), Some(down)) => (up + down).normalize(),
             (Some(up), None) => up,
@@ -720,7 +720,7 @@ fn create_norms(pts: &[Pt64]) -> Vec<Pt64> {
 }
 
 /// Get vector from upstream point to current point
-fn vector_upstream(pts: &[Pt64], i: usize) -> Option<Pt64> {
+fn vector_upstream<T: Float>(pts: &[Pt<T>], i: usize) -> Option<Pt<T>> {
     let current = pts[i];
     for up in pts[0..i].iter().rev() {
         if *up != current {
@@ -731,7 +731,7 @@ fn vector_upstream(pts: &[Pt64], i: usize) -> Option<Pt64> {
 }
 
 /// Get vector from current point to downstream point
-fn vector_downstream(pts: &[Pt64], i: usize) -> Option<Pt64> {
+fn vector_downstream<T: Float>(pts: &[Pt<T>], i: usize) -> Option<Pt<T>> {
     let current = pts[i];
     for down in pts[i + 1..].iter() {
         if *down != current {

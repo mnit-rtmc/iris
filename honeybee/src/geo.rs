@@ -1,6 +1,6 @@
 // geo.rs
 //
-// Copyright (C) 2019-2020  Minnesota Department of Transportation
+// Copyright (C) 2019-2021  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use pointy::Pt64;
+use pointy::Pt;
 
 /// WGS-84 (EPSG:4326) position.
 #[derive(Clone, Copy, Debug)]
@@ -114,9 +114,9 @@ impl From<WebMercatorPos> for Wgs84Pos {
     }
 }
 
-impl From<WebMercatorPos> for Pt64 {
+impl From<WebMercatorPos> for Pt<f64> {
     fn from(pos: WebMercatorPos) -> Self {
-        Self(pos.x, pos.y)
+        Self::new(pos.x, pos.y)
     }
 }
 
