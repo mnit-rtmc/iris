@@ -115,14 +115,15 @@ First     | May combine as first message
 Second    | May combine as second message
 Either    | May combine as first or second message
 
-There are two cases where messages can be combined:
+Messages can only be combined in certain cases:
 - The first message is scheduled by a [DMS action] and the second is selected by
   an operator.
 - Both messages are selected by an operator, the first being a quick message and
   the second composed (line-by-line).
 
-When messages are combined, the foreground color, font, and justification tags
-are reset to default values with `[cf][fo][jl][jp]` before the second message.
+The MULTI string `[cf][fo][jl][jp]` is automatically inserted before the second
+message to reset the foreground color, font, and justification tags to default
+values.
 
 There are two methods of combining messages: **Shared** and **Sequenced**.
 
