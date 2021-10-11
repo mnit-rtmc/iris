@@ -1,6 +1,6 @@
 # IRIS 5.x Release Notes
 
-5.24.0 (unreleased)
+5.24.0 (11 Oct 2021)
  - Added DMS [message combining](dms.md#message-combining) feature
  - Added "Send Settings" button to controller form
  - Added `DETECTOR_OCC_SPIKE_SECS` system attribute
