@@ -184,7 +184,7 @@ impl Binner {
         if self.contains(&name) {
             return Ok(0);
         }
-        if let Some(buf) = pack_binned::<T>(&vlog) {
+        if let Some(buf) = pack_binned::<T>(vlog) {
             debug!("Binning {:?}", name);
             let options = FileOptions::default().last_modified_time(*mtime);
             self.writer.start_file(name, options)?;

@@ -442,7 +442,7 @@ impl VehLog {
         period: usize,
         filter: VehicleFilter,
     ) -> BinIter<T> {
-        BinIter::new(period, &self, filter)
+        BinIter::new(period, self, filter)
     }
 }
 
@@ -583,11 +583,11 @@ impl<'a, T: TrafficData> BinIter<'a, T> {
     fn interval_data(&mut self) -> T {
         let mut data = self.make_data();
         if let Some(ev) = &self.ev {
-            if self.is_future_event(&ev) {
+            if self.is_future_event(ev) {
                 return data;
             }
-            if self.filter.check(&ev) {
-                data.bin_vehicle(&ev);
+            if self.filter.check(ev) {
+                data.bin_vehicle(ev);
             }
         }
         self.ev = None;
@@ -597,12 +597,12 @@ impl<'a, T: TrafficData> BinIter<'a, T> {
                 data.reset();
             } else {
                 self.reset = false;
-                if self.is_future_event(&ev) {
+                if self.is_future_event(ev) {
                     self.ev = Some(ev);
                     break;
                 }
-                if self.filter.check(&ev) {
-                    data.bin_vehicle(&ev);
+                if self.filter.check(ev) {
+                    data.bin_vehicle(ev);
                 }
             }
         }
