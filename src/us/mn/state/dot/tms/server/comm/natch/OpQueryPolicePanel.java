@@ -41,6 +41,9 @@ public class OpQueryPolicePanel extends OpStep {
 	public OpQueryPolicePanel(Counter c, RampMeterImpl m) {
 		meter = m;
 		Integer pin = RampMeterHelper.lookupPolicePanelPin(m);
+		// Don't query if no PP pin for the cabinet style
+		if (pin == null)
+			success = true;
 		prop = new PinStatusProp(c, (pin != null) ? pin : 0);
 	}
 
