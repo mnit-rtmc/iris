@@ -31,7 +31,7 @@ public class MeterStatusProp extends MeterProp {
 
 	/** Set the red dwell time */
 	public void setRed(int r) {
-		red = r;
+		red = (r >= 0) ? r : null;
 	}
 
 	/** Get the red dwell time */
@@ -79,8 +79,8 @@ public class MeterStatusProp extends MeterProp {
 	@Override
 	protected boolean parseParams(String[] param) {
 		if (param[2].equals(Integer.toString(getMeterNumber()))) {
-			red = parseInt(param[3]);
-			return (red >= 0) || "INV".equals(param[3]);
+			setRed(parseInt(param[3]));
+			return (red != null) || "INV".equals(param[3]);
 		} else
 			return false;
 	}
