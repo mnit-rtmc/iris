@@ -198,17 +198,17 @@ public class DMSDispatcher extends JPanel {
 
 	/** Get preview with blank composed message */
 	private String getPreviewBlank(boolean combining) {
+		String quick = getQuickMsg();
 		if (combining) {
-			String quick = getQuickMsgSecond();
+			String quick2 = getQuickMsgSecond();
 			String sched = getSchedCombining();
-			if (quick != null && sched != null)
-				return makeCombined(sched, quick);
+			if (quick2 != null && sched != null)
+				return makeCombined(sched, quick2);
 			else if (quick != null)
 				return quick;
 			else if (sched != null)
 				return sched;
 		}
-		String quick = getQuickMsg();
 		return (quick != null) ? quick : "";
 	}
 
