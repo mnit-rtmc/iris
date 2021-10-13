@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -714,7 +714,7 @@ public class IncidentDispatcher extends IPanel
 		final String inc_orig, String ms, final DmsMsgPriority prio,
 		final Integer duration)
 	{
-		final String _ms = DMSHelper.adjustMulti(dms, ms);
+		final String _ms = DMSHelper.addMultiOverrides(dms, ms);
 		runSwing(new Runnable() {
 			public void run() {
 				SignMessage sm = sm_creator.create(sc, inc_orig,

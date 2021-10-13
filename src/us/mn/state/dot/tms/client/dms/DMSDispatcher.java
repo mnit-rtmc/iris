@@ -178,7 +178,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Get the composed MULTI string */
 	private String getComposedMulti(DMS dms) {
-		return DMSHelper.adjustMulti(dms, multi);
+		return DMSHelper.addMultiOverrides(dms, multi);
 	}
 
 	/** Get the preview MULTI string */

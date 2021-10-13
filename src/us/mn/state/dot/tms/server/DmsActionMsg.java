@@ -201,7 +201,7 @@ public class DmsActionMsg {
 	/** Get the MULTI string */
 	public String getMulti() {
 		return (multi != null)
-		      ? DMSHelper.adjustMulti(dms, multi)
+		      ? DMSHelper.addMultiOverrides(dms, multi)
 		      : null;
 	}
 

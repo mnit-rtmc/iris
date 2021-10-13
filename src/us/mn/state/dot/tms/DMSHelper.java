@@ -208,19 +208,19 @@ public class DMSHelper extends BaseHelper {
 		        : ColorScheme.UNKNOWN;
 	}
 
-	/** Adjust a MULTI string for a DMS */
-	static public String adjustMulti(DMS dms, String multi) {
+	/** Add DMS overrides to a MULTI string */
+	static public String addMultiOverrides(DMS dms, String multi) {
 		ColorScheme scheme = getColorScheme(dms);
 		Font f = dms.getOverrideFont();
 		Integer fg = dms.getOverrideForeground();
 		Integer bg = dms.getOverrideBackground();
 		return (f != null || fg != null || bg != null)
-		      ? adjustMulti(multi, f, scheme, fg, bg)
+		      ? addMultiOverrides(multi, f, scheme, fg, bg)
 		      : multi;
 	}
 
 	/** Adjust a MULTI string with override font / colors */
-	static private String adjustMulti(String multi, Font f,
+	static private String addMultiOverrides(String multi, Font f,
 		ColorScheme scheme, Integer fg, Integer bg)
 	{
 		MultiBuilder mb = new MultiBuilder();
