@@ -238,9 +238,9 @@ public class PropMessages extends JPanel {
 		int ch = sc.getCharHeight();
 		int df = DMSHelper.getDefaultFontNumber(proxy);
 		ColorScheme cs = ColorScheme.fromOrdinal(sc.getColorScheme());
-		RasterBuilder b = new RasterBuilder(w, h, cw, ch, df, cs);
+		RasterBuilder rb = new RasterBuilder(w, h, cw, ch, df, cs);
 		try {
-			return b.createPixmaps(ms);
+			return rb.createPixmaps(ms);
 		}
 		catch (InvalidMsgException e) {
 			return null;

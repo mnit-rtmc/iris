@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2018  Minnesota Department of Transportation
+ * Copyright (C) 2013-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -101,7 +101,7 @@ public class WarningDms {
 	/** Update the DMS */
 	private void updateDms(DMS d) {
 		pix_pnl.setFilterColor(filterColor(d));
-		RasterGraphic[] rg = DMSHelper.getRasters(d);
+		RasterGraphic[] rg = DMSHelper.createRasters(d);
 		if (rg != null) {
 			String ms = DMSHelper.getMultiString(d);
 			pix_pnl.setDimensions(d.getSignConfig());

@@ -286,26 +286,14 @@ public class SingleSignTab extends IPanel {
 
 	/** Get pixmaps for the preview message */
 	private RasterGraphic[] getPreviewPixmaps(DMS dms, String ms) {
-		RasterBuilder b = DMSHelper.createRasterBuilder(dms);
-		if (b != null) {
-			try {
-				return b.createPixmaps(new MultiString(ms));
-			}
-			catch (IndexOutOfBoundsException e) {
-				// pixmap too small for message
-			}
-			catch (InvalidMsgException e) {
-				// most likely a MultiSyntaxError ...
-			}
-		}
-		return null;
+		return DMSHelper.createRasters(dms, ms);
 	}
 
 	/** Update the current panel */
 	private DMSPanelPager createCurrentPager(DMS dms,
 		SignPixelPanel pix_pnl)
 	{
-		RasterGraphic[] rg = DMSHelper.getRasters(dms);
+		RasterGraphic[] rg = DMSHelper.createRasters(dms);
 		if (rg != null) {
 			String ms = DMSHelper.getMultiString(dms);
 			return new DMSPanelPager(pix_pnl, rg, ms);

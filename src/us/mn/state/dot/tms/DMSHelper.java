@@ -263,14 +263,14 @@ public class DMSHelper extends BaseHelper {
 	static public RasterBuilder createRasterBuilder(DMS dms) {
 		SignConfig sc = dms.getSignConfig();
 		if (sc != null) {
-			int w = sc.getPixelWidth();
-			int h = sc.getPixelHeight();
+			int pw = sc.getPixelWidth();
+			int ph = sc.getPixelHeight();
 			int cw = sc.getCharWidth();
 			int ch = sc.getCharHeight();
 			int f = getFontNumber(dms);
 			ColorScheme cs = ColorScheme.fromOrdinal(
 				sc.getColorScheme());
-			return new RasterBuilder(w, h, cw, ch, f, cs);
+			return new RasterBuilder(pw, ph, cw, ch, f, cs);
 		} else
 			return null;
 	}
@@ -346,31 +346,15 @@ public class DMSHelper extends BaseHelper {
 			return null;
 	}
 
-	/** Create pixmap graphics for a DMS.
-	 * @param dms The sign.
-	 * @param ms Message MULTI string.
-	 * @return Array of bitmap graphics for the sign, or null.
-	 * @throws InvalidMsgException if MULTI string is invalid. */
-	static public RasterGraphic[] createPixmaps(DMS dms, MultiString ms)
-		throws InvalidMsgException
-	{
-		RasterBuilder rb = createRasterBuilder(dms);
-		if (rb != null)
-			return rb.createPixmaps(ms);
-		else
-			return null;
-	}
-
 	/** Get the current raster graphic for page one of the specified DMS.
 	 * @param dms The sign.
 	 * @return RasterGraphic for page one, or null on error.
 	 */
 	static public RasterGraphic getPageOne(DMS dms) {
-		RasterGraphic[] rasters = getRasters(dms);
-		if (rasters != null && rasters.length > 0)
-			return rasters[0];
-		else
-			return null;
+		RasterGraphic[] rasters = createRasters(dms);
+		return (rasters != null && rasters.length > 0)
+		      ? rasters[0]
+		      : null;
 	}
 
 	/** Create the page one raster graphic for a DMS with a MULTI string.
@@ -378,22 +362,21 @@ public class DMSHelper extends BaseHelper {
 	 * @param multi MULTI string.
 	 * @return RasterGraphic for page one, or null on error. */
 	static public RasterGraphic createPageOne(DMS dms, String multi) {
-		RasterGraphic[] rasters = getRasters(dms, multi);
-		if (rasters != null && rasters.length > 0)
-			return rasters[0];
-		else
-			return null;
+		RasterGraphic[] rasters = createRasters(dms, multi);
+		return (rasters != null && rasters.length > 0)
+		      ? rasters[0]
+		      : null;
 	}
 
 	/** Get the current raster graphics for all pages of the specified DMS.
 	 * @param dms Sign in question.
 	 * @return RasterGraphic array, one for each page, or null on error.
 	 */
-	static public RasterGraphic[] getRasters(DMS dms) {
+	static public RasterGraphic[] createRasters(DMS dms) {
 		if (dms != null) {
 			SignMessage sm = dms.getMsgCurrent();
 			if (sm != null)
-				return getRasters(dms, sm.getMulti());
+				return createRasters(dms, sm.getMulti());
 		}
 		return null;
 	}
@@ -403,7 +386,7 @@ public class DMSHelper extends BaseHelper {
 	 * @param multi MULTI string.
 	 * @return RasterGraphic array, one for each page, or null on error.
 	 */
-	static private RasterGraphic[] getRasters(DMS dms, String multi) {
+	static public RasterGraphic[] createRasters(DMS dms, String multi) {
 		RasterBuilder rb = createRasterBuilder(dms);
 		return (rb != null) ? createRasters(rb, multi) : null;
 	}
@@ -417,7 +400,12 @@ public class DMSHelper extends BaseHelper {
 		try {
 			return rb.createPixmaps(new MultiString(multi));
 		}
+		catch (IndexOutOfBoundsException e) {
+			// dimensions too small for message
+			return null;
+		}
 		catch (InvalidMsgException e) {
+			// most likely a MultiSyntaxError ...
 			return null;
 		}
 	}
