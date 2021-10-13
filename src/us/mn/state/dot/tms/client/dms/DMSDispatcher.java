@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
+import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.RasterGraphic;
@@ -223,21 +224,6 @@ public class DMSDispatcher extends JPanel {
 		return null;
 	}
 
-	/** Get the finished MULTI string (with combining quick message) */
-	private String getFinishedMulti(DMS dms) {
-		String ms = getComposedMulti(dms);
-		if (new MultiString(ms).isBlank()) {
-			String quick = getQuickMsg();
-			if (quick != null)
-				return quick;
-		} else {
-			String quick = getQuickMsgFirst();
-			if (quick != null)
-				return makeCombined(quick, ms);
-		}
-		return ms;
-	}
-
 	/** Get quick message */
 	private String getQuickMsg() {
 		QuickMessage qm = quick_msg;
@@ -348,37 +334,59 @@ public class DMSDispatcher extends JPanel {
 		selectPreview(false);
 	}
 
-	/** Create a new message from the widgets.
+	/** Create a new message for the specified sign.
 	 * @return A SignMessage from composer selection, or null on error. */
 	private SignMessage createMessage(DMS dms) {
-		return createMessage(dms, incident, getFinishedMulti(dms));
-	}
-
-	/** Create a new message using the specified MULTI */
-	private SignMessage createMessage(DMS dms, Incident inc, String ms) {
 		SignConfig sc = dms.getSignConfig();
-		if (sc != null) {
-			if (ms.length() > 0)
-				return createMessage(sc, inc, ms);
-			else
-				return creator.createBlankMessage(sc);
-		} else
+		if (sc == null)
 			return null;
+		String ms = getComposedMulti(dms);
+		QuickMessage qm = quick_msg;
+		if (new MultiString(ms).isBlank()) {
+			if (qm != null) {
+				String quick = qm.getMulti();
+				MsgCombining mc = MsgCombining.fromOrdinal(
+					qm.getMsgCombining());
+				return createMessage(sc, quick, mc);
+			} else
+				return creator.createBlankMessage(sc);
+		} else {
+			if (QuickMessageHelper.isMsgCombiningFirst(qm)) {
+				String quick = qm.getMulti();
+				String combined = makeCombined(quick, ms);
+				// Does combined message fit?
+				if (DMSHelper.createRasters(dms, combined)
+				    != null)
+				{
+					MsgCombining mc = MsgCombining.DISABLE;
+					return createMessage(sc, combined, mc);
+				}
+			}
+		}
+		MsgCombining mc = MsgCombining.EITHER;
+		Incident inc = incident;
+		return (inc != null)
+		      ? createMessage(sc, incident, ms, mc)
+		      : createMessage(sc, ms, mc);
 	}
 
 	/** Create a new message using the specified MULTI */
-	private SignMessage createMessage(SignConfig sc, Incident inc,
-		String ms)
+	private SignMessage createMessage(SignConfig sc, String ms,
+		MsgCombining mc)
 	{
 		Integer d = composer.getDuration();
-		if (inc != null) {
-			String inc_orig = IncidentHelper.getOriginalName(inc);
-			DmsMsgPriority prio = IncidentHelper.getPriority(inc);
-			return creator.create(sc, inc_orig, ms, prio, d);
-		} else {
-			boolean be = composer.isBeaconEnabled();
-			return creator.create(sc, ms, be, d);
-		}
+		boolean be = composer.isBeaconEnabled();
+		return creator.create(sc, ms, be, mc, d);
+	}
+
+	/** Create a new message linked to an incident */
+	private SignMessage createMessage(SignConfig sc, Incident inc,
+		String ms, MsgCombining mc)
+	{
+		String inc_orig = IncidentHelper.getOriginalName(inc);
+		DmsMsgPriority prio = IncidentHelper.getPriority(inc);
+		Integer d = composer.getDuration();
+		return creator.create(sc, inc_orig, ms, prio, d);
 	}
 
 	/** Blank the select DMS */

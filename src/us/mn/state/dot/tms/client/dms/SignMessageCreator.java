@@ -78,13 +78,14 @@ public class SignMessageCreator {
 	 * @param sc Sign configuration.
 	 * @param multi MULTI text.
 	 * @param be Beacon enabled.
+	 * @param mc Message combining.
 	 * @param duration Message duration; null for indefinite.
 	 * @return New sign message, or null on error.
 	 */
 	public SignMessage create(SignConfig sc, String multi, boolean be,
-		Integer duration)
+		MsgCombining mc, Integer duration)
 	{
-		return create(sc, null, multi, be, DmsMsgPriority.OPERATOR,
+		return create(sc, null, multi, be, mc, DmsMsgPriority.OPERATOR,
 			SignMsgSource.operator.bit(), user, duration);
 	}
 
@@ -93,8 +94,9 @@ public class SignMessageCreator {
 	 * @return Blank sign message, or null on error.
 	 */
 	public SignMessage createBlankMessage(SignConfig sc) {
-		return create(sc, null, "", false, DmsMsgPriority.BLANK,
-			SignMsgSource.blank.bit(), null, null);
+		return create(sc, null, "", false, MsgCombining.DISABLE,
+			DmsMsgPriority.BLANK, SignMsgSource.blank.bit(), null,
+			null);
 	}
 
 	/** Create an incident sign message.
@@ -110,8 +112,9 @@ public class SignMessageCreator {
 		DmsMsgPriority mp, Integer duration)
 	{
 		if (multi.length() > 0) {
-			return create(sc, inc, multi, false, mp, INCIDENT_SRC,
-				user, duration);
+			return create(sc, inc, multi, false,
+				MsgCombining.EITHER, mp, INCIDENT_SRC, user,
+				duration);
 		} else
 			return createBlankMessage(sc);
 	}
@@ -122,6 +125,7 @@ public class SignMessageCreator {
 	 * @param inc Associated incident (original name).
 	 * @param multi MULTI text.
 	 * @param be Beacon enabled.
+	 * @param mc Message combining.
 	 * @param mp Message priority.
 	 * @param src Sign message source bits.
 	 * @param owner User name.
@@ -129,12 +133,11 @@ public class SignMessageCreator {
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage create(SignConfig sc, String inc, String multi,
-		boolean be, DmsMsgPriority mp, int src, String owner,
-		Integer duration)
+		boolean be, MsgCombining mc, DmsMsgPriority mp, int src,
+		String owner, Integer duration)
 	{
-		int mc = MsgCombining.EITHER.ordinal();
-		SignMessage sm = SignMessageHelper.find(sc, inc, multi, be, mc,
-			mp, src, owner, duration);
+		SignMessage sm = SignMessageHelper.find(sc, inc, multi, be,
+			mc.ordinal(), mp, src, owner, duration);
 		String prefix = createPrefix(src);
 		if (sm != null && sm.getName().startsWith(prefix))
 			return sm;
@@ -161,7 +164,7 @@ public class SignMessageCreator {
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage create(String name, SignConfig sc, String inc,
-		String multi, boolean be, int mc, DmsMsgPriority mp,
+		String multi, boolean be, MsgCombining mc, DmsMsgPriority mp,
 		int src, String owner, Integer duration)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
@@ -170,7 +173,7 @@ public class SignMessageCreator {
 			attrs.put("incident", inc);
 		attrs.put("multi", multi);
 		attrs.put("beacon_enabled", be);
-		attrs.put("msg_combining", mc);
+		attrs.put("msg_combining", mc.ordinal());
 		attrs.put("msg_priority", Integer.valueOf(mp.ordinal()));
 		attrs.put("source", Integer.valueOf(src));
 		if (owner != null)
