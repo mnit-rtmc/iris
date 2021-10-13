@@ -1183,8 +1183,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		SignMessage sched)
 	{
 		String inc = user.getIncident();
+		Font of = getOverrideFont();
+		Integer f_num = (of != null) ? of.getNumber() : null;
 		String ms = MultiString.makeCombined(sched.getMulti(),
-			user.getMulti());
+			user.getMulti(), f_num);
 		boolean be = user.getBeaconEnabled();
 		int mc = MsgCombining.DISABLE.ordinal();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(

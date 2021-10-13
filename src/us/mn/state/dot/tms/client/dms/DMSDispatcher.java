@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
+import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.MsgCombining;
@@ -183,28 +184,30 @@ public class DMSDispatcher extends JPanel {
 
 	/** Get the preview MULTI string */
 	public String getPreviewMulti(DMS dms, boolean combining) {
+		Font of = dms.getOverrideFont();
+		Integer f_num = (of != null) ? of.getNumber() : null;
 		String ms = getComposedMulti(dms);
 		if (new MultiString(ms).isBlank())
-			return getPreviewBlank(combining);
+			return getPreviewBlank(f_num, combining);
 		if (combining) {
-			String sched = getSchedCombining();
-			if (sched != null)
-				return makeCombined(sched, ms);
 			String quick = getQuickMsgFirst();
 			if (quick != null)
-				return makeCombined(quick, ms);
+				return makeCombined(quick, ms, f_num);
+			String sched = getSchedCombining();
+			if (sched != null)
+				return makeCombined(sched, ms, f_num);
 		}
 		return ms;
 	}
 
 	/** Get preview with blank composed message */
-	private String getPreviewBlank(boolean combining) {
+	private String getPreviewBlank(Integer f_num, boolean combining) {
 		String quick = getQuickMsg();
 		if (combining) {
 			String quick2 = getQuickMsgSecond();
 			String sched = getSchedCombining();
 			if (quick2 != null && sched != null)
-				return makeCombined(sched, quick2);
+				return makeCombined(sched, quick2, f_num);
 			else if (quick != null)
 				return quick;
 			else if (sched != null)
@@ -352,8 +355,12 @@ public class DMSDispatcher extends JPanel {
 				return creator.createBlankMessage(sc);
 		} else {
 			if (QuickMessageHelper.isMsgCombiningFirst(qm)) {
+				Font of = dms.getOverrideFont();
+				Integer f_num = (of != null)
+					? of.getNumber()
+					: null;
 				String quick = qm.getMulti();
-				String combined = makeCombined(quick, ms);
+				String combined = makeCombined(quick, ms, f_num);
 				// Does combined message fit?
 				if (DMSHelper.createRasters(dms, combined)
 				    != null)
