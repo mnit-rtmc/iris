@@ -29,6 +29,18 @@ import us.mn.state.dot.tms.TMSException;
  */
 public class CabinetStyleImpl extends BaseObjectImpl implements CabinetStyle {
 
+	/** Check for valid pin value */
+	static private void checkPin(Integer p) throws ChangeVetoException {
+		if (p != null && (p < 1 || p > 104))
+			throw new ChangeVetoException("Invalid pin");
+	}
+
+	/** Check for valid dip setting */
+	static private void checkDip(Integer d) throws ChangeVetoException {
+		if (d != null && d < 0)
+			throw new ChangeVetoException("Invalid DIP");
+	}
+
 	/** Load all the cabinet styles */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CabinetStyleImpl.class);
@@ -90,9 +102,8 @@ public class CabinetStyleImpl extends BaseObjectImpl implements CabinetStyle {
 
 	/** Set the police panel input pin for meter 1 */
 	public void doSetPolicePanelPin1(Integer p) throws TMSException {
-		if (p < 1 || p > 104)
-			throw new ChangeVetoException("Invalid pin");
-		if (p != police_panel_pin_1) {
+		checkPin(p);
+		if (!objectEquals(p, police_panel_pin_1)) {
 			store.update(this, "police_panel_pin_1", p);
 			setPolicePanelPin1(p);
 		}
@@ -115,9 +126,8 @@ public class CabinetStyleImpl extends BaseObjectImpl implements CabinetStyle {
 
 	/** Set the police panel input pin for meter 2 */
 	public void doSetPolicePanelPin2(Integer p) throws TMSException {
-		if (p < 1 || p > 104)
-			throw new ChangeVetoException("Invalid pin");
-		if (p != police_panel_pin_2) {
+		checkPin(p);
+		if (!objectEquals(p, police_panel_pin_2)) {
 			store.update(this, "police_panel_pin_2", p);
 			setPolicePanelPin2(p);
 		}
@@ -140,9 +150,8 @@ public class CabinetStyleImpl extends BaseObjectImpl implements CabinetStyle {
 
 	/** Set the watchdog reset pin for meter 1 */
 	public void doSetWatchdogResetPin1(Integer p) throws TMSException {
-		if (p < 1 || p > 104)
-			throw new ChangeVetoException("Invalid pin");
-		if (p != watchdog_reset_pin_1) {
+		checkPin(p);
+		if (!objectEquals(p, watchdog_reset_pin_1)) {
 			store.update(this, "watchdog_reset_pin_1", p);
 			setWatchdogResetPin1(p);
 		}
@@ -165,9 +174,8 @@ public class CabinetStyleImpl extends BaseObjectImpl implements CabinetStyle {
 
 	/** Set the watchdog reset pin for meter 2 */
 	public void doSetWatchdogResetPin2(Integer p) throws TMSException {
-		if (p < 1 || p > 104)
-			throw new ChangeVetoException("Invalid pin");
-		if (p != watchdog_reset_pin_2) {
+		checkPin(p);
+		if (!objectEquals(p, watchdog_reset_pin_2)) {
 			store.update(this, "watchdog_reset_pin_2", p);
 			setWatchdogResetPin2(p);
 		}
@@ -190,21 +198,11 @@ public class CabinetStyleImpl extends BaseObjectImpl implements CabinetStyle {
 
 	/** Set the DIP switch setting */
 	public void doSetDip(Integer d) throws TMSException {
-		d = checkDip(d);
-		if (d < 0)
-			throw new ChangeVetoException("Invalid DIP");
-		if (d != dip) {
+		checkDip(d);
+		if (!objectEquals(d, dip)) {
 			store.update(this, "dip", d);
 			setDip(d);
 		}
-	}
-
-	/** Check for special null dip setting */
-	private Integer checkDip(Integer d) {
-		if (d != null && d == 0 && !name.equals("336"))
-			return null;
-		else
-			return d;
 	}
 
 	/** Get the DIP switch setting */

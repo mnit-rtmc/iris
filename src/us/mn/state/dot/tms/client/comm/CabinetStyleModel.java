@@ -34,6 +34,16 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 
+	/** Get a positive integer value, or null */
+	static private Integer positiveInt(Object value) {
+		if (value instanceof Integer) {
+			int v = (Integer) value;
+			if (v > 0)
+				return v;
+		}
+		return null;
+	}
+
 	/** Create a proxy descriptor */
 	static public ProxyDescriptor<CabinetStyle> descriptor(Session s) {
 		return new ProxyDescriptor<CabinetStyle>(
@@ -62,8 +72,7 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 				return canWrite(cs);
 			}
 			public void setValueAt(CabinetStyle cs, Object value) {
-				if (value instanceof Integer)
-					cs.setPolicePanelPin1((Integer) value);
+				cs.setPolicePanelPin1(positiveInt(value));
 			}
 			protected TableCellEditor createCellEditor() {
 				return new PinEditor();
@@ -79,15 +88,14 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 				return canWrite(cs);
 			}
 			public void setValueAt(CabinetStyle cs, Object value) {
-				if (value instanceof Integer)
-					cs.setPolicePanelPin2((Integer) value);
+				cs.setPolicePanelPin2(positiveInt(value));
 			}
 			protected TableCellEditor createCellEditor() {
 				return new PinEditor();
 			}
 		});
 		cols.add(new ProxyColumn<CabinetStyle>(
-			"cabinet.style.watchdog.reset.pin.1", 90)
+			"cabinet.style.watchdog.reset.pin.1", 100)
 		{
 			public Object getValueAt(CabinetStyle cs) {
 				return cs.getWatchdogResetPin1();
@@ -96,15 +104,14 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 				return canWrite(cs);
 			}
 			public void setValueAt(CabinetStyle cs, Object value) {
-				if (value instanceof Integer)
-					cs.setWatchdogResetPin1((Integer)value);
+				cs.setWatchdogResetPin1(positiveInt(value));
 			}
 			protected TableCellEditor createCellEditor() {
 				return new PinEditor();
 			}
 		});
 		cols.add(new ProxyColumn<CabinetStyle>(
-			"cabinet.style.watchdog.reset.pin.2", 90)
+			"cabinet.style.watchdog.reset.pin.2", 100)
 		{
 			public Object getValueAt(CabinetStyle cs) {
 				return cs.getWatchdogResetPin2();
@@ -113,8 +120,7 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 				return canWrite(cs);
 			}
 			public void setValueAt(CabinetStyle cs, Object value) {
-				if (value instanceof Integer)
-					cs.setWatchdogResetPin2((Integer)value);
+				cs.setWatchdogResetPin2(positiveInt(value));
 			}
 			protected TableCellEditor createCellEditor() {
 				return new PinEditor();
@@ -148,13 +154,14 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 		implements TableCellEditor
 	{
 		private final SpinnerNumberModel model =
-			new SpinnerNumberModel(1, 1, 104, 1);
+			new SpinnerNumberModel(1, 0, 104, 1);
 		private final JSpinner spinner = new JSpinner(model);
 
 		public Component getTableCellEditorComponent(JTable table,
 			Object value, boolean isSelected, int row, int column)
 		{
-			spinner.setValue((value != null) ? value : 0);
+			Integer v = positiveInt(value);
+			spinner.setValue((v != null) ? v : 0);
 			return spinner;
 		}
 		public Object getCellEditorValue() {
