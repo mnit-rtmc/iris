@@ -510,7 +510,7 @@ public class MultiStringTest extends TestCase {
 	}
 
 	private void checkCombine(String ms1, String ms2, String rs) {
-		assertTrue(MultiString.makeCombined(ms1, ms2).equals(rs));
+		assertTrue(MultiString.makeCombined(ms1, ms2, null).equals(rs));
 	}
 
 	public void testGetFonts() {
