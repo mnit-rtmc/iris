@@ -359,6 +359,8 @@ public class MultiRenderer extends MultiAdapter {
 		renderText();
 		tr_x = x;
 		tr_y = y;
+		if (tr_x < 1 || tr_y < 1)
+			syntax_err = MultiSyntaxError.unsupportedTagValue;
 		if (w == 0)
 			w = raster.getWidth() - (x - 1);
 		if (h == 0)
