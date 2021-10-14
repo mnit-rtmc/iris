@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.util.Collection;
 import java.util.Comparator;
@@ -563,9 +564,15 @@ abstract public class BasePoller implements DevicePoller {
 	private void updateInterest(int ops) {
 		synchronized (tx_buf) {
 			if (skey != null) {
-				if (!isConnecting())
-					skey.interestOps(ops);
-				skey.selector().wakeup();
+				try {
+					if (!isConnecting())
+						skey.interestOps(ops);
+					skey.selector().wakeup();
+				}
+				catch (CancelledKeyException e) {
+					closeChannel(skey);
+					skey = null;
+				}
 			}
 		}
 	}
