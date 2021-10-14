@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.OpStep;
  *
  * @author Douglas Lau
  */
-public class OpDetConfigQuery extends OpStep {
+public class OpDetConfigQuery extends OpNatch {
 
 	/** Message ID counter */
 	private final Counter counter;
@@ -34,9 +34,6 @@ public class OpDetConfigQuery extends OpStep {
 
 	/** Is store needed? */
 	private boolean store = false;
-
-	/** Was successfully received */
-	private boolean success = false;
 
 	/** Create a new detector config query step */
 	public OpDetConfigQuery(Counter c, int dn) {
@@ -59,7 +56,7 @@ public class OpDetConfigQuery extends OpStep {
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeQuery(op, rx_buf);
 		if (prop.isPinCorrect(op))
-			success = true;
+			setDone(true);
 		else {
 			store = true;
 			setPolling(true);
@@ -69,7 +66,7 @@ public class OpDetConfigQuery extends OpStep {
 	/** Get the next step */
 	@Override
 	public OpStep next() {
-		if (success) {
+		if (done) {
 			int dn = prop.detector_num + 1;
 			return (dn < 32)
 			      ? new OpDetConfigQuery(counter, dn)

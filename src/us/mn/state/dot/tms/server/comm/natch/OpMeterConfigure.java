@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.OpStep;
  *
  * @author Douglas Lau
  */
-public class OpMeterConfigure extends OpStep {
+public class OpMeterConfigure extends OpNatch {
 
 	/** Message ID counter */
 	private final Counter counter;
@@ -35,9 +35,6 @@ public class OpMeterConfigure extends OpStep {
 
 	/** Meter config property */
 	private final MeterConfigProp prop;
-
-	/** Was successfully received */
-	private boolean success = false;
 
 	/** Create a new configure ramp meter step */
 	public OpMeterConfigure(Counter c, RampMeterImpl m) {
@@ -57,12 +54,12 @@ public class OpMeterConfigure extends OpStep {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeStore(op, rx_buf);
-		success = true;
+		setDone(true);
 	}
 
 	/** Get the next step */
 	@Override
 	public OpStep next() {
-		return success ? new OpMeterTiming(counter, meter, 0) : this;
+		return done ? new OpMeterTiming(counter, meter, 0) : this;
 	}
 }

@@ -19,14 +19,13 @@ import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
-import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
  * Step to query a police panel switch
  *
  * @author Douglas Lau
  */
-public class OpQueryPolicePanel extends OpStep {
+public class OpQueryPolicePanel extends OpNatch {
 
 	/** Ramp meter device */
 	private final RampMeterImpl meter;
@@ -34,24 +33,23 @@ public class OpQueryPolicePanel extends OpStep {
 	/** Pin status property */
 	private final PinStatusProp prop;
 
-	/** Was successfully received */
-	private boolean success = false;
-
 	/** Create a new query police panel step */
 	public OpQueryPolicePanel(Counter c, RampMeterImpl m) {
 		meter = m;
 		Integer pin = RampMeterHelper.lookupPolicePanelPin(m);
 		// Don't query if no PP pin for the cabinet style
 		if (pin == null)
-			success = true;
+			setDone(true);
 		prop = new PinStatusProp(c, (pin != null) ? pin : 0);
 	}
 
 	/** Poll the controller */
 	@Override
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
-		prop.encodeQuery(op, tx_buf);
-		setPolling(false);
+		if (!done) {
+			prop.encodeQuery(op, tx_buf);
+			setPolling(false);
+		}
 	}
 
 	/** Parse data received from controller */
@@ -59,12 +57,6 @@ public class OpQueryPolicePanel extends OpStep {
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeQuery(op, rx_buf);
 		meter.setPolicePanel(prop.getStatus());
-		success = true;
-	}
-
-	/** Get the next step */
-	@Override
-	public OpStep next() {
-		return success ? null : this;
+		setDone(true);
 	}
 }

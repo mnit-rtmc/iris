@@ -18,23 +18,19 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
-import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
  * Step to send ramp meter status
  *
  * @author Douglas Lau
  */
-public class OpSendMeterStatus extends OpStep {
+public class OpSendMeterStatus extends OpNatch {
 
 	/** Ramp meter device */
 	private final RampMeterImpl meter;
 
 	/** Meter status property */
 	private final MeterStatusProp prop;
-
-	/** Was successfully received */
-	private boolean success = false;
 
 	/** Create a new send meter status step */
 	public OpSendMeterStatus(Counter c, RampMeterImpl m, Integer rate) {
@@ -60,12 +56,6 @@ public class OpSendMeterStatus extends OpStep {
 			? RedTime.toReleaseRate(red)
 			: null;
 		meter.setRateNotify(rate);
-		success = true;
-	}
-
-	/** Get the next step */
-	@Override
-	public OpStep next() {
-		return success ? null : this;
+		setDone(true);
 	}
 }

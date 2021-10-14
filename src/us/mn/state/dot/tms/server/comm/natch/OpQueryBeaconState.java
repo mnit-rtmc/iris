@@ -18,23 +18,19 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
-import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
  * Step to query a beacon
  *
  * @author Douglas Lau
  */
-public class OpQueryBeaconState extends OpStep {
+public class OpQueryBeaconState extends OpNatch {
 
 	/** Beacon device */
 	private final BeaconImpl beacon;
 
 	/** Pin status property */
 	private final PinStatusProp prop;
-
-	/** Was successfully received */
-	private boolean success = false;
 
 	/** Create a new query beacon state step */
 	public OpQueryBeaconState(Counter c, BeaconImpl b) {
@@ -54,12 +50,6 @@ public class OpQueryBeaconState extends OpStep {
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeQuery(op, rx_buf);
 		beacon.setFlashingNotify(prop.getStatus());
-		success = true;
-	}
-
-	/** Get the next step */
-	@Override
-	public OpStep next() {
-		return success ? null : this;
+		setDone(true);
 	}
 }

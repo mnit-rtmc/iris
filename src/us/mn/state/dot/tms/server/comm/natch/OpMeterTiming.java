@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.server.comm.OpStep;
  *
  * @author Douglas Lau
  */
-public class OpMeterTiming extends OpStep {
+public class OpMeterTiming extends OpNatch {
 
 	/** Message ID counter */
 	private final Counter counter;
@@ -47,9 +47,6 @@ public class OpMeterTiming extends OpStep {
 
 	/** Meter timing property */
 	private final MeterTimingProp prop;
-
-	/** Was successfully received */
-	private boolean success = false;
 
 	/** Create a new ramp meter timing step */
 	public OpMeterTiming(Counter c, RampMeterImpl m, int e) {
@@ -101,13 +98,13 @@ public class OpMeterTiming extends OpStep {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeStore(op, rx_buf);
-		success = true;
+		setDone(true);
 	}
 
 	/** Get the next step */
 	@Override
 	public OpStep next() {
-		if (success) {
+		if (done) {
 			return (entry < 3)
 			      ? new OpMeterTiming(counter, meter, entry + 1)
 			      : new OpMeterWatchdogReset(counter, meter);

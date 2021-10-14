@@ -14,36 +14,31 @@
  */
 package us.mn.state.dot.tms.server.comm.natch;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import us.mn.state.dot.tms.server.comm.Operation;
+import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
- * Step to send system attributes
+ * Step for Natch operations
  *
  * @author Douglas Lau
  */
-public class OpSystemAttributes extends OpNatch {
+abstract public class OpNatch extends OpStep {
 
-	/** System attributes property */
-	private final SystemAttributesProp prop;
+	/** Is step done? */
+	protected boolean done;
 
-	/** Create a new system attributes step */
-	public OpSystemAttributes(Counter c) {
-		prop = new SystemAttributesProp(c);
+	/** Set the step to be done */
+	public void setDone(boolean d) {
+		done = d;
 	}
 
-	/** Poll the controller */
-	@Override
-	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
-		prop.encodeStore(op, tx_buf);
-		setPolling(false);
+	/** Create a new Natch step */
+	protected OpNatch() {
+		done = false;
 	}
 
-	/** Parse data received from controller */
+	/** Get the next step */
 	@Override
-	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
-		prop.decodeStore(op, rx_buf);
-		setDone(true);
+	public OpStep next() {
+		return done ? null : this;
 	}
 }

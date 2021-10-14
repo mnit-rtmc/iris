@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.OpStep;
  *
  * @author Douglas Lau
  */
-public class OpQueryMeterStatus extends OpStep {
+public class OpQueryMeterStatus extends OpNatch {
 
 	/** Message ID counter */
 	private final Counter counter;
@@ -35,9 +35,6 @@ public class OpQueryMeterStatus extends OpStep {
 
 	/** Meter status property */
 	private final MeterStatusProp prop;
-
-	/** Was successfully received */
-	private boolean success = false;
 
 	/** Create a new query meter status step */
 	public OpQueryMeterStatus(Counter c, RampMeterImpl m) {
@@ -62,13 +59,13 @@ public class OpQueryMeterStatus extends OpStep {
 			? RedTime.toReleaseRate(red)
 			: null;
 		meter.setRateNotify(rate);
-		success = true;
+		setDone(true);
 	}
 
 	/** Get the next step */
 	@Override
 	public OpStep next() {
-		if (success) {
+		if (done) {
 			// If red is null, we got an INV response
 			return (prop.getRed() != null)
 			      ? new OpQueryPolicePanel(counter, meter)

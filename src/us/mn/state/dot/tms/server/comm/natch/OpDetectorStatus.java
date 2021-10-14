@@ -17,14 +17,13 @@ package us.mn.state.dot.tms.server.comm.natch;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.server.comm.Operation;
-import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
  * Step to listen for detector status
  *
  * @author Douglas Lau
  */
-public class OpDetectorStatus extends OpStep {
+public class OpDetectorStatus extends OpNatch {
 
 	/** Detector status property */
 	private final DetectorStatusProp prop;
@@ -56,11 +55,5 @@ public class OpDetectorStatus extends OpStep {
 		prop.decodeQuery(op, rx_buf);
 		if (prop.logEvent(op.getController()))
 			setPolling(true);
-	}
-
-	/** Get the next step */
-	@Override
-	public OpStep next() {
-		return this;
 	}
 }

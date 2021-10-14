@@ -19,14 +19,13 @@ import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
-import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
  * Step to reset a ramp meter watchdog
  *
  * @author Douglas Lau
  */
-public class OpMeterWatchdogReset extends OpStep {
+public class OpMeterWatchdogReset extends OpNatch {
 
 	/** Message ID counter */
 	private final Counter counter;
@@ -37,15 +36,12 @@ public class OpMeterWatchdogReset extends OpStep {
 	/** Reset state */
 	private boolean reset = true;
 
-	/** Was successfully received */
-	private boolean success = false;
-
 	/** Create a new ramp meter timing step */
 	public OpMeterWatchdogReset(Counter c, RampMeterImpl m) {
 		counter = c;
 		pin = RampMeterHelper.lookupWatchdogResetPin(m);
 		if (pin == null)
-			success = true;
+			setDone(true);
 	}
 
 	/** Poll the controller */
@@ -63,20 +59,13 @@ public class OpMeterWatchdogReset extends OpStep {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		if (pin != null) {
-			PinStatusProp prop = new PinStatusProp(counter, pin,
-				reset);
+			PinStatusProp prop = new PinStatusProp(counter, pin);
 			prop.decodeStore(op, rx_buf);
 			if (reset) {
 				reset = false;
 				setPolling(true);
 			} else
-				success = true;
+				setDone(true);
 		}
-	}
-
-	/** Get the next step */
-	@Override
-	public OpStep next() {
-		return success ? null : this;
 	}
 }

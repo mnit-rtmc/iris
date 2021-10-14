@@ -17,20 +17,16 @@ package us.mn.state.dot.tms.server.comm.natch;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.server.comm.Operation;
-import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
  * Step to send clock status
  *
  * @author Douglas Lau
  */
-public class OpClockStatus extends OpStep {
+public class OpClockStatus extends OpNatch {
 
 	/** Clock status property */
 	private final ClockStatusProp prop;
-
-	/** Was successfully received */
-	private boolean success = false;
 
 	/** Create a new clock status step */
 	public OpClockStatus(Counter c) {
@@ -48,12 +44,6 @@ public class OpClockStatus extends OpStep {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeStore(op, rx_buf);
-		success = true;
-	}
-
-	/** Get the next step */
-	@Override
-	public OpStep next() {
-		return success ? null : this;
+		setDone(true);
 	}
 }

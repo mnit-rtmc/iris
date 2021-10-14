@@ -24,16 +24,13 @@ import us.mn.state.dot.tms.server.comm.OpStep;
  *
  * @author Douglas Lau
  */
-public class OpDetectorConfigure extends OpStep {
+public class OpDetectorConfigure extends OpNatch {
 
 	/** Message ID counter */
 	private final Counter counter;
 
 	/** Detector config property */
 	private final DetectorConfigProp prop;
-
-	/** Was successfully received */
-	private boolean success = false;
 
 	/** Create a new configure detector step */
 	public OpDetectorConfigure(Counter c, int dn) {
@@ -52,13 +49,13 @@ public class OpDetectorConfigure extends OpStep {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeStore(op, rx_buf);
-		success = true;
+		setDone(true);
 	}
 
 	/** Get the next step */
 	@Override
 	public OpStep next() {
-		if (success) {
+		if (done) {
 			int dn = prop.detector_num + 1;
 			return (dn < 32)
 			      ? new OpDetectorConfigure(counter, dn)
