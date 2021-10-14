@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.OpStep;
  *
  * @author Douglas Lau
  */
-public class OpDetConfigQuery extends OpNatch {
+public class OpQueryDetConfig extends OpNatch {
 
 	/** Message ID counter */
 	private final Counter counter;
@@ -36,7 +36,7 @@ public class OpDetConfigQuery extends OpNatch {
 	private boolean store = false;
 
 	/** Create a new detector config query step */
-	public OpDetConfigQuery(Counter c, int dn) {
+	public OpQueryDetConfig(Counter c, int dn) {
 		counter = c;
 		prop = new DetectorConfigProp(c, dn);
 	}
@@ -69,7 +69,7 @@ public class OpDetConfigQuery extends OpNatch {
 		if (done) {
 			int dn = prop.detector_num + 1;
 			return (dn < 32)
-			      ? new OpDetConfigQuery(counter, dn)
+			      ? new OpQueryDetConfig(counter, dn)
 			      : null;
 		} else
 			return this;
