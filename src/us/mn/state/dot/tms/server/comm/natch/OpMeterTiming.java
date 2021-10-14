@@ -82,11 +82,12 @@ public class OpMeterTiming extends OpStep {
 	/** Poll the controller */
 	@Override
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
+		int red = getRed(start);
 		prop.setEntry(entry);
-		if (stop > start) {
+		if (stop > start && red > 0) {
 			prop.setStart(start);
 			prop.setStop(stop);
-			prop.setRed(getRed(start));
+			prop.setRed(red);
 		} else {
 			prop.setStart(0);
 			prop.setStop(0);

@@ -28,6 +28,8 @@ public class RedTime {
 	 * @param rate Release rate (vehicles per hour).
 	 * @return Red time (tenths of a second). */
 	static public int fromReleaseRate(int rate) {
+		if (rate <= 0)
+			return 0;
 		float secs_per_veh = Interval.HOUR.divide(rate);
 		float green = SystemAttrEnum.METER_GREEN_SECS.getFloat();
 		float yellow = SystemAttrEnum.METER_YELLOW_SECS.getFloat();
