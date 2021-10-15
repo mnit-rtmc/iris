@@ -396,7 +396,7 @@
 
 	<!-- Create an RPM package -->
 	<target name="rpm"
-	        depends="check-rpm,prepare-etc,tarball"
+	        depends="clean,check-rpm,prepare-etc,tarball"
 	        description="Create an RPM package">
 		<mkdir dir="${build.rpm}/BUILD"/>
 		<mkdir dir="${build.rpm}/BUILDROOT"/>
