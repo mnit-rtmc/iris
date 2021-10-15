@@ -34,6 +34,13 @@ public class OpDetectorStatus extends OpNatch {
 		setPolling(false);
 	}
 
+	/** Clear a received error */
+	@Override
+	public void clearError() {
+		// DS not polled, wait for more messages
+		setPolling(false);
+	}
+
 	/** Poll the controller.
 	 *
 	 * For `ds` messages, this serves as an ACK */

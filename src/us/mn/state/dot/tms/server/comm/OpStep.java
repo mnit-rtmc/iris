@@ -42,14 +42,19 @@ abstract public class OpStep {
 		// subclasses may override
 	}
 
-	/** Is this step waiting indefinitely */
-	public boolean isWaitingIndefinitely() {
-		return false;
-	}
-
 	/** Parse data received from controller */
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		// subclasses may override
+	}
+
+	/** Clear a received error */
+	public void clearError() {
+		setPolling(true);
+	}
+
+	/** Is this step waiting indefinitely */
+	public boolean isWaitingIndefinitely() {
+		return false;
 	}
 
 	/** Get the next step */

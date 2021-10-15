@@ -169,13 +169,6 @@ public final class Operation implements Comparable<Operation> {
 		return (s != null) && s.isPolling();
 	}
 
-	/** Set the polling flag */
-	private void setPolling(boolean p) {
-		OpStep s = step;
-		if (s != null)
-			s.setPolling(p);
-	}
-
 	/** Priority of the operation */
 	private PriorityLevel priority = PriorityLevel.DEVICE_DATA;
 
@@ -289,8 +282,6 @@ public final class Operation implements Comparable<Operation> {
 
 	/** Handle an IO event */
 	public void handleEvent(EventType et, String msg) {
-		// Poll failed -- try again
-		setPolling(true);
 		controller.logCommEvent(et, getId(), filterMsg(msg));
 		if (!retry())
 			setFailed();
@@ -301,6 +292,9 @@ public final class Operation implements Comparable<Operation> {
 
 	/** Check if the operation should be retried */
 	private boolean retry() {
+		OpStep s = step;
+		if (s != null)
+			s.clearError();
 		error_cnt++;
 		return error_cnt < getRetryThreshold();
 	}
