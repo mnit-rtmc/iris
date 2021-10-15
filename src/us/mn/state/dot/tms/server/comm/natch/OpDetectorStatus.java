@@ -60,7 +60,7 @@ public class OpDetectorStatus extends OpNatch {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeQuery(op, rx_buf);
-		if (prop.logEvent(op.getController()))
+		if (prop.logEvent(op))
 			setPolling(true);
 	}
 }

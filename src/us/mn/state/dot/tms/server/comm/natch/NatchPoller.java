@@ -100,7 +100,7 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 		if (c.getPollPeriodSec() == p) {
 			Operation ds = getDetectorStatusOp(c);
 			if (ds != null)
-				updateCounters(c, ds, p);
+				binEventData(c, ds, p);
 		} else {
 			// Long polling period, check detector configs
 			Operation op = new Operation("detector.op.query.config",
@@ -110,13 +110,12 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 		}
 	}
 
-	/** Update the controller operation counters */
-	private void updateCounters(ControllerImpl c, Operation ds, int p) {
-		boolean s = ds.isSuccess();
+	/** Bin detection event data */
+	private void binEventData(ControllerImpl c, Operation ds, int p) {
+		boolean s = isConnected() && !c.isFailed();
 		if (!s)
 			c.logGap();
 		c.binEventData(p, s);
-		c.completeOperation(ds.getId(), s);
 	}
 
 	/** Get detector status operation for a controller */

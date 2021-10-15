@@ -75,12 +75,14 @@ public class DetectorStatusProp extends DetectorProp {
 	private long stamp;
 
 	/** Log vehicle event */
-	public boolean logEvent(ControllerImpl ctrl) {
+	public boolean logEvent(Operation op) {
+		ControllerImpl ctrl = op.getController();
 		int pin = lookupPin(ctrl);
 		if (pin > 0 && stamp > 0) {
 			DetectorImpl det = ctrl.getDetectorAtPin(pin);
 			if (det != null) {
 				det.logVehicle(duration, headway, stamp, 0, 0);
+				ctrl.completeOperation(op.getId(), true);
 				return true;
 			}
 		}
