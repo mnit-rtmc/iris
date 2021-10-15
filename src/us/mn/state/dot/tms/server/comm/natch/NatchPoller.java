@@ -123,8 +123,8 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 	private synchronized Operation getDetectorStatusOp(ControllerImpl c) {
 		final Operation ds = collectors.get(c);
 		if (ds == null || ds.isDone()) {
-			Operation op = new Operation("detector.op.query.data",
-				c, new OpDetectorStatus(counter));
+			Operation op = new Operation("detector.op.status", c,
+				new OpDetectorStatus(counter));
 			op.setPriority(PriorityLevel.DEVICE_DATA);
 			collectors.put(c, op);
 			addOp(op);
