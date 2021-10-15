@@ -310,19 +310,26 @@ abstract public class BasePoller implements DevicePoller {
 			// This should never happen
 			elog("ERR RECV " + op);
 		}
-		scheduleTimeout(op);
+		scheduleTimeout();
 	}
 
-	/** Schedule timeout of operation */
-	private void scheduleTimeout(final Operation op) {
+	/** Schedule a timeout check */
+	private void scheduleTimeout() {
 		COMM.addJob(new Job(timeout_ms) {
 			@Override public String getName() {
 				return "scheduleTimeout";
 			}
 			@Override public void perform() {
-				checkTimeout(op);
+				checkTimeout();
 			}
 		});
+	}
+
+	/** Check if the first operation has timed out */
+	private void checkTimeout() {
+		Iterator<Operation> it = r_queue.iterator();
+		if (it.hasNext())
+			checkTimeout(it.next());
 	}
 
 	/** Check if an operation has timed out */
