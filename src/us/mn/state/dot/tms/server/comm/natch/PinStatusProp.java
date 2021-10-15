@@ -36,6 +36,11 @@ public class PinStatusProp extends NatchProp {
 		return status;
 	}
 
+	/** Set the pin status */
+	public void setStatus(boolean s) {
+		status = s;
+	}
+
 	/** Create a new pin status property */
 	public PinStatusProp(Counter c, int p, boolean st) {
 		super(c);

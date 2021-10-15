@@ -33,13 +33,14 @@ public class OpMeterWatchdogReset extends OpNatch {
 	/** Watchdog reset pin */
 	private final Integer pin;
 
-	/** Reset state */
-	private boolean reset = true;
+	/** Pin status property */
+	private final PinStatusProp prop;
 
 	/** Create a new ramp meter timing step */
 	public OpMeterWatchdogReset(Counter c, RampMeterImpl m) {
 		counter = c;
 		pin = RampMeterHelper.lookupWatchdogResetPin(m);
+		prop = new PinStatusProp(c, (pin != null) ? pin : 0, true);
 		if (pin == null)
 			setDone(true);
 	}
@@ -48,8 +49,6 @@ public class OpMeterWatchdogReset extends OpNatch {
 	@Override
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
 		if (pin != null) {
-			PinStatusProp prop = new PinStatusProp(counter, pin,
-				reset);
 			prop.encodeStore(op, tx_buf);
 			setPolling(false);
 		}
@@ -59,10 +58,9 @@ public class OpMeterWatchdogReset extends OpNatch {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		if (pin != null) {
-			PinStatusProp prop = new PinStatusProp(counter, pin);
 			prop.decodeStore(op, rx_buf);
-			if (reset) {
-				reset = false;
+			if (prop.getStatus()) {
+				prop.setStatus(false);
 				setPolling(true);
 			} else
 				setDone(true);
