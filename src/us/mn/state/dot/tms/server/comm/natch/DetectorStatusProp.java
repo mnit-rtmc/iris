@@ -55,6 +55,9 @@ public class DetectorStatusProp extends DetectorProp {
 		return 0;
 	}
 
+	/** Received Message ID */
+	private String received_id;
+
 	/** Duration (ms) */
 	private int duration;
 
@@ -92,6 +95,14 @@ public class DetectorStatusProp extends DetectorProp {
 	/** Create a new detector status property */
 	public DetectorStatusProp(Counter c) {
 		super(c, -1);
+		received_id = message_id;
+	}
+
+	/** Check received message ID */
+	@Override
+	protected boolean checkMessageId(String msg_id) {
+		received_id = msg_id;
+		return true;
 	}
 
 	/** Encode a QUERY request */
@@ -99,7 +110,7 @@ public class DetectorStatusProp extends DetectorProp {
 	public void encodeQuery(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		String msg = "DS," + message_id + '\n';
+		String msg = "DS," + received_id + '\n';
 		tx_buf.put(msg.getBytes(UTF8));
 	}
 

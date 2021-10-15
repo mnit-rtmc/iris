@@ -106,7 +106,7 @@ abstract public class NatchProp extends ControllerProp {
 		String[] param = msg.split(",");
 		if (param.length >= 2 &&
 		    param[0].equals(code()) &&
-		    param[1].equals(message_id))
+		    checkMessageId(param[1]))
 		{
 			if (param.length != parameters()) {
 				throw new ParsingException("Wrong params: " +
@@ -115,6 +115,11 @@ abstract public class NatchProp extends ControllerProp {
 			return parseParams(param);
 		}
 		return false;
+	}
+
+	/** Check received message ID */
+	protected boolean checkMessageId(String msg_id) {
+		return msg_id.equals(message_id);
 	}
 
 	/** Get the message code */
