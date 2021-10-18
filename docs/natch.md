@@ -6,8 +6,8 @@ for New Advanced Traffic Controller, Howdy.
 The controller listens and accepts a single TCP connection on port 8001.  The
 IRIS server connects and keeps the same connection open continuously.
 
-Immediately after connecting, IRIS will send configuration messages to the
-controller.  These include ramp meter and detector configuration.
+After connecting, IRIS will send configuration messages for enabled detectors
+and ramp meters.
 
 ## Messages
 
@@ -21,7 +21,7 @@ Parameter | Description
 …         | Remaining parameters
 
 __Code__ indicates the message type.  For polls (from IRIS) these are
-upper-case, but for responses or asynchronous detector counts (from the
+upper-case, but for responses or asynchronous detector status (from the
 controller), they are lower-case.
 
 Code        | Descripton
@@ -39,9 +39,13 @@ Code        | Descripton
 __Message ID__ is used to match polls with responses, but is otherwise not
 interpreted by the controller (except for `ds` messages, see below).
 
-Polls can be made in two forms: __store__ and __query__.  A store includes all
-parameters, but a query omits all marked with a dagger (†).  All parameters are
-included in responses for both poll forms.
+Polls can be made in two ways:
+
+- __store__: Includes all message parameters.
+- __query__: Only includes parameters without a dagger (†).
+
+Responses from the controller include all parameters, for both __store__ and
+__query__ polls.
 
 ### CS - Clock Status
 
@@ -93,6 +97,10 @@ Parameter | Description
 4 †       | Duration (ms)
 5 †       | Headway (ms)
 6 †       | Time (`HH:MM:SS`, local 24-hour)
+
+The DS message works differently from the others; there are no store/query
+polls.  Instead, messages are initiated by the controller, and IRIS responds
+with an ACK or NAK.
 
 When a vehicle leaves a detector, a detector status messages is added to a
 fixed-size ring buffer, with head and tail pointers.  The __message ID__ is
