@@ -32,7 +32,6 @@ Code        | Descripton
 `MC` / `mc` | Meter configure
 `MS` / `ms` | Meter status
 `MT` / `mt` | Meter timing table
-`PC` / `pc` | Pin configure
 `PS` / `ps` | Pin status
 `SA` / `sa` | System attributes
 `SC` / `sc` | System command
@@ -68,7 +67,7 @@ Parameter | Description
 1         | Code: `DC` / `dc`
 2         | Message ID
 3         | Detector Number (0-31)
-4 †       | Input Pin Number (0-108; 0 means deleted)
+4 †       | Input Pin Number (0-104; 0 means deleted)
 
 If the input pin number is not valid, the detector is *deleted*, and this is
 indicated in the response.
@@ -127,12 +126,12 @@ Parameter | Description
 4 †       | Heads (0: deleted, 1: single, 2: dual)
 5 †       | Release (0: alternating, 1: simultaneous / drag-race)
 6 †       | Turn on output pin (usually 2 or 3)
-7 †       | Left head, red output pin (1-108)
-8 †       | Left head, yellow output pin (1-108)
-9 †       | Left head, green output pin (1-108)
-10 †      | Right head, red output pin (1-108)
-11 †      | Right head, yellow output pin (1-108)
-12 †      | Right head, green output pin (1-108)
+7 †       | Left head, red output pin (1-104)
+8 †       | Left head, yellow output pin (1-104)
+9 †       | Left head, green output pin (1-104)
+10 †      | Right head, red output pin (1-104)
+11 †      | Right head, yellow output pin (1-104)
+12 †      | Right head, green output pin (1-104)
 
 If any of the parameters are not valid, the meter is *deleted*, zeroing out
 values 4-12, and the response indicates this.
@@ -192,29 +191,13 @@ MT,0236,2,XX
 mt,0235,2,0,0,0,0
 ```
 
-### PC - Pin Configure
-
-Parameter | Description
-----------|------------------
-1         | Code: `PC` / `pc`
-2         | Message ID
-3         | Pin Number (1-108)
-4 †       | Function Label (text)
-
-```
-PC,02B1,82
-pc,02B1,82,Unassigned
-PC,02B2,82,Police Panel
-pc,02B2,82,Police Panel
-```
-
 ### PS - Pin Status
 
 Parameter | Description
 ----------|--------------------------
 1         | Code: `PS` / `ps`
 2         | Message ID
-3         | Pin number (1-108)
+3         | Pin number (1-104)
 4 †       | Pin status (0 or 1)
 
 __Note__: Input pins and pins associated with meters (Meter Configure) cannot be
