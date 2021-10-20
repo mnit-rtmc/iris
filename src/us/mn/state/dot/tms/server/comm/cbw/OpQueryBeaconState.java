@@ -98,7 +98,7 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 	/** Format the new maintenance status */
 	private String formatMaintStatus() {
 		Integer vp = beacon.getVerifyPin();
-		if (vp != null) {
+		if (vp != null && vp != 0 ) {
 			boolean f = getRelay(beacon.getPin());
 			boolean v = getInput(vp);
 			if (f && !v)

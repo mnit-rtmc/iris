@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.utils.LineReader;
  * Control by web relay property.
  *
  * @author Douglas Lau
+ * @author Deb Behera
  */
 public class CBWProperty extends ControllerProperty {
 
@@ -37,13 +38,21 @@ public class CBWProperty extends ControllerProperty {
 	/** Maximum number of lines to read */
 	static private final int MAX_LINES = 500;
 
+	/** Regex to match relay state for previous version*/
+	static private final Pattern RELAY_PREV = Pattern.compile(
+		"<relay([\\d]+)state>([01])</relay\\1state>");
+
+	/** Regex to match input state for previous version*/
+	static private final Pattern INPUT_PREV = Pattern.compile(
+		"<input([\\d]+)state>([01])</input\\1state>");
+
 	/** Regex to match relay state */
 	static private final Pattern RELAY = Pattern.compile(
-		"<relay([\\d]+)state>([01])</relay\\1state>");
+		"<relay([\\d]+)>([01])</relay([\\d]+)>");
 
 	/** Regex to match input state */
 	static private final Pattern INPUT = Pattern.compile(
-		"<input([\\d]+)state>([01])</input\\1state>");
+		"<digitalInput([\\d]+)>([01])</digitalInput([\\d]+)>");
 
 	/** Relative path */
 	private final String path;
@@ -112,7 +121,7 @@ public class CBWProperty extends ControllerProperty {
 		decodeXml(is);
 	}
 
-	/** Decode a STORE response */
+	/** Decode a STORE response based on previous or current version.*/
 	@Override
 	public void decodeStore(ControllerImpl c, InputStream is)
 		throws IOException
@@ -127,20 +136,33 @@ public class CBWProperty extends ControllerProperty {
 		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
 		for (int i = 0; line != null && i < MAX_LINES; i++) {
-			found |= matchRelay(line) | matchInput(line);
+			found |= matchRelay(line, "current") | matchInput(line, "current");
 			line = lr.readLine();
 		}
 		if (!found)
-			throw new ControllerException("NO RELAYS");
+		{
+			for (int i = 0; line != null && i < MAX_LINES; i++) {
+			found |= matchRelay(line, "previous") | matchInput(line, "previous");
+			line = lr.readLine();
+			}            
+			if (!found)
+				throw new ControllerException("NO RELAYS");
+		}
 	}
 
 	/** Match a relay element */
-	private boolean matchRelay(String line) throws ControllerException {
+	private boolean matchRelay(String line, String version) throws ControllerException {
 		boolean found = false;
-		Matcher m = RELAY.matcher(line);
+		Matcher m;
+		if ( version == "current" ) {
+			m = RELAY.matcher(line);
+		} else {
+			m = RELAY_PREV.matcher(line);
+		}
+
 		while (m.find()) {
 			int pin = parsePin(m.group(1));
-			boolean v = parseBool(m.group(2));
+ 			boolean v = parseBool(m.group(2));
 			try {
 				setRelay(pin, v);
 			}
@@ -153,9 +175,15 @@ public class CBWProperty extends ControllerProperty {
 	}
 
 	/** Match an input element */
-	private boolean matchInput(String line) throws ControllerException {
+	private boolean matchInput(String line, String version) throws ControllerException {
 		boolean found = false;
-		Matcher m = INPUT.matcher(line);
+		Matcher m;
+		if ( version == "current" ) {
+			m = INPUT.matcher(line);
+		} else {
+			m = INPUT_PREV.matcher(line);
+		}
+
 		while (m.find()) {
 			int pin = parsePin(m.group(1));
 			boolean v = parseBool(m.group(2));
