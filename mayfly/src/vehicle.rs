@@ -599,13 +599,16 @@ impl<'a, T: TrafficData> BinIter<'a, T> {
                 self.reset = false;
                 if self.is_future_event(ev) {
                     self.ev = Some(ev);
-                    break;
+                    return data;
                 }
                 if self.filter.check(ev) {
                     data.bin_vehicle(ev);
                 }
             }
         }
+        // no more events
+        self.reset = true;
+        data.reset();
         data
     }
 
