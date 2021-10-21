@@ -81,7 +81,10 @@ impl From<Error> for tide::Result {
 impl Default for Body {
     fn default() -> Self {
         let body = String::with_capacity(2880 * 4);
-        Body { max_age: None, body }
+        Body {
+            max_age: None,
+            body,
+        }
     }
 }
 
