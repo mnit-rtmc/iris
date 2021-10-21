@@ -29,6 +29,12 @@ import us.mn.state.dot.tms.server.comm.Operation;
  */
 public class DetectorStatusProp extends DetectorProp {
 
+	/** Valid age of vehicle events (1 hour) */
+	static private final long VALID_AGE_MS = 60 * 60 * 1000;
+
+	/** Valid future vehicle events (30 second drift) */
+	static private final long FUTURE_MS = 30 * 1000;
+
 	/** Parse a time */
 	static private long parseTime(String v) {
 		if (v.length() == 8 &&
@@ -47,7 +53,7 @@ public class DetectorStatusProp extends DetectorProp {
 				cal.set(Calendar.SECOND, sec);
 				cal.set(Calendar.MILLISECOND, 0);
 				// Is the stamp from before midnight?
-				if (cal.getTimeInMillis() > now)
+				if (cal.getTimeInMillis() - FUTURE_MS > now)
 					cal.add(Calendar.DAY_OF_MONTH, -1);
 				return cal.getTimeInMillis();
 			}
@@ -76,21 +82,6 @@ public class DetectorStatusProp extends DetectorProp {
 
 	/** Date/time stamp */
 	private long stamp;
-
-	/** Log vehicle event */
-	public boolean logEvent(Operation op) {
-		ControllerImpl ctrl = op.getController();
-		int pin = lookupPin(ctrl);
-		if (pin > 0 && stamp > 0) {
-			DetectorImpl det = ctrl.getDetectorAtPin(pin);
-			if (det != null) {
-				det.logVehicle(duration, headway, stamp, 0, 0);
-				ctrl.completeOperation(op.getId(), true);
-				return true;
-			}
-		}
-		return false;
-	}
 
 	/** Create a new detector status property */
 	public DetectorStatusProp(Counter c) {
@@ -144,5 +135,23 @@ public class DetectorStatusProp extends DetectorProp {
 		headway = parseInt(param[4]);
 		stamp = parseTime(param[5]);
 		return detector_num >= 0 && detector_num < 32;
+	}
+
+	/** Log vehicle event */
+	public void logEvent(Operation op) {
+		ControllerImpl ctrl = op.getController();
+		DetectorImpl det = lookupDet(ctrl);
+		if (det != null && isValidStamp()) {
+			det.logVehicle(duration, headway, stamp, 0, 0);
+			ctrl.completeOperation(op.getId(), true);
+		} else
+			ctrl.logGap();
+	}
+
+	/** Is time stamp valid? */
+	private boolean isValidStamp() {
+		long now = TimeSteward.currentTimeMillis();
+		return (stamp > now - VALID_AGE_MS)
+		    && (stamp < now + FUTURE_MS);
 	}
 }

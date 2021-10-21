@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.natch;
 
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.DetectorImpl;
 
 /**
  * Detector property
@@ -25,6 +26,15 @@ abstract public class DetectorProp extends NatchProp {
 
 	/** Detector number (0-31) */
 	public int detector_num;
+
+	/** Lookup the detector from a controller */
+	protected DetectorImpl lookupDet(ControllerImpl ctrl) {
+		if (detector_num >= 0 && detector_num < 32) {
+			int pin = detector_num + 39;
+			return ctrl.getDetectorAtPin(pin);
+		} else
+			return null;
+	}
 
 	/** Lookup the input pin for the detector */
 	protected int lookupPin(ControllerImpl ctrl) {
