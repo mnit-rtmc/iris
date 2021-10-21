@@ -52,8 +52,8 @@ public class DetectorStatusProp extends DetectorProp {
 				cal.set(Calendar.MINUTE, min);
 				cal.set(Calendar.SECOND, sec);
 				cal.set(Calendar.MILLISECOND, 0);
-				// Is the stamp from before midnight?
-				if (cal.getTimeInMillis() - FUTURE_MS > now)
+				// Is the stamp from yesterday?
+				if (cal.getTimeInMillis() > now + FUTURE_MS)
 					cal.add(Calendar.DAY_OF_MONTH, -1);
 				return cal.getTimeInMillis();
 			}
@@ -141,11 +141,11 @@ public class DetectorStatusProp extends DetectorProp {
 	public void logEvent(Operation op) {
 		ControllerImpl ctrl = op.getController();
 		DetectorImpl det = lookupDet(ctrl);
-		if (det != null && isValidStamp()) {
+		if (det != null && isValidStamp())
 			det.logVehicle(duration, headway, stamp, 0, 0);
-			ctrl.completeOperation(op.getId(), true);
-		} else
+		else
 			ctrl.logGap();
+		ctrl.completeOperation(op.getId(), true);
 	}
 
 	/** Is time stamp valid? */
