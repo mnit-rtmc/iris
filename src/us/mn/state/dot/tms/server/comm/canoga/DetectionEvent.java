@@ -30,6 +30,9 @@ import static us.mn.state.dot.tms.units.Speed.Units.MPH;
  */
 public class DetectionEvent {
 
+	/** Maximum number of missed vehicles between consecutive polls */
+	static private final int MAX_MISSED_VEHICLES = 16;
+
 	/** Minimum spacing between speed pair detectors */
 	static private final Distance MIN_SPACING = new Distance(6, FEET);
 
@@ -143,15 +146,15 @@ public class DetectionEvent {
 		// Test for rollover (about once every 50 days)
 		if (e < 0)
 			e += (1 << 32);
-		return (int)e;
+		return (int) e;
 	}
 
 	/** Log the current event in the detection log */
 	public void logEvent(long stamp, DetectorImpl det, DetectionEvent prev,
 		int speed)
 	{
-		if (isHeadwayValid(prev)) {
-			int missed = calculateMissed(prev);
+		int missed = calculateMissed(prev);
+		if (isHeadwayValid(prev) && missed <= MAX_MISSED_VEHICLES) {
 			for (int i = 0; i < missed; i++)
 				det.logVehicle(0, 0, 0, 0, 0);
 		} else {
@@ -171,12 +174,14 @@ public class DetectionEvent {
 		}
 	}
 
-	/** Calculate the number of missed vehicles */
+	/** Calculate the number of missed vehicles between consecutive polls */
 	private int calculateMissed(DetectionEvent prev) {
+		if (prev == null)
+			return 0;
 		int n_vehicles = count - prev.count;
 		if (n_vehicles < 0)
 			n_vehicles += 256;
-		return n_vehicles > 0 ? n_vehicles - 1 : 0;
+		return (n_vehicles > 0) ? n_vehicles - 1 : 0;
 	}
 
 	/** Calculate speed (mph) from upstream event/spacing (ft).
