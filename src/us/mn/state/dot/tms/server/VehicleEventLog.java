@@ -53,8 +53,17 @@ public class VehicleEventLog {
 
 	/** Calculate headway if necessary */
 	static private int calculateHeadway(int headway, long stamp, long ps) {
-		if (headway <= 0 && ps > 0 && stamp > ps)
-			headway = (int) (stamp - ps);
+		if (ps > 0 && stamp > ps) {
+			if (headway <= 0)
+				headway = (int) (stamp - ps);
+			else {
+				long st = ps + headway;
+				// If headway / stamps are more than 1 s off,
+				// then headway must be invalid
+				if (st < stamp - 1000 || st > stamp + 1000)
+					headway = 0;
+			}
+		}
 		return (headway > 0 && headway <= MAX_HEADWAY) ? headway : 0;
 	}
 
