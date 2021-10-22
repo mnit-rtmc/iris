@@ -34,13 +34,13 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	static private final int VEH_COUNT_WRAP = 4 * 60 * 1000;
 
 	/** Message payload for a GET request */
-	static protected final byte[] PAYLOAD_GET = { '*' };
+	static private final byte[] PAYLOAD_GET = { '*' };
 
 	/** Offset for response checksum field */
-	static protected final int OFF_CHECKSUM = 36;
+	static private final int OFF_CHECKSUM = 36;
 
 	/** Parse one vehicle detection event */
-	static protected DetectionEvent parseEvent(byte[] v, int det) {
+	static private DetectionEvent parseEvent(byte[] v, int det) {
 		int b = det * 9;
 		int duration = ((v[b] & 0xFF) << 16) +
 			((v[b + 1] & 0xFF) << 8) +
@@ -55,16 +55,19 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	}
 
 	/** Get the expected number of octets in response */
+	@Override
 	protected int expectedResponseOctets() {
 		return 37;
 	}
 
 	/** Format a basic "GET" request */
+	@Override
 	protected byte[] formatPayloadGet() {
 		return PAYLOAD_GET;
 	}
 
 	/** Format a basic "SET" request */
+	@Override
 	protected byte[] formatPayloadSet() throws IOException {
 		throw new ProtocolException("Binary detection is read-only");
 	}
@@ -83,10 +86,10 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	}
 
 	/** Previous vehicle detection event data */
-	protected final DetectionEvent[] p_events = new DetectionEvent[4];
+	private final DetectionEvent[] p_events = new DetectionEvent[4];
 
 	/** Current vehicle detection event data */
-	protected final DetectionEvent[] c_events = new DetectionEvent[4];
+	private final DetectionEvent[] c_events = new DetectionEvent[4];
 
 	/** Time stamp of most recent event */
 	private long event_time = TimeSteward.currentTimeMillis();
@@ -97,6 +100,7 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	}
 
 	/** Set the requested value */
+	@Override
 	protected void setValue(byte[] v) {
 		if (v.length == expectedResponseOctets()) {
 			for (int i = 0; i < 4; i++)
@@ -120,9 +124,7 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	}
 
 	/** Log a new vehicle detection event for one input */
-	protected void logEvent(ControllerImpl controller, long stamp,
-		int inp)
-	{
+	private void logEvent(ControllerImpl controller, long stamp, int inp) {
 		DetectionEvent pe = p_events[inp];
 		DetectionEvent ce = c_events[inp];
 		if (ce == null || ce.hasErrors(pe))
@@ -139,7 +141,7 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	}
 
 	/** Calculate the speed from a matching speed loop */
-	protected int calculateSpeed(ControllerImpl controller, int inp) {
+	private int calculateSpeed(ControllerImpl controller, int inp) {
 		int sp = controller.getSpeedPair(inp + 1);
 		if (sp > 0 && sp <= 4) {
 			DetectorImpl det = controller.getDetectorAtPin(inp + 1);

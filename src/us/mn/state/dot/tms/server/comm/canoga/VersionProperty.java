@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,19 +25,22 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
 public class VersionProperty extends CanogaProperty {
 
 	/** Message payload for a GET request */
-	static protected final byte[] PAYLOAD_GET = { 'B' };
+	static private final byte[] PAYLOAD_GET = { 'B' };
 
 	/** Get the expected number of octets in response */
+	@Override
 	protected int expectedResponseOctets() {
 		return 18;
 	}
 
 	/** Format a basic "GET" request */
+	@Override
 	protected byte[] formatPayloadGet() {
 		return PAYLOAD_GET;
 	}
 
 	/** Format a basic "SET" request */
+	@Override
 	protected byte[] formatPayloadSet() throws IOException {
 		throw new ProtocolException("Firmware version is read-only");
 	}
@@ -49,9 +52,10 @@ public class VersionProperty extends CanogaProperty {
 	}
 
 	/** Firmware version */
-	protected String version;
+	private String version;
 
 	/** Set the requested value */
+	@Override
 	protected void setValue(byte[] v) {
 		version = getPayload(v);
 	}

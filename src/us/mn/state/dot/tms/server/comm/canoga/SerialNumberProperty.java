@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,22 +22,25 @@ package us.mn.state.dot.tms.server.comm.canoga;
 public class SerialNumberProperty extends CanogaProperty {
 
 	/** Message payload for a GET request */
-	static protected final byte[] PAYLOAD_GET = { 'a' };
+	static private final byte[] PAYLOAD_GET = { 'a' };
 
 	/** Message payload for a SET request */
-	static protected final byte[] PAYLOAD_SET = { 'A' };
+	static private final byte[] PAYLOAD_SET = { 'A' };
 
 	/** Get the expected number of octets in response */
+	@Override
 	protected int expectedResponseOctets() {
 		return 20;
 	}
 
 	/** Format a basic "GET" request */
+	@Override
 	protected byte[] formatPayloadGet() {
 		return PAYLOAD_GET;
 	}
 
 	/** Format a basic "SET" request */
+	@Override
 	protected byte[] formatPayloadSet() {
 		return PAYLOAD_SET;
 	}
@@ -49,9 +52,10 @@ public class SerialNumberProperty extends CanogaProperty {
 	}
 
 	/** Serial number */
-	protected String serial_number;
+	private String serial_number;
 
 	/** Set the requested value */
+	@Override
 	protected void setValue(byte[] v) {
 		serial_number = getPayload(v);
 	}
