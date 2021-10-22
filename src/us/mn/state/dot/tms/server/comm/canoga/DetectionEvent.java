@@ -147,22 +147,18 @@ public class DetectionEvent {
 	}
 
 	/** Log the current event in the detection log */
-	public void logEvent(long stamp, DetectorImpl det,
-		DetectionEvent prev, int speed)
+	public void logEvent(long stamp, DetectorImpl det, DetectionEvent prev,
+		int speed)
 	{
-		int headway = 0;
 		if (isHeadwayValid(prev)) {
 			int missed = calculateMissed(prev);
 			for (int i = 0; i < missed; i++)
 				det.logVehicle(0, 0, 0, 0, 0);
-			// If no vehicles were missed, log headway
-			if (missed == 0)
-				headway = calculateElapsed(prev);
 		} else {
 			// There is a gap in vehicle event log
 			det.logGap(stamp);
 		}
-		det.logVehicle(duration, headway, stamp, speed, 0);
+		det.logVehicle(duration, 0, stamp, speed, 0);
 	}
 
 	/** Test if headway from previous event is valid */
