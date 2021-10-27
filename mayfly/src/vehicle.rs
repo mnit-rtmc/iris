@@ -84,8 +84,8 @@ pub struct BinIter<'a, T: TrafficData> {
     _data: PhantomData<T>,
     /// Remaining vehicle events
     event_iter: std::slice::Iter<'a, VehicleEvent>,
-    /// Most recent event
-    ev: Option<&'a VehicleEvent>,
+    /// Future event
+    future_ev: Option<&'a VehicleEvent>,
     /// Vehicle event filter
     filter: VehicleFilter,
     /// Binning period (s)
@@ -555,7 +555,7 @@ impl<'a, T: TrafficData> BinIter<'a, T> {
         BinIter {
             _data: PhantomData,
             event_iter: log.events[..].iter(),
-            ev: None,
+            future_ev: None,
             filter,
             period,
             interval: 0,
@@ -582,7 +582,7 @@ impl<'a, T: TrafficData> BinIter<'a, T> {
     /// Get the current interval data
     fn interval_data(&mut self) -> T {
         let mut data = self.make_data();
-        if let Some(ev) = &self.ev {
+        if let Some(ev) = &self.future_ev {
             if self.is_future_event(ev) {
                 return data;
             }
@@ -590,17 +590,17 @@ impl<'a, T: TrafficData> BinIter<'a, T> {
                 data.bin_vehicle(ev);
             }
         }
-        self.ev = None;
+        self.future_ev = None;
         while let Some(ev) = self.event_iter.next() {
             if ev.is_reset() {
                 self.reset = true;
                 data.reset();
             } else {
-                self.reset = false;
                 if self.is_future_event(ev) {
-                    self.ev = Some(ev);
+                    self.future_ev = Some(ev);
                     return data;
                 }
+                self.reset = false;
                 if self.filter.check(ev) {
                     data.bin_vehicle(ev);
                 }
