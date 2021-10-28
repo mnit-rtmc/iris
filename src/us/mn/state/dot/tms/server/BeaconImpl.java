@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2020  Minnesota Department of Transportation
+ * Copyright (C) 2004-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 					row.getString(5),	// notes
 					row.getString(6),	// preset
 					row.getString(7),	// message
-					row.getInt(8)		// verify_pin
+					(Integer) row.getObject(8) // verify_pin
 				));
 			}
 		});
@@ -94,8 +94,8 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	}
 
 	/** Create a beacon */
-	protected BeaconImpl(String n, GeoLocImpl l, ControllerImpl c,
-		int p, String nt, CameraPresetImpl cp, String m, Integer vp)
+	private BeaconImpl(String n, GeoLocImpl l, ControllerImpl c, int p,
+		String nt, CameraPresetImpl cp, String m, Integer vp)
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
@@ -106,7 +106,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	}
 
 	/** Create a beacon */
-	protected BeaconImpl(String n, String l, String c, int p, String nt,
+	private BeaconImpl(String n, String l, String c, int p, String nt,
 		String cp, String m, Integer vp)
 	{
 		this(n, lookupGeoLoc(l), lookupController(c), p, nt,
