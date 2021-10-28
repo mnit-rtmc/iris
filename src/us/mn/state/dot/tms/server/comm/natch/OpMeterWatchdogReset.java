@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.natch;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
@@ -60,6 +61,9 @@ public class OpMeterWatchdogReset extends OpNatch {
 		if (pin != null) {
 			prop.decodeStore(op, rx_buf);
 			if (prop.getStatus()) {
+				// FIXME: add "waiting" state to OpStep so that
+				//        we don't sleep on BasePoller thread
+				TimeSteward.sleep_well(100);
 				prop.setStatus(false);
 				setPolling(true);
 			} else
