@@ -44,11 +44,18 @@ public class VehicleEventLog {
 		return (stamp > 0) ? stamp : TimeSteward.currentTimeMillis();
 	}
 
-	/** Get the hour for a given timestamp */
+	/** Get the (local) hour for a given timestamp */
 	static private int getHour(long stamp) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(stamp);
 		return cal.get(Calendar.HOUR);
+	}
+
+	/** Get the (local) date for a given timestamp */
+	static private int getDate(long stamp) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(stamp);
+		return cal.get(Calendar.DATE);
 	}
 
 	/** Calculate headway if necessary */
@@ -149,11 +156,17 @@ public class VehicleEventLog {
 			        : 0;
 			final String ev = formatEvent(duration, head, st, speed,
 				length);
+			long stamp_ms = getStampMillis(stamp);
+			// Are we *inside* a gap and starting a new day?
+			if (gap > 0 && getDate(stamp_ms) != getDate(gap)) {
+				gap = 0; // new day, new gap
+				logGap(stamp_ms);
+			}
 			p_stamp = stamp;
-			gap = false;
+			gap = 0;
 			FLUSH.addJob(new Job() {
 				public void perform() throws IOException {
-					appendEvent(stamp, ev);
+					appendEvent(stamp_ms, ev);
 				}
 			});
 		}
@@ -161,8 +174,7 @@ public class VehicleEventLog {
 
 	/** Append an event to the log */
 	private void appendEvent(long stamp, String line) throws IOException {
-		File file = factory.createFile(sensor_id, "vlog",
-			getStampMillis(stamp));
+		File file = factory.createFile(sensor_id, "vlog", stamp);
 		if (file != null) {
 			FileWriter fw = new FileWriter(file, true);
 			try {
@@ -176,22 +188,24 @@ public class VehicleEventLog {
 
 	/** Log a gap in vehicle events */
 	public void logGap(long stamp) {
-		if (isArchiveEnabled() && !gap) {
+		long stamp_ms = getStampMillis(stamp);
+		if (isArchiveEnabled() && gap == 0) {
 			p_stamp = 0;
-			gap = true;
+			gap = stamp_ms;
 			FLUSH.addJob(new Job() {
 				public void perform() throws IOException {
-					appendEvent(stamp, "*\n");
+					appendEvent(stamp_ms, "*\n");
 				}
 			});
 		}
 	}
 
 	/** Time stamp of most recent vehicle event */
-	private transient long p_stamp;
+	private transient long p_stamp = 0;
 
-	/** Flag indicating gap as most recent event */
-	private transient boolean gap;
+	/** Time stamp of logging gap (zero for no gap).
+	 * Initializing to 1 causes a gap to be logged on IRIS restart. */
+	private transient long gap = 1;
 
 	/** Binning flag */
 	private transient boolean binning;
