@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@ public class IrisCapabilityImpl extends CapabilityImpl
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -63,6 +64,7 @@ public class IrisCapabilityImpl extends CapabilityImpl
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris.capability";
 	}
@@ -79,34 +81,40 @@ public class IrisCapabilityImpl extends CapabilityImpl
 	}
 
 	/** Compare to another capability */
+	@Override
 	public int compareTo(IrisCapabilityImpl o) {
 		return name.compareTo(o.name);
 	}
 
 	/** Test if the capability equals another capability */
+	@Override
 	public boolean equals(Object o) {
-		if(o instanceof IrisCapabilityImpl)
+		if (o instanceof IrisCapabilityImpl)
 			return name.equals(((IrisCapabilityImpl)o).name);
 		else
 			return false;
 	}
 
 	/** Calculate a hash code */
+	@Override
 	public int hashCode() {
 		return name.hashCode();
 	}
 
 	/** Get the primary key name */
-	public String getKeyName() {
+	@Override
+	public String getPKeyName() {
 		return "name";
 	}
 
 	/** Get the primary key */
-	public String getKey() {
+	@Override
+	public String getPKey() {
 		return name;
 	}
 
 	/** Get a string representation of the object */
+	@Override
 	public String toString() {
 		return name;
 	}
@@ -118,9 +126,9 @@ public class IrisCapabilityImpl extends CapabilityImpl
 
 	/** Set the enabled flag */
 	public void doSetEnabled(boolean e) throws TMSException {
-		if(e == enabled)
-			return;
-		store.update(this, "enabled", e);
-		super.setEnabled(e);
+		if (e != enabled) {
+			store.update(this, "enabled", e);
+			super.setEnabled(e);
+		}
 	}
 }

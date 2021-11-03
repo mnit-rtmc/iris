@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -158,13 +158,13 @@ public class IrisUserImpl extends UserImpl implements Storable {
 
 	/** Get the primary key name */
 	@Override
-	public String getKeyName() {
+	public String getPKeyName() {
 		return "name";
 	}
 
 	/** Get the primary key */
 	@Override
-	public String getKey() {
+	public String getPKey() {
 		return name;
 	}
 

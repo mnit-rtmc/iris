@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2017  Minnesota Department of Transportation
+ * Copyright (C) 2006-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ public class TableMappingList {
 
 	/** Lookup related objects from the given table/key pair */
 	public List<String> lookup(Storable owner) throws TMSException {
-		final String key = owner.getKey();
+		final String key = owner.getPKey();
 		final ArrayList<String> res = new ArrayList<String>();
 		store.query(createLookup(key), new ResultFactory() {
 			public void create(ResultSet row) throws Exception {
@@ -83,14 +83,14 @@ public class TableMappingList {
 
 	/** Create an SQL insert statement */
 	private String createInsert(String start, Storable v, int o) {
-		return start + v.getKey() + "'," + o + ");";
+		return start + v.getPKey() + "'," + o + ");";
 	}
 
 	/** Update the relation from one table to a list in the other */
 	public void update(Storable owner, List<Storable> values)
 		throws TMSException
 	{
-		final String key = owner.getKey();
+		final String key = owner.getPKey();
 		final String insert = createInsertStart(key);
 		final ListIterator<Storable> it = values.listIterator();
 		store.batch(new BatchFactory() {

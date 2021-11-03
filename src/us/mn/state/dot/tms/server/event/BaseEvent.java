@@ -50,13 +50,13 @@ abstract public class BaseEvent implements Storable {
 
 	/** Get the primary key name */
 	@Override
-	public String getKeyName() {
+	public String getPKeyName() {
 		return "name";
 	}
 
 	/** Get the primary key */
 	@Override
-	public String getKey() {
+	public String getPKey() {
 		return null;
 	}
 

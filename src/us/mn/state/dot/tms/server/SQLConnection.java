@@ -225,7 +225,7 @@ public class SQLConnection {
 		throws TMSException
 	{
 		validateIdentifier(field);
-		String key = escapeValue(s.getKey());
+		String key = escapeValue(s.getPKey());
 		validateValue(key);
 		if (value == null) {
 			updateNull(s, field, key);
@@ -236,7 +236,7 @@ public class SQLConnection {
 		validateValue(ev);
 		update("UPDATE " + s.getTable() +
 		      " SET " + field + " = '" + ev + "'" +
-		      " WHERE " + s.getKeyName() + " = '" + key + "';");
+		      " WHERE " + s.getPKeyName() + " = '" + key + "';");
 	}
 
 	/** Update one field with a NULL value */
@@ -245,7 +245,7 @@ public class SQLConnection {
 	{
 		update("UPDATE " + s.getTable() +
 		      " SET " + field + " = NULL" +
-		      " WHERE " + s.getKeyName() + " = '" + key + "';");
+		      " WHERE " + s.getPKeyName() + " = '" + key + "';");
 	}
 
 	/** Create one storable record */
@@ -253,10 +253,10 @@ public class SQLConnection {
 		Map<String, Object> columns = s.getColumns();
 		StringBuilder keys = new StringBuilder();
 		StringBuilder values = new StringBuilder();
-		for (Map.Entry<String, Object> e: columns.entrySet()) {
-			Object value = e.getValue();
+		for (Map.Entry<String, Object> col: columns.entrySet()) {
+			Object value = col.getValue();
 			if (value != null) {
-				String field = e.getKey();
+				String field = col.getKey();
 				validateIdentifier(field);
 				keys.append(field);
 				keys.append(",");
@@ -277,11 +277,11 @@ public class SQLConnection {
 
 	/** Destroy one storable record */
 	public void destroy(Storable s) throws TMSException {
-		String esc_val = escapeValue(s.getKey());
+		String esc_val = escapeValue(s.getPKey());
 		String val = prepareArray(esc_val);
 		validateValue(val);
 		update("DELETE FROM " + s.getTable() +
-		      " WHERE " + s.getKeyName() + " = '" + val + "';");
+		      " WHERE " + s.getPKeyName() + " = '" + val + "';");
 	}
 
 	/** Update the database with a batch of SQL commands */

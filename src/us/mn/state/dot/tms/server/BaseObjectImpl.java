@@ -403,13 +403,13 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 
 	/** Get the primary key name */
 	@Override
-	public String getKeyName() {
+	public String getPKeyName() {
 		return "name";
 	}
 
 	/** Get the primary key */
 	@Override
-	public String getKey() {
+	public String getPKey() {
 		return name;
 	}
 
