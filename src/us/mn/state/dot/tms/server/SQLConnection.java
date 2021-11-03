@@ -20,7 +20,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -70,14 +70,13 @@ public class SQLConnection {
 	static public String escapeValue(Object value) {
 		return value.toString().replace("'", "''");
 	}
-	
+
 	/** Prepare a string array for SQL */
 	static private String prepareArray(Object value) {
-		if (value != null && (value.getClass().isArray()
-				|| value instanceof List<?>)) {
-			return value.toString().replace("[", "{").replace("]", "}");
-		}
-		return value.toString();
+		assert value != null;
+		return (value.getClass().isArray() || value instanceof List<?>)
+		      ? value.toString().replace("[", "{").replace("]", "}")
+		      : value.toString();
 	}
 
 	/** Get a PostGIS MultiPolygon from a DB query object.
@@ -111,8 +110,8 @@ public class SQLConnection {
 	private Connection connection = null;
 
 	/** Available SQL statements */
-	private final LinkedList<Statement> statements =
-		new LinkedList<Statement>();
+	private final ArrayDeque<Statement> statements =
+		new ArrayDeque<Statement>();
 
 	/** Create a new SQL connection */
 	public SQLConnection(String url, String usr, String pswd)
@@ -263,7 +262,6 @@ public class SQLConnection {
 				keys.append(",");
 				String av = prepareArray(value);
 				String ev = escapeValue(av);
-				
 				validateValue(ev);
 				values.append("'");
 				values.append(ev);
