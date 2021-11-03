@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ package us.mn.state.dot.sonar;
 public class Name {
 
 	/** Name separator */
-	static private final String SEP = "/";
+	static public final String SEP = "/";
 
 	/** Test if a SONAR path is absolute (versus relative) */
 	static public boolean isAbsolute(String p) {

@@ -27,6 +27,8 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import org.postgis.MultiPolygon;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sonar.Message;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.TMSException;
 
@@ -39,6 +41,28 @@ public class SQLConnection {
 
 	/** SQL debug log */
 	static private final DebugLog SQL_LOG = new DebugLog("sql");
+
+	/** Pattern to match for an invalid SONAR name */
+	static private final Pattern INVALID_NAME = Pattern.compile("[" +
+		Message.RECORD_SEP.code +
+		Message.UNIT_SEP.code +
+		Message.NULL_REF.code +
+		Name.SEP +
+		"]"
+	);
+
+	/** Validate SONAR name */
+	static private void validateName(String name)
+		throws ChangeVetoException
+	{
+		if (name != null) {
+			Matcher m = INVALID_NAME.matcher(name);
+			if (m.find()) {
+				throw new ChangeVetoException("Invalid name: "+
+					name);
+			}
+		}
+	}
 
 	/** Pattern to match for a SQL identifier */
 	static private final Pattern SQL_IDENTIFIER =
@@ -250,6 +274,7 @@ public class SQLConnection {
 
 	/** Create one storable record */
 	public void create(Storable s) throws TMSException {
+		validateName(s.getPKey());
 		Map<String, Object> columns = s.getColumns();
 		StringBuilder keys = new StringBuilder();
 		StringBuilder values = new StringBuilder();

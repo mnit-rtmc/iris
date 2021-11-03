@@ -424,7 +424,6 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 
 	/** Create a new base object */
 	protected BaseObjectImpl(String n) {
-		// FIXME: validate for SQL injection
 		name = n;
 	}
 
