@@ -587,7 +587,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			OccupancySample occ = (v >= 0)
 			    ? new OccupancySample(stamp, period, v, max_scans)
 			    : null;
-			det.storeOccupancy(occ);
+			det.storeOccupancy(occ, false);
 		}
 	}
 
@@ -607,7 +607,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			PeriodicSample ps = (s > 0)
 				? new PeriodicSample(stamp, period, s)
 				: null;
-			det.storeSpeed(ps);
+			det.storeSpeed(ps, false);
 		}
 	}
 

@@ -207,19 +207,6 @@ public class VehicleEventLog {
 	 * Initializing to 1 causes a gap to be logged on IRIS restart. */
 	private transient long gap = 1;
 
-	/** Binning flag */
-	private transient boolean binning;
-
-	/** Are vehicle events being binned? */
-	public boolean isBinning() {
-		return binning;
-	}
-
-	/** Set flag indicating events are being binned */
-	public void setBinning(boolean b) {
-		binning = b;
-	}
-
 	/** Clear binned counts */
 	public void clear() {
 		ev_vehicles = 0;

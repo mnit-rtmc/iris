@@ -766,6 +766,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Vehicle event log */
 	private transient final VehicleEventLog v_log;
 
+	/** Event Logging flag */
+	private transient boolean is_logging_events = true;
+
 	/** Occupancy value from previous 30-second period */
 	private transient int prev_value = MISSING_DATA;
 
@@ -900,7 +903,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	 * @param vc Vehicle class. */
 	public void storeVehCount(PeriodicSample v, VehLengthClass vc) {
 		if (vc == null)
-			storeVehCount(v);
+			storeVehCount(v, false);
 		else if (v != null) {
 			switch (vc) {
 			case MOTORCYCLE:
@@ -921,7 +924,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Store vehicle count for one binning interval.
 	 * @param v PeriodicSample containing vehicle count data. */
-	public void storeVehCount(PeriodicSample v) {
+	public void storeVehCount(PeriodicSample v, boolean logging) {
+		is_logging_events = logging;
 		if (v != null) {
 			if (lane_type != LaneType.GREEN &&
 			    v.period == BIN_PERIOD_SEC)
@@ -955,7 +959,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Store occupancy for one binning interval.
 	 * @param occ Occupancy data. */
-	public void storeOccupancy(OccupancySample occ) {
+	public void storeOccupancy(OccupancySample occ, boolean logging) {
+		is_logging_events = logging;
 		if (occ != null) {
 			int n_scans = occ.as60HzScans();
 			if (occ.period == BIN_PERIOD_SEC) {
@@ -998,18 +1003,16 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Store speed for one binning interval.
 	 * @param speed PeriodicSample containing speed data. */
-	public void storeSpeed(PeriodicSample speed) {
+	public void storeSpeed(PeriodicSample speed, boolean logging) {
+		is_logging_events = logging;
 		if (speed != null)
 			spd_cache.add(speed, name);
 	}
 
 	/** Flush buffered data to disk */
 	public void flush(PeriodicSampleWriter writer) {
-		// Clear binning flag on each flush; it will be set on each call
-		// to binEventData as long as vehicle events are being logged
-		if (v_log.isBinning())
-			v_log.setBinning(false);
-		else {
+		// Only flush periodic binned data if not logging events
+		if (!is_logging_events) {
 			writer.flush(veh_cache, name);
 			writer.flush(scn_cache, name);
 			writer.flush(spd_cache, name);
@@ -1052,12 +1055,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	public void binEventData(int period, boolean success) {
 		if (success) {
 			long stamp = calculateEndTime(period);
-			storeVehCount(v_log.getVehCount(stamp, period));
-			storeOccupancy(v_log.getOccupancy(stamp, period));
-			storeSpeed(v_log.getSpeed(stamp, period));
+			storeVehCount(v_log.getVehCount(stamp, period), true);
+			storeOccupancy(v_log.getOccupancy(stamp, period), true);
+			storeSpeed(v_log.getSpeed(stamp, period), true);
 		}
 		v_log.clear();
-		v_log.setBinning(true);
 	}
 
 	/** Write a single detector as an XML element */

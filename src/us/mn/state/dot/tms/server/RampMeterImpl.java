@@ -862,7 +862,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		if (det != null) {
 			if (g == 0 && isMetering())
 				return;
-			det.storeVehCount(new PeriodicSample(stamp, 30, g));
+			det.storeVehCount(new PeriodicSample(stamp, 30, g),
+				false);
 		} else
 			log("No green det");
 	}
@@ -870,9 +871,10 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Update the 5-minute green count */
 	public void updateGreenCount5(long stamp, int g) {
 		DetectorImpl det = green_det;
-		if (det != null)
-			det.storeVehCount(new PeriodicSample(stamp, 300, g));
-		else
+		if (det != null) {
+			det.storeVehCount(new PeriodicSample(stamp, 300, g),
+				false);
+		} else
 			log("No green det");
 	}
 
