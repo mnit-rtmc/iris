@@ -134,7 +134,7 @@ public class DetectorStatusProp extends DetectorProp {
 		duration = parseInt(param[3]);
 		headway = parseInt(param[4]);
 		stamp = parseTime(param[5]);
-		return detector_num >= 0 && detector_num < 32;
+		return isValidNum();
 	}
 
 	/** Log vehicle event */

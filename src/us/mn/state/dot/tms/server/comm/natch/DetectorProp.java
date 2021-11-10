@@ -24,12 +24,20 @@ import us.mn.state.dot.tms.server.DetectorImpl;
  */
 abstract public class DetectorProp extends NatchProp {
 
+	/** Maximum detector number */
+	static protected final int MAX_DET = 32;
+
 	/** Detector number (0-31) */
 	public int detector_num;
 
+	/** Check if detector number is valid */
+	protected boolean isValidNum() {
+		return detector_num >= 0 && detector_num < MAX_DET;
+	}
+
 	/** Lookup the detector from a controller */
 	protected DetectorImpl lookupDet(ControllerImpl ctrl) {
-		if (detector_num >= 0 && detector_num < 32) {
+		if (isValidNum()) {
 			int pin = detector_num + 39;
 			return ctrl.getDetectorAtPin(pin);
 		} else
@@ -38,7 +46,7 @@ abstract public class DetectorProp extends NatchProp {
 
 	/** Lookup the input pin for the detector */
 	protected int lookupPin(ControllerImpl ctrl) {
-		if (detector_num >= 0 && detector_num < 32) {
+		if (isValidNum()) {
 			int pin = detector_num + 39;
 			if (ctrl.getDetectorAtPin(pin) != null)
 				return pin;

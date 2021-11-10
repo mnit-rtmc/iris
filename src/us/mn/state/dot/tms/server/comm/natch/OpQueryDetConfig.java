@@ -68,7 +68,7 @@ public class OpQueryDetConfig extends OpNatch {
 	public OpStep next() {
 		if (done) {
 			int dn = prop.detector_num + 1;
-			return (dn < 32)
+			return (dn < DetectorProp.MAX_DET)
 			      ? new OpQueryDetConfig(counter, dn)
 			      : null;
 		} else
