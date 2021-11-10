@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,10 +50,10 @@ abstract public class Op170 extends OpController<MndotProperty> {
 	/** Test if a pin is set in the special function output buffer */
 	static public boolean getSpecFuncOutput(byte[] buffer, int pin) {
 		int i = pin - SPECIAL_FUNCTION_OUTPUT_PIN;
-		if(i >= 0 && i < 8)
+		if (i >= 0 && i < 8)
 			return ((buffer[0] >> i) & 1) != 0;
 		i -= 8;
-		if(i >= 0 && i < 8)
+		if (i >= 0 && i < 8)
 			return ((buffer[1] >> i) & 1) != 0;
 		return false;
 	}
@@ -61,45 +61,43 @@ abstract public class Op170 extends OpController<MndotProperty> {
 	/** Set the specified pin in a special function output buffer */
 	static public void setSpecFuncOutput(byte[] buffer, int pin) {
 		int i = pin - SPECIAL_FUNCTION_OUTPUT_PIN;
-		if(i >= 0 && i < 8)
+		if (i >= 0 && i < 8)
 			buffer[0] |= 1 << i;
 		i -= 8;
-		if(i >= 0 && i < 8)
+		if (i >= 0 && i < 8)
 			buffer[1] |= 1 << i;
 	}
 
 	/** Clear the specified pin in a special function output buffer */
 	static public void clearSpecFuncOutput(byte[] buffer, int pin) {
 		int i = pin - SPECIAL_FUNCTION_OUTPUT_PIN;
-		if(i >= 0 && i < 8)
+		if (i >= 0 && i < 8)
 			buffer[0] &= (1 << i) ^ 0xFF;
 		i -= 8;
-		if(i >= 0 && i < 8)
+		if (i >= 0 && i < 8)
 			buffer[1] &= (1 << i) ^ 0xFF;
 	}
 
 	/** Lookup the first ramp meter on a 170 controller */
 	static public RampMeterImpl lookupMeter1(ControllerImpl c) {
 		ControllerIO io = c.getIO(DEVICE_1_PIN);
-		if(io instanceof RampMeterImpl)
-			return (RampMeterImpl)io;
-		else
-			return null;
+		return (io instanceof RampMeterImpl)
+		      ? (RampMeterImpl) io
+		      : null;
 	}
 
 	/** Lookup the second ramp meter on a 170 controller */
 	static public RampMeterImpl lookupMeter2(ControllerImpl c) {
 		ControllerIO io = c.getIO(METER_2_PIN);
-		if(io instanceof RampMeterImpl)
-			return (RampMeterImpl)io;
-		else
-			return null;
+		return (io instanceof RampMeterImpl)
+		      ? (RampMeterImpl) io
+		      : null;
 	}
 
 	/** Adjust the green count for single release meters */
 	static protected int adjustGreenCount(RampMeterImpl meter, int g) {
-		if(meter.getMeterType() == RampMeterType.SINGLE.ordinal()) {
-			if((g % 2) != 0)
+		if (meter.getMeterType() == RampMeterType.SINGLE.ordinal()) {
+			if ((g % 2) != 0)
 				g++;
 			return g / 2;
 		} else
