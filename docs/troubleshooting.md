@@ -68,7 +68,6 @@ Filename               | Description
 `infinova`             | [Infinova] protocol
 `kadaptive`            | K Adaptive metering algorithm
 `manchester`           | [Manchester] protocol
-`meter`                | Ramp meter configuration errors
 `mndot170`             | [MnDOT-170] protocol
 `modem`                | Modem error log
 `ntcip`                | [NTCIP] protocols

@@ -19,6 +19,8 @@ import java.util.Calendar;
 import java.util.Date;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.DetectorImpl;
+import us.mn.state.dot.tms.server.PeriodicSample;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerException;
@@ -129,22 +131,28 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 				FIRST_DETECTOR_PIN, v_count);
 			controller.storeOccupancy(getStamp(), SAMPLE_PERIOD_SEC,
 				FIRST_DETECTOR_PIN, scans, MAX_SCANS);
-			updateGreenCount(lookupMeter1(controller),
+			storeGreenCount(lookupMeter1(controller),
 				rec[Address.OFF_GREEN_METER_1] & 0xFF);
-			updateGreenCount(lookupMeter2(controller),
+			storeGreenCount(lookupMeter2(controller),
 				rec[Address.OFF_GREEN_METER_2] & 0xFF);
-			if(recs > 0 && TimeSteward.currentTimeMillis() < newest)
+			if (recs > 0 && TimeSteward.currentTimeMillis() < newest)
 				return this;
 			else
 				return null;
 		}
 	}
 
-	/** Update meter with the most recent 5-minute green count */
-	private void updateGreenCount(RampMeterImpl meter, int g) {
+	/** Store green count for a ramp meter */
+	private void storeGreenCount(RampMeterImpl meter, int g) {
 		if (meter != null) {
-			meter.updateGreenCount5(getStamp(),
-				adjustGreenCount(meter, g));
+			int gc = adjustGreenCount(meter, g);
+			DetectorImpl det = meter.getGreenDet();
+			if (det != null) {
+				long stamp = getStamp();
+				PeriodicSample ps = new PeriodicSample(stamp,
+					SAMPLE_PERIOD_SEC, gc);
+				det.storeVehCount(ps, false);
+			}
 		}
 	}
 

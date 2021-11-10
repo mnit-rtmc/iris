@@ -22,7 +22,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ActionPlan;
@@ -65,9 +64,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Default maximum wait time (in seconds) */
 	static public final int DEFAULT_MAX_WAIT = 240;
-
-	/** Meter debug log */
-	static private final DebugLog METER_LOG = new DebugLog("meter");
 
 	/** Lookup a single green detector in a sampler set */
 	static private DetectorImpl lookupGreen(SamplerSet ss) {
@@ -849,39 +845,16 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Green count detector */
 	private transient DetectorImpl green_det = null;
 
+	/** Get the green count detector */
+	public DetectorImpl getGreenDet() {
+		return green_det;
+	}
+
 	/** Lookup the merge and green count detectors from R_Nodes */
 	public void lookupDetectors() {
 		SamplerSet ss = getSamplerSet();
 		merge_set = ss.filter(LaneType.MERGE);
 		green_det = lookupGreen(ss);
-	}
-
-	/** Update the 30-second green count */
-	public void updateGreenCount(long stamp, int g) {
-		DetectorImpl det = green_det;
-		if (det != null) {
-			if (g == 0 && isMetering())
-				return;
-			det.storeVehCount(new PeriodicSample(stamp, 30, g),
-				false);
-		} else
-			log("No green det");
-	}
-
-	/** Update the 5-minute green count */
-	public void updateGreenCount5(long stamp, int g) {
-		DetectorImpl det = green_det;
-		if (det != null) {
-			det.storeVehCount(new PeriodicSample(stamp, 300, g),
-				false);
-		} else
-			log("No green det");
-	}
-
-	/** Log a message to the meter debug log */
-	private void log(String msg) {
-		if (METER_LOG.isOpen())
-			METER_LOG.log(getName() + ": " + msg);
 	}
 
 	/** Get the corridor containing the ramp meter */

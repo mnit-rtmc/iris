@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.server.DetectorImpl;
+import us.mn.state.dot.tms.server.PeriodicSample;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -70,7 +72,7 @@ public class OpQueryMeterStatus extends Op170Device {
 	private void parseMeterData() throws IOException {
 		validateMeterState();
 		updateMeterLocks();
-		updateGreenCount();
+		storeGreenCount();
 	}
 
 	/** Validate meter status and current rate */
@@ -101,11 +103,16 @@ public class OpQueryMeterStatus extends Op170Device {
 		return (p & POLICE_PANEL_BIT) != 0;
 	}
 
-	/** Update the green count */
-	private void updateGreenCount() {
+	/** Store the green count */
+	private void storeGreenCount() {
 		int g = data[Address.OFF_GREEN_COUNT_30];
-		meter.updateGreenCount(TimeSteward.currentTimeMillis(),
-			Op170.adjustGreenCount(meter, g));
+		int gc = Op170.adjustGreenCount(meter, g);
+		DetectorImpl det = meter.getGreenDet();
+		if (det != null && (gc > 0 || !meter.isMetering())) {
+			long stamp = TimeSteward.currentTimeMillis();
+			PeriodicSample ps = new PeriodicSample(stamp, 30, gc);
+			det.storeVehCount(ps, false);
+		}
 	}
 
 	/** Check if current rate is metering (not flashing). */
