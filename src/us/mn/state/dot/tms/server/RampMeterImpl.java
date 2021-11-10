@@ -849,8 +849,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Green count detector */
 	private transient DetectorImpl green_det = null;
 
-	/** Lookup the associated detectors */
-	private void lookupDetectors() {
+	/** Lookup the merge and green count detectors from R_Nodes */
+	public void lookupDetectors() {
 		SamplerSet ss = getSamplerSet();
 		merge_set = ss.filter(LaneType.MERGE);
 		green_det = lookupGreen(ss);
@@ -909,12 +909,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Get the r_node associated with the ramp meter */
 	public R_NodeImpl getR_Node() {
-		lookupDetectors();
 		DetectorImpl det = green_det;
 		if (det != null) {
 			R_Node n = det.getR_Node();
 			if (n instanceof R_NodeImpl)
-				return (R_NodeImpl)n;
+				return (R_NodeImpl) n;
 		}
 		return null;
 	}

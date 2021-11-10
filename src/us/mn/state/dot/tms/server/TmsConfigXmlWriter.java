@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2020  Minnesota Department of Transportation
+ * Copyright (C) 2012-2021  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  * Copyright (C) 2012  Iteris Inc.
  *
@@ -48,9 +48,9 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	private final CorridorManager manager;
 
 	/** Create a new TMS config XML writer */
-	public TmsConfigXmlWriter(CorridorManager cm) {
+	public TmsConfigXmlWriter() {
 		super(MainServer.districtId() + CONFIG_XML, true);
-		manager = cm;
+		manager = BaseObjectImpl.corridors;
 	}
 
 	/** Write the TMS config XML file */
@@ -185,12 +185,12 @@ public class TmsConfigXmlWriter extends XmlWriter {
 		HashMap<String, RampMeterImpl> m_nodes =
 			new HashMap<String, RampMeterImpl>();
 		Iterator<RampMeter> it = RampMeterHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			RampMeter m = it.next();
-			if(m instanceof RampMeterImpl) {
-				RampMeterImpl meter = (RampMeterImpl)m;
+			if (m instanceof RampMeterImpl) {
+				RampMeterImpl meter = (RampMeterImpl) m;
 				R_NodeImpl n = meter.getR_Node();
-				if(n != null) 
+				if (n != null)
 					m_nodes.put(n.getName(), meter);
 			}
 		}
@@ -200,40 +200,40 @@ public class TmsConfigXmlWriter extends XmlWriter {
 	/** Write the camera elements */
 	private void writeCameraBody(Writer w) throws IOException {
 		Iterator<Camera> it = CameraHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Camera c = it.next();
-			if(c instanceof CameraImpl)
-				((CameraImpl)c).writeXml(w);
+			if (c instanceof CameraImpl)
+				((CameraImpl) c).writeXml(w);
 		}
 	}
 
 	/** Write the comm link elements */
 	private void writeCommLinkBody(Writer w) throws IOException {
 		Iterator<CommLink> it = CommLinkHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			CommLink cl = it.next();
-			if(cl instanceof CommLinkImpl)
-				((CommLinkImpl)cl).writeXml(w);
+			if (cl instanceof CommLinkImpl)
+				((CommLinkImpl) cl).writeXml(w);
 		}
 	}
 
 	/** Write the controller elements */
 	private void writeControllerBody(Writer w) throws IOException {
 		Iterator<Controller> it = ControllerHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Controller c = it.next();
-			if(c instanceof ControllerImpl)
-				((ControllerImpl)c).writeXml(w);
+			if (c instanceof ControllerImpl)
+				((ControllerImpl) c).writeXml(w);
 		}
 	}
 
 	/** Write the DMS elements */
 	private void writeDmsBody(Writer w) throws IOException {
 		Iterator<DMS> it = DMSHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			DMS dms = it.next();
-			if(dms instanceof DMSImpl)
-				((DMSImpl)dms).writeXml(w);
+			if (dms instanceof DMSImpl)
+				((DMSImpl) dms).writeXml(w);
 		}
 	}
 

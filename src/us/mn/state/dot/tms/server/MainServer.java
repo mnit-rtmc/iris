@@ -213,7 +213,7 @@ public class MainServer {
 		FLUSH.addJob(new FlushSamplesJob(a_factory));
 		FLUSH.addJob(new ArchiveSamplesJob(a_factory));
 		FLUSH.addJob(new ProfilingJob());
-		FLUSH.addJob(new XmlConfigJob());
+		FLUSH.addJob(new CreateCorridorsJob(FLUSH));
 		FLUSH.addJob(new XmlConfigJob(1000));
 		FLUSH.addJob(new SignMessageXmlJob());
 		FLUSH.addJob(new IncidentXmlJob());

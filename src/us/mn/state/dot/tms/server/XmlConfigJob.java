@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
-import java.util.Calendar;
 import us.mn.state.dot.sched.Job;
 
 /**
@@ -25,26 +24,20 @@ import us.mn.state.dot.sched.Job;
  */
 public class XmlConfigJob extends Job {
 
-	/** Create a new XML config writer job */
-	public XmlConfigJob() {
-		super(Calendar.DATE, 1, Calendar.HOUR, 20);
-	}
-
 	/** Create a new one-shot XML config writer job */
 	public XmlConfigJob(int ms) {
 		super(ms);
 	}
 
 	/** Perform the XML config job */
+	@Override
 	public void perform() throws IOException {
 		writeXmlConfiguration();
 	}
 
 	/** Write the TMS xml configuration files */
 	private void writeXmlConfiguration() throws IOException {
-		CorridorManager cm = BaseObjectImpl.corridors;
-		cm.createCorridors();
-		TmsConfigXmlWriter xml_writer = new TmsConfigXmlWriter(cm);
+		TmsConfigXmlWriter xml_writer = new TmsConfigXmlWriter();
 		xml_writer.write();
 	}
 }
