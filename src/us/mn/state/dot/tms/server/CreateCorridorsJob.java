@@ -41,6 +41,7 @@ public class CreateCorridorsJob extends Job {
 	@Override
 	public void perform() {
 		createCorridors();
+		lookupMeterDetectors();
 		flush.addJob(new XmlConfigJob(1000));
 	}
 
@@ -50,8 +51,8 @@ public class CreateCorridorsJob extends Job {
 		cm.createCorridors();
 	}
 
-	/** Get a mapping of r_node names to meters */
-	private void getNodeMeterMapping() {
+	/** Lookup associated detectors for all ramp meters */
+	private void lookupMeterDetectors() {
 		Iterator<RampMeter> it = RampMeterHelper.iterator();
 		while (it.hasNext()) {
 			RampMeter m = it.next();
