@@ -19,10 +19,7 @@ larger and smaller views.
 ## Warning Action Plan
 
 An [action plan] can be associated with a gate arm array.  The plan's [phase]
-will be continuously updated according to the array [state](#states):
-
-- `OPEN`: `ga_open`
-- otherwise: `ga_closed`
+will be continuously updated according to the array [state](#states).
 
 One or more [DMS actions] can be assigned to these phases to warn motorists of
 the gate arm state.
@@ -34,24 +31,24 @@ An operator can request to change an array to one of three [states](#states):
 - `WARN_CLOSE` †
 - `CLOSING`
 
-† `WARN_CLOSE` is only available when a [warning action plan] is configured.  An
-operator should request this state to warn motorists when the gates will soon be
-closing.  After checking the verification cameras, the `CLOSING` state can be
+† `WARN_CLOSE` is only available when a [warning action plan] is configured.
+Operators should request this state to warn motorists when the gates will soon
+be closing.  After checking the verification cameras, the `CLOSING` state can be
 requested.
 
 ## States
 
 A gate arm array can be in one of 7 states:
 
-State        | Description           | Transition
--------------|-----------------------|------------------
-`OPENING`    | open in progress      | `OPEN` or `FAULT`
-`OPEN`       | gate open             | N/A
-`WARN_CLOSE` | warn before closing † | N/A
-`CLOSING`    | closing in progress   | `CLOSED` or `FAULT`
-`CLOSED`     | gate closed           | N/A
-`FAULT`      | open / close fault    | N/A
-`UNKNOWN`    | commnuication failure | N/A
+State        | Description           | Plan Phase  | Transition
+-------------|-----------------------|-------------|------------------
+`OPENING`    | open in progress      | `ga_closed` | `OPEN` or `FAULT`
+`OPEN`       | gate open             | `ga_open`   | N/A
+`WARN_CLOSE` | warn before closing † | `ga_closed` | N/A
+`CLOSING`    | closing in progress   | `ga_closed` | `CLOSED` or `FAULT`
+`CLOSED`     | gate closed           | `ga_closed` | N/A
+`FAULT`      | open / close fault    | `ga_closed` | N/A
+`UNKNOWN`    | commnuication failure | `ga_closed` | N/A
 
 ## Interlocks
 
@@ -115,4 +112,4 @@ filesystem at `/var/lib/iris/gate_arm_enable` (using the touch command).
 [DMS actions]: action_plans.html#dms-actions
 [phase]: action_plans.html#plan-phases
 [system attribute]: system_attributes.html
-[warning action plan]: #action-plan
+[warning action plan]: #warning-action-plan
