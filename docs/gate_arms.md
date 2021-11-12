@@ -3,11 +3,10 @@
 Select `View ➔ Gate Arm Arrays` menu item
 
 Gate arms are traffic control devices which restrict access to a section of
-roadway.  They can be used, for example, for reversible lanes which can be
-changed by time of day.
+roadway.  They are commonly used for on-ramps or reversible lanes.
 
-Gate arms are grouped as arrays of 1-8 arms.  Opening or closing an array will
-control all gate arms in the array.
+They are grouped into arrays of 1-8 arms.  *Opening* or *closing* an array
+controls **all** associated arms.
 
 ## Verification Cameras
 
@@ -19,10 +18,40 @@ larger and smaller views.
 
 ## Warning Action Plan
 
-An [action plan] can be associated with a gate arm array, allowing one or more
-[DMS] to display appropriate warning messages.  Whenever the array state
-changes, this plan will immediately be changed to the appropriate [phase] —
-**Warning Open Phase** when fully open, otherwise **Warning Closed Phase**.
+An [action plan] can be associated with a gate arm array.  The plan's [phase]
+will be continuously updated according to the array [state](#states):
+
+- `OPEN`: `ga_open`
+- otherwise: `ga_closed`
+
+One or more [DMS actions] can be assigned to these phases to warn motorists of
+the gate arm state.
+
+## Operating
+
+An operator can request to change an array to one of three [states](#states):
+- `OPENING`
+- `WARN_CLOSE` †
+- `CLOSING`
+
+† `WARN_CLOSE` is only available when a [warning action plan] is configured.  An
+operator should request this state to warn motorists when the gates will soon be
+closing.  After checking the verification cameras, the `CLOSING` state can be
+requested.
+
+## States
+
+A gate arm array can be in one of 7 states:
+
+State        | Description           | Transition
+-------------|-----------------------|------------------
+`OPENING`    | open in progress      | `OPEN` or `FAULT`
+`OPEN`       | gate open             | N/A
+`WARN_CLOSE` | warn before closing † | N/A
+`CLOSING`    | closing in progress   | `CLOSED` or `FAULT`
+`CLOSED`     | gate closed           | N/A
+`FAULT`      | open / close fault    | N/A
+`UNKNOWN`    | commnuication failure | N/A
 
 ## Interlocks
 
@@ -70,11 +99,11 @@ list of addresses in [CIDR] notation (exact IP, or ranges specified such as
 
 ### System Disable
 
-Another gate arm security feature causes the entire _gate arm system_ to be
-disabled whenever any configuration change is made to a gate arm.  This includes
-any changes to a gate arm array, [controller] or associated [comm link].  IRIS
-will not send any command to open or close any gate arm while in this state.
-The only way to re-enable gate arm control is to create a file in the server
+Another security feature causes the entire _gate arm system_ to be disabled
+whenever a configuration change is made to any gate arm.  This includes any
+changes to a gate arm array, [controller] or associated [comm link].  IRIS will
+not send any command to open or close any gate arm while in this state.  The
+only way to re-enable gate arm control is to create a file in the server
 filesystem at `/var/lib/iris/gate_arm_enable` (using the touch command).
 
 
@@ -83,6 +112,7 @@ filesystem at `/var/lib/iris/gate_arm_enable` (using the touch command).
 [CIDR]: https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing
 [comm link]: comm_links.html
 [controller]: controllers.html
-[DMS]: dms.html
+[DMS actions]: action_plans.html#dms-actions
 [phase]: action_plans.html#plan-phases
 [system attribute]: system_attributes.html
+[warning action plan]: #action-plan
