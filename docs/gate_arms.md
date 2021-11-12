@@ -19,36 +19,37 @@ larger and smaller views.
 ## Warning Action Plan
 
 An [action plan] can be associated with a gate arm array.  The plan's [phase]
-will be continuously updated according to the array [state](#states).
+will be continuously updated according to the array state (see below).
 
 One or more [DMS actions] can be assigned to these phases to warn motorists of
 the gate arm state.
 
 ## Operating
 
-An operator can request to change an array to one of three [states](#states):
-- `OPENING`
-- `WARN_CLOSE` †
-- `CLOSING`
-
-† `WARN_CLOSE` is only available when a [warning action plan] is configured.
-Operators should request this state to warn motorists when the gates will soon
-be closing.  After checking the verification cameras, the `CLOSING` state can be
-requested.
-
-## States
-
 A gate arm array can be in one of 7 states:
 
 State        | Description           | Plan Phase  | Transition
 -------------|-----------------------|-------------|------------------
-`OPENING`    | open in progress      | `ga_closed` | `OPEN` or `FAULT`
+`OPENING`    | opening in progress   | `ga_closed` | `OPEN` or `FAULT`
 `OPEN`       | gate open             | `ga_open`   | N/A
 `WARN_CLOSE` | warn before closing † | `ga_closed` | N/A
 `CLOSING`    | closing in progress   | `ga_closed` | `CLOSED` or `FAULT`
 `CLOSED`     | gate closed           | `ga_closed` | N/A
 `FAULT`      | open / close fault    | `ga_closed` | N/A
 `UNKNOWN`    | commnuication failure | `ga_closed` | N/A
+
+An operator can request one of three states:
+- `OPENING`
+- `WARN_CLOSE`
+- `CLOSING`
+
+None of these three states can be requested automatically by the system -- an
+operator must **manually** request them.
+
+† `WARN_CLOSE` is only available when a [warning action plan] is configured.
+Operators should request this state to warn motorists when the gates will soon
+be closing.  After checking the verification cameras, the `CLOSING` state can be
+requested.
 
 ## Interlocks
 
