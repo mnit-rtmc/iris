@@ -1025,18 +1025,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * each polling period.  Also, if a scheduled message has just expired,
 	 * it will be replaced by the user message. */
 	private void updateSchedMsg() {
-		try {
-			if (isMsgScheduled() || msg_sched != null) {
-				SignMessage usm = getMsgValidated();
-				if (isMsgSource(usm, SignMsgSource.schedule) ||
-				    isMsgScheduled())
-				{
-					sendMsg(usm);
-				}
+		if (isMsgScheduled() || msg_sched != null) {
+			SignMessage usm = getMsgValidated();
+			if (isMsgSource(usm, SignMsgSource.schedule) ||
+			    isMsgScheduled())
+			{
+				sendMsgLogError(usm);
 			}
-		}
-		catch (TMSException e) {
-			logError("updateSchedMsg: " + e.getMessage());
 		}
 	}
 
@@ -1131,12 +1126,20 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Get validated user/scheduled sign message.
 	 * @return Validated sign message. */
-	private SignMessage getMsgValidated() throws TMSException {
+	private SignMessage getMsgValidated() {
 		SignMessage sm = getMsgCombined();
-		if (null == sm)
-			sm = createMsgBlank();
-		validateMsg(sm);
-		return sm;
+		if (sm != null) {
+			try {
+				validateMsg(sm);
+				return sm;
+			}
+			catch (InvalidMsgException e) {
+				// message can't be displayed,
+				// most likely due to stuck pixels
+			}
+		}
+		// no message, or invalid -- blank the sign
+		return createMsgBlank();
 	}
 
 	/** Validate a sign message */
@@ -1204,10 +1207,15 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		        sm1.getMsgPriority() > sm2.getMsgPriority());
 	}
 
-	/** Send message to DMS.
+	/** Send message to DMS, logging any exceptions.
 	 * @param sm Sign message (not null). */
-	private void sendMsg(SignMessage sm) throws TMSException {
-		sendMsg(sm, getOwner(sm, sm.getOwner()));
+	private void sendMsgLogError(SignMessage sm) {
+		try {
+			sendMsg(sm, getOwner(sm, sm.getOwner()));
+		}
+		catch (TMSException e) {
+			logError("sendMsgLogError: " + e.getMessage());
+		}
 	}
 
 	/** Send message to DMS.
