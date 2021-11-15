@@ -113,14 +113,14 @@ public class GateArmDispatcher extends IPanel
 	private final JLabel interlock_lbl = new JLabel();
 
 	/** Action to open the gate arm */
-	private final IAction open_arm = new IAction("gate.arm.open") {
+	private final IAction open_act = new IAction("gate.arm.open") {
 		protected void doActionPerformed(ActionEvent e) {
 			requestState(GateArmState.OPENING);
 		}
 	};
 
 	/** Action to warn before closing gate arm */
-	private final IAction warn_close_arm = new IAction(
+	private final IAction warn_close_act = new IAction(
 		"gate.arm.warn.close")
 	{
 		protected void doActionPerformed(ActionEvent e) {
@@ -129,7 +129,7 @@ public class GateArmDispatcher extends IPanel
 	};
 
 	/** Action to close the gate arm */
-	private final IAction close_arm = new IAction("gate.arm.close") {
+	private final IAction close_act = new IAction("gate.arm.close") {
 		protected void doActionPerformed(ActionEvent e) {
 			requestState(GateArmState.CLOSING);
 		}
@@ -277,11 +277,11 @@ public class GateArmDispatcher extends IPanel
 	/** Build the button box */
 	private Box buildButtonBox() {
 		Box box = Box.createHorizontalBox();
-		box.add(new JButton(open_arm));
+		box.add(new JButton(open_act));
 		box.add(Box.createHorizontalStrut(UI.hgap));
-		box.add(new JButton(warn_close_arm));
+		box.add(new JButton(warn_close_act));
 		box.add(Box.createHorizontalStrut(UI.hgap));
-		box.add(new JButton(close_arm));
+		box.add(new JButton(close_act));
 		return box;
 	}
 
@@ -423,11 +423,11 @@ public class GateArmDispatcher extends IPanel
 		GateArmState gas = GateArmState.fromOrdinal(ga.getArmState());
 		GateArmInterlock gai =
 			GateArmInterlock.fromOrdinal(ga.getInterlock());
-		open_arm.setEnabled(e && gas.canRequestOpening() &&
+		open_act.setEnabled(e && gas.canRequestOpening() &&
 			gai.isOpenAllowed());
-		warn_close_arm.setEnabled(e && gas.canRequestWarnClose() &&
+		warn_close_act.setEnabled(e && gas.canRequestWarnClose() &&
 			gai.isCloseAllowed());
-		close_arm.setEnabled(e && gas.canRequestClosing() &&
+		close_act.setEnabled(e && gas.canRequestClosing() &&
 			gai.isCloseAllowed());
 	}
 
@@ -436,9 +436,9 @@ public class GateArmDispatcher extends IPanel
 	public void clear() {
 		ga_array = null;
 		swap_act.setEnabled(false);
-		open_arm.setEnabled(false);
-		warn_close_arm.setEnabled(false);
-		close_arm.setEnabled(false);
+		open_act.setEnabled(false);
+		warn_close_act.setEnabled(false);
+		close_act.setEnabled(false);
 		swap_streams = false;
 		stream_pnl.setCamera(null);
 		thumb_pnl.setCamera(null);
