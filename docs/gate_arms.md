@@ -21,22 +21,23 @@ larger and smaller views.
 An [action plan] can be associated with a gate arm array.  The plan's [phase]
 will be continuously updated according to the array state (see below).
 
-One or more [DMS actions] can be assigned to these phases to warn motorists of
-the gate arm state.
+Any number of [DMS actions] can be assigned to these phases to warn motorists of
+the gate arm state.  The messages for these are displayed to the right of the
+camera view, for up to two of these signs.
 
 ## Operating
 
 Gate arms can be in one of 7 states:
 
-State        | Description           | Plan Phase  | Transition
--------------|-----------------------|-------------|------------------
-`OPENING`    | opening in progress   | `ga_closed` | `OPEN` or `FAULT`
-`OPEN`       | gate open             | `ga_open`   | N/A
-`WARN_CLOSE` | warn before closing   | `ga_closed` | N/A
-`CLOSING`    | closing in progress   | `ga_closed` | `CLOSED` or `FAULT`
-`CLOSED`     | gate closed           | `ga_closed` | N/A
-`FAULT`      | open / close fault    | `ga_closed` | N/A
-`UNKNOWN`    | commnuication failure | `ga_closed` | N/A
+State        | Description             | Plan Phase
+-------------|-------------------------|------------
+`OPENING`    | opening in progress     | `ga_closed`
+`OPEN`       | gate open               | `ga_open`
+`WARN_CLOSE` | warn before closing     | `ga_closed`
+`CLOSING`    | closing in progress     | `ga_closed`
+`CLOSED`     | gate closed             | `ga_closed`
+`FAULT`      | fault in gate operation | `ga_closed`
+`UNKNOWN`    | no commnuication        | `ga_closed`
 
 ![](images/gate_arm_dispatch.png)
 
