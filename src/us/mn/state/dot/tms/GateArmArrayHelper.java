@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,5 +38,11 @@ public class GateArmArrayHelper extends BaseHelper {
 	static public Iterator<GateArmArray> iterator() {
 		return new IteratorWrapper<GateArmArray>(namespace.iterator(
 			GateArmArray.SONAR_TYPE));
+	}
+
+	/** Check if an array has action plan signs */
+	static public boolean hasActionPlanSigns(GateArmArray ga) {
+		ActionPlan ap = ga.getActionPlan();
+		return !DmsActionHelper.findSigns(ap).isEmpty();
 	}
 }

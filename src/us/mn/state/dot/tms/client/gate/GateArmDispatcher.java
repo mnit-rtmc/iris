@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
 import static us.mn.state.dot.tms.GateArmArray.MAX_ARMS;
+import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GateArmHelper;
 import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
@@ -423,12 +424,13 @@ public class GateArmDispatcher extends IPanel
 		GateArmState gas = GateArmState.fromOrdinal(ga.getArmState());
 		GateArmInterlock gai =
 			GateArmInterlock.fromOrdinal(ga.getInterlock());
-		open_act.setEnabled(e && gas.canRequestOpening() &&
-			gai.isOpenAllowed());
-		warn_close_act.setEnabled(e && gas.canRequestWarnClose() &&
-			gai.isCloseAllowed());
-		close_act.setEnabled(e && gas.canRequestClosing() &&
-			gai.isCloseAllowed());
+		boolean has_signs = GateArmArrayHelper.hasActionPlanSigns(ga);
+		open_act.setEnabled(e && gai.isOpenAllowed() &&
+			gas.canRequestOpening());
+		warn_close_act.setEnabled(e && gai.isCloseAllowed() &&
+ 			gas.canRequestWarnClose(has_signs));
+		close_act.setEnabled(e && gai.isCloseAllowed() &&
+ 			gas.canRequestClosing(has_signs));
 	}
 
 	/** Clear all of the fields */

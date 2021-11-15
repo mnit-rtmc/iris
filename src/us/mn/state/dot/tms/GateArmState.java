@@ -50,21 +50,24 @@ public enum GateArmState {
 	}
 
 	/** Check if operator can request WARN_CLOSE */
-	public boolean canRequestWarnClose() {
+	public boolean canRequestWarnClose(boolean has_signs) {
 		switch (this) {
 		case OPEN:
-			return true;
+			return has_signs;
 		default:
 			return false;
 		}
 	}
 
 	/** Check if operator can request CLOSING */
-	public boolean canRequestClosing() {
+	public boolean canRequestClosing(boolean has_signs) {
 		switch (this) {
 		case FAULT:
 		case WARN_CLOSE:
 			return true;
+		case OPEN:
+			// only allow OPEN -> CLOSING if there are no signs
+			return !has_signs;
 		default:
 			return false;
 		}

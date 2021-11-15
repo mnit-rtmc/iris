@@ -416,6 +416,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		throws TMSException
 	{
 		GateArmInterlock gai = lock_state.getInterlock();
+		boolean has_signs = GateArmArrayHelper.hasActionPlanSigns(this);
 		if (rs == GateArmState.OPENING) {
 			if (!gai.isOpenAllowed())
 				throw INTERLOCK_CONFLICT;
@@ -425,13 +426,13 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		if (rs == GateArmState.WARN_CLOSE) {
 			if (!gai.isCloseAllowed())
 				throw INTERLOCK_CONFLICT;
-			if (cs.canRequestWarnClose())
+			if (cs.canRequestWarnClose(has_signs))
 				return rs;
 		}
 		if (rs == GateArmState.CLOSING) {
 			if (!gai.isCloseAllowed())
 				throw INTERLOCK_CONFLICT;
-			if (cs.canRequestClosing())
+			if (cs.canRequestClosing(has_signs))
 				return rs;
 		}
 		throw new ChangeVetoException("INVALID STATE CHANGE: " + cs +
