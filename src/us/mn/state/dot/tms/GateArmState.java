@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,20 +24,49 @@ package us.mn.state.dot.tms;
 public enum GateArmState {
 
 	/** Gate Arm states */
-	UNKNOWN,	/* initial unknown	no change allowed */
-	FAULT,		/* open / close fault	user: CLOSING */
-	OPENING,	/* open in progress	system: OPEN or FAULT */
-	OPEN,		/* gate open		user: WARN_CLOSE */
-	WARN_CLOSE,	/* gate open, DMS warn	user: CLOSING or OPENING */
-	CLOSING,	/* close in progress	system: CLOSED or FAULT */
-	CLOSED,		/* gate closed		user: OPENING */
-	TIMEOUT;	/* comm. timeout	no change allowed */
+	UNKNOWN,    /* no communication */
+	FAULT,      /* fault in gate operation */
+	OPENING,    /* open in progress */
+	OPEN,       /* gate open, open msg on DMS */
+	WARN_CLOSE, /* gate open, closed msg on DMS */
+	CLOSING,    /* close in progress */
+	CLOSED,     /* gate closed */
+	TIMEOUT;    /* comm. timeout */
 
 	/** Get gate arm state from an ordinal value */
 	static public GateArmState fromOrdinal(int o) {
-		if (o >= 0 && o < values().length)
-			return values()[o];
-		else
-			return UNKNOWN;
+		return (o >= 0 && o < values().length) ? values()[o] : UNKNOWN;
+	}
+
+	/** Check if operator can request OPENING */
+	public boolean canRequestOpening() {
+		switch (this) {
+		case WARN_CLOSE:
+		case CLOSED:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	/** Check if operator can request WARN_CLOSE */
+	public boolean canRequestWarnClose() {
+		switch (this) {
+		case OPEN:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	/** Check if operator can request CLOSING */
+	public boolean canRequestClosing() {
+		switch (this) {
+		case FAULT:
+		case WARN_CLOSE:
+			return true;
+		default:
+			return false;
+		}
 	}
 }

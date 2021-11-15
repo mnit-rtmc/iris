@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,17 +22,36 @@ package us.mn.state.dot.tms;
 public enum GateArmInterlock {
 
 	/** Gate Arm interlock states */
-	NONE,			/* no interlock active */
-	DENY_OPEN,		/* open disallowed */
-	DENY_CLOSE,		/* close disallowed */
-	DENY_ALL,		/* open and close disallowed */
-	SYSTEM_DISABLE;		/* system disable */
+	NONE,           /* open and close allowed */
+	DENY_OPEN,      /* open disallowed / close allowed */
+	DENY_CLOSE,     /* close disallowed / open allowed */
+	DENY_ALL,       /* open and close disallowed */
+	SYSTEM_DISABLE; /* system disable */
 
 	/** Get gate arm interlock from an ordinal value */
 	static public GateArmInterlock fromOrdinal(int o) {
-		if (o >= 0 && o < values().length)
-			return values()[o];
-		else
-			return null;
+		return (o >= 0 && o < values().length) ? values()[o] : null;
+	}
+
+	/** Check if gate arm open is allowed */
+	public boolean isOpenAllowed() {
+		switch (this) {
+		case NONE:
+		case DENY_CLOSE:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	/** Check if gate arm close is allowed */
+	public boolean isCloseAllowed() {
+		switch (this) {
+		case NONE:
+		case DENY_OPEN:
+			return true;
+		default:
+			return false;
+		}
 	}
 }

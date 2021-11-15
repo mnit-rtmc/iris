@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2020  Minnesota Department of Transportation
+ * Copyright (C) 2013-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,13 +83,13 @@ public class GateArmLockState {
 
 	/** Get the interlock enum */
 	public GateArmInterlock getInterlock() {
-		if(!system_enable)
+		if (!system_enable)
 			return GateArmInterlock.SYSTEM_DISABLE;
-		else if(isOpenDenied() && isCloseDenied())
+		else if (isOpenDenied() && isCloseDenied())
 			return GateArmInterlock.DENY_ALL;
-		else if(isOpenDenied())
+		else if (isOpenDenied())
 			return GateArmInterlock.DENY_OPEN;
-		else if(isCloseDenied())
+		else if (isCloseDenied())
 			return GateArmInterlock.DENY_CLOSE;
 		else
 			return GateArmInterlock.NONE;

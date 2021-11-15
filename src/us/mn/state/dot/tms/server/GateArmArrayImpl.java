@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2020  Minnesota Department of Transportation
+ * Copyright (C) 2013-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GateArmArrayHelper;
+import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
@@ -414,24 +415,23 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private GateArmState validateStateReq(GateArmState rs, GateArmState cs)
 		throws TMSException
 	{
+		GateArmInterlock gai = lock_state.getInterlock();
 		if (rs == GateArmState.OPENING) {
-			if (lock_state.isOpenDenied())
+			if (!gai.isOpenAllowed())
 				throw INTERLOCK_CONFLICT;
-			if (cs == GateArmState.CLOSED ||
-			   cs == GateArmState.WARN_CLOSE)
+			if (cs.canRequestOpening())
 				return rs;
 		}
 		if (rs == GateArmState.WARN_CLOSE) {
-			if (lock_state.isCloseDenied())
+			if (!gai.isCloseAllowed())
 				throw INTERLOCK_CONFLICT;
-			if (cs == GateArmState.OPEN)
+			if (cs.canRequestWarnClose())
 				return rs;
 		}
 		if (rs == GateArmState.CLOSING) {
-			if (lock_state.isCloseDenied())
+			if (!gai.isCloseAllowed())
 				throw INTERLOCK_CONFLICT;
-			if (cs == GateArmState.WARN_CLOSE ||
-			   cs == GateArmState.FAULT)
+			if (cs.canRequestClosing())
 				return rs;
 		}
 		throw new ChangeVetoException("INVALID STATE CHANGE: " + cs +

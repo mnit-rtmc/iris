@@ -421,48 +421,14 @@ public class GateArmDispatcher extends IPanel
 	private void updateButtons(GateArmArray ga) {
 		boolean e = session.isWritePermitted(ga, "armStateNext");
 		GateArmState gas = GateArmState.fromOrdinal(ga.getArmState());
-		open_arm.setEnabled(e && (gas == GateArmState.CLOSED
-		                       || gas == GateArmState.WARN_CLOSE)
-			&& isOpenAllowed(ga));
-		warn_close_arm.setEnabled(e && gas == GateArmState.OPEN &&
-			isCloseAllowed(ga));
-		close_arm.setEnabled(e && isClosePossible(gas) &&
-			isCloseAllowed(ga));
-	}
-
-	/** Check if gate arm open is allowed */
-	private boolean isOpenAllowed(GateArmArray ga) {
-		switch (GateArmInterlock.fromOrdinal(ga.getInterlock())) {
-		case DENY_OPEN:
-		case DENY_ALL:
-		case SYSTEM_DISABLE:
-			return false;
-		default:
-			return true;
-		}
-	}
-
-	/** Check if gate arm close is allowed */
-	private boolean isCloseAllowed(GateArmArray ga) {
-		switch (GateArmInterlock.fromOrdinal(ga.getInterlock())) {
-		case DENY_CLOSE:
-		case DENY_ALL:
-		case SYSTEM_DISABLE:
-			return false;
-		default:
-			return true;
-		}
-	}
-
-	/** Check if gate arm close is possible */
-	private boolean isClosePossible(GateArmState gas) {
-		switch (gas) {
-		case FAULT:
-		case WARN_CLOSE:
-			return true;
-		default:
-			return false;
-		}
+		GateArmInterlock gai =
+			GateArmInterlock.fromOrdinal(ga.getInterlock());
+		open_arm.setEnabled(e && gas.canRequestOpening() &&
+			gai.isOpenAllowed());
+		warn_close_arm.setEnabled(e && gas.canRequestWarnClose() &&
+			gai.isCloseAllowed());
+		close_arm.setEnabled(e && gas.canRequestClosing() &&
+			gai.isCloseAllowed());
 	}
 
 	/** Clear all of the fields */
