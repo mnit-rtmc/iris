@@ -26,27 +26,30 @@ the gate arm state.
 
 ## Operating
 
-A gate arm array can be in one of 7 states:
+Gate arms can be in one of 7 states:
 
 State        | Description           | Plan Phase  | Transition
 -------------|-----------------------|-------------|------------------
 `OPENING`    | opening in progress   | `ga_closed` | `OPEN` or `FAULT`
 `OPEN`       | gate open             | `ga_open`   | N/A
-`WARN_CLOSE` | warn before closing † | `ga_closed` | N/A
+`WARN_CLOSE` | warn before closing   | `ga_closed` | N/A
 `CLOSING`    | closing in progress   | `ga_closed` | `CLOSED` or `FAULT`
 `CLOSED`     | gate closed           | `ga_closed` | N/A
 `FAULT`      | open / close fault    | `ga_closed` | N/A
 `UNKNOWN`    | commnuication failure | `ga_closed` | N/A
 
-An operator can request one of three states:
-- `OPENING`
-- `WARN_CLOSE`
-- `CLOSING`
+![](images/gate_arm_dispatch.png)
+
+Depending on the current array state, one of the buttons will be enabled.  When
+an operator presses a button, its corresponding state will be requested:
+- `Open` ⇒ `OPENING`
+- `Warn Close` ⇒ `WARN_CLOSE` †
+- `Close` ⇒ `CLOSING`
 
 None of these three states can be requested automatically by the system -- an
 operator must **manually** request them.
 
-† `WARN_CLOSE` is only available when a [warning action plan] is configured.
+† `Warn Close` is only enabled if a [warning action plan] is configured.
 Operators should request this state to warn motorists when the gates will soon
 be closing.  After checking the verification cameras, the `CLOSING` state can be
 requested.
