@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GateArmState;
-import static us.mn.state.dot.tms.GateArmState.TIMEOUT;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
@@ -38,7 +37,7 @@ import us.mn.state.dot.tms.server.event.GateArmEvent;
  */
 public class GateArmImpl extends DeviceImpl implements GateArm {
 
-	/** Timeout (ms) for a comm failure to result in TIMEOUT status */
+	/** Timeout (ms) for a comm failure to result in UNKNOWN status */
 	static private final long failTimeoutMS() {
 		return 1000*SystemAttrEnum.GATE_ARM_ALERT_TIMEOUT_SECS.getInt();
 	}
@@ -208,10 +207,10 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		}
 	}
 
-	/** Check for comm timeout */
+	/** Check for comm timeout to UNKNOWN status */
 	public void checkTimeout() {
 		if (getFailMillis() > failTimeoutMS())
-			setArmStateNotify(TIMEOUT, null);
+			setArmStateNotify(GateArmState.UNKNOWN, null);
 	}
 
 	/** Send gate arm interlock settings.  Do not test checkEnabled since

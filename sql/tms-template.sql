@@ -91,7 +91,6 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 305	Gate Arm WARN CLOSE
 306	Gate Arm CLOSING
 307	Gate Arm CLOSED
-308	Gate Arm TIMEOUT
 401	Meter event
 501	Beacon ON
 502	Beacon OFF

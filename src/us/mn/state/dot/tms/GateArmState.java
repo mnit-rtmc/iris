@@ -30,8 +30,7 @@ public enum GateArmState {
 	OPEN,       /* gate open, open msg on DMS */
 	WARN_CLOSE, /* gate open, closed msg on DMS */
 	CLOSING,    /* close in progress */
-	CLOSED,     /* gate closed */
-	TIMEOUT;    /* comm. timeout */
+	CLOSED;     /* gate closed */
 
 	/** Get gate arm state from an ordinal value */
 	static public GateArmState fromOrdinal(int o) {

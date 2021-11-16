@@ -49,7 +49,7 @@ public class GateArmEvent extends BaseEvent {
 
 	/** Get corresponding event type for a gate arm state */
 	static private EventType gateArmStateEventType(GateArmState gas) {
-		switch(gas) {
+		switch (gas) {
 		case FAULT:
 			return EventType.GATE_ARM_FAULT;
 		case OPENING:
@@ -62,8 +62,6 @@ public class GateArmEvent extends BaseEvent {
 			return EventType.GATE_ARM_CLOSING;
 		case CLOSED:
 			return EventType.GATE_ARM_CLOSED;
-		case TIMEOUT:
-			return EventType.GATE_ARM_TIMEOUT;
 		default:
 			return EventType.GATE_ARM_UNKNOWN;
 		}

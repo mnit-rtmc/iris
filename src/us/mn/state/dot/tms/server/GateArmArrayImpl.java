@@ -462,7 +462,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		arm_state = gas;
 		notifyAttribute("armState");
 		updateStyles();
-		if (gas == GateArmState.TIMEOUT)
+		if (gas == GateArmState.UNKNOWN)
 			sendEmailAlert("COMMUNICATION FAILED: " + name);
 		if (gas == GateArmState.FAULT)
 			sendEmailAlert("FAULT: " + name);
@@ -525,7 +525,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		boolean open = false;
 		boolean closing = false;
 		boolean closed = false;
-		boolean timeout = false;
 		for (int i = 0; i < MAX_ARMS; i++) {
 			GateArmImpl ga = getArm(i);
 			if (ga != null && ga.isActive()) {
@@ -549,16 +548,11 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 				case CLOSED:
 					closed = true;
 					break;
-				case TIMEOUT:
-					timeout = true;
-					break;
 				}
 			}
 		}
 		if (unknown)
 			return GateArmState.UNKNOWN;
-		if (timeout)
-			return GateArmState.TIMEOUT;
 		if (fault)
 			return GateArmState.FAULT;
 		if (opening && !closing)
@@ -598,8 +592,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		GateArmSystem.checkInterlocks(getRoad());
 		GateArmSystem.updateDependants();
 		setSystemEnable(checkEnabled());
-		setOpenConflict(lock_state.isOpenDenied() &&
-			(isOpen() || isTimeout()));
+		setOpenConflict(lock_state.isOpenDenied() && isPossiblyOpen());
 		setCloseConflict(lock_state.isCloseDenied() && isClosed());
 	}
 
@@ -757,19 +750,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Test if gate arm is possibly open */
 	public boolean isPossiblyOpen() {
-		return isActive() &&
-		       arm_state != GateArmState.CLOSED &&
-		       arm_state != GateArmState.UNKNOWN;
+		return isActive() && arm_state != GateArmState.CLOSED;
 	}
 
 	/** Test if gate arm is open */
 	private boolean isOpen() {
 		return isOnline() && isPossiblyOpen();
-	}
-
-	/** Test if gate arm is in TIMEOUT state */
-	private boolean isTimeout() {
-		return isActive() && arm_state == GateArmState.TIMEOUT;
 	}
 
 	/** Test if gate arm is fully open */
