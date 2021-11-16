@@ -15,11 +15,11 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArrayHelper;
@@ -46,18 +46,11 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, GateArmImpl.class);
 		store.query("SELECT name, ga_array, idx, controller, pin, " +
-			"notes FROM iris." + SONAR_TYPE  + ";",
+			"notes, arm_state FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new GateArmImpl(
-					row.getString(1),	// name
-					row.getString(2),	// ga_array
-					row.getInt(3),		// idx
-					row.getString(4),	// controller
-					row.getInt(5),		// pin
-					row.getString(6)	// notes
-				));
+				namespace.addObject(new GateArmImpl(row));
 			}
 		});
 	}
@@ -72,6 +65,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
+		map.put("arm_state", getArmState());
 		return map;
 	}
 
@@ -94,21 +88,26 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	}
 
 	/** Create a gate arm */
-	private GateArmImpl(String n, GateArmArrayImpl a, int i,
-		ControllerImpl c, int p, String nt)
-	{
-		super(n, c, p, nt);
-		ga_array = a;
-		idx = i;
-		initTransients();
+	private GateArmImpl(ResultSet row) throws SQLException {
+		this(row.getString(1), // name
+		     row.getString(2), // ga_array
+		     row.getInt(3),    // idx
+		     row.getString(4), // controller
+		     row.getInt(5),    // pin
+		     row.getString(6), // notes
+		     row.getInt(7)     // arm_state
+		);
 	}
 
 	/** Create a gate arm */
 	private GateArmImpl(String n, String a, int i, String c, int p,
-		String nt)
+		String nt, int as)
 	{
-		this(n, (GateArmArrayImpl)GateArmArrayHelper.lookup(a), i,
-		    (ControllerImpl)ControllerHelper.lookup(c), p, nt);
+		super(n, lookupController(c), p, nt);
+		ga_array = (GateArmArrayImpl) GateArmArrayHelper.lookup(a);
+		idx = i;
+		arm_state = GateArmState.fromOrdinal(as);
+		initTransients();
 	}
 
 	/** Set gate arm array index */
@@ -222,7 +221,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	}
 
 	/** Gate arm state */
-	private transient GateArmState arm_state = GateArmState.UNKNOWN;
+	private GateArmState arm_state;
 
 	/** Request a change to the gate arm state.
 	 * @param gas Requested gate arm state.
@@ -246,6 +245,12 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		if (gas != arm_state) {
 			String owner = (o != null) ? o.getName() : null;
 			logEvent(new GateArmEvent(gas, name, owner));
+			try {
+				store.update(this, "arm_state", gas.ordinal());
+			}
+			catch (TMSException e) {
+				GateArmSystem.disable(name, "DB error");
+			}
 			arm_state = gas;
 			notifyAttribute("armState");
 		}

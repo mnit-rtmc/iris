@@ -15,22 +15,24 @@
 package us.mn.state.dot.tms;
 
 /**
- * Gate Arm state enumeration.  These states are used for gate arm arrays as
- * well as individual gate arms.  The WARN_CLOSE state only applies to gate
- * arm arrays.
+ * Gate Arm state enumeration.
+ *
+ * The ordinal values correspond to the records in the iris.gate_arm_state
+ * look-up table.  These states are used for gate arm arrays as well as
+ * individual gate arms.  The WARN_CLOSE state only applies to gate arm arrays.
  *
  * @author Douglas Lau
  */
 public enum GateArmState {
 
 	/** Gate Arm states */
-	UNKNOWN,    /* no communication */
-	FAULT,      /* fault in gate operation */
-	OPENING,    /* open in progress */
-	OPEN,       /* gate open, open msg on DMS */
-	WARN_CLOSE, /* gate open, closed msg on DMS */
-	CLOSING,    /* close in progress */
-	CLOSED;     /* gate closed */
+	UNKNOWN,    /* 0: no communication */
+	FAULT,      /* 1: fault in gate operation */
+	OPENING,    /* 2: open in progress */
+	OPEN,       /* 3: gate open, open msg on DMS */
+	WARN_CLOSE, /* 4: gate open, closed msg on DMS */
+	CLOSING,    /* 5: close in progress */
+	CLOSED;     /* 6: gate closed */
 
 	/** Get gate arm state from an ordinal value */
 	static public GateArmState fromOrdinal(int o) {

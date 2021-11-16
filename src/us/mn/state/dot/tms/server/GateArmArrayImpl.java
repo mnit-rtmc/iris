@@ -57,8 +57,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, GateArmArrayImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"prereq, camera, approach, action_plan FROM iris." +
-			SONAR_TYPE  + ";", new ResultFactory()
+			"prereq, camera, approach, action_plan, arm_state " +
+			"FROM iris." + SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GateArmArrayImpl(row));
@@ -79,6 +79,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		map.put("camera", camera);
 		map.put("approach", approach);
 		map.put("action_plan", action_plan);
+		map.put("arm_state", arm_state.ordinal());
 		return map;
 	}
 
@@ -113,23 +114,24 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		     row.getString(6),    // prereq
 		     row.getString(7),    // camera
 		     row.getString(8),    // approach
-		     row.getString(9)     // action_plan
+		     row.getString(9),    // action_plan
+		     row.getInt(10)       // arm_state
 		);
 	}
 
 	/** Create a gate arm array */
 	private GateArmArrayImpl(String n, String loc, String c, int p,
-		String nt, String pr, String cam, String ap, String pln)
+		String nt, String pr, String cam, String ap, String pln, int as)
 	{
 		this(n, lookupGeoLoc(loc), lookupController(c), p, nt, pr,
-		     lookupCamera(cam), lookupCamera(ap), lookupActionPlan(pln)
-		);
+		     lookupCamera(cam), lookupCamera(ap), lookupActionPlan(pln),
+		     as);
 	}
 
 	/** Create a gate arm array */
 	private GateArmArrayImpl(String n, GeoLocImpl loc, ControllerImpl c,
 		int p, String nt, String pr, Camera cam, Camera ap,
-		ActionPlanImpl pln)
+		ActionPlanImpl pln, int as)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
@@ -137,6 +139,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		camera = cam;
 		approach = ap;
 		action_plan = pln;
+		arm_state = GateArmState.fromOrdinal(as);
 		initTransients();
 	}
 
@@ -319,7 +322,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	}
 
 	/** Gate arm state */
-	private transient GateArmState arm_state = GateArmState.UNKNOWN;
+	private GateArmState arm_state;
 
 	/** Set the next arm state (request change) */
 	@Override
@@ -402,6 +405,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Set the arm state */
 	private void setArmState(GateArmState gas) {
+		try {
+			store.update(this, "arm_state", gas.ordinal());
+		}
+		catch (TMSException e) {
+			GateArmSystem.disable(name, "DB error, array");
+		}
 		arm_state = gas;
 		notifyAttribute("armState");
 		updateStyles();
