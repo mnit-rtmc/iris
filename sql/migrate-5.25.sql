@@ -11,4 +11,8 @@ UPDATE event.gate_arm_event SET event_desc_id = 301 WHERE event_desc_id = 308;
 -- Delete gate arm TIMEOUT event type
 DELETE FROM event.event_description WHERE event_desc_id = 308;
 
+-- Don't allow using the same action plan for more than one gate arm array
+ALTER TABLE iris._gate_arm_array
+    ADD CONSTRAINT _gate_arm_array_action_plan_key UNIQUE (action_plan);
+
 COMMIT;

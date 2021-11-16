@@ -3030,7 +3030,7 @@ CREATE TABLE iris._gate_arm_array (
 	prereq VARCHAR(20) REFERENCES iris._gate_arm_array,
 	camera VARCHAR(20) REFERENCES iris._camera,
 	approach VARCHAR(20) REFERENCES iris._camera,
-	action_plan VARCHAR(16) REFERENCES iris.action_plan,
+	action_plan VARCHAR(16) UNIQUE REFERENCES iris.action_plan,
 	open_phase VARCHAR(12) REFERENCES iris.plan_phase,
 	closed_phase VARCHAR(12) REFERENCES iris.plan_phase
 );
