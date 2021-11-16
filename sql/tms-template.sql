@@ -1172,6 +1172,8 @@ undeployed	0	\N
 alert_before	0	\N
 alert_during	0	\N
 alert_after	0	\N
+ga_open	0	\N
+ga_closed	0	\N
 \.
 
 CREATE TABLE iris.action_plan (
@@ -3030,9 +3032,7 @@ CREATE TABLE iris._gate_arm_array (
 	prereq VARCHAR(20) REFERENCES iris._gate_arm_array,
 	camera VARCHAR(20) REFERENCES iris._camera,
 	approach VARCHAR(20) REFERENCES iris._camera,
-	action_plan VARCHAR(16) UNIQUE REFERENCES iris.action_plan,
-	open_phase VARCHAR(12) REFERENCES iris.plan_phase,
-	closed_phase VARCHAR(12) REFERENCES iris.plan_phase
+	action_plan VARCHAR(16) UNIQUE REFERENCES iris.action_plan
 );
 
 ALTER TABLE iris._gate_arm_array ADD CONSTRAINT _gate_arm_array_fkey
@@ -3052,7 +3052,7 @@ CREATE TRIGGER gate_arm_array_notify_trig
 
 CREATE VIEW iris.gate_arm_array AS
 	SELECT _gate_arm_array.name, geo_loc, controller, pin, notes, prereq,
-	       camera, approach, action_plan, open_phase, closed_phase
+	       camera, approach, action_plan
 	FROM iris._gate_arm_array JOIN iris._device_io
 	ON _gate_arm_array.name = _device_io.name;
 
@@ -3062,11 +3062,9 @@ BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._gate_arm_array (name, geo_loc, notes, prereq, camera,
-	                                  approach, action_plan, open_phase,
-	                                  closed_phase)
+	                                  approach, action_plan)
 	    VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.prereq, NEW.camera,
-	            NEW.approach, NEW.action_plan, NEW.open_phase,
-	            NEW.closed_phase);
+	            NEW.approach, NEW.action_plan);
 	RETURN NEW;
 END;
 $gate_arm_array_insert$ LANGUAGE plpgsql;
@@ -3086,9 +3084,7 @@ BEGIN
 	       prereq = NEW.prereq,
 	       camera = NEW.camera,
 	       approach = NEW.approach,
-	       action_plan = NEW.action_plan,
-	       open_phase = NEW.open_phase,
-	       closed_phase = NEW.closed_phase
+	       action_plan = NEW.action_plan
 	WHERE name = OLD.name;
 	RETURN NEW;
 END;
@@ -3107,8 +3103,7 @@ CREATE VIEW gate_arm_array_view AS
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.landmark, l.lat, l.lon, l.corridor, l.location,
 	       ga.controller, ga.pin, ctr.comm_link, ctr.drop_id, ctr.condition,
-	       ga.prereq, ga.camera, ga.approach, ga.action_plan, ga.open_phase,
-	       ga.closed_phase
+	       ga.prereq, ga.camera, ga.approach, ga.action_plan
 	FROM iris.gate_arm_array ga
 	LEFT JOIN geo_loc_view l ON ga.geo_loc = l.name
 	LEFT JOIN controller_view ctr ON ga.controller = ctr.name;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2018  Minnesota Department of Transportation
+ * Copyright (C) 2013-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@ import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GateArmState;
-import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
@@ -131,42 +130,6 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	private final JComboBox<ActionPlan> plan_cbx =
 		new JComboBox<ActionPlan>();
 
-	/** Open phase combo box model */
-	private final IComboBoxModel<PlanPhase> open_mdl;
-
-	/** Open phase action */
-	private final IAction open_act = new IAction("gate.arm.open.phase") {
-		protected void doActionPerformed(ActionEvent e) {
-			proxy.setOpenPhase(open_mdl.getSelectedProxy());
-		}
-		@Override
-		protected void doUpdateSelected() {
-			open_mdl.setSelectedItem(proxy.getOpenPhase());
-		}
-	};
-
-	/** Open phase combo box */
-	private final JComboBox<PlanPhase> open_cbx =
-		new JComboBox<PlanPhase>();
-
-	/** Closed phase combo box model */
-	private final IComboBoxModel<PlanPhase> closed_mdl;
-
-	/** Closed phase action */
-	private final IAction closed_act = new IAction("gate.arm.closed.phase"){
-		protected void doActionPerformed(ActionEvent e) {
-			proxy.setClosedPhase(closed_mdl.getSelectedProxy());
-		}
-		@Override
-		protected void doUpdateSelected() {
-			closed_mdl.setSelectedItem(proxy.getClosedPhase());
-		}
-	};
-
-	/** Closed phase combo box */
-	private final JComboBox<PlanPhase> closed_cbx =
-		new JComboBox<PlanPhase>();
-
 	/** Gate arm table panel */
 	private final ProxyTablePanel<GateArm> ga_pnl;
 
@@ -205,9 +168,6 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		prereq_mdl = new IComboBoxModel<GateArmArray>(
 			state.getGateArmArrayModel());
 		plan_mdl = new IComboBoxModel<ActionPlan>(state.getPlanModel());
-		open_mdl = new IComboBoxModel<PlanPhase>(state.getPhaseModel());
-		closed_mdl = new IComboBoxModel<PlanPhase>(
-			state.getPhaseModel());
 		loc_pnl = new LocationPanel(s);
 		ga_pnl = new ProxyTablePanel<GateArm>(new GateArmTableModel(
 			s, ga));
@@ -267,19 +227,11 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		prereq_cbx.setAction(prereq_act);
 		plan_cbx.setModel(plan_mdl);
 		plan_cbx.setAction(plan_act);
-		open_cbx.setModel(open_mdl);
-		open_cbx.setAction(open_act);
-		closed_cbx.setModel(closed_mdl);
-		closed_cbx.setAction(closed_act);
 		IPanel p = new IPanel();
 		p.add("gate.arm.prereq");
 		p.add(prereq_cbx, Stretch.LAST);
 		p.add("gate.arm.plan");
 		p.add(plan_cbx, Stretch.LAST);
-		p.add("gate.arm.open.phase");
-		p.add(open_cbx, Stretch.LAST);
-		p.add("gate.arm.closed.phase");
-		p.add(closed_cbx, Stretch.LAST);
 		return p;
 	}
 
@@ -300,8 +252,6 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	protected void dispose() {
 		// Prevent plan being cleared on close
 		plan_act.setEnabled(false);
-		open_act.setEnabled(false);
-		closed_act.setEnabled(false);
 		ga_pnl.dispose();
 		loc_pnl.dispose();
 		super.dispose();
@@ -316,8 +266,6 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		approach_act.setEnabled(canWrite("approach"));
 		prereq_act.setEnabled(canWrite("prereq"));
 		plan_act.setEnabled(canWrite("actionPlan"));
-		open_act.setEnabled(canWrite("openPhase"));
-		closed_act.setEnabled(canWrite("closedPhase"));
 		disable.setEnabled(canWrite("deviceRequest"));
 	}
 
@@ -334,10 +282,6 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 			prereq_act.updateSelected();
 		if (null == a || a.equals("actionPlan"))
 			plan_act.updateSelected();
-		if (null == a || a.equals("openPhase"))
-			open_act.updateSelected();
-		if (null == a || a.equals("closedPhase"))
-			closed_act.updateSelected();
 		if (a == null || a.equals("armState")) {
 			arm_state_lbl.setText(GateArmState.fromOrdinal(
 				proxy.getArmState()).toString());

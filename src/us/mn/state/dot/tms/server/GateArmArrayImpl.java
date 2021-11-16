@@ -57,9 +57,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, GateArmArrayImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"prereq, camera, approach, action_plan, open_phase, " +
-			"closed_phase FROM iris." + SONAR_TYPE  + ";",
-			new ResultFactory()
+			"prereq, camera, approach, action_plan FROM iris." +
+			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GateArmArrayImpl(row));
@@ -80,8 +79,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		map.put("camera", camera);
 		map.put("approach", approach);
 		map.put("action_plan", action_plan);
-		map.put("open_phase", open_phase);
-		map.put("closed_phase", closed_phase);
 		return map;
 	}
 
@@ -116,25 +113,23 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		     row.getString(6),    // prereq
 		     row.getString(7),    // camera
 		     row.getString(8),    // approach
-		     row.getString(9),    // action_plan
-		     row.getString(10),   // open_phase
-		     row.getString(11));  // closed_phase
+		     row.getString(9)     // action_plan
+		);
 	}
 
 	/** Create a gate arm array */
 	private GateArmArrayImpl(String n, String loc, String c, int p,
-		String nt, String pr, String cam, String ap, String pln,
-		String op, String cp)
+		String nt, String pr, String cam, String ap, String pln)
 	{
 		this(n, lookupGeoLoc(loc), lookupController(c), p, nt, pr,
-		     lookupCamera(cam), lookupCamera(ap), lookupActionPlan(pln),
-		     lookupPlanPhase(op), lookupPlanPhase(cp));
+		     lookupCamera(cam), lookupCamera(ap), lookupActionPlan(pln)
+		);
 	}
 
 	/** Create a gate arm array */
 	private GateArmArrayImpl(String n, GeoLocImpl loc, ControllerImpl c,
 		int p, String nt, String pr, Camera cam, Camera ap,
-		ActionPlanImpl pln, PlanPhaseImpl op, PlanPhaseImpl cp)
+		ActionPlanImpl pln)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
@@ -142,8 +137,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		camera = cam;
 		approach = ap;
 		action_plan = pln;
-		open_phase = op;
-		closed_phase = cp;
 		initTransients();
 	}
 
@@ -276,56 +269,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	@Override
 	public ActionPlan getActionPlan() {
 		return action_plan;
-	}
-
-	/** Action plan phase for OPEN state */
-	private PlanPhaseImpl open_phase;
-
-	/** Set the action plan phase for OPEN state */
-	@Override
-	public void setOpenPhase(PlanPhase p) {
-		GateArmSystem.disable(name, "set openPhase");
-		if (p instanceof PlanPhaseImpl)
-			open_phase = (PlanPhaseImpl) p;
-	}
-
-	/** Set the action plan phase for OPEN state */
-	public void doSetOpenPhase(PlanPhase p) throws TMSException {
-		if (p != open_phase) {
-			store.update(this, "open_phase", p);
-			setOpenPhase(p);
-		}
-	}
-
-	/** Get the action plan phase for OPEN state */
-	@Override
-	public PlanPhase getOpenPhase() {
-		return open_phase;
-	}
-
-	/** Action plan phase for CLOSED state */
-	private PlanPhaseImpl closed_phase;
-
-	/** Set the action plan phase for CLOSED state */
-	@Override
-	public void setClosedPhase(PlanPhase p) {
-		GateArmSystem.disable(name, "set closedPhase");
-		if (p instanceof PlanPhaseImpl)
-			closed_phase = (PlanPhaseImpl) p;
-	}
-
-	/** Set the action plan phase for CLOSED state */
-	public void doSetClosedPhase(PlanPhase p) throws TMSException {
-		if (p != closed_phase) {
-			store.update(this, "closed_phase", p);
-			setClosedPhase(p);
-		}
-	}
-
-	/** Get the action plan phase for CLOSED state */
-	@Override
-	public PlanPhase getClosedPhase() {
-		return closed_phase;
 	}
 
 	/** Array of all gate arms */
@@ -484,11 +427,11 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Update the action plan phase */
 	private void updatePlanPhase(ActionPlanImpl ap) throws TMSException {
 		if (isMsgOpen()) {
-			PlanPhase op = open_phase;
+			PlanPhase op = lookupPlanPhase("ga_open");
 			if (op != null && ap.setPhaseNotify(op))
 				updateDmsActions();
 		} else {
-			PlanPhase cp = closed_phase;
+			PlanPhase cp = lookupPlanPhase("ga_closed");
 			if (cp != null && ap.setPhaseNotify(cp))
 				updateDmsActions();
 		}
