@@ -541,6 +541,19 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		      : null;
 	}
 
+	/** Truncate a string to a given maximum length.
+	 * @param arg String to be truncated.
+	 * @param maxlen Maximum length of string (characters).
+	 * @return Truncated string, or null. */
+	static protected String truncateString(String arg, int maxlen) {
+		if (arg != null) {
+			return (arg.length() <= maxlen)
+			      ? arg
+			      : arg.substring(0, maxlen);
+		} else
+			return null;
+	}
+
 	/** Log an event */
 	static public void logEvent(final BaseEvent ev) {
 		FLUSH.addJob(new Job() {

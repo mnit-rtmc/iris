@@ -46,8 +46,8 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, GateArmImpl.class);
 		store.query("SELECT name, ga_array, idx, controller, pin, " +
-			"notes, arm_state FROM iris." + SONAR_TYPE  + ";",
-			new ResultFactory()
+			"notes, arm_state, fault FROM iris." + SONAR_TYPE  +
+			";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GateArmImpl(row));
@@ -66,6 +66,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		map.put("pin", pin);
 		map.put("notes", notes);
 		map.put("arm_state", getArmState());
+		map.put("fault", fault);
 		return map;
 	}
 
@@ -95,18 +96,20 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		     row.getString(4), // controller
 		     row.getInt(5),    // pin
 		     row.getString(6), // notes
-		     row.getInt(7)     // arm_state
+		     row.getInt(7),    // arm_state
+		     row.getString(8)  // fault
 		);
 	}
 
 	/** Create a gate arm */
 	private GateArmImpl(String n, String a, int i, String c, int p,
-		String nt, int as)
+		String nt, int as, String flt)
 	{
 		super(n, lookupController(c), p, nt);
 		ga_array = (GateArmArrayImpl) GateArmArrayHelper.lookup(a);
 		idx = i;
 		arm_state = GateArmState.fromOrdinal(as);
+		fault = flt;
 		initTransients();
 	}
 
@@ -249,7 +252,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 				store.update(this, "arm_state", gas.ordinal());
 			}
 			catch (TMSException e) {
-				GateArmSystem.disable(name, "DB error");
+				logError("setArmStateNotify: " +e.getMessage());
 			}
 			arm_state = gas;
 			notifyAttribute("armState");
@@ -271,6 +274,30 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Check if gate arm open is locked */
 	public boolean isOpenLocked() {
 		return ga_array.getInterlockEnum().isOpenLocked();
+	}
+
+	/** Fault description */
+	private String fault;
+
+	/** Get fault description (or null) */
+	@Override
+	public String getFault() {
+		return fault;
+	}
+
+	/** Set fault description */
+	public void setFaultNotify(String flt) {
+		flt = truncateString(flt, 32);
+		if (!objectEquals(flt, fault)) {
+			try {
+				store.update(this, "fault", flt);
+			}
+			catch (TMSException e) {
+				logError("setFaultNotify: " + e.getMessage());
+			}
+			fault = flt;
+			notifyAttribute("fault");
+		}
 	}
 
 	/** Get the gate arm poller */

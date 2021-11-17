@@ -66,13 +66,13 @@ Two types of constraints are available for this purpose:
 - **Open interlock**: prevents opening the gate arm
 - **Close interlock**: prevents closing the gate arm
 
-**Opposing Traffic**: When a gate arm is open, all other gate on the same
-roadway, but in any other direction will have an _open interlock_.
+**Opposing Traffic**: When a gate is open, all others on the same roadway, but
+in any other direction will have an _open interlock_.
 
-**Prerequisites**: An array _prerequisite_ prevents a sequence of gates from
-opening in the wrong order.  If the prerequisite is not `OPEN`, the array will
-have an _open interlock_.  Once they are both open, the prerequisite will have a
-_close interlock_ until the dependent array is closed.
+**Prerequisites** prevent a sequence of gates from opening in the wrong order.
+If a dependent array's prerequisite is not `OPEN`, the array will have an _open
+interlock_.  Once they are both open, the prerequisite will have a _close
+interlock_ until the dependent is closed.
 
 If a gate arm is in any state other than `CLOSED`, it is treated as **possibly
 open**, and interlock constraints will be checked.

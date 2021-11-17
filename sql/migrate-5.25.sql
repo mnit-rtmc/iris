@@ -66,6 +66,9 @@ UPDATE iris._gate_arm SET arm_state = 0;
 ALTER TABLE iris._gate_arm
     ALTER COLUMN arm_state SET NOT NULL;
 
+-- Add fault to gate arm
+ALTER TABLE iris._gate_arm ADD COLUMN fault VARCHAR(32);
+
 -- Add arm_state to gate arm array
 ALTER TABLE iris._gate_arm_array
     ADD COLUMN arm_state INTEGER REFERENCES iris.gate_arm_state;
@@ -147,7 +150,8 @@ CREATE VIEW gate_arm_array_view AS
 GRANT SELECT ON gate_arm_array_view TO PUBLIC;
 
 CREATE VIEW iris.gate_arm AS
-	SELECT _gate_arm.name, ga_array, idx, controller, pin, notes, arm_state
+	SELECT _gate_arm.name, ga_array, idx, controller, pin, notes, arm_state,
+	       fault
 	FROM iris._gate_arm JOIN iris._device_io
 	ON _gate_arm.name = _device_io.name;
 
@@ -156,8 +160,11 @@ CREATE FUNCTION iris.gate_arm_insert() RETURNS TRIGGER AS
 BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._gate_arm (name, ga_array, idx, notes, arm_state)
-	     VALUES (NEW.name, NEW.ga_array, NEW.idx, NEW.notes, NEW.arm_state);
+	INSERT INTO iris._gate_arm (
+	    name, ga_array, idx, notes, arm_state, fault
+	) VALUES (
+	    NEW.name, NEW.ga_array, NEW.idx, NEW.notes, NEW.arm_state, NEW.fault
+	);
 	RETURN NEW;
 END;
 $gate_arm_insert$ LANGUAGE plpgsql;
@@ -176,7 +183,8 @@ BEGIN
 	   SET ga_array = NEW.ga_array,
 	       idx = NEW.idx,
 	       notes = NEW.notes,
-	       arm_state = NEW.arm_state
+	       arm_state = NEW.arm_state,
+	       fault = NEW.fault
 	WHERE name = OLD.name;
         RETURN NEW;
 END;
@@ -191,11 +199,12 @@ CREATE TRIGGER gate_arm_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.device_delete();
 
 CREATE VIEW gate_arm_view AS
-	SELECT g.name, g.ga_array, g.notes, gas.description AS arm_state,
-	       ga.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
-	       l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location,
+	SELECT g.name, g.ga_array, g.notes, ga.geo_loc,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       l.landmark, l.lat, l.lon, l.corridor, l.location,
 	       g.controller, g.pin, ctr.comm_link, ctr.drop_id, ctr.condition,
-	       ga.prereq, ga.camera, ga.approach
+	       ga.prereq, ga.camera, ga.approach,
+	       gas.description AS arm_state, fault
 	FROM iris.gate_arm g
 	JOIN iris.gate_arm_state gas ON g.arm_state = gas.id
 	JOIN iris.gate_arm_array ga ON g.ga_array = ga.name
