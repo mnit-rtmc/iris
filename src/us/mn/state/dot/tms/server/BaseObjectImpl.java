@@ -523,26 +523,13 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		return nf.format(value);
 	}
 
-	/** Get a Boolean value from a particular column of a ResultSet. Supports
-	 *  returning null values.
-	 */
-	static protected Boolean getBoolean(ResultSet row, int columnIndex)
-			throws SQLException {
-		boolean b = row.getBoolean(columnIndex);
-		if (row.wasNull())
-			return null;
-		return b;
-	}
-
-	/** Get a String array from a particular column of a ResultSet. Guards
-	 *  against null pointer exceptions.
-	 */
+	/** Get a String array from a particular column of a ResultSet.
+	 * Guards against null pointer exceptions. */
 	static protected String[] getStringArray(ResultSet row, int columnIndex)
-			throws SQLException {
+		throws SQLException
+	{
 		Array arr = row.getArray(columnIndex);
-		if (!row.wasNull())
-			return (String[]) arr.getArray();
-		return null;
+		return row.wasNull() ? null : (String []) arr.getArray();
 	}
 
 	/** Get an array representation of a string given a string array.  If
