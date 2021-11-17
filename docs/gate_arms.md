@@ -55,36 +55,32 @@ Operators should request this state to warn motorists when the gates will soon
 be closing.  After checking the verification cameras, the `CLOSING` state can be
 requested.
 
+If communication is lost to a gate arm for longer than the value of
+`gate_arm_alert_timeout_secs` [system attribute], its state will be set to
+`UNKNOWN`.
+
 ## Interlocks
 
-Great care must be taken to prevent traffic conflicts when operating gate arms.
-Two types of _interlock_ are available for this purpose.  An **open interlock**
-is a constraint which prevents the gate arm from being opened.  Similarly, a
-**close interlock** prevents the gate arm from being closed.
+Care must be taken to prevent traffic conflicts when operating gate arms.
+Two types of constraints are available for this purpose:
+- **Open interlock**: prevents the gate arm from opening
+- **Close interlock**: prevents the gate arm from closing
 
-When a gate arm is open, all other gate arms on the same roadway, but in any
-other direction will have an _open interlock_.
+**Opposing Directions**: When a gate arm is open, all other gate arms on the
+same roadway, but in any other direction will have an _open interlock_.
 
-### Prerequesites
+**Prerequesites**: Each gate arm array can be assigned a _prerequisite_ array
+(on the same roadway and direction).  This configuration prevents the gate arms
+from opening until the prerequisite has been opened, using an _open interlock_.
+Once an array and its prerequisite are both open, the prerequisite array will
+have a _close interlock_ until the other array is closed.
 
-Each gate arm array can be assigned a _prerequisite_ array (on the same roadway
-and direction).  This configuration prevents the gate arms from opening until
-the prerequisite has been opened, using an _open interlock_.  Once an array and
-its prerequisite are both open, the prerequisite array will have a _close
-interlock_ until the other array is closed.
+If a gate arm is in any state other than `CLOSED`, it is treated as **possibly
+open**, and interlock constraints will be checked.
 
-### Conflicts
-
-An **open conflict** exists when an _open interlock_ constraint is broken.
-Similarly, a **close conflict** exists for _close interlock_ constraints.  IRIS
-will not automatically try to resolve conflicts.
-
-If a conflict is detected, an _alert_ email will be sent to the address in the
+If a constraint is broken, IRIS will not automatically try to resolve it.
+Instead, an _alert_ email will be sent to the address in the
 `email_recipient_gate_arm` [system attribute].
-
-If communication is lost to a gate arm, the state will be unknown.  After an
-interval equal to the `gate_arm_alert_timeout_secs` [system attribute], it will
-be treated as **possibly open**, and interlock conflicts will be checked.
 
 ## Security
 
