@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2018  Minnesota Department of Transportation
+ * Copyright (C) 2013-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,15 +77,15 @@ public class OpQueryGateStatus extends OpSTC {
 			mess.add(status);
 			mess.queryProps();
 			updateStatus();
-			// FIXME: return QueryFaults phase if faults exist
-			return this;
+			return status.hasFaults() ? new QueryFaults() : this;
 		}
 	}
 
 	/** Update controller status */
 	private void updateStatus() {
+		if (!status.hasFaults())
+			gate_arm.setFaultNotify(null);
 		gate_arm.setArmStateNotify(status.getState(), null);
-		// FIXME: only clear maint status here if no faults exist
 		setMaintStatus(status.getMaintStatus());
 		updateMaintStatus();
 		if (shouldUpdateOpCount()) {
@@ -109,9 +109,7 @@ public class OpQueryGateStatus extends OpSTC {
 			FaultProperty faults = new FaultProperty(password());
 			mess.add(faults);
 			mess.queryProps();
-			// FIXME: clear the faults somehow???
-			setMaintStatus(faults.getFaults());
-			updateMaintStatus();
+			gate_arm.setFaultNotify(faults.getFaults());
 			return new QueryStatus();
 		}
 	}

@@ -274,7 +274,7 @@ public class StatusProperty extends STCProperty {
 	}
 
 	/** Test if the gate arm has faults */
-	private boolean hasFaults() {
+	public boolean hasFaults() {
 		return faults ||
 		       CommandStatus.isFault(command_state) ||
 		       OperatorStatus.isFault(operator_state);
