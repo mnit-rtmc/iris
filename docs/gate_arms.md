@@ -63,17 +63,16 @@ If communication is lost to a gate arm for longer than the value of
 
 Care must be taken to prevent traffic conflicts when operating gate arms.
 Two types of constraints are available for this purpose:
-- **Open interlock**: prevents the gate arm from opening
-- **Close interlock**: prevents the gate arm from closing
+- **Open interlock**: prevents opening the gate arm
+- **Close interlock**: prevents closing the gate arm
 
-**Opposing Directions**: When a gate arm is open, all other gate arms on the
-same roadway, but in any other direction will have an _open interlock_.
+**Opposing Traffic**: When a gate arm is open, all other gate on the same
+roadway, but in any other direction will have an _open interlock_.
 
-**Prerequesites**: Each gate arm array can be assigned a _prerequisite_ array
-(on the same roadway and direction).  This configuration prevents the gate arms
-from opening until the prerequisite has been opened, using an _open interlock_.
-Once an array and its prerequisite are both open, the prerequisite array will
-have a _close interlock_ until the other array is closed.
+**Prerequisites**: An array _prerequisite_ prevents a sequence of gates from
+opening in the wrong order.  If the prerequisite is not `OPEN`, the array will
+have an _open interlock_.  Once they are both open, the prerequisite will have a
+_close interlock_ until the dependent array is closed.
 
 If a gate arm is in any state other than `CLOSED`, it is treated as **possibly
 open**, and interlock constraints will be checked.
