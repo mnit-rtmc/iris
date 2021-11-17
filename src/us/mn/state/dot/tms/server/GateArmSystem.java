@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2020  Minnesota Department of Transportation
+ * Copyright (C) 2013-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -173,46 +173,46 @@ public class GateArmSystem {
 		return d;
 	}
 
-	/** Update all dependant gate arm arrays.  NOTE: this does three
-	 * linear scans of all gate arm arrays -- it doesn't scale very well. */
-	static public void updateDependants() {
-		clearDependants();
-		checkDependants();
-		setDependants();
+	/** Update all gate arm array dependencies.
+	 * NOTE: this does three linear scans of all gate arm arrays */
+	static public void updateDependencies() {
+		beginDependencies();
+		checkDependencies();
+		commitDependencies();
 	}
 
-	/** Clear dependant open flags for all gate arm arrays */
-	static private void clearDependants() {
+	/** Begin dependency transaction for all gate arm arrays */
+	static private void beginDependencies() {
 		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
 		while (it.hasNext()) {
 			GateArmArray g = it.next();
 			if (g instanceof GateArmArrayImpl) {
 				GateArmArrayImpl ga = (GateArmArrayImpl) g;
-				ga.clearDependant();
+				ga.beginDependencies();
 			}
 		}
 	}
 
-	/** Check dependant open flags for all gate arm arrays */
-	static private void checkDependants() {
+	/** Check dependencies for all gate arm arrays */
+	static private void checkDependencies() {
 		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
 		while (it.hasNext()) {
 			GateArmArray g = it.next();
 			if (g instanceof GateArmArrayImpl) {
 				GateArmArrayImpl ga = (GateArmArrayImpl) g;
-				ga.checkDependant();
+				ga.checkDependencies();
 			}
 		}
 	}
 
-	/** Set dependant open flags for all gate arm arrays */
-	static private void setDependants() {
+	/** Commit dependency transaction for all gate arm arrays */
+	static private void commitDependencies() {
 		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
 		while (it.hasNext()) {
 			GateArmArray g = it.next();
 			if (g instanceof GateArmArrayImpl) {
 				GateArmArrayImpl ga = (GateArmArrayImpl) g;
-				ga.setDependant();
+				ga.commitDependencies();
 			}
 		}
 	}

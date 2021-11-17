@@ -542,7 +542,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	public void updateStyles() {
 		super.updateStyles();
 		GateArmSystem.checkInterlocks(getRoad());
-		GateArmSystem.updateDependants();
+		GateArmSystem.updateDependencies();
 		setSystemEnable(checkEnabled());
 		setOpenConflict(lock_state.isOpenDenied() && isPossiblyOpen());
 		setCloseConflict(lock_state.isCloseDenied() && isClosed());
@@ -577,49 +577,31 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		return lock_state.isOpenInterlock();
 	}
 
-	/** Check open/close state of prerequisite gate arm array */
-	private void checkPrerequisite() {
+	/** Begin dependency transaction */
+	public void beginDependencies() {
+		lock_state.beginDependencies();
+	}
+
+	/** Check gate arm array dependencies */
+	public void checkDependencies() {
 		GateArmArrayImpl pr = getPrerequisite();
-		setPrereqClosed(pr != null && !pr.isFullyOpen());
+		if (pr != null) {
+			if (isPossiblyOpen())
+				pr.lock_state.setDependentOpen();
+			lock_state.setPrereqClosed(!pr.isFullyOpen());
+		}
 	}
 
-	/** Set flag to indicate prerequisite closed */
-	private void setPrereqClosed(boolean c) {
-		if (lock_state.setPrereqClosed(c))
-			setInterlockNotify();
-	}
-
-	/** Dependant open flag */
-	private transient boolean dep_open = false;
-
-	/** Clear dependant open flag */
-	public void clearDependant() {
-		dep_open = false;
-	}
-
-	/** Check open/close state of dependant gate arm array */
-	public void checkDependant() {
-		GateArmArrayImpl pr = getPrerequisite();
-		if (pr != null)
-			pr.dep_open = (pr.dep_open || isPossiblyOpen());
-	}
-
-	/** Set dependant open state */
-	public void setDependant() {
-		setDependantOpen(dep_open);
-		checkPrerequisite();
-	}
-
-	/** Set flag to indicate dependant gate arm open */
-	private void setDependantOpen(boolean o) {
-		if (lock_state.setDependantOpen(o))
-			setInterlockNotify();
+	/** Commit dependcy transaction */
+	public void commitDependencies() {
+		lock_state.commitDependencies();
+		setInterlockNotify();
 	}
 
 	/** Set flag to enable gate arm system */
 	public void setSystemEnable(boolean e) {
-		if (lock_state.setSystemEnable(e && isActive()))
-			setInterlockNotify();
+		lock_state.setSystemEnable(e && isActive());
+		setInterlockNotify();
 	}
 
 	/** Open conflict detected flag.  This is initially set to true because
@@ -661,16 +643,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	}
 
 	/** Set the valid open direction for road.
-	 * @param d Valid open direction; 0 for any, -1 for none */
-	public void setOpenDirection(int d) {
+	 * @param dir Valid open direction; 0 for any, -1 for none */
+	public void setOpenDirection(int dir) {
 		int gd = getRoadDir();
-		setOpposingOpen(d != 0 && d != gd);
-	}
-
-	/** Set flag to indicate opposing direction open */
-	private void setOpposingOpen(boolean o) {
-		if (lock_state.setOpposingOpen(o))
-			setInterlockNotify();
+		boolean open = (dir != 0) && (dir != gd);
+		lock_state.setOpposingOpen(open);
+		setInterlockNotify();
 	}
 
 	/** Get the active status */

@@ -26,37 +26,25 @@ public class GateArmLockState {
 	/** Flag to enable gate arm system */
 	private boolean system_enable = false;
 
-	/** Set flag to enable gate arm system.
-	 * @param e True to enable gate arm system, or false to disable.
-	 * @return True if interlock value changed. */
-	public boolean setSystemEnable(boolean e) {
-		GateArmInterlock gai = getInterlock();
-		system_enable = e;
-		return gai != getInterlock();
+	/** Set flag to enable gate arm system */
+	public void setSystemEnable(boolean enable) {
+		system_enable = enable;
 	}
 
 	/** Flag to indicate opposing direction open */
 	private boolean opposing_open = false;
 
-	/** Set flag to indicate opposing direction open.
-	 * @param o True if opposing gate open; false otherwise.
-	 * @return True if interlock value changed. */
-	public boolean setOpposingOpen(boolean o) {
-		GateArmInterlock gai = getInterlock();
-		opposing_open = o;
-		return gai != getInterlock();
+	/** Set flag to indicate opposing direction open */
+	public void setOpposingOpen(boolean open) {
+		opposing_open = open;
 	}
 
 	/** Flag to indicate prerequisite gate arm closed (not fully open) */
 	private boolean prereq_closed = false;
 
-	/** Set flag to indicate prerequisite gate arm closed (not fully open).
-	 * @param c True if prerequisite gate closed; false otherwise.
-	 * @return True if interlock value changed. */
-	public boolean setPrereqClosed(boolean c) {
-		GateArmInterlock gai = getInterlock();
-		prereq_closed = c;
-		return gai != getInterlock();
+	/** Set flag to indicate prerequisite arm closed (not fully open) */
+	public void setPrereqClosed(boolean closed) {
+		prereq_closed = closed;
 	}
 
 	/** Check if gate open is denied */
@@ -64,21 +52,33 @@ public class GateArmLockState {
 		return opposing_open || prereq_closed;
 	}
 
-	/** Flag to indicate dependant gate arm open */
-	private boolean dependant_open = false;
+	/** Flag to indicate dependent gate arm open */
+	private boolean dependent_open = false;
 
-	/** Set flag to indicate dependant gate arm open.
-	 * @param o True if dependant gate open; false otherwise.
-	 * @return True if interlock value changed. */
-	public boolean setDependantOpen(boolean o) {
-		GateArmInterlock gai = getInterlock();
-		dependant_open = o;
-		return gai != getInterlock();
+	/** Dependency transaction flag.
+	 *
+	 * Used during dependency check transactions, between calls to
+	 * beginDependencies and commitDependencies */
+	private boolean dep_open_temp = false;
+
+	/** Begin dependency transaction */
+	public void beginDependencies() {
+		dep_open_temp = false;
+	}
+
+	/** Set temp flag indicating dependent gate arm open */
+	public void setDependentOpen() {
+		dep_open_temp = true;
+	}
+
+	/** Commit dependcy transaction */
+	public void commitDependencies() {
+		dependent_open = dep_open_temp;
 	}
 
 	/** Check if gate close is denied */
 	public boolean isCloseDenied() {
-		return dependant_open;
+		return dependent_open;
 	}
 
 	/** Get the interlock enum */
