@@ -70,7 +70,7 @@ Two types of constraints are available for this purpose:
 in any other direction will have an _open interlock_.
 
 **Prerequisites** prevent a sequence of gates from opening in the wrong order.
-If a dependent array's prerequisite is not `OPEN`, the array will have an _open
+If a dependent array's prerequisite is not `OPEN`, it will have an _open
 interlock_.  Once they are both open, the prerequisite will have a _close
 interlock_ until the dependent is closed.
 

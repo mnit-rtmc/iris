@@ -85,6 +85,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Create a new gate arm with a string name */
 	public GateArmImpl(String n) throws TMSException, SonarException {
 		super(n);
+		arm_state = GateArmState.UNKNOWN;
 		GateArmSystem.disable(n, "create gate arm");
 	}
 

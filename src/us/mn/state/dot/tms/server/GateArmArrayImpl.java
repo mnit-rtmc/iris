@@ -100,6 +100,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Create a new gate arm array with a string name */
 	public GateArmArrayImpl(String n) throws TMSException, SonarException {
 		super(n);
+		arm_state = GateArmState.UNKNOWN;
+		interlock = GateArmInterlock.NONE;
 		GeoLocImpl g = new GeoLocImpl(name, SONAR_TYPE);
 		g.notifyCreate();
 		geo_loc = g;

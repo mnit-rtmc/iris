@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2020  Minnesota Department of Transportation
+ * Copyright (C) 2013-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 	@Override
 	protected ArrayList<ProxyColumn<GateArm>> createColumns() {
 		ArrayList<ProxyColumn<GateArm>> cols =
-			new ArrayList<ProxyColumn<GateArm>>(4);
+			new ArrayList<ProxyColumn<GateArm>>(6);
 		cols.add(new ProxyColumn<GateArm>("gate.arm.index", 36,
 			Integer.class)
 		{
@@ -80,6 +80,11 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 			public Object getValueAt(GateArm ga) {
 				return GateArmState.fromOrdinal(
 					ga.getArmState());
+			}
+		});
+		cols.add(new ProxyColumn<GateArm>("gate.arm.fault", 160) {
+			public Object getValueAt(GateArm ga) {
+				return ga.getFault();
 			}
 		});
 		return cols;

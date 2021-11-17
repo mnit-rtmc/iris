@@ -500,10 +500,13 @@ public class GateArmDispatcher extends IPanel
 		String cs = ControllerHelper.getStatus(ga.getController());
 		if (cs.length() > 0)
 			return cs;
-		String ms = ControllerHelper.getMaintenance(ga.getController());
-		if (ms.length() > 0)
-			return ms;
-		return GateArmState.fromOrdinal(ga.getArmState()).toString();
+		GateArmState gas = GateArmState.fromOrdinal(ga.getArmState());
+		if (GateArmState.FAULT == gas) {
+			String fault = ga.getFault();
+			if (fault != null)
+				return fault;
+		}
+		return gas.toString();
 	}
 
 	/** Update the status widgets */
