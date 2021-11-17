@@ -73,11 +73,15 @@ public class GateArmEvent extends BaseEvent {
 	/** User who initiated change */
 	private final String iris_user;
 
+	/** Fault description (if any) */
+	private final String fault;
+
 	/** Create a new gate arm event */
-	public GateArmEvent(GateArmState gas, String d, String u) {
+	public GateArmEvent(GateArmState gas, String d, String u, String f) {
 		super(gateArmStateEventType(gas));
 		device_id = d;
 		iris_user = u;
+		fault = f;
 	}
 
 	/** Get the database table name */
@@ -94,6 +98,7 @@ public class GateArmEvent extends BaseEvent {
 		map.put("event_date", new Timestamp(event_date.getTime()));
 		map.put("device_id", device_id);
 		map.put("iris_user", iris_user);
+		map.put("fault", fault);
 		return map;
 	}
 }

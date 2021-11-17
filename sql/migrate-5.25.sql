@@ -46,6 +46,7 @@ COPY iris.gate_arm_interlock(id, description) FROM stdin;
 \.
 
 -- Drop gate arm views and functions
+DROP VIEW gate_arm_event_view;
 DROP VIEW gate_arm_view;
 DROP VIEW iris.gate_arm;
 DROP FUNCTION iris.gate_arm_insert();
@@ -216,5 +217,15 @@ GRANT SELECT ON gate_arm_view TO PUBLIC;
 INSERT INTO iris.plan_phase (name, hold_time)
     VALUES ('ga_open', 0), ('ga_closed', 0)
     ON CONFLICT DO NOTHING;
+
+-- Add fault column to gate arm event
+ALTER TABLE event.gate_arm_event ADD COLUMN fault VARCHAR(32);
+
+CREATE VIEW gate_arm_event_view AS
+	SELECT e.event_id, e.event_date, ed.description, device_id, e.iris_user,
+	       e.fault
+	FROM event.gate_arm_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+GRANT SELECT ON gate_arm_event_view TO PUBLIC;
 
 COMMIT;

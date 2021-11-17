@@ -3229,11 +3229,13 @@ CREATE TABLE event.gate_arm_event (
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	device_id VARCHAR(20),
-	iris_user VARCHAR(15)
+	iris_user VARCHAR(15),
+	fault VARCHAR(32)
 );
 
 CREATE VIEW gate_arm_event_view AS
-	SELECT e.event_id, e.event_date, ed.description, device_id, e.iris_user
+	SELECT e.event_id, e.event_date, ed.description, device_id, e.iris_user,
+	       e.fault
 	FROM event.gate_arm_event e
 	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
 GRANT SELECT ON gate_arm_event_view TO PUBLIC;

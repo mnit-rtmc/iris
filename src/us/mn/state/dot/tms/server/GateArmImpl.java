@@ -248,7 +248,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	public void setArmStateNotify(GateArmState gas, User o) {
 		if (gas != arm_state) {
 			String owner = (o != null) ? o.getName() : null;
-			logEvent(new GateArmEvent(gas, name, owner));
+			logEvent(new GateArmEvent(gas, name, owner, fault));
 			try {
 				store.update(this, "arm_state", gas.ordinal());
 			}
