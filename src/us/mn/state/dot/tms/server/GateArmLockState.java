@@ -47,11 +47,6 @@ public class GateArmLockState {
 		prereq_closed = closed;
 	}
 
-	/** Check if gate open is denied */
-	public boolean isOpenDenied() {
-		return opposing_open || prereq_closed;
-	}
-
 	/** Flag to indicate dependent gate arm open */
 	private boolean dependent_open = false;
 
@@ -76,11 +71,6 @@ public class GateArmLockState {
 		dependent_open = dep_open_temp;
 	}
 
-	/** Check if gate close is denied */
-	public boolean isCloseDenied() {
-		return dependent_open;
-	}
-
 	/** Get the interlock enum */
 	public GateArmInterlock getInterlock() {
 		if (!system_enable)
@@ -95,10 +85,13 @@ public class GateArmLockState {
 			return GateArmInterlock.NONE;
 	}
 
-	/** Check if arm open interlock in effect.  When gate arm system is
-	 * disabled, open interlock is shut off to allow manual control.
-	 * @return True if gate arm open is denied. */
-	public boolean isOpenInterlock() {
-		return isOpenDenied() && system_enable;
+	/** Check if gate open is denied */
+	private boolean isOpenDenied() {
+		return opposing_open || prereq_closed;
+	}
+
+	/** Check if gate close is denied */
+	private boolean isCloseDenied() {
+		return dependent_open;
 	}
 }

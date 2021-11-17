@@ -17,16 +17,19 @@ package us.mn.state.dot.tms;
 /**
  * Gate Arm interlock enumeration.
  *
+ * The ordinal values correspond to the records in the iris.gate_arm_interlock
+ * look-up table.
+ *
  * @author Douglas Lau
  */
 public enum GateArmInterlock {
 
 	/** Gate Arm interlock states */
-	NONE,           /* open and close allowed */
-	DENY_OPEN,      /* open disallowed / close allowed */
-	DENY_CLOSE,     /* close disallowed / open allowed */
-	DENY_ALL,       /* open and close disallowed */
-	SYSTEM_DISABLE; /* system disable */
+	NONE,           /* 0: open and close allowed */
+	DENY_OPEN,      /* 1: open disallowed / close allowed */
+	DENY_CLOSE,     /* 2: close disallowed / open allowed */
+	DENY_ALL,       /* 3: open and close disallowed */
+	SYSTEM_DISABLE; /* 4: system disable */
 
 	/** Get gate arm interlock from an ordinal value */
 	static public GateArmInterlock fromOrdinal(int o) {
@@ -44,11 +47,35 @@ public enum GateArmInterlock {
 		}
 	}
 
+	/** Check if gate arm open is locked */
+	public boolean isOpenLocked() {
+		switch (this) {
+		case DENY_OPEN:
+		case DENY_ALL:
+			return true;
+		default:
+			// NOTE: For SYSTEM_DISABLE, open is not locked
+			//       to allow manual front panel control
+			return false;
+		}
+	}
+
 	/** Check if gate arm close is allowed */
 	public boolean isCloseAllowed() {
 		switch (this) {
 		case NONE:
 		case DENY_OPEN:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	/** Check if gate arm close is locked */
+	public boolean isCloseLocked() {
+		switch (this) {
+		case DENY_CLOSE:
+		case DENY_ALL:
 			return true;
 		default:
 			return false;

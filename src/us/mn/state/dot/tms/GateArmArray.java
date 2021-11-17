@@ -65,6 +65,6 @@ public interface GateArmArray extends Device {
 	/** Get the (aggregate) arm state */
 	int getArmState();
 
-	/** Get the interlock state */
+	/** Get the interlock ordinal */
 	int getInterlock();
 }

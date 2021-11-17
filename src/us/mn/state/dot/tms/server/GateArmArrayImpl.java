@@ -57,8 +57,9 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, GateArmArrayImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"prereq, camera, approach, action_plan, arm_state " +
-			"FROM iris." + SONAR_TYPE  + ";", new ResultFactory()
+			"prereq, camera, approach, action_plan, arm_state, " +
+			"interlock FROM iris." + SONAR_TYPE  + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GateArmArrayImpl(row));
@@ -80,6 +81,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		map.put("approach", approach);
 		map.put("action_plan", action_plan);
 		map.put("arm_state", arm_state.ordinal());
+		map.put("interlock", interlock.ordinal());
 		return map;
 	}
 
@@ -115,23 +117,25 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		     row.getString(7),    // camera
 		     row.getString(8),    // approach
 		     row.getString(9),    // action_plan
-		     row.getInt(10)       // arm_state
+		     row.getInt(10),      // arm_state
+		     row.getInt(11)       // interlock
 		);
 	}
 
 	/** Create a gate arm array */
 	private GateArmArrayImpl(String n, String loc, String c, int p,
-		String nt, String pr, String cam, String ap, String pln, int as)
+		String nt, String pr, String cam, String ap, String pln, int as,
+		int lk)
 	{
 		this(n, lookupGeoLoc(loc), lookupController(c), p, nt, pr,
 		     lookupCamera(cam), lookupCamera(ap), lookupActionPlan(pln),
-		     as);
+		     as, lk);
 	}
 
 	/** Create a gate arm array */
 	private GateArmArrayImpl(String n, GeoLocImpl loc, ControllerImpl c,
 		int p, String nt, String pr, Camera cam, Camera ap,
-		ActionPlanImpl pln, int as)
+		ActionPlanImpl pln, int as, int lk)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
@@ -140,6 +144,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		approach = ap;
 		action_plan = pln;
 		arm_state = GateArmState.fromOrdinal(as);
+		interlock = GateArmInterlock.fromOrdinal(lk);
 		initTransients();
 	}
 
@@ -361,7 +366,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private GateArmState validateStateReq(GateArmState rs, GateArmState cs)
 		throws TMSException
 	{
-		GateArmInterlock gai = lock_state.getInterlock();
+		GateArmInterlock gai = interlock;
 		boolean has_signs = GateArmArrayHelper.hasActionPlanSigns(this);
 		if (rs == GateArmState.OPENING) {
 			if (!gai.isOpenAllowed())
@@ -409,7 +414,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			store.update(this, "arm_state", gas.ordinal());
 		}
 		catch (TMSException e) {
-			GateArmSystem.disable(name, "DB error, array");
+			GateArmSystem.disable(name, "DB arm_state");
 		}
 		arm_state = gas;
 		notifyAttribute("armState");
@@ -544,17 +549,38 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		GateArmSystem.checkInterlocks(getRoad());
 		GateArmSystem.updateDependencies();
 		setSystemEnable(checkEnabled());
-		setOpenConflict(lock_state.isOpenDenied() && isPossiblyOpen());
-		setCloseConflict(lock_state.isCloseDenied() && isClosed());
+		setOpenConflict(interlock.isOpenLocked() && isPossiblyOpen());
+		setCloseConflict(interlock.isCloseLocked() && isClosed());
 	}
 
-	/** Lock state */
-	private transient GateArmLockState lock_state = new GateArmLockState();
+	/** Gate arm interlock */
+	private GateArmInterlock interlock;
+
+	/** Get the interlock ordinal */
+	@Override
+	public int getInterlock() {
+		return interlock.ordinal();
+	}
+
+	/** Get the interlock enum */
+	public GateArmInterlock getInterlockEnum() {
+		return interlock;
+	}
 
 	/** Set the interlock flag */
 	private void setInterlockNotify() {
-		notifyAttribute("interlock");
-		sendInterlocks();
+		GateArmInterlock lk = lock_state.getInterlock();
+		if (lk != interlock) {
+			try {
+				store.update(this, "interlock", lk.ordinal());
+			}
+			catch (TMSException e) {
+				GateArmSystem.disable(name, "DB interlock");
+			}
+			interlock = lk;
+			notifyAttribute("interlock");
+			sendInterlocks();
+		}
 	}
 
 	/** Send gate arm interlock settings */
@@ -566,16 +592,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		}
 	}
 
-	/** Get the interlock enum */
-	@Override
-	public int getInterlock() {
-		return lock_state.getInterlock().ordinal();
-	}
-
-	/** Check if arm open interlock in effect. */
-	public boolean isOpenInterlock() {
-		return lock_state.isOpenInterlock();
-	}
+	/** Lock state for calculating interlock */
+	private transient GateArmLockState lock_state = new GateArmLockState();
 
 	/** Begin dependency transaction */
 	public void beginDependencies() {

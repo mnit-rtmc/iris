@@ -3040,6 +3040,19 @@ COPY iris.gate_arm_state(id, description) FROM stdin;
 6	closed
 \.
 
+CREATE TABLE iris.gate_arm_interlock (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(16) NOT NULL
+);
+
+COPY iris.gate_arm_interlock(id, description) FROM stdin;
+0	none
+1	deny open
+2	deny close
+3	deny all
+4	system disable
+\.
+
 CREATE TABLE iris._gate_arm_array (
 	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
@@ -3048,7 +3061,8 @@ CREATE TABLE iris._gate_arm_array (
 	camera VARCHAR(20) REFERENCES iris._camera,
 	approach VARCHAR(20) REFERENCES iris._camera,
 	action_plan VARCHAR(16) UNIQUE REFERENCES iris.action_plan,
-	arm_state INTEGER NOT NULL REFERENCES iris.gate_arm_state
+	arm_state INTEGER NOT NULL REFERENCES iris.gate_arm_state,
+	interlock INTEGER NOT NULL REFERENCES iris.gate_arm_interlock
 );
 
 ALTER TABLE iris._gate_arm_array ADD CONSTRAINT _gate_arm_array_fkey
@@ -3068,7 +3082,7 @@ CREATE TRIGGER gate_arm_array_notify_trig
 
 CREATE VIEW iris.gate_arm_array AS
 	SELECT _gate_arm_array.name, geo_loc, controller, pin, notes, prereq,
-	       camera, approach, action_plan, arm_state
+	       camera, approach, action_plan, arm_state, interlock
 	FROM iris._gate_arm_array JOIN iris._device_io
 	ON _gate_arm_array.name = _device_io.name;
 
@@ -3077,10 +3091,11 @@ CREATE FUNCTION iris.gate_arm_array_insert() RETURNS TRIGGER AS
 BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._gate_arm_array (name, geo_loc, notes, prereq, camera,
-	                                  approach, action_plan, arm_state)
-	    VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.prereq, NEW.camera,
-	            NEW.approach, NEW.action_plan, NEW.arm_state);
+	INSERT INTO iris._gate_arm_array (
+	    name, geo_loc, notes, prereq, camera, approach, action_plan,
+	    arm_state, interlock
+	) VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.prereq, NEW.camera,
+	          NEW.approach, NEW.action_plan, NEW.arm_state, NEW.interlock);
 	RETURN NEW;
 END;
 $gate_arm_array_insert$ LANGUAGE plpgsql;
@@ -3101,7 +3116,8 @@ BEGIN
 	       camera = NEW.camera,
 	       approach = NEW.approach,
 	       action_plan = NEW.action_plan,
-	       arm_state = NEW.arm_state
+	       arm_state = NEW.arm_state,
+	       interlock = NEW.interlock
 	WHERE name = OLD.name;
 	RETURN NEW;
 END;
@@ -3121,9 +3137,10 @@ CREATE VIEW gate_arm_array_view AS
 	       l.landmark, l.lat, l.lon, l.corridor, l.location,
 	       ga.controller, ga.pin, ctr.comm_link, ctr.drop_id, ctr.condition,
 	       ga.prereq, ga.camera, ga.approach, ga.action_plan,
-	       gas.description AS arm_state
+	       gas.description AS arm_state, gai.description AS interlock
 	FROM iris.gate_arm_array ga
 	JOIN iris.gate_arm_state gas ON ga.arm_state = gas.id
+	JOIN iris.gate_arm_interlock gai ON ga.interlock = gai.id
 	LEFT JOIN geo_loc_view l ON ga.geo_loc = l.name
 	LEFT JOIN controller_view ctr ON ga.controller = ctr.name;
 GRANT SELECT ON gate_arm_array_view TO PUBLIC;

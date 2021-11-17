@@ -268,9 +268,9 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		return getArmStateEnum().ordinal();
 	}
 
-	/** Check is arm open interlock in effect */
-	public boolean isOpenInterlock() {
-		return ga_array.isOpenInterlock();
+	/** Check if gate arm open is locked */
+	public boolean isOpenLocked() {
+		return ga_array.getInterlockEnum().isOpenLocked();
 	}
 
 	/** Get the gate arm poller */
