@@ -1,5 +1,13 @@
 # IRIS 5.x Release Notes
 
+5.25.0 (unreleased)
+ - Gate arms: skip "Warn Close" state when no action plan exists
+ - Gate arms: Add `opposing`, `arm_state` and `fault` to DB gate arm table
+ - Gate arms: Add `interlock` to DB gate arm array table
+ - Gate arms: Add `fault` to DB gate arm event table
+ - Gate arms: Drop configurable open/closed phases from gate arm array table
+ - Gate arms: Simplified gate arm states and interlocks (removed TIMEOUT state)
+
 5.24.0 (11 Oct 2021)
  - Added DMS [message combining](dms.md#message-combining) feature
  - Added "Send Settings" button to controller form
