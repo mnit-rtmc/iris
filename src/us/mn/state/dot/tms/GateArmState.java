@@ -44,6 +44,7 @@ public enum GateArmState {
 		switch (this) {
 		case WARN_CLOSE:
 		case CLOSED:
+		case FAULT:
 			return true;
 		default:
 			return false;
@@ -63,8 +64,8 @@ public enum GateArmState {
 	/** Check if operator can request CLOSING */
 	public boolean canRequestClosing(boolean has_signs) {
 		switch (this) {
-		case FAULT:
 		case WARN_CLOSE:
+		case FAULT:
 			return true;
 		case OPEN:
 			// only allow OPEN -> CLOSING if there are no signs
