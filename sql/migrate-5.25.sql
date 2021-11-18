@@ -70,6 +70,11 @@ ALTER TABLE iris._gate_arm
 -- Add fault to gate arm
 ALTER TABLE iris._gate_arm ADD COLUMN fault VARCHAR(32);
 
+-- Add opposing to gate arm array
+ALTER TABLE iris._gate_arm_array ADD COLUMN opposing BOOLEAN;
+UPDATE iris._gate_arm_array SET opposing = true;
+ALTER TABLE iris._gate_arm_array ALTER COLUMN opposing SET NOT NULL;
+
 -- Add arm_state to gate arm array
 ALTER TABLE iris._gate_arm_array
     ADD COLUMN arm_state INTEGER REFERENCES iris.gate_arm_state;
@@ -86,8 +91,8 @@ ALTER TABLE iris._gate_arm_array
 
 -- Recreate gate arm views and functions
 CREATE VIEW iris.gate_arm_array AS
-	SELECT _gate_arm_array.name, geo_loc, controller, pin, notes, prereq,
-	       camera, approach, action_plan, arm_state, interlock
+	SELECT _gate_arm_array.name, geo_loc, controller, pin, notes, opposing,
+	       prereq, camera, approach, action_plan, arm_state, interlock
 	FROM iris._gate_arm_array JOIN iris._device_io
 	ON _gate_arm_array.name = _device_io.name;
 
@@ -97,10 +102,13 @@ BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._gate_arm_array (
-	    name, geo_loc, notes, prereq, camera, approach, action_plan,
-	    arm_state, interlock
-	) VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.prereq, NEW.camera,
-	          NEW.approach, NEW.action_plan, NEW.arm_state, NEW.interlock);
+	    name, geo_loc, notes, opposing, prereq, camera, approach,
+	    action_plan, arm_state, interlock
+	) VALUES (
+	    NEW.name, NEW.geo_loc, NEW.notes, NEW.opposing, NEW.prereq,
+	    NEW.camera, NEW.approach, NEW.action_plan, NEW.arm_state,
+	    NEW.interlock
+	);
 	RETURN NEW;
 END;
 $gate_arm_array_insert$ LANGUAGE plpgsql;
@@ -117,6 +125,7 @@ BEGIN
 	UPDATE iris._gate_arm_array
 	   SET geo_loc = NEW.geo_loc,
 	       notes = NEW.notes,
+	       opposing = NEW.opposing,
 	       prereq = NEW.prereq,
 	       camera = NEW.camera,
 	       approach = NEW.approach,
@@ -141,7 +150,7 @@ CREATE VIEW gate_arm_array_view AS
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.landmark, l.lat, l.lon, l.corridor, l.location,
 	       ga.controller, ga.pin, ctr.comm_link, ctr.drop_id, ctr.condition,
-	       ga.prereq, ga.camera, ga.approach, ga.action_plan,
+	       ga.opposing, ga.prereq, ga.camera, ga.approach, ga.action_plan,
 	       gas.description AS arm_state, gai.description AS interlock
 	FROM iris.gate_arm_array ga
 	JOIN iris.gate_arm_state gas ON ga.arm_state = gas.id
@@ -204,7 +213,7 @@ CREATE VIEW gate_arm_view AS
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.landmark, l.lat, l.lon, l.corridor, l.location,
 	       g.controller, g.pin, ctr.comm_link, ctr.drop_id, ctr.condition,
-	       ga.prereq, ga.camera, ga.approach,
+	       ga.opposing, ga.prereq, ga.camera, ga.approach,
 	       gas.description AS arm_state, fault
 	FROM iris.gate_arm g
 	JOIN iris.gate_arm_state gas ON g.arm_state = gas.id

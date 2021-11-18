@@ -66,16 +66,16 @@ Two types of constraints are available for this purpose:
 - **Open interlock**: prevents opening the gate arm
 - **Close interlock**: prevents closing the gate arm
 
-**Opposing Traffic**: When a gate is open, all others on the same roadway, but
-in any other direction will have an _open interlock_.
+When a gate arm is in any state other than `CLOSED`, it is considered _possibly
+open_.
+
+**Opposing Traffic** creates an _open interlock_ constraint -- if _any_ gate is
+possibly open in a different direction on the same roadway.
 
 **Prerequisites** prevent a sequence of gates from opening in the wrong order.
 If a dependent array's prerequisite is not `OPEN`, it will have an _open
 interlock_.  Once they are both open, the prerequisite will have a _close
 interlock_ until the dependent is closed.
-
-If a gate arm is in any state other than `CLOSED`, it is treated as **possibly
-open**, and interlock constraints will be checked.
 
 If a constraint is broken, IRIS will not automatically try to resolve it.
 Instead, an _alert_ email will be sent to the address in the

@@ -57,8 +57,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, GateArmArrayImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"prereq, camera, approach, action_plan, arm_state, " +
-			"interlock FROM iris." + SONAR_TYPE  + ";",
+			"opposing, prereq, camera, approach, action_plan, " +
+			"arm_state, interlock FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -76,6 +76,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
+		map.put("opposing", opposing);
 		map.put("prereq", prereq);
 		map.put("camera", camera);
 		map.put("approach", approach);
@@ -100,6 +101,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Create a new gate arm array with a string name */
 	public GateArmArrayImpl(String n) throws TMSException, SonarException {
 		super(n);
+		opposing = true;
 		arm_state = GateArmState.UNKNOWN;
 		interlock = GateArmInterlock.NONE;
 		GeoLocImpl g = new GeoLocImpl(name, SONAR_TYPE);
@@ -115,32 +117,34 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		     row.getString(3),    // controller
 		     row.getInt(4),       // pin
 		     row.getString(5),    // notes
-		     row.getString(6),    // prereq
-		     row.getString(7),    // camera
-		     row.getString(8),    // approach
-		     row.getString(9),    // action_plan
-		     row.getInt(10),      // arm_state
-		     row.getInt(11)       // interlock
+		     row.getBoolean(6),   // opposing
+		     row.getString(7),    // prereq
+		     row.getString(8),    // camera
+		     row.getString(9),    // approach
+		     row.getString(10),   // action_plan
+		     row.getInt(11),      // arm_state
+		     row.getInt(12)       // interlock
 		);
 	}
 
 	/** Create a gate arm array */
 	private GateArmArrayImpl(String n, String loc, String c, int p,
-		String nt, String pr, String cam, String ap, String pln, int as,
-		int lk)
+		String nt, boolean ot, String pr, String cam, String ap,
+		String pln, int as, int lk)
 	{
-		this(n, lookupGeoLoc(loc), lookupController(c), p, nt, pr,
+		this(n, lookupGeoLoc(loc), lookupController(c), p, nt, ot, pr,
 		     lookupCamera(cam), lookupCamera(ap), lookupActionPlan(pln),
 		     as, lk);
 	}
 
 	/** Create a gate arm array */
 	private GateArmArrayImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, String pr, Camera cam, Camera ap,
+		int p, String nt, boolean ot, String pr, Camera cam, Camera ap,
 		ActionPlanImpl pln, int as, int lk)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
+		opposing = ot;
 		prereq = pr;
 		camera = cam;
 		approach = ap;
@@ -177,6 +181,30 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	@Override
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
+	}
+
+	/** Opposing traffic flag */
+	private boolean opposing;
+
+	/** Set the opposing traffic flag */
+	@Override
+	public void setOpposing(boolean ot) {
+		GateArmSystem.disable(name, "set opposing");
+		opposing = ot;
+	}
+
+	/** Set the opposing traffic flag */
+	public void doSetOpposing(boolean ot) throws TMSException {
+		if (ot != opposing) {
+			store.update(this, "opposing", ot);
+			setOpposing(ot);
+		}
+	}
+
+	/** Get the opposing traffic flag */
+	@Override
+	public boolean getOpposing() {
+		return opposing;
 	}
 
 	/** Prerequisite gate arm array */
@@ -667,7 +695,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	public void setOpenDirection(int dir) {
 		int gd = getRoadDir();
 		boolean open = (dir != 0) && (dir != gd);
-		lock_state.setOpposingOpen(open);
+		lock_state.setOpposingOpen(opposing && open);
 		setInterlockNotify();
 	}
 

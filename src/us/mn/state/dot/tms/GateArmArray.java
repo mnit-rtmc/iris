@@ -32,6 +32,12 @@ public interface GateArmArray extends Device {
 	/** Get the device location */
 	GeoLoc getGeoLoc();
 
+	/** Set the opposing traffic flag */
+	void setOpposing(boolean ot);
+
+	/** Get the opposing traffic flag */
+	boolean getOpposing();
+
 	/** Set prerequisite gate arm array */
 	void setPrereq(String pr);
 

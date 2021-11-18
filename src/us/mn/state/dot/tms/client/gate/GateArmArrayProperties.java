@@ -18,6 +18,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -88,6 +89,13 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 
 	/** Approach camera combo box */
 	private final JComboBox<Camera> approach_cbx = new JComboBox<Camera>();
+
+	/** Checkbox for opposing traffic flag */
+	private final JCheckBox opposing_chk = new JCheckBox(new IAction(null) {
+		protected void doActionPerformed(ActionEvent e) {
+			proxy.setOpposing(opposing_chk.isSelected());
+		}
+	});
 
 	/** Prerequisite combo box model */
 	private final IComboBoxModel<GateArmArray> prereq_mdl;
@@ -228,6 +236,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		plan_cbx.setModel(plan_mdl);
 		plan_cbx.setAction(plan_act);
 		IPanel p = new IPanel();
+		p.add("gate.arm.opposing");
+		p.add(opposing_chk, Stretch.LAST);
 		p.add("gate.arm.prereq");
 		p.add(prereq_cbx, Stretch.LAST);
 		p.add("gate.arm.plan");
@@ -264,6 +274,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		notes_txt.setEnabled(canWrite("notes"));
 		camera_act.setEnabled(canWrite("camera"));
 		approach_act.setEnabled(canWrite("approach"));
+		opposing_chk.setEnabled(canWrite("opposing"));
 		prereq_act.setEnabled(canWrite("prereq"));
 		plan_act.setEnabled(canWrite("actionPlan"));
 		disable.setEnabled(canWrite("deviceRequest"));
@@ -278,11 +289,13 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 			camera_act.updateSelected();
 		if (a == null || a.equals("approach"))
 			approach_act.updateSelected();
-		if (a == null || a.equals("prereq"))
+		if (null == a || a.equals("opposing"))
+			opposing_chk.setSelected(proxy.getOpposing());
+		if (null == a || a.equals("prereq"))
 			prereq_act.updateSelected();
 		if (null == a || a.equals("actionPlan"))
 			plan_act.updateSelected();
-		if (a == null || a.equals("armState")) {
+		if (null == a || a.equals("armState")) {
 			arm_state_lbl.setText(GateArmState.fromOrdinal(
 				proxy.getArmState()).toString());
 		}
