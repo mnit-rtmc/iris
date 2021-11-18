@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2020  Minnesota Department of Transportation
+ * Copyright (C) 2002-2021  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -412,7 +412,7 @@ abstract class OpDms extends OpDevice {
 				SignDetailImpl sd = SignDetailImpl.findOrCreate(
 					dt, false, "OTHER", signAccess, "other",
 					"other", make, model, make, model, 0,
-					2, 64);
+					2, 64, false, false);
 				if (sd != null)
 					m_dms.setSignDetailNotify(sd);
 				SignConfigImpl sc = SignConfigImpl.findOrCreate(

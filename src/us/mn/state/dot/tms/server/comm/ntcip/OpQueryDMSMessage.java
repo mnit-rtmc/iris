@@ -177,7 +177,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(ms);
-			if (dms.getSupportsBeaconObject())
+			if (dms.getSignDetail().getBeaconActivationFlag())
 				mess.add(beacon);
 			else
 				beacon.setInteger(0);
@@ -186,7 +186,7 @@ public class OpQueryDMSMessage extends OpDMS {
 			mess.add(time);
 			mess.queryProps();
 			logQuery(ms);
-			if (dms.getSupportsBeaconObject())
+			if (dms.getSignDetail().getBeaconActivationFlag())
 				logQuery(beacon);
 			logQuery(prior);
 			logQuery(status);

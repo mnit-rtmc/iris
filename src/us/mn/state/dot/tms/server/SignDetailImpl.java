@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2019  Minnesota Department of Transportation
+ * Copyright (C) 2016-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,25 +54,29 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 	 * @param st Supported MULTI tags (bit flags).
 	 * @param mp Maximum number of pages.
 	 * @param ml Maximum MULTI string length.
+	 * @param ba Beacon activation flag.
+	 * @param ps Pixel service flag.
 	 * @return Matching existing, or new sign detail.
 	 */
 	static public SignDetailImpl findOrCreate(int dt, boolean p, String t,
 		String sa, String l, String bt, String hmk, String hmd,
-		String smk, String smd, int st, int mp, int ml)
+		String smk, String smd, int st, int mp, int ml, boolean ba,
+		boolean ps)
 	{
+		DMSType dmt = DMSType.fromOrdinal(dt);
 		bt = filterDesc(bt);
 		hmk = filterDesc(hmk);
 		hmd = filterDesc(hmd);
 		smk = filterDesc(smk);
 		smd = filterDesc(smd);
-		SignDetail sd = SignDetailHelper.find(DMSType.fromOrdinal(dt),
-			p, t, sa, l, bt, hmk, hmd, smk, smd, st, mp, ml);
+		SignDetail sd = SignDetailHelper.find(dmt, p, t, sa, l, bt, hmk,
+			hmd, smk, smd, st, mp, ml, ba, ps);
 		if (sd instanceof SignDetailImpl)
 			return (SignDetailImpl) sd;
 		else {
 			String n = createUniqueName();
 			SignDetailImpl sdi = new SignDetailImpl(n, dt, p, t, sa,
-				l, bt, hmk, hmd, smk, smd, st, mp, ml);
+				l, bt, hmk, hmd, smk, smd, st, mp, ml, ba, ps);
 			return createNotify(sdi);
 		}
 	}
@@ -92,7 +96,8 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 	/** Find or create LCS sign detail */
 	static public SignDetailImpl findOrCreateLCS() {
 		return findOrCreate(DMSType.OTHER.ordinal(), false, "DLCS",
-			"FRONT", "NONE", "NONE", "", "", "", "", 0, 1, 0);
+			"FRONT", "NONE", "NONE", "", "", "", "", 0, 1, 0, false,
+			false);
 	}
 
 	/** Last allocated sign detail ID */
@@ -122,7 +127,8 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 			"sign_access, legend, beacon_type, " +
 			"hardware_make, hardware_model, software_make, " +
 			"software_model, supported_tags, max_pages, " +
-			"max_multi_len FROM iris." + SONAR_TYPE + ";",
+			"max_multi_len, beacon_activation_flag, " +
+			"pixel_service_flag FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -149,6 +155,8 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		map.put("supported_tags", supported_tags);
 		map.put("max_pages", max_pages);
 		map.put("max_multi_len", max_multi_len);
+		map.put("beacon_activation_flag", beacon_activation_flag);
+		map.put("pixel_service_flag", pixel_service_flag);
 		return map;
 	}
 
@@ -179,14 +187,16 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		     row.getString(11),  // software_model
 		     row.getInt(12),     // supported_tags
 		     row.getInt(13),     // max_pages
-		     row.getInt(14)      // max_multi_len
+		     row.getInt(14),     // max_multi_len
+		     row.getBoolean(15), // beacon_activation_flag
+		     row.getBoolean(16)  // pixel_service_flag
 		);
 	}
 
 	/** Create a sign detail */
 	private SignDetailImpl(String n, int dt, boolean p, String t, String sa,
 		String l, String bt, String hmk, String hmd, String smk,
-		String smd, int st, int mp, int ml)
+		String smd, int st, int mp, int ml, boolean ba, boolean ps)
 	{
 		super(n);
 		dms_type = DMSType.fromOrdinal(dt);
@@ -202,6 +212,8 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		supported_tags = st;
 		max_pages = mp;
 		max_multi_len = ml;
+		beacon_activation_flag = ba;
+		pixel_service_flag = ps;
 	}
 
 	/** DMS type enum value */
@@ -319,5 +331,23 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 	@Override
 	public int getMaxMultiLen() {
 		return max_multi_len;
+	}
+
+	/** Beacon activation flag */
+	private final boolean beacon_activation_flag;
+
+	/** Get beacon activation flag (3.6.6.5 in PRL) */
+	@Override
+	public boolean getBeaconActivationFlag() {
+		return beacon_activation_flag;
+	}
+
+	/** Pixel service flag */
+	private final boolean pixel_service_flag;
+
+	/** Get pixel service flag (3.6.6.6 in PRL) */
+	@Override
+	public boolean getPixelServiceFlag() {
+		return pixel_service_flag;
 	}
 }

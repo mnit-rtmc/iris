@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,4 +64,10 @@ public interface SignDetail extends SonarObject {
 
 	/** Get the maximum MULTI string length */
 	int getMaxMultiLen();
+
+	/** Get beacon activation flag (3.6.6.5 in PRL) */
+	boolean getBeaconActivationFlag();
+
+	/** Get pixel service flag (3.6.6.6 in PRL) */
+	boolean getPixelServiceFlag();
 }

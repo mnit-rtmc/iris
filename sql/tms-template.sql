@@ -2509,7 +2509,9 @@ CREATE TABLE iris.sign_detail (
 	software_model VARCHAR(32) NOT NULL,
 	supported_tags INTEGER NOT NULL,
 	max_pages INTEGER NOT NULL,
-	max_multi_len INTEGER NOT NULL
+	max_multi_len INTEGER NOT NULL,
+	beacon_activation_flag BOOLEAN NOT NULL,
+	pixel_service_flag BOOLEAN NOT NULL
 );
 
 CREATE TRIGGER sign_detail_notify_trig
@@ -2520,7 +2522,7 @@ CREATE VIEW sign_detail_view AS
 	SELECT name, dt.description AS dms_type, portable, technology,
 	       sign_access, legend, beacon_type, hardware_make, hardware_model,
 	       software_make, software_model, supported_tags, max_pages,
-	       max_multi_len
+	       max_multi_len, beacon_activation_flag, pixel_service_flag
 	FROM iris.sign_detail
 	JOIN iris.dms_type dt ON sign_detail.dms_type = dt.id;
 GRANT SELECT ON sign_detail_view TO PUBLIC;

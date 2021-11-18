@@ -235,7 +235,8 @@ const SIGN_DETAIL_RES: Resource = Resource::Simple(
     "SELECT row_to_json(r)::text FROM (\
     SELECT name, dms_type, portable, technology, sign_access, legend, \
            beacon_type, hardware_make, hardware_model, software_make, \
-           software_model, supported_tags, max_pages, max_multi_len \
+           software_model, supported_tags, max_pages, max_multi_len, \
+           beacon_activation_flag, pixel_service_flag \
     FROM sign_detail_view \
 ) r",
 );

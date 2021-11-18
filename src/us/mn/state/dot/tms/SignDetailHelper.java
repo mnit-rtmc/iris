@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2019  Minnesota Department of Transportation
+ * Copyright (C) 2016-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,10 +54,13 @@ public class SignDetailHelper extends BaseHelper {
 	 * @param st Supported tags.
 	 * @param mp Maximum pages.
 	 * @param ml Maximum MULTI length.
+	 * @param ba Beacon activation flag.
+	 * @param ps Pixel service flag.
 	 * @return Matching sign detail, or null if not found. */
 	static public SignDetail find(DMSType dt, boolean p, String t,
 		String sa, String l, String bt, String hmk, String hmd,
-		String smk, String smd, int st, int mp, int ml)
+		String smk, String smd, int st, int mp, int ml, boolean ba,
+		boolean ps)
 	{
 		int dti = dt.ordinal();
 		Iterator<SignDetail> it = iterator();
@@ -75,7 +78,9 @@ public class SignDetailHelper extends BaseHelper {
 			    smd.equals(sd.getSoftwareModel()) &&
 			    st == sd.getSupportedTags() &&
 			    mp == sd.getMaxPages() &&
-			    ml == sd.getMaxMultiLen())
+			    ml == sd.getMaxMultiLen() &&
+			    ba == sd.getBeaconActivationFlag() &&
+			    ps == sd.getPixelServiceFlag())
 			{
 				return sd;
 			}

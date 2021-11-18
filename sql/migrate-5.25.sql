@@ -237,4 +237,27 @@ CREATE VIEW gate_arm_event_view AS
 	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
 GRANT SELECT ON gate_arm_event_view TO PUBLIC;
 
+DROP VIEW sign_detail_view;
+
+-- Add beacon_activation_flag to sign_detail
+ALTER TABLE iris.sign_detail ADD COLUMN beacon_activation_flag BOOLEAN;
+UPDATE iris.sign_detail SET beacon_activation_flag = true;
+UPDATE iris.sign_detail SET beacon_activation_flag = false WHERE dms_type = 0;
+ALTER TABLE iris.sign_detail ALTER COLUMN beacon_activation_flag SET NOT NULL;
+
+-- Add pixel_service_flag to sign_detail
+ALTER TABLE iris.sign_detail ADD COLUMN pixel_service_flag BOOLEAN;
+UPDATE iris.sign_detail SET pixel_service_flag = true;
+UPDATE iris.sign_detail SET pixel_service_flag = false WHERE dms_type = 0;
+ALTER TABLE iris.sign_detail ALTER COLUMN pixel_service_flag SET NOT NULL;
+
+CREATE VIEW sign_detail_view AS
+	SELECT name, dt.description AS dms_type, portable, technology,
+	       sign_access, legend, beacon_type, hardware_make, hardware_model,
+	       software_make, software_model, supported_tags, max_pages,
+	       max_multi_len, beacon_activation_flag, pixel_service_flag
+	FROM iris.sign_detail
+	JOIN iris.dms_type dt ON sign_detail.dms_type = dt.id;
+GRANT SELECT ON sign_detail_view TO PUBLIC;
+
 COMMIT;

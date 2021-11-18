@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  * Copyright (C) 2019-2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -97,10 +97,9 @@ public class OpSendDMSDefaults extends OpDMS {
 			logStore(comm_time);
 			logStore(end_msg);
 			mess.storeProps();
-			if (dms.getSupportsPixelServiceObject())
-				return new PixelService();
-			else
-				return new MessageDefaults();
+			return dms.getSignDetail().getPixelServiceFlag()
+			      ? new PixelService()
+			      : new MessageDefaults();
 		}
 	}
 

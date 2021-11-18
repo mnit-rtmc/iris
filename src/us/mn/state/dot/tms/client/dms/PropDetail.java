@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,8 +39,16 @@ public class PropDetail extends IPanel {
 			return UNKNOWN;
 	}
 
+	/** Format a boolean field */
+	static private String formatBool(boolean v) {
+		return v ? "Yes" : "No";
+	}
+
 	/** Sign type label */
 	private final JLabel type_lbl = createValueLabel();
+
+	/** Portable label */
+	private final JLabel portable_lbl = createValueLabel();
 
 	/** Sign technology label */
 	private final JLabel tech_lbl = createValueLabel();
@@ -75,6 +83,12 @@ public class PropDetail extends IPanel {
 	/** Maximum MULTI string length label */
 	private final JLabel max_multi_len_lbl = createValueLabel();
 
+	/** Beacon activation flag label */
+	private final JLabel beacon_activation_flag_lbl = createValueLabel();
+
+	/** Pixel service flag label */
+	private final JLabel pixel_service_flag_lbl = createValueLabel();
+
 	/** User session */
 	private final Session session;
 
@@ -93,6 +107,8 @@ public class PropDetail extends IPanel {
 		super.initialize();
 		add("dms.type");
 		add(type_lbl, Stretch.LAST);
+		add("dms.portable");
+		add(portable_lbl, Stretch.LAST);
 		add("dms.technology");
 		add(tech_lbl, Stretch.LAST);
 		add("dms.access");
@@ -115,6 +131,10 @@ public class PropDetail extends IPanel {
 		add(max_pages_lbl, Stretch.LAST);
 		add("dms.max.multi.len");
 		add(max_multi_len_lbl, Stretch.LAST);
+		add("dms.beacon.activation.flag");
+		add(beacon_activation_flag_lbl, Stretch.LAST);
+		add("dms.pixel.service.flag");
+		add(pixel_service_flag_lbl, Stretch.LAST);
 		updateAttribute(null);
 	}
 
@@ -124,6 +144,7 @@ public class PropDetail extends IPanel {
 		if (null == a) {
 			DMSType t = DMSType.fromOrdinal(sd.getDmsType());
 			type_lbl.setText(t.description);
+			portable_lbl.setText(formatBool(sd.getPortable()));
 			tech_lbl.setText(formatString(sd.getTechnology()));
 			access_lbl.setText(formatString(sd.getSignAccess()));
 			legend_lbl.setText(formatString(sd.getLegend()));
@@ -142,6 +163,10 @@ public class PropDetail extends IPanel {
 				sd.getMaxPages()));
 			max_multi_len_lbl.setText(Integer.toString(
 				sd.getMaxMultiLen()));
+			beacon_activation_flag_lbl.setText(formatBool(
+				sd.getBeaconActivationFlag()));
+			pixel_service_flag_lbl.setText(formatBool(
+				sd.getPixelServiceFlag()));
 		}
 	}
 }

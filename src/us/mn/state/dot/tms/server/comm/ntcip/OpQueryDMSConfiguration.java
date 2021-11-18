@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2021  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  * Copyright (C) 2017  	    Iteris Inc.
  *
@@ -136,6 +136,12 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	private final ASN1Integer max_multi_len =
 		dmsMaxMultiStringLength.makeInt();
 
+	/** Beacon activation flag (3.6.6.5 in PRL) */
+	private boolean beacon_activation_flag;
+
+	/** Pixel service flag (3.6.6.6 in PRL) */
+	private boolean pixel_service_flag;
+
 	/** Create a new DMS query configuration object */
 	public OpQueryDMSConfiguration(DMSImpl d) {
 		super(PriorityLevel.DOWNLOAD, d);
@@ -262,38 +268,35 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		}
 	}
 
-	/** Phase to check for beacon support */
+	/** Phase to check beacon activation flag */
 	private class QuerySupportsBeacon extends Phase {
 
 		/** Query dmsMessageBeacon object */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-
-			// Verify beacon support by reading
-			// dmsMessageBeacon from the
-			// changeable.1 message slot.
+			// Verify beacon activation flag support by reading
+			// dmsMessageBeacon from the changeable.1 message slot
 			ASN1Integer beacon = dmsMessageBeacon.makeInt(
-					DmsMessageMemoryType.changeable, 1);
+				DmsMessageMemoryType.changeable, 1);
 			mess.add(beacon);
 			try {
 				mess.queryProps();
-				dms.setSupportsBeaconObject(true);
+				beacon_activation_flag = true;
 			}
 			catch (NoSuchName e) {
-				dms.setSupportsBeaconObject(false);
+				beacon_activation_flag = false;
 			}
 			return new QuerySupportsPixelService();
 		}
 	}
 
-	/** Phase to check for pixelService support */
+	/** Phase to check pixel service flag */
 	private class QuerySupportsPixelService extends Phase {
 
 		/** Query dmsMessagePixelService object */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-
-			// Verify pixelService support by reading
+			// Verify pixel service flag by reading
 			// dmsMessagePixelService from the
 			// changeable.1 message slot.
 			ASN1Integer srv = dmsMessagePixelService.makeInt(
@@ -301,10 +304,10 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			mess.add(srv);
 			try {
 				mess.queryProps();
-				dms.setSupportsPixelServiceObject(true);
+				pixel_service_flag = true;
 			}
 			catch (NoSuchName e) {
-				dms.setSupportsPixelServiceObject(false);
+				pixel_service_flag = false;
 			}
 			return new QueryV2();
 		}
@@ -375,7 +378,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 				hardware_make, hardware_model, software_make,
 				software_model, supported_tags.getInteger(),
 				max_pages.getInteger(),
-				max_multi_len.getInteger());
+				max_multi_len.getInteger(),
+				beacon_activation_flag, pixel_service_flag);
 			if (sd != null)
 				dms.setSignDetailNotify(sd);
 			SignConfigImpl sc = SignConfigImpl.findOrCreate(
