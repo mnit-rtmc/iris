@@ -144,6 +144,9 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Arm state label */
 	private final JLabel arm_state_lbl = IPanel.createValueLabel();
 
+	/** Interlock label */
+	private final JLabel interlock_lbl = IPanel.createValueLabel();
+
 	/** Operation description label */
 	private final JLabel op_lbl = IPanel.createValueLabel();
 
@@ -250,6 +253,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		IPanel p = new IPanel();
 		p.add("gate.arm.state");
 		p.add(arm_state_lbl, Stretch.LAST);
+		p.add("gate.arm.interlock");
+		p.add(interlock_lbl, Stretch.LAST);
 		p.add("device.operation");
 		p.add(op_lbl, Stretch.LAST);
 		p.add(new JButton(settings), Stretch.RIGHT);
@@ -298,6 +303,10 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		if (null == a || a.equals("armState")) {
 			arm_state_lbl.setText(GateArmState.fromOrdinal(
 				proxy.getArmState()).toString());
+		}
+		if (null == a || a.equals("interlock")) {
+			interlock_lbl.setText(
+				GateArmDispatcher.getInterlockText(proxy));
 		}
 		if (a == null || a.equals("operation"))
 			op_lbl.setText(proxy.getOperation());

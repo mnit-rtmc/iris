@@ -62,6 +62,22 @@ import us.mn.state.dot.tms.utils.I18N;
 public class GateArmDispatcher extends IPanel
 	implements ProxyView<GateArmArray>
 {
+	/** Get interlock text */
+	static public String getInterlockText(GateArmArray ga) {
+		switch (GateArmInterlock.fromOrdinal(ga.getInterlock())) {
+		case DENY_OPEN:
+			return I18N.get("gate.arm.interlock.deny_open");
+		case DENY_CLOSE:
+			return I18N.get("gate.arm.interlock.deny_close");
+		case DENY_ALL:
+			return I18N.get("gate.arm.interlock.deny_all");
+		case SYSTEM_DISABLE:
+			return I18N.get("gate.arm.interlock.system_disable");
+		default:
+			return I18N.get("gate.arm.interlock.none");
+		}
+	}
+
 	/** SONAR session */
 	private final Session session;
 
@@ -382,34 +398,25 @@ public class GateArmDispatcher extends IPanel
 		case NONE:
 			interlock_lbl.setForeground(Color.BLACK);
 			interlock_lbl.setBackground(Color.GREEN);
-			interlock_lbl.setText(I18N.get(
-				"gate.arm.interlock.none"));
 			break;
 		case DENY_OPEN:
 			interlock_lbl.setForeground(Color.WHITE);
 			interlock_lbl.setBackground(Color.RED);
-			interlock_lbl.setText(I18N.get(
-				"gate.arm.interlock.deny_open"));
 			break;
 		case DENY_CLOSE:
 			interlock_lbl.setForeground(Color.BLACK);
 			interlock_lbl.setBackground(Color.YELLOW);
-			interlock_lbl.setText(I18N.get(
-				"gate.arm.interlock.deny_close"));
 			break;
 		case DENY_ALL:
 			interlock_lbl.setForeground(Color.WHITE);
 			interlock_lbl.setBackground(Color.RED);
-			interlock_lbl.setText(I18N.get(
-				"gate.arm.interlock.deny_all"));
 			break;
 		case SYSTEM_DISABLE:
 			interlock_lbl.setForeground(Color.WHITE);
 			interlock_lbl.setBackground(Color.GRAY);
-			interlock_lbl.setText(I18N.get(
-				"gate.arm.interlock.system_disable"));
 			break;
 		}
+		interlock_lbl.setText(getInterlockText(ga));
 	}
 
 	/** Update the swap button enabled states */
