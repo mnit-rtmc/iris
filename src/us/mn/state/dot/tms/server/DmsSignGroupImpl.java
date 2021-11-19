@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SignGroup;

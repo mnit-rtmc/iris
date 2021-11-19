@@ -18,7 +18,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DmsAction;
