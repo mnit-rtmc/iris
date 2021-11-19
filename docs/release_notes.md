@@ -1,6 +1,6 @@
 # IRIS 5.x Release Notes
 
-5.25.0 (unreleased)
+5.25.0 (19 Nov 2021)
  - Gate arms: skip "Warn Close" state when no action plan exists
  - Gate arms: Add `arm_state` and `fault` to DB gate arm table
  - Gate arms: Add `opposing`, `arm_state` and `interlock` to DB gate arm array
