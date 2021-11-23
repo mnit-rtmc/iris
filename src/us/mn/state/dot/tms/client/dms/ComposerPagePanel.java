@@ -217,8 +217,12 @@ public class ComposerPagePanel extends JPanel {
 
 	/** Get the font number for the page */
 	public int getFontNumber() {
-		Integer fn = font_cbx.getFontNumber();
-		return (fn != null) ? fn : composer.getDefaultFont();
+		if (FontComboBox.getIEnabled()) {
+			Integer fn = font_cbx.getFontNumber();
+			if (fn != null)
+				return fn;
+		}
+		return composer.getDefaultFont();
 	}
 
 	/** Set the font number for the page */

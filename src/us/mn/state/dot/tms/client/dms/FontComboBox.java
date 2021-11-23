@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
@@ -40,11 +39,11 @@ public class FontComboBox extends JComboBox<Font> implements ActionListener {
 		return SystemAttrEnum.DMS_FONT_SELECTION_ENABLE.getBoolean();
 	}
 
-	/** Font combo box model */
-	private FontComboBoxModel font_mdl;
-
 	/** Sign message composer */
 	private final SignMessageComposer composer;
+
+	/** Font combo box model */
+	private FontComboBoxModel font_mdl;
 
 	/** Counter to indicate we're adjusting widgets.  This needs to be
 	 * incremented before calling dispatcher methods which might cause
@@ -62,12 +61,8 @@ public class FontComboBox extends JComboBox<Font> implements ActionListener {
 	public void setSignConfig(SignConfig sc) {
 		if (font_mdl != null)
 			font_mdl.dispose();
-		if (sc != null) {
-			font_mdl = FontComboBoxModel.create(composer.getFonts(),
-				sc);
-			setModel(font_mdl);
-		} else
-			setModel(new DefaultComboBoxModel<Font>());
+		font_mdl = FontComboBoxModel.create(composer.getFonts(), sc);
+		setModel(font_mdl);
 	}
 
 	/** Set the selected font number */
@@ -80,15 +75,15 @@ public class FontComboBox extends JComboBox<Font> implements ActionListener {
 	/** Get the selected font number or null if nothing selected. */
 	protected Integer getFontNumber() {
 		Font font = (Font) getSelectedItem();
-		if (font != null)
-			return font.getNumber();
-		else
-			return null;
+		return (font != null) ? font.getNumber() : null;
 	}
 
 	/** Dispose of the font combo box */
 	public void dispose() {
-		setSignConfig(null);
+		if (font_mdl != null) {
+			font_mdl.dispose();
+			font_mdl = null;
+		}
 		removeActionListener(this);
 	}
 
