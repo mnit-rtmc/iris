@@ -41,6 +41,9 @@ public interface MeterPoller {
 	/** Threshold to fail communication (minutes) */
 	int COMM_FAIL_THRESHOLD = 3;
 
+	/** Threshold to fail communication (deciseconds) */
+	int COMM_FAIL_THRESHOLD_DS = COMM_FAIL_THRESHOLD * 60 * 10;
+
 	/** Threshold to fail communication (ms) */
 	long COMM_FAIL_THRESHOLD_MS = COMM_FAIL_THRESHOLD * 60 * 1000;
 

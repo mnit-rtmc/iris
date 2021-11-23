@@ -36,7 +36,7 @@ public class SystemAttributesProp extends NatchProp {
 	public void encodeStore(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		String msg = "SA," + message_id + ',' + COMM_FAIL_THRESHOLD_MS +
+		String msg = "SA," + message_id + ',' + COMM_FAIL_THRESHOLD_DS +
 			',' + STARTUP_GREEN + ',' + STARTUP_YELLOW + ',' +
 			getGreenTime() + ',' + getYellowTime() + '\n';
 		tx_buf.put(msg.getBytes(UTF8));
