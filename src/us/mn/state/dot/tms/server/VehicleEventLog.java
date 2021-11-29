@@ -216,18 +216,18 @@ public class VehicleEventLog {
 	}
 
 	/** Get the vehicle count for a given period */
-	public PeriodicSample getVehCount(long stamp, int per_sec) {
+	public PeriodicSample getVehCountSam(long stamp, int per_sec) {
 		return new PeriodicSample(stamp, per_sec, ev_vehicles);
 	}
 
 	/** Get the occupancy for a given period */
-	public OccupancySample getOccupancy(long stamp, int per_sec) {
+	public OccupancySample getOccupancySam(long stamp, int per_sec) {
 		int per_ms = per_sec * 1000;
 		return new OccupancySample(stamp, per_sec, ev_duration, per_ms);
 	}
 
 	/** Get the average vehicle speed for a given period */
-	public PeriodicSample getSpeed(long stamp, int per_sec) {
+	public PeriodicSample getSpeedSam(long stamp, int per_sec) {
 		if (ev_n_speed > 0 && ev_speed > 0) {
 			int s = ev_speed / ev_n_speed;
 			return new PeriodicSample(stamp, per_sec, s);

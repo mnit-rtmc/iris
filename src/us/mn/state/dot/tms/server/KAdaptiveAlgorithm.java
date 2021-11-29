@@ -167,11 +167,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Convert flow rate to vehicle count for a given period.
 	 * @param flow Flow rate to convert (vehicles / hour).
-	 * @param period Period for vehicle count (seconds).
+	 * @param per_sec Period for vehicle count (seconds).
 	 * @return Vehicle count over given period. */
-	static private float vehCountPeriod(int flow, int period) {
-		if (flow >= 0 && period > 0) {
-			float hour_frac = HOUR.per(new Interval(period));
+	static private float vehCountPeriod(int flow, int per_sec) {
+		if (flow >= 0 && per_sec > 0) {
+			float hour_frac = HOUR.per(new Interval(per_sec));
 			return flow * hour_frac;
 		} else
 			return MISSING_DATA;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,12 +59,12 @@ public class SampleProp extends ControllerProp {
 	private final long stamp;
 
 	/** Sample perdiod */
-	private final int period;
+	private final int per_sec;
 
 	/** Create a sample property */
 	public SampleProp(int p) {
 		stamp = TimeSteward.currentTimeMillis();
-		period = p;
+		per_sec = p;
 	}
 
 	/** Encode a QUERY request */
@@ -103,7 +103,8 @@ public class SampleProp extends ControllerProp {
 		if (p > 0 && pl >= p) {
 			int len = 1 + pl - p;
 			int[] occ = parseOcc(rx_buf, p, len);
-			controller.storeOccupancy(stamp, period, p,occ,MAX_C30);
+			controller.storeOccupancy(stamp, per_sec, p, occ,
+				MAX_C30);
 		} else
 			throw new ProtocolException("No Detector");
 	}

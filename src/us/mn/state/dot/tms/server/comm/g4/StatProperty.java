@@ -83,7 +83,7 @@ public class StatProperty extends G4Property {
 	}
 
 	/** Binning period (seconds) */
-	public final int period;
+	public final int per_sec;
 
 	/** Vehicle count data */
 	private final int[] v_count = new int[MAX_LANES];
@@ -171,7 +171,7 @@ public class StatProperty extends G4Property {
 	/** Create a new statistical property.
 	 * @param p Binning period (seconds). */
 	public StatProperty(int p) {
-		period = p;
+		per_sec = p;
 		clear();
 	}
 
@@ -228,15 +228,15 @@ public class StatProperty extends G4Property {
 	/** Check if time stamp is from the previous interval */
 	public boolean isPreviousInterval() {
 		long now = TimeSteward.currentTimeMillis();
-		int pms = period * 1000;
-		long end = now / pms * pms; // end of previous interval
-		long start = end - pms;
+		long per_ms = per_sec * 1000;
+		long end = now / per_ms * per_ms; // end of previous interval
+		long start = end - per_ms;
 		return (stamp >= start && stamp <= end);
 	}
 
 	/** Is time stamp valid (within valid interval) */
 	public boolean isValidStamp() {
-		long valid_ms = 2 * period * 1000;
+		long valid_ms = 2 * per_sec * 1000;
 		long now = TimeSteward.currentTimeMillis();
 		return (stamp > now - valid_ms) && (stamp < now + valid_ms);
 	}
@@ -335,7 +335,7 @@ public class StatProperty extends G4Property {
 		if (msg_comp.getClassCount() == 0)
 			throw new ParsingException("INVALID COMP");
 		int msg_period = parse16(data, OFF_PERIOD);
-		if (msg_period != period)
+		if (msg_period != per_sec)
 			throw new ParsingException("INVALID PERIOD");
 		volt = parse8(data, OFF_VOLT);
 		health = parse8(data, OFF_HEALTH);
@@ -454,7 +454,7 @@ public class StatProperty extends G4Property {
 		sb.append(" comp:");
 		sb.append(msg_comp);
 		sb.append(" period:");
-		sb.append(period);
+		sb.append(per_sec);
 		sb.append(" volts:");
 		sb.append(volt);
 		sb.append(' ');

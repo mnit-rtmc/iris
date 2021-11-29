@@ -45,13 +45,13 @@ public class OpQuerySamples extends OpController {
 	/** Maximum occupancy value (100%) */
 	static private final int MAX_OCC = 200;
 
-	/** Poll period */
-	private final int period;
+	/** Binning period */
+	private final int per_sec;
 
 	/** Create a new query samples object */
 	public OpQuerySamples(ControllerImpl c, int p) {
 		super(PriorityLevel.DEVICE_DATA, c);
-		period = p;
+		per_sec = p;
 	}
 
 	/** Create the second phase of the operation */
@@ -133,11 +133,11 @@ public class OpQuerySamples extends OpController {
 		private void storeVehOcc(DetectorImpl det, int veh, int occ) {
 			if (veh < VEH_OVERFLOW) {
 				det.storeVehCount(new PeriodicSample(stamp,
-					period, veh), false);
+					per_sec, veh), false);
 			}
 			if (occ <= MAX_OCC) {
 				det.storeOccupancy(new OccupancySample(stamp,
-					period, occ, MAX_OCC), false);
+					per_sec, occ, MAX_OCC), false);
 			}
 			// FIXME: deal with detector fault codes
 		}

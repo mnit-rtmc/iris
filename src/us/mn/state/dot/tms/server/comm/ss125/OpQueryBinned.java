@@ -87,15 +87,15 @@ public class OpQueryBinned extends OpSS125 {
 	@Override
 	public void cleanup() {
 		long stamp = binned_data.getTime();
-		int period = binned_data.getPeriod();
-		controller.storeVehCount(stamp, period, START_PIN,
+		int per_sec = binned_data.getPeriod();
+		controller.storeVehCount(stamp, per_sec, START_PIN,
 			binned_data.getVehCount());
-		controller.storeOccupancy(stamp, period, START_PIN,
+		controller.storeOccupancy(stamp, per_sec, START_PIN,
 			binned_data.getScans(), MAX_SCANS);
-		controller.storeSpeed(stamp, period, START_PIN,
+		controller.storeSpeed(stamp, per_sec, START_PIN,
 			binned_data.getSpeed());
 		for (SS125VehClass vc: SS125VehClass.values()) {
-			controller.storeVehCount(stamp, period, START_PIN,
+			controller.storeVehCount(stamp, per_sec, START_PIN,
 				binned_data.getVehCount(vc), vc.v_class);
 		}
 		super.cleanup();

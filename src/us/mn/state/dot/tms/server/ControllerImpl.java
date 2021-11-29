@@ -540,22 +540,22 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Store vehicle count data.
 	 * @param stamp Timestamp in milliseconds since epoch.
-	 * @param period Sampling period in seconds.
+	 * @param per_sec Sampling period in seconds.
 	 * @param start_pin Start pin on controller I/O.
 	 * @param veh_count Array of vehicle count samples. */
-	public void storeVehCount(long stamp, int period, int start_pin,
+	public void storeVehCount(long stamp, int per_sec, int start_pin,
 		int[] veh_count)
 	{
-		storeVehCount(stamp, period, start_pin, veh_count, null);
+		storeVehCount(stamp, per_sec, start_pin, veh_count, null);
 	}
 
 	/** Store vehicle count data.
 	 * @param stamp Timestamp in milliseconds since epoch.
-	 * @param period Sampling period in seconds.
+	 * @param per_sec Sampling period in seconds.
 	 * @param start_pin Start pin on controller I/O.
 	 * @param veh_count Array of vehicle count samples.
 	 * @param vc Vehicle class. */
-	public void storeVehCount(long stamp, int period, int start_pin,
+	public void storeVehCount(long stamp, int per_sec, int start_pin,
 		int[] veh_count, VehLengthClass vc)
 	{
 		HashMap<Integer, DetectorImpl> dets = getDetectors();
@@ -564,7 +564,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			int i = pin - start_pin;
 			int v = sampleValue(veh_count, i);
 			PeriodicSample ps = (v >= 0)
-				? new PeriodicSample(stamp, period, v)
+				? new PeriodicSample(stamp, per_sec, v)
 				: null;
 			det.storeVehCount(ps, vc);
 		}
@@ -572,11 +572,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Store occupancy data.
 	 * @param stamp Timestamp in milliseconds since epoch.
-	 * @param period Sampling period in seconds.
+	 * @param per_sec Sampling period in seconds.
 	 * @param start_pin Start pin on controller I/O.
 	 * @param scans Array of scan samples (0 to max_scans).
 	 * @param max_scans Maximum scan value (representing 100% occupancy). */
-	public void storeOccupancy(long stamp, int period, int start_pin,
+	public void storeOccupancy(long stamp, int per_sec, int start_pin,
 		int[] scans, int max_scans)
 	{
 		HashMap<Integer, DetectorImpl> dets = getDetectors();
@@ -585,7 +585,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			int i = pin - start_pin;
 			int v = sampleValue(scans, i);
 			OccupancySample occ = (v >= 0)
-			    ? new OccupancySample(stamp, period, v, max_scans)
+			    ? new OccupancySample(stamp, per_sec, v, max_scans)
 			    : null;
 			det.storeOccupancy(occ, false);
 		}
@@ -593,10 +593,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Store speed data.
 	 * @param stamp Timestamp in milliseconds since epoch.
-	 * @param period Sampling period in seconds.
+	 * @param per_sec Sampling period in seconds.
 	 * @param start_pin Start pin on controller I/O.
 	 * @param speed Array of speed samples (MPH). */
-	public void storeSpeed(long stamp, int period, int start_pin,
+	public void storeSpeed(long stamp, int per_sec, int start_pin,
 		int[] speed)
 	{
 		HashMap<Integer, DetectorImpl> dets = getDetectors();
@@ -605,7 +605,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			int i = pin - start_pin;
 			int s = sampleValue(speed, i);
 			PeriodicSample ps = (s > 0)
-				? new PeriodicSample(stamp, period, s)
+				? new PeriodicSample(stamp, per_sec, s)
 				: null;
 			det.storeSpeed(ps, false);
 		}
@@ -945,15 +945,15 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Poll controller devices */
-	public void pollDevices(int period, boolean is_long) {
+	public void pollDevices(int per_sed, boolean is_long) {
 		if (isConditionActive())
-			pollActiveDevices(period, is_long);
+			pollActiveDevices(per_sed, is_long);
 		if (isConditionTesting())
 			startTesting();
 	}
 
 	/** Poll active controller devices */
-	private void pollActiveDevices(int period, boolean is_long) {
+	private void pollActiveDevices(int per_sec, boolean is_long) {
 		if (!is_long)
 			pollController();
 		// Must call getDevices so we don't hold the lock
@@ -961,7 +961,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			pollDevice(io, is_long);
 		// Must check hasActiveMeter for green counts (mndot protocol)
 		if (hasActiveDetector() || (is_long && hasActiveMeter()))
-			pollDetectors(period);
+			pollDetectors(per_sec);
 	}
 
 	/** Poll controller for protocols with no devices */
@@ -1014,10 +1014,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Poll all detectors */
-	private void pollDetectors(int period) {
+	private void pollDetectors(int per_sec) {
 		SamplePoller p = getSamplePoller();
 		if (p != null)
-			p.querySamples(this, period);
+			p.querySamples(this, per_sec);
 	}
 
 	/** Get a data collection poller */

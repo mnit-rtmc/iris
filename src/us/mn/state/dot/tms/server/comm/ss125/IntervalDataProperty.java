@@ -30,29 +30,29 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 public class IntervalDataProperty extends SS125Property {
 
 	/** Interval period (sec) */
-	private final int period;
+	private final int per_sec;
 
 	/** Get the interval period (sec) */
 	public int getPeriod() {
-		return period;
+		return per_sec;
 	}
 
 	/** Create a new interval data property */
 	public IntervalDataProperty(int p) {
-		period = p;
+		per_sec = p;
 	}
 
 	/** Check if time stamp is from the previous interval */
 	public boolean isPreviousInterval() {
 		long now = TimeSteward.currentTimeMillis();
-		int pms = period * 1000;
-		long end = now / pms * pms; // end of previous interval
+		long per_ms = per_sec * 1000;
+		long end = now / per_ms * per_ms; // end of previous interval
 		return (end == stamp);
 	}
 
 	/** Is time stamp valid (within valid interval) */
 	public boolean isValidStamp() {
-		long valid_ms = 2 * period * 1000;
+		long valid_ms = 2 * per_sec * 1000;
 		long now = TimeSteward.currentTimeMillis();
 		return (stamp > now - valid_ms) && (stamp < now + valid_ms);
 	}

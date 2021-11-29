@@ -31,7 +31,7 @@ public class OpQuerySpeed extends OpDR500 {
 	static private final int START_PIN = 1;
 
 	/** Binning period (seconds) */
-	private final int period;
+	private final int per_sec;
 
 	/** Time stamp of sample data */
 	private long stamp;
@@ -42,7 +42,7 @@ public class OpQuerySpeed extends OpDR500 {
 	/** Create a new query speed operation */
 	public OpQuerySpeed(ControllerImpl c, int p) {
 		super(PriorityLevel.SHORT_POLL, c);
-		period = p;
+		per_sec = p;
 	}
 
 	/** Create the first phase of the operation */
@@ -74,7 +74,7 @@ public class OpQuerySpeed extends OpDR500 {
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		controller.storeSpeed(stamp, period, START_PIN, getSpeed());
+		controller.storeSpeed(stamp, per_sec, START_PIN, getSpeed());
 		super.cleanup();
 	}
 }

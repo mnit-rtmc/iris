@@ -1052,9 +1052,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	public void binEventData(int per_sec, boolean success) {
 		if (success) {
 			long stamp = calculateEndTime(per_sec * 1000);
-			storeVehCount(v_log.getVehCount(stamp, per_sec), true);
-			storeOccupancy(v_log.getOccupancy(stamp, per_sec),true);
-			storeSpeed(v_log.getSpeed(stamp, per_sec), true);
+			storeVehCount(v_log.getVehCountSam(stamp, per_sec),
+				true);
+			storeOccupancy(v_log.getOccupancySam(stamp, per_sec),
+				true);
+			storeSpeed(v_log.getSpeedSam(stamp, per_sec), true);
 		}
 		v_log.clear();
 	}

@@ -86,23 +86,23 @@ public class OpQueryStats extends OpG4 {
 	@Override
 	public void cleanup() {
 		long stamp = stat.getStamp();
-		int period = stat.period;
-		controller.storeVehCount(stamp, period, START_PIN,
+		int per_sec = stat.per_sec;
+		controller.storeVehCount(stamp, per_sec, START_PIN,
 			stat.getVehCount());
-		controller.storeOccupancy(stamp, period, START_PIN,
+		controller.storeOccupancy(stamp, per_sec, START_PIN,
 			stat.getScans(), StatProperty.MAX_SCANS);
-		controller.storeSpeed(stamp, period, START_PIN,
+		controller.storeSpeed(stamp, per_sec, START_PIN,
 			stat.getSpeed());
-		controller.storeVehCount(stamp, period, START_PIN,
+		controller.storeVehCount(stamp, per_sec, START_PIN,
 			stat.getVehCount(G4VehClass.SMALL),
 			G4VehClass.SMALL.v_class);
-		controller.storeVehCount(stamp, period, START_PIN,
+		controller.storeVehCount(stamp, per_sec, START_PIN,
 			stat.getVehCount(G4VehClass.REGULAR),
 			G4VehClass.REGULAR.v_class);
-		controller.storeVehCount(stamp, period, START_PIN,
+		controller.storeVehCount(stamp, per_sec, START_PIN,
 			stat.getVehCount(G4VehClass.LARGE),
 			G4VehClass.LARGE.v_class);
-		controller.storeVehCount(stamp, period, START_PIN,
+		controller.storeVehCount(stamp, per_sec, START_PIN,
 			stat.getVehCount(G4VehClass.EXTRA_LARGE),
 			G4VehClass.EXTRA_LARGE.v_class);
 		super.cleanup();

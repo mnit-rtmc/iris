@@ -426,18 +426,18 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
 	/** Set the accumulation of precipitation (micrometers) */
 	public void updateAccumulation(Integer a, long st) {
-		int period = calculatePeriod(st);
+		int per_sec = calculatePeriod(st);
 		int value = calculatePrecipValue(a);
-		if (period > 0 && value >= 0) {
-			cache.add(new PeriodicSample(st, period, value), name);
-			float period_h = 3600f / period;// periods per hour
-			float umph = value * period_h;	// micrometers per hour
-			float mmph = umph / 1000;	// millimeters per hour
+		if (per_sec > 0 && value >= 0) {
+			cache.add(new PeriodicSample(st, per_sec, value), name);
+			float per_h = 3600f / per_sec;  // periods per hour
+			float umph = value * per_h;     // micrometers per hour
+			float mmph = umph / 1000;       // millimeters per hour
 			setPrecipRateNotify(Math.round(mmph));
 		}
 		if (value < 0)
 			setPrecipRateNotify(null);
-		if (period > 0 || value < 0)
+		if (per_sec > 0 || value < 0)
 			accumulation = a != null ? a : MISSING_DATA;
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2019  Minnesota Department of Transportation
+ * Copyright (C) 2004-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,11 +30,11 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 public class BinnedSampleProperty extends SS105Property {
 
 	/** Interval period (sec) */
-	private final int period;
+	private final int per_sec;
 
 	/** Get the interval period (sec) */
 	public int getPeriod() {
-		return period;
+		return per_sec;
 	}
 
 	/** Sample age (number of intervals old) */
@@ -51,14 +51,14 @@ public class BinnedSampleProperty extends SS105Property {
 	/** Check if time stamp is from the previous interval */
 	public boolean isPreviousInterval() {
 		long now = TimeSteward.currentTimeMillis();
-		int pms = period * 1000;
-		long end = now / pms * pms; // end of previous interval
+		long per_ms = per_sec * 1000;
+		long end = now / per_ms * per_ms; // end of previous interval
 		return (end == stamp);
 	}
 
 	/** Is time stamp valid (within valid interval) */
 	public boolean isValidStamp() {
-		long valid_ms = 2 * period * 1000;
+		long valid_ms = 2 * per_sec * 1000;
 		long now = TimeSteward.currentTimeMillis();
 		return (stamp > now - valid_ms) && (stamp < now + valid_ms);
 	}
@@ -74,7 +74,7 @@ public class BinnedSampleProperty extends SS105Property {
 
 	/** Create a new binned sample property */
 	public BinnedSampleProperty(int p) {
-		period = p;
+		per_sec = p;
 		age = 0;
 	}
 
