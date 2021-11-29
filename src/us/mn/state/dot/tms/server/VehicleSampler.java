@@ -16,21 +16,20 @@ package us.mn.state.dot.tms.server;
 
 /**
  * Vehicle sampler interface.
- * FIXME: use units package.
  *
  * @author Douglas Lau
  */
 public interface VehicleSampler {
 
 	/** Get vehicle count */
-	int getVehCount(long stamp, int period);
+	int getVehCount(long stamp, int per_ms);
 
 	/** Get a flow rate (vehicles per hour) */
-	int getFlow(long stamp, int period);
+	int getFlow(long stamp, int per_ms);
 
 	/** Get density (vehicles per mile) */
-	float getDensity(long stamp, int period);
+	float getDensity(long stamp, int per_ms);
 
 	/** Get recorded speed (miles per hour) */
-	float getSpeed(long stamp, int period);
+	float getSpeed(long stamp, int per_ms);
 }

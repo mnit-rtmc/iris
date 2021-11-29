@@ -57,14 +57,14 @@ class StationManager {
 
 	/** Calculate the current data for all stations */
 	public void calculateData() {
-		int period = DetectorImpl.BIN_PERIOD_MS;
-		stamp = DetectorImpl.calculateEndTime(period);
+		int per_ms = DetectorImpl.BIN_PERIOD_MS;
+		stamp = DetectorImpl.calculateEndTime(per_ms);
 		Iterator<Station> it = StationHelper.iterator();
 		while (it.hasNext()) {
 			Station s = it.next();
 			if (s instanceof StationImpl) {
 				StationImpl si = (StationImpl) s;
-				si.calculateData(stamp, period);
+				si.calculateData(stamp, per_ms);
 			}
 		}
 	}
@@ -111,7 +111,7 @@ class StationManager {
 
 	/** Write the station data out as JSON */
 	private void writeSampleJson(BufferedWriter writer) throws IOException {
-		int period = DetectorImpl.BIN_PERIOD_MS;
+		int per_ms = DetectorImpl.BIN_PERIOD_MS;
 		writer.write("{\n");
 		writer.write("\"time_stamp\":\"");
 		writer.write(RFC3339.format(new Date(stamp)));
@@ -123,7 +123,7 @@ class StationManager {
 			Station s = it.next();
 			if (s instanceof StationImpl) {
 				StationImpl si = (StationImpl) s;
-				if (si.writeSampleJson(stamp, period, writer)) {
+				if (si.writeSampleJson(stamp, per_ms, writer)) {
 					if (it.hasNext())
 						writer.write(',');
 					writer.write('\n');
@@ -159,13 +159,13 @@ class StationManager {
 
 	/** Print the body of the station XML file */
 	private void writeSampleXmlBody(Writer w) throws IOException {
-		int period = DetectorImpl.BIN_PERIOD_MS;
+		int per_ms = DetectorImpl.BIN_PERIOD_MS;
 		Iterator<Station> it = StationHelper.iterator();
 		while (it.hasNext()) {
 			Station s = it.next();
 			if (s instanceof StationImpl) {
 				StationImpl si = (StationImpl) s;
-				si.writeSampleXml(w, stamp, period);
+				si.writeSampleXml(w, stamp, per_ms);
 			}
 		}
 	}

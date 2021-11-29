@@ -113,11 +113,11 @@ public class SamplerSet implements VehicleSampler {
 
 	/** Get a vehicle count */
 	@Override
-	public int getVehCount(long stamp, int period) {
+	public int getVehCount(long stamp, int per_ms) {
 		int count = 0;
 		int n_count = 0;
 		for (VehicleSampler vs: samplers) {
-			int c = vs.getVehCount(stamp, period);
+			int c = vs.getVehCount(stamp, per_ms);
 			if (c >= 0) {
 				count += c;
 				n_count++;
@@ -129,11 +129,11 @@ public class SamplerSet implements VehicleSampler {
 
 	/** Get a total flow rate */
 	@Override
-	public int getFlow(long stamp, int period) {
+	public int getFlow(long stamp, int per_ms) {
 		int flow = 0;
 		int n_flow = 0;
 		for (VehicleSampler vs: samplers) {
-			int f = vs.getFlow(stamp, period);
+			int f = vs.getFlow(stamp, per_ms);
 			if (f >= 0) {
 				flow += f;
 				n_flow++;
@@ -145,11 +145,11 @@ public class SamplerSet implements VehicleSampler {
 
 	/** Get the current density (vehicle per mile) */
 	@Override
-	public float getDensity(long stamp, int period) {
+	public float getDensity(long stamp, int per_ms) {
 		float t_density = 0;
 		int n_density = 0;
 		for (VehicleSampler vs: samplers) {
-			float k = vs.getDensity(stamp, period);
+			float k = vs.getDensity(stamp, per_ms);
 			if (k >= 0) {
 				t_density += k;
 				n_density++;
@@ -160,11 +160,11 @@ public class SamplerSet implements VehicleSampler {
 
 	/** Get the current average speed */
 	@Override
-	public float getSpeed(long stamp, int period) {
+	public float getSpeed(long stamp, int per_ms) {
 		float t_speed = 0;
 		int n_speed = 0;
 		for (VehicleSampler vs: samplers) {
-			float s = vs.getSpeed(stamp, period);
+			float s = vs.getSpeed(stamp, per_ms);
 			if (s > 0) {
 				t_speed += s;
 				n_speed++;
@@ -174,12 +174,12 @@ public class SamplerSet implements VehicleSampler {
 	}
 
 	/** Get the maximum occupancy */
-	public float getMaxOccupancy(long stamp, int period) {
+	public float getMaxOccupancy(long stamp, int per_ms) {
 		float occ = MISSING_DATA;
 		for (VehicleSampler vs: samplers) {
 			if (vs instanceof DetectorImpl) {
 				DetectorImpl det = (DetectorImpl) vs;
-				float o = det.getOccupancy(stamp, period);
+				float o = det.getOccupancy(stamp, per_ms);
 				occ = Math.max(o, occ);
 			}
 		}

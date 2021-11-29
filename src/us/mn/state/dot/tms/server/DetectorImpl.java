@@ -206,10 +206,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	static public final int BIN_PERIOD_MS =
 		(int) new Interval(BIN_PERIOD_SEC).ms();
 
-	/** Calculate the end time of previous period */
-	static public long calculateEndTime(int period) {
+	/** Calculate the end time of previous period (ms) */
+	static public long calculateEndTime(int per_ms) {
 		long stamp = TimeSteward.currentTimeMillis();
-		long p = period;
+		long p = per_ms;
 		return stamp / p * p;
 	}
 
@@ -777,16 +777,16 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get vehicle count */
 	@Override
-	public int getVehCount(long stamp, int period) {
+	public int getVehCount(long stamp, int per_ms) {
 		return isSampling()
-		      ? veh_cache.getValue(stamp - period, stamp)
+		      ? veh_cache.getValue(stamp - per_ms, stamp)
 		      : MISSING_DATA;
 	}
 
 	/** Get the occupancy for an interval */
-	protected float getOccupancy(long stamp, int period) {
+	protected float getOccupancy(long stamp, int per_ms) {
 		int scn = isSampling()
-		       ? scn_cache.getValue(stamp - period, stamp)
+		       ? scn_cache.getValue(stamp - per_ms, stamp)
 		       : MISSING_DATA;
 		return (scn != MISSING_DATA)
 		      ? MAX_OCCUPANCY * (float) scn / MAX_C30
@@ -795,42 +795,42 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get a flow rate (vehicles per hour) */
 	@Override
-	public int getFlow(long stamp, int period) {
-		int flow = getFlowRaw(stamp, period);
-		return (flow >= 0) ? flow : getFlowFake(stamp, period);
+	public int getFlow(long stamp, int per_ms) {
+		int flow = getFlowRaw(stamp, per_ms);
+		return (flow >= 0) ? flow : getFlowFake(stamp, per_ms);
 	}
 
 	/** Get a raw (non-faked) flow rate (vehicles per hour) */
-	protected int getFlowRaw(long stamp, int period) {
-		int v = getVehCount(stamp, period);
-		float ph = new Interval(period, MILLISECONDS).per(HOUR);
+	protected int getFlowRaw(long stamp, int per_ms) {
+		int v = getVehCount(stamp, per_ms);
+		float ph = new Interval(per_ms, MILLISECONDS).per(HOUR);
 		return (v >= 0) ? Math.round(v * ph) : MISSING_DATA;
 	}
 
 	/** Get a fake flow rate (vehicles per hour) */
-	private int getFlowFake(long stamp, int period) {
+	private int getFlowFake(long stamp, int per_ms) {
 		FakeDetector f = fake_det;
-		return (f != null) ? f.getFlow(stamp, period) : MISSING_DATA;
+		return (f != null) ? f.getFlow(stamp, per_ms) : MISSING_DATA;
 	}
 
 	/** Get the density (vehicles per mile) */
 	@Override
-	public float getDensity(long stamp, int period) {
-		float k = getDensityRaw(stamp, period);
-		return (k >= 0) ? k : getDensityFake(stamp, period);
+	public float getDensity(long stamp, int per_ms) {
+		float k = getDensityRaw(stamp, per_ms);
+		return (k >= 0) ? k : getDensityFake(stamp, per_ms);
 	}
 
 	/** Get the current raw (non-faked) density (vehicles per mile) */
-	protected float getDensityRaw(long stamp, int period) {
-		float k = getDensityFromFlowSpeed(stamp, period);
-		return (k >= 0) ? k : getDensityFromOccupancy(stamp, period);
+	protected float getDensityRaw(long stamp, int per_ms) {
+		float k = getDensityFromFlowSpeed(stamp, per_ms);
+		return (k >= 0) ? k : getDensityFromOccupancy(stamp, per_ms);
 	}
 
 	/** Get the density from flow and speed (vehicles per mile) */
-	private float getDensityFromFlowSpeed(long stamp, int period) {
-		float speed = getSpeedRaw(stamp, period);
+	private float getDensityFromFlowSpeed(long stamp, int per_ms) {
+		float speed = getSpeedRaw(stamp, per_ms);
 		if (speed > 0) {
-			int flow = getFlowRaw(stamp, period);
+			int flow = getFlowRaw(stamp, per_ms);
 			if (flow > MISSING_DATA)
 				return flow / speed;
 		}
@@ -838,8 +838,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	}
 
 	/** Get the density from occupancy (vehicles per mile) */
-	private float getDensityFromOccupancy(long stamp, int period) {
-		float occ = getOccupancy(stamp, period);
+	private float getDensityFromOccupancy(long stamp, int per_ms) {
+		float occ = getOccupancy(stamp, per_ms);
 		if (occ >= 0 && field_length > 0) {
 			Distance fl = new Distance(field_length, FEET);
 			return occ / (fl.asFloat(MILES) * MAX_OCCUPANCY);
@@ -848,49 +848,46 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	}
 
 	/** Get fake density (vehicles per mile) */
-	private float getDensityFake(long stamp, int period) {
+	private float getDensityFake(long stamp, int per_ms) {
 		FakeDetector f = fake_det;
-		return (f != null) ? f.getDensity(stamp, period) : MISSING_DATA;
+		return (f != null) ? f.getDensity(stamp, per_ms) : MISSING_DATA;
 	}
 
 	/** Get recorded speed (miles per hour) */
 	@Override
-	public float getSpeed(long stamp, int period) {
-		float speed = getSpeedRaw(stamp, period);
+	public float getSpeed(long stamp, int per_ms) {
+		float speed = getSpeedRaw(stamp, per_ms);
 		if (speed > 0)
 			return speed;
-		speed = getSpeedEstimate(stamp, period);
+		speed = getSpeedEstimate(stamp, per_ms);
 		if (speed > 0)
 			return speed;
 		else
-			return getSpeedFake(stamp, period);
+			return getSpeedFake(stamp, per_ms);
 	}
 
 	/** Get the raw (non-faked) speed (MPH) */
-	protected float getSpeedRaw(long stamp, int period) {
+	protected float getSpeedRaw(long stamp, int per_ms) {
 		return isSampling()
-		      ? spd_cache.getValue(stamp - period, stamp)
+		      ? spd_cache.getValue(stamp - per_ms, stamp)
 		      : MISSING_DATA;
 	}
 
 	/** Get speed estimate based on flow / density */
-	private float getSpeedEstimate(long stamp, int period) {
-		int flow = getFlowRaw(stamp, period);
+	private float getSpeedEstimate(long stamp, int per_ms) {
+		int flow = getFlowRaw(stamp, per_ms);
 		if (flow <= 0)
 			return MISSING_DATA;
-		float density = getDensityFromOccupancy(stamp, period);
+		float density = getDensityFromOccupancy(stamp, per_ms);
 		if (density <= DENSITY_THRESHOLD)
 			return MISSING_DATA;
 		return flow / density;
 	}
 
 	/** Get fake speed (miles per hour) */
-	private float getSpeedFake(long stamp, int period) {
+	private float getSpeedFake(long stamp, int per_ms) {
 		FakeDetector f = fake_det;
-		if (f != null)
-			return f.getSpeed(stamp, period);
-		else
-			return MISSING_DATA;
+		return (f != null) ? f.getSpeed(stamp, per_ms) : MISSING_DATA;
 	}
 
 	/** Log a detector event */
@@ -1087,14 +1084,14 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	}
 
 	/** Print binned data as an XML element */
-	public void writeSampleXml(Writer w, long stamp, int period)
+	public void writeSampleXml(Writer w, long stamp, int per_ms)
 		throws IOException
 	{
 		if (abandoned || !isSampling())
 			return;
-		int flow = getFlowRaw(stamp, period);
-		int speed = Math.round(getSpeed(stamp, period));
-		float occ = getOccupancy(stamp, period);
+		int flow = getFlowRaw(stamp, per_ms);
+		int speed = Math.round(getSpeed(stamp, per_ms));
+		float occ = getOccupancy(stamp, per_ms);
 		w.write("\t<sample");
 		w.write(createAttribute("sensor", name));
 		if (flow != MISSING_DATA)

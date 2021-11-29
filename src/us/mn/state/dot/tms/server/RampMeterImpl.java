@@ -836,9 +836,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Check if traffic is backed up over merge detector */
 	private boolean isMergeBackedUp() {
-		int period = DetectorImpl.BIN_PERIOD_MS;
-		long stamp = DetectorImpl.calculateEndTime(period);
-		float occ = merge_set.getMaxOccupancy(stamp, period);
+		int per_ms = DetectorImpl.BIN_PERIOD_MS;
+		long stamp = DetectorImpl.calculateEndTime(per_ms);
+		float occ = merge_set.getMaxOccupancy(stamp, per_ms);
 		return merge_set.isPerfect() && occ >= MERGE_BACKUP_OCC;
 	}
 

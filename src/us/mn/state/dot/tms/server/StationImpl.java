@@ -207,12 +207,12 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Get a vehicle count */
 	@Override
-	public int getVehCount(long stamp, int period) {
+	public int getVehCount(long stamp, int per_ms) {
 		int total = 0;
 		int n_count = 0;
 		for (DetectorImpl det: r_node.getDetectors()) {
 			if (isValidStation(det)) {
-				int c = det.getVehCount(stamp, period);
+				int c = det.getVehCount(stamp, per_ms);
 				if (c >= 0) {
 					total += c;
 					n_count++;
@@ -224,12 +224,12 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Get the average station flow */
 	@Override
-	public int getFlow(long stamp, int period) {
+	public int getFlow(long stamp, int per_ms) {
 		int t_flow = 0;
 		int n_flow = 0;
 		for (DetectorImpl det: r_node.getDetectors()) {
 			if (isValidStation(det)) {
-				int f = det.getFlow(stamp, period);
+				int f = det.getFlow(stamp, per_ms);
 				if (f >= 0) {
 					t_flow += f;
 					n_flow++;
@@ -244,7 +244,7 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Get the average station density */
 	@Override
-	public float getDensity(long stamp, int period) {
+	public float getDensity(long stamp, int per_ms) {
 		return density;
 	}
 
@@ -253,7 +253,7 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Get the average station speed */
 	@Override
-	public float getSpeed(long stamp, int period) {
+	public float getSpeed(long stamp, int per_ms) {
 		return speed;
 	}
 
@@ -358,7 +358,7 @@ public class StationImpl implements Station, VehicleSampler {
 	}
 
 	/** Calculate the current station data */
-	public void calculateData(long stamp, int period) {
+	public void calculateData(long stamp, int per_ms) {
 		updateRollingSamples();
 		float low = MISSING_DATA;
 		float t_occ = 0;
@@ -370,17 +370,17 @@ public class StationImpl implements Station, VehicleSampler {
 		for (DetectorImpl det: r_node.getDetectors()) {
 			if (!isValidStation(det))
 				continue;
-			float f = det.getOccupancy(stamp, period);
+			float f = det.getOccupancy(stamp, per_ms);
 			if (f != MISSING_DATA) {
 				t_occ += f;
 				n_occ++;
 			}
-			f = det.getDensity(stamp, period);
+			f = det.getDensity(stamp, per_ms);
 			if (f != MISSING_DATA) {
 				t_density += f;
 				n_density++;
 			}
-			f = det.getSpeed(stamp, period);
+			f = det.getSpeed(stamp, per_ms);
 			if (f > 0) {
 				t_speed += f;
 				n_speed++;
@@ -398,13 +398,13 @@ public class StationImpl implements Station, VehicleSampler {
 	}
 
 	/** Write the current sample as an XML element */
-	public void writeSampleXml(Writer w, long stamp, int period)
+	public void writeSampleXml(Writer w, long stamp, int per_ms)
 		throws IOException
 	{
 		if (!getActive())
 			return;
-		int f = getFlow(stamp, period);
-		int s = Math.round(getSpeed(stamp, period));
+		int f = getFlow(stamp, per_ms);
+		int s = Math.round(getSpeed(stamp, per_ms));
 		float o = occupancy;
 		w.write("\t<sample");
 		w.write(createAttribute("sensor", name));
@@ -420,11 +420,11 @@ public class StationImpl implements Station, VehicleSampler {
 	}
 
 	/** Write the current sample as a JSON object */
-	public boolean writeSampleJson(long stamp, int period, Writer writer)
+	public boolean writeSampleJson(long stamp, int per_ms, Writer writer)
 		throws IOException
 	{
-		int f = getFlow(stamp, period);
-		int s = Math.round(getSpeed(stamp, period));
+		int f = getFlow(stamp, per_ms);
+		int s = Math.round(getSpeed(stamp, per_ms));
 		if (f > MISSING_DATA || s > 0) {
 			writeSampleJson(f, s, writer);
 			return true;

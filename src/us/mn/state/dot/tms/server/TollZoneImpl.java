@@ -371,11 +371,11 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	/** Update density.
 	 * @param np New pricing period (if true). */
 	public synchronized void updateDensity(boolean np) {
-		int period = DetectorImpl.BIN_PERIOD_MS;
-		long stamp = DetectorImpl.calculateEndTime(period);
+		int per_ms = DetectorImpl.BIN_PERIOD_MS;
+		long stamp = DetectorImpl.calculateEndTime(per_ms);
 		updateDensityHistory("JOB");
 		for (Map.Entry<VehicleSampler,DensityHist> e:k_hist.entrySet()){
-			double k = e.getKey().getDensity(stamp, period);
+			double k = e.getKey().getDensity(stamp, per_ms);
 			e.getValue().updateDensity(np, k);
 		}
 	}

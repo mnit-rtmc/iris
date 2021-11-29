@@ -89,13 +89,13 @@ public class FlushXmlJob extends Job {
 	/** Write the body of the detector XML file */
 	private void writeSampleXmlBody(Writer w) throws IOException {
 		long stamp = station_manager.getStamp();
-		int period = DetectorImpl.BIN_PERIOD_MS;
+		int per_ms = DetectorImpl.BIN_PERIOD_MS;
 		Iterator<Detector> it = DetectorHelper.iterator();
 		while (it.hasNext()) {
 			Detector d = it.next();
 			if (d instanceof DetectorImpl) {
 				DetectorImpl det = (DetectorImpl) d;
-				det.writeSampleXml(w, stamp, period);
+				det.writeSampleXml(w, stamp, per_ms);
 			}
 		}
 	}

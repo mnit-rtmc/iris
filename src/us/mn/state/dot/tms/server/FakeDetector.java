@@ -59,10 +59,10 @@ public class FakeDetector implements VehicleSampler {
 
 	/** Get a vehicle count */
 	@Override
-	public int getVehCount(long stamp, int period) {
+	public int getVehCount(long stamp, int per_ms) {
 		int count = 0;
 		for (int i = 0; i < dets.length; i++) {
-			int c = dets[i].getVehCount(stamp, period);
+			int c = dets[i].getVehCount(stamp, per_ms);
 			if (c < 0)
 				return MISSING_DATA;
 			count += c;
@@ -72,10 +72,10 @@ public class FakeDetector implements VehicleSampler {
 
 	/** Get total flow rate */
 	@Override
-	public int getFlow(long stamp, int period) {
+	public int getFlow(long stamp, int per_ms) {
 		int flow = 0;
 		for (int i = 0; i < dets.length; i++) {
-			int f = dets[i].getFlowRaw(stamp, period);
+			int f = dets[i].getFlowRaw(stamp, per_ms);
 			if (f < 0)
 				return MISSING_DATA;
 			flow += f;
@@ -85,11 +85,11 @@ public class FakeDetector implements VehicleSampler {
 
 	/** Get the fake density (vehicle per mile) */
 	@Override
-	public float getDensity(long stamp, int period) {
+	public float getDensity(long stamp, int per_ms) {
 		float t_density = 0;
 		int n_density = 0;
 		for (DetectorImpl det: dets) {
-			float k = det.getDensityRaw(stamp, period);
+			float k = det.getDensityRaw(stamp, per_ms);
 			if (k >= 0) {
 				t_density += k;
 				n_density++;
@@ -100,11 +100,11 @@ public class FakeDetector implements VehicleSampler {
 
 	/** Get the fake speed (miles per hour) */
 	@Override
-	public float getSpeed(long stamp, int period) {
+	public float getSpeed(long stamp, int per_ms) {
 		float t_speed = 0;
 		int n_speed = 0;
 		for (DetectorImpl det: dets) {
-			float s = det.getSpeedRaw(stamp, period);
+			float s = det.getSpeedRaw(stamp, per_ms);
 			if (s > 0) {
 				t_speed += s;
 				n_speed++;
