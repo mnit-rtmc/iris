@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2018  Minnesota Department of Transportation
+ * Copyright (C) 2010-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ public class PeriodicSample implements Comparable<PeriodicSample> {
 	public final long stamp;
 
 	/** Sample period in seconds */
-	public final int period;
+	public final int per_sec;
 
 	/** Sample data value */
 	public final int value;
@@ -37,13 +37,16 @@ public class PeriodicSample implements Comparable<PeriodicSample> {
 	public PeriodicSample(long s, int p, int v) {
 		assert p > 0;
 		stamp = s;
-		period = p;
+		per_sec = p;
 		value = v;
 	}
 
 	/** Compare the sample to another */
+	@Override
 	public int compareTo(PeriodicSample other) {
-		return (int) ((stamp + period) - (other.stamp + other.period));
+		long ms = stamp + periodMillis();
+		long oms = other.stamp + other.periodMillis();
+		return (int) (ms - oms);
 	}
 
 	/** Get a time stamp at the start of the sampling period.
@@ -54,12 +57,12 @@ public class PeriodicSample implements Comparable<PeriodicSample> {
 
 	/** Get a time stamp at the end of the sampling period. */
 	public long end() {
-		int pms = periodMillis();
-		return stamp / pms * pms;
+		long per_ms = periodMillis();
+		return stamp / per_ms * per_ms;
 	}
 
 	/** Get the sampling period in milliseconds */
-	private int periodMillis() {
-		return period * 1000;
+	private long periodMillis() {
+		return per_sec * 1000;
 	}
 }

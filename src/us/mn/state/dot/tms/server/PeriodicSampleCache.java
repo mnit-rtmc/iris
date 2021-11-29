@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2019  Minnesota Department of Transportation
+ * Copyright (C) 2010-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -148,9 +148,9 @@ public class PeriodicSampleCache {
 	public void add(PeriodicSample ps, String name) {
 		if (checkStamp(ps.stamp)) {
 			if (sample_type.isValid(ps)) {
-				if (!isPeriodOk(ps.period))
+				if (!isPeriodOk(ps.per_sec))
 					samples.clear();
-				if (isPeriodSame(ps.period))
+				if (isPeriodSame(ps.per_sec))
 					addSample(ps);
 				else
 					interpolate(ps);
@@ -164,29 +164,29 @@ public class PeriodicSampleCache {
 	}
 
 	/** Check if a period is OK to be cached.
-	 * @param period Period to check (seconds).
+	 * @param per_sec Period to check (seconds).
 	 * @return true if period is OK to be cached. */
-	private boolean isPeriodOk(int period) {
-		return period % getPeriod(period) == 0;
+	private boolean isPeriodOk(int per_sec) {
+		return per_sec % getPeriod(per_sec) == 0;
 	}
 
 	/** Is a sample period the same as for the cache? */
-	private boolean isPeriodSame(int period) {
-		return period == getPeriod(period);
+	private boolean isPeriodSame(int per_sec) {
+		return per_sec == getPeriod(per_sec);
 	}
 
 	/** Get the sample period.
-	 * @param period Default sample period.
+	 * @param per_sec Default sample period.
 	 * @return Sample period (seconds). */
-	private int getPeriod(int period) {
+	private int getPeriod(int per_sec) {
 		return samples.isEmpty()
-		      ? period
-		      : samples.first().period;
+		      ? per_sec
+		      : samples.first().per_sec;
 	}
 
 	/** Add a sample */
 	private void addSample(PeriodicSample ps) {
-		assert ps.period == getPeriod(ps.period) : "Invalid period";
+		assert ps.per_sec == getPeriod(ps.per_sec) : "Invalid period";
 		assert !exists(ps.start()) : "Duplicate start time";
 		samples.add(ps);
 	}
@@ -205,17 +205,17 @@ public class PeriodicSampleCache {
 	 * @param ps Periodic sample (with a larger period). */
 	private void interpolate(PeriodicSample ps) {
 		long start = ps.start();
-		int period = getPeriod(ps.period);
-		int n_samples = ps.period / period;
+		int per_sec = getPeriod(ps.per_sec);
+		int n_samples = ps.per_sec / per_sec;
 		assert n_samples > 1;
-		int[] values = getValues(start, ps.end(), n_samples, period);
+		int[] values = getValues(start, ps.end(), n_samples, per_sec);
 		switch (sample_type.aggregation) {
 		case SUM:
-			addSamples(start, period, interpolateSum(values,
+			addSamples(start, per_sec, interpolateSum(values,
 				ps.value));
 			return;
 		case AVERAGE:
-			addSamples(start, period, interpolateAverage(values,
+			addSamples(start, per_sec, interpolateAverage(values,
 				ps.value));
 			return;
 		default:
@@ -227,19 +227,19 @@ public class PeriodicSampleCache {
 	 * @param start Time stamp at start of samples.
 	 * @param end Time stamp at end of samples.
 	 * @param n_samples Number of sample values.
-	 * @param period Period used for samples.
+	 * @param per_sec Period used for samples.
 	 * @return Array of samples values. */
 	private int[] getValues(long start, long end, int n_samples,
-		int period)
+		int per_sec)
 	{
-		int period_ms = period * 1000;
+		int per_ms = per_sec * 1000;
 		int[] values = new int[n_samples];
 		for (int i = 0; i < values.length; i++)
 			values[i] = MISSING_DATA;
 		for (PeriodicSample ps: samples) {
 			long stamp = ps.start();
 			if (stamp >= start && stamp < end) {
-				int i = (int) ((stamp - start) / period_ms);
+				int i = (int) ((stamp - start) / per_ms);
 				values[i] = ps.value;
 			}
 		}
@@ -260,13 +260,13 @@ public class PeriodicSampleCache {
 
 	/** Get sum of sampled values in a time interval */
 	private int getSum(long start, long end) {
-		int period = 0;
+		int per_sec = 0;
 		int total = 0;
 		int n_samples = 0;
 		for (PeriodicSample ps: samples) {
-			if (0 == period)
-				period = ps.period;
-			else if (period != ps.period)
+			if (0 == per_sec)
+				per_sec = ps.per_sec;
+			else if (per_sec != ps.per_sec)
 				break;
 			if (ps.value >= 0) {
 				long stamp = ps.start();
@@ -276,8 +276,8 @@ public class PeriodicSampleCache {
 				}
 			}
 		}
-		long sam_ms = n_samples * period * 1000; // sampled period
-		long full_ms = end - start;              // full period
+		long sam_ms = n_samples * per_sec * 1000; // sampled period
+		long full_ms = end - start;               // full period
 		if (sam_ms == full_ms)
 			return total;
 		else if (2 * sam_ms >= full_ms) {  // at least half sampled
@@ -307,14 +307,14 @@ public class PeriodicSampleCache {
 
 	/** Add an array of samples.
 	 * @param start Start time of sample array.
-	 * @param period Sampling period (seconds).
+	 * @param per_sec Sampling period (seconds).
 	 * @param vals Array of sample values to add. */
-	private void addSamples(long start, int period, int[] vals) {
-		int period_ms = period * 1000;
+	private void addSamples(long start, int per_sec, int[] vals) {
+		int per_ms = per_sec * 1000;
 		for (int i = 0; i < vals.length; i++) {
 			if (vals[i] >= 0) {
-				long stamp = start + period_ms * (i + 1);
-				addSample(new PeriodicSample(stamp, period,
+				long stamp = start + per_ms * (i + 1);
+				addSample(new PeriodicSample(stamp, per_sec,
 					vals[i]));
 			}
 		}

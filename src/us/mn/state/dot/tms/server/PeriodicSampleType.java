@@ -89,7 +89,7 @@ public enum PeriodicSampleType {
 
 	/** Is a periodic sample valid? */
 	public boolean isValid(PeriodicSample ps) {
-		return ps.period > 0 &&
+		return ps.per_sec > 0 &&
 		       ps.value > MISSING_DATA;
 	}
 }

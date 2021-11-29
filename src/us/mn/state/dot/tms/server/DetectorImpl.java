@@ -928,7 +928,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		is_logging_events = logging;
 		if (v != null) {
 			if (lane_type != LaneType.GREEN &&
-			    v.period == BIN_PERIOD_SEC)
+			    v.per_sec == BIN_PERIOD_SEC)
 				testVehCount(v);
 			veh_cache.add(v, name);
 		}
@@ -936,11 +936,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Test vehicle count with error detecting algorithms */
 	private void testVehCount(PeriodicSample vs) {
-		chatter.updateState(vs.period, vs.value > MAX_VEH_COUNT_30);
-		if (chatter.checkLogging(vs.period))
+		chatter.updateState(vs.per_sec, vs.value > MAX_VEH_COUNT_30);
+		if (chatter.checkLogging(vs.per_sec))
 			logEvent(EventType.DET_CHATTER);
-		no_hits.updateState(vs.period, vs.value == 0);
-		if (no_hits.checkLogging(vs.period))
+		no_hits.updateState(vs.per_sec, vs.value == 0);
+		if (no_hits.checkLogging(vs.per_sec))
 			logEvent(EventType.DET_NO_HITS);
 		updateAutoFail();
 	}
@@ -963,11 +963,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		is_logging_events = logging;
 		if (occ != null) {
 			int n_scans = occ.as60HzScans();
-			if (occ.period == BIN_PERIOD_SEC) {
+			if (occ.per_sec == BIN_PERIOD_SEC) {
 				testScans(occ);
 				prev_value = occ.value;
 			}
-			scn_cache.add(new PeriodicSample(occ.stamp, occ.period,
+			scn_cache.add(new PeriodicSample(occ.stamp, occ.per_sec,
 				n_scans), name);
 		} else
 			prev_value = MISSING_DATA;
@@ -981,23 +981,23 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		// occupancy spikes is shorter than the threshold time
 		// and interspersed with zeroes.
 		boolean hold = locked_on.failed && (occ.value == 0);
-		locked_on.updateState(occ.period, lock || hold);
-		if (locked_on.checkLogging(occ.period))
+		locked_on.updateState(occ.per_sec, lock || hold);
+		if (locked_on.checkLogging(occ.per_sec))
 			logEvent(EventType.DET_LOCKED_ON);
 		boolean v = (occ.value > 0) && (occ.value == prev_value);
-		no_change.updateState(occ.period, v);
-		if (no_change.checkLogging(occ.period))
+		no_change.updateState(occ.per_sec, v);
+		if (no_change.checkLogging(occ.per_sec))
 			logEvent(EventType.DET_NO_CHANGE);
 		if (occ.value >= 0 && prev_value >= 0) {
 			int spk = Math.abs(occ.value - prev_value) / OCC_SPIKE;
-			spike_hold_sec += occ.period * spk;
+			spike_hold_sec += occ.per_sec * spk;
 		}
 		int threshold = getOccSpikeSecs();
 		boolean sf = (threshold > 0) && (spike_hold_sec > threshold);
-		occ_spike.updateState(occ.period, sf);
-		if (occ_spike.checkLogging(occ.period))
+		occ_spike.updateState(occ.per_sec, sf);
+		if (occ_spike.checkLogging(occ.per_sec))
 			logEvent(EventType.DET_OCC_SPIKE);
-		spike_hold_sec = Math.max(0, spike_hold_sec - occ.period);
+		spike_hold_sec = Math.max(0, spike_hold_sec - occ.per_sec);
 		updateAutoFail();
 	}
 

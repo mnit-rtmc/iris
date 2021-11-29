@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2019  Minnesota Department of Transportation
+ * Copyright (C) 2010-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -98,7 +98,7 @@ public class PeriodicSampleWriter {
 		try {
 			while (it.hasNext()) {
 				PeriodicSample ps = it.next();
-				period = new Interval(ps.period);
+				period = new Interval(ps.per_sec);
 				File f = factory.createFile(sensor_id, s_type,
 					ps);
 				if (!f.equals(file)) {
@@ -185,6 +185,6 @@ public class PeriodicSampleWriter {
 	 * @return File position of sample (0 is first sample). */
 	private int samplePosition(PeriodicSample ps, int s_bytes) {
 		return TimeSteward.secondOfDayInt(ps.start()) *
-		       s_bytes / ps.period;
+		       s_bytes / ps.per_sec;
 	}
 }
