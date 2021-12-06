@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2019  Minnesota Department of Transportation
+ * Copyright (C) 2008-2021  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -94,9 +94,9 @@ public class SignTextComboBoxModel extends AbstractListModel<SignText>
 	@Override
 	public void setSelectedItem(Object s) {
 		if (s instanceof SignText)
-			selected = (SignText)s;
+			selected = (SignText) s;
 		else if (s instanceof String)
-			selected = getSignText((String)s);
+			selected = getSignText((String) s);
 		else
 			selected = null;
 		// this results in a call to the editor's setSelectedItem method
@@ -105,13 +105,14 @@ public class SignTextComboBoxModel extends AbstractListModel<SignText>
 
 	/** Get or create a sign text for the given string */
 	private SignText getSignText(String s) {
-		String m = new MultiString(s.trim()).normalizeLine().toString();
-		if (m.length() == 0)
+		MultiString multi = new MultiString(s.trim()).normalizeLine();
+		if (multi.isBlank())
 			return BLANK_SIGN_TEXT;
-		SignText st = lookupMessage(m);
+		String ms = multi.toString();
+		SignText st = lookupMessage(ms);
 		return (st != null)
 		      ? st
-		      : new ClientSignText(m, line, ON_THE_FLY_RANK);
+		      : new ClientSignText(ms, line, ON_THE_FLY_RANK);
 	}
 
 	/** Lookup a sign text.
@@ -158,9 +159,8 @@ public class SignTextComboBoxModel extends AbstractListModel<SignText>
 	/** Get the edited sign text (if any) */
 	public ClientSignText getEditedSignText() {
 		SignText st = selected;
-		if (st instanceof ClientSignText && st != BLANK_SIGN_TEXT)
-			return (ClientSignText)st;
-		else
-			return null;
+		return (st instanceof ClientSignText && st != BLANK_SIGN_TEXT)
+		      ? (ClientSignText) st
+		      : null;
 	}
 }

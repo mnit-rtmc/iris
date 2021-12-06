@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,7 +123,7 @@ public class SignTextModel {
 		// NOTE: updating last_line can't be deferred to the
 		//       swing thread, because getLastLine is called
 		//       before the Runnables get a chance to run.
-		last_line = (short)Math.max(last_line, st.getLine());
+		last_line = (short) Math.max(last_line, st.getLine());
 		runSwing(new Runnable() {
 			public void run() {
 				addSignText(st);
@@ -163,8 +163,8 @@ public class SignTextModel {
 	private void changeSignText(SignText st) {
 		// iterate through all combobox models because the line
 		// may have changed, moving it between comboboxes
-		for (SignTextComboBoxModel m: lines.values())
-			m.remove(st);
+		for (SignTextComboBoxModel mdl: lines.values())
+			mdl.remove(st);
 		addSignText(st);
 	}
 
@@ -234,10 +234,10 @@ public class SignTextModel {
 		if (lines.containsKey(line))
 			return lines.get(line);
 		else {
-			SignTextComboBoxModel m = new SignTextComboBoxModel(
+			SignTextComboBoxModel mdl = new SignTextComboBoxModel(
 				line);
-			lines.put(line, m);
-			return m;
+			lines.put(line, mdl);
+			return mdl;
 		}
 	}
 
@@ -248,8 +248,8 @@ public class SignTextModel {
 
 	/** Update the message library with the currently selected messages */
 	public void updateMessageLibrary() {
-		for (SignTextComboBoxModel m: lines.values()) {
-			ClientSignText st = m.getEditedSignText();
+		for (SignTextComboBoxModel mdl: lines.values()) {
+			ClientSignText st = mdl.getEditedSignText();
 			if (st != null)
 				createSignText(st);
 		}
