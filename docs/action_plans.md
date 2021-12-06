@@ -43,6 +43,7 @@ they are **only** usable in action plan messages - not operator-selected ones.
 Tag              | Description
 -----------------|------------------
 `[cg` *…* `]`    | [ClearGuide] data
+`[exit` *…* `]`  | [Exit ramp backup]
 `[feed` *…* `]`  | [Msg-Feed] message
 `[pa` *…* `]`    | [Parking area] availability
 `[slow` *…* `]`  | [Slow traffic] warning
@@ -168,6 +169,7 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 [ClearGuide]: clearguide.html
 [DateTimeFormatter]: https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
 [DMS]: dms.html
+[exit ramp backup]: exit_backup.html
 [Msg-Feed]: comm_links.html#msg-feed
 [MULTI]: dms.html#multi
 [Parking area]: parking_areas.html

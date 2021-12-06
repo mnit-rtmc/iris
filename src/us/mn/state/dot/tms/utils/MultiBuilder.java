@@ -370,6 +370,18 @@ public class MultiBuilder implements Multi {
 		multi.append("]");
 	}
 
+	/** Add an exit backup warning.
+	 * @param did Exit detector ID.
+	 * @param occ Occupancy threshold to activate warning. */
+	@Override
+	public void addExitWarning(String did, int occ) {
+		multi.append("[exit");
+		multi.append(did);
+		multi.append(',');
+		multi.append(occ);
+		multi.append("]");
+	}
+
 	/** Add a feed message */
 	@Override
 	public void addFeed(String fid) {

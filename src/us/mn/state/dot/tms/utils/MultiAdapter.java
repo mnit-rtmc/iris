@@ -163,6 +163,12 @@ public class MultiAdapter implements Multi {
 	@Override
 	public void addSlowWarning(int spd, int dist, String mode) { }
 
+	/** Add an exit backup warning.
+	 * @param did Exit detector ID.
+	 * @param occ Occupancy threshold to activate warning. */
+	@Override
+	public void addExitWarning(String did, int occ) { }
+
 	/** Add a feed message */
 	@Override
 	public void addFeed(String fid) { }

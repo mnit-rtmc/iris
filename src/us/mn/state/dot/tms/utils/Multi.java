@@ -185,6 +185,11 @@ public interface Multi {
 	 * @param mode Tag replacement mode (none, dist or speed). */
 	void addSlowWarning(int spd, int dist, String mode);
 
+	/** Add an exit backup warning.
+	 * @param did Exit detector ID.
+	 * @param occ Occupancy threshold to activate warning. */
+	void addExitWarning(String did, int occ);
+
 	/** Add a feed message */
 	void addFeed(String fid);
 

@@ -128,6 +128,11 @@ public enum WTokenType {
 //	 * @param mode Tag replacement mode (none, dist or speed). */
 	slowWarning(             "Slow Warning"),
 //
+//	/** Add an exit backup warning.
+//	 * @param did Detector ID.
+//	 * @param occ Occupancy threshold */
+	exitWarning(             "Exit Warning"),
+//
 //	/** Add a feed message */
 	feedMsg(                 "Feed Message"),
 //

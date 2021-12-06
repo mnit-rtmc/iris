@@ -92,6 +92,8 @@ public class MultiString {
 		@Override
 		public void addSlowWarning(int spd, int dist, String mode) {}
 		@Override
+		public void addExitWarning(String did, int occ) {}
+		@Override
 		public void addTolling(String mode, String[] zones) {}
 		@Override
 		public void addTravelTime(String sid, OverLimitMode mode,
@@ -107,10 +109,7 @@ public class MultiString {
 
 	/** Parse an integer value */
 	static private Integer parseInt(String[] args, int n) {
-		if (n < args.length)
-			return parseInt(args[n]);
-		else
-			return null;
+		return (n < args.length) ? parseInt(args[n]) : null;
 	}
 
 	/** Parse an integer value */
@@ -162,6 +161,8 @@ public class MultiString {
 			parseClearGuideAdvisory(tag.substring(2), cb);
 		else if (ltag.startsWith("slow"))
 			parseSlowWarning(tag.substring(4), cb);
+		else if (ltag.startsWith("exit"))
+			parseExitWarning(tag.substring(4), cb);
 		else if (ltag.startsWith("feed"))
 			cb.addFeed(tag.substring(4));
 		else if (ltag.startsWith("tz"))
@@ -372,6 +373,17 @@ public class MultiString {
 			cb.addSlowWarning(spd, dist, mode);
 	}
 
+	/** Parse exit backup warning from a [exitd,o] tag.
+	 * @param v Exit backup tag value (d,o tag).
+	 * @param cb Callback to set exit warning. */
+	static private void parseExitWarning(String v, Multi cb) {
+		String[] args = v.split(",", 2);
+		String did = (args.length > 0) ? args[0] : null;
+		Integer occ = parseInt(args, 1);
+		if (did != null && isOccValid(occ))
+			cb.addExitWarning(did, occ);
+	}
+
 	/** Parse tolling tag [tz{p,o,c},z1,...zn].
 	 * @param v Tolling tag value ({p,o,c},z1,...zn).
 	 * @param cb Callback to set tag. */
@@ -436,6 +448,11 @@ public class MultiString {
 		return ("dist".equals(param) || "speed".equals(param))
 		      ? param
 		      : null;
+	}
+
+	/** Test if a parsed occupancy is valid */
+	static private boolean isOccValid(Integer occ) {
+		return occ != null && occ > 0 && occ < 100;
 	}
 
 	/** Make a combined message (either shared or sequenced) */

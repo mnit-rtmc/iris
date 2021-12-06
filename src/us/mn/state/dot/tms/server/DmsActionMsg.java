@@ -27,6 +27,8 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.DMSHelper;
@@ -263,6 +265,9 @@ public class DmsActionMsg {
 		{
 			addSpan(slowWarningSpan(spd, dist, mode));
 		}
+		@Override public void addExitWarning(String did, int occ) {
+			addSpan(exitWarningSpan(did, occ));
+		}
 		@Override public void addFeed(String fid) {
 			parseFeed(fid);
 		}
@@ -421,6 +426,26 @@ public class DmsActionMsg {
 	private String slowWarningSpan(int spd, int dist, String mode) {
 		addSrc(SignMsgSource.slow_warning);
 		return slowWarningSpan(createSpeed(spd), createDist(dist),mode);
+	}
+
+	/** Add an exit backup warning.
+	 * @param did Exit detector ID.
+	 * @param occ Threshold occupancy to activate warning. */
+	private String exitWarningSpan(String did, int occ) {
+		addSrc(SignMsgSource.exit_warning);
+		Detector det = DetectorHelper.lookup(did);
+		return (det instanceof DetectorImpl)
+		      ? EMPTY_SPAN
+		      : fail("Detector not found");
+	}
+
+	/** Add an exit backup warning.
+	 * @param det Exit detector.
+	 * @param occ Threshold occupancy to activate warning. */
+	private String exitWarningSpan(DetectorImpl det, int occ) {
+		return (det.getOccupancy(DetectorImpl.BIN_PERIOD_MS * 3) > occ)
+		      ? EMPTY_SPAN
+		      : fail("Occupancy too low");
 	}
 
 	/** Create a speed.

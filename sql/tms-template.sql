@@ -2596,6 +2596,7 @@ COPY iris.sign_msg_source (bit, source) FROM stdin;
 11	speed advisory
 12	parking
 13	clearguide
+14	exit warning
 \.
 
 CREATE FUNCTION iris.sign_msg_sources(INTEGER) RETURNS TEXT

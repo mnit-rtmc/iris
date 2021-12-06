@@ -793,6 +793,12 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		      : MISSING_DATA;
 	}
 
+	/** Get the occupancy for most recent period */
+	public float getOccupancy(int per_ms) {
+		long stamp = calculateEndTime(per_ms);
+		return getOccupancy(stamp, per_ms);
+	}
+
 	/** Get a flow rate (vehicles per hour) */
 	@Override
 	public int getFlow(long stamp, int per_ms) {

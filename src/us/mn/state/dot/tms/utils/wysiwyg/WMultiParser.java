@@ -247,6 +247,14 @@ public class WMultiParser implements Multi {
 	}
 
 	/* (non-Javadoc)
+	 * @see us.mn.state.dot.tms.utils.Multi#addExitWarning(java.lang.String, int)
+	 */
+	@Override
+	public void addExitWarning(String did, int occ) {
+		page.addToken(new WtExitWarning(did, occ));
+	}
+
+	/* (non-Javadoc)
 	 * @see us.mn.state.dot.tms.utils.Multi#addFeed(java.lang.String)
 	 */
 	@Override
