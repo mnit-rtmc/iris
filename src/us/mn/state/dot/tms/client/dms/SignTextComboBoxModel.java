@@ -86,20 +86,20 @@ public class SignTextComboBoxModel extends AbstractListModel<SignText>
 	}
 
 	/**
-	 * Set the selected item. This method is called by the combobox when:
-	 * 	-the focus leaves the combobox with a String arg when editable.
-	 *      -a combobox item is clicked on via the mouse.
-	 *      -a combobox item is moved to via the cursor keys.
+	 * Set the selected item.  This method is called by the combobox when:
+	 *   -the focus leaves the combobox with a String arg when editable.
+	 *   -a combobox item is clicked on via the mouse.
+	 *   -a combobox item is moved to via the cursor keys.
 	 */
 	@Override
-	public void setSelectedItem(Object s) {
-		if (s instanceof SignText)
-			selected = (SignText) s;
-		else if (s instanceof String)
-			selected = getSignText((String) s);
+	public void setSelectedItem(Object item) {
+		if (item instanceof SignText)
+			selected = (SignText) item;
+		else if (item instanceof String)
+			selected = getSignText((String) item);
 		else
 			selected = null;
-		// this results in a call to the editor's setSelectedItem method
+		// this results in a call to the editor's setItem method
 		fireContentsChanged(this, -1, -1);
 	}
 

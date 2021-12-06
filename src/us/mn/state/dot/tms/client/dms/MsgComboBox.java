@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2019  Minnesota Department of Transportation
+ * Copyright (C) 2011-2021  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,6 +37,12 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class MsgComboBox extends JComboBox<SignText> {
 
+	/** Get the MULTI string of an item */
+	static private String getMulti(Object item) {
+		String ms = (item != null) ? item.toString() : "";
+		return new MultiString(ms.trim()).normalizeLine().toString();
+	}
+
 	/** Combobox edit mode.  These values correspond to the
 	 * dms_composer_edit_mode system attribute. */
 	public enum EditMode {
@@ -56,13 +62,6 @@ public class MsgComboBox extends JComboBox<SignText> {
 				SystemAttrEnum.DMS_COMPOSER_EDIT_MODE.getInt());
 		}
 	}
-
-	/** Rank for on-the-fly created sign messages */
-	static private final short ON_THE_FLY_RANK = 99;
-
-	/** Blank client-side sign text object */
-	static private final SignText BLANK_SIGN_TEXT =
-		new ClientSignText("");
 
 	/** Prototype sign text */
 	static private final SignText PROTOTYPE_SIGN_TEXT =
@@ -162,10 +161,9 @@ public class MsgComboBox extends JComboBox<SignText> {
 	 * @param cam Flag to indicate the user can add messages */
 	private EditMode getEditMode(boolean cam) {
 		EditMode em = EditMode.getEditMode();
-		if (em == EditMode.AFTERKEY && !cam)
-			return EditMode.NEVER;
-		else
-			return em;
+		return (cam || em != EditMode.AFTERKEY)
+		      ? em
+		      : EditMode.NEVER;
 	}
 
 	/** Key event saved when making combobox editable */
@@ -203,15 +201,10 @@ public class MsgComboBox extends JComboBox<SignText> {
 
 	/** Get message text */
 	public String getMessage() {
-		SignText st = getSignText();
-		return (st != null) ? st.getMulti() : "";
-	}
-
-	/** Get the sign text */
-	private SignText getSignText() {
-		Object o = (edit_mode == EditMode.ALWAYS)
-		         ? editor.getItem() : getSelectedItem();
-		return (o instanceof SignText) ? (SignText) o : null;
+		Object item = (edit_mode == EditMode.ALWAYS)
+			? editor.getItem()
+			: getSelectedItem();
+		return getMulti(item);
 	}
 
 	/** Editor for message combo box */
@@ -226,26 +219,14 @@ public class MsgComboBox extends JComboBox<SignText> {
 		/** Return the edited item */
 		@Override
 		public Object getItem() {
-			return toSignText(getText());
+			return getMulti(getText());
 		}
 
 		/** Set the item that should be edited.
 		 * @param item New value of item */
 		@Override
 		public void setItem(Object item) {
-			setText(toSignText(item).getMulti());
+			setText(getMulti(item));
 		}
-	}
-
-	/** Convert an item to sign text */
-	private SignText toSignText(Object item) {
-		if (item instanceof SignText)
-			return (SignText) item;
-		else if (item != null) {
-			String txt = new MultiString(item.toString())
-				.normalizeLine().toString();
-			return new ClientSignText(txt, line, ON_THE_FLY_RANK);
-		} else
-			return BLANK_SIGN_TEXT;
 	}
 }
