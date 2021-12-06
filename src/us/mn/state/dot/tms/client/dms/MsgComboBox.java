@@ -26,7 +26,6 @@ import javax.swing.ComboBoxEditor;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import us.mn.state.dot.tms.SignText;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -41,26 +40,6 @@ public class MsgComboBox extends JComboBox<SignText> {
 	static private String getMulti(Object item) {
 		String ms = (item != null) ? item.toString() : "";
 		return new MultiString(ms.trim()).normalizeLine().toString();
-	}
-
-	/** Combobox edit mode.  These values correspond to the
-	 * dms_composer_edit_mode system attribute. */
-	public enum EditMode {
-		NEVER, ALWAYS, AFTERKEY;
-
-		/** Convert an int to enum */
-		static public EditMode fromOrdinal(int o) {
-			if (o >= 0 && o < values().length)
-				return values()[o];
-			else
-				return NEVER;
-		}
-
-		/** Get the edit mode */
-		static public EditMode getEditMode() {
-			return fromOrdinal(
-				SystemAttrEnum.DMS_COMPOSER_EDIT_MODE.getInt());
-		}
 	}
 
 	/** Prototype sign text */
@@ -160,7 +139,7 @@ public class MsgComboBox extends JComboBox<SignText> {
 	/** Get the edit mode.
 	 * @param cam Flag to indicate the user can add messages */
 	private EditMode getEditMode(boolean cam) {
-		EditMode em = EditMode.getEditMode();
+		EditMode em = EditMode.getMode();
 		return (cam || em != EditMode.AFTERKEY)
 		      ? em
 		      : EditMode.NEVER;

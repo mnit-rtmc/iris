@@ -117,9 +117,9 @@ public class SignTextComboBoxModel extends AbstractListModel<SignText>
 
 	/** Lookup a sign text.
 	 * @return Existing SignText, or null if not found. */
-	private SignText lookupMessage(String t) {
+	private SignText lookupMessage(String ms) {
 		for (SignText st: items) {
-			if (t.equals(st.getMulti()))
+			if (ms.equals(st.getMulti()))
 				return st;
 		}
 		return null;
@@ -158,9 +158,12 @@ public class SignTextComboBoxModel extends AbstractListModel<SignText>
 
 	/** Get the edited sign text (if any) */
 	public ClientSignText getEditedSignText() {
-		SignText st = selected;
-		return (st instanceof ClientSignText && st != BLANK_SIGN_TEXT)
-		      ? (ClientSignText) st
-		      : null;
+		if (EditMode.getMode() != EditMode.NEVER) {
+			SignText st = selected;
+			if (st instanceof ClientSignText &&
+			    st != BLANK_SIGN_TEXT)
+				return (ClientSignText) st;
+		}
+		return null;
 	}
 }
