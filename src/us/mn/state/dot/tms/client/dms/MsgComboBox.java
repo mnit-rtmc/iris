@@ -38,8 +38,15 @@ public class MsgComboBox extends JComboBox<SignText> {
 
 	/** Get the MULTI string of an item */
 	static private String getMulti(Object item) {
-		String ms = (item != null) ? item.toString() : "";
-		return new MultiString(ms.trim()).normalizeLine().toString();
+		if (item != null) {
+			String ms = (item instanceof SignText)
+				? ((SignText) item).getMulti()
+				: item.toString();
+			return new MultiString(ms.trim())
+				.normalizeLine()
+				.toString();
+		}
+		return "";
 	}
 
 	/** Prototype sign text */
