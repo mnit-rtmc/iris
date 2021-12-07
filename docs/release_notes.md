@@ -1,5 +1,12 @@
 # IRIS 5.x Release Notes
 
+5.26.0 (7 Dev 2021)
+ - Added [exit backup](exit_backup.md) DMS action tag
+ - Fixed wrongly creating SignText when deploying DMS messages
+ - Replaced `_device_io` table with `controller_io`
+ - Fixed minor bug in binning vehicle events
+ - Fixed rare wrong font selection when deploying DMS messages
+
 5.25.0 (19 Nov 2021)
  - Gate arms: skip "Warn Close" state when no action plan exists
  - Gate arms: Add `arm_state` and `fault` to DB gate arm table
