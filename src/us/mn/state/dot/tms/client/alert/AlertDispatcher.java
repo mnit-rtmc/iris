@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * An alert dispatcher is a GUI panel for dispatching and reviewing automated
@@ -244,7 +245,7 @@ public class AlertDispatcher extends IPanel {
 
 	/** Set the selected alert */
 	private void setSelectedAlert(AlertInfo ai) {
-		headline_lbl.setText(ai.getHeadline());
+		headline_lbl.setText(SString.truncate(ai.getHeadline(), 64));
 		resp_lbl.setText(CapResponseType.fromOrdinal(
 			ai.getResponseType()).toString());
 		urgency_lbl.setText(CapUrgency.fromOrdinal(ai.getUrgency())
@@ -255,7 +256,7 @@ public class AlertDispatcher extends IPanel {
 			ai.getCertainty()).toString());
 		start_date_lbl.setText(dt_format.format(ai.getStartDate()));
 		end_date_lbl.setText(dt_format.format(ai.getEndDate()));
-		area_lbl.setText(ai.getAreaDesc());
+		area_lbl.setText(SString.truncate(ai.getAreaDesc(), 64));
 		description_txt.setText(ai.getDescription());
 		instruction_txt.setText(ai.getInstruction());
 		plan_lbl.setText(ai.getActionPlan().getName());
