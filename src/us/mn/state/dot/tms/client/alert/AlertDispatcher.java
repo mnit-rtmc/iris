@@ -256,7 +256,7 @@ public class AlertDispatcher extends IPanel {
 			ai.getCertainty()).toString());
 		start_date_lbl.setText(dt_format.format(ai.getStartDate()));
 		end_date_lbl.setText(dt_format.format(ai.getEndDate()));
-		area_lbl.setText(SString.truncate(ai.getAreaDesc(), 64));
+		area_lbl.setText(SString.truncate(ai.getAreaDesc(), 48));
 		description_txt.setText(ai.getDescription());
 		instruction_txt.setText(ai.getInstruction());
 		plan_lbl.setText(ai.getActionPlan().getName());
