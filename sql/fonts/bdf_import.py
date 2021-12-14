@@ -1,7 +1,7 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
-'''This simple script imports a font in BDF format and creates a series
-of SQL statements to import the font into IRIS.
+'''This script imports a font in BDF format and creates a series of SQL
+statements to import the font into IRIS.
 
 BDF fonts can be created by converting from OTF with otf2bdf:
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-'''This simple script connects to an IRIS database and exports a single font as
-a series of SQL statements.'''
+'''This script connects to an IRIS database and exports a single font as a
+series of SQL statements.'''
 
 from sys import argv, exit
 import pgdb
@@ -24,25 +24,25 @@ _FOOTER = """\.
 COMMIT;"""
 
 def read_font(conn, name):
-    print _HEADER
+    print (_HEADER)
     cursor = conn.cursor()
     cursor.execute(_SELECT_FONT % name)
     for row in range(cursor.rowcount):
-        print _INSERT_FONT % tuple(cursor.fetchone())
+        print (_INSERT_FONT % tuple(cursor.fetchone()))
     cursor.close()
 
 def read_glyphs(conn, name):
     glyphs = []
     cursor = conn.cursor()
     cursor.execute(_SELECT_GLYPH % name)
-    print _COPY
+    print (_COPY)
     for row in range(cursor.rowcount):
-        print _COPY_GLYPH % tuple(cursor.fetchone())
+        print (_COPY_GLYPH % tuple(cursor.fetchone()))
     cursor.close()
-    print _FOOTER
+    print (_FOOTER)
 
 if len(argv) != 2:
-    print "Usage:\n./sql_export.py [font-name]\n"
+    print ("Usage:\n./sql_export.py [font-name]\n")
     exit(1)
 name = argv[1]
 connection = pgdb.connect(database='tms')
