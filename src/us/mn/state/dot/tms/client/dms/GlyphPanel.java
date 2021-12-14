@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2021  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class GlyphPanel extends JPanel {
 
 	/** Maximum width of glyphs */
-	static private final int MAX_GLYPH_WIDTH = 30;
+	static private final int MAX_GLYPH_WIDTH = 32;
 
 	/** User session */
 	private final Session session;

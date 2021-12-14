@@ -2436,8 +2436,8 @@ ALTER TABLE iris.glyph
 	ADD CONSTRAINT glyph_code_point_ck
 	CHECK (code_point > 0 AND code_point < 128);
 ALTER TABLE iris.glyph
-	ADD CONSTRAINT glyph_width_ck
-	CHECK (width >= 0 AND width <= 24);
+    ADD CONSTRAINT glyph_width_ck
+    CHECK (width >= 0 AND width <= 32);
 
 CREATE FUNCTION iris.glyph_ck() RETURNS TRIGGER AS
 	$glyph_ck$
