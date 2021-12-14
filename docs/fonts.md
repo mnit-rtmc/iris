@@ -2,9 +2,8 @@
 
 Select `View ➔ Message Signs ➔ DMS Fonts` menu item
 
-A font is a set of bitmapped glyphs for displaying text on a [DMS].  Each font
-can contain any of the printable characters in the ASCII character set (0x20 to
-0x7E).
+A font is a set of bitmapped glyphs for displaying text on a [DMS].  Fonts can
+contain only printable ASCII characters (U+0020 to U+007E).
 
 When selecting a font, a few parameters must be considered, such as pixel pitch,
 desired character height, and font weight.  Pixel pitch can vary from 66 mm down
@@ -27,11 +26,10 @@ Font Height | Pitch: 20 mm | Pitch: 33 mm | Pitch: 50 mm | Pitch 66 mm
 
 _† Best height_
 
-In the past, DMS have been used with upper-case only fonts, but with smaller
-pixel pitch, it is possible to create legible fonts which also include
-lower-case characters.  If a message containing lower-case characters is used
-with an upper-case only font, IRIS will replace those characters with their
-equivalent.
+Upper-case only fonts are recommended for 66 mm pixel pitch signs, but with
+smaller pitch, fonts can also include lower-case characters and remain legible.
+If a message containing lower-case characters is used with an upper-case only
+font, it will be converted to upper-case.
 
 ## Predefined Fonts
 
@@ -60,7 +58,7 @@ Number | Font Name      | Description
 13     | `16_full`      | 16 pixel high full-matrix
 14     | `18_full`      | 18 pixel high full-matrix
 15     | `20_full`      | 20 pixel high full-matrix (numerals only)
-16     | `24_full`      | 24 pixel high full-matrix (numerals only)
+16     | `24_full`      | 24 pixel high full-matrix
 20     | `26_full`      | 26 pixel high full-matrix
 17     | `_09_full_12`  | 9 pixel high (12 with lower case descenders)
 
