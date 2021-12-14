@@ -3,7 +3,7 @@ SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
 INSERT INTO iris.font (name, f_number, height, width, line_spacing,
-    char_spacing, version_id) VALUES ('26_full', 20, 26, 0, 9, 5, 0);
+    char_spacing, version_id) VALUES ('26_full', 20, 26, 0, 8, 5, 0);
 
 COPY iris.glyph (name, font, code_point, width, pixels) FROM stdin;
 26_full_32	26_full	32	3	AAAAAAAAAAAAAA==
@@ -44,7 +44,7 @@ COPY iris.glyph (name, font, code_point, width, pixels) FROM stdin;
 26_full_67	26_full	67	18	AfAB/wD/4Hx8PAeOAOeAHcAHcAAcAA4AA4AA4AA4AA4AA4AAcAHcAHcAHeAOOAOPAcHx8D/4B/wA\nfAA=
 26_full_68	26_full	68	17	/+B//D//HAfOAecAe4AdwA7gA/AB+AD8AH4APwAfgA/AB+AD8AH4AdwA7gD3APOA8f/4//h/8AA=
 26_full_69	26_full	69	14	///////4AOADgA4AOADgA4AOAD/+//v/7gA4AOADgA4AOADgA4AOAD//////8A==
-26_full_70	26_full	70	13	///////ADgBwA4AcAOAHADgB/+//f/uAHADgBwA4AcAOAHADgBwA4AcAAA==
+26_full_70	26_full	70	13	///////ADgBwA4AcAOAHADgB/8/+f/OAHADgBwA4AcAOAHADgBwA4AcAAA==
 26_full_71	26_full	71	19	APAAf8A//A+HweA4eAOOAHOADnAADgABwABwAA4B/8A/+Af7gAdwAO4AHcADvADzgB44B8fD+H/z\nB/xgPgw=
 26_full_72	26_full	72	15	4A/AH4A/AH4A/AH4A/AH4A/AH4A////////4A/AH4A/AH4A/AH4A/AH4A/AH4A/AHA==
 26_full_73	26_full	73	3	/////////////A==
