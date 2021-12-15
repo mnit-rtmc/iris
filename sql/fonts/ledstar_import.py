@@ -9,6 +9,7 @@ from binascii import unhexlify
 
 HEADER = """\set ON_ERROR_STOP
 SET SESSION AUTHORIZATION 'tms';
+BEGIN;
 """
 HFONT = """INSERT INTO iris.font (
     name, f_number, height, width, line_spacing, char_spacing, version_id
@@ -37,7 +38,7 @@ def create_font_sql(lines):
             c_width = next(lines)
             c_data = next(lines)
             print (COPY_GLYPH % (name, c_point, name, c_point, c_width,
-                b64encode(unhexlify(c_data))))
+                b64encode(unhexlify(c_data)).decode('ASCII')))
         except StopIteration:
             break
     print (FOOTER)
