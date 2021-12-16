@@ -6,30 +6,26 @@ A font is a set of bitmapped glyphs for displaying text on a [DMS].  Fonts can
 contain only printable ASCII characters (U+0020 to U+007E).
 
 When selecting a font, a few parameters must be considered, such as pixel pitch,
-desired character height, and font weight.  Pixel pitch can vary from 66 mm down
+desired character height, and font weight.  Pixel pitch varies from 70 mm down
 to 20 mm or smaller.
 
-Typically, for freeway signs, characters should be between 350 and 400 mm (about
-14 or 15 inches) high.  See the table below for character heights based on these
-common sizes.
+For legibility, text on freeway signs should be about 380 mm tall (15 in).  See
+the table below for optimal character heights based on pixel pitch.
 
-Font Height | Pitch: 20 mm | Pitch: 33 mm | Pitch: 50 mm | Pitch 66 mm
-------------|--------------|--------------|--------------|-------------
-7 px        | 120 mm       | 198 mm       | 300 mm       | 396 mm †
-8 px        | 140 mm       | 231 mm       | 350 mm †     | 462 mm
-10 px       | 180 mm       | 297 mm       | 450 mm       | 594 mm
-12 px       | 220 mm       | 363 mm †     | 550 mm       | 726 mm
-14 px       | 260 mm       | 429 mm       | 650 mm       | 858 mm
-16 px       | 300 mm       | 495 mm       | 750 mm       | 990 mm
-18 px       | 340 mm       | 561 mm       | 850 mm       | 1122 mm
-20 px       | 380 mm †     | 627 mm       | 950 mm       | 1254 mm
+Pixel Pitch | Font Height | Character Height
+------------|-------------|-----------------
+70 mm       | 7 px        | 420 mm (16.5 in)
+66 mm       | 7 px        | 396 mm (15.6 in)
+63 mm       | 7 px        | 378 mm (14.9 in)
+50 mm       | 8 px        | 350 mm (13.8 in)
+43 mm       | 9 px        | 387 mm (15.2 in)
+33 mm       | 12 px       | 363 mm (14.3 in)
+20 mm       | 20 px       | 380 mm (15.0 in)
 
-_† Best height_
-
-Upper-case only fonts are recommended for 66 mm pixel pitch signs, but with
-smaller pitch, fonts can also include lower-case characters and remain legible.
-If a message containing lower-case characters is used with an upper-case only
-font, it will be converted to upper-case.
+Upper-case only fonts are recommended for larger pixel pitch, but fonts with
+lower-case characters can be used if pitch is below 50 mm.  If a message
+containing lower-case characters is used with an upper-case only font, it will
+be converted to upper-case.
 
 ## Predefined Fonts
 

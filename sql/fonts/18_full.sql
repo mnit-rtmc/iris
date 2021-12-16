@@ -2,16 +2,17 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
-INSERT INTO iris.font (name, f_number, height, width, line_spacing,
-    char_spacing, version_id) VALUES ('18_full', 14, 18, 0, 5, 3, 0);
+INSERT INTO iris.font (
+    name, f_number, height, width, line_spacing, char_spacing, version_id
+) VALUES ('18_full', 14, 18, 0, 5, 3, 0);
 
 COPY iris.glyph (name, font, code_point, width, pixels) FROM stdin;
 18_full_32	18_full	32	1	AAAA
 18_full_33	18_full	33	3	2222222A2A==
 18_full_34	18_full	34	6	zzRAAAAAAAAAAAAAAAA=
 18_full_35	18_full	35	8	AAAAZmb//2ZmZv//ZmYAAAAA
-18_full_36	18_full	36	8	GBh+/9vY2Pj+fx8bG9v/fhgY
-18_full_37	18_full	37	8	AADgoeMHBgwcODBg4MeFBwAA
+18_full_36	18_full	36	10	DAMD8f7s8wzD8H8P4NwzDPN3+PwMAwA=
+18_full_37	18_full	37	8	AGGTk2YGDAwYGDAwYGbJyYYA
 18_full_38	18_full	38	9	OD47mMzj4eBgeH7z+exmMx3ffZxA
 18_full_39	18_full	39	2	+AAAAAA=
 18_full_40	18_full	40	4	N27MzMzMzOZz
