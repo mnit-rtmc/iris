@@ -57,7 +57,7 @@ Number | Font Name      | Description
 21     | `15_full`      | 15 pixel high full-matrix
 13     | `16_full`      | 16 pixel high full-matrix
 14     | `18_full`      | 18 pixel high full-matrix
-15     | `20_full`      | 20 pixel high full-matrix (numerals only)
+15     | `20_full`      | 20 pixel high full-matrix
 16     | `24_full`      | 24 pixel high full-matrix
 20     | `26_full`      | 26 pixel high full-matrix
 17     | `_09_full_12`  | 9 pixel high (12 with lower case descenders)
