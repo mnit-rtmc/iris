@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2016-2021  Minnesota Department of Transportation
+ * Copyright (C) 2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * Query the state of a beacon
  *
  * @author Douglas Lau
+ * @author Deb Behera
  */
 public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 

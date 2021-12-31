@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2016-2020  Minnesota Department of Transportation
+ * Copyright (C) 2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,15 +25,21 @@ import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
 
 /**
- * Poller to control Control By Web Relay devices.
+ * Poller to control Control By Web Relay devices. This driver
+ * was updated to support controllers with firmware verison 2.2.1
+ * which supports https and authentication. The IRIS controller
+ * password field should have the user name and password in the
+ * format "username:password".
  *
  * @author Douglas Lau
+ * @author Deb Behera
+ * @author Michael Darter
  */
 public class CBWPoller extends ThreadedPoller<CBWProperty>
 	implements BeaconPoller
 {
 	/** Control-By-Web debug log */
-	static final DebugLog CBW_LOG = new DebugLog("cbw");
+	static protected final DebugLog CBW_LOG = new DebugLog("cbw");
 
 	/** Create a new CBW relay poller */
 	public CBWPoller(CommLink link) {
