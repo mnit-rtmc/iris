@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2016-2020  Minnesota Department of Transportation
- * Copyright (C) 2022  Iteris Inc.
+ * Copyright (C) 2021-2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.BeaconImpl;
-import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
 import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
@@ -46,15 +45,23 @@ public class CBWPoller extends ThreadedPoller<CBWProperty>
 		super(link, HTTP, CBW_LOG);
 	}
 
-	/** Send a device request */
+	/** Send a device request.
+	 * @param bea Beacon
+	 * @param req Device request */
 	@Override
-	public void sendRequest(BeaconImpl b, DeviceRequest r) {
-		switch (r) {
+	public void sendRequest(BeaconImpl bea, DeviceRequest req) {
+		switch (req) {
+		// every poll period
 		case QUERY_STATUS:
-			addOp(new OpQueryBeaconState(b));
+			addOp(new OpQueryBeaconState(bea));
 			break;
+		// on startup and 4am
+		case SEND_SETTINGS:
+			log("ignored: beacon=" + bea + " req=" + req);
+ 			break;
 		default:
 			// Ignore other requests
+			log("ignored: beacon=" + bea + " req=" + req);
 			break;
 		}
 	}

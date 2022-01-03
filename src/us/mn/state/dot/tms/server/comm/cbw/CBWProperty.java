@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2016  Minnesota Department of Transportation
- * Copyright (C) 2021  Iteris Inc.
+ * Copyright (C) 2021-2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,12 +24,14 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.utils.LineReader;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * Control by web relay property.
  *
  * @author Douglas Lau
  * @author Deb Behera
+ * @author Michael Darter
  */
 public class CBWProperty extends ControllerProperty {
 
@@ -70,6 +72,12 @@ public class CBWProperty extends ControllerProperty {
 	/** Input status */
 	private final boolean[] inputs = new boolean[8];
 
+	/** Voltage in */
+	public double volt_in;
+
+	/** Controller serial number */
+	public String ctl_sn;
+
 	/** Get relay state */
 	public boolean getRelay(int pin) {
 		return relays[pin - 1];
@@ -90,7 +98,8 @@ public class CBWProperty extends ControllerProperty {
 		inputs[pin - 1] = s;
 	}
 
-	/** Create a new CBW relay property */
+	/** Create a new CBW relay property.
+	 * @param p URL path to get beacons / controller status */
 	public CBWProperty(String p) {
 		path = p;
 	}
@@ -138,7 +147,9 @@ public class CBWProperty extends ControllerProperty {
 		String line = lr.readLine();
 		for (int i = 0; line != null && i < MAX_LINES; i++) {
 			found |= matchRelay(line, "current") | matchInput(line, "current");
-			line = lr.readLine();
+			line = lr.readLine();  // can be null
+			volt_in = parseVoltage(line);
+			ctl_sn = parseSn(line);
 		}
 		if (!found)
 		{
@@ -228,5 +239,22 @@ public class CBWProperty extends ControllerProperty {
 		}
 		catch (NumberFormatException e) { }
 		throw new ControllerException("INVALID BOOL");
+	}
+
+	/** Extract voltage from XML */
+	private double parseVoltage(String line) {
+		if (!SString.safe(line).startsWith("<vin>"))
+			return volt_in;
+		String volts = SString.extractMiddle(line, "<vin>", "</vin>");
+		volts = (volts.isEmpty() ? "0" : volts);
+		return Double.parseDouble(volts);
+	}
+
+	/** Extract device SN from XML */
+	private String parseSn(String line) {
+		if (!SString.safe(line).startsWith("<serialNumber>"))
+			return ctl_sn;
+		String sn = SString.extractMiddle(line, "<serialNumber>", "</serialNumber>");
+		return (!sn.isEmpty() ? sn : ctl_sn);
 	}
 }
