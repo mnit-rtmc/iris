@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,6 +83,8 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 			new OpSystemAttributes(counter));
 		createSettingsOp("detector.op.configure", c,
 			new OpDetectorConfigure(counter, 0));
+		createSettingsOp("firmware.version.op", c,
+			new OpFirmwareVersion(counter));
 	}
 
 	/** Create a settings operation */

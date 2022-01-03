@@ -35,6 +35,7 @@ Code        | Descripton
 `PS` / `ps` | Pin status
 `SA` / `sa` | System attributes
 `SC` / `sc` | System command
+`V.` / `v.` | Firmware version
 
 __Message ID__ is used to match polls with responses, but is otherwise not
 interpreted by the controller (except for `ds` messages, see below).
@@ -252,6 +253,20 @@ The command `restart` causes the controller program to be restarted.
 ```
 SC,05c1,restart
 sc,05c1,restart
+```
+
+### V. - Firmware Version
+
+Parameter | Description
+----------|------------------------------------------
+1         | Code: `V.` / `v.`
+2         | Message ID
+3 †       | Firmware version
+4 †       | Build date / time
+
+```
+V.,A042
+v.,A042,0.1.0,2022-01-31T12:34:56-05:00
 ```
 
 [RFC 3339]: https://tools.ietf.org/html/rfc3339#section-5.6
