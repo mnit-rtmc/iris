@@ -9,9 +9,9 @@ handled by the IRIS server.
 ## Building
 
 ```
+rustup target add x86_64-unknown-linux-musl
 git clone https://github.com/mnit-rtmc/iris.git
 cd iris/mayfly/
-rustup target add x86_64-unknown-linux-musl
 cargo build --release
 ```
 
