@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2021  Minnesota Department of Transportation
+ * Copyright (C) 2013-2022  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -435,7 +435,7 @@ public class DmsActionMsg {
 		addSrc(SignMsgSource.exit_warning);
 		Detector det = DetectorHelper.lookup(did);
 		return (det instanceof DetectorImpl)
-		      ? EMPTY_SPAN
+		      ? exitWarningSpan((DetectorImpl) det, occ)
 		      : fail("Detector not found");
 	}
 
