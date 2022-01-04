@@ -2,8 +2,9 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
-INSERT INTO iris.font (name, f_number, height, width, line_spacing,
-    char_spacing, version_id) VALUES ('26_full', 20, 26, 0, 8, 5, 0);
+INSERT INTO iris.font (
+    name, f_number, height, width, line_spacing, char_spacing, version_id
+) VALUES ('26_full', 20, 26, 0, 8, 5, 0);
 
 COPY iris.glyph (name, font, code_point, width, pixels) FROM stdin;
 26_full_32	26_full	32	3	AAAAAAAAAAAAAA==

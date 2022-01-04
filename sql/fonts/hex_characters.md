@@ -18,5 +18,4 @@ Character    | ASCII | Font
 -------------|-------|---------------
 ↖            | ^     | `14_ledstar`
 █            | \`    | `14_ledstar`
-↓            | ~     | `26_full`
 ◊            | *     | `_07_full`

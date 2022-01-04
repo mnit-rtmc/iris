@@ -12,8 +12,9 @@ BEGIN;
 """
 _SELECT_FONT = """SELECT name, f_number, height, width, line_spacing,
     char_spacing, version_id FROM iris.font WHERE name = '%s';"""
-_INSERT_FONT = """INSERT INTO iris.font (name, f_number, height, width, line_spacing,
-    char_spacing, version_id) VALUES ('%s', %s, %s, %s, %s, %s, %s);
+_INSERT_FONT = """INSERT INTO iris.font (
+    name, f_number, height, width, line_spacing, char_spacing, version_id
+) VALUES ('%s', %s, %s, %s, %s, %s, %s);
 """
 _SELECT_GLYPH = """SELECT name, font, code_point, width, pixels
     FROM iris.glyph WHERE font = '%s' ORDER BY code_point;"""
