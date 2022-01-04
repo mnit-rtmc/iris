@@ -25,14 +25,15 @@ def parse_kv(key, kv):
     assert akey == key
     return value
 
-def create_font_sql(f_num, lines):
+def create_font_sql(lines):
     print (HEADER)
     name = parse_kv('name', next(lines))
+    f_number = int(parse_kv('font_number', next(lines)))
     height = int(parse_kv('height', next(lines)))
     width = int(parse_kv('width', next(lines)))
     char_spacing = parse_kv('char_spacing', next(lines))
     line_spacing = parse_kv('line_spacing', next(lines))
-    print (HFONT % (name, f_num, height, width, line_spacing, char_spacing))
+    print (HFONT % (name, f_number, height, width, line_spacing, char_spacing))
     print (COPY)
     while True:
         try:
@@ -66,7 +67,7 @@ def parse_glyph(name, height, width, lines):
     print (COPY_GLYPH % (name, code_point, name, code_point, width,
         b64encode(pixels).decode('ASCII')))
 
-if len(argv) != 3:
-    print ("Usage:\n./ifnt_import.py [font-num] [file-name]\n")
+if len(argv) != 2:
+    print ("Usage:\n./ifnt_import.py [file-name]\n")
     exit(1)
-create_font_sql(int(argv[1]), (line.strip() for line in open(argv[2])))
+create_font_sql(line.strip() for line in open(argv[1]))

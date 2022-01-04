@@ -11,8 +11,9 @@ def read_font(conn, font):
 	cursor = conn.cursor()
 	cursor.execute("SELECT name, f_number, height, width, line_spacing, "
 		"char_spacing FROM iris.font WHERE name = '%s';" % font)
-	name, f_num, height, width, line_spacing, char_spacing = cursor.fetchone()
+	name, f_number, height, width, line_spacing, char_spacing = cursor.fetchone()
 	print('name: %s' % name)
+	print('font_number: %s' % f_number)
 	print('height: %s' % height)
 	print('width: %s' % width)
 	print('char_spacing: %s' % char_spacing)
