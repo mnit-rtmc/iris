@@ -2493,6 +2493,75 @@ COPY iris.color_scheme (id, description) FROM stdin;
 4	color24Bit
 \.
 
+-- Bit flags for sign_detail.supported_tags
+CREATE TABLE iris.multi_tag (
+    bit INTEGER PRIMARY KEY,
+    tag VARCHAR(3) UNIQUE NOT NULL
+);
+ALTER TABLE iris.multi_tag ADD CONSTRAINT multi_tag_bit_ck
+    CHECK (bit >= 0 AND bit < 32);
+
+COPY iris.multi_tag (bit, tag) FROM stdin;
+0	cb
+1	cf
+2	fl
+3	fo
+4	g
+5	hc
+6	jl
+7	jp
+8	ms
+9	mvt
+10	nl
+11	np
+12	pt
+13	sc
+14	f1
+15	f2
+16	f3
+17	f4
+18	f5
+19	f6
+20	f7
+21	f8
+22	f9
+23	f10
+24	f11
+25	f12
+26	tr
+27	cr
+28	pb
+\.
+
+CREATE FUNCTION iris.multi_tags(INTEGER)
+    RETURNS SETOF iris.multi_tag AS $multi_tags$
+DECLARE
+    mt RECORD;
+    b INTEGER;
+BEGIN
+    FOR mt IN SELECT bit, tag FROM iris.multi_tag LOOP
+        b = 1 << mt.bit;
+        IF ($1 & b) = b THEN
+            RETURN NEXT mt;
+        END IF;
+    END LOOP;
+END;
+$multi_tags$ LANGUAGE plpgsql;
+
+-- Get supported MULTI tags from integer bit flags
+CREATE FUNCTION iris.multi_tags_str(INTEGER)
+    RETURNS text AS $multi_tags_str$
+DECLARE
+    bits ALIAS FOR $1;
+BEGIN
+    RETURN (
+        SELECT string_agg(mt.tag, ', ') FROM (
+            SELECT bit, tag FROM iris.multi_tags(bits) ORDER BY bit
+        ) AS mt
+    );
+END;
+$multi_tags_str$ LANGUAGE plpgsql;
+
 CREATE TABLE iris.sign_detail (
 	name VARCHAR(12) PRIMARY KEY,
 	dms_type INTEGER NOT NULL REFERENCES iris.dms_type,
@@ -2517,12 +2586,12 @@ CREATE TRIGGER sign_detail_notify_trig
 	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW sign_detail_view AS
-	SELECT name, dt.description AS dms_type, portable, technology,
-	       sign_access, legend, beacon_type, hardware_make, hardware_model,
-	       software_make, software_model, supported_tags, max_pages,
-	       max_multi_len, beacon_activation_flag, pixel_service_flag
-	FROM iris.sign_detail
-	JOIN iris.dms_type dt ON sign_detail.dms_type = dt.id;
+    SELECT name, dt.description AS dms_type, portable, technology, sign_access,
+           legend, beacon_type, hardware_make, hardware_model, software_make,
+           software_model,iris.multi_tags_str(supported_tags) AS supported_tags,
+           max_pages, max_multi_len, beacon_activation_flag, pixel_service_flag
+    FROM iris.sign_detail
+    JOIN iris.dms_type dt ON sign_detail.dms_type = dt.id;
 GRANT SELECT ON sign_detail_view TO PUBLIC;
 
 CREATE TABLE iris.sign_config (

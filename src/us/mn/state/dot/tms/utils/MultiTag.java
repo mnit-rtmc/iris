@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,9 @@ import java.util.ArrayList;
 /**
  * Enumeration of MULTI tags.  This is specified by NTCIP 1203, as part of the
  * dmsSupportedMultiTags object.
+ *
+ * The ordinal values correspond to the bits in the iris.multi_tag look-up
+ * table.
  *
  * @author Douglas Lau
  */
