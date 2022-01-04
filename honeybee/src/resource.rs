@@ -129,7 +129,8 @@ const CAMERA_RES: Resource = Resource::Simple(
     "camera_pub",
     Listen::Exclude("camera", &["video_loss"]),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, publish, streamable, location, lat, lon \
+    SELECT name, publish, streamable, roadway, road_dir, cross_street,\
+           location, lat, lon \
     FROM camera_view \
     ORDER BY name \
 ) r",
