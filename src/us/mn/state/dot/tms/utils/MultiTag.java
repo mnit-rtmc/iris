@@ -35,7 +35,7 @@ public enum MultiTag {
 	jl,  //  6: justification -- line
 	jp,  //  7: justification -- page
 	ms,  //  8: manufacturer specific
-	mvt, //  9: moving text
+	mv,  //  9: moving text
 	nl,  // 10: new line
 	np,  // 11: new page
 	pt,  // 12: page time

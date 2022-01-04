@@ -75,7 +75,7 @@ COPY iris.multi_tag (bit, tag) FROM stdin;
 6	jl
 7	jp
 8	ms
-9	mvt
+9	mv
 10	nl
 11	np
 12	pt
