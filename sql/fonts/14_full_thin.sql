@@ -2,11 +2,12 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
-INSERT INTO iris.font (name, f_number, height, width, line_spacing,
-    char_spacing, version_id) VALUES ('14_full_thin', 12, 14, 0, 6, 3, 0);
+INSERT INTO iris.font (
+    name, f_number, height, width, line_spacing, char_spacing, version_id
+) VALUES ('14_full_thin', 12, 14, 0, 6, 3, 0);
 
 COPY iris.glyph (name, font, code_point, width, pixels) FROM stdin;
-14_full_thin_32	14_full_thin	32	5	AAAAAAAAAAAA
+14_full_thin_32	14_full_thin	32	2	AAAAAA==
 14_full_thin_33	14_full_thin	33	2	///w8A==
 14_full_thin_34	14_full_thin	34	6	zzzzzzAAAAAAAAA=
 14_full_thin_35	14_full_thin	35	8	ZmZm//9mZmZm//9mZmY=
@@ -65,12 +66,12 @@ COPY iris.glyph (name, font, code_point, width, pixels) FROM stdin;
 14_full_thin_88	14_full_thin	88	8	w8PDw8NmPDxmw8PDw8M=
 14_full_thin_89	14_full_thin	89	8	w8PDw8PDZjwYGBgYGBg=
 14_full_thin_90	14_full_thin	90	8	//8DAwMGDBgwYMDA//8=
-14_full_thin_91	14_full_thin	91	8	GDx+25kYGBgYGBgYGBg=
+14_full_thin_91	14_full_thin	91	4	/8zMzMzM/w==
 14_full_thin_92	14_full_thin	92	8	AACAwGAwGAwGAwEAAAA=
-14_full_thin_93	14_full_thin	93	8	GBgYGBgYGBgYmdt+PBg=
+14_full_thin_93	14_full_thin	93	4	/zMzMzMz/w==
 14_full_thin_94	14_full_thin	94	8	GDxmw4EAAAAAAAAAAAA=
 14_full_thin_95	14_full_thin	95	7	AAAAAAAAAAAAAA//wA==
-14_full_thin_96	14_full_thin	96	3	AAAAAAAA
+14_full_thin_96	14_full_thin	96	3	3YAAAAAA
 14_full_thin_97	14_full_thin	97	8	AAAAAD9/48PDw8Pnfzs=
 14_full_thin_98	14_full_thin	98	8	wMDAwPz+x8PDw8PH/vw=
 14_full_thin_99	14_full_thin	99	8	AAAAAD5/48DAwMDjfz4=
@@ -97,10 +98,10 @@ COPY iris.glyph (name, font, code_point, width, pixels) FROM stdin;
 14_full_thin_120	14_full_thin	120	7	AAAADHjxtjhxtjx4wA==
 14_full_thin_121	14_full_thin	121	8	AAAAAMPDw2Y8GBgYGBg=
 14_full_thin_122	14_full_thin	122	8	AAAAAP//BgwYMGDA//8=
-14_full_thin_123	14_full_thin	123	8	AAAAEDBg//9gMBAAAAA=
+14_full_thin_123	14_full_thin	123	5	O9jGMxhjGMec
 14_full_thin_124	14_full_thin	124	2	////8A==
-14_full_thin_125	14_full_thin	125	8	AAAACAwG//8GDAgAAAA=
-14_full_thin_126	14_full_thin	126	1	AAA=
+14_full_thin_125	14_full_thin	125	5	54xjGGMxjG9w
+14_full_thin_126	14_full_thin	126	7	AAAAAAw8zwwAAAAAAA==
 \.
 
 COMMIT;

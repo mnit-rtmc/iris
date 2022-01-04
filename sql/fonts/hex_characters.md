@@ -16,12 +16,6 @@ Character    | ASCII | Font
 
 Character    | ASCII | Font
 -------------|-------|---------------
-↑            | [     | `14_full_thin`
-↓            | ]     | `14_full_thin`
-`wide space` | \`    | `14_full_thin`
-←            | {     | `14_full_thin`
-→            | }     | `14_full_thin`
-`thin space` | ~     | `14_full_thin`
 ↖            | ^     | `14_ledstar`
 █            | \`    | `14_ledstar`
 ↓            | ~     | `26_full`
