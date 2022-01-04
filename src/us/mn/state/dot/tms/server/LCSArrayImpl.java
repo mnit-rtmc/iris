@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -352,7 +352,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 			text = null;
 		}
 		String owner = (o != null) ? o.getName() : null;
-		logEvent(new SignEvent(et, name, text, owner));
+		logEvent(new SignEvent(et, name, text, owner, null));
 	}
 
 	/** Get the current lane-use indications.

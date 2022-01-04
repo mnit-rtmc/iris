@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2008-2009  AHMCT, University of California
  * Copyright (C) 2012-2021  Iteris Inc.
  * Copyright (C) 2016-2020  SRF Consulting Group
@@ -1104,11 +1104,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private void logMsg(SignMessage sm, String owner) {
 		EventType et = EventType.DMS_DEPLOYED;
 		String text = (sm != null) ? sm.getMulti() : null;
+		Integer duration = (sm != null) ? sm.getDuration() : null;
 		if (SignMessageHelper.isBlank(sm)) {
 			et = EventType.DMS_CLEARED;
 			text = null;
+			duration = null;
 		}
-		logEvent(new SignEvent(et, name, text, owner));
+		logEvent(new SignEvent(et, name, text, owner, duration));
 	}
 
 	/** Next sign message (sending in process) */
@@ -1152,7 +1154,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				e.getEventType(),
 				name,
 				sm.getMulti(),
-				sm.getOwner()
+				sm.getOwner(),
+				sm.getDuration()
 			));
 			throw e;
 		}

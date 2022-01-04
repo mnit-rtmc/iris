@@ -2968,30 +2968,44 @@ CREATE VIEW dms_action_view AS
 GRANT SELECT ON dms_action_view TO PUBLIC;
 
 CREATE TABLE event.sign_event (
-	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	device_id VARCHAR(20),
-	message text,
-	owner VARCHAR(16)
+    event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    device_id VARCHAR(20),
+    multi VARCHAR(1024),
+    owner VARCHAR(16),
+    duration INTEGER
 );
 CREATE INDEX ON event.sign_event(event_date);
 
+CREATE FUNCTION event.multi_message(VARCHAR(1024))
+    RETURNS TEXT AS $multi_message$
+DECLARE
+    multi ALIAS FOR $1;
+BEGIN
+    RETURN regexp_replace(
+        replace(
+            replace(multi, '[nl]', E'\n'),
+            '[np]', E'\n'
+        ),
+        '\[.+?\]', ' ', 'g'
+    );
+END;
+$multi_message$ LANGUAGE plpgsql;
+
 CREATE VIEW sign_event_view AS
-	SELECT event_id, event_date, description, device_id,
-	       regexp_replace(replace(replace(message, '[nl]', E'\n'), '[np]',
-	                      E'\n'), '\[.+?\]', ' ', 'g') AS message,
-	       message AS multi, owner
-	FROM event.sign_event JOIN event.event_description
-	ON sign_event.event_desc_id = event_description.event_desc_id;
+    SELECT event_id, event_date, description, device_id,
+           event.multi_message(multi) as message, multi, owner, duration
+    FROM event.sign_event JOIN event.event_description
+    ON sign_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON sign_event_view TO PUBLIC;
 
 CREATE VIEW recent_sign_event_view AS
-	SELECT event_id, event_date, description, device_id, message, multi,
-	       owner
-	FROM sign_event_view
-	WHERE event_date > (CURRENT_TIMESTAMP - interval '90 days');
+    SELECT event_id, event_date, description, device_id, message, multi,
+           owner, duration
+    FROM sign_event_view
+    WHERE event_date > (CURRENT_TIMESTAMP - interval '90 days');
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
 
 CREATE TABLE event.travel_time_event (
