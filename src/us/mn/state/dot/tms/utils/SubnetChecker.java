@@ -314,26 +314,45 @@ public final class SubnetChecker {
 		}
 	}
 
+	/** Get network interfaces.
+	 * Requests network interfaces up to 5 times to
+	 * deal with rare getNetworkInterfaces() error.
+	 * (See Java Bug System: JDK-8165665)
+	 * @return enumeration of interfaces or null */
+	static private Enumeration<NetworkInterface> getNetworkInterfaces2() {
+		for (int i = 1; (i < 6); ++i) {
+			try {
+				return NetworkInterface.getNetworkInterfaces();
+			} catch (SocketException e) {
+				// try again
+			} catch (java.lang.Error e2) {
+				// try again
+			}
+		}
+		return null;
+	}
+	
 	/** Get string containing comma separated
 	 *  list of all current IP addresses for
 	 *  this workstation. */
 	static public String getAllMyAddresses() {
+		Enumeration<NetworkInterface> eni;
+		eni = getNetworkInterfaces2();
+		if (eni == null)
+			return "";
 		StringBuilder sb = new StringBuilder();
-		Enumeration<NetworkInterface> e;
-		try {
-			e = NetworkInterface.getNetworkInterfaces();
-			while (e.hasMoreElements()) {
-				NetworkInterface n = e.nextElement();
-				Enumeration<InetAddress> ee = n.getInetAddresses();
-				while (ee.hasMoreElements()) {
-					InetAddress i = ee.nextElement();
-					if (sb.length() > 0)
-						sb.append(',');
-					sb.append(i.getHostAddress());
-				}
+		NetworkInterface ni;
+		Enumeration<InetAddress> eAddr;
+		InetAddress addr;
+		while (eni.hasMoreElements()) {
+			ni = eni.nextElement();
+			eAddr = ni.getInetAddresses();
+			while (eAddr.hasMoreElements()) {
+				addr = eAddr.nextElement();
+				if (sb.length() > 0)
+					sb.append(',');
+				sb.append(addr.getHostAddress());
 			}
-		} catch (SocketException e1) {
-			e1.printStackTrace();
 		}
 		return sb.toString();
 	}
