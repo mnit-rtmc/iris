@@ -1,6 +1,6 @@
 // sonar.rs
 //
-// Copyright (C) 2021  Minnesota Department of Transportation
+// Copyright (C) 2021-2022  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -59,8 +59,9 @@ impl ServerCertVerifier for Verifier {
         _: DNSNameRef,
         _: &[u8],
     ) -> std::result::Result<ServerCertVerified, TLSError> {
-        // TODO: check cert
-        return Ok(ServerCertVerified::assertion());
+        // NOTE: we are *NOT* checking the server cert here!  This is only
+        //       secure when graft is running on the same host as IRIS.
+        Ok(ServerCertVerified::assertion())
     }
 }
 
@@ -113,7 +114,7 @@ impl<'a> Message<'a> {
     /// Decode one message
     fn decode_one(buf: &'a [u8]) -> Option<Self> {
         let msg: Vec<&[u8]> = buf.split(|b| *b == b'\x1F').collect();
-        if msg.len() < 1 {
+        if msg.is_empty() {
             return None;
         }
         let code = msg[0];
@@ -340,7 +341,7 @@ impl Connection {
         while !done {
             self.recv(|m| match m {
                 Message::Attribute(attr, v) => {
-                    let att = attr.rsplit('/').nth(0).unwrap();
+                    let att = attr.rsplit('/').next().unwrap();
                     callback(att, v)
                 }
                 Message::Object(_) => {
