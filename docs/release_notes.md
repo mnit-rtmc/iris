@@ -1,5 +1,13 @@
 # IRIS 5.x Release Notes
 
+5.27.0 (6 Jan 2022)
+ - Added message duration to sign event table
+ - Fixed occ check in "exit" DMS action tag
+ - Fixed alert UI issues
+ - Show supported MULTI tags in `sign_detail_view` (not bit flags)
+ - Improved DMS font scripts
+ - honeybee: Add `roadway` and `road_dir` to `camera_pub` JSON
+
 5.26.0 (7 Dev 2021)
  - Added [exit backup](exit_backup.md) DMS action tag
  - Fixed wrongly creating SignText when deploying DMS messages
