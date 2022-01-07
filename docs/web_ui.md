@@ -37,9 +37,9 @@ This document tracks progress on the web-based user interface for IRIS.
 * graft
   - [X] Connect to IRIS server with sonar
   - [X] Add web service using tide
-  - [ ] Authentication endpoint using tokens
+  - [X] Session authentication
 * bulb
-  - [ ] Handle authentication page
+  - [ ] Handle authentication
 
 ## Phase 3 — Comm Link Administation
 

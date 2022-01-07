@@ -807,6 +807,8 @@ dependencies = [
  "json",
  "log",
  "rustls",
+ "serde",
+ "serde_derive",
  "thiserror",
  "tide",
  "webpki",

@@ -17,6 +17,8 @@
 use async_std::io::ErrorKind::TimedOut;
 use convert_case::{Case, Casing};
 use graft::sonar::{Connection, Result, SonarError};
+use tide::prelude::*;
+use tide::sessions::{MemoryStore, SessionMiddleware};
 use tide::{Request, Response, StatusCode};
 
 /// Trait to get HTTP status code from an error
@@ -33,6 +35,7 @@ impl ErrorStatus for SonarError {
             Self::Msg(_) => StatusCode::Conflict,
             Self::NameMissing => StatusCode::BadRequest,
             Self::IO(e) if e.kind() == TimedOut => StatusCode::GatewayTimeout,
+            Self::Unauthorized => StatusCode::Unauthorized,
             _ => StatusCode::InternalServerError,
         }
     }
@@ -44,7 +47,7 @@ macro_rules! resp {
         match $res {
             Ok(r) => r,
             Err(e) => {
-                log::warn!("{:?}", e);
+                log::warn!("response: {:?}", e);
                 return Ok(Response::builder(e.status_code())
                     .body(e.to_string())
                     .build());
@@ -56,8 +59,7 @@ macro_rules! resp {
 /// Add `POST` / `GET` / `PATCH` / `DELETE` routes for a Sonar object type
 macro_rules! add_routes {
     ($app:expr, $tp:expr) => {
-        $app.at(concat!("/", $tp))
-            .get(|req| list_objects($tp, req));
+        $app.at(concat!("/", $tp)).get(|req| list_objects($tp, req));
         $app.at(concat!("/", $tp))
             .post(|req| create_sonar_object($tp, req));
         $app.at(concat!("/", $tp, "/:name"))
@@ -74,6 +76,15 @@ macro_rules! add_routes {
 async fn main() -> tide::Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let mut app = tide::new();
+    app.with(
+        SessionMiddleware::new(
+            MemoryStore::new(),
+            std::env::var("TIDE_SECRET").unwrap().as_bytes(),
+        )
+        .with_cookie_name("graft"),
+    );
+    app.at("/login").get(get_login);
+    app.at("/login").post(post_login);
     add_routes!(app, "comm_config");
     add_routes!(app, "comm_link");
     add_routes!(app, "controller");
@@ -81,13 +92,67 @@ async fn main() -> tide::Result<()> {
     Ok(())
 }
 
+/// Login form
+const LOGIN: &str = r#"<html>
+<form method="POST" action="/login">
+  <label>username
+    <input type="text" name="username" autocomplete="username" required>
+  </label>
+  <label>password
+    <input type="password" name="password" autocomplete="current-password" required>
+  </label>
+  <button type="submit">Login</button>
+</form>
+</html>"#;
+
+/// `GET` login form
+async fn get_login(req: Request<()>) -> tide::Result {
+    log::info!("GET {}", req.url());
+    Ok(Response::builder(200)
+        .body(LOGIN)
+        .content_type("text/html;charset=utf-8")
+        .build())
+}
+
+/// Auth information
+#[derive(Debug, Deserialize, Serialize)]
+struct AuthMap {
+    /// Sonar username
+    username: String,
+    /// Sonar password
+    password: String,
+}
+
+/// Handle `POST` to login page
+async fn post_login(mut req: Request<()>) -> tide::Result {
+    log::info!("POST {}", req.url());
+    let auth: AuthMap = match req.body_form().await {
+        Ok(auth) => auth,
+        Err(e) => {
+            log::warn!("response: {:?}", e);
+            return Ok(Response::builder(StatusCode::BadRequest)
+                .body(e.to_string())
+                .build());
+        }
+    };
+    let session = req.session_mut();
+    // serialization error should never happen; unwrap OK
+    session.insert("auth", auth).unwrap();
+    Ok(Response::builder(200)
+        .body("<html>Posted!</html>")
+        .content_type("text/html;charset=utf-8")
+        .build())
+}
+
 /// IRIS host name
 const HOST: &str = "localhost.localdomain";
 
 /// Create a Sonar connection for a request
-async fn connection(_req: &Request<()>) -> Result<Connection> {
+async fn connection(req: &Request<()>) -> Result<Connection> {
+    let session = req.session();
+    let auth: AuthMap = session.get("auth").ok_or(SonarError::Unauthorized)?;
     let mut c = Connection::new(HOST, 1037).await?;
-    c.login("admin", "atms_242").await?;
+    c.login(&auth.username, &auth.password).await?;
     Ok(c)
 }
 
@@ -100,7 +165,7 @@ fn obj_name(tp: &str, req: &Request<()>) -> Result<String> {
 }
 
 /// `GET` list of objects and return JSON result
-async fn list_objects(tp: &str, req: Request<()>) -> tide::Result {
+async fn list_objects(_tp: &str, req: Request<()>) -> tide::Result {
     log::info!("GET {}", req.url());
     todo!("read file created by honeybee");
 }

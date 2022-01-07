@@ -43,6 +43,9 @@ pub enum SonarError {
     /// Invalid Query
     #[error("`name` missing from query")]
     NameMissing,
+    /// Unauthorized
+    #[error("unauthorized")]
+    Unauthorized,
 }
 
 /// Sonar result
