@@ -17,6 +17,7 @@
 use async_std::io::ErrorKind::TimedOut;
 use convert_case::{Case, Casing};
 use graft::sonar::{Connection, Result, SonarError};
+use rand::Rng;
 use tide::prelude::*;
 use tide::sessions::{MemoryStore, SessionMiddleware};
 use tide::{Request, Response, StatusCode};
@@ -79,7 +80,7 @@ async fn main() -> tide::Result<()> {
     app.with(
         SessionMiddleware::new(
             MemoryStore::new(),
-            std::env::var("TIDE_SECRET").unwrap().as_bytes(),
+            &rand::thread_rng().gen::<[u8; 32]>(),
         )
         .with_cookie_name("graft"),
     );

@@ -806,6 +806,7 @@ dependencies = [
  "env_logger",
  "json",
  "log",
+ "rand 0.8.3",
  "rustls",
  "serde",
  "serde_derive",
