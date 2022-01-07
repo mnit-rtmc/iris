@@ -27,6 +27,9 @@ trait ErrorStatus {
 impl ErrorStatus for SonarError {
     fn status_code(&self) -> StatusCode {
         match self {
+            Self::Msg(msg) if msg.starts_with("Permission") => {
+                StatusCode::Forbidden
+            }
             Self::Msg(_) => StatusCode::Conflict,
             Self::NameMissing => StatusCode::BadRequest,
             Self::IO(e) if e.kind() == TimedOut => StatusCode::GatewayTimeout,
@@ -41,6 +44,7 @@ macro_rules! resp {
         match $res {
             Ok(r) => r,
             Err(e) => {
+                log::warn!("{:?}", e);
                 return Ok(Response::builder(e.status_code())
                     .body(e.to_string())
                     .build());
@@ -49,14 +53,18 @@ macro_rules! resp {
     };
 }
 
-/// Add GET/PUT/DELETE routes for a Sonar object type
+/// Add `POST` / `GET` / `PATCH` / `DELETE` routes for a Sonar object type
 macro_rules! add_routes {
     ($app:expr, $tp:expr) => {
         $app.at(concat!("/", $tp))
-            .get(|req| get_sonar_object($tp, req));
+            .get(|req| list_objects($tp, req));
         $app.at(concat!("/", $tp))
             .post(|req| create_sonar_object($tp, req));
-        $app.at(concat!("/", $tp))
+        $app.at(concat!("/", $tp, "/:name"))
+            .get(|req| get_sonar_object($tp, req));
+        $app.at(concat!("/", $tp, "/:name"))
+            .patch(|req| update_sonar_object($tp, req));
+        $app.at(concat!("/", $tp, "/:name"))
             .delete(|req| remove_sonar_object($tp, req));
     };
 }
@@ -83,20 +91,25 @@ async fn connection(_req: &Request<()>) -> Result<Connection> {
     Ok(c)
 }
 
-/// Get Sonar type name from a request
-fn req_name(tp: &str, req: &Request<()>) -> Result<String> {
-    for pair in req.url().query_pairs() {
-        if pair.0 == "name" {
-            return Ok(format!("{}/{}", tp, pair.1));
-        }
+/// Get Sonar object name from a request
+fn obj_name(tp: &str, req: &Request<()>) -> Result<String> {
+    match req.param("name") {
+        Ok(name) => Ok(format!("{}/{}", tp, name)),
+        Err(_) => Err(SonarError::NameMissing),
     }
-    Err(SonarError::NameMissing)
 }
 
-/// GET a Sonar object and return JSON result
+/// `GET` list of objects and return JSON result
+async fn list_objects(tp: &str, req: Request<()>) -> tide::Result {
+    log::info!("GET {}", req.url());
+    todo!("read file created by honeybee");
+}
+
+/// `GET` a Sonar object and return JSON result
 async fn get_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
+    log::info!("GET {}", req.url());
     let mut c = resp!(connection(&req).await);
-    let nm = resp!(req_name(tp, &req));
+    let nm = resp!(obj_name(tp, &req));
     let mut res = json::object!();
     resp!(
         c.enumerate_object(&nm, |att, val| {
@@ -112,17 +125,37 @@ async fn get_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
         .build())
 }
 
-/// Create a Sonar object from a PUT request
+/// Create a Sonar object from a `POST` request
 async fn create_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
-    let nm = resp!(req_name(tp, &req));
+    log::info!("POST {}", req.url());
+    let nm = resp!(obj_name(tp, &req));
     let mut c = resp!(connection(&req).await);
     resp!(c.create_object(&nm).await);
     Ok(Response::builder(StatusCode::Created).build())
 }
 
-/// Remove a Sonar object from a DELETE request
+/// Update a Sonar object from a `PATCH` request
+async fn update_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
+    log::info!("PATCH {}", req.url());
+    let mut c = resp!(connection(&req).await);
+    match req.param("name") {
+        Ok(name) => {
+            for pair in req.url().query_pairs() {
+                let att = pair.0.to_case(Case::Camel);
+                let nm = format!("{}/{}/{}", tp, name, att);
+                log::info!("{} = {}", nm, &pair.1);
+                resp!(c.update_object(&nm, &pair.1).await);
+            }
+            Ok(Response::builder(StatusCode::NoContent).build())
+        }
+        Err(_) => resp!(Err(SonarError::NameMissing)),
+    }
+}
+
+/// Remove a Sonar object from a `DELETE` request
 async fn remove_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
-    let nm = resp!(req_name(tp, &req));
+    log::info!("DELETE {}", req.url());
+    let nm = resp!(obj_name(tp, &req));
     let mut c = resp!(connection(&req).await);
     resp!(c.remove_object(&nm).await);
     Ok(Response::builder(StatusCode::NoContent).build())

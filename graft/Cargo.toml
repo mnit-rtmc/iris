@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0"
 async-std = { version="1.8", features=["attributes"] }
-convert_case = "0.4"
+convert_case = "0.5"
 json = "0.12"
 log = "0.4"
 rustls = { version="0.19", features=["dangerous_configuration"] }

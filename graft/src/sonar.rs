@@ -315,6 +315,16 @@ impl Connection {
         Ok(())
     }
 
+    /// Update an object
+    pub async fn update_object(&mut self, nm: &str, a: &str) -> Result<()> {
+        let mut buf = vec![];
+        Message::Attribute(nm, a).encode(&mut buf);
+        self.check_error().await?;
+        self.send(&buf[..]).await?;
+        self.check_error().await?;
+        Ok(())
+    }
+
     /// Remove an object
     pub async fn remove_object(&mut self, nm: &str) -> Result<()> {
         let mut buf = vec![];

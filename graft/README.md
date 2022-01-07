@@ -1,6 +1,18 @@
 # Graft
 
-*Graft* is a web server for proxying IRIS sonar objects.
+*Graft* is a web server for proxying IRIS sonar objects to a REST API.
+
+## Requests
+
+For each supported *type*, these requests are available:
+
+Route              | Verb     | Description
+-------------------|----------|------------------------
+`/`*type*          | `GET`    | Get all objects of type
+`/`*type*          | `POST`   | Create new object
+`/`*type*`/`*name* | `GET`    | Get one object
+`/`*type*`/`*name* | `PATCH`  | Update attributes of one object
+`/`*type*`/`*name* | `DELETE` | Delete one object
 
 ## Building
 
