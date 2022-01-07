@@ -89,6 +89,7 @@ public class PeriodicSampleWriterTest extends TestCase {
 */
 	}
 
+/*
 	static class TestFactory implements SampleArchiveFactory {
 		public File createFile(String sensor_id, String ext, long stamp)
 			throws IOException
@@ -106,4 +107,5 @@ public class PeriodicSampleWriterTest extends TestCase {
 			return true;
 		}
 	}
+*/
 }
