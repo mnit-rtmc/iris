@@ -59,8 +59,8 @@ public class SignEvent extends BaseEvent {
 	/** Device ID (if device specific) */
 	private final String device_id;
 
-	/** Message text */
-	private final String message;
+	/** Message MULTI text */
+	private final String multi;
 
 	/** Message owner */
 	private final String owner;
@@ -75,7 +75,7 @@ public class SignEvent extends BaseEvent {
 		super(et);
 		assert isSignEvent(et);
 		device_id = d;
-		message = m;
+		multi = m;
 		owner = o;
 		duration = dur;
 	}
@@ -93,7 +93,7 @@ public class SignEvent extends BaseEvent {
 		map.put("event_desc_id", event_type.id);
 		map.put("event_date", new Timestamp(event_date.getTime()));
 		map.put("device_id", device_id);
-		map.put("message", message);
+		map.put("multi", multi);
 		map.put("owner", owner);
 		map.put("duration", duration);
 		return map;
