@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2019  Minnesota Department of Transportation
+ * Copyright (C) 2012-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,7 +100,7 @@ public class PeriodicSampleWriterTest extends TestCase {
 			throws IOException
 		{
 			return new File("/tmp", sensor_id + "." +
-				s_type.extension + ps.period);
+				s_type.extension + ps.per_sec);
 		}
 		public boolean hasKnownExtension(String name) {
 			return true;
