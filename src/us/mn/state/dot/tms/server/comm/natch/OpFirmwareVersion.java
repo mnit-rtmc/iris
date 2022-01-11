@@ -36,14 +36,14 @@ public class OpFirmwareVersion extends OpNatch {
 	/** Poll the controller */
 	@Override
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
-		prop.encodeStore(op, tx_buf);
+		prop.encodeQuery(op, tx_buf);
 		setPolling(false);
 	}
 
 	/** Parse data received from controller */
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
-		prop.decodeStore(op, rx_buf);
+		prop.decodeQuery(op, rx_buf);
 		op.getController().setVersionNotify(prop.getVersion());
 		setDone(true);
 	}
