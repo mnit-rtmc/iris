@@ -31,18 +31,27 @@ pub enum SonarError {
     /// Unexpected response to a message
     #[error("unexpected response")]
     UnexpectedResponse,
+
     /// Unexpected message received
     #[error("unexpected message")]
     UnexpectedMessage,
-    /// Message received from server (SHOW)
-    #[error("{0}")]
-    Msg(String),
+
     /// I/O error
     #[error("I/O {0}")]
     IO(#[from] std::io::Error),
+
     /// Invalid Query
     #[error("`name` missing from query")]
     NameMissing,
+
+    /// Forbidden (permission denied)
+    #[error("forbidden")]
+    Forbidden,
+
+    /// Not found
+    #[error("not found")]
+    NotFound,
+
     /// Unauthorized
     #[error("unauthorized")]
     Unauthorized,
@@ -53,6 +62,19 @@ pub type Result<T> = std::result::Result<T, SonarError>;
 
 /// TLS certificate verifier for IRIS server
 struct Verifier {}
+
+impl SonarError {
+    fn parse_show(msg: &str) -> Self {
+        if msg.starts_with("Permission") {
+            Self::Forbidden
+        } else if msg.starts_with("Invalid name") {
+            Self::NotFound
+        } else {
+            warn!("SHOW {}", msg);
+            Self::UnexpectedMessage
+        }
+    }
+}
 
 impl ServerCertVerifier for Verifier {
     fn verify_server_cert(
@@ -74,22 +96,31 @@ impl ServerCertVerifier for Verifier {
 pub enum Message<'a> {
     /// Client login request
     Login(&'a str, &'a str),
+
     /// Client quit request
     Quit(),
+
     /// Client enumerate request
     Enumerate(&'a str),
+
     /// Client ignore request
     Ignore(&'a str),
+
     /// Client password change request
     Password(&'a str, &'a str),
+
     /// Object create request (client) / list (server)
     Object(&'a str),
+
     /// Attribute set request (client) / change (server)
     Attribute(&'a str, &'a str),
+
     /// Object remove request (client) / change (server)
     Remove(&'a str),
+
     /// Server type change
     Type(&'a str),
+
     /// Server show message
     Show(&'a str),
 }
@@ -253,9 +284,7 @@ impl Connection {
             Ok(()) => Ok(()),
         }?;
         match Message::decode(self.received()) {
-            Some((Message::Show(txt), _)) => {
-                Err(SonarError::Msg(txt.to_string()))
-            }
+            Some((Message::Show(txt), _)) => Err(SonarError::parse_show(txt)),
             Some((_res, _c)) => Err(SonarError::UnexpectedResponse),
             None => Ok(()),
         }
@@ -292,7 +321,7 @@ impl Connection {
         self.send(&buf[..]).await?;
         self.recv(|m| match m {
             Message::Type("") => Ok(()),
-            Message::Show(txt) => Err(SonarError::Msg(txt.to_string())),
+            Message::Show(txt) => Err(SonarError::parse_show(txt)),
             _ => Err(SonarError::UnexpectedMessage),
         })
         .await?;
@@ -361,6 +390,7 @@ impl Connection {
                     done = true;
                     Ok(())
                 }
+                Message::Show(msg) => Err(SonarError::parse_show(msg)),
                 _ => Err(SonarError::UnexpectedMessage),
             })
             .await?;

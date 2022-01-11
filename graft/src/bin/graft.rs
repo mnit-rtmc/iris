@@ -30,11 +30,9 @@ trait ErrorStatus {
 impl ErrorStatus for SonarError {
     fn status_code(&self) -> StatusCode {
         match self {
-            Self::Msg(msg) if msg.starts_with("Permission") => {
-                StatusCode::Forbidden
-            }
-            Self::Msg(_) => StatusCode::Conflict,
             Self::NameMissing => StatusCode::BadRequest,
+            Self::Forbidden => StatusCode::Forbidden,
+            Self::NotFound => StatusCode::NotFound,
             Self::IO(e) if e.kind() == TimedOut => StatusCode::GatewayTimeout,
             Self::Unauthorized => StatusCode::Unauthorized,
             _ => StatusCode::InternalServerError,
