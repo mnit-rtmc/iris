@@ -2560,7 +2560,7 @@ BEGIN
         ) AS mt
     );
 END;
-$multi_tags_str$ LANGUAGE plpgsql;
+$multi_tags_str$ LANGUAGE plpgsql SECURITY DEFINER;
 
 CREATE TABLE iris.sign_detail (
 	name VARCHAR(12) PRIMARY KEY,
