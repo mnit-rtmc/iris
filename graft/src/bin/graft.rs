@@ -124,6 +124,15 @@ struct AuthMap {
     password: String,
 }
 
+impl AuthMap {
+    /// Authenticate with IRIS server
+    async fn authenticate(&self) -> Result<Connection> {
+        let mut c = Connection::new(HOST, 1037).await?;
+        c.login(&self.username, &self.password).await?;
+        Ok(c)
+    }
+}
+
 /// Handle `POST` to login page
 async fn post_login(mut req: Request<()>) -> tide::Result {
     log::info!("POST {}", req.url());
@@ -136,6 +145,7 @@ async fn post_login(mut req: Request<()>) -> tide::Result {
                 .build());
         }
     };
+    resp!(auth.authenticate().await);
     let session = req.session_mut();
     // serialization error should never happen; unwrap OK
     session.insert("auth", auth).unwrap();
@@ -152,9 +162,7 @@ const HOST: &str = "localhost.localdomain";
 async fn connection(req: &Request<()>) -> Result<Connection> {
     let session = req.session();
     let auth: AuthMap = session.get("auth").ok_or(SonarError::Unauthorized)?;
-    let mut c = Connection::new(HOST, 1037).await?;
-    c.login(&auth.username, &auth.password).await?;
-    Ok(c)
+    auth.authenticate().await
 }
 
 /// Get Sonar object name from a request

@@ -4,13 +4,13 @@
 
 ## Requests
 
-All requests must include a `graft` session cookie which is authenticated with
-a valid IRIS `username` and `password`.  This can be created by using `POST` on
-the `/login` route.
+All requests must include a session cookie called `graft` which is authenticated
+with a valid IRIS `username` and `password`.  This can be created by using
+`POST` on the `/login` route.
 
 For each supported *type*, these requests are available:
 
-Route              | Verb     | Description
+Route              | Verb     | Function
 -------------------|----------|------------------------
 `/`*type*          | `GET`    | Get all objects of type
 `/`*type*          | `POST`   | Create new object
