@@ -55,6 +55,12 @@ macro_rules! resp {
     };
 }
 
+/// Build response to a bad request
+fn bad_request(msg: &str) -> tide::Result {
+    log::warn!("bad request: {}", msg);
+    Ok(Response::builder(StatusCode::BadRequest).body(msg).build())
+}
+
 /// Add `POST` / `GET` / `PATCH` / `DELETE` routes for a Sonar object type
 macro_rules! add_routes {
     ($app:expr, $tp:expr) => {
@@ -136,12 +142,7 @@ async fn post_login(mut req: Request<()>) -> tide::Result {
     log::info!("POST {}", req.url());
     let auth: AuthMap = match req.body_form().await {
         Ok(auth) => auth,
-        Err(e) => {
-            log::warn!("response: {:?}", e);
-            return Ok(Response::builder(StatusCode::BadRequest)
-                .body(e.to_string())
-                .build());
-        }
+        Err(e) => return bad_request(&e.to_string()),
     };
     resp!(auth.authenticate().await);
     let session = req.session_mut();
@@ -164,7 +165,7 @@ async fn connection(req: &Request<()>) -> Result<Connection> {
 }
 
 /// Invalid characters for SONAR names
-const INVALID_CHARS: &[char] = &['/', '\0', '\u{001e}', '\u{001f}'];
+const INVALID_CHARS: &[char] = &['\0', '\u{001e}', '\u{001f}'];
 
 /// Check if a character in a Sonar name is invalid
 fn invalid_char(c: char) -> bool {
@@ -175,13 +176,25 @@ fn invalid_char(c: char) -> bool {
 fn obj_name(tp: &str, req: &Request<()>) -> Result<String> {
     match req.param("name") {
         Ok(name) => {
-            if name.len() > 64 || name.contains(invalid_char) {
+            if name.len() > 64
+                || name.contains(invalid_char)
+                || name.contains('/')
+            {
                 Err(SonarError::InvalidName)
             } else {
                 Ok(format!("{}/{}", tp, name))
             }
         }
         Err(_) => Err(SonarError::InvalidName),
+    }
+}
+
+/// Get Sonar attribute name
+fn att_name(nm: &str, att: &str) -> Result<String> {
+    if att.len() > 64 || att.contains(invalid_char) || att.contains('/') {
+        Err(SonarError::InvalidName)
+    } else {
+        Ok(format!("{}/{}", nm, att.to_case(Case::Camel)))
     }
 }
 
@@ -194,8 +207,8 @@ async fn list_objects(_tp: &str, req: Request<()>) -> tide::Result {
 /// `GET` a Sonar object and return JSON result
 async fn get_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
     log::info!("GET {}", req.url());
-    let mut c = resp!(connection(&req).await);
     let nm = resp!(obj_name(tp, &req));
+    let mut c = resp!(connection(&req).await);
     let mut res = json::object!();
     resp!(
         c.enumerate_object(&nm, |att, val| {
@@ -223,19 +236,20 @@ async fn create_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
 /// Update a Sonar object from a `PATCH` request
 async fn update_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
     log::info!("PATCH {}", req.url());
-    let mut c = resp!(connection(&req).await);
-    match req.param("name") {
-        Ok(name) => {
-            for pair in req.url().query_pairs() {
-                let att = pair.0.to_case(Case::Camel);
-                let nm = format!("{}/{}/{}", tp, name, att);
-                log::info!("{} = {}", nm, &pair.1);
-                resp!(c.update_object(&nm, &pair.1).await);
-            }
-            Ok(Response::builder(StatusCode::NoContent).build())
-        }
-        Err(_) => resp!(Err(SonarError::InvalidName)),
+    let nm = resp!(obj_name(tp, &req));
+    if req.url().query_pairs().count() == 0 {
+        return bad_request("no query");
     }
+    let mut c = resp!(connection(&req).await);
+    for pair in req.url().query_pairs() {
+        let anm = resp!(att_name(&nm, &pair.0));
+        if pair.1.contains(invalid_char) {
+            return bad_request("invalid value");
+        }
+        log::info!("{} = {}", anm, &pair.1);
+        resp!(c.update_object(&anm, &pair.1).await);
+    }
+    Ok(Response::builder(StatusCode::NoContent).build())
 }
 
 /// Remove a Sonar object from a `DELETE` request
