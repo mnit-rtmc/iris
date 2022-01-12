@@ -30,7 +30,7 @@ trait ErrorStatus {
 impl ErrorStatus for SonarError {
     fn status_code(&self) -> StatusCode {
         match self {
-            Self::NameMissing => StatusCode::BadRequest,
+            Self::InvalidName => StatusCode::BadRequest,
             Self::Forbidden => StatusCode::Forbidden,
             Self::NotFound => StatusCode::NotFound,
             Self::IO(e) if e.kind() == TimedOut => StatusCode::GatewayTimeout,
@@ -163,11 +163,25 @@ async fn connection(req: &Request<()>) -> Result<Connection> {
     auth.authenticate().await
 }
 
+/// Invalid characters for SONAR names
+const INVALID_CHARS: &[char] = &['/', '\0', '\u{001e}', '\u{001f}'];
+
+/// Check if a character in a Sonar name is invalid
+fn invalid_char(c: char) -> bool {
+    INVALID_CHARS.contains(&c)
+}
+
 /// Get Sonar object name from a request
 fn obj_name(tp: &str, req: &Request<()>) -> Result<String> {
     match req.param("name") {
-        Ok(name) => Ok(format!("{}/{}", tp, name)),
-        Err(_) => Err(SonarError::NameMissing),
+        Ok(name) => {
+            if name.len() > 64 || name.contains(invalid_char) {
+                Err(SonarError::InvalidName)
+            } else {
+                Ok(format!("{}/{}", tp, name))
+            }
+        }
+        Err(_) => Err(SonarError::InvalidName),
     }
 }
 
@@ -220,7 +234,7 @@ async fn update_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
             }
             Ok(Response::builder(StatusCode::NoContent).build())
         }
-        Err(_) => resp!(Err(SonarError::NameMissing)),
+        Err(_) => resp!(Err(SonarError::InvalidName)),
     }
 }
 

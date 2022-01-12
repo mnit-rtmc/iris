@@ -40,9 +40,9 @@ pub enum SonarError {
     #[error("I/O {0}")]
     IO(#[from] std::io::Error),
 
-    /// Invalid Query
-    #[error("`name` missing from query")]
-    NameMissing,
+    /// Invalid name
+    #[error("invalid name")]
+    InvalidName,
 
     /// Forbidden (permission denied)
     #[error("forbidden")]
