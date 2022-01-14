@@ -1,6 +1,6 @@
 // segments.rs
 //
-// Copyright (C) 2019-2021  Minnesota Department of Transportation
+// Copyright (C) 2019-2022  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
 //
 use crate::fetcher::create_client;
 use crate::geo::{WebMercatorPos, Wgs84Pos};
+use crate::resource::{make_backup_name, make_name};
 use crate::Result;
 use pointy::{Float, Pt};
 use postgis::ewkb::{LineString, Point, Polygon};
@@ -27,7 +28,7 @@ use std::fmt;
 use std::fs::{create_dir_all, rename, File};
 use std::hash::{Hash, Hasher};
 use std::io::BufWriter;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::mpsc::Receiver;
 
 /// Base segment scale factor
@@ -126,32 +127,18 @@ impl<'a> AtomicFile<'a> {
 
     /// Create the file and get writer
     fn writer(&self) -> Result<BufWriter<File>> {
-        Ok(BufWriter::new(File::create(self.tmp_path())?))
-    }
-
-    /// Get path to temp file
-    fn tmp_path(&self) -> PathBuf {
-        let mut path = PathBuf::new();
-        path.push(self.dir);
-        path.push(".".to_owned() + self.name);
-        path
-    }
-
-    /// Get path to final file
-    fn path(&self) -> PathBuf {
-        let mut path = PathBuf::new();
-        path.push(self.dir);
-        path.push(self.name);
-        path
+        Ok(BufWriter::new(File::create(make_backup_name(
+            self.dir, self.name,
+        ))?))
     }
 }
 
 impl Drop for AtomicFile<'_> {
     fn drop(&mut self) {
         debug!("AtomicFile::drop: {:?}", &self.name);
-        let tmp = &self.tmp_path();
-        let path = &self.path();
-        if let Err(e) = rename(tmp, path) {
+        let backup = make_backup_name(self.dir, self.name);
+        let path = make_name(self.dir, self.name);
+        if let Err(e) = rename(backup, path) {
             error!("rename: {:?}", e);
         }
     }

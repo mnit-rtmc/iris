@@ -1,6 +1,6 @@
 // signmsg.rs
 //
-// Copyright (C) 2018-2021  Minnesota Department of Transportation
+// Copyright (C) 2018-2022  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 //! and renders to images.  This design allows it to be
 //! used in Web Assembly contexts.
 //!
-use crate::resource::{make_name, make_tmp_name};
+use crate::resource::{make_backup_name, make_name};
 use crate::Result;
 use gift::{Encoder, Step};
 use ntcip::dms::multi::{
@@ -618,18 +618,18 @@ impl SignMessage {
         let name = images.make_name(&self.name);
         debug!("SignMessage::fetch: {:?}", name);
         if !images.contains(&name) {
-            let tmp_name = images.make_tmp_name(&self.name);
-            let writer = BufWriter::new(File::create(&tmp_name)?);
+            let backup = images.make_backup_name(&self.name);
+            let writer = BufWriter::new(File::create(&backup)?);
             let t = Instant::now();
             if let Err(e) = self.render_sign_msg(msg_data, writer) {
                 warn!(
                     "{}, cfg={}, multi={} {:?}",
                     &self.name, self.sign_config, self.multi, e
                 );
-                remove_file(&tmp_name)?;
+                remove_file(&backup)?;
                 return Ok(());
             };
-            rename(tmp_name, name)?;
+            rename(backup, name)?;
             info!("{}.gif rendered in {:?}", &self.name, t.elapsed());
         }
         Ok(())
@@ -695,10 +695,10 @@ impl ImageCache {
         make_name(dir, &n)
     }
 
-    /// Make temp image file name
-    fn make_tmp_name(&self, name: &str) -> PathBuf {
+    /// Make backup image file name
+    fn make_backup_name(&self, name: &str) -> PathBuf {
         let (dir, n) = self.dir_name(name);
-        make_tmp_name(dir, &n)
+        make_backup_name(dir, &n)
     }
 
     /// Check if an image exists

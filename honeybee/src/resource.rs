@@ -1,6 +1,6 @@
 // resource.rs
 //
-// Copyright (C) 2018-2021  Minnesota Department of Transportation
+// Copyright (C) 2018-2022  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,11 +30,11 @@ pub fn make_name(dir: &Path, n: &str) -> PathBuf {
     p
 }
 
-/// Make a PathBuf for a temp file
-pub fn make_tmp_name(dir: &Path, n: &str) -> PathBuf {
+/// Make a PathBuf for a backup file
+pub fn make_backup_name(dir: &Path, n: &str) -> PathBuf {
     let mut b = String::new();
-    b.push('.');
     b.push_str(n);
+    b.push('~');
     make_name(dir, &b)
 }
 
@@ -507,13 +507,13 @@ impl Resource {
     fn fetch_file(&self, client: &mut Client, name: &str) -> Result<()> {
         debug!("fetch_file: {:?}", name);
         let t = Instant::now();
-        let p = Path::new("");
-        let tn = make_tmp_name(p, name);
-        let n = make_name(p, name);
-        let writer = BufWriter::new(File::create(&tn)?);
-        let c = self.fetch_writer(client, writer)?;
-        rename(tn, &n)?;
-        info!("{}: wrote {} rows in {:?}", name, c, t.elapsed());
+        let dir = Path::new("");
+        let backup = make_backup_name(dir, name);
+        let n = make_name(dir, name);
+        let writer = BufWriter::new(File::create(&backup)?);
+        let count = self.fetch_writer(client, writer)?;
+        rename(backup, &n)?;
+        info!("{}: wrote {} rows in {:?}", name, count, t.elapsed());
         Ok(())
     }
 
