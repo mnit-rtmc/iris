@@ -19,4 +19,25 @@ BEGIN
 END;
 $multi_tags_str$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- Add NOTIFY triggers for more tables
+CREATE TRIGGER comm_config_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.comm_config
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE TRIGGER comm_link_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.comm_link
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE TRIGGER modem_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.modem
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE TRIGGER cabinet_style_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.cabinet_style
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE TRIGGER controller_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.controller
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 COMMIT;

@@ -2,11 +2,8 @@
 -- PostgreSQL database template for IRIS
 --
 -- NOTIFY messages can be received asynchronously with the LISTEN command.
--- The channel is determined by the table, and the payload is for specific
+-- The channel is the same as a table name, and the payload is for specific
 -- update data (usually blank).
---
--- CHANNEL: camera, detector, dms, font, glyph, graphic, incident, parking_area,
---          road, road_class, sign_config, sign_detail, sign_message
 --
 -- PAYLOAD: 'publish ' || name, 'video_loss' (camera)
 --          'auto_fail' (detector)
@@ -1299,6 +1296,10 @@ ALTER TABLE iris.comm_config
 	CHECK (poll_period_sec >= 5
 	       AND long_poll_period_sec >= poll_period_sec);
 
+CREATE TRIGGER comm_config_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.comm_config
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 CREATE VIEW comm_config_view AS
 	SELECT cc.name, cc.description, cp.description AS protocol, modem,
 	       timeout_ms, poll_period_sec, long_poll_period_sec,
@@ -1314,6 +1315,10 @@ CREATE TABLE iris.comm_link (
 	poll_enabled BOOLEAN NOT NULL,
 	comm_config VARCHAR(10) NOT NULL REFERENCES iris.comm_config
 );
+
+CREATE TRIGGER comm_link_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.comm_link
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW comm_link_view AS
 	SELECT cl.name, cl.description, uri, poll_enabled,
@@ -1332,6 +1337,10 @@ CREATE TABLE iris.modem (
 	enabled BOOLEAN NOT NULL
 );
 
+CREATE TRIGGER modem_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.modem
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 CREATE VIEW modem_view AS
 	SELECT name, uri, config, timeout, enabled
 	FROM iris.modem;
@@ -1346,6 +1355,10 @@ CREATE TABLE iris.cabinet_style (
 	dip INTEGER
 );
 
+CREATE TRIGGER cabinet_style_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.cabinet_style
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 CREATE VIEW cabinet_style_view AS
 	SELECT name, police_panel_pin_1, police_panel_pin_2,
 	       watchdog_reset_pin_1, watchdog_reset_pin_2, dip
@@ -1359,8 +1372,8 @@ CREATE TABLE iris.cabinet (
 );
 
 CREATE TRIGGER cabinet_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris.cabinet
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    AFTER INSERT OR UPDATE OR DELETE ON iris.cabinet
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW cabinet_view AS
 	SELECT name, style, geo_loc
@@ -1394,6 +1407,10 @@ CREATE TABLE iris.controller (
 
 CREATE UNIQUE INDEX ctrl_link_drop_idx ON iris.controller
 	USING btree (comm_link, drop_id);
+
+CREATE TRIGGER controller_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.controller
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW controller_view AS
 	SELECT c.name, drop_id, comm_link, cabinet,
