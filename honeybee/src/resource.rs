@@ -213,6 +213,70 @@ const R_NODE_RES: Resource = Resource::RNode(Listen::All("r_node"));
 /// Road resource
 const ROAD_RES: Resource = Resource::Road(Listen::All("road"));
 
+/// Comm configuration resource
+const COMM_CONFIG_RES: Resource = Resource::Simple(
+    "api/comm_config",
+    Listen::All("comm_config"),
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT name, description, protocol, modem, timeout_ms, \
+           poll_period_sec, long_poll_period_sec, idle_disconnect_sec, \
+           no_response_disconnect_sec \
+    FROM iris.comm_config\
+) r",
+);
+
+/// Comm link resource
+const COMM_LINK_RES: Resource = Resource::Simple(
+    "api/comm_link",
+    Listen::All("comm_link"),
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT name, description, uri, poll_enabled, comm_config \
+    FROM iris.comm_link\
+) r",
+);
+
+/// Modem resource
+const MODEM_RES: Resource = Resource::Simple(
+    "api/modem",
+    Listen::All("modem"),
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT name, uri, config, timeout_ms, enabled \
+    FROM iris.modem\
+) r",
+);
+
+/// Cabinet style resource
+const CABINET_STYLE_RES: Resource = Resource::Simple(
+    "api/cabinet_style",
+    Listen::All("cabinet_style"),
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT name, police_panel_pin_1, police_panel_pin_2, watchdog_reset_pin_1, \
+           watchdog_reset_pin_2, dip \
+    FROM iris.cabinet_style\
+) r",
+);
+
+/// Cabinet resource
+const CABINET_RES: Resource = Resource::Simple(
+    "api/cabinet",
+    Listen::All("cabinet"),
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT name, style, geo_loc \
+    FROM iris.cabinet\
+) r",
+);
+
+/// Controller resource
+const CONTROLLER_RES: Resource = Resource::Simple(
+    "api/controller",
+    Listen::All("controller"),
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT name, drop_id, comm_link, cabinet, notes, fail_time, condition, \
+           version \
+    FROM controller_view\
+) r",
+);
+
 /// Sign configuration resource
 const SIGN_CONFIG_RES: Resource = Resource::Simple(
     "sign_config",
@@ -320,6 +384,12 @@ const TPIMS_ARCH_RES: Resource = Resource::Simple(
 const ALL: &[Resource] = &[
     SYSTEM_ATTRIBUTE_RES, // System attributes must be loaded first
     ROAD_RES,             // Roads must be loaded before R_Nodes
+    COMM_CONFIG_RES,
+    COMM_LINK_RES,
+    MODEM_RES,
+    CABINET_STYLE_RES,
+    CABINET_RES,
+    CONTROLLER_RES,
     CAMERA_RES,
     DMS_RES,
     DMS_MSG_RES,

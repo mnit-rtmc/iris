@@ -14,17 +14,30 @@
 //
 #![forbid(unsafe_code)]
 
-use async_std::io::ErrorKind::TimedOut;
+use async_std::path::PathBuf;
 use convert_case::{Case, Casing};
 use graft::sonar::{Connection, Result, SonarError};
 use rand::Rng;
+use std::io;
 use tide::prelude::*;
 use tide::sessions::{MemoryStore, SessionMiddleware};
-use tide::{Request, Response, StatusCode};
+use tide::{Body, Request, Response, StatusCode};
 
 /// Trait to get HTTP status code from an error
 trait ErrorStatus {
     fn status_code(&self) -> StatusCode;
+}
+
+impl ErrorStatus for io::Error {
+    fn status_code(&self) -> StatusCode {
+        if self.kind() == io::ErrorKind::NotFound {
+            StatusCode::NotFound
+        } else if self.kind() == io::ErrorKind::TimedOut {
+            StatusCode::GatewayTimeout
+        } else {
+            StatusCode::InternalServerError
+        }
+    }
 }
 
 impl ErrorStatus for SonarError {
@@ -33,7 +46,7 @@ impl ErrorStatus for SonarError {
             Self::InvalidName => StatusCode::BadRequest,
             Self::Forbidden => StatusCode::Forbidden,
             Self::NotFound => StatusCode::NotFound,
-            Self::IO(e) if e.kind() == TimedOut => StatusCode::GatewayTimeout,
+            Self::IO(e) => e.status_code(),
             Self::Unauthorized => StatusCode::Unauthorized,
             _ => StatusCode::InternalServerError,
         }
@@ -92,7 +105,10 @@ async fn main() -> tide::Result<()> {
     app.at("/login").post(post_login);
     add_routes!(app, "comm_config");
     add_routes!(app, "comm_link");
+    add_routes!(app, "cabinet_style");
+    add_routes!(app, "cabinet");
     add_routes!(app, "controller");
+    add_routes!(app, "modem");
     app.listen("127.0.0.1:3737").await?;
     Ok(())
 }
@@ -199,9 +215,27 @@ fn att_name(nm: &str, att: &str) -> Result<String> {
 }
 
 /// `GET` list of objects and return JSON result
-async fn list_objects(_tp: &str, req: Request<()>) -> tide::Result {
+async fn list_objects(tp: &str, req: Request<()>) -> tide::Result {
     log::info!("GET {}", req.url());
-    todo!("read file created by honeybee");
+    get_json_file(tp, req).await
+}
+
+/// Path for static files
+const STATIC_PATH: &str = "/var/www/html/iris/api";
+
+/// Get a static JSON file
+async fn get_json_file(nm: &str, req: Request<()>) -> tide::Result {
+    let session = req.session();
+    let _auth: AuthMap =
+        resp!(session.get("auth").ok_or(SonarError::Unauthorized));
+    // FIXME: check Sonar for read permission first
+    let file = format!("{}/{}", STATIC_PATH, nm);
+    let path = PathBuf::from(file);
+    let body = resp!(Body::from_file(&path).await);
+    Ok(Response::builder(StatusCode::Ok)
+        .body(body)
+        .content_type("application/json")
+        .build())
 }
 
 /// `GET` a Sonar object and return JSON result
@@ -210,6 +244,7 @@ async fn get_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
     let nm = resp!(obj_name(tp, &req));
     let mut c = resp!(connection(&req).await);
     let mut res = json::object!();
+    res["name"] = req.param("name").unwrap().into();
     resp!(
         c.enumerate_object(&nm, |att, val| {
             let att = att.to_case(Case::Snake);
