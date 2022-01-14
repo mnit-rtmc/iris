@@ -101,21 +101,22 @@ async fn main() -> tide::Result<()> {
         )
         .with_cookie_name("graft"),
     );
-    app.at("/login").get(get_login);
-    app.at("/login").post(post_login);
-    add_routes!(app, "comm_config");
-    add_routes!(app, "comm_link");
-    add_routes!(app, "cabinet_style");
-    add_routes!(app, "cabinet");
-    add_routes!(app, "controller");
-    add_routes!(app, "modem");
+    let mut route = app.at("/iris/api");
+    route.at("/login").get(get_login);
+    route.at("/login").post(post_login);
+    add_routes!(route, "comm_config");
+    add_routes!(route, "comm_link");
+    add_routes!(route, "cabinet_style");
+    add_routes!(route, "cabinet");
+    add_routes!(route, "controller");
+    add_routes!(route, "modem");
     app.listen("127.0.0.1:3737").await?;
     Ok(())
 }
 
 /// Login form
 const LOGIN: &str = r#"<html>
-<form method="POST" action="/login">
+<form method="POST" action="/iris/api/login">
   <label>username
     <input type="text" name="username" autocomplete="username" required>
   </label>
