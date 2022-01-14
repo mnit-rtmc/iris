@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2016  Minnesota Department of Transportation
+ * Copyright (C) 2011-2022  Minnesota Department of Transportation
  * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -33,7 +33,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	/** Load all the modems */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, ModemImpl.class);
-		store.query("SELECT name, uri, config, timeout, enabled " +
+		store.query("SELECT name, uri, config, timeout_ms, enabled " +
 			"FROM iris." + SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -49,7 +49,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 		map.put("name", name);
 		map.put("uri", uri);
 		map.put("config", config);
-		map.put("timeout", timeout);
+		map.put("timeout_ms", timeout_ms);
 		map.put("enabled", enabled);
 		return map;
 	}
@@ -71,7 +71,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 		this(row.getString(1),		// name
 		     row.getString(2),		// uri
 		     row.getString(3),		// config
-		     row.getInt(4),		// timeout
+		     row.getInt(4),		// timeout_ms
 		     row.getBoolean(5)		// enabled
 		);
 	}
@@ -81,7 +81,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 		super(n);
 		uri = u;
 		config = c;
-		timeout = t;
+		timeout_ms = t;
 		enabled = e;
 	}
 
@@ -139,26 +139,26 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	}
 
 	/** Connect timeout (milliseconds) */
-	private int timeout = 30000;
+	private int timeout_ms = 30000;
 
 	/** Set the connect timeout (milliseconds) */
 	@Override
-	public void setTimeout(int t) {
-		timeout = t;
+	public void setTimeoutMs(int t) {
+		timeout_ms = t;
 	}
 
 	/** Set the connect timeout (milliseconds) */
-	public void doSetTimeout(int t) throws TMSException {
-		if (t != timeout) {
-			store.update(this, "timeout", t);
-			setTimeout(t);
+	public void doSetTimeoutMs(int t) throws TMSException {
+		if (t != timeout_ms) {
+			store.update(this, "timeout_ms", t);
+			setTimeoutMs(t);
 		}
 	}
 
 	/** Get the connect timeout (milliseconds) */
 	@Override
-	public int getTimeout() {
-		return timeout;
+	public int getTimeoutMs() {
+		return timeout_ms;
 	}
 
 	/** Modem enabled boolean */

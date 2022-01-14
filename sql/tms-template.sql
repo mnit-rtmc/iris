@@ -1330,11 +1330,11 @@ CREATE VIEW comm_link_view AS
 GRANT SELECT ON comm_link_view TO PUBLIC;
 
 CREATE TABLE iris.modem (
-	name VARCHAR(20) PRIMARY KEY,
-	uri VARCHAR(64) NOT NULL,
-	config VARCHAR(64) NOT NULL,
-	timeout INTEGER NOT NULL,
-	enabled BOOLEAN NOT NULL
+    name VARCHAR(20) PRIMARY KEY,
+    uri VARCHAR(64) NOT NULL,
+    config VARCHAR(64) NOT NULL,
+    timeout_ms INTEGER NOT NULL,
+    enabled BOOLEAN NOT NULL
 );
 
 CREATE TRIGGER modem_notify_trig
@@ -1342,8 +1342,8 @@ CREATE TRIGGER modem_notify_trig
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW modem_view AS
-	SELECT name, uri, config, timeout, enabled
-	FROM iris.modem;
+    SELECT name, uri, config, timeout_ms, enabled
+    FROM iris.modem;
 GRANT SELECT ON modem_view TO PUBLIC;
 
 CREATE TABLE iris.cabinet_style (

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2017  Minnesota Department of Transportation
+ * Copyright (C) 2011-2022  Minnesota Department of Transportation
  * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -77,14 +77,14 @@ public class ModemModel extends ProxyTableModel<Modem> {
 		});
 		cols.add(new ProxyColumn<Modem>("modem.timeout", 80) {
 			public Object getValueAt(Modem m) {
-				return m.getTimeout();
+				return m.getTimeoutMs();
 			}
 			public boolean isEditable(Modem m) {
 				return canWrite(m, "timeout");
 			}
 			public void setValueAt(Modem m, Object value) {
 				if (value instanceof Integer)
-					m.setTimeout((Integer) value);
+					m.setTimeoutMs((Integer) value);
 			}
 			protected TableCellEditor createCellEditor() {
 				return new TimeoutCellEditor(MAX_MODEM_TIMEOUT);

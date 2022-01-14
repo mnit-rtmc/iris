@@ -40,4 +40,17 @@ CREATE TRIGGER controller_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.controller
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
+-- Rename modem.timeout to timeout_ms
+DROP VIEW modem_view;
+
+ALTER TABLE iris.modem ADD COLUMN timeout_ms INTEGER;
+UPDATE iris.modem SET timeout_ms = timeout;
+ALTER TABLE iris.modem ALTER COLUMN timeout_ms SET NOT NULL;
+ALTER TABLE iris.modem DROP COLUMN timeout;
+
+CREATE VIEW modem_view AS
+    SELECT name, uri, config, timeout_ms, enabled
+    FROM iris.modem;
+GRANT SELECT ON modem_view TO PUBLIC;
+
 COMMIT;

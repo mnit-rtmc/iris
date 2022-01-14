@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2016  Minnesota Department of Transportation
+ * Copyright (C) 2011-2022  Minnesota Department of Transportation
  * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -40,10 +40,10 @@ public interface Modem extends SonarObject {
 	String getUri();
 
 	/** Set the connection timeout (milliseconds) */
-	void setTimeout(int t);
+	void setTimeoutMs(int t);
 
 	/** Get the connection timeout (milliseconds) */
-	int getTimeout();
+	int getTimeoutMs();
 
 	/** Get the modem state (ordinal of ModemState) */
 	int getState();

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2020  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  * Copyright (C) 2020       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -127,7 +127,7 @@ public class ModemMessenger extends Messenger {
 		phone_number = phone.replace("p", ",");
 		log("create");
 		try {
-			int ct = mdm.getTimeout();
+			int ct = mdm.getTimeoutMs();
 			wrapped = StreamMessenger.create(um, rt, ct, nrd);
 		}
 		catch (IOException e) {
