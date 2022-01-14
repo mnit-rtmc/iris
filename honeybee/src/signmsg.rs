@@ -682,11 +682,7 @@ impl ImageCache {
 
     /// Make image file name
     fn dir_name(&self, name: &str) -> (&Path, String) {
-        let mut n = String::new();
-        n.push_str(name);
-        n.push('.');
-        n.push_str(&self.ext);
-        (self.img_dir.as_path(), n)
+        (self.img_dir.as_path(), format!("{}.{}", name, self.ext))
     }
 
     /// Make image file name

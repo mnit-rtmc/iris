@@ -32,10 +32,7 @@ pub fn make_name(dir: &Path, n: &str) -> PathBuf {
 
 /// Make a PathBuf for a backup file
 pub fn make_backup_name(dir: &Path, n: &str) -> PathBuf {
-    let mut b = String::new();
-    b.push_str(n);
-    b.push('~');
-    make_name(dir, &b)
+    make_name(dir, &format!("{}~", n))
 }
 
 /// Listen enum for postgres NOTIFY events
