@@ -104,6 +104,7 @@ async fn main() -> tide::Result<()> {
     let mut route = app.at("/iris/api");
     route.at("/login").get(get_login);
     route.at("/login").post(post_login);
+    route.at("/comm_protocol").get(|req| list_objects("comm_protocol", req));
     add_routes!(route, "comm_config");
     add_routes!(route, "comm_link");
     add_routes!(route, "cabinet_style");

@@ -213,6 +213,17 @@ const R_NODE_RES: Resource = Resource::RNode(Listen::All("r_node"));
 /// Road resource
 const ROAD_RES: Resource = Resource::Road(Listen::All("road"));
 
+/// Comm protocol resource
+const COMM_PROTOCOL_RES: Resource = Resource::Simple(
+    "api/comm_protocol",
+    Listen::All("comm_protocol"),
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT id, description \
+    FROM iris.comm_protocol \
+    ORDER BY description\
+) r",
+);
+
 /// Comm configuration resource
 const COMM_CONFIG_RES: Resource = Resource::Simple(
     "api/comm_config",
@@ -221,7 +232,8 @@ const COMM_CONFIG_RES: Resource = Resource::Simple(
     SELECT name, description, protocol, modem, timeout_ms, \
            poll_period_sec, long_poll_period_sec, idle_disconnect_sec, \
            no_response_disconnect_sec \
-    FROM iris.comm_config\
+    FROM iris.comm_config \
+    ORDER BY description\
 ) r",
 );
 
@@ -384,6 +396,7 @@ const TPIMS_ARCH_RES: Resource = Resource::Simple(
 const ALL: &[Resource] = &[
     SYSTEM_ATTRIBUTE_RES, // System attributes must be loaded first
     ROAD_RES,             // Roads must be loaded before R_Nodes
+    COMM_PROTOCOL_RES,
     COMM_CONFIG_RES,
     COMM_LINK_RES,
     MODEM_RES,
