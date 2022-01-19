@@ -2,7 +2,8 @@
 <html>
   <head>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
-    <title>IRIS Phase 1</title>
+    <title>IRIS Phase 2</title>
+    <link href='https://fonts.googleapis.com/css?family=Overpass' rel='stylesheet'>
     <link rel="stylesheet"
           href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
           crossorigin="anonymous"
@@ -18,70 +19,21 @@
       import init from './bulb.js';
       init();
     </script>
-    <script>
-function expand() {
-    document.getElementById("sidebar").setAttribute("style", "flex: 0 0 20rem;");
-}
-function shrink() {
-    document.getElementById("sidebar").setAttribute("style", "flex: 0 0 1px;");
-}
-    </script>
-    <style type="text/css">
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        background-color: #dce;
-      }
-      legend {
-        padding: 3px 6px;
-      }
-      .root {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-      }
-      #mapid {
-        flex: 6 1 auto;
-      }
-      #divider {
-        flex: 0 0 auto;
-        display: flex;
-        flex-direction: column;
-      }
-      #divider button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        padding: 0;
-        margin: 0.5rem 0.1rem;
-        background-color: transparent;
-        border-radius: 0.2rem;
-      }
-      #divider button:hover {
-        background-color: #eee;
-      }
-      #sidebar {
-        flex: 0 0 1px;
-        margin: 0;
-        overflow-y: scroll;
-        transition: all 250ms;
-      }
-    </style>
+    <link rel="stylesheet" href="bulb.css">
   </head>
   <body>
     <div class="root">
-      <div id="mapid">
-      </div>
-      <div id="divider">
-        <button type="button" onclick="expand()">🡄</button>
-        <button type="button" onclick="shrink()">🡆</button>
-      </div>
-      <div id="sidebar">
+      <div id="mapid"></div>
+      <div id="sidebar" class="sidebar">
+        <div class="filter">
+          <select id="ob_type">
+            <option>Comm Config</option>
+            <option>Comm Link</option>
+            <option>Controller</option>
+          </select>
+          <label id="ob_glass">🔍</label>
+          <input id="ob_search" type="text" placeholder="search">
+        </div>
       </div>
     </div>
   </body>

@@ -1,0 +1,86 @@
+body {
+  background-color: #dde;
+  font-family: "Overpass";
+}
+.root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+#mapid {
+  display: none;
+}
+.sidebar {
+  position: relative;
+  flex: 0 0 100%;
+  margin: 0;
+  overflow-y: scroll;
+}
+
+@media screen and (min-width: 32rem) {
+  #mapid {
+    display: block;
+    flex: 3 1 auto;
+  }
+  .sidebar {
+    flex: 1 0 12rem;
+  }
+}
+.filter {
+  display: flex;
+  margin: 0.2rem;
+}
+#ob_type {
+  flex: 1 0 auto;
+}
+#ob_glass {
+  flex: 1 0 auto;
+  padding-left: 0.2rem;
+  white-space: nowrap;
+}
+#ob_search {
+  flex: 2 1 50%;
+  width: 50%;
+}
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  list-style: none;
+  padding: 0;
+  margin: 0.2rem;
+}
+.card {
+  flex: 10rem;
+  display: flex;
+  justify-content: space-between;
+  box-sizing: border-box;
+  padding: 0 0.2rem;
+  margin: 0.1rem 0.1rem;
+  background-color: #eee;
+  border-radius: 0.1rem;
+  box-shadow: 0.2rem 0.2rem 0.2rem 0 rgba(0, 0, 0, 0.2);
+}
+.card:hover {
+  box-shadow: 0.2rem 0.2rem 0.2rem 0 rgba(0, 0, 0, 0.5);
+  background-color: white;
+}
+.name {
+}
+.info {
+  font-weight: bold;
+  font-size: 70%;
+}
+.notes {
+  font-style: italic;
+  font-size: smaller;
+  color: #446;
+  text-indent: 0.4rem;
+}
+.disabled {
+  text-decoration: line-through;
+}
