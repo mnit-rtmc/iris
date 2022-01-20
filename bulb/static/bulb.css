@@ -20,6 +20,9 @@ body {
   flex-direction: column;
   flex: 0 0 100%;
   margin: 0;
+  background-image: url(iris.svg);
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 @media screen and (min-width: 32rem) {
