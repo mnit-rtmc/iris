@@ -203,6 +203,10 @@ async fn fetch_json_vec<C: Card>(window: &Window) -> Result<Vec<C>, JsValue> {
     Ok(obs)
 }
 
+/// Set global allocator to `wee_alloc`
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
 #[wasm_bindgen(start)]
 pub async fn main() -> Result<(), JsValue> {
     let window = web_sys::window().unwrap();
@@ -227,7 +231,7 @@ pub async fn main() -> Result<(), JsValue> {
 
     ob_type.add_event_listener_with_callback(
         "input",
-        &cb.as_ref().unchecked_ref(),
+        cb.as_ref().unchecked_ref(),
     )?;
     cb.forget();
 
