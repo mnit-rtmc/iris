@@ -29,6 +29,50 @@ struct CommConfig {
     pub no_response_disconnect_sec: u32,
 }
 
+/// Comm link
+#[derive(Debug, Deserialize, Serialize)]
+struct CommLink {
+    pub name: String,
+    pub description: String,
+    pub uri: String,
+    pub poll_enabled: bool,
+    pub comm_config: String,
+}
+
+/// Modem
+#[derive(Debug, Deserialize, Serialize)]
+struct Modem {
+    pub name: String,
+    pub uri: String,
+    pub config: String,
+    pub timeout_ms: u32,
+    pub enabled: bool,
+}
+
+/// Cabinet Style
+#[derive(Debug, Deserialize, Serialize)]
+struct CabinetStyle {
+    pub name: String,
+    pub police_panel_pin_1: Option<u32>,
+    pub police_panel_pin_2: Option<u32>,
+    pub watchdog_reset_pin_1: Option<u32>,
+    pub watchdog_reset_pin_2: Option<u32>,
+    pub dip: Option<u32>,
+}
+
+/// Controller
+#[derive(Debug, Deserialize, Serialize)]
+struct Controller {
+    pub name: String,
+    pub drop_id: u16,
+    pub comm_link: String,
+    pub cabinet: String,
+    pub condition: u32,
+    pub notes: String,
+    pub fail_time: Option<String>,
+    pub version: Option<String>,
+}
+
 impl Card for () {
     const OB_TYPE: &'static str = "";
     const URI: &'static str = "";
@@ -57,6 +101,97 @@ impl Card for CommConfig {
     }
 }
 
+impl Card for CommLink {
+    const OB_TYPE: &'static str = "Comm Link";
+    const URI: &'static str = "/iris/api/comm_link";
+
+    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
+        let card = doc.create_element("li")?;
+        card.set_class_name("card");
+        let name = doc.create_element("span")?;
+        if self.poll_enabled {
+            name.set_class_name("name");
+        } else {
+            name.set_class_name("name disabled");
+        }
+        name.set_inner_html(&self.description);
+        card.append_child(&name)?;
+        let info = doc.create_element("span")?;
+        info.set_class_name("info");
+        info.set_inner_html(&self.name);
+        card.append_child(&info)?;
+        Ok(card)
+    }
+}
+
+impl Card for Modem {
+    const OB_TYPE: &'static str = "Modem";
+    const URI: &'static str = "/iris/api/modem";
+
+    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
+        let card = doc.create_element("li")?;
+        card.set_class_name("card");
+        let name = doc.create_element("span")?;
+        if self.enabled {
+            name.set_class_name("name");
+        } else {
+            name.set_class_name("name disabled");
+        }
+        name.set_inner_html(&self.name);
+        card.append_child(&name)?;
+        Ok(card)
+    }
+}
+
+impl Card for CabinetStyle {
+    const OB_TYPE: &'static str = "Cabinet Style";
+    const URI: &'static str = "/iris/api/cabinet_style";
+
+    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
+        let card = doc.create_element("li")?;
+        card.set_class_name("card");
+        let name = doc.create_element("span")?;
+        name.set_class_name("name");
+        name.set_inner_html(&self.name);
+        card.append_child(&name)?;
+        Ok(card)
+    }
+}
+
+impl Card for Controller {
+    const OB_TYPE: &'static str = "Controller";
+    const URI: &'static str = "/iris/api/controller";
+
+    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
+        let card = doc.create_element("li")?;
+        card.set_class_name("card");
+        let name = doc.create_element("span")?;
+        // condition 1 is "Active"
+        if self.condition == 1 {
+            name.set_class_name("name");
+        } else {
+            name.set_class_name("name disabled");
+        }
+        name.set_inner_html(&format!("{}:{}", self.comm_link, self.drop_id));
+        card.append_child(&name)?;
+        let info = doc.create_element("span")?;
+        info.set_class_name("info");
+        info.set_inner_html(&self.name);
+        card.append_child(&info)?;
+        Ok(card)
+    }
+}
+
+/// Object types
+const OB_TYPES: &[&str] = &[
+    <()>::OB_TYPE,
+    CommConfig::OB_TYPE,
+    CommLink::OB_TYPE,
+    Modem::OB_TYPE,
+    CabinetStyle::OB_TYPE,
+    Controller::OB_TYPE,
+];
+
 /// Fetch a JSON array and deserialize into a Vec
 async fn fetch_json_vec<C: Card>(window: &Window) -> Result<Vec<C>, JsValue> {
     let req = Request::new_with_str(C::URI)?;
@@ -67,9 +202,6 @@ async fn fetch_json_vec<C: Card>(window: &Window) -> Result<Vec<C>, JsValue> {
     let obs: Vec<C> = json.into_serde().unwrap();
     Ok(obs)
 }
-
-/// Object types
-const OB_TYPES: &[&str] = &["", "Comm Config", "Comm Link", "Controller"];
 
 #[wasm_bindgen(start)]
 pub async fn main() -> Result<(), JsValue> {
@@ -104,7 +236,11 @@ pub async fn main() -> Result<(), JsValue> {
 
 fn populate_list_str(value: &str) {
     match value {
-        "Comm Config" => spawn_local(populate_list::<CommConfig>()),
+        CommConfig::OB_TYPE => spawn_local(populate_list::<CommConfig>()),
+        CommLink::OB_TYPE => spawn_local(populate_list::<CommLink>()),
+        Modem::OB_TYPE => spawn_local(populate_list::<Modem>()),
+        CabinetStyle::OB_TYPE => spawn_local(populate_list::<CabinetStyle>()),
+        Controller::OB_TYPE => spawn_local(populate_list::<Controller>()),
         _ => spawn_local(populate_list::<()>()),
     }
     console::log_1(&value.into());

@@ -255,7 +255,8 @@ const MODEM_RES: Resource = Resource::Simple(
     Listen::All("modem"),
     "SELECT row_to_json(r)::text FROM (\
     SELECT name, uri, config, timeout_ms, enabled \
-    FROM iris.modem\
+    FROM iris.modem \
+    ORDER BY name\
 ) r",
 );
 
@@ -266,7 +267,8 @@ const CABINET_STYLE_RES: Resource = Resource::Simple(
     "SELECT row_to_json(r)::text FROM (\
     SELECT name, police_panel_pin_1, police_panel_pin_2, watchdog_reset_pin_1, \
            watchdog_reset_pin_2, dip \
-    FROM iris.cabinet_style\
+    FROM iris.cabinet_style \
+    ORDER BY name\
 ) r",
 );
 
@@ -276,7 +278,8 @@ const CABINET_RES: Resource = Resource::Simple(
     Listen::All("cabinet"),
     "SELECT row_to_json(r)::text FROM (\
     SELECT name, style, geo_loc \
-    FROM iris.cabinet\
+    FROM iris.cabinet \
+    ORDER BY name\
 ) r",
 );
 
@@ -287,7 +290,10 @@ const CONTROLLER_RES: Resource = Resource::Simple(
     "SELECT row_to_json(r)::text FROM (\
     SELECT name, drop_id, comm_link, cabinet, notes, fail_time, condition, \
            version \
-    FROM controller_view\
+    FROM iris.controller \
+    ORDER BY regexp_replace(comm_link, '[0-9]', '', 'g'), \
+            (regexp_replace(comm_link, '[^0-9]', '', 'g') || '0')::INTEGER, \
+             drop_id\
 ) r",
 );
 
