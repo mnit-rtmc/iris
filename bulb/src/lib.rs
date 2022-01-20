@@ -197,9 +197,9 @@ async fn fetch_json_vec<C: Card>(window: &Window) -> Result<Vec<C>, JsValue> {
     let req = Request::new_with_str(C::URI)?;
     req.headers().set("Accept", "application/json")?;
     let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
-    let resp: Response = resp.dyn_into().unwrap();
+    let resp: Response = resp.dyn_into().unwrap_throw();
     let json = JsFuture::from(resp.json()?).await?;
-    let obs: Vec<C> = json.into_serde().unwrap();
+    let obs: Vec<C> = json.into_serde().unwrap_throw();
     Ok(obs)
 }
 
@@ -209,9 +209,9 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen(start)]
 pub async fn main() -> Result<(), JsValue> {
-    let window = web_sys::window().unwrap();
-    let doc = window.document().unwrap();
-    let ob_type = doc.get_element_by_id("ob_type").unwrap();
+    let window = web_sys::window().unwrap_throw();
+    let doc = window.document().unwrap_throw();
+    let ob_type = doc.get_element_by_id("ob_type").unwrap_throw();
 
     for ob in OB_TYPES {
         let opt = doc.create_element("option")?;
@@ -255,9 +255,9 @@ async fn populate_list<C: Card>() {
 }
 
 async fn populate_list_a<C: Card>() -> Result<(), JsValue> {
-    let window = web_sys::window().unwrap();
-    let doc = window.document().unwrap();
-    let ob_list = doc.get_element_by_id("ob_list").unwrap();
+    let window = web_sys::window().unwrap_throw();
+    let doc = window.document().unwrap_throw();
+    let ob_list = doc.get_element_by_id("ob_list").unwrap_throw();
     let list = ob_list.clone_node()?;
     if !C::URI.is_empty() {
         let obs: Vec<C> = fetch_json_vec(&window).await?;
