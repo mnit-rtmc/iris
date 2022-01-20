@@ -15,10 +15,13 @@ serde = { version = "1", features = ["derive"] }
 [dependencies.web-sys]
 version = "0.3"
 features = [
+  'console',
   'Document',
   'HtmlElement',
   'Window',
+  'Event',
   'Headers',
+  'HtmlSelectElement',
   'Request',
   'RequestInit',
   'RequestMode',
@@ -27,3 +30,5 @@ features = [
 
 [profile.release]
 opt-level = "s"
+lto = true
+# debug = true

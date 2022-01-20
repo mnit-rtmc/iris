@@ -16,9 +16,10 @@ body {
 }
 .sidebar {
   position: relative;
+  display: flex;
+  flex-direction: column;
   flex: 0 0 100%;
   margin: 0;
-  overflow-y: scroll;
 }
 
 @media screen and (min-width: 32rem) {
@@ -31,20 +32,25 @@ body {
   }
 }
 .filter {
+  flex: 0 0 auto;
   display: flex;
   margin: 0.2rem;
 }
 #ob_type {
   flex: 1 0 auto;
 }
-#ob_glass {
-  flex: 1 0 auto;
-  padding-left: 0.2rem;
+#ob_search {
+  flex: 0 0 auto;
+  margin-top: 0.2rem;
+  margin-left: 0.2rem;
   white-space: nowrap;
 }
-#ob_search {
-  flex: 2 1 50%;
-  width: 50%;
+#ob_input {
+  flex: 4 1 auto;
+}
+#ob_list {
+  flex: 0 1 auto;
+  overflow-y: scroll;
 }
 .cards {
   display: flex;

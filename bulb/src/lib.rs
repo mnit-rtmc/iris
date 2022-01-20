@@ -3,8 +3,9 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{Request, Response};
+use web_sys::{console, Event, HtmlSelectElement, Request, Response, Window};
 
+/// Comm configuration
 #[derive(Debug, Deserialize, Serialize)]
 struct CommConfig {
     pub name: String,
@@ -18,12 +19,15 @@ struct CommConfig {
     pub no_response_disconnect_sec: u32,
 }
 
-async fn fetch_json_vec<T>(url: &str) -> Result<Vec<T>, JsValue>
+/// Fetch a JSON array and deserialize into a Vec
+async fn fetch_json_vec<T>(
+    window: &Window,
+    url: &str,
+) -> Result<Vec<T>, JsValue>
 where
     T: DeserializeOwned,
 {
-    let window = web_sys::window().unwrap();
-    let req = Request::new_with_str(&url)?;
+    let req = Request::new_with_str(url)?;
     req.headers().set("Accept", "application/json")?;
     let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
     let resp: Response = resp.dyn_into().unwrap();
@@ -32,14 +36,41 @@ where
     Ok(configs)
 }
 
+/// Object types
+const OB_TYPES: &[&str] = &["", "Comm Config", "Comm Link", "Controller"];
+
 #[wasm_bindgen(start)]
 pub async fn main() -> Result<(), JsValue> {
     let window = web_sys::window().unwrap();
     let document = window.document().unwrap();
-    let sidebar = document.get_element_by_id("sidebar").unwrap();
+    let ob_list = document.get_element_by_id("ob_list").unwrap();
+    let ob_type = document.get_element_by_id("ob_type").unwrap();
+
+    for ob in OB_TYPES {
+        let opt = document.create_element("option")?;
+        opt.append_with_str_1(ob)?;
+        ob_type.append_child(&opt)?;
+    }
+
+    let cb = Closure::wrap(Box::new(|e: Event| {
+        let value = e
+            .current_target()
+            .unwrap()
+            .dyn_into::<HtmlSelectElement>()
+            .unwrap()
+            .value();
+        console::log_1(&value.into());
+    }) as Box<dyn FnMut(_)>);
+
+    ob_type.add_event_listener_with_callback(
+        "input",
+        &cb.as_ref().unchecked_ref(),
+    )?;
+
+    cb.forget();
 
     let configs: Vec<CommConfig> =
-        fetch_json_vec("/iris/api/comm_config").await?;
+        fetch_json_vec(&window, "/iris/api/comm_config").await?;
 
     let cards = document.create_element("ul")?;
     cards.set_class_name("cards");
@@ -56,6 +87,6 @@ pub async fn main() -> Result<(), JsValue> {
         card.append_child(&info)?;
         cards.append_child(&card)?;
     }
-    sidebar.append_child(&cards)?;
+    ob_list.append_child(&cards)?;
     Ok(())
 }
