@@ -472,4 +472,10 @@ public class WMessage {
 		return removedOneOrMore;
 	}
 	
+	//===========================================
+
+	/** Test for standby tag in message */
+	public boolean isStandby() {
+		return containsAny(WTokenType.standby);
+	}
 }

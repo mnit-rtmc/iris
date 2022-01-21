@@ -1374,6 +1374,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return SignMessageHelper.isBlank(msg_current);
 	}
 
+	/** Test if current message is standby */
+	public boolean isMsgStandby() {
+		return SignMessageHelper.isStandby(msg_current);
+	}
+
 	/** Test if the current message source contains "operator" */
 	private boolean isMsgOperator() {
 		return isMsgSource(getMsgCurrent(), SignMsgSource.operator);

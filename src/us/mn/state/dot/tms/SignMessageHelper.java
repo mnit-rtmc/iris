@@ -125,6 +125,12 @@ public class SignMessageHelper extends BaseHelper {
 		return ms == null || new MultiString(ms).isBlank();
 	}
 
+	/** Check if a sign message is a standby message */
+	static public boolean isStandby(SignMessage sm) {
+		int src = sm.getSource();
+		return SignMsgSource.standby.checkBit(src);
+	}
+	
 	/** Get the bitmap graphic for all pages of the specified DMS.
 	 * @param sm SignMessage in question.
 	 * @param dms Sign with the graphic.
