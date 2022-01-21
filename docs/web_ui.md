@@ -16,44 +16,29 @@ This document tracks progress on the web-based user interface for IRIS.
   JavaScript library.  The rest of the code is written in Rust, compiled as
   WebAssembly.
 
-## Phase 1 — Segment Map
+## Phase 1 — Segment Map (Complete)
 
-* Earthwyrm
-  - [X] Serve MVT for OpenStreetMap layers
-  - [X] Update to use [MuON] for configuration
-* Honeybee
-  - [X] Generate JSON for cameras, DMS, etc.
-  - [X] Generate segment map layer in earthwyrm DB
-* IRIS
-  - [X] Generate JSON for station flow, speed and density
-* Bulb
-  - [X] Set up build using wasm-pack
-  - [X] Integrate leaflet map
-  - [X] Set up nginx configuration
-  - [X] Style segment layer with detector data
+The traffic data is displayed on a web-based segment map, served by Earthwyrm.
 
-## Phase 2 — Authentication
+## Phase 2 — Proxying Sonar (Complete)
+
+The graft service handles requests through Sonar, using session-based
+authentication.
+
+## Phase 3 — Maintenance Administation (in progress)
 
 * graft
-  - [X] Connect to IRIS server with sonar
-  - [X] Add web service using tide
-  - [X] Session authentication
+  - [X] Add routes for maintenance resources
 * bulb
-  - [ ] Handle authentication
-
-## Phase 3 — Comm Link Administation
-
-* graft
-  - [X] Add comm config endpoints
-  - [X] Add comm link endpoints
-  - [X] Add controller endpoints
-* bulb
-  - [ ] Comm config page
-  - [ ] Comm link page
-  - [ ] Cabinet style page
-  - [ ] Modem page
-  - [ ] Controller page
-  - [ ] Session expiration
+  - [X] Resource type selector with card list
+  - [X] Search filter
+  - [ ] Alarm overlay
+  - [ ] Cabinet style overlay
+  - [ ] Comm config overlay
+  - [ ] Comm link overlay
+  - [ ] Controller overlay
+  - [ ] Modem overlay
+  - [ ] Authentication and session expiration
 
 ## Phase 4 — DMS control
 
