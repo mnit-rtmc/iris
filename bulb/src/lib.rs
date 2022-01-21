@@ -9,6 +9,28 @@ use web_sys::{
     Request, Response, Window,
 };
 
+/// Alarm
+#[derive(Debug, Deserialize, Serialize)]
+struct Alarm {
+    pub name: String,
+    pub description: String,
+    pub controller: Option<String>,
+    pub pin: u32,
+    pub state: bool,
+    pub trigger_time: Option<String>,
+}
+
+/// Cabinet Style
+#[derive(Debug, Deserialize, Serialize)]
+struct CabinetStyle {
+    pub name: String,
+    pub police_panel_pin_1: Option<u32>,
+    pub police_panel_pin_2: Option<u32>,
+    pub watchdog_reset_pin_1: Option<u32>,
+    pub watchdog_reset_pin_2: Option<u32>,
+    pub dip: Option<u32>,
+}
+
 /// Comm configuration
 #[derive(Debug, Deserialize, Serialize)]
 struct CommConfig {
@@ -33,27 +55,6 @@ struct CommLink {
     pub comm_config: String,
 }
 
-/// Modem
-#[derive(Debug, Deserialize, Serialize)]
-struct Modem {
-    pub name: String,
-    pub uri: String,
-    pub config: String,
-    pub timeout_ms: u32,
-    pub enabled: bool,
-}
-
-/// Cabinet Style
-#[derive(Debug, Deserialize, Serialize)]
-struct CabinetStyle {
-    pub name: String,
-    pub police_panel_pin_1: Option<u32>,
-    pub police_panel_pin_2: Option<u32>,
-    pub watchdog_reset_pin_1: Option<u32>,
-    pub watchdog_reset_pin_2: Option<u32>,
-    pub dip: Option<u32>,
-}
-
 /// Controller
 #[derive(Debug, Deserialize, Serialize)]
 struct Controller {
@@ -65,6 +66,16 @@ struct Controller {
     pub notes: String,
     pub fail_time: Option<String>,
     pub version: Option<String>,
+}
+
+/// Modem
+#[derive(Debug, Deserialize, Serialize)]
+struct Modem {
+    pub name: String,
+    pub uri: String,
+    pub config: String,
+    pub timeout_ms: u32,
+    pub enabled: bool,
 }
 
 trait Card: DeserializeOwned {
@@ -86,6 +97,46 @@ impl Card for () {
 
     fn make_elem(&self, _doc: &Document) -> Result<Element, JsValue> {
         unreachable!()
+    }
+}
+
+impl Card for Alarm {
+    const OB_TYPE: &'static str = "Alarm";
+    const URI: &'static str = "/iris/api/alarm";
+
+    fn is_match(&self, re: &Regex) -> bool {
+        re.is_match(&self.description) || re.is_match(&self.name)
+    }
+    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue> {
+        let card = doc.create_element("li")?;
+        card.set_class_name("card");
+        let title = doc.create_element("span")?;
+        title.set_class_name(Alarm::TITLE);
+        title.set_inner_html(&self.description);
+        card.append_child(&title)?;
+        let info = doc.create_element("span")?;
+        info.set_class_name(Alarm::INFO);
+        info.set_inner_html(&self.name);
+        card.append_child(&info)?;
+        Ok(card)
+    }
+}
+
+impl Card for CabinetStyle {
+    const OB_TYPE: &'static str = "Cabinet Style";
+    const URI: &'static str = "/iris/api/cabinet_style";
+
+    fn is_match(&self, re: &Regex) -> bool {
+        re.is_match(&self.name)
+    }
+    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue> {
+        let card = doc.create_element("li")?;
+        card.set_class_name("card");
+        let title = doc.create_element("span")?;
+        title.set_class_name(CabinetStyle::TITLE);
+        title.set_inner_html(&self.name);
+        card.append_child(&title)?;
+        Ok(card)
     }
 }
 
@@ -137,46 +188,6 @@ impl Card for CommLink {
     }
 }
 
-impl Card for Modem {
-    const OB_TYPE: &'static str = "Modem";
-    const URI: &'static str = "/iris/api/modem";
-
-    fn is_match(&self, re: &Regex) -> bool {
-        re.is_match(&self.name)
-    }
-    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue> {
-        let card = doc.create_element("li")?;
-        card.set_class_name("card");
-        let title = doc.create_element("span")?;
-        if self.enabled {
-            title.set_class_name(Modem::TITLE);
-        } else {
-            title.set_class_name(Modem::DISABLED);
-        }
-        title.set_inner_html(&self.name);
-        card.append_child(&title)?;
-        Ok(card)
-    }
-}
-
-impl Card for CabinetStyle {
-    const OB_TYPE: &'static str = "Cabinet Style";
-    const URI: &'static str = "/iris/api/cabinet_style";
-
-    fn is_match(&self, re: &Regex) -> bool {
-        re.is_match(&self.name)
-    }
-    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue> {
-        let card = doc.create_element("li")?;
-        card.set_class_name("card");
-        let title = doc.create_element("span")?;
-        title.set_class_name(CabinetStyle::TITLE);
-        title.set_inner_html(&self.name);
-        card.append_child(&title)?;
-        Ok(card)
-    }
-}
-
 impl Card for Controller {
     const OB_TYPE: &'static str = "Controller";
     const URI: &'static str = "/iris/api/controller";
@@ -205,8 +216,31 @@ impl Card for Controller {
     }
 }
 
+impl Card for Modem {
+    const OB_TYPE: &'static str = "Modem";
+    const URI: &'static str = "/iris/api/modem";
+
+    fn is_match(&self, re: &Regex) -> bool {
+        re.is_match(&self.name)
+    }
+    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue> {
+        let card = doc.create_element("li")?;
+        card.set_class_name("card");
+        let title = doc.create_element("span")?;
+        if self.enabled {
+            title.set_class_name(Modem::TITLE);
+        } else {
+            title.set_class_name(Modem::DISABLED);
+        }
+        title.set_inner_html(&self.name);
+        card.append_child(&title)?;
+        Ok(card)
+    }
+}
+
 /// Object types
 const OB_TYPES: &[&str] = &[
+    Alarm::OB_TYPE,
     CabinetStyle::OB_TYPE,
     CommConfig::OB_TYPE,
     CommLink::OB_TYPE,
@@ -292,9 +326,10 @@ fn populate_cards(tp: &str, search: &str) {
         .build()
         .unwrap_throw();
     match tp {
+        Alarm::OB_TYPE => spawn_local(populate_list::<Alarm>(re)),
+        CabinetStyle::OB_TYPE => spawn_local(populate_list::<CabinetStyle>(re)),
         CommConfig::OB_TYPE => spawn_local(populate_list::<CommConfig>(re)),
         CommLink::OB_TYPE => spawn_local(populate_list::<CommLink>(re)),
-        CabinetStyle::OB_TYPE => spawn_local(populate_list::<CabinetStyle>(re)),
         Controller::OB_TYPE => spawn_local(populate_list::<Controller>(re)),
         Modem::OB_TYPE => spawn_local(populate_list::<Modem>(re)),
         _ => spawn_local(populate_list::<()>(re)),

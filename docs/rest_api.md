@@ -35,8 +35,8 @@ resources are JSON arrays, fetched using http `GET` requests.
 ## Restricted Data
 
 There are many restricted resource types, which can be accessed using standard
-http methods.  These `{type}` values include: `comm_config`, `comm_link`,
-`cabinet_style`, `cabinet`, `controller` and `modem`.
+http methods.  These `{type}` values include: `alarm`, `cabinet_style`,
+`cabinet`, `comm_config`, `comm_link`, `controller` and `modem`.
 
 A `Content-Type: application/json` header is included where appropriate.
 

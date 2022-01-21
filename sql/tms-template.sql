@@ -1279,10 +1279,6 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 43	ClearGuide
 \.
 
-CREATE TRIGGER comm_protocol_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.comm_protocol
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
-
 CREATE TABLE iris.comm_config (
 	name VARCHAR(10) PRIMARY KEY,
 	description VARCHAR(20) NOT NULL UNIQUE,
@@ -1926,6 +1922,10 @@ CREATE TABLE iris._alarm (
 
 ALTER TABLE iris._alarm ADD CONSTRAINT _alarm_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
+
+CREATE TRIGGER alarm_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._alarm
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.alarm AS
     SELECT a.name, description, controller, pin, state, trigger_time

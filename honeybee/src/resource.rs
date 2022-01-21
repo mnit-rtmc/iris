@@ -213,6 +213,40 @@ const R_NODE_RES: Resource = Resource::RNode(Listen::All("r_node"));
 /// Road resource
 const ROAD_RES: Resource = Resource::Road(Listen::All("road"));
 
+/// Alarm resource
+const ALARM_RES: Resource = Resource::Simple(
+    "api/alarm",
+    Listen::All("alarm"),
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT name, description, controller, pin, state, trigger_time \
+    FROM iris.alarm \
+    ORDER BY description\
+) r",
+);
+
+/// Cabinet style resource
+const CABINET_STYLE_RES: Resource = Resource::Simple(
+    "api/cabinet_style",
+    Listen::All("cabinet_style"),
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT name, police_panel_pin_1, police_panel_pin_2, watchdog_reset_pin_1, \
+           watchdog_reset_pin_2, dip \
+    FROM iris.cabinet_style \
+    ORDER BY name\
+) r",
+);
+
+/// Cabinet resource
+const CABINET_RES: Resource = Resource::Simple(
+    "api/cabinet",
+    Listen::All("cabinet"),
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT name, style, geo_loc \
+    FROM iris.cabinet \
+    ORDER BY name\
+) r",
+);
+
 /// Comm protocol resource
 const COMM_PROTOCOL_RES: Resource = Resource::Simple(
     "api/comm_protocol",
@@ -249,40 +283,6 @@ const COMM_LINK_RES: Resource = Resource::Simple(
 ) r",
 );
 
-/// Modem resource
-const MODEM_RES: Resource = Resource::Simple(
-    "api/modem",
-    Listen::All("modem"),
-    "SELECT row_to_json(r)::text FROM (\
-    SELECT name, uri, config, timeout_ms, enabled \
-    FROM iris.modem \
-    ORDER BY name\
-) r",
-);
-
-/// Cabinet style resource
-const CABINET_STYLE_RES: Resource = Resource::Simple(
-    "api/cabinet_style",
-    Listen::All("cabinet_style"),
-    "SELECT row_to_json(r)::text FROM (\
-    SELECT name, police_panel_pin_1, police_panel_pin_2, watchdog_reset_pin_1, \
-           watchdog_reset_pin_2, dip \
-    FROM iris.cabinet_style \
-    ORDER BY name\
-) r",
-);
-
-/// Cabinet resource
-const CABINET_RES: Resource = Resource::Simple(
-    "api/cabinet",
-    Listen::All("cabinet"),
-    "SELECT row_to_json(r)::text FROM (\
-    SELECT name, style, geo_loc \
-    FROM iris.cabinet \
-    ORDER BY name\
-) r",
-);
-
 /// Controller resource
 const CONTROLLER_RES: Resource = Resource::Simple(
     "api/controller",
@@ -294,6 +294,17 @@ const CONTROLLER_RES: Resource = Resource::Simple(
     ORDER BY regexp_replace(comm_link, '[0-9]', '', 'g'), \
             (regexp_replace(comm_link, '[^0-9]', '', 'g') || '0')::INTEGER, \
              drop_id\
+) r",
+);
+
+/// Modem resource
+const MODEM_RES: Resource = Resource::Simple(
+    "api/modem",
+    Listen::All("modem"),
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT name, uri, config, timeout_ms, enabled \
+    FROM iris.modem \
+    ORDER BY name\
 ) r",
 );
 
@@ -404,13 +415,14 @@ const TPIMS_ARCH_RES: Resource = Resource::Simple(
 const ALL: &[Resource] = &[
     SYSTEM_ATTRIBUTE_RES, // System attributes must be loaded first
     ROAD_RES,             // Roads must be loaded before R_Nodes
+    ALARM_RES,
+    CABINET_STYLE_RES,
+    CABINET_RES,
     COMM_PROTOCOL_RES,
     COMM_CONFIG_RES,
     COMM_LINK_RES,
-    MODEM_RES,
-    CABINET_STYLE_RES,
-    CABINET_RES,
     CONTROLLER_RES,
+    MODEM_RES,
     CAMERA_RES,
     DMS_RES,
     DMS_MSG_RES,
