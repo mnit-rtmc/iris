@@ -13,6 +13,11 @@ wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4"
 wee_alloc = "0.4"
 
+[dependencies.regex]
+version = "1"
+default-features = false
+features = ["std", "unicode-case"]
+
 [dependencies.web-sys]
 version = "0.3"
 features = [
@@ -22,6 +27,7 @@ features = [
   'Window',
   'Event',
   'Headers',
+  'HtmlInputElement',
   'HtmlSelectElement',
   'Request',
   'RequestInit',

@@ -1,22 +1,13 @@
+use regex::{Regex, RegexBuilder};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
 use web_sys::{
-    console, Document, Element, Event, HtmlSelectElement, Request, Response,
-    Window,
+    console, Document, Element, Event, HtmlInputElement, HtmlSelectElement,
+    Request, Response, Window,
 };
-
-trait Card: DeserializeOwned {
-    const TITLE: &'static str = "title";
-    const DISABLED: &'static str = "title disabled";
-    const INFO: &'static str = "info";
-    const OB_TYPE: &'static str;
-    const URI: &'static str;
-
-    fn make_card(&self, doc: &Document) -> Result<Element, JsValue>;
-}
 
 /// Comm configuration
 #[derive(Debug, Deserialize, Serialize)]
@@ -76,11 +67,24 @@ struct Controller {
     pub version: Option<String>,
 }
 
+trait Card: DeserializeOwned {
+    const TITLE: &'static str = "title";
+    const DISABLED: &'static str = "title disabled";
+    const INFO: &'static str = "info";
+    const OB_TYPE: &'static str;
+    const URI: &'static str;
+
+    fn is_match(&self, _re: &Regex) -> bool {
+        false
+    }
+    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue>;
+}
+
 impl Card for () {
     const OB_TYPE: &'static str = "";
     const URI: &'static str = "";
 
-    fn make_card(&self, _doc: &Document) -> Result<Element, JsValue> {
+    fn make_elem(&self, _doc: &Document) -> Result<Element, JsValue> {
         unreachable!()
     }
 }
@@ -89,7 +93,10 @@ impl Card for CommConfig {
     const OB_TYPE: &'static str = "Comm Config";
     const URI: &'static str = "/iris/api/comm_config";
 
-    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
+    fn is_match(&self, re: &Regex) -> bool {
+        re.is_match(&self.description) || re.is_match(&self.name)
+    }
+    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
         card.set_class_name("card");
         let title = doc.create_element("span")?;
@@ -108,7 +115,10 @@ impl Card for CommLink {
     const OB_TYPE: &'static str = "Comm Link";
     const URI: &'static str = "/iris/api/comm_link";
 
-    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
+    fn is_match(&self, re: &Regex) -> bool {
+        re.is_match(&self.description) || re.is_match(&self.name)
+    }
+    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
         card.set_class_name("card");
         let title = doc.create_element("span")?;
@@ -131,7 +141,10 @@ impl Card for Modem {
     const OB_TYPE: &'static str = "Modem";
     const URI: &'static str = "/iris/api/modem";
 
-    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
+    fn is_match(&self, re: &Regex) -> bool {
+        re.is_match(&self.name)
+    }
+    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
         card.set_class_name("card");
         let title = doc.create_element("span")?;
@@ -150,7 +163,10 @@ impl Card for CabinetStyle {
     const OB_TYPE: &'static str = "Cabinet Style";
     const URI: &'static str = "/iris/api/cabinet_style";
 
-    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
+    fn is_match(&self, re: &Regex) -> bool {
+        re.is_match(&self.name)
+    }
+    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
         card.set_class_name("card");
         let title = doc.create_element("span")?;
@@ -165,7 +181,11 @@ impl Card for Controller {
     const OB_TYPE: &'static str = "Controller";
     const URI: &'static str = "/iris/api/controller";
 
-    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
+    fn is_match(&self, re: &Regex) -> bool {
+        re.is_match(&self.comm_link)
+            || re.is_match(&format!("{}:{}", self.comm_link, self.drop_id))
+    }
+    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
         card.set_class_name("card");
         let title = doc.create_element("span")?;
@@ -214,52 +234,69 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 pub async fn main() -> Result<(), JsValue> {
     // this should be debug only
     console_error_panic_hook::set_once();
+
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let ob_type = doc.get_element_by_id("ob_type").unwrap_throw();
-
     for ob in OB_TYPES {
         let opt = doc.create_element("option")?;
         opt.append_with_str_1(ob)?;
         ob_type.append_child(&opt)?;
     }
-
-    let cb = Closure::wrap(Box::new(|e: Event| {
-        let value = e
-            .current_target()
-            .unwrap()
-            .dyn_into::<HtmlSelectElement>()
-            .unwrap()
-            .value();
-        populate_list_str(&value);
-    }) as Box<dyn FnMut(_)>);
-
-    ob_type.add_event_listener_with_callback(
-        "input",
-        cb.as_ref().unchecked_ref(),
-    )?;
-    cb.forget();
-
+    add_select_event_listener(&ob_type, handle_type_ev)?;
+    let ob_input = doc.get_element_by_id("ob_input").unwrap_throw();
+    add_input_event_listener(&ob_input, handle_search_ev)?;
     Ok(())
 }
 
-fn populate_list_str(value: &str) {
-    match value {
-        CommConfig::OB_TYPE => spawn_local(populate_list::<CommConfig>()),
-        CommLink::OB_TYPE => spawn_local(populate_list::<CommLink>()),
-        Modem::OB_TYPE => spawn_local(populate_list::<Modem>()),
-        CabinetStyle::OB_TYPE => spawn_local(populate_list::<CabinetStyle>()),
-        Controller::OB_TYPE => spawn_local(populate_list::<Controller>()),
-        _ => spawn_local(populate_list::<()>()),
+/// Handle an event from "ob_type" `select` element
+fn handle_type_ev(tp: &str) {
+    let window = web_sys::window().unwrap_throw();
+    let doc = window.document().unwrap_throw();
+    let search = doc
+        .get_element_by_id("ob_input")
+        .unwrap_throw()
+        .dyn_into::<HtmlInputElement>()
+        .unwrap_throw()
+        .value();
+    populate_cards(tp, &search);
+}
+
+/// Handle an event from "ob_input" `input` element
+fn handle_search_ev(search: &str) {
+    let window = web_sys::window().unwrap_throw();
+    let doc = window.document().unwrap_throw();
+    let tp = doc
+        .get_element_by_id("ob_type")
+        .unwrap_throw()
+        .dyn_into::<HtmlSelectElement>()
+        .unwrap_throw()
+        .value();
+    populate_cards(&tp, search);
+}
+
+/// Populate cards in list
+fn populate_cards(tp: &str, search: &str) {
+    console::log_1(&tp.into());
+    let re = RegexBuilder::new(&regex::escape(&search))
+        .case_insensitive(true)
+        .build()
+        .unwrap_throw();
+    match tp {
+        CommConfig::OB_TYPE => spawn_local(populate_list::<CommConfig>(re)),
+        CommLink::OB_TYPE => spawn_local(populate_list::<CommLink>(re)),
+        Modem::OB_TYPE => spawn_local(populate_list::<Modem>(re)),
+        CabinetStyle::OB_TYPE => spawn_local(populate_list::<CabinetStyle>(re)),
+        Controller::OB_TYPE => spawn_local(populate_list::<Controller>(re)),
+        _ => spawn_local(populate_list::<()>(re)),
     }
-    console::log_1(&value.into());
 }
 
-async fn populate_list<C: Card>() {
-    populate_list_a::<C>().await.unwrap();
+async fn populate_list<C: Card>(re: Regex) {
+    populate_list_a::<C>(re).await.unwrap();
 }
 
-async fn populate_list_a<C: Card>() -> Result<(), JsValue> {
+async fn populate_list_a<C: Card>(re: Regex) -> Result<(), JsValue> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let ob_list = doc.get_element_by_id("ob_list").unwrap_throw();
@@ -268,11 +305,57 @@ async fn populate_list_a<C: Card>() -> Result<(), JsValue> {
         let cards = doc.create_element("ul")?;
         cards.set_class_name("cards");
         let obs: Vec<C> = fetch_json_vec(&window).await?;
-        for ob in obs {
-            cards.append_child(&*ob.make_card(&doc)?)?;
+        for ob in obs.iter().filter(|ob| ob.is_match(&re)) {
+            cards.append_child(&*ob.make_elem(&doc)?)?;
         }
         list.append_child(&cards)?;
     }
     ob_list.replace_with_with_node_1(&list)?;
+    Ok(())
+}
+
+/// Add an "input" event listener to an element
+fn add_select_event_listener(
+    elem: &Element,
+    handle_ev: fn(&str),
+) -> Result<(), JsValue> {
+    let closure = Closure::wrap(Box::new(move |e: Event| {
+        let value = e
+            .current_target()
+            .unwrap()
+            .dyn_into::<HtmlSelectElement>()
+            .unwrap()
+            .value();
+        handle_ev(&value);
+    }) as Box<dyn FnMut(_)>);
+    elem.add_event_listener_with_callback(
+        "input",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
+    Ok(())
+}
+
+/// Add an "input" event listener to an element
+fn add_input_event_listener(
+    elem: &Element,
+    handle_ev: fn(&str),
+) -> Result<(), JsValue> {
+    let closure = Closure::wrap(Box::new(move |e: Event| {
+        let value = e
+            .current_target()
+            .unwrap()
+            .dyn_into::<HtmlInputElement>()
+            .unwrap()
+            .value();
+        handle_ev(&value);
+    }) as Box<dyn FnMut(_)>);
+    elem.add_event_listener_with_callback(
+        "input",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
     Ok(())
 }
