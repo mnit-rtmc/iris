@@ -425,4 +425,51 @@ public class WMessage {
 	public void renderMsg(MultiConfig mcfg) {
 		renderMsg(mcfg, null);
 	}
+	
+	//===========================================
+	
+	/** Test for a specific token-type anywhere in the message.
+	 * @param type WTokenType to look for
+	 * @return true if a token of that type was found,
+	 *   false if it was not.
+	 * @implNote WTokenType.newpage tokens 
+	 *   can NOT be found using this method.
+	 */
+	public boolean containsAny(WTokenType type) {
+		WPage p;
+		Iterator<WPage> pit = pagelist.iterator();
+		while (pit.hasNext()) {
+			p = pit.next();
+			if (p.containsAny(type))
+				return true;
+		}
+		return false;
+	}
+
+	/** Remove all tokens of a specific token-type anywhere in the message.
+	 * @param type WTokenType to look for
+	 * @return true if any tokens of that type were removed,
+	 *   false if none were found.
+	 * @implNote After any removeAll(...) has returned true,
+	 *   depending on what kind of tokens were removed,
+	 *   it might be necessary to call reparseMulti()
+	 *   and maybe renderMsg(...) to update WMessage
+	 *   internal values and/or rendered pages.
+	 * @implNote WTokenType.newpage tokens 
+	 *   can NOT be removed using this method.
+	 */
+	public boolean removeAll(WTokenType type) {
+		boolean removedOneOrMore = false;
+		WPage p;
+		Iterator<WPage> pit = pagelist.iterator();
+		while (pit.hasNext()) {
+			p = pit.next();
+			if (p.removeAll(type)) {
+				removedOneOrMore = true;
+				bChanged = true;
+			}
+		}
+		return removedOneOrMore;
+	}
+	
 }

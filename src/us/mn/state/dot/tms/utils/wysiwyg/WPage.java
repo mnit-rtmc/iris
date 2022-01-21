@@ -467,4 +467,41 @@ public class WPage {
 		pageOn = pageOn2;
 		pageOff = pageOff2;
 	}
+
+	//===============================
+
+	/** Test for a specific token-type anywhere on the page.
+	 * @param type WTokenType to look for
+	 * @return true if a token of that type was found,
+	 *  false if it was not.
+	 */
+	public boolean containsAny(WTokenType type) {
+		WToken t;
+		Iterator<WToken> it = tokenList.iterator();
+		while (it.hasNext()) {
+			t = it.next();
+			if (t.isType(type))
+				return true;
+		}
+		return false;
+	}
+
+	/** Remove all tokens of a specific token-type anywhere on the page.
+	 * @param type WTokenType to look for
+	 * @return true if any tokens of that type were removed,
+	 *  false if none were found.
+	 */
+	public boolean removeAll(WTokenType type) {
+		boolean removedOneOrMore = false;
+		WToken t;
+		Iterator<WToken> it = tokenList.iterator();
+		while (it.hasNext()) {
+			t = it.next();
+			if (t.isType(type)) {
+				it.remove();
+				removedOneOrMore = true;
+			}
+		}
+		return removedOneOrMore;
+	}
 }
