@@ -98,7 +98,8 @@ abstract public class WToken {
 	/** Is this token part of the message-text?
 	 * (WYSIWYG flag.  The only tokens that are
 	 *  not part of the message-text are graphics,
-	 *  text-rectangles, and color-rectangles.)
+	 *  text-rectangles, color-rectangles, and
+	 *  standby tags. )
 	 *  {WToken default = true} */
 	public boolean isText() {
 		return true;

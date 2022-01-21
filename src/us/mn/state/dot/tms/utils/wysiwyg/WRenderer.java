@@ -1025,7 +1025,7 @@ public class WRenderer {
 
 	/** Render a WtLocator token */
 	public void renderLocator(WtLocator tok) {
-		//TODO:  Figure out how to handle these tokens...
+		//TODO:  Figure out how to handle this token...
 	}
 
 	/** Render a WtStandby token */
