@@ -48,7 +48,7 @@ public class WtStandby extends WToken {
 	 */
 	@Override
 	public void doMulti(Multi cb) {
-//		cb.addStandby();
+		cb.addStandby();
 	}
 
 	/* (non-Javadoc)
