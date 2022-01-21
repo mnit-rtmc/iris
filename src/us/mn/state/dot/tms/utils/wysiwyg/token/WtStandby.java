@@ -56,7 +56,7 @@ public class WtStandby extends WToken {
 	 */
 	@Override
 	public void doRender(WRenderer wr) {
-//		wr.renderStandby(this);
+		wr.renderStandby(this);
 	}
 
 	/* (non-Javadoc)
