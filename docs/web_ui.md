@@ -47,12 +47,12 @@ This document tracks progress on the web-based user interface for IRIS.
   - [X] Add comm config endpoints
   - [X] Add comm link endpoints
   - [X] Add controller endpoints
-  - [ ] Send SSE for update notifications
 * bulb
-  - [ ] Add comm config pages
-  - [ ] Add comm link pages
-  - [ ] Add controller pages
-  - [ ] Connect to graft for SSE
+  - [ ] Comm config page
+  - [ ] Comm link page
+  - [ ] Cabinet style page
+  - [ ] Modem page
+  - [ ] Controller page
 
 ## Phase 4 — DMS control
 
@@ -62,10 +62,17 @@ This document tracks progress on the web-based user interface for IRIS.
 * graft
   - [ ] Add endpoints for controlling DMS
   - [ ] Write full installation documentation
+  - [ ] Send SSE for update notifications
 * bulb
   - [ ] UI for DMS viewing / control
   - [ ] Generate DMS previews and insert into img element using data URI
   - [ ] Write full installation documentation
+  - [ ] Connect to graft for SSE
+
+## Other Bits
+
+* graft
+  - [ ] ETags for table versioning
 
 
 [bulb]: https://github.com/mnit-rtmc/iris/tree/master/bulb

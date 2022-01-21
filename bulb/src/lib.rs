@@ -9,6 +9,9 @@ use web_sys::{
 };
 
 trait Card: DeserializeOwned {
+    const TITLE: &'static str = "title";
+    const DISABLED: &'static str = "title disabled";
+    const INFO: &'static str = "info";
     const OB_TYPE: &'static str;
     const URI: &'static str;
 
@@ -89,12 +92,12 @@ impl Card for CommConfig {
     fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
         card.set_class_name("card");
-        let name = doc.create_element("span")?;
-        name.set_class_name("name");
-        name.set_inner_html(&self.description);
-        card.append_child(&name)?;
+        let title = doc.create_element("span")?;
+        title.set_class_name(CommConfig::TITLE);
+        title.set_inner_html(&self.description);
+        card.append_child(&title)?;
         let info = doc.create_element("span")?;
-        info.set_class_name("info");
+        info.set_class_name(CommConfig::INFO);
         info.set_inner_html(&self.name);
         card.append_child(&info)?;
         Ok(card)
@@ -108,16 +111,16 @@ impl Card for CommLink {
     fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
         card.set_class_name("card");
-        let name = doc.create_element("span")?;
+        let title = doc.create_element("span")?;
         if self.poll_enabled {
-            name.set_class_name("name");
+            title.set_class_name(CommLink::TITLE);
         } else {
-            name.set_class_name("name disabled");
+            title.set_class_name(CommLink::DISABLED);
         }
-        name.set_inner_html(&self.description);
-        card.append_child(&name)?;
+        title.set_inner_html(&self.description);
+        card.append_child(&title)?;
         let info = doc.create_element("span")?;
-        info.set_class_name("info");
+        info.set_class_name(CommLink::INFO);
         info.set_inner_html(&self.name);
         card.append_child(&info)?;
         Ok(card)
@@ -131,14 +134,14 @@ impl Card for Modem {
     fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
         card.set_class_name("card");
-        let name = doc.create_element("span")?;
+        let title = doc.create_element("span")?;
         if self.enabled {
-            name.set_class_name("name");
+            title.set_class_name(Modem::TITLE);
         } else {
-            name.set_class_name("name disabled");
+            title.set_class_name(Modem::DISABLED);
         }
-        name.set_inner_html(&self.name);
-        card.append_child(&name)?;
+        title.set_inner_html(&self.name);
+        card.append_child(&title)?;
         Ok(card)
     }
 }
@@ -150,10 +153,10 @@ impl Card for CabinetStyle {
     fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
         card.set_class_name("card");
-        let name = doc.create_element("span")?;
-        name.set_class_name("name");
-        name.set_inner_html(&self.name);
-        card.append_child(&name)?;
+        let title = doc.create_element("span")?;
+        title.set_class_name(CabinetStyle::TITLE);
+        title.set_inner_html(&self.name);
+        card.append_child(&title)?;
         Ok(card)
     }
 }
@@ -165,17 +168,17 @@ impl Card for Controller {
     fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
         card.set_class_name("card");
-        let name = doc.create_element("span")?;
+        let title = doc.create_element("span")?;
         // condition 1 is "Active"
         if self.condition == 1 {
-            name.set_class_name("name");
+            title.set_class_name(Controller::TITLE);
         } else {
-            name.set_class_name("name disabled");
+            title.set_class_name(Controller::DISABLED);
         }
-        name.set_inner_html(&format!("{}:{}", self.comm_link, self.drop_id));
-        card.append_child(&name)?;
+        title.set_inner_html(&format!("{}:{}", self.comm_link, self.drop_id));
+        card.append_child(&title)?;
         let info = doc.create_element("span")?;
-        info.set_class_name("info");
+        info.set_class_name(Controller::INFO);
         info.set_inner_html(&self.name);
         card.append_child(&info)?;
         Ok(card)
@@ -209,6 +212,8 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen(start)]
 pub async fn main() -> Result<(), JsValue> {
+    // this should be debug only
+    console_error_panic_hook::set_once();
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let ob_type = doc.get_element_by_id("ob_type").unwrap_throw();
@@ -260,9 +265,9 @@ async fn populate_list_a<C: Card>() -> Result<(), JsValue> {
     let ob_list = doc.get_element_by_id("ob_list").unwrap_throw();
     let list = ob_list.clone_node()?;
     if !C::URI.is_empty() {
-        let obs: Vec<C> = fetch_json_vec(&window).await?;
         let cards = doc.create_element("ul")?;
         cards.set_class_name("cards");
+        let obs: Vec<C> = fetch_json_vec(&window).await?;
         for ob in obs {
             cards.append_child(&*ob.make_card(&doc)?)?;
         }
