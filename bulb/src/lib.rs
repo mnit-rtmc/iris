@@ -305,6 +305,9 @@ async fn populate_list_a<C: Card>(re: Regex) -> Result<(), JsValue> {
         let cards = doc.create_element("ul")?;
         cards.set_class_name("cards");
         let obs: Vec<C> = fetch_json_vec(&window).await?;
+        if re.as_str().is_empty() {
+            cards.append_child(&*make_new_elem(&doc)?)?;
+        }
         for ob in obs.iter().filter(|ob| ob.is_match(&re)) {
             cards.append_child(&*ob.make_elem(&doc)?)?;
         }
@@ -312,6 +315,16 @@ async fn populate_list_a<C: Card>(re: Regex) -> Result<(), JsValue> {
     }
     ob_list.replace_with_with_node_1(&list)?;
     Ok(())
+}
+
+fn make_new_elem(doc: &Document) -> Result<Element, JsValue> {
+    let card = doc.create_element("li")?;
+    card.set_class_name("card");
+    let title = doc.create_element("span")?;
+    title.set_class_name("notes");
+    title.set_inner_html("Create New");
+    card.append_child(&title)?;
+    Ok(card)
 }
 
 /// Add an "input" event listener to an element
