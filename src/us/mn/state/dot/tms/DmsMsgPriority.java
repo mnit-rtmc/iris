@@ -64,6 +64,8 @@ public enum DmsMsgPriority {
 		case BLANK:
 		case OVERRIDE:
 			return SignMsgSource.blank.bit();
+		case STANDBY:
+			return SignMsgSource.standby.bit();
 		case TRAVEL_TIME:
 			return SignMsgSource.toBits(SignMsgSource.schedule,
 			                            SignMsgSource.travel_time);
