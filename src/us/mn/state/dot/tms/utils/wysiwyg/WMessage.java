@@ -137,6 +137,12 @@ public class WMessage {
 		bChanged = true;
 	}
 	
+	/** Reparse MULTI string after adding/changing/deleting tokens */
+	public void reparseMulti() {
+		String multiStr = toString();
+		parseMulti(multiStr);
+	}
+	
 	/** Create a MULTI string from a WMessage */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -477,5 +483,16 @@ public class WMessage {
 	/** Test for standby tag in message */
 	public boolean isStandby() {
 		return containsAny(WTokenType.standby);
+	}
+	
+	/** Add or remove standby token in message */
+	public void setStandby(boolean bStandby) {
+		if (bStandby) {
+			String multiStr = "[standby]" + toString();
+			parseMulti(multiStr);
+		}
+		else {
+			removeAll(WTokenType.standby);
+		}
 	}
 }
