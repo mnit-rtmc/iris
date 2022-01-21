@@ -53,6 +53,7 @@ This document tracks progress on the web-based user interface for IRIS.
   - [ ] Cabinet style page
   - [ ] Modem page
   - [ ] Controller page
+  - [ ] Session expiration
 
 ## Phase 4 — DMS control
 

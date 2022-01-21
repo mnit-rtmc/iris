@@ -207,12 +207,11 @@ impl Card for Controller {
 
 /// Object types
 const OB_TYPES: &[&str] = &[
-    <()>::OB_TYPE,
+    CabinetStyle::OB_TYPE,
     CommConfig::OB_TYPE,
     CommLink::OB_TYPE,
-    Modem::OB_TYPE,
-    CabinetStyle::OB_TYPE,
     Controller::OB_TYPE,
+    Modem::OB_TYPE,
 ];
 
 /// Fetch a JSON array and deserialize into a Vec
@@ -221,9 +220,14 @@ async fn fetch_json_vec<C: Card>(window: &Window) -> Result<Vec<C>, JsValue> {
     req.headers().set("Accept", "application/json")?;
     let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
     let resp: Response = resp.dyn_into().unwrap_throw();
-    let json = JsFuture::from(resp.json()?).await?;
-    let obs: Vec<C> = json.into_serde().unwrap_throw();
-    Ok(obs)
+    match resp.status() {
+        200 => {
+            let json = JsFuture::from(resp.json()?).await?;
+            Ok(json.into_serde::<Vec<C>>().unwrap_throw())
+        }
+        401 => Err(resp.status_text().into()),
+        _ => Err(resp.status_text().into()),
+    }
 }
 
 /// Set global allocator to `wee_alloc`
@@ -238,11 +242,17 @@ pub async fn main() -> Result<(), JsValue> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let ob_type = doc.get_element_by_id("ob_type").unwrap_throw();
+    let opt = doc.create_element("option")?;
+    opt.append_with_str_1("")?;
+    ob_type.append_child(&opt)?;
+    let group = doc.create_element("optgroup")?;
+    group.set_attribute("label", "Maintenance")?;
     for ob in OB_TYPES {
         let opt = doc.create_element("option")?;
         opt.append_with_str_1(ob)?;
-        ob_type.append_child(&opt)?;
+        group.append_child(&opt)?;
     }
+    ob_type.append_child(&group)?;
     add_select_event_listener(&ob_type, handle_type_ev)?;
     let ob_input = doc.get_element_by_id("ob_input").unwrap_throw();
     add_input_event_listener(&ob_input, handle_search_ev)?;
@@ -277,7 +287,6 @@ fn handle_search_ev(search: &str) {
 
 /// Populate cards in list
 fn populate_cards(tp: &str, search: &str) {
-    console::log_1(&tp.into());
     let re = RegexBuilder::new(&regex::escape(&search))
         .case_insensitive(true)
         .build()
@@ -285,18 +294,21 @@ fn populate_cards(tp: &str, search: &str) {
     match tp {
         CommConfig::OB_TYPE => spawn_local(populate_list::<CommConfig>(re)),
         CommLink::OB_TYPE => spawn_local(populate_list::<CommLink>(re)),
-        Modem::OB_TYPE => spawn_local(populate_list::<Modem>(re)),
         CabinetStyle::OB_TYPE => spawn_local(populate_list::<CabinetStyle>(re)),
         Controller::OB_TYPE => spawn_local(populate_list::<Controller>(re)),
+        Modem::OB_TYPE => spawn_local(populate_list::<Modem>(re)),
         _ => spawn_local(populate_list::<()>(re)),
     }
 }
 
 async fn populate_list<C: Card>(re: Regex) {
-    populate_list_a::<C>(re).await.unwrap();
+    if let Err(e) = try_populate_list::<C>(re).await {
+        // unauthorized (401) should be handled here
+        console::log_1(&e);
+    }
 }
 
-async fn populate_list_a<C: Card>(re: Regex) -> Result<(), JsValue> {
+async fn try_populate_list<C: Card>(re: Regex) -> Result<(), JsValue> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let ob_list = doc.get_element_by_id("ob_list").unwrap_throw();
