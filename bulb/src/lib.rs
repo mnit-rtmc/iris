@@ -81,33 +81,162 @@ const TITLE: &str = "title";
 const DISABLED: &str = "title disabled";
 const INFO: &str = "info";
 
-trait Card: DeserializeOwned {
-    const OB_TYPE: &'static str;
-    const URI: &'static str;
+#[derive(Clone, Copy, Debug)]
+enum ObType {
+    Unknown,
+    Alarm,
+    CabinetStyle,
+    CommConfig,
+    CommLink,
+    Controller,
+    Modem,
+}
 
+impl From<&str> for ObType {
+    fn from(tp: &str) -> Self {
+        match tp {
+            "Alarm" => ObType::Alarm,
+            "Cabinet Style" => ObType::CabinetStyle,
+            "Comm Config" => ObType::CommConfig,
+            "Comm Link" => ObType::CommLink,
+            "Controller" => ObType::Controller,
+            "Modem" => ObType::Modem,
+            _ => ObType::Unknown,
+        }
+    }
+}
+
+impl ObType {
+    const ALL: &'static [ObType] = &[
+        ObType::Alarm,
+        ObType::CabinetStyle,
+        ObType::CommConfig,
+        ObType::CommLink,
+        ObType::Controller,
+        ObType::Modem,
+    ];
+
+    fn name(self) -> &'static str {
+        match self {
+            Self::Unknown => "",
+            Self::Alarm => "Alarm",
+            Self::CabinetStyle => "Cabinet Style",
+            Self::CommConfig => "Comm Config",
+            Self::CommLink => "Comm Link",
+            Self::Controller => "Controller",
+            Self::Modem => "Modem",
+        }
+    }
+
+    fn uri(self) -> &'static str {
+        match self {
+            Self::Unknown => "",
+            Self::Alarm => "/iris/api/alarm",
+            Self::CabinetStyle => "/iris/api/cabinet_style",
+            Self::CommConfig => "/iris/api/comm_config",
+            Self::CommLink => "/iris/api/comm_link",
+            Self::Controller => "/iris/api/controller",
+            Self::Modem => "/iris/api/modem",
+        }
+    }
+
+    /// Populate cards in list
+    fn populate_cards(self, tx: String) {
+        spawn_local(self.populate_list(tx));
+    }
+
+    async fn populate_list(self, tx: String) {
+        if let Err(e) = self.try_populate_list(tx).await {
+            // unauthorized (401) should be handled here
+            console::log_1(&e);
+        }
+    }
+
+    async fn try_populate_list(self, tx: String) -> Result<(), JsValue> {
+        let window = web_sys::window().unwrap_throw();
+        let doc = window.document().unwrap_throw();
+        let ob_list = doc.get_element_by_id("ob_list").unwrap_throw();
+        remove_children(&ob_list);
+        if !self.uri().is_empty() {
+            let cards = doc.create_element("ul")?;
+            cards.set_class_name("cards");
+            if tx.is_empty() {
+                cards.append_child(&*make_new_elem(&doc)?)?;
+            }
+            let json = self.fetch_json(&window).await?;
+            self.append_cards(json, &tx, &doc, &cards)?;
+            ob_list.append_child(&cards)?;
+        }
+        Ok(())
+    }
+
+    /// Fetch a JSON document
+    async fn fetch_json(self, window: &Window) -> Result<JsValue, JsValue> {
+        let req = Request::new_with_str(self.uri())?;
+        req.headers().set("Accept", "application/json")?;
+        let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
+        let resp: Response = resp.dyn_into().unwrap_throw();
+        match resp.status() {
+            200 => Ok(JsFuture::from(resp.json()?).await?),
+            401 => Err(resp.status_text().into()),
+            _ => Err(resp.status_text().into()),
+        }
+    }
+
+    fn append_cards(
+        self,
+        json: JsValue,
+        tx: &str,
+        doc: &Document,
+        cards: &Element,
+    ) -> Result<(), JsValue> {
+        match self {
+            Self::Alarm => Alarm::make_cards(json, tx, doc, cards),
+            Self::CabinetStyle => {
+                CabinetStyle::make_cards(json, tx, doc, cards)
+            }
+            Self::CommConfig => CommConfig::make_cards(json, tx, doc, cards),
+            Self::CommLink => CommLink::make_cards(json, tx, doc, cards),
+            Self::Controller => Controller::make_cards(json, tx, doc, cards),
+            Self::Modem => Modem::make_cards(json, tx, doc, cards),
+            _ => Ok(()),
+        }
+    }
+}
+
+trait Card: DeserializeOwned {
     fn is_match(&self, _tx: &str) -> bool {
         false
     }
+
     fn make_card(&self, doc: &Document) -> Result<Element, JsValue>;
+
+    fn make_cards(
+        json: JsValue,
+        tx: &str,
+        doc: &Document,
+        cards: &Element,
+    ) -> Result<(), JsValue> {
+        let obs = json.into_serde::<Vec<Self>>().unwrap_throw();
+        for ob in obs.iter().filter(|ob| ob.is_match(tx)) {
+            cards.append_child(&*ob.make_card(doc)?)?;
+        }
+        Ok(())
+    }
 }
 
 impl Card for () {
-    const OB_TYPE: &'static str = "";
-    const URI: &'static str = "";
-
     fn make_card(&self, _doc: &Document) -> Result<Element, JsValue> {
         unreachable!()
     }
 }
 
 impl Card for Alarm {
-    const OB_TYPE: &'static str = "Alarm";
-    const URI: &'static str = "/iris/api/alarm";
-
     fn is_match(&self, tx: &str) -> bool {
         self.description.to_lowercase().contains(tx)
             || self.name.to_lowercase().contains(tx)
     }
+
     fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
         card.set_attribute("name", &self.name)?;
@@ -125,12 +254,10 @@ impl Card for Alarm {
 }
 
 impl Card for CabinetStyle {
-    const OB_TYPE: &'static str = "Cabinet Style";
-    const URI: &'static str = "/iris/api/cabinet_style";
-
     fn is_match(&self, tx: &str) -> bool {
         self.name.to_lowercase().contains(tx)
     }
+
     fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
         card.set_attribute("name", &self.name)?;
@@ -144,13 +271,11 @@ impl Card for CabinetStyle {
 }
 
 impl Card for CommConfig {
-    const OB_TYPE: &'static str = "Comm Config";
-    const URI: &'static str = "/iris/api/comm_config";
-
     fn is_match(&self, tx: &str) -> bool {
         self.description.to_lowercase().contains(tx)
             || self.name.to_lowercase().contains(tx)
     }
+
     fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
         card.set_attribute("name", &self.name)?;
@@ -168,13 +293,11 @@ impl Card for CommConfig {
 }
 
 impl Card for CommLink {
-    const OB_TYPE: &'static str = "Comm Link";
-    const URI: &'static str = "/iris/api/comm_link";
-
     fn is_match(&self, tx: &str) -> bool {
         self.description.to_lowercase().contains(tx)
             || self.name.to_lowercase().contains(tx)
     }
+
     fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
         card.set_attribute("name", &self.name)?;
@@ -196,14 +319,12 @@ impl Card for CommLink {
 }
 
 impl Card for Controller {
-    const OB_TYPE: &'static str = "Controller";
-    const URI: &'static str = "/iris/api/controller";
-
     fn is_match(&self, tx: &str) -> bool {
         let comm_link = self.comm_link.to_lowercase();
         comm_link.contains(tx)
             || format!("{}:{}", comm_link, self.drop_id).contains(tx)
     }
+
     fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
         card.set_attribute("name", &self.name)?;
@@ -226,12 +347,10 @@ impl Card for Controller {
 }
 
 impl Card for Modem {
-    const OB_TYPE: &'static str = "Modem";
-    const URI: &'static str = "/iris/api/modem";
-
     fn is_match(&self, tx: &str) -> bool {
         self.name.to_lowercase().contains(tx)
     }
+
     fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
         card.set_attribute("name", &self.name)?;
@@ -245,32 +364,6 @@ impl Card for Modem {
         title.set_inner_html(&self.name);
         card.append_child(&title)?;
         Ok(card)
-    }
-}
-
-/// Object types
-const OB_TYPES: &[&str] = &[
-    Alarm::OB_TYPE,
-    CabinetStyle::OB_TYPE,
-    CommConfig::OB_TYPE,
-    CommLink::OB_TYPE,
-    Controller::OB_TYPE,
-    Modem::OB_TYPE,
-];
-
-/// Fetch a JSON array and deserialize into a Vec
-async fn fetch_json_vec<C: Card>(window: &Window) -> Result<Vec<C>, JsValue> {
-    let req = Request::new_with_str(C::URI)?;
-    req.headers().set("Accept", "application/json")?;
-    let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
-    let resp: Response = resp.dyn_into().unwrap_throw();
-    match resp.status() {
-        200 => {
-            let json = JsFuture::from(resp.json()?).await?;
-            Ok(json.into_serde::<Vec<C>>().unwrap_throw())
-        }
-        401 => Err(resp.status_text().into()),
-        _ => Err(resp.status_text().into()),
     }
 }
 
@@ -291,9 +384,9 @@ pub async fn main() -> Result<(), JsValue> {
     ob_type.append_child(&opt)?;
     let group = doc.create_element("optgroup")?;
     group.set_attribute("label", "Maintenance")?;
-    for ob in OB_TYPES {
+    for ob in ObType::ALL {
         let opt = doc.create_element("option")?;
-        opt.append_with_str_1(ob)?;
+        opt.append_with_str_1(ob.name())?;
         group.append_child(&opt)?;
     }
     ob_type.append_child(&group)?;
@@ -316,63 +409,25 @@ fn handle_type_ev(tp: &str) {
         .unwrap_throw()
         .value()
         .to_lowercase();
-    populate_cards(tp, tx);
+    let tp: ObType = tp.into();
+    tp.populate_cards(tx);
 }
 
 /// Handle an event from "ob_input" `input` element
 fn handle_search_ev(tx: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    let tp = selected_type(&doc);
-    populate_cards(&tp, tx);
+    let tp = selected_type(&doc).unwrap_throw();
+    let tp = ObType::from(&tp[..]);
+    tp.populate_cards(tx);
 }
 
-fn selected_type(doc: &Document) -> String {
-    doc.get_element_by_id("ob_type")
-        .unwrap_throw()
-        .dyn_into::<HtmlSelectElement>()
-        .unwrap_throw()
-        .value()
-}
-
-/// Populate cards in list
-fn populate_cards(tp: &str, tx: String) {
-    match tp {
-        Alarm::OB_TYPE => spawn_local(populate_list::<Alarm>(tx)),
-        CabinetStyle::OB_TYPE => spawn_local(populate_list::<CabinetStyle>(tx)),
-        CommConfig::OB_TYPE => spawn_local(populate_list::<CommConfig>(tx)),
-        CommLink::OB_TYPE => spawn_local(populate_list::<CommLink>(tx)),
-        Controller::OB_TYPE => spawn_local(populate_list::<Controller>(tx)),
-        Modem::OB_TYPE => spawn_local(populate_list::<Modem>(tx)),
-        _ => spawn_local(populate_list::<()>(tx)),
-    }
-}
-
-async fn populate_list<C: Card>(tx: String) {
-    if let Err(e) = try_populate_list::<C>(tx).await {
-        // unauthorized (401) should be handled here
-        console::log_1(&e);
-    }
-}
-
-async fn try_populate_list<C: Card>(tx: String) -> Result<(), JsValue> {
-    let window = web_sys::window().unwrap_throw();
-    let doc = window.document().unwrap_throw();
-    let ob_list = doc.get_element_by_id("ob_list").unwrap_throw();
-    remove_children(&ob_list);
-    if !C::URI.is_empty() {
-        let cards = doc.create_element("ul")?;
-        cards.set_class_name("cards");
-        let obs: Vec<C> = fetch_json_vec(&window).await?;
-        if tx.is_empty() {
-            cards.append_child(&*make_new_elem(&doc)?)?;
-        }
-        for ob in obs.iter().filter(|ob| ob.is_match(&tx)) {
-            cards.append_child(&*ob.make_card(&doc)?)?;
-        }
-        ob_list.append_child(&cards)?;
-    }
-    Ok(())
+fn selected_type(doc: &Document) -> Result<String, JsValue> {
+    Ok(doc
+        .get_element_by_id("ob_type")
+        .ok_or("`ob_type` not found")?
+        .dyn_into::<HtmlSelectElement>()?
+        .value())
 }
 
 fn remove_children(elem: &Element) {
@@ -463,7 +518,7 @@ fn add_click_event_listener(
 fn handle_click_ev(elem: &Element) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    let tp = selected_type(&doc);
+    let tp = selected_type(&doc).unwrap_throw();
     console::log_1(&tp.into());
     if let Some(card) = elem.closest(".card").unwrap_throw() {
         if let Some(name) = card.get_attribute("name") {
