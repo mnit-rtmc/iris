@@ -25,7 +25,7 @@ The traffic data is displayed on a web-based segment map, served by Earthwyrm.
 The graft service handles requests through Sonar, using session-based
 authentication.
 
-## Phase 3 — Maintenance Administation (in progress)
+## Phase 3 — Maintenance Administration (in progress)
 
 * graft
   - [X] Add routes for maintenance resources

@@ -1,12 +1,11 @@
-use regex::{Regex, RegexBuilder};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
 use web_sys::{
-    console, Document, Element, Event, HtmlInputElement, HtmlSelectElement,
-    Request, Response, Window,
+    console, Document, Element, Event, HtmlElement, HtmlInputElement,
+    HtmlSelectElement, Request, Response, Window,
 };
 
 /// Alarm
@@ -78,24 +77,25 @@ struct Modem {
     pub enabled: bool,
 }
 
+const TITLE: &str = "title";
+const DISABLED: &str = "title disabled";
+const INFO: &str = "info";
+
 trait Card: DeserializeOwned {
-    const TITLE: &'static str = "title";
-    const DISABLED: &'static str = "title disabled";
-    const INFO: &'static str = "info";
     const OB_TYPE: &'static str;
     const URI: &'static str;
 
-    fn is_match(&self, _re: &Regex) -> bool {
+    fn is_match(&self, _tx: &str) -> bool {
         false
     }
-    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue>;
+    fn make_card(&self, doc: &Document) -> Result<Element, JsValue>;
 }
 
 impl Card for () {
     const OB_TYPE: &'static str = "";
     const URI: &'static str = "";
 
-    fn make_elem(&self, _doc: &Document) -> Result<Element, JsValue> {
+    fn make_card(&self, _doc: &Document) -> Result<Element, JsValue> {
         unreachable!()
     }
 }
@@ -104,18 +104,20 @@ impl Card for Alarm {
     const OB_TYPE: &'static str = "Alarm";
     const URI: &'static str = "/iris/api/alarm";
 
-    fn is_match(&self, re: &Regex) -> bool {
-        re.is_match(&self.description) || re.is_match(&self.name)
+    fn is_match(&self, tx: &str) -> bool {
+        self.description.to_lowercase().contains(tx)
+            || self.name.to_lowercase().contains(tx)
     }
-    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue> {
+    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
+        card.set_attribute("name", &self.name)?;
         card.set_class_name("card");
         let title = doc.create_element("span")?;
-        title.set_class_name(Alarm::TITLE);
+        title.set_class_name(TITLE);
         title.set_inner_html(&self.description);
         card.append_child(&title)?;
         let info = doc.create_element("span")?;
-        info.set_class_name(Alarm::INFO);
+        info.set_class_name(INFO);
         info.set_inner_html(&self.name);
         card.append_child(&info)?;
         Ok(card)
@@ -126,14 +128,15 @@ impl Card for CabinetStyle {
     const OB_TYPE: &'static str = "Cabinet Style";
     const URI: &'static str = "/iris/api/cabinet_style";
 
-    fn is_match(&self, re: &Regex) -> bool {
-        re.is_match(&self.name)
+    fn is_match(&self, tx: &str) -> bool {
+        self.name.to_lowercase().contains(tx)
     }
-    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue> {
+    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
+        card.set_attribute("name", &self.name)?;
         card.set_class_name("card");
         let title = doc.create_element("span")?;
-        title.set_class_name(CabinetStyle::TITLE);
+        title.set_class_name(TITLE);
         title.set_inner_html(&self.name);
         card.append_child(&title)?;
         Ok(card)
@@ -144,18 +147,20 @@ impl Card for CommConfig {
     const OB_TYPE: &'static str = "Comm Config";
     const URI: &'static str = "/iris/api/comm_config";
 
-    fn is_match(&self, re: &Regex) -> bool {
-        re.is_match(&self.description) || re.is_match(&self.name)
+    fn is_match(&self, tx: &str) -> bool {
+        self.description.to_lowercase().contains(tx)
+            || self.name.to_lowercase().contains(tx)
     }
-    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue> {
+    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
+        card.set_attribute("name", &self.name)?;
         card.set_class_name("card");
         let title = doc.create_element("span")?;
-        title.set_class_name(CommConfig::TITLE);
+        title.set_class_name(TITLE);
         title.set_inner_html(&self.description);
         card.append_child(&title)?;
         let info = doc.create_element("span")?;
-        info.set_class_name(CommConfig::INFO);
+        info.set_class_name(INFO);
         info.set_inner_html(&self.name);
         card.append_child(&info)?;
         Ok(card)
@@ -166,22 +171,24 @@ impl Card for CommLink {
     const OB_TYPE: &'static str = "Comm Link";
     const URI: &'static str = "/iris/api/comm_link";
 
-    fn is_match(&self, re: &Regex) -> bool {
-        re.is_match(&self.description) || re.is_match(&self.name)
+    fn is_match(&self, tx: &str) -> bool {
+        self.description.to_lowercase().contains(tx)
+            || self.name.to_lowercase().contains(tx)
     }
-    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue> {
+    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
+        card.set_attribute("name", &self.name)?;
         card.set_class_name("card");
         let title = doc.create_element("span")?;
         if self.poll_enabled {
-            title.set_class_name(CommLink::TITLE);
+            title.set_class_name(TITLE);
         } else {
-            title.set_class_name(CommLink::DISABLED);
+            title.set_class_name(DISABLED);
         }
         title.set_inner_html(&self.description);
         card.append_child(&title)?;
         let info = doc.create_element("span")?;
-        info.set_class_name(CommLink::INFO);
+        info.set_class_name(INFO);
         info.set_inner_html(&self.name);
         card.append_child(&info)?;
         Ok(card)
@@ -192,24 +199,26 @@ impl Card for Controller {
     const OB_TYPE: &'static str = "Controller";
     const URI: &'static str = "/iris/api/controller";
 
-    fn is_match(&self, re: &Regex) -> bool {
-        re.is_match(&self.comm_link)
-            || re.is_match(&format!("{}:{}", self.comm_link, self.drop_id))
+    fn is_match(&self, tx: &str) -> bool {
+        let comm_link = self.comm_link.to_lowercase();
+        comm_link.contains(tx)
+            || format!("{}:{}", comm_link, self.drop_id).contains(tx)
     }
-    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue> {
+    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
+        card.set_attribute("name", &self.name)?;
         card.set_class_name("card");
         let title = doc.create_element("span")?;
         // condition 1 is "Active"
         if self.condition == 1 {
-            title.set_class_name(Controller::TITLE);
+            title.set_class_name(TITLE);
         } else {
-            title.set_class_name(Controller::DISABLED);
+            title.set_class_name(DISABLED);
         }
         title.set_inner_html(&format!("{}:{}", self.comm_link, self.drop_id));
         card.append_child(&title)?;
         let info = doc.create_element("span")?;
-        info.set_class_name(Controller::INFO);
+        info.set_class_name(INFO);
         info.set_inner_html(&self.name);
         card.append_child(&info)?;
         Ok(card)
@@ -220,17 +229,18 @@ impl Card for Modem {
     const OB_TYPE: &'static str = "Modem";
     const URI: &'static str = "/iris/api/modem";
 
-    fn is_match(&self, re: &Regex) -> bool {
-        re.is_match(&self.name)
+    fn is_match(&self, tx: &str) -> bool {
+        self.name.to_lowercase().contains(tx)
     }
-    fn make_elem(&self, doc: &Document) -> Result<Element, JsValue> {
+    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
         let card = doc.create_element("li")?;
+        card.set_attribute("name", &self.name)?;
         card.set_class_name("card");
         let title = doc.create_element("span")?;
         if self.enabled {
-            title.set_class_name(Modem::TITLE);
+            title.set_class_name(TITLE);
         } else {
-            title.set_class_name(Modem::DISABLED);
+            title.set_class_name(DISABLED);
         }
         title.set_inner_html(&self.name);
         card.append_child(&title)?;
@@ -290,6 +300,8 @@ pub async fn main() -> Result<(), JsValue> {
     add_select_event_listener(&ob_type, handle_type_ev)?;
     let ob_input = doc.get_element_by_id("ob_input").unwrap_throw();
     add_input_event_listener(&ob_input, handle_search_ev)?;
+    let ob_list = doc.get_element_by_id("ob_list").unwrap_throw();
+    add_click_event_listener(&ob_list, handle_click_ev)?;
     Ok(())
 }
 
@@ -297,75 +309,84 @@ pub async fn main() -> Result<(), JsValue> {
 fn handle_type_ev(tp: &str) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    let search = doc
+    let tx = doc
         .get_element_by_id("ob_input")
         .unwrap_throw()
         .dyn_into::<HtmlInputElement>()
         .unwrap_throw()
-        .value();
-    populate_cards(tp, &search);
+        .value()
+        .to_lowercase();
+    populate_cards(tp, tx);
 }
 
 /// Handle an event from "ob_input" `input` element
-fn handle_search_ev(search: &str) {
+fn handle_search_ev(tx: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    let tp = doc
-        .get_element_by_id("ob_type")
+    let tp = selected_type(&doc);
+    populate_cards(&tp, tx);
+}
+
+fn selected_type(doc: &Document) -> String {
+    doc.get_element_by_id("ob_type")
         .unwrap_throw()
         .dyn_into::<HtmlSelectElement>()
         .unwrap_throw()
-        .value();
-    populate_cards(&tp, search);
+        .value()
 }
 
 /// Populate cards in list
-fn populate_cards(tp: &str, search: &str) {
-    let re = RegexBuilder::new(&regex::escape(&search))
-        .case_insensitive(true)
-        .build()
-        .unwrap_throw();
+fn populate_cards(tp: &str, tx: String) {
     match tp {
-        Alarm::OB_TYPE => spawn_local(populate_list::<Alarm>(re)),
-        CabinetStyle::OB_TYPE => spawn_local(populate_list::<CabinetStyle>(re)),
-        CommConfig::OB_TYPE => spawn_local(populate_list::<CommConfig>(re)),
-        CommLink::OB_TYPE => spawn_local(populate_list::<CommLink>(re)),
-        Controller::OB_TYPE => spawn_local(populate_list::<Controller>(re)),
-        Modem::OB_TYPE => spawn_local(populate_list::<Modem>(re)),
-        _ => spawn_local(populate_list::<()>(re)),
+        Alarm::OB_TYPE => spawn_local(populate_list::<Alarm>(tx)),
+        CabinetStyle::OB_TYPE => spawn_local(populate_list::<CabinetStyle>(tx)),
+        CommConfig::OB_TYPE => spawn_local(populate_list::<CommConfig>(tx)),
+        CommLink::OB_TYPE => spawn_local(populate_list::<CommLink>(tx)),
+        Controller::OB_TYPE => spawn_local(populate_list::<Controller>(tx)),
+        Modem::OB_TYPE => spawn_local(populate_list::<Modem>(tx)),
+        _ => spawn_local(populate_list::<()>(tx)),
     }
 }
 
-async fn populate_list<C: Card>(re: Regex) {
-    if let Err(e) = try_populate_list::<C>(re).await {
+async fn populate_list<C: Card>(tx: String) {
+    if let Err(e) = try_populate_list::<C>(tx).await {
         // unauthorized (401) should be handled here
         console::log_1(&e);
     }
 }
 
-async fn try_populate_list<C: Card>(re: Regex) -> Result<(), JsValue> {
+async fn try_populate_list<C: Card>(tx: String) -> Result<(), JsValue> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let ob_list = doc.get_element_by_id("ob_list").unwrap_throw();
-    let list = ob_list.clone_node()?;
+    remove_children(&ob_list);
     if !C::URI.is_empty() {
         let cards = doc.create_element("ul")?;
         cards.set_class_name("cards");
         let obs: Vec<C> = fetch_json_vec(&window).await?;
-        if re.as_str().is_empty() {
+        if tx.is_empty() {
             cards.append_child(&*make_new_elem(&doc)?)?;
         }
-        for ob in obs.iter().filter(|ob| ob.is_match(&re)) {
-            cards.append_child(&*ob.make_elem(&doc)?)?;
+        for ob in obs.iter().filter(|ob| ob.is_match(&tx)) {
+            cards.append_child(&*ob.make_card(&doc)?)?;
         }
-        list.append_child(&cards)?;
+        ob_list.append_child(&cards)?;
     }
-    ob_list.replace_with_with_node_1(&list)?;
     Ok(())
+}
+
+fn remove_children(elem: &Element) {
+    let children = elem.children();
+    for i in 0..children.length() {
+        if let Some(child) = children.get_with_index(i) {
+            child.remove();
+        }
+    }
 }
 
 fn make_new_elem(doc: &Document) -> Result<Element, JsValue> {
     let card = doc.create_element("li")?;
+    card.set_attribute("name", "")?;
     card.set_class_name("card");
     let title = doc.create_element("span")?;
     title.set_class_name("notes");
@@ -400,7 +421,7 @@ fn add_select_event_listener(
 /// Add an "input" event listener to an element
 fn add_input_event_listener(
     elem: &Element,
-    handle_ev: fn(&str),
+    handle_ev: fn(String),
 ) -> Result<(), JsValue> {
     let closure = Closure::wrap(Box::new(move |e: Event| {
         let value = e
@@ -409,7 +430,7 @@ fn add_input_event_listener(
             .dyn_into::<HtmlInputElement>()
             .unwrap()
             .value();
-        handle_ev(&value);
+        handle_ev(value);
     }) as Box<dyn FnMut(_)>);
     elem.add_event_listener_with_callback(
         "input",
@@ -418,4 +439,42 @@ fn add_input_event_listener(
     // can't drop closure, just forget it to make JS happy
     closure.forget();
     Ok(())
+}
+
+/// Add a "click" event listener to an element
+fn add_click_event_listener(
+    elem: &Element,
+    handle_ev: fn(&Element),
+) -> Result<(), JsValue> {
+    let closure = Closure::wrap(Box::new(move |e: Event| {
+        let value = e.target().unwrap().dyn_into::<Element>().unwrap();
+        handle_ev(&value);
+    }) as Box<dyn FnMut(_)>);
+    elem.add_event_listener_with_callback(
+        "click",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
+    Ok(())
+}
+
+/// Handle an event from "ob_list" `click` element
+fn handle_click_ev(elem: &Element) {
+    let window = web_sys::window().unwrap_throw();
+    let doc = window.document().unwrap_throw();
+    let tp = selected_type(&doc);
+    console::log_1(&tp.into());
+    if let Some(card) = elem.closest(".card").unwrap_throw() {
+        if let Some(name) = card.get_attribute("name") {
+            let ob_form = doc.get_element_by_id("ob_form").unwrap_throw();
+            remove_children(&ob_form);
+            let title = doc.create_element("span").unwrap_throw();
+            title.set_inner_html(&format!("name: {}", name));
+            ob_form.append_child(&title).unwrap_throw();
+            let style =
+                ob_form.dyn_into::<HtmlElement>().unwrap_throw().style();
+            style.set_property("max-height", "50%").unwrap_throw();
+        }
+    }
 }

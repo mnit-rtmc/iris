@@ -34,11 +34,22 @@ body {
     flex: 1 0 12rem;
   }
 }
-.filter {
+
+#ob_filter {
   flex: 0 0 auto;
   display: flex;
   margin: 0.2rem;
 }
+#ob_list {
+  flex: 1 1 auto;
+  overflow-y: scroll;
+}
+#ob_form {
+  flex: 0 1 auto;
+  max-height: 0;
+  transition: max-height 0.2s ease-in-out;
+}
+
 #ob_type {
   flex: 1 0 auto;
 }
@@ -51,10 +62,7 @@ body {
 #ob_input {
   flex: 4 1 auto;
 }
-#ob_list {
-  flex: 0 1 auto;
-  overflow-y: scroll;
-}
+
 .cards {
   display: flex;
   flex-wrap: wrap;
