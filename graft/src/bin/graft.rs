@@ -17,11 +17,24 @@
 use async_std::path::PathBuf;
 use convert_case::{Case, Casing};
 use graft::sonar::{Connection, Result, SonarError};
+use json::JsonValue;
 use rand::Rng;
 use std::io;
 use tide::prelude::*;
 use tide::sessions::{MemoryStore, SessionMiddleware};
 use tide::{Body, Request, Response, StatusCode};
+
+/// Slice of (type, attribute) tuples for JSON integer values
+const INTEGERS: &[(&str, &str)] = &[
+    ("alarm", "pin"),
+    ("alarm", "trigger_time"),
+    ("alarm", "styles"),
+];
+
+/// Slice of (type, attribute) tuples for JSON boolean values
+const BOOLS: &[(&str, &str)] = &[
+    ("alarm", "state"),
+];
 
 /// Trait to get HTTP status code from an error
 trait ErrorStatus {
@@ -251,7 +264,9 @@ async fn get_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
     resp!(
         c.enumerate_object(&nm, |att, val| {
             let att = att.to_case(Case::Snake);
-            res[att] = val.into();
+            if let Some(val) = make_json(&(tp, &att), val) {
+                res[att] = val;
+            }
             Ok(())
         })
         .await
@@ -260,6 +275,17 @@ async fn get_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
         .body(res.to_string())
         .content_type("application/json")
         .build())
+}
+
+/// Make a JSON attribute value
+fn make_json(tp_att: &(&str, &str), val: &str) -> Option<JsonValue> {
+    if INTEGERS.contains(tp_att) {
+        val.parse::<i64>().ok().map(|v| v.into())
+    } else if BOOLS.contains(tp_att) {
+        val.parse::<bool>().ok().map(|v| v.into())
+    } else {
+        Some(val.into())
+    }
 }
 
 /// Create a Sonar object from a `POST` request
