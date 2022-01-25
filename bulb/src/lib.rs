@@ -8,6 +8,20 @@ use web_sys::{
     HtmlSelectElement, Request, Response, Window,
 };
 
+trait ElemCast {
+    /// Get an element by ID and cast it
+    fn elem<E: JsCast>(&self, id: &str) -> Result<E, JsValue>;
+}
+
+impl ElemCast for Document {
+    fn elem<E: JsCast>(&self, id: &str) -> Result<E, JsValue> {
+        Ok(self
+            .get_element_by_id(id)
+            .ok_or("id not found")?
+            .dyn_into::<E>()?)
+    }
+}
+
 /// Alarm
 #[derive(Debug, Deserialize, Serialize)]
 struct Alarm {
@@ -155,7 +169,7 @@ impl ObType {
     async fn try_populate_list(self, tx: String) -> Result<(), JsValue> {
         let window = web_sys::window().unwrap_throw();
         let doc = window.document().unwrap_throw();
-        let ob_list = doc.get_element_by_id("ob_list").unwrap_throw();
+        let ob_list = doc.elem("ob_list")?;
         remove_children(&ob_list);
         if !self.uri().is_empty() {
             let cards = doc.create_element("ul")?;
@@ -201,6 +215,12 @@ impl ObType {
             Self::Modem => Modem::make_cards(json, tx, doc, cards),
             _ => Ok(()),
         }
+    }
+
+    fn make_form(self, name: &str, doc: &Document, ob_form: &Element) {
+        let title = doc.create_element("span").unwrap_throw();
+        title.set_inner_html(&format!("name: {}", name));
+        ob_form.append_child(&title).unwrap_throw();
     }
 }
 
@@ -378,7 +398,7 @@ pub async fn main() -> Result<(), JsValue> {
 
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    let ob_type = doc.get_element_by_id("ob_type").unwrap_throw();
+    let ob_type: HtmlSelectElement = doc.elem("ob_type")?;
     let opt = doc.create_element("option")?;
     opt.append_with_str_1("")?;
     ob_type.append_child(&opt)?;
@@ -391,9 +411,9 @@ pub async fn main() -> Result<(), JsValue> {
     }
     ob_type.append_child(&group)?;
     add_select_event_listener(&ob_type, handle_type_ev)?;
-    let ob_input = doc.get_element_by_id("ob_input").unwrap_throw();
+    let ob_input = doc.elem("ob_input")?;
     add_input_event_listener(&ob_input, handle_search_ev)?;
-    let ob_list = doc.get_element_by_id("ob_list").unwrap_throw();
+    let ob_list = doc.elem("ob_list")?;
     add_click_event_listener(&ob_list, handle_click_ev)?;
     Ok(())
 }
@@ -402,13 +422,8 @@ pub async fn main() -> Result<(), JsValue> {
 fn handle_type_ev(tp: &str) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    let tx = doc
-        .get_element_by_id("ob_input")
-        .unwrap_throw()
-        .dyn_into::<HtmlInputElement>()
-        .unwrap_throw()
-        .value()
-        .to_lowercase();
+    let input: HtmlInputElement = doc.elem("ob_input").unwrap_throw();
+    let tx = input.value().to_lowercase();
     let tp: ObType = tp.into();
     tp.populate_cards(tx);
 }
@@ -418,16 +433,13 @@ fn handle_search_ev(tx: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let tp = selected_type(&doc).unwrap_throw();
-    let tp = ObType::from(&tp[..]);
     tp.populate_cards(tx);
 }
 
-fn selected_type(doc: &Document) -> Result<String, JsValue> {
-    Ok(doc
-        .get_element_by_id("ob_type")
-        .ok_or("`ob_type` not found")?
-        .dyn_into::<HtmlSelectElement>()?
-        .value())
+fn selected_type(doc: &Document) -> Result<ObType, JsValue> {
+    let ob_type: HtmlSelectElement = doc.elem("ob_type")?;
+    let tp = ob_type.value();
+    Ok(ObType::from(tp.as_str()))
 }
 
 fn remove_children(elem: &Element) {
@@ -452,7 +464,7 @@ fn make_new_elem(doc: &Document) -> Result<Element, JsValue> {
 
 /// Add an "input" event listener to an element
 fn add_select_event_listener(
-    elem: &Element,
+    elem: &HtmlSelectElement,
     handle_ev: fn(&str),
 ) -> Result<(), JsValue> {
     let closure = Closure::wrap(Box::new(move |e: Event| {
@@ -475,7 +487,7 @@ fn add_select_event_listener(
 
 /// Add an "input" event listener to an element
 fn add_input_event_listener(
-    elem: &Element,
+    elem: &HtmlInputElement,
     handle_ev: fn(String),
 ) -> Result<(), JsValue> {
     let closure = Closure::wrap(Box::new(move |e: Event| {
@@ -519,16 +531,13 @@ fn handle_click_ev(elem: &Element) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let tp = selected_type(&doc).unwrap_throw();
-    console::log_1(&tp.into());
+    console::log_1(&JsValue::from(tp.name()));
     if let Some(card) = elem.closest(".card").unwrap_throw() {
         if let Some(name) = card.get_attribute("name") {
-            let ob_form = doc.get_element_by_id("ob_form").unwrap_throw();
+            let ob_form: HtmlElement = doc.elem("ob_form").unwrap_throw();
             remove_children(&ob_form);
-            let title = doc.create_element("span").unwrap_throw();
-            title.set_inner_html(&format!("name: {}", name));
-            ob_form.append_child(&title).unwrap_throw();
-            let style =
-                ob_form.dyn_into::<HtmlElement>().unwrap_throw().style();
+            tp.make_form(&name, &doc, &ob_form);
+            let style = ob_form.style();
             style.set_property("max-height", "50%").unwrap_throw();
         }
     }
