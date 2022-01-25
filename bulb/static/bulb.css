@@ -46,6 +46,7 @@ body {
 }
 #ob_form {
   flex: 0 1 auto;
+  margin: 0.2rem;
   max-height: 0;
   transition: max-height 0.2s ease-in-out;
 }
@@ -86,7 +87,11 @@ body {
   box-shadow: 0.2rem 0.2rem 0.2rem 0 rgba(0, 0, 0, 0.5);
   background-color: white;
 }
+.selected {
+  background-color: #ffc;
+}
 .title {
+  font-weight: bold;
 }
 .info {
   font-weight: bold;
@@ -100,4 +105,14 @@ body {
 }
 .disabled {
   text-decoration: line-through;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffc;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.1rem;
 }

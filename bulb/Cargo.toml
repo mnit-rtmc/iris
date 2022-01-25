@@ -3,9 +3,6 @@ name = "bulb"
 version = "0.0.0"
 edition = "2021"
 
-[lib]
-crate-type = ["cdylib"]
-
 [dependencies]
 console_error_panic_hook = "0.1"
 serde = { version = "1", features = ["derive"] }
@@ -25,6 +22,7 @@ features = [
   'Event',
   'Headers',
   'HtmlInputElement',
+  'HtmlLabelElement',
   'HtmlSelectElement',
   'Request',
   'RequestInit',

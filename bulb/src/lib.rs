@@ -5,12 +5,15 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
 use web_sys::{
     console, Document, Element, Event, HtmlElement, HtmlInputElement,
-    HtmlSelectElement, Request, Response, Window,
+    HtmlLabelElement, HtmlSelectElement, Request, Response, Window,
 };
 
 trait ElemCast {
     /// Get an element by ID and cast it
     fn elem<E: JsCast>(&self, id: &str) -> Result<E, JsValue>;
+
+    /// Make an element and cast it
+    fn make_elem<E: JsCast>(&self, local_name: &str) -> Result<E, JsValue>;
 }
 
 impl ElemCast for Document {
@@ -19,6 +22,23 @@ impl ElemCast for Document {
             .get_element_by_id(id)
             .ok_or("id not found")?
             .dyn_into::<E>()?)
+    }
+
+    fn make_elem<E: JsCast>(&self, local_name: &str) -> Result<E, JsValue> {
+        Ok(self.create_element(local_name)?.dyn_into::<E>()?)
+    }
+}
+
+/// Fetch a JSON document
+async fn fetch_json(window: &Window, uri: &str) -> Result<JsValue, JsValue> {
+    let req = Request::new_with_str(uri)?;
+    req.headers().set("Accept", "application/json")?;
+    let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
+    let resp: Response = resp.dyn_into().unwrap_throw();
+    match resp.status() {
+        200 => Ok(JsFuture::from(resp.json()?).await?),
+        401 => Err(resp.status_text().into()),
+        _ => Err(resp.status_text().into()),
     }
 }
 
@@ -30,7 +50,7 @@ struct Alarm {
     pub controller: Option<String>,
     pub pin: u32,
     pub state: bool,
-    pub trigger_time: Option<String>,
+    //pub trigger_time: Option<String>,
 }
 
 /// Cabinet Style
@@ -91,10 +111,19 @@ struct Modem {
     pub enabled: bool,
 }
 
+/// CSS class for titles
 const TITLE: &str = "title";
-const DISABLED: &str = "title disabled";
+
+/// CSS class for disabled cards
+const DISABLED: &str = "disabled";
+
+/// CSS class for info
 const INFO: &str = "info";
 
+/// CSS class for form
+const FORM: &str = "form";
+
+/// IRIS object types
 #[derive(Clone, Copy, Debug)]
 enum ObType {
     Unknown,
@@ -121,6 +150,7 @@ impl From<&str> for ObType {
 }
 
 impl ObType {
+    /// Slice of all valid types
     const ALL: &'static [ObType] = &[
         ObType::Alarm,
         ObType::CabinetStyle,
@@ -130,6 +160,7 @@ impl ObType {
         ObType::Modem,
     ];
 
+    /// Get type name
     fn name(self) -> &'static str {
         match self {
             Self::Unknown => "",
@@ -142,6 +173,7 @@ impl ObType {
         }
     }
 
+    /// Get the type URI
     fn uri(self) -> &'static str {
         match self {
             Self::Unknown => "",
@@ -154,19 +186,16 @@ impl ObType {
         }
     }
 
-    /// Populate cards in list
-    fn populate_cards(self, tx: String) {
-        spawn_local(self.populate_list(tx));
-    }
-
-    async fn populate_list(self, tx: String) {
-        if let Err(e) = self.try_populate_list(tx).await {
+    /// Populate cards in `ob_list`
+    async fn populate_cards(self, tx: String) {
+        if let Err(e) = self.try_populate_cards(tx).await {
             // unauthorized (401) should be handled here
             console::log_1(&e);
         }
     }
 
-    async fn try_populate_list(self, tx: String) -> Result<(), JsValue> {
+    /// Try to populate cards in `ob_list`
+    async fn try_populate_cards(self, tx: String) -> Result<(), JsValue> {
         let window = web_sys::window().unwrap_throw();
         let doc = window.document().unwrap_throw();
         let ob_list = doc.elem("ob_list")?;
@@ -177,26 +206,14 @@ impl ObType {
             if tx.is_empty() {
                 cards.append_child(&*make_new_elem(&doc)?)?;
             }
-            let json = self.fetch_json(&window).await?;
+            let json = fetch_json(&window, self.uri()).await?;
             self.append_cards(json, &tx, &doc, &cards)?;
             ob_list.append_child(&cards)?;
         }
         Ok(())
     }
 
-    /// Fetch a JSON document
-    async fn fetch_json(self, window: &Window) -> Result<JsValue, JsValue> {
-        let req = Request::new_with_str(self.uri())?;
-        req.headers().set("Accept", "application/json")?;
-        let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
-        let resp: Response = resp.dyn_into().unwrap_throw();
-        match resp.status() {
-            200 => Ok(JsFuture::from(resp.json()?).await?),
-            401 => Err(resp.status_text().into()),
-            _ => Err(resp.status_text().into()),
-        }
-    }
-
+    /// Append cards to a list element
     fn append_cards(
         self,
         json: JsValue,
@@ -217,10 +234,34 @@ impl ObType {
         }
     }
 
-    fn make_form(self, name: &str, doc: &Document, ob_form: &Element) {
-        let title = doc.create_element("span").unwrap_throw();
-        title.set_inner_html(&format!("name: {}", name));
-        ob_form.append_child(&title).unwrap_throw();
+    fn make_form(
+        self,
+        doc: &Document,
+        form: &HtmlElement,
+        json: JsValue,
+    ) -> Result<(), JsValue> {
+        match self {
+            Self::Alarm => Alarm::make_form(doc, form, json),
+            Self::CabinetStyle => CabinetStyle::make_form(doc, form, json),
+            Self::CommConfig => CommConfig::make_form(doc, form, json),
+            Self::CommLink => CommLink::make_form(doc, form, json),
+            Self::Controller => Controller::make_form(doc, form, json),
+            Self::Modem => Modem::make_form(doc, form, json),
+            _ => Ok(()),
+        }
+    }
+
+    /// Add form for the given name
+    async fn add_form(self, name: String) {
+        let window = web_sys::window().unwrap_throw();
+        let doc = window.document().unwrap_throw();
+        let ob_form: HtmlElement = doc.elem("ob_form").unwrap_throw();
+        let uri = format!("{}/{}", self.uri(), &name);
+        let json = fetch_json(&window, &uri).await.unwrap_throw();
+        remove_children(&ob_form);
+        self.make_form(&doc, &ob_form, json).unwrap_throw();
+        let style = ob_form.style();
+        style.set_property("max-height", "50%").unwrap_throw();
     }
 }
 
@@ -243,6 +284,14 @@ trait Card: DeserializeOwned {
         }
         Ok(())
     }
+
+    fn make_form(
+        _doc: &Document,
+        _form: &HtmlElement,
+        _json: JsValue,
+    ) -> Result<(), JsValue> {
+        Ok(())
+    }
 }
 
 impl Card for () {
@@ -262,7 +311,6 @@ impl Card for Alarm {
         card.set_attribute("name", &self.name)?;
         card.set_class_name("card");
         let title = doc.create_element("span")?;
-        title.set_class_name(TITLE);
         title.set_inner_html(&self.description);
         card.append_child(&title)?;
         let info = doc.create_element("span")?;
@@ -270,6 +318,44 @@ impl Card for Alarm {
         info.set_inner_html(&self.name);
         card.append_child(&info)?;
         Ok(card)
+    }
+
+    fn make_form(
+        doc: &Document,
+        form: &HtmlElement,
+        json: JsValue,
+    ) -> Result<(), JsValue> {
+        let val = json.into_serde::<Self>().unwrap_throw();
+
+        let div = doc.create_element("div")?;
+        div.set_class_name("row");
+        let title = doc.create_element("div")?;
+        title.set_class_name(TITLE);
+        title.set_inner_html(&"Alarm");
+        div.append_child(&title)?;
+        let info = doc.create_element("span")?;
+        info.set_class_name(INFO);
+        info.set_inner_html(&val.name);
+        div.append_child(&info)?;
+        form.append_child(&div)?;
+
+        let desc: HtmlLabelElement = doc.make_elem("label")?;
+        desc.set_html_for("form_description");
+        desc.set_inner_html(&"Description");
+        form.append_child(&desc)?;
+
+        let div = doc.create_element("div")?;
+        div.set_class_name("row");
+        let input = doc.create_element("input")?;
+        input.set_attribute("id", "form_description")?;
+        input.set_attribute("maxlength", "24")?;
+        input.set_attribute("size", "24")?;
+        input.set_attribute("value", &val.description)?;
+        div.append_child(&input).unwrap_throw();
+        form.append_child(&div).unwrap_throw();
+        form.set_class_name(FORM);
+
+        Ok(())
     }
 }
 
@@ -283,7 +369,6 @@ impl Card for CabinetStyle {
         card.set_attribute("name", &self.name)?;
         card.set_class_name("card");
         let title = doc.create_element("span")?;
-        title.set_class_name(TITLE);
         title.set_inner_html(&self.name);
         card.append_child(&title)?;
         Ok(card)
@@ -301,7 +386,6 @@ impl Card for CommConfig {
         card.set_attribute("name", &self.name)?;
         card.set_class_name("card");
         let title = doc.create_element("span")?;
-        title.set_class_name(TITLE);
         title.set_inner_html(&self.description);
         card.append_child(&title)?;
         let info = doc.create_element("span")?;
@@ -323,9 +407,7 @@ impl Card for CommLink {
         card.set_attribute("name", &self.name)?;
         card.set_class_name("card");
         let title = doc.create_element("span")?;
-        if self.poll_enabled {
-            title.set_class_name(TITLE);
-        } else {
+        if !self.poll_enabled {
             title.set_class_name(DISABLED);
         }
         title.set_inner_html(&self.description);
@@ -351,9 +433,7 @@ impl Card for Controller {
         card.set_class_name("card");
         let title = doc.create_element("span")?;
         // condition 1 is "Active"
-        if self.condition == 1 {
-            title.set_class_name(TITLE);
-        } else {
+        if self.condition != 1 {
             title.set_class_name(DISABLED);
         }
         title.set_inner_html(&format!("{}:{}", self.comm_link, self.drop_id));
@@ -376,9 +456,7 @@ impl Card for Modem {
         card.set_attribute("name", &self.name)?;
         card.set_class_name("card");
         let title = doc.create_element("span")?;
-        if self.enabled {
-            title.set_class_name(TITLE);
-        } else {
+        if !self.enabled {
             title.set_class_name(DISABLED);
         }
         title.set_inner_html(&self.name);
@@ -425,7 +503,7 @@ fn handle_type_ev(tp: &str) {
     let input: HtmlInputElement = doc.elem("ob_input").unwrap_throw();
     let tx = input.value().to_lowercase();
     let tp: ObType = tp.into();
-    tp.populate_cards(tx);
+    spawn_local(tp.populate_cards(tx));
 }
 
 /// Handle an event from "ob_input" `input` element
@@ -433,7 +511,7 @@ fn handle_search_ev(tx: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let tp = selected_type(&doc).unwrap_throw();
-    tp.populate_cards(tx);
+    spawn_local(tp.populate_cards(tx));
 }
 
 fn selected_type(doc: &Document) -> Result<ObType, JsValue> {
@@ -444,13 +522,12 @@ fn selected_type(doc: &Document) -> Result<ObType, JsValue> {
 
 fn remove_children(elem: &Element) {
     let children = elem.children();
-    for i in 0..children.length() {
-        if let Some(child) = children.get_with_index(i) {
-            child.remove();
-        }
+    while let Some(child) = children.get_with_index(0) {
+        child.remove();
     }
 }
 
+/// Make card for "Create New"
 fn make_new_elem(doc: &Document) -> Result<Element, JsValue> {
     let card = doc.create_element("li")?;
     card.set_attribute("name", "")?;
@@ -533,12 +610,9 @@ fn handle_click_ev(elem: &Element) {
     let tp = selected_type(&doc).unwrap_throw();
     console::log_1(&JsValue::from(tp.name()));
     if let Some(card) = elem.closest(".card").unwrap_throw() {
+        card.set_class_name("card selected");
         if let Some(name) = card.get_attribute("name") {
-            let ob_form: HtmlElement = doc.elem("ob_form").unwrap_throw();
-            remove_children(&ob_form);
-            tp.make_form(&name, &doc, &ob_form);
-            let style = ob_form.style();
-            style.set_property("max-height", "50%").unwrap_throw();
+            spawn_local(tp.add_form(name));
         }
     }
 }
