@@ -8,29 +8,31 @@ use web_sys::{
     HtmlSelectElement, Request, Response, Window,
 };
 
+type Result<T> = std::result::Result<T, JsValue>;
+
 trait ElemCast {
     /// Get an element by ID and cast it
-    fn elem<E: JsCast>(&self, id: &str) -> Result<E, JsValue>;
+    fn elem<E: JsCast>(&self, id: &str) -> Result<E>;
 
     /// Make an element and cast it
-    fn make_elem<E: JsCast>(&self, local_name: &str) -> Result<E, JsValue>;
+    fn make_elem<E: JsCast>(&self, local_name: &str) -> Result<E>;
 }
 
 impl ElemCast for Document {
-    fn elem<E: JsCast>(&self, id: &str) -> Result<E, JsValue> {
+    fn elem<E: JsCast>(&self, id: &str) -> Result<E> {
         Ok(self
             .get_element_by_id(id)
             .ok_or("id not found")?
             .dyn_into::<E>()?)
     }
 
-    fn make_elem<E: JsCast>(&self, local_name: &str) -> Result<E, JsValue> {
+    fn make_elem<E: JsCast>(&self, local_name: &str) -> Result<E> {
         Ok(self.create_element(local_name)?.dyn_into::<E>()?)
     }
 }
 
 /// Fetch a JSON document
-async fn fetch_json(window: &Window, uri: &str) -> Result<JsValue, JsValue> {
+async fn fetch_json(window: &Window, uri: &str) -> Result<JsValue> {
     let req = Request::new_with_str(uri)?;
     req.headers().set("Accept", "application/json")?;
     let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
@@ -198,7 +200,7 @@ impl ObType {
     }
 
     /// Try to populate cards in `ob_list`
-    async fn try_populate_cards(self, tx: String) -> Result<(), JsValue> {
+    async fn try_populate_cards(self, tx: String) -> Result<()> {
         let window = web_sys::window().unwrap_throw();
         let doc = window.document().unwrap_throw();
         let ob_list = doc.elem("ob_list")?;
@@ -215,7 +217,7 @@ impl ObType {
     }
 
     /// Build cards for list
-    fn build_cards(self, json: JsValue, tx: &str) -> Result<String, JsValue> {
+    fn build_cards(self, json: JsValue, tx: &str) -> Result<String> {
         match self {
             Self::Alarm => Alarm::build_cards(json, tx),
             Self::CabinetStyle => CabinetStyle::build_cards(json, tx),
@@ -228,7 +230,7 @@ impl ObType {
     }
 
     /// Build form using JSON value
-    fn build_form(self, json: JsValue) -> Result<String, JsValue> {
+    fn build_form(self, json: JsValue) -> Result<String> {
         match self {
             Self::Alarm => Alarm::build_form(json),
             Self::CabinetStyle => CabinetStyle::build_form(json),
@@ -255,7 +257,7 @@ impl ObType {
 
 trait Card: DeserializeOwned {
     /// Build form using JSON value
-    fn build_form(_json: JsValue) -> Result<String, JsValue> {
+    fn build_form(_json: JsValue) -> Result<String> {
         Ok("".into())
     }
 
@@ -265,9 +267,9 @@ trait Card: DeserializeOwned {
 
     fn name(&self) -> &str;
 
-    fn build_card(&self) -> Result<String, JsValue>;
+    fn build_card(&self) -> Result<String>;
 
-    fn build_cards(json: JsValue, tx: &str) -> Result<String, JsValue> {
+    fn build_cards(json: JsValue, tx: &str) -> Result<String> {
         let mut html = String::new();
         if tx.is_empty() {
             html.push_str(CREATE_NEW_CARD);
@@ -288,14 +290,14 @@ impl Card for () {
         unreachable!()
     }
 
-    fn build_card(&self) -> Result<String, JsValue> {
+    fn build_card(&self) -> Result<String> {
         unreachable!()
     }
 }
 
 impl Card for Alarm {
     /// Build form using JSON value
-    fn build_form(json: JsValue) -> Result<String, JsValue> {
+    fn build_form(json: JsValue) -> Result<String> {
         let val = json.into_serde::<Self>().unwrap_throw();
         let name = &val.name;
         let description = &val.description;
@@ -321,7 +323,7 @@ impl Card for Alarm {
         &self.name
     }
 
-    fn build_card(&self) -> Result<String, JsValue> {
+    fn build_card(&self) -> Result<String> {
         let name = &self.name;
         let description = &self.description;
         Ok(format!(
@@ -340,7 +342,7 @@ impl Card for CabinetStyle {
         &self.name
     }
 
-    fn build_card(&self) -> Result<String, JsValue> {
+    fn build_card(&self) -> Result<String> {
         let name = &self.name;
         Ok(format!("<span>{name}</span>"))
     }
@@ -356,7 +358,7 @@ impl Card for CommConfig {
         &self.name
     }
 
-    fn build_card(&self) -> Result<String, JsValue> {
+    fn build_card(&self) -> Result<String> {
         let name = &self.name;
         let description = &self.description;
         Ok(format!(
@@ -376,7 +378,7 @@ impl Card for CommLink {
         &self.name
     }
 
-    fn build_card(&self) -> Result<String, JsValue> {
+    fn build_card(&self) -> Result<String> {
         let name = &self.name;
         let description = &self.description;
         let disabled = if self.poll_enabled { "" } else { DISABLED };
@@ -398,7 +400,7 @@ impl Card for Controller {
         &self.name
     }
 
-    fn build_card(&self) -> Result<String, JsValue> {
+    fn build_card(&self) -> Result<String> {
         let name = &self.name;
         // condition 1 is "Active"
         let disabled = if self.condition == 1 { "" } else { DISABLED };
@@ -420,7 +422,7 @@ impl Card for Modem {
         &self.name
     }
 
-    fn build_card(&self) -> Result<String, JsValue> {
+    fn build_card(&self) -> Result<String> {
         let name = &self.name;
         let disabled = if self.enabled { "" } else { DISABLED };
         Ok(format!("<span{disabled}>{name}</span>"))
@@ -432,7 +434,7 @@ impl Card for Modem {
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen(start)]
-pub async fn main() -> Result<(), JsValue> {
+pub async fn main() -> Result<()> {
     // this should be debug only
     console_error_panic_hook::set_once();
 
@@ -476,7 +478,7 @@ fn handle_search_ev(tx: String) {
     spawn_local(tp.populate_cards(tx));
 }
 
-fn selected_type(doc: &Document) -> Result<ObType, JsValue> {
+fn selected_type(doc: &Document) -> Result<ObType> {
     let ob_type: HtmlSelectElement = doc.elem("ob_type")?;
     let tp = ob_type.value();
     Ok(ObType::from(tp.as_str()))
@@ -493,7 +495,7 @@ fn remove_children(elem: &Element) {
 fn add_select_event_listener(
     elem: &HtmlSelectElement,
     handle_ev: fn(&str),
-) -> Result<(), JsValue> {
+) -> Result<()> {
     let closure = Closure::wrap(Box::new(move |e: Event| {
         let value = e
             .current_target()
@@ -516,7 +518,7 @@ fn add_select_event_listener(
 fn add_input_event_listener(
     elem: &HtmlInputElement,
     handle_ev: fn(String),
-) -> Result<(), JsValue> {
+) -> Result<()> {
     let closure = Closure::wrap(Box::new(move |e: Event| {
         let value = e
             .current_target()
@@ -539,7 +541,7 @@ fn add_input_event_listener(
 fn add_click_event_listener(
     elem: &Element,
     handle_ev: fn(&Element),
-) -> Result<(), JsValue> {
+) -> Result<()> {
     let closure = Closure::wrap(Box::new(move |e: Event| {
         let value = e.target().unwrap().dyn_into::<Element>().unwrap();
         handle_ev(&value);
