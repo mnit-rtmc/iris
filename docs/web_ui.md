@@ -32,12 +32,12 @@ authentication.
 * bulb
   - [X] Resource type selector with card list
   - [X] Search filter
-  - [ ] Alarm overlay
-  - [ ] Cabinet style overlay
-  - [ ] Comm config overlay
-  - [ ] Comm link overlay
-  - [ ] Controller overlay
-  - [ ] Modem overlay
+  - [X] Alarm form
+  - [X] Cabinet style form
+  - [ ] Comm config form
+  - [ ] Comm link form
+  - [ ] Controller form
+  - [ ] Modem form
   - [ ] Authentication and session expiration
 
 ## Phase 4 — DMS control

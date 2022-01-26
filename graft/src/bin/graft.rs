@@ -29,6 +29,11 @@ const INTEGERS: &[(&str, &str)] = &[
     ("alarm", "pin"),
     ("alarm", "trigger_time"),
     ("alarm", "styles"),
+    ("cabinet_style", "police_panel_pin_1"),
+    ("cabinet_style", "police_panel_pin_2"),
+    ("cabinet_style", "watchdog_reset_pin_1"),
+    ("cabinet_style", "watchdog_reset_pin_2"),
+    ("cabinet_style", "dip"),
 ];
 
 /// Slice of (type, attribute) tuples for JSON boolean values

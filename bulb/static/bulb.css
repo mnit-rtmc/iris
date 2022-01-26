@@ -41,11 +41,12 @@ body {
   margin: 0.2rem;
 }
 #ob_list {
-  flex: 1 1 auto;
-  overflow-y: scroll;
+  flex: 0 1 auto;
+  overflow-y: auto;
 }
 #ob_form {
-  flex: 0 1 auto;
+  flex: 1 0 auto;
+  overflow-y: auto;
   margin: 0.2rem;
   max-height: 0;
   transition: max-height 0.2s ease-in-out;

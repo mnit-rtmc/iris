@@ -1,5 +1,6 @@
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
+use std::fmt;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
@@ -9,6 +10,21 @@ use web_sys::{
 };
 
 type Result<T> = std::result::Result<T, JsValue>;
+
+#[derive(Debug)]
+struct OValue<T>(Option<T>);
+
+impl<T> fmt::Display for OValue<T>
+where
+    T: Copy + fmt::Display,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self.0 {
+            Some(v) => write!(f, "{}", v),
+            None => Ok(()),
+        }
+    }
+}
 
 trait ElemCast {
     /// Get an element by ID and cast it
@@ -294,15 +310,37 @@ impl Card for Alarm {
         let val = json.into_serde::<Self>().unwrap_throw();
         let name = &val.name;
         let description = &val.description;
+        let controller = &val.controller.unwrap_or("".into());
+        let pin = val.pin;
+        let state = val.state;
         Ok(format!(
             "<div class='row'>\
-                <div class='{TITLE}'>Alarm</div>\
-                <span class='{INFO}'>{name}</span>\
+              <div class='{TITLE}'>Alarm</div>\
+              <span class='{INFO}'>{name}</span>\
             </div>\
-            <label for='form_description'>Description</label>\
             <div class='row'>\
-                <input id='form_description' maxlength='24' size='24' \
-                       value='{description}'/>\
+              <label for='form_description'>Description</label>\
+              <input id='form_description' maxlength='24' size='24' \
+                     value='{description}'/>\
+            </div>\
+            <div class='row'>\
+              <label for='form_controller'>Controller</label>\
+              <input id='form_controller' maxlength='20' size='20' \
+                     value='{controller}'/>\
+            </div>\
+            <div class='row'>\
+              <label for='form_pin'>Pin</label>\
+              <input id='form_pin' type='number' min='1' max='104' \
+                     value='{pin}'/>\
+            </div>\
+            <div class='row'>\
+              <label>State</label>\
+              <span>{state}</span>\
+            </div>\
+            <div class='row'>\
+              <span></span>\
+              <button type='button'>Save</button>\
+            </div>\
             </div>"
         ))
     }
@@ -327,6 +365,54 @@ impl Card for Alarm {
 }
 
 impl Card for CabinetStyle {
+    /// Build form using JSON value
+    fn build_form(json: JsValue) -> Result<String> {
+        console::log_1(&json);
+        let val = json.into_serde::<Self>().unwrap_throw();
+        let name = &val.name;
+        let police_panel_pin_1 = OValue(val.police_panel_pin_1);
+        let police_panel_pin_2 = OValue(val.police_panel_pin_2);
+        let watchdog_reset_pin_1 = OValue(val.watchdog_reset_pin_1);
+        let watchdog_reset_pin_2 = OValue(val.watchdog_reset_pin_2);
+        let dip = OValue(val.dip);
+        Ok(format!(
+            "<div class='row'>\
+              <div class='{TITLE}'>Cabinet Style</div>\
+              <span class='{INFO}'>{name}</span>\
+            </div>\
+            <div class='row'>\
+              <label for='form_pp1'>Police Panel Pin 1</label>\
+              <input id='form_pp1' type='number' min='1' max='104' \
+                     value='{police_panel_pin_1}'/>\
+            </div>\
+            <div class='row'>\
+              <label for='form_pp2'>Police Panel Pin 2</label>\
+              <input id='form_pp2' type='number' min='1' max='104' \
+                     value='{police_panel_pin_2}'/>\
+            </div>\
+            <div class='row'>\
+              <label for='form_wr1'>Watchdog Reset Pin 1</label>\
+              <input id='form_wr1' type='number' min='1' max='104' \
+                     value='{watchdog_reset_pin_1}'/>\
+            </div>\
+            <div class='row'>\
+              <label for='form_wr2'>Watchdog Reset Pin 2</label>\
+              <input id='form_wr2' type='number' min='1' max='104' \
+                     value='{watchdog_reset_pin_2}'/>\
+            </div>\
+            <div class='row'>\
+              <label for='form_dip'>Dip</label>\
+              <input id='form_dip' type='number' min='0' max='255' \
+                     value='{dip}'/>\
+            </div>\
+            <div class='row'>\
+              <span></span>\
+              <button type='button'>Save</button>\
+            </div>\
+            </div>"
+        ))
+    }
+
     fn is_match(&self, tx: &str) -> bool {
         self.name.to_lowercase().contains(tx)
     }
