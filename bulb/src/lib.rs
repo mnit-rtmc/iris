@@ -5,7 +5,7 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
 use web_sys::{
     console, Document, Element, Event, HtmlElement, HtmlInputElement,
-    HtmlLabelElement, HtmlSelectElement, Request, Response, Window,
+    HtmlSelectElement, Request, Response, Window,
 };
 
 trait ElemCast {
@@ -115,13 +115,16 @@ struct Modem {
 const TITLE: &str = "title";
 
 /// CSS class for disabled cards
-const DISABLED: &str = "disabled";
+const DISABLED: &str = " class='disabled'";
 
 /// CSS class for info
 const INFO: &str = "info";
 
-/// CSS class for form
-const FORM: &str = "form";
+/// Card for "Create New"
+const CREATE_NEW_CARD: &str = "\
+    <li name='' class='card'>\
+        <span class='notes'>Create New</span>\
+    </li>";
 
 /// IRIS object types
 #[derive(Clone, Copy, Debug)]
@@ -203,51 +206,37 @@ impl ObType {
         if !self.uri().is_empty() {
             let cards = doc.create_element("ul")?;
             cards.set_class_name("cards");
-            if tx.is_empty() {
-                cards.append_child(&*make_new_elem(&doc)?)?;
-            }
             let json = fetch_json(&window, self.uri()).await?;
-            self.append_cards(json, &tx, &doc, &cards)?;
+            let html = self.build_cards(json, &tx)?;
+            cards.set_inner_html(&html);
             ob_list.append_child(&cards)?;
         }
         Ok(())
     }
 
-    /// Append cards to a list element
-    fn append_cards(
-        self,
-        json: JsValue,
-        tx: &str,
-        doc: &Document,
-        cards: &Element,
-    ) -> Result<(), JsValue> {
+    /// Build cards for list
+    fn build_cards(self, json: JsValue, tx: &str) -> Result<String, JsValue> {
         match self {
-            Self::Alarm => Alarm::make_cards(json, tx, doc, cards),
-            Self::CabinetStyle => {
-                CabinetStyle::make_cards(json, tx, doc, cards)
-            }
-            Self::CommConfig => CommConfig::make_cards(json, tx, doc, cards),
-            Self::CommLink => CommLink::make_cards(json, tx, doc, cards),
-            Self::Controller => Controller::make_cards(json, tx, doc, cards),
-            Self::Modem => Modem::make_cards(json, tx, doc, cards),
-            _ => Ok(()),
+            Self::Alarm => Alarm::build_cards(json, tx),
+            Self::CabinetStyle => CabinetStyle::build_cards(json, tx),
+            Self::CommConfig => CommConfig::build_cards(json, tx),
+            Self::CommLink => CommLink::build_cards(json, tx),
+            Self::Controller => Controller::build_cards(json, tx),
+            Self::Modem => Modem::build_cards(json, tx),
+            _ => Ok("".into()),
         }
     }
 
-    fn make_form(
-        self,
-        doc: &Document,
-        form: &HtmlElement,
-        json: JsValue,
-    ) -> Result<(), JsValue> {
+    /// Build form using JSON value
+    fn build_form(self, json: JsValue) -> Result<String, JsValue> {
         match self {
-            Self::Alarm => Alarm::make_form(doc, form, json),
-            Self::CabinetStyle => CabinetStyle::make_form(doc, form, json),
-            Self::CommConfig => CommConfig::make_form(doc, form, json),
-            Self::CommLink => CommLink::make_form(doc, form, json),
-            Self::Controller => Controller::make_form(doc, form, json),
-            Self::Modem => Modem::make_form(doc, form, json),
-            _ => Ok(()),
+            Self::Alarm => Alarm::build_form(json),
+            Self::CabinetStyle => CabinetStyle::build_form(json),
+            Self::CommConfig => CommConfig::build_form(json),
+            Self::CommLink => CommLink::build_form(json),
+            Self::Controller => Controller::build_form(json),
+            Self::Modem => Modem::build_form(json),
+            _ => Ok("".into()),
         }
     }
 
@@ -258,104 +247,87 @@ impl ObType {
         let ob_form: HtmlElement = doc.elem("ob_form").unwrap_throw();
         let uri = format!("{}/{}", self.uri(), &name);
         let json = fetch_json(&window, &uri).await.unwrap_throw();
-        remove_children(&ob_form);
-        self.make_form(&doc, &ob_form, json).unwrap_throw();
+        ob_form.set_inner_html(&self.build_form(json).unwrap_throw());
         let style = ob_form.style();
         style.set_property("max-height", "50%").unwrap_throw();
     }
 }
 
 trait Card: DeserializeOwned {
+    /// Build form using JSON value
+    fn build_form(_json: JsValue) -> Result<String, JsValue> {
+        Ok("".into())
+    }
+
     fn is_match(&self, _tx: &str) -> bool {
         false
     }
 
-    fn make_card(&self, doc: &Document) -> Result<Element, JsValue>;
+    fn name(&self) -> &str;
 
-    fn make_cards(
-        json: JsValue,
-        tx: &str,
-        doc: &Document,
-        cards: &Element,
-    ) -> Result<(), JsValue> {
+    fn build_card(&self) -> Result<String, JsValue>;
+
+    fn build_cards(json: JsValue, tx: &str) -> Result<String, JsValue> {
+        let mut html = String::new();
+        if tx.is_empty() {
+            html.push_str(CREATE_NEW_CARD);
+        }
         let obs = json.into_serde::<Vec<Self>>().unwrap_throw();
         for ob in obs.iter().filter(|ob| ob.is_match(tx)) {
-            cards.append_child(&*ob.make_card(doc)?)?;
+            let name = ob.name();
+            html.push_str(&format!("<li name='{name}' class='card'>"));
+            html.push_str(&ob.build_card()?);
+            html.push_str("</li>");
         }
-        Ok(())
-    }
-
-    fn make_form(
-        _doc: &Document,
-        _form: &HtmlElement,
-        _json: JsValue,
-    ) -> Result<(), JsValue> {
-        Ok(())
+        Ok(html)
     }
 }
 
 impl Card for () {
-    fn make_card(&self, _doc: &Document) -> Result<Element, JsValue> {
+    fn name(&self) -> &str {
+        unreachable!()
+    }
+
+    fn build_card(&self) -> Result<String, JsValue> {
         unreachable!()
     }
 }
 
 impl Card for Alarm {
+    /// Build form using JSON value
+    fn build_form(json: JsValue) -> Result<String, JsValue> {
+        let val = json.into_serde::<Self>().unwrap_throw();
+        let name = &val.name;
+        let description = &val.description;
+        Ok(format!(
+            "<div class='row'>\
+                <div class='{TITLE}'>Alarm</div>\
+                <span class='{INFO}'>{name}</span>\
+            </div>\
+            <label for='form_description'>Description</label>\
+            <div class='row'>\
+                <input id='form_description' maxlength='24' size='24' \
+                       value='{description}'/>\
+            </div>"
+        ))
+    }
+
     fn is_match(&self, tx: &str) -> bool {
         self.description.to_lowercase().contains(tx)
             || self.name.to_lowercase().contains(tx)
     }
 
-    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
-        let card = doc.create_element("li")?;
-        card.set_attribute("name", &self.name)?;
-        card.set_class_name("card");
-        let title = doc.create_element("span")?;
-        title.set_inner_html(&self.description);
-        card.append_child(&title)?;
-        let info = doc.create_element("span")?;
-        info.set_class_name(INFO);
-        info.set_inner_html(&self.name);
-        card.append_child(&info)?;
-        Ok(card)
+    fn name(&self) -> &str {
+        &self.name
     }
 
-    fn make_form(
-        doc: &Document,
-        form: &HtmlElement,
-        json: JsValue,
-    ) -> Result<(), JsValue> {
-        let val = json.into_serde::<Self>().unwrap_throw();
-
-        let div = doc.create_element("div")?;
-        div.set_class_name("row");
-        let title = doc.create_element("div")?;
-        title.set_class_name(TITLE);
-        title.set_inner_html(&"Alarm");
-        div.append_child(&title)?;
-        let info = doc.create_element("span")?;
-        info.set_class_name(INFO);
-        info.set_inner_html(&val.name);
-        div.append_child(&info)?;
-        form.append_child(&div)?;
-
-        let desc: HtmlLabelElement = doc.make_elem("label")?;
-        desc.set_html_for("form_description");
-        desc.set_inner_html(&"Description");
-        form.append_child(&desc)?;
-
-        let div = doc.create_element("div")?;
-        div.set_class_name("row");
-        let input = doc.create_element("input")?;
-        input.set_attribute("id", "form_description")?;
-        input.set_attribute("maxlength", "24")?;
-        input.set_attribute("size", "24")?;
-        input.set_attribute("value", &val.description)?;
-        div.append_child(&input).unwrap_throw();
-        form.append_child(&div).unwrap_throw();
-        form.set_class_name(FORM);
-
-        Ok(())
+    fn build_card(&self) -> Result<String, JsValue> {
+        let name = &self.name;
+        let description = &self.description;
+        Ok(format!(
+            "<span>{description}</span>\
+            <span class='{INFO}'>{name}</span>"
+        ))
     }
 }
 
@@ -364,14 +336,13 @@ impl Card for CabinetStyle {
         self.name.to_lowercase().contains(tx)
     }
 
-    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
-        let card = doc.create_element("li")?;
-        card.set_attribute("name", &self.name)?;
-        card.set_class_name("card");
-        let title = doc.create_element("span")?;
-        title.set_inner_html(&self.name);
-        card.append_child(&title)?;
-        Ok(card)
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn build_card(&self) -> Result<String, JsValue> {
+        let name = &self.name;
+        Ok(format!("<span>{name}</span>"))
     }
 }
 
@@ -381,18 +352,17 @@ impl Card for CommConfig {
             || self.name.to_lowercase().contains(tx)
     }
 
-    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
-        let card = doc.create_element("li")?;
-        card.set_attribute("name", &self.name)?;
-        card.set_class_name("card");
-        let title = doc.create_element("span")?;
-        title.set_inner_html(&self.description);
-        card.append_child(&title)?;
-        let info = doc.create_element("span")?;
-        info.set_class_name(INFO);
-        info.set_inner_html(&self.name);
-        card.append_child(&info)?;
-        Ok(card)
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn build_card(&self) -> Result<String, JsValue> {
+        let name = &self.name;
+        let description = &self.description;
+        Ok(format!(
+            "<span>{description}</span>\
+            <span class='{INFO}'>{name}</span>"
+        ))
     }
 }
 
@@ -402,21 +372,18 @@ impl Card for CommLink {
             || self.name.to_lowercase().contains(tx)
     }
 
-    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
-        let card = doc.create_element("li")?;
-        card.set_attribute("name", &self.name)?;
-        card.set_class_name("card");
-        let title = doc.create_element("span")?;
-        if !self.poll_enabled {
-            title.set_class_name(DISABLED);
-        }
-        title.set_inner_html(&self.description);
-        card.append_child(&title)?;
-        let info = doc.create_element("span")?;
-        info.set_class_name(INFO);
-        info.set_inner_html(&self.name);
-        card.append_child(&info)?;
-        Ok(card)
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn build_card(&self) -> Result<String, JsValue> {
+        let name = &self.name;
+        let description = &self.description;
+        let disabled = if self.poll_enabled { "" } else { DISABLED };
+        Ok(format!(
+            "<span{disabled}>{description}</span>\
+            <span class='{INFO}'>{name}</span>"
+        ))
     }
 }
 
@@ -427,22 +394,20 @@ impl Card for Controller {
             || format!("{}:{}", comm_link, self.drop_id).contains(tx)
     }
 
-    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
-        let card = doc.create_element("li")?;
-        card.set_attribute("name", &self.name)?;
-        card.set_class_name("card");
-        let title = doc.create_element("span")?;
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn build_card(&self) -> Result<String, JsValue> {
+        let name = &self.name;
         // condition 1 is "Active"
-        if self.condition != 1 {
-            title.set_class_name(DISABLED);
-        }
-        title.set_inner_html(&format!("{}:{}", self.comm_link, self.drop_id));
-        card.append_child(&title)?;
-        let info = doc.create_element("span")?;
-        info.set_class_name(INFO);
-        info.set_inner_html(&self.name);
-        card.append_child(&info)?;
-        Ok(card)
+        let disabled = if self.condition == 1 { "" } else { DISABLED };
+        let comm_link = &self.comm_link;
+        let drop_id = self.drop_id;
+        Ok(format!(
+            "<span{disabled}>{comm_link}:{drop_id}</span>\
+            <span class='{INFO}'>{name}</span>"
+        ))
     }
 }
 
@@ -451,17 +416,14 @@ impl Card for Modem {
         self.name.to_lowercase().contains(tx)
     }
 
-    fn make_card(&self, doc: &Document) -> Result<Element, JsValue> {
-        let card = doc.create_element("li")?;
-        card.set_attribute("name", &self.name)?;
-        card.set_class_name("card");
-        let title = doc.create_element("span")?;
-        if !self.enabled {
-            title.set_class_name(DISABLED);
-        }
-        title.set_inner_html(&self.name);
-        card.append_child(&title)?;
-        Ok(card)
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn build_card(&self) -> Result<String, JsValue> {
+        let name = &self.name;
+        let disabled = if self.enabled { "" } else { DISABLED };
+        Ok(format!("<span{disabled}>{name}</span>"))
     }
 }
 
@@ -525,18 +487,6 @@ fn remove_children(elem: &Element) {
     while let Some(child) = children.get_with_index(0) {
         child.remove();
     }
-}
-
-/// Make card for "Create New"
-fn make_new_elem(doc: &Document) -> Result<Element, JsValue> {
-    let card = doc.create_element("li")?;
-    card.set_attribute("name", "")?;
-    card.set_class_name("card");
-    let title = doc.create_element("span")?;
-    title.set_class_name("notes");
-    title.set_inner_html("Create New");
-    card.append_child(&title)?;
-    Ok(card)
 }
 
 /// Add an "input" event listener to an element
