@@ -13,9 +13,6 @@ type Result<T> = std::result::Result<T, JsValue>;
 trait ElemCast {
     /// Get an element by ID and cast it
     fn elem<E: JsCast>(&self, id: &str) -> Result<E>;
-
-    /// Make an element and cast it
-    fn make_elem<E: JsCast>(&self, local_name: &str) -> Result<E>;
 }
 
 impl ElemCast for Document {
@@ -24,10 +21,6 @@ impl ElemCast for Document {
             .get_element_by_id(id)
             .ok_or("id not found")?
             .dyn_into::<E>()?)
-    }
-
-    fn make_elem<E: JsCast>(&self, local_name: &str) -> Result<E> {
-        Ok(self.create_element(local_name)?.dyn_into::<E>()?)
     }
 }
 
@@ -203,15 +196,15 @@ impl ObType {
     async fn try_populate_cards(self, tx: String) -> Result<()> {
         let window = web_sys::window().unwrap_throw();
         let doc = window.document().unwrap_throw();
-        let ob_list = doc.elem("ob_list")?;
-        remove_children(&ob_list);
-        if !self.uri().is_empty() {
-            let cards = doc.create_element("ul")?;
-            cards.set_class_name("cards");
+        let ob_list = doc.elem::<Element>("ob_list")?;
+        if self.uri().is_empty() {
+            ob_list.set_inner_html(&"");
+        } else {
             let json = fetch_json(&window, self.uri()).await?;
             let html = self.build_cards(json, &tx)?;
-            cards.set_inner_html(&html);
-            ob_list.append_child(&cards)?;
+            ob_list.set_inner_html(&format!(
+                "<ul id='ob_cards' class='cards'>{html}</ul>"
+            ));
         }
         Ok(())
     }
@@ -245,10 +238,10 @@ impl ObType {
     /// Add form for the given name
     async fn add_form(self, name: String) {
         let window = web_sys::window().unwrap_throw();
-        let doc = window.document().unwrap_throw();
-        let ob_form: HtmlElement = doc.elem("ob_form").unwrap_throw();
         let uri = format!("{}/{}", self.uri(), &name);
         let json = fetch_json(&window, &uri).await.unwrap_throw();
+        let doc = window.document().unwrap_throw();
+        let ob_form: HtmlElement = doc.elem("ob_form").unwrap_throw();
         ob_form.set_inner_html(&self.build_form(json).unwrap_throw());
         let style = ob_form.style();
         style.set_property("max-height", "50%").unwrap_throw();
@@ -464,6 +457,7 @@ pub async fn main() -> Result<()> {
 fn handle_type_ev(tp: &str) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
+    deselect_cards(&doc).unwrap_throw();
     let input: HtmlInputElement = doc.elem("ob_input").unwrap_throw();
     let tx = input.value().to_lowercase();
     let tp: ObType = tp.into();
@@ -474,6 +468,7 @@ fn handle_type_ev(tp: &str) {
 fn handle_search_ev(tx: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
+    deselect_cards(&doc).unwrap_throw();
     let tp = selected_type(&doc).unwrap_throw();
     spawn_local(tp.populate_cards(tx));
 }
@@ -482,13 +477,6 @@ fn selected_type(doc: &Document) -> Result<ObType> {
     let ob_type: HtmlSelectElement = doc.elem("ob_type")?;
     let tp = ob_type.value();
     Ok(ObType::from(tp.as_str()))
-}
-
-fn remove_children(elem: &Element) {
-    let children = elem.children();
-    while let Some(child) = children.get_with_index(0) {
-        child.remove();
-    }
 }
 
 /// Add an "input" event listener to an element
@@ -561,10 +549,26 @@ fn handle_click_ev(elem: &Element) {
     let doc = window.document().unwrap_throw();
     let tp = selected_type(&doc).unwrap_throw();
     console::log_1(&JsValue::from(tp.name()));
+    deselect_cards(&doc).unwrap_throw();
     if let Some(card) = elem.closest(".card").unwrap_throw() {
-        card.set_class_name("card selected");
         if let Some(name) = card.get_attribute("name") {
+            card.set_class_name("card selected");
             spawn_local(tp.add_form(name));
         }
     }
+}
+
+fn deselect_cards(doc: &Document) -> Result<()> {
+    if let Ok(ob_cards) = doc.elem::<Element>("ob_cards") {
+        let cards = ob_cards.children();
+        for i in 0..cards.length() {
+            if let Some(card) = cards.get_with_index(i) {
+                card.set_class_name("card");
+            }
+        }
+    }
+    let ob_form: HtmlElement = doc.elem("ob_form")?;
+    let style = ob_form.style();
+    style.set_property("max-height", "0")?;
+    Ok(())
 }

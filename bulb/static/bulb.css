@@ -88,7 +88,10 @@ body {
   background-color: white;
 }
 .selected {
-  background-color: #ffc;
+  background-color: #ffd;
+}
+.selected:hover {
+  background-color: #ffd;
 }
 .title {
   font-weight: bold;
@@ -109,7 +112,7 @@ body {
 .form {
   display: flex;
   flex-direction: column;
-  background-color: #ffc;
+  background-color: #ffd;
 }
 .row {
   display: flex;
