@@ -8,7 +8,8 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
 use web_sys::{
     console, Document, Element, Event, HtmlElement, HtmlInputElement,
-    HtmlSelectElement, Request, Response, Window,
+    HtmlSelectElement, Request, Response, ScrollBehavior,
+    ScrollIntoViewOptions, ScrollLogicalPosition, Window,
 };
 
 type Result<T> = std::result::Result<T, JsValue>;
@@ -110,6 +111,7 @@ struct Controller {
     pub cabinet: String,
     pub condition: u32,
     pub notes: String,
+    pub password: Option<String>,
     pub fail_time: Option<String>,
     pub version: Option<String>,
 }
@@ -216,7 +218,7 @@ impl ObType {
         let doc = window.document().unwrap_throw();
         let ob_list = doc.elem::<Element>("ob_list")?;
         if self.uri().is_empty() {
-            ob_list.set_inner_html(&"");
+            ob_list.set_inner_html("");
         } else {
             let json = fetch_json(&window, self.uri()).await?;
             let html = self.build_cards(json, &tx)?;
@@ -265,6 +267,10 @@ impl ObType {
         state.selected = Some((self, name, html));
         elem.set_class_name("form");
         elem.set_inner_html(&self.build_form_json(json).unwrap_throw());
+        let mut opt = ScrollIntoViewOptions::new();
+        opt.behavior(ScrollBehavior::Smooth)
+            .block(ScrollLogicalPosition::Nearest);
+        elem.scroll_into_view_with_scroll_into_view_options(&opt);
     }
 }
 
@@ -322,7 +328,7 @@ impl Card for () {
     }
 
     fn name(&self) -> &str {
-        &""
+        ""
     }
 }
 
@@ -347,7 +353,6 @@ impl Card for Alarm {
             CardType::Form => {
                 let controller = OValue(self.controller.as_ref());
                 let pin = self.pin;
-                let state = self.state;
                 format!(
                     "<div class='row'>\
                       <div class='{TITLE}'>Alarm</div>\
@@ -366,11 +371,7 @@ impl Card for Alarm {
                     <div class='row'>\
                       <label for='form_pin'>Pin</label>\
                       <input id='form_pin' type='number' min='1' max='104' \
-                             value='{pin}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label>State</label>\
-                      <span>{state}</span>\
+                             size='8' value='{pin}'/>\
                     </div>\
                     <div class='row'>\
                       <span></span>\
@@ -410,32 +411,31 @@ impl Card for CabinetStyle {
                     <div class='row'>\
                       <label for='form_pp1'>Police Panel Pin 1</label>\
                       <input id='form_pp1' type='number' min='1' max='104' \
-                             value='{police_panel_pin_1}'/>\
+                             size='8' value='{police_panel_pin_1}'/>\
                     </div>\
                     <div class='row'>\
                       <label for='form_pp2'>Police Panel Pin 2</label>\
                       <input id='form_pp2' type='number' min='1' max='104' \
-                             value='{police_panel_pin_2}'/>\
+                             size='8' value='{police_panel_pin_2}'/>\
                     </div>\
                     <div class='row'>\
                       <label for='form_wr1'>Watchdog Reset Pin 1</label>\
                       <input id='form_wr1' type='number' min='1' max='104' \
-                             value='{watchdog_reset_pin_1}'/>\
+                             size='8' value='{watchdog_reset_pin_1}'/>\
                     </div>\
                     <div class='row'>\
                       <label for='form_wr2'>Watchdog Reset Pin 2</label>\
                       <input id='form_wr2' type='number' min='1' max='104' \
-                             value='{watchdog_reset_pin_2}'/>\
+                             size='8' value='{watchdog_reset_pin_2}'/>\
                     </div>\
                     <div class='row'>\
                       <label for='form_dip'>Dip</label>\
                       <input id='form_dip' type='number' min='0' max='255' \
-                             value='{dip}'/>\
+                             size='8' value='{dip}'/>\
                     </div>\
                     <div class='row'>\
                       <span></span>\
                       <button type='button'>Save</button>\
-                    </div>\
                     </div>"
                 )
             }
@@ -453,13 +453,64 @@ impl Card for CommConfig {
         &self.name
     }
 
-    fn to_html(&self, _ct: CardType) -> String {
+    fn to_html(&self, ct: CardType) -> String {
         let name = &self.name;
         let description = &self.description;
-        format!(
-            "<span>{description}</span>\
-            <span class='{INFO}'>{name}</span>"
-        )
+        match ct {
+            CardType::Compact => format!(
+                "<span>{description}</span>\
+                <span class='{INFO}'>{name}</span>"
+            ),
+            CardType::Form => {
+                let timeout_ms = self.timeout_ms;
+                let poll_period_sec = self.poll_period_sec;
+                let long_poll_period_sec = self.long_poll_period_sec;
+                let idle_disconnect_sec = self.idle_disconnect_sec;
+                let no_response_disconnect_sec =
+                    self.no_response_disconnect_sec;
+                format!(
+                    "<div class='row'>\
+                      <div class='{TITLE}'>Comm Config</div>\
+                      <span class='{INFO}'>{name}</span>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_description'>Description</label>\
+                      <input id='form_description' maxlength='20' size='20' \
+                             value='{description}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_timeout'>Timeout (ms)</label>\
+                      <input id='form_timeout' type='number' min='0' size='8' \
+                             max='20000' value='{timeout_ms}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_poll_period'>Poll Period (s)</label>\
+                      <input id='form_poll_period' type='number' min='0' \
+                             size='8' value='{poll_period_sec}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_long_poll'>Long Poll Period (s)</label>\
+                      <input id='form_long_poll' type='number' min='0' \
+                             size='8' value='{long_poll_period_sec}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_idle'>Idle Disconnect (s)</label>\
+                      <input id='form_idle' type='number' min='0' size='8' \
+                             value='{idle_disconnect_sec}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_no_resp'>No Response Disconnect (s)\
+                      </label>\
+                      <input id='form_no_resp' type='number' min='0' size='8' \
+                             value='{no_response_disconnect_sec}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <span></span>\
+                      <button type='button'>Save</button>\
+                    </div>"
+                )
+            }
+        }
     }
 }
 
@@ -473,14 +524,52 @@ impl Card for CommLink {
         &self.name
     }
 
-    fn to_html(&self, _ct: CardType) -> String {
+    fn to_html(&self, ct: CardType) -> String {
         let name = &self.name;
         let description = &self.description;
-        let disabled = if self.poll_enabled { "" } else { DISABLED };
-        format!(
-            "<span{disabled}>{description}</span>\
-            <span class='{INFO}'>{name}</span>"
-        )
+        let uri = &self.uri;
+        match ct {
+            CardType::Compact => {
+                let disabled = if self.poll_enabled { "" } else { DISABLED };
+                format!(
+                    "<span{disabled}>{description}</span>\
+                    <span class='{INFO}'>{name}</span>"
+                )
+            }
+            CardType::Form => {
+                let enabled = if self.poll_enabled { " checked" } else { "" };
+                let comm_config = &self.comm_config;
+                format!(
+                    "<div class='row'>\
+                      <div class='{TITLE}'>Comm Link</div>\
+                      <span class='{INFO}'>{name}</span>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_description'>Description</label>\
+                      <input id='form_description' maxlength='32' size='26' \
+                             value='{description}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_uri'>URI</label>\
+                      <input id='form_uri' maxlength='256' size='32' \
+                             value='{uri}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_enabled'>Poll Enabled</label>\
+                      <input id='form_enabled' type='checkbox'{enabled}/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_config'>Comm Config</label>\
+                      <input id='form_config' maxlength='10' size='10' \
+                             value='{comm_config}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <span></span>\
+                      <button type='button'>Save</button>\
+                    </div>"
+                )
+            }
+        }
     }
 }
 
@@ -489,22 +578,67 @@ impl Card for Controller {
         let comm_link = self.comm_link.to_lowercase();
         comm_link.contains(tx)
             || format!("{}:{}", comm_link, self.drop_id).contains(tx)
+            || self.notes.to_lowercase().contains(tx)
     }
 
     fn name(&self) -> &str {
         &self.name
     }
 
-    fn to_html(&self, _ct: CardType) -> String {
+    fn to_html(&self, ct: CardType) -> String {
         let name = &self.name;
-        // condition 1 is "Active"
-        let disabled = if self.condition == 1 { "" } else { DISABLED };
         let comm_link = &self.comm_link;
         let drop_id = self.drop_id;
-        format!(
-            "<span{disabled}>{comm_link}:{drop_id}</span>\
-            <span class='{INFO}'>{name}</span>"
-        )
+        match ct {
+            CardType::Compact => {
+                // condition 1 is "Active"
+                let disabled = if self.condition == 1 { "" } else { DISABLED };
+                format!(
+                    "<span{disabled}>{comm_link}:{drop_id}</span>\
+                    <span class='{INFO}'>{name}</span>"
+                )
+            }
+            CardType::Form => {
+                let cabinet = &self.cabinet;
+                let notes = &self.notes;
+                let password = OValue(self.password.as_ref());
+                format!(
+                    "<div class='row'>\
+                      <div class='{TITLE}'>Controller</div>\
+                      <span class='{INFO}'>{name}</span>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_comm_link'>Comm Link</label>\
+                      <input id='form_comm_link' maxlength='20' size='20' \
+                             value='{comm_link}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_drop_id'>Drop ID</label>\
+                      <input id='form_drop_id' type='number' min='0'
+                             max='65535' size='6' value='{drop_id}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_cabinet'>Cabinet</label>\
+                      <input id='form_cabinet' maxlength='20' size='20' \
+                             value='{cabinet}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_notes'>Notes</label>\
+                      <textarea id='form_notes' maxlength='128' rows='2' \
+                                cols='28'/>{notes}</textarea>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_password'>Password</label>\
+                      <input id='form_password' maxlength='32' size='26' \
+                             value='{password}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <span></span>\
+                      <button type='button'>Save</button>\
+                    </div>"
+                )
+            }
+        }
     }
 }
 
@@ -517,10 +651,49 @@ impl Card for Modem {
         &self.name
     }
 
-    fn to_html(&self, _ct: CardType) -> String {
+    fn to_html(&self, ct: CardType) -> String {
         let name = &self.name;
-        let disabled = if self.enabled { "" } else { DISABLED };
-        format!("<span{disabled}>{name}</span>")
+        match ct {
+            CardType::Compact => {
+                let disabled = if self.enabled { "" } else { DISABLED };
+                format!("<span{disabled}>{name}</span>")
+            }
+            CardType::Form => {
+                let uri = &self.uri;
+                let config = &self.config;
+                let timeout_ms = self.timeout_ms;
+                let enabled = if self.enabled { " checked" } else { "" };
+                format!(
+                    "<div class='row'>\
+                      <div class='{TITLE}'>Modem</div>\
+                      <span class='{INFO}'>{name}</span>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_uri'>URI</label>\
+                      <input id='form_uri' maxlength='64' size='32' \
+                             value='{uri}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_config'>Config</label>\
+                      <input id='form_config' maxlength='64' size='32' \
+                             value='{config}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_timeout'>Timeout (ms)</label>\
+                      <input id='form_timeout' type='number' min='0' size='8' \
+                             max='20000' value='{timeout_ms}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_enabled'>Enabled</label>\
+                      <input id='form_enabled' type='checkbox'{enabled}/>\
+                    </div>\
+                    <div class='row'>\
+                      <span></span>\
+                      <button type='button'>Save</button>\
+                    </div>"
+                )
+            }
+        }
     }
 }
 
@@ -658,9 +831,9 @@ fn handle_click_ev(elem: &Element) {
     let doc = window.document().unwrap_throw();
     let tp = selected_type(&doc).unwrap_throw();
     console::log_1(&JsValue::from(tp.tname()));
-    deselect_card(&doc).unwrap_throw();
     if let Some(card) = elem.closest(".card").unwrap_throw() {
         if let Some(name) = card.get_attribute("name") {
+            deselect_card(&doc).unwrap_throw();
             spawn_local(tp.expand_card(name));
         }
     }

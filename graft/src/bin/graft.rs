@@ -34,12 +34,39 @@ const INTEGERS: &[(&str, &str)] = &[
     ("cabinet_style", "watchdog_reset_pin_1"),
     ("cabinet_style", "watchdog_reset_pin_2"),
     ("cabinet_style", "dip"),
+    ("comm_config", "protocol"),
+    ("comm_config", "timeout_ms"),
+    ("comm_config", "poll_period_sec"),
+    ("comm_config", "long_poll_period_sec"),
+    ("comm_config", "idle_disconnect_sec"),
+    ("comm_config", "no_response_disconnect_sec"),
+    ("controller", "drop_id"),
+    ("controller", "condition"),
+    ("controller", "controller_err"),
+    ("controller", "success_ops"),
+    ("modem", "timeout_ms"),
+    ("modem", "state"),
 ];
 
 /// Slice of (type, attribute) tuples for JSON boolean values
 const BOOLS: &[(&str, &str)] = &[
     ("alarm", "state"),
+    ("comm_config", "modem"),
+    ("comm_link", "poll_enabled"),
+    ("modem", "enabled"),
 ];
+
+const STAMPS: &[(&str, &str)] = &[
+    ("controller", "fail_time"),
+];
+
+fn rename_att(tp: &str, att: &str) -> String {
+    if tp == "controller" && att == "drop" {
+        "drop_id".to_string()
+    } else {
+        att.to_case(Case::Snake)
+    }
+}
 
 /// Trait to get HTTP status code from an error
 trait ErrorStatus {
@@ -268,7 +295,7 @@ async fn get_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
     res["name"] = req.param("name").unwrap().into();
     resp!(
         c.enumerate_object(&nm, |att, val| {
-            let att = att.to_case(Case::Snake);
+            let att = rename_att(tp, att);
             if let Some(val) = make_json(&(tp, &att), val) {
                 res[att] = val;
             }
@@ -288,8 +315,14 @@ fn make_json(tp_att: &(&str, &str), val: &str) -> Option<JsonValue> {
         val.parse::<i64>().ok().map(|v| v.into())
     } else if BOOLS.contains(tp_att) {
         val.parse::<bool>().ok().map(|v| v.into())
-    } else {
+    } else if STAMPS.contains(tp_att) {
+        // TODO: format to RFC 3339
+        //let st = val.parse::<i64>().ok().map(|v| v.into());
+        val.parse::<i64>().ok().map(|v| v.into())
+    } else if val != "\0" {
         Some(val.into())
+    } else {
+        Some(JsonValue::Null)
     }
 }
 

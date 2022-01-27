@@ -29,15 +29,16 @@ authentication.
 
 * graft
   - [X] Add routes for maintenance resources
+  - [ ] Date / time formatting (RFC 3339)
 * bulb
   - [X] Resource type selector with card list
   - [X] Search filter
-  - [X] Alarm form
-  - [X] Cabinet style form
-  - [ ] Comm config form
-  - [ ] Comm link form
-  - [ ] Controller form
-  - [ ] Modem form
+  - [X] Maintenance object forms
+  - [ ] Html escaping
+  - [ ] Updating values (save)
+  - [ ] Creating objects
+  - [ ] Deleting objects
+  - [ ] Add status button / view
   - [ ] Authentication and session expiration
 
 ## Phase 4 — DMS control
