@@ -1,6 +1,8 @@
+use once_cell::sync::Lazy;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use std::sync::Mutex;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
@@ -175,7 +177,7 @@ impl ObType {
     ];
 
     /// Get type name
-    fn name(self) -> &'static str {
+    fn tname(self) -> &'static str {
         match self {
             Self::Unknown => "",
             Self::Alarm => "Alarm",
@@ -218,56 +220,70 @@ impl ObType {
         } else {
             let json = fetch_json(&window, self.uri()).await?;
             let html = self.build_cards(json, &tx)?;
-            ob_list.set_inner_html(&format!(
-                "<ul id='ob_cards' class='cards'>{html}</ul>"
-            ));
+            ob_list.set_inner_html(&html);
         }
         Ok(())
     }
 
     /// Build cards for list
     fn build_cards(self, json: JsValue, tx: &str) -> Result<String> {
+        let tname = self.tname();
         match self {
-            Self::Alarm => Alarm::build_cards(json, tx),
-            Self::CabinetStyle => CabinetStyle::build_cards(json, tx),
-            Self::CommConfig => CommConfig::build_cards(json, tx),
-            Self::CommLink => CommLink::build_cards(json, tx),
-            Self::Controller => Controller::build_cards(json, tx),
-            Self::Modem => Modem::build_cards(json, tx),
+            Self::Alarm => Alarm::build_cards(tname, json, tx),
+            Self::CabinetStyle => CabinetStyle::build_cards(tname, json, tx),
+            Self::CommConfig => CommConfig::build_cards(tname, json, tx),
+            Self::CommLink => CommLink::build_cards(tname, json, tx),
+            Self::Controller => Controller::build_cards(tname, json, tx),
+            Self::Modem => Modem::build_cards(tname, json, tx),
             _ => Ok("".into()),
         }
     }
 
     /// Build form using JSON value
-    fn build_form(self, json: JsValue) -> Result<String> {
+    fn build_form_json(self, json: JsValue) -> Result<String> {
         match self {
-            Self::Alarm => Alarm::build_form(json),
-            Self::CabinetStyle => CabinetStyle::build_form(json),
-            Self::CommConfig => CommConfig::build_form(json),
-            Self::CommLink => CommLink::build_form(json),
-            Self::Controller => Controller::build_form(json),
-            Self::Modem => Modem::build_form(json),
+            Self::Alarm => Alarm::build_form_json(json),
+            Self::CabinetStyle => CabinetStyle::build_form_json(json),
+            Self::CommConfig => CommConfig::build_form_json(json),
+            Self::CommLink => CommLink::build_form_json(json),
+            Self::Controller => Controller::build_form_json(json),
+            Self::Modem => Modem::build_form_json(json),
             _ => Ok("".into()),
         }
     }
 
-    /// Add form for the given name
-    async fn add_form(self, name: String) {
+    /// Expand a card to a full form
+    async fn expand_card(self, name: String) {
         let window = web_sys::window().unwrap_throw();
         let uri = format!("{}/{}", self.uri(), &name);
         let json = fetch_json(&window, &uri).await.unwrap_throw();
         let doc = window.document().unwrap_throw();
-        let ob_form: HtmlElement = doc.elem("ob_form").unwrap_throw();
-        ob_form.set_inner_html(&self.build_form(json).unwrap_throw());
-        let style = ob_form.style();
-        style.set_property("max-height", "50%").unwrap_throw();
+        let id = format!("{}_{}", self.tname(), &name);
+        let elem: HtmlElement = doc.elem(&id).unwrap_throw();
+        let html = elem.inner_html();
+        let mut state = STATE.lock().unwrap_throw();
+        state.selected = Some((self, name, html));
+        elem.set_class_name("form");
+        elem.set_inner_html(&self.build_form_json(json).unwrap_throw());
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum CardType {
+    Compact,
+    Form,
+}
+
 trait Card: DeserializeOwned {
+    fn new(json: JsValue) -> Result<Self> {
+        Ok(json.into_serde::<Self>().unwrap_throw())
+    }
+
     /// Build form using JSON value
-    fn build_form(_json: JsValue) -> Result<String> {
-        Ok("".into())
+    fn build_form_json(json: JsValue) -> Result<String> {
+        console::log_1(&json);
+        let val = Self::new(json)?;
+        Ok(val.to_html(CardType::Form))
     }
 
     fn is_match(&self, _tx: &str) -> bool {
@@ -276,75 +292,41 @@ trait Card: DeserializeOwned {
 
     fn name(&self) -> &str;
 
-    fn build_card(&self) -> Result<String>;
-
-    fn build_cards(json: JsValue, tx: &str) -> Result<String> {
+    fn build_cards(tname: &str, json: JsValue, tx: &str) -> Result<String> {
         let mut html = String::new();
+        html.push_str("<ul id='ob_cards' class='cards'>");
         if tx.is_empty() {
             html.push_str(CREATE_NEW_CARD);
         }
         let obs = json.into_serde::<Vec<Self>>().unwrap_throw();
         for ob in obs.iter().filter(|ob| ob.is_match(tx)) {
             let name = ob.name();
-            html.push_str(&format!("<li name='{name}' class='card'>"));
-            html.push_str(&ob.build_card()?);
+            html.push_str(&format!(
+                "<li id='{tname}_{name}' name='{name}' class='card'>"
+            ));
+            html.push_str(&ob.to_html(CardType::Compact));
             html.push_str("</li>");
         }
+        html.push_str("</ul>");
         Ok(html)
+    }
+
+    fn to_html(&self, _ct: CardType) -> String {
+        String::new()
     }
 }
 
 impl Card for () {
-    fn name(&self) -> &str {
+    fn new(_json: JsValue) -> Result<Self> {
         unreachable!()
     }
 
-    fn build_card(&self) -> Result<String> {
-        unreachable!()
+    fn name(&self) -> &str {
+        &""
     }
 }
 
 impl Card for Alarm {
-    /// Build form using JSON value
-    fn build_form(json: JsValue) -> Result<String> {
-        let val = json.into_serde::<Self>().unwrap_throw();
-        let name = &val.name;
-        let description = &val.description;
-        let controller = &val.controller.unwrap_or("".into());
-        let pin = val.pin;
-        let state = val.state;
-        Ok(format!(
-            "<div class='row'>\
-              <div class='{TITLE}'>Alarm</div>\
-              <span class='{INFO}'>{name}</span>\
-            </div>\
-            <div class='row'>\
-              <label for='form_description'>Description</label>\
-              <input id='form_description' maxlength='24' size='24' \
-                     value='{description}'/>\
-            </div>\
-            <div class='row'>\
-              <label for='form_controller'>Controller</label>\
-              <input id='form_controller' maxlength='20' size='20' \
-                     value='{controller}'/>\
-            </div>\
-            <div class='row'>\
-              <label for='form_pin'>Pin</label>\
-              <input id='form_pin' type='number' min='1' max='104' \
-                     value='{pin}'/>\
-            </div>\
-            <div class='row'>\
-              <label>State</label>\
-              <span>{state}</span>\
-            </div>\
-            <div class='row'>\
-              <span></span>\
-              <button type='button'>Save</button>\
-            </div>\
-            </div>"
-        ))
-    }
-
     fn is_match(&self, tx: &str) -> bool {
         self.description.to_lowercase().contains(tx)
             || self.name.to_lowercase().contains(tx)
@@ -354,65 +336,54 @@ impl Card for Alarm {
         &self.name
     }
 
-    fn build_card(&self) -> Result<String> {
+    fn to_html(&self, ct: CardType) -> String {
         let name = &self.name;
         let description = &self.description;
-        Ok(format!(
-            "<span>{description}</span>\
-            <span class='{INFO}'>{name}</span>"
-        ))
+        match ct {
+            CardType::Compact => format!(
+                "<span>{description}</span>\
+                <span class='{INFO}'>{name}</span>"
+            ),
+            CardType::Form => {
+                let controller = OValue(self.controller.as_ref());
+                let pin = self.pin;
+                let state = self.state;
+                format!(
+                    "<div class='row'>\
+                      <div class='{TITLE}'>Alarm</div>\
+                      <span class='{INFO}'>{name}</span>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_description'>Description</label>\
+                      <input id='form_description' maxlength='24' size='24' \
+                             value='{description}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_controller'>Controller</label>\
+                      <input id='form_controller' maxlength='20' size='20' \
+                             value='{controller}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_pin'>Pin</label>\
+                      <input id='form_pin' type='number' min='1' max='104' \
+                             value='{pin}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label>State</label>\
+                      <span>{state}</span>\
+                    </div>\
+                    <div class='row'>\
+                      <span></span>\
+                      <button type='button'>Save</button>\
+                    </div>\
+                    </div>"
+                )
+            }
+        }
     }
 }
 
 impl Card for CabinetStyle {
-    /// Build form using JSON value
-    fn build_form(json: JsValue) -> Result<String> {
-        console::log_1(&json);
-        let val = json.into_serde::<Self>().unwrap_throw();
-        let name = &val.name;
-        let police_panel_pin_1 = OValue(val.police_panel_pin_1);
-        let police_panel_pin_2 = OValue(val.police_panel_pin_2);
-        let watchdog_reset_pin_1 = OValue(val.watchdog_reset_pin_1);
-        let watchdog_reset_pin_2 = OValue(val.watchdog_reset_pin_2);
-        let dip = OValue(val.dip);
-        Ok(format!(
-            "<div class='row'>\
-              <div class='{TITLE}'>Cabinet Style</div>\
-              <span class='{INFO}'>{name}</span>\
-            </div>\
-            <div class='row'>\
-              <label for='form_pp1'>Police Panel Pin 1</label>\
-              <input id='form_pp1' type='number' min='1' max='104' \
-                     value='{police_panel_pin_1}'/>\
-            </div>\
-            <div class='row'>\
-              <label for='form_pp2'>Police Panel Pin 2</label>\
-              <input id='form_pp2' type='number' min='1' max='104' \
-                     value='{police_panel_pin_2}'/>\
-            </div>\
-            <div class='row'>\
-              <label for='form_wr1'>Watchdog Reset Pin 1</label>\
-              <input id='form_wr1' type='number' min='1' max='104' \
-                     value='{watchdog_reset_pin_1}'/>\
-            </div>\
-            <div class='row'>\
-              <label for='form_wr2'>Watchdog Reset Pin 2</label>\
-              <input id='form_wr2' type='number' min='1' max='104' \
-                     value='{watchdog_reset_pin_2}'/>\
-            </div>\
-            <div class='row'>\
-              <label for='form_dip'>Dip</label>\
-              <input id='form_dip' type='number' min='0' max='255' \
-                     value='{dip}'/>\
-            </div>\
-            <div class='row'>\
-              <span></span>\
-              <button type='button'>Save</button>\
-            </div>\
-            </div>"
-        ))
-    }
-
     fn is_match(&self, tx: &str) -> bool {
         self.name.to_lowercase().contains(tx)
     }
@@ -421,9 +392,54 @@ impl Card for CabinetStyle {
         &self.name
     }
 
-    fn build_card(&self) -> Result<String> {
+    fn to_html(&self, ct: CardType) -> String {
         let name = &self.name;
-        Ok(format!("<span>{name}</span>"))
+        match ct {
+            CardType::Compact => format!("<span>{name}</span>"),
+            CardType::Form => {
+                let police_panel_pin_1 = OValue(self.police_panel_pin_1);
+                let police_panel_pin_2 = OValue(self.police_panel_pin_2);
+                let watchdog_reset_pin_1 = OValue(self.watchdog_reset_pin_1);
+                let watchdog_reset_pin_2 = OValue(self.watchdog_reset_pin_2);
+                let dip = OValue(self.dip);
+                format!(
+                    "<div class='row'>\
+                      <div class='{TITLE}'>Cabinet Style</div>\
+                      <span class='{INFO}'>{name}</span>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_pp1'>Police Panel Pin 1</label>\
+                      <input id='form_pp1' type='number' min='1' max='104' \
+                             value='{police_panel_pin_1}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_pp2'>Police Panel Pin 2</label>\
+                      <input id='form_pp2' type='number' min='1' max='104' \
+                             value='{police_panel_pin_2}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_wr1'>Watchdog Reset Pin 1</label>\
+                      <input id='form_wr1' type='number' min='1' max='104' \
+                             value='{watchdog_reset_pin_1}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_wr2'>Watchdog Reset Pin 2</label>\
+                      <input id='form_wr2' type='number' min='1' max='104' \
+                             value='{watchdog_reset_pin_2}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_dip'>Dip</label>\
+                      <input id='form_dip' type='number' min='0' max='255' \
+                             value='{dip}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <span></span>\
+                      <button type='button'>Save</button>\
+                    </div>\
+                    </div>"
+                )
+            }
+        }
     }
 }
 
@@ -437,13 +453,13 @@ impl Card for CommConfig {
         &self.name
     }
 
-    fn build_card(&self) -> Result<String> {
+    fn to_html(&self, _ct: CardType) -> String {
         let name = &self.name;
         let description = &self.description;
-        Ok(format!(
+        format!(
             "<span>{description}</span>\
             <span class='{INFO}'>{name}</span>"
-        ))
+        )
     }
 }
 
@@ -457,14 +473,14 @@ impl Card for CommLink {
         &self.name
     }
 
-    fn build_card(&self) -> Result<String> {
+    fn to_html(&self, _ct: CardType) -> String {
         let name = &self.name;
         let description = &self.description;
         let disabled = if self.poll_enabled { "" } else { DISABLED };
-        Ok(format!(
+        format!(
             "<span{disabled}>{description}</span>\
             <span class='{INFO}'>{name}</span>"
-        ))
+        )
     }
 }
 
@@ -479,16 +495,16 @@ impl Card for Controller {
         &self.name
     }
 
-    fn build_card(&self) -> Result<String> {
+    fn to_html(&self, _ct: CardType) -> String {
         let name = &self.name;
         // condition 1 is "Active"
         let disabled = if self.condition == 1 { "" } else { DISABLED };
         let comm_link = &self.comm_link;
         let drop_id = self.drop_id;
-        Ok(format!(
+        format!(
             "<span{disabled}>{comm_link}:{drop_id}</span>\
             <span class='{INFO}'>{name}</span>"
-        ))
+        )
     }
 }
 
@@ -501,12 +517,19 @@ impl Card for Modem {
         &self.name
     }
 
-    fn build_card(&self) -> Result<String> {
+    fn to_html(&self, _ct: CardType) -> String {
         let name = &self.name;
         let disabled = if self.enabled { "" } else { DISABLED };
-        Ok(format!("<span{disabled}>{name}</span>"))
+        format!("<span{disabled}>{name}</span>")
     }
 }
+
+#[derive(Default)]
+struct State {
+    selected: Option<(ObType, String, String)>,
+}
+
+static STATE: Lazy<Mutex<State>> = Lazy::new(|| Mutex::new(State::default()));
 
 /// Set global allocator to `wee_alloc`
 #[global_allocator]
@@ -527,7 +550,7 @@ pub async fn main() -> Result<()> {
     group.set_attribute("label", "Maintenance")?;
     for ob in ObType::ALL {
         let opt = doc.create_element("option")?;
-        opt.append_with_str_1(ob.name())?;
+        opt.append_with_str_1(ob.tname())?;
         group.append_child(&opt)?;
     }
     ob_type.append_child(&group)?;
@@ -543,7 +566,7 @@ pub async fn main() -> Result<()> {
 fn handle_type_ev(tp: &str) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    deselect_cards(&doc).unwrap_throw();
+    deselect_card(&doc).unwrap_throw();
     let input: HtmlInputElement = doc.elem("ob_input").unwrap_throw();
     let tx = input.value().to_lowercase();
     let tp: ObType = tp.into();
@@ -554,7 +577,7 @@ fn handle_type_ev(tp: &str) {
 fn handle_search_ev(tx: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    deselect_cards(&doc).unwrap_throw();
+    deselect_card(&doc).unwrap_throw();
     let tp = selected_type(&doc).unwrap_throw();
     spawn_local(tp.populate_cards(tx));
 }
@@ -634,27 +657,22 @@ fn handle_click_ev(elem: &Element) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let tp = selected_type(&doc).unwrap_throw();
-    console::log_1(&JsValue::from(tp.name()));
-    deselect_cards(&doc).unwrap_throw();
+    console::log_1(&JsValue::from(tp.tname()));
+    deselect_card(&doc).unwrap_throw();
     if let Some(card) = elem.closest(".card").unwrap_throw() {
         if let Some(name) = card.get_attribute("name") {
-            card.set_class_name("card selected");
-            spawn_local(tp.add_form(name));
+            spawn_local(tp.expand_card(name));
         }
     }
 }
 
-fn deselect_cards(doc: &Document) -> Result<()> {
-    if let Ok(ob_cards) = doc.elem::<Element>("ob_cards") {
-        let cards = ob_cards.children();
-        for i in 0..cards.length() {
-            if let Some(card) = cards.get_with_index(i) {
-                card.set_class_name("card");
-            }
-        }
+fn deselect_card(doc: &Document) -> Result<()> {
+    let mut state = STATE.lock().unwrap_throw();
+    if let Some((tp, name, html)) = state.selected.take() {
+        let id = format!("{}_{}", tp.tname(), &name);
+        let elem: HtmlElement = doc.elem(&id).unwrap_throw();
+        elem.set_inner_html(&html);
+        elem.set_class_name("card");
     }
-    let ob_form: HtmlElement = doc.elem("ob_form")?;
-    let style = ob_form.style();
-    style.set_property("max-height", "0")?;
     Ok(())
 }

@@ -44,13 +44,6 @@ body {
   flex: 0 1 auto;
   overflow-y: auto;
 }
-#ob_form {
-  flex: 1 0 auto;
-  overflow-y: auto;
-  margin: 0.2rem;
-  max-height: 0;
-  transition: max-height 0.2s ease-in-out;
-}
 
 #ob_type {
   flex: 1 0 auto;
@@ -111,9 +104,13 @@ body {
   text-decoration: line-through;
 }
 .form {
+  flex: 20rem;
   display: flex;
   flex-direction: column;
   background-color: #ffd;
+  overflow-x: none;
+  overflow-y: auto;
+  margin: 0.2rem;
 }
 .row {
   display: flex;
