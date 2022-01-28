@@ -18,6 +18,7 @@ use async_std::path::PathBuf;
 use convert_case::{Case, Casing};
 use graft::sonar::{Connection, Result, SonarError};
 use json::JsonValue;
+use percent_encoding::percent_decode_str;
 use rand::Rng;
 use std::io;
 use tide::prelude::*;
@@ -240,6 +241,9 @@ fn invalid_char(c: char) -> bool {
 fn obj_name(tp: &str, req: &Request<()>) -> Result<String> {
     match req.param("name") {
         Ok(name) => {
+            let name = percent_decode_str(name)
+                .decode_utf8()
+                .or(Err(SonarError::InvalidName))?;
             if name.len() > 64
                 || name.contains(invalid_char)
                 || name.contains('/')
@@ -292,7 +296,7 @@ async fn get_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
     let nm = resp!(obj_name(tp, &req));
     let mut c = resp!(connection(&req).await);
     let mut res = json::object!();
-    res["name"] = req.param("name").unwrap().into();
+    res["name"] = nm.split_once('/').unwrap().1.into();
     resp!(
         c.enumerate_object(&nm, |att, val| {
             let att = rename_att(tp, att);

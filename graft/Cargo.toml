@@ -11,6 +11,7 @@ async-std = { version="1.8", features=["attributes"] }
 convert_case = "0.5"
 json = "0.12"
 log = "0.4"
+percent-encoding = "2"
 rand = "0.8"
 rustls = { version="0.19", features=["dangerous_configuration"] }
 serde = "1.0"

@@ -1,4 +1,5 @@
 use once_cell::sync::Lazy;
+use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -28,7 +29,6 @@ where
         }
     }
 }
-
 
 #[derive(Debug)]
 struct HtmlStr<S>(S);
@@ -297,7 +297,11 @@ impl ObType {
             // todo: make "new" card?
             return;
         }
-        let uri = format!("{}/{}", self.uri(), &name);
+        let uri = format!(
+            "{}/{}",
+            self.uri(),
+            utf8_percent_encode(&name, NON_ALPHANUMERIC)
+        );
         let json = fetch_json(&window, &uri).await.unwrap_throw();
         console::log_1(&json);
         let doc = window.document().unwrap_throw();
@@ -875,7 +879,9 @@ mod test {
         assert_eq!(HtmlStr("&").to_string(), "&amp;");
         assert_eq!(HtmlStr("\"").to_string(), "&quot;");
         assert_eq!(HtmlStr("'").to_string(), "&#x27;");
-        assert_eq!(HtmlStr("<script>XSS stuff</script>").to_string(),
-            "&lt;script&gt;XSS stuff&lt;/script&gt;");
+        assert_eq!(
+            HtmlStr("<script>XSS stuff</script>").to_string(),
+            "&lt;script&gt;XSS stuff&lt;/script&gt;"
+        );
     }
 }
