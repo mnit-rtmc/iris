@@ -15,6 +15,7 @@
 #![forbid(unsafe_code)]
 
 use async_std::path::PathBuf;
+use chrono::{DateTime, NaiveDateTime, Utc};
 use convert_case::{Case, Casing};
 use graft::sonar::{Connection, Result, SonarError};
 use json::JsonValue;
@@ -320,9 +321,16 @@ fn make_json(tp_att: &(&str, &str), val: &str) -> Option<JsonValue> {
     } else if BOOLS.contains(tp_att) {
         val.parse::<bool>().ok().map(|v| v.into())
     } else if STAMPS.contains(tp_att) {
-        // TODO: format to RFC 3339
-        //let st = val.parse::<i64>().ok().map(|v| v.into());
-        val.parse::<i64>().ok().map(|v| v.into())
+        val.parse::<i64>().ok().map(|ms| {
+            let sec = ms / 1_000;
+            let ns = (ms % 1_000) as u32 * 1_000_000;
+            DateTime::<Utc>::from_utc(
+                NaiveDateTime::from_timestamp(sec, ns),
+                Utc,
+            )
+            .to_rfc3339()
+            .into()
+        })
     } else if val != "\0" {
         Some(val.into())
     } else {

@@ -310,8 +310,13 @@ impl ObType {
         let html = elem.inner_html();
         let mut state = STATE.lock().unwrap_throw();
         state.selected = Some((self, name, html));
-        elem.set_class_name("form");
-        elem.set_inner_html(&self.build_form_json(json).unwrap_throw());
+        match self.build_form_json(json) {
+            Ok(html) => {
+                elem.set_class_name("form");
+                elem.set_inner_html(&html);
+            }
+            Err(e) => console::log_1(&(&e).into()),
+        }
         let mut opt = ScrollIntoViewOptions::new();
         opt.behavior(ScrollBehavior::Smooth)
             .block(ScrollLogicalPosition::Nearest);
@@ -327,7 +332,7 @@ enum CardType {
 
 trait Card: DeserializeOwned {
     fn new(json: JsValue) -> Result<Self> {
-        Ok(json.into_serde::<Self>().unwrap_throw())
+        json.into_serde::<Self>().map_err(|e| e.to_string().into())
     }
 
     /// Build form using JSON value
@@ -365,7 +370,9 @@ trait Card: DeserializeOwned {
                 </li>"
             ));
         }
-        let obs = json.into_serde::<Vec<Self>>().unwrap_throw();
+        let obs = json
+            .into_serde::<Vec<Self>>()
+            .map_err(|e| JsValue::from(e.to_string()))?;
         for ob in obs.iter().filter(|ob| ob.is_match(tx)) {
             let name = HtmlStr(ob.name());
             html.push_str(&format!(
@@ -609,10 +616,12 @@ impl Card for CommLink {
 
 impl Card for Controller {
     fn is_match(&self, tx: &str) -> bool {
-        let comm_link = self.comm_link.to_lowercase();
-        comm_link.contains(tx)
-            || format!("{}:{}", comm_link, self.drop_id).contains(tx)
-            || self.notes.to_lowercase().contains(tx)
+        self.name.contains(tx) || {
+            let comm_link = self.comm_link.to_lowercase();
+            comm_link.contains(tx)
+                || format!("{}:{}", comm_link, self.drop_id).contains(tx)
+                || self.notes.to_lowercase().contains(tx)
+        }
     }
 
     fn name(&self) -> &str {
