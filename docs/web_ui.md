@@ -34,7 +34,7 @@ authentication.
   - [X] Resource type selector with card list
   - [X] Search filter
   - [X] Maintenance object forms
-  - [ ] Html escaping
+  - [X] Html escaping
   - [ ] Updating values (save)
   - [ ] Creating objects
   - [ ] Deleting objects

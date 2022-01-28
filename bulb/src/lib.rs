@@ -15,15 +15,56 @@ use web_sys::{
 type Result<T> = std::result::Result<T, JsValue>;
 
 #[derive(Debug)]
-struct OValue<T>(Option<T>);
+struct OptVal<T>(Option<T>);
 
-impl<T> fmt::Display for OValue<T>
+impl<T> fmt::Display for OptVal<T>
 where
-    T: Copy + fmt::Display,
+    T: fmt::Display,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self.0 {
+        match &self.0 {
             Some(v) => write!(f, "{}", v),
+            None => Ok(()),
+        }
+    }
+}
+
+
+#[derive(Debug)]
+struct HtmlStr<S>(S);
+
+impl<S> HtmlStr<S> {
+    fn fmt_encode(s: &str, f: &mut fmt::Formatter) -> fmt::Result {
+        for c in s.chars() {
+            match c {
+                '&' => write!(f, "&amp;")?,
+                '<' => write!(f, "&lt;")?,
+                '>' => write!(f, "&gt;")?,
+                '"' => write!(f, "&quot;")?,
+                '\'' => write!(f, "&#x27;")?,
+                _ => write!(f, "{}", c)?,
+            }
+        }
+        Ok(())
+    }
+}
+
+impl fmt::Display for HtmlStr<&str> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        Self::fmt_encode(self.0, f)
+    }
+}
+
+impl fmt::Display for HtmlStr<&String> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        Self::fmt_encode(self.0, f)
+    }
+}
+
+impl fmt::Display for HtmlStr<Option<&String>> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match &self.0 {
+            Some(val) => Self::fmt_encode(val, f),
             None => Ok(()),
         }
     }
@@ -288,7 +329,7 @@ trait Card: DeserializeOwned {
     /// Build form using JSON value
     fn build_form_json(tname: &str, json: JsValue) -> Result<String> {
         let val = Self::new(json)?;
-        let name = val.name();
+        let name = HtmlStr(val.name());
         Ok(format!(
             "<div class='row'>\
               <div class='{TITLE}'>{tname}</div>\
@@ -296,7 +337,7 @@ trait Card: DeserializeOwned {
             </div>\
             {}\
             <div class='row'>\
-              <span></span>\
+              <button type='button'>Delete</button>\
               <button type='button'>Save</button>\
             </div>",
             val.to_html(CardType::Form)
@@ -322,7 +363,7 @@ trait Card: DeserializeOwned {
         }
         let obs = json.into_serde::<Vec<Self>>().unwrap_throw();
         for ob in obs.iter().filter(|ob| ob.is_match(tx)) {
-            let name = ob.name();
+            let name = HtmlStr(ob.name());
             html.push_str(&format!(
                 "<li id='{tname}_{name}' name='{name}' class='card'>"
             ));
@@ -359,15 +400,17 @@ impl Card for Alarm {
     }
 
     fn to_html(&self, ct: CardType) -> String {
-        let name = &self.name;
-        let description = &self.description;
+        let description = HtmlStr(&self.description);
         match ct {
-            CardType::Compact => format!(
-                "<span>{description}</span>\
-                <span class='{INFO}'>{name}</span>"
-            ),
+            CardType::Compact => {
+                let name = HtmlStr(&self.name);
+                format!(
+                    "<span>{description}</span>\
+                    <span class='{INFO}'>{name}</span>"
+                )
+            }
             CardType::Form => {
-                let controller = OValue(self.controller.as_ref());
+                let controller = HtmlStr(self.controller.as_ref());
                 let pin = self.pin;
                 format!(
                     "<div class='row'>\
@@ -401,15 +444,17 @@ impl Card for CabinetStyle {
     }
 
     fn to_html(&self, ct: CardType) -> String {
-        let name = &self.name;
         match ct {
-            CardType::Compact => format!("<span>{name}</span>"),
+            CardType::Compact => {
+                let name = HtmlStr(&self.name);
+                format!("<span>{name}</span>")
+            }
             CardType::Form => {
-                let police_panel_pin_1 = OValue(self.police_panel_pin_1);
-                let police_panel_pin_2 = OValue(self.police_panel_pin_2);
-                let watchdog_reset_pin_1 = OValue(self.watchdog_reset_pin_1);
-                let watchdog_reset_pin_2 = OValue(self.watchdog_reset_pin_2);
-                let dip = OValue(self.dip);
+                let police_panel_pin_1 = OptVal(self.police_panel_pin_1);
+                let police_panel_pin_2 = OptVal(self.police_panel_pin_2);
+                let watchdog_reset_pin_1 = OptVal(self.watchdog_reset_pin_1);
+                let watchdog_reset_pin_2 = OptVal(self.watchdog_reset_pin_2);
+                let dip = OptVal(self.dip);
                 format!(
                     "<div class='row'>\
                       <label for='form_pp1'>Police Panel Pin 1</label>\
@@ -453,13 +498,15 @@ impl Card for CommConfig {
     }
 
     fn to_html(&self, ct: CardType) -> String {
-        let name = &self.name;
-        let description = &self.description;
+        let description = HtmlStr(&self.description);
         match ct {
-            CardType::Compact => format!(
-                "<span>{description}</span>\
-                <span class='{INFO}'>{name}</span>"
-            ),
+            CardType::Compact => {
+                let name = HtmlStr(&self.name);
+                format!(
+                    "<span>{description}</span>\
+                    <span class='{INFO}'>{name}</span>"
+                )
+            }
             CardType::Form => {
                 let timeout_ms = self.timeout_ms;
                 let poll_period_sec = self.poll_period_sec;
@@ -516,11 +563,10 @@ impl Card for CommLink {
     }
 
     fn to_html(&self, ct: CardType) -> String {
-        let name = &self.name;
-        let description = &self.description;
-        let uri = &self.uri;
+        let description = HtmlStr(&self.description);
         match ct {
             CardType::Compact => {
+                let name = HtmlStr(&self.name);
                 let disabled = if self.poll_enabled { "" } else { DISABLED };
                 format!(
                     "<span{disabled}>{description}</span>\
@@ -528,8 +574,9 @@ impl Card for CommLink {
                 )
             }
             CardType::Form => {
+                let uri = HtmlStr(&self.uri);
                 let enabled = if self.poll_enabled { " checked" } else { "" };
-                let comm_config = &self.comm_config;
+                let comm_config = HtmlStr(&self.comm_config);
                 format!(
                     "<div class='row'>\
                       <label for='form_description'>Description</label>\
@@ -569,11 +616,11 @@ impl Card for Controller {
     }
 
     fn to_html(&self, ct: CardType) -> String {
-        let name = &self.name;
-        let comm_link = &self.comm_link;
+        let comm_link = HtmlStr(&self.comm_link);
         let drop_id = self.drop_id;
         match ct {
             CardType::Compact => {
+                let name = HtmlStr(&self.name);
                 // condition 1 is "Active"
                 let disabled = if self.condition == 1 { "" } else { DISABLED };
                 format!(
@@ -582,9 +629,9 @@ impl Card for Controller {
                 )
             }
             CardType::Form => {
-                let cabinet = &self.cabinet;
-                let notes = &self.notes;
-                let password = OValue(self.password.as_ref());
+                let cabinet = HtmlStr(&self.cabinet);
+                let notes = HtmlStr(&self.notes);
+                let password = HtmlStr(self.password.as_ref());
                 format!(
                     "<div class='row'>\
                       <label for='form_comm_link'>Comm Link</label>\
@@ -627,15 +674,15 @@ impl Card for Modem {
     }
 
     fn to_html(&self, ct: CardType) -> String {
-        let name = &self.name;
         match ct {
             CardType::Compact => {
+                let name = HtmlStr(&self.name);
                 let disabled = if self.enabled { "" } else { DISABLED };
                 format!("<span{disabled}>{name}</span>")
             }
             CardType::Form => {
-                let uri = &self.uri;
-                let config = &self.config;
+                let uri = HtmlStr(&self.uri);
+                let config = HtmlStr(&self.config);
                 let timeout_ms = self.timeout_ms;
                 let enabled = if self.enabled { " checked" } else { "" };
                 format!(
@@ -676,7 +723,7 @@ static STATE: Lazy<Mutex<State>> = Lazy::new(|| Mutex::new(State::default()));
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen(start)]
-pub async fn main() -> Result<()> {
+pub async fn start() -> Result<()> {
     // this should be debug only
     console_error_panic_hook::set_once();
 
@@ -815,4 +862,20 @@ fn deselect_card(doc: &Document) -> Result<()> {
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn html() {
+        assert_eq!(HtmlStr("<").to_string(), "&lt;");
+        assert_eq!(HtmlStr(">").to_string(), "&gt;");
+        assert_eq!(HtmlStr("&").to_string(), "&amp;");
+        assert_eq!(HtmlStr("\"").to_string(), "&quot;");
+        assert_eq!(HtmlStr("'").to_string(), "&#x27;");
+        assert_eq!(HtmlStr("<script>XSS stuff</script>").to_string(),
+            "&lt;script&gt;XSS stuff&lt;/script&gt;");
+    }
 }
