@@ -108,6 +108,14 @@ struct Alarm {
     pub trigger_time: Option<String>,
 }
 
+/// Cabinet
+#[derive(Debug, Deserialize, Serialize)]
+struct Cabinet {
+    pub name: String,
+    pub style: Option<String>,
+    pub geo_loc: String,
+}
+
 /// Cabinet Style
 #[derive(Debug, Deserialize, Serialize)]
 struct CabinetStyle {
@@ -181,6 +189,7 @@ const INFO: &str = "info";
 enum ObType {
     Unknown,
     Alarm,
+    Cabinet,
     CabinetStyle,
     CommConfig,
     CommLink,
@@ -192,6 +201,7 @@ impl From<&str> for ObType {
     fn from(tp: &str) -> Self {
         match tp {
             "Alarm" => ObType::Alarm,
+            "Cabinet" => ObType::Cabinet,
             "Cabinet Style" => ObType::CabinetStyle,
             "Comm Config" => ObType::CommConfig,
             "Comm Link" => ObType::CommLink,
@@ -206,6 +216,7 @@ impl ObType {
     /// Slice of all valid types
     const ALL: &'static [ObType] = &[
         ObType::Alarm,
+        ObType::Cabinet,
         ObType::CabinetStyle,
         ObType::CommConfig,
         ObType::CommLink,
@@ -218,6 +229,7 @@ impl ObType {
         match self {
             Self::Unknown => "",
             Self::Alarm => "Alarm",
+            Self::Cabinet => "Cabinet",
             Self::CabinetStyle => "Cabinet Style",
             Self::CommConfig => "Comm Config",
             Self::CommLink => "Comm Link",
@@ -231,6 +243,7 @@ impl ObType {
         match self {
             Self::Unknown => "",
             Self::Alarm => "/iris/api/alarm",
+            Self::Cabinet => "/iris/api/cabinet",
             Self::CabinetStyle => "/iris/api/cabinet_style",
             Self::CommConfig => "/iris/api/comm_config",
             Self::CommLink => "/iris/api/comm_link",
@@ -276,6 +289,7 @@ impl ObType {
         let tname = self.tname();
         match self {
             Self::Alarm => Alarm::build_cards(tname, json, tx),
+            Self::Cabinet => Cabinet::build_cards(tname, json, tx),
             Self::CabinetStyle => CabinetStyle::build_cards(tname, json, tx),
             Self::CommConfig => CommConfig::build_cards(tname, json, tx),
             Self::CommLink => CommLink::build_cards(tname, json, tx),
@@ -289,6 +303,7 @@ impl ObType {
     fn build_form_json(self, json: JsValue) -> Result<String> {
         match self {
             Self::Alarm => Alarm::build_form_json(self, json),
+            Self::Cabinet => Cabinet::build_form_json(self, json),
             Self::CabinetStyle => CabinetStyle::build_form_json(self, json),
             Self::CommConfig => CommConfig::build_form_json(self, json),
             Self::CommLink => CommLink::build_form_json(self, json),
@@ -455,6 +470,47 @@ impl Card for Alarm {
                       <label for='form_pin'>Pin</label>\
                       <input id='form_pin' type='number' min='1' max='104' \
                              size='8' value='{pin}'/>\
+                    </div>"
+                )
+            }
+        }
+    }
+}
+
+impl Card for Cabinet {
+    fn is_match(&self, tx: &str) -> bool {
+        self.name.to_lowercase().contains(tx)
+            || self
+                .style
+                .as_ref()
+                .filter(|s| s.to_lowercase().contains(tx))
+                .is_some()
+    }
+
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn to_html(&self, ct: CardType) -> String {
+        match ct {
+            CardType::Compact => {
+                let name = HtmlStr(&self.name);
+                format!("<span>{name}</span>")
+            }
+            CardType::Status => String::new(),
+            CardType::Edit => {
+                let style = HtmlStr(self.style.as_ref());
+                let geo_loc = HtmlStr(&self.geo_loc);
+                format!(
+                    "<div class='row'>\
+                      <label for='form_style'>Cabinet Style</label>\
+                      <input id='form_style' maxlength='20' size='20' \
+                             value='{style}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_geo_loc'>Geo Loc</label>\
+                      <input id='form_geo_loc' maxlength='20' size='20' \
+                             value='{geo_loc}'/>\
                     </div>"
                 )
             }

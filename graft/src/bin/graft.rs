@@ -57,11 +57,13 @@ const BOOLS: &[(&str, &str)] = &[
     ("modem", "enabled"),
 ];
 
+/// Slice of (type, attribute) tuples for RFC 3339 time stamp values
 const STAMPS: &[(&str, &str)] = &[
     ("alarm", "trigger_time"),
     ("controller", "fail_time"),
 ];
 
+/// Hack to rename IRIS attributes that don't match DB names
 fn rename_att(tp: &str, att: &str) -> String {
     if tp == "controller" && att == "drop" {
         "drop_id".to_string()
