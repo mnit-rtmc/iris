@@ -105,7 +105,7 @@ struct Alarm {
     pub controller: Option<String>,
     pub pin: u32,
     pub state: bool,
-    //pub trigger_time: Option<String>,
+    pub trigger_time: Option<String>,
 }
 
 /// Cabinet Style
@@ -139,8 +139,8 @@ struct CommLink {
     pub name: String,
     pub description: String,
     pub uri: String,
-    pub poll_enabled: bool,
     pub comm_config: String,
+    pub poll_enabled: bool,
 }
 
 /// Controller
@@ -239,6 +239,15 @@ impl ObType {
         }
     }
 
+    fn has_status(self) -> bool {
+        match self {
+            Self::Alarm | Self::CommLink | Self::Controller | Self::Modem => {
+                true
+            }
+            _ => false,
+        }
+    }
+
     /// Populate cards in `ob_list`
     async fn populate_cards(self, tx: String) {
         if let Err(e) = self.try_populate_cards(tx).await {
@@ -278,14 +287,13 @@ impl ObType {
 
     /// Build form using JSON value
     fn build_form_json(self, json: JsValue) -> Result<String> {
-        let tname = self.tname();
         match self {
-            Self::Alarm => Alarm::build_form_json(tname, json),
-            Self::CabinetStyle => CabinetStyle::build_form_json(tname, json),
-            Self::CommConfig => CommConfig::build_form_json(tname, json),
-            Self::CommLink => CommLink::build_form_json(tname, json),
-            Self::Controller => Controller::build_form_json(tname, json),
-            Self::Modem => Modem::build_form_json(tname, json),
+            Self::Alarm => Alarm::build_form_json(self, json),
+            Self::CabinetStyle => CabinetStyle::build_form_json(self, json),
+            Self::CommConfig => CommConfig::build_form_json(self, json),
+            Self::CommLink => CommLink::build_form_json(self, json),
+            Self::Controller => Controller::build_form_json(self, json),
+            Self::Modem => Modem::build_form_json(self, json),
             _ => Ok("".into()),
         }
     }
@@ -327,7 +335,8 @@ impl ObType {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum CardType {
     Compact,
-    Form,
+    Status,
+    Edit,
 }
 
 trait Card: DeserializeOwned {
@@ -336,9 +345,15 @@ trait Card: DeserializeOwned {
     }
 
     /// Build form using JSON value
-    fn build_form_json(tname: &str, json: JsValue) -> Result<String> {
+    fn build_form_json(tp: ObType, json: JsValue) -> Result<String> {
+        let tname = tp.tname();
         let val = Self::new(json)?;
         let name = HtmlStr(val.name());
+        let status = if tp.has_status() {
+            "<button type='button'>Status</button>"
+        } else {
+            ""
+        };
         Ok(format!(
             "<div class='row'>\
               <div class='{TITLE}'>{tname}</div>\
@@ -347,9 +362,10 @@ trait Card: DeserializeOwned {
             {}\
             <div class='row'>\
               <button type='button'>Delete</button>\
+              {status}
               <button type='button'>Save</button>\
             </div>",
-            val.to_html(CardType::Form)
+            val.to_html(CardType::Edit)
         ))
     }
 
@@ -420,7 +436,8 @@ impl Card for Alarm {
                     <span class='{INFO}'>{name}</span>"
                 )
             }
-            CardType::Form => {
+            CardType::Status => String::new(),
+            CardType::Edit => {
                 let controller = HtmlStr(self.controller.as_ref());
                 let pin = self.pin;
                 format!(
@@ -460,7 +477,8 @@ impl Card for CabinetStyle {
                 let name = HtmlStr(&self.name);
                 format!("<span>{name}</span>")
             }
-            CardType::Form => {
+            CardType::Status => String::new(),
+            CardType::Edit => {
                 let police_panel_pin_1 = OptVal(self.police_panel_pin_1);
                 let police_panel_pin_2 = OptVal(self.police_panel_pin_2);
                 let watchdog_reset_pin_1 = OptVal(self.watchdog_reset_pin_1);
@@ -518,7 +536,8 @@ impl Card for CommConfig {
                     <span class='{INFO}'>{name}</span>"
                 )
             }
-            CardType::Form => {
+            CardType::Status => String::new(),
+            CardType::Edit => {
                 let timeout_ms = self.timeout_ms;
                 let poll_period_sec = self.poll_period_sec;
                 let long_poll_period_sec = self.long_poll_period_sec;
@@ -584,7 +603,8 @@ impl Card for CommLink {
                     <span class='{INFO}'>{name}</span>"
                 )
             }
-            CardType::Form => {
+            CardType::Status => String::new(),
+            CardType::Edit => {
                 let uri = HtmlStr(&self.uri);
                 let enabled = if self.poll_enabled { " checked" } else { "" };
                 let comm_config = HtmlStr(&self.comm_config);
@@ -600,13 +620,13 @@ impl Card for CommLink {
                              value='{uri}'/>\
                     </div>\
                     <div class='row'>\
-                      <label for='form_enabled'>Poll Enabled</label>\
-                      <input id='form_enabled' type='checkbox'{enabled}/>\
-                    </div>\
-                    <div class='row'>\
                       <label for='form_config'>Comm Config</label>\
                       <input id='form_config' maxlength='10' size='10' \
                              value='{comm_config}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_enabled'>Poll Enabled</label>\
+                      <input id='form_enabled' type='checkbox'{enabled}/>\
                     </div>"
                 )
             }
@@ -641,7 +661,8 @@ impl Card for Controller {
                     <span class='{INFO}'>{name}</span>"
                 )
             }
-            CardType::Form => {
+            CardType::Status => String::new(),
+            CardType::Edit => {
                 let cabinet = HtmlStr(&self.cabinet);
                 let notes = HtmlStr(&self.notes);
                 let password = HtmlStr(self.password.as_ref());
@@ -693,7 +714,8 @@ impl Card for Modem {
                 let disabled = if self.enabled { "" } else { DISABLED };
                 format!("<span{disabled}>{name}</span>")
             }
-            CardType::Form => {
+            CardType::Status => String::new(),
+            CardType::Edit => {
                 let uri = HtmlStr(&self.uri);
                 let config = HtmlStr(&self.config);
                 let timeout_ms = self.timeout_ms;

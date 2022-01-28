@@ -29,7 +29,6 @@ use tide::{Body, Request, Response, StatusCode};
 /// Slice of (type, attribute) tuples for JSON integer values
 const INTEGERS: &[(&str, &str)] = &[
     ("alarm", "pin"),
-    ("alarm", "trigger_time"),
     ("alarm", "styles"),
     ("cabinet_style", "police_panel_pin_1"),
     ("cabinet_style", "police_panel_pin_2"),
@@ -59,6 +58,7 @@ const BOOLS: &[(&str, &str)] = &[
 ];
 
 const STAMPS: &[(&str, &str)] = &[
+    ("alarm", "trigger_time"),
     ("controller", "fail_time"),
 ];
 
