@@ -1,9 +1,8 @@
-use once_cell::sync::Lazy;
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
+use std::cell::RefCell;
 use std::fmt;
-use std::sync::Mutex;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
@@ -290,14 +289,14 @@ impl ObType {
             sb_list.set_inner_html("");
         } else {
             let json = fetch_json(&window, self.uri()).await?;
-            let html = self.build_cards(json, &tx)?;
+            let html = self.build_cards(&json, &tx)?;
             sb_list.set_inner_html(&html);
         }
         Ok(())
     }
 
     /// Build cards for list
-    fn build_cards(self, json: JsValue, tx: &str) -> Result<String> {
+    fn build_cards(self, json: &JsValue, tx: &str) -> Result<String> {
         let tname = self.tname();
         match self {
             Self::Alarm => Alarm::build_cards(tname, json, tx),
@@ -311,16 +310,16 @@ impl ObType {
         }
     }
 
-    /// Build form using JSON value
-    fn build_form_json(self, json: JsValue) -> Result<String> {
+    /// Build card using JSON value
+    fn build_card(self, json: &JsValue, ct: CardType) -> Result<String> {
         match self {
-            Self::Alarm => Alarm::build_form_json(self, json),
-            Self::Cabinet => Cabinet::build_form_json(self, json),
-            Self::CabinetStyle => CabinetStyle::build_form_json(self, json),
-            Self::CommConfig => CommConfig::build_form_json(self, json),
-            Self::CommLink => CommLink::build_form_json(self, json),
-            Self::Controller => Controller::build_form_json(self, json),
-            Self::Modem => Modem::build_form_json(self, json),
+            Self::Alarm => Alarm::build_card(self, json, ct),
+            Self::Cabinet => Cabinet::build_card(self, json, ct),
+            Self::CabinetStyle => CabinetStyle::build_card(self, json, ct),
+            Self::CommConfig => CommConfig::build_card(self, json, ct),
+            Self::CommLink => CommLink::build_card(self, json, ct),
+            Self::Controller => Controller::build_card(self, json, ct),
+            Self::Modem => Modem::build_card(self, json, ct),
             _ => Ok("".into()),
         }
     }
@@ -340,27 +339,24 @@ impl ObType {
         let json = fetch_json(&window, &uri).await.unwrap_throw();
         console::log_1(&json);
         let doc = window.document().unwrap_throw();
-        let id = format!("{}_{}", self.tname(), &name);
-        let elem: HtmlElement = doc.elem(&id).unwrap_throw();
-        let html = elem.inner_html();
-        let mut state = STATE.lock().unwrap_throw();
-        state.selected = Some((self, name, html));
-        match self.build_form_json(json) {
-            Ok(html) => {
-                elem.set_class_name("form");
-                elem.set_inner_html(&html);
-            }
-            Err(e) => console::log_1(&(&e).into()),
-        }
-        let mut opt = ScrollIntoViewOptions::new();
-        opt.behavior(ScrollBehavior::Smooth)
-            .block(ScrollLogicalPosition::Nearest);
-        elem.scroll_into_view_with_scroll_into_view_options(&opt);
+        let cs = CardState {
+            ob_tp: self,
+            name,
+            json,
+        };
+        cs.replace_card(&doc, CardType::Any);
+        STATE.with(|rc| {
+            let mut state = rc.borrow_mut();
+            state.selected.replace(cs);
+        });
     }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum CardType {
+    Any,
+
+    /// Compact in list
     Compact,
 
     /// 📖, 📄, 🗒️, 📃
@@ -373,20 +369,30 @@ enum CardType {
 trait Card: DeserializeOwned {
     const ENAME: &'static str;
 
-    fn new(json: JsValue) -> Result<Self> {
+    fn new(json: &JsValue) -> Result<Self> {
         json.into_serde::<Self>().map_err(|e| e.to_string().into())
     }
 
     /// Build form using JSON value
-    fn build_form_json(tp: ObType, json: JsValue) -> Result<String> {
-        if tp.has_status() {
-            Self::build_status_form(tp, json)
-        } else {
-            Self::build_edit_form(tp, json)
+    fn build_card(tp: ObType, json: &JsValue, ct: CardType) -> Result<String> {
+        match ct {
+            CardType::Status if tp.has_status() => {
+                Self::build_status_form(tp, json)
+            }
+            CardType::Any if tp.has_status() => {
+                Self::build_status_form(tp, json)
+            }
+            CardType::Compact => Self::build_compact_form(json),
+            _ => Self::build_edit_form(tp, json),
         }
     }
 
-    fn build_status_form(tp: ObType, json: JsValue) -> Result<String> {
+    fn build_compact_form(json: &JsValue) -> Result<String> {
+        let val = Self::new(json)?;
+        Ok(val.to_html(CardType::Compact))
+    }
+
+    fn build_status_form(tp: ObType, json: &JsValue) -> Result<String> {
         let ename = tp.ename();
         let val = Self::new(json)?;
         let name = HtmlStr(val.name());
@@ -403,7 +409,7 @@ trait Card: DeserializeOwned {
         ))
     }
 
-    fn build_edit_form(tp: ObType, json: JsValue) -> Result<String> {
+    fn build_edit_form(tp: ObType, json: &JsValue) -> Result<String> {
         let ename = tp.ename();
         let val = Self::new(json)?;
         let name = HtmlStr(val.name());
@@ -433,7 +439,7 @@ trait Card: DeserializeOwned {
         false
     }
 
-    fn build_cards(tname: &str, json: JsValue, tx: &str) -> Result<String> {
+    fn build_cards(tname: &str, json: &JsValue, tx: &str) -> Result<String> {
         let mut html = String::new();
         html.push_str("<ul class='cards'>");
         if tx.is_empty() {
@@ -467,7 +473,7 @@ trait Card: DeserializeOwned {
 impl Card for () {
     const ENAME: &'static str = "";
 
-    fn new(_json: JsValue) -> Result<Self> {
+    fn new(_json: &JsValue) -> Result<Self> {
         unreachable!()
     }
 
@@ -495,6 +501,7 @@ impl Card for Alarm {
     fn to_html(&self, ct: CardType) -> String {
         let description = HtmlStr(&self.description);
         match ct {
+            CardType::Any => unreachable!(),
             CardType::Compact => {
                 let name = HtmlStr(&self.name);
                 format!(
@@ -567,6 +574,7 @@ impl Card for Cabinet {
 
     fn to_html(&self, ct: CardType) -> String {
         match ct {
+            CardType::Any => unreachable!(),
             CardType::Compact => {
                 let name = HtmlStr(&self.name);
                 format!("<span>{name}</span>")
@@ -605,6 +613,7 @@ impl Card for CabinetStyle {
 
     fn to_html(&self, ct: CardType) -> String {
         match ct {
+            CardType::Any => unreachable!(),
             CardType::Compact => {
                 let name = HtmlStr(&self.name);
                 format!("<span>{name}</span>")
@@ -663,6 +672,7 @@ impl Card for CommConfig {
     fn to_html(&self, ct: CardType) -> String {
         let description = HtmlStr(&self.description);
         match ct {
+            CardType::Any => unreachable!(),
             CardType::Compact => {
                 let name = HtmlStr(&self.name);
                 format!(
@@ -731,6 +741,7 @@ impl Card for CommLink {
     fn to_html(&self, ct: CardType) -> String {
         let description = HtmlStr(&self.description);
         match ct {
+            CardType::Any => unreachable!(),
             CardType::Compact => {
                 let name = HtmlStr(&self.name);
                 let disabled = if self.poll_enabled { "" } else { DISABLED };
@@ -797,6 +808,7 @@ impl Card for Controller {
         let comm_link = HtmlStr(&self.comm_link);
         let drop_id = self.drop_id;
         match ct {
+            CardType::Any => unreachable!(),
             CardType::Compact => {
                 let name = HtmlStr(&self.name);
                 // condition 1 is "Active"
@@ -873,6 +885,7 @@ impl Card for Modem {
 
     fn to_html(&self, ct: CardType) -> String {
         match ct {
+            CardType::Any => unreachable!(),
             CardType::Compact => {
                 let name = HtmlStr(&self.name);
                 let disabled = if self.enabled { "" } else { DISABLED };
@@ -910,12 +923,51 @@ impl Card for Modem {
     }
 }
 
-#[derive(Default)]
-struct State {
-    selected: Option<(ObType, String, String)>,
+#[derive(Clone)]
+struct CardState {
+    /// Object type
+    ob_tp: ObType,
+    /// Object name
+    name: String,
+    /// JSON value of object
+    json: JsValue,
 }
 
-static STATE: Lazy<Mutex<State>> = Lazy::new(|| Mutex::new(State::default()));
+impl CardState {
+    fn replace_card(&self, doc: &Document, ct: CardType) {
+        let id = format!("{}_{}", self.ob_tp.tname(), &self.name);
+        if let Ok(elem) = doc.elem::<HtmlElement>(&id) {
+            match self.ob_tp.build_card(&self.json, ct) {
+                Ok(html) => {
+                    elem.set_inner_html(&html);
+                    if let CardType::Compact = ct {
+                        elem.set_class_name("card");
+                    } else {
+                        elem.set_class_name("form");
+                        let mut opt = ScrollIntoViewOptions::new();
+                        opt.behavior(ScrollBehavior::Smooth)
+                            .block(ScrollLogicalPosition::Nearest);
+                        elem.scroll_into_view_with_scroll_into_view_options(
+                            &opt,
+                        );
+                    }
+                }
+                Err(e) => {
+                    console::log_1(&(&e).into());
+                }
+            }
+        }
+    }
+}
+
+#[derive(Default)]
+struct State {
+    selected: Option<CardState>,
+}
+
+thread_local! {
+    static STATE: RefCell<State> = RefCell::new(State::default());
+}
 
 /// Set global allocator to `wee_alloc`
 #[global_allocator]
@@ -1045,16 +1097,19 @@ fn handle_click_ev(elem: &Element) {
     let tp = selected_type(&doc).unwrap_throw();
     if elem.is_instance_of::<HtmlButtonElement>() {
         if let Some(form) = elem.closest(".form").unwrap_throw() {
-            if let Some(name) = form.get_attribute("name") {
-                // TODO: handle "Close", "Delete", "Edit", "Save" buttons
-                match elem.id() {
-                    id if id == "ob_delete" => (),
-                    id if id == "ob_edit" => (),
-                    id if id == "ob_status" => (),
-                    id if id == "ob_save" => (),
-                    id => console::log_1(&id.into()),
+            if let Some(_name) = form.get_attribute("name") {
+                let cs = STATE.with(|rc| rc.borrow().selected.clone());
+                if let Some(cs) = cs {
+                    match elem.id() {
+                        id if id == "ob_delete" => todo!(),
+                        id if id == "ob_edit" => {
+                            cs.replace_card(&doc, CardType::Edit)
+                        }
+                        id if id == "ob_status" => todo!(),
+                        id if id == "ob_save" => todo!(),
+                        id => console::log_1(&id.into()),
+                    }
                 }
-                console::log_1(&name.into());
             }
         }
     } else if let Some(card) = elem.closest(".card").unwrap_throw() {
@@ -1066,13 +1121,12 @@ fn handle_click_ev(elem: &Element) {
 }
 
 fn deselect_card(doc: &Document) -> Result<()> {
-    let mut state = STATE.lock().unwrap_throw();
-    if let Some((tp, name, html)) = state.selected.take() {
-        let id = format!("{}_{}", tp.tname(), &name);
-        if let Ok(elem) = doc.elem::<HtmlElement>(&id) {
-            elem.set_inner_html(&html);
-            elem.set_class_name("card");
-        }
+    let cs = STATE.with(|rc| {
+        let mut state = rc.borrow_mut();
+        state.selected.take()
+    });
+    if let Some(cs) = cs {
+        cs.replace_card(doc, CardType::Compact);
     }
     Ok(())
 }
