@@ -8,8 +8,8 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
 use web_sys::{
-    console, Document, Element, Event, HtmlElement, HtmlInputElement,
-    HtmlSelectElement, Request, Response, ScrollBehavior,
+    console, Document, Element, Event, HtmlButtonElement, HtmlElement,
+    HtmlInputElement, HtmlSelectElement, Request, Response, ScrollBehavior,
     ScrollIntoViewOptions, ScrollLogicalPosition, Window,
 };
 
@@ -181,8 +181,8 @@ const TITLE: &str = "title";
 /// CSS class for disabled cards
 const DISABLED: &str = " class='disabled'";
 
-/// CSS class for info
-const INFO: &str = "info";
+/// CSS class for names
+const NAME: &str = "ob_name";
 
 /// IRIS object types
 #[derive(Clone, Copy, Debug)]
@@ -268,9 +268,7 @@ impl ObType {
 
     fn has_status(self) -> bool {
         match self {
-            Self::Alarm | Self::CommLink | Self::Controller | Self::Modem => {
-                true
-            }
+            Self::Alarm | Self::Controller => true,
             _ => false,
         }
     }
@@ -381,24 +379,49 @@ trait Card: DeserializeOwned {
 
     /// Build form using JSON value
     fn build_form_json(tp: ObType, json: JsValue) -> Result<String> {
+        if tp.has_status() {
+            Self::build_status_form(tp, json)
+        } else {
+            Self::build_edit_form(tp, json)
+        }
+    }
+
+    fn build_status_form(tp: ObType, json: JsValue) -> Result<String> {
+        let ename = tp.ename();
+        let val = Self::new(json)?;
+        let name = HtmlStr(val.name());
+        Ok(format!(
+            "<div class='row'>\
+              <div class='{TITLE}'>{ename}</div>\
+              <span class='{NAME}'>{name}</span>\
+            </div>\
+            {}\
+            <div class='row'>\
+              <button id='ob_edit' type='button'>Edit</button>\
+            </div>",
+            val.to_html(CardType::Status)
+        ))
+    }
+
+    fn build_edit_form(tp: ObType, json: JsValue) -> Result<String> {
         let ename = tp.ename();
         let val = Self::new(json)?;
         let name = HtmlStr(val.name());
         let status = if tp.has_status() {
-            "<button type='button'>📖 Status</button>"
+            "<button id='ob_status' type='button'>📖 Status</button>"
         } else {
             ""
         };
         Ok(format!(
             "<div class='row'>\
               <div class='{TITLE}'>{ename}</div>\
-              <span class='{INFO}'>{name}</span>\
+              <span class='{NAME}'>{name}</span>\
             </div>\
             {}\
             <div class='row'>\
-              <button type='button'>🗑️ Delete</button>\
+              <button id='ob_delete' type='button'>🗑️ Delete</button>\
               {status}
-              <button type='button'>🖍️ Save</button>\
+              <button id='ob_save' type='button'>🖍️ Save</button>\
             </div>",
             val.to_html(CardType::Edit)
         ))
@@ -454,11 +477,15 @@ impl Card for () {
 }
 
 impl Card for Alarm {
-    const ENAME: &'static str = "😧 Alarm";
+    const ENAME: &'static str = "⚠ Alarm";
 
     fn is_match(&self, tx: &str) -> bool {
         self.description.to_lowercase().contains(tx)
             || self.name.to_lowercase().contains(tx)
+            || {
+                let state = if self.state { "triggered" } else { "clear" };
+                state.contains(tx)
+            }
     }
 
     fn name(&self) -> &str {
@@ -472,10 +499,31 @@ impl Card for Alarm {
                 let name = HtmlStr(&self.name);
                 format!(
                     "<span>{description}</span>\
-                    <span class='{INFO}'>{name}</span>"
+                    <span class='{NAME}'>{name}</span>"
                 )
             }
-            CardType::Status => String::new(),
+            CardType::Status => {
+                let state = if self.state {
+                    "triggered 😧"
+                } else {
+                    "clear 🙂"
+                };
+                let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
+                format!(
+                    "<div class='row'>\
+                      <span>Description</span>\
+                      <span class='info'>{description}</span>\
+                    </div>\
+                    <div class='row'>\
+                      <span>State</span>\
+                      <span class='info'>{state}</span>\
+                    </div>\
+                    <div class='row'>\
+                      <span>Trigger Time</span>\
+                      <span class='info'>{trigger_time}</span>\
+                    </div>"
+                )
+            }
             CardType::Edit => {
                 let controller = HtmlStr(self.controller.as_ref());
                 let pin = self.pin;
@@ -619,7 +667,7 @@ impl Card for CommConfig {
                 let name = HtmlStr(&self.name);
                 format!(
                     "<span>{description}</span>\
-                    <span class='{INFO}'>{name}</span>"
+                    <span class='{NAME}'>{name}</span>"
                 )
             }
             CardType::Status => String::new(),
@@ -688,7 +736,7 @@ impl Card for CommLink {
                 let disabled = if self.poll_enabled { "" } else { DISABLED };
                 format!(
                     "<span{disabled}>{description}</span>\
-                    <span class='{INFO}'>{name}</span>"
+                    <span class='{NAME}'>{name}</span>"
                 )
             }
             CardType::Status => String::new(),
@@ -726,12 +774,19 @@ impl Card for Controller {
     const ENAME: &'static str = "🎛️ Controller";
 
     fn is_match(&self, tx: &str) -> bool {
-        self.name.contains(tx) || {
-            let comm_link = self.comm_link.to_lowercase();
-            comm_link.contains(tx)
-                || format!("{}:{}", comm_link, self.drop_id).contains(tx)
-                || self.notes.to_lowercase().contains(tx)
-        }
+        self.name.contains(tx)
+            || {
+                let comm_link = self.comm_link.to_lowercase();
+                comm_link.contains(tx)
+                    || format!("{}:{}", comm_link, self.drop_id).contains(tx)
+            }
+            || self.notes.to_lowercase().contains(tx)
+            || self
+                .version
+                .as_deref()
+                .unwrap_or("")
+                .to_lowercase()
+                .contains(tx)
     }
 
     fn name(&self) -> &str {
@@ -748,10 +803,27 @@ impl Card for Controller {
                 let disabled = if self.condition == 1 { "" } else { DISABLED };
                 format!(
                     "<span{disabled}>{comm_link}:{drop_id}</span>\
-                    <span class='{INFO}'>{name}</span>"
+                    <span class='{NAME}'>{name}</span>"
                 )
             }
-            CardType::Status => String::new(),
+            CardType::Status => {
+                let version = self.version.as_deref().unwrap_or("-");
+                let fail_time = self.fail_time.as_deref().unwrap_or("-");
+                format!(
+                    "<div class='row'>\
+                      <span>Comm Link:Drop ID</span>\
+                      <span class='info'>{comm_link}:{drop_id}</span>\
+                    </div>\
+                    <div class='row'>\
+                      <span>Version</span>\
+                      <span class='info'>{version}</span>\
+                    </div>\
+                    <div class='row'>\
+                      <span>Fail Time</span>\
+                      <span class='info'>{fail_time}</span>\
+                    </div>"
+                )
+            }
             CardType::Edit => {
                 let cabinet = HtmlStr(&self.cabinet);
                 let notes = HtmlStr(&self.notes);
@@ -868,7 +940,7 @@ pub async fn start() -> Result<()> {
         group.append_child(&opt)?;
     }
     sb_type.append_child(&group)?;
-    add_select_event_listener(&sb_type, handle_type_ev)?;
+    add_select_event_listener(&sb_type, handle_sb_type_ev)?;
     let sb_input = doc.elem("sb_input")?;
     add_input_event_listener(&sb_input, handle_search_ev)?;
     let sb_list = doc.elem("sb_list")?;
@@ -877,14 +949,14 @@ pub async fn start() -> Result<()> {
 }
 
 /// Handle an event from "sb_type" `select` element
-fn handle_type_ev(tp: &str) {
+fn handle_sb_type_ev(tp: &str) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     deselect_card(&doc).unwrap_throw();
     let input: HtmlInputElement = doc.elem("sb_input").unwrap_throw();
-    let tx = input.value().to_lowercase();
+    input.set_value("");
     let tp: ObType = tp.into();
-    spawn_local(tp.populate_cards(tx));
+    spawn_local(tp.populate_cards("".into()));
 }
 
 /// Handle an event from "sb_input" `input` element
@@ -971,7 +1043,21 @@ fn handle_click_ev(elem: &Element) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let tp = selected_type(&doc).unwrap_throw();
-    if let Some(card) = elem.closest(".card").unwrap_throw() {
+    if elem.is_instance_of::<HtmlButtonElement>() {
+        if let Some(form) = elem.closest(".form").unwrap_throw() {
+            if let Some(name) = form.get_attribute("name") {
+                // TODO: handle "Close", "Delete", "Edit", "Save" buttons
+                match elem.id() {
+                    id if id == "ob_delete" => (),
+                    id if id == "ob_edit" => (),
+                    id if id == "ob_status" => (),
+                    id if id == "ob_save" => (),
+                    id => console::log_1(&id.into()),
+                }
+                console::log_1(&name.into());
+            }
+        }
+    } else if let Some(card) = elem.closest(".card").unwrap_throw() {
         if let Some(name) = card.get_attribute("name") {
             deselect_card(&doc).unwrap_throw();
             spawn_local(tp.expand_card(name));

@@ -82,10 +82,15 @@ textarea {
 .title {
   font-weight: bold;
 }
-.info {
+.ob_name {
   font-weight: bold;
   font-size: 70%;
   border: 1px dotted #0004;
+}
+.info {
+  font-style: italic;
+  color: #448;
+  margin-left: 0.2rem;
 }
 .create {
   font-style: italic;

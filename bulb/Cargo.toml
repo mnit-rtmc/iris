@@ -25,6 +25,7 @@ features = [
   'Window',
   'Event',
   'Headers',
+  'HtmlButtonElement',
   'HtmlInputElement',
   'HtmlSelectElement',
   'Request',

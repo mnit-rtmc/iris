@@ -29,7 +29,7 @@ authentication.
 
 * graft
   - [X] Add routes for maintenance resources
-  - [ ] Date / time formatting (RFC 3339)
+  - [X] Date / time formatting (RFC 3339)
 * bulb
   - [X] Resource type selector with card list
   - [X] Search filter
