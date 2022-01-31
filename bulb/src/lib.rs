@@ -200,13 +200,13 @@ enum ObType {
 impl From<&str> for ObType {
     fn from(tp: &str) -> Self {
         match tp {
-            "Alarm" => ObType::Alarm,
-            "Cabinet" => ObType::Cabinet,
-            "Cabinet Style" => ObType::CabinetStyle,
-            "Comm Config" => ObType::CommConfig,
-            "Comm Link" => ObType::CommLink,
-            "Controller" => ObType::Controller,
-            "Modem" => ObType::Modem,
+            Alarm::ENAME => ObType::Alarm,
+            Cabinet::ENAME => ObType::Cabinet,
+            CabinetStyle::ENAME => ObType::CabinetStyle,
+            CommConfig::ENAME => ObType::CommConfig,
+            CommLink::ENAME => ObType::CommLink,
+            Controller::ENAME => ObType::Controller,
+            Modem::ENAME => ObType::Modem,
             _ => ObType::Unknown,
         }
     }
@@ -238,6 +238,20 @@ impl ObType {
         }
     }
 
+    /// Get type name with emoji
+    fn ename(self) -> &'static str {
+        match self {
+            Self::Unknown => "",
+            Self::Alarm => Alarm::ENAME,
+            Self::Cabinet => Cabinet::ENAME,
+            Self::CabinetStyle => CabinetStyle::ENAME,
+            Self::CommConfig => CommConfig::ENAME,
+            Self::CommLink => CommLink::ENAME,
+            Self::Controller => Controller::ENAME,
+            Self::Modem => Modem::ENAME,
+        }
+    }
+
     /// Get the type URI
     fn uri(self) -> &'static str {
         match self {
@@ -261,25 +275,25 @@ impl ObType {
         }
     }
 
-    /// Populate cards in `ob_list`
+    /// Populate cards in `sb_list`
     async fn populate_cards(self, tx: String) {
         if let Err(e) = self.try_populate_cards(tx).await {
-            // unauthorized (401) should be handled here
+            // ⛔ 🔒 unauthorized (401) should be handled here
             console::log_1(&e);
         }
     }
 
-    /// Try to populate cards in `ob_list`
+    /// Try to populate cards in `sb_list`
     async fn try_populate_cards(self, tx: String) -> Result<()> {
         let window = web_sys::window().unwrap_throw();
         let doc = window.document().unwrap_throw();
-        let ob_list = doc.elem::<Element>("ob_list")?;
+        let sb_list = doc.elem::<Element>("sb_list")?;
         if self.uri().is_empty() {
-            ob_list.set_inner_html("");
+            sb_list.set_inner_html("");
         } else {
             let json = fetch_json(&window, self.uri()).await?;
             let html = self.build_cards(json, &tx)?;
-            ob_list.set_inner_html(&html);
+            sb_list.set_inner_html(&html);
         }
         Ok(())
     }
@@ -350,54 +364,60 @@ impl ObType {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum CardType {
     Compact,
+
+    /// 📖, 📄, 🗒️, 📃
     Status,
+
+    /// 📝
     Edit,
 }
 
 trait Card: DeserializeOwned {
+    const ENAME: &'static str;
+
     fn new(json: JsValue) -> Result<Self> {
         json.into_serde::<Self>().map_err(|e| e.to_string().into())
     }
 
     /// Build form using JSON value
     fn build_form_json(tp: ObType, json: JsValue) -> Result<String> {
-        let tname = tp.tname();
+        let ename = tp.ename();
         let val = Self::new(json)?;
         let name = HtmlStr(val.name());
         let status = if tp.has_status() {
-            "<button type='button'>Status</button>"
+            "<button type='button'>📖 Status</button>"
         } else {
             ""
         };
         Ok(format!(
             "<div class='row'>\
-              <div class='{TITLE}'>{tname}</div>\
+              <div class='{TITLE}'>{ename}</div>\
               <span class='{INFO}'>{name}</span>\
             </div>\
             {}\
             <div class='row'>\
-              <button type='button'>Delete</button>\
+              <button type='button'>🗑️ Delete</button>\
               {status}
-              <button type='button'>Save</button>\
+              <button type='button'>🖍️ Save</button>\
             </div>",
             val.to_html(CardType::Edit)
         ))
     }
 
+    fn name(&self) -> &str;
+
     fn is_match(&self, _tx: &str) -> bool {
         false
     }
 
-    fn name(&self) -> &str;
-
     fn build_cards(tname: &str, json: JsValue, tx: &str) -> Result<String> {
         let mut html = String::new();
-        html.push_str("<ul id='ob_cards' class='cards'>");
+        html.push_str("<ul class='cards'>");
         if tx.is_empty() {
             // the "New" card has id "{tname}_" and blank name
             html.push_str(&format!(
                 "<li id='{tname}_' name='' class='card'>\
-                    <span class='notes'>New</span>\
+                    <span class='create'>Create 🆕</span>\
                 </li>"
             ));
         }
@@ -422,6 +442,8 @@ trait Card: DeserializeOwned {
 }
 
 impl Card for () {
+    const ENAME: &'static str = "";
+
     fn new(_json: JsValue) -> Result<Self> {
         unreachable!()
     }
@@ -432,6 +454,8 @@ impl Card for () {
 }
 
 impl Card for Alarm {
+    const ENAME: &'static str = "😧 Alarm";
+
     fn is_match(&self, tx: &str) -> bool {
         self.description.to_lowercase().contains(tx)
             || self.name.to_lowercase().contains(tx)
@@ -478,6 +502,8 @@ impl Card for Alarm {
 }
 
 impl Card for Cabinet {
+    const ENAME: &'static str = "🗄️ Cabinet";
+
     fn is_match(&self, tx: &str) -> bool {
         self.name.to_lowercase().contains(tx)
             || self
@@ -519,6 +545,8 @@ impl Card for Cabinet {
 }
 
 impl Card for CabinetStyle {
+    const ENAME: &'static str = "🗄️ Cabinet Style";
+
     fn is_match(&self, tx: &str) -> bool {
         self.name.to_lowercase().contains(tx)
     }
@@ -573,6 +601,8 @@ impl Card for CabinetStyle {
 }
 
 impl Card for CommConfig {
+    const ENAME: &'static str = "📝 Comm Config";
+
     fn is_match(&self, tx: &str) -> bool {
         self.description.to_lowercase().contains(tx)
             || self.name.to_lowercase().contains(tx)
@@ -639,6 +669,8 @@ impl Card for CommConfig {
 }
 
 impl Card for CommLink {
+    const ENAME: &'static str = "📡 Comm Link";
+
     fn is_match(&self, tx: &str) -> bool {
         self.description.to_lowercase().contains(tx)
             || self.name.to_lowercase().contains(tx)
@@ -667,12 +699,12 @@ impl Card for CommLink {
                 format!(
                     "<div class='row'>\
                       <label for='form_description'>Description</label>\
-                      <input id='form_description' maxlength='32' size='26' \
+                      <input id='form_description' maxlength='32' size='24' \
                              value='{description}'/>\
                     </div>\
                     <div class='row'>\
                       <label for='form_uri'>URI</label>\
-                      <input id='form_uri' maxlength='256' size='32' \
+                      <input id='form_uri' maxlength='256' size='28' \
                              value='{uri}'/>\
                     </div>\
                     <div class='row'>\
@@ -691,6 +723,8 @@ impl Card for CommLink {
 }
 
 impl Card for Controller {
+    const ENAME: &'static str = "🎛️ Controller";
+
     fn is_match(&self, tx: &str) -> bool {
         self.name.contains(tx) || {
             let comm_link = self.comm_link.to_lowercase();
@@ -741,7 +775,7 @@ impl Card for Controller {
                     <div class='row'>\
                       <label for='form_notes'>Notes</label>\
                       <textarea id='form_notes' maxlength='128' rows='2' \
-                                cols='28'/>{notes}</textarea>\
+                                cols='26'/>{notes}</textarea>\
                     </div>\
                     <div class='row'>\
                       <label for='form_password'>Password</label>\
@@ -755,6 +789,8 @@ impl Card for Controller {
 }
 
 impl Card for Modem {
+    const ENAME: &'static str = "🖀 Modem";
+
     fn is_match(&self, tx: &str) -> bool {
         self.name.to_lowercase().contains(tx)
     }
@@ -779,12 +815,12 @@ impl Card for Modem {
                 format!(
                     "<div class='row'>\
                       <label for='form_uri'>URI</label>\
-                      <input id='form_uri' maxlength='64' size='32' \
+                      <input id='form_uri' maxlength='64' size='30' \
                              value='{uri}'/>\
                     </div>\
                     <div class='row'>\
                       <label for='form_config'>Config</label>\
-                      <input id='form_config' maxlength='64' size='32' \
+                      <input id='form_config' maxlength='64' size='28' \
                              value='{config}'/>\
                     </div>\
                     <div class='row'>\
@@ -820,38 +856,38 @@ pub async fn start() -> Result<()> {
 
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    let ob_type: HtmlSelectElement = doc.elem("ob_type")?;
+    let sb_type: HtmlSelectElement = doc.elem("sb_type")?;
     let opt = doc.create_element("option")?;
     opt.append_with_str_1("")?;
-    ob_type.append_child(&opt)?;
+    sb_type.append_child(&opt)?;
     let group = doc.create_element("optgroup")?;
-    group.set_attribute("label", "Maintenance")?;
+    group.set_attribute("label", "🧰 Maintenance")?;
     for ob in ObType::ALL {
         let opt = doc.create_element("option")?;
-        opt.append_with_str_1(ob.tname())?;
+        opt.append_with_str_1(ob.ename())?;
         group.append_child(&opt)?;
     }
-    ob_type.append_child(&group)?;
-    add_select_event_listener(&ob_type, handle_type_ev)?;
-    let ob_input = doc.elem("ob_input")?;
-    add_input_event_listener(&ob_input, handle_search_ev)?;
-    let ob_list = doc.elem("ob_list")?;
-    add_click_event_listener(&ob_list, handle_click_ev)?;
+    sb_type.append_child(&group)?;
+    add_select_event_listener(&sb_type, handle_type_ev)?;
+    let sb_input = doc.elem("sb_input")?;
+    add_input_event_listener(&sb_input, handle_search_ev)?;
+    let sb_list = doc.elem("sb_list")?;
+    add_click_event_listener(&sb_list, handle_click_ev)?;
     Ok(())
 }
 
-/// Handle an event from "ob_type" `select` element
+/// Handle an event from "sb_type" `select` element
 fn handle_type_ev(tp: &str) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     deselect_card(&doc).unwrap_throw();
-    let input: HtmlInputElement = doc.elem("ob_input").unwrap_throw();
+    let input: HtmlInputElement = doc.elem("sb_input").unwrap_throw();
     let tx = input.value().to_lowercase();
     let tp: ObType = tp.into();
     spawn_local(tp.populate_cards(tx));
 }
 
-/// Handle an event from "ob_input" `input` element
+/// Handle an event from "sb_input" `input` element
 fn handle_search_ev(tx: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
@@ -861,8 +897,8 @@ fn handle_search_ev(tx: String) {
 }
 
 fn selected_type(doc: &Document) -> Result<ObType> {
-    let ob_type: HtmlSelectElement = doc.elem("ob_type")?;
-    let tp = ob_type.value();
+    let sb_type: HtmlSelectElement = doc.elem("sb_type")?;
+    let tp = sb_type.value();
     Ok(ObType::from(tp.as_str()))
 }
 
@@ -930,7 +966,7 @@ fn add_click_event_listener(
     Ok(())
 }
 
-/// Handle an event from "ob_list" `click` element
+/// Handle an event from "sb_list" `click` element
 fn handle_click_ev(elem: &Element) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();

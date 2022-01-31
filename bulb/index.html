@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>IRIS Phase 3</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link href='https://fonts.googleapis.com/css?family=Overpass' rel='stylesheet'>
@@ -26,12 +27,13 @@
     <div class="root">
       <div id="mapid"></div>
       <div id="sidebar" class="sidebar">
-        <div id="ob_filter">
-          <select id="ob_type"></select>
-          <label id="ob_search" for="ob_input">Search</label>
-          <input id="ob_input" type="text" placeholder="🔍">
-        </div>
-        <div id="ob_list"></div>
+        <label id="sb_select">Select
+          <select id="sb_type"></select>
+	</label>
+        <label id="sb_search">Search
+          <input id="sb_input" type="text" placeholder="🔍">
+	</label>
+        <div id="sb_list"></div>
       </div>
     </div>
   </body>
