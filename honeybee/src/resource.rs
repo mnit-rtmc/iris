@@ -236,10 +236,10 @@ const CABINET_STYLE_RES: Resource = Resource::Simple(
 ) r",
 );
 
-/// Comm protocol resource
+/// Comm protocol LUT resource
 const COMM_PROTOCOL_RES: Resource = Resource::Simple(
     "api/comm_protocol",
-    Listen::All("comm_protocol"),
+    Listen::All("comm_protocol"), // no notifications for LUT
     "SELECT row_to_json(r)::text FROM (\
     SELECT id, description \
     FROM iris.comm_protocol \
@@ -269,6 +269,17 @@ const COMM_LINK_RES: Resource = Resource::Simple(
     FROM iris.comm_link \
     ORDER BY regexp_replace(name, '[0-9]', '', 'g'), \
             (regexp_replace(name, '[^0-9]', '', 'g') || '0')::INTEGER\
+) r",
+);
+
+/// Controller condition LUT resource
+const CONDITION_RES: Resource = Resource::Simple(
+    "api/condition",
+    Listen::All("condition"), // no notifications for LUT
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT id, description \
+    FROM iris.condition \
+    ORDER BY description\
 ) r",
 );
 
@@ -409,6 +420,7 @@ const ALL: &[Resource] = &[
     COMM_PROTOCOL_RES,
     COMM_CONFIG_RES,
     COMM_LINK_RES,
+    CONDITION_RES,
     CONTROLLER_RES,
     MODEM_RES,
     CAMERA_RES,
