@@ -155,7 +155,6 @@ async fn main() -> tide::Result<()> {
     route.at("/login").post(post_login);
     route.at("/comm_protocol").get(|req| list_objects("comm_protocol", req));
     add_routes!(route, "alarm");
-    add_routes!(route, "cabinet");
     add_routes!(route, "cabinet_style");
     add_routes!(route, "comm_config");
     add_routes!(route, "comm_link");

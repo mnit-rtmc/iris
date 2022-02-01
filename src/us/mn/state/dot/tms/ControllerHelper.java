@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -45,8 +45,7 @@ public class ControllerHelper extends BaseHelper {
 
 	/** Get the geo location of a controller or null */
 	static public GeoLoc getGeoLoc(Controller ctrl) {
-		Cabinet cab = ctrl.getCabinet();
-		return (cab != null) ? cab.getGeoLoc() : null;
+		return (ctrl != null) ? ctrl.getGeoLoc() : null;
 	}
 
 	/** Get a controller location or an empty string */

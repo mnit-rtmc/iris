@@ -236,17 +236,6 @@ const CABINET_STYLE_RES: Resource = Resource::Simple(
 ) r",
 );
 
-/// Cabinet resource
-const CABINET_RES: Resource = Resource::Simple(
-    "api/cabinet",
-    Listen::All("cabinet"),
-    "SELECT row_to_json(r)::text FROM (\
-    SELECT name, style, geo_loc \
-    FROM iris.cabinet \
-    ORDER BY name\
-) r",
-);
-
 /// Comm protocol resource
 const COMM_PROTOCOL_RES: Resource = Resource::Simple(
     "api/comm_protocol",
@@ -288,8 +277,8 @@ const CONTROLLER_RES: Resource = Resource::Simple(
     "api/controller",
     Listen::All("controller"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, drop_id, comm_link, cabinet, notes, fail_time, condition, \
-           version \
+    SELECT name, drop_id, comm_link, cabinet_style, geo_loc, condition, \
+           notes, password, fail_time, version \
     FROM iris.controller \
     ORDER BY regexp_replace(comm_link, '[0-9]', '', 'g'), \
             (regexp_replace(comm_link, '[^0-9]', '', 'g') || '0')::INTEGER, \
@@ -417,7 +406,6 @@ const ALL: &[Resource] = &[
     ROAD_RES,             // Roads must be loaded before R_Nodes
     ALARM_RES,
     CABINET_STYLE_RES,
-    CABINET_RES,
     COMM_PROTOCOL_RES,
     COMM_CONFIG_RES,
     COMM_LINK_RES,

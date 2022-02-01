@@ -156,7 +156,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.27.0
+database_version	5.28.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
@@ -395,7 +395,6 @@ alert_info
 alert_message
 beacon
 beacon_action
-cabinet
 cabinet_style
 camera
 camera_action
@@ -490,7 +489,6 @@ PRV_0007	base	map_extent		f
 PRV_0008	base	road		f
 PRV_000B	base	road_affix		f
 PRV_0009	base	geo_loc		f
-PRV_0010	base	cabinet		f
 PRV_0011	base	controller		f
 PRV_0012	base_admin	user		t
 PRV_0013	base_admin	role		t
@@ -539,7 +537,6 @@ PRV_004A	comm_admin	comm_config		t
 PRV_0039	comm_admin	comm_link		t
 PRV_0040	comm_admin	modem		t
 PRV_0041	comm_admin	cabinet_style		t
-PRV_0042	comm_admin	cabinet		t
 PRV_0043	comm_admin	controller		t
 PRV_0044	comm_admin	alarm		t
 PRV_0045	comm_control	controller	condition	t
@@ -1365,21 +1362,6 @@ CREATE VIEW cabinet_style_view AS
 	FROM iris.cabinet_style;
 GRANT SELECT ON cabinet_style_view TO PUBLIC;
 
-CREATE TABLE iris.cabinet (
-	name VARCHAR(20) PRIMARY KEY,
-	style VARCHAR(20) REFERENCES iris.cabinet_style(name),
-	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name)
-);
-
-CREATE TRIGGER cabinet_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.cabinet
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
-
-CREATE VIEW cabinet_view AS
-	SELECT name, style, geo_loc
-	FROM iris.cabinet;
-GRANT SELECT ON cabinet_view TO PUBLIC;
-
 CREATE TABLE iris.condition (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(12) NOT NULL
@@ -1394,38 +1376,37 @@ COPY iris.condition (id, description) FROM stdin;
 \.
 
 CREATE TABLE iris.controller (
-	name VARCHAR(20) PRIMARY KEY,
-	drop_id SMALLINT NOT NULL,
-	comm_link VARCHAR(20) NOT NULL REFERENCES iris.comm_link(name),
-	cabinet VARCHAR(20) NOT NULL REFERENCES iris.cabinet(name),
-	condition INTEGER NOT NULL REFERENCES iris.condition,
-	password VARCHAR(32),
-	notes VARCHAR(128) NOT NULL,
-	fail_time TIMESTAMP WITH time zone,
-	version VARCHAR(64)
+    name VARCHAR(20) PRIMARY KEY,
+    drop_id SMALLINT NOT NULL,
+    comm_link VARCHAR(20) NOT NULL REFERENCES iris.comm_link(name),
+    cabinet_style VARCHAR(20) REFERENCES iris.cabinet_style(name),
+    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
+    condition INTEGER NOT NULL REFERENCES iris.condition,
+    notes VARCHAR(128) NOT NULL,
+    password VARCHAR(32),
+    fail_time TIMESTAMP WITH time zone,
+    version VARCHAR(64)
 );
 
 CREATE UNIQUE INDEX ctrl_link_drop_idx ON iris.controller
-	USING btree (comm_link, drop_id);
+    USING btree (comm_link, drop_id);
 
 CREATE TRIGGER controller_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.controller
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW controller_view AS
-	SELECT c.name, drop_id, comm_link, cabinet,
-	       cnd.description AS condition, notes, cab.geo_loc, fail_time,
-	       version
-	FROM iris.controller c
-	LEFT JOIN iris.cabinet cab ON c.cabinet = cab.name
-	LEFT JOIN iris.condition cnd ON c.condition = cnd.id;
+    SELECT c.name, drop_id, comm_link, cabinet_style, geo_loc,
+           cnd.description AS condition, notes, fail_time, version
+    FROM iris.controller c
+    LEFT JOIN iris.condition cnd ON c.condition = cnd.id;
 GRANT SELECT ON controller_view TO PUBLIC;
 
 CREATE VIEW controller_loc_view AS
-	SELECT c.name, drop_id, comm_link, cabinet, condition, c.notes,
-	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir
-	FROM controller_view c
-	LEFT JOIN geo_loc_view l ON c.geo_loc = l.name;
+    SELECT c.name, drop_id, comm_link, cabinet_style, condition, c.notes,
+           l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir
+    FROM controller_view c
+    LEFT JOIN geo_loc_view l ON c.geo_loc = l.name;
 GRANT SELECT ON controller_loc_view TO PUBLIC;
 
 CREATE TABLE event.comm_event (
@@ -5303,12 +5284,11 @@ CREATE VIEW controller_device_view AS
 GRANT SELECT ON controller_device_view TO PUBLIC;
 
 CREATE VIEW controller_report AS
-    SELECT c.name, c.comm_link, c.drop_id, l.landmark, cab.geo_loc, l.location,
-           cab.style AS "type", d.name AS device, d.pin, d.cross_loc,
-           d.corridor, c.notes
+    SELECT c.name, c.comm_link, c.drop_id, l.landmark, c.geo_loc, l.location,
+           cabinet_style, d.name AS device, d.pin, d.cross_loc, d.corridor,
+           c.notes
     FROM iris.controller c
-    LEFT JOIN iris.cabinet cab ON c.cabinet = cab.name
-    LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name
+    LEFT JOIN geo_loc_view l ON c.geo_loc = l.name
     LEFT JOIN controller_device_view d ON d.controller = c.name;
 GRANT SELECT ON controller_report TO PUBLIC;
 

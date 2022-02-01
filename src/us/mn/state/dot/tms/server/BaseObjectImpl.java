@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2021  Minnesota Department of Transportation
+ * Copyright (C) 2007-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,6 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		CommLinkImpl.loadAll();
 		ModemImpl.loadAll();
 		CabinetStyleImpl.loadAll();
-		CabinetImpl.loadAll();
 		ControllerImpl.loadAll();
 		SignConfigImpl.loadAll();
 		SignDetailImpl.loadAll();
@@ -171,13 +170,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		return (so instanceof R_NodeImpl) ? (R_NodeImpl) so : null;
 	}
 
-	/** Lookup a cabinet */
-	static protected CabinetImpl lookupCabinet(String name) {
-		SonarObject so = lookupObject(CabinetImpl.SONAR_TYPE, name);
-		if (so instanceof CabinetImpl)
-			return (CabinetImpl) so;
-		else
-			return null;
+	/** Lookup a cabinet style */
+	static protected CabinetStyleImpl lookupCabinetStyle(String name) {
+		SonarObject so = lookupObject(CabinetStyleImpl.SONAR_TYPE,name);
+		return (so instanceof CabinetStyleImpl)
+		      ? (CabinetStyleImpl) so
+		      : null;
 	}
 
 	/** Lookup a comm config */
@@ -191,10 +189,9 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	/** Lookup a comm link */
 	static protected CommLinkImpl lookupCommLink(String name) {
 		SonarObject so = lookupObject(CommLinkImpl.SONAR_TYPE, name);
-		if (so instanceof CommLinkImpl)
-			return (CommLinkImpl) so;
-		else
-			return null;
+		return (so instanceof CommLinkImpl)
+		      ?	(CommLinkImpl) so
+		      : null;
 	}
 
 	/** Lookup a controller */

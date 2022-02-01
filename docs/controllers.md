@@ -7,8 +7,6 @@ one or more associated [devices](#devices), depending on the [protocol].
 Sometimes a controller represents a separate physical _box_, which is connected
 to devices, and other times the controller may be embedded within the device.
 In either case, a controller is required for any communication to a device.
-Controllers can be assigned to a **cabinet**, which has location information to
-allow displaying on a map.
 
 ## Drop Address
 

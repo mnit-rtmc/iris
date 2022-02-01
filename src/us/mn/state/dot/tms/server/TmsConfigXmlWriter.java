@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2021  Minnesota Department of Transportation
+ * Copyright (C) 2012-2022  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  * Copyright (C) 2012  Iteris Inc.
  *
@@ -151,7 +151,6 @@ public class TmsConfigXmlWriter extends XmlWriter {
 		w.write("<!ATTLIST controller lon CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST controller lat CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST controller location CDATA #REQUIRED>\n");
-		w.write("<!ATTLIST controller cabinet CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST controller notes CDATA #IMPLIED>\n");
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2021  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -35,7 +35,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
@@ -129,28 +128,17 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Cabinet style action */
 	private final IAction cab_style_act = new IAction("cabinet.style") {
 		protected void doActionPerformed(ActionEvent e) {
-			cabinet.setStyle(cab_style_mdl.getSelectedProxy());
+			proxy.setCabinetStyle(cab_style_mdl.getSelectedProxy());
 		}
 		@Override
 		protected void doUpdateSelected() {
-			cab_style_mdl.setSelectedItem((cabinet != null)
-			                             ? cabinet.getStyle()
-			                             : null);
+			cab_style_mdl.setSelectedItem(proxy.getCabinetStyle());
 		}
 	};
 
 	/** Cabinet style combo box */
 	private final JComboBox<CabinetStyle> cab_style_cbx =
 		new JComboBox<CabinetStyle>();
-
-	/** Cabinet for controller */
-	private final Cabinet cabinet;
-
-	/** Cabinet cache */
-	private final TypeCache<Cabinet> cabinets;
-
-	/** Cabinet listener */
-	private final CabinetListener cab_listener;
 
 	/** Controller IO model */
 	private ControllerIOModel io_model;
@@ -210,9 +198,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	public ControllerForm(Session s, Controller c) {
 		super(I18N.get("controller") + ": ", s, c);
 		ConCache con_cache = state.getConCache();
-		cabinets = con_cache.getCabinets();
-		cabinet = proxy.getCabinet();
-		cab_listener = new CabinetListener();
 		loc_pnl = new LocationPanel(s);
 		comm_link_mdl = new IComboBoxModel<CommLink>(
 			con_cache.getCommLinkModel(), false);
@@ -231,14 +216,13 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	protected void initialize() {
 		io_model = new ControllerIOModel(session, proxy);
 		io_model.initialize();
-		cabinets.addProxyListener(cab_listener);
 		comm_link_cbx.setModel(comm_link_mdl);
 		comm_link_cbx.setAction(comm_link_act);
 		cab_style_cbx.setModel(cab_style_mdl);
 		cab_style_cbx.setAction(cab_style_act);
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("device.setup"), createSetupPanel());
-		tab.add(I18N.get("cabinet"), createCabinetPanel());
+		tab.add(I18N.get("location"), createLocPanel());
 		tab.add(I18N.get("controller.io"), createIOPanel());
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
@@ -256,7 +240,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	@Override
 	protected void dispose() {
 		io_model.dispose();
-		cabinets.removeProxyListener(cab_listener);
 		loc_pnl.dispose();
 		super.dispose();
 	}
@@ -278,11 +261,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		p.add("controller.condition");
 		p.add(condition_cbx, Stretch.LAST);
 		return p;
-	}
-
-	/** Check if the user can write the cabinet */
-	private boolean canWriteCabinet(String a) {
-		return session.canWrite(cabinet, a);
 	}
 
 	/** Can a controller request be made */
@@ -317,26 +295,13 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		});
 	}
 
-	/** Create the cabinet panel */
-	private JPanel createCabinetPanel() {
+	/** Create the location panel */
+	private JPanel createLocPanel() {
 		loc_pnl.initialize();
 		loc_pnl.add("cabinet.style");
 		loc_pnl.add(cab_style_cbx, Stretch.LAST);
-		loc_pnl.setGeoLoc((cabinet != null)
-		                 ? cabinet.getGeoLoc()
-		                 : null);
+		loc_pnl.setGeoLoc(proxy.getGeoLoc());
 		return loc_pnl;
-	}
-
-	/** Listener for cabinet proxy changes */
-	private class CabinetListener implements ProxyListener<Cabinet> {
-		public void proxyAdded(Cabinet p) {}
-		public void enumerationComplete() { }
-		public void proxyRemoved(Cabinet p) {}
-		public void proxyChanged(Cabinet p, final String a) {
-			if (p == cabinet)
-				doUpdateAttribute(a);
-		}
 	}
 
 	/** Create the I/O panel */
@@ -387,13 +352,13 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	@Override
 	protected void updateEditMode() {
 		loc_pnl.updateEditMode();
-		password.setEnabled(canWrite("password"));
-		clear_pwd.setEnabled(canWrite("password"));
 		comm_link_act.setEnabled(canWrite("commLink"));
 		drop_spn.setEnabled(canWrite("drop"));
+		cab_style_act.setEnabled(canWrite("cabinetStyle"));
 		notes_txt.setEnabled(canWrite("notes"));
 		condition_act.setEnabled(canWrite("condition"));
-		cab_style_act.setEnabled(canWriteCabinet("style"));
+		password.setEnabled(canWrite("password"));
+		clear_pwd.setEnabled(canWrite("password"));
 	}
 
 	/** Update one attribute on the form */
@@ -408,6 +373,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		}
 		if (a == null || a.equals("drop"))
 			drop_spn.setValue(proxy.getDrop());
+		if (a == null || a.equals("cabinetStyle"))
+			cab_style_act.updateSelected();
 		if (a == null || a.equals("notes"))
 			notes_txt.setText(proxy.getNotes());
 		if (a == null || a.equals("condition"))
@@ -449,8 +416,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			failed_lbl.setText(String.valueOf(
 				proxy.getFailedOps()));
 		}
-		if (a == null || a.equals("style"))
-			cab_style_act.updateSelected();
 	}
 
 	/** Update the comm link */

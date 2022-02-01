@@ -1,5 +1,11 @@
 # IRIS 5.x Release Notes
 
+5.28.0 (unreleased)
+ - Dropped `cabinet` table, moving columns to `controller`
+   * `controller_view`: `cabinet` -> `cabinet_style`
+   * `controller_loc_view`: `cabinet` -> `cabinet_style`
+   * `controller_report`: `type` -> `cabinet_style`
+
 5.27.0 (6 Jan 2022)
  - Added message duration to sign event table
  - Fixed occ check in "exit" DMS action tag

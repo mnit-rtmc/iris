@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ public class RampMeterHelper extends BaseHelper {
 
 	/** Lookup the ramp meter with the specified name */
 	static public RampMeter lookup(String name) {
-		return (RampMeter)namespace.lookupObject(RampMeter.SONAR_TYPE,
+		return (RampMeter) namespace.lookupObject(RampMeter.SONAR_TYPE,
 			name);
 	}
 
@@ -72,12 +72,7 @@ public class RampMeterHelper extends BaseHelper {
 	/** Lookup cabinet style for a ramp meter */
 	static private CabinetStyle lookupCabinetStyle(RampMeter meter) {
 		Controller ctrl = meter.getController();
-		if (ctrl != null) {
-			Cabinet cab = ctrl.getCabinet();
-			if (cab != null)
-				return cab.getStyle();
-		}
-		return null;
+		return (ctrl != null) ? ctrl.getCabinetStyle() : null;
 	}
 
 	/** Lookup the preset for a ramp meter */

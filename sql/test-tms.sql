@@ -45,10 +45,8 @@ INSERT INTO iris.comm_link (name, description, uri, protocol, poll_enabled,
                             poll_period, timeout)
 	VALUES ('LNK_TEST_1', 'Test comm link', 'Test URI', 0, false, 30, 750);
 INSERT INTO iris.geo_loc (name) VALUES ('LOC_TEST_1');
-INSERT INTO iris.cabinet (name, geo_loc)
-	VALUES ('CAB_TEST_1', 'LOC_TEST_1');
-INSERT INTO iris.controller (name, drop_id, comm_link, cabinet, active, notes)
-	VALUES ('CTL_TEST_1', 1, 'LNK_TEST_1', 'CAB_TEST_1', false,
+INSERT INTO iris.controller (name, drop_id, comm_link, geo_loc, active, notes)
+	VALUES ('CTL_TEST_1', 1, 'LNK_TEST_1', 'LOC_TEST_1', false,
 	        'Test controller');
 
 -- Test alarm view
@@ -548,7 +546,6 @@ DELETE FROM iris.lcs_array WHERE name = 'LCS_TEST_1';
 DELETE FROM iris.camera_preset WHERE name = 'PRE_TEST_1';
 DELETE FROM iris.camera WHERE name = 'CAM_TEST_1';
 DELETE FROM iris.controller WHERE name = 'CTL_TEST_1';
-DELETE FROM iris.cabinet WHERE name = 'CAB_TEST_1';
 DELETE FROM iris.geo_loc WHERE name = 'LOC_TEST_1';
 DELETE FROM iris.comm_link WHERE name = 'LNK_TEST_1';
 

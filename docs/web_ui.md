@@ -38,7 +38,7 @@ authentication.
   - [ ] Updating values (save)
   - [ ] Creating objects
   - [ ] Deleting objects
-  - [ ] Add status button / view
+  - [X] Add status button / view
   - [ ] Authentication and session expiration
 
 ## Phase 4 — DMS control

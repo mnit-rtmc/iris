@@ -31,7 +31,7 @@
     - Select the new controller in the lower table and click the `Properties`
       button.  The Controller form should appear
     - On the Controller Form Setup Tab, change the condition to active
-    - On the Cabinet Tab specify the DMS cabinet location and style
+    - On the Location Tab specify the DMS location and cabinet style
     - On the Controller Form IO Tab, for Pin=1, select DMS in the `Type` column
     - In the Device column, select the name of the DMS created above
  5. View DMS Status

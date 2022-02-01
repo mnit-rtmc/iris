@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.Cabinet;
+import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.CtrlCondition;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VehLengthClass;
 import us.mn.state.dot.tms.geo.Position;
@@ -68,9 +69,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Load all the controllers */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, ControllerImpl.class);
-		store.query("SELECT name, cabinet, comm_link, drop_id, " +
-			"condition, password, notes, fail_time, version " +
-			"FROM iris." + SONAR_TYPE  +";", new ResultFactory()
+		store.query("SELECT name, comm_link, drop_id, " +
+			"cabinet_style, geo_loc, condition, notes, password, " +
+			"fail_time, version FROM iris." + SONAR_TYPE  +";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new ControllerImpl(row));
@@ -83,12 +85,13 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("cabinet", cabinet);
 		map.put("comm_link", comm_link);
 		map.put("drop_id", drop_id);
+		map.put("cabinet_style", cabinet_style);
+		map.put("geo_loc", geo_loc);
 		map.put("condition", condition.ordinal());
-		map.put("password", password);
 		map.put("notes", notes);
+		map.put("password", password);
 		map.put("fail_time", asTimestamp(failTime));
 		map.put("version", version);
 		return map;
@@ -109,47 +112,40 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Create a new controller */
 	public ControllerImpl(String n) throws TMSException, SonarException {
 		super(n);
-		CabinetImpl c = new CabinetImpl(n);
-		c.notifyCreate();
-		cabinet = c;
+		GeoLocImpl gl = new GeoLocImpl(n, SONAR_TYPE);
+		gl.notifyCreate();
+		geo_loc = gl;
 		condition = CtrlCondition.PLANNED;
 	}
 
 	/** Create a controller */
 	private ControllerImpl(ResultSet row) throws SQLException, TMSException{
-		this(row.getString(1),		// name
-		     row.getString(2),		// cabinet
-		     row.getString(3),		// comm_link
-		     row.getShort(4),		// drop_id
-		     row.getInt(5),		// condition
-		     row.getString(6),		// password
-		     row.getString(7),		// notes
-		     row.getTimestamp(8),	// failTime
-		     row.getString(9)		// version
+		this(row.getString(1),    // name
+		     row.getString(2),    // comm_link
+		     row.getShort(3),     // drop_id
+		     row.getString(4),    // cabinet_style
+		     row.getString(5),    // geo_loc
+		     row.getInt(6),       // condition
+		     row.getString(7),    // notes
+		     row.getString(8),    // password
+		     row.getTimestamp(9), // fail_time
+		     row.getString(10)    // version
 		);
 	}
 
 	/** Create a controller */
-	private ControllerImpl(String n, String c, String cl, short d,
-		int cnd, String p, String nt, Date ft, String v)
-		throws TMSException
-	{
-		this(n, lookupCabinet(c), lookupCommLink(cl), d, cnd, p, nt,
-		     ft, v);
-	}
-
-	/** Create a controller */
-	private ControllerImpl(String n, CabinetImpl c, CommLink cl, short d,
-		int cnd, String p, String nt, Date ft, String v)
+	private ControllerImpl(String n, String cl, short d, String cs,
+		String gl, int cnd, String nt, String p, Date ft, String v)
 		throws TMSException
 	{
 		super(n);
-		cabinet = c;
-		comm_link = commLinkImpl(cl);
+		comm_link = lookupCommLink(cl);
 		drop_id = d;
+		cabinet_style = lookupCabinetStyle(cs);
+		geo_loc = lookupGeoLoc(gl);
 		condition = CtrlCondition.fromOrdinal(cnd);
-		password = p;
 		notes = nt;
+		password = p;
 		failTime = stampMillis(ft);
 		version = v;
 		initTransients();
@@ -180,30 +176,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get controller label */
 	public String getLbl() {
 		return "" + comm_link + ":" + drop_id;
-	}
-
-	/** Controller cabinet */
-	private CabinetImpl cabinet;
-
-	/** Set the controller cabinet */
-	@Override
-	public void setCabinet(Cabinet c) {
-		if (c instanceof CabinetImpl)
-			cabinet = (CabinetImpl) c;
-	}
-
-	/** Set the controller cabinet */
-	public void doSetCabinet(Cabinet c) throws TMSException {
-		if ((c instanceof CabinetImpl) && (c != cabinet)) {
-			store.update(this, "cabinet", c);
-			setCabinet(c);
-		}
-	}
-
-	/** Get the controller cabinet */
-	@Override
-	public Cabinet getCabinet() {
-		return cabinet;
 	}
 
 	/** Put this controller into a comm link */
@@ -277,6 +249,38 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	@Override
 	public short getDrop() {
 		return drop_id;
+	}
+
+	/** Cabinet style */
+	private CabinetStyle cabinet_style;
+
+	/** Set the cabinet style */
+	@Override
+	public void setCabinetStyle(CabinetStyle cs) {
+		cabinet_style = cs;
+	}
+
+	/** Set the cabinet style */
+	public void doSetCabinetStyle(CabinetStyle cs) throws TMSException {
+		if (cs != cabinet_style) {
+			store.update(this, "cabinet_style", cs);
+			setCabinetStyle(cs);
+		}
+	}
+
+	/** Get the cabinet style */
+	@Override
+	public CabinetStyle getCabinetStyle() {
+		return cabinet_style;
+	}
+
+	/** Controller location */
+	private GeoLocImpl geo_loc;
+
+	/** Get the controller location */
+	@Override
+	public GeoLoc getGeoLoc() {
+		return geo_loc;
 	}
 
 	/** Test whether gate arm system should be disabled */
@@ -1065,7 +1069,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			cl.pullController(this);
 		}
 		super.doDestroy();
-		cabinet.notifyRemove();
+		geo_loc.notifyRemove();
 	}
 
 	/** Check if dial-up is required to communicate */
@@ -1098,9 +1102,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 		w.write(createAttribute("location",
 			ControllerHelper.getLocation(this)));
-		Cabinet cab = getCabinet();
-		if (cab != null && cab.toString().length() > 0)
-			w.write(createAttribute("cabinet", getCabinet()));
 		if (getNotes().length() > 0)
 			w.write(createAttribute("notes", getNotes()));
 		w.write("/>\n");

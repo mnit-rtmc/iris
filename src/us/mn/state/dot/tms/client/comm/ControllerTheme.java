@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2016  Minnesota Department of Transportation
+ * Copyright (C) 2012-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.util.HashSet;
 import java.util.Iterator;
-import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
@@ -82,15 +81,12 @@ public class ControllerTheme extends ProxyTheme<Controller> {
 	public void drawSelected(Graphics2D g, MapObject mo) {
 		Controller c = manager.findProxy(mo);
 		if (c != null) {
-			Cabinet cab = c.getCabinet();
-			if (cab != null) {
-				GeoLoc loc = cab.getGeoLoc();
-				if (loc != null) {
-					SphericalMercatorPosition pos =
-						GeoLocHelper.getPosition(loc);
-					if (pos != null)
-						drawSelected(g, c, pos);
-				}
+			GeoLoc loc = c.getGeoLoc();
+			if (loc != null) {
+				SphericalMercatorPosition pos =
+					GeoLocHelper.getPosition(loc);
+				if (pos != null)
+					drawSelected(g, c, pos);
 			}
 		}
 		super.drawSelected(g, mo);

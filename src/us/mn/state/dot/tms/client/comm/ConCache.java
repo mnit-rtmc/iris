@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.comm;
 
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.CommConfig;
 import us.mn.state.dot.tms.CommLink;
@@ -45,14 +44,6 @@ public class ConCache {
 	/** Get the Cabinet Style list model */
 	public ProxyListModel<CabinetStyle> getCabinetStyleModel() {
 		return cab_style_model;
-	}
-
-	/** Cache of cabinet proxies */
-	protected final TypeCache<Cabinet> cabinets;
-
-	/** Get the cabinet type cache */
-	public TypeCache<Cabinet> getCabinets() {
-		return cabinets;
 	}
 
 	/** Cache of comm configurations */
@@ -104,7 +95,6 @@ public class ConCache {
 		cab_style_model = new ProxyListModel<CabinetStyle>(
 			cabinet_styles);
 		cab_style_model.initialize();
-		cabinets = new TypeCache<Cabinet>(Cabinet.class, client);
 		comm_configs = new TypeCache<CommConfig>(CommConfig.class,
 			client);
 		comm_links = new TypeCache<CommLink>(CommLink.class, client);
@@ -118,12 +108,11 @@ public class ConCache {
 	/** Populate the type caches */
 	public void populate(SonarState client) {
 		client.populateReadable(cabinet_styles);
-		client.populateReadable(cabinets);
 		client.populateReadable(comm_configs);
 		client.populateReadable(comm_links);
 		client.populateReadable(modems);
 		client.populateReadable(controllers);
-		if(client.canRead(Controller.SONAR_TYPE)) {
+		if (client.canRead(Controller.SONAR_TYPE)) {
 			controllers.ignoreAttribute("timeoutErr");
 			controllers.ignoreAttribute("checksumErr");
 			controllers.ignoreAttribute("parsingErr");

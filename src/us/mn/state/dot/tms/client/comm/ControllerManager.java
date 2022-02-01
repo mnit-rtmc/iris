@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.comm;
 
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
@@ -106,11 +105,7 @@ public class ControllerManager extends ProxyManager<Controller> {
 	/** Find the map geo location for a proxy */
 	@Override
 	protected GeoLoc getGeoLoc(Controller proxy) {
-		Cabinet cab = proxy.getCabinet();
-		if(cab != null)
-			return cab.getGeoLoc();
-		else
-			return null;
+		return (proxy != null) ? proxy.getGeoLoc() : null;
 	}
 
 	/** Check if a given attribute affects a proxy style */

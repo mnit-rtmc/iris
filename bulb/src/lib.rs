@@ -107,14 +107,6 @@ struct Alarm {
     pub trigger_time: Option<String>,
 }
 
-/// Cabinet
-#[derive(Debug, Deserialize, Serialize)]
-struct Cabinet {
-    pub name: String,
-    pub style: Option<String>,
-    pub geo_loc: String,
-}
-
 /// Cabinet Style
 #[derive(Debug, Deserialize, Serialize)]
 struct CabinetStyle {
@@ -156,7 +148,8 @@ struct Controller {
     pub name: String,
     pub drop_id: u16,
     pub comm_link: String,
-    pub cabinet: String,
+    pub cabinet_style: Option<String>,
+    pub geo_loc: String,
     pub condition: u32,
     pub notes: String,
     pub password: Option<String>,
@@ -188,7 +181,6 @@ const NAME: &str = "ob_name";
 enum ObType {
     Unknown,
     Alarm,
-    Cabinet,
     CabinetStyle,
     CommConfig,
     CommLink,
@@ -200,7 +192,6 @@ impl From<&str> for ObType {
     fn from(tp: &str) -> Self {
         match tp {
             Alarm::ENAME => ObType::Alarm,
-            Cabinet::ENAME => ObType::Cabinet,
             CabinetStyle::ENAME => ObType::CabinetStyle,
             CommConfig::ENAME => ObType::CommConfig,
             CommLink::ENAME => ObType::CommLink,
@@ -215,7 +206,6 @@ impl ObType {
     /// Slice of all valid types
     const ALL: &'static [ObType] = &[
         ObType::Alarm,
-        ObType::Cabinet,
         ObType::CabinetStyle,
         ObType::CommConfig,
         ObType::CommLink,
@@ -228,7 +218,6 @@ impl ObType {
         match self {
             Self::Unknown => "",
             Self::Alarm => "Alarm",
-            Self::Cabinet => "Cabinet",
             Self::CabinetStyle => "Cabinet Style",
             Self::CommConfig => "Comm Config",
             Self::CommLink => "Comm Link",
@@ -242,7 +231,6 @@ impl ObType {
         match self {
             Self::Unknown => "",
             Self::Alarm => Alarm::ENAME,
-            Self::Cabinet => Cabinet::ENAME,
             Self::CabinetStyle => CabinetStyle::ENAME,
             Self::CommConfig => CommConfig::ENAME,
             Self::CommLink => CommLink::ENAME,
@@ -256,7 +244,6 @@ impl ObType {
         match self {
             Self::Unknown => "",
             Self::Alarm => "/iris/api/alarm",
-            Self::Cabinet => "/iris/api/cabinet",
             Self::CabinetStyle => "/iris/api/cabinet_style",
             Self::CommConfig => "/iris/api/comm_config",
             Self::CommLink => "/iris/api/comm_link",
@@ -289,6 +276,7 @@ impl ObType {
             sb_list.set_inner_html("");
         } else {
             let json = fetch_json(&window, self.uri()).await?;
+            let tx = tx.to_lowercase();
             let html = self.build_cards(&json, &tx)?;
             sb_list.set_inner_html(&html);
         }
@@ -300,7 +288,6 @@ impl ObType {
         let tname = self.tname();
         match self {
             Self::Alarm => Alarm::build_cards(tname, json, tx),
-            Self::Cabinet => Cabinet::build_cards(tname, json, tx),
             Self::CabinetStyle => CabinetStyle::build_cards(tname, json, tx),
             Self::CommConfig => CommConfig::build_cards(tname, json, tx),
             Self::CommLink => CommLink::build_cards(tname, json, tx),
@@ -314,7 +301,6 @@ impl ObType {
     fn build_card(self, json: &JsValue, ct: CardType) -> Result<String> {
         match self {
             Self::Alarm => Alarm::build_card(self, json, ct),
-            Self::Cabinet => Cabinet::build_card(self, json, ct),
             Self::CabinetStyle => CabinetStyle::build_card(self, json, ct),
             Self::CommConfig => CommConfig::build_card(self, json, ct),
             Self::CommLink => CommLink::build_card(self, json, ct),
@@ -557,50 +543,6 @@ impl Card for Alarm {
     }
 }
 
-impl Card for Cabinet {
-    const ENAME: &'static str = "🗄️ Cabinet";
-
-    fn is_match(&self, tx: &str) -> bool {
-        self.name.to_lowercase().contains(tx)
-            || self
-                .style
-                .as_ref()
-                .filter(|s| s.to_lowercase().contains(tx))
-                .is_some()
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn to_html(&self, ct: CardType) -> String {
-        match ct {
-            CardType::Any => unreachable!(),
-            CardType::Compact => {
-                let name = HtmlStr(&self.name);
-                format!("<span>{name}</span>")
-            }
-            CardType::Status => String::new(),
-            CardType::Edit => {
-                let style = HtmlStr(self.style.as_ref());
-                let geo_loc = HtmlStr(&self.geo_loc);
-                format!(
-                    "<div class='row'>\
-                      <label for='form_style'>Cabinet Style</label>\
-                      <input id='form_style' maxlength='20' size='20' \
-                             value='{style}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_geo_loc'>Geo Loc</label>\
-                      <input id='form_geo_loc' maxlength='20' size='20' \
-                             value='{geo_loc}'/>\
-                    </div>"
-                )
-            }
-        }
-    }
-}
-
 impl Card for CabinetStyle {
     const ENAME: &'static str = "🗄️ Cabinet Style";
 
@@ -797,6 +739,12 @@ impl Card for Controller {
             }
             || self.notes.to_lowercase().contains(tx)
             || self
+                .cabinet_style
+                .as_deref()
+                .unwrap_or("")
+                .to_lowercase()
+                .contains(tx)
+            || self
                 .version
                 .as_deref()
                 .unwrap_or("")
@@ -841,7 +789,8 @@ impl Card for Controller {
                 )
             }
             CardType::Edit => {
-                let cabinet = HtmlStr(&self.cabinet);
+                let cabinet_style = HtmlStr(self.cabinet_style.as_ref());
+                let geo_loc = HtmlStr(&self.geo_loc);
                 let notes = HtmlStr(&self.notes);
                 let password = HtmlStr(self.password.as_ref());
                 format!(
@@ -856,9 +805,14 @@ impl Card for Controller {
                              max='65535' size='6' value='{drop_id}'/>\
                     </div>\
                     <div class='row'>\
-                      <label for='form_cabinet'>Cabinet</label>\
+                      <label for='form_cabinet'>Cabinet Style</label>\
                       <input id='form_cabinet' maxlength='20' size='20' \
-                             value='{cabinet}'/>\
+                             value='{cabinet_style}'/>\
+                    </div>\
+                    <div class='row'>\
+                      <label for='form_geo_loc'>Geo Loc</label>\
+                      <input id='form_geo_loc' maxlength='20' size='20' \
+                             value='{geo_loc}'/>\
                     </div>\
                     <div class='row'>\
                       <label for='form_notes'>Notes</label>\
