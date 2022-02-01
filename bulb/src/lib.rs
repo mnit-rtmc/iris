@@ -359,10 +359,10 @@ enum CardType {
     /// Compact in list
     Compact,
 
-    /// 📖, 📄, 🗒️, 📃
+    /// Status card
     Status,
 
-    /// 📝
+    /// Edit card
     Edit,
 }
 
@@ -403,7 +403,7 @@ trait Card: DeserializeOwned {
             </div>\
             {}\
             <div class='row'>\
-              <button id='ob_edit' type='button'>Edit</button>\
+              <button id='ob_edit' type='button'>📝 Edit</button>\
             </div>",
             val.to_html(CardType::Status)
         ))
@@ -414,7 +414,7 @@ trait Card: DeserializeOwned {
         let val = Self::new(json)?;
         let name = HtmlStr(val.name());
         let status = if tp.has_status() {
-            "<button id='ob_status' type='button'>📖 Status</button>"
+            "<button id='ob_status' type='button'>📄 Status</button>"
         } else {
             ""
         };
@@ -425,8 +425,8 @@ trait Card: DeserializeOwned {
             </div>\
             {}\
             <div class='row'>\
-              <button id='ob_delete' type='button'>🗑️ Delete</button>\
               {status}
+              <button id='ob_delete' type='button'>🗑️ Delete</button>\
               <button id='ob_save' type='button'>🖍️ Save</button>\
             </div>",
             val.to_html(CardType::Edit)
@@ -453,6 +453,7 @@ trait Card: DeserializeOwned {
         let obs = json
             .into_serde::<Vec<Self>>()
             .map_err(|e| JsValue::from(e.to_string()))?;
+        // TODO: split this into async calls so it can be cancelled
         for ob in obs.iter().filter(|ob| ob.is_match(tx)) {
             let name = HtmlStr(ob.name());
             html.push_str(&format!(
@@ -658,7 +659,7 @@ impl Card for CabinetStyle {
 }
 
 impl Card for CommConfig {
-    const ENAME: &'static str = "📝 Comm Config";
+    const ENAME: &'static str = "📡 Comm Config";
 
     fn is_match(&self, tx: &str) -> bool {
         self.description.to_lowercase().contains(tx)
@@ -727,11 +728,14 @@ impl Card for CommConfig {
 }
 
 impl Card for CommLink {
-    const ENAME: &'static str = "📡 Comm Link";
+    const ENAME: &'static str = "🔗 Comm Link";
 
     fn is_match(&self, tx: &str) -> bool {
         self.description.to_lowercase().contains(tx)
             || self.name.to_lowercase().contains(tx)
+            || self.comm_config.to_lowercase().contains(tx)
+            || self.uri.to_lowercase().contains(tx)
+        // TODO: check comm_config protocol
     }
 
     fn name(&self) -> &str {
@@ -1096,27 +1100,32 @@ fn handle_click_ev(elem: &Element) {
     let doc = window.document().unwrap_throw();
     let tp = selected_type(&doc).unwrap_throw();
     if elem.is_instance_of::<HtmlButtonElement>() {
-        if let Some(form) = elem.closest(".form").unwrap_throw() {
-            if let Some(_name) = form.get_attribute("name") {
-                let cs = STATE.with(|rc| rc.borrow().selected.clone());
-                if let Some(cs) = cs {
-                    match elem.id() {
-                        id if id == "ob_delete" => todo!(),
-                        id if id == "ob_edit" => {
-                            cs.replace_card(&doc, CardType::Edit)
-                        }
-                        id if id == "ob_status" => todo!(),
-                        id if id == "ob_save" => todo!(),
-                        id => console::log_1(&id.into()),
-                    }
-                }
-            }
-        }
+        handle_button_click_ev(&doc, elem);
     } else if let Some(card) = elem.closest(".card").unwrap_throw() {
         if let Some(name) = card.get_attribute("name") {
             deselect_card(&doc).unwrap_throw();
             spawn_local(tp.expand_card(name));
         }
+    }
+}
+
+fn handle_button_click_ev(doc: &Document, elem: &Element) {
+    match elem.id() {
+        id if id == "ob_delete" => todo!(),
+        id if id == "ob_edit" => {
+            let cs = STATE.with(|rc| rc.borrow().selected.clone());
+            if let Some(cs) = cs {
+                cs.replace_card(&doc, CardType::Edit);
+            }
+        }
+        id if id == "ob_status" => {
+            let cs = STATE.with(|rc| rc.borrow().selected.clone());
+            if let Some(cs) = cs {
+                cs.replace_card(&doc, CardType::Status);
+            }
+        }
+        id if id == "ob_save" => todo!(),
+        id => console::log_1(&id.into()),
     }
 }
 
