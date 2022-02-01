@@ -1,6 +1,5 @@
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::de::DeserializeOwned;
-use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::fmt;
 use wasm_bindgen::prelude::*;
@@ -12,7 +11,21 @@ use web_sys::{
     ScrollIntoViewOptions, ScrollLogicalPosition, Window,
 };
 
-type Result<T> = std::result::Result<T, JsValue>;
+pub type Result<T> = std::result::Result<T, JsValue>;
+
+mod alarm;
+mod cabinetstyle;
+mod commconfig;
+mod commlink;
+mod controller;
+mod modem;
+
+use alarm::Alarm;
+use cabinetstyle::CabinetStyle;
+use commconfig::CommConfig;
+use commlink::CommLink;
+use controller::Controller;
+use modem::Modem;
 
 #[derive(Debug)]
 struct OptVal<T>(Option<T>);
@@ -30,7 +43,7 @@ where
 }
 
 #[derive(Debug)]
-struct HtmlStr<S>(S);
+pub struct HtmlStr<S>(S);
 
 impl<S> HtmlStr<S> {
     fn fmt_encode(s: &str, f: &mut fmt::Formatter) -> fmt::Result {
@@ -69,7 +82,7 @@ impl fmt::Display for HtmlStr<Option<&String>> {
     }
 }
 
-trait ElemCast {
+pub trait ElemCast {
     /// Get an element by ID and cast it
     fn elem<E: JsCast>(&self, id: &str) -> Result<E>;
 }
@@ -96,89 +109,15 @@ async fn fetch_json(window: &Window, uri: &str) -> Result<JsValue> {
     }
 }
 
-/// Alarm
-#[derive(Debug, Deserialize, Serialize)]
-struct Alarm {
-    pub name: String,
-    pub description: String,
-    pub controller: Option<String>,
-    pub pin: u32,
-    pub state: bool,
-    pub trigger_time: Option<String>,
-}
-
-/// Cabinet Style
-#[derive(Debug, Deserialize, Serialize)]
-struct CabinetStyle {
-    pub name: String,
-    pub police_panel_pin_1: Option<u32>,
-    pub police_panel_pin_2: Option<u32>,
-    pub watchdog_reset_pin_1: Option<u32>,
-    pub watchdog_reset_pin_2: Option<u32>,
-    pub dip: Option<u32>,
-}
-
-/// Comm configuration
-#[derive(Debug, Deserialize, Serialize)]
-struct CommConfig {
-    pub name: String,
-    pub description: String,
-    pub protocol: u32,
-    pub modem: bool,
-    pub timeout_ms: u32,
-    pub poll_period_sec: u32,
-    pub long_poll_period_sec: u32,
-    pub idle_disconnect_sec: u32,
-    pub no_response_disconnect_sec: u32,
-}
-
-/// Comm link
-#[derive(Debug, Deserialize, Serialize)]
-struct CommLink {
-    pub name: String,
-    pub description: String,
-    pub uri: String,
-    pub comm_config: String,
-    pub poll_enabled: bool,
-}
-
-/// Controller
-#[derive(Debug, Deserialize, Serialize)]
-struct Controller {
-    pub name: String,
-    pub drop_id: u16,
-    pub comm_link: String,
-    pub cabinet_style: Option<String>,
-    pub geo_loc: String,
-    pub condition: u32,
-    pub notes: String,
-    pub password: Option<String>,
-    pub fail_time: Option<String>,
-    pub version: Option<String>,
-}
-
-/// Modem
-#[derive(Debug, Deserialize, Serialize)]
-struct Modem {
-    pub name: String,
-    pub uri: String,
-    pub config: String,
-    pub timeout_ms: u32,
-    pub enabled: bool,
-}
-
 /// CSS class for titles
 const TITLE: &str = "title";
 
-/// CSS class for disabled cards
-const DISABLED: &str = " class='disabled'";
-
 /// CSS class for names
-const NAME: &str = "ob_name";
+pub const NAME: &str = "ob_name";
 
 /// IRIS object types
 #[derive(Clone, Copy, Debug)]
-enum ObType {
+pub enum ObType {
     Unknown,
     Alarm,
     CabinetStyle,
@@ -339,7 +278,7 @@ impl ObType {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum CardType {
+pub enum CardType {
     Any,
 
     /// Compact in list
@@ -352,7 +291,7 @@ enum CardType {
     Edit,
 }
 
-trait Card: DeserializeOwned {
+pub trait Card: DeserializeOwned {
     const ENAME: &'static str;
 
     fn new(json: &JsValue) -> Result<Self> {
@@ -469,415 +408,11 @@ impl Card for () {
     }
 }
 
-impl Card for Alarm {
-    const ENAME: &'static str = "⚠ Alarm";
-
-    fn is_match(&self, tx: &str) -> bool {
-        self.description.to_lowercase().contains(tx)
-            || self.name.to_lowercase().contains(tx)
-            || {
-                let state = if self.state { "triggered" } else { "clear" };
-                state.contains(tx)
-            }
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn to_html(&self, ct: CardType) -> String {
-        let description = HtmlStr(&self.description);
-        match ct {
-            CardType::Any => unreachable!(),
-            CardType::Compact => {
-                let name = HtmlStr(&self.name);
-                format!(
-                    "<span>{description}</span>\
-                    <span class='{NAME}'>{name}</span>"
-                )
-            }
-            CardType::Status => {
-                let state = if self.state {
-                    "triggered 😧"
-                } else {
-                    "clear 🙂"
-                };
-                let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
-                format!(
-                    "<div class='row'>\
-                      <span>Description</span>\
-                      <span class='info'>{description}</span>\
-                    </div>\
-                    <div class='row'>\
-                      <span>State</span>\
-                      <span class='info'>{state}</span>\
-                    </div>\
-                    <div class='row'>\
-                      <span>Trigger Time</span>\
-                      <span class='info'>{trigger_time}</span>\
-                    </div>"
-                )
-            }
-            CardType::Edit => {
-                let controller = HtmlStr(self.controller.as_ref());
-                let pin = self.pin;
-                format!(
-                    "<div class='row'>\
-                      <label for='form_description'>Description</label>\
-                      <input id='form_description' maxlength='24' size='24' \
-                             value='{description}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_controller'>Controller</label>\
-                      <input id='form_controller' maxlength='20' size='20' \
-                             value='{controller}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_pin'>Pin</label>\
-                      <input id='form_pin' type='number' min='1' max='104' \
-                             size='8' value='{pin}'/>\
-                    </div>"
-                )
-            }
-        }
-    }
-}
-
-impl Card for CabinetStyle {
-    const ENAME: &'static str = "🗄️ Cabinet Style";
-
-    fn is_match(&self, tx: &str) -> bool {
-        self.name.to_lowercase().contains(tx)
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn to_html(&self, ct: CardType) -> String {
-        match ct {
-            CardType::Any => unreachable!(),
-            CardType::Compact => {
-                let name = HtmlStr(&self.name);
-                format!("<span>{name}</span>")
-            }
-            CardType::Status => String::new(),
-            CardType::Edit => {
-                let police_panel_pin_1 = OptVal(self.police_panel_pin_1);
-                let police_panel_pin_2 = OptVal(self.police_panel_pin_2);
-                let watchdog_reset_pin_1 = OptVal(self.watchdog_reset_pin_1);
-                let watchdog_reset_pin_2 = OptVal(self.watchdog_reset_pin_2);
-                let dip = OptVal(self.dip);
-                format!(
-                    "<div class='row'>\
-                      <label for='form_pp1'>Police Panel Pin 1</label>\
-                      <input id='form_pp1' type='number' min='1' max='104' \
-                             size='8' value='{police_panel_pin_1}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_pp2'>Police Panel Pin 2</label>\
-                      <input id='form_pp2' type='number' min='1' max='104' \
-                             size='8' value='{police_panel_pin_2}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_wr1'>Watchdog Reset Pin 1</label>\
-                      <input id='form_wr1' type='number' min='1' max='104' \
-                             size='8' value='{watchdog_reset_pin_1}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_wr2'>Watchdog Reset Pin 2</label>\
-                      <input id='form_wr2' type='number' min='1' max='104' \
-                             size='8' value='{watchdog_reset_pin_2}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_dip'>Dip</label>\
-                      <input id='form_dip' type='number' min='0' max='255' \
-                             size='8' value='{dip}'/>\
-                    </div>"
-                )
-            }
-        }
-    }
-}
-
-impl Card for CommConfig {
-    const ENAME: &'static str = "📡 Comm Config";
-
-    fn is_match(&self, tx: &str) -> bool {
-        self.description.to_lowercase().contains(tx)
-            || self.name.to_lowercase().contains(tx)
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn to_html(&self, ct: CardType) -> String {
-        let description = HtmlStr(&self.description);
-        match ct {
-            CardType::Any => unreachable!(),
-            CardType::Compact => {
-                let name = HtmlStr(&self.name);
-                format!(
-                    "<span>{description}</span>\
-                    <span class='{NAME}'>{name}</span>"
-                )
-            }
-            CardType::Status => String::new(),
-            CardType::Edit => {
-                let timeout_ms = self.timeout_ms;
-                let poll_period_sec = self.poll_period_sec;
-                let long_poll_period_sec = self.long_poll_period_sec;
-                let idle_disconnect_sec = self.idle_disconnect_sec;
-                let no_response_disconnect_sec =
-                    self.no_response_disconnect_sec;
-                format!(
-                    "<div class='row'>\
-                      <label for='form_description'>Description</label>\
-                      <input id='form_description' maxlength='20' size='20' \
-                             value='{description}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_timeout'>Timeout (ms)</label>\
-                      <input id='form_timeout' type='number' min='0' size='8' \
-                             max='20000' value='{timeout_ms}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_poll_period'>Poll Period (s)</label>\
-                      <input id='form_poll_period' type='number' min='0' \
-                             size='8' value='{poll_period_sec}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_long_poll'>Long Poll Period (s)</label>\
-                      <input id='form_long_poll' type='number' min='0' \
-                             size='8' value='{long_poll_period_sec}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_idle'>Idle Disconnect (s)</label>\
-                      <input id='form_idle' type='number' min='0' size='8' \
-                             value='{idle_disconnect_sec}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_no_resp'>No Response Disconnect (s)\
-                      </label>\
-                      <input id='form_no_resp' type='number' min='0' size='8' \
-                             value='{no_response_disconnect_sec}'/>\
-                    </div>"
-                )
-            }
-        }
-    }
-}
-
-impl Card for CommLink {
-    const ENAME: &'static str = "🔗 Comm Link";
-
-    fn is_match(&self, tx: &str) -> bool {
-        self.description.to_lowercase().contains(tx)
-            || self.name.to_lowercase().contains(tx)
-            || self.comm_config.to_lowercase().contains(tx)
-            || self.uri.to_lowercase().contains(tx)
-        // TODO: check comm_config protocol
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn to_html(&self, ct: CardType) -> String {
-        let description = HtmlStr(&self.description);
-        match ct {
-            CardType::Any => unreachable!(),
-            CardType::Compact => {
-                let name = HtmlStr(&self.name);
-                let disabled = if self.poll_enabled { "" } else { DISABLED };
-                format!(
-                    "<span{disabled}>{description}</span>\
-                    <span class='{NAME}'>{name}</span>"
-                )
-            }
-            CardType::Status => String::new(),
-            CardType::Edit => {
-                let uri = HtmlStr(&self.uri);
-                let enabled = if self.poll_enabled { " checked" } else { "" };
-                let comm_config = HtmlStr(&self.comm_config);
-                format!(
-                    "<div class='row'>\
-                      <label for='form_description'>Description</label>\
-                      <input id='form_description' maxlength='32' size='24' \
-                             value='{description}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_uri'>URI</label>\
-                      <input id='form_uri' maxlength='256' size='28' \
-                             value='{uri}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_config'>Comm Config</label>\
-                      <input id='form_config' maxlength='10' size='10' \
-                             value='{comm_config}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_enabled'>Poll Enabled</label>\
-                      <input id='form_enabled' type='checkbox'{enabled}/>\
-                    </div>"
-                )
-            }
-        }
-    }
-}
-
-impl Card for Controller {
-    const ENAME: &'static str = "🎛️ Controller";
-
-    fn is_match(&self, tx: &str) -> bool {
-        self.name.contains(tx)
-            || {
-                let comm_link = self.comm_link.to_lowercase();
-                comm_link.contains(tx)
-                    || format!("{}:{}", comm_link, self.drop_id).contains(tx)
-            }
-            || self.notes.to_lowercase().contains(tx)
-            || self
-                .cabinet_style
-                .as_deref()
-                .unwrap_or("")
-                .to_lowercase()
-                .contains(tx)
-            || self
-                .version
-                .as_deref()
-                .unwrap_or("")
-                .to_lowercase()
-                .contains(tx)
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn to_html(&self, ct: CardType) -> String {
-        let comm_link = HtmlStr(&self.comm_link);
-        let drop_id = self.drop_id;
-        match ct {
-            CardType::Any => unreachable!(),
-            CardType::Compact => {
-                let name = HtmlStr(&self.name);
-                // condition 1 is "Active"
-                let disabled = if self.condition == 1 { "" } else { DISABLED };
-                format!(
-                    "<span{disabled}>{comm_link}:{drop_id}</span>\
-                    <span class='{NAME}'>{name}</span>"
-                )
-            }
-            CardType::Status => {
-                let version = self.version.as_deref().unwrap_or("-");
-                let fail_time = self.fail_time.as_deref().unwrap_or("-");
-                format!(
-                    "<div class='row'>\
-                      <span>Comm Link:Drop ID</span>\
-                      <span class='info'>{comm_link}:{drop_id}</span>\
-                    </div>\
-                    <div class='row'>\
-                      <span>Version</span>\
-                      <span class='info'>{version}</span>\
-                    </div>\
-                    <div class='row'>\
-                      <span>Fail Time</span>\
-                      <span class='info'>{fail_time}</span>\
-                    </div>"
-                )
-            }
-            CardType::Edit => {
-                let cabinet_style = HtmlStr(self.cabinet_style.as_ref());
-                let geo_loc = HtmlStr(&self.geo_loc);
-                let notes = HtmlStr(&self.notes);
-                let password = HtmlStr(self.password.as_ref());
-                format!(
-                    "<div class='row'>\
-                      <label for='form_comm_link'>Comm Link</label>\
-                      <input id='form_comm_link' maxlength='20' size='20' \
-                             value='{comm_link}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_drop_id'>Drop ID</label>\
-                      <input id='form_drop_id' type='number' min='0'
-                             max='65535' size='6' value='{drop_id}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_cabinet'>Cabinet Style</label>\
-                      <input id='form_cabinet' maxlength='20' size='20' \
-                             value='{cabinet_style}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_geo_loc'>Geo Loc</label>\
-                      <input id='form_geo_loc' maxlength='20' size='20' \
-                             value='{geo_loc}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_notes'>Notes</label>\
-                      <textarea id='form_notes' maxlength='128' rows='2' \
-                                cols='26'/>{notes}</textarea>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_password'>Password</label>\
-                      <input id='form_password' maxlength='32' size='26' \
-                             value='{password}'/>\
-                    </div>"
-                )
-            }
-        }
-    }
-}
-
-impl Card for Modem {
-    const ENAME: &'static str = "🖀 Modem";
-
-    fn is_match(&self, tx: &str) -> bool {
-        self.name.to_lowercase().contains(tx)
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn to_html(&self, ct: CardType) -> String {
-        match ct {
-            CardType::Any => unreachable!(),
-            CardType::Compact => {
-                let name = HtmlStr(&self.name);
-                let disabled = if self.enabled { "" } else { DISABLED };
-                format!("<span{disabled}>{name}</span>")
-            }
-            CardType::Status => String::new(),
-            CardType::Edit => {
-                let uri = HtmlStr(&self.uri);
-                let config = HtmlStr(&self.config);
-                let timeout_ms = self.timeout_ms;
-                let enabled = if self.enabled { " checked" } else { "" };
-                format!(
-                    "<div class='row'>\
-                      <label for='form_uri'>URI</label>\
-                      <input id='form_uri' maxlength='64' size='30' \
-                             value='{uri}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_config'>Config</label>\
-                      <input id='form_config' maxlength='64' size='28' \
-                             value='{config}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_timeout'>Timeout (ms)</label>\
-                      <input id='form_timeout' type='number' min='0' size='8' \
-                             max='20000' value='{timeout_ms}'/>\
-                    </div>\
-                    <div class='row'>\
-                      <label for='form_enabled'>Enabled</label>\
-                      <input id='form_enabled' type='checkbox'{enabled}/>\
-                    </div>"
-                )
-            }
-        }
+pub fn disabled_attr(enabled: bool) -> &'static str {
+    if enabled {
+        ""
+    } else {
+        " class='disabled'"
     }
 }
 
