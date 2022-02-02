@@ -27,6 +27,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+
+import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.wysiwyg.editor.tags.WMultiTagDialog;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
@@ -196,6 +198,16 @@ public class WMsgMultiTagToolbar extends WToolbar {
 	
 	@Override
 	public void setColor(Color c, String mode) {
+		// this does nothing in this toolbar
+	}
+	
+	@Override
+	public void setColor(DmsColor c, String mode) {
+		// this does nothing in this toolbar
+	}
+	
+	@Override
+	public void setColor(int c, String mode) {
 		// this does nothing in this toolbar
 	}
 }

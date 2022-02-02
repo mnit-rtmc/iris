@@ -15,6 +15,7 @@
 
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
+import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.utils.I18N;
@@ -76,4 +77,12 @@ public class WMsgGraphicToolbar extends WToolbar {
 	/** Does nothing in graphic toolbar. */
 	@Override
 	public void setColor(Color c, String mode) { }
+	
+	/** Does nothing in graphic toolbar. */
+	@Override
+	public void setColor(DmsColor c, String mode) { }
+
+	/** Does nothing in graphic toolbar. */
+	@Override
+	public void setColor(int c, String mode) { }
 }

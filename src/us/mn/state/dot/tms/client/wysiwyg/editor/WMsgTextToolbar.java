@@ -232,12 +232,44 @@ public class WMsgTextToolbar extends WToolbar {
 			setBackgroundColor(c);
 	}
 	
+	/** Set the foreground or background color to c. The color to set is
+	 *  specified by passing "foreground" or "background" in the fgbg 
+	 *  parameter. For classic color schemes.
+	 */
+	public void setColor(DmsColor c, String mode) {
+		if (mode.equalsIgnoreCase(WMsgColorChooser.FOREGROUND))
+			setForegroundColor(c);
+		else if (mode.equalsIgnoreCase(WMsgColorChooser.BACKGROUND))
+			setBackgroundColor(c);
+	}
+	
+	/** Set the foreground or background color to c. The color to set is
+	 *  specified by passing "foreground" or "background" in the fgbg 
+	 *  parameter. For monochrome color schemes.
+	 */
+	public void setColor(int c, String mode) {
+		DmsColor dc = controller.getMonochromeFromTag(c);
+		if (mode.equalsIgnoreCase(WMsgColorChooser.FOREGROUND))
+			setForegroundColor(dc);
+		else if (mode.equalsIgnoreCase(WMsgColorChooser.BACKGROUND))
+			setBackgroundColor(dc);
+	}
+	
 	/** Set the foreground color on the controller and change the button
-	 *  appearance
+	 *  appearance.
 	 */
 	public void setForegroundColor(Color c) {
 		fgColor = c;
 		controller.setForegroundColor(new DmsColor(fgColor));
+		applyForegroundColorIcon();
+	}
+	
+	/** Set the foreground color on the controller and change the button
+	 *  appearance.
+	 */
+	public void setForegroundColor(DmsColor c) {
+		fgColor = c.color;
+		controller.setForegroundColor(c);
 		applyForegroundColorIcon();
 	}
 	
@@ -249,11 +281,20 @@ public class WMsgTextToolbar extends WToolbar {
 	}
 	
 	/** Set the background color on the controller and change the button
-	 *  appearance
+	 *  appearance.
 	 */
 	public void setBackgroundColor(Color c) {
 		bgColor = c;
 		controller.setBackgroundColor(new DmsColor(bgColor));
+		applyBackgroundColorIcon();
+	}
+	
+	/** Set the background color on the controller and change the button
+	 *  appearance.
+	 */
+	public void setBackgroundColor(DmsColor c) {
+		bgColor = c.color;
+		controller.setBackgroundColor(c);
 		applyBackgroundColorIcon();
 	}
 
