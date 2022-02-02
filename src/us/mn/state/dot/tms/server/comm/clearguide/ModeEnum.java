@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Iteris Inc.
+ * Copyright (C) 2021-2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,11 @@ public enum ModeEnum {
 
 	/** Possible modes */
 	UNKNOWN(""),
-	DELAY("delay"),
-	TRAVELTIME("tt");
+	DELAY("delay"),			// work zone delay (mins)
+	TRAVELTIME("tt"),		// TT adjusted w/ speed limit TT (mins)
+	TRAVELTIME_ACTUAL("tta"),	// actual TT
+	TRAVELTIME_SPEED_LIMIT("ttsl"),	// TT at the speed limit
+	SPEED("sp");			// speed
 
 	/** Name of mode */
 	private final String name;

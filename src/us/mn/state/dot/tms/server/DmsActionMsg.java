@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013-2022  Minnesota Department of Transportation
- * Copyright (C) 2021  Iteris Inc.
+ * Copyright (C) 2021-2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -807,7 +807,8 @@ public class DmsActionMsg {
 		if (stat != null) {
 			return Integer.toString(Math.round(stat));
 		} else {
-			String msg = "No ClearGuide statistic match";
+			String msg = "No match: does statistic, " + 
+				"route_id and index match?";
 			if (dlog.isOpen())
 				dlog.log("calcClearGuideAdvisory: " + msg);
 			return fail(msg);

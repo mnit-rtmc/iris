@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Iteris Inc.
+ * Copyright (C) 2021-2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,6 +13,9 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.tms.server.comm.clearguide;
+
+import org.json.JSONObject;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
  * ClearGuide Route and associated data.
@@ -42,8 +45,11 @@ public class Route {
 	/** ClearGuide Route id */
 	protected final int gcr_id;
 
-	/** ClearGuide route travel time (mins) */
-	protected final int gcr_tt;
+	/** ClearGuide route travel time actual (mins) */
+	protected final int gcr_tta;
+
+	/** ClearGuide route travel time at the speed limit (mins) */
+	protected final int gcr_ttsl;
 
 	/** ClearGuide route delay (mins) */
 	protected final int gcr_delay;
@@ -51,21 +57,49 @@ public class Route {
 	/** ClearGuide route datetime in ms */
 	protected final long gcr_time;
 
+	/** ClearGuide route speed in mph */
+	protected final int gcr_speed;
+
+	/** Create a route from JSON.
+	 * @param jroute A single route with attributes:
+	 * 	{"route_id":34731,"speed_mph":68,"route_name":"Cliff to
+	 * 	Diffley Que anal","travel_time_mins":1,"delay_ff_mins":0,
+	 * 	"delay_sl_mins":0,"timestamp":1.611017443E9} */
+	protected Route(JSONObject jroute) throws ParsingException {
+		this(	jroute.getInt("route_id"),
+			jroute.getDouble("travel_time_mins"),
+			jroute.getDouble("delay_sl_mins"),
+			jroute.getLong("timestamp") * 1000,
+			jroute.getDouble("sl_travel_time_mins"),
+			jroute.getInt("speed_mph"));
+	}
+
 	/** Create a route with CG calculated values
  	 * @param rid ClearGuide route id, 0 to ignore.
-	 * @param rtt Calculated route travel time
+	 * @param rtta Calculated route travel time actual
 	 * @param rd Calculated workzone delay
-	 * @param rt Route time Unix time in ms */
-	protected Route(int rid, double rtt, double rd, long rt) {
+	 * @param rt Route time Unix time in ms
+	 * @param rttsl Calculated route travel time at speed limit
+	 * @param rsp Calculated route speed in mph */
+	private Route(
+		int rid, double rtta, double rd, long rt, double rttsl, int rsp) 
+	{
 		gcr_id = rid;
-		gcr_tt = (int)Math.round(rtt);
+		gcr_tta = (int)Math.round(rtta);
 		gcr_delay = (int)Math.round(rd);
 		gcr_time = rt;
+		gcr_ttsl = (int)Math.round(rttsl);
+		gcr_speed = rsp;
 	}
 
 	/** Get age of data in secs */
 	private long getAgeSecs() {
 		return timeDeltaSecs(gcr_time);
+	}
+
+	/** Get travel time adjusted by the speed limit */
+	private int getTravelTime() {
+		return Math.max(gcr_tta, gcr_ttsl);
 	}
 
 	/** Get ClearGuide calculated statistic by matching [cg] tag values.
@@ -74,31 +108,33 @@ public class Route {
 	 * @param mode Statistic defined by [cg] tag.
 	 * @return Statistic from CG server or null for missing */
 	protected Integer getStat(int rid, int min, ModeEnum mode) {
-		Integer stat;
+		final Integer stat;
 		if (getAgeSecs() > MAX_CG_DATA_AGE_SECS) {
 			stat = null;
 			log("getStat: CG data too old: age_s=" + getAgeSecs() +
 				" > " + MAX_CG_DATA_AGE_SECS);
 		} else if (mode == ModeEnum.UNKNOWN) {
 			stat = null;
-			log("getStat: unknown cg tag mode");
 		} else if (rid != gcr_id) {
 			stat = null;
 			log("getStat: cg tag route id " + rid + " no match");
 		} else if (mode == ModeEnum.DELAY) {
 			stat = (gcr_delay >= min ? gcr_delay : null);
-			if (stat == null)
-				log("getStat: delay less than minimum");
 		} else if (mode == ModeEnum.TRAVELTIME) {
-			stat = (gcr_tt >= min ? gcr_tt : null);
-			if (stat == null)
-				log("getStat: tt less than minimum");
+			final int tt = getTravelTime();
+			stat = (tt >= min ? tt : null);
+		} else if (mode == ModeEnum.TRAVELTIME_ACTUAL) {
+			stat = (gcr_tta >= min ? gcr_tta: null);
+		} else if (mode == ModeEnum.TRAVELTIME_SPEED_LIMIT) {
+			stat = (gcr_ttsl >= min ? gcr_ttsl : null);
+		} else if (mode == ModeEnum.SPEED) {
+			stat = (gcr_speed >= min ? gcr_speed : null);
 		} else {
 			stat = null;
-			log("getStat: unknown mode");
+			log("getStat: unaccounted mode");
 		}
-		log("getStat: rid=" + rid + " mode=" + mode +
-			" route=" + toString() + " -->stat=" + stat);
+		log("getStat: rid=" + rid + " mode=" + mode + " min=" + min +
+			" route=" + toString() + " --> stat=" + stat);
 		return stat;
 	}
 
@@ -111,7 +147,10 @@ public class Route {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("(Route: id=").append(gcr_id);
-		sb.append(" tt_m=").append(gcr_tt);
+		sb.append(" tta_m=").append(gcr_tta);
+		sb.append(" ttsl_m=").append(gcr_ttsl);
+		sb.append(" tt_m=").append(getTravelTime());
+		sb.append(" speed=").append(gcr_speed);
 		sb.append(" delay_m=").append(gcr_delay);
 		sb.append(" time=").append(gcr_time);
 		sb.append(" age_s=").append(getAgeSecs());
