@@ -235,8 +235,7 @@ pub async fn start() -> Result<()> {
     add_select_event_listener(&sb_type, handle_sb_type_ev)?;
     let sb_input = doc.elem("sb_input")?;
     add_input_event_listener(&sb_input, handle_search_ev)?;
-    let sb_list = doc.elem("sb_list")?;
-    add_click_event_listener(&sb_list, handle_click_ev)?;
+    add_click_event_listener(&doc.elem("sb_list")?)?;
     Ok(())
 }
 
@@ -320,13 +319,10 @@ fn add_input_event_listener(
 }
 
 /// Add a "click" event listener to an element
-fn add_click_event_listener(
-    elem: &Element,
-    handle_ev: fn(&Element),
-) -> Result<()> {
-    let closure = Closure::wrap(Box::new(move |e: Event| {
+fn add_click_event_listener(elem: &Element) -> Result<()> {
+    let closure = Closure::wrap(Box::new(|e: Event| {
         let value = e.target().unwrap().dyn_into::<Element>().unwrap();
-        handle_ev(&value);
+        handle_click_ev(&value);
     }) as Box<dyn FnMut(_)>);
     elem.add_event_listener_with_callback(
         "click",
