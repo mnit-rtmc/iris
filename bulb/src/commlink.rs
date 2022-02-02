@@ -65,7 +65,9 @@ impl CommLink {
 }
 
 impl Card for CommLink {
+    const TNAME: &'static str = "Comm Link";
     const ENAME: &'static str = "🔗 Comm Link";
+    const URI: &'static str = "/iris/api/comm_link";
 
     fn is_match(&self, tx: &str) -> bool {
         self.description.to_lowercase().contains(tx)

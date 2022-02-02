@@ -68,7 +68,9 @@ impl CabinetStyle {
 }
 
 impl Card for CabinetStyle {
+    const TNAME: &'static str = "Cabinet Style";
     const ENAME: &'static str = "🗄️ Cabinet Style";
+    const URI: &'static str = "/iris/api/cabinet_style";
 
     fn is_match(&self, tx: &str) -> bool {
         self.name.to_lowercase().contains(tx)

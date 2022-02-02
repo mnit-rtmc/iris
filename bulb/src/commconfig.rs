@@ -82,7 +82,9 @@ impl CommConfig {
 }
 
 impl Card for CommConfig {
+    const TNAME: &'static str = "Comm Config";
     const ENAME: &'static str = "📡 Comm Config";
+    const URI: &'static str = "/iris/api/comm_config";
 
     fn is_match(&self, tx: &str) -> bool {
         self.description.to_lowercase().contains(tx)

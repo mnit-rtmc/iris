@@ -61,7 +61,9 @@ impl Modem {
 }
 
 impl Card for Modem {
+    const TNAME: &'static str = "Modem";
     const ENAME: &'static str = "🖀 Modem";
+    const URI: &'static str = "/iris/api/modem";
 
     fn is_match(&self, tx: &str) -> bool {
         self.name.to_lowercase().contains(tx)

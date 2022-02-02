@@ -106,7 +106,10 @@ impl Controller {
 }
 
 impl Card for Controller {
+    const TNAME: &'static str = "Controller";
     const ENAME: &'static str = "🎛️ Controller";
+    const URI: &'static str = "/iris/api/controller";
+    const HAS_STATUS: bool = true;
 
     fn is_match(&self, tx: &str) -> bool {
         self.name.contains(tx)

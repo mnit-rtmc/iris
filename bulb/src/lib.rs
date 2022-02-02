@@ -110,172 +110,85 @@ async fn fetch_json(window: &Window, uri: &str) -> Result<JsValue> {
     }
 }
 
-/// IRIS object types
-#[derive(Clone, Copy, Debug)]
-pub enum ObType {
-    Unknown,
-    Alarm,
-    CabinetStyle,
-    CommConfig,
-    CommLink,
-    Controller,
-    Modem,
-}
-
-impl From<&str> for ObType {
-    fn from(tp: &str) -> Self {
-        match tp {
-            Alarm::ENAME => ObType::Alarm,
-            CabinetStyle::ENAME => ObType::CabinetStyle,
-            CommConfig::ENAME => ObType::CommConfig,
-            CommLink::ENAME => ObType::CommLink,
-            Controller::ENAME => ObType::Controller,
-            Modem::ENAME => ObType::Modem,
-            _ => ObType::Unknown,
-        }
+async fn populate_list(tp: String, tx: String) {
+    match tp.as_str() {
+        Alarm::ENAME => populate_cards::<Alarm>(tx).await,
+        CabinetStyle::ENAME => populate_cards::<CabinetStyle>(tx).await,
+        CommConfig::ENAME => populate_cards::<CommConfig>(tx).await,
+        CommLink::ENAME => populate_cards::<CommLink>(tx).await,
+        Controller::ENAME => populate_cards::<Controller>(tx).await,
+        Modem::ENAME => populate_cards::<Modem>(tx).await,
+        _ => (),
     }
 }
 
-impl ObType {
-    /// Slice of all valid types
-    const ALL: &'static [ObType] = &[
-        ObType::Alarm,
-        ObType::CabinetStyle,
-        ObType::CommConfig,
-        ObType::CommLink,
-        ObType::Controller,
-        ObType::Modem,
-    ];
-
-    /// Get type name
-    fn tname(self) -> &'static str {
-        match self {
-            Self::Unknown => "",
-            Self::Alarm => "Alarm",
-            Self::CabinetStyle => "Cabinet Style",
-            Self::CommConfig => "Comm Config",
-            Self::CommLink => "Comm Link",
-            Self::Controller => "Controller",
-            Self::Modem => "Modem",
-        }
+/// Populate cards in `sb_list`
+async fn populate_cards<C: Card>(tx: String) {
+    if let Err(e) = try_populate_cards::<C>(tx).await {
+        // ⛔ 🔒 unauthorized (401) should be handled here
+        console::log_1(&e);
     }
+}
 
-    /// Get type name with emoji
-    fn ename(self) -> &'static str {
-        match self {
-            Self::Unknown => "",
-            Self::Alarm => Alarm::ENAME,
-            Self::CabinetStyle => CabinetStyle::ENAME,
-            Self::CommConfig => CommConfig::ENAME,
-            Self::CommLink => CommLink::ENAME,
-            Self::Controller => Controller::ENAME,
-            Self::Modem => Modem::ENAME,
-        }
+/// Try to populate cards in `sb_list`
+async fn try_populate_cards<C: Card>(tx: String) -> Result<()> {
+    let window = web_sys::window().unwrap_throw();
+    let doc = window.document().unwrap_throw();
+    let sb_list = doc.elem::<Element>("sb_list")?;
+    if C::URI.is_empty() {
+        sb_list.set_inner_html("");
+    } else {
+        let json = fetch_json(&window, C::URI).await?;
+        let tx = tx.to_lowercase();
+        let html = C::build_cards(&json, &tx)?;
+        sb_list.set_inner_html(&html);
     }
+    Ok(())
+}
 
-    /// Get the type URI
-    fn uri(self) -> &'static str {
-        match self {
-            Self::Unknown => "",
-            Self::Alarm => "/iris/api/alarm",
-            Self::CabinetStyle => "/iris/api/cabinet_style",
-            Self::CommConfig => "/iris/api/comm_config",
-            Self::CommLink => "/iris/api/comm_link",
-            Self::Controller => "/iris/api/controller",
-            Self::Modem => "/iris/api/modem",
-        }
+async fn click_card(tp: String, name: String) {
+    match tp.as_str() {
+        Alarm::ENAME => expand_card::<Alarm>(name).await,
+        CabinetStyle::ENAME => expand_card::<CabinetStyle>(name).await,
+        CommConfig::ENAME => expand_card::<CommConfig>(name).await,
+        CommLink::ENAME => expand_card::<CommLink>(name).await,
+        Controller::ENAME => expand_card::<Controller>(name).await,
+        Modem::ENAME => expand_card::<Modem>(name).await,
+        _ => (),
     }
+}
 
-    fn has_status(self) -> bool {
-        match self {
-            Self::Alarm | Self::Controller => true,
-            _ => false,
-        }
+/// Expand a card to a full form
+async fn expand_card<C: Card>(name: String) {
+    let window = web_sys::window().unwrap_throw();
+    if name.is_empty() {
+        // todo: make "new" card?
+        return;
     }
-
-    /// Populate cards in `sb_list`
-    async fn populate_cards(self, tx: String) {
-        if let Err(e) = self.try_populate_cards(tx).await {
-            // ⛔ 🔒 unauthorized (401) should be handled here
-            console::log_1(&e);
-        }
-    }
-
-    /// Try to populate cards in `sb_list`
-    async fn try_populate_cards(self, tx: String) -> Result<()> {
-        let window = web_sys::window().unwrap_throw();
-        let doc = window.document().unwrap_throw();
-        let sb_list = doc.elem::<Element>("sb_list")?;
-        if self.uri().is_empty() {
-            sb_list.set_inner_html("");
-        } else {
-            let json = fetch_json(&window, self.uri()).await?;
-            let tx = tx.to_lowercase();
-            let html = self.build_cards(&json, &tx)?;
-            sb_list.set_inner_html(&html);
-        }
-        Ok(())
-    }
-
-    /// Build cards for list
-    fn build_cards(self, json: &JsValue, tx: &str) -> Result<String> {
-        let tname = self.tname();
-        match self {
-            Self::Alarm => Alarm::build_cards(tname, json, tx),
-            Self::CabinetStyle => CabinetStyle::build_cards(tname, json, tx),
-            Self::CommConfig => CommConfig::build_cards(tname, json, tx),
-            Self::CommLink => CommLink::build_cards(tname, json, tx),
-            Self::Controller => Controller::build_cards(tname, json, tx),
-            Self::Modem => Modem::build_cards(tname, json, tx),
-            _ => Ok("".into()),
-        }
-    }
-
-    /// Build card using JSON value
-    fn build_card(self, json: &JsValue, ct: CardType) -> Result<String> {
-        match self {
-            Self::Alarm => Alarm::build_card(self, json, ct),
-            Self::CabinetStyle => CabinetStyle::build_card(self, json, ct),
-            Self::CommConfig => CommConfig::build_card(self, json, ct),
-            Self::CommLink => CommLink::build_card(self, json, ct),
-            Self::Controller => Controller::build_card(self, json, ct),
-            Self::Modem => Modem::build_card(self, json, ct),
-            _ => Ok("".into()),
-        }
-    }
-
-    /// Expand a card to a full form
-    async fn expand_card(self, name: String) {
-        let window = web_sys::window().unwrap_throw();
-        if name.is_empty() {
-            // todo: make "new" card?
-            return;
-        }
-        let uri = format!(
-            "{}/{}",
-            self.uri(),
-            utf8_percent_encode(&name, NON_ALPHANUMERIC)
-        );
-        let json = fetch_json(&window, &uri).await.unwrap_throw();
-        console::log_1(&json);
-        let doc = window.document().unwrap_throw();
-        let cs = CardState {
-            ob_tp: self,
-            name,
-            json,
-        };
-        cs.replace_card(&doc, CardType::Any);
-        STATE.with(|rc| {
-            let mut state = rc.borrow_mut();
-            state.selected.replace(cs);
-        });
-    }
+    let uri = format!(
+        "{}/{}",
+        C::URI,
+        utf8_percent_encode(&name, NON_ALPHANUMERIC)
+    );
+    let json = fetch_json(&window, &uri).await.unwrap_throw();
+    console::log_1(&json);
+    let doc = window.document().unwrap_throw();
+    let cs = CardState {
+        tname: C::TNAME,
+        name,
+        json,
+    };
+    cs.replace_card(&doc, CardType::Any);
+    STATE.with(|rc| {
+        let mut state = rc.borrow_mut();
+        state.selected.replace(cs);
+    });
 }
 
 #[derive(Clone)]
 struct CardState {
-    /// Object type
-    ob_tp: ObType,
+    /// Type name
+    tname: &'static str,
     /// Object name
     name: String,
     /// JSON value of object
@@ -284,9 +197,9 @@ struct CardState {
 
 impl CardState {
     fn replace_card(&self, doc: &Document, ct: CardType) {
-        let id = format!("{}_{}", self.ob_tp.tname(), &self.name);
+        let id = format!("{}_{}", self.tname, &self.name);
         if let Ok(elem) = doc.elem::<HtmlElement>(&id) {
-            match self.ob_tp.build_card(&self.json, ct) {
+            match build_card(&self.tname, &self.json, ct) {
                 Ok(html) => {
                     elem.set_inner_html(&html);
                     if let CardType::Compact = ct {
@@ -306,6 +219,19 @@ impl CardState {
                 }
             }
         }
+    }
+}
+
+/// Build card using JSON value
+fn build_card(tp: &str, json: &JsValue, ct: CardType) -> Result<String> {
+    match tp {
+        Alarm::TNAME => Alarm::build_card(json, ct),
+        CabinetStyle::TNAME => CabinetStyle::build_card(json, ct),
+        CommConfig::TNAME => CommConfig::build_card(json, ct),
+        CommLink::TNAME => CommLink::build_card(json, ct),
+        Controller::TNAME => Controller::build_card(json, ct),
+        Modem::TNAME => Modem::build_card(json, ct),
+        _ => Ok("".into()),
     }
 }
 
@@ -335,11 +261,12 @@ pub async fn start() -> Result<()> {
     sb_type.append_child(&opt)?;
     let group = doc.create_element("optgroup")?;
     group.set_attribute("label", "🧰 Maintenance")?;
-    for ob in ObType::ALL {
-        let opt = doc.create_element("option")?;
-        opt.append_with_str_1(ob.ename())?;
-        group.append_child(&opt)?;
-    }
+    add_option::<Alarm>(&doc, &group)?;
+    add_option::<CabinetStyle>(&doc, &group)?;
+    add_option::<CommConfig>(&doc, &group)?;
+    add_option::<CommLink>(&doc, &group)?;
+    add_option::<Controller>(&doc, &group)?;
+    add_option::<Modem>(&doc, &group)?;
     sb_type.append_child(&group)?;
     add_select_event_listener(&sb_type, handle_sb_type_ev)?;
     let sb_input = doc.elem("sb_input")?;
@@ -349,15 +276,21 @@ pub async fn start() -> Result<()> {
     Ok(())
 }
 
+fn add_option<C: Card>(doc: &Document, group: &Element) -> Result<()> {
+    let opt = doc.create_element("option")?;
+    opt.append_with_str_1(C::ENAME)?;
+    group.append_child(&opt)?;
+    Ok(())
+}
+
 /// Handle an event from "sb_type" `select` element
-fn handle_sb_type_ev(tp: &str) {
+fn handle_sb_type_ev(tp: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     deselect_card(&doc).unwrap_throw();
     let input: HtmlInputElement = doc.elem("sb_input").unwrap_throw();
     input.set_value("");
-    let tp: ObType = tp.into();
-    spawn_local(tp.populate_cards("".into()));
+    spawn_local(populate_list(tp, "".into()));
 }
 
 /// Handle an event from "sb_input" `input` element
@@ -366,19 +299,18 @@ fn handle_search_ev(tx: String) {
     let doc = window.document().unwrap_throw();
     deselect_card(&doc).unwrap_throw();
     let tp = selected_type(&doc).unwrap_throw();
-    spawn_local(tp.populate_cards(tx));
+    spawn_local(populate_list(tp, tx));
 }
 
-fn selected_type(doc: &Document) -> Result<ObType> {
+fn selected_type(doc: &Document) -> Result<String> {
     let sb_type: HtmlSelectElement = doc.elem("sb_type")?;
-    let tp = sb_type.value();
-    Ok(ObType::from(tp.as_str()))
+    Ok(sb_type.value())
 }
 
 /// Add an "input" event listener to an element
 fn add_select_event_listener(
     elem: &HtmlSelectElement,
-    handle_ev: fn(&str),
+    handle_ev: fn(String),
 ) -> Result<()> {
     let closure = Closure::wrap(Box::new(move |e: Event| {
         let value = e
@@ -387,7 +319,7 @@ fn add_select_event_listener(
             .dyn_into::<HtmlSelectElement>()
             .unwrap()
             .value();
-        handle_ev(&value);
+        handle_ev(value);
     }) as Box<dyn FnMut(_)>);
     elem.add_event_listener_with_callback(
         "input",
@@ -449,7 +381,7 @@ fn handle_click_ev(elem: &Element) {
     } else if let Some(card) = elem.closest(".card").unwrap_throw() {
         if let Some(name) = card.get_attribute("name") {
             deselect_card(&doc).unwrap_throw();
-            spawn_local(tp.expand_card(name));
+            spawn_local(click_card(tp, name));
         }
     }
 }

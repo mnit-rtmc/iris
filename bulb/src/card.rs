@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::{HtmlStr, ObType, Result};
+use crate::{HtmlStr, Result};
 use serde::de::DeserializeOwned;
 use wasm_bindgen::JsValue;
 
@@ -35,20 +35,23 @@ pub enum CardType {
 }
 
 pub trait Card: DeserializeOwned {
+    const TNAME: &'static str;
     const ENAME: &'static str;
+    const HAS_STATUS: bool = false;
+    const URI: &'static str;
 
     fn new(json: &JsValue) -> Result<Self> {
         json.into_serde::<Self>().map_err(|e| e.to_string().into())
     }
 
     /// Build form using JSON value
-    fn build_card(tp: ObType, json: &JsValue, ct: CardType) -> Result<String> {
+    fn build_card(json: &JsValue, ct: CardType) -> Result<String> {
         match ct {
-            CardType::Status | CardType::Any if tp.has_status() => {
-                Self::build_status_form(tp, json)
+            CardType::Status | CardType::Any if Self::HAS_STATUS => {
+                Self::build_status_form(json)
             }
             CardType::Compact => Self::build_compact_form(json),
-            _ => Self::build_edit_form(tp, json),
+            _ => Self::build_edit_form(json),
         }
     }
 
@@ -57,8 +60,8 @@ pub trait Card: DeserializeOwned {
         Ok(val.to_html(CardType::Compact))
     }
 
-    fn build_status_form(tp: ObType, json: &JsValue) -> Result<String> {
-        let ename = tp.ename();
+    fn build_status_form(json: &JsValue) -> Result<String> {
+        let ename = Self::ENAME;
         let val = Self::new(json)?;
         let name = HtmlStr(val.name());
         Ok(format!(
@@ -74,11 +77,11 @@ pub trait Card: DeserializeOwned {
         ))
     }
 
-    fn build_edit_form(tp: ObType, json: &JsValue) -> Result<String> {
-        let ename = tp.ename();
+    fn build_edit_form(json: &JsValue) -> Result<String> {
+        let ename = Self::ENAME;
         let val = Self::new(json)?;
         let name = HtmlStr(val.name());
-        let status = if tp.has_status() {
+        let status = if Self::HAS_STATUS {
             "<button id='ob_status' type='button'>📄 Status</button>"
         } else {
             ""
@@ -104,7 +107,8 @@ pub trait Card: DeserializeOwned {
         false
     }
 
-    fn build_cards(tname: &str, json: &JsValue, tx: &str) -> Result<String> {
+    fn build_cards(json: &JsValue, tx: &str) -> Result<String> {
+        let tname = Self::TNAME;
         let mut html = String::new();
         html.push_str("<ul class='cards'>");
         if tx.is_empty() {
@@ -137,11 +141,9 @@ pub trait Card: DeserializeOwned {
 }
 
 impl Card for () {
+    const TNAME: &'static str = "";
     const ENAME: &'static str = "";
-
-    fn new(_json: &JsValue) -> Result<Self> {
-        unreachable!()
-    }
+    const URI: &'static str = "";
 
     fn name(&self) -> &str {
         ""
