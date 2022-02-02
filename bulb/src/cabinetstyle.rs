@@ -10,7 +10,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::{Card, CardType, HtmlStr, OptVal};
+use crate::card::{Card, CardType};
+use crate::{HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 
 /// Cabinet Style

@@ -10,7 +10,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::{disabled_attr, Card, CardType, HtmlStr};
+use crate::card::{disabled_attr, Card, CardType};
+use crate::HtmlStr;
 use serde::{Deserialize, Serialize};
 
 /// Modem

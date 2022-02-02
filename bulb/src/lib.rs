@@ -1,5 +1,4 @@
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
-use serde::de::DeserializeOwned;
 use std::cell::RefCell;
 use std::fmt;
 use wasm_bindgen::prelude::*;
@@ -15,6 +14,7 @@ pub type Result<T> = std::result::Result<T, JsValue>;
 
 mod alarm;
 mod cabinetstyle;
+mod card;
 mod commconfig;
 mod commlink;
 mod controller;
@@ -22,6 +22,7 @@ mod modem;
 
 use alarm::Alarm;
 use cabinetstyle::CabinetStyle;
+use card::{Card, CardType};
 use commconfig::CommConfig;
 use commlink::CommLink;
 use controller::Controller;
@@ -108,12 +109,6 @@ async fn fetch_json(window: &Window, uri: &str) -> Result<JsValue> {
         _ => Err(resp.status_text().into()),
     }
 }
-
-/// CSS class for titles
-const TITLE: &str = "title";
-
-/// CSS class for names
-pub const NAME: &str = "ob_name";
 
 /// IRIS object types
 #[derive(Clone, Copy, Debug)]
@@ -274,145 +269,6 @@ impl ObType {
             let mut state = rc.borrow_mut();
             state.selected.replace(cs);
         });
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum CardType {
-    Any,
-
-    /// Compact in list
-    Compact,
-
-    /// Status card
-    Status,
-
-    /// Edit card
-    Edit,
-}
-
-pub trait Card: DeserializeOwned {
-    const ENAME: &'static str;
-
-    fn new(json: &JsValue) -> Result<Self> {
-        json.into_serde::<Self>().map_err(|e| e.to_string().into())
-    }
-
-    /// Build form using JSON value
-    fn build_card(tp: ObType, json: &JsValue, ct: CardType) -> Result<String> {
-        match ct {
-            CardType::Status if tp.has_status() => {
-                Self::build_status_form(tp, json)
-            }
-            CardType::Any if tp.has_status() => {
-                Self::build_status_form(tp, json)
-            }
-            CardType::Compact => Self::build_compact_form(json),
-            _ => Self::build_edit_form(tp, json),
-        }
-    }
-
-    fn build_compact_form(json: &JsValue) -> Result<String> {
-        let val = Self::new(json)?;
-        Ok(val.to_html(CardType::Compact))
-    }
-
-    fn build_status_form(tp: ObType, json: &JsValue) -> Result<String> {
-        let ename = tp.ename();
-        let val = Self::new(json)?;
-        let name = HtmlStr(val.name());
-        Ok(format!(
-            "<div class='row'>\
-              <div class='{TITLE}'>{ename}</div>\
-              <span class='{NAME}'>{name}</span>\
-            </div>\
-            {}\
-            <div class='row'>\
-              <button id='ob_edit' type='button'>📝 Edit</button>\
-            </div>",
-            val.to_html(CardType::Status)
-        ))
-    }
-
-    fn build_edit_form(tp: ObType, json: &JsValue) -> Result<String> {
-        let ename = tp.ename();
-        let val = Self::new(json)?;
-        let name = HtmlStr(val.name());
-        let status = if tp.has_status() {
-            "<button id='ob_status' type='button'>📄 Status</button>"
-        } else {
-            ""
-        };
-        Ok(format!(
-            "<div class='row'>\
-              <div class='{TITLE}'>{ename}</div>\
-              <span class='{NAME}'>{name}</span>\
-            </div>\
-            {}\
-            <div class='row'>\
-              {status}
-              <button id='ob_delete' type='button'>🗑️ Delete</button>\
-              <button id='ob_save' type='button'>🖍️ Save</button>\
-            </div>",
-            val.to_html(CardType::Edit)
-        ))
-    }
-
-    fn name(&self) -> &str;
-
-    fn is_match(&self, _tx: &str) -> bool {
-        false
-    }
-
-    fn build_cards(tname: &str, json: &JsValue, tx: &str) -> Result<String> {
-        let mut html = String::new();
-        html.push_str("<ul class='cards'>");
-        if tx.is_empty() {
-            // the "New" card has id "{tname}_" and blank name
-            html.push_str(&format!(
-                "<li id='{tname}_' name='' class='card'>\
-                    <span class='create'>Create 🆕</span>\
-                </li>"
-            ));
-        }
-        let obs = json
-            .into_serde::<Vec<Self>>()
-            .map_err(|e| JsValue::from(e.to_string()))?;
-        // TODO: split this into async calls so it can be cancelled
-        for ob in obs.iter().filter(|ob| ob.is_match(tx)) {
-            let name = HtmlStr(ob.name());
-            html.push_str(&format!(
-                "<li id='{tname}_{name}' name='{name}' class='card'>"
-            ));
-            html.push_str(&ob.to_html(CardType::Compact));
-            html.push_str("</li>");
-        }
-        html.push_str("</ul>");
-        Ok(html)
-    }
-
-    fn to_html(&self, _ct: CardType) -> String {
-        String::new()
-    }
-}
-
-impl Card for () {
-    const ENAME: &'static str = "";
-
-    fn new(_json: &JsValue) -> Result<Self> {
-        unreachable!()
-    }
-
-    fn name(&self) -> &str {
-        ""
-    }
-}
-
-pub fn disabled_attr(enabled: bool) -> &'static str {
-    if enabled {
-        ""
-    } else {
-        " class='disabled'"
     }
 }
 

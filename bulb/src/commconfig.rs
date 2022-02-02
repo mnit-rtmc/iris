@@ -10,7 +10,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::{Card, CardType, HtmlStr, NAME};
+use crate::card::{Card, CardType, NAME};
+use crate::HtmlStr;
 use serde::{Deserialize, Serialize};
 
 /// Comm configuration
