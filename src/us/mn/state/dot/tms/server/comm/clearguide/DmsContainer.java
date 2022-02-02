@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Iteris Inc.
+ * Copyright (C) 2021-2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,20 +89,6 @@ public class DmsContainer {
 	private int addDms(String dms, Routes rs) {
 		dms_hash.put(dms, rs);
 		return size();
-	}
-
-	/** Add a DMS with associated route to the container.
-	 * @param dms Name of dms
- 	 * @param rid ClearGuide route id
-	 * @param rtt Calculated route travel time
-	 * @param rd Calculated route delay
-	 * @param rt Route time Unix time in secs
-	 * @return The number of key value pairs in hash */
-	protected int addDms(
-		String dms, int rid, double rtt, double rd, long rt)
-	{
-		return addDms(dms,
-			new Routes().add(new Route(rid, rtt, rd, rt)));
 	}
 
 	/** Get the specified statistic for the specified dms.

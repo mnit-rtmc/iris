@@ -12,7 +12,7 @@ name.
 
 Real-time ClearGuide data can be embedded in DMS messages using [DMS actions].
 A `[cg` *…* `]` [action tag] in the [quick message] will be replaced by the
-appropriate value.  It has the following format:
+appropriate value.  The action tag has the following format:
 
 `[cg` *dms,wid,min,mode,idx* `]`
 
@@ -22,8 +22,11 @@ appropriate value.  It has the following format:
 2. `wid`: The workzone ID defined in ClearGuide
 3. `min`: The minimum acceptable value for the statistic read from ClearGuide
 4. `mode`: An identifier for the desired ClearGuide statistic:
-   - `tt`: workzone travel time
+   - `tt`: workzone travel time calculated as max(tta, ttsl)
+   - `ttsl`: workzone travel time at the speed limit
+   - `tta`: actual travel time, may be > ttsl
    - `delay`: workzone delay
+   - `sp`: workzone speed
 5. `idx`: The zero-based index of the workzone associated with the DMS. This only applies for DMS with more than 1 associated workzone. It is optional and defaults to zero.
 
 

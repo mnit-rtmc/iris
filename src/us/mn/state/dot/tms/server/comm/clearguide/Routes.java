@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Iteris Inc.
+ * Copyright (C) 2021-2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,27 +52,14 @@ public class Routes {
 	}
 
 	/** Parse routes from JSON array.
-	 * @param jroutes Array of routes, each an object of route attribs:
-	 * 	[{"route_id":34731,"speed_mph":68,"route_name":"Cliff to
-	 * 	Diffley Que anal","travel_time_mins":1,"delay_ff_mins":0,
-	 * 	"delay_sl_mins":0,"timestamp":1.611017443E9}, ...]
+	 * @param jroutes Array of routes, each an object of route attribs.
 	 * @return Number of routes added */
 	protected int parse(JSONArray jroutes) throws ParsingException {
-		try {
-			for (int i = 0; i < jroutes.length(); i++) {
-				JSONObject jroute = jroutes.getJSONObject(i);
-				add(new Route(
-					jroute.getInt("route_id"),
-					jroute.getDouble("travel_time_mins"),
-					jroute.getDouble("delay_sl_mins"),
-					jroute.getLong("timestamp") * 1000));
-			}
-		} catch(Exception ex) {
-			String msg = "parseRoutes ex=" + ex;
-			throw new ParsingException(msg);
-		} finally {
-			return size();
+		for (int i = 0; i < jroutes.length(); i++) {
+			JSONObject jroute = jroutes.getJSONObject(i);
+			add(new Route(jroute));
 		}
+		return size();
 	}
 
 	/** Get a statistic for the specified route.
