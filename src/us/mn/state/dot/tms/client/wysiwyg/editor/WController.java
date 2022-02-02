@@ -3123,6 +3123,16 @@ public class WController {
 			tokensAfter.remove(tok);
 		}
 	}
+
+	/** Toggle the standby message flag tag. */
+	public Action toggleStandbyMsg = new AbstractAction() {
+		public void actionPerformed(ActionEvent e) {
+			// check the state of the check box, adding a tag if it's checked
+			// and removing if not
+			wmsg.setStandby(editor.getStandby());
+			update();
+		}
+	};
 	
 	/** Add the token to the selected page at the caret index. */
 	public void addToken(WToken tok) {
@@ -4045,6 +4055,13 @@ public class WController {
 	/** Return message combining value. */
 	public int getMsgCombining() {
 		return msgCombining;
+	}
+	
+	/** Return whether or not the current message is a standby message. */
+	public boolean isStandby() {
+		if (wmsg != null)
+			return wmsg.isStandby();
+		return false;
 	}
 	
 }
