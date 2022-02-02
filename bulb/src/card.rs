@@ -21,10 +21,9 @@ const TITLE: &str = "title";
 /// CSS class for names
 pub const NAME: &str = "ob_name";
 
+/// Type of card
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CardType {
-    Any,
-
     /// Compact in list
     Compact,
 
@@ -35,12 +34,14 @@ pub enum CardType {
     Edit,
 }
 
+/// A card can be displayed in a card list
 pub trait Card: DeserializeOwned {
     const TNAME: &'static str;
     const ENAME: &'static str;
-    const HAS_STATUS: bool = false;
     const URI: &'static str;
+    const HAS_STATUS: bool = false;
 
+    /// Create from a JSON value
     fn new(json: &JsValue) -> Result<Self> {
         json.into_serde::<Self>().map_err(|e| e.to_string().into())
     }
@@ -48,19 +49,21 @@ pub trait Card: DeserializeOwned {
     /// Build form using JSON value
     fn build_card(json: &JsValue, ct: CardType) -> Result<String> {
         match ct {
-            CardType::Status | CardType::Any if Self::HAS_STATUS => {
+            CardType::Compact => Self::build_compact_form(json),
+            CardType::Status if Self::HAS_STATUS => {
                 Self::build_status_form(json)
             }
-            CardType::Compact => Self::build_compact_form(json),
             _ => Self::build_edit_form(json),
         }
     }
 
+    /// Build a compact card
     fn build_compact_form(json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         Ok(val.to_html(CardType::Compact))
     }
 
+    /// Build a status card
     fn build_status_form(json: &JsValue) -> Result<String> {
         let ename = Self::ENAME;
         let val = Self::new(json)?;
@@ -78,6 +81,7 @@ pub trait Card: DeserializeOwned {
         ))
     }
 
+    /// Build an edit card
     fn build_edit_form(json: &JsValue) -> Result<String> {
         let ename = Self::ENAME;
         let val = Self::new(json)?;
@@ -102,12 +106,15 @@ pub trait Card: DeserializeOwned {
         ))
     }
 
+    /// Get the name
     fn name(&self) -> &str;
 
+    /// Check if a search string matches
     fn is_match(&self, _tx: &str) -> bool {
         false
     }
 
+    /// Build a list of cards from a JSON array
     fn build_cards(json: &JsValue, tx: &str) -> Result<String> {
         let tname = Self::TNAME;
         let mut html = String::new();
@@ -136,6 +143,7 @@ pub trait Card: DeserializeOwned {
         Ok(html)
     }
 
+    /// Convert to HTML
     fn to_html(&self, _ct: CardType) -> String {
         String::new()
     }
@@ -151,6 +159,7 @@ impl Card for () {
     }
 }
 
+/// Get attribute for disabled cards
 pub fn disabled_attr(enabled: bool) -> &'static str {
     if enabled {
         ""

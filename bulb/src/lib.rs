@@ -40,6 +40,7 @@ use commlink::CommLink;
 use controller::Controller;
 use modem::Modem;
 
+/// Helper trait to lookup elements
 pub trait ElemCast {
     /// Get an element by ID and cast it
     fn elem<E: JsCast>(&self, id: &str) -> Result<E>;
@@ -67,6 +68,7 @@ async fn fetch_json(window: &Window, uri: &str) -> Result<JsValue> {
     }
 }
 
+/// Populate `sb_list` with `tp` card types
 async fn populate_list(tp: String, tx: String) {
     match tp.as_str() {
         Alarm::ENAME => populate_cards::<Alarm>(tx).await,
@@ -103,6 +105,7 @@ async fn try_populate_cards<C: Card>(tx: String) -> Result<()> {
     Ok(())
 }
 
+/// Handle a card click event
 async fn click_card(tp: String, name: String) {
     match tp.as_str() {
         Alarm::ENAME => expand_card::<Alarm>(name).await,
@@ -135,13 +138,14 @@ async fn expand_card<C: Card>(name: String) {
         name,
         json,
     };
-    cs.replace_card(&doc, CardType::Any);
+    cs.replace_card(&doc, CardType::Status);
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
         state.selected.replace(cs);
     });
 }
 
+/// Selected card state
 #[derive(Clone)]
 struct CardState {
     /// Type name
@@ -153,6 +157,7 @@ struct CardState {
 }
 
 impl CardState {
+    /// Replace a card element with another card type
     fn replace_card(&self, doc: &Document, ct: CardType) {
         let id = format!("{}_{}", self.tname, &self.name);
         if let Ok(elem) = doc.elem::<HtmlElement>(&id) {
@@ -192,6 +197,7 @@ fn build_card(tp: &str, json: &JsValue, ct: CardType) -> Result<String> {
     }
 }
 
+/// Global app state
 #[derive(Default)]
 struct State {
     selected: Option<CardState>,
@@ -205,6 +211,7 @@ thread_local! {
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
+/// Application starting function
 #[wasm_bindgen(start)]
 pub async fn start() -> Result<()> {
     // this should be debug only
@@ -233,6 +240,7 @@ pub async fn start() -> Result<()> {
     Ok(())
 }
 
+/// Add an option element to a group
 fn add_option<C: Card>(doc: &Document, group: &Element) -> Result<()> {
     let opt = doc.create_element("option")?;
     opt.append_with_str_1(C::ENAME)?;
@@ -259,6 +267,7 @@ fn handle_search_ev(tx: String) {
     spawn_local(populate_list(tp, tx));
 }
 
+/// Get the selected type
 fn selected_type(doc: &Document) -> Result<String> {
     let sb_type: HtmlSelectElement = doc.elem("sb_type")?;
     Ok(sb_type.value())
@@ -343,6 +352,7 @@ fn handle_click_ev(elem: &Element) {
     }
 }
 
+/// Handle a click event with a button target
 fn handle_button_click_ev(doc: &Document, elem: &Element) {
     match elem.id() {
         id if id == "ob_delete" => todo!(),
@@ -363,6 +373,7 @@ fn handle_button_click_ev(doc: &Document, elem: &Element) {
     }
 }
 
+/// Deselect the selected card
 fn deselect_card(doc: &Document) -> Result<()> {
     let cs = STATE.with(|rc| {
         let mut state = rc.borrow_mut();

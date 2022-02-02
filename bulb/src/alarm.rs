@@ -107,7 +107,6 @@ impl Card for Alarm {
             CardType::Compact => self.to_compact_html(),
             CardType::Status => self.to_status_html(),
             CardType::Edit => self.to_edit_html(),
-            _ => unreachable!(),
         }
     }
 }
