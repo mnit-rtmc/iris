@@ -52,7 +52,7 @@ impl Card for CommConfig {
         )
     }
 
-    /// Convert to status HTML
+    /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
         let description = HtmlStr(&self.description);
         let timeout_ms = self.timeout_ms;

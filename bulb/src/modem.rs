@@ -44,7 +44,7 @@ impl Card for Modem {
         format!("<span{disabled}>{name}</span>")
     }
 
-    /// Convert to status HTML
+    /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
         let uri = HtmlStr(&self.uri);
         let config = HtmlStr(&self.config);

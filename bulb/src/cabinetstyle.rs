@@ -44,7 +44,7 @@ impl Card for CabinetStyle {
         format!("<span>{name}</span>")
     }
 
-    /// Convert to status HTML
+    /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
         let police_panel_pin_1 = OptVal(self.police_panel_pin_1);
         let police_panel_pin_2 = OptVal(self.police_panel_pin_2);

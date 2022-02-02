@@ -96,7 +96,7 @@ impl Card for Controller {
         )
     }
 
-    /// Convert to status HTML
+    /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
         let comm_link = HtmlStr(&self.comm_link);
         let drop_id = self.drop_id;

@@ -60,7 +60,7 @@ pub trait Card: DeserializeOwned {
     /// Build a compact card
     fn build_compact_form(json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
-        Ok(val.to_html(CardType::Compact))
+        Ok(val.to_html_compact())
     }
 
     /// Build a status card
@@ -77,7 +77,7 @@ pub trait Card: DeserializeOwned {
             <div class='row'>\
               <button id='ob_edit' type='button'>📝 Edit</button>\
             </div>",
-            val.to_html(CardType::Status)
+            val.to_html_status()
         ))
     }
 
@@ -102,7 +102,7 @@ pub trait Card: DeserializeOwned {
               <button id='ob_delete' type='button'>🗑️ Delete</button>\
               <button id='ob_save' type='button'>🖍️ Save</button>\
             </div>",
-            val.to_html(CardType::Edit)
+            val.to_html_edit()
         ))
     }
 
@@ -136,20 +136,11 @@ pub trait Card: DeserializeOwned {
             html.push_str(&format!(
                 "<li id='{tname}_{name}' name='{name}' class='card'>"
             ));
-            html.push_str(&ob.to_html(CardType::Compact));
+            html.push_str(&ob.to_html_compact());
             html.push_str("</li>");
         }
         html.push_str("</ul>");
         Ok(html)
-    }
-
-    /// Convert to HTML
-    fn to_html(&self, ct: CardType) -> String {
-        match ct {
-            CardType::Compact => self.to_html_compact(),
-            CardType::Status => self.to_html_status(),
-            CardType::Edit => self.to_html_edit(),
-        }
     }
 
     /// Convert to compact HTML
@@ -160,7 +151,7 @@ pub trait Card: DeserializeOwned {
         unreachable!()
     }
 
-    /// Convert to status HTML
+    /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
         unreachable!()
     }

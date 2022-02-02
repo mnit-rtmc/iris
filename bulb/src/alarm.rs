@@ -79,7 +79,7 @@ impl Card for Alarm {
         )
     }
 
-    /// Convert to status HTML
+    /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
         let description = HtmlStr(&self.description);
         let controller = HtmlStr(self.controller.as_ref());
