@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{Card, CardType, NAME};
+use crate::card::{Card, NAME};
 use crate::util::HtmlStr;
 use serde::{Deserialize, Serialize};
 
@@ -28,8 +28,22 @@ pub struct CommConfig {
     pub no_response_disconnect_sec: u32,
 }
 
-impl CommConfig {
-    fn to_compact_html(&self) -> String {
+impl Card for CommConfig {
+    const TNAME: &'static str = "Comm Config";
+    const ENAME: &'static str = "📡 Comm Config";
+    const URI: &'static str = "/iris/api/comm_config";
+
+    fn is_match(&self, tx: &str) -> bool {
+        self.description.to_lowercase().contains(tx)
+            || self.name.to_lowercase().contains(tx)
+    }
+
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    /// Convert to compact HTML
+    fn to_html_compact(&self) -> String {
         let description = HtmlStr(&self.description);
         let name = HtmlStr(&self.name);
         format!(
@@ -38,7 +52,8 @@ impl CommConfig {
         )
     }
 
-    fn to_edit_html(&self) -> String {
+    /// Convert to status HTML
+    fn to_html_edit(&self) -> String {
         let description = HtmlStr(&self.description);
         let timeout_ms = self.timeout_ms;
         let poll_period_sec = self.poll_period_sec;
@@ -78,28 +93,5 @@ impl CommConfig {
                      value='{no_response_disconnect_sec}'/>\
             </div>"
         )
-    }
-}
-
-impl Card for CommConfig {
-    const TNAME: &'static str = "Comm Config";
-    const ENAME: &'static str = "📡 Comm Config";
-    const URI: &'static str = "/iris/api/comm_config";
-
-    fn is_match(&self, tx: &str) -> bool {
-        self.description.to_lowercase().contains(tx)
-            || self.name.to_lowercase().contains(tx)
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn to_html(&self, ct: CardType) -> String {
-        match ct {
-            CardType::Compact => self.to_compact_html(),
-            CardType::Edit => self.to_edit_html(),
-            _ => unreachable!(),
-        }
     }
 }

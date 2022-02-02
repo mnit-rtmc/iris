@@ -144,18 +144,25 @@ pub trait Card: DeserializeOwned {
     }
 
     /// Convert to HTML
-    fn to_html(&self, _ct: CardType) -> String {
-        String::new()
+    fn to_html(&self, ct: CardType) -> String {
+        match ct {
+            CardType::Compact => self.to_html_compact(),
+            CardType::Status => self.to_html_status(),
+            CardType::Edit => self.to_html_edit(),
+        }
     }
-}
 
-impl Card for () {
-    const TNAME: &'static str = "";
-    const ENAME: &'static str = "";
-    const URI: &'static str = "";
+    /// Convert to compact HTML
+    fn to_html_compact(&self) -> String;
 
-    fn name(&self) -> &str {
-        ""
+    /// Convert to status HTML
+    fn to_html_status(&self) -> String {
+        unreachable!()
+    }
+
+    /// Convert to status HTML
+    fn to_html_edit(&self) -> String {
+        unreachable!()
     }
 }
 

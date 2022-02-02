@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{disabled_attr, Card, CardType, NAME};
+use crate::card::{disabled_attr, Card, NAME};
 use crate::util::HtmlStr;
 use serde::{Deserialize, Serialize};
 
@@ -29,8 +29,40 @@ pub struct Controller {
     pub version: Option<String>,
 }
 
-impl Controller {
-    fn to_compact_html(&self) -> String {
+impl Card for Controller {
+    const TNAME: &'static str = "Controller";
+    const ENAME: &'static str = "🎛️ Controller";
+    const URI: &'static str = "/iris/api/controller";
+    const HAS_STATUS: bool = true;
+
+    fn is_match(&self, tx: &str) -> bool {
+        self.name.contains(tx)
+            || {
+                let comm_link = self.comm_link.to_lowercase();
+                comm_link.contains(tx)
+                    || format!("{}:{}", comm_link, self.drop_id).contains(tx)
+            }
+            || self.notes.to_lowercase().contains(tx)
+            || self
+                .cabinet_style
+                .as_deref()
+                .unwrap_or("")
+                .to_lowercase()
+                .contains(tx)
+            || self
+                .version
+                .as_deref()
+                .unwrap_or("")
+                .to_lowercase()
+                .contains(tx)
+    }
+
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    /// Convert to compact HTML
+    fn to_html_compact(&self) -> String {
         let comm_link = HtmlStr(&self.comm_link);
         let drop_id = self.drop_id;
         let name = HtmlStr(&self.name);
@@ -42,7 +74,8 @@ impl Controller {
         )
     }
 
-    fn to_status_html(&self) -> String {
+    /// Convert to status HTML
+    fn to_html_status(&self) -> String {
         let comm_link = HtmlStr(&self.comm_link);
         let drop_id = self.drop_id;
         let version = self.version.as_deref().unwrap_or("-");
@@ -63,7 +96,8 @@ impl Controller {
         )
     }
 
-    fn to_edit_html(&self) -> String {
+    /// Convert to status HTML
+    fn to_html_edit(&self) -> String {
         let comm_link = HtmlStr(&self.comm_link);
         let drop_id = self.drop_id;
         let cabinet_style = HtmlStr(self.cabinet_style.as_ref());
@@ -102,46 +136,5 @@ impl Controller {
                      value='{password}'/>\
             </div>"
         )
-    }
-}
-
-impl Card for Controller {
-    const TNAME: &'static str = "Controller";
-    const ENAME: &'static str = "🎛️ Controller";
-    const URI: &'static str = "/iris/api/controller";
-    const HAS_STATUS: bool = true;
-
-    fn is_match(&self, tx: &str) -> bool {
-        self.name.contains(tx)
-            || {
-                let comm_link = self.comm_link.to_lowercase();
-                comm_link.contains(tx)
-                    || format!("{}:{}", comm_link, self.drop_id).contains(tx)
-            }
-            || self.notes.to_lowercase().contains(tx)
-            || self
-                .cabinet_style
-                .as_deref()
-                .unwrap_or("")
-                .to_lowercase()
-                .contains(tx)
-            || self
-                .version
-                .as_deref()
-                .unwrap_or("")
-                .to_lowercase()
-                .contains(tx)
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn to_html(&self, ct: CardType) -> String {
-        match ct {
-            CardType::Compact => self.to_compact_html(),
-            CardType::Status => self.to_status_html(),
-            CardType::Edit => self.to_edit_html(),
-        }
     }
 }

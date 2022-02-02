@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{Card, CardType};
+use crate::card::Card;
 use crate::util::{HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 
@@ -25,13 +25,27 @@ pub struct CabinetStyle {
     pub dip: Option<u32>,
 }
 
-impl CabinetStyle {
-    fn to_compact_html(&self) -> String {
+impl Card for CabinetStyle {
+    const TNAME: &'static str = "Cabinet Style";
+    const ENAME: &'static str = "🗄️ Cabinet Style";
+    const URI: &'static str = "/iris/api/cabinet_style";
+
+    fn is_match(&self, tx: &str) -> bool {
+        self.name.to_lowercase().contains(tx)
+    }
+
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    /// Convert to compact HTML
+    fn to_html_compact(&self) -> String {
         let name = HtmlStr(&self.name);
         format!("<span>{name}</span>")
     }
 
-    fn to_edit_html(&self) -> String {
+    /// Convert to status HTML
+    fn to_html_edit(&self) -> String {
         let police_panel_pin_1 = OptVal(self.police_panel_pin_1);
         let police_panel_pin_2 = OptVal(self.police_panel_pin_2);
         let watchdog_reset_pin_1 = OptVal(self.watchdog_reset_pin_1);
@@ -64,27 +78,5 @@ impl CabinetStyle {
                      size='8' value='{dip}'/>\
             </div>"
         )
-    }
-}
-
-impl Card for CabinetStyle {
-    const TNAME: &'static str = "Cabinet Style";
-    const ENAME: &'static str = "🗄️ Cabinet Style";
-    const URI: &'static str = "/iris/api/cabinet_style";
-
-    fn is_match(&self, tx: &str) -> bool {
-        self.name.to_lowercase().contains(tx)
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn to_html(&self, ct: CardType) -> String {
-        match ct {
-            CardType::Compact => self.to_compact_html(),
-            CardType::Edit => self.to_edit_html(),
-            _ => unreachable!(),
-        }
     }
 }

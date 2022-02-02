@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{disabled_attr, Card, CardType};
+use crate::card::{disabled_attr, Card};
 use crate::util::HtmlStr;
 use serde::{Deserialize, Serialize};
 
@@ -24,14 +24,28 @@ pub struct Modem {
     pub enabled: bool,
 }
 
-impl Modem {
-    fn to_compact_html(&self) -> String {
+impl Card for Modem {
+    const TNAME: &'static str = "Modem";
+    const ENAME: &'static str = "🖀 Modem";
+    const URI: &'static str = "/iris/api/modem";
+
+    fn is_match(&self, tx: &str) -> bool {
+        self.name.to_lowercase().contains(tx)
+    }
+
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    /// Convert to compact HTML
+    fn to_html_compact(&self) -> String {
         let name = HtmlStr(&self.name);
         let disabled = disabled_attr(self.enabled);
         format!("<span{disabled}>{name}</span>")
     }
 
-    fn to_edit_html(&self) -> String {
+    /// Convert to status HTML
+    fn to_html_edit(&self) -> String {
         let uri = HtmlStr(&self.uri);
         let config = HtmlStr(&self.config);
         let timeout_ms = self.timeout_ms;
@@ -57,27 +71,5 @@ impl Modem {
               <input id='edit_enabled' type='checkbox'{enabled}/>\
             </div>"
         )
-    }
-}
-
-impl Card for Modem {
-    const TNAME: &'static str = "Modem";
-    const ENAME: &'static str = "🖀 Modem";
-    const URI: &'static str = "/iris/api/modem";
-
-    fn is_match(&self, tx: &str) -> bool {
-        self.name.to_lowercase().contains(tx)
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn to_html(&self, ct: CardType) -> String {
-        match ct {
-            CardType::Compact => self.to_compact_html(),
-            CardType::Edit => self.to_edit_html(),
-            _ => unreachable!(),
-        }
     }
 }

@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{Card, CardType, NAME};
+use crate::card::{Card, NAME};
 use crate::util::HtmlStr;
 use serde::{Deserialize, Serialize};
 
@@ -25,8 +25,27 @@ pub struct Alarm {
     pub trigger_time: Option<String>,
 }
 
-impl Alarm {
-    fn to_compact_html(&self) -> String {
+impl Card for Alarm {
+    const TNAME: &'static str = "Alarm";
+    const ENAME: &'static str = "⚠ Alarm";
+    const HAS_STATUS: bool = true;
+    const URI: &'static str = "/iris/api/alarm";
+
+    fn is_match(&self, tx: &str) -> bool {
+        self.description.to_lowercase().contains(tx)
+            || self.name.to_lowercase().contains(tx)
+            || {
+                let state = if self.state { "triggered" } else { "clear" };
+                state.contains(tx)
+            }
+    }
+
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    /// Convert to compact HTML
+    fn to_html_compact(&self) -> String {
         let description = HtmlStr(&self.description);
         let name = HtmlStr(&self.name);
         format!(
@@ -35,7 +54,8 @@ impl Alarm {
         )
     }
 
-    fn to_status_html(&self) -> String {
+    /// Convert to status HTML
+    fn to_html_status(&self) -> String {
         let description = HtmlStr(&self.description);
         let state = if self.state {
             "triggered 😧"
@@ -59,7 +79,8 @@ impl Alarm {
         )
     }
 
-    fn to_edit_html(&self) -> String {
+    /// Convert to status HTML
+    fn to_html_edit(&self) -> String {
         let description = HtmlStr(&self.description);
         let controller = HtmlStr(self.controller.as_ref());
         let pin = self.pin;
@@ -80,33 +101,5 @@ impl Alarm {
                       size='8' value='{pin}'/>\
              </div>"
         )
-    }
-}
-
-impl Card for Alarm {
-    const TNAME: &'static str = "Alarm";
-    const ENAME: &'static str = "⚠ Alarm";
-    const HAS_STATUS: bool = true;
-    const URI: &'static str = "/iris/api/alarm";
-
-    fn is_match(&self, tx: &str) -> bool {
-        self.description.to_lowercase().contains(tx)
-            || self.name.to_lowercase().contains(tx)
-            || {
-                let state = if self.state { "triggered" } else { "clear" };
-                state.contains(tx)
-            }
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn to_html(&self, ct: CardType) -> String {
-        match ct {
-            CardType::Compact => self.to_compact_html(),
-            CardType::Status => self.to_status_html(),
-            CardType::Edit => self.to_edit_html(),
-        }
     }
 }

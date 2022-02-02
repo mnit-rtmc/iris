@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{disabled_attr, Card, CardType, NAME};
+use crate::card::{disabled_attr, Card, NAME};
 use crate::util::HtmlStr;
 use serde::{Deserialize, Serialize};
 
@@ -24,8 +24,25 @@ pub struct CommLink {
     pub poll_enabled: bool,
 }
 
-impl CommLink {
-    fn to_compact_html(&self) -> String {
+impl Card for CommLink {
+    const TNAME: &'static str = "Comm Link";
+    const ENAME: &'static str = "🔗 Comm Link";
+    const URI: &'static str = "/iris/api/comm_link";
+
+    fn is_match(&self, tx: &str) -> bool {
+        self.description.to_lowercase().contains(tx)
+            || self.name.to_lowercase().contains(tx)
+            || self.comm_config.to_lowercase().contains(tx)
+            || self.uri.to_lowercase().contains(tx)
+        // TODO: check comm_config protocol
+    }
+
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    /// Convert to compact HTML
+    fn to_html_compact(&self) -> String {
         let description = HtmlStr(&self.description);
         let name = HtmlStr(&self.name);
         let disabled = disabled_attr(self.poll_enabled);
@@ -35,7 +52,8 @@ impl CommLink {
         )
     }
 
-    fn to_edit_html(&self) -> String {
+    /// Convert to status HTML
+    fn to_html_edit(&self) -> String {
         let description = HtmlStr(&self.description);
         let uri = HtmlStr(&self.uri);
         let enabled = if self.poll_enabled { " checked" } else { "" };
@@ -61,31 +79,5 @@ impl CommLink {
               <input id='form_enabled' type='checkbox'{enabled}/>\
             </div>"
         )
-    }
-}
-
-impl Card for CommLink {
-    const TNAME: &'static str = "Comm Link";
-    const ENAME: &'static str = "🔗 Comm Link";
-    const URI: &'static str = "/iris/api/comm_link";
-
-    fn is_match(&self, tx: &str) -> bool {
-        self.description.to_lowercase().contains(tx)
-            || self.name.to_lowercase().contains(tx)
-            || self.comm_config.to_lowercase().contains(tx)
-            || self.uri.to_lowercase().contains(tx)
-        // TODO: check comm_config protocol
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn to_html(&self, ct: CardType) -> String {
-        match ct {
-            CardType::Compact => self.to_compact_html(),
-            CardType::Edit => self.to_edit_html(),
-            _ => unreachable!(),
-        }
     }
 }
