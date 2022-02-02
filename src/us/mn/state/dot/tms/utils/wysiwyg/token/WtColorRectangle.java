@@ -39,6 +39,7 @@ public class WtColorRectangle extends Wt_Rectangle implements Wt_ColorToken {
 		this.paramH = h;
 		this.z = z;
 		this.tvColor = toTagval(z);
+		setCoordinates(x, y, w, h);
 		updateString();
 	}
 
@@ -52,6 +53,7 @@ public class WtColorRectangle extends Wt_Rectangle implements Wt_ColorToken {
 		this.g = g;
 		this.b = b;
 		this.tvColor = toTagval(r,g,b);
+		setCoordinates(x, y, w, h);
 		updateString();
 	}
 
@@ -67,7 +69,13 @@ public class WtColorRectangle extends Wt_Rectangle implements Wt_ColorToken {
 		this.b = b;
 		tvColor = toTagval(r,g,b);
 	}
-	
+
+	/** Set the color rectangle's color */
+	public void setColor(int z) {
+		this.z = z;
+		tvColor = toTagval(z);
+	}
+
 	@Override
 	public boolean isBlank() {
 		return false;

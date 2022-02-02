@@ -23,6 +23,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -50,6 +51,10 @@ abstract public class WToolbar extends JPanel {
 	
 	abstract public void setColor(Color c, String mode);
 	
+	abstract public void setColor(DmsColor c, String mode);
+
+	abstract public void setColor(int c, String mode);
+
 	protected void addMoveRegionForwardButton() {
 		moveRegionForward = new JButton(controller.moveSelectedRegionForward);
 		ImageIcon moveRectFwIcon = Icons.getIconByPropName(

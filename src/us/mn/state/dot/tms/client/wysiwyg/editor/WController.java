@@ -21,6 +21,7 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IllegalFormatException;
@@ -77,6 +78,7 @@ import us.mn.state.dot.tms.utils.wysiwyg.token.WtPageTime;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextChar;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextRectangle;
 import us.mn.state.dot.tms.utils.wysiwyg.token.Wt_Rectangle;
+import us.mn.state.dot.tms.utils.ColorClassic;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Multi.JustificationLine;
 import us.mn.state.dot.tms.utils.Multi.JustificationPage;
@@ -238,6 +240,7 @@ public class WController {
 	private DmsColor fgColor;
 	private DmsColor bgColor;
 	private DmsColor colorRectColor;
+	private Integer colorRectMonoColor;
 	
 	/** Page list */
 	private WPageList pageList;
@@ -402,6 +405,11 @@ public class WController {
 			// use the default foreground color for color rectangles (so we
 			// always have one)
 			colorRectColor = multiConfig.getDefaultFG();
+			
+			// default monochrome to 1 or 255
+			colorRectMonoColor = 1;
+			if (multiConfig.colorScheme == ColorScheme.MONOCHROME_8_BIT)
+				colorRectMonoColor = 255;
 		} else
 			// if our MultiConfig is null, we can't use WYSIWYG mode
 			forceMULTI = true;
@@ -787,18 +795,40 @@ public class WController {
 			// because of coordinate conversion idiosyncrasies
 			if (w > 1 && h > 1) {
 				// create a new rectangle token
-				Wt_Rectangle rt;
+				Wt_Rectangle rt = null;
 				if (inTextRectMode())
 					rt = new WtTextRectangle(x, y, w, h);
 				else {
-					rt = new WtColorRectangle(x, y, w, h, colorRectColor.red,
-							colorRectColor.green, colorRectColor.blue);
+					switch (multiConfig.getColorScheme()) {
+						case COLOR_24_BIT:
+							rt = new WtColorRectangle(x, y, w, h, colorRectColor.red,
+									colorRectColor.green, colorRectColor.blue);
+							break;
+						case COLOR_CLASSIC:
+							// get classic color number
+							ColorClassic cc = ColorClassic.fromColor(colorRectColor);
+							rt = new WtColorRectangle(x, y, w, h, cc.ordinal());
+							break;
+						case MONOCHROME_8_BIT:
+						case MONOCHROME_1_BIT:
+							rt = new WtColorRectangle(x, y, w, h, colorRectMonoColor);
+							break;
+					default:
+						System.out.println("Unhandled color scheme " +
+									multiConfig.getColorScheme());
+						break;
+					}
+					
+					
 				}
 				
 				// make an undo point then add it to the page - it doesn't
 				// really matter where (at least for now)
 				saveState();
-				selectedPage.addToken(rt);
+				if (rt != null)
+					selectedPage.addToken(rt);
+				else
+					System.out.println("Bad rectangle!");
 				
 				// update rectangles and get the WgRectangle object for the
 				// rectangle we just created
@@ -2688,6 +2718,18 @@ public class WController {
 		moveCaretRight.actionPerformed(null);
 	}
 	
+	/** Get the DmsColor object given the monochrome color tag value c. */
+	public DmsColor getMonochromeFromTag(Integer c) {
+		DmsColor dfg = multiConfig.getDefaultFG();
+		// translate RGB to HSB, then scale the brightness to the value we
+		// received
+		float[] hsb = Color.RGBtoHSB(dfg.red, dfg.green,
+				dfg.blue, null);
+		hsb[2] = (multiConfig.colorScheme == ColorScheme.MONOCHROME_8_BIT)
+					? c.floatValue()/255 : c;
+		return new DmsColor(Color.HSBtoRGB(hsb[0], hsb[1], hsb[2]));
+	}
+	
 	/** Set the color value of the currently selected color rectangle. Also
 	 *  sets the active color rectangle color so new ones created after this
 	 *  use the same color
@@ -2702,6 +2744,28 @@ public class WController {
 			((WgColorRect) selectedRectangle).setColor(colorRectColor);
 			update();
 		}
+	}
+	
+	/** Set the color value of the currently selected color rectangle. Also
+	 *  sets the active color rectangle color so new ones created after this
+	 *  use the same color. For monochrome color schemes.
+	 */
+	public void setColorRectangleColor(Integer c) {
+		colorRectMonoColor = c;
+		colorRectColor = getMonochromeFromTag(c);
+		
+		// check if we have an active color rectangle
+		if (selectedRectangle instanceof WgColorRect) {
+			// if we do, save state, set the color, and update
+			saveState();
+			((WgColorRect) selectedRectangle).setColor(c);
+			update();
+		}
+	}
+	
+	/** Return the current color for drawing color rectangles. */
+	public DmsColor getColorRectangleColor() {
+		return colorRectColor;
 	}
 	
 	/** Get the active page justification value given the current caret
@@ -4023,6 +4087,10 @@ public class WController {
 		
 	public DmsColor getBackgroundColor() {
 		return bgColor;
+	}
+	
+	public Integer getMonochromeColor() {
+		return colorRectMonoColor;
 	}
 	
 	public Session getSession() {

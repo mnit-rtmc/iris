@@ -71,6 +71,12 @@ public class WMsgColorChooser extends AbstractForm {
 	/** Selected color */
 	private Color color;
 	
+	/** DMS (classic) color */
+	private DmsColor classicColor;
+	
+	/** Monochrome color (for 8-bit monochrome) */
+	private Integer monoColor = 255;
+	
 	/** "Mode" of color chooser so we know whether we're editing the fore- or
 	 *  background color */
 	public final static String FOREGROUND="foreground";
@@ -111,6 +117,31 @@ public class WMsgColorChooser extends AbstractForm {
 		initColorChooser();
 		
 		// now the buttons
+		addButtons();
+	}
+	
+	public WMsgColorChooser(WController c, WToolbar tb, String title,
+			Integer mnc, String md) {
+		super(title, true);
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		controller = c;
+		desktop = controller.getDesktop();
+		toolbar = tb;
+		MultiConfig mc = controller.getMultiConfig();
+		colorScheme = (mc != null) ? mc.getColorScheme()
+				: ColorScheme.UNKNOWN;
+		monoColor = (mnc != null) ? mnc : 255;
+		mode = md;
+		
+		// create and add the color chooser panes
+		initColorChooser();
+		
+		// now the buttons
+		addButtons();
+	}
+	
+	/** Add buttons to the color chooser. */
+	private void addButtons() {
 		ok_btn = new JButton(chooseColor);
 		cancel_btn = new JButton(cancel);
 		btn_pnl = new JPanel();
@@ -133,7 +164,7 @@ public class WMsgColorChooser extends AbstractForm {
 			add(classicColorChooser);
 		} else if (colorScheme == ColorScheme.MONOCHROME_8_BIT) {
 			// for 8-bit monochrome, use a slider from 0 to 255
-			monochrome8BitSlider = new JSlider(0, 255, 127);
+			monochrome8BitSlider = new JSlider(0, 255, monoColor);
 			add(monochrome8BitSlider);
 		} else if (colorScheme == ColorScheme.MONOCHROME_1_BIT) {
 			// for 1-bit monochrome, use a list with 2 colors in it
@@ -255,8 +286,8 @@ public class WMsgColorChooser extends AbstractForm {
 			DmsColor unlit = mc.getDefaultBG();
 			
 			mono1ColorMap = new LinkedHashMap<String, DmsColor>();
-			mono1ColorMap.put("Unlit", lit);
-			mono1ColorMap.put("Lit", unlit);
+			mono1ColorMap.put("Lit", lit);
+			mono1ColorMap.put("Unlit", unlit);
 			
 			// create the list model and fill it with colors
 			mono1ColorModel = new DefaultListModel<String>();
@@ -285,7 +316,11 @@ public class WMsgColorChooser extends AbstractForm {
 				JList<? extends String> list, String cName, int index,
 				boolean isSelected, boolean hasFocus) {
 			// get the DmsColor object from the hash map
-			DmsColor c = classicColorMap.get(cName);
+			DmsColor c;
+			if (colorScheme == ColorScheme.MONOCHROME_1_BIT)
+				c = mono1ColorMap.get(cName);
+			else
+				c = classicColorMap.get(cName);
 			
 			// use the color icon and the name of the color in the list
 			setIcon(createColorIcon(c.color, 16,16));
@@ -310,20 +345,35 @@ public class WMsgColorChooser extends AbstractForm {
 				throws Exception
 		{
 			color = null;
+			classicColor = null;
+			monoColor = null;
 			if (colorScheme == ColorScheme.COLOR_24_BIT) {
 				color = fullColorChooser.getColor();
 			} else if (colorScheme == ColorScheme.COLOR_CLASSIC) {
 				int i = classicColorChooser.getSelectedIndex();
 				if (i != -1) {
 					String cName = classicColorModel.get(i);
-					color = classicColorMap.get(cName).color;
+					classicColor = classicColorMap.get(cName);
 				}
 			} else if (colorScheme == ColorScheme.MONOCHROME_8_BIT) {
-				int mValue = monochrome8BitSlider.getValue();
+				monoColor = monochrome8BitSlider.getValue();
+			} else if (colorScheme == ColorScheme.MONOCHROME_1_BIT) {
+				int i = mono1ColorChooser.getSelectedIndex();
+				if (i != -1) {
+					String cName = mono1ColorModel.get(i);
+					monoColor = mono1ColorMap.get(cName).isLit() ? 1 : 0;
+				}
+			} else {
+				System.out.println("Didn't get a color! Using default foreground!");
+				color = controller.getMultiConfig().getDefaultFG().color;
 			}
 			
 			if (color != null)
 				toolbar.setColor(color, mode);
+			else if (classicColor != null)
+				toolbar.setColor(classicColor, mode);
+			else if (monoColor != null)
+				toolbar.setColor(monoColor, mode);
 			close(desktop);
 		}
 	};

@@ -90,8 +90,11 @@ public class WGraphicMenu extends JComboBox<Graphic> {
 			String v = (g != null) ? Integer.toString(g.getGNumber()) : "";
 			cell.getListCellRendererComponent(list, v, index, isSelected,
 				hasFocus);
-			Image im = createImage(g).getScaledInstance(
+			Image im = null;
+			if (g != null) {
+				im = createImage(g).getScaledInstance(
 					-1, 25, BufferedImage.SCALE_DEFAULT);
+			}
 			cell.setIcon((im != null) ? new ImageIcon(im) : null);
 			return cell;
 		}

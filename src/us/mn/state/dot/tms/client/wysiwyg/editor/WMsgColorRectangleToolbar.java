@@ -44,6 +44,9 @@ public class WMsgColorRectangleToolbar extends WToolbar {
 	/** Current color */
 	private Color color;
 	
+	/** Current color */
+	private Integer monoColor;
+	
 	public WMsgColorRectangleToolbar(WController c) {
 		super(c);
 
@@ -83,8 +86,15 @@ public class WMsgColorRectangleToolbar extends WToolbar {
 				throws Exception
 		{
 			String title = I18N.get("wysiwyg.epanel.color_rect_picker_title");
-			WMsgColorChooser ccForm = new WMsgColorChooser(controller, tb,
-					title, color, WMsgColorChooser.COLOR_RECT);
+			WMsgColorChooser ccForm;
+			if (controller.getMultiConfig().getColorScheme() == ColorScheme.MONOCHROME_8_BIT) {
+				ccForm = new WMsgColorChooser(controller, tb, title,
+						controller.getMonochromeColor(),
+						WMsgColorChooser.COLOR_RECT);
+			} else {
+				ccForm = new WMsgColorChooser(controller, tb, title, color,
+						WMsgColorChooser.COLOR_RECT);
+			}
 			SmartDesktop desktop = controller.getDesktop();
 			desktop.show(ccForm);
 		}
@@ -97,5 +107,27 @@ public class WMsgColorRectangleToolbar extends WToolbar {
 		color = c;
 		controller.setColorRectangleColor(new DmsColor(color));
 		colorBtn.setIcon(WMsgColorChooser.createColorIcon(color, 16, 16));
+	}
+	
+	/** Set the color rectangle color on the controller and change the button
+	 *  appearance.
+	 */
+	public void setColor(DmsColor c, String mode) {
+		color = c.color;
+		controller.setColorRectangleColor(c);
+		colorBtn.setIcon(WMsgColorChooser.createColorIcon(color, 16, 16));
+	}
+	
+	/** Set the color rectangle color on the controller and change the button
+	 *  appearance. For monochrome color schemes.
+	 */
+	public void setColor(int c, String mode) {
+		monoColor = c;
+		controller.setColorRectangleColor(c);
+		
+		// get the color from the controller so we can set the icon (it will
+		// translate the tag value we gave it to a color)
+		colorBtn.setIcon(WMsgColorChooser.createColorIcon(
+				controller.getColorRectangleColor().color, 16, 16));
 	}
 }

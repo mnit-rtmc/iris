@@ -42,4 +42,11 @@ public class WgColorRect extends WgRectangle {
 		getColorRectToken().setColor(c.red, c.green, c.blue);
 		rt.updateString();
 	}
+	
+	/** Set the color on the color rectangle tag. For 8-bit monochrome color
+	 *  scheme. */
+	public void setColor(int c) {
+		getColorRectToken().setColor(c);
+		rt.updateString();
+	}
 }
