@@ -1,6 +1,17 @@
+// Copyright (C) 2022  Minnesota Department of Transportation
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use std::cell::RefCell;
-use std::fmt;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
@@ -19,6 +30,7 @@ mod commconfig;
 mod commlink;
 mod controller;
 mod modem;
+mod util;
 
 use alarm::Alarm;
 use cabinetstyle::CabinetStyle;
@@ -27,61 +39,6 @@ use commconfig::CommConfig;
 use commlink::CommLink;
 use controller::Controller;
 use modem::Modem;
-
-#[derive(Debug)]
-struct OptVal<T>(Option<T>);
-
-impl<T> fmt::Display for OptVal<T>
-where
-    T: fmt::Display,
-{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match &self.0 {
-            Some(v) => write!(f, "{}", v),
-            None => Ok(()),
-        }
-    }
-}
-
-#[derive(Debug)]
-pub struct HtmlStr<S>(S);
-
-impl<S> HtmlStr<S> {
-    fn fmt_encode(s: &str, f: &mut fmt::Formatter) -> fmt::Result {
-        for c in s.chars() {
-            match c {
-                '&' => write!(f, "&amp;")?,
-                '<' => write!(f, "&lt;")?,
-                '>' => write!(f, "&gt;")?,
-                '"' => write!(f, "&quot;")?,
-                '\'' => write!(f, "&#x27;")?,
-                _ => write!(f, "{}", c)?,
-            }
-        }
-        Ok(())
-    }
-}
-
-impl fmt::Display for HtmlStr<&str> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        Self::fmt_encode(self.0, f)
-    }
-}
-
-impl fmt::Display for HtmlStr<&String> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        Self::fmt_encode(self.0, f)
-    }
-}
-
-impl fmt::Display for HtmlStr<Option<&String>> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match &self.0 {
-            Some(val) => Self::fmt_encode(val, f),
-            None => Ok(()),
-        }
-    }
-}
 
 pub trait ElemCast {
     /// Get an element by ID and cast it
@@ -415,22 +372,4 @@ fn deselect_card(doc: &Document) -> Result<()> {
         cs.replace_card(doc, CardType::Compact);
     }
     Ok(())
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn html() {
-        assert_eq!(HtmlStr("<").to_string(), "&lt;");
-        assert_eq!(HtmlStr(">").to_string(), "&gt;");
-        assert_eq!(HtmlStr("&").to_string(), "&amp;");
-        assert_eq!(HtmlStr("\"").to_string(), "&quot;");
-        assert_eq!(HtmlStr("'").to_string(), "&#x27;");
-        assert_eq!(
-            HtmlStr("<script>XSS stuff</script>").to_string(),
-            "&lt;script&gt;XSS stuff&lt;/script&gt;"
-        );
-    }
 }

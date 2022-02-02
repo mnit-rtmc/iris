@@ -10,7 +10,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::{HtmlStr, Result};
+use crate::util::HtmlStr;
+use crate::Result;
 use serde::de::DeserializeOwned;
 use wasm_bindgen::JsValue;
 

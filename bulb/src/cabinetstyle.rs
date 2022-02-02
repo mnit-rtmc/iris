@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{Card, CardType};
-use crate::{HtmlStr, OptVal};
+use crate::util::{HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 
 /// Cabinet Style

@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{Card, CardType, NAME};
-use crate::HtmlStr;
+use crate::util::HtmlStr;
 use serde::{Deserialize, Serialize};
 
 /// Alarm
