@@ -160,27 +160,27 @@ impl CardState {
     /// Replace a card element with another card type
     fn replace_card(&self, doc: &Document, ct: CardType) {
         let id = format!("{}_{}", self.tname, &self.name);
-        if let Ok(elem) = doc.elem::<HtmlElement>(&id) {
-            match build_card(&self.tname, &self.json, ct) {
-                Ok(html) => {
-                    elem.set_inner_html(&html);
-                    if let CardType::Compact = ct {
-                        elem.set_class_name("card");
-                    } else {
-                        elem.set_class_name("form");
-                        let mut opt = ScrollIntoViewOptions::new();
-                        opt.behavior(ScrollBehavior::Smooth)
-                            .block(ScrollLogicalPosition::Nearest);
-                        elem.scroll_into_view_with_scroll_into_view_options(
-                            &opt,
-                        );
-                    }
-                }
-                Err(e) => {
-                    console::log_1(&(&e).into());
-                }
-            }
+        match doc.elem::<HtmlElement>(&id) {
+            Ok(elem) => match build_card(&self.tname, &self.json, ct) {
+                Ok(html) => replace_card_html(&elem, ct, &html),
+                Err(e) => console::log_1(&(&e).into()),
+            },
+            Err(e) => console::log_1(&(&e).into()),
         }
+    }
+}
+
+/// Replace a card with provieded HTML
+fn replace_card_html(elem: &HtmlElement, ct: CardType, html: &str) {
+    elem.set_inner_html(&html);
+    if let CardType::Compact = ct {
+        elem.set_class_name("card");
+    } else {
+        elem.set_class_name("form");
+        let mut opt = ScrollIntoViewOptions::new();
+        opt.behavior(ScrollBehavior::Smooth)
+            .block(ScrollLogicalPosition::Nearest);
+        elem.scroll_into_view_with_scroll_into_view_options(&opt);
     }
 }
 
@@ -337,11 +337,11 @@ fn add_click_event_listener(elem: &Element) -> Result<()> {
 fn handle_click_ev(elem: &Element) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    let tp = selected_type(&doc).unwrap_throw();
     if elem.is_instance_of::<HtmlButtonElement>() {
         handle_button_click_ev(&doc, elem);
     } else if let Some(card) = elem.closest(".card").unwrap_throw() {
         if let Some(name) = card.get_attribute("name") {
+            let tp = selected_type(&doc).unwrap_throw();
             deselect_card(&doc).unwrap_throw();
             spawn_local(click_card(tp, name));
         }
