@@ -54,6 +54,7 @@ const BOOLS: &[(&str, &str)] = &[
     ("alarm", "state"),
     ("comm_config", "modem"),
     ("comm_link", "poll_enabled"),
+    ("comm_link", "connected"),
     ("modem", "enabled"),
 ];
 
@@ -153,7 +154,15 @@ async fn main() -> tide::Result<()> {
     let mut route = app.at("/iris/api");
     route.at("/login").get(get_login);
     route.at("/login").post(post_login);
-    route.at("/comm_protocol").get(|req| list_objects("comm_protocol", req));
+    route
+        .at("/comm_link_stat")
+        .get(|req| list_objects("comm_link_stat", req));
+    route
+        .at("/comm_protocol")
+        .get(|req| list_objects("comm_protocol", req));
+    route
+        .at("/controller_stat")
+        .get(|req| list_objects("controller_stat", req));
     add_routes!(route, "alarm");
     add_routes!(route, "cabinet_style");
     add_routes!(route, "comm_config");

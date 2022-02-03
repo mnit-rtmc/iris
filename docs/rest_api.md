@@ -47,6 +47,24 @@ A `Content-Type: application/json` header is included where appropriate.
 - `PATCH iris/api/{type}/{name}`: Update attributes of one object, with JSON
 - `DELETE iris/api/{type}/{name}`: Delete one object
 
+## Status Data
+
+Some types have additional resources for status data.  These are:
+
+- `GET iris/api/comm_link_stat`
+- `GET iris/api/controller_stat`
+
+These contain status data for every object of the resource type.  Note that the
+status data is also included in a `GET` request for an individual object.
+
+## Lookup Tables
+
+There are some "static" lookup tables, which change infrequently, and only when
+IRIS is updated.  These are:
+
+- `GET iris/api/comm_protocol`
+- `GET iris/api/condition`
+
 ## ETags and Caching
 
 Consider using Etags to avoid mid-air collisions
