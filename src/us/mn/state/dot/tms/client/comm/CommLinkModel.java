@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2020  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -132,12 +132,12 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 					cl.setPollEnabled((Boolean) value);
 			}
 		});
-		cols.add(new ProxyColumn<CommLink>("device.status", 44) {
+		cols.add(new ProxyColumn<CommLink>("comm.link.connected", 50) {
 			public Object getValueAt(CommLink cl) {
-				return cl.getStatus();
+				return cl.getConnected();
 			}
 			protected TableCellRenderer createCellRenderer() {
-				return new StatusCellRenderer();
+				return new ConnectedCellRenderer();
 			}
 		});
 		cols.add(new ProxyColumn<CommLink>("comm.config", 180) {

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -55,7 +55,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CommLinkImpl.class);
 		store.query("SELECT name, description, uri, poll_enabled, " +
-			"comm_config FROM iris." + SONAR_TYPE  + ";",
+			"comm_config, connected FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -129,19 +129,21 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		     row.getString(2),  // description
 		     row.getString(3),  // uri
 		     row.getBoolean(4), // poll_enabled
-		     row.getString(5)   // comm_config
+		     row.getString(5),  // comm_config
+		     row.getBoolean(6)  // connected
 		);
 	}
 
 	/** Create a comm link */
 	private CommLinkImpl(String n, String d, String u, boolean pe,
-		String cc)
+		String cc, boolean cn)
 	{
 		super(n);
 		description = d;
 		uri = u;
 		poll_enabled = pe;
 		comm_config = lookupCommConfig(cc);
+		connected = cn;
 		recreatePoller();
 		initTransients();
 	}
@@ -229,7 +231,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Check if dial-up is required to communicate */
 	public boolean isDialUpRequired() {
-		return isDialUpModem() && !isConnected();
+		return isDialUpModem() && !getConnected();
 	}
 
 	/** Remote URI for link */
@@ -318,7 +320,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Get the device poller */
 	public synchronized DevicePoller getPoller() {
 		if (poll_enabled) {
-			updateStatus();
+			updateConnected();
 			return poller;
 		}
 		return null;
@@ -329,7 +331,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		destroyPoller();
 		if (poll_enabled)
 			createPoller();
-		updateStatus();
+		updateConnected();
 	}
 
 	/** Destroy the device poller */
@@ -357,32 +359,40 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			c.pollDevices(period, is_long);
 	}
 
-	/** Communication link status */
-	private transient String status = Constants.UNKNOWN;
+	/** Connected status */
+	private boolean connected = false;
 
-	/** Update the comm link status */
-	private void updateStatus() {
+	/** Update the connected status */
+	private void updateConnected() {
 		DevicePoller dp = poller;
-		setStatusNotify((dp != null)
-			? dp.getStatus()
-			: Constants.UNKNOWN);
+		setConnectedNotify((dp != null) && dp.isConnected());
 	}
 
-	/** Set the communication status */
-	private void setStatusNotify(String s) {
-		assert s != null;
-		if (!s.equals(status)) {
-			status = s;
-			notifyAttribute("status");
-			if (!s.isEmpty())
+	/** Set the connected status */
+	private void setConnectedNotify(boolean c) {
+		if (c != connected) {
+			storeConnected(c);
+			connected = c;
+			notifyAttribute("connected");
+			if (!c)
 				failControllers();
 		}
 	}
 
-	/** Get the communication status */
+	/** Set the connected status in DB */
+	private void storeConnected(boolean c) {
+		try {
+			store.update(this, "connected", c);
+		}
+		catch (TMSException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Get the connected status */
 	@Override
-	public String getStatus() {
-		return status;
+	public boolean getConnected() {
+		return connected;
 	}
 
 	/** Field device controllers */
@@ -402,12 +412,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	public synchronized void pullController(ControllerImpl c) {
 		Integer d = Integer.valueOf(c.getDrop());
 		controllers.remove(d);
-	}
-
-	/** Check if the comm link is currently connected */
-	public boolean isConnected() {
-		DevicePoller dp = poller;
-		return (dp != null) && dp.isConnected();
 	}
 
 	/** Write the comm link as an XML element */

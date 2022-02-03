@@ -5,6 +5,8 @@
    * `controller_view`: `cabinet` -> `cabinet_style`
    * `controller_loc_view`: `cabinet` -> `cabinet_style`
    * `controller_report`: `type` -> `cabinet_style`
+ - Added `connected` to `comm_link` table
+ - Removed CommLink status property (use `connected` instead)
 
 5.27.0 (6 Jan 2022)
  - Added message duration to sign event table

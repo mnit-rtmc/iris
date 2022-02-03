@@ -28,8 +28,24 @@ CREATE TRIGGER comm_config_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.comm_config
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
+CREATE FUNCTION iris.comm_link_notify() RETURNS TRIGGER AS
+    $comm_link_notify$
+BEGIN
+    IF (NEW.connected IS DISTINCT FROM OLD.connected) THEN
+        PERFORM pg_notify('comm_link', 'connected');
+    ELSE
+        NOTIFY comm_link;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$comm_link_notify$ LANGUAGE plpgsql;
+
 CREATE TRIGGER comm_link_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.comm_link
+    AFTER UPDATE ON iris.comm_link
+    FOR EACH ROW EXECUTE PROCEDURE iris.comm_link_notify();
+
+CREATE TRIGGER comm_link_table_notify_trig
+    AFTER INSERT OR DELETE ON iris.comm_link
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE TRIGGER modem_notify_trig
@@ -238,5 +254,20 @@ CREATE VIEW weather_sensor_view AS
     LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
     LEFT JOIN controller_view ctr ON w.controller = ctr.name;
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
+
+-- Add `connected` column to `comm_link`
+ALTER TABLE iris.comm_link ADD COLUMN connected BOOLEAN;
+UPDATE iris.comm_link SET connected = false;
+ALTER TABLE iris.comm_link ALTER COLUMN connected SET NOT NULL;
+
+DROP VIEW comm_link_view;
+CREATE VIEW comm_link_view AS
+    SELECT cl.name, cl.description, uri, poll_enabled,
+           cp.description AS protocol, cc.description AS comm_config,
+           modem, timeout_ms, poll_period_sec, connected
+    FROM iris.comm_link cl
+    JOIN iris.comm_config cc ON cl.comm_config = cc.name
+    JOIN iris.comm_protocol cp ON cc.protocol = cp.id;
+GRANT SELECT ON comm_link_view TO PUBLIC;
 
 COMMIT;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,11 +22,11 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
- * Renderer for comm link status in a table cell.
+ * Renderer for connected status in a table cell.
  *
  * @author Douglas Lau
  */
-public class StatusCellRenderer extends DefaultTableCellRenderer {
+public class ConnectedCellRenderer extends DefaultTableCellRenderer {
 
 	/** Icon for OK status */
 	static private final Icon OK = new CommLinkIcon(Color.BLUE);
@@ -40,11 +40,11 @@ public class StatusCellRenderer extends DefaultTableCellRenderer {
 		Object value, boolean isSelected, boolean hasFocus,
 		int row, int column)
 	{
-		JLabel label = (JLabel)super.getTableCellRendererComponent(
+		JLabel label = (JLabel) super.getTableCellRendererComponent(
 			table, "", isSelected, hasFocus, row, column);
 		if (value == null)
 			label.setIcon(null);
-		else if ("".equals(value))
+		else if (Boolean.TRUE.equals(value))
 			label.setIcon(OK);
 		else
 			label.setIcon(FAIL);

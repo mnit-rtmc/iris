@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2017-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -103,17 +103,12 @@ public class CommThread<T extends ControllerProperty> {
 	/** Done state */
 	private boolean done = false;
 
-	/** Thread status */
-	private String status = "";
+	/** Connected state */
+	private boolean connected = false;
 
-	/** Set the thread status */
-	protected void setStatus(String s) {
-		status = s;
-	}
-
-	/** Get the thread status */
-	public String getStatus() {
-		return status;
+	/** Get the connected state */
+	public boolean isConnected() {
+		return connected && !done;
 	}
 
 	/** Create a new comm thread.
@@ -148,11 +143,6 @@ public class CommThread<T extends ControllerProperty> {
 		thread.start();
 	}
 
-	/** Check if the thread is done */
-	public boolean isDone() {
-		return done;
-	}
-
 	/** Destroy the comm thread */
 	public void destroy() {
 		done = true;
@@ -171,7 +161,7 @@ public class CommThread<T extends ControllerProperty> {
 			performOperations();
 		}
 		catch (MessengerException e) {
-			setStatus(getMessage(e));
+			getMessage(e);
 		}
 		catch (RuntimeException e) {
 			e.printStackTrace();
@@ -193,7 +183,7 @@ public class CommThread<T extends ControllerProperty> {
 				pollQueue(m);
 			}
 			catch (DisconnectException e) {
-				setStatus(getMessage(e));
+				getMessage(e);
 				break;
 			}
 			catch (ReconnectException e) {
@@ -201,23 +191,20 @@ public class CommThread<T extends ControllerProperty> {
 			}
 			catch (NoModemException e) {
 				// Keep looping until modem is available
-				setStatus(getMessage(e));
+				getMessage(e);
 			}
 			catch (ConnectException e) {
 				String msg = getMessage(e);
-				setStatus(msg);
 				if (poller.handleError(CONNECTION_REFUSED, msg))
 					break;
 			}
 			catch (NoResponseException e) {
 				String msg = getMessage(e);
-				setStatus(msg);
 				if (poller.noMoreOps())
 					break;
 			}
 			catch (IOException e) {
 				String msg = getMessage(e);
-				setStatus(msg);
 				if (poller.handleError(COMM_ERROR, msg))
 					break;
 			}
@@ -245,11 +232,10 @@ public class CommThread<T extends ControllerProperty> {
 	private void pollQueue(Messenger m) throws DisconnectException,
 		IOException
 	{
-		setStatus("");
+		connected = true;
 		while (shouldContinue()) {
 			OpController<T> op = queue.next(idle_disconnect_ms);
 			doPoll(m, op);
-			setStatus("");
 		}
 	}
 

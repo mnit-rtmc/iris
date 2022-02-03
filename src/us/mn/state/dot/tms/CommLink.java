@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -52,6 +52,6 @@ public interface CommLink extends SonarObject {
 	/** Get the comm configuration */
 	CommConfig getCommConfig();
 
-	/** Get the communication port status */
-	String getStatus();
+	/** Get connected status */
+	boolean getConnected();
 }

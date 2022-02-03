@@ -263,12 +263,22 @@ const COMM_CONFIG_RES: Resource = Resource::Simple(
 /// Comm link resource
 const COMM_LINK_RES: Resource = Resource::Simple(
     "api/comm_link",
-    Listen::All("comm_link"),
+    Listen::Exclude("comm_link", &["connected"]),
     "SELECT row_to_json(r)::text FROM (\
     SELECT name, description, uri, poll_enabled, comm_config \
     FROM iris.comm_link \
     ORDER BY regexp_replace(name, '[0-9]', '', 'g'), \
             (regexp_replace(name, '[^0-9]', '', 'g') || '0')::INTEGER\
+) r",
+);
+
+/// Comm link status resource
+const COMM_LINK_STAT_RES: Resource = Resource::Simple(
+    "api/comm_link_stat",
+    Listen::Include("comm_link", &["connected"]),
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT name, connected \
+    FROM iris.comm_link\
 ) r",
 );
 
@@ -430,6 +440,7 @@ const ALL: &[Resource] = &[
     COMM_PROTOCOL_RES,
     COMM_CONFIG_RES,
     COMM_LINK_RES,
+    COMM_LINK_STAT_RES,
     CONDITION_RES,
     CONTROLLER_RES,
     CONTROLLER_STAT_RES,

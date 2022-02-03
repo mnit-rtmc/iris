@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2021  Minnesota Department of Transportation
+ * Copyright (C) 2016-2022  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -201,19 +201,18 @@ abstract public class BasePoller implements DevicePoller {
 		return rx_buf;
 	}
 
-	/** Poller status */
-	private String status = "INIT";
+	/** Connected state */
+	private boolean connected = false;
 
-	/** Get the poller status.
-	 * Any value other than a blank string is considered "failed". */
+	/** Get the connected state */
 	@Override
-	public String getStatus() {
-		return status;
+	public boolean isConnected() {
+		return connected;
 	}
 
-	/** Set the poller status */
-	private void setStatus(String s) {
-		status = s;
+	/** Set the connected state */
+	private void setConnected(boolean c) {
+		connected = c;
 	}
 
 	/** Add an operation to the device poller */
@@ -347,13 +346,12 @@ abstract public class BasePoller implements DevicePoller {
 
 	/** Ensure that the channel is open */
 	private void ensureOpen() {
-		if (!isConnected())
+		if (!isKeyValid())
 			openChannel();
 	}
 
-	/** Check if the poller is currently connected */
-	@Override
-	public boolean isConnected() {
+	/** Check if the selection key is valid */
+	private boolean isKeyValid() {
 		SelectionKey sk = skey;
 		return (sk != null)
 		    && (sk.isValid())
@@ -395,7 +393,7 @@ abstract public class BasePoller implements DevicePoller {
 		skey = sel.createChannel(this, uri);
 		clearTxBuf();
 		clearRxBuf();
-		setStatus("");
+		setConnected(true);
 	}
 
 	/** Clear the transmit buffer */
@@ -474,7 +472,7 @@ abstract public class BasePoller implements DevicePoller {
 
 	/** Close the channel */
 	private void closeChannel(SelectionKey sk) {
-		setStatus("CLOSED");
+		setConnected(false);
 		// Tell selector to close the channel
 		sk.attach(null);
 		if (sk.isValid())

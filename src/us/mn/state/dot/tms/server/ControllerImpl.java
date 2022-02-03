@@ -740,11 +740,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return failTime != null;
 	}
 
-	/** Test if controller is online (active and not failed) */
-	public boolean isOnline() {
-		return isActive() && isConnected() && !isFailed();
-	}
-
 	/** Get the controller fail time, or null if communication is not
 	 * failed.  This time is in milliseconds since the epoch. */
 	@Override
@@ -1076,12 +1071,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public boolean isDialUpRequired() {
 		CommLinkImpl cl = comm_link;
 		return (cl != null) && cl.isDialUpRequired();
-	}
-
-	/** Check if the controller comm link is currently connected */
-	private boolean isConnected() {
-		CommLinkImpl cl = comm_link;
-		return (cl != null) && cl.isConnected();
 	}
 
 	/** Write the controller as an XML element */

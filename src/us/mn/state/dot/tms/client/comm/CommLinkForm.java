@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2020  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,11 +60,15 @@ public class CommLinkForm extends AbstractForm {
 	private final ProxyView<CommLink> view = new ProxyView<CommLink>() {
 		public void enumerationComplete() { }
 		public void update(CommLink cl, String a) {
-			if (a == null || a.equals("status"))
-				link_status.setText(cl.getStatus());
+			if (a == null || a.equals("connected")) {
+				connected_lbl.setText(cl.getConnected()
+					? I18N.get("comm.link.connected")
+					: I18N.get("item.style.failed")
+				);
+			}
 		}
 		public void clear() {
-			link_status.setText("");
+			connected_lbl.setText("");
 		}
 	};
 
@@ -89,8 +93,8 @@ public class CommLinkForm extends AbstractForm {
 	/** Comm link label */
 	private final JLabel link_lbl = new ILabel("comm.link.selected");
 
-	/** Comm link status */
-	private final JLabel link_status = new JLabel();
+	/** Comm link connected label */
+	private final JLabel connected_lbl = new JLabel();
 
 	/** Table panel for controllers */
 	private final ControllerPanel controller_pnl;
@@ -162,7 +166,7 @@ public class CommLinkForm extends AbstractForm {
 		g1.addGap(UI.hgap);
 		g1.addComponent(link_lbl);
 		g1.addGap(UI.hgap);
-		g1.addComponent(link_status);
+		g1.addComponent(connected_lbl);
 		GroupLayout.ParallelGroup hg = gl.createParallelGroup();
 		hg.addGroup(g0);
 		hg.addGroup(g1);
@@ -180,7 +184,7 @@ public class CommLinkForm extends AbstractForm {
 			false);
 		g1.addComponent(clear_btn);
 		g1.addComponent(link_lbl);
-		g1.addComponent(link_status);
+		g1.addComponent(connected_lbl);
 		GroupLayout.SequentialGroup vg = gl.createSequentialGroup();
 		vg.addGroup(g0);
 		vg.addGroup(g1);

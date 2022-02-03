@@ -7,6 +7,7 @@
 --
 -- PAYLOAD: 'publish ' || name, 'video_loss' (camera)
 --          'fail_time' (controller)
+--          'connected' (comm_link)
 --          'auto_fail' (detector)
 --          'msg_current', 'msg_sched', 'expire_time' (dms)
 --          'time_stamp' (parking_area)
@@ -1307,24 +1308,41 @@ CREATE VIEW comm_config_view AS
 GRANT SELECT ON comm_config_view TO PUBLIC;
 
 CREATE TABLE iris.comm_link (
-	name VARCHAR(20) PRIMARY KEY,
-	description VARCHAR(32) NOT NULL,
-	uri VARCHAR(256) NOT NULL,
-	poll_enabled BOOLEAN NOT NULL,
-	comm_config VARCHAR(10) NOT NULL REFERENCES iris.comm_config
+    name VARCHAR(20) PRIMARY KEY,
+    description VARCHAR(32) NOT NULL,
+    uri VARCHAR(256) NOT NULL,
+    poll_enabled BOOLEAN NOT NULL,
+    comm_config VARCHAR(10) NOT NULL REFERENCES iris.comm_config,
+    connected BOOLEAN NOT NULL
 );
 
+CREATE FUNCTION iris.comm_link_notify() RETURNS TRIGGER AS
+    $comm_link_notify$
+BEGIN
+    IF (NEW.connected IS DISTINCT FROM OLD.connected) THEN
+        PERFORM pg_notify('comm_link', 'connected');
+    ELSE
+        NOTIFY comm_link;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$comm_link_notify$ LANGUAGE plpgsql;
+
 CREATE TRIGGER comm_link_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.comm_link
+    AFTER UPDATE ON iris.comm_link
+    FOR EACH ROW EXECUTE PROCEDURE iris.comm_link_notify();
+
+CREATE TRIGGER comm_link_table_notify_trig
+    AFTER INSERT OR DELETE ON iris.comm_link
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW comm_link_view AS
-	SELECT cl.name, cl.description, uri, poll_enabled,
-	       cp.description AS protocol, cc.description AS comm_config,
-	       modem, timeout_ms, poll_period_sec
-	FROM iris.comm_link cl
-	JOIN iris.comm_config cc ON cl.comm_config = cc.name
-	JOIN iris.comm_protocol cp ON cc.protocol = cp.id;
+    SELECT cl.name, cl.description, uri, poll_enabled,
+           cp.description AS protocol, cc.description AS comm_config,
+           modem, timeout_ms, poll_period_sec, connected
+    FROM iris.comm_link cl
+    JOIN iris.comm_config cc ON cl.comm_config = cc.name
+    JOIN iris.comm_protocol cp ON cc.protocol = cp.id;
 GRANT SELECT ON comm_link_view TO PUBLIC;
 
 CREATE TABLE iris.modem (
