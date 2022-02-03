@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.utils.Multi;
 import us.mn.state.dot.tms.utils.wysiwyg.WRenderer;
 import us.mn.state.dot.tms.utils.wysiwyg.WToken;
 import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
+import us.mn.state.dot.tms.utils.wysiwyg.WToken.AnchorLoc;
 
 /** Standby-message token for WYSIWYG editor.
  * 
@@ -32,6 +33,7 @@ public class WtStandby extends WToken {
 	 */
 	public WtStandby() {
 		super(WTokenType.standby, "[standby");
+		anchorLoc = AnchorLoc.NONE;
 		updateString();
 	}
 
