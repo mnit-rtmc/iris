@@ -43,11 +43,11 @@ enum Listen {
     /// * channel name
     All(&'static str),
 
-    /// Listen for a single payload.
+    /// Listen for specific payloads.
     ///
     /// * channel name
-    /// * payload to include
-    Include(&'static str, &'static str),
+    /// * payloads to include
+    Include(&'static str, &'static [&'static str]),
 
     /// Listen while excluding payloads.
     ///
@@ -77,7 +77,7 @@ impl Listen {
     fn is_listening(&self, chan: &str, payload: &str) -> bool {
         match self {
             Listen::All(n) => n == &chan,
-            Listen::Include(n, inc) => n == &chan && inc == &payload,
+            Listen::Include(n, inc) => n == &chan && inc.contains(&payload),
             Listen::Exclude(n, exc) => n == &chan && !exc.contains(&payload),
             Listen::Two(n0, n1) => n0 == &chan || n1 == &chan,
         }
@@ -155,10 +155,10 @@ const DMS_RES: Resource = Resource::Simple(
 ) r",
 );
 
-/// DMS message resource
-const DMS_MSG_RES: Resource = Resource::Simple(
+/// DMS status resource
+const DMS_STAT_RES: Resource = Resource::Simple(
     "dms_message",
-    Listen::Include("dms", "msg_current"),
+    Listen::Include("dms", &["msg_current"]),
     "SELECT row_to_json(r)::text FROM (\
     SELECT name, msg_current, failed, sources, duration, expire_time \
     FROM dms_message_view WHERE condition = 'Active' \
@@ -286,14 +286,24 @@ const CONDITION_RES: Resource = Resource::Simple(
 /// Controller resource
 const CONTROLLER_RES: Resource = Resource::Simple(
     "api/controller",
-    Listen::All("controller"),
+    Listen::Exclude("controller", &["fail_time"]),
     "SELECT row_to_json(r)::text FROM (\
     SELECT name, drop_id, comm_link, cabinet_style, geo_loc, condition, \
-           notes, password, fail_time, version \
+           notes, password, version \
     FROM iris.controller \
     ORDER BY regexp_replace(comm_link, '[0-9]', '', 'g'), \
             (regexp_replace(comm_link, '[^0-9]', '', 'g') || '0')::INTEGER, \
              drop_id\
+) r",
+);
+
+/// Controller status resource
+const CONTROLLER_STAT_RES: Resource = Resource::Simple(
+    "api/controller_stat",
+    Listen::Include("controller", &["fail_time"]),
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT name, fail_time \
+    FROM iris.controller \
 ) r",
 );
 
@@ -357,7 +367,7 @@ const SYSTEM_ATTRIBUTE_RES: Resource = Resource::Simple(
 
 /// Static parking area resource
 const TPIMS_STAT_RES: Resource = Resource::Simple(
-"TPIMS_static", Listen::Include("parking_area", "time_stamp_static"),
+"TPIMS_static", Listen::Include("parking_area", &["time_stamp_static"]),
 "SELECT row_to_json(r)::text FROM (\
     SELECT site_id AS \"siteId\", to_char(time_stamp_static AT TIME ZONE 'UTC', \
            'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
@@ -380,7 +390,7 @@ const TPIMS_STAT_RES: Resource = Resource::Simple(
 /// Dynamic parking area resource
 const TPIMS_DYN_RES: Resource = Resource::Simple(
     "TPIMS_dynamic",
-    Listen::Include("parking_area", "time_stamp"),
+    Listen::Include("parking_area", &["time_stamp"]),
     "SELECT row_to_json(r)::text FROM (\
     SELECT site_id AS \"siteId\", to_char(time_stamp AT TIME ZONE 'UTC', \
            'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
@@ -395,7 +405,7 @@ const TPIMS_DYN_RES: Resource = Resource::Simple(
 /// Archive parking area resource
 const TPIMS_ARCH_RES: Resource = Resource::Simple(
     "TPIMS_archive",
-    Listen::Include("parking_area", "time_stamp"),
+    Listen::Include("parking_area", &["time_stamp"]),
     "SELECT row_to_json(r)::text FROM (\
     SELECT site_id AS \"siteId\", to_char(time_stamp AT TIME ZONE 'UTC', \
            'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
@@ -422,10 +432,11 @@ const ALL: &[Resource] = &[
     COMM_LINK_RES,
     CONDITION_RES,
     CONTROLLER_RES,
+    CONTROLLER_STAT_RES,
     MODEM_RES,
     CAMERA_RES,
     DMS_RES,
-    DMS_MSG_RES,
+    DMS_STAT_RES,
     FONT_RES,
     GRAPHIC_RES,
     INCIDENT_RES,

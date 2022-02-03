@@ -6,6 +6,7 @@
 -- update data (usually blank).
 --
 -- PAYLOAD: 'publish ' || name, 'video_loss' (camera)
+--          'fail_time' (controller)
 --          'auto_fail' (detector)
 --          'msg_current', 'msg_sched', 'expire_time' (dms)
 --          'time_stamp' (parking_area)
@@ -1384,20 +1385,36 @@ CREATE TABLE iris.controller (
     condition INTEGER NOT NULL REFERENCES iris.condition,
     notes VARCHAR(128) NOT NULL,
     password VARCHAR(32),
-    fail_time TIMESTAMP WITH time zone,
-    version VARCHAR(64)
+    version VARCHAR(64),
+    fail_time TIMESTAMP WITH time zone
 );
 
 CREATE UNIQUE INDEX ctrl_link_drop_idx ON iris.controller
     USING btree (comm_link, drop_id);
 
+CREATE FUNCTION iris.controller_notify() RETURNS TRIGGER AS
+    $controller_notify$
+BEGIN
+    IF (NEW.fail_time IS DISTINCT FROM OLD.fail_time) THEN
+        PERFORM pg_notify('controller', 'fail_time');
+    ELSE
+        NOTIFY controller;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$controller_notify$ LANGUAGE plpgsql;
+
 CREATE TRIGGER controller_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.controller
+    AFTER UPDATE ON iris.controller
+    FOR EACH ROW EXECUTE PROCEDURE iris.controller_notify();
+
+CREATE TRIGGER controller_table_notify_trig
+    AFTER INSERT OR DELETE ON iris.controller
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW controller_view AS
     SELECT c.name, drop_id, comm_link, cabinet_style, geo_loc,
-           cnd.description AS condition, notes, fail_time, version
+           cnd.description AS condition, notes, version, fail_time
     FROM iris.controller c
     LEFT JOIN iris.condition cnd ON c.condition = cnd.id;
 GRANT SELECT ON controller_view TO PUBLIC;
