@@ -18,9 +18,10 @@ use async_std::path::PathBuf;
 use chrono::{DateTime, NaiveDateTime, Utc};
 use convert_case::{Case, Casing};
 use graft::sonar::{Connection, Result, SonarError};
-use json::JsonValue;
 use percent_encoding::percent_decode_str;
 use rand::Rng;
+use serde_json::map::Map;
+use serde_json::Value;
 use std::io;
 use tide::prelude::*;
 use tide::sessions::{MemoryStore, SessionMiddleware};
@@ -94,6 +95,7 @@ impl ErrorStatus for SonarError {
     fn status_code(&self) -> StatusCode {
         match self {
             Self::InvalidName => StatusCode::BadRequest,
+            Self::InvalidValue => StatusCode::BadRequest,
             Self::Forbidden => StatusCode::Forbidden,
             Self::NotFound => StatusCode::NotFound,
             Self::IO(e) => e.status_code(),
@@ -306,26 +308,30 @@ async fn get_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
     log::info!("GET {}", req.url());
     let nm = resp!(obj_name(tp, &req));
     let mut c = resp!(connection(&req).await);
-    let mut res = json::object!();
-    res["name"] = nm.split_once('/').unwrap().1.into();
+    let mut res = Map::new();
+    res.insert(
+        "name".to_string(),
+        Value::String(nm.split_once('/').unwrap().1.to_string()),
+    );
     resp!(
         c.enumerate_object(&nm, |att, val| {
             let att = rename_att(tp, att);
             if let Some(val) = make_json(&(tp, &att), val) {
-                res[att] = val;
+                res.insert(att, val);
             }
             Ok(())
         })
         .await
     );
+    let body = Value::Object(res).to_string();
     Ok(Response::builder(StatusCode::Ok)
-        .body(res.to_string())
+        .body(&body[..])
         .content_type("application/json")
         .build())
 }
 
 /// Make a JSON attribute value
-fn make_json(tp_att: &(&str, &str), val: &str) -> Option<JsonValue> {
+fn make_json(tp_att: &(&str, &str), val: &str) -> Option<Value> {
     if INTEGERS.contains(tp_att) {
         val.parse::<i64>().ok().map(|v| v.into())
     } else if BOOLS.contains(tp_att) {
@@ -344,7 +350,7 @@ fn make_json(tp_att: &(&str, &str), val: &str) -> Option<JsonValue> {
     } else if val != "\0" {
         Some(val.into())
     } else {
-        Some(JsonValue::Null)
+        Some(Value::Null)
     }
 }
 
@@ -357,21 +363,37 @@ async fn create_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
     Ok(Response::builder(StatusCode::Created).build())
 }
 
+/// Get Sonar attribute value
+fn att_value(value: &Value) -> Result<String> {
+    match value {
+        Value::String(value) => {
+            if value.contains(invalid_char) {
+                Err(SonarError::InvalidValue)
+            } else {
+                Ok(value.to_string())
+            }
+        }
+        Value::Bool(value) => Ok(value.to_string()),
+        Value::Number(value) => Ok(value.to_string()),
+        Value::Null => Ok("\0".to_string()),
+        _ => Err(SonarError::InvalidValue),
+    }
+}
+
 /// Update a Sonar object from a `PATCH` request
-async fn update_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
+async fn update_sonar_object(tp: &str, mut req: Request<()>) -> tide::Result {
     log::info!("PATCH {}", req.url());
     let nm = resp!(obj_name(tp, &req));
-    if req.url().query_pairs().count() == 0 {
-        return bad_request("no query");
+    let body: Value = req.body_json().await?;
+    if !body.is_object() {
+        return bad_request("invalid request");
     }
     let mut c = resp!(connection(&req).await);
-    for pair in req.url().query_pairs() {
-        let anm = resp!(att_name(&nm, &pair.0));
-        if pair.1.contains(invalid_char) {
-            return bad_request("invalid value");
-        }
-        log::info!("{} = {}", anm, &pair.1);
-        resp!(c.update_object(&anm, &pair.1).await);
+    for (key, value) in body.as_object().unwrap() {
+        let anm = resp!(att_name(&nm, &key));
+        let value = resp!(att_value(value));
+        log::debug!("{} = {}", anm, &value);
+        resp!(c.update_object(&anm, &value).await);
     }
     Ok(Response::builder(StatusCode::NoContent).build())
 }

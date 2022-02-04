@@ -44,6 +44,10 @@ pub enum SonarError {
     #[error("invalid name")]
     InvalidName,
 
+    /// Invalid value
+    #[error("invalid value")]
+    InvalidValue,
+
     /// Forbidden (permission denied)
     #[error("forbidden")]
     Forbidden,
