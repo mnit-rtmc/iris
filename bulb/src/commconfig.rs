@@ -12,7 +12,10 @@
 //
 use crate::card::{Card, NAME};
 use crate::util::HtmlStr;
+use crate::Result;
 use serde::{Deserialize, Serialize};
+use wasm_bindgen::JsValue;
+use web_sys::Document;
 
 /// Comm configuration
 #[derive(Debug, Deserialize, Serialize)]
@@ -93,5 +96,10 @@ impl Card for CommConfig {
                      value='{no_response_disconnect_sec}'/>\
             </div>"
         )
+    }
+
+    /// Get changed fields from Edit form
+    fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
+        todo!()
     }
 }

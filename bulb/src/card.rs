@@ -14,6 +14,7 @@ use crate::util::HtmlStr;
 use crate::Result;
 use serde::de::DeserializeOwned;
 use wasm_bindgen::JsValue;
+use web_sys::Document;
 
 /// CSS class for titles
 const TITLE: &str = "title";
@@ -105,6 +106,9 @@ pub trait Card: DeserializeOwned {
             val.to_html_edit()
         ))
     }
+
+    /// Get changed fields from Edit form
+    fn changed_fields(doc: &Document, json: &JsValue) -> Result<String>;
 
     /// Get the name
     fn name(&self) -> &str;

@@ -12,7 +12,10 @@
 //
 use crate::card::{disabled_attr, Card, NAME};
 use crate::util::HtmlStr;
+use crate::Result;
 use serde::{Deserialize, Serialize};
+use wasm_bindgen::JsValue;
+use web_sys::Document;
 
 /// Comm link
 #[derive(Debug, Deserialize, Serialize)]
@@ -79,5 +82,10 @@ impl Card for CommLink {
               <input id='form_enabled' type='checkbox'{enabled}/>\
             </div>"
         )
+    }
+
+    /// Get changed fields from Edit form
+    fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
+        todo!()
     }
 }

@@ -12,7 +12,10 @@
 //
 use crate::card::Card;
 use crate::util::{HtmlStr, OptVal};
+use crate::Result;
 use serde::{Deserialize, Serialize};
+use wasm_bindgen::JsValue;
+use web_sys::Document;
 
 /// Cabinet Style
 #[derive(Debug, Deserialize, Serialize)]
@@ -78,5 +81,10 @@ impl Card for CabinetStyle {
                      size='8' value='{dip}'/>\
             </div>"
         )
+    }
+
+    /// Get changed fields from Edit form
+    fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
+        todo!()
     }
 }

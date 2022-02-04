@@ -12,7 +12,12 @@
 //
 use crate::card::{Card, NAME};
 use crate::util::HtmlStr;
+use crate::{ElemCast, Result};
 use serde::{Deserialize, Serialize};
+use serde_json::map::Map;
+use serde_json::Value;
+use wasm_bindgen::JsValue;
+use web_sys::{Document, HtmlInputElement};
 
 /// Alarm
 #[derive(Debug, Deserialize, Serialize)]
@@ -86,20 +91,47 @@ impl Card for Alarm {
         let pin = self.pin;
         format!(
             "<div class='row'>\
-               <label for='form_description'>Description</label>\
-               <input id='form_description' maxlength='24' size='24' \
+               <label for='edit_desc'>Description</label>\
+               <input id='edit_desc' maxlength='24' size='24' \
                       value='{description}'/>\
              </div>\
              <div class='row'>\
-               <label for='form_controller'>Controller</label>\
-               <input id='form_controller' maxlength='20' size='20' \
+               <label for='edit_ctrl'>Controller</label>\
+               <input id='edit_ctrl' maxlength='20' size='20' \
                       value='{controller}'/>\
              </div>\
              <div class='row'>\
-               <label for='form_pin'>Pin</label>\
-               <input id='form_pin' type='number' min='1' max='104' \
+               <label for='edit_pin'>Pin</label>\
+               <input id='edit_pin' type='number' min='1' max='104' \
                       size='8' value='{pin}'/>\
              </div>"
         )
+    }
+
+    /// Get changed fields from Edit form
+    fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
+        let val = Self::new(json)?;
+        let mut obj = Map::new();
+        let desc = doc.elem::<HtmlInputElement>("edit_desc")?.value();
+        if desc != val.description {
+            obj.insert("description".to_string(), Value::String(desc));
+        }
+        let ctrl = doc.elem::<HtmlInputElement>("edit_ctrl")?.value();
+        let ctrl = if ctrl.is_empty() { None } else { Some(ctrl) };
+        if ctrl != val.controller {
+            obj.insert(
+                "controller".to_string(),
+                match ctrl {
+                    Some(ctrl) => Value::String(ctrl),
+                    None => Value::Null,
+                },
+            );
+        }
+        let pin: String = doc.elem::<HtmlInputElement>("edit_pin")?.value();
+        let pin = pin.parse::<u32>().map_err(|_| "Parse err")?;
+        if pin != val.pin {
+            obj.insert("pin".to_string(), Value::Number(pin.into()));
+        }
+        Ok(Value::Object(obj).to_string())
     }
 }

@@ -17,8 +17,8 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
 use web_sys::{
     console, Document, Element, Event, HtmlButtonElement, HtmlElement,
-    HtmlInputElement, HtmlSelectElement, Request, Response, ScrollBehavior,
-    ScrollIntoViewOptions, ScrollLogicalPosition, Window,
+    HtmlInputElement, HtmlSelectElement, Request, RequestInit, Response,
+    ScrollBehavior, ScrollIntoViewOptions, ScrollLogicalPosition, Window,
 };
 
 pub type Result<T> = std::result::Result<T, JsValue>;
@@ -55,15 +55,29 @@ impl ElemCast for Document {
     }
 }
 
-/// Fetch a JSON document
-async fn fetch_json(window: &Window, uri: &str) -> Result<JsValue> {
+/// Fetch a GET request
+async fn fetch_get(uri: &str) -> Result<JsValue> {
     let req = Request::new_with_str(uri)?;
     req.headers().set("Accept", "application/json")?;
+    let window = web_sys::window().unwrap_throw();
     let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
     let resp: Response = resp.dyn_into().unwrap_throw();
     match resp.status() {
         200 => Ok(JsFuture::from(resp.json()?).await?),
-        401 => Err(resp.status_text().into()),
+        _ => Err(resp.status_text().into()),
+    }
+}
+
+/// Fetch a PATCH request
+async fn fetch_patch(window: &Window, uri: &str, json: &JsValue) -> Result<()> {
+    let req = Request::new_with_str_and_init(
+        uri,
+        RequestInit::new().method("PATCH").body(Some(json)),
+    )?;
+    let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
+    let resp: Response = resp.dyn_into().unwrap_throw();
+    match resp.status() {
+        200 => Ok(()),
         _ => Err(resp.status_text().into()),
     }
 }
@@ -97,7 +111,7 @@ async fn try_populate_cards<C: Card>(tx: String) -> Result<()> {
     if C::URI.is_empty() {
         sb_list.set_inner_html("");
     } else {
-        let json = fetch_json(&window, C::URI).await?;
+        let json = fetch_get(C::URI).await?;
         let tx = tx.to_lowercase();
         let html = C::build_cards(&json, &tx)?;
         sb_list.set_inner_html(&html);
@@ -120,29 +134,27 @@ async fn click_card(tp: String, name: String) {
 
 /// Expand a card to a full form
 async fn expand_card<C: Card>(name: String) {
-    let window = web_sys::window().unwrap_throw();
     if name.is_empty() {
         // todo: make "new" card?
         return;
     }
-    let uri = format!(
-        "{}/{}",
-        C::URI,
-        utf8_percent_encode(&name, NON_ALPHANUMERIC)
-    );
-    let json = fetch_json(&window, &uri).await.unwrap_throw();
-    console::log_1(&json);
+    let cs = fetch_card::<C>(name).await;
+    let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    let cs = CardState {
+    cs.replace_card(&doc, CardType::Status);
+}
+
+/// Fetch a card with a GET request
+async fn fetch_card<C: Card>(name: String) -> CardState {
+    let uri = name_uri::<C>(&name);
+    let json = fetch_get(&uri).await.unwrap_throw();
+    console::log_1(&json);
+    CardState {
         tname: C::TNAME,
+        uri,
         name,
         json,
-    };
-    cs.replace_card(&doc, CardType::Status);
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        state.selected.replace(cs);
-    });
+    }
 }
 
 /// Selected card state
@@ -150,6 +162,8 @@ async fn expand_card<C: Card>(name: String) {
 struct CardState {
     /// Type name
     tname: &'static str,
+    /// Object URI
+    uri: String,
     /// Object name
     name: String,
     /// JSON value of object
@@ -158,7 +172,7 @@ struct CardState {
 
 impl CardState {
     /// Replace a card element with another card type
-    fn replace_card(&self, doc: &Document, ct: CardType) {
+    fn replace_card(self, doc: &Document, ct: CardType) {
         let id = format!("{}_{}", self.tname, &self.name);
         match doc.elem::<HtmlElement>(&id) {
             Ok(elem) => match build_card(&self.tname, &self.json, ct) {
@@ -167,7 +181,40 @@ impl CardState {
             },
             Err(e) => console::log_1(&(&e).into()),
         }
+        STATE.with(|rc| {
+            let mut state = rc.borrow_mut();
+            state.selected.replace(self);
+        });
     }
+
+    /// Save changed fields on Edit form
+    async fn save_changed(mut self) {
+        let window = web_sys::window().unwrap_throw();
+        let doc = window.document().unwrap_throw();
+        match try_changed_fields(&self, &doc) {
+            Ok(v) => {
+                let json = v.into();
+                if let Err(e) = fetch_patch(&window, &self.uri, &json).await {
+                    console::log_1(&e)
+                }
+            }
+            Err(e) => console::log_1(&e),
+        }
+        self.fetch_again().await;
+        self.replace_card(&doc, CardType::Compact);
+    }
+
+    /// Fetch a card again with a GET request
+    async fn fetch_again(&mut self) {
+        let json = fetch_get(&self.uri).await.unwrap_throw();
+        console::log_1(&json);
+        self.json = json;
+    }
+}
+
+/// Get the URI of an object
+fn name_uri<C: Card>(name: &str) -> String {
+    format!("{}/{}", C::URI, utf8_percent_encode(name, NON_ALPHANUMERIC))
 }
 
 /// Replace a card with provieded HTML
@@ -181,6 +228,19 @@ fn replace_card_html(elem: &HtmlElement, ct: CardType, html: &str) {
         opt.behavior(ScrollBehavior::Smooth)
             .block(ScrollLogicalPosition::Nearest);
         elem.scroll_into_view_with_scroll_into_view_options(&opt);
+    }
+}
+
+/// Try to retrieve changed fields on edit form
+fn try_changed_fields(cs: &CardState, doc: &Document) -> Result<String> {
+    match cs.tname {
+        Alarm::TNAME => Alarm::changed_fields(doc, &cs.json),
+        CabinetStyle::TNAME => CabinetStyle::changed_fields(doc, &cs.json),
+        CommConfig::TNAME => CommConfig::changed_fields(doc, &cs.json),
+        CommLink::TNAME => CommLink::changed_fields(doc, &cs.json),
+        Controller::TNAME => Controller::changed_fields(doc, &cs.json),
+        Modem::TNAME => Modem::changed_fields(doc, &cs.json),
+        _ => unreachable!(),
     }
 }
 
@@ -350,22 +410,15 @@ fn handle_click_ev(elem: &Element) {
 
 /// Handle a click event with a button target
 fn handle_button_click_ev(doc: &Document, elem: &Element) {
-    match elem.id() {
-        id if id == "ob_delete" => todo!(),
-        id if id == "ob_edit" => {
-            let cs = STATE.with(|rc| rc.borrow().selected.clone());
-            if let Some(cs) = cs {
-                cs.replace_card(&doc, CardType::Edit);
-            }
+    let cs = STATE.with(|rc| rc.borrow().selected.clone());
+    if let Some(cs) = cs {
+        match elem.id() {
+            id if id == "ob_delete" => todo!(),
+            id if id == "ob_edit" => cs.replace_card(&doc, CardType::Edit),
+            id if id == "ob_status" => cs.replace_card(&doc, CardType::Status),
+            id if id == "ob_save" => spawn_local(cs.save_changed()),
+            id => console::log_1(&id.into()),
         }
-        id if id == "ob_status" => {
-            let cs = STATE.with(|rc| rc.borrow().selected.clone());
-            if let Some(cs) = cs {
-                cs.replace_card(&doc, CardType::Status);
-            }
-        }
-        id if id == "ob_save" => todo!(),
-        id => console::log_1(&id.into()),
     }
 }
 
