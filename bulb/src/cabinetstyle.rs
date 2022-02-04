@@ -11,14 +11,13 @@
 // GNU General Public License for more details.
 //
 use crate::card::Card;
-use crate::util::{HtmlStr, OptVal};
-use crate::{ElemCast, Result};
+use crate::util::{input_parse, HtmlStr, OptVal};
+use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
-use std::str::FromStr;
 use wasm_bindgen::JsValue;
-use web_sys::{Document, HtmlInputElement};
+use web_sys::Document;
 
 /// Cabinet Style
 #[derive(Debug, Deserialize, Serialize)]
@@ -90,35 +89,26 @@ impl Card for CabinetStyle {
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         let mut obj = Map::new();
-        let pin = input_number(doc, "edit_pp1");
+        let pin = input_parse(doc, "edit_pp1");
         if pin != val.police_panel_pin_1 {
             obj.insert("police_panel_pin_1".to_string(), OptVal(pin).into());
         }
-        let pin = input_number(doc, "edit_pp2");
+        let pin = input_parse(doc, "edit_pp2");
         if pin != val.police_panel_pin_2 {
             obj.insert("police_panel_pin_2".to_string(), OptVal(pin).into());
         }
-        let pin = input_number(doc, "edit_wr1");
+        let pin = input_parse(doc, "edit_wr1");
         if pin != val.watchdog_reset_pin_1 {
             obj.insert("watchdog_reset_pin_1".to_string(), OptVal(pin).into());
         }
-        let pin = input_number(doc, "edit_wr2");
+        let pin = input_parse(doc, "edit_wr2");
         if pin != val.watchdog_reset_pin_2 {
             obj.insert("watchdog_reset_pin_2".to_string(), OptVal(pin).into());
         }
-        let dip = input_number(doc, "edit_dip");
+        let dip = input_parse(doc, "edit_dip");
         if dip != val.dip {
             obj.insert("dip".to_string(), OptVal(dip).into());
         }
         Ok(Value::Object(obj).to_string())
     }
-}
-
-/// Get a number value from an `input` element
-fn input_number<T: FromStr>(doc: &Document, id: &str) -> Option<T> {
-    doc.elem::<HtmlInputElement>(id)
-        .unwrap()
-        .value()
-        .parse()
-        .ok()
 }

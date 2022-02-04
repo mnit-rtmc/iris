@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
+use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -39,20 +40,13 @@ use commconfig::CommConfig;
 use commlink::CommLink;
 use controller::Controller;
 use modem::Modem;
+use util::ElemCast;
 
-/// Helper trait to lookup elements
-pub trait ElemCast {
-    /// Get an element by ID and cast it
-    fn elem<E: JsCast>(&self, id: &str) -> Result<E>;
-}
-
-impl ElemCast for Document {
-    fn elem<E: JsCast>(&self, id: &str) -> Result<E> {
-        Ok(self
-            .get_element_by_id(id)
-            .ok_or("id not found")?
-            .dyn_into::<E>()?)
-    }
+/// Comm protocol
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Protocol {
+    pub id: u32,
+    pub description: String,
 }
 
 /// Fetch a GET request
@@ -260,6 +254,7 @@ fn build_card(tp: &str, json: &JsValue, ct: CardType) -> Result<String> {
 /// Global app state
 #[derive(Default)]
 struct State {
+    protocols: Vec<Protocol>,
     selected: Option<CardState>,
 }
 
@@ -279,6 +274,14 @@ pub async fn start() -> Result<()> {
 
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
+
+    let json = fetch_get(&"/iris/api/comm_protocol").await?;
+    let mut protocols = json.into_serde::<Vec<Protocol>>().unwrap_throw();
+    STATE.with(|rc| {
+        let mut state = rc.borrow_mut();
+        state.protocols.append(&mut protocols);
+    });
+
     let sb_type: HtmlSelectElement = doc.elem("sb_type")?;
     let opt = doc.create_element("option")?;
     opt.append_with_str_1("")?;
@@ -297,6 +300,28 @@ pub async fn start() -> Result<()> {
     add_input_event_listener(&sb_input, handle_search_ev)?;
     add_click_event_listener(&doc.elem("sb_list")?)?;
     Ok(())
+}
+
+/// Create an HTML `select` element of comm protocols
+pub fn protocols_html(selected: u32) -> String {
+    STATE.with(|rc| {
+        let state = rc.borrow();
+        let mut html = String::new();
+        html.push_str("<select id='edit_protocol'>");
+        for protocol in &state.protocols {
+            html.push_str("<option value='");
+            html.push_str(&protocol.id.to_string());
+            html.push('\'');
+            if selected == protocol.id {
+                html.push_str(" selected");
+            }
+            html.push('>');
+            html.push_str(&protocol.description);
+            html.push_str("</option>");
+        }
+        html.push_str("</select>");
+        html
+    })
 }
 
 /// Add an option element to a group

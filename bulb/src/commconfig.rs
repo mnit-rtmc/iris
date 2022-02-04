@@ -11,11 +11,13 @@
 // GNU General Public License for more details.
 //
 use crate::card::{Card, NAME};
-use crate::util::HtmlStr;
-use crate::Result;
+use crate::util::{input_parse, HtmlStr};
+use crate::{protocols_html, ElemCast, Result};
 use serde::{Deserialize, Serialize};
+use serde_json::map::Map;
+use serde_json::Value;
 use wasm_bindgen::JsValue;
-use web_sys::Document;
+use web_sys::{Document, HtmlInputElement};
 
 /// Comm configuration
 #[derive(Debug, Deserialize, Serialize)]
@@ -58,6 +60,8 @@ impl Card for CommConfig {
     /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
         let description = HtmlStr(&self.description);
+        let protocols = protocols_html(self.protocol);
+        let modem = if self.modem { " checked" } else { "" };
         let timeout_ms = self.timeout_ms;
         let poll_period_sec = self.poll_period_sec;
         let long_poll_period_sec = self.long_poll_period_sec;
@@ -65,34 +69,41 @@ impl Card for CommConfig {
         let no_response_disconnect_sec = self.no_response_disconnect_sec;
         format!(
             "<div class='row'>\
-              <label for='form_description'>Description</label>\
-              <input id='form_description' maxlength='20' size='20' \
+              <label for='edit_desc'>Description</label>\
+              <input id='edit_desc' maxlength='20' size='20' \
                      value='{description}'/>\
             </div>\
             <div class='row'>\
-              <label for='form_timeout'>Timeout (ms)</label>\
-              <input id='form_timeout' type='number' min='0' size='8' \
+              <label for='edit_protocol'>Protocol</label>\
+              {protocols}\
+            </div>\
+            <div class='row'>\
+              <label for='edit_modem'>Modem</label>\
+              <input id='edit_modem' type='checkbox'{modem}/>\
+            </div>\
+            <div class='row'>\
+              <label for='edit_timeout'>Timeout (ms)</label>\
+              <input id='edit_timeout' type='number' min='0' size='8' \
                      max='20000' value='{timeout_ms}'/>\
             </div>\
             <div class='row'>\
-              <label for='form_poll_period'>Poll Period (s)</label>\
-              <input id='form_poll_period' type='number' min='0' \
+              <label for='edit_poll'>Poll Period (s)</label>\
+              <input id='edit_poll' type='number' min='0' \
                      size='8' value='{poll_period_sec}'/>\
             </div>\
             <div class='row'>\
-              <label for='form_long_poll'>Long Poll Period (s)</label>\
-              <input id='form_long_poll' type='number' min='0' \
+              <label for='edit_long'>Long Poll Period (s)</label>\
+              <input id='edit_long' type='number' min='0' \
                      size='8' value='{long_poll_period_sec}'/>\
             </div>\
             <div class='row'>\
-              <label for='form_idle'>Idle Disconnect (s)</label>\
-              <input id='form_idle' type='number' min='0' size='8' \
+              <label for='edit_idle'>Idle Disconnect (s)</label>\
+              <input id='edit_idle' type='number' min='0' size='8' \
                      value='{idle_disconnect_sec}'/>\
             </div>\
             <div class='row'>\
-              <label for='form_no_resp'>No Response Disconnect (s)\
-              </label>\
-              <input id='form_no_resp' type='number' min='0' size='8' \
+              <label for='edit_no_resp'>No Response Disconnect (s)</label>\
+              <input id='edit_no_resp' type='number' min='0' size='8' \
                      value='{no_response_disconnect_sec}'/>\
             </div>"
         )
@@ -100,6 +111,56 @@ impl Card for CommConfig {
 
     /// Get changed fields from Edit form
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
-        todo!()
+        let val = Self::new(json)?;
+        let mut obj = Map::new();
+        let desc = doc.elem::<HtmlInputElement>("edit_desc")?.value();
+        if desc != val.description {
+            obj.insert("description".to_string(), Value::String(desc));
+        }
+        if let Some(timeout_ms) = input_parse::<u32>(doc, "edit_timeout") {
+            if timeout_ms != val.timeout_ms {
+                obj.insert(
+                    "timeout_ms".to_string(),
+                    Value::Number(timeout_ms.into()),
+                );
+            }
+        }
+        if let Some(poll_period_sec) = input_parse::<u32>(doc, "edit_poll") {
+            if poll_period_sec != val.poll_period_sec {
+                obj.insert(
+                    "poll_period_sec".to_string(),
+                    Value::Number(poll_period_sec.into()),
+                );
+            }
+        }
+        if let Some(long_poll_period_sec) = input_parse::<u32>(doc, "edit_long")
+        {
+            if long_poll_period_sec != val.long_poll_period_sec {
+                obj.insert(
+                    "long_poll_period_sec".to_string(),
+                    Value::Number(long_poll_period_sec.into()),
+                );
+            }
+        }
+        if let Some(idle_disconnect_sec) = input_parse::<u32>(doc, "edit_idle")
+        {
+            if idle_disconnect_sec != val.idle_disconnect_sec {
+                obj.insert(
+                    "idle_disconnect_sec".to_string(),
+                    Value::Number(idle_disconnect_sec.into()),
+                );
+            }
+        }
+        if let Some(no_response_disconnect_sec) =
+            input_parse::<u32>(doc, "edit_no_resp")
+        {
+            if no_response_disconnect_sec != val.no_response_disconnect_sec {
+                obj.insert(
+                    "no_response_disconnect_sec".to_string(),
+                    Value::Number(no_response_disconnect_sec.into()),
+                );
+            }
+        }
+        Ok(Value::Object(obj).to_string())
     }
 }

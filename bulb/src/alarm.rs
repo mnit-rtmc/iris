@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{Card, NAME};
-use crate::util::HtmlStr;
+use crate::util::{input_parse, HtmlStr};
 use crate::{ElemCast, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -127,10 +127,10 @@ impl Card for Alarm {
                 },
             );
         }
-        let pin: String = doc.elem::<HtmlInputElement>("edit_pin")?.value();
-        let pin = pin.parse::<u32>().map_err(|_| "Parse err")?;
-        if pin != val.pin {
-            obj.insert("pin".to_string(), Value::Number(pin.into()));
+        if let Some(pin) = input_parse::<u32>(doc, "edit_pin") {
+            if pin != val.pin {
+                obj.insert("pin".to_string(), Value::Number(pin.into()));
+            }
         }
         Ok(Value::Object(obj).to_string())
     }

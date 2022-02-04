@@ -10,8 +10,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::Result;
 use serde_json::Value;
 use std::fmt;
+use std::str::FromStr;
+use wasm_bindgen::JsCast;
+use web_sys::{Document, HtmlInputElement};
 
 /// An optional value which has impl Display
 #[derive(Debug)]
@@ -77,6 +81,30 @@ impl fmt::Display for HtmlStr<Option<&String>> {
             None => Ok(()),
         }
     }
+}
+
+/// Helper trait to lookup elements
+pub trait ElemCast {
+    /// Get an element by ID and cast it
+    fn elem<E: JsCast>(&self, id: &str) -> Result<E>;
+}
+
+impl ElemCast for Document {
+    fn elem<E: JsCast>(&self, id: &str) -> Result<E> {
+        Ok(self
+            .get_element_by_id(id)
+            .ok_or("id not found")?
+            .dyn_into::<E>()?)
+    }
+}
+
+/// Parse a value from an `input` element
+pub fn input_parse<T: FromStr>(doc: &Document, id: &str) -> Option<T> {
+    doc.elem::<HtmlInputElement>(id)
+        .unwrap()
+        .value()
+        .parse()
+        .ok()
 }
 
 #[cfg(test)]
