@@ -77,6 +77,7 @@ pub trait Card: DeserializeOwned {
             {}\
             <div class='row'>\
               <button id='ob_edit' type='button'>📝 Edit</button>\
+              <button id='ob_close' type='button'>❌ Close</button>\
             </div>",
             val.to_html_status()
         ))
