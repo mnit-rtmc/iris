@@ -10,6 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use serde_json::Value;
 use std::fmt;
 
 /// An optional value which has impl Display
@@ -24,6 +25,15 @@ where
         match &self.0 {
             Some(v) => write!(f, "{}", v),
             None => Ok(()),
+        }
+    }
+}
+
+impl From<OptVal<u32>> for Value {
+    fn from(val: OptVal<u32>) -> Self {
+        match val.0 {
+            Some(num) => Value::Number(num.into()),
+            None => Value::Null,
         }
     }
 }

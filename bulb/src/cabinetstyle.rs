@@ -12,10 +12,13 @@
 //
 use crate::card::Card;
 use crate::util::{HtmlStr, OptVal};
-use crate::Result;
+use crate::{ElemCast, Result};
 use serde::{Deserialize, Serialize};
+use serde_json::map::Map;
+use serde_json::Value;
+use std::str::FromStr;
 use wasm_bindgen::JsValue;
-use web_sys::Document;
+use web_sys::{Document, HtmlInputElement};
 
 /// Cabinet Style
 #[derive(Debug, Deserialize, Serialize)]
@@ -56,28 +59,28 @@ impl Card for CabinetStyle {
         let dip = OptVal(self.dip);
         format!(
             "<div class='row'>\
-              <label for='form_pp1'>Police Panel Pin 1</label>\
-              <input id='form_pp1' type='number' min='1' max='104' \
+              <label for='edit_pp1'>Police Panel Pin 1</label>\
+              <input id='edit_pp1' type='number' min='1' max='104' \
                      size='8' value='{police_panel_pin_1}'/>\
             </div>\
             <div class='row'>\
-              <label for='form_pp2'>Police Panel Pin 2</label>\
-              <input id='form_pp2' type='number' min='1' max='104' \
+              <label for='edit_pp2'>Police Panel Pin 2</label>\
+              <input id='edit_pp2' type='number' min='1' max='104' \
                      size='8' value='{police_panel_pin_2}'/>\
             </div>\
             <div class='row'>\
-              <label for='form_wr1'>Watchdog Reset Pin 1</label>\
-              <input id='form_wr1' type='number' min='1' max='104' \
+              <label for='edit_wr1'>Watchdog Reset Pin 1</label>\
+              <input id='edit_wr1' type='number' min='1' max='104' \
                      size='8' value='{watchdog_reset_pin_1}'/>\
             </div>\
             <div class='row'>\
-              <label for='form_wr2'>Watchdog Reset Pin 2</label>\
-              <input id='form_wr2' type='number' min='1' max='104' \
+              <label for='edit_wr2'>Watchdog Reset Pin 2</label>\
+              <input id='edit_wr2' type='number' min='1' max='104' \
                      size='8' value='{watchdog_reset_pin_2}'/>\
             </div>\
             <div class='row'>\
-              <label for='form_dip'>Dip</label>\
-              <input id='form_dip' type='number' min='0' max='255' \
+              <label for='edit_dip'>Dip</label>\
+              <input id='edit_dip' type='number' min='0' max='255' \
                      size='8' value='{dip}'/>\
             </div>"
         )
@@ -85,6 +88,37 @@ impl Card for CabinetStyle {
 
     /// Get changed fields from Edit form
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
-        todo!()
+        let val = Self::new(json)?;
+        let mut obj = Map::new();
+        let pin = input_number(doc, "edit_pp1");
+        if pin != val.police_panel_pin_1 {
+            obj.insert("police_panel_pin_1".to_string(), OptVal(pin).into());
+        }
+        let pin = input_number(doc, "edit_pp2");
+        if pin != val.police_panel_pin_2 {
+            obj.insert("police_panel_pin_2".to_string(), OptVal(pin).into());
+        }
+        let pin = input_number(doc, "edit_wr1");
+        if pin != val.watchdog_reset_pin_1 {
+            obj.insert("watchdog_reset_pin_1".to_string(), OptVal(pin).into());
+        }
+        let pin = input_number(doc, "edit_wr2");
+        if pin != val.watchdog_reset_pin_2 {
+            obj.insert("watchdog_reset_pin_2".to_string(), OptVal(pin).into());
+        }
+        let dip = input_number(doc, "edit_dip");
+        if dip != val.dip {
+            obj.insert("dip".to_string(), OptVal(dip).into());
+        }
+        Ok(Value::Object(obj).to_string())
     }
+}
+
+/// Get a number value from an `input` element
+fn input_number<T: FromStr>(doc: &Document, id: &str) -> Option<T> {
+    doc.elem::<HtmlInputElement>(id)
+        .unwrap()
+        .value()
+        .parse()
+        .ok()
 }
