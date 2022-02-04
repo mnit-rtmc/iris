@@ -95,7 +95,7 @@ impl ErrorStatus for SonarError {
     fn status_code(&self) -> StatusCode {
         match self {
             Self::InvalidName => StatusCode::BadRequest,
-            Self::InvalidValue => StatusCode::BadRequest,
+            Self::InvalidValue => StatusCode::UnprocessableEntity,
             Self::Forbidden => StatusCode::Forbidden,
             Self::NotFound => StatusCode::NotFound,
             Self::IO(e) => e.status_code(),
@@ -381,7 +381,7 @@ async fn update_sonar_object(tp: &str, mut req: Request<()>) -> tide::Result {
     let nm = resp!(obj_name(tp, &req));
     let body: Value = req.body_json().await?;
     if !body.is_object() {
-        return bad_request("invalid request");
+        return bad_request("body must be a JSON object");
     }
     let mut c = resp!(connection(&req).await);
     for (key, value) in body.as_object().unwrap() {

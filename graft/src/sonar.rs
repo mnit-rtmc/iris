@@ -73,6 +73,8 @@ impl SonarError {
             Self::Forbidden
         } else if msg.starts_with("Invalid name") {
             Self::NotFound
+        } else if msg.starts_with("Invalid") {
+            Self::InvalidValue
         } else {
             warn!("SHOW {}", msg);
             Self::UnexpectedMessage
