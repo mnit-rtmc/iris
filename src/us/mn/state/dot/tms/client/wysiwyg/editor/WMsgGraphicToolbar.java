@@ -75,8 +75,11 @@ public class WMsgGraphicToolbar extends WToolbar {
 				throws Exception {
 			// get the selected graphic and add it using the controller
 			Graphic g = graphicList.getSelectedItem();
-			WController.println("Adding graphic %d", g.getGNumber());
-			controller.addGraphic(g);
+			if (g != null) {
+				WController.println("Adding graphic %d", g.getGNumber());
+				controller.addGraphic(g);
+			} else
+				WController.println("No graphic selected!");
 		}
 	};
 	
