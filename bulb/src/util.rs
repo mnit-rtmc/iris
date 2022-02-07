@@ -15,7 +15,7 @@ use serde_json::Value;
 use std::fmt;
 use std::str::FromStr;
 use wasm_bindgen::JsCast;
-use web_sys::{Document, HtmlInputElement};
+use web_sys::{Document, HtmlInputElement, HtmlSelectElement};
 
 /// An optional value which has impl Display
 #[derive(Debug)]
@@ -83,28 +83,48 @@ impl fmt::Display for HtmlStr<Option<&String>> {
     }
 }
 
-/// Helper trait to lookup elements
-pub trait ElemCast {
+/// Helper trait for DOM methods
+pub trait Dom {
     /// Get an element by ID and cast it
     fn elem<E: JsCast>(&self, id: &str) -> Result<E>;
+
+    /// Get and parse a `select` element value
+    fn select_parse<T: FromStr>(&self, id: &str) -> Option<T>;
+
+    /// Get and parse an `input` element value
+    fn input_parse<T: FromStr>(&self, id: &str) -> Option<T>;
+
+    /// Get a boolean `input` element value
+    fn input_bool(&self, id: &str) -> Option<bool>;
 }
 
-impl ElemCast for Document {
+impl Dom for Document {
     fn elem<E: JsCast>(&self, id: &str) -> Result<E> {
         Ok(self
             .get_element_by_id(id)
             .ok_or("id not found")?
             .dyn_into::<E>()?)
     }
-}
 
-/// Parse a value from an `input` element
-pub fn input_parse<T: FromStr>(doc: &Document, id: &str) -> Option<T> {
-    doc.elem::<HtmlInputElement>(id)
-        .unwrap()
-        .value()
-        .parse()
-        .ok()
+    fn select_parse<T: FromStr>(&self, id: &str) -> Option<T> {
+        self.elem::<HtmlSelectElement>(id)
+            .unwrap()
+            .value()
+            .parse()
+            .ok()
+    }
+
+    fn input_parse<T: FromStr>(&self, id: &str) -> Option<T> {
+        self.elem::<HtmlInputElement>(id)
+            .unwrap()
+            .value()
+            .parse()
+            .ok()
+    }
+
+    fn input_bool(&self, id: &str) -> Option<bool> {
+        Some(self.elem::<HtmlInputElement>(id).unwrap().checked())
+    }
 }
 
 #[cfg(test)]

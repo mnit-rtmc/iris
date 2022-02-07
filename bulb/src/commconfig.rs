@@ -11,13 +11,13 @@
 // GNU General Public License for more details.
 //
 use crate::card::{Card, NAME};
-use crate::util::{input_parse, HtmlStr};
-use crate::{protocols_html, ElemCast, Result};
+use crate::util::{Dom, HtmlStr};
+use crate::{protocols_html, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
 use wasm_bindgen::JsValue;
-use web_sys::{Document, HtmlInputElement};
+use web_sys::Document;
 
 /// Comm configuration
 #[derive(Debug, Deserialize, Serialize)]
@@ -113,11 +113,25 @@ impl Card for CommConfig {
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         let mut obj = Map::new();
-        let desc = doc.elem::<HtmlInputElement>("edit_desc")?.value();
-        if desc != val.description {
-            obj.insert("description".to_string(), Value::String(desc));
+        if let Some(desc) = doc.input_parse::<String>("edit_desc") {
+            if desc != val.description {
+                obj.insert("description".to_string(), Value::String(desc));
+            }
         }
-        if let Some(timeout_ms) = input_parse::<u32>(doc, "edit_timeout") {
+        if let Some(protocol) = doc.select_parse::<u32>("edit_protocol") {
+            if protocol != val.protocol {
+                obj.insert(
+                    "protocol".to_string(),
+                    Value::Number(protocol.into()),
+                );
+            }
+        }
+        if let Some(modem) = doc.input_bool("edit_modem") {
+            if modem != val.modem {
+                obj.insert("modem".to_string(), Value::Bool(modem));
+            }
+        }
+        if let Some(timeout_ms) = doc.input_parse::<u32>("edit_timeout") {
             if timeout_ms != val.timeout_ms {
                 obj.insert(
                     "timeout_ms".to_string(),
@@ -125,7 +139,7 @@ impl Card for CommConfig {
                 );
             }
         }
-        if let Some(poll_period_sec) = input_parse::<u32>(doc, "edit_poll") {
+        if let Some(poll_period_sec) = doc.input_parse::<u32>("edit_poll") {
             if poll_period_sec != val.poll_period_sec {
                 obj.insert(
                     "poll_period_sec".to_string(),
@@ -133,7 +147,7 @@ impl Card for CommConfig {
                 );
             }
         }
-        if let Some(long_poll_period_sec) = input_parse::<u32>(doc, "edit_long")
+        if let Some(long_poll_period_sec) = doc.input_parse::<u32>("edit_long")
         {
             if long_poll_period_sec != val.long_poll_period_sec {
                 obj.insert(
@@ -142,8 +156,7 @@ impl Card for CommConfig {
                 );
             }
         }
-        if let Some(idle_disconnect_sec) = input_parse::<u32>(doc, "edit_idle")
-        {
+        if let Some(idle_disconnect_sec) = doc.input_parse::<u32>("edit_idle") {
             if idle_disconnect_sec != val.idle_disconnect_sec {
                 obj.insert(
                     "idle_disconnect_sec".to_string(),
@@ -152,7 +165,7 @@ impl Card for CommConfig {
             }
         }
         if let Some(no_response_disconnect_sec) =
-            input_parse::<u32>(doc, "edit_no_resp")
+            doc.input_parse::<u32>("edit_no_resp")
         {
             if no_response_disconnect_sec != val.no_response_disconnect_sec {
                 obj.insert(

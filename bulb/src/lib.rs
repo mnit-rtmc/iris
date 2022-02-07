@@ -40,7 +40,7 @@ use commconfig::CommConfig;
 use commlink::CommLink;
 use controller::Controller;
 use modem::Modem;
-use util::ElemCast;
+use util::Dom;
 
 /// Comm protocol
 #[derive(Debug, Deserialize, Serialize)]

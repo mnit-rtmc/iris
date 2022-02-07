@@ -11,8 +11,8 @@
 // GNU General Public License for more details.
 //
 use crate::card::{Card, NAME};
-use crate::util::{input_parse, HtmlStr};
-use crate::{ElemCast, Result};
+use crate::util::{Dom, HtmlStr};
+use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
@@ -32,7 +32,7 @@ pub struct Alarm {
 
 impl Card for Alarm {
     const TNAME: &'static str = "Alarm";
-    const ENAME: &'static str = "⚠ Alarm";
+    const ENAME: &'static str = "🚨 Alarm";
     const HAS_STATUS: bool = true;
     const URI: &'static str = "/iris/api/alarm";
 
@@ -127,7 +127,7 @@ impl Card for Alarm {
                 },
             );
         }
-        if let Some(pin) = input_parse::<u32>(doc, "edit_pin") {
+        if let Some(pin) = doc.input_parse::<u32>("edit_pin") {
             if pin != val.pin {
                 obj.insert("pin".to_string(), Value::Number(pin.into()));
             }
