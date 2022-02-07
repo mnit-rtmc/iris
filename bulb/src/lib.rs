@@ -49,6 +49,13 @@ pub struct Protocol {
     pub description: String,
 }
 
+/// Controller conditions
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Condition {
+    pub id: u32,
+    pub description: String,
+}
+
 /// Fetch a GET request
 async fn fetch_get(uri: &str) -> Result<JsValue> {
     let req = Request::new_with_str(uri)?;
@@ -255,6 +262,7 @@ fn build_card(tp: &str, json: &JsValue, ct: CardType) -> Result<String> {
 #[derive(Default)]
 struct State {
     protocols: Vec<Protocol>,
+    conditions: Vec<Condition>,
     selected: Option<CardState>,
 }
 
@@ -280,6 +288,12 @@ pub async fn start() -> Result<()> {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
         state.protocols.append(&mut protocols);
+    });
+    let json = fetch_get(&"/iris/api/condition").await?;
+    let mut conditions = json.into_serde::<Vec<Condition>>().unwrap_throw();
+    STATE.with(|rc| {
+        let mut state = rc.borrow_mut();
+        state.conditions.append(&mut conditions);
     });
 
     let sb_type: HtmlSelectElement = doc.elem("sb_type")?;
@@ -317,6 +331,28 @@ pub fn protocols_html(selected: u32) -> String {
             }
             html.push('>');
             html.push_str(&protocol.description);
+            html.push_str("</option>");
+        }
+        html.push_str("</select>");
+        html
+    })
+}
+
+/// Create an HTML `select` element of controller conditions
+pub fn conditions_html(selected: u32) -> String {
+    STATE.with(|rc| {
+        let state = rc.borrow();
+        let mut html = String::new();
+        html.push_str("<select id='edit_condition'>");
+        for condition in &state.conditions {
+            html.push_str("<option value='");
+            html.push_str(&condition.id.to_string());
+            html.push('\'');
+            if selected == condition.id {
+                html.push_str(" selected");
+            }
+            html.push('>');
+            html.push_str(&condition.description);
             html.push_str("</option>");
         }
         html.push_str("</select>");

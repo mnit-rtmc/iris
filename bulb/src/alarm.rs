@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
 use wasm_bindgen::JsValue;
-use web_sys::{Document, HtmlInputElement};
+use web_sys::Document;
 
 /// Alarm
 #[derive(Debug, Deserialize, Serialize)]
@@ -112,12 +112,14 @@ impl Card for Alarm {
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         let mut obj = Map::new();
-        let desc = doc.elem::<HtmlInputElement>("edit_desc")?.value();
-        if desc != val.description {
-            obj.insert("description".to_string(), Value::String(desc));
+        if let Some(desc) = doc.input_parse::<String>("edit_desc") {
+            if desc != val.description {
+                obj.insert("description".to_string(), Value::String(desc));
+            }
         }
-        let ctrl = doc.elem::<HtmlInputElement>("edit_ctrl")?.value();
-        let ctrl = if ctrl.is_empty() { None } else { Some(ctrl) };
+        let ctrl = doc
+            .input_parse::<String>("edit_ctrl")
+            .filter(|c| !c.is_empty());
         if ctrl != val.controller {
             obj.insert(
                 "controller".to_string(),

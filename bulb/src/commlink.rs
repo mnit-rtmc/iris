@@ -11,9 +11,11 @@
 // GNU General Public License for more details.
 //
 use crate::card::{disabled_attr, Card, NAME};
-use crate::util::HtmlStr;
+use crate::util::{Dom, HtmlStr};
 use crate::Result;
 use serde::{Deserialize, Serialize};
+use serde_json::map::Map;
+use serde_json::Value;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
 
@@ -25,11 +27,13 @@ pub struct CommLink {
     pub uri: String,
     pub comm_config: String,
     pub poll_enabled: bool,
+    pub connected: Option<bool>,
 }
 
 impl Card for CommLink {
     const TNAME: &'static str = "Comm Link";
     const ENAME: &'static str = "🔗 Comm Link";
+    const HAS_STATUS: bool = true;
     const URI: &'static str = "/iris/api/comm_link";
 
     fn is_match(&self, tx: &str) -> bool {
@@ -55,6 +59,26 @@ impl Card for CommLink {
         )
     }
 
+    /// Convert to status HTML
+    fn to_html_status(&self) -> String {
+        let description = HtmlStr(&self.description);
+        let connected = if *self.connected.as_ref().unwrap_or(&false) {
+            "Yes (online)"
+        } else {
+            "No (offline)"
+        };
+        format!(
+            "<div class='row'>\
+              <span>Description</span>\
+              <span class='info'>{description}</span>\
+            </div>\
+            <div class='row'>\
+              <span>Connected</span>\
+              <span class='info'>{connected}</span>\
+            </div>"
+        )
+    }
+
     /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
         let description = HtmlStr(&self.description);
@@ -63,29 +87,57 @@ impl Card for CommLink {
         let comm_config = HtmlStr(&self.comm_config);
         format!(
             "<div class='row'>\
-              <label for='form_description'>Description</label>\
-              <input id='form_description' maxlength='32' size='24' \
+              <label for='edit_desc'>Description</label>\
+              <input id='edit_desc' maxlength='32' size='24' \
                      value='{description}'/>\
             </div>\
             <div class='row'>\
-              <label for='form_uri'>URI</label>\
-              <input id='form_uri' maxlength='256' size='28' \
+              <label for='edit_uri'>URI</label>\
+              <input id='edit_uri' maxlength='256' size='28' \
                      value='{uri}'/>\
             </div>\
             <div class='row'>\
-              <label for='form_config'>Comm Config</label>\
-              <input id='form_config' maxlength='10' size='10' \
+              <label for='edit_config'>Comm Config</label>\
+              <input id='edit_config' maxlength='10' size='10' \
                      value='{comm_config}'/>\
             </div>\
             <div class='row'>\
-              <label for='form_enabled'>Poll Enabled</label>\
-              <input id='form_enabled' type='checkbox'{enabled}/>\
+              <label for='edit_enabled'>Poll Enabled</label>\
+              <input id='edit_enabled' type='checkbox'{enabled}/>\
             </div>"
         )
     }
 
     /// Get changed fields from Edit form
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
-        todo!()
+        let val = Self::new(json)?;
+        let mut obj = Map::new();
+        if let Some(desc) = doc.input_parse::<String>("edit_desc") {
+            if desc != val.description {
+                obj.insert("description".to_string(), Value::String(desc));
+            }
+        }
+        if let Some(uri) = doc.input_parse::<String>("edit_uri") {
+            if uri != val.uri {
+                obj.insert("uri".to_string(), Value::String(uri));
+            }
+        }
+        if let Some(comm_config) = doc.input_parse::<String>("edit_config") {
+            if comm_config != val.comm_config {
+                obj.insert(
+                    "comm_config".to_string(),
+                    Value::String(comm_config),
+                );
+            }
+        }
+        if let Some(poll_enabled) = doc.input_bool("edit_enabled") {
+            if poll_enabled != val.poll_enabled {
+                obj.insert(
+                    "poll_enabled".to_string(),
+                    Value::Bool(poll_enabled),
+                );
+            }
+        }
+        Ok(Value::Object(obj).to_string())
     }
 }

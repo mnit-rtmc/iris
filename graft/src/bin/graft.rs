@@ -163,6 +163,9 @@ async fn main() -> tide::Result<()> {
         .at("/comm_protocol")
         .get(|req| list_objects("comm_protocol", req));
     route
+        .at("/condition")
+        .get(|req| list_objects("condition", req));
+    route
         .at("/controller_stat")
         .get(|req| list_objects("controller_stat", req));
     add_routes!(route, "alarm");

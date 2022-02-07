@@ -28,6 +28,7 @@ features = [
   'HtmlButtonElement',
   'HtmlInputElement',
   'HtmlSelectElement',
+  'HtmlTextAreaElement',
   'Request',
   'RequestInit',
   'RequestMode',

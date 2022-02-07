@@ -11,9 +11,11 @@
 // GNU General Public License for more details.
 //
 use crate::card::{disabled_attr, Card, NAME};
-use crate::util::HtmlStr;
-use crate::Result;
+use crate::util::{Dom, HtmlStr};
+use crate::{conditions_html, Result};
 use serde::{Deserialize, Serialize};
+use serde_json::map::Map;
+use serde_json::Value;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
 
@@ -104,38 +106,43 @@ impl Card for Controller {
         let comm_link = HtmlStr(&self.comm_link);
         let drop_id = self.drop_id;
         let cabinet_style = HtmlStr(self.cabinet_style.as_ref());
+        let conditions = conditions_html(self.condition);
         let geo_loc = HtmlStr(&self.geo_loc);
         let notes = HtmlStr(&self.notes);
         let password = HtmlStr(self.password.as_ref());
         format!(
             "<div class='row'>\
-              <label for='form_comm_link'>Comm Link</label>\
-              <input id='form_comm_link' maxlength='20' size='20' \
+              <label for='edit_comm_link'>Comm Link</label>\
+              <input id='edit_comm_link' maxlength='20' size='20' \
                      value='{comm_link}'/>\
             </div>\
             <div class='row'>\
-              <label for='form_drop_id'>Drop ID</label>\
-              <input id='form_drop_id' type='number' min='0'
+              <label for='edit_drop_id'>Drop ID</label>\
+              <input id='edit_drop_id' type='number' min='0'
                      max='65535' size='6' value='{drop_id}'/>\
             </div>\
             <div class='row'>\
-              <label for='form_cabinet'>Cabinet Style</label>\
-              <input id='form_cabinet' maxlength='20' size='20' \
+              <label for='edit_cabinet'>Cabinet Style</label>\
+              <input id='edit_cabinet' maxlength='20' size='20' \
                      value='{cabinet_style}'/>\
             </div>\
             <div class='row'>\
-              <label for='form_geo_loc'>Geo Loc</label>\
-              <input id='form_geo_loc' maxlength='20' size='20' \
+              <label for='edit_condition'>Condition</label>\
+              {conditions}\
+            </div>\
+            <div class='row'>\
+              <label for='edit_geo_loc'>Geo Loc</label>\
+              <input id='edit_geo_loc' maxlength='20' size='20' \
                      value='{geo_loc}'/>\
             </div>\
             <div class='row'>\
-              <label for='form_notes'>Notes</label>\
-              <textarea id='form_notes' maxlength='128' rows='2' \
+              <label for='edit_notes'>Notes</label>\
+              <textarea id='edit_notes' maxlength='128' rows='2' \
                         cols='26'/>{notes}</textarea>\
             </div>\
             <div class='row'>\
-              <label for='form_password'>Password</label>\
-              <input id='form_password' maxlength='32' size='26' \
+              <label for='edit_password'>Password</label>\
+              <input id='edit_password' maxlength='32' size='26' \
                      value='{password}'/>\
             </div>"
         )
@@ -143,6 +150,58 @@ impl Card for Controller {
 
     /// Get changed fields from Edit form
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
-        todo!()
+        let val = Self::new(json)?;
+        let mut obj = Map::new();
+        if let Some(comm_link) = doc.input_parse::<String>("edit_comm_link") {
+            if comm_link != val.comm_link {
+                obj.insert("comm_link".to_string(), Value::String(comm_link));
+            }
+        }
+        if let Some(drop_id) = doc.input_parse::<u16>("edit_drop_id") {
+            if drop_id != val.drop_id {
+                obj.insert(
+                    "drop_id".to_string(),
+                    Value::Number(drop_id.into()),
+                );
+            }
+        }
+        let cabinet_style = doc
+            .input_parse::<String>("edit_cabinet")
+            .filter(|c| !c.is_empty());
+        if cabinet_style != val.cabinet_style {
+            obj.insert(
+                "cabinet_style".to_string(),
+                match cabinet_style {
+                    Some(cab) => Value::String(cab),
+                    None => Value::Null,
+                },
+            );
+        }
+        if let Some(condition) = doc.select_parse::<u32>("edit_condition") {
+            if condition != val.condition {
+                obj.insert(
+                    "condition".to_string(),
+                    Value::Number(condition.into()),
+                );
+            }
+        }
+        if let Some(notes) = doc.text_area_parse::<String>("edit_notes") {
+            if notes != val.notes {
+                obj.insert("notes".to_string(), Value::String(notes));
+            }
+        }
+        let password = doc
+            .input_parse::<String>("edit_password")
+            .filter(|p| !p.is_empty());
+        if password != val.password {
+            obj.insert(
+                "password".to_string(),
+                match password {
+                    Some(password) => Value::String(password),
+                    None => Value::Null,
+                },
+            );
+        }
+        Ok(Value::Object(obj).to_string())
     }
 }

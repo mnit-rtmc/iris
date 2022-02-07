@@ -15,7 +15,9 @@ use serde_json::Value;
 use std::fmt;
 use std::str::FromStr;
 use wasm_bindgen::JsCast;
-use web_sys::{Document, HtmlInputElement, HtmlSelectElement};
+use web_sys::{
+    Document, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
+};
 
 /// An optional value which has impl Display
 #[derive(Debug)]
@@ -96,6 +98,9 @@ pub trait Dom {
 
     /// Get a boolean `input` element value
     fn input_bool(&self, id: &str) -> Option<bool>;
+
+    /// Get and parse a `textarea` element value
+    fn text_area_parse<T: FromStr>(&self, id: &str) -> Option<T>;
 }
 
 impl Dom for Document {
@@ -124,6 +129,14 @@ impl Dom for Document {
 
     fn input_bool(&self, id: &str) -> Option<bool> {
         Some(self.elem::<HtmlInputElement>(id).unwrap().checked())
+    }
+
+    fn text_area_parse<T: FromStr>(&self, id: &str) -> Option<T> {
+        self.elem::<HtmlTextAreaElement>(id)
+            .unwrap()
+            .value()
+            .parse()
+            .ok()
     }
 }
 
