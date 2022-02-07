@@ -86,12 +86,12 @@ async fn fetch_patch(window: &Window, uri: &str, json: &JsValue) -> Result<()> {
 /// Populate `sb_list` with `tp` card types
 async fn populate_list(tp: String, tx: String) {
     match tp.as_str() {
-        Alarm::ENAME => populate_cards::<Alarm>(tx).await,
-        CabinetStyle::ENAME => populate_cards::<CabinetStyle>(tx).await,
-        CommConfig::ENAME => populate_cards::<CommConfig>(tx).await,
-        CommLink::ENAME => populate_cards::<CommLink>(tx).await,
-        Controller::ENAME => populate_cards::<Controller>(tx).await,
-        Modem::ENAME => populate_cards::<Modem>(tx).await,
+        Alarm::TNAME => populate_cards::<Alarm>(tx).await,
+        CabinetStyle::TNAME => populate_cards::<CabinetStyle>(tx).await,
+        CommConfig::TNAME => populate_cards::<CommConfig>(tx).await,
+        CommLink::TNAME => populate_cards::<CommLink>(tx).await,
+        Controller::TNAME => populate_cards::<Controller>(tx).await,
+        Modem::TNAME => populate_cards::<Modem>(tx).await,
         _ => (),
     }
 }
@@ -123,12 +123,12 @@ async fn try_populate_cards<C: Card>(tx: String) -> Result<()> {
 /// Handle a card click event
 async fn click_card(tp: String, name: String) {
     match tp.as_str() {
-        Alarm::ENAME => expand_card::<Alarm>(name).await,
-        CabinetStyle::ENAME => expand_card::<CabinetStyle>(name).await,
-        CommConfig::ENAME => expand_card::<CommConfig>(name).await,
-        CommLink::ENAME => expand_card::<CommLink>(name).await,
-        Controller::ENAME => expand_card::<Controller>(name).await,
-        Modem::ENAME => expand_card::<Modem>(name).await,
+        Alarm::TNAME => expand_card::<Alarm>(name).await,
+        CabinetStyle::TNAME => expand_card::<CabinetStyle>(name).await,
+        CommConfig::TNAME => expand_card::<CommConfig>(name).await,
+        CommLink::TNAME => expand_card::<CommLink>(name).await,
+        Controller::TNAME => expand_card::<Controller>(name).await,
+        Modem::TNAME => expand_card::<Modem>(name).await,
         _ => (),
     }
 }
@@ -297,23 +297,33 @@ pub async fn start() -> Result<()> {
     });
 
     let sb_type: HtmlSelectElement = doc.elem("sb_type")?;
-    let opt = doc.create_element("option")?;
-    opt.append_with_str_1("")?;
-    sb_type.append_child(&opt)?;
-    let group = doc.create_element("optgroup")?;
-    group.set_attribute("label", "🧰 Maintenance")?;
-    add_option::<Alarm>(&doc, &group)?;
-    add_option::<CabinetStyle>(&doc, &group)?;
-    add_option::<CommConfig>(&doc, &group)?;
-    add_option::<CommLink>(&doc, &group)?;
-    add_option::<Controller>(&doc, &group)?;
-    add_option::<Modem>(&doc, &group)?;
-    sb_type.append_child(&group)?;
+    sb_type.set_inner_html(&types_html());
     add_select_event_listener(&sb_type, handle_sb_type_ev)?;
     let sb_input = doc.elem("sb_input")?;
     add_input_event_listener(&sb_input, handle_search_ev)?;
     add_click_event_listener(&doc.elem("sb_list")?)?;
     Ok(())
+}
+
+/// Create types `select` element
+fn types_html() -> String {
+    let (alarm_tname, alarm_ename) = (Alarm::TNAME, Alarm::ENAME);
+    let (cab_tname, cab_ename) = (CabinetStyle::TNAME, CabinetStyle::ENAME);
+    let (cc_tname, cc_ename) = (CommConfig::TNAME, CommConfig::ENAME);
+    let (cl_tname, cl_ename) = (CommLink::TNAME, CommLink::ENAME);
+    let (ctr_tname, ctr_ename) = (Controller::TNAME, Controller::ENAME);
+    let (mdm_tname, mdm_ename) = (Modem::TNAME, Modem::ENAME);
+    format!(
+        "<option/>\
+        <optgroup label='🧰 Maintenance'>\
+          <option value='{alarm_tname}'>{alarm_ename}</option>
+          <option value='{cab_tname}'>{cab_ename}</option>
+          <option value='{cc_tname}'>{cc_ename}</option>
+          <option value='{cl_tname}'>{cl_ename}</option>
+          <option value='{ctr_tname}'>{ctr_ename}</option>
+          <option value='{mdm_tname}'>{mdm_ename}</option>
+        </optgroup>"
+    )
 }
 
 /// Create an HTML `select` element of comm protocols
@@ -360,14 +370,6 @@ pub fn conditions_html(selected: u32) -> String {
     })
 }
 
-/// Add an option element to a group
-fn add_option<C: Card>(doc: &Document, group: &Element) -> Result<()> {
-    let opt = doc.create_element("option")?;
-    opt.append_with_str_1(C::ENAME)?;
-    group.append_child(&opt)?;
-    Ok(())
-}
-
 /// Handle an event from "sb_type" `select` element
 fn handle_sb_type_ev(tp: String) {
     let window = web_sys::window().unwrap_throw();
@@ -383,17 +385,12 @@ fn handle_search_ev(tx: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     deselect_card(&doc).unwrap_throw();
-    let tp = selected_type(&doc).unwrap_throw();
-    spawn_local(populate_list(tp, tx));
+    if let Some(tp) = doc.select_parse::<String>("sb_type") {
+        spawn_local(populate_list(tp, tx));
+    }
 }
 
-/// Get the selected type
-fn selected_type(doc: &Document) -> Result<String> {
-    let sb_type: HtmlSelectElement = doc.elem("sb_type")?;
-    Ok(sb_type.value())
-}
-
-/// Add an "input" event listener to an element
+/// Add an "input" event listener to a `select` element
 fn add_select_event_listener(
     elem: &HtmlSelectElement,
     handle_ev: fn(String),
@@ -462,9 +459,10 @@ fn handle_click_ev(elem: &Element) {
         handle_button_click_ev(&doc, elem);
     } else if let Some(card) = elem.closest(".card").unwrap_throw() {
         if let Some(name) = card.get_attribute("name") {
-            let tp = selected_type(&doc).unwrap_throw();
-            deselect_card(&doc).unwrap_throw();
-            spawn_local(click_card(tp, name));
+            if let Some(tp) = doc.select_parse::<String>("sb_type") {
+                deselect_card(&doc).unwrap_throw();
+                spawn_local(click_card(tp, name));
+            }
         }
     }
 }
