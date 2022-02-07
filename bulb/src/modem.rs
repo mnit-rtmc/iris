@@ -11,9 +11,11 @@
 // GNU General Public License for more details.
 //
 use crate::card::{disabled_attr, Card};
-use crate::util::HtmlStr;
+use crate::util::{Dom, HtmlStr};
 use crate::Result;
 use serde::{Deserialize, Serialize};
+use serde_json::map::Map;
+use serde_json::Value;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
 
@@ -67,7 +69,7 @@ impl Card for Modem {
             <div class='row'>\
               <label for='edit_timeout'>Timeout (ms)</label>\
               <input id='edit_timeout' type='number' min='0' size='8' \
-                     max='20000' value='{timeout_ms}'/>\
+                     max='90000' value='{timeout_ms}'/>\
             </div>\
             <div class='row'>\
               <label for='edit_enabled'>Enabled</label>\
@@ -78,6 +80,31 @@ impl Card for Modem {
 
     /// Get changed fields from Edit form
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
-        todo!()
+        let val = Self::new(json)?;
+        let mut obj = Map::new();
+        if let Some(uri) = doc.input_parse::<String>("edit_uri") {
+            if uri != val.uri {
+                obj.insert("uri".to_string(), Value::String(uri));
+            }
+        }
+        if let Some(config) = doc.input_parse::<String>("edit_config") {
+            if config != val.config {
+                obj.insert("config".to_string(), Value::String(config));
+            }
+        }
+        if let Some(timeout_ms) = doc.input_parse::<u32>("edit_timeout") {
+            if timeout_ms != val.timeout_ms {
+                obj.insert(
+                    "timeout_ms".to_string(),
+                    Value::Number(timeout_ms.into()),
+                );
+            }
+        }
+        if let Some(enabled) = doc.input_bool("edit_enabled") {
+            if enabled != val.enabled {
+                obj.insert("enabled".to_string(), Value::Bool(enabled));
+            }
+        }
+        Ok(Value::Object(obj).to_string())
     }
 }
