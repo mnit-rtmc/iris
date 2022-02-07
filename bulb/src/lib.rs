@@ -477,7 +477,6 @@ fn handle_button_click_ev(doc: &Document, elem: &Element) {
             id if id == "ob_close" => cs.replace_card(&doc, CardType::Compact),
             id if id == "ob_delete" => todo!(),
             id if id == "ob_edit" => cs.replace_card(&doc, CardType::Edit),
-            id if id == "ob_status" => cs.replace_card(&doc, CardType::Status),
             id if id == "ob_save" => spawn_local(cs.save_changed()),
             id => console::log_1(&id.into()),
         }

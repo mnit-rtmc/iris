@@ -30,12 +30,13 @@ authentication.
 * graft
   - [X] Add routes for maintenance resources
   - [X] Date / time formatting (RFC 3339)
+  - [ ] Verify user's domain on login
 * bulb
   - [X] Resource type selector with card list
   - [X] Search filter
   - [X] Maintenance object forms
   - [X] Html escaping
-  - [ ] Updating values (save)
+  - [X] Updating values (save)
   - [ ] Creating objects
   - [ ] Deleting objects
   - [X] Add status button / view

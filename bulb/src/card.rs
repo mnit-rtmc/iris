@@ -88,11 +88,6 @@ pub trait Card: DeserializeOwned {
         let ename = Self::ENAME;
         let val = Self::new(json)?;
         let name = HtmlStr(val.name());
-        let status = if Self::HAS_STATUS {
-            "<button id='ob_status' type='button'>📄 Status</button>"
-        } else {
-            ""
-        };
         Ok(format!(
             "<div class='row'>\
               <div class='{TITLE}'>{ename}</div>\
@@ -100,9 +95,9 @@ pub trait Card: DeserializeOwned {
             </div>\
             {}\
             <div class='row'>\
-              {status}
-              <button id='ob_delete' type='button'>🗑️ Delete</button>\
               <button id='ob_save' type='button'>🖍️ Save</button>\
+              <button id='ob_delete' type='button'>🗑️ Delete</button>\
+              <button id='ob_close' type='button'>❌ Close</button>\
             </div>",
             val.to_html_edit()
         ))
