@@ -253,6 +253,24 @@ fn invalid_char(c: char) -> bool {
     INVALID_CHARS.contains(&c)
 }
 
+/// Make a Sonar name (with validation)
+fn make_name(tp: &str, nm: &str) -> Result<String> {
+    if nm.len() > 64 || nm.contains(invalid_char) || nm.contains('/') {
+        Err(SonarError::InvalidName)
+    } else {
+        Ok(format!("{}/{}", tp, nm))
+    }
+}
+
+/// Make a Sonar attribute (with validation)
+fn make_att(nm: &str, att: &str) -> Result<String> {
+    if att.len() > 64 || att.contains(invalid_char) || att.contains('/') {
+        Err(SonarError::InvalidName)
+    } else {
+        Ok(format!("{}/{}", nm, att.to_case(Case::Camel)))
+    }
+}
+
 /// Get Sonar object name from a request
 fn obj_name(tp: &str, req: &Request<()>) -> Result<String> {
     match req.param("name") {
@@ -260,25 +278,9 @@ fn obj_name(tp: &str, req: &Request<()>) -> Result<String> {
             let name = percent_decode_str(name)
                 .decode_utf8()
                 .or(Err(SonarError::InvalidName))?;
-            if name.len() > 64
-                || name.contains(invalid_char)
-                || name.contains('/')
-            {
-                Err(SonarError::InvalidName)
-            } else {
-                Ok(format!("{}/{}", tp, name))
-            }
+            make_name(tp, &name)
         }
         Err(_) => Err(SonarError::InvalidName),
-    }
-}
-
-/// Get Sonar attribute name
-fn att_name(nm: &str, att: &str) -> Result<String> {
-    if att.len() > 64 || att.contains(invalid_char) || att.contains('/') {
-        Err(SonarError::InvalidName)
-    } else {
-        Ok(format!("{}/{}", nm, att.to_case(Case::Camel)))
     }
 }
 
@@ -353,12 +355,23 @@ fn make_json(tp_att: &(&str, &str), val: &str) -> Option<Value> {
 }
 
 /// Create a Sonar object from a `POST` request
-async fn create_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
+async fn create_sonar_object(tp: &str, mut req: Request<()>) -> tide::Result {
     log::info!("POST {}", req.url());
-    let nm = resp!(obj_name(tp, &req));
-    let mut c = resp!(connection(&req).await);
-    resp!(c.create_object(&nm).await);
-    Ok(Response::builder(StatusCode::Created).build())
+    let body: Value = req.body_json().await?;
+    match body.as_object() {
+        Some(obj) => match obj.get("name") {
+            Some(Value::String(name)) => {
+                let nm = resp!(make_name(tp, &name));
+                let mut c = resp!(connection(&req).await);
+                log::debug!("creating {}", nm);
+                resp!(c.create_object(&nm).await);
+                Ok(Response::builder(StatusCode::Created).build())
+            }
+            Some(_) => bad_request("invalid name"),
+            None => bad_request("missing name"),
+        },
+        None => bad_request("body must be a JSON object"),
+    }
 }
 
 /// Get Sonar attribute value
@@ -388,7 +401,7 @@ async fn update_sonar_object(tp: &str, mut req: Request<()>) -> tide::Result {
     }
     let mut c = resp!(connection(&req).await);
     for (key, value) in body.as_object().unwrap() {
-        let anm = resp!(att_name(&nm, &key));
+        let anm = resp!(make_att(&nm, &key));
         let value = resp!(att_value(value));
         log::debug!("{} = {}", anm, &value);
         resp!(c.update_object(&anm, &value).await);
