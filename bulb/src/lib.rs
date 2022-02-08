@@ -83,41 +83,53 @@ async fn fetch_patch(window: &Window, uri: &str, json: &JsValue) -> Result<()> {
     }
 }
 
+/// Fetch a POST request
+async fn fetch_post(window: &Window, uri: &str, json: &JsValue) -> Result<()> {
+    let req = Request::new_with_str_and_init(
+        uri,
+        RequestInit::new().method("POST").body(Some(json)),
+    )?;
+    let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
+    let resp: Response = resp.dyn_into().unwrap_throw();
+    match resp.status() {
+        200 => Ok(()),
+        _ => Err(resp.status_text().into()),
+    }
+}
+
 /// Populate `sb_list` with `tp` card types
 async fn populate_list(tp: String, tx: String) {
-    match tp.as_str() {
-        Alarm::TNAME => populate_cards::<Alarm>(tx).await,
-        CabinetStyle::TNAME => populate_cards::<CabinetStyle>(tx).await,
-        CommConfig::TNAME => populate_cards::<CommConfig>(tx).await,
-        CommLink::TNAME => populate_cards::<CommLink>(tx).await,
-        Controller::TNAME => populate_cards::<Controller>(tx).await,
-        Modem::TNAME => populate_cards::<Modem>(tx).await,
-        _ => (),
-    }
-}
-
-/// Populate cards in `sb_list`
-async fn populate_cards<C: Card>(tx: String) {
-    if let Err(e) = try_populate_cards::<C>(tx).await {
-        // ⛔ 🔒 unauthorized (401) should be handled here
-        console::log_1(&e);
-    }
-}
-
-/// Try to populate cards in `sb_list`
-async fn try_populate_cards<C: Card>(tx: String) -> Result<()> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    let sb_list = doc.elem::<Element>("sb_list")?;
-    if C::URI.is_empty() {
-        sb_list.set_inner_html("");
-    } else {
-        let json = fetch_get(C::URI).await?;
-        let tx = tx.to_lowercase();
-        let html = C::build_cards(&json, &tx)?;
-        sb_list.set_inner_html(&html);
+    let sb_list = doc.elem::<Element>("sb_list").unwrap_throw();
+    match create_cards(tp, tx).await {
+        Ok(cards) => sb_list.set_inner_html(&cards),
+        Err(e) => {
+            // ⛔ 🔒 unauthorized (401) should be handled here
+            console::log_1(&e);
+        }
     }
-    Ok(())
+}
+
+/// Create cards for `sb_list`
+async fn create_cards(tp: String, tx: String) -> Result<String> {
+    match tp.as_str() {
+        Alarm::TNAME => try_build_cards::<Alarm>(tx).await,
+        CabinetStyle::TNAME => try_build_cards::<CabinetStyle>(tx).await,
+        CommConfig::TNAME => try_build_cards::<CommConfig>(tx).await,
+        CommLink::TNAME => try_build_cards::<CommLink>(tx).await,
+        Controller::TNAME => try_build_cards::<Controller>(tx).await,
+        Modem::TNAME => try_build_cards::<Modem>(tx).await,
+        _ => Ok("".into()),
+    }
+}
+
+/// Try to build cards
+async fn try_build_cards<C: Card>(tx: String) -> Result<String> {
+    let json = fetch_get(C::URI).await?;
+    let tx = tx.to_lowercase();
+    let html = C::build_cards(&json, &tx)?;
+    Ok(html)
 }
 
 /// Handle a card click event
@@ -135,14 +147,15 @@ async fn click_card(tp: String, name: String) {
 
 /// Expand a card to a full form
 async fn expand_card<C: Card>(name: String) {
-    if name.is_empty() {
-        // todo: make "new" card?
-        return;
-    }
-    let cs = fetch_card::<C>(name).await;
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    cs.replace_card(&doc, CardType::Status);
+    if name.is_empty() {
+        let cs = CardState::new::<C>();
+        cs.replace_card(&doc, CardType::Create);
+    } else {
+        let cs = fetch_card::<C>(name).await;
+        cs.replace_card(&doc, CardType::Status);
+    }
 }
 
 /// Fetch a card with a GET request
@@ -154,7 +167,7 @@ async fn fetch_card<C: Card>(name: String) -> CardState {
         tname: C::TNAME,
         uri,
         name,
-        json,
+        json: Some(json),
     }
 }
 
@@ -168,19 +181,32 @@ struct CardState {
     /// Object name
     name: String,
     /// JSON value of object
-    json: JsValue,
+    json: Option<JsValue>,
 }
 
 impl CardState {
+    /// Create a new blank card state
+    fn new<C: Card>() -> Self {
+        CardState {
+            tname: C::TNAME,
+            uri: "".into(),
+            name: "".into(),
+            json: None,
+        }
+    }
+
     /// Replace a card element with another card type
     fn replace_card(self, doc: &Document, ct: CardType) {
         let id = format!("{}_{}", self.tname, &self.name);
         match doc.elem::<HtmlElement>(&id) {
             Ok(elem) => match build_card(&self.tname, &self.json, ct) {
                 Ok(html) => replace_card_html(&elem, ct, &html),
-                Err(e) => console::log_1(&(&e).into()),
+                Err(e) => {
+                    console::log_1(&(&e).into());
+                    return;
+                }
             },
-            Err(e) => console::log_1(&(&e).into()),
+            Err(e) => console::log_1(&format!("{:?} {}", e, id).into()),
         }
         STATE.with(|rc| {
             let mut state = rc.borrow_mut();
@@ -192,16 +218,16 @@ impl CardState {
     async fn save_changed(mut self) {
         let window = web_sys::window().unwrap_throw();
         let doc = window.document().unwrap_throw();
-        match try_changed_fields(&self, &doc) {
-            Ok(v) => {
-                let json = v.into();
-                if let Err(e) = fetch_patch(&window, &self.uri, &json).await {
-                    console::log_1(&e)
+        match &self.json {
+            Some(json) => {
+                match try_changed_fields(&self.tname, &doc, &json) {
+                    Ok(v) => save_changed_fields(&window, &self.uri, &v).await,
+                    Err(e) => console::log_1(&e),
                 }
+                self.fetch_again().await;
             }
-            Err(e) => console::log_1(&e),
+            None => try_create_new(&self.tname, &doc).await,
         }
-        self.fetch_again().await;
         self.replace_card(&doc, CardType::Compact);
     }
 
@@ -209,7 +235,15 @@ impl CardState {
     async fn fetch_again(&mut self) {
         let json = fetch_get(&self.uri).await.unwrap_throw();
         console::log_1(&json);
-        self.json = json;
+        self.json = Some(json);
+    }
+}
+
+/// Save changed fields
+async fn save_changed_fields(window: &Window, uri: &str, v: &str) {
+    let json = v.into();
+    if let Err(e) = fetch_patch(window, uri, &json).await {
+        console::log_1(&e)
     }
 }
 
@@ -232,21 +266,58 @@ fn replace_card_html(elem: &HtmlElement, ct: CardType, html: &str) {
     }
 }
 
+/// Try to create a new object
+async fn try_create_new(tp: &str, doc: &Document) {
+    if let Err(e) = create_new(tp, doc).await {
+        console::log_1(&e)
+    }
+}
+
+/// Create a new object
+async fn create_new(tp: &str, doc: &Document) -> Result<()> {
+    match tp {
+        Alarm::TNAME => do_create::<Alarm>(doc).await,
+        CabinetStyle::TNAME => do_create::<CabinetStyle>(doc).await,
+        CommConfig::TNAME => do_create::<CommConfig>(doc).await,
+        CommLink::TNAME => do_create::<CommLink>(doc).await,
+        Controller::TNAME => do_create::<Controller>(doc).await,
+        Modem::TNAME => do_create::<Modem>(doc).await,
+        _ => unreachable!(),
+    }
+}
+
+/// Create a new object
+async fn do_create<C: Card>(doc: &Document) -> Result<()> {
+    let window = web_sys::window().unwrap_throw();
+    let value = C::create_value(doc)?;
+    let json = value.into();
+    console::log_1(&json);
+    fetch_post(&window, &C::URI, &json).await
+}
+
 /// Try to retrieve changed fields on edit form
-fn try_changed_fields(cs: &CardState, doc: &Document) -> Result<String> {
-    match cs.tname {
-        Alarm::TNAME => Alarm::changed_fields(doc, &cs.json),
-        CabinetStyle::TNAME => CabinetStyle::changed_fields(doc, &cs.json),
-        CommConfig::TNAME => CommConfig::changed_fields(doc, &cs.json),
-        CommLink::TNAME => CommLink::changed_fields(doc, &cs.json),
-        Controller::TNAME => Controller::changed_fields(doc, &cs.json),
-        Modem::TNAME => Modem::changed_fields(doc, &cs.json),
+fn try_changed_fields(
+    tp: &str,
+    doc: &Document,
+    json: &JsValue,
+) -> Result<String> {
+    match tp {
+        Alarm::TNAME => Alarm::changed_fields(doc, json),
+        CabinetStyle::TNAME => CabinetStyle::changed_fields(doc, json),
+        CommConfig::TNAME => CommConfig::changed_fields(doc, json),
+        CommLink::TNAME => CommLink::changed_fields(doc, json),
+        Controller::TNAME => Controller::changed_fields(doc, json),
+        Modem::TNAME => Modem::changed_fields(doc, json),
         _ => unreachable!(),
     }
 }
 
 /// Build card using JSON value
-fn build_card(tp: &str, json: &JsValue, ct: CardType) -> Result<String> {
+fn build_card(
+    tp: &str,
+    json: &Option<JsValue>,
+    ct: CardType,
+) -> Result<String> {
     match tp {
         Alarm::TNAME => Alarm::build_card(json, ct),
         CabinetStyle::TNAME => CabinetStyle::build_card(json, ct),
@@ -374,7 +445,10 @@ pub fn conditions_html(selected: u32) -> String {
 fn handle_sb_type_ev(tp: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    deselect_card(&doc).unwrap_throw();
+    STATE.with(|rc| {
+        let mut state = rc.borrow_mut();
+        state.selected.take()
+    });
     let input: HtmlInputElement = doc.elem("sb_input").unwrap_throw();
     input.set_value("");
     spawn_local(populate_list(tp, "".into()));

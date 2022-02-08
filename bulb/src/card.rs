@@ -10,9 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::util::HtmlStr;
+use crate::util::{Dom, HtmlStr};
 use crate::Result;
 use serde::de::DeserializeOwned;
+use serde_json::map::Map;
+use serde_json::Value;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
 
@@ -22,11 +24,17 @@ const TITLE: &str = "title";
 /// CSS class for names
 pub const NAME: &str = "ob_name";
 
+/// Create new card
+const CREATE_CARD: &str = "<span class='create'>Create 🆕</span>";
+
 /// Type of card
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CardType {
     /// Compact in list
     Compact,
+
+    /// Create card
+    Create,
 
     /// Status card
     Status,
@@ -42,19 +50,27 @@ pub trait Card: DeserializeOwned {
     const URI: &'static str;
     const HAS_STATUS: bool = false;
 
+    const CREATE: &'static str = "\
+        <div class='row'>\
+           <label for='create_name'>Name</label>\
+           <input id='create_name' maxlength='24' size='24'/>\
+        </div>";
+
     /// Create from a JSON value
     fn new(json: &JsValue) -> Result<Self> {
         json.into_serde::<Self>().map_err(|e| e.to_string().into())
     }
 
     /// Build form using JSON value
-    fn build_card(json: &JsValue, ct: CardType) -> Result<String> {
-        match ct {
-            CardType::Compact => Self::build_compact_form(json),
-            CardType::Status if Self::HAS_STATUS => {
+    fn build_card(json: &Option<JsValue>, ct: CardType) -> Result<String> {
+        match (json, ct) {
+            (Some(json), CardType::Compact) => Self::build_compact_form(json),
+            (Some(json), CardType::Status) if Self::HAS_STATUS => {
                 Self::build_status_form(json)
             }
-            _ => Self::build_edit_form(json),
+            (_, CardType::Create) => Self::build_create_form(),
+            (None, _) => Ok(CREATE_CARD.into()),
+            (Some(json), _) => Self::build_edit_form(json),
         }
     }
 
@@ -62,6 +78,35 @@ pub trait Card: DeserializeOwned {
     fn build_compact_form(json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         Ok(val.to_html_compact())
+    }
+
+    /// Build a create card
+    fn build_create_form() -> Result<String> {
+        let ename = Self::ENAME;
+        let create = Self::CREATE;
+        Ok(format!(
+            "<div class='row'>\
+              <div class='{TITLE}'>{ename}</div>\
+              <span class='{NAME}'>🆕</span>\
+            </div>\
+            {create}\
+            <div class='row'>\
+              <button id='ob_close' type='button'>❌ Close</button>\
+              <button id='ob_save' type='button'>🖍️ Save</button>\
+            </div>"
+        ))
+    }
+
+    /// Get value to create a new object
+    fn create_value(doc: &Document) -> Result<String> {
+        if let Some(name) = doc.input_parse::<String>("create_name") {
+            if !name.is_empty() {
+                let mut obj = Map::new();
+                obj.insert("name".to_string(), Value::String(name));
+                return Ok(Value::Object(obj).to_string());
+            }
+        }
+        Err("name missing".into())
     }
 
     /// Build a status card
@@ -76,8 +121,8 @@ pub trait Card: DeserializeOwned {
             </div>\
             {}\
             <div class='row'>\
-              <button id='ob_edit' type='button'>📝 Edit</button>\
               <button id='ob_close' type='button'>❌ Close</button>\
+              <button id='ob_edit' type='button'>📝 Edit</button>\
             </div>",
             val.to_html_status()
         ))
@@ -95,9 +140,9 @@ pub trait Card: DeserializeOwned {
             </div>\
             {}\
             <div class='row'>\
-              <button id='ob_save' type='button'>🖍️ Save</button>\
-              <button id='ob_delete' type='button'>🗑️ Delete</button>\
               <button id='ob_close' type='button'>❌ Close</button>\
+              <button id='ob_delete' type='button'>🗑️ Delete</button>\
+              <button id='ob_save' type='button'>🖍️ Save</button>\
             </div>",
             val.to_html_edit()
         ))
@@ -123,7 +168,7 @@ pub trait Card: DeserializeOwned {
             // the "New" card has id "{tname}_" and blank name
             html.push_str(&format!(
                 "<li id='{tname}_' name='' class='card'>\
-                    <span class='create'>Create 🆕</span>\
+                    {CREATE_CARD}\
                 </li>"
             ));
         }
