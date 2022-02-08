@@ -54,9 +54,15 @@ public class WMsgGraphicToolbar extends WToolbar {
 		
 		// add the "add" button
 		addBtn = new JButton(addGraphic);
-		addBtn.setToolTipText(I18N.get("wysiwyg.epanel.add_graphic_tooltip"));
 		add(Box.createHorizontalStrut(10));
 		add(addBtn);
+		
+		// disable the button if no graphics and add a tooltip for the user
+		if (graphicList.getGraphicCount() == 0) {
+			addBtn.setEnabled(false);
+			addBtn.setToolTipText(I18N.get("wysiwyg.epanel.add_graphic_tooltip_empty"));
+		} else
+			addBtn.setToolTipText(I18N.get("wysiwyg.epanel.add_graphic_tooltip"));
 		
 		addMoveRegionForwardButton();
 		addMoveRegionBackwardButton();
