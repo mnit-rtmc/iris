@@ -20,7 +20,15 @@ import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.utils.ColorClassic;
 import us.mn.state.dot.tms.utils.MultiConfig;
 
-/**
+/** WRasterColor24: WRaster child-class for 
+ *  24bit color graphics.
+ * 
+ * Each value in the pixels array for this class
+ * contains a 24bit RGB color value or one of the
+ * three generic DEFAULT_BG, DEFAULT_FG, or
+ * ERROR_PIXEL colors.
+ * (Range: -3..0x00ffffff)
+ * 
  * @author John L. Stanley - SRF Consulting
  *
  */
@@ -85,6 +93,7 @@ public class WRasterColor24 extends WRaster {
 	 */
 	@Override
 	public void setPixelData(byte[] ba) {
+		assertValidDmsGraphicByteArray(ba);
 		int len = length();
 		int pix, r, g, b, i, j;
 		i = 0;

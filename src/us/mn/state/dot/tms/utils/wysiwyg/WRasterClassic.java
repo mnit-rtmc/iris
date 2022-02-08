@@ -20,9 +20,16 @@ import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.utils.ColorClassic;
 import us.mn.state.dot.tms.utils.MultiConfig;
 
-/**
+/** WRasterClassic: WRaster child-class for 
+ *  color-classic graphics.
+ * 
+ * Each value in the pixels array for this class
+ * contains a color-classic color number or one
+ * of the three generic DEFAULT_BG, DEFAULT_FG,
+ * or ERROR_PIXEL colors.
+ * (value range: -3..9)
+ * 
  * @author John L. Stanley - SRF Consulting
- *
  */
 public class WRasterClassic extends WRaster {
 
@@ -72,9 +79,15 @@ public class WRasterClassic extends WRaster {
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WRaster#setPixelData(byte[])
 	 */
 	@Override
-	public void setPixelData(byte[] p) {
-		// TODO Auto-generated method stub
-
+	public void setPixelData(byte[] ba) {
+		assertValidDmsGraphicByteArray(ba);
+		int len = length();
+		int pixel;
+		for (int ind = 0; (ind < len); ++ind) {
+			pixel = ba[ind] & 0x0ff;
+			assertValidPixel(pixel);
+			pixels[ind] = pixel;
+		}
 	}
 
 	/* (non-Javadoc)
@@ -82,8 +95,26 @@ public class WRasterClassic extends WRaster {
 	 */
 	@Override
 	public byte[] getPixelData() {
-		// TODO Auto-generated method stub
-		return null;
+		int len = length();
+		byte[] ba = new byte[len];
+		int pixel;
+		for (int ind = 0; (ind < len); ++ind) {
+			pixel = pixels[ind];
+			if (!isValidPixel(pixel)) {
+				switch (pixel) {
+					case DEFAULT_BG:
+						pixel = defaultBgPixel;
+						break;
+					case DEFAULT_FG:
+						pixel = defaultFgPixel;
+						break;
+					default: // includes ERROR_PIXEL
+						pixel = BLACK;
+				}
+			}
+			ba[ind] = (byte) pixel;
+		}
+		return ba;
 	}
 
 	/* (non-Javadoc)

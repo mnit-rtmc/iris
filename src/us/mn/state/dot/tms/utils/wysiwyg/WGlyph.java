@@ -62,6 +62,8 @@ public class WGlyph extends WRasterMono1 {
 		this.charNum = g.getCodePoint();
 		try {
 			this.setEncodedPixels(g.getPixels());
+		} catch (IndexOutOfBoundsException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

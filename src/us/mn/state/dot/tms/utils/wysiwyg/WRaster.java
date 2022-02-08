@@ -257,7 +257,22 @@ abstract public class WRaster {
 	public void assertValidPixel(int pixel)
 			throws IndexOutOfBoundsException {
 		if (!isValidPixel(pixel))
-			throw new IndexOutOfBoundsException("Bad colorIndex: "+pixel);
+			throw new IndexOutOfBoundsException("Bad pixel value: "+pixel);
+	}
+
+	/** Assert that an NTCIP 1203 DMS-graphic
+	 * byte-array looks right.
+	 * @throws IndexOutOfBoundsException if
+	 * byte array is null or the wrong length. */
+	public void assertValidDmsGraphicByteArray(byte[] ba)
+			throws IndexOutOfBoundsException {
+		if (ba == null)
+			throw new IndexOutOfBoundsException(
+					"WRaster set to a null byte array");
+		int len = length();
+		if (ba.length != len)
+			throw new IndexOutOfBoundsException(
+					"ba.length="+ba.length+", pixels.length="+len);
 	}
 
 	/** Get the graphic as a Base64 string */
@@ -654,7 +669,7 @@ abstract public class WRaster {
 
 	/** Load graphic from an NTCIP 1203
 	 *  DMS-graphic byte-array */
-	abstract public void setPixelData(byte[] p);
+	abstract public void setPixelData(byte[] ba);
 
 	/** Convert the graphic to an NTCIP 1203
 	 *  DMS-graphic byte-array */
