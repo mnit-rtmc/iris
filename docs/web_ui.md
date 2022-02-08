@@ -37,7 +37,7 @@ authentication.
   - [X] Maintenance object forms
   - [X] Html escaping
   - [X] Updating values (save)
-  - [ ] Creating objects
+  - [X] Creating objects
   - [ ] Deleting objects
   - [X] Add status button / view
   - [ ] Authentication and session expiration

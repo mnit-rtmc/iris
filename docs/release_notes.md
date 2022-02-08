@@ -1,6 +1,8 @@
 # IRIS 5.x Release Notes
 
-5.28.0 (unreleased)
+5.28.0 (8 Feb 2022)
+ - Added web-based administration UI (alpha)
+ - ClearGuide: support limiting travel time by speed limit
  - Fixed SSL handshake stall race on client login
  - Dropped `cabinet` table, moving columns to `controller`
    * `controller_view`: `cabinet` -> `cabinet_style`
