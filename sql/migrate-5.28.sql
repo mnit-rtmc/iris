@@ -20,9 +20,17 @@ END;
 $multi_tags_str$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Add NOTIFY triggers for more tables
+CREATE FUNCTION iris.alarm_table_notify() RETURNS TRIGGER AS
+    $alarm_table_notify$
+BEGIN
+    NOTIFY alarm;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$alarm_table_notify$ LANGUAGE plpgsql;
+
 CREATE TRIGGER alarm_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._alarm
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.alarm_table_notify();
 
 CREATE TRIGGER comm_config_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.comm_config
@@ -75,6 +83,34 @@ CREATE TRIGGER controller_notify_trig
 CREATE TRIGGER controller_table_notify_trig
     AFTER INSERT OR DELETE ON iris.controller
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+DROP TRIGGER camera_table_notify_trig ON iris._camera;
+
+CREATE FUNCTION iris.camera_table_notify() RETURNS TRIGGER AS
+    $camera_table_notify$
+BEGIN
+    NOTIFY camera;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$camera_table_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_table_notify_trig
+    AFTER INSERT OR DELETE ON iris._camera
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.camera_table_notify();
+
+DROP TRIGGER dms_table_notify_trig ON iris._dms;
+
+CREATE FUNCTION iris.dms_table_notify() RETURNS TRIGGER AS
+    $dms_table_notify$
+BEGIN
+    NOTIFY dms;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$dms_table_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER dms_table_notify_trig
+    AFTER INSERT OR DELETE ON iris._dms
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.dms_table_notify();
 
 -- Rename modem.timeout to timeout_ms
 DROP VIEW modem_view;
