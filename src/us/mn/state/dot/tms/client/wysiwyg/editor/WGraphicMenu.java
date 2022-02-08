@@ -104,4 +104,10 @@ public class WGraphicMenu extends JComboBox<Graphic> {
 	public Graphic getSelectedItem() {
 		return (Graphic) super.getSelectedItem();
 	}
+	
+	public int getGraphicCount() {
+		if (supportedGraphics != null)
+			return supportedGraphics.getSize();
+		return 0;
+	}
 }
