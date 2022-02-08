@@ -20,9 +20,15 @@ import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.utils.ColorClassic;
 import us.mn.state.dot.tms.utils.MultiConfig;
 
-/**
+/** WRaster child-class for 8-bit monochrome graphics.
+ * 
+ * Each value in the pixels array for this class
+ * contains a pixel brightness value or one
+ * of the three generic DEFAULT_BG, DEFAULT_FG,
+ * or ERROR_PIXEL colors
+ * (range: -3..255).
+ * 
  * @author John L. Stanley - SRF Consulting
- *
  */
 public class WRasterMono8 extends WRaster {
 
@@ -71,10 +77,11 @@ public class WRasterMono8 extends WRaster {
 	 * @see us.mn.state.dot.tms.utils.wysiwyg.WRaster#setPixelData(byte[])
 	 */
 	@Override
-	public void setPixelData(byte[] p) {
-		
-		// TODO Auto-generated method stub
-
+	public void setPixelData(byte[] ba) {
+		assertValidDmsGraphicByteArray(ba);
+		int len = length();
+		for (int ind = 0; (ind < len); ++ind)
+			pixels[ind] = ba[ind] & 0x0ff;
 	}
 
 	/* (non-Javadoc)
@@ -82,8 +89,11 @@ public class WRasterMono8 extends WRaster {
 	 */
 	@Override
 	public byte[] getPixelData() {
-		// TODO Auto-generated method stub
-		return null;
+		int len = length();
+		byte[] ba = new byte[len];
+		for (int ind = 0; (ind < len); ++ind)
+			ba[ind] = (byte) pixels[ind];
+		return ba;
 	}
 
 	/* (non-Javadoc)

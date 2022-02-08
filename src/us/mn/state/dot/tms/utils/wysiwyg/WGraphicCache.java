@@ -60,7 +60,9 @@ public class WGraphicCache {
 	}
 
 	/** Returns a WRaster for the given graphic number.
-	 *  Returns null if there is no such graphic.
+	 *  Returns null if there is no such graphic or
+	 *  there is an error detected while loading the
+	 *  graphic.
 	 *  
 	 * @param graphicNum
 	 * @return Matching WRaster or null
@@ -80,6 +82,9 @@ public class WGraphicCache {
 				wr.setEncodedPixels(g.getPixels());
 				wgraphicMap.put(graphicNum, wr);
 				return wr;
+			} catch (IndexOutOfBoundsException e) {
+				e.printStackTrace();
+				return null;
 			} catch (IOException e) {
 				e.printStackTrace();
 				return null;

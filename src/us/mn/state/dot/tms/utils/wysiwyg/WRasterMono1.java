@@ -20,9 +20,16 @@ import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.utils.ColorClassic;
 import us.mn.state.dot.tms.utils.MultiConfig;
 
-/**
+/** WRasterMono1: WRaster child-class for 
+ *  mono1bit graphics.
+ * 
+ * Each value in the pixels array for this class
+ * contains a single off/on pixel value or one
+ * of the three generic DEFAULT_BG, DEFAULT_FG,
+ * or ERROR_PIXEL colors.
+ * (value range: -3..1)
+ * 
  * @author John L. Stanley - SRF Consulting
- *
  */
 public class WRasterMono1 extends WRaster {
 
@@ -105,12 +112,7 @@ public class WRasterMono1 extends WRaster {
 	 */
 	@Override
 	public void setPixelData(byte[] ba) {
-		if (ba == null)
-			throw new IndexOutOfBoundsException(
-					"Set WRaster to a null byte array");
-		if (ba.length != length())
-			throw new IndexOutOfBoundsException(
-					"p="+ba.length+",length="+length());
+		assertValidDmsGraphicByteArray(ba);
 		int ind, by, bi;
 		for (int x = 0; (x < width); ++x) {
 			for (int y = 0; (y < height); ++y) {
