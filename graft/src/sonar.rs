@@ -40,13 +40,17 @@ pub enum SonarError {
     #[error("I/O {0}")]
     IO(#[from] std::io::Error),
 
-    /// Invalid name
+    /// Invalid name (too long, invalid characters)
     #[error("invalid name")]
     InvalidName,
 
-    /// Invalid value
+    /// Invalid value (invalid characters, etc)
     #[error("invalid value")]
     InvalidValue,
+
+    /// Conflict (name already exists)
+    #[error("name conflict")]
+    Conflict,
 
     /// Forbidden (permission denied)
     #[error("forbidden")]
@@ -72,9 +76,12 @@ impl SonarError {
         if msg.starts_with("Permission") {
             Self::Forbidden
         } else if msg.starts_with("Invalid name") {
+            // Sonar should really use "Unknown name" instead of "Invalid name"
             Self::NotFound
         } else if msg.starts_with("Invalid") {
             Self::InvalidValue
+        } else if msg.starts_with("Name already exists") {
+            Self::Conflict
         } else {
             warn!("SHOW {}", msg);
             Self::UnexpectedMessage

@@ -95,11 +95,12 @@ impl ErrorStatus for SonarError {
     fn status_code(&self) -> StatusCode {
         match self {
             Self::InvalidName => StatusCode::BadRequest,
-            Self::InvalidValue => StatusCode::UnprocessableEntity,
+            Self::Unauthorized => StatusCode::Unauthorized,
             Self::Forbidden => StatusCode::Forbidden,
             Self::NotFound => StatusCode::NotFound,
+            Self::Conflict => StatusCode::Conflict,
+            Self::InvalidValue => StatusCode::UnprocessableEntity,
             Self::IO(e) => e.status_code(),
-            Self::Unauthorized => StatusCode::Unauthorized,
             _ => StatusCode::InternalServerError,
         }
     }
