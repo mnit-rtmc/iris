@@ -146,7 +146,10 @@ const DETECTOR_RES: Resource = Resource::Simple(
 /// DMS resource
 const DMS_RES: Resource = Resource::Simple(
     "dms_pub",
-    Listen::Exclude("dms", &["expire_time", "msg_sched", "msg_current"]),
+    Listen::Exclude(
+        "dms",
+        &["msg_user", "msg_sched", "msg_current", "expire_time"],
+    ),
     "SELECT row_to_json(r)::text FROM (\
     SELECT name, sign_config, sign_detail, roadway, road_dir, cross_street, \
            location, lat, lon \

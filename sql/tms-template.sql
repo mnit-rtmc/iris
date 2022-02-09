@@ -9,7 +9,7 @@
 --          'fail_time' (controller)
 --          'connected' (comm_link)
 --          'auto_fail' (detector)
---          'msg_current', 'msg_sched', 'expire_time' (dms)
+--          'msg_user', 'msg_sched', 'msg_current', 'expire_time' (dms)
 --          'time_stamp' (parking_area)
 --          id (road_class)
 --          name (r_node, road, any notify_tag in geo_loc)
@@ -2890,24 +2890,26 @@ ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
 CREATE FUNCTION iris.dms_notify() RETURNS TRIGGER AS
-	$dms_notify$
+    $dms_notify$
 BEGIN
-	IF (NEW.msg_current IS DISTINCT FROM OLD.msg_current) THEN
-		NOTIFY dms, 'msg_current';
-	ELSIF (NEW.expire_time IS DISTINCT FROM OLD.expire_time) THEN
-		NOTIFY dms, 'expire_time';
-	ELSIF (NEW.msg_sched IS DISTINCT FROM OLD.msg_sched) THEN
-		NOTIFY dms, 'msg_sched';
-	ELSE
-		NOTIFY dms;
-	END IF;
-	RETURN NULL; -- AFTER trigger return is ignored
+    IF (NEW.msg_user IS DISTINCT FROM OLD.msg_user) THEN
+        NOTIFY dms, 'msg_user';
+    ELSIF (NEW.msg_sched IS DISTINCT FROM OLD.msg_sched) THEN
+        NOTIFY dms, 'msg_sched';
+    ELSIF (NEW.msg_current IS DISTINCT FROM OLD.msg_current) THEN
+        NOTIFY dms, 'msg_current';
+    ELSIF (NEW.expire_time IS DISTINCT FROM OLD.expire_time) THEN
+        NOTIFY dms, 'expire_time';
+    ELSE
+        NOTIFY dms;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
 END;
 $dms_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER dms_notify_trig
-	AFTER UPDATE ON iris._dms
-	FOR EACH ROW EXECUTE PROCEDURE iris.dms_notify();
+    AFTER UPDATE ON iris._dms
+    FOR EACH ROW EXECUTE PROCEDURE iris.dms_notify();
 
 -- Can't use iris.table_notify due to underscore (_dms)
 CREATE FUNCTION iris.dms_table_notify() RETURNS TRIGGER AS
