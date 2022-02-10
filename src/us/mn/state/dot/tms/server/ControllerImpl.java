@@ -944,9 +944,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Poll controller devices */
-	public void pollDevices(int per_sed, boolean is_long) {
+	public void pollDevices(int per_sec, boolean is_long) {
 		if (isConditionActive())
-			pollActiveDevices(per_sed, is_long);
+			pollActiveDevices(per_sec, is_long);
 		if (isConditionTesting())
 			startTesting();
 	}
