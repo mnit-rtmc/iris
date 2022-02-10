@@ -183,6 +183,7 @@ public class CommThread<T extends ControllerProperty> {
 				pollQueue(m);
 			}
 			catch (DisconnectException e) {
+				connected = false;
 				getMessage(e);
 				break;
 			}
@@ -191,19 +192,23 @@ public class CommThread<T extends ControllerProperty> {
 			}
 			catch (NoModemException e) {
 				// Keep looping until modem is available
+				connected = false;
 				getMessage(e);
 			}
 			catch (ConnectException e) {
+				connected = false;
 				String msg = getMessage(e);
 				if (poller.handleError(CONNECTION_REFUSED, msg))
 					break;
 			}
 			catch (NoResponseException e) {
+				connected = false;
 				String msg = getMessage(e);
 				if (poller.noMoreOps())
 					break;
 			}
 			catch (IOException e) {
+				connected = false;
 				String msg = getMessage(e);
 				if (poller.handleError(COMM_ERROR, msg))
 					break;
@@ -236,6 +241,7 @@ public class CommThread<T extends ControllerProperty> {
 		while (shouldContinue()) {
 			OpController<T> op = queue.next(idle_disconnect_ms);
 			doPoll(m, op);
+			connected = true;
 		}
 	}
 
