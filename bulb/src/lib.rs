@@ -125,7 +125,7 @@ async fn fetch_patch(window: &Window, uri: &str, json: &JsValue) -> Result<()> {
     let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
     let resp: Response = resp.dyn_into().unwrap_throw();
     match resp.status() {
-        200 => Ok(()),
+        200 | 204 => Ok(()),
         _ => Err(resp.status_text().into()),
     }
 }
@@ -140,6 +140,20 @@ async fn fetch_post(window: &Window, uri: &str, json: &JsValue) -> Result<()> {
     let resp: Response = resp.dyn_into().unwrap_throw();
     match resp.status() {
         200 | 201 => Ok(()),
+        _ => Err(resp.status_text().into()),
+    }
+}
+
+/// Fetch a DELETE request
+async fn fetch_delete(window: &Window, uri: &str) -> Result<()> {
+    let req = Request::new_with_str_and_init(
+        uri,
+        RequestInit::new().method("DELETE"),
+    )?;
+    let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
+    let resp: Response = resp.dyn_into().unwrap_throw();
+    match resp.status() {
+        200 | 204 => Ok(()),
         _ => Err(resp.status_text().into()),
     }
 }
@@ -200,22 +214,28 @@ async fn expand_card<C: Card>(name: String) {
         let cs = CardState::new::<C>();
         cs.replace_card(&doc, CardType::Create);
     } else {
-        let cs = fetch_card::<C>(name).await;
-        cs.replace_card(&doc, CardType::Status);
+        match fetch_card::<C>(name).await {
+            Ok(cs) => cs.replace_card(&doc, CardType::Status),
+            Err(e) => {
+                // Card list out-of-date; refresh with search
+                console::log_1(&e);
+                schedule_search(200);
+            }
+        }
     }
 }
 
 /// Fetch a card with a GET request
-async fn fetch_card<C: Card>(name: String) -> CardState {
+async fn fetch_card<C: Card>(name: String) -> Result<CardState> {
     let uri = name_uri::<C>(&name);
-    let json = fetch_get(&uri).await.unwrap_throw();
+    let json = fetch_get(&uri).await?;
     console::log_1(&json);
-    CardState {
+    Ok(CardState {
         tname: C::TNAME,
         uri,
         name,
         json: Some(json),
-    }
+    })
 }
 
 /// Selected card state
@@ -246,7 +266,7 @@ impl CardState {
     fn replace_card(self, doc: &Document, ct: CardType) {
         let id = format!("{}_{}", self.tname, &self.name);
         match doc.elem::<HtmlElement>(&id) {
-            Ok(elem) => match build_card(&self.tname, &self.json, ct) {
+            Ok(elem) => match build_card(self.tname, &self.json, ct) {
                 Ok(html) => replace_card_html(&elem, ct, &html),
                 Err(e) => {
                     console::log_1(&(&e).into());
@@ -257,8 +277,21 @@ impl CardState {
         }
         STATE.with(|rc| {
             let mut state = rc.borrow_mut();
-            state.selected.replace(self);
+            if ct != CardType::Compact {
+                state.selected.replace(self);
+            } else {
+                state.selected.take();
+            }
         });
+    }
+
+    /// Delete selected card / object
+    async fn delete(self) {
+        if let Some(window) = web_sys::window() {
+            let doc = window.document().unwrap_throw();
+            deselect_card(&doc);
+            try_delete(&window, &self.uri).await;
+        }
     }
 
     /// Save changed fields on Edit form
@@ -267,22 +300,30 @@ impl CardState {
         let doc = window.document().unwrap_throw();
         match &self.json {
             Some(json) => {
-                match try_changed_fields(&self.tname, &doc, &json) {
+                match try_changed_fields(self.tname, &doc, json) {
                     Ok(v) => save_changed_fields(&window, &self.uri, &v).await,
                     Err(e) => console::log_1(&e),
                 }
                 self.fetch_again().await;
             }
-            None => try_create_new(&self.tname, &doc).await,
+            None => try_create_new(self.tname, &doc).await,
         }
         self.replace_card(&doc, CardType::Compact);
     }
 
     /// Fetch a card again with a GET request
     async fn fetch_again(&mut self) {
-        let json = fetch_get(&self.uri).await.unwrap_throw();
-        console::log_1(&json);
-        self.json = Some(json);
+        match fetch_get(&self.uri).await {
+            Ok(json) => {
+                console::log_1(&json);
+                self.json = Some(json);
+            }
+            Err(e) => {
+                // Card list out-of-date; refresh with search
+                console::log_1(&e);
+                schedule_search(200);
+            }
+        }
     }
 }
 
@@ -301,7 +342,7 @@ fn name_uri<C: Card>(name: &str) -> String {
 
 /// Replace a card with provieded HTML
 fn replace_card_html(elem: &HtmlElement, ct: CardType, html: &str) {
-    elem.set_inner_html(&html);
+    elem.set_inner_html(html);
     if let CardType::Compact = ct {
         elem.set_class_name("card");
     } else {
@@ -313,17 +354,28 @@ fn replace_card_html(elem: &HtmlElement, ct: CardType, html: &str) {
     }
 }
 
+/// Try to delete an object
+async fn try_delete(window: &Window, uri: &str) {
+    match fetch_delete(window, uri).await {
+        Ok(_) => schedule_search(1500),
+        Err(e) => console::log_1(&e),
+    }
+}
+
+/// Schedule search callback using timeout
+fn schedule_search(timeout_ms: i32) {
+    if let Some(window) = web_sys::window() {
+        STATE.with(|rc| {
+            let state = rc.borrow();
+            state.schedule_search(&window, timeout_ms);
+        });
+    }
+}
+
 /// Try to create a new object
 async fn try_create_new(tp: &str, doc: &Document) {
     match create_new(tp, doc).await {
-        Ok(_) => {
-            if let Some(window) = web_sys::window() {
-                STATE.with(|rc| {
-                    let state = rc.borrow();
-                    state.schedule_search(&window, 1500);
-                });
-            }
-        }
+        Ok(_) => schedule_search(1500),
         Err(e) => console::log_1(&e),
     }
 }
@@ -347,7 +399,7 @@ async fn do_create<C: Card>(doc: &Document) -> Result<()> {
     let json = value.into();
     console::log_1(&json);
     let window = web_sys::window().unwrap_throw();
-    fetch_post(&window, &C::URI, &json).await
+    fetch_post(&window, C::URI, &json).await
 }
 
 /// Try to retrieve changed fields on edit form
@@ -397,9 +449,9 @@ pub async fn start() -> Result<()> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
 
-    let json = fetch_get(&"/iris/api/comm_protocol").await?;
+    let json = fetch_get("/iris/api/comm_protocol").await?;
     let protocols = json.into_serde::<Vec<Protocol>>().unwrap_throw();
-    let json = fetch_get(&"/iris/api/condition").await?;
+    let json = fetch_get("/iris/api/condition").await?;
     let conditions = json.into_serde::<Vec<Condition>>().unwrap_throw();
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
@@ -579,9 +631,9 @@ fn handle_button_click_ev(doc: &Document, elem: &Element) {
     let cs = STATE.with(|rc| rc.borrow().selected.clone());
     if let Some(cs) = cs {
         match elem.id() {
-            id if id == "ob_close" => cs.replace_card(&doc, CardType::Compact),
-            id if id == "ob_delete" => todo!(),
-            id if id == "ob_edit" => cs.replace_card(&doc, CardType::Edit),
+            id if id == "ob_close" => cs.replace_card(doc, CardType::Compact),
+            id if id == "ob_delete" => spawn_local(cs.delete()),
+            id if id == "ob_edit" => cs.replace_card(doc, CardType::Edit),
             id if id == "ob_save" => spawn_local(cs.save_changed()),
             id => console::log_1(&id.into()),
         }
