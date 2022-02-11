@@ -73,14 +73,17 @@ struct Verifier {}
 
 impl SonarError {
     fn parse_show(msg: &str) -> Self {
+        // gross, but no point in changing SHOW messages now!
         if msg.starts_with("Permission") {
             Self::Forbidden
         } else if msg.starts_with("Invalid name") {
-            // Sonar should really use "Unknown name" instead of "Invalid name"
+            // this should really have been "Unknown name", not "Invalid name"
             Self::NotFound
         } else if msg.starts_with("Invalid") {
             Self::InvalidValue
-        } else if msg.starts_with("Name already exists") {
+        } else if msg.starts_with("Name already exists")
+            | msg.starts_with("Must be removed")
+        {
             Self::Conflict
         } else {
             warn!("SHOW {}", msg);
@@ -376,6 +379,7 @@ impl Connection {
         Message::Remove(nm).encode(&mut buf);
         self.check_error().await?;
         self.send(&buf[..]).await?;
+        self.check_error().await?;
         Ok(())
     }
 
