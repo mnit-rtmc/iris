@@ -56,6 +56,53 @@ pub struct Condition {
     pub description: String,
 }
 
+/// Global app state
+#[derive(Default)]
+struct State {
+    /// Comm protocols
+    protocols: Vec<Protocol>,
+    /// Controller conditions
+    conditions: Vec<Condition>,
+    /// Search callback for use in JS timeouts
+    search_cb: Option<Closure<dyn Fn()>>,
+    /// Selected card state
+    selected: Option<CardState>,
+}
+
+thread_local! {
+    static STATE: RefCell<State> = RefCell::new(State::default());
+}
+
+impl State {
+    /// Initialize global app state
+    fn initialize(
+        &mut self,
+        mut protocols: Vec<Protocol>,
+        mut conditions: Vec<Condition>,
+    ) {
+        self.protocols.append(&mut protocols);
+        self.conditions.append(&mut conditions);
+        let search_cb = Closure::wrap(Box::new(|| {
+            search_list();
+        }) as Box<dyn Fn()>);
+        self.search_cb.replace(search_cb);
+    }
+
+    /// Schedule search callback using timeout
+    fn schedule_search(&self, window: &Window, timeout_ms: i32) {
+        if let Some(search_cb) = &self.search_cb {
+            if let Err(e) = window
+                .set_timeout_with_callback_and_timeout_and_arguments_0(
+                    search_cb.as_ref().unchecked_ref(),
+                    timeout_ms,
+                )
+            {
+                console::log_1(&e);
+            }
+        }
+    }
+}
+
 /// Fetch a GET request
 async fn fetch_get(uri: &str) -> Result<JsValue> {
     let req = Request::new_with_str(uri)?;
@@ -92,7 +139,7 @@ async fn fetch_post(window: &Window, uri: &str, json: &JsValue) -> Result<()> {
     let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
     let resp: Response = resp.dyn_into().unwrap_throw();
     match resp.status() {
-        200 => Ok(()),
+        200 | 201 => Ok(()),
         _ => Err(resp.status_text().into()),
     }
 }
@@ -268,8 +315,16 @@ fn replace_card_html(elem: &HtmlElement, ct: CardType, html: &str) {
 
 /// Try to create a new object
 async fn try_create_new(tp: &str, doc: &Document) {
-    if let Err(e) = create_new(tp, doc).await {
-        console::log_1(&e)
+    match create_new(tp, doc).await {
+        Ok(_) => {
+            if let Some(window) = web_sys::window() {
+                STATE.with(|rc| {
+                    let state = rc.borrow();
+                    state.schedule_search(&window, 1500);
+                });
+            }
+        }
+        Err(e) => console::log_1(&e),
     }
 }
 
@@ -288,10 +343,10 @@ async fn create_new(tp: &str, doc: &Document) -> Result<()> {
 
 /// Create a new object
 async fn do_create<C: Card>(doc: &Document) -> Result<()> {
-    let window = web_sys::window().unwrap_throw();
     let value = C::create_value(doc)?;
     let json = value.into();
     console::log_1(&json);
+    let window = web_sys::window().unwrap_throw();
     fetch_post(&window, &C::URI, &json).await
 }
 
@@ -329,18 +384,6 @@ fn build_card(
     }
 }
 
-/// Global app state
-#[derive(Default)]
-struct State {
-    protocols: Vec<Protocol>,
-    conditions: Vec<Condition>,
-    selected: Option<CardState>,
-}
-
-thread_local! {
-    static STATE: RefCell<State> = RefCell::new(State::default());
-}
-
 /// Set global allocator to `wee_alloc`
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
@@ -355,23 +398,18 @@ pub async fn start() -> Result<()> {
     let doc = window.document().unwrap_throw();
 
     let json = fetch_get(&"/iris/api/comm_protocol").await?;
-    let mut protocols = json.into_serde::<Vec<Protocol>>().unwrap_throw();
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        state.protocols.append(&mut protocols);
-    });
+    let protocols = json.into_serde::<Vec<Protocol>>().unwrap_throw();
     let json = fetch_get(&"/iris/api/condition").await?;
-    let mut conditions = json.into_serde::<Vec<Condition>>().unwrap_throw();
+    let conditions = json.into_serde::<Vec<Condition>>().unwrap_throw();
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        state.conditions.append(&mut conditions);
+        state.initialize(protocols, conditions);
     });
 
     let sb_type: HtmlSelectElement = doc.elem("sb_type")?;
     sb_type.set_inner_html(&types_html());
     add_select_event_listener(&sb_type, handle_sb_type_ev)?;
-    let sb_input = doc.elem("sb_input")?;
-    add_input_event_listener(&sb_input, handle_search_ev)?;
+    add_input_event_listener(&doc.elem("sb_input")?)?;
     add_click_event_listener(&doc.elem("sb_list")?)?;
     Ok(())
 }
@@ -449,18 +487,22 @@ fn handle_sb_type_ev(tp: String) {
         let mut state = rc.borrow_mut();
         state.selected.take()
     });
-    let input: HtmlInputElement = doc.elem("sb_input").unwrap_throw();
-    input.set_value("");
+    if let Ok(input) = doc.elem::<HtmlInputElement>("sb_input") {
+        input.set_value("");
+    }
     spawn_local(populate_list(tp, "".into()));
 }
 
-/// Handle an event from "sb_input" `input` element
-fn handle_search_ev(tx: String) {
+/// Search list using the value from "sb_input"
+fn search_list() {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    deselect_card(&doc).unwrap_throw();
-    if let Some(tp) = doc.select_parse::<String>("sb_type") {
-        spawn_local(populate_list(tp, tx));
+    if let Ok(input) = doc.elem::<HtmlInputElement>("sb_input") {
+        let value = input.value();
+        deselect_card(&doc);
+        if let Some(tp) = doc.select_parse::<String>("sb_type") {
+            spawn_local(populate_list(tp, value));
+        }
     }
 }
 
@@ -488,19 +530,10 @@ fn add_select_event_listener(
 }
 
 /// Add an "input" event listener to an element
-fn add_input_event_listener(
-    elem: &HtmlInputElement,
-    handle_ev: fn(String),
-) -> Result<()> {
-    let closure = Closure::wrap(Box::new(move |e: Event| {
-        let value = e
-            .current_target()
-            .unwrap()
-            .dyn_into::<HtmlInputElement>()
-            .unwrap()
-            .value();
-        handle_ev(value);
-    }) as Box<dyn FnMut(_)>);
+fn add_input_event_listener(elem: &HtmlInputElement) -> Result<()> {
+    let closure = Closure::wrap(Box::new(|_e: Event| {
+        search_list();
+    }) as Box<dyn Fn(_)>);
     elem.add_event_listener_with_callback(
         "input",
         closure.as_ref().unchecked_ref(),
@@ -534,7 +567,7 @@ fn handle_click_ev(elem: &Element) {
     } else if let Some(card) = elem.closest(".card").unwrap_throw() {
         if let Some(name) = card.get_attribute("name") {
             if let Some(tp) = doc.select_parse::<String>("sb_type") {
-                deselect_card(&doc).unwrap_throw();
+                deselect_card(&doc);
                 spawn_local(click_card(tp, name));
             }
         }
@@ -556,7 +589,7 @@ fn handle_button_click_ev(doc: &Document, elem: &Element) {
 }
 
 /// Deselect the selected card
-fn deselect_card(doc: &Document) -> Result<()> {
+fn deselect_card(doc: &Document) {
     let cs = STATE.with(|rc| {
         let mut state = rc.borrow_mut();
         state.selected.take()
@@ -564,5 +597,4 @@ fn deselect_card(doc: &Document) -> Result<()> {
     if let Some(cs) = cs {
         cs.replace_card(doc, CardType::Compact);
     }
-    Ok(())
 }
