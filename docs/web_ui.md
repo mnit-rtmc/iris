@@ -34,12 +34,11 @@ authentication.
 * bulb
   - [X] Resource type selector with card list
   - [X] Search filter
-  - [X] Maintenance object forms
   - [X] Html escaping
-  - [X] Updating values (save)
-  - [X] Creating objects
-  - [X] Deleting objects
-  - [X] Add status button / view
+  - [X] Maintenance object CRUD
+  - [X] Status button / view
+  - [ ] Feedback with "snackbar" popups
+  - [ ] UI refinements
   - [ ] Authentication and session expiration
 
 ## Phase 4 — DMS control

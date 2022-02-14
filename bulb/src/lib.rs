@@ -42,6 +42,9 @@ use controller::Controller;
 use modem::Modem;
 use util::Dom;
 
+/// Interval (ms) between ticks for deferred actions
+const TICK_INTERVAL: i32 = 500;
+
 /// Comm protocol
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Protocol {
@@ -56,6 +59,13 @@ pub struct Condition {
     pub description: String,
 }
 
+/// Deferred actions (called on set_interval)
+#[derive(Clone, Copy, Debug)]
+enum DeferredAction {
+    SearchList,
+    HideToast,
+}
+
 /// Global app state
 #[derive(Default)]
 struct State {
@@ -63,8 +73,10 @@ struct State {
     protocols: Vec<Protocol>,
     /// Controller conditions
     conditions: Vec<Condition>,
-    /// Search callback for use in JS timeouts
-    search_cb: Option<Closure<dyn Fn()>>,
+    /// Deferred actions (with tick number)
+    deferred: Vec<(i32, DeferredAction)>,
+    /// Timer tick count
+    tick: i32,
     /// Selected card state
     selected: Option<CardState>,
 }
@@ -82,23 +94,51 @@ impl State {
     ) {
         self.protocols.append(&mut protocols);
         self.conditions.append(&mut conditions);
-        let search_cb = Closure::wrap(Box::new(|| {
-            search_list();
-        }) as Box<dyn Fn()>);
-        self.search_cb.replace(search_cb);
     }
 
-    /// Schedule search callback using timeout
-    fn schedule_search(&self, window: &Window, timeout_ms: i32) {
-        if let Some(search_cb) = &self.search_cb {
-            if let Err(e) = window
-                .set_timeout_with_callback_and_timeout_and_arguments_0(
-                    search_cb.as_ref().unchecked_ref(),
-                    timeout_ms,
-                )
-            {
-                console::log_1(&e);
+    /// Add ticks to current tick count
+    fn plus_ticks(&self, t: i32) -> i32 {
+        if let Some(t) = self.tick.checked_add(t) {
+            t
+        } else {
+            0
+        }
+    }
+
+    /// Schedule a deferred action
+    fn schedule(&mut self, action: DeferredAction, timeout_ms: i32) {
+        let tick =
+            self.plus_ticks((timeout_ms + TICK_INTERVAL - 1) / TICK_INTERVAL);
+        self.deferred.push((tick, action));
+    }
+
+    /// Get a deferred action
+    fn action(&mut self) -> Option<DeferredAction> {
+        for i in 0..self.deferred.len() {
+            let (tick, action) = self.deferred[i];
+            if tick <= self.tick {
+                self.deferred.swap_remove(i);
+                return Some(action);
             }
+        }
+        None
+    }
+}
+
+impl DeferredAction {
+    /// Schedule with timeout
+    fn schedule(self, timeout_ms: i32) {
+        STATE.with(|rc| {
+            let mut state = rc.borrow_mut();
+            state.schedule(self, timeout_ms);
+        });
+    }
+
+    /// Perform the action
+    fn perform(self) {
+        match self {
+            Self::SearchList => search_list(),
+            Self::HideToast => hide_toast(),
         }
     }
 }
@@ -219,7 +259,7 @@ async fn expand_card<C: Card>(name: String) {
             Err(e) => {
                 // Card list out-of-date; refresh with search
                 console::log_1(&e);
-                schedule_search(200);
+                DeferredAction::SearchList.schedule(200);
             }
         }
     }
@@ -301,8 +341,11 @@ impl CardState {
         match &self.json {
             Some(json) => {
                 match try_changed_fields(self.tname, &doc, json) {
-                    Ok(v) => save_changed_fields(&window, &self.uri, &v).await,
-                    Err(e) => console::log_1(&e),
+                    Ok(v) => save_changed_fields(&self.uri, &v).await,
+                    Err(e) => {
+                        // this should only happen if the JSON is not valid
+                        console::log_1(&e);
+                    }
                 }
                 self.fetch_again().await;
             }
@@ -321,17 +364,44 @@ impl CardState {
             Err(e) => {
                 // Card list out-of-date; refresh with search
                 console::log_1(&e);
-                schedule_search(200);
+                DeferredAction::SearchList.schedule(200);
             }
         }
     }
 }
 
 /// Save changed fields
-async fn save_changed_fields(window: &Window, uri: &str, v: &str) {
-    let json = v.into();
-    if let Err(e) = fetch_patch(window, uri, &json).await {
-        console::log_1(&e)
+async fn save_changed_fields(uri: &str, v: &str) {
+    if let Some(window) = web_sys::window() {
+        let json = v.into();
+        if let Err(e) = fetch_patch(&window, uri, &json).await {
+            console::log_1(&e);
+            if let Err(e) = show_toast("Save failed!") {
+                console::log_1(&e);
+            }
+        }
+    }
+}
+
+/// Show a toast message
+fn show_toast(msg: &str) -> Result<()> {
+    let window = web_sys::window().unwrap_throw();
+    let doc = window.document().unwrap_throw();
+    let sb_toast: HtmlElement = doc.elem("sb_toast")?;
+    sb_toast.set_inner_html(msg);
+    sb_toast.set_class_name("show");
+    DeferredAction::HideToast.schedule(3000);
+    Ok(())
+}
+
+/// Hide toast
+fn hide_toast() {
+    if let Some(window) = web_sys::window() {
+        if let Some(doc) = window.document() {
+            if let Ok(sb_toast) = doc.elem::<HtmlElement>("sb_toast") {
+                sb_toast.set_class_name("");
+            }
+        }
     }
 }
 
@@ -357,26 +427,26 @@ fn replace_card_html(elem: &HtmlElement, ct: CardType, html: &str) {
 /// Try to delete an object
 async fn try_delete(window: &Window, uri: &str) {
     match fetch_delete(window, uri).await {
-        Ok(_) => schedule_search(1500),
-        Err(e) => console::log_1(&e),
-    }
-}
-
-/// Schedule search callback using timeout
-fn schedule_search(timeout_ms: i32) {
-    if let Some(window) = web_sys::window() {
-        STATE.with(|rc| {
-            let state = rc.borrow();
-            state.schedule_search(&window, timeout_ms);
-        });
+        Ok(_) => DeferredAction::SearchList.schedule(1500),
+        Err(e) => {
+            console::log_1(&e);
+            if let Err(e) = show_toast("Delete failed!") {
+                console::log_1(&e);
+            }
+        }
     }
 }
 
 /// Try to create a new object
 async fn try_create_new(tp: &str, doc: &Document) {
     match create_new(tp, doc).await {
-        Ok(_) => schedule_search(1500),
-        Err(e) => console::log_1(&e),
+        Ok(_) => DeferredAction::SearchList.schedule(1500),
+        Err(e) => {
+            console::log_1(&e);
+            if let Err(e) = show_toast("Create failed!") {
+                console::log_1(&e);
+            }
+        }
     }
 }
 
@@ -463,6 +533,7 @@ pub async fn start() -> Result<()> {
     add_select_event_listener(&sb_type, handle_sb_type_ev)?;
     add_input_event_listener(&doc.elem("sb_input")?)?;
     add_click_event_listener(&doc.elem("sb_list")?)?;
+    add_interval_callback(&window)?;
     Ok(())
 }
 
@@ -635,7 +706,7 @@ fn handle_button_click_ev(doc: &Document, elem: &Element) {
             id if id == "ob_delete" => spawn_local(cs.delete()),
             id if id == "ob_edit" => cs.replace_card(doc, CardType::Edit),
             id if id == "ob_save" => spawn_local(cs.save_changed()),
-            id => console::log_1(&id.into()),
+            id => console::log_1(&format!("unknown button: {}", id).into()),
         }
     }
 }
@@ -648,5 +719,32 @@ fn deselect_card(doc: &Document) {
     });
     if let Some(cs) = cs {
         cs.replace_card(doc, CardType::Compact);
+    }
+}
+
+/// Add callback for regular interval checks
+fn add_interval_callback(window: &Window) -> Result<()> {
+    let closure = Closure::wrap(Box::new(|| {
+        tick_interval();
+    }) as Box<dyn Fn()>);
+    window.set_interval_with_callback_and_timeout_and_arguments_0(
+        closure.as_ref().unchecked_ref(),
+        TICK_INTERVAL,
+    )?;
+    closure.forget();
+    Ok(())
+}
+
+/// Process a tick interval
+fn tick_interval() {
+    STATE.with(|rc| {
+        let mut state = rc.borrow_mut();
+        state.tick = state.plus_ticks(1);
+    });
+    while let Some(action) = STATE.with(|rc| {
+        let mut state = rc.borrow_mut();
+        state.action()
+    }) {
+        action.perform();
     }
 }

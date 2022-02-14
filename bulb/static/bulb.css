@@ -57,6 +57,34 @@ textarea {
   overflow-y: auto;
 }
 
+#sb_toast {
+  visibility: hidden;
+  position: fixed;
+  z-index: 1;
+
+  right: 5%;
+  bottom: 2rem;
+  min-width: 10rem;
+  margin-left: 1rem;
+  text-align: center;
+  border-radius: 0.1rem;
+  padding: 0.5rem;
+  background-color: #400;
+  color: #fff;
+}
+#sb_toast.show {
+  visibility: visible;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+@keyframes fadein {
+  from { bottom: 0; opacity: 0; }
+  to { bottom: 2rem; opacity: 1; }
+}
+@keyframes fadeout {
+  from { bottom: 2rem; opacity: 1; }
+  to { bottom: 0; opacity: 0; }
+}
+
 .cards {
   display: flex;
   flex-wrap: wrap;
