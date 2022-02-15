@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- ant build file for IRIS project
-     Copyright (C) 2007-2021  Minnesota Department of Transportation
+     Copyright (C) 2007-2022  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -352,8 +352,8 @@
 			<fileset file="${build.etc}/index.html"/>
 		</copy>
 
-		<mkdir dir="${install.dir}/var/www/html/bulb"/>
 		<mkdir dir="${install.dir}/var/www/html/iris"/>
+		<mkdir dir="${install.dir}/var/www/html/iris/bulb"/>
 		<mkdir dir="${install.dir}/var/www/html/iris/img"/>
 		<mkdir dir="${install.dir}/var/www/html/iris-gstreamer"/>
 		<mkdir dir="${install.dir}/var/www/html/iris_xml"/>

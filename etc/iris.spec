@@ -134,8 +134,8 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 
 # /var/www/html/
 %attr(0644,root,root) /var/www/html/index.html
-%dir %attr(3775,tms,tms) /var/www/html/bulb
 %dir %attr(3775,tms,tms) /var/www/html/iris
+%dir %attr(3775,tms,tms) /var/www/html/iris/bulb
 %dir %attr(3775,tms,tms) /var/www/html/iris/img
 %dir %attr(3775,tms,tms) /var/www/html/iris_xml
 %dir %attr(3775,tms,tms) /var/www/html/iris-gstreamer
