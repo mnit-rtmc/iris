@@ -19,7 +19,8 @@ use wasm_bindgen_futures::{spawn_local, JsFuture};
 use web_sys::{
     console, Document, Element, Event, HtmlButtonElement, HtmlElement,
     HtmlInputElement, HtmlSelectElement, Request, RequestInit, Response,
-    ScrollBehavior, ScrollIntoViewOptions, ScrollLogicalPosition, Window,
+    ScrollBehavior, ScrollIntoViewOptions, ScrollLogicalPosition,
+    TransitionEvent, Window,
 };
 
 pub type Result<T> = std::result::Result<T, JsValue>;
@@ -79,6 +80,8 @@ struct State {
     tick: i32,
     /// Selected card state
     selected: Option<CardState>,
+    /// Delete action enabled (slider transition finished)
+    delete_enabled: bool,
 }
 
 thread_local! {
@@ -533,6 +536,7 @@ pub async fn start() -> Result<()> {
     add_select_event_listener(&sb_type, handle_sb_type_ev)?;
     add_input_event_listener(&doc.elem("sb_input")?)?;
     add_click_event_listener(&doc.elem("sb_list")?)?;
+    add_transition_event_listener(&doc.elem("sb_list")?)?;
     add_interval_callback(&window)?;
     Ok(())
 }
@@ -703,12 +707,58 @@ fn handle_button_click_ev(doc: &Document, elem: &Element) {
     if let Some(cs) = cs {
         match elem.id() {
             id if id == "ob_close" => cs.replace_card(doc, CardType::Compact),
-            id if id == "ob_delete" => spawn_local(cs.delete()),
+            id if id == "ob_delete" => {
+                if STATE.with(|rc| rc.borrow().delete_enabled) {
+                    spawn_local(cs.delete());
+                }
+            }
             id if id == "ob_edit" => cs.replace_card(doc, CardType::Edit),
             id if id == "ob_save" => spawn_local(cs.save_changed()),
             id => console::log_1(&format!("unknown button: {}", id).into()),
         }
     }
+}
+
+/// Add transition event listener to an element
+fn add_transition_event_listener(elem: &Element) -> Result<()> {
+    let closure =
+        Closure::wrap(Box::new(handle_transition_ev) as Box<dyn FnMut(_)>);
+    elem.add_event_listener_with_callback(
+        "transitionstart",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    elem.add_event_listener_with_callback(
+        "transitioncancel",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    elem.add_event_listener_with_callback(
+        "transitionend",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    closure.forget();
+    Ok(())
+}
+
+/// Handle a `transition*` event from "sb_list" child element
+fn handle_transition_ev(ev: Event) {
+    if let Some(target) = ev.target() {
+        if let Ok(target) = target.dyn_into::<Element>() {
+            if let Ok(ev) = ev.dyn_into::<TransitionEvent>() {
+                // delete slider is a "left" property transition
+                if target.id() == "ob_delete" && ev.property_name() == "left" {
+                    set_delete_enabled(&ev.type_() == "transitionend");
+                }
+            }
+        }
+    }
+}
+
+/// Set delete action enabled/disabled
+fn set_delete_enabled(enabled: bool) {
+    STATE.with(|rc| {
+        let mut state = rc.borrow_mut();
+        state.delete_enabled = enabled;
+    });
 }
 
 /// Deselect the selected card

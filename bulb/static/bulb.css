@@ -9,6 +9,26 @@ label {
 textarea {
   resize: none;
 }
+
+button {
+  appearance: none;
+  display: inline-block;
+  border: 1px solid #888;
+  border-radius: 0.2rem;
+  padding: 0.1rem 0.2rem;
+  margin: 0;
+  background: none;
+  color: black;
+  cursor: pointer;
+  transition: background 50ms ease-in-out;
+}
+button:hover {
+  background: #ddd;
+}
+button:active {
+  background: #bbb;
+}
+
 .root {
   position: fixed;
   top: 0;
@@ -57,6 +77,29 @@ textarea {
   overflow-y: auto;
 }
 
+/* Delete button sliding "confirmation" animation */
+#ob_delete {
+  position: relative; /* add position context for ::before pseudo-element */
+  overflow: hidden;
+}
+#ob_delete:active {
+  background: none; /* clear background to make slider visible */
+}
+#ob_delete::before {
+  position: absolute;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  left: -100%;
+  top: 0;
+  content: "";
+  background: #bbb;
+}
+#ob_delete:active::before {
+  transition: left 1s;
+  left: 0;
+}
+
 #sb_toast {
   visibility: hidden;
   position: absolute;
@@ -74,13 +117,13 @@ textarea {
 }
 #sb_toast.show {
   visibility: visible;
-  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  animation: fade_in 0.5s, fade_out 0.5s 2.5s;
 }
-@keyframes fadein {
+@keyframes fade_in {
   from { bottom: 0; opacity: 0; }
   to { bottom: 2rem; opacity: 1; }
 }
-@keyframes fadeout {
+@keyframes fade_out {
   from { bottom: 2rem; opacity: 1; }
   to { bottom: 0; opacity: 0; }
 }
@@ -146,4 +189,5 @@ textarea {
   display: flex;
   justify-content: space-between;
   padding: 0.1rem;
+  z-index: 1; /* required for ob_delete::before slider pseudo-element */
 }
