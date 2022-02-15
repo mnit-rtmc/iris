@@ -74,15 +74,19 @@ struct Verifier {}
 impl SonarError {
     fn parse_show(msg: &str) -> Self {
         // gross, but no point in changing SHOW messages now!
-        if msg.starts_with("Permission") {
+        let msg = msg.to_lowercase();
+        if msg.starts_with("permission") {
             Self::Forbidden
-        } else if msg.starts_with("Invalid name") {
+        } else if msg.starts_with("invalid name") {
             // this should really have been "Unknown name", not "Invalid name"
             Self::NotFound
-        } else if msg.starts_with("Invalid") {
+        } else if msg.starts_with("invalid") | msg.starts_with("bad") {
             Self::InvalidValue
-        } else if msg.starts_with("Name already exists")
-            | msg.starts_with("Must be removed")
+        } else if msg.starts_with("name already exists")
+            | msg.starts_with("must be removed")
+            | msg.starts_with("cannot")
+            | msg.starts_with("already")
+            | msg.contains("exists")  // "Drop X exists"
         {
             Self::Conflict
         } else {

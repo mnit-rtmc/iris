@@ -65,8 +65,8 @@ const STAMPS: &[(&str, &str)] = &[
     ("controller", "fail_time"),
 ];
 
-/// Hack to rename IRIS attributes that don't match DB names
-fn rename_att(tp: &str, att: &str) -> String {
+/// Rename Sonar attributes to DB names
+fn rename_sonar_to_db(tp: &str, att: &str) -> String {
     if tp == "controller" && att == "drop" {
         "drop_id".to_string()
     } else {
@@ -264,11 +264,16 @@ fn make_name(tp: &str, nm: &str) -> Result<String> {
 }
 
 /// Make a Sonar attribute (with validation)
-fn make_att(nm: &str, att: &str) -> Result<String> {
+fn make_att(tp: &str, nm: &str, att: &str) -> Result<String> {
     if att.len() > 64 || att.contains(invalid_char) || att.contains('/') {
         Err(SonarError::InvalidName)
     } else {
-        Ok(format!("{}/{}", nm, att.to_case(Case::Camel)))
+        let att = if tp == "controller" && att == "drop_id" {
+            "drop".to_string()
+        } else {
+            att.to_case(Case::Camel)
+        };
+        Ok(format!("{}/{}", nm, att))
     }
 }
 
@@ -321,7 +326,7 @@ async fn get_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
     );
     resp!(
         c.enumerate_object(&nm, |att, val| {
-            let att = rename_att(tp, att);
+            let att = rename_sonar_to_db(tp, att);
             if let Some(val) = make_json(&(tp, &att), val) {
                 res.insert(att, val);
             }
@@ -402,7 +407,7 @@ async fn update_sonar_object(tp: &str, mut req: Request<()>) -> tide::Result {
     }
     let mut c = resp!(connection(&req).await);
     for (key, value) in body.as_object().unwrap() {
-        let anm = resp!(make_att(&nm, &key));
+        let anm = resp!(make_att(tp, &nm, &key));
         let value = resp!(att_value(value));
         log::debug!("{} = {}", anm, &value);
         resp!(c.update_object(&anm, &value).await);
