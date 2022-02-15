@@ -376,33 +376,37 @@ async fn save_changed_fields(uri: &str, v: &str) {
         let json = v.into();
         if let Err(e) = fetch_patch(&window, uri, &json).await {
             console::log_1(&e);
-            if let Err(e) = show_toast("Save failed!") {
-                console::log_1(&e);
-            }
+            show_toast("Save failed!");
         }
     }
 }
 
 /// Show a toast message
-fn show_toast(msg: &str) -> Result<()> {
-    let window = web_sys::window().unwrap_throw();
-    let doc = window.document().unwrap_throw();
-    let sb_toast: HtmlElement = doc.elem("sb_toast")?;
-    sb_toast.set_inner_html(msg);
-    sb_toast.set_class_name("show");
-    DeferredAction::HideToast.schedule(3000);
-    Ok(())
+fn show_toast(msg: &str) {
+    get_toast().filter(|t| {
+        t.set_inner_html(msg);
+        t.set_class_name("show");
+        DeferredAction::HideToast.schedule(3000);
+        false
+    });
+}
+
+/// Get toast element
+fn get_toast() -> Option<HtmlElement> {
+    if let Some(window) = web_sys::window() {
+        if let Some(doc) = window.document() {
+            return doc.elem("sb_toast").ok();
+        }
+    }
+    None
 }
 
 /// Hide toast
 fn hide_toast() {
-    if let Some(window) = web_sys::window() {
-        if let Some(doc) = window.document() {
-            if let Ok(sb_toast) = doc.elem::<HtmlElement>("sb_toast") {
-                sb_toast.set_class_name("");
-            }
-        }
-    }
+    get_toast().filter(|t| {
+        t.set_class_name("");
+        false
+    });
 }
 
 /// Get the URI of an object
@@ -430,9 +434,7 @@ async fn try_delete(window: &Window, uri: &str) {
         Ok(_) => DeferredAction::SearchList.schedule(1500),
         Err(e) => {
             console::log_1(&e);
-            if let Err(e) = show_toast("Delete failed!") {
-                console::log_1(&e);
-            }
+            show_toast("Delete failed!");
         }
     }
 }
@@ -443,9 +445,7 @@ async fn try_create_new(tp: &str, doc: &Document) {
         Ok(_) => DeferredAction::SearchList.schedule(1500),
         Err(e) => {
             console::log_1(&e);
-            if let Err(e) = show_toast("Create failed!") {
-                console::log_1(&e);
-            }
+            show_toast("Create failed!");
         }
     }
 }
@@ -739,6 +739,10 @@ fn add_interval_callback(window: &Window) -> Result<()> {
 fn tick_interval() {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
+        // don't need to count ticks if nothing's deferred
+        if state.deferred.is_empty() {
+            return;
+        }
         state.tick = state.plus_ticks(1);
     });
     while let Some(action) = STATE.with(|rc| {

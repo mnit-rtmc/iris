@@ -37,7 +37,7 @@ authentication.
   - [X] Html escaping
   - [X] Maintenance object CRUD
   - [X] Status button / view
-  - [ ] Feedback with "snackbar" popups
+  - [X] Feedback with "toast" popups
   - [ ] UI refinements
   - [ ] Authentication and session expiration
 

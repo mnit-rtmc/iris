@@ -59,16 +59,16 @@ textarea {
 
 #sb_toast {
   visibility: hidden;
-  position: fixed;
+  position: absolute;
   z-index: 1;
 
-  right: 5%;
+  left: 2rem;
   bottom: 2rem;
   min-width: 10rem;
-  margin-left: 1rem;
-  text-align: center;
-  border-radius: 0.1rem;
+  margin: 5%;
+  border-radius: 0.2rem;
   padding: 0.5rem;
+  text-align: center;
   background-color: #400;
   color: #fff;
 }
