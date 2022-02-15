@@ -86,7 +86,8 @@ impl SonarError {
             | msg.starts_with("must be removed")
             | msg.starts_with("cannot")
             | msg.starts_with("already")
-            | msg.contains("exists")  // "Drop X exists"
+            | msg.contains("foreign key") // SQL constraint on delete
+            | msg.contains("exists")      // "Drop X exists"
         {
             Self::Conflict
         } else {
@@ -297,8 +298,8 @@ impl Connection {
     }
 
     /// Check for an error message from the server
-    async fn check_error(&mut self) -> Result<()> {
-        match io::timeout(Duration::from_millis(10), self.read()).await {
+    async fn check_error(&mut self, ms: u64) -> Result<()> {
+        match io::timeout(Duration::from_millis(ms), self.read()).await {
             Err(ref e) if e.kind() == io::ErrorKind::TimedOut => Ok(()),
             Err(e) => Err(e),
             Ok(()) => Ok(()),
@@ -361,9 +362,9 @@ impl Connection {
     pub async fn create_object(&mut self, nm: &str) -> Result<()> {
         let mut buf = vec![];
         Message::Object(nm).encode(&mut buf);
-        self.check_error().await?;
+        self.check_error(10).await?;
         self.send(&buf[..]).await?;
-        self.check_error().await?;
+        self.check_error(100).await?;
         Ok(())
     }
 
@@ -371,9 +372,9 @@ impl Connection {
     pub async fn update_object(&mut self, nm: &str, a: &str) -> Result<()> {
         let mut buf = vec![];
         Message::Attribute(nm, a).encode(&mut buf);
-        self.check_error().await?;
+        self.check_error(10).await?;
         self.send(&buf[..]).await?;
-        self.check_error().await?;
+        self.check_error(100).await?;
         Ok(())
     }
 
@@ -381,9 +382,9 @@ impl Connection {
     pub async fn remove_object(&mut self, nm: &str) -> Result<()> {
         let mut buf = vec![];
         Message::Remove(nm).encode(&mut buf);
-        self.check_error().await?;
+        self.check_error(10).await?;
         self.send(&buf[..]).await?;
-        self.check_error().await?;
+        self.check_error(100).await?;
         Ok(())
     }
 
@@ -398,7 +399,7 @@ impl Connection {
     {
         let mut buf = vec![];
         Message::Enumerate(nm).encode(&mut buf);
-        self.check_error().await?;
+        self.check_error(10).await?;
         self.send(&buf[..]).await?;
         let mut done = false;
         while !done {
