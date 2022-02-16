@@ -24,8 +24,8 @@ const TITLE: &str = "title";
 /// CSS class for names
 pub const NAME: &str = "ob_name";
 
-/// Create new card
-const CREATE_CARD: &str = "<span class='create'>Create 🆕</span>";
+/// Compact "Create" card
+const CREATE_COMPACT: &str = "<span class='create'>Create 🆕</span>";
 
 /// Type of card
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -50,26 +50,24 @@ pub trait Card: DeserializeOwned {
     const URI: &'static str;
     const HAS_STATUS: bool = false;
 
-    const CREATE: &'static str = "\
-        <div class='row'>\
-           <label for='create_name'>Name</label>\
-           <input id='create_name' maxlength='24' size='24'/>\
-        </div>";
-
     /// Create from a JSON value
     fn new(json: &JsValue) -> Result<Self> {
         json.into_serde::<Self>().map_err(|e| e.to_string().into())
     }
 
     /// Build form using JSON value
-    fn build_card(json: &Option<JsValue>, ct: CardType) -> Result<String> {
+    fn build_card(
+        name: &str,
+        json: &Option<JsValue>,
+        ct: CardType,
+    ) -> Result<String> {
         match (json, ct) {
             (Some(json), CardType::Compact) => Self::build_compact_form(json),
             (Some(json), CardType::Status) if Self::HAS_STATUS => {
                 Self::build_status_form(json)
             }
-            (_, CardType::Create) => Self::build_create_form(),
-            (None, _) => Ok(CREATE_CARD.into()),
+            (_, CardType::Create) => Self::build_create_form(name),
+            (None, _) => Ok(CREATE_COMPACT.into()),
             (Some(json), _) => Self::build_edit_form(json),
         }
     }
@@ -81,15 +79,17 @@ pub trait Card: DeserializeOwned {
     }
 
     /// Build a create card
-    fn build_create_form() -> Result<String> {
+    fn build_create_form(name: &str) -> Result<String> {
         let ename = Self::ENAME;
-        let create = Self::CREATE;
         Ok(format!(
             "<div class='row'>\
               <div class='{TITLE}'>{ename}</div>\
               <span class='{NAME}'>🆕</span>\
             </div>\
-            {create}\
+            <div class='row'>\
+             <label for='create_name'>Name</label>\
+             <input id='create_name' maxlength='24' size='24' value='{name}'/>\
+            </div>\
             <div class='row'>\
               <button id='ob_close' type='button'>❌ Close</button>\
               <button id='ob_save' type='button'>🖍️ Save</button>\
@@ -159,22 +159,28 @@ pub trait Card: DeserializeOwned {
         false
     }
 
+    /// Get next suggested name
+    fn next_name(_obs: &[Self]) -> String {
+        "".into()
+    }
+
     /// Build a list of cards from a JSON array
     fn build_cards(json: &JsValue, tx: &str) -> Result<String> {
         let tname = Self::TNAME;
         let mut html = String::new();
         html.push_str("<ul class='cards'>");
-        if tx.is_empty() {
-            // the "New" card has id "{tname}_" and blank name
-            html.push_str(&format!(
-                "<li id='{tname}_' name='' class='card'>\
-                    {CREATE_CARD}\
-                </li>"
-            ));
-        }
         let obs = json
             .into_serde::<Vec<Self>>()
             .map_err(|e| JsValue::from(e.to_string()))?;
+        let next_name = Self::next_name(&obs);
+        if tx.is_empty() {
+            // the "Create" card has id "{tname}_" and next available name
+            html.push_str(&format!(
+                "<li id='{tname}_' name='{next_name}' class='card'>\
+                    {CREATE_COMPACT}\
+                </li>"
+            ));
+        }
         // TODO: split this into async calls so it can be cancelled
         for ob in obs.iter().filter(|ob| ob.is_match(tx)) {
             let name = HtmlStr(ob.name());

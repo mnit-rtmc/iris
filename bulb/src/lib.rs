@@ -237,24 +237,24 @@ async fn try_build_cards<C: Card>(tx: String) -> Result<String> {
 }
 
 /// Handle a card click event
-async fn click_card(tp: String, name: String) {
+async fn click_card(tp: String, id: String, name: String) {
     match tp.as_str() {
-        Alarm::TNAME => expand_card::<Alarm>(name).await,
-        CabinetStyle::TNAME => expand_card::<CabinetStyle>(name).await,
-        CommConfig::TNAME => expand_card::<CommConfig>(name).await,
-        CommLink::TNAME => expand_card::<CommLink>(name).await,
-        Controller::TNAME => expand_card::<Controller>(name).await,
-        Modem::TNAME => expand_card::<Modem>(name).await,
+        Alarm::TNAME => expand_card::<Alarm>(id, name).await,
+        CabinetStyle::TNAME => expand_card::<CabinetStyle>(id, name).await,
+        CommConfig::TNAME => expand_card::<CommConfig>(id, name).await,
+        CommLink::TNAME => expand_card::<CommLink>(id, name).await,
+        Controller::TNAME => expand_card::<Controller>(id, name).await,
+        Modem::TNAME => expand_card::<Modem>(id, name).await,
         _ => (),
     }
 }
 
 /// Expand a card to a full form
-async fn expand_card<C: Card>(name: String) {
+async fn expand_card<C: Card>(id: String, name: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    if name.is_empty() {
-        let cs = CardState::new::<C>();
+    if id.ends_with('_') {
+        let cs = CardState::new::<C>(name);
         cs.replace_card(&doc, CardType::Create);
     } else {
         match fetch_card::<C>(name).await {
@@ -296,26 +296,37 @@ struct CardState {
 
 impl CardState {
     /// Create a new blank card state
-    fn new<C: Card>() -> Self {
+    fn new<C: Card>(name: String) -> Self {
         CardState {
             tname: C::TNAME,
             uri: "".into(),
-            name: "".into(),
+            name,
             json: None,
+        }
+    }
+
+    /// Get card element ID
+    fn id(&self) -> String {
+        if self.json.is_some() {
+            format!("{}_{}", self.tname, &self.name)
+        } else {
+            format!("{}_", self.tname)
         }
     }
 
     /// Replace a card element with another card type
     fn replace_card(self, doc: &Document, ct: CardType) {
-        let id = format!("{}_{}", self.tname, &self.name);
+        let id = self.id();
         match doc.elem::<HtmlElement>(&id) {
-            Ok(elem) => match build_card(self.tname, &self.json, ct) {
-                Ok(html) => replace_card_html(&elem, ct, &html),
-                Err(e) => {
-                    console::log_1(&(&e).into());
-                    return;
+            Ok(elem) => {
+                match build_card(self.tname, &self.name, &self.json, ct) {
+                    Ok(html) => replace_card_html(&elem, ct, &html),
+                    Err(e) => {
+                        console::log_1(&(&e).into());
+                        return;
+                    }
                 }
-            },
+            }
             Err(e) => console::log_1(&format!("{:?} {}", e, id).into()),
         }
         STATE.with(|rc| {
@@ -495,16 +506,17 @@ fn try_changed_fields(
 /// Build card using JSON value
 fn build_card(
     tp: &str,
+    name: &str,
     json: &Option<JsValue>,
     ct: CardType,
 ) -> Result<String> {
     match tp {
-        Alarm::TNAME => Alarm::build_card(json, ct),
-        CabinetStyle::TNAME => CabinetStyle::build_card(json, ct),
-        CommConfig::TNAME => CommConfig::build_card(json, ct),
-        CommLink::TNAME => CommLink::build_card(json, ct),
-        Controller::TNAME => Controller::build_card(json, ct),
-        Modem::TNAME => Modem::build_card(json, ct),
+        Alarm::TNAME => Alarm::build_card(name, json, ct),
+        CabinetStyle::TNAME => CabinetStyle::build_card(name, json, ct),
+        CommConfig::TNAME => CommConfig::build_card(name, json, ct),
+        CommLink::TNAME => CommLink::build_card(name, json, ct),
+        Controller::TNAME => Controller::build_card(name, json, ct),
+        Modem::TNAME => Modem::build_card(name, json, ct),
         _ => Ok("".into()),
     }
 }
@@ -692,10 +704,12 @@ fn handle_click_ev(elem: &Element) {
     if elem.is_instance_of::<HtmlButtonElement>() {
         handle_button_click_ev(&doc, elem);
     } else if let Some(card) = elem.closest(".card").unwrap_throw() {
-        if let Some(name) = card.get_attribute("name") {
-            if let Some(tp) = doc.select_parse::<String>("sb_type") {
-                deselect_card(&doc);
-                spawn_local(click_card(tp, name));
+        if let Some(id) = card.get_attribute("id") {
+            if let Some(name) = card.get_attribute("name") {
+                if let Some(tp) = doc.select_parse::<String>("sb_type") {
+                    deselect_card(&doc);
+                    spawn_local(click_card(tp, id, name));
+                }
             }
         }
     }

@@ -47,6 +47,19 @@ impl Card for CommConfig {
         &self.name
     }
 
+    /// Get next suggested name
+    fn next_name(obs: &[Self]) -> String {
+        let mut num = 1;
+        for ob in obs {
+            if let Some(("cfg", suffix)) = ob.name.split_once('_') {
+                if let Ok(n) = suffix.parse::<u32>() {
+                    num = num.max(n + 1);
+                }
+            }
+        }
+        format!("cfg_{num}")
+    }
+
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
         let description = HtmlStr(&self.description);
