@@ -401,12 +401,20 @@ fn att_value(value: &Value) -> Result<String> {
 async fn update_sonar_object(tp: &str, mut req: Request<()>) -> tide::Result {
     log::info!("PATCH {}", req.url());
     let nm = resp!(obj_name(tp, &req));
-    let body: Value = req.body_json().await?;
+    let mut body: Value = req.body_json().await?;
     if !body.is_object() {
         return bad_request("body must be a JSON object");
     }
+    let object = body.as_object_mut().unwrap();
     let mut c = resp!(connection(&req).await);
-    for (key, value) in body.as_object().unwrap() {
+    // "pin" attribute must be set before "controller"
+    if let Some(value) = object.remove("pin") {
+        let anm = resp!(make_att(tp, &nm, &"pin"));
+        let value = resp!(att_value(&value));
+        log::debug!("{} = {}", anm, &value);
+        resp!(c.update_object(&anm, &value).await);
+    }
+    for (key, value) in object.iter() {
         let anm = resp!(make_att(tp, &nm, &key));
         let value = resp!(att_value(value));
         log::debug!("{} = {}", anm, &value);

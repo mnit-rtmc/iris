@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{Card, NAME};
+use crate::card::{disabled_attr, Card, NAME};
 use crate::util::{Dom, HtmlStr};
 use crate::Result;
 use serde::{Deserialize, Serialize};
@@ -30,6 +30,19 @@ pub struct Alarm {
     pub trigger_time: Option<String>,
 }
 
+impl Alarm {
+    fn state(&self, long: bool) -> &'static str {
+        match (self.controller.is_some(), self.state, long) {
+            (true, false, false) => "👍",
+            (true, false, true) => "clear 👍",
+            (true, true, false) => "😧",
+            (true, true, true) => "triggered 😧",
+            (false, _, true) => "unknown ❓",
+            _ => "❓",
+        }
+    }
+}
+
 impl Card for Alarm {
     const TNAME: &'static str = "Alarm";
     const ENAME: &'static str = "🚨 Alarm";
@@ -39,10 +52,7 @@ impl Card for Alarm {
     fn is_match(&self, tx: &str) -> bool {
         self.description.to_lowercase().contains(tx)
             || self.name.to_lowercase().contains(tx)
-            || {
-                let state = if self.state { "triggered" } else { "clear" };
-                state.contains(tx)
-            }
+            || self.state(true).contains(tx)
     }
 
     fn name(&self) -> &str {
@@ -52,9 +62,12 @@ impl Card for Alarm {
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
         let description = HtmlStr(&self.description);
+        let state = self.state(false);
         let name = HtmlStr(&self.name);
+        let disabled = disabled_attr(self.controller.is_some());
         format!(
-            "<span>{description}</span>\
+            "<span{disabled}>{description}</span>\
+            <span>{state}</span>\
             <span class='{NAME}'>{name}</span>"
         )
     }
@@ -62,11 +75,7 @@ impl Card for Alarm {
     /// Convert to status HTML
     fn to_html_status(&self) -> String {
         let description = HtmlStr(&self.description);
-        let state = if self.state {
-            "triggered 😧"
-        } else {
-            "clear 🙂"
-        };
+        let state = self.state(true);
         let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
         format!(
             "<div class='row'>\

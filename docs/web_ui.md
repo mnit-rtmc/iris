@@ -30,7 +30,6 @@ authentication.
 * graft
   - [X] Add routes for maintenance resources
   - [X] Date / time formatting (RFC 3339)
-  - [ ] Verify user's domain on login
 * bulb
   - [X] Resource type selector with card list
   - [X] Search filter
@@ -48,13 +47,14 @@ authentication.
   - [ ] Generate DMS map layer in earthwyrm DB
 * graft
   - [ ] Add endpoints for controlling DMS
-  - [ ] Write full installation documentation
+  - [ ] Verify user's domain on login
   - [ ] Send SSE for update notifications
+  - [ ] Write full installation documentation
 * bulb
   - [ ] UI for DMS viewing / control
   - [ ] Generate DMS previews and insert into img element using data URI
-  - [ ] Write full installation documentation
   - [ ] Connect to graft for SSE
+  - [ ] Write full installation documentation
 
 ## Other Bits
 
