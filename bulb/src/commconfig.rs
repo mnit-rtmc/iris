@@ -16,8 +16,100 @@ use crate::{protocols_html, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
+use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
+
+/// Time units for period selections
+#[derive(Clone, Copy, Debug)]
+enum TimeUnit {
+    Sec,
+    Min,
+    Hr,
+}
+
+impl fmt::Display for TimeUnit {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Sec => write!(f, "s"),
+            Self::Min => write!(f, "m"),
+            Self::Hr => write!(f, "h"),
+        }
+    }
+}
+
+/// Time periods for poll / disconnect values
+#[derive(Clone, Copy, Debug)]
+struct Period {
+    value: u32,
+    unit: TimeUnit,
+}
+
+impl Period {
+    /// Create a new period
+    const fn new(value: u32, unit: TimeUnit) -> Self {
+        Self { value, unit }
+    }
+
+    /// Get the seconds in the period
+    fn seconds(self) -> u32 {
+        match self.unit {
+            TimeUnit::Sec => self.value,
+            TimeUnit::Min => self.value * 60,
+            TimeUnit::Hr => self.value * 3600,
+        }
+    }
+}
+
+impl fmt::Display for Period {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} {}", self.value, self.unit)
+    }
+}
+
+/// Available periods for selection
+const PERIODS: &[Period] = &[
+    Period::new(0, TimeUnit::Sec),
+    Period::new(5, TimeUnit::Sec),
+    Period::new(6, TimeUnit::Sec),
+    Period::new(10, TimeUnit::Sec),
+    Period::new(15, TimeUnit::Sec),
+    Period::new(20, TimeUnit::Sec),
+    Period::new(30, TimeUnit::Sec),
+    Period::new(60, TimeUnit::Sec),
+    Period::new(90, TimeUnit::Sec),
+    Period::new(2, TimeUnit::Min),
+    Period::new(4, TimeUnit::Min),
+    Period::new(5, TimeUnit::Min),
+    Period::new(10, TimeUnit::Min),
+    Period::new(15, TimeUnit::Min),
+    Period::new(20, TimeUnit::Min),
+    Period::new(30, TimeUnit::Min),
+    Period::new(60, TimeUnit::Min),
+    Period::new(2, TimeUnit::Hr),
+    Period::new(4, TimeUnit::Hr),
+    Period::new(8, TimeUnit::Hr),
+    Period::new(12, TimeUnit::Hr),
+    Period::new(24, TimeUnit::Hr),
+];
+
+/// Make `option` elements for an HTML period `select`
+fn period_options(periods: &[Period], seconds: u32) -> String {
+    let mut html = String::new();
+    for period in periods {
+        let sec = period.seconds();
+        html.push_str("<option value='");
+        html.push_str(&sec.to_string());
+        html.push('\'');
+        if seconds == sec {
+            html.push_str(" selected");
+        }
+        html.push('>');
+        html.push_str(&period.to_string());
+        html.push_str("</option>");
+    }
+    html
+}
 
 /// Comm configuration
 #[derive(Debug, Deserialize, Serialize)]
@@ -76,10 +168,12 @@ impl Card for CommConfig {
         let protocols = protocols_html(self.protocol);
         let modem = if self.modem { " checked" } else { "" };
         let timeout_ms = self.timeout_ms;
-        let poll_period_sec = self.poll_period_sec;
-        let long_poll_period_sec = self.long_poll_period_sec;
-        let idle_disconnect_sec = self.idle_disconnect_sec;
-        let no_response_disconnect_sec = self.no_response_disconnect_sec;
+        let poll_periods = period_options(&PERIODS[1..], self.poll_period_sec);
+        let long_periods =
+            period_options(&PERIODS[1..], self.long_poll_period_sec);
+        let idle_periods = period_options(PERIODS, self.idle_disconnect_sec);
+        let no_resp_periods =
+            period_options(PERIODS, self.no_response_disconnect_sec);
         format!(
             "<div class='row'>\
               <label for='edit_desc'>Description</label>\
@@ -100,24 +194,20 @@ impl Card for CommConfig {
                      max='20000' value='{timeout_ms}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_poll'>Poll Period (s)</label>\
-              <input id='edit_poll' type='number' min='0' \
-                     size='8' value='{poll_period_sec}'/>\
+              <label for='edit_poll'>Poll Period</label>\
+              <select id='edit_poll'>{poll_periods}</select>\
             </div>\
             <div class='row'>\
-              <label for='edit_long'>Long Poll Period (s)</label>\
-              <input id='edit_long' type='number' min='0' \
-                     size='8' value='{long_poll_period_sec}'/>\
+              <label for='edit_long'>Long Poll Period</label>\
+              <select id='edit_long'>{long_periods}</select>\
             </div>\
             <div class='row'>\
-              <label for='edit_idle'>Idle Disconnect (s)</label>\
-              <input id='edit_idle' type='number' min='0' size='8' \
-                     value='{idle_disconnect_sec}'/>\
+              <label for='edit_idle'>Idle Disconnect</label>\
+              <select id='edit_idle'>{idle_periods}</select>\
             </div>\
             <div class='row'>\
-              <label for='edit_no_resp'>No Response Disconnect (s)</label>\
-              <input id='edit_no_resp' type='number' min='0' size='8' \
-                     value='{no_response_disconnect_sec}'/>\
+              <label for='edit_no_resp'>No Response Disconnect</label>\
+              <select id='edit_no_resp'>{no_resp_periods}</select>\
             </div>"
         )
     }
@@ -152,7 +242,7 @@ impl Card for CommConfig {
                 );
             }
         }
-        if let Some(poll_period_sec) = doc.input_parse::<u32>("edit_poll") {
+        if let Some(poll_period_sec) = doc.select_parse::<u32>("edit_poll") {
             if poll_period_sec != val.poll_period_sec {
                 obj.insert(
                     "poll_period_sec".to_string(),
@@ -160,7 +250,7 @@ impl Card for CommConfig {
                 );
             }
         }
-        if let Some(long_poll_period_sec) = doc.input_parse::<u32>("edit_long")
+        if let Some(long_poll_period_sec) = doc.select_parse::<u32>("edit_long")
         {
             if long_poll_period_sec != val.long_poll_period_sec {
                 obj.insert(
@@ -169,7 +259,8 @@ impl Card for CommConfig {
                 );
             }
         }
-        if let Some(idle_disconnect_sec) = doc.input_parse::<u32>("edit_idle") {
+        if let Some(idle_disconnect_sec) = doc.select_parse::<u32>("edit_idle")
+        {
             if idle_disconnect_sec != val.idle_disconnect_sec {
                 obj.insert(
                     "idle_disconnect_sec".to_string(),
@@ -178,7 +269,7 @@ impl Card for CommConfig {
             }
         }
         if let Some(no_response_disconnect_sec) =
-            doc.input_parse::<u32>("edit_no_resp")
+            doc.select_parse::<u32>("edit_no_resp")
         {
             if no_response_disconnect_sec != val.no_response_disconnect_sec {
                 obj.insert(
