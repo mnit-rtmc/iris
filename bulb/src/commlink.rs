@@ -27,7 +27,7 @@ pub struct CommLink {
     pub uri: String,
     pub comm_config: String,
     pub poll_enabled: bool,
-    pub connected: Option<bool>,
+    pub connected: bool,
 }
 
 impl CommLink {
@@ -37,11 +37,14 @@ impl CommLink {
     }
 
     /// Get connected state to display
-    fn connected(&self) -> &'static str {
-        if *self.connected.as_ref().unwrap_or(&false) {
-            "Yes (online)"
-        } else {
-            "No (offline)"
+    fn connected(&self, long: bool) -> &'static str {
+        match (self.poll_enabled, self.connected, long) {
+            (true, true, false) => "👍",
+            (true, true, true) => "👍 online",
+            (true, false, false) => "🔌",
+            (true, false, true) => "🔌 offline",
+            (false, _, false) => "❓",
+            (false, _, true) => "❓ disabled",
         }
     }
 }
@@ -61,11 +64,11 @@ impl Card for CommLink {
     const URI: &'static str = "/iris/api/comm_link";
 
     fn is_match(&self, tx: &str) -> bool {
-        // can't check connected here, because it's not in the JSON file
         self.description.to_lowercase().contains(tx)
             || self.name.to_lowercase().contains(tx)
             || self.comm_config_desc().to_lowercase().contains(tx)
             || self.uri.to_lowercase().contains(tx)
+            || self.connected(true).contains(tx)
     }
 
     fn name(&self) -> &str {
@@ -74,11 +77,13 @@ impl Card for CommLink {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let description = HtmlStr(truncated(&self.description, 12));
+        let description = HtmlStr(truncated(&self.description, 10));
+        let connected = self.connected(false);
         let name = HtmlStr(&self.name);
         let disabled = disabled_attr(self.poll_enabled);
         format!(
             "<span{disabled}>{description}…</span>\
+            <span>{connected}</span>\
             <span class='{NAME}'>{name}</span>"
         )
     }
@@ -88,19 +93,15 @@ impl Card for CommLink {
         let description = HtmlStr(&self.description);
         let comm_config = self.comm_config_desc();
         let config = HtmlStr(&comm_config);
-        let connected = self.connected();
+        let connected = self.connected(true);
         let disabled = if self.poll_enabled { "" } else { " disabled" };
         format!(
             "<div class='row'>\
-              <span>Description</span>\
               <span class='info{disabled}'>{description}</span>\
             </div>\
             <div class='row'>\
-              <span>Comm Config</span>\
-              <span class='info'>{config}</span>\
-            </div>\
-            <div class='row'>\
-              <span>Connected</span>\
+              <span>{config}</span>\
+              <span>    </span>\
               <span class='info'>{connected}</span>\
             </div>"
         )

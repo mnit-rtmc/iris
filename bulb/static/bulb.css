@@ -4,7 +4,10 @@ body {
 }
 label {
   text-indent: 0.4rem;
-  margin-right: 0.2rem;
+}
+span {
+  margin-left: 0.1rem;
+  margin-right: 0.1rem;
 }
 textarea {
   resize: none;
@@ -162,7 +165,6 @@ button:active {
 .info {
   font-style: italic;
   color: #448;
-  margin-left: 0.2rem;
 }
 .create {
   font-style: italic;
