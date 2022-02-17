@@ -30,6 +30,17 @@ pub struct CommLink {
     pub connected: Option<bool>,
 }
 
+impl CommLink {
+    /// Get connected state to display
+    fn connected(&self) -> &'static str {
+        if *self.connected.as_ref().unwrap_or(&false) {
+            "Yes (online)"
+        } else {
+            "No (offline)"
+        }
+    }
+}
+
 impl Card for CommLink {
     const TNAME: &'static str = "Comm Link";
     const ENAME: &'static str = "🔗 Comm Link";
@@ -37,6 +48,7 @@ impl Card for CommLink {
     const URI: &'static str = "/iris/api/comm_link";
 
     fn is_match(&self, tx: &str) -> bool {
+        // can't check connected here, because it's not in the JSON file
         self.description.to_lowercase().contains(tx)
             || self.name.to_lowercase().contains(tx)
             || self.comm_config.to_lowercase().contains(tx)
@@ -62,15 +74,16 @@ impl Card for CommLink {
     /// Convert to status HTML
     fn to_html_status(&self) -> String {
         let description = HtmlStr(&self.description);
-        let connected = if *self.connected.as_ref().unwrap_or(&false) {
-            "Yes (online)"
+        let connected = self.connected();
+        let disabled = if self.poll_enabled {
+            ""
         } else {
-            "No (offline)"
+            " disabled"
         };
         format!(
             "<div class='row'>\
               <span>Description</span>\
-              <span class='info'>{description}</span>\
+              <span class='info{disabled}'>{description}</span>\
             </div>\
             <div class='row'>\
               <span>Connected</span>\

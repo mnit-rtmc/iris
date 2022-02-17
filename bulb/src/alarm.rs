@@ -31,6 +31,7 @@ pub struct Alarm {
 }
 
 impl Alarm {
+    /// Get the alarm state to display
     fn state(&self, long: bool) -> &'static str {
         match (self.controller.is_some(), self.state, long) {
             (true, false, false) => "👍",

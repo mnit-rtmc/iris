@@ -333,6 +333,7 @@ impl CardState {
             let mut state = rc.borrow_mut();
             if ct != CardType::Compact {
                 state.selected.replace(self);
+                state.deferred.clear();
             } else {
                 state.selected.take();
             }
