@@ -80,15 +80,11 @@ impl Card for Alarm {
         let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
         format!(
             "<div class='row'>\
-              <span>Description</span>\
               <span class='info'>{description}</span>\
-            </div>\
-            <div class='row'>\
-              <span>State</span>\
               <span class='info'>{state}</span>\
             </div>\
             <div class='row'>\
-              <span>Trigger Time</span>\
+              <span>Triggered</span>\
               <span class='info'>{trigger_time}</span>\
             </div>"
         )
