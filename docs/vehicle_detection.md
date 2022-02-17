@@ -239,10 +239,10 @@ Column | Name     | Description
 5      | Length   | Vehicle length (ft)
 
 **Duration** is the time a vehicle occupied the detector area, between 1 and
-60000 ms.  An invalid or missing value is represented by a `?` (U+003F).
+60,000 ms.  An invalid or missing value is represented by a `?` (U+003F).
 
 **Headway** is the difference in arrival time from the previous vehicle to the
-current one.  It is a positive integer between 1 and 3600000 ms (1 hour).  An
+current one.  It is a positive integer between 1 and 3,600,000 ms (1 hour).  An
 invalid or missing value is represented by a `?` (U+003F).
 
 **Time** is when the vehicle left the detection area.  Normally, this field is
