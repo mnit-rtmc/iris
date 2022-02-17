@@ -28,6 +28,7 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.CommConfig;
+import us.mn.state.dot.tms.CommConfigHelper;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommLinkHelper;
 import us.mn.state.dot.tms.CommProtocol;
@@ -122,6 +123,17 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Create a new comm link */
 	public CommLinkImpl(String n) {
 		super(n);
+		// comm_config is NOT NULL, so let's find one
+		CommConfig cc = null;
+		Iterator<CommConfig> it = CommConfigHelper.iterator();
+		while (it.hasNext()) {
+			cc = it.next();
+			if (CommProtocol.NTCIP_A.ordinal() == cc.getProtocol()
+			    && !cc.getModem())
+				break;
+		}
+		if (cc != null)
+			comm_config = lookupCommConfig(cc.getName());
 	}
 
 	/** Create a comm link */
@@ -203,7 +215,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Description of communication link */
-	private String description = "<New Link>";
+	private String description = "";
 
 	/** Set text description */
 	@Override
