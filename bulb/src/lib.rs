@@ -74,6 +74,8 @@ struct State {
     protocols: Vec<Protocol>,
     /// Controller conditions
     conditions: Vec<Condition>,
+    /// Comm configs
+    comm_configs: Vec<CommConfig>,
     /// Deferred actions (with tick number)
     deferred: Vec<(i32, DeferredAction)>,
     /// Timer tick count
@@ -94,9 +96,11 @@ impl State {
         &mut self,
         mut protocols: Vec<Protocol>,
         mut conditions: Vec<Condition>,
+        mut comm_configs: Vec<CommConfig>,
     ) {
         self.protocols.append(&mut protocols);
         self.conditions.append(&mut conditions);
+        self.comm_configs.append(&mut comm_configs);
     }
 
     /// Add ticks to current tick count
@@ -333,6 +337,7 @@ impl CardState {
             let mut state = rc.borrow_mut();
             if ct != CardType::Compact {
                 state.selected.replace(self);
+                // should only clear UI actions...
                 state.deferred.clear();
             } else {
                 state.selected.take();
@@ -539,9 +544,11 @@ pub async fn start() -> Result<()> {
     let protocols = json.into_serde::<Vec<Protocol>>().unwrap_throw();
     let json = fetch_get("/iris/api/condition").await?;
     let conditions = json.into_serde::<Vec<Condition>>().unwrap_throw();
+    let json = fetch_get(CommConfig::URI).await?;
+    let comm_configs = json.into_serde::<Vec<CommConfig>>().unwrap_throw();
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        state.initialize(protocols, conditions);
+        state.initialize(protocols, conditions, comm_configs);
     });
 
     let sb_type: HtmlSelectElement = doc.elem("sb_type")?;
@@ -612,6 +619,41 @@ pub fn conditions_html(selected: u32) -> String {
             }
             html.push('>');
             html.push_str(&condition.description);
+            html.push_str("</option>");
+        }
+        html.push_str("</select>");
+        html
+    })
+}
+
+/// Get a comm config by name
+pub fn get_comm_config_desc(name: &str) -> Option<String> {
+    STATE.with(|rc| {
+        let state = rc.borrow();
+        for config in &state.comm_configs {
+            if name == config.name {
+                return Some(config.description.clone());
+            }
+        }
+        None
+    })
+}
+
+/// Create an HTML `select` element of comm configs
+pub fn comm_configs_html(selected: &str) -> String {
+    STATE.with(|rc| {
+        let state = rc.borrow();
+        let mut html = String::new();
+        html.push_str("<select id='edit_config'>");
+        for config in &state.comm_configs {
+            html.push_str("<option value='");
+            html.push_str(&config.name);
+            html.push('\'');
+            if selected == config.name {
+                html.push_str(" selected");
+            }
+            html.push('>');
+            html.push_str(&config.description);
             html.push_str("</option>");
         }
         html.push_str("</select>");

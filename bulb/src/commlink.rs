@@ -12,7 +12,7 @@
 //
 use crate::card::{disabled_attr, Card, NAME};
 use crate::util::{Dom, HtmlStr};
-use crate::Result;
+use crate::{comm_configs_html, get_comm_config_desc, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
@@ -31,6 +31,11 @@ pub struct CommLink {
 }
 
 impl CommLink {
+    /// Get comm config description
+    fn comm_config_desc(&self) -> String {
+        get_comm_config_desc(&self.comm_config).unwrap_or_else(|| "".into())
+    }
+
     /// Get connected state to display
     fn connected(&self) -> &'static str {
         if *self.connected.as_ref().unwrap_or(&false) {
@@ -38,6 +43,14 @@ impl CommLink {
         } else {
             "No (offline)"
         }
+    }
+}
+
+/// Get a truncated string slice
+fn truncated(s: &str, max_chars: usize) -> &str {
+    match s.char_indices().nth(max_chars) {
+        None => s,
+        Some((idx, _)) => &s[..idx],
     }
 }
 
@@ -51,9 +64,8 @@ impl Card for CommLink {
         // can't check connected here, because it's not in the JSON file
         self.description.to_lowercase().contains(tx)
             || self.name.to_lowercase().contains(tx)
-            || self.comm_config.to_lowercase().contains(tx)
+            || self.comm_config_desc().to_lowercase().contains(tx)
             || self.uri.to_lowercase().contains(tx)
-        // TODO: check comm_config protocol
     }
 
     fn name(&self) -> &str {
@@ -62,11 +74,11 @@ impl Card for CommLink {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let description = HtmlStr(&self.description);
+        let description = HtmlStr(truncated(&self.description, 12));
         let name = HtmlStr(&self.name);
         let disabled = disabled_attr(self.poll_enabled);
         format!(
-            "<span{disabled}>{description}</span>\
+            "<span{disabled}>{description}…</span>\
             <span class='{NAME}'>{name}</span>"
         )
     }
@@ -74,16 +86,18 @@ impl Card for CommLink {
     /// Convert to status HTML
     fn to_html_status(&self) -> String {
         let description = HtmlStr(&self.description);
+        let comm_config = self.comm_config_desc();
+        let config = HtmlStr(&comm_config);
         let connected = self.connected();
-        let disabled = if self.poll_enabled {
-            ""
-        } else {
-            " disabled"
-        };
+        let disabled = if self.poll_enabled { "" } else { " disabled" };
         format!(
             "<div class='row'>\
               <span>Description</span>\
               <span class='info{disabled}'>{description}</span>\
+            </div>\
+            <div class='row'>\
+              <span>Comm Config</span>\
+              <span class='info'>{config}</span>\
             </div>\
             <div class='row'>\
               <span>Connected</span>\
@@ -97,7 +111,7 @@ impl Card for CommLink {
         let description = HtmlStr(&self.description);
         let uri = HtmlStr(&self.uri);
         let enabled = if self.poll_enabled { " checked" } else { "" };
-        let comm_config = HtmlStr(&self.comm_config);
+        let comm_configs = comm_configs_html(&self.comm_config);
         format!(
             "<div class='row'>\
               <label for='edit_desc'>Description</label>\
@@ -111,8 +125,7 @@ impl Card for CommLink {
             </div>\
             <div class='row'>\
               <label for='edit_config'>Comm Config</label>\
-              <input id='edit_config' maxlength='10' size='10' \
-                     value='{comm_config}'/>\
+              {comm_configs}\
             </div>\
             <div class='row'>\
               <label for='edit_enabled'>Poll Enabled</label>\
@@ -135,7 +148,7 @@ impl Card for CommLink {
                 obj.insert("uri".to_string(), Value::String(uri));
             }
         }
-        if let Some(comm_config) = doc.input_parse::<String>("edit_config") {
+        if let Some(comm_config) = doc.select_parse::<String>("edit_config") {
             if comm_config != val.comm_config {
                 obj.insert(
                     "comm_config".to_string(),
