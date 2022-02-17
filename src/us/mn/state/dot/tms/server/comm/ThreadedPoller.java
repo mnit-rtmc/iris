@@ -123,7 +123,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 
 	/** Add an operation to the device poller */
 	protected void addOp(OpController<T> op) {
-		if (!isConnected()) {
+		if (isThreadDone()) {
 			disconnect();
 			createCommThread();
 		}
@@ -145,6 +145,11 @@ public class ThreadedPoller<T extends ControllerProperty>
 	@Override
 	public synchronized boolean isConnected() {
 		return (c_thread != null) && c_thread.isConnected();
+	}
+
+	/** Check if the thread is done */
+	private synchronized boolean isThreadDone() {
+		return (c_thread == null) || c_thread.isDone();
 	}
 
 	/** Get max seconds an idle connection should be left open

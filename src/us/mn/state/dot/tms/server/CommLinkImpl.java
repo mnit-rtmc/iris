@@ -103,6 +103,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		map.put("uri", uri);
 		map.put("poll_enabled", poll_enabled);
 		map.put("comm_config", comm_config);
+		map.put("connected", connected);
 		return map;
 	}
 

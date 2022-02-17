@@ -103,8 +103,13 @@ public class CommThread<T extends ControllerProperty> {
 	/** Done state */
 	private boolean done = false;
 
+	/** Is the thread done? */
+	public boolean isDone() {
+		return done;
+	}
+
 	/** Connected state */
-	private boolean connected = true;
+	private boolean connected = false;
 
 	/** Get the connected state */
 	public boolean isConnected() {
@@ -180,6 +185,7 @@ public class CommThread<T extends ControllerProperty> {
 			try (Messenger m = createMessenger(scheme, uri,
 				timeout, no_resp_disconnect_sec))
 			{
+				connected = true;
 				pollQueue(m);
 			}
 			catch (DisconnectException e) {
@@ -187,6 +193,7 @@ public class CommThread<T extends ControllerProperty> {
 				break;
 			}
 			catch (ReconnectException e) {
+				connected = false;
 				continue;
 			}
 			catch (NoModemException e) {
@@ -233,7 +240,6 @@ public class CommThread<T extends ControllerProperty> {
 	private void pollQueue(Messenger m) throws DisconnectException,
 		IOException
 	{
-		connected = true;
 		while (shouldContinue()) {
 			OpController<T> op = queue.next(idle_disconnect_ms);
 			doPoll(m, op);
