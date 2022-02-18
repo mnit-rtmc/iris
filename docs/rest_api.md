@@ -67,6 +67,10 @@ Consider using Etags to avoid mid-air collisions
 
 ## Object definitions
 
-- Alarm
+- `alarm`
   * Minimal: `name`, `description`, `controller`, `state`
   * Full: `pin`, `trigger_time`
+- `cabinet_style`
+  * Minimal: `name`
+  * Full: `police_panel_pin_1`, `police_panel_pin_2`, `watchdog_reset_pin_1`,
+    `watchdog_reset_pin_2`, `dip`

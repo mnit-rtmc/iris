@@ -232,8 +232,7 @@ const CABINET_STYLE_RES: Resource = Resource::Simple(
     "api/cabinet_style",
     Listen::All("cabinet_style"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, police_panel_pin_1, police_panel_pin_2, watchdog_reset_pin_1, \
-           watchdog_reset_pin_2, dip \
+    SELECT name \
     FROM iris.cabinet_style \
     ORDER BY name\
 ) r",
