@@ -74,3 +74,7 @@ Consider using Etags to avoid mid-air collisions
   * Minimal: `name`
   * Full: `police_panel_pin_1`, `police_panel_pin_2`, `watchdog_reset_pin_1`,
     `watchdog_reset_pin_2`, `dip`
+- `comm_config`
+  * Minimal: `name`, `description`
+  * Full: `protocol`, `modem`, `timeout_ms`, `poll_period_sec`,
+    `long_poll_period_sec`, `idle_disconnect_sec`, `no_response_disconnect_sec`

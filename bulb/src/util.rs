@@ -44,9 +44,18 @@ impl From<OptVal<u32>> for Value {
     }
 }
 
+impl From<OptVal<bool>> for Value {
+    fn from(val: OptVal<bool>) -> Self {
+        match val.0 {
+            Some(b) => Value::Bool(b),
+            None => Value::Null,
+        }
+    }
+}
+
 /// String wrapper which can be written as HTML
 #[derive(Debug)]
-pub struct HtmlStr<S>{
+pub struct HtmlStr<S> {
     val: S,
     len: usize,
 }
@@ -54,7 +63,10 @@ pub struct HtmlStr<S>{
 impl<S> HtmlStr<S> {
     /// Create a new HTML string
     pub fn new(val: S) -> Self {
-        Self { val, len: usize::MAX }
+        Self {
+            val,
+            len: usize::MAX,
+        }
     }
 
     /// Adjust the maximum length

@@ -583,7 +583,7 @@ fn types_html() -> String {
 }
 
 /// Create an HTML `select` element of comm protocols
-pub fn protocols_html(selected: u32) -> String {
+pub fn protocols_html(selected: Option<u32>) -> String {
     STATE.with(|rc| {
         let state = rc.borrow();
         let mut html = String::new();
@@ -592,8 +592,10 @@ pub fn protocols_html(selected: u32) -> String {
             html.push_str("<option value='");
             html.push_str(&protocol.id.to_string());
             html.push('\'');
-            if selected == protocol.id {
-                html.push_str(" selected");
+            if let Some(p) = selected {
+                if p == protocol.id {
+                    html.push_str(" selected");
+                }
             }
             html.push('>');
             html.push_str(&protocol.description);

@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{Card, NAME};
-use crate::util::{Dom, HtmlStr};
+use crate::util::{Dom, HtmlStr, OptVal};
 use crate::{protocols_html, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -94,15 +94,17 @@ const PERIODS: &[Period] = &[
 ];
 
 /// Make `option` elements for an HTML period `select`
-fn period_options(periods: &[Period], seconds: u32) -> String {
+fn period_options(periods: &[Period], seconds: Option<u32>) -> String {
     let mut html = String::new();
     for period in periods {
         let sec = period.seconds();
         html.push_str("<option value='");
         html.push_str(&sec.to_string());
         html.push('\'');
-        if seconds == sec {
-            html.push_str(" selected");
+        if let Some(s) = seconds {
+            if s == sec {
+                html.push_str(" selected");
+            }
         }
         html.push('>');
         html.push_str(&period.to_string());
@@ -116,13 +118,13 @@ fn period_options(periods: &[Period], seconds: u32) -> String {
 pub struct CommConfig {
     pub name: String,
     pub description: String,
-    pub protocol: u32,
-    pub modem: bool,
-    pub timeout_ms: u32,
-    pub poll_period_sec: u32,
-    pub long_poll_period_sec: u32,
-    pub idle_disconnect_sec: u32,
-    pub no_response_disconnect_sec: u32,
+    pub protocol: Option<u32>,
+    pub modem: Option<bool>,
+    pub timeout_ms: Option<u32>,
+    pub poll_period_sec: Option<u32>,
+    pub long_poll_period_sec: Option<u32>,
+    pub idle_disconnect_sec: Option<u32>,
+    pub no_response_disconnect_sec: Option<u32>,
 }
 
 impl Card for CommConfig {
@@ -166,8 +168,12 @@ impl Card for CommConfig {
     fn to_html_edit(&self) -> String {
         let description = HtmlStr::new(&self.description);
         let protocols = protocols_html(self.protocol);
-        let modem = if self.modem { " checked" } else { "" };
-        let timeout_ms = self.timeout_ms;
+        let modem = if let Some(true) = self.modem {
+            " checked"
+        } else {
+            ""
+        };
+        let timeout_ms = OptVal(self.timeout_ms);
         let poll_periods = period_options(&PERIODS[1..], self.poll_period_sec);
         let long_periods =
             period_options(&PERIODS[1..], self.long_poll_period_sec);
@@ -221,62 +227,46 @@ impl Card for CommConfig {
                 obj.insert("description".to_string(), Value::String(desc));
             }
         }
-        if let Some(protocol) = doc.select_parse::<u32>("edit_protocol") {
-            if protocol != val.protocol {
-                obj.insert(
-                    "protocol".to_string(),
-                    Value::Number(protocol.into()),
-                );
-            }
+        let protocol = doc.select_parse::<u32>("edit_protocol");
+        if protocol != val.protocol {
+            obj.insert("protocol".to_string(), OptVal(protocol).into());
         }
-        if let Some(modem) = doc.input_bool("edit_modem") {
-            if modem != val.modem {
-                obj.insert("modem".to_string(), Value::Bool(modem));
-            }
+        let modem = doc.input_bool("edit_modem");
+        if modem != val.modem {
+            obj.insert("modem".to_string(), OptVal(modem).into());
         }
-        if let Some(timeout_ms) = doc.input_parse::<u32>("edit_timeout") {
-            if timeout_ms != val.timeout_ms {
-                obj.insert(
-                    "timeout_ms".to_string(),
-                    Value::Number(timeout_ms.into()),
-                );
-            }
+        let timeout_ms = doc.input_parse::<u32>("edit_timeout");
+        if timeout_ms != val.timeout_ms {
+            obj.insert("timeout_ms".to_string(), OptVal(timeout_ms).into());
         }
-        if let Some(poll_period_sec) = doc.select_parse::<u32>("edit_poll") {
-            if poll_period_sec != val.poll_period_sec {
-                obj.insert(
-                    "poll_period_sec".to_string(),
-                    Value::Number(poll_period_sec.into()),
-                );
-            }
+        let poll_period_sec = doc.select_parse::<u32>("edit_poll");
+        if poll_period_sec != val.poll_period_sec {
+            obj.insert(
+                "poll_period_sec".to_string(),
+                OptVal(poll_period_sec).into(),
+            );
         }
-        if let Some(long_poll_period_sec) = doc.select_parse::<u32>("edit_long")
-        {
-            if long_poll_period_sec != val.long_poll_period_sec {
-                obj.insert(
-                    "long_poll_period_sec".to_string(),
-                    Value::Number(long_poll_period_sec.into()),
-                );
-            }
+        let long_poll_period_sec = doc.select_parse::<u32>("edit_long");
+        if long_poll_period_sec != val.long_poll_period_sec {
+            obj.insert(
+                "long_poll_period_sec".to_string(),
+                OptVal(long_poll_period_sec).into(),
+            );
         }
-        if let Some(idle_disconnect_sec) = doc.select_parse::<u32>("edit_idle")
-        {
-            if idle_disconnect_sec != val.idle_disconnect_sec {
-                obj.insert(
-                    "idle_disconnect_sec".to_string(),
-                    Value::Number(idle_disconnect_sec.into()),
-                );
-            }
+        let idle_disconnect_sec = doc.select_parse::<u32>("edit_idle");
+        if idle_disconnect_sec != val.idle_disconnect_sec {
+            obj.insert(
+                "idle_disconnect_sec".to_string(),
+                OptVal(idle_disconnect_sec).into(),
+            );
         }
-        if let Some(no_response_disconnect_sec) =
-            doc.select_parse::<u32>("edit_no_resp")
-        {
-            if no_response_disconnect_sec != val.no_response_disconnect_sec {
-                obj.insert(
-                    "no_response_disconnect_sec".to_string(),
-                    Value::Number(no_response_disconnect_sec.into()),
-                );
-            }
+        let no_response_disconnect_sec =
+            doc.select_parse::<u32>("edit_no_resp");
+        if no_response_disconnect_sec != val.no_response_disconnect_sec {
+            obj.insert(
+                "no_response_disconnect_sec".to_string(),
+                OptVal(no_response_disconnect_sec).into(),
+            );
         }
         Ok(Value::Object(obj).to_string())
     }
