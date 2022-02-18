@@ -606,6 +606,19 @@ pub fn protocols_html(selected: Option<u32>) -> String {
     })
 }
 
+/// Get a condition by ID
+pub fn get_condition(id: u32) -> Option<String> {
+    STATE.with(|rc| {
+        let state = rc.borrow();
+        for condition in &state.conditions {
+            if id == condition.id {
+                return Some(condition.description.clone());
+            }
+        }
+        None
+    })
+}
+
 /// Create an HTML `select` element of controller conditions
 pub fn conditions_html(selected: u32) -> String {
     STATE.with(|rc| {

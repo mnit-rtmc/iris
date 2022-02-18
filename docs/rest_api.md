@@ -83,3 +83,7 @@ Consider using Etags to avoid mid-air collisions
 - `comm_link`
   * Minimal: `name`, `description`, `uri`, `comm_config`, `poll_enabled`,
     `connected`
+- `controller`
+  * Minimal: `name`, `drop_id`, `comm_link`, `cabinet_style`, `condition`,
+    `notes`, `version`, `location`
+  * Full: `geo_loc`, `password`, `fail_time`

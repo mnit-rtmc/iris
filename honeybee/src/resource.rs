@@ -286,24 +286,15 @@ const CONDITION_RES: Resource = Resource::Simple(
 /// Controller resource
 const CONTROLLER_RES: Resource = Resource::Simple(
     "api/controller",
-    Listen::Exclude("controller", &["fail_time"]),
+    Listen::All("controller"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, drop_id, comm_link, cabinet_style, geo_loc, condition, \
-           notes, password, version \
-    FROM iris.controller \
+    SELECT c.name, location, comm_link, drop_id, cabinet_style, condition, \
+           notes, version, fail_time \
+    FROM iris.controller c \
+    JOIN geo_loc_view l ON c.geo_loc = l.name \
     ORDER BY regexp_replace(comm_link, '[0-9]', '', 'g'), \
             (regexp_replace(comm_link, '[^0-9]', '', 'g') || '0')::INTEGER, \
              drop_id\
-) r",
-);
-
-/// Controller status resource
-const CONTROLLER_STAT_RES: Resource = Resource::Simple(
-    "api/controller_stat",
-    Listen::Include("controller", &["fail_time"]),
-    "SELECT row_to_json(r)::text FROM (\
-    SELECT name, fail_time \
-    FROM iris.controller \
 ) r",
 );
 
@@ -432,7 +423,6 @@ const ALL: &[Resource] = &[
     COMM_LINK_RES,
     CONDITION_RES,
     CONTROLLER_RES,
-    CONTROLLER_STAT_RES,
     MODEM_RES,
     CAMERA_RES,
     DMS_RES,

@@ -11,8 +11,8 @@
 // GNU General Public License for more details.
 //
 use crate::card::{disabled_attr, Card, NAME};
-use crate::util::{Dom, HtmlStr};
-use crate::{conditions_html, Result};
+use crate::util::{Dom, HtmlStr, OptVal};
+use crate::{conditions_html, get_condition, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
@@ -23,15 +23,37 @@ use web_sys::Document;
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Controller {
     pub name: String,
-    pub drop_id: u16,
+    pub location: Option<String>,
     pub comm_link: String,
+    pub drop_id: u16,
     pub cabinet_style: Option<String>,
-    pub geo_loc: String,
     pub condition: u32,
     pub notes: String,
-    pub password: Option<String>,
-    pub fail_time: Option<String>,
     pub version: Option<String>,
+    pub fail_time: Option<String>,
+    pub geo_loc: Option<String>,
+    pub password: Option<String>,
+}
+
+impl Controller {
+    /// Get condition description
+    fn condition(&self) -> String {
+        get_condition(self.condition).unwrap_or_else(|| "".to_string())
+    }
+
+    /// Get comm state
+    fn comm_state(&self, long: bool) -> &'static str {
+        let active = self.condition == 1;
+        let failed = self.fail_time.is_some();
+        match (active, failed, long) {
+            (true, false, false) => "👍",
+            (true, false, true) => "👍 ok",
+            (true, true, false) => "☠️",
+            (true, true, true) => "☠️ failed",
+            (false, _, false) => "❓",
+            (false, _, true) => "❓ inactive",
+        }
+    }
 }
 
 impl Card for Controller {
@@ -47,7 +69,15 @@ impl Card for Controller {
                 comm_link.contains(tx)
                     || format!("{}:{}", comm_link, self.drop_id).contains(tx)
             }
+            || self.comm_state(true).contains(tx)
             || self.notes.to_lowercase().contains(tx)
+            || self
+                .location
+                .as_deref()
+                .unwrap_or("")
+                .to_lowercase()
+                .contains(tx)
+            || self.condition().to_lowercase().contains(tx)
             || self
                 .cabinet_style
                 .as_deref()
@@ -86,8 +116,10 @@ impl Card for Controller {
         let name = HtmlStr::new(&self.name);
         // condition 1 is "Active"
         let disabled = disabled_attr(self.condition == 1);
+        let comm_state = self.comm_state(false);
         format!(
             "<span{disabled}>{comm_link}:{drop_id}</span>\
+            <span>{comm_state}</span>\
             <span class='{NAME}'>{name}</span>"
         )
     }
@@ -96,21 +128,37 @@ impl Card for Controller {
     fn to_html_status(&self) -> String {
         let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
-        let version = HtmlStr::new(self.version.as_deref().unwrap_or("-"));
-        let fail_time = self.fail_time.as_deref().unwrap_or("-");
+        let location = HtmlStr::new(self.location.as_ref()).with_len(64);
+        let version = HtmlStr::new(self.version.as_ref()).with_len(32);
+        let condition = self.condition();
+        let comm_state = self.comm_state(true);
+        let notes = HtmlStr::new(&self.notes);
+        let fail_time = match &self.fail_time {
+            Some(fail_time) => {
+                format!(
+                    "<span>Fail Time</span>\
+                    <span class='info'>{fail_time}</span>"
+                )
+            }
+            None => "".to_string(),
+        };
         format!(
             "<div class='row'>\
-              <span>Comm Link:Drop ID</span>\
               <span class='info'>{comm_link}:{drop_id}</span>\
+              <span class='info'>{comm_state}</span>\
             </div>\
             <div class='row'>\
-              <span>Version</span>\
+              <span> comm_config </span>\
+              <span>{condition}</span>\
+            </div>\
+            <div class='row'>\
+              <span>{location}</span>\
               <span class='info'>{version}</span>\
             </div>\
             <div class='row'>\
-              <span>Fail Time</span>\
-              <span class='info'>{fail_time}</span>\
-            </div>"
+              <span class='info'>{notes}</span>\
+            </div>\
+            <div class='row'>{fail_time}</div>"
         )
     }
 
@@ -124,13 +172,13 @@ impl Card for Controller {
         let password = HtmlStr::new(self.password.as_ref());
         format!(
             "<div class='row'>\
-              <label for='edit_comm_link'>Comm Link</label>\
-              <input id='edit_comm_link' maxlength='20' size='20' \
+              <label for='edit_link'>Comm Link</label>\
+              <input id='edit_link' maxlength='20' size='20' \
                      value='{comm_link}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_drop_id'>Drop ID</label>\
-              <input id='edit_drop_id' type='number' min='0'
+              <label for='edit_drop'>Drop ID</label>\
+              <input id='edit_drop' type='number' min='0'
                      max='65535' size='6' value='{drop_id}'/>\
             </div>\
             <div class='row'>\
@@ -159,12 +207,12 @@ impl Card for Controller {
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         let mut obj = Map::new();
-        if let Some(comm_link) = doc.input_parse::<String>("edit_comm_link") {
+        if let Some(comm_link) = doc.input_parse::<String>("edit_link") {
             if comm_link != val.comm_link {
                 obj.insert("comm_link".to_string(), Value::String(comm_link));
             }
         }
-        if let Some(drop_id) = doc.input_parse::<u16>("edit_drop_id") {
+        if let Some(drop_id) = doc.input_parse::<u16>("edit_drop") {
             if drop_id != val.drop_id {
                 obj.insert(
                     "drop_id".to_string(),
@@ -178,10 +226,7 @@ impl Card for Controller {
         if cabinet_style != val.cabinet_style {
             obj.insert(
                 "cabinet_style".to_string(),
-                match cabinet_style {
-                    Some(cab) => Value::String(cab),
-                    None => Value::Null,
-                },
+                OptVal(cabinet_style).into(),
             );
         }
         if let Some(condition) = doc.select_parse::<u32>("edit_condition") {
@@ -201,13 +246,7 @@ impl Card for Controller {
             .input_parse::<String>("edit_password")
             .filter(|p| !p.is_empty());
         if password != val.password {
-            obj.insert(
-                "password".to_string(),
-                match password {
-                    Some(password) => Value::String(password),
-                    None => Value::Null,
-                },
-            );
+            obj.insert("password".to_string(), OptVal(password).into());
         }
         Ok(Value::Object(obj).to_string())
     }

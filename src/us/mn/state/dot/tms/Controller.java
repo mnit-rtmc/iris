@@ -75,6 +75,9 @@ public interface Controller extends SonarObject {
 	 * failed.  This time is in milliseconds since the epoch. */
 	Long getFailTime();
 
+	/** Get controller location (from GeoLoc) */
+	String getLocation();
+
 	/** Get the controller error status.  If this attribute is set (not
 	 * an empty string), there is a critical error. */
 	String getStatus();

@@ -157,6 +157,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		CommLinkImpl cl = comm_link;
 		if (cl != null)
 			cl.putController(drop_id, this);
+		location = ControllerHelper.getLocation(this);
 	}
 
 	/** Get controller label */
@@ -756,6 +757,24 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			return 0;
 	}
 
+	/** Location description */
+	private transient String location;
+
+	/** Get controller location (from GeoLoc) */
+	@Override
+	public String getLocation() {
+		return location;
+	}
+
+	/** Update the location */
+	private void updateLocation() {
+		String loc = ControllerHelper.getLocation(this);
+		if (!objectEquals(loc, location)) {
+			location = loc;
+			notifyAttribute("location");
+		}
+	}
+
 	/** Controller maint status */
 	private transient String maint = "";
 
@@ -949,6 +968,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			pollActiveDevices(per_sec, is_long);
 		if (isConditionTesting())
 			startTesting();
+		updateLocation();
 	}
 
 	/** Poll active controller devices */
