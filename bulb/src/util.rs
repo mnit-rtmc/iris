@@ -53,6 +53,15 @@ impl From<OptVal<bool>> for Value {
     }
 }
 
+impl From<OptVal<String>> for Value {
+    fn from(val: OptVal<String>) -> Self {
+        match val.0 {
+            Some(s) => Value::String(s),
+            None => Value::Null,
+        }
+    }
+}
+
 /// String wrapper which can be written as HTML
 #[derive(Debug)]
 pub struct HtmlStr<S> {

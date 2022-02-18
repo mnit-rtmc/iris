@@ -265,7 +265,7 @@ const COMM_LINK_RES: Resource = Resource::Simple(
     "api/comm_link",
     Listen::All("comm_link"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, description, uri, poll_enabled, comm_config, connected \
+    SELECT name, description, poll_enabled, connected \
     FROM iris.comm_link \
     ORDER BY regexp_replace(name, '[0-9]', '', 'g'), \
             (regexp_replace(name, '[^0-9]', '', 'g') || '0')::INTEGER\

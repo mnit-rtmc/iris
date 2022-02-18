@@ -642,7 +642,7 @@ pub fn get_comm_config_desc(name: &str) -> Option<String> {
 }
 
 /// Create an HTML `select` element of comm configs
-pub fn comm_configs_html(selected: &str) -> String {
+pub fn comm_configs_html(selected: Option<&str>) -> String {
     STATE.with(|rc| {
         let state = rc.borrow();
         let mut html = String::new();
@@ -651,8 +651,10 @@ pub fn comm_configs_html(selected: &str) -> String {
             html.push_str("<option value='");
             html.push_str(&config.name);
             html.push('\'');
-            if selected == config.name {
-                html.push_str(" selected");
+            if let Some(s) = selected {
+                if s == config.name {
+                    html.push_str(" selected");
+                }
             }
             html.push('>');
             html.push_str(&config.description);

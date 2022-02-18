@@ -78,3 +78,6 @@ Consider using Etags to avoid mid-air collisions
   * Minimal: `name`, `description`
   * Full: `protocol`, `modem`, `timeout_ms`, `poll_period_sec`,
     `long_poll_period_sec`, `idle_disconnect_sec`, `no_response_disconnect_sec`
+- `comm_link`
+  * Minimal: `name`, `description`, `poll_enabled`, `connected`
+  * Full: `uri`, `comm_config`

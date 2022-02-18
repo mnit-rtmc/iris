@@ -127,13 +127,7 @@ impl Card for Alarm {
             .input_parse::<String>("edit_ctrl")
             .filter(|c| !c.is_empty());
         if ctrl != val.controller {
-            obj.insert(
-                "controller".to_string(),
-                match ctrl {
-                    Some(ctrl) => Value::String(ctrl),
-                    None => Value::Null,
-                },
-            );
+            obj.insert("controller".to_string(), OptVal(ctrl).into());
         }
         let pin = doc.input_parse::<u32>("edit_pin");
         if pin != val.pin {
