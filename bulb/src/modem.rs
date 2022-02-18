@@ -44,15 +44,15 @@ impl Card for Modem {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let name = HtmlStr(&self.name);
+        let name = HtmlStr::new(&self.name);
         let disabled = disabled_attr(self.enabled);
         format!("<span{disabled}>{name}</span>")
     }
 
     /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
-        let uri = HtmlStr(&self.uri);
-        let config = HtmlStr(&self.config);
+        let uri = HtmlStr::new(&self.uri);
+        let config = HtmlStr::new(&self.config);
         let timeout_ms = self.timeout_ms;
         let enabled = if self.enabled { " checked" } else { "" };
         format!(

@@ -49,14 +49,6 @@ impl CommLink {
     }
 }
 
-/// Get a truncated string slice
-fn truncated(s: &str, max_chars: usize) -> &str {
-    match s.char_indices().nth(max_chars) {
-        None => s,
-        Some((idx, _)) => &s[..idx],
-    }
-}
-
 impl Card for CommLink {
     const TNAME: &'static str = "Comm Link";
     const ENAME: &'static str = "🔗 Comm Link";
@@ -77,9 +69,9 @@ impl Card for CommLink {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let description = HtmlStr(truncated(&self.description, 10));
+        let description = HtmlStr::new(&self.description).with_len(10);
         let connected = self.connected(false);
-        let name = HtmlStr(&self.name);
+        let name = HtmlStr::new(&self.name);
         let disabled = disabled_attr(self.poll_enabled);
         format!(
             "<span{disabled}>{description}…</span>\
@@ -90,9 +82,9 @@ impl Card for CommLink {
 
     /// Convert to status HTML
     fn to_html_status(&self) -> String {
-        let description = HtmlStr(&self.description);
+        let description = HtmlStr::new(&self.description);
         let comm_config = self.comm_config_desc();
-        let config = HtmlStr(&comm_config);
+        let config = HtmlStr::new(&comm_config);
         let connected = self.connected(true);
         let disabled = if self.poll_enabled { "" } else { " disabled" };
         format!(
@@ -109,8 +101,8 @@ impl Card for CommLink {
 
     /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
-        let description = HtmlStr(&self.description);
-        let uri = HtmlStr(&self.uri);
+        let description = HtmlStr::new(&self.description);
+        let uri = HtmlStr::new(&self.uri);
         let enabled = if self.poll_enabled { " checked" } else { "" };
         let comm_configs = comm_configs_html(&self.comm_config);
         format!(

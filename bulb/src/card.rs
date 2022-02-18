@@ -113,7 +113,7 @@ pub trait Card: DeserializeOwned {
     fn build_status_form(json: &JsValue) -> Result<String> {
         let ename = Self::ENAME;
         let val = Self::new(json)?;
-        let name = HtmlStr(val.name());
+        let name = HtmlStr::new(val.name());
         Ok(format!(
             "<div class='row'>\
               <div class='{TITLE}'>{ename}</div>\
@@ -132,7 +132,7 @@ pub trait Card: DeserializeOwned {
     fn build_edit_form(json: &JsValue) -> Result<String> {
         let ename = Self::ENAME;
         let val = Self::new(json)?;
-        let name = HtmlStr(val.name());
+        let name = HtmlStr::new(val.name());
         Ok(format!(
             "<div class='row'>\
               <div class='{TITLE}'>{ename}</div>\
@@ -183,7 +183,7 @@ pub trait Card: DeserializeOwned {
         }
         // TODO: split this into async calls so it can be cancelled
         for ob in obs.iter().filter(|ob| ob.is_match(tx)) {
-            let name = HtmlStr(ob.name());
+            let name = HtmlStr::new(ob.name());
             html.push_str(&format!(
                 "<li id='{tname}_{name}' name='{name}' class='card'>"
             ));

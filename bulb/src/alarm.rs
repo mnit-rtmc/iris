@@ -62,9 +62,9 @@ impl Card for Alarm {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let description = HtmlStr(&self.description);
+        let description = HtmlStr::new(&self.description);
         let state = self.state(false);
-        let name = HtmlStr(&self.name);
+        let name = HtmlStr::new(&self.name);
         let disabled = disabled_attr(self.controller.is_some());
         format!(
             "<span{disabled}>{description}</span>\
@@ -75,7 +75,7 @@ impl Card for Alarm {
 
     /// Convert to status HTML
     fn to_html_status(&self) -> String {
-        let description = HtmlStr(&self.description);
+        let description = HtmlStr::new(&self.description);
         let state = self.state(true);
         let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
         format!(
@@ -92,9 +92,9 @@ impl Card for Alarm {
 
     /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
-        let description = HtmlStr(&self.description);
-        let controller = HtmlStr(self.controller.as_ref());
         let pin = self.pin;
+        let description = HtmlStr::new(&self.description);
+        let controller = HtmlStr::new(self.controller.as_ref());
         format!(
             "<div class='row'>\
                <label for='edit_desc'>Description</label>\

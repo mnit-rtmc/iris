@@ -45,7 +45,7 @@ impl Card for CabinetStyle {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let name = HtmlStr(&self.name);
+        let name = HtmlStr::new(&self.name);
         format!("<span>{name}</span>")
     }
 

@@ -46,11 +46,26 @@ impl From<OptVal<u32>> for Value {
 
 /// String wrapper which can be written as HTML
 #[derive(Debug)]
-pub struct HtmlStr<S>(pub S);
+pub struct HtmlStr<S>{
+    val: S,
+    len: usize,
+}
 
 impl<S> HtmlStr<S> {
-    fn fmt_encode(s: &str, f: &mut fmt::Formatter) -> fmt::Result {
-        for c in s.chars() {
+    /// Create a new HTML string
+    pub fn new(val: S) -> Self {
+        Self { val, len: usize::MAX }
+    }
+
+    /// Adjust the maximum length
+    pub fn with_len(mut self, len: usize) -> Self {
+        self.len = len;
+        self
+    }
+
+    /// Format and encode entities
+    fn fmt_encode(&self, val: &str, f: &mut fmt::Formatter) -> fmt::Result {
+        for c in val.chars().take(self.len) {
             match c {
                 '&' => write!(f, "&amp;")?,
                 '<' => write!(f, "&lt;")?,
@@ -66,20 +81,20 @@ impl<S> HtmlStr<S> {
 
 impl fmt::Display for HtmlStr<&str> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        Self::fmt_encode(self.0, f)
+        self.fmt_encode(self.val, f)
     }
 }
 
 impl fmt::Display for HtmlStr<&String> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        Self::fmt_encode(self.0, f)
+        self.fmt_encode(self.val, f)
     }
 }
 
 impl fmt::Display for HtmlStr<Option<&String>> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match &self.0 {
-            Some(val) => Self::fmt_encode(val, f),
+        match &self.val {
+            Some(val) => self.fmt_encode(val, f),
             None => Ok(()),
         }
     }
@@ -146,14 +161,15 @@ mod test {
 
     #[test]
     fn html() {
-        assert_eq!(HtmlStr("<").to_string(), "&lt;");
-        assert_eq!(HtmlStr(">").to_string(), "&gt;");
-        assert_eq!(HtmlStr("&").to_string(), "&amp;");
-        assert_eq!(HtmlStr("\"").to_string(), "&quot;");
-        assert_eq!(HtmlStr("'").to_string(), "&#x27;");
+        assert_eq!(HtmlStr::new("<").to_string(), "&lt;");
+        assert_eq!(HtmlStr::new(">").to_string(), "&gt;");
+        assert_eq!(HtmlStr::new("&").to_string(), "&amp;");
+        assert_eq!(HtmlStr::new("\"").to_string(), "&quot;");
+        assert_eq!(HtmlStr::new("'").to_string(), "&#x27;");
         assert_eq!(
-            HtmlStr("<script>XSS stuff</script>").to_string(),
+            HtmlStr::new("<script>XSS stuff</script>").to_string(),
             "&lt;script&gt;XSS stuff&lt;/script&gt;"
         );
+        assert_eq!(HtmlStr::new("len").with_len(2).to_string(), "le");
     }
 }

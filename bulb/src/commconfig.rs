@@ -154,8 +154,8 @@ impl Card for CommConfig {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let description = HtmlStr(&self.description);
-        let name = HtmlStr(&self.name);
+        let description = HtmlStr::new(&self.description);
+        let name = HtmlStr::new(&self.name);
         format!(
             "<span>{description}</span>\
             <span class='{NAME}'>{name}</span>"
@@ -164,7 +164,7 @@ impl Card for CommConfig {
 
     /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
-        let description = HtmlStr(&self.description);
+        let description = HtmlStr::new(&self.description);
         let protocols = protocols_html(self.protocol);
         let modem = if self.modem { " checked" } else { "" };
         let timeout_ms = self.timeout_ms;

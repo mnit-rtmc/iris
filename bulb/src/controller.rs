@@ -81,9 +81,9 @@ impl Card for Controller {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let comm_link = HtmlStr(&self.comm_link);
+        let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
-        let name = HtmlStr(&self.name);
+        let name = HtmlStr::new(&self.name);
         // condition 1 is "Active"
         let disabled = disabled_attr(self.condition == 1);
         format!(
@@ -94,9 +94,9 @@ impl Card for Controller {
 
     /// Convert to status HTML
     fn to_html_status(&self) -> String {
-        let comm_link = HtmlStr(&self.comm_link);
+        let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
-        let version = self.version.as_deref().unwrap_or("-");
+        let version = HtmlStr::new(self.version.as_deref().unwrap_or("-"));
         let fail_time = self.fail_time.as_deref().unwrap_or("-");
         format!(
             "<div class='row'>\
@@ -116,13 +116,12 @@ impl Card for Controller {
 
     /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
-        let comm_link = HtmlStr(&self.comm_link);
+        let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
-        let cabinet_style = HtmlStr(self.cabinet_style.as_ref());
+        let cabinet_style = HtmlStr::new(self.cabinet_style.as_ref());
         let conditions = conditions_html(self.condition);
-        let geo_loc = HtmlStr(&self.geo_loc);
-        let notes = HtmlStr(&self.notes);
-        let password = HtmlStr(self.password.as_ref());
+        let notes = HtmlStr::new(&self.notes);
+        let password = HtmlStr::new(self.password.as_ref());
         format!(
             "<div class='row'>\
               <label for='edit_comm_link'>Comm Link</label>\
@@ -142,11 +141,6 @@ impl Card for Controller {
             <div class='row'>\
               <label for='edit_condition'>Condition</label>\
               {conditions}\
-            </div>\
-            <div class='row'>\
-              <label for='edit_geo_loc'>Geo Loc</label>\
-              <input id='edit_geo_loc' maxlength='20' size='20' \
-                     value='{geo_loc}'/>\
             </div>\
             <div class='row'>\
               <label for='edit_notes'>Notes</label>\
