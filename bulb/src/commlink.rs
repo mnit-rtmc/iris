@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{disabled_attr, Card, NAME};
-use crate::util::{Dom, HtmlStr, OptVal};
+use crate::util::{Dom, HtmlStr};
 use crate::{comm_configs_html, get_comm_config_desc, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -24,20 +24,16 @@ use web_sys::Document;
 pub struct CommLink {
     pub name: String,
     pub description: String,
+    pub uri: String,
+    pub comm_config: String,
     pub poll_enabled: bool,
     pub connected: bool,
-    pub uri: Option<String>,
-    pub comm_config: Option<String>,
 }
 
 impl CommLink {
     /// Get comm config description
     fn comm_config_desc(&self) -> String {
-        match self.comm_config.as_ref() {
-            Some(cc) => get_comm_config_desc(cc),
-            _ => None,
-        }
-        .unwrap_or_else(|| "".to_string())
+        get_comm_config_desc(&self.comm_config).unwrap_or_else(|| "".into())
     }
 
     /// Get connected state to display
@@ -63,12 +59,7 @@ impl Card for CommLink {
         self.description.to_lowercase().contains(tx)
             || self.name.to_lowercase().contains(tx)
             || self.comm_config_desc().to_lowercase().contains(tx)
-            || self
-                .uri
-                .as_deref()
-                .unwrap_or("")
-                .to_lowercase()
-                .contains(tx)
+            || self.uri.to_lowercase().contains(tx)
             || self.connected(true).contains(tx)
     }
 
@@ -111,9 +102,9 @@ impl Card for CommLink {
     /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
         let description = HtmlStr::new(&self.description);
-        let uri = HtmlStr::new(self.uri.as_ref());
+        let uri = HtmlStr::new(&self.uri);
         let enabled = if self.poll_enabled { " checked" } else { "" };
-        let comm_configs = comm_configs_html(self.comm_config.as_deref());
+        let comm_configs = comm_configs_html(&self.comm_config);
         format!(
             "<div class='row'>\
               <label for='edit_desc'>Description</label>\
@@ -145,13 +136,18 @@ impl Card for CommLink {
                 obj.insert("description".to_string(), Value::String(desc));
             }
         }
-        let uri = doc.input_parse::<String>("edit_uri");
-        if uri != val.uri {
-            obj.insert("uri".to_string(), OptVal(uri).into());
+        if let Some(uri) = doc.input_parse::<String>("edit_uri") {
+            if uri != val.uri {
+                obj.insert("uri".to_string(), Value::String(uri));
+            }
         }
-        let comm_config = doc.select_parse::<String>("edit_config");
-        if comm_config != val.comm_config {
-            obj.insert("comm_config".to_string(), OptVal(comm_config).into());
+        if let Some(comm_config) = doc.select_parse::<String>("edit_config") {
+            if comm_config != val.comm_config {
+                obj.insert(
+                    "comm_config".to_string(),
+                    Value::String(comm_config),
+                );
+            }
         }
         if let Some(poll_enabled) = doc.input_bool("edit_enabled") {
             if poll_enabled != val.poll_enabled {

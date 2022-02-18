@@ -49,9 +49,11 @@ A `Content-Type: application/json` header is included where appropriate.
 
 ## Minimal vs. Full
 
-A list of *minimal* objects contains only the attributes needed for displaying
-compact cards.  Additional attributes are included in a single *full*
-object response.
+A `GET` request of all objects of a `{type}` contains only the *minimal*
+attributes.  Those are attributes needed for *searching* and *displaying
+compact cards*.
+
+Additional (*full*) attributes are also included in a single object response.
 
 ## Lookup Tables
 
@@ -79,5 +81,5 @@ Consider using Etags to avoid mid-air collisions
   * Full: `protocol`, `modem`, `timeout_ms`, `poll_period_sec`,
     `long_poll_period_sec`, `idle_disconnect_sec`, `no_response_disconnect_sec`
 - `comm_link`
-  * Minimal: `name`, `description`, `poll_enabled`, `connected`
-  * Full: `uri`, `comm_config`
+  * Minimal: `name`, `description`, `uri`, `comm_config`, `poll_enabled`,
+    `connected`
