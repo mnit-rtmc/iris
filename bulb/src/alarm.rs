@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{disabled_attr, Card, NAME};
-use crate::util::{Dom, HtmlStr};
+use crate::util::{Dom, HtmlStr, OptVal};
 use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -25,8 +25,8 @@ pub struct Alarm {
     pub name: String,
     pub description: String,
     pub controller: Option<String>,
-    pub pin: u32,
     pub state: bool,
+    pub pin: Option<u32>,
     pub trigger_time: Option<String>,
 }
 
@@ -92,9 +92,9 @@ impl Card for Alarm {
 
     /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
-        let pin = self.pin;
         let description = HtmlStr::new(&self.description);
         let controller = HtmlStr::new(self.controller.as_ref());
+        let pin = OptVal(self.pin);
         format!(
             "<div class='row'>\
                <label for='edit_desc'>Description</label>\
@@ -135,10 +135,9 @@ impl Card for Alarm {
                 },
             );
         }
-        if let Some(pin) = doc.input_parse::<u32>("edit_pin") {
-            if pin != val.pin {
-                obj.insert("pin".to_string(), Value::Number(pin.into()));
-            }
+        let pin = doc.input_parse::<u32>("edit_pin");
+        if pin != val.pin {
+            obj.insert("pin".to_string(), OptVal(pin).into());
         }
         Ok(Value::Object(obj).to_string())
     }

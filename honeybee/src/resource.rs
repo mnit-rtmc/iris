@@ -219,9 +219,9 @@ const ROAD_RES: Resource = Resource::Road(Listen::All("road"));
 /// Alarm resource
 const ALARM_RES: Resource = Resource::Simple(
     "api/alarm",
-    Listen::All("alarm"),
+    Listen::Exclude("alarm", &["pin", "trigger_time"]),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, description, controller, pin, state, trigger_time \
+    SELECT name, description, controller, state \
     FROM iris.alarm \
     ORDER BY description\
 ) r",

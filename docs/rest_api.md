@@ -40,22 +40,18 @@ http methods.  These `{type}` values include: `alarm`, `cabinet_style`,
 
 A `Content-Type: application/json` header is included where appropriate.
 
-- `GET iris/api/{type}`: Get a list of all objects of one type, as a JSON array
-- `POST iris/api/{type}`: Create a new object of the given type.  Body contains
+- `GET iris/api/{type}`: Get all objects of `{type}` (minimal), as a JSON array
+- `POST iris/api/{type}`: Create a new object of the `{type}`.  Body contains
                           required attributes as JSON
-- `GET iris/api/{type}/{name}`: Get one object as JSON
+- `GET iris/api/{type}/{name}`: Get one full object as JSON
 - `PATCH iris/api/{type}/{name}`: Update attributes of one object, with JSON
 - `DELETE iris/api/{type}/{name}`: Delete one object
 
-## Status Data
+## Minimal vs. Full
 
-Some types have additional resources for status data.  These are:
-
-- `GET iris/api/comm_link_stat`
-- `GET iris/api/controller_stat`
-
-These contain status data for every object of the resource type.  Note that the
-status data is also included in a `GET` request for an individual object.
+A list of *minimal* objects contains only the attributes needed for displaying
+compact cards.  Additional attributes are included in a single *full*
+object response.
 
 ## Lookup Tables
 
@@ -68,3 +64,9 @@ IRIS is updated.  These are:
 ## ETags and Caching
 
 Consider using Etags to avoid mid-air collisions
+
+## Object definitions
+
+- Alarm
+  * Minimal: `name`, `description`, `controller`, `state`
+  * Full: `pin`, `trigger_time`
