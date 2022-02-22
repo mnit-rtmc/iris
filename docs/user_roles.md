@@ -20,6 +20,53 @@ Other _roles_ can be created to allow different capability sets, as needed.
 **WARNING: if the administrator role or admin user are disabled, the ability to
 make further changes will be lost immediately.**
 
+### Permissions
+
+Role *permissions* are a newer feature intended to replace *capabilities* and
+*privileges*.  For now, they determine permissions for web access only.  These
+are made up of *access*, *resource* and *batch* values.
+
+There are 4 access levels, in increasing permissiveness:
+
+| Level | Access    | Permissions              |
+|-------|-----------|--------------------------|
+|     1 | View      | Monitor / read           |
+|     2 | Operate   | + Control                |
+|     3 | Plan      | + Policies, scheduling   |
+|     4 | Configure | + Create, update, delete |
+
+A __Resource__ is the `type` part of the resource URI:
+
+| Resource         | *Operate* (2) Access          | *Plan* (3) Access         |
+|------------------|-------------------------------|---------------------------|
+| `alarm`          |                               |                           |
+| `cabinet_style`  |                               |                           |
+| `comm_config`    |                               |                           |
+| `comm_link`      | `poll_enabled`                |                           |
+| `controller`     | `download`                    | `deviceRequest`           |
+| `modem`          |                               |                           |
+| `permission`     |                               |                           |
+|                  |                               |                           |
+| `action_plan`    | `phase`                       |                           |
+| `alert`          |                               |                           |
+| `beacon`         | `flashing`                    |                           |
+| `camera`         | `ptz` `recallPreset`          | `publish`                 |
+| `detector`       |                               | `fieldLength` `forceFail` |
+| `dms`            | `msgUser`                     | `deviceRequest`           |
+| `gate_arm`       | `armStateNext` `ownerNext`    | `deviceRequest`           |
+| `gps`            |                               |                           |
+| `incident`       |                               |                           |
+| `lcs`            | `indicationsNext` `ownerNext` |                           |
+| `parking_area`   |                               |                           |
+| `ramp_meter`     | `rateNext` `mLock`            |                           |
+| `weather_sensor` |                               |                           |
+| `toll_reader`    |                               |                           |
+| `user`           |                               |                           |
+| `video_monitor`  | `camera`                      |                           |
+
+A *batch* is a group to which a resource may belong.  These typically are used
+for districts or similar regional divisions.
+
 ## Capabilities
 
 A _capability_ is a set of [privileges](#privileges) which can be associated

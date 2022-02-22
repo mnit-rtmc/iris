@@ -442,6 +442,7 @@ meter_action
 modem
 monitor_style
 parking_area
+permission
 plan_phase
 play_list
 privilege
@@ -468,6 +469,29 @@ vid_src_template
 weather_sensor
 word
 \.
+
+CREATE TABLE iris.permission (
+    id SERIAL PRIMARY KEY,
+    role VARCHAR(15) NOT NULL REFERENCES iris.role ON DELETE CASCADE,
+    resource_n VARCHAR(16) NOT NULL REFERENCES iris.sonar_type,
+    batch VARCHAR(16),
+    access_n INTEGER NOT NULL,
+    CONSTRAINT permission_access_n CHECK (access_n >= 1 AND access_n <= 4)
+);
+
+COPY iris.permission (role, resource_n, access_n) FROM stdin;
+administrator	alarm	4
+administrator	cabinet_style	4
+administrator	comm_config	4
+administrator	comm_link	4
+administrator	controller	4
+administrator	modem	4
+administrator	permission	4
+\.
+
+CREATE TRIGGER permission_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.permission
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE TABLE iris.privilege (
 	name VARCHAR(8) PRIMARY KEY,

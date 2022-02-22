@@ -309,6 +309,17 @@ const MODEM_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Permission resource
+const PERMISSION_RES: Resource = Resource::Simple(
+    "api/permission",
+    Listen::All("permission"),
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT id, role, resource_n, batch, access_n \
+    FROM iris.permission \
+    ORDER BY role, resource_n, id\
+) r",
+);
+
 /// Sign configuration resource
 const SIGN_CONFIG_RES: Resource = Resource::Simple(
     "sign_config",
@@ -424,6 +435,7 @@ const ALL: &[Resource] = &[
     CONDITION_RES,
     CONTROLLER_RES,
     MODEM_RES,
+    PERMISSION_RES,
     CAMERA_RES,
     DMS_RES,
     DMS_STAT_RES,

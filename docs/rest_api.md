@@ -47,8 +47,6 @@ A `Content-Type: application/json` header is included where appropriate.
 - `PATCH iris/api/{type}/{name}`: Update attributes of one object, with JSON
 - `DELETE iris/api/{type}/{name}`: Delete one object
 
-## Minimal vs. Full
-
 A `GET` request of all objects of a `{type}` contains only the *minimal*
 attributes.  Those are attributes needed for *searching* and *displaying
 compact cards*.
