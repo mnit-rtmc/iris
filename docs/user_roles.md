@@ -23,10 +23,10 @@ make further changes will be lost immediately.**
 ### Permissions
 
 Role *permissions* are a newer feature intended to replace *capabilities* and
-*privileges*.  For now, they determine permissions for web access only.  These
-are made up of *access*, *resource* and *batch* values.
+*privileges*.  For now, they determine permissions for web access only.  Each
+permission record is made up of *access*, *resource* and *batch* values.
 
-There are 4 access levels, in increasing permissiveness:
+There are 4 access levels, with increasing permissiveness:
 
 | Level | Access    | Permissions              |
 |-------|-----------|--------------------------|
