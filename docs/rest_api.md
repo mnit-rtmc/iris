@@ -66,17 +66,50 @@ Additional (*full*) attributes are also included in a single object response.
 
 ## Resource Types
 
-| Resource        | Minimal | Full |
-|-----------------|---------|------|
-| `alarm`         | `name` `description` `controller` `state` | `pin` `trigger_time` |
-| `cabinet_style` | `name` | `police_panel_pin_1` `police_panel_pin_2` `watchdog_reset_pin_1` `watchdog_reset_pin_2` `dip` |
-| `comm_config`   | `name` `description` | `protocol` `modem` `timeout_ms` `poll_period_sec` `long_poll_period_sec` `idle_disconnect_sec` `no_response_disconnect_sec` |
-| `comm_link`     | `name` `description` `uri` `comm_config` `poll_enabled` | `connected` |
-| `controller`    | `name` `location` `comm_link` `drop_id` `cabinet_style` `condition` `notes` `version` `fail_time` | `geo_loc` `password` |
-| `modem`         | `name` `enabled` | `uri` `config` `timeout_ms` |
-| `permission`    | `id` `role` `resource_n` | `batch` `access_n` |
-| `role`          | `name` `enabled` | |
-| `user`          | `name` `full_name` `role` `enabled` | |
+| `alarm` | View (1)       | Configure (4)              |
+|---------|----------------|----------------------------|
+| Minimal | `name` `state` | `description` `controller` |
+| Full    | `trigger_time` | `pin`                      |
+
+| `cabinet_style` | Configure (4) |
+|-----------------|---------------|
+| Minimal         | `name`        |
+| Full            | `police_panel_pin_1` `police_panel_pin_2` `watchdog_reset_pin_1` `watchdog_reset_pin_2` `dip` |
+
+| `comm_config` | Plan (3) | Configure (4)        |
+|---------------|----------|----------------------|
+| Minimal       |          | `name` `description` |
+| Full          | `timeout_ms` `idle_disconnect_sec` `no_response_disconnect_sec` | `protocol` `modem` `poll_period_sec` `long_poll_period_sec` |
+
+| `comm_link` | View (1)    | Plan (3)       | Configure (4) |
+|-------------|-------------|----------------|---------------|
+| Minimal     | `name`      | `poll_enabled` | `description` `uri` `comm_config` |
+| Full        | `connected` |                |               |
+
+| `controller` | View (1)                                | Plan (3)     | Configure (4) |
+|--------------|-----------------------------------------|--------------|---------------|
+| Minimal      | `name` `location` `version` `fail_time` | `condition`  | `comm_link` `drop_id` `cabinet_style` `notes` |
+| Full         | `geo_loc` `password`                    | `download` `device_req` |    |
+
+| `modem` | View (1) | Plan (3)     | Configure (4)  |
+|---------|----------|--------------|----------------|
+| Minimal | `name`   | `enabled`    |                |
+| Full    |          | `timeout_ms` | `uri` `config` |
+
+| `permission` | View (1) | Configure (4)       |
+|--------------|----------|---------------------|
+| Minimal      | `id`     | `role` `resource_n` |
+| Full         |          | `batch` `access_n`  |
+
+| `role`  | View (1) | Plan (3)  |
+|---------|----------|-----------|
+| Minimal | `name`   | `enabled` |
+| Full    |          |           |
+
+| `user`  | View (1) | Plan (3)  | Configure (4)      |
+|---------|----------|-----------|--------------------|
+| Minimal | `name`   | `enabled` | `full_name` `role` |
+| Full    |          |           |                    |
 
 ## ETags and Caching
 
