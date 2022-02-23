@@ -294,6 +294,10 @@ administrator	t
 operator	t
 \.
 
+CREATE TRIGGER role_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.role
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 CREATE TABLE iris.domain (
 	name VARCHAR(15) PRIMARY KEY,
 	cidr VARCHAR(64) NOT NULL,
@@ -317,6 +321,10 @@ CREATE TABLE iris.i_user (
 COPY iris.i_user (name, full_name, password, dn, role, enabled) FROM stdin;
 admin	IRIS Administrator	+vAwDtk/0KGx9k+kIoKFgWWbd3Ku8e/FOHoZoHB65PAuNEiN2muHVavP0fztOi4=		administrator	t
 \.
+
+CREATE TRIGGER i_user_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.i_user
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW i_user_view AS
 	SELECT name, full_name, dn, role, enabled
@@ -407,6 +415,8 @@ capability
 catalog
 comm_config
 comm_link
+comm_protocol
+condition
 connection
 controller
 day_matcher
@@ -484,6 +494,8 @@ administrator	alarm	4
 administrator	cabinet_style	4
 administrator	comm_config	4
 administrator	comm_link	4
+administrator	comm_protocol	1
+administrator	condition	1
 administrator	controller	4
 administrator	modem	4
 administrator	permission	4

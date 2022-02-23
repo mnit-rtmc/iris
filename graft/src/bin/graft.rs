@@ -14,12 +14,14 @@
 //
 #![forbid(unsafe_code)]
 
+use async_std::fs;
 use async_std::path::PathBuf;
 use chrono::{Local, TimeZone};
 use convert_case::{Case, Casing};
 use graft::sonar::{Connection, Result, SonarError};
 use percent_encoding::percent_decode_str;
 use rand::Rng;
+use serde::de::DeserializeOwned;
 use serde_json::map::Map;
 use serde_json::Value;
 use std::io;
@@ -142,11 +144,103 @@ macro_rules! add_routes {
     };
 }
 
+/// Permission
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Permission {
+    pub id: u32,
+    pub role: String,
+    pub resource_n: String,
+    pub batch: Option<String>,
+    pub access_n: u32,
+}
+
+/// Role
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Role {
+    pub name: String,
+    pub enabled: bool,
+}
+
+/// User
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct User {
+    pub name: String,
+    pub full_name: String,
+    pub role: String,
+    pub enabled: bool,
+}
+
+/// Read a file
+async fn read_file<T: DeserializeOwned>(name: &str) -> Result<Vec<T>> {
+    let file = format!("{STATIC_PATH}/{name}");
+    let json = fs::read_to_string(file).await?;
+    Ok(serde_json::from_str(&json).map_err(|_e| SonarError::InvalidJson)?)
+}
+
+/// Application state
+#[derive(Clone)]
+pub struct State {
+    roles: Vec<Role>,
+    permissions: Vec<Permission>,
+    users: Vec<User>,
+}
+
+impl State {
+    /// Create a new application state
+    async fn new() -> Result<Self> {
+        let roles = read_file::<Role>("role").await?;
+        let permissions = read_file::<Permission>("permission").await?;
+        let users = read_file::<User>("user").await?;
+        Ok(State {
+            roles,
+            permissions,
+            users,
+        })
+    }
+
+    /// Check permission
+    fn check_permission(&self, role: &str, nm: &str) -> Result<()> {
+        for p in &self.permissions {
+            if role == p.role && nm == p.resource_n && p.batch.is_none() {
+                return Ok(());
+            }
+        }
+        Err(SonarError::Forbidden)
+    }
+
+    /// Check role read permission
+    fn check_role(&self, role: &str, nm: &str) -> Result<()> {
+        for r in &self.roles {
+            if role == r.name {
+                if r.enabled {
+                    return self.check_permission(role, nm);
+                }
+                break;
+            }
+        }
+        Err(SonarError::Forbidden)
+    }
+
+    /// Check user read permission
+    fn check_user(&self, username: &str, nm: &str) -> Result<()> {
+        for user in &self.users {
+            if username == user.name {
+                if user.enabled {
+                    return self.check_role(&user.role, nm);
+                }
+                break;
+            }
+        }
+        Err(SonarError::Forbidden)
+    }
+}
+
 /// Main entry point
 #[async_std::main]
 async fn main() -> tide::Result<()> {
     env_logger::builder().format_timestamp(None).init();
-    let mut app = tide::new();
+    let state = State::new().await?;
+    let mut app = tide::with_state(state);
     app.with(
         SessionMiddleware::new(
             MemoryStore::new(),
@@ -158,17 +252,11 @@ async fn main() -> tide::Result<()> {
     route.at("/login").get(get_login);
     route.at("/login").post(post_login);
     route
-        .at("/comm_link_stat")
-        .get(|req| list_objects("comm_link_stat", req));
-    route
         .at("/comm_protocol")
         .get(|req| list_objects("comm_protocol", req));
     route
         .at("/condition")
         .get(|req| list_objects("condition", req));
-    route
-        .at("/controller_stat")
-        .get(|req| list_objects("controller_stat", req));
     add_routes!(route, "alarm");
     add_routes!(route, "cabinet_style");
     add_routes!(route, "comm_config");
@@ -193,7 +281,7 @@ const LOGIN: &str = r#"<html>
 </html>"#;
 
 /// `GET` login form
-async fn get_login(req: Request<()>) -> tide::Result {
+async fn get_login(req: Request<State>) -> tide::Result {
     log::info!("GET {}", req.url());
     Ok(Response::builder(200)
         .body(LOGIN)
@@ -220,7 +308,7 @@ impl AuthMap {
 }
 
 /// Handle `POST` to login page
-async fn post_login(mut req: Request<()>) -> tide::Result {
+async fn post_login(mut req: Request<State>) -> tide::Result {
     log::info!("POST {}", req.url());
     let auth: AuthMap = match req.body_form().await {
         Ok(auth) => auth,
@@ -240,7 +328,7 @@ async fn post_login(mut req: Request<()>) -> tide::Result {
 const HOST: &str = "localhost.localdomain";
 
 /// Create a Sonar connection for a request
-async fn connection(req: &Request<()>) -> Result<Connection> {
+async fn connection(req: &Request<State>) -> Result<Connection> {
     let session = req.session();
     let auth: AuthMap = session.get("auth").ok_or(SonarError::Unauthorized)?;
     auth.authenticate().await
@@ -278,7 +366,7 @@ fn make_att(tp: &str, nm: &str, att: &str) -> Result<String> {
 }
 
 /// Get Sonar object name from a request
-fn obj_name(tp: &str, req: &Request<()>) -> Result<String> {
+fn obj_name(tp: &str, req: &Request<State>) -> Result<String> {
     match req.param("name") {
         Ok(name) => {
             let name = percent_decode_str(name)
@@ -291,7 +379,7 @@ fn obj_name(tp: &str, req: &Request<()>) -> Result<String> {
 }
 
 /// `GET` list of objects and return JSON result
-async fn list_objects(tp: &str, req: Request<()>) -> tide::Result {
+async fn list_objects(tp: &str, req: Request<State>) -> tide::Result {
     log::info!("GET {}", req.url());
     get_json_file(tp, req).await
 }
@@ -300,12 +388,12 @@ async fn list_objects(tp: &str, req: Request<()>) -> tide::Result {
 const STATIC_PATH: &str = "/var/www/html/iris/api";
 
 /// Get a static JSON file
-async fn get_json_file(nm: &str, req: Request<()>) -> tide::Result {
+async fn get_json_file(nm: &str, req: Request<State>) -> tide::Result {
     let session = req.session();
-    let _auth: AuthMap =
+    let auth: AuthMap =
         resp!(session.get("auth").ok_or(SonarError::Unauthorized));
-    // FIXME: check Sonar for read permission first
-    let file = format!("{}/{}", STATIC_PATH, nm);
+    resp!(req.state().check_user(&auth.username, nm));
+    let file = format!("{STATIC_PATH}/{nm}");
     let path = PathBuf::from(file);
     let body = resp!(Body::from_file(&path).await);
     Ok(Response::builder(StatusCode::Ok)
@@ -315,7 +403,7 @@ async fn get_json_file(nm: &str, req: Request<()>) -> tide::Result {
 }
 
 /// `GET` a Sonar object and return JSON result
-async fn get_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
+async fn get_sonar_object(tp: &str, req: Request<State>) -> tide::Result {
     log::info!("GET {}", req.url());
     let nm = resp!(obj_name(tp, &req));
     let mut c = resp!(connection(&req).await);
@@ -361,13 +449,16 @@ fn make_json(tp_att: &(&str, &str), val: &str) -> Option<Value> {
 }
 
 /// Create a Sonar object from a `POST` request
-async fn create_sonar_object(tp: &str, mut req: Request<()>) -> tide::Result {
+async fn create_sonar_object(
+    tp: &str,
+    mut req: Request<State>,
+) -> tide::Result {
     log::info!("POST {}", req.url());
     let body: Value = req.body_json().await?;
     match body.as_object() {
         Some(obj) => match obj.get("name") {
             Some(Value::String(name)) => {
-                let nm = resp!(make_name(tp, &name));
+                let nm = resp!(make_name(tp, name));
                 let mut c = resp!(connection(&req).await);
                 log::debug!("creating {}", nm);
                 resp!(c.create_object(&nm).await);
@@ -398,7 +489,10 @@ fn att_value(value: &Value) -> Result<String> {
 }
 
 /// Update a Sonar object from a `PATCH` request
-async fn update_sonar_object(tp: &str, mut req: Request<()>) -> tide::Result {
+async fn update_sonar_object(
+    tp: &str,
+    mut req: Request<State>,
+) -> tide::Result {
     log::info!("PATCH {}", req.url());
     let nm = resp!(obj_name(tp, &req));
     let mut body: Value = req.body_json().await?;
@@ -409,13 +503,13 @@ async fn update_sonar_object(tp: &str, mut req: Request<()>) -> tide::Result {
     let mut c = resp!(connection(&req).await);
     // "pin" attribute must be set before "controller"
     if let Some(value) = object.remove("pin") {
-        let anm = resp!(make_att(tp, &nm, &"pin"));
+        let anm = resp!(make_att(tp, &nm, "pin"));
         let value = resp!(att_value(&value));
         log::debug!("{} = {}", anm, &value);
         resp!(c.update_object(&anm, &value).await);
     }
     for (key, value) in object.iter() {
-        let anm = resp!(make_att(tp, &nm, &key));
+        let anm = resp!(make_att(tp, &nm, key));
         let value = resp!(att_value(value));
         log::debug!("{} = {}", anm, &value);
         resp!(c.update_object(&anm, &value).await);
@@ -424,7 +518,7 @@ async fn update_sonar_object(tp: &str, mut req: Request<()>) -> tide::Result {
 }
 
 /// Remove a Sonar object from a `DELETE` request
-async fn remove_sonar_object(tp: &str, req: Request<()>) -> tide::Result {
+async fn remove_sonar_object(tp: &str, req: Request<State>) -> tide::Result {
     log::info!("DELETE {}", req.url());
     let nm = resp!(obj_name(tp, &req));
     let mut c = resp!(connection(&req).await);

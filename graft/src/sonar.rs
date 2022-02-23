@@ -40,6 +40,10 @@ pub enum SonarError {
     #[error("I/O {0}")]
     IO(#[from] std::io::Error),
 
+    /// Invalid JSON error
+    #[error("Invalid JSON")]
+    InvalidJson,
+
     /// Invalid name (too long, invalid characters)
     #[error("invalid name")]
     InvalidName,

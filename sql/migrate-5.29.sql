@@ -31,7 +31,8 @@ CREATE TRIGGER dms_notify_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.dms_notify();
 
 -- Add permission table
-INSERT INTO iris.sonar_type (name) VALUES ('permission');
+INSERT INTO iris.sonar_type (name)
+    VALUES ('permission'), ('comm_protocol'), ('condition');
 
 CREATE TABLE iris.permission (
     id SERIAL PRIMARY KEY,
@@ -47,6 +48,8 @@ administrator	alarm	4
 administrator	cabinet_style	4
 administrator	comm_config	4
 administrator	comm_link	4
+administrator	comm_protocol	1
+administrator	condition	1
 administrator	controller	4
 administrator	modem	4
 administrator	permission	4
@@ -54,6 +57,14 @@ administrator	permission	4
 
 CREATE TRIGGER permission_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.permission
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE TRIGGER role_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.role
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE TRIGGER i_user_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.i_user
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 COMMIT;
