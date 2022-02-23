@@ -64,32 +64,19 @@ compact cards*.
 
 Additional (*full*) attributes are also included in a single object response.
 
-## Object definitions
+## Resource Types
 
-- `alarm`: Equipment alarms
-  * Minimal: `name`, `description`, `controller`, `state`
-  * Full: `pin`, `trigger_time`
-- `cabinet_style`: Cabinet styles and I/O pins
-  * Minimal: `name`
-  * Full: `police_panel_pin_1`, `police_panel_pin_2`, `watchdog_reset_pin_1`,
-    `watchdog_reset_pin_2`, `dip`
-- `comm_config`: Communication configurations
-  * Minimal: `name`, `description`
-  * Full: `protocol`, `modem`, `timeout_ms`, `poll_period_sec`,
-    `long_poll_period_sec`, `idle_disconnect_sec`, `no_response_disconnect_sec`
-- `comm_link`: Communication links
-  * Minimal: `name`, `description`, `uri`, `comm_config`, `poll_enabled`,
-    `connected`
-- `controller`: Controllers for field devices
-  * Minimal: `name`, `location`, `comm_link`, `drop_id`, `cabinet_style`,
-    `condition`, `notes`, `version`, `fail_time`
-  * Full: `geo_loc`, `password`
-- `modem`: POTS modems
-  * Minimal: `name`, `enabled`
-  * Full: `uri`, `config`, `timeout_ms`
-- `permission`: Resource permissions for user roles
-- `role`: User access roles
-- `user`: User accounts
+| Resource Type   | Description                 | Minimal                                   | Full |
+|-----------------|-----------------------------|-------------------------------------------|----------------------|
+| `alarm`         | Equipment alarms            | `name` `description` `controller` `state` | `pin` `trigger_time` |
+| `cabinet_style` | Cabinet I/O                 | `name`                                    | `police_panel_pin_1` `police_panel_pin_2` `watchdog_reset_pin_1` `watchdog_reset_pin_2` `dip` |
+| `comm_config`   | Communication configuration | `name` `description`                      | `protocol` `modem` `timeout_ms` `poll_period_sec` `long_poll_period_sec` `idle_disconnect_sec` `no_response_disconnect_sec` |
+| `comm_link`     | Communication links         | `name` `description` `uri` `comm_config` `poll_enabled` | `connected` |
+| `controller`    | Controllers for field devices | `name` `location` `comm_link` `drop_id` `cabinet_style` `condition` `notes` `version` `fail_time` | `geo_loc` `password` |
+| `modem`         | POTS modems                 | `name` `enabled` | `uri` `config` `timeout_ms` |
+| `permission`    | Resource permissions for user roles | | |
+| `role`          | User access roles | | |
+| `user`          | User accounts | | |
 
 ## ETags and Caching
 
