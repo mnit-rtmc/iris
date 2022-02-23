@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{disabled_attr, Card};
-use crate::util::{Dom, HtmlStr};
+use crate::util::{Dom, HtmlStr, OptVal};
 use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -23,9 +23,9 @@ use web_sys::Document;
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Modem {
     pub name: String,
-    pub uri: String,
-    pub config: String,
-    pub timeout_ms: u32,
+    pub uri: Option<String>,
+    pub config: Option<String>,
+    pub timeout_ms: Option<u32>,
     pub enabled: bool,
 }
 
@@ -51,9 +51,9 @@ impl Card for Modem {
 
     /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
-        let uri = HtmlStr::new(&self.uri);
-        let config = HtmlStr::new(&self.config);
-        let timeout_ms = self.timeout_ms;
+        let uri = HtmlStr::new(self.uri.as_ref());
+        let config = HtmlStr::new(self.config.as_ref());
+        let timeout_ms = OptVal(self.timeout_ms);
         let enabled = if self.enabled { " checked" } else { "" };
         format!(
             "<div class='row'>\
@@ -82,23 +82,17 @@ impl Card for Modem {
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         let mut obj = Map::new();
-        if let Some(uri) = doc.input_parse::<String>("edit_uri") {
-            if uri != val.uri {
-                obj.insert("uri".to_string(), Value::String(uri));
-            }
+        let uri = doc.input_parse::<String>("edit_uri");
+        if uri != val.uri {
+            obj.insert("uri".to_string(), OptVal(uri).into());
         }
-        if let Some(config) = doc.input_parse::<String>("edit_config") {
-            if config != val.config {
-                obj.insert("config".to_string(), Value::String(config));
-            }
+        let config = doc.input_parse::<String>("edit_config");
+        if config != val.config {
+            obj.insert("config".to_string(), OptVal(config).into());
         }
-        if let Some(timeout_ms) = doc.input_parse::<u32>("edit_timeout") {
-            if timeout_ms != val.timeout_ms {
-                obj.insert(
-                    "timeout_ms".to_string(),
-                    Value::Number(timeout_ms.into()),
-                );
-            }
+        let timeout_ms = doc.input_parse::<u32>("edit_timeout");
+        if timeout_ms != val.timeout_ms {
+            obj.insert("timeout_ms".to_string(), OptVal(timeout_ms).into());
         }
         if let Some(enabled) = doc.input_bool("edit_enabled") {
             if enabled != val.enabled {

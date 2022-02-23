@@ -6,18 +6,17 @@ These are rough notes about the IRIS web API.
 
 Data requests are split into *public* and *restricted* paths:
 
-- `iris/`: Public data
+- `iris/`: Public data (no authentication required)
 - `iris/api/`: Restricted data (needs session authentication)
 - `iris/api/login`: Authentication endpoint
 
 ## Public Data
 
-This data is available publicly, with no authentication required.  These
-resources are JSON arrays, fetched using http `GET` requests.
+These resources are JSON arrays, fetched using http `GET` requests.
 
 - `iris/camera_pub`: Camera locations and configuration
-- `iris/comm_protocol`: Protocol look-up table (may only change on IRIS updates)
-- `iris/condition`: Condition look-up table (may only change on IRIS updates)
+- `iris/comm_protocol`: Protocol LUT (may only change on IRIS updates)
+- `iris/condition`: Condition LUT (may only change on IRIS updates)
 - `iris/detector`: Vehicle detectors
 - `iris/dms_message`: Current DMS messages and status
 - `iris/dms_pub`: DMS locations and configuration
@@ -52,9 +51,9 @@ http methods.  The `{type}` values include:
 A `Content-Type: application/json` header is included where appropriate.
 
 - `GET iris/api/{type}`: Get all objects of `{type}` (minimal), as a JSON array
+- `GET iris/api/{type}/{name}`: Get one full object as JSON
 - `POST iris/api/{type}`: Create a new object of the `{type}`.  Body contains
                           required attributes as JSON
-- `GET iris/api/{type}/{name}`: Get one full object as JSON
 - `PATCH iris/api/{type}/{name}`: Update attributes of one object, with JSON
 - `DELETE iris/api/{type}/{name}`: Delete one object
 
@@ -88,3 +87,6 @@ Consider using Etags to avoid mid-air collisions
   * Minimal: `name`, `drop_id`, `comm_link`, `cabinet_style`, `condition`,
     `notes`, `version`, `location`
   * Full: `geo_loc`, `password`, `fail_time`
+- `modem`
+  * Minimal: `name`, `enabled`
+  * Full: `uri`, `config`, `timeout_ms`

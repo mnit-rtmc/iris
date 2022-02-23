@@ -303,7 +303,7 @@ const MODEM_RES: Resource = Resource::Simple(
     "api/modem",
     Listen::All("modem"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, uri, config, timeout_ms, enabled \
+    SELECT name, enabled \
     FROM iris.modem \
     ORDER BY name\
 ) r",
