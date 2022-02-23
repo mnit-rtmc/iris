@@ -16,6 +16,8 @@ This data is available publicly, with no authentication required.  These
 resources are JSON arrays, fetched using http `GET` requests.
 
 - `iris/camera_pub`: Camera locations and configuration
+- `iris/comm_protocol`: Protocol look-up table (may only change on IRIS updates)
+- `iris/condition`: Condition look-up table (may only change on IRIS updates)
 - `iris/detector`: Vehicle detectors
 - `iris/dms_message`: Current DMS messages and status
 - `iris/dms_pub`: DMS locations and configuration
@@ -35,8 +37,17 @@ resources are JSON arrays, fetched using http `GET` requests.
 ## Restricted Data
 
 There are many restricted resource types, which can be accessed using standard
-http methods.  These `{type}` values include: `alarm`, `cabinet_style`,
-`comm_config`, `comm_link`, `controller` and `modem`.
+http methods.  The `{type}` values include:
+
+- `alarm`: Equipment alarms
+- `cabinet_style`: Cabinet styles and I/O pins
+- `comm_config`: Communication configurations
+- `comm_link`: Communication links
+- `controller`: Controllers for field devices
+- `modem`: POTS modems
+- `permission`: Resource permissions for user roles
+- `role`: User access roles
+- `user`: User accounts
 
 A `Content-Type: application/json` header is included where appropriate.
 
@@ -52,14 +63,6 @@ attributes.  Those are attributes needed for *searching* and *displaying
 compact cards*.
 
 Additional (*full*) attributes are also included in a single object response.
-
-## Lookup Tables
-
-There are some "static" lookup tables, which change infrequently, and only when
-IRIS is updated.  These are:
-
-- `GET iris/api/comm_protocol`
-- `GET iris/api/condition`
 
 ## ETags and Caching
 

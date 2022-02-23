@@ -251,12 +251,6 @@ async fn main() -> tide::Result<()> {
     let mut route = app.at("/iris/api");
     route.at("/login").get(get_login);
     route.at("/login").post(post_login);
-    route
-        .at("/comm_protocol")
-        .get(|req| list_objects("comm_protocol", req));
-    route
-        .at("/condition")
-        .get(|req| list_objects("condition", req));
     add_routes!(route, "alarm");
     add_routes!(route, "cabinet_style");
     add_routes!(route, "comm_config");

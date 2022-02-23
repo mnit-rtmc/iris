@@ -415,8 +415,6 @@ capability
 catalog
 comm_config
 comm_link
-comm_protocol
-condition
 connection
 controller
 day_matcher
@@ -494,8 +492,6 @@ administrator	alarm	4
 administrator	cabinet_style	4
 administrator	comm_config	4
 administrator	comm_link	4
-administrator	comm_protocol	1
-administrator	condition	1
 administrator	controller	4
 administrator	modem	4
 administrator	permission	4

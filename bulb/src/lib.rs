@@ -540,9 +540,9 @@ pub async fn start() -> Result<()> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
 
-    let json = fetch_get("/iris/api/comm_protocol").await?;
+    let json = fetch_get("/iris/comm_protocol").await?;
     let protocols = json.into_serde::<Vec<Protocol>>().unwrap_throw();
-    let json = fetch_get("/iris/api/condition").await?;
+    let json = fetch_get("/iris/condition").await?;
     let conditions = json.into_serde::<Vec<Condition>>().unwrap_throw();
     let json = fetch_get(CommConfig::URI).await?;
     let comm_configs = json.into_serde::<Vec<CommConfig>>().unwrap_throw();

@@ -240,7 +240,7 @@ const CABINET_STYLE_RES: Resource = Resource::Simple(
 
 /// Comm protocol LUT resource
 const COMM_PROTOCOL_RES: Resource = Resource::Simple(
-    "api/comm_protocol",
+    "comm_protocol",
     Listen::All("comm_protocol"), // no notifications for LUT
     "SELECT row_to_json(r)::text FROM (\
     SELECT id, description \
@@ -274,7 +274,7 @@ const COMM_LINK_RES: Resource = Resource::Simple(
 
 /// Controller condition LUT resource
 const CONDITION_RES: Resource = Resource::Simple(
-    "api/condition",
+    "condition",
     Listen::All("condition"), // no notifications for LUT
     "SELECT row_to_json(r)::text FROM (\
     SELECT id, description \
