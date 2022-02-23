@@ -66,17 +66,17 @@ Additional (*full*) attributes are also included in a single object response.
 
 ## Resource Types
 
-| Resource Type   | Description                 | Minimal                                   | Full |
-|-----------------|-----------------------------|-------------------------------------------|----------------------|
-| `alarm`         | Equipment alarms            | `name` `description` `controller` `state` | `pin` `trigger_time` |
-| `cabinet_style` | Cabinet I/O                 | `name`                                    | `police_panel_pin_1` `police_panel_pin_2` `watchdog_reset_pin_1` `watchdog_reset_pin_2` `dip` |
-| `comm_config`   | Communication configuration | `name` `description`                      | `protocol` `modem` `timeout_ms` `poll_period_sec` `long_poll_period_sec` `idle_disconnect_sec` `no_response_disconnect_sec` |
-| `comm_link`     | Communication links         | `name` `description` `uri` `comm_config` `poll_enabled` | `connected` |
-| `controller`    | Controllers for field devices | `name` `location` `comm_link` `drop_id` `cabinet_style` `condition` `notes` `version` `fail_time` | `geo_loc` `password` |
-| `modem`         | POTS modems                 | `name` `enabled` | `uri` `config` `timeout_ms` |
-| `permission`    | Resource permissions for user roles | | |
-| `role`          | User access roles | | |
-| `user`          | User accounts | | |
+| Resource        | Minimal | Full |
+|-----------------|---------|------|
+| `alarm`         | `name` `description` `controller` `state` | `pin` `trigger_time` |
+| `cabinet_style` | `name` | `police_panel_pin_1` `police_panel_pin_2` `watchdog_reset_pin_1` `watchdog_reset_pin_2` `dip` |
+| `comm_config`   | `name` `description` | `protocol` `modem` `timeout_ms` `poll_period_sec` `long_poll_period_sec` `idle_disconnect_sec` `no_response_disconnect_sec` |
+| `comm_link`     | `name` `description` `uri` `comm_config` `poll_enabled` | `connected` |
+| `controller`    | `name` `location` `comm_link` `drop_id` `cabinet_style` `condition` `notes` `version` `fail_time` | `geo_loc` `password` |
+| `modem`         | `name` `enabled` | `uri` `config` `timeout_ms` |
+| `permission`    | `id` `role` `resource_n` | `batch` `access_n` |
+| `role`          | `name` `enabled` | |
+| `user`          | `name` `full_name` `role` `enabled` | |
 
 ## ETags and Caching
 
