@@ -47,19 +47,7 @@ roles which do not have any access to the `permission`, `role` and `user` types.
 ## Restricted Resources
 
 There are many restricted resource types, which can be accessed using standard
-http methods, including:
-
-- `alarm`: Equipment alarms
-- `cabinet_style`: Cabinet styles and I/O pins
-- `comm_config`: Communication configurations
-- `comm_link`: Communication links
-- `controller`: Controllers for field devices
-- `modem`: POTS modems
-- `permission`: Resource permissions for user roles
-- `role`: User access roles
-- `user`: User accounts
-
-A `Content-Type: application/json` header is included where appropriate.
+http methods:
 
 - `GET iris/api/{type}`: Get all objects of `{type}` (minimal), as a JSON array
 - `GET iris/api/{type}/{name}`: Get one full object as JSON
@@ -68,36 +56,41 @@ A `Content-Type: application/json` header is included where appropriate.
 - `PATCH iris/api/{type}/{name}`: Update attributes of one object, with JSON
 - `DELETE iris/api/{type}/{name}`: Delete one object
 
+A `Content-Type: application/json` header is included where appropriate.
+
 A `GET` request of all objects of a `{type}` contains only the *minimal*
 attributes.  Those are attributes needed for *searching* and *displaying
 compact cards*.
 
 Additional (*full*) attributes are also included in a single object response.
 
-## ETags and Caching
-
-Consider using Etags to avoid mid-air collisions
-
 ## Object definitions
 
-- `alarm`
+- `alarm`: Equipment alarms
   * Minimal: `name`, `description`, `controller`, `state`
   * Full: `pin`, `trigger_time`
-- `cabinet_style`
+- `cabinet_style`: Cabinet styles and I/O pins
   * Minimal: `name`
   * Full: `police_panel_pin_1`, `police_panel_pin_2`, `watchdog_reset_pin_1`,
     `watchdog_reset_pin_2`, `dip`
-- `comm_config`
+- `comm_config`: Communication configurations
   * Minimal: `name`, `description`
   * Full: `protocol`, `modem`, `timeout_ms`, `poll_period_sec`,
     `long_poll_period_sec`, `idle_disconnect_sec`, `no_response_disconnect_sec`
-- `comm_link`
+- `comm_link`: Communication links
   * Minimal: `name`, `description`, `uri`, `comm_config`, `poll_enabled`,
     `connected`
-- `controller`
+- `controller`: Controllers for field devices
   * Minimal: `name`, `location`, `comm_link`, `drop_id`, `cabinet_style`,
     `condition`, `notes`, `version`, `fail_time`
   * Full: `geo_loc`, `password`
-- `modem`
+- `modem`: POTS modems
   * Minimal: `name`, `enabled`
   * Full: `uri`, `config`, `timeout_ms`
+- `permission`: Resource permissions for user roles
+- `role`: User access roles
+- `user`: User accounts
+
+## ETags and Caching
+
+Consider using Etags to avoid mid-air collisions
