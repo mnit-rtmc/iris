@@ -40,6 +40,10 @@ pub enum SonarError {
     #[error("I/O {0}")]
     IO(#[from] std::io::Error),
 
+    /// Serde JSON error
+    #[error("Serialization error")]
+    SerdeJson(#[from] serde_json::Error),
+
     /// Invalid JSON error
     #[error("Invalid JSON")]
     InvalidJson,

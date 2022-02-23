@@ -9,8 +9,9 @@ Data requests are split into *public* and *restricted* paths:
 - `iris/`: Public data (no authentication required)
 - `iris/api/`: Restricted data (needs session authentication)
 - `iris/api/login`: Authentication endpoint
+- `iris/api/access`: User's access permissions
 
-## Public Data
+## Public Resources
 
 These resources are JSON arrays, fetched using http `GET` requests.
 
@@ -33,10 +34,20 @@ These resources are JSON arrays, fetched using http `GET` requests.
 - `iris/TPIMS_static`: Truck parking static data
 - `iris/img/`: Images (gif) of active sign messages in `sign_message`
 
-## Restricted Data
+## Login and Access
+
+A `POST iris/api/login` request is needed to authenticate a session, by
+submitting `username` and `password` form values.  This returns a session cookie
+which can be used for subsequent restricted requests.
+
+A `GET iris/api/access` request returns a JSON array of `permission` records
+associated with the authenticated user's role.  This endpoint is required for
+roles which do not have any access to the `permission`, `role` and `user` types.
+
+## Restricted Resources
 
 There are many restricted resource types, which can be accessed using standard
-http methods.  The `{type}` values include:
+http methods, including:
 
 - `alarm`: Equipment alarms
 - `cabinet_style`: Cabinet styles and I/O pins
@@ -84,9 +95,9 @@ Consider using Etags to avoid mid-air collisions
   * Minimal: `name`, `description`, `uri`, `comm_config`, `poll_enabled`,
     `connected`
 - `controller`
-  * Minimal: `name`, `drop_id`, `comm_link`, `cabinet_style`, `condition`,
-    `notes`, `version`, `location`
-  * Full: `geo_loc`, `password`, `fail_time`
+  * Minimal: `name`, `location`, `comm_link`, `drop_id`, `cabinet_style`,
+    `condition`, `notes`, `version`, `fail_time`
+  * Full: `geo_loc`, `password`
 - `modem`
   * Minimal: `name`, `enabled`
   * Full: `uri`, `config`, `timeout_ms`

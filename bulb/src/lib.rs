@@ -32,6 +32,7 @@ mod commconfig;
 mod commlink;
 mod controller;
 mod modem;
+mod permission;
 mod util;
 
 use alarm::Alarm;
@@ -41,6 +42,7 @@ use commconfig::CommConfig;
 use commlink::CommLink;
 use controller::Controller;
 use modem::Modem;
+use permission::Permission;
 use util::Dom;
 
 /// Interval (ms) between ticks for deferred actions
@@ -70,6 +72,8 @@ enum DeferredAction {
 /// Global app state
 #[derive(Default)]
 struct State {
+    /// Permission access
+    access: Vec<Permission>,
     /// Comm protocols
     protocols: Vec<Protocol>,
     /// Controller conditions
@@ -94,10 +98,12 @@ impl State {
     /// Initialize global app state
     fn initialize(
         &mut self,
+        mut access: Vec<Permission>,
         mut protocols: Vec<Protocol>,
         mut conditions: Vec<Condition>,
         mut comm_configs: Vec<CommConfig>,
     ) {
+        self.access.append(&mut access);
         self.protocols.append(&mut protocols);
         self.conditions.append(&mut conditions);
         self.comm_configs.append(&mut comm_configs);
@@ -234,7 +240,7 @@ async fn create_cards(tp: String, tx: String) -> Result<String> {
 
 /// Try to build cards
 async fn try_build_cards<C: Card>(tx: String) -> Result<String> {
-    let json = fetch_get(C::URI).await?;
+    let json = fetch_get(&format!("/iris/api/{}", C::UNAME)).await?;
     let tx = tx.to_lowercase();
     let html = C::build_cards(&json, &tx)?;
     Ok(html)
@@ -431,7 +437,11 @@ fn hide_toast() {
 
 /// Get the URI of an object
 fn name_uri<C: Card>(name: &str) -> String {
-    format!("{}/{}", C::URI, utf8_percent_encode(name, NON_ALPHANUMERIC))
+    format!(
+        "/iris/api/{}/{}",
+        C::UNAME,
+        utf8_percent_encode(name, NON_ALPHANUMERIC)
+    )
 }
 
 /// Replace a card with provieded HTML
@@ -489,7 +499,7 @@ async fn do_create<C: Card>(doc: &Document) -> Result<()> {
     let json = value.into();
     console::log_1(&json);
     let window = web_sys::window().unwrap_throw();
-    fetch_post(&window, C::URI, &json).await
+    fetch_post(&window, &format!("/iris/api/{}", C::UNAME), &json).await
 }
 
 /// Try to retrieve changed fields on edit form
@@ -540,15 +550,17 @@ pub async fn start() -> Result<()> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
 
+    let json = fetch_get("/iris/api/access").await?;
+    let access = json.into_serde::<Vec<Permission>>().unwrap_throw();
     let json = fetch_get("/iris/comm_protocol").await?;
     let protocols = json.into_serde::<Vec<Protocol>>().unwrap_throw();
     let json = fetch_get("/iris/condition").await?;
     let conditions = json.into_serde::<Vec<Condition>>().unwrap_throw();
-    let json = fetch_get(CommConfig::URI).await?;
+    let json = fetch_get(&format!("/iris/api/{}", CommConfig::UNAME)).await?;
     let comm_configs = json.into_serde::<Vec<CommConfig>>().unwrap_throw();
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        state.initialize(protocols, conditions, comm_configs);
+        state.initialize(access, protocols, conditions, comm_configs);
     });
 
     let sb_type: HtmlSelectElement = doc.elem("sb_type")?;
@@ -563,23 +575,32 @@ pub async fn start() -> Result<()> {
 
 /// Create types `select` element
 fn types_html() -> String {
-    let (alarm_tname, alarm_ename) = (Alarm::TNAME, Alarm::ENAME);
-    let (cab_tname, cab_ename) = (CabinetStyle::TNAME, CabinetStyle::ENAME);
-    let (cc_tname, cc_ename) = (CommConfig::TNAME, CommConfig::ENAME);
-    let (cl_tname, cl_ename) = (CommLink::TNAME, CommLink::ENAME);
-    let (ctr_tname, ctr_ename) = (Controller::TNAME, Controller::ENAME);
-    let (mdm_tname, mdm_ename) = (Modem::TNAME, Modem::ENAME);
-    format!(
-        "<option/>\
-        <optgroup label='🧰 Maintenance'>\
-          <option value='{alarm_tname}'>{alarm_ename}</option>
-          <option value='{cab_tname}'>{cab_ename}</option>
-          <option value='{cc_tname}'>{cc_ename}</option>
-          <option value='{cl_tname}'>{cl_ename}</option>
-          <option value='{ctr_tname}'>{ctr_ename}</option>
-          <option value='{mdm_tname}'>{mdm_ename}</option>
-        </optgroup>"
-    )
+    let mut html = "<option/>".to_string();
+    STATE.with(|rc| {
+        let state = rc.borrow();
+        for permission in &state.access {
+            if permission.batch.is_none() {
+                add_option::<Alarm>(permission, &mut html);
+                add_option::<CabinetStyle>(permission, &mut html);
+                add_option::<CommConfig>(permission, &mut html);
+                add_option::<CommLink>(permission, &mut html);
+                add_option::<Controller>(permission, &mut html);
+                add_option::<Modem>(permission, &mut html);
+            }
+        }
+    });
+    html
+}
+
+/// Add option to access select
+fn add_option<C: Card>(perm: &Permission, html: &mut String) {
+    if perm.resource_n == C::UNAME.to_lowercase() {
+        html.push_str("<option value='");
+        html.push_str(C::TNAME);
+        html.push_str("'>");
+        html.push_str(C::ENAME);
+        html.push_str("</option>");
+    }
 }
 
 /// Create an HTML `select` element of comm protocols

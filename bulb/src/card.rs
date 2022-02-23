@@ -47,7 +47,7 @@ pub enum CardType {
 pub trait Card: DeserializeOwned {
     const TNAME: &'static str;
     const ENAME: &'static str;
-    const URI: &'static str;
+    const UNAME: &'static str;
     const HAS_STATUS: bool = false;
 
     /// Create from a JSON value

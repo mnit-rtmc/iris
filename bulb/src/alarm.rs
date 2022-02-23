@@ -47,8 +47,8 @@ impl Alarm {
 impl Card for Alarm {
     const TNAME: &'static str = "Alarm";
     const ENAME: &'static str = "🚨 Alarm";
+    const UNAME: &'static str = "alarm";
     const HAS_STATUS: bool = true;
-    const URI: &'static str = "/iris/api/alarm";
 
     fn is_match(&self, tx: &str) -> bool {
         self.description.to_lowercase().contains(tx)

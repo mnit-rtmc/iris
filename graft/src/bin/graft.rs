@@ -29,6 +29,9 @@ use tide::prelude::*;
 use tide::sessions::{MemoryStore, SessionMiddleware};
 use tide::{Body, Request, Response, StatusCode};
 
+/// Path for static files
+const STATIC_PATH: &str = "/var/www/html/iris/api";
+
 /// Slice of (type, attribute) tuples for JSON integer values
 const INTEGERS: &[(&str, &str)] = &[
     ("alarm", "pin"),
@@ -198,41 +201,67 @@ impl State {
         })
     }
 
-    /// Check permission
-    fn check_permission(&self, role: &str, nm: &str) -> Result<()> {
-        for p in &self.permissions {
-            if role == p.role && nm == p.resource_n && p.batch.is_none() {
-                return Ok(());
+    /// Get access permissions as JSON
+    fn get_access(&self, user: &str) -> Result<Value> {
+        if let Some(user) = self.user(user) {
+            if let Some(role) = self.role(&user.role) {
+                let permissions: Vec<&Permission> = self
+                    .permissions
+                    .iter()
+                    .filter(move |p| role.name == p.role)
+                    .collect();
+                return Ok(serde_json::to_value(&permissions)?);
             }
         }
         Err(SonarError::Forbidden)
     }
 
+    /// Get permissions for a role / resource
+    fn permissions<'a>(
+        &'a self,
+        role: &'a str,
+        nm: &'a str,
+    ) -> impl Iterator<Item = &'a Permission> {
+        self.permissions
+            .iter()
+            .filter(move |p| role == p.role && nm == p.resource_n)
+    }
+
     /// Check role read permission
-    fn check_role(&self, role: &str, nm: &str) -> Result<()> {
-        for r in &self.roles {
-            if role == r.name {
-                if r.enabled {
-                    return self.check_permission(role, nm);
-                }
-                break;
-            }
-        }
-        Err(SonarError::Forbidden)
+    fn role(&self, role: &str) -> Option<&Role> {
+        self.roles.iter().find(|r| role == r.name)
+    }
+
+    /// Check user read permission
+    fn user(&self, user: &str) -> Option<&User> {
+        self.users.iter().find(|u| user == u.name)
     }
 
     /// Check user read permission
     fn check_user(&self, username: &str, nm: &str) -> Result<()> {
-        for user in &self.users {
-            if username == user.name {
-                if user.enabled {
-                    return self.check_role(&user.role, nm);
+        if let Some(user) = self.user(username) {
+            if user.enabled {
+                if let Some(role) = self.role(&user.role) {
+                    if role.enabled {
+                        for permission in self.permissions(&role.name, nm) {
+                            if permission.batch.is_none() {
+                                return Ok(());
+                            }
+                        }
+                    }
                 }
-                break;
             }
         }
         Err(SonarError::Forbidden)
     }
+}
+
+/// Check for read access to a resource
+fn check_read(nm: &str, req: &Request<State>) -> Result<()> {
+    let session = req.session();
+    let auth: AuthMap = session.get("auth").ok_or(SonarError::Unauthorized)?;
+    req.state().check_user(&auth.username, nm)?;
+    Ok(())
 }
 
 /// Main entry point
@@ -251,6 +280,7 @@ async fn main() -> tide::Result<()> {
     let mut route = app.at("/iris/api");
     route.at("/login").get(get_login);
     route.at("/login").post(post_login);
+    route.at("/access").get(get_access);
     add_routes!(route, "alarm");
     add_routes!(route, "cabinet_style");
     add_routes!(route, "comm_config");
@@ -318,6 +348,19 @@ async fn post_login(mut req: Request<State>) -> tide::Result {
         .build())
 }
 
+/// `GET` access
+async fn get_access(req: Request<State>) -> tide::Result {
+    log::info!("GET {}", req.url());
+    let session = req.session();
+    let auth: AuthMap =
+        resp!(session.get("auth").ok_or(SonarError::Unauthorized));
+    let body = resp!(req.state().get_access(&auth.username));
+    Ok(Response::builder(StatusCode::Ok)
+        .body(body)
+        .content_type("application/json")
+        .build())
+}
+
 /// IRIS host name
 const HOST: &str = "localhost.localdomain";
 
@@ -374,19 +417,13 @@ fn obj_name(tp: &str, req: &Request<State>) -> Result<String> {
 
 /// `GET` list of objects and return JSON result
 async fn list_objects(tp: &str, req: Request<State>) -> tide::Result {
-    log::info!("GET {}", req.url());
     get_json_file(tp, req).await
 }
 
-/// Path for static files
-const STATIC_PATH: &str = "/var/www/html/iris/api";
-
 /// Get a static JSON file
 async fn get_json_file(nm: &str, req: Request<State>) -> tide::Result {
-    let session = req.session();
-    let auth: AuthMap =
-        resp!(session.get("auth").ok_or(SonarError::Unauthorized));
-    resp!(req.state().check_user(&auth.username, nm));
+    log::info!("GET {}", req.url());
+    resp!(check_read(nm, &req));
     let file = format!("{STATIC_PATH}/{nm}");
     let path = PathBuf::from(file);
     let body = resp!(Body::from_file(&path).await);
@@ -399,6 +436,7 @@ async fn get_json_file(nm: &str, req: Request<State>) -> tide::Result {
 /// `GET` a Sonar object and return JSON result
 async fn get_sonar_object(tp: &str, req: Request<State>) -> tide::Result {
     log::info!("GET {}", req.url());
+    resp!(check_read(tp, &req));
     let nm = resp!(obj_name(tp, &req));
     let mut c = resp!(connection(&req).await);
     let mut res = Map::new();
