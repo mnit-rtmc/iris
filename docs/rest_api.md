@@ -62,19 +62,22 @@ A `GET` request of all objects of a `{type}` contains only the *minimal*
 attributes.  Those are attributes needed for *searching* and *displaying
 compact cards*.
 
-Additional (*full*) attributes are also included in a single object response.
+Additional *full* attributes are also included in a single object response,
+(shown in parentheses below).
 
 ## Resource Types
 
-| `alarm` | View (1)       | Configure (4)              |
-|---------|----------------|----------------------------|
-| Minimal | `name` `state` | `description` `controller` |
-| Full    | `trigger_time` | `pin`                      |
+### `alarm`
+| Access      | Attributes                         |
+|-------------|------------------------------------|
+| Read Only   | `name` `state` (`trigger_time`)    |
+| 4 Configure | `description` `controller` (`pin`) |
 
-| `cabinet_style` | Configure (4) |
-|-----------------|---------------|
-| Minimal         | `name`        |
-| Full            | `police_panel_pin_1` `police_panel_pin_2` `watchdog_reset_pin_1` `watchdog_reset_pin_2` `dip` |
+### `cabinet_style`
+| Access      | Attributes |
+|-------------|------------|
+| Read Only   | `name`     |
+| 4 Configure | (`police_panel_pin_1` `police_panel_pin_2` `watchdog_reset_pin_1` `watchdog_reset_pin_2` `dip`) |
 
 | `comm_config` | Plan (3) | Configure (4)        |
 |---------------|----------|----------------------|
