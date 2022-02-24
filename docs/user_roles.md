@@ -35,33 +35,18 @@ There are 4 access levels, with increasing permissiveness:
 |     3 | Plan      | + Policies, scheduling   |
 |     4 | Configure | + Create, update, delete |
 
-A __Resource__ is the `type` part of the resource URI:
+[Resource] is the `type` part of the URI:
 
 | Resource         | *Operate* (2) Access          | *Plan* (3) Access         |
 |------------------|-------------------------------|---------------------------|
-| `alarm`          |                               |                           |
-| `cabinet_style`  |                               |                           |
-| `comm_config`    |                               |                           |
-| `comm_link`      | `poll_enabled`                |                           |
-| `controller`     | `download`                    | `deviceRequest`           |
-| `modem`          |                               |                           |
-| `permission`     |                               |                           |
-|                  |                               |                           |
 | `action_plan`    | `phase`                       |                           |
-| `alert`          |                               |                           |
 | `beacon`         | `flashing`                    |                           |
 | `camera`         | `ptz` `recallPreset`          | `publish`                 |
 | `detector`       |                               | `fieldLength` `forceFail` |
 | `dms`            | `msgUser`                     | `deviceRequest`           |
 | `gate_arm`       | `armStateNext` `ownerNext`    | `deviceRequest`           |
-| `gps`            |                               |                           |
-| `incident`       |                               |                           |
 | `lcs`            | `indicationsNext` `ownerNext` |                           |
-| `parking_area`   |                               |                           |
 | `ramp_meter`     | `rateNext` `mLock`            |                           |
-| `weather_sensor` |                               |                           |
-| `toll_reader`    |                               |                           |
-| `user`           |                               |                           |
 | `video_monitor`  | `camera`                      |                           |
 
 A *batch* is a group to which a resource may belong.  These typically are used
@@ -125,4 +110,5 @@ These records are purged automatically when older than the value of the
 [device]: controllers.html#devices
 [LCS]: lcs.html
 [LDAP]: installation.html#ldap
+[resource]: rest_api.html#resource-types
 [system attribute]: system_attributes.html
