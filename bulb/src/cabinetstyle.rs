@@ -16,6 +16,7 @@ use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
+use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
 
@@ -30,6 +31,12 @@ pub struct CabinetStyle {
     pub dip: Option<u32>,
 }
 
+impl fmt::Display for CabinetStyle {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", HtmlStr::new(&self.name))
+    }
+}
+
 impl Card for CabinetStyle {
     const TNAME: &'static str = "Cabinet Style";
     const ENAME: &'static str = "🗄️ Cabinet Style";
@@ -39,14 +46,9 @@ impl Card for CabinetStyle {
         self.name.to_lowercase().contains(tx)
     }
 
-    fn name(&self) -> &str {
-        &self.name
-    }
-
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let name = HtmlStr::new(&self.name);
-        format!("<span>{name}</span>")
+        format!("<span>{self}</span>")
     }
 
     /// Convert to edit HTML

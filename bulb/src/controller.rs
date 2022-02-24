@@ -17,6 +17,7 @@ use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
+use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
 
@@ -34,6 +35,12 @@ pub struct Controller {
     pub fail_time: Option<String>,
     pub geo_loc: Option<String>,
     pub password: Option<String>,
+}
+
+impl fmt::Display for Controller {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", HtmlStr::new(&self.name))
+    }
 }
 
 impl Controller {
@@ -93,10 +100,6 @@ impl Card for Controller {
                 .contains(tx)
     }
 
-    fn name(&self) -> &str {
-        &self.name
-    }
-
     /// Get next suggested name
     fn next_name(obs: &[Self]) -> String {
         let mut num = 1;
@@ -114,14 +117,13 @@ impl Card for Controller {
     fn to_html_compact(&self) -> String {
         let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
-        let name = HtmlStr::new(&self.name);
         // condition 1 is "Active"
         let disabled = disabled_attr(self.condition == 1);
         let comm_state = self.comm_state(false);
         format!(
             "<span{disabled}>{comm_link}:{drop_id}</span>\
             <span>{comm_state}</span>\
-            <span class='{NAME}'>{name}</span>"
+            <span class='{NAME}'>{self}</span>"
         )
     }
 

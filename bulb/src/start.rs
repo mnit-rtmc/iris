@@ -168,6 +168,7 @@ async fn create_cards(tp: String, tx: String) -> Result<String> {
         CommLink::TNAME => try_build_cards::<CommLink>(tx).await,
         Controller::TNAME => try_build_cards::<Controller>(tx).await,
         Modem::TNAME => try_build_cards::<Modem>(tx).await,
+        Permission::TNAME => try_build_cards::<Permission>(tx).await,
         _ => Ok("".into()),
     }
 }
@@ -189,6 +190,7 @@ async fn click_card(tp: String, id: String, name: String) {
         CommLink::TNAME => expand_card::<CommLink>(id, name).await,
         Controller::TNAME => expand_card::<Controller>(id, name).await,
         Modem::TNAME => expand_card::<Modem>(id, name).await,
+        Permission::TNAME => expand_card::<Permission>(id, name).await,
         _ => (),
     }
 }
@@ -421,6 +423,7 @@ async fn create_new(tp: &str, doc: &Document) -> Result<()> {
         CommLink::TNAME => do_create::<CommLink>(doc).await,
         Controller::TNAME => do_create::<Controller>(doc).await,
         Modem::TNAME => do_create::<Modem>(doc).await,
+        Permission::TNAME => do_create::<Permission>(doc).await,
         _ => unreachable!(),
     }
 }
@@ -446,6 +449,7 @@ fn try_changed_fields(
         CommLink::TNAME => CommLink::changed_fields(doc, json),
         Controller::TNAME => Controller::changed_fields(doc, json),
         Modem::TNAME => Modem::changed_fields(doc, json),
+        Permission::TNAME => Permission::changed_fields(doc, json),
         _ => unreachable!(),
     }
 }
@@ -464,6 +468,7 @@ fn build_card(
         CommLink::TNAME => CommLink::build_card(name, json, ct),
         Controller::TNAME => Controller::build_card(name, json, ct),
         Modem::TNAME => Modem::build_card(name, json, ct),
+        Permission::TNAME => Permission::build_card(name, json, ct),
         _ => Ok("".into()),
     }
 }
@@ -517,6 +522,7 @@ fn types_html() -> String {
                 add_option::<CommLink>(permission, &mut html);
                 add_option::<Controller>(permission, &mut html);
                 add_option::<Modem>(permission, &mut html);
+                add_option::<Permission>(permission, &mut html);
             }
         }
     });

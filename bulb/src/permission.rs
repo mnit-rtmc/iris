@@ -10,11 +10,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::Card;
+use crate::card::{Card, NAME};
+use crate::util::HtmlStr;
 use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
+use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
 
@@ -28,28 +30,42 @@ pub struct Permission {
     pub access_n: u32,
 }
 
+impl fmt::Display for Permission {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.id)
+    }
+}
+
 impl Card for Permission {
     const TNAME: &'static str = "Permission";
-    const ENAME: &'static str = "Perm";
+    const ENAME: &'static str = "🗝️ Permission";
     const UNAME: &'static str = "permission";
 
     fn is_match(&self, tx: &str) -> bool {
-        self.resource_n.to_lowercase().contains(tx)
-    }
-
-    fn name(&self) -> &str {
-        &self.role
+        self.id.to_string().contains(tx) |
+        self.role.to_lowercase().contains(tx) |
+        self.resource_n.contains(tx)
     }
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let id = self.id;
-        format!("<span>{id}</span>")
+        let role = HtmlStr::new(&self.role).with_len(4);
+        let resource = HtmlStr::new(&self.resource_n).with_len(9);
+        let emo = match self.access_n {
+            1 => "👁️",
+            2 => "👉",
+            3 => "💡",
+            4 => "🔧",
+            _ => "?",
+        };
+        format!(
+            "<span>{role}{emo}{resource}</span>\
+            <span class='{NAME}'>{self}</span>"
+        )
     }
 
     /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
-        let id = self.id;
         format!(
             "<div class='row'>\
             </div>"

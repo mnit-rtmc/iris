@@ -128,6 +128,12 @@ pub struct CommConfig {
     pub no_response_disconnect_sec: Option<u32>,
 }
 
+impl fmt::Display for CommConfig {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", HtmlStr::new(&self.name))
+    }
+}
+
 impl Card for CommConfig {
     const TNAME: &'static str = "Comm Config";
     const ENAME: &'static str = "📡 Comm Config";
@@ -136,10 +142,6 @@ impl Card for CommConfig {
     fn is_match(&self, tx: &str) -> bool {
         self.description.to_lowercase().contains(tx)
             || self.name.to_lowercase().contains(tx)
-    }
-
-    fn name(&self) -> &str {
-        &self.name
     }
 
     /// Get next suggested name
@@ -158,10 +160,9 @@ impl Card for CommConfig {
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
         let description = HtmlStr::new(&self.description);
-        let name = HtmlStr::new(&self.name);
         format!(
             "<span>{description}</span>\
-            <span class='{NAME}'>{name}</span>"
+            <span class='{NAME}'>{self}</span>"
         )
     }
 

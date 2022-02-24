@@ -28,12 +28,12 @@ permission record is made up of *access*, *resource* and *batch* values.
 
 There are 4 access levels, with increasing permissiveness:
 
-| Level | Access    | Permissions              |
-|-------|-----------|--------------------------|
-|     1 | View      | Monitor / read           |
-|     2 | Operate   | + Control                |
-|     3 | Plan      | + Policies, scheduling   |
-|     4 | Configure | + Create, update, delete |
+| Level | Access       | Permissions              |
+|-------|--------------|--------------------------|
+|     1 | 👁️ View      | Monitor / read           |
+|     2 | 👉 Operate   | + Control                |
+|     3 | 💡 Plan      | + Policies, scheduling   |
+|     4 | 🔧 Configure | + Create, update, delete |
 
 [Resource] is the `type` part of the URI:
 

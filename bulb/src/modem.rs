@@ -16,6 +16,7 @@ use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
+use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
 
@@ -29,6 +30,12 @@ pub struct Modem {
     pub enabled: bool,
 }
 
+impl fmt::Display for Modem {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", HtmlStr::new(&self.name))
+    }
+}
+
 impl Card for Modem {
     const TNAME: &'static str = "Modem";
     const ENAME: &'static str = "🖀 Modem";
@@ -38,15 +45,10 @@ impl Card for Modem {
         self.name.to_lowercase().contains(tx)
     }
 
-    fn name(&self) -> &str {
-        &self.name
-    }
-
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let name = HtmlStr::new(&self.name);
         let disabled = disabled_attr(self.enabled);
-        format!("<span{disabled}>{name}</span>")
+        format!("<span{disabled}>{self}</span>")
     }
 
     /// Convert to edit HTML

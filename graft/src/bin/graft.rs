@@ -287,6 +287,7 @@ async fn main() -> tide::Result<()> {
     add_routes!(route, "comm_link");
     add_routes!(route, "controller");
     add_routes!(route, "modem");
+    route.at("/permission").get(|req| list_objects("permission", req));
     app.listen("127.0.0.1:3737").await?;
     Ok(())
 }

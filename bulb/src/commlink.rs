@@ -17,6 +17,7 @@ use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
+use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
 
@@ -29,6 +30,12 @@ pub struct CommLink {
     pub comm_config: String,
     pub poll_enabled: bool,
     pub connected: bool,
+}
+
+impl fmt::Display for CommLink {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", HtmlStr::new(&self.name))
+    }
 }
 
 impl CommLink {
@@ -64,20 +71,15 @@ impl Card for CommLink {
             || self.connected(true).contains(tx)
     }
 
-    fn name(&self) -> &str {
-        &self.name
-    }
-
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
         let description = HtmlStr::new(&self.description).with_len(10);
         let connected = self.connected(false);
-        let name = HtmlStr::new(&self.name);
         let disabled = disabled_attr(self.poll_enabled);
         format!(
             "<span{disabled}>{description}…</span>\
             <span>{connected}</span>\
-            <span class='{NAME}'>{name}</span>"
+            <span class='{NAME}'>{self}</span>"
         )
     }
 

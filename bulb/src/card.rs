@@ -10,11 +10,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::util::{Dom, HtmlStr};
+use crate::util::Dom;
 use crate::Result;
 use serde::de::DeserializeOwned;
 use serde_json::map::Map;
 use serde_json::Value;
+use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
 
@@ -44,7 +45,7 @@ pub enum CardType {
 }
 
 /// A card can be displayed in a card list
-pub trait Card: DeserializeOwned {
+pub trait Card: fmt::Display + DeserializeOwned {
     const TNAME: &'static str;
     const ENAME: &'static str;
     const UNAME: &'static str;
@@ -113,12 +114,11 @@ pub trait Card: DeserializeOwned {
     fn build_status_form(json: &JsValue) -> Result<String> {
         let ename = Self::ENAME;
         let val = Self::new(json)?;
-        let name = HtmlStr::new(val.name());
         // could use 🌐 instead
         Ok(format!(
             "<div class='row'>\
               <div class='{TITLE}'>{ename}</div>\
-              <span class='{NAME}'>{name}</span>\
+              <span class='{NAME}'>{val}</span>\
             </div>\
             {}\
             <div class='row'>\
@@ -134,11 +134,10 @@ pub trait Card: DeserializeOwned {
     fn build_edit_form(json: &JsValue) -> Result<String> {
         let ename = Self::ENAME;
         let val = Self::new(json)?;
-        let name = HtmlStr::new(val.name());
         Ok(format!(
             "<div class='row'>\
               <div class='{TITLE}'>{ename}</div>\
-              <span class='{NAME}'>{name}</span>\
+              <span class='{NAME}'>{val}</span>\
             </div>\
             {}\
             <div class='row'>\
@@ -152,9 +151,6 @@ pub trait Card: DeserializeOwned {
 
     /// Get changed fields from Edit form
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String>;
-
-    /// Get the name
-    fn name(&self) -> &str;
 
     /// Check if a search string matches
     fn is_match(&self, _tx: &str) -> bool {
@@ -185,9 +181,8 @@ pub trait Card: DeserializeOwned {
         }
         // TODO: split this into async calls so it can be cancelled
         for ob in obs.iter().filter(|ob| ob.is_match(tx)) {
-            let name = HtmlStr::new(ob.name());
             html.push_str(&format!(
-                "<li id='{tname}_{name}' name='{name}' class='card'>"
+                "<li id='{tname}_{ob}' name='{ob}' class='card'>"
             ));
             html.push_str(&ob.to_html_compact());
             html.push_str("</li>");
