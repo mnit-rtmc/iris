@@ -40,9 +40,9 @@ A `POST iris/api/login` request is needed to authenticate a session, by
 submitting `username` and `password` form values.  This returns a session cookie
 which can be used for subsequent restricted requests.
 
-A `GET iris/api/access` request returns a JSON array of `permission` records
+A `GET iris/api/access` request returns a JSON array of [permission] records
 associated with the authenticated user's role.  This endpoint is required for
-roles which do not have any access to the `permission`, `role` and `user` types.
+roles which do not have any access to the [permission], [role] and [user] types.
 
 ## Restricted Resources
 
@@ -138,3 +138,8 @@ compact cards*.
 ## ETags and Caching
 
 Consider using Etags to avoid mid-air collisions
+
+
+[permission]: #permission
+[role]: #role
+[user]: #user
