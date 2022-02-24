@@ -23,4 +23,4 @@ whoami = "1"
 [dependencies.env_logger]
 version = "0.9"
 default-features = false
-features = ["atty", "humantime"]
+features = ["atty"]
