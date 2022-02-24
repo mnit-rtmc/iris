@@ -62,27 +62,33 @@ A `GET` request of all objects of a `{type}` contains only the *minimal*
 attributes.  Those are attributes needed for *searching* and *displaying
 compact cards*.
 
-Additional *full* attributes are also included in a single object response,
-(shown in parentheses below).
-
 ## Resource Types
 
+*Full* attributes (in parentheses) are only included in single object responses.
+
 ### `alarm`
+
 | Access      | Attributes                         |
 |-------------|------------------------------------|
 | Read Only   | `name` `state` (`trigger_time`)    |
 | 4 Configure | `description` `controller` (`pin`) |
 
 ### `cabinet_style`
+
 | Access      | Attributes |
 |-------------|------------|
 | Read Only   | `name`     |
-| 4 Configure | (`police_panel_pin_1` `police_panel_pin_2` `watchdog_reset_pin_1` `watchdog_reset_pin_2` `dip`) |
+| 4 Configure | (`police_panel_pin_1`) (`police_panel_pin_2`) (`watchdog_reset_pin_1`) (`watchdog_reset_pin_2`) (`dip`) |
 
-| `comm_config` | Plan (3) | Configure (4)        |
-|---------------|----------|----------------------|
-| Minimal       |          | `name` `description` |
-| Full          | `timeout_ms` `idle_disconnect_sec` `no_response_disconnect_sec` | `protocol` `modem` `poll_period_sec` `long_poll_period_sec` |
+### `comm_config`
+
+| Access      | Attributes |
+|-------------|------------|
+| Read Only   | `name`     |
+| 3 Plan      | (`timeout_ms` `idle_disconnect_sec` `no_response_disconnect_sec`)
+| 4 Configure | `description` (`protocol` `modem` `poll_period_sec` `long_poll_period_sec`)
+
+### `comm_link`
 
 | `comm_link` | View (1)    | Plan (3)       | Configure (4) |
 |-------------|-------------|----------------|---------------|
