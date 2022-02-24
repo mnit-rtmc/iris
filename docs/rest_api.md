@@ -64,76 +64,76 @@ compact cards*.
 
 ## Resource Types
 
-*Full* attributes (in parentheses) are only included in single object responses.
+*Full* attributes {`in brackets`} are only included in single object responses.
 
 ### `alarm`
 
-| Access    | Attributes                           |
-|-----------|--------------------------------------|
-| Read Only | `name`, `state`, (`trigger_time`)    |
-| Configure | `description`, `controller`, (`pin`) |
+| Access    | Attributes                       |
+|-----------|----------------------------------|
+| Read Only | name, state, {`trigger_time`}    |
+| Configure | description, controller, {`pin`} |
 
 ### `cabinet_style`
 
 | Access    | Attributes |
 |-----------|------------|
-| Read Only | `name`     |
-| Configure | (`police_panel_pin_1`), (`police_panel_pin_2`), (`watchdog_reset_pin_1`), (`watchdog_reset_pin_2`), (`dip`) |
+| Read Only | name       |
+| Configure | {`police_panel_pin_1`}, {`police_panel_pin_2`}, {`watchdog_reset_pin_1`}, {`watchdog_reset_pin_2`}, {`dip`} |
 
 ### `comm_config`
 
 | Access    | Attributes |
 |-----------|------------|
-| Read Only | `name`     |
-| Plan      | (`timeout_ms`), (`idle_disconnect_sec`), (`no_response_disconnect_sec`) |
-| Configure | `description`, (`protocol`), (`modem`), (`poll_period_sec`), (`long_poll_period_sec`) |
+| Read Only | name       |
+| Plan      | {`timeout_ms`}, {`idle_disconnect_sec`}, {`no_response_disconnect_sec`} |
+| Configure | description, {`protocol`}, {`modem`}, {`poll_period_sec`}, {`long_poll_period_sec`} |
 
 ### `comm_link`
 
-| Access    | Attributes                          |
-|-----------|-------------------------------------|
-| Read Only | `name`, `connected`                 |
-| Plan      | `poll_enabled`                      |
-| Configure | `description`, `uri`, `comm_config` |
+| Access    | Attributes                     |
+|-----------|--------------------------------|
+| Read Only | name, connected                |
+| Plan      | poll\_enabled                  |
+| Configure | description, uri, comm\_config |
 
 ### `controller`
 
-| Access    | Attributes                                                     |
-|-----------|----------------------------------------------------------------|
-| Read Only | `name`, `location`, `version`, `fail_time`, (`geo_loc`)        |
-| Operate   | (`download`), (`device_req`)                                   |
-| Plan      | `condition`                                                    |
-| Configure | `comm_link`, `drop_id`, `cabinet_style`, `notes`, (`password`) |
+| Access    | Attributes                                                |
+|-----------|-----------------------------------------------------------|
+| Read Only | name, location, version, fail\_time, {`geo_loc`}          |
+| Operate   | {`download`}, {`device_req`}                              |
+| Plan      | condition                                                 |
+| Configure | comm\_link, drop\_id, cabinet\_style, notes, {`password`} |
 
 ### `modem`
 
-| Access    | Attributes                |
-|-----------|---------------------------|
-| Read Only | `name`                    |
-| Plan      | `enabled`, (`timeout_ms`) |
-| Configure | (`uri`), (`config`)       |
+| Access    | Attributes              |
+|-----------|-------------------------|
+| Read Only | name                    |
+| Plan      | enabled, {`timeout_ms`} |
+| Configure | {`uri`}, {`config`}     |
 
 ### `permission`
 
-| Access    | Attributes                                    |
-|-----------|-----------------------------------------------|
-| Read Only | `id`                                          |
-| Configure | `role`, `resource_n`, (`batch`), (`access_n`) |
+| Access    | Attributes                                 |
+|-----------|--------------------------------------------|
+| Read Only | id                                         |
+| Configure | role, resource\_n, {`batch`}, {`access_n`} |
 
 ### `role`
 
 | Access    | Attributes |
 |-----------|------------|
-| Read Only | `name`     |
-| Plan      | `enabled`  |
+| Read Only | name       |
+| Plan      | enabled    |
 
 ### `user`
 
-| Access    | Attributes          |
-|-----------|---------------------|
-| Read Only | `name`              |
-| Plan      | `enabled`           |
-| Configure | `full_name`, `role` |
+| Access    | Attributes       |
+|-----------|------------------|
+| Read Only | name             |
+| Plan      | enabled          |
+| Configure | full\_name, role |
 
 ## ETags and Caching
 
