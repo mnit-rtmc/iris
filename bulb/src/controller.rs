@@ -11,8 +11,9 @@
 // GNU General Public License for more details.
 //
 use crate::card::{disabled_attr, Card, NAME};
+use crate::start::{conditions_html, get_condition};
 use crate::util::{Dom, HtmlStr, OptVal};
-use crate::{conditions_html, get_condition, Result};
+use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
