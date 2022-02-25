@@ -393,11 +393,11 @@ parking_admin	t
 parking_tab	t
 \.
 
-CREATE TABLE iris.sonar_type (
-	name VARCHAR(16) PRIMARY KEY
+CREATE TABLE iris.resource_type (
+    name VARCHAR(16) PRIMARY KEY
 );
 
-COPY iris.sonar_type (name) FROM stdin;
+COPY iris.resource_type (name) FROM stdin;
 action_plan
 alarm
 alert_config
@@ -481,7 +481,7 @@ word
 CREATE TABLE iris.permission (
     id SERIAL PRIMARY KEY,
     role VARCHAR(15) NOT NULL REFERENCES iris.role ON DELETE CASCADE,
-    resource_n VARCHAR(16) NOT NULL REFERENCES iris.sonar_type,
+    resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
     batch VARCHAR(16),
     access_n INTEGER NOT NULL,
     CONSTRAINT permission_access_n CHECK (access_n >= 1 AND access_n <= 4)
@@ -502,13 +502,13 @@ CREATE TRIGGER permission_notify_trig
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE TABLE iris.privilege (
-	name VARCHAR(8) PRIMARY KEY,
-	capability VARCHAR(16) NOT NULL REFERENCES iris.capability,
-	type_n VARCHAR(16) NOT NULL REFERENCES iris.sonar_type,
-	obj_n VARCHAR(16) DEFAULT ''::VARCHAR NOT NULL,
-	group_n VARCHAR(16) DEFAULT ''::VARCHAR NOT NULL,
-	attr_n VARCHAR(16) DEFAULT ''::VARCHAR NOT NULL,
-	write BOOLEAN DEFAULT false NOT NULL
+    name VARCHAR(8) PRIMARY KEY,
+    capability VARCHAR(16) NOT NULL REFERENCES iris.capability,
+    type_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
+    obj_n VARCHAR(16) DEFAULT ''::VARCHAR NOT NULL,
+    group_n VARCHAR(16) DEFAULT ''::VARCHAR NOT NULL,
+    attr_n VARCHAR(16) DEFAULT ''::VARCHAR NOT NULL,
+    write BOOLEAN DEFAULT false NOT NULL
 );
 
 COPY iris.privilege (name, capability, type_n, attr_n, write) FROM stdin;

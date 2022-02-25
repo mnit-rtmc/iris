@@ -30,13 +30,30 @@ CREATE TRIGGER dms_notify_trig
     AFTER UPDATE ON iris._dms
     FOR EACH ROW EXECUTE PROCEDURE iris.dms_notify();
 
+-- Replace sonar_type with resource_type
+CREATE TABLE iris.resource_type (
+    name VARCHAR(16) PRIMARY KEY
+);
+
+INSERT INTO iris.resource_type SELECT name FROM iris.sonar_type;
+
+ALTER TABLE iris.privilege
+    DROP CONSTRAINT IF EXISTS _sonar_type_fkey;
+ALTER TABLE iris.privilege
+    DROP CONSTRAINT IF EXISTS privilege_type_n_fkey;
+ALTER TABLE iris.privilege
+    ADD CONSTRAINT privilege_type_n_fkey
+    FOREIGN KEY (type_n) REFERENCES iris.resource_type;
+
+DROP TABLE iris.sonar_type;
+
 -- Add permission table
-INSERT INTO iris.sonar_type (name) VALUES ('permission');
+INSERT INTO iris.resource_type (name) VALUES ('permission');
 
 CREATE TABLE iris.permission (
     id SERIAL PRIMARY KEY,
     role VARCHAR(15) NOT NULL REFERENCES iris.role ON DELETE CASCADE,
-    resource_n VARCHAR(16) NOT NULL REFERENCES iris.sonar_type,
+    resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
     batch VARCHAR(16),
     access_n INTEGER NOT NULL,
     CONSTRAINT permission_access_n CHECK (access_n >= 1 AND access_n <= 4)

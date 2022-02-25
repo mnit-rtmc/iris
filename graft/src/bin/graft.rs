@@ -254,6 +254,11 @@ impl State {
         }
         Err(SonarError::Forbidden)
     }
+
+    /// Get permission by ID
+    fn permission(&self, id: u32) -> Option<&Permission> {
+        self.permissions.iter().find(|p| p.id == id)
+    }
 }
 
 /// Check for read access to a resource
@@ -288,6 +293,7 @@ async fn main() -> tide::Result<()> {
     add_routes!(route, "controller");
     add_routes!(route, "modem");
     route.at("/permission").get(|req| list_objects("permission", req));
+    route.at("/permission/:id").get(get_permission);
     app.listen("127.0.0.1:3737").await?;
     Ok(())
 }
@@ -360,6 +366,25 @@ async fn get_access(req: Request<State>) -> tide::Result {
         .body(body)
         .content_type("application/json")
         .build())
+}
+
+/// `GET` one permission record
+async fn get_permission(req: Request<State>) -> tide::Result {
+    log::info!("GET {}", req.url());
+    resp!(check_read("permission", &req));
+    let body = resp!(get_perm(&req));
+    Ok(Response::builder(StatusCode::Ok)
+        .body(body)
+        .content_type("application/json")
+        .build())
+}
+
+/// Get permission record
+fn get_perm(req: &Request<State>) -> Result<String> {
+    let id = req.param("id").map_err(|_e| SonarError::InvalidName)?;
+    let id = id.parse::<u32>().map_err(|_e| SonarError::InvalidName)?;
+    let perm = req.state().permission(id).ok_or(SonarError::InvalidName)?;
+    Ok(serde_json::to_value(perm)?.to_string())
 }
 
 /// IRIS host name

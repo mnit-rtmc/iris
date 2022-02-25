@@ -12,6 +12,7 @@
 //
 use crate::card::{Card, NAME};
 use crate::util::HtmlStr;
+use crate::start::resource_types_html;
 use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -36,38 +37,87 @@ impl fmt::Display for Permission {
     }
 }
 
+/// Get access to display
+fn access_str(access_n: u32, long: bool) -> &'static str {
+    match (access_n, long) {
+        (1, false) => "👁️",
+        (1, true) => "👁️ view",
+        (2, false) => "👉",
+        (2, true) => "👉 operate",
+        (3, false) => "💡",
+        (3, true) => "💡 plan",
+        (4, false) => "🔧",
+        (4, true) => "🔧 configure",
+        _ => "❓",
+    }
+}
+
+/// Create an HTML `select` element of access
+fn access_html(selected: u32) -> String {
+    let mut html = String::new();
+    html.push_str("<select id='edit_access'>");
+    for access_n in 1..=4 {
+        html.push_str("<option value='");
+        html.push_str(&access_n.to_string());
+        html.push('\'');
+        if selected == access_n {
+            html.push_str(" selected");
+        }
+        html.push('>');
+        html.push_str(access_str(access_n, true));
+        html.push_str("</option>");
+    }
+    html.push_str("</select>");
+    html
+}
+
 impl Card for Permission {
     const TNAME: &'static str = "Permission";
     const ENAME: &'static str = "🗝️ Permission";
     const UNAME: &'static str = "permission";
 
     fn is_match(&self, tx: &str) -> bool {
-        self.id.to_string().contains(tx) |
-        self.role.to_lowercase().contains(tx) |
-        self.resource_n.contains(tx)
+        self.id.to_string().contains(tx)
+            | access_str(self.access_n, true).contains(tx)
+            | self.role.to_lowercase().contains(tx)
+            | self.resource_n.contains(tx)
     }
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
+        let access = access_str(self.access_n, false);
         let role = HtmlStr::new(&self.role).with_len(4);
-        let resource = HtmlStr::new(&self.resource_n).with_len(9);
-        let emo = match self.access_n {
-            1 => "👁️",
-            2 => "👉",
-            3 => "💡",
-            4 => "🔧",
-            _ => "?",
-        };
+        let resource = HtmlStr::new(&self.resource_n).with_len(8);
         format!(
-            "<span>{role}{emo}{resource}</span>\
+            "<span>{access}{role}…{resource}</span>\
             <span class='{NAME}'>{self}</span>"
         )
     }
 
     /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
+        let role = HtmlStr::new(&self.role);
+        let resource = resource_types_html(&self.resource_n);
+        let batch = HtmlStr::new(self.batch.as_ref());
+        let access = access_html(self.access_n);
         format!(
             "<div class='row'>\
+               <label for='edit_role'>Role</label>\
+               <input id='edit_role' maxlength='15' size='15' \
+                      value='{role}'/>\
+            </div>\
+            <div class='row'>\
+              <label for='edit_resource'>Resource</label>\
+              {resource}\
+            </div>\
+            <div class='row'>\
+               <label for='edit_batch'>Batch</label>\
+               <input id='edit_batch' maxlength='16' size='16' \
+                      value='{batch}'/>\
+            </div>\
+            <div class='row'>\
+              <label for='edit_access'>Access</label>\
+              {access}\
             </div>"
         )
     }

@@ -283,6 +283,17 @@ const CONDITION_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Resource type LUT resource
+const RESOURCE_TYPE_RES: Resource = Resource::Simple(
+    "resource_type",
+    Listen::All("resource_type"), // no notifications for LUT
+    "SELECT to_json(r.name)::text FROM (
+      SELECT name \
+      FROM iris.resource_type \
+      ORDER BY name\
+    ) r",
+);
+
 /// Controller resource
 const CONTROLLER_RES: Resource = Resource::Simple(
     "api/controller",
@@ -453,6 +464,7 @@ const ALL: &[Resource] = &[
     COMM_CONFIG_RES,
     COMM_LINK_RES,
     CONDITION_RES,
+    RESOURCE_TYPE_RES,
     CONTROLLER_RES,
     MODEM_RES,
     PERMISSION_RES,

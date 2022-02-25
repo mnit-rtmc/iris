@@ -67,6 +67,8 @@ struct State {
     protocols: Vec<Protocol>,
     /// Controller conditions
     conditions: Vec<Condition>,
+    /// Resource types
+    resource_types: Vec<String>,
     /// Comm configs
     comm_configs: Vec<CommConfig>,
     /// Deferred actions (with tick number)
@@ -90,11 +92,13 @@ impl State {
         mut access: Vec<Permission>,
         mut protocols: Vec<Protocol>,
         mut conditions: Vec<Condition>,
+        mut resource_types: Vec<String>,
         mut comm_configs: Vec<CommConfig>,
     ) {
         self.access.append(&mut access);
         self.protocols.append(&mut protocols);
         self.conditions.append(&mut conditions);
+        self.resource_types.append(&mut resource_types);
         self.comm_configs.append(&mut comm_configs);
     }
 
@@ -492,11 +496,13 @@ pub async fn start() -> Result<()> {
     let protocols = json.into_serde::<Vec<Protocol>>().unwrap_throw();
     let json = fetch_get("/iris/condition").await?;
     let conditions = json.into_serde::<Vec<Condition>>().unwrap_throw();
+    let json = fetch_get("/iris/resource_type").await?;
+    let resource_types = json.into_serde::<Vec<String>>().unwrap_throw();
     let json = fetch_get(&format!("/iris/api/{}", CommConfig::UNAME)).await?;
     let comm_configs = json.into_serde::<Vec<CommConfig>>().unwrap_throw();
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        state.initialize(access, protocols, conditions, comm_configs);
+        state.initialize(access, protocols, conditions, resource_types, comm_configs);
     });
 
     let sb_type: HtmlSelectElement = doc.elem("sb_type")?;
@@ -592,6 +598,26 @@ pub fn conditions_html(selected: u32) -> String {
             }
             html.push('>');
             html.push_str(&condition.description);
+            html.push_str("</option>");
+        }
+        html.push_str("</select>");
+        html
+    })
+}
+
+/// Create an HTML `select` element of resource types
+pub fn resource_types_html(selected: &str) -> String {
+    STATE.with(|rc| {
+        let state = rc.borrow();
+        let mut html = String::new();
+        html.push_str("<select id='edit_resource'>");
+        for resource_type in &state.resource_types {
+            html.push_str("<option");
+            if selected == resource_type {
+                html.push_str(" selected");
+            }
+            html.push('>');
+            html.push_str(resource_type);
             html.push_str("</option>");
         }
         html.push_str("</select>");

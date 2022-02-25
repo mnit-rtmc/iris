@@ -6,7 +6,8 @@ These are rough notes about the IRIS web API.
 
 Data requests are split into *public* and *restricted* paths:
 
-- `iris/`: Public data (no authentication required)
+- `iris/`: Public data (no authentication)
+- `iris/img/`: Public sign images (no authentication)
 - `iris/api/`: Restricted data (needs session authentication)
 - `iris/api/login`: Authentication endpoint
 - `iris/api/access`: User's access permissions
@@ -16,8 +17,6 @@ Data requests are split into *public* and *restricted* paths:
 These resources are JSON arrays, fetched using http `GET` requests.
 
 - `iris/camera_pub`: Camera locations and configuration
-- `iris/comm_protocol`: Protocol LUT (may only change on IRIS updates)
-- `iris/condition`: Condition LUT (may only change on IRIS updates)
 - `iris/detector`: Vehicle detectors
 - `iris/dms_message`: Current DMS messages and status
 - `iris/dms_pub`: DMS locations and configuration
@@ -32,7 +31,19 @@ These resources are JSON arrays, fetched using http `GET` requests.
 - `iris/TPIMS_archive`: Truck parking archive data
 - `iris/TPIMS_dynamic`: Truck parking dynamic data
 - `iris/TPIMS_static`: Truck parking static data
-- `iris/img/`: Images (gif) of active sign messages in `sign_message`
+
+### Lookup Tables
+
+These resources are static, and may only change on IRIS updates:
+
+- `iris/comm_protocol`: Communication protocols
+- `iris/condition`: Controller conditions
+- `iris/resource_type`: [Resource types] available in `iris/api/`
+
+### Sign Images
+
+The resources in `iris/img/` are GIF images of active sign messages from
+`sign_message`.
 
 ## Login and Access
 
@@ -98,12 +109,12 @@ compact cards*.
 
 ### `controller`
 
-| Access       | Attributes                                                |
-|--------------|-----------------------------------------------------------|
-| Read Only    | name, location, version, fail\_time, {`geo_loc`}          |
-| 👉 Operate   | {`download`}, {`device_req`}                              |
-| 💡 Plan      | condition                                                 |
-| 🔧 Configure | comm\_link, drop\_id, cabinet\_style, notes, {`password`} |
+| Access       | Attributes                                         |
+|--------------|----------------------------------------------------|
+| Read Only    | name, location, version, fail\_time, {`geo_loc`}   |
+| 👉 Operate   | {`download`}, {`device_req`}                       |
+| 💡 Plan      | condition, notes                                   |
+| 🔧 Configure | comm\_link, drop\_id, cabinet\_style, {`password`} |
 
 ### `modem`
 
@@ -141,5 +152,6 @@ Consider using Etags to avoid mid-air collisions
 
 
 [permission]: #permission
+[resource types]: #resource-types
 [role]: #role
 [user]: #user
