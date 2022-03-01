@@ -19,6 +19,8 @@ use async_std::path::PathBuf;
 use chrono::{Local, TimeZone};
 use convert_case::{Case, Casing};
 use graft::sonar::{Connection, Result, SonarError};
+use graft::state::Permission;
+use graft::state::State as TokioState;
 use percent_encoding::percent_decode_str;
 use rand::Rng;
 use serde::de::DeserializeOwned;
@@ -147,16 +149,6 @@ macro_rules! add_routes {
     };
 }
 
-/// Permission
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Permission {
-    pub id: u32,
-    pub role: String,
-    pub resource_n: String,
-    pub batch: Option<String>,
-    pub access_n: u32,
-}
-
 /// Role
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Role {
@@ -183,6 +175,7 @@ async fn read_file<T: DeserializeOwned>(name: &str) -> Result<Vec<T>> {
 /// Application state
 #[derive(Clone)]
 pub struct State {
+    state: TokioState,
     roles: Vec<Role>,
     permissions: Vec<Permission>,
     users: Vec<User>,
@@ -191,10 +184,12 @@ pub struct State {
 impl State {
     /// Create a new application state
     async fn new() -> Result<Self> {
+        let state = TokioState::new()?;
         let roles = read_file::<Role>("role").await?;
         let permissions = read_file::<Permission>("permission").await?;
         let users = read_file::<User>("user").await?;
         Ok(State {
+            state,
             roles,
             permissions,
             users,
@@ -256,8 +251,8 @@ impl State {
     }
 
     /// Get permission by ID
-    fn permission(&self, id: u32) -> Option<&Permission> {
-        self.permissions.iter().find(|p| p.id == id)
+    async fn permission(&self, id: i32) -> Result<Permission> {
+        self.state.permission(id).await
     }
 }
 
@@ -372,7 +367,7 @@ async fn get_access(req: Request<State>) -> tide::Result {
 async fn get_permission(req: Request<State>) -> tide::Result {
     log::info!("GET {}", req.url());
     resp!(check_read("permission", &req));
-    let body = resp!(get_perm(&req));
+    let body = resp!(get_perm(&req).await);
     Ok(Response::builder(StatusCode::Ok)
         .body(body)
         .content_type("application/json")
@@ -380,10 +375,10 @@ async fn get_permission(req: Request<State>) -> tide::Result {
 }
 
 /// Get permission record
-fn get_perm(req: &Request<State>) -> Result<String> {
+async fn get_perm(req: &Request<State>) -> Result<String> {
     let id = req.param("id").map_err(|_e| SonarError::InvalidName)?;
-    let id = id.parse::<u32>().map_err(|_e| SonarError::InvalidName)?;
-    let perm = req.state().permission(id).ok_or(SonarError::InvalidName)?;
+    let id = id.parse::<i32>().map_err(|_e| SonarError::InvalidName)?;
+    let perm = req.state().permission(id).await?;
     Ok(serde_json::to_value(perm)?.to_string())
 }
 

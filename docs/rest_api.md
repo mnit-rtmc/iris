@@ -47,9 +47,9 @@ The resources in `iris/img/` are GIF images of active sign messages from
 
 ## Login and Access
 
-A `POST iris/api/login` request is needed to authenticate a session, by
-submitting `username` and `password` form values.  This returns a session cookie
-which can be used for subsequent restricted requests.
+Authentication uses a `POST iris/api/login` request with `username` and
+`password` form values.  This returns a session cookie which can be used for
+subsequent restricted requests.
 
 A `GET iris/api/access` request returns a JSON array of [permission] records
 associated with the authenticated user's role.  This endpoint is required for
@@ -57,8 +57,7 @@ roles which do not have any access to the [permission], [role] and [user] types.
 
 ## Restricted Resources
 
-There are many restricted resource types, which can be accessed using standard
-http methods:
+Restricted resources can be accessed using standard http methods:
 
 - `GET iris/api/{type}`: Get all objects of `{type}` (minimal), as a JSON array
 - `GET iris/api/{type}/{name}`: Get one full object as JSON

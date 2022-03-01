@@ -16,6 +16,7 @@ use async_std::io;
 use async_std::net::{TcpStream, ToSocketAddrs};
 use async_std::prelude::*;
 use async_tls::{client::TlsStream, TlsConnector};
+use bb8_postgres::tokio_postgres;
 use rustls::{
     Certificate, ClientConfig, RootCertStore, ServerCertVerified,
     ServerCertVerifier, TLSError,
@@ -35,14 +36,6 @@ pub enum SonarError {
     /// Unexpected message received
     #[error("unexpected message")]
     UnexpectedMessage,
-
-    /// I/O error
-    #[error("I/O {0}")]
-    IO(#[from] std::io::Error),
-
-    /// Serde JSON error
-    #[error("Serialization error")]
-    SerdeJson(#[from] serde_json::Error),
 
     /// Invalid JSON error
     #[error("Invalid JSON")]
@@ -71,6 +64,26 @@ pub enum SonarError {
     /// Unauthorized
     #[error("unauthorized")]
     Unauthorized,
+
+    /// I/O error
+    #[error("I/O {0}")]
+    IO(#[from] std::io::Error),
+
+    /// Serde JSON error
+    #[error("Serialization error")]
+    SerdeJson(#[from] serde_json::Error),
+
+    /// Postgres error
+    #[error("Postgres {0}")]
+    TokioPostgres(#[from] tokio_postgres::Error),
+
+    /// BB8 error
+    #[error("BB8 {0}")]
+    Bb8(#[from] bb8::RunError<tokio_postgres::Error>),
+
+    /// Flume receive error
+    #[error("Flume {0}")]
+    FlumeRecv(#[from] flume::RecvError),
 }
 
 /// Sonar result
