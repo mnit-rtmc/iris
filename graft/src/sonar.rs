@@ -16,7 +16,6 @@ use async_std::io;
 use async_std::net::{TcpStream, ToSocketAddrs};
 use async_std::prelude::*;
 use async_tls::{client::TlsStream, TlsConnector};
-use bb8_postgres::tokio_postgres;
 use rustls::{
     Certificate, ClientConfig, RootCertStore, ServerCertVerified,
     ServerCertVerifier, TLSError,
@@ -75,15 +74,11 @@ pub enum SonarError {
 
     /// Postgres error
     #[error("Postgres {0}")]
-    TokioPostgres(#[from] tokio_postgres::Error),
+    Postgres(#[from] postgres::Error),
 
-    /// BB8 error
-    #[error("BB8 {0}")]
-    Bb8(#[from] bb8::RunError<tokio_postgres::Error>),
-
-    /// Flume receive error
-    #[error("Flume {0}")]
-    FlumeRecv(#[from] flume::RecvError),
+    /// R2D2 error
+    #[error("R2D2 {0}")]
+    R2d2(#[from] r2d2::Error),
 }
 
 /// Sonar result

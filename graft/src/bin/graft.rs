@@ -16,11 +16,12 @@
 
 use async_std::fs;
 use async_std::path::PathBuf;
+use async_std::task::spawn_blocking;
 use chrono::{Local, TimeZone};
 use convert_case::{Case, Casing};
 use graft::sonar::{Connection, Result, SonarError};
 use graft::state::Permission;
-use graft::state::State as TokioState;
+use graft::state::State as PostgresState;
 use percent_encoding::percent_decode_str;
 use rand::Rng;
 use serde::de::DeserializeOwned;
@@ -175,7 +176,7 @@ async fn read_file<T: DeserializeOwned>(name: &str) -> Result<Vec<T>> {
 /// Application state
 #[derive(Clone)]
 pub struct State {
-    state: TokioState,
+    state: PostgresState,
     roles: Vec<Role>,
     permissions: Vec<Permission>,
     users: Vec<User>,
@@ -184,7 +185,7 @@ pub struct State {
 impl State {
     /// Create a new application state
     async fn new() -> Result<Self> {
-        let state = TokioState::new()?;
+        let state = PostgresState::new()?;
         let roles = read_file::<Role>("role").await?;
         let permissions = read_file::<Permission>("permission").await?;
         let users = read_file::<User>("user").await?;
@@ -196,19 +197,9 @@ impl State {
         })
     }
 
-    /// Get access permissions as JSON
-    fn get_access(&self, user: &str) -> Result<Value> {
-        if let Some(user) = self.user(user) {
-            if let Some(role) = self.role(&user.role) {
-                let permissions: Vec<&Permission> = self
-                    .permissions
-                    .iter()
-                    .filter(move |p| role.name == p.role)
-                    .collect();
-                return Ok(serde_json::to_value(&permissions)?);
-            }
-        }
-        Err(SonarError::Forbidden)
+    /// Get access permissions
+    fn access(&self, user: &str) -> Result<Vec<Permission>> {
+        self.state.access(user)
     }
 
     /// Get permissions for a role / resource
@@ -251,8 +242,8 @@ impl State {
     }
 
     /// Get permission by ID
-    async fn permission(&self, id: i32) -> Result<Permission> {
-        self.state.permission(id).await
+    fn permission(&self, id: i32) -> Result<Permission> {
+        self.state.permission(id)
     }
 }
 
@@ -280,7 +271,7 @@ async fn main() -> tide::Result<()> {
     let mut route = app.at("/iris/api");
     route.at("/login").get(get_login);
     route.at("/login").post(post_login);
-    route.at("/access").get(get_access);
+    route.at("/access").get(access_get);
     add_routes!(route, "alarm");
     add_routes!(route, "cabinet_style");
     add_routes!(route, "comm_config");
@@ -288,7 +279,7 @@ async fn main() -> tide::Result<()> {
     add_routes!(route, "controller");
     add_routes!(route, "modem");
     route.at("/permission").get(|req| list_objects("permission", req));
-    route.at("/permission/:id").get(get_permission);
+    route.at("/permission/:id").get(permission_get);
     app.listen("127.0.0.1:3737").await?;
     Ok(())
 }
@@ -350,35 +341,41 @@ async fn post_login(mut req: Request<State>) -> tide::Result {
         .build())
 }
 
-/// `GET` access
-async fn get_access(req: Request<State>) -> tide::Result {
+/// `GET` access permissions
+async fn access_get(req: Request<State>) -> tide::Result {
     log::info!("GET {}", req.url());
-    let session = req.session();
-    let auth: AuthMap =
-        resp!(session.get("auth").ok_or(SonarError::Unauthorized));
-    let body = resp!(req.state().get_access(&auth.username));
+    let body = resp!(access_get_json(req).await);
     Ok(Response::builder(StatusCode::Ok)
         .body(body)
         .content_type("application/json")
         .build())
+}
+
+/// `GET` access permissions as JSON
+async fn access_get_json(req: Request<State>) -> Result<String> {
+    let session = req.session();
+    let auth: AuthMap = session.get("auth").ok_or(SonarError::Unauthorized)?;
+    let perms =
+        spawn_blocking(move || req.state().access(&auth.username)).await?;
+    Ok(serde_json::to_value(perms)?.to_string())
 }
 
 /// `GET` one permission record
-async fn get_permission(req: Request<State>) -> tide::Result {
+async fn permission_get(req: Request<State>) -> tide::Result {
     log::info!("GET {}", req.url());
-    resp!(check_read("permission", &req));
-    let body = resp!(get_perm(&req).await);
+    let body = resp!(permission_get_json(req).await);
     Ok(Response::builder(StatusCode::Ok)
         .body(body)
         .content_type("application/json")
         .build())
 }
 
-/// Get permission record
-async fn get_perm(req: &Request<State>) -> Result<String> {
+/// Get permission record as JSON
+async fn permission_get_json(req: Request<State>) -> Result<String> {
+    check_read("permission", &req)?;
     let id = req.param("id").map_err(|_e| SonarError::InvalidName)?;
     let id = id.parse::<i32>().map_err(|_e| SonarError::InvalidName)?;
-    let perm = req.state().permission(id).await?;
+    let perm = spawn_blocking(move || req.state().permission(id)).await?;
     Ok(serde_json::to_value(perm)?.to_string())
 }
 

@@ -13,12 +13,18 @@
 // GNU General Public License for more details.
 //
 use crate::sonar::Result;
-use bb8::Pool;
-use bb8_postgres::tokio_postgres::NoTls;
-use bb8_postgres::PostgresConnectionManager;
-use flume::{Receiver, Sender};
+use postgres::row::Row;
+use postgres::NoTls;
+use r2d2::Pool;
+use r2d2_postgres::PostgresConnectionManager;
 use serde::{Deserialize, Serialize};
-use tokio::runtime::{Handle, Runtime};
+
+/// Role
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Role {
+    pub name: String,
+    pub enabled: bool,
+}
 
 /// Permission
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -30,75 +36,82 @@ pub struct Permission {
     pub access_n: i32,
 }
 
-/// Application state for Tokio
-#[derive(Clone)]
-pub struct State {
-    /// Tokio runtime handle
-    _handle: Handle,
-    /// Flume sender
-    tx: Sender<i32>,
-    /// Flume receiver
-    rx: Receiver<Permission>,
+/// User
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct User {
+    pub name: String,
+    pub full_name: String,
+    pub role: String,
+    pub enabled: bool,
 }
 
-/// Make postgres connection pool
-async fn make_pool() -> Result<Pool<PostgresConnectionManager<NoTls>>> {
+/// Db connection pool
+type PostgresPool = Pool<PostgresConnectionManager<NoTls>>;
+
+/// Application state for postgres
+#[derive(Clone)]
+pub struct State {
+    /// Db connection pool
+    pool: PostgresPool,
+}
+
+impl Permission {
+    fn from_row(row: Row) -> Self {
+        Permission {
+            id: row.get(0),
+            role: row.get(1),
+            resource_n: row.get(2),
+            batch: row.get(3),
+            access_n: row.get(4),
+        }
+    }
+}
+
+/// Make postgres pool
+fn make_pool() -> Result<PostgresPool> {
     let username = whoami::username();
     // Format path for unix domain socket -- not worth using percent_encode
     let uds = format!("postgres://{username}@%2Frun%2Fpostgresql/tms");
     let config = uds.parse()?;
     let manager = PostgresConnectionManager::new(config, NoTls);
-    Ok(Pool::builder().build(manager).await?)
-}
-
-/// Runner to handle requests
-async fn runner(prx: Receiver<i32>, ptx: Sender<Permission>) -> Result<()> {
-    let pool = make_pool().await?;
-    loop {
-        let id = prx.recv_async().await?;
-        let perm = permission(&pool, id).await?;
-        ptx.send_async(perm).await.unwrap();
-    }
+    Ok(r2d2::Pool::new(manager)?)
 }
 
 /// Query one permission
 const QUERY_PERM: &str = "\
 SELECT id, role, resource_n, batch, access_n \
 FROM iris.permission \
-WHERE id = ($1)";
+WHERE id = $1";
 
-/// Get permission by ID
-async fn permission(
-    pool: &Pool<PostgresConnectionManager<NoTls>>,
-    id: i32,
-) -> Result<Permission> {
-    let conn = pool.get().await?;
-    let row = conn.query_one(QUERY_PERM, &[&id]).await?;
-    Ok(Permission {
-        id: row.get(0),
-        role: row.get(1),
-        resource_n: row.get(2),
-        batch: row.get(3),
-        access_n: row.get(4),
-    })
-}
+/// Query access permissions for a user
+const QUERY_ACCESS: &str = "\
+SELECT p.id, p.role, p.resource_n, p.batch, p.access_n \
+FROM iris.i_user u \
+JOIN iris.role r ON u.role = r.name \
+JOIN iris.permission p ON p.role = r.name \
+WHERE u.name = $1 AND u.enabled = true AND r.enabled = true;";
 
 impl State {
-    /// Create a new Tokio application state
+    /// Create new postgres application state
     pub fn new() -> Result<Self> {
-        let runtime = Runtime::new()?;
-        let (tx, prx) = flume::bounded(8);
-        let (ptx, rx) = flume::unbounded();
-        runtime.spawn(runner(prx, ptx));
-        let _handle = runtime.handle().clone();
-        // Can't drop runtime, but can't clone it either; just forget about it
-        std::mem::forget(runtime);
-        Ok(State { _handle, tx, rx })
+        let pool = make_pool()?;
+        Ok(State { pool })
     }
 
     /// Get permission by ID
-    pub async fn permission(&self, id: i32) -> Result<Permission> {
-        self.tx.send_async(id).await.unwrap();
-        Ok(self.rx.recv_async().await?)
+    pub fn permission(&self, id: i32) -> Result<Permission> {
+        let mut conn = self.pool.get()?;
+        let row = conn.query_one(QUERY_PERM, &[&id])?;
+        Ok(Permission::from_row(row))
+    }
+
+    /// Get access permissions for a user
+    pub fn access(&self, user: &str) -> Result<Vec<Permission>> {
+        let mut perms = vec![];
+        let mut conn = self.pool.get()?;
+        for row in conn.query(QUERY_ACCESS, &[&user])? {
+            perms.push(Permission::from_row(row));
+        }
+        Ok(perms)
     }
 }
