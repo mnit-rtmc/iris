@@ -14,17 +14,14 @@
 //
 #![forbid(unsafe_code)]
 
-use async_std::fs;
 use async_std::path::PathBuf;
 use async_std::task::spawn_blocking;
 use chrono::{Local, TimeZone};
 use convert_case::{Case, Casing};
 use graft::sonar::{Connection, Result, SonarError};
-use graft::state::Permission;
-use graft::state::State as PostgresState;
+use graft::state::State;
 use percent_encoding::percent_decode_str;
 use rand::Rng;
-use serde::de::DeserializeOwned;
 use serde_json::map::Map;
 use serde_json::Value;
 use std::io;
@@ -150,108 +147,11 @@ macro_rules! add_routes {
     };
 }
 
-/// Role
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Role {
-    pub name: String,
-    pub enabled: bool,
-}
-
-/// User
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct User {
-    pub name: String,
-    pub full_name: String,
-    pub role: String,
-    pub enabled: bool,
-}
-
-/// Read a file
-async fn read_file<T: DeserializeOwned>(name: &str) -> Result<Vec<T>> {
-    let file = format!("{STATIC_PATH}/{name}");
-    let json = fs::read_to_string(file).await?;
-    Ok(serde_json::from_str(&json).map_err(|_e| SonarError::InvalidJson)?)
-}
-
-/// Application state
-#[derive(Clone)]
-pub struct State {
-    state: PostgresState,
-    roles: Vec<Role>,
-    permissions: Vec<Permission>,
-    users: Vec<User>,
-}
-
-impl State {
-    /// Create a new application state
-    async fn new() -> Result<Self> {
-        let state = PostgresState::new()?;
-        let roles = read_file::<Role>("role").await?;
-        let permissions = read_file::<Permission>("permission").await?;
-        let users = read_file::<User>("user").await?;
-        Ok(State {
-            state,
-            roles,
-            permissions,
-            users,
-        })
-    }
-
-    /// Get access permissions
-    fn access(&self, user: &str) -> Result<Vec<Permission>> {
-        self.state.access(user)
-    }
-
-    /// Get permissions for a role / resource
-    fn permissions<'a>(
-        &'a self,
-        role: &'a str,
-        nm: &'a str,
-    ) -> impl Iterator<Item = &'a Permission> {
-        self.permissions
-            .iter()
-            .filter(move |p| role == p.role && nm == p.resource_n)
-    }
-
-    /// Check role read permission
-    fn role(&self, role: &str) -> Option<&Role> {
-        self.roles.iter().find(|r| role == r.name)
-    }
-
-    /// Check user read permission
-    fn user(&self, user: &str) -> Option<&User> {
-        self.users.iter().find(|u| user == u.name)
-    }
-
-    /// Check user read permission
-    fn check_user(&self, username: &str, nm: &str) -> Result<()> {
-        if let Some(user) = self.user(username) {
-            if user.enabled {
-                if let Some(role) = self.role(&user.role) {
-                    if role.enabled {
-                        for permission in self.permissions(&role.name, nm) {
-                            if permission.batch.is_none() {
-                                return Ok(());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        Err(SonarError::Forbidden)
-    }
-
-    /// Get permission by ID
-    fn permission(&self, id: i32) -> Result<Permission> {
-        self.state.permission(id)
-    }
-}
-
 /// Check for read access to a resource
 fn check_read(nm: &str, req: &Request<State>) -> Result<()> {
     let session = req.session();
     let auth: AuthMap = session.get("auth").ok_or(SonarError::Unauthorized)?;
-    req.state().check_user(&auth.username, nm)?;
+    req.state().permission_user_res(&auth.username, nm)?;
     Ok(())
 }
 
@@ -259,7 +159,7 @@ fn check_read(nm: &str, req: &Request<State>) -> Result<()> {
 #[async_std::main]
 async fn main() -> tide::Result<()> {
     env_logger::builder().format_timestamp(None).init();
-    let state = State::new().await?;
+    let state = State::new()?;
     let mut app = tide::with_state(state);
     app.with(
         SessionMiddleware::new(
@@ -356,7 +256,8 @@ async fn access_get_json(req: Request<State>) -> Result<String> {
     let session = req.session();
     let auth: AuthMap = session.get("auth").ok_or(SonarError::Unauthorized)?;
     let perms =
-        spawn_blocking(move || req.state().access(&auth.username)).await?;
+        spawn_blocking(move || req.state().permissions_user(&auth.username))
+            .await?;
     Ok(serde_json::to_value(perms)?.to_string())
 }
 

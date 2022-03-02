@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::sonar::Result;
+use crate::sonar::{Result, SonarError};
 use postgres::row::Row;
 use postgres::NoTls;
 use r2d2::Pool;
@@ -89,7 +89,17 @@ SELECT p.id, p.role, p.resource_n, p.batch, p.access_n \
 FROM iris.i_user u \
 JOIN iris.role r ON u.role = r.name \
 JOIN iris.permission p ON p.role = r.name \
-WHERE u.name = $1 AND u.enabled = true AND r.enabled = true;";
+WHERE u.enabled = true AND r.enabled = true \
+AND u.name = $1";
+
+/// Query permissions for a user / resource
+const QUERY_PERMISSIONS: &str = "\
+SELECT p.id, p.role, p.resource_n, p.batch, p.access_n \
+FROM iris.i_user u \
+JOIN iris.role r ON u.role = r.name \
+JOIN iris.permission p ON p.role = r.name \
+WHERE u.enabled = true AND r.enabled = true \
+AND u.name = $1 AND resource_n = $2";
 
 impl State {
     /// Create new postgres application state
@@ -105,13 +115,29 @@ impl State {
         Ok(Permission::from_row(row))
     }
 
-    /// Get access permissions for a user
-    pub fn access(&self, user: &str) -> Result<Vec<Permission>> {
+    /// Get permissions for a user
+    pub fn permissions_user(&self, user: &str) -> Result<Vec<Permission>> {
         let mut perms = vec![];
         let mut conn = self.pool.get()?;
         for row in conn.query(QUERY_ACCESS, &[&user])? {
             perms.push(Permission::from_row(row));
         }
         Ok(perms)
+    }
+
+    /// Get user permission for a resource
+    pub fn permission_user_res(
+        &self,
+        user: &str,
+        res: &str,
+    ) -> Result<Permission> {
+        let mut conn = self.pool.get()?;
+        for row in conn.query(QUERY_PERMISSIONS, &[&user, &res])? {
+            let perm = Permission::from_row(row);
+            if perm.batch.is_none() {
+                return Ok(perm);
+            }
+        }
+        Err(SonarError::Forbidden)
     }
 }
