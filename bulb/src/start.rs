@@ -159,6 +159,10 @@ async fn populate_list(tp: String, tx: String) {
         Err(e) => {
             // ⛔ 🔒 unauthorized (401) should be handled here
             console::log_1(&e);
+            show_toast(&format!(
+                "View failed: {}",
+                e.as_string().unwrap_or_else(|| "???".to_string())
+            ));
         }
     }
 }
@@ -502,7 +506,13 @@ pub async fn start() -> Result<()> {
     let comm_configs = json.into_serde::<Vec<CommConfig>>().unwrap_throw();
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        state.initialize(access, protocols, conditions, resource_types, comm_configs);
+        state.initialize(
+            access,
+            protocols,
+            conditions,
+            resource_types,
+            comm_configs,
+        );
     });
 
     let sb_type: HtmlSelectElement = doc.elem("sb_type")?;

@@ -102,8 +102,10 @@ impl SonarError {
             | msg.starts_with("must be removed")
             | msg.starts_with("cannot")
             | msg.starts_with("already")
-            | msg.contains("foreign key") // SQL constraint on delete
-            | msg.contains("exists")      // "Drop X exists"
+              // SQL constraint on delete
+            | msg.contains("foreign key")
+              // "Drop X exists"
+            | msg.contains("exists")
         {
             Self::Conflict
         } else {

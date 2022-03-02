@@ -83,6 +83,12 @@ SELECT id, role, resource_n, batch, access_n \
 FROM iris.permission \
 WHERE id = $1";
 
+/// Delete one permission
+const DELETE_PERM: &str = "\
+DELETE \
+FROM iris.permission \
+WHERE id = $1";
+
 /// Query access permissions for a user
 const QUERY_ACCESS: &str = "\
 SELECT p.id, p.role, p.resource_n, p.batch, p.access_n \
@@ -90,7 +96,8 @@ FROM iris.i_user u \
 JOIN iris.role r ON u.role = r.name \
 JOIN iris.permission p ON p.role = r.name \
 WHERE u.enabled = true AND r.enabled = true \
-AND u.name = $1";
+AND u.name = $1 \
+ORDER BY p.resource_n, p.batch";
 
 /// Query permissions for a user / resource
 const QUERY_PERMISSIONS: &str = "\
@@ -113,6 +120,17 @@ impl State {
         let mut conn = self.pool.get()?;
         let row = conn.query_one(QUERY_PERM, &[&id])?;
         Ok(Permission::from_row(row))
+    }
+
+    /// Delete permission by ID
+    pub fn permission_delete(&self, id: i32) -> Result<()> {
+        let mut conn = self.pool.get()?;
+        let rows = conn.execute(DELETE_PERM, &[&id])?;
+        if rows == 1 {
+            Ok(())
+        } else {
+            Err(SonarError::NotFound)
+        }
     }
 
     /// Get permissions for a user

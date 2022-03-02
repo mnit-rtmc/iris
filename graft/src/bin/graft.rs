@@ -145,14 +145,12 @@ fn bad_request(msg: &str) -> tide::Result {
 /// Add `POST` / `GET` / `PATCH` / `DELETE` routes for a Sonar object type
 macro_rules! add_routes {
     ($app:expr, $tp:expr) => {
-        $app.at(concat!("/", $tp)).get(|req| resource_get($tp, req));
         $app.at(concat!("/", $tp))
+            .get(|req| resource_get($tp, req))
             .post(|req| sonar_object_post($tp, req));
         $app.at(concat!("/", $tp, "/:name"))
-            .get(|req| sonar_object_get($tp, req));
-        $app.at(concat!("/", $tp, "/:name"))
-            .patch(|req| sonar_object_patch($tp, req));
-        $app.at(concat!("/", $tp, "/:name"))
+            .get(|req| sonar_object_get($tp, req))
+            .patch(|req| sonar_object_patch($tp, req))
             .delete(|req| sonar_object_delete($tp, req));
     };
 }
@@ -196,8 +194,7 @@ async fn main() -> tide::Result<()> {
         .with_cookie_name("graft"),
     );
     let mut route = app.at("/iris/api");
-    route.at("/login").get(login_get);
-    route.at("/login").post(login_post);
+    route.at("/login").get(login_get).post(login_post);
     route.at("/access").get(access_get);
     add_routes!(route, "alarm");
     add_routes!(route, "cabinet_style");
@@ -205,8 +202,10 @@ async fn main() -> tide::Result<()> {
     add_routes!(route, "comm_link");
     add_routes!(route, "controller");
     add_routes!(route, "modem");
-    route.at("/permission").get(|req| resource_get("permission", req));
-    route.at("/permission/:id").get(permission_get);
+    route
+        .at("/permission")
+        .get(|req| resource_get("permission", req));
+    route.at("/permission/:id").get(permission_get).delete(permission_delete);
     app.listen("127.0.0.1:3737").await?;
     Ok(())
 }
@@ -263,7 +262,7 @@ async fn login_post(mut req: Request<State>) -> tide::Result {
     // serialization error should never happen; unwrap OK
     session.insert("auth", auth).unwrap();
     Ok(Response::builder(200)
-        .body("<html>Posted!</html>")
+        .body("<html>Authenticated</html>")
         .content_type("text/html;charset=utf-8")
         .build())
 }
@@ -301,10 +300,29 @@ async fn permission_get(req: Request<State>) -> tide::Result {
 /// Get permission record as JSON
 async fn permission_get_json(req: Request<State>) -> Result<String> {
     Access::View.check("permission", &req)?;
-    let id = req.param("id").map_err(|_e| SonarError::InvalidName)?;
-    let id = id.parse::<i32>().map_err(|_e| SonarError::InvalidName)?;
+    let id = obj_id(&req)?;
     let perm = spawn_blocking(move || req.state().permission(id)).await?;
     Ok(serde_json::to_value(perm)?.to_string())
+}
+
+/// `DELETE` one permission record
+async fn permission_delete(req: Request<State>) -> tide::Result {
+    log::info!("DELETE {}", req.url());
+    resp!(permission_delete2(req).await);
+    Ok(Response::builder(StatusCode::NoContent).build())
+}
+
+/// `DELETE` one permission record
+async fn permission_delete2(req: Request<State>) -> Result<()> {
+    Access::Configure.check("permission", &req)?;
+    let id = obj_id(&req)?;
+    spawn_blocking(move || req.state().permission_delete(id)).await
+}
+
+/// Get object ID from a request
+fn obj_id(req: &Request<State>) -> Result<i32> {
+    let id = req.param("id").map_err(|_e| SonarError::InvalidName)?;
+    id.parse::<i32>().map_err(|_e| SonarError::InvalidName)
 }
 
 /// IRIS host name
