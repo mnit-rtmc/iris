@@ -204,8 +204,12 @@ async fn main() -> tide::Result<()> {
     add_routes!(route, "modem");
     route
         .at("/permission")
-        .get(|req| resource_get("permission", req));
-    route.at("/permission/:id").get(permission_get).delete(permission_delete);
+        .get(|req| resource_get("permission", req))
+        .post(permission_post);
+    route
+        .at("/permission/:id")
+        .get(permission_get)
+        .delete(permission_delete);
     app.listen("127.0.0.1:3737").await?;
     Ok(())
 }
@@ -303,6 +307,34 @@ async fn permission_get_json(req: Request<State>) -> Result<String> {
     let id = obj_id(&req)?;
     let perm = spawn_blocking(move || req.state().permission(id)).await?;
     Ok(serde_json::to_value(perm)?.to_string())
+}
+
+/// `POST` one permission record
+async fn permission_post(mut req: Request<State>) -> tide::Result {
+    log::info!("POST {}", req.url());
+    let body: Value = req.body_json().await?;
+    resp!(permission_post2(req, body).await);
+    Ok(Response::builder(StatusCode::Created).build())
+}
+
+/// `POST` one permission record
+async fn permission_post2(req: Request<State>, body: Value) -> Result<()> {
+    Access::Configure.check("permission", &req)?;
+    if let Some(obj) = body.as_object() {
+        let role = obj.get("role");
+        let resource_n = obj.get("resource_n");
+        if let (Some(Value::String(role)), Some(Value::String(resource_n))) =
+            (role, resource_n)
+        {
+            let role = role.to_string();
+            let resource_n = resource_n.to_string();
+            return spawn_blocking(move || {
+                req.state().permission_post(&role, &resource_n)
+            })
+            .await;
+        }
+    }
+    Err(SonarError::InvalidName)
 }
 
 /// `DELETE` one permission record

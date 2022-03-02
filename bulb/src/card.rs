@@ -62,40 +62,49 @@ pub trait Card: fmt::Display + DeserializeOwned {
         json: &Option<JsValue>,
         ct: CardType,
     ) -> Result<String> {
-        match (json, ct) {
-            (Some(json), CardType::Compact) => Self::build_compact_form(json),
-            (Some(json), CardType::Status) if Self::HAS_STATUS => {
-                Self::build_status_form(json)
+        match json {
+            Some(json) => {
+                let val = Self::new(json)?;
+                match ct {
+                    CardType::Compact => Ok(val.to_html_compact()),
+                    CardType::Status if Self::HAS_STATUS => {
+                        Ok(val.status_card())
+                    }
+                    _ => Ok(val.edit_card()),
+                }
             }
-            (_, CardType::Create) => Self::build_create_form(name),
-            (None, _) => Ok(CREATE_COMPACT.into()),
-            (Some(json), _) => Self::build_edit_form(json),
+            None => match ct {
+                CardType::Create => Ok(Self::create_card(name)),
+                _ => Ok(CREATE_COMPACT.into()),
+            }
         }
     }
 
-    /// Build a compact card
-    fn build_compact_form(json: &JsValue) -> Result<String> {
-        let val = Self::new(json)?;
-        Ok(val.to_html_compact())
-    }
-
     /// Build a create card
-    fn build_create_form(name: &str) -> Result<String> {
+    fn create_card(name: &str) -> String {
         let ename = Self::ENAME;
-        Ok(format!(
+        let create = Self::html_create(name);
+        format!(
             "<div class='row'>\
               <div class='{TITLE}'>{ename}</div>\
               <span class='{NAME}'>🆕</span>\
             </div>\
-            <div class='row'>\
-             <label for='create_name'>Name</label>\
-             <input id='create_name' maxlength='24' size='24' value='{name}'/>\
-            </div>\
+            {create}
             <div class='row'>\
               <button id='ob_close' type='button'>❌ Close</button>\
               <button id='ob_save' type='button'>🖍️ Save</button>\
             </div>"
-        ))
+        )
+    }
+
+    /// Get row for create card
+    fn html_create(name: &str) -> String {
+        format!(
+            "<div class='row'>\
+              <label for='create_name'>Name</label>\
+              <input id='create_name' maxlength='24' size='24' value='{name}'/>\
+            </div>"
+        )
     }
 
     /// Get value to create a new object
@@ -111,42 +120,50 @@ pub trait Card: fmt::Display + DeserializeOwned {
     }
 
     /// Build a status card
-    fn build_status_form(json: &JsValue) -> Result<String> {
+    fn status_card(&self) -> String {
         let ename = Self::ENAME;
-        let val = Self::new(json)?;
+        let status = self.to_html_status();
         // could use 🌐 instead
-        Ok(format!(
+        format!(
             "<div class='row'>\
               <div class='{TITLE}'>{ename}</div>\
-              <span class='{NAME}'>{val}</span>\
+              <span class='{NAME}'>{self}</span>\
             </div>\
-            {}\
+            {status}\
             <div class='row'>\
               <button id='ob_close' type='button'>❌ Close</button>\
               <button id='ob_loc' type='button'>🗺️ Location</button>\
               <button id='ob_edit' type='button'>📝 Edit</button>\
-            </div>",
-            val.to_html_status()
-        ))
+            </div>"
+        )
+    }
+
+    /// Convert to status HTML
+    fn to_html_status(&self) -> String {
+        unreachable!()
     }
 
     /// Build an edit card
-    fn build_edit_form(json: &JsValue) -> Result<String> {
+    fn edit_card(&self) -> String {
         let ename = Self::ENAME;
-        let val = Self::new(json)?;
-        Ok(format!(
+        let edit = self.to_html_edit();
+        format!(
             "<div class='row'>\
               <div class='{TITLE}'>{ename}</div>\
-              <span class='{NAME}'>{val}</span>\
+              <span class='{NAME}'>{self}</span>\
             </div>\
-            {}\
+            {edit}\
             <div class='row'>\
               <button id='ob_close' type='button'>❌ Close</button>\
               <button id='ob_delete' type='button'>🗑️ Delete</button>\
               <button id='ob_save' type='button'>🖍️ Save</button>\
-            </div>",
-            val.to_html_edit()
-        ))
+            </div>"
+        )
+    }
+
+    /// Convert to edit HTML
+    fn to_html_edit(&self) -> String {
+        unreachable!()
     }
 
     /// Get changed fields from Edit form
@@ -193,16 +210,6 @@ pub trait Card: fmt::Display + DeserializeOwned {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String;
-
-    /// Convert to status HTML
-    fn to_html_status(&self) -> String {
-        unreachable!()
-    }
-
-    /// Convert to edit HTML
-    fn to_html_edit(&self) -> String {
-        unreachable!()
-    }
 }
 
 /// Get attribute for disabled cards

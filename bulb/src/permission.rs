@@ -12,7 +12,7 @@
 //
 use crate::card::{Card, NAME};
 use crate::start::resource_types_html;
-use crate::util::HtmlStr;
+use crate::util::{Dom, HtmlStr};
 use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -81,6 +81,34 @@ impl Card for Permission {
             | access_str(self.access_n, true).contains(tx)
             | self.role.to_lowercase().contains(tx)
             | self.resource_n.contains(tx)
+    }
+
+    /// Get row for create card
+    fn html_create(_name: &str) -> String {
+        let resource = resource_types_html("");
+        format!(
+            "<div class='row'>\
+              <label for='edit_role'>Role</label>\
+              <input id='edit_role' maxlength='24' size='24'/>\
+            </div>\
+            <div class='row'>\
+              <label for='edit_resource'>Resource</label>\
+              {resource}\
+            </div>"
+        )
+    }
+
+    /// Get value to create a new object
+    fn create_value(doc: &Document) -> Result<String> {
+        let role = doc.input_parse::<String>("edit_role");
+        let resource_n = doc.select_parse::<String>("edit_resource");
+        if let (Some(role), Some(resource_n)) = (role, resource_n) {
+            let mut obj = Map::new();
+            obj.insert("role".to_string(), Value::String(role));
+            obj.insert("resource_n".to_string(), Value::String(resource_n));
+            return Ok(Value::Object(obj).to_string());
+        }
+        Err("parse error".into())
     }
 
     /// Convert to compact HTML

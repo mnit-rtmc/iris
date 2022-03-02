@@ -83,6 +83,11 @@ SELECT id, role, resource_n, batch, access_n \
 FROM iris.permission \
 WHERE id = $1";
 
+/// Create one permission
+const INSERT_PERM: &str = "\
+INSERT INTO iris.permission (role, resource_n, access_n) \
+VALUES ($1, $2, $3)";
+
 /// Delete one permission
 const DELETE_PERM: &str = "\
 DELETE \
@@ -120,6 +125,20 @@ impl State {
         let mut conn = self.pool.get()?;
         let row = conn.query_one(QUERY_PERM, &[&id])?;
         Ok(Permission::from_row(row))
+    }
+
+    /// Create a permission
+    pub fn permission_post(&self, role: &str, resource_n: &str) -> Result<()> {
+        let access_n = 1; // View is a good default
+        let mut conn = self.pool.get()?;
+        let rows = conn
+            .execute(INSERT_PERM, &[&role, &resource_n, &access_n])
+            .map_err(|_e| SonarError::InvalidValue)?;
+        if rows == 1 {
+            Ok(())
+        } else {
+            Err(SonarError::InvalidValue)
+        }
     }
 
     /// Delete permission by ID
