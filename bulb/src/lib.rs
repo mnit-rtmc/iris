@@ -21,7 +21,9 @@ mod controller;
 mod fetch;
 mod modem;
 mod permission;
+mod role;
 mod start;
+mod user;
 mod util;
 
 pub type Result<T> = std::result::Result<T, JsValue>;

@@ -99,13 +99,13 @@ impl SonarError {
         } else if msg.starts_with("invalid") | msg.starts_with("bad") {
             Self::InvalidValue
         } else if msg.starts_with("name already exists")
-            | msg.starts_with("must be removed")
-            | msg.starts_with("cannot")
-            | msg.starts_with("already")
-              // SQL constraint on delete
-            | msg.contains("foreign key")
-              // "Drop X exists"
-            | msg.contains("exists")
+            || msg.starts_with("must be removed")
+            || msg.starts_with("cannot")
+            || msg.starts_with("already")
+               // SQL constraint on delete
+            || msg.contains("foreign key")
+               // "Drop X exists"
+            || msg.contains("exists")
         {
             Self::Conflict
         } else {

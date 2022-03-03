@@ -62,6 +62,8 @@ const BOOLS: &[(&str, &str)] = &[
     ("comm_link", "poll_enabled"),
     ("comm_link", "connected"),
     ("modem", "enabled"),
+    ("role", "enabled"),
+    ("user", "enabled"),
 ];
 
 /// Slice of (type, attribute) tuples for RFC 3339 time stamp values
@@ -156,6 +158,18 @@ macro_rules! add_routes {
     };
 }
 
+/// Add `POST` / `PATCH` / `DELETE` routes for a Sonar object type
+macro_rules! add_routes_except_get {
+    ($app:expr, $tp:expr) => {
+        $app.at(concat!("/", $tp))
+            .get(|req| resource_get($tp, req))
+            .post(|req| sonar_object_post($tp, req));
+        $app.at(concat!("/", $tp, "/:name"))
+            .patch(|req| sonar_object_patch($tp, req))
+            .delete(|req| sonar_object_delete($tp, req));
+    };
+}
+
 impl Access {
     /// Get access level
     fn level(self) -> i32 {
@@ -212,6 +226,12 @@ async fn main() -> tide::Result<()> {
         .get(permission_get)
         .patch(permission_patch)
         .delete(permission_delete);
+    // can't use sonar_object_get due to capabilities array
+    add_routes_except_get!(route, "role");
+    route.at("/role/:name").get(role_get);
+    // can't use sonar_object_get due to domains array
+    add_routes_except_get!(route, "user");
+    route.at("/user/:name").get(user_get);
     app.listen("127.0.0.1:3737").await?;
     Ok(())
 }
@@ -376,6 +396,48 @@ async fn permission_delete2(req: Request<State>) -> Result<()> {
 fn obj_id(req: &Request<State>) -> Result<i32> {
     let id = req.param("id").map_err(|_e| SonarError::InvalidName)?;
     id.parse::<i32>().map_err(|_e| SonarError::InvalidName)
+}
+
+/// `GET` one role record
+async fn role_get(req: Request<State>) -> tide::Result {
+    log::info!("GET {}", req.url());
+    let body = resp!(role_get_json(req).await);
+    Ok(Response::builder(StatusCode::Ok)
+        .body(body)
+        .content_type("application/json")
+        .build())
+}
+
+/// Get role record as JSON
+async fn role_get_json(req: Request<State>) -> Result<String> {
+    Access::View.check("role", &req)?;
+    let name = req
+        .param("name")
+        .map_err(|_e| SonarError::InvalidName)?
+        .to_string();
+    let role = spawn_blocking(move || req.state().role(&name)).await?;
+    Ok(serde_json::to_value(role)?.to_string())
+}
+
+/// `GET` one user record
+async fn user_get(req: Request<State>) -> tide::Result {
+    log::info!("GET {}", req.url());
+    let body = resp!(user_get_json(req).await);
+    Ok(Response::builder(StatusCode::Ok)
+        .body(body)
+        .content_type("application/json")
+        .build())
+}
+
+/// Get user record as JSON
+async fn user_get_json(req: Request<State>) -> Result<String> {
+    Access::View.check("user", &req)?;
+    let name = req
+        .param("name")
+        .map_err(|_e| SonarError::InvalidName)?
+        .to_string();
+    let user = spawn_blocking(move || req.state().user(&name)).await?;
+    Ok(serde_json::to_value(user)?.to_string())
 }
 
 /// IRIS host name
