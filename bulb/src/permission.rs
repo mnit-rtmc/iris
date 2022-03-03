@@ -12,7 +12,7 @@
 //
 use crate::card::{Card, NAME};
 use crate::start::resource_types_html;
-use crate::util::{Dom, HtmlStr};
+use crate::util::{Dom, HtmlStr, OptVal};
 use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -152,7 +152,32 @@ impl Card for Permission {
 
     /// Get changed fields from Edit form
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
+        let val = Self::new(json)?;
         let mut obj = Map::new();
+        if let Some(role) = doc.input_parse::<String>("edit_role") {
+            if role != val.role {
+                obj.insert("role".to_string(), Value::String(role));
+            }
+        }
+        if let Some(resource_n) = doc.select_parse::<String>("edit_resource") {
+            if resource_n != val.resource_n {
+                obj.insert("resource_n".to_string(), Value::String(resource_n));
+            }
+        }
+        let batch = doc
+            .input_parse::<String>("edit_batch")
+            .filter(|b| !b.is_empty());
+        if batch != val.batch {
+            obj.insert("batch".to_string(), OptVal(batch).into());
+        }
+        if let Some(access_n) = doc.select_parse::<u32>("edit_access") {
+            if access_n != val.access_n {
+                obj.insert(
+                    "access_n".to_string(),
+                    Value::Number(access_n.into()),
+                );
+            }
+        }
         Ok(Value::Object(obj).to_string())
     }
 }

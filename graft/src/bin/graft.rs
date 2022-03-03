@@ -68,6 +68,7 @@ const BOOLS: &[(&str, &str)] = &[
 const STAMPS: &[(&str, &str)] = &[
     ("alarm", "trigger_time"),
     ("controller", "fail_time"),
+    ("dms", "expire_time"),
 ];
 
 /// Access for permission records
@@ -209,6 +210,7 @@ async fn main() -> tide::Result<()> {
     route
         .at("/permission/:id")
         .get(permission_get)
+        .patch(permission_patch)
         .delete(permission_delete);
     app.listen("127.0.0.1:3737").await?;
     Ok(())
@@ -291,24 +293,6 @@ async fn access_get_json(req: Request<State>) -> Result<String> {
     Ok(serde_json::to_value(perms)?.to_string())
 }
 
-/// `GET` one permission record
-async fn permission_get(req: Request<State>) -> tide::Result {
-    log::info!("GET {}", req.url());
-    let body = resp!(permission_get_json(req).await);
-    Ok(Response::builder(StatusCode::Ok)
-        .body(body)
-        .content_type("application/json")
-        .build())
-}
-
-/// Get permission record as JSON
-async fn permission_get_json(req: Request<State>) -> Result<String> {
-    Access::View.check("permission", &req)?;
-    let id = obj_id(&req)?;
-    let perm = spawn_blocking(move || req.state().permission(id)).await?;
-    Ok(serde_json::to_value(perm)?.to_string())
-}
-
 /// `POST` one permission record
 async fn permission_post(mut req: Request<State>) -> tide::Result {
     log::info!("POST {}", req.url());
@@ -333,6 +317,43 @@ async fn permission_post2(req: Request<State>, body: Value) -> Result<()> {
             })
             .await;
         }
+    }
+    Err(SonarError::InvalidName)
+}
+
+/// `GET` one permission record
+async fn permission_get(req: Request<State>) -> tide::Result {
+    log::info!("GET {}", req.url());
+    let body = resp!(permission_get_json(req).await);
+    Ok(Response::builder(StatusCode::Ok)
+        .body(body)
+        .content_type("application/json")
+        .build())
+}
+
+/// Get permission record as JSON
+async fn permission_get_json(req: Request<State>) -> Result<String> {
+    Access::View.check("permission", &req)?;
+    let id = obj_id(&req)?;
+    let perm = spawn_blocking(move || req.state().permission(id)).await?;
+    Ok(serde_json::to_value(perm)?.to_string())
+}
+
+/// `PATCH` one permission record
+async fn permission_patch(mut req: Request<State>) -> tide::Result {
+    log::info!("PATCH {}", req.url());
+    let body: Value = req.body_json().await?;
+    resp!(permission_patch2(req, body).await);
+    Ok(Response::builder(StatusCode::NoContent).build())
+}
+
+/// `PATCH` one permission record
+async fn permission_patch2(req: Request<State>, body: Value) -> Result<()> {
+    Access::Configure.check("permission", &req)?;
+    let id = obj_id(&req)?;
+    if let Value::Object(obj) = body {
+        return spawn_blocking(move || req.state().permission_patch(id, obj))
+            .await;
     }
     Err(SonarError::InvalidName)
 }

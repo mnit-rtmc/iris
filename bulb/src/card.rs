@@ -76,7 +76,7 @@ pub trait Card: fmt::Display + DeserializeOwned {
             None => match ct {
                 CardType::Create => Ok(Self::create_card(name)),
                 _ => Ok(CREATE_COMPACT.into()),
-            }
+            },
         }
     }
 

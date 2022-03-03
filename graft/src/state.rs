@@ -18,6 +18,8 @@ use postgres::NoTls;
 use r2d2::Pool;
 use r2d2_postgres::PostgresConnectionManager;
 use serde::{Deserialize, Serialize};
+use serde_json::map::Map;
+use serde_json::Value;
 
 /// Role
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -88,6 +90,12 @@ const INSERT_PERM: &str = "\
 INSERT INTO iris.permission (role, resource_n, access_n) \
 VALUES ($1, $2, $3)";
 
+/// Update one permission
+const UPDATE_PERM: &str = "\
+UPDATE iris.permission \
+SET (role, resource_n, batch, access_n) = ($2, $3, $4, $5) \
+WHERE id = $1";
+
 /// Delete one permission
 const DELETE_PERM: &str = "\
 DELETE \
@@ -122,16 +130,16 @@ impl State {
 
     /// Get permission by ID
     pub fn permission(&self, id: i32) -> Result<Permission> {
-        let mut conn = self.pool.get()?;
-        let row = conn.query_one(QUERY_PERM, &[&id])?;
+        let mut client = self.pool.get()?;
+        let row = client.query_one(QUERY_PERM, &[&id])?;
         Ok(Permission::from_row(row))
     }
 
     /// Create a permission
     pub fn permission_post(&self, role: &str, resource_n: &str) -> Result<()> {
         let access_n = 1; // View is a good default
-        let mut conn = self.pool.get()?;
-        let rows = conn
+        let mut client = self.pool.get()?;
+        let rows = client
             .execute(INSERT_PERM, &[&role, &resource_n, &access_n])
             .map_err(|_e| SonarError::InvalidValue)?;
         if rows == 1 {
@@ -141,10 +149,55 @@ impl State {
         }
     }
 
+    /// Patch permission
+    pub fn permission_patch(
+        &self,
+        id: i32,
+        mut obj: Map<String, Value>,
+    ) -> Result<()> {
+        let mut client = self.pool.get()?;
+        let mut transaction = client.transaction()?;
+        let row = transaction
+            .query_one(QUERY_PERM, &[&id])
+            .map_err(|_e| SonarError::InvalidName)?;
+        let Permission {
+            id,
+            mut role,
+            mut resource_n,
+            mut batch,
+            mut access_n,
+        } = Permission::from_row(row);
+        if let Some(Value::String(r)) = obj.remove("role") {
+            role = r;
+        }
+        if let Some(Value::String(r)) = obj.remove("resource_n") {
+            resource_n = r;
+        }
+        match obj.remove("batch") {
+            Some(Value::String(b)) => batch = Some(b),
+            Some(Value::Null) => batch = None,
+            _ => (),
+        };
+        if let Some(Value::Number(a)) = obj.remove("access_n") {
+            if let Some(a) = a.as_i64() {
+                access_n = a as i32;
+            }
+        }
+        let rows = transaction
+            .execute(UPDATE_PERM, &[&id, &role, &resource_n, &batch, &access_n])
+            .map_err(|_e| SonarError::Conflict)?;
+        if rows == 1 {
+            transaction.commit()?;
+            Ok(())
+        } else {
+            Err(SonarError::Conflict)
+        }
+    }
+
     /// Delete permission by ID
     pub fn permission_delete(&self, id: i32) -> Result<()> {
-        let mut conn = self.pool.get()?;
-        let rows = conn.execute(DELETE_PERM, &[&id])?;
+        let mut client = self.pool.get()?;
+        let rows = client.execute(DELETE_PERM, &[&id])?;
         if rows == 1 {
             Ok(())
         } else {
@@ -155,8 +208,8 @@ impl State {
     /// Get permissions for a user
     pub fn permissions_user(&self, user: &str) -> Result<Vec<Permission>> {
         let mut perms = vec![];
-        let mut conn = self.pool.get()?;
-        for row in conn.query(QUERY_ACCESS, &[&user])? {
+        let mut client = self.pool.get()?;
+        for row in client.query(QUERY_ACCESS, &[&user])? {
             perms.push(Permission::from_row(row));
         }
         Ok(perms)
@@ -168,8 +221,8 @@ impl State {
         user: &str,
         res: &str,
     ) -> Result<Permission> {
-        let mut conn = self.pool.get()?;
-        for row in conn.query(QUERY_PERMISSIONS, &[&user, &res])? {
+        let mut client = self.pool.get()?;
+        for row in client.query(QUERY_PERMISSIONS, &[&user, &res])? {
             let perm = Permission::from_row(row);
             if perm.batch.is_none() {
                 return Ok(perm);
