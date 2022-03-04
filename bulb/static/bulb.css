@@ -78,6 +78,11 @@ button:active {
   overflow-y: auto;
 }
 
+#ob_close {
+  margin: none;
+  padding: none;
+}
+
 /* Delete button sliding "confirmation" animation */
 #ob_delete {
   position: relative; /* add position context for ::before pseudo-element */
@@ -158,7 +163,6 @@ button:active {
 .ob_name {
   font-weight: bold;
   font-size: 70%;
-  border: 1px dotted #0004;
 }
 .info {
   font-style: italic;

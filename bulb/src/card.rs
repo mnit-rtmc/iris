@@ -88,11 +88,13 @@ pub trait Card: fmt::Display + DeserializeOwned {
         format!(
             "<div class='row'>\
               <div class='{TITLE}'>{ename}</div>\
-              <span class='{NAME}'>🆕</span>\
+              <span class='{NAME}'>🆕 \
+                <button id='ob_close' type='button'>X</button>\
+              </span>\
             </div>\
             {create}
             <div class='row'>\
-              <button id='ob_close' type='button'>❌ Close</button>\
+              <span></span>\
               <button id='ob_save' type='button'>🖍️ Save</button>\
             </div>"
         )
@@ -133,12 +135,14 @@ pub trait Card: fmt::Display + DeserializeOwned {
         format!(
             "<div class='row'>\
               <div class='{TITLE}'>{ename}</div>\
-              <span class='{NAME}'>{self}</span>\
+              <span class='{NAME}'>{self} \
+                <button id='ob_close' type='button'>X</button>\
+              </span>\
             </div>\
             {status}\
             <div class='row'>\
-              <button id='ob_close' type='button'>❌ Close</button>\
-              {location}
+              <span></span>\
+              {location}\
               <button id='ob_edit' type='button'>📝 Edit</button>\
             </div>"
         )
@@ -156,11 +160,13 @@ pub trait Card: fmt::Display + DeserializeOwned {
         format!(
             "<div class='row'>\
               <div class='{TITLE}'>{ename}</div>\
-              <span class='{NAME}'>{self}</span>\
+              <span class='{NAME}'>{self} \
+                <button id='ob_close' type='button'>X</button>\
+              </span>\
             </div>\
             {edit}\
             <div class='row'>\
-              <button id='ob_close' type='button'>❌ Close</button>\
+              <span></span>\
               <button id='ob_delete' type='button'>🗑️ Delete</button>\
               <button id='ob_save' type='button'>🖍️ Save</button>\
             </div>"
