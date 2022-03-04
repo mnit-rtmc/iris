@@ -107,7 +107,7 @@ impl Card for Alarm {
                <label for='edit_ctrl'>Controller</label>\
                <input id='edit_ctrl' maxlength='20' size='20' \
                       value='{controller}'/>\
-               <button id='link_ctrl' type='button'>🖇️</button>\
+               <button id='go_ctrl' type='button'>🖇️</button>\
              </div>\
              <div class='row'>\
                <label for='edit_pin'>Pin</label>\

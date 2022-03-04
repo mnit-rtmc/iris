@@ -794,23 +794,24 @@ fn handle_button_click_ev(doc: &Document, id: String) {
             }
             "ob_edit" => cs.replace_card(doc, CardType::Edit),
             "ob_save" => spawn_local(cs.save_changed()),
-            "link_ctrl" => go_controller_link(doc),
+            "go_ctrl" => go_resource(doc, "edit_ctrl", Controller::TNAME),
+            "go_link" => go_resource(doc, "edit_link", CommLink::TNAME),
             _ => console::log_1(&format!("unknown button: {}", id).into()),
         }
     }
 }
 
-/// Go to controller in `edit_ctrl`
-fn go_controller_link(doc: &Document) {
-    if let Some(ctrl) = doc
-        .input_parse::<String>("edit_ctrl")
+/// Go to resource named in edit element
+fn go_resource(doc: &Document, edit: &str, tp: &str) {
+    if let Some(name) = doc
+        .input_parse::<String>(edit)
         .filter(|c| !c.is_empty())
     {
         if let Ok(sb_resource) = doc.elem::<HtmlSelectElement>("sb_resource") {
-            sb_resource.set_value(Controller::TNAME);
+            sb_resource.set_value(tp);
             if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
-                input.set_value(&ctrl);
-                spawn_local(populate_list(Controller::TNAME.to_string(), ctrl));
+                input.set_value(&name);
+                spawn_local(populate_list(tp.to_string(), name));
             }
         }
     }

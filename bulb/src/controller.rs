@@ -133,10 +133,19 @@ impl Card for Controller {
         let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
         let location = HtmlStr::new(self.location.as_ref()).with_len(64);
-        let version = HtmlStr::new(self.version.as_ref()).with_len(32);
         let condition = self.condition();
         let comm_state = self.comm_state(true);
         let notes = HtmlStr::new(&self.notes);
+        let version = match &self.version {
+            Some(version) => {
+                let version = HtmlStr::new(version).with_len(32);
+                format!(
+                  "<span>Version</span>\
+                  <span class='info'>{version}</span>"
+                )
+            }
+            None => "".to_string(),
+        };
         let fail_time = match &self.fail_time {
             Some(fail_time) => {
                 format!(
@@ -157,11 +166,9 @@ impl Card for Controller {
             </div>\
             <div class='row'>\
               <span>{location}</span>\
-              <span class='info'>{version}</span>\
-            </div>\
-            <div class='row'>\
               <span class='info'>{notes}</span>\
             </div>\
+            <div class='row'>{version}</div>\
             <div class='row'>{fail_time}</div>"
         )
     }
@@ -179,6 +186,7 @@ impl Card for Controller {
               <label for='edit_link'>Comm Link</label>\
               <input id='edit_link' maxlength='20' size='20' \
                      value='{comm_link}'/>\
+               <button id='go_link' type='button'>🖇️</button>\
             </div>\
             <div class='row'>\
               <label for='edit_drop'>Drop ID</label>\
