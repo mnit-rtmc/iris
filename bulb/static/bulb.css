@@ -66,14 +66,11 @@ button:active {
   }
 }
 
-#sb_select {
+.sb_label {
   flex: 0 1 min-content;
   margin: 0.1rem;
 }
-#sb_search {
-  flex: 0 1 min-content;
-  margin: 0.1rem;
-}
+
 #sb_list {
   flex: 1 0 fill;
   margin: 0.1rem;

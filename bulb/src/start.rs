@@ -527,10 +527,10 @@ pub async fn start() -> Result<()> {
         );
     });
 
-    let sb_type: HtmlSelectElement = doc.elem("sb_type")?;
-    sb_type.set_inner_html(&types_html());
-    add_select_event_listener(&sb_type, handle_sb_type_ev)?;
-    add_input_event_listener(&doc.elem("sb_input")?)?;
+    let sb_resource: HtmlSelectElement = doc.elem("sb_resource")?;
+    sb_resource.set_inner_html(&types_html());
+    add_select_event_listener(&sb_resource, handle_sb_resource_ev)?;
+    add_input_event_listener(&doc.elem("sb_search")?)?;
     add_click_event_listener(&doc.elem("sb_list")?)?;
     add_transition_event_listener(&doc.elem("sb_list")?)?;
     add_interval_callback(&window)?;
@@ -684,28 +684,28 @@ pub fn comm_configs_html(selected: &str) -> String {
     })
 }
 
-/// Handle an event from "sb_type" `select` element
-fn handle_sb_type_ev(tp: String) {
+/// Handle an event from "sb_resource" `select` element
+fn handle_sb_resource_ev(tp: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
         state.selected.take()
     });
-    if let Ok(input) = doc.elem::<HtmlInputElement>("sb_input") {
+    if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
         input.set_value("");
     }
     spawn_local(populate_list(tp, "".into()));
 }
 
-/// Search list using the value from "sb_input"
+/// Search list using the value from "sb_search"
 fn search_list() {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    if let Ok(input) = doc.elem::<HtmlInputElement>("sb_input") {
+    if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
         let value = input.value();
         deselect_card(&doc);
-        if let Some(tp) = doc.select_parse::<String>("sb_type") {
+        if let Some(tp) = doc.select_parse::<String>("sb_resource") {
             spawn_local(populate_list(tp, value));
         }
     }
@@ -772,7 +772,7 @@ fn handle_click_ev(elem: &Element) {
     } else if let Some(card) = elem.closest(".card").unwrap_throw() {
         if let Some(id) = card.get_attribute("id") {
             if let Some(name) = card.get_attribute("name") {
-                if let Some(tp) = doc.select_parse::<String>("sb_type") {
+                if let Some(tp) = doc.select_parse::<String>("sb_resource") {
                     deselect_card(&doc);
                     spawn_local(click_card(tp, id, name));
                 }
