@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{disabled_attr, Card, NAME};
+use crate::controller::Controller;
 use crate::util::{Dom, HtmlStr, OptVal};
 use crate::Result;
 use serde::{Deserialize, Serialize};
@@ -77,13 +78,20 @@ impl Card for Alarm {
 
     /// Convert to status HTML
     fn to_html_status(&self) -> String {
+        let tname = Controller::TNAME;
         let description = HtmlStr::new(&self.description);
         let state = self.state(true);
+        let controller = HtmlStr::new(self.controller.as_ref());
         let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
         format!(
             "<div class='row'>\
               <span class='info'>{description}</span>\
               <span class='info'>{state}</span>\
+            </div>\
+            <div class='row'>\
+              <label>Controller</label>\
+              <button class='go_link' type='button' \
+                      data-link='{controller} data-type='{tname}''>🖇️</button>\
             </div>\
             <div class='row'>\
               <span>Triggered</span>\
@@ -99,15 +107,14 @@ impl Card for Alarm {
         let pin = OptVal(self.pin);
         format!(
             "<div class='row'>\
-               <label for='edit_desc'>Description</label>\
-               <input id='edit_desc' maxlength='24' size='24' \
-                      value='{description}'/>\
+              <label for='edit_desc'>Description</label>\
+              <input id='edit_desc' maxlength='24' size='24' \
+                     value='{description}'/>\
              </div>\
              <div class='row'>\
                <label for='edit_ctrl'>Controller</label>\
                <input id='edit_ctrl' maxlength='20' size='20' \
                       value='{controller}'/>\
-               <button id='go_ctrl' type='button'>🖇️</button>\
              </div>\
              <div class='row'>\
                <label for='edit_pin'>Pin</label>\

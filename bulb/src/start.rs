@@ -768,7 +768,7 @@ fn handle_click_ev(target: &Element) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     if target.is_instance_of::<HtmlButtonElement>() {
-        handle_button_click_ev(&doc, target.id());
+        handle_button_click_ev(&doc, target);
     } else if let Some(card) = target.closest(".card").unwrap_throw() {
         if let Some(id) = card.get_attribute("id") {
             if let Some(name) = card.get_attribute("name") {
@@ -782,9 +782,10 @@ fn handle_click_ev(target: &Element) {
 }
 
 /// Handle a `click` event with a button target
-fn handle_button_click_ev(doc: &Document, id: String) {
+fn handle_button_click_ev(doc: &Document, target: &Element) {
     let cs = STATE.with(|rc| rc.borrow().selected.clone());
     if let Some(cs) = cs {
+        let id = target.id();
         match id.as_str() {
             "ob_close" => cs.replace_card(doc, CardType::Compact),
             "ob_delete" => {
@@ -794,24 +795,28 @@ fn handle_button_click_ev(doc: &Document, id: String) {
             }
             "ob_edit" => cs.replace_card(doc, CardType::Edit),
             "ob_save" => spawn_local(cs.save_changed()),
-            "go_ctrl" => go_resource(doc, "edit_ctrl", Controller::TNAME),
-            "go_link" => go_resource(doc, "edit_link", CommLink::TNAME),
-            _ => console::log_1(&format!("unknown button: {}", id).into()),
+            _ => {
+                if target.class_name() == "go_link" {
+                    go_resource(doc, target);
+                } else {
+                    console::log_1(&format!("unknown button: {}", id).into());
+                }
+            }
         }
     }
 }
 
-/// Go to resource named in edit element
-fn go_resource(doc: &Document, edit: &str, tp: &str) {
-    if let Some(name) = doc
-        .input_parse::<String>(edit)
-        .filter(|c| !c.is_empty())
-    {
+/// Go to resource from target's `data-link` attribute
+fn go_resource(doc: &Document, target: &Element) {
+    if let (Some(link), Some(tp)) = (
+        target.get_attribute("data-link"),
+        target.get_attribute("data-type"),
+    ) {
         if let Ok(sb_resource) = doc.elem::<HtmlSelectElement>("sb_resource") {
-            sb_resource.set_value(tp);
+            sb_resource.set_value(&tp);
             if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
-                input.set_value(&name);
-                spawn_local(populate_list(tp.to_string(), name));
+                input.set_value(&link);
+                spawn_local(populate_list(tp, link));
             }
         }
     }

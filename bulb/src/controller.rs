@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{disabled_attr, Card, NAME};
+use crate::commlink::CommLink;
 use crate::start::{conditions_html, get_condition};
 use crate::util::{Dom, HtmlStr, OptVal};
 use crate::Result;
@@ -130,6 +131,7 @@ impl Card for Controller {
 
     /// Convert to status HTML
     fn to_html_status(&self) -> String {
+        let tname = CommLink::TNAME;
         let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
         let location = HtmlStr::new(self.location.as_ref()).with_len(64);
@@ -140,8 +142,7 @@ impl Card for Controller {
             Some(version) => {
                 let version = HtmlStr::new(version).with_len(32);
                 format!(
-                  "<span>Version</span>\
-                  <span class='info'>{version}</span>"
+                    "<span>Version</span><span class='info'>{version}</span>"
                 )
             }
             None => "".to_string(),
@@ -157,7 +158,10 @@ impl Card for Controller {
         };
         format!(
             "<div class='row'>\
-              <span class='info'>{comm_link}:{drop_id}</span>\
+              <span class='info'>{comm_link}:{drop_id} \
+                <button class='go_link' type='button' \
+                        data-link='{comm_link}' data-type='{tname}'>🖇️</button>\
+              </span>\
               <span class='info'>{comm_state}</span>\
             </div>\
             <div class='row'>\
@@ -186,7 +190,6 @@ impl Card for Controller {
               <label for='edit_link'>Comm Link</label>\
               <input id='edit_link' maxlength='20' size='20' \
                      value='{comm_link}'/>\
-               <button id='go_link' type='button'>🖇️</button>\
             </div>\
             <div class='row'>\
               <label for='edit_drop'>Drop ID</label>\
