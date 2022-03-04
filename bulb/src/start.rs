@@ -748,7 +748,7 @@ fn add_input_event_listener(elem: &HtmlInputElement) -> Result<()> {
     Ok(())
 }
 
-/// Add a "click" event listener to an element
+/// Add a `click` event listener to an element
 fn add_click_event_listener(elem: &Element) -> Result<()> {
     let closure = Closure::wrap(Box::new(|e: Event| {
         let value = e.target().unwrap().dyn_into::<Element>().unwrap();
@@ -763,13 +763,13 @@ fn add_click_event_listener(elem: &Element) -> Result<()> {
     Ok(())
 }
 
-/// Handle an event from "sb_list" `click` element
-fn handle_click_ev(elem: &Element) {
+/// Handle a `click` event from a target element
+fn handle_click_ev(target: &Element) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    if elem.is_instance_of::<HtmlButtonElement>() {
-        handle_button_click_ev(&doc, elem);
-    } else if let Some(card) = elem.closest(".card").unwrap_throw() {
+    if target.is_instance_of::<HtmlButtonElement>() {
+        handle_button_click_ev(&doc, target.id());
+    } else if let Some(card) = target.closest(".card").unwrap_throw() {
         if let Some(id) = card.get_attribute("id") {
             if let Some(name) = card.get_attribute("name") {
                 if let Some(tp) = doc.select_parse::<String>("sb_resource") {
@@ -781,20 +781,37 @@ fn handle_click_ev(elem: &Element) {
     }
 }
 
-/// Handle a click event with a button target
-fn handle_button_click_ev(doc: &Document, elem: &Element) {
+/// Handle a `click` event with a button target
+fn handle_button_click_ev(doc: &Document, id: String) {
     let cs = STATE.with(|rc| rc.borrow().selected.clone());
     if let Some(cs) = cs {
-        match elem.id() {
-            id if id == "ob_close" => cs.replace_card(doc, CardType::Compact),
-            id if id == "ob_delete" => {
+        match id.as_str() {
+            "ob_close" => cs.replace_card(doc, CardType::Compact),
+            "ob_delete" => {
                 if STATE.with(|rc| rc.borrow().delete_enabled) {
                     spawn_local(cs.delete());
                 }
             }
-            id if id == "ob_edit" => cs.replace_card(doc, CardType::Edit),
-            id if id == "ob_save" => spawn_local(cs.save_changed()),
-            id => console::log_1(&format!("unknown button: {}", id).into()),
+            "ob_edit" => cs.replace_card(doc, CardType::Edit),
+            "ob_save" => spawn_local(cs.save_changed()),
+            "link_ctrl" => go_controller_link(doc),
+            _ => console::log_1(&format!("unknown button: {}", id).into()),
+        }
+    }
+}
+
+/// Go to controller in `edit_ctrl`
+fn go_controller_link(doc: &Document) {
+    if let Some(ctrl) = doc
+        .input_parse::<String>("edit_ctrl")
+        .filter(|c| !c.is_empty())
+    {
+        if let Ok(sb_resource) = doc.elem::<HtmlSelectElement>("sb_resource") {
+            sb_resource.set_value(Controller::TNAME);
+            if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
+                input.set_value(&ctrl);
+                spawn_local(populate_list(Controller::TNAME.to_string(), ctrl));
+            }
         }
     }
 }
