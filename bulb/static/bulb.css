@@ -27,7 +27,7 @@ button {
   transition: background 50ms ease-in-out;
 }
 button:hover {
-  background: #ddd;
+  background-color: #ccc;
 }
 button:active {
   background: #bbb;
@@ -155,7 +155,7 @@ button:active {
 }
 .card:hover {
   box-shadow: 0.2rem 0.2rem 0.2rem 0 rgba(0, 0, 0, 0.5);
-  background-color: white;
+  background-color: #ccc;
 }
 .title {
   font-weight: bold;
@@ -180,7 +180,7 @@ button:active {
   flex: fill;
   display: flex;
   flex-direction: column;
-  background-color: #fed;
+  background-color: #eee;
   overflow-x: none;
   overflow-y: auto;
   margin: 0.1rem;

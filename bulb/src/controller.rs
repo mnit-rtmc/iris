@@ -56,11 +56,11 @@ impl Controller {
         let failed = self.fail_time.is_some();
         match (active, failed, long) {
             (true, false, false) => "👍",
-            (true, false, true) => "👍 ok",
+            (true, false, true) => "ok 👍",
             (true, true, false) => "☠️",
-            (true, true, true) => "☠️ failed",
+            (true, true, true) => "failed ☠️",
             (false, _, false) => "❓",
-            (false, _, true) => "❓ inactive",
+            (false, _, true) => "inactive ❓",
         }
     }
 }
@@ -132,11 +132,11 @@ impl Card for Controller {
     /// Convert to status HTML
     fn to_html_status(&self) -> String {
         let tname = CommLink::TNAME;
+        let condition = self.condition();
+        let comm_state = self.comm_state(true);
         let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
         let location = HtmlStr::new(self.location.as_ref()).with_len(64);
-        let condition = self.condition();
-        let comm_state = self.comm_state(true);
         let notes = HtmlStr::new(&self.notes);
         let version = match &self.version {
             Some(version) => {
@@ -158,15 +158,15 @@ impl Card for Controller {
         };
         format!(
             "<div class='row'>\
-              <span class='info'>{comm_link}:{drop_id} \
+              <span>{condition}</span>\
+              <span>{comm_state}</span>\
+              <span>{comm_link}:{drop_id} \
                 <button class='go_link' type='button' \
                         data-link='{comm_link}' data-type='{tname}'>🖇️</button>\
               </span>\
-              <span class='info'>{comm_state}</span>\
             </div>\
             <div class='row'>\
               <span> comm_config </span>\
-              <span>{condition}</span>\
             </div>\
             <div class='row'>\
               <span>{location}</span>\

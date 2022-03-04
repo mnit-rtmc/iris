@@ -48,11 +48,11 @@ impl CommLink {
     fn connected(&self, long: bool) -> &'static str {
         match (self.poll_enabled, self.connected, long) {
             (true, true, false) => "👍",
-            (true, true, true) => "👍 online",
+            (true, true, true) => "online 👍",
             (true, false, false) => "🔌",
-            (true, false, true) => "🔌 offline",
+            (true, false, true) => "offline 🔌",
             (false, _, false) => "❓",
-            (false, _, true) => "❓ disabled",
+            (false, _, true) => "disabled ❓",
         }
     }
 }
@@ -85,19 +85,19 @@ impl Card for CommLink {
 
     /// Convert to status HTML
     fn to_html_status(&self) -> String {
+        let connected = self.connected(true);
+        let disabled = if self.poll_enabled { "" } else { " disabled" };
         let description = HtmlStr::new(&self.description);
         let comm_config = self.comm_config_desc();
         let config = HtmlStr::new(&comm_config);
-        let connected = self.connected(true);
-        let disabled = if self.poll_enabled { "" } else { " disabled" };
         format!(
             "<div class='row'>\
-              <span class='info{disabled}'>{description}</span>\
+              <span>{connected}</span>\
+              <span></span>\
+              <span{disabled}'>{description}</span>\
             </div>\
             <div class='row'>\
               <span>{config}</span>\
-              <span>    </span>\
-              <span class='info'>{connected}</span>\
             </div>"
         )
     }
