@@ -355,7 +355,6 @@ public class WMsgEditorForm extends AbstractForm {
 		pPanel.add(new ILabel("wysiwyg.editor.standby"));
 		pPanel.add(standby_chk);
 		gbPanel.add(pPanel, gbc);
-		prefix_chk.setSelected(controller.getPrefixPage());
 		standby_chk.setSelected(controller.isStandby());
 		
 		/* Cancel/Save As/Save Buttons */
