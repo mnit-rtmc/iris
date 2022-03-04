@@ -65,12 +65,12 @@ impl Card for Alarm {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let description = HtmlStr::new(&self.description);
         let state = self.state(false);
+        let description = HtmlStr::new(&self.description);
         let disabled = disabled_attr(self.controller.is_some());
         format!(
-            "<span{disabled}>{description}</span>\
-            <span>{state}</span>\
+            "<span>{state}</span>\
+            <span{disabled}>{description}</span>\
             <span class='{NAME}'>{self}</span>"
         )
     }

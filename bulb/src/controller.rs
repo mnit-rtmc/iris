@@ -68,6 +68,7 @@ impl Card for Controller {
     const TNAME: &'static str = "Controller";
     const ENAME: &'static str = "🎛️ Controller";
     const UNAME: &'static str = "controller";
+    const HAS_LOCATION: bool = true;
     const HAS_STATUS: bool = true;
 
     fn is_match(&self, tx: &str) -> bool {
@@ -115,14 +116,14 @@ impl Card for Controller {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
+        let comm_state = self.comm_state(false);
         let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
         // condition 1 is "Active"
         let disabled = disabled_attr(self.condition == 1);
-        let comm_state = self.comm_state(false);
         format!(
-            "<span{disabled}>{comm_link}:{drop_id}</span>\
-            <span>{comm_state}</span>\
+            "<span>{comm_state}</span>\
+            <span{disabled}>{comm_link}:{drop_id}</span>\
             <span class='{NAME}'>{self}</span>"
         )
     }

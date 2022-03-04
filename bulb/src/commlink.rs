@@ -73,12 +73,12 @@ impl Card for CommLink {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let description = HtmlStr::new(&self.description).with_len(10);
         let connected = self.connected(false);
+        let description = HtmlStr::new(&self.description).with_len(10);
         let disabled = disabled_attr(self.poll_enabled);
         format!(
-            "<span{disabled}>{description}…</span>\
-            <span>{connected}</span>\
+            "<span>{connected}</span>\
+            <span{disabled}>{description}…</span>\
             <span class='{NAME}'>{self}</span>"
         )
     }

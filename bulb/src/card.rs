@@ -49,6 +49,7 @@ pub trait Card: fmt::Display + DeserializeOwned {
     const TNAME: &'static str;
     const ENAME: &'static str;
     const UNAME: &'static str;
+    const HAS_LOCATION: bool = false;
     const HAS_STATUS: bool = false;
 
     /// Create from a JSON value
@@ -123,7 +124,12 @@ pub trait Card: fmt::Display + DeserializeOwned {
     fn status_card(&self) -> String {
         let ename = Self::ENAME;
         let status = self.to_html_status();
-        // could use 🌐 instead
+        let location = if Self::HAS_LOCATION {
+            // could use 🌐 instead
+            "<button id='ob_loc' type='button'>🗺️ Location</button>"
+        } else {
+            ""
+        };
         format!(
             "<div class='row'>\
               <div class='{TITLE}'>{ename}</div>\
@@ -132,7 +138,7 @@ pub trait Card: fmt::Display + DeserializeOwned {
             {status}\
             <div class='row'>\
               <button id='ob_close' type='button'>❌ Close</button>\
-              <button id='ob_loc' type='button'>🗺️ Location</button>\
+              {location}
               <button id='ob_edit' type='button'>📝 Edit</button>\
             </div>"
         )
