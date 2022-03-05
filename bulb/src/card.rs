@@ -208,11 +208,9 @@ pub trait Card: fmt::Display + DeserializeOwned {
                 </li>"
             ));
         }
-        // TODO: split this into async calls so it can be cancelled
-        for ob in obs
-            .iter()
-            .filter(|ob| search.is_empty() || ob.is_match(search))
-        {
+        for ob in obs.iter().filter(|ob| {
+            search.is_empty() || search.split(' ').all(|s| ob.is_match(s))
+        }) {
             html.push_str(&format!(
                 "<li id='{tname}_{ob}' name='{ob}' class='card'>"
             ));
