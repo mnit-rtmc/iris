@@ -58,10 +58,11 @@ impl Card for Alarm {
     const UNAME: &'static str = "alarm";
     const HAS_STATUS: bool = true;
 
-    fn is_match(&self, tx: &str) -> bool {
-        self.description.to_lowercase().contains(tx)
-            || self.name.to_lowercase().contains(tx)
-            || self.state(true).contains(tx)
+    /// Check if a search string matches
+    fn is_match(&self, search: &str) -> bool {
+        self.description.to_lowercase().contains(search)
+            || self.name.to_lowercase().contains(search)
+            || self.state(true).contains(search)
     }
 
     /// Convert to compact HTML

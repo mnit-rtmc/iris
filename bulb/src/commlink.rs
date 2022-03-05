@@ -63,12 +63,13 @@ impl Card for CommLink {
     const UNAME: &'static str = "comm_link";
     const HAS_STATUS: bool = true;
 
-    fn is_match(&self, tx: &str) -> bool {
-        self.description.to_lowercase().contains(tx)
-            || self.name.to_lowercase().contains(tx)
-            || self.comm_config_desc().to_lowercase().contains(tx)
-            || self.uri.to_lowercase().contains(tx)
-            || self.connected(true).contains(tx)
+    /// Check if a search string matches
+    fn is_match(&self, search: &str) -> bool {
+        self.description.to_lowercase().contains(search)
+            || self.name.to_lowercase().contains(search)
+            || self.comm_config_desc().to_lowercase().contains(search)
+            || self.uri.to_lowercase().contains(search)
+            || self.connected(true).contains(search)
     }
 
     /// Convert to compact HTML

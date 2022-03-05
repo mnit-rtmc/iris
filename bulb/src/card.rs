@@ -182,7 +182,7 @@ pub trait Card: fmt::Display + DeserializeOwned {
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String>;
 
     /// Check if a search string matches
-    fn is_match(&self, _tx: &str) -> bool {
+    fn is_match(&self, _search: &str) -> bool {
         false
     }
 
@@ -192,7 +192,7 @@ pub trait Card: fmt::Display + DeserializeOwned {
     }
 
     /// Build a list of cards from a JSON array
-    fn build_cards(json: &JsValue, tx: &str) -> Result<String> {
+    fn build_cards(json: &JsValue, search: &str) -> Result<String> {
         let tname = Self::TNAME;
         let mut html = String::new();
         html.push_str("<ul class='cards'>");
@@ -200,7 +200,7 @@ pub trait Card: fmt::Display + DeserializeOwned {
             .into_serde::<Vec<Self>>()
             .map_err(|e| JsValue::from(e.to_string()))?;
         let next_name = Self::next_name(&obs);
-        if tx.is_empty() {
+        if search.is_empty() {
             // the "Create" card has id "{tname}_" and next available name
             html.push_str(&format!(
                 "<li id='{tname}_' name='{next_name}' class='card'>\
@@ -209,7 +209,10 @@ pub trait Card: fmt::Display + DeserializeOwned {
             ));
         }
         // TODO: split this into async calls so it can be cancelled
-        for ob in obs.iter().filter(|ob| ob.is_match(tx)) {
+        for ob in obs
+            .iter()
+            .filter(|ob| search.is_empty() || ob.is_match(search))
+        {
             html.push_str(&format!(
                 "<li id='{tname}_{ob}' name='{ob}' class='card'>"
             ));

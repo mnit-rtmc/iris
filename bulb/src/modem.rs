@@ -41,8 +41,9 @@ impl Card for Modem {
     const ENAME: &'static str = "🖀 Modem";
     const UNAME: &'static str = "modem";
 
-    fn is_match(&self, tx: &str) -> bool {
-        self.name.to_lowercase().contains(tx)
+    /// Check if a search string matches
+    fn is_match(&self, search: &str) -> bool {
+        self.name.to_lowercase().contains(search)
     }
 
     /// Convert to compact HTML

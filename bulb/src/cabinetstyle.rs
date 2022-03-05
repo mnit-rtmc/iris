@@ -42,8 +42,9 @@ impl Card for CabinetStyle {
     const ENAME: &'static str = "🗄️ Cabinet Style";
     const UNAME: &'static str = "cabinet_style";
 
-    fn is_match(&self, tx: &str) -> bool {
-        self.name.to_lowercase().contains(tx)
+    /// Check if a search string matches
+    fn is_match(&self, search: &str) -> bool {
+        self.name.to_lowercase().contains(search)
     }
 
     /// Convert to compact HTML

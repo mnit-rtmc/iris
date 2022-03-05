@@ -30,6 +30,8 @@ authentication.
 * graft
   - [X] Add routes for maintenance resources
   - [X] Date / time formatting (RFC 3339)
+  - [ ] ETags for table versioning
+  - [ ] Check for Operate / Plan access levels
 * bulb
   - [X] Resource type selector with card list
   - [X] Search filter
@@ -38,6 +40,7 @@ authentication.
   - [X] Status button / view
   - [X] Feedback with "toast" popups
   - [ ] UI refinements
+  - [ ] Tooltips
   - [ ] Authentication and session expiration
 
 ## Phase 4 — DMS control
@@ -55,11 +58,6 @@ authentication.
   - [ ] Generate DMS previews and insert into img element using data URI
   - [ ] Connect to graft for SSE
   - [ ] Write full installation documentation
-
-## Other Bits
-
-* graft
-  - [ ] ETags for table versioning
 
 
 [bulb]: https://github.com/mnit-rtmc/iris/tree/master/bulb

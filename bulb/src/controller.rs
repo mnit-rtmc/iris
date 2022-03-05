@@ -72,34 +72,34 @@ impl Card for Controller {
     const HAS_LOCATION: bool = true;
     const HAS_STATUS: bool = true;
 
-    fn is_match(&self, tx: &str) -> bool {
-        self.name.contains(tx)
+    /// Check if a search string matches
+    fn is_match(&self, search: &str) -> bool {
+        self.name.contains(search)
             || {
                 let comm_link = self.comm_link.to_lowercase();
-                comm_link.contains(tx)
-                    || format!("{}:{}", comm_link, self.drop_id).contains(tx)
+                format!("{comm_link}:{}", self.drop_id).contains(search)
             }
-            || self.comm_state(true).contains(tx)
-            || self.notes.to_lowercase().contains(tx)
+            || self.comm_state(true).contains(search)
+            || self.notes.to_lowercase().contains(search)
             || self
                 .location
                 .as_deref()
                 .unwrap_or("")
                 .to_lowercase()
-                .contains(tx)
-            || self.condition().to_lowercase().contains(tx)
+                .contains(search)
+            || self.condition().to_lowercase().contains(search)
             || self
                 .cabinet_style
                 .as_deref()
                 .unwrap_or("")
                 .to_lowercase()
-                .contains(tx)
+                .contains(search)
             || self
                 .version
                 .as_deref()
                 .unwrap_or("")
                 .to_lowercase()
-                .contains(tx)
+                .contains(search)
     }
 
     /// Get next suggested name

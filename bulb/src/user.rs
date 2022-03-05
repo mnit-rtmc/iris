@@ -40,15 +40,16 @@ impl Card for User {
     const ENAME: &'static str = "🧑 User";
     const UNAME: &'static str = "user";
 
-    fn is_match(&self, tx: &str) -> bool {
-        self.name.contains(tx)
-            || self.full_name.to_lowercase().contains(tx)
+    /// Check if a search string matches
+    fn is_match(&self, search: &str) -> bool {
+        self.name.contains(search)
+            || self.full_name.to_lowercase().contains(search)
             || self
                 .role
                 .as_deref()
                 .unwrap_or("")
                 .to_lowercase()
-                .contains(tx)
+                .contains(search)
     }
 
     /// Convert to compact HTML

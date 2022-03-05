@@ -38,8 +38,9 @@ impl Card for Role {
     const ENAME: &'static str = "💪 Role";
     const UNAME: &'static str = "role";
 
-    fn is_match(&self, tx: &str) -> bool {
-        self.name.to_lowercase().contains(tx)
+    /// Check if a search string matches
+    fn is_match(&self, search: &str) -> bool {
+        self.name.to_lowercase().contains(search)
     }
 
     /// Convert to compact HTML

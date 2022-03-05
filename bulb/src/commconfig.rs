@@ -139,9 +139,10 @@ impl Card for CommConfig {
     const ENAME: &'static str = "📡 Comm Config";
     const UNAME: &'static str = "comm_config";
 
-    fn is_match(&self, tx: &str) -> bool {
-        self.description.to_lowercase().contains(tx)
-            || self.name.to_lowercase().contains(tx)
+    /// Check if a search string matches
+    fn is_match(&self, search: &str) -> bool {
+        self.description.to_lowercase().contains(search)
+            || self.name.to_lowercase().contains(search)
     }
 
     /// Get next suggested name

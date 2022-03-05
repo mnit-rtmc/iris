@@ -68,9 +68,14 @@ Restricted resources can be accessed using standard http methods:
 
 A `Content-Type: application/json` header is included where appropriate.
 
-A `GET` request of all objects of a `{type}` contains only the *minimal*
-attributes.  Those are attributes needed for *searching* and *displaying
-compact cards*.
+### All Object Arrays
+
+A `GET iris/api/{type}` returns all objects of `{type}` in a JSON array.
+These objects contain only the *minimal* attributes -- those needed for
+*searching* and *displaying compact cards*.
+
+The response for these requests contains an ETag header, containing a table
+version taken from the file's *created* metadata, encoded in hexadecimal.
 
 ## Resource Types
 
@@ -144,10 +149,6 @@ compact cards*.
 | Read Only    | name             |
 | 💡 Plan      | enabled          |
 | 🔧 Configure | full\_name, role |
-
-## ETags and Caching
-
-Consider using Etags to avoid mid-air collisions
 
 
 [permission]: #permission

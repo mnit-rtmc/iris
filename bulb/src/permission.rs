@@ -76,11 +76,12 @@ impl Card for Permission {
     const ENAME: &'static str = "🗝️ Permission";
     const UNAME: &'static str = "permission";
 
-    fn is_match(&self, tx: &str) -> bool {
-        self.id.to_string().contains(tx)
-            | access_str(self.access_n, true).contains(tx)
-            | self.role.to_lowercase().contains(tx)
-            | self.resource_n.contains(tx)
+    /// Check if a search string matches
+    fn is_match(&self, search: &str) -> bool {
+        self.id.to_string().contains(search)
+            || access_str(self.access_n, true).contains(search)
+            || self.role.to_lowercase().contains(search)
+            || self.resource_n.contains(search)
     }
 
     /// Get row for create card

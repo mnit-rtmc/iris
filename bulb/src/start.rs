@@ -152,11 +152,11 @@ impl DeferredAction {
 }
 
 /// Populate `sb_list` with `tp` card types
-async fn populate_list(tp: String, tx: String) {
+async fn populate_list(tp: String, search: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let sb_list = doc.elem::<Element>("sb_list").unwrap_throw();
-    match create_cards(tp, tx).await {
+    match create_cards(tp, &search).await {
         Ok(cards) => sb_list.set_inner_html(&cards),
         Err(e) => {
             // ⛔ 🔒 unauthorized (401) should be handled here
@@ -170,26 +170,26 @@ async fn populate_list(tp: String, tx: String) {
 }
 
 /// Create cards for `sb_list`
-async fn create_cards(tp: String, tx: String) -> Result<String> {
+async fn create_cards(tp: String, search: &str) -> Result<String> {
     match tp.as_str() {
-        Alarm::TNAME => try_build_cards::<Alarm>(tx).await,
-        CabinetStyle::TNAME => try_build_cards::<CabinetStyle>(tx).await,
-        CommConfig::TNAME => try_build_cards::<CommConfig>(tx).await,
-        CommLink::TNAME => try_build_cards::<CommLink>(tx).await,
-        Controller::TNAME => try_build_cards::<Controller>(tx).await,
-        Modem::TNAME => try_build_cards::<Modem>(tx).await,
-        Permission::TNAME => try_build_cards::<Permission>(tx).await,
-        Role::TNAME => try_build_cards::<Role>(tx).await,
-        User::TNAME => try_build_cards::<User>(tx).await,
+        Alarm::TNAME => try_build_cards::<Alarm>(search).await,
+        CabinetStyle::TNAME => try_build_cards::<CabinetStyle>(search).await,
+        CommConfig::TNAME => try_build_cards::<CommConfig>(search).await,
+        CommLink::TNAME => try_build_cards::<CommLink>(search).await,
+        Controller::TNAME => try_build_cards::<Controller>(search).await,
+        Modem::TNAME => try_build_cards::<Modem>(search).await,
+        Permission::TNAME => try_build_cards::<Permission>(search).await,
+        Role::TNAME => try_build_cards::<Role>(search).await,
+        User::TNAME => try_build_cards::<User>(search).await,
         _ => Ok("".into()),
     }
 }
 
 /// Try to build cards
-async fn try_build_cards<C: Card>(tx: String) -> Result<String> {
+async fn try_build_cards<C: Card>(search: &str) -> Result<String> {
     let json = fetch_get(&format!("/iris/api/{}", C::UNAME)).await?;
-    let tx = tx.to_lowercase();
-    let html = C::build_cards(&json, &tx)?;
+    let search = search.to_lowercase();
+    let html = C::build_cards(&json, &search)?;
     Ok(html)
 }
 
@@ -703,10 +703,10 @@ fn search_list() {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
-        let value = input.value();
+        let search = input.value();
         deselect_card(&doc);
         if let Some(tp) = doc.select_parse::<String>("sb_resource") {
-            spawn_local(populate_list(tp, value));
+            spawn_local(populate_list(tp, search));
         }
     }
 }
