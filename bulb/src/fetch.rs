@@ -36,19 +36,15 @@ pub async fn fetch_get(uri: &str) -> Result<JsValue> {
             Error::FetchRequest()
         })?;
     let resp: Response = resp.dyn_into().unwrap_throw();
-    match resp.status() {
-        200 => {
-            let json = resp.json().map_err(|e| {
-                console::log_1(&e);
-                Error::FetchRequest()
-            })?;
-            JsFuture::from(json).await.map_err(|e| {
-                console::log_1(&e);
-                Error::FetchRequest()
-            })
-        }
-        _ => Err(Error::FetchResponse(resp.status())),
-    }
+    resp_status(resp.status())?;
+    let json = resp.json().map_err(|e| {
+        console::log_1(&e);
+        Error::FetchRequest()
+    })?;
+    JsFuture::from(json).await.map_err(|e| {
+        console::log_1(&e);
+        Error::FetchRequest()
+    })
 }
 
 /// Perform a fetch request
@@ -75,29 +71,31 @@ async fn perform_fetch(
     Ok(resp.dyn_into().unwrap_throw())
 }
 
+/// Check for errors in response status code
+fn resp_status(sc: u16) -> Result<()> {
+    match sc {
+        200 | 201 | 202 | 204 => Ok(()),
+        401 => Err(Error::FetchResponseUnauthorized()),
+        403 => Err(Error::FetchResponseForbidden()),
+        409 => Err(Error::FetchResponseConflict()),
+        _ => Err(Error::FetchResponseOther(sc)),
+    }
+}
+
 /// Fetch a PATCH request
 pub async fn fetch_patch(uri: &str, json: &JsValue) -> Result<()> {
     let resp = perform_fetch("PATCH", uri, Some(json)).await?;
-    match resp.status() {
-        200 | 202 | 204 => Ok(()),
-        _ => Err(Error::FetchResponse(resp.status())),
-    }
+    resp_status(resp.status())
 }
 
 /// Fetch a POST request
 pub async fn fetch_post(uri: &str, json: &JsValue) -> Result<()> {
     let resp = perform_fetch("POST", uri, Some(json)).await?;
-    match resp.status() {
-        200 | 201 | 202 => Ok(()),
-        _ => Err(Error::FetchResponse(resp.status())),
-    }
+    resp_status(resp.status())
 }
 
 /// Fetch a DELETE request
 pub async fn fetch_delete(uri: &str) -> Result<()> {
     let resp = perform_fetch("DELETE", uri, None).await?;
-    match resp.status() {
-        200 | 202 | 204 => Ok(()),
-        _ => Err(Error::FetchResponse(resp.status())),
-    }
+    resp_status(resp.status())
 }

@@ -18,9 +18,21 @@ pub enum Error {
     #[error("Fetch request error")]
     FetchRequest(),
 
-    /// Fetch response error
+    /// Fetch response "Unauthorized 401"
+    #[error("Unauthorized")]
+    FetchResponseUnauthorized(),
+
+    /// Fetch response "Forbidden 403"
+    #[error("Forbidden")]
+    FetchResponseForbidden(),
+
+    /// Fetch response "Conflict 409"
+    #[error("Conflict")]
+    FetchResponseConflict(),
+
+    /// Fetch response other error
     #[error("Status code {0}")]
-    FetchResponse(u16),
+    FetchResponseOther(u16),
 
     /// Name missing
     #[error("Name missing")]
