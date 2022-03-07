@@ -80,7 +80,7 @@ struct State {
     /// Timer tick count
     tick: i32,
     /// Selected card state
-    selected: Option<CardState>,
+    selected_card: Option<CardState>,
     /// Delete action enabled (slider transition finished)
     delete_enabled: bool,
 }
@@ -247,7 +247,7 @@ async fn fetch_card<C: Card>(name: String) -> Result<CardState> {
 
 /// Selected card state
 #[derive(Clone)]
-struct CardState {
+pub struct CardState {
     /// Type name
     tname: &'static str,
     /// Object URI
@@ -296,11 +296,11 @@ impl CardState {
         STATE.with(|rc| {
             let mut state = rc.borrow_mut();
             if ct != CardType::Compact {
-                state.selected.replace(self);
+                state.selected_card.replace(self);
                 // should only clear UI actions...
                 state.deferred.clear();
             } else {
-                state.selected.take();
+                state.selected_card.take();
             }
         });
     }
@@ -682,7 +682,7 @@ fn handle_sb_resource_ev(tp: String) {
     let doc = window.document().unwrap_throw();
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        state.selected.take()
+        state.selected_card.take()
     });
     if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
         input.set_value("");
@@ -775,7 +775,7 @@ fn handle_click_ev(target: &Element) {
 
 /// Handle a `click` event with a button target
 fn handle_button_click_ev(doc: &Document, target: &Element) {
-    let cs = STATE.with(|rc| rc.borrow().selected.clone());
+    let cs = STATE.with(|rc| rc.borrow().selected_card.clone());
     if let Some(cs) = cs {
         let id = target.id();
         match id.as_str() {
@@ -860,7 +860,7 @@ fn set_delete_enabled(enabled: bool) {
 fn deselect_card(doc: &Document) {
     let cs = STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        state.selected.take()
+        state.selected_card.take()
     });
     if let Some(cs) = cs {
         cs.replace_card(doc, CardType::Compact);
