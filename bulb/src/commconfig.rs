@@ -11,9 +11,9 @@
 // GNU General Public License for more details.
 //
 use crate::card::{Card, NAME};
+use crate::error::Result;
 use crate::start::protocols_html;
 use crate::util::{Dom, HtmlStr, OptVal};
-use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;

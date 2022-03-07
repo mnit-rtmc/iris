@@ -10,8 +10,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::error::{Error, Result};
 use crate::util::Dom;
-use crate::Result;
 use serde::de::DeserializeOwned;
 use serde_json::map::Map;
 use serde_json::Value;
@@ -54,7 +54,7 @@ pub trait Card: fmt::Display + DeserializeOwned {
 
     /// Create from a JSON value
     fn new(json: &JsValue) -> Result<Self> {
-        json.into_serde::<Self>().map_err(|e| e.to_string().into())
+        Ok(json.into_serde::<Self>()?)
     }
 
     /// Build form using JSON value
@@ -119,7 +119,7 @@ pub trait Card: fmt::Display + DeserializeOwned {
                 return Ok(Value::Object(obj).to_string());
             }
         }
-        Err("name missing".into())
+        Err(Error::NameMissing())
     }
 
     /// Build a status card
@@ -196,9 +196,7 @@ pub trait Card: fmt::Display + DeserializeOwned {
         let tname = Self::TNAME;
         let mut html = String::new();
         html.push_str("<ul class='cards'>");
-        let obs = json
-            .into_serde::<Vec<Self>>()
-            .map_err(|e| JsValue::from(e.to_string()))?;
+        let obs = json.into_serde::<Vec<Self>>()?;
         let next_name = Self::next_name(&obs);
         if search.is_empty() {
             // the "Create" card has id "{tname}_" and next available name

@@ -39,6 +39,7 @@ authentication.
   - [X] Maintenance object CRUD
   - [X] Status button / view
   - [X] Feedback with "toast" popups
+  - [ ] Resource buttons: "Operate", "Plan", "Configure", etc.
   - [ ] UI refinements
   - [ ] Tooltips
   - [ ] Authentication and session expiration

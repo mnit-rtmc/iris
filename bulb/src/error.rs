@@ -10,17 +10,30 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-mod alarm;
-mod cabinetstyle;
-mod card;
-mod commconfig;
-mod commlink;
-mod controller;
-mod error;
-mod fetch;
-mod modem;
-mod permission;
-mod role;
-mod start;
-mod user;
-mod util;
+
+/// Bulb errors
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    /// Fetch request error
+    #[error("Fetch request error")]
+    FetchRequest(),
+
+    /// Fetch response error
+    #[error("Fetch response error")]
+    FetchResponse(u16),
+
+    /// Name missing
+    #[error("Name missing")]
+    NameMissing(),
+
+    /// Parse error
+    #[error("Parse error")]
+    ParseError(),
+
+    /// Serde JSON error
+    #[error("Serialization error")]
+    SerdeJson(#[from] serde_json::Error),
+}
+
+/// Bulb result
+pub type Result<T> = std::result::Result<T, Error>;

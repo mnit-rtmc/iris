@@ -11,9 +11,9 @@
 // GNU General Public License for more details.
 //
 use crate::card::{disabled_attr, Card, NAME};
+use crate::error::Result;
 use crate::start::{comm_configs_html, get_comm_config_desc};
 use crate::util::{Dom, HtmlStr};
-use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;

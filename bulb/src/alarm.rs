@@ -12,8 +12,8 @@
 //
 use crate::card::{disabled_attr, Card, NAME};
 use crate::controller::Controller;
+use crate::error::Result;
 use crate::util::{Dom, HtmlStr, OptVal};
-use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;

@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::Result;
+use crate::start::JsResult;
 use serde_json::Value;
 use std::fmt;
 use std::str::FromStr;
@@ -124,7 +124,7 @@ impl fmt::Display for HtmlStr<Option<&String>> {
 /// Helper trait for DOM methods
 pub trait Dom {
     /// Get an element by ID and cast it
-    fn elem<E: JsCast>(&self, id: &str) -> Result<E>;
+    fn elem<E: JsCast>(&self, id: &str) -> JsResult<E>;
 
     /// Get and parse a `select` element value
     fn select_parse<T: FromStr>(&self, id: &str) -> Option<T>;
@@ -140,10 +140,10 @@ pub trait Dom {
 }
 
 impl Dom for Document {
-    fn elem<E: JsCast>(&self, id: &str) -> Result<E> {
+    fn elem<E: JsCast>(&self, id: &str) -> JsResult<E> {
         Ok(self
             .get_element_by_id(id)
-            .ok_or("id not found")?
+            .ok_or("Invalid element ID")?
             .dyn_into::<E>()?)
     }
 

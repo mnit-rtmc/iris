@@ -10,6 +10,19 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::alarm::Alarm;
+use crate::cabinetstyle::CabinetStyle;
+use crate::card::{Card, CardType};
+use crate::commconfig::CommConfig;
+use crate::commlink::CommLink;
+use crate::controller::Controller;
+use crate::error::Result;
+use crate::fetch::{fetch_delete, fetch_get, fetch_patch, fetch_post};
+use crate::modem::Modem;
+use crate::permission::Permission;
+use crate::role::Role;
+use crate::user::User;
+use crate::util::Dom;
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
@@ -22,19 +35,8 @@ use web_sys::{
     ScrollLogicalPosition, TransitionEvent, Window,
 };
 
-use crate::alarm::Alarm;
-use crate::cabinetstyle::CabinetStyle;
-use crate::card::{Card, CardType};
-use crate::commconfig::CommConfig;
-use crate::commlink::CommLink;
-use crate::controller::Controller;
-use crate::fetch::{fetch_delete, fetch_get, fetch_patch, fetch_post};
-use crate::modem::Modem;
-use crate::permission::Permission;
-use crate::role::Role;
-use crate::user::User;
-use crate::util::Dom;
-use crate::Result;
+/// JavaScript result
+pub type JsResult<T> = std::result::Result<T, JsValue>;
 
 /// Interval (ms) between ticks for deferred actions
 const TICK_INTERVAL: i32 = 500;
@@ -160,11 +162,7 @@ async fn populate_list(tp: String, search: String) {
         Ok(cards) => sb_list.set_inner_html(&cards),
         Err(e) => {
             // ⛔ 🔒 unauthorized (401) should be handled here
-            console::log_1(&e);
-            show_toast(&format!(
-                "View failed: {}",
-                e.as_string().unwrap_or_else(|| "???".to_string())
-            ));
+            show_toast(&format!("View failed: {}", e));
         }
     }
 }
@@ -220,8 +218,9 @@ async fn expand_card<C: Card>(id: String, name: String) {
         match fetch_card::<C>(name).await {
             Ok(cs) => cs.replace_card(&doc, CardType::Status),
             Err(e) => {
+                // ⛔ 🔒 unauthorized (401) should be handled here
+                show_toast(&format!("Fetch failed: {}", e));
                 // Card list out-of-date; refresh with search
-                console::log_1(&e);
                 DeferredAction::SearchList.schedule(200);
             }
         }
@@ -232,7 +231,6 @@ async fn expand_card<C: Card>(id: String, name: String) {
 async fn fetch_card<C: Card>(name: String) -> Result<CardState> {
     let uri = name_uri::<C>(&name);
     let json = fetch_get(&uri).await?;
-    console::log_1(&json);
     Ok(CardState {
         tname: C::TNAME,
         uri,
@@ -282,7 +280,7 @@ impl CardState {
                 match build_card(self.tname, &self.name, &self.json, ct) {
                     Ok(html) => replace_card_html(&elem, ct, &html),
                     Err(e) => {
-                        console::log_1(&(&e).into());
+                        show_toast(&format!("Build failed: {}", e));
                         return;
                     }
                 }
@@ -318,10 +316,7 @@ impl CardState {
             Some(json) => {
                 match try_changed_fields(self.tname, &doc, json) {
                     Ok(v) => save_changed_fields(&self.uri, &v).await,
-                    Err(e) => {
-                        // this should only happen if the JSON is not valid
-                        console::log_1(&e);
-                    }
+                    Err(e) => show_toast(&format!("Change failed: {}", e)),
                 }
                 self.fetch_again().await;
             }
@@ -333,15 +328,9 @@ impl CardState {
     /// Fetch a card again with a GET request
     async fn fetch_again(&mut self) {
         match fetch_get(&self.uri).await {
-            Ok(json) => {
-                console::log_1(&json);
-                self.json = Some(json);
-            }
-            Err(e) => {
-                // Card list out-of-date; refresh with search
-                console::log_1(&e);
-                DeferredAction::SearchList.schedule(200);
-            }
+            Ok(json) => self.json = Some(json),
+            // Card list out-of-date; refresh with search
+            Err(_) => DeferredAction::SearchList.schedule(200),
         }
     }
 }
@@ -350,13 +339,13 @@ impl CardState {
 async fn save_changed_fields(uri: &str, v: &str) {
     let json = v.into();
     if let Err(e) = fetch_patch(uri, &json).await {
-        console::log_1(&e);
-        show_toast("Save failed!");
+        show_toast(&format!("Save failed: {}", e));
     }
 }
 
 /// Show a toast message
 fn show_toast(msg: &str) {
+    console::log_1(&format!("toast: {msg}").into());
     get_toast().filter(|t| {
         t.set_inner_html(msg);
         t.set_class_name("show");
@@ -410,10 +399,7 @@ fn replace_card_html(elem: &HtmlElement, ct: CardType, html: &str) {
 async fn try_delete(uri: &str) {
     match fetch_delete(uri).await {
         Ok(_) => DeferredAction::SearchList.schedule(1500),
-        Err(e) => {
-            console::log_1(&e);
-            show_toast("Delete failed!");
-        }
+        Err(e) => show_toast(&format!("Delete failed: {}", e)),
     }
 }
 
@@ -421,10 +407,7 @@ async fn try_delete(uri: &str) {
 async fn try_create_new(tp: &str, doc: &Document) {
     match create_new(tp, doc).await {
         Ok(_) => DeferredAction::SearchList.schedule(1500),
-        Err(e) => {
-            console::log_1(&e);
-            show_toast("Create failed!");
-        }
+        Err(e) => show_toast(&format!("Create failed: {}", e)),
     }
 }
 
@@ -448,8 +431,8 @@ async fn create_new(tp: &str, doc: &Document) -> Result<()> {
 async fn do_create<C: Card>(doc: &Document) -> Result<()> {
     let value = C::create_value(doc)?;
     let json = value.into();
-    console::log_1(&json);
-    fetch_post(&format!("/iris/api/{}", C::UNAME), &json).await
+    fetch_post(&format!("/iris/api/{}", C::UNAME), &json).await?;
+    Ok(())
 }
 
 /// Try to retrieve changed fields on edit form
@@ -499,23 +482,19 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 /// Application starting function
 #[wasm_bindgen(start)]
-pub async fn start() -> Result<()> {
+pub async fn start() -> core::result::Result<(), JsError> {
     // this should be debug only
     console_error_panic_hook::set_once();
-
-    let window = web_sys::window().unwrap_throw();
-    let doc = window.document().unwrap_throw();
-
     let json = fetch_get("/iris/api/access").await?;
-    let access = json.into_serde::<Vec<Permission>>().unwrap_throw();
+    let access = json.into_serde::<Vec<Permission>>()?;
     let json = fetch_get("/iris/comm_protocol").await?;
-    let protocols = json.into_serde::<Vec<Protocol>>().unwrap_throw();
+    let protocols = json.into_serde::<Vec<Protocol>>()?;
     let json = fetch_get("/iris/condition").await?;
-    let conditions = json.into_serde::<Vec<Condition>>().unwrap_throw();
+    let conditions = json.into_serde::<Vec<Condition>>()?;
     let json = fetch_get("/iris/resource_type").await?;
-    let resource_types = json.into_serde::<Vec<String>>().unwrap_throw();
+    let resource_types = json.into_serde::<Vec<String>>()?;
     let json = fetch_get(&format!("/iris/api/{}", CommConfig::UNAME)).await?;
-    let comm_configs = json.into_serde::<Vec<CommConfig>>().unwrap_throw();
+    let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
         state.initialize(
@@ -526,14 +505,21 @@ pub async fn start() -> Result<()> {
             comm_configs,
         );
     });
+    add_event_listeners().unwrap_throw();
+    Ok(())
+}
 
+/// Add all event listeners
+fn add_event_listeners() -> JsResult<()> {
+    let window = web_sys::window().unwrap_throw();
+    let doc = window.document().unwrap_throw();
     let sb_resource: HtmlSelectElement = doc.elem("sb_resource")?;
     sb_resource.set_inner_html(&types_html());
     add_select_event_listener(&sb_resource, handle_sb_resource_ev)?;
     add_input_event_listener(&doc.elem("sb_search")?)?;
     add_click_event_listener(&doc.elem("sb_list")?)?;
     add_transition_event_listener(&doc.elem("sb_list")?)?;
-    add_interval_callback(&window)?;
+    add_interval_callback(&window).unwrap_throw();
     Ok(())
 }
 
@@ -715,7 +701,7 @@ fn search_list() {
 fn add_select_event_listener(
     elem: &HtmlSelectElement,
     handle_ev: fn(String),
-) -> Result<()> {
+) -> JsResult<()> {
     let closure = Closure::wrap(Box::new(move |e: Event| {
         let value = e
             .current_target()
@@ -735,7 +721,7 @@ fn add_select_event_listener(
 }
 
 /// Add an "input" event listener to an element
-fn add_input_event_listener(elem: &HtmlInputElement) -> Result<()> {
+fn add_input_event_listener(elem: &HtmlInputElement) -> JsResult<()> {
     let closure = Closure::wrap(Box::new(|_e: Event| {
         search_list();
     }) as Box<dyn Fn(_)>);
@@ -749,7 +735,7 @@ fn add_input_event_listener(elem: &HtmlInputElement) -> Result<()> {
 }
 
 /// Add a `click` event listener to an element
-fn add_click_event_listener(elem: &Element) -> Result<()> {
+fn add_click_event_listener(elem: &Element) -> JsResult<()> {
     let closure = Closure::wrap(Box::new(|e: Event| {
         let value = e.target().unwrap().dyn_into::<Element>().unwrap();
         handle_click_ev(&value);
@@ -823,7 +809,7 @@ fn go_resource(doc: &Document, target: &Element) {
 }
 
 /// Add transition event listener to an element
-fn add_transition_event_listener(elem: &Element) -> Result<()> {
+fn add_transition_event_listener(elem: &Element) -> JsResult<()> {
     let closure =
         Closure::wrap(Box::new(handle_transition_ev) as Box<dyn FnMut(_)>);
     elem.add_event_listener_with_callback(
@@ -876,7 +862,7 @@ fn deselect_card(doc: &Document) {
 }
 
 /// Add callback for regular interval checks
-fn add_interval_callback(window: &Window) -> Result<()> {
+fn add_interval_callback(window: &Window) -> JsResult<()> {
     let closure = Closure::wrap(Box::new(|| {
         tick_interval();
     }) as Box<dyn Fn()>);

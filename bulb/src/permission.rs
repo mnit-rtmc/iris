@@ -11,9 +11,9 @@
 // GNU General Public License for more details.
 //
 use crate::card::{Card, NAME};
+use crate::error::{Error, Result};
 use crate::start::resource_types_html;
 use crate::util::{Dom, HtmlStr, OptVal};
-use crate::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
@@ -109,7 +109,7 @@ impl Card for Permission {
             obj.insert("resource_n".to_string(), Value::String(resource_n));
             return Ok(Value::Object(obj).to_string());
         }
-        Err("parse error".into())
+        Err(Error::ParseError())
     }
 
     /// Convert to compact HTML
