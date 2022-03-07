@@ -16,7 +16,7 @@ use crate::card::{Card, CardType};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::fetch::{fetch_delete, fetch_get, fetch_patch, fetch_post};
 use crate::modem::Modem;
 use crate::permission::Permission;
@@ -160,8 +160,11 @@ async fn populate_list(tp: String, search: String) {
     let sb_list = doc.elem::<Element>("sb_list").unwrap_throw();
     match create_cards(tp, &search).await {
         Ok(cards) => sb_list.set_inner_html(&cards),
-        Err(e) => {
+        Err(Error::FetchResponse(401)) => {
             // ⛔ 🔒 unauthorized (401) should be handled here
+            show_toast("Unauthorized");
+        }
+        Err(e) => {
             show_toast(&format!("View failed: {}", e));
         }
     }
@@ -217,8 +220,11 @@ async fn expand_card<C: Card>(id: String, name: String) {
     } else {
         match fetch_card::<C>(name).await {
             Ok(cs) => cs.replace_card(&doc, CardType::Status),
-            Err(e) => {
+            Err(Error::FetchResponse(401)) => {
                 // ⛔ 🔒 unauthorized (401) should be handled here
+                show_toast("Unauthorized");
+            }
+            Err(e) => {
                 show_toast(&format!("Fetch failed: {}", e));
                 // Card list out-of-date; refresh with search
                 DeferredAction::SearchList.schedule(200);
@@ -399,6 +405,9 @@ fn replace_card_html(elem: &HtmlElement, ct: CardType, html: &str) {
 async fn try_delete(uri: &str) {
     match fetch_delete(uri).await {
         Ok(_) => DeferredAction::SearchList.schedule(1500),
+        Err(Error::FetchResponse(409)) => {
+            show_toast("Delete failed: Conflict");
+        }
         Err(e) => show_toast(&format!("Delete failed: {}", e)),
     }
 }

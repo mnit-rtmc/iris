@@ -19,7 +19,7 @@ pub enum Error {
     FetchRequest(),
 
     /// Fetch response error
-    #[error("Fetch response error")]
+    #[error("Status code {0}")]
     FetchResponse(u16),
 
     /// Name missing

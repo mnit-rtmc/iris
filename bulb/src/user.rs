@@ -37,7 +37,7 @@ impl fmt::Display for User {
 
 impl Card for User {
     const TNAME: &'static str = "User";
-    const ENAME: &'static str = "🧑 User";
+    const ENAME: &'static str = "👤 User";
     const UNAME: &'static str = "user";
 
     /// Check if a search string matches
