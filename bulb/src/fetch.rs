@@ -79,7 +79,7 @@ async fn perform_fetch(
 pub async fn fetch_patch(uri: &str, json: &JsValue) -> Result<()> {
     let resp = perform_fetch("PATCH", uri, Some(json)).await?;
     match resp.status() {
-        200 | 204 => Ok(()),
+        200 | 202 | 204 => Ok(()),
         _ => Err(Error::FetchResponse(resp.status())),
     }
 }
@@ -88,7 +88,7 @@ pub async fn fetch_patch(uri: &str, json: &JsValue) -> Result<()> {
 pub async fn fetch_post(uri: &str, json: &JsValue) -> Result<()> {
     let resp = perform_fetch("POST", uri, Some(json)).await?;
     match resp.status() {
-        200 | 201 => Ok(()),
+        200 | 201 | 202 => Ok(()),
         _ => Err(Error::FetchResponse(resp.status())),
     }
 }
@@ -97,7 +97,7 @@ pub async fn fetch_post(uri: &str, json: &JsValue) -> Result<()> {
 pub async fn fetch_delete(uri: &str) -> Result<()> {
     let resp = perform_fetch("DELETE", uri, None).await?;
     match resp.status() {
-        200 | 204 => Ok(()),
+        200 | 202 | 204 => Ok(()),
         _ => Err(Error::FetchResponse(resp.status())),
     }
 }

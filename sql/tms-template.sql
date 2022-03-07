@@ -1489,6 +1489,9 @@ CREATE TABLE event.comm_event (
 	device_id VARCHAR(20)
 );
 
+-- DELETE of iris.controller *very* slow without this index
+CREATE INDEX ON event.comm_event (controller);
+
 CREATE VIEW comm_event_view AS
 	SELECT e.event_id, e.event_date, ed.description, e.controller,
 	       c.comm_link, c.drop_id

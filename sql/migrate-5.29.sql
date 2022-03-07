@@ -84,4 +84,7 @@ CREATE TRIGGER i_user_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.i_user
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
+-- DELETE of iris.controller *very* slow without this index
+CREATE INDEX ON event.comm_event (controller);
+
 COMMIT;

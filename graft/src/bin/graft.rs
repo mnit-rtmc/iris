@@ -637,5 +637,5 @@ async fn sonar_object_delete(tp: &str, req: Request<State>) -> tide::Result {
     let nm = resp!(obj_name(tp, &req));
     let mut c = resp!(connection(&req).await);
     resp!(c.remove_object(&nm).await);
-    Ok(Response::builder(StatusCode::NoContent).build())
+    Ok(Response::builder(StatusCode::Accepted).build())
 }
