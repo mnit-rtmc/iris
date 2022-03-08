@@ -38,6 +38,12 @@ use web_sys::{
 /// JavaScript result
 pub type JsResult<T> = std::result::Result<T, JsValue>;
 
+/// ID of toast element
+const TOAST_ID: &str = "sb_toast";
+
+/// ID of login shade
+const LOGIN_ID: &str = "sb_login";
+
 /// Interval (ms) between ticks for deferred actions
 const TICK_INTERVAL: i32 = 500;
 
@@ -106,6 +112,11 @@ impl State {
         self.comm_configs.append(&mut comm_configs);
     }
 
+    /// Does state need initializing?
+    fn needs_initializing(&self) -> bool {
+        self.resource_types.is_empty()
+    }
+
     /// Add ticks to current tick count
     fn plus_ticks(&self, t: i32) -> i32 {
         if let Some(t) = self.tick.checked_add(t) {
@@ -160,13 +171,8 @@ async fn populate_list(tp: String, search: String) {
     let sb_list = doc.elem::<Element>("sb_list").unwrap_throw();
     match create_cards(tp, &search).await {
         Ok(cards) => sb_list.set_inner_html(&cards),
-        Err(Error::FetchResponseUnauthorized()) => {
-            // ⛔ 🔒 unauthorized (401) should be handled here
-            show_toast("Unauthorized");
-        }
-        Err(e) => {
-            show_toast(&format!("View failed: {}", e));
-        }
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(e) => show_toast(&format!("View failed: {}", e)),
     }
 }
 
@@ -220,13 +226,10 @@ async fn expand_card<C: Card>(id: String, name: String) {
     } else {
         match fetch_card::<C>(name).await {
             Ok(cs) => cs.replace_card(&doc, CardType::Status),
-            Err(Error::FetchResponseUnauthorized()) => {
-                // ⛔ 🔒 unauthorized (401) should be handled here
-                show_toast("Unauthorized");
-            }
+            Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => {
                 show_toast(&format!("Fetch failed: {}", e));
-                // Card list out-of-date; refresh with search
+                // Card list may be out-of-date; refresh with search
                 DeferredAction::SearchList.schedule(200);
             }
         }
@@ -285,6 +288,10 @@ impl CardState {
             Ok(elem) => {
                 match build_card(self.tname, &self.name, &self.json, ct) {
                     Ok(html) => replace_card_html(&elem, ct, &html),
+                    Err(Error::FetchResponseUnauthorized()) => {
+                        show_login();
+                        return;
+                    }
                     Err(e) => {
                         show_toast(&format!("Build failed: {}", e));
                         return;
@@ -307,11 +314,7 @@ impl CardState {
 
     /// Delete selected card / object
     async fn delete(self) {
-        if let Some(window) = web_sys::window() {
-            let doc = window.document().unwrap_throw();
-            deselect_card(&doc);
-            try_delete(&self.uri).await;
-        }
+        try_delete(&self.uri).await;
     }
 
     /// Save changed fields on Edit form
@@ -320,15 +323,25 @@ impl CardState {
         let doc = window.document().unwrap_throw();
         match &self.json {
             Some(json) => {
-                match try_changed_fields(self.tname, &doc, json) {
-                    Ok(v) => save_changed_fields(&self.uri, &v).await,
-                    Err(e) => show_toast(&format!("Change failed: {}", e)),
+                let res = match try_changed_fields(self.tname, &doc, json) {
+                    Ok(v) => fetch_patch(&self.uri, &v.into()).await,
+                    Err(e) => Err(e),
+                };
+                match res {
+                    Ok(_) => {
+                        self.fetch_again().await;
+                        self.replace_card(&doc, CardType::Compact);
+                    }
+                    Err(Error::FetchResponseUnauthorized()) => show_login(),
+                    Err(e) => show_toast(&format!("Save failed: {}", e)),
                 }
-                self.fetch_again().await;
             }
-            None => try_create_new(self.tname, &doc).await,
+            None => {
+                if try_create_new(self.tname, &doc).await {
+                    self.replace_card(&doc, CardType::Compact);
+                }
+            }
         }
-        self.replace_card(&doc, CardType::Compact);
     }
 
     /// Fetch a card again with a GET request
@@ -341,18 +354,26 @@ impl CardState {
     }
 }
 
-/// Save changed fields
-async fn save_changed_fields(uri: &str, v: &str) {
-    let json = v.into();
-    if let Err(e) = fetch_patch(uri, &json).await {
-        show_toast(&format!("Save failed: {}", e));
-    }
+/// Show login form shade
+fn show_login() {
+    get_element(LOGIN_ID).filter(|e| {
+        e.set_class_name("show");
+        false
+    });
+}
+
+/// Hide login form shade
+fn hide_login() {
+    get_element(LOGIN_ID).filter(|e| {
+        e.set_class_name("");
+        false
+    });
 }
 
 /// Show a toast message
 fn show_toast(msg: &str) {
     console::log_1(&format!("toast: {msg}").into());
-    get_toast().filter(|t| {
+    get_element(TOAST_ID).filter(|t| {
         t.set_inner_html(msg);
         t.set_class_name("show");
         DeferredAction::HideToast.schedule(3000);
@@ -360,11 +381,11 @@ fn show_toast(msg: &str) {
     });
 }
 
-/// Get toast element
-fn get_toast() -> Option<HtmlElement> {
+/// Get element by ID
+fn get_element(id: &str) -> Option<HtmlElement> {
     if let Some(window) = web_sys::window() {
         if let Some(doc) = window.document() {
-            return doc.elem("sb_toast").ok();
+            return doc.elem(id).ok();
         }
     }
     None
@@ -372,7 +393,7 @@ fn get_toast() -> Option<HtmlElement> {
 
 /// Hide toast
 fn hide_toast() {
-    get_toast().filter(|t| {
+    get_element(TOAST_ID).filter(|t| {
         t.set_class_name("");
         false
     });
@@ -404,16 +425,33 @@ fn replace_card_html(elem: &HtmlElement, ct: CardType, html: &str) {
 /// Try to delete an object
 async fn try_delete(uri: &str) {
     match fetch_delete(uri).await {
-        Ok(_) => DeferredAction::SearchList.schedule(1500),
+        Ok(_) => {
+            if let Some(window) = web_sys::window() {
+                let doc = window.document().unwrap_throw();
+                deselect_card(&doc);
+            }
+            DeferredAction::SearchList.schedule(1500);
+        }
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
         Err(e) => show_toast(&format!("Delete failed: {}", e)),
     }
 }
 
 /// Try to create a new object
-async fn try_create_new(tp: &str, doc: &Document) {
+async fn try_create_new(tp: &str, doc: &Document) -> bool {
     match create_new(tp, doc).await {
-        Ok(_) => DeferredAction::SearchList.schedule(1500),
-        Err(e) => show_toast(&format!("Create failed: {}", e)),
+        Ok(_) => {
+            DeferredAction::SearchList.schedule(1500);
+            true
+        }
+        Err(Error::FetchResponseUnauthorized()) => {
+            show_login();
+            false
+        }
+        Err(e) => {
+            show_toast(&format!("Create failed: {}", e));
+            false
+        }
     }
 }
 
@@ -486,11 +524,50 @@ fn build_card(
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
+/// Page sidebar
+const SIDEBAR: &str = include_str!("sidebar.html");
+
 /// Application starting function
 #[wasm_bindgen(start)]
 pub async fn start() -> core::result::Result<(), JsError> {
     // this should be debug only
     console_error_panic_hook::set_once();
+    add_sidebar().unwrap_throw();
+    initialize_state().await;
+    Ok(())
+}
+
+/// Add sidebar HTML and event listeners
+fn add_sidebar() -> JsResult<()> {
+    let window = web_sys::window().unwrap_throw();
+    let doc = window.document().unwrap_throw();
+    let sidebar: HtmlElement = doc.elem("sidebar")?;
+    sidebar.set_inner_html(SIDEBAR);
+    add_click_event_listener(&sidebar)?;
+    let sb_resource: HtmlSelectElement = doc.elem("sb_resource")?;
+    add_select_event_listener(&sb_resource, handle_sb_resource_ev)?;
+    add_input_event_listener(&doc.elem("sb_search")?)?;
+    add_transition_event_listener(&doc.elem("sb_list")?)?;
+    add_interval_callback(&window).unwrap_throw();
+    Ok(())
+}
+
+/// Initialize app state
+async fn initialize_state() {
+    match do_initialize().await {
+        Ok(()) => {
+            let window = web_sys::window().unwrap_throw();
+            let doc = window.document().unwrap_throw();
+            if let Ok(r) = doc.elem::<HtmlElement>("sb_resource") {
+                r.set_inner_html(&types_html());
+            }
+        }
+        Err(_e) => console::log_1(&"State not initialized".into()),
+    }
+}
+
+/// Initialize app state
+async fn do_initialize() -> core::result::Result<(), JsError> {
     let json = fetch_get("/iris/api/access").await?;
     let access = json.into_serde::<Vec<Permission>>()?;
     let json = fetch_get("/iris/comm_protocol").await?;
@@ -511,21 +588,6 @@ pub async fn start() -> core::result::Result<(), JsError> {
             comm_configs,
         );
     });
-    add_event_listeners().unwrap_throw();
-    Ok(())
-}
-
-/// Add all event listeners
-fn add_event_listeners() -> JsResult<()> {
-    let window = web_sys::window().unwrap_throw();
-    let doc = window.document().unwrap_throw();
-    let sb_resource: HtmlSelectElement = doc.elem("sb_resource")?;
-    sb_resource.set_inner_html(&types_html());
-    add_select_event_listener(&sb_resource, handle_sb_resource_ev)?;
-    add_input_event_listener(&doc.elem("sb_search")?)?;
-    add_click_event_listener(&doc.elem("sb_list")?)?;
-    add_transition_event_listener(&doc.elem("sb_list")?)?;
-    add_interval_callback(&window).unwrap_throw();
     Ok(())
 }
 
@@ -775,9 +837,13 @@ fn handle_click_ev(target: &Element) {
 
 /// Handle a `click` event with a button target
 fn handle_button_click_ev(doc: &Document, target: &Element) {
+    let id = target.id();
+    if id == "ob_login" {
+        spawn_local(handle_login());
+        return;
+    }
     let cs = STATE.with(|rc| rc.borrow().selected_card.clone());
     if let Some(cs) = cs {
-        let id = target.id();
         match id.as_str() {
             "ob_close" => cs.replace_card(doc, CardType::Compact),
             "ob_delete" => {
@@ -794,6 +860,28 @@ fn handle_button_click_ev(doc: &Document, target: &Element) {
                     console::log_1(&format!("unknown button: {}", id).into());
                 }
             }
+        }
+    }
+}
+
+/// Handle login button press
+async fn handle_login() {
+    let window = web_sys::window().unwrap_throw();
+    let doc = window.document().unwrap_throw();
+    if let (Some(user), Some(pass)) = (
+        doc.input_parse::<String>("login_user"),
+        doc.input_parse::<String>("login_pass"),
+    ) {
+        let js = format!("{{\"username\":\"{user}\",\"password\":\"{pass}\"}}");
+        let js = js.into();
+        match fetch_post("/iris/api/login", &js).await {
+            Ok(_) => {
+                hide_login();
+                if STATE.with(|rc| rc.borrow().needs_initializing()) {
+                    initialize_state().await;
+                }
+            }
+            Err(e) => show_toast(&format!("Login failed: {}", e)),
         }
     }
 }

@@ -42,7 +42,7 @@ authentication.
   - [ ] Resource buttons: "Operate", "Plan", "Configure", etc.
   - [ ] UI refinements
   - [ ] Tooltips
-  - [ ] Authentication and session expiration
+  - [X] Authentication and session expiration
 
 ## Phase 4 — DMS control
 

@@ -47,9 +47,9 @@ The resources in `iris/img/` are GIF images of active sign messages from
 
 ## Login and Access
 
-Authentication uses a `POST iris/api/login` request with `username` and
-`password` form values.  This returns a session cookie which can be used for
-subsequent restricted requests.
+Authentication uses a `POST iris/api/login` request with a JSON object
+containing `username` and `password` values.  This returns a session cookie
+which can be used for subsequent restricted requests.
 
 A `GET iris/api/access` request returns a JSON array of [permission] records
 associated with the authenticated user's role.  This endpoint is required for

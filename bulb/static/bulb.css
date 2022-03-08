@@ -134,6 +134,22 @@ button:active {
   to { bottom: 0; opacity: 0; }
 }
 
+#sb_login {
+  visibility: hidden;
+  position: absolute;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 100%;
+  background-color: rgba(238, 238, 238, 0.75);
+}
+#sb_login.show {
+  visibility: visible;
+  left: 0;
+  transition: left 100ms ease-in-out;
+}
+
 .cards {
   display: flex;
   flex-wrap: wrap;

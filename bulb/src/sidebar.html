@@ -1,0 +1,37 @@
+<label class='sb_label'>Resource
+  <select id='sb_resource'></select>
+</label>
+<label class='sb_label'>Search
+  <input id='sb_search' type='text' placeholder='🔍'>
+</label>
+<div id='sb_list'></div>
+<div id='sb_toast'></div>
+<div id='sb_login' class='show'>
+  <div class='form'>
+    <div class='row'>
+      <span></span><img src='bulb/iris.svg'><span></span>
+    </div>
+    <div class='row'>
+      <span></span>
+      <span>IRIS authentication required</span>
+    </div>
+    <div class='row'>
+      <span></span>
+      <label for='login_user'>User name</label>
+      <input id='login_user' type='text' name='username'
+             autocomplete='username' required>
+    </div>
+    <div class='row'>
+      <span></span>
+      <label for='login_pass'>Password</label>
+      <input id='login_pass' type='password' name='password'
+             autocomplete='current-password' required>
+    </div>
+    <div class='row'>
+      <span></span>
+      <button id='ob_login' type='button'>Login</button>
+    </div>
+  </div>
+  <div id='sb_shade'>
+  </div>
+</div>

@@ -209,7 +209,7 @@ async fn main() -> tide::Result<()> {
         .with_cookie_name("graft"),
     );
     let mut route = app.at("/iris/api");
-    route.at("/login").get(login_get).post(login_post);
+    route.at("/login").post(login_post);
     route.at("/access").get(access_get);
     add_routes!(route, "alarm");
     add_routes!(route, "cabinet_style");
@@ -236,28 +236,6 @@ async fn main() -> tide::Result<()> {
     Ok(())
 }
 
-/// Login form
-const LOGIN: &str = r#"<html>
-<form method="POST" action="/iris/api/login">
-  <label>username
-    <input type="text" name="username" autocomplete="username" required>
-  </label>
-  <label>password
-    <input type="password" name="password" autocomplete="current-password" required>
-  </label>
-  <button type="submit">Login</button>
-</form>
-</html>"#;
-
-/// `GET` login form
-async fn login_get(req: Request<State>) -> tide::Result {
-    log::info!("GET {}", req.url());
-    Ok(Response::builder(200)
-        .body(LOGIN)
-        .content_type("text/html;charset=utf-8")
-        .build())
-}
-
 /// Auth information
 #[derive(Debug, Deserialize, Serialize)]
 struct AuthMap {
@@ -279,7 +257,7 @@ impl AuthMap {
 /// Handle `POST` to login page
 async fn login_post(mut req: Request<State>) -> tide::Result {
     log::info!("POST {}", req.url());
-    let auth: AuthMap = match req.body_form().await {
+    let auth: AuthMap = match req.body_json().await {
         Ok(auth) => auth,
         Err(e) => return bad_request(&e.to_string()),
     };
