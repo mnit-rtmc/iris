@@ -62,7 +62,7 @@ pub struct Condition {
 }
 
 /// Deferred actions (called on set_interval)
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 enum DeferredAction {
     SearchList,
     HideToast,
@@ -143,6 +143,11 @@ impl State {
             }
         }
         None
+    }
+
+    /// Clear deferred search actions
+    fn clear_searches(&mut self) {
+        self.deferred.retain(|(_, a)| *a != DeferredAction::SearchList)
     }
 }
 
@@ -304,8 +309,7 @@ impl CardState {
             let mut state = rc.borrow_mut();
             if ct != CardType::Compact {
                 state.selected_card.replace(self);
-                // should only clear UI actions...
-                state.deferred.clear();
+                state.clear_searches();
             } else {
                 state.selected_card.take();
             }
@@ -876,6 +880,9 @@ async fn handle_login() {
         let js = js.into();
         match fetch_post("/iris/api/login", &js).await {
             Ok(_) => {
+                if let Ok(pass) = doc.elem::<HtmlInputElement>("login_pass") {
+                    pass.set_value("");
+                }
                 hide_login();
                 if STATE.with(|rc| rc.borrow().needs_initializing()) {
                     initialize_state().await;
