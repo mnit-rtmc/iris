@@ -18,6 +18,7 @@ use async_std::path::PathBuf;
 use async_std::task::spawn_blocking;
 use chrono::{Local, TimeZone};
 use convert_case::{Case, Casing};
+use core::time::Duration;
 use graft::sonar::{Connection, Result, SonarError};
 use graft::state::State;
 use percent_encoding::percent_decode_str;
@@ -206,7 +207,8 @@ async fn main() -> tide::Result<()> {
             MemoryStore::new(),
             &rand::thread_rng().gen::<[u8; 32]>(),
         )
-        .with_cookie_name("graft"),
+        .with_cookie_name("graft")
+        .with_session_ttl(Some(Duration::from_secs(8 * 60 * 60))),
     );
     let mut route = app.at("/iris/api");
     route.at("/login").post(login_post);

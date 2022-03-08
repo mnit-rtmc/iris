@@ -39,10 +39,11 @@ authentication.
   - [X] Maintenance object CRUD
   - [X] Status button / view
   - [X] Feedback with "toast" popups
+  - [X] Authentication and session expiration
+  - [ ] Controller location (`geo_loc`)
   - [ ] Resource buttons: "Operate", "Plan", "Configure", etc.
   - [ ] UI refinements
   - [ ] Tooltips
-  - [X] Authentication and session expiration
 
 ## Phase 4 — DMS control
 
