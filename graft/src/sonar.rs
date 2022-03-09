@@ -36,6 +36,10 @@ pub enum SonarError {
     #[error("unexpected message")]
     UnexpectedMessage,
 
+    /// Not modified
+    #[error("not modified")]
+    NotModified,
+
     /// Invalid JSON error
     #[error("Invalid JSON")]
     InvalidJson,
@@ -79,6 +83,10 @@ pub enum SonarError {
     /// R2D2 error
     #[error("R2D2 {0}")]
     R2d2(#[from] r2d2::Error),
+
+    /// System time error
+    #[error("Invalid time {0}")]
+    SystemTime(#[from] std::time::SystemTimeError),
 }
 
 /// Sonar result

@@ -74,8 +74,8 @@ A `GET iris/api/{type}` returns all objects of `{type}` in a JSON array.
 These objects contain only the *minimal* attributes -- those needed for
 *searching* and *displaying compact cards*.
 
-The response for these requests contains an ETag header, containing a table
-version taken from the file's *created* metadata, encoded in hexadecimal.
+The response for these requests contains an ETag header, derived from the file's
+*modified* metadata, encoded in hexadecimal.
 
 ## Resource Types
 

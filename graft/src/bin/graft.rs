@@ -14,7 +14,8 @@
 //
 #![forbid(unsafe_code)]
 
-use async_std::path::PathBuf;
+use async_std::fs::metadata;
+use async_std::path::{Path, PathBuf};
 use async_std::task::spawn_blocking;
 use chrono::{Local, TimeZone};
 use convert_case::{Case, Casing};
@@ -26,6 +27,7 @@ use rand::Rng;
 use serde_json::map::Map;
 use serde_json::Value;
 use std::io;
+use std::time::SystemTime;
 use tide::prelude::*;
 use tide::sessions::{MemoryStore, SessionMiddleware};
 use tide::{Body, Request, Response, StatusCode};
@@ -113,6 +115,7 @@ impl ErrorStatus for io::Error {
 impl ErrorStatus for SonarError {
     fn status_code(&self) -> StatusCode {
         match self {
+            Self::NotModified => StatusCode::NotModified,
             Self::InvalidName => StatusCode::BadRequest,
             Self::Unauthorized => StatusCode::Unauthorized,
             Self::Forbidden => StatusCode::Forbidden,
@@ -477,19 +480,37 @@ fn obj_name(tp: &str, req: &Request<State>) -> Result<String> {
 /// `GET` a file resource
 async fn resource_get(tp: &str, req: Request<State>) -> tide::Result {
     log::info!("GET {}", req.url());
-    let body = resp!(resource_get_json(tp, req).await);
+    let (etag, body) = resp!(resource_get_json(tp, req).await);
     Ok(Response::builder(StatusCode::Ok)
+        .header("ETag", &etag)
         .body(body)
         .content_type("application/json")
         .build())
 }
 
 /// Get a static JSON file
-async fn resource_get_json(nm: &str, req: Request<State>) -> Result<Body> {
-    Access::View.check(nm, &req)?;
-    let file = format!("{STATIC_PATH}/{nm}");
-    let path = PathBuf::from(file);
-    Ok(Body::from_file(&path).await?)
+async fn resource_get_json(
+    tp: &str,
+    req: Request<State>,
+) -> Result<(String, Body)> {
+    Access::View.check(tp, &req)?;
+    let path = PathBuf::from(format!("{STATIC_PATH}/{tp}"));
+    let etag = resource_etag(&path).await?;
+    if let Some(values) = req.header("If-None-Match") {
+        if values.iter().any(|v| v == &etag) {
+            return Err(SonarError::NotModified);
+        }
+    }
+    let body = Body::from_file(&path).await?;
+    Ok((etag, body))
+}
+
+/// Get a static file ETag
+async fn resource_etag(path: &Path) -> Result<String> {
+    let meta = metadata(path).await?;
+    let modified = meta.modified()?;
+    let dur = modified.duration_since(SystemTime::UNIX_EPOCH)?.as_millis();
+    Ok(format!("{dur:x}"))
 }
 
 /// `GET` a Sonar object and return JSON result
