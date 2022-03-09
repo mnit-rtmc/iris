@@ -69,8 +69,12 @@ impl Card for Controller {
     const TNAME: &'static str = "Controller";
     const ENAME: &'static str = "🎛️ Controller";
     const UNAME: &'static str = "controller";
-    const HAS_LOCATION: bool = true;
     const HAS_STATUS: bool = true;
+
+    /// Get geo location of card
+    fn geo_loc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
+    }
 
     /// Check if a search string matches
     fn is_match(&self, search: &str) -> bool {

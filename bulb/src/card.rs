@@ -49,12 +49,16 @@ pub trait Card: fmt::Display + DeserializeOwned {
     const TNAME: &'static str;
     const ENAME: &'static str;
     const UNAME: &'static str;
-    const HAS_LOCATION: bool = false;
     const HAS_STATUS: bool = false;
 
     /// Create from a JSON value
     fn new(json: &JsValue) -> Result<Self> {
         Ok(json.into_serde::<Self>()?)
+    }
+
+    /// Get geo location of card
+    fn geo_loc(&self) -> Option<&str> {
+        None
     }
 
     /// Build form using JSON value
@@ -126,11 +130,14 @@ pub trait Card: fmt::Display + DeserializeOwned {
     fn status_card(&self) -> String {
         let ename = Self::ENAME;
         let status = self.to_html_status();
-        let location = if Self::HAS_LOCATION {
-            // could use 🌐 instead
-            "<button id='ob_loc' type='button'>🗺️ Location</button>"
-        } else {
-            ""
+        let geo_loc = match self.geo_loc() {
+            Some(geo_loc) => {
+                format!(
+                    "<button id='ob_loc' name='{geo_loc}' \
+                    type='button'>🗺️ Location</button>"
+                )
+            }
+            None => "".into(),
         };
         format!(
             "<div class='row'>\
@@ -142,7 +149,7 @@ pub trait Card: fmt::Display + DeserializeOwned {
             {status}\
             <div class='row'>\
               <span></span>\
-              {location}\
+              {geo_loc}\
               <button id='ob_edit' type='button'>📝 Edit</button>\
             </div>"
         )

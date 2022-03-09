@@ -147,7 +147,8 @@ impl State {
 
     /// Clear deferred search actions
     fn clear_searches(&mut self) {
-        self.deferred.retain(|(_, a)| *a != DeferredAction::SearchList)
+        self.deferred
+            .retain(|(_, a)| *a != DeferredAction::SearchList)
     }
 }
 
@@ -229,7 +230,7 @@ async fn expand_card<C: Card>(id: String, name: String) {
         let cs = CardState::new::<C>(name);
         cs.replace_card(&doc, CardType::Create);
     } else {
-        match fetch_card::<C>(name).await {
+        match fetch_card(C::TNAME, C::UNAME, name).await {
             Ok(cs) => cs.replace_card(&doc, CardType::Status),
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => {
@@ -242,11 +243,15 @@ async fn expand_card<C: Card>(id: String, name: String) {
 }
 
 /// Fetch a card with a GET request
-async fn fetch_card<C: Card>(name: String) -> Result<CardState> {
-    let uri = name_uri::<C>(&name);
+async fn fetch_card(
+    tname: &'static str,
+    uname: &'static str,
+    name: String,
+) -> Result<CardState> {
+    let uri = name_uri(uname, &name);
     let json = fetch_get(&uri).await?;
     Ok(CardState {
-        tname: C::TNAME,
+        tname,
         uri,
         name,
         json: Some(json),
@@ -404,12 +409,9 @@ fn hide_toast() {
 }
 
 /// Get the URI of an object
-fn name_uri<C: Card>(name: &str) -> String {
-    format!(
-        "/iris/api/{}/{}",
-        C::UNAME,
-        utf8_percent_encode(name, NON_ALPHANUMERIC)
-    )
+fn name_uri(uname: &'static str, name: &str) -> String {
+    let name = utf8_percent_encode(name, NON_ALPHANUMERIC);
+    format!("/iris/api/{uname}/{name}")
 }
 
 /// Replace a card with provieded HTML
@@ -856,6 +858,11 @@ fn handle_button_click_ev(doc: &Document, target: &Element) {
                 }
             }
             "ob_edit" => cs.replace_card(doc, CardType::Edit),
+            "ob_loc" => {
+                if let Some(name) = target.get_attribute("name") {
+                    spawn_local(show_geo_loc(name, cs));
+                }
+            }
             "ob_save" => spawn_local(cs.save_changed()),
             _ => {
                 if target.class_name() == "go_link" {
@@ -865,6 +872,19 @@ fn handle_button_click_ev(doc: &Document, target: &Element) {
                 }
             }
         }
+    }
+}
+
+/// Lookup and show `geo_loc` card
+async fn show_geo_loc(name: String, cs: CardState) {
+    let uri = name_uri("geo_loc", &name);
+    match fetch_get(&uri).await {
+        Ok(json) => {
+            console::log_1(&json);
+            // TODO: display geo loc card
+        }
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(e) => show_toast(&format!("Fetch failed: {}", e)),
     }
 }
 
