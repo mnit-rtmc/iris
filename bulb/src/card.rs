@@ -204,8 +204,8 @@ pub trait Card: fmt::Display + DeserializeOwned {
         let mut html = String::new();
         html.push_str("<ul class='cards'>");
         let obs = json.into_serde::<Vec<Self>>()?;
-        let next_name = Self::next_name(&obs);
         if search.is_empty() {
+            let next_name = Self::next_name(&obs);
             // the "Create" card has id "{tname}_" and next available name
             html.push_str(&format!(
                 "<li id='{tname}_' name='{next_name}' class='card'>\

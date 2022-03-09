@@ -550,8 +550,7 @@ fn add_sidebar() -> JsResult<()> {
     let sidebar: HtmlElement = doc.elem("sidebar")?;
     sidebar.set_inner_html(SIDEBAR);
     add_click_event_listener(&sidebar)?;
-    let sb_resource: HtmlSelectElement = doc.elem("sb_resource")?;
-    add_select_event_listener(&sb_resource, handle_sb_resource_ev)?;
+    add_select_event_listener(&doc.elem("sb_resource")?)?;
     add_input_event_listener(&doc.elem("sb_search")?)?;
     add_transition_event_listener(&doc.elem("sb_list")?)?;
     add_interval_callback(&window).unwrap_throw();
@@ -772,18 +771,15 @@ fn search_list() {
 }
 
 /// Add an "input" event listener to a `select` element
-fn add_select_event_listener(
-    elem: &HtmlSelectElement,
-    handle_ev: fn(String),
-) -> JsResult<()> {
-    let closure = Closure::wrap(Box::new(move |e: Event| {
-        let value = e
+fn add_select_event_listener(elem: &HtmlSelectElement) -> JsResult<()> {
+    let closure = Closure::wrap(Box::new(|e: Event| {
+        let tp = e
             .current_target()
             .unwrap()
             .dyn_into::<HtmlSelectElement>()
             .unwrap()
             .value();
-        handle_ev(value);
+        handle_sb_resource_ev(tp);
     }) as Box<dyn FnMut(_)>);
     elem.add_event_listener_with_callback(
         "input",
@@ -811,8 +807,8 @@ fn add_input_event_listener(elem: &HtmlInputElement) -> JsResult<()> {
 /// Add a `click` event listener to an element
 fn add_click_event_listener(elem: &Element) -> JsResult<()> {
     let closure = Closure::wrap(Box::new(|e: Event| {
-        let value = e.target().unwrap().dyn_into::<Element>().unwrap();
-        handle_click_ev(&value);
+        let target = e.target().unwrap().dyn_into::<Element>().unwrap();
+        handle_click_ev(&target);
     }) as Box<dyn FnMut(_)>);
     elem.add_event_listener_with_callback(
         "click",
