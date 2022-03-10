@@ -12,12 +12,12 @@
 //
 use crate::alarm::Alarm;
 use crate::cabinetstyle::CabinetStyle;
-use crate::card::{fetch_card, fetch_create, fetch_list, Card, CardType};
+use crate::card::{fetch_card, fetch_create, fetch_list, fetch_save, Card, CardType};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
-use crate::error::{Error, Result};
-use crate::fetch::{fetch_delete, fetch_get, fetch_patch, fetch_post};
+use crate::error::Error;
+use crate::fetch::{fetch_delete, fetch_get, fetch_post};
 use crate::modem::Modem;
 use crate::permission::Permission;
 use crate::role::Role;
@@ -326,7 +326,7 @@ impl SelectedCard {
         if ct == CardType::Create {
             self.fetch_create().await;
         } else {
-            match self.fetch_save().await {
+            match fetch_save(&self.tname, &self.name).await {
                 Ok(_) => self.replace_card(ct.compact()).await,
                 Err(Error::FetchResponseUnauthorized()) => show_login(),
                 Err(Error::FetchResponseNotFound()) => {
@@ -348,13 +348,6 @@ impl SelectedCard {
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Create failed: {e}")),
         }
-    }
-
-    /// Save changed fields on card
-    async fn fetch_save(&self) -> Result<()> {
-        let json = fetch_get(&self.uri()).await?;
-        let v = try_changed_fields(self.tname, &json)?;
-        fetch_patch(&self.uri(), &v.into()).await
     }
 }
 
@@ -414,24 +407,6 @@ fn replace_card_html(elem: &HtmlElement, ct: CardType, html: &str) {
         opt.behavior(ScrollBehavior::Smooth)
             .block(ScrollLogicalPosition::Nearest);
         elem.scroll_into_view_with_scroll_into_view_options(&opt);
-    }
-}
-
-/// Try to retrieve changed fields on edit form
-fn try_changed_fields(tp: &str, json: &JsValue) -> Result<String> {
-    let window = web_sys::window().unwrap_throw();
-    let doc = window.document().unwrap_throw();
-    match tp {
-        Alarm::TNAME => Alarm::changed_fields(&doc, json),
-        CabinetStyle::TNAME => CabinetStyle::changed_fields(&doc, json),
-        CommConfig::TNAME => CommConfig::changed_fields(&doc, json),
-        CommLink::TNAME => CommLink::changed_fields(&doc, json),
-        Controller::TNAME => Controller::changed_fields(&doc, json),
-        Modem::TNAME => Modem::changed_fields(&doc, json),
-        Permission::TNAME => Permission::changed_fields(&doc, json),
-        Role::TNAME => Role::changed_fields(&doc, json),
-        User::TNAME => User::changed_fields(&doc, json),
-        _ => unreachable!(),
     }
 }
 

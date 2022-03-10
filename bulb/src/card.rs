@@ -16,7 +16,7 @@ use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
 use crate::error::{Error, Result};
-use crate::fetch::{fetch_get, fetch_post};
+use crate::fetch::{fetch_get, fetch_patch, fetch_post};
 use crate::modem::Modem;
 use crate::permission::Permission;
 use crate::role::Role;
@@ -330,6 +330,37 @@ async fn create_and_post<C: Card>() -> Result<()> {
             let value = C::create_value(&doc)?;
             let json = value.into();
             fetch_post(&format!("/iris/api/{}", C::UNAME), &json).await?;
+        }
+    }
+    Ok(())
+}
+
+/// Save changed fields on card
+pub async fn fetch_save(res: &str, name: &str) -> Result<()> {
+    match res {
+        Alarm::TNAME => fetch_save_card::<Alarm>(name).await,
+        CabinetStyle::TNAME => fetch_save_card::<CabinetStyle>(name).await,
+        CommConfig::TNAME => fetch_save_card::<CommConfig>(name).await,
+        CommLink::TNAME => fetch_save_card::<CommLink>(name).await,
+        Controller::TNAME => fetch_save_card::<Controller>(name).await,
+        Modem::TNAME => fetch_save_card::<Modem>(name).await,
+        Permission::TNAME => fetch_save_card::<Permission>(name).await,
+        Role::TNAME => fetch_save_card::<Role>(name).await,
+        User::TNAME => fetch_save_card::<User>(name).await,
+        _ => Ok(()),
+    }
+}
+
+/// Save changed fields on card
+async fn fetch_save_card<C: Card>(name: &str) -> Result<()> {
+    if let Some(window) = web_sys::window() {
+        if let Some(doc) = window.document() {
+            let uname = C::UNAME;
+            let nm = utf8_percent_encode(name, NON_ALPHANUMERIC);
+            let uri = format!("/iris/api/{uname}/{nm}");
+            let json = fetch_get(&uri).await?;
+            let v = C::changed_fields(&doc, &json)?;
+            fetch_patch(&uri, &v.into()).await?;
         }
     }
     Ok(())
