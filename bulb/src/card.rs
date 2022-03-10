@@ -22,6 +22,7 @@ use crate::permission::Permission;
 use crate::role::Role;
 use crate::user::User;
 use crate::util::Dom;
+use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::de::DeserializeOwned;
 use serde_json::map::Map;
 use serde_json::Value;
@@ -44,6 +45,9 @@ pub enum CardType {
     /// Compact in list
     Compact,
 
+    /// Create compact card
+    CreateCompact,
+
     /// Create card
     Create,
 
@@ -52,6 +56,33 @@ pub enum CardType {
 
     /// Edit card
     Edit,
+}
+
+impl CardType {
+    /// Is the card compact?
+    pub fn is_compact(self) -> bool {
+        match self {
+            CardType::Compact | CardType::CreateCompact => true,
+            _ => false,
+        }
+    }
+
+    /// Is the card a create card?
+    pub fn is_create(self) -> bool {
+        match self {
+            CardType::Create | CardType::CreateCompact => true,
+            _ => false,
+        }
+    }
+
+    /// Get compact card type
+    pub fn compact(self) -> Self {
+        if self.is_create() {
+            CardType::CreateCompact
+        } else {
+            CardType::Compact
+        }
+    }
 }
 
 /// A card can be displayed in a card list
@@ -72,31 +103,17 @@ pub trait Card: fmt::Display + DeserializeOwned {
     }
 
     /// Build form using JSON value
-    fn build_card(
-        name: &str,
-        json: &Option<JsValue>,
-        ct: CardType,
-    ) -> Result<String> {
-        match json {
-            Some(json) => {
-                let val = Self::new(json)?;
-                match ct {
-                    CardType::Compact => Ok(val.to_html_compact()),
-                    CardType::Status if Self::HAS_STATUS => {
-                        Ok(val.status_card())
-                    }
-                    _ => Ok(val.edit_card()),
-                }
-            }
-            None => match ct {
-                CardType::Create => Ok(Self::create_card(name)),
-                _ => Ok(CREATE_COMPACT.into()),
-            },
+    fn build_card(json: JsValue, ct: CardType) -> Result<String> {
+        let val = Self::new(&json)?;
+        match ct {
+            CardType::Compact => Ok(val.to_html_compact()),
+            CardType::Status if Self::HAS_STATUS => Ok(val.status_card()),
+            _ => Ok(val.edit_card()),
         }
     }
 
     /// Build a create card
-    fn create_card(name: &str) -> String {
+    fn build_create_card(name: &str) -> String {
         let ename = Self::ENAME;
         let create = Self::html_create(name);
         format!(
@@ -221,24 +238,24 @@ pub fn disabled_attr(enabled: bool) -> &'static str {
     }
 }
 
-/// Build card list for a resource type
-pub async fn build_list(res: &str, search: &str) -> Result<String> {
+/// Fetch card list for a resource type
+pub async fn fetch_list(res: &str, search: &str) -> Result<String> {
     match res {
-        Alarm::TNAME => try_build_list::<Alarm>(search).await,
-        CabinetStyle::TNAME => try_build_list::<CabinetStyle>(search).await,
-        CommConfig::TNAME => try_build_list::<CommConfig>(search).await,
-        CommLink::TNAME => try_build_list::<CommLink>(search).await,
-        Controller::TNAME => try_build_list::<Controller>(search).await,
-        Modem::TNAME => try_build_list::<Modem>(search).await,
-        Permission::TNAME => try_build_list::<Permission>(search).await,
-        Role::TNAME => try_build_list::<Role>(search).await,
-        User::TNAME => try_build_list::<User>(search).await,
+        Alarm::TNAME => fetch_build_list::<Alarm>(search).await,
+        CabinetStyle::TNAME => fetch_build_list::<CabinetStyle>(search).await,
+        CommConfig::TNAME => fetch_build_list::<CommConfig>(search).await,
+        CommLink::TNAME => fetch_build_list::<CommLink>(search).await,
+        Controller::TNAME => fetch_build_list::<Controller>(search).await,
+        Modem::TNAME => fetch_build_list::<Modem>(search).await,
+        Permission::TNAME => fetch_build_list::<Permission>(search).await,
+        Role::TNAME => fetch_build_list::<Role>(search).await,
+        User::TNAME => fetch_build_list::<User>(search).await,
         _ => Ok("".into()),
     }
 }
 
 /// Fetch JSON array and build card list
-async fn try_build_list<C: Card>(search: &str) -> Result<String> {
+async fn fetch_build_list<C: Card>(search: &str) -> Result<String> {
     let json = fetch_get(&format!("/iris/api/{}", C::UNAME)).await?;
     let search = search.to_lowercase();
     let tname = C::TNAME;
@@ -263,4 +280,35 @@ async fn try_build_list<C: Card>(search: &str) -> Result<String> {
     }
     html.push_str("</ul>");
     Ok(html)
+}
+
+/// Fetch a card for a resource type
+pub async fn fetch_card(res: &str, name: &str, ct: CardType) -> Result<String> {
+    match res {
+        Alarm::TNAME => fetch_build_card::<Alarm>(name, ct).await,
+        CabinetStyle::TNAME => fetch_build_card::<CabinetStyle>(name, ct).await,
+        CommConfig::TNAME => fetch_build_card::<CommConfig>(name, ct).await,
+        CommLink::TNAME => fetch_build_card::<CommLink>(name, ct).await,
+        Controller::TNAME => fetch_build_card::<Controller>(name, ct).await,
+        Modem::TNAME => fetch_build_card::<Modem>(name, ct).await,
+        Permission::TNAME => fetch_build_card::<Permission>(name, ct).await,
+        Role::TNAME => fetch_build_card::<Role>(name, ct).await,
+        User::TNAME => fetch_build_card::<User>(name, ct).await,
+        _ => Ok("".into()),
+    }
+}
+
+/// Fetch and build a card
+async fn fetch_build_card<C: Card>(name: &str, ct: CardType) -> Result<String> {
+    match ct {
+        CardType::CreateCompact => Ok(CREATE_COMPACT.into()),
+        CardType::Create => Ok(C::build_create_card(name)),
+        _ => {
+            let uname = C::UNAME;
+            let nm = utf8_percent_encode(name, NON_ALPHANUMERIC);
+            let uri = format!("/iris/api/{uname}/{nm}");
+            let json = fetch_get(&uri).await?;
+            C::build_card(json, ct)
+        }
+    }
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2020  Minnesota Department of Transportation
+ * Copyright (C) 2020-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -130,7 +130,7 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 	}
 
 	/** Description of communication config */
-	private String description = "<new>";
+	private String description = "";
 
 	/** Set text description */
 	@Override

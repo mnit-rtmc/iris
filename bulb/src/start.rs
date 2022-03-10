@@ -12,7 +12,7 @@
 //
 use crate::alarm::Alarm;
 use crate::cabinetstyle::CabinetStyle;
-use crate::card::{build_list, Card, CardType};
+use crate::card::{fetch_card, fetch_list, Card, CardType};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
@@ -61,6 +61,19 @@ pub struct Condition {
     pub description: String,
 }
 
+/// Selected card state
+#[derive(Clone, Debug)]
+struct SelectedCard {
+    /// Type name
+    tname: &'static str,
+    /// URI name
+    uname: &'static str,
+    /// Card type
+    card_type: CardType,
+    /// Object name
+    name: String,
+}
+
 /// Deferred actions (called on set_interval)
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum DeferredAction {
@@ -85,8 +98,8 @@ struct State {
     deferred: Vec<(i32, DeferredAction)>,
     /// Timer tick count
     tick: i32,
-    /// Selected card state
-    selected_card: Option<CardState>,
+    /// Selected card
+    selected_card: Option<SelectedCard>,
     /// Delete action enabled (slider transition finished)
     delete_enabled: bool,
 }
@@ -172,10 +185,14 @@ impl DeferredAction {
 
 /// Populate `sb_list` with `tp` card types
 async fn populate_list(tp: String, search: String) {
+    STATE.with(|rc| {
+        let mut state = rc.borrow_mut();
+        state.selected_card.take()
+    });
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let sb_list = doc.elem::<Element>("sb_list").unwrap_throw();
-    match build_list(&tp, &search).await {
+    match fetch_list(&tp, &search).await {
         Ok(cards) => sb_list.set_inner_html(&cards),
         Err(Error::FetchResponseUnauthorized()) => show_login(),
         Err(e) => show_toast(&format!("View failed: {}", e)),
@@ -184,6 +201,7 @@ async fn populate_list(tp: String, search: String) {
 
 /// Handle a card click event
 async fn click_card(tp: String, id: String, name: String) {
+    deselect_card().await;
     match tp.as_str() {
         Alarm::TNAME => expand_card::<Alarm>(id, name).await,
         CabinetStyle::TNAME => expand_card::<CabinetStyle>(id, name).await,
@@ -198,88 +216,81 @@ async fn click_card(tp: String, id: String, name: String) {
     }
 }
 
-/// Expand a card to a full form
-async fn expand_card<C: Card>(id: String, name: String) {
-    let window = web_sys::window().unwrap_throw();
-    let doc = window.document().unwrap_throw();
-    if id.ends_with('_') {
-        let cs = CardState::new(C::TNAME, name);
-        cs.replace_card(&doc, CardType::Create);
-    } else {
-        match fetch_card(C::TNAME, C::UNAME, name).await {
-            Ok(cs) => cs.replace_card(&doc, CardType::Status),
-            Err(Error::FetchResponseUnauthorized()) => show_login(),
-            Err(e) => {
-                show_toast(&format!("Fetch failed: {}", e));
-                // Card list may be out-of-date; refresh with search
-                DeferredAction::SearchList.schedule(200);
-            }
+/// Deselect the selected card
+async fn deselect_card() {
+    let cs = STATE.with(|rc| {
+        let mut state = rc.borrow_mut();
+        state.selected_card.take()
+    });
+    if let Some(cs) = cs {
+        let ct = cs.card_type;
+        if !ct.is_compact() {
+            let ct = ct.compact();
+            cs.replace_card(ct).await;
         }
     }
 }
 
-/// Fetch a card with a GET request
-async fn fetch_card(
-    tname: &'static str,
-    uname: &'static str,
-    name: String,
-) -> Result<CardState> {
-    let uri = name_uri(uname, &name);
-    let json = fetch_get(&uri).await?;
-    Ok(CardState {
-        tname,
-        uri,
-        name,
-        json: Some(json),
-    })
+/// Expand a card to a full form
+async fn expand_card<C: Card>(id: String, name: String) {
+    if id.ends_with('_') {
+        let cs = SelectedCard::new(C::TNAME, C::UNAME, CardType::Create, name);
+        cs.replace_card(CardType::Create).await;
+    } else {
+        let cs = SelectedCard::new(C::TNAME, C::UNAME, CardType::Status, name);
+        cs.replace_card(CardType::Status).await;
+    }
 }
 
-/// Selected card state
-#[derive(Clone)]
-pub struct CardState {
-    /// Type name
-    tname: &'static str,
-    /// Object URI
-    uri: String,
-    /// Object name
-    name: String,
-    /// JSON value of object
-    json: Option<JsValue>,
-}
-
-impl CardState {
-    /// Create a new blank card state
-    fn new(tname: &'static str, name: String) -> Self {
-        CardState {
+impl SelectedCard {
+    /// Create a new blank selected card
+    fn new(
+        tname: &'static str,
+        uname: &'static str,
+        card_type: CardType,
+        name: String,
+    ) -> Self {
+        SelectedCard {
             tname,
-            uri: "".into(),
+            uname,
+            card_type,
             name,
-            json: None,
         }
+    }
+
+    /// Get the URI of an object
+    fn uri(&self) -> String {
+        let uname = self.uname;
+        let name = utf8_percent_encode(&self.name, NON_ALPHANUMERIC);
+        format!("/iris/api/{uname}/{name}")
     }
 
     /// Get card element ID
     fn id(&self) -> String {
-        if self.json.is_some() {
-            format!("{}_{}", self.tname, &self.name)
-        } else {
+        if self.card_type.is_create() {
             format!("{}_", self.tname)
+        } else {
+            format!("{}_{}", self.tname, &self.name)
         }
     }
 
     /// Replace a card element with another card type
-    fn replace_card(self, doc: &Document, ct: CardType) {
+    async fn replace_card(mut self, ct: CardType) {
+        let window = web_sys::window().unwrap_throw();
+        let doc = window.document().unwrap_throw();
         let id = self.id();
         match doc.elem::<HtmlElement>(&id) {
             Ok(elem) => {
-                match build_card(self.tname, &self.name, &self.json, ct) {
+                match fetch_card(self.tname, &self.name, ct).await {
                     Ok(html) => replace_card_html(&elem, ct, &html),
                     Err(Error::FetchResponseUnauthorized()) => {
                         show_login();
                         return;
                     }
                     Err(e) => {
-                        show_toast(&format!("Build failed: {}", e));
+                        show_toast(&format!("Fetch failed: {}", e));
+                        // Card list may be out-of-date; refresh with search
+                        DeferredAction::SearchList.schedule(200);
                         return;
                     }
                 }
@@ -288,53 +299,45 @@ impl CardState {
         }
         STATE.with(|rc| {
             let mut state = rc.borrow_mut();
-            if ct != CardType::Compact {
+            if ct.is_compact() {
+                state.selected_card.take();
+            } else {
+                self.card_type = ct;
                 state.selected_card.replace(self);
                 state.clear_searches();
-            } else {
-                state.selected_card.take();
             }
         });
     }
 
     /// Delete selected card / object
     async fn delete(self) {
-        try_delete(&self.uri).await;
+        try_delete(&self.uri()).await;
     }
 
     /// Save changed fields on Edit form
-    async fn save_changed(mut self) {
-        let window = web_sys::window().unwrap_throw();
-        let doc = window.document().unwrap_throw();
-        match &self.json {
-            Some(json) => {
-                let res = match try_changed_fields(self.tname, &doc, json) {
-                    Ok(v) => fetch_patch(&self.uri, &v.into()).await,
+    async fn save_changed(self) {
+        let ct = self.card_type;
+        if ct == CardType::Create {
+            if try_create_new(self.tname).await {
+                self.replace_card(ct.compact()).await;
+            }
+        } else {
+            let res = match fetch_get(&self.uri()).await {
+                Ok(json) => match try_changed_fields(self.tname, &json) {
+                    Ok(v) => fetch_patch(&self.uri(), &v.into()).await,
                     Err(e) => Err(e),
-                };
-                match res {
-                    Ok(_) => {
-                        self.fetch_again().await;
-                        self.replace_card(&doc, CardType::Compact);
-                    }
-                    Err(Error::FetchResponseUnauthorized()) => show_login(),
-                    Err(e) => show_toast(&format!("Save failed: {}", e)),
+                },
+                Err(_) => {
+                    // Card list out-of-date; refresh with search
+                    DeferredAction::SearchList.schedule(200);
+                    return;
                 }
+            };
+            match res {
+                Ok(_) => self.replace_card(ct.compact()).await,
+                Err(Error::FetchResponseUnauthorized()) => show_login(),
+                Err(e) => show_toast(&format!("Save failed: {}", e)),
             }
-            None => {
-                if try_create_new(self.tname, &doc).await {
-                    self.replace_card(&doc, CardType::Compact);
-                }
-            }
-        }
-    }
-
-    /// Fetch a card again with a GET request
-    async fn fetch_again(&mut self) {
-        match fetch_get(&self.uri).await {
-            Ok(json) => self.json = Some(json),
-            // Card list out-of-date; refresh with search
-            Err(_) => DeferredAction::SearchList.schedule(200),
         }
     }
 }
@@ -384,16 +387,10 @@ fn hide_toast() {
     });
 }
 
-/// Get the URI of an object
-fn name_uri(uname: &'static str, name: &str) -> String {
-    let name = utf8_percent_encode(name, NON_ALPHANUMERIC);
-    format!("/iris/api/{uname}/{name}")
-}
-
 /// Replace a card with provieded HTML
 fn replace_card_html(elem: &HtmlElement, ct: CardType, html: &str) {
     elem.set_inner_html(html);
-    if let CardType::Compact = ct {
+    if ct.is_compact() {
         elem.set_class_name("card");
     } else {
         elem.set_class_name("form");
@@ -407,21 +404,15 @@ fn replace_card_html(elem: &HtmlElement, ct: CardType, html: &str) {
 /// Try to delete an object
 async fn try_delete(uri: &str) {
     match fetch_delete(uri).await {
-        Ok(_) => {
-            if let Some(window) = web_sys::window() {
-                let doc = window.document().unwrap_throw();
-                deselect_card(&doc);
-            }
-            DeferredAction::SearchList.schedule(1500);
-        }
+        Ok(_) => DeferredAction::SearchList.schedule(1000),
         Err(Error::FetchResponseUnauthorized()) => show_login(),
         Err(e) => show_toast(&format!("Delete failed: {}", e)),
     }
 }
 
 /// Try to create a new object
-async fn try_create_new(tp: &str, doc: &Document) -> bool {
-    match create_new(tp, doc).await {
+async fn try_create_new(tp: &str) -> bool {
+    match create_new(tp).await {
         Ok(_) => {
             DeferredAction::SearchList.schedule(1500);
             true
@@ -438,17 +429,19 @@ async fn try_create_new(tp: &str, doc: &Document) -> bool {
 }
 
 /// Create a new object
-async fn create_new(tp: &str, doc: &Document) -> Result<()> {
+async fn create_new(tp: &str) -> Result<()> {
+    let window = web_sys::window().unwrap_throw();
+    let doc = window.document().unwrap_throw();
     match tp {
-        Alarm::TNAME => do_create::<Alarm>(doc).await,
-        CabinetStyle::TNAME => do_create::<CabinetStyle>(doc).await,
-        CommConfig::TNAME => do_create::<CommConfig>(doc).await,
-        CommLink::TNAME => do_create::<CommLink>(doc).await,
-        Controller::TNAME => do_create::<Controller>(doc).await,
-        Modem::TNAME => do_create::<Modem>(doc).await,
-        Permission::TNAME => do_create::<Permission>(doc).await,
-        Role::TNAME => do_create::<Role>(doc).await,
-        User::TNAME => do_create::<User>(doc).await,
+        Alarm::TNAME => do_create::<Alarm>(&doc).await,
+        CabinetStyle::TNAME => do_create::<CabinetStyle>(&doc).await,
+        CommConfig::TNAME => do_create::<CommConfig>(&doc).await,
+        CommLink::TNAME => do_create::<CommLink>(&doc).await,
+        Controller::TNAME => do_create::<Controller>(&doc).await,
+        Modem::TNAME => do_create::<Modem>(&doc).await,
+        Permission::TNAME => do_create::<Permission>(&doc).await,
+        Role::TNAME => do_create::<Role>(&doc).await,
+        User::TNAME => do_create::<User>(&doc).await,
         _ => unreachable!(),
     }
 }
@@ -462,43 +455,20 @@ async fn do_create<C: Card>(doc: &Document) -> Result<()> {
 }
 
 /// Try to retrieve changed fields on edit form
-fn try_changed_fields(
-    tp: &str,
-    doc: &Document,
-    json: &JsValue,
-) -> Result<String> {
+fn try_changed_fields(tp: &str, json: &JsValue) -> Result<String> {
+    let window = web_sys::window().unwrap_throw();
+    let doc = window.document().unwrap_throw();
     match tp {
-        Alarm::TNAME => Alarm::changed_fields(doc, json),
-        CabinetStyle::TNAME => CabinetStyle::changed_fields(doc, json),
-        CommConfig::TNAME => CommConfig::changed_fields(doc, json),
-        CommLink::TNAME => CommLink::changed_fields(doc, json),
-        Controller::TNAME => Controller::changed_fields(doc, json),
-        Modem::TNAME => Modem::changed_fields(doc, json),
-        Permission::TNAME => Permission::changed_fields(doc, json),
-        Role::TNAME => Role::changed_fields(doc, json),
-        User::TNAME => User::changed_fields(doc, json),
+        Alarm::TNAME => Alarm::changed_fields(&doc, json),
+        CabinetStyle::TNAME => CabinetStyle::changed_fields(&doc, json),
+        CommConfig::TNAME => CommConfig::changed_fields(&doc, json),
+        CommLink::TNAME => CommLink::changed_fields(&doc, json),
+        Controller::TNAME => Controller::changed_fields(&doc, json),
+        Modem::TNAME => Modem::changed_fields(&doc, json),
+        Permission::TNAME => Permission::changed_fields(&doc, json),
+        Role::TNAME => Role::changed_fields(&doc, json),
+        User::TNAME => User::changed_fields(&doc, json),
         _ => unreachable!(),
-    }
-}
-
-/// Build card using JSON value
-fn build_card(
-    tp: &str,
-    name: &str,
-    json: &Option<JsValue>,
-    ct: CardType,
-) -> Result<String> {
-    match tp {
-        Alarm::TNAME => Alarm::build_card(name, json, ct),
-        CabinetStyle::TNAME => CabinetStyle::build_card(name, json, ct),
-        CommConfig::TNAME => CommConfig::build_card(name, json, ct),
-        CommLink::TNAME => CommLink::build_card(name, json, ct),
-        Controller::TNAME => Controller::build_card(name, json, ct),
-        Modem::TNAME => Modem::build_card(name, json, ct),
-        Permission::TNAME => Permission::build_card(name, json, ct),
-        Role::TNAME => Role::build_card(name, json, ct),
-        User::TNAME => User::build_card(name, json, ct),
-        _ => Ok("".into()),
     }
 }
 
@@ -723,10 +693,6 @@ pub fn comm_configs_html(selected: &str) -> String {
 fn handle_sb_resource_ev(tp: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        state.selected_card.take()
-    });
     if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
         input.set_value("");
     }
@@ -739,7 +705,6 @@ fn search_list() {
     let doc = window.document().unwrap_throw();
     if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
         let search = input.value();
-        deselect_card(&doc);
         if let Some(tp) = doc.select_parse::<String>("sb_resource") {
             spawn_local(populate_list(tp, search));
         }
@@ -800,12 +765,11 @@ fn handle_click_ev(target: &Element) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     if target.is_instance_of::<HtmlButtonElement>() {
-        handle_button_click_ev(&doc, target);
+        handle_button_click_ev(target);
     } else if let Some(card) = target.closest(".card").unwrap_throw() {
         if let Some(id) = card.get_attribute("id") {
             if let Some(name) = card.get_attribute("name") {
                 if let Some(tp) = doc.select_parse::<String>("sb_resource") {
-                    deselect_card(&doc);
                     spawn_local(click_card(tp, id, name));
                 }
             }
@@ -814,7 +778,7 @@ fn handle_click_ev(target: &Element) {
 }
 
 /// Handle a `click` event with a button target
-fn handle_button_click_ev(doc: &Document, target: &Element) {
+fn handle_button_click_ev(target: &Element) {
     let id = target.id();
     if id == "ob_login" {
         spawn_local(handle_login());
@@ -822,41 +786,56 @@ fn handle_button_click_ev(doc: &Document, target: &Element) {
     }
     let cs = STATE.with(|rc| rc.borrow().selected_card.clone());
     if let Some(cs) = cs {
-        match id.as_str() {
-            "ob_close" => cs.replace_card(doc, CardType::Compact),
-            "ob_delete" => {
-                if STATE.with(|rc| rc.borrow().delete_enabled) {
-                    spawn_local(cs.delete());
-                }
-            }
-            "ob_edit" => cs.replace_card(doc, CardType::Edit),
-            "ob_loc" => {
-                if let Some(name) = target.get_attribute("name") {
-                    spawn_local(show_geo_loc(name, cs));
-                }
-            }
-            "ob_save" => spawn_local(cs.save_changed()),
-            _ => {
-                if target.class_name() == "go_link" {
-                    go_resource(doc, target);
-                } else {
-                    console::log_1(&format!("unknown button: {}", id).into());
-                }
-            }
-        }
+        let attrs = ButtonAttrs {
+            id,
+            class_name: target.class_name(),
+            name: target.get_attribute("name"),
+            data_link: target.get_attribute("data-link"),
+            data_type: target.get_attribute("data-type"),
+        };
+        spawn_local(handle_button_card(attrs, cs));
     }
 }
 
-/// Lookup and show `geo_loc` card
-async fn show_geo_loc(name: String, cs: CardState) {
-    let uri = name_uri("geo_loc", &name);
-    match fetch_get(&uri).await {
-        Ok(json) => {
-            console::log_1(&json);
-            // TODO: display geo loc card
+/// Button attributes
+struct ButtonAttrs {
+    id: String,
+    class_name: String,
+    name: Option<String>,
+    data_link: Option<String>,
+    data_type: Option<String>,
+}
+
+/// Handle button click event with selected card
+async fn handle_button_card(attrs: ButtonAttrs, cs: SelectedCard) {
+    let window = web_sys::window().unwrap_throw();
+    let doc = window.document().unwrap_throw();
+    match attrs.id.as_str() {
+        "ob_close" => {
+            let ct = cs.card_type.compact();
+            cs.replace_card(ct).await;
         }
-        Err(Error::FetchResponseUnauthorized()) => show_login(),
-        Err(e) => show_toast(&format!("Fetch failed: {}", e)),
+        "ob_delete" => {
+            if STATE.with(|rc| rc.borrow().delete_enabled) {
+                cs.delete().await;
+            }
+        }
+        "ob_edit" => cs.replace_card(CardType::Edit).await,
+        "ob_loc" => {
+            if let Some(_name) = attrs.name {
+                //show_geo_loc(name, cs).await;
+            }
+        }
+        "ob_save" => cs.save_changed().await,
+        _ => {
+            if attrs.class_name == "go_link" {
+                go_resource(&doc, attrs).await;
+            } else {
+                console::log_1(
+                    &format!("unknown button: {}", &attrs.id).into(),
+                );
+            }
+        }
     }
 }
 
@@ -886,16 +865,13 @@ async fn handle_login() {
 }
 
 /// Go to resource from target's `data-link` attribute
-fn go_resource(doc: &Document, target: &Element) {
-    if let (Some(link), Some(tp)) = (
-        target.get_attribute("data-link"),
-        target.get_attribute("data-type"),
-    ) {
+async fn go_resource(doc: &Document, attrs: ButtonAttrs) {
+    if let (Some(link), Some(tp)) = (attrs.data_link, attrs.data_type) {
         if let Ok(sb_resource) = doc.elem::<HtmlSelectElement>("sb_resource") {
             sb_resource.set_value(&tp);
             if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
                 input.set_value(&link);
-                spawn_local(populate_list(tp, link));
+                populate_list(tp, link).await;
             }
         }
     }
@@ -941,17 +917,6 @@ fn set_delete_enabled(enabled: bool) {
         let mut state = rc.borrow_mut();
         state.delete_enabled = enabled;
     });
-}
-
-/// Deselect the selected card
-fn deselect_card(doc: &Document) {
-    let cs = STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        state.selected_card.take()
-    });
-    if let Some(cs) = cs {
-        cs.replace_card(doc, CardType::Compact);
-    }
 }
 
 /// Add callback for regular interval checks
