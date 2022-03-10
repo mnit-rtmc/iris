@@ -16,7 +16,7 @@ use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
 use crate::error::{Error, Result};
-use crate::fetch::fetch_get;
+use crate::fetch::{fetch_get, fetch_post};
 use crate::modem::Modem;
 use crate::permission::Permission;
 use crate::role::Role;
@@ -61,18 +61,12 @@ pub enum CardType {
 impl CardType {
     /// Is the card compact?
     pub fn is_compact(self) -> bool {
-        match self {
-            CardType::Compact | CardType::CreateCompact => true,
-            _ => false,
-        }
+        matches!(self, CardType::Compact | CardType::CreateCompact)
     }
 
     /// Is the card a create card?
     pub fn is_create(self) -> bool {
-        match self {
-            CardType::Create | CardType::CreateCompact => true,
-            _ => false,
-        }
+        matches!(self, CardType::Create | CardType::CreateCompact)
     }
 
     /// Get compact card type
@@ -311,4 +305,32 @@ async fn fetch_build_card<C: Card>(name: &str, ct: CardType) -> Result<String> {
             C::build_card(json, ct)
         }
     }
+}
+
+/// Create new object from create card
+pub async fn fetch_create(res: &str) -> Result<()> {
+    match res {
+        Alarm::TNAME => create_and_post::<Alarm>().await,
+        CabinetStyle::TNAME => create_and_post::<CabinetStyle>().await,
+        CommConfig::TNAME => create_and_post::<CommConfig>().await,
+        CommLink::TNAME => create_and_post::<CommLink>().await,
+        Controller::TNAME => create_and_post::<Controller>().await,
+        Modem::TNAME => create_and_post::<Modem>().await,
+        Permission::TNAME => create_and_post::<Permission>().await,
+        Role::TNAME => create_and_post::<Role>().await,
+        User::TNAME => create_and_post::<User>().await,
+        _ => Ok(()),
+    }
+}
+
+/// Create a new object
+async fn create_and_post<C: Card>() -> Result<()> {
+    if let Some(window) = web_sys::window() {
+        if let Some(doc) = window.document() {
+            let value = C::create_value(&doc)?;
+            let json = value.into();
+            fetch_post(&format!("/iris/api/{}", C::UNAME), &json).await?;
+        }
+    }
+    Ok(())
 }

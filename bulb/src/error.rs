@@ -40,7 +40,7 @@ pub enum Error {
 
     /// Parse error
     #[error("Parse error")]
-    ParseError(),
+    Parse(),
 
     /// Serde JSON error
     #[error("Serialization error")]

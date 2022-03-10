@@ -109,7 +109,7 @@ impl Card for Permission {
             obj.insert("resource_n".to_string(), Value::String(resource_n));
             return Ok(Value::Object(obj).to_string());
         }
-        Err(Error::ParseError())
+        Err(Error::Parse())
     }
 
     /// Convert to compact HTML

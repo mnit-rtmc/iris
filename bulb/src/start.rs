@@ -12,7 +12,7 @@
 //
 use crate::alarm::Alarm;
 use crate::cabinetstyle::CabinetStyle;
-use crate::card::{fetch_card, fetch_list, Card, CardType};
+use crate::card::{fetch_card, fetch_create, fetch_list, Card, CardType};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
@@ -318,9 +318,7 @@ impl SelectedCard {
     async fn save_changed(self) {
         let ct = self.card_type;
         if ct == CardType::Create {
-            if try_create_new(self.tname).await {
-                self.replace_card(ct.compact()).await;
-            }
+            self.fetch_create().await;
         } else {
             let res = match fetch_get(&self.uri()).await {
                 Ok(json) => match try_changed_fields(self.tname, &json) {
@@ -338,6 +336,18 @@ impl SelectedCard {
                 Err(Error::FetchResponseUnauthorized()) => show_login(),
                 Err(e) => show_toast(&format!("Save failed: {}", e)),
             }
+        }
+    }
+
+    /// Create a new object from card
+    async fn fetch_create(self) {
+        match fetch_create(self.tname).await {
+            Ok(_) => {
+                self.replace_card(CardType::Create.compact()).await;
+                DeferredAction::SearchList.schedule(1500);
+            }
+            Err(Error::FetchResponseUnauthorized()) => show_login(),
+            Err(e) => show_toast(&format!("Create failed: {}", e)),
         }
     }
 }
@@ -408,50 +418,6 @@ async fn try_delete(uri: &str) {
         Err(Error::FetchResponseUnauthorized()) => show_login(),
         Err(e) => show_toast(&format!("Delete failed: {}", e)),
     }
-}
-
-/// Try to create a new object
-async fn try_create_new(tp: &str) -> bool {
-    match create_new(tp).await {
-        Ok(_) => {
-            DeferredAction::SearchList.schedule(1500);
-            true
-        }
-        Err(Error::FetchResponseUnauthorized()) => {
-            show_login();
-            false
-        }
-        Err(e) => {
-            show_toast(&format!("Create failed: {}", e));
-            false
-        }
-    }
-}
-
-/// Create a new object
-async fn create_new(tp: &str) -> Result<()> {
-    let window = web_sys::window().unwrap_throw();
-    let doc = window.document().unwrap_throw();
-    match tp {
-        Alarm::TNAME => do_create::<Alarm>(&doc).await,
-        CabinetStyle::TNAME => do_create::<CabinetStyle>(&doc).await,
-        CommConfig::TNAME => do_create::<CommConfig>(&doc).await,
-        CommLink::TNAME => do_create::<CommLink>(&doc).await,
-        Controller::TNAME => do_create::<Controller>(&doc).await,
-        Modem::TNAME => do_create::<Modem>(&doc).await,
-        Permission::TNAME => do_create::<Permission>(&doc).await,
-        Role::TNAME => do_create::<Role>(&doc).await,
-        User::TNAME => do_create::<User>(&doc).await,
-        _ => unreachable!(),
-    }
-}
-
-/// Create a new object
-async fn do_create<C: Card>(doc: &Document) -> Result<()> {
-    let value = C::create_value(doc)?;
-    let json = value.into();
-    fetch_post(&format!("/iris/api/{}", C::UNAME), &json).await?;
-    Ok(())
 }
 
 /// Try to retrieve changed fields on edit form
