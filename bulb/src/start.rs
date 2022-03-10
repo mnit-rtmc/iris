@@ -326,20 +326,13 @@ impl SelectedCard {
         if ct == CardType::Create {
             self.fetch_create().await;
         } else {
-            let res = match fetch_get(&self.uri()).await {
-                Ok(json) => match try_changed_fields(self.tname, &json) {
-                    Ok(v) => fetch_patch(&self.uri(), &v.into()).await,
-                    Err(e) => Err(e),
-                },
-                Err(_) => {
-                    // Card list out-of-date; refresh with search
-                    DeferredAction::SearchList.schedule(200);
-                    return;
-                }
-            };
-            match res {
+            match self.fetch_save().await {
                 Ok(_) => self.replace_card(ct.compact()).await,
                 Err(Error::FetchResponseUnauthorized()) => show_login(),
+                Err(Error::FetchResponseNotFound()) => {
+                    // Card list out-of-date; refresh with search
+                    DeferredAction::SearchList.schedule(200);
+                }
                 Err(e) => show_toast(&format!("Save failed: {e}")),
             }
         }
@@ -355,6 +348,13 @@ impl SelectedCard {
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Create failed: {e}")),
         }
+    }
+
+    /// Save changed fields on card
+    async fn fetch_save(&self) -> Result<()> {
+        let json = fetch_get(&self.uri()).await?;
+        let v = try_changed_fields(self.tname, &json)?;
+        fetch_patch(&self.uri(), &v.into()).await
     }
 }
 

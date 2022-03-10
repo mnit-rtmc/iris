@@ -77,6 +77,7 @@ fn resp_status(sc: u16) -> Result<()> {
         200 | 201 | 202 | 204 => Ok(()),
         401 => Err(Error::FetchResponseUnauthorized()),
         403 => Err(Error::FetchResponseForbidden()),
+        404 => Err(Error::FetchResponseNotFound()),
         409 => Err(Error::FetchResponseConflict()),
         _ => Err(Error::FetchResponseOther(sc)),
     }

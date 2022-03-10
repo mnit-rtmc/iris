@@ -26,6 +26,10 @@ pub enum Error {
     #[error("Forbidden")]
     FetchResponseForbidden(),
 
+    /// Fetch response "Not Found 404"
+    #[error("Not Found")]
+    FetchResponseNotFound(),
+
     /// Fetch response "Conflict 409"
     #[error("Conflict")]
     FetchResponseConflict(),
