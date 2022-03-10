@@ -227,7 +227,7 @@ async fn expand_card<C: Card>(id: String, name: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     if id.ends_with('_') {
-        let cs = CardState::new::<C>(name);
+        let cs = CardState::new(C::TNAME, name);
         cs.replace_card(&doc, CardType::Create);
     } else {
         match fetch_card(C::TNAME, C::UNAME, name).await {
@@ -273,9 +273,9 @@ pub struct CardState {
 
 impl CardState {
     /// Create a new blank card state
-    fn new<C: Card>(name: String) -> Self {
+    fn new(tname: &'static str, name: String) -> Self {
         CardState {
-            tname: C::TNAME,
+            tname,
             uri: "".into(),
             name,
             json: None,
