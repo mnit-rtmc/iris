@@ -10,7 +10,17 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::alarm::Alarm;
+use crate::cabinetstyle::CabinetStyle;
+use crate::commconfig::CommConfig;
+use crate::commlink::CommLink;
+use crate::controller::Controller;
 use crate::error::{Error, Result};
+use crate::fetch::fetch_get;
+use crate::modem::Modem;
+use crate::permission::Permission;
+use crate::role::Role;
+use crate::user::User;
 use crate::util::Dom;
 use serde::de::DeserializeOwned;
 use serde_json::map::Map;
@@ -237,4 +247,28 @@ pub fn disabled_attr(enabled: bool) -> &'static str {
     } else {
         " class='disabled'"
     }
+}
+
+/// Create cards for a resource type
+pub async fn create_cards(res: &str, search: &str) -> Result<String> {
+    match res {
+        Alarm::TNAME => try_build_cards::<Alarm>(search).await,
+        CabinetStyle::TNAME => try_build_cards::<CabinetStyle>(search).await,
+        CommConfig::TNAME => try_build_cards::<CommConfig>(search).await,
+        CommLink::TNAME => try_build_cards::<CommLink>(search).await,
+        Controller::TNAME => try_build_cards::<Controller>(search).await,
+        Modem::TNAME => try_build_cards::<Modem>(search).await,
+        Permission::TNAME => try_build_cards::<Permission>(search).await,
+        Role::TNAME => try_build_cards::<Role>(search).await,
+        User::TNAME => try_build_cards::<User>(search).await,
+        _ => Ok("".into()),
+    }
+}
+
+/// Try to build cards
+async fn try_build_cards<C: Card>(search: &str) -> Result<String> {
+    let json = fetch_get(&format!("/iris/api/{}", C::UNAME)).await?;
+    let search = search.to_lowercase();
+    let html = C::build_cards(&json, &search)?;
+    Ok(html)
 }

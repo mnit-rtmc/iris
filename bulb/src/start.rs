@@ -12,7 +12,7 @@
 //
 use crate::alarm::Alarm;
 use crate::cabinetstyle::CabinetStyle;
-use crate::card::{Card, CardType};
+use crate::card::{create_cards, Card, CardType};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
@@ -175,35 +175,11 @@ async fn populate_list(tp: String, search: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let sb_list = doc.elem::<Element>("sb_list").unwrap_throw();
-    match create_cards(tp, &search).await {
+    match create_cards(&tp, &search).await {
         Ok(cards) => sb_list.set_inner_html(&cards),
         Err(Error::FetchResponseUnauthorized()) => show_login(),
         Err(e) => show_toast(&format!("View failed: {}", e)),
     }
-}
-
-/// Create cards for `sb_list`
-async fn create_cards(tp: String, search: &str) -> Result<String> {
-    match tp.as_str() {
-        Alarm::TNAME => try_build_cards::<Alarm>(search).await,
-        CabinetStyle::TNAME => try_build_cards::<CabinetStyle>(search).await,
-        CommConfig::TNAME => try_build_cards::<CommConfig>(search).await,
-        CommLink::TNAME => try_build_cards::<CommLink>(search).await,
-        Controller::TNAME => try_build_cards::<Controller>(search).await,
-        Modem::TNAME => try_build_cards::<Modem>(search).await,
-        Permission::TNAME => try_build_cards::<Permission>(search).await,
-        Role::TNAME => try_build_cards::<Role>(search).await,
-        User::TNAME => try_build_cards::<User>(search).await,
-        _ => Ok("".into()),
-    }
-}
-
-/// Try to build cards
-async fn try_build_cards<C: Card>(search: &str) -> Result<String> {
-    let json = fetch_get(&format!("/iris/api/{}", C::UNAME)).await?;
-    let search = search.to_lowercase();
-    let html = C::build_cards(&json, &search)?;
-    Ok(html)
 }
 
 /// Handle a card click event
