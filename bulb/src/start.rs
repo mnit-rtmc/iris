@@ -12,7 +12,7 @@
 //
 use crate::alarm::Alarm;
 use crate::cabinetstyle::CabinetStyle;
-use crate::card::{create_cards, Card, CardType};
+use crate::card::{build_list, Card, CardType};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
@@ -175,7 +175,7 @@ async fn populate_list(tp: String, search: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let sb_list = doc.elem::<Element>("sb_list").unwrap_throw();
-    match create_cards(&tp, &search).await {
+    match build_list(&tp, &search).await {
         Ok(cards) => sb_list.set_inner_html(&cards),
         Err(Error::FetchResponseUnauthorized()) => show_login(),
         Err(e) => show_toast(&format!("View failed: {}", e)),

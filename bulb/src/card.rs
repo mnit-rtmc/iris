@@ -208,34 +208,6 @@ pub trait Card: fmt::Display + DeserializeOwned {
         "".into()
     }
 
-    /// Build a list of cards from a JSON array
-    fn build_cards(json: &JsValue, search: &str) -> Result<String> {
-        let tname = Self::TNAME;
-        let mut html = String::new();
-        html.push_str("<ul class='cards'>");
-        let obs = json.into_serde::<Vec<Self>>()?;
-        if search.is_empty() {
-            let next_name = Self::next_name(&obs);
-            // the "Create" card has id "{tname}_" and next available name
-            html.push_str(&format!(
-                "<li id='{tname}_' name='{next_name}' class='card'>\
-                    {CREATE_COMPACT}\
-                </li>"
-            ));
-        }
-        for ob in obs.iter().filter(|ob| {
-            search.is_empty() || search.split(' ').all(|s| ob.is_match(s))
-        }) {
-            html.push_str(&format!(
-                "<li id='{tname}_{ob}' name='{ob}' class='card'>"
-            ));
-            html.push_str(&ob.to_html_compact());
-            html.push_str("</li>");
-        }
-        html.push_str("</ul>");
-        Ok(html)
-    }
-
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String;
 }
@@ -249,26 +221,46 @@ pub fn disabled_attr(enabled: bool) -> &'static str {
     }
 }
 
-/// Create cards for a resource type
-pub async fn create_cards(res: &str, search: &str) -> Result<String> {
+/// Build card list for a resource type
+pub async fn build_list(res: &str, search: &str) -> Result<String> {
     match res {
-        Alarm::TNAME => try_build_cards::<Alarm>(search).await,
-        CabinetStyle::TNAME => try_build_cards::<CabinetStyle>(search).await,
-        CommConfig::TNAME => try_build_cards::<CommConfig>(search).await,
-        CommLink::TNAME => try_build_cards::<CommLink>(search).await,
-        Controller::TNAME => try_build_cards::<Controller>(search).await,
-        Modem::TNAME => try_build_cards::<Modem>(search).await,
-        Permission::TNAME => try_build_cards::<Permission>(search).await,
-        Role::TNAME => try_build_cards::<Role>(search).await,
-        User::TNAME => try_build_cards::<User>(search).await,
+        Alarm::TNAME => try_build_list::<Alarm>(search).await,
+        CabinetStyle::TNAME => try_build_list::<CabinetStyle>(search).await,
+        CommConfig::TNAME => try_build_list::<CommConfig>(search).await,
+        CommLink::TNAME => try_build_list::<CommLink>(search).await,
+        Controller::TNAME => try_build_list::<Controller>(search).await,
+        Modem::TNAME => try_build_list::<Modem>(search).await,
+        Permission::TNAME => try_build_list::<Permission>(search).await,
+        Role::TNAME => try_build_list::<Role>(search).await,
+        User::TNAME => try_build_list::<User>(search).await,
         _ => Ok("".into()),
     }
 }
 
-/// Try to build cards
-async fn try_build_cards<C: Card>(search: &str) -> Result<String> {
+/// Fetch JSON array and build card list
+async fn try_build_list<C: Card>(search: &str) -> Result<String> {
     let json = fetch_get(&format!("/iris/api/{}", C::UNAME)).await?;
     let search = search.to_lowercase();
-    let html = C::build_cards(&json, &search)?;
+    let tname = C::TNAME;
+    let mut html = String::new();
+    html.push_str("<ul class='cards'>");
+    let obs = json.into_serde::<Vec<C>>()?;
+    let next_name = C::next_name(&obs);
+    // the "Create" card has id "{tname}_" and next available name
+    html.push_str(&format!(
+        "<li id='{tname}_' name='{next_name}' class='card'>\
+            {CREATE_COMPACT}\
+        </li>"
+    ));
+    for ob in obs.iter().filter(|ob| {
+        search.is_empty() || search.split(' ').all(|s| ob.is_match(s))
+    }) {
+        html.push_str(&format!(
+            "<li id='{tname}_{ob}' name='{ob}' class='card'>"
+        ));
+        html.push_str(&ob.to_html_compact());
+        html.push_str("</li>");
+    }
+    html.push_str("</ul>");
     Ok(html)
 }
