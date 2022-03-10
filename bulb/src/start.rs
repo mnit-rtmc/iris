@@ -195,7 +195,7 @@ async fn populate_list(tp: String, search: String) {
     match fetch_list(&tp, &search).await {
         Ok(cards) => sb_list.set_inner_html(&cards),
         Err(Error::FetchResponseUnauthorized()) => show_login(),
-        Err(e) => show_toast(&format!("View failed: {}", e)),
+        Err(e) => show_toast(&format!("View failed: {e}")),
     }
 }
 
@@ -288,14 +288,16 @@ impl SelectedCard {
                         return;
                     }
                     Err(e) => {
-                        show_toast(&format!("Fetch failed: {}", e));
+                        show_toast(&format!("Fetch failed: {e}"));
                         // Card list may be out-of-date; refresh with search
                         DeferredAction::SearchList.schedule(200);
                         return;
                     }
                 }
             }
-            Err(e) => console::log_1(&format!("{:?} {}", e, id).into()),
+            Err(e) => {
+                console::log_1(&format!("replace_card {id} {e:?}").into());
+            }
         }
         STATE.with(|rc| {
             let mut state = rc.borrow_mut();
@@ -311,7 +313,11 @@ impl SelectedCard {
 
     /// Delete selected card / object
     async fn delete(self) {
-        try_delete(&self.uri()).await;
+        match fetch_delete(&self.uri()).await {
+            Ok(_) => DeferredAction::SearchList.schedule(1000),
+            Err(Error::FetchResponseUnauthorized()) => show_login(),
+            Err(e) => show_toast(&format!("Delete failed: {e}")),
+        }
     }
 
     /// Save changed fields on Edit form
@@ -334,7 +340,7 @@ impl SelectedCard {
             match res {
                 Ok(_) => self.replace_card(ct.compact()).await,
                 Err(Error::FetchResponseUnauthorized()) => show_login(),
-                Err(e) => show_toast(&format!("Save failed: {}", e)),
+                Err(e) => show_toast(&format!("Save failed: {e}")),
             }
         }
     }
@@ -347,7 +353,7 @@ impl SelectedCard {
                 DeferredAction::SearchList.schedule(1500);
             }
             Err(Error::FetchResponseUnauthorized()) => show_login(),
-            Err(e) => show_toast(&format!("Create failed: {}", e)),
+            Err(e) => show_toast(&format!("Create failed: {e}")),
         }
     }
 }
@@ -408,15 +414,6 @@ fn replace_card_html(elem: &HtmlElement, ct: CardType, html: &str) {
         opt.behavior(ScrollBehavior::Smooth)
             .block(ScrollLogicalPosition::Nearest);
         elem.scroll_into_view_with_scroll_into_view_options(&opt);
-    }
-}
-
-/// Try to delete an object
-async fn try_delete(uri: &str) {
-    match fetch_delete(uri).await {
-        Ok(_) => DeferredAction::SearchList.schedule(1000),
-        Err(Error::FetchResponseUnauthorized()) => show_login(),
-        Err(e) => show_toast(&format!("Delete failed: {}", e)),
     }
 }
 
@@ -825,7 +822,7 @@ async fn handle_login() {
                     initialize_state().await;
                 }
             }
-            Err(e) => show_toast(&format!("Login failed: {}", e)),
+            Err(e) => show_toast(&format!("Login failed: {e}")),
         }
     }
 }
