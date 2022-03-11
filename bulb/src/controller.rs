@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{disabled_attr, Card, NAME};
+use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
 use crate::util::{Dom, HtmlStr, OptVal};
@@ -43,8 +44,10 @@ pub struct Controller {
     pub geo_loc: Option<String>,
     pub password: Option<String>,
 
-    /// Ancillary condition list
+    /// Ancillary data
     pub conditions: Option<Vec<Condition>>,
+    pub comm_links: Option<Vec<CommLink>>,
+    pub comm_configs: Option<Vec<CommConfig>>,
 }
 
 impl fmt::Display for Controller {
@@ -100,6 +103,25 @@ impl Controller {
         html.push_str("</select>");
         html
     }
+
+    /// Get the comm config
+    fn comm_config(&self) -> &str {
+        if let (Some(comm_links), Some(comm_configs)) =
+            (&self.comm_links, &self.comm_configs)
+        {
+            if let Some(comm_link) =
+                comm_links.iter().find(|cl| cl.name == self.comm_link)
+            {
+                if let Some(comm_config) = comm_configs
+                    .iter()
+                    .find(|cc| cc.name == comm_link.comm_config)
+                {
+                    return &comm_config.description[..];
+                }
+            }
+        }
+        ""
+    }
 }
 
 impl Card for Controller {
@@ -151,17 +173,30 @@ impl Card for Controller {
 
     /// Get ancillary URI
     fn ancillary_uri(&self) -> Option<&str> {
-        if self.conditions.is_none() {
-            Some("/iris/condition")
-        } else {
-            None
+        match (&self.conditions, &self.comm_links, &self.comm_configs) {
+            (None, _, _) => Some("/iris/condition"),
+            (_, None, _) => Some("/iris/api/comm_link"),
+            (_, _, None) => Some("/iris/api/comm_config"),
+            _ => None,
         }
     }
 
     /// Put ancillary JSON data
     fn ancillary_json(&mut self, json: JsValue) -> Result<()> {
-        let conditions = json.into_serde::<Vec<Condition>>()?;
-        self.conditions = Some(conditions);
+        match (&self.conditions, &self.comm_links) {
+            (None, _) => {
+                let conditions = json.into_serde::<Vec<Condition>>()?;
+                self.conditions = Some(conditions);
+            }
+            (_, None) => {
+                let comm_links = json.into_serde::<Vec<CommLink>>()?;
+                self.comm_links = Some(comm_links);
+            }
+            _ => {
+                let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
+                self.comm_configs = Some(comm_configs);
+            }
+        }
         Ok(())
     }
 
@@ -198,6 +233,7 @@ impl Card for Controller {
         let condition = self.condition();
         let comm_state = self.comm_state(true);
         let comm_link = HtmlStr::new(&self.comm_link);
+        let comm_config = self.comm_config();
         let drop_id = self.drop_id;
         let location = HtmlStr::new(self.location.as_ref()).with_len(64);
         let notes = HtmlStr::new(&self.notes);
@@ -205,7 +241,11 @@ impl Card for Controller {
             Some(version) => {
                 let version = HtmlStr::new(version).with_len(32);
                 format!(
-                    "<span>Version</span><span class='info'>{version}</span>"
+                    "<span>\
+                      <span>Version</span>\
+                      <span class='info'>{version}</span>\
+                    </span>\
+                    <span></span>"
                 )
             }
             None => "".to_string(),
@@ -229,7 +269,8 @@ impl Card for Controller {
               </span>\
             </div>\
             <div class='row'>\
-              <span> comm_config </span>\
+              <span></span>\
+              <span class='info'>{comm_config}</span>\
             </div>\
             <div class='row'>\
               <span>{location}</span>\
