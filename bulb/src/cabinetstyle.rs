@@ -21,7 +21,7 @@ use wasm_bindgen::JsValue;
 use web_sys::Document;
 
 /// Cabinet Style
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct CabinetStyle {
     pub name: String,
     pub police_panel_pin_1: Option<u32>,
@@ -41,6 +41,12 @@ impl Card for CabinetStyle {
     const TNAME: &'static str = "Cabinet Style";
     const ENAME: &'static str = "🗄️ Cabinet Style";
     const UNAME: &'static str = "cabinet_style";
+
+    /// Set the name
+    fn with_name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
 
     /// Check if a search string matches
     fn is_match(&self, search: &str) -> bool {

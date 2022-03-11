@@ -80,7 +80,7 @@ impl CardType {
 }
 
 /// A card can be displayed in a card list
-pub trait Card: fmt::Display + DeserializeOwned {
+pub trait Card: Default + fmt::Display + DeserializeOwned {
     const TNAME: &'static str;
     const ENAME: &'static str;
     const UNAME: &'static str;
@@ -90,6 +90,9 @@ pub trait Card: fmt::Display + DeserializeOwned {
     fn new(json: &JsValue) -> Result<Self> {
         Ok(json.into_serde::<Self>()?)
     }
+
+    /// Set the name
+    fn with_name(self, name: &str) -> Self;
 
     /// Get ancillary URI
     fn ancillary_uri(&self) -> Option<&str> {
@@ -107,11 +110,11 @@ pub trait Card: fmt::Display + DeserializeOwned {
     }
 
     /// Get row for create card
-    fn html_create(name: &str) -> String {
+    fn to_html_create(&self) -> String {
         format!(
             "<div class='row'>\
               <label for='create_name'>Name</label>\
-              <input id='create_name' maxlength='24' size='24' value='{name}'/>\
+              <input id='create_name' maxlength='24' size='24' value='{self}'/>\
             </div>"
         )
     }
@@ -241,7 +244,12 @@ async fn res_build_card<C: Card>(name: &str, ct: CardType) -> Result<String> {
     match ct {
         CardType::CreateCompact => Ok(CREATE_COMPACT.into()),
         CardType::Create => {
-            Ok(html_card_create(C::ENAME, &C::html_create(name)))
+            let mut val = C::default().with_name(name);
+            while let Some(uri) = val.ancillary_uri() {
+                let json = fetch_get(uri).await?;
+                val.ancillary_json(json)?;
+            }
+            Ok(html_card_create(C::ENAME, &val.to_html_create()))
         }
         CardType::Compact => {
             let val = fetch_all::<C>(name).await?;

@@ -77,8 +77,6 @@ enum DeferredAction {
 struct State {
     /// Permission access
     access: Vec<Permission>,
-    /// Resource types
-    resource_types: Vec<String>,
     /// Deferred actions (with tick number)
     deferred: Vec<(i32, DeferredAction)>,
     /// Timer tick count
@@ -98,15 +96,13 @@ impl State {
     fn initialize(
         &mut self,
         mut access: Vec<Permission>,
-        mut resource_types: Vec<String>,
     ) {
         self.access.append(&mut access);
-        self.resource_types.append(&mut resource_types);
     }
 
     /// Does state need initializing?
     fn needs_initializing(&self) -> bool {
-        self.resource_types.is_empty()
+        self.access.is_empty()
     }
 
     /// Add ticks to current tick count
@@ -402,11 +398,9 @@ async fn initialize_state() {
 async fn do_initialize() -> core::result::Result<(), JsError> {
     let json = fetch_get("/iris/api/access").await?;
     let access = json.into_serde::<Vec<Permission>>()?;
-    let json = fetch_get("/iris/resource_type").await?;
-    let resource_types = json.into_serde::<Vec<String>>()?;
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        state.initialize(access, resource_types);
+        state.initialize(access);
     });
     Ok(())
 }
@@ -442,27 +436,6 @@ fn add_option<C: Card>(perm: &Permission, html: &mut String) {
         html.push_str(C::ENAME);
         html.push_str("</option>");
     }
-}
-
-
-/// Create an HTML `select` element of resource types
-pub fn resource_types_html(selected: &str) -> String {
-    STATE.with(|rc| {
-        let state = rc.borrow();
-        let mut html = String::new();
-        html.push_str("<select id='edit_resource'>");
-        for resource_type in &state.resource_types {
-            html.push_str("<option");
-            if selected == resource_type {
-                html.push_str(" selected");
-            }
-            html.push('>');
-            html.push_str(resource_type);
-            html.push_str("</option>");
-        }
-        html.push_str("</select>");
-        html
-    })
 }
 
 /// Handle an event from "sb_resource" `select` element

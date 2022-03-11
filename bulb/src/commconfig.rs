@@ -121,7 +121,7 @@ pub struct Protocol {
 }
 
 /// Comm configuration
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct CommConfig {
     pub name: String,
     pub description: String,
@@ -172,6 +172,12 @@ impl Card for CommConfig {
     const TNAME: &'static str = "Comm Config";
     const ENAME: &'static str = "📡 Comm Config";
     const UNAME: &'static str = "comm_config";
+
+    /// Set the name
+    fn with_name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
 
     /// Check if a search string matches
     fn is_match(&self, search: &str) -> bool {

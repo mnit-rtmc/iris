@@ -22,7 +22,7 @@ use wasm_bindgen::JsValue;
 use web_sys::Document;
 
 /// Comm link
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct CommLink {
     pub name: String,
     pub description: String,
@@ -93,6 +93,12 @@ impl Card for CommLink {
     const ENAME: &'static str = "🔗 Comm Link";
     const UNAME: &'static str = "comm_link";
     const HAS_STATUS: bool = true;
+
+    /// Set the name
+    fn with_name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
 
     /// Check if a search string matches
     fn is_match(&self, search: &str) -> bool {

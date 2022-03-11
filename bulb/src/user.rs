@@ -21,7 +21,7 @@ use wasm_bindgen::JsValue;
 use web_sys::Document;
 
 /// User
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct User {
     pub name: String,
     pub full_name: String,
@@ -39,6 +39,12 @@ impl Card for User {
     const TNAME: &'static str = "User";
     const ENAME: &'static str = "👤 User";
     const UNAME: &'static str = "user";
+
+    /// Set the name
+    fn with_name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
 
     /// Check if a search string matches
     fn is_match(&self, search: &str) -> bool {

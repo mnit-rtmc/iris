@@ -21,7 +21,7 @@ use wasm_bindgen::JsValue;
 use web_sys::Document;
 
 /// Modem
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Modem {
     pub name: String,
     pub uri: Option<String>,
@@ -40,6 +40,12 @@ impl Card for Modem {
     const TNAME: &'static str = "Modem";
     const ENAME: &'static str = "🖀 Modem";
     const UNAME: &'static str = "modem";
+
+    /// Set the name
+    fn with_name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
 
     /// Check if a search string matches
     fn is_match(&self, search: &str) -> bool {

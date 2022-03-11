@@ -29,7 +29,7 @@ pub struct Condition {
 }
 
 /// Controller
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Controller {
     pub name: String,
     pub location: Option<String>,
@@ -107,6 +107,12 @@ impl Card for Controller {
     const ENAME: &'static str = "🎛️ Controller";
     const UNAME: &'static str = "controller";
     const HAS_STATUS: bool = true;
+
+    /// Set the name
+    fn with_name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
 
     /// Get geo location of card
     fn geo_loc(&self) -> Option<&str> {

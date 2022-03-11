@@ -21,7 +21,7 @@ use wasm_bindgen::JsValue;
 use web_sys::Document;
 
 /// Role
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Role {
     pub name: String,
     pub enabled: bool,
@@ -37,6 +37,12 @@ impl Card for Role {
     const TNAME: &'static str = "Role";
     const ENAME: &'static str = "💪 Role";
     const UNAME: &'static str = "role";
+
+    /// Set the name
+    fn with_name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
 
     /// Check if a search string matches
     fn is_match(&self, search: &str) -> bool {

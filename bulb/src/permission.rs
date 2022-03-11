@@ -12,7 +12,6 @@
 //
 use crate::card::{Card, NAME};
 use crate::error::{Error, Result};
-use crate::start::resource_types_html;
 use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -22,13 +21,16 @@ use wasm_bindgen::JsValue;
 use web_sys::Document;
 
 /// Permission
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Permission {
     pub id: u32,
     pub role: String,
     pub resource_n: String,
     pub batch: Option<String>,
     pub access_n: u32,
+
+    /// Ancillary resource type list
+    pub resource_types: Option<Vec<String>>,
 }
 
 impl fmt::Display for Permission {
@@ -71,10 +73,36 @@ fn access_html(selected: u32) -> String {
     html
 }
 
+impl Permission {
+    /// Create an HTML `select` element of resource types
+    fn resource_types_html(&self) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='edit_resource'>");
+        if let Some(resource_types) = &self.resource_types {
+            for resource_type in resource_types {
+                html.push_str("<option");
+                if &self.resource_n == resource_type {
+                    html.push_str(" selected");
+                }
+                html.push('>');
+                html.push_str(resource_type);
+                html.push_str("</option>");
+            }
+        }
+        html.push_str("</select>");
+        html
+    }
+}
+
 impl Card for Permission {
     const TNAME: &'static str = "Permission";
     const ENAME: &'static str = "🗝️ Permission";
     const UNAME: &'static str = "permission";
+
+    /// Set the name
+    fn with_name(self, _name: &str) -> Self {
+        self
+    }
 
     /// Check if a search string matches
     fn is_match(&self, search: &str) -> bool {
@@ -84,9 +112,25 @@ impl Card for Permission {
             || self.resource_n.contains(search)
     }
 
+    /// Get ancillary URI
+    fn ancillary_uri(&self) -> Option<&str> {
+        if self.resource_types.is_none() {
+            Some("/iris/resource_type")
+        } else {
+            None
+        }
+    }
+
+    /// Put ancillary JSON data
+    fn ancillary_json(&mut self, json: JsValue) -> Result<()> {
+        let resource_types = json.into_serde::<Vec<String>>()?;
+        self.resource_types = Some(resource_types);
+        Ok(())
+    }
+
     /// Get row for create card
-    fn html_create(_name: &str) -> String {
-        let resource = resource_types_html("");
+    fn to_html_create(&self) -> String {
+        let resource = self.resource_types_html();
         format!(
             "<div class='row'>\
               <label for='edit_role'>Role</label>\
@@ -126,7 +170,7 @@ impl Card for Permission {
     /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
         let role = HtmlStr::new(&self.role);
-        let resource = resource_types_html(&self.resource_n);
+        let resource = self.resource_types_html();
         let batch = HtmlStr::new(self.batch.as_ref());
         let access = access_html(self.access_n);
         format!(
