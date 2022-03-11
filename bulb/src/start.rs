@@ -25,7 +25,6 @@ use crate::permission::Permission;
 use crate::role::Role;
 use crate::user::User;
 use crate::util::Dom;
-use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -55,13 +54,6 @@ const LOGIN_ID: &str = "sb_login";
 /// Interval (ms) between ticks for deferred actions
 const TICK_INTERVAL: i32 = 500;
 
-/// Controller conditions
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Condition {
-    pub id: u32,
-    pub description: String,
-}
-
 /// Selected card state
 #[derive(Clone, Debug)]
 struct SelectedCard {
@@ -85,8 +77,6 @@ enum DeferredAction {
 struct State {
     /// Permission access
     access: Vec<Permission>,
-    /// Controller conditions
-    conditions: Vec<Condition>,
     /// Resource types
     resource_types: Vec<String>,
     /// Deferred actions (with tick number)
@@ -108,11 +98,9 @@ impl State {
     fn initialize(
         &mut self,
         mut access: Vec<Permission>,
-        mut conditions: Vec<Condition>,
         mut resource_types: Vec<String>,
     ) {
         self.access.append(&mut access);
-        self.conditions.append(&mut conditions);
         self.resource_types.append(&mut resource_types);
     }
 
@@ -414,13 +402,11 @@ async fn initialize_state() {
 async fn do_initialize() -> core::result::Result<(), JsError> {
     let json = fetch_get("/iris/api/access").await?;
     let access = json.into_serde::<Vec<Permission>>()?;
-    let json = fetch_get("/iris/condition").await?;
-    let conditions = json.into_serde::<Vec<Condition>>()?;
     let json = fetch_get("/iris/resource_type").await?;
     let resource_types = json.into_serde::<Vec<String>>()?;
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        state.initialize(access, conditions, resource_types);
+        state.initialize(access, resource_types);
     });
     Ok(())
 }
@@ -458,40 +444,6 @@ fn add_option<C: Card>(perm: &Permission, html: &mut String) {
     }
 }
 
-/// Get a condition by ID
-pub fn get_condition(id: u32) -> Option<String> {
-    STATE.with(|rc| {
-        let state = rc.borrow();
-        for condition in &state.conditions {
-            if id == condition.id {
-                return Some(condition.description.clone());
-            }
-        }
-        None
-    })
-}
-
-/// Create an HTML `select` element of controller conditions
-pub fn conditions_html(selected: u32) -> String {
-    STATE.with(|rc| {
-        let state = rc.borrow();
-        let mut html = String::new();
-        html.push_str("<select id='edit_condition'>");
-        for condition in &state.conditions {
-            html.push_str("<option value='");
-            html.push_str(&condition.id.to_string());
-            html.push('\'');
-            if selected == condition.id {
-                html.push_str(" selected");
-            }
-            html.push('>');
-            html.push_str(&condition.description);
-            html.push_str("</option>");
-        }
-        html.push_str("</select>");
-        html
-    })
-}
 
 /// Create an HTML `select` element of resource types
 pub fn resource_types_html(selected: &str) -> String {

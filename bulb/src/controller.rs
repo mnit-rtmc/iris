@@ -13,7 +13,6 @@
 use crate::card::{disabled_attr, Card, NAME};
 use crate::commlink::CommLink;
 use crate::error::Result;
-use crate::start::{conditions_html, get_condition};
 use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -21,6 +20,13 @@ use serde_json::Value;
 use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
+
+/// Controller conditions
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Condition {
+    pub id: u32,
+    pub description: String,
+}
 
 /// Controller
 #[derive(Debug, Deserialize, Serialize)]
@@ -36,6 +42,9 @@ pub struct Controller {
     pub fail_time: Option<String>,
     pub geo_loc: Option<String>,
     pub password: Option<String>,
+
+    /// Ancillary condition list
+    pub conditions: Option<Vec<Condition>>,
 }
 
 impl fmt::Display for Controller {
@@ -45,11 +54,6 @@ impl fmt::Display for Controller {
 }
 
 impl Controller {
-    /// Get condition description
-    fn condition(&self) -> String {
-        get_condition(self.condition).unwrap_or_else(|| "".to_string())
-    }
-
     /// Get comm state
     fn comm_state(&self, long: bool) -> &'static str {
         let active = self.condition == 1;
@@ -62,6 +66,39 @@ impl Controller {
             (false, _, false) => "❓",
             (false, _, true) => "inactive ❓",
         }
+    }
+
+    /// Get condition description
+    fn condition(&self) -> &str {
+        if let Some(conditions) = &self.conditions {
+            for condition in conditions {
+                if self.condition == condition.id {
+                    return &condition.description;
+                }
+            }
+        }
+        ""
+    }
+
+    /// Create an HTML `select` element of controller conditions
+    fn conditions_html(&self) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='edit_condition'>");
+        if let Some(conditions) = &self.conditions {
+            for condition in conditions {
+                html.push_str("<option value='");
+                html.push_str(&condition.id.to_string());
+                html.push('\'');
+                if self.condition == condition.id {
+                    html.push_str(" selected");
+                }
+                html.push('>');
+                html.push_str(&condition.description);
+                html.push_str("</option>");
+            }
+        }
+        html.push_str("</select>");
+        html
     }
 }
 
@@ -104,6 +141,22 @@ impl Card for Controller {
                 .unwrap_or("")
                 .to_lowercase()
                 .contains(search)
+    }
+
+    /// Get ancillary URI
+    fn ancillary_uri(&self) -> Option<&str> {
+        if self.conditions.is_none() {
+            Some("/iris/condition")
+        } else {
+            None
+        }
+    }
+
+    /// Put ancillary JSON data
+    fn ancillary_json(&mut self, json: JsValue) -> Result<()> {
+        let conditions = json.into_serde::<Vec<Condition>>()?;
+        self.conditions = Some(conditions);
+        Ok(())
     }
 
     /// Get next suggested name
@@ -186,7 +239,7 @@ impl Card for Controller {
         let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
         let cabinet_style = HtmlStr::new(self.cabinet_style.as_ref());
-        let conditions = conditions_html(self.condition);
+        let conditions = self.conditions_html();
         let notes = HtmlStr::new(&self.notes);
         let password = HtmlStr::new(self.password.as_ref());
         format!(
