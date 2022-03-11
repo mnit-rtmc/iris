@@ -55,13 +55,6 @@ const LOGIN_ID: &str = "sb_login";
 /// Interval (ms) between ticks for deferred actions
 const TICK_INTERVAL: i32 = 500;
 
-/// Comm protocol
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Protocol {
-    pub id: u32,
-    pub description: String,
-}
-
 /// Controller conditions
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Condition {
@@ -92,8 +85,6 @@ enum DeferredAction {
 struct State {
     /// Permission access
     access: Vec<Permission>,
-    /// Comm protocols
-    protocols: Vec<Protocol>,
     /// Controller conditions
     conditions: Vec<Condition>,
     /// Resource types
@@ -119,13 +110,11 @@ impl State {
     fn initialize(
         &mut self,
         mut access: Vec<Permission>,
-        mut protocols: Vec<Protocol>,
         mut conditions: Vec<Condition>,
         mut resource_types: Vec<String>,
         mut comm_configs: Vec<CommConfig>,
     ) {
         self.access.append(&mut access);
-        self.protocols.append(&mut protocols);
         self.conditions.append(&mut conditions);
         self.resource_types.append(&mut resource_types);
         self.comm_configs.append(&mut comm_configs);
@@ -429,8 +418,6 @@ async fn initialize_state() {
 async fn do_initialize() -> core::result::Result<(), JsError> {
     let json = fetch_get("/iris/api/access").await?;
     let access = json.into_serde::<Vec<Permission>>()?;
-    let json = fetch_get("/iris/comm_protocol").await?;
-    let protocols = json.into_serde::<Vec<Protocol>>()?;
     let json = fetch_get("/iris/condition").await?;
     let conditions = json.into_serde::<Vec<Condition>>()?;
     let json = fetch_get("/iris/resource_type").await?;
@@ -441,7 +428,6 @@ async fn do_initialize() -> core::result::Result<(), JsError> {
         let mut state = rc.borrow_mut();
         state.initialize(
             access,
-            protocols,
             conditions,
             resource_types,
             comm_configs,
@@ -481,30 +467,6 @@ fn add_option<C: Card>(perm: &Permission, html: &mut String) {
         html.push_str(C::ENAME);
         html.push_str("</option>");
     }
-}
-
-/// Create an HTML `select` element of comm protocols
-pub fn protocols_html(selected: Option<u32>) -> String {
-    STATE.with(|rc| {
-        let state = rc.borrow();
-        let mut html = String::new();
-        html.push_str("<select id='edit_protocol'>");
-        for protocol in &state.protocols {
-            html.push_str("<option value='");
-            html.push_str(&protocol.id.to_string());
-            html.push('\'');
-            if let Some(p) = selected {
-                if p == protocol.id {
-                    html.push_str(" selected");
-                }
-            }
-            html.push('>');
-            html.push_str(&protocol.description);
-            html.push_str("</option>");
-        }
-        html.push_str("</select>");
-        html
-    })
 }
 
 /// Get a condition by ID

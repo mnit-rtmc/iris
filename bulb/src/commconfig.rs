@@ -12,7 +12,6 @@
 //
 use crate::card::{Card, NAME};
 use crate::error::Result;
-use crate::start::protocols_html;
 use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -114,6 +113,13 @@ fn period_options(periods: &[Period], seconds: Option<u32>) -> String {
     html
 }
 
+/// Comm protocol
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Protocol {
+    pub id: u32,
+    pub description: String,
+}
+
 /// Comm configuration
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CommConfig {
@@ -126,11 +132,39 @@ pub struct CommConfig {
     pub long_poll_period_sec: Option<u32>,
     pub idle_disconnect_sec: Option<u32>,
     pub no_response_disconnect_sec: Option<u32>,
+
+    /// Ancillary protocol list
+    pub protocols: Option<Vec<Protocol>>,
 }
 
 impl fmt::Display for CommConfig {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", HtmlStr::new(&self.name))
+    }
+}
+
+impl CommConfig {
+    /// Create an HTML `select` element of comm protocols
+    fn protocols_html(&self) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='edit_protocol'>");
+        if let Some(protocols) = &self.protocols {
+            for protocol in protocols {
+                html.push_str("<option value='");
+                html.push_str(&protocol.id.to_string());
+                html.push('\'');
+                if let Some(p) = self.protocol {
+                    if p == protocol.id {
+                        html.push_str(" selected");
+                    }
+                }
+                html.push('>');
+                html.push_str(&protocol.description);
+                html.push_str("</option>");
+            }
+        }
+        html.push_str("</select>");
+        html
     }
 }
 
@@ -143,6 +177,22 @@ impl Card for CommConfig {
     fn is_match(&self, search: &str) -> bool {
         self.description.to_lowercase().contains(search)
             || self.name.to_lowercase().contains(search)
+    }
+
+    /// Get ancillary URI
+    fn ancillary_uri(&self) -> Option<&str> {
+        if self.protocols.is_none() {
+            Some("/iris/comm_protocol")
+        } else {
+            None
+        }
+    }
+
+    /// Put ancillary JSON data
+    fn ancillary_json(&mut self, json: JsValue) -> Result<()> {
+        let protocols = json.into_serde::<Vec<Protocol>>()?;
+        self.protocols = Some(protocols);
+        Ok(())
     }
 
     /// Get next suggested name
@@ -170,7 +220,7 @@ impl Card for CommConfig {
     /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
         let description = HtmlStr::new(&self.description);
-        let protocols = protocols_html(self.protocol);
+        let protocols = self.protocols_html();
         let modem = if let Some(true) = self.modem {
             " checked"
         } else {

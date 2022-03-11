@@ -91,6 +91,16 @@ pub trait Card: fmt::Display + DeserializeOwned {
         Ok(json.into_serde::<Self>()?)
     }
 
+    /// Get ancillary URI
+    fn ancillary_uri(&self) -> Option<&str> {
+        None
+    }
+
+    /// Put ancillary JSON data
+    fn ancillary_json(&mut self, _json: JsValue) -> Result<()> {
+        unreachable!()
+    }
+
     /// Get geo location of card
     fn geo_loc(&self) -> Option<&str> {
         None
@@ -234,22 +244,30 @@ async fn res_build_card<C: Card>(name: &str, ct: CardType) -> Result<String> {
             Ok(html_card_create(C::ENAME, &C::html_create(name)))
         }
         CardType::Compact => {
-            let json = fetch_json(C::UNAME, name).await?;
-            let val = C::new(&json)?;
+            let val = fetch_all::<C>(name).await?;
             Ok(val.to_html_compact())
         }
         CardType::Status if C::HAS_STATUS => {
-            let json = fetch_json(C::UNAME, name).await?;
-            let val = C::new(&json)?;
+            let val = fetch_all::<C>(name).await?;
             let geo_loc = val.geo_loc();
             Ok(html_card_status(C::ENAME, name, &val.to_html_status(), geo_loc))
         }
         _ => {
-            let json = fetch_json(C::UNAME, name).await?;
-            let val = C::new(&json)?;
+            let val = fetch_all::<C>(name).await?;
             Ok(html_card_edit(C::ENAME, name, &val.to_html_edit()))
         }
     }
+}
+
+/// Fetch JSON and ancillary data
+async fn fetch_all<C: Card>(name: &str) -> Result<C> {
+    let json = fetch_json(C::UNAME, name).await?;
+    let mut val = C::new(&json)?;
+    while let Some(uri) = val.ancillary_uri() {
+        let json = fetch_get(uri).await?;
+        val.ancillary_json(json)?;
+    }
+    Ok(val)
 }
 
 /// Build a create card
