@@ -39,6 +39,13 @@ use web_sys::{
 /// JavaScript result
 pub type JsResult<T> = std::result::Result<T, JsValue>;
 
+/// Set global allocator to `wee_alloc`
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
+/// Page sidebar
+const SIDEBAR: &str = include_str!("sidebar.html");
+
 /// ID of toast element
 const TOAST_ID: &str = "sb_toast";
 
@@ -281,15 +288,6 @@ impl SelectedCard {
         });
     }
 
-    /// Delete selected card / object
-    async fn delete(self) {
-        match res_delete(&self.tname, &self.name).await {
-            Ok(_) => DeferredAction::SearchList.schedule(1000),
-            Err(Error::FetchResponseUnauthorized()) => show_login(),
-            Err(e) => show_toast(&format!("Delete failed: {e}")),
-        }
-    }
-
     /// Save changed fields on Edit form
     async fn save_changed(self) {
         let ct = self.card_type;
@@ -317,6 +315,15 @@ impl SelectedCard {
             }
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Create failed: {e}")),
+        }
+    }
+
+    /// Delete selected card / object
+    async fn res_delete(self) {
+        match res_delete(&self.tname, &self.name).await {
+            Ok(_) => DeferredAction::SearchList.schedule(1000),
+            Err(Error::FetchResponseUnauthorized()) => show_login(),
+            Err(e) => show_toast(&format!("Delete failed: {e}")),
         }
     }
 }
@@ -379,13 +386,6 @@ fn replace_card_html(elem: &HtmlElement, ct: CardType, html: &str) {
         elem.scroll_into_view_with_scroll_into_view_options(&opt);
     }
 }
-
-/// Set global allocator to `wee_alloc`
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
-/// Page sidebar
-const SIDEBAR: &str = include_str!("sidebar.html");
 
 /// Application starting function
 #[wasm_bindgen(start)]
@@ -725,7 +725,7 @@ async fn handle_button_card(attrs: ButtonAttrs, cs: SelectedCard) {
         }
         "ob_delete" => {
             if STATE.with(|rc| rc.borrow().delete_enabled) {
-                cs.delete().await;
+                cs.res_delete().await;
             }
         }
         "ob_edit" => cs.replace_card(CardType::Edit).await,
