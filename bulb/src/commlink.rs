@@ -11,8 +11,8 @@
 // GNU General Public License for more details.
 //
 use crate::card::{disabled_attr, Card, NAME};
+use crate::commconfig::CommConfig;
 use crate::error::Result;
-use crate::start::{comm_configs_html, get_comm_config_desc};
 use crate::util::{Dom, HtmlStr};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -30,6 +30,9 @@ pub struct CommLink {
     pub comm_config: String,
     pub poll_enabled: bool,
     pub connected: bool,
+
+    /// Ancillary comm config list
+    pub comm_configs: Option<Vec<CommConfig>>,
 }
 
 impl fmt::Display for CommLink {
@@ -39,11 +42,6 @@ impl fmt::Display for CommLink {
 }
 
 impl CommLink {
-    /// Get comm config description
-    fn comm_config_desc(&self) -> String {
-        get_comm_config_desc(&self.comm_config).unwrap_or_else(|| "".into())
-    }
-
     /// Get connected state to display
     fn connected(&self, long: bool) -> &'static str {
         match (self.poll_enabled, self.connected, long) {
@@ -54,6 +52,39 @@ impl CommLink {
             (false, _, false) => "❓",
             (false, _, true) => "disabled ❓",
         }
+    }
+
+    /// Get comm config description
+    fn comm_config_desc(&self) -> &str {
+        if let Some(comm_configs) = &self.comm_configs {
+            for config in comm_configs {
+                if self.comm_config == config.name {
+                    return &config.description;
+                }
+            }
+        }
+        ""
+    }
+
+    /// Create an HTML `select` element of comm configs
+    fn comm_configs_html(&self) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='edit_config'>");
+        if let Some(comm_configs) = &self.comm_configs {
+            for config in comm_configs {
+                html.push_str("<option value='");
+                html.push_str(&config.name);
+                html.push('\'');
+                if self.comm_config == config.name {
+                    html.push_str(" selected");
+                }
+                html.push('>');
+                html.push_str(&config.description);
+                html.push_str("</option>");
+            }
+        }
+        html.push_str("</select>");
+        html
     }
 }
 
@@ -70,6 +101,22 @@ impl Card for CommLink {
             || self.comm_config_desc().to_lowercase().contains(search)
             || self.uri.to_lowercase().contains(search)
             || self.connected(true).contains(search)
+    }
+
+    /// Get ancillary URI
+    fn ancillary_uri(&self) -> Option<&str> {
+        if self.comm_configs.is_none() {
+            Some("/iris/api/comm_config")
+        } else {
+            None
+        }
+    }
+
+    /// Put ancillary JSON data
+    fn ancillary_json(&mut self, json: JsValue) -> Result<()> {
+        let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
+        self.comm_configs = Some(comm_configs);
+        Ok(())
     }
 
     /// Convert to compact HTML
@@ -90,7 +137,7 @@ impl Card for CommLink {
         let disabled = if self.poll_enabled { "" } else { " disabled" };
         let description = HtmlStr::new(&self.description);
         let comm_config = self.comm_config_desc();
-        let config = HtmlStr::new(&comm_config);
+        let config = HtmlStr::new(comm_config);
         format!(
             "<div class='row'>\
               <span>{connected}</span>\
@@ -108,7 +155,7 @@ impl Card for CommLink {
         let description = HtmlStr::new(&self.description);
         let uri = HtmlStr::new(&self.uri);
         let enabled = if self.poll_enabled { " checked" } else { "" };
-        let comm_configs = comm_configs_html(&self.comm_config);
+        let comm_configs = self.comm_configs_html();
         format!(
             "<div class='row'>\
               <label for='edit_desc'>Description</label>\

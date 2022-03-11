@@ -89,8 +89,6 @@ struct State {
     conditions: Vec<Condition>,
     /// Resource types
     resource_types: Vec<String>,
-    /// Comm configs
-    comm_configs: Vec<CommConfig>,
     /// Deferred actions (with tick number)
     deferred: Vec<(i32, DeferredAction)>,
     /// Timer tick count
@@ -112,12 +110,10 @@ impl State {
         mut access: Vec<Permission>,
         mut conditions: Vec<Condition>,
         mut resource_types: Vec<String>,
-        mut comm_configs: Vec<CommConfig>,
     ) {
         self.access.append(&mut access);
         self.conditions.append(&mut conditions);
         self.resource_types.append(&mut resource_types);
-        self.comm_configs.append(&mut comm_configs);
     }
 
     /// Does state need initializing?
@@ -422,16 +418,9 @@ async fn do_initialize() -> core::result::Result<(), JsError> {
     let conditions = json.into_serde::<Vec<Condition>>()?;
     let json = fetch_get("/iris/resource_type").await?;
     let resource_types = json.into_serde::<Vec<String>>()?;
-    let json = fetch_get(&format!("/iris/api/{}", CommConfig::UNAME)).await?;
-    let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        state.initialize(
-            access,
-            conditions,
-            resource_types,
-            comm_configs,
-        );
+        state.initialize(access, conditions, resource_types);
     });
     Ok(())
 }
@@ -517,41 +506,6 @@ pub fn resource_types_html(selected: &str) -> String {
             }
             html.push('>');
             html.push_str(resource_type);
-            html.push_str("</option>");
-        }
-        html.push_str("</select>");
-        html
-    })
-}
-
-/// Get a comm config by name
-pub fn get_comm_config_desc(name: &str) -> Option<String> {
-    STATE.with(|rc| {
-        let state = rc.borrow();
-        for config in &state.comm_configs {
-            if name == config.name {
-                return Some(config.description.clone());
-            }
-        }
-        None
-    })
-}
-
-/// Create an HTML `select` element of comm configs
-pub fn comm_configs_html(selected: &str) -> String {
-    STATE.with(|rc| {
-        let state = rc.borrow();
-        let mut html = String::new();
-        html.push_str("<select id='edit_config'>");
-        for config in &state.comm_configs {
-            html.push_str("<option value='");
-            html.push_str(&config.name);
-            html.push('\'');
-            if selected == config.name {
-                html.push_str(" selected");
-            }
-            html.push('>');
-            html.push_str(&config.description);
             html.push_str("</option>");
         }
         html.push_str("</select>");

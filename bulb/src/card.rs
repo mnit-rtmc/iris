@@ -250,7 +250,12 @@ async fn res_build_card<C: Card>(name: &str, ct: CardType) -> Result<String> {
         CardType::Status if C::HAS_STATUS => {
             let val = fetch_all::<C>(name).await?;
             let geo_loc = val.geo_loc();
-            Ok(html_card_status(C::ENAME, name, &val.to_html_status(), geo_loc))
+            Ok(html_card_status(
+                C::ENAME,
+                name,
+                &val.to_html_status(),
+                geo_loc,
+            ))
         }
         _ => {
             let val = fetch_all::<C>(name).await?;
