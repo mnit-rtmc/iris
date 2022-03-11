@@ -12,8 +12,8 @@
 //
 use crate::card::{Card, NAME};
 use crate::error::{Error, Result};
-use crate::util::{Dom, HtmlStr, OptVal};
 use crate::role::Role;
+use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;

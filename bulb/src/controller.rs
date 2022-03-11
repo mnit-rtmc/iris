@@ -143,7 +143,7 @@ impl Card for Controller {
 
     /// Check if a search string matches
     fn is_match(&self, search: &str) -> bool {
-        self.name.contains(search)
+        self.name.to_lowercase().contains(search)
             || {
                 let comm_link = self.comm_link.to_lowercase();
                 format!("{comm_link}:{}", self.drop_id).contains(search)

@@ -187,10 +187,9 @@ impl Card for CommConfig {
 
     /// Get ancillary URI
     fn ancillary_uri(&self) -> Option<&str> {
-        if self.protocols.is_none() {
-            Some("/iris/comm_protocol")
-        } else {
-            None
+        match &self.protocols {
+            None => Some("/iris/comm_protocol"),
+            _ => None,
         }
     }
 

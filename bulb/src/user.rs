@@ -12,6 +12,7 @@
 //
 use crate::card::{disabled_attr, Card};
 use crate::error::Result;
+use crate::role::Role;
 use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -27,11 +28,36 @@ pub struct User {
     pub full_name: String,
     pub role: Option<String>,
     pub enabled: bool,
+
+    /// Ancillary data
+    pub roles: Option<Vec<Role>>,
 }
 
 impl fmt::Display for User {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.name)
+    }
+}
+
+impl User {
+    /// Create an HTML `select` element of roles
+    fn roles_html(&self) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='edit_role'>");
+        html.push_str("<option></option>");
+        if let Some(roles) = &self.roles {
+            for role in roles {
+                html.push_str("<option");
+                if self.role.as_ref() == Some(&role.name) {
+                    html.push_str(" selected");
+                }
+                html.push('>');
+                html.push_str(&role.name);
+                html.push_str("</option>");
+            }
+        }
+        html.push_str("</select>");
+        html
     }
 }
 
@@ -58,6 +84,21 @@ impl Card for User {
                 .contains(search)
     }
 
+    /// Get ancillary URI
+    fn ancillary_uri(&self) -> Option<&str> {
+        match &self.roles {
+            None => Some("/iris/api/role"),
+            _ => None,
+        }
+    }
+
+    /// Put ancillary JSON data
+    fn ancillary_json(&mut self, json: JsValue) -> Result<()> {
+        let roles = json.into_serde::<Vec<Role>>()?;
+        self.roles = Some(roles);
+        Ok(())
+    }
+
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
         let disabled = disabled_attr(self.enabled && self.role.is_some());
@@ -67,7 +108,7 @@ impl Card for User {
     /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
         let full_name = HtmlStr::new(&self.full_name);
-        let role = HtmlStr::new(self.role.as_ref());
+        let role = self.roles_html();
         let enabled = if self.enabled { " checked" } else { "" };
         format!(
             "<div class='row'>\
@@ -77,8 +118,7 @@ impl Card for User {
             </div>\
             <div class='row'>\
                <label for='edit_role'>Role</label>\
-               <input id='edit_role' maxlength='15' size='15' \
-                      value='{role}'/>\
+               {role}\
             </div>\
             <div class='row'>\
               <label for='edit_enabled'>Enabled</label>\
@@ -97,7 +137,7 @@ impl Card for User {
             }
         }
         let role = doc
-            .input_parse::<String>("edit_role")
+            .select_parse::<String>("edit_role")
             .filter(|r| !r.is_empty());
         if role != val.role {
             obj.insert("role".to_string(), OptVal(role).into());
