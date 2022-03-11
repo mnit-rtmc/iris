@@ -155,9 +155,15 @@ pub fn disabled_attr(enabled: bool) -> &'static str {
 }
 
 /// Get the URI of an object
-fn uri_name(uname: &str, name: &str) -> String {
+fn uri_name(uname: &'static str, name: &str) -> String {
     let nm = utf8_percent_encode(name, NON_ALPHANUMERIC);
     format!("/iris/api/{uname}/{nm}")
+}
+
+/// Fetch a JSON object by name
+async fn fetch_json(uname: &'static str, name: &str) -> Result<JsValue> {
+    let uri = uri_name(uname, name);
+    Ok(fetch_get(&uri).await?)
 }
 
 /// Fetch card list for a resource type
@@ -228,21 +234,18 @@ async fn res_build_card<C: Card>(name: &str, ct: CardType) -> Result<String> {
             Ok(html_card_create(C::ENAME, &C::html_create(name)))
         }
         CardType::Compact => {
-            let uri = uri_name(C::UNAME, name);
-            let json = fetch_get(&uri).await?;
+            let json = fetch_json(C::UNAME, name).await?;
             let val = C::new(&json)?;
             Ok(val.to_html_compact())
         }
         CardType::Status if C::HAS_STATUS => {
-            let uri = uri_name(C::UNAME, name);
-            let json = fetch_get(&uri).await?;
+            let json = fetch_json(C::UNAME, name).await?;
             let val = C::new(&json)?;
             let geo_loc = val.geo_loc();
             Ok(html_card_status(C::ENAME, name, &val.to_html_status(), geo_loc))
         }
         _ => {
-            let uri = uri_name(C::UNAME, name);
-            let json = fetch_get(&uri).await?;
+            let json = fetch_json(C::UNAME, name).await?;
             let val = C::new(&json)?;
             Ok(html_card_edit(C::ENAME, name, &val.to_html_edit()))
         }
