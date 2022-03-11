@@ -79,7 +79,6 @@ struct State {
     delete_enabled: bool,
 }
 
-/// Global app state
 thread_local! {
     static STATE: RefCell<State> = RefCell::new(State::default());
 }

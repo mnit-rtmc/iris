@@ -12,6 +12,7 @@
 //
 use crate::card::{disabled_attr, Card, NAME};
 use crate::commconfig::CommConfig;
+use crate::controller::Controller;
 use crate::error::Result;
 use crate::util::{Dom, HtmlStr};
 use serde::{Deserialize, Serialize};
@@ -31,8 +32,9 @@ pub struct CommLink {
     pub poll_enabled: bool,
     pub connected: bool,
 
-    /// Ancillary comm config list
+    /// Ancillary data
     pub comm_configs: Option<Vec<CommConfig>>,
+    pub controllers: Option<Vec<Controller>>,
 }
 
 impl fmt::Display for CommLink {
@@ -86,6 +88,29 @@ impl CommLink {
         html.push_str("</select>");
         html
     }
+
+    /// Build controller links as HTML
+    fn controllers_html(&self) -> String {
+        let mut html = String::new();
+        if let Some(controllers) = &self.controllers {
+            let tname = Controller::TNAME;
+            for ctrl in controllers {
+                let drop_id = ctrl.drop_id;
+                let loc = HtmlStr::new(ctrl.location.as_ref()).with_len(32);
+                let row = format!(
+                    "<div class='row'>\
+                        <span>:{drop_id}</span>\
+                        <span class='info'>{loc}</span>\
+                        <button class='go_link' type='button' \
+                                data-link='{ctrl}' data-type='{tname}'>🖇️\
+                        </button>\
+                    </div>"
+                );
+                html.push_str(&row);
+            }
+        }
+        html
+    }
 }
 
 impl Card for CommLink {
@@ -111,17 +136,26 @@ impl Card for CommLink {
 
     /// Get ancillary URI
     fn ancillary_uri(&self) -> Option<&str> {
-        if self.comm_configs.is_none() {
-            Some("/iris/api/comm_config")
-        } else {
-            None
+        match (&self.comm_configs, &self.controllers) {
+            (None, _) => Some("/iris/api/comm_config"),
+            (_, None) => Some("/iris/api/controller"),
+            _ => None,
         }
     }
 
     /// Put ancillary JSON data
     fn ancillary_json(&mut self, json: JsValue) -> Result<()> {
-        let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
-        self.comm_configs = Some(comm_configs);
+        match (&self.comm_configs, &self.controllers) {
+            (None, _) => {
+                let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
+                self.comm_configs = Some(comm_configs);
+            }
+            _ => {
+                let mut controllers = json.into_serde::<Vec<Controller>>()?;
+                controllers.retain(|c| c.comm_link == self.name);
+                self.controllers = Some(controllers);
+            }
+        }
         Ok(())
     }
 
@@ -144,6 +178,7 @@ impl Card for CommLink {
         let description = HtmlStr::new(&self.description);
         let comm_config = self.comm_config_desc();
         let config = HtmlStr::new(comm_config);
+        let controllers = self.controllers_html();
         format!(
             "<div class='row'>\
               <span>{connected}</span>\
@@ -152,7 +187,8 @@ impl Card for CommLink {
             </div>\
             <div class='row'>\
               <span>{config}</span>\
-            </div>"
+            </div>\
+            {controllers}"
         )
     }
 
