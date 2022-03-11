@@ -42,14 +42,14 @@ const CREATE_COMPACT: &str = "<span class='create'>Create 🆕</span>";
 /// Type of card
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CardType {
-    /// Compact in list
-    Compact,
-
     /// Create compact card
     CreateCompact,
 
     /// Create card
     Create,
+
+    /// Compact in list
+    Compact,
 
     /// Status card
     Status,
@@ -94,16 +94,6 @@ pub trait Card: fmt::Display + DeserializeOwned {
     /// Get geo location of card
     fn geo_loc(&self) -> Option<&str> {
         None
-    }
-
-    /// Build form using JSON value
-    fn build_card(json: JsValue, ct: CardType) -> Result<String> {
-        let val = Self::new(&json)?;
-        match ct {
-            CardType::Compact => Ok(val.to_html_compact()),
-            CardType::Status if Self::HAS_STATUS => Ok(val.status_card()),
-            _ => Ok(val.edit_card()),
-        }
     }
 
     /// Build a create card
@@ -303,10 +293,23 @@ async fn res_build_card<C: Card>(name: &str, ct: CardType) -> Result<String> {
     match ct {
         CardType::CreateCompact => Ok(CREATE_COMPACT.into()),
         CardType::Create => Ok(C::build_create_card(name)),
+        CardType::Compact => {
+            let uri = uri_name(C::UNAME, name);
+            let json = fetch_get(&uri).await?;
+            let val = C::new(&json)?;
+            Ok(val.to_html_compact())
+        }
+        CardType::Status if C::HAS_STATUS => {
+            let uri = uri_name(C::UNAME, name);
+            let json = fetch_get(&uri).await?;
+            let val = C::new(&json)?;
+            Ok(val.status_card())
+        }
         _ => {
             let uri = uri_name(C::UNAME, name);
             let json = fetch_get(&uri).await?;
-            C::build_card(json, ct)
+            let val = C::new(&json)?;
+            Ok(val.edit_card())
         }
     }
 }
