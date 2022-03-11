@@ -13,6 +13,7 @@
 use crate::card::{Card, NAME};
 use crate::error::{Error, Result};
 use crate::util::{Dom, HtmlStr, OptVal};
+use crate::role::Role;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
@@ -29,8 +30,9 @@ pub struct Permission {
     pub batch: Option<String>,
     pub access_n: u32,
 
-    /// Ancillary resource type list
+    /// Ancillary data
     pub resource_types: Option<Vec<String>>,
+    pub roles: Option<Vec<Role>>,
 }
 
 impl fmt::Display for Permission {
@@ -92,6 +94,25 @@ impl Permission {
         html.push_str("</select>");
         html
     }
+
+    /// Create an HTML `select` element of roles
+    fn roles_html(&self) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='edit_role'>");
+        if let Some(roles) = &self.roles {
+            for role in roles {
+                html.push_str("<option");
+                if self.role == role.name {
+                    html.push_str(" selected");
+                }
+                html.push('>');
+                html.push_str(&role.name);
+                html.push_str("</option>");
+            }
+        }
+        html.push_str("</select>");
+        html
+    }
 }
 
 impl Card for Permission {
@@ -114,27 +135,36 @@ impl Card for Permission {
 
     /// Get ancillary URI
     fn ancillary_uri(&self) -> Option<&str> {
-        if self.resource_types.is_none() {
-            Some("/iris/resource_type")
-        } else {
-            None
+        match (&self.resource_types, &self.roles) {
+            (None, _) => Some("/iris/resource_type"),
+            (_, None) => Some("/iris/api/role"),
+            _ => None,
         }
     }
 
     /// Put ancillary JSON data
     fn ancillary_json(&mut self, json: JsValue) -> Result<()> {
-        let resource_types = json.into_serde::<Vec<String>>()?;
-        self.resource_types = Some(resource_types);
+        match &self.resource_types {
+            None => {
+                let resource_types = json.into_serde::<Vec<String>>()?;
+                self.resource_types = Some(resource_types);
+            }
+            _ => {
+                let roles = json.into_serde::<Vec<Role>>()?;
+                self.roles = Some(roles);
+            }
+        }
         Ok(())
     }
 
     /// Get row for create card
     fn to_html_create(&self) -> String {
+        let role = self.roles_html();
         let resource = self.resource_types_html();
         format!(
             "<div class='row'>\
               <label for='edit_role'>Role</label>\
-              <input id='edit_role' maxlength='24' size='24'/>\
+              {role}\
             </div>\
             <div class='row'>\
               <label for='edit_resource'>Resource</label>\
@@ -145,7 +175,7 @@ impl Card for Permission {
 
     /// Get value to create a new object
     fn create_value(doc: &Document) -> Result<String> {
-        let role = doc.input_parse::<String>("edit_role");
+        let role = doc.select_parse::<String>("edit_role");
         let resource_n = doc.select_parse::<String>("edit_resource");
         if let (Some(role), Some(resource_n)) = (role, resource_n) {
             let mut obj = Map::new();
@@ -169,15 +199,14 @@ impl Card for Permission {
 
     /// Convert to edit HTML
     fn to_html_edit(&self) -> String {
-        let role = HtmlStr::new(&self.role);
+        let role = self.roles_html();
         let resource = self.resource_types_html();
         let batch = HtmlStr::new(self.batch.as_ref());
         let access = access_html(self.access_n);
         format!(
             "<div class='row'>\
                <label for='edit_role'>Role</label>\
-               <input id='edit_role' maxlength='15' size='15' \
-                      value='{role}'/>\
+               {role}\
             </div>\
             <div class='row'>\
               <label for='edit_resource'>Resource</label>\
@@ -199,7 +228,7 @@ impl Card for Permission {
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         let mut obj = Map::new();
-        if let Some(role) = doc.input_parse::<String>("edit_role") {
+        if let Some(role) = doc.select_parse::<String>("edit_role") {
             if role != val.role {
                 obj.insert("role".to_string(), Value::String(role));
             }
