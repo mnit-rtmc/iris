@@ -12,18 +12,19 @@
 //
 use crate::alarm::Alarm;
 use crate::cabinetstyle::CabinetStyle;
-use crate::card::{fetch_card, fetch_create, fetch_list, fetch_save, Card, CardType};
+use crate::card::{
+    res_create, res_delete, res_get, res_list, res_save, Card, CardType,
+};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
 use crate::error::Error;
-use crate::fetch::{fetch_delete, fetch_get, fetch_post};
+use crate::fetch::{fetch_get, fetch_post};
 use crate::modem::Modem;
 use crate::permission::Permission;
 use crate::role::Role;
 use crate::user::User;
 use crate::util::Dom;
-use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
@@ -65,9 +66,7 @@ pub struct Condition {
 #[derive(Clone, Debug)]
 struct SelectedCard {
     /// Type name
-    tname: &'static str,
-    /// URI name
-    uname: &'static str,
+    tname: String,
     /// Card type
     card_type: CardType,
     /// Object name
@@ -192,7 +191,7 @@ async fn populate_list(tp: String, search: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let sb_list = doc.elem::<Element>("sb_list").unwrap_throw();
-    match fetch_list(&tp, &search).await {
+    match res_list(&tp, &search).await {
         Ok(cards) => sb_list.set_inner_html(&cards),
         Err(Error::FetchResponseUnauthorized()) => show_login(),
         Err(e) => show_toast(&format!("View failed: {e}")),
@@ -202,17 +201,12 @@ async fn populate_list(tp: String, search: String) {
 /// Handle a card click event
 async fn click_card(tp: String, id: String, name: String) {
     deselect_card().await;
-    match tp.as_str() {
-        Alarm::TNAME => expand_card::<Alarm>(id, name).await,
-        CabinetStyle::TNAME => expand_card::<CabinetStyle>(id, name).await,
-        CommConfig::TNAME => expand_card::<CommConfig>(id, name).await,
-        CommLink::TNAME => expand_card::<CommLink>(id, name).await,
-        Controller::TNAME => expand_card::<Controller>(id, name).await,
-        Modem::TNAME => expand_card::<Modem>(id, name).await,
-        Permission::TNAME => expand_card::<Permission>(id, name).await,
-        Role::TNAME => expand_card::<Role>(id, name).await,
-        User::TNAME => expand_card::<User>(id, name).await,
-        _ => (),
+    if id.ends_with('_') {
+        let cs = SelectedCard::new(tp, CardType::Create, name);
+        cs.replace_card(CardType::Create).await;
+    } else {
+        let cs = SelectedCard::new(tp, CardType::Status, name);
+        cs.replace_card(CardType::Status).await;
     }
 }
 
@@ -231,38 +225,14 @@ async fn deselect_card() {
     }
 }
 
-/// Expand a card to a full form
-async fn expand_card<C: Card>(id: String, name: String) {
-    if id.ends_with('_') {
-        let cs = SelectedCard::new(C::TNAME, C::UNAME, CardType::Create, name);
-        cs.replace_card(CardType::Create).await;
-    } else {
-        let cs = SelectedCard::new(C::TNAME, C::UNAME, CardType::Status, name);
-        cs.replace_card(CardType::Status).await;
-    }
-}
-
 impl SelectedCard {
     /// Create a new blank selected card
-    fn new(
-        tname: &'static str,
-        uname: &'static str,
-        card_type: CardType,
-        name: String,
-    ) -> Self {
+    fn new(tname: String, card_type: CardType, name: String) -> Self {
         SelectedCard {
             tname,
-            uname,
             card_type,
             name,
         }
-    }
-
-    /// Get the URI of an object
-    fn uri(&self) -> String {
-        let uname = self.uname;
-        let name = utf8_percent_encode(&self.name, NON_ALPHANUMERIC);
-        format!("/iris/api/{uname}/{name}")
     }
 
     /// Get card element ID
@@ -281,7 +251,7 @@ impl SelectedCard {
         let id = self.id();
         match doc.elem::<HtmlElement>(&id) {
             Ok(elem) => {
-                match fetch_card(self.tname, &self.name, ct).await {
+                match res_get(&self.tname, &self.name, ct).await {
                     Ok(html) => replace_card_html(&elem, ct, &html),
                     Err(Error::FetchResponseUnauthorized()) => {
                         show_login();
@@ -313,7 +283,7 @@ impl SelectedCard {
 
     /// Delete selected card / object
     async fn delete(self) {
-        match fetch_delete(&self.uri()).await {
+        match res_delete(&self.tname, &self.name).await {
             Ok(_) => DeferredAction::SearchList.schedule(1000),
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Delete failed: {e}")),
@@ -324,9 +294,9 @@ impl SelectedCard {
     async fn save_changed(self) {
         let ct = self.card_type;
         if ct == CardType::Create {
-            self.fetch_create().await;
+            self.res_create().await;
         } else {
-            match fetch_save(&self.tname, &self.name).await {
+            match res_save(&self.tname, &self.name).await {
                 Ok(_) => self.replace_card(ct.compact()).await,
                 Err(Error::FetchResponseUnauthorized()) => show_login(),
                 Err(Error::FetchResponseNotFound()) => {
@@ -339,8 +309,8 @@ impl SelectedCard {
     }
 
     /// Create a new object from card
-    async fn fetch_create(self) {
-        match fetch_create(self.tname).await {
+    async fn res_create(self) {
+        match res_create(&self.tname).await {
             Ok(_) => {
                 self.replace_card(CardType::Create.compact()).await;
                 DeferredAction::SearchList.schedule(1500);

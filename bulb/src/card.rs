@@ -16,7 +16,7 @@ use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
 use crate::error::{Error, Result};
-use crate::fetch::{fetch_get, fetch_patch, fetch_post};
+use crate::fetch::{fetch_delete, fetch_get, fetch_patch, fetch_post};
 use crate::modem::Modem;
 use crate::permission::Permission;
 use crate::role::Role;
@@ -232,24 +232,30 @@ pub fn disabled_attr(enabled: bool) -> &'static str {
     }
 }
 
+/// Get the URI of an object
+fn uri_name(uname: &str, name: &str) -> String {
+    let nm = utf8_percent_encode(name, NON_ALPHANUMERIC);
+    format!("/iris/api/{uname}/{nm}")
+}
+
 /// Fetch card list for a resource type
-pub async fn fetch_list(res: &str, search: &str) -> Result<String> {
+pub async fn res_list(res: &str, search: &str) -> Result<String> {
     match res {
-        Alarm::TNAME => fetch_build_list::<Alarm>(search).await,
-        CabinetStyle::TNAME => fetch_build_list::<CabinetStyle>(search).await,
-        CommConfig::TNAME => fetch_build_list::<CommConfig>(search).await,
-        CommLink::TNAME => fetch_build_list::<CommLink>(search).await,
-        Controller::TNAME => fetch_build_list::<Controller>(search).await,
-        Modem::TNAME => fetch_build_list::<Modem>(search).await,
-        Permission::TNAME => fetch_build_list::<Permission>(search).await,
-        Role::TNAME => fetch_build_list::<Role>(search).await,
-        User::TNAME => fetch_build_list::<User>(search).await,
+        Alarm::TNAME => res_build_list::<Alarm>(search).await,
+        CabinetStyle::TNAME => res_build_list::<CabinetStyle>(search).await,
+        CommConfig::TNAME => res_build_list::<CommConfig>(search).await,
+        CommLink::TNAME => res_build_list::<CommLink>(search).await,
+        Controller::TNAME => res_build_list::<Controller>(search).await,
+        Modem::TNAME => res_build_list::<Modem>(search).await,
+        Permission::TNAME => res_build_list::<Permission>(search).await,
+        Role::TNAME => res_build_list::<Role>(search).await,
+        User::TNAME => res_build_list::<User>(search).await,
         _ => Ok("".into()),
     }
 }
 
 /// Fetch JSON array and build card list
-async fn fetch_build_list<C: Card>(search: &str) -> Result<String> {
+async fn res_build_list<C: Card>(search: &str) -> Result<String> {
     let json = fetch_get(&format!("/iris/api/{}", C::UNAME)).await?;
     let search = search.to_lowercase();
     let tname = C::TNAME;
@@ -276,39 +282,37 @@ async fn fetch_build_list<C: Card>(search: &str) -> Result<String> {
     Ok(html)
 }
 
-/// Fetch a card for a resource type
-pub async fn fetch_card(res: &str, name: &str, ct: CardType) -> Result<String> {
+/// Get a card for a resource type
+pub async fn res_get(res: &str, name: &str, ct: CardType) -> Result<String> {
     match res {
-        Alarm::TNAME => fetch_build_card::<Alarm>(name, ct).await,
-        CabinetStyle::TNAME => fetch_build_card::<CabinetStyle>(name, ct).await,
-        CommConfig::TNAME => fetch_build_card::<CommConfig>(name, ct).await,
-        CommLink::TNAME => fetch_build_card::<CommLink>(name, ct).await,
-        Controller::TNAME => fetch_build_card::<Controller>(name, ct).await,
-        Modem::TNAME => fetch_build_card::<Modem>(name, ct).await,
-        Permission::TNAME => fetch_build_card::<Permission>(name, ct).await,
-        Role::TNAME => fetch_build_card::<Role>(name, ct).await,
-        User::TNAME => fetch_build_card::<User>(name, ct).await,
+        Alarm::TNAME => res_build_card::<Alarm>(name, ct).await,
+        CabinetStyle::TNAME => res_build_card::<CabinetStyle>(name, ct).await,
+        CommConfig::TNAME => res_build_card::<CommConfig>(name, ct).await,
+        CommLink::TNAME => res_build_card::<CommLink>(name, ct).await,
+        Controller::TNAME => res_build_card::<Controller>(name, ct).await,
+        Modem::TNAME => res_build_card::<Modem>(name, ct).await,
+        Permission::TNAME => res_build_card::<Permission>(name, ct).await,
+        Role::TNAME => res_build_card::<Role>(name, ct).await,
+        User::TNAME => res_build_card::<User>(name, ct).await,
         _ => Ok("".into()),
     }
 }
 
 /// Fetch and build a card
-async fn fetch_build_card<C: Card>(name: &str, ct: CardType) -> Result<String> {
+async fn res_build_card<C: Card>(name: &str, ct: CardType) -> Result<String> {
     match ct {
         CardType::CreateCompact => Ok(CREATE_COMPACT.into()),
         CardType::Create => Ok(C::build_create_card(name)),
         _ => {
-            let uname = C::UNAME;
-            let nm = utf8_percent_encode(name, NON_ALPHANUMERIC);
-            let uri = format!("/iris/api/{uname}/{nm}");
+            let uri = uri_name(C::UNAME, name);
             let json = fetch_get(&uri).await?;
             C::build_card(json, ct)
         }
     }
 }
 
-/// Create new object from create card
-pub async fn fetch_create(res: &str) -> Result<()> {
+/// Create new resource from create card
+pub async fn res_create(res: &str) -> Result<()> {
     match res {
         Alarm::TNAME => create_and_post::<Alarm>().await,
         CabinetStyle::TNAME => create_and_post::<CabinetStyle>().await,
@@ -336,7 +340,7 @@ async fn create_and_post<C: Card>() -> Result<()> {
 }
 
 /// Save changed fields on card
-pub async fn fetch_save(res: &str, name: &str) -> Result<()> {
+pub async fn res_save(res: &str, name: &str) -> Result<()> {
     match res {
         Alarm::TNAME => fetch_save_card::<Alarm>(name).await,
         CabinetStyle::TNAME => fetch_save_card::<CabinetStyle>(name).await,
@@ -355,13 +359,33 @@ pub async fn fetch_save(res: &str, name: &str) -> Result<()> {
 async fn fetch_save_card<C: Card>(name: &str) -> Result<()> {
     if let Some(window) = web_sys::window() {
         if let Some(doc) = window.document() {
-            let uname = C::UNAME;
-            let nm = utf8_percent_encode(name, NON_ALPHANUMERIC);
-            let uri = format!("/iris/api/{uname}/{nm}");
+            let uri = uri_name(C::UNAME, name);
             let json = fetch_get(&uri).await?;
             let v = C::changed_fields(&doc, &json)?;
             fetch_patch(&uri, &v.into()).await?;
         }
     }
     Ok(())
+}
+
+/// Delete card resource
+pub async fn res_delete(res: &str, name: &str) -> Result<()> {
+    match res {
+        Alarm::TNAME => res_delete_card::<Alarm>(name).await,
+        CabinetStyle::TNAME => res_delete_card::<CabinetStyle>(name).await,
+        CommConfig::TNAME => res_delete_card::<CommConfig>(name).await,
+        CommLink::TNAME => res_delete_card::<CommLink>(name).await,
+        Controller::TNAME => res_delete_card::<Controller>(name).await,
+        Modem::TNAME => res_delete_card::<Modem>(name).await,
+        Permission::TNAME => res_delete_card::<Permission>(name).await,
+        Role::TNAME => res_delete_card::<Role>(name).await,
+        User::TNAME => res_delete_card::<User>(name).await,
+        _ => Ok(()),
+    }
+}
+
+/// Delete card resource
+async fn res_delete_card<C: Card>(name: &str) -> Result<()> {
+    let uri = uri_name(C::UNAME, name);
+    fetch_delete(&uri).await
 }
