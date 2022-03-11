@@ -21,7 +21,7 @@ use crate::modem::Modem;
 use crate::permission::Permission;
 use crate::role::Role;
 use crate::user::User;
-use crate::util::Dom;
+use crate::util::{Dom, HtmlStr};
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::de::DeserializeOwned;
 use serde_json::map::Map;
@@ -96,25 +96,6 @@ pub trait Card: fmt::Display + DeserializeOwned {
         None
     }
 
-    /// Build a create card
-    fn build_create_card(name: &str) -> String {
-        let ename = Self::ENAME;
-        let create = Self::html_create(name);
-        format!(
-            "<div class='row'>\
-              <div class='{TITLE}'>{ename}</div>\
-              <span class='{NAME}'>🆕 \
-                <button id='ob_close' type='button'>X</button>\
-              </span>\
-            </div>\
-            {create}
-            <div class='row'>\
-              <span></span>\
-              <button id='ob_save' type='button'>🖍️ Save</button>\
-            </div>"
-        )
-    }
-
     /// Get row for create card
     fn html_create(name: &str) -> String {
         format!(
@@ -137,58 +118,12 @@ pub trait Card: fmt::Display + DeserializeOwned {
         Err(Error::NameMissing())
     }
 
-    /// Build a status card
-    fn status_card(&self) -> String {
-        let ename = Self::ENAME;
-        let status = self.to_html_status();
-        let geo_loc = match self.geo_loc() {
-            Some(geo_loc) => {
-                format!(
-                    "<button id='ob_loc' name='{geo_loc}' \
-                    type='button'>🗺️ Location</button>"
-                )
-            }
-            None => "".into(),
-        };
-        format!(
-            "<div class='row'>\
-              <div class='{TITLE}'>{ename}</div>\
-              <span class='{NAME}'>{self} \
-                <button id='ob_close' type='button'>X</button>\
-              </span>\
-            </div>\
-            {status}\
-            <div class='row'>\
-              <span></span>\
-              {geo_loc}\
-              <button id='ob_edit' type='button'>📝 Edit</button>\
-            </div>"
-        )
-    }
+    /// Convert to compact HTML
+    fn to_html_compact(&self) -> String;
 
     /// Convert to status HTML
     fn to_html_status(&self) -> String {
         unreachable!()
-    }
-
-    /// Build an edit card
-    fn edit_card(&self) -> String {
-        let ename = Self::ENAME;
-        let edit = self.to_html_edit();
-        format!(
-            "<div class='row'>\
-              <div class='{TITLE}'>{ename}</div>\
-              <span class='{NAME}'>{self} \
-                <button id='ob_close' type='button'>X</button>\
-              </span>\
-            </div>\
-            {edit}\
-            <div class='row'>\
-              <span></span>\
-              <button id='ob_delete' type='button'>🗑️ Delete</button>\
-              <button id='ob_save' type='button'>🖍️ Save</button>\
-            </div>"
-        )
     }
 
     /// Convert to edit HTML
@@ -208,9 +143,6 @@ pub trait Card: fmt::Display + DeserializeOwned {
     fn next_name(_obs: &[Self]) -> String {
         "".into()
     }
-
-    /// Convert to compact HTML
-    fn to_html_compact(&self) -> String;
 }
 
 /// Get attribute for disabled cards
@@ -292,7 +224,9 @@ pub async fn res_get(res: &str, name: &str, ct: CardType) -> Result<String> {
 async fn res_build_card<C: Card>(name: &str, ct: CardType) -> Result<String> {
     match ct {
         CardType::CreateCompact => Ok(CREATE_COMPACT.into()),
-        CardType::Create => Ok(C::build_create_card(name)),
+        CardType::Create => {
+            Ok(html_card_create(C::ENAME, &C::html_create(name)))
+        }
         CardType::Compact => {
             let uri = uri_name(C::UNAME, name);
             let json = fetch_get(&uri).await?;
@@ -303,15 +237,85 @@ async fn res_build_card<C: Card>(name: &str, ct: CardType) -> Result<String> {
             let uri = uri_name(C::UNAME, name);
             let json = fetch_get(&uri).await?;
             let val = C::new(&json)?;
-            Ok(val.status_card())
+            let geo_loc = val.geo_loc();
+            Ok(html_card_status(C::ENAME, name, &val.to_html_status(), geo_loc))
         }
         _ => {
             let uri = uri_name(C::UNAME, name);
             let json = fetch_get(&uri).await?;
             let val = C::new(&json)?;
-            Ok(val.edit_card())
+            Ok(html_card_edit(C::ENAME, name, &val.to_html_edit()))
         }
     }
+}
+
+/// Build a create card
+fn html_card_create(ename: &'static str, create: &str) -> String {
+    format!(
+        "<div class='row'>\
+          <div class='{TITLE}'>{ename}</div>\
+          <span class='{NAME}'>🆕 \
+            <button id='ob_close' type='button'>X</button>\
+          </span>\
+        </div>\
+        {create}
+        <div class='row'>\
+          <span></span>\
+          <button id='ob_save' type='button'>🖍️ Save</button>\
+        </div>"
+    )
+}
+
+/// Build a status card
+fn html_card_status(
+    ename: &'static str,
+    name: &str,
+    status: &str,
+    geo_loc: Option<&str>,
+) -> String {
+    let name = HtmlStr::new(name);
+    let geo_loc = match geo_loc {
+        Some(geo_loc) => {
+            format!(
+                "<button id='ob_loc' name='{geo_loc}' \
+                type='button'>🗺️ Location</button>"
+            )
+        }
+        None => "".into(),
+    };
+    format!(
+        "<div class='row'>\
+          <div class='{TITLE}'>{ename}</div>\
+          <span class='{NAME}'>{name} \
+            <button id='ob_close' type='button'>X</button>\
+          </span>\
+        </div>\
+        {status}\
+        <div class='row'>\
+          <span></span>\
+          {geo_loc}\
+          <button id='ob_edit' type='button'>📝 Edit</button>\
+        </div>"
+    )
+}
+
+/// Build an edit card
+fn html_card_edit(ename: &'static str, name: &str, edit: &str) -> String {
+    let name = HtmlStr::new(name);
+    format!(
+        "<div class='row'>\
+          <div class='{TITLE}'>{ename}</div>\
+          <span class='{NAME}'>{name} \
+            <button id='ob_close' type='button'>X</button>\
+          </span>\
+        </div>\
+        {edit}\
+        <div class='row'>\
+          <span></span>\
+          <button id='ob_delete' type='button'>🗑️ Delete</button>\
+          <button id='ob_save' type='button'>🖍️ Save</button>\
+        </div>"
+    )
 }
 
 /// Create new resource from create card
