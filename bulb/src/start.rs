@@ -10,20 +10,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::alarm::Alarm;
-use crate::cabinetstyle::CabinetStyle;
 use crate::card::{
-    res_create, res_delete, res_get, res_list, res_save, Card, CardType,
+    res_create, res_delete, res_get, res_list, res_save, CardType,
 };
-use crate::commconfig::CommConfig;
-use crate::commlink::CommLink;
-use crate::controller::Controller;
-use crate::error::Error;
+use crate::error::{Error, Result};
 use crate::fetch::{fetch_get, fetch_post};
-use crate::modem::Modem;
-use crate::permission::Permission;
-use crate::role::Role;
-use crate::user::User;
+use crate::permission::{permissions_html, Permission};
 use crate::util::Dom;
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
@@ -75,8 +67,8 @@ enum DeferredAction {
 /// Global app state
 #[derive(Default)]
 struct State {
-    /// Permission access
-    access: Vec<Permission>,
+    /// Have permissions been initialized?
+    initialized: bool,
     /// Deferred actions (with tick number)
     deferred: Vec<(i32, DeferredAction)>,
     /// Timer tick count
@@ -87,24 +79,12 @@ struct State {
     delete_enabled: bool,
 }
 
+/// Global app state
 thread_local! {
     static STATE: RefCell<State> = RefCell::new(State::default());
 }
 
 impl State {
-    /// Initialize global app state
-    fn initialize(
-        &mut self,
-        mut access: Vec<Permission>,
-    ) {
-        self.access.append(&mut access);
-    }
-
-    /// Does state need initializing?
-    fn needs_initializing(&self) -> bool {
-        self.access.is_empty()
-    }
-
     /// Add ticks to current tick count
     fn plus_ticks(&self, t: i32) -> i32 {
         if let Some(t) = self.tick.checked_add(t) {
@@ -361,81 +341,44 @@ fn replace_card_html(elem: &HtmlElement, ct: CardType, html: &str) {
 pub async fn start() -> core::result::Result<(), JsError> {
     // this should be debug only
     console_error_panic_hook::set_once();
-    add_sidebar().unwrap_throw();
-    initialize_state().await;
+    add_sidebar().await.unwrap_throw();
     Ok(())
 }
 
 /// Add sidebar HTML and event listeners
-fn add_sidebar() -> JsResult<()> {
+async fn add_sidebar() -> JsResult<()> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let sidebar: HtmlElement = doc.elem("sidebar")?;
     sidebar.set_inner_html(SIDEBAR);
     add_click_event_listener(&sidebar)?;
-    add_select_event_listener(&doc.elem("sb_resource")?)?;
+    let sb_resource = doc.elem("sb_resource")?;
+    add_select_event_listener(&sb_resource)?;
     add_input_event_listener(&doc.elem("sb_search")?)?;
     add_transition_event_listener(&doc.elem("sb_list")?)?;
     add_interval_callback(&window).unwrap_throw();
+    fill_resource_select(&sb_resource).await;
     Ok(())
 }
 
-/// Initialize app state
-async fn initialize_state() {
-    match do_initialize().await {
-        Ok(()) => {
-            let window = web_sys::window().unwrap_throw();
-            let doc = window.document().unwrap_throw();
-            if let Ok(r) = doc.elem::<HtmlElement>("sb_resource") {
-                r.set_inner_html(&types_html());
-            }
+/// Fill resource select element
+async fn fill_resource_select(sb_resource: &Element) {
+    match fetch_access_list().await {
+        Ok(perm) => {
+            sb_resource.set_inner_html(&perm);
+            STATE.with(|rc| rc.borrow_mut().initialized = true)
         }
-        Err(_e) => console::log_1(&"State not initialized".into()),
+        Err(e) => {
+            console::log_1(&format!("fill_resource_select: {:?}", e).into())
+        }
     }
 }
 
-/// Initialize app state
-async fn do_initialize() -> core::result::Result<(), JsError> {
+/// Fetch permission access list
+async fn fetch_access_list() -> Result<String> {
     let json = fetch_get("/iris/api/access").await?;
-    let access = json.into_serde::<Vec<Permission>>()?;
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        state.initialize(access);
-    });
-    Ok(())
-}
-
-/// Create types `select` element
-fn types_html() -> String {
-    let mut html = "<option/>".to_string();
-    STATE.with(|rc| {
-        let state = rc.borrow();
-        for permission in &state.access {
-            if permission.batch.is_none() {
-                add_option::<Alarm>(permission, &mut html);
-                add_option::<CabinetStyle>(permission, &mut html);
-                add_option::<CommConfig>(permission, &mut html);
-                add_option::<CommLink>(permission, &mut html);
-                add_option::<Controller>(permission, &mut html);
-                add_option::<Modem>(permission, &mut html);
-                add_option::<Permission>(permission, &mut html);
-                add_option::<Role>(permission, &mut html);
-                add_option::<User>(permission, &mut html);
-            }
-        }
-    });
-    html
-}
-
-/// Add option to access select
-fn add_option<C: Card>(perm: &Permission, html: &mut String) {
-    if perm.resource_n == C::UNAME.to_lowercase() {
-        html.push_str("<option value='");
-        html.push_str(C::TNAME);
-        html.push_str("'>");
-        html.push_str(C::ENAME);
-        html.push_str("</option>");
-    }
+    let permissions = json.into_serde::<Vec<Permission>>()?;
+    Ok(permissions_html(permissions))
 }
 
 /// Handle an event from "sb_resource" `select` element
@@ -604,8 +547,10 @@ async fn handle_login() {
                     pass.set_value("");
                 }
                 hide_login();
-                if STATE.with(|rc| rc.borrow().needs_initializing()) {
-                    initialize_state().await;
+                if !STATE.with(|rc| rc.borrow().initialized) {
+                    if let Ok(elem) = doc.elem::<HtmlElement>("sb_resource") {
+                        fill_resource_select(&elem).await;
+                    }
                 }
             }
             Err(e) => show_toast(&format!("Login failed: {e}")),

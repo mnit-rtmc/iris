@@ -226,3 +226,33 @@ impl Card for Permission {
         Ok(Value::Object(obj).to_string())
     }
 }
+
+/// Build a `select` element of access permissions
+pub fn permissions_html(access: Vec<Permission>) -> String {
+    let mut html = "<option/>".to_string();
+    for perm in &access {
+        if perm.batch.is_none() {
+            add_option::<crate::alarm::Alarm>(perm, &mut html);
+            add_option::<crate::cabinetstyle::CabinetStyle>(perm, &mut html);
+            add_option::<crate::commconfig::CommConfig>(perm, &mut html);
+            add_option::<crate::commlink::CommLink>(perm, &mut html);
+            add_option::<crate::controller::Controller>(perm, &mut html);
+            add_option::<crate::modem::Modem>(perm, &mut html);
+            add_option::<Permission>(perm, &mut html);
+            add_option::<crate::role::Role>(perm, &mut html);
+            add_option::<crate::user::User>(perm, &mut html);
+        }
+    }
+    html
+}
+
+/// Add option to access select
+fn add_option<C: Card>(perm: &Permission, html: &mut String) {
+    if perm.resource_n == C::UNAME.to_lowercase() {
+        html.push_str("<option value='");
+        html.push_str(C::TNAME);
+        html.push_str("'>");
+        html.push_str(C::ENAME);
+        html.push_str("</option>");
+    }
+}
