@@ -98,7 +98,7 @@ impl Card for Alarm {
             <div class='row'>\
               <label>Controller</label>\
               <button class='go_link' type='button' \
-                      data-link='{controller} data-type='{tname}''>🖇️</button>\
+                      data-link='{controller}' data-type='{tname}'>🖇️</button>\
             </div>\
             <div class='row'>\
               <span>Triggered</span>\
