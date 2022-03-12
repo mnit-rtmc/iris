@@ -10,6 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::cabinetstyle::CabinetStyle;
 use crate::card::{disabled_attr, Card, NAME};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
@@ -46,6 +47,7 @@ pub struct Controller {
 
     /// Ancillary data
     pub conditions: Option<Vec<Condition>>,
+    pub cabinet_styles: Option<Vec<CabinetStyle>>,
     pub comm_links: Option<Vec<CommLink>>,
     pub comm_configs: Option<Vec<CommConfig>>,
 }
@@ -97,6 +99,28 @@ impl Controller {
                 }
                 html.push('>');
                 html.push_str(&condition.description);
+                html.push_str("</option>");
+            }
+        }
+        html.push_str("</select>");
+        html
+    }
+
+    /// Create an HTML `select` element of cabinet styles
+    fn cabinet_styles_html(&self) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='edit_cabinet'>");
+        html.push_str("<option></option>");
+        if let Some(cabinet_styles) = &self.cabinet_styles {
+            for cabinet_style in cabinet_styles {
+                html.push_str("<option");
+                if let Some(cab) = &self.cabinet_style {
+                    if cab == &cabinet_style.name {
+                        html.push_str(" selected");
+                    }
+                }
+                html.push('>');
+                html.push_str(&cabinet_style.name);
                 html.push_str("</option>");
             }
         }
@@ -173,22 +197,32 @@ impl Card for Controller {
 
     /// Get ancillary URI
     fn ancillary_uri(&self) -> Option<&str> {
-        match (&self.conditions, &self.comm_links, &self.comm_configs) {
-            (None, _, _) => Some("/iris/condition"),
-            (_, None, _) => Some("/iris/api/comm_link"),
-            (_, _, None) => Some("/iris/api/comm_config"),
+        match (
+            &self.conditions,
+            &self.cabinet_styles,
+            &self.comm_links,
+            &self.comm_configs,
+        ) {
+            (None, _, _, _) => Some("/iris/condition"),
+            (_, None, _, _) => Some("/iris/api/cabinet_style"),
+            (_, _, None, _) => Some("/iris/api/comm_link"),
+            (_, _, _, None) => Some("/iris/api/comm_config"),
             _ => None,
         }
     }
 
     /// Put ancillary JSON data
     fn ancillary_json(&mut self, json: JsValue) -> Result<()> {
-        match (&self.conditions, &self.comm_links) {
-            (None, _) => {
+        match (&self.conditions, &self.cabinet_styles, &self.comm_links) {
+            (None, _, _) => {
                 let conditions = json.into_serde::<Vec<Condition>>()?;
                 self.conditions = Some(conditions);
             }
-            (_, None) => {
+            (_, None, _) => {
+                let cabinet_styles = json.into_serde::<Vec<CabinetStyle>>()?;
+                self.cabinet_styles = Some(cabinet_styles);
+            }
+            (_, _, None) => {
                 let comm_links = json.into_serde::<Vec<CommLink>>()?;
                 self.comm_links = Some(comm_links);
             }
@@ -285,7 +319,7 @@ impl Card for Controller {
     fn to_html_edit(&self) -> String {
         let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
-        let cabinet_style = HtmlStr::new(self.cabinet_style.as_ref());
+        let cabinet_styles = self.cabinet_styles_html();
         let conditions = self.conditions_html();
         let notes = HtmlStr::new(&self.notes);
         let password = HtmlStr::new(self.password.as_ref());
@@ -302,8 +336,7 @@ impl Card for Controller {
             </div>\
             <div class='row'>\
               <label for='edit_cabinet'>Cabinet Style</label>\
-              <input id='edit_cabinet' maxlength='20' size='20' \
-                     value='{cabinet_style}'/>\
+              {cabinet_styles}
             </div>\
             <div class='row'>\
               <label for='edit_condition'>Condition</label>\
@@ -340,7 +373,7 @@ impl Card for Controller {
             }
         }
         let cabinet_style = doc
-            .input_parse::<String>("edit_cabinet")
+            .select_parse::<String>("edit_cabinet")
             .filter(|c| !c.is_empty());
         if cabinet_style != val.cabinet_style {
             obj.insert(
