@@ -127,6 +127,7 @@ impl Card for CommLink {
 
     /// Check if a search string matches
     fn is_match(&self, search: &str) -> bool {
+        // FIXME: ancillary comm configs can't be searched
         self.description.to_lowercase().contains(search)
             || self.name.to_lowercase().contains(search)
             || self.comm_config_desc().to_lowercase().contains(search)

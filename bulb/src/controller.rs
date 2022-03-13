@@ -167,6 +167,7 @@ impl Card for Controller {
 
     /// Check if a search string matches
     fn is_match(&self, search: &str) -> bool {
+        // FIXME: ancillary conditions can't be searched
         self.name.to_lowercase().contains(search)
             || {
                 let comm_link = self.comm_link.to_lowercase();
