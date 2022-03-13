@@ -30,6 +30,20 @@ pub struct Condition {
     pub description: String,
 }
 
+/// Geo location
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GeoLoc {
+    pub name: String,
+    pub roadway: Option<String>,
+    pub road_dir: Option<i16>,
+    pub cross_street: Option<String>,
+    pub cross_dir: Option<i16>,
+    pub cross_mod: Option<i16>,
+    pub landmark: Option<String>,
+    pub lat: Option<f64>,
+    pub lon: Option<f64>,
+}
+
 /// Controller
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Controller {
@@ -50,6 +64,7 @@ pub struct Controller {
     pub cabinet_styles: Option<Vec<CabinetStyle>>,
     pub comm_links: Option<Vec<CommLink>>,
     pub comm_configs: Option<Vec<CommConfig>>,
+    pub a_geo_loc: Option<GeoLoc>,
 }
 
 impl fmt::Display for Controller {
@@ -153,16 +168,12 @@ impl Card for Controller {
     const ENAME: &'static str = "🎛️ Controller";
     const UNAME: &'static str = "controller";
     const HAS_STATUS: bool = true;
+    const HAS_LOCATION: bool = true;
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
         self
-    }
-
-    /// Get geo location of card
-    fn geo_loc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
     }
 
     /// Check if a search string matches
@@ -314,6 +325,11 @@ impl Card for Controller {
             <div class='row'>{version}</div>\
             <div class='row'>{fail_time}</div>"
         )
+    }
+
+    /// Convert to location HTML
+    fn to_html_location(&self) -> String {
+        "".into()
     }
 
     /// Convert to edit HTML

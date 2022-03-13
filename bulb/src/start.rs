@@ -480,7 +480,6 @@ fn handle_button_click_ev(target: &Element) {
         let attrs = ButtonAttrs {
             id,
             class_name: target.class_name(),
-            name: target.get_attribute("name"),
             data_link: target.get_attribute("data-link"),
             data_type: target.get_attribute("data-type"),
         };
@@ -492,7 +491,6 @@ fn handle_button_click_ev(target: &Element) {
 struct ButtonAttrs {
     id: String,
     class_name: String,
-    name: Option<String>,
     data_link: Option<String>,
     data_type: Option<String>,
 }
@@ -512,11 +510,7 @@ async fn handle_button_card(attrs: ButtonAttrs, cs: SelectedCard) {
             }
         }
         "ob_edit" => cs.replace_card(CardType::Edit).await,
-        "ob_loc" => {
-            if let Some(_name) = attrs.name {
-                //show_geo_loc(name, cs).await;
-            }
-        }
+        "ob_loc" => cs.replace_card(CardType::Location).await,
         "ob_save" => cs.save_changed().await,
         _ => {
             if attrs.class_name == "go_link" {

@@ -56,6 +56,9 @@ pub enum CardType {
 
     /// Edit card
     Edit,
+
+    /// Location card
+    Location,
 }
 
 impl CardType {
@@ -85,6 +88,7 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     const ENAME: &'static str;
     const UNAME: &'static str;
     const HAS_STATUS: bool = false;
+    const HAS_LOCATION: bool = false;
 
     /// Create from a JSON value
     fn new(json: &JsValue) -> Result<Self> {
@@ -93,6 +97,16 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
 
     /// Set the name
     fn with_name(self, name: &str) -> Self;
+
+    /// Get next suggested name
+    fn next_name(_obs: &[Self]) -> String {
+        "".into()
+    }
+
+    /// Check if a search string matches
+    fn is_match(&self, _search: &str) -> bool {
+        false
+    }
 
     /// Get ancillary URI
     fn ancillary_uri(&self) -> Option<&str> {
@@ -104,10 +118,8 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
         unreachable!()
     }
 
-    /// Get geo location of card
-    fn geo_loc(&self) -> Option<&str> {
-        None
-    }
+    /// Convert to compact HTML
+    fn to_html_compact(&self) -> String;
 
     /// Get row for create card
     fn to_html_create(&self) -> String {
@@ -119,23 +131,13 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
         )
     }
 
-    /// Get value to create a new object
-    fn create_value(doc: &Document) -> Result<String> {
-        if let Some(name) = doc.input_parse::<String>("create_name") {
-            if !name.is_empty() {
-                let mut obj = Map::new();
-                obj.insert("name".to_string(), Value::String(name));
-                return Ok(Value::Object(obj).to_string());
-            }
-        }
-        Err(Error::NameMissing())
-    }
-
-    /// Convert to compact HTML
-    fn to_html_compact(&self) -> String;
-
     /// Convert to status HTML
     fn to_html_status(&self) -> String {
+        unreachable!()
+    }
+
+    /// Convert to location HTML
+    fn to_html_location(&self) -> String {
         unreachable!()
     }
 
@@ -147,14 +149,16 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     /// Get changed fields from Edit form
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String>;
 
-    /// Check if a search string matches
-    fn is_match(&self, _search: &str) -> bool {
-        false
-    }
-
-    /// Get next suggested name
-    fn next_name(_obs: &[Self]) -> String {
-        "".into()
+    /// Get value to create a new object
+    fn create_value(doc: &Document) -> Result<String> {
+        if let Some(name) = doc.input_parse::<String>("create_name") {
+            if !name.is_empty() {
+                let mut obj = Map::new();
+                obj.insert("name".to_string(), Value::String(name));
+                return Ok(Value::Object(obj).to_string());
+            }
+        }
+        Err(Error::NameMissing())
     }
 }
 
@@ -257,13 +261,16 @@ async fn res_build_card<C: Card>(name: &str, ct: CardType) -> Result<String> {
         }
         CardType::Status if C::HAS_STATUS => {
             let val = fetch_all::<C>(name).await?;
-            let geo_loc = val.geo_loc();
             Ok(html_card_status(
                 C::ENAME,
                 name,
                 &val.to_html_status(),
-                geo_loc,
+                C::HAS_LOCATION,
             ))
+        }
+        CardType::Location => {
+            let val = fetch_all::<C>(name).await?;
+            Ok(html_card_location(C::ENAME, name, &val.to_html_location()))
         }
         _ => {
             let val = fetch_all::<C>(name).await?;
@@ -305,17 +312,13 @@ fn html_card_status(
     ename: &'static str,
     name: &str,
     status: &str,
-    geo_loc: Option<&str>,
+    has_location: bool,
 ) -> String {
     let name = HtmlStr::new(name);
-    let geo_loc = match geo_loc {
-        Some(geo_loc) => {
-            format!(
-                "<button id='ob_loc' name='{geo_loc}' \
-                type='button'>🗺️ Location</button>"
-            )
-        }
-        None => "".into(),
+    let geo_loc = if has_location {
+        "<button id='ob_loc' type='button'>🗺️ Location</button>"
+    } else {
+        ""
     };
     format!(
         "<div class='row'>\
@@ -347,6 +350,24 @@ fn html_card_edit(ename: &'static str, name: &str, edit: &str) -> String {
         <div class='row'>\
           <span></span>\
           <button id='ob_delete' type='button'>🗑️ Delete</button>\
+          <button id='ob_save' type='button'>🖍️ Save</button>\
+        </div>"
+    )
+}
+
+/// Build a location card
+fn html_card_location(ename: &'static str, name: &str, loc: &str) -> String {
+    let name = HtmlStr::new(name);
+    format!(
+        "<div class='row'>\
+          <div class='{TITLE}'>{ename}</div>\
+          <span class='{NAME}'>{name} \
+            <button id='ob_close' type='button'>X</button>\
+          </span>\
+        </div>\
+        {loc}\
+        <div class='row'>\
+          <span></span>\
           <button id='ob_save' type='button'>🖍️ Save</button>\
         </div>"
     )
