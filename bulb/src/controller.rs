@@ -11,10 +11,10 @@
 // GNU General Public License for more details.
 //
 use crate::cabinetstyle::CabinetStyle;
-use crate::card::{disabled_attr, Card, NAME};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
+use crate::resource::{disabled_attr, Card, NAME};
 use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;

@@ -12,7 +12,6 @@
 //
 mod alarm;
 mod cabinetstyle;
-mod card;
 mod commconfig;
 mod commlink;
 mod controller;
@@ -20,6 +19,7 @@ mod error;
 mod fetch;
 mod modem;
 mod permission;
+mod resource;
 mod role;
 mod start;
 mod user;

@@ -10,10 +10,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{disabled_attr, Card, NAME};
 use crate::commconfig::CommConfig;
 use crate::controller::Controller;
 use crate::error::Result;
+use crate::resource::{disabled_attr, Card, NAME};
 use crate::util::{Dom, HtmlStr};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;

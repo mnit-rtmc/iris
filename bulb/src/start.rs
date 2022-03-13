@@ -10,12 +10,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{
-    res_create, res_delete, res_get, res_list, res_save, CardType,
-};
 use crate::error::{Error, Result};
 use crate::fetch::{fetch_get, fetch_post};
 use crate::permission::{permissions_html, Permission};
+use crate::resource::{
+    res_create, res_delete, res_get, res_list, res_save, CardType,
+};
 use crate::util::Dom;
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
