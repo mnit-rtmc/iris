@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
-use crate::resource::{Card, NAME};
+use crate::resource::{AncillaryData, Card, View, NAME};
 use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -132,20 +132,41 @@ pub struct CommConfig {
     pub long_poll_period_sec: Option<u32>,
     pub idle_disconnect_sec: Option<u32>,
     pub no_response_disconnect_sec: Option<u32>,
+}
 
-    /// Ancillary protocol list
+/// Ancillary comm configuration
+#[derive(Debug, Default)]
+pub struct CommConfigAnc {
     pub protocols: Option<Vec<Protocol>>,
 }
 
-impl fmt::Display for CommConfig {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
+impl AncillaryData for CommConfigAnc {
+    type Resource = CommConfig;
+
+    /// Get ancillary URI
+    fn uri(&self, _view: View) -> Option<&str> {
+        match &self.protocols {
+            None => Some("/iris/comm_protocol"),
+            _ => None,
+        }
+    }
+
+    /// Put ancillary JSON data
+    fn set_json(
+        &mut self,
+        _view: View,
+        json: JsValue,
+        _res: &CommConfig,
+    ) -> Result<()> {
+        let protocols = json.into_serde::<Vec<Protocol>>()?;
+        self.protocols = Some(protocols);
+        Ok(())
     }
 }
 
-impl CommConfig {
+impl CommConfigAnc {
     /// Create an HTML `select` element of comm protocols
-    fn protocols_html(&self) -> String {
+    fn protocols_html(&self, res: &CommConfig) -> String {
         let mut html = String::new();
         html.push_str("<select id='edit_protocol'>");
         if let Some(protocols) = &self.protocols {
@@ -153,7 +174,7 @@ impl CommConfig {
                 html.push_str("<option value='");
                 html.push_str(&protocol.id.to_string());
                 html.push('\'');
-                if let Some(p) = self.protocol {
+                if let Some(p) = res.protocol {
                     if p == protocol.id {
                         html.push_str(" selected");
                     }
@@ -168,10 +189,18 @@ impl CommConfig {
     }
 }
 
+impl fmt::Display for CommConfig {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", HtmlStr::new(&self.name))
+    }
+}
+
 impl Card for CommConfig {
     const TNAME: &'static str = "Comm Config";
     const ENAME: &'static str = "📡 Comm Config";
     const UNAME: &'static str = "comm_config";
+
+    type Ancillary = CommConfigAnc;
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
@@ -180,24 +209,9 @@ impl Card for CommConfig {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str) -> bool {
+    fn is_match(&self, search: &str, _anc: &CommConfigAnc) -> bool {
         self.description.to_lowercase().contains(search)
             || self.name.to_lowercase().contains(search)
-    }
-
-    /// Get ancillary URI
-    fn ancillary_uri(&self) -> Option<&str> {
-        match &self.protocols {
-            None => Some("/iris/comm_protocol"),
-            _ => None,
-        }
-    }
-
-    /// Put ancillary JSON data
-    fn ancillary_json(&mut self, json: JsValue) -> Result<()> {
-        let protocols = json.into_serde::<Vec<Protocol>>()?;
-        self.protocols = Some(protocols);
-        Ok(())
     }
 
     /// Get next suggested name
@@ -223,9 +237,9 @@ impl Card for CommConfig {
     }
 
     /// Convert to edit HTML
-    fn to_html_edit(&self) -> String {
+    fn to_html_edit(&self, anc: &CommConfigAnc) -> String {
         let description = HtmlStr::new(&self.description);
-        let protocols = self.protocols_html();
+        let protocols = anc.protocols_html(self);
         let modem = if let Some(true) = self.modem {
             " checked"
         } else {

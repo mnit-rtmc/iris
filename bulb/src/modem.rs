@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
-use crate::resource::{disabled_attr, Card};
+use crate::resource::{disabled_attr, AncillaryData, Card};
 use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -30,6 +30,14 @@ pub struct Modem {
     pub enabled: bool,
 }
 
+/// Modem ancillary data
+#[derive(Debug, Default)]
+pub struct ModemAnc;
+
+impl AncillaryData for ModemAnc {
+    type Resource = Modem;
+}
+
 impl fmt::Display for Modem {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", HtmlStr::new(&self.name))
@@ -41,6 +49,8 @@ impl Card for Modem {
     const ENAME: &'static str = "🖀 Modem";
     const UNAME: &'static str = "modem";
 
+    type Ancillary = ModemAnc;
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
@@ -48,7 +58,7 @@ impl Card for Modem {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str) -> bool {
+    fn is_match(&self, search: &str, _anc: &ModemAnc) -> bool {
         self.name.to_lowercase().contains(search)
     }
 
@@ -59,7 +69,7 @@ impl Card for Modem {
     }
 
     /// Convert to edit HTML
-    fn to_html_edit(&self) -> String {
+    fn to_html_edit(&self, _anc: &ModemAnc) -> String {
         let uri = HtmlStr::new(self.uri.as_ref());
         let config = HtmlStr::new(self.config.as_ref());
         let timeout_ms = OptVal(self.timeout_ms);

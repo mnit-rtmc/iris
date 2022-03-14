@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
-use crate::resource::{disabled_attr, Card};
+use crate::resource::{disabled_attr, AncillaryData, Card};
 use crate::util::Dom;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -27,6 +27,14 @@ pub struct Role {
     pub enabled: bool,
 }
 
+/// Ancillary role data
+#[derive(Debug, Default)]
+pub struct RoleAnc;
+
+impl AncillaryData for RoleAnc {
+    type Resource = Role;
+}
+
 impl fmt::Display for Role {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.name)
@@ -38,6 +46,8 @@ impl Card for Role {
     const ENAME: &'static str = "💪 Role";
     const UNAME: &'static str = "role";
 
+    type Ancillary = RoleAnc;
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
@@ -45,7 +55,7 @@ impl Card for Role {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str) -> bool {
+    fn is_match(&self, search: &str, _anc: &RoleAnc) -> bool {
         self.name.to_lowercase().contains(search)
     }
 
@@ -56,7 +66,7 @@ impl Card for Role {
     }
 
     /// Convert to edit HTML
-    fn to_html_edit(&self) -> String {
+    fn to_html_edit(&self, _anc: &RoleAnc) -> String {
         let enabled = if self.enabled { " checked" } else { "" };
         format!(
             "<div class='row'>\

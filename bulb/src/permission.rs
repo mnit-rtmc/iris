@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::{Error, Result};
-use crate::resource::{Card, NAME};
+use crate::resource::{AncillaryData, Card, View, NAME};
 use crate::role::Role;
 use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
@@ -29,15 +29,85 @@ pub struct Permission {
     pub resource_n: String,
     pub batch: Option<String>,
     pub access_n: u32,
+}
 
-    /// Ancillary data
+/// Ancillary permission data
+#[derive(Debug, Default)]
+pub struct PermissionAnc {
     pub resource_types: Option<Vec<String>>,
     pub roles: Option<Vec<Role>>,
 }
 
-impl fmt::Display for Permission {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.id)
+impl AncillaryData for PermissionAnc {
+    type Resource = Permission;
+
+    /// Get ancillary URI
+    fn uri(&self, _view: View) -> Option<&str> {
+        match (&self.resource_types, &self.roles) {
+            (None, _) => Some("/iris/resource_type"),
+            (_, None) => Some("/iris/api/role"),
+            _ => None,
+        }
+    }
+
+    /// Put ancillary JSON data
+    fn set_json(
+        &mut self,
+        _view: View,
+        json: JsValue,
+        _res: &Permission,
+    ) -> Result<()> {
+        match &self.resource_types {
+            None => {
+                let resource_types = json.into_serde::<Vec<String>>()?;
+                self.resource_types = Some(resource_types);
+            }
+            _ => {
+                let roles = json.into_serde::<Vec<Role>>()?;
+                self.roles = Some(roles);
+            }
+        }
+        Ok(())
+    }
+}
+
+impl PermissionAnc {
+    /// Create an HTML `select` element of resource types
+    fn resource_types_html(&self, res: &Permission) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='edit_resource'>");
+        if let Some(resource_types) = &self.resource_types {
+            for resource_type in resource_types {
+                html.push_str("<option");
+                if &res.resource_n == resource_type {
+                    html.push_str(" selected");
+                }
+                html.push('>');
+                html.push_str(resource_type);
+                html.push_str("</option>");
+            }
+        }
+        html.push_str("</select>");
+        html
+    }
+
+    /// Create an HTML `select` element of roles
+    fn roles_html(&self, res: &Permission) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='edit_role'>");
+        if let Some(roles) = &self.roles {
+            for role in roles {
+                html.push_str("<option");
+                if res.role == role.name {
+                    html.push_str(" selected");
+                }
+                html.push('>');
+                html.push_str(&role.name);
+                html.push_str("</option>");
+            }
+        }
+        html.push_str("</select>");
+        html
     }
 }
 
@@ -75,43 +145,9 @@ fn access_html(selected: u32) -> String {
     html
 }
 
-impl Permission {
-    /// Create an HTML `select` element of resource types
-    fn resource_types_html(&self) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='edit_resource'>");
-        if let Some(resource_types) = &self.resource_types {
-            for resource_type in resource_types {
-                html.push_str("<option");
-                if &self.resource_n == resource_type {
-                    html.push_str(" selected");
-                }
-                html.push('>');
-                html.push_str(resource_type);
-                html.push_str("</option>");
-            }
-        }
-        html.push_str("</select>");
-        html
-    }
-
-    /// Create an HTML `select` element of roles
-    fn roles_html(&self) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='edit_role'>");
-        if let Some(roles) = &self.roles {
-            for role in roles {
-                html.push_str("<option");
-                if self.role == role.name {
-                    html.push_str(" selected");
-                }
-                html.push('>');
-                html.push_str(&role.name);
-                html.push_str("</option>");
-            }
-        }
-        html.push_str("</select>");
-        html
+impl fmt::Display for Permission {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.id)
     }
 }
 
@@ -120,47 +156,25 @@ impl Card for Permission {
     const ENAME: &'static str = "🗝️ Permission";
     const UNAME: &'static str = "permission";
 
+    type Ancillary = PermissionAnc;
+
     /// Set the name
     fn with_name(self, _name: &str) -> Self {
         self
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str) -> bool {
+    fn is_match(&self, search: &str, _anc: &PermissionAnc) -> bool {
         self.id.to_string().contains(search)
             || access_str(self.access_n, true).contains(search)
             || self.role.to_lowercase().contains(search)
             || self.resource_n.contains(search)
     }
 
-    /// Get ancillary URI
-    fn ancillary_uri(&self) -> Option<&str> {
-        match (&self.resource_types, &self.roles) {
-            (None, _) => Some("/iris/resource_type"),
-            (_, None) => Some("/iris/api/role"),
-            _ => None,
-        }
-    }
-
-    /// Put ancillary JSON data
-    fn ancillary_json(&mut self, json: JsValue) -> Result<()> {
-        match &self.resource_types {
-            None => {
-                let resource_types = json.into_serde::<Vec<String>>()?;
-                self.resource_types = Some(resource_types);
-            }
-            _ => {
-                let roles = json.into_serde::<Vec<Role>>()?;
-                self.roles = Some(roles);
-            }
-        }
-        Ok(())
-    }
-
     /// Get row for create card
-    fn to_html_create(&self) -> String {
-        let role = self.roles_html();
-        let resource = self.resource_types_html();
+    fn to_html_create(&self, anc: &PermissionAnc) -> String {
+        let role = anc.roles_html(self);
+        let resource = anc.resource_types_html(self);
         format!(
             "<div class='row'>\
               <label for='edit_role'>Role</label>\
@@ -198,9 +212,9 @@ impl Card for Permission {
     }
 
     /// Convert to edit HTML
-    fn to_html_edit(&self) -> String {
-        let role = self.roles_html();
-        let resource = self.resource_types_html();
+    fn to_html_edit(&self, anc: &PermissionAnc) -> String {
+        let role = anc.roles_html(self);
+        let resource = anc.resource_types_html(self);
         let batch = HtmlStr::new(self.batch.as_ref());
         let access = access_html(self.access_n);
         format!(

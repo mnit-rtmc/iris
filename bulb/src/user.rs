@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
-use crate::resource::{disabled_attr, Card};
+use crate::resource::{disabled_attr, AncillaryData, Card, View};
 use crate::role::Role;
 use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
@@ -28,27 +28,48 @@ pub struct User {
     pub full_name: String,
     pub role: Option<String>,
     pub enabled: bool,
+}
 
-    /// Ancillary data
+/// Ancillary user data
+#[derive(Debug, Default)]
+pub struct UserAnc {
     pub roles: Option<Vec<Role>>,
 }
 
-impl fmt::Display for User {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.name)
+impl AncillaryData for UserAnc {
+    type Resource = User;
+
+    /// Get ancillary URI
+    fn uri(&self, _view: View) -> Option<&str> {
+        match &self.roles {
+            None => Some("/iris/api/role"),
+            _ => None,
+        }
+    }
+
+    /// Put ancillary JSON data
+    fn set_json(
+        &mut self,
+        _view: View,
+        json: JsValue,
+        _res: &User,
+    ) -> Result<()> {
+        let roles = json.into_serde::<Vec<Role>>()?;
+        self.roles = Some(roles);
+        Ok(())
     }
 }
 
-impl User {
+impl UserAnc {
     /// Create an HTML `select` element of roles
-    fn roles_html(&self) -> String {
+    fn roles_html(&self, res: &User) -> String {
         let mut html = String::new();
         html.push_str("<select id='edit_role'>");
         html.push_str("<option></option>");
         if let Some(roles) = &self.roles {
             for role in roles {
                 html.push_str("<option");
-                if self.role.as_ref() == Some(&role.name) {
+                if res.role.as_ref() == Some(&role.name) {
                     html.push_str(" selected");
                 }
                 html.push('>');
@@ -61,10 +82,18 @@ impl User {
     }
 }
 
+impl fmt::Display for User {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.name)
+    }
+}
+
 impl Card for User {
     const TNAME: &'static str = "User";
     const ENAME: &'static str = "👤 User";
     const UNAME: &'static str = "user";
+
+    type Ancillary = UserAnc;
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
@@ -73,7 +102,7 @@ impl Card for User {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str) -> bool {
+    fn is_match(&self, search: &str, _anc: &UserAnc) -> bool {
         self.name.contains(search)
             || self.full_name.to_lowercase().contains(search)
             || self
@@ -84,21 +113,6 @@ impl Card for User {
                 .contains(search)
     }
 
-    /// Get ancillary URI
-    fn ancillary_uri(&self) -> Option<&str> {
-        match &self.roles {
-            None => Some("/iris/api/role"),
-            _ => None,
-        }
-    }
-
-    /// Put ancillary JSON data
-    fn ancillary_json(&mut self, json: JsValue) -> Result<()> {
-        let roles = json.into_serde::<Vec<Role>>()?;
-        self.roles = Some(roles);
-        Ok(())
-    }
-
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
         let disabled = disabled_attr(self.enabled && self.role.is_some());
@@ -106,9 +120,9 @@ impl Card for User {
     }
 
     /// Convert to edit HTML
-    fn to_html_edit(&self) -> String {
+    fn to_html_edit(&self, anc: &UserAnc) -> String {
         let full_name = HtmlStr::new(&self.full_name);
-        let role = self.roles_html();
+        let role = anc.roles_html(self);
         let enabled = if self.enabled { " checked" } else { "" };
         format!(
             "<div class='row'>\

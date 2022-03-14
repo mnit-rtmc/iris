@@ -12,7 +12,7 @@
 //
 use crate::controller::Controller;
 use crate::error::Result;
-use crate::resource::{disabled_attr, Card, NAME};
+use crate::resource::{disabled_attr, AncillaryData, Card, NAME};
 use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -30,6 +30,14 @@ pub struct Alarm {
     pub state: bool,
     pub pin: Option<u32>,
     pub trigger_time: Option<String>,
+}
+
+/// Ancillary alarm data
+#[derive(Debug, Default)]
+pub struct AlarmAnc;
+
+impl AncillaryData for AlarmAnc {
+    type Resource = Alarm;
 }
 
 impl Alarm {
@@ -58,6 +66,8 @@ impl Card for Alarm {
     const UNAME: &'static str = "alarm";
     const HAS_STATUS: bool = true;
 
+    type Ancillary = AlarmAnc;
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
@@ -65,7 +75,7 @@ impl Card for Alarm {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str) -> bool {
+    fn is_match(&self, search: &str, _anc: &AlarmAnc) -> bool {
         self.description.to_lowercase().contains(search)
             || self.name.to_lowercase().contains(search)
             || self.state(true).contains(search)
@@ -84,7 +94,7 @@ impl Card for Alarm {
     }
 
     /// Convert to status HTML
-    fn to_html_status(&self) -> String {
+    fn to_html_status(&self, _anc: &AlarmAnc) -> String {
         let tname = Controller::TNAME;
         let description = HtmlStr::new(&self.description);
         let state = self.state(true);
@@ -108,7 +118,7 @@ impl Card for Alarm {
     }
 
     /// Convert to edit HTML
-    fn to_html_edit(&self) -> String {
+    fn to_html_edit(&self, _anc: &AlarmAnc) -> String {
         let description = HtmlStr::new(&self.description);
         let controller = HtmlStr::new(self.controller.as_ref());
         let pin = OptVal(self.pin);

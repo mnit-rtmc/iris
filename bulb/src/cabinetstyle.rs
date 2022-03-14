@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
-use crate::resource::Card;
+use crate::resource::{AncillaryData, Card};
 use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -31,6 +31,14 @@ pub struct CabinetStyle {
     pub dip: Option<u32>,
 }
 
+/// Ancillary Cabinet Style data
+#[derive(Debug, Default)]
+pub struct CabinetStyleAnc;
+
+impl AncillaryData for CabinetStyleAnc {
+    type Resource = CabinetStyle;
+}
+
 impl fmt::Display for CabinetStyle {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", HtmlStr::new(&self.name))
@@ -42,6 +50,8 @@ impl Card for CabinetStyle {
     const ENAME: &'static str = "🗄️ Cabinet Style";
     const UNAME: &'static str = "cabinet_style";
 
+    type Ancillary = CabinetStyleAnc;
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
@@ -49,7 +59,7 @@ impl Card for CabinetStyle {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str) -> bool {
+    fn is_match(&self, search: &str, _res: &CabinetStyleAnc) -> bool {
         self.name.to_lowercase().contains(search)
     }
 
@@ -59,7 +69,7 @@ impl Card for CabinetStyle {
     }
 
     /// Convert to edit HTML
-    fn to_html_edit(&self) -> String {
+    fn to_html_edit(&self, _anc: &CabinetStyleAnc) -> String {
         let police_panel_pin_1 = OptVal(self.police_panel_pin_1);
         let police_panel_pin_2 = OptVal(self.police_panel_pin_2);
         let watchdog_reset_pin_1 = OptVal(self.watchdog_reset_pin_1);

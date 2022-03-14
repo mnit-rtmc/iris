@@ -14,7 +14,7 @@ use crate::cabinetstyle::CabinetStyle;
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
-use crate::resource::{disabled_attr, Card, NAME};
+use crate::resource::{disabled_attr, AncillaryData, Card, View, NAME};
 use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -58,13 +58,140 @@ pub struct Controller {
     pub fail_time: Option<String>,
     pub geo_loc: Option<String>,
     pub password: Option<String>,
+}
 
-    /// Ancillary data
+/// Ancillary controller data
+#[derive(Debug, Default)]
+pub struct ControllerAnc {
     pub conditions: Option<Vec<Condition>>,
     pub cabinet_styles: Option<Vec<CabinetStyle>>,
     pub comm_links: Option<Vec<CommLink>>,
     pub comm_configs: Option<Vec<CommConfig>>,
-    pub a_geo_loc: Option<GeoLoc>,
+    pub geo_loc: Option<GeoLoc>,
+}
+
+impl AncillaryData for ControllerAnc {
+    type Resource = Controller;
+
+    /// Get ancillary URI
+    fn uri(&self, _view: View) -> Option<&str> {
+        match (
+            &self.conditions,
+            &self.cabinet_styles,
+            &self.comm_links,
+            &self.comm_configs,
+        ) {
+            (None, _, _, _) => Some("/iris/condition"),
+            (_, None, _, _) => Some("/iris/api/cabinet_style"),
+            (_, _, None, _) => Some("/iris/api/comm_link"),
+            (_, _, _, None) => Some("/iris/api/comm_config"),
+            _ => None,
+        }
+    }
+
+    /// Put ancillary JSON data
+    fn set_json(
+        &mut self,
+        _view: View,
+        json: JsValue,
+        _res: &Controller,
+    ) -> Result<()> {
+        match (&self.conditions, &self.cabinet_styles, &self.comm_links) {
+            (None, _, _) => {
+                let conditions = json.into_serde::<Vec<Condition>>()?;
+                self.conditions = Some(conditions);
+            }
+            (_, None, _) => {
+                let cabinet_styles = json.into_serde::<Vec<CabinetStyle>>()?;
+                self.cabinet_styles = Some(cabinet_styles);
+            }
+            (_, _, None) => {
+                let comm_links = json.into_serde::<Vec<CommLink>>()?;
+                self.comm_links = Some(comm_links);
+            }
+            _ => {
+                let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
+                self.comm_configs = Some(comm_configs);
+            }
+        }
+        Ok(())
+    }
+}
+
+impl ControllerAnc {
+    /// Get condition description
+    fn condition(&self, res: &Controller) -> &str {
+        if let Some(conditions) = &self.conditions {
+            for condition in conditions {
+                if res.condition == condition.id {
+                    return &condition.description;
+                }
+            }
+        }
+        ""
+    }
+
+    /// Create an HTML `select` element of controller conditions
+    fn conditions_html(&self, res: &Controller) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='edit_condition'>");
+        if let Some(conditions) = &self.conditions {
+            for condition in conditions {
+                html.push_str("<option value='");
+                html.push_str(&condition.id.to_string());
+                html.push('\'');
+                if res.condition == condition.id {
+                    html.push_str(" selected");
+                }
+                html.push('>');
+                html.push_str(&condition.description);
+                html.push_str("</option>");
+            }
+        }
+        html.push_str("</select>");
+        html
+    }
+
+    /// Create an HTML `select` element of cabinet styles
+    fn cabinet_styles_html(&self, res: &Controller) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='edit_cabinet'>");
+        html.push_str("<option></option>");
+        if let Some(cabinet_styles) = &self.cabinet_styles {
+            for cabinet_style in cabinet_styles {
+                html.push_str("<option");
+                if let Some(cab) = &res.cabinet_style {
+                    if cab == &cabinet_style.name {
+                        html.push_str(" selected");
+                    }
+                }
+                html.push('>');
+                html.push_str(&cabinet_style.name);
+                html.push_str("</option>");
+            }
+        }
+        html.push_str("</select>");
+        html
+    }
+
+    /// Get the comm config
+    fn comm_config(&self, res: &Controller) -> &str {
+        if let (Some(comm_links), Some(comm_configs)) =
+            (&self.comm_links, &self.comm_configs)
+        {
+            if let Some(comm_link) =
+                comm_links.iter().find(|cl| cl.name == res.comm_link)
+            {
+                if let Some(comm_config) = comm_configs
+                    .iter()
+                    .find(|cc| cc.name == comm_link.comm_config)
+                {
+                    return &comm_config.description[..];
+                }
+            }
+        }
+        ""
+    }
 }
 
 impl fmt::Display for Controller {
@@ -87,80 +214,6 @@ impl Controller {
             (false, _, true) => "inactive ❓",
         }
     }
-
-    /// Get condition description
-    fn condition(&self) -> &str {
-        if let Some(conditions) = &self.conditions {
-            for condition in conditions {
-                if self.condition == condition.id {
-                    return &condition.description;
-                }
-            }
-        }
-        ""
-    }
-
-    /// Create an HTML `select` element of controller conditions
-    fn conditions_html(&self) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='edit_condition'>");
-        if let Some(conditions) = &self.conditions {
-            for condition in conditions {
-                html.push_str("<option value='");
-                html.push_str(&condition.id.to_string());
-                html.push('\'');
-                if self.condition == condition.id {
-                    html.push_str(" selected");
-                }
-                html.push('>');
-                html.push_str(&condition.description);
-                html.push_str("</option>");
-            }
-        }
-        html.push_str("</select>");
-        html
-    }
-
-    /// Create an HTML `select` element of cabinet styles
-    fn cabinet_styles_html(&self) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='edit_cabinet'>");
-        html.push_str("<option></option>");
-        if let Some(cabinet_styles) = &self.cabinet_styles {
-            for cabinet_style in cabinet_styles {
-                html.push_str("<option");
-                if let Some(cab) = &self.cabinet_style {
-                    if cab == &cabinet_style.name {
-                        html.push_str(" selected");
-                    }
-                }
-                html.push('>');
-                html.push_str(&cabinet_style.name);
-                html.push_str("</option>");
-            }
-        }
-        html.push_str("</select>");
-        html
-    }
-
-    /// Get the comm config
-    fn comm_config(&self) -> &str {
-        if let (Some(comm_links), Some(comm_configs)) =
-            (&self.comm_links, &self.comm_configs)
-        {
-            if let Some(comm_link) =
-                comm_links.iter().find(|cl| cl.name == self.comm_link)
-            {
-                if let Some(comm_config) = comm_configs
-                    .iter()
-                    .find(|cc| cc.name == comm_link.comm_config)
-                {
-                    return &comm_config.description[..];
-                }
-            }
-        }
-        ""
-    }
 }
 
 impl Card for Controller {
@@ -170,6 +223,8 @@ impl Card for Controller {
     const HAS_STATUS: bool = true;
     const HAS_LOCATION: bool = true;
 
+    type Ancillary = ControllerAnc;
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
@@ -177,8 +232,7 @@ impl Card for Controller {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str) -> bool {
-        // FIXME: ancillary conditions can't be searched
+    fn is_match(&self, search: &str, anc: &ControllerAnc) -> bool {
         self.name.to_lowercase().contains(search)
             || {
                 let comm_link = self.comm_link.to_lowercase();
@@ -192,7 +246,7 @@ impl Card for Controller {
                 .unwrap_or("")
                 .to_lowercase()
                 .contains(search)
-            || self.condition().to_lowercase().contains(search)
+            || anc.condition(self).to_lowercase().contains(search)
             || self
                 .cabinet_style
                 .as_deref()
@@ -205,45 +259,6 @@ impl Card for Controller {
                 .unwrap_or("")
                 .to_lowercase()
                 .contains(search)
-    }
-
-    /// Get ancillary URI
-    fn ancillary_uri(&self) -> Option<&str> {
-        match (
-            &self.conditions,
-            &self.cabinet_styles,
-            &self.comm_links,
-            &self.comm_configs,
-        ) {
-            (None, _, _, _) => Some("/iris/condition"),
-            (_, None, _, _) => Some("/iris/api/cabinet_style"),
-            (_, _, None, _) => Some("/iris/api/comm_link"),
-            (_, _, _, None) => Some("/iris/api/comm_config"),
-            _ => None,
-        }
-    }
-
-    /// Put ancillary JSON data
-    fn ancillary_json(&mut self, json: JsValue) -> Result<()> {
-        match (&self.conditions, &self.cabinet_styles, &self.comm_links) {
-            (None, _, _) => {
-                let conditions = json.into_serde::<Vec<Condition>>()?;
-                self.conditions = Some(conditions);
-            }
-            (_, None, _) => {
-                let cabinet_styles = json.into_serde::<Vec<CabinetStyle>>()?;
-                self.cabinet_styles = Some(cabinet_styles);
-            }
-            (_, _, None) => {
-                let comm_links = json.into_serde::<Vec<CommLink>>()?;
-                self.comm_links = Some(comm_links);
-            }
-            _ => {
-                let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
-                self.comm_configs = Some(comm_configs);
-            }
-        }
-        Ok(())
     }
 
     /// Get next suggested name
@@ -274,12 +289,12 @@ impl Card for Controller {
     }
 
     /// Convert to status HTML
-    fn to_html_status(&self) -> String {
+    fn to_html_status(&self, anc: &ControllerAnc) -> String {
         let tname = CommLink::TNAME;
-        let condition = self.condition();
+        let condition = anc.condition(self);
         let comm_state = self.comm_state(true);
         let comm_link = HtmlStr::new(&self.comm_link);
-        let comm_config = self.comm_config();
+        let comm_config = anc.comm_config(self);
         let drop_id = self.drop_id;
         let location = HtmlStr::new(self.location.as_ref()).with_len(64);
         let notes = HtmlStr::new(&self.notes);
@@ -333,11 +348,11 @@ impl Card for Controller {
     }
 
     /// Convert to edit HTML
-    fn to_html_edit(&self) -> String {
+    fn to_html_edit(&self, anc: &ControllerAnc) -> String {
         let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
-        let cabinet_styles = self.cabinet_styles_html();
-        let conditions = self.conditions_html();
+        let cabinet_styles = anc.cabinet_styles_html(self);
+        let conditions = anc.conditions_html(self);
         let notes = HtmlStr::new(&self.notes);
         let password = HtmlStr::new(self.password.as_ref());
         format!(

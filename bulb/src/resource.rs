@@ -39,46 +39,69 @@ pub const NAME: &str = "ob_name";
 /// Compact "Create" card
 const CREATE_COMPACT: &str = "<span class='create'>Create 🆕</span>";
 
-/// Type of card
+/// Card View
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum CardType {
-    /// Create compact card
+pub enum View {
+    /// Compact Create view
     CreateCompact,
 
-    /// Create card
+    /// Create view
     Create,
 
-    /// Compact in list
+    /// Compact view
     Compact,
 
-    /// Status card
+    /// Status view
     Status,
 
-    /// Edit card
+    /// Edit view
     Edit,
 
-    /// Location card
+    /// Location view
     Location,
+
+    /// Search view
+    Search,
 }
 
-impl CardType {
-    /// Is the card compact?
+impl View {
+    /// Is the view compact?
     pub fn is_compact(self) -> bool {
-        matches!(self, CardType::Compact | CardType::CreateCompact)
+        matches!(self, View::Compact | View::CreateCompact)
     }
 
-    /// Is the card a create card?
+    /// Is the view a create view?
     pub fn is_create(self) -> bool {
-        matches!(self, CardType::Create | CardType::CreateCompact)
+        matches!(self, View::Create | View::CreateCompact)
     }
 
-    /// Get compact card type
+    /// Get compact view
     pub fn compact(self) -> Self {
         if self.is_create() {
-            CardType::CreateCompact
+            View::CreateCompact
         } else {
-            CardType::Compact
+            View::Compact
         }
+    }
+}
+
+/// Ancillary card view data
+pub trait AncillaryData: Default {
+    type Resource;
+
+    /// Get ancillary URI
+    fn uri(&self, _view: View) -> Option<&str> {
+        None
+    }
+
+    /// Set ancillary JSON data
+    fn set_json(
+        &mut self,
+        _view: View,
+        _json: JsValue,
+        _res: &Self::Resource,
+    ) -> Result<()> {
+        Ok(())
     }
 }
 
@@ -89,6 +112,8 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     const UNAME: &'static str;
     const HAS_STATUS: bool = false;
     const HAS_LOCATION: bool = false;
+
+    type Ancillary: AncillaryData<Resource = Self>;
 
     /// Create from a JSON value
     fn new(json: &JsValue) -> Result<Self> {
@@ -104,25 +129,15 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, _search: &str) -> bool {
+    fn is_match(&self, _search: &str, _anc: &Self::Ancillary) -> bool {
         false
-    }
-
-    /// Get ancillary URI
-    fn ancillary_uri(&self) -> Option<&str> {
-        None
-    }
-
-    /// Put ancillary JSON data
-    fn ancillary_json(&mut self, _json: JsValue) -> Result<()> {
-        unreachable!()
     }
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String;
 
     /// Get row for create card
-    fn to_html_create(&self) -> String {
+    fn to_html_create(&self, _anc: &Self::Ancillary) -> String {
         format!(
             "<div class='row'>\
               <label for='create_name'>Name</label>\
@@ -132,7 +147,7 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     }
 
     /// Convert to status HTML
-    fn to_html_status(&self) -> String {
+    fn to_html_status(&self, _anc: &Self::Ancillary) -> String {
         unreachable!()
     }
 
@@ -142,7 +157,7 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     }
 
     /// Convert to edit HTML
-    fn to_html_edit(&self) -> String {
+    fn to_html_edit(&self, _anc: &Self::Ancillary) -> String {
         unreachable!()
     }
 
@@ -214,8 +229,11 @@ async fn res_build_list<C: Card>(search: &str) -> Result<String> {
             {CREATE_COMPACT}\
         </li>"
     ));
+    // Use default value for ancillary data lookup
+    let res = C::default();
+    let anc = fetch_ancillary(&res, View::Search).await?;
     for ob in obs.iter().filter(|ob| {
-        search.is_empty() || search.split(' ').all(|s| ob.is_match(s))
+        search.is_empty() || search.split(' ').all(|s| ob.is_match(s, &anc))
     }) {
         html.push_str(&format!(
             "<li id='{tname}_{ob}' name='{ob}' class='card'>"
@@ -228,66 +246,70 @@ async fn res_build_list<C: Card>(search: &str) -> Result<String> {
 }
 
 /// Get a card for a resource type
-pub async fn res_get(res: &str, name: &str, ct: CardType) -> Result<String> {
+pub async fn res_get(res: &str, name: &str, view: View) -> Result<String> {
     match res {
-        Alarm::TNAME => res_build_card::<Alarm>(name, ct).await,
-        CabinetStyle::TNAME => res_build_card::<CabinetStyle>(name, ct).await,
-        CommConfig::TNAME => res_build_card::<CommConfig>(name, ct).await,
-        CommLink::TNAME => res_build_card::<CommLink>(name, ct).await,
-        Controller::TNAME => res_build_card::<Controller>(name, ct).await,
-        Modem::TNAME => res_build_card::<Modem>(name, ct).await,
-        Permission::TNAME => res_build_card::<Permission>(name, ct).await,
-        Role::TNAME => res_build_card::<Role>(name, ct).await,
-        User::TNAME => res_build_card::<User>(name, ct).await,
+        Alarm::TNAME => res_build_card::<Alarm>(name, view).await,
+        CabinetStyle::TNAME => res_build_card::<CabinetStyle>(name, view).await,
+        CommConfig::TNAME => res_build_card::<CommConfig>(name, view).await,
+        CommLink::TNAME => res_build_card::<CommLink>(name, view).await,
+        Controller::TNAME => res_build_card::<Controller>(name, view).await,
+        Modem::TNAME => res_build_card::<Modem>(name, view).await,
+        Permission::TNAME => res_build_card::<Permission>(name, view).await,
+        Role::TNAME => res_build_card::<Role>(name, view).await,
+        User::TNAME => res_build_card::<User>(name, view).await,
         _ => Ok("".into()),
     }
 }
 
 /// Fetch and build a card
-async fn res_build_card<C: Card>(name: &str, ct: CardType) -> Result<String> {
-    match ct {
-        CardType::CreateCompact => Ok(CREATE_COMPACT.into()),
-        CardType::Create => {
-            let mut val = C::default().with_name(name);
-            while let Some(uri) = val.ancillary_uri() {
-                let json = fetch_get(uri).await?;
-                val.ancillary_json(json)?;
-            }
-            Ok(html_card_create(C::ENAME, &val.to_html_create()))
+async fn res_build_card<C: Card>(name: &str, view: View) -> Result<String> {
+    match view {
+        View::CreateCompact => Ok(CREATE_COMPACT.into()),
+        View::Create => {
+            let res = C::default().with_name(name);
+            let anc = fetch_ancillary(&res, view).await?;
+            Ok(html_card_create(C::ENAME, &res.to_html_create(&anc)))
         }
-        CardType::Compact => {
-            let val = fetch_all::<C>(name).await?;
-            Ok(val.to_html_compact())
+        View::Compact => {
+            let res = fetch_res::<C>(name).await?;
+            Ok(res.to_html_compact())
         }
-        CardType::Status if C::HAS_STATUS => {
-            let val = fetch_all::<C>(name).await?;
+        View::Status if C::HAS_STATUS => {
+            let res = fetch_res::<C>(name).await?;
+            let anc = fetch_ancillary(&res, view).await?;
             Ok(html_card_status(
                 C::ENAME,
                 name,
-                &val.to_html_status(),
+                &res.to_html_status(&anc),
                 C::HAS_LOCATION,
             ))
         }
-        CardType::Location => {
-            let val = fetch_all::<C>(name).await?;
-            Ok(html_card_location(C::ENAME, name, &val.to_html_location()))
+        View::Location => {
+            let res = fetch_res::<C>(name).await?;
+            Ok(html_card_location(C::ENAME, name, &res.to_html_location()))
         }
         _ => {
-            let val = fetch_all::<C>(name).await?;
-            Ok(html_card_edit(C::ENAME, name, &val.to_html_edit()))
+            let res = fetch_res::<C>(name).await?;
+            let anc = fetch_ancillary(&res, view).await?;
+            Ok(html_card_edit(C::ENAME, name, &res.to_html_edit(&anc)))
         }
     }
 }
 
-/// Fetch JSON and ancillary data
-async fn fetch_all<C: Card>(name: &str) -> Result<C> {
+/// Fetch JSON resource
+async fn fetch_res<C: Card>(name: &str) -> Result<C> {
     let json = fetch_json(C::UNAME, name).await?;
-    let mut val = C::new(&json)?;
-    while let Some(uri) = val.ancillary_uri() {
+    Ok(C::new(&json)?)
+}
+
+/// Fetch ancillary data
+async fn fetch_ancillary<C: Card>(res: &C, view: View) -> Result<C::Ancillary> {
+    let mut anc = C::Ancillary::default();
+    while let Some(uri) = anc.uri(view) {
         let json = fetch_get(uri).await?;
-        val.ancillary_json(json)?;
+        anc.set_json(view, json, res)?;
     }
-    Ok(val)
+    Ok(anc)
 }
 
 /// Build a create card
@@ -423,8 +445,8 @@ async fn fetch_save_card<C: Card>(name: &str) -> Result<()> {
         if let Some(doc) = window.document() {
             let uri = uri_name(C::UNAME, name);
             let json = fetch_get(&uri).await?;
-            let v = C::changed_fields(&doc, &json)?;
-            fetch_patch(&uri, &v.into()).await?;
+            let changed = C::changed_fields(&doc, &json)?;
+            fetch_patch(&uri, &changed.into()).await?;
         }
     }
     Ok(())

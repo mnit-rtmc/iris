@@ -13,7 +13,7 @@
 use crate::commconfig::CommConfig;
 use crate::controller::Controller;
 use crate::error::Result;
-use crate::resource::{disabled_attr, Card, NAME};
+use crate::resource::{disabled_attr, AncillaryData, Card, View, NAME};
 use crate::util::{Dom, HtmlStr};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -31,36 +31,55 @@ pub struct CommLink {
     pub comm_config: String,
     pub poll_enabled: bool,
     pub connected: bool,
+}
 
-    /// Ancillary data
+/// Ancillary comm link data
+#[derive(Debug, Default)]
+pub struct CommLinkAnc {
     pub comm_configs: Option<Vec<CommConfig>>,
     pub controllers: Option<Vec<Controller>>,
 }
 
-impl fmt::Display for CommLink {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
+impl AncillaryData for CommLinkAnc {
+    type Resource = CommLink;
 
-impl CommLink {
-    /// Get connected state to display
-    fn connected(&self, long: bool) -> &'static str {
-        match (self.poll_enabled, self.connected, long) {
-            (true, true, false) => "👍",
-            (true, true, true) => "online 👍",
-            (true, false, false) => "🔌",
-            (true, false, true) => "offline 🔌",
-            (false, _, false) => "❓",
-            (false, _, true) => "disabled ❓",
+    /// Get ancillary URI
+    fn uri(&self, _view: View) -> Option<&str> {
+        match (&self.comm_configs, &self.controllers) {
+            (None, _) => Some("/iris/api/comm_config"),
+            (_, None) => Some("/iris/api/controller"),
+            _ => None,
         }
     }
 
+    /// Put ancillary JSON data
+    fn set_json(
+        &mut self,
+        _view: View,
+        json: JsValue,
+        res: &CommLink,
+    ) -> Result<()> {
+        match (&self.comm_configs, &self.controllers) {
+            (None, _) => {
+                let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
+                self.comm_configs = Some(comm_configs);
+            }
+            _ => {
+                let mut controllers = json.into_serde::<Vec<Controller>>()?;
+                controllers.retain(|c| c.comm_link == res.name);
+                self.controllers = Some(controllers);
+            }
+        }
+        Ok(())
+    }
+}
+
+impl CommLinkAnc {
     /// Get comm config description
-    fn comm_config_desc(&self) -> &str {
+    fn comm_config_desc(&self, res: &CommLink) -> &str {
         if let Some(comm_configs) = &self.comm_configs {
             for config in comm_configs {
-                if self.comm_config == config.name {
+                if res.comm_config == config.name {
                     return &config.description;
                 }
             }
@@ -69,7 +88,7 @@ impl CommLink {
     }
 
     /// Create an HTML `select` element of comm configs
-    fn comm_configs_html(&self) -> String {
+    fn comm_configs_html(&self, res: &CommLink) -> String {
         let mut html = String::new();
         html.push_str("<select id='edit_config'>");
         if let Some(comm_configs) = &self.comm_configs {
@@ -77,7 +96,7 @@ impl CommLink {
                 html.push_str("<option value='");
                 html.push_str(&config.name);
                 html.push('\'');
-                if self.comm_config == config.name {
+                if res.comm_config == config.name {
                     html.push_str(" selected");
                 }
                 html.push('>');
@@ -113,11 +132,33 @@ impl CommLink {
     }
 }
 
+impl fmt::Display for CommLink {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", HtmlStr::new(&self.name))
+    }
+}
+
+impl CommLink {
+    /// Get connected state to display
+    fn connected(&self, long: bool) -> &'static str {
+        match (self.poll_enabled, self.connected, long) {
+            (true, true, false) => "👍",
+            (true, true, true) => "online 👍",
+            (true, false, false) => "🔌",
+            (true, false, true) => "offline 🔌",
+            (false, _, false) => "❓",
+            (false, _, true) => "disabled ❓",
+        }
+    }
+}
+
 impl Card for CommLink {
     const TNAME: &'static str = "Comm Link";
     const ENAME: &'static str = "🔗 Comm Link";
     const UNAME: &'static str = "comm_link";
     const HAS_STATUS: bool = true;
+
+    type Ancillary = CommLinkAnc;
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
@@ -126,38 +167,12 @@ impl Card for CommLink {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str) -> bool {
-        // FIXME: ancillary comm configs can't be searched
+    fn is_match(&self, search: &str, anc: &CommLinkAnc) -> bool {
         self.description.to_lowercase().contains(search)
             || self.name.to_lowercase().contains(search)
-            || self.comm_config_desc().to_lowercase().contains(search)
+            || anc.comm_config_desc(self).to_lowercase().contains(search)
             || self.uri.to_lowercase().contains(search)
             || self.connected(true).contains(search)
-    }
-
-    /// Get ancillary URI
-    fn ancillary_uri(&self) -> Option<&str> {
-        match (&self.comm_configs, &self.controllers) {
-            (None, _) => Some("/iris/api/comm_config"),
-            (_, None) => Some("/iris/api/controller"),
-            _ => None,
-        }
-    }
-
-    /// Put ancillary JSON data
-    fn ancillary_json(&mut self, json: JsValue) -> Result<()> {
-        match (&self.comm_configs, &self.controllers) {
-            (None, _) => {
-                let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
-                self.comm_configs = Some(comm_configs);
-            }
-            _ => {
-                let mut controllers = json.into_serde::<Vec<Controller>>()?;
-                controllers.retain(|c| c.comm_link == self.name);
-                self.controllers = Some(controllers);
-            }
-        }
-        Ok(())
     }
 
     /// Convert to compact HTML
@@ -173,13 +188,13 @@ impl Card for CommLink {
     }
 
     /// Convert to status HTML
-    fn to_html_status(&self) -> String {
+    fn to_html_status(&self, anc: &CommLinkAnc) -> String {
         let connected = self.connected(true);
         let disabled = if self.poll_enabled { "" } else { " disabled" };
         let description = HtmlStr::new(&self.description);
-        let comm_config = self.comm_config_desc();
+        let comm_config = anc.comm_config_desc(self);
         let config = HtmlStr::new(comm_config);
-        let controllers = self.controllers_html();
+        let controllers = anc.controllers_html();
         format!(
             "<div class='row'>\
               <span>{connected}</span>\
@@ -194,11 +209,11 @@ impl Card for CommLink {
     }
 
     /// Convert to edit HTML
-    fn to_html_edit(&self) -> String {
+    fn to_html_edit(&self, anc: &CommLinkAnc) -> String {
         let description = HtmlStr::new(&self.description);
         let uri = HtmlStr::new(&self.uri);
         let enabled = if self.poll_enabled { " checked" } else { "" };
-        let comm_configs = self.comm_configs_html();
+        let comm_configs = anc.comm_configs_html(self);
         format!(
             "<div class='row'>\
               <label for='edit_desc'>Description</label>\
