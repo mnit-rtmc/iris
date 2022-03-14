@@ -40,9 +40,9 @@ impl AncillaryData for UserAnc {
     type Resource = User;
 
     /// Get ancillary URI
-    fn uri(&self, _view: View) -> Option<&str> {
-        match &self.roles {
-            None => Some("/iris/api/role"),
+    fn uri(&self, view: View) -> Option<&str> {
+        match (view, &self.roles) {
+            (View::Edit, None) => Some("/iris/api/role"),
             _ => None,
         }
     }

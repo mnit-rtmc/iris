@@ -36,18 +36,23 @@ pub struct CommLink {
 /// Ancillary comm link data
 #[derive(Debug, Default)]
 pub struct CommLinkAnc {
-    pub comm_configs: Option<Vec<CommConfig>>,
     pub controllers: Option<Vec<Controller>>,
+    pub comm_configs: Option<Vec<CommConfig>>,
 }
+
+const CONTROLLER_URI: &str = "/iris/api/controller";
+const COMM_CONFIG_URI: &str = "/iris/api/comm_config";
 
 impl AncillaryData for CommLinkAnc {
     type Resource = CommLink;
 
     /// Get ancillary URI
-    fn uri(&self, _view: View) -> Option<&str> {
-        match (&self.comm_configs, &self.controllers) {
-            (None, _) => Some("/iris/api/comm_config"),
-            (_, None) => Some("/iris/api/controller"),
+    fn uri(&self, view: View) -> Option<&str> {
+        match (view, &self.controllers, &self.comm_configs) {
+            (View::Status, None, _) => Some(CONTROLLER_URI),
+            (View::Status | View::Edit | View::Search, _, None) => {
+                Some(COMM_CONFIG_URI)
+            }
             _ => None,
         }
     }
@@ -55,19 +60,19 @@ impl AncillaryData for CommLinkAnc {
     /// Put ancillary JSON data
     fn set_json(
         &mut self,
-        _view: View,
+        view: View,
         json: JsValue,
         res: &CommLink,
     ) -> Result<()> {
-        match (&self.comm_configs, &self.controllers) {
-            (None, _) => {
-                let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
-                self.comm_configs = Some(comm_configs);
-            }
-            _ => {
+        match self.uri(view) {
+            Some(CONTROLLER_URI) => {
                 let mut controllers = json.into_serde::<Vec<Controller>>()?;
                 controllers.retain(|c| c.comm_link == res.name);
                 self.controllers = Some(controllers);
+            }
+            _ => {
+                let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
+                self.comm_configs = Some(comm_configs);
             }
         }
         Ok(())

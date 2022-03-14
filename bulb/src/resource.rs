@@ -290,7 +290,7 @@ async fn res_build_card<C: Card>(name: &str, view: View) -> Result<String> {
         }
         _ => {
             let res = fetch_res::<C>(name).await?;
-            let anc = fetch_ancillary(&res, view).await?;
+            let anc = fetch_ancillary(&res, View::Edit).await?;
             Ok(html_card_edit(C::ENAME, name, &res.to_html_edit(&anc)))
         }
     }

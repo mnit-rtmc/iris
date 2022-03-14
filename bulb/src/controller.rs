@@ -70,21 +70,29 @@ pub struct ControllerAnc {
     pub geo_loc: Option<GeoLoc>,
 }
 
+const CONDITION_URI: &str = "/iris/condition";
+const COMM_LINK_URI: &str = "/iris/api/comm_link";
+const COMM_CONFIG_URI: &str = "/iris/api/comm_config";
+const CABINET_STYLE_URI: &str = "/iris/api/cabinet_style";
+
 impl AncillaryData for ControllerAnc {
     type Resource = Controller;
 
     /// Get ancillary URI
-    fn uri(&self, _view: View) -> Option<&str> {
+    fn uri(&self, view: View) -> Option<&str> {
         match (
+            view,
             &self.conditions,
-            &self.cabinet_styles,
             &self.comm_links,
             &self.comm_configs,
+            &self.cabinet_styles,
         ) {
-            (None, _, _, _) => Some("/iris/condition"),
-            (_, None, _, _) => Some("/iris/api/cabinet_style"),
-            (_, _, None, _) => Some("/iris/api/comm_link"),
-            (_, _, _, None) => Some("/iris/api/comm_config"),
+            (View::Search | View::Status | View::Edit, None, _, _, _) => {
+                Some(CONDITION_URI)
+            }
+            (View::Status, _, None, _, _) => Some(COMM_LINK_URI),
+            (View::Status, _, _, None, _) => Some(COMM_CONFIG_URI),
+            (View::Edit, _, _, _, None) => Some(CABINET_STYLE_URI),
             _ => None,
         }
     }
@@ -92,27 +100,28 @@ impl AncillaryData for ControllerAnc {
     /// Put ancillary JSON data
     fn set_json(
         &mut self,
-        _view: View,
+        view: View,
         json: JsValue,
         _res: &Controller,
     ) -> Result<()> {
-        match (&self.conditions, &self.cabinet_styles, &self.comm_links) {
-            (None, _, _) => {
+        match self.uri(view) {
+            Some(CONDITION_URI) => {
                 let conditions = json.into_serde::<Vec<Condition>>()?;
                 self.conditions = Some(conditions);
             }
-            (_, None, _) => {
-                let cabinet_styles = json.into_serde::<Vec<CabinetStyle>>()?;
-                self.cabinet_styles = Some(cabinet_styles);
-            }
-            (_, _, None) => {
+            Some(COMM_LINK_URI) => {
                 let comm_links = json.into_serde::<Vec<CommLink>>()?;
                 self.comm_links = Some(comm_links);
             }
-            _ => {
+            Some(COMM_CONFIG_URI) => {
                 let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
                 self.comm_configs = Some(comm_configs);
             }
+            Some(CABINET_STYLE_URI) => {
+                let cabinet_styles = json.into_serde::<Vec<CabinetStyle>>()?;
+                self.cabinet_styles = Some(cabinet_styles);
+            }
+            _ => (),
         }
         Ok(())
     }

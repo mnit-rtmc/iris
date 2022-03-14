@@ -144,9 +144,9 @@ impl AncillaryData for CommConfigAnc {
     type Resource = CommConfig;
 
     /// Get ancillary URI
-    fn uri(&self, _view: View) -> Option<&str> {
-        match &self.protocols {
-            None => Some("/iris/comm_protocol"),
+    fn uri(&self, view: View) -> Option<&str> {
+        match (view, &self.protocols) {
+            (View::Edit, None) => Some("/iris/comm_protocol"),
             _ => None,
         }
     }

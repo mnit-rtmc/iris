@@ -38,14 +38,17 @@ pub struct PermissionAnc {
     pub roles: Option<Vec<Role>>,
 }
 
+const RESOURCE_TYPE_URI: &str = "/iris/resource_type";
+const ROLE_URI: &str = "/iris/api/role";
+
 impl AncillaryData for PermissionAnc {
     type Resource = Permission;
 
     /// Get ancillary URI
-    fn uri(&self, _view: View) -> Option<&str> {
-        match (&self.resource_types, &self.roles) {
-            (None, _) => Some("/iris/resource_type"),
-            (_, None) => Some("/iris/api/role"),
+    fn uri(&self, view: View) -> Option<&str> {
+        match (view, &self.resource_types, &self.roles) {
+            (View::Create | View::Edit, None, _) => Some(RESOURCE_TYPE_URI),
+            (View::Create | View::Edit, _, None) => Some(ROLE_URI),
             _ => None,
         }
     }
@@ -53,12 +56,12 @@ impl AncillaryData for PermissionAnc {
     /// Put ancillary JSON data
     fn set_json(
         &mut self,
-        _view: View,
+        view: View,
         json: JsValue,
         _res: &Permission,
     ) -> Result<()> {
-        match &self.resource_types {
-            None => {
+        match self.uri(view) {
+            Some(RESOURCE_TYPE_URI) => {
                 let resource_types = json.into_serde::<Vec<String>>()?;
                 self.resource_types = Some(resource_types);
             }
