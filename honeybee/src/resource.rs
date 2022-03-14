@@ -283,6 +283,28 @@ const CONDITION_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Direction LUT resource
+const DIRECTION_RES: Resource = Resource::Simple(
+    "direction",
+    Listen::All("direction"), // no notifications for LUT
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT id, direction, dir \
+    FROM iris.direction \
+    ORDER BY id\
+) r",
+);
+
+/// Road modifier LUT resource
+const ROAD_MODIFIER_RES: Resource = Resource::Simple(
+    "road_modifier",
+    Listen::All("road_modifier"), // no notifications for LUT
+    "SELECT row_to_json(r)::text FROM (\
+    SELECT id, modifier, mod AS md \
+    FROM iris.road_modifier \
+    ORDER BY id\
+) r",
+);
+
 /// Resource type LUT resource
 const RESOURCE_TYPE_RES: Resource = Resource::Simple(
     "resource_type",
@@ -464,6 +486,8 @@ const ALL: &[Resource] = &[
     COMM_CONFIG_RES,
     COMM_LINK_RES,
     CONDITION_RES,
+    DIRECTION_RES,
+    ROAD_MODIFIER_RES,
     RESOURCE_TYPE_RES,
     CONTROLLER_RES,
     MODEM_RES,

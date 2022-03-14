@@ -17,6 +17,7 @@ use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
+use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
@@ -45,10 +46,12 @@ impl AncillaryData for PermissionAnc {
     type Resource = Permission;
 
     /// Get ancillary URI
-    fn uri(&self, view: View) -> Option<&str> {
+    fn uri(&self, view: View, _res: &Permission) -> Option<Cow<str>> {
         match (view, &self.resource_types, &self.roles) {
-            (View::Create | View::Edit, None, _) => Some(RESOURCE_TYPE_URI),
-            (View::Create | View::Edit, _, None) => Some(ROLE_URI),
+            (View::Create | View::Edit, None, _) => {
+                Some(RESOURCE_TYPE_URI.into())
+            }
+            (View::Create | View::Edit, _, None) => Some(ROLE_URI.into()),
             _ => None,
         }
     }
@@ -57,17 +60,19 @@ impl AncillaryData for PermissionAnc {
     fn set_json(
         &mut self,
         view: View,
+        res: &Permission,
         json: JsValue,
-        _res: &Permission,
     ) -> Result<()> {
-        match self.uri(view) {
-            Some(RESOURCE_TYPE_URI) => {
-                let resource_types = json.into_serde::<Vec<String>>()?;
-                self.resource_types = Some(resource_types);
-            }
-            _ => {
-                let roles = json.into_serde::<Vec<Role>>()?;
-                self.roles = Some(roles);
+        if let Some(uri) = self.uri(view, res) {
+            match uri.borrow() {
+                RESOURCE_TYPE_URI => {
+                    let resource_types = json.into_serde::<Vec<String>>()?;
+                    self.resource_types = Some(resource_types);
+                }
+                _ => {
+                    let roles = json.into_serde::<Vec<Role>>()?;
+                    self.roles = Some(roles);
+                }
             }
         }
         Ok(())

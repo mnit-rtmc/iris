@@ -26,6 +26,7 @@ use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::de::DeserializeOwned;
 use serde_json::map::Map;
 use serde_json::Value;
+use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
@@ -90,7 +91,7 @@ pub trait AncillaryData: Default {
     type Resource;
 
     /// Get ancillary URI
-    fn uri(&self, _view: View) -> Option<&str> {
+    fn uri(&self, _view: View, _res: &Self::Resource) -> Option<Cow<str>> {
         None
     }
 
@@ -98,8 +99,8 @@ pub trait AncillaryData: Default {
     fn set_json(
         &mut self,
         _view: View,
-        _json: JsValue,
         _res: &Self::Resource,
+        _json: JsValue,
     ) -> Result<()> {
         Ok(())
     }
@@ -152,7 +153,7 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     }
 
     /// Convert to location HTML
-    fn to_html_location(&self) -> String {
+    fn to_html_location(&self, _anc: &Self::Ancillary) -> String {
         unreachable!()
     }
 
@@ -286,7 +287,12 @@ async fn res_build_card<C: Card>(name: &str, view: View) -> Result<String> {
         }
         View::Location => {
             let res = fetch_res::<C>(name).await?;
-            Ok(html_card_location(C::ENAME, name, &res.to_html_location()))
+            let anc = fetch_ancillary(&res, view).await?;
+            Ok(html_card_location(
+                C::ENAME,
+                name,
+                &res.to_html_location(&anc),
+            ))
         }
         _ => {
             let res = fetch_res::<C>(name).await?;
@@ -305,9 +311,9 @@ async fn fetch_res<C: Card>(name: &str) -> Result<C> {
 /// Fetch ancillary data
 async fn fetch_ancillary<C: Card>(res: &C, view: View) -> Result<C::Ancillary> {
     let mut anc = C::Ancillary::default();
-    while let Some(uri) = anc.uri(view) {
-        let json = fetch_get(uri).await?;
-        anc.set_json(view, json, res)?;
+    while let Some(uri) = anc.uri(view, res) {
+        let json = fetch_get(uri.borrow()).await?;
+        anc.set_json(view, res, json)?;
     }
     Ok(anc)
 }

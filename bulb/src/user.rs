@@ -17,6 +17,7 @@ use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
+use std::borrow::Cow;
 use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
@@ -40,9 +41,9 @@ impl AncillaryData for UserAnc {
     type Resource = User;
 
     /// Get ancillary URI
-    fn uri(&self, view: View) -> Option<&str> {
+    fn uri(&self, view: View, _res: &User) -> Option<Cow<str>> {
         match (view, &self.roles) {
-            (View::Edit, None) => Some("/iris/api/role"),
+            (View::Edit, None) => Some("/iris/api/role".into()),
             _ => None,
         }
     }
@@ -51,8 +52,8 @@ impl AncillaryData for UserAnc {
     fn set_json(
         &mut self,
         _view: View,
-        json: JsValue,
         _res: &User,
+        json: JsValue,
     ) -> Result<()> {
         let roles = json.into_serde::<Vec<Role>>()?;
         self.roles = Some(roles);

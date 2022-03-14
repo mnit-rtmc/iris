@@ -19,6 +19,7 @@ use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
+use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
@@ -30,15 +31,31 @@ pub struct Condition {
     pub description: String,
 }
 
+/// Roadway directions
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Direction {
+    pub id: u16,
+    pub direction: String,
+    pub dir: String,
+}
+
+/// Roadway modifiers
+#[derive(Debug, Deserialize, Serialize)]
+pub struct RoadModifier {
+    pub id: u16,
+    pub modifier: String,
+    pub md: String,
+}
+
 /// Geo location
 #[derive(Debug, Deserialize, Serialize)]
 pub struct GeoLoc {
     pub name: String,
     pub roadway: Option<String>,
-    pub road_dir: Option<i16>,
+    pub road_dir: Option<u16>,
     pub cross_street: Option<String>,
-    pub cross_dir: Option<i16>,
-    pub cross_mod: Option<i16>,
+    pub cross_dir: Option<u16>,
+    pub cross_mod: Option<u16>,
     pub landmark: Option<String>,
     pub lat: Option<f64>,
     pub lon: Option<f64>,
@@ -67,6 +84,8 @@ pub struct ControllerAnc {
     pub cabinet_styles: Option<Vec<CabinetStyle>>,
     pub comm_links: Option<Vec<CommLink>>,
     pub comm_configs: Option<Vec<CommConfig>>,
+    pub directions: Option<Vec<Direction>>,
+    pub modifiers: Option<Vec<RoadModifier>>,
     pub geo_loc: Option<GeoLoc>,
 }
 
@@ -74,12 +93,14 @@ const CONDITION_URI: &str = "/iris/condition";
 const COMM_LINK_URI: &str = "/iris/api/comm_link";
 const COMM_CONFIG_URI: &str = "/iris/api/comm_config";
 const CABINET_STYLE_URI: &str = "/iris/api/cabinet_style";
+const DIRECTION_URI: &str = "/iris/direction";
+const ROAD_MODIFIER_URI: &str = "/iris/road_modifier";
 
 impl AncillaryData for ControllerAnc {
     type Resource = Controller;
 
     /// Get ancillary URI
-    fn uri(&self, view: View) -> Option<&str> {
+    fn uri(&self, view: View, res: &Controller) -> Option<Cow<str>> {
         match (
             view,
             &self.conditions,
@@ -88,40 +109,62 @@ impl AncillaryData for ControllerAnc {
             &self.cabinet_styles,
         ) {
             (View::Search | View::Status | View::Edit, None, _, _, _) => {
-                Some(CONDITION_URI)
+                Some(CONDITION_URI.into())
             }
-            (View::Status, _, None, _, _) => Some(COMM_LINK_URI),
-            (View::Status, _, _, None, _) => Some(COMM_CONFIG_URI),
-            (View::Edit, _, _, _, None) => Some(CABINET_STYLE_URI),
+            (View::Status, _, None, _, _) => Some(COMM_LINK_URI.into()),
+            (View::Status, _, _, None, _) => Some(COMM_CONFIG_URI.into()),
+            (View::Edit, _, _, _, None) => Some(CABINET_STYLE_URI.into()),
             _ => None,
         }
+        .or_else(|| {
+            match (view, &self.directions, &self.modifiers, &self.geo_loc) {
+                (View::Location, None, _, _) => Some(DIRECTION_URI.into()),
+                (View::Location, _, None, _) => Some(ROAD_MODIFIER_URI.into()),
+                (View::Location, _, _, None) => res
+                    .geo_loc
+                    .as_ref()
+                    .map(|n| format!("/iris/api/geo_loc/{}", n).into()),
+                _ => None,
+            }
+        })
     }
 
     /// Put ancillary JSON data
     fn set_json(
         &mut self,
         view: View,
+        res: &Controller,
         json: JsValue,
-        _res: &Controller,
     ) -> Result<()> {
-        match self.uri(view) {
-            Some(CONDITION_URI) => {
-                let conditions = json.into_serde::<Vec<Condition>>()?;
-                self.conditions = Some(conditions);
+        if let Some(uri) = self.uri(view, res) {
+            match uri.borrow() {
+                CONDITION_URI => {
+                    self.conditions =
+                        Some(json.into_serde::<Vec<Condition>>()?);
+                }
+                COMM_LINK_URI => {
+                    self.comm_links = Some(json.into_serde::<Vec<CommLink>>()?);
+                }
+                COMM_CONFIG_URI => {
+                    self.comm_configs =
+                        Some(json.into_serde::<Vec<CommConfig>>()?);
+                }
+                CABINET_STYLE_URI => {
+                    self.cabinet_styles =
+                        Some(json.into_serde::<Vec<CabinetStyle>>()?);
+                }
+                DIRECTION_URI => {
+                    self.directions =
+                        Some(json.into_serde::<Vec<Direction>>()?);
+                }
+                ROAD_MODIFIER_URI => {
+                    self.modifiers =
+                        Some(json.into_serde::<Vec<RoadModifier>>()?);
+                }
+                _ => {
+                    self.geo_loc = Some(json.into_serde::<GeoLoc>()?);
+                }
             }
-            Some(COMM_LINK_URI) => {
-                let comm_links = json.into_serde::<Vec<CommLink>>()?;
-                self.comm_links = Some(comm_links);
-            }
-            Some(COMM_CONFIG_URI) => {
-                let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
-                self.comm_configs = Some(comm_configs);
-            }
-            Some(CABINET_STYLE_URI) => {
-                let cabinet_styles = json.into_serde::<Vec<CabinetStyle>>()?;
-                self.cabinet_styles = Some(cabinet_styles);
-            }
-            _ => (),
         }
         Ok(())
     }
@@ -200,6 +243,50 @@ impl ControllerAnc {
             }
         }
         ""
+    }
+
+    /// Create an HTML `select` element of road directions
+    fn directions_html(&self, id: &str, dir: u16) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='");
+        html.push_str(id);
+        html.push_str("'>");
+        if let Some(directions) = &self.directions {
+            for direction in directions {
+                html.push_str("<option value='");
+                html.push_str(&direction.id.to_string());
+                html.push('\'');
+                if dir == direction.id {
+                    html.push_str(" selected");
+                }
+                html.push('>');
+                html.push_str(&direction.direction);
+                html.push_str("</option>");
+            }
+        }
+        html.push_str("</select>");
+        html
+    }
+
+    /// Create an HTML `select` element of road modifiers
+    fn modifiers_html(&self, md: u16) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='edit_mod'>");
+        if let Some(modifiers) = &self.modifiers {
+            for modifier in modifiers {
+                html.push_str("<option value='");
+                html.push_str(&modifier.id.to_string());
+                html.push('\'');
+                if md == modifier.id {
+                    html.push_str(" selected");
+                }
+                html.push('>');
+                html.push_str(&modifier.modifier);
+                html.push_str("</option>");
+            }
+        }
+        html.push_str("</select>");
+        html
     }
 }
 
@@ -352,8 +439,36 @@ impl Card for Controller {
     }
 
     /// Convert to location HTML
-    fn to_html_location(&self) -> String {
-        "".into()
+    fn to_html_location(&self, anc: &ControllerAnc) -> String {
+        let geo_loc = anc.geo_loc.as_ref().unwrap();
+        let roadway = HtmlStr::new(geo_loc.roadway.as_ref());
+        let rdir =
+            anc.directions_html("edit_rdir", geo_loc.road_dir.unwrap_or(0));
+        let xmod = anc.modifiers_html(geo_loc.cross_mod.unwrap_or(0));
+        let xstreet = HtmlStr::new(geo_loc.cross_street.as_ref());
+        let xdir =
+            anc.directions_html("edit_xdir", geo_loc.cross_dir.unwrap_or(0));
+        let landmark = HtmlStr::new(geo_loc.landmark.as_ref());
+        format!(
+            "<div class='row'>\
+              <label for='edit_road'>Roadway</label>\
+              <input id='edit_road' maxlength='20' size='16' \
+                     value='{roadway}'/>\
+              {rdir}
+            </div>\
+            <div class='row'>\
+              <label for='edit_xstreet'>Cross</label>\
+              {xmod}\
+              <input id='edit_xstreet' maxlength='20' size='12' \
+                     value='{xstreet}'/>\
+              {xdir}\
+            </div>\
+            <div class='row'>\
+              <label for='edit_lmark'>Landmark</label>\
+              <input id='edit_lmark' maxlength='22' size='24' \
+                     value='{landmark}'/>\
+            </div>"
+        )
     }
 
     /// Convert to edit HTML

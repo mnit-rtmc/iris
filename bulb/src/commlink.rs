@@ -18,6 +18,7 @@ use crate::util::{Dom, HtmlStr};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
+use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
@@ -47,11 +48,11 @@ impl AncillaryData for CommLinkAnc {
     type Resource = CommLink;
 
     /// Get ancillary URI
-    fn uri(&self, view: View) -> Option<&str> {
+    fn uri(&self, view: View, _res: &CommLink) -> Option<Cow<str>> {
         match (view, &self.controllers, &self.comm_configs) {
-            (View::Status, None, _) => Some(CONTROLLER_URI),
+            (View::Status, None, _) => Some(CONTROLLER_URI.into()),
             (View::Status | View::Edit | View::Search, _, None) => {
-                Some(COMM_CONFIG_URI)
+                Some(COMM_CONFIG_URI.into())
             }
             _ => None,
         }
@@ -61,18 +62,21 @@ impl AncillaryData for CommLinkAnc {
     fn set_json(
         &mut self,
         view: View,
-        json: JsValue,
         res: &CommLink,
+        json: JsValue,
     ) -> Result<()> {
-        match self.uri(view) {
-            Some(CONTROLLER_URI) => {
-                let mut controllers = json.into_serde::<Vec<Controller>>()?;
-                controllers.retain(|c| c.comm_link == res.name);
-                self.controllers = Some(controllers);
-            }
-            _ => {
-                let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
-                self.comm_configs = Some(comm_configs);
+        if let Some(uri) = self.uri(view, res) {
+            match uri.borrow() {
+                CONTROLLER_URI => {
+                    let mut controllers =
+                        json.into_serde::<Vec<Controller>>()?;
+                    controllers.retain(|c| c.comm_link == res.name);
+                    self.controllers = Some(controllers);
+                }
+                _ => {
+                    let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
+                    self.comm_configs = Some(comm_configs);
+                }
             }
         }
         Ok(())

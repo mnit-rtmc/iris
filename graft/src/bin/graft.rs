@@ -54,8 +54,17 @@ const INTEGERS: &[(&str, &str)] = &[
     ("controller", "condition"),
     ("controller", "controller_err"),
     ("controller", "success_ops"),
+    ("geo_loc", "road_dir"),
+    ("geo_loc", "cross_dir"),
+    ("geo_loc", "cross_mod"),
     ("modem", "timeout_ms"),
     ("modem", "state"),
+];
+
+/// Slice of (type, attribute) tuples for JSON float values
+const FLOATS: &[(&str, &str)] = &[
+    ("geo_loc", "lat"),
+    ("geo_loc", "lon"),
 ];
 
 /// Slice of (type, attribute) tuples for JSON boolean values
@@ -554,6 +563,8 @@ async fn sonar_object_get_json(
 fn make_json(tp_att: &(&str, &str), val: &str) -> Option<Value> {
     if INTEGERS.contains(tp_att) {
         val.parse::<i64>().ok().map(|v| v.into())
+    } else if FLOATS.contains(tp_att) {
+        val.parse::<f64>().ok().map(|v| v.into())
     } else if BOOLS.contains(tp_att) {
         val.parse::<bool>().ok().map(|v| v.into())
     } else if STAMPS.contains(tp_att) {

@@ -40,9 +40,9 @@ authentication.
   - [X] Status button / view
   - [X] Feedback with "toast" popups
   - [X] Authentication and session expiration
-  - [ ] Controller location (`geo_loc`)
+  - [X] Controller location (`geo_loc`)
+  - [X] UI refinements
   - [ ] Resource buttons: "Operate", "Plan", "Configure", etc.
-  - [ ] UI refinements
   - [ ] Tooltips
 
 ## Phase 4 — DMS control

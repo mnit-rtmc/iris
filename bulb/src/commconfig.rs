@@ -16,6 +16,7 @@ use crate::util::{Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
+use std::borrow::Cow;
 use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
@@ -144,9 +145,9 @@ impl AncillaryData for CommConfigAnc {
     type Resource = CommConfig;
 
     /// Get ancillary URI
-    fn uri(&self, view: View) -> Option<&str> {
+    fn uri(&self, view: View, _res: &CommConfig) -> Option<Cow<str>> {
         match (view, &self.protocols) {
-            (View::Edit, None) => Some("/iris/comm_protocol"),
+            (View::Edit, None) => Some("/iris/comm_protocol".into()),
             _ => None,
         }
     }
@@ -155,8 +156,8 @@ impl AncillaryData for CommConfigAnc {
     fn set_json(
         &mut self,
         _view: View,
-        json: JsValue,
         _res: &CommConfig,
+        json: JsValue,
     ) -> Result<()> {
         let protocols = json.into_serde::<Vec<Protocol>>()?;
         self.protocols = Some(protocols);

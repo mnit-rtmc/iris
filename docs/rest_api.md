@@ -38,7 +38,9 @@ These resources are static, and may only change on IRIS updates:
 
 - `iris/comm_protocol`: Communication protocols
 - `iris/condition`: Controller conditions
+- `iris/direction`: Travel directions
 - `iris/resource_type`: [Resource types] available in `iris/api/`
+- `iris/road_modifier`: Road modifiers
 
 ### Sign Images
 
