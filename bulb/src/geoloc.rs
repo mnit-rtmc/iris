@@ -213,7 +213,8 @@ impl Card for GeoLoc {
         let roadway = anc.roads_html("edit_road", self.roadway.as_deref());
         let rdir = anc.directions_html("edit_rdir", self.road_dir);
         let xmod = anc.modifiers_html(self.cross_mod);
-        let xstreet = anc.roads_html("edit_xstreet", self.cross_street.as_deref());
+        let xstreet =
+            anc.roads_html("edit_xstreet", self.cross_street.as_deref());
         let xdir = anc.directions_html("edit_xdir", self.cross_dir);
         let landmark = HtmlStr::new(self.landmark.as_ref());
         let lat = OptVal(self.lat);
@@ -225,7 +226,7 @@ impl Card for GeoLoc {
               {rdir}\
             </div>\
             <div class='row'>\
-              <label for='edit_xstreet'>Cross</label>\
+              <label for='edit_xstreet'> </label>\
               {xmod}\
               {xstreet}\
               {xdir}\
