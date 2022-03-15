@@ -449,6 +449,8 @@ impl Card for Controller {
         let xdir =
             anc.directions_html("edit_xdir", geo_loc.cross_dir.unwrap_or(0));
         let landmark = HtmlStr::new(geo_loc.landmark.as_ref());
+        let lat = OptVal(geo_loc.lat);
+        let lon = OptVal(geo_loc.lon);
         format!(
             "<div class='row'>\
               <label for='edit_road'>Roadway</label>\
@@ -467,6 +469,16 @@ impl Card for Controller {
               <label for='edit_lmark'>Landmark</label>\
               <input id='edit_lmark' maxlength='22' size='24' \
                      value='{landmark}'/>\
+            </div>\
+            <div class='row'>\
+              <label for='edit_lat'>Latitude</label>\
+              <input id='edit_lat' type='number' step='0.00001' \
+                     inputmode='decimal' value='{lat}'/>\
+            </div>\
+            <div class='row'>\
+              <label for='edit_lon'>Longitude</label>\
+              <input id='edit_lon' type='number' step='0.00001' \
+                     inputmode='decimal' value='{lon}'/>\
             </div>"
         )
     }

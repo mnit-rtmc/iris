@@ -232,21 +232,13 @@ impl SelectedCard {
         });
     }
 
-    /// Save changed fields on Edit form
+    /// Save changed fields
     async fn save_changed(self) {
         let v = self.view;
-        if v == View::Create {
-            self.res_create().await;
-        } else {
-            match res_save(&self.tname, &self.name).await {
-                Ok(_) => self.replace_card(v.compact()).await,
-                Err(Error::FetchResponseUnauthorized()) => show_login(),
-                Err(Error::FetchResponseNotFound()) => {
-                    // Card list out-of-date; refresh with search
-                    DeferredAction::SearchList.schedule(200);
-                }
-                Err(e) => show_toast(&format!("Save failed: {e}")),
-            }
+        match v {
+            View::Create => self.res_create().await,
+            View::Edit => self.res_save_edit().await,
+            _ => (),
         }
     }
 
@@ -259,6 +251,19 @@ impl SelectedCard {
             }
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Create failed: {e}")),
+        }
+    }
+
+    /// Save changed fields on Edit card
+    async fn res_save_edit(self) {
+        match res_save(&self.tname, &self.name).await {
+            Ok(_) => self.replace_card(View::Edit.compact()).await,
+            Err(Error::FetchResponseUnauthorized()) => show_login(),
+            Err(Error::FetchResponseNotFound()) => {
+                // Card list out-of-date; refresh with search
+                DeferredAction::SearchList.schedule(200);
+            }
+            Err(e) => show_toast(&format!("Save failed: {e}")),
         }
     }
 
