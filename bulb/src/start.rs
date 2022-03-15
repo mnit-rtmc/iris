@@ -237,7 +237,7 @@ impl SelectedCard {
         let v = self.view;
         match v {
             View::Create => self.res_create().await,
-            View::Edit => self.res_save_edit().await,
+            View::Edit | View::Status => self.res_save_edit().await,
             View::Location => self.res_save_loc().await,
             _ => (),
         }
