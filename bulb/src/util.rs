@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::start::JsResult;
-use serde_json::Value;
+use serde_json::{Number, Value};
 use std::fmt;
 use std::str::FromStr;
 use wasm_bindgen::JsCast;
@@ -35,6 +35,24 @@ where
     }
 }
 
+impl From<OptVal<bool>> for Value {
+    fn from(val: OptVal<bool>) -> Self {
+        match val.0 {
+            Some(b) => Value::Bool(b),
+            None => Value::Null,
+        }
+    }
+}
+
+impl From<OptVal<u16>> for Value {
+    fn from(val: OptVal<u16>) -> Self {
+        match val.0 {
+            Some(num) => Value::Number(num.into()),
+            None => Value::Null,
+        }
+    }
+}
+
 impl From<OptVal<u32>> for Value {
     fn from(val: OptVal<u32>) -> Self {
         match val.0 {
@@ -44,10 +62,13 @@ impl From<OptVal<u32>> for Value {
     }
 }
 
-impl From<OptVal<bool>> for Value {
-    fn from(val: OptVal<bool>) -> Self {
+impl From<OptVal<f64>> for Value {
+    fn from(val: OptVal<f64>) -> Self {
         match val.0 {
-            Some(b) => Value::Bool(b),
+            Some(num) => match Number::from_f64(num) {
+                Some(num) => Value::Number(num),
+                None => Value::Null,
+            },
             None => Value::Null,
         }
     }

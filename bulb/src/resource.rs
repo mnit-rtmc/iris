@@ -17,6 +17,7 @@ use crate::commlink::CommLink;
 use crate::controller::Controller;
 use crate::error::{Error, Result};
 use crate::fetch::{fetch_delete, fetch_get, fetch_patch, fetch_post};
+use crate::geoloc::GeoLoc;
 use crate::modem::Modem;
 use crate::permission::Permission;
 use crate::role::Role;
@@ -92,9 +93,7 @@ impl Search {
     fn is_match<C: Card>(&self, res: &C, anc: &C::Ancillary) -> bool {
         match self {
             Search::Empty() => true,
-            Search::Normal(se) => {
-                se.split(' ').all(|s| res.is_match(s, &anc))
-            }
+            Search::Normal(se) => se.split(' ').all(|s| res.is_match(s, &anc)),
             Search::Exact(se) => res.is_match(se, &anc),
         }
     }
@@ -147,7 +146,6 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     const ENAME: &'static str;
     const UNAME: &'static str;
     const HAS_STATUS: bool = false;
-    const HAS_LOCATION: bool = false;
 
     type Ancillary: AncillaryData<Resource = Self>;
 
@@ -162,6 +160,11 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     /// Get next suggested name
     fn next_name(_obs: &[Self]) -> String {
         "".into()
+    }
+
+    /// Get geo location name
+    fn geo_loc(&self) -> Option<&str> {
+        None
     }
 
     /// Check if a search string matches
@@ -184,11 +187,6 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
 
     /// Convert to status HTML
     fn to_html_status(&self, _anc: &Self::Ancillary) -> String {
-        unreachable!()
-    }
-
-    /// Convert to location HTML
-    fn to_html_location(&self, _anc: &Self::Ancillary) -> String {
         unreachable!()
     }
 
@@ -287,6 +285,7 @@ pub async fn res_get(res: &str, name: &str, view: View) -> Result<String> {
         CommConfig::TNAME => res_build_card::<CommConfig>(name, view).await,
         CommLink::TNAME => res_build_card::<CommLink>(name, view).await,
         Controller::TNAME => res_build_card::<Controller>(name, view).await,
+        GeoLoc::TNAME => res_build_card::<GeoLoc>(name, view).await,
         Modem::TNAME => res_build_card::<Modem>(name, view).await,
         Permission::TNAME => res_build_card::<Permission>(name, view).await,
         Role::TNAME => res_build_card::<Role>(name, view).await,
@@ -315,17 +314,22 @@ async fn res_build_card<C: Card>(name: &str, view: View) -> Result<String> {
                 C::ENAME,
                 name,
                 &res.to_html_status(&anc),
-                C::HAS_LOCATION,
+                res.geo_loc().is_some(),
             ))
         }
         View::Location => {
             let res = fetch_res::<C>(name).await?;
-            let anc = fetch_ancillary(&res, view).await?;
-            Ok(html_card_location(
-                C::ENAME,
-                name,
-                &res.to_html_location(&anc),
-            ))
+            if let Some(geo_loc) = res.geo_loc() {
+                let res = fetch_res::<GeoLoc>(&geo_loc).await?;
+                let anc = fetch_ancillary(&res, View::Edit).await?;
+                Ok(html_card_edit(
+                    GeoLoc::ENAME,
+                    &geo_loc,
+                    &res.to_html_edit(&anc),
+                ))
+            } else {
+                Err(Error::NameMissing())
+            }
         }
         _ => {
             let res = fetch_res::<C>(name).await?;
@@ -416,24 +420,6 @@ fn html_card_edit(ename: &'static str, name: &str, edit: &str) -> String {
     )
 }
 
-/// Build a location card
-fn html_card_location(ename: &'static str, name: &str, loc: &str) -> String {
-    let name = HtmlStr::new(name);
-    format!(
-        "<div class='row'>\
-          <span class='{TITLE}'>{ename}</span>\
-          <span class='{TITLE}'>Location</span>\
-          <span class='{NAME}'>{name}</span>\
-          <button id='ob_close' type='button'>X</button>\
-        </div>\
-        {loc}\
-        <div class='row'>\
-          <span></span>\
-          <button id='ob_save' type='button'>🖍️ Save</button>\
-        </div>"
-    )
-}
-
 /// Create new resource from create card
 pub async fn res_create(res: &str) -> Result<()> {
     match res {
@@ -470,6 +456,7 @@ pub async fn res_save(res: &str, name: &str) -> Result<()> {
         CommConfig::TNAME => fetch_save_card::<CommConfig>(name).await,
         CommLink::TNAME => fetch_save_card::<CommLink>(name).await,
         Controller::TNAME => fetch_save_card::<Controller>(name).await,
+        GeoLoc::TNAME => fetch_save_card::<GeoLoc>(name).await,
         Modem::TNAME => fetch_save_card::<Modem>(name).await,
         Permission::TNAME => fetch_save_card::<Permission>(name).await,
         Role::TNAME => fetch_save_card::<Role>(name).await,
@@ -489,6 +476,22 @@ async fn fetch_save_card<C: Card>(name: &str) -> Result<()> {
         }
     }
     Ok(())
+}
+
+/// Save changed fields on card
+pub async fn res_save_loc(res: &str, name: &str) -> Result<()> {
+    match res {
+        Controller::TNAME => {
+            let uri = uri_name(Controller::UNAME, name);
+            let json = fetch_get(&uri).await?;
+            let ctrl = Controller::new(&json)?;
+            match ctrl.geo_loc() {
+                Some(geo_loc) => fetch_save_card::<GeoLoc>(geo_loc).await,
+                None => Ok(()),
+            }
+        }
+        _ => Ok(()),
+    }
 }
 
 /// Delete card resource

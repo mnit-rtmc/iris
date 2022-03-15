@@ -14,7 +14,7 @@ use crate::error::{Error, Result};
 use crate::fetch::{fetch_get, fetch_post};
 use crate::permission::{permissions_html, Permission};
 use crate::resource::{
-    res_create, res_delete, res_get, res_list, res_save, View,
+    res_create, res_delete, res_get, res_list, res_save, res_save_loc, View,
 };
 use crate::util::Dom;
 use std::cell::RefCell;
@@ -238,6 +238,7 @@ impl SelectedCard {
         match v {
             View::Create => self.res_create().await,
             View::Edit => self.res_save_edit().await,
+            View::Location => self.res_save_loc().await,
             _ => (),
         }
     }
@@ -263,6 +264,15 @@ impl SelectedCard {
                 // Card list out-of-date; refresh with search
                 DeferredAction::SearchList.schedule(200);
             }
+            Err(e) => show_toast(&format!("Save failed: {e}")),
+        }
+    }
+
+    /// Save changed fields on Location card
+    async fn res_save_loc(self) {
+        match res_save_loc(&self.tname, &self.name).await {
+            Ok(_) => self.replace_card(View::Location.compact()).await,
+            Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Save failed: {e}")),
         }
     }

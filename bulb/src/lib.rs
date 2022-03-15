@@ -17,6 +17,7 @@ mod commlink;
 mod controller;
 mod error;
 mod fetch;
+mod geoloc;
 mod modem;
 mod permission;
 mod resource;
