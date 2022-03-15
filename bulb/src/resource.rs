@@ -355,10 +355,10 @@ async fn fetch_ancillary<C: Card>(res: &C, view: View) -> Result<C::Ancillary> {
 fn html_card_create(ename: &'static str, create: &str) -> String {
     format!(
         "<div class='row'>\
-          <div class='{TITLE}'>{ename}</div>\
-          <span class='{NAME}'>🆕 \
-            <button id='ob_close' type='button'>X</button>\
-          </span>\
+          <span class='{TITLE}'>{ename}</span>\
+          <span class='{TITLE}'>Create</span>\
+          <span class='{NAME}'>🆕</span>\
+          <button id='ob_close' type='button'>X</button>\
         </div>\
         {create}
         <div class='row'>\
@@ -383,10 +383,10 @@ fn html_card_status(
     };
     format!(
         "<div class='row'>\
-          <div class='{TITLE}'>{ename}</div>\
-          <span class='{NAME}'>{name} \
-            <button id='ob_close' type='button'>X</button>\
-          </span>\
+          <span class='{TITLE}'>{ename}</span>\
+          <span class='{TITLE}'>Status</span>\
+          <span class='{NAME}'>{name}</span>\
+          <button id='ob_close' type='button'>X</button>\
         </div>\
         {status}\
         <div class='row'>\
@@ -402,10 +402,10 @@ fn html_card_edit(ename: &'static str, name: &str, edit: &str) -> String {
     let name = HtmlStr::new(name);
     format!(
         "<div class='row'>\
-          <div class='{TITLE}'>{ename}</div>\
-          <span class='{NAME}'>{name} \
-            <button id='ob_close' type='button'>X</button>\
-          </span>\
+          <span class='{TITLE}'>{ename}</span>\
+          <span class='{TITLE}'>Edit</span>\
+          <span class='{NAME}'>{name}</span>\
+          <button id='ob_close' type='button'>X</button>\
         </div>\
         {edit}\
         <div class='row'>\
@@ -421,10 +421,10 @@ fn html_card_location(ename: &'static str, name: &str, loc: &str) -> String {
     let name = HtmlStr::new(name);
     format!(
         "<div class='row'>\
-          <div class='{TITLE}'>{ename}</div>\
-          <span class='{NAME}'>{name} \
-            <button id='ob_close' type='button'>X</button>\
-          </span>\
+          <span class='{TITLE}'>{ename}</span>\
+          <span class='{TITLE}'>Location</span>\
+          <span class='{NAME}'>{name}</span>\
+          <button id='ob_close' type='button'>X</button>\
         </div>\
         {loc}\
         <div class='row'>\
