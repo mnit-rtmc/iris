@@ -40,6 +40,16 @@ pub const NAME: &str = "ob_name";
 /// Compact "Create" card
 const CREATE_COMPACT: &str = "<span class='create'>Create 🆕</span>";
 
+/// Search term
+enum Search {
+    /// Empty search (matches anything)
+    Empty(),
+    /// Normal search
+    Normal(String),
+    /// Exact (multi-word) search
+    Exact(String),
+}
+
 /// Card View
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum View {
@@ -63,6 +73,31 @@ pub enum View {
 
     /// Search view
     Search,
+}
+
+impl Search {
+    /// Create a new search term
+    fn new(se: &str) -> Self {
+        let se = se.to_lowercase();
+        if se.is_empty() {
+            Search::Empty()
+        } else if se.starts_with('"') && se.ends_with('"') {
+            Search::Exact(se.trim_matches('"').to_string())
+        } else {
+            Search::Normal(se)
+        }
+    }
+
+    /// Test if a card matches the search
+    fn is_match<C: Card>(&self, res: &C, anc: &C::Ancillary) -> bool {
+        match self {
+            Search::Empty() => true,
+            Search::Normal(se) => {
+                se.split(' ').all(|s| res.is_match(s, &anc))
+            }
+            Search::Exact(se) => res.is_match(se, &anc),
+        }
+    }
 }
 
 impl View {
@@ -218,7 +253,7 @@ pub async fn res_list(res: &str, search: &str) -> Result<String> {
 /// Fetch JSON array and build card list
 async fn res_build_list<C: Card>(search: &str) -> Result<String> {
     let json = fetch_get(&format!("/iris/api/{}", C::UNAME)).await?;
-    let search = search.to_lowercase();
+    let search = Search::new(search);
     let tname = C::TNAME;
     let mut html = String::new();
     html.push_str("<ul class='cards'>");
@@ -233,13 +268,11 @@ async fn res_build_list<C: Card>(search: &str) -> Result<String> {
     // Use default value for ancillary data lookup
     let res = C::default();
     let anc = fetch_ancillary(&res, View::Search).await?;
-    for ob in obs.iter().filter(|ob| {
-        search.is_empty() || search.split(' ').all(|s| ob.is_match(s, &anc))
-    }) {
+    for res in obs.iter().filter(|res| search.is_match(*res, &anc)) {
         html.push_str(&format!(
-            "<li id='{tname}_{ob}' name='{ob}' class='card'>"
+            "<li id='{tname}_{res}' name='{res}' class='card'>"
         ));
-        html.push_str(&ob.to_html_compact());
+        html.push_str(&res.to_html_compact());
         html.push_str("</li>");
     }
     html.push_str("</ul>");
