@@ -498,6 +498,7 @@ administrator	comm_link	4
 administrator	controller	4
 administrator	modem	4
 administrator	permission	4
+administrator	road	4
 administrator	role	4
 administrator	user	4
 \.

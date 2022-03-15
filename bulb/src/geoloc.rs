@@ -21,6 +21,15 @@ use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
 
+/// Road definitions
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Road {
+    pub name: String,
+    pub abbrev: String,
+    pub r_class: u16,
+    pub direction: u16,
+}
+
 /// Roadway directions
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Direction {
@@ -54,10 +63,12 @@ pub struct GeoLoc {
 /// Ancillary location data
 #[derive(Debug, Default)]
 pub struct GeoLocAnc {
+    pub roads: Option<Vec<Road>>,
     pub directions: Option<Vec<Direction>>,
     pub modifiers: Option<Vec<RoadModifier>>,
 }
 
+const ROAD_URI: &str = "/iris/api/road";
 const DIRECTION_URI: &str = "/iris/direction";
 const ROAD_MODIFIER_URI: &str = "/iris/road_modifier";
 
@@ -66,9 +77,10 @@ impl AncillaryData for GeoLocAnc {
 
     /// Get ancillary URI
     fn uri(&self, view: View, _res: &GeoLoc) -> Option<Cow<str>> {
-        match (view, &self.directions, &self.modifiers) {
-            (View::Edit, None, _) => Some(DIRECTION_URI.into()),
-            (View::Edit, _, None) => Some(ROAD_MODIFIER_URI.into()),
+        match (view, &self.roads, &self.directions, &self.modifiers) {
+            (View::Edit, None, _, _) => Some(ROAD_URI.into()),
+            (View::Edit, _, None, _) => Some(DIRECTION_URI.into()),
+            (View::Edit, _, _, None) => Some(ROAD_MODIFIER_URI.into()),
             _ => None,
         }
     }
@@ -82,6 +94,7 @@ impl AncillaryData for GeoLocAnc {
     ) -> Result<()> {
         if let Some(uri) = self.uri(view, res) {
             match uri.borrow() {
+                ROAD_URI => self.roads = Some(json.into_serde::<Vec<Road>>()?),
                 DIRECTION_URI => {
                     self.directions =
                         Some(json.into_serde::<Vec<Direction>>()?);
@@ -98,6 +111,29 @@ impl AncillaryData for GeoLocAnc {
 }
 
 impl GeoLocAnc {
+    /// Create an HTML `select` element of roads
+    fn roads_html(&self, id: &str, groad: Option<&str>) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='");
+        html.push_str(id);
+        html.push_str("'><option></option>");
+        if let Some(roads) = &self.roads {
+            for road in roads {
+                html.push_str("<option ");
+                if let Some(groad) = groad {
+                    if groad == road.name {
+                        html.push_str(" selected");
+                    }
+                }
+                html.push('>');
+                html.push_str(&format!("{}", HtmlStr::new(&road.name)));
+                html.push_str("</option>");
+            }
+        }
+        html.push_str("</select>");
+        html
+    }
+
     /// Create an HTML `select` element of road directions
     fn directions_html(&self, id: &str, dir: u16) -> String {
         let mut html = String::new();
@@ -174,10 +210,10 @@ impl Card for GeoLoc {
 
     /// Convert to edit HTML
     fn to_html_edit(&self, anc: &GeoLocAnc) -> String {
-        let roadway = HtmlStr::new(self.roadway.as_ref());
+        let roadway = anc.roads_html("edit_road", self.roadway.as_deref());
         let rdir = anc.directions_html("edit_rdir", self.road_dir);
         let xmod = anc.modifiers_html(self.cross_mod);
-        let xstreet = HtmlStr::new(self.cross_street.as_ref());
+        let xstreet = anc.roads_html("edit_xstreet", self.cross_street.as_deref());
         let xdir = anc.directions_html("edit_xdir", self.cross_dir);
         let landmark = HtmlStr::new(self.landmark.as_ref());
         let lat = OptVal(self.lat);
@@ -185,15 +221,13 @@ impl Card for GeoLoc {
         format!(
             "<div class='row'>\
               <label for='edit_road'>Roadway</label>\
-              <input id='edit_road' maxlength='20' size='16' \
-                     value='{roadway}'/>\
-              {rdir}
+              {roadway}\
+              {rdir}\
             </div>\
             <div class='row'>\
               <label for='edit_xstreet'>Cross</label>\
               {xmod}\
-              <input id='edit_xstreet' maxlength='20' size='12' \
-                     value='{xstreet}'/>\
+              {xstreet}\
               {xdir}\
             </div>\
             <div class='row'>\
@@ -219,7 +253,7 @@ impl Card for GeoLoc {
         let res = Self::new(json)?;
         let mut obj = Map::new();
         let roadway = doc
-            .input_parse::<String>("edit_road")
+            .select_parse::<String>("edit_road")
             .filter(|r| !r.is_empty());
         if roadway != res.roadway {
             obj.insert("roadway".to_string(), OptVal(roadway).into());
@@ -230,7 +264,7 @@ impl Card for GeoLoc {
             }
         }
         let cross_street = doc
-            .input_parse::<String>("edit_xstreet")
+            .select_parse::<String>("edit_xstreet")
             .filter(|r| !r.is_empty());
         if cross_street != res.cross_street {
             obj.insert("cross_street".to_string(), OptVal(cross_street).into());

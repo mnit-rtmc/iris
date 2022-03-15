@@ -294,6 +294,17 @@ const DIRECTION_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Roadway resource
+const ROADWAY_RES: Resource = Resource::Simple(
+    "api/road",
+    Listen::All("road"),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT name, abbrev, r_class, direction \
+        FROM iris.road \
+        ORDER BY name\
+    ) r",
+);
+
 /// Road modifier LUT resource
 const ROAD_MODIFIER_RES: Resource = Resource::Simple(
     "road_modifier",
@@ -487,6 +498,7 @@ const ALL: &[Resource] = &[
     COMM_LINK_RES,
     CONDITION_RES,
     DIRECTION_RES,
+    ROADWAY_RES,
     ROAD_MODIFIER_RES,
     RESOURCE_TYPE_RES,
     CONTROLLER_RES,

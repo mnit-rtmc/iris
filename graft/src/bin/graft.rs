@@ -235,9 +235,11 @@ async fn main() -> tide::Result<()> {
     add_routes!(route, "comm_link");
     add_routes!(route, "controller");
     add_routes!(route, "modem");
-    route.at("/geo_loc/:name")
+    route
+        .at("/geo_loc/:name")
         .get(|req| sonar_object_get("geo_loc", req))
         .patch(|req| sonar_object_patch("geo_loc", req));
+    route.at("/road").get(|req| resource_get("road", req));
     route
         .at("/permission")
         .get(|req| resource_get("permission", req))
