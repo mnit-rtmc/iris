@@ -70,6 +70,8 @@ administrator	comm_link	4
 administrator	controller	4
 administrator	modem	4
 administrator	permission	4
+administrator	role	4
+administrator	user	4
 \.
 
 CREATE TRIGGER permission_notify_trig
@@ -86,5 +88,13 @@ CREATE TRIGGER i_user_notify_trig
 
 -- DELETE of iris.controller *very* slow without this index
 CREATE INDEX ON event.comm_event (controller);
+
+-- Make some geo_loc columns NOT NULL
+UPDATE iris.geo_loc SET road_dir = 0 WHERE road_dir IS NULL;
+UPDATE iris.geo_loc SET cross_dir = 0 WHERE cross_dir IS NULL;
+UPDATE iris.geo_loc SET cross_mod = 0 WHERE cross_mod IS NULL;
+ALTER TABLE iris.geo_loc ALTER COLUMN road_dir SET NOT NULL;
+ALTER TABLE iris.geo_loc ALTER COLUMN cross_dir SET NOT NULL;
+ALTER TABLE iris.geo_loc ALTER COLUMN cross_mod SET NOT NULL;
 
 COMMIT;

@@ -498,6 +498,8 @@ administrator	comm_link	4
 administrator	controller	4
 administrator	modem	4
 administrator	permission	4
+administrator	role	4
+administrator	user	4
 \.
 
 CREATE TRIGGER permission_notify_trig
@@ -932,10 +934,10 @@ CREATE TABLE iris.geo_loc (
 	name VARCHAR(20) PRIMARY KEY,
 	notify_tag VARCHAR(20),
 	roadway VARCHAR(20) REFERENCES iris.road(name),
-	road_dir SMALLINT REFERENCES iris.direction(id),
+	road_dir SMALLINT NOT NULL REFERENCES iris.direction(id),
 	cross_street VARCHAR(20) REFERENCES iris.road(name),
-	cross_dir SMALLINT REFERENCES iris.direction(id),
-	cross_mod SMALLINT REFERENCES iris.road_modifier(id),
+	cross_dir SMALLINT NOT NULL REFERENCES iris.direction(id),
+	cross_mod SMALLINT NOT NULL REFERENCES iris.road_modifier(id),
 	landmark VARCHAR(24),
 	lat double precision,
 	lon double precision
