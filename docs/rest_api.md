@@ -127,7 +127,7 @@ The response for these requests contains an ETag header, derived from the file's
 | Access       | Attributes |
 |--------------|------------|
 | Read Only    | name       |
-| 🔧 Configure | roadway, road\_dir, cross\_street, cross\_dir, cross\_mod, landmark, lat, lon |
+| 🔧 Configure | roadway, road\_dir, cross\_street, cross\_dir, cross\_mod, landmark, {`lat`}, {`lon`} |
 
 ### `modem`
 

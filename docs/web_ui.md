@@ -32,6 +32,7 @@ authentication.
   - [X] Date / time formatting (RFC 3339)
   - [X] ETags for table versioning
   - [X] Check for Operate / Plan access levels
+  - [ ] Controller I/O types
 * bulb
   - [X] Resource type selector with card list
   - [X] Search filter
@@ -39,7 +40,6 @@ authentication.
   - [X] Maintenance object CRUD
   - [X] Feedback with "toast" popups
   - [X] Authentication and session expiration
-  - [ ] Resource buttons: "Operate", "Plan", "Configure", etc.
   - [ ] Tooltips
 
 ## Phase 4 — DMS control
