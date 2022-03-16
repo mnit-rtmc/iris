@@ -496,6 +496,7 @@ administrator	cabinet_style	4
 administrator	comm_config	4
 administrator	comm_link	4
 administrator	controller	4
+administrator	geo_loc	4
 administrator	modem	4
 administrator	permission	4
 administrator	road	4
@@ -1435,7 +1436,7 @@ COPY iris.condition (id, description) FROM stdin;
 CREATE TABLE iris.controller (
     name VARCHAR(20) PRIMARY KEY,
     drop_id SMALLINT NOT NULL,
-    comm_link VARCHAR(20) NOT NULL REFERENCES iris.comm_link(name),
+    comm_link VARCHAR(20) REFERENCES iris.comm_link(name),
     cabinet_style VARCHAR(20) REFERENCES iris.cabinet_style(name),
     geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
     condition INTEGER NOT NULL REFERENCES iris.condition,

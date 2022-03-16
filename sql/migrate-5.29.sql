@@ -68,6 +68,7 @@ administrator	cabinet_style	4
 administrator	comm_config	4
 administrator	comm_link	4
 administrator	controller	4
+administrator	geo_loc	4
 administrator	modem	4
 administrator	permission	4
 administrator	road	4
@@ -97,5 +98,8 @@ UPDATE iris.geo_loc SET cross_mod = 0 WHERE cross_mod IS NULL;
 ALTER TABLE iris.geo_loc ALTER COLUMN road_dir SET NOT NULL;
 ALTER TABLE iris.geo_loc ALTER COLUMN cross_dir SET NOT NULL;
 ALTER TABLE iris.geo_loc ALTER COLUMN cross_mod SET NOT NULL;
+
+-- Make controller `comm_link` nullable
+ALTER TABLE iris.controller ALTER COLUMN comm_link DROP NOT NULL;
 
 COMMIT;

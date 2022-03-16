@@ -336,7 +336,7 @@ const CONTROLLER_RES: Resource = Resource::Simple(
            notes, version, fail_time \
     FROM iris.controller c \
     JOIN geo_loc_view l ON c.geo_loc = l.name \
-    ORDER BY regexp_replace(comm_link, '[0-9]', '', 'g'), \
+    ORDER BY COALESCE(regexp_replace(comm_link, '[0-9]', '', 'g'), ''), \
             (regexp_replace(comm_link, '[^0-9]', '', 'g') || '0')::INTEGER, \
              drop_id\
 ) r",

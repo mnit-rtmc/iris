@@ -36,7 +36,7 @@ pub struct Condition {
 pub struct Controller {
     pub name: String,
     pub location: Option<String>,
-    pub comm_link: String,
+    pub comm_link: Option<String>,
     pub drop_id: u16,
     pub cabinet_style: Option<String>,
     pub condition: u32,
@@ -172,15 +172,13 @@ impl ControllerAnc {
 
     /// Get the comm config
     fn comm_config(&self, res: &Controller) -> &str {
-        if let (Some(comm_links), Some(comm_configs)) =
-            (&self.comm_links, &self.comm_configs)
+        if let (Some(comm_link), Some(comm_links), Some(comm_configs)) =
+            (&res.comm_link, &self.comm_links, &self.comm_configs)
         {
-            if let Some(comm_link) =
-                comm_links.iter().find(|cl| cl.name == res.comm_link)
+            if let Some(cl) = comm_links.iter().find(|cl| &cl.name == comm_link)
             {
-                if let Some(comm_config) = comm_configs
-                    .iter()
-                    .find(|cc| cc.name == comm_link.comm_config)
+                if let Some(comm_config) =
+                    comm_configs.iter().find(|cc| cc.name == cl.comm_config)
                 {
                     return &comm_config.description[..];
                 }
@@ -235,7 +233,8 @@ impl Card for Controller {
     fn is_match(&self, search: &str, anc: &ControllerAnc) -> bool {
         self.name.to_lowercase().contains(search)
             || {
-                let comm_link = self.comm_link.to_lowercase();
+                let comm_link =
+                    self.comm_link.as_deref().unwrap_or("").to_lowercase();
                 format!("{comm_link}:{}", self.drop_id).contains(search)
             }
             || self.comm_state(true).contains(search)
@@ -277,7 +276,7 @@ impl Card for Controller {
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
         let comm_state = self.comm_state(false);
-        let comm_link = HtmlStr::new(&self.comm_link);
+        let comm_link = HtmlStr::new(self.comm_link.as_ref());
         let drop_id = self.drop_id;
         // condition 1 is "Active"
         let disabled = disabled_attr(self.condition == 1);
@@ -293,7 +292,7 @@ impl Card for Controller {
         let tname = CommLink::TNAME;
         let condition = anc.condition(self);
         let comm_state = self.comm_state(true);
-        let comm_link = HtmlStr::new(&self.comm_link);
+        let comm_link = HtmlStr::new(self.comm_link.as_ref());
         let comm_config = anc.comm_config(self);
         let drop_id = self.drop_id;
         let location = HtmlStr::new(self.location.as_ref()).with_len(64);
@@ -344,7 +343,7 @@ impl Card for Controller {
 
     /// Convert to edit HTML
     fn to_html_edit(&self, anc: &ControllerAnc) -> String {
-        let comm_link = HtmlStr::new(&self.comm_link);
+        let comm_link = HtmlStr::new(self.comm_link.as_ref());
         let drop_id = self.drop_id;
         let cabinet_styles = anc.cabinet_styles_html(self);
         let conditions = anc.conditions_html(self);
@@ -386,10 +385,11 @@ impl Card for Controller {
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         let mut obj = Map::new();
-        if let Some(comm_link) = doc.input_parse::<String>("edit_link") {
-            if comm_link != val.comm_link {
-                obj.insert("comm_link".to_string(), Value::String(comm_link));
-            }
+        let comm_link = doc
+            .input_parse::<String>("edit_link")
+            .filter(|cl| !cl.is_empty());
+        if comm_link != val.comm_link {
+            obj.insert("comm_link".to_string(), OptVal(comm_link).into());
         }
         if let Some(drop_id) = doc.input_parse::<u16>("edit_drop") {
             if drop_id != val.drop_id {

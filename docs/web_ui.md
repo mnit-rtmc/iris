@@ -37,11 +37,8 @@ authentication.
   - [X] Search filter
   - [X] Html escaping
   - [X] Maintenance object CRUD
-  - [X] Status button / view
   - [X] Feedback with "toast" popups
   - [X] Authentication and session expiration
-  - [X] Controller location (`geo_loc`)
-  - [X] UI refinements
   - [ ] Resource buttons: "Operate", "Plan", "Configure", etc.
   - [ ] Tooltips
 

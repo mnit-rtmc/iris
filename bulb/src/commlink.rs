@@ -70,7 +70,8 @@ impl AncillaryData for CommLinkAnc {
                 CONTROLLER_URI => {
                     let mut controllers =
                         json.into_serde::<Vec<Controller>>()?;
-                    controllers.retain(|c| c.comm_link == res.name);
+                    controllers
+                        .retain(|c| c.comm_link.as_deref() == Some(&res.name));
                     self.controllers = Some(controllers);
                 }
                 _ => {
