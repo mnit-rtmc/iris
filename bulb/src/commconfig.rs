@@ -270,7 +270,7 @@ impl Card for CommConfig {
             <div class='row'>\
               <label for='edit_timeout'>Timeout (ms)</label>\
               <input id='edit_timeout' type='number' min='0' size='8' \
-                     max='20000' value='{timeout_ms}'/>\
+                     max='20000' step='50' value='{timeout_ms}'/>\
             </div>\
             <div class='row'>\
               <label for='edit_poll'>Poll Period</label>\

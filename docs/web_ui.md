@@ -31,7 +31,7 @@ authentication.
   - [X] Add routes for maintenance resources
   - [X] Date / time formatting (RFC 3339)
   - [X] ETags for table versioning
-  - [ ] Check for Operate / Plan access levels
+  - [X] Check for Operate / Plan access levels
 * bulb
   - [X] Resource type selector with card list
   - [X] Search filter

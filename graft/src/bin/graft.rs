@@ -89,9 +89,33 @@ const STAMPS: &[(&str, &str)] = &[
     ("dms", "expire_time"),
 ];
 
+/// Slice of (type/attribute) tuples requiring Operate or higher permission
+const OPERATE: &[(&str, &str)] = &[
+    ("controller", "download"),
+    ("controller", "device_req"),
+];
+
+/// Slice of (type/attribute) tuples requiring Plan or higher permission
+const PLAN: &[(&str, &str)] = &[
+    ("comm_config", "timeout_ms"),
+    ("comm_config", "idle_disconnect_sec"),
+    ("comm_config", "no_response_disconnect_sec"),
+    ("comm_link", "poll_enabled"),
+    ("controller", "condition"),
+    ("controller", "notes"),
+    ("modem", "enabled"),
+    ("modem", "timeout_ms"),
+    ("role", "enabled"),
+    ("user", "enabled"),
+];
+
+/// Check for type/key pairs in PATCH first pass
+const PATCH_FIRST_PASS: &[(&str, &str)] = &[
+    ("alarm", "pin"),
+];
+
 /// Access for permission records
 #[derive(Clone, Copy, Debug)]
-#[allow(dead_code)]
 pub enum Access {
     View,
     Operate,
@@ -188,8 +212,19 @@ macro_rules! add_routes_except_get {
 }
 
 impl Access {
+    /// Get access from type/att pair
+    fn from_type_key(tp_att: &(&str, &str)) -> Self {
+        if OPERATE.contains(tp_att) {
+            Access::Operate
+        } else if PLAN.contains(tp_att) {
+            Access::Plan
+        } else {
+            Access::Configure
+        }
+    }
+
     /// Get access level
-    fn level(self) -> i32 {
+    const fn level(self) -> i32 {
         match self {
             Access::View => 1,
             Access::Operate => 2,
@@ -627,28 +662,51 @@ fn att_value(value: &Value) -> Result<String> {
 /// Update a Sonar object from a `PATCH` request
 async fn sonar_object_patch(tp: &str, mut req: Request<State>) -> tide::Result {
     log::info!("PATCH {}", req.url());
-    resp!(Access::Configure.check(tp, &req));
-    let nm = resp!(obj_name(tp, &req));
-    let mut body: Value = req.body_json().await?;
-    if !body.is_object() {
-        return bad_request("body must be a JSON object");
+    // *At least* Operate access needed (further checks below)
+    resp!(Access::Operate.check(tp, &req));
+    let body: Value = req.body_json().await?;
+    match body.as_object() {
+        Some(obj) => {
+            resp!(sonar_object_patch_json(tp, req, obj).await);
+            Ok(Response::builder(StatusCode::NoContent).build())
+        }
+        None => bad_request("body must be a JSON object"),
     }
-    let object = body.as_object_mut().unwrap();
-    let mut c = resp!(connection(&req).await);
-    // "pin" attribute must be set before "controller"
-    if let Some(value) = object.remove("pin") {
-        let anm = resp!(make_att(tp, &nm, "pin"));
-        let value = resp!(att_value(&value));
-        log::debug!("{} = {}", anm, &value);
-        resp!(c.update_object(&anm, &value).await);
+}
+
+/// Update a Sonar object from a `PATCH` request
+async fn sonar_object_patch_json(
+    tp: &str,
+    req: Request<State>,
+    obj: &Map<String, Value>,
+) -> Result<()> {
+    let nm = obj_name(tp, &req)?;
+    for key in obj.keys() {
+        let key = &key[..];
+        Access::from_type_key(&(tp, key)).check(tp, &req)?;
     }
-    for (key, value) in object.iter() {
-        let anm = resp!(make_att(tp, &nm, key));
-        let value = resp!(att_value(value));
-        log::debug!("{} = {}", anm, &value);
-        resp!(c.update_object(&anm, &value).await);
+    let mut c = connection(&req).await?;
+    // first pass
+    for (key, value) in obj.iter() {
+        let key = &key[..];
+        if PATCH_FIRST_PASS.contains(&(tp, key)) {
+            let anm = make_att(tp, &nm, key)?;
+            let value = att_value(&value)?;
+            log::debug!("{} = {}", anm, &value);
+            c.update_object(&anm, &value).await?;
+        }
     }
-    Ok(Response::builder(StatusCode::NoContent).build())
+    // second pass
+    for (key, value) in obj.iter() {
+        let key = &key[..];
+        if !PATCH_FIRST_PASS.contains(&(tp, key)) {
+            let anm = make_att(tp, &nm, key)?;
+            let value = att_value(value)?;
+            log::debug!("{} = {}", anm, &value);
+            c.update_object(&anm, &value).await?;
+        }
+    }
+    Ok(())
 }
 
 /// Remove a Sonar object from a `DELETE` request
