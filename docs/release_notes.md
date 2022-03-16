@@ -1,5 +1,12 @@
 # IRIS 5.x Release Notes
 
+5.29.0 (16 Mar 2022)
+ - Fixed comm link connection regressions
+ - Expanded web-based administration UI
+ - Expanded REST API from honeybee / graft
+ - Added simpler permission model for web UI
+ - Improved caching for REST API
+
 5.28.0 (8 Feb 2022)
  - Added web-based administration UI (alpha)
  - ClearGuide: support limiting travel time by speed limit
