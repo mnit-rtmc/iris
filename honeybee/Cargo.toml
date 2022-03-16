@@ -1,6 +1,6 @@
 [package]
 name = "honeybee"
-version = "0.14.0"
+version = "0.15.0"
 description = "Server for publishing IRIS data as JSON / GIF"
 license = "GPL-2.0-or-later"
 edition = "2021"
