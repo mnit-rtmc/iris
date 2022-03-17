@@ -5232,29 +5232,48 @@ GRANT SELECT ON flow_stream_view TO PUBLIC;
 -- Weather Sensors
 --
 CREATE TABLE iris._weather_sensor (
-	name VARCHAR(20) PRIMARY KEY,
-	site_id VARCHAR(20),
-	alt_id VARCHAR(20),
-	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-	notes VARCHAR(64) NOT NULL,
-	settings JSONB,
-	sample JSONB
+    name VARCHAR(20) PRIMARY KEY,
+    site_id VARCHAR(20),
+    alt_id VARCHAR(20),
+    geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+    notes VARCHAR(64) NOT NULL,
+    settings JSONB,
+    sample JSONB
 );
 
 ALTER TABLE iris._weather_sensor ADD CONSTRAINT _weather_sensor_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
 CREATE FUNCTION iris.weather_sensor_notify() RETURNS TRIGGER AS
-	$weather_sensor_notify$
+    $weather_sensor_notify$
 BEGIN
-	NOTIFY weather_sensor;
-	RETURN NULL; -- AFTER trigger return is ignored
+    IF (NEW.settings IS DISTINCT FROM OLD.settings) THEN
+        NOTIFY weather_sensor, 'settings';
+    ELSIF (NEW.sample IS DISTINCT FROM OLD.sample) THEN
+        NOTIFY weather_sensor, 'sample';
+    ELSE
+        NOTIFY weather_sensor;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
 END;
 $weather_sensor_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER weather_sensor_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris._weather_sensor
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.weather_sensor_notify();
+    AFTER UPDATE ON iris._weather_sensor
+    FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_notify();
+
+-- Can't use iris.table_notify due to underscore (_weather_sensor)
+CREATE FUNCTION iris.weather_sensor_table_notify() RETURNS TRIGGER AS
+    $weather_sensor_table_notify$
+BEGIN
+    NOTIFY weather_sensor;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$weather_sensor_table_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER weather_sensor_table_notify_trig
+    AFTER INSERT OR DELETE ON iris._weather_sensor
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.weather_sensor_table_notify();
 
 CREATE VIEW iris.weather_sensor AS
     SELECT w.name, site_id, alt_id, geo_loc, controller, pin, notes, settings,

@@ -35,6 +35,34 @@ use tide::{Body, Request, Response, StatusCode};
 /// Path for static files
 const STATIC_PATH: &str = "/var/www/html/iris/api";
 
+/// Slice of (type, attribute) tuples for ignored attributes
+const IGNORE: &[(&str, &str)] = &[
+    ("weather_sensor", "air_temp"),
+    ("weather_sensor", "dew_point_temp"),
+    ("weather_sensor", "humidity"),
+    ("weather_sensor", "max_temp"),
+    ("weather_sensor", "max_wind_gust_dir"),
+    ("weather_sensor", "max_wind_gust_speed"),
+    ("weather_sensor", "min_temp"),
+    ("weather_sensor", "precip_one_hour"),
+    ("weather_sensor", "precip_rate"),
+    ("weather_sensor", "precip_situation"),
+    ("weather_sensor", "pressure"),
+    ("weather_sensor", "pvmt_surf_status"),
+    ("weather_sensor", "pvmt_surf_temp"),
+    ("weather_sensor", "spot_wind_dir"),
+    ("weather_sensor", "spot_wind_speed"),
+    ("weather_sensor", "sub_surf_temp"),
+    ("weather_sensor", "stamp"),
+    ("weather_sensor", "surf_freeze_temp"),
+    ("weather_sensor", "surf_temp"),
+    ("weather_sensor", "visibility"),
+    ("weather_sensor", "wind_dir"),
+    ("weather_sensor", "wind_speed"),
+    ("weather_sensor", "operation"),
+    ("weather_sensor", "styles"),
+];
+
 /// Slice of (type, attribute) tuples for JSON integer values
 const INTEGERS: &[(&str, &str)] = &[
     ("alarm", "pin"),
@@ -63,6 +91,7 @@ const INTEGERS: &[(&str, &str)] = &[
     ("geo_loc", "cross_mod"),
     ("modem", "timeout_ms"),
     ("modem", "state"),
+    ("weather_sensor", "pin"),
 ];
 
 /// Slice of (type, attribute) tuples for JSON float values
@@ -107,6 +136,9 @@ const PLAN: &[(&str, &str)] = &[
     ("modem", "timeout_ms"),
     ("role", "enabled"),
     ("user", "enabled"),
+    ("weather_sensor", "site_id"),
+    ("weather_sensor", "alt_id"),
+    ("weather_sensor", "notes"),
 ];
 
 /// Check for type/key pairs in PATCH first pass
@@ -270,6 +302,7 @@ async fn main() -> tide::Result<()> {
     add_routes!(route, "comm_link");
     add_routes!(route, "controller");
     add_routes!(route, "modem");
+    add_routes!(route, "weather_sensor");
     route
         .at("/geo_loc/:name")
         .get(|req| sonar_object_get("geo_loc", req))
@@ -614,6 +647,8 @@ fn make_json(tp_att: &(&str, &str), val: &str) -> Option<Value> {
             let ns = (ms % 1_000) as u32 * 1_000_000;
             Local.timestamp(sec, ns).to_rfc3339().into()
         })
+    } else if IGNORE.contains(tp_att) {
+        None
     } else if val != "\0" {
         Some(val.into())
     } else {

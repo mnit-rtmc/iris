@@ -25,3 +25,4 @@ mod role;
 mod start;
 mod user;
 mod util;
+mod weathersensor;

@@ -159,6 +159,14 @@ The response for these requests contains an ETag header, derived from the file's
 | 💡 Plan      | enabled          |
 | 🔧 Configure | full\_name, role |
 
+### `weather_sensor`
+
+| Access       | Attributes                                            |
+|--------------|-------------------------------------------------------|
+| Read Only    | name, location, {`geo_loc`}, {`settings`}, {`sample`} |
+| 💡 Plan      | site\_id, alt\_id, notes                              |
+| 🔧 Configure | controller, {`pin`}                                   |
+
 
 [permission]: #permission
 [resource types]: #resource-types

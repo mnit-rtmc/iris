@@ -23,6 +23,7 @@ use crate::permission::Permission;
 use crate::role::Role;
 use crate::user::User;
 use crate::util::{Dom, HtmlStr};
+use crate::weathersensor::WeatherSensor;
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::de::DeserializeOwned;
 use serde_json::map::Map;
@@ -244,6 +245,7 @@ pub async fn res_list(res: &str, search: &str) -> Result<String> {
         Permission::TNAME => res_build_list::<Permission>(search).await,
         Role::TNAME => res_build_list::<Role>(search).await,
         User::TNAME => res_build_list::<User>(search).await,
+        WeatherSensor::TNAME => res_build_list::<WeatherSensor>(search).await,
         _ => Ok("".into()),
     }
 }
@@ -290,6 +292,9 @@ pub async fn res_get(res: &str, name: &str, view: View) -> Result<String> {
         Permission::TNAME => res_build_card::<Permission>(name, view).await,
         Role::TNAME => res_build_card::<Role>(name, view).await,
         User::TNAME => res_build_card::<User>(name, view).await,
+        WeatherSensor::TNAME => {
+            res_build_card::<WeatherSensor>(name, view).await
+        }
         _ => Ok("".into()),
     }
 }
@@ -432,6 +437,7 @@ pub async fn res_create(res: &str) -> Result<()> {
         Permission::TNAME => create_and_post::<Permission>().await,
         Role::TNAME => create_and_post::<Role>().await,
         User::TNAME => create_and_post::<User>().await,
+        WeatherSensor::TNAME => create_and_post::<WeatherSensor>().await,
         _ => Ok(()),
     }
 }
@@ -461,6 +467,7 @@ pub async fn res_save(res: &str, name: &str) -> Result<()> {
         Permission::TNAME => fetch_save_card::<Permission>(name).await,
         Role::TNAME => fetch_save_card::<Role>(name).await,
         User::TNAME => fetch_save_card::<User>(name).await,
+        WeatherSensor::TNAME => fetch_save_card::<WeatherSensor>(name).await,
         _ => Ok(()),
     }
 }
@@ -506,6 +513,7 @@ pub async fn res_delete(res: &str, name: &str) -> Result<()> {
         Permission::TNAME => res_delete_card::<Permission>(name).await,
         Role::TNAME => res_delete_card::<Role>(name).await,
         User::TNAME => res_delete_card::<User>(name).await,
+        WeatherSensor::TNAME => res_delete_card::<WeatherSensor>(name).await,
         _ => Ok(()),
     }
 }

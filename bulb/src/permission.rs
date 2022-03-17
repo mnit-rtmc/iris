@@ -292,6 +292,7 @@ pub fn permissions_html(access: Vec<Permission>) -> String {
             add_option::<Permission>(perm, &mut html);
             add_option::<crate::role::Role>(perm, &mut html);
             add_option::<crate::user::User>(perm, &mut html);
+            add_option::<crate::weathersensor::WeatherSensor>(perm, &mut html);
         }
     }
     html

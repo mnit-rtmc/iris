@@ -28,6 +28,7 @@ pub struct Alarm {
     pub description: String,
     pub controller: Option<String>,
     pub state: bool,
+    // full attributes
     pub pin: Option<u32>,
     pub trigger_time: Option<String>,
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2019  Minnesota Department of Transportation
+ * Copyright (C) 2010-2022  Minnesota Department of Transportation
  * Copyright (C) 2011  AHMCT, University of California
  * Copyright (C) 2017-2021  Iteris Inc.
  *
@@ -30,6 +30,9 @@ public interface WeatherSensor extends Device {
 
 	/** Get the device location */
 	GeoLoc getGeoLoc();
+
+	/** Get device location (from GeoLoc) */
+	String getLocation();
 
 	/** Get the site id */
 	String getSiteId();

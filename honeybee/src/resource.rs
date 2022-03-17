@@ -335,11 +335,23 @@ const CONTROLLER_RES: Resource = Resource::Simple(
     SELECT c.name, location, comm_link, drop_id, cabinet_style, condition, \
            notes, version, fail_time \
     FROM iris.controller c \
-    JOIN geo_loc_view l ON c.geo_loc = l.name \
+    LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
     ORDER BY COALESCE(regexp_replace(comm_link, '[0-9]', '', 'g'), ''), \
             (regexp_replace(comm_link, '[^0-9]', '', 'g') || '0')::INTEGER, \
              drop_id\
 ) r",
+);
+
+/// Weather sensor resource
+const WEATHER_SENSOR_RES: Resource = Resource::Simple(
+    "api/weather_sensor",
+    Listen::Exclude("weather_sensor", &["pin", "settings", "sample"]),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT ws.name, site_id, alt_id, location, controller, notes \
+        FROM iris.weather_sensor ws \
+        LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
+        ORDER BY name\
+    ) r",
 );
 
 /// Modem resource
@@ -370,7 +382,8 @@ const ROLE_RES: Resource = Resource::Simple(
     Listen::All("role"),
     "SELECT row_to_json(r)::text FROM (\
         SELECT name, enabled \
-        FROM iris.role\
+        FROM iris.role \
+        ORDER BY name\
     ) r",
 );
 
@@ -380,7 +393,8 @@ const USER_RES: Resource = Resource::Simple(
     Listen::All("i_user"),
     "SELECT row_to_json(r)::text FROM (\
         SELECT name, full_name, role, enabled \
-        FROM iris.i_user\
+        FROM iris.i_user \
+        ORDER BY name\
     ) r",
 );
 
@@ -393,7 +407,7 @@ const SIGN_CONFIG_RES: Resource = Resource::Simple(
            pitch_horiz, pitch_vert, pixel_width, pixel_height, \
            char_width, char_height, monochrome_foreground, \
            monochrome_background, color_scheme, default_font \
-    FROM sign_config_view \
+    FROM sign_config_view\
 ) r",
 );
 
@@ -406,7 +420,7 @@ const SIGN_DETAIL_RES: Resource = Resource::Simple(
            beacon_type, hardware_make, hardware_model, software_make, \
            software_model, supported_tags, max_pages, max_multi_len, \
            beacon_activation_flag, pixel_service_flag \
-    FROM sign_detail_view \
+    FROM sign_detail_view\
 ) r",
 );
 
@@ -418,7 +432,7 @@ const SIGN_MSG_RES: Resource = Resource::SignMsg(
     SELECT name, sign_config, incident, multi, beacon_enabled, \
            msg_combining, msg_priority, sources, owner, duration \
     FROM sign_message_view \
-    ORDER BY name \
+    ORDER BY name\
 ) r",
 );
 
@@ -449,7 +463,7 @@ const TPIMS_STAT_RES: Resource = Resource::Simple(
            camera_image_base_url || camera_2, \
            camera_image_base_url || camera_3], NULL) AS images, \
            ARRAY[]::text[] AS logos \
-    FROM parking_area_view \
+    FROM parking_area_view\
 ) r",
 );
 
@@ -464,7 +478,7 @@ const TPIMS_DYN_RES: Resource = Resource::Simple(
            'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStampStatic\", \
            reported_available AS \"reportedAvailable\", \
            trend, open, trust_data AS \"trustData\", capacity \
-    FROM parking_area_view \
+    FROM parking_area_view\
 ) r",
 );
 
@@ -483,7 +497,7 @@ const TPIMS_ARCH_RES: Resource = Resource::Simple(
            verification_check_amplitude AS \"verificationCheckAmplitude\", \
            low_threshold AS \"lowThreshold\", \
            true_available AS \"trueAvailable\" \
-    FROM parking_area_view \
+    FROM parking_area_view\
 ) r",
 );
 
@@ -502,6 +516,7 @@ const ALL: &[Resource] = &[
     ROAD_MODIFIER_RES,
     RESOURCE_TYPE_RES,
     CONTROLLER_RES,
+    WEATHER_SENSOR_RES,
     MODEM_RES,
     PERMISSION_RES,
     ROLE_RES,
