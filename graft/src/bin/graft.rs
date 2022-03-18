@@ -35,34 +35,6 @@ use tide::{Body, Request, Response, StatusCode};
 /// Path for static files
 const STATIC_PATH: &str = "/var/www/html/iris/api";
 
-/// Slice of (type, attribute) tuples for ignored attributes
-const IGNORE: &[(&str, &str)] = &[
-    ("weather_sensor", "air_temp"),
-    ("weather_sensor", "dew_point_temp"),
-    ("weather_sensor", "humidity"),
-    ("weather_sensor", "max_temp"),
-    ("weather_sensor", "max_wind_gust_dir"),
-    ("weather_sensor", "max_wind_gust_speed"),
-    ("weather_sensor", "min_temp"),
-    ("weather_sensor", "precip_one_hour"),
-    ("weather_sensor", "precip_rate"),
-    ("weather_sensor", "precip_situation"),
-    ("weather_sensor", "pressure"),
-    ("weather_sensor", "pvmt_surf_status"),
-    ("weather_sensor", "pvmt_surf_temp"),
-    ("weather_sensor", "spot_wind_dir"),
-    ("weather_sensor", "spot_wind_speed"),
-    ("weather_sensor", "sub_surf_temp"),
-    ("weather_sensor", "stamp"),
-    ("weather_sensor", "surf_freeze_temp"),
-    ("weather_sensor", "surf_temp"),
-    ("weather_sensor", "visibility"),
-    ("weather_sensor", "wind_dir"),
-    ("weather_sensor", "wind_speed"),
-    ("weather_sensor", "operation"),
-    ("weather_sensor", "styles"),
-];
-
 /// Slice of (type, attribute) tuples for JSON integer values
 const INTEGERS: &[(&str, &str)] = &[
     ("alarm", "pin"),
@@ -91,7 +63,6 @@ const INTEGERS: &[(&str, &str)] = &[
     ("geo_loc", "cross_mod"),
     ("modem", "timeout_ms"),
     ("modem", "state"),
-    ("weather_sensor", "pin"),
 ];
 
 /// Slice of (type, attribute) tuples for JSON float values
@@ -144,6 +115,7 @@ const PLAN: &[(&str, &str)] = &[
 /// Check for type/key pairs in PATCH first pass
 const PATCH_FIRST_PASS: &[(&str, &str)] = &[
     ("alarm", "pin"),
+    ("weather_sensor", "pin"),
 ];
 
 /// Access for permission records
@@ -302,7 +274,18 @@ async fn main() -> tide::Result<()> {
     add_routes!(route, "comm_link");
     add_routes!(route, "controller");
     add_routes!(route, "modem");
-    add_routes!(route, "weather_sensor");
+    add_routes_except_get!(route, "weather_sensor");
+    route.at("/weather_sensor/:name").get(|req| {
+        sql_get("weather_sensor",
+            "SELECT row_to_json(r)::text FROM (\
+                SELECT ws.name, location, geo_loc, controller, pin, site_id, \
+                       alt_id, notes, settings, sample \
+                FROM iris.weather_sensor ws \
+                LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
+                WHERE ws.name = $1
+            ) r",
+        req)
+    });
     route
         .at("/geo_loc/:name")
         .get(|req| sonar_object_get("geo_loc", req))
@@ -467,6 +450,34 @@ fn obj_id(req: &Request<State>) -> Result<i32> {
     id.parse::<i32>().map_err(|_e| SonarError::InvalidName)
 }
 
+/// `GET` one sql record as JSON
+async fn sql_get(
+    resource_n: &'static str,
+    sql: &'static str,
+    req: Request<State>,
+) -> tide::Result {
+    log::info!("GET {}", req.url());
+    let body = resp!(sql_get_by_name(resource_n, sql, req).await);
+    Ok(Response::builder(StatusCode::Ok)
+        .body(body)
+        .content_type("application/json")
+        .build())
+}
+
+/// Get one sql record by name
+async fn sql_get_by_name(
+    resource_n: &'static str,
+    sql: &'static str,
+    req: Request<State>,
+) -> Result<String> {
+    Access::View.check(resource_n, &req)?;
+    let name = req
+        .param("name")
+        .map_err(|_e| SonarError::InvalidName)?
+        .to_string();
+    Ok(spawn_blocking(move || req.state().get_by_pkey(sql, &name)).await?)
+}
+
 /// `GET` one role record
 async fn role_get(req: Request<State>) -> tide::Result {
     log::info!("GET {}", req.url());
@@ -601,6 +612,7 @@ async fn resource_etag(path: &Path) -> Result<String> {
 
 /// `GET` a Sonar object and return JSON result
 async fn sonar_object_get(tp: &str, req: Request<State>) -> tide::Result {
+    // FIXME: make a DB request instead...
     log::info!("GET {}", req.url());
     let body = resp!(sonar_object_get_json(tp, req).await);
     Ok(Response::builder(StatusCode::Ok)
@@ -616,6 +628,7 @@ async fn sonar_object_get_json(
 ) -> Result<String> {
     Access::View.check(tp, &req)?;
     let nm = obj_name(tp, &req)?;
+    // FIXME: make a DB request instead...
     let mut c = connection(&req).await?;
     let mut res = Map::new();
     res.insert(
@@ -647,8 +660,6 @@ fn make_json(tp_att: &(&str, &str), val: &str) -> Option<Value> {
             let ns = (ms % 1_000) as u32 * 1_000_000;
             Local.timestamp(sec, ns).to_rfc3339().into()
         })
-    } else if IGNORE.contains(tp_att) {
-        None
     } else if val != "\0" {
         Some(val.into())
     } else {

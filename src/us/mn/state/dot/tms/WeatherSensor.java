@@ -31,9 +31,6 @@ public interface WeatherSensor extends Device {
 	/** Get the device location */
 	GeoLoc getGeoLoc();
 
-	/** Get device location (from GeoLoc) */
-	String getLocation();
-
 	/** Get the site id */
 	String getSiteId();
 

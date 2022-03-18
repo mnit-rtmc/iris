@@ -160,12 +160,6 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		return geo_loc;
 	}
 
-	/** Get device location (from GeoLoc) */
-	@Override
-	public String getLocation() {
-		return GeoLocHelper.getLocation(geo_loc);
-	}
-
 	/** Site id (null for missing) */
 	private transient String site_id;
 

@@ -14,6 +14,7 @@
 //
 use crate::sonar::{Result, SonarError};
 use postgres::row::Row;
+use postgres::types::ToSql;
 use postgres::NoTls;
 use r2d2::Pool;
 use r2d2_postgres::PostgresConnectionManager;
@@ -275,5 +276,16 @@ impl State {
         let mut client = self.pool.get()?;
         let row = client.query_one(QUERY_USER, &[&name])?;
         Ok(User::from_row(row))
+    }
+
+    /// Query one row by primary key
+    pub fn get_by_pkey<PK: ToSql + Sync>(
+        &self,
+        sql: &'static str,
+        pkey: PK,
+    ) -> Result<String> {
+        let mut client = self.pool.get()?;
+        let row = client.query_one(sql, &[&pkey])?;
+        Ok(row.get::<usize, String>(0))
     }
 }
