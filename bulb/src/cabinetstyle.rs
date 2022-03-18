@@ -12,7 +12,7 @@
 //
 use crate::error::Result;
 use crate::resource::{AncillaryData, Card};
-use crate::util::{Dom, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
@@ -60,7 +60,7 @@ impl Card for CabinetStyle {
 
     /// Check if a search string matches
     fn is_match(&self, search: &str, _res: &CabinetStyleAnc) -> bool {
-        self.name.to_lowercase().contains(search)
+        self.name.contains_lower(search)
     }
 
     /// Convert to compact HTML

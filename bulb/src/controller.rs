@@ -15,7 +15,7 @@ use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
 use crate::resource::{disabled_attr, AncillaryData, Card, View, NAME};
-use crate::util::{Dom, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
@@ -76,8 +76,12 @@ impl AncillaryData for ControllerAnc {
             (View::Search | View::Status | View::Edit, None, _, _, _) => {
                 Some(CONDITION_URI.into())
             }
-            (View::Status, _, None, _, _) => Some(COMM_LINK_URI.into()),
-            (View::Status, _, _, None, _) => Some(COMM_CONFIG_URI.into()),
+            (View::Search | View::Status, _, None, _, _) => {
+                Some(COMM_LINK_URI.into())
+            }
+            (View::Search | View::Status, _, _, None, _) => {
+                Some(COMM_CONFIG_URI.into())
+            }
             (View::Edit, _, _, _, None) => Some(CABINET_STYLE_URI.into()),
             _ => None,
         }
@@ -231,33 +235,19 @@ impl Card for Controller {
 
     /// Check if a search string matches
     fn is_match(&self, search: &str, anc: &ControllerAnc) -> bool {
-        self.name.to_lowercase().contains(search)
+        self.name.contains_lower(search)
             || {
                 let comm_link =
                     self.comm_link.as_deref().unwrap_or("").to_lowercase();
                 format!("{comm_link}:{}", self.drop_id).contains(search)
             }
             || self.comm_state(true).contains(search)
-            || self.notes.to_lowercase().contains(search)
-            || self
-                .location
-                .as_deref()
-                .unwrap_or("")
-                .to_lowercase()
-                .contains(search)
-            || anc.condition(self).to_lowercase().contains(search)
-            || self
-                .cabinet_style
-                .as_deref()
-                .unwrap_or("")
-                .to_lowercase()
-                .contains(search)
-            || self
-                .version
-                .as_deref()
-                .unwrap_or("")
-                .to_lowercase()
-                .contains(search)
+            || anc.condition(self).contains_lower(search)
+            || anc.comm_config(self).contains_lower(search)
+            || self.location.contains_lower(search)
+            || self.notes.contains_lower(search)
+            || self.cabinet_style.contains_lower(search)
+            || self.version.contains_lower(search)
     }
 
     /// Get next suggested name

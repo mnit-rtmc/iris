@@ -13,7 +13,7 @@
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::resource::{disabled_attr, AncillaryData, Card, NAME};
-use crate::util::{Dom, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
@@ -77,8 +77,8 @@ impl Card for Alarm {
 
     /// Check if a search string matches
     fn is_match(&self, search: &str, _anc: &AlarmAnc) -> bool {
-        self.description.to_lowercase().contains(search)
-            || self.name.to_lowercase().contains(search)
+        self.description.contains_lower(search)
+            || self.name.contains_lower(search)
             || self.state(true).contains(search)
     }
 

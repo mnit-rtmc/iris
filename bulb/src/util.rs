@@ -19,6 +19,26 @@ use web_sys::{
     Document, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
 };
 
+/// Check for items containing a search string (lower case)
+pub trait ContainsLower {
+    fn contains_lower(self, search: &str) -> bool;
+}
+
+impl ContainsLower for &str {
+    fn contains_lower(self, search: &str) -> bool {
+        self.to_lowercase().contains(search)
+    }
+}
+
+impl ContainsLower for &Option<String> {
+    fn contains_lower(self, search: &str) -> bool {
+        self.as_deref()
+            .unwrap_or("")
+            .to_lowercase()
+            .contains(search)
+    }
+}
+
 /// An optional value which has impl Display
 #[derive(Debug)]
 pub struct OptVal<T>(pub Option<T>);

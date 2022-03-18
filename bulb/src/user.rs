@@ -13,7 +13,7 @@
 use crate::error::Result;
 use crate::resource::{disabled_attr, AncillaryData, Card, View};
 use crate::role::Role;
-use crate::util::{Dom, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
@@ -105,13 +105,8 @@ impl Card for User {
     /// Check if a search string matches
     fn is_match(&self, search: &str, _anc: &UserAnc) -> bool {
         self.name.contains(search)
-            || self.full_name.to_lowercase().contains(search)
-            || self
-                .role
-                .as_deref()
-                .unwrap_or("")
-                .to_lowercase()
-                .contains(search)
+            || self.full_name.contains_lower(search)
+            || self.role.contains_lower(search)
     }
 
     /// Convert to compact HTML

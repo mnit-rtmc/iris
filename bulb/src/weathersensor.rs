@@ -13,7 +13,7 @@
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::resource::{disabled_attr, AncillaryData, Card, NAME};
-use crate::util::{Dom, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
@@ -70,26 +70,11 @@ impl Card for WeatherSensor {
 
     /// Check if a search string matches
     fn is_match(&self, search: &str, _anc: &WeatherSensorAnc) -> bool {
-        self.name.to_lowercase().contains(search)
-            || self
-                .location
-                .as_deref()
-                .unwrap_or("")
-                .to_lowercase()
-                .contains(search)
-            || self
-                .site_id
-                .as_deref()
-                .unwrap_or("")
-                .to_lowercase()
-                .contains(search)
-            || self
-                .alt_id
-                .as_deref()
-                .unwrap_or("")
-                .to_lowercase()
-                .contains(search)
-            || self.notes.to_lowercase().contains(search)
+        self.name.contains_lower(search)
+            || self.location.contains_lower(search)
+            || self.site_id.contains_lower(search)
+            || self.alt_id.contains_lower(search)
+            || self.notes.contains_lower(search)
     }
 
     /// Convert to compact HTML

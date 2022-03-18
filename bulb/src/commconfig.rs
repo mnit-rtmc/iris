@@ -12,7 +12,7 @@
 //
 use crate::error::Result;
 use crate::resource::{AncillaryData, Card, View, NAME};
-use crate::util::{Dom, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
@@ -211,8 +211,8 @@ impl Card for CommConfig {
 
     /// Check if a search string matches
     fn is_match(&self, search: &str, _anc: &CommConfigAnc) -> bool {
-        self.description.to_lowercase().contains(search)
-            || self.name.to_lowercase().contains(search)
+        self.description.contains_lower(search)
+            || self.name.contains_lower(search)
     }
 
     /// Get next suggested name

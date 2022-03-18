@@ -12,7 +12,7 @@
 //
 use crate::error::Result;
 use crate::resource::{disabled_attr, AncillaryData, Card};
-use crate::util::Dom;
+use crate::util::{ContainsLower, Dom};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
@@ -56,7 +56,7 @@ impl Card for Role {
 
     /// Check if a search string matches
     fn is_match(&self, search: &str, _anc: &RoleAnc) -> bool {
-        self.name.to_lowercase().contains(search)
+        self.name.contains_lower(search)
     }
 
     /// Convert to compact HTML

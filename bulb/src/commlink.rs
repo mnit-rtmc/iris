@@ -14,7 +14,7 @@ use crate::commconfig::CommConfig;
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::resource::{disabled_attr, AncillaryData, Card, View, NAME};
-use crate::util::{Dom, HtmlStr};
+use crate::util::{ContainsLower, Dom, HtmlStr};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
@@ -178,10 +178,10 @@ impl Card for CommLink {
 
     /// Check if a search string matches
     fn is_match(&self, search: &str, anc: &CommLinkAnc) -> bool {
-        self.description.to_lowercase().contains(search)
-            || self.name.to_lowercase().contains(search)
-            || anc.comm_config_desc(self).to_lowercase().contains(search)
-            || self.uri.to_lowercase().contains(search)
+        self.description.contains_lower(search)
+            || self.name.contains_lower(search)
+            || anc.comm_config_desc(self).contains_lower(search)
+            || self.uri.contains_lower(search)
             || self.connected(true).contains(search)
     }
 

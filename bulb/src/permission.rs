@@ -13,7 +13,7 @@
 use crate::error::{Error, Result};
 use crate::resource::{AncillaryData, Card, View, NAME};
 use crate::role::Role;
-use crate::util::{Dom, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
@@ -175,7 +175,7 @@ impl Card for Permission {
     fn is_match(&self, search: &str, _anc: &PermissionAnc) -> bool {
         self.id.to_string().contains(search)
             || access_str(self.access_n, true).contains(search)
-            || self.role.to_lowercase().contains(search)
+            || self.role.contains_lower(search)
             || self.resource_n.contains(search)
     }
 
