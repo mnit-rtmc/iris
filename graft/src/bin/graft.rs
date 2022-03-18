@@ -259,8 +259,8 @@ async fn main() -> tide::Result<()> {
         .get(|req| {
             sql_get(
                 "geo_loc",
-                "SELECT name, roadway, road_dir, cross_street, cross_dir, \
-                        cross_mod, landmark, lat, lon \
+                "SELECT name, resource_n, roadway, road_dir, cross_street, \
+                        cross_dir, cross_mod, landmark, lat, lon \
                 FROM iris.geo_loc \
                 WHERE name = $1",
                 req,

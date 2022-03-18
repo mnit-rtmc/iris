@@ -124,9 +124,9 @@ The response for these requests contains an ETag header, derived from the file's
 
 ### `geo_loc`
 
-| Access       | Attributes |
-|--------------|------------|
-| Read Only    | name       |
+| Access       | Attributes           |
+|--------------|----------------------|
+| Read Only    | name, {`resource_n`} |
 | 🔧 Configure | roadway, road\_dir, cross\_street, cross\_dir, cross\_mod, landmark, {`lat`}, {`lon`} |
 
 ### `modem`
