@@ -276,15 +276,15 @@ async fn main() -> tide::Result<()> {
     add_routes!(route, "modem");
     add_routes_except_get!(route, "weather_sensor");
     route.at("/weather_sensor/:name").get(|req| {
-        sql_get("weather_sensor",
-            "SELECT row_to_json(r)::text FROM (\
-                SELECT ws.name, location, geo_loc, controller, pin, site_id, \
-                       alt_id, notes, settings, sample \
-                FROM iris.weather_sensor ws \
-                LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
-                WHERE ws.name = $1
-            ) r",
-        req)
+        sql_get(
+            "weather_sensor",
+            "SELECT ws.name, location, geo_loc, controller, pin, site_id, \
+                    alt_id, notes, settings, sample \
+            FROM iris.weather_sensor ws \
+            LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
+            WHERE ws.name = $1",
+            req,
+        )
     });
     route
         .at("/geo_loc/:name")
@@ -302,10 +302,24 @@ async fn main() -> tide::Result<()> {
         .delete(permission_delete);
     // can't use sonar_object_get due to capabilities array
     add_routes_except_get!(route, "role");
-    route.at("/role/:name").get(role_get);
+    route.at("/role/:name").get(|req| {
+        sql_get(
+            "role",
+            "SELECT name, enabled FROM iris.role WHERE name = $1",
+            req,
+        )
+    });
     // can't use sonar_object_get due to domains array
     add_routes_except_get!(route, "user");
-    route.at("/user/:name").get(user_get);
+    route.at("/user/:name").get(|req| {
+        sql_get(
+            "user",
+            "SELECT name, full_name, role, enabled \
+            FROM iris.i_user \
+            WHERE name = $1",
+            req,
+        )
+    });
     app.listen("127.0.0.1:3737").await?;
     Ok(())
 }
@@ -476,48 +490,6 @@ async fn sql_get_by_name(
         .map_err(|_e| SonarError::InvalidName)?
         .to_string();
     Ok(spawn_blocking(move || req.state().get_by_pkey(sql, &name)).await?)
-}
-
-/// `GET` one role record
-async fn role_get(req: Request<State>) -> tide::Result {
-    log::info!("GET {}", req.url());
-    let body = resp!(role_get_json(req).await);
-    Ok(Response::builder(StatusCode::Ok)
-        .body(body)
-        .content_type("application/json")
-        .build())
-}
-
-/// Get role record as JSON
-async fn role_get_json(req: Request<State>) -> Result<String> {
-    Access::View.check("role", &req)?;
-    let name = req
-        .param("name")
-        .map_err(|_e| SonarError::InvalidName)?
-        .to_string();
-    let role = spawn_blocking(move || req.state().role(&name)).await?;
-    Ok(serde_json::to_value(role)?.to_string())
-}
-
-/// `GET` one user record
-async fn user_get(req: Request<State>) -> tide::Result {
-    log::info!("GET {}", req.url());
-    let body = resp!(user_get_json(req).await);
-    Ok(Response::builder(StatusCode::Ok)
-        .body(body)
-        .content_type("application/json")
-        .build())
-}
-
-/// Get user record as JSON
-async fn user_get_json(req: Request<State>) -> Result<String> {
-    Access::View.check("user", &req)?;
-    let name = req
-        .param("name")
-        .map_err(|_e| SonarError::InvalidName)?
-        .to_string();
-    let user = spawn_blocking(move || req.state().user(&name)).await?;
-    Ok(serde_json::to_value(user)?.to_string())
 }
 
 /// IRIS host name

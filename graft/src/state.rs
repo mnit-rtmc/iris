@@ -22,13 +22,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
 
-/// Role
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Role {
-    pub name: String,
-    pub enabled: bool,
-}
-
 /// Permission
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Permission {
@@ -37,15 +30,6 @@ pub struct Permission {
     pub resource_n: String,
     pub batch: Option<String>,
     pub access_n: i32,
-}
-
-/// User
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct User {
-    pub name: String,
-    pub full_name: String,
-    pub role: Option<String>,
-    pub enabled: bool,
 }
 
 /// Db connection pool
@@ -66,26 +50,6 @@ impl Permission {
             resource_n: row.get(2),
             batch: row.get(3),
             access_n: row.get(4),
-        }
-    }
-}
-
-impl Role {
-    fn from_row(row: Row) -> Self {
-        Role {
-            name: row.get(0),
-            enabled: row.get(1),
-        }
-    }
-}
-
-impl User {
-    fn from_row(row: Row) -> Self {
-        User {
-            name: row.get(0),
-            full_name: row.get(1),
-            role: row.get(2),
-            enabled: row.get(3),
         }
     }
 }
@@ -141,18 +105,6 @@ JOIN iris.role r ON u.role = r.name \
 JOIN iris.permission p ON p.role = r.name \
 WHERE u.enabled = true AND r.enabled = true \
 AND u.name = $1 AND resource_n = $2";
-
-/// Query one role
-const QUERY_ROLE: &str = "\
-SELECT name, enabled \
-FROM iris.role \
-WHERE name = $1";
-
-/// Query one user
-const QUERY_USER: &str = "\
-SELECT name, full_name, role, enabled \
-FROM iris.i_user \
-WHERE name = $1";
 
 impl State {
     /// Create new postgres application state
@@ -264,20 +216,6 @@ impl State {
         Err(SonarError::Forbidden)
     }
 
-    /// Get role by name
-    pub fn role(&self, name: &str) -> Result<Role> {
-        let mut client = self.pool.get()?;
-        let row = client.query_one(QUERY_ROLE, &[&name])?;
-        Ok(Role::from_row(row))
-    }
-
-    /// Get user by name
-    pub fn user(&self, name: &str) -> Result<User> {
-        let mut client = self.pool.get()?;
-        let row = client.query_one(QUERY_USER, &[&name])?;
-        Ok(User::from_row(row))
-    }
-
     /// Query one row by primary key
     pub fn get_by_pkey<PK: ToSql + Sync>(
         &self,
@@ -285,7 +223,8 @@ impl State {
         pkey: PK,
     ) -> Result<String> {
         let mut client = self.pool.get()?;
-        let row = client.query_one(sql, &[&pkey])?;
+        let query = format!("SELECT row_to_json(r)::text FROM ({sql}) r");
+        let row = client.query_one(&query, &[&pkey])?;
         Ok(row.get::<usize, String>(0))
     }
 }
