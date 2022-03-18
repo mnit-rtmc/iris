@@ -266,7 +266,7 @@ impl Card for Controller {
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
         let comm_state = self.comm_state(false);
-        let comm_link = HtmlStr::new(self.comm_link.as_ref());
+        let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
         // condition 1 is "Active"
         let disabled = disabled_attr(self.condition == 1);
@@ -282,10 +282,10 @@ impl Card for Controller {
         let tname = CommLink::TNAME;
         let condition = anc.condition(self);
         let comm_state = self.comm_state(true);
-        let comm_link = HtmlStr::new(self.comm_link.as_ref());
+        let comm_link = HtmlStr::new(&self.comm_link);
         let comm_config = anc.comm_config(self);
         let drop_id = self.drop_id;
-        let location = HtmlStr::new(self.location.as_ref()).with_len(64);
+        let location = HtmlStr::new(&self.location).with_len(64);
         let notes = HtmlStr::new(&self.notes);
         let version = match &self.version {
             Some(version) => {
@@ -333,12 +333,12 @@ impl Card for Controller {
 
     /// Convert to edit HTML
     fn to_html_edit(&self, anc: &ControllerAnc) -> String {
-        let comm_link = HtmlStr::new(self.comm_link.as_ref());
+        let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
         let cabinet_styles = anc.cabinet_styles_html(self);
         let conditions = anc.conditions_html(self);
         let notes = HtmlStr::new(&self.notes);
-        let password = HtmlStr::new(self.password.as_ref());
+        let password = HtmlStr::new(&self.password);
         format!(
             "<div class='row'>\
               <label for='edit_link'>Comm Link</label>\

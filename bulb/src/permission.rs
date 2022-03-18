@@ -223,7 +223,7 @@ impl Card for Permission {
     fn to_html_edit(&self, anc: &PermissionAnc) -> String {
         let role = anc.roles_html(self);
         let resource = anc.resource_types_html(self);
-        let batch = HtmlStr::new(self.batch.as_ref());
+        let batch = HtmlStr::new(&self.batch);
         let access = access_html(self.access_n);
         format!(
             "<div class='row'>\

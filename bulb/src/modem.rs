@@ -70,8 +70,8 @@ impl Card for Modem {
 
     /// Convert to edit HTML
     fn to_html_edit(&self, _anc: &ModemAnc) -> String {
-        let uri = HtmlStr::new(self.uri.as_ref());
-        let config = HtmlStr::new(self.config.as_ref());
+        let uri = HtmlStr::new(&self.uri);
+        let config = HtmlStr::new(&self.config);
         let timeout_ms = OptVal(self.timeout_ms);
         let enabled = if self.enabled { " checked" } else { "" };
         format!(

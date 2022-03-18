@@ -99,7 +99,7 @@ impl Card for Alarm {
         let tname = Controller::TNAME;
         let description = HtmlStr::new(&self.description);
         let state = self.state(true);
-        let controller = HtmlStr::new(self.controller.as_ref());
+        let controller = HtmlStr::new(&self.controller);
         let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
         format!(
             "<div class='row'>\
@@ -121,7 +121,7 @@ impl Card for Alarm {
     /// Convert to edit HTML
     fn to_html_edit(&self, _anc: &AlarmAnc) -> String {
         let description = HtmlStr::new(&self.description);
-        let controller = HtmlStr::new(self.controller.as_ref());
+        let controller = HtmlStr::new(&self.controller);
         let pin = OptVal(self.pin);
         format!(
             "<div class='row'>\

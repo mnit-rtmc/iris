@@ -216,7 +216,7 @@ impl Card for GeoLoc {
         let xstreet =
             anc.roads_html("edit_xstreet", self.cross_street.as_deref());
         let xdir = anc.directions_html("edit_xdir", self.cross_dir);
-        let landmark = HtmlStr::new(self.landmark.as_ref());
+        let landmark = HtmlStr::new(&self.landmark);
         let lat = OptVal(self.lat);
         let lon = OptVal(self.lon);
         format!(

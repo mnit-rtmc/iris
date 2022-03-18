@@ -153,9 +153,9 @@ impl fmt::Display for HtmlStr<&String> {
     }
 }
 
-impl fmt::Display for HtmlStr<Option<&String>> {
+impl fmt::Display for HtmlStr<&Option<String>> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match &self.val {
+        match self.val.as_ref() {
             Some(val) => self.fmt_encode(val, f),
             None => Ok(()),
         }

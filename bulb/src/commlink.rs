@@ -125,7 +125,7 @@ impl CommLinkAnc {
             let tname = Controller::TNAME;
             for ctrl in controllers {
                 let drop_id = ctrl.drop_id;
-                let loc = HtmlStr::new(ctrl.location.as_ref()).with_len(32);
+                let loc = HtmlStr::new(&ctrl.location).with_len(32);
                 let row = format!(
                     "<div class='row'>\
                         <span>:{drop_id}</span>\

@@ -79,7 +79,7 @@ impl Card for WeatherSensor {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let location = HtmlStr::new(self.location.as_ref()).with_len(12);
+        let location = HtmlStr::new(&self.location).with_len(12);
         let disabled = disabled_attr(self.controller.is_some());
         format!(
             "<span{disabled}>{location}</span>\
@@ -90,10 +90,10 @@ impl Card for WeatherSensor {
     /// Convert to status HTML
     fn to_html_status(&self, _anc: &WeatherSensorAnc) -> String {
         let tname = Controller::TNAME;
-        let location = HtmlStr::new(self.location.as_ref()).with_len(64);
-        let site_id = HtmlStr::new(self.site_id.as_ref());
-        let alt_id = HtmlStr::new(self.alt_id.as_ref());
-        let controller = HtmlStr::new(self.controller.as_ref());
+        let location = HtmlStr::new(&self.location).with_len(64);
+        let site_id = HtmlStr::new(&self.site_id);
+        let alt_id = HtmlStr::new(&self.alt_id);
+        let controller = HtmlStr::new(&self.controller);
         format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
@@ -112,10 +112,10 @@ impl Card for WeatherSensor {
 
     /// Convert to edit HTML
     fn to_html_edit(&self, _anc: &WeatherSensorAnc) -> String {
-        let site_id = HtmlStr::new(self.site_id.as_ref());
-        let alt_id = HtmlStr::new(self.alt_id.as_ref());
+        let site_id = HtmlStr::new(&self.site_id);
+        let alt_id = HtmlStr::new(&self.alt_id);
         let notes = HtmlStr::new(&self.notes);
-        let controller = HtmlStr::new(self.controller.as_ref());
+        let controller = HtmlStr::new(&self.controller);
         let pin = OptVal(self.pin);
         format!(
             "<div class='row'>\
