@@ -82,7 +82,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	/** Load all the geo locations */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, GeoLocImpl.class);
-		store.query("SELECT name, notify_tag, roadway, road_dir, " +
+		store.query("SELECT name, resource_n, roadway, road_dir, " +
 			"cross_street, cross_dir, cross_mod, landmark, lat, " +
 			"lon FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()
@@ -98,7 +98,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("notify_tag", notify_tag);
+		map.put("resource_n", resource_n);
 		map.put("roadway", roadway);
 		map.put("road_dir", road_dir);
 		map.put("cross_street", cross_street);
@@ -130,14 +130,14 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	}
 
 	/** Create a new geo location */
-	public GeoLocImpl(String n, String nt) {
+	public GeoLocImpl(String n, String rn) {
 		super(n);
-		notify_tag = nt;
+		resource_n = rn;
 	}
 	
 	/** Create a new geo location */
-	public GeoLocImpl(String n, String nt, Double lt, Double ln) {
-		this(n, nt);
+	public GeoLocImpl(String n, String rn, Double lt, Double ln) {
+		this(n, rn);
 		lat = lt;
 		lon = ln;
 	}
@@ -145,7 +145,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	/** Create a new geo location */
 	private GeoLocImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),          // name
-		     row.getString(2),          // notify_tag
+		     row.getString(2),          // resource_n
 		     row.getString(3),          // roadway
 		     row.getShort(4),           // road_dir
 		     row.getString(5),          // cross_street
@@ -158,10 +158,10 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	}
 
 	/** Create a new geo location */
-	private GeoLocImpl(String n, String nt, Road r, short rd, Road x,
+	private GeoLocImpl(String n, String rn, Road r, short rd, Road x,
 		short xd, short xm, String lm, Double lt, Double ln)
 	{
-		this(n, nt);
+		this(n, rn);
 		roadway = r;
 		road_dir = rd;
 		cross_street = x;
@@ -173,15 +173,15 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	}
 
 	/** Create a new geo location */
-	private GeoLocImpl(String n, String nt, String r, short rd, String x,
+	private GeoLocImpl(String n, String rn, String r, short rd, String x,
 		short xd, short xm, String lm, Double lt, Double ln)
 	{
-		this(n, nt, lookupRoad(r), rd, lookupRoad(x), xd, xm, lm,
+		this(n, rn, lookupRoad(r), rd, lookupRoad(x), xd, xm, lm,
 		     lt, ln);
 	}
 
 	/** Tag for pg_notify trigger on update */
-	private String notify_tag;
+	private String resource_n;
 
 	/** Roadway road */
 	private Road roadway;

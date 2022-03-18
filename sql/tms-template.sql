@@ -12,7 +12,7 @@
 --          'msg_user', 'msg_sched', 'msg_current', 'expire_time' (dms)
 --          'time_stamp' (parking_area)
 --          id (road_class)
---          name (r_node, road, any notify_tag in geo_loc)
+--          name (r_node, road, any resource_n in geo_loc)
 --
 SET client_encoding = 'UTF8';
 
@@ -158,7 +158,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.29.0
+database_version	5.30.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
@@ -502,6 +502,7 @@ administrator	permission	4
 administrator	road	4
 administrator	role	4
 administrator	user	4
+administrator	weather_sensor	4
 \.
 
 CREATE TRIGGER permission_notify_trig
@@ -933,35 +934,35 @@ WAY	f		f
 \.
 
 CREATE TABLE iris.geo_loc (
-	name VARCHAR(20) PRIMARY KEY,
-	notify_tag VARCHAR(20),
-	roadway VARCHAR(20) REFERENCES iris.road(name),
-	road_dir SMALLINT NOT NULL REFERENCES iris.direction(id),
-	cross_street VARCHAR(20) REFERENCES iris.road(name),
-	cross_dir SMALLINT NOT NULL REFERENCES iris.direction(id),
-	cross_mod SMALLINT NOT NULL REFERENCES iris.road_modifier(id),
-	landmark VARCHAR(24),
-	lat double precision,
-	lon double precision
+    name VARCHAR(20) PRIMARY KEY,
+    resource_n VARCHAR(16) REFERENCES iris.resource_type,
+    roadway VARCHAR(20) REFERENCES iris.road(name),
+    road_dir SMALLINT NOT NULL REFERENCES iris.direction(id),
+    cross_street VARCHAR(20) REFERENCES iris.road(name),
+    cross_dir SMALLINT NOT NULL REFERENCES iris.direction(id),
+    cross_mod SMALLINT NOT NULL REFERENCES iris.road_modifier(id),
+    landmark VARCHAR(24),
+    lat double precision,
+    lon double precision
 );
 
 CREATE FUNCTION iris.geo_loc_notify() RETURNS TRIGGER AS
-	$geo_loc_notify$
+    $geo_loc_notify$
 BEGIN
-	IF (TG_OP = 'DELETE') THEN
-		IF (OLD.notify_tag IS NOT NULL) THEN
-			PERFORM pg_notify(OLD.notify_tag, OLD.name);
-		END IF;
-	ELSIF (NEW.notify_tag IS NOT NULL) THEN
-		PERFORM pg_notify(NEW.notify_tag, NEW.name);
-	END IF;
-	RETURN NULL; -- AFTER trigger return is ignored
+    IF (TG_OP = 'DELETE') THEN
+        IF (OLD.resource_n IS NOT NULL) THEN
+            PERFORM pg_notify(OLD.resource_n, OLD.name);
+        END IF;
+    ELSIF (NEW.resource_n IS NOT NULL) THEN
+        PERFORM pg_notify(NEW.resource_n, NEW.name);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
 END;
 $geo_loc_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER geo_loc_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris.geo_loc
-	FOR EACH ROW EXECUTE PROCEDURE iris.geo_loc_notify();
+    AFTER INSERT OR UPDATE OR DELETE ON iris.geo_loc
+    FOR EACH ROW EXECUTE PROCEDURE iris.geo_loc_notify();
 
 CREATE FUNCTION iris.geo_location(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT)
 	RETURNS TEXT AS $geo_location$
