@@ -844,7 +844,6 @@ dependencies = [
  "anyhow",
  "async-std",
  "async-tls",
- "chrono",
  "convert_case",
  "env_logger",
  "log",

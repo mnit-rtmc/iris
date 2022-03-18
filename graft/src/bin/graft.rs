@@ -17,7 +17,6 @@
 use async_std::fs::metadata;
 use async_std::path::{Path, PathBuf};
 use async_std::task::spawn_blocking;
-use chrono::{Local, TimeZone};
 use convert_case::{Case, Casing};
 use core::time::Duration;
 use graft::sonar::{Connection, Result, SonarError};
@@ -35,65 +34,9 @@ use tide::{Body, Request, Response, StatusCode};
 /// Path for static files
 const STATIC_PATH: &str = "/var/www/html/iris/api";
 
-/// Slice of (type, attribute) tuples for JSON integer values
-const INTEGERS: &[(&str, &str)] = &[
-    ("alarm", "pin"),
-    ("alarm", "styles"),
-    ("cabinet_style", "police_panel_pin_1"),
-    ("cabinet_style", "police_panel_pin_2"),
-    ("cabinet_style", "watchdog_reset_pin_1"),
-    ("cabinet_style", "watchdog_reset_pin_2"),
-    ("cabinet_style", "dip"),
-    ("comm_config", "protocol"),
-    ("comm_config", "timeout_ms"),
-    ("comm_config", "poll_period_sec"),
-    ("comm_config", "long_poll_period_sec"),
-    ("comm_config", "idle_disconnect_sec"),
-    ("comm_config", "no_response_disconnect_sec"),
-    ("controller", "drop_id"),
-    ("controller", "condition"),
-    ("controller", "controller_err"),
-    ("controller", "checksum_err"),
-    ("controller", "parsing_err"),
-    ("controller", "timeout_err"),
-    ("controller", "success_ops"),
-    ("controller", "failed_ops"),
-    ("geo_loc", "road_dir"),
-    ("geo_loc", "cross_dir"),
-    ("geo_loc", "cross_mod"),
-    ("modem", "timeout_ms"),
-    ("modem", "state"),
-];
-
-/// Slice of (type, attribute) tuples for JSON float values
-const FLOATS: &[(&str, &str)] = &[
-    ("geo_loc", "lat"),
-    ("geo_loc", "lon"),
-];
-
-/// Slice of (type, attribute) tuples for JSON boolean values
-const BOOLS: &[(&str, &str)] = &[
-    ("alarm", "state"),
-    ("comm_config", "modem"),
-    ("comm_link", "poll_enabled"),
-    ("comm_link", "connected"),
-    ("modem", "enabled"),
-    ("role", "enabled"),
-    ("user", "enabled"),
-];
-
-/// Slice of (type, attribute) tuples for RFC 3339 time stamp values
-const STAMPS: &[(&str, &str)] = &[
-    ("alarm", "trigger_time"),
-    ("controller", "fail_time"),
-    ("dms", "expire_time"),
-];
-
 /// Slice of (type/attribute) tuples requiring Operate or higher permission
-const OPERATE: &[(&str, &str)] = &[
-    ("controller", "download"),
-    ("controller", "device_req"),
-];
+const OPERATE: &[(&str, &str)] =
+    &[("controller", "download"), ("controller", "device_req")];
 
 /// Slice of (type/attribute) tuples requiring Plan or higher permission
 const PLAN: &[(&str, &str)] = &[
@@ -113,10 +56,8 @@ const PLAN: &[(&str, &str)] = &[
 ];
 
 /// Check for type/key pairs in PATCH first pass
-const PATCH_FIRST_PASS: &[(&str, &str)] = &[
-    ("alarm", "pin"),
-    ("weather_sensor", "pin"),
-];
+const PATCH_FIRST_PASS: &[(&str, &str)] =
+    &[("alarm", "pin"), ("weather_sensor", "pin")];
 
 /// Access for permission records
 #[derive(Clone, Copy, Debug)]
@@ -125,15 +66,6 @@ pub enum Access {
     Operate,
     Plan,
     Configure,
-}
-
-/// Rename Sonar attributes to DB names
-fn rename_sonar_to_db(tp: &str, att: &str) -> String {
-    if tp == "controller" && att == "drop" {
-        "drop_id".to_string()
-    } else {
-        att.to_case(Case::Snake)
-    }
 }
 
 /// Trait to get HTTP status code from an error
@@ -192,19 +124,6 @@ fn bad_request(msg: &str) -> tide::Result {
 
 /// Add `POST` / `GET` / `PATCH` / `DELETE` routes for a Sonar object type
 macro_rules! add_routes {
-    ($app:expr, $tp:expr) => {
-        $app.at(concat!("/", $tp))
-            .get(|req| resource_get($tp, req))
-            .post(|req| sonar_object_post($tp, req));
-        $app.at(concat!("/", $tp, "/:name"))
-            .get(|req| sonar_object_get($tp, req))
-            .patch(|req| sonar_object_patch($tp, req))
-            .delete(|req| sonar_object_delete($tp, req));
-    };
-}
-
-/// Add `POST` / `PATCH` / `DELETE` routes for a Sonar object type
-macro_rules! add_routes_except_get {
     ($app:expr, $tp:expr) => {
         $app.at(concat!("/", $tp))
             .get(|req| resource_get($tp, req))
@@ -269,26 +188,84 @@ async fn main() -> tide::Result<()> {
     route.at("/login").post(login_post);
     route.at("/access").get(access_get);
     add_routes!(route, "alarm");
-    add_routes!(route, "cabinet_style");
-    add_routes!(route, "comm_config");
-    add_routes!(route, "comm_link");
-    add_routes!(route, "controller");
-    add_routes!(route, "modem");
-    add_routes_except_get!(route, "weather_sensor");
-    route.at("/weather_sensor/:name").get(|req| {
+    route.at("/alarm/:name").get(|req| {
         sql_get(
-            "weather_sensor",
-            "SELECT ws.name, location, geo_loc, controller, pin, site_id, \
-                    alt_id, notes, settings, sample \
-            FROM iris.weather_sensor ws \
-            LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
-            WHERE ws.name = $1",
+            "alarm",
+            "SELECT name, description, controller, pin, state, trigger_time \
+            FROM iris.alarm \
+            WHERE name = $1",
+            req,
+        )
+    });
+    add_routes!(route, "cabinet_style");
+    route.at("/cabinet_style/:name").get(|req| {
+        sql_get(
+            "cabinet_style",
+            "SELECT name, police_panel_pin_1, police_panel_pin_2, \
+                    watchdog_reset_pin_1, watchdog_reset_pin_2, dip \
+            FROM iris.cabinet_style \
+            WHERE name = $1",
+            req,
+        )
+    });
+    add_routes!(route, "comm_config");
+    route.at("/comm_config/:name").get(|req| {
+        sql_get(
+            "comm_config",
+            "SELECT name, description, protocol, modem, poll_period_sec, \
+                    long_poll_period_sec, timeout_ms, idle_disconnect_sec, \
+                    no_response_disconnect_sec \
+            FROM iris.comm_config \
+            WHERE name = $1",
+            req,
+        )
+    });
+    add_routes!(route, "comm_link");
+    route.at("/comm_link/:name").get(|req| {
+        sql_get(
+            "comm_link",
+            "SELECT name, description, uri, comm_config, poll_enabled, \
+                    connected \
+            FROM iris.comm_link \
+            WHERE name = $1",
+            req,
+        )
+    });
+    add_routes!(route, "controller");
+    route.at("/controller/:name").get(|req| {
+        sql_get(
+            "controller",
+            "SELECT c.name, location, geo_loc, comm_link, drop_id, \
+                    cabinet_style, condition, notes, password, version, \
+                    fail_time \
+            FROM iris.controller c \
+            LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
+            WHERE c.name = $1",
+            req,
+        )
+    });
+    add_routes!(route, "modem");
+    route.at("/modem/:name").get(|req| {
+        sql_get(
+            "modem",
+            "SELECT name, uri, config, enabled, timeout_ms \
+            FROM iris.modem \
+            WHERE name = $1",
             req,
         )
     });
     route
         .at("/geo_loc/:name")
-        .get(|req| sonar_object_get("geo_loc", req))
+        .get(|req| {
+            sql_get(
+                "geo_loc",
+                "SELECT name, roadway, road_dir, cross_street, cross_dir, \
+                        cross_mod, landmark, lat, lon \
+                FROM iris.geo_loc \
+                WHERE name = $1",
+                req,
+            )
+        })
         .patch(|req| sonar_object_patch("geo_loc", req));
     route.at("/road").get(|req| resource_get("road", req));
     route
@@ -300,8 +277,7 @@ async fn main() -> tide::Result<()> {
         .get(permission_get)
         .patch(permission_patch)
         .delete(permission_delete);
-    // can't use sonar_object_get due to capabilities array
-    add_routes_except_get!(route, "role");
+    add_routes!(route, "role");
     route.at("/role/:name").get(|req| {
         sql_get(
             "role",
@@ -309,14 +285,25 @@ async fn main() -> tide::Result<()> {
             req,
         )
     });
-    // can't use sonar_object_get due to domains array
-    add_routes_except_get!(route, "user");
+    add_routes!(route, "user");
     route.at("/user/:name").get(|req| {
         sql_get(
             "user",
             "SELECT name, full_name, role, enabled \
             FROM iris.i_user \
             WHERE name = $1",
+            req,
+        )
+    });
+    add_routes!(route, "weather_sensor");
+    route.at("/weather_sensor/:name").get(|req| {
+        sql_get(
+            "weather_sensor",
+            "SELECT ws.name, location, geo_loc, controller, pin, site_id, \
+                    alt_id, notes, settings, sample \
+            FROM iris.weather_sensor ws \
+            LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
+            WHERE ws.name = $1",
             req,
         )
     });
@@ -485,11 +472,21 @@ async fn sql_get_by_name(
     req: Request<State>,
 ) -> Result<String> {
     Access::View.check(resource_n, &req)?;
-    let name = req
-        .param("name")
-        .map_err(|_e| SonarError::InvalidName)?
-        .to_string();
+    let name = resource_name(&req)?;
     Ok(spawn_blocking(move || req.state().get_by_pkey(sql, &name)).await?)
+}
+
+/// Get resource name from a request
+fn resource_name(req: &Request<State>) -> Result<String> {
+    let name = req.param("name").map_err(|_e| SonarError::InvalidName)?;
+    let name = percent_decode_str(name)
+        .decode_utf8()
+        .or(Err(SonarError::InvalidName))?;
+    if name.len() > 64 || name.contains(invalid_char) || name.contains('/') {
+        Err(SonarError::InvalidName)
+    } else {
+        Ok(name.to_string())
+    }
 }
 
 /// IRIS host name
@@ -580,63 +577,6 @@ async fn resource_etag(path: &Path) -> Result<String> {
     let modified = meta.modified()?;
     let dur = modified.duration_since(SystemTime::UNIX_EPOCH)?.as_millis();
     Ok(format!("{dur:x}"))
-}
-
-/// `GET` a Sonar object and return JSON result
-async fn sonar_object_get(tp: &str, req: Request<State>) -> tide::Result {
-    // FIXME: make a DB request instead...
-    log::info!("GET {}", req.url());
-    let body = resp!(sonar_object_get_json(tp, req).await);
-    Ok(Response::builder(StatusCode::Ok)
-        .body(&body[..])
-        .content_type("application/json")
-        .build())
-}
-
-/// `GET` a Sonar object as JSON
-async fn sonar_object_get_json(
-    tp: &str,
-    req: Request<State>,
-) -> Result<String> {
-    Access::View.check(tp, &req)?;
-    let nm = obj_name(tp, &req)?;
-    // FIXME: make a DB request instead...
-    let mut c = connection(&req).await?;
-    let mut res = Map::new();
-    res.insert(
-        "name".to_string(),
-        Value::String(nm.split_once('/').unwrap().1.to_string()),
-    );
-    c.enumerate_object(&nm, |att, val| {
-        let att = rename_sonar_to_db(tp, att);
-        if let Some(val) = make_json(&(tp, &att), val) {
-            res.insert(att, val);
-        }
-        Ok(())
-    })
-    .await?;
-    Ok(Value::Object(res).to_string())
-}
-
-/// Make a JSON attribute value
-fn make_json(tp_att: &(&str, &str), val: &str) -> Option<Value> {
-    if INTEGERS.contains(tp_att) {
-        val.parse::<i64>().ok().map(|v| v.into())
-    } else if FLOATS.contains(tp_att) {
-        val.parse::<f64>().ok().map(|v| v.into())
-    } else if BOOLS.contains(tp_att) {
-        val.parse::<bool>().ok().map(|v| v.into())
-    } else if STAMPS.contains(tp_att) {
-        val.parse::<i64>().ok().map(|ms| {
-            let sec = ms / 1_000;
-            let ns = (ms % 1_000) as u32 * 1_000_000;
-            Local.timestamp(sec, ns).to_rfc3339().into()
-        })
-    } else if val != "\0" {
-        Some(val.into())
-    } else {
-        Some(Value::Null)
-    }
 }
 
 /// Create a Sonar object from a `POST` request
