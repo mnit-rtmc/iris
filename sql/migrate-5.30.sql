@@ -5,6 +5,36 @@ BEGIN;
 
 SELECT iris.update_version('5.29.0', '5.30.0');
 
+-- Handle NOTIFY for tables starting with underscore
+CREATE OR REPLACE FUNCTION iris.table_notify() RETURNS TRIGGER AS
+    $table_notify$
+BEGIN
+    PERFORM pg_notify(LTRIM(TG_TABLE_NAME, '_'), '');
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$table_notify$ LANGUAGE plpgsql;
+
+-- Use table_notify for camera_table_notify_trig
+DROP TRIGGER camera_table_notify_trig ON iris._camera;
+DROP FUNCTION iris.camera_table_notify();
+CREATE TRIGGER camera_table_notify_trig
+    AFTER INSERT OR DELETE ON iris._camera
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+-- Use table_notify for alarm_table_notify_trig
+DROP TRIGGER alarm_notify_trig ON iris._alarm;
+DROP FUNCTION iris.alarm_table_notify();
+CREATE TRIGGER alarm_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._alarm
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+-- Use table_notify for dms_table_notify_trig
+DROP TRIGGER dms_table_notify_trig ON iris._dms;
+DROP FUNCTION iris.dms_table_notify();
+CREATE TRIGGER dms_table_notify_trig
+    AFTER INSERT OR DELETE ON iris._dms
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 -- Special-case 'settings' / 'sample' changes in weather_sensor_notify_trig
 DROP TRIGGER weather_sensor_notify_trig ON iris._weather_sensor;
 
@@ -26,18 +56,9 @@ CREATE TRIGGER weather_sensor_notify_trig
     AFTER UPDATE ON iris._weather_sensor
     FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_notify();
 
--- Can't use iris.table_notify due to underscore (_weather_sensor)
-CREATE FUNCTION iris.weather_sensor_table_notify() RETURNS TRIGGER AS
-    $weather_sensor_table_notify$
-BEGIN
-    NOTIFY weather_sensor;
-    RETURN NULL; -- AFTER trigger return is ignored
-END;
-$weather_sensor_table_notify$ LANGUAGE plpgsql;
-
 CREATE TRIGGER weather_sensor_table_notify_trig
     AFTER INSERT OR DELETE ON iris._weather_sensor
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.weather_sensor_table_notify();
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 -- Rename geo_loc.notify_tag to resource_n
 ALTER TABLE iris.geo_loc

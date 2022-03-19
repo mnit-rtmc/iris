@@ -118,16 +118,16 @@ CREATE TABLE iris.system_attribute (
 );
 
 CREATE FUNCTION iris.table_notify() RETURNS TRIGGER AS
-	$table_notify$
+    $table_notify$
 BEGIN
-	PERFORM pg_notify(TG_TABLE_NAME, '');
-	RETURN NULL; -- AFTER trigger return is ignored
+    PERFORM pg_notify(LTRIM(TG_TABLE_NAME, '_'), '');
+    RETURN NULL; -- AFTER trigger return is ignored
 END;
 $table_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER system_attribute_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris.system_attribute
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    AFTER INSERT OR UPDATE OR DELETE ON iris.system_attribute
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 COPY iris.system_attribute (name, value) FROM stdin;
 action_plan_alert_list	
@@ -1653,18 +1653,9 @@ CREATE TRIGGER camera_notify_trig
 	AFTER UPDATE ON iris._camera
 	FOR EACH ROW EXECUTE PROCEDURE iris.camera_notify();
 
--- Can't use iris.table_notify due to underscore (_camera)
-CREATE FUNCTION iris.camera_table_notify() RETURNS TRIGGER AS
-    $camera_table_notify$
-BEGIN
-    NOTIFY camera;
-    RETURN NULL; -- AFTER trigger return is ignored
-END;
-$camera_table_notify$ LANGUAGE plpgsql;
-
 CREATE TRIGGER camera_table_notify_trig
     AFTER INSERT OR DELETE ON iris._camera
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.camera_table_notify();
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.camera AS
     SELECT c.name, geo_loc, controller, pin, notes, cam_num, cam_template,
@@ -1991,18 +1982,9 @@ CREATE TABLE iris._alarm (
 ALTER TABLE iris._alarm ADD CONSTRAINT _alarm_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
--- Can't use iris.table_notify due to underscore (_alarm)
-CREATE FUNCTION iris.alarm_table_notify() RETURNS TRIGGER AS
-    $alarm_table_notify$
-BEGIN
-    NOTIFY alarm;
-    RETURN NULL; -- AFTER trigger return is ignored
-END;
-$alarm_table_notify$ LANGUAGE plpgsql;
-
 CREATE TRIGGER alarm_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._alarm
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.alarm_table_notify();
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.alarm AS
     SELECT a.name, description, controller, pin, state, trigger_time
@@ -2954,18 +2936,9 @@ CREATE TRIGGER dms_notify_trig
     AFTER UPDATE ON iris._dms
     FOR EACH ROW EXECUTE PROCEDURE iris.dms_notify();
 
--- Can't use iris.table_notify due to underscore (_dms)
-CREATE FUNCTION iris.dms_table_notify() RETURNS TRIGGER AS
-    $dms_table_notify$
-BEGIN
-    NOTIFY dms;
-    RETURN NULL; -- AFTER trigger return is ignored
-END;
-$dms_table_notify$ LANGUAGE plpgsql;
-
 CREATE TRIGGER dms_table_notify_trig
     AFTER INSERT OR DELETE ON iris._dms
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.dms_table_notify();
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.dms AS
     SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
@@ -5263,18 +5236,9 @@ CREATE TRIGGER weather_sensor_notify_trig
     AFTER UPDATE ON iris._weather_sensor
     FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_notify();
 
--- Can't use iris.table_notify due to underscore (_weather_sensor)
-CREATE FUNCTION iris.weather_sensor_table_notify() RETURNS TRIGGER AS
-    $weather_sensor_table_notify$
-BEGIN
-    NOTIFY weather_sensor;
-    RETURN NULL; -- AFTER trigger return is ignored
-END;
-$weather_sensor_table_notify$ LANGUAGE plpgsql;
-
 CREATE TRIGGER weather_sensor_table_notify_trig
     AFTER INSERT OR DELETE ON iris._weather_sensor
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.weather_sensor_table_notify();
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.weather_sensor AS
     SELECT w.name, site_id, alt_id, geo_loc, controller, pin, notes, settings,
