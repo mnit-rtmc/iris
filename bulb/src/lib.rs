@@ -19,6 +19,7 @@ mod controller;
 mod error;
 mod fetch;
 mod geoloc;
+mod lanemarking;
 mod modem;
 mod permission;
 mod resource;

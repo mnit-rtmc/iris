@@ -230,11 +230,23 @@ const ALARM_RES: Resource = Resource::Simple(
 /// Beacon resource
 const BEACON_RES: Resource = Resource::Simple(
     "api/beacon",
-    Listen::Exclude("beacon", &["flashing"]),
+    Listen::All("beacon"),
     "SELECT row_to_json(r)::text FROM (\
         SELECT b.name, location, controller, message, notes, flashing \
         FROM iris.beacon b \
         LEFT JOIN geo_loc_view gl ON b.geo_loc = gl.name \
+        ORDER BY name\
+    ) r",
+);
+
+/// Lane marking resource
+const LANE_MARKING_RES: Resource = Resource::Simple(
+    "api/lane_marking",
+    Listen::All("lane_marking"),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT m.name, location, controller, notes, deployed \
+        FROM iris.lane_marking m \
+        LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
         ORDER BY name\
     ) r",
 );
@@ -519,6 +531,7 @@ const ALL: &[Resource] = &[
     ROAD_RES,             // Roads must be loaded before R_Nodes
     ALARM_RES,
     BEACON_RES,
+    LANE_MARKING_RES,
     CABINET_STYLE_RES,
     COMM_PROTOCOL_RES,
     COMM_CONFIG_RES,

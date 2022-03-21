@@ -21,42 +21,40 @@ use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
 
-/// Beacon
+/// Lane Marking
 #[derive(Debug, Default, Deserialize, Serialize)]
-pub struct Beacon {
+pub struct LaneMarking {
     pub name: String,
     pub location: Option<String>,
-    pub message: String,
     pub notes: String,
     pub controller: Option<String>,
-    pub flashing: bool,
+    pub deployed: bool,
     // full attributes
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
-    pub verify_pin: Option<u32>,
 }
 
-/// Ancillary beacon data
+/// Ancillary lane marking data
 #[derive(Debug, Default)]
-pub struct BeaconAnc;
+pub struct LaneMarkingAnc;
 
-impl AncillaryData for BeaconAnc {
-    type Resource = Beacon;
+impl AncillaryData for LaneMarkingAnc {
+    type Resource = LaneMarking;
 }
 
-impl fmt::Display for Beacon {
+impl fmt::Display for LaneMarking {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", HtmlStr::new(&self.name))
     }
 }
 
-impl Card for Beacon {
-    const TNAME: &'static str = "Beacon";
-    const ENAME: &'static str = "🔆 Beacon";
-    const UNAME: &'static str = "beacon";
+impl Card for LaneMarking {
+    const TNAME: &'static str = "LaneMarking";
+    const ENAME: &'static str = "⛙ Lane Marking";
+    const UNAME: &'static str = "lane_marking";
     const HAS_STATUS: bool = true;
 
-    type Ancillary = BeaconAnc;
+    type Ancillary = LaneMarkingAnc;
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
@@ -70,10 +68,9 @@ impl Card for Beacon {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &BeaconAnc) -> bool {
+    fn is_match(&self, search: &str, _anc: &LaneMarkingAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || self.message.contains_lower(search)
             || self.notes.contains_lower(search)
     }
 
@@ -88,19 +85,13 @@ impl Card for Beacon {
     }
 
     /// Convert to status HTML
-    fn to_html_status(&self, _anc: &BeaconAnc) -> String {
+    fn to_html_status(&self, _anc: &LaneMarkingAnc) -> String {
         let tname = Controller::TNAME;
         let location = HtmlStr::new(&self.location).with_len(64);
-        let message = HtmlStr::new(&self.message);
         let controller = HtmlStr::new(&self.controller);
         format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
-            </div>\
-            <div class='center-row'>\
-              <span class='blink-a'>🔆</span>\
-              <span class='sign'>{message}</span>\
-              <span class='blink-b'>🔆</span>\
             </div>\
             <div class='row'>\
               <label>Controller</label>\
@@ -111,19 +102,12 @@ impl Card for Beacon {
     }
 
     /// Convert to edit HTML
-    fn to_html_edit(&self, _anc: &BeaconAnc) -> String {
-        let message = HtmlStr::new(&self.message);
+    fn to_html_edit(&self, _anc: &LaneMarkingAnc) -> String {
         let notes = HtmlStr::new(&self.notes);
         let controller = HtmlStr::new(&self.controller);
         let pin = OptVal(self.pin);
-        let verify_pin = OptVal(self.verify_pin);
         format!(
             "<div class='row'>\
-              <label for='edit_msg'>Message</label>\
-              <textarea id='edit_msg' maxlength='128' rows='3' \
-                        cols='24'>{message}</textarea>\
-            </div>\
-            <div class='row'>\
               <label for='edit_notes'>Notes</label>\
               <textarea id='edit_notes' maxlength='128' rows='2' \
                         cols='24'>{notes}</textarea>\
@@ -137,11 +121,6 @@ impl Card for Beacon {
               <label for='edit_pin'>Pin</label>\
               <input id='edit_pin' type='number' min='1' max='104' \
                      size='8' value='{pin}'/>\
-            </div>\
-            <div class='row'>\
-              <label for='edit_ver'>Verify Pin</label>\
-              <input id='edit_ver' type='number' min='1' max='104' \
-                     size='8' value='{verify_pin}'/>\
             </div>"
         )
     }
@@ -150,11 +129,6 @@ impl Card for Beacon {
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         let mut obj = Map::new();
-        if let Some(message) = doc.text_area_parse::<String>("edit_msg") {
-            if message != val.message {
-                obj.insert("message".to_string(), Value::String(message));
-            }
-        }
         if let Some(notes) = doc.text_area_parse::<String>("edit_notes") {
             if notes != val.notes {
                 obj.insert("notes".to_string(), Value::String(notes));
@@ -169,10 +143,6 @@ impl Card for Beacon {
         let pin = doc.input_parse::<u32>("edit_pin");
         if pin != val.pin {
             obj.insert("pin".to_string(), OptVal(pin).into());
-        }
-        let verify_pin = doc.input_parse::<u32>("edit_ver");
-        if verify_pin != val.verify_pin {
-            obj.insert("verify_pin".to_string(), OptVal(verify_pin).into());
         }
         Ok(Value::Object(obj).to_string())
     }

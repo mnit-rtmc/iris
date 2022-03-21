@@ -492,11 +492,13 @@ CREATE UNIQUE INDEX permission_role_resource_n_batch_idx
 
 COPY iris.permission (role, resource_n, access_n) FROM stdin;
 administrator	alarm	4
+administrator	beacon	4
 administrator	cabinet_style	4
 administrator	comm_config	4
 administrator	comm_link	4
 administrator	controller	4
 administrator	geo_loc	4
+administrator	lane_marking	4
 administrator	modem	4
 administrator	permission	4
 administrator	road	4
@@ -1973,10 +1975,10 @@ CREATE TABLE iris.camera_action (
 -- Alarms
 --
 CREATE TABLE iris._alarm (
-	name VARCHAR(20) PRIMARY KEY,
-	description VARCHAR(24) NOT NULL,
-	state BOOLEAN NOT NULL,
-	trigger_time TIMESTAMP WITH time zone
+    name VARCHAR(20) PRIMARY KEY,
+    description VARCHAR(24) NOT NULL,
+    state BOOLEAN NOT NULL,
+    trigger_time TIMESTAMP WITH time zone
 );
 
 ALTER TABLE iris._alarm ADD CONSTRAINT _alarm_fkey
@@ -4146,16 +4148,21 @@ CREATE TABLE cap.alert_info (
 -- Lane Markings
 --
 CREATE TABLE iris._lane_marking (
-	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-	notes VARCHAR(64) NOT NULL
+    name VARCHAR(20) PRIMARY KEY,
+    geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+    notes VARCHAR(64) NOT NULL,
+    deployed BOOLEAN NOT NULL
 );
 
 ALTER TABLE iris._lane_marking ADD CONSTRAINT _lane_marking_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
+CREATE TRIGGER lane_marking_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._lane_marking
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 CREATE VIEW iris.lane_marking AS
-    SELECT m.name, geo_loc, controller, pin, notes
+    SELECT m.name, geo_loc, controller, pin, notes, deployed
     FROM iris._lane_marking m
     JOIN iris.controller_io cio ON m.name = cio.name;
 
@@ -4164,8 +4171,8 @@ CREATE FUNCTION iris.lane_marking_insert() RETURNS TRIGGER AS
 BEGIN
     INSERT INTO iris.controller_io (name, controller, pin)
          VALUES (NEW.name, NEW.controller, NEW.pin);
-    INSERT INTO iris._lane_marking (name, geo_loc, notes)
-         VALUES (NEW.name, NEW.geo_loc, NEW.notes);
+    INSERT INTO iris._lane_marking (name, geo_loc, notes, deployed)
+         VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.deployed);
     RETURN NEW;
 END;
 $lane_marking_insert$ LANGUAGE plpgsql;
@@ -4183,7 +4190,8 @@ BEGIN
      WHERE name = OLD.name;
     UPDATE iris._lane_marking
        SET geo_loc = NEW.geo_loc,
-           notes = NEW.notes
+           notes = NEW.notes,
+           deployed = NEW.deployed
      WHERE name = OLD.name;
     RETURN NEW;
 END;
@@ -4201,7 +4209,7 @@ CREATE VIEW lane_marking_view AS
     SELECT m.name, m.notes, m.geo_loc, l.roadway, l.road_dir, l.cross_mod,
            l.cross_street, l.cross_dir, l.landmark, l.lat, l.lon, l.corridor,
            l.location, m.controller, m.pin, ctr.comm_link, ctr.drop_id,
-           ctr.condition
+           ctr.condition, m.deployed
     FROM iris.lane_marking m
     LEFT JOIN geo_loc_view l ON m.geo_loc = l.name
     LEFT JOIN controller_view ctr ON m.controller = ctr.name;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,7 +103,7 @@ public class OpDeployLaneMarking extends Op170Device {
 	@Override
 	public void cleanup() {
 		if (isSuccess())
-			lane_marking.setDeployedStatus(deploy);
+			lane_marking.setDeployedNotify(deploy);
 		super.cleanup();
 	}
 }

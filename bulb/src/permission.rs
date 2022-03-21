@@ -289,6 +289,7 @@ pub fn permissions_html(access: Vec<Permission>) -> String {
             add_option::<crate::commconfig::CommConfig>(perm, &mut html);
             add_option::<crate::commlink::CommLink>(perm, &mut html);
             add_option::<crate::controller::Controller>(perm, &mut html);
+            add_option::<crate::lanemarking::LaneMarking>(perm, &mut html);
             add_option::<crate::modem::Modem>(perm, &mut html);
             add_option::<Permission>(perm, &mut html);
             add_option::<crate::role::Role>(perm, &mut html);

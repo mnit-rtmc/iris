@@ -19,6 +19,7 @@ use crate::controller::Controller;
 use crate::error::{Error, Result};
 use crate::fetch::{fetch_delete, fetch_get, fetch_patch, fetch_post};
 use crate::geoloc::GeoLoc;
+use crate::lanemarking::LaneMarking;
 use crate::modem::Modem;
 use crate::permission::Permission;
 use crate::role::Role;
@@ -249,6 +250,7 @@ pub async fn res_list(res: &str, search: &str) -> Result<String> {
         CommConfig::TNAME => res_build_list::<CommConfig>(search).await,
         CommLink::TNAME => res_build_list::<CommLink>(search).await,
         Controller::TNAME => res_build_list::<Controller>(search).await,
+        LaneMarking::TNAME => res_build_list::<LaneMarking>(search).await,
         Modem::TNAME => res_build_list::<Modem>(search).await,
         Permission::TNAME => res_build_list::<Permission>(search).await,
         Role::TNAME => res_build_list::<Role>(search).await,
@@ -297,6 +299,7 @@ pub async fn res_get(res: &str, name: &str, view: View) -> Result<String> {
         CommLink::TNAME => res_build_card::<CommLink>(name, view).await,
         Controller::TNAME => res_build_card::<Controller>(name, view).await,
         GeoLoc::TNAME => res_build_card::<GeoLoc>(name, view).await,
+        LaneMarking::TNAME => res_build_card::<LaneMarking>(name, view).await,
         Modem::TNAME => res_build_card::<Modem>(name, view).await,
         Permission::TNAME => res_build_card::<Permission>(name, view).await,
         Role::TNAME => res_build_card::<Role>(name, view).await,
@@ -437,6 +440,7 @@ pub async fn res_create(res: &str) -> Result<()> {
         CommConfig::TNAME => create_and_post::<CommConfig>().await,
         CommLink::TNAME => create_and_post::<CommLink>().await,
         Controller::TNAME => create_and_post::<Controller>().await,
+        LaneMarking::TNAME => create_and_post::<LaneMarking>().await,
         Modem::TNAME => create_and_post::<Modem>().await,
         Permission::TNAME => create_and_post::<Permission>().await,
         Role::TNAME => create_and_post::<Role>().await,
@@ -468,6 +472,7 @@ pub async fn res_save(res: &str, name: &str) -> Result<()> {
         CommLink::TNAME => fetch_save_card::<CommLink>(name).await,
         Controller::TNAME => fetch_save_card::<Controller>(name).await,
         GeoLoc::TNAME => fetch_save_card::<GeoLoc>(name).await,
+        LaneMarking::TNAME => fetch_save_card::<LaneMarking>(name).await,
         Modem::TNAME => fetch_save_card::<Modem>(name).await,
         Permission::TNAME => fetch_save_card::<Permission>(name).await,
         Role::TNAME => fetch_save_card::<Role>(name).await,
@@ -495,6 +500,7 @@ pub async fn res_save_loc(res: &str, name: &str) -> Result<()> {
     let geo_loc = match res {
         Beacon::TNAME => fetch_geo_loc::<Beacon>(name).await?,
         Controller::TNAME => fetch_geo_loc::<Controller>(name).await?,
+        LaneMarking::TNAME => fetch_geo_loc::<LaneMarking>(name).await?,
         WeatherSensor::TNAME => fetch_geo_loc::<WeatherSensor>(name).await?,
         _ => None,
     };
@@ -522,6 +528,7 @@ pub async fn res_delete(res: &str, name: &str) -> Result<()> {
         CommConfig::TNAME => res_delete_card::<CommConfig>(name).await,
         CommLink::TNAME => res_delete_card::<CommLink>(name).await,
         Controller::TNAME => res_delete_card::<Controller>(name).await,
+        LaneMarking::TNAME => res_delete_card::<LaneMarking>(name).await,
         Modem::TNAME => res_delete_card::<Modem>(name).await,
         Permission::TNAME => res_delete_card::<Permission>(name).await,
         Role::TNAME => res_delete_card::<Role>(name).await,

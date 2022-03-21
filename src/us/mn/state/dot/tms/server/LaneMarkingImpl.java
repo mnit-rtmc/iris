@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -37,17 +38,12 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 	/** Load all the lane markings */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, LaneMarkingImpl.class);
-		store.query("SELECT name, geo_loc, controller, pin, notes " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, geo_loc, controller, pin, notes, " +
+			"deployed FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new LaneMarkingImpl(
-					row.getString(1),	// name
-					row.getString(2),	// geo_loc
-					row.getString(3),	// controller
-					row.getInt(4),		// pin
-					row.getString(5)	// notes
-				));
+				namespace.addObject(new LaneMarkingImpl(row));
 			}
 		});
 	}
@@ -61,6 +57,7 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
+		map.put("deployed", deployed);
 		return map;
 	}
 
@@ -85,17 +82,24 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 	}
 
 	/** Create a lane marking */
-	private LaneMarkingImpl(String n, GeoLocImpl l, ControllerImpl c, int p,
-		String nt)
-	{
-		super(n, c, p, nt);
-		geo_loc = l;
-		initTransients();
+	private LaneMarkingImpl(ResultSet row) throws SQLException {
+		this(row.getString(1), // name
+		     row.getString(2), // geo_loc
+		     row.getString(3), // controller
+		     row.getInt(4),    // pin
+		     row.getString(5), // notes
+		     row.getBoolean(6) // deployed
+		);
 	}
 
 	/** Create a lane marking */
-	private LaneMarkingImpl(String n, String l, String c, int p, String nt){
-		this(n, lookupGeoLoc(l), lookupController(c), p, nt);
+	private LaneMarkingImpl(String n, String gl, String c, int p, String nt,
+		boolean d)
+	{
+		super(n, lookupController(c), p, nt);
+		geo_loc = lookupGeoLoc(gl);
+		deployed = d;
+		initTransients();
 	}
 
 	/** Destroy an object */
@@ -132,9 +136,17 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 	}
 
 	/** Set the actual deployed status from the controller */
-	public void setDeployedStatus(boolean d) {
-		if (d != deployed)
-			deployed = d;
+	public void setDeployedNotify(boolean d) {
+		if (d != deployed) {
+			try {
+				store.update(this, "deployed", d);
+				deployed = d;
+				notifyAttribute("deployed");
+			}
+			catch (TMSException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/** Get a lane marking poller */

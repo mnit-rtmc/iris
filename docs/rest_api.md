@@ -138,6 +138,15 @@ The response for these requests contains an ETag header, derived from the file's
 | Read Only    | name, {`resource_n`} |
 | 🔧 Configure | roadway, road\_dir, cross\_street, cross\_dir, cross\_mod, landmark, {`lat`}, {`lon`} |
 
+### `lane_marking`
+
+| Access       | Attributes                  |
+|--------------|-----------------------------|
+| Read Only    | name, location, {`geo_loc`} |
+| 👉 Operate   | deployed                    |
+| 💡 Plan      | notes                       |
+| 🔧 Configure | controller, {`pin`}         |
+
 ### `modem`
 
 | Access       | Attributes              |

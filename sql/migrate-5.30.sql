@@ -87,6 +87,8 @@ CREATE TRIGGER geo_loc_notify_trig
 ALTER TABLE iris.geo_loc DROP COLUMN notify_tag;
 
 COPY iris.permission (role, resource_n, access_n) FROM stdin;
+administrator	beacon	4
+administrator	lane_marking	4
 administrator	weather_sensor	4
 \.
 
@@ -203,5 +205,73 @@ CREATE TRIGGER beacon_notify_trig
 CREATE TRIGGER beacon_table_notify_trig
     AFTER INSERT OR DELETE ON iris._beacon
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+-- Add deployed column to lane_marking
+DROP VIEW lane_marking_view;
+DROP VIEW iris.lane_marking;
+DROP FUNCTION iris.lane_marking_insert();
+DROP FUNCTION iris.lane_marking_update();
+
+CREATE TRIGGER lane_marking_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._lane_marking
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+ALTER TABLE iris._lane_marking ADD COLUMN deployed BOOLEAN;
+UPDATE iris._lane_marking SET deployed = false;
+ALTER TABLE iris._lane_marking ALTER COLUMN deployed SET NOT NULL;
+
+CREATE VIEW iris.lane_marking AS
+    SELECT m.name, geo_loc, controller, pin, notes, deployed
+    FROM iris._lane_marking m
+    JOIN iris.controller_io cio ON m.name = cio.name;
+
+CREATE FUNCTION iris.lane_marking_insert() RETURNS TRIGGER AS
+    $lane_marking_insert$
+BEGIN
+    INSERT INTO iris.controller_io (name, controller, pin)
+         VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris._lane_marking (name, geo_loc, notes, deployed)
+         VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.deployed);
+    RETURN NEW;
+END;
+$lane_marking_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lane_marking_insert_trig
+    INSTEAD OF INSERT ON iris.lane_marking
+    FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_insert();
+
+CREATE FUNCTION iris.lane_marking_update() RETURNS TRIGGER AS
+    $lane_marking_update$
+BEGIN
+    UPDATE iris.controller_io
+       SET controller = NEW.controller,
+           pin = NEW.pin
+     WHERE name = OLD.name;
+    UPDATE iris._lane_marking
+       SET geo_loc = NEW.geo_loc,
+           notes = NEW.notes,
+           deployed = NEW.deployed
+     WHERE name = OLD.name;
+    RETURN NEW;
+END;
+$lane_marking_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lane_marking_update_trig
+    INSTEAD OF UPDATE ON iris.lane_marking
+    FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_update();
+
+CREATE TRIGGER lane_marking_delete_trig
+    INSTEAD OF DELETE ON iris.lane_marking
+    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+
+CREATE VIEW lane_marking_view AS
+    SELECT m.name, m.notes, m.geo_loc, l.roadway, l.road_dir, l.cross_mod,
+           l.cross_street, l.cross_dir, l.landmark, l.lat, l.lon, l.corridor,
+           l.location, m.controller, m.pin, ctr.comm_link, ctr.drop_id,
+           ctr.condition, m.deployed
+    FROM iris.lane_marking m
+    LEFT JOIN geo_loc_view l ON m.geo_loc = l.name
+    LEFT JOIN controller_view ctr ON m.controller = ctr.name;
+GRANT SELECT ON lane_marking_view TO PUBLIC;
 
 COMMIT;

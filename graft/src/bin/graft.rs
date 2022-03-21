@@ -39,6 +39,7 @@ const OPERATE: &[(&str, &str)] = &[
     ("beacon", "flashing"),
     ("controller", "download"),
     ("controller", "device_req"),
+    ("lane_marking", "deployed"),
 ];
 
 /// Slice of (type/attribute) tuples requiring Plan or higher permission
@@ -52,6 +53,7 @@ const PLAN: &[(&str, &str)] = &[
     ("comm_link", "poll_enabled"),
     ("controller", "condition"),
     ("controller", "notes"),
+    ("lane_marking", "notes"),
     ("modem", "enabled"),
     ("modem", "timeout_ms"),
     ("role", "enabled"),
@@ -66,6 +68,7 @@ const PATCH_FIRST_PASS: &[(&str, &str)] = &[
     ("alarm", "pin"),
     ("beacon", "pin"),
     ("beacon", "verify_pin"),
+    ("lane_marking", "pin"),
     ("weather_sensor", "pin"),
 ];
 
@@ -263,6 +266,18 @@ async fn main() -> tide::Result<()> {
             FROM iris.controller c \
             LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
             WHERE c.name = $1",
+            req,
+        )
+    });
+    add_routes!(route, "lane_marking");
+    route.at("/lane_marking/:name").get(|req| {
+        sql_get(
+            "lane_marking",
+            "SELECT m.name, location, geo_loc, controller, pin, notes, \
+                    deployed \
+            FROM iris.lane_marking m \
+            LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
+            WHERE m.name = $1",
             req,
         )
     });
