@@ -937,7 +937,7 @@ WAY	f		f
 
 CREATE TABLE iris.geo_loc (
     name VARCHAR(20) PRIMARY KEY,
-    resource_n VARCHAR(16) REFERENCES iris.resource_type,
+    resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
     roadway VARCHAR(20) REFERENCES iris.road(name),
     road_dir SMALLINT NOT NULL REFERENCES iris.direction(id),
     cross_street VARCHAR(20) REFERENCES iris.road(name),
@@ -948,23 +948,17 @@ CREATE TABLE iris.geo_loc (
     lon double precision
 );
 
-CREATE FUNCTION iris.geo_loc_notify() RETURNS TRIGGER AS
-    $geo_loc_notify$
+CREATE FUNCTION iris.resource_notify() RETURNS TRIGGER AS
+    $resource_notify$
 BEGIN
-    IF (TG_OP = 'DELETE') THEN
-        IF (OLD.resource_n IS NOT NULL) THEN
-            PERFORM pg_notify(OLD.resource_n, OLD.name);
-        END IF;
-    ELSIF (NEW.resource_n IS NOT NULL) THEN
-        PERFORM pg_notify(NEW.resource_n, NEW.name);
-    END IF;
+    PERFORM pg_notify(NEW.resource_n, NEW.name);
     RETURN NULL; -- AFTER trigger return is ignored
 END;
-$geo_loc_notify$ LANGUAGE plpgsql;
+$resource_notify$ LANGUAGE plpgsql;
 
-CREATE TRIGGER geo_loc_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.geo_loc
-    FOR EACH ROW EXECUTE PROCEDURE iris.geo_loc_notify();
+CREATE TRIGGER resource_notify_trig
+    AFTER UPDATE ON iris.geo_loc
+    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify();
 
 CREATE FUNCTION iris.geo_location(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT)
 	RETURNS TEXT AS $geo_location$
@@ -1509,10 +1503,19 @@ GRANT SELECT ON comm_event_view TO PUBLIC;
 
 CREATE TABLE iris.controller_io (
     name VARCHAR(20) PRIMARY KEY,
+    resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
     controller VARCHAR(20) REFERENCES iris.controller,
     pin INTEGER NOT NULL,
     UNIQUE (controller, pin)
 );
+
+CREATE TRIGGER controller_io_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.controller_io
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE TRIGGER resource_notify_trig
+    AFTER UPDATE ON iris.controller_io
+    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify();
 
 CREATE FUNCTION iris.controller_io_delete() RETURNS TRIGGER AS
     $controller_io_delete$
@@ -1528,7 +1531,7 @@ END;
 $controller_io_delete$ LANGUAGE plpgsql;
 
 CREATE VIEW controller_io_view AS
-    SELECT name, controller, pin
+    SELECT name, resource_n, controller, pin
     FROM iris.controller_io;
 GRANT SELECT ON controller_io_view TO PUBLIC;
 
@@ -1669,8 +1672,8 @@ CREATE VIEW iris.camera AS
 CREATE FUNCTION iris.camera_insert() RETURNS TRIGGER AS
     $camera_insert$
 BEGIN
-    INSERT INTO iris.controller_io (name, controller, pin)
-         VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'camera', NEW.controller, NEW.pin);
     INSERT INTO iris._camera (
         name, geo_loc, notes, cam_num, cam_template, encoder_type, enc_address,
         enc_port, enc_mcast, enc_channel, publish, streamable, video_loss
@@ -1995,8 +1998,8 @@ CREATE VIEW iris.alarm AS
 CREATE FUNCTION iris.alarm_insert() RETURNS TRIGGER AS
     $alarm_insert$
 BEGIN
-    INSERT INTO iris.controller_io (name, controller, pin)
-         VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'alarm', NEW.controller, NEW.pin);
     INSERT INTO iris._alarm (name, description, state, trigger_time)
          VALUES (NEW.name, NEW.description, NEW.state, NEW.trigger_time);
     RETURN NEW;
@@ -2100,8 +2103,8 @@ CREATE VIEW iris.beacon AS
 CREATE FUNCTION iris.beacon_insert() RETURNS TRIGGER AS
     $beacon_insert$
 BEGIN
-    INSERT INTO iris.controller_io (name, controller, pin)
-        VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+        VALUES (NEW.name, 'beacon', NEW.controller, NEW.pin);
     INSERT INTO iris._device_preset (name, preset)
         VALUES (NEW.name, NEW.preset);
     INSERT INTO iris._beacon (name, geo_loc, notes, message, verify_pin,
@@ -2240,8 +2243,8 @@ CREATE VIEW iris.detector AS
 CREATE FUNCTION iris.detector_insert() RETURNS TRIGGER AS
     $detector_insert$
 BEGIN
-    INSERT INTO iris.controller_io (name, controller, pin)
-         VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'detector', NEW.controller, NEW.pin);
     INSERT INTO iris._detector (
         name, r_node, lane_type, lane_number, abandoned, force_fail, auto_fail,
         field_length, fake, notes
@@ -2416,8 +2419,8 @@ CREATE VIEW iris.gps AS
 CREATE FUNCTION iris.gps_insert() RETURNS TRIGGER AS
     $gps_insert$
 BEGIN
-    INSERT INTO iris.controller_io (name, controller, pin)
-         VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'gps', NEW.controller, NEW.pin);
     INSERT INTO iris._gps (name, notes, latest_poll, latest_sample, lat,lon)
          VALUES (NEW.name, NEW.notes, NEW.latest_poll, NEW.latest_sample,
                  NEW.lat, NEW.lon);
@@ -2426,8 +2429,8 @@ END;
 $gps_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER gps_insert_trig
-	INSTEAD OF INSERT ON iris.gps
-	FOR EACH ROW EXECUTE PROCEDURE iris.gps_insert();
+    INSTEAD OF INSERT ON iris.gps
+    FOR EACH ROW EXECUTE PROCEDURE iris.gps_insert();
 
 CREATE FUNCTION iris.gps_update() RETURNS TRIGGER AS
     $gps_update$
@@ -2966,8 +2969,8 @@ CREATE VIEW iris.dms AS
 CREATE FUNCTION iris.dms_insert() RETURNS TRIGGER AS
     $dms_insert$
 BEGIN
-    INSERT INTO iris.controller_io (name, controller, pin)
-         VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'dms', NEW.controller, NEW.pin);
     INSERT INTO iris._device_preset (name, preset)
          VALUES (NEW.name, NEW.preset);
     INSERT INTO iris._dms (
@@ -3269,8 +3272,8 @@ CREATE VIEW iris.gate_arm_array AS
 CREATE FUNCTION iris.gate_arm_array_insert() RETURNS TRIGGER AS
     $gate_arm_array_insert$
 BEGIN
-    INSERT INTO iris.controller_io (name, controller, pin)
-         VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'gate_arm_array', NEW.controller, NEW.pin);
     INSERT INTO iris._gate_arm_array (
         name, geo_loc, notes, opposing, prereq, camera, approach, action_plan,
         arm_state, interlock
@@ -3350,8 +3353,8 @@ CREATE VIEW iris.gate_arm AS
 CREATE FUNCTION iris.gate_arm_insert() RETURNS TRIGGER AS
     $gate_arm_insert$
 BEGIN
-    INSERT INTO iris.controller_io (name, controller, pin)
-         VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'gate_arm', NEW.controller, NEW.pin);
     INSERT INTO iris._gate_arm (
         name, ga_array, idx, notes, arm_state, fault
     ) VALUES (
@@ -4169,8 +4172,8 @@ CREATE VIEW iris.lane_marking AS
 CREATE FUNCTION iris.lane_marking_insert() RETURNS TRIGGER AS
     $lane_marking_insert$
 BEGIN
-    INSERT INTO iris.controller_io (name, controller, pin)
-         VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'lane_marking', NEW.controller, NEW.pin);
     INSERT INTO iris._lane_marking (name, geo_loc, notes, deployed)
          VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.deployed);
     RETURN NEW;
@@ -4254,8 +4257,8 @@ CREATE VIEW iris.lcs_array AS
 CREATE FUNCTION iris.lcs_array_insert() RETURNS TRIGGER AS
     $lcs_array_insert$
 BEGIN
-    INSERT INTO iris.controller_io (name, controller, pin)
-         VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'lcs_array', NEW.controller, NEW.pin);
     INSERT INTO iris._lcs_array(name, notes, shift, lcs_lock)
          VALUES (NEW.name, NEW.notes, NEW.shift, NEW.lcs_lock);
     RETURN NEW;
@@ -4347,8 +4350,8 @@ CREATE VIEW iris.lcs_indication AS
 CREATE FUNCTION iris.lcs_indication_insert() RETURNS TRIGGER AS
     $lcs_indication_insert$
 BEGIN
-    INSERT INTO iris.controller_io (name, controller, pin)
-         VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'lcs_indication', NEW.controller, NEW.pin);
     INSERT INTO iris._lcs_indication(name, lcs, indication)
          VALUES (NEW.name, NEW.lcs, NEW.indication);
     RETURN NEW;
@@ -4598,8 +4601,8 @@ CREATE VIEW iris.ramp_meter AS
 CREATE FUNCTION iris.ramp_meter_insert() RETURNS TRIGGER AS
     $ramp_meter_insert$
 BEGIN
-    INSERT INTO iris.controller_io (name, controller, pin)
-         VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'ramp_meter', NEW.controller, NEW.pin);
     INSERT INTO iris._device_preset (name, preset)
          VALUES (NEW.name, NEW.preset);
     INSERT INTO iris._ramp_meter (
@@ -4833,8 +4836,8 @@ CREATE VIEW iris.tag_reader AS
 CREATE FUNCTION iris.tag_reader_insert() RETURNS TRIGGER AS
     $tag_reader_insert$
 BEGIN
-    INSERT INTO iris.controller_io (name, controller, pin)
-         VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'tag_reader', NEW.controller, NEW.pin);
     INSERT INTO iris._tag_reader (
         name, geo_loc, notes, toll_zone, downlink_freq_khz, uplink_freq_khz,
         sego_atten_downlink_db, sego_atten_uplink_db, sego_data_detect_db,
@@ -5078,8 +5081,8 @@ CREATE VIEW iris.video_monitor AS
 CREATE FUNCTION iris.video_monitor_insert() RETURNS TRIGGER AS
     $video_monitor_insert$
 BEGIN
-    INSERT INTO iris.controller_io (name, controller, pin)
-         VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'video_monitor', NEW.controller, NEW.pin);
     INSERT INTO iris._video_monitor (
         name, notes, group_n, mon_num, restricted, monitor_style, camera
     ) VALUES (
@@ -5166,8 +5169,8 @@ CREATE VIEW iris.flow_stream AS
 CREATE FUNCTION iris.flow_stream_insert() RETURNS TRIGGER AS
     $flow_stream_insert$
 BEGIN
-    INSERT INTO iris.controller_io (name, controller, pin)
-         VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'flow_stream', NEW.controller, NEW.pin);
     INSERT INTO iris._flow_stream (
         name, restricted, loc_overlay, quality, camera, mon_num, address, port,
         status
@@ -5269,8 +5272,8 @@ CREATE VIEW iris.weather_sensor AS
 CREATE FUNCTION iris.weather_sensor_insert() RETURNS TRIGGER AS
     $weather_sensor_insert$
 BEGIN
-    INSERT INTO iris.controller_io (name, controller, pin)
-         VALUES (NEW.name, NEW.controller, NEW.pin);
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'weather_sensor', NEW.controller, NEW.pin);
     INSERT INTO iris._weather_sensor (
         name, site_id, alt_id, geo_loc, notes, settings, sample
     ) VALUES (

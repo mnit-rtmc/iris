@@ -366,6 +366,18 @@ const CONTROLLER_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Controller IO resource
+const CONTROLLER_IO_RES: Resource = Resource::Simple(
+    "api/controller_io",
+    Listen::All("controller_io"),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT name, resource_n, controller, pin \
+        FROM iris.controller_io \
+        WHERE controller IS NOT NULL \
+        ORDER BY controller, pin\
+    ) r",
+);
+
 /// Weather sensor resource
 const WEATHER_SENSOR_RES: Resource = Resource::Simple(
     "api/weather_sensor",
@@ -542,6 +554,7 @@ const ALL: &[Resource] = &[
     ROAD_MODIFIER_RES,
     RESOURCE_TYPE_RES,
     CONTROLLER_RES,
+    CONTROLLER_IO_RES,
     WEATHER_SENSOR_RES,
     MODEM_RES,
     PERMISSION_RES,

@@ -269,6 +269,7 @@ async fn main() -> tide::Result<()> {
             req,
         )
     });
+    route.at("/controller_io").get(|req| resource_get("controller_io", req));
     add_routes!(route, "lane_marking");
     route.at("/lane_marking/:name").get(|req| {
         sql_get(
@@ -581,7 +582,7 @@ fn obj_name(tp: &str, req: &Request<State>) -> Result<String> {
 }
 
 /// `GET` a file resource
-async fn resource_get(tp: &str, req: Request<State>) -> tide::Result {
+async fn resource_get(tp: &'static str, req: Request<State>) -> tide::Result {
     log::info!("GET {}", req.url());
     let (etag, body) = resp!(resource_get_json(tp, req).await);
     Ok(Response::builder(StatusCode::Ok)
@@ -593,10 +594,10 @@ async fn resource_get(tp: &str, req: Request<State>) -> tide::Result {
 
 /// Get a static JSON file
 async fn resource_get_json(
-    tp: &str,
+    tp: &'static str,
     req: Request<State>,
 ) -> Result<(String, Body)> {
-    Access::View.check(tp, &req)?;
+    Access::View.check(resource_tp(tp), &req)?;
     let path = PathBuf::from(format!("{STATIC_PATH}/{tp}"));
     let etag = resource_etag(&path).await?;
     if let Some(values) = req.header("If-None-Match") {
@@ -606,6 +607,14 @@ async fn resource_get_json(
     }
     let body = Body::from_file(&path).await?;
     Ok((etag, body))
+}
+
+/// Get "main" associated resource type
+fn resource_tp(tp: &'static str) -> &'static str {
+    match tp {
+        "controller_io" => "controller",
+        _ => tp,
+    }
 }
 
 /// Get a static file ETag
