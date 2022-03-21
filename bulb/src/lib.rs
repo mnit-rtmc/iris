@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 mod alarm;
+mod beacon;
 mod cabinetstyle;
 mod commconfig;
 mod commlink;

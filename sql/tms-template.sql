@@ -2057,30 +2057,40 @@ GRANT SELECT ON alarm_event_view TO PUBLIC;
 -- Beacons
 --
 CREATE TABLE iris._beacon (
-	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-	notes text NOT NULL,
-	message text NOT NULL,
-	verify_pin INTEGER -- FIXME: make unique on controller_io
+    name VARCHAR(20) PRIMARY KEY,
+    geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+    message VARCHAR(128) NOT NULL,
+    notes VARCHAR(128) NOT NULL,
+    verify_pin INTEGER, -- FIXME: make unique on controller_io
+    flashing BOOLEAN NOT NULL
 );
 
 ALTER TABLE iris._beacon ADD CONSTRAINT _beacon_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
 CREATE FUNCTION iris.beacon_notify() RETURNS TRIGGER AS
-	$beacon_notify$
+    $beacon_notify$
 BEGIN
-	NOTIFY beacon;
-	RETURN NULL; -- AFTER trigger return is ignored
+    IF (NEW.flashing IS DISTINCT FROM OLD.flashing) THEN
+        NOTIFY beacon, 'flashing';
+    ELSE
+        NOTIFY beacon;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
 END;
 $beacon_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER beacon_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris._beacon
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.beacon_notify();
+    AFTER UPDATE ON iris._beacon
+    FOR EACH ROW EXECUTE PROCEDURE iris.beacon_notify();
+
+CREATE TRIGGER beacon_table_notify_trig
+    AFTER INSERT OR DELETE ON iris._beacon
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.beacon AS
-    SELECT b.name, geo_loc, controller, pin, notes, message, verify_pin, preset
+    SELECT b.name, geo_loc, controller, pin, notes, message, verify_pin, preset,
+           flashing
     FROM iris._beacon b
     JOIN iris.controller_io cio ON b.name = cio.name
     JOIN iris._device_preset p ON b.name = p.name;
@@ -2092,9 +2102,10 @@ BEGIN
         VALUES (NEW.name, NEW.controller, NEW.pin);
     INSERT INTO iris._device_preset (name, preset)
         VALUES (NEW.name, NEW.preset);
-    INSERT INTO iris._beacon (name, geo_loc, notes, message, verify_pin)
+    INSERT INTO iris._beacon (name, geo_loc, notes, message, verify_pin,
+                              flashing)
         VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message,
-                NEW.verify_pin);
+                NEW.verify_pin, NEW.flashing);
     RETURN NEW;
 END;
 $beacon_insert$ LANGUAGE plpgsql;
@@ -2117,7 +2128,8 @@ BEGIN
        SET geo_loc = NEW.geo_loc,
            notes = NEW.notes,
            message = NEW.message,
-           verify_pin = NEW.verify_pin
+           verify_pin = NEW.verify_pin,
+           flashing = NEW.flashing
      WHERE name = OLD.name;
     RETURN NEW;
 END;
@@ -2136,7 +2148,7 @@ CREATE VIEW beacon_view AS
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            l.landmark, l.lat, l.lon, l.corridor, l.location,
            b.controller, b.pin, b.verify_pin, ctr.comm_link, ctr.drop_id,
-           ctr.condition
+           ctr.condition, flashing
     FROM iris.beacon b
     LEFT JOIN iris.camera_preset p ON b.preset = p.name
     LEFT JOIN geo_loc_view l ON b.geo_loc = l.name

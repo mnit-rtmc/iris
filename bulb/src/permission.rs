@@ -284,6 +284,7 @@ pub fn permissions_html(access: Vec<Permission>) -> String {
     for perm in &access {
         if perm.batch.is_none() {
             add_option::<crate::alarm::Alarm>(perm, &mut html);
+            add_option::<crate::beacon::Beacon>(perm, &mut html);
             add_option::<crate::cabinetstyle::CabinetStyle>(perm, &mut html);
             add_option::<crate::commconfig::CommConfig>(perm, &mut html);
             add_option::<crate::commlink::CommLink>(perm, &mut html);

@@ -221,10 +221,22 @@ const ALARM_RES: Resource = Resource::Simple(
     "api/alarm",
     Listen::Exclude("alarm", &["pin", "trigger_time"]),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, description, controller, state \
-    FROM iris.alarm \
-    ORDER BY description\
-) r",
+        SELECT name, description, controller, state \
+        FROM iris.alarm \
+        ORDER BY description\
+    ) r",
+);
+
+/// Beacon resource
+const BEACON_RES: Resource = Resource::Simple(
+    "api/beacon",
+    Listen::Exclude("beacon", &["flashing"]),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT b.name, location, controller, message, notes, flashing \
+        FROM iris.beacon b \
+        LEFT JOIN geo_loc_view gl ON b.geo_loc = gl.name \
+        ORDER BY name\
+    ) r",
 );
 
 /// Cabinet style resource
@@ -506,6 +518,7 @@ const ALL: &[Resource] = &[
     SYSTEM_ATTRIBUTE_RES, // System attributes must be loaded first
     ROAD_RES,             // Roads must be loaded before R_Nodes
     ALARM_RES,
+    BEACON_RES,
     CABINET_STYLE_RES,
     COMM_PROTOCOL_RES,
     COMM_CONFIG_RES,

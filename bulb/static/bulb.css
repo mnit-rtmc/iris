@@ -184,6 +184,25 @@ button:active {
   font-style: italic;
   color: #448;
 }
+.sign {
+  font-weight: bold;
+  white-space: break-spaces;
+  background-color: #fb0;
+  padding: 0.2rem;
+  border: 1px solid black;
+  border-radius: 0.2rem;
+}
+.blink-a {
+  animation: blink 1s step-start infinite;
+}
+.blink-b {
+  animation: blink 1s step-start 0.5s infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
 .create {
   font-style: italic;
   font-size: smaller;
@@ -208,6 +227,15 @@ button:active {
   flex: fill;
   display: flex;
   justify-content: space-between;
+  padding: 0.1rem;
+  z-index: 1; /* required for ob_delete::before slider pseudo-element */
+}
+.center-row {
+  flex: fill;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
   padding: 0.1rem;
   z-index: 1; /* required for ob_delete::before slider pseudo-element */
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2021  Minnesota Department of Transportation
+ * Copyright (C) 2004-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
@@ -40,20 +41,11 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, BeaconImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"preset, message, verify_pin FROM iris." + SONAR_TYPE +
-			";", new ResultFactory()
+			"preset, message, verify_pin, flashing FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new BeaconImpl(
-					row.getString(1),	// name
-					row.getString(2),	// geo_loc
-					row.getString(3),	// controller
-					row.getInt(4),		// pin
-					row.getString(5),	// notes
-					row.getString(6),	// preset
-					row.getString(7),	// message
-					(Integer) row.getObject(8) // verify_pin
-				));
+				namespace.addObject(new BeaconImpl(row));
 			}
 		});
 	}
@@ -70,6 +62,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		map.put("preset", preset);
 		map.put("message", message);
 		map.put("verify_pin", verify_pin);
+		map.put("flashing", flashing);
 		return map;
 	}
 
@@ -94,23 +87,30 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	}
 
 	/** Create a beacon */
-	private BeaconImpl(String n, GeoLocImpl l, ControllerImpl c, int p,
-		String nt, CameraPresetImpl cp, String m, Integer vp)
-	{
-		super(n, c, p, nt);
-		geo_loc = l;
-		setPreset(cp);
-		message = m;
-		verify_pin = vp;
-		initTransients();
+	private BeaconImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),           // name
+		     row.getString(2),           // geo_loc
+		     row.getString(3),           // controller
+		     row.getInt(4),              // pin
+		     row.getString(5),           // notes
+		     row.getString(6),           // preset
+		     row.getString(7),           // message
+		     (Integer) row.getObject(8), // verify_pin
+		     row.getBoolean(9)           // flashing
+		);
 	}
 
 	/** Create a beacon */
 	private BeaconImpl(String n, String l, String c, int p, String nt,
-		String cp, String m, Integer vp)
+		String cp, String m, Integer vp, boolean f)
 	{
-		this(n, lookupGeoLoc(l), lookupController(c), p, nt,
-		     lookupPreset(cp), m, vp);
+		super(n, lookupController(c), p, nt);
+		geo_loc = lookupGeoLoc(l);
+		setPreset(lookupPreset(cp));
+		message = m;
+		verify_pin = vp;
+		flashing = f;
+		initTransients();
 	}
 
 	/** Initialize transients */
@@ -267,7 +267,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	}
 
 	/** Flashing state */
-	private transient boolean flashing;
+	private boolean flashing;
 
 	/** Set the flashing state */
 	@Override
@@ -286,8 +286,14 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	/** Set the flashing state and notify clients */
 	public void setFlashingNotify(boolean f) {
 		if (f != flashing) {
-			flashing = f;
-			notifyAttribute("flashing");
+			try {
+				store.update(this, "flashing", f);
+				flashing = f;
+				notifyAttribute("flashing");
+			}
+			catch (TMSException e) {
+				e.printStackTrace();
+			}
 			logBeaconEvent(f);
 			updateStyles();
 		}

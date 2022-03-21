@@ -90,6 +90,15 @@ The response for these requests contains an ETag header, derived from the file's
 | Read Only    | name, state, {`trigger_time`}    |
 | 🔧 Configure | description, controller, {`pin`} |
 
+### `beacon`
+
+| Access       | Attributes                          |
+|--------------|-------------------------------------|
+| Read Only    | name, location, {`geo_loc`}         |
+| 👉 Operate   | flashing                            |
+| 💡 Plan      | message, notes, {`preset`}          |
+| 🔧 Configure | controller, {`pin`}, {`verify_pin`} |
+
 ### `cabinet_style`
 
 | Access       | Attributes |

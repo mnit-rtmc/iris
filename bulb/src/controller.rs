@@ -361,7 +361,7 @@ impl Card for Controller {
             <div class='row'>\
               <label for='edit_notes'>Notes</label>\
               <textarea id='edit_notes' maxlength='128' rows='2' \
-                        cols='26'/>{notes}</textarea>\
+                        cols='26'>{notes}</textarea>\
             </div>\
             <div class='row'>\
               <label for='edit_password'>Password</label>\

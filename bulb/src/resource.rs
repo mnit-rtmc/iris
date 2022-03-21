@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::alarm::Alarm;
+use crate::beacon::Beacon;
 use crate::cabinetstyle::CabinetStyle;
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
@@ -237,6 +238,7 @@ async fn fetch_json(uname: &'static str, name: &str) -> Result<JsValue> {
 pub async fn res_list(res: &str, search: &str) -> Result<String> {
     match res {
         Alarm::TNAME => res_build_list::<Alarm>(search).await,
+        Beacon::TNAME => res_build_list::<Beacon>(search).await,
         CabinetStyle::TNAME => res_build_list::<CabinetStyle>(search).await,
         CommConfig::TNAME => res_build_list::<CommConfig>(search).await,
         CommLink::TNAME => res_build_list::<CommLink>(search).await,
@@ -283,6 +285,7 @@ async fn res_build_list<C: Card>(search: &str) -> Result<String> {
 pub async fn res_get(res: &str, name: &str, view: View) -> Result<String> {
     match res {
         Alarm::TNAME => res_build_card::<Alarm>(name, view).await,
+        Beacon::TNAME => res_build_card::<Beacon>(name, view).await,
         CabinetStyle::TNAME => res_build_card::<CabinetStyle>(name, view).await,
         CommConfig::TNAME => res_build_card::<CommConfig>(name, view).await,
         CommLink::TNAME => res_build_card::<CommLink>(name, view).await,
@@ -429,6 +432,7 @@ fn html_card_edit(ename: &'static str, name: &str, edit: &str) -> String {
 pub async fn res_create(res: &str) -> Result<()> {
     match res {
         Alarm::TNAME => create_and_post::<Alarm>().await,
+        Beacon::TNAME => create_and_post::<Beacon>().await,
         CabinetStyle::TNAME => create_and_post::<CabinetStyle>().await,
         CommConfig::TNAME => create_and_post::<CommConfig>().await,
         CommLink::TNAME => create_and_post::<CommLink>().await,
@@ -458,6 +462,7 @@ async fn create_and_post<C: Card>() -> Result<()> {
 pub async fn res_save(res: &str, name: &str) -> Result<()> {
     match res {
         Alarm::TNAME => fetch_save_card::<Alarm>(name).await,
+        Beacon::TNAME => fetch_save_card::<Beacon>(name).await,
         CabinetStyle::TNAME => fetch_save_card::<CabinetStyle>(name).await,
         CommConfig::TNAME => fetch_save_card::<CommConfig>(name).await,
         CommLink::TNAME => fetch_save_card::<CommLink>(name).await,
@@ -505,6 +510,7 @@ pub async fn res_save_loc(res: &str, name: &str) -> Result<()> {
 pub async fn res_delete(res: &str, name: &str) -> Result<()> {
     match res {
         Alarm::TNAME => res_delete_card::<Alarm>(name).await,
+        Beacon::TNAME => res_delete_card::<Beacon>(name).await,
         CabinetStyle::TNAME => res_delete_card::<CabinetStyle>(name).await,
         CommConfig::TNAME => res_delete_card::<CommConfig>(name).await,
         CommLink::TNAME => res_delete_card::<CommLink>(name).await,

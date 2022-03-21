@@ -21,41 +21,42 @@ use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
 
-/// Weather Sensor
+/// Beacon
 #[derive(Debug, Default, Deserialize, Serialize)]
-pub struct WeatherSensor {
+pub struct Beacon {
     pub name: String,
     pub location: Option<String>,
-    pub site_id: Option<String>,
-    pub alt_id: Option<String>,
+    pub message: String,
     pub notes: String,
-    pub geo_loc: Option<String>,
     pub controller: Option<String>,
+    pub flashing: bool,
     // full attributes
+    pub geo_loc: Option<String>,
     pub pin: Option<u32>,
+    pub verify_pin: Option<u32>,
 }
 
-/// Ancillary weather sensor data
+/// Ancillary beacon data
 #[derive(Debug, Default)]
-pub struct WeatherSensorAnc;
+pub struct BeaconAnc;
 
-impl AncillaryData for WeatherSensorAnc {
-    type Resource = WeatherSensor;
+impl AncillaryData for BeaconAnc {
+    type Resource = Beacon;
 }
 
-impl fmt::Display for WeatherSensor {
+impl fmt::Display for Beacon {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", HtmlStr::new(&self.name))
     }
 }
 
-impl Card for WeatherSensor {
-    const TNAME: &'static str = "Weather Sensor";
-    const ENAME: &'static str = "🌦️ Weather Sensor";
-    const UNAME: &'static str = "weather_sensor";
+impl Card for Beacon {
+    const TNAME: &'static str = "Beacon";
+    const ENAME: &'static str = "🚨 Beacon";
+    const UNAME: &'static str = "beacon";
     const HAS_STATUS: bool = true;
 
-    type Ancillary = WeatherSensorAnc;
+    type Ancillary = BeaconAnc;
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
@@ -69,11 +70,10 @@ impl Card for WeatherSensor {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &WeatherSensorAnc) -> bool {
+    fn is_match(&self, search: &str, _anc: &BeaconAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || self.site_id.contains_lower(search)
-            || self.alt_id.contains_lower(search)
+            || self.message.contains_lower(search)
             || self.notes.contains_lower(search)
     }
 
@@ -88,19 +88,19 @@ impl Card for WeatherSensor {
     }
 
     /// Convert to status HTML
-    fn to_html_status(&self, _anc: &WeatherSensorAnc) -> String {
+    fn to_html_status(&self, _anc: &BeaconAnc) -> String {
         let tname = Controller::TNAME;
         let location = HtmlStr::new(&self.location).with_len(64);
-        let site_id = HtmlStr::new(&self.site_id);
-        let alt_id = HtmlStr::new(&self.alt_id);
+        let message = HtmlStr::new(&self.message);
         let controller = HtmlStr::new(&self.controller);
         format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
             </div>\
-            <div class='row'>\
-              <span class='info'>{site_id}</span>\
-              <span class='info'>{alt_id}</span>\
+            <div class='center-row'>\
+              <span class='blink-a'>🔆</span>\
+              <span class='sign'>{message}</span>\
+              <span class='blink-b'>🔆</span>\
             </div>\
             <div class='row'>\
               <label>Controller</label>\
@@ -111,27 +111,22 @@ impl Card for WeatherSensor {
     }
 
     /// Convert to edit HTML
-    fn to_html_edit(&self, _anc: &WeatherSensorAnc) -> String {
-        let site_id = HtmlStr::new(&self.site_id);
-        let alt_id = HtmlStr::new(&self.alt_id);
+    fn to_html_edit(&self, _anc: &BeaconAnc) -> String {
+        let message = HtmlStr::new(&self.message);
         let notes = HtmlStr::new(&self.notes);
         let controller = HtmlStr::new(&self.controller);
         let pin = OptVal(self.pin);
+        let verify_pin = OptVal(self.verify_pin);
         format!(
             "<div class='row'>\
-              <label for='edit_site'>Site ID</label>\
-              <input id='edit_site' maxlength='20' size='20' \
-                     value='{site_id}'/>\
-            </div>\
-            <div class='row'>\
-              <label for='edit_alt'>Alt ID</label>\
-              <input id='edit_alt' maxlength='20' size='20' \
-                     value='{alt_id}'/>\
+              <label for='edit_msg'>Message</label>\
+              <textarea id='edit_msg' maxlength='128' rows='3' \
+                        cols='24'>{message}</textarea>\
             </div>\
             <div class='row'>\
               <label for='edit_notes'>Notes</label>\
-              <textarea id='edit_notes' maxlength='64' rows='2' \
-                        cols='26'>{notes}</textarea>\
+              <textarea id='edit_notes' maxlength='128' rows='2' \
+                        cols='24'>{notes}</textarea>\
             </div>\
             <div class='row'>\
               <label for='edit_ctrl'>Controller</label>\
@@ -142,6 +137,11 @@ impl Card for WeatherSensor {
               <label for='edit_pin'>Pin</label>\
               <input id='edit_pin' type='number' min='1' max='104' \
                      size='8' value='{pin}'/>\
+            </div>\
+            <div class='row'>\
+              <label for='edit_ver'>Verify Pin</label>\
+              <input id='edit_ver' type='number' min='1' max='104' \
+                     size='8' value='{verify_pin}'/>\
             </div>"
         )
     }
@@ -150,13 +150,10 @@ impl Card for WeatherSensor {
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         let mut obj = Map::new();
-        let site_id = doc.input_parse::<String>("edit_site");
-        if site_id != val.site_id {
-            obj.insert("site_id".to_string(), OptVal(site_id).into());
-        }
-        let alt_id = doc.input_parse::<String>("edit_alt");
-        if alt_id != val.alt_id {
-            obj.insert("alt_id".to_string(), OptVal(alt_id).into());
+        if let Some(message) = doc.text_area_parse::<String>("edit_msg") {
+            if message != val.message {
+                obj.insert("message".to_string(), Value::String(message));
+            }
         }
         if let Some(notes) = doc.text_area_parse::<String>("edit_notes") {
             if notes != val.notes {
@@ -172,6 +169,10 @@ impl Card for WeatherSensor {
         let pin = doc.input_parse::<u32>("edit_pin");
         if pin != val.pin {
             obj.insert("pin".to_string(), OptVal(pin).into());
+        }
+        let verify_pin = doc.input_parse::<u32>("edit_ver");
+        if verify_pin != val.verify_pin {
+            obj.insert("verify_pin".to_string(), OptVal(verify_pin).into());
         }
         Ok(Value::Object(obj).to_string())
     }

@@ -35,11 +35,17 @@ use tide::{Body, Request, Response, StatusCode};
 const STATIC_PATH: &str = "/var/www/html/iris/api";
 
 /// Slice of (type/attribute) tuples requiring Operate or higher permission
-const OPERATE: &[(&str, &str)] =
-    &[("controller", "download"), ("controller", "device_req")];
+const OPERATE: &[(&str, &str)] = &[
+    ("beacon", "flashing"),
+    ("controller", "download"),
+    ("controller", "device_req"),
+];
 
 /// Slice of (type/attribute) tuples requiring Plan or higher permission
 const PLAN: &[(&str, &str)] = &[
+    ("beacon", "message"),
+    ("beacon", "notes"),
+    ("beacon", "preset"),
     ("comm_config", "timeout_ms"),
     ("comm_config", "idle_disconnect_sec"),
     ("comm_config", "no_response_disconnect_sec"),
@@ -56,8 +62,12 @@ const PLAN: &[(&str, &str)] = &[
 ];
 
 /// Check for type/key pairs in PATCH first pass
-const PATCH_FIRST_PASS: &[(&str, &str)] =
-    &[("alarm", "pin"), ("weather_sensor", "pin")];
+const PATCH_FIRST_PASS: &[(&str, &str)] = &[
+    ("alarm", "pin"),
+    ("beacon", "pin"),
+    ("beacon", "verify_pin"),
+    ("weather_sensor", "pin"),
+];
 
 /// Access for permission records
 #[derive(Clone, Copy, Debug)]
@@ -194,6 +204,18 @@ async fn main() -> tide::Result<()> {
             "SELECT name, description, controller, pin, state, trigger_time \
             FROM iris.alarm \
             WHERE name = $1",
+            req,
+        )
+    });
+    add_routes!(route, "beacon");
+    route.at("/beacon/:name").get(|req| {
+        sql_get(
+            "beacon",
+            "SELECT b.name, location, controller, pin, verify_pin, geo_loc, \
+                    message, notes, preset, flashing \
+            FROM iris.beacon b \
+            LEFT JOIN geo_loc_view gl ON b.geo_loc = gl.name \
+            WHERE b.name = $1",
             req,
         )
     });
