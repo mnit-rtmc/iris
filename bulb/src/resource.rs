@@ -234,6 +234,12 @@ async fn fetch_json(uname: &'static str, name: &str) -> Result<JsValue> {
     Ok(fetch_get(&uri).await?)
 }
 
+/// Fetch JSON resource
+async fn fetch_res<C: Card>(name: &str) -> Result<C> {
+    let json = fetch_json(C::UNAME, name).await?;
+    Ok(C::new(&json)?)
+}
+
 /// Fetch card list for a resource type
 pub async fn res_list(res: &str, search: &str) -> Result<String> {
     match res {
@@ -345,12 +351,6 @@ async fn res_build_card<C: Card>(name: &str, view: View) -> Result<String> {
             Ok(html_card_edit(C::ENAME, name, &res.to_html_edit(&anc)))
         }
     }
-}
-
-/// Fetch JSON resource
-async fn fetch_res<C: Card>(name: &str) -> Result<C> {
-    let json = fetch_json(C::UNAME, name).await?;
-    Ok(C::new(&json)?)
 }
 
 /// Fetch ancillary data
@@ -492,17 +492,24 @@ async fn fetch_save_card<C: Card>(name: &str) -> Result<()> {
 
 /// Save changed fields on card
 pub async fn res_save_loc(res: &str, name: &str) -> Result<()> {
-    match res {
-        Controller::TNAME => {
-            let uri = uri_name(Controller::UNAME, name);
-            let json = fetch_get(&uri).await?;
-            let ctrl = Controller::new(&json)?;
-            match ctrl.geo_loc() {
-                Some(geo_loc) => fetch_save_card::<GeoLoc>(geo_loc).await,
-                None => Ok(()),
-            }
-        }
-        _ => Ok(()),
+    let geo_loc = match res {
+        Beacon::TNAME => fetch_geo_loc::<Beacon>(name).await?,
+        Controller::TNAME => fetch_geo_loc::<Controller>(name).await?,
+        WeatherSensor::TNAME => fetch_geo_loc::<WeatherSensor>(name).await?,
+        _ => None,
+    };
+    match geo_loc {
+        Some(geo_loc) => fetch_save_card::<GeoLoc>(&geo_loc).await,
+        None => Ok(()),
+    }
+}
+
+/// Fetch geo location of a resource
+async fn fetch_geo_loc<C: Card>(name: &str) -> Result<Option<String>> {
+    let res = fetch_res::<C>(name).await?;
+    match res.geo_loc() {
+        Some(geo_loc) => Ok(Some(geo_loc.to_string())),
+        None => Ok(None),
     }
 }
 
