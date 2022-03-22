@@ -349,7 +349,7 @@ impl Card for Controller {
         let condition = anc.condition(self);
         let comm_state = self.comm_state(true);
         let comm_link = HtmlStr::new(&self.comm_link);
-        let link_drop = HtmlStr::new(self.link_drop());
+        let drop_id = self.drop_id;
         let comm_config = anc.comm_config(self);
         let location = HtmlStr::new(&self.location).with_len(64);
         let notes = HtmlStr::new(&self.notes);
@@ -380,9 +380,12 @@ impl Card for Controller {
             "<div class='row'>\
               <span>{condition}</span>\
               <span>{comm_state}</span>\
-              <span>{link_drop} \
+              <span>\
                 <button class='go_link' type='button' \
-                        data-link='{comm_link}' data-type='{tname}'>🖇️</button>\
+                        data-link='{comm_link}' data-type='{tname}'>\
+                  {comm_link}\
+                </button>\
+                :{drop_id}\
               </span>\
             </div>\
             <div class='row'>\
