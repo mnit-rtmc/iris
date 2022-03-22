@@ -44,6 +44,20 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 public class NatchPoller extends BasePoller implements AlarmPoller,
 	BeaconPoller, LCSPoller, MeterPoller, SamplePoller
 {
+	/** I/O pin for first ramp meter */
+	static public final int METER_1_PIN = 2;
+
+	/** I/O pin for second ramp meter */
+	static public final int METER_2_PIN = 3;
+
+	/** Lookup a ramp meter on a controller */
+	static public RampMeterImpl lookupMeter(ControllerImpl ctrl, int pin) {
+		ControllerIO cio = ctrl.getIO(pin);
+		return (cio instanceof RampMeterImpl)
+		      ? (RampMeterImpl) cio
+		      : null;
+	}
+
 	/** Counter for message IDs */
 	private final Counter counter = new Counter();
 
@@ -85,6 +99,12 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 			new OpDetectorConfigure(counter, 0));
 		createSettingsOp("firmware.version.op", c,
 			new OpFirmwareVersion(counter));
+		RampMeterImpl meter1 = lookupMeter(c, METER_1_PIN);
+		if (meter1 != null)
+			sendRequest(meter1, DeviceRequest.SEND_SETTINGS);
+		RampMeterImpl meter2 = lookupMeter(c, METER_2_PIN);
+		if (meter2 != null)
+			sendRequest(meter2, DeviceRequest.SEND_SETTINGS);
 	}
 
 	/** Create a settings operation */

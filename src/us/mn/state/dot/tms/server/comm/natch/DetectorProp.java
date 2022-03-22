@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,12 +38,6 @@ abstract public class DetectorProp extends NatchProp {
 	/** Second ramp meter green detector number */
 	static private final int METER_2_GREEN_DET = 31;
 
-	/** I/O pin for first ramp meter */
-	static private final int METER_1_PIN = 2;
-
-	/** I/O pin for second ramp meter */
-	static private final int METER_2_PIN = 3;
-
 	/** Detector number (0-31) */
 	public int detector_num;
 
@@ -76,9 +70,9 @@ abstract public class DetectorProp extends NatchProp {
 			if (ctrl.getDetectorAtPin(pin) != null)
 				return pin;
 			else if (getMeter1Green(ctrl) != null)
-				return METER_1_PIN;
+				return NatchPoller.METER_1_PIN;
 			else if (getMeter2Green(ctrl) != null)
-				return METER_2_PIN;
+				return NatchPoller.METER_2_PIN;
 		}
 		return 0;
 	}
@@ -86,11 +80,10 @@ abstract public class DetectorProp extends NatchProp {
 	/** Get the first meter green detector (if det num is correct) */
 	private DetectorImpl getMeter1Green(ControllerImpl ctrl) {
 		if (detector_num == METER_1_GREEN_DET) {
-			ControllerIO cio = ctrl.getIO(METER_1_PIN);
-			if (cio instanceof RampMeterImpl) {
-				RampMeterImpl meter = (RampMeterImpl) cio;
+			RampMeterImpl meter = NatchPoller.lookupMeter(ctrl,
+				NatchPoller.METER_1_PIN);
+			if (meter != null)
 				return meter.getGreenDet();
-			}
 		}
 		return null;
 	}
@@ -98,11 +91,10 @@ abstract public class DetectorProp extends NatchProp {
 	/** Get the second meter green detector (if det num is correct) */
 	private DetectorImpl getMeter2Green(ControllerImpl ctrl) {
 		if (detector_num == METER_2_GREEN_DET) {
-			ControllerIO cio = ctrl.getIO(METER_2_PIN);
-			if (cio instanceof RampMeterImpl) {
-				RampMeterImpl meter = (RampMeterImpl) cio;
+			RampMeterImpl meter = NatchPoller.lookupMeter(ctrl,
+				NatchPoller.METER_2_PIN);
+			if (meter != null)
 				return meter.getGreenDet();
-			}
 		}
 		return null;
 	}
