@@ -10,9 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::controller::Controller;
+use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
-use crate::resource::{disabled_attr, AncillaryData, Card, NAME};
+use crate::resource::{disabled_attr, Card, NAME};
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -33,13 +33,7 @@ pub struct Alarm {
     pub trigger_time: Option<String>,
 }
 
-/// Ancillary alarm data
-#[derive(Debug, Default)]
-pub struct AlarmAnc;
-
-impl AncillaryData for AlarmAnc {
-    type Resource = Alarm;
-}
+type AlarmAnc = DeviceAnc<Alarm>;
 
 impl Alarm {
     /// Get the alarm state to display
@@ -58,6 +52,13 @@ impl Alarm {
 impl fmt::Display for Alarm {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", HtmlStr::new(&self.name))
+    }
+}
+
+impl Device for Alarm {
+    /// Get controller
+    fn controller(&self) -> Option<&str> {
+        self.controller.as_deref()
     }
 }
 
@@ -95,22 +96,17 @@ impl Card for Alarm {
     }
 
     /// Convert to status HTML
-    fn to_html_status(&self, _anc: &AlarmAnc) -> String {
-        let tname = Controller::TNAME;
+    fn to_html_status(&self, anc: &AlarmAnc) -> String {
         let description = HtmlStr::new(&self.description);
         let state = self.state(true);
-        let controller = HtmlStr::new(&self.controller);
         let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
+        let controller = anc.controller_html();
         format!(
             "<div class='row'>\
               <span class='info'>{description}</span>\
               <span class='info'>{state}</span>\
             </div>\
-            <div class='row'>\
-              <label>Controller</label>\
-              <button class='go_link' type='button' \
-                      data-link='{controller}' data-type='{tname}'>🖇️</button>\
-            </div>\
+            {controller}\
             <div class='row'>\
               <span>Triggered</span>\
               <span class='info'>{trigger_time}</span>\

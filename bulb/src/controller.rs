@@ -212,6 +212,28 @@ impl Controller {
             (false, _, true) => "inactive ❓",
         }
     }
+
+    /// Get controller `link:drop`
+    pub fn link_drop(&self) -> String {
+        let comm_link = self.comm_link.as_deref().unwrap_or("");
+        format!("{comm_link}:{}", self.drop_id)
+    }
+
+    /// Create a button to select the controller
+    pub fn button_link_html(&self) -> String {
+        let tname = Controller::TNAME;
+        let link_drop = HtmlStr::new(self.link_drop());
+        let loc = HtmlStr::new(&self.location).with_len(32);
+        format!(
+            "<div class='row left'>\
+                <button type='button' class='go_link' \
+                        data-link='{link_drop}' data-type='{tname}'>\
+                        {link_drop}\
+                </button>\
+                <span class='info'>{loc}</span>\
+            </div>"
+        )
+    }
 }
 
 impl Card for Controller {
@@ -236,11 +258,7 @@ impl Card for Controller {
     /// Check if a search string matches
     fn is_match(&self, search: &str, anc: &ControllerAnc) -> bool {
         self.name.contains_lower(search)
-            || {
-                let comm_link =
-                    self.comm_link.as_deref().unwrap_or("").to_lowercase();
-                format!("{comm_link}:{}", self.drop_id).contains(search)
-            }
+            || self.link_drop().contains_lower(search)
             || self.comm_state(true).contains(search)
             || anc.condition(self).contains_lower(search)
             || anc.comm_config(self).contains_lower(search)
@@ -266,13 +284,12 @@ impl Card for Controller {
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
         let comm_state = self.comm_state(false);
-        let comm_link = HtmlStr::new(&self.comm_link);
-        let drop_id = self.drop_id;
+        let link_drop = HtmlStr::new(self.link_drop());
         // condition 1 is "Active"
         let disabled = disabled_attr(self.condition == 1);
         format!(
             "<span>{comm_state}</span>\
-            <span{disabled}>{comm_link}:{drop_id}</span>\
+            <span{disabled}>{link_drop}</span>\
             <span class='{NAME}'>{self}</span>"
         )
     }
@@ -283,8 +300,8 @@ impl Card for Controller {
         let condition = anc.condition(self);
         let comm_state = self.comm_state(true);
         let comm_link = HtmlStr::new(&self.comm_link);
+        let link_drop = HtmlStr::new(self.link_drop());
         let comm_config = anc.comm_config(self);
-        let drop_id = self.drop_id;
         let location = HtmlStr::new(&self.location).with_len(64);
         let notes = HtmlStr::new(&self.notes);
         let version = match &self.version {
@@ -313,7 +330,7 @@ impl Card for Controller {
             "<div class='row'>\
               <span>{condition}</span>\
               <span>{comm_state}</span>\
-              <span>{comm_link}:{drop_id} \
+              <span>{link_drop} \
                 <button class='go_link' type='button' \
                         data-link='{comm_link}' data-type='{tname}'>🖇️</button>\
               </span>\

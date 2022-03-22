@@ -96,8 +96,8 @@ impl Search {
     fn is_match<C: Card>(&self, res: &C, anc: &C::Ancillary) -> bool {
         match self {
             Search::Empty() => true,
-            Search::Normal(se) => se.split(' ').all(|s| res.is_match(s, &anc)),
-            Search::Exact(se) => res.is_match(se, &anc),
+            Search::Normal(se) => se.split(' ').all(|s| res.is_match(s, anc)),
+            Search::Exact(se) => res.is_match(se, anc),
         }
     }
 }
@@ -337,11 +337,11 @@ async fn res_build_card<C: Card>(name: &str, view: View) -> Result<String> {
         View::Location => {
             let res = fetch_res::<C>(name).await?;
             if let Some(geo_loc) = res.geo_loc() {
-                let res = fetch_res::<GeoLoc>(&geo_loc).await?;
+                let res = fetch_res::<GeoLoc>(geo_loc).await?;
                 let anc = fetch_ancillary(&res, View::Edit).await?;
                 Ok(html_card_edit(
                     GeoLoc::ENAME,
-                    &geo_loc,
+                    geo_loc,
                     &res.to_html_edit(&anc),
                 ))
             } else {

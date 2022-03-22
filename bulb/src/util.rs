@@ -153,6 +153,12 @@ impl fmt::Display for HtmlStr<&String> {
     }
 }
 
+impl fmt::Display for HtmlStr<String> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.fmt_encode(&self.val, f)
+    }
+}
+
 impl fmt::Display for HtmlStr<&Option<String>> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.val.as_ref() {

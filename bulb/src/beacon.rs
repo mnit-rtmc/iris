@@ -10,9 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::controller::Controller;
+use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
-use crate::resource::{disabled_attr, AncillaryData, Card, NAME};
+use crate::resource::{disabled_attr, Card, NAME};
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -36,17 +36,18 @@ pub struct Beacon {
     pub verify_pin: Option<u32>,
 }
 
-/// Ancillary beacon data
-#[derive(Debug, Default)]
-pub struct BeaconAnc;
-
-impl AncillaryData for BeaconAnc {
-    type Resource = Beacon;
-}
+type BeaconAnc = DeviceAnc<Beacon>;
 
 impl fmt::Display for Beacon {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", HtmlStr::new(&self.name))
+    }
+}
+
+impl Device for Beacon {
+    /// Get controller
+    fn controller(&self) -> Option<&str> {
+        self.controller.as_deref()
     }
 }
 
@@ -88,24 +89,19 @@ impl Card for Beacon {
     }
 
     /// Convert to status HTML
-    fn to_html_status(&self, _anc: &BeaconAnc) -> String {
-        let tname = Controller::TNAME;
+    fn to_html_status(&self, anc: &BeaconAnc) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
         let message = HtmlStr::new(&self.message);
-        let controller = HtmlStr::new(&self.controller);
+        let controller = anc.controller_html();
         format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
             </div>\
-            <div class='center-row'>\
+            {controller}\
+            <div class='row center'>\
               <span class='blink-a'>🔆</span>\
               <span class='sign'>{message}</span>\
               <span class='blink-b'>🔆</span>\
-            </div>\
-            <div class='row'>\
-              <label>Controller</label>\
-              <button class='go_link' type='button' \
-                      data-link='{controller}' data-type='{tname}'>🖇️</button>\
             </div>"
         )
     }

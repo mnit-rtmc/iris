@@ -16,6 +16,7 @@ mod cabinetstyle;
 mod commconfig;
 mod commlink;
 mod controller;
+mod device;
 mod error;
 mod fetch;
 mod geoloc;

@@ -10,9 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::controller::Controller;
+use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
-use crate::resource::{disabled_attr, AncillaryData, Card, NAME};
+use crate::resource::{disabled_attr, Card, NAME};
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -35,17 +35,18 @@ pub struct WeatherSensor {
     pub pin: Option<u32>,
 }
 
-/// Ancillary weather sensor data
-#[derive(Debug, Default)]
-pub struct WeatherSensorAnc;
-
-impl AncillaryData for WeatherSensorAnc {
-    type Resource = WeatherSensor;
-}
+type WeatherSensorAnc = DeviceAnc<WeatherSensor>;
 
 impl fmt::Display for WeatherSensor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", HtmlStr::new(&self.name))
+    }
+}
+
+impl Device for WeatherSensor {
+    /// Get controller
+    fn controller(&self) -> Option<&str> {
+        self.controller.as_deref()
     }
 }
 
@@ -88,12 +89,11 @@ impl Card for WeatherSensor {
     }
 
     /// Convert to status HTML
-    fn to_html_status(&self, _anc: &WeatherSensorAnc) -> String {
-        let tname = Controller::TNAME;
+    fn to_html_status(&self, anc: &WeatherSensorAnc) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
-        let controller = HtmlStr::new(&self.controller);
+        let controller = anc.controller_html();
         format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
@@ -102,11 +102,7 @@ impl Card for WeatherSensor {
               <span class='info'>{site_id}</span>\
               <span class='info'>{alt_id}</span>\
             </div>\
-            <div class='row'>\
-              <label>Controller</label>\
-              <button class='go_link' type='button' \
-                      data-link='{controller}' data-type='{tname}'>🖇️</button>\
-            </div>"
+            {controller}"
         )
     }
 

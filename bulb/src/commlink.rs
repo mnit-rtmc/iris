@@ -122,20 +122,8 @@ impl CommLinkAnc {
     fn controllers_html(&self) -> String {
         let mut html = String::new();
         if let Some(controllers) = &self.controllers {
-            let tname = Controller::TNAME;
             for ctrl in controllers {
-                let drop_id = ctrl.drop_id;
-                let loc = HtmlStr::new(&ctrl.location).with_len(32);
-                let row = format!(
-                    "<div class='row'>\
-                        <span>:{drop_id}</span>\
-                        <span class='info'>{loc}</span>\
-                        <button class='go_link' type='button' \
-                                data-link='{ctrl}' data-type='{tname}'>🖇️\
-                        </button>\
-                    </div>"
-                );
-                html.push_str(&row);
+                html.push_str(&ctrl.button_link_html());
             }
         }
         html
