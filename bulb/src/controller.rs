@@ -14,7 +14,9 @@ use crate::cabinetstyle::CabinetStyle;
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
-use crate::resource::{disabled_attr, AncillaryData, Card, View, NAME};
+use crate::resource::{
+    disabled_attr, uname_to_tname, AncillaryData, Card, View, NAME,
+};
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -29,6 +31,14 @@ use web_sys::Document;
 pub struct Condition {
     pub id: u32,
     pub description: String,
+}
+
+/// Controller IO
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ControllerIo {
+    pub pin: u32,
+    pub resource_n: String,
+    pub name: String,
 }
 
 /// Controller
@@ -54,6 +64,7 @@ pub struct ControllerAnc {
     pub cabinet_styles: Option<Vec<CabinetStyle>>,
     pub comm_links: Option<Vec<CommLink>>,
     pub comm_configs: Option<Vec<CommConfig>>,
+    pub controller_io: Option<Vec<ControllerIo>>,
 }
 
 const CONDITION_URI: &str = "/iris/condition";
@@ -65,24 +76,28 @@ impl AncillaryData for ControllerAnc {
     type Resource = Controller;
 
     /// Get ancillary URI
-    fn uri(&self, view: View, _res: &Controller) -> Option<Cow<str>> {
+    fn uri(&self, view: View, res: &Controller) -> Option<Cow<str>> {
         match (
             view,
             &self.conditions,
             &self.comm_links,
             &self.comm_configs,
             &self.cabinet_styles,
+            &self.controller_io,
         ) {
-            (View::Search | View::Status | View::Edit, None, _, _, _) => {
+            (View::Search | View::Status | View::Edit, None, _, _, _, _) => {
                 Some(CONDITION_URI.into())
             }
-            (View::Search | View::Status, _, None, _, _) => {
+            (View::Search | View::Status, _, None, _, _, _) => {
                 Some(COMM_LINK_URI.into())
             }
-            (View::Search | View::Status, _, _, None, _) => {
+            (View::Search | View::Status, _, _, None, _, _) => {
                 Some(COMM_CONFIG_URI.into())
             }
-            (View::Edit, _, _, _, None) => Some(CABINET_STYLE_URI.into()),
+            (View::Edit, _, _, _, None, _) => Some(CABINET_STYLE_URI.into()),
+            (View::Status, _, _, _, _, None) => {
+                Some(format!("/iris/api/controller_io/{}", &res.name).into())
+            }
             _ => None,
         }
     }
@@ -111,7 +126,10 @@ impl AncillaryData for ControllerAnc {
                     self.cabinet_styles =
                         Some(json.into_serde::<Vec<CabinetStyle>>()?);
                 }
-                _ => (),
+                _ => {
+                    self.controller_io =
+                        Some(json.into_serde::<Vec<ControllerIo>>()?);
+                }
             }
         }
         Ok(())
@@ -189,6 +207,37 @@ impl ControllerAnc {
             }
         }
         ""
+    }
+
+    /// Build IO links as HTML
+    fn io_pins_html(&self) -> String {
+        let mut html = String::new();
+        if let Some(controller_io) = &self.controller_io {
+            for cio in controller_io {
+                html.push_str(&cio.button_link_html());
+            }
+        }
+        html
+    }
+}
+
+impl ControllerIo {
+    /// Create a button to select the controller IO
+    pub fn button_link_html(&self) -> String {
+        let pin = self.pin;
+        let resource_n = uname_to_tname(&self.resource_n);
+        let name = HtmlStr::new(&self.name);
+        format!(
+            "<div class='row'>\
+              <span>#{pin}</span>\
+              <span class='info'>{resource_n} \
+                <button type='button' class='go_link' \
+                        data-link='{name}' data-type='{resource_n}'>\
+                        {name}\
+                </button>\
+              </span>\
+            </div>"
+        )
     }
 }
 
@@ -326,6 +375,7 @@ impl Card for Controller {
             }
             None => "".to_string(),
         };
+        let io_pins = anc.io_pins_html();
         format!(
             "<div class='row'>\
               <span>{condition}</span>\
@@ -344,7 +394,8 @@ impl Card for Controller {
               <span class='info'>{notes}</span>\
             </div>\
             <div class='row'>{version}</div>\
-            <div class='row'>{fail_time}</div>"
+            <div class='row'>{fail_time}</div>\
+            {io_pins}"
         )
     }
 

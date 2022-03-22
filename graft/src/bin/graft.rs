@@ -149,7 +149,7 @@ macro_rules! add_routes {
 
 impl Access {
     /// Get access from type/att pair
-    fn from_type_key(tp_att: &(&str, &str)) -> Self {
+    fn from_type_key(tp_att: &(&'static str, &str)) -> Self {
         if OPERATE.contains(tp_att) {
             Access::Operate
         } else if PLAN.contains(tp_att) {
@@ -269,7 +269,16 @@ async fn main() -> tide::Result<()> {
             req,
         )
     });
-    route.at("/controller_io").get(|req| resource_get("controller_io", req));
+    route.at("/controller_io/:name").get(|req| {
+        sql_get_array(
+            "controller_io",
+            "SELECT pin, name, resource_n \
+            FROM iris.controller_io \
+            WHERE controller = $1 \
+            ORDER BY pin",
+            req,
+        )
+    });
     add_routes!(route, "lane_marking");
     route.at("/lane_marking/:name").get(|req| {
         sql_get(
@@ -489,7 +498,7 @@ fn obj_id(req: &Request<State>) -> Result<i32> {
     id.parse::<i32>().map_err(|_e| SonarError::InvalidName)
 }
 
-/// `GET` one sql record as JSON
+/// `GET` one SQL record as JSON
 async fn sql_get(
     resource_n: &'static str,
     sql: &'static str,
@@ -503,15 +512,43 @@ async fn sql_get(
         .build())
 }
 
-/// Get one sql record by name
+/// Get one SQL record by name
 async fn sql_get_by_name(
     resource_n: &'static str,
     sql: &'static str,
     req: Request<State>,
 ) -> Result<String> {
-    Access::View.check(resource_n, &req)?;
+    Access::View.check(resource_tp(resource_n), &req)?;
     let name = resource_name(&req)?;
     Ok(spawn_blocking(move || req.state().get_by_pkey(sql, &name)).await?)
+}
+
+/// `GET` array of SQL records as JSON
+async fn sql_get_array(
+    resource_n: &'static str,
+    sql: &'static str,
+    req: Request<State>,
+) -> tide::Result {
+    log::info!("GET {}", req.url());
+    let body = resp!(sql_get_array_by_name(resource_n, sql, req).await);
+    Ok(Response::builder(StatusCode::Ok)
+        .body(body)
+        .content_type("application/json")
+        .build())
+}
+
+/// Get array of SQL records by name
+async fn sql_get_array_by_name(
+    resource_n: &'static str,
+    sql: &'static str,
+    req: Request<State>,
+) -> Result<String> {
+    Access::View.check(resource_tp(resource_n), &req)?;
+    let name = resource_name(&req)?;
+    Ok(
+        spawn_blocking(move || req.state().get_array_by_pkey(sql, &name))
+            .await?,
+    )
 }
 
 /// Get resource name from a request
@@ -546,7 +583,7 @@ fn invalid_char(c: char) -> bool {
 }
 
 /// Make a Sonar name (with validation)
-fn make_name(tp: &str, nm: &str) -> Result<String> {
+fn make_name(tp: &'static str, nm: &str) -> Result<String> {
     if nm.len() > 64 || nm.contains(invalid_char) || nm.contains('/') {
         Err(SonarError::InvalidName)
     } else {
@@ -555,7 +592,7 @@ fn make_name(tp: &str, nm: &str) -> Result<String> {
 }
 
 /// Make a Sonar attribute (with validation)
-fn make_att(tp: &str, nm: &str, att: &str) -> Result<String> {
+fn make_att(tp: &'static str, nm: &str, att: &str) -> Result<String> {
     if att.len() > 64 || att.contains(invalid_char) || att.contains('/') {
         Err(SonarError::InvalidName)
     } else {
@@ -569,7 +606,7 @@ fn make_att(tp: &str, nm: &str, att: &str) -> Result<String> {
 }
 
 /// Get Sonar object name from a request
-fn obj_name(tp: &str, req: &Request<State>) -> Result<String> {
+fn obj_name(tp: &'static str, req: &Request<State>) -> Result<String> {
     match req.param("name") {
         Ok(name) => {
             let name = percent_decode_str(name)
@@ -594,11 +631,11 @@ async fn resource_get(tp: &'static str, req: Request<State>) -> tide::Result {
 
 /// Get a static JSON file
 async fn resource_get_json(
-    tp: &'static str,
+    resource_n: &'static str,
     req: Request<State>,
 ) -> Result<(String, Body)> {
-    Access::View.check(resource_tp(tp), &req)?;
-    let path = PathBuf::from(format!("{STATIC_PATH}/{tp}"));
+    Access::View.check(resource_tp(resource_n), &req)?;
+    let path = PathBuf::from(format!("{STATIC_PATH}/{resource_n}"));
     let etag = resource_etag(&path).await?;
     if let Some(values) = req.header("If-None-Match") {
         if values.iter().any(|v| v == &etag) {
@@ -610,10 +647,10 @@ async fn resource_get_json(
 }
 
 /// Get "main" associated resource type
-fn resource_tp(tp: &'static str) -> &'static str {
-    match tp {
+fn resource_tp(resource_n: &'static str) -> &'static str {
+    match resource_n {
         "controller_io" => "controller",
-        _ => tp,
+        _ => resource_n,
     }
 }
 
@@ -626,7 +663,10 @@ async fn resource_etag(path: &Path) -> Result<String> {
 }
 
 /// Create a Sonar object from a `POST` request
-async fn sonar_object_post(tp: &str, mut req: Request<State>) -> tide::Result {
+async fn sonar_object_post(
+    tp: &'static str,
+    mut req: Request<State>,
+) -> tide::Result {
     log::info!("POST {}", req.url());
     resp!(Access::Configure.check(tp, &req));
     let body: Value = req.body_json().await?;
@@ -664,7 +704,10 @@ fn att_value(value: &Value) -> Result<String> {
 }
 
 /// Update a Sonar object from a `PATCH` request
-async fn sonar_object_patch(tp: &str, mut req: Request<State>) -> tide::Result {
+async fn sonar_object_patch(
+    tp: &'static str,
+    mut req: Request<State>,
+) -> tide::Result {
     log::info!("PATCH {}", req.url());
     // *At least* Operate access needed (further checks below)
     resp!(Access::Operate.check(tp, &req));
@@ -680,7 +723,7 @@ async fn sonar_object_patch(tp: &str, mut req: Request<State>) -> tide::Result {
 
 /// Update a Sonar object from a `PATCH` request
 async fn sonar_object_patch_json(
-    tp: &str,
+    tp: &'static str,
     req: Request<State>,
     obj: &Map<String, Value>,
 ) -> Result<()> {
@@ -714,7 +757,10 @@ async fn sonar_object_patch_json(
 }
 
 /// Remove a Sonar object from a `DELETE` request
-async fn sonar_object_delete(tp: &str, req: Request<State>) -> tide::Result {
+async fn sonar_object_delete(
+    tp: &'static str,
+    req: Request<State>,
+) -> tide::Result {
     log::info!("DELETE {}", req.url());
     resp!(Access::Configure.check(tp, &req));
     let nm = resp!(obj_name(tp, &req));

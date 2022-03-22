@@ -227,4 +227,17 @@ impl State {
         let row = client.query_one(&query, &[&pkey])?;
         Ok(row.get::<usize, String>(0))
     }
+
+    /// Query rows as an array by primary key
+    pub fn get_array_by_pkey<PK: ToSql + Sync>(
+        &self,
+        sql: &'static str,
+        pkey: PK,
+    ) -> Result<String> {
+        let mut client = self.pool.get()?;
+        let query =
+            format!("SELECT COALESCE(json_agg(r), '[]')::text FROM ({sql}) r");
+        let row = client.query_one(&query, &[&pkey])?;
+        Ok(row.get::<usize, String>(0))
+    }
 }

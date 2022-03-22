@@ -131,6 +131,10 @@ The response for these requests contains an ETag header, derived from the file's
 | 💡 Plan      | condition, notes                                   |
 | 🔧 Configure | comm\_link, drop\_id, cabinet\_style, {`password`} |
 
+Also, a read only `controller_io` resource is available with
+`GET iris/api/controller_io/{name}`.  It contains an array of objects consisting
+of `pin`, `resource_n` and `name`.
+
 ### `geo_loc`
 
 | Access       | Attributes           |

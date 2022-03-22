@@ -543,3 +543,22 @@ async fn res_delete_card<C: Card>(name: &str) -> Result<()> {
     let uri = uri_name(C::UNAME, name);
     fetch_delete(&uri).await
 }
+
+/// Get resource TNAME from UNAME
+pub fn uname_to_tname(uname: &str) -> &'static str {
+    match uname {
+        Alarm::UNAME => Alarm::TNAME,
+        Beacon::UNAME => Beacon::TNAME,
+        CabinetStyle::UNAME => CabinetStyle::TNAME,
+        CommConfig::UNAME => CommConfig::TNAME,
+        CommLink::UNAME => CommLink::TNAME,
+        Controller::UNAME => Controller::TNAME,
+        LaneMarking::UNAME => LaneMarking::TNAME,
+        Modem::UNAME => Modem::TNAME,
+        Permission::UNAME => Permission::TNAME,
+        Role::UNAME => Role::TNAME,
+        User::UNAME => User::TNAME,
+        WeatherSensor::UNAME => WeatherSensor::TNAME,
+        _ => "Unknown",
+    }
+}
