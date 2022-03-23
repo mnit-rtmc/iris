@@ -52,6 +52,7 @@ impl Device for WeatherSensor {
 
 impl Card for WeatherSensor {
     const TNAME: &'static str = "Weather Sensor";
+    const SYMBOL: &'static str = "🌦️";
     const ENAME: &'static str = "🌦️ Weather Sensor";
     const UNAME: &'static str = "weather_sensor";
     const HAS_STATUS: bool = true;

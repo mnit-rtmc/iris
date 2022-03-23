@@ -146,6 +146,7 @@ pub trait AncillaryData: Default {
 /// A card can be displayed in a card list
 pub trait Card: Default + fmt::Display + DeserializeOwned {
     const TNAME: &'static str;
+    const SYMBOL: &'static str;
     const ENAME: &'static str;
     const UNAME: &'static str;
     const HAS_STATUS: bool = false;
@@ -544,21 +545,21 @@ async fn res_delete_card<C: Card>(name: &str) -> Result<()> {
     fetch_delete(&uri).await
 }
 
-/// Get resource TNAME from UNAME
-pub fn uname_to_tname(uname: &str) -> &'static str {
+/// Lookup a resource by UNAME
+pub fn resource_lookup(uname: &str) -> (&'static str, &'static str) {
     match uname {
-        Alarm::UNAME => Alarm::TNAME,
-        Beacon::UNAME => Beacon::TNAME,
-        CabinetStyle::UNAME => CabinetStyle::TNAME,
-        CommConfig::UNAME => CommConfig::TNAME,
-        CommLink::UNAME => CommLink::TNAME,
-        Controller::UNAME => Controller::TNAME,
-        LaneMarking::UNAME => LaneMarking::TNAME,
-        Modem::UNAME => Modem::TNAME,
-        Permission::UNAME => Permission::TNAME,
-        Role::UNAME => Role::TNAME,
-        User::UNAME => User::TNAME,
-        WeatherSensor::UNAME => WeatherSensor::TNAME,
-        _ => "Unknown",
+        Alarm::UNAME => (Alarm::SYMBOL, Alarm::TNAME),
+        Beacon::UNAME => (Beacon::SYMBOL, Beacon::TNAME),
+        CabinetStyle::UNAME => (CabinetStyle::SYMBOL, CabinetStyle::TNAME),
+        CommConfig::UNAME => (CommConfig::SYMBOL, CommConfig::TNAME),
+        CommLink::UNAME => (CommLink::SYMBOL, CommLink::TNAME),
+        Controller::UNAME => (Controller::SYMBOL, Controller::TNAME),
+        LaneMarking::UNAME => (LaneMarking::SYMBOL, LaneMarking::TNAME),
+        Modem::UNAME => (Modem::SYMBOL, Modem::TNAME),
+        Permission::UNAME => (Permission::SYMBOL, Permission::TNAME),
+        Role::UNAME => (Role::SYMBOL, Role::TNAME),
+        User::UNAME => (User::SYMBOL, User::TNAME),
+        WeatherSensor::UNAME => (WeatherSensor::SYMBOL, WeatherSensor::TNAME),
+        _ => ("❓", "Unknown"),
     }
 }

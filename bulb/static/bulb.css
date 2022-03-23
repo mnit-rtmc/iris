@@ -32,6 +32,10 @@ button:hover {
 button:active {
   background: #bbb;
 }
+button.go_link {
+  font-size: smaller;
+  padding: 0 0.2rem;
+}
 
 .root {
   position: fixed;
@@ -237,4 +241,10 @@ button:active {
   justify-content: center;
   align-content: center;
   align-items: center;
+}
+.pins {
+  column-count: 2;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }

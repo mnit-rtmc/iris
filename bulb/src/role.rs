@@ -43,6 +43,7 @@ impl fmt::Display for Role {
 
 impl Card for Role {
     const TNAME: &'static str = "Role";
+    const SYMBOL: &'static str = "💪";
     const ENAME: &'static str = "💪 Role";
     const UNAME: &'static str = "role";
 

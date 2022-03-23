@@ -53,6 +53,7 @@ impl Device for Beacon {
 
 impl Card for Beacon {
     const TNAME: &'static str = "Beacon";
+    const SYMBOL: &'static str = "🔆";
     const ENAME: &'static str = "🔆 Beacon";
     const UNAME: &'static str = "beacon";
     const HAS_STATUS: bool = true;

@@ -46,6 +46,7 @@ impl fmt::Display for Modem {
 
 impl Card for Modem {
     const TNAME: &'static str = "Modem";
+    const SYMBOL: &'static str = "🖀";
     const ENAME: &'static str = "🖀 Modem";
     const UNAME: &'static str = "modem";
 

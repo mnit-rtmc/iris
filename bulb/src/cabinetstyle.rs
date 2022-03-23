@@ -47,6 +47,7 @@ impl fmt::Display for CabinetStyle {
 
 impl Card for CabinetStyle {
     const TNAME: &'static str = "Cabinet Style";
+    const SYMBOL: &'static str = "🗄️";
     const ENAME: &'static str = "🗄️ Cabinet Style";
     const UNAME: &'static str = "cabinet_style";
 

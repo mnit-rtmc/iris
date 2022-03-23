@@ -51,6 +51,7 @@ impl Device for LaneMarking {
 
 impl Card for LaneMarking {
     const TNAME: &'static str = "LaneMarking";
+    const SYMBOL: &'static str = "⛙";
     const ENAME: &'static str = "⛙ Lane Marking";
     const UNAME: &'static str = "lane_marking";
     const HAS_STATUS: bool = true;

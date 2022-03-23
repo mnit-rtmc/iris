@@ -152,6 +152,7 @@ impl CommLink {
 
 impl Card for CommLink {
     const TNAME: &'static str = "Comm Link";
+    const SYMBOL: &'static str = "🔗";
     const ENAME: &'static str = "🔗 Comm Link";
     const UNAME: &'static str = "comm_link";
     const HAS_STATUS: bool = true;

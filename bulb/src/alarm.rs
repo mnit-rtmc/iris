@@ -64,6 +64,7 @@ impl Device for Alarm {
 
 impl Card for Alarm {
     const TNAME: &'static str = "Alarm";
+    const SYMBOL: &'static str = "📢";
     const ENAME: &'static str = "📢 Alarm";
     const UNAME: &'static str = "alarm";
     const HAS_STATUS: bool = true;

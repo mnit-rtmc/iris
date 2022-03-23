@@ -15,7 +15,7 @@ use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
 use crate::resource::{
-    disabled_attr, uname_to_tname, AncillaryData, Card, View, NAME,
+    disabled_attr, resource_lookup, AncillaryData, Card, View, NAME,
 };
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
@@ -213,9 +213,11 @@ impl ControllerAnc {
     fn io_pins_html(&self) -> String {
         let mut html = String::new();
         if let Some(controller_io) = &self.controller_io {
+            html.push_str("<ul class='pins'>");
             for cio in controller_io {
                 html.push_str(&cio.button_link_html());
             }
+            html.push_str("</ul>");
         }
         html
     }
@@ -225,18 +227,18 @@ impl ControllerIo {
     /// Create a button to select the controller IO
     pub fn button_link_html(&self) -> String {
         let pin = self.pin;
-        let resource_n = uname_to_tname(&self.resource_n);
+        let (symbol, resource_n) = resource_lookup(&self.resource_n);
         let name = HtmlStr::new(&self.name);
         format!(
-            "<div class='row'>\
+            "<li class='row'>\
               <span>#{pin}</span>\
-              <span class='info'>{resource_n} \
+              <span>{symbol} \
                 <button type='button' class='go_link' \
                         data-link='{name}' data-type='{resource_n}'>\
                         {name}\
                 </button>\
               </span>\
-            </div>"
+            </li>"
         )
     }
 }
@@ -287,6 +289,7 @@ impl Controller {
 
 impl Card for Controller {
     const TNAME: &'static str = "Controller";
+    const SYMBOL: &'static str = "🎛️";
     const ENAME: &'static str = "🎛️ Controller";
     const UNAME: &'static str = "controller";
     const HAS_STATUS: bool = true;
@@ -381,7 +384,7 @@ impl Card for Controller {
               <span>{condition}</span>\
               <span>{comm_state}</span>\
               <span>\
-                <button class='go_link' type='button' \
+                <button type='button' class='go_link' \
                         data-link='{comm_link}' data-type='{tname}'>\
                   {comm_link}\
                 </button>\

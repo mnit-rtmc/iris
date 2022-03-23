@@ -189,6 +189,7 @@ impl fmt::Display for GeoLoc {
 
 impl Card for GeoLoc {
     const TNAME: &'static str = "Location";
+    const SYMBOL: &'static str = "🗺️";
     const ENAME: &'static str = "🗺️ Location";
     const UNAME: &'static str = "geo_loc";
 

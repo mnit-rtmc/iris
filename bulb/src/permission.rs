@@ -161,6 +161,7 @@ impl fmt::Display for Permission {
 
 impl Card for Permission {
     const TNAME: &'static str = "Permission";
+    const SYMBOL: &'static str = "🗝️";
     const ENAME: &'static str = "🗝️ Permission";
     const UNAME: &'static str = "permission";
 

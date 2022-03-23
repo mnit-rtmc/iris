@@ -198,6 +198,7 @@ impl fmt::Display for CommConfig {
 
 impl Card for CommConfig {
     const TNAME: &'static str = "Comm Config";
+    const SYMBOL: &'static str = "📡";
     const ENAME: &'static str = "📡 Comm Config";
     const UNAME: &'static str = "comm_config";
 
