@@ -589,17 +589,31 @@ CREATE TRIGGER flow_stream_insert_trig
     INSTEAD OF INSERT ON iris.flow_stream
     FOR EACH ROW EXECUTE PROCEDURE iris.flow_stream_insert();
 
-DROP TRIGGER weather_sensor_insert_trig ON iris.weather_sensor;
-CREATE OR REPLACE FUNCTION iris.weather_sensor_insert() RETURNS TRIGGER AS
+-- Add `sample_time` to `weather_sensor`
+DROP VIEW weather_sensor_view;
+DROP VIEW iris.weather_sensor;
+DROP FUNCTION iris.weather_sensor_insert();
+DROP FUNCTION iris.weather_sensor_update();
+
+ALTER TABLE iris._weather_sensor
+    ADD COLUMN sample_time TIMESTAMP WITH TIME ZONE;
+
+CREATE VIEW iris.weather_sensor AS
+    SELECT w.name, site_id, alt_id, geo_loc, controller, pin, notes, settings,
+           sample, sample_time
+      FROM iris._weather_sensor w
+      JOIN iris.controller_io cio ON w.name = cio.name;
+
+CREATE FUNCTION iris.weather_sensor_insert() RETURNS TRIGGER AS
     $weather_sensor_insert$
 BEGIN
     INSERT INTO iris.controller_io (name, resource_n, controller, pin)
          VALUES (NEW.name, 'weather_sensor', NEW.controller, NEW.pin);
     INSERT INTO iris._weather_sensor (
-        name, site_id, alt_id, geo_loc, notes, settings, sample
+        name, site_id, alt_id, geo_loc, notes, settings, sample, sample_time
     ) VALUES (
         NEW.name, NEW.site_id, NEW.alt_id, NEW.geo_loc, NEW.notes, NEW.settings,
-        NEW.sample
+        NEW.sample, NEW.sample_time
     );
     RETURN NEW;
 END;
@@ -608,5 +622,43 @@ $weather_sensor_insert$ LANGUAGE plpgsql;
 CREATE TRIGGER weather_sensor_insert_trig
     INSTEAD OF INSERT ON iris.weather_sensor
     FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_insert();
+
+CREATE FUNCTION iris.weather_sensor_update() RETURNS TRIGGER AS
+    $weather_sensor_update$
+BEGIN
+    UPDATE iris.controller_io
+       SET controller = NEW.controller,
+           pin = NEW.pin
+     WHERE name = OLD.name;
+    UPDATE iris._weather_sensor
+       SET site_id = NEW.site_id,
+           alt_id = NEW.alt_id,
+           geo_loc = NEW.geo_loc,
+           notes = NEW.notes,
+           settings = NEW.settings,
+           sample = NEW.sample,
+           sample_time = NEW.sample_time
+     WHERE name = OLD.name;
+    RETURN NEW;
+END;
+$weather_sensor_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER weather_sensor_update_trig
+    INSTEAD OF UPDATE ON iris.weather_sensor
+    FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_update();
+
+CREATE TRIGGER weather_sensor_delete_trig
+    INSTEAD OF DELETE ON iris.weather_sensor
+    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+
+CREATE VIEW weather_sensor_view AS
+    SELECT w.name, site_id, alt_id, w.notes, settings, sample, sample_time,
+           w.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
+           l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location,
+           w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.condition
+    FROM iris.weather_sensor w
+    LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
+    LEFT JOIN controller_view ctr ON w.controller = ctr.name;
+GRANT SELECT ON weather_sensor_view TO PUBLIC;
 
 COMMIT;

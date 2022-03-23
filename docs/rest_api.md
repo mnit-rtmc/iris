@@ -185,7 +185,7 @@ of `pin`, `resource_n` and `name`.
 
 | Access       | Attributes                                            |
 |--------------|-------------------------------------------------------|
-| Read Only    | name, location, {`geo_loc`}, {`settings`}, {`sample`} |
+| Read Only    | name, location, {`geo_loc`}, {`settings`}, {`sample`}, {`sample_time`} |
 | 💡 Plan      | site\_id, alt\_id, notes                              |
 | 🔧 Configure | controller, {`pin`}                                   |
 

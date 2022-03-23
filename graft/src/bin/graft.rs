@@ -347,7 +347,7 @@ async fn main() -> tide::Result<()> {
         sql_get(
             "weather_sensor",
             "SELECT ws.name, location, geo_loc, controller, pin, site_id, \
-                    alt_id, notes, settings, sample \
+                    alt_id, notes, settings, sample, sample_time \
             FROM iris.weather_sensor ws \
             LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
             WHERE ws.name = $1",

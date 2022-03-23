@@ -33,6 +33,9 @@ pub struct WeatherSensor {
     pub controller: Option<String>,
     // full attributes
     pub pin: Option<u32>,
+    pub settings: Option<Value>,
+    pub sample: Option<Value>,
+    pub sample_time: Option<String>,
 }
 
 type WeatherSensorAnc = DeviceAnc<WeatherSensor>;

@@ -5235,7 +5235,8 @@ CREATE TABLE iris._weather_sensor (
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
     notes VARCHAR(64) NOT NULL,
     settings JSONB,
-    sample JSONB
+    sample JSONB,
+    sample_time TIMESTAMP WITH time zone
 );
 
 ALTER TABLE iris._weather_sensor ADD CONSTRAINT _weather_sensor_fkey
@@ -5265,7 +5266,7 @@ CREATE TRIGGER weather_sensor_table_notify_trig
 
 CREATE VIEW iris.weather_sensor AS
     SELECT w.name, site_id, alt_id, geo_loc, controller, pin, notes, settings,
-           sample
+           sample, sample_time
       FROM iris._weather_sensor w
       JOIN iris.controller_io cio ON w.name = cio.name;
 
@@ -5275,10 +5276,10 @@ BEGIN
     INSERT INTO iris.controller_io (name, resource_n, controller, pin)
          VALUES (NEW.name, 'weather_sensor', NEW.controller, NEW.pin);
     INSERT INTO iris._weather_sensor (
-        name, site_id, alt_id, geo_loc, notes, settings, sample
+        name, site_id, alt_id, geo_loc, notes, settings, sample, sample_time
     ) VALUES (
         NEW.name, NEW.site_id, NEW.alt_id, NEW.geo_loc, NEW.notes, NEW.settings,
-        NEW.sample
+        NEW.sample, NEW.sample_time
     );
     RETURN NEW;
 END;
@@ -5301,7 +5302,8 @@ BEGIN
            geo_loc = NEW.geo_loc,
            notes = NEW.notes,
            settings = NEW.settings,
-           sample = NEW.sample
+           sample = NEW.sample,
+           sample_time = NEW.sample_time
      WHERE name = OLD.name;
     RETURN NEW;
 END;
@@ -5316,7 +5318,7 @@ CREATE TRIGGER weather_sensor_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
 
 CREATE VIEW weather_sensor_view AS
-    SELECT w.name, w.site_id, w.alt_id, w.notes, w.settings, w.sample,
+    SELECT w.name, site_id, alt_id, w.notes, settings, sample, sample_time,
            w.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location,
            w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.condition
@@ -5326,17 +5328,17 @@ CREATE VIEW weather_sensor_view AS
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
 
 CREATE TABLE event.weather_sensor_settings (
-	event_id SERIAL PRIMARY KEY,
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	weather_sensor VARCHAR(20) NOT NULL,
-	settings JSONB
+    event_id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone NOT NULL,
+    weather_sensor VARCHAR(20) NOT NULL,
+    settings JSONB
 );
 
 CREATE TABLE event.weather_sensor_sample (
-	event_id SERIAL PRIMARY KEY,
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	weather_sensor VARCHAR(20) NOT NULL,
-	sample JSONB
+    event_id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone NOT NULL,
+    weather_sensor VARCHAR(20) NOT NULL,
+    sample JSONB
 );
 
 CREATE FUNCTION event.weather_sensor_sample_trig() RETURNS TRIGGER AS

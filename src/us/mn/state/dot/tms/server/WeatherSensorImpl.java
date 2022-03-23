@@ -719,8 +719,15 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
 	/** Set the time stamp for the current sample */
 	public void setStampNotify(Long s) {
-		stamp = s;
-		notifyAttribute("stamp");
+		try {
+			store.update(this, "sample_time", asTimestamp(s));
+			stamp = s;
+			notifyAttribute("stamp");
+		}
+		catch (TMSException e) {
+			// FIXME: what else can we do with this exception?
+			e.printStackTrace();
+		}
 	}
 
 	/** Get a weather sensor poller */
