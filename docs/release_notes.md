@@ -1,5 +1,13 @@
 # IRIS 5.x Release Notes
 
+5.30.0 (24 Mar 2022)
+ - Added controller IO pin links to web UI
+ - Added beacons/weather sensors/lane markings to web UI
+ - Improved GET requests for REST API
+ - Natch: reest watchdog in "send settings"
+ - Fixed problems with WYSIWYG editor
+ - Fixed problems with subnet checking
+
 5.29.0 (16 Mar 2022)
  - Fixed comm link connection regressions
  - Expanded web-based administration UI
