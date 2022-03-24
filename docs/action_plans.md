@@ -47,6 +47,7 @@ Tag              | Description
 `[feed` *…* `]`  | [Msg-Feed] message
 `[pa` *…* `]`    | [Parking area] availability
 `[slow` *…* `]`  | [Slow traffic] warning
+`[standby]`      | Standby messages
 `[ta` *…* `]`    | Scheduled [time actions](#time-action-tag)
 `[tt` *…* `]`    | [Travel time] estimation
 `[tz` *…* `]`    | [Toll zone] pricing

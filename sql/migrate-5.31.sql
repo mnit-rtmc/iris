@@ -3,9 +3,9 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
--- Uncomment and change if/as needed
--- SELECT iris.update_version('5.22.4', '5.22.5');
+SELECT iris.update_version('5.30.0', '5.31.0');
 
+-- Add message source for standby tags
 INSERT INTO iris.sign_msg_source (bit, source) VALUES (15, 'standby');
 
 COMMIT;
