@@ -848,7 +848,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Increment the controller error count */
-	private void incrementControllerErr() {
+	public void incrementControllerErr() {
 		controllerErr++;
 		notifyAttribute("controllerErr");
 	}
