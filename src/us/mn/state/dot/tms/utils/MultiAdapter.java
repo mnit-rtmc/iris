@@ -193,4 +193,8 @@ public class MultiAdapter implements Multi {
 	/** Add an incident locator */
 	@Override
 	public void addLocator(String code) { }
+
+	/** Add a standby-message tag */
+	@Override
+	public void addStandby() { }
 }

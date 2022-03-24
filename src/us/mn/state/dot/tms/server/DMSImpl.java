@@ -1365,13 +1365,18 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	protected boolean isAvailable() {
 		return super.isAvailable()
-		    && isMsgBlank()
+		    && (isMsgBlank() || isMsgStandby())
 		    && purpose == DevicePurpose.GENERAL;
 	}
 
 	/** Test if current message is blank */
 	public boolean isMsgBlank() {
 		return SignMessageHelper.isBlank(msg_current);
+	}
+
+	/** Test if current message is standby */
+	public boolean isMsgStandby() {
+		return SignMessageHelper.isStandby(msg_current);
 	}
 
 	/** Test if the current message source contains "operator" */
@@ -1407,12 +1412,16 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Test if a DMS has been deployed by a user */
 	public boolean isUserDeployed() {
-		return isMsgDeployed() && isMsgOperator();
+		return isMsgDeployed()
+		    && isMsgOperator()
+		    && !isMsgStandby();
 	}
 
 	/** Test if a DMS has been deployed by schedule */
 	public boolean isScheduleDeployed() {
-		return isMsgDeployed() && isMsgScheduled();
+		return isMsgDeployed()
+		    && isMsgScheduled()
+		    && !isMsgStandby();
 	}
 
 	/** Test if a DMS has been deployed by an external system */

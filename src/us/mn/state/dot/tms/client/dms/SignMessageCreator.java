@@ -24,6 +24,8 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
+import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
 /**
  * This is a utility class to create sign messages.
@@ -136,8 +138,14 @@ public class SignMessageCreator {
 		boolean be, MsgCombining mc, DmsMsgPriority mp, int src,
 		String owner, Integer duration)
 	{
+		WMessage wmsg = new WMessage(multi);
+		if (wmsg.removeAll(WTokenType.standby)) {
+			multi = wmsg.toString();
+			mp = DmsMsgPriority.STANDBY;
+			src |= SignMsgSource.standby.bit();
+		}
 		SignMessage sm = SignMessageHelper.find(sc, inc, multi, be,
-			mc.ordinal(), mp, src, owner, duration);
+				mc.ordinal(), mp, src, owner, duration);
 		String prefix = createPrefix(src);
 		if (sm != null && sm.getName().startsWith(prefix))
 			return sm;

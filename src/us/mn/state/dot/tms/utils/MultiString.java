@@ -100,6 +100,8 @@ public class MultiString {
 			String o_txt) {}
 		@Override
 		public void addSpeedAdvisory() {}
+		@Override
+		public void addStandby() {}
 	}
 
 	/** Filter brackets in a span of text */
@@ -173,6 +175,8 @@ public class MultiString {
 			parseTimeAction(tag.substring(2), cb);
 		else if (ltag.startsWith("loc"))
 			parseLocator(tag.substring(3), cb);
+		else if (ltag.startsWith("standby"))
+			cb.addStandby();
 		else
 			cb.unsupportedTag(tag);
 	}

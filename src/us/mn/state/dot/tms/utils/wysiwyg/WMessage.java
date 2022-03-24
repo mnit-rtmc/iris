@@ -137,6 +137,12 @@ public class WMessage {
 		bChanged = true;
 	}
 	
+	/** Reparse MULTI string after adding/changing/deleting tokens */
+	public void reparseMulti() {
+		String multiStr = toString();
+		parseMulti(multiStr);
+	}
+	
 	/** Create a MULTI string from a WMessage */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -424,5 +430,69 @@ public class WMessage {
 	 * Updates the raster image in all WPage(s) */
 	public void renderMsg(MultiConfig mcfg) {
 		renderMsg(mcfg, null);
+	}
+	
+	//===========================================
+	
+	/** Test for a specific token-type anywhere in the message.
+	 * @param type WTokenType to look for
+	 * @return true if a token of that type was found,
+	 *   false if it was not.
+	 * @implNote WTokenType.newpage tokens 
+	 *   can NOT be found using this method.
+	 */
+	public boolean containsAny(WTokenType type) {
+		WPage p;
+		Iterator<WPage> pit = pagelist.iterator();
+		while (pit.hasNext()) {
+			p = pit.next();
+			if (p.containsAny(type))
+				return true;
+		}
+		return false;
+	}
+
+	/** Remove all tokens of a specific token-type anywhere in the message.
+	 * @param type WTokenType to look for
+	 * @return true if any tokens of that type were removed,
+	 *   false if none were found.
+	 * @implNote After any removeAll(...) has returned true,
+	 *   depending on what kind of tokens were removed,
+	 *   it might be necessary to call reparseMulti()
+	 *   and maybe renderMsg(...) to update WMessage
+	 *   internal values and/or rendered pages.
+	 * @implNote WTokenType.newpage tokens 
+	 *   can NOT be removed using this method.
+	 */
+	public boolean removeAll(WTokenType type) {
+		boolean removedOneOrMore = false;
+		WPage p;
+		Iterator<WPage> pit = pagelist.iterator();
+		while (pit.hasNext()) {
+			p = pit.next();
+			if (p.removeAll(type)) {
+				removedOneOrMore = true;
+				bChanged = true;
+			}
+		}
+		return removedOneOrMore;
+	}
+	
+	//===========================================
+
+	/** Test for standby tag in message */
+	public boolean isStandby() {
+		return containsAny(WTokenType.standby);
+	}
+	
+	/** Add or remove standby token in message */
+	public void setStandby(boolean bStandby) {
+		if (bStandby) {
+			String multiStr = "[standby]" + toString();
+			parseMulti(multiStr);
+		}
+		else {
+			removeAll(WTokenType.standby);
+		}
 	}
 }

@@ -26,7 +26,7 @@ package us.mn.state.dot.tms;
 public enum DmsMsgPriority {
 	INVALID,	/* 0: invalid priority */
 	BLANK,		/* 1: blank message run-time priority */
-	RESERVED,	/* 2: reserved for future use */
+	STANDBY,	/* 2: standby message */
 	PSA,		/* 3: public service announcement */
 	TRAVEL_TIME,	/* 4: travel time priority */
 	ALERT_LOW,	/* 5: low alert priority */
@@ -64,6 +64,8 @@ public enum DmsMsgPriority {
 		case BLANK:
 		case OVERRIDE:
 			return SignMsgSource.blank.bit();
+		case STANDBY:
+			return SignMsgSource.standby.bit();
 		case TRAVEL_TIME:
 			return SignMsgSource.toBits(SignMsgSource.schedule,
 			                            SignMsgSource.travel_time);
