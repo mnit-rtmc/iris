@@ -36,6 +36,11 @@ pub struct WeatherData {
     spot_wind_speed: Option<f32>,
     gust_wind_dir: Option<u32>,
     gust_wind_speed: Option<f32>,
+    precip_1_hour: Option<u32>,
+    precip_3_hours: Option<u32>,
+    precip_6_hours: Option<u32>,
+    precip_12_hours: Option<u32>,
+    precip_24_hours: Option<u32>,
 }
 
 /// Weather Sensor
@@ -57,13 +62,20 @@ pub struct WeatherSensor {
 
 type WeatherSensorAnc = DeviceAnc<WeatherSensor>;
 
-/// Get atmospheric situation string
-fn situation_str(situation: &str) -> &'static str {
+/// Get visibility situation string (from NTCIP 1204)
+fn vis_situation(situation: &str) -> &'static str {
     match situation {
-        "clear" => "☀️ / 🌃 clear",
+        "other" => "⛆ other",
+        "clear" => "🔭 clear",
         "fogNotPatchy" => "🌫️ fog",
         "patchyFog" => "🌁 patchy fog",
-        "other" => "⛆ other",
+        "blowingSnow" => "❄️ snow",
+        "smoke" => "🚬 smoke",
+        "seaSpray" => "💦 sea spray",
+        "vehicleSpray" => "💦 spray",
+        "blowingDustOrSand" => "💨 dust",
+        "sunGlare" => "🕶️ sun glare",
+        "swarmOfInsects" => "🦗 swarm", // seriously?!?
         _ => "❓ unknown",
     }
 }
@@ -110,13 +122,21 @@ impl WeatherData {
         let mut html = String::new();
         if self.min_air_temp.is_some()
             || self.max_air_temp.is_some()
-            || self.wet_bulb_temp.is_some()
             || self.dew_point_temp.is_some()
+            || self.wet_bulb_temp.is_some()
         {
             html.push_str(&self.temp_html());
         }
         if self.visibility_situation.is_some() || self.visibility.is_some() {
             html.push_str(&self.atmospheric_html());
+        }
+        if self.precip_1_hour.is_some()
+            || self.precip_3_hours.is_some()
+            || self.precip_6_hours.is_some()
+            || self.precip_12_hours.is_some()
+            || self.precip_24_hours.is_some()
+        {
+            html.push_str(&self.precipitation_html());
         }
         if self.avg_wind_dir.is_some()
             || self.avg_wind_speed.is_some()
@@ -150,14 +170,14 @@ impl WeatherData {
             }
             _ => (),
         }
-        if let Some(wet_bulb_temp) = self.wet_bulb_temp {
-            html.push_str(" WB <span class='info'>");
-            html.push_str(&wet_bulb_temp.to_string());
-            html.push_str(" ℃</span>");
-        }
         if let Some(dew_point_temp) = self.dew_point_temp {
             html.push_str(" DP <span class='info'>");
             html.push_str(&dew_point_temp.to_string());
+            html.push_str(" ℃</span>");
+        }
+        if let Some(wet_bulb_temp) = self.wet_bulb_temp {
+            html.push_str(" WB <span class='info'>");
+            html.push_str(&wet_bulb_temp.to_string());
             html.push_str(" ℃</span>");
         }
         html.push_str("</span></div>");
@@ -172,7 +192,7 @@ impl WeatherData {
             (&self.visibility_situation, self.visibility)
         {
             html.push_str("<span>");
-            html.push_str(situation_str(visibility_situation));
+            html.push_str(vis_situation(visibility_situation));
             html.push_str(", visibility <span class='info'>");
             html.push_str(&visibility.to_string());
             html.push_str(" m</span>");
@@ -182,11 +202,41 @@ impl WeatherData {
         html
     }
 
+    /// Get precipitation data as HTML
+    fn precipitation_html(&self) -> String {
+        let mut html = String::new();
+        html.push_str(
+            "<table><tr><th>🌧️ Precip<th>1h<th>3h<th>6h<th>12h<th>24h",
+        );
+        html.push_str("<tr><td>Total (mm)<td>");
+        if let Some(precip_1_hour) = self.precip_1_hour {
+            html.push_str(&precip_1_hour.to_string());
+        }
+        html.push_str("<td>");
+        if let Some(precip_3_hours) = self.precip_3_hours {
+            html.push_str(&precip_3_hours.to_string());
+        }
+        html.push_str("<td>");
+        if let Some(precip_6_hours) = self.precip_6_hours {
+            html.push_str(&precip_6_hours.to_string());
+        }
+        html.push_str("<td>");
+        if let Some(precip_12_hours) = self.precip_12_hours {
+            html.push_str(&precip_12_hours.to_string());
+        }
+        html.push_str("<td>");
+        if let Some(precip_24_hours) = self.precip_24_hours {
+            html.push_str(&precip_24_hours.to_string());
+        }
+        html.push_str("</table>");
+        html
+    }
+
     /// Get wind data as HTML
     fn wind_html(&self) -> String {
         let mut html = String::new();
         html.push_str("<table><tr><th>🌬️ Wind<th>Avg<th>Spot<th>Gust");
-        html.push_str("<tr><td>🧭 Dir<td>");
+        html.push_str("<tr><td>Dir 🧭<td>");
         if let Some(avg_wind_dir) = self.avg_wind_dir {
             html.push_str(&wind_dir_html(avg_wind_dir));
         }
