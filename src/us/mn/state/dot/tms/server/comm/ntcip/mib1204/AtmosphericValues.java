@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2020  Minnesota Department of Transportation
+ * Copyright (C) 2019-2022  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -145,9 +145,9 @@ public class AtmosphericValues {
 	}
 
 	/** Get visibility in meters */
-	public Float getVisibility() {
+	public Integer getVisibility() {
 		Distance vis = convertVisibility(visibility);
-		return (vis != null) ? vis.asFloat(METERS) : null;
+		return (vis != null) ? vis.round(METERS) : null;
 	}
 
 	/** Get the visibility situation */

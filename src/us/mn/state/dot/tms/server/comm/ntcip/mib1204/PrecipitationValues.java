@@ -15,6 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
+import java.text.NumberFormat;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
@@ -48,57 +49,88 @@ public class PrecipitationValues {
 	static private final int PRECIP_ERROR_MISSING = 65535;
 
 	/** Convert precipitation rate to mm/hr.
-	 * @param pr precipitation rate in 1/10s of gram per square meter per
+	 * @param pr precipitation rate in tenths of gram per square meter per
 	 *           second.
 	 * @return Precipiration rate in mm/hr or null if missing */
-	static private Integer convertPrecipRate(ASN1Integer pr) {
+	static private Float convertPrecipRate(ASN1Integer pr) {
 		if (pr != null) {
-			// 1mm of water over 1 sqm is 1L which is 1Kg
 			int tg = pr.getInteger();
 			if (tg != PRECIP_ERROR_MISSING) {
-				int mmhr = (int) Math.round((double) tg * 0.36);
-				return Integer.valueOf(mmhr);
+				// starting from tenths of g/m^2/s
+				// divide by 10,000 => kg/m^2/s
+				// equivalent to L/m^2/s (for water)
+				// cancel out 0.001 m^3/m^2 => mm/s
+				// multiply by 3600 => mm/hr
+				// 3600 / 10,000 = 0.36
+				return tg * 0.36f;
 			}
 		}
 		return null;
 	}
 
-	/** Convert one hour precipitation amount.
-	 * @param pr One hour precipitation in tenths of a mm.
-	 * @return One hour precipitation in mm or null */
-	static private Float convertPrecip(ASN1Integer pr) {
-		if (pr != null) {
-			int pri = pr.getInteger();
-			if (pri != PRECIP_ERROR_MISSING)
-				return Float.valueOf(pri * 0.1f);
+	/** Format precipitation rate to tenths of mm/hr */
+	static private String formatPrecipRate(ASN1Integer pr) {
+		Float pr_mm_hr = convertPrecipRate(pr);
+		if (pr_mm_hr != null) {
+			// Format mm/hr to 1 decimal place
+			NumberFormat f = NumberFormat.getInstance();
+			f.setMaximumFractionDigits(1);
+			f.setMinimumFractionDigits(1);
+			return f.format(pr_mm_hr);
+		} else
+			return null;
+	}
+
+	/** Convert precipitation total.
+	 * @param pr Precipitation total in tenths of kg/m^2.
+	 * @return Precipitation total in mm or null */
+	static private Float convertPrecipTotal(ASN1Integer pt) {
+		if (pt != null) {
+			// 1kg of water is 1L volume,
+			// equivalent to 1mm depth in a square meter
+			int pti = pt.getInteger();
+			if (pti != PRECIP_ERROR_MISSING)
+				return pti * 0.1f;
 		}
 		return null;
+	}
+
+	/** Format precipitation total to mm units with 1 decimal place */
+	static private String formatPrecipTotal(ASN1Integer pt) {
+		Float pt_mm = convertPrecipTotal(pt);
+		if (pt_mm != null) {
+			NumberFormat f = NumberFormat.getInstance();
+			f.setMaximumFractionDigits(1);
+			f.setMinimumFractionDigits(1);
+			return f.format(pt_mm);
+		} else
+			return null;
 	}
 
 	/** Relative humidity */
 	public final ASN1Integer relative_humidity = essRelativeHumidity
 		.makeInt();
 
-	/** Precipitation rate */
+	/** Precipitation rate (tenths of grams/m^2/s) */
 	public final ASN1Integer precip_rate = essPrecipRate.makeInt();
 
-	/** One hour precipitation total */
+	/** One hour precipitation total (tenths of kg/m^2) */
 	public final ASN1Integer precip_1_hour =
 		essPrecipitationOneHour.makeInt();
 
-	/** Three hour precipitation total */
+	/** Three hour precipitation total (tenths of kg/m^2) */
 	public final ASN1Integer precip_3_hours =
 		essPrecipitationThreeHours.makeInt();
 
-	/** Six hour precipitation total */
+	/** Six hour precipitation total (tenths of kg/m^2) */
 	public final ASN1Integer precip_6_hours =
 		essPrecipitationSixHours.makeInt();
 
-	/** Twelve hour precipitation total */
+	/** Twelve hour precipitation total (tenths of kg/m^2) */
 	public final ASN1Integer precip_12_hours =
 		essPrecipitationTwelveHours.makeInt();
 
-	/** Twenty-four hour precipitation total */
+	/** Twenty-four hour precipitation total (tenths of kg/m^2) */
 	public final ASN1Integer precip_24_hours =
 		essPrecipitation24Hours.makeInt();
 
@@ -125,13 +157,14 @@ public class PrecipitationValues {
 
 	/** Get the precipitation rate in mm/hr */
 	public Integer getPrecipRate() {
-		return convertPrecipRate(precip_rate);
+		Float pr = convertPrecipRate(precip_rate);
+		return (pr != null) ? Math.round(pr) : null;
 	}
 
-	/** Get the one hour precipitation in mm */
+	/** Get the one hour precipitation total in mm */
 	public Integer getPrecip1Hour() {
-		Float pr = convertPrecip(precip_1_hour);
-		return (pr != null) ? Math.round(pr) : null;
+		Float pt = convertPrecipTotal(precip_1_hour);
+		return (pt != null) ? Math.round(pt) : null;
 	}
 
 	/** Get the precipitation situation */
@@ -144,16 +177,17 @@ public class PrecipitationValues {
 	public String toJson() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Json.num("relative_humidity", getRelativeHumidity()));
-		sb.append(Json.num("precip_rate", getPrecipRate()));
-		sb.append(Json.num("precip_1_hour", convertPrecip(
+		sb.append(Json.num("precip_rate", formatPrecipRate(
+			precip_rate)));
+		sb.append(Json.num("precip_1_hour", formatPrecipTotal(
 			precip_1_hour)));
-		sb.append(Json.num("precip_3_hours", convertPrecip(
+		sb.append(Json.num("precip_3_hours", formatPrecipTotal(
 			precip_3_hours)));
-		sb.append(Json.num("precip_6_hours", convertPrecip(
+		sb.append(Json.num("precip_6_hours", formatPrecipTotal(
 			precip_6_hours)));
-		sb.append(Json.num("precip_12_hours", convertPrecip(
+		sb.append(Json.num("precip_12_hours", formatPrecipTotal(
 			precip_12_hours)));
-		sb.append(Json.num("precip_24_hours", convertPrecip(
+		sb.append(Json.num("precip_24_hours", formatPrecipTotal(
 			precip_24_hours)));
 		sb.append(Json.str("precip_situation", getPrecipSituation()));
 		return sb.toString();
