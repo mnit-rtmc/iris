@@ -35,8 +35,7 @@ pub struct Camera {
 
 type CameraAnc = DeviceAnc<Camera>;
 
-impl Camera {
-}
+impl Camera {}
 
 impl fmt::Display for Camera {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -73,8 +72,7 @@ impl Card for Camera {
 
     /// Check if a search string matches
     fn is_match(&self, search: &str, _anc: &CameraAnc) -> bool {
-        self.name.contains_lower(search)
-            || self.location.contains_lower(search)
+        self.name.contains_lower(search) || self.location.contains_lower(search)
     }
 
     /// Convert to compact HTML

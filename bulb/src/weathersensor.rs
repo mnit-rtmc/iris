@@ -21,11 +21,20 @@ use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
 
+/// Air temp data
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct AirTemp {
+    air_temp: f32,
+}
+
 /// Weather Sensor Data
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct WeatherData {
+    /// Minimum air temp in last 24 hours (first sensor)
     min_air_temp: Option<f32>,
+    /// Maximum air temp in last 24 hours (first sensor)
     max_air_temp: Option<f32>,
+    temperature_sensor: Option<Vec<AirTemp>>,
     wet_bulb_temp: Option<f32>,
     dew_point_temp: Option<f32>,
     visibility: Option<u32>,
@@ -120,8 +129,7 @@ impl WeatherData {
     /// Get weather data as HTML
     fn to_html(&self) -> String {
         let mut html = String::new();
-        if self.min_air_temp.is_some()
-            || self.max_air_temp.is_some()
+        if self.temperature_sensor.is_some()
             || self.dew_point_temp.is_some()
             || self.wet_bulb_temp.is_some()
         {
@@ -155,20 +163,16 @@ impl WeatherData {
         let mut html = String::new();
         html.push_str("<div class='row'>");
         html.push_str("<span>🌡️</span><span>");
-        match (self.min_air_temp, self.max_air_temp) {
-            (Some(min_air_temp), Some(max_air_temp)) => {
+        if let Some(temperature_sensor) = &self.temperature_sensor {
+            if !temperature_sensor.is_empty() {
+                let n_temps = temperature_sensor.len() as f32;
+                let air_temp =
+                    temperature_sensor.iter().map(|at| at.air_temp).sum::<f32>()
+                        / n_temps;
                 html.push_str("Air <span class='info'>");
-                html.push_str(&min_air_temp.to_string());
-                html.push_str("…");
-                html.push_str(&max_air_temp.to_string());
+                html.push_str(&format!("{air_temp:.1}"));
                 html.push_str(" ℃</span>");
             }
-            (Some(air_temp), None) | (None, Some(air_temp)) => {
-                html.push_str("Air <span class='info'>");
-                html.push_str(&air_temp.to_string());
-                html.push_str(" ℃</span>");
-            }
-            _ => (),
         }
         if let Some(dew_point_temp) = self.dew_point_temp {
             html.push_str(" DP <span class='info'>");
