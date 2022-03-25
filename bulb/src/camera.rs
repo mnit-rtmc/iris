@@ -89,7 +89,7 @@ impl Card for Camera {
 
     /// Convert to status HTML
     fn to_html_status(&self, anc: &CameraAnc) -> String {
-        let location = HtmlStr::new(&self.location).with_len(12);
+        let location = HtmlStr::new(&self.location).with_len(64);
         let controller = anc.controller_html();
         format!(
             "<div class='row'>\

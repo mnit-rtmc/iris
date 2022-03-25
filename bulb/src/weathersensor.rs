@@ -36,11 +36,11 @@ pub struct WeatherData {
     spot_wind_speed: Option<f32>,
     gust_wind_dir: Option<u32>,
     gust_wind_speed: Option<f32>,
-    precip_1_hour: Option<u32>,
-    precip_3_hours: Option<u32>,
-    precip_6_hours: Option<u32>,
-    precip_12_hours: Option<u32>,
-    precip_24_hours: Option<u32>,
+    precip_1_hour: Option<f32>,
+    precip_3_hours: Option<f32>,
+    precip_6_hours: Option<f32>,
+    precip_12_hours: Option<f32>,
+    precip_24_hours: Option<f32>,
 }
 
 /// Weather Sensor
