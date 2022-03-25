@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2020  Minnesota Department of Transportation
+ * Copyright (C) 2019-2022  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -66,13 +66,11 @@ public class PrecipitationValues {
 	/** Convert one hour precipitation amount.
 	 * @param pr One hour precipitation in tenths of a mm.
 	 * @return One hour precipitation in mm or null */
-	static private Integer convertPrecip(ASN1Integer pr) {
+	static private Float convertPrecip(ASN1Integer pr) {
 		if (pr != null) {
 			int pri = pr.getInteger();
-			if (pri != PRECIP_ERROR_MISSING) {
-				int cp = (int) Math.round((double) pri * 0.1);
-				return Integer.valueOf(cp);
-			}
+			if (pri != PRECIP_ERROR_MISSING)
+				return Float.valueOf(pri * 0.1f);
 		}
 		return null;
 	}
@@ -132,7 +130,8 @@ public class PrecipitationValues {
 
 	/** Get the one hour precipitation in mm */
 	public Integer getPrecip1Hour() {
-		return convertPrecip(precip_1_hour);
+		Float pr = convertPrecip(precip_1_hour);
+		return (pr != null) ? Math.round(pr) : null;
 	}
 
 	/** Get the precipitation situation */
@@ -146,7 +145,8 @@ public class PrecipitationValues {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Json.num("relative_humidity", getRelativeHumidity()));
 		sb.append(Json.num("precip_rate", getPrecipRate()));
-		sb.append(Json.num("precip_1_hour", getPrecip1Hour()));
+		sb.append(Json.num("precip_1_hour", convertPrecip(
+			precip_1_hour)));
 		sb.append(Json.num("precip_3_hours", convertPrecip(
 			precip_3_hours)));
 		sb.append(Json.num("precip_6_hours", convertPrecip(
