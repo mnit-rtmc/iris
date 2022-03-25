@@ -494,6 +494,7 @@ COPY iris.permission (role, resource_n, access_n) FROM stdin;
 administrator	alarm	4
 administrator	beacon	4
 administrator	cabinet_style	4
+administrator	camera	4
 administrator	comm_config	4
 administrator	comm_link	4
 administrator	controller	4

@@ -233,6 +233,22 @@ async fn main() -> tide::Result<()> {
             req,
         )
     });
+    add_routes!(route, "camera");
+    route
+        .at("/camera/:name")
+        .get(|req| {
+            sql_get(
+                "camera",
+                "SELECT c.name, location, geo_loc, controller, pin, notes, \
+                        cam_num, publish, streamable, cam_template, \
+                        encoder_type, enc_address, enc_port, enc_mcast, \
+                        enc_channel, video_loss \
+                FROM iris.camera c \
+                LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
+                WHERE c.name = $1",
+                req,
+            )
+        });
     add_routes!(route, "comm_config");
     route.at("/comm_config/:name").get(|req| {
         sql_get(

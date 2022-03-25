@@ -13,6 +13,7 @@
 mod alarm;
 mod beacon;
 mod cabinetstyle;
+mod camera;
 mod commconfig;
 mod commlink;
 mod controller;

@@ -106,6 +106,15 @@ The response for these requests contains an ETag header, derived from the file's
 | Read Only    | name       |
 | 🔧 Configure | {`police_panel_pin_1`}, {`police_panel_pin_2`}, {`watchdog_reset_pin_1`}, {`watchdog_reset_pin_2`}, {`dip`} |
 
+### `camera`
+
+| Access       | Attributes                                  |
+|--------------|---------------------------------------------|
+| Read Only    | name, location, {`geo_loc`}, {`video_loss`} |
+| 👉 Operate   | {`ptz`}                                     |
+| 💡 Plan      | notes, publish, {`streamable`}              |
+| 🔧 Configure | controller, cam\_num, {`pin`}, {`cam_template`}, {`encoder_type`}, {`enc_address`}, {`enc_port`}, {`enc_mcast`}, {`enc_channel`}
+
 ### `comm_config`
 
 | Access       | Attributes |

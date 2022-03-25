@@ -123,14 +123,26 @@ enum Resource {
 
 /// Camera resource
 const CAMERA_RES: Resource = Resource::Simple(
+    "api/camera",
+    Listen::Exclude("camera", &["video_loss"]),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT c.name, location, controller, notes, cam_num, publish \
+        FROM iris.camera c \
+        LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
+        ORDER BY cam_num, c.name\
+    ) r",
+);
+
+/// Camera public resource
+const CAMERA_PUB_RES: Resource = Resource::Simple(
     "camera_pub",
     Listen::Exclude("camera", &["video_loss"]),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, publish, streamable, roadway, road_dir, cross_street,\
-           location, lat, lon \
-    FROM camera_view \
-    ORDER BY name \
-) r",
+        SELECT name, publish, streamable, roadway, road_dir, cross_street, \
+               location, lat, lon \
+        FROM camera_view \
+        ORDER BY name\
+    ) r",
 );
 
 /// Detector resource
@@ -548,6 +560,7 @@ const ALL: &[Resource] = &[
     ROLE_RES,
     USER_RES,
     CAMERA_RES,
+    CAMERA_PUB_RES,
     DMS_RES,
     DMS_STAT_RES,
     FONT_RES,

@@ -13,6 +13,7 @@
 use crate::alarm::Alarm;
 use crate::beacon::Beacon;
 use crate::cabinetstyle::CabinetStyle;
+use crate::camera::Camera;
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
@@ -248,6 +249,7 @@ pub async fn res_list(res: &str, search: &str) -> Result<String> {
         Alarm::TNAME => res_build_list::<Alarm>(search).await,
         Beacon::TNAME => res_build_list::<Beacon>(search).await,
         CabinetStyle::TNAME => res_build_list::<CabinetStyle>(search).await,
+        Camera::TNAME => res_build_list::<Camera>(search).await,
         CommConfig::TNAME => res_build_list::<CommConfig>(search).await,
         CommLink::TNAME => res_build_list::<CommLink>(search).await,
         Controller::TNAME => res_build_list::<Controller>(search).await,
@@ -296,6 +298,7 @@ pub async fn res_get(res: &str, name: &str, view: View) -> Result<String> {
         Alarm::TNAME => res_build_card::<Alarm>(name, view).await,
         Beacon::TNAME => res_build_card::<Beacon>(name, view).await,
         CabinetStyle::TNAME => res_build_card::<CabinetStyle>(name, view).await,
+        Camera::TNAME => res_build_card::<Camera>(name, view).await,
         CommConfig::TNAME => res_build_card::<CommConfig>(name, view).await,
         CommLink::TNAME => res_build_card::<CommLink>(name, view).await,
         Controller::TNAME => res_build_card::<Controller>(name, view).await,
@@ -438,6 +441,7 @@ pub async fn res_create(res: &str) -> Result<()> {
         Alarm::TNAME => create_and_post::<Alarm>().await,
         Beacon::TNAME => create_and_post::<Beacon>().await,
         CabinetStyle::TNAME => create_and_post::<CabinetStyle>().await,
+        Camera::TNAME => create_and_post::<Camera>().await,
         CommConfig::TNAME => create_and_post::<CommConfig>().await,
         CommLink::TNAME => create_and_post::<CommLink>().await,
         Controller::TNAME => create_and_post::<Controller>().await,
@@ -469,6 +473,7 @@ pub async fn res_save(res: &str, name: &str) -> Result<()> {
         Alarm::TNAME => fetch_save_card::<Alarm>(name).await,
         Beacon::TNAME => fetch_save_card::<Beacon>(name).await,
         CabinetStyle::TNAME => fetch_save_card::<CabinetStyle>(name).await,
+        Camera::TNAME => fetch_save_card::<Camera>(name).await,
         CommConfig::TNAME => fetch_save_card::<CommConfig>(name).await,
         CommLink::TNAME => fetch_save_card::<CommLink>(name).await,
         Controller::TNAME => fetch_save_card::<Controller>(name).await,
@@ -526,6 +531,7 @@ pub async fn res_delete(res: &str, name: &str) -> Result<()> {
         Alarm::TNAME => res_delete_card::<Alarm>(name).await,
         Beacon::TNAME => res_delete_card::<Beacon>(name).await,
         CabinetStyle::TNAME => res_delete_card::<CabinetStyle>(name).await,
+        Camera::TNAME => res_delete_card::<Camera>(name).await,
         CommConfig::TNAME => res_delete_card::<CommConfig>(name).await,
         CommLink::TNAME => res_delete_card::<CommLink>(name).await,
         Controller::TNAME => res_delete_card::<Controller>(name).await,
@@ -551,6 +557,7 @@ pub fn resource_lookup(uname: &str) -> (&'static str, &'static str) {
         Alarm::UNAME => (Alarm::SYMBOL, Alarm::TNAME),
         Beacon::UNAME => (Beacon::SYMBOL, Beacon::TNAME),
         CabinetStyle::UNAME => (CabinetStyle::SYMBOL, CabinetStyle::TNAME),
+        Camera::UNAME => (Camera::SYMBOL, Camera::TNAME),
         CommConfig::UNAME => (CommConfig::SYMBOL, CommConfig::TNAME),
         CommLink::UNAME => (CommLink::SYMBOL, CommLink::TNAME),
         Controller::UNAME => (Controller::SYMBOL, Controller::TNAME),
