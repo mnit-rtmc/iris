@@ -14,12 +14,21 @@ use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
 use crate::resource::{disabled_attr, Card, NAME};
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
+use mag::length::{m, mm, Unit as _};
+use mag::temp::DegC;
+use mag::time::{s, Unit as _};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
 use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::Document;
+
+/// Display Units
+type TempUnit = mag::temp::DegF;
+type DistUnit = mag::length::mi;
+type RainUnit = mag::length::In;
+type SpeedUnit = mag::time::h;
 
 /// Air temp data
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -97,7 +106,7 @@ fn dir_arrow(deg: u32) -> Option<&'static str> {
         // 45° ±22.5
         23..=67 => Some("↙"),
         // 90° ±22.5
-        68..=123 => Some("←"),
+        68..=112 => Some("←"),
         // 135° ±22.5
         113..=157 => Some("↖"),
         // 180° ±22.5
@@ -123,6 +132,23 @@ fn wind_dir_html(deg: u32) -> String {
     html.push_str(&deg.to_string());
     html.push_str("°</span>");
     html
+}
+
+/// Format precipitation quantity
+fn precip_format(precip: f32) -> String {
+    let precip = (f64::from(precip) * mm).to::<RainUnit>().quantity;
+    format!("{precip:.2}")
+        .trim_end_matches('0')
+        .trim_end_matches('.')
+        .to_string()
+}
+
+/// Format wind speed quantity
+fn speed_format(speed: f32) -> String {
+    let speed = (f64::from(speed) * m / s)
+        .to::<DistUnit, SpeedUnit>()
+        .quantity;
+    format!("{speed:.0}")
 }
 
 impl WeatherData {
@@ -166,23 +192,34 @@ impl WeatherData {
         if let Some(temperature_sensor) = &self.temperature_sensor {
             if !temperature_sensor.is_empty() {
                 let n_temps = temperature_sensor.len() as f32;
-                let air_temp =
-                    temperature_sensor.iter().map(|at| at.air_temp).sum::<f32>()
-                        / n_temps;
+                let air_temp = temperature_sensor
+                    .iter()
+                    .map(|at| at.air_temp)
+                    .sum::<f32>()
+                    / n_temps;
                 html.push_str("Air <span class='info'>");
-                html.push_str(&format!("{air_temp:.1}"));
-                html.push_str(" ℃</span>");
+                html.push_str(&format!(
+                    "{:.1}",
+                    (f64::from(air_temp) * DegC).to::<TempUnit>()
+                ));
+                html.push_str("</span>");
             }
         }
-        if let Some(dew_point_temp) = self.dew_point_temp {
+        if let Some(dew_point) = self.dew_point_temp {
             html.push_str(" DP <span class='info'>");
-            html.push_str(&dew_point_temp.to_string());
-            html.push_str(" ℃</span>");
+            html.push_str(&format!(
+                "{:.1}",
+                (f64::from(dew_point) * DegC).to::<TempUnit>()
+            ));
+            html.push_str("</span>");
         }
-        if let Some(wet_bulb_temp) = self.wet_bulb_temp {
+        if let Some(wet_bulb) = self.wet_bulb_temp {
             html.push_str(" WB <span class='info'>");
-            html.push_str(&wet_bulb_temp.to_string());
-            html.push_str(" ℃</span>");
+            html.push_str(&format!(
+                "{:.1}",
+                (f64::from(wet_bulb) * DegC).to::<TempUnit>()
+            ));
+            html.push_str("</span>");
         }
         html.push_str("</span></div>");
         html
@@ -198,9 +235,9 @@ impl WeatherData {
             html.push_str("<span>");
             html.push_str(vis_situation(visibility_situation));
             html.push_str(", visibility <span class='info'>");
-            html.push_str(&visibility.to_string());
-            html.push_str(" m</span>");
-            html.push_str("</span>");
+            let vis = (f64::from(visibility) * m).to::<DistUnit>();
+            html.push_str(&format!("{vis:.1}"));
+            html.push_str("</span></span>");
         }
         html.push_str("</div>");
         html
@@ -212,25 +249,25 @@ impl WeatherData {
         html.push_str(
             "<table><tr><th>🌧️ Precip<th>1h<th>3h<th>6h<th>12h<th>24h",
         );
-        html.push_str("<tr><td>Total (mm)<td>");
-        if let Some(precip_1_hour) = self.precip_1_hour {
-            html.push_str(&precip_1_hour.to_string());
+        html.push_str(&format!("<tr><td>Total ({})<td>", RainUnit::LABEL));
+        if let Some(precip) = self.precip_1_hour {
+            html.push_str(&precip_format(precip));
         }
         html.push_str("<td>");
-        if let Some(precip_3_hours) = self.precip_3_hours {
-            html.push_str(&precip_3_hours.to_string());
+        if let Some(precip) = self.precip_3_hours {
+            html.push_str(&precip_format(precip));
         }
         html.push_str("<td>");
-        if let Some(precip_6_hours) = self.precip_6_hours {
-            html.push_str(&precip_6_hours.to_string());
+        if let Some(precip) = self.precip_6_hours {
+            html.push_str(&precip_format(precip));
         }
         html.push_str("<td>");
-        if let Some(precip_12_hours) = self.precip_12_hours {
-            html.push_str(&precip_12_hours.to_string());
+        if let Some(precip) = self.precip_12_hours {
+            html.push_str(&precip_format(precip));
         }
         html.push_str("<td>");
-        if let Some(precip_24_hours) = self.precip_24_hours {
-            html.push_str(&precip_24_hours.to_string());
+        if let Some(precip) = self.precip_24_hours {
+            html.push_str(&precip_format(precip));
         }
         html.push_str("</table>");
         html
@@ -252,22 +289,26 @@ impl WeatherData {
         if let Some(gust_wind_dir) = self.gust_wind_dir {
             html.push_str(&wind_dir_html(gust_wind_dir));
         }
-        html.push_str("<tr><td>Speed (m/s)<td>");
+        html.push_str("<tr><td>Speed (");
+        html.push_str(DistUnit::LABEL);
+        html.push('/');
+        html.push_str(SpeedUnit::LABEL);
+        html.push_str(")<td>");
         if let Some(avg_wind_speed) = self.avg_wind_speed {
             html.push_str("<span class='info'>");
-            html.push_str(&avg_wind_speed.to_string());
+            html.push_str(&speed_format(avg_wind_speed));
             html.push_str("</span>");
         }
         html.push_str("<td>");
         if let Some(spot_wind_speed) = self.spot_wind_speed {
             html.push_str("<span class='info'>");
-            html.push_str(&spot_wind_speed.to_string());
+            html.push_str(&speed_format(spot_wind_speed));
             html.push_str("</span>");
         }
         html.push_str("<td>");
         if let Some(gust_wind_speed) = self.gust_wind_speed {
             html.push_str("<span class='info'>");
-            html.push_str(&gust_wind_speed.to_string());
+            html.push_str(&speed_format(gust_wind_speed));
             html.push_str("</span>");
         }
         html.push_str("</table>");
