@@ -90,15 +90,13 @@ impl Card for Beacon {
     }
 
     /// Convert to status HTML
-    fn to_html_status(&self, anc: &BeaconAnc) -> String {
+    fn to_html_status(&self, _anc: &BeaconAnc) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
         let message = HtmlStr::new(&self.message);
-        let controller = anc.controller_html();
         format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
             </div>\
-            {controller}\
             <div class='row center'>\
               <span class='blink-a'>🔆</span>\
               <span class='sign'>{message}</span>\
@@ -108,14 +106,16 @@ impl Card for Beacon {
     }
 
     /// Convert to edit HTML
-    fn to_html_edit(&self, _anc: &BeaconAnc) -> String {
+    fn to_html_edit(&self, anc: &BeaconAnc) -> String {
+        let ctrl_loc = anc.controller_loc_html();
         let message = HtmlStr::new(&self.message);
         let notes = HtmlStr::new(&self.notes);
         let controller = HtmlStr::new(&self.controller);
         let pin = OptVal(self.pin);
         let verify_pin = OptVal(self.verify_pin);
         format!(
-            "<div class='row'>\
+            "{ctrl_loc}\
+            <div class='row'>\
               <label for='edit_msg'>Message</label>\
               <textarea id='edit_msg' maxlength='128' rows='3' \
                         cols='24'>{message}</textarea>\

@@ -87,24 +87,24 @@ impl Card for LaneMarking {
     }
 
     /// Convert to status HTML
-    fn to_html_status(&self, anc: &LaneMarkingAnc) -> String {
+    fn to_html_status(&self, _anc: &LaneMarkingAnc) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
-        let controller = anc.controller_html();
         format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
-            </div>\
-            {controller}"
+            </div>"
         )
     }
 
     /// Convert to edit HTML
-    fn to_html_edit(&self, _anc: &LaneMarkingAnc) -> String {
+    fn to_html_edit(&self, anc: &LaneMarkingAnc) -> String {
+        let ctrl_loc = anc.controller_loc_html();
         let notes = HtmlStr::new(&self.notes);
         let controller = HtmlStr::new(&self.controller);
         let pin = OptVal(self.pin);
         format!(
-            "<div class='row'>\
+            "{ctrl_loc}\
+            <div class='row'>\
               <label for='edit_notes'>Notes</label>\
               <textarea id='edit_notes' maxlength='128' rows='2' \
                         cols='24'>{notes}</textarea>\

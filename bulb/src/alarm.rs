@@ -97,17 +97,15 @@ impl Card for Alarm {
     }
 
     /// Convert to status HTML
-    fn to_html_status(&self, anc: &AlarmAnc) -> String {
+    fn to_html_status(&self, _anc: &AlarmAnc) -> String {
         let description = HtmlStr::new(&self.description);
         let state = self.state(true);
         let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
-        let controller = anc.controller_html();
         format!(
             "<div class='row'>\
               <span class='info'>{description}</span>\
               <span class='info'>{state}</span>\
             </div>\
-            {controller}\
             <div class='row'>\
               <span>Triggered</span>\
               <span class='info'>{trigger_time}</span>\
@@ -116,12 +114,14 @@ impl Card for Alarm {
     }
 
     /// Convert to edit HTML
-    fn to_html_edit(&self, _anc: &AlarmAnc) -> String {
+    fn to_html_edit(&self, anc: &AlarmAnc) -> String {
+        let ctrl_loc = anc.controller_loc_html();
         let description = HtmlStr::new(&self.description);
         let controller = HtmlStr::new(&self.controller);
         let pin = OptVal(self.pin);
         format!(
-            "<div class='row'>\
+            "{ctrl_loc}\
+            <div class='row'>\
               <label for='edit_desc'>Description</label>\
               <input id='edit_desc' maxlength='24' size='24' \
                      value='{description}'/>\

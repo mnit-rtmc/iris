@@ -33,7 +33,7 @@ pub struct DeviceAnc<D> {
 }
 
 impl<D> DeviceAnc<D> {
-    pub fn controller_html(&self) -> String {
+    pub fn controller_loc_html(&self) -> String {
         match &self.controller {
             Some(ctrl) => ctrl.button_link_html(),
             None => "".into(),
@@ -47,7 +47,7 @@ impl<D: Device> AncillaryData for DeviceAnc<D> {
     /// Get ancillary URI
     fn uri(&self, view: View, res: &D) -> Option<Cow<str>> {
         match (view, &res.controller(), &self.controller) {
-            (View::Status, Some(ctrl), None) => {
+            (View::Edit, Some(ctrl), None) => {
                 Some(format!("/iris/api/controller/{}", &ctrl).into())
             }
             _ => None,

@@ -398,11 +398,10 @@ impl Card for WeatherSensor {
     }
 
     /// Convert to status HTML
-    fn to_html_status(&self, anc: &WeatherSensorAnc) -> String {
+    fn to_html_status(&self, _anc: &WeatherSensorAnc) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
-        let controller = anc.controller_html();
         let sample_time = self.sample_time.as_deref().unwrap_or("-");
         let sample = self.sample_html();
         format!(
@@ -413,9 +412,8 @@ impl Card for WeatherSensor {
               <span class='info'>{site_id}</span>\
               <span class='info'>{alt_id}</span>\
             </div>\
-            {controller}\
             <div class='row'>\
-              <span>Time</span>\
+              <span>Obs</span>\
               <span class='info'>{sample_time}</span>\
             </div>\
             {sample}"
@@ -423,14 +421,16 @@ impl Card for WeatherSensor {
     }
 
     /// Convert to edit HTML
-    fn to_html_edit(&self, _anc: &WeatherSensorAnc) -> String {
+    fn to_html_edit(&self, anc: &WeatherSensorAnc) -> String {
+        let ctrl_loc = anc.controller_loc_html();
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
         let notes = HtmlStr::new(&self.notes);
         let controller = HtmlStr::new(&self.controller);
         let pin = OptVal(self.pin);
         format!(
-            "<div class='row'>\
+            "{ctrl_loc}\
+            <div class='row'>\
               <label for='edit_site'>Site ID</label>\
               <input id='edit_site' maxlength='20' size='20' \
                      value='{site_id}'/>\
