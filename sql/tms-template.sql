@@ -502,6 +502,7 @@ administrator	geo_loc	4
 administrator	lane_marking	4
 administrator	modem	4
 administrator	permission	4
+administrator	ramp_meter	4
 administrator	road	4
 administrator	role	4
 administrator	user	4
@@ -4565,17 +4566,17 @@ COPY iris.meter_lock (id, description) FROM stdin;
 \.
 
 CREATE TABLE iris._ramp_meter (
-	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-	notes text NOT NULL,
-	meter_type INTEGER NOT NULL REFERENCES iris.meter_type(id),
-	storage INTEGER NOT NULL,
-	max_wait INTEGER NOT NULL,
-	algorithm INTEGER NOT NULL REFERENCES iris.meter_algorithm,
-	am_target INTEGER NOT NULL,
-	pm_target INTEGER NOT NULL,
-	beacon VARCHAR(20) REFERENCES iris._beacon,
-	m_lock INTEGER REFERENCES iris.meter_lock(id)
+    name VARCHAR(20) PRIMARY KEY,
+    geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+    notes text NOT NULL,
+    meter_type INTEGER NOT NULL REFERENCES iris.meter_type(id),
+    storage INTEGER NOT NULL,
+    max_wait INTEGER NOT NULL,
+    algorithm INTEGER NOT NULL REFERENCES iris.meter_algorithm,
+    am_target INTEGER NOT NULL,
+    pm_target INTEGER NOT NULL,
+    beacon VARCHAR(20) REFERENCES iris._beacon,
+    m_lock INTEGER REFERENCES iris.meter_lock(id)
 );
 
 ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_fkey

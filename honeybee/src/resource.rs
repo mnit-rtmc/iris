@@ -145,6 +145,18 @@ const CAMERA_PUB_RES: Resource = Resource::Simple(
     ) r",
 );
 
+/// Ramp meter resource
+const RAMP_METER_RES: Resource = Resource::Simple(
+    "api/ramp_meter",
+    Listen::All("ramp_meter"),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT m.name, location, controller, notes \
+        FROM iris.ramp_meter m \
+        LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
+        ORDER BY m.name\
+    ) r",
+);
+
 /// Detector resource
 const DETECTOR_RES: Resource = Resource::Simple(
     "detector",
@@ -561,6 +573,7 @@ const ALL: &[Resource] = &[
     USER_RES,
     CAMERA_RES,
     CAMERA_PUB_RES,
+    RAMP_METER_RES,
     DMS_RES,
     DMS_STAT_RES,
     FONT_RES,

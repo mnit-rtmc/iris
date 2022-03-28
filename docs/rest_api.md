@@ -175,6 +175,15 @@ of `pin`, `resource_n` and `name`.
 | Read Only    | id                                  |
 | 🔧 Configure | role, resource\_n, batch, access\_n |
 
+### `ramp_meter`
+
+| Access       | Attributes                  |
+|--------------|-----------------------------|
+| Read Only    | name, location, {`geo_loc`} |
+| 👉 Operate   | {`m_lock`}, {`rate`}        |
+| 💡 Plan      | notes, {`storage`}, {`max_wait`}, {`algorithm`}, {`am_target`}, {`pm_target`} |
+| 🔧 Configure | controller, {`pin`}, {`meter_type`}, {`beacon`}, {`preset`} |
+
 ### `role`
 
 | Access       | Attributes |

@@ -330,6 +330,21 @@ async fn main() -> tide::Result<()> {
             )
         })
         .patch(|req| sonar_object_patch("geo_loc", req));
+    add_routes!(route, "ramp_meter");
+    route
+        .at("/ramp_meter/:name")
+        .get(|req| {
+            sql_get(
+                "ramp_meter",
+                "SELECT m.name, location, geo_loc, controller, pin, notes, \
+                        meter_type, beacon, preset, storage, max_wait, \
+                        algorithm, am_target, pm_target, m_lock \
+                FROM iris.ramp_meter m \
+                LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
+                WHERE m.name = $1",
+                req,
+            )
+        });
     route.at("/road").get(|req| resource_get("road", req));
     route
         .at("/permission")

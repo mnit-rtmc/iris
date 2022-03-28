@@ -23,6 +23,7 @@ use crate::geoloc::GeoLoc;
 use crate::lanemarking::LaneMarking;
 use crate::modem::Modem;
 use crate::permission::Permission;
+use crate::rampmeter::RampMeter;
 use crate::role::Role;
 use crate::user::User;
 use crate::util::{Dom, HtmlStr};
@@ -256,6 +257,7 @@ pub async fn res_list(res: &str, search: &str) -> Result<String> {
         LaneMarking::TNAME => res_build_list::<LaneMarking>(search).await,
         Modem::TNAME => res_build_list::<Modem>(search).await,
         Permission::TNAME => res_build_list::<Permission>(search).await,
+        RampMeter::TNAME => res_build_list::<RampMeter>(search).await,
         Role::TNAME => res_build_list::<Role>(search).await,
         User::TNAME => res_build_list::<User>(search).await,
         WeatherSensor::TNAME => res_build_list::<WeatherSensor>(search).await,
@@ -306,6 +308,7 @@ pub async fn res_get(res: &str, name: &str, view: View) -> Result<String> {
         LaneMarking::TNAME => res_build_card::<LaneMarking>(name, view).await,
         Modem::TNAME => res_build_card::<Modem>(name, view).await,
         Permission::TNAME => res_build_card::<Permission>(name, view).await,
+        RampMeter::TNAME => res_build_card::<RampMeter>(name, view).await,
         Role::TNAME => res_build_card::<Role>(name, view).await,
         User::TNAME => res_build_card::<User>(name, view).await,
         WeatherSensor::TNAME => {
@@ -448,6 +451,7 @@ pub async fn res_create(res: &str) -> Result<()> {
         LaneMarking::TNAME => create_and_post::<LaneMarking>().await,
         Modem::TNAME => create_and_post::<Modem>().await,
         Permission::TNAME => create_and_post::<Permission>().await,
+        RampMeter::TNAME => create_and_post::<RampMeter>().await,
         Role::TNAME => create_and_post::<Role>().await,
         User::TNAME => create_and_post::<User>().await,
         WeatherSensor::TNAME => create_and_post::<WeatherSensor>().await,
@@ -481,6 +485,7 @@ pub async fn res_save(res: &str, name: &str) -> Result<()> {
         LaneMarking::TNAME => fetch_save_card::<LaneMarking>(name).await,
         Modem::TNAME => fetch_save_card::<Modem>(name).await,
         Permission::TNAME => fetch_save_card::<Permission>(name).await,
+        RampMeter::TNAME => fetch_save_card::<RampMeter>(name).await,
         Role::TNAME => fetch_save_card::<Role>(name).await,
         User::TNAME => fetch_save_card::<User>(name).await,
         WeatherSensor::TNAME => fetch_save_card::<WeatherSensor>(name).await,
@@ -505,8 +510,10 @@ async fn fetch_save_card<C: Card>(name: &str) -> Result<()> {
 pub async fn res_save_loc(res: &str, name: &str) -> Result<()> {
     let geo_loc = match res {
         Beacon::TNAME => fetch_geo_loc::<Beacon>(name).await?,
+        Camera::TNAME => fetch_geo_loc::<Camera>(name).await?,
         Controller::TNAME => fetch_geo_loc::<Controller>(name).await?,
         LaneMarking::TNAME => fetch_geo_loc::<LaneMarking>(name).await?,
+        RampMeter::TNAME => fetch_geo_loc::<RampMeter>(name).await?,
         WeatherSensor::TNAME => fetch_geo_loc::<WeatherSensor>(name).await?,
         _ => None,
     };
@@ -538,6 +545,7 @@ pub async fn res_delete(res: &str, name: &str) -> Result<()> {
         LaneMarking::TNAME => res_delete_card::<LaneMarking>(name).await,
         Modem::TNAME => res_delete_card::<Modem>(name).await,
         Permission::TNAME => res_delete_card::<Permission>(name).await,
+        RampMeter::TNAME => res_delete_card::<RampMeter>(name).await,
         Role::TNAME => res_delete_card::<Role>(name).await,
         User::TNAME => res_delete_card::<User>(name).await,
         WeatherSensor::TNAME => res_delete_card::<WeatherSensor>(name).await,
@@ -564,6 +572,7 @@ pub fn resource_lookup(uname: &str) -> (&'static str, &'static str) {
         LaneMarking::UNAME => (LaneMarking::SYMBOL, LaneMarking::TNAME),
         Modem::UNAME => (Modem::SYMBOL, Modem::TNAME),
         Permission::UNAME => (Permission::SYMBOL, Permission::TNAME),
+        RampMeter::UNAME => (RampMeter::SYMBOL, RampMeter::TNAME),
         Role::UNAME => (Role::SYMBOL, Role::TNAME),
         User::UNAME => (User::SYMBOL, User::TNAME),
         WeatherSensor::UNAME => (WeatherSensor::SYMBOL, WeatherSensor::TNAME),

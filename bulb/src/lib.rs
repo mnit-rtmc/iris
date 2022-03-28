@@ -24,6 +24,7 @@ mod geoloc;
 mod lanemarking;
 mod modem;
 mod permission;
+mod rampmeter;
 mod resource;
 mod role;
 mod start;
