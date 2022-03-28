@@ -15,6 +15,7 @@ use crate::error::Result;
 use crate::resource::{disabled_attr, Card, NAME};
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use mag::length::{m, mm, Unit as _};
+use mag::quan::Unit as _;
 use mag::temp::DegC;
 use mag::time::{s, Unit as _};
 use serde::{Deserialize, Serialize};
@@ -39,15 +40,16 @@ pub struct AirTemp {
 /// Weather Sensor Data
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct WeatherData {
+    temperature_sensor: Option<Vec<AirTemp>>,
+    wet_bulb_temp: Option<f32>,
+    dew_point_temp: Option<f32>,
     /// Minimum air temp in last 24 hours (first sensor)
     min_air_temp: Option<f32>,
     /// Maximum air temp in last 24 hours (first sensor)
     max_air_temp: Option<f32>,
-    temperature_sensor: Option<Vec<AirTemp>>,
-    wet_bulb_temp: Option<f32>,
-    dew_point_temp: Option<f32>,
-    visibility: Option<u32>,
     visibility_situation: Option<String>,
+    visibility: Option<u32>,
+    relative_humidity: Option<u32>,
     avg_wind_dir: Option<u32>,
     avg_wind_speed: Option<f32>,
     spot_wind_dir: Option<u32>,
@@ -134,6 +136,12 @@ fn wind_dir_html(deg: u32) -> String {
     html
 }
 
+/// Format temperature quantity
+fn temp_format(temp: f32) -> String {
+    let temp = (f64::from(temp) * DegC).to::<TempUnit>().value;
+    format!("<span class='info'>{temp:.1}</span>")
+}
+
 /// Format precipitation quantity
 fn precip_format(precip: f32) -> String {
     let precip = (f64::from(precip) * mm).to::<RainUnit>().quantity;
@@ -155,14 +163,19 @@ impl WeatherData {
     /// Get weather data as HTML
     fn to_html(&self) -> String {
         let mut html = String::new();
+        if self.visibility_situation.is_some()
+            || self.visibility.is_some()
+            || self.relative_humidity.is_some()
+        {
+            html.push_str(&self.atmospheric_html());
+        }
         if self.temperature_sensor.is_some()
             || self.dew_point_temp.is_some()
             || self.wet_bulb_temp.is_some()
+            || self.min_air_temp.is_some()
+            || self.max_air_temp.is_some()
         {
             html.push_str(&self.temp_html());
-        }
-        if self.visibility_situation.is_some() || self.visibility.is_some() {
-            html.push_str(&self.atmospheric_html());
         }
         if self.precip_1_hour.is_some()
             || self.precip_3_hours.is_some()
@@ -188,40 +201,38 @@ impl WeatherData {
     fn temp_html(&self) -> String {
         let mut html = String::new();
         html.push_str("<div class='row'>");
-        html.push_str("<span>🌡️</span><span>");
+        html.push_str("<table><tr><th>🌡️<th>Air<th>DP<th>WB<th>Min24<th>Max24");
+        html.push_str("<tr><td>");
+        html.push_str(TempUnit::LABEL);
+        html.push_str("<td>");
         if let Some(temperature_sensor) = &self.temperature_sensor {
             if !temperature_sensor.is_empty() {
                 let n_temps = temperature_sensor.len() as f32;
-                let air_temp = temperature_sensor
+                let temp = temperature_sensor
                     .iter()
                     .map(|at| at.air_temp)
                     .sum::<f32>()
                     / n_temps;
-                html.push_str("Air <span class='info'>");
-                html.push_str(&format!(
-                    "{:.1}",
-                    (f64::from(air_temp) * DegC).to::<TempUnit>()
-                ));
-                html.push_str("</span>");
+                html.push_str(&temp_format(temp));
             }
         }
-        if let Some(dew_point) = self.dew_point_temp {
-            html.push_str(" DP <span class='info'>");
-            html.push_str(&format!(
-                "{:.1}",
-                (f64::from(dew_point) * DegC).to::<TempUnit>()
-            ));
-            html.push_str("</span>");
+        html.push_str("<td>");
+        if let Some(temp) = self.dew_point_temp {
+            html.push_str(&temp_format(temp));
         }
-        if let Some(wet_bulb) = self.wet_bulb_temp {
-            html.push_str(" WB <span class='info'>");
-            html.push_str(&format!(
-                "{:.1}",
-                (f64::from(wet_bulb) * DegC).to::<TempUnit>()
-            ));
-            html.push_str("</span>");
+        html.push_str("<td>");
+        if let Some(temp) = self.wet_bulb_temp {
+            html.push_str(&temp_format(temp));
         }
-        html.push_str("</span></div>");
+        html.push_str("<td>");
+        if let Some(temp) = self.min_air_temp {
+            html.push_str(&temp_format(temp));
+        }
+        html.push_str("<td>");
+        if let Some(temp) = self.max_air_temp {
+            html.push_str(&temp_format(temp));
+        }
+        html.push_str("</table></div>");
         html
     }
 
@@ -229,15 +240,23 @@ impl WeatherData {
     fn atmospheric_html(&self) -> String {
         let mut html = String::new();
         html.push_str("<div class='row left'>");
-        if let (Some(visibility_situation), Some(visibility)) =
-            (&self.visibility_situation, self.visibility)
-        {
-            html.push_str("<span>");
+        if let Some(visibility_situation) = &self.visibility_situation {
             html.push_str(vis_situation(visibility_situation));
-            html.push_str(", visibility <span class='info'>");
+            if self.visibility.is_some() || self.relative_humidity.is_some() {
+                html.push_str(", ");
+            }
+        }
+        if let Some(visibility) = self.visibility {
+            html.push_str("vis <span class='info'>");
             let vis = (f64::from(visibility) * m).to::<DistUnit>();
             html.push_str(&format!("{vis:.1}"));
-            html.push_str("</span></span>");
+            html.push_str("</span>");
+            if self.relative_humidity.is_some() {
+                html.push_str(", ");
+            }
+        }
+        if let Some(rh) = self.relative_humidity {
+            html.push_str(&format!("RH <span class='info'>{rh}%</span>"));
         }
         html.push_str("</div>");
         html
