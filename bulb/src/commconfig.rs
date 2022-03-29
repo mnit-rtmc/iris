@@ -229,7 +229,7 @@ impl Card for CommConfig {
     }
 
     /// Convert to compact HTML
-    fn to_html_compact(&self) -> String {
+    fn to_html_compact(&self, _anc: &CommConfigAnc) -> String {
         let description = HtmlStr::new(&self.description);
         format!(
             "<span>{description}</span>\

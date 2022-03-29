@@ -153,8 +153,6 @@ impl CommLink {
 }
 
 impl Card for CommLink {
-    const HAS_STATUS: bool = true;
-
     type Ancillary = CommLinkAnc;
 
     /// Set the name
@@ -173,7 +171,7 @@ impl Card for CommLink {
     }
 
     /// Convert to compact HTML
-    fn to_html_compact(&self) -> String {
+    fn to_html_compact(&self, _anc: &CommLinkAnc) -> String {
         let connected = self.connected(false);
         let description = HtmlStr::new(&self.description).with_len(10);
         let disabled = disabled_attr(self.poll_enabled);

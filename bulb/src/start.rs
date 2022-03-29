@@ -14,7 +14,8 @@ use crate::error::{Error, Result};
 use crate::fetch::{fetch_get, fetch_post};
 use crate::permission::{permissions_html, Permission};
 use crate::resource::{
-    res_create, res_delete, res_get, res_list, res_save, res_save_loc, View,
+    res_create, res_delete, res_get_view, res_list, res_save, res_save_loc,
+    View,
 };
 use crate::util::Dom;
 use std::cell::RefCell;
@@ -49,8 +50,8 @@ const TICK_INTERVAL: i32 = 500;
 /// Selected card state
 #[derive(Clone, Debug)]
 struct SelectedCard {
-    /// Type name
-    tname: String,
+    /// Resource type name
+    rname: String,
     /// Card view
     view: View,
     /// Object name
@@ -182,16 +183,16 @@ async fn deselect_card() {
 
 impl SelectedCard {
     /// Create a new blank selected card
-    fn new(tname: String, view: View, name: String) -> Self {
-        SelectedCard { tname, view, name }
+    fn new(rname: String, view: View, name: String) -> Self {
+        SelectedCard { rname, view, name }
     }
 
     /// Get card element ID
     fn id(&self) -> String {
         if self.view.is_create() {
-            format!("{}_", self.tname)
+            format!("{}_", self.rname)
         } else {
-            format!("{}_{}", self.tname, &self.name)
+            format!("{}_{}", self.rname, &self.name)
         }
     }
 
@@ -202,7 +203,7 @@ impl SelectedCard {
         let id = self.id();
         match doc.elem::<HtmlElement>(&id) {
             Ok(elem) => {
-                match res_get(&self.tname, &self.name, v).await {
+                match res_get_view(&self.rname, &self.name, v).await {
                     Ok(html) => replace_card_html(&elem, v, &html),
                     Err(Error::FetchResponseUnauthorized()) => {
                         show_login();
@@ -245,7 +246,7 @@ impl SelectedCard {
 
     /// Create a new object from card
     async fn res_create(self) {
-        match res_create(&self.tname).await {
+        match res_create(&self.rname).await {
             Ok(_) => {
                 self.replace_card(View::Create.compact()).await;
                 DeferredAction::SearchList.schedule(1500);
@@ -257,7 +258,7 @@ impl SelectedCard {
 
     /// Save changed fields on Edit card
     async fn res_save_edit(self) {
-        match res_save(&self.tname, &self.name).await {
+        match res_save(&self.rname, &self.name).await {
             Ok(_) => self.replace_card(View::Edit.compact()).await,
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(Error::FetchResponseNotFound()) => {
@@ -270,7 +271,7 @@ impl SelectedCard {
 
     /// Save changed fields on Location card
     async fn res_save_loc(self) {
-        match res_save_loc(&self.tname, &self.name).await {
+        match res_save_loc(&self.rname, &self.name).await {
             Ok(_) => self.replace_card(View::Location.compact()).await,
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Save failed: {e}")),
@@ -279,7 +280,7 @@ impl SelectedCard {
 
     /// Delete selected card / object
     async fn res_delete(self) {
-        match res_delete(&self.tname, &self.name).await {
+        match res_delete(&self.rname, &self.name).await {
             Ok(_) => DeferredAction::SearchList.schedule(1000),
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Delete failed: {e}")),

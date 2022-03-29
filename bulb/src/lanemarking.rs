@@ -54,8 +54,6 @@ impl Device for LaneMarking {
 }
 
 impl Card for LaneMarking {
-    const HAS_STATUS: bool = true;
-
     type Ancillary = LaneMarkingAnc;
 
     /// Set the name
@@ -77,7 +75,7 @@ impl Card for LaneMarking {
     }
 
     /// Convert to compact HTML
-    fn to_html_compact(&self) -> String {
+    fn to_html_compact(&self, _anc: &LaneMarkingAnc) -> String {
         let location = HtmlStr::new(&self.location).with_len(12);
         let disabled = disabled_attr(self.controller.is_some());
         format!(

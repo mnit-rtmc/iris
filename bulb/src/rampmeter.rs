@@ -52,8 +52,6 @@ impl Device for RampMeter {
 }
 
 impl Card for RampMeter {
-    const HAS_STATUS: bool = true;
-
     type Ancillary = RampMeterAnc;
 
     /// Set the name
@@ -73,7 +71,7 @@ impl Card for RampMeter {
     }
 
     /// Convert to compact HTML
-    fn to_html_compact(&self) -> String {
+    fn to_html_compact(&self, _anc: &RampMeterAnc) -> String {
         let location = HtmlStr::new(&self.location).with_len(12);
         let disabled = disabled_attr(self.controller.is_some());
         format!(

@@ -56,8 +56,6 @@ impl Device for Beacon {
 }
 
 impl Card for Beacon {
-    const HAS_STATUS: bool = true;
-
     type Ancillary = BeaconAnc;
 
     /// Set the name
@@ -80,7 +78,7 @@ impl Card for Beacon {
     }
 
     /// Convert to compact HTML
-    fn to_html_compact(&self) -> String {
+    fn to_html_compact(&self, _anc: &BeaconAnc) -> String {
         let location = HtmlStr::new(&self.location).with_len(12);
         let disabled = disabled_attr(self.controller.is_some());
         format!(

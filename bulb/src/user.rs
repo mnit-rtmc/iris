@@ -110,7 +110,7 @@ impl Card for User {
     }
 
     /// Convert to compact HTML
-    fn to_html_compact(&self) -> String {
+    fn to_html_compact(&self, _anc: &UserAnc) -> String {
         let disabled = disabled_attr(self.enabled && self.role.is_some());
         format!("<span{disabled}>{self}</span>")
     }

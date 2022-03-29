@@ -206,7 +206,7 @@ impl Card for GeoLoc {
     }
 
     /// Convert to compact HTML
-    fn to_html_compact(&self) -> String {
+    fn to_html_compact(&self, _anc: &GeoLocAnc) -> String {
         "".into()
     }
 

@@ -65,8 +65,6 @@ impl Device for Alarm {
 }
 
 impl Card for Alarm {
-    const HAS_STATUS: bool = true;
-
     type Ancillary = AlarmAnc;
 
     /// Set the name
@@ -83,7 +81,7 @@ impl Card for Alarm {
     }
 
     /// Convert to compact HTML
-    fn to_html_compact(&self) -> String {
+    fn to_html_compact(&self, _anc: &AlarmAnc) -> String {
         let state = self.state(false);
         let description = HtmlStr::new(&self.description);
         let disabled = disabled_attr(self.controller.is_some());

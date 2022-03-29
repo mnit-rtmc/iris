@@ -361,8 +361,6 @@ impl Device for WeatherSensor {
 }
 
 impl Card for WeatherSensor {
-    const HAS_STATUS: bool = true;
-
     type Ancillary = WeatherSensorAnc;
 
     /// Set the name
@@ -386,7 +384,7 @@ impl Card for WeatherSensor {
     }
 
     /// Convert to compact HTML
-    fn to_html_compact(&self) -> String {
+    fn to_html_compact(&self, _anc: &WeatherSensorAnc) -> String {
         let location = HtmlStr::new(&self.location).with_len(12);
         let disabled = disabled_attr(self.controller.is_some());
         format!(

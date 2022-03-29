@@ -292,8 +292,6 @@ impl Controller {
 }
 
 impl Card for Controller {
-    const HAS_STATUS: bool = true;
-
     type Ancillary = ControllerAnc;
 
     /// Set the name
@@ -334,7 +332,7 @@ impl Card for Controller {
     }
 
     /// Convert to compact HTML
-    fn to_html_compact(&self) -> String {
+    fn to_html_compact(&self, _anc: &ControllerAnc) -> String {
         let comm_state = self.comm_state(false);
         let link_drop = HtmlStr::new(self.link_drop());
         // condition 1 is "Active"

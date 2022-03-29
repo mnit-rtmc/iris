@@ -209,7 +209,7 @@ impl Card for Permission {
     }
 
     /// Convert to compact HTML
-    fn to_html_compact(&self) -> String {
+    fn to_html_compact(&self, _anc: &PermissionAnc) -> String {
         let access = access_str(self.access_n, false);
         let role = HtmlStr::new(&self.role).with_len(4);
         let resource = HtmlStr::new(&self.resource_n).with_len(8);

@@ -59,12 +59,12 @@ impl Card for CabinetStyle {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _pri: &CabinetStyleAnc) -> bool {
+    fn is_match(&self, search: &str, _anc: &CabinetStyleAnc) -> bool {
         self.name.contains_lower(search)
     }
 
     /// Convert to compact HTML
-    fn to_html_compact(&self) -> String {
+    fn to_html_compact(&self, _anc: &CabinetStyleAnc) -> String {
         format!("<span>{self}</span>")
     }
 
