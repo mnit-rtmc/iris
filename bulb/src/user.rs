@@ -38,10 +38,10 @@ pub struct UserAnc {
 }
 
 impl AncillaryData for UserAnc {
-    type Resource = User;
+    type Primary = User;
 
     /// Get ancillary URI
-    fn uri(&self, view: View, _res: &User) -> Option<Cow<str>> {
+    fn uri(&self, view: View, _pri: &User) -> Option<Cow<str>> {
         match (view, &self.roles) {
             (View::Edit, None) => Some("/iris/api/role".into()),
             _ => None,
@@ -52,7 +52,7 @@ impl AncillaryData for UserAnc {
     fn set_json(
         &mut self,
         _view: View,
-        _res: &User,
+        _pri: &User,
         json: JsValue,
     ) -> Result<()> {
         let roles = json.into_serde::<Vec<Role>>()?;
@@ -63,14 +63,14 @@ impl AncillaryData for UserAnc {
 
 impl UserAnc {
     /// Create an HTML `select` element of roles
-    fn roles_html(&self, res: &User) -> String {
+    fn roles_html(&self, pri: &User) -> String {
         let mut html = String::new();
         html.push_str("<select id='edit_role'>");
         html.push_str("<option></option>");
         if let Some(roles) = &self.roles {
             for role in roles {
                 html.push_str("<option");
-                if res.role.as_ref() == Some(&role.name) {
+                if pri.role.as_ref() == Some(&role.name) {
                     html.push_str(" selected");
                 }
                 html.push('>');
@@ -83,6 +83,10 @@ impl UserAnc {
     }
 }
 
+impl User {
+    pub const RESOURCE_N: &'static str = "user";
+}
+
 impl fmt::Display for User {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.name)
@@ -90,11 +94,6 @@ impl fmt::Display for User {
 }
 
 impl Card for User {
-    const TNAME: &'static str = "User";
-    const SYMBOL: &'static str = "👤";
-    const ENAME: &'static str = "👤 User";
-    const UNAME: &'static str = "user";
-
     type Ancillary = UserAnc;
 
     /// Set the name

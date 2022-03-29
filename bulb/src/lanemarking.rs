@@ -36,6 +36,10 @@ pub struct LaneMarking {
 
 type LaneMarkingAnc = DeviceAnc<LaneMarking>;
 
+impl LaneMarking {
+    pub const RESOURCE_N: &'static str = "lane_marking";
+}
+
 impl fmt::Display for LaneMarking {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", HtmlStr::new(&self.name))
@@ -50,10 +54,6 @@ impl Device for LaneMarking {
 }
 
 impl Card for LaneMarking {
-    const TNAME: &'static str = "LaneMarking";
-    const SYMBOL: &'static str = "⛙";
-    const ENAME: &'static str = "⛙ Lane Marking";
-    const UNAME: &'static str = "lane_marking";
     const HAS_STATUS: bool = true;
 
     type Ancillary = LaneMarkingAnc;

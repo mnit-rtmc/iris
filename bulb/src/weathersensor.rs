@@ -336,6 +336,8 @@ impl WeatherData {
 }
 
 impl WeatherSensor {
+    pub const RESOURCE_N: &'static str = "weather_sensor";
+
     /// Get sample as HTML
     fn sample_html(&self) -> String {
         match &self.sample {
@@ -359,10 +361,6 @@ impl Device for WeatherSensor {
 }
 
 impl Card for WeatherSensor {
-    const TNAME: &'static str = "Weather Sensor";
-    const SYMBOL: &'static str = "🌦️";
-    const ENAME: &'static str = "🌦️ Weather Sensor";
-    const UNAME: &'static str = "weather_sensor";
     const HAS_STATUS: bool = true;
 
     type Ancillary = WeatherSensorAnc;

@@ -34,7 +34,9 @@ pub struct RampMeter {
 
 type RampMeterAnc = DeviceAnc<RampMeter>;
 
-impl RampMeter {}
+impl RampMeter {
+    pub const RESOURCE_N: &'static str = "ramp_meter";
+}
 
 impl fmt::Display for RampMeter {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -50,10 +52,6 @@ impl Device for RampMeter {
 }
 
 impl Card for RampMeter {
-    const TNAME: &'static str = "Ramp Meter";
-    const SYMBOL: &'static str = "🚦";
-    const ENAME: &'static str = "🚦 Ramp Meter";
-    const UNAME: &'static str = "ramp_meter";
     const HAS_STATUS: bool = true;
 
     type Ancillary = RampMeterAnc;

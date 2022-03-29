@@ -45,10 +45,10 @@ const CONTROLLER_URI: &str = "/iris/api/controller";
 const COMM_CONFIG_URI: &str = "/iris/api/comm_config";
 
 impl AncillaryData for CommLinkAnc {
-    type Resource = CommLink;
+    type Primary = CommLink;
 
     /// Get ancillary URI
-    fn uri(&self, view: View, _res: &CommLink) -> Option<Cow<str>> {
+    fn uri(&self, view: View, _pri: &CommLink) -> Option<Cow<str>> {
         match (view, &self.controllers, &self.comm_configs) {
             (View::Status, None, _) => Some(CONTROLLER_URI.into()),
             (View::Status | View::Edit | View::Search, _, None) => {
@@ -62,16 +62,16 @@ impl AncillaryData for CommLinkAnc {
     fn set_json(
         &mut self,
         view: View,
-        res: &CommLink,
+        pri: &CommLink,
         json: JsValue,
     ) -> Result<()> {
-        if let Some(uri) = self.uri(view, res) {
+        if let Some(uri) = self.uri(view, pri) {
             match uri.borrow() {
                 CONTROLLER_URI => {
                     let mut controllers =
                         json.into_serde::<Vec<Controller>>()?;
                     controllers
-                        .retain(|c| c.comm_link.as_deref() == Some(&res.name));
+                        .retain(|c| c.comm_link.as_deref() == Some(&pri.name));
                     self.controllers = Some(controllers);
                 }
                 _ => {
@@ -86,10 +86,10 @@ impl AncillaryData for CommLinkAnc {
 
 impl CommLinkAnc {
     /// Get comm config description
-    fn comm_config_desc(&self, res: &CommLink) -> &str {
+    fn comm_config_desc(&self, pri: &CommLink) -> &str {
         if let Some(comm_configs) = &self.comm_configs {
             for config in comm_configs {
-                if res.comm_config == config.name {
+                if pri.comm_config == config.name {
                     return &config.description;
                 }
             }
@@ -98,7 +98,7 @@ impl CommLinkAnc {
     }
 
     /// Create an HTML `select` element of comm configs
-    fn comm_configs_html(&self, res: &CommLink) -> String {
+    fn comm_configs_html(&self, pri: &CommLink) -> String {
         let mut html = String::new();
         html.push_str("<select id='edit_config'>");
         if let Some(comm_configs) = &self.comm_configs {
@@ -106,7 +106,7 @@ impl CommLinkAnc {
                 html.push_str("<option value='");
                 html.push_str(&config.name);
                 html.push('\'');
-                if res.comm_config == config.name {
+                if pri.comm_config == config.name {
                     html.push_str(" selected");
                 }
                 html.push('>');
@@ -137,6 +137,8 @@ impl fmt::Display for CommLink {
 }
 
 impl CommLink {
+    pub const RESOURCE_N: &'static str = "comm_link";
+
     /// Get connected state to display
     fn connected(&self, long: bool) -> &'static str {
         match (self.poll_enabled, self.connected, long) {
@@ -151,10 +153,6 @@ impl CommLink {
 }
 
 impl Card for CommLink {
-    const TNAME: &'static str = "Comm Link";
-    const SYMBOL: &'static str = "🔗";
-    const ENAME: &'static str = "🔗 Comm Link";
-    const UNAME: &'static str = "comm_link";
     const HAS_STATUS: bool = true;
 
     type Ancillary = CommLinkAnc;

@@ -36,6 +36,8 @@ pub struct Alarm {
 type AlarmAnc = DeviceAnc<Alarm>;
 
 impl Alarm {
+    pub const RESOURCE_N: &'static str = "alarm";
+
     /// Get the alarm state to display
     fn state(&self, long: bool) -> &'static str {
         match (self.controller.is_some(), self.state, long) {
@@ -63,10 +65,6 @@ impl Device for Alarm {
 }
 
 impl Card for Alarm {
-    const TNAME: &'static str = "Alarm";
-    const SYMBOL: &'static str = "📢";
-    const ENAME: &'static str = "📢 Alarm";
-    const UNAME: &'static str = "alarm";
     const HAS_STATUS: bool = true;
 
     type Ancillary = AlarmAnc;

@@ -142,10 +142,10 @@ pub struct CommConfigAnc {
 }
 
 impl AncillaryData for CommConfigAnc {
-    type Resource = CommConfig;
+    type Primary = CommConfig;
 
     /// Get ancillary URI
-    fn uri(&self, view: View, _res: &CommConfig) -> Option<Cow<str>> {
+    fn uri(&self, view: View, _pri: &CommConfig) -> Option<Cow<str>> {
         match (view, &self.protocols) {
             (View::Edit, None) => Some("/iris/comm_protocol".into()),
             _ => None,
@@ -156,7 +156,7 @@ impl AncillaryData for CommConfigAnc {
     fn set_json(
         &mut self,
         _view: View,
-        _res: &CommConfig,
+        _pri: &CommConfig,
         json: JsValue,
     ) -> Result<()> {
         let protocols = json.into_serde::<Vec<Protocol>>()?;
@@ -167,7 +167,7 @@ impl AncillaryData for CommConfigAnc {
 
 impl CommConfigAnc {
     /// Create an HTML `select` element of comm protocols
-    fn protocols_html(&self, res: &CommConfig) -> String {
+    fn protocols_html(&self, pri: &CommConfig) -> String {
         let mut html = String::new();
         html.push_str("<select id='edit_protocol'>");
         if let Some(protocols) = &self.protocols {
@@ -175,7 +175,7 @@ impl CommConfigAnc {
                 html.push_str("<option value='");
                 html.push_str(&protocol.id.to_string());
                 html.push('\'');
-                if let Some(p) = res.protocol {
+                if let Some(p) = pri.protocol {
                     if p == protocol.id {
                         html.push_str(" selected");
                     }
@@ -190,6 +190,10 @@ impl CommConfigAnc {
     }
 }
 
+impl CommConfig {
+    pub const RESOURCE_N: &'static str = "comm_config";
+}
+
 impl fmt::Display for CommConfig {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", HtmlStr::new(&self.name))
@@ -197,11 +201,6 @@ impl fmt::Display for CommConfig {
 }
 
 impl Card for CommConfig {
-    const TNAME: &'static str = "Comm Config";
-    const SYMBOL: &'static str = "📡";
-    const ENAME: &'static str = "📡 Comm Config";
-    const UNAME: &'static str = "comm_config";
-
     type Ancillary = CommConfigAnc;
 
     /// Set the name

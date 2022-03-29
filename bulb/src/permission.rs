@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::{Error, Result};
-use crate::resource::{AncillaryData, Card, View, NAME};
+use crate::resource::{AncillaryData, Card, Resource, View, NAME};
 use crate::role::Role;
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
@@ -43,10 +43,10 @@ const RESOURCE_TYPE_URI: &str = "/iris/resource_type";
 const ROLE_URI: &str = "/iris/api/role";
 
 impl AncillaryData for PermissionAnc {
-    type Resource = Permission;
+    type Primary = Permission;
 
     /// Get ancillary URI
-    fn uri(&self, view: View, _res: &Permission) -> Option<Cow<str>> {
+    fn uri(&self, view: View, _pri: &Permission) -> Option<Cow<str>> {
         match (view, &self.resource_types, &self.roles) {
             (View::Create | View::Edit, None, _) => {
                 Some(RESOURCE_TYPE_URI.into())
@@ -60,10 +60,10 @@ impl AncillaryData for PermissionAnc {
     fn set_json(
         &mut self,
         view: View,
-        res: &Permission,
+        pri: &Permission,
         json: JsValue,
     ) -> Result<()> {
-        if let Some(uri) = self.uri(view, res) {
+        if let Some(uri) = self.uri(view, pri) {
             match uri.borrow() {
                 RESOURCE_TYPE_URI => {
                     let resource_types = json.into_serde::<Vec<String>>()?;
@@ -81,13 +81,13 @@ impl AncillaryData for PermissionAnc {
 
 impl PermissionAnc {
     /// Create an HTML `select` element of resource types
-    fn resource_types_html(&self, res: &Permission) -> String {
+    fn resource_types_html(&self, pri: &Permission) -> String {
         let mut html = String::new();
         html.push_str("<select id='edit_resource'>");
         if let Some(resource_types) = &self.resource_types {
             for resource_type in resource_types {
                 html.push_str("<option");
-                if &res.resource_n == resource_type {
+                if &pri.resource_n == resource_type {
                     html.push_str(" selected");
                 }
                 html.push('>');
@@ -100,13 +100,13 @@ impl PermissionAnc {
     }
 
     /// Create an HTML `select` element of roles
-    fn roles_html(&self, res: &Permission) -> String {
+    fn roles_html(&self, pri: &Permission) -> String {
         let mut html = String::new();
         html.push_str("<select id='edit_role'>");
         if let Some(roles) = &self.roles {
             for role in roles {
                 html.push_str("<option");
-                if res.role == role.name {
+                if pri.role == role.name {
                     html.push_str(" selected");
                 }
                 html.push('>');
@@ -153,6 +153,23 @@ fn access_html(selected: u32) -> String {
     html
 }
 
+impl Permission {
+    pub const RESOURCE_N: &'static str = "permission";
+
+    /// Get value to create a new object
+    pub fn create_value(doc: &Document) -> Result<String> {
+        let role = doc.select_parse::<String>("edit_role");
+        let resource_n = doc.select_parse::<String>("edit_resource");
+        if let (Some(role), Some(resource_n)) = (role, resource_n) {
+            let mut obj = Map::new();
+            obj.insert("role".to_string(), Value::String(role));
+            obj.insert("resource_n".to_string(), Value::String(resource_n));
+            return Ok(Value::Object(obj).to_string());
+        }
+        Err(Error::Parse())
+    }
+}
+
 impl fmt::Display for Permission {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.id)
@@ -160,11 +177,6 @@ impl fmt::Display for Permission {
 }
 
 impl Card for Permission {
-    const TNAME: &'static str = "Permission";
-    const SYMBOL: &'static str = "🗝️";
-    const ENAME: &'static str = "🗝️ Permission";
-    const UNAME: &'static str = "permission";
-
     type Ancillary = PermissionAnc;
 
     /// Set the name
@@ -194,19 +206,6 @@ impl Card for Permission {
               {resource}\
             </div>"
         )
-    }
-
-    /// Get value to create a new object
-    fn create_value(doc: &Document) -> Result<String> {
-        let role = doc.select_parse::<String>("edit_role");
-        let resource_n = doc.select_parse::<String>("edit_resource");
-        if let (Some(role), Some(resource_n)) = (role, resource_n) {
-            let mut obj = Map::new();
-            obj.insert("role".to_string(), Value::String(role));
-            obj.insert("resource_n".to_string(), Value::String(resource_n));
-            return Ok(Value::Object(obj).to_string());
-        }
-        Err(Error::Parse())
     }
 
     /// Convert to compact HTML
@@ -284,32 +283,32 @@ pub fn permissions_html(access: Vec<Permission>) -> String {
     let mut html = "<option/>".to_string();
     for perm in &access {
         if perm.batch.is_none() {
-            add_option::<crate::alarm::Alarm>(perm, &mut html);
-            add_option::<crate::beacon::Beacon>(perm, &mut html);
-            add_option::<crate::cabinetstyle::CabinetStyle>(perm, &mut html);
-            add_option::<crate::camera::Camera>(perm, &mut html);
-            add_option::<crate::commconfig::CommConfig>(perm, &mut html);
-            add_option::<crate::commlink::CommLink>(perm, &mut html);
-            add_option::<crate::controller::Controller>(perm, &mut html);
-            add_option::<crate::lanemarking::LaneMarking>(perm, &mut html);
-            add_option::<crate::modem::Modem>(perm, &mut html);
-            add_option::<Permission>(perm, &mut html);
-            add_option::<crate::rampmeter::RampMeter>(perm, &mut html);
-            add_option::<crate::role::Role>(perm, &mut html);
-            add_option::<crate::user::User>(perm, &mut html);
-            add_option::<crate::weathersensor::WeatherSensor>(perm, &mut html);
+            add_option(Resource::Alarm, perm, &mut html);
+            add_option(Resource::Beacon, perm, &mut html);
+            add_option(Resource::CabinetStyle, perm, &mut html);
+            add_option(Resource::Camera, perm, &mut html);
+            add_option(Resource::CommConfig, perm, &mut html);
+            add_option(Resource::CommLink, perm, &mut html);
+            add_option(Resource::Controller, perm, &mut html);
+            add_option(Resource::LaneMarking, perm, &mut html);
+            add_option(Resource::Modem, perm, &mut html);
+            add_option(Resource::Permission, perm, &mut html);
+            add_option(Resource::RampMeter, perm, &mut html);
+            add_option(Resource::Role, perm, &mut html);
+            add_option(Resource::User, perm, &mut html);
+            add_option(Resource::WeatherSensor, perm, &mut html);
         }
     }
     html
 }
 
 /// Add option to access select
-fn add_option<C: Card>(perm: &Permission, html: &mut String) {
-    if perm.resource_n == C::UNAME.to_lowercase() {
+fn add_option(res: Resource, perm: &Permission, html: &mut String) {
+    if &perm.resource_n == res.rname() {
         html.push_str("<option value='");
-        html.push_str(C::TNAME);
+        html.push_str(&res.rname());
         html.push_str("'>");
-        html.push_str(C::ENAME);
+        html.push_str(&res.dname());
         html.push_str("</option>");
     }
 }

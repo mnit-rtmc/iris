@@ -35,7 +35,11 @@ pub struct Modem {
 pub struct ModemAnc;
 
 impl AncillaryData for ModemAnc {
-    type Resource = Modem;
+    type Primary = Modem;
+}
+
+impl Modem {
+    pub const RESOURCE_N: &'static str = "modem";
 }
 
 impl fmt::Display for Modem {
@@ -45,11 +49,6 @@ impl fmt::Display for Modem {
 }
 
 impl Card for Modem {
-    const TNAME: &'static str = "Modem";
-    const SYMBOL: &'static str = "🖀";
-    const ENAME: &'static str = "🖀 Modem";
-    const UNAME: &'static str = "modem";
-
     type Ancillary = ModemAnc;
 
     /// Set the name

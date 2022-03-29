@@ -75,10 +75,10 @@ const DIRECTION_URI: &str = "/iris/direction";
 const ROAD_MODIFIER_URI: &str = "/iris/road_modifier";
 
 impl AncillaryData for GeoLocAnc {
-    type Resource = GeoLoc;
+    type Primary = GeoLoc;
 
     /// Get ancillary URI
-    fn uri(&self, view: View, _res: &GeoLoc) -> Option<Cow<str>> {
+    fn uri(&self, view: View, _pri: &GeoLoc) -> Option<Cow<str>> {
         match (view, &self.roads, &self.directions, &self.modifiers) {
             (View::Edit, None, _, _) => Some(ROAD_URI.into()),
             (View::Edit, _, None, _) => Some(DIRECTION_URI.into()),
@@ -91,10 +91,10 @@ impl AncillaryData for GeoLocAnc {
     fn set_json(
         &mut self,
         view: View,
-        res: &GeoLoc,
+        pri: &GeoLoc,
         json: JsValue,
     ) -> Result<()> {
-        if let Some(uri) = self.uri(view, res) {
+        if let Some(uri) = self.uri(view, pri) {
             match uri.borrow() {
                 ROAD_URI => self.roads = Some(json.into_serde::<Vec<Road>>()?),
                 DIRECTION_URI => {
@@ -181,6 +181,10 @@ impl GeoLocAnc {
     }
 }
 
+impl GeoLoc {
+    pub const RESOURCE_N: &'static str = "geo_loc";
+}
+
 impl fmt::Display for GeoLoc {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", HtmlStr::new(&self.name))
@@ -188,11 +192,6 @@ impl fmt::Display for GeoLoc {
 }
 
 impl Card for GeoLoc {
-    const TNAME: &'static str = "Location";
-    const SYMBOL: &'static str = "🗺️";
-    const ENAME: &'static str = "🗺️ Location";
-    const UNAME: &'static str = "geo_loc";
-
     type Ancillary = GeoLocAnc;
 
     /// Set the name
@@ -254,47 +253,47 @@ impl Card for GeoLoc {
 
     /// Get changed fields from Edit form
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
-        let res = Self::new(json)?;
+        let pri = Self::new(json)?;
         let mut obj = Map::new();
         let roadway = doc
             .select_parse::<String>("edit_road")
             .filter(|r| !r.is_empty());
-        if roadway != res.roadway {
+        if roadway != pri.roadway {
             obj.insert("roadway".to_string(), OptVal(roadway).into());
         }
         if let Some(road_dir) = doc.select_parse::<u16>("edit_rdir") {
-            if road_dir != res.road_dir {
+            if road_dir != pri.road_dir {
                 obj.insert("road_dir".to_string(), road_dir.into());
             }
         }
         let cross_street = doc
             .select_parse::<String>("edit_xstreet")
             .filter(|r| !r.is_empty());
-        if cross_street != res.cross_street {
+        if cross_street != pri.cross_street {
             obj.insert("cross_street".to_string(), OptVal(cross_street).into());
         }
         if let Some(cross_mod) = doc.select_parse::<u16>("edit_mod") {
-            if cross_mod != res.cross_mod {
+            if cross_mod != pri.cross_mod {
                 obj.insert("cross_mod".to_string(), cross_mod.into());
             }
         }
         if let Some(cross_dir) = doc.select_parse::<u16>("edit_xdir") {
-            if cross_dir != res.cross_dir {
+            if cross_dir != pri.cross_dir {
                 obj.insert("cross_dir".to_string(), cross_dir.into());
             }
         }
         let landmark = doc
             .input_parse::<String>("edit_lmark")
             .filter(|m| !m.is_empty());
-        if landmark != res.landmark {
+        if landmark != pri.landmark {
             obj.insert("landmark".to_string(), OptVal(landmark).into());
         }
         let lat = doc.input_parse::<f64>("edit_lat");
-        if lat != res.lat {
+        if lat != pri.lat {
             obj.insert("lat".to_string(), OptVal(lat).into());
         }
         let lon = doc.input_parse::<f64>("edit_lon");
-        if lon != res.lon {
+        if lon != pri.lon {
             obj.insert("lon".to_string(), OptVal(lon).into());
         }
         Ok(Value::Object(obj).to_string())

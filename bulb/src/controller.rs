@@ -15,7 +15,7 @@ use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
 use crate::resource::{
-    disabled_attr, resource_lookup, AncillaryData, Card, View, NAME,
+    disabled_attr, AncillaryData, Card, Resource, View, NAME,
 };
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
@@ -73,10 +73,10 @@ const COMM_CONFIG_URI: &str = "/iris/api/comm_config";
 const CABINET_STYLE_URI: &str = "/iris/api/cabinet_style";
 
 impl AncillaryData for ControllerAnc {
-    type Resource = Controller;
+    type Primary = Controller;
 
     /// Get ancillary URI
-    fn uri(&self, view: View, res: &Controller) -> Option<Cow<str>> {
+    fn uri(&self, view: View, pri: &Controller) -> Option<Cow<str>> {
         match (
             view,
             &self.conditions,
@@ -96,7 +96,7 @@ impl AncillaryData for ControllerAnc {
             }
             (View::Edit, _, _, _, None, _) => Some(CABINET_STYLE_URI.into()),
             (View::Status, _, _, _, _, None) => {
-                Some(format!("/iris/api/controller_io/{}", &res.name).into())
+                Some(format!("/iris/api/controller_io/{}", &pri.name).into())
             }
             _ => None,
         }
@@ -106,10 +106,10 @@ impl AncillaryData for ControllerAnc {
     fn set_json(
         &mut self,
         view: View,
-        res: &Controller,
+        pri: &Controller,
         json: JsValue,
     ) -> Result<()> {
-        if let Some(uri) = self.uri(view, res) {
+        if let Some(uri) = self.uri(view, pri) {
             match uri.borrow() {
                 CONDITION_URI => {
                     self.conditions =
@@ -138,10 +138,10 @@ impl AncillaryData for ControllerAnc {
 
 impl ControllerAnc {
     /// Get condition description
-    fn condition(&self, res: &Controller) -> &str {
+    fn condition(&self, pri: &Controller) -> &str {
         if let Some(conditions) = &self.conditions {
             for condition in conditions {
-                if res.condition == condition.id {
+                if pri.condition == condition.id {
                     return &condition.description;
                 }
             }
@@ -150,7 +150,7 @@ impl ControllerAnc {
     }
 
     /// Create an HTML `select` element of controller conditions
-    fn conditions_html(&self, res: &Controller) -> String {
+    fn conditions_html(&self, pri: &Controller) -> String {
         let mut html = String::new();
         html.push_str("<select id='edit_condition'>");
         if let Some(conditions) = &self.conditions {
@@ -158,7 +158,7 @@ impl ControllerAnc {
                 html.push_str("<option value='");
                 html.push_str(&condition.id.to_string());
                 html.push('\'');
-                if res.condition == condition.id {
+                if pri.condition == condition.id {
                     html.push_str(" selected");
                 }
                 html.push('>');
@@ -171,14 +171,14 @@ impl ControllerAnc {
     }
 
     /// Create an HTML `select` element of cabinet styles
-    fn cabinet_styles_html(&self, res: &Controller) -> String {
+    fn cabinet_styles_html(&self, pri: &Controller) -> String {
         let mut html = String::new();
         html.push_str("<select id='edit_cabinet'>");
         html.push_str("<option></option>");
         if let Some(cabinet_styles) = &self.cabinet_styles {
             for cabinet_style in cabinet_styles {
                 html.push_str("<option");
-                if let Some(cab) = &res.cabinet_style {
+                if let Some(cab) = &pri.cabinet_style {
                     if cab == &cabinet_style.name {
                         html.push_str(" selected");
                     }
@@ -193,9 +193,9 @@ impl ControllerAnc {
     }
 
     /// Get the comm config
-    fn comm_config(&self, res: &Controller) -> &str {
+    fn comm_config(&self, pri: &Controller) -> &str {
         if let (Some(comm_link), Some(comm_links), Some(comm_configs)) =
-            (&res.comm_link, &self.comm_links, &self.comm_configs)
+            (&pri.comm_link, &self.comm_links, &self.comm_configs)
         {
             if let Some(cl) = comm_links.iter().find(|cl| &cl.name == comm_link)
             {
@@ -227,14 +227,16 @@ impl ControllerIo {
     /// Create a button to select the controller IO
     pub fn button_link_html(&self) -> String {
         let pin = self.pin;
-        let (symbol, resource_n) = resource_lookup(&self.resource_n);
+        let res = Resource::from_name(&self.resource_n);
+        let symbol = res.symbol();
+        let rname = res.rname();
         let name = HtmlStr::new(&self.name);
         format!(
             "<li class='row'>\
               <span>#{pin}</span>\
               <span>{symbol} \
                 <button type='button' class='go_link' \
-                        data-link='{name}' data-type='{resource_n}'>\
+                        data-link='{name}' data-type='{rname}'>\
                         {name}\
                 </button>\
               </span>\
@@ -250,6 +252,8 @@ impl fmt::Display for Controller {
 }
 
 impl Controller {
+    pub const RESOURCE_N: &'static str = "controller";
+
     /// Get comm state
     fn comm_state(&self, long: bool) -> &'static str {
         let active = self.condition == 1;
@@ -272,13 +276,13 @@ impl Controller {
 
     /// Create a button to select the controller
     pub fn button_link_html(&self) -> String {
-        let tname = Controller::TNAME;
+        let rname = Resource::Controller.rname();
         let link_drop = HtmlStr::new(self.link_drop());
         let loc = HtmlStr::new(&self.location).with_len(32);
         format!(
             "<div class='row left'>\
                 <button type='button' class='go_link' \
-                        data-link='{link_drop}' data-type='{tname}'>\
+                        data-link='{link_drop}' data-type='{rname}'>\
                         {link_drop}\
                 </button>\
                 <span class='info'>{loc}</span>\
@@ -288,10 +292,6 @@ impl Controller {
 }
 
 impl Card for Controller {
-    const TNAME: &'static str = "Controller";
-    const SYMBOL: &'static str = "🎛️";
-    const ENAME: &'static str = "🎛️ Controller";
-    const UNAME: &'static str = "controller";
     const HAS_STATUS: bool = true;
 
     type Ancillary = ControllerAnc;
@@ -348,7 +348,7 @@ impl Card for Controller {
 
     /// Convert to status HTML
     fn to_html_status(&self, anc: &ControllerAnc) -> String {
-        let tname = CommLink::TNAME;
+        let rname = Resource::CommLink.rname();
         let condition = anc.condition(self);
         let comm_state = self.comm_state(true);
         let comm_link = HtmlStr::new(&self.comm_link);
@@ -385,7 +385,7 @@ impl Card for Controller {
               <span>{comm_state}</span>\
               <span>\
                 <button type='button' class='go_link' \
-                        data-link='{comm_link}' data-type='{tname}'>\
+                        data-link='{comm_link}' data-type='{rname}'>\
                   {comm_link}\
                 </button>\
                 :{drop_id}\

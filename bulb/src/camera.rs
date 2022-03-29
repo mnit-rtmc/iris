@@ -35,7 +35,9 @@ pub struct Camera {
 
 type CameraAnc = DeviceAnc<Camera>;
 
-impl Camera {}
+impl Camera {
+    pub const RESOURCE_N: &'static str = "camera";
+}
 
 impl fmt::Display for Camera {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -51,10 +53,6 @@ impl Device for Camera {
 }
 
 impl Card for Camera {
-    const TNAME: &'static str = "Camera";
-    const SYMBOL: &'static str = "🎥";
-    const ENAME: &'static str = "🎥 Camera";
-    const UNAME: &'static str = "camera";
     const HAS_STATUS: bool = true;
 
     type Ancillary = CameraAnc;

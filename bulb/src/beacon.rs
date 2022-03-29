@@ -44,6 +44,10 @@ impl fmt::Display for Beacon {
     }
 }
 
+impl Beacon {
+    pub const RESOURCE_N: &'static str = "beacon";
+}
+
 impl Device for Beacon {
     /// Get controller
     fn controller(&self) -> Option<&str> {
@@ -52,10 +56,6 @@ impl Device for Beacon {
 }
 
 impl Card for Beacon {
-    const TNAME: &'static str = "Beacon";
-    const SYMBOL: &'static str = "🔆";
-    const ENAME: &'static str = "🔆 Beacon";
-    const UNAME: &'static str = "beacon";
     const HAS_STATUS: bool = true;
 
     type Ancillary = BeaconAnc;

@@ -28,7 +28,7 @@ pub trait Device: Card {
 /// Ancillary controller IO device data
 #[derive(Debug, Default)]
 pub struct DeviceAnc<D> {
-    res: PhantomData<D>,
+    pri: PhantomData<D>,
     pub controller: Option<Controller>,
 }
 
@@ -42,11 +42,11 @@ impl<D> DeviceAnc<D> {
 }
 
 impl<D: Device> AncillaryData for DeviceAnc<D> {
-    type Resource = D;
+    type Primary = D;
 
     /// Get ancillary URI
-    fn uri(&self, view: View, res: &D) -> Option<Cow<str>> {
-        match (view, &res.controller(), &self.controller) {
+    fn uri(&self, view: View, pri: &D) -> Option<Cow<str>> {
+        match (view, &pri.controller(), &self.controller) {
             (View::Edit, Some(ctrl), None) => {
                 Some(format!("/iris/api/controller/{}", &ctrl).into())
             }
@@ -55,7 +55,7 @@ impl<D: Device> AncillaryData for DeviceAnc<D> {
     }
 
     /// Put ancillary JSON data
-    fn set_json(&mut self, _view: View, _res: &D, json: JsValue) -> Result<()> {
+    fn set_json(&mut self, _view: View, _pri: &D, json: JsValue) -> Result<()> {
         self.controller = Some(json.into_serde::<Controller>()?);
         Ok(())
     }

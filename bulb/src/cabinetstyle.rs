@@ -36,7 +36,11 @@ pub struct CabinetStyle {
 pub struct CabinetStyleAnc;
 
 impl AncillaryData for CabinetStyleAnc {
-    type Resource = CabinetStyle;
+    type Primary = CabinetStyle;
+}
+
+impl CabinetStyle {
+    pub const RESOURCE_N: &'static str = "cabinet_style";
 }
 
 impl fmt::Display for CabinetStyle {
@@ -46,11 +50,6 @@ impl fmt::Display for CabinetStyle {
 }
 
 impl Card for CabinetStyle {
-    const TNAME: &'static str = "Cabinet Style";
-    const SYMBOL: &'static str = "🗄️";
-    const ENAME: &'static str = "🗄️ Cabinet Style";
-    const UNAME: &'static str = "cabinet_style";
-
     type Ancillary = CabinetStyleAnc;
 
     /// Set the name
@@ -60,7 +59,7 @@ impl Card for CabinetStyle {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _res: &CabinetStyleAnc) -> bool {
+    fn is_match(&self, search: &str, _pri: &CabinetStyleAnc) -> bool {
         self.name.contains_lower(search)
     }
 

@@ -137,8 +137,8 @@ impl DeferredAction {
     }
 }
 
-/// Populate `sb_list` with `tp` card types
-async fn populate_list(tp: String, search: String) {
+/// Populate `sb_list` with `rname` card types
+async fn populate_list(rname: String, search: String) {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
         state.selected_card.take()
@@ -146,7 +146,7 @@ async fn populate_list(tp: String, search: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let sb_list = doc.elem::<Element>("sb_list").unwrap_throw();
-    match res_list(&tp, &search).await {
+    match res_list(&rname, &search).await {
         Ok(cards) => sb_list.set_inner_html(&cards),
         Err(Error::FetchResponseUnauthorized()) => show_login(),
         Err(e) => show_toast(&format!("View failed: {e}")),
@@ -154,13 +154,13 @@ async fn populate_list(tp: String, search: String) {
 }
 
 /// Handle a card click event
-async fn click_card(tp: String, id: String, name: String) {
+async fn click_card(rname: String, id: String, name: String) {
     deselect_card().await;
     if id.ends_with('_') {
-        let cs = SelectedCard::new(tp, View::Create, name);
+        let cs = SelectedCard::new(rname, View::Create, name);
         cs.replace_card(View::Create).await;
     } else {
-        let cs = SelectedCard::new(tp, View::Status, name);
+        let cs = SelectedCard::new(rname, View::Status, name);
         cs.replace_card(View::Status).await;
     }
 }
@@ -392,13 +392,13 @@ async fn fetch_access_list() -> Result<String> {
 }
 
 /// Handle an event from "sb_resource" `select` element
-fn handle_sb_resource_ev(tp: String) {
+fn handle_sb_resource_ev(rname: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
         input.set_value("");
     }
-    spawn_local(populate_list(tp, "".into()));
+    spawn_local(populate_list(rname, "".into()));
 }
 
 /// Search list using the value from "sb_search"
@@ -407,8 +407,8 @@ fn search_list() {
     let doc = window.document().unwrap_throw();
     if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
         let search = input.value();
-        if let Some(tp) = doc.select_parse::<String>("sb_resource") {
-            spawn_local(populate_list(tp, search));
+        if let Some(rname) = doc.select_parse::<String>("sb_resource") {
+            spawn_local(populate_list(rname, search));
         }
     }
 }
@@ -416,13 +416,13 @@ fn search_list() {
 /// Add an "input" event listener to a `select` element
 fn add_select_event_listener(elem: &HtmlSelectElement) -> JsResult<()> {
     let closure = Closure::wrap(Box::new(|e: Event| {
-        let tp = e
+        let rname = e
             .current_target()
             .unwrap()
             .dyn_into::<HtmlSelectElement>()
             .unwrap()
             .value();
-        handle_sb_resource_ev(tp);
+        handle_sb_resource_ev(rname);
     }) as Box<dyn FnMut(_)>);
     elem.add_event_listener_with_callback(
         "input",
@@ -471,8 +471,8 @@ fn handle_click_ev(target: &Element) {
     } else if let Some(card) = target.closest(".card").unwrap_throw() {
         if let Some(id) = card.get_attribute("id") {
             if let Some(name) = card.get_attribute("name") {
-                if let Some(tp) = doc.select_parse::<String>("sb_resource") {
-                    spawn_local(click_card(tp, id, name));
+                if let Some(rname) = doc.select_parse::<String>("sb_resource") {
+                    spawn_local(click_card(rname, id, name));
                 }
             }
         }
@@ -564,12 +564,12 @@ async fn handle_login() {
 
 /// Go to resource from target's `data-link` attribute
 async fn go_resource(doc: &Document, attrs: ButtonAttrs) {
-    if let (Some(link), Some(tp)) = (attrs.data_link, attrs.data_type) {
+    if let (Some(link), Some(rname)) = (attrs.data_link, attrs.data_type) {
         if let Ok(sb_resource) = doc.elem::<HtmlSelectElement>("sb_resource") {
-            sb_resource.set_value(&tp);
+            sb_resource.set_value(&rname);
             if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
                 input.set_value(&link);
-                populate_list(tp, link).await;
+                populate_list(rname, link).await;
             }
         }
     }
