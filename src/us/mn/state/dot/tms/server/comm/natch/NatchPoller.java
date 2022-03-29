@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.AlarmImpl;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.ControllerIoImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.AlarmPoller;
@@ -71,11 +72,11 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 	}
 
 	/** Create an operation */
-	private void createOp(String n, ControllerIO cio, OpStep s) {
+	private void createOp(String n, ControllerIoImpl cio, OpStep s) {
 		Controller c = cio.getController();
 		if (c instanceof ControllerImpl) {
 			ControllerImpl ci = (ControllerImpl) c;
-			Operation op = new Operation(n, ci, s);
+			Operation op = new Operation(n, ci, cio, s);
 			op.setPriority(PriorityLevel.SHORT_POLL);
 			addOp(op);
 		}

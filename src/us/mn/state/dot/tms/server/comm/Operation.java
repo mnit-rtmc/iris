@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2021  Minnesota Department of Transportation
+ * Copyright (C) 2005-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ public final class Operation implements Comparable<Operation> {
 	 * @param c Controller.
 	 * @param d Device.
 	 * @param s First step. */
-	private Operation(String n, ControllerImpl c, ControllerIoImpl d,
+	public Operation(String n, ControllerImpl c, ControllerIoImpl d,
 		OpStep s)
 	{
 		name = n;
