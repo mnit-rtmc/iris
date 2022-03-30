@@ -279,7 +279,10 @@ impl Resource {
                 Ok(html_card_create(self.dname(), &html))
             }
             View::Compact => self.card_view(View::Compact, name).await,
-            View::Location => self.card_location(name).await,
+            View::Location => match self.fetch_geo_loc(name).await? {
+                Some(geo_loc) => card_location(&geo_loc).await,
+                None => unreachable!(),
+            },
             View::Status if self.has_status() => {
                 let html = self.card_view(View::Status, name).await?;
                 let has_location = self.has_location();
@@ -320,22 +323,6 @@ impl Resource {
         }
     }
 
-    /// Fetch a Location card
-    async fn card_location(self, name: &str) -> Result<String> {
-        match self {
-            Self::Beacon => card_location::<Beacon>(self, name).await,
-            Self::Camera => card_location::<Camera>(self, name).await,
-            Self::Controller => card_location::<Controller>(self, name).await,
-            Self::GeoLoc => card_location::<GeoLoc>(self, name).await,
-            Self::LaneMarking => card_location::<LaneMarking>(self, name).await,
-            Self::RampMeter => card_location::<RampMeter>(self, name).await,
-            Self::WeatherSensor => {
-                card_location::<WeatherSensor>(self, name).await
-            }
-            _ => unreachable!(),
-        }
-    }
-
     /// Check if a resource has a Status view
     fn has_status(self) -> bool {
         matches!(
@@ -344,20 +331,6 @@ impl Resource {
                 | Self::Beacon
                 | Self::Camera
                 | Self::CommLink
-                | Self::Controller
-                | Self::GeoLoc
-                | Self::LaneMarking
-                | Self::RampMeter
-                | Self::WeatherSensor
-        )
-    }
-
-    /// Check if a resource has a location
-    fn has_location(self) -> bool {
-        matches!(
-            self,
-            Self::Beacon
-                | Self::Camera
                 | Self::Controller
                 | Self::GeoLoc
                 | Self::LaneMarking
@@ -436,12 +409,27 @@ impl Resource {
         Ok(C::new(&json)?)
     }
 
+    /// Check if a resource has a location
+    fn has_location(self) -> bool {
+        matches!(
+            self,
+            Self::Beacon
+                | Self::Camera
+                | Self::Controller
+                | Self::GeoLoc
+                | Self::LaneMarking
+                | Self::RampMeter
+                | Self::WeatherSensor
+        )
+    }
+
     /// Fetch geo location name (if any)
     pub async fn fetch_geo_loc(self, name: &str) -> Result<Option<String>> {
         match self {
             Self::Beacon => self.geo_loc::<Beacon>(name).await,
             Self::Camera => self.geo_loc::<Camera>(name).await,
             Self::Controller => self.geo_loc::<Controller>(name).await,
+            Self::GeoLoc => Ok(Some(name.into())),
             Self::LaneMarking => self.geo_loc::<LaneMarking>(name).await,
             Self::RampMeter => self.geo_loc::<RampMeter>(name).await,
             Self::WeatherSensor => self.geo_loc::<WeatherSensor>(name).await,
@@ -514,15 +502,9 @@ async fn card_view<C: Card>(
 }
 
 /// Fetch a Location card
-async fn card_location<C: Card>(res: Resource, name: &str) -> Result<String> {
-    let pri = res.fetch_primary::<C>(name).await?;
-    match pri.geo_loc() {
-        Some(geo_loc) => {
-            let html = Resource::GeoLoc.card_view(View::Edit, geo_loc).await?;
-            Ok(html_card_edit(Resource::GeoLoc.dname(), geo_loc, &html))
-        }
-        None => unreachable!(),
-    }
+async fn card_location(name: &str) -> Result<String> {
+    let html = Resource::GeoLoc.card_view(View::Edit, &name).await?;
+    Ok(html_card_edit(Resource::GeoLoc.dname(), &name, &html))
 }
 
 impl Search {
