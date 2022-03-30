@@ -192,44 +192,9 @@ impl CommConfigAnc {
 
 impl CommConfig {
     pub const RESOURCE_N: &'static str = "comm_config";
-}
-
-impl fmt::Display for CommConfig {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
-impl Card for CommConfig {
-    type Ancillary = CommConfigAnc;
-
-    /// Set the name
-    fn with_name(mut self, name: &str) -> Self {
-        self.name = name.to_string();
-        self
-    }
-
-    /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &CommConfigAnc) -> bool {
-        self.description.contains_lower(search)
-            || self.name.contains_lower(search)
-    }
-
-    /// Get next suggested name
-    fn next_name(obs: &[Self]) -> String {
-        let mut num = 1;
-        for ob in obs {
-            if let Some(("cfg", suffix)) = ob.name.split_once('_') {
-                if let Ok(n) = suffix.parse::<u32>() {
-                    num = num.max(n + 1);
-                }
-            }
-        }
-        format!("cfg_{num}")
-    }
 
     /// Convert to compact HTML
-    fn to_html_compact(&self, _anc: &CommConfigAnc) -> String {
+    fn to_html_compact(&self) -> String {
         let description = HtmlStr::new(&self.description);
         format!(
             "<span>{description}</span>\
@@ -289,6 +254,51 @@ impl Card for CommConfig {
               <select id='edit_no_resp'>{no_resp_periods}</select>\
             </div>"
         )
+    }
+}
+
+impl fmt::Display for CommConfig {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", HtmlStr::new(&self.name))
+    }
+}
+
+impl Card for CommConfig {
+    type Ancillary = CommConfigAnc;
+
+    /// Set the name
+    fn with_name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
+
+    /// Check if a search string matches
+    fn is_match(&self, search: &str, _anc: &CommConfigAnc) -> bool {
+        self.description.contains_lower(search)
+            || self.name.contains_lower(search)
+    }
+
+    /// Convert to HTML view
+    fn to_html(&self, view: View, anc: &CommConfigAnc) -> String {
+        match view {
+            View::Create => self.to_html_create(anc),
+            View::Compact => self.to_html_compact(),
+            View::Edit => self.to_html_edit(anc),
+            _ => unreachable!(),
+        }
+    }
+
+    /// Get next suggested name
+    fn next_name(obs: &[Self]) -> String {
+        let mut num = 1;
+        for ob in obs {
+            if let Some(("cfg", suffix)) = ob.name.split_once('_') {
+                if let Ok(n) = suffix.parse::<u32>() {
+                    num = num.max(n + 1);
+                }
+            }
+        }
+        format!("cfg_{num}")
     }
 
     /// Get changed fields from Edit form

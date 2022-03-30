@@ -150,28 +150,9 @@ impl CommLink {
             (false, _, true) => "disabled ❓",
         }
     }
-}
 
-impl Card for CommLink {
-    type Ancillary = CommLinkAnc;
-
-    /// Set the name
-    fn with_name(mut self, name: &str) -> Self {
-        self.name = name.to_string();
-        self
-    }
-
-    /// Check if a search string matches
-    fn is_match(&self, search: &str, anc: &CommLinkAnc) -> bool {
-        self.description.contains_lower(search)
-            || self.name.contains_lower(search)
-            || anc.comm_config_desc(self).contains_lower(search)
-            || self.uri.contains_lower(search)
-            || self.connected(true).contains(search)
-    }
-
-    /// Convert to compact HTML
-    fn to_html_compact(&self, _anc: &CommLinkAnc) -> String {
+    /// Convert to Compact HTML
+    fn to_html_compact(&self) -> String {
         let connected = self.connected(false);
         let description = HtmlStr::new(&self.description).with_len(10);
         let disabled = disabled_attr(self.poll_enabled);
@@ -182,7 +163,7 @@ impl Card for CommLink {
         )
     }
 
-    /// Convert to status HTML
+    /// Convert to Status HTML
     fn to_html_status(&self, anc: &CommLinkAnc) -> String {
         let connected = self.connected(true);
         let disabled = if self.poll_enabled { "" } else { " disabled" };
@@ -203,7 +184,7 @@ impl Card for CommLink {
         )
     }
 
-    /// Convert to edit HTML
+    /// Convert to Edit HTML
     fn to_html_edit(&self, anc: &CommLinkAnc) -> String {
         let description = HtmlStr::new(&self.description);
         let uri = HtmlStr::new(&self.uri);
@@ -229,6 +210,36 @@ impl Card for CommLink {
               <input id='edit_enabled' type='checkbox'{enabled}/>\
             </div>"
         )
+    }
+}
+
+impl Card for CommLink {
+    type Ancillary = CommLinkAnc;
+
+    /// Set the name
+    fn with_name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
+
+    /// Check if a search string matches
+    fn is_match(&self, search: &str, anc: &CommLinkAnc) -> bool {
+        self.description.contains_lower(search)
+            || self.name.contains_lower(search)
+            || anc.comm_config_desc(self).contains_lower(search)
+            || self.uri.contains_lower(search)
+            || self.connected(true).contains(search)
+    }
+
+    /// Convert to HTML view
+    fn to_html(&self, view: View, anc: &CommLinkAnc) -> String {
+        match view {
+            View::Create => self.to_html_create(anc),
+            View::Compact => self.to_html_compact(),
+            View::Status => self.to_html_status(anc),
+            View::Edit => self.to_html_edit(anc),
+            _ => unreachable!(),
+        }
     }
 
     /// Get changed fields from Edit form

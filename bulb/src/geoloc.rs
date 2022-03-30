@@ -183,34 +183,8 @@ impl GeoLocAnc {
 
 impl GeoLoc {
     pub const RESOURCE_N: &'static str = "geo_loc";
-}
 
-impl fmt::Display for GeoLoc {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
-impl Card for GeoLoc {
-    type Ancillary = GeoLocAnc;
-
-    /// Set the name
-    fn with_name(mut self, name: &str) -> Self {
-        self.name = name.to_string();
-        self
-    }
-
-    /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &GeoLocAnc) -> bool {
-        self.name.contains_lower(search)
-    }
-
-    /// Convert to compact HTML
-    fn to_html_compact(&self, _anc: &GeoLocAnc) -> String {
-        "".into()
-    }
-
-    /// Convert to edit HTML
+    /// Convert to Edit HTML
     fn to_html_edit(&self, anc: &GeoLocAnc) -> String {
         let roadway = anc.roads_html("edit_road", self.roadway.as_deref());
         let rdir = anc.directions_html("edit_rdir", self.road_dir);
@@ -249,6 +223,35 @@ impl Card for GeoLoc {
                      inputmode='decimal' value='{lon}'/>\
             </div>"
         )
+    }
+}
+
+impl fmt::Display for GeoLoc {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", HtmlStr::new(&self.name))
+    }
+}
+
+impl Card for GeoLoc {
+    type Ancillary = GeoLocAnc;
+
+    /// Set the name
+    fn with_name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
+
+    /// Check if a search string matches
+    fn is_match(&self, search: &str, _anc: &GeoLocAnc) -> bool {
+        self.name.contains_lower(search)
+    }
+
+    /// Convert to HTML view
+    fn to_html(&self, view: View, anc: &GeoLocAnc) -> String {
+        match view {
+            View::Edit => self.to_html_edit(anc),
+            _ => unreachable!(),
+        }
     }
 
     /// Get changed fields from Edit form

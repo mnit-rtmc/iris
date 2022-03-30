@@ -12,7 +12,7 @@
 //
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
-use crate::resource::{disabled_attr, Card, NAME};
+use crate::resource::{disabled_attr, Card, View, NAME};
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -49,6 +49,61 @@ impl Alarm {
             _ => "❓",
         }
     }
+
+    /// Convert to Compact HTML
+    fn to_html_compact(&self) -> String {
+        let state = self.state(false);
+        let description = HtmlStr::new(&self.description);
+        let disabled = disabled_attr(self.controller.is_some());
+        format!(
+            "<span>{state}</span>\
+            <span{disabled}>{description}</span>\
+            <span class='{NAME}'>{self}</span>"
+        )
+    }
+
+    /// Convert to Status HTML
+    fn to_html_status(&self) -> String {
+        let description = HtmlStr::new(&self.description);
+        let state = self.state(true);
+        let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
+        format!(
+            "<div class='row'>\
+              <span class='info'>{description}</span>\
+              <span class='info'>{state}</span>\
+            </div>\
+            <div class='row'>\
+              <span>Triggered</span>\
+              <span class='info'>{trigger_time}</span>\
+            </div>"
+        )
+    }
+
+    /// Convert to Edit HTML
+    fn to_html_edit(&self, anc: &AlarmAnc) -> String {
+        let ctrl_loc = anc.controller_loc_html();
+        let description = HtmlStr::new(&self.description);
+        let controller = HtmlStr::new(&self.controller);
+        let pin = OptVal(self.pin);
+        format!(
+            "{ctrl_loc}\
+            <div class='row'>\
+              <label for='edit_desc'>Description</label>\
+              <input id='edit_desc' maxlength='24' size='24' \
+                     value='{description}'/>\
+             </div>\
+             <div class='row'>\
+               <label for='edit_ctrl'>Controller</label>\
+               <input id='edit_ctrl' maxlength='20' size='20' \
+                      value='{controller}'/>\
+             </div>\
+             <div class='row'>\
+               <label for='edit_pin'>Pin</label>\
+               <input id='edit_pin' type='number' min='1' max='104' \
+                      size='8' value='{pin}'/>\
+             </div>"
+        )
+    }
 }
 
 impl fmt::Display for Alarm {
@@ -80,59 +135,15 @@ impl Card for Alarm {
             || self.state(true).contains(search)
     }
 
-    /// Convert to compact HTML
-    fn to_html_compact(&self, _anc: &AlarmAnc) -> String {
-        let state = self.state(false);
-        let description = HtmlStr::new(&self.description);
-        let disabled = disabled_attr(self.controller.is_some());
-        format!(
-            "<span>{state}</span>\
-            <span{disabled}>{description}</span>\
-            <span class='{NAME}'>{self}</span>"
-        )
-    }
-
-    /// Convert to status HTML
-    fn to_html_status(&self, _anc: &AlarmAnc) -> String {
-        let description = HtmlStr::new(&self.description);
-        let state = self.state(true);
-        let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
-        format!(
-            "<div class='row'>\
-              <span class='info'>{description}</span>\
-              <span class='info'>{state}</span>\
-            </div>\
-            <div class='row'>\
-              <span>Triggered</span>\
-              <span class='info'>{trigger_time}</span>\
-            </div>"
-        )
-    }
-
-    /// Convert to edit HTML
-    fn to_html_edit(&self, anc: &AlarmAnc) -> String {
-        let ctrl_loc = anc.controller_loc_html();
-        let description = HtmlStr::new(&self.description);
-        let controller = HtmlStr::new(&self.controller);
-        let pin = OptVal(self.pin);
-        format!(
-            "{ctrl_loc}\
-            <div class='row'>\
-              <label for='edit_desc'>Description</label>\
-              <input id='edit_desc' maxlength='24' size='24' \
-                     value='{description}'/>\
-             </div>\
-             <div class='row'>\
-               <label for='edit_ctrl'>Controller</label>\
-               <input id='edit_ctrl' maxlength='20' size='20' \
-                      value='{controller}'/>\
-             </div>\
-             <div class='row'>\
-               <label for='edit_pin'>Pin</label>\
-               <input id='edit_pin' type='number' min='1' max='104' \
-                      size='8' value='{pin}'/>\
-             </div>"
-        )
+    /// Convert to HTML view
+    fn to_html(&self, view: View, anc: &AlarmAnc) -> String {
+        match view {
+            View::Create => self.to_html_create(anc),
+            View::Compact => self.to_html_compact(),
+            View::Status => self.to_html_status(),
+            View::Edit => self.to_html_edit(anc),
+            _ => unreachable!(),
+        }
     }
 
     /// Get changed fields from Edit form

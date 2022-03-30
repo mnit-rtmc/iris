@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
-use crate::resource::{disabled_attr, AncillaryData, Card};
+use crate::resource::{disabled_attr, AncillaryData, Card, View};
 use crate::util::{ContainsLower, Dom};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -37,6 +37,23 @@ impl AncillaryData for RoleAnc {
 
 impl Role {
     pub const RESOURCE_N: &'static str = "role";
+
+    /// Convert to Compact HTML
+    fn to_html_compact(&self) -> String {
+        let disabled = disabled_attr(self.enabled);
+        format!("<span{disabled}>{self}</span>")
+    }
+
+    /// Convert to Edit HTML
+    fn to_html_edit(&self) -> String {
+        let enabled = if self.enabled { " checked" } else { "" };
+        format!(
+            "<div class='row'>\
+              <label for='edit_enabled'>Enabled</label>\
+              <input id='edit_enabled' type='checkbox'{enabled}/>\
+            </div>"
+        )
+    }
 }
 
 impl fmt::Display for Role {
@@ -59,21 +76,14 @@ impl Card for Role {
         self.name.contains_lower(search)
     }
 
-    /// Convert to compact HTML
-    fn to_html_compact(&self, _anc: &RoleAnc) -> String {
-        let disabled = disabled_attr(self.enabled);
-        format!("<span{disabled}>{self}</span>")
-    }
-
-    /// Convert to edit HTML
-    fn to_html_edit(&self, _anc: &RoleAnc) -> String {
-        let enabled = if self.enabled { " checked" } else { "" };
-        format!(
-            "<div class='row'>\
-              <label for='edit_enabled'>Enabled</label>\
-              <input id='edit_enabled' type='checkbox'{enabled}/>\
-            </div>"
-        )
+    /// Convert to HTML view
+    fn to_html(&self, view: View, anc: &RoleAnc) -> String {
+        match view {
+            View::Create => self.to_html_create(anc),
+            View::Compact => self.to_html_compact(),
+            View::Edit => self.to_html_edit(),
+            _ => unreachable!(),
+        }
     }
 
     /// Get changed fields from Edit form

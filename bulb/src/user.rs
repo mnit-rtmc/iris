@@ -85,6 +85,34 @@ impl UserAnc {
 
 impl User {
     pub const RESOURCE_N: &'static str = "user";
+
+    /// Convert to Compact HTML
+    fn to_html_compact(&self) -> String {
+        let disabled = disabled_attr(self.enabled && self.role.is_some());
+        format!("<span{disabled}>{self}</span>")
+    }
+
+    /// Convert to Edit HTML
+    fn to_html_edit(&self, anc: &UserAnc) -> String {
+        let full_name = HtmlStr::new(&self.full_name);
+        let role = anc.roles_html(self);
+        let enabled = if self.enabled { " checked" } else { "" };
+        format!(
+            "<div class='row'>\
+               <label for='edit_full'>Full Name</label>\
+               <input id='edit_full' maxlength='31' size='20' \
+                      value='{full_name}'/>\
+            </div>\
+            <div class='row'>\
+               <label for='edit_role'>Role</label>\
+               {role}\
+            </div>\
+            <div class='row'>\
+              <label for='edit_enabled'>Enabled</label>\
+              <input id='edit_enabled' type='checkbox'{enabled}/>\
+            </div>"
+        )
+    }
 }
 
 impl fmt::Display for User {
@@ -109,32 +137,14 @@ impl Card for User {
             || self.role.contains_lower(search)
     }
 
-    /// Convert to compact HTML
-    fn to_html_compact(&self, _anc: &UserAnc) -> String {
-        let disabled = disabled_attr(self.enabled && self.role.is_some());
-        format!("<span{disabled}>{self}</span>")
-    }
-
-    /// Convert to edit HTML
-    fn to_html_edit(&self, anc: &UserAnc) -> String {
-        let full_name = HtmlStr::new(&self.full_name);
-        let role = anc.roles_html(self);
-        let enabled = if self.enabled { " checked" } else { "" };
-        format!(
-            "<div class='row'>\
-               <label for='edit_full'>Full Name</label>\
-               <input id='edit_full' maxlength='31' size='20' \
-                      value='{full_name}'/>\
-            </div>\
-            <div class='row'>\
-               <label for='edit_role'>Role</label>\
-               {role}\
-            </div>\
-            <div class='row'>\
-              <label for='edit_enabled'>Enabled</label>\
-              <input id='edit_enabled' type='checkbox'{enabled}/>\
-            </div>"
-        )
+    /// Convert to HTML view
+    fn to_html(&self, view: View, anc: &UserAnc) -> String {
+        match view {
+            View::Create => self.to_html_create(anc),
+            View::Compact => self.to_html_compact(),
+            View::Edit => self.to_html_edit(anc),
+            _ => unreachable!(),
+        }
     }
 
     /// Get changed fields from Edit form

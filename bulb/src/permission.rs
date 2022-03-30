@@ -168,48 +168,9 @@ impl Permission {
         }
         Err(Error::Parse())
     }
-}
 
-impl fmt::Display for Permission {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.id)
-    }
-}
-
-impl Card for Permission {
-    type Ancillary = PermissionAnc;
-
-    /// Set the name
-    fn with_name(self, _name: &str) -> Self {
-        self
-    }
-
-    /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &PermissionAnc) -> bool {
-        self.id.to_string().contains(search)
-            || access_str(self.access_n, true).contains(search)
-            || self.role.contains_lower(search)
-            || self.resource_n.contains(search)
-    }
-
-    /// Get row for create card
-    fn to_html_create(&self, anc: &PermissionAnc) -> String {
-        let role = anc.roles_html(self);
-        let resource = anc.resource_types_html(self);
-        format!(
-            "<div class='row'>\
-              <label for='edit_role'>Role</label>\
-              {role}\
-            </div>\
-            <div class='row'>\
-              <label for='edit_resource'>Resource</label>\
-              {resource}\
-            </div>"
-        )
-    }
-
-    /// Convert to compact HTML
-    fn to_html_compact(&self, _anc: &PermissionAnc) -> String {
+    /// Convert to Compact HTML
+    fn to_html_compact(&self) -> String {
         let access = access_str(self.access_n, false);
         let role = HtmlStr::new(&self.role).with_len(4);
         let resource = HtmlStr::new(&self.resource_n).with_len(8);
@@ -219,7 +180,7 @@ impl Card for Permission {
         )
     }
 
-    /// Convert to edit HTML
+    /// Convert to Edit HTML
     fn to_html_edit(&self, anc: &PermissionAnc) -> String {
         let role = anc.roles_html(self);
         let resource = anc.resource_types_html(self);
@@ -244,6 +205,55 @@ impl Card for Permission {
               {access}\
             </div>"
         )
+    }
+}
+
+impl fmt::Display for Permission {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.id)
+    }
+}
+
+impl Card for Permission {
+    type Ancillary = PermissionAnc;
+
+    /// Set the name
+    fn with_name(self, _name: &str) -> Self {
+        self
+    }
+
+    /// Check if a search string matches
+    fn is_match(&self, search: &str, _anc: &PermissionAnc) -> bool {
+        self.id.to_string().contains(search)
+            || access_str(self.access_n, true).contains(search)
+            || self.role.contains_lower(search)
+            || self.resource_n.contains(search)
+    }
+
+    /// Get row for Create card
+    fn to_html_create(&self, anc: &PermissionAnc) -> String {
+        let role = anc.roles_html(self);
+        let resource = anc.resource_types_html(self);
+        format!(
+            "<div class='row'>\
+              <label for='edit_role'>Role</label>\
+              {role}\
+            </div>\
+            <div class='row'>\
+              <label for='edit_resource'>Resource</label>\
+              {resource}\
+            </div>"
+        )
+    }
+
+    /// Convert to HTML view
+    fn to_html(&self, view: View, anc: &PermissionAnc) -> String {
+        match view {
+            View::Create => self.to_html_create(anc),
+            View::Compact => self.to_html_compact(),
+            View::Edit => self.to_html_edit(anc),
+            _ => unreachable!(),
+        }
     }
 
     /// Get changed fields from Edit form
@@ -304,11 +314,11 @@ pub fn permissions_html(access: Vec<Permission>) -> String {
 
 /// Add option to access select
 fn add_option(res: Resource, perm: &Permission, html: &mut String) {
-    if &perm.resource_n == res.rname() {
+    if perm.resource_n == res.rname() {
         html.push_str("<option value='");
-        html.push_str(&res.rname());
+        html.push_str(res.rname());
         html.push_str("'>");
-        html.push_str(&res.dname());
+        html.push_str(res.dname());
         html.push_str("</option>");
     }
 }

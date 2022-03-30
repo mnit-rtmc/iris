@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
-use crate::resource::{disabled_attr, AncillaryData, Card};
+use crate::resource::{disabled_attr, AncillaryData, Card, View};
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -40,36 +40,15 @@ impl AncillaryData for ModemAnc {
 
 impl Modem {
     pub const RESOURCE_N: &'static str = "modem";
-}
 
-impl fmt::Display for Modem {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
-impl Card for Modem {
-    type Ancillary = ModemAnc;
-
-    /// Set the name
-    fn with_name(mut self, name: &str) -> Self {
-        self.name = name.to_string();
-        self
-    }
-
-    /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &ModemAnc) -> bool {
-        self.name.contains_lower(search)
-    }
-
-    /// Convert to compact HTML
-    fn to_html_compact(&self, _anc: &ModemAnc) -> String {
+    /// Convert to Compact HTML
+    fn to_html_compact(&self) -> String {
         let disabled = disabled_attr(self.enabled);
         format!("<span{disabled}>{self}</span>")
     }
 
-    /// Convert to edit HTML
-    fn to_html_edit(&self, _anc: &ModemAnc) -> String {
+    /// Convert to Edit HTML
+    fn to_html_edit(&self) -> String {
         let uri = HtmlStr::new(&self.uri);
         let config = HtmlStr::new(&self.config);
         let timeout_ms = OptVal(self.timeout_ms);
@@ -95,6 +74,37 @@ impl Card for Modem {
               <input id='edit_enabled' type='checkbox'{enabled}/>\
             </div>"
         )
+    }
+}
+
+impl fmt::Display for Modem {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", HtmlStr::new(&self.name))
+    }
+}
+
+impl Card for Modem {
+    type Ancillary = ModemAnc;
+
+    /// Set the name
+    fn with_name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
+
+    /// Check if a search string matches
+    fn is_match(&self, search: &str, _anc: &ModemAnc) -> bool {
+        self.name.contains_lower(search)
+    }
+
+    /// Convert to HTML view
+    fn to_html(&self, view: View, anc: &ModemAnc) -> String {
+        match view {
+            View::Create => self.to_html_create(anc),
+            View::Compact => self.to_html_compact(),
+            View::Edit => self.to_html_edit(),
+            _ => unreachable!(),
+        }
     }
 
     /// Get changed fields from Edit form

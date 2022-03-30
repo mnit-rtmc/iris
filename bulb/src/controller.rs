@@ -289,50 +289,9 @@ impl Controller {
             </div>"
         )
     }
-}
-
-impl Card for Controller {
-    type Ancillary = ControllerAnc;
-
-    /// Set the name
-    fn with_name(mut self, name: &str) -> Self {
-        self.name = name.to_string();
-        self
-    }
-
-    /// Get geo location name
-    fn geo_loc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
-    }
-
-    /// Check if a search string matches
-    fn is_match(&self, search: &str, anc: &ControllerAnc) -> bool {
-        self.name.contains_lower(search)
-            || self.link_drop().contains_lower(search)
-            || self.comm_state(true).contains(search)
-            || anc.condition(self).contains_lower(search)
-            || anc.comm_config(self).contains_lower(search)
-            || self.location.contains_lower(search)
-            || self.notes.contains_lower(search)
-            || self.cabinet_style.contains_lower(search)
-            || self.version.contains_lower(search)
-    }
-
-    /// Get next suggested name
-    fn next_name(obs: &[Self]) -> String {
-        let mut num = 1;
-        for ob in obs {
-            if let Some(("ctl", suffix)) = ob.name.split_once('_') {
-                if let Ok(n) = suffix.parse::<u32>() {
-                    num = num.max(n + 1);
-                }
-            }
-        }
-        format!("ctl_{num}")
-    }
 
     /// Convert to compact HTML
-    fn to_html_compact(&self, _anc: &ControllerAnc) -> String {
+    fn to_html_compact(&self) -> String {
         let comm_state = self.comm_state(false);
         let link_drop = HtmlStr::new(self.link_drop());
         // condition 1 is "Active"
@@ -441,6 +400,58 @@ impl Card for Controller {
                      value='{password}'/>\
             </div>"
         )
+    }
+}
+
+impl Card for Controller {
+    type Ancillary = ControllerAnc;
+
+    /// Set the name
+    fn with_name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
+
+    /// Get geo location name
+    fn geo_loc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
+    }
+
+    /// Check if a search string matches
+    fn is_match(&self, search: &str, anc: &ControllerAnc) -> bool {
+        self.name.contains_lower(search)
+            || self.link_drop().contains_lower(search)
+            || self.comm_state(true).contains(search)
+            || anc.condition(self).contains_lower(search)
+            || anc.comm_config(self).contains_lower(search)
+            || self.location.contains_lower(search)
+            || self.notes.contains_lower(search)
+            || self.cabinet_style.contains_lower(search)
+            || self.version.contains_lower(search)
+    }
+
+    /// Get next suggested name
+    fn next_name(obs: &[Self]) -> String {
+        let mut num = 1;
+        for ob in obs {
+            if let Some(("ctl", suffix)) = ob.name.split_once('_') {
+                if let Ok(n) = suffix.parse::<u32>() {
+                    num = num.max(n + 1);
+                }
+            }
+        }
+        format!("ctl_{num}")
+    }
+
+    /// Convert to HTML view
+    fn to_html(&self, view: View, anc: &ControllerAnc) -> String {
+        match view {
+            View::Create => self.to_html_create(anc),
+            View::Compact => self.to_html_compact(),
+            View::Status => self.to_html_status(anc),
+            View::Edit => self.to_html_edit(anc),
+            _ => unreachable!(),
+        }
     }
 
     /// Get changed fields from Edit form

@@ -143,9 +143,6 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
         false
     }
 
-    /// Convert to Compact HTML
-    fn to_html_compact(&self, _anc: &Self::Ancillary) -> String;
-
     /// Convert to Create HTML
     fn to_html_create(&self, _anc: &Self::Ancillary) -> String {
         format!(
@@ -156,15 +153,8 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
         )
     }
 
-    /// Convert to Status HTML
-    fn to_html_status(&self, _anc: &Self::Ancillary) -> String {
-        unreachable!()
-    }
-
-    /// Convert to Edit HTML
-    fn to_html_edit(&self, _anc: &Self::Ancillary) -> String {
-        unreachable!()
-    }
+    /// Convert to HTML view
+    fn to_html(&self, view: View, _anc: &Self::Ancillary) -> String;
 
     /// Get changed fields from Edit form
     fn changed_fields(doc: &Document, json: &JsValue) -> Result<String>;
@@ -285,70 +275,46 @@ impl Resource {
         match view {
             View::CreateCompact => Ok(CREATE_COMPACT.into()),
             View::Create => {
-                let html = self.card_create(name).await?;
+                let html = self.card_view(View::Create, name).await?;
                 Ok(html_card_create(self.dname(), &html))
             }
-            View::Compact => self.card_compact(name).await,
+            View::Compact => self.card_view(View::Compact, name).await,
             View::Location => self.card_location(name).await,
-            View::Status => self.card_status(name).await,
+            View::Status if self.has_status() => {
+                let html = self.card_view(View::Status, name).await?;
+                let has_location = self.has_location();
+                Ok(html_card_status(self.dname(), name, &html, has_location))
+            }
             _ => {
-                let html = self.card_edit(name).await?;
+                let html = self.card_view(View::Edit, name).await?;
                 Ok(html_card_edit(self.dname(), name, &html))
             }
         }
     }
 
-    /// Fetch a "create" card
-    async fn card_create(self, name: &str) -> Result<String> {
+    /// Fetch a card view
+    async fn card_view(self, view: View, name: &str) -> Result<String> {
         match self {
-            Resource::Alarm => card_create::<Alarm>(name).await,
-            Resource::Beacon => card_create::<Beacon>(name).await,
-            Resource::CabinetStyle => card_create::<CabinetStyle>(name).await,
-            Resource::Camera => card_create::<Camera>(name).await,
-            Resource::CommConfig => card_create::<CommConfig>(name).await,
-            Resource::CommLink => card_create::<CommLink>(name).await,
-            Resource::Controller => card_create::<Controller>(name).await,
-            Resource::GeoLoc => card_create::<GeoLoc>(name).await,
-            Resource::LaneMarking => card_create::<LaneMarking>(name).await,
-            Resource::Modem => card_create::<Modem>(name).await,
-            Resource::Permission => card_create::<Permission>(name).await,
-            Resource::RampMeter => card_create::<RampMeter>(name).await,
-            Resource::Role => card_create::<Role>(name).await,
-            Resource::User => card_create::<User>(name).await,
-            Resource::WeatherSensor => card_create::<WeatherSensor>(name).await,
-            _ => unreachable!(),
-        }
-    }
-
-    /// Fetch a Compact card
-    async fn card_compact(self, name: &str) -> Result<String> {
-        match self {
-            Resource::Alarm => card_compact::<Alarm>(self, name).await,
-            Resource::Beacon => card_compact::<Beacon>(self, name).await,
-            Resource::CabinetStyle => {
-                card_compact::<CabinetStyle>(self, name).await
+            Self::Alarm => card_view::<Alarm>(self, view, name).await,
+            Self::Beacon => card_view::<Beacon>(self, view, name).await,
+            Self::CabinetStyle => {
+                card_view::<CabinetStyle>(self, view, name).await
             }
-            Resource::Camera => card_compact::<Camera>(self, name).await,
-            Resource::CommConfig => {
-                card_compact::<CommConfig>(self, name).await
+            Self::Camera => card_view::<Camera>(self, view, name).await,
+            Self::CommConfig => card_view::<CommConfig>(self, view, name).await,
+            Self::CommLink => card_view::<CommLink>(self, view, name).await,
+            Self::Controller => card_view::<Controller>(self, view, name).await,
+            Self::GeoLoc => card_view::<GeoLoc>(self, view, name).await,
+            Self::LaneMarking => {
+                card_view::<LaneMarking>(self, view, name).await
             }
-            Resource::CommLink => card_compact::<CommLink>(self, name).await,
-            Resource::Controller => {
-                card_compact::<Controller>(self, name).await
-            }
-            Resource::GeoLoc => card_compact::<GeoLoc>(self, name).await,
-            Resource::LaneMarking => {
-                card_compact::<LaneMarking>(self, name).await
-            }
-            Resource::Modem => card_compact::<Modem>(self, name).await,
-            Resource::Permission => {
-                card_compact::<Permission>(self, name).await
-            }
-            Resource::RampMeter => card_compact::<RampMeter>(self, name).await,
-            Resource::Role => card_compact::<Role>(self, name).await,
-            Resource::User => card_compact::<User>(self, name).await,
-            Resource::WeatherSensor => {
-                card_compact::<WeatherSensor>(self, name).await
+            Self::Modem => card_view::<Modem>(self, view, name).await,
+            Self::Permission => card_view::<Permission>(self, view, name).await,
+            Self::RampMeter => card_view::<RampMeter>(self, view, name).await,
+            Self::Role => card_view::<Role>(self, view, name).await,
+            Self::User => card_view::<User>(self, view, name).await,
+            Self::WeatherSensor => {
+                card_view::<WeatherSensor>(self, view, name).await
             }
             _ => unreachable!(),
         }
@@ -357,89 +323,47 @@ impl Resource {
     /// Fetch a Location card
     async fn card_location(self, name: &str) -> Result<String> {
         match self {
-            Resource::Beacon => card_location::<Beacon>(self, name).await,
-            Resource::Camera => card_location::<Camera>(self, name).await,
-            Resource::Controller => {
-                card_location::<Controller>(self, name).await
-            }
-            Resource::GeoLoc => card_location::<GeoLoc>(self, name).await,
-            Resource::LaneMarking => {
-                card_location::<LaneMarking>(self, name).await
-            }
-            Resource::RampMeter => card_location::<RampMeter>(self, name).await,
-            Resource::WeatherSensor => {
+            Self::Beacon => card_location::<Beacon>(self, name).await,
+            Self::Camera => card_location::<Camera>(self, name).await,
+            Self::Controller => card_location::<Controller>(self, name).await,
+            Self::GeoLoc => card_location::<GeoLoc>(self, name).await,
+            Self::LaneMarking => card_location::<LaneMarking>(self, name).await,
+            Self::RampMeter => card_location::<RampMeter>(self, name).await,
+            Self::WeatherSensor => {
                 card_location::<WeatherSensor>(self, name).await
             }
             _ => unreachable!(),
         }
     }
 
-    /// Fetch a Status card
-    async fn card_status(self, name: &str) -> Result<String> {
-        match self {
-            Resource::Alarm => {
-                let html = card_status::<Alarm>(self, name).await?;
-                Ok(html_card_status(self.dname(), name, &html, false))
-            }
-            Resource::Beacon => {
-                let html = card_status::<Beacon>(self, name).await?;
-                Ok(html_card_status(self.dname(), name, &html, true))
-            }
-            Resource::Camera => {
-                let html = card_status::<Camera>(self, name).await?;
-                Ok(html_card_status(self.dname(), name, &html, true))
-            }
-            Resource::CommLink => {
-                let html = card_status::<CommLink>(self, name).await?;
-                Ok(html_card_status(self.dname(), name, &html, false))
-            }
-            Resource::Controller => {
-                let html = card_status::<Controller>(self, name).await?;
-                Ok(html_card_status(self.dname(), name, &html, true))
-            }
-            Resource::LaneMarking => {
-                let html = card_status::<LaneMarking>(self, name).await?;
-                Ok(html_card_status(self.dname(), name, &html, true))
-            }
-            Resource::RampMeter => {
-                let html = card_status::<RampMeter>(self, name).await?;
-                Ok(html_card_status(self.dname(), name, &html, true))
-            }
-            Resource::WeatherSensor => {
-                let html = card_status::<WeatherSensor>(self, name).await?;
-                Ok(html_card_status(self.dname(), name, &html, true))
-            }
-            _ => {
-                let html = self.card_edit(name).await?;
-                Ok(html_card_edit(self.dname(), name, &html))
-            }
-        }
+    /// Check if a resource has a Status view
+    fn has_status(self) -> bool {
+        matches!(
+            self,
+            Self::Alarm
+                | Self::Beacon
+                | Self::Camera
+                | Self::CommLink
+                | Self::Controller
+                | Self::GeoLoc
+                | Self::LaneMarking
+                | Self::RampMeter
+                | Self::WeatherSensor
+        )
     }
 
-    /// Fetch an Edit card
-    async fn card_edit(self, name: &str) -> Result<String> {
-        match self {
-            Resource::Alarm => card_edit::<Alarm>(self, name).await,
-            Resource::Beacon => card_edit::<Beacon>(self, name).await,
-            Resource::CabinetStyle => {
-                card_edit::<CabinetStyle>(self, name).await
-            }
-            Resource::Camera => card_edit::<Camera>(self, name).await,
-            Resource::CommConfig => card_edit::<CommConfig>(self, name).await,
-            Resource::CommLink => card_edit::<CommLink>(self, name).await,
-            Resource::Controller => card_edit::<Controller>(self, name).await,
-            Resource::GeoLoc => card_edit::<GeoLoc>(self, name).await,
-            Resource::LaneMarking => card_edit::<LaneMarking>(self, name).await,
-            Resource::Modem => card_edit::<Modem>(self, name).await,
-            Resource::Permission => card_edit::<Permission>(self, name).await,
-            Resource::RampMeter => card_edit::<RampMeter>(self, name).await,
-            Resource::Role => card_edit::<Role>(self, name).await,
-            Resource::User => card_edit::<User>(self, name).await,
-            Resource::WeatherSensor => {
-                card_edit::<WeatherSensor>(self, name).await
-            }
-            _ => Ok("".into()),
-        }
+    /// Check if a resource has a location
+    fn has_location(self) -> bool {
+        matches!(
+            self,
+            Self::Beacon
+                | Self::Camera
+                | Self::Controller
+                | Self::GeoLoc
+                | Self::LaneMarking
+                | Self::RampMeter
+                | Self::WeatherSensor
+        )
     }
 
     /// Save changed fields on card
@@ -557,7 +481,7 @@ async fn fetch_list<C: Card>(res: Resource, search: &str) -> Result<String> {
         html.push_str(&format!(
             "<li id='{rname}_{pri}' name='{pri}' class='card'>"
         ));
-        html.push_str(&pri.to_html_compact(&anc));
+        html.push_str(&pri.to_html(View::Compact, &anc));
         html.push_str("</li>");
     }
     html.push_str("</ul>");
@@ -574,18 +498,19 @@ async fn fetch_ancillary<C: Card>(view: View, pri: &C) -> Result<C::Ancillary> {
     Ok(anc)
 }
 
-/// Fetch a Create card
-async fn card_create<C: Card>(name: &str) -> Result<String> {
-    let pri = C::default().with_name(name);
-    let anc = fetch_ancillary(View::Create, &pri).await?;
-    Ok(pri.to_html_create(&anc))
-}
-
-/// Fetch a Compact card
-async fn card_compact<C: Card>(res: Resource, name: &str) -> Result<String> {
-    let pri = res.fetch_primary::<C>(name).await?;
-    let anc = fetch_ancillary(View::Compact, &pri).await?;
-    Ok(pri.to_html_compact(&anc))
+/// Fetch a card view
+async fn card_view<C: Card>(
+    res: Resource,
+    view: View,
+    name: &str,
+) -> Result<String> {
+    let pri = if view == View::Create {
+        C::default().with_name(name)
+    } else {
+        res.fetch_primary::<C>(name).await?
+    };
+    let anc = fetch_ancillary(view, &pri).await?;
+    Ok(pri.to_html(view, &anc))
 }
 
 /// Fetch a Location card
@@ -593,25 +518,11 @@ async fn card_location<C: Card>(res: Resource, name: &str) -> Result<String> {
     let pri = res.fetch_primary::<C>(name).await?;
     match pri.geo_loc() {
         Some(geo_loc) => {
-            let html = Resource::GeoLoc.card_edit(geo_loc).await?;
+            let html = Resource::GeoLoc.card_view(View::Edit, geo_loc).await?;
             Ok(html_card_edit(Resource::GeoLoc.dname(), geo_loc, &html))
         }
         None => unreachable!(),
     }
-}
-
-/// Fetch a Status card
-async fn card_status<C: Card>(res: Resource, name: &str) -> Result<String> {
-    let pri = res.fetch_primary::<C>(name).await?;
-    let anc = fetch_ancillary(View::Status, &pri).await?;
-    Ok(pri.to_html_status(&anc))
-}
-
-/// Fetch an Edit card
-async fn card_edit<C: Card>(res: Resource, name: &str) -> Result<String> {
-    let pri = res.fetch_primary::<C>(name).await?;
-    let anc = fetch_ancillary(View::Edit, &pri).await?;
-    Ok(pri.to_html_edit(&anc))
 }
 
 impl Search {

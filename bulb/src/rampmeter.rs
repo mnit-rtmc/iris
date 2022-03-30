@@ -12,7 +12,7 @@
 //
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
-use crate::resource::{disabled_attr, Card, NAME};
+use crate::resource::{disabled_attr, Card, View, NAME};
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -36,6 +36,46 @@ type RampMeterAnc = DeviceAnc<RampMeter>;
 
 impl RampMeter {
     pub const RESOURCE_N: &'static str = "ramp_meter";
+
+    /// Convert to Compact HTML
+    fn to_html_compact(&self) -> String {
+        let location = HtmlStr::new(&self.location).with_len(12);
+        let disabled = disabled_attr(self.controller.is_some());
+        format!(
+            "<span{disabled}>{location}</span>\
+            <span class='{NAME}'>{self}</span>"
+        )
+    }
+
+    /// Convert to Status HTML
+    fn to_html_status(&self) -> String {
+        let location = HtmlStr::new(&self.location).with_len(64);
+        format!(
+            "<div class='row'>\
+              <span class='info'>{location}</span>\
+            </div>"
+        )
+    }
+
+    /// Convert to Edit HTML
+    fn to_html_edit(&self, anc: &RampMeterAnc) -> String {
+        let ctrl_loc = anc.controller_loc_html();
+        let controller = HtmlStr::new(&self.controller);
+        let pin = OptVal(self.pin);
+        format!(
+            "{ctrl_loc}\
+             <div class='row'>\
+               <label for='edit_ctrl'>Controller</label>\
+               <input id='edit_ctrl' maxlength='20' size='20' \
+                      value='{controller}'/>\
+             </div>\
+             <div class='row'>\
+               <label for='edit_pin'>Pin</label>\
+               <input id='edit_pin' type='number' min='1' max='104' \
+                      size='8' value='{pin}'/>\
+             </div>"
+        )
+    }
 }
 
 impl fmt::Display for RampMeter {
@@ -70,44 +110,15 @@ impl Card for RampMeter {
         self.name.contains_lower(search) || self.location.contains_lower(search)
     }
 
-    /// Convert to compact HTML
-    fn to_html_compact(&self, _anc: &RampMeterAnc) -> String {
-        let location = HtmlStr::new(&self.location).with_len(12);
-        let disabled = disabled_attr(self.controller.is_some());
-        format!(
-            "<span{disabled}>{location}</span>\
-            <span class='{NAME}'>{self}</span>"
-        )
-    }
-
-    /// Convert to status HTML
-    fn to_html_status(&self, _anc: &RampMeterAnc) -> String {
-        let location = HtmlStr::new(&self.location).with_len(64);
-        format!(
-            "<div class='row'>\
-              <span class='info'>{location}</span>\
-            </div>"
-        )
-    }
-
-    /// Convert to edit HTML
-    fn to_html_edit(&self, anc: &RampMeterAnc) -> String {
-        let ctrl_loc = anc.controller_loc_html();
-        let controller = HtmlStr::new(&self.controller);
-        let pin = OptVal(self.pin);
-        format!(
-            "{ctrl_loc}\
-             <div class='row'>\
-               <label for='edit_ctrl'>Controller</label>\
-               <input id='edit_ctrl' maxlength='20' size='20' \
-                      value='{controller}'/>\
-             </div>\
-             <div class='row'>\
-               <label for='edit_pin'>Pin</label>\
-               <input id='edit_pin' type='number' min='1' max='104' \
-                      size='8' value='{pin}'/>\
-             </div>"
-        )
+    /// Convert to HTML view
+    fn to_html(&self, view: View, anc: &RampMeterAnc) -> String {
+        match view {
+            View::Create => self.to_html_create(anc),
+            View::Compact => self.to_html_compact(),
+            View::Status => self.to_html_status(),
+            View::Edit => self.to_html_edit(anc),
+            _ => unreachable!(),
+        }
     }
 
     /// Get changed fields from Edit form

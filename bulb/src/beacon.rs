@@ -12,7 +12,7 @@
 //
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
-use crate::resource::{disabled_attr, Card, NAME};
+use crate::resource::{disabled_attr, Card, View, NAME};
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -46,39 +46,9 @@ impl fmt::Display for Beacon {
 
 impl Beacon {
     pub const RESOURCE_N: &'static str = "beacon";
-}
 
-impl Device for Beacon {
-    /// Get controller
-    fn controller(&self) -> Option<&str> {
-        self.controller.as_deref()
-    }
-}
-
-impl Card for Beacon {
-    type Ancillary = BeaconAnc;
-
-    /// Set the name
-    fn with_name(mut self, name: &str) -> Self {
-        self.name = name.to_string();
-        self
-    }
-
-    /// Get geo location name
-    fn geo_loc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
-    }
-
-    /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &BeaconAnc) -> bool {
-        self.name.contains_lower(search)
-            || self.location.contains_lower(search)
-            || self.message.contains_lower(search)
-            || self.notes.contains_lower(search)
-    }
-
-    /// Convert to compact HTML
-    fn to_html_compact(&self, _anc: &BeaconAnc) -> String {
+    /// Convert to Compact HTML
+    fn to_html_compact(&self) -> String {
         let location = HtmlStr::new(&self.location).with_len(12);
         let disabled = disabled_attr(self.controller.is_some());
         format!(
@@ -87,8 +57,8 @@ impl Card for Beacon {
         )
     }
 
-    /// Convert to status HTML
-    fn to_html_status(&self, _anc: &BeaconAnc) -> String {
+    /// Convert to Status HTML
+    fn to_html_status(&self) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
         let message = HtmlStr::new(&self.message);
         format!(
@@ -103,7 +73,7 @@ impl Card for Beacon {
         )
     }
 
-    /// Convert to edit HTML
+    /// Convert to Edit HTML
     fn to_html_edit(&self, anc: &BeaconAnc) -> String {
         let ctrl_loc = anc.controller_loc_html();
         let message = HtmlStr::new(&self.message);
@@ -139,6 +109,47 @@ impl Card for Beacon {
                      size='8' value='{verify_pin}'/>\
             </div>"
         )
+    }
+}
+
+impl Device for Beacon {
+    /// Get controller
+    fn controller(&self) -> Option<&str> {
+        self.controller.as_deref()
+    }
+}
+
+impl Card for Beacon {
+    type Ancillary = BeaconAnc;
+
+    /// Set the name
+    fn with_name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
+
+    /// Get geo location name
+    fn geo_loc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
+    }
+
+    /// Check if a search string matches
+    fn is_match(&self, search: &str, _anc: &BeaconAnc) -> bool {
+        self.name.contains_lower(search)
+            || self.location.contains_lower(search)
+            || self.message.contains_lower(search)
+            || self.notes.contains_lower(search)
+    }
+
+    /// Convert to HTML view
+    fn to_html(&self, view: View, anc: &BeaconAnc) -> String {
+        match view {
+            View::Create => self.to_html_create(anc),
+            View::Compact => self.to_html_compact(),
+            View::Status => self.to_html_status(),
+            View::Edit => self.to_html_edit(anc),
+            _ => unreachable!(),
+        }
     }
 
     /// Get changed fields from Edit form

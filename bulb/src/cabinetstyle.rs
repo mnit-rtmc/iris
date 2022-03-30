@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
-use crate::resource::{AncillaryData, Card};
+use crate::resource::{AncillaryData, Card, View};
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -41,35 +41,14 @@ impl AncillaryData for CabinetStyleAnc {
 
 impl CabinetStyle {
     pub const RESOURCE_N: &'static str = "cabinet_style";
-}
 
-impl fmt::Display for CabinetStyle {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
-impl Card for CabinetStyle {
-    type Ancillary = CabinetStyleAnc;
-
-    /// Set the name
-    fn with_name(mut self, name: &str) -> Self {
-        self.name = name.to_string();
-        self
-    }
-
-    /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &CabinetStyleAnc) -> bool {
-        self.name.contains_lower(search)
-    }
-
-    /// Convert to compact HTML
-    fn to_html_compact(&self, _anc: &CabinetStyleAnc) -> String {
+    /// Convert to Compact HTML
+    fn to_html_compact(&self) -> String {
         format!("<span>{self}</span>")
     }
 
-    /// Convert to edit HTML
-    fn to_html_edit(&self, _anc: &CabinetStyleAnc) -> String {
+    /// Convert to Edit HTML
+    fn to_html_edit(&self) -> String {
         let police_panel_pin_1 = OptVal(self.police_panel_pin_1);
         let police_panel_pin_2 = OptVal(self.police_panel_pin_2);
         let watchdog_reset_pin_1 = OptVal(self.watchdog_reset_pin_1);
@@ -102,6 +81,37 @@ impl Card for CabinetStyle {
                      size='8' value='{dip}'/>\
             </div>"
         )
+    }
+}
+
+impl fmt::Display for CabinetStyle {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", HtmlStr::new(&self.name))
+    }
+}
+
+impl Card for CabinetStyle {
+    type Ancillary = CabinetStyleAnc;
+
+    /// Set the name
+    fn with_name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
+
+    /// Check if a search string matches
+    fn is_match(&self, search: &str, _anc: &CabinetStyleAnc) -> bool {
+        self.name.contains_lower(search)
+    }
+
+    /// Convert to HTML view
+    fn to_html(&self, view: View, anc: &CabinetStyleAnc) -> String {
+        match view {
+            View::Create => self.to_html_create(anc),
+            View::Compact => self.to_html_compact(),
+            View::Edit => self.to_html_edit(),
+            _ => unreachable!(),
+        }
     }
 
     /// Get changed fields from Edit form
