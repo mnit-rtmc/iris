@@ -13,10 +13,7 @@
 use crate::error::{Error, Result};
 use crate::fetch::{fetch_get, fetch_post};
 use crate::permission::{permissions_html, Permission};
-use crate::resource::{
-    res_create, res_delete, res_get_view, res_list, res_save, res_save_loc,
-    View,
-};
+use crate::resource::{Resource, View};
 use crate::util::Dom;
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
@@ -147,7 +144,8 @@ async fn populate_list(rname: String, search: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let sb_list = doc.elem::<Element>("sb_list").unwrap_throw();
-    match res_list(&rname, &search).await {
+    let res = Resource::from_name(&rname);
+    match res.fetch_list(&search).await {
         Ok(cards) => sb_list.set_inner_html(&cards),
         Err(Error::FetchResponseUnauthorized()) => show_login(),
         Err(e) => show_toast(&format!("View failed: {e}")),
@@ -203,7 +201,8 @@ impl SelectedCard {
         let id = self.id();
         match doc.elem::<HtmlElement>(&id) {
             Ok(elem) => {
-                match res_get_view(&self.rname, &self.name, v).await {
+                let res = Resource::from_name(&self.rname);
+                match res.fetch_card(&self.name, v).await {
                     Ok(html) => replace_card_html(&elem, v, &html),
                     Err(Error::FetchResponseUnauthorized()) => {
                         show_login();
@@ -246,7 +245,8 @@ impl SelectedCard {
 
     /// Create a new object from card
     async fn res_create(self) {
-        match res_create(&self.rname).await {
+        let res = Resource::from_name(&self.rname);
+        match res.create_and_post().await {
             Ok(_) => {
                 self.replace_card(View::Create.compact()).await;
                 DeferredAction::SearchList.schedule(1500);
@@ -258,7 +258,8 @@ impl SelectedCard {
 
     /// Save changed fields on Edit card
     async fn res_save_edit(self) {
-        match res_save(&self.rname, &self.name).await {
+        let res = Resource::from_name(&self.rname);
+        match res.save(&self.name).await {
             Ok(_) => self.replace_card(View::Edit.compact()).await,
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(Error::FetchResponseNotFound()) => {
@@ -271,7 +272,14 @@ impl SelectedCard {
 
     /// Save changed fields on Location card
     async fn res_save_loc(self) {
-        match res_save_loc(&self.rname, &self.name).await {
+        let res = Resource::from_name(&self.rname);
+        let geo_loc = res.fetch_geo_loc(&self.name).await;
+        let result = match geo_loc {
+            Ok(Some(geo_loc)) => Resource::GeoLoc.save(&geo_loc).await,
+            Ok(None) => Ok(()),
+            Err(e) => Err(e),
+        };
+        match result {
             Ok(_) => self.replace_card(View::Location.compact()).await,
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Save failed: {e}")),
@@ -280,7 +288,8 @@ impl SelectedCard {
 
     /// Delete selected card / object
     async fn res_delete(self) {
-        match res_delete(&self.rname, &self.name).await {
+        let res = Resource::from_name(&self.rname);
+        match res.delete(&self.name).await {
             Ok(_) => DeferredAction::SearchList.schedule(1000),
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Delete failed: {e}")),
