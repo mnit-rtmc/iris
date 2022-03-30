@@ -72,22 +72,16 @@ pub enum Resource {
 pub enum View {
     /// Compact Create view
     CreateCompact,
-
     /// Create view
     Create,
-
     /// Compact view
     Compact,
-
     /// Status view
     Status,
-
     /// Edit view
     Edit,
-
     /// Location view
     Location,
-
     /// Search view
     Search,
 }
@@ -100,6 +94,80 @@ enum Search {
     Normal(String),
     /// Exact (multi-word) search
     Exact(String),
+}
+
+/// Ancillary card view data
+pub trait AncillaryData: Default {
+    type Primary;
+
+    /// Get ancillary data URI
+    fn uri(&self, _view: View, _pri: &Self::Primary) -> Option<Cow<str>> {
+        None
+    }
+
+    /// Set ancillary JSON data
+    fn set_json(
+        &mut self,
+        _view: View,
+        _pri: &Self::Primary,
+        _json: JsValue,
+    ) -> Result<()> {
+        Ok(())
+    }
+}
+
+/// A card view of a resource
+pub trait Card: Default + fmt::Display + DeserializeOwned {
+    type Ancillary: AncillaryData<Primary = Self>;
+
+    /// Create from a JSON value
+    fn new(json: &JsValue) -> Result<Self> {
+        Ok(json.into_serde::<Self>()?)
+    }
+
+    /// Set the name
+    fn with_name(self, name: &str) -> Self;
+
+    /// Get next suggested name
+    fn next_name(_obs: &[Self]) -> String {
+        "".into()
+    }
+
+    /// Get geo location name
+    fn geo_loc(&self) -> Option<&str> {
+        None
+    }
+
+    /// Check if a search string matches
+    fn is_match(&self, _search: &str, _anc: &Self::Ancillary) -> bool {
+        false
+    }
+
+    /// Convert to Compact HTML
+    fn to_html_compact(&self, _anc: &Self::Ancillary) -> String;
+
+    /// Convert to Create HTML
+    fn to_html_create(&self, _anc: &Self::Ancillary) -> String {
+        format!(
+            "<div class='row'>\
+              <label for='create_name'>Name</label>\
+              <input id='create_name' maxlength='24' size='24' value='{self}'/>\
+            </div>"
+        )
+    }
+
+    /// Convert to Status HTML
+    fn to_html_status(&self, _anc: &Self::Ancillary) -> String {
+        unreachable!()
+    }
+
+    /// Convert to Edit HTML
+    fn to_html_edit(&self, _anc: &Self::Ancillary) -> String {
+        unreachable!()
+    }
+
+    /// Get changed fields from Edit form
+    fn changed_fields(doc: &Document, json: &JsValue) -> Result<String>;
 }
 
 impl Resource {
@@ -588,82 +656,6 @@ impl View {
             View::Compact
         }
     }
-}
-
-/// Ancillary card view data
-pub trait AncillaryData: Default {
-    type Primary;
-
-    /// Get ancillary URI
-    fn uri(&self, _view: View, _pri: &Self::Primary) -> Option<Cow<str>> {
-        None
-    }
-
-    /// Set ancillary JSON data
-    fn set_json(
-        &mut self,
-        _view: View,
-        _pri: &Self::Primary,
-        _json: JsValue,
-    ) -> Result<()> {
-        Ok(())
-    }
-}
-
-/// A card can be displayed in a card list
-pub trait Card: Default + fmt::Display + DeserializeOwned {
-    const HAS_STATUS: bool = false;
-
-    type Ancillary: AncillaryData<Primary = Self>;
-
-    /// Create from a JSON value
-    fn new(json: &JsValue) -> Result<Self> {
-        Ok(json.into_serde::<Self>()?)
-    }
-
-    /// Set the name
-    fn with_name(self, name: &str) -> Self;
-
-    /// Get next suggested name
-    fn next_name(_obs: &[Self]) -> String {
-        "".into()
-    }
-
-    /// Get geo location name
-    fn geo_loc(&self) -> Option<&str> {
-        None
-    }
-
-    /// Check if a search string matches
-    fn is_match(&self, _search: &str, _anc: &Self::Ancillary) -> bool {
-        false
-    }
-
-    /// Convert to compact HTML
-    fn to_html_compact(&self, _anc: &Self::Ancillary) -> String;
-
-    /// Get row for create card
-    fn to_html_create(&self, _anc: &Self::Ancillary) -> String {
-        format!(
-            "<div class='row'>\
-              <label for='create_name'>Name</label>\
-              <input id='create_name' maxlength='24' size='24' value='{self}'/>\
-            </div>"
-        )
-    }
-
-    /// Convert to status HTML
-    fn to_html_status(&self, _anc: &Self::Ancillary) -> String {
-        unreachable!()
-    }
-
-    /// Convert to edit HTML
-    fn to_html_edit(&self, _anc: &Self::Ancillary) -> String {
-        unreachable!()
-    }
-
-    /// Get changed fields from Edit form
-    fn changed_fields(doc: &Document, json: &JsValue) -> Result<String>;
 }
 
 /// Get attribute for disabled cards
