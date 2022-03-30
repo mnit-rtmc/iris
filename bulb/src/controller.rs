@@ -15,7 +15,8 @@ use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
 use crate::resource::{
-    disabled_attr, AncillaryData, Card, Resource, View, NAME,
+    disabled_attr, AncillaryData, Card, Resource, View, EDIT_BUTTON,
+    LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
@@ -275,17 +276,25 @@ impl Controller {
     }
 
     /// Create a button to select the controller
-    pub fn button_link_html(&self) -> String {
+    pub fn button_html(&self) -> String {
         let rname = Resource::Controller.rname();
         let link_drop = HtmlStr::new(self.link_drop());
+        format!(
+            "<button type='button' class='go_link' \
+                     data-link='{link_drop}' data-type='{rname}'>\
+                     {link_drop}\
+            </button>"
+        )
+    }
+
+    /// Create a controller button and location
+    pub fn button_loc_html(&self) -> String {
+        let button = self.button_html();
         let loc = HtmlStr::new(&self.location).with_len(32);
         format!(
             "<div class='row left'>\
-                <button type='button' class='go_link' \
-                        data-link='{link_drop}' data-type='{rname}'>\
-                        {link_drop}\
-                </button>\
-                <span class='info'>{loc}</span>\
+              {button}\
+              <span class='info'>{loc}</span>\
             </div>"
         )
     }
@@ -358,7 +367,12 @@ impl Controller {
             </div>\
             <div class='row'>{version}</div>\
             <div class='row'>{fail_time}</div>\
-            {io_pins}"
+            {io_pins}\
+            <div class='row'>\
+              <span></span>\
+              {LOC_BUTTON}\
+              {EDIT_BUTTON}\
+            </div>"
         )
     }
 

@@ -12,7 +12,9 @@
 //
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
-use crate::resource::{disabled_attr, Card, View, NAME};
+use crate::resource::{
+    disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
+};
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -63,10 +65,11 @@ impl Alarm {
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self) -> String {
+    fn to_html_status(&self, anc: &AlarmAnc) -> String {
         let description = HtmlStr::new(&self.description);
         let state = self.state(true);
         let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
+        let ctrl_button = anc.controller_button();
         format!(
             "<div class='row'>\
               <span class='info'>{description}</span>\
@@ -75,19 +78,22 @@ impl Alarm {
             <div class='row'>\
               <span>Triggered</span>\
               <span class='info'>{trigger_time}</span>\
+            </div>\
+            <div class='row'>\
+              {ctrl_button}\
+              {LOC_BUTTON}\
+              {EDIT_BUTTON}\
             </div>"
         )
     }
 
     /// Convert to Edit HTML
-    fn to_html_edit(&self, anc: &AlarmAnc) -> String {
-        let ctrl_loc = anc.controller_loc_html();
+    fn to_html_edit(&self) -> String {
         let description = HtmlStr::new(&self.description);
         let controller = HtmlStr::new(&self.controller);
         let pin = OptVal(self.pin);
         format!(
-            "{ctrl_loc}\
-            <div class='row'>\
+            "<div class='row'>\
               <label for='edit_desc'>Description</label>\
               <input id='edit_desc' maxlength='24' size='24' \
                      value='{description}'/>\
@@ -140,8 +146,8 @@ impl Card for Alarm {
         match view {
             View::Create => self.to_html_create(anc),
             View::Compact => self.to_html_compact(),
-            View::Status => self.to_html_status(),
-            View::Edit => self.to_html_edit(anc),
+            View::Status => self.to_html_status(anc),
+            View::Edit => self.to_html_edit(),
             _ => unreachable!(),
         }
     }

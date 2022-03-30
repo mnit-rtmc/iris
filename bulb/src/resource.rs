@@ -46,6 +46,14 @@ pub const NAME: &str = "ob_name";
 /// Compact "Create" card
 const CREATE_COMPACT: &str = "<span class='create'>Create 🆕</span>";
 
+/// Location button
+pub const LOC_BUTTON: &str =
+    "<button id='ob_loc' type='button'>🗺️ Location</button>";
+
+/// Edit button
+pub const EDIT_BUTTON: &str =
+    "<button id='ob_edit' type='button'>📝 Edit</button>";
+
 /// Resource types
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Resource {
@@ -285,8 +293,7 @@ impl Resource {
             },
             View::Status if self.has_status() => {
                 let html = self.card_view(View::Status, name).await?;
-                let has_location = self.has_location();
-                Ok(html_card_status(self.dname(), name, &html, has_location))
+                Ok(self.html_card_status(name, &html))
             }
             _ => {
                 let html = self.card_view(View::Edit, name).await?;
@@ -409,20 +416,6 @@ impl Resource {
         Ok(C::new(&json)?)
     }
 
-    /// Check if a resource has a location
-    fn has_location(self) -> bool {
-        matches!(
-            self,
-            Self::Beacon
-                | Self::Camera
-                | Self::Controller
-                | Self::GeoLoc
-                | Self::LaneMarking
-                | Self::RampMeter
-                | Self::WeatherSensor
-        )
-    }
-
     /// Fetch geo location name (if any)
     pub async fn fetch_geo_loc(self, name: &str) -> Result<Option<String>> {
         match self {
@@ -444,6 +437,21 @@ impl Resource {
             Some(geo_loc) => Ok(Some(geo_loc.to_string())),
             None => Ok(None),
         }
+    }
+
+    /// Build a status card
+    fn html_card_status(self, name: &str, status: &str) -> String {
+        let dname = self.dname();
+        let name = HtmlStr::new(name);
+        format!(
+            "<div class='row'>\
+              <span class='{TITLE}'>{dname}</span>\
+              <span class='{TITLE}'>Status</span>\
+              <span class='{NAME}'>{name}</span>\
+              <button id='ob_close' type='button'>X</button>\
+            </div>\
+            {status}"
+        )
     }
 }
 
@@ -573,35 +581,6 @@ fn html_card_create(dname: &'static str, create: &str) -> String {
         <div class='row'>\
           <span></span>\
           <button id='ob_save' type='button'>🖍️ Save</button>\
-        </div>"
-    )
-}
-
-/// Build a status card
-fn html_card_status(
-    dname: &'static str,
-    name: &str,
-    status: &str,
-    has_location: bool,
-) -> String {
-    let name = HtmlStr::new(name);
-    let geo_loc = if has_location {
-        "<button id='ob_loc' type='button'>🗺️ Location</button>"
-    } else {
-        ""
-    };
-    format!(
-        "<div class='row'>\
-          <span class='{TITLE}'>{dname}</span>\
-          <span class='{TITLE}'>Status</span>\
-          <span class='{NAME}'>{name}</span>\
-          <button id='ob_close' type='button'>X</button>\
-        </div>\
-        {status}\
-        <div class='row'>\
-          <span></span>\
-          {geo_loc}\
-          <button id='ob_edit' type='button'>📝 Edit</button>\
         </div>"
     )
 }

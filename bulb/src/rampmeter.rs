@@ -12,7 +12,9 @@
 //
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
-use crate::resource::{disabled_attr, Card, View, NAME};
+use crate::resource::{
+    disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
+};
 use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -48,23 +50,27 @@ impl RampMeter {
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self) -> String {
+    fn to_html_status(&self, anc: &RampMeterAnc) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
+        let ctrl_button = anc.controller_button();
         format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
+            </div>\
+            <div class='row'>\
+              {ctrl_button}\
+              {LOC_BUTTON}\
+              {EDIT_BUTTON}\
             </div>"
         )
     }
 
     /// Convert to Edit HTML
-    fn to_html_edit(&self, anc: &RampMeterAnc) -> String {
-        let ctrl_loc = anc.controller_loc_html();
+    fn to_html_edit(&self) -> String {
         let controller = HtmlStr::new(&self.controller);
         let pin = OptVal(self.pin);
         format!(
-            "{ctrl_loc}\
-             <div class='row'>\
+            "<div class='row'>\
                <label for='edit_ctrl'>Controller</label>\
                <input id='edit_ctrl' maxlength='20' size='20' \
                       value='{controller}'/>\
@@ -115,8 +121,8 @@ impl Card for RampMeter {
         match view {
             View::Create => self.to_html_create(anc),
             View::Compact => self.to_html_compact(),
-            View::Status => self.to_html_status(),
-            View::Edit => self.to_html_edit(anc),
+            View::Status => self.to_html_status(anc),
+            View::Edit => self.to_html_edit(),
             _ => unreachable!(),
         }
     }

@@ -242,6 +242,9 @@ button.go_link {
   align-content: center;
   align-items: center;
 }
+.right {
+  justify-content: end;
+}
 .pins {
   column-count: 2;
   list-style: none;

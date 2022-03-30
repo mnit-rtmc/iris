@@ -13,7 +13,9 @@
 use crate::commconfig::CommConfig;
 use crate::controller::Controller;
 use crate::error::Result;
-use crate::resource::{disabled_attr, AncillaryData, Card, View, NAME};
+use crate::resource::{
+    disabled_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
+};
 use crate::util::{ContainsLower, Dom, HtmlStr};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -123,7 +125,7 @@ impl CommLinkAnc {
         let mut html = String::new();
         if let Some(controllers) = &self.controllers {
             for ctrl in controllers {
-                html.push_str(&ctrl.button_link_html());
+                html.push_str(&ctrl.button_loc_html());
             }
         }
         html
@@ -180,7 +182,10 @@ impl CommLink {
             <div class='row'>\
               <span>{config}</span>\
             </div>\
-            {controllers}"
+            {controllers}\
+            <div class='row right'>\
+              {EDIT_BUTTON}\
+            </div>"
         )
     }
 
