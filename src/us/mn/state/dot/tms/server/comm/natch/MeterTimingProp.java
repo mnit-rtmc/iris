@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,6 +68,16 @@ public class MeterTimingProp extends MeterProp {
 		red = rd;
 	}
 
+	/** Is the table entry valid? */
+	private boolean isEntryValid() {
+		return stop > start && red > 0;
+	}
+
+	/** Get the validated meter number */
+	private int getMeterNumValid() {
+		return isEntryValid() ? getMeterNumber() : 0;
+	}
+
 	/** Create a new meter timing table property */
 	public MeterTimingProp(Counter c, RampMeterImpl m) {
 		super(c, m);
@@ -79,7 +89,7 @@ public class MeterTimingProp extends MeterProp {
 		throws IOException
 	{
 		String msg = "MT," + message_id + ',' + getEntryNumber() + ',' +
-			getMeterNumber() + ',' + start + ',' + stop + ',' +
+			getMeterNumValid() + ',' + start + ',' + stop + ',' +
 			red + '\n';
 		tx_buf.put(msg.getBytes(UTF8));
 	}
@@ -109,7 +119,7 @@ public class MeterTimingProp extends MeterProp {
 	@Override
 	protected boolean parseParams(String[] param) {
 		if (param[2].equals(getEntryNumber()) &&
-		    param[3].equals(Integer.toString(getMeterNumber())))
+		    param[3].equals(Integer.toString(getMeterNumValid())))
 		{
 			start = parseInt(param[4]);
 			stop = parseInt(param[5]);
