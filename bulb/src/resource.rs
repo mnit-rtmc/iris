@@ -503,8 +503,8 @@ async fn card_view<C: Card>(
 
 /// Fetch a Location card
 async fn card_location(name: &str) -> Result<String> {
-    let html = Resource::GeoLoc.card_view(View::Edit, &name).await?;
-    Ok(html_card_edit(Resource::GeoLoc.dname(), &name, &html))
+    let html = Resource::GeoLoc.card_view(View::Edit, name).await?;
+    Ok(html_card_edit(Resource::GeoLoc.dname(), name, &html))
 }
 
 impl Search {
