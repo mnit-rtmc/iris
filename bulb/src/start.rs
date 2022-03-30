@@ -47,8 +47,8 @@ const TICK_INTERVAL: i32 = 500;
 /// Selected card state
 #[derive(Clone, Debug)]
 struct SelectedCard {
-    /// Resource type name
-    rname: String,
+    /// Resource type
+    res: Resource,
     /// Card view
     view: View,
     /// Object name
@@ -135,8 +135,8 @@ impl DeferredAction {
     }
 }
 
-/// Populate `sb_list` with `rname` card types
-async fn populate_list(rname: String, search: String) {
+/// Populate `sb_list` with `res` card types
+async fn populate_list(res: Resource, search: String) {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
         state.selected_card.take()
@@ -144,7 +144,6 @@ async fn populate_list(rname: String, search: String) {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let sb_list = doc.elem::<Element>("sb_list").unwrap_throw();
-    let res = Resource::from_name(&rname);
     match res.fetch_list(&search).await {
         Ok(cards) => sb_list.set_inner_html(&cards),
         Err(Error::FetchResponseUnauthorized()) => show_login(),
@@ -153,13 +152,13 @@ async fn populate_list(rname: String, search: String) {
 }
 
 /// Handle a card click event
-async fn click_card(rname: String, id: String, name: String) {
+async fn click_card(res: Resource, id: String, name: String) {
     deselect_card().await;
     if id.ends_with('_') {
-        let cs = SelectedCard::new(rname, View::Create, name);
+        let cs = SelectedCard::new(res, View::Create, name);
         cs.replace_card(View::Create).await;
     } else {
-        let cs = SelectedCard::new(rname, View::Status, name);
+        let cs = SelectedCard::new(res, View::Status, name);
         cs.replace_card(View::Status).await;
     }
 }
@@ -181,16 +180,16 @@ async fn deselect_card() {
 
 impl SelectedCard {
     /// Create a new blank selected card
-    fn new(rname: String, view: View, name: String) -> Self {
-        SelectedCard { rname, view, name }
+    fn new(res: Resource, view: View, name: String) -> Self {
+        SelectedCard { res, view, name }
     }
 
     /// Get card element ID
     fn id(&self) -> String {
         if self.view.is_create() {
-            format!("{}_", self.rname)
+            format!("{}_", self.res.rname())
         } else {
-            format!("{}_{}", self.rname, &self.name)
+            format!("{}_{}", self.res.rname(), &self.name)
         }
     }
 
@@ -201,7 +200,7 @@ impl SelectedCard {
         let id = self.id();
         match doc.elem::<HtmlElement>(&id) {
             Ok(elem) => {
-                let res = Resource::from_name(&self.rname);
+                let res = self.res;
                 match res.fetch_card(&self.name, v).await {
                     Ok(html) => replace_card_html(&elem, v, &html),
                     Err(Error::FetchResponseUnauthorized()) => {
@@ -245,7 +244,7 @@ impl SelectedCard {
 
     /// Create a new object from card
     async fn res_create(self) {
-        let res = Resource::from_name(&self.rname);
+        let res = self.res;
         match res.create_and_post().await {
             Ok(_) => {
                 self.replace_card(View::Create.compact()).await;
@@ -258,7 +257,7 @@ impl SelectedCard {
 
     /// Save changed fields on Edit card
     async fn res_save_edit(self) {
-        let res = Resource::from_name(&self.rname);
+        let res = self.res;
         match res.save(&self.name).await {
             Ok(_) => self.replace_card(View::Edit.compact()).await,
             Err(Error::FetchResponseUnauthorized()) => show_login(),
@@ -272,7 +271,7 @@ impl SelectedCard {
 
     /// Save changed fields on Location card
     async fn res_save_loc(self) {
-        let res = Resource::from_name(&self.rname);
+        let res = self.res;
         let geo_loc = res.fetch_geo_loc(&self.name).await;
         let result = match geo_loc {
             Ok(Some(geo_loc)) => Resource::GeoLoc.save(&geo_loc).await,
@@ -288,7 +287,7 @@ impl SelectedCard {
 
     /// Delete selected card / object
     async fn res_delete(self) {
-        let res = Resource::from_name(&self.rname);
+        let res = self.res;
         match res.delete(&self.name).await {
             Ok(_) => DeferredAction::SearchList.schedule(1000),
             Err(Error::FetchResponseUnauthorized()) => show_login(),
@@ -408,7 +407,8 @@ fn handle_sb_resource_ev(rname: String) {
     if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
         input.set_value("");
     }
-    spawn_local(populate_list(rname, "".into()));
+    let res = Resource::from_name(&rname);
+    spawn_local(populate_list(res, "".into()));
 }
 
 /// Search list using the value from "sb_search"
@@ -418,7 +418,8 @@ fn search_list() {
     if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
         let search = input.value();
         if let Some(rname) = doc.select_parse::<String>("sb_resource") {
-            spawn_local(populate_list(rname, search));
+            let res = Resource::from_name(&rname);
+            spawn_local(populate_list(res, search));
         }
     }
 }
@@ -482,7 +483,8 @@ fn handle_click_ev(target: &Element) {
         if let Some(id) = card.get_attribute("id") {
             if let Some(name) = card.get_attribute("name") {
                 if let Some(rname) = doc.select_parse::<String>("sb_resource") {
-                    spawn_local(click_card(rname, id, name));
+                    let res = Resource::from_name(&rname);
+                    spawn_local(click_card(res, id, name));
                 }
             }
         }
@@ -579,7 +581,8 @@ async fn go_resource(doc: &Document, attrs: ButtonAttrs) {
             sb_resource.set_value(&rname);
             if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
                 input.set_value(&link);
-                populate_list(rname, link).await;
+                let res = Resource::from_name(&rname);
+                populate_list(res, link).await;
             }
         }
     }
