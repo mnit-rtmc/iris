@@ -301,42 +301,41 @@ impl Card for CommConfig {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
-        let val = Self::new(json)?;
+    fn changed_fields(&self, doc: &Doc) -> String {
         let mut obj = Map::new();
         if let Some(desc) = doc.input_parse::<String>("edit_desc") {
-            if desc != val.description {
+            if desc != self.description {
                 obj.insert("description".to_string(), Value::String(desc));
             }
         }
         let protocol = doc.select_parse::<u32>("edit_protocol");
-        if protocol != val.protocol {
+        if protocol != self.protocol {
             obj.insert("protocol".to_string(), OptVal(protocol).into());
         }
         let modem = doc.input_bool("edit_modem");
-        if modem != val.modem {
+        if modem != self.modem {
             obj.insert("modem".to_string(), OptVal(modem).into());
         }
         let timeout_ms = doc.input_parse::<u32>("edit_timeout");
-        if timeout_ms != val.timeout_ms {
+        if timeout_ms != self.timeout_ms {
             obj.insert("timeout_ms".to_string(), OptVal(timeout_ms).into());
         }
         let poll_period_sec = doc.select_parse::<u32>("edit_poll");
-        if poll_period_sec != val.poll_period_sec {
+        if poll_period_sec != self.poll_period_sec {
             obj.insert(
                 "poll_period_sec".to_string(),
                 OptVal(poll_period_sec).into(),
             );
         }
         let long_poll_period_sec = doc.select_parse::<u32>("edit_long");
-        if long_poll_period_sec != val.long_poll_period_sec {
+        if long_poll_period_sec != self.long_poll_period_sec {
             obj.insert(
                 "long_poll_period_sec".to_string(),
                 OptVal(long_poll_period_sec).into(),
             );
         }
         let idle_disconnect_sec = doc.select_parse::<u32>("edit_idle");
-        if idle_disconnect_sec != val.idle_disconnect_sec {
+        if idle_disconnect_sec != self.idle_disconnect_sec {
             obj.insert(
                 "idle_disconnect_sec".to_string(),
                 OptVal(idle_disconnect_sec).into(),
@@ -344,12 +343,12 @@ impl Card for CommConfig {
         }
         let no_response_disconnect_sec =
             doc.select_parse::<u32>("edit_no_resp");
-        if no_response_disconnect_sec != val.no_response_disconnect_sec {
+        if no_response_disconnect_sec != self.no_response_disconnect_sec {
             obj.insert(
                 "no_response_disconnect_sec".to_string(),
                 OptVal(no_response_disconnect_sec).into(),
             );
         }
-        Ok(Value::Object(obj).to_string())
+        Value::Object(obj).to_string()
     }
 }

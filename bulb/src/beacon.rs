@@ -11,7 +11,6 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
-use crate::error::Result;
 use crate::resource::{
     disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
@@ -20,7 +19,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
 use std::fmt;
-use wasm_bindgen::JsValue;
 
 /// Beacon
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -158,31 +156,30 @@ impl Card for Beacon {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
-        let val = Self::new(json)?;
+    fn changed_fields(&self, doc: &Doc) -> String {
         let mut obj = Map::new();
         if let Some(message) = doc.text_area_parse::<String>("edit_msg") {
-            if message != val.message {
+            if message != self.message {
                 obj.insert("message".to_string(), Value::String(message));
             }
         }
         if let Some(notes) = doc.text_area_parse::<String>("edit_notes") {
-            if notes != val.notes {
+            if notes != self.notes {
                 obj.insert("notes".to_string(), Value::String(notes));
             }
         }
         let ctrl = doc.input_option_string("edit_ctrl");
-        if ctrl != val.controller {
+        if ctrl != self.controller {
             obj.insert("controller".to_string(), OptVal(ctrl).into());
         }
         let pin = doc.input_parse::<u32>("edit_pin");
-        if pin != val.pin {
+        if pin != self.pin {
             obj.insert("pin".to_string(), OptVal(pin).into());
         }
         let verify_pin = doc.input_parse::<u32>("edit_ver");
-        if verify_pin != val.verify_pin {
+        if verify_pin != self.verify_pin {
             obj.insert("verify_pin".to_string(), OptVal(verify_pin).into());
         }
-        Ok(Value::Object(obj).to_string())
+        Value::Object(obj).to_string()
     }
 }

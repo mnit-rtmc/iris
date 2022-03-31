@@ -247,21 +247,20 @@ impl Card for CommLink {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
-        let val = Self::new(json)?;
+    fn changed_fields(&self, doc: &Doc) -> String {
         let mut obj = Map::new();
         if let Some(desc) = doc.input_parse::<String>("edit_desc") {
-            if desc != val.description {
+            if desc != self.description {
                 obj.insert("description".to_string(), Value::String(desc));
             }
         }
         if let Some(uri) = doc.input_parse::<String>("edit_uri") {
-            if uri != val.uri {
+            if uri != self.uri {
                 obj.insert("uri".to_string(), Value::String(uri));
             }
         }
         if let Some(comm_config) = doc.select_parse::<String>("edit_config") {
-            if comm_config != val.comm_config {
+            if comm_config != self.comm_config {
                 obj.insert(
                     "comm_config".to_string(),
                     Value::String(comm_config),
@@ -269,13 +268,13 @@ impl Card for CommLink {
             }
         }
         if let Some(poll_enabled) = doc.input_bool("edit_enabled") {
-            if poll_enabled != val.poll_enabled {
+            if poll_enabled != self.poll_enabled {
                 obj.insert(
                     "poll_enabled".to_string(),
                     Value::Bool(poll_enabled),
                 );
             }
         }
-        Ok(Value::Object(obj).to_string())
+        Value::Object(obj).to_string()
     }
 }

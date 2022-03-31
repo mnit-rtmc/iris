@@ -11,7 +11,6 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
-use crate::error::Result;
 use crate::resource::{
     disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
@@ -24,7 +23,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
 use std::fmt;
-use wasm_bindgen::JsValue;
 
 /// Display Units
 type TempUnit = mag::temp::DegF;
@@ -471,30 +469,29 @@ impl Card for WeatherSensor {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
-        let val = Self::new(json)?;
+    fn changed_fields(&self, doc: &Doc) -> String {
         let mut obj = Map::new();
         let site_id = doc.input_parse::<String>("edit_site");
-        if site_id != val.site_id {
+        if site_id != self.site_id {
             obj.insert("site_id".to_string(), OptVal(site_id).into());
         }
         let alt_id = doc.input_parse::<String>("edit_alt");
-        if alt_id != val.alt_id {
+        if alt_id != self.alt_id {
             obj.insert("alt_id".to_string(), OptVal(alt_id).into());
         }
         if let Some(notes) = doc.text_area_parse::<String>("edit_notes") {
-            if notes != val.notes {
+            if notes != self.notes {
                 obj.insert("notes".to_string(), Value::String(notes));
             }
         }
         let ctrl = doc.input_option_string("edit_ctrl");
-        if ctrl != val.controller {
+        if ctrl != self.controller {
             obj.insert("controller".to_string(), OptVal(ctrl).into());
         }
         let pin = doc.input_parse::<u32>("edit_pin");
-        if pin != val.pin {
+        if pin != self.pin {
             obj.insert("pin".to_string(), OptVal(pin).into());
         }
-        Ok(Value::Object(obj).to_string())
+        Value::Object(obj).to_string()
     }
 }

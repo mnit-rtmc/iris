@@ -254,44 +254,43 @@ impl Card for GeoLoc {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
-        let pri = Self::new(json)?;
+    fn changed_fields(&self, doc: &Doc) -> String {
         let mut obj = Map::new();
-        let roadway = doc.input_option_string("edit_road");
-        if roadway != pri.roadway {
+        let roadway = doc.select_option_string("edit_road");
+        if roadway != self.roadway {
             obj.insert("roadway".to_string(), OptVal(roadway).into());
         }
         if let Some(road_dir) = doc.select_parse::<u16>("edit_rdir") {
-            if road_dir != pri.road_dir {
+            if road_dir != self.road_dir {
                 obj.insert("road_dir".to_string(), road_dir.into());
             }
         }
-        let cross_street = doc.input_option_string("edit_xstreet");
-        if cross_street != pri.cross_street {
+        let cross_street = doc.select_option_string("edit_xstreet");
+        if cross_street != self.cross_street {
             obj.insert("cross_street".to_string(), OptVal(cross_street).into());
         }
         if let Some(cross_mod) = doc.select_parse::<u16>("edit_mod") {
-            if cross_mod != pri.cross_mod {
+            if cross_mod != self.cross_mod {
                 obj.insert("cross_mod".to_string(), cross_mod.into());
             }
         }
         if let Some(cross_dir) = doc.select_parse::<u16>("edit_xdir") {
-            if cross_dir != pri.cross_dir {
+            if cross_dir != self.cross_dir {
                 obj.insert("cross_dir".to_string(), cross_dir.into());
             }
         }
         let landmark = doc.input_option_string("edit_lmark");
-        if landmark != pri.landmark {
+        if landmark != self.landmark {
             obj.insert("landmark".to_string(), OptVal(landmark).into());
         }
         let lat = doc.input_parse::<f64>("edit_lat");
-        if lat != pri.lat {
+        if lat != self.lat {
             obj.insert("lat".to_string(), OptVal(lat).into());
         }
         let lon = doc.input_parse::<f64>("edit_lon");
-        if lon != pri.lon {
+        if lon != self.lon {
             obj.insert("lon".to_string(), OptVal(lon).into());
         }
-        Ok(Value::Object(obj).to_string())
+        Value::Object(obj).to_string()
     }
 }

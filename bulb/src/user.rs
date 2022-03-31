@@ -147,23 +147,22 @@ impl Card for User {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
-        let val = Self::new(json)?;
+    fn changed_fields(&self, doc: &Doc) -> String {
         let mut obj = Map::new();
         if let Some(full_name) = doc.input_parse::<String>("edit_full") {
-            if full_name != val.full_name {
+            if full_name != self.full_name {
                 obj.insert("full_name".to_string(), Value::String(full_name));
             }
         }
-        let role = doc.input_option_string("edit_role");
-        if role != val.role {
+        let role = doc.select_option_string("edit_role");
+        if role != self.role {
             obj.insert("role".to_string(), OptVal(role).into());
         }
         if let Some(enabled) = doc.input_bool("edit_enabled") {
-            if enabled != val.enabled {
+            if enabled != self.enabled {
                 obj.insert("enabled".to_string(), Value::Bool(enabled));
             }
         }
-        Ok(Value::Object(obj).to_string())
+        Value::Object(obj).to_string()
     }
 }

@@ -468,30 +468,29 @@ impl Card for Controller {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
-        let val = Self::new(json)?;
+    fn changed_fields(&self, doc: &Doc) -> String {
         let mut obj = Map::new();
         let comm_link = doc.input_option_string("edit_link");
-        if comm_link != val.comm_link {
+        if comm_link != self.comm_link {
             obj.insert("comm_link".to_string(), OptVal(comm_link).into());
         }
         if let Some(drop_id) = doc.input_parse::<u16>("edit_drop") {
-            if drop_id != val.drop_id {
+            if drop_id != self.drop_id {
                 obj.insert(
                     "drop_id".to_string(),
                     Value::Number(drop_id.into()),
                 );
             }
         }
-        let cabinet_style = doc.input_option_string("edit_cabinet");
-        if cabinet_style != val.cabinet_style {
+        let cabinet_style = doc.select_option_string("edit_cabinet");
+        if cabinet_style != self.cabinet_style {
             obj.insert(
                 "cabinet_style".to_string(),
                 OptVal(cabinet_style).into(),
             );
         }
         if let Some(condition) = doc.select_parse::<u32>("edit_condition") {
-            if condition != val.condition {
+            if condition != self.condition {
                 obj.insert(
                     "condition".to_string(),
                     Value::Number(condition.into()),
@@ -499,14 +498,14 @@ impl Card for Controller {
             }
         }
         if let Some(notes) = doc.text_area_parse::<String>("edit_notes") {
-            if notes != val.notes {
+            if notes != self.notes {
                 obj.insert("notes".to_string(), Value::String(notes));
             }
         }
         let password = doc.input_option_string("edit_password");
-        if password != val.password {
+        if password != self.password {
             obj.insert("password".to_string(), OptVal(password).into());
         }
-        Ok(Value::Object(obj).to_string())
+        Value::Object(obj).to_string()
     }
 }

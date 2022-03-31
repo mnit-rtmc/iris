@@ -256,32 +256,31 @@ impl Card for Permission {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
-        let val = Self::new(json)?;
+    fn changed_fields(&self, doc: &Doc) -> String {
         let mut obj = Map::new();
         if let Some(role) = doc.select_parse::<String>("edit_role") {
-            if role != val.role {
+            if role != self.role {
                 obj.insert("role".to_string(), Value::String(role));
             }
         }
         if let Some(resource_n) = doc.select_parse::<String>("edit_resource") {
-            if resource_n != val.resource_n {
+            if resource_n != self.resource_n {
                 obj.insert("resource_n".to_string(), Value::String(resource_n));
             }
         }
         let batch = doc.input_option_string("edit_batch");
-        if batch != val.batch {
+        if batch != self.batch {
             obj.insert("batch".to_string(), OptVal(batch).into());
         }
         if let Some(access_n) = doc.select_parse::<u32>("edit_access") {
-            if access_n != val.access_n {
+            if access_n != self.access_n {
                 obj.insert(
                     "access_n".to_string(),
                     Value::Number(access_n.into()),
                 );
             }
         }
-        Ok(Value::Object(obj).to_string())
+        Value::Object(obj).to_string()
     }
 }
 

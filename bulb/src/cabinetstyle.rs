@@ -10,14 +10,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::Result;
 use crate::resource::{AncillaryData, Card, View};
 use crate::util::{ContainsLower, Doc, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
 use std::fmt;
-use wasm_bindgen::JsValue;
 
 /// Cabinet Style
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -114,29 +112,28 @@ impl Card for CabinetStyle {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
-        let val = Self::new(json)?;
+    fn changed_fields(&self, doc: &Doc) -> String {
         let mut obj = Map::new();
         let pin = doc.input_parse("edit_pp1");
-        if pin != val.police_panel_pin_1 {
+        if pin != self.police_panel_pin_1 {
             obj.insert("police_panel_pin_1".to_string(), OptVal(pin).into());
         }
         let pin = doc.input_parse("edit_pp2");
-        if pin != val.police_panel_pin_2 {
+        if pin != self.police_panel_pin_2 {
             obj.insert("police_panel_pin_2".to_string(), OptVal(pin).into());
         }
         let pin = doc.input_parse("edit_wr1");
-        if pin != val.watchdog_reset_pin_1 {
+        if pin != self.watchdog_reset_pin_1 {
             obj.insert("watchdog_reset_pin_1".to_string(), OptVal(pin).into());
         }
         let pin = doc.input_parse("edit_wr2");
-        if pin != val.watchdog_reset_pin_2 {
+        if pin != self.watchdog_reset_pin_2 {
             obj.insert("watchdog_reset_pin_2".to_string(), OptVal(pin).into());
         }
         let dip = doc.input_parse("edit_dip");
-        if dip != val.dip {
+        if dip != self.dip {
             obj.insert("dip".to_string(), OptVal(dip).into());
         }
-        Ok(Value::Object(obj).to_string())
+        Value::Object(obj).to_string()
     }
 }

@@ -10,14 +10,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::Result;
 use crate::resource::{disabled_attr, AncillaryData, Card, View};
 use crate::util::{ContainsLower, Doc, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
 use std::fmt;
-use wasm_bindgen::JsValue;
 
 /// Modem
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -107,26 +105,25 @@ impl Card for Modem {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
-        let val = Self::new(json)?;
+    fn changed_fields(&self, doc: &Doc) -> String {
         let mut obj = Map::new();
         let uri = doc.input_parse::<String>("edit_uri");
-        if uri != val.uri {
+        if uri != self.uri {
             obj.insert("uri".to_string(), OptVal(uri).into());
         }
         let config = doc.input_parse::<String>("edit_config");
-        if config != val.config {
+        if config != self.config {
             obj.insert("config".to_string(), OptVal(config).into());
         }
         let timeout_ms = doc.input_parse::<u32>("edit_timeout");
-        if timeout_ms != val.timeout_ms {
+        if timeout_ms != self.timeout_ms {
             obj.insert("timeout_ms".to_string(), OptVal(timeout_ms).into());
         }
         if let Some(enabled) = doc.input_bool("edit_enabled") {
-            if enabled != val.enabled {
+            if enabled != self.enabled {
                 obj.insert("enabled".to_string(), Value::Bool(enabled));
             }
         }
-        Ok(Value::Object(obj).to_string())
+        Value::Object(obj).to_string()
     }
 }

@@ -200,6 +200,11 @@ impl Doc {
             .ok()
     }
 
+    /// Get and parse an optional `select` element string
+    pub fn select_option_string(&self, id: &str) -> Option<String> {
+        self.select_parse::<String>(id).filter(|v| !v.is_empty())
+    }
+
     /// Get and parse an `input` element value
     pub fn input_parse<T: FromStr>(&self, id: &str) -> Option<T> {
         self.elem::<HtmlInputElement>(id)

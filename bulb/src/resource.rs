@@ -164,7 +164,7 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     fn to_html(&self, view: View, _anc: &Self::Ancillary) -> String;
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String>;
+    fn changed_fields(&self, doc: &Doc) -> String;
 }
 
 impl Resource {
@@ -347,34 +347,37 @@ impl Resource {
 
     /// Save changed fields on card
     pub async fn save(self, name: &str) -> Result<()> {
-        if let Some(doc) = Doc::get_opt() {
+        let changed = self.fetch_changed(name).await?;
+        if !changed.is_empty() {
             let uri = self.uri_name(name);
-            let json = fetch_get(&uri).await?;
-            let changed = self.changed_fields(&doc, &json)?;
             fetch_patch(&uri, &changed.into()).await?;
         }
         Ok(())
     }
 
-    /// Get changed fields from an edit view
-    fn changed_fields(self, doc: &Doc, json: &JsValue) -> Result<String> {
+    /// Fetch changed fields from an Edit view
+    async fn fetch_changed(self, name: &str) -> Result<String> {
         match self {
-            Self::Alarm => Alarm::changed_fields(doc, json),
-            Self::Beacon => Beacon::changed_fields(doc, json),
-            Self::CabinetStyle => CabinetStyle::changed_fields(doc, json),
-            Self::Camera => Camera::changed_fields(doc, json),
-            Self::CommConfig => CommConfig::changed_fields(doc, json),
-            Self::CommLink => CommLink::changed_fields(doc, json),
-            Self::Controller => Controller::changed_fields(doc, json),
-            Self::GeoLoc => GeoLoc::changed_fields(doc, json),
-            Self::LaneMarking => LaneMarking::changed_fields(doc, json),
-            Self::Modem => Modem::changed_fields(doc, json),
-            Self::Permission => Permission::changed_fields(doc, json),
-            Self::RampMeter => RampMeter::changed_fields(doc, json),
-            Self::Role => Role::changed_fields(doc, json),
-            Self::User => User::changed_fields(doc, json),
-            Self::WeatherSensor => WeatherSensor::changed_fields(doc, json),
-            Self::Unknown => Ok("".into()),
+            Self::Alarm => fetch_changed::<Alarm>(self, name).await,
+            Self::Beacon => fetch_changed::<Beacon>(self, name).await,
+            Self::CabinetStyle => {
+                fetch_changed::<CabinetStyle>(self, name).await
+            }
+            Self::Camera => fetch_changed::<Camera>(self, name).await,
+            Self::CommConfig => fetch_changed::<CommConfig>(self, name).await,
+            Self::CommLink => fetch_changed::<CommLink>(self, name).await,
+            Self::Controller => fetch_changed::<Controller>(self, name).await,
+            Self::GeoLoc => fetch_changed::<GeoLoc>(self, name).await,
+            Self::LaneMarking => fetch_changed::<LaneMarking>(self, name).await,
+            Self::Modem => fetch_changed::<Modem>(self, name).await,
+            Self::Permission => fetch_changed::<Permission>(self, name).await,
+            Self::RampMeter => fetch_changed::<RampMeter>(self, name).await,
+            Self::Role => fetch_changed::<Role>(self, name).await,
+            Self::User => fetch_changed::<User>(self, name).await,
+            Self::WeatherSensor => {
+                fetch_changed::<WeatherSensor>(self, name).await
+            }
+            _ => unreachable!(),
         }
     }
 
@@ -484,6 +487,16 @@ async fn fetch_ancillary<C: Card>(view: View, pri: &C) -> Result<C::Ancillary> {
         anc.set_json(view, pri, json)?;
     }
     Ok(anc)
+}
+
+/// Fetch changed fields from an Edit view
+async fn fetch_changed<C: Card>(res: Resource, name: &str) -> Result<String> {
+    if let Some(doc) = Doc::get_opt() {
+        let pri = res.fetch_primary::<C>(name).await?;
+        Ok(pri.changed_fields(&doc))
+    } else {
+        unreachable!()
+    }
 }
 
 /// Fetch a card view

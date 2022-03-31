@@ -10,14 +10,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::Result;
 use crate::resource::{disabled_attr, AncillaryData, Card, View};
 use crate::util::{ContainsLower, Doc};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
 use std::fmt;
-use wasm_bindgen::JsValue;
 
 /// Role
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -86,14 +84,13 @@ impl Card for Role {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
-        let val = Self::new(json)?;
+    fn changed_fields(&self, doc: &Doc) -> String {
         let mut obj = Map::new();
         if let Some(enabled) = doc.input_bool("edit_enabled") {
-            if enabled != val.enabled {
+            if enabled != self.enabled {
                 obj.insert("enabled".to_string(), Value::Bool(enabled));
             }
         }
-        Ok(Value::Object(obj).to_string())
+        Value::Object(obj).to_string()
     }
 }
