@@ -34,6 +34,10 @@ pub enum Error {
     #[error("Conflict")]
     FetchResponseConflict(),
 
+    /// Fetch response "Unprocessable Entity 422"
+    #[error("Unprocessable")]
+    FetchResponseUnprocessable(),
+
     /// Fetch response other error
     #[error("Status code {0}")]
     FetchResponseOther(u16),

@@ -79,6 +79,7 @@ fn resp_status(sc: u16) -> Result<()> {
         403 => Err(Error::FetchResponseForbidden()),
         404 => Err(Error::FetchResponseNotFound()),
         409 => Err(Error::FetchResponseConflict()),
+        422 => Err(Error::FetchResponseUnprocessable()),
         _ => Err(Error::FetchResponseOther(sc)),
     }
 }
