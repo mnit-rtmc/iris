@@ -26,7 +26,7 @@ use crate::permission::Permission;
 use crate::rampmeter::RampMeter;
 use crate::role::Role;
 use crate::user::User;
-use crate::util::{Dom, HtmlStr};
+use crate::util::{Doc, HtmlStr};
 use crate::weathersensor::WeatherSensor;
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::de::DeserializeOwned;
@@ -35,7 +35,6 @@ use serde_json::Value;
 use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
-use web_sys::Document;
 
 /// CSS class for titles
 const TITLE: &str = "title";
@@ -165,7 +164,7 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     fn to_html(&self, view: View, _anc: &Self::Ancillary) -> String;
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Document, json: &JsValue) -> Result<String>;
+    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String>;
 }
 
 impl Resource {
@@ -348,19 +347,17 @@ impl Resource {
 
     /// Save changed fields on card
     pub async fn save(self, name: &str) -> Result<()> {
-        if let Some(window) = web_sys::window() {
-            if let Some(doc) = window.document() {
-                let uri = self.uri_name(name);
-                let json = fetch_get(&uri).await?;
-                let changed = self.changed_fields(&doc, &json)?;
-                fetch_patch(&uri, &changed.into()).await?;
-            }
+        if let Some(doc) = Doc::get_opt() {
+            let uri = self.uri_name(name);
+            let json = fetch_get(&uri).await?;
+            let changed = self.changed_fields(&doc, &json)?;
+            fetch_patch(&uri, &changed.into()).await?;
         }
         Ok(())
     }
 
     /// Get changed fields from an edit view
-    fn changed_fields(self, doc: &Document, json: &JsValue) -> Result<String> {
+    fn changed_fields(self, doc: &Doc, json: &JsValue) -> Result<String> {
         match self {
             Self::Alarm => Alarm::changed_fields(doc, json),
             Self::Beacon => Beacon::changed_fields(doc, json),
@@ -383,22 +380,19 @@ impl Resource {
 
     /// Create a new object
     pub async fn create_and_post(self) -> Result<()> {
-        if let Some(window) = web_sys::window() {
-            if let Some(doc) = window.document() {
-                let value = match self {
-                    Resource::Permission => Permission::create_value(&doc)?,
-                    _ => self.create_value(&doc)?,
-                };
-                let json = value.into();
-                fetch_post(&format!("/iris/api/{}", self.rname()), &json)
-                    .await?;
-            }
+        if let Some(doc) = Doc::get_opt() {
+            let value = match self {
+                Resource::Permission => Permission::create_value(&doc)?,
+                _ => self.create_value(&doc)?,
+            };
+            let json = value.into();
+            fetch_post(&format!("/iris/api/{}", self.rname()), &json).await?;
         }
         Ok(())
     }
 
     /// Create a name value
-    fn create_value(self, doc: &Document) -> Result<String> {
+    fn create_value(self, doc: &Doc) -> Result<String> {
         if let Some(name) = doc.input_parse::<String>("create_name") {
             if !name.is_empty() {
                 let mut obj = Map::new();

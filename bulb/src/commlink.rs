@@ -16,14 +16,13 @@ use crate::error::Result;
 use crate::resource::{
     disabled_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
 };
-use crate::util::{ContainsLower, Dom, HtmlStr};
+use crate::util::{ContainsLower, Doc, HtmlStr};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
 use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
-use web_sys::Document;
 
 /// Comm link
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -248,7 +247,7 @@ impl Card for CommLink {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
+    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         let mut obj = Map::new();
         if let Some(desc) = doc.input_parse::<String>("edit_desc") {

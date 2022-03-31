@@ -168,33 +168,31 @@ impl fmt::Display for HtmlStr<&Option<String>> {
     }
 }
 
-/// Helper trait for DOM methods
-pub trait Dom {
+/// Wrapper for web_sys Document
+pub struct Doc(pub Document);
+
+impl Doc {
+    /// Get document
+    pub fn get_opt() -> Option<Self> {
+        if let Some(window) = web_sys::window() {
+            if let Some(doc) = window.document() {
+                return Some(Doc(doc));
+            }
+        }
+        None
+    }
+
     /// Get an element by ID and cast it
-    fn elem<E: JsCast>(&self, id: &str) -> JsResult<E>;
-
-    /// Get and parse a `select` element value
-    fn select_parse<T: FromStr>(&self, id: &str) -> Option<T>;
-
-    /// Get and parse an `input` element value
-    fn input_parse<T: FromStr>(&self, id: &str) -> Option<T>;
-
-    /// Get a boolean `input` element value
-    fn input_bool(&self, id: &str) -> Option<bool>;
-
-    /// Get and parse a `textarea` element value
-    fn text_area_parse<T: FromStr>(&self, id: &str) -> Option<T>;
-}
-
-impl Dom for Document {
-    fn elem<E: JsCast>(&self, id: &str) -> JsResult<E> {
+    pub fn elem<E: JsCast>(&self, id: &str) -> JsResult<E> {
         Ok(self
+            .0
             .get_element_by_id(id)
             .ok_or("Invalid element ID")?
             .dyn_into::<E>()?)
     }
 
-    fn select_parse<T: FromStr>(&self, id: &str) -> Option<T> {
+    /// Get and parse a `select` element value
+    pub fn select_parse<T: FromStr>(&self, id: &str) -> Option<T> {
         self.elem::<HtmlSelectElement>(id)
             .unwrap()
             .value()
@@ -202,7 +200,8 @@ impl Dom for Document {
             .ok()
     }
 
-    fn input_parse<T: FromStr>(&self, id: &str) -> Option<T> {
+    /// Get and parse an `input` element value
+    pub fn input_parse<T: FromStr>(&self, id: &str) -> Option<T> {
         self.elem::<HtmlInputElement>(id)
             .unwrap()
             .value()
@@ -210,11 +209,13 @@ impl Dom for Document {
             .ok()
     }
 
-    fn input_bool(&self, id: &str) -> Option<bool> {
+    /// Get a boolean `input` element value
+    pub fn input_bool(&self, id: &str) -> Option<bool> {
         Some(self.elem::<HtmlInputElement>(id).unwrap().checked())
     }
 
-    fn text_area_parse<T: FromStr>(&self, id: &str) -> Option<T> {
+    /// Get and parse a `textarea` element value
+    pub fn text_area_parse<T: FromStr>(&self, id: &str) -> Option<T> {
         self.elem::<HtmlTextAreaElement>(id)
             .unwrap()
             .value()

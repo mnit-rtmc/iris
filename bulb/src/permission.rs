@@ -13,14 +13,13 @@
 use crate::error::{Error, Result};
 use crate::resource::{AncillaryData, Card, Resource, View, NAME};
 use crate::role::Role;
-use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Doc, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
 use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
-use web_sys::Document;
 
 /// Permission
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -157,7 +156,7 @@ impl Permission {
     pub const RESOURCE_N: &'static str = "permission";
 
     /// Get value to create a new object
-    pub fn create_value(doc: &Document) -> Result<String> {
+    pub fn create_value(doc: &Doc) -> Result<String> {
         let role = doc.select_parse::<String>("edit_role");
         let resource_n = doc.select_parse::<String>("edit_resource");
         if let (Some(role), Some(resource_n)) = (role, resource_n) {
@@ -257,7 +256,7 @@ impl Card for Permission {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
+    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         let mut obj = Map::new();
         if let Some(role) = doc.select_parse::<String>("edit_role") {

@@ -15,13 +15,12 @@ use crate::error::Result;
 use crate::resource::{
     disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
-use crate::util::{ContainsLower, Dom, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Doc, HtmlStr, OptVal};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
 use std::fmt;
 use wasm_bindgen::JsValue;
-use web_sys::Document;
 
 /// Ramp Meter
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -128,7 +127,7 @@ impl Card for RampMeter {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
+    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         let mut obj = Map::new();
         let ctrl = doc

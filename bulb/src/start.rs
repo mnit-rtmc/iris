@@ -14,14 +14,14 @@ use crate::error::{Error, Result};
 use crate::fetch::{fetch_get, fetch_post};
 use crate::permission::{permissions_html, Permission};
 use crate::resource::{Resource, View};
-use crate::util::Dom;
+use crate::util::Doc;
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{
-    console, Document, Element, Event, HtmlButtonElement, HtmlElement,
-    HtmlInputElement, HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
+    console, Element, Event, HtmlButtonElement, HtmlElement, HtmlInputElement,
+    HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
     ScrollLogicalPosition, TransitionEvent, Window,
 };
 
@@ -141,13 +141,13 @@ async fn populate_list(res: Resource, search: String) {
         let mut state = rc.borrow_mut();
         state.selected_card.take()
     });
-    let window = web_sys::window().unwrap_throw();
-    let doc = window.document().unwrap_throw();
-    let sb_list = doc.elem::<Element>("sb_list").unwrap_throw();
-    match res.fetch_list(&search).await {
-        Ok(cards) => sb_list.set_inner_html(&cards),
-        Err(Error::FetchResponseUnauthorized()) => show_login(),
-        Err(e) => show_toast(&format!("View failed: {e}")),
+    if let Some(doc) = Doc::get_opt() {
+        let sb_list = doc.elem::<Element>("sb_list").unwrap_throw();
+        match res.fetch_list(&search).await {
+            Ok(cards) => sb_list.set_inner_html(&cards),
+            Err(Error::FetchResponseUnauthorized()) => show_login(),
+            Err(e) => show_toast(&format!("View failed: {e}")),
+        }
     }
 }
 
@@ -195,10 +195,12 @@ impl SelectedCard {
 
     /// Replace a card element with another card type
     async fn replace_card(mut self, v: View) {
-        let window = web_sys::window().unwrap_throw();
-        let doc = window.document().unwrap_throw();
         let id = self.id();
-        match doc.elem::<HtmlElement>(&id) {
+        let elem = match Doc::get_opt() {
+            Some(doc) => doc.elem::<HtmlElement>(&id),
+            None => return,
+        };
+        match elem {
             Ok(elem) => {
                 let res = self.res;
                 match res.fetch_card(&self.name, v).await {
@@ -325,10 +327,8 @@ fn show_toast(msg: &str) {
 
 /// Get element by ID
 fn get_element(id: &str) -> Option<HtmlElement> {
-    if let Some(window) = web_sys::window() {
-        if let Some(doc) = window.document() {
-            return doc.elem(id).ok();
-        }
+    if let Some(doc) = Doc::get_opt() {
+        return doc.elem(id).ok();
     }
     None
 }
@@ -368,6 +368,7 @@ pub async fn start() -> core::result::Result<(), JsError> {
 async fn add_sidebar() -> JsResult<()> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
+    let doc = Doc(doc);
     let sidebar: HtmlElement = doc.elem("sidebar")?;
     sidebar.set_inner_html(SIDEBAR);
     add_click_event_listener(&sidebar)?;
@@ -402,24 +403,24 @@ async fn fetch_access_list() -> Result<String> {
 
 /// Handle an event from "sb_resource" `select` element
 fn handle_sb_resource_ev(rname: String) {
-    let window = web_sys::window().unwrap_throw();
-    let doc = window.document().unwrap_throw();
-    if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
-        input.set_value("");
+    if let Some(doc) = Doc::get_opt() {
+        if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
+            input.set_value("");
+        }
+        let res = Resource::from_name(&rname);
+        spawn_local(populate_list(res, "".into()));
     }
-    let res = Resource::from_name(&rname);
-    spawn_local(populate_list(res, "".into()));
 }
 
 /// Search list using the value from "sb_search"
 fn search_list() {
-    let window = web_sys::window().unwrap_throw();
-    let doc = window.document().unwrap_throw();
-    if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
-        let search = input.value();
-        if let Some(rname) = doc.select_parse::<String>("sb_resource") {
-            let res = Resource::from_name(&rname);
-            spawn_local(populate_list(res, search));
+    if let Some(doc) = Doc::get_opt() {
+        if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
+            let search = input.value();
+            if let Some(rname) = doc.select_parse::<String>("sb_resource") {
+                let res = Resource::from_name(&rname);
+                spawn_local(populate_list(res, search));
+            }
         }
     }
 }
@@ -475,16 +476,18 @@ fn add_click_event_listener(elem: &Element) -> JsResult<()> {
 
 /// Handle a `click` event from a target element
 fn handle_click_ev(target: &Element) {
-    let window = web_sys::window().unwrap_throw();
-    let doc = window.document().unwrap_throw();
-    if target.is_instance_of::<HtmlButtonElement>() {
-        handle_button_click_ev(target);
-    } else if let Some(card) = target.closest(".card").unwrap_throw() {
-        if let Some(id) = card.get_attribute("id") {
-            if let Some(name) = card.get_attribute("name") {
-                if let Some(rname) = doc.select_parse::<String>("sb_resource") {
-                    let res = Resource::from_name(&rname);
-                    spawn_local(click_card(res, id, name));
+    if let Some(doc) = Doc::get_opt() {
+        if target.is_instance_of::<HtmlButtonElement>() {
+            handle_button_click_ev(target);
+        } else if let Some(card) = target.closest(".card").unwrap_throw() {
+            if let Some(id) = card.get_attribute("id") {
+                if let Some(name) = card.get_attribute("name") {
+                    if let Some(rname) =
+                        doc.select_parse::<String>("sb_resource")
+                    {
+                        let res = Resource::from_name(&rname);
+                        spawn_local(click_card(res, id, name));
+                    }
                 }
             }
         }
@@ -520,8 +523,6 @@ struct ButtonAttrs {
 
 /// Handle button click event with selected card
 async fn handle_button_card(attrs: ButtonAttrs, cs: SelectedCard) {
-    let window = web_sys::window().unwrap_throw();
-    let doc = window.document().unwrap_throw();
     match attrs.id.as_str() {
         "ob_close" => {
             let v = cs.view.compact();
@@ -537,7 +538,7 @@ async fn handle_button_card(attrs: ButtonAttrs, cs: SelectedCard) {
         "ob_save" => cs.save_changed().await,
         _ => {
             if attrs.class_name == "go_link" {
-                go_resource(&doc, attrs).await;
+                go_resource(attrs).await;
             } else {
                 console::log_1(
                     &format!("unknown button: {}", &attrs.id).into(),
@@ -551,6 +552,7 @@ async fn handle_button_card(attrs: ButtonAttrs, cs: SelectedCard) {
 async fn handle_login() {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
+    let doc = Doc(doc);
     if let (Some(user), Some(pass)) = (
         doc.input_parse::<String>("login_user"),
         doc.input_parse::<String>("login_pass"),
@@ -575,14 +577,18 @@ async fn handle_login() {
 }
 
 /// Go to resource from target's `data-link` attribute
-async fn go_resource(doc: &Document, attrs: ButtonAttrs) {
-    if let (Some(link), Some(rname)) = (attrs.data_link, attrs.data_type) {
-        if let Ok(sb_resource) = doc.elem::<HtmlSelectElement>("sb_resource") {
-            sb_resource.set_value(&rname);
-            if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
-                input.set_value(&link);
-                let res = Resource::from_name(&rname);
-                populate_list(res, link).await;
+async fn go_resource(attrs: ButtonAttrs) {
+    if let Some(doc) = Doc::get_opt() {
+        if let (Some(link), Some(rname)) = (attrs.data_link, attrs.data_type) {
+            if let Ok(sb_resource) =
+                doc.elem::<HtmlSelectElement>("sb_resource")
+            {
+                sb_resource.set_value(&rname);
+                if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
+                    input.set_value(&link);
+                    let res = Resource::from_name(&rname);
+                    populate_list(res, link).await;
+                }
             }
         }
     }

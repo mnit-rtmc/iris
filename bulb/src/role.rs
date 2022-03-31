@@ -12,13 +12,12 @@
 //
 use crate::error::Result;
 use crate::resource::{disabled_attr, AncillaryData, Card, View};
-use crate::util::{ContainsLower, Dom};
+use crate::util::{ContainsLower, Doc};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
 use std::fmt;
 use wasm_bindgen::JsValue;
-use web_sys::Document;
 
 /// Role
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -87,7 +86,7 @@ impl Card for Role {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(doc: &Document, json: &JsValue) -> Result<String> {
+    fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         let mut obj = Map::new();
         if let Some(enabled) = doc.input_bool("edit_enabled") {
