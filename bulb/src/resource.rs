@@ -393,12 +393,10 @@ impl Resource {
 
     /// Create a name value
     fn create_value(self, doc: &Doc) -> Result<String> {
-        if let Some(name) = doc.input_parse::<String>("create_name") {
-            if !name.is_empty() {
-                let mut obj = Map::new();
-                obj.insert("name".to_string(), Value::String(name));
-                return Ok(Value::Object(obj).to_string());
-            }
+        if let Some(name) = doc.input_option_string("create_name") {
+            let mut obj = Map::new();
+            obj.insert("name".to_string(), Value::String(name));
+            return Ok(Value::Object(obj).to_string());
         }
         Err(Error::NameMissing())
     }

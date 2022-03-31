@@ -171,9 +171,7 @@ impl Card for Beacon {
                 obj.insert("notes".to_string(), Value::String(notes));
             }
         }
-        let ctrl = doc
-            .input_parse::<String>("edit_ctrl")
-            .filter(|c| !c.is_empty());
+        let ctrl = doc.input_option_string("edit_ctrl");
         if ctrl != val.controller {
             obj.insert("controller".to_string(), OptVal(ctrl).into());
         }

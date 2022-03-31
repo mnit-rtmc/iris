@@ -471,9 +471,7 @@ impl Card for Controller {
     fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         let mut obj = Map::new();
-        let comm_link = doc
-            .input_parse::<String>("edit_link")
-            .filter(|cl| !cl.is_empty());
+        let comm_link = doc.input_option_string("edit_link");
         if comm_link != val.comm_link {
             obj.insert("comm_link".to_string(), OptVal(comm_link).into());
         }
@@ -485,9 +483,7 @@ impl Card for Controller {
                 );
             }
         }
-        let cabinet_style = doc
-            .select_parse::<String>("edit_cabinet")
-            .filter(|c| !c.is_empty());
+        let cabinet_style = doc.input_option_string("edit_cabinet");
         if cabinet_style != val.cabinet_style {
             obj.insert(
                 "cabinet_style".to_string(),
@@ -507,9 +503,7 @@ impl Card for Controller {
                 obj.insert("notes".to_string(), Value::String(notes));
             }
         }
-        let password = doc
-            .input_parse::<String>("edit_password")
-            .filter(|p| !p.is_empty());
+        let password = doc.input_option_string("edit_password");
         if password != val.password {
             obj.insert("password".to_string(), OptVal(password).into());
         }

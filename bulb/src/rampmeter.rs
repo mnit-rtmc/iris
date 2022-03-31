@@ -130,9 +130,7 @@ impl Card for RampMeter {
     fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
         let val = Self::new(json)?;
         let mut obj = Map::new();
-        let ctrl = doc
-            .input_parse::<String>("edit_ctrl")
-            .filter(|c| !c.is_empty());
+        let ctrl = doc.input_option_string("edit_ctrl");
         if ctrl != val.controller {
             obj.insert("controller".to_string(), OptVal(ctrl).into());
         }

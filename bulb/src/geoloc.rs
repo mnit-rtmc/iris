@@ -257,9 +257,7 @@ impl Card for GeoLoc {
     fn changed_fields(doc: &Doc, json: &JsValue) -> Result<String> {
         let pri = Self::new(json)?;
         let mut obj = Map::new();
-        let roadway = doc
-            .select_parse::<String>("edit_road")
-            .filter(|r| !r.is_empty());
+        let roadway = doc.input_option_string("edit_road");
         if roadway != pri.roadway {
             obj.insert("roadway".to_string(), OptVal(roadway).into());
         }
@@ -268,9 +266,7 @@ impl Card for GeoLoc {
                 obj.insert("road_dir".to_string(), road_dir.into());
             }
         }
-        let cross_street = doc
-            .select_parse::<String>("edit_xstreet")
-            .filter(|r| !r.is_empty());
+        let cross_street = doc.input_option_string("edit_xstreet");
         if cross_street != pri.cross_street {
             obj.insert("cross_street".to_string(), OptVal(cross_street).into());
         }
@@ -284,9 +280,7 @@ impl Card for GeoLoc {
                 obj.insert("cross_dir".to_string(), cross_dir.into());
             }
         }
-        let landmark = doc
-            .input_parse::<String>("edit_lmark")
-            .filter(|m| !m.is_empty());
+        let landmark = doc.input_option_string("edit_lmark");
         if landmark != pri.landmark {
             obj.insert("landmark".to_string(), OptVal(landmark).into());
         }

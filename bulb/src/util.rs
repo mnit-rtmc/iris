@@ -209,6 +209,11 @@ impl Doc {
             .ok()
     }
 
+    /// Get and parse an optional `input` element string
+    pub fn input_option_string(&self, id: &str) -> Option<String> {
+        self.input_parse::<String>(id).filter(|v| !v.is_empty())
+    }
+
     /// Get a boolean `input` element value
     pub fn input_bool(&self, id: &str) -> Option<bool> {
         Some(self.elem::<HtmlInputElement>(id).unwrap().checked())

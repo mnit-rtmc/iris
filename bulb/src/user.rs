@@ -155,9 +155,7 @@ impl Card for User {
                 obj.insert("full_name".to_string(), Value::String(full_name));
             }
         }
-        let role = doc
-            .select_parse::<String>("edit_role")
-            .filter(|r| !r.is_empty());
+        let role = doc.input_option_string("edit_role");
         if role != val.role {
             obj.insert("role".to_string(), OptVal(role).into());
         }

@@ -269,9 +269,7 @@ impl Card for Permission {
                 obj.insert("resource_n".to_string(), Value::String(resource_n));
             }
         }
-        let batch = doc
-            .input_parse::<String>("edit_batch")
-            .filter(|b| !b.is_empty());
+        let batch = doc.input_option_string("edit_batch");
         if batch != val.batch {
             obj.insert("batch".to_string(), OptVal(batch).into());
         }

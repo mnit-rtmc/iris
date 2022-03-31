@@ -141,9 +141,7 @@ impl Card for Camera {
         if cam_num != val.cam_num {
             obj.insert("cam_num".to_string(), OptVal(cam_num).into());
         }
-        let ctrl = doc
-            .input_parse::<String>("edit_ctrl")
-            .filter(|c| !c.is_empty());
+        let ctrl = doc.input_option_string("edit_ctrl");
         if ctrl != val.controller {
             obj.insert("controller".to_string(), OptVal(ctrl).into());
         }

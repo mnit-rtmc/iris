@@ -160,9 +160,7 @@ impl Card for Alarm {
                 obj.insert("description".to_string(), Value::String(desc));
             }
         }
-        let ctrl = doc
-            .input_parse::<String>("edit_ctrl")
-            .filter(|c| !c.is_empty());
+        let ctrl = doc.input_option_string("edit_ctrl");
         if ctrl != val.controller {
             obj.insert("controller".to_string(), OptVal(ctrl).into());
         }
