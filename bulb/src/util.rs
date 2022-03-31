@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::start::JsResult;
+use serde_json::map::Map;
 use serde_json::{Number, Value};
 use std::fmt;
 use std::str::FromStr;
@@ -200,11 +201,6 @@ impl Doc {
             .ok()
     }
 
-    /// Get and parse an optional `select` element string
-    pub fn select_option_string(&self, id: &str) -> Option<String> {
-        self.select_parse::<String>(id).filter(|v| !v.is_empty())
-    }
-
     /// Get and parse an `input` element value
     pub fn input_parse<T: FromStr>(&self, id: &str) -> Option<T> {
         self.elem::<HtmlInputElement>(id)
@@ -231,6 +227,171 @@ impl Doc {
             .value()
             .parse()
             .ok()
+    }
+}
+
+/// Mapping of fields on an Edit view
+pub struct Fields {
+    doc: Doc,
+    obj: Map<String, Value>,
+}
+
+/// Check if an `input` element field has changed
+pub trait Input<T> {
+    /// Check an `input` element
+    fn changed_input(&mut self, id: &str, val: T);
+}
+
+/// Check if a `textarea` element field has changed
+pub trait TextArea<T> {
+    /// Check a `textarea` element
+    fn changed_text_area(&mut self, id: &str, val: T);
+}
+
+/// Check if a `select` element field has changed
+pub trait Select<T> {
+    /// Check a `select` element
+    fn changed_select(&mut self, id: &str, val: T);
+}
+
+impl Fields {
+    /// Create a new fields mapping
+    pub fn new() -> Self {
+        let doc = Doc::get_opt().unwrap();
+        let obj = Map::default();
+        Fields { doc, obj }
+    }
+
+    /// Convert fields into a JSON value
+    pub fn into_value(self) -> Value {
+        Value::Object(self.obj)
+    }
+}
+
+impl Input<&String> for Fields {
+    fn changed_input(&mut self, id: &str, val: &String) {
+        if let Some(parsed) = self.doc.input_parse::<String>(id) {
+            if &parsed != val {
+                self.obj.insert(id.to_string(), Value::String(parsed));
+            }
+        }
+    }
+}
+
+impl Input<&Option<String>> for Fields {
+    fn changed_input(&mut self, id: &str, val: &Option<String>) {
+        let parsed = self.doc.input_option_string(id);
+        if parsed.as_deref() != val.as_deref() {
+            self.obj.insert(id.to_string(), OptVal(parsed).into());
+        }
+    }
+}
+
+impl Input<u16> for Fields {
+    fn changed_input(&mut self, id: &str, val: u16) {
+        if let Some(parsed) = self.doc.input_parse::<u16>(id) {
+            if parsed != val {
+                self.obj
+                    .insert(id.to_string(), Value::Number(parsed.into()));
+            }
+        }
+    }
+}
+
+impl Input<bool> for Fields {
+    fn changed_input(&mut self, id: &str, val: bool) {
+        if let Some(parsed) = self.doc.input_bool(id) {
+            if parsed != val {
+                self.obj.insert(id.to_string(), Value::Bool(parsed));
+            }
+        }
+    }
+}
+
+impl Input<Option<bool>> for Fields {
+    fn changed_input(&mut self, id: &str, val: Option<bool>) {
+        let parsed = self.doc.input_bool(id);
+        if parsed != val {
+            self.obj.insert(id.to_string(), OptVal(parsed).into());
+        }
+    }
+}
+
+impl Input<Option<u32>> for Fields {
+    fn changed_input(&mut self, id: &str, val: Option<u32>) {
+        let parsed = self.doc.input_parse::<u32>(id);
+        if parsed != val {
+            self.obj.insert(id.to_string(), OptVal(parsed).into());
+        }
+    }
+}
+
+impl Input<Option<f64>> for Fields {
+    fn changed_input(&mut self, id: &str, val: Option<f64>) {
+        let parsed = self.doc.input_parse::<f64>(id);
+        if parsed != val {
+            self.obj.insert(id.to_string(), OptVal(parsed).into());
+        }
+    }
+}
+
+impl TextArea<&String> for Fields {
+    fn changed_text_area(&mut self, id: &str, val: &String) {
+        if let Some(parsed) = self.doc.text_area_parse::<String>(id) {
+            if &parsed != val {
+                self.obj.insert(id.to_string(), Value::String(parsed));
+            }
+        }
+    }
+}
+
+impl Select<&String> for Fields {
+    fn changed_select(&mut self, id: &str, val: &String) {
+        if let Some(parsed) = self.doc.select_parse::<String>(id) {
+            if &parsed != val {
+                self.obj.insert(id.to_string(), Value::String(parsed));
+            }
+        }
+    }
+}
+
+impl Select<&Option<String>> for Fields {
+    fn changed_select(&mut self, id: &str, val: &Option<String>) {
+        let parsed = self.doc.select_parse::<String>(id);
+        if &parsed != val {
+            self.obj.insert(id.to_string(), OptVal(parsed).into());
+        }
+    }
+}
+
+impl Select<u16> for Fields {
+    fn changed_select(&mut self, id: &str, val: u16) {
+        if let Some(parsed) = self.doc.select_parse::<u16>(id) {
+            if parsed != val {
+                self.obj
+                    .insert(id.to_string(), Value::Number(parsed.into()));
+            }
+        }
+    }
+}
+
+impl Select<u32> for Fields {
+    fn changed_select(&mut self, id: &str, val: u32) {
+        if let Some(parsed) = self.doc.select_parse::<u32>(id) {
+            if parsed != val {
+                self.obj
+                    .insert(id.to_string(), Value::Number(parsed.into()));
+            }
+        }
+    }
+}
+
+impl Select<Option<u32>> for Fields {
+    fn changed_select(&mut self, id: &str, val: Option<u32>) {
+        let parsed = self.doc.select_parse::<u32>(id);
+        if parsed != val {
+            self.obj.insert(id.to_string(), OptVal(parsed).into());
+        }
     }
 }
 

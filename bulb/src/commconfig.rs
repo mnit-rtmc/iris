@@ -12,10 +12,8 @@
 //
 use crate::error::Result;
 use crate::resource::{AncillaryData, Card, View, NAME};
-use crate::util::{ContainsLower, Doc, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
 use serde::{Deserialize, Serialize};
-use serde_json::map::Map;
-use serde_json::Value;
 use std::borrow::Cow;
 use std::fmt;
 use wasm_bindgen::JsValue;
@@ -125,6 +123,7 @@ pub struct Protocol {
 pub struct CommConfig {
     pub name: String,
     pub description: String,
+    // full attributes
     pub protocol: Option<u32>,
     pub modem: Option<bool>,
     pub timeout_ms: Option<u32>,
@@ -168,7 +167,7 @@ impl CommConfigAnc {
     /// Create an HTML `select` element of comm protocols
     fn protocols_html(&self, pri: &CommConfig) -> String {
         let mut html = String::new();
-        html.push_str("<select id='edit_protocol'>");
+        html.push_str("<select id='protocol'>");
         if let Some(protocols) = &self.protocols {
             for protocol in protocols {
                 html.push_str("<option value='");
@@ -219,38 +218,38 @@ impl CommConfig {
             period_options(PERIODS, self.no_response_disconnect_sec);
         format!(
             "<div class='row'>\
-              <label for='edit_desc'>Description</label>\
-              <input id='edit_desc' maxlength='20' size='20' \
+              <label for='description'>Description</label>\
+              <input id='description' maxlength='20' size='20' \
                      value='{description}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_protocol'>Protocol</label>\
+              <label for='protocol'>Protocol</label>\
               {protocols}\
             </div>\
             <div class='row'>\
-              <label for='edit_modem'>Modem</label>\
-              <input id='edit_modem' type='checkbox'{modem}/>\
+              <label for='modem'>Modem</label>\
+              <input id='modem' type='checkbox'{modem}/>\
             </div>\
             <div class='row'>\
-              <label for='edit_timeout'>Timeout (ms)</label>\
-              <input id='edit_timeout' type='number' min='0' size='8' \
+              <label for='timeout_ms'>Timeout (ms)</label>\
+              <input id='timeout_ms' type='number' min='0' size='8' \
                      max='20000' step='50' value='{timeout_ms}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_poll'>Poll Period</label>\
-              <select id='edit_poll'>{poll_periods}</select>\
+              <label for='poll_period_sec'>Poll Period</label>\
+              <select id='poll_period_sec'>{poll_periods}</select>\
             </div>\
             <div class='row'>\
-              <label for='edit_long'>Long Poll Period</label>\
-              <select id='edit_long'>{long_periods}</select>\
+              <label for='long_poll_period_sec'>Long Poll Period</label>\
+              <select id='long_poll_period_sec'>{long_periods}</select>\
             </div>\
             <div class='row'>\
-              <label for='edit_idle'>Idle Disconnect</label>\
-              <select id='edit_idle'>{idle_periods}</select>\
+              <label for='idle_disconnect_sec'>Idle Disconnect</label>\
+              <select id='idle_disconnect_sec'>{idle_periods}</select>\
             </div>\
             <div class='row'>\
-              <label for='edit_no_resp'>No Response Disconnect</label>\
-              <select id='edit_no_resp'>{no_resp_periods}</select>\
+              <label for='no_response_disconnect_sec'>No Response Disconnect</label>\
+              <select id='no_response_disconnect_sec'>{no_resp_periods}</select>\
             </div>"
         )
     }
@@ -301,54 +300,20 @@ impl Card for CommConfig {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(&self, doc: &Doc) -> String {
-        let mut obj = Map::new();
-        if let Some(desc) = doc.input_parse::<String>("edit_desc") {
-            if desc != self.description {
-                obj.insert("description".to_string(), Value::String(desc));
-            }
-        }
-        let protocol = doc.select_parse::<u32>("edit_protocol");
-        if protocol != self.protocol {
-            obj.insert("protocol".to_string(), OptVal(protocol).into());
-        }
-        let modem = doc.input_bool("edit_modem");
-        if modem != self.modem {
-            obj.insert("modem".to_string(), OptVal(modem).into());
-        }
-        let timeout_ms = doc.input_parse::<u32>("edit_timeout");
-        if timeout_ms != self.timeout_ms {
-            obj.insert("timeout_ms".to_string(), OptVal(timeout_ms).into());
-        }
-        let poll_period_sec = doc.select_parse::<u32>("edit_poll");
-        if poll_period_sec != self.poll_period_sec {
-            obj.insert(
-                "poll_period_sec".to_string(),
-                OptVal(poll_period_sec).into(),
-            );
-        }
-        let long_poll_period_sec = doc.select_parse::<u32>("edit_long");
-        if long_poll_period_sec != self.long_poll_period_sec {
-            obj.insert(
-                "long_poll_period_sec".to_string(),
-                OptVal(long_poll_period_sec).into(),
-            );
-        }
-        let idle_disconnect_sec = doc.select_parse::<u32>("edit_idle");
-        if idle_disconnect_sec != self.idle_disconnect_sec {
-            obj.insert(
-                "idle_disconnect_sec".to_string(),
-                OptVal(idle_disconnect_sec).into(),
-            );
-        }
-        let no_response_disconnect_sec =
-            doc.select_parse::<u32>("edit_no_resp");
-        if no_response_disconnect_sec != self.no_response_disconnect_sec {
-            obj.insert(
-                "no_response_disconnect_sec".to_string(),
-                OptVal(no_response_disconnect_sec).into(),
-            );
-        }
-        Value::Object(obj).to_string()
+    fn changed_fields(&self) -> String {
+        let mut fields = Fields::new();
+        fields.changed_input("description", &self.description);
+        fields.changed_select("protocol", self.protocol);
+        fields.changed_input("modem", self.modem);
+        fields.changed_input("timeout_ms", self.timeout_ms);
+        fields.changed_select("poll_period_sec", self.poll_period_sec);
+        fields
+            .changed_select("long_poll_period_sec", self.long_poll_period_sec);
+        fields.changed_select("idle_disconnect_sec", self.idle_disconnect_sec);
+        fields.changed_select(
+            "no_response_disconnect_sec",
+            self.no_response_disconnect_sec,
+        );
+        fields.into_value().to_string()
     }
 }

@@ -14,10 +14,8 @@ use crate::device::{Device, DeviceAnc};
 use crate::resource::{
     disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
-use crate::util::{ContainsLower, Doc, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
-use serde_json::map::Map;
-use serde_json::Value;
 use std::fmt;
 
 /// Ramp Meter
@@ -68,13 +66,13 @@ impl RampMeter {
         let pin = OptVal(self.pin);
         format!(
             "<div class='row'>\
-               <label for='edit_ctrl'>Controller</label>\
-               <input id='edit_ctrl' maxlength='20' size='20' \
+               <label for='controller'>Controller</label>\
+               <input id='controller' maxlength='20' size='20' \
                       value='{controller}'/>\
              </div>\
              <div class='row'>\
-               <label for='edit_pin'>Pin</label>\
-               <input id='edit_pin' type='number' min='1' max='104' \
+               <label for='pin'>Pin</label>\
+               <input id='pin' type='number' min='1' max='104' \
                       size='8' value='{pin}'/>\
              </div>"
         )
@@ -125,16 +123,10 @@ impl Card for RampMeter {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(&self, doc: &Doc) -> String {
-        let mut obj = Map::new();
-        let ctrl = doc.input_option_string("edit_ctrl");
-        if ctrl != self.controller {
-            obj.insert("controller".to_string(), OptVal(ctrl).into());
-        }
-        let pin = doc.input_parse::<u32>("edit_pin");
-        if pin != self.pin {
-            obj.insert("pin".to_string(), OptVal(pin).into());
-        }
-        Value::Object(obj).to_string()
+    fn changed_fields(&self) -> String {
+        let mut fields = Fields::new();
+        fields.changed_input("controller", &self.controller);
+        fields.changed_input("pin", self.pin);
+        fields.into_value().to_string()
     }
 }

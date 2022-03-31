@@ -14,10 +14,8 @@ use crate::device::{Device, DeviceAnc};
 use crate::resource::{
     disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
-use crate::util::{ContainsLower, Doc, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use serde::{Deserialize, Serialize};
-use serde_json::map::Map;
-use serde_json::Value;
 use std::fmt;
 
 /// Lane Marking
@@ -71,18 +69,18 @@ impl LaneMarking {
         let pin = OptVal(self.pin);
         format!(
             "<div class='row'>\
-              <label for='edit_notes'>Notes</label>\
-              <textarea id='edit_notes' maxlength='128' rows='2' \
+              <label for='notes'>Notes</label>\
+              <textarea id='notes' maxlength='128' rows='2' \
                         cols='24'>{notes}</textarea>\
             </div>\
             <div class='row'>\
-              <label for='edit_ctrl'>Controller</label>\
-              <input id='edit_ctrl' maxlength='20' size='20' \
+              <label for='controller'>Controller</label>\
+              <input id='controller' maxlength='20' size='20' \
                      value='{controller}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_pin'>Pin</label>\
-              <input id='edit_pin' type='number' min='1' max='104' \
+              <label for='pin'>Pin</label>\
+              <input id='pin' type='number' min='1' max='104' \
                      size='8' value='{pin}'/>\
             </div>"
         )
@@ -135,21 +133,11 @@ impl Card for LaneMarking {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(&self, doc: &Doc) -> String {
-        let mut obj = Map::new();
-        if let Some(notes) = doc.text_area_parse::<String>("edit_notes") {
-            if notes != self.notes {
-                obj.insert("notes".to_string(), Value::String(notes));
-            }
-        }
-        let ctrl = doc.input_option_string("edit_ctrl");
-        if ctrl != self.controller {
-            obj.insert("controller".to_string(), OptVal(ctrl).into());
-        }
-        let pin = doc.input_parse::<u32>("edit_pin");
-        if pin != self.pin {
-            obj.insert("pin".to_string(), OptVal(pin).into());
-        }
-        Value::Object(obj).to_string()
+    fn changed_fields(&self) -> String {
+        let mut fields = Fields::new();
+        fields.changed_text_area("notes", &self.notes);
+        fields.changed_input("controller", &self.controller);
+        fields.changed_input("pin", self.pin);
+        fields.into_value().to_string()
     }
 }

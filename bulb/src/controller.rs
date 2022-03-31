@@ -18,10 +18,8 @@ use crate::resource::{
     disabled_attr, AncillaryData, Card, Resource, View, EDIT_BUTTON,
     LOC_BUTTON, NAME,
 };
-use crate::util::{ContainsLower, Doc, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select, TextArea};
 use serde::{Deserialize, Serialize};
-use serde_json::map::Map;
-use serde_json::Value;
 use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
@@ -53,6 +51,7 @@ pub struct Controller {
     pub notes: String,
     pub version: Option<String>,
     pub fail_time: Option<String>,
+    // full attributes
     pub geo_loc: Option<String>,
     pub password: Option<String>,
 }
@@ -152,7 +151,7 @@ impl ControllerAnc {
     /// Create an HTML `select` element of controller conditions
     fn conditions_html(&self, pri: &Controller) -> String {
         let mut html = String::new();
-        html.push_str("<select id='edit_condition'>");
+        html.push_str("<select id='condition'>");
         if let Some(conditions) = &self.conditions {
             for condition in conditions {
                 html.push_str("<option value='");
@@ -173,7 +172,7 @@ impl ControllerAnc {
     /// Create an HTML `select` element of cabinet styles
     fn cabinet_styles_html(&self, pri: &Controller) -> String {
         let mut html = String::new();
-        html.push_str("<select id='edit_cabinet'>");
+        html.push_str("<select id='cabinet_style'>");
         html.push_str("<option></option>");
         if let Some(cabinet_styles) = &self.cabinet_styles {
             for cabinet_style in cabinet_styles {
@@ -385,31 +384,31 @@ impl Controller {
         let password = HtmlStr::new(&self.password);
         format!(
             "<div class='row'>\
-              <label for='edit_link'>Comm Link</label>\
-              <input id='edit_link' maxlength='20' size='20' \
+              <label for='comm_link'>Comm Link</label>\
+              <input id='comm_link' maxlength='20' size='20' \
                      value='{comm_link}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_drop'>Drop ID</label>\
-              <input id='edit_drop' type='number' min='0'
+              <label for='drop_id'>Drop ID</label>\
+              <input id='drop_id' type='number' min='0'
                      max='65535' size='6' value='{drop_id}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_cabinet'>Cabinet Style</label>\
+              <label for='cabinet_style'>Cabinet Style</label>\
               {cabinet_styles}
             </div>\
             <div class='row'>\
-              <label for='edit_condition'>Condition</label>\
+              <label for='condition'>Condition</label>\
               {conditions}\
             </div>\
             <div class='row'>\
-              <label for='edit_notes'>Notes</label>\
-              <textarea id='edit_notes' maxlength='128' rows='2' \
+              <label for='notes'>Notes</label>\
+              <textarea id='notes' maxlength='128' rows='2' \
                         cols='26'>{notes}</textarea>\
             </div>\
             <div class='row'>\
-              <label for='edit_password'>Password</label>\
-              <input id='edit_password' maxlength='32' size='26' \
+              <label for='password'>Password</label>\
+              <input id='password' maxlength='32' size='26' \
                      value='{password}'/>\
             </div>"
         )
@@ -468,44 +467,14 @@ impl Card for Controller {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(&self, doc: &Doc) -> String {
-        let mut obj = Map::new();
-        let comm_link = doc.input_option_string("edit_link");
-        if comm_link != self.comm_link {
-            obj.insert("comm_link".to_string(), OptVal(comm_link).into());
-        }
-        if let Some(drop_id) = doc.input_parse::<u16>("edit_drop") {
-            if drop_id != self.drop_id {
-                obj.insert(
-                    "drop_id".to_string(),
-                    Value::Number(drop_id.into()),
-                );
-            }
-        }
-        let cabinet_style = doc.select_option_string("edit_cabinet");
-        if cabinet_style != self.cabinet_style {
-            obj.insert(
-                "cabinet_style".to_string(),
-                OptVal(cabinet_style).into(),
-            );
-        }
-        if let Some(condition) = doc.select_parse::<u32>("edit_condition") {
-            if condition != self.condition {
-                obj.insert(
-                    "condition".to_string(),
-                    Value::Number(condition.into()),
-                );
-            }
-        }
-        if let Some(notes) = doc.text_area_parse::<String>("edit_notes") {
-            if notes != self.notes {
-                obj.insert("notes".to_string(), Value::String(notes));
-            }
-        }
-        let password = doc.input_option_string("edit_password");
-        if password != self.password {
-            obj.insert("password".to_string(), OptVal(password).into());
-        }
-        Value::Object(obj).to_string()
+    fn changed_fields(&self) -> String {
+        let mut fields = Fields::new();
+        fields.changed_input("comm_link", &self.comm_link);
+        fields.changed_input("drop_id", self.drop_id);
+        fields.changed_select("cabinet_style", &self.cabinet_style);
+        fields.changed_select("condition", self.condition);
+        fields.changed_text_area("notes", &self.notes);
+        fields.changed_input("password", &self.password);
+        fields.into_value().to_string()
     }
 }

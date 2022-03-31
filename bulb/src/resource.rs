@@ -164,7 +164,7 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     fn to_html(&self, view: View, _anc: &Self::Ancillary) -> String;
 
     /// Get changed fields from Edit form
-    fn changed_fields(&self, doc: &Doc) -> String;
+    fn changed_fields(&self) -> String;
 }
 
 impl Resource {
@@ -273,7 +273,7 @@ impl Resource {
             Self::WeatherSensor => {
                 fetch_list::<WeatherSensor>(self, search).await
             }
-            _ => unreachable!(),
+            _ => Ok("".into()),
         }
     }
 
@@ -491,12 +491,8 @@ async fn fetch_ancillary<C: Card>(view: View, pri: &C) -> Result<C::Ancillary> {
 
 /// Fetch changed fields from an Edit view
 async fn fetch_changed<C: Card>(res: Resource, name: &str) -> Result<String> {
-    if let Some(doc) = Doc::get_opt() {
-        let pri = res.fetch_primary::<C>(name).await?;
-        Ok(pri.changed_fields(&doc))
-    } else {
-        unreachable!()
-    }
+    let pri = res.fetch_primary::<C>(name).await?;
+    Ok(pri.changed_fields())
 }
 
 /// Fetch a card view

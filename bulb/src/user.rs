@@ -13,10 +13,8 @@
 use crate::error::Result;
 use crate::resource::{disabled_attr, AncillaryData, Card, View};
 use crate::role::Role;
-use crate::util::{ContainsLower, Doc, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input};
 use serde::{Deserialize, Serialize};
-use serde_json::map::Map;
-use serde_json::Value;
 use std::borrow::Cow;
 use std::fmt;
 use wasm_bindgen::JsValue;
@@ -64,7 +62,7 @@ impl UserAnc {
     /// Create an HTML `select` element of roles
     fn roles_html(&self, pri: &User) -> String {
         let mut html = String::new();
-        html.push_str("<select id='edit_role'>");
+        html.push_str("<select id='role'>");
         html.push_str("<option></option>");
         if let Some(roles) = &self.roles {
             for role in roles {
@@ -98,17 +96,17 @@ impl User {
         let enabled = if self.enabled { " checked" } else { "" };
         format!(
             "<div class='row'>\
-               <label for='edit_full'>Full Name</label>\
-               <input id='edit_full' maxlength='31' size='20' \
+               <label for='full_name'>Full Name</label>\
+               <input id='full_name' maxlength='31' size='20' \
                       value='{full_name}'/>\
             </div>\
             <div class='row'>\
-               <label for='edit_role'>Role</label>\
+               <label for='role'>Role</label>\
                {role}\
             </div>\
             <div class='row'>\
-              <label for='edit_enabled'>Enabled</label>\
-              <input id='edit_enabled' type='checkbox'{enabled}/>\
+              <label for='enabled'>Enabled</label>\
+              <input id='enabled' type='checkbox'{enabled}/>\
             </div>"
         )
     }
@@ -147,22 +145,11 @@ impl Card for User {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(&self, doc: &Doc) -> String {
-        let mut obj = Map::new();
-        if let Some(full_name) = doc.input_parse::<String>("edit_full") {
-            if full_name != self.full_name {
-                obj.insert("full_name".to_string(), Value::String(full_name));
-            }
-        }
-        let role = doc.select_option_string("edit_role");
-        if role != self.role {
-            obj.insert("role".to_string(), OptVal(role).into());
-        }
-        if let Some(enabled) = doc.input_bool("edit_enabled") {
-            if enabled != self.enabled {
-                obj.insert("enabled".to_string(), Value::Bool(enabled));
-            }
-        }
-        Value::Object(obj).to_string()
+    fn changed_fields(&self) -> String {
+        let mut fields = Fields::new();
+        fields.changed_input("full_name", &self.full_name);
+        fields.changed_input("role", &self.role);
+        fields.changed_input("enabled", self.enabled);
+        fields.into_value().to_string()
     }
 }

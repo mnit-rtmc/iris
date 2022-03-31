@@ -11,10 +11,8 @@
 // GNU General Public License for more details.
 //
 use crate::resource::{disabled_attr, AncillaryData, Card, View};
-use crate::util::{ContainsLower, Doc, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
-use serde_json::map::Map;
-use serde_json::Value;
 use std::fmt;
 
 /// Modem
@@ -52,23 +50,23 @@ impl Modem {
         let enabled = if self.enabled { " checked" } else { "" };
         format!(
             "<div class='row'>\
-              <label for='edit_uri'>URI</label>\
-              <input id='edit_uri' maxlength='64' size='30' \
+              <label for='uri'>URI</label>\
+              <input id='uri' maxlength='64' size='30' \
                      value='{uri}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_config'>Config</label>\
-              <input id='edit_config' maxlength='64' size='28' \
+              <label for='config'>Config</label>\
+              <input id='config' maxlength='64' size='28' \
                      value='{config}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_timeout'>Timeout (ms)</label>\
-              <input id='edit_timeout' type='number' min='0' size='8' \
+              <label for='timeout_ms'>Timeout (ms)</label>\
+              <input id='timeout_ms' type='number' min='0' size='8' \
                      max='90000' value='{timeout_ms}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_enabled'>Enabled</label>\
-              <input id='edit_enabled' type='checkbox'{enabled}/>\
+              <label for='enabled'>Enabled</label>\
+              <input id='enabled' type='checkbox'{enabled}/>\
             </div>"
         )
     }
@@ -105,25 +103,12 @@ impl Card for Modem {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(&self, doc: &Doc) -> String {
-        let mut obj = Map::new();
-        let uri = doc.input_parse::<String>("edit_uri");
-        if uri != self.uri {
-            obj.insert("uri".to_string(), OptVal(uri).into());
-        }
-        let config = doc.input_parse::<String>("edit_config");
-        if config != self.config {
-            obj.insert("config".to_string(), OptVal(config).into());
-        }
-        let timeout_ms = doc.input_parse::<u32>("edit_timeout");
-        if timeout_ms != self.timeout_ms {
-            obj.insert("timeout_ms".to_string(), OptVal(timeout_ms).into());
-        }
-        if let Some(enabled) = doc.input_bool("edit_enabled") {
-            if enabled != self.enabled {
-                obj.insert("enabled".to_string(), Value::Bool(enabled));
-            }
-        }
-        Value::Object(obj).to_string()
+    fn changed_fields(&self) -> String {
+        let mut fields = Fields::new();
+        fields.changed_input("uri", &self.uri);
+        fields.changed_input("config", &self.config);
+        fields.changed_input("timeout_ms", self.timeout_ms);
+        fields.changed_input("enabled", self.enabled);
+        fields.into_value().to_string()
     }
 }

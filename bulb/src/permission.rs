@@ -13,7 +13,7 @@
 use crate::error::{Error, Result};
 use crate::resource::{AncillaryData, Card, Resource, View, NAME};
 use crate::role::Role;
-use crate::util::{ContainsLower, Doc, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, Select};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
@@ -82,7 +82,7 @@ impl PermissionAnc {
     /// Create an HTML `select` element of resource types
     fn resource_types_html(&self, pri: &Permission) -> String {
         let mut html = String::new();
-        html.push_str("<select id='edit_resource'>");
+        html.push_str("<select id='resource_n'>");
         if let Some(resource_types) = &self.resource_types {
             for resource_type in resource_types {
                 html.push_str("<option");
@@ -101,7 +101,7 @@ impl PermissionAnc {
     /// Create an HTML `select` element of roles
     fn roles_html(&self, pri: &Permission) -> String {
         let mut html = String::new();
-        html.push_str("<select id='edit_role'>");
+        html.push_str("<select id='role'>");
         if let Some(roles) = &self.roles {
             for role in roles {
                 html.push_str("<option");
@@ -136,7 +136,7 @@ fn access_str(access_n: u32, long: bool) -> &'static str {
 /// Create an HTML `select` element of access
 fn access_html(selected: u32) -> String {
     let mut html = String::new();
-    html.push_str("<select id='edit_access'>");
+    html.push_str("<select id='access_n'>");
     for access_n in 1..=4 {
         html.push_str("<option value='");
         html.push_str(&access_n.to_string());
@@ -150,138 +150,6 @@ fn access_html(selected: u32) -> String {
     }
     html.push_str("</select>");
     html
-}
-
-impl Permission {
-    pub const RESOURCE_N: &'static str = "permission";
-
-    /// Get value to create a new object
-    pub fn create_value(doc: &Doc) -> Result<String> {
-        let role = doc.select_parse::<String>("edit_role");
-        let resource_n = doc.select_parse::<String>("edit_resource");
-        if let (Some(role), Some(resource_n)) = (role, resource_n) {
-            let mut obj = Map::new();
-            obj.insert("role".to_string(), Value::String(role));
-            obj.insert("resource_n".to_string(), Value::String(resource_n));
-            return Ok(Value::Object(obj).to_string());
-        }
-        Err(Error::Parse())
-    }
-
-    /// Convert to Compact HTML
-    fn to_html_compact(&self) -> String {
-        let access = access_str(self.access_n, false);
-        let role = HtmlStr::new(&self.role).with_len(4);
-        let resource = HtmlStr::new(&self.resource_n).with_len(8);
-        format!(
-            "<span>{access}{role}…{resource}</span>\
-            <span class='{NAME}'>{self}</span>"
-        )
-    }
-
-    /// Convert to Edit HTML
-    fn to_html_edit(&self, anc: &PermissionAnc) -> String {
-        let role = anc.roles_html(self);
-        let resource = anc.resource_types_html(self);
-        let batch = HtmlStr::new(&self.batch);
-        let access = access_html(self.access_n);
-        format!(
-            "<div class='row'>\
-               <label for='edit_role'>Role</label>\
-               {role}\
-            </div>\
-            <div class='row'>\
-              <label for='edit_resource'>Resource</label>\
-              {resource}\
-            </div>\
-            <div class='row'>\
-               <label for='edit_batch'>Batch</label>\
-               <input id='edit_batch' maxlength='16' size='16' \
-                      value='{batch}'/>\
-            </div>\
-            <div class='row'>\
-              <label for='edit_access'>Access</label>\
-              {access}\
-            </div>"
-        )
-    }
-}
-
-impl fmt::Display for Permission {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.id)
-    }
-}
-
-impl Card for Permission {
-    type Ancillary = PermissionAnc;
-
-    /// Set the name
-    fn with_name(self, _name: &str) -> Self {
-        self
-    }
-
-    /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &PermissionAnc) -> bool {
-        self.id.to_string().contains(search)
-            || access_str(self.access_n, true).contains(search)
-            || self.role.contains_lower(search)
-            || self.resource_n.contains(search)
-    }
-
-    /// Get row for Create card
-    fn to_html_create(&self, anc: &PermissionAnc) -> String {
-        let role = anc.roles_html(self);
-        let resource = anc.resource_types_html(self);
-        format!(
-            "<div class='row'>\
-              <label for='edit_role'>Role</label>\
-              {role}\
-            </div>\
-            <div class='row'>\
-              <label for='edit_resource'>Resource</label>\
-              {resource}\
-            </div>"
-        )
-    }
-
-    /// Convert to HTML view
-    fn to_html(&self, view: View, anc: &PermissionAnc) -> String {
-        match view {
-            View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(),
-            View::Edit => self.to_html_edit(anc),
-            _ => unreachable!(),
-        }
-    }
-
-    /// Get changed fields from Edit form
-    fn changed_fields(&self, doc: &Doc) -> String {
-        let mut obj = Map::new();
-        if let Some(role) = doc.select_parse::<String>("edit_role") {
-            if role != self.role {
-                obj.insert("role".to_string(), Value::String(role));
-            }
-        }
-        if let Some(resource_n) = doc.select_parse::<String>("edit_resource") {
-            if resource_n != self.resource_n {
-                obj.insert("resource_n".to_string(), Value::String(resource_n));
-            }
-        }
-        let batch = doc.input_option_string("edit_batch");
-        if batch != self.batch {
-            obj.insert("batch".to_string(), OptVal(batch).into());
-        }
-        if let Some(access_n) = doc.select_parse::<u32>("edit_access") {
-            if access_n != self.access_n {
-                obj.insert(
-                    "access_n".to_string(),
-                    Value::Number(access_n.into()),
-                );
-            }
-        }
-        Value::Object(obj).to_string()
-    }
 }
 
 /// Build a `select` element of access permissions
@@ -316,5 +184,119 @@ fn add_option(res: Resource, perm: &Permission, html: &mut String) {
         html.push_str("'>");
         html.push_str(res.dname());
         html.push_str("</option>");
+    }
+}
+
+impl Permission {
+    pub const RESOURCE_N: &'static str = "permission";
+
+    /// Get value to create a new object
+    pub fn create_value(doc: &Doc) -> Result<String> {
+        let role = doc.select_parse::<String>("role");
+        let resource_n = doc.select_parse::<String>("resource_n");
+        if let (Some(role), Some(resource_n)) = (role, resource_n) {
+            let mut obj = Map::new();
+            obj.insert("role".to_string(), Value::String(role));
+            obj.insert("resource_n".to_string(), Value::String(resource_n));
+            return Ok(Value::Object(obj).to_string());
+        }
+        Err(Error::Parse())
+    }
+
+    /// Convert to Compact HTML
+    fn to_html_compact(&self) -> String {
+        let access = access_str(self.access_n, false);
+        let role = HtmlStr::new(&self.role).with_len(4);
+        let resource = HtmlStr::new(&self.resource_n).with_len(8);
+        format!(
+            "<span>{access}{role}…{resource}</span>\
+            <span class='{NAME}'>{self}</span>"
+        )
+    }
+
+    /// Convert to Edit HTML
+    fn to_html_edit(&self, anc: &PermissionAnc) -> String {
+        let role = anc.roles_html(self);
+        let resource = anc.resource_types_html(self);
+        let batch = HtmlStr::new(&self.batch);
+        let access = access_html(self.access_n);
+        format!(
+            "<div class='row'>\
+               <label for='role'>Role</label>\
+               {role}\
+            </div>\
+            <div class='row'>\
+              <label for='resource_n'>Resource</label>\
+              {resource}\
+            </div>\
+            <div class='row'>\
+               <label for='batch'>Batch</label>\
+               <input id='batch' maxlength='16' size='16' \
+                      value='{batch}'/>\
+            </div>\
+            <div class='row'>\
+              <label for='access_n'>Access</label>\
+              {access}\
+            </div>"
+        )
+    }
+}
+
+impl fmt::Display for Permission {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.id)
+    }
+}
+
+impl Card for Permission {
+    type Ancillary = PermissionAnc;
+
+    /// Set the name
+    fn with_name(self, _name: &str) -> Self {
+        self
+    }
+
+    /// Check if a search string matches
+    fn is_match(&self, search: &str, _anc: &PermissionAnc) -> bool {
+        self.id.to_string().contains(search)
+            || access_str(self.access_n, true).contains(search)
+            || self.role.contains_lower(search)
+            || self.resource_n.contains(search)
+    }
+
+    /// Get row for Create card
+    fn to_html_create(&self, anc: &PermissionAnc) -> String {
+        let role = anc.roles_html(self);
+        let resource = anc.resource_types_html(self);
+        format!(
+            "<div class='row'>\
+              <label for='role'>Role</label>\
+              {role}\
+            </div>\
+            <div class='row'>\
+              <label for='resource_n'>Resource</label>\
+              {resource}\
+            </div>"
+        )
+    }
+
+    /// Convert to HTML view
+    fn to_html(&self, view: View, anc: &PermissionAnc) -> String {
+        match view {
+            View::Create => self.to_html_create(anc),
+            View::Compact => self.to_html_compact(),
+            View::Edit => self.to_html_edit(anc),
+            _ => unreachable!(),
+        }
+    }
+
+    /// Get changed fields from Edit form
+    fn changed_fields(&self) -> String {
+        let mut fields = Fields::new();
+        fields.changed_select("role", &self.role);
+        fields.changed_select("resource_n", &self.resource_n);
+        fields.changed_input("batch", &self.batch);
+        fields.changed_select("access_n", self.access_n);
+        fields.into_value().to_string()
     }
 }

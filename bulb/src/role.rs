@@ -11,10 +11,8 @@
 // GNU General Public License for more details.
 //
 use crate::resource::{disabled_attr, AncillaryData, Card, View};
-use crate::util::{ContainsLower, Doc};
+use crate::util::{ContainsLower, Fields, Input};
 use serde::{Deserialize, Serialize};
-use serde_json::map::Map;
-use serde_json::Value;
 use std::fmt;
 
 /// Role
@@ -46,8 +44,8 @@ impl Role {
         let enabled = if self.enabled { " checked" } else { "" };
         format!(
             "<div class='row'>\
-              <label for='edit_enabled'>Enabled</label>\
-              <input id='edit_enabled' type='checkbox'{enabled}/>\
+              <label for='enabled'>Enabled</label>\
+              <input id='enabled' type='checkbox'{enabled}/>\
             </div>"
         )
     }
@@ -84,13 +82,9 @@ impl Card for Role {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(&self, doc: &Doc) -> String {
-        let mut obj = Map::new();
-        if let Some(enabled) = doc.input_bool("edit_enabled") {
-            if enabled != self.enabled {
-                obj.insert("enabled".to_string(), Value::Bool(enabled));
-            }
-        }
-        Value::Object(obj).to_string()
+    fn changed_fields(&self) -> String {
+        let mut fields = Fields::new();
+        fields.changed_input("enabled", self.enabled);
+        fields.into_value().to_string()
     }
 }

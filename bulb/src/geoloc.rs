@@ -12,10 +12,8 @@
 //
 use crate::error::Result;
 use crate::resource::{AncillaryData, Card, View};
-use crate::util::{ContainsLower, Doc, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
 use serde::{Deserialize, Serialize};
-use serde_json::map::Map;
-use serde_json::Value;
 use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
@@ -161,7 +159,7 @@ impl GeoLocAnc {
     /// Create an HTML `select` element of road modifiers
     fn modifiers_html(&self, md: u16) -> String {
         let mut html = String::new();
-        html.push_str("<select id='edit_mod'>");
+        html.push_str("<select id='cross_mod'>");
         if let Some(modifiers) = &self.modifiers {
             for modifier in modifiers {
                 html.push_str("<option value='");
@@ -185,40 +183,40 @@ impl GeoLoc {
 
     /// Convert to Edit HTML
     fn to_html_edit(&self, anc: &GeoLocAnc) -> String {
-        let roadway = anc.roads_html("edit_road", self.roadway.as_deref());
-        let rdir = anc.directions_html("edit_rdir", self.road_dir);
+        let roadway = anc.roads_html("roadway", self.roadway.as_deref());
+        let rdir = anc.directions_html("road_dir", self.road_dir);
         let xmod = anc.modifiers_html(self.cross_mod);
         let xstreet =
-            anc.roads_html("edit_xstreet", self.cross_street.as_deref());
-        let xdir = anc.directions_html("edit_xdir", self.cross_dir);
+            anc.roads_html("cross_street", self.cross_street.as_deref());
+        let xdir = anc.directions_html("cross_dir", self.cross_dir);
         let landmark = HtmlStr::new(&self.landmark);
         let lat = OptVal(self.lat);
         let lon = OptVal(self.lon);
         format!(
             "<div class='row'>\
-              <label for='edit_road'>Roadway</label>\
+              <label for='roadway'>Roadway</label>\
               {roadway}\
               {rdir}\
             </div>\
             <div class='row'>\
-              <label for='edit_xstreet'> </label>\
+              <label for='cross_street'> </label>\
               {xmod}\
               {xstreet}\
               {xdir}\
             </div>\
             <div class='row'>\
-              <label for='edit_lmark'>Landmark</label>\
-              <input id='edit_lmark' maxlength='22' size='24' \
+              <label for='landmark'>Landmark</label>\
+              <input id='landmark' maxlength='22' size='24' \
                      value='{landmark}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_lat'>Latitude</label>\
-              <input id='edit_lat' type='number' step='0.00001' \
+              <label for='lat'>Latitude</label>\
+              <input id='lat' type='number' step='0.00001' \
                      inputmode='decimal' value='{lat}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_lon'>Longitude</label>\
-              <input id='edit_lon' type='number' step='0.00001' \
+              <label for='lon'>Longitude</label>\
+              <input id='lon' type='number' step='0.00001' \
                      inputmode='decimal' value='{lon}'/>\
             </div>"
         )
@@ -254,43 +252,16 @@ impl Card for GeoLoc {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(&self, doc: &Doc) -> String {
-        let mut obj = Map::new();
-        let roadway = doc.select_option_string("edit_road");
-        if roadway != self.roadway {
-            obj.insert("roadway".to_string(), OptVal(roadway).into());
-        }
-        if let Some(road_dir) = doc.select_parse::<u16>("edit_rdir") {
-            if road_dir != self.road_dir {
-                obj.insert("road_dir".to_string(), road_dir.into());
-            }
-        }
-        let cross_street = doc.select_option_string("edit_xstreet");
-        if cross_street != self.cross_street {
-            obj.insert("cross_street".to_string(), OptVal(cross_street).into());
-        }
-        if let Some(cross_mod) = doc.select_parse::<u16>("edit_mod") {
-            if cross_mod != self.cross_mod {
-                obj.insert("cross_mod".to_string(), cross_mod.into());
-            }
-        }
-        if let Some(cross_dir) = doc.select_parse::<u16>("edit_xdir") {
-            if cross_dir != self.cross_dir {
-                obj.insert("cross_dir".to_string(), cross_dir.into());
-            }
-        }
-        let landmark = doc.input_option_string("edit_lmark");
-        if landmark != self.landmark {
-            obj.insert("landmark".to_string(), OptVal(landmark).into());
-        }
-        let lat = doc.input_parse::<f64>("edit_lat");
-        if lat != self.lat {
-            obj.insert("lat".to_string(), OptVal(lat).into());
-        }
-        let lon = doc.input_parse::<f64>("edit_lon");
-        if lon != self.lon {
-            obj.insert("lon".to_string(), OptVal(lon).into());
-        }
-        Value::Object(obj).to_string()
+    fn changed_fields(&self) -> String {
+        let mut fields = Fields::new();
+        fields.changed_select("roadway", &self.roadway);
+        fields.changed_select("road_dir", self.road_dir);
+        fields.changed_select("cross_street", &self.cross_street);
+        fields.changed_select("cross_mod", self.cross_mod);
+        fields.changed_select("cross_dir", self.cross_dir);
+        fields.changed_input("landmark", &self.landmark);
+        fields.changed_input("lat", self.lat);
+        fields.changed_input("lon", self.lon);
+        fields.into_value().to_string()
     }
 }

@@ -11,10 +11,8 @@
 // GNU General Public License for more details.
 //
 use crate::resource::{AncillaryData, Card, View};
-use crate::util::{ContainsLower, Doc, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
-use serde_json::map::Map;
-use serde_json::Value;
 use std::fmt;
 
 /// Cabinet Style
@@ -53,28 +51,28 @@ impl CabinetStyle {
         let dip = OptVal(self.dip);
         format!(
             "<div class='row'>\
-              <label for='edit_pp1'>Police Panel Pin 1</label>\
-              <input id='edit_pp1' type='number' min='1' max='104' \
+              <label for='police_panel_pin_1'>Police Panel Pin 1</label>\
+              <input id='police_panel_pin_1' type='number' min='1' max='104' \
                      size='8' value='{police_panel_pin_1}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_pp2'>Police Panel Pin 2</label>\
-              <input id='edit_pp2' type='number' min='1' max='104' \
+              <label for='police_panel_pin_2'>Police Panel Pin 2</label>\
+              <input id='police_panel_pin_2' type='number' min='1' max='104' \
                      size='8' value='{police_panel_pin_2}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_wr1'>Watchdog Reset Pin 1</label>\
-              <input id='edit_wr1' type='number' min='1' max='104' \
+              <label for='watchdog_reset_pin_1'>Watchdog Reset Pin 1</label>\
+              <input id='watchdog_reset_pin_1' type='number' min='1' max='104' \
                      size='8' value='{watchdog_reset_pin_1}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_wr2'>Watchdog Reset Pin 2</label>\
-              <input id='edit_wr2' type='number' min='1' max='104' \
+              <label for='watchdog_reset_pin_2'>Watchdog Reset Pin 2</label>\
+              <input id='watchdog_reset_pin_2' type='number' min='1' max='104' \
                      size='8' value='{watchdog_reset_pin_2}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_dip'>Dip</label>\
-              <input id='edit_dip' type='number' min='0' max='255' \
+              <label for='dip'>Dip</label>\
+              <input id='dip' type='number' min='0' max='255' \
                      size='8' value='{dip}'/>\
             </div>"
         )
@@ -112,28 +110,13 @@ impl Card for CabinetStyle {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(&self, doc: &Doc) -> String {
-        let mut obj = Map::new();
-        let pin = doc.input_parse("edit_pp1");
-        if pin != self.police_panel_pin_1 {
-            obj.insert("police_panel_pin_1".to_string(), OptVal(pin).into());
-        }
-        let pin = doc.input_parse("edit_pp2");
-        if pin != self.police_panel_pin_2 {
-            obj.insert("police_panel_pin_2".to_string(), OptVal(pin).into());
-        }
-        let pin = doc.input_parse("edit_wr1");
-        if pin != self.watchdog_reset_pin_1 {
-            obj.insert("watchdog_reset_pin_1".to_string(), OptVal(pin).into());
-        }
-        let pin = doc.input_parse("edit_wr2");
-        if pin != self.watchdog_reset_pin_2 {
-            obj.insert("watchdog_reset_pin_2".to_string(), OptVal(pin).into());
-        }
-        let dip = doc.input_parse("edit_dip");
-        if dip != self.dip {
-            obj.insert("dip".to_string(), OptVal(dip).into());
-        }
-        Value::Object(obj).to_string()
+    fn changed_fields(&self) -> String {
+        let mut fields = Fields::new();
+        fields.changed_input("police_panel_pin_1", self.police_panel_pin_1);
+        fields.changed_input("police_panel_pin_2", self.police_panel_pin_2);
+        fields.changed_input("watchdog_reset_pin_1", self.watchdog_reset_pin_1);
+        fields.changed_input("watchdog_reset_pin_2", self.watchdog_reset_pin_2);
+        fields.changed_input("dip", self.dip);
+        fields.into_value().to_string()
     }
 }

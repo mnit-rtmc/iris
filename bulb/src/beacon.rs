@@ -14,10 +14,8 @@ use crate::device::{Device, DeviceAnc};
 use crate::resource::{
     disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
-use crate::util::{ContainsLower, Doc, HtmlStr, OptVal};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use serde::{Deserialize, Serialize};
-use serde_json::map::Map;
-use serde_json::Value;
 use std::fmt;
 
 /// Beacon
@@ -87,28 +85,28 @@ impl Beacon {
         let verify_pin = OptVal(self.verify_pin);
         format!(
             "<div class='row'>\
-              <label for='edit_msg'>Message</label>\
-              <textarea id='edit_msg' maxlength='128' rows='3' \
+              <label for='message'>Message</label>\
+              <textarea id='message' maxlength='128' rows='3' \
                         cols='24'>{message}</textarea>\
             </div>\
             <div class='row'>\
-              <label for='edit_notes'>Notes</label>\
-              <textarea id='edit_notes' maxlength='128' rows='2' \
+              <label for='notes'>Notes</label>\
+              <textarea id='notes' maxlength='128' rows='2' \
                         cols='24'>{notes}</textarea>\
             </div>\
             <div class='row'>\
-              <label for='edit_ctrl'>Controller</label>\
-              <input id='edit_ctrl' maxlength='20' size='20' \
+              <label for='controller'>Controller</label>\
+              <input id='controller' maxlength='20' size='20' \
                      value='{controller}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_pin'>Pin</label>\
-              <input id='edit_pin' type='number' min='1' max='104' \
+              <label for='pin'>Pin</label>\
+              <input id='pin' type='number' min='1' max='104' \
                      size='8' value='{pin}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_ver'>Verify Pin</label>\
-              <input id='edit_ver' type='number' min='1' max='104' \
+              <label for='verify_pin'>Verify Pin</label>\
+              <input id='verify_pin' type='number' min='1' max='104' \
                      size='8' value='{verify_pin}'/>\
             </div>"
         )
@@ -156,30 +154,13 @@ impl Card for Beacon {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(&self, doc: &Doc) -> String {
-        let mut obj = Map::new();
-        if let Some(message) = doc.text_area_parse::<String>("edit_msg") {
-            if message != self.message {
-                obj.insert("message".to_string(), Value::String(message));
-            }
-        }
-        if let Some(notes) = doc.text_area_parse::<String>("edit_notes") {
-            if notes != self.notes {
-                obj.insert("notes".to_string(), Value::String(notes));
-            }
-        }
-        let ctrl = doc.input_option_string("edit_ctrl");
-        if ctrl != self.controller {
-            obj.insert("controller".to_string(), OptVal(ctrl).into());
-        }
-        let pin = doc.input_parse::<u32>("edit_pin");
-        if pin != self.pin {
-            obj.insert("pin".to_string(), OptVal(pin).into());
-        }
-        let verify_pin = doc.input_parse::<u32>("edit_ver");
-        if verify_pin != self.verify_pin {
-            obj.insert("verify_pin".to_string(), OptVal(verify_pin).into());
-        }
-        Value::Object(obj).to_string()
+    fn changed_fields(&self) -> String {
+        let mut fields = Fields::new();
+        fields.changed_text_area("message", &self.message);
+        fields.changed_text_area("notes", &self.notes);
+        fields.changed_input("controller", &self.controller);
+        fields.changed_input("pin", self.pin);
+        fields.changed_input("verify_pin", self.verify_pin);
+        fields.into_value().to_string()
     }
 }

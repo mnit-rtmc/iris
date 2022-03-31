@@ -16,10 +16,8 @@ use crate::error::Result;
 use crate::resource::{
     disabled_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
 };
-use crate::util::{ContainsLower, Doc, HtmlStr};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use serde::{Deserialize, Serialize};
-use serde_json::map::Map;
-use serde_json::Value;
 use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
@@ -101,7 +99,7 @@ impl CommLinkAnc {
     /// Create an HTML `select` element of comm configs
     fn comm_configs_html(&self, pri: &CommLink) -> String {
         let mut html = String::new();
-        html.push_str("<select id='edit_config'>");
+        html.push_str("<select id='comm_config'>");
         if let Some(comm_configs) = &self.comm_configs {
             for config in comm_configs {
                 html.push_str("<option value='");
@@ -196,22 +194,22 @@ impl CommLink {
         let comm_configs = anc.comm_configs_html(self);
         format!(
             "<div class='row'>\
-              <label for='edit_desc'>Description</label>\
-              <input id='edit_desc' maxlength='32' size='24' \
+              <label for='description'>Description</label>\
+              <input id='description' maxlength='32' size='24' \
                      value='{description}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_uri'>URI</label>\
-              <input id='edit_uri' maxlength='256' size='28' \
+              <label for='uri'>URI</label>\
+              <input id='uri' maxlength='256' size='28' \
                      value='{uri}'/>\
             </div>\
             <div class='row'>\
-              <label for='edit_config'>Comm Config</label>\
+              <label for='comm_config'>Comm Config</label>\
               {comm_configs}\
             </div>\
             <div class='row'>\
-              <label for='edit_enabled'>Poll Enabled</label>\
-              <input id='edit_enabled' type='checkbox'{enabled}/>\
+              <label for='poll_enabled'>Poll Enabled</label>\
+              <input id='poll_enabled' type='checkbox'{enabled}/>\
             </div>"
         )
     }
@@ -247,34 +245,12 @@ impl Card for CommLink {
     }
 
     /// Get changed fields from Edit form
-    fn changed_fields(&self, doc: &Doc) -> String {
-        let mut obj = Map::new();
-        if let Some(desc) = doc.input_parse::<String>("edit_desc") {
-            if desc != self.description {
-                obj.insert("description".to_string(), Value::String(desc));
-            }
-        }
-        if let Some(uri) = doc.input_parse::<String>("edit_uri") {
-            if uri != self.uri {
-                obj.insert("uri".to_string(), Value::String(uri));
-            }
-        }
-        if let Some(comm_config) = doc.select_parse::<String>("edit_config") {
-            if comm_config != self.comm_config {
-                obj.insert(
-                    "comm_config".to_string(),
-                    Value::String(comm_config),
-                );
-            }
-        }
-        if let Some(poll_enabled) = doc.input_bool("edit_enabled") {
-            if poll_enabled != self.poll_enabled {
-                obj.insert(
-                    "poll_enabled".to_string(),
-                    Value::Bool(poll_enabled),
-                );
-            }
-        }
-        Value::Object(obj).to_string()
+    fn changed_fields(&self) -> String {
+        let mut fields = Fields::new();
+        fields.changed_input("description", &self.description);
+        fields.changed_input("uri", &self.uri);
+        fields.changed_select("comm_config", &self.comm_config);
+        fields.changed_input("poll_enabled", self.poll_enabled);
+        fields.into_value().to_string()
     }
 }
