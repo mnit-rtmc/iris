@@ -327,8 +327,7 @@ impl Controller {
                     "<span>\
                       <span>Version</span>\
                       <span class='info'>{version}</span>\
-                    </span>\
-                    <span></span>"
+                    </span>"
                 )
             }
             None => "".to_string(),
@@ -355,15 +354,14 @@ impl Controller {
                 :{drop_id}\
               </span>\
             </div>\
-            <div class='row'>\
-              <span></span>\
+            <div class='row right'>\
               <span class='info'>{comm_config}</span>\
             </div>\
             <div class='row'>\
               <span>{location}</span>\
               <span class='info'>{notes}</span>\
             </div>\
-            <div class='row'>{version}</div>\
+            <div class='row left'>{version}</div>\
             <div class='row'>{fail_time}</div>\
             {io_pins}\
             <div class='row'>\

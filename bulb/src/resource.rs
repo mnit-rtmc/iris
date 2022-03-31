@@ -579,8 +579,7 @@ fn html_card_create(dname: &'static str, create: &str) -> String {
           <button id='ob_close' type='button'>X</button>\
         </div>\
         {create}
-        <div class='row'>\
-          <span></span>\
+        <div class='row right'>\
           <button id='ob_save' type='button'>🖍️ Save</button>\
         </div>"
     )
