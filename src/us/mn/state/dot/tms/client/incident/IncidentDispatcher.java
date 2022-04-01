@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.IncSeverity;
 import us.mn.state.dot.tms.LaneConfiguration;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
@@ -296,7 +296,7 @@ public class IncidentDispatcher extends IPanel
 	/** Edit (replace) an existing incident */
 	private void editIncident(Incident inc) {
 		ClientIncident ci = new ClientIncident(inc.getName(),
-			inc.getEventType(), inc.getDetail(), inc.getLaneType(),
+			inc.getEventType(), inc.getDetail(), inc.getLaneCode(),
 			inc.getRoad(), inc.getDir(), inc.getLat(),
 			inc.getLon(), inc.getImpact());
 		sel_mdl.setSelected(ci);
@@ -322,7 +322,7 @@ public class IncidentDispatcher extends IPanel
 			IncidentDetail dtl = getSelectedDetail();
 			if (dtl != null)
 				attrs.put("detail", dtl);
-			attrs.put("lane_type", inc.getLaneType());
+			attrs.put("lane_code", inc.getLaneCode());
 			attrs.put("road", inc.getRoad());
 			attrs.put("dir", inc.getDir());
 			attrs.put("lat", inc.getLat());
@@ -621,7 +621,7 @@ public class IncidentDispatcher extends IPanel
 
 	/** Check if the user can deploy signs for an incident */
 	private boolean canDeploy(Incident inc) {
-		switch (LaneType.fromOrdinal(inc.getLaneType())) {
+		switch (LaneCode.fromCode(inc.getLaneCode())) {
 		case MAINLINE:
 			return canSendIndications();
 		default:

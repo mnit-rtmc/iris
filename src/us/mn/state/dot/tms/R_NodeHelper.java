@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,7 +110,7 @@ public class R_NodeHelper extends BaseHelper {
 		while (it.hasNext()) {
 			Detector d = it.next();
 			if (d.getR_Node() == n &&
-			    d.getLaneType() == LaneType.PARKING.ordinal())
+			    LaneCode.PARKING.lcode.equals(d.getLaneCode()))
 				return true;
 		}
 		return false;

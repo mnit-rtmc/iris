@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2020  Minnesota Department of Transportation
+ * Copyright (C) 2016-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.tms.IncAdvice;
 import us.mn.state.dot.tms.IncImpact;
 import us.mn.state.dot.tms.IncRange;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -72,22 +72,22 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<IncAdvice>("incident.lane_type", 80) {
+		cols.add(new ProxyColumn<IncAdvice>("incident.lane_code", 80) {
 			public Object getValueAt(IncAdvice adv) {
-				return LaneType.fromOrdinal(adv.getLaneType());
+				return LaneCode.fromCode(adv.getLaneCode());
 			}
 			public boolean isEditable(IncAdvice adv) {
 				return canWrite(adv);
 			}
 			public void setValueAt(IncAdvice adv, Object value) {
-				if (value instanceof LaneType) {
-					LaneType lt = (LaneType) value;
-					adv.setLaneType((short) lt.ordinal());
+				if (value instanceof LaneCode) {
+					LaneCode lc = (LaneCode) value;
+					adv.setLaneCode(lc.lcode);
 				}
 			}
 			protected TableCellEditor createCellEditor() {
 				return new DefaultCellEditor(IncidentCreator
-					.createLaneTypeCombo());
+					.createLaneCodeCombo());
 			}
 		});
 		cols.add(new ProxyColumn<IncAdvice>("incident.range", 64) {
@@ -169,10 +169,10 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				int imp1 = adv1.getImpact();
 				if (imp0 != imp1)
 					return imp0 - imp1;
-				int lt0 = adv0.getLaneType();
-				int lt1 = adv0.getLaneType();
-				if (lt0 != lt1)
-					return lt0 - lt1;
+				String lc0 = adv0.getLaneCode();
+				String lc1 = adv0.getLaneCode();
+				if (!lc0.equals(lc1))
+					return lc0.compareTo(lc1);
 				int r0 = adv0.getRange();
 				int r1 = adv1.getRange();
 				if (r0 != r1)

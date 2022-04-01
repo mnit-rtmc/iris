@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2020  Minnesota Department of Transportation
+ * Copyright (C) 2007-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import java.util.TreeMap;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
@@ -100,7 +100,7 @@ public class CorridorManager {
 	/** Create a GeoLoc snapped to nearest r_node segment.
 	 * NOTE: copied from client/roads/R_NodeManager. */
 	public synchronized GeoLoc snapGeoLoc(SphericalMercatorPosition smp,
-		LaneType lt, Distance max_dist, Direction dir)
+		LaneCode lc, Distance max_dist, Direction dir)
 	{
 		GeoLoc loc = null;
 		Distance dist = max_dist;
@@ -108,7 +108,7 @@ public class CorridorManager {
 			if (dir != Direction.UNKNOWN &&
 			    dir.ordinal() != c.getRoadDir())
 				continue;
-			Corridor.GeoLocDist ld = c.snapGeoLoc(smp, lt, dist);
+			Corridor.GeoLocDist ld = c.snapGeoLoc(smp, lc, dist);
 			if (ld != null && ld.dist.m() < dist.m()) {
 				loc = ld.loc;
 				dist = ld.dist;

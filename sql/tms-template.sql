@@ -10,6 +10,7 @@
 --          'connected' (comm_link)
 --          'auto_fail' (detector)
 --          'msg_user', 'msg_sched', 'msg_current', 'expire_time' (dms)
+--          'settings', 'sample' (weather_sensor)
 --          'time_stamp' (parking_area)
 --          id (road_class)
 --          name (r_node, road, any resource_n in geo_loc)
@@ -2186,58 +2187,55 @@ CREATE VIEW beacon_event_view AS
 GRANT SELECT ON beacon_event_view TO PUBLIC;
 
 --
--- Lane Types, Detectors
+-- Lane Codes, Detectors
 --
-CREATE TABLE iris.lane_type (
-	id SMALLINT PRIMARY KEY,
-	description VARCHAR(12) NOT NULL,
-	-- FIXME: should be CHAR(1) PRIMARY KEY
-	dcode VARCHAR(2) NOT NULL
+CREATE TABLE iris.lane_code (
+    lcode VARCHAR(1) PRIMARY KEY,
+    description VARCHAR(12) NOT NULL
 );
 
-COPY iris.lane_type (id, description, dcode) FROM stdin;
-0		
-1	Mainline	
-2	Auxiliary	A
-3	CD Lane	C
-4	Reversible	R
-5	Merge	M
-6	Queue	Q
-7	Exit	X
-8	Bypass	B
-9	Passage	P
-10	Velocity	V
-11	Omnibus	O
-12	Green	G
-13	Wrong Way	Y
-14	HOV	H
-15	HOT	T
-16	Shoulder	D
-17	Parking	K
+COPY iris.lane_code (lcode, description) FROM stdin;
+	Mainline
+A	Auxiliary
+B	Bypass
+C	CD Lane
+D	Shoulder
+G	Green
+H	HOV
+K	Parking
+M	Merge
+O	Omnibus
+P	Passage
+Q	Queue
+R	Reversible
+T	HOT
+V	Velocity
+X	Exit
+Y	Wrong Way
 \.
 
-CREATE VIEW lane_type_view AS
-	SELECT id, description, dcode FROM iris.lane_type;
-GRANT SELECT ON lane_type_view TO PUBLIC;
+CREATE VIEW lane_code_view AS
+    SELECT lcode, description FROM iris.lane_code;
+GRANT SELECT ON lane_code_view TO PUBLIC;
 
 CREATE TABLE iris._detector (
-	name VARCHAR(20) PRIMARY KEY,
-	r_node VARCHAR(10) NOT NULL REFERENCES iris.r_node(name),
-	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
-	lane_number SMALLINT NOT NULL,
-	abandoned BOOLEAN NOT NULL,
-	force_fail BOOLEAN NOT NULL,
-	auto_fail BOOLEAN NOT NULL,
-	field_length REAL NOT NULL,
-	fake VARCHAR(32),
-	notes VARCHAR(32)
+    name VARCHAR(20) PRIMARY KEY,
+    r_node VARCHAR(10) NOT NULL REFERENCES iris.r_node(name),
+    lane_code VARCHAR(1) NOT NULL REFERENCES iris.lane_code,
+    lane_number SMALLINT NOT NULL,
+    abandoned BOOLEAN NOT NULL,
+    force_fail BOOLEAN NOT NULL,
+    auto_fail BOOLEAN NOT NULL,
+    field_length REAL NOT NULL,
+    fake VARCHAR(32),
+    notes VARCHAR(32)
 );
 
 ALTER TABLE iris._detector ADD CONSTRAINT _detector_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
 CREATE VIEW iris.detector AS
-    SELECT det.name, controller, pin, r_node, lane_type, lane_number,
+    SELECT det.name, controller, pin, r_node, lane_code, lane_number,
            abandoned, force_fail, auto_fail, field_length, fake, notes
     FROM iris._detector det
     JOIN iris.controller_io cio ON det.name = cio.name;
@@ -2248,10 +2246,10 @@ BEGIN
     INSERT INTO iris.controller_io (name, resource_n, controller, pin)
          VALUES (NEW.name, 'detector', NEW.controller, NEW.pin);
     INSERT INTO iris._detector (
-        name, r_node, lane_type, lane_number, abandoned, force_fail, auto_fail,
+        name, r_node, lane_code, lane_number, abandoned, force_fail, auto_fail,
         field_length, fake, notes
     ) VALUES (
-        NEW.name, NEW.r_node, NEW.lane_type, NEW.lane_number, NEW.abandoned,
+        NEW.name, NEW.r_node, NEW.lane_code, NEW.lane_number, NEW.abandoned,
         NEW.force_fail, NEW.auto_fail, NEW.field_length, NEW.fake, NEW.notes
     );
     RETURN NEW;
@@ -2271,7 +2269,7 @@ BEGIN
      WHERE name = OLD.name;
     UPDATE iris._detector
        SET r_node = NEW.r_node,
-           lane_type = NEW.lane_type,
+           lane_code = NEW.lane_code,
            lane_number = NEW.lane_number,
            abandoned = NEW.abandoned,
            force_fail = NEW.force_fail,
@@ -2293,63 +2291,65 @@ CREATE TRIGGER detector_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
 
 CREATE FUNCTION iris.detector_notify() RETURNS TRIGGER AS
-	$detector_notify$
+    $detector_notify$
 BEGIN
-	IF (NEW.auto_fail IS DISTINCT FROM OLD.auto_fail) THEN
-		NOTIFY detector, 'auto_fail';
-	ELSE
-		NOTIFY detector;
-	END IF;
-	RETURN NULL; -- AFTER trigger return is ignored
+    IF (NEW.auto_fail IS DISTINCT FROM OLD.auto_fail) THEN
+        NOTIFY detector, 'auto_fail';
+    ELSE
+        NOTIFY detector;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
 END;
 $detector_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER detector_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris.detector
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.detector_notify();
+    AFTER UPDATE ON iris.detector
+    FOR EACH ROW EXECUTE PROCEDURE iris.detector_notify();
+
+CREATE TRIGGER detector_table_notify_trig
+    AFTER INSERT OR DELETE ON iris._detector
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE FUNCTION iris.detector_label(VARCHAR(6), VARCHAR(4), VARCHAR(6),
-	VARCHAR(4), VARCHAR(2), SMALLINT, SMALLINT, BOOLEAN)
-	RETURNS TEXT AS $detector_label$
+    VARCHAR(4), VARCHAR(2), CHAR, SMALLINT, BOOLEAN)
+    RETURNS TEXT AS $detector_label$
 DECLARE
-	rd ALIAS FOR $1;
-	rdir ALIAS FOR $2;
-	xst ALIAS FOR $3;
-	xdir ALIAS FOR $4;
-	xmod ALIAS FOR $5;
-	l_type ALIAS FOR $6;
-	lane_number ALIAS FOR $7;
-	abandoned ALIAS FOR $8;
-	xmd VARCHAR(2);
-	ltyp VARCHAR(2);
-	lnum VARCHAR(2);
-	suffix VARCHAR(5);
+    rd ALIAS FOR $1;
+    rdir ALIAS FOR $2;
+    xst ALIAS FOR $3;
+    xdir ALIAS FOR $4;
+    xmod ALIAS FOR $5;
+    lcode ALIAS FOR $6;
+    lane_number ALIAS FOR $7;
+    abandoned ALIAS FOR $8;
+    xmd VARCHAR(2);
+    lnum VARCHAR(2);
+    suffix VARCHAR(5);
 BEGIN
-	IF rd IS NULL OR xst IS NULL THEN
-		RETURN 'FUTURE';
-	END IF;
-	SELECT dcode INTO ltyp FROM lane_type_view WHERE id = l_type;
-	lnum = '';
-	IF lane_number > 0 THEN
-		lnum = TO_CHAR(lane_number, 'FM9');
-	END IF;
-	xmd = '';
-	IF xmod != '@' THEN
-		xmd = xmod;
-	END IF;
-	suffix = '';
-	IF abandoned THEN
-		suffix = '-ABND';
-	END IF;
-	RETURN rd || '/' || xdir || xmd || xst || rdir || ltyp || lnum ||
-	       suffix;
+    IF rd IS NULL OR xst IS NULL THEN
+        RETURN 'FUTURE';
+    END IF;
+    lnum = '';
+    IF lane_number > 0 THEN
+        lnum = TO_CHAR(lane_number, 'FM9');
+    END IF;
+    xmd = '';
+    IF xmod != '@' THEN
+        xmd = xmod;
+    END IF;
+    suffix = '';
+    IF abandoned THEN
+        suffix = '-ABND';
+    END IF;
+    RETURN rd || '/' || xdir || xmd || xst || rdir || lcode || lnum ||
+           suffix;
 END;
 $detector_label$ LANGUAGE plpgsql;
 
 CREATE VIEW detector_label_view AS
     SELECT d.name AS det_id,
            iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
-                               d.lane_type, d.lane_number, d.abandoned)
+                               d.lane_code, d.lane_number, d.abandoned)
            AS label
     FROM iris.detector d
     LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
@@ -2367,16 +2367,16 @@ CREATE TABLE event.detector_event (
 CREATE VIEW detector_view AS
     SELECT d.name, d.r_node, d.controller, c.comm_link, c.drop_id, d.pin,
            iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
-           d.lane_type, d.lane_number, d.abandoned) AS label,
+           d.lane_code, d.lane_number, d.abandoned) AS label,
            rnd.geo_loc, l.rd || '_' || l.road_dir AS cor_id,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-           d.lane_number, d.field_length, ln.description AS lane_type,
-           ln.dcode AS lane_code, d.abandoned, d.force_fail, d.auto_fail,
-           c.condition, d.fake, d.notes
+           d.lane_number, d.field_length, lc.description AS lane_type,
+           d.lane_code, d.abandoned, d.force_fail, d.auto_fail, c.condition,
+           d.fake, d.notes
     FROM iris.detector d
     LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
     LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name
-    LEFT JOIN iris.lane_type ln ON d.lane_type = ln.id
+    LEFT JOIN iris.lane_code lc ON d.lane_code = lc.lcode
     LEFT JOIN controller_view c ON d.controller = c.name;
 GRANT SELECT ON detector_view TO PUBLIC;
 
@@ -3456,22 +3456,22 @@ veh_fire	Vehicle Fire
 \.
 
 CREATE TABLE event.incident (
-	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	name VARCHAR(16) NOT NULL UNIQUE,
-	replaces VARCHAR(16) REFERENCES event.incident(name),
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	detail VARCHAR(8) REFERENCES event.incident_detail(name),
-	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
-	road VARCHAR(20) NOT NULL,
-	dir SMALLINT NOT NULL REFERENCES iris.direction(id),
-	lat double precision NOT NULL,
-	lon double precision NOT NULL,
-	camera VARCHAR(20),
-	impact VARCHAR(20) NOT NULL,
-	cleared BOOLEAN NOT NULL,
-	confirmed BOOLEAN NOT NULL
+    event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+    name VARCHAR(16) NOT NULL UNIQUE,
+    replaces VARCHAR(16) REFERENCES event.incident(name),
+    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    detail VARCHAR(8) REFERENCES event.incident_detail(name),
+    lane_code VARCHAR(1) NOT NULL REFERENCES iris.lane_code,
+    road VARCHAR(20) NOT NULL,
+    dir SMALLINT NOT NULL REFERENCES iris.direction(id),
+    lat double precision NOT NULL,
+    lon double precision NOT NULL,
+    camera VARCHAR(20),
+    impact VARCHAR(20) NOT NULL,
+    cleared BOOLEAN NOT NULL,
+    confirmed BOOLEAN NOT NULL
 );
 
 CREATE TRIGGER incident_notify_trig
@@ -3517,12 +3517,12 @@ CREATE VIEW incident_view AS
     SELECT event_id, name, event_date, ed.description, road, d.direction,
            impact, event.incident_blocked_lanes(impact) AS blocked_lanes,
            event.incident_blocked_shoulders(impact) AS blocked_shoulders,
-           cleared, confirmed, camera, ln.description AS lane_type, detail,
+           cleared, confirmed, camera, lc.description AS lane_type, detail,
            replaces, lat, lon
     FROM event.incident i
     LEFT JOIN event.event_description ed ON i.event_desc_id = ed.event_desc_id
     LEFT JOIN iris.direction d ON i.dir = d.id
-    LEFT JOIN iris.lane_type ln ON i.lane_type = ln.id;
+    LEFT JOIN iris.lane_code lc ON i.lane_code = lc.lcode;
 GRANT SELECT ON incident_view TO PUBLIC;
 
 CREATE TABLE event.incident_update (
@@ -3551,74 +3551,74 @@ CREATE TRIGGER incident_update_trigger
 CREATE VIEW incident_update_view AS
     SELECT iu.event_id, name, iu.event_date, ed.description, road,
            d.direction, iu.impact, iu.cleared, iu.confirmed, camera,
-           ln.description AS lane_type, detail, replaces, lat, lon
+           lc.description AS lane_type, detail, replaces, lat, lon
     FROM event.incident i
     JOIN event.incident_update iu ON i.name = iu.incident
     LEFT JOIN event.event_description ed ON i.event_desc_id = ed.event_desc_id
     LEFT JOIN iris.direction d ON i.dir = d.id
-    LEFT JOIN iris.lane_type ln ON i.lane_type = ln.id;
+    LEFT JOIN iris.lane_code lc ON i.lane_code = lc.lcode;
 GRANT SELECT ON incident_update_view TO PUBLIC;
 
 CREATE TABLE iris.inc_descriptor (
-	name VARCHAR(10) PRIMARY KEY,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	detail VARCHAR(8) REFERENCES event.incident_detail(name),
-	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
-	multi VARCHAR(64) NOT NULL
+    name VARCHAR(10) PRIMARY KEY,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    detail VARCHAR(8) REFERENCES event.incident_detail(name),
+    lane_code VARCHAR(1) NOT NULL REFERENCES iris.lane_code,
+    multi VARCHAR(64) NOT NULL
 );
 
 CREATE FUNCTION iris.inc_descriptor_ck() RETURNS TRIGGER AS
-	$inc_descriptor_ck$
+    $inc_descriptor_ck$
 BEGIN
-	-- Only incident event IDs are allowed
-	IF NEW.event_desc_id < 21 OR NEW.event_desc_id > 24 THEN
-		RAISE EXCEPTION 'invalid incident event_desc_id';
-	END IF;
-	-- Only mainline, cd road, merge and exit lane types are allowed
-	IF NEW.lane_type != 1 AND NEW.lane_type != 3 AND
-	   NEW.lane_type != 5 AND NEW.lane_type != 7 THEN
-		RAISE EXCEPTION 'invalid incident lane_type';
-	END IF;
-	RETURN NEW;
+    -- Only incident event IDs are allowed
+    IF NEW.event_desc_id < 21 OR NEW.event_desc_id > 24 THEN
+        RAISE EXCEPTION 'invalid incident event_desc_id';
+    END IF;
+    -- Only mainline, cd road, merge and exit lane types are allowed
+    IF NEW.lane_code != '' AND NEW.lane_code != 'C' AND
+       NEW.lane_code != 'M' AND NEW.lane_code != 'X' THEN
+        RAISE EXCEPTION 'invalid incident lane_code';
+    END IF;
+    RETURN NEW;
 END;
 $inc_descriptor_ck$ LANGUAGE plpgsql;
 
 CREATE TRIGGER inc_descriptor_ck_trig
-	BEFORE INSERT OR UPDATE ON iris.inc_descriptor
-	FOR EACH ROW EXECUTE PROCEDURE iris.inc_descriptor_ck();
+    BEFORE INSERT OR UPDATE ON iris.inc_descriptor
+    FOR EACH ROW EXECUTE PROCEDURE iris.inc_descriptor_ck();
 
 CREATE VIEW inc_descriptor_view AS
-	SELECT id.name, ed.description AS event_description, detail,
-	       lt.description AS lane_type, multi
-	FROM iris.inc_descriptor id
-	JOIN event.event_description ed ON id.event_desc_id = ed.event_desc_id
-	LEFT JOIN iris.lane_type lt ON id.lane_type = lt.id;
+    SELECT id.name, ed.description AS event_description, detail,
+           lc.description AS lane_type, multi
+    FROM iris.inc_descriptor id
+    JOIN event.event_description ed ON id.event_desc_id = ed.event_desc_id
+    LEFT JOIN iris.lane_code lc ON id.lane_code = lc.lcode;
 GRANT SELECT ON inc_descriptor_view TO PUBLIC;
 
-COPY iris.inc_descriptor (name, event_desc_id, detail, lane_type, multi) FROM stdin;
-idsc_00001	21	\N	1	CRASH
-idsc_00002	21	\N	7	CRASH ON EXIT
-idsc_00003	22	\N	1	STALLED VEHICLE
-idsc_00004	23	\N	1	INCIDENT
-idsc_00005	23	animal	1	ANIMAL ON ROAD
-idsc_00006	23	debris	1	DEBRIS ON ROAD
-idsc_00007	23	emrg_veh	1	EMERGENCY VEHICLES
-idsc_00008	23	event	1	EVENT CONGESTION
-idsc_00009	23	event	7	CONGESTION ON RAMP
-idsc_00010	23	flooding	1	FLASH FLOODING
-idsc_00011	23	gr_fire	1	GRASS FIRE
-idsc_00012	23	ice	1	ICE
-idsc_00013	23	pavement	1	PAVEMENT FAILURE
-idsc_00014	23	ped	1	PEDESTRIAN ON ROAD
-idsc_00015	23	rollover	1	CRASH
-idsc_00016	23	snow_rmv	1	SNOW REMOVAL
-idsc_00017	23	spin_out	1	CRASH
-idsc_00018	23	spin_out	7	CRASH ON EXIT
-idsc_00019	23	test	1	TEST
-idsc_00020	23	veh_fire	1	VEHICLE FIRE
-idsc_00021	24	\N	1	ROAD WORK
-idsc_00022	24	\N	7	ROAD WORK ON RAMP
+COPY iris.inc_descriptor (name, event_desc_id, detail, lane_code, multi) FROM stdin;
+idsc_00001	21	\N		CRASH
+idsc_00002	21	\N	X	CRASH ON EXIT
+idsc_00003	22	\N		STALLED VEHICLE
+idsc_00004	23	\N		INCIDENT
+idsc_00005	23	animal		ANIMAL ON ROAD
+idsc_00006	23	debris		DEBRIS ON ROAD
+idsc_00007	23	emrg_veh		EMERGENCY VEHICLES
+idsc_00008	23	event		EVENT CONGESTION
+idsc_00009	23	event	X	CONGESTION ON RAMP
+idsc_00010	23	flooding		FLASH FLOODING
+idsc_00011	23	gr_fire		GRASS FIRE
+idsc_00012	23	ice		ICE
+idsc_00013	23	pavement		PAVEMENT FAILURE
+idsc_00014	23	ped		PEDESTRIAN ON ROAD
+idsc_00015	23	rollover		CRASH
+idsc_00016	23	snow_rmv		SNOW REMOVAL
+idsc_00017	23	spin_out		CRASH
+idsc_00018	23	spin_out	X	CRASH ON EXIT
+idsc_00019	23	test		TEST
+idsc_00020	23	veh_fire		VEHICLE FIRE
+idsc_00021	24	\N		ROAD WORK
+idsc_00022	24	\N	X	ROAD WORK ON RAMP
 \.
 
 CREATE TABLE iris.inc_impact (
@@ -3690,147 +3690,147 @@ iloc_00016	3	t	t	ON [locrn] [locrd] [locmd] [locxn]
 \.
 
 CREATE TABLE iris.inc_advice (
-	name VARCHAR(10) PRIMARY KEY,
-	impact INTEGER NOT NULL REFERENCES iris.inc_impact(id),
-	open_lanes INTEGER,
-	impacted_lanes INTEGER,
-	range INTEGER NOT NULL REFERENCES iris.inc_range(id),
-	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
-	multi VARCHAR(64) NOT NULL
+    name VARCHAR(10) PRIMARY KEY,
+    impact INTEGER NOT NULL REFERENCES iris.inc_impact(id),
+    open_lanes INTEGER,
+    impacted_lanes INTEGER,
+    range INTEGER NOT NULL REFERENCES iris.inc_range(id),
+    lane_code VARCHAR(1) NOT NULL REFERENCES iris.lane_code,
+    multi VARCHAR(64) NOT NULL
 );
 
 CREATE FUNCTION iris.inc_advice_ck() RETURNS TRIGGER AS
-	$inc_advice_ck$
+    $inc_advice_ck$
 BEGIN
-	-- Only mainline, cd road, merge and exit lane types are allowed
-	IF NEW.lane_type != 1 AND NEW.lane_type != 3 AND
-	   NEW.lane_type != 5 AND NEW.lane_type != 7 THEN
-		RAISE EXCEPTION 'invalid incident lane_type';
-	END IF;
-	RETURN NEW;
+    -- Only mainline, cd road, merge and exit lane codes are allowed
+    IF NEW.lane_code != '' AND NEW.lane_code != 'C' AND
+       NEW.lane_code != 'M' AND NEW.lane_code != 'X' THEN
+        RAISE EXCEPTION 'invalid incident lane_code';
+    END IF;
+    RETURN NEW;
 END;
 $inc_advice_ck$ LANGUAGE plpgsql;
 
 CREATE TRIGGER inc_advice_ck_trig
-	BEFORE INSERT OR UPDATE ON iris.inc_advice
-	FOR EACH ROW EXECUTE PROCEDURE iris.inc_advice_ck();
+    BEFORE INSERT OR UPDATE ON iris.inc_advice
+    FOR EACH ROW EXECUTE PROCEDURE iris.inc_advice_ck();
 
 CREATE VIEW inc_advice_view AS
-	SELECT a.name, imp.description AS impact, lt.description AS lane_type,
-	       rng.description AS range, open_lanes, impacted_lanes, multi
-	FROM iris.inc_advice a
-	LEFT JOIN iris.inc_impact imp ON a.impact = imp.id
-	LEFT JOIN iris.inc_range rng ON a.range = rng.id
-	LEFT JOIN iris.lane_type lt ON a.lane_type = lt.id;
+    SELECT a.name, imp.description AS impact, lc.description AS lane_type,
+           rng.description AS range, open_lanes, impacted_lanes, multi
+    FROM iris.inc_advice a
+    LEFT JOIN iris.inc_impact imp ON a.impact = imp.id
+    LEFT JOIN iris.inc_range rng ON a.range = rng.id
+    LEFT JOIN iris.lane_code lc ON a.lane_code = lc.lcode;
 GRANT SELECT ON inc_advice_view TO PUBLIC;
 
-COPY iris.inc_advice (name, impact, lane_type, range, open_lanes, impacted_lanes, multi) FROM stdin;
-iadv_00001	0	1	0	0	\N	ROAD CLOSED
-iadv_00002	0	1	0	\N	\N	LANES CLOSED
-iadv_00003	0	1	1	0	\N	ROAD CLOSED
-iadv_00004	0	1	1	\N	\N	LANES CLOSED
-iadv_00005	0	1	2	\N	1	1 LANE CLOSED
-iadv_00006	0	1	2	\N	2	2 LANES CLOSED
-iadv_00007	0	1	2	\N	3	3 LANES CLOSED
-iadv_00008	0	1	2	0	\N	ROAD CLOSED
-iadv_00009	0	1	2	1	\N	SINGLE LANE
-iadv_00010	0	1	2	\N	\N	LANES CLOSED
-iadv_00011	0	1	3	\N	1	1 LANE CLOSED
-iadv_00012	0	1	3	\N	2	2 LANES CLOSED
-iadv_00013	0	1	3	\N	3	3 LANES CLOSED
-iadv_00014	0	1	3	0	\N	ROAD CLOSED
-iadv_00015	0	1	3	1	\N	SINGLE LANE
-iadv_00016	0	1	3	\N	\N	LANES CLOSED
-iadv_00017	1	1	0	\N	1	LEFT LANE CLOSED
-iadv_00018	1	1	0	\N	2	LEFT 2 LANES CLOSED
-iadv_00019	1	1	0	\N	3	LEFT 3 LANES CLOSED
-iadv_00020	1	1	0	\N	\N	LEFT LANES CLOSED
-iadv_00021	1	1	1	\N	1	LEFT LANE CLOSED
-iadv_00022	1	1	1	\N	2	LEFT 2 LANES CLOSED
-iadv_00023	1	1	1	\N	3	LEFT 3 LANES CLOSED
-iadv_00024	1	1	1	\N	\N	LEFT LANES CLOSED
-iadv_00025	1	1	2	\N	1	LANE CLOSED
-iadv_00026	1	1	2	\N	2	2 LANES CLOSED
-iadv_00027	1	1	2	\N	3	3 LANES CLOSED
-iadv_00028	1	1	2	1	\N	SINGLE LANE
-iadv_00029	1	1	2	\N	\N	LANES CLOSED
-iadv_00030	1	1	3	\N	1	LANE CLOSED
-iadv_00031	1	1	3	\N	2	2 LANES CLOSED
-iadv_00032	1	1	3	\N	3	3 LANES CLOSED
-iadv_00033	1	1	3	1	\N	SINGLE LANE
-iadv_00034	1	1	3	\N	\N	LANES CLOSED
-iadv_00035	2	1	0	\N	1	RIGHT LANE CLOSED
-iadv_00036	2	1	0	\N	2	RIGHT 2 LANES CLOSED
-iadv_00037	2	1	0	\N	3	RIGHT 3 LANES CLOSED
-iadv_00038	2	1	0	\N	\N	RIGHT LANES CLOSED
-iadv_00039	2	1	1	\N	1	RIGHT LANE CLOSED
-iadv_00040	2	1	1	\N	2	RIGHT 2 LANES CLOSED
-iadv_00041	2	1	1	\N	3	RIGHT 3 LANES CLOSED
-iadv_00042	2	1	1	\N	\N	RIGHT LANES CLOSED
-iadv_00043	2	1	2	\N	1	LANE CLOSED
-iadv_00044	2	1	2	\N	2	2 LANES CLOSED
-iadv_00045	2	1	2	\N	3	3 LANES CLOSED
-iadv_00046	2	1	2	1	\N	SINGLE LANE
-iadv_00047	2	1	2	\N	\N	LANES CLOSED
-iadv_00048	2	1	3	\N	1	LANE CLOSED
-iadv_00049	2	1	3	\N	2	2 LANES CLOSED
-iadv_00050	2	1	3	\N	3	3 LANES CLOSED
-iadv_00051	2	1	3	1	\N	SINGLE LANE
-iadv_00052	2	1	3	\N	\N	LANES CLOSED
-iadv_00053	3	1	0	\N	1	CENTER LANE CLOSED
-iadv_00054	3	1	0	\N	\N	CENTER LANES CLOSED
-iadv_00055	3	1	1	\N	1	CENTER LANE CLOSED
-iadv_00056	3	1	1	\N	\N	CENTER LANES CLOSED
-iadv_00057	3	1	2	\N	1	LANE CLOSED
-iadv_00058	3	1	2	\N	2	2 LANES CLOSED
-iadv_00059	3	1	2	\N	3	3 LANES CLOSED
-iadv_00060	3	1	2	\N	\N	LANES CLOSED
-iadv_00061	3	1	3	\N	1	LANE CLOSED
-iadv_00062	3	1	3	\N	2	2 LANES CLOSED
-iadv_00063	3	1	3	\N	3	3 LANES CLOSED
-iadv_00064	3	1	3	\N	\N	LANES CLOSED
-iadv_00065	4	1	0	0	1	IN LANE
-iadv_00066	4	1	0	0	2	IN BOTH LANES
-iadv_00067	4	1	0	0	\N	IN ALL LANES
-iadv_00068	4	1	1	0	1	IN LANE
-iadv_00069	4	1	1	0	2	IN BOTH LANES
-iadv_00070	4	1	1	0	\N	IN ALL LANES
-iadv_00071	5	1	0	\N	1	IN LEFT LANE
-iadv_00072	5	1	0	\N	2	IN LEFT 2 LANES
-iadv_00073	5	1	0	\N	3	IN LEFT 3 LANES
-iadv_00074	5	1	0	\N	4	IN LEFT 4 LANES
-iadv_00075	5	1	0	\N	\N	IN LEFT LANES
-iadv_00076	5	1	1	\N	1	IN LEFT LANE
-iadv_00077	5	1	1	\N	2	IN LEFT 2 LANES
-iadv_00078	5	1	1	\N	3	IN LEFT 3 LANES
-iadv_00079	5	1	1	\N	4	IN LEFT 4 LANES
-iadv_00080	5	1	1	\N	\N	IN LEFT LANES
-iadv_00081	6	1	0	\N	1	IN RIGHT LANE
-iadv_00082	6	1	0	\N	2	IN RIGHT 2 LANES
-iadv_00083	6	1	0	\N	3	IN RIGHT 3 LANES
-iadv_00084	6	1	0	\N	4	IN RIGHT 4 LANES
-iadv_00085	6	1	0	\N	\N	IN RIGHT LANES
-iadv_00086	6	1	1	\N	1	IN RIGHT LANE
-iadv_00087	6	1	1	\N	2	IN RIGHT 2 LANES
-iadv_00088	6	1	1	\N	3	IN RIGHT 3 LANES
-iadv_00089	6	1	1	\N	4	IN RIGHT 4 LANES
-iadv_00090	6	1	1	\N	\N	IN RIGHT LANES
-iadv_00091	7	1	0	\N	1	IN CENTER LANE
-iadv_00092	7	1	0	\N	\N	IN CENTER LANES
-iadv_00093	7	1	1	\N	1	IN CENTER LANE
-iadv_00094	7	1	1	\N	\N	IN CENTER LANES
-iadv_00095	8	1	0	\N	\N	ON BOTH SHOULDERS
-iadv_00096	8	1	1	\N	\N	ON BOTH SHOULDERS
-iadv_00097	9	1	0	\N	\N	ON LEFT SHOULDER
-iadv_00098	9	1	1	\N	\N	ON LEFT SHOULDER
-iadv_00099	10	1	0	\N	\N	ON RIGHT SHOULDER
-iadv_00100	10	1	1	\N	\N	ON RIGHT SHOULDER
-iadv_00101	11	1	0	\N	\N	IN BOTH SHOULDERS
-iadv_00102	11	1	1	\N	\N	IN BOTH SHOULDERS
-iadv_00103	12	1	0	\N	\N	IN LEFT SHOULDER
-iadv_00104	12	1	1	\N	\N	IN LEFT SHOULDER
-iadv_00105	13	1	0	\N	\N	IN RIGHT SHOULDER
-iadv_00106	13	1	1	\N	\N	IN RIGHT SHOULDER
+COPY iris.inc_advice (name, impact, lane_code, range, open_lanes, impacted_lanes, multi) FROM stdin;
+iadv_00001	0		0	0	\N	ROAD CLOSED
+iadv_00002	0		0	\N	\N	LANES CLOSED
+iadv_00003	0		1	0	\N	ROAD CLOSED
+iadv_00004	0		1	\N	\N	LANES CLOSED
+iadv_00005	0		2	\N	1	1 LANE CLOSED
+iadv_00006	0		2	\N	2	2 LANES CLOSED
+iadv_00007	0		2	\N	3	3 LANES CLOSED
+iadv_00008	0		2	0	\N	ROAD CLOSED
+iadv_00009	0		2	1	\N	SINGLE LANE
+iadv_00010	0		2	\N	\N	LANES CLOSED
+iadv_00011	0		3	\N	1	1 LANE CLOSED
+iadv_00012	0		3	\N	2	2 LANES CLOSED
+iadv_00013	0		3	\N	3	3 LANES CLOSED
+iadv_00014	0		3	0	\N	ROAD CLOSED
+iadv_00015	0		3	1	\N	SINGLE LANE
+iadv_00016	0		3	\N	\N	LANES CLOSED
+iadv_00017	1		0	\N	1	LEFT LANE CLOSED
+iadv_00018	1		0	\N	2	LEFT 2 LANES CLOSED
+iadv_00019	1		0	\N	3	LEFT 3 LANES CLOSED
+iadv_00020	1		0	\N	\N	LEFT LANES CLOSED
+iadv_00021	1		1	\N	1	LEFT LANE CLOSED
+iadv_00022	1		1	\N	2	LEFT 2 LANES CLOSED
+iadv_00023	1		1	\N	3	LEFT 3 LANES CLOSED
+iadv_00024	1		1	\N	\N	LEFT LANES CLOSED
+iadv_00025	1		2	\N	1	LANE CLOSED
+iadv_00026	1		2	\N	2	2 LANES CLOSED
+iadv_00027	1		2	\N	3	3 LANES CLOSED
+iadv_00028	1		2	1	\N	SINGLE LANE
+iadv_00029	1		2	\N	\N	LANES CLOSED
+iadv_00030	1		3	\N	1	LANE CLOSED
+iadv_00031	1		3	\N	2	2 LANES CLOSED
+iadv_00032	1		3	\N	3	3 LANES CLOSED
+iadv_00033	1		3	1	\N	SINGLE LANE
+iadv_00034	1		3	\N	\N	LANES CLOSED
+iadv_00035	2		0	\N	1	RIGHT LANE CLOSED
+iadv_00036	2		0	\N	2	RIGHT 2 LANES CLOSED
+iadv_00037	2		0	\N	3	RIGHT 3 LANES CLOSED
+iadv_00038	2		0	\N	\N	RIGHT LANES CLOSED
+iadv_00039	2		1	\N	1	RIGHT LANE CLOSED
+iadv_00040	2		1	\N	2	RIGHT 2 LANES CLOSED
+iadv_00041	2		1	\N	3	RIGHT 3 LANES CLOSED
+iadv_00042	2		1	\N	\N	RIGHT LANES CLOSED
+iadv_00043	2		2	\N	1	LANE CLOSED
+iadv_00044	2		2	\N	2	2 LANES CLOSED
+iadv_00045	2		2	\N	3	3 LANES CLOSED
+iadv_00046	2		2	1	\N	SINGLE LANE
+iadv_00047	2		2	\N	\N	LANES CLOSED
+iadv_00048	2		3	\N	1	LANE CLOSED
+iadv_00049	2		3	\N	2	2 LANES CLOSED
+iadv_00050	2		3	\N	3	3 LANES CLOSED
+iadv_00051	2		3	1	\N	SINGLE LANE
+iadv_00052	2		3	\N	\N	LANES CLOSED
+iadv_00053	3		0	\N	1	CENTER LANE CLOSED
+iadv_00054	3		0	\N	\N	CENTER LANES CLOSED
+iadv_00055	3		1	\N	1	CENTER LANE CLOSED
+iadv_00056	3		1	\N	\N	CENTER LANES CLOSED
+iadv_00057	3		2	\N	1	LANE CLOSED
+iadv_00058	3		2	\N	2	2 LANES CLOSED
+iadv_00059	3		2	\N	3	3 LANES CLOSED
+iadv_00060	3		2	\N	\N	LANES CLOSED
+iadv_00061	3		3	\N	1	LANE CLOSED
+iadv_00062	3		3	\N	2	2 LANES CLOSED
+iadv_00063	3		3	\N	3	3 LANES CLOSED
+iadv_00064	3		3	\N	\N	LANES CLOSED
+iadv_00065	4		0	0	1	IN LANE
+iadv_00066	4		0	0	2	IN BOTH LANES
+iadv_00067	4		0	0	\N	IN ALL LANES
+iadv_00068	4		1	0	1	IN LANE
+iadv_00069	4		1	0	2	IN BOTH LANES
+iadv_00070	4		1	0	\N	IN ALL LANES
+iadv_00071	5		0	\N	1	IN LEFT LANE
+iadv_00072	5		0	\N	2	IN LEFT 2 LANES
+iadv_00073	5		0	\N	3	IN LEFT 3 LANES
+iadv_00074	5		0	\N	4	IN LEFT 4 LANES
+iadv_00075	5		0	\N	\N	IN LEFT LANES
+iadv_00076	5		1	\N	1	IN LEFT LANE
+iadv_00077	5		1	\N	2	IN LEFT 2 LANES
+iadv_00078	5		1	\N	3	IN LEFT 3 LANES
+iadv_00079	5		1	\N	4	IN LEFT 4 LANES
+iadv_00080	5		1	\N	\N	IN LEFT LANES
+iadv_00081	6		0	\N	1	IN RIGHT LANE
+iadv_00082	6		0	\N	2	IN RIGHT 2 LANES
+iadv_00083	6		0	\N	3	IN RIGHT 3 LANES
+iadv_00084	6		0	\N	4	IN RIGHT 4 LANES
+iadv_00085	6		0	\N	\N	IN RIGHT LANES
+iadv_00086	6		1	\N	1	IN RIGHT LANE
+iadv_00087	6		1	\N	2	IN RIGHT 2 LANES
+iadv_00088	6		1	\N	3	IN RIGHT 3 LANES
+iadv_00089	6		1	\N	4	IN RIGHT 4 LANES
+iadv_00090	6		1	\N	\N	IN RIGHT LANES
+iadv_00091	7		0	\N	1	IN CENTER LANE
+iadv_00092	7		0	\N	\N	IN CENTER LANES
+iadv_00093	7		1	\N	1	IN CENTER LANE
+iadv_00094	7		1	\N	\N	IN CENTER LANES
+iadv_00095	8		0	\N	\N	ON BOTH SHOULDERS
+iadv_00096	8		1	\N	\N	ON BOTH SHOULDERS
+iadv_00097	9		0	\N	\N	ON LEFT SHOULDER
+iadv_00098	9		1	\N	\N	ON LEFT SHOULDER
+iadv_00099	10		0	\N	\N	ON RIGHT SHOULDER
+iadv_00100	10		1	\N	\N	ON RIGHT SHOULDER
+iadv_00101	11		0	\N	\N	IN BOTH SHOULDERS
+iadv_00102	11		1	\N	\N	IN BOTH SHOULDERS
+iadv_00103	12		0	\N	\N	IN LEFT SHOULDER
+iadv_00104	12		1	\N	\N	IN LEFT SHOULDER
+iadv_00105	13		0	\N	\N	IN RIGHT SHOULDER
+iadv_00106	13		1	\N	\N	IN RIGHT SHOULDER
 \.
 
 --

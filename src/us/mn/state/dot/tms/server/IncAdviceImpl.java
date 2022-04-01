@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2019  Minnesota Department of Transportation
+ * Copyright (C) 2016-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.IncAdvice;
 import us.mn.state.dot.tms.IncAdviceHelper;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -35,7 +35,7 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	/** Load all the incident advices */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncAdviceImpl.class);
-		store.query("SELECT name, impact, lane_type, range, " +
+		store.query("SELECT name, impact, lane_code, range, " +
 			"open_lanes, impacted_lanes, multi FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
@@ -51,7 +51,7 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("impact", impact);
-		map.put("lane_type", lane_type);
+		map.put("lane_code", lane_code);
 		map.put("range", range);
 		map.put("open_lanes", open_lanes);
 		map.put("impacted_lanes", impacted_lanes);
@@ -75,7 +75,7 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	private IncAdviceImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),           // name
 		     row.getInt(2),              // impact
-		     row.getShort(3),            // lane_type
+		     row.getString(3),           // lane_code
 		     row.getInt(4),              // range
 		     (Integer) row.getObject(5), // open_lanes
 		     (Integer) row.getObject(6), // impacted_lanes
@@ -84,12 +84,12 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	}
 
 	/** Create an incident advice */
-	private IncAdviceImpl(String n, int imp, short lt, int r, Integer oln,
+	private IncAdviceImpl(String n, int imp, String lc, int r, Integer oln,
 		Integer iln, String m)
 	{
 		super(n);
 		impact = imp;
-		lane_type = lt;
+		lane_code = lc;
 		range = r;
 		open_lanes = oln;
 		impacted_lanes = iln;
@@ -125,41 +125,41 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		return impact;
 	}
 
-	/** Lane type ordinal */
-	private short lane_type = (short) LaneType.MAINLINE.ordinal();
+	/** Lane code */
+	private String lane_code = LaneCode.MAINLINE.lcode;
 
-	/** Set the lane type ordinal */
+	/** Set the lane code */
 	@Override
-	public void setLaneType(short lt) {
-		lane_type = lt;
+	public void setLaneCode(String lc) {
+		lane_code = lc;
 	}
 
-	/** Set the lane type ordinal */
-	public void doSetLaneType(short lt) throws TMSException {
-		checkLaneType(lt);
-		if (lt != lane_type) {
-			store.update(this, "lane_type", lt);
-			setLaneType(lt);
+	/** Set the lane code */
+	public void doSetLaneCode(String lc) throws TMSException {
+		checkLaneCode(lc);
+		if (!objectEquals(lc, lane_code)) {
+			store.update(this, "lane_code", lc);
+			setLaneCode(lc);
 		}
 	}
 
-	/** Check for valid lane types */
-	private void checkLaneType(short lt) throws ChangeVetoException {
-		switch (LaneType.fromOrdinal(lt)) {
+	/** Check for valid lane codes */
+	private void checkLaneCode(String lc) throws ChangeVetoException {
+		switch (LaneCode.fromCode(lc)) {
 		case MAINLINE:
 		case EXIT:
 		case MERGE:
 		case CD_LANE:
 			return;
 		default:
-			throw new ChangeVetoException("INVALID LANE TYPE");
+			throw new ChangeVetoException("INVALID LANE CODE");
 		}
 	}
 
-	/** Get the lane type ordinal */
+	/** Get the lane code */
 	@Override
-	public short getLaneType() {
-		return lane_type;
+	public String getLaneCode() {
+		return lane_code;
 	}
 
 	/** Range ordinal */

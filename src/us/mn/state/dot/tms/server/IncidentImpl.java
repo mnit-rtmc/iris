@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.LaneImpact;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSException;
@@ -57,7 +57,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncidentImpl.class);
 		store.query("SELECT name, replaces, event_desc_id, " +
-			"event_date, detail, lane_type, road, dir, lat, " +
+			"event_date, detail, lane_code, road, dir, lat, " +
 			"lon, camera, impact, cleared, confirmed FROM event." +
 			SONAR_TYPE + " WHERE cleared = 'f';",new ResultFactory()
 		{
@@ -68,7 +68,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 					row.getInt(3),		// event_desc_id
 					row.getTimestamp(4),	// event_date
 					row.getString(5),	// detail
-					row.getShort(6),	// lane_type
+					row.getString(6),	// lane_code
 					row.getString(7),	// road
 					row.getShort(8),	// dir
 					row.getDouble(9),	// lat
@@ -91,7 +91,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		map.put("event_desc_id", event_desc_id);
 		map.put("event_date", event_date);
 		map.put("detail", detail);
-		map.put("lane_type", lane_type);
+		map.put("lane_code", lane_code);
 		map.put("road", road);
 		map.put("dir", dir);
 		map.put("lat", lat);
@@ -122,17 +122,17 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 
 	/** Create an incident */
 	protected IncidentImpl(Namespace ns, String n, String rpl, int et,
-		Date ed, String dtl, short lnt, String r, short d, double lt,
+		Date ed, String dtl, String lc, String r, short d, double lt,
 		double ln, String cam, String im, boolean clr, boolean cnf)
 	{
 		this(n, rpl, et, ed, (IncidentDetail)ns.lookupObject(
-		     IncidentDetail.SONAR_TYPE, dtl), lnt, lookupRoad(r), d, lt,
+		     IncidentDetail.SONAR_TYPE, dtl), lc, lookupRoad(r), d, lt,
 		     ln, lookupCamera(cam), im, clr, cnf);
 	}
 
 	/** Create an incident */
 	public IncidentImpl(String n, String rpl, int et, Date ed,
-		IncidentDetail dtl, short lnt, Road r, short d, double lt,
+		IncidentDetail dtl, String lc, Road r, short d, double lt,
 		double ln, Camera cam, String im, boolean clr, boolean cnf)
 	{
 		super(n);
@@ -140,7 +140,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		event_desc_id = et;
 		event_date = new Date(ed.getTime());
 		detail = dtl;
-		lane_type = lnt;
+		lane_code = lc;
 		road = r;
 		dir = d;
 		lat = lt;
@@ -196,13 +196,13 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		return detail;
 	}
 
-	/** Lane type ordinal */
-	private short lane_type = (short) LaneType.MAINLINE.ordinal();
+	/** Lane code */
+	private String lane_code = LaneCode.MAINLINE.lcode;
 
-	/** Get the lane type */
+	/** Get the lane code */
 	@Override
-	public short getLaneType() {
-		return lane_type;
+	public String getLaneCode() {
+		return lane_code;
 	}
 
 	/** Road for incident location */
@@ -352,8 +352,8 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		w.write(createAttribute("event_date", event_date));
 		if (dtl != null)
 			w.write(createAttribute("detail", dtl));
-		w.write(createAttribute("lane_type",
-			LaneType.fromOrdinal(lane_type)));
+		w.write(createAttribute("lane_code",
+			LaneCode.fromCode(lane_code)));
 		w.write(createAttribute("road", road));
 		w.write(createAttribute("dir",
 			Direction.fromOrdinal(dir).abbrev));

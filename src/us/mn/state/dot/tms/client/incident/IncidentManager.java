@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2020  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneConfiguration;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.map.Style;
@@ -138,8 +138,8 @@ public class IncidentManager extends ProxyManager<Incident>
 
 	/** Get lane configuration at an incident */
 	public LaneConfiguration laneConfiguration(Incident inc) {
-		LaneType lt = LaneType.fromOrdinal(inc.getLaneType());
-		if (lt.isRamp())
+		LaneCode lc = LaneCode.fromCode(inc.getLaneCode());
+		if (lc.isRamp())
 			return rampLaneConfiguration(inc);
 		CorridorBase cb = lookupCorridor(new IncidentLoc(inc));
 		return (cb != null)
@@ -226,20 +226,20 @@ public class IncidentManager extends ProxyManager<Incident>
 	public String getTypeDesc(Incident inc) {
 		Style sty = getTheme().getStyle(inc);
 		if (sty != null) {
-			LaneType lt = LaneType.fromOrdinal(inc.getLaneType());
-			return getTypeDesc(sty.toString(), getLaneType(lt));
+			LaneCode lc = LaneCode.fromCode(inc.getLaneCode());
+			return getTypeDesc(sty.toString(), getLaneCode(lc));
 		} else
 			return "";
 	}
 
-	/** Get the lane type description */
-	private String getLaneType(LaneType lt) {
-		switch (lt) {
+	/** Get the lane code description */
+	private String getLaneCode(LaneCode lc) {
+		switch (lc) {
 		case MAINLINE:
 		case EXIT:
 		case MERGE:
 		case CD_LANE:
-			return lt.toString();
+			return lc.toString();
 		default:
 			return null;
 		}
@@ -247,11 +247,11 @@ public class IncidentManager extends ProxyManager<Incident>
 
 	/** Get the incident type description.
 	 * @param sty Style of incident.
-	 * @param ltd Lane type description (may be null).
+	 * @param lcd Lane code description (may be null).
 	 * @return Description of incident type. */
-	private String getTypeDesc(String sty, String ltd) {
-		if (ltd != null)
-			return sty + " " + I18N.get("incident.on") + " " + ltd;
+	private String getTypeDesc(String sty, String lcd) {
+		if (lcd != null)
+			return sty + " " + I18N.get("incident.on") + " " + lcd;
 		else
 			return sty;
 	}

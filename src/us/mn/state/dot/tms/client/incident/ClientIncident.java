@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.client.incident;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.geo.Position;
 
@@ -32,13 +32,13 @@ public class ClientIncident implements Incident {
 	static public final String NAME = "client_incident";
 
 	/** Create a new client incident */
-	public ClientIncident(String rpl, int et, IncidentDetail id, short lnt,
+	public ClientIncident(String rpl, int et, IncidentDetail id, String lc,
 		Road rd, short d, double lt, double ln, String i)
 	{
 		replaces = rpl;
 		event_type = et;
 		detail = id;
-		lane_type = LaneType.fromOrdinal(lnt);
+		lane_code = lc;
 		road = rd;
 		dir = d;
 		lat = lt;
@@ -94,13 +94,13 @@ public class ClientIncident implements Incident {
 		return detail;
 	}
 
-	/** Lane type */
-	private final LaneType lane_type;
+	/** Lane code */
+	private final String lane_code;
 
-	/** Get the lane type ordinal */
+	/** Get the lane code */
 	@Override
-	public short getLaneType() {
-		return (short) lane_type.ordinal();
+	public String getLaneCode() {
+		return lane_code;
 	}
 
 	/** Road */

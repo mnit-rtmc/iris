@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2020  Minnesota Department of Transportation
+ * Copyright (C) 2016-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.LaneImpact;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import static us.mn.state.dot.tms.server.BaseObjectImpl.corridors;
@@ -104,7 +104,7 @@ public class IncidentCache {
 		Position pos = new Position(pi.lat, pi.lon);
 		SphericalMercatorPosition smp =
 			SphericalMercatorPosition.convert(pos);
-		GeoLoc loc = corridors.snapGeoLoc(smp, LaneType.MAINLINE,
+		GeoLoc loc = corridors.snapGeoLoc(smp, LaneCode.MAINLINE,
 			MAX_DIST, pi.dir);
 		if (loc != null)
 			updateIncident(pi, loc);
@@ -114,7 +114,7 @@ public class IncidentCache {
 
 	/** Update an incident */
 	private void updateIncident(ParsedIncident pi, GeoLoc loc) {
-		int n_lanes = getLaneCount(LaneType.MAINLINE, loc);
+		int n_lanes = getLaneCount(LaneCode.MAINLINE, loc);
 		if (n_lanes > 0)
 			updateIncident(pi, loc, n_lanes);
 		else if (inc_log.isOpen())
@@ -122,9 +122,9 @@ public class IncidentCache {
 	}
 
 	/** Get the lane count at the incident location */
-	private int getLaneCount(LaneType lt, GeoLoc loc) {
+	private int getLaneCount(LaneCode lc, GeoLoc loc) {
 		CorridorBase cb = corridors.getCorridor(loc);
-		return (cb != null) ? cb.getLaneCount(lt, loc) : 0;
+		return (cb != null) ? cb.getLaneCount(lc, loc) : 0;
 	}
 
 	/** Update an incident */
@@ -165,11 +165,11 @@ public class IncidentCache {
 	private boolean createIncidentNotify(String n, String orig,
 		ParsedIncident pi, GeoLoc loc, int n_lanes)
 	{
-		short lnt = (short) LaneType.MAINLINE.ordinal();
+		String lc = LaneCode.MAINLINE.lcode;
 		String im = LaneImpact.fromLanes(n_lanes);
 		IncidentImpl inc = new IncidentImpl(n, orig,
 			pi.inc_type.id, new Date(), pi.detail,
-			lnt, loc.getRoadway(), loc.getRoadDir(),
+			lc, loc.getRoadway(), loc.getRoadDir(),
 			pi.lat, pi.lon, pi.lookupCamera(), im, false, false);
 		try {
 			inc.notifyCreate();

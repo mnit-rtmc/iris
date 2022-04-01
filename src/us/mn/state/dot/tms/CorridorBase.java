@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2020  Minnesota Department of Transportation
+ * Copyright (C) 2007-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,32 +60,32 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 	}
 
 	/** Check if a segment is valid */
-	static private boolean isSegmentValid(LaneType lt, R_Node np, R_Node n){
-		return isStartValid(lt, np) && isEndValid(lt, n);
+	static private boolean isSegmentValid(LaneCode lc, R_Node np, R_Node n){
+		return isStartValid(lc, np) && isEndValid(lc, n);
 	}
 
 	/** Check if start of a segment is valid */
-	static private boolean isStartValid(LaneType lt, R_Node np) {
+	static private boolean isStartValid(LaneCode lc, R_Node np) {
 		return (np != null)
-		    && isStartType(lt, np)
+		    && isStartType(lc, np)
 		    && !R_NodeHelper.isCommonExit(np);
 	}
 
-	/** Check if start node matches lane type */
-	static private boolean isStartType(LaneType lt, R_Node np) {
-		return lt != LaneType.EXIT || R_NodeHelper.isExit(np);
+	/** Check if start node matches lane code */
+	static private boolean isStartType(LaneCode lc, R_Node np) {
+		return lc != LaneCode.EXIT || R_NodeHelper.isExit(np);
 	}
 
 	/** Check if end of a segment is valid */
-	static private boolean isEndValid(LaneType lt, R_Node n) {
+	static private boolean isEndValid(LaneCode lc, R_Node n) {
 		return (n != null)
-		    && isEndType(lt, n)
+		    && isEndType(lc, n)
 		    && !R_NodeHelper.isCommonEntrance(n);
 	}
 
-	/** Check if end node matches lane type */
-	static private boolean isEndType(LaneType lt, R_Node n) {
-		return lt != LaneType.MERGE || R_NodeHelper.isEntrance(n);
+	/** Check if end node matches lane code */
+	static private boolean isEndType(LaneCode lc, R_Node n) {
+		return lc != LaneCode.MERGE || R_NodeHelper.isEntrance(n);
 	}
 
 	/** GeoLoc / distance pair */
@@ -315,7 +315,7 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 			Position pos = new Position(lat, lon);
 			SphericalMercatorPosition smp =
 				 SphericalMercatorPosition.convert(pos);
-			return snapGeoLoc2(smp, LaneType.MAINLINE, MAX_DIST);
+			return snapGeoLoc2(smp, LaneCode.MAINLINE, MAX_DIST);
 		}
 		return null;
 	}
@@ -499,11 +499,11 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 	}
 
 	/** Get the lane count a given location */
-	public int getLaneCount(LaneType lt, GeoLoc loc) {
+	public int getLaneCount(LaneCode lc, GeoLoc loc) {
 		Position pos = GeoLocHelper.getWgs84Position(loc);
 		if (pos == null)
 			return 0;
-		switch (lt) {
+		switch (lc) {
 		case EXIT:
 			R_Node n = findNearest(pos, R_NodeType.EXIT);
 			return (n != null) ? n.getLanes() : 0;
@@ -517,19 +517,19 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 
 	/** Snap a point to the corridor.
 	 * @param smp Selected point (spherical mercator position).
-	 * @param lt Lane type (MAINLINE, EXIT, MERGE or CD_LANE).
+	 * @param lc Lane code (MAINLINE, EXIT, MERGE or CD_LANE).
 	 * @param max_dist Maximum distance to snap.
 	 * @return GeoLocDist snapped to corridor, or null if not found. */
-	public GeoLocDist snapGeoLoc(SphericalMercatorPosition smp, LaneType lt,
+	public GeoLocDist snapGeoLoc(SphericalMercatorPosition smp, LaneCode lc,
 		Distance max_dist)
 	{
-		switch (lt) {
+		switch (lc) {
 		case EXIT:
 		case MERGE:
 		case MAINLINE:
 		case CD_LANE:
-			if (checkLaneType(lt))
-				return snapGeoLoc2(smp, lt, max_dist);
+			if (checkLaneCode(lc))
+				return snapGeoLoc2(smp, lc, max_dist);
 		}
 		return null;
 	}
@@ -540,9 +540,9 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 			roadway.getRClass());
 	}
 
-	/** Check if the road class matches a lane type */
-	private boolean checkLaneType(LaneType lt) {
-		boolean cd_typ = (lt == LaneType.CD_LANE);
+	/** Check if the road class matches a lane code */
+	private boolean checkLaneCode(LaneCode lc) {
+		boolean cd_typ = (lc == LaneCode.CD_LANE);
 		return isCDRoad() == cd_typ;
 	}
 
@@ -551,7 +551,7 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 	 * @param max_dist Maximum distance to snap.
 	 * @return GeoLocDist snapped to corridor, or null if not found. */
 	private GeoLocDist snapGeoLoc2(SphericalMercatorPosition smp,
-		LaneType lt, Distance max_dist)
+		LaneCode lc, Distance max_dist)
 	{
 		final Position pos = smp.getPosition();
 		GeoLocDist gld = null; /* location snapped to corridor */
@@ -560,7 +560,7 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 		for (T n: r_nodes) {
 			if (n.getActive()) {
 				GeoLoc l = n.getGeoLoc();
-				if (isSegmentValid(lt, np, n)) {
+				if (isSegmentValid(lc, np, n)) {
 					GeoLoc loc = snapSegment(lp, l, smp);
 					gld = shortestDist(pos, loc, gld,
 						max_dist);

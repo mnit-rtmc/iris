@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2021  Minnesota Department of Transportation
+ * Copyright (C) 2015-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TollZone;
@@ -315,7 +315,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	 * @return Set of all HOT detectors in the route. */
 	private SamplerSet lookupDetectors(Route r) {
 		return (r != null)
-		      ? r.getSamplerSet(LaneType.HOT)
+		      ? r.getSamplerSet(LaneCode.HOT)
 		      : new SamplerSet();
 	}
 

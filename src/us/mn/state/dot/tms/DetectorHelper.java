@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,14 +48,13 @@ public class DetectorHelper extends BaseHelper {
 
 	/** Get the detector label */
 	static public String getLabel(Detector det) {
-		if (det.getLaneType() == LaneType.PARKING.ordinal())
+		if (LaneCode.PARKING.lcode.equals(det.getLaneCode()))
 			return getParkingLabel(det);
 		StringBuilder b = new StringBuilder();
 		b.append(GeoLocHelper.getRootLabel(getGeoLoc(det)));
 		if (b.toString().equals(GeoLocHelper.FUTURE))
 			return b.toString();
-		LaneType lt = LaneType.fromOrdinal(det.getLaneType());
-		b.append(lt.suffix);
+		b.append(det.getLaneCode());
 		int l_num = det.getLaneNumber();
 		if (l_num > 0)
 			b.append(l_num);

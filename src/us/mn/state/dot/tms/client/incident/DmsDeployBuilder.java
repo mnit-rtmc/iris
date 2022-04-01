@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2020  Minnesota Department of Transportation
+ * Copyright (C) 2010-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.IncDescriptorHelper;
 import us.mn.state.dot.tms.IncLocator;
 import us.mn.state.dot.tms.IncLocatorHelper;
 import us.mn.state.dot.tms.IncRange;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -47,11 +47,11 @@ public class DmsDeployBuilder {
 	}
 
 	/** Get the r_node type checker */
-	static private R_NodeType.Checker getChecker(short lto) {
-		final LaneType lt = LaneType.fromOrdinal(lto);
+	static private R_NodeType.Checker getChecker(String lcode) {
+		final LaneCode lc = LaneCode.fromCode(lcode);
 		return new R_NodeType.Checker() {
 			public boolean check(R_NodeType nt) {
-				switch (lt) {
+				switch (lc) {
 				case EXIT:
 					return R_NodeType.EXIT == nt;
 				case MERGE:
@@ -98,7 +98,7 @@ public class DmsDeployBuilder {
 	/** Pick a node within 1 mile of incident */
 	private R_Node pickNode(CorridorBase cb, float mp) {
 		Position pos = new Position(inc.getLat(), inc.getLon());
-		R_NodeType.Checker checker = getChecker(inc.getLaneType());
+		R_NodeType.Checker checker = getChecker(inc.getLaneCode());
 		R_Node n = cb.pickNearest(pos, checker);
 		if (n != null) {
 			Float lp = cb.calculateMilePoint(n.getGeoLoc());

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,11 +30,11 @@ public interface Detector extends Device {
 	/** Get the r_node (roadway network node) */
 	R_Node getR_Node();
 
-	/** Set the lane type */
-	void setLaneType(short t);
+	/** Set the lane code */
+	void setLaneCode(String lc);
 
-	/** Get the lane type */
-	short getLaneType();
+	/** Get the lane code */
+	String getLaneCode();
 
 	/** Set the lane number */
 	void setLaneNumber(short n);

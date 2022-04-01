@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2018  Minnesota Department of Transportation
+ * Copyright (C) 2010-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
@@ -60,22 +60,28 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		abstract protected void do_perform(Detector d);
 	}
 
-	/** Lane type action */
-	private final DAction type_act = new DAction("detector.lane.type") {
+	/** Lane code action */
+	private final DAction code_act = new DAction("detector.lane.code") {
 		protected void do_perform(Detector d) {
-			d.setLaneType((short) type_cbx.getSelectedIndex());
+			Object item = code_cbx.getSelectedItem();
+			if (item instanceof LaneCode) {
+				LaneCode lc = (LaneCode) item;
+				d.setLaneCode(lc.lcode);
+			}
 		}
 		@Override
 		protected void doUpdateSelected() {
 			Detector d = detector;
-			if (d != null)
-				type_cbx.setSelectedIndex(d.getLaneType());
+			if (d != null) {
+				LaneCode lc = LaneCode.fromCode(d.getLaneCode());
+				code_cbx.setSelectedItem(lc);
+			}
 		}
 	};
 
-	/** Lane type combobox */
-	private final JComboBox<LaneType> type_cbx =
-		new JComboBox<LaneType>(LaneType.values());
+	/** Lane code combobox */
+	private final JComboBox<LaneCode> code_cbx =
+		new JComboBox<LaneCode>(LaneCode.values());
 
 	/** Spinner for lane number */
 	private final JSpinner lane_spn = new JSpinner(
@@ -166,9 +172,9 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 	@Override
 	public void initialize() {
 		super.initialize();
-		type_cbx.setAction(type_act);
-		add("detector.lane.type");
-		add(type_cbx, Stretch.LAST);
+		code_cbx.setAction(code_act);
+		add("detector.lane.code");
+		add(code_cbx, Stretch.LAST);
 		add("detector.lane.number");
 		add(lane_spn, Stretch.LAST);
 		add("detector.abandoned");
@@ -284,7 +290,7 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 	/** Update the edit mode */
 	public void updateEditMode() {
 		Detector d = detector;
-		type_act.setEnabled(session.canWrite(d, "laneType"));
+		code_act.setEnabled(session.canWrite(d, "laneCode"));
 		lane_spn.setEnabled(session.canWrite(d, "laneNumber"));
 		aband_chk.setEnabled(session.canWrite(d, "abandoned"));
 		force_chk.setEnabled(session.canWrite(d, "forceFail"));
@@ -308,8 +314,8 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 			detector = d;
 			updateEditMode();
 		}
-		if (a == null || a.equals("laneType"))
-			type_act.updateSelected();
+		if (a == null || a.equals("laneCode"))
+			code_act.updateSelected();
 		if (a == null || a.equals("laneNumber"))
 			lane_spn.setValue(d.getLaneNumber());
 		if (a == null || a.equals("abandoned"))
@@ -330,8 +336,8 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 	@Override
 	public void clear() {
 		detector = null;
-		type_act.setEnabled(false);
-		type_cbx.setSelectedIndex(0);
+		code_act.setEnabled(false);
+		code_cbx.setSelectedIndex(0);
 		lane_spn.setEnabled(false);
 		lane_spn.setValue(0);
 		aband_chk.setEnabled(false);

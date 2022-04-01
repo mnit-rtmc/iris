@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2021  Minnesota Department of Transportation
+ * Copyright (C) 2001-2022  Minnesota Department of Transportation
  * Copyright (C) 2011-2012  University of Minnesota Duluth (NATSRL)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@ import java.util.Iterator;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.units.Interval;
@@ -688,11 +688,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			meter = mtr;
 			node = en;
 			SamplerSet ss = meter.getSamplerSet();
-			queue = ss.filter(LaneType.QUEUE);
-			passage = ss.filter(LaneType.PASSAGE);
-			merge = ss.filter(LaneType.MERGE);
-			bypass = ss.filter(LaneType.BYPASS);
-			green = ss.filter(LaneType.GREEN);
+			queue = ss.filter(LaneCode.QUEUE);
+			passage = ss.filter(LaneCode.PASSAGE);
+			merge = ss.filter(LaneCode.MERGE);
+			bypass = ss.filter(LaneCode.BYPASS);
+			green = ss.filter(LaneCode.GREEN);
 			s_node = getAssociatedStation();
 		}
 

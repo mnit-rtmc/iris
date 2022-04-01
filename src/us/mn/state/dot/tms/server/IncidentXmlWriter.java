@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ public class IncidentXmlWriter extends XmlWriter {
 		w.write("<!ATTLIST incident event_type CDATA #REQUIRED>\n");
 		w.write("<!ATTLIST incident event_date CDATA #REQUIRED>\n");
 		w.write("<!ATTLIST incident detail CDATA #IMPLIED>\n");
-		w.write("<!ATTLIST incident lane_type CDATA #REQUIRED>\n");
+		w.write("<!ATTLIST incident lane_code CDATA #REQUIRED>\n");
 		w.write("<!ATTLIST incident road CDATA #REQUIRED>\n");
 		w.write("<!ATTLIST incident dir CDATA #REQUIRED>\n");
 		w.write("<!ATTLIST incident location CDATA #IMPLIED>\n");

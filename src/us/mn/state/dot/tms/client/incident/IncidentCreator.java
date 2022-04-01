@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneImpact;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.IrisClient;
@@ -63,13 +63,13 @@ public class IncidentCreator extends JPanel {
 	/** Maximum distance to snap */
 	static private final Distance MAX_DIST = new Distance(1, MILES);
 
-	/** Create the lane type combo box */
-	static protected JComboBox<LaneType> createLaneTypeCombo() {
-		return new JComboBox<LaneType>(new LaneType[] {
-			LaneType.MAINLINE,
-			LaneType.EXIT,
-			LaneType.MERGE,
-			LaneType.CD_LANE
+	/** Create the lane code combo box */
+	static protected JComboBox<LaneCode> createLaneCodeCombo() {
+		return new JComboBox<LaneCode>(new LaneCode[] {
+			LaneCode.MAINLINE,
+			LaneCode.EXIT,
+			LaneCode.MERGE,
+			LaneCode.CD_LANE
 		});
 	}
 
@@ -85,8 +85,8 @@ public class IncidentCreator extends JPanel {
 	/** Button to create a "hazard" incident */
 	private final JToggleButton hazard_btn;
 
-	/** Lane type combo box */
-	private final JComboBox<LaneType> ltype_cbx;
+	/** Lane code combo box */
+	private final JComboBox<LaneCode> lcode_cbx;
 
 	/** Incident selection model */
 	private final ProxySelectionModel<Incident> sel_mdl;
@@ -125,7 +125,7 @@ public class IncidentCreator extends JPanel {
 			EventType.INCIDENT_ROADWORK, theme);
 		hazard_btn = createButton(ItemStyle.HAZARD,
 			EventType.INCIDENT_HAZARD, theme);
-		ltype_cbx = createLaneTypeCombo();
+		lcode_cbx = createLaneCodeCombo();
 		Box box = Box.createHorizontalBox();
 		box.add(crash_btn);
 		box.add(Box.createHorizontalStrut(4));
@@ -138,9 +138,9 @@ public class IncidentCreator extends JPanel {
 		add(Box.createVerticalStrut(4));
 		box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
-		box.add(new ILabel("incident.lane_type"));
+		box.add(new ILabel("incident.lane_code"));
 		box.add(Box.createHorizontalStrut(4));
-		box.add(ltype_cbx);
+		box.add(lcode_cbx);
 		box.add(Box.createHorizontalGlue());
 		add(box);
 		setEnabled(false);
@@ -212,10 +212,11 @@ public class IncidentCreator extends JPanel {
 		final String replaces = inc.getName();
 		final EventType et = EventType.fromId(inc.getEventType());
 		final IncidentDetail dtl = inc.getDetail();
-		final LaneType lt = LaneType.fromOrdinal(inc.getLaneType());
+		final String lcode = inc.getLaneCode();
+		final LaneCode lc = LaneCode.fromCode(lcode);
 		client.setPointSelector(new PointSelector() {
 			public boolean selectPoint(Point2D p) {
-				createIncident(replaces, et, dtl, lt,
+				createIncident(replaces, et, dtl, lc,
 					getPosition(p));
 				return true;
 			}
@@ -232,10 +233,11 @@ public class IncidentCreator extends JPanel {
 	private void createIncident(String replaces, EventType et,
 		SphericalMercatorPosition smp)
 	{
-		LaneType lt = (LaneType) ltype_cbx.getSelectedItem();
-		if (lt != null) {
-			createIncident(replaces, et, (IncidentDetail)null, lt,
-				smp);
+		Object item = lcode_cbx.getSelectedItem();
+		if (item instanceof LaneCode) {
+			LaneCode lc = (LaneCode) item;
+			createIncident(replaces, et, (IncidentDetail) null,
+				lc, smp);
 		}
 	}
 
@@ -243,32 +245,32 @@ public class IncidentCreator extends JPanel {
 	 * @param replaces Name of incident being replaced.
 	 * @param et Event type.
 	 * @param dtl Incident detail.
-	 * @param lt Lane type.
+	 * @param lc Lane code.
 	 * @param smp Position (lat / lon). */
 	private void createIncident(String replaces, EventType et,
-		IncidentDetail dtl, LaneType lt, SphericalMercatorPosition smp)
+		IncidentDetail dtl, LaneCode lc, SphericalMercatorPosition smp)
 	{
-		GeoLoc loc = r_node_manager.snapGeoLoc(smp, lt, MAX_DIST);
+		GeoLoc loc = r_node_manager.snapGeoLoc(smp, lc, MAX_DIST);
 		if (loc != null)
-			createIncident(replaces, et, dtl, lt, loc);
+			createIncident(replaces, et, dtl, lc, loc);
 	}
 
 	/** Create and select an incident.
 	 * @param replaces Name of incident being replaced.
 	 * @param et Event type.
 	 * @param dtl Incident detail.
-	 * @param lt Lane type.
+	 * @param lc Lane code.
 	 * @param loc Incident location. */
 	private void createIncident(String replaces, EventType et,
-		IncidentDetail dtl, LaneType lt, GeoLoc loc)
+		IncidentDetail dtl, LaneCode lc, GeoLoc loc)
 	{
 		Road road = loc.getRoadway();
 		short dir = loc.getRoadDir();
 		Position pos = GeoLocHelper.getWgs84Position(loc);
-		int n_lanes = getLaneCount(lt, loc);
+		int n_lanes = getLaneCount(lc, loc);
 		if (pos != null && n_lanes > 0) {
 			ClientIncident ci = new ClientIncident(replaces, et.id,
-				dtl, (short) lt.ordinal(), road, dir,
+				dtl, lc.lcode, road, dir,
 				(float) pos.getLatitude(),
 				(float) pos.getLongitude(),
 				LaneImpact.fromLanes(n_lanes));
@@ -277,9 +279,9 @@ public class IncidentCreator extends JPanel {
 	}
 
 	/** Get the lane count at the incident location */
-	private int getLaneCount(LaneType lt, GeoLoc loc) {
+	private int getLaneCount(LaneCode lc, GeoLoc loc) {
 		CorridorBase cb = r_node_manager.lookupCorridor(loc);
-		return (cb != null) ? cb.getLaneCount(lt, loc) : 0;
+		return (cb != null) ? cb.getLaneCount(lc, loc) : 0;
 	}
 
 	/** Get the selected toggle button */
@@ -306,7 +308,7 @@ public class IncidentCreator extends JPanel {
 			work_btn.setSelected(false);
 		if (hazard_btn.isSelected())
 			hazard_btn.setSelected(false);
-		ltype_cbx.setSelectedItem(LaneType.MAINLINE);
+		lcode_cbx.setSelectedItem(LaneCode.MAINLINE);
 	}
 
 	/** Set enabled */
@@ -315,7 +317,7 @@ public class IncidentCreator extends JPanel {
 		stall_btn.setEnabled(e);
 		work_btn.setEnabled(e);
 		hazard_btn.setEnabled(e);
-		ltype_cbx.setEnabled(e);
+		lcode_cbx.setEnabled(e);
 	}
 
 	/** Dispose of the incident creator */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2019  Minnesota Department of Transportation
+ * Copyright (C) 2016-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.IncDescriptor;
 import us.mn.state.dot.tms.IncDescriptorHelper;
 import us.mn.state.dot.tms.IncidentDetail;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
 
@@ -38,7 +38,7 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 	/** Load all the incident descriptors */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncDescriptorImpl.class);
-		store.query("SELECT name, event_desc_id, detail, lane_type, " +
+		store.query("SELECT name, event_desc_id, detail, lane_code, " +
 			"multi FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
@@ -55,7 +55,7 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 		map.put("name", name);
 		map.put("event_desc_id", event_desc_id);
 		map.put("detail", detail);
-		map.put("lane_type", lane_type);
+		map.put("lane_code", lane_code);
 		map.put("multi", multi);
 		return map;
 	}
@@ -74,22 +74,22 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 
 	/** Create an incident descriptor */
 	private IncDescriptorImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),          // name
-		     row.getInt(2),             // event_desc_id
-		     row.getString(3),          // detail
-		     row.getShort(4),           // lane_type
-		     row.getString(5)           // multi
+		this(row.getString(1),      // name
+		     row.getInt(2),         // event_desc_id
+		     row.getString(3),      // detail
+		     row.getString(4),      // lane_code
+		     row.getString(5)       // multi
 		);
 	}
 
 	/** Create an incident descriptor */
-	private IncDescriptorImpl(String n, int et, String dtl, short lt,
+	private IncDescriptorImpl(String n, int et, String dtl, String lc,
 		String m)
 	{
 		super(n);
 		event_desc_id = et;
 		detail = lookupIncDetail(dtl);
-		lane_type = lt;
+		lane_code = lc;
 		multi = m;
 	}
 
@@ -158,41 +158,41 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 		return detail;
 	}
 
-	/** Lane type ordinal */
-	private short lane_type = (short) LaneType.MAINLINE.ordinal();
+	/** Lane code */
+	private String lane_code = LaneCode.MAINLINE.lcode;
 
-	/** Set the lane type ordinal */
+	/** Set the lane code */
 	@Override
-	public void setLaneType(short lt) {
-		lane_type = lt;
+	public void setLaneCode(String lc) {
+		lane_code = lc;
 	}
 
-	/** Set the lane type ordinal */
-	public void doSetLaneType(short lt) throws TMSException {
-		checkLaneType(lt);
-		if (lt != lane_type) {
-			store.update(this, "lane_type", lt);
-			setLaneType(lt);
+	/** Set the lane code */
+	public void doSetLaneCode(String lc) throws TMSException {
+		checkLaneCode(lc);
+		if (!objectEquals(lc, lane_code)) {
+			store.update(this, "lane_code", lc);
+			setLaneCode(lc);
 		}
 	}
 
-	/** Check for valid lane types */
-	private void checkLaneType(short lt) throws ChangeVetoException {
-		switch (LaneType.fromOrdinal(lt)) {
+	/** Check for valid lane code */
+	private void checkLaneCode(String lc) throws ChangeVetoException {
+		switch (LaneCode.fromCode(lc)) {
 		case MAINLINE:
 		case EXIT:
 		case MERGE:
 		case CD_LANE:
 			return;
 		default:
-			throw new ChangeVetoException("INVALID LANE TYPE");
+			throw new ChangeVetoException("INVALID LANE CODE");
 		}
 	}
 
-	/** Get the lane type ordinal */
+	/** Get the lane code */
 	@Override
-	public short getLaneType() {
-		return lane_type;
+	public String getLaneCode() {
+		return lane_code;
 	}
 
 	/** MULTI string */

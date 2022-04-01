@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2019  Minnesota Department of Transportation
+ * Copyright (C) 2016-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ public class IncAdviceHelper extends BaseHelper {
 			IncAdvice adv = it.next();
 			if (adv.getImpact() == imp.ordinal() &&
 			    adv.getRange() == rng.ordinal() &&
-			    adv.getLaneType() == inc.getLaneType())
+			    adv.getLaneCode().equals(inc.getLaneCode()))
 			{
 				LaneMatch open = LaneMatch.check(
 					adv.getOpenLanes(),

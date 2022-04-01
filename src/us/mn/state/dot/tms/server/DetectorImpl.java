@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -33,7 +33,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -216,7 +216,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Load all the detectors */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DetectorImpl.class);
-		store.query("SELECT name, controller, pin, r_node, lane_type, "+
+		store.query("SELECT name, controller, pin, r_node, lane_code, "+
 			"lane_number, abandoned, force_fail, auto_fail, " +
 			"field_length, fake, notes FROM iris." + SONAR_TYPE +
 			";", new ResultFactory()
@@ -276,7 +276,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		map.put("pin", pin);
 		if (r_node != null)
 			map.put("r_node", r_node.getName());
-		map.put("lane_type", (short) lane_type.ordinal());
+		map.put("lane_code", lane_code);
 		map.put("lane_number", lane_number);
 		map.put("abandoned", abandoned);
 		map.put("force_fail", force_fail);
@@ -302,7 +302,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Create a new detector */
 	public DetectorImpl(String n) throws TMSException, SonarException {
 		super(n);
-		veh_cache = new PeriodicSampleCache(PeriodicSampleType.VEH_COUNT);
+		veh_cache = new PeriodicSampleCache(
+			PeriodicSampleType.VEH_COUNT);
 		scn_cache = new PeriodicSampleCache(PeriodicSampleType.SCAN);
 		spd_cache = new PeriodicSampleCache(PeriodicSampleType.SPEED);
 		mc_count_cache = new PeriodicSampleCache(
@@ -323,7 +324,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		     row.getString(2),  // controller
 		     row.getInt(3),     // pin
 		     row.getString(4),  // r_node
-		     row.getShort(5),   // lane_type
+		     row.getString(5),  // lane_code
 		     row.getShort(6),   // lane_number
 		     row.getBoolean(7), // abandoned
 		     row.getBoolean(8), // force_fail
@@ -335,29 +336,30 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	}
 
 	/** Create a detector */
-	private DetectorImpl(String n, String c, int p, String r, short lt,
+	private DetectorImpl(String n, String c, int p, String r, String lc,
 		short ln, boolean a, boolean ff, boolean af, float fl, String f,
 		String nt)
 	{
-		this(n, lookupController(c), p, lookupR_Node(r), lt, ln, a, ff,
+		this(n, lookupController(c), p, lookupR_Node(r), lc, ln, a, ff,
 		     af, fl, f, nt);
 	}
 
 	/** Create a detector */
 	private DetectorImpl(String n, ControllerImpl c, int p, R_NodeImpl r,
-		short lt, short ln, boolean a, boolean ff, boolean af, float fl,
-		String f, String nt)
+		String lc, short ln, boolean a, boolean ff, boolean af,
+		float fl, String f, String nt)
 	{
 		super(n, c, p, nt);
 		r_node = r;
-		lane_type = LaneType.fromOrdinal(lt);
+		lane_code = lc;
 		lane_number = ln;
 		abandoned = a;
 		force_fail = ff;
 		auto_fail = af;
 		field_length = fl;
 		fake = f;
-		veh_cache = new PeriodicSampleCache(PeriodicSampleType.VEH_COUNT);
+		veh_cache = new PeriodicSampleCache(
+			PeriodicSampleType.VEH_COUNT);
 		scn_cache = new PeriodicSampleCache(PeriodicSampleType.SCAN);
 		spd_cache = new PeriodicSampleCache(PeriodicSampleType.SPEED);
 		mc_count_cache = new PeriodicSampleCache(
@@ -424,7 +426,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			if (loc != null && isReversibleLocationHack(loc))
 				return new Interval(72, Interval.Units.HOURS);
 		}
-		return lane_type.no_hit_threshold;
+		return LaneCode.fromCode(lane_code).no_hit_threshold;
 	}
 
 	/** Get the vehicle count "chatter" threshold */
@@ -434,7 +436,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get the scan "locked on" threshold */
 	private Interval getLockedOnThreshold() {
-		return lane_type.getLockedOnThreshold();
+		return LaneCode.fromCode(lane_code).getLockedOnThreshold();
 	}
 
 	/** Get the scan "no change" threshold */
@@ -492,54 +494,53 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return (rn != null) ? rn.getGeoLoc() : null;
 	}
 
-	/** Lane type */
-	private LaneType lane_type = LaneType.NONE;
+	/** Lane code */
+	private String lane_code = LaneCode.MAINLINE.lcode;
 
-	/** Set the lane type */
+	/** Set the lane code */
 	@Override
-	public void setLaneType(short t) {
-		lane_type = LaneType.fromOrdinal(t);
+	public void setLaneCode(String lc) {
+		lane_code = lc;
 		resetAutoFailCounters();
 	}
 
-	/** Set the lane type */
-	public void doSetLaneType(short t) throws TMSException {
-		LaneType lt = LaneType.fromOrdinal(t);
-		if (lt != lane_type) {
-			store.update(this, "lane_type", t);
-			setLaneType(t);
+	/** Set the lane code */
+	public void doSetLaneCode(String lc) throws TMSException {
+		if (!objectEquals(lc, lane_code)) {
+			store.update(this, "lane_code", lc);
+			setLaneCode(lc);
 		}
 	}
 
-	/** Get the lane type */
+	/** Get the lane code */
 	@Override
-	public short getLaneType() {
-		return (short) lane_type.ordinal();
+	public String getLaneCode() {
+		return lane_code;
 	}
 
 	/** Is this a mailline detector? (auxiliary, cd, etc.) */
 	public boolean isMainline() {
-		return lane_type.isMainline();
+		return LaneCode.fromCode(lane_code).isMainline();
 	}
 
 	/** Is this a station detector? (mainline, non-HOV) */
 	public boolean isStation() {
-		return lane_type.isStation();
+		return LaneCode.fromCode(lane_code).isStation();
 	}
 
 	/** Is this a station or CD detector? */
 	public boolean isStationOrCD() {
-		return lane_type.isStationOrCD();
+		return LaneCode.fromCode(lane_code).isStationOrCD();
 	}
 
 	/** Is this a ramp detector? (merge, queue, exit, bypass) */
 	public boolean isRamp() {
-		return lane_type.isRamp();
+		return LaneCode.fromCode(lane_code).isRamp();
 	}
 
 	/** Is this a velocity detector? */
 	public boolean isVelocity() {
-		return lane_type.isVelocity();
+		return LaneCode.fromCode(lane_code).isVelocity();
 	}
 
 	/** Test if the given detector is a speed pair with this detector */
@@ -674,12 +675,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Get the active status */
 	@Override
 	public boolean isActive() {
-		return lane_type == LaneType.GREEN || super.isActive();
+		return LaneCode.fromCode(lane_code) == LaneCode.GREEN ||
+			super.isActive();
 	}
 
 	/** Check if the detector is currently sampling data */
 	public boolean isSampling() {
-		return (lane_type == LaneType.GREEN) ||
+		return (LaneCode.fromCode(lane_code) == LaneCode.GREEN) ||
 		       (isActive() && !isFailed());
 	}
 
@@ -930,7 +932,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	public void storeVehCount(PeriodicSample v, boolean logging) {
 		is_logging_events = logging;
 		if (v != null) {
-			if (lane_type != LaneType.GREEN &&
+			if (LaneCode.fromCode(lane_code) != LaneCode.GREEN &&
 			    v.per_sec == BIN_PERIOD_SEC)
 				testVehCount(v);
 			veh_cache.add(v, name);
@@ -1069,7 +1071,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Write a single detector as an XML element */
 	public void writeXmlElement(Writer w) throws IOException {
-		LaneType lt = lane_type;
+		LaneCode lc = LaneCode.fromCode(lane_code);
 		short lane = getLaneNumber();
 		float field = getFieldLength();
 		String l = DetectorHelper.getLabel(this);
@@ -1079,8 +1081,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			w.write(createAttribute("label", l));
 		if (abandoned)
 			w.write(createAttribute("abandoned", "t"));
-		if (lt != LaneType.NONE && lt != LaneType.MAINLINE)
-			w.write(createAttribute("category", lt.suffix));
+		if (LaneCode.MAINLINE != lc)
+			w.write(createAttribute("category", lc));
 		if (lane > 0)
 			w.write(createAttribute("lane", lane));
 		if (field != DEFAULT_FIELD_FT)

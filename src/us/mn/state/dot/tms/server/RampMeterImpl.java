@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
 import us.mn.state.dot.tms.MeterAlgorithm;
@@ -67,7 +67,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Lookup a single green detector in a sampler set */
 	static private DetectorImpl lookupGreen(SamplerSet ss) {
-		SamplerSet greens = ss.filter(LaneType.GREEN);
+		SamplerSet greens = ss.filter(LaneCode.GREEN);
 		if (1 == greens.size()) {
 			VehicleSampler vs = greens.getAll().get(0);
 			if (vs instanceof DetectorImpl)
@@ -853,7 +853,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Lookup the merge and green count detectors from R_Nodes */
 	public void lookupDetectors() {
 		SamplerSet ss = getSamplerSet();
-		merge_set = ss.filter(LaneType.MERGE);
+		merge_set = ss.filter(LaneCode.MERGE);
 		green_det = lookupGreen(ss);
 	}
 

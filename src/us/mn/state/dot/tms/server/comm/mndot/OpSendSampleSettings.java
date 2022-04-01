@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DetectorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -119,6 +119,7 @@ public class OpSendSampleSettings extends Op170 {
 	private boolean isQueueDetector(int inp) {
 		DetectorImpl d = controller.getDetectorAtPin(
 			FIRST_DETECTOR_PIN + inp);
-		return d != null && d.getLaneType() == LaneType.QUEUE.ordinal();
+		return d != null &&
+		       LaneCode.QUEUE.lcode.equals(d.getLaneCode());
 	}
 }

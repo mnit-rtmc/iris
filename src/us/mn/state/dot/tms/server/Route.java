@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.util.ArrayList;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.units.Distance;
 
 /**
@@ -114,11 +114,11 @@ public class Route {
 	}
 
 	/** Get a set of vehicle samplers on route */
-	public SamplerSet getSamplerSet(LaneType lt) {
+	public SamplerSet getSamplerSet(LaneCode lc) {
 		ArrayList<VehicleSampler> samplers =
 			new ArrayList<VehicleSampler>();
 		for (RouteLeg lg = leg; lg != null; lg = lg.prev)
-			lg.lookupSamplers(samplers, lt);
+			lg.lookupSamplers(samplers, lc);
 		return new SamplerSet(samplers);
 	}
 

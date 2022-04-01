@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,7 +18,7 @@ package us.mn.state.dot.tms.client.incident;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.Road;
 
 /**
@@ -172,7 +172,7 @@ public class IncidentLoc implements GeoLoc {
 
 	/** Get a description of an incident location */
 	public String getLocation() {
-		switch (LaneType.fromOrdinal(incident.getLaneType())) {
+		switch (LaneCode.fromCode(incident.getLaneCode())) {
 		case MERGE:
 			return GeoLocHelper.getOnRampLocation(rnd_loc);
 		case EXIT:

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2021  Minnesota Department of Transportation
+ * Copyright (C) 2018-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.units.Interval;
@@ -107,7 +107,7 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 			    && checkDet((DetectorImpl) vs);
 		}
 		private boolean checkDet(DetectorImpl d) {
-			return d.getLaneType() == LaneType.PARKING.ordinal()
+			return LaneCode.PARKING.lcode.equals(d.getLaneCode())
 			    && (isTail(d) == tail);
 		}
 	}

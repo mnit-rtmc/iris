@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 
 /**
  * An incident impact is the full impact of an incident across all lanes.  The
@@ -143,8 +143,8 @@ public enum IncImpact {
 	}
 
 	/** Get the incident severity */
-	static public IncSeverity severity(Incident inc, LaneType lane_type) {
-		switch (lane_type) {
+	static public IncSeverity severity(Incident inc, LaneCode lc) {
+		switch (lc) {
 		case MAINLINE:
 			return severityMainline(inc);
 		case EXIT:

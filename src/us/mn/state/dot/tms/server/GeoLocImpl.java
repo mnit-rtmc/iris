@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2020  Minnesota Department of Transportation
+ * Copyright (C) 2005-2022  Minnesota Department of Transportation
  * Copyright (C) 2014       AHMCT, University of California
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.LocModifier;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
@@ -439,7 +439,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	/** Find the nearest geo location to current lat/lon. */
 	private GeoLoc findNearest() {
 		SphericalMercatorPosition smp = getPosition(lat, lon);
-		GeoLoc loc = corridors.snapGeoLoc(smp, LaneType.MAINLINE,
+		GeoLoc loc = corridors.snapGeoLoc(smp, LaneCode.MAINLINE,
 			MAX_DIST, Direction.UNKNOWN);
 		return (loc != null) ? findNearest(loc) : null;
 	}

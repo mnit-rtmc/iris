@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2020  Minnesota Department of Transportation
+ * Copyright (C) 2016-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.util.ArrayList;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.units.Distance;
 
 /**
@@ -127,9 +127,9 @@ public class RouteLeg {
 
 	/** Lookup samplers on a corridor trip.
 	 * @param samplers Array to add samplers.
-	 * @param lt Detector lane type to include. */
+	 * @param lc Detector lane code to include. */
 	public void lookupSamplers(final ArrayList<VehicleSampler> samplers,
-		final LaneType lt)
+		final LaneCode lc)
 	{
 		corridor.findStation(new Corridor.StationFinder() {
 			public boolean check(float m, StationImpl s) {
@@ -137,7 +137,7 @@ public class RouteLeg {
 					// Detectors within station should be
 					// averaged at the station level
 					SamplerSet dets = s.getSamplerSet()
-					                   .filter(lt);
+					                   .filter(lc);
 					if (dets.size() > 0)
 						samplers.add(dets);
 				}

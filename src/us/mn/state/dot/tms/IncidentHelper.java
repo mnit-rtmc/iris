@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,8 +79,8 @@ public class IncidentHelper extends BaseHelper {
 
 	/** Get the severity of an incident */
 	static public IncSeverity getSeverity(Incident inc) {
-		LaneType lane_type = LaneType.fromOrdinal(inc.getLaneType());
-		return IncImpact.severity(inc, lane_type);
+		LaneCode lc = LaneCode.fromCode(inc.getLaneCode());
+		return IncImpact.severity(inc, lc);
 	}
 
 	/** Get the DMS message priority for an incident */
