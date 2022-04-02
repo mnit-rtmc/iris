@@ -39,6 +39,8 @@ const OPERATE: &[(&str, &str)] = &[
     ("beacon", "flashing"),
     ("controller", "download"),
     ("controller", "device_req"),
+    ("detector", "field_length"),
+    ("detector", "force_fail"),
     ("lane_marking", "deployed"),
 ];
 
@@ -53,6 +55,8 @@ const PLAN: &[(&str, &str)] = &[
     ("comm_link", "poll_enabled"),
     ("controller", "condition"),
     ("controller", "notes"),
+    ("detector", "abandoned"),
+    ("detector", "notes"),
     ("lane_marking", "notes"),
     ("modem", "enabled"),
     ("modem", "timeout_ms"),
@@ -68,7 +72,9 @@ const PATCH_FIRST_PASS: &[(&str, &str)] = &[
     ("alarm", "pin"),
     ("beacon", "pin"),
     ("beacon", "verify_pin"),
+    ("detector", "pin"),
     ("lane_marking", "pin"),
+    ("ramp_meter", "pin"),
     ("weather_sensor", "pin"),
 ];
 
@@ -295,6 +301,21 @@ async fn main() -> tide::Result<()> {
             req,
         )
     });
+    add_routes!(route, "detector");
+    route
+        .at("/detector/:name")
+        .get(|req| {
+            sql_get(
+                "detector",
+                "SELECT d.name, label, r_node, controller, pin, notes, \
+                        lane_code, lane_number, abandoned, fake, field_length, \
+                        force_fail, auto_fail \
+                FROM iris.detector d \
+                LEFT JOIN detector_label_view dl ON d.name = dl.det_id \
+                WHERE d.name = $1",
+                req,
+            )
+        });
     add_routes!(route, "lane_marking");
     route.at("/lane_marking/:name").get(|req| {
         sql_get(

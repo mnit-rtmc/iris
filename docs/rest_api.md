@@ -17,7 +17,7 @@ Data requests are split into *public* and *restricted* paths:
 These resources are JSON arrays, fetched using http `GET` requests.
 
 - `iris/camera_pub`: Camera locations and configuration
-- `iris/detector`: Vehicle detectors
+- `iris/detector_pub`: Vehicle detectors
 - `iris/dms_message`: Current DMS messages and status
 - `iris/dms_pub`: DMS locations and configuration
 - `iris/font`: Bitmapped fonts for DMS
@@ -143,6 +143,15 @@ The response for these requests contains an ETag header, derived from the file's
 Also, a read only `controller_io` resource is available with
 `GET iris/api/controller_io/{name}`.  It contains an array of objects consisting
 of `pin`, `resource_n` and `name`.
+
+### `detector`
+
+| Access       | Attributes                       |
+|--------------|----------------------------------|
+| Read Only    | name, label, {`auto_fail`}       |
+| 👉 Operate   | {`field_length`}, {`force_fail`} |
+| 💡 Plan      | notes, {`abandoned`}             |
+| 🔧 Configure | controller, {`pin`}, {`r_node`}, {`lane_code`}, {`lane_number`}, {`fake`} |
 
 ### `geo_loc`
 

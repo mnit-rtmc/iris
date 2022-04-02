@@ -17,6 +17,7 @@ mod camera;
 mod commconfig;
 mod commlink;
 mod controller;
+mod detector;
 mod device;
 mod error;
 mod fetch;

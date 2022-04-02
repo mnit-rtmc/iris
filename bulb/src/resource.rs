@@ -17,6 +17,7 @@ use crate::camera::Camera;
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
+use crate::detector::Detector;
 use crate::error::{Error, Result};
 use crate::fetch::{fetch_delete, fetch_get, fetch_patch, fetch_post};
 use crate::geoloc::GeoLoc;
@@ -63,6 +64,7 @@ pub enum Resource {
     CommConfig,
     CommLink,
     Controller,
+    Detector,
     GeoLoc,
     LaneMarking,
     Modem,
@@ -178,6 +180,7 @@ impl Resource {
             CommConfig::RESOURCE_N => Self::CommConfig,
             CommLink::RESOURCE_N => Self::CommLink,
             Controller::RESOURCE_N => Self::Controller,
+            Detector::RESOURCE_N => Self::Detector,
             GeoLoc::RESOURCE_N => Self::GeoLoc,
             LaneMarking::RESOURCE_N => Self::LaneMarking,
             Modem::RESOURCE_N => Self::Modem,
@@ -200,6 +203,7 @@ impl Resource {
             Self::CommConfig => CommConfig::RESOURCE_N,
             Self::CommLink => CommLink::RESOURCE_N,
             Self::Controller => Controller::RESOURCE_N,
+            Self::Detector => Detector::RESOURCE_N,
             Self::GeoLoc => GeoLoc::RESOURCE_N,
             Self::LaneMarking => LaneMarking::RESOURCE_N,
             Self::Modem => Modem::RESOURCE_N,
@@ -222,6 +226,7 @@ impl Resource {
             Self::CommConfig => "📡 Comm Config",
             Self::CommLink => "🔗 Comm Link",
             Self::Controller => "🎛️ Controller",
+            Self::Detector => "🚗⬚ Detector",
             Self::GeoLoc => "🗺️ Location",
             Self::LaneMarking => "⛙ Lane Marking",
             Self::Modem => "🖀 Modem",
@@ -264,6 +269,7 @@ impl Resource {
             Self::CommConfig => fetch_list::<CommConfig>(self, search).await,
             Self::CommLink => fetch_list::<CommLink>(self, search).await,
             Self::Controller => fetch_list::<Controller>(self, search).await,
+            Self::Detector => fetch_list::<Detector>(self, search).await,
             Self::LaneMarking => fetch_list::<LaneMarking>(self, search).await,
             Self::Modem => fetch_list::<Modem>(self, search).await,
             Self::Permission => fetch_list::<Permission>(self, search).await,
@@ -313,6 +319,7 @@ impl Resource {
             Self::CommConfig => card_view::<CommConfig>(self, view, name).await,
             Self::CommLink => card_view::<CommLink>(self, view, name).await,
             Self::Controller => card_view::<Controller>(self, view, name).await,
+            Self::Detector => card_view::<Detector>(self, view, name).await,
             Self::GeoLoc => card_view::<GeoLoc>(self, view, name).await,
             Self::LaneMarking => {
                 card_view::<LaneMarking>(self, view, name).await
@@ -338,6 +345,7 @@ impl Resource {
                 | Self::Camera
                 | Self::CommLink
                 | Self::Controller
+                | Self::Detector
                 | Self::GeoLoc
                 | Self::LaneMarking
                 | Self::RampMeter
@@ -367,6 +375,7 @@ impl Resource {
             Self::CommConfig => fetch_changed::<CommConfig>(self, name).await,
             Self::CommLink => fetch_changed::<CommLink>(self, name).await,
             Self::Controller => fetch_changed::<Controller>(self, name).await,
+            Self::Detector => fetch_changed::<Detector>(self, name).await,
             Self::GeoLoc => fetch_changed::<GeoLoc>(self, name).await,
             Self::LaneMarking => fetch_changed::<LaneMarking>(self, name).await,
             Self::Modem => fetch_changed::<Modem>(self, name).await,

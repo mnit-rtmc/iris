@@ -159,12 +159,24 @@ const RAMP_METER_RES: Resource = Resource::Simple(
 
 /// Detector resource
 const DETECTOR_RES: Resource = Resource::Simple(
-    "detector",
+    "api/detector",
     Listen::Exclude("detector", &["auto_fail"]),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, r_node, cor_id, lane_number, lane_code, field_length \
-    FROM detector_view \
-) r",
+        SELECT name, label, controller, notes \
+        FROM detector_view \
+        ORDER BY regexp_replace(name, '[0-9]', '', 'g'), \
+                (regexp_replace(name, '[^0-9]', '', 'g') || '0')::INTEGER\
+    ) r",
+);
+
+/// Detector resource
+const DETECTOR_PUB_RES: Resource = Resource::Simple(
+    "detector_pub",
+    Listen::Exclude("detector", &["auto_fail"]),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT name, r_node, cor_id, lane_number, lane_code, field_length \
+        FROM detector_view\
+    ) r",
 );
 
 /// DMS resource
@@ -581,6 +593,7 @@ const ALL: &[Resource] = &[
     INCIDENT_RES,
     R_NODE_RES,
     DETECTOR_RES,
+    DETECTOR_PUB_RES,
     SIGN_CONFIG_RES,
     SIGN_DETAIL_RES,
     SIGN_MSG_RES,

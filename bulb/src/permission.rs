@@ -164,6 +164,7 @@ pub fn permissions_html(access: Vec<Permission>) -> String {
             add_option(Resource::CommConfig, perm, &mut html);
             add_option(Resource::CommLink, perm, &mut html);
             add_option(Resource::Controller, perm, &mut html);
+            add_option(Resource::Detector, perm, &mut html);
             add_option(Resource::LaneMarking, perm, &mut html);
             add_option(Resource::Modem, perm, &mut html);
             add_option(Resource::Permission, perm, &mut html);
