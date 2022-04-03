@@ -29,6 +29,7 @@ mod rampmeter;
 mod resource;
 mod role;
 mod start;
+mod tagreader;
 mod user;
 mod util;
 mod weathersensor;

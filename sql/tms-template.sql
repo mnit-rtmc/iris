@@ -499,6 +499,7 @@ administrator	camera	4
 administrator	comm_config	4
 administrator	comm_link	4
 administrator	controller	4
+administrator	detector	4
 administrator	geo_loc	4
 administrator	lane_marking	4
 administrator	modem	4
@@ -506,6 +507,7 @@ administrator	permission	4
 administrator	ramp_meter	4
 administrator	road	4
 administrator	role	4
+administrator	tag_reader	4
 administrator	user	4
 administrator	weather_sensor	4
 \.

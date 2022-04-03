@@ -384,6 +384,20 @@ async fn main() -> tide::Result<()> {
             req,
         )
     });
+    add_routes!(route, "tag_reader");
+    route
+        .at("/tag_reader/:name")
+        .get(|req| {
+            sql_get(
+                "tag_reader",
+                "SELECT t.name, location, geo_loc, controller, pin, notes, \
+                        toll_zone \
+                FROM iris.tag_reader t \
+                LEFT JOIN geo_loc_view gl ON t.geo_loc = gl.name \
+                WHERE t.name = $1",
+                req,
+            )
+        });
     add_routes!(route, "user");
     route.at("/user/:name").get(|req| {
         sql_get(

@@ -200,6 +200,14 @@ of `pin`, `resource_n` and `name`.
 | Read Only    | name       |
 | 💡 Plan      | enabled    |
 
+### `tag_reader`
+
+| Access       | Attributes                  |
+|--------------|-----------------------------|
+| Read Only    | name, location, {`geo_loc`} |
+| 💡 Plan      | notes, {`toll_zone`}        |
+| 🔧 Configure | controller, {`pin`}         |
+
 ### `user`
 
 | Access       | Attributes       |

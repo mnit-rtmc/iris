@@ -157,6 +157,18 @@ const RAMP_METER_RES: Resource = Resource::Simple(
     ) r",
 );
 
+/// Tag reader resource
+const TAG_READER_RES: Resource = Resource::Simple(
+    "api/tag_reader",
+    Listen::All("tag_reader"),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT t.name, location, controller, notes \
+        FROM iris.tag_reader t \
+        LEFT JOIN geo_loc_view gl ON t.geo_loc = gl.name \
+        ORDER BY t.name\
+    ) r",
+);
+
 /// Detector resource
 const DETECTOR_RES: Resource = Resource::Simple(
     "api/detector",
@@ -586,6 +598,7 @@ const ALL: &[Resource] = &[
     CAMERA_RES,
     CAMERA_PUB_RES,
     RAMP_METER_RES,
+    TAG_READER_RES,
     DMS_RES,
     DMS_STAT_RES,
     FONT_RES,

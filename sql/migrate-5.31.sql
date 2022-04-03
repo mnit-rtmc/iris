@@ -11,7 +11,9 @@ INSERT INTO iris.sign_msg_source (bit, source) VALUES (15, 'standby');
 -- Add new permissions for administrator
 COPY iris.permission (role, resource_n, access_n) FROM stdin;
 administrator	camera	4
+administrator	detector	4
 administrator	ramp_meter	4
+administrator	tag_reader	4
 \.
 
 -- Replace lane_type table with lane_code

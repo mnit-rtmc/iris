@@ -26,6 +26,7 @@ use crate::modem::Modem;
 use crate::permission::Permission;
 use crate::rampmeter::RampMeter;
 use crate::role::Role;
+use crate::tagreader::TagReader;
 use crate::user::User;
 use crate::util::{Doc, HtmlStr};
 use crate::weathersensor::WeatherSensor;
@@ -71,6 +72,7 @@ pub enum Resource {
     Permission,
     RampMeter,
     Role,
+    TagReader,
     User,
     WeatherSensor,
     Unknown,
@@ -187,6 +189,7 @@ impl Resource {
             Permission::RESOURCE_N => Self::Permission,
             RampMeter::RESOURCE_N => Self::RampMeter,
             Role::RESOURCE_N => Self::Role,
+            TagReader::RESOURCE_N => Self::TagReader,
             User::RESOURCE_N => Self::User,
             WeatherSensor::RESOURCE_N => Self::WeatherSensor,
             _ => Self::Unknown,
@@ -210,6 +213,7 @@ impl Resource {
             Self::Permission => Permission::RESOURCE_N,
             Self::RampMeter => RampMeter::RESOURCE_N,
             Self::Role => Role::RESOURCE_N,
+            Self::TagReader => TagReader::RESOURCE_N,
             Self::User => User::RESOURCE_N,
             Self::WeatherSensor => WeatherSensor::RESOURCE_N,
             Self::Unknown => "",
@@ -233,6 +237,7 @@ impl Resource {
             Self::Permission => "🗝️ Permission",
             Self::RampMeter => "🚦 Ramp Meter",
             Self::Role => "💪 Role",
+            Self::TagReader => "🏷️ Tag Reader",
             Self::User => "👤 User",
             Self::WeatherSensor => "🌦️ Weather Sensor",
             Self::Unknown => "❓ Unknown",
@@ -275,6 +280,7 @@ impl Resource {
             Self::Permission => fetch_list::<Permission>(self, search).await,
             Self::RampMeter => fetch_list::<RampMeter>(self, search).await,
             Self::Role => fetch_list::<Role>(self, search).await,
+            Self::TagReader => fetch_list::<TagReader>(self, search).await,
             Self::User => fetch_list::<User>(self, search).await,
             Self::WeatherSensor => {
                 fetch_list::<WeatherSensor>(self, search).await
@@ -328,6 +334,7 @@ impl Resource {
             Self::Permission => card_view::<Permission>(self, view, name).await,
             Self::RampMeter => card_view::<RampMeter>(self, view, name).await,
             Self::Role => card_view::<Role>(self, view, name).await,
+            Self::TagReader => card_view::<TagReader>(self, view, name).await,
             Self::User => card_view::<User>(self, view, name).await,
             Self::WeatherSensor => {
                 card_view::<WeatherSensor>(self, view, name).await
@@ -349,6 +356,7 @@ impl Resource {
                 | Self::GeoLoc
                 | Self::LaneMarking
                 | Self::RampMeter
+                | Self::TagReader
                 | Self::WeatherSensor
         )
     }
@@ -382,6 +390,7 @@ impl Resource {
             Self::Permission => fetch_changed::<Permission>(self, name).await,
             Self::RampMeter => fetch_changed::<RampMeter>(self, name).await,
             Self::Role => fetch_changed::<Role>(self, name).await,
+            Self::TagReader => fetch_changed::<TagReader>(self, name).await,
             Self::User => fetch_changed::<User>(self, name).await,
             Self::WeatherSensor => {
                 fetch_changed::<WeatherSensor>(self, name).await
@@ -429,6 +438,7 @@ impl Resource {
             Self::GeoLoc => Ok(Some(name.into())),
             Self::LaneMarking => self.geo_loc::<LaneMarking>(name).await,
             Self::RampMeter => self.geo_loc::<RampMeter>(name).await,
+            Self::TagReader => self.geo_loc::<TagReader>(name).await,
             Self::WeatherSensor => self.geo_loc::<WeatherSensor>(name).await,
             _ => Ok(None),
         }

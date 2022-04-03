@@ -170,6 +170,7 @@ pub fn permissions_html(access: Vec<Permission>) -> String {
             add_option(Resource::Permission, perm, &mut html);
             add_option(Resource::RampMeter, perm, &mut html);
             add_option(Resource::Role, perm, &mut html);
+            add_option(Resource::TagReader, perm, &mut html);
             add_option(Resource::User, perm, &mut html);
             add_option(Resource::WeatherSensor, perm, &mut html);
         }
