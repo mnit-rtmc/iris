@@ -29,6 +29,7 @@ use crate::role::Role;
 use crate::tagreader::TagReader;
 use crate::user::User;
 use crate::util::{Doc, HtmlStr};
+use crate::videomonitor::VideoMonitor;
 use crate::weathersensor::WeatherSensor;
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::de::DeserializeOwned;
@@ -74,6 +75,7 @@ pub enum Resource {
     Role,
     TagReader,
     User,
+    VideoMonitor,
     WeatherSensor,
     Unknown,
 }
@@ -191,6 +193,7 @@ impl Resource {
             Role::RESOURCE_N => Self::Role,
             TagReader::RESOURCE_N => Self::TagReader,
             User::RESOURCE_N => Self::User,
+            VideoMonitor::RESOURCE_N => Self::VideoMonitor,
             WeatherSensor::RESOURCE_N => Self::WeatherSensor,
             _ => Self::Unknown,
         }
@@ -215,6 +218,7 @@ impl Resource {
             Self::Role => Role::RESOURCE_N,
             Self::TagReader => TagReader::RESOURCE_N,
             Self::User => User::RESOURCE_N,
+            Self::VideoMonitor => VideoMonitor::RESOURCE_N,
             Self::WeatherSensor => WeatherSensor::RESOURCE_N,
             Self::Unknown => "",
         }
@@ -239,6 +243,7 @@ impl Resource {
             Self::Role => "💪 Role",
             Self::TagReader => "🏷️ Tag Reader",
             Self::User => "👤 User",
+            Self::VideoMonitor => "📺 Video Monitor",
             Self::WeatherSensor => "🌦️ Weather Sensor",
             Self::Unknown => "❓ Unknown",
         }
@@ -282,6 +287,9 @@ impl Resource {
             Self::Role => fetch_list::<Role>(self, search).await,
             Self::TagReader => fetch_list::<TagReader>(self, search).await,
             Self::User => fetch_list::<User>(self, search).await,
+            Self::VideoMonitor => {
+                fetch_list::<VideoMonitor>(self, search).await
+            }
             Self::WeatherSensor => {
                 fetch_list::<WeatherSensor>(self, search).await
             }
@@ -336,6 +344,9 @@ impl Resource {
             Self::Role => card_view::<Role>(self, view, name).await,
             Self::TagReader => card_view::<TagReader>(self, view, name).await,
             Self::User => card_view::<User>(self, view, name).await,
+            Self::VideoMonitor => {
+                card_view::<VideoMonitor>(self, view, name).await
+            }
             Self::WeatherSensor => {
                 card_view::<WeatherSensor>(self, view, name).await
             }
@@ -357,6 +368,7 @@ impl Resource {
                 | Self::LaneMarking
                 | Self::RampMeter
                 | Self::TagReader
+                | Self::VideoMonitor
                 | Self::WeatherSensor
         )
     }
@@ -392,6 +404,9 @@ impl Resource {
             Self::Role => fetch_changed::<Role>(self, name).await,
             Self::TagReader => fetch_changed::<TagReader>(self, name).await,
             Self::User => fetch_changed::<User>(self, name).await,
+            Self::VideoMonitor => {
+                fetch_changed::<VideoMonitor>(self, name).await
+            }
             Self::WeatherSensor => {
                 fetch_changed::<WeatherSensor>(self, name).await
             }

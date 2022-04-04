@@ -216,6 +216,15 @@ of `pin`, `resource_n` and `name`.
 | 💡 Plan      | enabled          |
 | 🔧 Configure | full\_name, role |
 
+### `video_monitor`
+
+| Access       | Attributes                               |
+|--------------|------------------------------------------|
+| Read Only    | name                                     |
+| 👉 Operate   | {`camera`}                               |
+| 💡 Plan      | notes, {`restricted`}, {`monitor_style`} |
+| 🔧 Configure | mon\_num, controller, {`pin`}            |
+
 ### `weather_sensor`
 
 | Access       | Attributes                                            |

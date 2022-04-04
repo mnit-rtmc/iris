@@ -14,6 +14,7 @@ administrator	camera	4
 administrator	detector	4
 administrator	ramp_meter	4
 administrator	tag_reader	4
+administrator	video_monitor	4
 \.
 
 -- Replace lane_type table with lane_code
@@ -314,5 +315,26 @@ CREATE VIEW inc_advice_view AS
 GRANT SELECT ON inc_advice_view TO PUBLIC;
 
 DROP TABLE iris.lane_type;
+
+-- Add video_monitor notify triggers
+CREATE FUNCTION iris.video_monitor_notify() RETURNS TRIGGER AS
+    $video_monitor_notify$
+BEGIN
+    IF (NEW.camera IS DISTINCT FROM OLD.camera) THEN
+        NOTIFY video_monitor, 'camera';
+    ELSE
+        NOTIFY video_monitor;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$video_monitor_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER video_monitor_notify_trig
+    AFTER UPDATE ON iris._video_monitor
+    FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_notify();
+
+CREATE TRIGGER video_monitor_table_notify_trig
+    AFTER INSERT OR DELETE ON iris._video_monitor
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 COMMIT;

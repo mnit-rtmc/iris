@@ -169,6 +169,17 @@ const TAG_READER_RES: Resource = Resource::Simple(
     ) r",
 );
 
+/// Video monitor resource
+const VIDEO_MONITOR_RES: Resource = Resource::Simple(
+    "api/video_monitor",
+    Listen::Exclude("video_monitor", &["camera"]),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT name, mon_num, controller, notes \
+        FROM iris.video_monitor \
+        ORDER BY mon_num, name\
+    ) r",
+);
+
 /// Detector resource
 const DETECTOR_RES: Resource = Resource::Simple(
     "api/detector",
@@ -599,6 +610,7 @@ const ALL: &[Resource] = &[
     CAMERA_PUB_RES,
     RAMP_METER_RES,
     TAG_READER_RES,
+    VIDEO_MONITOR_RES,
     DMS_RES,
     DMS_STAT_RES,
     FONT_RES,

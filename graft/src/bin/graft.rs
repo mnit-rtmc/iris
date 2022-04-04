@@ -408,6 +408,19 @@ async fn main() -> tide::Result<()> {
             req,
         )
     });
+    add_routes!(route, "video_monitor");
+    route
+        .at("/video_monitor/:name")
+        .get(|req| {
+            sql_get(
+                "video_monitor",
+                "SELECT name, mon_num, controller, pin, notes, restricted, \
+                        monitor_style, camera \
+                FROM iris.video_monitor \
+                WHERE name = $1",
+                req,
+            )
+        });
     add_routes!(route, "weather_sensor");
     route.at("/weather_sensor/:name").get(|req| {
         sql_get(

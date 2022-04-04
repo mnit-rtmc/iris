@@ -16,52 +16,38 @@ use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-/// Detector
+/// Video Monitor
 #[derive(Debug, Default, Deserialize, Serialize)]
-pub struct Detector {
+pub struct VideoMonitor {
     pub name: String,
-    pub label: Option<String>,
-    pub notes: Option<String>,
+    pub mon_num: u32,
     pub controller: Option<String>,
     // full attributes
     pub pin: Option<u32>,
-    pub lane_code: Option<String>,
-    pub lane_number: Option<u16>,
-    pub abandoned: Option<bool>,
-    pub force_fail: Option<bool>,
-    pub auto_fail: Option<bool>,
-    pub field_length: Option<f32>,
-    pub fake: Option<String>,
 }
 
-type DetectorAnc = DeviceAnc<Detector>;
+type VideoMonitorAnc = DeviceAnc<VideoMonitor>;
 
-impl Detector {
-    pub const RESOURCE_N: &'static str = "detector";
+impl VideoMonitor {
+    pub const RESOURCE_N: &'static str = "video_monitor";
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let label = HtmlStr::new(&self.label).with_len(12);
-        let enabled = self.controller.is_some()
-            || self
-                .label
-                .as_ref()
-                .filter(|lbl| lbl.ends_with("G"))
-                .is_some();
-        let disabled = disabled_attr(enabled);
+        let mon_num = self.mon_num;
+        let disabled = disabled_attr(self.controller.is_some());
         format!(
-            "<span{disabled}>{label}</span>\
+            "<span{disabled}>{mon_num}</span>\
             <span class='{NAME}'>{self}</span>"
         )
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self, anc: &DetectorAnc) -> String {
-        let label = HtmlStr::new(&self.label).with_len(20);
+    fn to_html_status(&self, anc: &VideoMonitorAnc) -> String {
+        let mon_num = self.mon_num;
         let ctrl_button = anc.controller_button();
         format!(
             "<div class='row'>\
-              <span class='info'>{label}</span>\
+              <span class='info'>{mon_num}</span>\
             </div>\
             <div class='row'>\
               {ctrl_button}\
@@ -89,21 +75,21 @@ impl Detector {
     }
 }
 
-impl fmt::Display for Detector {
+impl fmt::Display for VideoMonitor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", HtmlStr::new(&self.name))
     }
 }
 
-impl Device for Detector {
+impl Device for VideoMonitor {
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
     }
 }
 
-impl Card for Detector {
-    type Ancillary = DetectorAnc;
+impl Card for VideoMonitor {
+    type Ancillary = VideoMonitorAnc;
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
@@ -112,12 +98,13 @@ impl Card for Detector {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &DetectorAnc) -> bool {
-        self.name.contains_lower(search) || self.label.contains_lower(search)
+    fn is_match(&self, search: &str, _anc: &VideoMonitorAnc) -> bool {
+        self.name.contains_lower(search)
+            || self.mon_num.to_string().contains(search)
     }
 
     /// Convert to HTML view
-    fn to_html(&self, view: View, anc: &DetectorAnc) -> String {
+    fn to_html(&self, view: View, anc: &VideoMonitorAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
             View::Compact => self.to_html_compact(),

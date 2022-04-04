@@ -32,4 +32,5 @@ mod start;
 mod tagreader;
 mod user;
 mod util;
+mod videomonitor;
 mod weathersensor;

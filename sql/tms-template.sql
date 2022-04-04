@@ -509,6 +509,7 @@ administrator	road	4
 administrator	role	4
 administrator	tag_reader	4
 administrator	user	4
+administrator	video_monitor	4
 administrator	weather_sensor	4
 \.
 
@@ -1646,22 +1647,22 @@ ALTER TABLE iris._camera ADD CONSTRAINT _camera_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
 CREATE FUNCTION iris.camera_notify() RETURNS TRIGGER AS
-	$camera_notify$
+    $camera_notify$
 BEGIN
-	IF (NEW.publish IS DISTINCT FROM OLD.publish) THEN
-		PERFORM pg_notify('camera', 'publish ' || NEW.name);
-	ELSIF (NEW.video_loss IS DISTINCT FROM OLD.video_loss) THEN
-		NOTIFY camera, 'video_loss';
-	ELSE
-		NOTIFY camera;
-	END IF;
-	RETURN NULL; -- AFTER trigger return is ignored
+    IF (NEW.publish IS DISTINCT FROM OLD.publish) THEN
+        PERFORM pg_notify('camera', 'publish ' || NEW.name);
+    ELSIF (NEW.video_loss IS DISTINCT FROM OLD.video_loss) THEN
+        NOTIFY camera, 'video_loss';
+    ELSE
+        NOTIFY camera;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
 END;
 $camera_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER camera_notify_trig
-	AFTER UPDATE ON iris._camera
-	FOR EACH ROW EXECUTE PROCEDURE iris.camera_notify();
+    AFTER UPDATE ON iris._camera
+    FOR EACH ROW EXECUTE PROCEDURE iris.camera_notify();
 
 CREATE TRIGGER camera_table_notify_trig
     AFTER INSERT OR DELETE ON iris._camera
@@ -5066,17 +5067,37 @@ CREATE VIEW monitor_style_view AS
 GRANT SELECT ON monitor_style_view TO PUBLIC;
 
 CREATE TABLE iris._video_monitor (
-	name VARCHAR(12) PRIMARY KEY,
-	notes VARCHAR(32) NOT NULL,
-	group_n VARCHAR(16),
-	mon_num INTEGER NOT NULL,
-	restricted BOOLEAN NOT NULL,
-	monitor_style VARCHAR(24) REFERENCES iris.monitor_style,
-	camera VARCHAR(20) REFERENCES iris._camera
+    name VARCHAR(12) PRIMARY KEY,
+    notes VARCHAR(32) NOT NULL,
+    group_n VARCHAR(16),
+    mon_num INTEGER NOT NULL,
+    restricted BOOLEAN NOT NULL,
+    monitor_style VARCHAR(24) REFERENCES iris.monitor_style,
+    camera VARCHAR(20) REFERENCES iris._camera
 );
 
 ALTER TABLE iris._video_monitor ADD CONSTRAINT _video_monitor_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
+
+CREATE FUNCTION iris.video_monitor_notify() RETURNS TRIGGER AS
+    $video_monitor_notify$
+BEGIN
+    IF (NEW.camera IS DISTINCT FROM OLD.camera) THEN
+        NOTIFY video_monitor, 'camera';
+    ELSE
+        NOTIFY video_monitor;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$video_monitor_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER video_monitor_notify_trig
+    AFTER UPDATE ON iris._video_monitor
+    FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_notify();
+
+CREATE TRIGGER video_monitor_table_notify_trig
+    AFTER INSERT OR DELETE ON iris._video_monitor
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.video_monitor AS
     SELECT m.name, controller, pin, notes, group_n, mon_num, restricted,
