@@ -96,25 +96,25 @@ fn vis_situation(situation: &str) -> &'static str {
     }
 }
 
-/// Get a direction arrow from degrees
+/// Get direction and arrow from degrees
 fn dir_arrow(deg: u32) -> Option<&'static str> {
     match deg {
         // 0° ± 22.5
-        0..=22 | 338..=360 => Some("↓"),
+        0..=22 | 338..=360 => Some("N ↓"),
         // 45° ±22.5
-        23..=67 => Some("↙"),
+        23..=67 => Some("NE ↙"),
         // 90° ±22.5
-        68..=112 => Some("←"),
+        68..=112 => Some("E ←"),
         // 135° ±22.5
-        113..=157 => Some("↖"),
+        113..=157 => Some("SE ↖"),
         // 180° ±22.5
-        158..=202 => Some("↑"),
+        158..=202 => Some("S ↑"),
         // 225° ±22.5
-        203..=247 => Some("↗"),
+        203..=247 => Some("SW ↗"),
         // 270° ±22.5
-        248..=292 => Some("→"),
+        248..=292 => Some("W →"),
         // 315° ±22.5
-        293..=337 => Some("↘"),
+        293..=337 => Some("NW ↘"),
         _ => None,
     }
 }
@@ -125,10 +125,8 @@ fn wind_dir_html(deg: u32) -> String {
     html.push_str("<span class='info'>");
     if let Some(arrow) = dir_arrow(deg) {
         html.push_str(arrow);
-        html.push(' ');
     }
-    html.push_str(&deg.to_string());
-    html.push_str("°</span>");
+    html.push_str("</span>");
     html
 }
 
