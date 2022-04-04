@@ -1,5 +1,12 @@
 # IRIS 5.x Release Notes
 
+5.31.0 (4 Apr 2022)
+ - Added support for NDOR gate arm protocol
+ - Added `[standby]` DMS action
+ - Added resources to web UI (cameras, video monitors, detectors, tag readers)
+ - Changed RWIS status to use imperial units
+ - Fixed a couple of natch protocol bugs
+
 5.30.0 (24 Mar 2022)
  - Added controller IO pin links to web UI
  - Added beacons/weather sensors/lane markings to web UI
