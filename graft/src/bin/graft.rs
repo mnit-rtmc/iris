@@ -134,8 +134,8 @@ impl ErrorStatus for SonarError {
 
 /// Convert a Sonar result to a Response
 macro_rules! resp {
-    ($res:expr) => {
-        match $res {
+    ($rslt:expr) => {
+        match $rslt {
             Ok(r) => r,
             Err(e) => {
                 log::warn!("response: {:?}", e);
@@ -149,19 +149,19 @@ macro_rules! resp {
 
 /// Add `POST` / `GET` / `PATCH` / `DELETE` routes for a Sonar object type
 macro_rules! add_routes {
-    ($app:expr, $tp:expr, $sql:expr) => {
-        $app.at(concat!("/", $tp))
-            .get(|req| resource_get($tp, req))
-            .post(|req| sonar_object_post($tp, req));
-        $app.at(concat!("/", $tp, "/:name"))
-            .get(|req| sql_get($tp, $sql, req))
-            .patch(|req| sonar_object_patch($tp, req))
-            .delete(|req| sonar_object_delete($tp, req));
+    ($app:expr, $res:expr, $sql:expr) => {
+        $app.at(concat!("/", $res))
+            .get(|req| resource_get($res, req))
+            .post(|req| sonar_object_post($res, req));
+        $app.at(concat!("/", $res, "/:name"))
+            .get(|req| sql_get($res, $sql, req))
+            .patch(|req| sonar_object_patch($res, req))
+            .delete(|req| sonar_object_delete($res, req));
     };
 }
 
 /// Lookup authorized access for a resource
-fn auth_access(req: &Request<State>, res: &str) -> Result<Access> {
+fn auth_access(res: &'static str, req: &Request<State>) -> Result<Access> {
     let session = req.session();
     let auth: AuthMap = session.get("auth").ok_or(SonarError::Unauthorized)?;
     let perm = req.state().permission_user_res(&auth.username, res)?;
@@ -336,7 +336,7 @@ async fn permission_post(req: Request<State>) -> tide::Result {
 
 /// `POST` one permission record
 async fn permission_post2(mut req: Request<State>) -> Result<()> {
-    auth_access(&req, "permission")?.check(Access::Configure)?;
+    auth_access("permission", &req)?.check(Access::Configure)?;
     let obj = body_json_obj(&mut req).await?;
     let role = obj.get("role");
     let resource_n = obj.get("resource_n");
@@ -365,7 +365,7 @@ async fn permission_get(req: Request<State>) -> tide::Result {
 
 /// Get permission record as JSON
 async fn permission_get_json(req: Request<State>) -> Result<String> {
-    auth_access(&req, "permission")?.check(Access::View)?;
+    auth_access("permission", &req)?.check(Access::View)?;
     let id = obj_id(&req)?;
     let perm = spawn_blocking(move || req.state().permission(id)).await?;
     Ok(serde_json::to_value(perm)?.to_string())
@@ -380,7 +380,7 @@ async fn permission_patch(req: Request<State>) -> tide::Result {
 
 /// `PATCH` one permission record
 async fn permission_patch2(mut req: Request<State>) -> Result<()> {
-    auth_access(&req, "permission")?.check(Access::Configure)?;
+    auth_access("permission", &req)?.check(Access::Configure)?;
     let id = obj_id(&req)?;
     let obj = body_json_obj(&mut req).await?;
     return spawn_blocking(move || req.state().permission_patch(id, obj)).await;
@@ -395,7 +395,7 @@ async fn permission_delete(req: Request<State>) -> tide::Result {
 
 /// `DELETE` one permission record
 async fn permission_delete2(req: Request<State>) -> Result<()> {
-    auth_access(&req, "permission")?.check(Access::Configure)?;
+    auth_access("permission", &req)?.check(Access::Configure)?;
     let id = obj_id(&req)?;
     spawn_blocking(move || req.state().permission_delete(id)).await
 }
@@ -426,8 +426,8 @@ async fn sql_get_by_name(
     sql: &'static str,
     req: Request<State>,
 ) -> Result<String> {
-    auth_access(&req, resource_tp(resource_n))?.check(Access::View)?;
-    let name = resource_name(&req)?;
+    auth_access(res_name(resource_n), &req)?.check(Access::View)?;
+    let name = req_name(&req)?;
     Ok(spawn_blocking(move || req.state().get_by_pkey(sql, &name)).await?)
 }
 
@@ -451,16 +451,16 @@ async fn sql_get_array_by_name(
     sql: &'static str,
     req: Request<State>,
 ) -> Result<String> {
-    auth_access(&req, resource_tp(resource_n))?.check(Access::View)?;
-    let name = resource_name(&req)?;
+    auth_access(res_name(resource_n), &req)?.check(Access::View)?;
+    let name = req_name(&req)?;
     Ok(
         spawn_blocking(move || req.state().get_array_by_pkey(sql, &name))
             .await?,
     )
 }
 
-/// Get resource name from a request
-fn resource_name(req: &Request<State>) -> Result<String> {
+/// Get name from a request
+fn req_name(req: &Request<State>) -> Result<String> {
     let name = req.param("name").map_err(|_e| SonarError::InvalidName)?;
     let name = percent_decode_str(name)
         .decode_utf8()
@@ -491,20 +491,20 @@ fn invalid_char(c: char) -> bool {
 }
 
 /// Make a Sonar name (with validation)
-fn make_name(tp: &'static str, nm: &str) -> Result<String> {
+fn make_name(res: &'static str, nm: &str) -> Result<String> {
     if nm.len() > 64 || nm.contains(invalid_char) || nm.contains('/') {
         Err(SonarError::InvalidName)
     } else {
-        Ok(format!("{}/{}", tp, nm))
+        Ok(format!("{}/{}", res, nm))
     }
 }
 
 /// Make a Sonar attribute (with validation)
-fn make_att(tp: &'static str, nm: &str, att: &str) -> Result<String> {
+fn make_att(res: &'static str, nm: &str, att: &str) -> Result<String> {
     if att.len() > 64 || att.contains(invalid_char) || att.contains('/') {
         Err(SonarError::InvalidName)
     } else {
-        let att = if tp == "controller" && att == "drop_id" {
+        let att = if res == "controller" && att == "drop_id" {
             "drop".to_string()
         } else {
             att.to_case(Case::Camel)
@@ -514,22 +514,22 @@ fn make_att(tp: &'static str, nm: &str, att: &str) -> Result<String> {
 }
 
 /// Get Sonar object name from a request
-fn obj_name(tp: &'static str, req: &Request<State>) -> Result<String> {
+fn obj_name(res: &'static str, req: &Request<State>) -> Result<String> {
     match req.param("name") {
         Ok(name) => {
             let name = percent_decode_str(name)
                 .decode_utf8()
                 .or(Err(SonarError::InvalidName))?;
-            make_name(tp, &name)
+            make_name(res, &name)
         }
         Err(_) => Err(SonarError::InvalidName),
     }
 }
 
 /// `GET` a file resource
-async fn resource_get(tp: &'static str, req: Request<State>) -> tide::Result {
+async fn resource_get(res: &'static str, req: Request<State>) -> tide::Result {
     log::info!("GET {}", req.url());
-    let (etag, body) = resp!(resource_get_json(tp, req).await);
+    let (etag, body) = resp!(resource_get_json(res, req).await);
     Ok(Response::builder(StatusCode::Ok)
         .header("ETag", &etag)
         .body(body)
@@ -542,7 +542,7 @@ async fn resource_get_json(
     resource_n: &'static str,
     req: Request<State>,
 ) -> Result<(String, Body)> {
-    auth_access(&req, resource_tp(resource_n))?.check(Access::View)?;
+    auth_access(res_name(resource_n), &req)?.check(Access::View)?;
     let path = PathBuf::from(format!("{STATIC_PATH}/{resource_n}"));
     let etag = resource_etag(&path).await?;
     if let Some(values) = req.header("If-None-Match") {
@@ -554,8 +554,8 @@ async fn resource_get_json(
     Ok((etag, body))
 }
 
-/// Get "main" associated resource type
-fn resource_tp(resource_n: &'static str) -> &'static str {
+/// Get associated resource name
+fn res_name(resource_n: &'static str) -> &'static str {
     match resource_n {
         "controller_io" => "controller",
         _ => resource_n,
@@ -572,24 +572,24 @@ async fn resource_etag(path: &Path) -> Result<String> {
 
 /// Create a Sonar object from a `POST` request
 async fn sonar_object_post(
-    tp: &'static str,
+    res: &'static str,
     req: Request<State>,
 ) -> tide::Result {
     log::info!("POST {}", req.url());
-    resp!(sonar_object_post2(tp, req).await);
+    resp!(sonar_object_post2(res, req).await);
     Ok(Response::builder(StatusCode::Created).build())
 }
 
 /// Create a Sonar object from a `POST` request
 async fn sonar_object_post2(
-    tp: &'static str,
+    res: &'static str,
     mut req: Request<State>,
 ) -> Result<()> {
-    auth_access(&req, tp)?.check(Access::Configure)?;
+    auth_access(res, &req)?.check(Access::Configure)?;
     let obj = body_json_obj(&mut req).await?;
     match obj.get("name") {
         Some(Value::String(name)) => {
-            let nm = make_name(tp, name)?;
+            let nm = make_name(res, name)?;
             let mut c = connection(&req).await?;
             log::debug!("creating {}", nm);
             c.create_object(&nm).await?;
@@ -618,34 +618,46 @@ fn att_value(value: &Value) -> Result<String> {
 
 /// Update a Sonar object from a `PATCH` request
 async fn sonar_object_patch(
-    tp: &'static str,
+    res: &'static str,
     req: Request<State>,
 ) -> tide::Result {
     log::info!("PATCH {}", req.url());
-    resp!(sonar_object_patch2(tp, req).await);
+    resp!(sonar_object_patch2(res, req).await);
     Ok(Response::builder(StatusCode::NoContent).build())
+}
+
+/// Lookup authorized PATCH access for a resource
+async fn auth_access_patch(
+    res: &'static str,
+    req: &Request<State>,
+) -> Result<Access> {
+    if res == "geo_loc" {
+        todo!()
+    } else {
+        auth_access(res, &req)
+    }
 }
 
 /// Update a Sonar object from a `PATCH` request
 async fn sonar_object_patch2(
-    tp: &'static str,
+    res: &'static str,
     mut req: Request<State>,
 ) -> Result<()> {
-    let nm = obj_name(tp, &req)?;
-    let access = auth_access(&req, tp)?;
+    let nm = obj_name(res, &req)?;
+    let access = auth_access_patch(res, &req).await?;
     // *At least* Operate access needed (further checks below)
     access.check(Access::Operate)?;
     let obj = body_json_obj(&mut req).await?;
     for key in obj.keys() {
         let key = &key[..];
-        access.check(Access::from_type_key(&(tp, key)))?;
+        access.check(Access::from_type_key(&(res, key)))?;
     }
     let mut c = connection(&req).await?;
     // first pass
     for (key, value) in obj.iter() {
         let key = &key[..];
-        if PATCH_FIRST_PASS.contains(&(tp, key)) {
-            let anm = make_att(tp, &nm, key)?;
+        if PATCH_FIRST_PASS.contains(&(res, key)) {
+            let anm = make_att(res, &nm, key)?;
             let value = att_value(&value)?;
             log::debug!("{} = {}", anm, &value);
             c.update_object(&anm, &value).await?;
@@ -654,8 +666,8 @@ async fn sonar_object_patch2(
     // second pass
     for (key, value) in obj.iter() {
         let key = &key[..];
-        if !PATCH_FIRST_PASS.contains(&(tp, key)) {
-            let anm = make_att(tp, &nm, key)?;
+        if !PATCH_FIRST_PASS.contains(&(res, key)) {
+            let anm = make_att(res, &nm, key)?;
             let value = att_value(value)?;
             log::debug!("{} = {}", anm, &value);
             c.update_object(&anm, &value).await?;
@@ -666,13 +678,13 @@ async fn sonar_object_patch2(
 
 /// Remove a Sonar object from a `DELETE` request
 async fn sonar_object_delete(
-    tp: &'static str,
+    res: &'static str,
     req: Request<State>,
 ) -> tide::Result {
     log::info!("DELETE {}", req.url());
-    let access = resp!(auth_access(&req, tp));
+    let access = resp!(auth_access(res, &req));
     resp!(access.check(Access::Configure));
-    let nm = resp!(obj_name(tp, &req));
+    let nm = resp!(obj_name(res, &req));
     let mut c = resp!(connection(&req).await);
     resp!(c.remove_object(&nm).await);
     Ok(Response::builder(StatusCode::Accepted).build())
