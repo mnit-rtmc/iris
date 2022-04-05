@@ -138,7 +138,7 @@ macro_rules! resp {
         match $rslt {
             Ok(r) => r,
             Err(e) => {
-                log::warn!("response: {:?}", e);
+                log::warn!("response: {e:?}");
                 return Ok(Response::builder(e.status_code())
                     .body(e.to_string())
                     .build());
@@ -591,7 +591,7 @@ async fn sonar_object_post2(
         Some(Value::String(name)) => {
             let nm = make_name(res, name)?;
             let mut c = connection(&req).await?;
-            log::debug!("creating {}", nm);
+            log::debug!("creating {nm}");
             c.create_object(&nm).await?;
             Ok(())
         }
@@ -626,25 +626,13 @@ async fn sonar_object_patch(
     Ok(Response::builder(StatusCode::NoContent).build())
 }
 
-/// Lookup authorized PATCH access for a resource
-async fn auth_access_patch(
-    res: &'static str,
-    req: &Request<State>,
-) -> Result<Access> {
-    if res == "geo_loc" {
-        todo!()
-    } else {
-        auth_access(res, &req)
-    }
-}
-
 /// Update a Sonar object from a `PATCH` request
 async fn sonar_object_patch2(
     res: &'static str,
     mut req: Request<State>,
 ) -> Result<()> {
     let nm = obj_name(res, &req)?;
-    let access = auth_access_patch(res, &req).await?;
+    let access = auth_access(res, &req)?;
     // *At least* Operate access needed (further checks below)
     access.check(Access::Operate)?;
     let obj = body_json_obj(&mut req).await?;
@@ -659,7 +647,7 @@ async fn sonar_object_patch2(
         if PATCH_FIRST_PASS.contains(&(res, key)) {
             let anm = make_att(res, &nm, key)?;
             let value = att_value(&value)?;
-            log::debug!("{} = {}", anm, &value);
+            log::debug!("{anm} = {value}");
             c.update_object(&anm, &value).await?;
         }
     }
