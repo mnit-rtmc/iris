@@ -17,5 +17,6 @@
 #[macro_use]
 extern crate log;
 
+pub mod query;
 pub mod sonar;
 pub mod state;

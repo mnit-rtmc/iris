@@ -19,6 +19,7 @@ use async_std::path::{Path, PathBuf};
 use async_std::task::spawn_blocking;
 use convert_case::{Case, Casing};
 use core::time::Duration;
+use graft::query;
 use graft::sonar::{Connection, Result, SonarError};
 use graft::state::{Permission, State};
 use percent_encoding::percent_decode_str;
@@ -148,11 +149,12 @@ macro_rules! resp {
 
 /// Add `POST` / `GET` / `PATCH` / `DELETE` routes for a Sonar object type
 macro_rules! add_routes {
-    ($app:expr, $tp:expr) => {
+    ($app:expr, $tp:expr, $sql:expr) => {
         $app.at(concat!("/", $tp))
             .get(|req| resource_get($tp, req))
             .post(|req| sonar_object_post($tp, req));
         $app.at(concat!("/", $tp, "/:name"))
+            .get(|req| sql_get($tp, $sql, req))
             .patch(|req| sonar_object_patch($tp, req))
             .delete(|req| sonar_object_delete($tp, req));
     };
@@ -215,166 +217,24 @@ async fn main() -> tide::Result<()> {
     let mut route = app.at("/iris/api");
     route.at("/login").post(login_post);
     route.at("/access").get(access_get);
-    add_routes!(route, "alarm");
-    route.at("/alarm/:name").get(|req| {
-        sql_get(
-            "alarm",
-            "SELECT name, description, controller, pin, state, trigger_time \
-            FROM iris.alarm \
-            WHERE name = $1",
-            req,
-        )
-    });
-    add_routes!(route, "beacon");
-    route.at("/beacon/:name").get(|req| {
-        sql_get(
-            "beacon",
-            "SELECT b.name, location, controller, pin, verify_pin, geo_loc, \
-                    message, notes, preset, flashing \
-            FROM iris.beacon b \
-            LEFT JOIN geo_loc_view gl ON b.geo_loc = gl.name \
-            WHERE b.name = $1",
-            req,
-        )
-    });
-    add_routes!(route, "cabinet_style");
-    route.at("/cabinet_style/:name").get(|req| {
-        sql_get(
-            "cabinet_style",
-            "SELECT name, police_panel_pin_1, police_panel_pin_2, \
-                    watchdog_reset_pin_1, watchdog_reset_pin_2, dip \
-            FROM iris.cabinet_style \
-            WHERE name = $1",
-            req,
-        )
-    });
-    add_routes!(route, "camera");
+    add_routes!(route, "alarm", query::ALARM);
+    add_routes!(route, "beacon", query::BEACON);
+    add_routes!(route, "cabinet_style", query::CABINET_STYLE);
+    add_routes!(route, "camera", query::CAMERA);
+    add_routes!(route, "comm_config", query::COMM_CONFIG);
+    add_routes!(route, "comm_link", query::COMM_LINK);
+    add_routes!(route, "controller", query::CONTROLLER);
     route
-        .at("/camera/:name")
-        .get(|req| {
-            sql_get(
-                "camera",
-                "SELECT c.name, location, geo_loc, controller, pin, notes, \
-                        cam_num, publish, streamable, cam_template, \
-                        encoder_type, enc_address, enc_port, enc_mcast, \
-                        enc_channel, video_loss \
-                FROM iris.camera c \
-                LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
-                WHERE c.name = $1",
-                req,
-            )
-        });
-    add_routes!(route, "comm_config");
-    route.at("/comm_config/:name").get(|req| {
-        sql_get(
-            "comm_config",
-            "SELECT name, description, protocol, modem, poll_period_sec, \
-                    long_poll_period_sec, timeout_ms, idle_disconnect_sec, \
-                    no_response_disconnect_sec \
-            FROM iris.comm_config \
-            WHERE name = $1",
-            req,
-        )
-    });
-    add_routes!(route, "comm_link");
-    route.at("/comm_link/:name").get(|req| {
-        sql_get(
-            "comm_link",
-            "SELECT name, description, uri, comm_config, poll_enabled, \
-                    connected \
-            FROM iris.comm_link \
-            WHERE name = $1",
-            req,
-        )
-    });
-    add_routes!(route, "controller");
-    route.at("/controller/:name").get(|req| {
-        sql_get(
-            "controller",
-            "SELECT c.name, location, geo_loc, comm_link, drop_id, \
-                    cabinet_style, condition, notes, password, version, \
-                    fail_time \
-            FROM iris.controller c \
-            LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
-            WHERE c.name = $1",
-            req,
-        )
-    });
-    route.at("/controller_io/:name").get(|req| {
-        sql_get_array(
-            "controller_io",
-            "SELECT pin, name, resource_n \
-            FROM iris.controller_io \
-            WHERE controller = $1 \
-            ORDER BY pin",
-            req,
-        )
-    });
-    add_routes!(route, "detector");
-    route
-        .at("/detector/:name")
-        .get(|req| {
-            sql_get(
-                "detector",
-                "SELECT d.name, label, r_node, controller, pin, notes, \
-                        lane_code, lane_number, abandoned, fake, field_length, \
-                        force_fail, auto_fail \
-                FROM iris.detector d \
-                LEFT JOIN detector_label_view dl ON d.name = dl.det_id \
-                WHERE d.name = $1",
-                req,
-            )
-        });
-    add_routes!(route, "lane_marking");
-    route.at("/lane_marking/:name").get(|req| {
-        sql_get(
-            "lane_marking",
-            "SELECT m.name, location, geo_loc, controller, pin, notes, \
-                    deployed \
-            FROM iris.lane_marking m \
-            LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
-            WHERE m.name = $1",
-            req,
-        )
-    });
-    add_routes!(route, "modem");
-    route.at("/modem/:name").get(|req| {
-        sql_get(
-            "modem",
-            "SELECT name, uri, config, enabled, timeout_ms \
-            FROM iris.modem \
-            WHERE name = $1",
-            req,
-        )
-    });
+        .at("/controller_io/:name")
+        .get(|req| sql_get_array("controller_io", query::CONTROLLER_IO, req));
+    add_routes!(route, "detector", query::DETECTOR);
     route
         .at("/geo_loc/:name")
-        .get(|req| {
-            sql_get(
-                "geo_loc",
-                "SELECT name, resource_n, roadway, road_dir, cross_street, \
-                        cross_dir, cross_mod, landmark, lat, lon \
-                FROM iris.geo_loc \
-                WHERE name = $1",
-                req,
-            )
-        })
+        .get(|req| sql_get("geo_loc", query::GEO_LOC, req))
         .patch(|req| sonar_object_patch("geo_loc", req));
-    add_routes!(route, "ramp_meter");
-    route
-        .at("/ramp_meter/:name")
-        .get(|req| {
-            sql_get(
-                "ramp_meter",
-                "SELECT m.name, location, geo_loc, controller, pin, notes, \
-                        meter_type, beacon, preset, storage, max_wait, \
-                        algorithm, am_target, pm_target, m_lock \
-                FROM iris.ramp_meter m \
-                LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
-                WHERE m.name = $1",
-                req,
-            )
-        });
+    add_routes!(route, "lane_marking", query::LANE_MARKING);
+    add_routes!(route, "modem", query::MODEM);
+    add_routes!(route, "ramp_meter", query::RAMP_METER);
     route.at("/road").get(|req| resource_get("road", req));
     route
         .at("/permission")
@@ -385,63 +245,11 @@ async fn main() -> tide::Result<()> {
         .get(permission_get)
         .patch(permission_patch)
         .delete(permission_delete);
-    add_routes!(route, "role");
-    route.at("/role/:name").get(|req| {
-        sql_get(
-            "role",
-            "SELECT name, enabled FROM iris.role WHERE name = $1",
-            req,
-        )
-    });
-    add_routes!(route, "tag_reader");
-    route
-        .at("/tag_reader/:name")
-        .get(|req| {
-            sql_get(
-                "tag_reader",
-                "SELECT t.name, location, geo_loc, controller, pin, notes, \
-                        toll_zone \
-                FROM iris.tag_reader t \
-                LEFT JOIN geo_loc_view gl ON t.geo_loc = gl.name \
-                WHERE t.name = $1",
-                req,
-            )
-        });
-    add_routes!(route, "user");
-    route.at("/user/:name").get(|req| {
-        sql_get(
-            "user",
-            "SELECT name, full_name, role, enabled \
-            FROM iris.i_user \
-            WHERE name = $1",
-            req,
-        )
-    });
-    add_routes!(route, "video_monitor");
-    route
-        .at("/video_monitor/:name")
-        .get(|req| {
-            sql_get(
-                "video_monitor",
-                "SELECT name, mon_num, controller, pin, notes, restricted, \
-                        monitor_style, camera \
-                FROM iris.video_monitor \
-                WHERE name = $1",
-                req,
-            )
-        });
-    add_routes!(route, "weather_sensor");
-    route.at("/weather_sensor/:name").get(|req| {
-        sql_get(
-            "weather_sensor",
-            "SELECT ws.name, location, geo_loc, controller, pin, site_id, \
-                    alt_id, notes, settings, sample, sample_time \
-            FROM iris.weather_sensor ws \
-            LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
-            WHERE ws.name = $1",
-            req,
-        )
-    });
+    add_routes!(route, "role", query::ROLE);
+    add_routes!(route, "tag_reader", query::TAG_READER);
+    add_routes!(route, "user", query::USER);
+    add_routes!(route, "video_monitor", query::VIDEO_MONITOR);
+    add_routes!(route, "weather_sensor", query::WEATHER_SENSOR);
     app.listen("127.0.0.1:3737").await?;
     Ok(())
 }
