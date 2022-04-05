@@ -160,6 +160,12 @@ of `pin`, `resource_n` and `name`.
 | Read Only    | name, {`resource_n`} |
 | 🔧 Configure | roadway, road\_dir, cross\_street, cross\_dir, cross\_mod, landmark, {`lat`}, {`lon`} |
 
+Since `geo_loc` resources are only created and deleted with an associated
+`resource_n`, there are only two valid endpoints:
+
+- `GET iris/api/{type}/{name}`: Get one full object as JSON
+- `PATCH iris/api/{type}/{name}`: Update attributes of one object, with JSON
+
 ### `lane_marking`
 
 | Access       | Attributes                  |

@@ -48,13 +48,24 @@ pub const NAME: &str = "ob_name";
 /// Compact "Create" card
 const CREATE_COMPACT: &str = "<span class='create'>Create 🆕</span>";
 
+/// Close button
+pub const CLOSE_BUTTON: &str = "<button id='ob_close' type='button'>X</button>";
+
 /// Location button
 pub const LOC_BUTTON: &str =
     "<button id='ob_loc' type='button'>🗺️ Location</button>";
 
+/// Delete button
+pub const DEL_BUTTON: &str =
+    "<button id='ob_delete' type='button'>🗑️ Delete</button>";
+
 /// Edit button
 pub const EDIT_BUTTON: &str =
     "<button id='ob_edit' type='button'>📝 Edit</button>";
+
+/// Save button
+pub const SAVE_BUTTON: &str =
+    "<button id='ob_save' type='button'>🖍️ Save</button>";
 
 /// Resource types
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -316,7 +327,7 @@ impl Resource {
             }
             _ => {
                 let html = self.card_view(View::Edit, name).await?;
-                Ok(html_card_edit(self.dname(), name, &html))
+                Ok(html_card_edit(self.dname(), name, &html, DEL_BUTTON))
             }
         }
     }
@@ -477,7 +488,7 @@ impl Resource {
               <span class='{TITLE}'>{dname}</span>\
               <span class='{TITLE}'>Status</span>\
               <span class='{NAME}'>{name}</span>\
-              <button id='ob_close' type='button'>X</button>\
+              {CLOSE_BUTTON}\
             </div>\
             {status}"
         )
@@ -547,7 +558,7 @@ async fn card_view<C: Card>(
 /// Fetch a Location card
 async fn card_location(name: &str) -> Result<String> {
     let html = Resource::GeoLoc.card_view(View::Edit, name).await?;
-    Ok(html_card_edit(Resource::GeoLoc.dname(), name, &html))
+    Ok(html_card_edit(Resource::GeoLoc.dname(), name, &html, ""))
 }
 
 impl Search {
@@ -610,30 +621,35 @@ fn html_card_create(dname: &'static str, create: &str) -> String {
           <span class='{TITLE}'>{dname}</span>\
           <span class='{TITLE}'>Create</span>\
           <span class='{NAME}'>🆕</span>\
-          <button id='ob_close' type='button'>X</button>\
+          {CLOSE_BUTTON}\
         </div>\
         {create}
         <div class='row right'>\
-          <button id='ob_save' type='button'>🖍️ Save</button>\
+          {SAVE_BUTTON}\
         </div>"
     )
 }
 
 /// Build an edit card
-fn html_card_edit(dname: &'static str, name: &str, edit: &str) -> String {
+fn html_card_edit(
+    dname: &'static str,
+    name: &str,
+    edit: &str,
+    delete: &'static str,
+) -> String {
     let name = HtmlStr::new(name);
     format!(
         "<div class='row'>\
           <span class='{TITLE}'>{dname}</span>\
           <span class='{TITLE}'>Edit</span>\
           <span class='{NAME}'>{name}</span>\
-          <button id='ob_close' type='button'>X</button>\
+          {CLOSE_BUTTON}\
         </div>\
         {edit}\
         <div class='row'>\
           <span></span>\
-          <button id='ob_delete' type='button'>🗑️ Delete</button>\
-          <button id='ob_save' type='button'>🖍️ Save</button>\
+          {delete}\
+          {SAVE_BUTTON}\
         </div>"
     )
 }
