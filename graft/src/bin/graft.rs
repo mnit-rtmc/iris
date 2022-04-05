@@ -21,7 +21,7 @@ use convert_case::{Case, Casing};
 use core::time::Duration;
 use graft::query;
 use graft::sonar::{Connection, Result, SonarError};
-use graft::state::{Permission, State};
+use graft::state::State;
 use percent_encoding::percent_decode_str;
 use rand::Rng;
 use serde_json::map::Map;
@@ -160,12 +160,12 @@ macro_rules! add_routes {
     };
 }
 
-/// Lookup authorized permission for a resource
-fn auth_perm(req: &Request<State>, res: &str) -> Result<Permission> {
+/// Lookup authorized access for a resource
+fn auth_access(req: &Request<State>, res: &str) -> Result<Access> {
     let session = req.session();
     let auth: AuthMap = session.get("auth").ok_or(SonarError::Unauthorized)?;
     let perm = req.state().permission_user_res(&auth.username, res)?;
-    Ok(perm)
+    Access::new(perm.access_n).ok_or(SonarError::Unauthorized)
 }
 
 impl Access {
@@ -180,6 +180,17 @@ impl Access {
         }
     }
 
+    /// Create access from level
+    const fn new(level: i32) -> Option<Self> {
+        match level {
+            1 => Some(Self::View),
+            2 => Some(Self::Operate),
+            3 => Some(Self::Plan),
+            4 => Some(Self::Configure),
+            _ => None,
+        }
+    }
+
     /// Get access level
     const fn level(self) -> i32 {
         match self {
@@ -191,8 +202,8 @@ impl Access {
     }
 
     /// Check for access to a resource
-    fn check(self, perm: &Permission) -> Result<()> {
-        if perm.access_n >= self.level() {
+    fn check(self, rhs: Self) -> Result<()> {
+        if self.level() >= rhs.level() {
             Ok(())
         } else {
             Err(SonarError::Forbidden)
@@ -325,7 +336,7 @@ async fn permission_post(req: Request<State>) -> tide::Result {
 
 /// `POST` one permission record
 async fn permission_post2(mut req: Request<State>) -> Result<()> {
-    Access::Configure.check(&auth_perm(&req, "permission")?)?;
+    auth_access(&req, "permission")?.check(Access::Configure)?;
     let obj = body_json_obj(&mut req).await?;
     let role = obj.get("role");
     let resource_n = obj.get("resource_n");
@@ -354,7 +365,7 @@ async fn permission_get(req: Request<State>) -> tide::Result {
 
 /// Get permission record as JSON
 async fn permission_get_json(req: Request<State>) -> Result<String> {
-    Access::View.check(&auth_perm(&req, "permission")?)?;
+    auth_access(&req, "permission")?.check(Access::View)?;
     let id = obj_id(&req)?;
     let perm = spawn_blocking(move || req.state().permission(id)).await?;
     Ok(serde_json::to_value(perm)?.to_string())
@@ -369,7 +380,7 @@ async fn permission_patch(req: Request<State>) -> tide::Result {
 
 /// `PATCH` one permission record
 async fn permission_patch2(mut req: Request<State>) -> Result<()> {
-    Access::Configure.check(&auth_perm(&req, "permission")?)?;
+    auth_access(&req, "permission")?.check(Access::Configure)?;
     let id = obj_id(&req)?;
     let obj = body_json_obj(&mut req).await?;
     return spawn_blocking(move || req.state().permission_patch(id, obj)).await;
@@ -384,7 +395,7 @@ async fn permission_delete(req: Request<State>) -> tide::Result {
 
 /// `DELETE` one permission record
 async fn permission_delete2(req: Request<State>) -> Result<()> {
-    Access::Configure.check(&auth_perm(&req, "permission")?)?;
+    auth_access(&req, "permission")?.check(Access::Configure)?;
     let id = obj_id(&req)?;
     spawn_blocking(move || req.state().permission_delete(id)).await
 }
@@ -415,7 +426,7 @@ async fn sql_get_by_name(
     sql: &'static str,
     req: Request<State>,
 ) -> Result<String> {
-    Access::View.check(&auth_perm(&req, resource_tp(resource_n))?)?;
+    auth_access(&req, resource_tp(resource_n))?.check(Access::View)?;
     let name = resource_name(&req)?;
     Ok(spawn_blocking(move || req.state().get_by_pkey(sql, &name)).await?)
 }
@@ -440,7 +451,7 @@ async fn sql_get_array_by_name(
     sql: &'static str,
     req: Request<State>,
 ) -> Result<String> {
-    Access::View.check(&auth_perm(&req, resource_tp(resource_n))?)?;
+    auth_access(&req, resource_tp(resource_n))?.check(Access::View)?;
     let name = resource_name(&req)?;
     Ok(
         spawn_blocking(move || req.state().get_array_by_pkey(sql, &name))
@@ -531,7 +542,7 @@ async fn resource_get_json(
     resource_n: &'static str,
     req: Request<State>,
 ) -> Result<(String, Body)> {
-    Access::View.check(&auth_perm(&req, resource_tp(resource_n))?)?;
+    auth_access(&req, resource_tp(resource_n))?.check(Access::View)?;
     let path = PathBuf::from(format!("{STATIC_PATH}/{resource_n}"));
     let etag = resource_etag(&path).await?;
     if let Some(values) = req.header("If-None-Match") {
@@ -574,7 +585,7 @@ async fn sonar_object_post2(
     tp: &'static str,
     mut req: Request<State>,
 ) -> Result<()> {
-    Access::Configure.check(&auth_perm(&req, tp)?)?;
+    auth_access(&req, tp)?.check(Access::Configure)?;
     let obj = body_json_obj(&mut req).await?;
     match obj.get("name") {
         Some(Value::String(name)) => {
@@ -620,14 +631,14 @@ async fn sonar_object_patch2(
     tp: &'static str,
     mut req: Request<State>,
 ) -> Result<()> {
-    let perm = auth_perm(&req, tp)?;
-    // *At least* Operate access needed (further checks below)
-    Access::Operate.check(&perm)?;
-    let obj = body_json_obj(&mut req).await?;
     let nm = obj_name(tp, &req)?;
+    let access = auth_access(&req, tp)?;
+    // *At least* Operate access needed (further checks below)
+    access.check(Access::Operate)?;
+    let obj = body_json_obj(&mut req).await?;
     for key in obj.keys() {
         let key = &key[..];
-        Access::from_type_key(&(tp, key)).check(&perm)?;
+        access.check(Access::from_type_key(&(tp, key)))?;
     }
     let mut c = connection(&req).await?;
     // first pass
@@ -659,8 +670,8 @@ async fn sonar_object_delete(
     req: Request<State>,
 ) -> tide::Result {
     log::info!("DELETE {}", req.url());
-    let perm = resp!(auth_perm(&req, tp));
-    resp!(Access::Configure.check(&perm));
+    let access = resp!(auth_access(&req, tp));
+    resp!(access.check(Access::Configure));
     let nm = resp!(obj_name(tp, &req));
     let mut c = resp!(connection(&req).await);
     resp!(c.remove_object(&nm).await);
