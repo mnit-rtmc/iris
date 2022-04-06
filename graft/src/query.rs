@@ -97,6 +97,12 @@ pub const MODEM: &str = "\
 SELECT name, uri, config, enabled, timeout_ms FROM iris.modem \
 WHERE name = $1";
 
+/// SQL query for one permission
+pub const PERMISSION: &str = "\
+SELECT id, role, resource_n, batch, access_n \
+FROM iris.permission \
+WHERE id = $1";
+
 /// SQL query for one ramp meter
 pub const RAMP_METER: &str = "\
 SELECT m.name, location, geo_loc, controller, pin, notes, meter_type, beacon, \

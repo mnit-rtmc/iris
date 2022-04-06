@@ -12,6 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::query::PERMISSION;
 use crate::sonar::{Result, SonarError};
 use postgres::row::Row;
 use postgres::types::ToSql;
@@ -64,12 +65,6 @@ fn make_pool() -> Result<PostgresPool> {
     Ok(r2d2::Pool::new(manager)?)
 }
 
-/// Query one permission
-const QUERY_PERM: &str = "\
-SELECT id, role, resource_n, batch, access_n \
-FROM iris.permission \
-WHERE id = $1";
-
 /// Create one permission
 const INSERT_PERM: &str = "\
 INSERT INTO iris.permission (role, resource_n, access_n) \
@@ -116,7 +111,7 @@ impl State {
     /// Get permission by ID
     pub fn permission(&self, id: i32) -> Result<Permission> {
         let mut client = self.pool.get()?;
-        let row = client.query_one(QUERY_PERM, &[&id])?;
+        let row = client.query_one(PERMISSION, &[&id])?;
         Ok(Permission::from_row(row))
     }
 
@@ -143,7 +138,7 @@ impl State {
         let mut client = self.pool.get()?;
         let mut transaction = client.transaction()?;
         let row = transaction
-            .query_one(QUERY_PERM, &[&id])
+            .query_one(PERMISSION, &[&id])
             .map_err(|_e| SonarError::InvalidName)?;
         let Permission {
             id,
