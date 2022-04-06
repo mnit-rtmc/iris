@@ -252,6 +252,7 @@ vsa_min_station_miles	0.1
 vsa_start_intervals	3
 vsa_start_threshold	-1500
 vsa_stop_threshold	-750
+weather_sensor_event_purge_days	14
 window_title	IRIS: 
 work_request_url	
 \.

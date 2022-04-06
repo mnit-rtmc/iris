@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2021  Minnesota Department of Transportation
+ * Copyright (C) 2014-2022  Minnesota Department of Transportation
  * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.server.event.PriceMessageEvent;
 import us.mn.state.dot.tms.server.event.SignEvent;
 import us.mn.state.dot.tms.server.event.TagReadEvent;
 import us.mn.state.dot.tms.server.event.TravelTimeEvent;
+import us.mn.state.dot.tms.server.event.WeatherSensorEvent;
 
 /**
  * Job to periodically purge database event records.
@@ -63,5 +64,6 @@ public class EventPurgeJob extends Job {
 		SignEvent.purgeRecords();
 		TagReadEvent.purgeRecords();
 		TravelTimeEvent.purgeRecords();
+		WeatherSensorEvent.purgeRecords();
 	}
 }

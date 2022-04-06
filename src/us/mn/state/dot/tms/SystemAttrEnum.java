@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2015  AHMCT, University of California
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  * Copyright (C) 2012-2021  Iteris Inc.
  * Copyright (C) 2015-2020  SRF Consulting Group
  *
@@ -152,6 +152,7 @@ public enum SystemAttrEnum {
 	VSA_START_INTERVALS(3, 0, 10),
 	VSA_START_THRESHOLD(-1500, -5000, -200),
 	VSA_STOP_THRESHOLD(-750, -5000, -200),
+	WEATHER_SENSOR_EVENT_PURGE_DAYS(14, 0),
 	WINDOW_TITLE("IRIS: ", Change.RESTART_CLIENT),
 	WORK_REQUEST_URL(String.class);
 
