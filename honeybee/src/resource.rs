@@ -38,6 +38,9 @@ pub fn make_backup_name(dir: &Path, n: &str) -> PathBuf {
 /// Listen enum for postgres NOTIFY events
 #[derive(PartialEq, Eq, Hash)]
 enum Listen {
+    /// Do not listen
+    Nope,
+
     /// Listen for all payloads.
     ///
     /// * channel name
@@ -66,6 +69,7 @@ impl Listen {
     /// Get the LISTEN channel name
     fn channel_names(&self) -> Vec<&str> {
         match self {
+            Listen::Nope => vec![],
             Listen::All(n) => vec![n],
             Listen::Include(n, _) => vec![n],
             Listen::Exclude(n, _) => vec![n],
@@ -76,6 +80,7 @@ impl Listen {
     /// Check if listening to a channel
     fn is_listening(&self, chan: &str, payload: &str) -> bool {
         match self {
+            Listen::Nope => false,
             Listen::All(n) => n == &chan,
             Listen::Include(n, inc) => n == &chan && inc.contains(&payload),
             Listen::Exclude(n, exc) => n == &chan && !exc.contains(&payload),
@@ -153,6 +158,18 @@ const GATE_ARM_RES: Resource = Resource::Simple(
         SELECT name, controller, notes, arm_state \
         FROM iris.gate_arm \
         ORDER BY name\
+    ) r",
+);
+
+/// Gate arm array resource
+const GATE_ARM_ARRAY_RES: Resource = Resource::Simple(
+    "api/gate_arm_array",
+    Listen::All("gate_arm_array"),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT ga.name, location, notes, arm_state, interlock \
+        FROM iris.gate_arm_array ga \
+        LEFT JOIN geo_loc_view gl ON ga.geo_loc = gl.name \
+        ORDER BY ga.name\
     ) r",
 );
 
@@ -335,7 +352,7 @@ const CABINET_STYLE_RES: Resource = Resource::Simple(
 /// Comm protocol LUT resource
 const COMM_PROTOCOL_RES: Resource = Resource::Simple(
     "comm_protocol",
-    Listen::All("comm_protocol"), // no notifications for LUT
+    Listen::Nope,
     "SELECT row_to_json(r)::text FROM (\
         SELECT id, description \
         FROM iris.comm_protocol \
@@ -369,23 +386,23 @@ const COMM_LINK_RES: Resource = Resource::Simple(
 /// Controller condition LUT resource
 const CONDITION_RES: Resource = Resource::Simple(
     "condition",
-    Listen::All("condition"), // no notifications for LUT
+    Listen::Nope,
     "SELECT row_to_json(r)::text FROM (\
-    SELECT id, description \
-    FROM iris.condition \
-    ORDER BY description\
-) r",
+        SELECT id, description \
+        FROM iris.condition \
+        ORDER BY description\
+    ) r",
 );
 
 /// Direction LUT resource
 const DIRECTION_RES: Resource = Resource::Simple(
     "direction",
-    Listen::All("direction"), // no notifications for LUT
+    Listen::Nope,
     "SELECT row_to_json(r)::text FROM (\
-    SELECT id, direction, dir \
-    FROM iris.direction \
-    ORDER BY id\
-) r",
+        SELECT id, direction, dir \
+        FROM iris.direction \
+        ORDER BY id\
+    ) r",
 );
 
 /// Roadway resource
@@ -402,18 +419,29 @@ const ROADWAY_RES: Resource = Resource::Simple(
 /// Road modifier LUT resource
 const ROAD_MODIFIER_RES: Resource = Resource::Simple(
     "road_modifier",
-    Listen::All("road_modifier"), // no notifications for LUT
+    Listen::Nope,
     "SELECT row_to_json(r)::text FROM (\
-    SELECT id, modifier, mod AS md \
-    FROM iris.road_modifier \
-    ORDER BY id\
-) r",
+        SELECT id, modifier, mod AS md \
+        FROM iris.road_modifier \
+        ORDER BY id\
+    ) r",
+);
+
+/// Gate arm interlock LUT resource
+const GATE_ARM_INTERLOCK_RES: Resource = Resource::Simple(
+    "gate_arm_interlock",
+    Listen::Nope,
+    "SELECT row_to_json(r)::text FROM (
+        SELECT id, description \
+        FROM iris.gate_arm_interlock \
+        ORDER BY id\
+    ) r",
 );
 
 /// Gate arm state LUT resource
 const GATE_ARM_STATE_RES: Resource = Resource::Simple(
     "gate_arm_state",
-    Listen::All("gate_arm_state"), // no notifications for LUT
+    Listen::Nope,
     "SELECT row_to_json(r)::text FROM (
         SELECT id, description \
         FROM iris.gate_arm_state \
@@ -424,7 +452,7 @@ const GATE_ARM_STATE_RES: Resource = Resource::Simple(
 /// Resource type LUT resource
 const RESOURCE_TYPE_RES: Resource = Resource::Simple(
     "resource_type",
-    Listen::All("resource_type"), // no notifications for LUT
+    Listen::Nope,
     "SELECT to_json(r.name)::text FROM (
         SELECT name \
         FROM iris.resource_type \
@@ -621,6 +649,7 @@ const ALL: &[Resource] = &[
     DIRECTION_RES,
     ROADWAY_RES,
     ROAD_MODIFIER_RES,
+    GATE_ARM_INTERLOCK_RES,
     GATE_ARM_STATE_RES,
     RESOURCE_TYPE_RES,
     CONTROLLER_RES,
@@ -632,6 +661,7 @@ const ALL: &[Resource] = &[
     CAMERA_RES,
     CAMERA_PUB_RES,
     GATE_ARM_RES,
+    GATE_ARM_ARRAY_RES,
     RAMP_METER_RES,
     TAG_READER_RES,
     VIDEO_MONITOR_RES,

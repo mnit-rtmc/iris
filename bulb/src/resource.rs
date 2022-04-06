@@ -21,6 +21,7 @@ use crate::detector::Detector;
 use crate::error::{Error, Result};
 use crate::fetch::{fetch_delete, fetch_get, fetch_patch, fetch_post};
 use crate::gatearm::GateArm;
+use crate::gatearmarray::GateArmArray;
 use crate::geoloc::GeoLoc;
 use crate::lanemarking::LaneMarking;
 use crate::modem::Modem;
@@ -80,6 +81,7 @@ pub enum Resource {
     Controller,
     Detector,
     GateArm,
+    GateArmArray,
     GeoLoc,
     LaneMarking,
     Modem,
@@ -199,6 +201,7 @@ impl Resource {
             Controller::RESOURCE_N => Self::Controller,
             Detector::RESOURCE_N => Self::Detector,
             GateArm::RESOURCE_N => Self::GateArm,
+            GateArmArray::RESOURCE_N => Self::GateArmArray,
             GeoLoc::RESOURCE_N => Self::GeoLoc,
             LaneMarking::RESOURCE_N => Self::LaneMarking,
             Modem::RESOURCE_N => Self::Modem,
@@ -225,6 +228,7 @@ impl Resource {
             Self::Controller => Controller::RESOURCE_N,
             Self::Detector => Detector::RESOURCE_N,
             Self::GateArm => GateArm::RESOURCE_N,
+            Self::GateArmArray => GateArmArray::RESOURCE_N,
             Self::GeoLoc => GeoLoc::RESOURCE_N,
             Self::LaneMarking => LaneMarking::RESOURCE_N,
             Self::Modem => Modem::RESOURCE_N,
@@ -250,7 +254,8 @@ impl Resource {
             Self::CommLink => "🔗 Comm Link",
             Self::Controller => "🎛️ Controller",
             Self::Detector => "🚗⬚ Detector",
-            Self::GateArm => "⫭ Gate Arm",
+            Self::GateArm => "⫬ Gate Arm",
+            Self::GateArmArray => "⫭⫬ Gate Arm Array",
             Self::GeoLoc => "🗺️ Location",
             Self::LaneMarking => "⛙ Lane Marking",
             Self::Modem => "🖀 Modem",
@@ -297,6 +302,9 @@ impl Resource {
             Self::Controller => fetch_list::<Controller>(self, search).await,
             Self::Detector => fetch_list::<Detector>(self, search).await,
             Self::GateArm => fetch_list::<GateArm>(self, search).await,
+            Self::GateArmArray => {
+                fetch_list::<GateArmArray>(self, search).await
+            }
             Self::LaneMarking => fetch_list::<LaneMarking>(self, search).await,
             Self::Modem => fetch_list::<Modem>(self, search).await,
             Self::Permission => fetch_list::<Permission>(self, search).await,
@@ -352,6 +360,9 @@ impl Resource {
             Self::Controller => card_view::<Controller>(self, view, name).await,
             Self::Detector => card_view::<Detector>(self, view, name).await,
             Self::GateArm => card_view::<GateArm>(self, view, name).await,
+            Self::GateArmArray => {
+                card_view::<GateArmArray>(self, view, name).await
+            }
             Self::GeoLoc => card_view::<GeoLoc>(self, view, name).await,
             Self::LaneMarking => {
                 card_view::<LaneMarking>(self, view, name).await
@@ -383,6 +394,7 @@ impl Resource {
                 | Self::Controller
                 | Self::Detector
                 | Self::GateArm
+                | Self::GateArmArray
                 | Self::GeoLoc
                 | Self::LaneMarking
                 | Self::RampMeter
@@ -416,6 +428,9 @@ impl Resource {
             Self::Controller => fetch_changed::<Controller>(self, name).await,
             Self::Detector => fetch_changed::<Detector>(self, name).await,
             Self::GateArm => fetch_changed::<GateArm>(self, name).await,
+            Self::GateArmArray => {
+                fetch_changed::<GateArmArray>(self, name).await
+            }
             Self::GeoLoc => fetch_changed::<GeoLoc>(self, name).await,
             Self::LaneMarking => fetch_changed::<LaneMarking>(self, name).await,
             Self::Modem => fetch_changed::<Modem>(self, name).await,
@@ -470,6 +485,7 @@ impl Resource {
             Self::Beacon => self.geo_loc::<Beacon>(name).await,
             Self::Camera => self.geo_loc::<Camera>(name).await,
             Self::Controller => self.geo_loc::<Controller>(name).await,
+            Self::GateArmArray => self.geo_loc::<GateArmArray>(name).await,
             Self::GeoLoc => Ok(Some(name.into())),
             Self::LaneMarking => self.geo_loc::<LaneMarking>(name).await,
             Self::RampMeter => self.geo_loc::<RampMeter>(name).await,

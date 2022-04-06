@@ -240,6 +240,7 @@ async fn main() -> tide::Result<()> {
         .get(|req| sql_get_array("controller_io", query::CONTROLLER_IO, req));
     add_routes!(route, "detector", query::DETECTOR);
     add_routes!(route, "gate_arm", query::GATE_ARM);
+    add_routes!(route, "gate_arm_array", query::GATE_ARM_ARRAY);
     route
         .at("/geo_loc/:name")
         .get(|req| sql_get("geo_loc", query::GEO_LOC, req))

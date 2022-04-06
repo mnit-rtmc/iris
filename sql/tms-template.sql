@@ -159,7 +159,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.31.0
+database_version	5.32.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
@@ -502,6 +502,7 @@ administrator	comm_link	4
 administrator	controller	4
 administrator	detector	4
 administrator	gate_arm	4
+administrator	gate_arm_array	4
 administrator	geo_loc	4
 administrator	lane_marking	4
 administrator	modem	4
@@ -2239,6 +2240,26 @@ CREATE TABLE iris._detector (
 ALTER TABLE iris._detector ADD CONSTRAINT _detector_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
+CREATE FUNCTION iris.detector_notify() RETURNS TRIGGER AS
+    $detector_notify$
+BEGIN
+    IF (NEW.auto_fail IS DISTINCT FROM OLD.auto_fail) THEN
+        NOTIFY detector, 'auto_fail';
+    ELSE
+        NOTIFY detector;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$detector_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER detector_notify_trig
+    AFTER UPDATE ON iris._detector
+    FOR EACH ROW EXECUTE PROCEDURE iris.detector_notify();
+
+CREATE TRIGGER detector_table_notify_trig
+    AFTER INSERT OR DELETE ON iris._detector
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 CREATE VIEW iris.detector AS
     SELECT det.name, controller, pin, r_node, lane_code, lane_number,
            abandoned, force_fail, auto_fail, field_length, fake, notes
@@ -2294,26 +2315,6 @@ CREATE TRIGGER detector_update_trig
 CREATE TRIGGER detector_delete_trig
     INSTEAD OF DELETE ON iris.detector
     FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
-
-CREATE FUNCTION iris.detector_notify() RETURNS TRIGGER AS
-    $detector_notify$
-BEGIN
-    IF (NEW.auto_fail IS DISTINCT FROM OLD.auto_fail) THEN
-        NOTIFY detector, 'auto_fail';
-    ELSE
-        NOTIFY detector;
-    END IF;
-    RETURN NULL; -- AFTER trigger return is ignored
-END;
-$detector_notify$ LANGUAGE plpgsql;
-
-CREATE TRIGGER detector_notify_trig
-    AFTER UPDATE ON iris.detector
-    FOR EACH ROW EXECUTE PROCEDURE iris.detector_notify();
-
-CREATE TRIGGER detector_table_notify_trig
-    AFTER INSERT OR DELETE ON iris._detector
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE FUNCTION iris.detector_label(VARCHAR(6), VARCHAR(4), VARCHAR(6),
     VARCHAR(4), VARCHAR(2), CHAR, SMALLINT, BOOLEAN)
@@ -3231,8 +3232,8 @@ COPY iris.gate_arm_state(id, description) FROM stdin;
 \.
 
 CREATE TABLE iris.gate_arm_interlock (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(16) NOT NULL
 );
 
 COPY iris.gate_arm_interlock(id, description) FROM stdin;
@@ -3244,32 +3245,44 @@ COPY iris.gate_arm_interlock(id, description) FROM stdin;
 \.
 
 CREATE TABLE iris._gate_arm_array (
-	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
-	notes VARCHAR(64) NOT NULL,
-	opposing BOOLEAN NOT NULL,
-	prereq VARCHAR(20) REFERENCES iris._gate_arm_array,
-	camera VARCHAR(20) REFERENCES iris._camera,
-	approach VARCHAR(20) REFERENCES iris._camera,
-	action_plan VARCHAR(16) UNIQUE REFERENCES iris.action_plan,
-	arm_state INTEGER NOT NULL REFERENCES iris.gate_arm_state,
-	interlock INTEGER NOT NULL REFERENCES iris.gate_arm_interlock
+    name VARCHAR(20) PRIMARY KEY,
+    geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
+    notes VARCHAR(64) NOT NULL,
+    opposing BOOLEAN NOT NULL,
+    prereq VARCHAR(20) REFERENCES iris._gate_arm_array,
+    camera VARCHAR(20) REFERENCES iris._camera,
+    approach VARCHAR(20) REFERENCES iris._camera,
+    action_plan VARCHAR(16) UNIQUE REFERENCES iris.action_plan,
+    arm_state INTEGER NOT NULL REFERENCES iris.gate_arm_state,
+    interlock INTEGER NOT NULL REFERENCES iris.gate_arm_interlock
 );
 
+-- This constraint ensures that the name is unique among all devices
+-- Gate arm arrays are *not* associated with controllers or pins
 ALTER TABLE iris._gate_arm_array ADD CONSTRAINT _gate_arm_array_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
 CREATE FUNCTION iris.gate_arm_array_notify() RETURNS TRIGGER AS
-	$gate_arm_array_notify$
+    $gate_arm_array_notify$
 BEGIN
-	NOTIFY gate_arm_array;
-	RETURN NULL; -- AFTER trigger return is ignored
+    IF (NEW.arm_state IS DISTINCT FROM OLD.arm_state) THEN
+        NOTIFY gate_arm_array, 'arm_state';
+    ELSIF (NEW.interlock IS DISTINCT FROM OLD.interlock) THEN
+        NOTIFY gate_arm_array, 'interlock';
+    ELSE
+        NOTIFY gate_arm_array;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
 END;
 $gate_arm_array_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER gate_arm_array_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris._gate_arm_array
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.gate_arm_array_notify();
+    AFTER UPDATE ON iris._gate_arm_array
+    FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_array_notify();
+
+CREATE TRIGGER gate_arm_array_table_notify_trig
+    AFTER INSERT OR DELETE ON iris._gate_arm_array
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.gate_arm_array AS
     SELECT g.name, geo_loc, controller, pin, notes, opposing, prereq, camera,
