@@ -6,7 +6,7 @@ BEGIN;
 SELECT iris.update_version('5.31.0', '5.32.0');
 
 INSERT INTO iris.system_attribute (name, value)
-    VALUES ('weather_sensor_event_purge_days', '14');
+    VALUES ('weather_sensor_event_purge_days', '90');
 
 -- Remove batch from permission index
 DROP INDEX iris.permission_role_resource_n_batch_idx;
