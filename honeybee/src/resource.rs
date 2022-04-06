@@ -145,6 +145,17 @@ const CAMERA_PUB_RES: Resource = Resource::Simple(
     ) r",
 );
 
+/// Gate arm resource
+const GATE_ARM_RES: Resource = Resource::Simple(
+    "api/gate_arm",
+    Listen::All("gate_arm"),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT name, controller, notes, arm_state \
+        FROM iris.gate_arm \
+        ORDER BY name\
+    ) r",
+);
+
 /// Ramp meter resource
 const RAMP_METER_RES: Resource = Resource::Simple(
     "api/ramp_meter",
@@ -326,10 +337,10 @@ const COMM_PROTOCOL_RES: Resource = Resource::Simple(
     "comm_protocol",
     Listen::All("comm_protocol"), // no notifications for LUT
     "SELECT row_to_json(r)::text FROM (\
-    SELECT id, description \
-    FROM iris.comm_protocol \
-    ORDER BY description\
-) r",
+        SELECT id, description \
+        FROM iris.comm_protocol \
+        ORDER BY description\
+    ) r",
 );
 
 /// Comm configuration resource
@@ -399,14 +410,25 @@ const ROAD_MODIFIER_RES: Resource = Resource::Simple(
 ) r",
 );
 
+/// Gate arm state LUT resource
+const GATE_ARM_STATE_RES: Resource = Resource::Simple(
+    "gate_arm_state",
+    Listen::All("gate_arm_state"), // no notifications for LUT
+    "SELECT row_to_json(r)::text FROM (
+        SELECT id, description \
+        FROM iris.gate_arm_state \
+        ORDER BY id\
+    ) r",
+);
+
 /// Resource type LUT resource
 const RESOURCE_TYPE_RES: Resource = Resource::Simple(
     "resource_type",
     Listen::All("resource_type"), // no notifications for LUT
     "SELECT to_json(r.name)::text FROM (
-      SELECT name \
-      FROM iris.resource_type \
-      ORDER BY name\
+        SELECT name \
+        FROM iris.resource_type \
+        ORDER BY name\
     ) r",
 );
 
@@ -599,6 +621,7 @@ const ALL: &[Resource] = &[
     DIRECTION_RES,
     ROADWAY_RES,
     ROAD_MODIFIER_RES,
+    GATE_ARM_STATE_RES,
     RESOURCE_TYPE_RES,
     CONTROLLER_RES,
     WEATHER_SENSOR_RES,
@@ -608,6 +631,7 @@ const ALL: &[Resource] = &[
     USER_RES,
     CAMERA_RES,
     CAMERA_PUB_RES,
+    GATE_ARM_RES,
     RAMP_METER_RES,
     TAG_READER_RES,
     VIDEO_MONITOR_RES,

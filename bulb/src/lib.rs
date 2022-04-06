@@ -21,6 +21,7 @@ mod detector;
 mod device;
 mod error;
 mod fetch;
+mod gatearm;
 mod geoloc;
 mod lanemarking;
 mod modem;

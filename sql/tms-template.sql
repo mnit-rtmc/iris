@@ -489,8 +489,8 @@ CREATE TABLE iris.permission (
     CONSTRAINT permission_access_n CHECK (access_n >= 1 AND access_n <= 4)
 );
 
-CREATE UNIQUE INDEX permission_role_resource_n_batch_idx
-    ON iris.permission (role, resource_n, COALESCE(batch, ''));
+CREATE UNIQUE INDEX permission_role_resource_n_idx
+    ON iris.permission (role, resource_n);
 
 COPY iris.permission (role, resource_n, access_n) FROM stdin;
 administrator	alarm	4
@@ -501,6 +501,7 @@ administrator	comm_config	4
 administrator	comm_link	4
 administrator	controller	4
 administrator	detector	4
+administrator	gate_arm	4
 administrator	geo_loc	4
 administrator	lane_marking	4
 administrator	modem	4
@@ -3215,8 +3216,8 @@ CREATE TABLE event.brightness_sample (
 -- Gate Arms
 --
 CREATE TABLE iris.gate_arm_state (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(10) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(10) NOT NULL
 );
 
 COPY iris.gate_arm_state(id, description) FROM stdin;
@@ -3339,19 +3340,23 @@ CREATE VIEW gate_arm_array_view AS
 GRANT SELECT ON gate_arm_array_view TO PUBLIC;
 
 CREATE TABLE iris._gate_arm (
-	name VARCHAR(20) PRIMARY KEY,
-	ga_array VARCHAR(20) NOT NULL REFERENCES iris._gate_arm_array,
-	idx INTEGER NOT NULL,
-	notes VARCHAR(32) NOT NULL,
-	arm_state INTEGER NOT NULL REFERENCES iris.gate_arm_state,
-	fault VARCHAR(32)
+    name VARCHAR(20) PRIMARY KEY,
+    ga_array VARCHAR(20) NOT NULL REFERENCES iris._gate_arm_array,
+    idx INTEGER NOT NULL,
+    notes VARCHAR(32) NOT NULL,
+    arm_state INTEGER NOT NULL REFERENCES iris.gate_arm_state,
+    fault VARCHAR(32)
 );
 
 ALTER TABLE iris._gate_arm ADD CONSTRAINT _gate_arm_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
 CREATE UNIQUE INDEX gate_arm_array_idx ON iris._gate_arm
-	USING btree (ga_array, idx);
+    USING btree (ga_array, idx);
+
+CREATE TRIGGER gate_arm_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._gate_arm
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.gate_arm AS
     SELECT g.name, ga_array, idx, controller, pin, notes, arm_state, fault
@@ -3414,20 +3419,20 @@ CREATE VIEW gate_arm_view AS
 GRANT SELECT ON gate_arm_view TO PUBLIC;
 
 CREATE TABLE event.gate_arm_event (
-	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	device_id VARCHAR(20),
-	iris_user VARCHAR(15),
-	fault VARCHAR(32)
+    event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    device_id VARCHAR(20),
+    iris_user VARCHAR(15),
+    fault VARCHAR(32)
 );
 
 CREATE VIEW gate_arm_event_view AS
-	SELECT e.event_id, e.event_date, ed.description, device_id, e.iris_user,
-	       e.fault
-	FROM event.gate_arm_event e
-	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+    SELECT e.event_id, e.event_date, ed.description, device_id, e.iris_user,
+           e.fault
+    FROM event.gate_arm_event e
+    JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
 GRANT SELECT ON gate_arm_event_view TO PUBLIC;
 
 --

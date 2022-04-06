@@ -39,6 +39,7 @@ These resources are static, and may only change on IRIS updates:
 - `iris/comm_protocol`: Communication protocols
 - `iris/condition`: Controller conditions
 - `iris/direction`: Travel directions
+- `iris/gate_arm_state`: Gate arm states
 - `iris/resource_type`: [Resource types] available in `iris/api/`
 - `iris/road_modifier`: Road modifiers
 
@@ -152,6 +153,14 @@ of `pin`, `resource_n` and `name`.
 | 👉 Operate   | {`field_length`}, {`force_fail`} |
 | 💡 Plan      | notes, {`abandoned`}             |
 | 🔧 Configure | controller, {`pin`}, {`r_node`}, {`lane_code`}, {`lane_number`}, {`fake`} |
+
+### `gate_arm`
+
+| Access       | Attributes                                         |
+|--------------|----------------------------------------------------|
+| Read Only    | name, arm\_state, {`ga_array`}, {`idx`}, {`fault`} |
+| 💡 Plan      | notes                                              |
+| 🔧 Configure | controller, {`pin`}                                |
 
 ### `geo_loc`
 
