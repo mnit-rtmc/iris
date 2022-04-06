@@ -13,7 +13,7 @@
 use crate::error::Result;
 use crate::resource::{disabled_attr, AncillaryData, Card, View};
 use crate::role::Role;
-use crate::util::{ContainsLower, Fields, HtmlStr, Input};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::fmt;
@@ -148,7 +148,7 @@ impl Card for User {
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("full_name", &self.full_name);
-        fields.changed_input("role", &self.role);
+        fields.changed_select("role", &self.role);
         fields.changed_input("enabled", self.enabled);
         fields.into_value().to_string()
     }
