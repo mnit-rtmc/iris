@@ -78,6 +78,14 @@ FROM iris.detector d \
 LEFT JOIN detector_label_view dl ON d.name = dl.det_id \
 WHERE d.name = $1";
 
+/// SQL query for one DMS
+pub const DMS: &str = "\
+SELECT d.name, location, geo_loc, controller, pin, notes, sign_config, \
+       sign_detail, msg_user, msg_sched, msg_current \
+FROM iris.dms d \
+LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
+WHERE d.name = $1";
+
 /// SQL query for one gate arm
 pub const GATE_ARM: &str = "\
 SELECT name, ga_array, idx, controller, pin, notes, arm_state, fault \

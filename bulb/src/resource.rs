@@ -18,6 +18,7 @@ use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
 use crate::detector::Detector;
+use crate::dms::Dms;
 use crate::error::{Error, Result};
 use crate::fetch::{fetch_delete, fetch_get, fetch_patch, fetch_post};
 use crate::gatearm::GateArm;
@@ -83,6 +84,7 @@ pub enum Resource {
     CommLink,
     Controller,
     Detector,
+    Dms,
     GateArm,
     GateArmArray,
     GeoLoc,
@@ -206,6 +208,7 @@ impl Resource {
             CommLink::RESOURCE_N => Self::CommLink,
             Controller::RESOURCE_N => Self::Controller,
             Detector::RESOURCE_N => Self::Detector,
+            Dms::RESOURCE_N => Self::Dms,
             GateArm::RESOURCE_N => Self::GateArm,
             GateArmArray::RESOURCE_N => Self::GateArmArray,
             GeoLoc::RESOURCE_N => Self::GeoLoc,
@@ -236,6 +239,7 @@ impl Resource {
             Self::CommLink => CommLink::RESOURCE_N,
             Self::Controller => Controller::RESOURCE_N,
             Self::Detector => Detector::RESOURCE_N,
+            Self::Dms => Dms::RESOURCE_N,
             Self::GateArm => GateArm::RESOURCE_N,
             Self::GateArmArray => GateArmArray::RESOURCE_N,
             Self::GeoLoc => GeoLoc::RESOURCE_N,
@@ -266,6 +270,7 @@ impl Resource {
             Self::CommLink => "🔗 Comm Link",
             Self::Controller => "🎛️ Controller",
             Self::Detector => "🚗⬚ Detector",
+            Self::Dms => "⬛ Dms",
             Self::GateArm => "⫬ Gate Arm",
             Self::GateArmArray => "⫭⫬ Gate Arm Array",
             Self::GeoLoc => "🗺️ Location",
@@ -316,6 +321,7 @@ impl Resource {
             Self::CommLink => fetch_list::<CommLink>(self, search).await,
             Self::Controller => fetch_list::<Controller>(self, search).await,
             Self::Detector => fetch_list::<Detector>(self, search).await,
+            Self::Dms => fetch_list::<Dms>(self, search).await,
             Self::GateArm => fetch_list::<GateArm>(self, search).await,
             Self::GateArmArray => {
                 fetch_list::<GateArmArray>(self, search).await
@@ -379,6 +385,7 @@ impl Resource {
             Self::CommLink => card_view::<CommLink>(self, view, name).await,
             Self::Controller => card_view::<Controller>(self, view, name).await,
             Self::Detector => card_view::<Detector>(self, view, name).await,
+            Self::Dms => card_view::<Dms>(self, view, name).await,
             Self::GateArm => card_view::<GateArm>(self, view, name).await,
             Self::GateArmArray => {
                 card_view::<GateArmArray>(self, view, name).await
@@ -418,6 +425,7 @@ impl Resource {
                 | Self::CommLink
                 | Self::Controller
                 | Self::Detector
+                | Self::Dms
                 | Self::GateArm
                 | Self::GateArmArray
                 | Self::GeoLoc
@@ -455,6 +463,7 @@ impl Resource {
             Self::CommLink => fetch_changed::<CommLink>(self, name).await,
             Self::Controller => fetch_changed::<Controller>(self, name).await,
             Self::Detector => fetch_changed::<Detector>(self, name).await,
+            Self::Dms => fetch_changed::<Dms>(self, name).await,
             Self::GateArm => fetch_changed::<GateArm>(self, name).await,
             Self::GateArmArray => {
                 fetch_changed::<GateArmArray>(self, name).await
@@ -518,6 +527,7 @@ impl Resource {
             Self::Beacon => self.geo_loc::<Beacon>(name).await,
             Self::Camera => self.geo_loc::<Camera>(name).await,
             Self::Controller => self.geo_loc::<Controller>(name).await,
+            Self::Dms => self.geo_loc::<Dms>(name).await,
             Self::GateArmArray => self.geo_loc::<GateArmArray>(name).await,
             Self::GeoLoc => Ok(Some(name.into())),
             Self::LaneMarking => self.geo_loc::<LaneMarking>(name).await,

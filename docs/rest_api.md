@@ -157,6 +157,15 @@ of `pin`, `resource_n` and `name`.
 | 💡 Plan      | notes, {`abandoned`}             |
 | 🔧 Configure | controller, {`pin`}, {`r_node`}, {`lane_code`}, {`lane_number`}, {`fake`} |
 
+### `dms`
+
+| Access       | Attributes                                                  |
+|--------------|-------------------------------------------------------------|
+| Read Only    | name, location, sign\_config, sign\_detail, {`geo_loc`}, {`msg_sched`}, {`msg_current`} |
+| 👉 Operate   | {`msg_user`}                                                |
+| 💡 Plan      | notes                                                       |
+| 🔧 Configure | controller, {`pin`}                                         |
+
 ### `gate_arm`
 
 | Access       | Attributes                                         |

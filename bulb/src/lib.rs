@@ -19,6 +19,7 @@ mod commlink;
 mod controller;
 mod detector;
 mod device;
+mod dms;
 mod error;
 mod fetch;
 mod gatearm;

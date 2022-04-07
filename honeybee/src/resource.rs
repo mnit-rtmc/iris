@@ -265,17 +265,32 @@ const DETECTOR_PUB_RES: Resource = Resource::Simple(
 
 /// DMS resource
 const DMS_RES: Resource = Resource::Simple(
+    "api/dms",
+    Listen::Exclude(
+        "dms",
+        &["msg_user", "msg_sched", "msg_current", "expire_time"],
+    ),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT d.name, controller, location, notes, sign_config, sign_detail \
+        FROM iris.dms d \
+        LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
+        ORDER BY d.name\
+    ) r",
+);
+
+/// Public DMS resource
+const DMS_PUB_RES: Resource = Resource::Simple(
     "dms_pub",
     Listen::Exclude(
         "dms",
         &["msg_user", "msg_sched", "msg_current", "expire_time"],
     ),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, sign_config, sign_detail, roadway, road_dir, cross_street, \
-           location, lat, lon \
-    FROM dms_view \
-    ORDER BY name \
-) r",
+        SELECT name, sign_config, sign_detail, roadway, road_dir, \
+               cross_street, location, lat, lon \
+        FROM dms_view \
+        ORDER BY name\
+    ) r",
 );
 
 /// DMS status resource
@@ -726,6 +741,7 @@ const ALL: &[Resource] = &[
     TAG_READER_RES,
     VIDEO_MONITOR_RES,
     DMS_RES,
+    DMS_PUB_RES,
     DMS_STAT_RES,
     FONT_RES,
     GRAPHIC_RES,
