@@ -11,9 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
-use crate::resource::{
-    AncillaryData, Card, View, EDIT_BUTTON, NAME,
-};
+use crate::resource::{AncillaryData, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;

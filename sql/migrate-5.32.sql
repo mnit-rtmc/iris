@@ -17,6 +17,7 @@ CREATE UNIQUE INDEX permission_role_resource_n_idx
 COPY iris.permission (role, resource_n, access_n) FROM stdin;
 administrator	gate_arm	4
 administrator	gate_arm_array	4
+administrator	gps	4
 administrator	lcs_array	4
 administrator	lcs_indication	4
 \.
@@ -55,6 +56,32 @@ CREATE TRIGGER lcs_indication_notify_trig
 
 CREATE TRIGGER lcs_array_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._lcs_array
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE FUNCTION iris.gps_notify() RETURNS TRIGGER AS
+    $gps_notify$
+BEGIN
+    IF (NEW.lat IS DISTINCT FROM OLD.lat) THEN
+        NOTIFY gps, 'lat';
+    ELSIF (NEW.lon IS DISTINCT FROM OLD.lon) THEN
+        NOTIFY gps, 'lon';
+    ELSIF (NEW.latest_sample IS DISTINCT FROM OLD.latest_sample) THEN
+        NOTIFY gps, 'latest_sample';
+    ELSIF (NEW.latest_poll IS DISTINCT FROM OLD.latest_poll) THEN
+        NOTIFY gps, 'latest_poll';
+    ELSE
+        NOTIFY gps;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$gps_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gps_notify_trig
+    AFTER UPDATE ON iris._gps
+    FOR EACH ROW EXECUTE PROCEDURE iris.gps_notify();
+
+CREATE TRIGGER gps_table_notify_trig
+    AFTER INSERT OR DELETE ON iris._gps
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 COMMIT;

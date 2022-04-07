@@ -173,6 +173,17 @@ const GATE_ARM_ARRAY_RES: Resource = Resource::Simple(
     ) r",
 );
 
+/// GPS resource
+const GPS_RES: Resource = Resource::Simple(
+    "api/gps",
+    Listen::Exclude("gps", &["latest_poll", "latest_sample", "lat", "lon"]),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT name, controller, notes \
+        FROM iris.gps \
+        ORDER BY name\
+    ) r",
+);
+
 /// LCS array resource
 const LCS_ARRAY_RES: Resource = Resource::Simple(
     "api/lcs_array",
@@ -708,6 +719,7 @@ const ALL: &[Resource] = &[
     CAMERA_PUB_RES,
     GATE_ARM_RES,
     GATE_ARM_ARRAY_RES,
+    GPS_RES,
     LCS_ARRAY_RES,
     LCS_INDICATION_RES,
     RAMP_METER_RES,

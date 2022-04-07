@@ -99,6 +99,12 @@ SELECT name, resource_n, roadway, road_dir, cross_street, cross_dir, \
 FROM iris.geo_loc \
 WHERE name = $1";
 
+/// SQL query for one GPS
+pub const GPS: &str = "\
+SELECT name, controller, pin, notes, latest_poll, latest_sample, lat, lon \
+FROM iris.gps \
+WHERE name = $1";
+
 /// SQL query for one lane marking
 pub const LANE_MARKING: &str = "\
 SELECT m.name, location, geo_loc, controller, pin, notes, deployed \

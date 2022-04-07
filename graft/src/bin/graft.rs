@@ -245,6 +245,7 @@ async fn main() -> tide::Result<()> {
         .at("/geo_loc/:name")
         .get(|req| sql_get("geo_loc", query::GEO_LOC, req))
         .patch(|req| sonar_object_patch("geo_loc", req));
+    add_routes!(route, "gps", query::GPS);
     add_routes!(route, "lane_marking", query::LANE_MARKING);
     add_routes!(route, "lcs_array", query::LCS_ARRAY);
     add_routes!(route, "lcs_indication", query::LCS_INDICATION);

@@ -23,6 +23,7 @@ use crate::fetch::{fetch_delete, fetch_get, fetch_patch, fetch_post};
 use crate::gatearm::GateArm;
 use crate::gatearmarray::GateArmArray;
 use crate::geoloc::GeoLoc;
+use crate::gps::Gps;
 use crate::lanemarking::LaneMarking;
 use crate::lcsarray::LcsArray;
 use crate::lcsindication::LcsIndication;
@@ -85,6 +86,7 @@ pub enum Resource {
     GateArm,
     GateArmArray,
     GeoLoc,
+    Gps,
     LaneMarking,
     LcsArray,
     LcsIndication,
@@ -207,6 +209,7 @@ impl Resource {
             GateArm::RESOURCE_N => Self::GateArm,
             GateArmArray::RESOURCE_N => Self::GateArmArray,
             GeoLoc::RESOURCE_N => Self::GeoLoc,
+            Gps::RESOURCE_N => Self::Gps,
             LaneMarking::RESOURCE_N => Self::LaneMarking,
             LcsArray::RESOURCE_N => Self::LcsArray,
             LcsIndication::RESOURCE_N => Self::LcsIndication,
@@ -236,6 +239,7 @@ impl Resource {
             Self::GateArm => GateArm::RESOURCE_N,
             Self::GateArmArray => GateArmArray::RESOURCE_N,
             Self::GeoLoc => GeoLoc::RESOURCE_N,
+            Self::Gps => Gps::RESOURCE_N,
             Self::LaneMarking => LaneMarking::RESOURCE_N,
             Self::LcsArray => LcsArray::RESOURCE_N,
             Self::LcsIndication => LcsIndication::RESOURCE_N,
@@ -265,6 +269,7 @@ impl Resource {
             Self::GateArm => "⫬ Gate Arm",
             Self::GateArmArray => "⫭⫬ Gate Arm Array",
             Self::GeoLoc => "🗺️ Location",
+            Self::Gps => "🌐 Gps",
             Self::LaneMarking => "⛙ Lane Marking",
             Self::LcsArray => "🡇🡇 LCS Array",
             Self::LcsIndication => "🡇 LCS Indication",
@@ -315,6 +320,7 @@ impl Resource {
             Self::GateArmArray => {
                 fetch_list::<GateArmArray>(self, search).await
             }
+            Self::Gps => fetch_list::<Gps>(self, search).await,
             Self::LaneMarking => fetch_list::<LaneMarking>(self, search).await,
             Self::LcsArray => fetch_list::<LcsArray>(self, search).await,
             Self::LcsIndication => {
@@ -378,6 +384,7 @@ impl Resource {
                 card_view::<GateArmArray>(self, view, name).await
             }
             Self::GeoLoc => card_view::<GeoLoc>(self, view, name).await,
+            Self::Gps => card_view::<Gps>(self, view, name).await,
             Self::LaneMarking => {
                 card_view::<LaneMarking>(self, view, name).await
             }
@@ -414,6 +421,7 @@ impl Resource {
                 | Self::GateArm
                 | Self::GateArmArray
                 | Self::GeoLoc
+                | Self::Gps
                 | Self::LaneMarking
                 | Self::LcsArray
                 | Self::LcsIndication
@@ -452,6 +460,7 @@ impl Resource {
                 fetch_changed::<GateArmArray>(self, name).await
             }
             Self::GeoLoc => fetch_changed::<GeoLoc>(self, name).await,
+            Self::Gps => fetch_changed::<Gps>(self, name).await,
             Self::LaneMarking => fetch_changed::<LaneMarking>(self, name).await,
             Self::LcsArray => fetch_changed::<LcsArray>(self, name).await,
             Self::LcsIndication => {

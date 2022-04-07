@@ -504,6 +504,7 @@ administrator	detector	4
 administrator	gate_arm	4
 administrator	gate_arm_array	4
 administrator	geo_loc	4
+administrator	gps	4
 administrator	lane_marking	4
 administrator	lcs_array	4
 administrator	lcs_indication	4
@@ -2420,6 +2421,32 @@ CREATE TABLE iris._gps (
 
 ALTER TABLE iris._gps ADD CONSTRAINT _gps_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
+
+CREATE FUNCTION iris.gps_notify() RETURNS TRIGGER AS
+    $gps_notify$
+BEGIN
+    IF (NEW.lat IS DISTINCT FROM OLD.lat) THEN
+        NOTIFY gps, 'lat';
+    ELSIF (NEW.lon IS DISTINCT FROM OLD.lon) THEN
+        NOTIFY gps, 'lon';
+    ELSIF (NEW.latest_sample IS DISTINCT FROM OLD.latest_sample) THEN
+        NOTIFY gps, 'latest_sample';
+    ELSIF (NEW.latest_poll IS DISTINCT FROM OLD.latest_poll) THEN
+        NOTIFY gps, 'latest_poll';
+    ELSE
+        NOTIFY gps;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$gps_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gps_notify_trig
+    AFTER UPDATE ON iris._gps
+    FOR EACH ROW EXECUTE PROCEDURE iris.gps_notify();
+
+CREATE TRIGGER gps_table_notify_trig
+    AFTER INSERT OR DELETE ON iris._gps
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.gps AS
     SELECT g.name, controller, pin, notes, latest_poll, latest_sample, lat, lon

@@ -187,6 +187,14 @@ Since `geo_loc` resources are only created and deleted with an associated
 - `GET iris/api/{type}/{name}`: Get one full object as JSON
 - `PATCH iris/api/{type}/{name}`: Update attributes of one object, with JSON
 
+### `gps`
+
+| Access       | Attributes                                                 |
+|--------------|------------------------------------------------------------|
+| Read Only    | name, {`latest_poll`}, {`latest_sample`}, {`lat`}, {`lon`} |
+| 💡 Plan      | notes                                                      |
+| 🔧 Configure | controller, {`pin`}                                        |
+
 ### `lane_marking`
 
 | Access       | Attributes                  |
