@@ -37,8 +37,6 @@ pub struct GateArmArray {
     pub interlock: u32,
     // full attributes
     pub geo_loc: Option<String>,
-    pub controller: Option<String>,
-    pub pin: Option<u32>,
 }
 
 /// Ancillary gate arm array data

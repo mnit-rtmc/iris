@@ -86,8 +86,8 @@ WHERE name = $1";
 
 /// SQL query for one gate arm array
 pub const GATE_ARM_ARRAY: &str = "\
-SELECT ga.name, location, geo_loc, notes, controller, pin, opposing, prereq, \
-       camera, approach, action_plan, arm_state, interlock \
+SELECT ga.name, location, geo_loc, notes, opposing, prereq, camera, approach, \
+       action_plan, arm_state, interlock \
 FROM iris.gate_arm_array ga \
 LEFT JOIN geo_loc_view gl ON ga.geo_loc = gl.name \
 WHERE ga.name = $1";

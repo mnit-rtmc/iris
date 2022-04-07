@@ -170,7 +170,7 @@ of `pin`, `resource_n` and `name`.
 | Read Only    | name, location, interlock, {`geo_loc`} |
 | 👉 Operate   | arm\_state                             |
 | 💡 Plan      | notes                                  |
-| 🔧 Configure | {`controller`}, {`pin`}, {`opposing`}, {`prereq`}, {`camera`}, {`approach`}, {`action_plan`} |
+| 🔧 Configure | {`opposing`}, {`prereq`}, {`camera`}, {`approach`}, {`action_plan`} |
 
 ### `geo_loc`
 
