@@ -4244,18 +4244,18 @@ CREATE VIEW lane_marking_view AS
 GRANT SELECT ON lane_marking_view TO PUBLIC;
 
 CREATE TABLE iris.lane_action (
-	name VARCHAR(30) PRIMARY KEY,
-	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	lane_marking VARCHAR(20) NOT NULL REFERENCES iris._lane_marking,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+    name VARCHAR(30) PRIMARY KEY,
+    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+    lane_marking VARCHAR(20) NOT NULL REFERENCES iris._lane_marking,
+    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 --
 -- Lane-Use Control Signals
 --
 CREATE TABLE iris.lcs_lock (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(16) NOT NULL
 );
 
 COPY iris.lcs_lock (id, description) FROM stdin;
@@ -4266,10 +4266,10 @@ COPY iris.lcs_lock (id, description) FROM stdin;
 \.
 
 CREATE TABLE iris._lcs_array (
-	name VARCHAR(20) PRIMARY KEY,
-	notes text NOT NULL,
-	shift INTEGER NOT NULL,
-	lcs_lock INTEGER REFERENCES iris.lcs_lock(id)
+    name VARCHAR(20) PRIMARY KEY,
+    notes text NOT NULL,
+    shift INTEGER NOT NULL,
+    lcs_lock INTEGER REFERENCES iris.lcs_lock(id)
 );
 
 ALTER TABLE iris._lcs_array ADD CONSTRAINT _lcs_array_fkey
@@ -4324,20 +4324,20 @@ CREATE VIEW lcs_array_view AS
 GRANT SELECT ON lcs_array_view TO PUBLIC;
 
 CREATE TABLE iris.lcs (
-	name VARCHAR(20) PRIMARY KEY REFERENCES iris._dms,
-	lcs_array VARCHAR(20) NOT NULL REFERENCES iris._lcs_array,
-	lane INTEGER NOT NULL
+    name VARCHAR(20) PRIMARY KEY REFERENCES iris._dms,
+    lcs_array VARCHAR(20) NOT NULL REFERENCES iris._lcs_array,
+    lane INTEGER NOT NULL
 );
 CREATE UNIQUE INDEX lcs_array_lane ON iris.lcs USING btree (lcs_array, lane);
 
 CREATE VIEW lcs_view AS
-	SELECT name, lcs_array, lane
-	FROM iris.lcs;
+    SELECT name, lcs_array, lane
+    FROM iris.lcs;
 GRANT SELECT ON lcs_view TO PUBLIC;
 
 CREATE TABLE iris.lane_use_indication (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(32) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(32) NOT NULL
 );
 
 COPY iris.lane_use_indication (id, description) FROM stdin;
@@ -4359,9 +4359,9 @@ COPY iris.lane_use_indication (id, description) FROM stdin;
 \.
 
 CREATE TABLE iris._lcs_indication (
-	name VARCHAR(20) PRIMARY KEY,
-	lcs VARCHAR(20) NOT NULL REFERENCES iris.lcs,
-	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication
+    name VARCHAR(20) PRIMARY KEY,
+    lcs VARCHAR(20) NOT NULL REFERENCES iris.lcs,
+    indication INTEGER NOT NULL REFERENCES iris.lane_use_indication
 );
 
 ALTER TABLE iris._lcs_indication ADD CONSTRAINT _lcs_indication_fkey
@@ -4417,15 +4417,15 @@ CREATE VIEW lcs_indication_view AS
 GRANT SELECT ON lcs_indication_view TO PUBLIC;
 
 CREATE TABLE iris.lane_use_multi (
-	name VARCHAR(10) PRIMARY KEY,
-	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
-	msg_num INTEGER,
-	quick_message VARCHAR(20) REFERENCES iris.quick_message
+    name VARCHAR(10) PRIMARY KEY,
+    indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
+    msg_num INTEGER,
+    quick_message VARCHAR(20) REFERENCES iris.quick_message
 );
 
 CREATE VIEW lane_use_multi_view AS
-	SELECT name, indication, msg_num, quick_message
-	FROM iris.lane_use_multi;
+    SELECT name, indication, msg_num, quick_message
+    FROM iris.lane_use_multi;
 GRANT SELECT ON lane_use_multi_view TO PUBLIC;
 
 --
@@ -4613,8 +4613,8 @@ END;
 $ramp_meter_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER ramp_meter_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris._ramp_meter
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.ramp_meter_notify();
+    AFTER INSERT OR UPDATE OR DELETE ON iris._ramp_meter
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.ramp_meter_notify();
 
 CREATE VIEW iris.ramp_meter AS
     SELECT m.name, geo_loc, controller, pin, notes, meter_type, storage,
