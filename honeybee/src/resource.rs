@@ -173,6 +173,17 @@ const GATE_ARM_ARRAY_RES: Resource = Resource::Simple(
     ) r",
 );
 
+/// LCS array resource
+const LCS_ARRAY_RES: Resource = Resource::Simple(
+    "api/lcs_array",
+    Listen::All("lcs_array"),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT name, notes, lcs_lock \
+        FROM iris.lcs_array \
+        ORDER BY name\
+    ) r",
+);
+
 /// LCS indication resource
 const LCS_INDICATION_RES: Resource = Resource::Simple(
     "api/lcs_indication",
@@ -471,6 +482,17 @@ const LANE_USE_INDICATION_RES: Resource = Resource::Simple(
     ) r",
 );
 
+/// LCS lock LUT resource
+const LCS_LOCK_RES: Resource = Resource::Simple(
+    "lcs_lock",
+    Listen::Nope,
+    "SELECT row_to_json(r)::text FROM (
+        SELECT id, description \
+        FROM iris.lcs_lock \
+        ORDER BY id\
+    ) r",
+);
+
 /// Resource type LUT resource
 const RESOURCE_TYPE_RES: Resource = Resource::Simple(
     "resource_type",
@@ -674,6 +696,7 @@ const ALL: &[Resource] = &[
     GATE_ARM_INTERLOCK_RES,
     GATE_ARM_STATE_RES,
     LANE_USE_INDICATION_RES,
+    LCS_LOCK_RES,
     RESOURCE_TYPE_RES,
     CONTROLLER_RES,
     WEATHER_SENSOR_RES,
@@ -685,6 +708,7 @@ const ALL: &[Resource] = &[
     CAMERA_PUB_RES,
     GATE_ARM_RES,
     GATE_ARM_ARRAY_RES,
+    LCS_ARRAY_RES,
     LCS_INDICATION_RES,
     RAMP_METER_RES,
     TAG_READER_RES,

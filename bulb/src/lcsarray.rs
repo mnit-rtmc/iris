@@ -12,7 +12,7 @@
 //
 use crate::error::Result;
 use crate::resource::{
-    AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
+    AncillaryData, Card, View, EDIT_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr};
 use serde::{Deserialize, Serialize};
@@ -20,38 +20,36 @@ use std::borrow::Cow;
 use std::fmt;
 use wasm_bindgen::JsValue;
 
-/// Gate arm states
+/// LCS locks
 #[derive(Debug, Deserialize, Serialize)]
-pub struct GateArmState {
+pub struct LcsLock {
     pub id: u32,
     pub description: String,
 }
 
-/// Gate Arm Array
+/// LCS Array
 #[derive(Debug, Default, Deserialize, Serialize)]
-pub struct GateArmArray {
+pub struct LcsArray {
     pub name: String,
-    pub location: Option<String>,
     pub notes: String,
-    pub arm_state: u32,
-    pub interlock: u32,
+    pub lcs_lock: Option<u32>,
     // full attributes
-    pub geo_loc: Option<String>,
+    pub shift: Option<u32>,
 }
 
-/// Ancillary gate arm array data
+/// Ancillary LCS array data
 #[derive(Debug, Default)]
-pub struct GateArmArrayAnc {
-    pub states: Option<Vec<GateArmState>>,
+pub struct LcsArrayAnc {
+    pub locks: Option<Vec<LcsLock>>,
 }
 
-impl GateArmArrayAnc {
-    /// Get state description
-    fn state(&self, pri: &GateArmArray) -> &str {
-        if let Some(states) = &self.states {
-            for state in states {
-                if pri.arm_state == state.id {
-                    return &state.description;
+impl LcsArrayAnc {
+    /// Get lock description
+    fn lock(&self, pri: &LcsArray) -> &str {
+        if let (Some(lcs_lock), Some(locks)) = (pri.lcs_lock, &self.locks) {
+            for lock in locks {
+                if lcs_lock == lock.id {
+                    return &lock.description;
                 }
             }
         }
@@ -59,15 +57,15 @@ impl GateArmArrayAnc {
     }
 }
 
-const GATE_ARM_STATE_URI: &str = "/iris/gate_arm_state";
+const LCS_LOCK_URI: &str = "/iris/lcs_lock";
 
-impl AncillaryData for GateArmArrayAnc {
-    type Primary = GateArmArray;
+impl AncillaryData for LcsArrayAnc {
+    type Primary = LcsArray;
 
     /// Get ancillary URI
-    fn uri(&self, view: View, _pri: &GateArmArray) -> Option<Cow<str>> {
-        match (view, &self.states) {
-            (View::Search, None) => Some(GATE_ARM_STATE_URI.into()),
+    fn uri(&self, _view: View, _pri: &LcsArray) -> Option<Cow<str>> {
+        match &self.locks {
+            None => Some(LCS_LOCK_URI.into()),
             _ => None,
         }
     }
@@ -76,36 +74,35 @@ impl AncillaryData for GateArmArrayAnc {
     fn set_json(
         &mut self,
         _view: View,
-        _pri: &GateArmArray,
+        _pri: &LcsArray,
         json: JsValue,
     ) -> Result<()> {
-        self.states = Some(json.into_serde::<Vec<GateArmState>>()?);
+        self.locks = Some(json.into_serde::<Vec<LcsLock>>()?);
         Ok(())
     }
 }
 
-impl GateArmArray {
-    pub const RESOURCE_N: &'static str = "gate_arm_array";
+impl LcsArray {
+    pub const RESOURCE_N: &'static str = "lcs_array";
 
     /// Convert to Compact HTML
-    fn to_html_compact(&self, _anc: &GateArmArrayAnc) -> String {
-        let location = HtmlStr::new(&self.location).with_len(12);
+    fn to_html_compact(&self, anc: &LcsArrayAnc) -> String {
+        let lock = anc.lock(self);
         format!(
-            "<span>{location}</span>\
+            "<span>{lock}</span>\
             <span class='{NAME}'>{self}</span>"
         )
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self, _anc: &GateArmArrayAnc) -> String {
-        let location = HtmlStr::new(&self.location).with_len(64);
+    fn to_html_status(&self, anc: &LcsArrayAnc) -> String {
+        let lock = anc.lock(self);
         format!(
             "<div class='row'>\
-              <span class='info'>{location}</span>\
+              <span class='info'>{lock}</span>\
             </div>\
             <div class='row'>\
               <span></span>\
-              {LOC_BUTTON}\
               {EDIT_BUTTON}\
             </div>"
         )
@@ -117,14 +114,14 @@ impl GateArmArray {
     }
 }
 
-impl fmt::Display for GateArmArray {
+impl fmt::Display for LcsArray {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", HtmlStr::new(&self.name))
     }
 }
 
-impl Card for GateArmArray {
-    type Ancillary = GateArmArrayAnc;
+impl Card for LcsArray {
+    type Ancillary = LcsArrayAnc;
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
@@ -132,20 +129,13 @@ impl Card for GateArmArray {
         self
     }
 
-    /// Get geo location name
-    fn geo_loc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
-    }
-
     /// Check if a search string matches
-    fn is_match(&self, search: &str, anc: &GateArmArrayAnc) -> bool {
-        self.name.contains_lower(search)
-            || self.location.contains_lower(search)
-            || anc.state(self).contains(search)
+    fn is_match(&self, search: &str, anc: &LcsArrayAnc) -> bool {
+        self.name.contains_lower(search) || anc.lock(self).contains(search)
     }
 
     /// Convert to HTML view
-    fn to_html(&self, view: View, anc: &GateArmArrayAnc) -> String {
+    fn to_html(&self, view: View, anc: &LcsArrayAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
             View::Compact => self.to_html_compact(anc),

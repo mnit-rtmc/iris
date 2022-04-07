@@ -106,6 +106,12 @@ FROM iris.lane_marking m \
 LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
 WHERE m.name = $1";
 
+/// SQL query for one LCS array
+pub const LCS_ARRAY: &str = "\
+SELECT name, notes, shift, lcs_lock \
+FROM iris.lcs_array \
+WHERE name = $1";
+
 /// SQL query for one LCS indication
 pub const LCS_INDICATION: &str = "\
 SELECT name, controller, pin, lcs, indication \

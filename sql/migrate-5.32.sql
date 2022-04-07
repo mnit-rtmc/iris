@@ -17,6 +17,7 @@ CREATE UNIQUE INDEX permission_role_resource_n_idx
 COPY iris.permission (role, resource_n, access_n) FROM stdin;
 administrator	gate_arm	4
 administrator	gate_arm_array	4
+administrator	lcs_array	4
 administrator	lcs_indication	4
 \.
 
@@ -50,6 +51,10 @@ CREATE TRIGGER gate_arm_array_table_notify_trig
 
 CREATE TRIGGER lcs_indication_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._lcs_indication
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE TRIGGER lcs_array_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._lcs_array
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 COMMIT;

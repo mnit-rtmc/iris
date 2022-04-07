@@ -505,6 +505,7 @@ administrator	gate_arm	4
 administrator	gate_arm_array	4
 administrator	geo_loc	4
 administrator	lane_marking	4
+administrator	lcs_array	4
 administrator	lcs_indication	4
 administrator	modem	4
 administrator	permission	4
@@ -4273,8 +4274,14 @@ CREATE TABLE iris._lcs_array (
     lcs_lock INTEGER REFERENCES iris.lcs_lock(id)
 );
 
+-- This constraint ensures that the name is unique among all devices
+-- LCS arrays are *not* associated with controllers or pins
 ALTER TABLE iris._lcs_array ADD CONSTRAINT _lcs_array_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
+
+CREATE TRIGGER lcs_array_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._lcs_array
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.lcs_array AS
     SELECT la.name, controller, pin, notes, shift, lcs_lock
