@@ -246,6 +246,7 @@ async fn main() -> tide::Result<()> {
         .get(|req| sql_get("geo_loc", query::GEO_LOC, req))
         .patch(|req| sonar_object_patch("geo_loc", req));
     add_routes!(route, "lane_marking", query::LANE_MARKING);
+    add_routes!(route, "lcs_indication", query::LCS_INDICATION);
     add_routes!(route, "modem", query::MODEM);
     add_routes!(route, "ramp_meter", query::RAMP_METER);
     route.at("/road").get(|req| resource_get("road", req));

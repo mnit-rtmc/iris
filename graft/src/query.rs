@@ -106,6 +106,12 @@ FROM iris.lane_marking m \
 LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
 WHERE m.name = $1";
 
+/// SQL query for one LCS indication
+pub const LCS_INDICATION: &str = "\
+SELECT name, controller, pin, lcs, indication \
+FROM iris.lcs_indication \
+WHERE name = $1";
+
 /// SQL query for one modem
 pub const MODEM: &str = "\
 SELECT name, uri, config, enabled, timeout_ms FROM iris.modem \

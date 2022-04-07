@@ -173,6 +173,17 @@ const GATE_ARM_ARRAY_RES: Resource = Resource::Simple(
     ) r",
 );
 
+/// LCS indication resource
+const LCS_INDICATION_RES: Resource = Resource::Simple(
+    "api/lcs_indication",
+    Listen::All("lcs_indication"),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT name, controller, lcs, indication \
+        FROM iris.lcs_indication \
+        ORDER BY name\
+    ) r",
+);
+
 /// Ramp meter resource
 const RAMP_METER_RES: Resource = Resource::Simple(
     "api/ramp_meter",
@@ -449,6 +460,17 @@ const GATE_ARM_STATE_RES: Resource = Resource::Simple(
     ) r",
 );
 
+/// Lane use indication LUT resource
+const LANE_USE_INDICATION_RES: Resource = Resource::Simple(
+    "lane_use_indication",
+    Listen::Nope,
+    "SELECT row_to_json(r)::text FROM (
+        SELECT id, description \
+        FROM iris.lane_use_indication \
+        ORDER BY id\
+    ) r",
+);
+
 /// Resource type LUT resource
 const RESOURCE_TYPE_RES: Resource = Resource::Simple(
     "resource_type",
@@ -651,6 +673,7 @@ const ALL: &[Resource] = &[
     ROAD_MODIFIER_RES,
     GATE_ARM_INTERLOCK_RES,
     GATE_ARM_STATE_RES,
+    LANE_USE_INDICATION_RES,
     RESOURCE_TYPE_RES,
     CONTROLLER_RES,
     WEATHER_SENSOR_RES,
@@ -662,6 +685,7 @@ const ALL: &[Resource] = &[
     CAMERA_PUB_RES,
     GATE_ARM_RES,
     GATE_ARM_ARRAY_RES,
+    LCS_INDICATION_RES,
     RAMP_METER_RES,
     TAG_READER_RES,
     VIDEO_MONITOR_RES,

@@ -41,6 +41,7 @@ These resources are static, and may only change on IRIS updates:
 - `iris/direction`: Travel directions
 - `iris/gate_arm_interlock`: Gate arm interlocks
 - `iris/gate_arm_state`: Gate arm states
+- `iris/lane_use_indication`: Lane use indications
 - `iris/resource_type`: [Resource types] available in `iris/api/`
 - `iris/road_modifier`: Road modifiers
 
@@ -193,6 +194,13 @@ Since `geo_loc` resources are only created and deleted with an associated
 | 👉 Operate   | deployed                    |
 | 💡 Plan      | notes                       |
 | 🔧 Configure | controller, {`pin`}         |
+
+### `lcs_indication`
+
+| Access       | Attributes            |
+|--------------|-----------------------|
+| Read Only    | name, lcs, indication |
+| 🔧 Configure | controller, {`pin`}   |
 
 ### `modem`
 

@@ -25,6 +25,7 @@ mod gatearm;
 mod gatearmarray;
 mod geoloc;
 mod lanemarking;
+mod lcsindication;
 mod modem;
 mod permission;
 mod rampmeter;

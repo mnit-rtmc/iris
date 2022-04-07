@@ -505,6 +505,7 @@ administrator	gate_arm	4
 administrator	gate_arm_array	4
 administrator	geo_loc	4
 administrator	lane_marking	4
+administrator	lcs_indication	4
 administrator	modem	4
 administrator	permission	4
 administrator	ramp_meter	4
@@ -4366,6 +4367,10 @@ CREATE TABLE iris._lcs_indication (
 
 ALTER TABLE iris._lcs_indication ADD CONSTRAINT _lcs_indication_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
+
+CREATE TRIGGER lcs_indication_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._lcs_indication
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.lcs_indication AS
     SELECT li.name, controller, pin, lcs, indication

@@ -168,6 +168,7 @@ pub fn permissions_html(access: Vec<Permission>) -> String {
             add_option(Resource::GateArm, perm, &mut html);
             add_option(Resource::GateArmArray, perm, &mut html);
             add_option(Resource::LaneMarking, perm, &mut html);
+            add_option(Resource::LcsIndication, perm, &mut html);
             add_option(Resource::Modem, perm, &mut html);
             add_option(Resource::Permission, perm, &mut html);
             add_option(Resource::RampMeter, perm, &mut html);

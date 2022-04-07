@@ -24,6 +24,7 @@ use crate::gatearm::GateArm;
 use crate::gatearmarray::GateArmArray;
 use crate::geoloc::GeoLoc;
 use crate::lanemarking::LaneMarking;
+use crate::lcsindication::LcsIndication;
 use crate::modem::Modem;
 use crate::permission::Permission;
 use crate::rampmeter::RampMeter;
@@ -84,6 +85,7 @@ pub enum Resource {
     GateArmArray,
     GeoLoc,
     LaneMarking,
+    LcsIndication,
     Modem,
     Permission,
     RampMeter,
@@ -204,6 +206,7 @@ impl Resource {
             GateArmArray::RESOURCE_N => Self::GateArmArray,
             GeoLoc::RESOURCE_N => Self::GeoLoc,
             LaneMarking::RESOURCE_N => Self::LaneMarking,
+            LcsIndication::RESOURCE_N => Self::LcsIndication,
             Modem::RESOURCE_N => Self::Modem,
             Permission::RESOURCE_N => Self::Permission,
             RampMeter::RESOURCE_N => Self::RampMeter,
@@ -231,6 +234,7 @@ impl Resource {
             Self::GateArmArray => GateArmArray::RESOURCE_N,
             Self::GeoLoc => GeoLoc::RESOURCE_N,
             Self::LaneMarking => LaneMarking::RESOURCE_N,
+            Self::LcsIndication => LcsIndication::RESOURCE_N,
             Self::Modem => Modem::RESOURCE_N,
             Self::Permission => Permission::RESOURCE_N,
             Self::RampMeter => RampMeter::RESOURCE_N,
@@ -258,6 +262,7 @@ impl Resource {
             Self::GateArmArray => "⫭⫬ Gate Arm Array",
             Self::GeoLoc => "🗺️ Location",
             Self::LaneMarking => "⛙ Lane Marking",
+            Self::LcsIndication => "🡇 LCS Indication",
             Self::Modem => "🖀 Modem",
             Self::Permission => "🗝️ Permission",
             Self::RampMeter => "🚦 Ramp Meter",
@@ -306,6 +311,9 @@ impl Resource {
                 fetch_list::<GateArmArray>(self, search).await
             }
             Self::LaneMarking => fetch_list::<LaneMarking>(self, search).await,
+            Self::LcsIndication => {
+                fetch_list::<LcsIndication>(self, search).await
+            }
             Self::Modem => fetch_list::<Modem>(self, search).await,
             Self::Permission => fetch_list::<Permission>(self, search).await,
             Self::RampMeter => fetch_list::<RampMeter>(self, search).await,
@@ -367,6 +375,9 @@ impl Resource {
             Self::LaneMarking => {
                 card_view::<LaneMarking>(self, view, name).await
             }
+            Self::LcsIndication => {
+                card_view::<LcsIndication>(self, view, name).await
+            }
             Self::Modem => card_view::<Modem>(self, view, name).await,
             Self::Permission => card_view::<Permission>(self, view, name).await,
             Self::RampMeter => card_view::<RampMeter>(self, view, name).await,
@@ -397,6 +408,7 @@ impl Resource {
                 | Self::GateArmArray
                 | Self::GeoLoc
                 | Self::LaneMarking
+                | Self::LcsIndication
                 | Self::RampMeter
                 | Self::TagReader
                 | Self::VideoMonitor
@@ -433,6 +445,9 @@ impl Resource {
             }
             Self::GeoLoc => fetch_changed::<GeoLoc>(self, name).await,
             Self::LaneMarking => fetch_changed::<LaneMarking>(self, name).await,
+            Self::LcsIndication => {
+                fetch_changed::<LcsIndication>(self, name).await
+            }
             Self::Modem => fetch_changed::<Modem>(self, name).await,
             Self::Permission => fetch_changed::<Permission>(self, name).await,
             Self::RampMeter => fetch_changed::<RampMeter>(self, name).await,
