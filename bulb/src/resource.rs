@@ -114,8 +114,8 @@ pub enum View {
     Create,
     /// Compact view
     Compact,
-    /// Status view
-    Status,
+    /// Status view (with config flag)
+    Status(bool),
     /// Edit view
     Edit,
     /// Location view
@@ -367,8 +367,8 @@ impl Resource {
                 Some(geo_loc) => card_location(&geo_loc).await,
                 None => unreachable!(),
             },
-            View::Status if self.has_status() => {
-                let html = self.card_view(View::Status, name).await?;
+            View::Status(config) if self.has_status() => {
+                let html = self.card_view(View::Status(config), name).await?;
                 Ok(self.html_card_status(name, &html))
             }
             _ => {

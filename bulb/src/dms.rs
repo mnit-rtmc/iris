@@ -45,19 +45,21 @@ impl Dms {
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self, anc: &DmsAnc) -> String {
+    fn to_html_status(&self, anc: &DmsAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
-        let ctrl_button = anc.controller_button();
-        format!(
+        let mut status = format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
-            </div>\
-            <div class='row'>\
-              {ctrl_button}\
-              {LOC_BUTTON}\
-              {EDIT_BUTTON}\
             </div>"
-        )
+        );
+        if config {
+            status.push_str("<div class='row'>");
+            status.push_str(&anc.controller_button());
+            status.push_str(LOC_BUTTON);
+            status.push_str(EDIT_BUTTON);
+            status.push_str("</div>");
+        }
+        status
     }
 
     /// Convert to Edit HTML
@@ -116,7 +118,7 @@ impl Card for Dms {
         match view {
             View::Create => self.to_html_create(anc),
             View::Compact => self.to_html_compact(),
-            View::Status => self.to_html_status(anc),
+            View::Status(config) => self.to_html_status(anc, config),
             View::Edit => self.to_html_edit(),
             _ => unreachable!(),
         }

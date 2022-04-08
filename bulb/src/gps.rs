@@ -102,7 +102,7 @@ impl Card for Gps {
         match view {
             View::Create => self.to_html_create(anc),
             View::Compact => self.to_html_compact(),
-            View::Status => self.to_html_status(anc),
+            View::Status(_) => self.to_html_status(anc),
             View::Edit => self.to_html_edit(),
             _ => unreachable!(),
         }

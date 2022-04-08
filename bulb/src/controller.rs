@@ -84,17 +84,17 @@ impl AncillaryData for ControllerAnc {
             &self.cabinet_styles,
             &self.controller_io,
         ) {
-            (View::Search | View::Status | View::Edit, None, _, _, _, _) => {
+            (View::Search | View::Status(_) | View::Edit, None, _, _, _, _) => {
                 Some(CONDITION_URI.into())
             }
-            (View::Search | View::Status, _, None, _, _, _) => {
+            (View::Search | View::Status(_), _, None, _, _, _) => {
                 Some(COMM_LINK_URI.into())
             }
-            (View::Search | View::Status, _, _, None, _, _) => {
+            (View::Search | View::Status(_), _, _, None, _, _) => {
                 Some(COMM_CONFIG_URI.into())
             }
             (View::Edit, _, _, _, None, _) => Some(CABINET_STYLE_URI.into()),
-            (View::Status, _, _, _, _, None) => {
+            (View::Status(_), _, _, _, _, None) => {
                 Some(format!("/iris/api/controller_io/{}", &pri.name).into())
             }
             _ => None,
@@ -458,7 +458,7 @@ impl Card for Controller {
         match view {
             View::Create => self.to_html_create(anc),
             View::Compact => self.to_html_compact(),
-            View::Status => self.to_html_status(anc),
+            View::Status(_) => self.to_html_status(anc),
             View::Edit => self.to_html_edit(anc),
             _ => unreachable!(),
         }

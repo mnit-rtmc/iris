@@ -42,18 +42,20 @@ impl VideoMonitor {
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self, anc: &VideoMonitorAnc) -> String {
+    fn to_html_status(&self, anc: &VideoMonitorAnc, config: bool) -> String {
         let mon_num = self.mon_num;
-        let ctrl_button = anc.controller_button();
-        format!(
+        let mut status = format!(
             "<div class='row'>\
               <span class='info'>{mon_num}</span>\
-            </div>\
-            <div class='row'>\
-              {ctrl_button}\
-              {EDIT_BUTTON}\
             </div>"
-        )
+        );
+        if config {
+            status.push_str("<div class='row'>");
+            status.push_str(&anc.controller_button());
+            status.push_str(EDIT_BUTTON);
+            status.push_str("</div>");
+        }
+        status
     }
 
     /// Convert to Edit HTML
@@ -108,7 +110,7 @@ impl Card for VideoMonitor {
         match view {
             View::Create => self.to_html_create(anc),
             View::Compact => self.to_html_compact(),
-            View::Status => self.to_html_status(anc),
+            View::Status(config) => self.to_html_status(anc, config),
             View::Edit => self.to_html_edit(),
             _ => unreachable!(),
         }

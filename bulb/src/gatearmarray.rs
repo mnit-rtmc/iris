@@ -97,18 +97,21 @@ impl GateArmArray {
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self, _anc: &GateArmArrayAnc) -> String {
+    fn to_html_status(&self, _anc: &GateArmArrayAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
-        format!(
+        let mut status = format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
-            </div>\
-            <div class='row'>\
-              <span></span>\
-              {LOC_BUTTON}\
-              {EDIT_BUTTON}\
             </div>"
-        )
+        );
+        if config {
+            status.push_str("<div class='row'>");
+            status.push_str("<span></span>");
+            status.push_str(LOC_BUTTON);
+            status.push_str(EDIT_BUTTON);
+            status.push_str("</div>");
+        }
+        status
     }
 
     /// Convert to Edit HTML
@@ -149,7 +152,7 @@ impl Card for GateArmArray {
         match view {
             View::Create => self.to_html_create(anc),
             View::Compact => self.to_html_compact(anc),
-            View::Status => self.to_html_status(anc),
+            View::Status(config) => self.to_html_status(anc, config),
             View::Edit => self.to_html_edit(),
             _ => unreachable!(),
         }

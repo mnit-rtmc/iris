@@ -49,8 +49,8 @@ impl AncillaryData for CommLinkAnc {
     /// Get ancillary URI
     fn uri(&self, view: View, _pri: &CommLink) -> Option<Cow<str>> {
         match (view, &self.controllers, &self.comm_configs) {
-            (View::Status, None, _) => Some(CONTROLLER_URI.into()),
-            (View::Status | View::Edit | View::Search, _, None) => {
+            (View::Status(_), None, _) => Some(CONTROLLER_URI.into()),
+            (View::Status(_) | View::Edit | View::Search, _, None) => {
                 Some(COMM_CONFIG_URI.into())
             }
             _ => None,
@@ -238,7 +238,7 @@ impl Card for CommLink {
         match view {
             View::Create => self.to_html_create(anc),
             View::Compact => self.to_html_compact(),
-            View::Status => self.to_html_status(anc),
+            View::Status(_) => self.to_html_status(anc),
             View::Edit => self.to_html_edit(anc),
             _ => unreachable!(),
         }

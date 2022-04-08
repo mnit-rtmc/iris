@@ -76,7 +76,7 @@ impl AncillaryData for LcsIndicationAnc {
     fn uri(&self, view: View, pri: &LcsIndication) -> Option<Cow<str>> {
         match (view, &self.indications, &self.controller, &pri.controller()) {
             (_, None, _, _) => Some(LANE_USE_INDICATION_URI.into()),
-            (View::Status, _, None, Some(ctrl)) => {
+            (View::Status(_), _, None, Some(ctrl)) => {
                 Some(format!("/iris/api/controller/{}", &ctrl).into())
             }
             _ => None,
@@ -177,7 +177,7 @@ impl Card for LcsIndication {
         match view {
             View::Create => self.to_html_create(anc),
             View::Compact => self.to_html_compact(anc),
-            View::Status => self.to_html_status(anc),
+            View::Status(_) => self.to_html_status(anc),
             View::Edit => self.to_html_edit(),
             _ => unreachable!(),
         }

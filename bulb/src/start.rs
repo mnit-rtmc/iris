@@ -168,8 +168,9 @@ async fn click_card(res: Resource, id: String, name: String) {
         let cs = SelectedCard::new(res, View::Create, name);
         cs.replace_card(View::Create).await;
     } else {
-        let cs = SelectedCard::new(res, View::Status, name);
-        cs.replace_card(View::Status).await;
+        let config = Doc::get().input_bool("sb_config");
+        let cs = SelectedCard::new(res, View::Status(config), name);
+        cs.replace_card(View::Status(config)).await;
     }
 }
 
@@ -239,7 +240,7 @@ impl SelectedCard {
         let v = self.view;
         match v {
             View::Create => self.res_create().await,
-            View::Edit | View::Status => self.res_save_edit().await,
+            View::Edit | View::Status(_) => self.res_save_edit().await,
             View::Location => self.res_save_loc().await,
             _ => (),
         }

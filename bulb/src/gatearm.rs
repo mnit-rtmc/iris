@@ -76,7 +76,7 @@ impl AncillaryData for GateArmAnc {
     fn uri(&self, view: View, pri: &GateArm) -> Option<Cow<str>> {
         match (view, &self.states, &self.controller, &pri.controller()) {
             (_, None, _, _) => Some(GATE_ARM_STATE_URI.into()),
-            (View::Status, _, None, Some(ctrl)) => {
+            (View::Status(_), _, None, Some(ctrl)) => {
                 Some(format!("/iris/api/controller/{}", &ctrl).into())
             }
             _ => None,
@@ -175,7 +175,7 @@ impl Card for GateArm {
         match view {
             View::Create => self.to_html_create(anc),
             View::Compact => self.to_html_compact(anc),
-            View::Status => self.to_html_status(anc),
+            View::Status(_) => self.to_html_status(anc),
             View::Edit => self.to_html_edit(),
             _ => unreachable!(),
         }

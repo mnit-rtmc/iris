@@ -351,14 +351,13 @@ impl WeatherSensor {
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self, anc: &WeatherSensorAnc) -> String {
+    fn to_html_status(&self, anc: &WeatherSensorAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
         let sample_time = self.sample_time.as_deref().unwrap_or("-");
         let sample = self.sample_html();
-        let ctrl_button = anc.controller_button();
-        format!(
+        let mut status = format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
             </div>\
@@ -370,13 +369,16 @@ impl WeatherSensor {
               <span>Obs</span>\
               <span class='info'>{sample_time}</span>\
             </div>\
-            {sample}\
-            <div class='row'>\
-              {ctrl_button}\
-              {LOC_BUTTON}\
-              {EDIT_BUTTON}\
-            </div>"
-        )
+            {sample}"
+        );
+        if config {
+            status.push_str("<div class='row'>");
+            status.push_str(&anc.controller_button());
+            status.push_str(LOC_BUTTON);
+            status.push_str(EDIT_BUTTON);
+            status.push_str("</div>");
+        }
+        status
     }
 
     /// Convert to Edit HTML
@@ -457,7 +459,7 @@ impl Card for WeatherSensor {
         match view {
             View::Create => self.to_html_create(anc),
             View::Compact => self.to_html_compact(),
-            View::Status => self.to_html_status(anc),
+            View::Status(config) => self.to_html_status(anc, config),
             View::Edit => self.to_html_edit(),
             _ => unreachable!(),
         }

@@ -93,17 +93,20 @@ impl LcsArray {
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self, anc: &LcsArrayAnc) -> String {
+    fn to_html_status(&self, anc: &LcsArrayAnc, config: bool) -> String {
         let lock = anc.lock(self);
-        format!(
+        let mut status = format!(
             "<div class='row'>\
               <span class='info'>{lock}</span>\
-            </div>\
-            <div class='row'>\
-              <span></span>\
-              {EDIT_BUTTON}\
             </div>"
-        )
+        );
+        if config {
+            status.push_str("<div class='row'>");
+            status.push_str("<span></span>");
+            status.push_str(EDIT_BUTTON);
+            status.push_str("</div>");
+        }
+        status
     }
 
     /// Convert to Edit HTML
@@ -137,7 +140,7 @@ impl Card for LcsArray {
         match view {
             View::Create => self.to_html_create(anc),
             View::Compact => self.to_html_compact(anc),
-            View::Status => self.to_html_status(anc),
+            View::Status(config) => self.to_html_status(anc, config),
             View::Edit => self.to_html_edit(),
             _ => unreachable!(),
         }

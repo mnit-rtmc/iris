@@ -47,7 +47,7 @@ impl<D: Device> AncillaryData for DeviceAnc<D> {
     /// Get ancillary URI
     fn uri(&self, view: View, pri: &D) -> Option<Cow<str>> {
         match (view, &pri.controller(), &self.controller) {
-            (View::Status, Some(ctrl), None) => {
+            (View::Status(true), Some(ctrl), None) => {
                 Some(format!("/iris/api/controller/{}", &ctrl).into())
             }
             _ => None,
