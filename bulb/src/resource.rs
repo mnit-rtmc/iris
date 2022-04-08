@@ -502,14 +502,13 @@ impl Resource {
 
     /// Create a new object
     pub async fn create_and_post(self) -> Result<()> {
-        if let Some(doc) = Doc::get_opt() {
-            let value = match self {
-                Resource::Permission => Permission::create_value(&doc)?,
-                _ => self.create_value(&doc)?,
-            };
-            let json = value.into();
-            fetch_post(&format!("/iris/api/{}", self.rname()), &json).await?;
-        }
+        let doc = Doc::get();
+        let value = match self {
+            Resource::Permission => Permission::create_value(&doc)?,
+            _ => self.create_value(&doc)?,
+        };
+        let json = value.into();
+        fetch_post(&format!("/iris/api/{}", self.rname()), &json).await?;
         Ok(())
     }
 

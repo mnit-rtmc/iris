@@ -137,13 +137,12 @@ impl DeferredAction {
 
 /// Search list using the value from "sb_search"
 fn search_list() {
-    if let Some(doc) = Doc::get_opt() {
-        let input = doc.elem::<HtmlInputElement>("sb_search");
-        let search = input.value();
-        if let Some(rname) = doc.select_parse::<String>("sb_resource") {
-            let res = Resource::from_name(&rname);
-            spawn_local(populate_list(res, search));
-        }
+    let doc = Doc::get();
+    let input = doc.elem::<HtmlInputElement>("sb_search");
+    let search = input.value();
+    if let Some(rname) = doc.select_parse::<String>("sb_resource") {
+        let res = Resource::from_name(&rname);
+        spawn_local(populate_list(res, search));
     }
 }
 
@@ -153,13 +152,12 @@ async fn populate_list(res: Resource, search: String) {
         let mut state = rc.borrow_mut();
         state.selected_card.take()
     });
-    if let Some(doc) = Doc::get_opt() {
-        let sb_list = doc.elem::<Element>("sb_list");
-        match res.fetch_list(&search).await {
-            Ok(cards) => sb_list.set_inner_html(&cards),
-            Err(Error::FetchResponseUnauthorized()) => show_login(),
-            Err(e) => show_toast(&format!("View failed: {e}")),
-        }
+    let doc = Doc::get();
+    let sb_list = doc.elem::<Element>("sb_list");
+    match res.fetch_list(&search).await {
+        Ok(cards) => sb_list.set_inner_html(&cards),
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(e) => show_toast(&format!("View failed: {e}")),
     }
 }
 
@@ -208,10 +206,8 @@ impl SelectedCard {
     /// Replace a card element with another card type
     async fn replace_card(mut self, v: View) {
         let id = self.id();
-        let elem = match Doc::get_opt() {
-            Some(doc) => doc.elem::<HtmlElement>(&id),
-            None => return,
-        };
+        let doc = Doc::get();
+        let elem = doc.elem::<HtmlElement>(&id);
         let res = self.res;
         match res.fetch_card(&self.name, v).await {
             Ok(html) => replace_card_html(&elem, v, &html),
@@ -305,45 +301,28 @@ impl SelectedCard {
 
 /// Show login form shade
 fn show_login() {
-    get_element(LOGIN_ID).filter(|e| {
-        e.set_class_name("show");
-        false
-    });
+    Doc::get()
+        .elem::<HtmlElement>(LOGIN_ID)
+        .set_class_name("show");
 }
 
 /// Hide login form shade
 fn hide_login() {
-    get_element(LOGIN_ID).filter(|e| {
-        e.set_class_name("");
-        false
-    });
+    Doc::get().elem::<HtmlElement>(LOGIN_ID).set_class_name("");
 }
 
 /// Show a toast message
 fn show_toast(msg: &str) {
     console::log_1(&format!("toast: {msg}").into());
-    get_element(TOAST_ID).filter(|t| {
-        t.set_inner_html(msg);
-        t.set_class_name("show");
-        DeferredAction::HideToast.schedule(3000);
-        false
-    });
-}
-
-/// Get element by ID
-fn get_element(id: &str) -> Option<HtmlElement> {
-    if let Some(doc) = Doc::get_opt() {
-        return Some(doc.elem(id));
-    }
-    None
+    let t = Doc::get().elem::<HtmlElement>(TOAST_ID);
+    t.set_inner_html(msg);
+    t.set_class_name("show");
+    DeferredAction::HideToast.schedule(3000);
 }
 
 /// Hide toast
 fn hide_toast() {
-    get_element(TOAST_ID).filter(|t| {
-        t.set_class_name("");
-        false
-    });
+    Doc::get().elem::<HtmlElement>(TOAST_ID).set_class_name("");
 }
 
 /// Replace a card with provieded HTML
@@ -388,13 +367,12 @@ async fn add_sidebar() -> JsResult<()> {
 
 /// Fill resource select element
 async fn fill_resource_select() {
-    if let Some(doc) = Doc::get_opt() {
-        let config = doc.input_bool("sb_config");
-        let perm = fetch_access_list(config).await.unwrap_throw();
-        let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
-        sb_resource.set_inner_html(&perm);
-        STATE.with(|rc| rc.borrow_mut().initialized = true);
-    }
+    let doc = Doc::get();
+    let config = doc.input_bool("sb_config");
+    let perm = fetch_access_list(config).await.unwrap_throw();
+    let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
+    sb_resource.set_inner_html(&perm);
+    STATE.with(|rc| rc.borrow_mut().initialized = true);
 }
 
 /// Fetch permission access list
@@ -426,12 +404,11 @@ fn add_select_event_listener(elem: &HtmlSelectElement) -> JsResult<()> {
 
 /// Handle an event from "sb_resource" `select` element
 fn handle_sb_resource_ev(rname: String) {
-    if let Some(doc) = Doc::get_opt() {
-        let input = doc.elem::<HtmlInputElement>("sb_search");
-        input.set_value("");
-        let res = Resource::from_name(&rname);
-        spawn_local(populate_list(res, "".into()));
-    }
+    let doc = Doc::get();
+    let input = doc.elem::<HtmlInputElement>("sb_search");
+    input.set_value("");
+    let res = Resource::from_name(&rname);
+    spawn_local(populate_list(res, "".into()));
 }
 
 /// Add a "change" event listener to an element
@@ -485,18 +462,15 @@ fn add_click_event_listener(elem: &Element) -> JsResult<()> {
 
 /// Handle a `click` event from a target element
 fn handle_click_ev(target: &Element) {
-    if let Some(doc) = Doc::get_opt() {
-        if target.is_instance_of::<HtmlButtonElement>() {
-            handle_button_click_ev(target);
-        } else if let Some(card) = target.closest(".card").unwrap_throw() {
-            if let Some(id) = card.get_attribute("id") {
-                if let Some(name) = card.get_attribute("name") {
-                    if let Some(rname) =
-                        doc.select_parse::<String>("sb_resource")
-                    {
-                        let res = Resource::from_name(&rname);
-                        spawn_local(click_card(res, id, name));
-                    }
+    let doc = Doc::get();
+    if target.is_instance_of::<HtmlButtonElement>() {
+        handle_button_click_ev(target);
+    } else if let Some(card) = target.closest(".card").unwrap_throw() {
+        if let Some(id) = card.get_attribute("id") {
+            if let Some(name) = card.get_attribute("name") {
+                if let Some(rname) = doc.select_parse::<String>("sb_resource") {
+                    let res = Resource::from_name(&rname);
+                    spawn_local(click_card(res, id, name));
                 }
             }
         }
@@ -584,15 +558,14 @@ async fn handle_login() {
 
 /// Go to resource from target's `data-link` attribute
 async fn go_resource(attrs: ButtonAttrs) {
-    if let Some(doc) = Doc::get_opt() {
-        if let (Some(link), Some(rname)) = (attrs.data_link, attrs.data_type) {
-            let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
-            sb_resource.set_value(&rname);
-            let input = doc.elem::<HtmlInputElement>("sb_search");
-            input.set_value(&link);
-            let res = Resource::from_name(&rname);
-            populate_list(res, link).await;
-        }
+    let doc = Doc::get();
+    if let (Some(link), Some(rname)) = (attrs.data_link, attrs.data_type) {
+        let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
+        sb_resource.set_value(&rname);
+        let input = doc.elem::<HtmlInputElement>("sb_search");
+        input.set_value(&link);
+        let res = Resource::from_name(&rname);
+        populate_list(res, link).await;
     }
 }
 

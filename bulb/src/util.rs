@@ -14,7 +14,7 @@ use serde_json::map::Map;
 use serde_json::{Number, Value};
 use std::fmt;
 use std::str::FromStr;
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys::{
     Document, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
 };
@@ -173,13 +173,10 @@ pub struct Doc(pub Document);
 
 impl Doc {
     /// Get document
-    pub fn get_opt() -> Option<Self> {
-        if let Some(window) = web_sys::window() {
-            if let Some(doc) = window.document() {
-                return Some(Doc(doc));
-            }
-        }
-        None
+    pub fn get() -> Self {
+        let window = web_sys::window().unwrap_throw();
+        let doc = window.document().unwrap_throw();
+        Doc(doc)
     }
 
     /// Get an element by ID and cast it
@@ -245,7 +242,7 @@ pub trait Select<T> {
 impl Fields {
     /// Create a new fields mapping
     pub fn new() -> Self {
-        let doc = Doc::get_opt().unwrap();
+        let doc = Doc::get();
         let obj = Map::default();
         Fields { doc, obj }
     }
