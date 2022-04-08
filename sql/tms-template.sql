@@ -501,6 +501,7 @@ administrator	comm_config	4
 administrator	comm_link	4
 administrator	controller	4
 administrator	detector	4
+administrator	dms	4
 administrator	gate_arm	4
 administrator	gate_arm_array	4
 administrator	geo_loc	4
@@ -5425,6 +5426,8 @@ CREATE TABLE event.weather_sensor_sample (
     sample JSONB
 );
 
+CREATE INDEX ON event.weather_sensor_sample (weather_sensor);
+
 CREATE FUNCTION event.weather_sensor_sample_trig() RETURNS TRIGGER AS
 $weather_sensor_sample_trig$
 BEGIN
@@ -5443,17 +5446,17 @@ END;
 $weather_sensor_sample_trig$ LANGUAGE plpgsql;
 
 CREATE TRIGGER weather_sensor_sample_trigger
-	AFTER UPDATE ON iris._weather_sensor
-	FOR EACH ROW EXECUTE PROCEDURE event.weather_sensor_sample_trig();
+    AFTER UPDATE ON iris._weather_sensor
+    FOR EACH ROW EXECUTE PROCEDURE event.weather_sensor_sample_trig();
 
 CREATE VIEW weather_sensor_settings_view AS
-	SELECT event_id, event_date, weather_sensor, settings
-	FROM event.weather_sensor_settings;
+    SELECT event_id, event_date, weather_sensor, settings
+    FROM event.weather_sensor_settings;
 GRANT SELECT ON weather_sensor_settings_view TO PUBLIC;
 
 CREATE VIEW weather_sensor_sample_view AS
-	SELECT event_id, event_date, weather_sensor, sample
-	FROM event.weather_sensor_sample;
+    SELECT event_id, event_date, weather_sensor, sample
+    FROM event.weather_sensor_sample;
 GRANT SELECT ON weather_sensor_sample_view TO PUBLIC;
 
 --
