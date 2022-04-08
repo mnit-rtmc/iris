@@ -370,10 +370,16 @@ async fn add_sidebar() -> JsResult<()> {
 async fn fill_resource_select() {
     let doc = Doc::get();
     let config = doc.input_bool("sb_config");
-    let perm = fetch_access_list(config).await.unwrap_throw();
-    let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
-    sb_resource.set_inner_html(&perm);
-    STATE.with(|rc| rc.borrow_mut().initialized = true);
+    match fetch_access_list(config).await {
+        Ok(perm) => {
+            let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
+            sb_resource.set_inner_html(&perm);
+            STATE.with(|rc| rc.borrow_mut().initialized = true);
+        }
+        Err(e) => {
+            console::log_1(&format!("fill_resource_select: {:?}", e).into());
+        }
+    }
 }
 
 /// Fetch permission access list
