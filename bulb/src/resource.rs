@@ -527,7 +527,7 @@ impl Resource {
     async fn fetch_primary<C: Card>(self, name: &str) -> Result<C> {
         let uri = self.uri_name(name);
         let json = fetch_get(&uri).await?;
-        Ok(C::new(&json)?)
+        C::new(&json)
     }
 
     /// Fetch geo location name (if any)

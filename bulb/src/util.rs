@@ -10,7 +10,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::start::JsResult;
 use serde_json::map::Map;
 use serde_json::{Number, Value};
 use std::fmt;
@@ -184,30 +183,23 @@ impl Doc {
     }
 
     /// Get an element by ID and cast it
-    pub fn elem<E: JsCast>(&self, id: &str) -> JsResult<E> {
-        Ok(self
-            .0
+    pub fn elem<E: JsCast>(&self, id: &str) -> E {
+        self.0
             .get_element_by_id(id)
-            .ok_or("Invalid element ID")?
-            .dyn_into::<E>()?)
+            .ok_or_else(|| format!("Invalid element ID: {id}"))
+            .unwrap()
+            .dyn_into::<E>()
+            .expect("Invalid element type")
     }
 
     /// Get and parse a `select` element value
     pub fn select_parse<T: FromStr>(&self, id: &str) -> Option<T> {
-        self.elem::<HtmlSelectElement>(id)
-            .unwrap()
-            .value()
-            .parse()
-            .ok()
+        self.elem::<HtmlSelectElement>(id).value().parse().ok()
     }
 
     /// Get and parse an `input` element value
     pub fn input_parse<T: FromStr>(&self, id: &str) -> Option<T> {
-        self.elem::<HtmlInputElement>(id)
-            .unwrap()
-            .value()
-            .parse()
-            .ok()
+        self.elem::<HtmlInputElement>(id).value().parse().ok()
     }
 
     /// Get and parse an optional `input` element string
@@ -216,17 +208,13 @@ impl Doc {
     }
 
     /// Get a boolean `input` element value
-    pub fn input_bool(&self, id: &str) -> Option<bool> {
-        Some(self.elem::<HtmlInputElement>(id).unwrap().checked())
+    pub fn input_bool(&self, id: &str) -> bool {
+        self.elem::<HtmlInputElement>(id).checked()
     }
 
     /// Get and parse a `textarea` element value
     pub fn text_area_parse<T: FromStr>(&self, id: &str) -> Option<T> {
-        self.elem::<HtmlTextAreaElement>(id)
-            .unwrap()
-            .value()
-            .parse()
-            .ok()
+        self.elem::<HtmlTextAreaElement>(id).value().parse().ok()
     }
 }
 
@@ -300,17 +288,16 @@ impl Input<u16> for Fields {
 
 impl Input<bool> for Fields {
     fn changed_input(&mut self, id: &str, val: bool) {
-        if let Some(parsed) = self.doc.input_bool(id) {
-            if parsed != val {
-                self.obj.insert(id.to_string(), Value::Bool(parsed));
-            }
+        let parsed = self.doc.input_bool(id);
+        if parsed != val {
+            self.obj.insert(id.to_string(), Value::Bool(parsed));
         }
     }
 }
 
 impl Input<Option<bool>> for Fields {
     fn changed_input(&mut self, id: &str, val: Option<bool>) {
-        let parsed = self.doc.input_bool(id);
+        let parsed = Some(self.doc.input_bool(id));
         if parsed != val {
             self.obj.insert(id.to_string(), OptVal(parsed).into());
         }

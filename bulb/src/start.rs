@@ -135,6 +135,18 @@ impl DeferredAction {
     }
 }
 
+/// Search list using the value from "sb_search"
+fn search_list() {
+    if let Some(doc) = Doc::get_opt() {
+        let input = doc.elem::<HtmlInputElement>("sb_search");
+        let search = input.value();
+        if let Some(rname) = doc.select_parse::<String>("sb_resource") {
+            let res = Resource::from_name(&rname);
+            spawn_local(populate_list(res, search));
+        }
+    }
+}
+
 /// Populate `sb_list` with `res` card types
 async fn populate_list(res: Resource, search: String) {
     STATE.with(|rc| {
@@ -142,7 +154,7 @@ async fn populate_list(res: Resource, search: String) {
         state.selected_card.take()
     });
     if let Some(doc) = Doc::get_opt() {
-        let sb_list = doc.elem::<Element>("sb_list").unwrap_throw();
+        let sb_list = doc.elem::<Element>("sb_list");
         match res.fetch_list(&search).await {
             Ok(cards) => sb_list.set_inner_html(&cards),
             Err(Error::FetchResponseUnauthorized()) => show_login(),
@@ -200,25 +212,18 @@ impl SelectedCard {
             Some(doc) => doc.elem::<HtmlElement>(&id),
             None => return,
         };
-        match elem {
-            Ok(elem) => {
-                let res = self.res;
-                match res.fetch_card(&self.name, v).await {
-                    Ok(html) => replace_card_html(&elem, v, &html),
-                    Err(Error::FetchResponseUnauthorized()) => {
-                        show_login();
-                        return;
-                    }
-                    Err(e) => {
-                        show_toast(&format!("Fetch failed: {e}"));
-                        // Card list may be out-of-date; refresh with search
-                        DeferredAction::SearchList.schedule(200);
-                        return;
-                    }
-                }
+        let res = self.res;
+        match res.fetch_card(&self.name, v).await {
+            Ok(html) => replace_card_html(&elem, v, &html),
+            Err(Error::FetchResponseUnauthorized()) => {
+                show_login();
+                return;
             }
             Err(e) => {
-                console::log_1(&format!("replace_card {id} {e:?}").into());
+                show_toast(&format!("Fetch failed: {e}"));
+                // Card list may be out-of-date; refresh with search
+                DeferredAction::SearchList.schedule(200);
+                return;
             }
         }
         STATE.with(|rc| {
@@ -328,7 +333,7 @@ fn show_toast(msg: &str) {
 /// Get element by ID
 fn get_element(id: &str) -> Option<HtmlElement> {
     if let Some(doc) = Doc::get_opt() {
-        return doc.elem(id).ok();
+        return Some(doc.elem(id));
     }
     None
 }
@@ -369,60 +374,34 @@ async fn add_sidebar() -> JsResult<()> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let doc = Doc(doc);
-    let sidebar: HtmlElement = doc.elem("sidebar")?;
+    let sidebar: HtmlElement = doc.elem("sidebar");
     sidebar.set_inner_html(SIDEBAR);
+    add_select_event_listener(&doc.elem("sb_resource"))?;
+    add_change_event_listener(&doc.elem("sb_config"))?;
+    add_input_event_listener(&doc.elem("sb_search"))?;
     add_click_event_listener(&sidebar)?;
-    let sb_resource = doc.elem("sb_resource")?;
-    add_select_event_listener(&sb_resource)?;
-    add_input_event_listener(&doc.elem("sb_search")?)?;
-    add_transition_event_listener(&doc.elem("sb_list")?)?;
+    add_transition_event_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window).unwrap_throw();
-    fill_resource_select(&sb_resource).await;
+    fill_resource_select().await;
     Ok(())
 }
 
 /// Fill resource select element
-async fn fill_resource_select(sb_resource: &Element) {
-    match fetch_access_list().await {
-        Ok(perm) => {
-            sb_resource.set_inner_html(&perm);
-            STATE.with(|rc| rc.borrow_mut().initialized = true)
-        }
-        Err(e) => {
-            console::log_1(&format!("fill_resource_select: {:?}", e).into())
-        }
+async fn fill_resource_select() {
+    if let Some(doc) = Doc::get_opt() {
+        let config = doc.input_bool("sb_config");
+        let perm = fetch_access_list(config).await.unwrap_throw();
+        let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
+        sb_resource.set_inner_html(&perm);
+        STATE.with(|rc| rc.borrow_mut().initialized = true);
     }
 }
 
 /// Fetch permission access list
-async fn fetch_access_list() -> Result<String> {
+async fn fetch_access_list(config: bool) -> Result<String> {
     let json = fetch_get("/iris/api/access").await?;
     let permissions = json.into_serde::<Vec<Permission>>()?;
-    Ok(permissions_html(permissions))
-}
-
-/// Handle an event from "sb_resource" `select` element
-fn handle_sb_resource_ev(rname: String) {
-    if let Some(doc) = Doc::get_opt() {
-        if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
-            input.set_value("");
-        }
-        let res = Resource::from_name(&rname);
-        spawn_local(populate_list(res, "".into()));
-    }
-}
-
-/// Search list using the value from "sb_search"
-fn search_list() {
-    if let Some(doc) = Doc::get_opt() {
-        if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
-            let search = input.value();
-            if let Some(rname) = doc.select_parse::<String>("sb_resource") {
-                let res = Resource::from_name(&rname);
-                spawn_local(populate_list(res, search));
-            }
-        }
-    }
+    Ok(permissions_html(permissions, config))
 }
 
 /// Add an "input" event listener to a `select` element
@@ -443,6 +422,36 @@ fn add_select_event_listener(elem: &HtmlSelectElement) -> JsResult<()> {
     // can't drop closure, just forget it to make JS happy
     closure.forget();
     Ok(())
+}
+
+/// Handle an event from "sb_resource" `select` element
+fn handle_sb_resource_ev(rname: String) {
+    if let Some(doc) = Doc::get_opt() {
+        let input = doc.elem::<HtmlInputElement>("sb_search");
+        input.set_value("");
+        let res = Resource::from_name(&rname);
+        spawn_local(populate_list(res, "".into()));
+    }
+}
+
+/// Add a "change" event listener to an element
+fn add_change_event_listener(elem: &HtmlInputElement) -> JsResult<()> {
+    let closure = Closure::wrap(Box::new(|_e: Event| {
+        spawn_local(reload_resources());
+    }) as Box<dyn Fn(_)>);
+    elem.add_event_listener_with_callback(
+        "change",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
+    Ok(())
+}
+
+/// Reload resource select element
+async fn reload_resources() {
+    fill_resource_select().await;
+    search_list();
 }
 
 /// Add an "input" event listener to an element
@@ -561,14 +570,11 @@ async fn handle_login() {
         let js = js.into();
         match fetch_post("/iris/api/login", &js).await {
             Ok(_) => {
-                if let Ok(pass) = doc.elem::<HtmlInputElement>("login_pass") {
-                    pass.set_value("");
-                }
+                let pass = doc.elem::<HtmlInputElement>("login_pass");
+                pass.set_value("");
                 hide_login();
                 if !STATE.with(|rc| rc.borrow().initialized) {
-                    if let Ok(elem) = doc.elem::<HtmlElement>("sb_resource") {
-                        fill_resource_select(&elem).await;
-                    }
+                    fill_resource_select().await;
                 }
             }
             Err(e) => show_toast(&format!("Login failed: {e}")),
@@ -580,16 +586,12 @@ async fn handle_login() {
 async fn go_resource(attrs: ButtonAttrs) {
     if let Some(doc) = Doc::get_opt() {
         if let (Some(link), Some(rname)) = (attrs.data_link, attrs.data_type) {
-            if let Ok(sb_resource) =
-                doc.elem::<HtmlSelectElement>("sb_resource")
-            {
-                sb_resource.set_value(&rname);
-                if let Ok(input) = doc.elem::<HtmlInputElement>("sb_search") {
-                    input.set_value(&link);
-                    let res = Resource::from_name(&rname);
-                    populate_list(res, link).await;
-                }
-            }
+            let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
+            sb_resource.set_value(&rname);
+            let input = doc.elem::<HtmlInputElement>("sb_search");
+            input.set_value(&link);
+            let res = Resource::from_name(&rname);
+            populate_list(res, link).await;
         }
     }
 }

@@ -24,17 +24,47 @@ button {
   background: none;
   color: black;
   cursor: pointer;
-  transition: background 50ms ease-in-out;
 }
 button:hover {
   background-color: #ccc;
 }
 button:active {
-  background: #bbb;
+  background-color: #bbb;
 }
 button.go_link {
   font-size: smaller;
   padding: 0 0.2rem;
+}
+
+/* Checkbox toggle buttons:
+ *
+ * <input id='the_id' type='checkbox' class='toggle' />
+ * <label for='the_id'>...</label>
+ */
+.toggle {
+  display: none;
+}
+.toggle + label {
+  user-select: none;
+  background-color: #eee;
+  border: 1px solid #888;
+  border-radius: 0.2rem;
+  padding: 0 0.2rem;
+  margin: 0.1rem 0;
+  color: black;
+  cursor: pointer;
+}
+.toggle + label:hover {
+  background-color: #ccc;
+}
+.toggle:active + label {
+  background-color: #bbb;
+}
+.toggle:checked + label {
+  background-color: #3584e4;
+}
+.toggle:checked + label:hover {
+  background-color: #26e;
 }
 
 .root {
@@ -103,7 +133,7 @@ button.go_link {
   left: -100%;
   top: 0;
   content: "";
-  background: #bbb;
+  background-color: #bbb;
 }
 #ob_delete:active::before {
   transition: left 1s;

@@ -153,32 +153,46 @@ fn access_html(selected: u32) -> String {
 }
 
 /// Build a `select` element of access permissions
-pub fn permissions_html(access: Vec<Permission>) -> String {
+pub fn permissions_html(access: Vec<Permission>, config: bool) -> String {
     let mut html = "<option/>".to_string();
     for perm in &access {
         if perm.batch.is_none() {
-            add_option(Resource::Alarm, perm, &mut html);
+            if config {
+                add_option(Resource::Alarm, perm, &mut html);
+            }
             add_option(Resource::Beacon, perm, &mut html);
-            add_option(Resource::CabinetStyle, perm, &mut html);
+            if config {
+                add_option(Resource::CabinetStyle, perm, &mut html);
+            }
             add_option(Resource::Camera, perm, &mut html);
-            add_option(Resource::CommConfig, perm, &mut html);
-            add_option(Resource::CommLink, perm, &mut html);
-            add_option(Resource::Controller, perm, &mut html);
-            add_option(Resource::Detector, perm, &mut html);
+            if config {
+                add_option(Resource::CommConfig, perm, &mut html);
+                add_option(Resource::CommLink, perm, &mut html);
+                add_option(Resource::Controller, perm, &mut html);
+                add_option(Resource::Detector, perm, &mut html);
+            }
             add_option(Resource::Dms, perm, &mut html);
-            add_option(Resource::FlowStream, perm, &mut html);
-            add_option(Resource::GateArm, perm, &mut html);
+            if config {
+                add_option(Resource::FlowStream, perm, &mut html);
+                add_option(Resource::GateArm, perm, &mut html);
+            }
             add_option(Resource::GateArmArray, perm, &mut html);
-            add_option(Resource::Gps, perm, &mut html);
+            if config {
+                add_option(Resource::Gps, perm, &mut html);
+            }
             add_option(Resource::LaneMarking, perm, &mut html);
             add_option(Resource::LcsArray, perm, &mut html);
-            add_option(Resource::LcsIndication, perm, &mut html);
-            add_option(Resource::Modem, perm, &mut html);
-            add_option(Resource::Permission, perm, &mut html);
+            if config {
+                add_option(Resource::LcsIndication, perm, &mut html);
+                add_option(Resource::Modem, perm, &mut html);
+                add_option(Resource::Permission, perm, &mut html);
+            }
             add_option(Resource::RampMeter, perm, &mut html);
-            add_option(Resource::Role, perm, &mut html);
-            add_option(Resource::TagReader, perm, &mut html);
-            add_option(Resource::User, perm, &mut html);
+            if config {
+                add_option(Resource::Role, perm, &mut html);
+                add_option(Resource::TagReader, perm, &mut html);
+                add_option(Resource::User, perm, &mut html);
+            }
             add_option(Resource::VideoMonitor, perm, &mut html);
             add_option(Resource::WeatherSensor, perm, &mut html);
         }

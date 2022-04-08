@@ -113,7 +113,7 @@ impl GateArmArray {
 
     /// Convert to Edit HTML
     fn to_html_edit(&self) -> String {
-        format!("")
+        String::new()
     }
 }
 

@@ -46,7 +46,7 @@ impl Detector {
             || self
                 .label
                 .as_ref()
-                .filter(|lbl| lbl.ends_with("G"))
+                .filter(|lbl| lbl.ends_with('G'))
                 .is_some();
         let disabled = disabled_attr(enabled);
         format!(
