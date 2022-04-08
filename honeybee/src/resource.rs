@@ -241,6 +241,17 @@ const VIDEO_MONITOR_RES: Resource = Resource::Simple(
     ) r",
 );
 
+/// Flow stream resource
+const FLOW_STREAM_RES: Resource = Resource::Simple(
+    "api/flow_stream",
+    Listen::Exclude("flow_stream", &["status"]),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT name, controller \
+        FROM iris.flow_stream \
+        ORDER BY name\
+    ) r",
+);
+
 /// Detector resource
 const DETECTOR_RES: Resource = Resource::Simple(
     "api/detector",
@@ -740,6 +751,7 @@ const ALL: &[Resource] = &[
     RAMP_METER_RES,
     TAG_READER_RES,
     VIDEO_MONITOR_RES,
+    FLOW_STREAM_RES,
     DMS_RES,
     DMS_PUB_RES,
     DMS_STAT_RES,

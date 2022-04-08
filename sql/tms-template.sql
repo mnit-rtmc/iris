@@ -502,6 +502,7 @@ administrator	comm_link	4
 administrator	controller	4
 administrator	detector	4
 administrator	dms	4
+administrator	flow_stream	4
 administrator	gate_arm	4
 administrator	gate_arm_array	4
 administrator	geo_loc	4
@@ -5220,8 +5221,8 @@ GRANT SELECT ON video_monitor_view TO PUBLIC;
 -- Video Flow Streams
 --
 CREATE TABLE iris.flow_stream_status (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(8) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(8) NOT NULL
 );
 
 COPY iris.flow_stream_status (id, description) FROM stdin;
@@ -5231,20 +5232,24 @@ COPY iris.flow_stream_status (id, description) FROM stdin;
 \.
 
 CREATE TABLE iris._flow_stream (
-	name VARCHAR(12) PRIMARY KEY,
-	restricted BOOLEAN NOT NULL,
-	loc_overlay BOOLEAN NOT NULL,
-	quality INTEGER NOT NULL REFERENCES iris.encoding_quality,
-	camera VARCHAR(20) REFERENCES iris._camera,
-	mon_num INTEGER,
-	address INET,
-	port INTEGER CHECK (port > 0 AND port <= 65535),
-	status INTEGER NOT NULL REFERENCES iris.flow_stream_status,
-	CONSTRAINT camera_or_monitor CHECK (camera IS NULL OR mon_num IS NULL)
+    name VARCHAR(12) PRIMARY KEY,
+    restricted BOOLEAN NOT NULL,
+    loc_overlay BOOLEAN NOT NULL,
+    quality INTEGER NOT NULL REFERENCES iris.encoding_quality,
+    camera VARCHAR(20) REFERENCES iris._camera,
+    mon_num INTEGER,
+    address INET,
+    port INTEGER CHECK (port > 0 AND port <= 65535),
+    status INTEGER NOT NULL REFERENCES iris.flow_stream_status,
+    CONSTRAINT camera_or_monitor CHECK (camera IS NULL OR mon_num IS NULL)
 );
 
 ALTER TABLE iris._flow_stream ADD CONSTRAINT _flow_stream_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
+
+CREATE TRIGGER flow_stream_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._flow_stream
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.flow_stream AS
     SELECT f.name, controller, pin, restricted, loc_overlay, quality, camera,

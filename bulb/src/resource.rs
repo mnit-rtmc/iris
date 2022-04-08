@@ -21,6 +21,7 @@ use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::error::{Error, Result};
 use crate::fetch::{fetch_delete, fetch_get, fetch_patch, fetch_post};
+use crate::flowstream::FlowStream;
 use crate::gatearm::GateArm;
 use crate::gatearmarray::GateArmArray;
 use crate::geoloc::GeoLoc;
@@ -85,6 +86,7 @@ pub enum Resource {
     Controller,
     Detector,
     Dms,
+    FlowStream,
     GateArm,
     GateArmArray,
     GeoLoc,
@@ -209,6 +211,7 @@ impl Resource {
             Controller::RESOURCE_N => Self::Controller,
             Detector::RESOURCE_N => Self::Detector,
             Dms::RESOURCE_N => Self::Dms,
+            FlowStream::RESOURCE_N => Self::FlowStream,
             GateArm::RESOURCE_N => Self::GateArm,
             GateArmArray::RESOURCE_N => Self::GateArmArray,
             GeoLoc::RESOURCE_N => Self::GeoLoc,
@@ -240,6 +243,7 @@ impl Resource {
             Self::Controller => Controller::RESOURCE_N,
             Self::Detector => Detector::RESOURCE_N,
             Self::Dms => Dms::RESOURCE_N,
+            Self::FlowStream => FlowStream::RESOURCE_N,
             Self::GateArm => GateArm::RESOURCE_N,
             Self::GateArmArray => GateArmArray::RESOURCE_N,
             Self::GeoLoc => GeoLoc::RESOURCE_N,
@@ -271,6 +275,7 @@ impl Resource {
             Self::Controller => "🎛️ Controller",
             Self::Detector => "🚗⬚ Detector",
             Self::Dms => "⬛ Dms",
+            Self::FlowStream => "🎞️ Flow Stream",
             Self::GateArm => "⫬ Gate Arm",
             Self::GateArmArray => "⫭⫬ Gate Arm Array",
             Self::GeoLoc => "🗺️ Location",
@@ -322,6 +327,7 @@ impl Resource {
             Self::Controller => fetch_list::<Controller>(self, search).await,
             Self::Detector => fetch_list::<Detector>(self, search).await,
             Self::Dms => fetch_list::<Dms>(self, search).await,
+            Self::FlowStream => fetch_list::<FlowStream>(self, search).await,
             Self::GateArm => fetch_list::<GateArm>(self, search).await,
             Self::GateArmArray => {
                 fetch_list::<GateArmArray>(self, search).await
@@ -386,6 +392,7 @@ impl Resource {
             Self::Controller => card_view::<Controller>(self, view, name).await,
             Self::Detector => card_view::<Detector>(self, view, name).await,
             Self::Dms => card_view::<Dms>(self, view, name).await,
+            Self::FlowStream => card_view::<FlowStream>(self, view, name).await,
             Self::GateArm => card_view::<GateArm>(self, view, name).await,
             Self::GateArmArray => {
                 card_view::<GateArmArray>(self, view, name).await
@@ -426,6 +433,7 @@ impl Resource {
                 | Self::Controller
                 | Self::Detector
                 | Self::Dms
+                | Self::FlowStream
                 | Self::GateArm
                 | Self::GateArmArray
                 | Self::GeoLoc
@@ -464,6 +472,7 @@ impl Resource {
             Self::Controller => fetch_changed::<Controller>(self, name).await,
             Self::Detector => fetch_changed::<Detector>(self, name).await,
             Self::Dms => fetch_changed::<Dms>(self, name).await,
+            Self::FlowStream => fetch_changed::<FlowStream>(self, name).await,
             Self::GateArm => fetch_changed::<GateArm>(self, name).await,
             Self::GateArmArray => {
                 fetch_changed::<GateArmArray>(self, name).await

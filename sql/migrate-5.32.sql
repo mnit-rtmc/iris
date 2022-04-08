@@ -16,6 +16,7 @@ CREATE UNIQUE INDEX permission_role_resource_n_idx
 -- Add new permissions for administrator
 COPY iris.permission (role, resource_n, access_n) FROM stdin;
 administrator	dms	4
+administrator	flow_stream	4
 administrator	gate_arm	4
 administrator	gate_arm_array	4
 administrator	gps	4
@@ -83,6 +84,10 @@ CREATE TRIGGER gps_notify_trig
 
 CREATE TRIGGER gps_table_notify_trig
     AFTER INSERT OR DELETE ON iris._gps
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+CREATE TRIGGER flow_stream_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._flow_stream
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE INDEX ON event.weather_sensor_sample (weather_sensor);

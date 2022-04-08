@@ -166,6 +166,15 @@ of `pin`, `resource_n` and `name`.
 | 💡 Plan      | notes                                                       |
 | 🔧 Configure | controller, {`pin`}                                         |
 
+### `flow_stream`
+
+| Access       | Attributes                                        |
+|--------------|---------------------------------------------------|
+| Read Only    | name, {`status`}                                  |
+| 👉 Operate   | {`camera`}, {`mon_num`}                           |
+| 💡 Plan      | {`restricted`}, {`address`}, {`port`}             |
+| 🔧 Configure | controller, {`pin`}, {`loc_overlay`}, {`quality`} |
+
 ### `gate_arm`
 
 | Access       | Attributes                                         |

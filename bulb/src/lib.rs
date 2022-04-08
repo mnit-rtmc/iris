@@ -22,6 +22,7 @@ mod device;
 mod dms;
 mod error;
 mod fetch;
+mod flowstream;
 mod gatearm;
 mod gatearmarray;
 mod geoloc;

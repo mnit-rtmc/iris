@@ -86,6 +86,13 @@ FROM iris.dms d \
 LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
 WHERE d.name = $1";
 
+/// SQL query for one flow stream
+pub const FLOW_STREAM: &str = "\
+SELECT name, controller, pin, restricted, loc_overlay, quality, camera, \
+       mon_num, address, port, status \
+FROM iris.flow_stream \
+WHERE name = $1";
+
 /// SQL query for one gate arm
 pub const GATE_ARM: &str = "\
 SELECT name, ga_array, idx, controller, pin, notes, arm_state, fault \
