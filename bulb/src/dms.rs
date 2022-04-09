@@ -27,6 +27,7 @@ pub struct Dms {
     // full attributes
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
+    pub msg_current: Option<String>,
 }
 
 type DmsAnc = DeviceAnc<Dms>;
@@ -52,6 +53,11 @@ impl Dms {
               <span class='info'>{location}</span>\
             </div>"
         );
+        if let Some(msg_current) = &self.msg_current {
+            status.push_str("<div class='row center'><img src='/iris/img/");
+            status.push_str(msg_current);
+            status.push_str(".gif'/></div>");
+        }
         if config {
             status.push_str("<div class='row'>");
             status.push_str(&anc.controller_button());
