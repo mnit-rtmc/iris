@@ -32,7 +32,7 @@ authentication.
   - [X] Date / time formatting (RFC 3339)
   - [X] ETags for table versioning
   - [X] Check for Operate / Plan access levels
-  - [ ] Controller I/O types
+  - [X] Controller I/O types
 * bulb
   - [X] Resource type selector with card list
   - [X] Search filter
@@ -40,7 +40,6 @@ authentication.
   - [X] Maintenance object CRUD
   - [X] Feedback with "toast" popups
   - [X] Authentication and session expiration
-  - [ ] Tooltips
 
 ## Phase 4 — DMS control
 
@@ -53,6 +52,7 @@ authentication.
   - [ ] Send SSE for update notifications
   - [ ] Write full installation documentation
 * bulb
+  - [ ] Tooltips
   - [ ] UI for DMS viewing / control
   - [ ] Generate DMS previews and insert into img element using data URI
   - [ ] Connect to graft for SSE

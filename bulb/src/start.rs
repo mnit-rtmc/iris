@@ -154,7 +154,8 @@ async fn populate_list(res: Resource, search: String) {
     });
     let doc = Doc::get();
     let sb_list = doc.elem::<Element>("sb_list");
-    match res.fetch_list(&search).await {
+    let config = doc.input_bool("sb_config");
+    match res.fetch_list(&search, config).await {
         Ok(cards) => sb_list.set_inner_html(&cards),
         Err(Error::FetchResponseUnauthorized()) => show_login(),
         Err(e) => show_toast(&format!("View failed: {e}")),

@@ -314,41 +314,65 @@ impl Resource {
     }
 
     /// Fetch card list for a resource type
-    pub async fn fetch_list(self, search: &str) -> Result<String> {
+    pub async fn fetch_list(
+        self,
+        search: &str,
+        config: bool,
+    ) -> Result<String> {
         match self {
-            Self::Alarm => fetch_list::<Alarm>(self, search).await,
-            Self::Beacon => fetch_list::<Beacon>(self, search).await,
+            Self::Alarm => fetch_list::<Alarm>(self, search, config).await,
+            Self::Beacon => fetch_list::<Beacon>(self, search, config).await,
             Self::CabinetStyle => {
-                fetch_list::<CabinetStyle>(self, search).await
+                fetch_list::<CabinetStyle>(self, search, config).await
             }
-            Self::Camera => fetch_list::<Camera>(self, search).await,
-            Self::CommConfig => fetch_list::<CommConfig>(self, search).await,
-            Self::CommLink => fetch_list::<CommLink>(self, search).await,
-            Self::Controller => fetch_list::<Controller>(self, search).await,
-            Self::Detector => fetch_list::<Detector>(self, search).await,
-            Self::Dms => fetch_list::<Dms>(self, search).await,
-            Self::FlowStream => fetch_list::<FlowStream>(self, search).await,
-            Self::GateArm => fetch_list::<GateArm>(self, search).await,
+            Self::Camera => fetch_list::<Camera>(self, search, config).await,
+            Self::CommConfig => {
+                fetch_list::<CommConfig>(self, search, config).await
+            }
+            Self::CommLink => {
+                fetch_list::<CommLink>(self, search, config).await
+            }
+            Self::Controller => {
+                fetch_list::<Controller>(self, search, config).await
+            }
+            Self::Detector => {
+                fetch_list::<Detector>(self, search, config).await
+            }
+            Self::Dms => fetch_list::<Dms>(self, search, config).await,
+            Self::FlowStream => {
+                fetch_list::<FlowStream>(self, search, config).await
+            }
+            Self::GateArm => fetch_list::<GateArm>(self, search, config).await,
             Self::GateArmArray => {
-                fetch_list::<GateArmArray>(self, search).await
+                fetch_list::<GateArmArray>(self, search, config).await
             }
-            Self::Gps => fetch_list::<Gps>(self, search).await,
-            Self::LaneMarking => fetch_list::<LaneMarking>(self, search).await,
-            Self::LcsArray => fetch_list::<LcsArray>(self, search).await,
+            Self::Gps => fetch_list::<Gps>(self, search, config).await,
+            Self::LaneMarking => {
+                fetch_list::<LaneMarking>(self, search, config).await
+            }
+            Self::LcsArray => {
+                fetch_list::<LcsArray>(self, search, config).await
+            }
             Self::LcsIndication => {
-                fetch_list::<LcsIndication>(self, search).await
+                fetch_list::<LcsIndication>(self, search, config).await
             }
-            Self::Modem => fetch_list::<Modem>(self, search).await,
-            Self::Permission => fetch_list::<Permission>(self, search).await,
-            Self::RampMeter => fetch_list::<RampMeter>(self, search).await,
-            Self::Role => fetch_list::<Role>(self, search).await,
-            Self::TagReader => fetch_list::<TagReader>(self, search).await,
-            Self::User => fetch_list::<User>(self, search).await,
+            Self::Modem => fetch_list::<Modem>(self, search, config).await,
+            Self::Permission => {
+                fetch_list::<Permission>(self, search, config).await
+            }
+            Self::RampMeter => {
+                fetch_list::<RampMeter>(self, search, config).await
+            }
+            Self::Role => fetch_list::<Role>(self, search, config).await,
+            Self::TagReader => {
+                fetch_list::<TagReader>(self, search, config).await
+            }
+            Self::User => fetch_list::<User>(self, search, config).await,
             Self::VideoMonitor => {
-                fetch_list::<VideoMonitor>(self, search).await
+                fetch_list::<VideoMonitor>(self, search, config).await
             }
             Self::WeatherSensor => {
-                fetch_list::<WeatherSensor>(self, search).await
+                fetch_list::<WeatherSensor>(self, search, config).await
             }
             _ => Ok("".into()),
         }
@@ -572,20 +596,26 @@ impl Resource {
 }
 
 /// Fetch JSON array and build card list
-async fn fetch_list<C: Card>(res: Resource, search: &str) -> Result<String> {
+async fn fetch_list<C: Card>(
+    res: Resource,
+    search: &str,
+    config: bool,
+) -> Result<String> {
     let rname = res.rname();
     let json = fetch_get(&format!("/iris/api/{rname}")).await?;
     let search = Search::new(search);
     let mut html = String::new();
     html.push_str("<ul class='cards'>");
     let obs = json.into_serde::<Vec<C>>()?;
-    let next_name = C::next_name(&obs);
-    // the "Create" card has id "{rname}_" and next available name
-    html.push_str(&format!(
-        "<li id='{rname}_' name='{next_name}' class='card'>\
-            {CREATE_COMPACT}\
-        </li>"
-    ));
+    if config {
+        let next_name = C::next_name(&obs);
+        // the "Create" card has id "{rname}_" and next available name
+        html.push_str(&format!(
+            "<li id='{rname}_' name='{next_name}' class='card'>\
+                {CREATE_COMPACT}\
+            </li>"
+        ));
+    }
     // Use default value for ancillary data lookup
     let pri = C::default();
     let anc = fetch_ancillary(View::Search, &pri).await?;
