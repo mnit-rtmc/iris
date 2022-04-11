@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,6 +60,9 @@ public class DetectorStatusProp extends DetectorProp {
 		}
 		return 0;
 	}
+
+	/** Previous logged Message ID */
+	private String logged_id;
 
 	/** Received Message ID */
 	private String received_id;
@@ -139,13 +142,17 @@ public class DetectorStatusProp extends DetectorProp {
 
 	/** Log vehicle event */
 	public void logEvent(Operation op) {
-		ControllerImpl ctrl = op.getController();
-		DetectorImpl det = lookupDet(ctrl);
-		if (det != null && isValidStamp())
-			det.logVehicle(duration, headway, stamp, 0, 0);
-		else
-			ctrl.logGap();
-		ctrl.completeOperation(op.getId(), true);
+		// Do not log a DS message more than once
+		if (!received_id.equals(logged_id)) {
+			logged_id = received_id;
+			ControllerImpl ctrl = op.getController();
+			DetectorImpl det = lookupDet(ctrl);
+			if (det != null && isValidStamp())
+				det.logVehicle(duration, headway, stamp, 0, 0);
+			else
+				ctrl.logGap();
+			ctrl.completeOperation(op.getId(), true);
+		}
 	}
 
 	/** Is time stamp valid? */
