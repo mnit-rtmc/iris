@@ -1,5 +1,10 @@
 # IRIS 5.x Release Notes
 
+5.32.0 (11 Apr 2022)
+ - Added all controller IO cards to web UI
+ - Added "Config" toggle button to web UI
+ - Added `weather_sensor_event_purge_days` system attribute
+
 5.31.0 (4 Apr 2022)
  - Added support for NDOR gate arm protocol
  - Added `[standby]` DMS action
