@@ -196,7 +196,7 @@ impl Doc {
 
     /// Get and parse an `input` element value
     pub fn input_parse<T: FromStr>(&self, id: &str) -> Option<T> {
-        self.elem::<HtmlInputElement>(id).value().parse().ok()
+        self.elem::<HtmlInputElement>(id).value().trim().parse().ok()
     }
 
     /// Get and parse an optional `input` element string
@@ -211,7 +211,7 @@ impl Doc {
 
     /// Get and parse a `textarea` element value
     pub fn text_area_parse<T: FromStr>(&self, id: &str) -> Option<T> {
-        self.elem::<HtmlTextAreaElement>(id).value().parse().ok()
+        self.elem::<HtmlTextAreaElement>(id).value().trim().parse().ok()
     }
 }
 

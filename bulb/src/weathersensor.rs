@@ -37,28 +37,28 @@ pub struct AirTemp {
 /// Weather Sensor Data
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct WeatherData {
+    visibility_situation: Option<String>,
+    visibility: Option<u32>,
+    relative_humidity: Option<u32>,
     temperature_sensor: Option<Vec<AirTemp>>,
-    wet_bulb_temp: Option<f32>,
     dew_point_temp: Option<f32>,
+    wet_bulb_temp: Option<f32>,
     /// Minimum air temp in last 24 hours (first sensor)
     min_air_temp: Option<f32>,
     /// Maximum air temp in last 24 hours (first sensor)
     max_air_temp: Option<f32>,
-    visibility_situation: Option<String>,
-    visibility: Option<u32>,
-    relative_humidity: Option<u32>,
-    avg_wind_dir: Option<u32>,
-    avg_wind_speed: Option<f32>,
-    spot_wind_dir: Option<u32>,
-    spot_wind_speed: Option<f32>,
-    gust_wind_dir: Option<u32>,
-    gust_wind_speed: Option<f32>,
     precip_situation: Option<String>,
     precip_1_hour: Option<f32>,
     precip_3_hours: Option<f32>,
     precip_6_hours: Option<f32>,
     precip_12_hours: Option<f32>,
     precip_24_hours: Option<f32>,
+    avg_wind_dir: Option<u32>,
+    avg_wind_speed: Option<f32>,
+    spot_wind_dir: Option<u32>,
+    spot_wind_speed: Option<f32>,
+    gust_wind_dir: Option<u32>,
+    gust_wind_speed: Option<f32>,
 }
 
 /// Weather Sensor
