@@ -53,6 +53,7 @@ pub struct WeatherData {
     spot_wind_speed: Option<f32>,
     gust_wind_dir: Option<u32>,
     gust_wind_speed: Option<f32>,
+    precip_situation: Option<String>,
     precip_1_hour: Option<f32>,
     precip_3_hours: Option<f32>,
     precip_6_hours: Option<f32>,
@@ -136,6 +137,26 @@ fn temp_format(temp: f32) -> String {
     format!("<span class='info'>{temp:.1}</span>")
 }
 
+/// Get precipitation situation string (from NTCIP 1204)
+fn precip_situation(situation: &str) -> &'static str {
+    match situation {
+        "noPrecipitation" => "☀️ No Precip",
+        "unidentifiedSlight" => "🌧️ Slight precip",
+        "unidentifiedModerate" => "🌧️ Moderate precip",
+        "unidentifiedHeavy" => "🌧️ Heavy precip",
+        "snowSlight" => "🌨️ Slight snow",
+        "snowModerate" => "🌨️ Moderate snow",
+        "snowHeavy" => "🌨️ Heavy snow",
+        "rainSlight" => "🌧️ Slight rain",
+        "rainModerate" => "🌧️ Moderate rain",
+        "rainHeavy" => "🌧️ Heavy rain",
+        "frozenPrecipitationSlight" => "🧊 Slight sleet",
+        "frozenPrecipitationModerate" => "🧊 Moderate sleet",
+        "frozenPrecipitationHeavy" => "🧊 Heavy sleet",
+        _ => "🌧️ Precip",
+    }
+}
+
 /// Format precipitation quantity
 fn precip_format(precip: f32) -> String {
     let precip = (f64::from(precip) * mm).to::<RainUnit>().quantity;
@@ -171,7 +192,8 @@ impl WeatherData {
         {
             html.push_str(&self.temp_html());
         }
-        if self.precip_1_hour.is_some()
+        if self.precip_situation.is_some()
+            || self.precip_1_hour.is_some()
             || self.precip_3_hours.is_some()
             || self.precip_6_hours.is_some()
             || self.precip_12_hours.is_some()
@@ -259,9 +281,11 @@ impl WeatherData {
     /// Get precipitation data as HTML
     fn precipitation_html(&self) -> String {
         let mut html = String::new();
-        html.push_str(
-            "<table><tr><th>🌧️ Precip<th>1h<th>3h<th>6h<th>12h<th>24h",
-        );
+        html.push_str("<table><tr><th>");
+        html.push_str(precip_situation(
+            &self.precip_situation.as_deref().unwrap_or("unknown"),
+        ));
+        html.push_str("<th>1h<th>3h<th>6h<th>12h<th>24h");
         html.push_str(&format!("<tr><td>Total ({})<td>", RainUnit::LABEL));
         if let Some(precip) = self.precip_1_hour {
             html.push_str(&precip_format(precip));
