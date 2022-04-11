@@ -31,7 +31,7 @@ type SpeedUnit = mag::time::h;
 /// Air temp data
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct AirTemp {
-    air_temp: f32,
+    air_temp: Option<f32>,
 }
 
 /// Weather Sensor Data
@@ -222,14 +222,16 @@ impl WeatherData {
         html.push_str(TempUnit::LABEL);
         html.push_str("<td>");
         if let Some(temperature_sensor) = &self.temperature_sensor {
-            if !temperature_sensor.is_empty() {
-                let n_temps = temperature_sensor.len() as f32;
-                let temp = temperature_sensor
+            let n_temps = temperature_sensor
+                .iter()
+                .filter(|at| at.air_temp.is_some())
+                .count();
+            if n_temps > 0 {
+                let total = temperature_sensor
                     .iter()
-                    .map(|at| at.air_temp)
-                    .sum::<f32>()
-                    / n_temps;
-                html.push_str(&temp_format(temp));
+                    .filter_map(|at| at.air_temp)
+                    .sum::<f32>();
+                html.push_str(&temp_format(total / n_temps as f32));
             }
         }
         html.push_str("<td>");
