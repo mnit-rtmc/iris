@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2020  Minnesota Department of Transportation
+ * Copyright (C) 2019-2022  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -107,7 +107,9 @@ public class WindSensorValues {
 
 	/** Create wind sensor values */
 	public WindSensorValues() {
-		// FIXME: add support for sensor table (v2?)
+		// FIXME: these are deprecated in v3,
+		//        we should try wind sensor table first,
+		//        and only use these as fallback
 		wind_sensor_height.setInteger(HEIGHT_ERROR_MISSING);
 		avg_wind_dir.setInteger(WIND_DIR_ERROR_MISSING);
 		avg_wind_speed.setInteger(WIND_SPEED_ERROR_MISSING);
