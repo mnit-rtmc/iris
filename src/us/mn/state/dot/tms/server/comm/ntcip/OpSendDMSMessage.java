@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -340,15 +340,15 @@ public class OpSendDMSMessage extends OpDMS {
 			// NOTE: If dmsMessageBeacon and dmsMessagePixelService
 			//       objects exist, they must be set, since they are
 			//       used when calculating dmsMessageCRC
-			if (dms.getSignDetail().getBeaconActivationFlag())
+			if (supportsBeaconActivation())
 				mess.add(beacon);
-			if (dms.getSignDetail().getPixelServiceFlag())
+			if (supportsPixelService())
 				mess.add(srv);
 			mess.add(prior);
 			logStore(ms);
-			if (dms.getSignDetail().getBeaconActivationFlag())
+			if (supportsBeaconActivation())
 				logStore(beacon);
-			if (dms.getSignDetail().getPixelServiceFlag())
+			if (supportsPixelService())
 				logStore(srv);
 			logStore(prior);
 			mess.storeProps();

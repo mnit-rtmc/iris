@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -176,7 +176,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(ms);
-			if (dms.getSignDetail().getBeaconActivationFlag())
+			if (supportsBeaconActivation())
 				mess.add(beacon);
 			else
 				beacon.setInteger(0);
@@ -185,7 +185,7 @@ public class OpQueryDMSMessage extends OpDMS {
 			mess.add(time);
 			mess.queryProps();
 			logQuery(ms);
-			if (dms.getSignDetail().getBeaconActivationFlag())
+			if (supportsBeaconActivation())
 				logQuery(beacon);
 			logQuery(prior);
 			logQuery(status);
