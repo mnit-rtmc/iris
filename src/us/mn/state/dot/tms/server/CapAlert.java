@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  * Copyright (C) 2020  SRF Consulting Group, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -61,7 +61,8 @@ public class CapAlert implements Storable {
 		if (BaseObjectImpl.store != null && age > 0) {
 			BaseObjectImpl.store.update("DELETE FROM " + TABLE +
 				" WHERE receive_date < now() - '" + age +
-				" days'::interval;");
+				" days'::interval AND identifier NOT IN " +
+				"(SELECT alert FROM cap.alert_info);");
 		}
 	}
 

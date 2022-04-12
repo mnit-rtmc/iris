@@ -54,7 +54,6 @@ public class EventPurgeJob extends Job {
 		BeaconEvent.purgeRecords();
 		CameraSwitchEvent.purgeRecords();
 		CameraVideoEvent.purgeRecords();
-		CapAlert.purgeRecords();
 		ClientEvent.purgeRecords();
 		CommEvent.purgeRecords();
 		DetAutoFailEvent.purgeRecords();
@@ -65,5 +64,6 @@ public class EventPurgeJob extends Job {
 		TagReadEvent.purgeRecords();
 		TravelTimeEvent.purgeRecords();
 		WeatherSensorEvent.purgeRecords();
+		CapAlert.purgeRecords();
 	}
 }
