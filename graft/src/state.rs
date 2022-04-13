@@ -111,7 +111,9 @@ impl State {
     /// Get permission by ID
     pub fn permission(&self, id: i32) -> Result<Permission> {
         let mut client = self.pool.get()?;
-        let row = client.query_one(PERMISSION, &[&id])?;
+        let row = client
+            .query_one(PERMISSION, &[&id])
+            .map_err(|_e| SonarError::NotFound)?;
         Ok(Permission::from_row(row))
     }
 
@@ -139,7 +141,7 @@ impl State {
         let mut transaction = client.transaction()?;
         let row = transaction
             .query_one(PERMISSION, &[&id])
-            .map_err(|_e| SonarError::InvalidName)?;
+            .map_err(|_e| SonarError::NotFound)?;
         let Permission {
             id,
             mut role,
@@ -219,7 +221,9 @@ impl State {
     ) -> Result<String> {
         let mut client = self.pool.get()?;
         let query = format!("SELECT row_to_json(r)::text FROM ({sql}) r");
-        let row = client.query_one(&query, &[&pkey])?;
+        let row = client
+            .query_one(&query, &[&pkey])
+            .map_err(|_e| SonarError::NotFound)?;
         Ok(row.get::<usize, String>(0))
     }
 
@@ -232,7 +236,9 @@ impl State {
         let mut client = self.pool.get()?;
         let query =
             format!("SELECT COALESCE(json_agg(r), '[]')::text FROM ({sql}) r");
-        let row = client.query_one(&query, &[&pkey])?;
+        let row = client
+            .query_one(&query, &[&pkey])
+            .map_err(|_e| SonarError::NotFound)?;
         Ok(row.get::<usize, String>(0))
     }
 }
