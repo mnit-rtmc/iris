@@ -25,21 +25,10 @@ The traffic data is displayed on a web-based segment map, served by Earthwyrm.
 The graft service handles requests through Sonar, using session-based
 authentication.
 
-## Phase 3 — Maintenance Administration (in progress)
+## Phase 3 — Maintenance Administration (Complete)
 
-* graft
-  - [X] Add routes for maintenance resources
-  - [X] Date / time formatting (RFC 3339)
-  - [X] ETags for table versioning
-  - [X] Check for Operate / Plan access levels
-  - [X] Controller I/O types
-* bulb
-  - [X] Resource type selector with card list
-  - [X] Search filter
-  - [X] Html escaping
-  - [X] Maintenance object CRUD
-  - [X] Feedback with "toast" popups
-  - [X] Authentication and session expiration
+Administration of controllers, comm links and all controller IO objects is
+implemented.
 
 ## Phase 4 — DMS control
 
