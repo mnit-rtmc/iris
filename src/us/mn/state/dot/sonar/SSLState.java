@@ -21,9 +21,11 @@ import java.util.Properties;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
+import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sched.TimeSteward;
 
 /**
  * The SSL state manages buffers and handshaking for one SSL connection.
@@ -140,32 +142,39 @@ public class SSLState {
 	 * This may only be called on the Task Processor thread. */
 	public boolean doRead() throws SSLException {
 		doUnwrap();
-		while (doHandshake());
+		// Iterate up to 10 times (or 1.0 sec) for handshaking
+		for (int i = 0; i < 10; i++) {
+			HandshakeStatus hs = doHandshake();
+			if (HandshakeStatus.NOT_HANDSHAKING == hs)
+				break;
+			if (HandshakeStatus.NEED_UNWRAP == hs)
+				TimeSteward.sleep_well(100);
+		}
 		return app_in.position() > 0;
 	}
 
 	/** Do something to progress handshaking */
-	private boolean doHandshake() throws SSLException {
-		SSLEngineResult.HandshakeStatus hs = engine.getHandshakeStatus();
+	private HandshakeStatus doHandshake() throws SSLException {
+		HandshakeStatus hs = engine.getHandshakeStatus();
 		debugHandshake(hs);
 		switch (hs) {
 		case NEED_TASK:
 			doTask();
-			return true;
+			return hs;
 		case NEED_WRAP:
 			doWrap();
-			return true;
+			return hs;
 		case NEED_UNWRAP:
 			doUnwrap();
-			return true;
+			return hs;
 		default:
-			return false;
+			return hs;
 		}
 	}
 
 	/** Debug a TLS handshake */
-	private void debugHandshake(SSLEngineResult.HandshakeStatus hs) {
-		if (hs != SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING) {
+	private void debugHandshake(HandshakeStatus hs) {
+		if (hs != HandshakeStatus.NOT_HANDSHAKING) {
 			if (DEBUG_TLS.isOpen()) {
 				DEBUG_TLS.log("TLS handshake " + hs + " for " +
 					conduit.getName());
@@ -224,7 +233,7 @@ public class SSLState {
 	}
 
 	/** Unwrap SSL data into appcliation buffer */
-	private boolean doUnwrap() throws SSLException {
+	private void doUnwrap() throws SSLException {
 		synchronized (net_in) {
 			net_in.flip();
 			try {
@@ -235,7 +244,6 @@ public class SSLState {
 					ssl_in.flip();
 					app_in.put(ssl_in);
 				}
-				return net_in.remaining() < n_rem;
 			}
 			finally {
 				net_in.compact();
