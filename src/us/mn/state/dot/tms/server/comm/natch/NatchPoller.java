@@ -146,7 +146,7 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 		final Operation ds = collectors.get(c);
 		if (ds == null || ds.isDone()) {
 			Operation op = new Operation("detector.op.status", c,
-				new OpDetectorStatus(counter));
+				new OpDetectorStatus());
 			op.setPriority(PriorityLevel.DEVICE_DATA);
 			collectors.put(c, op);
 			addOp(op);

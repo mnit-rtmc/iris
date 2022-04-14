@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.natch;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayDeque;
 import us.mn.state.dot.tms.server.comm.Operation;
 
 /**
@@ -25,12 +26,16 @@ import us.mn.state.dot.tms.server.comm.Operation;
  */
 public class OpDetectorStatus extends OpNatch {
 
-	/** Detector status property */
-	private final DetectorStatusProp prop;
+	/** Detector status properties (FIFO) */
+	private final ArrayDeque<DetectorStatusProp> props;
+
+	/** Already logged message IDs */
+	private final ArrayDeque<String> logged;
 
 	/** Create a new step to listen for detector status */
-	public OpDetectorStatus(Counter c) {
-		prop = new DetectorStatusProp(c);
+	public OpDetectorStatus() {
+		props = new ArrayDeque<DetectorStatusProp>();
+		logged = new ArrayDeque<String>();
 		setPolling(false);
 	}
 
@@ -46,7 +51,13 @@ public class OpDetectorStatus extends OpNatch {
 	 * For `ds` messages, this serves as an ACK */
 	@Override
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
-		prop.encodeQuery(op, tx_buf);
+		// ACK all `ds` messages received since last time (FIFO)
+		while (!props.isEmpty()) {
+			// Don't remove until successfully encoded
+			DetectorStatusProp prop = props.getFirst();
+			prop.encodeQuery(op, tx_buf);
+			props.removeFirst();
+		}
 		setPolling(false);
 	}
 
@@ -59,8 +70,17 @@ public class OpDetectorStatus extends OpNatch {
 	/** Parse data received from controller */
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
+		DetectorStatusProp prop = new DetectorStatusProp(new Counter());
 		prop.decodeQuery(op, rx_buf);
-		prop.logEvent(op);
+		props.addLast(prop);
+		String received = prop.getReceivedId();
+		// Do not log a DS message more than once
+		if (!logged.contains(received)) {
+			prop.logEvent(op);
+			logged.addLast(received);
+			if (logged.size() > 24)
+				logged.removeFirst();
+		}
 		setPolling(true);
 	}
 }
