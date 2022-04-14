@@ -103,16 +103,16 @@ The detector status message works differently from the others; there are no
 store/query polls.  Instead, messages are initiated by the controller, and IRIS
 responds with an ACK or NAK.
 
-A buffer of `ds` messages contains vehicle events waiting to be sent to IRIS.
-It is fixed-size, with *head* and *tail* pointers.  *Head* is incremented when a
-new message is added, and *tail* is incremented when the oldest message is
-deleted.
+Vehicle events waiting to be sent to IRIS are stored in a buffer of `ds`
+messages.  It is fixed-size, with *head* and *tail* pointers.  *Head* is
+incremented when a new message is added, and *tail* is incremented when the
+oldest message is deleted.
 
 A one second *buffer timer* is used to delay sending `ds` messages to IRIS.
-After it expires, up to 16 buffered messages are sent, in order from oldest to
+After it expires, up to 24 buffered messages are sent, in order from oldest to
 newest.
 
-When a vehicle leaves a detector, the __message ID__ is incremented as a 16-bit
+When a vehicle leaves a detector, the __message ID__ is incremented as a 4-digit
 hex value.  A `ds` message is added to the buffer, and the *buffer timer* is
 reset.
 
