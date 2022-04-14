@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2021  Minnesota Department of Transportation
+ * Copyright (C) 2006-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,17 +118,20 @@ public class VehicleEventLog {
 	/** Sensor ID */
 	private final String sensor_id;
 
-	/** Count of vehicles in current sampling period */
-	private int ev_vehicles = 0;
+	/** Time stamp of binning period */
+	private long bin_stamp = 0;
 
-	/** Total vehicle duration (milliseconds) in current sampling period */
-	private int ev_duration = 0;
+	/** Count of vehicles in binning period */
+	private int bin_vehicles = 0;
 
-	/** Count of sampled speed events in current sampling period */
-	private int ev_n_speed = 0;
+	/** Total vehicle duration (milliseconds) in binning period */
+	private int bin_duration = 0;
 
-	/** Sum of all vehicle speeds (mph) in current sampling period */
-	private int ev_speed = 0;
+	/** Count of sampled speed events in binning period */
+	private int bin_n_speed = 0;
+
+	/** Sum of all vehicle speeds (mph) in binning period */
+	private int bin_speed = 0;
 
 	/** Create a new vehicle event log */
 	public VehicleEventLog(String sid) {
@@ -140,11 +143,13 @@ public class VehicleEventLog {
 	public void logVehicle(final int duration, final int headway,
 		final long stamp, final int speed, final int length)
 	{
-		ev_vehicles++;
-		ev_duration += duration;
-		if (speed > 0) {
-			ev_n_speed++;
-			ev_speed += speed;
+		if (stamp >= bin_stamp) {
+			bin_vehicles++;
+			bin_duration += duration;
+			if (speed > 0) {
+				bin_n_speed++;
+				bin_speed += speed;
+			}
 		}
 		if (isArchiveEnabled()) {
 			// Check if clock went backwards
@@ -208,28 +213,30 @@ public class VehicleEventLog {
 	private transient long gap = 1;
 
 	/** Clear binned counts */
-	public void clear() {
-		ev_vehicles = 0;
-		ev_duration = 0;
-		ev_n_speed = 0;
-		ev_speed = 0;
+	public void clear_bin(long stamp) {
+		bin_stamp = stamp;
+		bin_vehicles = 0;
+		bin_duration = 0;
+		bin_n_speed = 0;
+		bin_speed = 0;
 	}
 
 	/** Get the vehicle count for a given period */
 	public PeriodicSample getVehCountSam(long stamp, int per_sec) {
-		return new PeriodicSample(stamp, per_sec, ev_vehicles);
+		return new PeriodicSample(stamp, per_sec, bin_vehicles);
 	}
 
 	/** Get the occupancy for a given period */
 	public OccupancySample getOccupancySam(long stamp, int per_sec) {
 		int per_ms = per_sec * 1000;
-		return new OccupancySample(stamp, per_sec, ev_duration, per_ms);
+		return new OccupancySample(stamp, per_sec, bin_duration,
+			per_ms);
 	}
 
 	/** Get the average vehicle speed for a given period */
 	public PeriodicSample getSpeedSam(long stamp, int per_sec) {
-		if (ev_n_speed > 0 && ev_speed > 0) {
-			int s = ev_speed / ev_n_speed;
+		if (bin_n_speed > 0 && bin_speed > 0) {
+			int s = bin_speed / bin_n_speed;
 			return new PeriodicSample(stamp, per_sec, s);
 		}
 		return null;
