@@ -99,24 +99,29 @@ Parameter | Description
 5 †       | Headway (ms)
 6 †       | Time (`HH:MM:SS`, local 24-hour)
 
-The DS message works differently from the others; there are no store/query
-polls.  Instead, messages are initiated by the controller, and IRIS responds
-with an ACK or NAK.
+The detector status message works differently from the others; there are no
+store/query polls.  Instead, messages are initiated by the controller, and IRIS
+responds with an ACK or NAK.
 
-When a vehicle leaves a detector, a detector status messages is added to a
-fixed-size ring buffer, with head and tail pointers.  The __message ID__ is
-incremented as a 16-bit hex value.
+A buffer of `ds` messages contains vehicle events waiting to be sent to IRIS.
+It is fixed-size, with *head* and *tail* pointers.  *Head* is incremented when a
+new message is added, and *tail* is incremented when the oldest message is
+deleted.
 
-When this happens, the oldest message is sent by the controller, unless waiting
-for an ACK from a previous message.
+A one second *buffer timer* is used to delay sending `ds` messages to IRIS.
+After it expires, up to 16 buffered messages are sent, in order from oldest to
+newest.
 
-When a poll is received, the __message ID__ is compared with the last sent
-status message.  If it matches, the poll is an ACK, otherwise it is a NAK.
+When a vehicle leaves a detector, the __message ID__ is incremented as a 16-bit
+hex value.  A `ds` message is added to the buffer, and the *buffer timer* is
+reset.
 
-On ACK, the tail pointer is incremented, *deleting* the message.  If there are
-more messages in the ring buffer, the oldest one is then sent.
+When a `DS` is received from IRIS, the __message ID__ is compared with the
+oldest `ds` message in the buffer.  If it matches, the poll is an ACK, otherwise
+it is a NAK.  In either case, the *buffer timer* is reset.
 
-On NAK, the oldest status message is sent again.
+- On ACK, the oldest message is *deleted* by incrementing the *tail* pointer.
+- On NAK, the message is ignored.
 
 See [vehicle logging] for details on __duration__, __headway__ and __time__.
 

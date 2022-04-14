@@ -61,8 +61,28 @@ public class DetectorStatusProp extends DetectorProp {
 		return 0;
 	}
 
-	/** Previous logged Message ID */
-	private String logged_id;
+	/** Previous logged Message IDs */
+	private final String[] logged_ids = new String[16];
+
+	/** Check if the received ID is already logged */
+	private boolean isLogged() {
+		for (int i = 0; i < logged_ids.length; i++) {
+			if (received_id.equals(logged_ids[i]))
+				return true;
+		}
+		return false;
+	}
+
+	/** Index of next logged ID */
+	private int logged_next = 0;
+
+	/** Log the received message ID */
+	private void logReceived() {
+		logged_ids[logged_next] = received_id;
+		logged_next++;
+		if (logged_next >= logged_ids.length)
+			logged_next = 0;
+	}
 
 	/** Received Message ID */
 	private String received_id;
@@ -90,6 +110,8 @@ public class DetectorStatusProp extends DetectorProp {
 	public DetectorStatusProp(Counter c) {
 		super(c, -1);
 		received_id = message_id;
+		for (int i = 0; i < logged_ids.length; i++)
+			logged_ids[i] = "";
 	}
 
 	/** Check received message ID */
@@ -143,8 +165,8 @@ public class DetectorStatusProp extends DetectorProp {
 	/** Log vehicle event */
 	public void logEvent(Operation op) {
 		// Do not log a DS message more than once
-		if (!received_id.equals(logged_id)) {
-			logged_id = received_id;
+		if (!isLogged()) {
+			logReceived();
 			ControllerImpl ctrl = op.getController();
 			DetectorImpl det = lookupDet(ctrl);
 			if (det != null && isValidStamp())
