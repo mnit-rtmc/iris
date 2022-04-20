@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2016  SRF Consulting Group
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,12 +27,12 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 
 /**
- * Operation to query the location of a DMS.
+ * Operation to query the GPS location.
  *
  * @author John L. Stanley - SRF Consulting
  * @author Douglas Lau
  */
-public class OpQueryGpsLocationNtcip extends OpNtcip {
+public class OpQueryGpsLocation extends OpNtcip {
 
 	/** Latitude to indicate no GPS lock */
 	static private final int NO_GPS_LOCK_LAT = 90000001;
@@ -52,8 +52,8 @@ public class OpQueryGpsLocationNtcip extends OpNtcip {
 	/** GPS longitude */
 	private final ASN1Integer lon = MIB1204.essLongitude.makeInt();
 
-	/** Create a new DMS query configuration object */
-	public OpQueryGpsLocationNtcip(GpsImpl g, GeoLocImpl l) {
+	/** Create a new query GPS location operation */
+	public OpQueryGpsLocation(GpsImpl g, GeoLocImpl l) {
 		super(PriorityLevel.DEVICE_DATA, g);
 		gps = g;
 		loc = l;

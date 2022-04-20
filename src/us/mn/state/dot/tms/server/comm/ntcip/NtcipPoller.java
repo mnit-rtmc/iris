@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  * Copyright (C) 2017-2021  Iteris Inc.
  *
@@ -150,7 +150,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 		case QUERY_GPS_LOCATION:
 			GeoLoc loc = GpsHelper.lookupDeviceLoc(gps);
 			if (loc instanceof GeoLocImpl) {
-				addOp(new OpQueryGpsLocationNtcip(gps,
+				addOp(new OpQueryGpsLocation(gps,
 					(GeoLocImpl) loc));
 			}
 			break;
