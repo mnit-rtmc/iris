@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017 Iteris Inc.
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,16 +61,20 @@ public class OpQueryEssStatus extends OpEss {
 	/** Phase to query atmospheric values */
 	protected class QueryAtmospheric extends Phase {
 
-		/** Query */
+		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(ess_rec.atmospheric_values.atmospheric_pressure);
+			mess.add(ess_rec.atmospheric_values
+				.atmospheric_pressure);
 			mess.add(ess_rec.atmospheric_values.visibility);
-			mess.add(ess_rec.atmospheric_values.visibility_situation);
+			mess.add(ess_rec.atmospheric_values
+				.visibility_situation);
 			mess.queryProps();
-			logQuery(ess_rec.atmospheric_values.atmospheric_pressure);
+			logQuery(ess_rec.atmospheric_values
+				.atmospheric_pressure);
 			logQuery(ess_rec.atmospheric_values.visibility);
-			logQuery(ess_rec.atmospheric_values.visibility_situation);
+			logQuery(ess_rec.atmospheric_values
+				.visibility_situation);
 			return new QueryWind();
 		}
 	}
@@ -78,7 +82,7 @@ public class OpQueryEssStatus extends OpEss {
 	/** Phase to query wind values */
 	protected class QueryWind extends Phase {
 
-		/** Query */
+		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(ess_rec.wind_values.avg_wind_dir);
@@ -101,7 +105,7 @@ public class OpQueryEssStatus extends OpEss {
 	/** Phase to query the temperature sensors and other data */
 	protected class QueryTemperatureSensors extends Phase {
 
-		/** Query */
+		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(ts_table.num_temp_sensors);
@@ -115,30 +119,32 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(ts_table.dew_point_temp.node);
 			logQuery(ts_table.max_air_temp.node);
 			logQuery(ts_table.min_air_temp.node);
-			return new QueryTemperatureTable();
+			return ts_table.isDone()
+			      ? new QueryPrecipitation()
+			      : new QueryTemperatureTable();
 		}
 	}
 
 	/** Phase to query all rows in temperature table */
 	protected class QueryTemperatureTable extends Phase {
 
-		/** Query */
+		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (ts_table.isDone())
-				return new QueryPrecipitation();
 			TemperatureSensorsTable.Row tr = ts_table.addRow();
 			mess.add(tr.air_temp.node);
 			mess.queryProps();
 			logQuery(tr.air_temp.node);
-			return this;
+			return ts_table.isDone()
+			      ? new QueryPrecipitation()
+			      : this;
 		}
 	}
 
 	/** Phase to query precipitation values */
 	protected class QueryPrecipitation extends Phase {
 
-		/** Query */
+		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(ess_rec.precip_values.relative_humidity);
@@ -165,13 +171,15 @@ public class OpQueryEssStatus extends OpEss {
 	/** Phase to query pavement values */
 	protected class QueryPavement extends Phase {
 
-		/** Query */
+		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(ps_table.num_sensors);
 			mess.queryProps();
 			logQuery(ps_table.num_sensors);
-			return new QueryPavementTable();
+			return ps_table.isDone()
+			      ? new QuerySubSurface()
+			      : new QueryPavementTable();
 		}
 	}
 
@@ -181,8 +189,6 @@ public class OpQueryEssStatus extends OpEss {
 		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (ps_table.isDone())
-				return new QuerySubSurface();
 			PavementSensorsTable.Row pr = ps_table.addRow();
 			mess.add(pr.surface_status);
 			mess.add(pr.surface_temp.node);
@@ -201,31 +207,33 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(pr.surface_water_depth);
 			logQuery(pr.salinity);
 			logQuery(pr.black_ice_signal);
-			return this;
+			return ps_table.isDone()
+			      ? new QuerySubSurface()
+			      : this;
 		}
 	}
 
 	/** Phase to query sub-surface values */
 	protected class QuerySubSurface extends Phase {
 
-		/** Query */
+		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(ss_table.num_sensors);
 			mess.queryProps();
 			logQuery(ss_table.num_sensors);
-			return new QuerySubSurfaceTable();
+			return ss_table.isDone()
+			      ? null
+			      : new QuerySubSurfaceTable();
 		}
 	}
 
 	/** Phase to query all rows in sub-surface table */
 	protected class QuerySubSurfaceTable extends Phase {
 
-		/** Query */
+		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (ss_table.isDone())
-				return null;
 			SubSurfaceSensorsTable.Row sr = ss_table.addRow();
 			mess.add(sr.temp.node);
 			mess.add(sr.moisture);
@@ -234,7 +242,7 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(sr.temp.node);
 			logQuery(sr.moisture);
 			logQuery(sr.sensor_error);
-			return this;
+			return ss_table.isDone() ? null : this;
 		}
 	}
 
