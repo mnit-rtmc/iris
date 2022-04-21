@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssRec;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.TemperatureSensorsTable;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1204.WindSensorsTable;
 
 /**
  * Operation to query the status of a weather sensor.
@@ -34,6 +35,9 @@ public class OpQueryEssStatus extends OpEss {
 
 	/** Record of values read from the controller */
 	private final EssRec ess_rec = new EssRec();
+
+	/** Wind sensors table */
+	private final WindSensorsTable ws_table;
 
 	/** Temperature sensors table */
 	private final TemperatureSensorsTable ts_table;
@@ -47,6 +51,7 @@ public class OpQueryEssStatus extends OpEss {
 	/** Create new query ESS status operation */
 	public OpQueryEssStatus(WeatherSensorImpl ws) {
 		super(PriorityLevel.DEVICE_DATA, ws);
+		ws_table = ess_rec.ws_table;
 		ts_table = ess_rec.ts_table;
 		ps_table = ess_rec.ps_table;
 		ss_table = ess_rec.ss_table;
@@ -85,19 +90,19 @@ public class OpQueryEssStatus extends OpEss {
 		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(ess_rec.wind_values.avg_wind_dir);
-			mess.add(ess_rec.wind_values.avg_wind_speed);
-			mess.add(ess_rec.wind_values.spot_wind_dir);
-			mess.add(ess_rec.wind_values.spot_wind_speed);
-			mess.add(ess_rec.wind_values.gust_wind_dir);
-			mess.add(ess_rec.wind_values.gust_wind_speed);
+			mess.add(ws_table.avg_wind_dir.node);
+			mess.add(ws_table.avg_wind_speed.node);
+			mess.add(ws_table.spot_wind_dir.node);
+			mess.add(ws_table.spot_wind_speed.node);
+			mess.add(ws_table.gust_wind_dir.node);
+			mess.add(ws_table.gust_wind_speed.node);
 			mess.queryProps();
-			logQuery(ess_rec.wind_values.avg_wind_dir);
-			logQuery(ess_rec.wind_values.avg_wind_speed);
-			logQuery(ess_rec.wind_values.spot_wind_dir);
-			logQuery(ess_rec.wind_values.spot_wind_speed);
-			logQuery(ess_rec.wind_values.gust_wind_dir);
-			logQuery(ess_rec.wind_values.gust_wind_speed);
+			logQuery(ws_table.avg_wind_dir.node);
+			logQuery(ws_table.avg_wind_speed.node);
+			logQuery(ws_table.spot_wind_dir.node);
+			logQuery(ws_table.spot_wind_speed.node);
+			logQuery(ws_table.gust_wind_dir.node);
+			logQuery(ws_table.gust_wind_speed.node);
 			return new QueryTemperatureSensors();
 		}
 	}

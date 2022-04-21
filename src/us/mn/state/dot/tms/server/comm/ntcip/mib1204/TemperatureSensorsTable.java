@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017  Iteris Inc.
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,6 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 import java.util.ArrayList;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-import us.mn.state.dot.tms.units.Distance;
-import us.mn.state.dot.tms.utils.Json;
-
-import static us.mn.state.dot.tms.units.Distance.Units.METERS;
 
 /**
  * Temperature sensors data table, where each table row contains data read from
@@ -32,72 +28,45 @@ import static us.mn.state.dot.tms.units.Distance.Units.METERS;
  */
 public class TemperatureSensorsTable {
 
-	/** A height of 1001 is an error condition or missing value */
-	static private final int HEIGHT_ERROR_MISSING = 1001;
-
-	/** Convert height to Distance.
-	 * @param h Height in meters with 1001 indicating an error or missing
-	 *          value.
-	 * @return Height distance or null for missing */
-	static private Distance convertHeight(ASN1Integer h) {
-		if (h != null) {
-			int ih = h.getInteger();
-			if (ih < HEIGHT_ERROR_MISSING)
-				return new Distance(ih, METERS);
-		}
-		return null;
-	}
-
 	/** Number of sensors in table */
 	public final ASN1Integer num_temp_sensors =
 		essNumTemperatureSensors.makeInt();
 
 	/** Wet-bulb temperature */
 	public final TemperatureObject wet_bulb_temp = new TemperatureObject(
-		essWetbulbTemp.makeInt());
+		"wet_bulb_temp", essWetbulbTemp.makeInt());
 
 	/** Dew point temperature */
 	public final TemperatureObject dew_point_temp = new TemperatureObject(
-		essDewpointTemp.makeInt());
+		"dew_point_temp", essDewpointTemp.makeInt());
 
 	/** Maximum air temperature */
 	public final TemperatureObject max_air_temp = new TemperatureObject(
-		essMaxTemp.makeInt());
+		"max_air_temp", essMaxTemp.makeInt());
 
 	/** Minimum air temperature */
 	public final TemperatureObject min_air_temp = new TemperatureObject(
-		essMinTemp.makeInt());
+		"min_air_temp", essMinTemp.makeInt());
 
 	/** Temperature table row */
 	static public class Row {
-		public final ASN1Integer height;
+		public final HeightObject height;
 		public final TemperatureObject air_temp;
 
 		/** Create a table row */
 		private Row(int row) {
-			height = essTemperatureSensorHeight.makeInt(row);
-			height.setInteger(HEIGHT_ERROR_MISSING);
-			air_temp = new TemperatureObject(
+			height = new HeightObject("height",
+				essTemperatureSensorHeight.makeInt(row));
+			air_temp = new TemperatureObject("air_temp",
 				essAirTemperature.makeInt(row));
-		}
-
-		/** Get sensor height in meters */
-		public Integer getHeight() {
-			Distance h = convertHeight(height);
-			return (h != null) ? h.round(METERS) : null;
-		}
-
-		/** Get air temperature or null on error */
-		public Integer getAirTempC() {
-			return air_temp.getTempC();
 		}
 
 		/** Get JSON representation */
 		private String toJson() {
 			StringBuilder sb = new StringBuilder();
 			sb.append('{');
-			sb.append(Json.num("height", getHeight()));
-			sb.append(air_temp.toJson("air_temp"));
+			sb.append(height.toJson());
+			sb.append(air_temp.toJson());
 			// remove trailing comma
 			if (sb.charAt(sb.length() - 1) == ',')
 				sb.setLength(sb.length() - 1);
@@ -160,10 +129,10 @@ public class TemperatureSensorsTable {
 				sb.setLength(sb.length() - 1);
 			sb.append("],");
 		}
-		sb.append(wet_bulb_temp.toJson("wet_bulb_temp"));
-		sb.append(dew_point_temp.toJson("dew_point_temp"));
-		sb.append(max_air_temp.toJson("max_air_temp"));
-		sb.append(min_air_temp.toJson("min_air_temp"));
+		sb.append(wet_bulb_temp.toJson());
+		sb.append(dew_point_temp.toJson());
+		sb.append(max_air_temp.toJson());
+		sb.append(min_air_temp.toJson());
 		return sb.toString();
 	}
 }

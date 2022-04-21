@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017  Iteris Inc.
- * Copyright (C) 2019-2020  Minnesota Department of Transportation
+ * Copyright (C) 2019-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ public class SubSurfaceSensorsTable {
 				row);
 			sensor_depth = essSubSurfaceSensorDepth.makeInt(row);
 			sensor_depth.setInteger(DEPTH_ERROR_MISSING);
-			temp = new TemperatureObject(
+			temp = new TemperatureObject("temp",
 				essSubSurfaceTemperature.makeInt(row));
 			moisture = essSubSurfaceMoisture.makeInt(row);
 			moisture.setInteger(MOISTURE_ERROR_MISSING);
@@ -140,7 +140,7 @@ public class SubSurfaceSensorsTable {
 			sb.append(Json.str("sub_surface_type",
 				getSubSurfaceType()));
 			sb.append(Json.num("sensor_depth", getSensorDepth()));
-			sb.append(temp.toJson("temp"));
+			sb.append(temp.toJson());
 			sb.append(Json.num("moisture", getMoisture()));
 			sb.append(Json.str("sensor_error", getSensorError()));
 			// remove trailing comma

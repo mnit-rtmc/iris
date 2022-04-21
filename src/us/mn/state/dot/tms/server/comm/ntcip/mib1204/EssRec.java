@@ -32,8 +32,8 @@ public class EssRec {
 	public final AtmosphericValues atmospheric_values =
 		new AtmosphericValues();
 
-	/** Wind sensor values */
-	public final WindSensorValues wind_values = new WindSensorValues();
+	/** Wind sensors table */
+	public final WindSensorsTable ws_table = new WindSensorsTable();
 
 	/** Temperature sensors table */
 	public final TemperatureSensorsTable ts_table =
@@ -61,14 +61,14 @@ public class EssRec {
 		ws.setVisibilityNotify(vis);
 	}
 
-	/** Store the wind sensor samples */
+	/** Store the wind sensor data */
 	private void storeWinds(WeatherSensorImpl ws) {
-		ws.setWindDirNotify(wind_values.getAvgWindDir());
-		ws.setWindSpeedNotify(wind_values.getAvgWindSpeedKPH());
-		ws.setSpotWindDirNotify(wind_values.getSpotWindDir());
-		ws.setSpotWindSpeedNotify(wind_values.getSpotWindSpeedKPH());
-		ws.setMaxWindGustDirNotify(wind_values.getGustWindDir());
-		ws.setMaxWindGustSpeedNotify(wind_values.getGustWindSpeedKPH());
+		ws.setWindDirNotify(ws_table.getAvgWindDir());
+		ws.setWindSpeedNotify(ws_table.getAvgWindSpeedKPH());
+		ws.setSpotWindDirNotify(ws_table.getSpotWindDir());
+		ws.setSpotWindSpeedNotify(ws_table.getSpotWindSpeedKPH());
+		ws.setMaxWindGustDirNotify(ws_table.getGustWindDir());
+		ws.setMaxWindGustSpeedNotify(ws_table.getGustWindSpeedKPH());
 	}
 
 	/** Store the temperatures */
@@ -79,7 +79,7 @@ public class EssRec {
 		// Air temperature is assumed to be the first sensor
 		// in the table.  Additional sensors are ignored.
 		TemperatureSensorsTable.Row row = ts_table.getRow(1);
-		Integer t = (row != null) ? row.getAirTempC() : null;
+		Integer t = (row != null) ? row.air_temp.getTempC() : null;
 		ws.setAirTempNotify(t);
 	}
 
@@ -135,7 +135,7 @@ public class EssRec {
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
 		sb.append(atmospheric_values.toJson());
-		sb.append(wind_values.toJson());
+		sb.append(ws_table.toJson());
 		sb.append(ts_table.toJson());
 		sb.append(precip_values.toJson());
 		sb.append(ps_table.toJson());

@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017  Iteris Inc.
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,22 +34,6 @@ import static us.mn.state.dot.tms.units.Distance.Units.METERS;
  * @author Douglas Lau
  */
 public class PavementSensorsTable {
-
-	/** A height of 1001 is an error condition or missing value */
-	static private final int HEIGHT_ERROR_MISSING = 1001;
-
-	/** Convert height to Distance.
-	 * @param h Height in meters with 1001 indicating an error or missing
-	 *          value.
-	 * @return Height distance or null for missing */
-	static private Distance convertHeight(ASN1Integer h) {
-		if (h != null) {
-			int ih = h.getInteger();
-			if (ih < HEIGHT_ERROR_MISSING)
-				return new Distance(ih, METERS);
-		}
-		return null;
-	}
 
 	/** An exposure of 101 is an error condition or missing value */
 	static private final int EXPOSURE_ERROR_MISSING = 101;
@@ -106,7 +90,7 @@ public class PavementSensorsTable {
 	static public class Row {
 		public final DisplayString location;
 		public final ASN1Enum<EssPavementType> pavement_type;
-		public final ASN1Integer height;
+		public final HeightObject height;
 		public final ASN1Integer exposure;
 		public final ASN1Enum<EssPavementSensorType> sensor_type;
 		public final ASN1Enum<EssSurfaceStatus> surface_status;
@@ -125,8 +109,8 @@ public class PavementSensorsTable {
 			pavement_type = new ASN1Enum<EssPavementType>(
 				EssPavementType.class, essPavementType.node,
 				row);
-			height = essPavementElevation.makeInt(row);
-			height.setInteger(HEIGHT_ERROR_MISSING);
+			height = new HeightObject("height",
+				essPavementElevation.makeInt(row));
 			exposure = essPavementExposure.makeInt(row);
 			exposure.setInteger(EXPOSURE_ERROR_MISSING);
 			sensor_type = new ASN1Enum<EssPavementSensorType>(
@@ -135,9 +119,9 @@ public class PavementSensorsTable {
 			surface_status = new ASN1Enum<EssSurfaceStatus>(
 				EssSurfaceStatus.class, essSurfaceStatus.node,
 				row);
-			surface_temp = new TemperatureObject(
+			surface_temp = new TemperatureObject("surface_temp",
 				essSurfaceTemperature.makeInt(row));
-			pavement_temp = new TemperatureObject(
+			pavement_temp = new TemperatureObject("pavement_temp",
 				essPavementTemperature.makeInt(row));
 			sensor_error = new ASN1Enum<EssPavementSensorError>(
 				EssPavementSensorError.class,
@@ -147,6 +131,7 @@ public class PavementSensorsTable {
 			salinity = essSurfaceSalinity.makeInt(row);
 			salinity.setInteger(SALINITY_ERROR_MISSING);
 			surface_freeze_point = new TemperatureObject(
+				"surface_freeze_point",
 				essSurfaceFreezePoint.makeInt(row));
 			black_ice_signal = new ASN1Enum<EssSurfaceBlackIceSignal>
 				(EssSurfaceBlackIceSignal.class,
@@ -163,12 +148,6 @@ public class PavementSensorsTable {
 		public EssPavementType getPavementType() {
 			EssPavementType ept = pavement_type.getEnum();
 			return (ept != EssPavementType.undefined) ? ept : null;
-		}
-
-		/** Get pavement height in meters */
-		public Integer getHeight() {
-			Distance pe = convertHeight(height);
-			return (pe != null) ? pe.round(METERS) : null;
 		}
 
 		/** Get pavement exposure in percent */
@@ -224,7 +203,8 @@ public class PavementSensorsTable {
 
 		/** Get black ice signal or null on error */
 		public EssSurfaceBlackIceSignal getBlackIceSignal() {
-			EssSurfaceBlackIceSignal bis = black_ice_signal.getEnum();
+			EssSurfaceBlackIceSignal bis =
+				black_ice_signal.getEnum();
 			return (bis != null && bis.isValue()) ? bis : null;
 		}
 
@@ -234,20 +214,19 @@ public class PavementSensorsTable {
 			sb.append('{');
 			sb.append(Json.str("location", getSensorLocation()));
 			sb.append(Json.str("pavement_type", getPavementType()));
-			sb.append(Json.num("height", getHeight()));
+			sb.append(height.toJson());
 			sb.append(Json.num("exposure", getExposure()));
 			sb.append(Json.str("sensor_type",
 				getPavementSensorType()));
 			sb.append(Json.str("surface_status", getSurfStatus()));
-			sb.append(surface_temp.toJson("surface_temp"));
-			sb.append(pavement_temp.toJson("pavement_temp"));
+			sb.append(surface_temp.toJson());
+			sb.append(pavement_temp.toJson());
 			sb.append(Json.str("sensor_error",
 				getPavementSensorError()));
 			sb.append(Json.num("surface_water_depth",
 				getSurfaceWaterDepth()));
 			sb.append(Json.num("salinity", getSalinity()));
-			sb.append(surface_freeze_point.toJson(
-				"surface_freeze_point"));
+			sb.append(surface_freeze_point.toJson());
 			sb.append(Json.str("black_ice_signal",
 				getBlackIceSignal()));
 			// remove trailing comma

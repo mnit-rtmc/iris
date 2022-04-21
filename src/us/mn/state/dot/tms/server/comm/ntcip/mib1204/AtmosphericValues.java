@@ -48,22 +48,6 @@ public class AtmosphericValues {
 		return null;
 	}
 
-	/** A height of 1001 is an error condition or missing value */
-	static private final int HEIGHT_ERROR_MISSING = 1001;
-
-	/** Convert height to Distance.
-	 * @param h Height in meters with 1001 indicating an error or missing
-	 *          value.
-	 * @return Height distance or null for missing */
-	static private Distance convertHeight(ASN1Integer h) {
-		if (h != null) {
-			int ih = h.getInteger();
-			if (ih < HEIGHT_ERROR_MISSING)
-				return new Distance(ih, METERS);
-		}
-		return null;
-	}
-
 	/** Pressure of 65535 indicates error or missing value */
 	static private final int PRESSURE_ERROR_MISSING = 65535;
 
@@ -104,8 +88,8 @@ public class AtmosphericValues {
 		.makeInt();
 
 	/** Height of pressure sensor in meters */
-	public final ASN1Integer pressure_sensor_height = essPressureHeight
-		.makeInt();
+	public final HeightObject pressure_sensor_height = new HeightObject(
+		"pressure_sensor_height", essPressureHeight.makeInt());
 
 	/** Atmospheric pressure in tenths of millibars */
 	public final ASN1Integer atmospheric_pressure = essAtmosphericPressure
@@ -122,7 +106,6 @@ public class AtmosphericValues {
 	/** Create atmospheric values */
 	public AtmosphericValues() {
 		reference_elevation.setInteger(REF_ELEVATION_ERROR_MISSING);
-		pressure_sensor_height.setInteger(HEIGHT_ERROR_MISSING);
 		atmospheric_pressure.setInteger(PRESSURE_ERROR_MISSING);
 		visibility.setInteger(VISIBILITY_ERROR_MISSING);
 	}
@@ -130,12 +113,6 @@ public class AtmosphericValues {
 	/** Get reference elevation in meters above mean sea level */
 	public Integer getReferenceElevation() {
 		Distance h = convertRefElevation(reference_elevation);
-		return (h != null) ? h.round(METERS) : null;
-	}
-
-	/** Get sensor height in meters */
-	public Integer getSensorHeight() {
-		Distance h = convertHeight(pressure_sensor_height);
 		return (h != null) ? h.round(METERS) : null;
 	}
 
@@ -161,7 +138,7 @@ public class AtmosphericValues {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Json.num("reference_elevation",
 			getReferenceElevation()));
-		sb.append(Json.num("pressure_sensor_height", getSensorHeight()));
+		sb.append(pressure_sensor_height.toJson());
 		sb.append(Json.num("atmospheric_pressure",
 			getAtmosphericPressure()));
 		sb.append(Json.num("visibility", getVisibility()));

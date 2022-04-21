@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2022  Minnesota Department of Transportation
+ * Copyright (C) 2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,20 +15,22 @@
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 import java.text.NumberFormat;
+import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-import us.mn.state.dot.tms.units.Temperature;
-import static us.mn.state.dot.tms.units.Temperature.Units.CELSIUS;
+import us.mn.state.dot.tms.units.Speed;
+import static us.mn.state.dot.tms.units.Speed.Units.KPH;
+import static us.mn.state.dot.tms.units.Speed.Units.MPS;
 import us.mn.state.dot.tms.utils.Json;
 
 /**
- * Temperature object in tenths of a degree C.
+ * Wind speed object.
  *
  * @author Douglas Lau
  */
-public class TemperatureObject {
+public class WindSpeedObject {
 
-	/** A value of 1001 indicates an error condition or missing value */
-	static private final int ERROR_MISSING = 1001;
+	/** Wind speed of 65535 indicates error or missing value */
+	static private final int ERROR_MISSING = 65535;
 
 	/** Json speed key */
 	private final String key;
@@ -36,43 +38,42 @@ public class TemperatureObject {
 	/** Integer MIB node */
 	public final ASN1Integer node;
 
-	/** Create a temperature object */
-	public TemperatureObject(String k, ASN1Integer n) {
+	/** Create a wind speed object */
+	public WindSpeedObject(String k, ASN1Integer n) {
 		key = k;
 		node = n;
 		node.setInteger(ERROR_MISSING);
 	}
 
-	/** Get value as Temperature.
-	 * @return Temperature or null if missing */
-	public Temperature getTemperature() {
-		int t = node.getInteger();
-		return (t != ERROR_MISSING)
-		      ? new Temperature(0.1 * (double) t)
-		      : null;
+	/** Get value as MPS */
+	private Double speedMPS() {
+		// Speeds are recorded in tenths of meters per second
+		int s = node.getInteger();
+		return (s != ERROR_MISSING) ? (double) s * 0.1 : null;
 	}
 
-	/** Get value as degrees celcius */
-	public Integer getTempC() {
-		Temperature t = getTemperature();
-		return (t != null) ? t.round(CELSIUS) : null;
+	/** Get value as Speed.
+	 * @return Speed or null if missing */
+	public Speed getSpeed() {
+		Double mps = speedMPS();
+		return (mps != null) ? new Speed(mps, MPS) : null;
 	}
 
-	/** Get JSON representation */
-	private Double tempC() {
-		int t = node.getInteger();
-		return (t != ERROR_MISSING) ? (double) t * 0.1 : null;
+	/** Get value as KPH */
+	public Integer getSpeedKPH() {
+		Speed s = getSpeed();
+		return (s != null) ? s.round(KPH) : null;
 	}
 
 	/** Get JSON representation */
 	public String toJson() {
-		Double t = tempC();
-		if (t != null) {
-			// Format temp C to 1 decimal place
+		Double mps = speedMPS();
+		if (mps != null) {
+			// Format speed to 1 decimal place
 			NumberFormat f = NumberFormat.getInstance();
 			f.setMaximumFractionDigits(1);
 			f.setMinimumFractionDigits(1);
-			return Json.num(key, f.format(t));
+			return Json.num(key, f.format(mps));
 		} else
 			return "";
 	}
