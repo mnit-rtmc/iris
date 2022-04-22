@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
  *
  * @author Douglas Lau
  */
-public enum EssVisibilitySituation {
+public enum VisibilitySituation {
 	undefined,         // 0
 	other,             // 1
 	unknown,           // 2

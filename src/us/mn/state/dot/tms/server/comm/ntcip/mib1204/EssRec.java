@@ -91,7 +91,7 @@ public class EssRec {
 		ws.setHumidityNotify(precip_values.getRelativeHumidity());
 		ws.setPrecipRateNotify(precip_values.getPrecipRate());
 		ws.setPrecipOneHourNotify(precip_values.getPrecip1Hour());
-		EssPrecipSituation ps = precip_values.getPrecipSituation();
+		PrecipSituation ps = precip_values.getPrecipSituation();
 		ws.setPrecipSituationNotify((ps != null) ? ps.toString() : null);
 	}
 

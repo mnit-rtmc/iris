@@ -135,8 +135,8 @@ public class PrecipitationValues {
 		essPrecipitation24Hours.makeInt();
 
 	/** Precipitation situation */
-	public final ASN1Enum<EssPrecipSituation> precip_situation =
-		new ASN1Enum<EssPrecipSituation>(EssPrecipSituation.class,
+	public final ASN1Enum<PrecipSituation> precip_situation =
+		new ASN1Enum<PrecipSituation>(PrecipSituation.class,
 		essPrecipSituation.node);
 
 	/** Create precipitation values */
@@ -168,9 +168,9 @@ public class PrecipitationValues {
 	}
 
 	/** Get the precipitation situation */
-	public EssPrecipSituation getPrecipSituation() {
-		EssPrecipSituation eps = precip_situation.getEnum();
-		return (eps != EssPrecipSituation.undefined) ? eps : null;
+	public PrecipSituation getPrecipSituation() {
+		PrecipSituation eps = precip_situation.getEnum();
+		return (eps != PrecipSituation.undefined) ? eps : null;
 	}
 
 	/** Get JSON representation */

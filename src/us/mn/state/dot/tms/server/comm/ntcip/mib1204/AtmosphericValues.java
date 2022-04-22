@@ -99,8 +99,8 @@ public class AtmosphericValues {
 	public final ASN1Integer visibility = essVisibility.makeInt();
 
 	/** Visibility situation */
-	public final ASN1Enum<EssVisibilitySituation> visibility_situation =
-		new ASN1Enum<EssVisibilitySituation>(EssVisibilitySituation.class,
+	public final ASN1Enum<VisibilitySituation> visibility_situation =
+		new ASN1Enum<VisibilitySituation>(VisibilitySituation.class,
 		essVisibilitySituation.node);
 
 	/** Create atmospheric values */
@@ -128,9 +128,9 @@ public class AtmosphericValues {
 	}
 
 	/** Get the visibility situation */
-	public EssVisibilitySituation getVisibilitySituation() {
-		EssVisibilitySituation vs = visibility_situation.getEnum();
-		return (vs != EssVisibilitySituation.undefined) ? vs : null;
+	public VisibilitySituation getVisibilitySituation() {
+		VisibilitySituation vs = visibility_situation.getEnum();
+		return (vs != VisibilitySituation.undefined) ? vs : null;
 	}
 
 	/** Get JSON representation */
