@@ -1,7 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Iteris Inc.
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,31 +15,18 @@
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 /**
- * Pavement sensor errors as defined by essPavementSensorError in NTCIP 1204.
+ * Pavement sensor type as defined by essPavementSensorType in NTCIP 1204.
  *
- * @author Michael Darter
  * @author Douglas Lau
  */
-public enum EssPavementSensorError {
-	undefined,    // 0
-	other,        // 1
-	none,         // 2
-	noResponse,   // 3
-	cutCable,     // 4
-	shortCircuit, // 5
-	dirtyLens;    // 6
-
-	/** Is there an error? */
-	public boolean isError() {
-		switch (this) {
-			case other:
-			case noResponse:
-			case cutCable:
-			case shortCircuit:
-			case dirtyLens:
-				return true;
-			default:
-				return false;
-		}
-	}
+public enum PavementSensorType {
+	undefined,      // 0
+	other,          // 1
+	contactPassive, // 2
+	contactActive,  // 3
+	infrared,       // 4
+	radar,          // 5
+	vibrating,      // 6
+	microwave,      // 7
+	laser;          // 8
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,18 +15,26 @@
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 /**
- * Pavement sensor type as defined by essPavementSensorType in NTCIP 1204.
+ * Surface black ice signal as defined by essSurfaceStatus in NTCIP 1204.
  *
  * @author Douglas Lau
  */
-public enum EssPavementSensorType {
-	undefined,      // 0
-	other,          // 1
-	contactPassive, // 2
-	contactActive,  // 3
-	infrared,       // 4
-	radar,          // 5
-	vibrating,      // 6
-	microwave,      // 7
-	laser;          // 8
+public enum SurfaceBlackIceSignal {
+	undefined,     // 0
+	other,         // 1
+	noIce,         // 2
+	blackIce,      // 3
+	detectorError; // 4
+
+	/** Is there an interesting value? */
+	public boolean isValue() {
+		switch (this) {
+			case noIce:
+			case blackIce:
+			case detectorError:
+				return true;
+			default:
+				return false;
+		}
+	}
 }

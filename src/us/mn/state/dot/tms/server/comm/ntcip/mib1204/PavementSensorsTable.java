@@ -89,42 +89,41 @@ public class PavementSensorsTable {
 	/** Table row */
 	static public class Row {
 		public final DisplayString location;
-		public final ASN1Enum<EssPavementType> pavement_type;
+		public final ASN1Enum<PavementType> pavement_type;
 		public final HeightObject height;
 		public final ASN1Integer exposure;
-		public final ASN1Enum<EssPavementSensorType> sensor_type;
-		public final ASN1Enum<EssSurfaceStatus> surface_status;
+		public final ASN1Enum<PavementSensorType> sensor_type;
+		public final ASN1Enum<SurfaceStatus> surface_status;
 		public final TemperatureObject surface_temp;
 		public final TemperatureObject pavement_temp;
-		public final ASN1Enum<EssPavementSensorError> sensor_error;
+		public final ASN1Enum<PavementSensorError> sensor_error;
 		public final ASN1Integer surface_water_depth;
 		public final ASN1Integer salinity;
 		public final TemperatureObject surface_freeze_point;
-		public final ASN1Enum<EssSurfaceBlackIceSignal> black_ice_signal;
+		public final ASN1Enum<SurfaceBlackIceSignal> black_ice_signal;
 
 		/** Create a table row */
 		private Row(int row) {
 			location = new DisplayString(
 				essPavementSensorLocation.node, row);
-			pavement_type = new ASN1Enum<EssPavementType>(
-				EssPavementType.class, essPavementType.node,
-				row);
+			pavement_type = new ASN1Enum<PavementType>(
+				PavementType.class, essPavementType.node, row);
 			height = new HeightObject("height",
 				essPavementElevation.makeInt(row));
 			exposure = essPavementExposure.makeInt(row);
 			exposure.setInteger(EXPOSURE_ERROR_MISSING);
-			sensor_type = new ASN1Enum<EssPavementSensorType>(
-				EssPavementSensorType.class,
+			sensor_type = new ASN1Enum<PavementSensorType>(
+				PavementSensorType.class,
 				essPavementSensorType.node, row);
-			surface_status = new ASN1Enum<EssSurfaceStatus>(
-				EssSurfaceStatus.class, essSurfaceStatus.node,
+			surface_status = new ASN1Enum<SurfaceStatus>(
+				SurfaceStatus.class, essSurfaceStatus.node,
 				row);
 			surface_temp = new TemperatureObject("surface_temp",
 				essSurfaceTemperature.makeInt(row));
 			pavement_temp = new TemperatureObject("pavement_temp",
 				essPavementTemperature.makeInt(row));
-			sensor_error = new ASN1Enum<EssPavementSensorError>(
-				EssPavementSensorError.class,
+			sensor_error = new ASN1Enum<PavementSensorError>(
+				PavementSensorError.class,
 				essPavementSensorError.node, row);
 			surface_water_depth = essSurfaceWaterDepth.makeInt(row);
 			surface_water_depth.setInteger(DEPTH_ERROR_MISSING);
@@ -133,8 +132,8 @@ public class PavementSensorsTable {
 			surface_freeze_point = new TemperatureObject(
 				"surface_freeze_point",
 				essSurfaceFreezePoint.makeInt(row));
-			black_ice_signal = new ASN1Enum<EssSurfaceBlackIceSignal>
-				(EssSurfaceBlackIceSignal.class,
+			black_ice_signal = new ASN1Enum<SurfaceBlackIceSignal>(
+				SurfaceBlackIceSignal.class,
 				essSurfaceBlackIceSignal.node, row);
 		}
 
@@ -145,9 +144,9 @@ public class PavementSensorsTable {
 		}
 
 		/** Get pavement type or null on error */
-		public EssPavementType getPavementType() {
-			EssPavementType ept = pavement_type.getEnum();
-			return (ept != EssPavementType.undefined) ? ept : null;
+		public PavementType getPavementType() {
+			PavementType pt = pavement_type.getEnum();
+			return (pt != PavementType.undefined) ? pt : null;
 		}
 
 		/** Get pavement exposure in percent */
@@ -156,17 +155,17 @@ public class PavementSensorsTable {
 		}
 
 		/** Get pavement sensor type or null on error */
-		public EssPavementSensorType getPavementSensorType() {
-			EssPavementSensorType pst = sensor_type.getEnum();
-			return (pst != EssPavementSensorType.undefined)
+		public PavementSensorType getPavementSensorType() {
+			PavementSensorType pst = sensor_type.getEnum();
+			return (pst != PavementSensorType.undefined)
 			      ? pst
 			      : null;
 		}
 
 		/** Get surface status or null on error */
-		public EssSurfaceStatus getSurfStatus() {
-			EssSurfaceStatus ess = surface_status.getEnum();
-			return (ess != EssSurfaceStatus.undefined) ? ess : null;
+		public SurfaceStatus getSurfStatus() {
+			SurfaceStatus ess = surface_status.getEnum();
+			return (ess != SurfaceStatus.undefined) ? ess : null;
 		}
 
 		/** Get surface temp or null on error */
@@ -180,8 +179,8 @@ public class PavementSensorsTable {
 		}
 
 		/** Get pavement sensor error or null on error */
-		public EssPavementSensorError getPavementSensorError() {
-			EssPavementSensorError pse = sensor_error.getEnum();
+		public PavementSensorError getPavementSensorError() {
+			PavementSensorError pse = sensor_error.getEnum();
 			return (pse != null && pse.isError()) ? pse : null;
 		}
 
@@ -202,9 +201,8 @@ public class PavementSensorsTable {
 		}
 
 		/** Get black ice signal or null on error */
-		public EssSurfaceBlackIceSignal getBlackIceSignal() {
-			EssSurfaceBlackIceSignal bis =
-				black_ice_signal.getEnum();
+		public SurfaceBlackIceSignal getBlackIceSignal() {
+			SurfaceBlackIceSignal bis = black_ice_signal.getEnum();
 			return (bis != null && bis.isValue()) ? bis : null;
 		}
 

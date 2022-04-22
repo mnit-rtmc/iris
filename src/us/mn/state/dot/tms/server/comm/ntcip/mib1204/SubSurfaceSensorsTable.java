@@ -74,18 +74,18 @@ public class SubSurfaceSensorsTable {
 	/** Table row */
 	static public class Row {
 		public final DisplayString location;
-		public final ASN1Enum<EssSubSurfaceType> sub_surface_type;
+		public final ASN1Enum<SubSurfaceType> sub_surface_type;
 		public final ASN1Integer sensor_depth;
 		public final TemperatureObject temp;
 		public final ASN1Integer moisture;
-		public final ASN1Enum<EssSubSurfaceSensorError> sensor_error;
+		public final ASN1Enum<SubSurfaceSensorError> sensor_error;
 
 		/** Create a table row */
 		private Row(int row) {
 			location = new DisplayString(
 				essSubSurfaceSensorLocation.node, row);
-			sub_surface_type = new ASN1Enum<EssSubSurfaceType>(
-				EssSubSurfaceType.class, essSubSurfaceType.node,
+			sub_surface_type = new ASN1Enum<SubSurfaceType>(
+				SubSurfaceType.class, essSubSurfaceType.node,
 				row);
 			sensor_depth = essSubSurfaceSensorDepth.makeInt(row);
 			sensor_depth.setInteger(DEPTH_ERROR_MISSING);
@@ -93,8 +93,8 @@ public class SubSurfaceSensorsTable {
 				essSubSurfaceTemperature.makeInt(row));
 			moisture = essSubSurfaceMoisture.makeInt(row);
 			moisture.setInteger(MOISTURE_ERROR_MISSING);
-			sensor_error = new ASN1Enum<EssSubSurfaceSensorError>(
-				EssSubSurfaceSensorError.class,
+			sensor_error = new ASN1Enum<SubSurfaceSensorError>(
+				SubSurfaceSensorError.class,
 				essSubSurfaceSensorError.node, row);
 		}
 
@@ -105,9 +105,9 @@ public class SubSurfaceSensorsTable {
 		}
 
 		/** Get sub-surface type or null on error */
-		public EssSubSurfaceType getSubSurfaceType() {
-			EssSubSurfaceType sst = sub_surface_type.getEnum();
-			return (sst != EssSubSurfaceType.undefined) ? sst : null;
+		public SubSurfaceType getSubSurfaceType() {
+			SubSurfaceType sst = sub_surface_type.getEnum();
+			return (sst != SubSurfaceType.undefined) ? sst : null;
 		}
 
 		/** Get sub-surface sensor depth in meters */
@@ -127,8 +127,8 @@ public class SubSurfaceSensorsTable {
 		}
 
 		/** Get sensor error or null on error */
-		public EssSubSurfaceSensorError getSensorError() {
-			EssSubSurfaceSensorError se = sensor_error.getEnum();
+		public SubSurfaceSensorError getSensorError() {
+			SubSurfaceSensorError se = sensor_error.getEnum();
 			return (se != null && se.isError()) ? se : null;
 		}
 

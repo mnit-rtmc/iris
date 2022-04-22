@@ -101,10 +101,10 @@ public class EssRec {
 		if (row != null) {
 			ws.setPvmtSurfTempNotify(row.getPvmtTempC());
 			ws.setSurfTempNotify(row.getSurfTempC());
-			EssSurfaceStatus ess = row.getSurfStatus();
-			ws.setPvmtSurfStatusNotify((ess != null)
-				? ess.toString()
-				: EssSurfaceStatus.undefined.toString());
+			SurfaceStatus ss = row.getSurfStatus();
+			ws.setPvmtSurfStatusNotify((ss != null)
+				? ss.toString()
+				: SurfaceStatus.undefined.toString());
 			ws.setSurfFreezeTempNotify(row.getSurfFreezePointC());
 		} else {
 			ws.setPvmtSurfTempNotify(null);

@@ -1,7 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Iteris Inc.
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,29 +15,19 @@
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 /**
- * Subsurface sensor errors as defined by NTCIP 1204 essSubSurfaceSensorError.
+ * Pavement type as defined by essPavementType in NTCIP 1204.
  *
- * @author Michael Darter
  * @author Douglas Lau
  */
-public enum EssSubSurfaceSensorError {
-	undefined,    // 0
-	other,        // 1
-	none,         // 2
-	noResponse,   // 3
-	cutCable,     // 4
-	shortCircuit; // 5
-
-	/** Is there an error? */
-	public boolean isError() {
-		switch (this) {
-			case other:
-			case noResponse:
-			case cutCable:
-			case shortCircuit:
-				return true;
-			default:
-				return false;
-		}
-	}
+public enum PavementType {
+	undefined,            // 0
+	other,                // 1
+	unknown,              // 2
+	asphalt,              // 3
+	openGradedAsphalt,    // 4
+	concrete,             // 5
+	steelBridge,          // 6
+	concreteBridge,       // 7
+	asphaltOverlayBridge, // 8
+	timberBridge;         // 9
 }
