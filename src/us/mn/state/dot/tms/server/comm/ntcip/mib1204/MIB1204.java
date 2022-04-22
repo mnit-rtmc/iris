@@ -49,6 +49,10 @@ public enum MIB1204 {
 	      essPrecipitationTwelveHours	(essBufrPrecip, 22),
 	      essPrecipitation24Hours		(essBufrPrecip, 23),
 	    essBufrRadiation			(essBufr, 14),
+	      essInstantaneousTerrestrialRadiation(essBufrRadiation, 17), // V2
+	      essInstantaneousSolarRadiation	(essBufrRadiation, 18), // V2
+	      essSolarRadiation			(essBufrRadiation, 24), // V1
+	      essTotalRadiation			(essBufrRadiation, 25), // V2
 	      essTotalSun			(essBufrRadiation, 31),
 	  essNtcip				(ess, 2),
 	    essNtcipIdentification		(essNtcip, 1),
@@ -108,7 +112,8 @@ public enum MIB1204 {
 	      precipitationSensorModelInformation(essNtcipPrecip, 10),
 	      waterLevelSensorTableNumSensors	(essNtcipPrecip, 11),
 	    essNtcipRadiation			(essNtcip, 7),
-	      essCloudCoverSituation		(essNtcipRadiation, 1),
+	      essCloudSituation			(essNtcipRadiation, 1),
+	      essTotalRadiationPeriod		(essNtcipRadiation, 2), // V2
 	    essNtcipVisibility			(essNtcip, 8),
 	      essVisibility			(essNtcipVisibility, 1),
 	      essVisibilitySituation		(essNtcipVisibility, 3),
