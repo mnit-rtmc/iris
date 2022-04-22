@@ -2,7 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2017  SRF Consulting Group
  * Copyright (C) 2017-2021  Iteris Inc.
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -178,10 +178,5 @@ public enum MIB1204 {
 	/** Make an integer */
 	public ASN1Integer makeInt(int r) {
 		return new ASN1Integer(node, r);
-	}
-
-	/** Make an integer */
-	public ASN1Integer makeInt(int r, int s) {
-		return new ASN1Integer(node, r, s);
 	}
 }

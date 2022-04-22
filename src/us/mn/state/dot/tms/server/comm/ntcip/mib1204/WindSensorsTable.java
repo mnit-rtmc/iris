@@ -17,7 +17,9 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 import java.util.ArrayList;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.utils.Json;
 
 /**
  * Wind sensors data table, where each table row contains data read from a
@@ -37,6 +39,12 @@ public class WindSensorsTable {
 		public final DirectionObject spot_direction;
 		public final WindSpeedObject gust_speed;
 		public final DirectionObject gust_direction;
+		public final ASN1Enum<WindSituation> situation;
+
+		private WindSituation getSituation() {
+			WindSituation sit = situation.getEnum();
+			return (sit != WindSituation.undefined) ? sit : null;
+		}
 
 		/** Create a table row */
 		private Row(int row) {
@@ -54,6 +62,9 @@ public class WindSensorsTable {
 				windSensorGustSpeed.makeInt(row));
 			gust_direction = new DirectionObject("gust_direction",
 				windSensorGustDirection.makeInt(row));
+			situation = new ASN1Enum<WindSituation>(
+				WindSituation.class, windSensorSituation.node,
+				row);
 		}
 
 		/** Get JSON representation */
@@ -67,6 +78,7 @@ public class WindSensorsTable {
 			sb.append(spot_direction.toJson());
 			sb.append(gust_speed.toJson());
 			sb.append(gust_direction.toJson());
+			sb.append(Json.str("situation", getSituation()));
 			// remove trailing comma
 			if (sb.charAt(sb.length() - 1) == ',')
 				sb.setLength(sb.length() - 1);
@@ -78,6 +90,11 @@ public class WindSensorsTable {
 	/** Wind sensor height in meters (deprecated in V2) */
 	public final HeightObject height = new HeightObject("height",
 		essWindSensorHeight.makeInt());
+
+	/** Wind situation */
+	public final ASN1Enum<WindSituation> situation =
+		new ASN1Enum<WindSituation>(WindSituation.class,
+		essWindSituation.node);
 
 	/** Two minute average wind speed (deprecated in V2) */
 	public final WindSpeedObject avg_speed = new WindSpeedObject(
@@ -132,6 +149,12 @@ public class WindSensorsTable {
 		return (row >= 1 && row <= table_rows.size())
 		      ? table_rows.get(row - 1)
 		      : null;
+	}
+
+	/** Get the wind situation */
+	private WindSituation getSituation() {
+		WindSituation sit = situation.getEnum();
+		return (sit != WindSituation.undefined) ? sit : null;
 	}
 
 	/** Get two minute average wind speed */
@@ -192,6 +215,7 @@ public class WindSensorsTable {
 			sb.append(spot_direction.toJson());
 			sb.append(gust_speed.toJson());
 			sb.append(gust_direction.toJson());
+			sb.append(Json.str("situation", getSituation()));
 			// remove trailing comma
 			if (sb.charAt(sb.length() - 1) == ',')
 				sb.setLength(sb.length() - 1);
