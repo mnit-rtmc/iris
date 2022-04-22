@@ -63,12 +63,15 @@ public class EssRec {
 
 	/** Store the wind sensor data */
 	private void storeWinds(WeatherSensorImpl ws) {
-		ws.setWindDirNotify(ws_table.getAvgWindDir());
-		ws.setWindSpeedNotify(ws_table.getAvgWindSpeedKPH());
-		ws.setSpotWindDirNotify(ws_table.getSpotWindDir());
-		ws.setSpotWindSpeedNotify(ws_table.getSpotWindSpeedKPH());
-		ws.setMaxWindGustDirNotify(ws_table.getGustWindDir());
-		ws.setMaxWindGustSpeedNotify(ws_table.getGustWindSpeedKPH());
+		ws.setWindSpeedNotify(ws_table.getAvgSpeed().getSpeedKPH());
+		ws.setWindDirNotify(ws_table.getAvgDir().getDirection());
+		ws.setSpotWindSpeedNotify(ws_table.getSpotSpeed()
+			.getSpeedKPH());
+		ws.setSpotWindDirNotify(ws_table.getSpotDir().getDirection());
+		ws.setMaxWindGustSpeedNotify(ws_table.getGustSpeed()
+			.getSpeedKPH());
+		ws.setMaxWindGustDirNotify(ws_table.getGustDir()
+			.getDirection());
 	}
 
 	/** Store the temperatures */

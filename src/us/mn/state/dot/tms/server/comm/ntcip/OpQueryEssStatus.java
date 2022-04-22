@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.TemperatureSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.WindSensorsTable;
+import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 
 /**
  * Operation to query the status of a weather sensor.
@@ -80,29 +81,82 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(ess_rec.atmospheric_values.visibility);
 			logQuery(ess_rec.atmospheric_values
 				.visibility_situation);
-			return new QueryWind();
+			return new QueryWindSensorsV2();
 		}
 	}
 
-	/** Phase to query wind values */
-	protected class QueryWind extends Phase {
+	/** Phase to query the wind sensor count (V2+) */
+	protected class QueryWindSensorsV2 extends Phase {
 
 		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(ws_table.avg_wind_dir.node);
-			mess.add(ws_table.avg_wind_speed.node);
-			mess.add(ws_table.spot_wind_dir.node);
-			mess.add(ws_table.spot_wind_speed.node);
-			mess.add(ws_table.gust_wind_dir.node);
-			mess.add(ws_table.gust_wind_speed.node);
+			try {
+				mess.add(ws_table.num_sensors);
+				mess.queryProps();
+				logQuery(ws_table.num_sensors);
+				return ws_table.isDone()
+				      ? new QueryTemperatureSensors()
+				      : new QueryWindTableV2();
+			}
+			catch (NoSuchName e) {
+				// Note: this object was introduced in V2
+				return new QueryWindSensorV1();
+			}
+		}
+	}
+
+	/** Phase to query all rows in wind table (V2+) */
+	protected class QueryWindTableV2 extends Phase {
+
+		/** Query values */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			WindSensorsTable.Row tr = ws_table.addRow();
+			mess.add(tr.avg_speed.node);
+			mess.add(tr.avg_direction.node);
+			mess.add(tr.spot_speed.node);
+			mess.add(tr.spot_direction.node);
+			mess.add(tr.gust_speed.node);
+			mess.add(tr.gust_direction.node);
 			mess.queryProps();
-			logQuery(ws_table.avg_wind_dir.node);
-			logQuery(ws_table.avg_wind_speed.node);
-			logQuery(ws_table.spot_wind_dir.node);
-			logQuery(ws_table.spot_wind_speed.node);
-			logQuery(ws_table.gust_wind_dir.node);
-			logQuery(ws_table.gust_wind_speed.node);
+			logQuery(tr.avg_speed.node);
+			logQuery(tr.avg_direction.node);
+			logQuery(tr.spot_speed.node);
+			logQuery(tr.spot_direction.node);
+			logQuery(tr.gust_speed.node);
+			logQuery(tr.gust_direction.node);
+			return ws_table.isDone()
+			      ? new QueryTemperatureSensors()
+			      : this;
+		}
+	}
+
+	/** Phase to query wind sensor values (V1) */
+	protected class QueryWindSensorV1 extends Phase {
+
+		/** Query values */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(ws_table.avg_direction.node);
+			mess.add(ws_table.avg_speed.node);
+			mess.add(ws_table.spot_direction.node);
+			mess.add(ws_table.spot_speed.node);
+			mess.add(ws_table.gust_direction.node);
+			mess.add(ws_table.gust_speed.node);
+			try {
+				mess.queryProps();
+			}
+			catch (NoSuchName e) {
+				// Note: these objects are deprecated in V2
+				return new QueryTemperatureSensors();
+			}
+			logQuery(ws_table.avg_direction.node);
+			logQuery(ws_table.avg_speed.node);
+			logQuery(ws_table.spot_direction.node);
+			logQuery(ws_table.spot_speed.node);
+			logQuery(ws_table.gust_direction.node);
+			logQuery(ws_table.gust_speed.node);
 			return new QueryTemperatureSensors();
 		}
 	}

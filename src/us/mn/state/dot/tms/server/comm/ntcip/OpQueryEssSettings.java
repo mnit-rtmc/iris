@@ -25,8 +25,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.TemperatureSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.WindSensorsTable;
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
+import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import static us.mn.state.dot.tms.server.comm.snmp.MIB.*;
 
 /**
@@ -102,13 +102,66 @@ public class OpQueryEssSettings extends OpEss {
 				.reference_elevation);
 			mess.add(ess_rec.atmospheric_values
 				.pressure_sensor_height.node);
-			mess.add(ws_table.wind_sensor_height.node);
 			mess.queryProps();
 			logQuery(ess_rec.atmospheric_values
 				.reference_elevation);
 			logQuery(ess_rec.atmospheric_values
 				.pressure_sensor_height.node);
-			logQuery(ws_table.wind_sensor_height.node);
+			return new QueryWindSensorsV2();
+		}
+	}
+
+	/** Phase to query the wind sensor count (V2+) */
+	protected class QueryWindSensorsV2 extends Phase {
+
+		/** Query values */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			try {
+				mess.add(ws_table.num_sensors);
+				mess.queryProps();
+				logQuery(ws_table.num_sensors);
+				return ws_table.isDone()
+				      ? new QueryTemperatureSensors()
+				      : new QueryWindTableV2();
+			}
+			catch (NoSuchName e) {
+				// Note: this object was introduced in V2
+				return new QueryWindSensorV1();
+			}
+		}
+	}
+
+	/** Phase to query all rows in wind table (V2+) */
+	protected class QueryWindTableV2 extends Phase {
+
+		/** Query values */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			WindSensorsTable.Row tr = ws_table.addRow();
+			mess.add(tr.height.node);
+			mess.queryProps();
+			logQuery(tr.height.node);
+			return ws_table.isDone()
+			      ? new QueryTemperatureSensors()
+			      : this;
+		}
+	}
+
+	/** Phase to query wind sensor values (V1) */
+	protected class QueryWindSensorV1 extends Phase {
+
+		/** Query values */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(ws_table.height.node);
+			try {
+				mess.queryProps();
+				logQuery(ws_table.height.node);
+			}
+			catch (NoSuchName e) {
+				// Note: this object is deprecated in V2
+			}
 			return new QueryTemperatureSensors();
 		}
 	}
@@ -122,7 +175,9 @@ public class OpQueryEssSettings extends OpEss {
 			mess.add(ts_table.num_temp_sensors);
 			mess.queryProps();
 			logQuery(ts_table.num_temp_sensors);
-			return new QueryTemperatureTable();
+			return ts_table.isDone()
+			      ? new QueryPavement()
+			      : new QueryTemperatureTable();
 		}
 	}
 
@@ -132,13 +187,11 @@ public class OpQueryEssSettings extends OpEss {
 		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (ts_table.isDone())
-				return new QueryPavement();
 			TemperatureSensorsTable.Row tr = ts_table.addRow();
 			mess.add(tr.height.node);
 			mess.queryProps();
 			logQuery(tr.height.node);
-			return this;
+			return ts_table.isDone() ? new QueryPavement() : this;
 		}
 	}
 
@@ -151,7 +204,9 @@ public class OpQueryEssSettings extends OpEss {
 			mess.add(ps_table.num_sensors);
 			mess.queryProps();
 			logQuery(ps_table.num_sensors);
-			return new QueryPavementTable();
+			return ps_table.isDone()
+			      ? new QuerySubSurface()
+			      : new QueryPavementTable();
 		}
 	}
 
@@ -161,8 +216,6 @@ public class OpQueryEssSettings extends OpEss {
 		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (ps_table.isDone())
-				return new QuerySubSurface();
 			PavementSensorsTable.Row pr = ps_table.addRow();
 			mess.add(pr.location);
 			mess.add(pr.pavement_type);
@@ -175,7 +228,7 @@ public class OpQueryEssSettings extends OpEss {
 			logQuery(pr.height.node);
 			logQuery(pr.exposure);
 			logQuery(pr.sensor_type);
-			return this;
+			return ps_table.isDone() ? new QuerySubSurface() : this;
 		}
 	}
 
@@ -188,7 +241,9 @@ public class OpQueryEssSettings extends OpEss {
 			mess.add(ss_table.num_sensors);
 			mess.queryProps();
 			logQuery(ss_table.num_sensors);
-			return new QuerySubSurfaceTable();
+			return ss_table.isDone()
+			      ? null
+			      : new QuerySubSurfaceTable();
 		}
 	}
 
@@ -198,8 +253,6 @@ public class OpQueryEssSettings extends OpEss {
 		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (ss_table.isDone())
-				return null;
 			SubSurfaceSensorsTable.Row sr = ss_table.addRow();
 			mess.add(sr.location);
 			mess.add(sr.sub_surface_type);
@@ -208,7 +261,7 @@ public class OpQueryEssSettings extends OpEss {
 			logQuery(sr.location);
 			logQuery(sr.sub_surface_type);
 			logQuery(sr.sensor_depth);
-			return this;
+			return ss_table.isDone() ? null : this;
 		}
 	}
 

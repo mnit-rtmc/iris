@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.utils.Json;
 
 /**
  * Wind speed object.
+ * Speeds are reported in tenths of meters per second.
  *
  * @author Douglas Lau
  */

@@ -15,7 +15,9 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
+import java.util.ArrayList;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 
 /**
  * Wind sensors data table, where each table row contains data read from a
@@ -26,74 +28,179 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
  */
 public class WindSensorsTable {
 
-	/** Wind sensor height in meters (deprecated in V2) */
-	public final HeightObject wind_sensor_height = new HeightObject(
-		"wind_sensor_height", essWindSensorHeight.makeInt());
+	/** Wind sensor row */
+	static public class Row {
+		public final HeightObject height;
+		public final WindSpeedObject avg_speed;
+		public final DirectionObject avg_direction;
+		public final WindSpeedObject spot_speed;
+		public final DirectionObject spot_direction;
+		public final WindSpeedObject gust_speed;
+		public final DirectionObject gust_direction;
 
-	/** Two minute average wind direction (deprecated in V2) */
-	public final DirectionObject avg_wind_dir = new DirectionObject(
-		"avg_wind_dir", essAvgWindDirection.makeInt());
+		/** Create a table row */
+		private Row(int row) {
+			height = new HeightObject("height",
+				windSensorHeight.makeInt(row));
+			avg_speed = new WindSpeedObject("avg_speed",
+				windSensorAvgSpeed.makeInt(row));
+			avg_direction = new DirectionObject("avg_direction",
+				windSensorAvgDirection.makeInt(row));
+			spot_speed = new WindSpeedObject("spot_speed",
+				windSensorSpotSpeed.makeInt(row));
+			spot_direction = new DirectionObject("spot_direction",
+				windSensorSpotDirection.makeInt(row));
+			gust_speed = new WindSpeedObject("gust_speed",
+				windSensorGustSpeed.makeInt(row));
+			gust_direction = new DirectionObject("gust_direction",
+				windSensorGustDirection.makeInt(row));
+		}
 
-	/** Two minute average wind speed (deprecated in V2) */
-	public final WindSpeedObject avg_wind_speed = new WindSpeedObject(
-		"avg_wind_speed", essAvgWindSpeed.makeInt());
-
-	/** Spot wind direction (deprecated in V2) */
-	public final DirectionObject spot_wind_dir = new DirectionObject(
-		"spot_wind_dir", essSpotWindDirection.makeInt());
-
-	/** Spot wind speed (deprecated in V2) */
-	public final WindSpeedObject spot_wind_speed = new WindSpeedObject(
-		"spot_wind_speed", essSpotWindSpeed.makeInt());
-
-	/** Ten minute max gust wind direction (deprecated in V2) */
-	public final DirectionObject gust_wind_dir = new DirectionObject(
-		"gust_wind_dir", essMaxWindGustDir.makeInt());
-
-	/** Ten minute max gust wind speed (deprecated in V2) */
-	public final WindSpeedObject gust_wind_speed = new WindSpeedObject(
-		"gust_wind_speed", essMaxWindGustSpeed.makeInt());
-
-	/** Get two minute average wind direction */
-	public Integer getAvgWindDir() {
-		return avg_wind_dir.getDirection();
+		/** Get JSON representation */
+		private String toJson() {
+			StringBuilder sb = new StringBuilder();
+			sb.append('{');
+			sb.append(height.toJson());
+			sb.append(avg_speed.toJson());
+			sb.append(avg_direction.toJson());
+			sb.append(spot_speed.toJson());
+			sb.append(spot_direction.toJson());
+			sb.append(gust_speed.toJson());
+			sb.append(gust_direction.toJson());
+			// remove trailing comma
+			if (sb.charAt(sb.length() - 1) == ',')
+				sb.setLength(sb.length() - 1);
+			sb.append("},");
+			return sb.toString();
+		}
 	}
 
-	/** Get two minute average wind speed in KPH */
-	public Integer getAvgWindSpeedKPH() {
-		return avg_wind_speed.getSpeedKPH();
+	/** Wind sensor height in meters (deprecated in V2) */
+	public final HeightObject height = new HeightObject("height",
+		essWindSensorHeight.makeInt());
+
+	/** Two minute average wind speed (deprecated in V2) */
+	public final WindSpeedObject avg_speed = new WindSpeedObject(
+		"avg_speed", essAvgWindSpeed.makeInt());
+
+	/** Two minute average wind direction (deprecated in V2) */
+	public final DirectionObject avg_direction = new DirectionObject(
+		"avg_direction", essAvgWindDirection.makeInt());
+
+	/** Spot wind speed (deprecated in V2) */
+	public final WindSpeedObject spot_speed = new WindSpeedObject(
+		"spot_speed", essSpotWindSpeed.makeInt());
+
+	/** Spot wind direction (deprecated in V2) */
+	public final DirectionObject spot_direction = new DirectionObject(
+		"spot_direction", essSpotWindDirection.makeInt());
+
+	/** Ten minute max gust wind speed (deprecated in V2) */
+	public final WindSpeedObject gust_speed = new WindSpeedObject(
+		"gust_speed", essMaxWindGustSpeed.makeInt());
+
+	/** Ten minute max gust wind direction (deprecated in V2) */
+	public final DirectionObject gust_direction = new DirectionObject(
+		"gust_direction", essMaxWindGustDir.makeInt());
+
+	/** Number of sensors in table (V2+) */
+	public final ASN1Integer num_sensors =
+		windSensorTableNumSensors.makeInt();
+
+	/** Get number of sensors in table */
+	private int size() {
+		return num_sensors.getInteger();
+	}
+
+	/** Rows in table */
+	private final ArrayList<Row> table_rows = new ArrayList<Row>();
+
+	/** Check if all rows have been read */
+	public boolean isDone() {
+		return table_rows.size() >= size();
+	}
+
+	/** Add a row to the table */
+	public Row addRow() {
+		Row tr = new Row(table_rows.size() + 1);
+		table_rows.add(tr);
+		return tr;
+	}
+
+	/** Get one table row */
+	public Row getRow(int row) {
+		return (row >= 1 && row <= table_rows.size())
+		      ? table_rows.get(row - 1)
+		      : null;
+	}
+
+	/** Get two minute average wind speed */
+	public WindSpeedObject getAvgSpeed() {
+		return table_rows.isEmpty()
+		      ? avg_speed
+		      : table_rows.get(0).avg_speed;
+	}
+
+	/** Get two minute average wind direction */
+	public DirectionObject getAvgDir() {
+		return table_rows.isEmpty()
+		      ? avg_direction
+		      : table_rows.get(0).avg_direction;
+	}
+
+	/** Get spot wind speed */
+	public WindSpeedObject getSpotSpeed() {
+		return table_rows.isEmpty()
+		      ? spot_speed
+		      : table_rows.get(0).spot_speed;
 	}
 
 	/** Get spot wind direction */
-	public Integer getSpotWindDir() {
-		return spot_wind_dir.getDirection();
+	public DirectionObject getSpotDir() {
+		return table_rows.isEmpty()
+		      ? spot_direction
+		      : table_rows.get(0).spot_direction;
 	}
 
-	/** Get spot wind speed in KPH */
-	public Integer getSpotWindSpeedKPH() {
-		return spot_wind_speed.getSpeedKPH();
+	/** Get ten minute max gust wind speed */
+	public WindSpeedObject getGustSpeed() {
+		return table_rows.isEmpty()
+		      ? gust_speed
+		      : table_rows.get(0).gust_speed;
 	}
 
 	/** Get ten minute max gust wind direction */
-	public Integer getGustWindDir() {
-		return gust_wind_dir.getDirection();
-	}
-
-	/** Get ten minute max gust wind speed in KPH */
-	public Integer getGustWindSpeedKPH() {
-		return gust_wind_speed.getSpeedKPH();
+	public DirectionObject getGustDir() {
+		return table_rows.isEmpty()
+		      ? gust_direction
+		      : table_rows.get(0).gust_direction;
 	}
 
 	/** Get JSON representation */
 	public String toJson() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(wind_sensor_height.toJson());
-		sb.append(avg_wind_dir.toJson());
-		sb.append(avg_wind_speed.toJson());
-		sb.append(spot_wind_dir.toJson());
-		sb.append(spot_wind_speed.toJson());
-		sb.append(gust_wind_dir.toJson());
-		sb.append(gust_wind_speed.toJson());
+		sb.append("\"wind_sensor\":[");
+		if (table_rows.size() > 0) {
+			for (Row row : table_rows)
+				sb.append(row.toJson());
+		} else {
+			sb.append('{');
+			sb.append(height.toJson());
+			sb.append(avg_speed.toJson());
+			sb.append(avg_direction.toJson());
+			sb.append(spot_speed.toJson());
+			sb.append(spot_direction.toJson());
+			sb.append(gust_speed.toJson());
+			sb.append(gust_direction.toJson());
+			// remove trailing comma
+			if (sb.charAt(sb.length() - 1) == ',')
+				sb.setLength(sb.length() - 1);
+			sb.append("},");
+		}
+		// remove trailing comma
+		if (sb.charAt(sb.length() - 1) == ',')
+			sb.setLength(sb.length() - 1);
+		sb.append("],");
 		return sb.toString();
 	}
 }
