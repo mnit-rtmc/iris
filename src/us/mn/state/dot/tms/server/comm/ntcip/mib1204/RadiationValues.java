@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.utils.Json;
 
@@ -36,6 +37,11 @@ public class RadiationValues {
 
 	/** Total daily minutes of sun (0-1440 minutes) */
 	public final ASN1Integer total_sun = essTotalSun.makeInt();
+
+	/** Cloud situation */
+	public final ASN1Enum<CloudSituation> cloud_situation =
+		new ASN1Enum<CloudSituation>(CloudSituation.class,
+		essCloudSituation.node);
 
 	/** Instantaneous terrestrial radiation (watts / m^2) */
 	public final RadiationObject instantaneous_terrestrial =
@@ -74,6 +80,12 @@ public class RadiationValues {
 		      : null;
 	}
 
+	/** Get the cloud situation */
+	public CloudSituation getCloudSituation() {
+		CloudSituation cs = cloud_situation.getEnum();
+		return (cs != CloudSituation.undefined) ? cs : null;
+	}
+
 	/** Get the total radiation period (seconds) */
 	public Integer getTotalRadiationPeriod() {
 		int s = total_radiation_period.getInteger();
@@ -90,6 +102,7 @@ public class RadiationValues {
 	public String toJson() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Json.num("total_sun", getTotalSun()));
+		sb.append(Json.str("cloud_situation", getCloudSituation()));
 		Integer s = getSolarRadiation();
 		if (s != null) {
 			sb.append(Json.num("solar_radiation", s));

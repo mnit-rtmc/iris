@@ -309,7 +309,6 @@ public class OpQueryEssStatus extends OpEss {
 		}
 	}
 
-
 	/** Phase to query total sun value */
 	protected class QueryTotalSun extends Phase {
 
@@ -319,6 +318,22 @@ public class OpQueryEssStatus extends OpEss {
 			mess.add(ess_rec.rad_values.total_sun);
 			mess.queryProps();
 			logQuery(ess_rec.rad_values.total_sun);
+			return new QueryCloudSituation();
+		}
+	}
+
+	/** Phase to query cloud situation value */
+	protected class QueryCloudSituation extends Phase {
+
+		/** Query values */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(ess_rec.rad_values.cloud_situation);
+			try {
+				mess.queryProps();
+				logQuery(ess_rec.rad_values.cloud_situation);
+			}
+			catch (NoSuchName e) { }
 			return new QueryRadiationV2();
 		}
 	}
