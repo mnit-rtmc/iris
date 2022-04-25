@@ -113,8 +113,8 @@ After it expires, up to 24 buffered messages are sent, in order from oldest to
 newest.
 
 When a vehicle leaves a detector, the __message ID__ is incremented as a 4-digit
-hex value.  A `ds` message is added to the buffer, and the *buffer timer* is
-reset.
+hex value.  A `ds` message is added to the buffer, and if the *buffer timer* is
+not already running, it is started.
 
 When a `DS` is received from IRIS, the __message ID__ is compared with the
 oldest `ds` message in the buffer.  If it matches, the poll is an ACK, otherwise
