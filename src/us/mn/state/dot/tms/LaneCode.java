@@ -100,6 +100,14 @@ public enum LaneCode {
 	static private final Interval LOCK_ON_THRESHOLD_FALLBACK =
 		new Interval(2, WEEKS);
 
+	/** Scan "no change" threshold for mainline / ramp sensors */
+	static private final Interval NO_CHANGE_THRESHOLD =
+		new Interval(24, HOURS);
+
+	/** Scan "no change" threshold for other sensors */
+	static private final Interval NO_CHANGE_THRESHOLD_FALLBACK =
+		new Interval(2, WEEKS);
+
 	/** Description */
 	public final String description;
 
@@ -117,6 +125,14 @@ public enum LaneCode {
 			return LOCK_ON_THRESHOLD_RAMP;
 		else
 			return LOCK_ON_THRESHOLD_FALLBACK;
+	}
+
+	/** Get the no-change threshold */
+	public final Interval getNoChangeThreshold() {
+		if (is_mainline || is_ramp)
+			return NO_CHANGE_THRESHOLD;
+		else
+			return NO_CHANGE_THRESHOLD_FALLBACK;
 	}
 
 	/** Mainline lane */

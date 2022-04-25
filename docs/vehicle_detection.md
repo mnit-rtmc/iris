@@ -160,9 +160,14 @@ Parking                                                                | 2 weeks
 
 ### No Change
 
-If occupancy is greater than zero and does not change for 24 hours, this
+If occupancy is greater than zero and does not change for the duration, this
 condition will be triggered.  It will clear immediately if the occupancy
 changes.
+
+Lane Type  | Duration
+-----------|---------
+Parking    | 2 weeks
+All others | 24 hours
 
 ### Occ Spike
 

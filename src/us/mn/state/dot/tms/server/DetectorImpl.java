@@ -167,10 +167,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	static private final Interval CHATTER_THRESHOLD =
 		new Interval(30, SECONDS);
 
-	/** Scan "no change" threshold */
-	static private final Interval NO_CHANGE_THRESHOLD =
-		new Interval(24, Interval.Units.HOURS);
-
 	/** Scan "occ spike" trigger threshold */
 	static private final Interval OCC_SPIKE_THRESHOLD =
 		new Interval(29, SECONDS);
@@ -441,7 +437,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get the scan "no change" threshold */
 	private Interval getNoChangeThreshold() {
-		return NO_CHANGE_THRESHOLD;
+		return LaneCode.fromCode(lane_code).getNoChangeThreshold();
 	}
 
 	/** Get the scan "occ spike" trigger threshold */
