@@ -50,6 +50,9 @@ public class EssRec {
 	public final SubSurfaceSensorsTable ss_table =
 		new SubSurfaceSensorsTable();
 
+	/** Solar radiation values */
+	public final RadiationValues rad_values = new RadiationValues();
+
 	/** Create a new ESS record */
 	public EssRec() { }
 
@@ -143,6 +146,7 @@ public class EssRec {
 		sb.append(precip_values.toJson());
 		sb.append(ps_table.toJson());
 		sb.append(ss_table.toJson());
+		sb.append(rad_values.toJson());
 		// remove trailing comma
 		if (sb.charAt(sb.length() - 1) == ',')
 			sb.setLength(sb.length() - 1);

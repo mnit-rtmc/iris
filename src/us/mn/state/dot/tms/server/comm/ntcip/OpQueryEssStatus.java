@@ -286,7 +286,7 @@ public class OpQueryEssStatus extends OpEss {
 			mess.queryProps();
 			logQuery(ss_table.num_sensors);
 			return ss_table.isDone()
-			      ? null
+			      ? new QueryTotalSun()
 			      : new QuerySubSurfaceTable();
 		}
 	}
@@ -305,7 +305,67 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(sr.temp.node);
 			logQuery(sr.moisture);
 			logQuery(sr.sensor_error);
-			return ss_table.isDone() ? null : this;
+			return ss_table.isDone() ? new QueryTotalSun() : this;
+		}
+	}
+
+
+	/** Phase to query total sun value */
+	protected class QueryTotalSun extends Phase {
+
+		/** Query values */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(ess_rec.rad_values.total_sun);
+			mess.queryProps();
+			logQuery(ess_rec.rad_values.total_sun);
+			return new QueryRadiationV2();
+		}
+	}
+
+	/** Phase to query radiation values (V2) */
+	protected class QueryRadiationV2 extends Phase {
+
+		/** Query values */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(ess_rec.rad_values
+				.instantaneous_terrestrial.node);
+			mess.add(ess_rec.rad_values.instantaneous_solar.node);
+			mess.add(ess_rec.rad_values.total_radiation.node);
+			mess.add(ess_rec.rad_values.total_radiation_period);
+			try {
+				mess.queryProps();
+			}
+			catch (NoSuchName e) {
+				// Note: these objects were introduced in V2
+				return new QueryRadiationV1();
+			}
+			logQuery(ess_rec.rad_values
+				.instantaneous_terrestrial.node);
+			logQuery(ess_rec.rad_values.instantaneous_solar.node);
+			logQuery(ess_rec.rad_values.total_radiation.node);
+			logQuery(ess_rec.rad_values.total_radiation_period);
+			return null;
+		}
+	}
+
+	/** Phase to query radiation values (V1) */
+	protected class QueryRadiationV1 extends Phase {
+
+		/** Query values */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(ess_rec.rad_values.solar_radiation);
+			try {
+				mess.queryProps();
+			}
+			catch (NoSuchName e) {
+				// Note: this object was deprecated in V2
+				return null;
+			}
+			logQuery(ess_rec.rad_values.solar_radiation);
+			return null;
 		}
 	}
 
