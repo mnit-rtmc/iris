@@ -119,7 +119,6 @@ public class OpQueryEssStatus extends OpEss {
 			mess.add(tr.spot_direction.node);
 			mess.add(tr.gust_speed.node);
 			mess.add(tr.gust_direction.node);
-			mess.add(tr.situation);
 			mess.queryProps();
 			logQuery(tr.avg_speed.node);
 			logQuery(tr.avg_direction.node);
@@ -127,7 +126,6 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(tr.spot_direction.node);
 			logQuery(tr.gust_speed.node);
 			logQuery(tr.gust_direction.node);
-			logQuery(tr.situation);
 			return ws_table.isDone()
 			      ? new QueryTemperatureSensors()
 			      : this;
@@ -146,7 +144,6 @@ public class OpQueryEssStatus extends OpEss {
 			mess.add(ws_table.spot_speed.node);
 			mess.add(ws_table.gust_direction.node);
 			mess.add(ws_table.gust_speed.node);
-			mess.add(ws_table.situation);
 			try {
 				mess.queryProps();
 			}
@@ -160,7 +157,6 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(ws_table.spot_speed.node);
 			logQuery(ws_table.gust_direction.node);
 			logQuery(ws_table.gust_speed.node);
-			logQuery(ws_table.situation);
 			return new QueryTemperatureSensors();
 		}
 	}

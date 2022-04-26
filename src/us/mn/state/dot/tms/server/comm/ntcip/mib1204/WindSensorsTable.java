@@ -62,6 +62,7 @@ public class WindSensorsTable {
 				windSensorGustSpeed.makeInt(row));
 			gust_direction = new DirectionObject("gust_direction",
 				windSensorGustDirection.makeInt(row));
+			// Note: this object not supported by all vendors
 			situation = new ASN1Enum<WindSituation>(
 				WindSituation.class, windSensorSituation.node,
 				row);
@@ -91,7 +92,8 @@ public class WindSensorsTable {
 	public final HeightObject height = new HeightObject("height",
 		essWindSensorHeight.makeInt());
 
-	/** Wind situation */
+	/** Wind situation.
+	 * Note: this object not supported by all vendors */
 	public final ASN1Enum<WindSituation> situation =
 		new ASN1Enum<WindSituation>(WindSituation.class,
 		essWindSituation.node);
