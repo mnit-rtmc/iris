@@ -25,9 +25,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.TemperatureSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.WindSensorsTable;
-import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
-import static us.mn.state.dot.tms.server.comm.snmp.MIB.*;
 
 /**
  * Operation to query a weather sensor's settings.
@@ -73,21 +71,17 @@ public class OpQueryEssSettings extends OpEss {
 		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			// FIXME: move to EssRec
-			DisplayString sdes = new DisplayString(sysDescr.node);
-			DisplayString scon = new DisplayString(sysContact.node);
-			DisplayString snam = new DisplayString(sysName.node);
-			DisplayString sloc = new DisplayString(sysLocation.node);
-			mess.add(sdes);
-			mess.add(scon);
-			mess.add(snam);
-			mess.add(sloc);
+			mess.add(ess_rec.sys_descr.node);
+			mess.add(ess_rec.sys_contact.node);
+			mess.add(ess_rec.sys_name.node);
+			mess.add(ess_rec.sys_location.node);
 			mess.queryProps();
-			controller.setVersionNotify(sdes.toString());
-			logQuery(sdes);
-			logQuery(scon);
-			logQuery(snam);
-			logQuery(sloc);
+			controller.setVersionNotify(ess_rec.sys_descr
+				.getValue());
+			logQuery(ess_rec.sys_descr.node);
+			logQuery(ess_rec.sys_contact.node);
+			logQuery(ess_rec.sys_name.node);
+			logQuery(ess_rec.sys_location.node);
 			return new QueryElevation();
 		}
 	}

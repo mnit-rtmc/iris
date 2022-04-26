@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import static us.mn.state.dot.tms.server.comm.snmp.MIB.*;
 
 /**
  * A collection of weather condition values which can be converted to JSON.
@@ -27,6 +28,22 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
  * @author Douglas Lau
  */
 public class EssRec {
+
+	/** System description */
+	public final DisplayStringObject sys_descr = new DisplayStringObject(
+		"sys_descr", sysDescr.node);
+
+	/** System contact */
+	public final DisplayStringObject sys_contact = new DisplayStringObject(
+		"sys_contact", sysContact.node);
+
+	/** System name */
+	public final DisplayStringObject sys_name = new DisplayStringObject(
+		"sys_name", sysName.node);
+
+	/** System location */
+	public final DisplayStringObject sys_location = new DisplayStringObject(
+		"sys_location", sysLocation.node);
 
 	/** Atmospheric values */
 	public final AtmosphericValues atmospheric_values =
@@ -140,6 +157,10 @@ public class EssRec {
 	public String toJson() {
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
+		sb.append(sys_descr.toJson());
+		sb.append(sys_contact.toJson());
+		sb.append(sys_name.toJson());
+		sb.append(sys_location.toJson());
 		sb.append(atmospheric_values.toJson());
 		sb.append(ws_table.toJson());
 		sb.append(ts_table.toJson());

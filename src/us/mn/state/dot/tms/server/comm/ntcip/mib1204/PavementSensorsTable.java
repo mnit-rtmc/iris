@@ -21,10 +21,9 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import us.mn.state.dot.tms.units.Distance;
-import us.mn.state.dot.tms.utils.Json;
-
-import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
 import static us.mn.state.dot.tms.units.Distance.Units.METERS;
+import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
+import us.mn.state.dot.tms.utils.Json;
 
 /**
  * Pavement sensors data table, where each table row contains data read from
