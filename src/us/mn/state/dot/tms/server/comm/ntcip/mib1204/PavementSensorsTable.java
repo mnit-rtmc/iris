@@ -15,6 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
@@ -22,6 +23,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.METERS;
+import static us.mn.state.dot.tms.units.Distance.Units.MICROMETERS;
 import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
 import us.mn.state.dot.tms.utils.Json;
 
@@ -51,17 +53,33 @@ public class PavementSensorsTable {
 	}
 
 	/** A depth of 255 is an error condition or missing value */
-	static private final int DEPTH_ERROR_MISSING = 255;
+	static private final int DEPTH_V1_ERROR_MISSING = 255;
 
 	/** Convert depth to Distance.
 	 * @param d Depth in millimeters with 255 indicating an error or missing
 	 *          value.
 	 * @return Depth distance or null for missing */
-	static private Distance convertDepth(ASN1Integer d) {
+	static private Distance convertDepthV1(ASN1Integer d) {
 		if (d != null) {
 			int id = d.getInteger();
-			if (id < DEPTH_ERROR_MISSING)
+			if (id < DEPTH_V1_ERROR_MISSING)
 				return new Distance(id, MILLIMETERS);
+		}
+		return null;
+	}
+
+	/** A depth of 65,535 is an error condition or missing value */
+	static private final int DEPTH_V2_ERROR_MISSING = 65535;
+
+	/** Convert depth to Distance.
+	 * @param d Depth in tenth of millimeters with 65,535 indicating an
+	 *          error or missing value.
+	 * @return Depth distance or null for missing */
+	static private Distance convertDepthV2(ASN1Integer d) {
+		if (d != null) {
+			int id = d.getInteger();
+			if (id < DEPTH_V2_ERROR_MISSING)
+				return new Distance(100 * id, MICROMETERS);
 		}
 		return null;
 	}
@@ -97,6 +115,7 @@ public class PavementSensorsTable {
 		public final TemperatureObject pavement_temp;
 		public final ASN1Enum<PavementSensorError> sensor_error;
 		public final ASN1Integer surface_water_depth;
+		public final ASN1Integer surface_ice_or_water_depth;
 		public final ASN1Integer salinity;
 		public final TemperatureObject surface_freeze_point;
 		public final ASN1Enum<SurfaceBlackIceSignal> black_ice_signal;
@@ -125,7 +144,11 @@ public class PavementSensorsTable {
 				PavementSensorError.class,
 				essPavementSensorError.node, row);
 			surface_water_depth = essSurfaceWaterDepth.makeInt(row);
-			surface_water_depth.setInteger(DEPTH_ERROR_MISSING);
+			surface_water_depth.setInteger(DEPTH_V1_ERROR_MISSING);
+			surface_ice_or_water_depth =
+				essSurfaceIceOrWaterDepth.makeInt(row);
+			surface_ice_or_water_depth.setInteger(
+				DEPTH_V2_ERROR_MISSING);
 			salinity = essSurfaceSalinity.makeInt(row);
 			salinity.setInteger(SALINITY_ERROR_MISSING);
 			surface_freeze_point = new TemperatureObject(
@@ -183,10 +206,30 @@ public class PavementSensorsTable {
 			return (pse != null && pse.isError()) ? pse : null;
 		}
 
-		/** Get surface water depth in meters */
-		public Float getSurfaceWaterDepth() {
-			Distance d = convertDepth(surface_water_depth);
-			return (d != null) ? d.asFloat(METERS) : null;
+		/** Get surface water depth formatted to meter units */
+		private String getSurfaceWaterDepth() {
+			Distance d = convertDepthV1(surface_water_depth);
+			if (d != null) {
+				Float mm = d.asFloat(METERS);
+				NumberFormat f = NumberFormat.getInstance();
+				f.setMaximumFractionDigits(3); // mm
+				f.setMinimumFractionDigits(1);
+				return f.format(mm);
+			} else
+				return null;
+		}
+
+		/** Get surface ice or water depth formatted to meter units */
+		private String getSurfaceIceOrWaterDepth() {
+			Distance d = convertDepthV2(surface_ice_or_water_depth);
+			if (d != null) {
+				Float mm = d.asFloat(METERS);
+				NumberFormat f = NumberFormat.getInstance();
+				f.setMaximumFractionDigits(4); // tenth of mm
+				f.setMinimumFractionDigits(1);
+				return f.format(mm);
+			} else
+				return null;
 		}
 
 		/** Get surface salinity in parts per 100,000 by weight */
@@ -222,6 +265,8 @@ public class PavementSensorsTable {
 				getPavementSensorError()));
 			sb.append(Json.num("surface_water_depth",
 				getSurfaceWaterDepth()));
+			sb.append(Json.num("surface_ice_or_water_depth",
+				getSurfaceIceOrWaterDepth()));
 			sb.append(Json.num("salinity", getSalinity()));
 			sb.append(surface_freeze_point.toJson());
 			sb.append(Json.str("black_ice_signal",

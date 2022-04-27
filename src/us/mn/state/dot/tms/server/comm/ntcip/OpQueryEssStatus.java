@@ -242,19 +242,20 @@ public class OpQueryEssStatus extends OpEss {
 		}
 	}
 
-	/** Phase to query all rows in pavement table */
+	/** Phase to query rows in pavement table */
 	protected class QueryPavementTable extends Phase {
+		private final PavementSensorsTable.Row pr;
+		private QueryPavementTable() {
+			pr = ps_table.addRow();
+		}
 
-		/** Query */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			PavementSensorsTable.Row pr = ps_table.addRow();
 			mess.add(pr.surface_status);
 			mess.add(pr.surface_temp.node);
 			mess.add(pr.pavement_temp.node);
 			mess.add(pr.surface_freeze_point.node);
 			mess.add(pr.sensor_error);
-			mess.add(pr.surface_water_depth);
 			mess.add(pr.salinity);
 			mess.add(pr.black_ice_signal);
 			mess.queryProps();
@@ -263,12 +264,58 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(pr.pavement_temp.node);
 			logQuery(pr.surface_freeze_point.node);
 			logQuery(pr.sensor_error);
-			logQuery(pr.surface_water_depth);
 			logQuery(pr.salinity);
 			logQuery(pr.black_ice_signal);
+			return new QueryPavementTableV2(pr);
+		}
+	}
+
+	/** Phase to query pavement table data (V2) */
+	protected class QueryPavementTableV2 extends Phase {
+		private final PavementSensorsTable.Row pr;
+		private QueryPavementTableV2(PavementSensorsTable.Row r) {
+			pr = r;
+		}
+
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(pr.surface_ice_or_water_depth);
+			// Note: essSurfaceConductivityV2 could be polled here
+			try {
+				mess.queryProps();
+				logQuery(pr.surface_ice_or_water_depth);
+				return ps_table.isDone()
+				      ? new QuerySubSurface()
+				      : new QueryPavementTable();
+			}
+			catch (NoSuchName e) {
+				// Note: this object was introduced in V2
+				return new QueryPavementTableV1(pr);
+			}
+		}
+	}
+
+	/** Phase to query pavement table data (V1) */
+	protected class QueryPavementTableV1 extends Phase {
+		private final PavementSensorsTable.Row pr;
+		private QueryPavementTableV1(PavementSensorsTable.Row r) {
+			pr = r;
+		}
+
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(pr.surface_water_depth);
+			// Note: essSurfaceConductivity could be polled here
+			try {
+				mess.queryProps();
+				logQuery(pr.surface_water_depth);
+			}
+			catch (NoSuchName e) {
+				// Note: this object was deprecated in V2
+			}
 			return ps_table.isDone()
 			      ? new QuerySubSurface()
-			      : this;
+			      : new QueryPavementTable();
 		}
 	}
 
@@ -321,7 +368,6 @@ public class OpQueryEssStatus extends OpEss {
 	/** Phase to query cloud situation value */
 	protected class QueryCloudSituation extends Phase {
 
-		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(ess_rec.rad_values.cloud_situation);
@@ -329,7 +375,9 @@ public class OpQueryEssStatus extends OpEss {
 				mess.queryProps();
 				logQuery(ess_rec.rad_values.cloud_situation);
 			}
-			catch (NoSuchName e) { }
+			catch (NoSuchName e) {
+				// Not supported by some vendors...
+			}
 			return new QueryRadiationV2();
 		}
 	}
