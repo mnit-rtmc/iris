@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,10 +94,15 @@ public class OpMeterTiming extends OpNatch {
 		setPolling(false);
 	}
 
-	/** Parse data received from controller */
+	/** Get the property */
 	@Override
-	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
-		prop.decodeStore(op, rx_buf);
+	protected NatchProp getProp() {
+		return prop;
+	}
+
+	/** Handle received property */
+	@Override
+	protected void handleReceived(Operation op, NatchProp pr) {
 		setDone(true);
 	}
 

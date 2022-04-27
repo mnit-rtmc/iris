@@ -67,20 +67,27 @@ public class OpDetectorStatus extends OpNatch {
 		return !isPolling();
 	}
 
-	/** Parse data received from controller */
+	/** Get the property */
 	@Override
-	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
-		DetectorStatusProp prop = new DetectorStatusProp(new Counter());
-		prop.decodeQuery(op, rx_buf);
-		props.addLast(prop);
-		String received = prop.getReceivedId();
-		// Do not log a DS message more than once
-		if (!logged.contains(received)) {
-			prop.logEvent(op);
-			logged.addLast(received);
-			if (logged.size() > 24)
-				logged.removeFirst();
+	protected NatchProp getProp() {
+		return new DetectorStatusProp(new Counter());
+	}
+
+	/** Handle received property */
+	@Override
+	protected void handleReceived(Operation op, NatchProp prop) {
+		if (prop instanceof DetectorStatusProp) {
+			DetectorStatusProp ds = (DetectorStatusProp) prop;
+			props.addLast(ds);
+			String received = ds.getReceivedId();
+			// Do not log a DS message more than once
+			if (!logged.contains(received)) {
+				ds.logEvent(op);
+				logged.addLast(received);
+				if (logged.size() > 24)
+					logged.removeFirst();
+			}
+			setPolling(true);
 		}
-		setPolling(true);
 	}
 }

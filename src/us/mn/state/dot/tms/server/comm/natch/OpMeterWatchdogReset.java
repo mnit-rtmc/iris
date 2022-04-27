@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,11 +55,17 @@ public class OpMeterWatchdogReset extends OpNatch {
 		}
 	}
 
-	/** Parse data received from controller */
+	/** Get the property */
 	@Override
-	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
+	protected NatchProp getProp() {
+		return prop;
+	}
+
+	/** Handle received property */
+	@Override
+	protected void handleReceived(Operation op, NatchProp pr) {
+		assert pr == prop;
 		if (pin != null) {
-			prop.decodeStore(op, rx_buf);
 			if (prop.getStatus()) {
 				// FIXME: add "waiting" state to OpStep so that
 				//        we don't sleep on BasePoller thread

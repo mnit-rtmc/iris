@@ -40,10 +40,16 @@ public class OpFirmwareVersion extends OpNatch {
 		setPolling(false);
 	}
 
-	/** Parse data received from controller */
+	/** Get the property */
 	@Override
-	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
-		prop.decodeQuery(op, rx_buf);
+	protected NatchProp getProp() {
+		return prop;
+	}
+
+	/** Handle received property */
+	@Override
+	protected void handleReceived(Operation op, NatchProp pr) {
+		assert pr == prop;
 		op.getController().setVersionNotify(prop.getVersion());
 		setDone(true);
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,13 +15,10 @@
 package us.mn.state.dot.tms.server.comm.natch;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import us.mn.state.dot.tms.server.comm.ControllerProp;
-import us.mn.state.dot.tms.server.comm.NotReceivedException;
-import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.utils.HexString;
 
@@ -71,38 +68,8 @@ abstract public class NatchProp extends ControllerProp {
 		message_id = HexString.format(c.next(), 4);
 	}
 
-	/** Decode a STORE response */
-	@Override
-	public void decodeStore(Operation op, ByteBuffer rx_buf)
-		throws IOException
-	{
-		byte[] buf = new byte[rx_buf.remaining()];
-		rx_buf.get(buf);
-		doRecv(op, new String(buf, UTF8));
-	}
-
-	/** Decode a QUERY response */
-	@Override
-	public void decodeQuery(Operation op, ByteBuffer rx_buf)
-		throws IOException
-	{
-		byte[] buf = new byte[rx_buf.remaining()];
-		rx_buf.get(buf);
-		doRecv(op, new String(buf, UTF8));
-	}
-
-	/** Parse received message */
-	private void doRecv(Operation op, String msgs) throws IOException {
-		boolean received = false;
-		for (String msg : msgs.split("\n")) {
-			received |= parseMsg(op, msg);
-		}
-		if (!received)
-			throw new NotReceivedException();
-	}
-
 	/** Parse one received message */
-	private boolean parseMsg(Operation op, String msg) throws IOException {
+	boolean parseMsg(String msg) throws IOException {
 		String[] param = msg.split(",");
 		if (param.length >= 2 &&
 		    param[0].equals(code()) &&

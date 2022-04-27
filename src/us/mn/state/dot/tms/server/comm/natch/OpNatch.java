@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,10 @@
  */
 package us.mn.state.dot.tms.server.comm.natch;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.server.comm.NotReceivedException;
+import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
@@ -40,5 +44,31 @@ abstract public class OpNatch extends OpStep {
 	@Override
 	public OpStep next() {
 		return done ? null : this;
+	}
+
+	/** Parse data received from controller */
+	@Override
+	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
+		boolean received = false;
+		byte[] buf = new byte[rx_buf.remaining()];
+		rx_buf.get(buf);
+		String msgs = new String(buf, NatchProp.UTF8);
+		for (String msg : msgs.split("\n")) {
+			NatchProp prop = getProp();
+			if (prop.parseMsg(msg)) {
+				handleReceived(op, prop);
+				received = true;
+			}
+		}
+		if (!received)
+			throw new NotReceivedException();
+	}
+
+	/** Get the property */
+	abstract protected NatchProp getProp();
+
+	/** Handle received property */
+	protected void handleReceived(Operation op, NatchProp prop) {
+		// can be overridden
 	}
 }

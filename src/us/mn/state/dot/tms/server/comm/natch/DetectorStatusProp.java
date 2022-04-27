@@ -110,16 +110,6 @@ public class DetectorStatusProp extends DetectorProp {
 		tx_buf.put(msg.getBytes(UTF8));
 	}
 
-	/** Decode a QUERY response */
-	@Override
-	public void decodeQuery(Operation op, ByteBuffer rx_buf)
-		throws IOException
-	{
-		// Clear the detector status
-		detector_num = -1;
-		super.decodeQuery(op, rx_buf);
-	}
-
 	/** Get the message code */
 	@Override
 	protected String code() {
