@@ -130,7 +130,10 @@ public class AtmosphericValues {
 	/** Get the visibility situation */
 	public VisibilitySituation getVisibilitySituation() {
 		VisibilitySituation vs = visibility_situation.getEnum();
-		return (vs != VisibilitySituation.undefined) ? vs : null;
+		return (vs != VisibilitySituation.undefined &&
+		        vs != VisibilitySituation.unknown)
+		      ? vs
+		      : null;
 	}
 
 	/** Get JSON representation */
