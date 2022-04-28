@@ -352,20 +352,37 @@ impl WeatherData {
     /// Get wind data as HTML
     fn wind_html(&self, wind_sensor: &[WindSensor]) -> String {
         let mut html = String::new();
-        html.push_str("<details><summary>🌬️ Wind</summary><ul>");
+        html.push_str("<details><summary>🌬️ Wind");
+        if let Some(ws) = wind_sensor.iter().next() {
+            if let Some(dir) = ws.avg_direction {
+                html.push_str(" 🧭 ");
+                html.push_str(&wind_dir_html(dir));
+            }
+            if let Some(speed) = ws.avg_speed {
+                html.push(' ');
+                html.push_str(&format_speed(speed));
+            }
+        }
+        html.push_str("</summary><ul>");
         for (i, ws) in wind_sensor.iter().enumerate() {
-            let li = format!("<li>#{i} ");
-            if ws.avg_direction.is_some() || ws.avg_speed.is_some() {
-                html.push_str(&li);
-                if let Some(dir) = ws.avg_direction {
-                    html.push_str("Avg 🧭 ");
-                    html.push_str(&wind_dir_html(dir));
+            let li = if wind_sensor.len() > 1 {
+                format!("<li>#{i} ")
+            } else {
+                format!("<li>")
+            };
+            if i > 0 {
+                if ws.avg_direction.is_some() || ws.avg_speed.is_some() {
+                    html.push_str(&li);
+                    if let Some(dir) = ws.avg_direction {
+                        html.push_str("Avg 🧭 ");
+                        html.push_str(&wind_dir_html(dir));
+                    }
+                    if let Some(speed) = ws.avg_speed {
+                        html.push(' ');
+                        html.push_str(&format_speed(speed));
+                    }
+                    html.push_str("</li>");
                 }
-                if let Some(speed) = ws.avg_speed {
-                    html.push(' ');
-                    html.push_str(&format_speed(speed));
-                }
-                html.push_str("</li>");
             }
             if ws.spot_direction.is_some() || ws.spot_speed.is_some() {
                 html.push_str(&li);
@@ -399,9 +416,10 @@ impl WeatherData {
     /// Get radiation data as HTML
     fn radiation_html(&self) -> String {
         let mut html = String::new();
-        html.push_str("<details><summary>Sky ");
-        if let Some(situation) = &self.cloud_situation {
-            html.push_str(cloud_situation(situation));
+        html.push_str("<details><summary>");
+        match &self.cloud_situation {
+            Some(situation) => html.push_str(cloud_situation(situation)),
+            None => html.push_str("Sky"),
         }
         html.push_str("</summary></details>");
         html
