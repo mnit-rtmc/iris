@@ -65,6 +65,7 @@ pub struct WeatherData {
     precip_12_hours: Option<f32>,
     precip_24_hours: Option<f32>,
     wind_sensor: Option<Vec<WindSensor>>,
+    cloud_situation: Option<String>,
 }
 
 /// Weather Sensor
@@ -146,7 +147,7 @@ fn temp_format(temp: f32) -> String {
 /// Get precipitation situation string (from NTCIP 1204)
 fn precip_situation(situation: &str) -> &'static str {
     match situation {
-        "noPrecipitation" => "☀️ No Precip",
+        "noPrecipitation" => "🌂 No Precip",
         "unidentifiedSlight" => "🌧️ Slight precip",
         "unidentifiedModerate" => "🌧️ Moderate precip",
         "unidentifiedHeavy" => "🌧️ Heavy precip",
@@ -180,6 +181,18 @@ fn speed_format(speed: f32) -> String {
     format!("{speed:.0}")
 }
 
+/// Get cloud situation string (from NTCIP 1204)
+fn cloud_situation(situation: &str) -> &'static str {
+    match situation {
+        "overcast" => "☁️ Overcast",
+        "cloudy" => "🌥️ Mostly cloudy",
+        "partlyCloudy" => "⛅ Partly cloudy",
+        "mostlyClear" => "🌤️ Mostly clear",
+        "clear" => "☀️ Clear skies",
+        _ => "☁️ Unknown",
+    }
+}
+
 impl WeatherData {
     /// Get weather data as HTML
     fn to_html(&self) -> String {
@@ -197,6 +210,11 @@ impl WeatherData {
             || self.max_air_temp.is_some()
         {
             html.push_str(&self.temp_html());
+        }
+        if let Some(situation) = &self.cloud_situation {
+            html.push_str("<div class='row left'>");
+            html.push_str(cloud_situation(situation));
+            html.push_str("</div>");
         }
         if self.precip_situation.is_some()
             || self.precip_1_hour.is_some()
@@ -315,12 +333,12 @@ impl WeatherData {
     /// Get wind data as HTML
     fn wind_html(&self, wind_sensor: &[WindSensor]) -> String {
         let mut html = String::new();
-        html.push_str("<table><tr><th>🌬️ Wind<th>Avg<th>Spot<th>Gust");
+        html.push_str("<table><tr><th>🌬️<th>Wind<th>Avg<th>Spot<th>Gust");
         for (i, ws) in wind_sensor.iter().enumerate() {
             let i = i.to_string();
-            html.push_str("<tr><td>#");
+            html.push_str("<tr><td rowspan='2'>#");
             html.push_str(&i);
-            html.push_str(" Dir 🧭<td>");
+            html.push_str("<td>Dir 🧭<td>");
             if let Some(avg_dir) = ws.avg_direction {
                 html.push_str(&wind_dir_html(avg_dir));
             }
@@ -332,9 +350,7 @@ impl WeatherData {
             if let Some(gust_dir) = ws.gust_direction {
                 html.push_str(&wind_dir_html(gust_dir));
             }
-            html.push_str("<tr><td>#");
-            html.push_str(&i);
-            html.push_str("Speed (");
+            html.push_str("<tr><td>Speed (");
             html.push_str(DistUnit::LABEL);
             html.push('/');
             html.push_str(SpeedUnit::LABEL);
