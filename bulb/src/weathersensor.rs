@@ -38,11 +38,11 @@ pub struct AirTemp {
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct WindSensor {
     avg_speed: Option<f32>,
-    avg_dir: Option<u32>,
+    avg_direction: Option<u32>,
     spot_speed: Option<f32>,
-    spot_dir: Option<u32>,
+    spot_direction: Option<u32>,
     gust_speed: Option<f32>,
-    gust_dir: Option<u32>,
+    gust_direction: Option<u32>,
 }
 
 /// Weather Sensor Data
@@ -321,15 +321,15 @@ impl WeatherData {
             html.push_str("<tr><td>#");
             html.push_str(&i);
             html.push_str(" Dir 🧭<td>");
-            if let Some(avg_dir) = ws.avg_dir {
+            if let Some(avg_dir) = ws.avg_direction {
                 html.push_str(&wind_dir_html(avg_dir));
             }
             html.push_str("<td>");
-            if let Some(spot_dir) = ws.spot_dir {
+            if let Some(spot_dir) = ws.spot_direction {
                 html.push_str(&wind_dir_html(spot_dir));
             }
             html.push_str("<td>");
-            if let Some(gust_dir) = ws.gust_dir {
+            if let Some(gust_dir) = ws.gust_direction {
                 html.push_str(&wind_dir_html(gust_dir));
             }
             html.push_str("<tr><td>#");
