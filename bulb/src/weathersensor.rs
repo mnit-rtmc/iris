@@ -34,6 +34,17 @@ pub struct AirTemp {
     air_temp: Option<f32>,
 }
 
+/// Wind sensor data
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct WindSensor {
+    avg_speed: Option<f32>,
+    avg_dir: Option<u32>,
+    spot_speed: Option<f32>,
+    spot_dir: Option<u32>,
+    gust_speed: Option<f32>,
+    gust_dir: Option<u32>,
+}
+
 /// Weather Sensor Data
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct WeatherData {
@@ -53,12 +64,7 @@ pub struct WeatherData {
     precip_6_hours: Option<f32>,
     precip_12_hours: Option<f32>,
     precip_24_hours: Option<f32>,
-    avg_wind_dir: Option<u32>,
-    avg_wind_speed: Option<f32>,
-    spot_wind_dir: Option<u32>,
-    spot_wind_speed: Option<f32>,
-    gust_wind_dir: Option<u32>,
-    gust_wind_speed: Option<f32>,
+    wind_sensor: Option<Vec<WindSensor>>,
 }
 
 /// Weather Sensor
@@ -201,14 +207,8 @@ impl WeatherData {
         {
             html.push_str(&self.precipitation_html());
         }
-        if self.avg_wind_dir.is_some()
-            || self.avg_wind_speed.is_some()
-            || self.spot_wind_dir.is_some()
-            || self.spot_wind_speed.is_some()
-            || self.gust_wind_dir.is_some()
-            || self.gust_wind_speed.is_some()
-        {
-            html.push_str(&self.wind_html());
+        if let Some(wind_sensor) = &self.wind_sensor {
+            html.push_str(&self.wind_html(wind_sensor));
         }
         html
     }
@@ -313,42 +313,49 @@ impl WeatherData {
     }
 
     /// Get wind data as HTML
-    fn wind_html(&self) -> String {
+    fn wind_html(&self, wind_sensor: &[WindSensor]) -> String {
         let mut html = String::new();
         html.push_str("<table><tr><th>🌬️ Wind<th>Avg<th>Spot<th>Gust");
-        html.push_str("<tr><td>Dir 🧭<td>");
-        if let Some(avg_wind_dir) = self.avg_wind_dir {
-            html.push_str(&wind_dir_html(avg_wind_dir));
-        }
-        html.push_str("<td>");
-        if let Some(spot_wind_dir) = self.spot_wind_dir {
-            html.push_str(&wind_dir_html(spot_wind_dir));
-        }
-        html.push_str("<td>");
-        if let Some(gust_wind_dir) = self.gust_wind_dir {
-            html.push_str(&wind_dir_html(gust_wind_dir));
-        }
-        html.push_str("<tr><td>Speed (");
-        html.push_str(DistUnit::LABEL);
-        html.push('/');
-        html.push_str(SpeedUnit::LABEL);
-        html.push_str(")<td>");
-        if let Some(avg_wind_speed) = self.avg_wind_speed {
-            html.push_str("<span class='info'>");
-            html.push_str(&speed_format(avg_wind_speed));
-            html.push_str("</span>");
-        }
-        html.push_str("<td>");
-        if let Some(spot_wind_speed) = self.spot_wind_speed {
-            html.push_str("<span class='info'>");
-            html.push_str(&speed_format(spot_wind_speed));
-            html.push_str("</span>");
-        }
-        html.push_str("<td>");
-        if let Some(gust_wind_speed) = self.gust_wind_speed {
-            html.push_str("<span class='info'>");
-            html.push_str(&speed_format(gust_wind_speed));
-            html.push_str("</span>");
+        for (i, ws) in wind_sensor.iter().enumerate() {
+            let i = i.to_string();
+            html.push_str("<tr><td>#");
+            html.push_str(&i);
+            html.push_str(" Dir 🧭<td>");
+            if let Some(avg_dir) = ws.avg_dir {
+                html.push_str(&wind_dir_html(avg_dir));
+            }
+            html.push_str("<td>");
+            if let Some(spot_dir) = ws.spot_dir {
+                html.push_str(&wind_dir_html(spot_dir));
+            }
+            html.push_str("<td>");
+            if let Some(gust_dir) = ws.gust_dir {
+                html.push_str(&wind_dir_html(gust_dir));
+            }
+            html.push_str("<tr><td>#");
+            html.push_str(&i);
+            html.push_str("Speed (");
+            html.push_str(DistUnit::LABEL);
+            html.push('/');
+            html.push_str(SpeedUnit::LABEL);
+            html.push_str(")<td>");
+            if let Some(avg_speed) = ws.avg_speed {
+                html.push_str("<span class='info'>");
+                html.push_str(&speed_format(avg_speed));
+                html.push_str("</span>");
+            }
+            html.push_str("<td>");
+            if let Some(spot_speed) = ws.spot_speed {
+                html.push_str("<span class='info'>");
+                html.push_str(&speed_format(spot_speed));
+                html.push_str("</span>");
+            }
+            html.push_str("<td>");
+            if let Some(gust_speed) = ws.gust_speed {
+                html.push_str("<span class='info'>");
+                html.push_str(&speed_format(gust_speed));
+                html.push_str("</span>");
+            }
         }
         html.push_str("</table>");
         html
