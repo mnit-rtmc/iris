@@ -169,8 +169,11 @@ public class PrecipitationValues {
 
 	/** Get the precipitation situation */
 	public PrecipSituation getPrecipSituation() {
-		PrecipSituation eps = precip_situation.getEnum();
-		return (eps != PrecipSituation.undefined) ? eps : null;
+		PrecipSituation ps = precip_situation.getEnum();
+		return (ps != PrecipSituation.undefined &&
+		        ps != PrecipSituation.unknown)
+		      ? ps
+		      : null;
 	}
 
 	/** Get JSON representation */

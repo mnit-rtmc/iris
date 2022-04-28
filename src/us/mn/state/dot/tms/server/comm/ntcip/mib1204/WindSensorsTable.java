@@ -42,8 +42,11 @@ public class WindSensorsTable {
 		public final ASN1Enum<WindSituation> situation;
 
 		private WindSituation getSituation() {
-			WindSituation sit = situation.getEnum();
-			return (sit != WindSituation.undefined) ? sit : null;
+			WindSituation ws = situation.getEnum();
+			return (ws != WindSituation.undefined &&
+			        ws != WindSituation.unknown)
+			      ? ws
+			      : null;
 		}
 
 		/** Create a table row */
@@ -155,8 +158,11 @@ public class WindSensorsTable {
 
 	/** Get the wind situation */
 	private WindSituation getSituation() {
-		WindSituation sit = situation.getEnum();
-		return (sit != WindSituation.undefined) ? sit : null;
+		WindSituation ws = situation.getEnum();
+		return (ws != WindSituation.undefined &&
+		        ws != WindSituation.unknown)
+		      ? ws
+		      : null;
 	}
 
 	/** Get two minute average wind speed */
