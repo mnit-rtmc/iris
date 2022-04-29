@@ -27,6 +27,9 @@ type DistUnit = mag::length::mi;
 type RainUnit = mag::length::In;
 type SpeedUnit = mag::time::h;
 
+/// Barometer conversion
+const PASCALS_TO_IN_HG: f32 = 0.0002953;
+
 /// Air temp data
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct AirTemp {
@@ -50,6 +53,7 @@ pub struct WeatherData {
     visibility_situation: Option<String>,
     visibility: Option<u32>,
     relative_humidity: Option<u32>,
+    atmospheric_pressure: Option<u32>,
     temperature_sensor: Option<Vec<AirTemp>>,
     dew_point_temp: Option<f32>,
     wet_bulb_temp: Option<f32>,
@@ -105,7 +109,7 @@ fn vis_situation(situation: &str) -> &'static str {
         "blowingDustOrSand" => "💨 dust",
         "sunGlare" => "🕶️ sun glare",
         "swarmOfInsects" => "🦗 swarm", // seriously?!?
-        _ => "Visibility",
+        _ => "Atmosphere",
     }
 }
 
@@ -233,11 +237,14 @@ impl WeatherData {
     /// Get weather data as HTML
     fn to_html(&self) -> String {
         let mut html = String::new();
+        if self.temperature_exists() {
+            html.push_str(&self.temperature_html());
+        }
         if self.atmospheric_exists() {
             html.push_str(&self.atmospheric_html());
         }
-        if self.temperature_exists() {
-            html.push_str(&self.temperature_html());
+        if self.radiation_exists() {
+            html.push_str(&self.radiation_html());
         }
         if let Some(wind_sensor) = &self.wind_sensor {
             html.push_str(&self.wind_html(wind_sensor));
@@ -245,28 +252,6 @@ impl WeatherData {
         if self.precip_exists() {
             html.push_str(&self.precipitation_html());
         }
-        if self.radiation_exists() {
-            html.push_str(&self.radiation_html());
-        }
-        html
-    }
-
-    /// Get atmospheric HTML
-    fn atmospheric_html(&self) -> String {
-        let mut html = String::new();
-        html.push_str("<details><summary>");
-        html.push_str(vis_situation(
-            &self.visibility_situation.as_deref().unwrap_or("unknown"),
-        ));
-        html.push_str("</summary><ul>");
-        if let Some(visibility) = self.visibility {
-            let vis = (f64::from(visibility) * m).to::<DistUnit>();
-            html.push_str(&format!("<li>Visibility {vis:.1}</li>"));
-        }
-        if let Some(rh) = self.relative_humidity {
-            html.push_str(&format!("<li>RH {rh}%</li>"));
-        }
-        html.push_str("</ul></details>");
         html
     }
 
@@ -318,6 +303,64 @@ impl WeatherData {
             html.push_str(&format!("<li>Wet bulb "));
             html.push_str(&format_temp(temp));
             html.push_str(&format!("</li>"));
+        }
+        html.push_str("</ul></details>");
+        html
+    }
+
+    /// Get atmospheric HTML
+    fn atmospheric_html(&self) -> String {
+        let mut html = String::new();
+        html.push_str("<details><summary>");
+        html.push_str(vis_situation(
+            &self.visibility_situation.as_deref().unwrap_or("unknown"),
+        ));
+        html.push_str("</summary><ul>");
+        if let Some(visibility) = self.visibility {
+            let vis = (f64::from(visibility) * m).to::<DistUnit>();
+            html.push_str(&format!("<li>Visibility {vis:.1}</li>"));
+        }
+        if let Some(rh) = self.relative_humidity {
+            html.push_str(&format!("<li>RH {rh}%</li>"));
+        }
+        if let Some(p) = self.atmospheric_pressure {
+            let in_hg = (p as f32) * PASCALS_TO_IN_HG;
+            html.push_str(&format!("<li>Barometer {in_hg:.2} inHg</li>"));
+        }
+        html.push_str("</ul></details>");
+        html
+    }
+
+    /// Get radiation data as HTML
+    fn radiation_html(&self) -> String {
+        let mut html = String::new();
+        html.push_str("<details><summary>");
+        match &self.cloud_situation {
+            Some(situation) => html.push_str(cloud_situation(situation)),
+            None => html.push_str("Sky"),
+        }
+        html.push_str("</summary><ul>");
+        if let Some(sun) = &self.total_sun {
+            html.push_str(&format!("<li>{sun} minutes of sun</li>"));
+        }
+        if let Some(rad) = &self.solar_radiation {
+            html.push_str(&format!("<li>Solar radiation: {rad} J/m²</li>"));
+        }
+        if let Some(rad) = &self.instantaneous_terrestrial_radiation {
+            html.push_str(&format!(
+                "<li>Instantaneous terrestrial: {rad} W/m²</li>"
+            ));
+        }
+        if let Some(rad) = &self.instantaneous_solar_radiation {
+            html.push_str(&format!("<li>Instantaneous solar: {rad} W/m²</li>"));
+        }
+        if let Some(rad) = &self.total_radiation {
+            html.push_str(&format!("<li>Total radiation: {rad} W/m²</li>"));
+            if let Some(p) = &self.total_radiation_period {
+                html.push_str(&format!(
+                    "<li>Total radiation period: {p} s</li>"
+                ));
+            }
         }
         html.push_str("</ul></details>");
         html
@@ -418,41 +461,6 @@ impl WeatherData {
                     html.push_str(&format_speed(speed));
                 }
                 html.push_str("</li>");
-            }
-        }
-        html.push_str("</ul></details>");
-        html
-    }
-
-    /// Get radiation data as HTML
-    fn radiation_html(&self) -> String {
-        let mut html = String::new();
-        html.push_str("<details><summary>");
-        match &self.cloud_situation {
-            Some(situation) => html.push_str(cloud_situation(situation)),
-            None => html.push_str("Sky"),
-        }
-        html.push_str("</summary><ul>");
-        if let Some(sun) = &self.total_sun {
-            html.push_str(&format!("<li>{sun} minutes of sun</li>"));
-        }
-        if let Some(rad) = &self.solar_radiation {
-            html.push_str(&format!("<li>Solar radiation: {rad} J/m²</li>"));
-        }
-        if let Some(rad) = &self.instantaneous_terrestrial_radiation {
-            html.push_str(&format!(
-                "<li>Instantaneous terrestrial: {rad} W/m²</li>"
-            ));
-        }
-        if let Some(rad) = &self.instantaneous_solar_radiation {
-            html.push_str(&format!("<li>Instantaneous solar: {rad} W/m²</li>"));
-        }
-        if let Some(rad) = &self.total_radiation {
-            html.push_str(&format!("<li>Total radiation: {rad} W/m²</li>"));
-            if let Some(p) = &self.total_radiation_period {
-                html.push_str(&format!(
-                    "<li>Total radiation period: {p} s</li>"
-                ));
             }
         }
         html.push_str("</ul></details>");
