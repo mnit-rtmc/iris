@@ -94,7 +94,7 @@ type WeatherSensorAnc = DeviceAnc<WeatherSensor>;
 /// Get visibility situation string (from NTCIP 1204)
 fn vis_situation(situation: &str) -> &'static str {
     match situation {
-        "other" => "⛆ other",
+        "other" => "⛆ other visibility anomaly",
         "clear" => "🔭 clear",
         "fogNotPatchy" => "🌫️ fog",
         "patchyFog" => "🌁 patchy fog",
@@ -105,7 +105,7 @@ fn vis_situation(situation: &str) -> &'static str {
         "blowingDustOrSand" => "💨 dust",
         "sunGlare" => "🕶️ sun glare",
         "swarmOfInsects" => "🦗 swarm", // seriously?!?
-        _ => "❓ unknown",
+        _ => "Visibility",
     }
 }
 
@@ -228,7 +228,6 @@ impl WeatherData {
             || self.instantaneous_terrestrial_radiation.is_some()
             || self.instantaneous_solar_radiation.is_some()
             || self.total_radiation.is_some()
-            || self.total_radiation_period.is_some()
     }
 
     /// Get weather data as HTML
@@ -255,10 +254,10 @@ impl WeatherData {
     /// Get atmospheric HTML
     fn atmospheric_html(&self) -> String {
         let mut html = String::new();
-        html.push_str("<details><summary>Atmosphere ");
-        if let Some(visibility_situation) = &self.visibility_situation {
-            html.push_str(vis_situation(visibility_situation));
-        }
+        html.push_str("<details><summary>");
+        html.push_str(vis_situation(
+            &self.visibility_situation.as_deref().unwrap_or("unknown"),
+        ));
         html.push_str("</summary><ul>");
         if let Some(visibility) = self.visibility {
             let vis = (f64::from(visibility) * m).to::<DistUnit>();
@@ -450,9 +449,11 @@ impl WeatherData {
         }
         if let Some(rad) = &self.total_radiation {
             html.push_str(&format!("<li>Total radiation: {rad} W/m²</li>"));
-        }
-        if let Some(p) = &self.total_radiation_period {
-            html.push_str(&format!("<li>Total radiation period: {p} s</li>"));
+            if let Some(p) = &self.total_radiation_period {
+                html.push_str(&format!(
+                    "<li>Total radiation period: {p} s</li>"
+                ));
+            }
         }
         html.push_str("</ul></details>");
         html
