@@ -26,7 +26,7 @@ use std::time::Duration;
 /// Display Units
 type TempUnit = mag::temp::DegF;
 type DistUnit = mag::length::mi;
-type RainUnit = mag::length::In;
+type DepthUnit = mag::length::In;
 type SpeedUnit = mag::time::h;
 
 /// Barometer conversion
@@ -47,6 +47,19 @@ pub struct WindSensor {
     spot_direction: Option<u32>,
     gust_speed: Option<f32>,
     gust_direction: Option<u32>,
+}
+
+/// Pavement sensor data
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct PavementSensor {
+    surface_status: Option<String>,
+    sensor_error: Option<String>,
+    surface_temp: Option<f32>,
+    pavement_temp: Option<f32>,
+    freeze_point: Option<f32>,
+    ice_or_water_depth: Option<f32>,
+    salinity: Option<u32>,
+    black_ice_signal: Option<String>,
 }
 
 /// Weather Sensor Data
@@ -77,6 +90,7 @@ pub struct WeatherData {
     instantaneous_solar_radiation: Option<i32>,
     total_radiation: Option<i32>,
     total_radiation_period: Option<u32>,
+    pavement_sensor: Option<Vec<PavementSensor>>,
 }
 
 /// Weather Sensor
@@ -175,10 +189,10 @@ fn precip_situation(situation: &str) -> &'static str {
     }
 }
 
-/// Format precipitation quantity
-fn format_precip(precip: f32) -> String {
-    let precip = (f64::from(precip) * mm).to::<RainUnit>();
-    format!("{precip:.2}")
+/// Format depth quantity
+fn format_depth(depth: f32) -> String {
+    let depth = (f64::from(depth) * mm).to::<DepthUnit>();
+    format!("{depth:.2}")
 }
 
 /// Format wind speed quantity
@@ -253,6 +267,9 @@ impl WeatherData {
         }
         if self.precip_exists() {
             html.push_str(&self.precipitation_html());
+        }
+        if let Some(pavement_sensor) = &self.pavement_sensor {
+            html.push_str(&self.pavement_html(pavement_sensor));
         }
         html
     }
@@ -370,43 +387,6 @@ impl WeatherData {
         html
     }
 
-    /// Get precipitation data as HTML
-    fn precipitation_html(&self) -> String {
-        let mut html = String::new();
-        html.push_str("<details><summary>");
-        html.push_str(precip_situation(
-            &self.precip_situation.as_deref().unwrap_or("unknown"),
-        ));
-        html.push_str("</summary><ul>");
-        if let Some(precip) = self.precip_1_hour {
-            html.push_str("<li>1h, ");
-            html.push_str(&format_precip(precip));
-            html.push_str("</li>");
-        }
-        if let Some(precip) = self.precip_3_hours {
-            html.push_str("<li>3h, ");
-            html.push_str(&format_precip(precip));
-            html.push_str("</li>");
-        }
-        if let Some(precip) = self.precip_6_hours {
-            html.push_str("<li>6h, ");
-            html.push_str(&format_precip(precip));
-            html.push_str("</li>");
-        }
-        if let Some(precip) = self.precip_12_hours {
-            html.push_str("<li>12h, ");
-            html.push_str(&format_precip(precip));
-            html.push_str("</li>");
-        }
-        if let Some(precip) = self.precip_24_hours {
-            html.push_str("<li>24h, ");
-            html.push_str(&format_precip(precip));
-            html.push_str("</li>");
-        }
-        html.push_str("</ul></details>");
-        html
-    }
-
     /// Get wind data as HTML
     fn wind_html(&self, wind_sensor: &[WindSensor]) -> String {
         let mut html = String::new();
@@ -468,6 +448,89 @@ impl WeatherData {
             }
         }
         html.push_str("</ul></details>");
+        html
+    }
+
+    /// Get precipitation data as HTML
+    fn precipitation_html(&self) -> String {
+        let mut html = String::new();
+        html.push_str("<details><summary>");
+        html.push_str(precip_situation(
+            &self.precip_situation.as_deref().unwrap_or("unknown"),
+        ));
+        html.push_str("</summary><ul>");
+        if let Some(precip) = self.precip_1_hour {
+            html.push_str("<li>1h, ");
+            html.push_str(&format_depth(precip));
+            html.push_str("</li>");
+        }
+        if let Some(precip) = self.precip_3_hours {
+            html.push_str("<li>3h, ");
+            html.push_str(&format_depth(precip));
+            html.push_str("</li>");
+        }
+        if let Some(precip) = self.precip_6_hours {
+            html.push_str("<li>6h, ");
+            html.push_str(&format_depth(precip));
+            html.push_str("</li>");
+        }
+        if let Some(precip) = self.precip_12_hours {
+            html.push_str("<li>12h, ");
+            html.push_str(&format_depth(precip));
+            html.push_str("</li>");
+        }
+        if let Some(precip) = self.precip_24_hours {
+            html.push_str("<li>24h, ");
+            html.push_str(&format_depth(precip));
+            html.push_str("</li>");
+        }
+        html.push_str("</ul></details>");
+        html
+    }
+
+    /// Get pavement data as HTML
+    fn pavement_html(&self, pavement_sensor: &[PavementSensor]) -> String {
+        let mut html = String::new();
+        for (i, ps) in pavement_sensor.iter().enumerate() {
+            html.push_str("<details><summary>Pavement ");
+            if pavement_sensor.len() > 1 {
+                html.push_str(&format!("#{i} "));
+            };
+            if let Some(status) = &ps.surface_status {
+                html.push_str(status);
+            }
+            html.push_str("</summary><ul>");
+            if let Some(err) = &ps.sensor_error {
+                html.push_str(&format!("<li>{err} error</li>"));
+            }
+            if let Some(temp) = ps.surface_temp {
+                html.push_str("<li>Surface ");
+                html.push_str(&format_temp(temp));
+                html.push_str("</li>");
+            }
+            if let Some(temp) = ps.pavement_temp {
+                html.push_str("<li>Pavement ");
+                html.push_str(&format_temp(temp));
+                html.push_str("</li>");
+            }
+            if let Some(temp) = ps.freeze_point {
+                html.push_str("<li>Freeze point ");
+                html.push_str(&format_temp(temp));
+                html.push_str("</li>");
+            }
+            if let Some(depth) = ps.ice_or_water_depth {
+                html.push_str("<li>Ice/water depth ");
+                html.push_str(&format_depth(depth / 1_000.0));
+                html.push_str("</li>");
+            }
+            if let Some(salinity) = ps.salinity {
+                html.push_str(&format!("<li>Salinity {salinity}</li>"));
+            }
+            if let Some(signal) = &ps.black_ice_signal {
+                html.push_str(&format!("<li>{signal}</li>"));
+            }
+            html.push_str("</ul></details>");
+        }
         html
     }
 }
