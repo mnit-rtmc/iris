@@ -65,6 +65,12 @@ pub struct WeatherData {
     precip_24_hours: Option<f32>,
     wind_sensor: Option<Vec<WindSensor>>,
     cloud_situation: Option<String>,
+    total_sun: Option<u32>,
+    solar_radiation: Option<i32>,
+    instantaneous_terrestrial_radiation: Option<i32>,
+    instantaneous_solar_radiation: Option<i32>,
+    total_radiation: Option<i32>,
+    total_radiation_period: Option<u32>,
 }
 
 /// Weather Sensor
@@ -217,6 +223,12 @@ impl WeatherData {
     /// Check if radiation data exists
     fn radiation_exists(&self) -> bool {
         self.cloud_situation.is_some()
+            || total_sun.is_some()
+            || solar_radiation.is_some()
+            || instantaneous_terrestrial_radiation.is_some()
+            || instantaneous_solar_radiation.is_some()
+            || total_radiation.is_some()
+            || total_radiation_period.is_some()
     }
 
     /// Get weather data as HTML
@@ -228,11 +240,11 @@ impl WeatherData {
         if self.temperature_exists() {
             html.push_str(&self.temperature_html());
         }
-        if self.precip_exists() {
-            html.push_str(&self.precipitation_html());
-        }
         if let Some(wind_sensor) = &self.wind_sensor {
             html.push_str(&self.wind_html(wind_sensor));
+        }
+        if self.precip_exists() {
+            html.push_str(&self.precipitation_html());
         }
         if self.radiation_exists() {
             html.push_str(&self.radiation_html());
@@ -421,7 +433,28 @@ impl WeatherData {
             Some(situation) => html.push_str(cloud_situation(situation)),
             None => html.push_str("Sky"),
         }
-        html.push_str("</summary></details>");
+        html.push_str("</summary><ul>");
+        if let Some(sun) = &self.total_sun {
+            html.push_str(&format!("<li>{sun} minutes of sun</li>"));
+        }
+        if let Some(rad) = &self.solar_radiation {
+            html.push_str(&format!("<li>Solar radiation: {rad} J/m²</li>"));
+        }
+        if let Some(rad) = &self.instantaneous_terrestrial_radiation {
+            html.push_str(&format!(
+                "<li>Instantaneous terrestrial: {rad} W/m²</li>"
+            ));
+        }
+        if let Some(rad) = &self.instantaneous_solar_radiation {
+            html.push_str(&format!("<li>Instantaneous solar: {rad} W/m²</li>"));
+        }
+        if let Some(rad) = &self.total_radiation {
+            html.push_str(&format!("<li>Total radiation: {rad} W/m²</li>"));
+        }
+        if let Some(p) = &self.total_radiation_period {
+            html.push_str(&format!("<li>Total radiation period: {p} s</li>"));
+        }
+        html.push_str("</ul></details>");
         html
     }
 }

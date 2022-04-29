@@ -10,8 +10,9 @@ span {
   margin-left: 0.1rem;
   margin-right: 0.1rem;
 }
-details {
+details summary {
   padding-left: 0.2rem;
+  cursor: pointer;
 }
 textarea {
   resize: none;
