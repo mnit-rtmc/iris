@@ -15,11 +15,13 @@ use crate::resource::{
     disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
+use humantime::format_duration;
 use mag::length::{m, mm};
 use mag::temp::DegC;
 use mag::time::s;
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use std::time::Duration;
 
 /// Display Units
 type TempUnit = mag::temp::DegF;
@@ -340,8 +342,9 @@ impl WeatherData {
             None => html.push_str("Sky"),
         }
         html.push_str("</summary><ul>");
-        if let Some(sun) = &self.total_sun {
-            html.push_str(&format!("<li>{sun} minutes of sun</li>"));
+        if let Some(sun) = self.total_sun {
+            let dur = format_duration(Duration::from_secs(60 * u64::from(sun)));
+            html.push_str(&format!("<li>{dur} of sun</li>"));
         }
         if let Some(rad) = &self.solar_radiation {
             html.push_str(&format!("<li>Solar radiation: {rad} J/m²</li>"));
@@ -356,9 +359,10 @@ impl WeatherData {
         }
         if let Some(rad) = &self.total_radiation {
             html.push_str(&format!("<li>Total radiation: {rad} W/m²</li>"));
-            if let Some(p) = &self.total_radiation_period {
+            if let Some(p) = self.total_radiation_period {
+                let dur = format_duration(Duration::from_secs(p.into()));
                 html.push_str(&format!(
-                    "<li>Total radiation period: {p} s</li>"
+                    "<li>Total radiation period: {dur}</li>"
                 ));
             }
         }
@@ -494,8 +498,6 @@ impl WeatherSensor {
         let location = HtmlStr::new(&self.location).with_len(64);
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
-        let sample_time = self.sample_time.as_deref().unwrap_or("-");
-        let sample = self.sample_html();
         let mut status = format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
@@ -503,13 +505,17 @@ impl WeatherSensor {
             <div class='row'>\
               <span class='info'>{site_id}</span>\
               <span class='info'>{alt_id}</span>\
-            </div>\
-            <div class='row'>\
-              <span>Obs</span>\
-              <span class='info'>{sample_time}</span>\
-            </div>\
-            {sample}"
+            </div>"
         );
+        if let Some(sample_time) = &self.sample_time {
+            status.push_str(&format!(
+                "<div class='row'>\
+                  <span>Obs</span>\
+                  <span class='info'>{sample_time}</span>\
+                </div>"
+            ));
+        }
+        status.push_str(&self.sample_html());
         if config {
             status.push_str("<div class='row'>");
             status.push_str(&anc.controller_button());
