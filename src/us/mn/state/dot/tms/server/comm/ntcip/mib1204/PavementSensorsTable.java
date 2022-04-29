@@ -114,10 +114,10 @@ public class PavementSensorsTable {
 		public final TemperatureObject surface_temp;
 		public final TemperatureObject pavement_temp;
 		public final ASN1Enum<PavementSensorError> sensor_error;
-		public final ASN1Integer surface_water_depth;
-		public final ASN1Integer surface_ice_or_water_depth;
+		public final ASN1Integer water_depth;
+		public final ASN1Integer ice_or_water_depth;
 		public final ASN1Integer salinity;
-		public final TemperatureObject surface_freeze_point;
+		public final TemperatureObject freeze_point;
 		public final ASN1Enum<SurfaceBlackIceSignal> black_ice_signal;
 
 		/** Create a table row */
@@ -143,16 +143,14 @@ public class PavementSensorsTable {
 			sensor_error = new ASN1Enum<PavementSensorError>(
 				PavementSensorError.class,
 				essPavementSensorError.node, row);
-			surface_water_depth = essSurfaceWaterDepth.makeInt(row);
-			surface_water_depth.setInteger(DEPTH_V1_ERROR_MISSING);
-			surface_ice_or_water_depth =
+			water_depth = essSurfaceWaterDepth.makeInt(row);
+			water_depth.setInteger(DEPTH_V1_ERROR_MISSING);
+			ice_or_water_depth =
 				essSurfaceIceOrWaterDepth.makeInt(row);
-			surface_ice_or_water_depth.setInteger(
-				DEPTH_V2_ERROR_MISSING);
+			ice_or_water_depth.setInteger(DEPTH_V2_ERROR_MISSING);
 			salinity = essSurfaceSalinity.makeInt(row);
 			salinity.setInteger(SALINITY_ERROR_MISSING);
-			surface_freeze_point = new TemperatureObject(
-				"surface_freeze_point",
+			freeze_point = new TemperatureObject("freeze_point",
 				essSurfaceFreezePoint.makeInt(row));
 			black_ice_signal = new ASN1Enum<SurfaceBlackIceSignal>(
 				SurfaceBlackIceSignal.class,
@@ -207,8 +205,8 @@ public class PavementSensorsTable {
 		}
 
 		/** Get surface water depth formatted to meter units */
-		private String getSurfaceWaterDepth() {
-			Distance d = convertDepthV1(surface_water_depth);
+		private String getWaterDepth() {
+			Distance d = convertDepthV1(water_depth);
 			if (d != null) {
 				Float mm = d.asFloat(METERS);
 				NumberFormat f = NumberFormat.getInstance();
@@ -220,8 +218,8 @@ public class PavementSensorsTable {
 		}
 
 		/** Get surface ice or water depth formatted to meter units */
-		private String getSurfaceIceOrWaterDepth() {
-			Distance d = convertDepthV2(surface_ice_or_water_depth);
+		private String getIceOrWaterDepth() {
+			Distance d = convertDepthV2(ice_or_water_depth);
 			if (d != null) {
 				Float mm = d.asFloat(METERS);
 				NumberFormat f = NumberFormat.getInstance();
@@ -229,7 +227,7 @@ public class PavementSensorsTable {
 				f.setMinimumFractionDigits(1);
 				return f.format(mm);
 			} else
-				return getSurfaceWaterDepth();
+				return getWaterDepth();
 		}
 
 		/** Get surface salinity in parts per 100,000 by weight */
@@ -237,9 +235,9 @@ public class PavementSensorsTable {
 			return convertSalinity(salinity);
 		}
 
-		/** Get surf freeze temp or null on error */
-		public Integer getSurfFreezePointC() {
-			return surface_freeze_point.getTempC();
+		/** Get surface freeze temp or null on error */
+		public Integer getFreezePointC() {
+			return freeze_point.getTempC();
 		}
 
 		/** Get black ice signal or null on error */
@@ -263,10 +261,10 @@ public class PavementSensorsTable {
 			sb.append(pavement_temp.toJson());
 			sb.append(Json.str("sensor_error",
 				getPavementSensorError()));
-			sb.append(Json.num("surface_ice_or_water_depth",
-				getSurfaceIceOrWaterDepth()));
+			sb.append(Json.num("ice_or_water_depth",
+				getIceOrWaterDepth()));
 			sb.append(Json.num("salinity", getSalinity()));
-			sb.append(surface_freeze_point.toJson());
+			sb.append(freeze_point.toJson());
 			sb.append(Json.str("black_ice_signal",
 				getBlackIceSignal()));
 			// remove trailing comma

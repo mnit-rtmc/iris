@@ -254,7 +254,7 @@ public class OpQueryEssStatus extends OpEss {
 			mess.add(pr.surface_status);
 			mess.add(pr.surface_temp.node);
 			mess.add(pr.pavement_temp.node);
-			mess.add(pr.surface_freeze_point.node);
+			mess.add(pr.freeze_point.node);
 			mess.add(pr.sensor_error);
 			mess.add(pr.salinity);
 			mess.add(pr.black_ice_signal);
@@ -262,7 +262,7 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(pr.surface_status);
 			logQuery(pr.surface_temp.node);
 			logQuery(pr.pavement_temp.node);
-			logQuery(pr.surface_freeze_point.node);
+			logQuery(pr.freeze_point.node);
 			logQuery(pr.sensor_error);
 			logQuery(pr.salinity);
 			logQuery(pr.black_ice_signal);
@@ -279,11 +279,11 @@ public class OpQueryEssStatus extends OpEss {
 
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(pr.surface_ice_or_water_depth);
+			mess.add(pr.ice_or_water_depth);
 			// Note: essSurfaceConductivityV2 could be polled here
 			try {
 				mess.queryProps();
-				logQuery(pr.surface_ice_or_water_depth);
+				logQuery(pr.ice_or_water_depth);
 				return ps_table.isDone()
 				      ? new QuerySubSurface()
 				      : new QueryPavementTable();
@@ -304,11 +304,11 @@ public class OpQueryEssStatus extends OpEss {
 
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(pr.surface_water_depth);
+			mess.add(pr.water_depth);
 			// Note: essSurfaceConductivity could be polled here
 			try {
 				mess.queryProps();
-				logQuery(pr.surface_water_depth);
+				logQuery(pr.water_depth);
 			}
 			catch (NoSuchName e) {
 				// Note: this object was deprecated in V2
