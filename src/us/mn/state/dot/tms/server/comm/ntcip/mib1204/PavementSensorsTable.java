@@ -229,7 +229,7 @@ public class PavementSensorsTable {
 				f.setMinimumFractionDigits(1);
 				return f.format(mm);
 			} else
-				return null;
+				return getSurfaceWaterDepth();
 		}
 
 		/** Get surface salinity in parts per 100,000 by weight */
@@ -263,8 +263,6 @@ public class PavementSensorsTable {
 			sb.append(pavement_temp.toJson());
 			sb.append(Json.str("sensor_error",
 				getPavementSensorError()));
-			sb.append(Json.num("surface_water_depth",
-				getSurfaceWaterDepth()));
 			sb.append(Json.num("surface_ice_or_water_depth",
 				getSurfaceIceOrWaterDepth()));
 			sb.append(Json.num("salinity", getSalinity()));

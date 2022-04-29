@@ -78,7 +78,6 @@ Field                         | Description
 ↳`surface_temp`               | Surface temperature (℃)
 ↳`pavement_temp`              | Pavement temperature (℃)
 ↳`sensor_error`               | Sensor error description
-↳`surface_water_depth`        | Surface water depth (meters)
 ↳`surface_ice_or_water_depth` | Surface ice or water depth (meters)
 ↳`salinity`                   | Salinity (parts per 100,000 by weight)
 ↳`surface_freeze_point`       | Surface freeze point (℃)
