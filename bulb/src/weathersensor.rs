@@ -223,12 +223,12 @@ impl WeatherData {
     /// Check if radiation data exists
     fn radiation_exists(&self) -> bool {
         self.cloud_situation.is_some()
-            || total_sun.is_some()
-            || solar_radiation.is_some()
-            || instantaneous_terrestrial_radiation.is_some()
-            || instantaneous_solar_radiation.is_some()
-            || total_radiation.is_some()
-            || total_radiation_period.is_some()
+            || self.total_sun.is_some()
+            || self.solar_radiation.is_some()
+            || self.instantaneous_terrestrial_radiation.is_some()
+            || self.instantaneous_solar_radiation.is_some()
+            || self.total_radiation.is_some()
+            || self.total_radiation_period.is_some()
     }
 
     /// Get weather data as HTML
