@@ -32,6 +32,31 @@ type SpeedUnit = mag::time::h;
 /// Barometer conversion
 const PASCALS_TO_IN_HG: f32 = 0.0002953;
 
+/// Pavement sensor settings
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct PavementSettings {
+    location: Option<String>,
+    pavement_type: Option<String>,
+    height: Option<f32>,
+    exposure: Option<u32>,
+    sensor_type: Option<String>,
+}
+
+/// Sub-surface sensor settings
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct SubSurfaceSettings {
+    location: Option<String>,
+    sub_surface_type: Option<String>,
+    depth: Option<f32>,
+}
+
+/// Weather Sensor Settings
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct WeatherSettings {
+    pavement_sensor: Option<Vec<PavementSettings>>,
+    sub_surface_sensor: Option<Vec<SubSurfaceSettings>>,
+}
+
 /// Air temp data
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct AirTemp {
@@ -40,7 +65,7 @@ pub struct AirTemp {
 
 /// Wind sensor data
 #[derive(Debug, Default, Deserialize, Serialize)]
-pub struct WindSensor {
+pub struct WindData {
     avg_speed: Option<f32>,
     avg_direction: Option<u32>,
     spot_speed: Option<f32>,
@@ -51,7 +76,7 @@ pub struct WindSensor {
 
 /// Pavement sensor data
 #[derive(Debug, Default, Deserialize, Serialize)]
-pub struct PavementSensor {
+pub struct PavementData {
     surface_status: Option<String>,
     sensor_error: Option<String>,
     surface_temp: Option<f32>,
@@ -64,7 +89,7 @@ pub struct PavementSensor {
 
 /// Sub-surface sensor data
 #[derive(Debug, Default, Deserialize, Serialize)]
-pub struct SubSurfaceSensor {
+pub struct SubSurfaceData {
     sensor_error: Option<String>,
     temp: Option<f32>,
     moisture: Option<u32>,
@@ -90,7 +115,7 @@ pub struct WeatherData {
     precip_6_hours: Option<f32>,
     precip_12_hours: Option<f32>,
     precip_24_hours: Option<f32>,
-    wind_sensor: Option<Vec<WindSensor>>,
+    wind_sensor: Option<Vec<WindData>>,
     cloud_situation: Option<String>,
     total_sun: Option<u32>,
     solar_radiation: Option<i32>,
@@ -98,8 +123,8 @@ pub struct WeatherData {
     instantaneous_solar_radiation: Option<i32>,
     total_radiation: Option<i32>,
     total_radiation_period: Option<u32>,
-    pavement_sensor: Option<Vec<PavementSensor>>,
-    sub_surface_sensor: Option<Vec<SubSurfaceSensor>>,
+    pavement_sensor: Option<Vec<PavementData>>,
+    sub_surface_sensor: Option<Vec<SubSurfaceData>>,
 }
 
 /// Weather Sensor
@@ -114,6 +139,7 @@ pub struct WeatherSensor {
     pub controller: Option<String>,
     // full attributes
     pub pin: Option<u32>,
+    pub settings: Option<WeatherSettings>,
     pub sample: Option<WeatherData>,
     pub sample_time: Option<String>,
 }
@@ -260,7 +286,7 @@ impl WeatherData {
     }
 
     /// Get weather data as HTML
-    fn to_html(&self) -> String {
+    fn to_html(&self, settings: Option<&WeatherSettings>) -> String {
         let mut html = String::new();
         if self.temperature_exists() {
             html.push_str(&self.temperature_html());
@@ -277,11 +303,17 @@ impl WeatherData {
         if self.precip_exists() {
             html.push_str(&self.precipitation_html());
         }
-        if let Some(pavement_sensor) = &self.pavement_sensor {
-            html.push_str(&self.pavement_html(pavement_sensor));
+        if let Some(data) = &self.pavement_sensor {
+            html.push_str(&pavement_html(
+                pavement_settings(settings),
+                data,
+            ));
         }
-        if let Some(sub_surface_sensor) = &self.sub_surface_sensor {
-            html.push_str(&self.sub_surface_html(sub_surface_sensor));
+        if let Some(data) = &self.sub_surface_sensor {
+            html.push_str(&sub_surface_html(
+                sub_surface_settings(settings),
+                data,
+            ));
         }
         html
     }
@@ -400,10 +432,10 @@ impl WeatherData {
     }
 
     /// Get wind data as HTML
-    fn wind_html(&self, wind_sensor: &[WindSensor]) -> String {
+    fn wind_html(&self, data: &[WindData]) -> String {
         let mut html = String::new();
         html.push_str("<details><summary>🌬️ Wind");
-        if let Some(ws) = wind_sensor.iter().next() {
+        if let Some(ws) = data.iter().next() {
             if let Some(dir) = ws.avg_direction {
                 html.push_str(" 🧭 ");
                 html.push_str(&wind_dir_html(dir));
@@ -414,8 +446,8 @@ impl WeatherData {
             }
         }
         html.push_str("</summary><ul>");
-        for (i, ws) in wind_sensor.iter().enumerate() {
-            let li = if wind_sensor.len() > 1 {
+        for (i, ws) in data.iter().enumerate() {
+            let li = if data.len() > 1 {
                 format!("<li>#{i} ")
             } else {
                 format!("<li>")
@@ -499,75 +531,145 @@ impl WeatherData {
         html.push_str("</ul></details>");
         html
     }
+}
 
-    /// Get pavement data as HTML
-    fn pavement_html(&self, pavement_sensor: &[PavementSensor]) -> String {
-        let mut html = String::new();
-        for (i, ps) in pavement_sensor.iter().enumerate() {
-            html.push_str("<details><summary>Pavement ");
-            if pavement_sensor.len() > 1 {
-                html.push_str(&format!("#{i} "));
-            };
-            if let Some(status) = &ps.surface_status {
+/// Get pavement settings
+fn pavement_settings(
+    settings: Option<&WeatherSettings>,
+) -> &[PavementSettings] {
+    if let Some(settings) = settings {
+        if let Some(settings) = &settings.pavement_sensor {
+            return &settings;
+        }
+    }
+    &[]
+}
+
+/// Get pavement data as HTML
+fn pavement_html(settings: &[PavementSettings], data: &[PavementData]) -> String {
+    let len = settings.len().max(data.len());
+    let mut html = String::new();
+    for i in 0..len {
+        html.push_str("<details><summary>Pavement ");
+        if len > 1 {
+            html.push_str(&format!("#{i} "));
+        };
+        if let Some(pd) = data.get(i) {
+            if let Some(status) = &pd.surface_status {
                 html.push_str(status);
+                if pd.surface_temp.is_some() {
+                    html.push_str(", ");
+                }
             }
-            html.push_str("</summary><ul>");
-            if let Some(err) = &ps.sensor_error {
+            if let Some(temp) = pd.surface_temp {
+                html.push_str(&format_temp(temp));
+            }
+        }
+        html.push_str("</summary><ul>");
+        if let Some(pd) = data.get(i) {
+            if let Some(err) = &pd.sensor_error {
                 html.push_str(&format!("<li>{err} error</li>"));
             }
-            if let Some(temp) = ps.surface_temp {
-                html.push_str("<li>Surface ");
-                html.push_str(&format_temp(temp));
-                html.push_str("</li>");
-            }
-            if let Some(temp) = ps.pavement_temp {
+            if let Some(temp) = pd.pavement_temp {
                 html.push_str("<li>Pavement ");
                 html.push_str(&format_temp(temp));
                 html.push_str("</li>");
             }
-            if let Some(temp) = ps.freeze_point {
+            if let Some(temp) = pd.freeze_point {
                 html.push_str("<li>Freeze point ");
                 html.push_str(&format_temp(temp));
                 html.push_str("</li>");
             }
-            if let Some(depth) = ps.ice_or_water_depth {
+            if let Some(depth) = pd.ice_or_water_depth {
                 html.push_str("<li>Ice/water depth ");
                 html.push_str(&format_depth(depth / 1_000.0));
                 html.push_str("</li>");
             }
-            if let Some(salinity) = ps.salinity {
+            if let Some(salinity) = pd.salinity {
                 html.push_str(&format!("<li>Salinity {salinity}</li>"));
             }
-            if let Some(signal) = &ps.black_ice_signal {
+            if let Some(signal) = &pd.black_ice_signal {
                 html.push_str(&format!("<li>{signal}</li>"));
             }
-            html.push_str("</ul></details>");
         }
-        html
+        if let Some(ps) = settings.get(i) {
+            if let Some(loc) = &ps.location {
+                if !loc.trim().is_empty() {
+                    html.push_str(&format!("<li>{loc}</li>"));
+                }
+            }
+            if let Some(tp) = &ps.pavement_type {
+                html.push_str(&format!("<li>{tp} pavement</li>"));
+            }
+            if let Some(tp) = &ps.sensor_type {
+                html.push_str(&format!("<li>Type: {tp}</li>"));
+            }
+            if let Some(height) = ps.height {
+                html.push_str(&format!("<li>Height {height} m</li>"));
+            }
+            if let Some(exposure) = ps.exposure {
+                html.push_str(&format!("<li>Exposure {exposure}%</li>"));
+            }
+        }
+        html.push_str("</ul></details>");
     }
+    html
+}
 
-    /// Get sub-surface data as HTML
-    fn sub_surface_html(&self, sensor: &[SubSurfaceSensor]) -> String {
-        let mut html = String::new();
-        for (i, ss) in sensor.iter().enumerate() {
-            html.push_str("<details><summary>Sub-surface ");
-            if sensor.len() > 1 {
-                html.push_str(&format!("#{i} "));
-            };
-            if let Some(temp) = ss.temp {
+/// Get sub-surface settings
+fn sub_surface_settings(
+    settings: Option<&WeatherSettings>,
+) -> &[SubSurfaceSettings] {
+    if let Some(settings) = settings {
+        if let Some(settings) = &settings.sub_surface_sensor {
+            return &settings;
+        }
+    }
+    &[]
+}
+
+/// Get sub-surface data as HTML
+fn sub_surface_html(
+    settings: &[SubSurfaceSettings],
+    data: &[SubSurfaceData],
+) -> String {
+    let len = settings.len().max(data.len());
+    let mut html = String::new();
+    for i in 0..len {
+        html.push_str("<details><summary>Sub-surface ");
+        if len > 1 {
+            html.push_str(&format!("#{i} "));
+        };
+        if let Some(sd) = data.get(i) {
+            if let Some(temp) = sd.temp {
                 html.push_str(&format_temp(temp));
             }
-            html.push_str("</summary><ul>");
-            if let Some(err) = &ss.sensor_error {
+        }
+        html.push_str("</summary><ul>");
+        if let Some(ss) = settings.get(i) {
+            if let Some(loc) = &ss.location {
+                if !loc.trim().is_empty() {
+                    html.push_str(&format!("<li>{loc}</li>"));
+                }
+            }
+            if let Some(tp) = &ss.sub_surface_type {
+                html.push_str(&format!("<li>Type: {tp}</li>"));
+            }
+            if let Some(depth) = ss.depth {
+                html.push_str(&format!("<li>Depth {depth} m</li>"));
+            }
+        }
+        if let Some(sd) = data.get(i) {
+            if let Some(err) = &sd.sensor_error {
                 html.push_str(&format!("<li>{err} error</li>"));
             }
-            if let Some(moisture) = &ss.moisture {
+            if let Some(moisture) = &sd.moisture {
                 html.push_str(&format!("<li>Moisture {moisture}%</li>"));
             }
-            html.push_str("</ul></details>");
         }
-        html
+        html.push_str("</ul></details>");
     }
+    html
 }
 
 impl WeatherSensor {
@@ -576,7 +678,7 @@ impl WeatherSensor {
     /// Get sample as HTML
     fn sample_html(&self) -> String {
         match &self.sample {
-            Some(data) => data.to_html(),
+            Some(data) => data.to_html(self.settings.as_ref()),
             None => "".into(),
         }
     }
