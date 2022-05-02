@@ -36,22 +36,6 @@ import us.mn.state.dot.tms.utils.Json;
  */
 public class PavementSensorsTable {
 
-	/** An exposure of 101 is an error condition or missing value */
-	static private final int EXPOSURE_ERROR_MISSING = 101;
-
-	/** Convert solar exposure to percent.
-	 * @param e Exposure in percent with 101 indicating an error or missing
-	 *          value.
-	 * @return Exposure or null for missing */
-	static private Integer convertExposure(ASN1Integer e) {
-		if (e != null) {
-			int ie = e.getInteger();
-			if (ie >= 0 && ie < EXPOSURE_ERROR_MISSING)
-				return ie;
-		}
-		return null;
-	}
-
 	/** A depth of 255 is an error condition or missing value */
 	static private final int DEPTH_V1_ERROR_MISSING = 255;
 
@@ -100,22 +84,6 @@ public class PavementSensorsTable {
 		return null;
 	}
 
-	/** A 101 friction coefficient is an error condition or missing value */
-	static private final int FRICTION_ERROR_MISSING = 101;
-
-	/** Convert friction coefficient to percent.
-	 * @param f Friction in percent with 101 indicating an error or missing
-	 *          value.
-	 * @return Friction coefficient or null for missing */
-	static private Integer convertFriction(ASN1Integer f) {
-		if (f != null) {
-			int fc = f.getInteger();
-			if (fc >= 0 && fc < FRICTION_ERROR_MISSING)
-				return fc;
-		}
-		return null;
-	}
-
 	/** Number of sensors in table */
 	public final ASN1Integer num_sensors = numEssPavementSensors.makeInt();
 
@@ -125,7 +93,7 @@ public class PavementSensorsTable {
 		public final DisplayString location;
 		public final ASN1Enum<PavementType> pavement_type;
 		public final HeightObject height;
-		public final ASN1Integer exposure;
+		public final PercentObject exposure;
 		public final ASN1Enum<PavementSensorType> sensor_type;
 		public final ASN1Enum<SurfaceStatus> surface_status;
 		public final TemperatureObject surface_temp;
@@ -136,7 +104,7 @@ public class PavementSensorsTable {
 		public final ASN1Integer salinity;
 		public final TemperatureObject freeze_point;
 		public final ASN1Enum<SurfaceBlackIceSignal> black_ice_signal;
-		public final ASN1Integer friction;
+		public final PercentObject friction;
 
 		/** Create a table row */
 		private Row(int row) {
@@ -147,8 +115,8 @@ public class PavementSensorsTable {
 				PavementType.class, essPavementType.node, row);
 			height = new HeightObject("height",
 				essPavementElevation.makeInt(row));
-			exposure = essPavementExposure.makeInt(row);
-			exposure.setInteger(EXPOSURE_ERROR_MISSING);
+			exposure = new PercentObject("exposure",
+				essPavementExposure.makeInt(row));
 			sensor_type = new ASN1Enum<PavementSensorType>(
 				PavementSensorType.class,
 				essPavementSensorType.node, row);
@@ -176,8 +144,8 @@ public class PavementSensorsTable {
 				essSurfaceBlackIceSignal.node, row);
 			// Note: friction coefficient is not part of pavement
 			//       table (even though it *should* be)
-			friction = essMobileFriction.makeInt();
-			friction.setInteger(FRICTION_ERROR_MISSING);
+			friction = new PercentObject("friction",
+				essMobileFriction.makeInt());
 		}
 
 		/** Get the sensor location */
@@ -190,11 +158,6 @@ public class PavementSensorsTable {
 		public PavementType getPavementType() {
 			PavementType pt = pavement_type.getEnum();
 			return (pt != PavementType.undefined) ? pt : null;
-		}
-
-		/** Get pavement exposure in percent */
-		public Integer getExposure() {
-			return convertExposure(exposure);
 		}
 
 		/** Get pavement sensor type or null on error */
@@ -269,11 +232,6 @@ public class PavementSensorsTable {
 			return (bis != null && bis.isValue()) ? bis : null;
 		}
 
-		/** Get friction coefficient (percent) */
-		public Integer getFriction() {
-			return convertFriction(friction);
-		}
-
 		/** Get JSON representation */
 		private String toJson() {
 			StringBuilder sb = new StringBuilder();
@@ -281,7 +239,7 @@ public class PavementSensorsTable {
 			sb.append(Json.str("location", getSensorLocation()));
 			sb.append(Json.str("pavement_type", getPavementType()));
 			sb.append(height.toJson());
-			sb.append(Json.num("exposure", getExposure()));
+			sb.append(exposure.toJson());
 			sb.append(Json.str("sensor_type",
 				getPavementSensorType()));
 			sb.append(Json.str("surface_status", getSurfStatus()));
@@ -295,7 +253,7 @@ public class PavementSensorsTable {
 			sb.append(freeze_point.toJson());
 			sb.append(Json.str("black_ice_signal",
 				getBlackIceSignal()));
-			sb.append(Json.num("friction", getFriction()));
+			sb.append(friction.toJson());
 			// remove trailing comma
 			if (sb.charAt(sb.length() - 1) == ',')
 				sb.setLength(sb.length() - 1);

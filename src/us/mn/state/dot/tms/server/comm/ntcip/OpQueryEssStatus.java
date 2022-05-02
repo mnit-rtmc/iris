@@ -206,7 +206,7 @@ public class OpQueryEssStatus extends OpEss {
 		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(ess_rec.precip_values.relative_humidity);
+			mess.add(ess_rec.precip_values.relative_humidity.node);
 			mess.add(ess_rec.precip_values.precip_rate);
 			mess.add(ess_rec.precip_values.precip_1_hour);
 			mess.add(ess_rec.precip_values.precip_3_hours);
@@ -215,7 +215,7 @@ public class OpQueryEssStatus extends OpEss {
 			mess.add(ess_rec.precip_values.precip_24_hours);
 			mess.add(ess_rec.precip_values.precip_situation);
 			mess.queryProps();
-			logQuery(ess_rec.precip_values.relative_humidity);
+			logQuery(ess_rec.precip_values.relative_humidity.node);
 			logQuery(ess_rec.precip_values.precip_rate);
 			logQuery(ess_rec.precip_values.precip_1_hour);
 			logQuery(ess_rec.precip_values.precip_3_hours);
@@ -285,10 +285,10 @@ public class OpQueryEssStatus extends OpEss {
 
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(pr.friction);
+			mess.add(pr.friction.node);
 			try {
 				mess.queryProps();
-				logQuery(pr.friction);
+				logQuery(pr.friction.node);
 			}
 			catch (NoSuchName e) { }
 			return new QueryPavementTableV2(pr);
@@ -367,11 +367,11 @@ public class OpQueryEssStatus extends OpEss {
 		protected Phase poll(CommMessage mess) throws IOException {
 			SubSurfaceSensorsTable.Row sr = ss_table.addRow();
 			mess.add(sr.temp.node);
-			mess.add(sr.moisture);
+			mess.add(sr.moisture.node);
 			mess.add(sr.sensor_error);
 			mess.queryProps();
 			logQuery(sr.temp.node);
-			logQuery(sr.moisture);
+			logQuery(sr.moisture.node);
 			logQuery(sr.sensor_error);
 			return ss_table.isDone() ? new QueryTotalSun() : this;
 		}

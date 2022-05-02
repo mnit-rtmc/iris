@@ -214,13 +214,13 @@ public class OpQueryEssSettings extends OpEss {
 			mess.add(pr.location);
 			mess.add(pr.pavement_type);
 			mess.add(pr.height.node);
-			mess.add(pr.exposure);
+			mess.add(pr.exposure.node);
 			mess.add(pr.sensor_type);
 			mess.queryProps();
 			logQuery(pr.location);
 			logQuery(pr.pavement_type);
 			logQuery(pr.height.node);
-			logQuery(pr.exposure);
+			logQuery(pr.exposure.node);
 			logQuery(pr.sensor_type);
 			return ps_table.isDone() ? new QuerySubSurface() : this;
 		}

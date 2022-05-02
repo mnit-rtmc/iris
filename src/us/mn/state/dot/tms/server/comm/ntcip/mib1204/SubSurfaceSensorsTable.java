@@ -52,22 +52,6 @@ public class SubSurfaceSensorsTable {
 		return null;
 	}
 
-	/** Moisture of 101 indicates error or missing value */
-	static private final int MOISTURE_ERROR_MISSING = 101;
-
-	/** Convert moisture to an integer.
-	 * @param ms Moisture saturation in percent. A value of 101 indicates an
-	 *           error or missing value.
-	 * @return Moisture as a percent or null if missing. */
-	static private Integer convertMoisture(ASN1Integer ms) {
-		if (ms != null) {
-			int ims = ms.getInteger();
-			if (ims >= 0 && ims < MOISTURE_ERROR_MISSING)
-				return Integer.valueOf(ims);
-		}
-		return null;
-	}
-
 	/** Number of temperature sensors in table */
 	public final ASN1Integer num_sensors =
 		numEssSubSurfaceSensors.makeInt();
@@ -78,7 +62,7 @@ public class SubSurfaceSensorsTable {
 		public final ASN1Enum<SubSurfaceType> sub_surface_type;
 		public final ASN1Integer depth;
 		public final TemperatureObject temp;
-		public final ASN1Integer moisture;
+		public final PercentObject moisture;
 		public final ASN1Enum<SubSurfaceSensorError> sensor_error;
 
 		/** Create a table row */
@@ -92,8 +76,8 @@ public class SubSurfaceSensorsTable {
 			depth.setInteger(DEPTH_ERROR_MISSING);
 			temp = new TemperatureObject("temp",
 				essSubSurfaceTemperature.makeInt(row));
-			moisture = essSubSurfaceMoisture.makeInt(row);
-			moisture.setInteger(MOISTURE_ERROR_MISSING);
+			moisture = new PercentObject("moisture",
+				essSubSurfaceMoisture.makeInt(row));
 			sensor_error = new ASN1Enum<SubSurfaceSensorError>(
 				SubSurfaceSensorError.class,
 				essSubSurfaceSensorError.node, row);
@@ -129,11 +113,6 @@ public class SubSurfaceSensorsTable {
 			return temp.getTempC();
 		}
 
-		/** Get the moisture saturation (%) */
-		public Integer getMoisture() {
-			return convertMoisture(moisture);
-		}
-
 		/** Get sensor error or null on error */
 		public SubSurfaceSensorError getSensorError() {
 			SubSurfaceSensorError se = sensor_error.getEnum();
@@ -149,7 +128,7 @@ public class SubSurfaceSensorsTable {
 				getSubSurfaceType()));
 			sb.append(Json.num("depth", getDepth()));
 			sb.append(temp.toJson());
-			sb.append(Json.num("moisture", getMoisture()));
+			sb.append(moisture.toJson());
 			sb.append(Json.str("sensor_error", getSensorError()));
 			// remove trailing comma
 			if (sb.charAt(sb.length() - 1) == ',')

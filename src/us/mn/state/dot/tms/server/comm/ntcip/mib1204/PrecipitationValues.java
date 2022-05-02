@@ -29,22 +29,6 @@ import us.mn.state.dot.tms.utils.Json;
  */
 public class PrecipitationValues {
 
-	/** Humidity of 101 indicates error or missing value */
-	static private final int HUMIDITY_ERROR_MISSING = 101;
-
-	/** Convert humidity to an integer.
-	 * @param rhu Relative humidity in percent. A value of 101 indicates an
-	 *            error or missing value.
-	 * @return Humidity as a percent or null if missing. */
-	static private Integer convertHumidity(ASN1Integer rhu) {
-		if (rhu != null) {
-			int irhu = rhu.getInteger();
-			if (irhu >= 0 && irhu < HUMIDITY_ERROR_MISSING)
-				return Integer.valueOf(irhu);
-		}
-		return null;
-	}
-
 	/** Precipitation of 65535 indicates error or missing value */
 	static private final int PRECIP_ERROR_MISSING = 65535;
 
@@ -108,8 +92,8 @@ public class PrecipitationValues {
 	}
 
 	/** Relative humidity */
-	public final ASN1Integer relative_humidity = essRelativeHumidity
-		.makeInt();
+	public final PercentObject relative_humidity = new PercentObject(
+		"relative_humidity", essRelativeHumidity.makeInt());
 
 	/** Precipitation rate (tenths of grams/m^2/s) */
 	public final ASN1Integer precip_rate = essPrecipRate.makeInt();
@@ -141,18 +125,12 @@ public class PrecipitationValues {
 
 	/** Create precipitation values */
 	public PrecipitationValues() {
-		relative_humidity.setInteger(HUMIDITY_ERROR_MISSING);
 		precip_rate.setInteger(PRECIP_ERROR_MISSING);
 		precip_1_hour.setInteger(PRECIP_ERROR_MISSING);
 		precip_3_hours.setInteger(PRECIP_ERROR_MISSING);
 		precip_6_hours.setInteger(PRECIP_ERROR_MISSING);
 		precip_12_hours.setInteger(PRECIP_ERROR_MISSING);
 		precip_24_hours.setInteger(PRECIP_ERROR_MISSING);
-	}
-
-	/** Get the relative humidity (%) */
-	public Integer getRelativeHumidity() {
-		return convertHumidity(relative_humidity);
 	}
 
 	/** Get the precipitation rate in mm/hr */
@@ -179,7 +157,7 @@ public class PrecipitationValues {
 	/** Get JSON representation */
 	public String toJson() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(Json.num("relative_humidity", getRelativeHumidity()));
+		sb.append(relative_humidity.toJson());
 		sb.append(Json.num("precip_rate", formatPrecipRate(
 			precip_rate)));
 		sb.append(Json.num("precip_1_hour", formatPrecipTotal(
