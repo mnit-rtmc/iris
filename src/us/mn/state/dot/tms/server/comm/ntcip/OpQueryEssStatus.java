@@ -266,6 +266,31 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(pr.sensor_error);
 			logQuery(pr.salinity);
 			logQuery(pr.black_ice_signal);
+			// only read friction for the first row
+			return (pr.number == 0)
+			      ? new QueryFrictionCoefficient(pr)
+			      : new QueryPavementTableV2(pr);
+		}
+	}
+
+	/** Phase to query friction coefficient.
+	 * Note: some vendors support essMobileFriction for permanent stations
+	 *       (non-mobile).  We'll pretend it's part of the pavement sensors
+	 *       table (first row only), because that's where it should be. */
+	protected class QueryFrictionCoefficient extends Phase {
+		private final PavementSensorsTable.Row pr;
+		private QueryFrictionCoefficient(PavementSensorsTable.Row r) {
+			pr = r;
+		}
+
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(pr.friction);
+			try {
+				mess.queryProps();
+				logQuery(pr.friction);
+			}
+			catch (NoSuchName e) { }
 			return new QueryPavementTableV2(pr);
 		}
 	}

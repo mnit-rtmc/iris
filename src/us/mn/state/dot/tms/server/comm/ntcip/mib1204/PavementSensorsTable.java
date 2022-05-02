@@ -100,11 +100,28 @@ public class PavementSensorsTable {
 		return null;
 	}
 
+	/** A 101 friction coefficient is an error condition or missing value */
+	static private final int FRICTION_ERROR_MISSING = 101;
+
+	/** Convert friction coefficient to percent.
+	 * @param f Friction in percent with 101 indicating an error or missing
+	 *          value.
+	 * @return Friction coefficient or null for missing */
+	static private Integer convertFriction(ASN1Integer f) {
+		if (f != null) {
+			int fc = f.getInteger();
+			if (fc >= 0 && fc < FRICTION_ERROR_MISSING)
+				return fc;
+		}
+		return null;
+	}
+
 	/** Number of sensors in table */
 	public final ASN1Integer num_sensors = numEssPavementSensors.makeInt();
 
 	/** Table row */
 	static public class Row {
+		public final int number;
 		public final DisplayString location;
 		public final ASN1Enum<PavementType> pavement_type;
 		public final HeightObject height;
@@ -119,9 +136,11 @@ public class PavementSensorsTable {
 		public final ASN1Integer salinity;
 		public final TemperatureObject freeze_point;
 		public final ASN1Enum<SurfaceBlackIceSignal> black_ice_signal;
+		public final ASN1Integer friction;
 
 		/** Create a table row */
 		private Row(int row) {
+			number = row;
 			location = new DisplayString(
 				essPavementSensorLocation.node, row);
 			pavement_type = new ASN1Enum<PavementType>(
@@ -155,6 +174,10 @@ public class PavementSensorsTable {
 			black_ice_signal = new ASN1Enum<SurfaceBlackIceSignal>(
 				SurfaceBlackIceSignal.class,
 				essSurfaceBlackIceSignal.node, row);
+			// Note: friction coefficient is not part of pavement
+			//       table (even though it *should* be)
+			friction = essMobileFriction.makeInt();
+			friction.setInteger(FRICTION_ERROR_MISSING);
 		}
 
 		/** Get the sensor location */
@@ -246,6 +269,11 @@ public class PavementSensorsTable {
 			return (bis != null && bis.isValue()) ? bis : null;
 		}
 
+		/** Get friction coefficient (percent) */
+		public Integer getFriction() {
+			return convertFriction(friction);
+		}
+
 		/** Get JSON representation */
 		private String toJson() {
 			StringBuilder sb = new StringBuilder();
@@ -267,6 +295,7 @@ public class PavementSensorsTable {
 			sb.append(freeze_point.toJson());
 			sb.append(Json.str("black_ice_signal",
 				getBlackIceSignal()));
+			sb.append(Json.num("friction", getFriction()));
 			// remove trailing comma
 			if (sb.charAt(sb.length() - 1) == ',')
 				sb.setLength(sb.length() - 1);

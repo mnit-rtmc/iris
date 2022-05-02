@@ -32,7 +32,7 @@ Field                    | Description
 ↳`height`                | Pavement height relative to `reference_elevation` (meters)
 ↳`exposure`              | Rough estimate of solar energy (percent)
 ↳`sensor_type`           | Sensor type description
-`sub_surface_sensor`     | Array of sub-surface sample objects
+`sub_surface_sensor`     | Array of sub-surface settings objects
 ↳`location`              | Sensor location description
 ↳`sub_surface_type`      | Sub-surface type description
 ↳`depth`                 | Depth below pavement surface (meters)
@@ -82,6 +82,7 @@ Field                         | Description
 ↳`salinity`                   | Salinity (parts per 100,000 by weight)
 ↳`freeze_point`               | Surface freeze point (℃)
 ↳`black_ice_signal`           | Black ice signal description
+↳`friction`                   | Coefficient of friction (percent)
 `sub_surface_sensor`          | Array of sub-surface sample objects
 ↳`temp`                       | Sub-surface temperature (℃)
 ↳`moisture`                   | Sub-surface moisture saturation (percent)
