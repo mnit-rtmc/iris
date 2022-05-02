@@ -15,6 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
@@ -75,7 +76,7 @@ public class SubSurfaceSensorsTable {
 	static public class Row {
 		public final DisplayString location;
 		public final ASN1Enum<SubSurfaceType> sub_surface_type;
-		public final ASN1Integer sensor_depth;
+		public final ASN1Integer depth;
 		public final TemperatureObject temp;
 		public final ASN1Integer moisture;
 		public final ASN1Enum<SubSurfaceSensorError> sensor_error;
@@ -87,8 +88,8 @@ public class SubSurfaceSensorsTable {
 			sub_surface_type = new ASN1Enum<SubSurfaceType>(
 				SubSurfaceType.class, essSubSurfaceType.node,
 				row);
-			sensor_depth = essSubSurfaceSensorDepth.makeInt(row);
-			sensor_depth.setInteger(DEPTH_ERROR_MISSING);
+			depth = essSubSurfaceSensorDepth.makeInt(row);
+			depth.setInteger(DEPTH_ERROR_MISSING);
 			temp = new TemperatureObject("temp",
 				essSubSurfaceTemperature.makeInt(row));
 			moisture = essSubSurfaceMoisture.makeInt(row);
@@ -111,9 +112,16 @@ public class SubSurfaceSensorsTable {
 		}
 
 		/** Get sub-surface sensor depth in meters */
-		public Float getSensorDepth() {
-			Distance d = convertDepth(sensor_depth);
-			return (d != null) ? d.asFloat(METERS) : null;
+		private String getDepth() {
+			Distance d = convertDepth(depth);
+			if (d != null) {
+				Float dm = d.asFloat(METERS);
+				NumberFormat f = NumberFormat.getInstance();
+				f.setMaximumFractionDigits(2); // cm
+				f.setMinimumFractionDigits(1);
+				return f.format(dm);
+			} else
+				return null;
 		}
 
 		/** Get sub-surface temp or null on error */
@@ -139,7 +147,7 @@ public class SubSurfaceSensorsTable {
 			sb.append(Json.str("location", getSensorLocation()));
 			sb.append(Json.str("sub_surface_type",
 				getSubSurfaceType()));
-			sb.append(Json.num("sensor_depth", getSensorDepth()));
+			sb.append(Json.num("depth", getDepth()));
 			sb.append(temp.toJson());
 			sb.append(Json.num("moisture", getMoisture()));
 			sb.append(Json.str("sensor_error", getSensorError()));

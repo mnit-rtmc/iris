@@ -35,7 +35,7 @@ Field                    | Description
 `sub_surface_sensor`     | Array of sub-surface sample objects
 ↳`location`              | Sensor location description
 ↳`sub_surface_type`      | Sub-surface type description
-↳`sensor_depth`          | Depth below pavement surface (meters)
+↳`depth`                 | Depth below pavement surface (meters)
 
 ## Sample Data
 

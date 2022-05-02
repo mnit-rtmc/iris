@@ -250,11 +250,11 @@ public class OpQueryEssSettings extends OpEss {
 			SubSurfaceSensorsTable.Row sr = ss_table.addRow();
 			mess.add(sr.location);
 			mess.add(sr.sub_surface_type);
-			mess.add(sr.sensor_depth);
+			mess.add(sr.depth);
 			mess.queryProps();
 			logQuery(sr.location);
 			logQuery(sr.sub_surface_type);
-			logQuery(sr.sensor_depth);
+			logQuery(sr.depth);
 			return ss_table.isDone() ? null : this;
 		}
 	}

@@ -90,7 +90,7 @@ public class PavementSensorsTable {
 	/** Convert value to salinity.
 	 * @param s Salinity in parts per 100,000 by weight with 65535
 	 * 	    indicating an error or missing value.
-	 * @return Depth distance or null for missing */
+	 * @return Salinity or null for missing */
 	static private Integer convertSalinity(ASN1Integer s) {
 		if (s != null) {
 			int is = s.getInteger();
