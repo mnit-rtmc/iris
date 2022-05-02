@@ -79,7 +79,7 @@ Field                         | Description
 ↳`pavement_temp`              | Pavement temperature (℃)
 ↳`sensor_error`               | Sensor error description
 ↳`ice_or_water_depth`         | Surface ice or water depth (meters)
-↳`salinity`                   | Salinity (parts per 100,000 by weight)
+↳`salinity`                   | Salinity (ppm by weight)
 ↳`freeze_point`               | Surface freeze point (℃)
 ↳`black_ice_signal`           | Black ice signal description
 ↳`friction`                   | Coefficient of friction (percent)

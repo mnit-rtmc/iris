@@ -68,18 +68,18 @@ public class PavementSensorsTable {
 		return null;
 	}
 
-	/** A salinity of 65535 is an error condition or missing value */
+	/** A salinity of 65,535 is an error condition or missing value */
 	static private final int SALINITY_ERROR_MISSING = 65535;
 
-	/** Convert value to salinity.
+	/** Convert salinity to ppm.
 	 * @param s Salinity in parts per 100,000 by weight with 65535
 	 * 	    indicating an error or missing value.
-	 * @return Salinity or null for missing */
+	 * @return Salinity in ppm or null for missing */
 	static private Integer convertSalinity(ASN1Integer s) {
 		if (s != null) {
 			int is = s.getInteger();
-			if (is < SALINITY_ERROR_MISSING)
-				return is;
+			if (is >= 0 && is < SALINITY_ERROR_MISSING)
+				return 10 * is;
 		}
 		return null;
 	}
@@ -216,8 +216,8 @@ public class PavementSensorsTable {
 				return getWaterDepth();
 		}
 
-		/** Get surface salinity in parts per 100,000 by weight */
-		public Integer getSalinity() {
+		/** Get surface salinity in parts per million by weight */
+		private Integer getSalinity() {
 			return convertSalinity(salinity);
 		}
 

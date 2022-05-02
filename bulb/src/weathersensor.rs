@@ -587,7 +587,7 @@ fn pavement_html(
                 html.push_str("</li>");
             }
             if let Some(salinity) = pd.salinity {
-                html.push_str(&format!("<li>Salinity {salinity}</li>"));
+                html.push_str(&format!("<li>Salinity {salinity} ppm</li>"));
             }
             if let Some(signal) = &pd.black_ice_signal {
                 html.push_str(&format!("<li>{signal}</li>"));
