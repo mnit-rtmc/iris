@@ -85,6 +85,7 @@ pub struct PavementData {
     ice_or_water_depth: Option<f32>,
     salinity: Option<u32>,
     black_ice_signal: Option<String>,
+    friction: Option<u32>,
 }
 
 /// Sub-surface sensor data
@@ -304,10 +305,7 @@ impl WeatherData {
             html.push_str(&self.precipitation_html());
         }
         if let Some(data) = &self.pavement_sensor {
-            html.push_str(&pavement_html(
-                pavement_settings(settings),
-                data,
-            ));
+            html.push_str(&pavement_html(pavement_settings(settings), data));
         }
         if let Some(data) = &self.sub_surface_sensor {
             html.push_str(&sub_surface_html(
@@ -546,7 +544,10 @@ fn pavement_settings(
 }
 
 /// Get pavement data as HTML
-fn pavement_html(settings: &[PavementSettings], data: &[PavementData]) -> String {
+fn pavement_html(
+    settings: &[PavementSettings],
+    data: &[PavementData],
+) -> String {
     let len = settings.len().max(data.len());
     let mut html = String::new();
     for i in 0..len {
@@ -590,6 +591,11 @@ fn pavement_html(settings: &[PavementSettings], data: &[PavementData]) -> String
             }
             if let Some(signal) = &pd.black_ice_signal {
                 html.push_str(&format!("<li>{signal}</li>"));
+            }
+            if let Some(friction) = &pd.friction {
+                html.push_str(&format!(
+                    "<li>Coef. of friction {friction}%</li>"
+                ));
             }
         }
         if let Some(ps) = settings.get(i) {
