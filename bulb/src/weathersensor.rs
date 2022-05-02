@@ -346,12 +346,12 @@ impl WeatherData {
             }
         }
         if let Some(temp) = self.min_air_temp {
-            html.push_str(&format!("<li>Min 24-hour "));
+            html.push_str(&format!("<li>24h low "));
             html.push_str(&format_temp(temp));
             html.push_str(&format!("</li>"));
         }
         if let Some(temp) = self.max_air_temp {
-            html.push_str(&format!("<li>Max 24-hour "));
+            html.push_str(&format!("<li>24h high "));
             html.push_str(&format_temp(temp));
             html.push_str(&format!("</li>"));
         }
