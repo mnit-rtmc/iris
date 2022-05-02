@@ -62,6 +62,14 @@ pub struct PavementSensor {
     black_ice_signal: Option<String>,
 }
 
+/// Sub-surface sensor data
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct SubSurfaceSensor {
+    sensor_error: Option<String>,
+    temp: Option<f32>,
+    moisture: Option<u32>,
+}
+
 /// Weather Sensor Data
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct WeatherData {
@@ -91,6 +99,7 @@ pub struct WeatherData {
     total_radiation: Option<i32>,
     total_radiation_period: Option<u32>,
     pavement_sensor: Option<Vec<PavementSensor>>,
+    sub_surface_sensor: Option<Vec<SubSurfaceSensor>>,
 }
 
 /// Weather Sensor
@@ -270,6 +279,9 @@ impl WeatherData {
         }
         if let Some(pavement_sensor) = &self.pavement_sensor {
             html.push_str(&self.pavement_html(pavement_sensor));
+        }
+        if let Some(sub_surface_sensor) = &self.sub_surface_sensor {
+            html.push_str(&self.sub_surface_html(sub_surface_sensor));
         }
         html
     }
@@ -528,6 +540,29 @@ impl WeatherData {
             }
             if let Some(signal) = &ps.black_ice_signal {
                 html.push_str(&format!("<li>{signal}</li>"));
+            }
+            html.push_str("</ul></details>");
+        }
+        html
+    }
+
+    /// Get sub-surface data as HTML
+    fn sub_surface_html(&self, sensor: &[SubSurfaceSensor]) -> String {
+        let mut html = String::new();
+        for (i, ss) in sensor.iter().enumerate() {
+            html.push_str("<details><summary>Sub-surface ");
+            if sensor.len() > 1 {
+                html.push_str(&format!("#{i} "));
+            };
+            if let Some(temp) = ss.temp {
+                html.push_str(&format_temp(temp));
+            }
+            html.push_str("</summary><ul>");
+            if let Some(err) = &ss.sensor_error {
+                html.push_str(&format!("<li>{err} error</li>"));
+            }
+            if let Some(moisture) = &ss.moisture {
+                html.push_str(&format!("<li>Moisture {moisture}%</li>"));
             }
             html.push_str("</ul></details>");
         }
