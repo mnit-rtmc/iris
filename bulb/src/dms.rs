@@ -36,12 +36,13 @@ impl Dms {
     pub const RESOURCE_N: &'static str = "dms";
 
     /// Convert to Compact HTML
-    fn to_html_compact(&self) -> String {
+    fn to_html_compact(&self, anc: &DmsAnc) -> String {
         let location = HtmlStr::new(&self.location).with_len(12);
         let disabled = disabled_attr(self.controller.is_some());
+        let comm_state = anc.comm_state(self, false);
         format!(
             "<span{disabled}>{location}</span>\
-            <span class='{NAME}'>{self}</span>"
+            <span class='{NAME}'>{comm_state} {self}</span>"
         )
     }
 
@@ -123,7 +124,7 @@ impl Card for Dms {
     fn to_html(&self, view: View, anc: &DmsAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(),
+            View::Compact => self.to_html_compact(anc),
             View::Status(config) => self.to_html_status(anc, config),
             View::Edit => self.to_html_edit(),
             _ => unreachable!(),

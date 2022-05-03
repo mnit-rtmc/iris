@@ -254,7 +254,7 @@ impl Controller {
     pub const RESOURCE_N: &'static str = "controller";
 
     /// Get comm state
-    fn comm_state(&self, long: bool) -> &'static str {
+    pub fn comm_state(&self, long: bool) -> &'static str {
         let active = self.condition == 1;
         let failed = self.fail_time.is_some();
         match (active, failed, long) {

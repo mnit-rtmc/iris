@@ -13,7 +13,7 @@
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::resource::{AncillaryData, Card, View};
-use std::borrow::Cow;
+use std::borrow::{Borrow, Cow};
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
 
@@ -29,25 +29,52 @@ pub trait Device: Card {
 #[derive(Debug, Default)]
 pub struct DeviceAnc<D> {
     pri: PhantomData<D>,
+    pub controllers: Option<Vec<Controller>>,
     pub controller: Option<Controller>,
 }
 
-impl<D> DeviceAnc<D> {
+impl<D: Device> DeviceAnc<D> {
+    fn controller(&self, pri: &D) -> Option<&Controller> {
+        if let Some(ctrl) = &self.controller {
+            return Some(ctrl);
+        }
+        if let (Some(ctrl), Some(controllers)) =
+            (pri.controller(), &self.controllers)
+        {
+            for c in controllers {
+                if c.name == ctrl {
+                    return Some(c);
+                }
+            }
+        }
+        None
+    }
+
     pub fn controller_button(&self) -> String {
         match &self.controller {
             Some(ctrl) => ctrl.button_html(),
             None => "<span></span>".into(),
         }
     }
+
+    pub fn comm_state(&self, pri: &D, long: bool) -> &str {
+        match self.controller(pri) {
+            Some(ctrl) => ctrl.comm_state(long),
+            None => "",
+        }
+    }
 }
+
+const CONTROLLER_URI: &str = "/iris/api/controller";
 
 impl<D: Device> AncillaryData for DeviceAnc<D> {
     type Primary = D;
 
     /// Get ancillary URI
     fn uri(&self, view: View, pri: &D) -> Option<Cow<str>> {
-        match (view, &pri.controller(), &self.controller) {
-            (View::Status(true), Some(ctrl), None) => {
+        match (view, &self.controllers, &pri.controller(), &self.controller) {
+            (View::Search, None, _, _) => Some(CONTROLLER_URI.into()),
+            (View::Compact | View::Status(true), _, Some(ctrl), None) => {
                 Some(format!("/iris/api/controller/{}", &ctrl).into())
             }
             _ => None,
@@ -55,8 +82,16 @@ impl<D: Device> AncillaryData for DeviceAnc<D> {
     }
 
     /// Put ancillary JSON data
-    fn set_json(&mut self, _view: View, _pri: &D, json: JsValue) -> Result<()> {
-        self.controller = Some(json.into_serde::<Controller>()?);
+    fn set_json(&mut self, view: View, pri: &D, json: JsValue) -> Result<()> {
+        if let Some(uri) = self.uri(view, pri) {
+            match uri.borrow() {
+                CONTROLLER_URI => {
+                    self.controllers =
+                        Some(json.into_serde::<Vec<Controller>>()?);
+                }
+                _ => self.controller = Some(json.into_serde::<Controller>()?),
+            }
+        }
         Ok(())
     }
 }
