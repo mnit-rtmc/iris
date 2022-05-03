@@ -290,7 +290,9 @@ public class OpQueryEssStatus extends OpEss {
 				mess.queryProps();
 				logQuery(pr.friction.node);
 			}
-			catch (NoSuchName e) { }
+			catch (NoSuchName e) {
+				// Note: some vendors do not support this object
+			}
 			return new QueryPavementTableV2(pr);
 		}
 	}
@@ -359,21 +361,44 @@ public class OpQueryEssStatus extends OpEss {
 		}
 	}
 
-	/** Phase to query all rows in sub-surface table */
+	/** Phase to query rows in sub-surface table */
 	protected class QuerySubSurfaceTable extends Phase {
+		private final SubSurfaceSensorsTable.Row sr;
+		private QuerySubSurfaceTable() {
+			sr = ss_table.addRow();
+		}
 
-		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			SubSurfaceSensorsTable.Row sr = ss_table.addRow();
 			mess.add(sr.temp.node);
-			mess.add(sr.moisture.node);
 			mess.add(sr.sensor_error);
 			mess.queryProps();
 			logQuery(sr.temp.node);
-			logQuery(sr.moisture.node);
 			logQuery(sr.sensor_error);
-			return ss_table.isDone() ? new QueryTotalSun() : this;
+			return new QuerySubSurfaceMoisture(sr);
+		}
+	}
+
+	/** Phase to query sub-surface moisture */
+	protected class QuerySubSurfaceMoisture extends Phase {
+		private final SubSurfaceSensorsTable.Row sr;
+		private QuerySubSurfaceMoisture(SubSurfaceSensorsTable.Row r) {
+			sr = r;
+		}
+
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(sr.moisture.node);
+			try {
+				mess.queryProps();
+				logQuery(sr.moisture.node);
+			}
+			catch (NoSuchName e) {
+				// Note: some vendors do not support this object
+			}
+			return ss_table.isDone()
+			      ? new QueryTotalSun()
+			      : new QuerySubSurfaceTable();
 		}
 	}
 
