@@ -633,9 +633,18 @@ async fn fetch_list<C: Card>(
 /// Fetch ancillary data
 async fn fetch_ancillary<C: Card>(view: View, pri: &C) -> Result<C::Ancillary> {
     let mut anc = C::Ancillary::default();
-    while let Some(uri) = anc.uri(view, pri) {
-        let json = fetch_get(uri.borrow()).await?;
-        anc.set_json(view, pri, json)?;
+    // Only loop 50 times in case we make no progress
+    for _ in 0..50 {
+        if let Some(uri) = anc.uri(view, pri) {
+            match fetch_get(uri.borrow()).await {
+                Ok(json) => anc.set_json(view, pri, json)?,
+                Err(Error::FetchResponseForbidden()) => {
+                    // Oops, we don't have permission to read ancillary data
+                    break;
+                }
+                Err(e) => return Err(e),
+            }
+        }
     }
     Ok(anc)
 }
