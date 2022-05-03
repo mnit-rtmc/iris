@@ -346,24 +346,24 @@ impl WeatherData {
             }
         }
         if let Some(temp) = self.min_air_temp {
-            html.push_str(&format!("<li>24h low "));
+            html.push_str("<li>24h low ");
             html.push_str(&format_temp(temp));
-            html.push_str(&format!("</li>"));
+            html.push_str("</li>");
         }
         if let Some(temp) = self.max_air_temp {
-            html.push_str(&format!("<li>24h high "));
+            html.push_str("<li>24h high ");
             html.push_str(&format_temp(temp));
-            html.push_str(&format!("</li>"));
+            html.push_str("</li>");
         }
         if let Some(temp) = self.dew_point_temp {
-            html.push_str(&format!("<li>Dew point "));
+            html.push_str("<li>Dew point ");
             html.push_str(&format_temp(temp));
-            html.push_str(&format!("</li>"));
+            html.push_str("</li>");
         }
         if let Some(temp) = self.wet_bulb_temp {
-            html.push_str(&format!("<li>Wet bulb "));
+            html.push_str("<li>Wet bulb ");
             html.push_str(&format_temp(temp));
-            html.push_str(&format!("</li>"));
+            html.push_str("</li>");
         }
         html.push_str("</ul></details>");
         html
@@ -374,7 +374,7 @@ impl WeatherData {
         let mut html = String::new();
         html.push_str("<details><summary>");
         html.push_str(vis_situation(
-            &self.visibility_situation.as_deref().unwrap_or("unknown"),
+            self.visibility_situation.as_deref().unwrap_or("unknown"),
         ));
         html.push_str("</summary><ul>");
         if let Some(visibility) = self.visibility {
@@ -448,21 +448,19 @@ impl WeatherData {
             let li = if data.len() > 1 {
                 format!("<li>#{i} ")
             } else {
-                format!("<li>")
+                "<li>".into()
             };
-            if i > 0 {
-                if ws.avg_direction.is_some() || ws.avg_speed.is_some() {
-                    html.push_str(&li);
-                    if let Some(dir) = ws.avg_direction {
-                        html.push_str("Avg 🧭 ");
-                        html.push_str(&wind_dir_html(dir));
-                    }
-                    if let Some(speed) = ws.avg_speed {
-                        html.push(' ');
-                        html.push_str(&format_speed(speed));
-                    }
-                    html.push_str("</li>");
+            if i > 0 && (ws.avg_direction.is_some() || ws.avg_speed.is_some()) {
+                html.push_str(&li);
+                if let Some(dir) = ws.avg_direction {
+                    html.push_str("Avg 🧭 ");
+                    html.push_str(&wind_dir_html(dir));
                 }
+                if let Some(speed) = ws.avg_speed {
+                    html.push(' ');
+                    html.push_str(&format_speed(speed));
+                }
+                html.push_str("</li>");
             }
             if ws.spot_direction.is_some() || ws.spot_speed.is_some() {
                 html.push_str(&li);
@@ -498,7 +496,7 @@ impl WeatherData {
         let mut html = String::new();
         html.push_str("<details><summary>");
         html.push_str(precip_situation(
-            &self.precip_situation.as_deref().unwrap_or("unknown"),
+            self.precip_situation.as_deref().unwrap_or("unknown"),
         ));
         html.push_str("</summary><ul>");
         if let Some(precip) = self.precip_1_hour {
@@ -537,7 +535,7 @@ fn pavement_settings(
 ) -> &[PavementSettings] {
     if let Some(settings) = settings {
         if let Some(settings) = &settings.pavement_sensor {
-            return &settings;
+            return settings;
         }
     }
     &[]
@@ -628,7 +626,7 @@ fn sub_surface_settings(
 ) -> &[SubSurfaceSettings] {
     if let Some(settings) = settings {
         if let Some(settings) = &settings.sub_surface_sensor {
-            return &settings;
+            return settings;
         }
     }
     &[]
