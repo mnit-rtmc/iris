@@ -226,8 +226,8 @@ fn precip_situation(situation: &str) -> &'static str {
 }
 
 /// Format depth quantity
-fn format_depth(depth: f32) -> String {
-    let depth = (f64::from(depth) * mm).to::<DepthUnit>();
+fn format_depth(depth_mm: f32) -> String {
+    let depth = (f64::from(depth_mm) * mm).to::<DepthUnit>();
     format!("{depth:.2}")
 }
 
@@ -579,9 +579,9 @@ fn pavement_html(
                 html.push_str(&format_temp(temp));
                 html.push_str("</li>");
             }
-            if let Some(depth) = pd.ice_or_water_depth {
+            if let Some(depth_m) = pd.ice_or_water_depth {
                 html.push_str("<li>Ice/water depth ");
-                html.push_str(&format_depth(depth / 1_000.0));
+                html.push_str(&format_depth(depth_m * 1_000.0));
                 html.push_str("</li>");
             }
             if let Some(salinity) = pd.salinity {
