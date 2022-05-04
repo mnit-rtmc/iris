@@ -580,7 +580,7 @@ fn pavement_html(
                 html.push_str("</li>");
             }
             if let Some(depth_m) = pd.ice_or_water_depth {
-                html.push_str("<li>Ice/water depth ");
+                html.push_str("<li>Water/ice depth ");
                 html.push_str(&format_depth(depth_m * 1_000.0));
                 html.push_str("</li>");
             }
