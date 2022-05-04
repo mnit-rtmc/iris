@@ -16,6 +16,7 @@ use crate::segments::{RNode, Road, SegMsg};
 use crate::signmsg::render_all;
 use crate::Result;
 use postgres::Client;
+use std::collections::HashSet;
 use std::fs::{rename, File};
 use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
@@ -985,11 +986,15 @@ impl Resource {
 ///
 /// * `client` Database connection.
 pub fn listen_all(client: &mut Client) -> Result<()> {
+    let mut channels = HashSet::new();
     for r in ALL {
         for lsn in r.listen().channel_names() {
-            let listen = format!("LISTEN {}", lsn);
-            client.execute(&listen[..], &[])?;
+            channels.insert(lsn);
         }
+    }
+    for channel in channels {
+        let listen = format!("LISTEN {}", channel);
+        client.execute(&listen[..], &[])?;
     }
     Ok(())
 }
