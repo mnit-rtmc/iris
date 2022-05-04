@@ -568,6 +568,18 @@ const WEATHER_SENSOR_RES: Resource = Resource::Simple(
     ) r",
 );
 
+/// RWIS resource
+const RWIS_RES: Resource = Resource::Simple(
+    "rwis",
+    Listen::All("weather_sensor"),
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT ws.name, location, settings, sample, sample_time \
+        FROM iris.weather_sensor ws \
+        LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
+        ORDER BY name\
+    ) r",
+);
+
 /// Modem resource
 const MODEM_RES: Resource = Resource::Simple(
     "api/modem",
@@ -737,6 +749,7 @@ const ALL: &[Resource] = &[
     RESOURCE_TYPE_RES,
     CONTROLLER_RES,
     WEATHER_SENSOR_RES,
+    RWIS_RES,
     MODEM_RES,
     PERMISSION_RES,
     ROLE_RES,
