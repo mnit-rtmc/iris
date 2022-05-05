@@ -189,8 +189,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Maximum occupancy value (100%) */
 	static private final int MAX_OCCUPANCY = 100;
 
-	/** Maximum number of scans in 30 seconds */
-	static private final int MAX_C30 = 1800;
+	/** Scan time (ms) */
+	static private final float SCAN_MS = 1000f / 60f;
 
 	/** Change in occupancy to indicate a spike */
 	static private final int OCC_SPIKE = OccupancySample.MAX / 4;
@@ -786,8 +786,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		int scn = isSampling()
 		       ? scn_cache.getValue(stamp - per_ms, stamp)
 		       : MISSING_DATA;
-		return (scn != MISSING_DATA)
-		      ? MAX_OCCUPANCY * (float) scn / MAX_C30
+		return (scn >= 0)
+		      ? MAX_OCCUPANCY * scn * SCAN_MS / per_ms
 		      : MISSING_DATA;
 	}
 
