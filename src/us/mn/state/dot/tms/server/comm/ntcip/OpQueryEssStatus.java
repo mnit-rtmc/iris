@@ -61,26 +61,40 @@ public class OpQueryEssStatus extends OpEss {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase phaseTwo() {
-		return new QueryAtmospheric();
+		return new QueryPressure();
 	}
 
-	/** Phase to query atmospheric values */
-	protected class QueryAtmospheric extends Phase {
+	/** Phase to query atmospheric pressure */
+	protected class QueryPressure extends Phase {
 
-		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(ess_rec.atmospheric_values
 				.atmospheric_pressure);
-			mess.add(ess_rec.atmospheric_values.visibility);
-			mess.add(ess_rec.atmospheric_values
-				.visibility_situation);
 			mess.queryProps();
 			logQuery(ess_rec.atmospheric_values
 				.atmospheric_pressure);
-			logQuery(ess_rec.atmospheric_values.visibility);
-			logQuery(ess_rec.atmospheric_values
+			return new QueryVisibility();
+		}
+	}
+
+	/** Phase to query visibility */
+	protected class QueryVisibility extends Phase {
+
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(ess_rec.atmospheric_values.visibility);
+			mess.add(ess_rec.atmospheric_values
 				.visibility_situation);
+			try {
+				mess.queryProps();
+				logQuery(ess_rec.atmospheric_values.visibility);
+				logQuery(ess_rec.atmospheric_values
+					.visibility_situation);
+			}
+			catch (NoSuchName e) {
+				// Note: some vendors do not support these
+			}
 			return new QueryWindSensorsV2();
 		}
 	}
