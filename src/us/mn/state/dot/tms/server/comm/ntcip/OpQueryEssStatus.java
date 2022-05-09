@@ -267,7 +267,7 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(pr.salinity);
 			logQuery(pr.black_ice_signal);
 			// only read friction for the first row
-			return (pr.number == 0)
+			return (pr.number == 1)
 			      ? new QueryFrictionCoefficient(pr)
 			      : new QueryPavementTableV2(pr);
 		}
