@@ -419,12 +419,16 @@ public class OpQueryEssStatus extends OpEss {
 	/** Phase to query total sun value */
 	protected class QueryTotalSun extends Phase {
 
-		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(ess_rec.rad_values.total_sun);
-			mess.queryProps();
-			logQuery(ess_rec.rad_values.total_sun);
+			try {
+				mess.queryProps();
+				logQuery(ess_rec.rad_values.total_sun);
+			}
+			catch (NoSuchName e) {
+				// Not supported by some vendors...
+			}
 			return new QueryCloudSituation();
 		}
 	}
