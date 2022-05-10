@@ -132,10 +132,10 @@ const CAMERA_RES: Resource = Resource::Simple(
     "api/camera",
     Listen::Exclude("camera", &["video_loss"]),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT c.name, location, controller, notes, cam_num, publish \
-        FROM iris.camera c \
-        LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
-        ORDER BY cam_num, c.name\
+      SELECT c.name, location, controller, notes, cam_num, publish \
+      FROM iris.camera c \
+      LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
+      ORDER BY cam_num, c.name\
     ) r",
 );
 
@@ -144,10 +144,10 @@ const CAMERA_PUB_RES: Resource = Resource::Simple(
     "camera_pub",
     Listen::Exclude("camera", &["video_loss"]),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT name, publish, streamable, roadway, road_dir, cross_street, \
-               location, lat, lon \
-        FROM camera_view \
-        ORDER BY name\
+      SELECT name, publish, streamable, roadway, road_dir, cross_street, \
+             location, lat, lon \
+      FROM camera_view \
+      ORDER BY name\
     ) r",
 );
 
@@ -156,9 +156,9 @@ const GATE_ARM_RES: Resource = Resource::Simple(
     "api/gate_arm",
     Listen::All("gate_arm"),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT name, controller, notes, arm_state \
-        FROM iris.gate_arm \
-        ORDER BY name\
+      SELECT name, controller, notes, arm_state \
+      FROM iris.gate_arm \
+      ORDER BY name\
     ) r",
 );
 
@@ -167,10 +167,10 @@ const GATE_ARM_ARRAY_RES: Resource = Resource::Simple(
     "api/gate_arm_array",
     Listen::All("gate_arm_array"),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT ga.name, location, notes, arm_state, interlock \
-        FROM iris.gate_arm_array ga \
-        LEFT JOIN geo_loc_view gl ON ga.geo_loc = gl.name \
-        ORDER BY ga.name\
+      SELECT ga.name, location, notes, arm_state, interlock \
+      FROM iris.gate_arm_array ga \
+      LEFT JOIN geo_loc_view gl ON ga.geo_loc = gl.name \
+      ORDER BY ga.name\
     ) r",
 );
 
@@ -179,9 +179,9 @@ const GPS_RES: Resource = Resource::Simple(
     "api/gps",
     Listen::Exclude("gps", &["latest_poll", "latest_sample", "lat", "lon"]),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT name, controller, notes \
-        FROM iris.gps \
-        ORDER BY name\
+      SELECT name, controller, notes \
+      FROM iris.gps \
+      ORDER BY name\
     ) r",
 );
 
@@ -190,9 +190,9 @@ const LCS_ARRAY_RES: Resource = Resource::Simple(
     "api/lcs_array",
     Listen::All("lcs_array"),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT name, notes, lcs_lock \
-        FROM iris.lcs_array \
-        ORDER BY name\
+      SELECT name, notes, lcs_lock \
+      FROM iris.lcs_array \
+      ORDER BY name\
     ) r",
 );
 
@@ -201,9 +201,9 @@ const LCS_INDICATION_RES: Resource = Resource::Simple(
     "api/lcs_indication",
     Listen::All("lcs_indication"),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT name, controller, lcs, indication \
-        FROM iris.lcs_indication \
-        ORDER BY name\
+      SELECT name, controller, lcs, indication \
+      FROM iris.lcs_indication \
+      ORDER BY name\
     ) r",
 );
 
@@ -212,10 +212,10 @@ const RAMP_METER_RES: Resource = Resource::Simple(
     "api/ramp_meter",
     Listen::All("ramp_meter"),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT m.name, location, controller, notes \
-        FROM iris.ramp_meter m \
-        LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
-        ORDER BY m.name\
+      SELECT m.name, location, controller, notes \
+      FROM iris.ramp_meter m \
+      LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
+      ORDER BY m.name\
     ) r",
 );
 
@@ -224,10 +224,10 @@ const TAG_READER_RES: Resource = Resource::Simple(
     "api/tag_reader",
     Listen::All("tag_reader"),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT t.name, location, controller, notes \
-        FROM iris.tag_reader t \
-        LEFT JOIN geo_loc_view gl ON t.geo_loc = gl.name \
-        ORDER BY t.name\
+      SELECT t.name, location, controller, notes \
+      FROM iris.tag_reader t \
+      LEFT JOIN geo_loc_view gl ON t.geo_loc = gl.name \
+      ORDER BY t.name\
     ) r",
 );
 
@@ -236,9 +236,9 @@ const VIDEO_MONITOR_RES: Resource = Resource::Simple(
     "api/video_monitor",
     Listen::Exclude("video_monitor", &["camera"]),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT name, mon_num, controller, notes \
-        FROM iris.video_monitor \
-        ORDER BY mon_num, name\
+      SELECT name, mon_num, controller, notes \
+      FROM iris.video_monitor \
+      ORDER BY mon_num, name\
     ) r",
 );
 
@@ -247,9 +247,9 @@ const FLOW_STREAM_RES: Resource = Resource::Simple(
     "api/flow_stream",
     Listen::Exclude("flow_stream", &["status"]),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT name, controller \
-        FROM iris.flow_stream \
-        ORDER BY name\
+      SELECT name, controller \
+      FROM iris.flow_stream \
+      ORDER BY name\
     ) r",
 );
 
@@ -258,10 +258,10 @@ const DETECTOR_RES: Resource = Resource::Simple(
     "api/detector",
     Listen::Exclude("detector", &["auto_fail"]),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT name, label, controller, notes \
-        FROM detector_view \
-        ORDER BY regexp_replace(name, '[0-9]', '', 'g'), \
-                (regexp_replace(name, '[^0-9]', '', 'g') || '0')::INTEGER\
+      SELECT name, label, controller, notes \
+      FROM detector_view \
+      ORDER BY regexp_replace(name, '[0-9]', '', 'g'), \
+              (regexp_replace(name, '[^0-9]', '', 'g') || '0')::INTEGER\
     ) r",
 );
 
@@ -270,8 +270,8 @@ const DETECTOR_PUB_RES: Resource = Resource::Simple(
     "detector_pub",
     Listen::Exclude("detector", &["auto_fail"]),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT name, r_node, cor_id, lane_number, lane_code, field_length \
-        FROM detector_view\
+      SELECT name, r_node, cor_id, lane_number, lane_code, field_length \
+      FROM detector_view\
     ) r",
 );
 
@@ -283,10 +283,10 @@ const DMS_RES: Resource = Resource::Simple(
         &["msg_user", "msg_sched", "msg_current", "expire_time"],
     ),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT d.name, controller, location, notes, sign_config, sign_detail \
-        FROM iris.dms d \
-        LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
-        ORDER BY d.name\
+      SELECT d.name, controller, location, notes, sign_config, sign_detail \
+      FROM iris.dms d \
+      LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
+      ORDER BY d.name\
     ) r",
 );
 
@@ -298,10 +298,10 @@ const DMS_PUB_RES: Resource = Resource::Simple(
         &["msg_user", "msg_sched", "msg_current", "expire_time"],
     ),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT name, sign_config, sign_detail, roadway, road_dir, \
-               cross_street, location, lat, lon \
-        FROM dms_view \
-        ORDER BY name\
+      SELECT name, sign_config, sign_detail, roadway, road_dir, \
+             cross_street, location, lat, lon \
+      FROM dms_view \
+      ORDER BY name\
     ) r",
 );
 
@@ -310,10 +310,10 @@ const DMS_STAT_RES: Resource = Resource::Simple(
     "dms_message",
     Listen::Include("dms", &["msg_current"]),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, msg_current, failed, sources, duration, expire_time \
-    FROM dms_message_view WHERE condition = 'Active' \
-    ORDER BY name \
-) r",
+      SELECT name, msg_current, failed, sources, duration, expire_time \
+      FROM dms_message_view WHERE condition = 'Active' \
+      ORDER BY name\
+    ) r",
 );
 
 /// Font resource
@@ -321,16 +321,17 @@ const FONT_RES: Resource = Resource::Simple(
     "font",
     Listen::Two("font", "glyph"),
     "SELECT row_to_json(f)::text FROM (\
-    SELECT f_number AS number, name, height, char_spacing, line_spacing, \
-           array(SELECT row_to_json(c) FROM \
-               (SELECT code_point AS number, width, replace(pixels, E'\n', '') \
-                AS bitmap \
-                FROM iris.glyph \
-                WHERE font = ft.name \
-                ORDER BY code_point \
-               ) AS c) \
+      SELECT f_number AS number, name, height, char_spacing, line_spacing, \
+             array(SELECT row_to_json(c) FROM (\
+               SELECT code_point AS number, width, \
+                      replace(pixels, E'\n', '') AS bitmap \
+               FROM iris.glyph \
+               WHERE font = ft.name \
+               ORDER BY code_point \
+             ) AS c) \
            AS characters, version_id \
-    FROM iris.font ft ORDER BY name) AS f",
+      FROM iris.font ft ORDER BY name\
+    ) AS f",
 );
 
 /// Graphic resource
@@ -338,11 +339,11 @@ const GRAPHIC_RES: Resource = Resource::Simple(
     "graphic",
     Listen::All("graphic"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT g_number AS number, name, height, width, color_scheme, \
-           transparent_color, replace(pixels, E'\n', '') AS bitmap \
-    FROM graphic_view \
-    WHERE g_number < 256 \
-) r",
+      SELECT g_number AS number, name, height, width, color_scheme, \
+             transparent_color, replace(pixels, E'\n', '') AS bitmap \
+      FROM graphic_view \
+      WHERE g_number < 256\
+    ) r",
 );
 
 /// Incident resource
@@ -350,11 +351,11 @@ const INCIDENT_RES: Resource = Resource::Simple(
     "incident",
     Listen::All("incident"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, event_date, description, road, direction, lane_type, \
-           impact, confirmed, camera, detail, replaces, lat, lon \
-    FROM incident_view \
-    WHERE cleared = false\
-) r",
+      SELECT name, event_date, description, road, direction, lane_type, \
+             impact, confirmed, camera, detail, replaces, lat, lon \
+      FROM incident_view \
+      WHERE cleared = false\
+    ) r",
 );
 
 /// RNode resource
@@ -368,9 +369,9 @@ const ALARM_RES: Resource = Resource::Simple(
     "api/alarm",
     Listen::Exclude("alarm", &["pin", "trigger_time"]),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT name, description, controller, state \
-        FROM iris.alarm \
-        ORDER BY description\
+      SELECT name, description, controller, state \
+      FROM iris.alarm \
+      ORDER BY description\
     ) r",
 );
 
@@ -379,10 +380,10 @@ const BEACON_RES: Resource = Resource::Simple(
     "api/beacon",
     Listen::All("beacon"),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT b.name, location, controller, message, notes, flashing \
-        FROM iris.beacon b \
-        LEFT JOIN geo_loc_view gl ON b.geo_loc = gl.name \
-        ORDER BY name\
+      SELECT b.name, location, controller, message, notes, flashing \
+      FROM iris.beacon b \
+      LEFT JOIN geo_loc_view gl ON b.geo_loc = gl.name \
+      ORDER BY name\
     ) r",
 );
 
@@ -391,10 +392,10 @@ const LANE_MARKING_RES: Resource = Resource::Simple(
     "api/lane_marking",
     Listen::All("lane_marking"),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT m.name, location, controller, notes, deployed \
-        FROM iris.lane_marking m \
-        LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
-        ORDER BY name\
+      SELECT m.name, location, controller, notes, deployed \
+      FROM iris.lane_marking m \
+      LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
+      ORDER BY name\
     ) r",
 );
 
@@ -403,10 +404,10 @@ const CABINET_STYLE_RES: Resource = Resource::Simple(
     "api/cabinet_style",
     Listen::All("cabinet_style"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name \
-    FROM iris.cabinet_style \
-    ORDER BY name\
-) r",
+      SELECT name \
+      FROM iris.cabinet_style \
+      ORDER BY name\
+    ) r",
 );
 
 /// Comm protocol LUT resource
@@ -414,9 +415,9 @@ const COMM_PROTOCOL_RES: Resource = Resource::Simple(
     "comm_protocol",
     Listen::Nope,
     "SELECT row_to_json(r)::text FROM (\
-        SELECT id, description \
-        FROM iris.comm_protocol \
-        ORDER BY description\
+      SELECT id, description \
+      FROM iris.comm_protocol \
+      ORDER BY description\
     ) r",
 );
 
@@ -425,10 +426,10 @@ const COMM_CONFIG_RES: Resource = Resource::Simple(
     "api/comm_config",
     Listen::All("comm_config"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, description \
-    FROM iris.comm_config \
-    ORDER BY description\
-) r",
+      SELECT name, description \
+      FROM iris.comm_config \
+      ORDER BY description\
+    ) r",
 );
 
 /// Comm link resource
@@ -436,11 +437,11 @@ const COMM_LINK_RES: Resource = Resource::Simple(
     "api/comm_link",
     Listen::All("comm_link"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, description, uri, comm_config, poll_enabled, connected \
-    FROM iris.comm_link \
-    ORDER BY regexp_replace(name, '[0-9]', '', 'g'), \
-            (regexp_replace(name, '[^0-9]', '', 'g') || '0')::INTEGER\
-) r",
+      SELECT name, description, uri, comm_config, poll_enabled, connected \
+      FROM iris.comm_link \
+      ORDER BY regexp_replace(name, '[0-9]', '', 'g'), \
+              (regexp_replace(name, '[^0-9]', '', 'g') || '0')::INTEGER\
+    ) r",
 );
 
 /// Controller condition LUT resource
@@ -448,9 +449,9 @@ const CONDITION_RES: Resource = Resource::Simple(
     "condition",
     Listen::Nope,
     "SELECT row_to_json(r)::text FROM (\
-        SELECT id, description \
-        FROM iris.condition \
-        ORDER BY description\
+      SELECT id, description \
+      FROM iris.condition \
+      ORDER BY description\
     ) r",
 );
 
@@ -459,9 +460,9 @@ const DIRECTION_RES: Resource = Resource::Simple(
     "direction",
     Listen::Nope,
     "SELECT row_to_json(r)::text FROM (\
-        SELECT id, direction, dir \
-        FROM iris.direction \
-        ORDER BY id\
+      SELECT id, direction, dir \
+      FROM iris.direction \
+      ORDER BY id\
     ) r",
 );
 
@@ -470,9 +471,9 @@ const ROADWAY_RES: Resource = Resource::Simple(
     "api/road",
     Listen::All("road"),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT name, abbrev, r_class, direction \
-        FROM iris.road \
-        ORDER BY name\
+      SELECT name, abbrev, r_class, direction \
+      FROM iris.road \
+      ORDER BY name\
     ) r",
 );
 
@@ -481,9 +482,9 @@ const ROAD_MODIFIER_RES: Resource = Resource::Simple(
     "road_modifier",
     Listen::Nope,
     "SELECT row_to_json(r)::text FROM (\
-        SELECT id, modifier, mod AS md \
-        FROM iris.road_modifier \
-        ORDER BY id\
+      SELECT id, modifier, mod AS md \
+      FROM iris.road_modifier \
+      ORDER BY id\
     ) r",
 );
 
@@ -491,10 +492,10 @@ const ROAD_MODIFIER_RES: Resource = Resource::Simple(
 const GATE_ARM_INTERLOCK_RES: Resource = Resource::Simple(
     "gate_arm_interlock",
     Listen::Nope,
-    "SELECT row_to_json(r)::text FROM (
-        SELECT id, description \
-        FROM iris.gate_arm_interlock \
-        ORDER BY id\
+    "SELECT row_to_json(r)::text FROM (\
+      SELECT id, description \
+      FROM iris.gate_arm_interlock \
+      ORDER BY id\
     ) r",
 );
 
@@ -502,10 +503,10 @@ const GATE_ARM_INTERLOCK_RES: Resource = Resource::Simple(
 const GATE_ARM_STATE_RES: Resource = Resource::Simple(
     "gate_arm_state",
     Listen::Nope,
-    "SELECT row_to_json(r)::text FROM (
-        SELECT id, description \
-        FROM iris.gate_arm_state \
-        ORDER BY id\
+    "SELECT row_to_json(r)::text FROM (\
+      SELECT id, description \
+      FROM iris.gate_arm_state \
+      ORDER BY id\
     ) r",
 );
 
@@ -513,10 +514,10 @@ const GATE_ARM_STATE_RES: Resource = Resource::Simple(
 const LANE_USE_INDICATION_RES: Resource = Resource::Simple(
     "lane_use_indication",
     Listen::Nope,
-    "SELECT row_to_json(r)::text FROM (
-        SELECT id, description \
-        FROM iris.lane_use_indication \
-        ORDER BY id\
+    "SELECT row_to_json(r)::text FROM (\
+      SELECT id, description \
+      FROM iris.lane_use_indication \
+      ORDER BY id\
     ) r",
 );
 
@@ -524,10 +525,10 @@ const LANE_USE_INDICATION_RES: Resource = Resource::Simple(
 const LCS_LOCK_RES: Resource = Resource::Simple(
     "lcs_lock",
     Listen::Nope,
-    "SELECT row_to_json(r)::text FROM (
-        SELECT id, description \
-        FROM iris.lcs_lock \
-        ORDER BY id\
+    "SELECT row_to_json(r)::text FROM (\
+      SELECT id, description \
+      FROM iris.lcs_lock \
+      ORDER BY id\
     ) r",
 );
 
@@ -535,10 +536,10 @@ const LCS_LOCK_RES: Resource = Resource::Simple(
 const RESOURCE_TYPE_RES: Resource = Resource::Simple(
     "resource_type",
     Listen::Nope,
-    "SELECT to_json(r.name)::text FROM (
-        SELECT name \
-        FROM iris.resource_type \
-        ORDER BY name\
+    "SELECT to_json(r.name)::text FROM (\
+      SELECT name \
+      FROM iris.resource_type \
+      ORDER BY name\
     ) r",
 );
 
@@ -547,14 +548,14 @@ const CONTROLLER_RES: Resource = Resource::Simple(
     "api/controller",
     Listen::All("controller"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT c.name, location, comm_link, drop_id, cabinet_style, condition, \
-           notes, version, fail_time \
-    FROM iris.controller c \
-    LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
-    ORDER BY COALESCE(regexp_replace(comm_link, '[0-9]', '', 'g'), ''), \
-            (regexp_replace(comm_link, '[^0-9]', '', 'g') || '0')::INTEGER, \
-             drop_id\
-) r",
+      SELECT c.name, location, comm_link, drop_id, cabinet_style, condition, \
+             notes, version, fail_time \
+      FROM iris.controller c \
+      LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
+      ORDER BY COALESCE(regexp_replace(comm_link, '[0-9]', '', 'g'), ''), \
+              (regexp_replace(comm_link, '[^0-9]', '', 'g') || '0')::INTEGER, \
+               drop_id\
+    ) r",
 );
 
 /// Weather sensor resource
@@ -562,10 +563,10 @@ const WEATHER_SENSOR_RES: Resource = Resource::Simple(
     "api/weather_sensor",
     Listen::Exclude("weather_sensor", &["pin", "settings", "sample"]),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT ws.name, site_id, alt_id, location, controller, notes \
-        FROM iris.weather_sensor ws \
-        LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
-        ORDER BY name\
+      SELECT ws.name, site_id, alt_id, location, controller, notes \
+      FROM iris.weather_sensor ws \
+      LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
+      ORDER BY name\
     ) r",
 );
 
@@ -574,10 +575,10 @@ const RWIS_RES: Resource = Resource::Simple(
     "rwis",
     Listen::All("weather_sensor"),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT ws.name, location, settings, sample, sample_time \
-        FROM iris.weather_sensor ws \
-        LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
-        ORDER BY name\
+      SELECT ws.name, location, settings, sample, sample_time \
+      FROM iris.weather_sensor ws \
+      LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
+      ORDER BY name\
     ) r",
 );
 
@@ -586,10 +587,10 @@ const MODEM_RES: Resource = Resource::Simple(
     "api/modem",
     Listen::All("modem"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, enabled \
-    FROM iris.modem \
-    ORDER BY name\
-) r",
+      SELECT name, enabled \
+      FROM iris.modem \
+      ORDER BY name\
+    ) r",
 );
 
 /// Permission resource
@@ -597,10 +598,10 @@ const PERMISSION_RES: Resource = Resource::Simple(
     "api/permission",
     Listen::All("permission"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT id, role, resource_n, batch, access_n \
-    FROM iris.permission \
-    ORDER BY role, resource_n, id\
-) r",
+      SELECT id, role, resource_n, batch, access_n \
+      FROM iris.permission \
+      ORDER BY role, resource_n, id\
+    ) r",
 );
 
 /// Role resource
@@ -608,9 +609,9 @@ const ROLE_RES: Resource = Resource::Simple(
     "api/role",
     Listen::All("role"),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT name, enabled \
-        FROM iris.role \
-        ORDER BY name\
+      SELECT name, enabled \
+      FROM iris.role \
+      ORDER BY name\
     ) r",
 );
 
@@ -619,9 +620,9 @@ const USER_RES: Resource = Resource::Simple(
     "api/user",
     Listen::All("i_user"),
     "SELECT row_to_json(r)::text FROM (\
-        SELECT name, full_name, role, enabled \
-        FROM iris.i_user \
-        ORDER BY name\
+      SELECT name, full_name, role, enabled \
+      FROM iris.i_user \
+      ORDER BY name\
     ) r",
 );
 
@@ -630,12 +631,12 @@ const SIGN_CONFIG_RES: Resource = Resource::Simple(
     "sign_config",
     Listen::All("sign_config"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, face_width, face_height, border_horiz, border_vert, \
-           pitch_horiz, pitch_vert, pixel_width, pixel_height, \
-           char_width, char_height, monochrome_foreground, \
-           monochrome_background, color_scheme, default_font \
-    FROM sign_config_view\
-) r",
+      SELECT name, face_width, face_height, border_horiz, border_vert, \
+             pitch_horiz, pitch_vert, pixel_width, pixel_height, \
+             char_width, char_height, monochrome_foreground, \
+             monochrome_background, color_scheme, default_font \
+      FROM sign_config_view\
+    ) r",
 );
 
 /// Sign detail resource
@@ -643,12 +644,12 @@ const SIGN_DETAIL_RES: Resource = Resource::Simple(
     "sign_detail",
     Listen::All("sign_detail"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, dms_type, portable, technology, sign_access, legend, \
-           beacon_type, hardware_make, hardware_model, software_make, \
-           software_model, supported_tags, max_pages, max_multi_len, \
-           beacon_activation_flag, pixel_service_flag \
-    FROM sign_detail_view\
-) r",
+      SELECT name, dms_type, portable, technology, sign_access, legend, \
+             beacon_type, hardware_make, hardware_model, software_make, \
+             software_model, supported_tags, max_pages, max_multi_len, \
+             beacon_activation_flag, pixel_service_flag \
+      FROM sign_detail_view\
+    ) r",
 );
 
 /// Sign message resource
@@ -656,11 +657,11 @@ const SIGN_MSG_RES: Resource = Resource::SignMsg(
     "sign_message",
     Listen::All("sign_message"),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT name, sign_config, incident, multi, beacon_enabled, \
-           msg_combining, msg_priority, sources, owner, duration \
-    FROM sign_message_view \
-    ORDER BY name\
-) r",
+      SELECT name, sign_config, incident, multi, beacon_enabled, \
+             msg_combining, msg_priority, sources, owner, duration \
+      FROM sign_message_view \
+      ORDER BY name\
+    ) r",
 );
 
 /// System attribute resource
@@ -668,30 +669,32 @@ const SYSTEM_ATTRIBUTE_RES: Resource = Resource::Simple(
     "system_attribute",
     Listen::All("system_attribute"),
     "SELECT jsonb_object_agg(name, value)::text \
-    FROM iris.system_attribute \
-    WHERE name LIKE 'dms\\_%' OR name LIKE 'map\\_%'",
+      FROM iris.system_attribute \
+      WHERE name LIKE 'dms\\_%' OR name LIKE 'map\\_%'",
 );
 
 /// Static parking area resource
 const TPIMS_STAT_RES: Resource = Resource::Simple(
-"TPIMS_static", Listen::Include("parking_area", &["time_stamp_static"]),
-"SELECT row_to_json(r)::text FROM (\
-    SELECT site_id AS \"siteId\", to_char(time_stamp_static AT TIME ZONE 'UTC', \
-           'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
-           relevant_highway AS \"relevantHighway\", \
-           reference_post AS \"referencePost\", exit_id AS \"exitID\", \
-           road_dir AS \"directionOfTravel\", facility_name AS name, \
-           json_build_object('latitude', lat, 'longitude', lon, \
-           'streetAdr', street_adr, 'city', city, 'state', state, \
-           'zip', zip, 'timeZone', time_zone) AS location, \
-           ownership, capacity, \
-           string_to_array(amenities, ', ') AS amenities, \
-           array_remove(ARRAY[camera_image_base_url || camera_1, \
-           camera_image_base_url || camera_2, \
-           camera_image_base_url || camera_3], NULL) AS images, \
-           ARRAY[]::text[] AS logos \
-    FROM parking_area_view\
-) r",
+    "TPIMS_static",
+    Listen::Include("parking_area", &["time_stamp_static"]),
+    "SELECT row_to_json(r)::text FROM (\
+      SELECT site_id AS \"siteId\", \
+             to_char(time_stamp_static AT TIME ZONE 'UTC', \
+                     'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
+             relevant_highway AS \"relevantHighway\", \
+             reference_post AS \"referencePost\", exit_id AS \"exitID\", \
+             road_dir AS \"directionOfTravel\", facility_name AS name, \
+             json_build_object('latitude', lat, 'longitude', lon, \
+             'streetAdr', street_adr, 'city', city, 'state', state, \
+             'zip', zip, 'timeZone', time_zone) AS location, \
+             ownership, capacity, \
+             string_to_array(amenities, ', ') AS amenities, \
+             array_remove(ARRAY[camera_image_base_url || camera_1, \
+             camera_image_base_url || camera_2, \
+             camera_image_base_url || camera_3], NULL) AS images, \
+             ARRAY[]::text[] AS logos \
+      FROM parking_area_view\
+    ) r",
 );
 
 /// Dynamic parking area resource
@@ -699,14 +702,15 @@ const TPIMS_DYN_RES: Resource = Resource::Simple(
     "TPIMS_dynamic",
     Listen::Include("parking_area", &["time_stamp"]),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT site_id AS \"siteId\", to_char(time_stamp AT TIME ZONE 'UTC', \
-           'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
-           to_char(time_stamp_static AT TIME ZONE 'UTC', \
-           'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStampStatic\", \
-           reported_available AS \"reportedAvailable\", \
-           trend, open, trust_data AS \"trustData\", capacity \
-    FROM parking_area_view\
-) r",
+      SELECT site_id AS \"siteId\", \
+             to_char(time_stamp AT TIME ZONE 'UTC', \
+                     'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
+             to_char(time_stamp_static AT TIME ZONE 'UTC', \
+                     'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStampStatic\", \
+             reported_available AS \"reportedAvailable\", \
+             trend, open, trust_data AS \"trustData\", capacity \
+      FROM parking_area_view\
+    ) r",
 );
 
 /// Archive parking area resource
@@ -714,18 +718,19 @@ const TPIMS_ARCH_RES: Resource = Resource::Simple(
     "TPIMS_archive",
     Listen::Include("parking_area", &["time_stamp"]),
     "SELECT row_to_json(r)::text FROM (\
-    SELECT site_id AS \"siteId\", to_char(time_stamp AT TIME ZONE 'UTC', \
-           'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
-           to_char(time_stamp_static AT TIME ZONE 'UTC', \
-           'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStampStatic\", \
-           reported_available AS \"reportedAvailable\", \
-           trend, open, trust_data AS \"trustData\", capacity, \
-           last_verification_check AS \"lastVerificationCheck\", \
-           verification_check_amplitude AS \"verificationCheckAmplitude\", \
-           low_threshold AS \"lowThreshold\", \
-           true_available AS \"trueAvailable\" \
-    FROM parking_area_view\
-) r",
+      SELECT site_id AS \"siteId\",
+             to_char(time_stamp AT TIME ZONE 'UTC', \
+                     'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
+             to_char(time_stamp_static AT TIME ZONE 'UTC', \
+                     'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStampStatic\", \
+             reported_available AS \"reportedAvailable\", \
+             trend, open, trust_data AS \"trustData\", capacity, \
+             last_verification_check AS \"lastVerificationCheck\", \
+             verification_check_amplitude AS \"verificationCheckAmplitude\", \
+             low_threshold AS \"lowThreshold\", \
+             true_available AS \"trueAvailable\" \
+      FROM parking_area_view\
+    ) r",
 );
 
 /// All defined resources
@@ -987,9 +992,9 @@ impl Resource {
 /// * `client` Database connection.
 pub fn listen_all(client: &mut Client) -> Result<()> {
     let mut channels = HashSet::new();
-    for r in ALL {
-        for lsn in r.listen().channel_names() {
-            channels.insert(lsn);
+    for res in ALL {
+        for channel in res.listen().channel_names() {
+            channels.insert(channel);
         }
     }
     for channel in channels {
@@ -1004,8 +1009,8 @@ pub fn listen_all(client: &mut Client) -> Result<()> {
 /// * `client` The database connection.
 /// * `sender` Sender for segment messages.
 pub fn fetch_all(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
-    for r in ALL {
-        r.fetch(client, "", sender)?;
+    for res in ALL {
+        res.fetch(client, "", sender)?;
     }
     Ok(())
 }
@@ -1024,11 +1029,11 @@ pub fn notify(
 ) -> Result<()> {
     info!("notify: {}, {}", &chan, &payload);
     let mut found = false;
-    for r in ALL {
-        if r.listen().is_listening(chan, payload) {
+    for res in ALL {
+        if res.listen().is_listening(chan, payload) {
             found = true;
-            r.fetch(client, payload, sender)?;
-        } else if r.listen().is_listening_payload(chan, payload) {
+            res.fetch(client, payload, sender)?;
+        } else if res.listen().is_listening_payload(chan, payload) {
             found = true;
         }
     }
@@ -1041,5 +1046,5 @@ pub fn notify(
 /// Check if any resource is listening to a channel / payload
 pub fn is_listening_payload(chan: &str, payload: &str) -> bool {
     ALL.iter()
-        .any(|r| r.listen().is_listening_payload(chan, payload))
+        .any(|res| res.listen().is_listening_payload(chan, payload))
 }
