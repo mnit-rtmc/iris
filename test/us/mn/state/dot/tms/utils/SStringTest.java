@@ -2,7 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009 - 2011  AHMCT, University of California
  * Copyright (C) 2016-2017  Minnesota Department of Transportation
- * Copyright (C) 2017  Iteris Inc.
+ * Copyright (C) 2017-2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,5 +116,23 @@ public class SStringTest extends TestCase {
 		assertTrue(splitCamel("xx").equals("xx"));
 		assertTrue(splitCamel("xX").equals("x X"));
 		assertTrue(splitCamel("xxXx").equals("xx Xx"));
+	}
+
+	public void testExtractMiddle() {
+		assertTrue(extractMiddle("<vin>1.0</vin>", "<vin>", "</vin>").equals("1.0"));
+		assertTrue(extractMiddle("<vin>2.0</vin>", "<vin>", "</vin>X").equals(""));
+		assertTrue(extractMiddle("<vin>3.0</vin>", "<vin>X", "</vin>").equals(""));
+		assertTrue(extractMiddle("", "<vin>", "</vin>").equals(""));
+		assertTrue(extractMiddle("<vin>4.0</vin>", "", "</vin>").equals("<vin>4.0"));
+		assertTrue(extractMiddle("<vin>5.0</vin>", "<vin>", "").equals("5.0</vin>"));
+		assertTrue(extractMiddle("<vin>6.0</vin>", "<vin>", "</vin>").equals("6.0"));
+		assertTrue(extractMiddle("<vin>7.0</vin>", "", "").equals("<vin>7.0</vin>"));
+		assertTrue(extractMiddle("", "", "").equals(""));
+	}
+
+	public void testSafe() {
+		assertTrue(safe("abc").equals("abc"));
+		assertTrue(safe("").equals(""));
+		assertTrue(safe(null).equals(""));
 	}
 }

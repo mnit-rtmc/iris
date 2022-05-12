@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2016-2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +17,8 @@ package us.mn.state.dot.tms.server.comm.cbw;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.server.BeaconImpl;
+import us.mn.state.dot.tms.server.CommLinkImpl;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -24,6 +27,8 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * Query the state of a beacon
  *
  * @author Douglas Lau
+ * @author Deb Behera
+ * @author Michael Darter
  */
 public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 
@@ -54,6 +59,7 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 		{
 			mess.add(property);
 			mess.queryProps();
+			updateController();
 			return null;
 		}
 	}
@@ -98,7 +104,7 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 	/** Format the new maintenance status */
 	private String formatMaintStatus() {
 		Integer vp = beacon.getVerifyPin();
-		if (vp != null) {
+		if (vp != null && vp != 0 ) {
 			boolean f = getRelay(beacon.getPin());
 			boolean v = getInput(vp);
 			if (f && !v)
@@ -108,4 +114,12 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 		}
 		return "";
 	}
+
+	/** Update the controller with new values */
+	private void updateController() {
+		ControllerImpl ci = getController();
+		CommLinkImpl cli = (CommLinkImpl)ci.getCommLink();
+		ci.setVersionNotify("Vin=" + property.volt_in + ", SN=" + property.ctl_sn);
+	}
+
 }

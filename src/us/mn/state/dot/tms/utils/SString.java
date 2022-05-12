@@ -2,7 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2011  AHMCT, University of California
  * Copyright (C) 2013-2020  Minnesota Department of Transportation
- * Copyright (C) 2017 Iteris Inc.
+ * Copyright (C) 2017-2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -331,5 +331,30 @@ public class SString {
 			return sb.toString().trim();
 		}
 		return null;
+	}
+
+	/** Extract string bounded by a specified prefix and postfix.
+	 *  @param str String containing: prefix + middle + postfix. 
+	 *  @param pre Prefix string, may be empty.
+	 *  @param pos Postfix string, may be empty.
+	 *  @return If str contains both the pre and postfix, the string 
+	 *  		between them is returned, else the empty string. */
+	static public String extractMiddle(String str, String pre, String pos){
+		str = safe(str);
+		if (!str.isEmpty() && str.startsWith(safe(pre)) && 
+			str.endsWith(safe(pos)))
+		{
+			final int si = pre.length(); 
+			final int ei = str.lastIndexOf(pos);
+			return str.substring(si, ei);
+		}
+		return ""; 
+	}  
+
+	/** Return non-null stringRemove CR, LF, tabs and excess whitespace
+	 * @param str String that may be null
+	 * @return Argument with CR, LF tabs and extra spaces removed */
+	static public String safe(String str) {
+		return (str != null ? str : "");
 	}
 }
