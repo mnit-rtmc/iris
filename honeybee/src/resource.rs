@@ -575,7 +575,7 @@ const RWIS_RES: Resource = Resource::Simple(
     "rwis",
     Listen::All("weather_sensor"),
     "SELECT row_to_json(r)::text FROM (\
-      SELECT ws.name, location, settings, sample, sample_time \
+      SELECT ws.name, location, lat, lon, settings, sample, sample_time \
       FROM iris.weather_sensor ws \
       LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
       ORDER BY name\
