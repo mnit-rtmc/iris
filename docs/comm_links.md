@@ -84,8 +84,18 @@ Agency and a [controller] set to `ACTIVE` condition.
 ### CBW
 
 The `cbw` protocol can be used for [beacons], using a Control-By-Web controller.
-The _default scheme_ is `http`.  _Multi-drop_ is not supported.  Up to 8
-[beacons] can be associated with each [controller], using [IO pin]s 1 - 8.
+The _default scheme_ is `http`.  _Multi-drop_ is not supported.  Depending on
+the model, up to 16 [beacons] can be associated with each [controller].
+
+Model Number   | [IO Pin]s
+---------------|----------
+X-WR-1R12-1I-I | 1
+X-301-I        | 1 - 2
+X-401-I        | 1 - 2
+X-310-I        | 1 - 4
+X-410-I        | 1 - 4
+X-WR-10R12-I   | 1 - 10
+X-332-24I      | 1 - 16
 
 ### Cohu
 

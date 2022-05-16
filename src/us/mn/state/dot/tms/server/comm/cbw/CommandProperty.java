@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ public class CommandProperty extends CBWProperty {
 	}
 
 	/** Create a new relay command property.
-	 * @param relay (1-8).
+	 * @param relay (1-16).
 	 * @param on Turn relay on (true) or off (false). */
 	public CommandProperty(int relay, boolean on) {
 		super(requestString(relay, on));

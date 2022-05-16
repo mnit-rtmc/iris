@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,10 +68,7 @@ public class OpChangeBeaconState extends OpDevice<CBWProperty> {
 			mess.add(prop);
 			mess.storeProps();
 			Integer vp = beacon.getVerifyPin();
-			if (vp != null)
-				return new ChangeVerify(vp);
-			else
-				return null;
+			return (vp != null) ? new ChangeVerify(vp) : null;
 		}
 	}
 

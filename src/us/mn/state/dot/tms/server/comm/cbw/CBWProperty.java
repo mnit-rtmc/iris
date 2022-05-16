@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,13 +37,38 @@ public class CBWProperty extends ControllerProperty {
 	/** Maximum number of lines to read */
 	static private final int MAX_LINES = 500;
 
+	/** Count of valid pins */
+	static private final int PIN_COUNT = 16;
+
 	/** Regex to match relay state */
+	// <relaystate>0</relaystate>
+	// - X-WR-1R12-1I-1
+	//
+	// <relay1state>1</relay1state>
+	// - X-301, X-310, X-WR-10R12-I
+	//
+	// <relay2>0</relay2>
+	// - X-401, X-410
+	//
+	// <relaystates>0000000000000000</relaystates>
+	// - X-332 (relays 16,15,...,1)
 	static private final Pattern RELAY = Pattern.compile(
-		"<relay([\\d]+)state>([01])</relay\\1state>");
+		"<(relay([\\d]+)?(?:state)?)>([01])</\\1>");
 
 	/** Regex to match input state */
+	// <inputstate>1</inputstate>
+	// - X-WR-1R12-1I-1
+	//
+	// <input2state>0</input2state>
+	// - X-301, X-310, X-WR-10R12-I
+	//
+	// <digitalInput1>0</digitalInput1>
+	// - X-401, X-410
+	//
+	// <inputstates>000000000000000000</inputstates>
+	// - X-332 (inputs 18,17,...,1)
 	static private final Pattern INPUT = Pattern.compile(
-		"<input([\\d]+)state>([01])</input\\1state>");
+		"<((?:digitalI|i)nput([\\d]+)?(?:state)?)>([01])</\\1>");
 
 	/** Relative path */
 	private final String path;
@@ -55,14 +80,14 @@ public class CBWProperty extends ControllerProperty {
 	}
 
 	/** Relay powered status */
-	private final boolean[] relays = new boolean[8];
+	private final boolean[] relays = new boolean[PIN_COUNT];
 
 	/** Input status */
-	private final boolean[] inputs = new boolean[8];
+	private final boolean[] inputs = new boolean[PIN_COUNT];
 
 	/** Get relay state */
 	public boolean getRelay(int pin) {
-		return relays[pin - 1];
+		return (pin > 0 && pin <= PIN_COUNT) && relays[pin - 1];
 	}
 
 	/** Set relay state */
@@ -72,7 +97,7 @@ public class CBWProperty extends ControllerProperty {
 
 	/** Get input state */
 	public boolean getInput(int pin) {
-		return inputs[pin - 1];
+		return (pin > 0 && pin <= PIN_COUNT) && inputs[pin - 1];
 	}
 
 	/** Set input state */
@@ -127,7 +152,7 @@ public class CBWProperty extends ControllerProperty {
 		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
 		for (int i = 0; line != null && i < MAX_LINES; i++) {
-			found |= matchRelay(line) | matchInput(line);
+			found |= matchRelay(line) || matchInput(line);
 			line = lr.readLine();
 		}
 		if (!found)
@@ -139,14 +164,9 @@ public class CBWProperty extends ControllerProperty {
 		boolean found = false;
 		Matcher m = RELAY.matcher(line);
 		while (m.find()) {
-			int pin = parsePin(m.group(1));
-			boolean v = parseBool(m.group(2));
-			try {
-				setRelay(pin, v);
-			}
-			catch (IndexOutOfBoundsException e) {
-				throw new ControllerException("INVALID RELAY");
-			}
+			int pin = parsePin(m.group(2));
+			boolean v = parseBool(m.group(3));
+			setRelay(pin, v);
 			found = true;
 		}
 		return found;
@@ -157,14 +177,9 @@ public class CBWProperty extends ControllerProperty {
 		boolean found = false;
 		Matcher m = INPUT.matcher(line);
 		while (m.find()) {
-			int pin = parsePin(m.group(1));
-			boolean v = parseBool(m.group(2));
-			try {
-				setInput(pin, v);
-			}
-			catch (IndexOutOfBoundsException e) {
-				throw new ControllerException("INVALID INPUT");
-			}
+			int pin = parsePin(m.group(2));
+			boolean v = parseBool(m.group(3));
+			setInput(pin, v);
 			found = true;
 		}
 		return found;
@@ -178,14 +193,19 @@ public class CBWProperty extends ControllerProperty {
 			inputs[r] = false;
 	}
 
-	/** Parse pin number */
+	/** Parse pin number.
+	 * A null value is treated as pin 1, as in &lt;relaystate&gt; */
 	private int parsePin(String value) throws ControllerException {
-		try {
-			return Integer.parseInt(value);
-		}
-		catch (NumberFormatException e) {
+		if (value != null) {
+			try {
+				int pin = Integer.parseInt(value);
+				if (pin > 0 && pin <= PIN_COUNT)
+					return pin;
+			}
+			catch (NumberFormatException e) { }
 			throw new ControllerException("INVALID PIN");
-		}
+		} else
+			return 1;
 	}
 
 	/** Parse a boolean value */

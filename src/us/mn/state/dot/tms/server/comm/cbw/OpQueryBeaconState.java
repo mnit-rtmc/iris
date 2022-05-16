@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2021  Minnesota Department of Transportation
+ * Copyright (C) 2016-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,24 +75,7 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 
 	/** Get relay status */
 	private boolean getRelay(int pin) {
-		try {
-			return property.getRelay(pin);
-		}
-		catch (IndexOutOfBoundsException e) {
-			setErrorStatus("Invalid pin");
-			return false;
-		}
-	}
-
-	/** Get input status */
-	private boolean getInput(int pin) {
-		try {
-			return property.getInput(pin);
-		}
-		catch (IndexOutOfBoundsException e) {
-			setErrorStatus("Invalid pin");
-			return false;
-		}
+		return property.getRelay(pin);
 	}
 
 	/** Format the new maintenance status */
@@ -100,7 +83,7 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 		Integer vp = beacon.getVerifyPin();
 		if (vp != null) {
 			boolean f = getRelay(beacon.getPin());
-			boolean v = getInput(vp);
+			boolean v = property.getInput(vp);
 			if (f && !v)
 				return "Verify failed";
 			if (v && !f)
