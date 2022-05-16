@@ -52,9 +52,9 @@ abstract public class Messenger implements Closeable {
 		else if ("tcp".equals(scheme))
 			return StreamMessenger.create(u, rt, rt, nrd);
 		else if ("http".equals(scheme))
-			return HttpFileMessenger.create(u, rt, nrd);
+			return HttpFileMessenger.create(u, rt);
 		else if ("https".equals(scheme))
-			return HttpFileMessenger.create(u, rt, nrd);
+			return HttpFileMessenger.create(u, rt);
 		else if ("modem".equals(scheme))
 			return ModemMessenger.create(u, rt, nrd);
 		else
