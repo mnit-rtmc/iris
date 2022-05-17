@@ -41,42 +41,25 @@ public class CBWProperty extends ControllerProperty {
 	static private final int PIN_COUNT = 16;
 
 	/** Regex to match relay state */
-	// <relaystate>0</relaystate>
-	// - X-WR-1R12-1I-1
-	//
-	// <relay1state>1</relay1state>
-	// - X-301, X-310, X-WR-10R12-I
-	//
-	// <relay2>0</relay2>
-	// - X-401, X-410
-	//
-	// <relaystates>0000000000000000</relaystates>
-	// - X-332 (relays 16,15,...,1)
 	static private final Pattern RELAY = Pattern.compile(
 		"<(relay([\\d]+)?(?:state)?)>([01])</\\1>");
 
 	/** Regex to match input state */
-	// <inputstate>1</inputstate>
-	// - X-WR-1R12-1I-1
-	//
-	// <input2state>0</input2state>
-	// - X-301, X-310, X-WR-10R12-I
-	//
-	// <digitalInput1>0</digitalInput1>
-	// - X-401, X-410
-	//
-	// <inputstates>000000000000000000</inputstates>
-	// - X-332 (inputs 18,17,...,1)
 	static private final Pattern INPUT = Pattern.compile(
 		"<((?:digitalI|i)nput([\\d]+)?(?:state)?)>([01])</\\1>");
 
 	/** Relative path */
-	private final String path;
+	private String path;
 
 	/** Get the path for a property */
 	@Override
 	public String getPath() {
 		return path;
+	}
+
+	/** Set the path for a property */
+	public void setPath(String p) {
+		path = p;
 	}
 
 	/** Relay powered status */

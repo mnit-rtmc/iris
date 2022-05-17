@@ -27,6 +27,11 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 
+	/** Exception message for "Invalid Http response" -- this is fragile,
+	 *  since it matches a string literal from the JDK class
+	 *  "sun.net.www.protocol.http.HttpUrlConnection" */
+	static private final String INVALID_HTTP = "Invalid Http response";
+
 	/** Beacon device */
 	private final BeaconImpl beacon;
 
@@ -53,7 +58,18 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 			CommMessage<CBWProperty> mess) throws IOException
 		{
 			mess.add(property);
-			mess.queryProps();
+			try {
+				mess.queryProps();
+			}
+			catch (IOException e) {
+				// X-WR-1R12 models respond to "state.xml" with
+				// invalid HTTP; try "stateFull.xml" instead
+				if (INVALID_HTTP.equals(e.getMessage())) {
+					property.setPath("stateFull.xml");
+					mess.queryProps();
+				} else
+					throw e;
+			}
 			return null;
 		}
 	}
