@@ -273,7 +273,7 @@ dependencies = [
 
 [[package]]
 name = "honeybee"
-version = "0.19.0"
+version = "0.20.0"
 dependencies = [
  "anyhow",
  "base64 0.13.0",
