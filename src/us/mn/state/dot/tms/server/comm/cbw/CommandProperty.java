@@ -22,15 +22,15 @@ package us.mn.state.dot.tms.server.comm.cbw;
 public class CommandProperty extends CBWProperty {
 
 	/** Create a request string */
-	static private String requestString(int relay, boolean on) {
-		return "state.xml?relay" + relay + "State=" +
-			(on ? "1" : "0");
+	static private String requestString(Integer relay, boolean on) {
+		return "state.xml?relay" + ((relay != null) ? relay : "") +
+			"State=" + (on ? "1" : "0");
 	}
 
 	/** Create a new relay command property.
-	 * @param relay (1-16).
+	 * @param relay (1-16, or null).
 	 * @param on Turn relay on (true) or off (false). */
-	public CommandProperty(int relay, boolean on) {
+	public CommandProperty(Integer relay, boolean on) {
 		super(requestString(relay, on));
 	}
 

@@ -62,6 +62,14 @@ public class CBWProperty extends ControllerProperty {
 		path = p;
 	}
 
+	/** Flag indicating pin number included */
+	private boolean has_pin = false;
+
+	/** Get flag indicating pin number included */
+	public boolean hasPin() {
+		return has_pin;
+	}
+
 	/** Relay powered status */
 	private final boolean[] relays = new boolean[PIN_COUNT];
 
@@ -147,7 +155,10 @@ public class CBWProperty extends ControllerProperty {
 		boolean found = false;
 		Matcher m = RELAY.matcher(line);
 		while (m.find()) {
-			int pin = parsePin(m.group(2));
+			String spin = m.group(2);
+			if (spin != null)
+				has_pin = true;
+			int pin = parsePin(spin);
 			boolean v = parseBool(m.group(3));
 			setRelay(pin, v);
 			found = true;

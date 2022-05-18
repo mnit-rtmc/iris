@@ -33,21 +33,56 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 	static private final String INVALID_HTTP = "Invalid Http response";
 
 	/** Beacon device */
-	private final BeaconImpl beacon;
+	protected final BeaconImpl beacon;
 
 	/** Relay state property */
-	private final CBWProperty property = new CBWProperty("state.xml");
+	private final CBWProperty state = new CBWProperty("state.xml");
+
+	/** Get beacon relay state */
+	protected boolean getBeaconRelay() {
+		int pin = beacon.getPin();
+		return state.getRelay(pin);
+	}
+
+	/** Format the maintenance status */
+	protected String formatMaintStatus() {
+		Integer vp = beacon.getVerifyPin();
+		if (vp != null) {
+			boolean f = getBeaconRelay();
+			boolean v = state.getInput(vp);
+			if (f && !v)
+				return "Verify failed";
+			if (v && !f)
+				return "Verify stuck";
+		}
+		return "";
+	}
+
+	/** Get beacon relay pin, or null for single relay devices */
+	protected Integer getPin() {
+		return state.hasPin() ? beacon.getPin() : null;
+	}
+
+	/** Create a new query beacon state operation */
+	protected OpQueryBeaconState(PriorityLevel p, BeaconImpl b) {
+		super(p, b);
+		beacon = b;
+	}
 
 	/** Create a new query beacon state operation */
 	public OpQueryBeaconState(BeaconImpl b) {
-		super(PriorityLevel.SHORT_POLL, b);
-		beacon = b;
+		this(PriorityLevel.SHORT_POLL, b);
 	}
 
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase<CBWProperty> phaseTwo() {
 		return new QueryBeacon();
+	}
+
+	/** Create the third phase of the operation */
+	protected Phase<CBWProperty> phaseThree() {
+		return null;
 	}
 
 	/** Phase to query the beacon status */
@@ -57,7 +92,7 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 		protected Phase<CBWProperty> poll(
 			CommMessage<CBWProperty> mess) throws IOException
 		{
-			mess.add(property);
+			mess.add(state);
 			try {
 				mess.queryProps();
 			}
@@ -65,12 +100,12 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 				// X-WR-1R12 models respond to "state.xml" with
 				// invalid HTTP; try "stateFull.xml" instead
 				if (INVALID_HTTP.equals(e.getMessage())) {
-					property.setPath("stateFull.xml");
+					state.setPath("stateFull.xml");
 					mess.queryProps();
 				} else
 					throw e;
 			}
-			return null;
+			return phaseThree();
 		}
 	}
 
@@ -78,33 +113,9 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 	@Override
 	public void cleanup() {
 		if (isSuccess()) {
-			updateBeacon();
+			beacon.setFlashingNotify(getBeaconRelay());
 			setMaintStatus(formatMaintStatus());
 		}
 		super.cleanup();
-	}
-
-	/** Update the beacon state */
-	private void updateBeacon() {
-		beacon.setFlashingNotify(getRelay(beacon.getPin()));
-	}
-
-	/** Get relay status */
-	private boolean getRelay(int pin) {
-		return property.getRelay(pin);
-	}
-
-	/** Format the new maintenance status */
-	private String formatMaintStatus() {
-		Integer vp = beacon.getVerifyPin();
-		if (vp != null) {
-			boolean f = getRelay(beacon.getPin());
-			boolean v = property.getInput(vp);
-			if (f && !v)
-				return "Verify failed";
-			if (v && !f)
-				return "Verify stuck";
-		}
-		return "";
 	}
 }

@@ -17,26 +17,36 @@ package us.mn.state.dot.tms.server.comm.cbw;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to change a beacon state.
+ * This extends OpQueryBeaconState in order to read state.xml as the first
+ * phase.  This allows us to format the query parameters depending on the
+ * device.
  *
  * @author Douglas Lau
  */
-public class OpChangeBeaconState extends OpDevice<CBWProperty> {
-
-	/** Beacon device */
-	private final BeaconImpl beacon;
+public class OpChangeBeaconState extends OpQueryBeaconState {
 
 	/** New state to change beacon */
 	private final boolean flash;
 
+	/** Get beacon relay state */
+	@Override
+	protected boolean getBeaconRelay() {
+		return flash;
+	}
+
+	/** Format the maintenance status */
+	@Override
+	protected String formatMaintStatus() {
+		return null;
+	}
+
 	/** Create a new change beacon state operation */
 	public OpChangeBeaconState(BeaconImpl b, boolean f) {
 		super(PriorityLevel.COMMAND, b);
-		beacon = b;
 		flash = f;
 	}
 
@@ -50,9 +60,9 @@ public class OpChangeBeaconState extends OpDevice<CBWProperty> {
 			return false;
 	}
 
-	/** Create the second phase of the operation */
+	/** Create the third phase of the operation */
 	@Override
-	protected Phase<CBWProperty> phaseTwo() {
+	protected Phase<CBWProperty> phaseThree() {
 		return new ChangeBeacon();
 	}
 
@@ -63,8 +73,8 @@ public class OpChangeBeaconState extends OpDevice<CBWProperty> {
 		protected Phase<CBWProperty> poll(
 			CommMessage<CBWProperty> mess) throws IOException
 		{
-			int p = beacon.getPin();
-			CommandProperty prop = new CommandProperty(p, flash);
+			CommandProperty prop = new CommandProperty(getPin(),
+				flash);
 			mess.add(prop);
 			mess.storeProps();
 			Integer vp = beacon.getVerifyPin();
@@ -92,13 +102,5 @@ public class OpChangeBeaconState extends OpDevice<CBWProperty> {
 			mess.storeProps();
 			return null;
 		}
-	}
-
-	/** Cleanup the operation */
-	@Override
-	public void cleanup() {
-		if (isSuccess())
-			beacon.setFlashingNotify(flash);
-		super.cleanup();
 	}
 }
