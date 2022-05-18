@@ -335,8 +335,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		if (poll_enabled) {
 			updateConnected();
 			return poller;
-		}
-		return null;
+		} else
+			return null;
 	}
 
 	/** Recreate the device poller */
@@ -344,6 +344,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		destroyPoller();
 		if (poll_enabled)
 			createPoller();
+		failControllers();
 		updateConnected();
 	}
 
@@ -387,8 +388,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			storeConnected(c);
 			connected = c;
 			notifyAttribute("connected");
-			if (!c)
-				failControllers();
 		}
 	}
 
