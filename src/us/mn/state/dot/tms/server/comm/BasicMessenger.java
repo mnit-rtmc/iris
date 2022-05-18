@@ -17,22 +17,22 @@ package us.mn.state.dot.tms.server.comm;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
- * BasicMessenger is a class used for creating
- * Messenger child-classes which create low-level
- * input/output streams.  It handles wrapping
- * streams to monitor then, manages the no-response
- * timer, and adjusts the closing of the Messenger
- * to work with the no-response timer.
+ * BasicMessenger is a class used for creating Messenger child-classes which
+ * create low-level input/output streams.  It handles wrapping streams to
+ * monitor then, manages the no-response timer, and adjusts the closing of the
+ * Messenger to work with the no-response timer.
  *
  * @author John L. Stanley - SRF Consulting
  */
 abstract class BasicMessenger extends Messenger {
+
+	/** Scheduler for no-response jobs */
+	static private final Scheduler NORESPONSE = new Scheduler("noResponse");
 
 	/** No-response disconnect (sec) */
 	private final int no_resp_disconnect_sec;
@@ -42,56 +42,53 @@ abstract class BasicMessenger extends Messenger {
 		no_resp_disconnect_sec = nrd;
 	}
 
-	public void close()
-			throws IOException {
+	/** Close the messenger */
+	@Override
+	public void close() throws IOException {
 		stopNoResponseTimer();
 		close2();
 	}
 
 	/** Get wrapped input stream */
 	@Override
-	public InputStream getInputStream(String path)
-			throws IOException {
+	public InputStream getInputStream(String path) throws IOException {
 		return new InputDetector(this, getRawInputStream(path));
 	}
 
 	/** Get wrapped input stream */
 	@Override
 	public InputStream getInputStream(String path, ControllerImpl c)
-			throws IOException {
+		throws IOException
+	{
 		return new InputDetector(this, getRawInputStream(path, c));
 	}
 
 	/** Get wrapped output stream for the specified controller */
 	@Override
 	public OutputStream getOutputStream(ControllerImpl c)
-			throws IOException {
+		throws IOException
+	{
 		OutputStream os = getRawOutputStream(c);
-		if (os == null)
-			return os;
-		return new OutputDetector(this, os);
+		return (os != null) ? new OutputDetector(this, os) : null;
 	}
 
 	protected InputStream getRawInputStream(String path, ControllerImpl c)
-			throws IOException {
+		throws IOException
+	{
 		return getRawInputStream(path);
 	}
 
 	//----- Abstract child-class methods
 
-	protected abstract InputStream getRawInputStream(String path)
-			throws IOException;
+	abstract protected InputStream getRawInputStream(String path)
+		throws IOException;
 
-	protected abstract OutputStream getRawOutputStream(ControllerImpl c)
-			throws IOException;
+	abstract protected OutputStream getRawOutputStream(ControllerImpl c)
+		throws IOException;
 
-	protected abstract void close2()
-			throws IOException;
+	abstract protected void close2() throws IOException;
 
 	//----- No-Response-Disconnect code --------------------
-
-	/** Scheduler for no-response jobs */
-	static private final Scheduler NORESPONSE = new Scheduler("noResponse");
 
 	/** Set when a no-response disconnect is triggered */
 	private boolean bNoResponseDisconnect = false;
