@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 import us.mn.state.dot.tms.server.comm.snmp.BadValue;
+import us.mn.state.dot.tms.server.comm.snmp.Counter;
 import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import us.mn.state.dot.tms.server.comm.snmp.GenError;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
@@ -160,6 +161,9 @@ public class OpSendDMSMessage extends OpDMS {
 
 	/** Size of graphic blocks (in bytes) */
 	private final ASN1Integer block_size = dmsGraphicBlockSize.makeInt();
+
+	/** Maximum size of a graphic */
+	private final ASN1Integer max_size = dmsGraphicMaxSize.makeInt();
 
 	/** Get the message duration */
 	private int getDuration() {
@@ -669,10 +673,12 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.add(color_scheme);
 			mess.add(max_graphics);
 			mess.add(block_size);
+			mess.add(max_size);
 			mess.queryProps();
 			logQuery(color_scheme);
 			logQuery(max_graphics);
 			logQuery(block_size);
+			logQuery(max_size);
 			initGraphicStatus();
 			return nextGraphicPhase();
 		}
@@ -983,6 +989,11 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Send a graphic block */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
+			if (bitmap.length > max_size.getInteger()) {
+				setErrorStatus("Graphic too large: " +
+					graphic.getGNumber());
+				return null;
+			}
 			ASN1OctetString block_bitmap = new ASN1OctetString(
 				dmsGraphicBlockBitmap.node, row, block);
 			block_bitmap.setOctetString(createBlock());

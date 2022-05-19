@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  * Copyright (C) 2017  	    Iteris Inc.
  *
@@ -33,7 +33,6 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
-import us.mn.state.dot.tms.server.comm.snmp.Counter;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
@@ -57,16 +56,6 @@ public class OpQueryDMSConfiguration extends OpDMS {
 
 	/** Software module model */
 	private String software_model = "UNKNOWN";
-
-	/** Number of graphics defined in graphic table */
-	private final ASN1Integer num_graphics = dmsGraphicNumEntries.makeInt();
-
-	/** Maximum size of a graphic */
-	private final ASN1Integer max_size = dmsGraphicMaxSize.makeInt();
-
-	/** Available memory for storing graphics */
-	private final Counter available_memory = new Counter(
-		availableGraphicMemory.node);
 
 	/** Sign access */
 	private final ASN1Flags<DmsSignAccess> access = new ASN1Flags<
@@ -336,29 +325,6 @@ public class OpQueryDMSConfiguration extends OpDMS {
 				// Sign supports 1203v1 only
 				return null;
 			}
-			return new QueryGraphics();
-		}
-	}
-
-	/** Phase to query graphics objects */
-	private class QueryGraphics extends Phase {
-
-		/** Query graphics objects */
-		@SuppressWarnings("unchecked")
-		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(num_graphics);
-			mess.add(max_size);
-			mess.add(available_memory);
-			try {
-				mess.queryProps();
-			}
-			catch (NoSuchName e) {
-				logError("no graphics support");
-				return null;
-			}
-			logQuery(num_graphics);
-			logQuery(max_size);
-			logQuery(available_memory);
 			return null;
 		}
 	}
