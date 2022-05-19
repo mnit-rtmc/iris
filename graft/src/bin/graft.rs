@@ -435,7 +435,7 @@ async fn sql_get_by_name(
 ) -> Result<String> {
     auth_access(res_name(resource_n), &req)?.check(Access::View)?;
     let name = req_name(&req)?;
-    Ok(spawn_blocking(move || req.state().get_by_pkey(sql, &name)).await?)
+    spawn_blocking(move || req.state().get_by_pkey(sql, &name)).await
 }
 
 /// `GET` array of SQL records as JSON
@@ -460,10 +460,7 @@ async fn sql_get_array_by_name(
 ) -> Result<String> {
     auth_access(res_name(resource_n), &req)?.check(Access::View)?;
     let name = req_name(&req)?;
-    Ok(
-        spawn_blocking(move || req.state().get_array_by_pkey(sql, &name))
-            .await?,
-    )
+    spawn_blocking(move || req.state().get_array_by_pkey(sql, &name)).await
 }
 
 /// Get name from a request
@@ -653,7 +650,7 @@ async fn sonar_object_patch2(
         let key = &key[..];
         if PATCH_FIRST_PASS.contains(&(res, key)) {
             let anm = make_att(res, &nm, key)?;
-            let value = att_value(&value)?;
+            let value = att_value(value)?;
             log::debug!("{anm} = {value}");
             c.update_object(&anm, &value).await?;
         }
