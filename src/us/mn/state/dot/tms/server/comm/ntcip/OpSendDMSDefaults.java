@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
-import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SignDetail;
@@ -38,7 +37,6 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.BadValue;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
-import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 import us.mn.state.dot.tms.utils.Multi.JustificationLine;
 import us.mn.state.dot.tms.utils.Multi.JustificationPage;
 
