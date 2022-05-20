@@ -478,7 +478,7 @@ public class WRenderer {
 		Integer pt_off = tok.getPageOffTime();
 		if (pt_off == null)
 			state.pageOff = WState.getIrisDefaultPageOffTime();
-		else if ((pt_off < 1) || (pt_off > 255))
+		else if ((pt_off < 0) || (pt_off > 255))
 			reportError(MultiSyntaxError.unsupportedTagValue, tok);
 		else
 			state.pageOff = pt_off;
