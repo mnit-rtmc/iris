@@ -469,6 +469,16 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query Ledstar-specific status */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
+			if (isAmericanSignal()) {
+				// American Signal signs timeout if
+				// you ask for unknown objects.  So
+				// end the Op here for those signs.
+				dms.setLdcPotBaseNotify(null);
+				dms.setPixelCurrentLowNotify(null);
+				dms.setPixelCurrentHighNotify(null);
+				return null;
+			}
+
 			mess.add(potBase);
 			mess.add(low);
 			mess.add(high);

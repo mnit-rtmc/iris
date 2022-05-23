@@ -112,6 +112,12 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase phaseTwo() {
+		if (isAmericanSignal()) {
+			// American Signal signs have a
+			// hard-coded font table, so stop
+			// Op here for those signs.
+			return null;
+		}
 		return new Query1203Version();
 	}
 

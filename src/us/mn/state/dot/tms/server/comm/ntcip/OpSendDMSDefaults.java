@@ -199,6 +199,12 @@ public class OpSendDMSDefaults extends OpDMS {
 				// GenError: unsupported color
 				// BadValue: who knows?
 			}
+			if (isAmericanSignal()) {
+				// American Signal signs timeout if
+				// you set unknown objects.  So end
+				// the Op here for those signs.
+				return null;
+			}
 			return new LedstarDefaults();
 		}
 	}
