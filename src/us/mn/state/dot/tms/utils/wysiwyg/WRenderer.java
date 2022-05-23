@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2020  SRF Consulting Group
+ * Copyright (C) 2019-2022  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -478,7 +478,7 @@ public class WRenderer {
 		Integer pt_off = tok.getPageOffTime();
 		if (pt_off == null)
 			state.pageOff = WState.getIrisDefaultPageOffTime();
-		else if ((pt_off < 1) || (pt_off > 255))
+		else if ((pt_off < 0) || (pt_off > 255))
 			reportError(MultiSyntaxError.unsupportedTagValue, tok);
 		else
 			state.pageOff = pt_off;
