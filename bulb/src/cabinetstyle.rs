@@ -39,7 +39,7 @@ impl CabinetStyle {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        format!("<span>{self}</span>")
+        format!("<div>{self}</div>")
     }
 
     /// Convert to Edit HTML

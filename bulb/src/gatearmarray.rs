@@ -67,7 +67,9 @@ impl AncillaryData for GateArmArrayAnc {
     /// Get ancillary URI
     fn uri(&self, view: View, _pri: &GateArmArray) -> Option<Cow<str>> {
         match (view, &self.states) {
-            (View::Search, None) => Some(GATE_ARM_STATE_URI.into()),
+            (View::Search | View::Compact, None) => {
+                Some(GATE_ARM_STATE_URI.into())
+            }
             _ => None,
         }
     }
@@ -88,11 +90,12 @@ impl GateArmArray {
     pub const RESOURCE_N: &'static str = "gate_arm_array";
 
     /// Convert to Compact HTML
-    fn to_html_compact(&self, _anc: &GateArmArrayAnc) -> String {
-        let location = HtmlStr::new(&self.location).with_len(12);
+    fn to_html_compact(&self, anc: &GateArmArrayAnc) -> String {
+        let state = HtmlStr::new(anc.state(self));
+        let location = HtmlStr::new(&self.location);
         format!(
-            "<span>{location}</span>\
-            <span class='{NAME}'>{self}</span>"
+            "<div class='{NAME} right'>{state} {self}</div>\
+            <div class='info left'>{location}</div>"
         )
     }
 

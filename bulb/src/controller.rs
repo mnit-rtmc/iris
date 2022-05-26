@@ -300,13 +300,12 @@ impl Controller {
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
         let comm_state = self.comm_state(false);
-        let link_drop = HtmlStr::new(self.link_drop());
         // condition 1 is "Active"
         let disabled = disabled_attr(self.condition == 1);
+        let link_drop = HtmlStr::new(self.link_drop());
         format!(
-            "<span>{comm_state}</span>\
-            <span{disabled}>{link_drop}</span>\
-            <span class='{NAME}'>{self}</span>"
+            "<div class='{NAME} right'>{comm_state} {self}</div>\
+            <div class='info left'{disabled}>{link_drop}</div>"
         )
     }
 

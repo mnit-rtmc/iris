@@ -229,12 +229,12 @@ impl Permission {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
+        let role = HtmlStr::new(&self.role);
         let access = access_str(self.access_n, false);
-        let role = HtmlStr::new(&self.role).with_len(4);
-        let resource = HtmlStr::new(&self.resource_n).with_len(8);
+        let resource = HtmlStr::new(&self.resource_n);
         format!(
-            "<span>{access}{role}…{resource}</span>\
-            <span class='{NAME}'>{self}</span>"
+            "<div class='{NAME} right'>{role} {access} {self}</div>\
+            <div class='info left'>{resource}</div>"
         )
     }
 

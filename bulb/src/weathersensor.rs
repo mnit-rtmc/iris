@@ -689,12 +689,12 @@ impl WeatherSensor {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &WeatherSensorAnc) -> String {
-        let location = HtmlStr::new(&self.location).with_len(12);
-        let disabled = disabled_attr(self.controller.is_some());
         let comm_state = anc.comm_state(self, false);
+        let disabled = disabled_attr(self.controller.is_some());
+        let location = HtmlStr::new(&self.location);
         format!(
-            "<span{disabled}>{location}</span>\
-            <span class='{NAME}'>{comm_state} {self}</span>"
+            "<div class='{NAME} right'>{comm_state} {self}</div>\
+            <div class='info left'{disabled}>{location}</div>"
         )
     }
 

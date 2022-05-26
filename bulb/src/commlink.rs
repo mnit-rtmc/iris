@@ -153,12 +153,11 @@ impl CommLink {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let connected = self.connected(false);
-        let description = HtmlStr::new(&self.description).with_len(10);
         let disabled = disabled_attr(self.poll_enabled);
+        let description = HtmlStr::new(&self.description);
         format!(
-            "<span>{connected}</span>\
-            <span{disabled}>{description}…</span>\
-            <span class='{NAME}'>{self}</span>"
+            "<div class='{NAME} right'>{connected} {self}</div>\
+            <div class='info left'{disabled}>{description}</div>"
         )
     }
 

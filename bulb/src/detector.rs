@@ -40,8 +40,9 @@ impl Detector {
     pub const RESOURCE_N: &'static str = "detector";
 
     /// Convert to Compact HTML
-    fn to_html_compact(&self) -> String {
-        let label = HtmlStr::new(&self.label).with_len(12);
+    fn to_html_compact(&self, anc: &DetectorAnc) -> String {
+        let comm_state = anc.comm_state(self, false);
+        let label = HtmlStr::new(&self.label);
         let enabled = self.controller.is_some()
             || self
                 .label
@@ -50,8 +51,8 @@ impl Detector {
                 .is_some();
         let disabled = disabled_attr(enabled);
         format!(
-            "<span{disabled}>{label}</span>\
-            <span class='{NAME}'>{self}</span>"
+            "<div class='{NAME} right'>{comm_state} {self}</div>\
+            <div class='info left'{disabled}>{label}</div>"
         )
     }
 
@@ -120,7 +121,7 @@ impl Card for Detector {
     fn to_html(&self, view: View, anc: &DetectorAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(),
+            View::Compact => self.to_html_compact(anc),
             View::Status(_) => self.to_html_status(anc),
             View::Edit => self.to_html_edit(),
             _ => unreachable!(),

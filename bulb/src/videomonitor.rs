@@ -32,12 +32,13 @@ impl VideoMonitor {
     pub const RESOURCE_N: &'static str = "video_monitor";
 
     /// Convert to Compact HTML
-    fn to_html_compact(&self) -> String {
-        let mon_num = self.mon_num;
+    fn to_html_compact(&self, anc: &VideoMonitorAnc) -> String {
+        let comm_state = anc.comm_state(self, false);
         let disabled = disabled_attr(self.controller.is_some());
+        let mon_num = self.mon_num;
         format!(
-            "<span{disabled}>{mon_num}</span>\
-            <span class='{NAME}'>{self}</span>"
+            "<div class='{NAME} right'>{comm_state} {self}</div>\
+            <div class='info left'{disabled}>{mon_num}</div>"
         )
     }
 
@@ -109,7 +110,7 @@ impl Card for VideoMonitor {
     fn to_html(&self, view: View, anc: &VideoMonitorAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(),
+            View::Compact => self.to_html_compact(anc),
             View::Status(config) => self.to_html_status(anc, config),
             View::Edit => self.to_html_edit(),
             _ => unreachable!(),

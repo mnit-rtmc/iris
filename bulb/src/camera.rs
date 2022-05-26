@@ -37,11 +37,11 @@ impl Camera {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let location = HtmlStr::new(&self.location).with_len(12);
+        let location = HtmlStr::new(&self.location);
         let disabled = disabled_attr(self.controller.is_some());
         format!(
-            "<span{disabled}>{location}</span>\
-            <span class='{NAME}'>{self}</span>"
+            "<div class='{NAME} right'>{self}</div>\
+            <div class='info left'{disabled}>{location}</div>"
         )
     }
 

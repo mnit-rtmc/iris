@@ -32,6 +32,7 @@ pub struct GateArmState {
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct GateArm {
     pub name: String,
+    pub location: Option<String>,
     pub controller: Option<String>,
     pub notes: String,
     pub arm_state: u32,
@@ -114,9 +115,10 @@ impl GateArm {
     fn to_html_compact(&self, anc: &GateArmAnc) -> String {
         let arm_state = anc.state(self);
         let disabled = disabled_attr(self.controller.is_some());
+        let location = HtmlStr::new(&self.location);
         format!(
-            "<span{disabled}>{arm_state}</span>\
-            <span class='{NAME}'>{self}</span>"
+            "<div class='{NAME} right'>{arm_state} {self}</div>\
+            <div class='info left'{disabled}>{location}</div>"
         )
     }
 

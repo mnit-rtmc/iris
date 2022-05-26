@@ -197,9 +197,13 @@ button.go_link {
   margin: 0.2rem;
 }
 .card {
-  flex: 10rem;
   display: flex;
+  flex: 10rem;
+  flex-direction: column;
   justify-content: space-between;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
   box-sizing: border-box;
   padding: 0 0.2rem;
   margin: 0.1rem;
@@ -221,6 +225,8 @@ button.go_link {
 .info {
   font-style: italic;
   color: #448;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .sign {
   font-weight: bold;
@@ -262,14 +268,17 @@ button.go_link {
   box-shadow: 0.2rem 0.2rem 0.2rem 0 rgba(0, 0, 0, 0.2);
 }
 .row {
-  flex: fill;
   display: flex;
   justify-content: space-between;
-  padding: 0.1rem;
+  padding: 0.05rem 0;
   z-index: 1; /* required for ob_delete::before slider pseudo-element */
 }
 .left {
+  align-self: start;
   justify-content: start;
+  /* Setting width: 0 and min-width: 100% ignores element size */
+  width: 0;
+  min-width: 100%;
 }
 .center {
   justify-content: center;
@@ -277,6 +286,7 @@ button.go_link {
   align-items: center;
 }
 .right {
+  align-self: end;
   justify-content: end;
 }
 .pins {
