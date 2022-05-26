@@ -180,7 +180,7 @@ of `pin`, `resource_n` and `name`.
 
 | Access       | Attributes                                         |
 |--------------|----------------------------------------------------|
-| Read Only    | name, arm\_state, {`ga_array`}, {`idx`}, {`fault`} |
+| Read Only    | name, location, arm\_state, {`ga_array`}, {`idx`}, {`fault`} |
 | 💡 Plan      | notes                                              |
 | 🔧 Configure | controller, {`pin`}                                |
 

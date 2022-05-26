@@ -95,9 +95,12 @@ WHERE name = $1";
 
 /// SQL query for one gate arm
 pub const GATE_ARM: &str = "\
-SELECT name, ga_array, idx, controller, pin, notes, arm_state, fault \
-FROM iris.gate_arm \
-WHERE name = $1";
+SELECT g.name, location, g.ga_array, g.idx, g.controller, g.pin, g.notes, \
+       g.arm_state, g.fault \
+FROM iris.gate_arm g \
+LEFT JOIN iris.gate_arm_array ga ON g.ga_array = ga.name \
+LEFT JOIN geo_loc_view gl ON ga.geo_loc = gl.name \
+WHERE g.name = $1";
 
 /// SQL query for one gate arm array
 pub const GATE_ARM_ARRAY: &str = "\

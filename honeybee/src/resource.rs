@@ -156,8 +156,10 @@ const GATE_ARM_RES: Resource = Resource::Simple(
     "api/gate_arm",
     Listen::All("gate_arm"),
     "SELECT row_to_json(r)::text FROM (\
-      SELECT name, controller, notes, arm_state \
-      FROM iris.gate_arm \
+      SELECT g.name, location, g.controller, g.notes, g.arm_state \
+      FROM iris.gate_arm g \
+      LEFT JOIN iris.gate_arm_array ga ON g.ga_array = ga.name \
+      LEFT JOIN geo_loc_view gl ON ga.geo_loc = gl.name \
       ORDER BY name\
     ) r",
 );
