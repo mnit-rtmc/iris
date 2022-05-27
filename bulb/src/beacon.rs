@@ -138,9 +138,10 @@ impl Card for Beacon {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &BeaconAnc) -> bool {
+    fn is_match(&self, search: &str, anc: &BeaconAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
+            || anc.comm_state(self, true).contains(search)
             || self.message.contains_lower(search)
             || self.notes.contains_lower(search)
     }

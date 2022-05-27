@@ -796,11 +796,12 @@ impl Card for WeatherSensor {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &WeatherSensorAnc) -> bool {
+    fn is_match(&self, search: &str, anc: &WeatherSensorAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
             || self.site_id.contains_lower(search)
             || self.alt_id.contains_lower(search)
+            || anc.comm_state(self, true).contains(search)
             || self.notes.contains_lower(search)
     }
 

@@ -113,8 +113,10 @@ impl Card for Detector {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &DetectorAnc) -> bool {
-        self.name.contains_lower(search) || self.label.contains_lower(search)
+    fn is_match(&self, search: &str, anc: &DetectorAnc) -> bool {
+        self.name.contains_lower(search)
+            || self.label.contains_lower(search)
+            || anc.comm_state(self, true).contains(search)
     }
 
     /// Convert to HTML view
