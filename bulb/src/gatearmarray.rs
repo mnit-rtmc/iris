@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
+use crate::gatearm::warn_state;
 use crate::resource::{
     AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
@@ -92,9 +93,10 @@ impl GateArmArray {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &GateArmArrayAnc) -> String {
         let state = HtmlStr::new(anc.state(self));
+        let warn = warn_state(self.arm_state);
         let location = HtmlStr::new(&self.location);
         format!(
-            "<div class='{NAME} right'>{state} {self}</div>\
+            "<div class='{NAME} right'>{state} {warn} {self}</div>\
             <div class='info left'>{location}</div>"
         )
     }

@@ -47,6 +47,19 @@ pub struct GateArmAnc {
     pub states: Option<Vec<GateArmState>>,
 }
 
+/// Get warn state
+pub fn warn_state(arm_state: u32) -> &'static str {
+    match arm_state {
+        1 => "‼️",     // fault
+        2 => "⚠️",     // opening
+        3 => "✔️",     // open
+        4 => "⚠️",     // warn_close
+        5 => "⚠️ ⛔", // closing
+        6 => "⛔",        // closed
+        _ => "❓",        // unknown
+    }
+}
+
 impl GateArmAnc {
     fn controller_button(&self) -> String {
         match &self.controller {
@@ -114,10 +127,11 @@ impl GateArm {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &GateArmAnc) -> String {
         let arm_state = anc.state(self);
+        let warn = warn_state(self.arm_state);
         let disabled = disabled_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location);
         format!(
-            "<div class='{NAME} right'>{arm_state} {self}</div>\
+            "<div class='{NAME} right'>{arm_state} {warn} {self}</div>\
             <div class='info left{disabled}'>{location}</div>"
         )
     }
