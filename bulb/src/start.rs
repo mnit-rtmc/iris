@@ -138,11 +138,11 @@ impl DeferredAction {
 /// Search list using the value from "sb_search"
 fn search_list() {
     let doc = Doc::get();
-    let input = doc.elem::<HtmlInputElement>("sb_search");
-    let search = input.value();
+    let search = doc.elem::<HtmlInputElement>("sb_search");
+    let value = search.value();
     if let Some(rname) = doc.select_parse::<String>("sb_resource") {
         let res = Resource::from_name(&rname);
-        spawn_local(populate_list(res, search));
+        spawn_local(populate_list(res, value));
     }
 }
 
@@ -359,6 +359,8 @@ async fn add_sidebar() -> JsResult<()> {
     sidebar.set_inner_html(SIDEBAR);
     add_select_event_listener(&doc.elem("sb_resource"))?;
     add_change_event_listener(&doc.elem("sb_config"))?;
+    add_toggle_event_listener(&doc.elem("sb_ok"))?;
+    add_toggle_event_listener(&doc.elem("sb_failed"))?;
     add_input_event_listener(&doc.elem("sb_search"))?;
     add_click_event_listener(&sidebar)?;
     add_transition_event_listener(&doc.elem("sb_list"))?;
@@ -413,10 +415,11 @@ fn add_select_event_listener(elem: &HtmlSelectElement) -> JsResult<()> {
 /// Handle an event from "sb_resource" `select` element
 fn handle_sb_resource_ev(rname: String) {
     let doc = Doc::get();
-    let input = doc.elem::<HtmlInputElement>("sb_search");
-    input.set_value("");
+    let search = doc.elem::<HtmlInputElement>("sb_search");
+    search.set_value("");
+    let value = update_search_toggles();
     let res = Resource::from_name(&rname);
-    spawn_local(populate_list(res, "".into()));
+    spawn_local(populate_list(res, value));
 }
 
 /// Add a "change" event listener to an element
@@ -437,6 +440,41 @@ fn add_change_event_listener(elem: &HtmlInputElement) -> JsResult<()> {
 async fn reload_resources() {
     fill_resource_select().await;
     search_list();
+}
+
+/// Add a "change" event listener to a toggle element
+fn add_toggle_event_listener(elem: &HtmlInputElement) -> JsResult<()> {
+    let closure = Closure::wrap(Box::new(|_e: Event| {
+        update_search_toggles();
+        search_list();
+    }) as Box<dyn Fn(_)>);
+    elem.add_event_listener_with_callback(
+        "change",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
+    Ok(())
+}
+
+/// Update "sb_search" from toggle buttons
+fn update_search_toggles() -> String {
+    let doc = Doc::get();
+    let search = doc.elem::<HtmlInputElement>("sb_search");
+    let value = search.value();
+    let mut tokens: Vec<&str> = value
+        .split_whitespace()
+        .filter(|t| *t != "👍" && *t != "💀")
+        .collect();
+    if doc.input_bool("sb_ok") {
+        tokens.push("👍");
+    }
+    if doc.input_bool("sb_failed") {
+        tokens.push("💀");
+    }
+    let value = tokens.join(" ");
+    search.set_value(&value);
+    value
 }
 
 /// Add an "input" event listener to an element
@@ -570,8 +608,8 @@ async fn go_resource(attrs: ButtonAttrs) {
     if let (Some(link), Some(rname)) = (attrs.data_link, attrs.data_type) {
         let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
         sb_resource.set_value(&rname);
-        let input = doc.elem::<HtmlInputElement>("sb_search");
-        input.set_value(&link);
+        let search = doc.elem::<HtmlInputElement>("sb_search");
+        search.set_value(&link);
         let res = Resource::from_name(&rname);
         populate_list(res, link).await;
     }

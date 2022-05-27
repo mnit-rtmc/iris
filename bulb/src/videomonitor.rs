@@ -101,9 +101,10 @@ impl Card for VideoMonitor {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &VideoMonitorAnc) -> bool {
+    fn is_match(&self, search: &str, anc: &VideoMonitorAnc) -> bool {
         self.name.contains_lower(search)
             || self.mon_num.to_string().contains(search)
+            || anc.comm_state(self, true).contains(search)
     }
 
     /// Convert to HTML view

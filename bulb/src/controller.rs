@@ -260,8 +260,8 @@ impl Controller {
         match (active, failed, long) {
             (true, false, false) => "👍",
             (true, false, true) => "ok 👍",
-            (true, true, false) => "☠️",
-            (true, true, true) => "failed ☠️",
+            (true, true, false) => "💀",
+            (true, true, true) => "failed 💀",
             (false, _, false) => "❓",
             (false, _, true) => "inactive ❓",
         }
