@@ -86,7 +86,7 @@ impl User {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let disabled = disabled_attr(self.enabled && self.role.is_some());
-        format!("<span{disabled}>{self}</span>")
+        format!("<div class='{disabled}'>{self}</div>")
     }
 
     /// Convert to Edit HTML

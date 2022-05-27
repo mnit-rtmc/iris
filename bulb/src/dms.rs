@@ -42,7 +42,7 @@ impl Dms {
         let comm_state = anc.comm_state(self, false);
         format!(
             "<div class='{NAME} right'>{comm_state} {self}</div>\
-            <div class='info left'{disabled}>{location}</div>"
+            <div class='info left{disabled}'>{location}</div>"
         )
     }
 

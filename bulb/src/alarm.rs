@@ -36,8 +36,8 @@ impl Alarm {
     /// Get the alarm state to display
     fn state(&self, long: bool) -> &'static str {
         match (self.controller.is_some(), self.state, long) {
-            (true, false, false) => "👍",
-            (true, false, true) => "clear 👍",
+            (true, false, false) => "🆗",
+            (true, false, true) => "clear 🆗",
             (true, true, false) => "😧",
             (true, true, true) => "triggered 😧",
             (false, _, true) => "unknown ❓",
@@ -46,14 +46,14 @@ impl Alarm {
     }
 
     /// Convert to Compact HTML
-    fn to_html_compact(&self) -> String {
+    fn to_html_compact(&self, anc: &AlarmAnc) -> String {
+        let comm_state = anc.comm_state(self, false);
+        let disabled = disabled_attr(self.controller.is_some());
         let state = self.state(false);
         let description = HtmlStr::new(&self.description);
-        let disabled = disabled_attr(self.controller.is_some());
         format!(
-            "<span>{state}</span>\
-            <span{disabled}>{description}</span>\
-            <span class='{NAME}'>{self}</span>"
+            "<div class='{NAME} right'>{comm_state} {self}</div>\
+            <div class='info left{disabled}'>{state} {description}</div>"
         )
     }
 
@@ -137,7 +137,7 @@ impl Card for Alarm {
     fn to_html(&self, view: View, anc: &AlarmAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(),
+            View::Compact => self.to_html_compact(anc),
             View::Status(_) => self.to_html_status(anc),
             View::Edit => self.to_html_edit(),
             _ => unreachable!(),

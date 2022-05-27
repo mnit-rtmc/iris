@@ -113,11 +113,11 @@ impl LcsIndication {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LcsIndicationAnc) -> String {
-        let indication = anc.indication(self);
         let disabled = disabled_attr(self.controller.is_some());
+        let indication = anc.indication(self);
         format!(
-            "<span{disabled}>{indication}</span>\
-            <span class='{NAME}'>{self}</span>"
+            "<div class='{NAME} right'>{self}</div>\
+            <div class='info left{disabled}'>{indication}</div>"
         )
     }
 

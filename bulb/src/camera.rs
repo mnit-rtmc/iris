@@ -36,12 +36,13 @@ impl Camera {
     pub const RESOURCE_N: &'static str = "camera";
 
     /// Convert to Compact HTML
-    fn to_html_compact(&self) -> String {
+    fn to_html_compact(&self, anc: &CameraAnc) -> String {
+        let comm_state = anc.comm_state(self, false);
         let location = HtmlStr::new(&self.location);
         let disabled = disabled_attr(self.controller.is_some());
         format!(
-            "<div class='{NAME} right'>{self}</div>\
-            <div class='info left'{disabled}>{location}</div>"
+            "<div class='{NAME} right'>🕹️{comm_state} {self}</div>\
+            <div class='info left{disabled}'>{location}</div>"
         )
     }
 
@@ -124,7 +125,7 @@ impl Card for Camera {
     fn to_html(&self, view: View, anc: &CameraAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(),
+            View::Compact => self.to_html_compact(anc),
             View::Status(config) => self.to_html_status(anc, config),
             View::Edit => self.to_html_edit(),
             _ => unreachable!(),

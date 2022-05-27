@@ -51,7 +51,7 @@ impl Beacon {
         let location = HtmlStr::new(&self.location);
         format!(
             "<div class='{NAME} right'>{comm_state} {self}</div>\
-            <div class='info left'{disabled}>{location}</div>"
+            <div class='info left{disabled}'>{location}</div>"
         )
     }
 

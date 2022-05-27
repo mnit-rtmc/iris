@@ -52,7 +52,7 @@ impl Detector {
         let disabled = disabled_attr(enabled);
         format!(
             "<div class='{NAME} right'>{comm_state} {self}</div>\
-            <div class='info left'{disabled}>{label}</div>"
+            <div class='info left{disabled}'>{label}</div>"
         )
     }
 

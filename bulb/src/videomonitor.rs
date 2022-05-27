@@ -38,7 +38,7 @@ impl VideoMonitor {
         let mon_num = self.mon_num;
         format!(
             "<div class='{NAME} right'>{comm_state} {self}</div>\
-            <div class='info left'{disabled}>{mon_num}</div>"
+            <div class='info left{disabled}'>{mon_num}</div>"
         )
     }
 

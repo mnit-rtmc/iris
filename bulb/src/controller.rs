@@ -305,7 +305,7 @@ impl Controller {
         let link_drop = HtmlStr::new(self.link_drop());
         format!(
             "<div class='{NAME} right'>{comm_state} {self}</div>\
-            <div class='info left'{disabled}>{link_drop}</div>"
+            <div class='info left{disabled}'>{link_drop}</div>"
         )
     }
 

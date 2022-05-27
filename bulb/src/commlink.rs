@@ -157,14 +157,14 @@ impl CommLink {
         let description = HtmlStr::new(&self.description);
         format!(
             "<div class='{NAME} right'>{connected} {self}</div>\
-            <div class='info left'{disabled}>{description}</div>"
+            <div class='info left{disabled}'>{description}</div>"
         )
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &CommLinkAnc) -> String {
         let connected = self.connected(true);
-        let disabled = if self.poll_enabled { "" } else { " disabled" };
+        let disabled = disabled_attr(self.poll_enabled);
         let description = HtmlStr::new(&self.description);
         let comm_config = anc.comm_config_desc(self);
         let config = HtmlStr::new(comm_config);
@@ -172,8 +172,7 @@ impl CommLink {
         format!(
             "<div class='row'>\
               <span>{connected}</span>\
-              <span></span>\
-              <span{disabled}'>{description}</span>\
+              <span class='info right{disabled}'>{description}</span>\
             </div>\
             <div class='row'>\
               <span>{config}</span>\

@@ -725,7 +725,7 @@ pub fn disabled_attr(enabled: bool) -> &'static str {
     if enabled {
         ""
     } else {
-        " class='disabled'"
+        " disabled"
     }
 }
 
