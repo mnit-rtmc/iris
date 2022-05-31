@@ -156,8 +156,8 @@ impl CommLink {
         let disabled = disabled_attr(self.poll_enabled);
         let description = HtmlStr::new(&self.description);
         format!(
-            "<div class='{NAME} right'>{connected} {self}</div>\
-            <div class='info left{disabled}'>{description}</div>"
+            "<div class='{NAME} end'>{connected} {self}</div>\
+            <div class='info fill{disabled}'>{description}</div>"
         )
     }
 
@@ -172,13 +172,13 @@ impl CommLink {
         format!(
             "<div class='row'>\
               <span>{connected}</span>\
-              <span class='info right{disabled}'>{description}</span>\
+              <span class='info end{disabled}'>{description}</span>\
             </div>\
             <div class='row'>\
               <span>{config}</span>\
             </div>\
             {controllers}\
-            <div class='row right'>\
+            <div class='row end'>\
               {EDIT_BUTTON}\
             </div>"
         )

@@ -51,8 +51,8 @@ impl Detector {
                 .is_some();
         let disabled = disabled_attr(enabled);
         format!(
-            "<div class='{NAME} right'>{comm_state} {self}</div>\
-            <div class='info left{disabled}'>{label}</div>"
+            "<div class='{NAME} end'>{comm_state} {self}</div>\
+            <div class='info fill{disabled}'>{label}</div>"
         )
     }
 

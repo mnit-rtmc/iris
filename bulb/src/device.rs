@@ -63,6 +63,14 @@ impl<D: Device> DeviceAnc<D> {
             None => "",
         }
     }
+
+    /// Is device active?
+    pub fn is_active(&self, pri: &D) -> bool {
+        match self.controller(pri) {
+            Some(ctrl) => ctrl.is_active(),
+            None => false,
+        }
+    }
 }
 
 const CONTROLLER_URI: &str = "/iris/api/controller";
@@ -74,7 +82,7 @@ impl<D: Device> AncillaryData for DeviceAnc<D> {
     fn uri(&self, view: View, pri: &D) -> Option<Cow<str>> {
         match (view, &self.controllers, &pri.controller(), &self.controller) {
             (View::Search, None, _, _) => Some(CONTROLLER_URI.into()),
-            (View::Compact | View::Status(true), _, Some(ctrl), None) => {
+            (View::Compact | View::Status(_), _, Some(ctrl), None) => {
                 Some(format!("/iris/api/controller/{}", &ctrl).into())
             }
             _ => None,

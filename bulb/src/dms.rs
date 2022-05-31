@@ -41,8 +41,8 @@ impl Dms {
         let disabled = disabled_attr(self.controller.is_some());
         let comm_state = anc.comm_state(self, false);
         format!(
-            "<div class='{NAME} right'>{comm_state} {self}</div>\
-            <div class='info left{disabled}'>{location}</div>"
+            "<div class='{NAME} end'>{comm_state} {self}</div>\
+            <div class='info fill{disabled}'>{location}</div>"
         )
     }
 
@@ -51,13 +51,13 @@ impl Dms {
         let location = HtmlStr::new(&self.location).with_len(64);
         let mut status = format!(
             "<div class='row'>\
-              <span class='info'>{location}</span>\
+              <span class='info fill'>{location}</span>\
             </div>"
         );
         if let Some(msg_current) = &self.msg_current {
-            status.push_str("<div class='row center'><img src='/iris/img/");
+            status.push_str("<img class='message' src='/iris/img/");
             status.push_str(msg_current);
-            status.push_str(".gif'/></div>");
+            status.push_str(".gif'/>");
         }
         if config {
             status.push_str("<div class='row'>");

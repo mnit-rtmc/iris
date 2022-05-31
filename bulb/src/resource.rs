@@ -739,7 +739,7 @@ fn html_card_create(dname: &'static str, create: &str) -> String {
           {CLOSE_BUTTON}\
         </div>\
         {create}
-        <div class='row right'>\
+        <div class='row end'>\
           {SAVE_BUTTON}\
         </div>"
     )

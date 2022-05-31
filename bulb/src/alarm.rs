@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
+use crate::item::ItemState;
 use crate::resource::{disabled_attr, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
@@ -33,15 +34,12 @@ type AlarmAnc = DeviceAnc<Alarm>;
 impl Alarm {
     pub const RESOURCE_N: &'static str = "alarm";
 
-    /// Get the alarm state to display
-    fn state(&self, long: bool) -> &'static str {
-        match (self.controller.is_some(), self.state, long) {
-            (true, false, false) => "🆗",
-            (true, false, true) => "clear 🆗",
-            (true, true, false) => "😧",
-            (true, true, true) => "triggered 😧",
-            (false, _, true) => "unknown ❓",
-            _ => "❓",
+    /// Get the item state
+    fn item_state(&self) -> ItemState {
+        match (self.controller.is_some(), self.state) {
+            (false, _) => ItemState::Inactive,
+            (true, false) => ItemState::Available,
+            (true, true) => ItemState::Maintenance,
         }
     }
 
@@ -49,24 +47,25 @@ impl Alarm {
     fn to_html_compact(&self, anc: &AlarmAnc) -> String {
         let comm_state = anc.comm_state(self, false);
         let disabled = disabled_attr(self.controller.is_some());
-        let state = self.state(false);
+        let item_state = self.item_state();
         let description = HtmlStr::new(&self.description);
         format!(
-            "<div class='{NAME} right'>{comm_state} {self}</div>\
-            <div class='info left{disabled}'>{state} {description}</div>"
+            "<div class='{NAME} end'>{comm_state} {self} {item_state}</div>\
+            <div class='info fill{disabled}'>{description}</div>"
         )
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &AlarmAnc) -> String {
         let description = HtmlStr::new(&self.description);
-        let state = self.state(true);
+        let item_state = self.item_state();
+        let state_desc = item_state.description();
         let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
         let ctrl_button = anc.controller_button();
         format!(
             "<div class='row'>\
-              <span class='info'>{description}</span>\
-              <span class='info'>{state}</span>\
+              <span class='info full'>{description}</span>\
+              <span class='full'>{item_state} {state_desc}</span>\
             </div>\
             <div class='row'>\
               <span>Triggered</span>\
@@ -130,7 +129,7 @@ impl Card for Alarm {
     fn is_match(&self, search: &str, _anc: &AlarmAnc) -> bool {
         self.description.contains_lower(search)
             || self.name.contains_lower(search)
-            || self.state(true).contains(search)
+            || self.item_state().code().contains(search)
     }
 
     /// Convert to HTML view

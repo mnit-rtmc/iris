@@ -36,7 +36,7 @@ impl Role {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let disabled = disabled_attr(self.enabled);
-        format!("<div class='left{disabled}'>{self}</div>")
+        format!("<div class='fill{disabled}'>{self}</div>")
     }
 
     /// Convert to Edit HTML

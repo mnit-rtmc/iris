@@ -253,9 +253,15 @@ impl fmt::Display for Controller {
 impl Controller {
     pub const RESOURCE_N: &'static str = "controller";
 
+    /// Is controller active?
+    pub fn is_active(&self) -> bool {
+        // condition 1 is "Active"
+        self.condition == 1
+    }
+
     /// Get comm state
     pub fn comm_state(&self, long: bool) -> &'static str {
-        let active = self.condition == 1;
+        let active = self.is_active();
         let failed = self.fail_time.is_some();
         match (active, failed, long) {
             (true, false, false) => "👍",
@@ -290,7 +296,7 @@ impl Controller {
         let button = self.button_html();
         let loc = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='row left'>\
+            "<div class='row start'>\
               {button}\
               <span class='info'>{loc}</span>\
             </div>"
@@ -300,12 +306,11 @@ impl Controller {
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
         let comm_state = self.comm_state(false);
-        // condition 1 is "Active"
-        let disabled = disabled_attr(self.condition == 1);
+        let disabled = disabled_attr(self.is_active());
         let link_drop = HtmlStr::new(self.link_drop());
         format!(
-            "<div class='{NAME} right'>{comm_state} {self}</div>\
-            <div class='info left{disabled}'>{link_drop}</div>"
+            "<div class='{NAME} end'>{comm_state} {self}</div>\
+            <div class='info fill{disabled}'>{link_drop}</div>"
         )
     }
 
@@ -353,14 +358,12 @@ impl Controller {
                 :{drop_id}\
               </span>\
             </div>\
-            <div class='row right'>\
-              <span class='info'>{comm_config}</span>\
-            </div>\
+            <div class='info end'>{comm_config}</div>\
             <div class='row'>\
               <span>{location}</span>\
               <span class='info'>{notes}</span>\
             </div>\
-            <div class='row left'>{version}</div>\
+            <div class='row fill'>{version}</div>\
             <div class='row'>{fail_time}</div>\
             {io_pins}\
             <div class='row'>\

@@ -27,6 +27,7 @@ mod gatearm;
 mod gatearmarray;
 mod geoloc;
 mod gps;
+mod item;
 mod lanemarking;
 mod lcsarray;
 mod lcsindication;

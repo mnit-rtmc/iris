@@ -17,6 +17,9 @@ details summary {
 textarea {
   resize: none;
 }
+img.message {
+  max-width: 100%;
+}
 
 button {
   appearance: none;
@@ -231,6 +234,8 @@ button.go_link {
   color: #448;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* padding keeps italic text from overflowing */
+  padding-right: 0.05rem;
 }
 .sign {
   font-weight: bold;
@@ -277,21 +282,23 @@ button.go_link {
   padding: 0.05rem 0;
   z-index: 1; /* required for ob_delete::before slider pseudo-element */
 }
-.left {
+.start {
   align-self: start;
   justify-content: start;
-  /* Setting width: 0 and min-width: 100% ignores element size */
-  width: 0;
-  min-width: 100%;
 }
 .center {
   justify-content: center;
   align-content: center;
   align-items: center;
 }
-.right {
+.end {
   align-self: end;
   justify-content: end;
+}
+.fill {
+  /* Setting width: 0 and min-width: 100% ignores element size */
+  width: 0;
+  min-width: 100%;
 }
 .pins {
   column-count: 2;

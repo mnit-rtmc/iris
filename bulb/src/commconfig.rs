@@ -195,8 +195,8 @@ impl CommConfig {
     fn to_html_compact(&self) -> String {
         let description = HtmlStr::new(&self.description);
         format!(
-            "<div class='{NAME} right'>{self}</div>\
-            <div class='info left'>{description}</div>"
+            "<div class='{NAME} end'>{self}</div>\
+            <div class='info fill'>{description}</div>"
         )
     }
 

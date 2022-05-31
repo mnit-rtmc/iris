@@ -130,8 +130,8 @@ impl GateArm {
         let disabled = disabled_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location);
         format!(
-            "<div class='{NAME} right'>{self} {warn}</div>\
-            <div class='info left{disabled}'>{location}</div>"
+            "<div class='{NAME} end'>{self} {warn}</div>\
+            <div class='info fill{disabled}'>{location}</div>"
         )
     }
 
@@ -142,12 +142,8 @@ impl GateArm {
         let arm_state = HtmlStr::new(anc.arm_state(self));
         let ctrl_button = anc.controller_button();
         format!(
-            "<div class='row'>\
-              <span class='info'>{location}</span>\
-            </div>\
-            <div class='row'>\
-              <span class='info'>{warn} {arm_state}</span>\
-            </div>\
+            "<div class='info'>{location}</div>\
+            <div>{warn} {arm_state}</div>\
             <div class='row'>\
               {ctrl_button}\
               {EDIT_BUTTON}\

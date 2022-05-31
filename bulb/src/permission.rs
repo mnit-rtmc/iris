@@ -233,8 +233,8 @@ impl Permission {
         let access = access_str(self.access_n, false);
         let resource = HtmlStr::new(&self.resource_n);
         format!(
-            "<div class='{NAME} right'>{role} {access} {self}</div>\
-            <div class='info left'>{resource}</div>"
+            "<div class='{NAME} end'>{role} {access} {self}</div>\
+            <div class='info fill'>{resource}</div>"
         )
     }
 

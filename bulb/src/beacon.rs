@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
+use crate::item::ItemState;
 use crate::resource::{
     disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
@@ -44,24 +45,39 @@ impl fmt::Display for Beacon {
 impl Beacon {
     pub const RESOURCE_N: &'static str = "beacon";
 
+    /// Get item state
+    fn item_state(&self, anc: &BeaconAnc) -> ItemState {
+        match (anc.is_active(self), self.flashing) {
+            (false, _) => ItemState::Inactive,
+            (true, false) => ItemState::Available,
+            (true, true) => ItemState::Deployed,
+        }
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &BeaconAnc) -> String {
         let comm_state = anc.comm_state(self, false);
+        let item_state = self.item_state(anc);
         let disabled = disabled_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location);
         format!(
-            "<div class='{NAME} right'>{comm_state} {self}</div>\
-            <div class='info left{disabled}'>{location}</div>"
+            "<div class='{NAME} end'>{comm_state} {self} {item_state}</div>\
+            <div class='info fill{disabled}'>{location}</div>"
         )
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &BeaconAnc, config: bool) -> String {
+        let item_state = self.item_state(anc);
+        let state_desc = item_state.description();
         let location = HtmlStr::new(&self.location).with_len(64);
         let message = HtmlStr::new(&self.message);
         let mut status = format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
+            </div>\
+            <div class='row'>\
+              <span>{item_state} {state_desc}</span>\
             </div>\
             <div class='row center'>\
               <span class='blink-a'>🔆</span>\

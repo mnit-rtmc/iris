@@ -95,8 +95,8 @@ impl GateArmArray {
         let warn = warn_state(self.arm_state);
         let location = HtmlStr::new(&self.location);
         format!(
-            "<div class='{NAME} right'>{self} {warn}</div>\
-            <div class='info left'>{location}</div>"
+            "<div class='{NAME} end'>{self} {warn}</div>\
+            <div class='info fill'>{location}</div>"
         )
     }
 
@@ -106,12 +106,8 @@ impl GateArmArray {
         let warn = warn_state(self.arm_state);
         let arm_state = HtmlStr::new(anc.arm_state(self));
         let mut status = format!(
-            "<div class='row'>\
-              <span class='info'>{location}</span>\
-            </div>\
-            <div class='row'>\
-              <span class='info'>{warn} {arm_state}</span>\
-            </div>"
+            "<div class='info'>{location}</div>\
+            <div class='info'>{warn} {arm_state}</div>"
         );
         if config {
             status.push_str("<div class='row'>");

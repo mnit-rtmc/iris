@@ -116,8 +116,8 @@ impl LcsIndication {
         let disabled = disabled_attr(self.controller.is_some());
         let indication = anc.indication(self);
         format!(
-            "<div class='{NAME} right'>{self}</div>\
-            <div class='info left{disabled}'>{indication}</div>"
+            "<div class='{NAME} end'>{self}</div>\
+            <div class='info fill{disabled}'>{indication}</div>"
         )
     }
 
