@@ -34,7 +34,7 @@ impl Gps {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &GpsAnc) -> String {
         let disabled = disabled_attr(self.controller.is_some());
-        let comm_state = anc.comm_state(self, false);
+        let comm_state = anc.comm_state(self);
         format!("<div class='end{disabled}'>{comm_state} {self}</div>")
     }
 

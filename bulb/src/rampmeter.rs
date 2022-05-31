@@ -36,7 +36,7 @@ impl RampMeter {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &RampMeterAnc) -> String {
-        let comm_state = anc.comm_state(self, false);
+        let comm_state = anc.comm_state(self);
         let disabled = disabled_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location);
         format!(
@@ -113,7 +113,7 @@ impl Card for RampMeter {
     fn is_match(&self, search: &str, anc: &RampMeterAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || anc.comm_state(self, true).contains(search)
+            || anc.comm_state(self).code().contains(search)
     }
 
     /// Convert to HTML view

@@ -361,6 +361,7 @@ async fn add_sidebar() -> JsResult<()> {
     add_change_event_listener(&doc.elem("sb_config"))?;
     add_toggle_event_listener(&doc.elem("sb_ok"))?;
     add_toggle_event_listener(&doc.elem("sb_failed"))?;
+    add_toggle_event_listener(&doc.elem("sb_inactive"))?;
     add_input_event_listener(&doc.elem("sb_search"))?;
     add_click_event_listener(&sidebar)?;
     add_transition_event_listener(&doc.elem("sb_list"))?;
@@ -464,13 +465,16 @@ fn update_search_toggles() -> String {
     let value = search.value();
     let mut tokens: Vec<&str> = value
         .split_whitespace()
-        .filter(|t| *t != "👍" && *t != "💀")
+        .filter(|t| *t != "👍" && *t != "💀" && *t !="❓")
         .collect();
     if doc.input_bool("sb_ok") {
         tokens.push("👍");
     }
     if doc.input_bool("sb_failed") {
         tokens.push("💀");
+    }
+    if doc.input_bool("sb_inactive") {
+        tokens.push("❓");
     }
     let value = tokens.join(" ");
     search.set_value(&value);

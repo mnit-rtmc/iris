@@ -48,7 +48,7 @@ impl Beacon {
     /// Get item state
     fn item_state(&self, anc: &BeaconAnc) -> ItemState {
         match (anc.is_active(self), self.flashing) {
-            (false, _) => ItemState::Inactive,
+            (false, _) => ItemState::Disabled,
             (true, false) => ItemState::Available,
             (true, true) => ItemState::Deployed,
         }
@@ -56,7 +56,7 @@ impl Beacon {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &BeaconAnc) -> String {
-        let comm_state = anc.comm_state(self, false);
+        let comm_state = anc.comm_state(self);
         let item_state = self.item_state(anc);
         let disabled = disabled_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location);
@@ -157,7 +157,7 @@ impl Card for Beacon {
     fn is_match(&self, search: &str, anc: &BeaconAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || anc.comm_state(self, true).contains(search)
+            || anc.comm_state(self).code().contains(search)
             || self.message.contains_lower(search)
             || self.notes.contains_lower(search)
     }

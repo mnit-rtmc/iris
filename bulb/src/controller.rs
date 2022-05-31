@@ -24,6 +24,40 @@ use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
 
+/// Comm state
+#[derive(Clone, Copy)]
+pub enum CommState {
+    Inactive,
+    Online,
+    Failed,
+}
+
+impl CommState {
+    /// Get the comm state code
+    pub fn code(self) -> &'static str {
+        match self {
+            Self::Inactive => "❓",
+            Self::Online => "👍",
+            Self::Failed => "💀",
+        }
+    }
+
+    /// Get the comm state description
+    pub fn description(self) -> &'static str {
+        match self {
+            Self::Inactive => "inactive",
+            Self::Online => "online",
+            Self::Failed => "failed",
+        }
+    }
+}
+
+impl fmt::Display for CommState {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.code())
+    }
+}
+
 /// Controller conditions
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Condition {
@@ -260,16 +294,13 @@ impl Controller {
     }
 
     /// Get comm state
-    pub fn comm_state(&self, long: bool) -> &'static str {
+    pub fn comm_state(&self) -> CommState {
         let active = self.is_active();
         let failed = self.fail_time.is_some();
-        match (active, failed, long) {
-            (true, false, false) => "👍",
-            (true, false, true) => "ok 👍",
-            (true, true, false) => "💀",
-            (true, true, true) => "failed 💀",
-            (false, _, false) => "❓",
-            (false, _, true) => "inactive ❓",
+        match (active, failed) {
+            (false, _) => CommState::Inactive,
+            (true, false) => CommState::Online,
+            (true, true) => CommState::Failed,
         }
     }
 
@@ -305,7 +336,7 @@ impl Controller {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let comm_state = self.comm_state(false);
+        let comm_state = self.comm_state();
         let disabled = disabled_attr(self.is_active());
         let link_drop = HtmlStr::new(self.link_drop());
         format!(
@@ -318,7 +349,8 @@ impl Controller {
     fn to_html_status(&self, anc: &ControllerAnc) -> String {
         let rname = Resource::CommLink.rname();
         let condition = anc.condition(self);
-        let comm_state = self.comm_state(true);
+        let comm_state = self.comm_state();
+        let state_desc = comm_state.description();
         let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
         let comm_config = anc.comm_config(self);
@@ -349,7 +381,7 @@ impl Controller {
         format!(
             "<div class='row'>\
               <span>{condition}</span>\
-              <span>{comm_state}</span>\
+              <span>{state_desc} {comm_state}</span>\
               <span>\
                 <button type='button' class='go_link' \
                         data-link='{comm_link}' data-type='{rname}'>\
@@ -433,7 +465,7 @@ impl Card for Controller {
     fn is_match(&self, search: &str, anc: &ControllerAnc) -> bool {
         self.name.contains_lower(search)
             || self.link_drop().contains_lower(search)
-            || self.comm_state(true).contains(search)
+            || self.comm_state().code().contains(search)
             || anc.condition(self).contains_lower(search)
             || anc.comm_config(self).contains_lower(search)
             || self.location.contains_lower(search)

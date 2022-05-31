@@ -37,7 +37,7 @@ impl Alarm {
     /// Get the item state
     fn item_state(&self) -> ItemState {
         match (self.controller.is_some(), self.state) {
-            (false, _) => ItemState::Inactive,
+            (false, _) => ItemState::Disabled,
             (true, false) => ItemState::Available,
             (true, true) => ItemState::Maintenance,
         }
@@ -45,7 +45,7 @@ impl Alarm {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &AlarmAnc) -> String {
-        let comm_state = anc.comm_state(self, false);
+        let comm_state = anc.comm_state(self);
         let disabled = disabled_attr(self.controller.is_some());
         let item_state = self.item_state();
         let description = HtmlStr::new(&self.description);

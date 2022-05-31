@@ -39,7 +39,7 @@ impl Dms {
     fn to_html_compact(&self, anc: &DmsAnc) -> String {
         let location = HtmlStr::new(&self.location);
         let disabled = disabled_attr(self.controller.is_some());
-        let comm_state = anc.comm_state(self, false);
+        let comm_state = anc.comm_state(self);
         format!(
             "<div class='{NAME} end'>{comm_state} {self}</div>\
             <div class='info fill{disabled}'>{location}</div>"
@@ -119,7 +119,7 @@ impl Card for Dms {
     fn is_match(&self, search: &str, anc: &DmsAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || anc.comm_state(self, true).contains(search)
+            || anc.comm_state(self).code().contains(search)
     }
 
     /// Convert to HTML view

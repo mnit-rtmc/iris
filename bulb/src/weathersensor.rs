@@ -689,7 +689,7 @@ impl WeatherSensor {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &WeatherSensorAnc) -> String {
-        let comm_state = anc.comm_state(self, false);
+        let comm_state = anc.comm_state(self);
         let disabled = disabled_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location);
         format!(
@@ -801,7 +801,7 @@ impl Card for WeatherSensor {
             || self.location.contains_lower(search)
             || self.site_id.contains_lower(search)
             || self.alt_id.contains_lower(search)
-            || anc.comm_state(self, true).contains(search)
+            || anc.comm_state(self).code().contains(search)
             || self.notes.contains_lower(search)
     }
 

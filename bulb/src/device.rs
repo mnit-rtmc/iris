@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::controller::Controller;
+use crate::controller::{CommState, Controller};
 use crate::error::Result;
 use crate::resource::{AncillaryData, Card, View};
 use std::borrow::{Borrow, Cow};
@@ -57,10 +57,11 @@ impl<D: Device> DeviceAnc<D> {
         }
     }
 
-    pub fn comm_state(&self, pri: &D, long: bool) -> &str {
+    /// Get comm state
+    pub fn comm_state(&self, pri: &D) -> CommState {
         match self.controller(pri) {
-            Some(ctrl) => ctrl.comm_state(long),
-            None => "",
+            Some(ctrl) => ctrl.comm_state(),
+            None => CommState::Inactive,
         }
     }
 
