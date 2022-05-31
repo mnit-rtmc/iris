@@ -47,8 +47,8 @@ pub struct GateArmArrayAnc {
 }
 
 impl GateArmArrayAnc {
-    /// Get state description
-    fn state(&self, pri: &GateArmArray) -> &str {
+    /// Get arm state description
+    fn arm_state(&self, pri: &GateArmArray) -> &str {
         if let Some(states) = &self.states {
             for state in states {
                 if pri.arm_state == state.id {
@@ -68,7 +68,7 @@ impl AncillaryData for GateArmArrayAnc {
     /// Get ancillary URI
     fn uri(&self, view: View, _pri: &GateArmArray) -> Option<Cow<str>> {
         match (view, &self.states) {
-            (View::Search | View::Compact, None) => {
+            (View::Search | View::Status(_), None) => {
                 Some(GATE_ARM_STATE_URI.into())
             }
             _ => None,
@@ -91,22 +91,26 @@ impl GateArmArray {
     pub const RESOURCE_N: &'static str = "gate_arm_array";
 
     /// Convert to Compact HTML
-    fn to_html_compact(&self, anc: &GateArmArrayAnc) -> String {
-        let state = HtmlStr::new(anc.state(self));
+    fn to_html_compact(&self) -> String {
         let warn = warn_state(self.arm_state);
         let location = HtmlStr::new(&self.location);
         format!(
-            "<div class='{NAME} right'>{state} {warn} {self}</div>\
+            "<div class='{NAME} right'>{self} {warn}</div>\
             <div class='info left'>{location}</div>"
         )
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self, _anc: &GateArmArrayAnc, config: bool) -> String {
+    fn to_html_status(&self, anc: &GateArmArrayAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
+        let warn = warn_state(self.arm_state);
+        let arm_state = HtmlStr::new(anc.arm_state(self));
         let mut status = format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
+            </div>\
+            <div class='row'>\
+              <span class='info'>{warn} {arm_state}</span>\
             </div>"
         );
         if config {
@@ -149,14 +153,14 @@ impl Card for GateArmArray {
     fn is_match(&self, search: &str, anc: &GateArmArrayAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || anc.state(self).contains(search)
+            || anc.arm_state(self).contains(search)
     }
 
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &GateArmArrayAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(anc),
+            View::Compact => self.to_html_compact(),
             View::Status(config) => self.to_html_status(anc, config),
             View::Edit => self.to_html_edit(),
             _ => unreachable!(),

@@ -47,7 +47,7 @@ pub struct GateArmAnc {
     pub states: Option<Vec<GateArmState>>,
 }
 
-/// Get warn state
+/// Get arm warn state
 pub fn warn_state(arm_state: u32) -> &'static str {
     match arm_state {
         1 => "‼️",     // fault
@@ -68,8 +68,8 @@ impl GateArmAnc {
         }
     }
 
-    /// Get state description
-    fn state(&self, pri: &GateArm) -> &str {
+    /// Get arm state description
+    fn arm_state(&self, pri: &GateArm) -> &str {
         if let Some(states) = &self.states {
             for state in states {
                 if pri.arm_state == state.id {
@@ -125,22 +125,30 @@ impl GateArm {
     }
 
     /// Convert to Compact HTML
-    fn to_html_compact(&self, anc: &GateArmAnc) -> String {
-        let arm_state = anc.state(self);
+    fn to_html_compact(&self) -> String {
         let warn = warn_state(self.arm_state);
         let disabled = disabled_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location);
         format!(
-            "<div class='{NAME} right'>{arm_state} {warn} {self}</div>\
+            "<div class='{NAME} right'>{self} {warn}</div>\
             <div class='info left{disabled}'>{location}</div>"
         )
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &GateArmAnc) -> String {
+        let location = HtmlStr::new(&self.location).with_len(64);
+        let warn = warn_state(self.arm_state);
+        let arm_state = HtmlStr::new(anc.arm_state(self));
         let ctrl_button = anc.controller_button();
         format!(
             "<div class='row'>\
+              <span class='info'>{location}</span>\
+            </div>\
+            <div class='row'>\
+              <span class='info'>{warn} {arm_state}</span>\
+            </div>\
+            <div class='row'>\
               {ctrl_button}\
               {EDIT_BUTTON}\
             </div>"
@@ -183,14 +191,14 @@ impl Card for GateArm {
 
     /// Check if a search string matches
     fn is_match(&self, search: &str, anc: &GateArmAnc) -> bool {
-        self.name.contains_lower(search) || anc.state(self).contains(search)
+        self.name.contains_lower(search) || anc.arm_state(self).contains(search)
     }
 
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &GateArmAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(anc),
+            View::Compact => self.to_html_compact(),
             View::Status(_) => self.to_html_status(anc),
             View::Edit => self.to_html_edit(),
             _ => unreachable!(),
