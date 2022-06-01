@@ -12,13 +12,13 @@
 //
 use crate::controller::{CommState, Controller};
 use crate::error::Result;
-use crate::resource::{AncillaryData, Card, View};
+use crate::resource::{AncillaryData, View};
 use std::borrow::{Borrow, Cow};
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
 
 /// Device resource for controller IO
-pub trait Device: Card {
+pub trait Device {
     /// Get controller
     fn controller(&self) -> Option<&str> {
         None

@@ -135,7 +135,7 @@ enum Search {
 }
 
 /// Ancillary card view data
-pub trait AncillaryData: Default {
+pub trait AncillaryData {
     type Primary;
 
     /// Get ancillary data URI
@@ -156,7 +156,7 @@ pub trait AncillaryData: Default {
 
 /// A card view of a resource
 pub trait Card: Default + fmt::Display + DeserializeOwned {
-    type Ancillary: AncillaryData<Primary = Self>;
+    type Ancillary: AncillaryData<Primary = Self> + Default;
 
     /// Create from a JSON value
     fn new(json: &JsValue) -> Result<Self> {
