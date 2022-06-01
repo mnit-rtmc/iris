@@ -68,16 +68,19 @@ impl Beacon {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &BeaconAnc, config: bool) -> String {
-        let item_state = self.item_state(anc);
-        let state_desc = item_state.description();
         let location = HtmlStr::new(&self.location).with_len(64);
+        let comm_state = anc.comm_state(self);
+        let comm_desc = comm_state.description();
+        let item_state = self.item_state(anc);
+        let item_desc = item_state.description();
         let message = HtmlStr::new(&self.message);
         let mut status = format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
             </div>\
             <div class='row'>\
-              <span>{item_state} {state_desc}</span>\
+              <span>{comm_state} {comm_desc}</span>\
+              <span>{item_state} {item_desc}</span>\
             </div>\
             <div class='row center'>\
               <span class='blink-a'>🔆</span>\

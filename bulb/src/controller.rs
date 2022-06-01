@@ -350,7 +350,7 @@ impl Controller {
         let rname = Resource::CommLink.rname();
         let condition = anc.condition(self);
         let comm_state = self.comm_state();
-        let state_desc = comm_state.description();
+        let comm_desc = comm_state.description();
         let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
         let comm_config = anc.comm_config(self);
@@ -381,7 +381,7 @@ impl Controller {
         format!(
             "<div class='row'>\
               <span>{condition}</span>\
-              <span>{state_desc} {comm_state}</span>\
+              <span>{comm_state} {comm_desc}</span>\
               <span>\
                 <button type='button' class='go_link' \
                         data-link='{comm_link}' data-type='{rname}'>\

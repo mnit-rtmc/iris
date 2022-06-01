@@ -465,7 +465,7 @@ fn update_search_toggles() -> String {
     let value = search.value();
     let mut tokens: Vec<&str> = value
         .split_whitespace()
-        .filter(|t| *t != "👍" && *t != "💀" && *t !="❓")
+        .filter(|t| *t != "👍" && *t != "💀" && *t != "❓")
         .collect();
     if doc.input_bool("sb_ok") {
         tokens.push("👍");

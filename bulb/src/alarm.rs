@@ -59,13 +59,13 @@ impl Alarm {
     fn to_html_status(&self, anc: &AlarmAnc) -> String {
         let description = HtmlStr::new(&self.description);
         let item_state = self.item_state();
-        let state_desc = item_state.description();
+        let item_desc = item_state.description();
         let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
         let ctrl_button = anc.controller_button();
         format!(
             "<div class='row'>\
               <span class='info full'>{description}</span>\
-              <span class='full'>{item_state} {state_desc}</span>\
+              <span class='full'>{item_state} {item_desc}</span>\
             </div>\
             <div class='row'>\
               <span>Triggered</span>\

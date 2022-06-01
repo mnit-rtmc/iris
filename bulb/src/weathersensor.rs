@@ -703,6 +703,8 @@ impl WeatherSensor {
         let location = HtmlStr::new(&self.location).with_len(64);
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
+        let comm_state = anc.comm_state(self);
+        let comm_desc = comm_state.description();
         let mut status = format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
@@ -710,7 +712,8 @@ impl WeatherSensor {
             <div class='row'>\
               <span class='info'>{site_id}</span>\
               <span class='info'>{alt_id}</span>\
-            </div>"
+            </div>\
+            <span>{comm_state} {comm_desc}</span>"
         );
         if let Some(sample_time) = &self.sample_time {
             status.push_str(&format!(

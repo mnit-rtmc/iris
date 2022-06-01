@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
+use crate::item::ItemState;
 use crate::resource::{
     disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
@@ -35,6 +36,15 @@ type DmsAnc = DeviceAnc<Dms>;
 impl Dms {
     pub const RESOURCE_N: &'static str = "dms";
 
+    /// Get item state
+    fn item_state(&self, anc: &DmsAnc) -> ItemState {
+        match (anc.is_active(self), &self.msg_current) {
+            (false, _) => ItemState::Disabled,
+            (true, None) => ItemState::Available,
+            (true, Some(_)) => ItemState::Deployed,
+        }
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &DmsAnc) -> String {
         let location = HtmlStr::new(&self.location);
@@ -49,9 +59,15 @@ impl Dms {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DmsAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
+        let comm_state = anc.comm_state(self);
+        let comm_desc = comm_state.description();
+        let item_state = self.item_state(anc);
+        let item_desc = item_state.description();
         let mut status = format!(
-            "<div class='row'>\
-              <span class='info fill'>{location}</span>\
+            "<div class='info fill'>{location}</div>\
+            <div class='row'>\
+              <span>{comm_state} {comm_desc}</span>\
+              <span>{item_state} {item_desc}</span>\
             </div>"
         );
         if let Some(msg_current) = &self.msg_current {
