@@ -555,7 +555,7 @@ fn pavement_html(
         };
         if let Some(pd) = data.get(i) {
             if let Some(status) = &pd.surface_status {
-                html.push_str(status);
+                html.push_str(&HtmlStr::new(status).to_string());
                 if pd.surface_temp.is_some() {
                     html.push_str(", ");
                 }
@@ -567,6 +567,7 @@ fn pavement_html(
         html.push_str("</summary><ul>");
         if let Some(pd) = data.get(i) {
             if let Some(err) = &pd.sensor_error {
+                let err = HtmlStr::new(err);
                 html.push_str(&format!("<li>{err} error</li>"));
             }
             if let Some(temp) = pd.pavement_temp {
@@ -588,6 +589,7 @@ fn pavement_html(
                 html.push_str(&format!("<li>Salinity {salinity} ppm</li>"));
             }
             if let Some(signal) = &pd.black_ice_signal {
+                let signal = HtmlStr::new(signal);
                 html.push_str(&format!("<li>{signal}</li>"));
             }
             if let Some(friction) = &pd.friction {
@@ -599,13 +601,16 @@ fn pavement_html(
         if let Some(ps) = settings.get(i) {
             if let Some(loc) = &ps.location {
                 if !loc.trim().is_empty() {
+                    let loc = HtmlStr::new(loc);
                     html.push_str(&format!("<li>{loc}</li>"));
                 }
             }
             if let Some(tp) = &ps.pavement_type {
+                let tp = HtmlStr::new(tp);
                 html.push_str(&format!("<li>{tp} pavement</li>"));
             }
             if let Some(tp) = &ps.sensor_type {
+                let tp = HtmlStr::new(tp);
                 html.push_str(&format!("<li>Type: {tp}</li>"));
             }
             if let Some(height) = ps.height {
@@ -653,10 +658,12 @@ fn sub_surface_html(
         if let Some(ss) = settings.get(i) {
             if let Some(loc) = &ss.location {
                 if !loc.trim().is_empty() {
+                    let loc = HtmlStr::new(loc);
                     html.push_str(&format!("<li>{loc}</li>"));
                 }
             }
             if let Some(tp) = &ss.sub_surface_type {
+                let tp = HtmlStr::new(tp);
                 html.push_str(&format!("<li>Type: {tp}</li>"));
             }
             if let Some(depth) = ss.depth {
@@ -665,6 +672,7 @@ fn sub_surface_html(
         }
         if let Some(sd) = data.get(i) {
             if let Some(err) = &sd.sensor_error {
+                let err = HtmlStr::new(err);
                 html.push_str(&format!("<li>{err} error</li>"));
             }
             if let Some(moisture) = &sd.moisture {
