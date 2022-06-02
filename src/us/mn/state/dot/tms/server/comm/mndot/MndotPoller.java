@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,11 +87,11 @@ public class MndotPoller extends ThreadedPoller<MndotProperty>
 	}
 
 	/** Query sample data.
- 	 * @param c Controller to poll.
- 	 * @param p Sample period in seconds. */
+	 * @param c Controller to poll.
+	 * @param per_sec Sample period in seconds. */
 	@Override
-	public void querySamples(ControllerImpl c, int p) {
-		switch (p) {
+	public void querySamples(ControllerImpl c, int per_sec) {
+		switch (per_sec) {
 		case OpQuerySamples30Sec.SAMPLE_PERIOD_SEC:
 			addOp(new OpQuerySamples30Sec(c));
 			break;

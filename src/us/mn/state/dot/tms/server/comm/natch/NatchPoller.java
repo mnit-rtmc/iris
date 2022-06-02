@@ -116,14 +116,14 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 	}
 
 	/** Query sample data.
- 	 * @param c Controller to poll.
- 	 * @param p Sample period in seconds. */
+	 * @param c Controller to poll.
+	 * @param per_sec Sample period in seconds. */
 	@Override
-	public void querySamples(ControllerImpl c, int p) {
-		if (c.getPollPeriodSec() == p) {
+	public void querySamples(ControllerImpl c, int per_sec) {
+		if (c.getPollPeriodSec() == per_sec) {
 			Operation ds = getDetectorStatusOp(c);
 			if (ds != null)
-				binEventData(c, ds, p);
+				binEventData(c, per_sec);
 		} else {
 			// Long polling period, check detector configs
 			Operation op = new Operation("detector.op.query.config",
@@ -134,11 +134,11 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 	}
 
 	/** Bin detection event data */
-	private void binEventData(ControllerImpl c, Operation ds, int p) {
+	private void binEventData(ControllerImpl c, int per_sec) {
 		boolean s = isConnected() && !c.isFailed();
 		if (!s)
 			c.logGap();
-		c.binEventData(p, s);
+		c.binEventData(per_sec, s);
 	}
 
 	/** Get detector status operation for a controller */

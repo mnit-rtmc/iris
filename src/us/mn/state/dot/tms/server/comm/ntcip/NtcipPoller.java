@@ -203,14 +203,14 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 	}
 
 	/** Query sample data.
- 	 * @param c Controller to poll.
- 	 * @param p Sample period in seconds. */
+	 * @param c Controller to poll.
+	 * @param per_sec Sample period in seconds. */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void querySamples(ControllerImpl c, int p) {
+	public void querySamples(ControllerImpl c, int per_sec) {
 		// Don't query samples on 5 minute poll
-		if (c.getPollPeriodSec() == p)
-			addOp(new OpQuerySamples(c, p));
+		if (c.getPollPeriodSec() == per_sec)
+			addOp(new OpQuerySamples(c, per_sec));
 	}
 
 	/** Send a device request to a weather sensor */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2021  Minnesota Department of Transportation
+ * Copyright (C) 2018-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,13 +51,13 @@ public class DXMPoller extends BasePoller implements SamplePoller {
 	public void sendSettings(ControllerImpl c) { }
 
 	/** Query sample data.
- 	 * @param c Controller to poll.
- 	 * @param p Sample period in seconds. */
+	 * @param c Controller to poll.
+	 * @param per_sec Sample period in seconds. */
 	@Override
-	public void querySamples(ControllerImpl c, int p) {
-		if (c.getPollPeriodSec() == p) {
+	public void querySamples(ControllerImpl c, int per_sec) {
+		if (c.getPollPeriodSec() == per_sec) {
 			createOp("detector.op.query.data", c,
-				new OpQuerySamples(p));
+				new OpQuerySamples(per_sec));
 		}
 	}
 }

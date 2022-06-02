@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,17 +68,17 @@ public class SS125Poller extends ThreadedPoller<SS125Property>
 	}
 
 	/** Query binned interval data.
- 	 * @param c Controller to poll.
- 	 * @param p Binning interval in seconds. */
+	 * @param c Controller to poll.
+	 * @param per_sec Binning interval in seconds. */
 	@Override
-	public void querySamples(ControllerImpl c, int p) {
-		if (c.getPollPeriodSec() == p) {
+	public void querySamples(ControllerImpl c, int per_sec) {
+		if (c.getPollPeriodSec() == per_sec) {
 			if (protocol == CommProtocol.SS_125_VLOG) {
 				OpQueryEvents oqe = getVehicleOp(c);
 				if (oqe != null)
-					oqe.updateCounters(p);
+					oqe.updateCounters(per_sec);
 			} else
-				addOp(new OpQueryBinned(c, p));
+				addOp(new OpQueryBinned(c, per_sec));
 		}
 	}
 
