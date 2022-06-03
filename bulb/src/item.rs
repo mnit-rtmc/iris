@@ -18,6 +18,7 @@ pub enum ItemState {
     Disabled,
     Available,
     Deployed,
+    Scheduled,
     Maintenance,
 }
 
@@ -28,6 +29,7 @@ impl ItemState {
             Self::Disabled => "🔻",
             Self::Available => "🔹",
             Self::Deployed => "🔶",
+            Self::Scheduled => "🕗",
             Self::Maintenance => "◼️",
         }
     }
@@ -38,6 +40,7 @@ impl ItemState {
             Self::Disabled => "disabled",
             Self::Available => "available",
             Self::Deployed => "deployed",
+            Self::Scheduled => "scheduled",
             Self::Maintenance => "maintenance",
         }
     }

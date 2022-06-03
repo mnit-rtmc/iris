@@ -94,15 +94,30 @@ impl AncillaryData for DmsAnc {
 }
 
 impl DmsAnc {
-    fn is_deployed(&self, msg: Option<&str>) -> bool {
+    /// Get message sources
+    fn sources(&self, msg: Option<&str>) -> Option<&str> {
         match (&self.messages, msg) {
             (Some(messages), Some(msg)) => messages
                 .iter()
                 .find(|m| m.name == msg)
-                .filter(|m| !m.sources.contains("blank"))
-                .is_some(),
-            _ => false,
+                .map(|m| &m.sources[..]),
+            _ => None,
         }
+    }
+
+    /// Get item state
+    fn item_state(&self, msg: Option<&str>) -> ItemState {
+        self.sources(msg)
+            .map(|src| {
+                if src.contains("schedule") {
+                    ItemState::Scheduled
+                } else if !src.contains("blank") {
+                    ItemState::Deployed
+                } else {
+                    ItemState::Available
+                }
+            })
+            .unwrap_or(ItemState::Available)
     }
 }
 
@@ -111,13 +126,10 @@ impl Dms {
 
     /// Get item state
     fn item_state(&self, anc: &DmsAnc) -> ItemState {
-        match (
-            anc.dev.is_active(self),
-            anc.is_deployed(self.msg_current.as_deref()),
-        ) {
-            (false, _) => ItemState::Disabled,
-            (true, false) => ItemState::Available,
-            (true, true) => ItemState::Deployed,
+        if anc.dev.is_active(self) {
+            anc.item_state(self.msg_current.as_deref())
+        } else {
+            ItemState::Disabled
         }
     }
 
