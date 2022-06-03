@@ -11,13 +11,16 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
+use crate::error::Result;
 use crate::item::ItemState;
 use crate::resource::{
-    disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
+    disabled_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
+use std::borrow::{Borrow, Cow};
 use std::fmt;
+use wasm_bindgen::JsValue;
 
 /// Dms
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -31,27 +34,101 @@ pub struct Dms {
     pub msg_current: Option<String>,
 }
 
-type DmsAnc = DeviceAnc<Dms>;
+/// Sign Message
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct SignMessage {
+    pub name: String,
+    pub sign_config: String,
+    pub incident: Option<String>,
+    pub multi: String,
+    pub beacon_enabled: bool,
+    pub msg_combining: String,
+    pub msg_priority: u32,
+    pub sources: String,
+    pub owner: Option<String>,
+    pub duration: Option<u32>,
+}
+
+/// DMS ancillary data
+#[derive(Default)]
+pub struct DmsAnc {
+    dev: DeviceAnc<Dms>,
+    messages: Option<Vec<SignMessage>>,
+}
+
+const SIGN_MSG_URI: &str = "/iris/sign_message";
+
+impl AncillaryData for DmsAnc {
+    type Primary = Dms;
+
+    /// Get next ancillary data URI
+    fn next_uri(&self, view: View, pri: &Self::Primary) -> Option<Cow<str>> {
+        self.dev
+            .next_uri(view, pri)
+            .or_else(|| match (view, &self.messages) {
+                (View::Compact | View::Search | View::Status(_), None) => {
+                    Some(SIGN_MSG_URI.into())
+                }
+                _ => None,
+            })
+    }
+
+    /// Set ancillary JSON data
+    fn set_json(
+        &mut self,
+        view: View,
+        pri: &Self::Primary,
+        json: JsValue,
+    ) -> Result<()> {
+        if let Some(uri) = self.next_uri(view, pri) {
+            match uri.borrow() {
+                SIGN_MSG_URI => {
+                    self.messages =
+                        Some(json.into_serde::<Vec<SignMessage>>()?);
+                }
+                _ => self.dev.set_json(view, pri, json)?,
+            }
+        }
+        Ok(())
+    }
+}
+
+impl DmsAnc {
+    fn is_deployed(&self, msg: Option<&str>) -> bool {
+        match (&self.messages, msg) {
+            (Some(messages), Some(msg)) => messages
+                .iter()
+                .find(|m| m.name == msg)
+                .filter(|m| !m.sources.contains("blank"))
+                .is_some(),
+            _ => false,
+        }
+    }
+}
 
 impl Dms {
     pub const RESOURCE_N: &'static str = "dms";
 
     /// Get item state
     fn item_state(&self, anc: &DmsAnc) -> ItemState {
-        match (anc.is_active(self), &self.msg_current) {
+        match (
+            anc.dev.is_active(self),
+            anc.is_deployed(self.msg_current.as_deref()),
+        ) {
             (false, _) => ItemState::Disabled,
-            (true, None) => ItemState::Available,
-            (true, Some(_)) => ItemState::Deployed,
+            (true, false) => ItemState::Available,
+            (true, true) => ItemState::Deployed,
         }
     }
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &DmsAnc) -> String {
+        let comm_state = anc.dev.comm_state(self);
+        let item_state = self.item_state(anc);
         let location = HtmlStr::new(&self.location);
         let disabled = disabled_attr(self.controller.is_some());
-        let comm_state = anc.comm_state(self);
         format!(
-            "<div class='{NAME} end'>{comm_state} {self}</div>\
+            "<div class='{NAME} end'>{comm_state} {self} {item_state}</div>\
             <div class='info fill{disabled}'>{location}</div>"
         )
     }
@@ -59,7 +136,7 @@ impl Dms {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DmsAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
-        let comm_state = anc.comm_state(self);
+        let comm_state = anc.dev.comm_state(self);
         let comm_desc = comm_state.description();
         let item_state = self.item_state(anc);
         let item_desc = item_state.description();
@@ -77,7 +154,7 @@ impl Dms {
         }
         if config {
             status.push_str("<div class='row'>");
-            status.push_str(&anc.controller_button());
+            status.push_str(&anc.dev.controller_button());
             status.push_str(LOC_BUTTON);
             status.push_str(EDIT_BUTTON);
             status.push_str("</div>");
@@ -135,7 +212,7 @@ impl Card for Dms {
     fn is_match(&self, search: &str, anc: &DmsAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || anc.comm_state(self).code().contains(search)
+            || anc.dev.comm_state(self).code().contains(search)
     }
 
     /// Convert to HTML view

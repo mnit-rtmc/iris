@@ -162,7 +162,7 @@ of `pin`, `resource_n` and `name`.
 
 | Access       | Attributes                                                  |
 |--------------|-------------------------------------------------------------|
-| Read Only    | name, location, sign\_config, sign\_detail, {`geo_loc`}, {`msg_sched`}, {`msg_current`} |
+| Read Only    | name, location, msg\_current, {`sign_config`}, {`sign_detail`}, {`geo_loc`}, {`msg_sched`} |
 | 👉 Operate   | {`msg_user`}                                                |
 | 💡 Plan      | notes                                                       |
 | 🔧 Configure | controller, {`pin`}                                         |
