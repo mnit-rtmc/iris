@@ -87,7 +87,7 @@ button.go_link {
 #mapid {
   display: none;
 }
-.sidebar {
+#sidebar {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -104,7 +104,7 @@ button.go_link {
     display: block;
     flex: 3 1 auto;
   }
-  .sidebar {
+  #sidebar {
     flex: 1 0 12rem;
   }
 }
