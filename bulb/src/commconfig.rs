@@ -142,8 +142,8 @@ pub struct CommConfigAnc {
 impl AncillaryData for CommConfigAnc {
     type Primary = CommConfig;
 
-    /// Get ancillary URI
-    fn uri(&self, view: View, _pri: &CommConfig) -> Option<Cow<str>> {
+    /// Get next ancillary URI
+    fn next_uri(&self, view: View, _pri: &CommConfig) -> Option<Cow<str>> {
         match (view, &self.protocols) {
             (View::Edit, None) => Some("/iris/comm_protocol".into()),
             _ => None,

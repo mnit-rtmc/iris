@@ -72,8 +72,8 @@ const LANE_USE_INDICATION_URI: &str = "/iris/lane_use_indication";
 impl AncillaryData for LcsIndicationAnc {
     type Primary = LcsIndication;
 
-    /// Get ancillary URI
-    fn uri(&self, view: View, pri: &LcsIndication) -> Option<Cow<str>> {
+    /// Get next ancillary URI
+    fn next_uri(&self, view: View, pri: &LcsIndication) -> Option<Cow<str>> {
         match (view, &self.indications, &self.controller, &pri.controller()) {
             (_, None, _, _) => Some(LANE_USE_INDICATION_URI.into()),
             (View::Status(_), _, None, Some(ctrl)) => {
@@ -90,7 +90,7 @@ impl AncillaryData for LcsIndicationAnc {
         pri: &LcsIndication,
         json: JsValue,
     ) -> Result<()> {
-        if let Some(uri) = self.uri(view, pri) {
+        if let Some(uri) = self.next_uri(view, pri) {
             match uri.borrow() {
                 LANE_USE_INDICATION_URI => {
                     self.indications =

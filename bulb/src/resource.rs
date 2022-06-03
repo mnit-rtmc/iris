@@ -138,8 +138,8 @@ enum Search {
 pub trait AncillaryData {
     type Primary;
 
-    /// Get ancillary data URI
-    fn uri(&self, _view: View, _pri: &Self::Primary) -> Option<Cow<str>> {
+    /// Get next ancillary data URI
+    fn next_uri(&self, _view: View, _pri: &Self::Primary) -> Option<Cow<str>> {
         None
     }
 
@@ -635,15 +635,16 @@ async fn fetch_ancillary<C: Card>(view: View, pri: &C) -> Result<C::Ancillary> {
     let mut anc = C::Ancillary::default();
     // Only loop 50 times in case we make no progress
     for _ in 0..50 {
-        if let Some(uri) = anc.uri(view, pri) {
-            match fetch_get(uri.borrow()).await {
+        match anc.next_uri(view, pri) {
+            Some(uri) => match fetch_get(uri.borrow()).await {
                 Ok(json) => anc.set_json(view, pri, json)?,
                 Err(Error::FetchResponseForbidden()) => {
                     // Oops, we don't have permission to read ancillary data
                     break;
                 }
                 Err(e) => return Err(e),
-            }
+            },
+            None => break,
         }
     }
     Ok(anc)

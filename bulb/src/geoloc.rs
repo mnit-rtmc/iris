@@ -74,8 +74,8 @@ const ROAD_MODIFIER_URI: &str = "/iris/road_modifier";
 impl AncillaryData for GeoLocAnc {
     type Primary = GeoLoc;
 
-    /// Get ancillary URI
-    fn uri(&self, view: View, _pri: &GeoLoc) -> Option<Cow<str>> {
+    /// Get next ancillary URI
+    fn next_uri(&self, view: View, _pri: &GeoLoc) -> Option<Cow<str>> {
         match (view, &self.roads, &self.directions, &self.modifiers) {
             (View::Edit, None, _, _) => Some(ROAD_URI.into()),
             (View::Edit, _, None, _) => Some(DIRECTION_URI.into()),
@@ -91,7 +91,7 @@ impl AncillaryData for GeoLocAnc {
         pri: &GeoLoc,
         json: JsValue,
     ) -> Result<()> {
-        if let Some(uri) = self.uri(view, pri) {
+        if let Some(uri) = self.next_uri(view, pri) {
             match uri.borrow() {
                 ROAD_URI => self.roads = Some(json.into_serde::<Vec<Road>>()?),
                 DIRECTION_URI => {

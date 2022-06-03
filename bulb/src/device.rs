@@ -79,8 +79,8 @@ const CONTROLLER_URI: &str = "/iris/api/controller";
 impl<D: Device> AncillaryData for DeviceAnc<D> {
     type Primary = D;
 
-    /// Get ancillary URI
-    fn uri(&self, view: View, pri: &D) -> Option<Cow<str>> {
+    /// Get next ancillary URI
+    fn next_uri(&self, view: View, pri: &D) -> Option<Cow<str>> {
         match (view, &self.controllers, &pri.controller(), &self.controller) {
             (View::Search, None, _, _) => Some(CONTROLLER_URI.into()),
             (View::Compact | View::Status(_), _, Some(ctrl), None) => {
@@ -92,7 +92,7 @@ impl<D: Device> AncillaryData for DeviceAnc<D> {
 
     /// Put ancillary JSON data
     fn set_json(&mut self, view: View, pri: &D, json: JsValue) -> Result<()> {
-        if let Some(uri) = self.uri(view, pri) {
+        if let Some(uri) = self.next_uri(view, pri) {
             match uri.borrow() {
                 CONTROLLER_URI => {
                     self.controllers =

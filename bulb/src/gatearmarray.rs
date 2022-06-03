@@ -65,8 +65,8 @@ const GATE_ARM_STATE_URI: &str = "/iris/gate_arm_state";
 impl AncillaryData for GateArmArrayAnc {
     type Primary = GateArmArray;
 
-    /// Get ancillary URI
-    fn uri(&self, view: View, _pri: &GateArmArray) -> Option<Cow<str>> {
+    /// Get next ancillary URI
+    fn next_uri(&self, view: View, _pri: &GateArmArray) -> Option<Cow<str>> {
         match (view, &self.states) {
             (View::Search | View::Status(_), None) => {
                 Some(GATE_ARM_STATE_URI.into())

@@ -44,8 +44,8 @@ const ROLE_URI: &str = "/iris/api/role";
 impl AncillaryData for PermissionAnc {
     type Primary = Permission;
 
-    /// Get ancillary URI
-    fn uri(&self, view: View, _pri: &Permission) -> Option<Cow<str>> {
+    /// Get next ancillary URI
+    fn next_uri(&self, view: View, _pri: &Permission) -> Option<Cow<str>> {
         match (view, &self.resource_types, &self.roles) {
             (View::Create | View::Edit, None, _) => {
                 Some(RESOURCE_TYPE_URI.into())
@@ -62,7 +62,7 @@ impl AncillaryData for PermissionAnc {
         pri: &Permission,
         json: JsValue,
     ) -> Result<()> {
-        if let Some(uri) = self.uri(view, pri) {
+        if let Some(uri) = self.next_uri(view, pri) {
             match uri.borrow() {
                 RESOURCE_TYPE_URI => {
                     let resource_types = json.into_serde::<Vec<String>>()?;

@@ -37,8 +37,8 @@ pub struct UserAnc {
 impl AncillaryData for UserAnc {
     type Primary = User;
 
-    /// Get ancillary URI
-    fn uri(&self, view: View, _pri: &User) -> Option<Cow<str>> {
+    /// Get next ancillary URI
+    fn next_uri(&self, view: View, _pri: &User) -> Option<Cow<str>> {
         match (view, &self.roles) {
             (View::Edit, None) => Some("/iris/api/role".into()),
             _ => None,

@@ -46,8 +46,8 @@ const COMM_CONFIG_URI: &str = "/iris/api/comm_config";
 impl AncillaryData for CommLinkAnc {
     type Primary = CommLink;
 
-    /// Get ancillary URI
-    fn uri(&self, view: View, _pri: &CommLink) -> Option<Cow<str>> {
+    /// Get next ancillary URI
+    fn next_uri(&self, view: View, _pri: &CommLink) -> Option<Cow<str>> {
         match (view, &self.controllers, &self.comm_configs) {
             (View::Status(_), None, _) => Some(CONTROLLER_URI.into()),
             (View::Status(_) | View::Edit | View::Search, _, None) => {
@@ -64,7 +64,7 @@ impl AncillaryData for CommLinkAnc {
         pri: &CommLink,
         json: JsValue,
     ) -> Result<()> {
-        if let Some(uri) = self.uri(view, pri) {
+        if let Some(uri) = self.next_uri(view, pri) {
             match uri.borrow() {
                 CONTROLLER_URI => {
                     let mut controllers =

@@ -86,8 +86,8 @@ const GATE_ARM_STATE_URI: &str = "/iris/gate_arm_state";
 impl AncillaryData for GateArmAnc {
     type Primary = GateArm;
 
-    /// Get ancillary URI
-    fn uri(&self, view: View, pri: &GateArm) -> Option<Cow<str>> {
+    /// Get next ancillary URI
+    fn next_uri(&self, view: View, pri: &GateArm) -> Option<Cow<str>> {
         match (view, &self.states, &self.controller, &pri.controller()) {
             (_, None, _, _) => Some(GATE_ARM_STATE_URI.into()),
             (View::Status(_), _, None, Some(ctrl)) => {
@@ -104,7 +104,7 @@ impl AncillaryData for GateArmAnc {
         pri: &GateArm,
         json: JsValue,
     ) -> Result<()> {
-        if let Some(uri) = self.uri(view, pri) {
+        if let Some(uri) = self.next_uri(view, pri) {
             match uri.borrow() {
                 GATE_ARM_STATE_URI => {
                     self.states = Some(json.into_serde::<Vec<GateArmState>>()?);

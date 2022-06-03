@@ -60,8 +60,8 @@ const LCS_LOCK_URI: &str = "/iris/lcs_lock";
 impl AncillaryData for LcsArrayAnc {
     type Primary = LcsArray;
 
-    /// Get ancillary URI
-    fn uri(&self, _view: View, _pri: &LcsArray) -> Option<Cow<str>> {
+    /// Get next ancillary URI
+    fn next_uri(&self, _view: View, _pri: &LcsArray) -> Option<Cow<str>> {
         match &self.locks {
             None => Some(LCS_LOCK_URI.into()),
             _ => None,

@@ -108,8 +108,8 @@ const CABINET_STYLE_URI: &str = "/iris/api/cabinet_style";
 impl AncillaryData for ControllerAnc {
     type Primary = Controller;
 
-    /// Get ancillary URI
-    fn uri(&self, view: View, pri: &Controller) -> Option<Cow<str>> {
+    /// Get next ancillary URI
+    fn next_uri(&self, view: View, pri: &Controller) -> Option<Cow<str>> {
         match (
             view,
             &self.conditions,
@@ -142,7 +142,7 @@ impl AncillaryData for ControllerAnc {
         pri: &Controller,
         json: JsValue,
     ) -> Result<()> {
-        if let Some(uri) = self.uri(view, pri) {
+        if let Some(uri) = self.next_uri(view, pri) {
             match uri.borrow() {
                 CONDITION_URI => {
                     self.conditions =
