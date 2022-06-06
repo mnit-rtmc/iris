@@ -245,16 +245,26 @@ button.go_link {
   border: 1px solid black;
   border-radius: 0.2rem;
 }
+.flasher {
+  align-self: start;
+  background: black;
+  padding: 0.15rem 0.1rem 0 0.1rem;
+}
 .blink-a {
-  animation: blink 1s step-start infinite;
+  animation: blink 1s step-start;
 }
 .blink-b {
-  animation: blink 1s step-start 0.5s infinite;
+  animation: blink 1s step-start 0.5s;
+}
+.not-flashing {
+  opacity: 0;
+  animation-iteration-count: 0;
+}
+.flashing {
+  animation-iteration-count: infinite;
 }
 @keyframes blink {
-  50% {
-    opacity: 0;
-  }
+  50% { opacity: 0; }
 }
 .create {
   font-style: italic;

@@ -73,6 +73,7 @@ impl Beacon {
         let comm_desc = comm_state.description();
         let item_state = self.item_state(anc);
         let item_desc = item_state.description();
+        let flashing = if self.flashing { "flashing" } else { "not-flashing" };
         let message = HtmlStr::new(&self.message);
         let mut status = format!(
             "<div class='row'>\
@@ -83,9 +84,13 @@ impl Beacon {
               <span>{item_state} {item_desc}</span>\
             </div>\
             <div class='row center'>\
-              <span class='blink-a'>🔆</span>\
+              <span class='flasher'>\
+                <span class='blink-a {flashing}'>🔆</span>\
+              </span>\
               <span class='sign'>{message}</span>\
-              <span class='blink-b'>🔆</span>\
+              <span class='flasher'>\
+                <span class='blink-b {flashing}'>🔆</span>\
+              </span>\
             </div>"
         );
         if config {
