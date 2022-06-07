@@ -305,23 +305,20 @@ button.go_link {
   pointer-events: auto;
   align-self: start;
   background-color: black;
+  text-indent: 0;
   padding: 0.15rem 0.1rem 0 0.1rem;
   border-radius: 0.2rem;
 }
-.blink-a {
-  animation: blink 1s step-start;
-}
-.blink-b {
-  animation: blink 1s step-start 0.5s;
-}
 .not-flashing {
   opacity: 0;
-  animation-iteration-count: 0;
 }
 .flashing {
-  animation-iteration-count: infinite;
+  animation: beacon-flash 1s step-start infinite;
 }
-@keyframes blink {
+.flash-delayed {
+  animation-delay: 0.5s;
+}
+@keyframes beacon-flash {
   50% { opacity: 0; }
 }
 #ob_flashing {

@@ -86,11 +86,11 @@ impl Beacon {
             <div class='beacon-container row center'>\
               <input id='ob_flashing' class='hidden' type='checkbox'/>\
               <label for='ob_flashing' class='beacon'>\
-                <span class='blink-a {flashing}'>🔆</span>\
+                <span class='{flashing}'>🔆</span>\
               </label>\
               <span class='beacon-sign'>{message}</span>\
               <label for='ob_flashing' class='beacon'>\
-                <span class='blink-b {flashing}'>🔆</span>\
+                <span class='{flashing} flash-delayed'>🔆</span>\
               </label>\
             </div>"
         );
