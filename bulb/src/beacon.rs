@@ -83,16 +83,18 @@ impl Beacon {
               <span>{comm_state} {comm_desc}</span>\
               <span>{item_state} {item_desc}</span>\
             </div>\
-            <div class='row center'>\
-              <span class='flasher'>\
+            <div class='beacon-container row center'>\
+              <input id='ob_flashing' class='hidden' type='checkbox'/>\
+              <label for='ob_flashing' class='beacon'>\
                 <span class='blink-a {flashing}'>🔆</span>\
-              </span>\
-              <span class='sign'>{message}</span>\
-              <span class='flasher'>\
+              </label>\
+              <span class='beacon-sign'>{message}</span>\
+              <label for='ob_flashing' class='beacon'>\
                 <span class='blink-b {flashing}'>🔆</span>\
-              </span>\
+              </label>\
             </div>"
         );
+
         if config {
             status.push_str("<div class='row'>");
             status.push_str(&anc.controller_button());
