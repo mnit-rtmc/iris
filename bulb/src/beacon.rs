@@ -73,7 +73,11 @@ impl Beacon {
         let comm_desc = comm_state.description();
         let item_state = self.item_state(anc);
         let item_desc = item_state.description();
-        let flashing = if self.flashing { "flashing" } else { "not-flashing" };
+        let flashing = if self.flashing {
+            "flashing"
+        } else {
+            "not-flashing"
+        };
         let message = HtmlStr::new(&self.message);
         let mut status = format!(
             "<div class='row'>\
@@ -84,7 +88,7 @@ impl Beacon {
               <span>{item_state} {item_desc}</span>\
             </div>\
             <div class='beacon-container row center'>\
-              <input id='ob_flashing' class='hidden' type='checkbox'/>\
+              <button id='ob_flashing'></button>\
               <label for='ob_flashing' class='beacon'>\
                 <span class='{flashing}'>🔆</span>\
               </label>\
