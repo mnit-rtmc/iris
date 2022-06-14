@@ -53,6 +53,16 @@ struct SelectedCard {
     view: View,
     /// Object name
     name: String,
+    /// Delete action enabled (slider transition finished)
+    delete_enabled: bool,
+}
+
+/// Button attributes
+struct ButtonAttrs {
+    id: String,
+    class_name: String,
+    data_link: Option<String>,
+    data_type: Option<String>,
 }
 
 /// Deferred actions (called on set_interval)
@@ -73,8 +83,6 @@ struct State {
     tick: i32,
     /// Selected card
     selected_card: Option<SelectedCard>,
-    /// Delete action enabled (slider transition finished)
-    delete_enabled: bool,
 }
 
 thread_local! {
@@ -193,7 +201,12 @@ async fn deselect_card() {
 impl SelectedCard {
     /// Create a new blank selected card
     fn new(res: Resource, view: View, name: String) -> Self {
-        SelectedCard { res, view, name }
+        SelectedCard {
+            res,
+            view,
+            name,
+            delete_enabled: false,
+        }
     }
 
     /// Get card element ID
@@ -546,14 +559,6 @@ fn handle_button_click_ev(target: &Element) {
     }
 }
 
-/// Button attributes
-struct ButtonAttrs {
-    id: String,
-    class_name: String,
-    data_link: Option<String>,
-    data_type: Option<String>,
-}
-
 /// Handle button click event with selected card
 async fn handle_button_card(attrs: ButtonAttrs, cs: SelectedCard) {
     match attrs.id.as_str() {
@@ -562,7 +567,7 @@ async fn handle_button_card(attrs: ButtonAttrs, cs: SelectedCard) {
             cs.replace_card(v).await;
         }
         "ob_delete" => {
-            if STATE.with(|rc| rc.borrow().delete_enabled) {
+            if cs.delete_enabled {
                 cs.res_delete().await;
             }
         }
@@ -657,7 +662,9 @@ fn handle_transition_ev(ev: Event) {
 fn set_delete_enabled(enabled: bool) {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        state.delete_enabled = enabled;
+        if let Some(selected_card) = &mut state.selected_card {
+            selected_card.delete_enabled = enabled;
+        }
     });
 }
 
