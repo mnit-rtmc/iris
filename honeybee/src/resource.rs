@@ -145,8 +145,14 @@ const CAMERA_PUB_RES: Resource = Resource::Simple(
     Listen::Exclude("camera", &["video_loss"]),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, publish, streamable, roadway, road_dir, cross_street, \
-             location, lat, lon \
-      FROM camera_view \
+             location, lat, lon, ARRAY(\
+               SELECT view_num \
+               FROM iris.encoder_stream \
+               WHERE encoder_type = c.encoder_type \
+               AND view_num IS NOT NULL \
+               ORDER BY view_num\
+             ) AS views \
+      FROM camera_view c \
       ORDER BY name\
     ) r",
 );
