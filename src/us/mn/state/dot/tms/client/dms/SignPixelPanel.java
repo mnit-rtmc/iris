@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -271,9 +271,10 @@ public class SignPixelPanel extends JPanel {
 		for (int y = 0; y < height_pix; y++) {
 			int yy = Math.round(getPixelY(y));
 			for (int x = 0; x < width_pix; x++) {
-				int xx = Math.round(getPixelX(x));
-				if (!rg.getPixel(x, y).isLit())
+				if (!rg.getPixel(x, y).isLit()) {
+					int xx = Math.round(getPixelX(x));
 					g.fillRect(xx, yy, px, py);
+				}
 			}
 		}
 	}
