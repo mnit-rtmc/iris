@@ -79,16 +79,23 @@ public class BitmapGraphic extends RasterGraphic {
 	}
 
 	/** Set all pixels adjacent to lit pixels (clearing lit pixels) */
-	public void outline() {
-		BitmapGraphic b = createBlankCopy();
-		b.copy(this);
+	public void outlineLitPixels() {
+		BitmapGraphic bg = createBlankCopy();
+		bg.copy(this);
+		// Set neighbors of all lit pixels
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				if (b.getPixel(x, y).isLit())
+				if (!bg.isTransparent(x, y))
 					setNeighbors(x, y);
 			}
 		}
-		difference(b);
+		// Clear all original lit pixels
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (!bg.isTransparent(x, y))
+					setPixel(x, y, DmsColor.BLACK);
+			}
+		}
 	}
 
 	/** Set the neighbors of the specified pixel */
@@ -100,6 +107,20 @@ public class BitmapGraphic extends RasterGraphic {
 		for (int xx = xmin; xx < xmax; xx++) {
 			for (int yy = ymin; yy < ymax; yy++)
 				setPixel(xx, yy, DmsColor.AMBER);
+		}
+	}
+
+	/** Update the bitmap by clearing pixels not in another bitmap */
+	public void clearTransparent(BitmapGraphic bg) {
+		if (width != bg.width)
+			throw new IndexOutOfBoundsException("width mismatch");
+		if (height != bg.height)
+			throw new IndexOutOfBoundsException("height mismatch");
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (bg.isTransparent(x, y))
+					setPixel(x, y, DmsColor.BLACK);
+			}
 		}
 	}
 

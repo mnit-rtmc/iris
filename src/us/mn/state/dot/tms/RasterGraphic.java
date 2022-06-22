@@ -103,17 +103,21 @@ abstract public class RasterGraphic {
 	}
 
 	/** Copy the common region of the specified raster */
-	public void copy(RasterGraphic b) {
-		int x0 = Math.max(width - b.width, 0) / 2;
-		int x1 = Math.max(b.width - width, 0) / 2;
-		int y0 = Math.max(height - b.height, 0) / 2;
-		int y1 = Math.max(b.height - height, 0) / 2;
-		int w = Math.min(width, b.width);
-		int h = Math.min(height, b.height);
+	public void copy(RasterGraphic rg) {
+		int x0 = Math.max(width - rg.width, 0) / 2;
+		int x1 = Math.max(rg.width - width, 0) / 2;
+		int y0 = Math.max(height - rg.height, 0) / 2;
+		int y1 = Math.max(rg.height - height, 0) / 2;
+		int w = Math.min(width, rg.width);
+		int h = Math.min(height, rg.height);
 		for (int x = 0; x < w; x++) {
+			int xx = x1 + x;
 			for (int y = 0; y < h; y++) {
-				DmsColor v = b.getPixel(x1 + x, y1 + y);
-				setPixel(x0 + x, y0 + y, v);
+				int yy = y1 + y;
+				if (!rg.isTransparent(xx, yy)) {
+					DmsColor clr = rg.getPixel(xx, yy);
+					setPixel(x0 + x, y0 + y, clr);
+				}
 			}
 		}
 	}
@@ -128,37 +132,10 @@ abstract public class RasterGraphic {
 		int h = rg.getHeight();
 		for (int y = 0; y < h; y++) {
 			for (int x = 0; x < w; x++) {
-				DmsColor c = rg.getPixel(x, y, fg);
-				if (c.isLit())
-					setPixel(x0 + x, y0 + y, c);
-			}
-		}
-	}
-
-	/** Update the raster by clearing pixels not in another raster */
-	public void union(RasterGraphic rg) {
-		if (width != rg.width)
-			throw new IndexOutOfBoundsException("width mismatch");
-		if (height != rg.height)
-			throw new IndexOutOfBoundsException("height mismatch");
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				if (!rg.getPixel(x, y).isLit())
-					setPixel(x, y, DmsColor.BLACK);
-			}
-		}
-	}
-
-	/** Update the raster by clearing pixels in another raster */
-	public void difference(RasterGraphic rg) {
-		if (width != rg.width)
-			throw new IndexOutOfBoundsException("width mismatch");
-		if (height != rg.height)
-			throw new IndexOutOfBoundsException("height mismatch");
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				if (rg.getPixel(x, y).isLit())
-					setPixel(x, y, DmsColor.BLACK);
+				if (!rg.isTransparent(x, y)) {
+					DmsColor clr = rg.getPixel(x, y, fg);
+					setPixel(x0 + x, y0 + y, clr);
+				}
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2021  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -248,7 +248,7 @@ public class SignMessageHelper extends BaseHelper {
 		}
 		BitmapGraphic temp = bg.createBlankCopy();
 		temp.setPixelData(bg.getPixelData());
-		temp.union(stuck[DMS.STUCK_OFF_BITMAP]);
+		temp.clearTransparent(stuck[DMS.STUCK_OFF_BITMAP]);
 		int n_off = temp.getLitCount();
 		int off_lim = SystemAttrEnum.DMS_PIXEL_OFF_LIMIT.getInt();
 		if (off_lim >= 0 && n_off > off_lim) {
@@ -256,8 +256,8 @@ public class SignMessageHelper extends BaseHelper {
 				"Too many stuck off pixels: " + n_off, true);
 		}
 		temp.setPixelData(bg.getPixelData());
-		temp.outline();
-		temp.union(stuck[DMS.STUCK_ON_BITMAP]);
+		temp.outlineLitPixels();
+		temp.clearTransparent(stuck[DMS.STUCK_ON_BITMAP]);
 		int n_on = temp.getLitCount();
 		int on_lim = SystemAttrEnum.DMS_PIXEL_ON_LIMIT.getInt();
 		if (on_lim >= 0 && n_on > on_lim) {
