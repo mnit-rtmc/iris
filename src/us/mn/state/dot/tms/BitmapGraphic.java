@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2019  Minnesota Department of Transportation
+ * Copyright (C) 2006-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,15 @@ public class BitmapGraphic extends RasterGraphic {
 		return (y * width) + x;
 	}
 
+	/** Check if a specified pixel is transparent */
+	@Override
+	public boolean isTransparent(int x, int y) {
+		int p = pixelIndex(x, y);
+		int by = p / 8;
+		int bi = 7 - (p % 8);
+		return ((pixels[by] >> bi) & 1) == 0;
+	}
+
 	/** Get the pixel color at the specified location */
 	@Override
 	public DmsColor getPixel(int x, int y) {
@@ -54,13 +63,7 @@ public class BitmapGraphic extends RasterGraphic {
 	/** Get the pixel color at the specified location */
 	@Override
 	public DmsColor getPixel(int x, int y, DmsColor fg) {
-		int p = pixelIndex(x, y);
-		int by = p / 8;
-		int bi = 7 - (p % 8);
-		if (((pixels[by] >> bi) & 1) > 0)
-			return fg;
-		else
-			return DmsColor.BLACK;
+		return isTransparent(x, y) ? DmsColor.BLACK : fg;
 	}
 
 	/** Set the pixel color at the specified location */

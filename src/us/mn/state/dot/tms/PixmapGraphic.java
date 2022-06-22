@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2019  Minnesota Department of Transportation
+ * Copyright (C) 2011-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,18 @@ package us.mn.state.dot.tms;
  */
 public class PixmapGraphic extends RasterGraphic {
 
+	/** Transparent color */
+	private final Integer transparent_color;
+
 	/** Create a new pixmap graphic */
 	public PixmapGraphic(int w, int h) {
+		this(w, h, null);
+	}
+
+	/** Create a new pixmap graphic */
+	public PixmapGraphic(int w, int h, Integer tc) {
 		super(w, h);
+		transparent_color = tc;
 	}
 
 	/** Get the pixel data length in bytes */
@@ -44,6 +53,20 @@ public class PixmapGraphic extends RasterGraphic {
 				", height=" + height);
 		}
 		return ((y * width) + x) * 3;
+	}
+
+	/** Check if a specified pixel is transparent */
+	@Override
+	public boolean isTransparent(int x, int y) {
+		if (transparent_color != null) {
+			int p = pixelIndex(x, y);
+			int blue = pixels[p + 0] & 0xFF;
+			int green = pixels[p + 1] & 0xFF;
+			int red = pixels[p + 2] & 0xFF;
+			int clr = red | green << 8 | blue << 16;
+			return clr == transparent_color;
+		} else
+			return false;
 	}
 
 	/** Get the pixel color at the specified location */

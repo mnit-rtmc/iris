@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,6 +75,9 @@ abstract public class RasterGraphic {
 
 	/** Get the pixel data length in bytes */
 	abstract public int length();
+
+	/** Check if a specified pixel is transparent */
+	abstract public boolean isTransparent(int x, int y);
 
 	/** Get the pixel color at the specified location */
 	abstract public DmsColor getPixel(int x, int y);

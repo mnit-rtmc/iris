@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ public class GraphicHelper extends BaseHelper {
 	/** Create a pixmap graphic */
 	static private RasterGraphic createPixmap(Graphic g) throws IOException{
 		PixmapGraphic pg = new PixmapGraphic(g.getWidth(),
-			g.getHeight());
+			g.getHeight(), g.getTransparentColor());
 		pg.setPixelData(Base64.decode(g.getPixels()));
 		return pg;
 	}

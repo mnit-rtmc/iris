@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ public class GraphicImage {
 			bg.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		for (int y = 0; y < bg.getHeight(); y++) {
 			for (int x = 0; x < bg.getWidth(); x++) {
-				if (!bg.getPixel(x, y).isLit())
+				if (bg.isTransparent(x, y))
 					im.setRGB(x, y, 0xFF000000);
 			}
 		}
