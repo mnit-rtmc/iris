@@ -6,8 +6,8 @@ and [Org-815] protocols can collect RWIS data.
 
 ## JSON Data
 
-The `iris/rwis` endpoint contains JSON data for all weather sensors.  The JSON
-is an array of weather sensor objects.
+The `iris/rwis` endpoint produces a JSON document containing an array of all
+weather sensor objects.
 
 Key          | Value
 -------------|--------------------
@@ -25,10 +25,10 @@ This object contains sensor settings and configuration.
 
 Key                      | Value
 -------------------------|---------------------------------------------------
-`sys_descr`              | System description
-`sys_contact`            | System contact information
-`sys_name`               | System name
-`sys_location`           | System location
+`sys_descr`              | Sensor system description
+`sys_contact`            | Sensor system contact information
+`sys_name`               | Sensor system name
+`sys_location`           | Sensor system location
 `reference_elevation`    | Reference elevation above mean sea level (meters)
 `pressure_sensor_height` | Height relative to `reference_elevation` (meters)
 `wind_sensor`            | Array of wind sensor settings objects
@@ -57,7 +57,7 @@ Key                           | Value
 `atmospheric_pressure`        | Atmospheric pressure (pascals)
 `visibility`                  | Visibility (meters)
 `visibility_situation`        | Visibility situation description
-`wind_sensor`                 | Array of wind sensor sample objects
+`wind_sensor`                 | Array of wind sensor observations
 ↳`avg_speed`                  | Two minute average wind speed (m/s)
 ↳`avg_direction`              | Two minute average wind direction †
 ↳`spot_speed`                 | Spot wind speed (m/s)
@@ -65,7 +65,7 @@ Key                           | Value
 ↳`gust_speed`                 | Ten minute maximum wind gust speed (m/s)
 ↳`gust_direction`             | Ten minute maximum wind gust direction †
 ↳`situation`                  | Wind situation description
-`temperature_sensor`          | Array of temperature sensor sample objects
+`temperature_sensor`          | Array of temperature sensor observations
 ↳`air_temp`                   | Instantaneous air temperature (℃)
 `wet_bulb_temp`               | Instantaneous wet-bulb temperature (℃)
 `dew_point_temp`              | Instantaneous dew point temperature (℃)
@@ -79,7 +79,7 @@ Key                           | Value
 `precip_12_hours`             | Twelve hour accumulated precipitation (mm)
 `precip_24_hours`             | Twenty-four hour accumulated precipitation (mm)
 `precip_situation`            | Precipitation situation description
-`pavement_sensor`             | Array of pavement sensor sample objects
+`pavement_sensor`             | Array of pavement sensor observations
 ↳`surface_status`             | Surface status description
 ↳`surface_temp`               | Surface temperature (℃)
 ↳`pavement_temp`              | Pavement temperature (℃)
@@ -89,7 +89,7 @@ Key                           | Value
 ↳`freeze_point`               | Surface freeze point (℃)
 ↳`black_ice_signal`           | Black ice signal description
 ↳`friction`                   | Coefficient of friction (percent)
-`sub_surface_sensor`          | Array of sub-surface sample objects
+`sub_surface_sensor`          | Array of sub-surface observations
 ↳`temp`                       | Sub-surface temperature (℃)
 ↳`moisture`                   | Sub-surface moisture saturation (percent)
 ↳`sensor_error`               | Sensor error description
