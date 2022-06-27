@@ -1,20 +1,29 @@
 # Road Weather Information Systems
 
-Select `View ➔ Weather Sensors` menu item
-
 Road Weather Information Systems, or **RWIS** can sense data such as
 precipitation rate, road surface temperature, wind speed, etc.  The [NTCIP]
 and [Org-815] protocols can collect RWIS data.
 
-## Settings
+## JSON Data
 
-Sensor settings are checked once per day and stored in the `settings` column of
-the `weather_sensor` table as JSONB.  When the value changes, a time-stamped
-record is added to the `weather_sensor_settings` table.
+The `iris/rwis` endpoint contains JSON data for all weather sensors.  The JSON
+is an array of weather sensor objects.
 
-The possible settings fields are:
+Key          | Value
+-------------|--------------------
+name         | Weather sensor name
+location     | Location description
+lat          | Latitude of sensor
+lon          | Longitude of sensor
+settings     | [Settings](#settings) object
+sample       | Observation [sample](#sample) object
+sample\_time | Time stamp of observation
 
-Field                    | Description
+### Settings
+
+This object contains sensor settings and configuration.
+
+Key                      | Value
 -------------------------|---------------------------------------------------
 `sys_descr`              | System description
 `sys_contact`            | System contact information
@@ -37,16 +46,13 @@ Field                    | Description
 ↳`sub_surface_type`      | Sub-surface type description
 ↳`depth`                 | Depth below pavement surface (meters)
 
-## Sample Data
+### Sample
 
-Sample data is collected at regular intervals equal to the polling period of the
-[comm link].  It is stored in the `sample` column of the `weather_sensor` table
-as JSONB.  When a new sample is stored, a time-stamped record is added to the
-`weather_sensor_sample` table.
+This object contains all collected observation data from the most recent polling
+period.  The `wind_sensor`, `temperature_sensor`, `pavement_sensor` and
+`sub_surface_sensor` arrays match the order from the settings object.
 
-Only collected data is stored in the `sample` column.  The possible fields are:
-
-Field                         | Description
+Key                           | Value
 ------------------------------|------------------------------------
 `atmospheric_pressure`        | Atmospheric pressure (pascals)
 `visibility`                  | Visibility (meters)
@@ -98,6 +104,5 @@ Field                         | Description
 _† Wind direction in degrees clockwise from due north_.
 
 
-[comm link]: comm_links.html
 [NTCIP]: comm_links.html#ntcip
 [ORG-815]: comm_links.html#org815
