@@ -100,6 +100,10 @@ public class GateNdorV5Property extends AsciiDeviceProperty {
 	/** Translate NDOR v5-gate status values to GateArmState status values */
 	@SuppressWarnings("incomplete-switch")
 	public GateArmState getState() {
+		// communication error before state could be determined
+		if (statusOfGate == null)
+			return GateArmState.UNKNOWN;
+		
 		// gate-motion and primary faults (arm motion faults)
 		switch (statusOfGate) {
 			case OPEN_IN_PROGRESS:
@@ -130,6 +134,10 @@ public class GateNdorV5Property extends AsciiDeviceProperty {
 	/** Get fault description (or null) */
 	@SuppressWarnings("incomplete-switch")
 	public String getFault() {
+		// communication error before state could be determined
+		if (statusOfGate == null)
+			return GateArmState.UNKNOWN.toString();
+		
 		// primary faults (arm motion faults)
 		switch (statusOfGate) {
 			case TIMEOUT_STILL_CLOSED:
