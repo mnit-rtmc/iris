@@ -16,6 +16,8 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import us.mn.state.dot.sched.DebugLog;
@@ -110,9 +112,20 @@ public class ThreadedPoller<T extends ControllerProperty>
 			if (null == o)
 				break;
 			o.handleCommError(et, msg);
-			if (o.isDone())
-				o.cleanup();
-			else
+			if (o.isDone()) {
+				try {
+					o.cleanup();
+				} catch (Exception e) {
+					// catch any exceptions encountered while cleaning up so
+					// we can log them with the error
+					log("Encountered exception " + e.toString() +
+							" while cleaning up error " + msg);
+					StringWriter sw = new StringWriter();
+					PrintWriter pw = new PrintWriter(sw);
+					e.printStackTrace(pw);
+					log(sw.toString());
+				}
+			} else
 				not_done.add(o);
 		}
 		for (OpController<T> o : not_done)
