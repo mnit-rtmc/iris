@@ -100,6 +100,10 @@ public class GateNdorV5Property extends AsciiDeviceProperty {
 	/** Translate NDOR v5-gate status values to GateArmState status values */
 	@SuppressWarnings("incomplete-switch")
 	public GateArmState getState() {
+		// communication error before state could be determined
+		if (statusOfGate == null)
+			return GateArmState.UNKNOWN;
+		
 		// gate-motion and primary faults (arm motion faults)
 		switch (statusOfGate) {
 			case OPEN_IN_PROGRESS:
@@ -114,7 +118,8 @@ public class GateNdorV5Property extends AsciiDeviceProperty {
 				return GateArmState.FAULT;
 		}
 		// secondary faults (arm-lights and gate-sign)
-		if (gateArmLights.isError() || warningSign.isError())
+		if ( (gateArmLights == null || gateArmLights.isError())
+				|| (warningSign == null || warningSign.isError()))
 			return GateArmState.FAULT;
 		// finished moving status
 		switch (statusOfGate) {
@@ -130,6 +135,10 @@ public class GateNdorV5Property extends AsciiDeviceProperty {
 	/** Get fault description (or null) */
 	@SuppressWarnings("incomplete-switch")
 	public String getFault() {
+		// communication error before state could be determined
+		if (statusOfGate == null)
+			return GateArmState.UNKNOWN.toString();
+		
 		// primary faults (arm motion faults)
 		switch (statusOfGate) {
 			case TIMEOUT_STILL_CLOSED:
@@ -140,8 +149,12 @@ public class GateNdorV5Property extends AsciiDeviceProperty {
 				return statusOfGate.toString();
 		}
 		// secondary faults (arm-lights and gate-sign)
+		if (gateArmLights == null)
+			return StatusOfGateArmLights.LIGHTS_ERROR.toString();
 		if (gateArmLights.isError())
 			return gateArmLights.toString();
+		if (warningSign == null)
+			return StatusOfWarningSignLights.SIGN_ERROR.toString();
 		if (warningSign.isError())
 			return warningSign.toString();
 		// no faults
