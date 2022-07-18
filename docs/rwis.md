@@ -9,15 +9,15 @@ and [Org-815] protocols can collect RWIS data.
 The `iris/rwis` endpoint produces a JSON document containing an array of all
 weather sensor objects.
 
-Key          | Value
--------------|--------------------
-name         | Weather sensor name
-location     | Location description
-lat          | Latitude of sensor
-lon          | Longitude of sensor
-settings     | [Settings](#settings) object
-sample       | Observation [sample](#sample) object
-sample\_time | Time stamp of observation
+Key           | Value
+--------------|--------------------
+`name`        | Weather sensor name
+`location`    | Location description
+`lat`         | Latitude of sensor
+`lon`         | Longitude of sensor
+`settings`    | [Settings](#settings) object
+`sample`      | Observation [sample](#sample) object
+`sample_time` | Time stamp of observation
 
 ### Settings
 
