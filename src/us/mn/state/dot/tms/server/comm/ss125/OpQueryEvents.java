@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,12 +57,13 @@ public class OpQueryEvents extends OpSS125 {
 			ActiveEventProperty ev = new ActiveEventProperty();
 			mess.add(ev);
 			mess.queryProps();
-			setSuccess(true);
 			if (ev.isValidEvent()) {
-				if (ev.isValidStamp())
+				if (ev.isValidStamp()) {
 					ev.logVehicle(controller);
-				else {
+					setSuccess(true);
+				} else {
 					controller.logGap();
+					setSuccess(false);
 					mess.logError("BAD TIMESTAMP: " +
 						new Date(ev.getTime()));
 					return new SendDateTime();
