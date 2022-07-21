@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -218,9 +219,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 	/** Populate the rows mapping */
 	private void populateRows() {
-		// Start at the last row in the table -- some old firmwares
-		// treat the first row or two as special permanent fonts.
-		for (int row = num_fonts.getInteger(); row > 0; row--) {
+		for (int row: getFontRows()) {
 			if (rows.containsKey(row)) {
 				FontRow fr = populateRow(rows.remove(row));
 				if (fr != null)
@@ -229,6 +228,25 @@ public class OpSendDMSFonts extends OpDMS {
 					break;
 			}
 		}
+	}
+
+	/** Get an array of font row indices */
+	private ArrayDeque<Integer> getFontRows() {
+		ArrayDeque<Integer> row_nums = new ArrayDeque<Integer>();
+		for (int row = 1; row <= num_fonts.getInteger(); row++) {
+			row_nums.addLast(row);
+		}
+		// some old firmwares treat the first row or two as
+		// special permanent fonts, so put those at the end.
+		// we can't just start with the last row, because some
+		// *other* firmwares have bugs related to the last font row
+		Integer one = row_nums.pollFirst();
+		Integer two = row_nums.pollFirst();
+		if (two != null)
+			row_nums.addLast(two);
+		if (one != null)
+			row_nums.addLast(one);
+		return row_nums;
 	}
 
 	/** Populate a FontRow with an unassigned font */
