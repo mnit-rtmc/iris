@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,7 +82,7 @@ abstract public class SS125Property extends ControllerProperty {
 	 * @param pos Starting position in buffer.
 	 * @param value Value to store in buffer. */
 	static protected void formatBool(byte[] buf, int pos, boolean value) {
-		buf[pos] = value ? (byte)1 : (byte)0;
+		buf[pos] = value ? (byte) 1 : (byte) 0;
 	}
 
 	/** Format a 16-bit fixed-point value.
@@ -90,10 +90,10 @@ abstract public class SS125Property extends ControllerProperty {
 	 * @param pos Starting position in buffer.
 	 * @param value Value to store in buffer. */
 	static protected void format16Fixed(byte[] buf, int pos, float value) {
-		int intg = (int)value;
-		int frac = (int)(256 * (value - intg));
-		buf[pos] = (byte)intg;
-		buf[pos + 1] = (byte)frac;
+		int intg = (int) value;
+		int frac = (int) (256 * (value - intg));
+		buf[pos] = (byte) intg;
+		buf[pos + 1] = (byte) frac;
 	}
 
 	/** Format a 24-bit value.
@@ -101,9 +101,9 @@ abstract public class SS125Property extends ControllerProperty {
 	 * @param pos Starting position in buffer.
 	 * @param value Value to store in buffer. */
 	static protected void format24(byte[] buf, int pos, int value) {
-		buf[pos] = (byte)((value >> 16) & 0xFF);
-		buf[pos + 1] = (byte)((value >> 8) & 0xFF);
-		buf[pos + 2] = (byte)(value & 0xFF);
+		buf[pos] = (byte) ((value >> 16) & 0xFF);
+		buf[pos + 1] = (byte) ((value >> 8) & 0xFF);
+		buf[pos + 2] = (byte) (value & 0xFF);
 	}
 
 	/** Format a string to a byte array.
@@ -117,7 +117,7 @@ abstract public class SS125Property extends ControllerProperty {
 		byte[] src = value.getBytes(ASCII);
 		int vlen = Math.min(len, src.length);
 		System.arraycopy(src, 0, buf, pos, vlen);
-		for(int i = vlen; i < len; i++)
+		for (int i = vlen; i < len; i++)
 			buf[pos + i] = 0;
 	}
 
@@ -126,9 +126,9 @@ abstract public class SS125Property extends ControllerProperty {
 		throws ParsingException
 	{
 		int b = body[pos];
-		if(b == 0)
+		if (b == 0)
 			return false;
-		else if(b == 1)
+		else if (b == 1)
 			return true;
 		else
 			throw new ParsingException("INVALID BOOLEAN");
@@ -152,12 +152,12 @@ abstract public class SS125Property extends ControllerProperty {
 	/** Parse a 24-bit fixed-point value */
 	static protected Float parse24Fixed(byte[] body, int pos) {
 		int flag = (body[pos] >> 7) & 0x01;
-		if(flag == 0)
+		if (flag == 0)
 			return null;
 		int b1 = body[pos] & 0x7F;
 		int b0 = body[pos + 1] & 0xFF;
-		short sint = (short)((b1 << 8) | b0);
-		int intg = (short)(sint << 1) >> 1;	// extend sign
+		short sint = (short) ((b1 << 8) | b0);
+		int intg = (short) (sint << 1) >> 1;	// extend sign
 		int frac = body[pos + 2] & 0xFF;
 		int fr = intg >= 0 ? frac : -frac;
 		return intg + fr / 256f;
@@ -193,11 +193,11 @@ abstract public class SS125Property extends ControllerProperty {
 	 * @throws ParsingException On any errors parsing result code.
 	 * @throws ControllerException If result indicates an error. */
 	static void parseResult(byte[] rbody) throws IOException {
-		if(rbody.length != 6)
+		if (rbody.length != 6)
 			throw new ParsingException("RESULT LENGTH");
 		int result = parse16(rbody, OFF_RESULT);
 		ResponseCode rc = ResponseCode.fromCode(result);
-		if(rc != ResponseCode.NO_ERRORS)
+		if (rc != ResponseCode.NO_ERRORS)
 			throw new ControllerException(rc.toString());
 	}
 
@@ -251,23 +251,23 @@ abstract public class SS125Property extends ControllerProperty {
 		byte[] rhead = recvResponse(is, 11);
 		if (parse8(rhead, OFF_CRC) != calculate(rhead))
 			throw new ChecksumException("HEADER");
-		if(rhead[OFF_SENTINEL] != 'Z')
+		if (rhead[OFF_SENTINEL] != 'Z')
 			throw new ParsingException("SENTINEL");
-		if(rhead[OFF_PROTOCOL_VER] != '1')
+		if (rhead[OFF_PROTOCOL_VER] != '1')
 			throw new ParsingException("VERSION");
-		if(parse8(rhead, OFF_DEST_SUB_ID) != source_sub_id)
+		if (parse8(rhead, OFF_DEST_SUB_ID) != source_sub_id)
 			throw new ParsingException("DEST SUB ID");
-		if(parse16(rhead, OFF_DEST_ID) != source_id)
+		if (parse16(rhead, OFF_DEST_ID) != source_id)
 			throw new ParsingException("DEST ID");
-		if(parse8(rhead, OFF_SOURCE_SUB_ID) != dest_sub_id)
+		if (parse8(rhead, OFF_SOURCE_SUB_ID) != dest_sub_id)
 			throw new ParsingException("SRC SUB ID");
-		if(parse16(rhead, OFF_SOURCE_ID) != drop)
+		if (parse16(rhead, OFF_SOURCE_ID) != drop)
 			throw new ParsingException("SRC ID");
 		seq_num++;
-		if(parse8(rhead, OFF_SEQUENCE) != seq_num)
+		if (parse8(rhead, OFF_SEQUENCE) != seq_num)
 			throw new ParsingException("SEQUENCE");
 		int n_body = parse8(rhead, OFF_BODY_SIZE);
-		if(n_body < 3 || n_body > MAX_BODY_OCTETS)
+		if (n_body < 3 || n_body > MAX_BODY_OCTETS)
 			throw new ParsingException("BODY SIZE");
 		return n_body;
 	}
@@ -290,20 +290,20 @@ abstract public class SS125Property extends ControllerProperty {
 		throws IOException
 	{
 		byte[] rbody = recvResponse(is, n_body + 1);
-		if(rbody.length < 4)
+		if (rbody.length < 4)
 			throw new ParsingException("BODY SIZE");
 		if (parse8(rbody, rbody.length - 1) != calculate(rbody))
 			throw new ChecksumException("BODY CRC");
 		MessageID mid = MessageID.fromCode(parse8(rbody, OFF_MSG_ID));
-		if(mid != msgId())
+		if (mid != msgId())
 			throw new ParsingException("MESSAGE ID");
 		msg_sub_id = parse8(rbody, OFF_MSG_SUB_ID);
 		MessageType rmt = MessageType.fromCode(parse8(rbody,
 			OFF_MSG_TYPE));
-		if(rmt == MessageType.RESULT) {
-			if(rbody.length != 6)
+		if (rmt == MessageType.RESULT) {
+			if (rbody.length != 6)
 				throw new ParsingException("RESULT SIZE");
-		} else if(rmt != mt)
+		} else if (rmt != mt)
 			throw new ParsingException("MESSAGE TYPE");
 		return rbody;
 	}
