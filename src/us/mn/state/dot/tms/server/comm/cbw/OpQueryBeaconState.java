@@ -32,6 +32,9 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 	 *  "sun.net.www.protocol.http.HttpUrlConnection" */
 	static private final String INVALID_HTTP = "Invalid Http response";
 
+	/** Offset for input pins on controller IO */
+	static private final int INPUT_PIN_OFFSET = 20;
+
 	/** Beacon device */
 	protected final BeaconImpl beacon;
 
@@ -49,7 +52,7 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 		Integer vp = beacon.getVerifyPin();
 		if (vp != null) {
 			boolean f = getBeaconRelay();
-			boolean v = state.getInput(vp);
+			boolean v = state.getInput(vp - INPUT_PIN_OFFSET);
 			if (f && !v)
 				return "Verify failed";
 			if (v && !f)
