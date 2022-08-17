@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2016  Minnesota Department of Transportation
+ * Copyright (C) 2010-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,8 +78,8 @@ public class CommMessageImpl<T extends ControllerProperty>
 			os.flush();
 		}
 		for (T p: props) {
-			p.decodeQuery(c, messenger.getInputStream(p.getPath(),
-				c));
+			p.decodeQuery(c, messenger.getInputStream(
+				p.getPathQuery(), c));
 			logQuery(p);
 		}
 	}
@@ -107,8 +107,8 @@ public class CommMessageImpl<T extends ControllerProperty>
 		if (os != null)
 			os.flush();
 		for (T p: props) {
-			p.decodeStore(c, messenger.getInputStream(p.getPath(),
-				c));
+			p.decodeStore(c, messenger.getInputStream(
+				p.getPathQuery(), c));
 		}
 	}
 

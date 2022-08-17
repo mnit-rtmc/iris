@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2015  Minnesota Department of Transportation
+ * Copyright (C) 2010-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -220,8 +220,8 @@ abstract public class ControllerProperty {
 				":" + bcd1);
 	}
 
-	/** Get the path for a property */
-	public String getPath() {
+	/** Get the path + query for a property */
+	public String getPathQuery() {
 		return "";
 	}
 

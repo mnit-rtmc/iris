@@ -51,9 +51,9 @@ public class CBWProperty extends ControllerProperty {
 	/** Relative path */
 	private String path;
 
-	/** Get the path for a property */
+	/** Get the path + query for a property */
 	@Override
-	public String getPath() {
+	public String getPathQuery() {
 		return path;
 	}
 

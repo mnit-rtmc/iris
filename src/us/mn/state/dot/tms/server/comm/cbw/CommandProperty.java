@@ -37,6 +37,6 @@ public class CommandProperty extends CBWProperty {
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return "command: " + getPath();
+		return "command: " + getPathQuery();
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,9 +43,9 @@ abstract public class AxisProp extends ControllerProperty {
 		return param.toString();
 	}
 
-	/** Get the path for a property */
+	/** Get the path + query for a property */
 	@Override
-	public String getPath() {
+	public String getPathQuery() {
 		return "/axis-cgi/com/" + command + '?' + param;
 	}
 
