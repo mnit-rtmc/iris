@@ -1370,7 +1370,7 @@ CREATE FUNCTION iris.comm_link_notify() RETURNS TRIGGER AS
     $comm_link_notify$
 BEGIN
     IF (NEW.connected IS DISTINCT FROM OLD.connected) THEN
-        PERFORM pg_notify('comm_link', 'connected');
+        NOTIFY comm_link, 'connected';
     ELSE
         NOTIFY comm_link;
     END IF;
