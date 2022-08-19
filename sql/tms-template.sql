@@ -2080,7 +2080,7 @@ CREATE TABLE iris._beacon (
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
     message VARCHAR(128) NOT NULL,
     notes VARCHAR(128) NOT NULL,
-    verify_pin INTEGER, -- FIXME: make unique on controller_io
+    verify_pin INTEGER,
     flashing BOOLEAN NOT NULL
 );
 
