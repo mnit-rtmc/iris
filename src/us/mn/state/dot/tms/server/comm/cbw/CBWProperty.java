@@ -42,32 +42,32 @@ public class CBWProperty extends ControllerProperty {
 
 	/** Regex to match relay state */
 	static private final Pattern RELAY = Pattern.compile(
-		"<(relay([\\d]+)?(?:state)?)>([01])</\\1>");
+		"<(relay([\\d]+)?(state)?)>([01])</\\1>");
 
 	/** Regex to match input state */
 	static private final Pattern INPUT = Pattern.compile(
 		"<((?:digitalI|i)nput([\\d]+)?(?:state)?)>([01])</\\1>");
 
-	/** Relative path */
-	private String path;
+	/** Path and query URI components */
+	private final String path_query;
 
-	/** Get the path + query for a property */
+	/** Get the path + query URI components */
 	@Override
 	public String getPathQuery() {
-		return path;
+		return path_query;
 	}
 
-	/** Set the path for a property */
-	public void setPath(String p) {
-		path = p;
+	/** Create a new CBW relay property */
+	public CBWProperty(String pq) {
+		path_query = pq;
 	}
 
-	/** Flag indicating pin number included */
-	private boolean has_pin = false;
+	/** CBW model, based on parsed XML */
+	private Model model = Model.X_301;
 
-	/** Get flag indicating pin number included */
-	public boolean hasPin() {
-		return has_pin;
+	/** Get CBW model, based on parsed XML */
+	public Model getModel() {
+		return model;
 	}
 
 	/** Relay powered status */
@@ -94,11 +94,6 @@ public class CBWProperty extends ControllerProperty {
 	/** Set input state */
 	private void setInput(int pin, boolean s) {
 		inputs[pin - 1] = s;
-	}
-
-	/** Create a new CBW relay property */
-	public CBWProperty(String p) {
-		path = p;
 	}
 
 	/** Get a string representation */
@@ -136,7 +131,7 @@ public class CBWProperty extends ControllerProperty {
 		decodeXml(is);
 	}
 
-	/** Decode state.xml response */
+	/** Decode response to state XML request */
 	private void decodeXml(InputStream is) throws IOException {
 		boolean found = false;
 		clearValues();
@@ -156,10 +151,12 @@ public class CBWProperty extends ControllerProperty {
 		Matcher m = RELAY.matcher(line);
 		while (m.find()) {
 			String spin = m.group(2);
-			if (spin != null)
-				has_pin = true;
+			if (spin == null)
+				model = Model.X_WR_1R12;
+			else if (m.group(3) == null)
+				model = Model.X_401;
 			int pin = parsePin(spin);
-			boolean v = parseBool(m.group(3));
+			boolean v = parseBool(m.group(4));
 			setRelay(pin, v);
 			found = true;
 		}

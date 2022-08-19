@@ -42,6 +42,9 @@ public class CBWPoller extends ThreadedPoller<CBWProperty>
 	@Override
 	public void sendRequest(BeaconImpl b, DeviceRequest r) {
 		switch (r) {
+		case SEND_SETTINGS:
+			addOp(new OpQueryModel(b));
+			break;
 		case QUERY_STATUS:
 			addOp(new OpQueryBeaconState(b));
 			break;

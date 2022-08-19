@@ -11,10 +11,10 @@ HTTP, because why not?
 
 ## X-WR-1R12
 
-- Invalid `state.xml`; must use `stateFull.xml`
+- Invalid HTTP with `state.xml`; must use `stateFull.xml`
 - Relay: `<relaystate>0</relaystate>`
 - Input: `<inputstate>1</inputstate>`
-- Control: `state.xml?relayState=1`
+- Control: `stateFull.xml?relayState=1`
 
 ## X-401
 

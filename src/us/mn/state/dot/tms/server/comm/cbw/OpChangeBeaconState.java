@@ -17,37 +17,33 @@ package us.mn.state.dot.tms.server.comm.cbw;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to change a beacon state.
- * This extends OpQueryBeaconState in order to read state.xml as the first
- * phase.  This allows us to format the query parameters depending on the
- * device.
  *
  * @author Douglas Lau
  */
-public class OpChangeBeaconState extends OpQueryBeaconState {
+public class OpChangeBeaconState extends OpDevice<CBWProperty> {
+
+	/** Beacon device */
+	private final BeaconImpl beacon;
 
 	/** New state to change beacon */
 	private final boolean flash;
 
-	/** Get beacon relay state */
-	@Override
-	protected boolean getBeaconRelay() {
-		return flash;
-	}
-
-	/** Format the maintenance status */
-	@Override
-	protected String formatMaintStatus() {
-		return null;
-	}
-
 	/** Create a new change beacon state operation */
 	public OpChangeBeaconState(BeaconImpl b, boolean f) {
 		super(PriorityLevel.COMMAND, b);
+		beacon = b;
 		flash = f;
+	}
+
+	/** Get URI path + query components */
+	private String getPathQuery(int pin, boolean on) {
+		Model mdl = Model.fromValue(controller.getVersion());
+		return mdl.statePath() + mdl.commandQuery(pin, on);
 	}
 
 	/** Operation equality test */
@@ -60,47 +56,45 @@ public class OpChangeBeaconState extends OpQueryBeaconState {
 			return false;
 	}
 
-	/** Create the third phase of the operation */
+	/** Create the second phase of the operation */
 	@Override
-	protected Phase<CBWProperty> phaseThree() {
-		return new ChangeBeacon();
+	protected Phase<CBWProperty> phaseTwo() {
+		return new ChangeBeacon(beacon.getPin());
 	}
 
-	/** Phase to change the beacon state */
+	/** Phase to change the beacon relay state */
 	protected class ChangeBeacon extends Phase<CBWProperty> {
+
+		/** Relay pin (for flasher or verify) */
+		private final int pin;
+
+		/** Create change relay phase */
+		protected ChangeBeacon(int p) {
+			pin = p;
+		}
 
 		/** Change the beacon state */
 		protected Phase<CBWProperty> poll(
 			CommMessage<CBWProperty> mess) throws IOException
 		{
-			CommandProperty prop = new CommandProperty(getPin(),
-				flash);
+			String pq = getPathQuery(pin, flash);
+			CBWProperty prop = new CBWProperty(pq);
 			mess.add(prop);
 			mess.storeProps();
+			// After energizing the flashers, turn on the verify
+			// circuit (if controlled by a different relay pin)
 			Integer vp = beacon.getVerifyPin();
-			return (vp != null) ? new ChangeVerify(vp) : null;
+			return (vp != null && vp != pin)
+			      ? new ChangeBeacon(vp)
+			      : null;
 		}
 	}
 
-	/** Phase to change current sensor (verify) circuit */
-	protected class ChangeVerify extends Phase<CBWProperty> {
-
-		/** Verify pin */
-		private final int pin;
-
-		/** Create change verify phase */
-		protected ChangeVerify(int p) {
-			pin = p;
-		}
-
-		/** Enable verify circuit */
-		protected Phase<CBWProperty> poll(
-			CommMessage<CBWProperty> mess) throws IOException
-		{
-			CommandProperty prop = new CommandProperty(pin, flash);
-			mess.add(prop);
-			mess.storeProps();
-			return null;
-		}
+	/** Cleanup the operation */
+	@Override
+	public void cleanup() {
+		if (isSuccess())
+			beacon.setFlashingNotify(flash);
+		super.cleanup();
 	}
 }
