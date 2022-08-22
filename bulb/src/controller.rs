@@ -318,11 +318,25 @@ impl Controller {
         format!("{comm_link}:{}", self.drop_id)
     }
 
+    /// Get controller model
+    fn model(&self) -> Option<&str> {
+        self.setup
+            .as_ref()
+            .and_then(|s| s.model.as_deref())
+    }
+
     /// Get firmware version
     fn version(&self) -> Option<&str> {
         self.setup
             .as_ref()
             .and_then(|s| s.version.as_deref())
+    }
+
+    /// Get serial number
+    fn serial_num(&self) -> Option<&str> {
+        self.setup
+            .as_ref()
+            .and_then(|s| s.serial_num.as_deref())
     }
 
     /// Create a button to select the controller
@@ -371,15 +385,39 @@ impl Controller {
         let comm_config = anc.comm_config(self);
         let location = HtmlStr::new(&self.location).with_len(64);
         let notes = HtmlStr::new(&self.notes);
+        let model = self
+            .model()
+            .map(|m| {
+                format!(
+                    "<div class='row fill'>\
+                      <span>Model</span>\
+                      <span class='info'>{}</span>\
+                    </div>",
+                    HtmlStr::new(m).with_len(32),
+                )
+            })
+            .unwrap_or_else(|| "".to_string());
         let version = self
             .version()
             .map(|v| {
                 format!(
-                    "<span>\
+                    "<div class='row fill'>\
                       <span>Version</span>\
                       <span class='info'>{}</span>\
-                    </span>",
+                    </div>",
                     HtmlStr::new(v).with_len(32),
+                )
+            })
+            .unwrap_or_else(|| "".to_string());
+        let serial_num = self
+            .serial_num()
+            .map(|sn| {
+                format!(
+                    "<div class='row fill'>\
+                      <span>S/N</span>\
+                      <span class='info'>{}</span>\
+                    </div>",
+                    HtmlStr::new(sn).with_len(32),
                 )
             })
             .unwrap_or_else(|| "".to_string());
@@ -410,7 +448,9 @@ impl Controller {
               <span>{location}</span>\
               <span class='info'>{notes}</span>\
             </div>\
-            <div class='row fill'>{version}</div>\
+            {model}\
+            {version}\
+            {serial_num}\
             <div class='row'>{fail_time}</div>\
             {io_pins}\
             <div class='row'>\
