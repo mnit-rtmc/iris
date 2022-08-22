@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.cbw;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -42,7 +43,8 @@ public class OpChangeBeaconState extends OpDevice<CBWProperty> {
 
 	/** Get URI path + query components */
 	private String getPathQuery(int pin, boolean on) {
-		Model mdl = Model.fromValue(controller.getVersion());
+		String m = ControllerHelper.getSetup(controller, "model");
+		Model mdl = Model.fromValue(m);
 		return mdl.statePath() + mdl.commandQuery(pin, on);
 	}
 

@@ -171,7 +171,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 		});
 		cols.add(new ProxyColumn<Controller>("controller.version", 140){
 			public Object getValueAt(Controller c) {
-				return c.getVersion();
+				return ControllerHelper.getSetup(c, "version");
 			}
 		});
 		return cols;

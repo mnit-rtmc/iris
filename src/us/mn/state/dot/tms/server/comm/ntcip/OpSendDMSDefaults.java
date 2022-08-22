@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SignDetail;
@@ -115,7 +116,8 @@ public class OpSendDMSDefaults extends OpDMS {
 
 	/** Is the controller blacklisted for comm loss setting */
 	private boolean isCommLossBlacklisted() {
-		return CTO_BLACKLIST.contains(controller.getVersion());
+		String v = ControllerHelper.getSetup(controller, "version");
+		return CTO_BLACKLIST.contains(v);
 	}
 
 	/** Get the comm loss threshold for the comm link */

@@ -140,7 +140,7 @@ The response for these requests contains an ETag header, derived from the file's
 
 | Access       | Attributes                                         |
 |--------------|----------------------------------------------------|
-| Read Only    | name, location, version, fail\_time, {`geo_loc`}   |
+| Read Only    | name, location, setup, fail\_time, {`geo_loc`}     |
 | 👉 Operate   | {`download`}, {`device_req`}                       |
 | 💡 Plan      | condition, notes                                   |
 | 🔧 Configure | comm\_link, drop\_id, cabinet\_style, {`password`} |

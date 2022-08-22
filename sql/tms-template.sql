@@ -1454,7 +1454,6 @@ CREATE TABLE iris.controller (
     condition INTEGER NOT NULL REFERENCES iris.condition,
     notes VARCHAR(128) NOT NULL,
     password VARCHAR(32),
-    version VARCHAR(64),
     setup JSONB,
     fail_time TIMESTAMP WITH time zone
 );

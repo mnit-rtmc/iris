@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONException;
+import org.json.JSONObject;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.CabinetStyle;
@@ -71,7 +73,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		namespace.registerType(SONAR_TYPE, ControllerImpl.class);
 		store.query("SELECT name, comm_link, drop_id, " +
 			"cabinet_style, geo_loc, condition, notes, password, " +
-			"setup, fail_time, version FROM iris." +
+			"setup, fail_time FROM iris." +
 		        SONAR_TYPE  +";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -94,7 +96,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		map.put("password", password);
 		map.put("setup", setup);
 		map.put("fail_time", asTimestamp(failTime));
-		map.put("version", version);
 		return map;
 	}
 
@@ -130,15 +131,14 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		     row.getString(7),    // notes
 		     row.getString(8),    // password
 		     row.getString(9),    // setup
-		     row.getTimestamp(10),// fail_time
-		     row.getString(11)    // version
+		     row.getTimestamp(10) // fail_time
 		);
 	}
 
 	/** Create a controller */
 	private ControllerImpl(String n, String cl, short d, String cs,
-		String gl, int cnd, String nt, String p, String s, Date ft,
-	        String v) throws TMSException
+		String gl, int cnd, String nt, String p, String s, Date ft)
+		throws TMSException
 	{
 		super(n);
 		comm_link = lookupCommLink(cl);
@@ -150,7 +150,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		password = p;
 		setup = s;
 		failTime = stampMillis(ft);
-		version = v;
 		initTransients();
 	}
 
@@ -657,7 +656,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 	}
 
-	/** Set the JSON setup */
+	/** Set the JSON setup and notify clients of the change */
 	public void setSetupNotify(String s) {
 		if (!objectEquals(s, setup)) {
 			setSetup(s);
@@ -665,33 +664,25 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 	}
 
-	/** Controller firmware version */
-	private String version;
-
-	/** Set the firmware version in DB */
-	private void storeVersion(String v) {
+	/** Set a setup value and notify clients of the change */
+	public void setSetupNotify(String key, String value) {
+		String s = setup;
 		try {
-			store.update(this, "version", v);
+			JSONObject jo = (s != null)
+				? new JSONObject(s)
+				: new JSONObject();
+			jo.put(key, SString.truncate(value, 64));
+			setSetupNotify(jo.toString());
 		}
-		catch (TMSException e) {
+		catch (JSONException e) {
+			// malformed JSON
 			e.printStackTrace();
 		}
 	}
 
 	/** Set the firmware version and notify clients of the change */
 	public void setVersionNotify(String v) {
-		v = SString.truncate(v, 64);
-		if (!objectEquals(v, version)) {
-			storeVersion(v);
-			version = v;
-			notifyAttribute("version");
-		}
-	}
-
-	/** Get the controller firmware version */
-	@Override
-	public String getVersion() {
-		return version;
+		setSetupNotify("version", v);
 	}
 
 	/** Controller error status */

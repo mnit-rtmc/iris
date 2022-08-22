@@ -58,7 +58,7 @@ WHERE name = $1";
 /// SQL query for one controller
 pub const CONTROLLER: &str = "\
 SELECT c.name, location, geo_loc, comm_link, drop_id, cabinet_style, \
-       condition, notes, password, version, fail_time \
+       condition, notes, password, setup, fail_time \
 FROM iris.controller c \
 LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
 WHERE c.name = $1";

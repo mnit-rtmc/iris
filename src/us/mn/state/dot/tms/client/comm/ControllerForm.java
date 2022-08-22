@@ -38,6 +38,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.CtrlCondition;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
@@ -379,8 +380,10 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			notes_txt.setText(proxy.getNotes());
 		if (a == null || a.equals("condition"))
 			condition_act.updateSelected();
-		if (a == null || a.equals("version"))
-			version_lbl.setText(proxy.getVersion());
+		if (a == null || a.equals("setup")) {
+			String v = ControllerHelper.getSetup(proxy, "version");
+			version_lbl.setText(v);
+		}
 		if (a == null || a.equals("maint"))
 			maint_lbl.setText(proxy.getMaint());
 		if (a == null || a.equals("status"))

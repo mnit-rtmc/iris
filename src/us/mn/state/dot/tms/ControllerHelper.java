@@ -16,6 +16,8 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
+import org.json.JSONException;
+import org.json.JSONObject;
 import us.mn.state.dot.tms.geo.Position;
 
 /**
@@ -92,5 +94,20 @@ public class ControllerHelper extends BaseHelper {
 		return (ctrl != null)
 		      ? ctrl.getMaint()
 		      : ItemStyle.NO_CONTROLLER.toString();
+	}
+
+	/** Get controller setup data */
+	static public String getSetup(Controller ctrl, String key) {
+		if (ctrl != null) {
+			try {
+				JSONObject jo = new JSONObject(ctrl.getSetup());
+				return jo.optString(key, "");
+			}
+			catch (JSONException e) {
+				// malformed JSON
+				e.printStackTrace();
+			}
+		}
+		return "";
 	}
 }

@@ -73,6 +73,14 @@ pub struct ControllerIo {
     pub name: String,
 }
 
+/// Optional setup data
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct Setup {
+    pub model: Option<String>,
+    pub serial_num: Option<String>,
+    pub version: Option<String>,
+}
+
 /// Controller
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Controller {
@@ -83,7 +91,7 @@ pub struct Controller {
     pub cabinet_style: Option<String>,
     pub condition: u32,
     pub notes: String,
-    pub version: Option<String>,
+    pub setup: Option<Setup>,
     pub fail_time: Option<String>,
     // full attributes
     pub geo_loc: Option<String>,
@@ -310,6 +318,13 @@ impl Controller {
         format!("{comm_link}:{}", self.drop_id)
     }
 
+    /// Get firmware version
+    fn version(&self) -> Option<&str> {
+        self.setup
+            .as_ref()
+            .and_then(|s| s.version.as_deref())
+    }
+
     /// Create a button to select the controller
     pub fn button_html(&self) -> String {
         let rname = Resource::Controller.rname();
@@ -356,18 +371,18 @@ impl Controller {
         let comm_config = anc.comm_config(self);
         let location = HtmlStr::new(&self.location).with_len(64);
         let notes = HtmlStr::new(&self.notes);
-        let version = match &self.version {
-            Some(version) => {
-                let version = HtmlStr::new(version).with_len(32);
+        let version = self
+            .version()
+            .map(|v| {
                 format!(
                     "<span>\
                       <span>Version</span>\
-                      <span class='info'>{version}</span>\
-                    </span>"
+                      <span class='info'>{}</span>\
+                    </span>",
+                    HtmlStr::new(v).with_len(32),
                 )
-            }
-            None => "".to_string(),
-        };
+            })
+            .unwrap_or_else(|| "".to_string());
         let fail_time = match &self.fail_time {
             Some(fail_time) => {
                 format!(
@@ -471,7 +486,7 @@ impl Card for Controller {
             || self.location.contains_lower(search)
             || self.notes.contains_lower(search)
             || self.cabinet_style.contains_lower(search)
-            || self.version.contains_lower(search)
+            || self.version().unwrap_or("").contains_lower(search)
     }
 
     /// Get next suggested name

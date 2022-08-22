@@ -66,7 +66,7 @@ public class OpQueryModel extends OpDevice<CBWProperty> {
 				} else
 					throw e;
 			}
-			controller.setVersionNotify(
+			controller.setSetupNotify("model",
 				state.getModel().toString());
 			return null;
 		}

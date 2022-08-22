@@ -18,9 +18,6 @@ BEGIN
 END;
 $comm_link_notify$ LANGUAGE plpgsql;
 
--- Add setup column to controller
-ALTER TABLE iris.controller ADD COLUMN setup JSONB;
-
 -- Drop views depending on controller_view
 DROP VIEW camera_view;
 DROP VIEW beacon_view;
@@ -33,6 +30,13 @@ DROP VIEW flow_stream_view;
 DROP VIEW weather_sensor_view;
 DROP VIEW controller_loc_view;
 DROP VIEW controller_view;
+
+-- Replace controller version column with setup
+ALTER TABLE iris.controller ADD COLUMN setup JSONB;
+UPDATE iris.controller
+ SET setup = ('{"version":"' || version || '"}')::jsonb
+ WHERE version IS NOT NULL AND version != '';
+ALTER TABLE iris.controller DROP COLUMN version;
 
 CREATE VIEW controller_view AS
     SELECT c.name, drop_id, comm_link, cabinet_style, geo_loc,

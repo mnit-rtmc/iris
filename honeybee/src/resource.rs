@@ -557,7 +557,7 @@ const CONTROLLER_RES: Resource = Resource::Simple(
     Listen::All("controller"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT c.name, location, comm_link, drop_id, cabinet_style, condition, \
-             notes, version, fail_time \
+             notes, setup, fail_time \
       FROM iris.controller c \
       LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
       ORDER BY COALESCE(regexp_replace(comm_link, '[0-9]', '', 'g'), ''), \
