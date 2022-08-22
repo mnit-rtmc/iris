@@ -7,6 +7,7 @@
 --
 -- PAYLOAD: 'publish ' || name, 'video_loss' (camera)
 --          'fail_time' (controller)
+--          'setup' (controller)
 --          'connected' (comm_link)
 --          'auto_fail' (detector)
 --          'msg_user', 'msg_sched', 'msg_current', 'expire_time' (dms)
@@ -1454,6 +1455,7 @@ CREATE TABLE iris.controller (
     notes VARCHAR(128) NOT NULL,
     password VARCHAR(32),
     version VARCHAR(64),
+    setup JSONB,
     fail_time TIMESTAMP WITH time zone
 );
 
@@ -1464,7 +1466,9 @@ CREATE FUNCTION iris.controller_notify() RETURNS TRIGGER AS
     $controller_notify$
 BEGIN
     IF (NEW.fail_time IS DISTINCT FROM OLD.fail_time) THEN
-        PERFORM pg_notify('controller', 'fail_time');
+        NOTIFY controller, 'fail_time';
+    ELSIF (NEW.setup IS DISTINCT FROM OLD.setup) THEN
+        NOTIFY controller, 'setup';
     ELSE
         NOTIFY controller;
     END IF;
@@ -1482,7 +1486,7 @@ CREATE TRIGGER controller_table_notify_trig
 
 CREATE VIEW controller_view AS
     SELECT c.name, drop_id, comm_link, cabinet_style, geo_loc,
-           cnd.description AS condition, notes, version, fail_time
+           cnd.description AS condition, notes, setup, fail_time
     FROM iris.controller c
     LEFT JOIN iris.condition cnd ON c.condition = cnd.id;
 GRANT SELECT ON controller_view TO PUBLIC;

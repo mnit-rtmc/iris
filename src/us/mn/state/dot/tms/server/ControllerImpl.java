@@ -71,8 +71,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		namespace.registerType(SONAR_TYPE, ControllerImpl.class);
 		store.query("SELECT name, comm_link, drop_id, " +
 			"cabinet_style, geo_loc, condition, notes, password, " +
-			"fail_time, version FROM iris." + SONAR_TYPE  +";",
-			new ResultFactory()
+			"setup, fail_time, version FROM iris." +
+		        SONAR_TYPE  +";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new ControllerImpl(row));
@@ -92,6 +92,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		map.put("condition", condition.ordinal());
 		map.put("notes", notes);
 		map.put("password", password);
+		map.put("setup", setup);
 		map.put("fail_time", asTimestamp(failTime));
 		map.put("version", version);
 		return map;
@@ -128,15 +129,16 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		     row.getInt(6),       // condition
 		     row.getString(7),    // notes
 		     row.getString(8),    // password
-		     row.getTimestamp(9), // fail_time
-		     row.getString(10)    // version
+		     row.getString(9),    // setup
+		     row.getTimestamp(10),// fail_time
+		     row.getString(11)    // version
 		);
 	}
 
 	/** Create a controller */
 	private ControllerImpl(String n, String cl, short d, String cs,
-		String gl, int cnd, String nt, String p, Date ft, String v)
-		throws TMSException
+		String gl, int cnd, String nt, String p, String s, Date ft,
+	        String v) throws TMSException
 	{
 		super(n);
 		comm_link = lookupCommLink(cl);
@@ -146,6 +148,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		condition = CtrlCondition.fromOrdinal(cnd);
 		notes = nt;
 		password = p;
+		setup = s;
 		failTime = stampMillis(ft);
 		version = v;
 		initTransients();
@@ -631,6 +634,34 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		for (ControllerIO io: io_pins.values()) {
 			if (io instanceof DetectorImpl)
 				((DetectorImpl) io).logGap(0);
+		}
+	}
+
+	/** Setup (JSON) read from controller */
+	private String setup;
+
+	/** Get the setup as JSON */
+	@Override
+	public String getSetup() {
+		return setup;
+	}
+
+	/** Set the JSON setup */
+	private void setSetup(String s) {
+		try {
+			store.update(this, "setup", s);
+			setup = s;
+		}
+		catch (TMSException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Set the JSON setup */
+	public void setSetupNotify(String s) {
+		if (!objectEquals(s, setup)) {
+			setSetup(s);
+			notifyAttribute("setup");
 		}
 	}
 

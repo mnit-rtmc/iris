@@ -71,6 +71,9 @@ public interface Controller extends SonarObject {
 	/** Get the controller firmware version */
 	String getVersion();
 
+	/** Get setup read from the controller */
+	String getSetup();
+
 	/** Get the controller fail time, or null if communication is not
 	 * failed.  This time is in milliseconds since the epoch. */
 	Long getFailTime();
