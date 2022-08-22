@@ -21,19 +21,19 @@ import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
- * Query the CBW controller model
+ * Query the CBW controller setup
  *
  * @author Douglas Lau
  */
-public class OpQueryModel extends OpDevice<CBWProperty> {
+public class OpQuerySetup extends OpDevice<CBWProperty> {
 
 	/** Exception message for "Invalid Http response" -- this is fragile,
 	 *  since it matches a string literal from the JDK class
 	 *  "sun.net.www.protocol.http.HttpUrlConnection" */
 	static private final String INVALID_HTTP = "Invalid Http response";
 
-	/** Create a new query model operation */
-	public OpQueryModel(BeaconImpl b) {
+	/** Create a new query setup operation */
+	public OpQuerySetup(BeaconImpl b) {
 		super(PriorityLevel.DEVICE_DATA, b);
 	}
 
@@ -68,6 +68,9 @@ public class OpQueryModel extends OpDevice<CBWProperty> {
 			}
 			controller.setSetupNotify("model",
 				state.getModel().toString());
+			String sn = state.getSerialNumber();
+			if (sn != null)
+				controller.setSetupNotify("serial_num", sn);
 			return null;
 		}
 	}

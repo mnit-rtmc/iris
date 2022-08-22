@@ -48,6 +48,10 @@ public class CBWProperty extends ControllerProperty {
 	static private final Pattern INPUT = Pattern.compile(
 		"<((?:digitalI|i)nput([\\d]+)?(?:state)?)>([01])</\\1>");
 
+	/** Regex to match serial number */
+	static private final Pattern SERIAL = Pattern.compile(
+		"<serialNumber>([0-9:A-Z_a-z]{2,32})</serialNumber>");
+
 	/** Path and query URI components */
 	private final String path_query;
 
@@ -96,6 +100,14 @@ public class CBWProperty extends ControllerProperty {
 		inputs[pin - 1] = s;
 	}
 
+	/** Parsed serial number */
+	private String serialNumber;
+
+	/** Get parsed serial number */
+	public String getSerialNumber() {
+		return serialNumber;
+	}
+
 	/** Get a string representation */
 	@Override
 	public String toString() {
@@ -138,7 +150,8 @@ public class CBWProperty extends ControllerProperty {
 		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
 		for (int i = 0; line != null && i < MAX_LINES; i++) {
-			found |= matchRelay(line) || matchInput(line);
+			found |= matchRelay(line) || matchInput(line) ||
+				matchSerialNumber(line);
 			line = lr.readLine();
 		}
 		if (!found)
@@ -174,6 +187,17 @@ public class CBWProperty extends ControllerProperty {
 			found = true;
 		}
 		return found;
+	}
+
+	/** Match a serial number element */
+	private boolean matchSerialNumber(String line) {
+		Matcher m = SERIAL.matcher(line);
+		while (m.find()) {
+			String sn = m.group(1);
+			if (sn != null)
+				serialNumber = sn;
+		}
+		return false;
 	}
 
 	/** Clear the relays and inputs */
