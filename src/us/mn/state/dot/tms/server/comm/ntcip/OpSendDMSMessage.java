@@ -485,9 +485,7 @@ public class OpSendDMSMessage extends OpDMS {
 				return new QueryMultiSyntaxErr();
 			case other:
 				setErrorStatus(error.toString());
-				if (isAmericanSignal())
-					return null;
-				return new QueryLedstarActivateErr();
+				return queryOtherError();
 			case messageMemoryType:
 				// For original 1203v1, blank memory type was
 				// not defined.  This will cause a blank msg
@@ -585,6 +583,11 @@ public class OpSendDMSMessage extends OpDMS {
 			return o_err.toString().toLowerCase().contains(
 				"graphic");
 		}
+	}
+
+	/** Create phase to query "other" activation errors */
+	private Phase queryOtherError() {
+		return isLedstar() ? new QueryLedstarActivateErr() : null;
 	}
 
 	/** Phase to query a ledstar activate message error */

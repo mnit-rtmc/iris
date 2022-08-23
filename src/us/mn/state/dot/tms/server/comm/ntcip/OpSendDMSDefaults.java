@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SignDetail;
@@ -116,8 +115,7 @@ public class OpSendDMSDefaults extends OpDMS {
 
 	/** Is the controller blacklisted for comm loss setting */
 	private boolean isCommLossBlacklisted() {
-		String v = ControllerHelper.getSetup(controller, "version");
-		return CTO_BLACKLIST.contains(v);
+		return CTO_BLACKLIST.contains(getVersion());
 	}
 
 	/** Get the comm loss threshold for the comm link */
@@ -201,13 +199,7 @@ public class OpSendDMSDefaults extends OpDMS {
 				// GenError: unsupported color
 				// BadValue: who knows?
 			}
-			if (isAmericanSignal()) {
-				// American Signal signs timeout if
-				// you set unknown objects.  So end
-				// the Op here for those signs.
-				return null;
-			}
-			return new LedstarDefaults();
+			return vendorDefaults();
 		}
 	}
 
@@ -225,6 +217,23 @@ public class OpSendDMSDefaults extends OpDMS {
 			defaultForegroundRGB.node);
 		fg.setOctetString(DMSHelper.getDefaultForegroundBytes(dms));
 		return fg;
+	}
+
+	/** Get phase to send vendor-specific defaults */
+	private Phase vendorDefaults() {
+		if (isLedstar())
+			return new LedstarDefaults();
+		else if (isAddco()) {
+			// NOTE: setting these objects requires use of the
+			//       "administrator" community name.  This means we
+			//       need to check that the password is not null
+			//       before attempting to set them.
+			if (isCharMatrix() && controller.getPassword() != null)
+				return new AddcoDefaults();
+			else
+				return null;
+		} else
+			return null;
 	}
 
 	/** Phase to set Ledstar-specific object defaults */
@@ -290,7 +299,6 @@ public class OpSendDMSDefaults extends OpDMS {
 			}
 			catch (NoSuchName e) {
 				// Must not be a Skyline sign
-				return new AddcoDefaults();
 			}
 			return null;
 		}
@@ -302,47 +310,30 @@ public class OpSendDMSDefaults extends OpDMS {
 		/** Set ADDCO-specific object defaults */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Integer h_border = dmsHorizontalBorder.makeInt();
+			ASN1Integer v_border = dmsVerticalBorder.makeInt();
+			ASN1Integer h_pitch = vmsHorizontalPitch.makeInt();
+			ASN1Integer v_pitch = vmsVerticalPitch.makeInt();
 			// ADDCO brick signs have these dimensions
-			SignDetail sd = dms.getSignDetail();
-			String make = (sd != null) ? sd.getSoftwareMake() : "";
-			int dtype = (sd != null)
-			          ? sd.getDmsType()
-			          : DMSType.UNKNOWN.ordinal();
-			// NOTE: setting these objects requires use of the
-			//       "administrator" community name.  We need to
-			//       check that the password is not null before
-			//       attempting to set them.
-			if (make != null &&
-			    make.startsWith("ADDCO") &&
-			    dtype == DMSType.VMS_CHAR.ordinal() &&
-			    controller.getPassword() != null)
-			{
-				ASN1Integer h_border =
-					dmsHorizontalBorder.makeInt();
-				ASN1Integer v_border =
-					dmsVerticalBorder.makeInt();
-				ASN1Integer h_pitch =
-					vmsHorizontalPitch.makeInt();
-				ASN1Integer v_pitch =vmsVerticalPitch.makeInt();
-				h_border.setInteger(50);
-				v_border.setInteger(69);
-				h_pitch.setInteger(69);
-				v_pitch.setInteger(69);
-				mess.add(h_border);
-				mess.add(v_border);
-				mess.add(h_pitch);
-				mess.add(v_pitch);
-				try {
-					mess.storeProps();
-				} catch (NoSuchName ex) {
-					// ADDCO VSL ver: 3.4.x throws this exception (21r7)
-					log("ADDCO: ignored ex=" + ex);
-				}
-				logStore(h_border);
-				logStore(v_border);
-				logStore(h_pitch);
-				logStore(v_pitch);
+			h_border.setInteger(50);
+			v_border.setInteger(69);
+			h_pitch.setInteger(69);
+			v_pitch.setInteger(69);
+			mess.add(h_border);
+			mess.add(v_border);
+			mess.add(h_pitch);
+			mess.add(v_pitch);
+			try {
+				mess.storeProps();
 			}
+			catch (NoSuchName ex) {
+				// ADDCO VSL ver: 3.4.x throws this (21r7)
+				log("ADDCO: ignored ex=" + ex);
+			}
+			logStore(h_border);
+			logStore(v_border);
+			logStore(h_pitch);
+			logStore(v_pitch);
 			return null;
 		}
 	}

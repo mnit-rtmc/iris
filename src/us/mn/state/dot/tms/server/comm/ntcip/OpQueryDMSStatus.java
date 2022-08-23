@@ -313,7 +313,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			catch (NoSuchName e) {
 				// 1203v2 not supported ...
 				dms.setPowerStatus(new String[0]);
-				return new LedstarStatus();
+				return vendorStatus();
 			}
 			logQuery(n_pwr);
 			if (n_pwr.getInteger() > 0)
@@ -360,7 +360,7 @@ public class OpQueryDMSStatus extends OpDMS {
 				// Come on, man!  If we got here, 1203v2
 				// objects should really be supported ...
 				dms.setPowerStatus(new String[0]);
-				return new LedstarStatus();
+				return vendorStatus();
 			}
 			logQuery(desc);
 			logQuery(p_type);
@@ -412,14 +412,14 @@ public class OpQueryDMSStatus extends OpDMS {
 			}
 			catch (NoSuchName e) {
 				// 1203v2 not supported ...
-				return new LedstarStatus();
+				return vendorStatus();
 			}
 			logQuery(n_snsr);
 			if (n_snsr.getInteger() > 0) {
 				return new QueryLightSensorStatus(
 					n_snsr.getInteger());
 			} else
-				return new LedstarStatus();
+				return vendorStatus();
 		}
 	}
 
@@ -451,10 +451,21 @@ public class OpQueryDMSStatus extends OpDMS {
 			light_sensors.add(desc.getValue() + "," +
 				status.getValue() + "," + reading.getInteger());
 			row++;
-			if (row <= n_sensors)
-				return this;
-			else
-				return new LedstarStatus();
+			return (row <= n_sensors) ? this : vendorStatus();
+		}
+	}
+
+	/** Get phase to query vendor-specific status objects */
+	private Phase vendorStatus() {
+		// American Signal signs timeout if you ask for unknown objects
+		if (isLedstar())
+			return new LedstarStatus();
+		else {
+			// blank out LEDSTAR status values
+			dms.setLdcPotBaseNotify(null);
+			dms.setPixelCurrentLowNotify(null);
+			dms.setPixelCurrentHighNotify(null);
+			return isSkyline() ? new SkylineStatus() : null;
 		}
 	}
 
@@ -469,16 +480,6 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query Ledstar-specific status */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (isAmericanSignal()) {
-				// American Signal signs timeout if
-				// you ask for unknown objects.  So
-				// end the Op here for those signs.
-				dms.setLdcPotBaseNotify(null);
-				dms.setPixelCurrentLowNotify(null);
-				dms.setPixelCurrentHighNotify(null);
-				return null;
-			}
-
 			mess.add(potBase);
 			mess.add(low);
 			mess.add(high);
@@ -487,10 +488,8 @@ public class OpQueryDMSStatus extends OpDMS {
 				mess.queryProps();
 			}
 			catch (NoSuchName e) {
-				dms.setLdcPotBaseNotify(null);
-				dms.setPixelCurrentLowNotify(null);
-				dms.setPixelCurrentHighNotify(null);
-				return new SkylineStatus();
+				// Ignore; only LEDSTAR has these objects
+				return null;
 			}
 			logQuery(potBase);
 			logQuery(low);
@@ -515,15 +514,16 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(sensor);
 			try {
 				mess.queryProps();
-				logQuery(power);
-				logQuery(sensor);
-				dms.setPowerStatus(power.getPowerStatus());
-				if (power.isCritical())
-					setErrorStatus("POWER");
 			}
 			catch (NoSuchName e) {
 				// Ignore; only Skyline has these objects
+				return null;
 			}
+			logQuery(power);
+			logQuery(sensor);
+			dms.setPowerStatus(power.getPowerStatus());
+			if (power.isCritical())
+				setErrorStatus("POWER");
 			return null;
 		}
 	}

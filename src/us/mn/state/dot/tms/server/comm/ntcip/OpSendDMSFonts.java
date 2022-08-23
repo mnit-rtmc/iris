@@ -113,13 +113,9 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase phaseTwo() {
-		if (isAmericanSignal()) {
-			// American Signal signs have a
-			// hard-coded font table, so stop
-			// Op here for those signs.
-			return null;
-		}
-		return new Query1203Version();
+		// American Signal signs have a hard-coded font table,
+		// so stop Op here for those signs.
+		return isAmericanSignal() ? null : new Query1203Version();
 	}
 
 	/** Phase to determine the version of NTCIP 1203 (1 or 2) */
@@ -190,15 +186,9 @@ public class OpSendDMSFonts extends OpDMS {
 
 	/** Get the font number for a specified row and number */
 	private int fontNum(int row, int f_num) {
+		// Some ADDCO signs flake out if the font *number*
+		// is greater than numFonts (typically 4).
 		return isAddco() ? row : f_num;
-	}
-
-	/** Check if DMS make is ADDCO.  Some ADDCO signs flake out if
-	 * the font *number* is greater than numFonts (typically 4). */
-	private boolean isAddco() {
-		SignDetail sd = dms.getSignDetail();
-		String make = (sd != null) ? sd.getSoftwareMake() : null;
-		return (make != null) && make.startsWith("ADDCO");
 	}
 
 	/** Add a row to font rows mapping.
@@ -268,6 +258,35 @@ public class OpSendDMSFonts extends OpDMS {
 			abortUpload(new FontRow(f), "Table full");
 	}
 
+	/** Get the default phase or next font phase */
+	private Phase defaultOrNextFontPhase(FontRow frow) {
+		if (DMSHelper.getDefaultFont(dms) == frow.font) {
+			if (addcoFontIssue(frow.f_num))
+				logError("Invalid default font (older Addco)");
+			else
+				return new SetDefaultFont(frow);
+		}
+		return nextFontPhase();
+	}
+
+	/** Detect if the sign config indicates the ADDCO default font issue is
+	 * present.
+	 *
+	 * The issue causes the DMS to go into an invalid state if the default
+	 * font is set to anything other than 1 or 2.  When this happens, all
+	 * new messages are rejected as invalid with no corresponding error
+	 * description.
+	 *
+	 * @return True if the DMS is affected by this issue */
+	private boolean addcoFontIssue(int fnum) {
+		return fnum > 2 && isAddco() && isVersion("3.4.21");
+	}
+
+	/** Determine if the firmware version matches a given value */
+	private boolean isVersion(String version) {
+		return getVersion().contains(version);
+	}
+
 	/** Get the first phase of the next font */
 	private Phase nextFontPhase() {
 		while (true) {
@@ -312,10 +331,7 @@ public class OpSendDMSFonts extends OpDMS {
 			logQuery(version);
 			if (isVersionIDCorrect(v)) {
 				logError("Font is valid");
-				if (DMSHelper.getDefaultFont(dms) == frow.font)
-					return new SetDefaultFont(frow);
-				else
-					return nextFontPhase();
+				return defaultOrNextFontPhase(frow);
 			} else {
 				if (version2)
 					return new QueryInitialStatus(frow);
@@ -589,7 +605,8 @@ public class OpSendDMSFonts extends OpDMS {
 			logStore(char_bitmap);
 			try {
 				mess.storeProps();
-			} catch (NoSuchName ex) {
+			}
+			catch (NoSuchName ex) {
 				// SESA char matrix V20170904: 
 				// ignore bad characterWidth
 			}
@@ -624,10 +641,7 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.add(height);
 			logStore(height);
 			mess.storeProps();
-			if (DMSHelper.getDefaultFont(dms) == frow.font)
-				return new SetDefaultFont(frow);
-			else
-				return nextFontPhase();
+			return defaultOrNextFontPhase(frow);
 		}
 	}
 
@@ -670,10 +684,7 @@ public class OpSendDMSFonts extends OpDMS {
 			logQuery(status);
 			switch (status.getEnum()) {
 			case readyForUse:
-				if (DMSHelper.getDefaultFont(dms) == frow.font)
-					return new SetDefaultFont(frow);
-				else
-					return nextFontPhase();
+				return defaultOrNextFontPhase(frow);
 			case readyForUseReq:
 				// Daktronics DMS return readyForUseReq instead
 				// of calculatingID for a short time; try again
@@ -703,25 +714,12 @@ public class OpSendDMSFonts extends OpDMS {
 		/** Set the default font number */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			int fnum;
-			if (!DMSHelper.addcoFontIssue(dms))
-				fnum = frow.f_num;
-			else {
-				// Workaround for older Addco signs with
-				// the set default font issue. Font #1
-				// is a built-in 5x7 font.
-				fnum = 1;
-				log("Addco: forced default font to " + fnum);
-			}
+			int fnum = frow.f_num;
 			ASN1Integer dfont = defaultFont.makeInt();
 			dfont.setInteger(fnum);
 			mess.add(dfont);
 			logStore(dfont);
-			try {
-				mess.storeProps();
-			} catch (Exception ex) {
-				log("OpSendDMSFonts.SetDefaultFont: ex=" + ex);
-			}
+			mess.storeProps();
 			return nextFontPhase();
 		}
 	}

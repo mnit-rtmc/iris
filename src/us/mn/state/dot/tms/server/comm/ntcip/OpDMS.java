@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.ControllerHelper;
+import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SignDetail;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -78,14 +80,45 @@ abstract public class OpDMS extends OpNtcip {
 		super.cleanup();
 	}
 
-	/** Check if this is an American Signal sign */
-	public boolean isAmericanSignal() {
-		SignDetail det = dms.getSignDetail();
-		if (det == null)
-			return false;
-		String make = det.getSoftwareMake();
-		if (make == null)
-			return false;
-		return make.equals("American Signal");
+	/** Get the firmware version */
+	protected String getVersion() {
+		return ControllerHelper.getSetup(controller, "version");
+	}
+
+	/** Check if DMS make contains a value.
+	 *
+	 * NOTE: value must be all lower-case */
+	private boolean isMakeContaining(String value) {
+		assert value.equals(value.toLowerCase());
+		SignDetail sd = dms.getSignDetail();
+		String make = (sd != null) ? sd.getSoftwareMake() : null;
+		return (make != null) && make.toLowerCase().contains(value);
+	}
+
+	/** Check if DMS make is ADDCO */
+	protected boolean isAddco() {
+		return isMakeContaining("addco");
+	}
+
+	/** Check if DMS make is American Signal */
+	protected boolean isAmericanSignal() {
+		return isMakeContaining("american signal");
+	}
+
+	/** Check if DMS make is LEDSTAR */
+	protected boolean isLedstar() {
+		return isMakeContaining("ledstar");
+	}
+
+	/** Check if DMS make is Skyline */
+	protected boolean isSkyline() {
+		return isMakeContaining("skyline");
+	}
+
+	/** Check if DMS type is character matrix */
+	protected boolean isCharMatrix() {
+		SignDetail sd = dms.getSignDetail();
+		return (sd != null) &&
+			(sd.getDmsType() == DMSType.VMS_CHAR.ordinal());
 	}
 }
