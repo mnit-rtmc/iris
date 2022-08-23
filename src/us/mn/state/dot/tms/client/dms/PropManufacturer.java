@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignDetail;
@@ -163,8 +164,11 @@ public class PropManufacturer extends IPanel {
 
 	/** Update one attribute on the panel */
 	public void updateAttribute(String a) {
-		if (null == a || a.equals("version"))
-			version_lbl.setText(formatString(dms.getVersion()));
+		if (null == a || a.equals("controller")) {
+			String v = ControllerHelper.getSetup(
+				dms.getController(), "version");
+			version_lbl.setText(formatString(v));
+		}
 		if (null == a || a.equals("ldcPotBase"))
 			pot_base_lbl.setText(formatInt(dms.getLdcPotBase()));
 		if (null == a || a.equals("pixelCurrentLow")) {

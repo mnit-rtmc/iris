@@ -194,7 +194,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			if (m_type.getEnum() == ModuleType.software) {
 				software_make = make.getValue();
 				software_model = model.getValue();
-				dms.setVersionNotify(version.getValue());
+				controller.setVersionNotify(version.getValue());
 			}
 			mod += 1;
 			if (mod <= count)

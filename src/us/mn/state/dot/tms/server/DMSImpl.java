@@ -619,26 +619,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return override_background;
 	}
 
-	/** Software version */
-	private transient String version;
-
-	/** Set the version */
-	public void setVersionNotify(String v) {
-		ControllerImpl c = (ControllerImpl) getController();
-		if (c != null)
-			c.setVersionNotify(v);
-		if (!v.equals(version)) {
-			version = v;
-			notifyAttribute("version");
-		}
-	}
-
-	/** Get the version */
-	@Override
-	public String getVersion() {
-		return version;
-	}
-
 	/** Minimum cabinet temperature */
 	private transient Integer minCabinetTemp;
 
