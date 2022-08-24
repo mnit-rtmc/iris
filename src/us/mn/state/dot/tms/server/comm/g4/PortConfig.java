@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2014  Minnesota Department of Transportation
+ * Copyright (C) 2012-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,13 +42,14 @@ public class PortConfig {
 		POLLED(FLAG_MODE_POLLED),
 		PER_VEHICLE(FLAG_MODE_VEHICLE | FLAG_MODE_POLLED),
 		SPIDER(0);
+
 		private final int flags;
 		private Mode(int f) {
 			flags = f;
 		}
 		static public Mode fromFlags(int f) {
-			for(Mode m: Mode.values()) {
-				if(m.flags == f)
+			for (Mode m: Mode.values()) {
+				if (m.flags == f)
 					return m;
 			}
 			return NORMAL;
@@ -69,9 +70,10 @@ public class PortConfig {
 		B38400,		/* 6 */
 		B57600,		/* 7 */
 		B115200;	/* 8 */
+
 		static public Baud fromOrdinal(int o) {
-			for(Baud b: Baud.values()) {
-				if(b.ordinal() == o)
+			for (Baud b: Baud.values()) {
+				if (b.ordinal() == o)
 					return b;
 			}
 			return INVALID;
@@ -107,9 +109,9 @@ public class PortConfig {
 		port = p;
 		int c = FLAG_HIGH_OCC;
 		c |= m.flags;
-		if(rs4xx)
+		if (rs4xx)
 			c |= FLAG_RS4XX;
-		if(rtscts)
+		if (rtscts)
 			c |= FLAG_RTS_CTS;
 		c |= (baud.ordinal() & MASK_BAUD);
 		config = c;
@@ -132,8 +134,8 @@ public class PortConfig {
 
 	/** Get port type (rs232, rs485 or rs422) */
 	public String getPortType() {
-		if(isRS4xx()) {
-			if(port == 1)
+		if (isRS4xx()) {
+			if (port == 1)
 				return "rs485";
 			else
 				return "rs422";

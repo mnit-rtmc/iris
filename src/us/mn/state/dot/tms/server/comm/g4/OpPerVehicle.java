@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ public class OpPerVehicle extends OpG4 {
 
 	/** Create a new "per vehicle" operation */
 	public OpPerVehicle(ControllerImpl c) {
-		super(PriorityLevel.SHORT_POLL, c);
+		super(PriorityLevel.LONG_POLL, c);
 		setSuccess(false);
 	}
 
