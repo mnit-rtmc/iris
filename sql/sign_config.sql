@@ -1,8 +1,9 @@
+\set ON_ERROR_STOP
+
 -- Normally, IRIS will automatically add sign_config records when communicating
 -- with a new style DMS.  This script can be used to create a sign configuration
 -- for testing purposes if needed before that time.  Before running it, the
 -- VALUES must be adjusted manually for the specific configuration needed.
-\set ON_ERROR_STOP
 
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
