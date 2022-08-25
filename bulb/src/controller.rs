@@ -320,23 +320,17 @@ impl Controller {
 
     /// Get controller model
     fn model(&self) -> Option<&str> {
-        self.setup
-            .as_ref()
-            .and_then(|s| s.model.as_deref())
+        self.setup.as_ref().and_then(|s| s.model.as_deref())
     }
 
     /// Get firmware version
     fn version(&self) -> Option<&str> {
-        self.setup
-            .as_ref()
-            .and_then(|s| s.version.as_deref())
+        self.setup.as_ref().and_then(|s| s.version.as_deref())
     }
 
     /// Get serial number
     fn serial_num(&self) -> Option<&str> {
-        self.setup
-            .as_ref()
-            .and_then(|s| s.serial_num.as_deref())
+        self.setup.as_ref().and_then(|s| s.serial_num.as_deref())
     }
 
     /// Create a button to select the controller
