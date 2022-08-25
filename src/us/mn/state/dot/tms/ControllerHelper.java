@@ -98,9 +98,10 @@ public class ControllerHelper extends BaseHelper {
 
 	/** Get controller setup data */
 	static public String getSetup(Controller ctrl, String key) {
-		if (ctrl != null) {
+		String setup = (ctrl != null) ? ctrl.getSetup() : null;
+		if (setup != null) {
 			try {
-				JSONObject jo = new JSONObject(ctrl.getSetup());
+				JSONObject jo = new JSONObject(setup);
 				return jo.optString(key, "");
 			}
 			catch (JSONException e) {
