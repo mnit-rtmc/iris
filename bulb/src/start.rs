@@ -312,6 +312,18 @@ impl SelectedCard {
             Err(e) => show_toast(&format!("Delete failed: {e}")),
         }
     }
+
+    /// Handle a button click on selected card
+    async fn handle_click(self, attrs: &ButtonAttrs) -> bool {
+        let res = self.res;
+        match res.handle_click(&self.name, &attrs.id).await {
+            Ok(c) => c,
+            Err(e) => {
+                show_toast(&format!("Click failed: {e}"));
+                false
+            }
+        }
+    }
 }
 
 /// Show login form shade
@@ -525,12 +537,12 @@ fn add_click_event_listener(elem: &Element) -> JsResult<()> {
 
 /// Handle a `click` event from a target element
 fn handle_click_ev(target: &Element) {
-    let doc = Doc::get();
     if target.is_instance_of::<HtmlButtonElement>() {
         handle_button_click_ev(target);
     } else if let Some(card) = target.closest(".card").unwrap_throw() {
         if let Some(id) = card.get_attribute("id") {
             if let Some(name) = card.get_attribute("name") {
+                let doc = Doc::get();
                 if let Some(rname) = doc.select_parse::<String>("sb_resource") {
                     let res = Resource::from_name(&rname);
                     spawn_local(click_card(res, id, name));
@@ -577,7 +589,7 @@ async fn handle_button_card(attrs: ButtonAttrs, cs: SelectedCard) {
         _ => {
             if attrs.class_name == "go_link" {
                 go_resource(attrs).await;
-            } else {
+            } else if !cs.handle_click(&attrs).await {
                 console::log_1(
                     &format!("unknown button: {}", &attrs.id).into(),
                 );

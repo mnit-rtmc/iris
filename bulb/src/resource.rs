@@ -196,6 +196,11 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
 
     /// Get changed fields from Edit form
     fn changed_fields(&self) -> String;
+
+    /// Handle click event for a button on the card
+    fn click_changed(&self, _id: &str) -> String {
+        "".into()
+    }
 }
 
 impl Resource {
@@ -593,6 +598,14 @@ impl Resource {
             {status}"
         )
     }
+
+    /// Handle click event for a button owned by the resource
+    pub async fn handle_click(self, name: &str, id: &str) -> Result<bool> {
+        match self {
+            Self::Beacon => handle_click::<Beacon>(self, name, id).await,
+            _ => Ok(false),
+        }
+    }
 }
 
 /// Fetch JSON array and build card list
@@ -654,6 +667,21 @@ async fn fetch_ancillary<C: Card>(view: View, pri: &C) -> Result<C::Ancillary> {
 async fn fetch_changed<C: Card>(res: Resource, name: &str) -> Result<String> {
     let pri = res.fetch_primary::<C>(name).await?;
     Ok(pri.changed_fields())
+}
+
+/// Handle click event for a button on a card
+async fn handle_click<C: Card>(
+    res: Resource,
+    name: &str,
+    id: &str,
+) -> Result<bool> {
+    let pri = res.fetch_primary::<C>(name).await?;
+    let changed = pri.click_changed(id);
+    if !changed.is_empty() {
+        let uri = res.uri_name(name);
+        fetch_patch(&uri, &changed.into()).await?;
+    }
+    Ok(true)
 }
 
 /// Fetch a card view

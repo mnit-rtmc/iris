@@ -42,6 +42,10 @@ impl fmt::Display for Beacon {
     }
 }
 
+/// Flashing state class names
+const CLASS_FLASHING: &str = "flashing";
+const CLASS_NOT_FLASHING: &str = "not-flashing";
+
 impl Beacon {
     pub const RESOURCE_N: &'static str = "beacon";
 
@@ -74,9 +78,9 @@ impl Beacon {
         let item_state = self.item_state(anc);
         let item_desc = item_state.description();
         let flashing = if self.flashing {
-            "flashing"
+            CLASS_FLASHING
         } else {
-            "not-flashing"
+            CLASS_NOT_FLASHING
         };
         let message = HtmlStr::new(&self.message);
         let mut status = format!(
@@ -196,5 +200,16 @@ impl Card for Beacon {
         fields.changed_input("pin", self.pin);
         fields.changed_input("verify_pin", self.verify_pin);
         fields.into_value().to_string()
+    }
+
+    /// Handle click event for a button on the card
+    fn click_changed(&self, id: &str) -> String {
+        if id == "ob_flashing" {
+            let mut fields = Fields::new();
+            fields.insert_bool("flashing", !self.flashing);
+            fields.into_value().to_string()
+        } else {
+            "".into()
+        }
     }
 }
