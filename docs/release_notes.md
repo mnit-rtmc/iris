@@ -1,5 +1,16 @@
 # IRIS 5.x Release Notes
 
+5.33.0 (26 Aug 2022)
+ - Continue web UI development (beacon control)
+ - Expanded ntcip RWIS support (temp, radiation, surface, sub-surface, etc.)
+ - Fixed DMS graphic transparency problems
+ - Added support for more Control-By-Web models
+ - Improved compatibility with Americal Signal and Wanco ntcip signs
+ - Fixed natch vehicle event logging
+ - Replaced controller table "version" with "setup" (JSONB)
+ - Added optional "model" and "serial\_num" to "setup" JSON
+ - Fixed a few obscure bugs and exceptions
+
 5.32.0 (11 Apr 2022)
  - Added all controller IO cards to web UI
  - Added "Config" toggle button to web UI
@@ -47,7 +58,7 @@
  - Improved DMS font scripts
  - honeybee: Add `roadway` and `road_dir` to `camera_pub` JSON
 
-5.26.0 (7 Dev 2021)
+5.26.0 (7 Dec 2021)
  - Added [exit backup](exit_backup.md) DMS action tag
  - Fixed wrongly creating SignText when deploying DMS messages
  - Replaced `_device_io` table with `controller_io`
