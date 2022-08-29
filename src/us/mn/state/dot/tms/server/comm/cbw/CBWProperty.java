@@ -53,12 +53,17 @@ public class CBWProperty extends ControllerProperty {
 		"<serialNumber>([0-9:A-Z_a-z]{2,32})</serialNumber>");
 
 	/** Path and query URI components */
-	private final String path_query;
+	private String path_query;
 
 	/** Get the path + query URI components */
 	@Override
 	public String getPathQuery() {
 		return path_query;
+	}
+
+	/** Set the path + query URI components */
+	public void setPathQuery(String pq) {
+		path_query = pq;
 	}
 
 	/** Create a new CBW relay property */

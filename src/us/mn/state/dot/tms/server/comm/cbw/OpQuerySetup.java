@@ -60,7 +60,7 @@ public class OpQuerySetup extends OpDevice<CBWProperty> {
 				// X-WR-1R12 models respond to "state.xml" with
 				// invalid HTTP; try "stateFull.xml" instead
 				if (INVALID_HTTP.equals(e.getMessage())) {
-					state = new CBWProperty(
+					state.setPathQuery(
 						Model.X_WR_1R12.statePath());
 					mess.queryProps();
 				} else
