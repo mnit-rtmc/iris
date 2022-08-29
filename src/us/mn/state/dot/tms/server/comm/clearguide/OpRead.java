@@ -19,7 +19,6 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.CommLinkImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.CommMessageImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
