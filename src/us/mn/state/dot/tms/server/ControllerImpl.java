@@ -57,17 +57,20 @@ import us.mn.state.dot.tms.server.event.CommEvent;
  */
 public class ControllerImpl extends BaseObjectImpl implements Controller {
 
-	/** Truncate a string to a maximum length, with null checking.
+	/** Trim and truncate a string, with null checking.
 	 * @param value String to be truncated (may be null).
 	 * @param maxlen Maximum length of string (characters).
-	 * @return Truncated string, or null. */
-	static private String truncate(String value, int maxlen) {
+	 * @return Trimmed, truncated string, or null. */
+	static private String trimTruncate(String value, int maxlen) {
 		if (value != null) {
-			return (value.length() <= maxlen)
-			      ? value
-			      : value.substring(0, maxlen);
-		} else
-			return null;
+			String v = value.trim();
+			if (v.length() > 0) {
+				return (v.length() <= maxlen)
+				      ? v
+				      : v.substring(0, maxlen);
+			}
+		}
+		return null;
 	}
 
 	/** Get comm link impl */
@@ -683,7 +686,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			JSONObject jo = (s != null)
 				? new JSONObject(s)
 				: new JSONObject();
-			jo.put(key, truncate(value, 64));
+			jo.put(key, trimTruncate(value, 64));
 			setSetupNotify(jo.toString());
 		}
 		catch (JSONException e) {
