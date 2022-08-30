@@ -68,9 +68,8 @@ public class OpQuerySetup extends OpDevice<CBWProperty> {
 			}
 			controller.setSetupNotify("model",
 				state.getModel().toString());
-			String sn = state.getSerialNumber();
-			if (sn != null)
-				controller.setSetupNotify("serial_num", sn);
+			controller.setSetupNotify("serial_num",
+				state.getSerialNumber());
 			return null;
 		}
 	}

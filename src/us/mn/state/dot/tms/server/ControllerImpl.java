@@ -48,7 +48,6 @@ import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.FeedPoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.event.CommEvent;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * A controller represents a field device controller.
@@ -57,6 +56,19 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Michael Darter
  */
 public class ControllerImpl extends BaseObjectImpl implements Controller {
+
+	/** Truncate a string to a maximum length, with null checking.
+	 * @param value String to be truncated (may be null).
+	 * @param maxlen Maximum length of string (characters).
+	 * @return Truncated string, or null. */
+	static private String truncate(String value, int maxlen) {
+		if (value != null) {
+			return (value.length() <= maxlen)
+			      ? value
+			      : value.substring(0, maxlen);
+		} else
+			return null;
+	}
 
 	/** Get comm link impl */
 	static private CommLinkImpl commLinkImpl(CommLink cl) {
@@ -671,7 +683,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			JSONObject jo = (s != null)
 				? new JSONObject(s)
 				: new JSONObject();
-			jo.put(key, SString.truncate(value, 64));
+			jo.put(key, truncate(value, 64));
 			setSetupNotify(jo.toString());
 		}
 		catch (JSONException e) {
