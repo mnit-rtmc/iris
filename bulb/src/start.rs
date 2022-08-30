@@ -28,10 +28,6 @@ use web_sys::{
 /// JavaScript result
 pub type JsResult<T> = std::result::Result<T, JsValue>;
 
-/// Set global allocator to `wee_alloc`
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
 /// Page sidebar
 const SIDEBAR: &str = include_str!("sidebar.html");
 
