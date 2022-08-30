@@ -115,6 +115,11 @@ public class SensorInfoProperty extends G4Property {
 	/** Reserved data */
 	private int reserved;
 
+	/** Get the model */
+	public String getModel() {
+		return HexString.format(model, 2);
+	}
+
 	/** Get the version (for controller version property). */
 	public String getVersion() {
 		return "mcu:" + mcu_rev + '-' + mcu_build + ",fpga:" + fpga_rel;

@@ -80,6 +80,8 @@ public class OpSendSensorSettings extends OpG4 {
 			mess.add(sensor_info);
 			mess.queryProps();
 			controller.setVersionNotify(sensor_info.getVersion());
+			controller.setSetupNotify("model",
+				sensor_info.getModel());
 			controller.setSetupNotify("serial_num",
 				sensor_info.getSerialNum());
 			return new QuerySetupInfo();
