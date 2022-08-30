@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2015  Minnesota Department of Transportation
+ * Copyright (C) 2012-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
+import us.mn.state.dot.tms.utils.HexString;
 
 /**
  * Sensor information property contains firmware version, serial no., etc.
@@ -116,8 +117,12 @@ public class SensorInfoProperty extends G4Property {
 
 	/** Get the version (for controller version property). */
 	public String getVersion() {
-		return "mcu:" + mcu_rev + '-' + mcu_build +
-		       " fpga:" + fpga_rel + " ser#:" + serial_no;
+		return "mcu:" + mcu_rev + '-' + mcu_build + ",fpga:" + fpga_rel;
+	}
+
+	/** Get the serial number */
+	public String getSerialNum() {
+		return HexString.format(serial_no, 4);
 	}
 
 	/** Parse sensor information data */

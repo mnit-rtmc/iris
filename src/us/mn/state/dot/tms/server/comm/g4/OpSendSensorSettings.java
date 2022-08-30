@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,6 +80,8 @@ public class OpSendSensorSettings extends OpG4 {
 			mess.add(sensor_info);
 			mess.queryProps();
 			controller.setVersionNotify(sensor_info.getVersion());
+			controller.setSetupNotify("serial_num",
+				sensor_info.getSerialNum());
 			return new QuerySetupInfo();
 		}
 	}
