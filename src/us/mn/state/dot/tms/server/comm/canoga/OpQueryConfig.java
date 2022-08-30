@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2016  Minnesota Department of Transportation
+ * Copyright (C) 2006-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,8 +79,9 @@ public class OpQueryConfig extends OpCanoga {
 	@Override
 	public void cleanup() {
 		if (isSuccess()) {
-			controller.setVersionNotify(version.getValue() + " (" +
-				serial_number.getValue() + ")");
+			controller.setVersionNotify(version.getValue());
+			controller.setSetupNotify("serial_num",
+				serial_number.getValue());
 		}
 		super.cleanup();
 	}
