@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ss125;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
+import us.mn.state.dot.tms.utils.HexString;
 
 /**
  * Version Property.
@@ -30,15 +31,17 @@ public class VersionProperty extends SS125Property {
 	}
 
 	/** Format a QUERY request */
-	@Override protected byte[] formatQuery() throws IOException {
+	@Override
+	protected byte[] formatQuery() throws IOException {
 		byte[] body = new byte[4];
 		formatBody(body, MessageType.READ);
 		return body;
 	}
 
 	/** Parse a QUERY response */
-	@Override protected void parseQuery(byte[] rbody) throws IOException {
-		if(rbody.length != 20)
+	@Override
+	protected void parseQuery(byte[] rbody) throws IOException {
+		if (rbody.length != 20)
 			throw new ParsingException("BODY LENGTH");
 		digital = parse32(rbody, 3);
 		algorithm = parse32(rbody, 7);
@@ -80,20 +83,21 @@ public class VersionProperty extends SS125Property {
 
 	/** Get the DSP firmware version */
 	public String getVersion() {
-		return Integer.toHexString(getDigital());
+		return HexString.format(getDigital(), 8);
 	}
 
 	/** Get a string representation of the property */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("digital:");
-		sb.append(Integer.toHexString(getDigital()));
-		sb.append(" algorithm:");
-		sb.append(Integer.toHexString(getAlgorithm()));
-		sb.append(" fpga:");
-		sb.append(Integer.toHexString(getFpga()));
-		sb.append(" fpaa:");
-		sb.append(Integer.toHexString(getFpaa()));
+		sb.append(HexString.format(getDigital(), 8));
+		sb.append(",algorithm:");
+		sb.append(HexString.format(getAlgorithm(), 8));
+		sb.append(",fpga:");
+		sb.append(HexString.format(getFpga(), 8));
+		sb.append(",fpaa:");
+		sb.append(HexString.format(getFpaa(), 8));
 		return sb.toString();
 	}
 }
