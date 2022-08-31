@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,14 +29,49 @@ public enum MIB1201 {
 	transportation			(nema, 4),
 	devices				(transportation, 2),
 	global				(devices, 6),
-	globalConfiguration		(global, 1),
-	globalMaxModules		(globalConfiguration, 2),
-	globalModuleTable		(globalConfiguration, 3),
-	  moduleTableEntry		(globalModuleTable, 1),
-	    moduleMake			(moduleTableEntry, 3),
-	    moduleModel			(moduleTableEntry, 4),
-	    moduleVersion		(moduleTableEntry, 5),
-	    moduleType			(moduleTableEntry, 6);
+	  globalConfiguration		(global, 1),
+	    globalSetIDParameter	(globalConfiguration, 1),
+	    globalMaxModules		(globalConfiguration, 2),
+	    globalModuleTable		(globalConfiguration, 3),
+	      moduleTableEntry		(globalModuleTable, 1),
+	        moduleNumber		(moduleTableEntry, 1),
+	        moduleDeviceNode	(moduleTableEntry, 2),
+	        moduleMake		(moduleTableEntry, 3),
+	        moduleModel		(moduleTableEntry, 4),
+	        moduleVersion		(moduleTableEntry, 5),
+	        moduleType		(moduleTableEntry, 6),
+	    controllerBaseStandards	(globalConfiguration, 4),
+	  globalDBManagement		(global, 2),
+	    dbCreateTransaction		(globalDBManagement, 1),
+	    dbErrorType			(globalDBManagement, 2), // deprecated
+	    dbErrorID			(globalDBManagement, 3), // deprecated
+	    dbTransactionID		(globalDBManagement, 4), // deprecated
+	    dbMakeID			(globalDBManagement, 5), // deprecated
+	    dbVerifyStatus		(globalDBManagement, 6),
+	    dbVerifyError		(globalDBManagement, 7),
+	  globalTimeManagement		(global, 3),
+	    globalTime			(globalTimeManagement, 1),
+	    globalDaylightSaving	(globalTimeManagement, 2),
+	    timebase			(globalTimeManagement, 3),
+	      maxTimeBaseScheduleEntries	(timebase, 1),
+	      timeBaseScheduleTable		(timebase, 2),
+	        timeBaseScheduleEntry		(timeBaseScheduleTable, 1),
+	          timeBaseScheduleNumber	(timeBaseScheduleEntry, 1),
+	          timeBaseScheduleMonth		(timeBaseScheduleEntry, 2),
+	          timeBaseScheduleDay		(timeBaseScheduleEntry, 3),
+	          timeBaseScheduleDate		(timeBaseScheduleEntry, 4),
+	          timeBaseScheduleDayPlan	(timeBaseScheduleEntry, 5),
+	      maxDayPlans			(timebase, 3),
+	      maxDayPlanEvents			(timebase, 4),
+	      timeBaseDayPlanTable		(timebase, 5),
+	        timeBaseDayPlanEntry		(timeBaseDayPlanTable, 1),
+	          dayPlanNumber			(timeBaseDayPlanEntry, 1),
+	          dayPlanEventNumber		(timeBaseDayPlanEntry, 2),
+	          dayPlanHour			(timeBaseDayPlanEntry, 3),
+	          dayPlanMinute			(timeBaseDayPlanEntry, 4),
+	          dayPlanActionNumberOID	(timeBaseDayPlanEntry, 5),
+	      dayPlanStatus			(timebase, 6),
+	      timeBaseScheduleTableStatus	(timebase, 7);
 
 	/** MIB node */
 	public final MIBNode node;
