@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,19 +94,19 @@ public class OpSendSensorSettings extends OpSS125 {
 		{
 			mess.add(gen_config);
 			mess.queryProps();
-			if (shouldUpdateGenConfig())
-				return new StoreGenConfig();
-			else
-				return new QueryDataConfig();
+			controller.setSetupNotify("serial_num",
+				gen_config.getSerialNumber());
+			return shouldUpdateGenConfig()
+				? new StoreGenConfig()
+				: new QueryDataConfig();
 		}
 	}
 
 	/** Check if the general config should be updated */
 	private boolean shouldUpdateGenConfig() {
 		String loc = ControllerHelper.getLocation(controller);
-		if (!loc.equals(gen_config.getLocation()))
-			return true;
-		return gen_config.isMetric();
+		return (!loc.equals(gen_config.getLocation())) ||
+			gen_config.isMetric();
 	}
 
 	/** Phase to store the general config */
@@ -135,10 +135,9 @@ public class OpSendSensorSettings extends OpSS125 {
 		{
 			mess.add(data_config);
 			mess.queryProps();
-			if (shouldUpdateDataConfig())
-				return new StoreDataConfig();
-			else
-				return new QueryClassConfig();
+			return shouldUpdateDataConfig()
+				? new StoreDataConfig()
+				: new QueryClassConfig();
 		}
 	}
 
@@ -187,10 +186,9 @@ public class OpSendSensorSettings extends OpSS125 {
 		{
 			mess.add(class_config);
 			mess.queryProps();
-			if (shouldUpdateClassConfig())
-				return new StoreClassConfig();
-			else
-				return new QueryDateTime();
+			return shouldUpdateClassConfig()
+				? new StoreClassConfig()
+				: new QueryDateTime();
 		}
 	}
 
@@ -235,15 +233,15 @@ public class OpSendSensorSettings extends OpSS125 {
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
 			mess.queryProps();
-			if(shouldUpdateDateTime(date_time.getStamp().getTime()))
-				return new SendDateTime();
-			else
-				return configDonePhase();
+			return shouldUpdateDateTime(date_time)
+				? new SendDateTime()
+				: configDonePhase();
 		}
 	}
 
 	/** Check if the date / time should be updated */
-	protected boolean shouldUpdateDateTime(long stamp) {
+	private boolean shouldUpdateDateTime(DateTimeProperty date_time) {
+		long stamp = date_time.getStamp().getTime();
 		long now = TimeSteward.currentTimeMillis();
 		return stamp < (now - TIME_THRESHOLD) ||
 		       stamp > (now + TIME_THRESHOLD);
@@ -264,11 +262,8 @@ public class OpSendSensorSettings extends OpSS125 {
 	}
 
 	/** Phase after configuration is done */
-	protected Phase<SS125Property> configDonePhase() {
-		if (config_updated)
-			return new StoreConfigFlash();
-		else
-			return null;
+	private Phase<SS125Property> configDonePhase() {
+		return config_updated ? new StoreConfigFlash() : null;
 	}
 
 	/** Phase to store config to flash */

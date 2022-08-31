@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ public class GeneralConfigProperty extends SS125Property {
 	/** Parse a QUERY response */
 	@Override
 	protected void parseQuery(byte[] body) throws IOException {
-		if(body.length != 87)
+		if (body.length != 87)
 			throw new ParsingException("BODY LENGTH");
 		orientation = parseString(body, 3, 2);
 		location = parseString(body, 5, 32);
