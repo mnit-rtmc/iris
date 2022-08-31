@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2020  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -79,8 +79,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	private enum DeviceType {
 		Alarm, Camera, Detector, DMS, Flow_Stream, Gate_Arm, Gps,
 		Lane_Marking, LCSIndication, Ramp_Meter, Beacon,
-		Beacon_Verify, Video_Monitor, Weather_Sensor,
-		Tag_Reader
+		Video_Monitor, Weather_Sensor, Tag_Reader
 	}
 
 	/** Types of IO devices */
@@ -99,7 +98,6 @@ public class ControllerIOModel extends AbstractTableModel {
 		IO_TYPE.add(DeviceType.LCSIndication);
 		IO_TYPE.add(DeviceType.Ramp_Meter);
 		IO_TYPE.add(DeviceType.Beacon);
-		IO_TYPE.add(DeviceType.Beacon_Verify);
 		IO_TYPE.add(DeviceType.Video_Monitor);
 		IO_TYPE.add(DeviceType.Weather_Sensor);
 		IO_TYPE.add(DeviceType.Tag_Reader);
@@ -204,9 +202,6 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Controller IO list for beacons */
 	private final ControllerIOList b_list;
 
-	/** Beacon verify list */
-	private final BeaconVerifyList bv_list;
-
 	/** Controller IO list for weather sensors */
 	private final ControllerIOList wsensor_list;
 
@@ -248,7 +243,6 @@ public class ControllerIOModel extends AbstractTableModel {
 		v_list = new ControllerIOList(
 			state.getCamCache().getVideoMonitors());
 		b_list = new ControllerIOList(state.getBeacons());
-		bv_list = new BeaconVerifyList(state.getBeacons());
 		wsensor_list = new ControllerIOList(state.getWeatherSensors());
 		tr_list = new ControllerIOList(state.getTagReaders());
 	}
@@ -277,23 +271,6 @@ public class ControllerIOModel extends AbstractTableModel {
 		}
 	}
 
-	/** Beacon verify list model */
-	private class BeaconVerifyList extends ControllerIOList<Beacon> {
-		private BeaconVerifyList(TypeCache<Beacon> c) {
-			super(c);
-		}
-		@Override
-		protected boolean check(Beacon b) {
-			addVerifyIO(b);
-			return b.getController() != null
-			    && b.getVerifyPin() == null;
-		}
-		@Override
-		protected void checkRemove(Beacon b) {
-			removeVerifyIO(b);
-		}
-	}
-
 	/** Initialize the model */
 	public void initialize() {
 		a_list.initialize();
@@ -308,7 +285,6 @@ public class ControllerIOModel extends AbstractTableModel {
 		m_list.initialize();
 		v_list.initialize();
 		b_list.initialize();
-		bv_list.initialize();
 		wsensor_list.initialize();
 		tr_list.initialize();
 	}
@@ -327,7 +303,6 @@ public class ControllerIOModel extends AbstractTableModel {
 		m_list.dispose();
 		v_list.dispose();
 		b_list.dispose();
-		bv_list.dispose();
 		wsensor_list.dispose();
 		tr_list.dispose();
 	}
@@ -413,13 +388,9 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Set the device */
 	private void setDevice(int pin, Object value) {
 		DeviceType io_type = types[pin];
-		if (io_type == DeviceType.Beacon_Verify)
-			setBeaconVerifyIO(pin, value);
-		else {
-			clearDevice(pin);
-			if (value instanceof ControllerIO)
-				setDeviceIO(pin, (ControllerIO) value);
-		}
+		clearDevice(pin);
+		if (value instanceof ControllerIO)
+			setDeviceIO(pin, (ControllerIO) value);
 	}
 
 	/** Set the device IO */
@@ -432,32 +403,8 @@ public class ControllerIOModel extends AbstractTableModel {
 	private void clearDevice(int pin) {
 		ControllerIO cio = io[pin];
 		DeviceType io_type = types[pin];
-		if (cio != null && io_type != DeviceType.Beacon_Verify)
+		if (cio != null)
 			cio.setController(null);
-		if (cio instanceof Beacon) {
-			Beacon bio = (Beacon) cio;
-			bio.setVerifyPin(null);
-		}
-	}
-
-	/** Set a beacon verify device */
-	private void setBeaconVerifyIO(int pin, Object value) {
-		if (value instanceof Beacon) {
-			Beacon bio = (Beacon) value;
-			bio.setVerifyPin(pin);
-		} else
-			clearVerifies();
-	}
-
-	/** Clear verifies */
-	private void clearVerifies() {
-		for (int pin = 1; pin < io.length; pin++) {
-			ControllerIO cio = io[pin];
-			if (cio instanceof Beacon) {
-				Beacon bio = (Beacon) cio;
-				bio.setVerifyPin(null);
-			}
-		}
 	}
 
 	/** Create the pin column */
@@ -534,8 +481,6 @@ public class ControllerIOModel extends AbstractTableModel {
 			return v_list;
 		case Beacon:
 			return b_list;
-		case Beacon_Verify:
-			return bv_list;
 		case Weather_Sensor:
 			return wsensor_list;
 		case Tag_Reader:
@@ -597,26 +542,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Remove an IO from a pin on the controller */
 	private void removeIO(ControllerIO p) {
 		for (int pin = 1; pin < io.length; pin++) {
-			if (io[pin] == p &&
-			    types[pin] != DeviceType.Beacon_Verify)
-				updatePin(pin, null, null);
-		}
-	}
-
-	/** Add a beacon verify to a pin on the controller */
-	private void addVerifyIO(Beacon b) {
-		if (b.getController() == controller) {
-			Integer vp = b.getVerifyPin();
-			if (vp != null)
-				updatePin(vp, b, DeviceType.Beacon_Verify);
-		}
-	}
-
-	/** Remove a beacon verify from a pin on the controller */
-	private void removeVerifyIO(ControllerIO p) {
-		for (int pin = 1; pin < io.length; pin++) {
-			if (io[pin] == p &&
-			    types[pin] == DeviceType.Beacon_Verify)
+			if (io[pin] == p)
 				updatePin(pin, null, null);
 		}
 	}

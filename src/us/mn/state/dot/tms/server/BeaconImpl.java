@@ -113,48 +113,12 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		initTransients();
 	}
 
-	/** Initialize transients */
-	@Override
-	public void initTransients() {
-		ControllerImpl c = controller;
-		Integer vp = verify_pin;
-		if (c != null && vp != null)
-			c.setIO(vp, this);
-		super.initTransients();
-	}
-
 	/** Destroy an object */
 	@Override
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
 		setPreset(null);
 		geo_loc.notifyRemove();
-	}
-
-	/** Set the controller of the beacon */
-	@Override
-	protected void doSetControllerImpl(ControllerImpl c)
-		throws TMSException
-	{
-		ControllerImpl oc = controller;
-		Integer vp = verify_pin;
-		checkControllerPin(c, vp);
-		super.doSetControllerImpl(c);
-		updateVerifyPin(oc, vp, c, vp);
-	}
-
-	/** Update the controller verify pin.
-	 * @param oc Old controller.
-	 * @param op Old verify pin.
-	 * @param nc New controller.
-	 * @param np New verify pin. */
-	private void updateVerifyPin(ControllerImpl oc, Integer op,
-		ControllerImpl nc, Integer np)
-	{
-		if (oc != null && op != null)
-			oc.setIO(op, null);
-		if (nc != null && np != null)
-			nc.setIO(np, this);
 	}
 
 	/** Calculate the item styles */
@@ -253,9 +217,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	/** Set the controller I/O verify pin number */
 	public void doSetVerifyPin(Integer p) throws TMSException {
 		if (!objectEquals(p, verify_pin)) {
-			checkControllerPin(controller, p);
 			store.update(this, "verify_pin", p);
-			updateVerifyPin(controller, verify_pin, controller, p);
 			setVerifyPin(p);
 		}
 	}
