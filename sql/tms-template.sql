@@ -160,7 +160,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.33.0
+database_version	5.34.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
@@ -561,7 +561,7 @@ PRV_0019	base_policy	road		t
 PRV_001B	base_policy	road_affix		t
 PRV_0020	base_policy	system_attribute		t
 PRV_0021	beacon_admin	beacon		t
-PRV_0022	beacon_control	beacon	flashing	t
+PRV_0022	beacon_control	beacon	state	t
 PRV_0023	beacon_tab	beacon		f
 PRV_0024	camera_admin	camera		t
 PRV_002A	camera_admin	encoder_stream		t
@@ -2078,13 +2078,28 @@ GRANT SELECT ON alarm_event_view TO PUBLIC;
 --
 -- Beacons
 --
+CREATE TABLE iris.beacon_state (
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(16) NOT NULL
+);
+
+COPY iris.beacon_state (id, description) FROM stdin;
+0	Unknown
+1	Dark Req
+2	Dark
+3	Flashing Req
+4	Flashing
+5	Fault: No Verify
+6	Fault: Stuck On
+\.
+
 CREATE TABLE iris._beacon (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
     message VARCHAR(128) NOT NULL,
     notes VARCHAR(128) NOT NULL,
     verify_pin INTEGER,
-    flashing BOOLEAN NOT NULL
+    state INTEGER NOT NULL REFERENCES iris.beacon_state
 );
 
 ALTER TABLE iris._beacon ADD CONSTRAINT _beacon_fkey
@@ -2093,8 +2108,8 @@ ALTER TABLE iris._beacon ADD CONSTRAINT _beacon_fkey
 CREATE FUNCTION iris.beacon_notify() RETURNS TRIGGER AS
     $beacon_notify$
 BEGIN
-    IF (NEW.flashing IS DISTINCT FROM OLD.flashing) THEN
-        NOTIFY beacon, 'flashing';
+    IF (NEW.state IS DISTINCT FROM OLD.state) THEN
+        NOTIFY beacon, 'state';
     ELSE
         NOTIFY beacon;
     END IF;
@@ -2112,7 +2127,7 @@ CREATE TRIGGER beacon_table_notify_trig
 
 CREATE VIEW iris.beacon AS
     SELECT b.name, geo_loc, controller, pin, notes, message, verify_pin, preset,
-           flashing
+           state
     FROM iris._beacon b
     JOIN iris.controller_io cio ON b.name = cio.name
     JOIN iris._device_preset p ON b.name = p.name;
@@ -2124,10 +2139,9 @@ BEGIN
         VALUES (NEW.name, 'beacon', NEW.controller, NEW.pin);
     INSERT INTO iris._device_preset (name, preset)
         VALUES (NEW.name, NEW.preset);
-    INSERT INTO iris._beacon (name, geo_loc, notes, message, verify_pin,
-                              flashing)
+    INSERT INTO iris._beacon (name, geo_loc, notes, message, verify_pin, state)
         VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message,
-                NEW.verify_pin, NEW.flashing);
+                NEW.verify_pin, NEW.state);
     RETURN NEW;
 END;
 $beacon_insert$ LANGUAGE plpgsql;
@@ -2151,7 +2165,7 @@ BEGIN
            notes = NEW.notes,
            message = NEW.message,
            verify_pin = NEW.verify_pin,
-           flashing = NEW.flashing
+           state = NEW.state
      WHERE name = OLD.name;
     RETURN NEW;
 END;
@@ -2170,34 +2184,32 @@ CREATE VIEW beacon_view AS
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            l.landmark, l.lat, l.lon, l.corridor, l.location,
            b.controller, b.pin, b.verify_pin, ctr.comm_link, ctr.drop_id,
-           ctr.condition, flashing
+           ctr.condition, bs.description AS state
     FROM iris.beacon b
+    JOIN iris.beacon_state bs ON b.state = bs.id
     LEFT JOIN iris.camera_preset p ON b.preset = p.name
     LEFT JOIN geo_loc_view l ON b.geo_loc = l.name
     LEFT JOIN controller_view ctr ON b.controller = ctr.name;
 GRANT SELECT ON beacon_view TO PUBLIC;
 
 CREATE TABLE iris.beacon_action (
-	name VARCHAR(30) PRIMARY KEY,
-	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	beacon VARCHAR(20) NOT NULL REFERENCES iris._beacon,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+    name VARCHAR(30) PRIMARY KEY,
+    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+    beacon VARCHAR(20) NOT NULL REFERENCES iris._beacon,
+    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 CREATE TABLE event.beacon_event (
-	event_id SERIAL PRIMARY KEY,
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	beacon VARCHAR(20) NOT NULL REFERENCES iris._beacon
-		ON DELETE CASCADE
+    event_id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone NOT NULL,
+    beacon VARCHAR(20) NOT NULL REFERENCES iris._beacon ON DELETE CASCADE,
+    state INTEGER NOT NULL REFERENCES iris.beacon_state
 );
 
 CREATE VIEW beacon_event_view AS
-	SELECT event_id, event_date, event_description.description, beacon
-	FROM event.beacon_event
-	JOIN event.event_description
-	ON beacon_event.event_desc_id = event_description.event_desc_id;
+    SELECT event_id, event_date, beacon, bs.description AS state
+    FROM event.beacon_event be
+    JOIN iris.beacon_state bs ON be.state = bs.id;
 GRANT SELECT ON beacon_event_view TO PUBLIC;
 
 --

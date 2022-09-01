@@ -48,9 +48,9 @@ public interface Beacon extends Device {
 	 * verify circuit. */
 	Integer getVerifyPin();
 
-	/** Set the flashing state of the beacon */
-	void setFlashing(boolean f);
+	/** Set beacon state request (ordinal of BeaconState) */
+	void setState(int bs);
 
-	/** Check if the beacon is flashing */
-	boolean getFlashing();
+	/** Get beacon state (ordinal of BeaconState) */
+	int getState();
 }

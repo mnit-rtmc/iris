@@ -31,6 +31,7 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
@@ -456,7 +457,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		Beacon b = beacon;
 		if (b != null) {
 			boolean f = isOnline() && isMsgBeacon();
-			b.setFlashing(f);
+			BeaconState bs = (f)
+				? BeaconState.FLASHING_REQ
+				: BeaconState.DARK_REQ;
+			b.setState(bs.ordinal());
 		}
 	}
 

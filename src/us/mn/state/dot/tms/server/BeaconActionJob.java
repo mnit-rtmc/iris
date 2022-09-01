@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.BeaconActionHelper;
+import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.PlanPhase;
 
 /**
@@ -49,7 +50,11 @@ public class BeaconActionJob extends Job {
 	/** Perform a beacon action */
 	private void performBeaconAction(BeaconAction ba, PlanPhase phase) {
 		Beacon b = ba.getBeacon();
-		if (b != null)
-			b.setFlashing(phase == ba.getPhase());
+		if (b != null) {
+			BeaconState bs = (phase == ba.getPhase())
+				? BeaconState.FLASHING_REQ
+				: BeaconState.DARK_REQ;
+			b.setState(bs.ordinal());
+		}
 	}
 }

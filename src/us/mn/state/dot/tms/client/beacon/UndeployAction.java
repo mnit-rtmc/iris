@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2016  Minnesota Department of Transportation
+ * Copyright (C) 2004-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.beacon;
 
 import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.IAction;
 
@@ -39,7 +40,7 @@ public class UndeployAction extends IAction {
 	@Override
 	protected void doActionPerformed(ActionEvent e) {
 		for (Beacon b: sel_mdl.getSelected())
-			b.setFlashing(false);
+			b.setState(BeaconState.DARK_REQ.ordinal());
 		sel_mdl.clearSelection();
 	}
 }

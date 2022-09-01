@@ -20,7 +20,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.CameraPreset;
+import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
@@ -41,7 +43,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, BeaconImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"preset, message, verify_pin, flashing FROM iris." +
+			"preset, message, verify_pin, state FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -62,7 +64,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		map.put("preset", preset);
 		map.put("message", message);
 		map.put("verify_pin", verify_pin);
-		map.put("flashing", flashing);
+		map.put("state", state);
 		return map;
 	}
 
@@ -96,20 +98,20 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		     row.getString(6),           // preset
 		     row.getString(7),           // message
 		     (Integer) row.getObject(8), // verify_pin
-		     row.getBoolean(9)           // flashing
+		     row.getInt(9)               // state
 		);
 	}
 
 	/** Create a beacon */
 	private BeaconImpl(String n, String l, String c, int p, String nt,
-		String cp, String m, Integer vp, boolean f)
+		String cp, String m, Integer vp, int bs)
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(l);
 		setPreset(lookupPreset(cp));
 		message = m;
 		verify_pin = vp;
-		flashing = f;
+		state = bs;
 		initTransients();
 	}
 
@@ -133,12 +135,13 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	/** Test if beacon is available */
 	@Override
 	protected boolean isAvailable() {
-		return super.isAvailable() && !getFlashing();
+		return super.isAvailable() && 
+			state == BeaconState.DARK.ordinal();
 	}
 
 	/** Test if beacon is deployed */
 	private boolean isDeployed() {
-		return isOnline() && getFlashing();
+		return isOnline() && state == BeaconState.FLASHING.ordinal();
 	}
 
 	/** Device location */
@@ -228,45 +231,71 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		return verify_pin;
 	}
 
-	/** Flashing state */
-	private boolean flashing;
+	/** Beacon state */
+	private int state;
 
-	/** Set the flashing state */
+	/** Set beacon state request (ordinal of BeaconState) */
 	@Override
-	public void setFlashing(boolean f) {
+	public void setState(int bs) {
+		if (bs != BeaconState.DARK_REQ.ordinal() &&
+		    bs != BeaconState.FLASHING_REQ.ordinal())
+		{
+			logError("INVALID beacon req state: " + bs);
+		}
 		BeaconPoller p = getBeaconPoller();
-		if (p != null)
-			p.setFlashing(this, f);
+		if (p != null) {
+			BeaconState s = BeaconState.fromOrdinal(bs);
+			p.setFlashing(this, BeaconState.FLASHING_REQ == s);
+		} else
+			setStateNotify(BeaconState.UNKNOWN);
 	}
 
-	/** Check if the beacon is flashing */
-	@Override
-	public boolean getFlashing() {
-		return flashing;
+	/** Set beacon state request (ordinal of BeaconState) */
+	public void doSetState(int bs) throws TMSException {
+		switch (BeaconState.fromOrdinal(bs)) {
+			case DARK_REQ:
+			case FLASHING_REQ:
+				setState(bs);
+				break;
+			default:
+				throw new ChangeVetoException(
+					"Invalid state request");
+		}
 	}
 
-	/** Set the flashing state and notify clients */
-	public void setFlashingNotify(boolean f) {
-		if (f != flashing) {
+	/** Set the beacon state and notify clients */
+	public void setStateNotify(BeaconState bs) {
+		if (bs.ordinal() != state) {
 			try {
-				store.update(this, "flashing", f);
-				flashing = f;
-				notifyAttribute("flashing");
+				store.update(this, "state", bs.ordinal());
+				state = bs.ordinal();
+				notifyAttribute("state");
 			}
 			catch (TMSException e) {
 				e.printStackTrace();
 			}
-			logBeaconEvent(f);
+			logBeaconEvent(bs);
 			updateStyles();
 		}
 	}
 
+	/** Set the beacon flashing state and notify clients */
+	public void setFlashingNotify(boolean flashing) {
+		BeaconState bs = (flashing)
+			? BeaconState.FLASHING
+			: BeaconState.DARK;
+		setStateNotify(bs);
+	}
+
+	/** Get beacon state (ordinal of BeaconState) */
+	@Override
+	public int getState() {
+		return state;
+	}
+
 	/** Log a beacon event */
-	private void logBeaconEvent(boolean f) {
-		EventType et = (f)
-		             ? EventType.BEACON_ON_EVENT
-		             : EventType.BEACON_OFF_EVENT;
-		logEvent(new BeaconEvent(et, name));
+	private void logBeaconEvent(BeaconState bs) {
+		logEvent(new BeaconEvent(name, bs));
 	}
 
 	/** Get a beacon poller */

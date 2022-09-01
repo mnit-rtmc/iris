@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2021  Minnesota Department of Transportation
+ * Copyright (C) 2014-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,8 @@ package us.mn.state.dot.tms.server.event;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.BeaconState;
+import static us.mn.state.dot.tms.EventType.BEACON_EVENT;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 
@@ -46,20 +47,17 @@ public class BeaconEvent extends BaseEvent {
 		}
 	}
 
-	/** Is the specified event a beacon event? */
-	static private boolean isBeaconEvent(EventType et) {
-		return EventType.BEACON_ON_EVENT == et
-		    || EventType.BEACON_OFF_EVENT == et;
-	}
-
 	/** Beacon ID */
 	private final String beacon;
 
+	/** Beacon state ordinal */
+	private final int state;
+
 	/** Create a new beacon event */
-	public BeaconEvent(EventType et, String bid) {
-		super(et);
-		assert isBeaconEvent(et);
+	public BeaconEvent(String bid, BeaconState bs) {
+		super(BEACON_EVENT);
 		beacon = bid;
+		state = bs.ordinal();
 	}
 
 	/** Get the database table name */
@@ -73,8 +71,8 @@ public class BeaconEvent extends BaseEvent {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("event_date", new Timestamp(event_date.getTime()));
-		map.put("event_desc_id", event_type.id);
 		map.put("beacon", beacon);
+		map.put("state", state);
 		return map;
 	}
 }

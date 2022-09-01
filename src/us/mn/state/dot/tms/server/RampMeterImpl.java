@@ -26,6 +26,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -465,7 +466,10 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		if (b != null) {
 			boolean f = (isOnline() && isMetering())
 			          || isMergeBackedUp();
-			b.setFlashing(f);
+			BeaconState bs = (f)
+				? BeaconState.FLASHING_REQ
+				: BeaconState.DARK_REQ;
+			b.setState(bs.ordinal());
 		}
 	}
 

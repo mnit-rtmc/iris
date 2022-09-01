@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.cbw;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -66,10 +67,27 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 	@Override
 	public void cleanup() {
 		if (isSuccess()) {
-			beacon.setFlashingNotify(getBeaconRelay());
+			beacon.setStateNotify(getState());
 			setMaintStatus(formatMaintStatus());
 		}
 		super.cleanup();
+	}
+
+	/** Get the beacon state */
+	private BeaconState getState() {
+		boolean relay = getBeaconRelay();
+		Integer vp = beacon.getVerifyPin();
+		if (vp != null) {
+			boolean verify = state.getInput(vp);
+			if (relay && !verify)
+				return BeaconState.FAULT_NO_VERIFY;
+			if (verify && !relay)
+				return BeaconState.FAULT_STUCK_ON;
+		}
+		BeaconState bs = (relay)
+			? BeaconState.FLASHING
+			: BeaconState.DARK;
+		return bs;
 	}
 
 	/** Get beacon relay state */
@@ -79,15 +97,10 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 
 	/** Format the maintenance status */
 	private String formatMaintStatus() {
-		Integer vp = beacon.getVerifyPin();
-		if (vp != null) {
-			boolean f = getBeaconRelay();
-			boolean v = state.getInput(vp);
-			if (f && !v)
-				return "Verify failed";
-			if (v && !f)
-				return "Verify stuck";
+		switch (getState()) {
+			case FAULT_NO_VERIFY: return "Verify failed";
+			case FAULT_STUCK_ON: return "Verify stuck";
+			default: return "";
 		}
-		return "";
 	}
 }
