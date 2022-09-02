@@ -32,8 +32,8 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 	/** Beacon device */
 	private final BeaconImpl beacon;
 
-	/** Relay state property */
-	private final CBWProperty state;
+	/** Relay/input state property */
+	private final CBWProperty prop;
 
 	/** Create a new query beacon state operation */
 	public OpQueryBeaconState(BeaconImpl b) {
@@ -41,7 +41,7 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 		beacon = b;
 		String m = ControllerHelper.getSetup(controller, "model");
 		Model mdl = Model.fromValue(m);
-		state = new CBWProperty(mdl.statePath());
+		prop = new CBWProperty(mdl.statePath());
 	}
 
 	/** Create the second phase of the operation */
@@ -57,7 +57,7 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 		protected Phase<CBWProperty> poll(
 			CommMessage<CBWProperty> mess) throws IOException
 		{
-			mess.add(state);
+			mess.add(prop);
 			mess.queryProps();
 			return null;
 		}
@@ -78,7 +78,7 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 		boolean relay = getBeaconRelay();
 		Integer vp = beacon.getVerifyPin();
 		if (vp != null) {
-			boolean verify = state.getInput(vp);
+			boolean verify = prop.getInput(vp);
 			if (relay && !verify)
 				return BeaconState.FAULT_NO_VERIFY;
 			if (verify && !relay)
@@ -92,7 +92,7 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 
 	/** Get beacon relay state */
 	private boolean getBeaconRelay() {
-		return state.getRelay(beacon.getPin());
+		return prop.getRelay(beacon.getPin());
 	}
 
 	/** Format the maintenance status */

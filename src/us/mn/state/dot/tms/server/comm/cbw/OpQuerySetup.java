@@ -50,9 +50,9 @@ public class OpQuerySetup extends OpDevice<CBWProperty> {
 		protected Phase<CBWProperty> poll(
 			CommMessage<CBWProperty> mess) throws IOException
 		{
-			CBWProperty state = new CBWProperty(
+			CBWProperty prop = new CBWProperty(
 				Model.X_301.statePath());
-			mess.add(state);
+			mess.add(prop);
 			try {
 				mess.queryProps();
 			}
@@ -60,16 +60,16 @@ public class OpQuerySetup extends OpDevice<CBWProperty> {
 				// X-WR-1R12 models respond to "state.xml" with
 				// invalid HTTP; try "stateFull.xml" instead
 				if (INVALID_HTTP.equals(e.getMessage())) {
-					state.setPathQuery(
+					prop.setPathQuery(
 						Model.X_WR_1R12.statePath());
 					mess.queryProps();
 				} else
 					throw e;
 			}
 			controller.setSetupNotify("model",
-				state.getModel().toString());
+				prop.getModel().toString());
 			controller.setSetupNotify("serial_num",
-				state.getSerialNumber());
+				prop.getSerialNumber());
 			return null;
 		}
 	}
