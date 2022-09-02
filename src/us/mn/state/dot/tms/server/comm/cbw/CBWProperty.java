@@ -155,8 +155,10 @@ public class CBWProperty extends ControllerProperty {
 		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
 		for (int i = 0; line != null && i < MAX_LINES; i++) {
-			found |= matchRelay(line) || matchInput(line) ||
-				matchSerialNumber(line);
+			// NOTE: entire XML response could be one line
+			found |= matchRelay(line);
+			found |= matchInput(line);
+			matchSerialNumber(line);
 			line = lr.readLine();
 		}
 		if (!found)
@@ -195,14 +197,13 @@ public class CBWProperty extends ControllerProperty {
 	}
 
 	/** Match a serial number element */
-	private boolean matchSerialNumber(String line) {
+	private void matchSerialNumber(String line) {
 		Matcher m = SERIAL.matcher(line);
 		while (m.find()) {
 			String sn = m.group(1);
 			if (sn != null)
 				serialNumber = sn;
 		}
-		return false;
 	}
 
 	/** Clear the relays and inputs */
