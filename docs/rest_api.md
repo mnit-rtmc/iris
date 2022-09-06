@@ -37,6 +37,7 @@ These resources are JSON arrays, fetched using http `GET` requests.
 
 These resources are static, and may only change on IRIS updates:
 
+- `iris/beacon_state`: Beacon states
 - `iris/comm_protocol`: Communication protocols
 - `iris/condition`: Controller conditions
 - `iris/direction`: Travel directions
@@ -100,7 +101,7 @@ The response for these requests contains an ETag header, derived from the file's
 | Access       | Attributes                          |
 |--------------|-------------------------------------|
 | Read Only    | name, location, {`geo_loc`}         |
-| 👉 Operate   | flashing                            |
+| 👉 Operate   | state                               |
 | 💡 Plan      | message, notes, {`preset`}          |
 | 🔧 Configure | controller, {`pin`}, {`verify_pin`} |
 

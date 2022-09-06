@@ -20,7 +20,7 @@ WHERE name = $1";
 /// SQL query for one beacon
 pub const BEACON: &str = "\
 SELECT b.name, location, controller, pin, verify_pin, geo_loc, message, notes, \
-       preset, flashing \
+       preset, state \
 FROM iris.beacon b \
 LEFT JOIN geo_loc_view gl ON b.geo_loc = gl.name \
 WHERE b.name = $1";

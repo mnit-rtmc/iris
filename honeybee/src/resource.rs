@@ -286,10 +286,7 @@ const DETECTOR_PUB_RES: Resource = Resource::Simple(
 /// DMS resource
 const DMS_RES: Resource = Resource::Simple(
     "api/dms",
-    Listen::Exclude(
-        "dms",
-        &["msg_user", "msg_sched", "expire_time"],
-    ),
+    Listen::Exclude("dms", &["msg_user", "msg_sched", "expire_time"]),
     "SELECT row_to_json(r)::text FROM (\
       SELECT d.name, controller, location, notes, msg_current \
       FROM iris.dms d \
@@ -383,12 +380,23 @@ const ALARM_RES: Resource = Resource::Simple(
     ) r",
 );
 
+/// Beacon state LUT resource
+const BEACON_STATE_RES: Resource = Resource::Simple(
+    "beacon_state",
+    Listen::Nope,
+    "SELECT row_to_json(r)::text FROM (\
+      SELECT id, description \
+      FROM iris.beacon_state \
+      ORDER BY id\
+    ) r",
+);
+
 /// Beacon resource
 const BEACON_RES: Resource = Resource::Simple(
     "api/beacon",
     Listen::All("beacon"),
     "SELECT row_to_json(r)::text FROM (\
-      SELECT b.name, location, controller, message, notes, flashing \
+      SELECT b.name, location, controller, message, notes, state \
       FROM iris.beacon b \
       LEFT JOIN geo_loc_view gl ON b.geo_loc = gl.name \
       ORDER BY name\
@@ -746,6 +754,7 @@ const ALL: &[Resource] = &[
     SYSTEM_ATTRIBUTE_RES, // System attributes must be loaded first
     ROAD_RES,             // Roads must be loaded before R_Nodes
     ALARM_RES,
+    BEACON_STATE_RES,
     BEACON_RES,
     LANE_MARKING_RES,
     CABINET_STYLE_RES,
