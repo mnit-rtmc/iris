@@ -390,7 +390,7 @@ async fn permission_patch2(mut req: Request<State>) -> Result<()> {
     auth_access("permission", &req)?.check(Access::Configure)?;
     let id = obj_id(&req)?;
     let obj = body_json_obj(&mut req).await?;
-    return spawn_blocking(move || req.state().permission_patch(id, obj)).await;
+    spawn_blocking(move || req.state().permission_patch(id, obj)).await
 }
 
 /// `DELETE` one permission record
