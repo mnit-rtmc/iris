@@ -145,8 +145,8 @@ impl CommLink {
             (true, true, true) => "online 👍",
             (true, false, false) => "🔌",
             (true, false, true) => "offline 🔌",
-            (false, _, false) => "❓",
-            (false, _, true) => "disabled ❓",
+            (false, _, false) => "🔻",
+            (false, _, true) => "disabled 🔻",
         }
     }
 

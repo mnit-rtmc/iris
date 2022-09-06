@@ -812,7 +812,7 @@ impl Card for WeatherSensor {
             || self.location.contains_lower(search)
             || self.site_id.contains_lower(search)
             || self.alt_id.contains_lower(search)
-            || anc.comm_state(self).code().contains(search)
+            || anc.comm_state(self).is_match(search)
             || self.notes.contains_lower(search)
     }
 

@@ -27,7 +27,7 @@ use wasm_bindgen::JsValue;
 /// Comm state
 #[derive(Clone, Copy)]
 pub enum CommState {
-    Inactive,
+    Disabled,
     Online,
     Failed,
 }
@@ -36,7 +36,7 @@ impl CommState {
     /// Get the comm state code
     pub fn code(self) -> &'static str {
         match self {
-            Self::Inactive => "❓",
+            Self::Disabled => "🔻",
             Self::Online => "👍",
             Self::Failed => "💀",
         }
@@ -45,10 +45,15 @@ impl CommState {
     /// Get the comm state description
     pub fn description(self) -> &'static str {
         match self {
-            Self::Inactive => "inactive",
+            Self::Disabled => "disabled",
             Self::Online => "online",
             Self::Failed => "failed",
         }
+    }
+
+    /// Check if a search string matches
+    pub fn is_match(self, search: &str) -> bool {
+        self.code().contains(search) || self.description().contains(search)
     }
 }
 
@@ -303,12 +308,14 @@ impl Controller {
 
     /// Get comm state
     pub fn comm_state(&self) -> CommState {
-        let active = self.is_active();
-        let failed = self.fail_time.is_some();
-        match (active, failed) {
-            (false, _) => CommState::Inactive,
-            (true, false) => CommState::Online,
-            (true, true) => CommState::Failed,
+        if self.is_active() {
+            if self.fail_time.is_some() {
+                CommState::Failed
+            } else {
+                CommState::Online
+            }
+        } else {
+            CommState::Disabled
         }
     }
 
@@ -514,7 +521,7 @@ impl Card for Controller {
     fn is_match(&self, search: &str, anc: &ControllerAnc) -> bool {
         self.name.contains_lower(search)
             || self.link_drop().contains_lower(search)
-            || self.comm_state().code().contains(search)
+            || self.comm_state().is_match(search)
             || anc.condition(self).contains_lower(search)
             || anc.comm_config(self).contains_lower(search)
             || self.location.contains_lower(search)

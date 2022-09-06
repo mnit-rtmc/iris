@@ -111,7 +111,7 @@ impl Card for TagReader {
     fn is_match(&self, search: &str, anc: &TagReaderAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || anc.comm_state(self).code().contains(search)
+            || anc.comm_state(self).is_match(search)
     }
 
     /// Convert to HTML view

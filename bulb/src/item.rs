@@ -15,7 +15,7 @@ use std::fmt;
 /// Item state
 #[derive(Clone, Copy)]
 pub enum ItemState {
-    Disabled,
+    Unknown,
     Available,
     Deployed,
     Scheduled,
@@ -26,23 +26,28 @@ impl ItemState {
     /// Get the item state code
     pub fn code(self) -> &'static str {
         match self {
-            Self::Disabled => "🔻",
+            Self::Unknown => "❓",
             Self::Available => "🔹",
             Self::Deployed => "🔶",
             Self::Scheduled => "🕗",
-            Self::Maintenance => "◼️",
+            Self::Maintenance => "◾",
         }
     }
 
     /// Get the item state description
     pub fn description(self) -> &'static str {
         match self {
-            Self::Disabled => "disabled",
+            Self::Unknown => "unknown",
             Self::Available => "available",
             Self::Deployed => "deployed",
             Self::Scheduled => "scheduled",
             Self::Maintenance => "maintenance",
         }
+    }
+
+    /// Check if a search string matches
+    pub fn is_match(self, search: &str) -> bool {
+        self.code().contains(search) || self.description().contains(search)
     }
 }
 

@@ -265,6 +265,11 @@ impl Fields {
         self.insert(id, Value::String(val.into()));
     }
 
+    /// Insert a number value into mapping
+    pub fn insert_num<T: Into<Number>>(&mut self, id: &str, val: T) {
+        self.insert(id, Value::Number(val.into()));
+    }
+
     /// Insert a bool value into mapping
     pub fn insert_bool(&mut self, id: &str, val: bool) {
         self.insert(id, Value::Bool(val));

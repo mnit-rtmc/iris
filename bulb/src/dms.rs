@@ -129,7 +129,7 @@ impl Dms {
         if anc.dev.is_active(self) {
             anc.item_state(self.msg_current.as_deref())
         } else {
-            ItemState::Disabled
+            ItemState::Unknown
         }
     }
 
@@ -224,7 +224,8 @@ impl Card for Dms {
     fn is_match(&self, search: &str, anc: &DmsAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || anc.dev.comm_state(self).code().contains(search)
+            || anc.dev.comm_state(self).is_match(search)
+            || self.item_state(anc).is_match(search)
     }
 
     /// Convert to HTML view

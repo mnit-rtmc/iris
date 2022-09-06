@@ -61,7 +61,7 @@ impl<D: Device> DeviceAnc<D> {
     pub fn comm_state(&self, pri: &D) -> CommState {
         match self.controller(pri) {
             Some(ctrl) => ctrl.comm_state(),
-            None => CommState::Inactive,
+            None => CommState::Disabled,
         }
     }
 

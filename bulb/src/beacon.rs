@@ -11,13 +11,23 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
+use crate::error::Result;
 use crate::item::ItemState;
 use crate::resource::{
-    disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
+    disabled_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use serde::{Deserialize, Serialize};
+use std::borrow::{Borrow, Cow};
 use std::fmt;
+use wasm_bindgen::JsValue;
+
+/// Beacon States
+#[derive(Debug, Deserialize, Serialize)]
+pub struct BeaconState {
+    pub id: u32,
+    pub description: String,
+}
 
 /// Beacon
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -27,14 +37,55 @@ pub struct Beacon {
     pub message: String,
     pub notes: String,
     pub controller: Option<String>,
-    pub flashing: bool,
+    pub state: u32,
     // full attributes
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
     pub verify_pin: Option<u32>,
 }
 
-type BeaconAnc = DeviceAnc<Beacon>;
+/// Beacon ancillary data
+#[derive(Default)]
+pub struct BeaconAnc {
+    dev: DeviceAnc<Beacon>,
+    states: Option<Vec<BeaconState>>,
+}
+
+const BEACON_STATE_URI: &str = "/iris/beacon_state";
+
+impl AncillaryData for BeaconAnc {
+    type Primary = Beacon;
+
+    /// Get next ancillary data URI
+    fn next_uri(&self, view: View, pri: &Self::Primary) -> Option<Cow<str>> {
+        self.dev
+            .next_uri(view, pri)
+            .or_else(|| match (view, &self.states) {
+                (View::Compact | View::Search | View::Status(_), None) => {
+                    Some(BEACON_STATE_URI.into())
+                }
+                _ => None,
+            })
+    }
+
+    /// Set ancillary JSON data
+    fn set_json(
+        &mut self,
+        view: View,
+        pri: &Self::Primary,
+        json: JsValue,
+    ) -> Result<()> {
+        if let Some(uri) = self.next_uri(view, pri) {
+            match uri.borrow() {
+                BEACON_STATE_URI => {
+                    self.states = Some(json.into_serde::<Vec<BeaconState>>()?);
+                }
+                _ => self.dev.set_json(view, pri, json)?,
+            }
+        }
+        Ok(())
+    }
+}
 
 impl fmt::Display for Beacon {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -49,18 +100,41 @@ const CLASS_NOT_FLASHING: &str = "not-flashing";
 impl Beacon {
     pub const RESOURCE_N: &'static str = "beacon";
 
+    /// Check if beacon is flashing
+    fn flashing(&self) -> bool {
+        // 4: FLASHING, 6: FAULT_STUCK_ON
+        matches!(self.state, 4 | 6)
+    }
+
     /// Get item state
     fn item_state(&self, anc: &BeaconAnc) -> ItemState {
-        match (anc.is_active(self), self.flashing) {
-            (false, _) => ItemState::Disabled,
-            (true, false) => ItemState::Available,
-            (true, true) => ItemState::Deployed,
+        if anc.dev.is_active(self) {
+            match self.state {
+                0 => ItemState::Unknown,
+                2 => ItemState::Available,
+                4 => ItemState::Deployed,
+                _ => ItemState::Maintenance,
+            }
+        } else {
+            ItemState::Unknown
+        }
+    }
+
+    /// Get beacon state
+    fn beacon_state<'a>(&'a self, anc: &'a BeaconAnc) -> &'a str {
+        match &anc.states {
+            Some(states) => states
+                .iter()
+                .find(|s| s.id == self.state)
+                .map(|s| &s.description[..])
+                .unwrap_or("Unknown"),
+            _ => "Unknown",
         }
     }
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &BeaconAnc) -> String {
-        let comm_state = anc.comm_state(self);
+        let comm_state = anc.dev.comm_state(self);
         let item_state = self.item_state(anc);
         let disabled = disabled_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location);
@@ -73,15 +147,16 @@ impl Beacon {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &BeaconAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
-        let comm_state = anc.comm_state(self);
+        let comm_state = anc.dev.comm_state(self);
         let comm_desc = comm_state.description();
         let item_state = self.item_state(anc);
         let item_desc = item_state.description();
-        let flashing = if self.flashing {
+        let flashing = if self.flashing() {
             CLASS_FLASHING
         } else {
             CLASS_NOT_FLASHING
         };
+        let beacon_state = self.beacon_state(anc);
         let message = HtmlStr::new(&self.message);
         let mut status = format!(
             "<div class='row'>\
@@ -100,12 +175,14 @@ impl Beacon {
               <label for='ob_flashing' class='beacon'>\
                 <span class='{flashing} flash-delayed'>🔆</span>\
               </label>\
+            </div>\
+            <div class='row center'>\
+              <span>{beacon_state}</span>\
             </div>"
         );
-
         if config {
             status.push_str("<div class='row'>");
-            status.push_str(&anc.controller_button());
+            status.push_str(&anc.dev.controller_button());
             status.push_str(LOC_BUTTON);
             status.push_str(EDIT_BUTTON);
             status.push_str("</div>");
@@ -175,7 +252,8 @@ impl Card for Beacon {
     fn is_match(&self, search: &str, anc: &BeaconAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || anc.comm_state(self).code().contains(search)
+            || anc.dev.comm_state(self).is_match(search)
+            || self.item_state(anc).is_match(search)
             || self.message.contains_lower(search)
             || self.notes.contains_lower(search)
     }
@@ -206,7 +284,13 @@ impl Card for Beacon {
     fn click_changed(&self, id: &str) -> String {
         if id == "ob_flashing" {
             let mut fields = Fields::new();
-            fields.insert_bool("flashing", !self.flashing);
+            match self.state {
+                // DARK (2) => FLASHING_REQ (3)
+                2 => fields.insert_num("state", 3),
+                // FLASHING (4) or FAULT_NO_VERIFY (5) => DARK_REQ (1)
+                4 | 5 => fields.insert_num("state", 1),
+                _ => (),
+            }
             fields.into_value().to_string()
         } else {
             "".into()

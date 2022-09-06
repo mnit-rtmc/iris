@@ -104,7 +104,7 @@ impl Card for VideoMonitor {
     fn is_match(&self, search: &str, anc: &VideoMonitorAnc) -> bool {
         self.name.contains_lower(search)
             || self.mon_num.to_string().contains(search)
-            || anc.comm_state(self).code().contains(search)
+            || anc.comm_state(self).is_match(search)
     }
 
     /// Convert to HTML view

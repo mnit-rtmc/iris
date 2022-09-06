@@ -37,7 +37,7 @@ impl Alarm {
     /// Get the item state
     fn item_state(&self) -> ItemState {
         match (self.controller.is_some(), self.state) {
-            (false, _) => ItemState::Disabled,
+            (false, _) => ItemState::Unknown,
             (true, false) => ItemState::Available,
             (true, true) => ItemState::Maintenance,
         }
@@ -126,10 +126,11 @@ impl Card for Alarm {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &AlarmAnc) -> bool {
+    fn is_match(&self, search: &str, anc: &AlarmAnc) -> bool {
         self.description.contains_lower(search)
             || self.name.contains_lower(search)
-            || self.item_state().code().contains(search)
+            || anc.comm_state(self).is_match(search)
+            || self.item_state().is_match(search)
     }
 
     /// Convert to HTML view
