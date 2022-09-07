@@ -1,5 +1,12 @@
 # IRIS 5.x Release Notes
 
+5.34.0 (7 Sep 2022)
+ - Added beacon "state" attribute/LUT (replaces "flashing")
+ - Fixed beacon verify problem
+ - Handle Control-By-Web quirks
+ - Improved web UI search/filtering
+ - Read device serial numbers in more protocols
+
 5.33.0 (26 Aug 2022)
  - Continue web UI development (beacon control)
  - Expanded ntcip RWIS support (temp, radiation, surface, sub-surface, etc.)
