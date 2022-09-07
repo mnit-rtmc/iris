@@ -98,7 +98,7 @@ impl User {
             "<div class='row'>\
                <label for='full_name'>Full Name</label>\
                <input id='full_name' maxlength='31' size='20' \
-                      value='{full_name}'/>\
+                      value='{full_name}'>\
             </div>\
             <div class='row'>\
                <label for='role'>Role</label>\
@@ -106,7 +106,7 @@ impl User {
             </div>\
             <div class='row'>\
               <label for='enabled'>Enabled</label>\
-              <input id='enabled' type='checkbox'{enabled}/>\
+              <input id='enabled' type='checkbox'{enabled}>\
             </div>"
         )
     }

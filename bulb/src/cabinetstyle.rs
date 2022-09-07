@@ -53,27 +53,27 @@ impl CabinetStyle {
             "<div class='row'>\
               <label for='police_panel_pin_1'>Police Panel Pin 1</label>\
               <input id='police_panel_pin_1' type='number' min='1' max='104' \
-                     size='8' value='{police_panel_pin_1}'/>\
+                     size='8' value='{police_panel_pin_1}'>\
             </div>\
             <div class='row'>\
               <label for='police_panel_pin_2'>Police Panel Pin 2</label>\
               <input id='police_panel_pin_2' type='number' min='1' max='104' \
-                     size='8' value='{police_panel_pin_2}'/>\
+                     size='8' value='{police_panel_pin_2}'>\
             </div>\
             <div class='row'>\
               <label for='watchdog_reset_pin_1'>Watchdog Reset Pin 1</label>\
               <input id='watchdog_reset_pin_1' type='number' min='1' max='104' \
-                     size='8' value='{watchdog_reset_pin_1}'/>\
+                     size='8' value='{watchdog_reset_pin_1}'>\
             </div>\
             <div class='row'>\
               <label for='watchdog_reset_pin_2'>Watchdog Reset Pin 2</label>\
               <input id='watchdog_reset_pin_2' type='number' min='1' max='104' \
-                     size='8' value='{watchdog_reset_pin_2}'/>\
+                     size='8' value='{watchdog_reset_pin_2}'>\
             </div>\
             <div class='row'>\
               <label for='dip'>Dip</label>\
               <input id='dip' type='number' min='0' max='255' \
-                     size='8' value='{dip}'/>\
+                     size='8' value='{dip}'>\
             </div>"
         )
     }

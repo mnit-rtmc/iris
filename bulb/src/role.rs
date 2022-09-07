@@ -45,7 +45,7 @@ impl Role {
         format!(
             "<div class='row'>\
               <label for='enabled'>Enabled</label>\
-              <input id='enabled' type='checkbox'{enabled}/>\
+              <input id='enabled' type='checkbox'{enabled}>\
             </div>"
         )
     }

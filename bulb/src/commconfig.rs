@@ -220,7 +220,7 @@ impl CommConfig {
             "<div class='row'>\
               <label for='description'>Description</label>\
               <input id='description' maxlength='20' size='20' \
-                     value='{description}'/>\
+                     value='{description}'>\
             </div>\
             <div class='row'>\
               <label for='protocol'>Protocol</label>\
@@ -228,12 +228,12 @@ impl CommConfig {
             </div>\
             <div class='row'>\
               <label for='modem'>Modem</label>\
-              <input id='modem' type='checkbox'{modem}/>\
+              <input id='modem' type='checkbox'{modem}>\
             </div>\
             <div class='row'>\
               <label for='timeout_ms'>Timeout (ms)</label>\
               <input id='timeout_ms' type='number' min='0' size='8' \
-                     max='20000' step='50' value='{timeout_ms}'/>\
+                     max='20000' step='50' value='{timeout_ms}'>\
             </div>\
             <div class='row'>\
               <label for='poll_period_sec'>Poll Period</label>\

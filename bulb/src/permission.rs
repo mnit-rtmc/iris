@@ -255,8 +255,7 @@ impl Permission {
             </div>\
             <div class='row'>\
                <label for='batch'>Batch</label>\
-               <input id='batch' maxlength='16' size='16' \
-                      value='{batch}'/>\
+               <input id='batch' maxlength='16' size='16' value='{batch}'>\
             </div>\
             <div class='row'>\
               <label for='access_n'>Access</label>\

@@ -51,22 +51,20 @@ impl Modem {
         format!(
             "<div class='row'>\
               <label for='uri'>URI</label>\
-              <input id='uri' maxlength='64' size='30' \
-                     value='{uri}'/>\
+              <input id='uri' maxlength='64' size='30' value='{uri}'>\
             </div>\
             <div class='row'>\
               <label for='config'>Config</label>\
-              <input id='config' maxlength='64' size='28' \
-                     value='{config}'/>\
+              <input id='config' maxlength='64' size='28' value='{config}'>\
             </div>\
             <div class='row'>\
               <label for='timeout_ms'>Timeout (ms)</label>\
               <input id='timeout_ms' type='number' min='0' size='8' \
-                     max='90000' value='{timeout_ms}'/>\
+                     max='90000' value='{timeout_ms}'>\
             </div>\
             <div class='row'>\
               <label for='enabled'>Enabled</label>\
-              <input id='enabled' type='checkbox'{enabled}/>\
+              <input id='enabled' type='checkbox'{enabled}>\
             </div>"
         )
     }

@@ -186,7 +186,7 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
         format!(
             "<div class='row'>\
               <label for='create_name'>Name</label>\
-              <input id='create_name' maxlength='24' size='24' value='{self}'/>\
+              <input id='create_name' maxlength='24' size='24' value='{self}'>\
             </div>"
         )
     }

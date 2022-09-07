@@ -87,17 +87,17 @@ impl Alarm {
             "<div class='row'>\
               <label for='description'>Description</label>\
               <input id='description' maxlength='24' size='24' \
-                     value='{description}'/>\
+                     value='{description}'>\
              </div>\
              <div class='row'>\
                <label for='controller'>Controller</label>\
                <input id='controller' maxlength='20' size='20' \
-                      value='{controller}'/>\
+                      value='{controller}'>\
              </div>\
              <div class='row'>\
                <label for='pin'>Pin</label>\
                <input id='pin' type='number' min='1' max='104' \
-                      size='8' value='{pin}'/>\
+                      size='8' value='{pin}'>\
              </div>"
         )
     }

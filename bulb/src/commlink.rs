@@ -194,12 +194,11 @@ impl CommLink {
             "<div class='row'>\
               <label for='description'>Description</label>\
               <input id='description' maxlength='32' size='24' \
-                     value='{description}'/>\
+                     value='{description}'>\
             </div>\
             <div class='row'>\
               <label for='uri'>URI</label>\
-              <input id='uri' maxlength='256' size='28' \
-                     value='{uri}'/>\
+              <input id='uri' maxlength='256' size='28' value='{uri}'>\
             </div>\
             <div class='row'>\
               <label for='comm_config'>Comm Config</label>\
@@ -207,7 +206,7 @@ impl CommLink {
             </div>\
             <div class='row'>\
               <label for='poll_enabled'>Poll Enabled</label>\
-              <input id='poll_enabled' type='checkbox'{enabled}/>\
+              <input id='poll_enabled' type='checkbox'{enabled}>\
             </div>"
         )
     }

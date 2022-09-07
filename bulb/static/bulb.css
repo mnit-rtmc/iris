@@ -45,7 +45,7 @@ button.go_link {
 
 /* Checkbox toggle buttons:
  *
- * <input id='the_id' type='checkbox' class='toggle' />
+ * <input id='the_id' type='checkbox' class='toggle'>
  * <label for='the_id'>...</label>
  */
 .toggle {

@@ -474,12 +474,12 @@ impl Controller {
             "<div class='row'>\
               <label for='comm_link'>Comm Link</label>\
               <input id='comm_link' maxlength='20' size='20' \
-                     value='{comm_link}'/>\
+                     value='{comm_link}'>\
             </div>\
             <div class='row'>\
               <label for='drop_id'>Drop ID</label>\
               <input id='drop_id' type='number' min='0'
-                     max='65535' size='6' value='{drop_id}'/>\
+                     max='65535' size='6' value='{drop_id}'>\
             </div>\
             <div class='row'>\
               <label for='cabinet_style'>Cabinet Style</label>\
@@ -497,7 +497,7 @@ impl Controller {
             <div class='row'>\
               <label for='password'>Password</label>\
               <input id='password' maxlength='32' size='26' \
-                     value='{password}'/>\
+                     value='{password}'>\
             </div>"
         )
     }

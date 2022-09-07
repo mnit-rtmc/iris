@@ -207,17 +207,17 @@ impl GeoLoc {
             <div class='row'>\
               <label for='landmark'>Landmark</label>\
               <input id='landmark' maxlength='22' size='24' \
-                     value='{landmark}'/>\
+                     value='{landmark}'>\
             </div>\
             <div class='row'>\
               <label for='lat'>Latitude</label>\
               <input id='lat' type='number' step='0.00001' \
-                     inputmode='decimal' value='{lat}'/>\
+                     inputmode='decimal' value='{lat}'>\
             </div>\
             <div class='row'>\
               <label for='lon'>Longitude</label>\
               <input id='lon' type='number' step='0.00001' \
-                     inputmode='decimal' value='{lon}'/>\
+                     inputmode='decimal' value='{lon}'>\
             </div>"
         )
     }

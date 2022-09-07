@@ -753,12 +753,12 @@ impl WeatherSensor {
             "<div class='row'>\
               <label for='site_id'>Site ID</label>\
               <input id='site_id' maxlength='20' size='20' \
-                     value='{site_id}'/>\
+                     value='{site_id}'>\
             </div>\
             <div class='row'>\
               <label for='alt_id'>Alt ID</label>\
               <input id='alt_id' maxlength='20' size='20' \
-                     value='{alt_id}'/>\
+                     value='{alt_id}'>\
             </div>\
             <div class='row'>\
               <label for='notes'>Notes</label>\
@@ -768,12 +768,12 @@ impl WeatherSensor {
             <div class='row'>\
               <label for='controller'>Controller</label>\
               <input id='controller' maxlength='20' size='20' \
-                     value='{controller}'/>\
+                     value='{controller}'>\
             </div>\
             <div class='row'>\
               <label for='pin'>Pin</label>\
               <input id='pin' type='number' min='1' max='104' \
-                     size='8' value='{pin}'/>\
+                     size='8' value='{pin}'>\
             </div>"
         )
     }
