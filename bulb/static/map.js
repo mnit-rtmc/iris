@@ -182,15 +182,15 @@ function event_label(e) {
                 if (sample) {
                     let flow = sample[0];
                     if (flow)
-                        label += "<br/>&nbsp;<b>" + flow + "</b> veh/h";
+                        label += "<br>&nbsp;<b>" + flow + "</b> veh/h";
                     let speed = sample[1];
                     if (speed)
-                        label += "<br/>&nbsp;<b>" + speed + "</b> mi/h";
+                        label += "<br>&nbsp;<b>" + speed + "</b> mi/h";
                     let density = (flow && speed)
                                 ? Math.round(flow / speed)
                                 : null;
                     if (density)
-                        label += "<br/>&nbsp;<b>" + density + "</b> veh/lane·mi";
+                        label += "<br>&nbsp;<b>" + density + "</b> veh/lane·mi";
                 }
             }
         }
