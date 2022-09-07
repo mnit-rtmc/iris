@@ -162,7 +162,7 @@ impl Dms {
         if let Some(msg_current) = &self.msg_current {
             status.push_str("<img class='message' src='/iris/img/");
             status.push_str(msg_current);
-            status.push_str(".gif'/>");
+            status.push_str(".gif'>");
         }
         if config {
             status.push_str("<div class='row'>");
