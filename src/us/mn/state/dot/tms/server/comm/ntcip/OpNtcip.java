@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.LaneUseIndication;
@@ -183,5 +184,10 @@ abstract public class OpNtcip extends OpDevice {
 		if (s != null && s.length() > 0)
 			logError(s);
 		super.setErrorStatus(s);
+	}
+
+	/** Get the firmware version */
+	protected String getVersion() {
+		return ControllerHelper.getSetup(controller, "version");
 	}
 }

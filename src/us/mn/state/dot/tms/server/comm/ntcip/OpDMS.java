@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SignDetail;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -78,11 +77,6 @@ abstract public class OpDMS extends OpNtcip {
 		else
 			dms.setConfigure(false);
 		super.cleanup();
-	}
-
-	/** Get the firmware version */
-	protected String getVersion() {
-		return ControllerHelper.getSetup(controller, "version");
 	}
 
 	/** Check if DMS make contains a value.

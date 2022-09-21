@@ -95,8 +95,19 @@ public class OpQueryEssStatus extends OpEss {
 			catch (NoSuchName e) {
 				// Note: some vendors do not support these
 			}
-			return new QueryWindSensorsV2();
+			return queryWindSensors();
 		}
+	}
+
+	/** Get phase to query wind sensor data */
+	private Phase queryWindSensors() {
+		// LX model RPUs contain a bug which sometimes causes objects in
+		// the wind sensor table to update only once every 12 hours or
+		// so.  The workaround is to query the (deprecated) wind sensor
+		// objects from 1204v1 (for LX controllers only).
+		return (getVersion().contains("LX"))
+			? new QueryWindSensorV1()
+			: new QueryWindSensorsV2();
 	}
 
 	/** Phase to query the wind sensor count (V2+) */
