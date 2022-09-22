@@ -109,14 +109,14 @@ public class OpQueryModules extends OpNtcip {
 			logQuery(version);
 			logQuery(m_type);
 			if (m_type.getEnum() == ModuleType.hardware) {
-				setSetup("hardware_make", make.getValue());
-				setSetup("hardware_model", model.getValue());
-				setSetup("hardware_version", version.getValue());
+				setSetup("hw_make", make.getValue());
+				setSetup("hw_model", model.getValue());
+				setSetup("hw_version", version.getValue());
 			}
 			if (m_type.getEnum() == ModuleType.software) {
-				setSetup("software_make", make.getValue());
-				setSetup("software_model", model.getValue());
-				setSetup("software_version", version.getValue());
+				setSetup("sw_make", make.getValue());
+				setSetup("sw_model", model.getValue());
+				setSetup("sw_version", version.getValue());
 			}
 			mod += 1;
 			return (mod <= count) ? this : null;
