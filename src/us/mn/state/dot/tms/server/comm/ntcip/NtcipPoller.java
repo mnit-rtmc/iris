@@ -222,6 +222,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 			addOp(new OpQueryEssStatus(ws));
 			break;
 		case SEND_SETTINGS:
+			addOp(new OpQueryModules(ws));
 			addOp(new OpQueryEssSettings(ws));
 			break;
 		default:
