@@ -104,7 +104,10 @@ impl SonarError {
         } else if msg.starts_with("invalid name") {
             // this should really have been "Unknown name", not "Invalid name"
             Self::NotFound
-        } else if msg.starts_with("invalid") | msg.starts_with("bad") {
+        } else if msg.starts_with("invalid")
+            || msg.starts_with("bad")
+            || msg.starts_with("must not" /* contain upper-case ... */)
+        {
             Self::InvalidValue
         } else if msg.starts_with("name already exists")
             || msg.starts_with("must be removed")
