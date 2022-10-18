@@ -57,6 +57,16 @@ import us.mn.state.dot.tms.server.event.CommEvent;
  */
 public class ControllerImpl extends BaseObjectImpl implements Controller {
 
+	/** Check if controller IO should receive device requests */
+	static private boolean shouldRequestDevice(ControllerIO io) {
+		return io instanceof BeaconImpl ||
+		       io instanceof DMSImpl ||
+		       io instanceof LCSArrayImpl ||
+		       io instanceof RampMeterImpl ||
+		       io instanceof TagReaderImpl ||
+		       io instanceof WeatherSensorImpl;
+	}
+
 	/** Trim and truncate a string, with null checking.
 	 * @param value String to be truncated (may be null).
 	 * @param maxlen Maximum length of string (characters).
@@ -1092,12 +1102,23 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			else
 				sp.sendSettings(this);
 		}
-		// We only want one settings operation per controller,
-		// no matter how many video monitors are connected
+		requestDevices(DeviceRequest.SEND_SETTINGS);
+		// Only send settings to the "first" video monitor
+		// on the controller (lowest pin number)
 		VideoMonitorImpl vm = getFirstVideoMonitor();
 		if (vm != null) {
 			int dr = DeviceRequest.SEND_SETTINGS.ordinal();
 			vm.setDeviceRequest(dr);
+		}
+	}
+
+	/** Send a request to (most) devices */
+	private synchronized void requestDevices(DeviceRequest req) {
+		for (ControllerIO io: io_pins.values()) {
+			if (shouldRequestDevice(io)) {
+				DeviceImpl dev = (DeviceImpl) io;
+				dev.setDeviceReq(req);
+			}
 		}
 	}
 

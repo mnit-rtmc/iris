@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,6 @@ package us.mn.state.dot.tms.server;
 import java.util.Calendar;
 import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.tms.Beacon;
-import us.mn.state.dot.tms.BeaconHelper;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
@@ -27,16 +25,6 @@ import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.LCSArrayHelper;
-import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.RampMeterHelper;
-import us.mn.state.dot.tms.TagReader;
-import us.mn.state.dot.tms.TagReaderHelper;
-import us.mn.state.dot.tms.VideoMonitor;
-import us.mn.state.dot.tms.VideoMonitorHelper;
-import us.mn.state.dot.tms.WeatherSensor;
-import us.mn.state.dot.tms.WeatherSensorHelper;
 
 /**
  * Job to send settings to all field controllers.
@@ -69,13 +57,7 @@ public class SendSettingsJob extends Job {
 			c.setDownload(false);
 		}
 		requestCameraStop();
-		requestDMS(DeviceRequest.SEND_SETTINGS);
 		requestDMS(DeviceRequest.QUERY_PIXEL_FAILURES);
-		requestLCS(DeviceRequest.SEND_SETTINGS);
-		requestRampMeters(DeviceRequest.SEND_SETTINGS);
-		requestBeacons(DeviceRequest.SEND_SETTINGS);
-		requestTagReaders(DeviceRequest.SEND_SETTINGS);
-		requestWeatherSensors(DeviceRequest.SEND_SETTINGS);
 	}
 
 	/** Send a stop PTZ request to all cameras */
@@ -97,51 +79,6 @@ public class SendSettingsJob extends Job {
 		while (it.hasNext()) {
 			DMS dms = it.next();
 			dms.setDeviceRequest(req.ordinal());
-		}
-	}
-
-	/** Send a request to all LCS */
-	private void requestLCS(DeviceRequest req) {
-		Iterator<LCSArray> it = LCSArrayHelper.iterator();
-		while (it.hasNext()) {
-			LCSArray lcs_array = it.next();
-			lcs_array.setDeviceRequest(req.ordinal());
-		}
-	}
-
-	/** Send a request to all ramp meters */
-	private void requestRampMeters(DeviceRequest req) {
-		Iterator<RampMeter> it = RampMeterHelper.iterator();
-		while (it.hasNext()) {
-			RampMeter meter = it.next();
-			meter.setDeviceRequest(req.ordinal());
-		}
-	}
-
-	/** Send a request to all beacons */
-	private void requestBeacons(DeviceRequest req) {
-		Iterator<Beacon> it = BeaconHelper.iterator();
-		while (it.hasNext()) {
-			Beacon b = it.next();
-			b.setDeviceRequest(req.ordinal());
-		}
-	}
-
-	/** Send a request to all tag readers */
-	private void requestTagReaders(DeviceRequest req) {
-		Iterator<TagReader> it = TagReaderHelper.iterator();
-		while (it.hasNext()) {
-			TagReader tr = it.next();
-			tr.setDeviceRequest(req.ordinal());
-		}
-	}
-
-	/** Send a request to all weather sensors */
-	private void requestWeatherSensors(DeviceRequest req) {
-		Iterator<WeatherSensor> it = WeatherSensorHelper.iterator();
-		while (it.hasNext()) {
-			WeatherSensor ws = it.next();
-			ws.setDeviceRequest(req.ordinal());
 		}
 	}
 }
