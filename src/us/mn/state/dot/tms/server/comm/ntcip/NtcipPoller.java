@@ -97,6 +97,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 			if (SystemAttrEnum.DMS_UPDATE_FONT_TABLE.getBoolean())
 				addOp(new OpSendDMSFonts(dms));
 			addOp(new OpSendDMSDefaults(dms));
+			addOp(new OpTestDMSPixels(dms, false));
 			break;
 		case QUERY_CONFIGURATION:
 			addOp(new OpQueryDMSConfiguration(dms));

@@ -22,9 +22,6 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
-import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 
 /**
  * Job to send settings to all field controllers.
@@ -57,7 +54,6 @@ public class SendSettingsJob extends Job {
 			c.setDownload(false);
 		}
 		requestCameraStop();
-		requestDMS(DeviceRequest.QUERY_PIXEL_FAILURES);
 	}
 
 	/** Send a stop PTZ request to all cameras */
@@ -70,15 +66,6 @@ public class SendSettingsJob extends Job {
 		while (it.hasNext()) {
 			Camera cam = it.next();
 			cam.setPtz(ptz);
-		}
-	}
-
-	/** Send a request to all DMS */
-	private void requestDMS(DeviceRequest req) {
-		Iterator<DMS> it = DMSHelper.iterator();
-		while (it.hasNext()) {
-			DMS dms = it.next();
-			dms.setDeviceRequest(req.ordinal());
 		}
 	}
 }
