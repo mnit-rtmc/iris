@@ -115,6 +115,7 @@ Property               | Description
 `db.password`          | Password for PostgreSQL connection
 `sonar.ldap.urls`      | List of URLs for LDAP authentication
 `sonar.port`           | TCP port to connect to SONAR
+`sonar.protocols`      | Protocol names to enable (regex)
 `sonar.cipher.suites`  | Cipher suite names to enable (regex)
 `sonar.session.file`   | File to store client session IDs
 `keystore.file`        | Location of keystore file

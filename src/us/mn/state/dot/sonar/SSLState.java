@@ -39,8 +39,11 @@ public class SSLState {
 
 	/** Size (in bytes) of network buffers */
 	static private final int NETWORK_SIZE = 1 << 16;
+	
+	/** Default protocols (regex) **/
+	static private final String DEFAULT_PROTOCOLS = "TLSv1\\.[23]";
 
-	/** Default cipher suites */
+	/** Default cipher suites (regex) **/
 	static private final String DEFAULT_SUITES = "TLS_.*AES_256.*";
 
 	/** Create a SSL engine */
@@ -48,18 +51,21 @@ public class SSLState {
 		Properties props)
 	{
 		SSLEngine engine = context.createSSLEngine();
-		String regex = props.getProperty("sonar.cipher.suites",
-			DEFAULT_SUITES);
-		engine.setEnabledProtocols(getProtocols(engine));
-		engine.setEnabledCipherSuites(getCipherSuites(engine, regex));
+		String regex1 = props.getProperty("sonar.protocols",
+				DEFAULT_PROTOCOLS);
+		engine.setEnabledProtocols(getProtocols(engine, regex1));
+		String regex2 = props.getProperty("sonar.cipher.suites",
+				DEFAULT_SUITES);
+		engine.setEnabledCipherSuites(getCipherSuites(engine, regex2));
 		return engine;
 	}
 
 	/** Get an array of protocol versions to enable */
-	static private String[] getProtocols(SSLEngine engine) {
+	static private String[] getProtocols(SSLEngine engine,
+			String regex) {
 		ArrayList<String> protocols = new ArrayList<String>();
 		for (String sp: engine.getSupportedProtocols()) {
-			if (sp.equals("TLSv1.2") || sp.equals("TLSv1.3")) {
+			if (sp.matches(regex)) {
 				protocols.add(sp);
 				DEBUG_TLS.log("protocol enabled: " + sp);
 			}
