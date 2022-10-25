@@ -6,6 +6,8 @@ iris-client*
 *.rej
 *.orig
 *.swp
+devel/
+devel*.cfg
 
 # For Eclipse output
 bin/eclipse/

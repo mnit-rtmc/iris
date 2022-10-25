@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.zip.GZIPOutputStream;
+import us.mn.state.dot.tms.utils.DevelCfg;
 import us.mn.state.dot.tms.utils.FileIO;
 
 /**
@@ -33,7 +34,7 @@ abstract public class XmlWriter {
 
 	/** XML output directory */
 	static public final File XML_OUTPUT_DIRECTORY =
-		new File("/var/www/html/iris_xml/");
+		new File(DevelCfg.get("xml.output.dir", "/var/www/html/iris_xml/"));
 
 	/** XML version and encoding declaration */
 	static protected final String XML_DECLARATION =

@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.utils.DevelCfg;
 
 /**
  * The Gate Arm System contains static methods which act on the entire gate
@@ -44,7 +45,7 @@ public class GateArmSystem {
 	/** Path to configuration enable file.  This must not be a system
 	 * attribute for security reasons. */
 	static private final File CONFIG_ENABLE_FILE = new File(
-		"/var/lib/iris/gate_arm_enable");
+			DevelCfg.get("gates.enable.file", "/var/lib/iris/gate_arm_enable"));
 
 	/** Config delete flag.  This will only get set to false if
 	 * CONFIG_ENABLE_FILE cannot be deleted.  The only way to enable the

@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.SystemAttrEnum.DETECTOR_AUTO_FAIL_ENABLE;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.DevelCfg;
 
 /**
  * A system attribute is a name mapped to a string value.
@@ -55,7 +56,7 @@ public class SystemAttributeImpl extends BaseObjectImpl
 
 	/** Validate the database version */
 	static private void validateDatabaseVersion() {
-		String c_version = "@@VERSION@@";
+		String c_version = DevelCfg.get("db.version", "@@VERSION@@");
 		String db_version = SystemAttrEnum.DATABASE_VERSION.getString();
 		if (!validateVersions(c_version, db_version)) {
 			StringBuilder b = new StringBuilder();

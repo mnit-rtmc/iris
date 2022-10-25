@@ -1,0 +1,53 @@
+; The IRIS Eclipse-development (DevelCfg) extension
+; can be used by developers working in an Eclipse
+; IDE environment to run development versions of
+; IRIS in Eclipse without having to make changes
+; to files pulled from the IRIS repo.  It does
+; this by replacing key IRIS properties at run
+; time.
+;
+; It is NOT intended for use in a normal IRIS system.
+;
+; TO USE THIS EXTENSION:  Copy this file to devel.cfg
+; in Eclipse's default IRIS directory.  Then, in the
+; devel.cfg file, uncomment and customize the
+; <key>=<value> lines below as desired.
+;
+; If you want to customize client or server properties
+; files, make a copy of those files to a separate
+; subfolder (./devel is recomended), customize the copy(s),
+; and modify the server.prop.file or client.prop.file
+; values below to point to the modified versions.
+;
+; If you want to have more than one customized Eclipse
+; run/debug configuration, please read the comments in
+; the tms/utils/DevelCfg.java file.
+
+;---------------
+
+; Disable IRIS's default routing of stdout/stderr to
+; logfiles.  When true, standard output will be sent
+; to the Eclipse console.
+;runInEclipse = true
+
+; Set location of custom client/server property files.
+;server.prop.file = ./devel/iris-server.properties
+;client.prop.file = ./devel/iris-client.properties
+
+; Set database version.  These must match the
+; "database_version" value in the IRIS system-
+; attributes table.
+;db.version = 5.34.0
+;log.start.msg = IRIS 5.34.0 restarted
+
+; Redirect IRIS output paths to local directories.
+; (If these folders don't exist, the DevelCfg code
+; will automatically create them.)
+;log.output.dir  = ./var/log/iris/
+;font.output.dir = ./var/log/iris/fonts/
+;json.output.dir = ./var/www/html/iris/
+;xml.output.dir  = ./var/www/html/iris_xml/
+
+; Specifiy a different location for the gate_arm_enable file.
+;gates.enable.file = ./var/lib/iris/gate_arm_enable
+
