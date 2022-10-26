@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.Iterator;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
+import us.mn.state.dot.tms.utils.DevelCfg;
 import us.mn.state.dot.tms.utils.FileIO;
 
 /**
@@ -39,7 +40,7 @@ class StationManager {
 
 	/** JSON output directory */
 	static private final File JSON_OUTPUT_DIRECTORY =
-		new File("/var/www/html/iris/");
+		new File(DevelCfg.get("json.output.dir", "/var/www/html/iris/"));
 
 	/** Location of station XML file */
 	static private final String SAMPLE_XML = "stat_sample.xml";
