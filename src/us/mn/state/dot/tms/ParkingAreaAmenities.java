@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,8 @@ public enum ParkingAreaAmenities {
 	shop,                           // 11
 	play_area,                      // 12
 	pet_exercise_area,              // 13
-	interpretive_information;       // 14
+	interpretive_information,       // 14
+	family_restroom;		// 15
 
 	/** I18n name */
 	public String i18n() {
