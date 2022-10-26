@@ -4563,6 +4563,7 @@ COPY iris.parking_area_amenities (bit, amenity) FROM stdin;
 12	Play area
 13	Pet excercise area
 14	Interpretive information
+15	Family restroom
 \.
 
 CREATE FUNCTION iris.parking_area_amenities(INTEGER)
