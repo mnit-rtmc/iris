@@ -20,17 +20,21 @@ Beacons can be connected to controllers using one of these protocols:
 
 These fields are available for configuring a beacon:
 
-| Field      | Description                              |
-|------------|------------------------------------------|
-| Message    | Static text message on sign              |
-| Notes      | Administrative notes                     |
-| Pin        | Controller output pin to activate beacon |
-| Verify Pin | Verify circuit I/O pin                   |
+| Field       | Description                                  |
+|-------------|----------------------------------------------|
+| Message     | Static text message on sign                  |
+| Notes       | Administrative notes                         |
+| Pin         | Controller output pin to activate beacon     |
+| Verify Pin  | Verify circuit I/O pin                       |
+| Stuck Other | `Fault: Stuck On` (f), `Flashing: Other` (t) |
 
-Beacons can also have associated verify circuits.  The verify pin is a digital
-input to determine whether the beacon works when activated.  For the [CBW]
-protocol, it is also an output to energize the verify circuit.  **Pin** and
-**Verify Pin** can be the same.
+**Verify Pin** is a digital input to sense whether the lights are activated, for
+beacons which have verify circuitry.  For the [CBW] protocol, it is also an
+output to energize the verify circuit.  **Verify Pin** and **Pin** can be the
+same.
+
+**Stuck Other** determines the beacon state when a verify is detected without
+being commanded.  Use this to report when the other system controls the beacon.
 
 ### State
 
