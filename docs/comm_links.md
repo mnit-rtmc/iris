@@ -87,7 +87,7 @@ The `cbw` protocol can be used for [beacons], using a Control-By-Web controller.
 The _default scheme_ is `http`.  _Multi-drop_ is not supported.  Depending on
 the model, up to 16 [beacons] can be associated with each [controller].
 
-The [IO Pin]s are used for controlling relays.
+The [IO Pin]s are outputs for controlling relays.
 
 | Model Number | IO Pins |
 |--------------|---------|

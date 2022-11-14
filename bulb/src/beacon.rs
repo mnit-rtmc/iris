@@ -102,8 +102,8 @@ impl Beacon {
 
     /// Check if beacon is flashing
     fn flashing(&self) -> bool {
-        // 4: FLASHING, 6: FAULT_STUCK_ON
-        matches!(self.state, 4 | 6)
+        // 4: FLASHING, 6: FAULT_STUCK_ON, 7: FLASHING_OTHER
+        matches!(self.state, 4 | 6 | 7)
     }
 
     /// Get item state

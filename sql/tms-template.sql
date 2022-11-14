@@ -2091,6 +2091,7 @@ COPY iris.beacon_state (id, description) FROM stdin;
 4	Flashing
 5	Fault: No Verify
 6	Fault: Stuck On
+7	Flashing: Other
 \.
 
 CREATE TABLE iris._beacon (
