@@ -71,8 +71,8 @@ Restricted resources can be accessed using standard http methods:
   *minimal* attributes -- those needed for searching and displaying compact
   cards.  The response also contains an ETag header, derived from the file's
   *modified* metadata, encoded in hexadecimal.
-- `GET iris/api/{type}/{name}`: Get a single object as JSON, with *full*
-  attributes.
+- `GET iris/api/{type}/{name}`: Get a single object as JSON, with *minimal* and
+  *full* attributes
 - `POST iris/api/{type}`: Create a new object of the `{type}`.  Body contains
                           required attributes as JSON
 - `PATCH iris/api/{type}/{name}`: Update attributes of one object, with JSON
@@ -141,7 +141,7 @@ A `Content-Type: application/json` header is included where appropriate.
 
 Also, a read only `controller_io` resource is available with
 `GET iris/api/controller_io/{name}`.  It contains an array of objects consisting
-of `pin`, `resource_n` and `name`.
+of `pin`, `name` and `resource_n`.
 
 ### `detector`
 
@@ -189,16 +189,17 @@ of `pin`, `resource_n` and `name`.
 
 ### `geo_loc`
 
+Since `geo_loc` resources can only be created and deleted with an associated
+`resource_n`, there are only two valid endpoints:
+
+- `GET iris/api/geo_loc/{name}`: Get a single object as JSON, with *minimal*
+  and *full* attributes
+- `PATCH iris/api/geo_loc/{name}`: Update attributes of one object, with JSON
+
 | Access       | Minimal          | Full        |
 |--------------|------------------|-------------|
 | Read Only    | name             | resource\_n |
 | 🔧 Configure | roadway, road\_dir, cross\_street, cross\_dir, cross\_mod, landmark | lat, lon |
-
-Since `geo_loc` resources are only created and deleted with an associated
-`resource_n`, there are only two valid endpoints:
-
-- `GET iris/api/{type}/{name}`: Get one full object as JSON
-- `PATCH iris/api/{type}/{name}`: Update attributes of one object, with JSON
 
 ### `gps`
 
