@@ -67,7 +67,7 @@ roles which do not have any access to the [permission], [role] and [user] types.
 
 Restricted resources can be accessed using standard http methods:
 
-- `GET iris/api/{type}`: Get all objects of `{type}` (minimal), as a JSON array
+- `GET iris/api/{type}`: Get all objects of `{type}`, as a JSON array
 - `GET iris/api/{type}/{name}`: Get one full object as JSON
 - `POST iris/api/{type}`: Create a new object of the `{type}`.  Body contains
                           required attributes as JSON
@@ -76,29 +76,25 @@ Restricted resources can be accessed using standard http methods:
 
 A `Content-Type: application/json` header is included where appropriate.
 
-### All Object Arrays
-
-A `GET iris/api/{type}` returns all objects of `{type}` in a JSON array.
-These objects contain only the *minimal* attributes -- those needed for
-*searching* and *displaying compact cards*.
-
-The response for these requests contains an ETag header, derived from the file's
+`GET iris/api/{type}` returns an array of all objects of `{type}`, with only
+the *minimal* attributes -- those needed for searching and displaying compact
+cards.  The response also contains an ETag header, derived from the file's
 *modified* metadata, encoded in hexadecimal.
+
+`GET iris/api/{type}/{name}` returns a single object, with *full* attributes.
 
 ## Resource Types
 
-*Full* attributes are only included in single object responses.
-
 ### `alarm`
 
-| Access       | Attributes              | Full          |
+| Access       | Minimal                 | Full          |
 |--------------|-------------------------|---------------|
 | Read Only    | name, state             | trigger\_time |
 | 🔧 Configure | description, controller | pin           |
 
 ### `beacon`
 
-| Access       | Attributes     | Full                        |
+| Access       | Minimal        | Full                        |
 |--------------|----------------|-----------------------------|
 | Read Only    | name, location | geo\_loc                    |
 | 👉 Operate   | state          |                             |
@@ -107,14 +103,14 @@ The response for these requests contains an ETag header, derived from the file's
 
 ### `cabinet_style`
 
-| Access       | Attributes | Full |
+| Access       | Minimal    | Full |
 |--------------|------------|------|
 | Read Only    | name       |      |
 | 🔧 Configure |            | police\_panel\_pin\_1, police\_panel\_pin\_2, watchdog\_reset\_pin\_1, watchdog\_reset\_pin\_2, dip |
 
 ### `camera`
 
-| Access       | Attributes           | Full                  |
+| Access       | Minimal              | Full                  |
 |--------------|----------------------|-----------------------|
 | Read Only    | name, location       | geo\_loc, video\_loss |
 | 👉 Operate   |                      | ptz                   |
@@ -123,7 +119,7 @@ The response for these requests contains an ETag header, derived from the file's
 
 ### `comm_config`
 
-| Access       | Attributes  | Full |
+| Access       | Minimal     | Full |
 |--------------|-------------|------|
 | Read Only    | name        |      |
 | 💡 Plan      |             | timeout\_ms, idle\_disconnect\_sec, no\_response\_disconnect\_sec |
@@ -131,7 +127,7 @@ The response for these requests contains an ETag header, derived from the file's
 
 ### `comm_link`
 
-| Access       | Attributes                     | Full |
+| Access       | Minimal                        | Full |
 |--------------|--------------------------------|------|
 | Read Only    | name, connected                |      |
 | 💡 Plan      | poll\_enabled                  |      |
@@ -139,7 +135,7 @@ The response for these requests contains an ETag header, derived from the file's
 
 ### `controller`
 
-| Access       | Attributes                           | Full     |
+| Access       | Minimal                              | Full     |
 |--------------|--------------------------------------|----------|
 | Read Only    | name, location, setup, fail\_time    | geo\_loc |
 | 👉 Operate   |                                      | download, device\_req |
@@ -152,7 +148,7 @@ of `pin`, `resource_n` and `name`.
 
 ### `detector`
 
-| Access       | Attributes  | Full                       |
+| Access       | Minimal     | Full                       |
 |--------------|-------------|----------------------------|
 | Read Only    | name, label | auto\_fail                 |
 | 👉 Operate   |             | field\_length, force\_fail |
@@ -161,7 +157,7 @@ of `pin`, `resource_n` and `name`.
 
 ### `dms`
 
-| Access       | Attributes                   | Full      |
+| Access       | Minimal                      | Full      |
 |--------------|------------------------------|-----------|
 | Read Only    | name, location, msg\_current | sign\_config, sign\_detail, geo\_loc, msg\_sched |
 | 👉 Operate   |                              | msg\_user |
@@ -170,7 +166,7 @@ of `pin`, `resource_n` and `name`.
 
 ### `flow_stream`
 
-| Access       | Attributes | Full                       |
+| Access       | Minimal    | Full                       |
 |--------------|------------|----------------------------|
 | Read Only    | name       | status                     |
 | 👉 Operate   |            | camera, mon\_num           |
@@ -179,7 +175,7 @@ of `pin`, `resource_n` and `name`.
 
 ### `gate_arm`
 
-| Access       | Attributes                 | Full                  |
+| Access       | Minimal                    | Full                  |
 |--------------|----------------------------|-----------------------|
 | Read Only    | name, location, arm\_state | ga\_array, idx, fault |
 | 💡 Plan      | notes                      |                       |
@@ -187,7 +183,7 @@ of `pin`, `resource_n` and `name`.
 
 ### `gate_arm_array`
 
-| Access       | Attributes                | Full     |
+| Access       | Minimal                   | Full     |
 |--------------|---------------------------|----------|
 | Read Only    | name, location, interlock | geo\_loc |
 | 👉 Operate   | arm\_state                |          |
@@ -196,7 +192,7 @@ of `pin`, `resource_n` and `name`.
 
 ### `geo_loc`
 
-| Access       | Attributes       | Full        |
+| Access       | Minimal          | Full        |
 |--------------|------------------|-------------|
 | Read Only    | name             | resource\_n |
 | 🔧 Configure | roadway, road\_dir, cross\_street, cross\_dir, cross\_mod, landmark | lat, lon |
@@ -209,7 +205,7 @@ Since `geo_loc` resources are only created and deleted with an associated
 
 ### `gps`
 
-| Access       | Attributes | Full                                   |
+| Access       | Minimal    | Full                                   |
 |--------------|------------|----------------------------------------|
 | Read Only    | name       | latest\_poll, latest\_sample, lat, lon |
 | 💡 Plan      | notes      |                                        |
@@ -217,7 +213,7 @@ Since `geo_loc` resources are only created and deleted with an associated
 
 ### `lane_marking`
 
-| Access       | Attributes     | Full     |
+| Access       | Minimal        | Full     |
 |--------------|----------------|----------|
 | Read Only    | name, location | geo\_loc |
 | 👉 Operate   | deployed       |          |
@@ -226,7 +222,7 @@ Since `geo_loc` resources are only created and deleted with an associated
 
 ### `lcs_array`
 
-| Access       | Attributes | Full  |
+| Access       | Minimal    | Full  |
 |--------------|------------|-------|
 | Read Only    | name       |       |
 | 👉 Operate   | lcs\_lock  |       |
@@ -235,14 +231,14 @@ Since `geo_loc` resources are only created and deleted with an associated
 
 ### `lcs_indication`
 
-| Access       | Attributes            | Full |
+| Access       | Minimal               | Full |
 |--------------|-----------------------|------|
 | Read Only    | name, lcs, indication |      |
 | 🔧 Configure | controller            | pin  |
 
 ### `modem`
 
-| Access       | Attributes | Full        |
+| Access       | Minimal    | Full        |
 |--------------|------------|-------------|
 | Read Only    | name       |             |
 | 💡 Plan      | enabled    | timeout\_ms |
@@ -250,14 +246,14 @@ Since `geo_loc` resources are only created and deleted with an associated
 
 ### `permission`
 
-| Access       | Attributes                          | Full |
+| Access       | Minimal                             | Full |
 |--------------|-------------------------------------|------|
 | Read Only    | id                                  |      |
 | 🔧 Configure | role, resource\_n, batch, access\_n |      |
 
 ### `ramp_meter`
 
-| Access       | Attributes     | Full                             |
+| Access       | Minimal        | Full                             |
 |--------------|----------------|----------------------------------|
 | Read Only    | name, location | geo\_loc                         |
 | 👉 Operate   |                | m\_lock, rate                    |
@@ -266,14 +262,14 @@ Since `geo_loc` resources are only created and deleted with an associated
 
 ### `role`
 
-| Access       | Attributes | Full |
+| Access       | Minimal    | Full |
 |--------------|------------|------|
 | Read Only    | name       |      |
 | 💡 Plan      | enabled    |      |
 
 ### `tag_reader`
 
-| Access       | Attributes     | Full       |
+| Access       | Minimal        | Full       |
 |--------------|----------------|------------|
 | Read Only    | name, location | geo\_loc   |
 | 💡 Plan      | notes          | toll\_zone |
@@ -281,7 +277,7 @@ Since `geo_loc` resources are only created and deleted with an associated
 
 ### `user`
 
-| Access       | Attributes       | Full |
+| Access       | Minimal          | Full |
 |--------------|------------------|------|
 | Read Only    | name             |      |
 | 💡 Plan      | enabled          |      |
@@ -289,7 +285,7 @@ Since `geo_loc` resources are only created and deleted with an associated
 
 ### `video_monitor`
 
-| Access       | Attributes           | Full                       |
+| Access       | Minimal              | Full                       |
 |--------------|----------------------|----------------------------|
 | Read Only    | name                 |                            |
 | 👉 Operate   |                      | camera                     |
@@ -298,7 +294,7 @@ Since `geo_loc` resources are only created and deleted with an associated
 
 ### `weather_sensor`
 
-| Access       | Attributes               | Full |
+| Access       | Minimal                  | Full |
 |--------------|--------------------------|------|
 | Read Only    | name, location           | geo\_loc, settings, sample, sample\_time |
 | 💡 Plan      | site\_id, alt\_id, notes |      |
