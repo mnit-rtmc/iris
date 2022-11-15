@@ -42,6 +42,7 @@ pub struct Beacon {
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
     pub verify_pin: Option<u32>,
+    pub ext_mode: Option<bool>,
 }
 
 /// Beacon ancillary data
@@ -102,7 +103,7 @@ impl Beacon {
 
     /// Check if beacon is flashing
     fn flashing(&self) -> bool {
-        // 4: FLASHING, 6: FAULT_STUCK_ON, 7: FLASHING_OTHER
+        // 4: FLASHING, 6: FAULT_STUCK_ON, 7: FLASHING_EXT
         matches!(self.state, 4 | 6 | 7)
     }
 
@@ -197,6 +198,11 @@ impl Beacon {
         let controller = HtmlStr::new(&self.controller);
         let pin = OptVal(self.pin);
         let verify_pin = OptVal(self.verify_pin);
+        let ext_mode = if self.ext_mode.unwrap_or(false) {
+            " checked"
+        } else {
+            ""
+        };
         format!(
             "<div class='row'>\
               <label for='message'>Message</label>\
@@ -222,6 +228,10 @@ impl Beacon {
               <label for='verify_pin'>Verify Pin</label>\
               <input id='verify_pin' type='number' min='1' max='104' \
                      size='8' value='{verify_pin}'>\
+            </div>\
+            <div class='row'>\
+              <label for='ext_mode'>Ext Mode</label>\
+              <input id='ext_mode' type='checkbox'{ext_mode}>\
             </div>"
         )
     }
@@ -277,6 +287,7 @@ impl Card for Beacon {
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.changed_input("verify_pin", self.verify_pin);
+        fields.changed_input("ext_mode", self.ext_mode);
         fields.into_value().to_string()
     }
 

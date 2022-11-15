@@ -208,6 +208,7 @@ rejected message.
 [DMS action]: action_plans.html#dms-actions
 [fonts]: fonts.html
 [incident]: incident_dms.html
+[NTCIP]: comm_links.html#ntcip
 [Slow traffic]: slow_warning.html
 [system attribute]: system_attributes.html
 [Travel time]: travel_time.html

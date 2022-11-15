@@ -2,7 +2,7 @@
 
 A beacon is a light or set of lights that flashes toward oncoming traffic.
 Sometimes called _flashers_ or _wig-wags_, their purpose is to draw attention to
-a [DMS] or static sign.
+a static sign or [DMS].
 
 ### Setup
 

@@ -98,12 +98,12 @@ The response for these requests contains an ETag header, derived from the file's
 
 ### `beacon`
 
-| Access       | Attributes                          |
-|--------------|-------------------------------------|
-| Read Only    | name, location, {`geo_loc`}         |
-| 👉 Operate   | state                               |
-| 💡 Plan      | message, notes, {`preset`}          |
-| 🔧 Configure | controller, {`pin`}, {`verify_pin`} |
+| Access       | Attributes                                        |
+|--------------|---------------------------------------------------|
+| Read Only    | name, location, {`geo_loc`}                       |
+| 👉 Operate   | state                                             |
+| 💡 Plan      | message, notes, {`preset`}                        |
+| 🔧 Configure | controller, {`pin`}, {`verify_pin`}, {`ext_mode`} |
 
 ### `cabinet_style`
 

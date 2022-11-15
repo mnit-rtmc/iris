@@ -81,8 +81,11 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 			boolean verify = prop.getInput(vp);
 			if (relay && !verify)
 				return BeaconState.FAULT_NO_VERIFY;
-			if (verify && !relay)
-				return BeaconState.FAULT_STUCK_ON;
+			if (verify && !relay) {
+				return beacon.getExtMode()
+				      ? BeaconState.FLASHING_EXT
+				      : BeaconState.FAULT_STUCK_ON;
+			}
 		}
 		BeaconState bs = (relay)
 			? BeaconState.FLASHING

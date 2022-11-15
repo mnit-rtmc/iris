@@ -28,7 +28,7 @@ public enum BeaconState {
 	FLASHING,        /* 4: beacon flashing (on) */
 	FAULT_NO_VERIFY, /* 5: flashing, but no verify */
 	FAULT_STUCK_ON,  /* 6: dark, but verify stuck on */
-	FLASHING_OTHER;  /* 7: flashing, control by other system (on) */
+	FLASHING_EXT;    /* 7: flashing, control by external system (on) */
 
 	/** Values array */
 	static private final BeaconState[] VALUES = values();

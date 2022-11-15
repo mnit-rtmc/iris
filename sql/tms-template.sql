@@ -2080,7 +2080,7 @@ GRANT SELECT ON alarm_event_view TO PUBLIC;
 --
 CREATE TABLE iris.beacon_state (
     id INTEGER PRIMARY KEY,
-    description VARCHAR(16) NOT NULL
+    description VARCHAR(18) NOT NULL
 );
 
 COPY iris.beacon_state (id, description) FROM stdin;
@@ -2091,7 +2091,7 @@ COPY iris.beacon_state (id, description) FROM stdin;
 4	Flashing
 5	Fault: No Verify
 6	Fault: Stuck On
-7	Flashing: Ext
+7	Flashing: External
 \.
 
 CREATE TABLE iris._beacon (
@@ -2100,6 +2100,7 @@ CREATE TABLE iris._beacon (
     message VARCHAR(128) NOT NULL,
     notes VARCHAR(128) NOT NULL,
     verify_pin INTEGER,
+    ext_mode BOOLEAN NOT NULL,
     state INTEGER NOT NULL REFERENCES iris.beacon_state
 );
 
@@ -2127,8 +2128,8 @@ CREATE TRIGGER beacon_table_notify_trig
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.beacon AS
-    SELECT b.name, geo_loc, controller, pin, notes, message, verify_pin, preset,
-           state
+    SELECT b.name, geo_loc, controller, pin, notes, message, verify_pin,
+           ext_mode, preset, state
     FROM iris._beacon b
     JOIN iris.controller_io cio ON b.name = cio.name
     JOIN iris._device_preset p ON b.name = p.name;
@@ -2140,9 +2141,10 @@ BEGIN
         VALUES (NEW.name, 'beacon', NEW.controller, NEW.pin);
     INSERT INTO iris._device_preset (name, preset)
         VALUES (NEW.name, NEW.preset);
-    INSERT INTO iris._beacon (name, geo_loc, notes, message, verify_pin, state)
+    INSERT INTO iris._beacon (name, geo_loc, notes, message, verify_pin,
+                              ext_mode, state)
         VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message,
-                NEW.verify_pin, NEW.state);
+                NEW.verify_pin, NEW.ext_mode, NEW.state);
     RETURN NEW;
 END;
 $beacon_insert$ LANGUAGE plpgsql;
@@ -2166,6 +2168,7 @@ BEGIN
            notes = NEW.notes,
            message = NEW.message,
            verify_pin = NEW.verify_pin,
+           ext_mode = NEW.ext_mode,
            state = NEW.state
      WHERE name = OLD.name;
     RETURN NEW;
@@ -2184,8 +2187,8 @@ CREATE VIEW beacon_view AS
     SELECT b.name, b.notes, b.message, p.camera, p.preset_num, b.geo_loc,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            l.landmark, l.lat, l.lon, l.corridor, l.location,
-           b.controller, b.pin, b.verify_pin, ctr.comm_link, ctr.drop_id,
-           ctr.condition, bs.description AS state
+           b.controller, b.pin, b.verify_pin, b.ext_mode,
+           ctr.comm_link, ctr.drop_id, ctr.condition, bs.description AS state
     FROM iris.beacon b
     JOIN iris.beacon_state bs ON b.state = bs.id
     LEFT JOIN iris.camera_preset p ON b.preset = p.name

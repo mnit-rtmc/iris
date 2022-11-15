@@ -43,8 +43,8 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, BeaconImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"preset, message, verify_pin, state FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+			"preset, message, verify_pin, ext_mode, state " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new BeaconImpl(row));
@@ -64,6 +64,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		map.put("preset", preset);
 		map.put("message", message);
 		map.put("verify_pin", verify_pin);
+		map.put("ext_mode", ext_mode);
 		map.put("state", state);
 		return map;
 	}
@@ -98,19 +99,21 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		     row.getString(6),           // preset
 		     row.getString(7),           // message
 		     (Integer) row.getObject(8), // verify_pin
-		     row.getInt(9)               // state
+		     row.getBoolean(9),          // ext_mode
+		     row.getInt(10)              // state
 		);
 	}
 
 	/** Create a beacon */
 	private BeaconImpl(String n, String l, String c, int p, String nt,
-		String cp, String m, Integer vp, int bs)
+		String cp, String m, Integer vp, boolean em, int bs)
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(l);
 		setPreset(lookupPreset(cp));
 		message = m;
 		verify_pin = vp;
+		ext_mode = em;
 		state = bs;
 		initTransients();
 	}
@@ -229,6 +232,29 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	@Override
 	public Integer getVerifyPin() {
 		return verify_pin;
+	}
+
+	/** External detect mode */
+	private boolean ext_mode;
+
+	/** Set the external detect mode */
+	@Override
+	public void setExtMode(boolean em) {
+		ext_mode = em;
+	}
+
+	/** Set the external detect mode */
+	public void doSetExtMode(boolean em) throws TMSException {
+		if (em != ext_mode) {
+			store.update(this, "ext_mode", em);
+			setExtMode(em);
+		}
+	}
+
+	/** Get the external detect mode */
+	@Override
+	public boolean getExtMode() {
+		return ext_mode;
 	}
 
 	/** Beacon state */
