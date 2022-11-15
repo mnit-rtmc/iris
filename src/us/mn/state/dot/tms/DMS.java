@@ -51,10 +51,10 @@ public interface DMS extends Device {
 	/** Get the hidden flag */
 	boolean getHidden();
 
-	/** Set external beacon */
+	/** Set remote beacon */
 	void setBeacon(Beacon b);
 
-	/** Get external beacon */
+	/** Get remote beacon */
 	Beacon getBeacon();
 
 	/** Set verification camera preset */

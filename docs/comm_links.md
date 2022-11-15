@@ -2,8 +2,8 @@
 
 Select `View ➔ Maintenance ➔ Comm Links` menu item
 
-A **comm link** is a network connection to an external [device] or system.  IRIS
-is capable of supporting thousands of simultaneous comm links.
+A **comm link** is a network connection to field [device]s or external systems.
+IRIS is capable of supporting thousands of simultaneous comm links.
 
 ## URI
 

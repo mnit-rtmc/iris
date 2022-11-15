@@ -40,12 +40,12 @@ All       | All signs
 
 There are a number of fields available for configuring a DMS.
 
-Field           | Description
-----------------|----------------------------------------------------
-External beacon | [beacon] controlled when sign messages are deployed
-Static graphic  | image of static sign in which DMS is inset
-Device purpose  | _general_ or _dedicated_ purpose for sign operation
-Hidden          | hide sign when _available_ or _deployed_ styles are selected
+Field          | Description
+---------------|---------------------------------------------------
+Remote beacon  | [beacon] activated when sign messages are deployed
+Static graphic | image of static sign in which DMS is inset
+Device purpose | _general_ or _dedicated_ purpose for sign operation
+Hidden         | hide sign when _available_ or _deployed_ styles are selected
 
 ## Messages
 

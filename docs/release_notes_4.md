@@ -656,8 +656,8 @@
 4.18.0 (27 Oct 2014)
 
  - Add support for "internal" DMS beacons to NTCIP protocol.
- - Enable ramp meters to have external advance warning beacons.
- - Enable DMS to have external beacons.
+ - Enable ramp meters to have advance warning beacons.
+ - Enable DMS to have remote beacons.
  - Allow DMS actions to specify beacon state.
  - Add "tag reader" objects for tolling sensors.
  - Added automatic camera wiper function when nearby weather sensor indicates

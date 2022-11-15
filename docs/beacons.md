@@ -30,7 +30,7 @@ These fields are available for configuring a beacon:
 
 **Verify Pin** is a digital input to sense whether the lights are activated, for
 beacons which have verify circuitry.  For the [CBW] protocol, it is also an
-output to energize the verify circuit.  **Verify Pin** and **Pin** can be the
+output to energize the verify circuit.  **Pin** and **Verify Pin** can be the
 same.
 
 **Stuck/Other** determines the beacon state when a verify is detected without
@@ -40,8 +40,8 @@ being commanded.  Use this to report when some other system controls the beacon.
 
 Beacons can be controlled in a few ways:
 - Changing state manually through the user interface
-- Deploying or blanking DMS with an associated [external] beacon
-- Activating a ramp meter with an associated advance warning beacon
+- Deploying or blanking DMS with a [remote] beacon
+- Activating a ramp meter with an advance warning beacon
 - With [action plans] containing [beacon actions]
 
 A beacon can be in one of these states:
@@ -68,8 +68,8 @@ the value of the `beacon_event_purge_days` [system attribute].
 [CBW]: comm_links.html#cbw
 [Din-Relay]: comm_links.html#din-relay
 [DMS]: dms.html
-[external]: dms.html#setup
 [MnDOT-170]: comm_links.html#mndot-170
 [Natch]: comm_links.html#natch
 [NTCIP]: comm_links.html#ntcip
+[remote]: dms.html#setup
 [system attribute]: system_attributes.html

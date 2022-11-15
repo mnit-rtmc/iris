@@ -429,16 +429,16 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return hidden;
 	}
 
-	/** External beacon */
+	/** Remote beacon */
 	private Beacon beacon;
 
-	/** Set external beacon */
+	/** Set remote beacon */
 	@Override
 	public void setBeacon(Beacon b) {
 		beacon = b;
 	}
 
-	/** Set external beacon */
+	/** Set remote beacon */
 	public void doSetBeacon(Beacon b) throws TMSException {
 		if (b != beacon) {
 			store.update(this, "beacon", b);
@@ -446,13 +446,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
-	/** Get external beacon */
+	/** Get remote beacon */
 	@Override
 	public Beacon getBeacon() {
 		return beacon;
 	}
 
-	/** Update external beacon */
+	/** Update remote beacon */
 	private void updateBeacon() {
 		Beacon b = beacon;
 		if (b != null) {
