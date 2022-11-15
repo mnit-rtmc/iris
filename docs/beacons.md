@@ -32,7 +32,8 @@ same.
 **Ext Mode** determines the state reported when a verify is detected without
 being commanded:
 - false: `Fault: Stuck On`
-- true: `Flashing: Ext` (use when an external system can control the beacon)
+- true: `Flashing: External` (use when an external system can control the
+  beacon)
 
 ### State
 
@@ -44,14 +45,14 @@ Beacons can be controlled in a few ways:
 
 A beacon can be in one of these states:
 
-| State            | Description                                   |
-|------------------|-----------------------------------------------|
-| Unknown          | State not known due to communication error    |
-| Dark             | Not flashing                                  |
-| Flashing         | Lights flashing, commanded by IRIS            |
-| Flashing: Ext    | Lights flashing, commanded by external system |
-| Fault: Stuck On  | Lights flashing, but not commanded            |
-| Fault: No Verify | Flashing commanded, but not verified          |
+| State              | Description                                   |
+|--------------------|-----------------------------------------------|
+| Unknown            | State not known due to communication error    |
+| Dark               | Not flashing                                  |
+| Flashing           | Lights flashing, commanded by IRIS            |
+| Flashing: External | Lights flashing, commanded by external system |
+| Fault: Stuck On    | Lights flashing, but not commanded            |
+| Fault: No Verify   | Flashing commanded, but not verified          |
 
 
 ### Events
