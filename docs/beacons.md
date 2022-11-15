@@ -4,10 +4,6 @@ A beacon is a light or set of lights that flashes toward oncoming traffic.
 Sometimes called _flashers_ or _wig-wags_, their purpose is to draw attention to
 a [DMS] or static sign.
 
-Dynamic message signs can have **internal** beacons, which are controlled
-through the DMS controller using the [NTCIP] protocol.  These beacons do not
-need an associated object in IRIS.
-
 ### Setup
 
 Select `View ➔ Message Signs ➔ Beacons` menu item

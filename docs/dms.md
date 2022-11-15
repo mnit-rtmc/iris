@@ -41,11 +41,14 @@ All       | All signs
 There are a number of fields available for configuring a DMS.
 
 Field          | Description
----------------|---------------------------------------------------
-Remote beacon  | [beacon] activated when sign messages are deployed
+---------------|--------------------------------------------------
+Remote beacon  | beacon activated automatically when sign deployed
 Static graphic | image of static sign in which DMS is inset
 Device purpose | _general_ or _dedicated_ purpose for sign operation
 Hidden         | hide sign when _available_ or _deployed_ styles are selected
+
+**Internal** beacons are controlled through the DMS controller using the [NTCIP]
+protocol.  **Remote** [beacon]s are controlled using a separate [comm link].
 
 ## Messages
 
@@ -201,6 +204,7 @@ rejected message.
 [abbreviation]: incident_dms.html#abbreviation
 [action plan]: action_plans.html
 [beacon]: beacons.html
+[comm link]: comm_links.html
 [DMS action]: action_plans.html#dms-actions
 [fonts]: fonts.html
 [incident]: incident_dms.html
