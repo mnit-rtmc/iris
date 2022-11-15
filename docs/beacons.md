@@ -26,26 +26,27 @@ These fields are available for configuring a beacon:
 | Notes       | Administrative notes                         |
 | Pin         | Controller output pin to activate beacon     |
 | Verify Pin  | Verify circuit I/O pin                       |
-| Stuck Other | `Fault: Stuck On` (f), `Flashing: Other` (t) |
+| Stuck/Other | `Fault: Stuck On` (f), `Flashing: Other` (t) |
 
 **Verify Pin** is a digital input to sense whether the lights are activated, for
 beacons which have verify circuitry.  For the [CBW] protocol, it is also an
 output to energize the verify circuit.  **Verify Pin** and **Pin** can be the
 same.
 
-**Stuck Other** determines the beacon state when a verify is detected without
-being commanded.  Use this to report when the other system controls the beacon.
+**Stuck/Other** determines the beacon state when a verify is detected without
+being commanded.  Use this to report when some other system controls the beacon.
 
 ### State
 
 Beacons can be controlled in a few ways:
 - Changing state manually through the user interface
 - Deploying or blanking DMS with an associated [external] beacon
+- Activating a ramp meter with an associated advance warning beacon
 - With [action plans] containing [beacon actions]
 
 A beacon can be in one of these states:
 
-| Style            | Description                                |
+| State            | Description                                |
 |------------------|--------------------------------------------|
 | Unknown          | State not known due to communication error |
 | Dark             | Not flashing                               |
