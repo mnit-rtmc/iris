@@ -9,6 +9,6 @@ INSERT INTO iris.parking_area_amenities (bit, amenity)
     VALUES (15, 'Family restroom');
 
 INSERT INTO iris.beacon_state (id, description)
-    VALUES (7, 'Flashing: Other');
+    VALUES (7, 'Flashing: Ext');
 
 COMMIT;

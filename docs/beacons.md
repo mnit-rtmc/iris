@@ -20,21 +20,23 @@ Beacons can be connected to controllers using one of these protocols:
 
 These fields are available for configuring a beacon:
 
-| Field       | Description                                  |
-|-------------|----------------------------------------------|
-| Message     | Static text message on sign                  |
-| Notes       | Administrative notes                         |
-| Pin         | Controller output pin to activate beacon     |
-| Verify Pin  | Verify circuit I/O pin                       |
-| Stuck/Other | `Fault: Stuck On` (f), `Flashing: Other` (t) |
+| Field      | Description                              |
+|------------|------------------------------------------|
+| Message    | Static text message on sign              |
+| Notes      | Administrative notes                     |
+| Pin        | Controller output pin to activate beacon |
+| Verify Pin | Verify circuit I/O pin                   |
+| Ext Mode   | External detect verify mode              |
 
 **Verify Pin** is a digital input to sense whether the lights are activated, for
 beacons which have verify circuitry.  For the [CBW] protocol, it is also an
 output to energize the verify circuit.  **Pin** and **Verify Pin** can be the
 same.
 
-**Stuck/Other** determines the beacon state when a verify is detected without
-being commanded.  Use this to report when some other system controls the beacon.
+**Ext Mode** determines the state reported when a verify is detected without
+being commanded:
+- false: `Fault: Stuck On`
+- true: `Flashing: Ext` (use when an external system can control the beacon)
 
 ### State
 
@@ -46,14 +48,14 @@ Beacons can be controlled in a few ways:
 
 A beacon can be in one of these states:
 
-| State            | Description                                |
-|------------------|--------------------------------------------|
-| Unknown          | State not known due to communication error |
-| Dark             | Not flashing                               |
-| Flashing         | Lights flashing, commanded by IRIS         |
-| Flashing: Other  | Lights flashing, commanded by other system |
-| Fault: Stuck On  | Lights flashing, but not commanded         |
-| Fault: No Verify | Flashing commanded, but not verified       |
+| State            | Description                                   |
+|------------------|-----------------------------------------------|
+| Unknown          | State not known due to communication error    |
+| Dark             | Not flashing                                  |
+| Flashing         | Lights flashing, commanded by IRIS            |
+| Flashing: Ext    | Lights flashing, commanded by external system |
+| Fault: Stuck On  | Lights flashing, but not commanded            |
+| Fault: No Verify | Flashing commanded, but not verified          |
 
 
 ### Events
