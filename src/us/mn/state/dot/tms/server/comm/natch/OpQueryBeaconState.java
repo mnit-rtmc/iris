@@ -37,8 +37,9 @@ public class OpQueryBeaconState extends OpNatch {
 	/** Verify pin status property */
 	private final PinStatusProp verify;
 
-	/** Flag when pin query is done */
-	private boolean pin_done;
+	/** Flag when relay query is done.
+	 *  Can only be true if verify is not null. */
+	private boolean relay_done;
 
 	/** Create a new query beacon state step */
 	public OpQueryBeaconState(Counter c, BeaconImpl b) {
@@ -51,7 +52,7 @@ public class OpQueryBeaconState extends OpNatch {
 	/** Poll the controller */
 	@Override
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
-		if (pin_done)
+		if (relay_done)
 			verify.encodeQuery(op, tx_buf);
 		else
 			relay.encodeQuery(op, tx_buf);
@@ -61,14 +62,14 @@ public class OpQueryBeaconState extends OpNatch {
 	/** Get the property */
 	@Override
 	protected NatchProp getProp() {
-		return (pin_done) ? verify : relay;
+		return (relay_done) ? verify : relay;
 	}
 
 	/** Handle received property */
 	@Override
 	protected void handleReceived(Operation op, NatchProp pr) {
 		if (pr == relay && verify != null)
-			pin_done = true;
+			relay_done = true;
 		else
 			setDone(true);
 	}
@@ -77,8 +78,8 @@ public class OpQueryBeaconState extends OpNatch {
 	@Override
 	public OpStep next() {
 		if (done) {
-			BeaconState bs = beacon.getBeaconState(relay.getStatus(),
-				verify.getStatus());
+			boolean vs = (verify != null) ? verify.getStatus() : false;
+			BeaconState bs = beacon.getBeaconState(relay.getStatus(), vs);
 			beacon.setStateNotify(bs);
 			return null;
 		} else
