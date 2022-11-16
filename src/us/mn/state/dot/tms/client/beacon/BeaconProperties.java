@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2017  Minnesota Department of Transportation
+ * Copyright (C) 2004-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
@@ -76,7 +78,17 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 	private final IComboBoxModel<CameraPreset> preset_mdl;
 
 	/** Message text area */
-	private final JTextArea message_txt = new JTextArea(3, 24);
+	private final JTextArea message_txt = new JTextArea(4, 24);
+
+	/** Verify pin */
+	private final JTextField verify_pin_txt = new JTextField(3);
+
+	/** Checkbox for ext mode flag */
+	private final JCheckBox ext_mode_chk = new JCheckBox(new IAction(null) {
+		protected void doActionPerformed(ActionEvent e) {
+			proxy.setExtMode(ext_mode_chk.isSelected());
+		}
+	});
 
 	/** Create a new beacon form */
 	public BeaconProperties(Session s, Beacon b) {
@@ -134,6 +146,13 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 				proxy.setMessage(message_txt.getText());
 			}
 		});
+		verify_pin_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				Integer vp = IPanel.parseInt(verify_pin_txt);
+				proxy.setVerifyPin(vp);
+			}
+		});
 	}
 
 	/** Controller lookup button pressed */
@@ -153,6 +172,10 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 		p.add(preset_cbx, Stretch.LAST);
 		p.add("beacon.text");
 		p.add(message_txt, Stretch.LAST);
+		p.add("beacon.verify.pin");
+		p.add(verify_pin_txt, Stretch.LAST);
+		p.add("beacon.ext.mode");
+		p.add(ext_mode_chk, Stretch.LAST);
 		return p;
 	}
 
@@ -163,6 +186,8 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 		notes_txt.setEnabled(canWrite("notes"));
 		preset_act.setEnabled(canWrite("preset"));
 		message_txt.setEnabled(canWrite("message"));
+		verify_pin_txt.setEnabled(canWrite("verify_pin"));
+		ext_mode_chk.setEnabled(canWrite("ext_mode"));
 	}
 
 	/** Update one attribute on the form */
@@ -176,5 +201,13 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 			preset_act.updateSelected();
 		if (a == null || a.equals("message"))
 			message_txt.setText(proxy.getMessage());
+		if (a == null || a.equals("verifyPin")) {
+			Integer vp = proxy.getVerifyPin();
+			verify_pin_txt.setText(
+				(vp != null) ? vp.toString() : ""
+			);
+		}
+		if (a == null || a.equals("extMode"))
+			ext_mode_chk.setSelected(proxy.getExtMode());
 	}
 }
