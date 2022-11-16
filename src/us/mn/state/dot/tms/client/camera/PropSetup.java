@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2020  Minnesota Department of Transportation
+ * Copyright (C) 2014-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,16 +42,6 @@ import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
  * @author Douglas Lau
  */
 public class PropSetup extends IPanel {
-
-	/** Parse an integer */
-	static private Integer parseInt(String t) {
-		try {
-			return Integer.parseInt(t);
-		}
-		catch (NumberFormatException e) {
-			return null;
-		}
-	}
 
 	/** Camera number text */
 	private final JTextField cam_num_txt = new JTextField("", 8);
@@ -181,7 +171,7 @@ public class PropSetup extends IPanel {
 	private void createJobs() {
 		cam_num_txt.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
-			    Integer cn = parseInt(cam_num_txt.getText());
+			    Integer cn = parseInt(cam_num_txt);
 			    cam_num_txt.setText((cn != null)
 			                        ? cn.toString()
 			                        : "");
@@ -196,7 +186,7 @@ public class PropSetup extends IPanel {
 		});
 		enc_port_txt.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
-			    Integer ep = parseInt(enc_port_txt.getText());
+			    Integer ep = parseInt(enc_port_txt);
 			    enc_port_txt.setText((ep != null)
 			                        ? ep.toString()
 			                        : "");
