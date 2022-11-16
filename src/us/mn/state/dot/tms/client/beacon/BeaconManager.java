@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
@@ -67,13 +68,12 @@ public class BeaconManager extends DeviceManager<Beacon> {
 	protected ProxyTheme<Beacon> createTheme() {
 		ProxyTheme<Beacon> theme = new ProxyTheme<Beacon>(this,
 			new BeaconMarker());
+		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(ItemStyle.EXTERNAL, ProxyTheme.COLOR_EXTERNAL);
+		theme.addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(ItemStyle.NO_CONTROLLER,
-			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
@@ -86,6 +86,11 @@ public class BeaconManager extends DeviceManager<Beacon> {
 			pnl.setBackground(Color.WHITE);
 			p.add(pnl);
 		}
+		p.addSeparator();
+		BeaconState bs = BeaconState.fromOrdinal(b.getState());
+		JPanel st = makeMenuLabel(bs.toString());
+		st.setBackground(Color.LIGHT_GRAY);
+		p.add(st);
 		p.addSeparator();
 		p.add(new DeployAction(getSelectionModel()));
 		p.add(new UndeployAction(getSelectionModel()));

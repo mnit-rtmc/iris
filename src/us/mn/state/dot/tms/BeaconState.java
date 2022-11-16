@@ -21,14 +21,14 @@ package us.mn.state.dot.tms;
  * @author Douglas Lau
  */
 public enum BeaconState {
-	UNKNOWN,         /* 0: beacon state unknown */
-	DARK_REQ,        /* 1: command dark (off) */
-	DARK,            /* 2: beacon dark (off) */
-	FLASHING_REQ,    /* 3: command flashing (on) */
-	FLASHING,        /* 4: beacon flashing (on) */
-	FAULT_NO_VERIFY, /* 5: flashing, but no verify */
-	FAULT_STUCK_ON,  /* 6: dark, but verify stuck on */
-	FLASHING_EXT;    /* 7: flashing, control by external system (on) */
+	UNKNOWN,           /* 0: beacon state unknown */
+	DARK_REQ,          /* 1: command dark (off) */
+	DARK,              /* 2: beacon dark (off) */
+	FLASHING_REQ,      /* 3: command flashing (on) */
+	FLASHING,          /* 4: lights flashing, commanded by IRIS */
+	FAULT_NO_VERIFY,   /* 5: flashing commanded, but not verified */
+	FAULT_STUCK_ON,    /* 6: lights flashing, but not commanded */
+	FLASHING_EXTERNAL; /* 7: lights flashing, external system */
 
 	/** Values array */
 	static private final BeaconState[] VALUES = values();

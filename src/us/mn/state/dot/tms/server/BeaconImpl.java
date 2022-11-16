@@ -139,8 +139,10 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	@Override
 	protected long calculateStyles() {
 		long s = super.calculateStyles();
-		if (isDeployed())
+		if (isStyleDeployed())
 			s |= ItemStyle.DEPLOYED.bit();
+		if (isStyleExternal())
+			s |= ItemStyle.EXTERNAL.bit();
 		return s;
 	}
 
@@ -151,9 +153,24 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 			state == BeaconState.DARK.ordinal();
 	}
 
-	/** Test if beacon is deployed */
-	private boolean isDeployed() {
-		return isOnline() && state == BeaconState.FLASHING.ordinal();
+	/** Test if style is deployed */
+	private boolean isStyleDeployed() {
+		if (!isOnline())
+			return false;
+		switch (BeaconState.fromOrdinal(state)) {
+		case FLASHING:
+		case FLASHING_EXTERNAL:
+		case FAULT_STUCK_ON:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	/** Test if style is external */
+	private boolean isStyleExternal() {
+		return isOnline()
+		    && state == BeaconState.FLASHING_EXTERNAL.ordinal();
 	}
 
 	/** Test if beacon needs maintenance */
@@ -330,7 +347,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 				return BeaconState.FAULT_NO_VERIFY;
 			if (verify && !relay) {
 				return getExtMode()
-				      ? BeaconState.FLASHING_EXT
+				      ? BeaconState.FLASHING_EXTERNAL
 				      : BeaconState.FAULT_STUCK_ON;
 			}
 		}
