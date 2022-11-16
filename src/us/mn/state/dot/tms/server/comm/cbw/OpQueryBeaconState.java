@@ -66,10 +66,8 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		if (isSuccess()) {
+		if (isSuccess())
 			beacon.setStateNotify(getState());
-			setMaintStatus(formatMaintStatus());
-		}
 		super.cleanup();
 	}
 
@@ -87,14 +85,5 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 	private boolean getVerifyValue() {
 		Integer vp = beacon.getVerifyPin();
 		return (vp != null) ? prop.getInput(vp) : false;
-	}
-
-	/** Format the maintenance status */
-	private String formatMaintStatus() {
-		switch (getState()) {
-			case FAULT_NO_VERIFY: return "Verify failed";
-			case FAULT_STUCK_ON: return "Verify stuck";
-			default: return "";
-		}
 	}
 }

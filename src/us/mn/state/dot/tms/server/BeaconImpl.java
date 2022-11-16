@@ -156,6 +156,14 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		return isOnline() && state == BeaconState.FLASHING.ordinal();
 	}
 
+	/** Test if beacon needs maintenance */
+	@Override
+	protected boolean needsMaintenance() {
+		int bs = state;
+		return bs == BeaconState.FAULT_NO_VERIFY.ordinal()
+		    || bs == BeaconState.FAULT_STUCK_ON.ordinal();
+	}
+
 	/** Device location */
 	private GeoLocImpl geo_loc;
 
