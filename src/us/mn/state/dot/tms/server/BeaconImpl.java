@@ -126,6 +126,15 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		geo_loc.notifyRemove();
 	}
 
+	/** Update the item styles */
+	@Override
+	public void updateStyles() {
+		// NOTE: called by ControllerImpl.setFailed
+		if (isFailed())
+			setStateNotify(BeaconState.UNKNOWN);
+		super.updateStyles();
+	}
+
 	/** Calculate the item styles */
 	@Override
 	protected long calculateStyles() {
