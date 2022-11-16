@@ -78,8 +78,11 @@ public class OpQueryBeaconState extends OpNatch {
 	@Override
 	public OpStep next() {
 		if (done) {
-			boolean vs = (verify != null) ? verify.getStatus() : false;
-			BeaconState bs = beacon.getBeaconState(relay.getStatus(), vs);
+			boolean rs = relay.getStatus();
+			boolean vs = (verify != null)
+				? verify.getStatus()
+				: false;
+			BeaconState bs = beacon.getBeaconState(rs, vs);
 			beacon.setStateNotify(bs);
 			return null;
 		} else
