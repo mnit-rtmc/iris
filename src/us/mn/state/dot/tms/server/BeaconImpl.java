@@ -305,6 +305,21 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		}
 	}
 
+	/** Get the beacon state */
+	public BeaconState getBeaconState(boolean relay, boolean verify) {
+		Integer vp = getVerifyPin();
+		if (vp != null) {
+			if (relay && !verify)
+				return BeaconState.FAULT_NO_VERIFY;
+			if (verify && !relay) {
+				return getExtMode()
+				      ? BeaconState.FLASHING_EXT
+				      : BeaconState.FAULT_STUCK_ON;
+			}
+		}
+		return (relay) ? BeaconState.FLASHING : BeaconState.DARK;
+	}
+
 	/** Set the beacon flashing state and notify clients */
 	public void setFlashingNotify(boolean flashing) {
 		BeaconState bs = (flashing)

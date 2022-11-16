@@ -75,27 +75,18 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 
 	/** Get the beacon state */
 	private BeaconState getState() {
-		boolean relay = getBeaconRelay();
-		Integer vp = beacon.getVerifyPin();
-		if (vp != null) {
-			boolean verify = prop.getInput(vp);
-			if (relay && !verify)
-				return BeaconState.FAULT_NO_VERIFY;
-			if (verify && !relay) {
-				return beacon.getExtMode()
-				      ? BeaconState.FLASHING_EXT
-				      : BeaconState.FAULT_STUCK_ON;
-			}
-		}
-		BeaconState bs = (relay)
-			? BeaconState.FLASHING
-			: BeaconState.DARK;
-		return bs;
+		return beacon.getBeaconState(getRelayValue(), getVerifyValue());
 	}
 
-	/** Get beacon relay state */
-	private boolean getBeaconRelay() {
+	/** Get beacon relay value */
+	private boolean getRelayValue() {
 		return prop.getRelay(beacon.getPin());
+	}
+
+	/** Get beacon verify value */
+	private boolean getVerifyValue() {
+		Integer vp = beacon.getVerifyPin();
+		return (vp != null) ? prop.getInput(vp) : false;
 	}
 
 	/** Format the maintenance status */
