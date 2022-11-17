@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2021  Minnesota Department of Transportation
+ * Copyright (C) 2013-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,8 @@ public class GateArmSystem {
 	/** Path to configuration enable file.  This must not be a system
 	 * attribute for security reasons. */
 	static private final File CONFIG_ENABLE_FILE = new File(
-			DevelCfg.get("gates.enable.file", "/var/lib/iris/gate_arm_enable"));
+		DevelCfg.get("gates.enable.file",
+		 	"/var/lib/iris/gate_arm_enable"));
 
 	/** Config delete flag.  This will only get set to false if
 	 * CONFIG_ENABLE_FILE cannot be deleted.  The only way to enable the

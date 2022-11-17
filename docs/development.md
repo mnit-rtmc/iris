@@ -38,6 +38,11 @@ Now, the IRIS rpm file can be built with `ant rpm`.
 If there are no errors, the new rpm file should be in the
 `build/rpm/RPMS/noarch/` directory.
 
+## Eclipse
+
+See `etc/eclipse-development.cfg` for instructions to run IRIS within the
+Eclipse IDE.
+
 ## Contributing
 
 [Bug reports] and feature requests are welcome and encouraged!  Please create an

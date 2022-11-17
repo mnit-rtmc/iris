@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2020  Minnesota Department of Transportation
+ * Copyright (C) 2005-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ import us.mn.state.dot.tms.utils.FileIO;
 abstract public class XmlWriter {
 
 	/** XML output directory */
-	static public final File XML_OUTPUT_DIRECTORY =
-		new File(DevelCfg.get("xml.output.dir", "/var/www/html/iris_xml/"));
+	static public final File XML_OUTPUT_DIRECTORY = new File(DevelCfg.get(
+		"xml.output.dir", "/var/www/html/iris_xml/"));
 
 	/** XML version and encoding declaration */
 	static protected final String XML_DECLARATION =
