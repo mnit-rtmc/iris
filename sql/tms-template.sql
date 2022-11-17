@@ -1278,8 +1278,8 @@ GRANT SELECT ON action_plan_event_view TO PUBLIC;
 -- Comm Protocols, Comm Links, Modems, Cabinets, Controllers
 --
 CREATE TABLE iris.comm_protocol (
-	id SMALLINT PRIMARY KEY,
-	description VARCHAR(20) NOT NULL
+    id SMALLINT PRIMARY KEY,
+    description VARCHAR(20) NOT NULL
 );
 
 COPY iris.comm_protocol (id, description) FROM stdin;
@@ -1330,32 +1330,31 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 \.
 
 CREATE TABLE iris.comm_config (
-	name VARCHAR(10) PRIMARY KEY,
-	description VARCHAR(20) NOT NULL UNIQUE,
-	protocol SMALLINT NOT NULL REFERENCES iris.comm_protocol(id),
-	modem BOOLEAN NOT NULL,
-	timeout_ms INTEGER NOT NULL,
-	poll_period_sec INTEGER NOT NULL,
-	long_poll_period_sec INTEGER NOT NULL,
-	idle_disconnect_sec INTEGER NOT NULL,
-	no_response_disconnect_sec INTEGER NOT NULL
+    name VARCHAR(10) PRIMARY KEY,
+    description VARCHAR(20) NOT NULL UNIQUE,
+    protocol SMALLINT NOT NULL REFERENCES iris.comm_protocol(id),
+    modem BOOLEAN NOT NULL,
+    timeout_ms INTEGER NOT NULL,
+    poll_period_sec INTEGER NOT NULL,
+    long_poll_period_sec INTEGER NOT NULL,
+    idle_disconnect_sec INTEGER NOT NULL,
+    no_response_disconnect_sec INTEGER NOT NULL
 );
 
 ALTER TABLE iris.comm_config
-	ADD CONSTRAINT poll_period_ck
-	CHECK (poll_period_sec >= 5
-	       AND long_poll_period_sec >= poll_period_sec);
+    ADD CONSTRAINT poll_period_ck
+    CHECK (poll_period_sec >= 5 AND long_poll_period_sec >= poll_period_sec);
 
 CREATE TRIGGER comm_config_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.comm_config
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW comm_config_view AS
-	SELECT cc.name, cc.description, cp.description AS protocol, modem,
-	       timeout_ms, poll_period_sec, long_poll_period_sec,
-	       idle_disconnect_sec, no_response_disconnect_sec
-	FROM iris.comm_config cc
-	JOIN iris.comm_protocol cp ON cc.protocol = cp.id;
+    SELECT cc.name, cc.description, cp.description AS protocol, modem,
+           timeout_ms, poll_period_sec, long_poll_period_sec,
+           idle_disconnect_sec, no_response_disconnect_sec
+    FROM iris.comm_config cc
+    JOIN iris.comm_protocol cp ON cc.protocol = cp.id;
 GRANT SELECT ON comm_config_view TO PUBLIC;
 
 CREATE TABLE iris.comm_link (
@@ -1414,12 +1413,12 @@ CREATE VIEW modem_view AS
 GRANT SELECT ON modem_view TO PUBLIC;
 
 CREATE TABLE iris.cabinet_style (
-	name VARCHAR(20) PRIMARY KEY,
-	police_panel_pin_1 INTEGER,
-	police_panel_pin_2 INTEGER,
-	watchdog_reset_pin_1 INTEGER,
-	watchdog_reset_pin_2 INTEGER,
-	dip INTEGER
+    name VARCHAR(20) PRIMARY KEY,
+    police_panel_pin_1 INTEGER,
+    police_panel_pin_2 INTEGER,
+    watchdog_reset_pin_1 INTEGER,
+    watchdog_reset_pin_2 INTEGER,
+    dip INTEGER
 );
 
 CREATE TRIGGER cabinet_style_notify_trig
@@ -1427,14 +1426,14 @@ CREATE TRIGGER cabinet_style_notify_trig
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW cabinet_style_view AS
-	SELECT name, police_panel_pin_1, police_panel_pin_2,
-	       watchdog_reset_pin_1, watchdog_reset_pin_2, dip
-	FROM iris.cabinet_style;
+    SELECT name, police_panel_pin_1, police_panel_pin_2,
+           watchdog_reset_pin_1, watchdog_reset_pin_2, dip
+    FROM iris.cabinet_style;
 GRANT SELECT ON cabinet_style_view TO PUBLIC;
 
 CREATE TABLE iris.condition (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(12) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(12) NOT NULL
 );
 
 COPY iris.condition (id, description) FROM stdin;
