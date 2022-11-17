@@ -108,20 +108,20 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new RampMeterImpl(
-					row.getString(1),	// name
-					row.getString(2),	// geo_loc
-					row.getString(3),	// controller
-					row.getInt(4),		// pin
-					row.getString(5),	// notes
-					row.getInt(6),		// meter_type
-					row.getInt(7),		// storage
-					row.getInt(8),		// max_wait
-					row.getInt(9),		// algorithm
-					row.getInt(10),		// am_target
-					row.getInt(11),		// pm_target
-					row.getString(12),	// beacon
-					row.getString(13),	// preset
-					row.getInt(14)		// m_lock
+					row.getString(1),  // name
+					row.getString(2),  // geo_loc
+					row.getString(3),  // controller
+					row.getInt(4),     // pin
+					row.getString(5),  // notes
+					row.getInt(6),     // meter_type
+					row.getInt(7),     // storage
+					row.getInt(8),     // max_wait
+					row.getInt(9),     // algorithm
+					row.getInt(10),    // am_target
+					row.getInt(11),    // pm_target
+					row.getString(12), // beacon
+					row.getString(13), // preset
+					row.getInt(14)     // m_lock
 				));
 			}
 		});
@@ -635,7 +635,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	private RampMeterQueue queue = RampMeterQueue.UNKNOWN;
 
 	/** Set the queue status */
-	private void setQueue(RampMeterQueue q) {
+	private void setQueueNotify(RampMeterQueue q) {
 		if (q != queue) {
 			queue = q;
 			notifyAttribute("queue");
@@ -644,19 +644,20 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Get the queue status */
+	@Override
 	public int getQueue() {
 		return queue.ordinal();
 	}
 
 	/** Update the ramp meter queue status */
 	public void updateQueueState() {
-		setQueue(queueStatus(alg_state));
+		setQueueNotify(queueStatus(alg_state));
 	}
 
 	/** Determine the queue status */
 	private RampMeterQueue queueStatus(MeterAlgorithmState as) {
 		if (as != null && !isFailed()) {
-			 if (isMetering())
+			if (isMetering())
 				return as.getQueueState(this);
 			else
 				return RampMeterQueue.EMPTY;
