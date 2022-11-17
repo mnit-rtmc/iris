@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.utils.Base64;
+import us.mn.state.dot.tms.utils.DevelCfg;
 
 /**
  * Operation to query all fonts on a DMS controller.
@@ -37,7 +38,9 @@ import us.mn.state.dot.tms.utils.Base64;
 public class OpQueryDMSFonts extends OpDMS {
 
 	/** Directory to store font files */
-	static private final String FONT_FILE_DIR = "/var/log/iris/fonts/";
+	static private final String FONT_FILE_DIR = 
+			DevelCfg.get("font.output.dir", "/var/log/iris/fonts/");
+			
 	static {
 		File dir = new File(FONT_FILE_DIR);
 		if (!dir.exists())

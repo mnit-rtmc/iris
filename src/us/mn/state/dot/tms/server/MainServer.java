@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.BaseEvent;
 import us.mn.state.dot.tms.server.comm.cux50.CUx50;
 import us.mn.state.dot.tms.server.comm.cux50.PrServer;
+import us.mn.state.dot.tms.utils.DevelCfg;
 import us.mn.state.dot.tms.utils.HttpProxySelector;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.PropertyLoader;
@@ -48,11 +49,12 @@ import us.mn.state.dot.tms.utils.PropertyLoader;
 public class MainServer {
 
 	/** Location of IRIS property configuration file */
-	static private final String PROP_FILE =
-		"/etc/iris/iris-server.properties";
+	static private final String PROP_FILE = 
+			DevelCfg.get("server.prop.file", "/etc/iris/iris-server.properties");
 
 	/** Directory to store IRIS log files */
-	static private final String LOG_FILE_DIR = "/var/log/iris/";
+	static private final String LOG_FILE_DIR = 
+			DevelCfg.get("log.output.dir", "/var/log/iris/");
 
 	/** File to log standard out stream */
 	static private final String STD_OUT = LOG_FILE_DIR + "iris.stdout";
@@ -122,7 +124,7 @@ public class MainServer {
 	static private void initialize() throws IOException {
 		redirectStdStreams();
 		DebugLog.init(new File(LOG_FILE_DIR),
-			"IRIS @@VERSION@@ restarted");
+				DevelCfg.get("log.start.msg", "IRIS @@VERSION@@ restarted"));
 		checkAssert();
 	}
 
@@ -137,11 +139,14 @@ public class MainServer {
 		// VM arguments box.
 		
 		String inEclipseStr = System.getProperty("runInEclipse");
+		if (inEclipseStr == null)
+			inEclipseStr = DevelCfg.get("runInEclipse");
 		if ((inEclipseStr == null) || !inEclipseStr.equalsIgnoreCase("true")) {
 			System.setOut(createPrintStream(STD_OUT));
 			System.setErr(createPrintStream(STD_ERR));
-			String msg = "IRIS @@VERSION@@ restarted @ " +
-			      TimeSteward.getDateInstance();
+			String msg = DevelCfg.get("log.start.msg", "IRIS @@VERSION@@ restarted")
+					+ " @ "
+					+ TimeSteward.getDateInstance();
 			System.out.println(msg);
 			System.err.println(msg);
 		}
