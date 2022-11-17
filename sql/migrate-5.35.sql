@@ -97,4 +97,44 @@ CREATE VIEW beacon_view AS
     LEFT JOIN controller_view ctr ON b.controller = ctr.name;
 GRANT SELECT ON beacon_view TO PUBLIC;
 
+-- Change ramp meter notes to VARCHAR(128)
+DROP VIEW ramp_meter_view;
+DROP VIEW iris.ramp_meter;
+
+ALTER TABLE iris._ramp_meter ALTER COLUMN notes TYPE VARCHAR(128);
+
+CREATE VIEW iris.ramp_meter AS
+    SELECT m.name, geo_loc, controller, pin, notes, meter_type, storage,
+           max_wait, algorithm, am_target, pm_target, beacon, preset, m_lock
+    FROM iris._ramp_meter m
+    JOIN iris.controller_io cio ON m.name = cio.name
+    JOIN iris._device_preset p ON m.name = p.name;
+
+CREATE TRIGGER ramp_meter_insert_trig
+    INSTEAD OF INSERT ON iris.ramp_meter
+    FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_insert();
+
+CREATE TRIGGER ramp_meter_update_trig
+    INSTEAD OF UPDATE ON iris.ramp_meter
+    FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_update();
+
+CREATE TRIGGER ramp_meter_delete_trig
+    INSTEAD OF DELETE ON iris.ramp_meter
+    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+
+CREATE VIEW ramp_meter_view AS
+    SELECT m.name, geo_loc, controller, pin, notes,
+           mt.description AS meter_type, storage, max_wait,
+           alg.description AS algorithm, am_target, pm_target, beacon, camera,
+           preset_num, ml.description AS meter_lock, l.roadway, l.road_dir,
+           l.cross_mod, l.cross_street, l.cross_dir, l.landmark, l.lat, l.lon,
+           l.corridor, l.location, l.rd
+    FROM iris.ramp_meter m
+    LEFT JOIN iris.meter_type mt ON m.meter_type = mt.id
+    LEFT JOIN iris.meter_algorithm alg ON m.algorithm = alg.id
+    LEFT JOIN iris.camera_preset p ON m.preset = p.name
+    LEFT JOIN iris.meter_lock ml ON m.m_lock = ml.id
+    LEFT JOIN geo_loc_view l ON m.geo_loc = l.name;
+GRANT SELECT ON ramp_meter_view TO PUBLIC;
+
 COMMIT;

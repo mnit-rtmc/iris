@@ -4634,8 +4634,8 @@ COPY iris.meter_algorithm (id, description) FROM stdin;
 \.
 
 CREATE TABLE iris.meter_lock (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(16) NOT NULL
 );
 
 COPY iris.meter_lock (id, description) FROM stdin;
@@ -4650,7 +4650,7 @@ COPY iris.meter_lock (id, description) FROM stdin;
 CREATE TABLE iris._ramp_meter (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-    notes text NOT NULL,
+    notes VARCHAR(128) NOT NULL,
     meter_type INTEGER NOT NULL REFERENCES iris.meter_type(id),
     storage INTEGER NOT NULL,
     max_wait INTEGER NOT NULL,
@@ -4665,10 +4665,10 @@ ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
 CREATE FUNCTION iris.ramp_meter_notify() RETURNS TRIGGER AS
-	$ramp_meter_notify$
+    $ramp_meter_notify$
 BEGIN
-	NOTIFY ramp_meter;
-	RETURN NULL; -- AFTER trigger return is ignored
+    NOTIFY ramp_meter;
+    RETURN NULL; -- AFTER trigger return is ignored
 END;
 $ramp_meter_notify$ LANGUAGE plpgsql;
 
@@ -4756,10 +4756,10 @@ CREATE VIEW ramp_meter_view AS
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
 
 CREATE TABLE iris.meter_action (
-	name VARCHAR(30) PRIMARY KEY,
-	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+    name VARCHAR(30) PRIMARY KEY,
+    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+    ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter,
+    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 CREATE VIEW meter_action_view AS
