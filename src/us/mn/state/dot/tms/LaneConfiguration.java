@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ public class LaneConfiguration {
 	/** Create a new lane configuration */
 	public LaneConfiguration(int left, int right) {
 		leftShift = left;
-		rightShift = right;
+		rightShift = Math.max(left, right);
 	}
 
 	/** Get the number of lanes */
