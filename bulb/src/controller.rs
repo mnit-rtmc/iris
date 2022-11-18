@@ -159,22 +159,23 @@ impl AncillaryData for ControllerAnc {
             match uri.borrow() {
                 CONDITION_URI => {
                     self.conditions =
-                        Some(json.into_serde::<Vec<Condition>>()?);
+                        Some(serde_wasm_bindgen::from_value(json)?);
                 }
                 COMM_LINK_URI => {
-                    self.comm_links = Some(json.into_serde::<Vec<CommLink>>()?);
+                    self.comm_links =
+                        Some(serde_wasm_bindgen::from_value(json)?);
                 }
                 COMM_CONFIG_URI => {
                     self.comm_configs =
-                        Some(json.into_serde::<Vec<CommConfig>>()?);
+                        Some(serde_wasm_bindgen::from_value(json)?);
                 }
                 CABINET_STYLE_URI => {
                     self.cabinet_styles =
-                        Some(json.into_serde::<Vec<CabinetStyle>>()?);
+                        Some(serde_wasm_bindgen::from_value(json)?);
                 }
                 _ => {
                     self.controller_io =
-                        Some(json.into_serde::<Vec<ControllerIo>>()?);
+                        Some(serde_wasm_bindgen::from_value(json)?);
                 }
             }
         }

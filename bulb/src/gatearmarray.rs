@@ -82,7 +82,7 @@ impl AncillaryData for GateArmArrayAnc {
         _pri: &GateArmArray,
         json: JsValue,
     ) -> Result<()> {
-        self.states = Some(json.into_serde::<Vec<GateArmState>>()?);
+        self.states = Some(serde_wasm_bindgen::from_value(json)?);
         Ok(())
     }
 }

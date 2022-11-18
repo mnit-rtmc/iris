@@ -83,8 +83,7 @@ impl AncillaryData for DmsAnc {
         if let Some(uri) = self.next_uri(view, pri) {
             match uri.borrow() {
                 SIGN_MSG_URI => {
-                    self.messages =
-                        Some(json.into_serde::<Vec<SignMessage>>()?);
+                    self.messages = Some(serde_wasm_bindgen::from_value(json)?);
                 }
                 _ => self.dev.set_json(view, pri, json)?,
             }

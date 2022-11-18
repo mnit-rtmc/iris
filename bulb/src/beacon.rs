@@ -79,7 +79,7 @@ impl AncillaryData for BeaconAnc {
         if let Some(uri) = self.next_uri(view, pri) {
             match uri.borrow() {
                 BEACON_STATE_URI => {
-                    self.states = Some(json.into_serde::<Vec<BeaconState>>()?);
+                    self.states = Some(serde_wasm_bindgen::from_value(json)?);
                 }
                 _ => self.dev.set_json(view, pri, json)?,
             }

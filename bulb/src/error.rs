@@ -53,6 +53,10 @@ pub enum Error {
     /// Serde JSON error
     #[error("Serialization error")]
     SerdeJson(#[from] serde_json::Error),
+
+    /// Serde wasm-bindgen error
+    #[error("Serialization error")]
+    SerdeWasmBindgen(#[from] serde_wasm_bindgen::Error),
 }
 
 /// Bulb result

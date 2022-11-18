@@ -94,9 +94,12 @@ impl AncillaryData for LcsIndicationAnc {
             match uri.borrow() {
                 LANE_USE_INDICATION_URI => {
                     self.indications =
-                        Some(json.into_serde::<Vec<LaneUseIndication>>()?);
+                        Some(serde_wasm_bindgen::from_value(json)?);
                 }
-                _ => self.controller = Some(json.into_serde::<Controller>()?),
+                _ => {
+                    self.controller =
+                        Some(serde_wasm_bindgen::from_value(json)?)
+                }
             }
         }
         Ok(())

@@ -159,8 +159,8 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     type Ancillary: AncillaryData<Primary = Self> + Default;
 
     /// Create from a JSON value
-    fn new(json: &JsValue) -> Result<Self> {
-        Ok(json.into_serde::<Self>()?)
+    fn new(json: JsValue) -> Result<Self> {
+        Ok(serde_wasm_bindgen::from_value(json)?)
     }
 
     /// Set the name
@@ -555,7 +555,7 @@ impl Resource {
     async fn fetch_primary<C: Card>(self, name: &str) -> Result<C> {
         let uri = self.uri_name(name);
         let json = fetch_get(&uri).await?;
-        C::new(&json)
+        C::new(json)
     }
 
     /// Fetch geo location name (if any)
@@ -619,7 +619,7 @@ async fn fetch_list<C: Card>(
     let search = Search::new(search);
     let mut html = String::new();
     html.push_str("<ul class='cards'>");
-    let obs = json.into_serde::<Vec<C>>()?;
+    let obs: Vec<_> = serde_wasm_bindgen::from_value(json)?;
     if config {
         let next_name = C::next_name(&obs);
         // the "Create" card has id "{rname}_" and next available name

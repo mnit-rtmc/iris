@@ -65,12 +65,11 @@ impl AncillaryData for PermissionAnc {
         if let Some(uri) = self.next_uri(view, pri) {
             match uri.borrow() {
                 RESOURCE_TYPE_URI => {
-                    let resource_types = json.into_serde::<Vec<String>>()?;
-                    self.resource_types = Some(resource_types);
+                    self.resource_types =
+                        Some(serde_wasm_bindgen::from_value(json)?);
                 }
                 _ => {
-                    let roles = json.into_serde::<Vec<Role>>()?;
-                    self.roles = Some(roles);
+                    self.roles = Some(serde_wasm_bindgen::from_value(json)?);
                 }
             }
         }

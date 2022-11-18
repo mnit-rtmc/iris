@@ -52,8 +52,7 @@ impl AncillaryData for UserAnc {
         _pri: &User,
         json: JsValue,
     ) -> Result<()> {
-        let roles = json.into_serde::<Vec<Role>>()?;
-        self.roles = Some(roles);
+        self.roles = Some(serde_wasm_bindgen::from_value(json)?);
         Ok(())
     }
 }
