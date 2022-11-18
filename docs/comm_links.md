@@ -213,44 +213,36 @@ The `msgfeed` protocol can be used to interface with an external system that
 generates [DMS] messages.  Periodically, IRIS will poll the URI (using `http`)
 for DMS messages.
 
-#### Msg-Feed Format
-
 The external system should respond with an ASCII text file, with one line per
-message to be deployed.
+message to be deployed.  Each line must contain 3 fields, separated by tab
+characters `\t` (ASCII 0x09), and terminated with a single newline character
+`\n` (ASCII 0x0A).
 
-Each line must contain 3 fields, separated by tab characters `\t` (ASCII 0x09),
-and terminated with a single newline character `\n` (ASCII 0x0A).  The fields
-are **DMS name**, [MULTI] **string**, and **expiration time**.  The _DMS name_
-must exactly match one of the DMS as identified by IRIS.  The _MULTI string_
-specifies a message to display on the sign, using the _MULTI_ markup language.
-The _expiration time_ field indicates the date and time that the message should
-expire, in [RFC 3339] format, with `full-date` and `full-time` separated by a
-space instead of `T`.
 ```
 V66E37	CRASH[nl]5 MILES AHEAD[nl]LEFT LANE CLOSED	2019-10-02 11:37:00-05:00
 ```
 
-#### Msg-Feed Action Plan
+| Field    | Description                                               |
+|----------|-----------------------------------------------------------|
+| `dms`    | name of sign to deploy                                    |
+| `multi`  | message to display, using the [MULTI] markup language     |
+| `expire` | [RFC 3339] `full-date` / `full-time` separated by a space |
 
-An [action plan] is required to associate a [DMS action] with the feed.  The
-_DMS action_ must have a [quick message] with a `feed` [action tag]:
+`dms`: Must be a member of a sign group referenced by a [DMS action].
+Additionally, that action must be associated with the current phase of an
+active [action plan].  The [quick message] of the _DMS action_ must be a `feed`
+[action tag].  For example, if the _message feed_ is on a _Comm Link_ called
+`XYZ`, then the quick message must be `[feedXYZ]`.
 
-`[feed` *n* `]`
-
-So, if the _message feed_ is on a _Comm Link_ called `LFEED`, then the quick
-message [MULTI] string must be `[feedLFEED]`.  Also, the _action plan_ must be
-active and deployed.  This requirement allows only administrator-approved DMS to
-be controlled by the message feed.
-
-#### Msg-Feed Text
-
-All messages used by the feed must be defined in the DMS message library.  This
-requirement allows only administrator-approved messages to be deployed by the
-_message feed_.  In some circumstances, it may be appropriate to disable this
-checking.  For example, if the message feed host is fully trusted and there is
-no possibility of man-in-the-middle attacks between IRIS and the feed host.  In
+`multi`: Each line of the message must be defined in the sign's message
+library.  This requirement restricts the feed to only administrator-approved
+messages.  It may be appropriate to disable this check if the message feed host
+is fully trusted and there is no possibility of man-in-the-middle attacks.  In
 this case the `msg_feed_verify` [system attribute] can be set to `false` to
 disable this check.
+
+`expire`: The message will only be displayed if this is a future date/time.
+It can be left blank to cancel a previous message.
 
 #### Msg-Feed Beacons
 
