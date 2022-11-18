@@ -214,34 +214,30 @@ generates [DMS] messages.  Periodically, IRIS will poll the URI (using `http`)
 for DMS messages.
 
 The external system should respond with an ASCII text file, with one line per
-message to be deployed.  Each line must contain 3 fields, separated by tab
-characters `\t` (ASCII 0x09), and terminated with a single newline character
-`\n` (ASCII 0x0A).
+message to be deployed.  Each line contains 3 fields: `dms`, `message` and
+`expire`, separated by tab characters `\t` (ASCII 0x09), and terminated with a
+single newline character `\n` (ASCII 0x0A).
 
 ```
-V66E37	CRASH[nl]5 MILES AHEAD[nl]LEFT LANE CLOSED	2019-10-02 11:37:00-05:00
+V66E37\tSNOW PLOW[nl]AHEAD[nl]USE CAUTION\t2022-10-02 11:37:00-05:00
 ```
 
-| Field    | Description                                               |
-|----------|-----------------------------------------------------------|
-| `dms`    | name of sign to deploy                                    |
-| `multi`  | message to display, using the [MULTI] markup language     |
-| `expire` | [RFC 3339] `full-date` / `full-time` separated by a space |
+`dms`: Name of the sign to deploy.  Must be a member of a sign group referenced
+by a [DMS action].  Additionally, that action must be associated with the
+current phase of an active [action plan].  The [quick message] of the
+_DMS action_ must be a `feed` [action tag].  For example, if the `msgfeed`
+_Comm Link_ name is `XYZ`, then the quick message must be `[feedXYZ]`.
 
-`dms`: Must be a member of a sign group referenced by a [DMS action].
-Additionally, that action must be associated with the current phase of an
-active [action plan].  The [quick message] of the _DMS action_ must be a `feed`
-[action tag].  For example, if the `msgfeed` _Comm Link_ name is `XYZ`, then
-the quick message must be `[feedXYZ]`.
+`multi`: Message to deploy, using the [MULTI] markup language.  Each line of
+the message must be defined in the sign's message library.  This check allows
+only "administrator-approved" messages, but it can be disabled by changing the
+`msg_feed_verify` [system attribute] to `false`.  **WARNING**: only disable
+this check if the message feed host is fully trusted, and there is no
+possibility of man-in-the-middle attacks.
 
-`multi`: Each line of the message must be defined in the sign's message
-library.  This check allows only "administrator-approved" messages, but it can
-be disabled by changing the `msg_feed_verify` [system attribute] to `false`.
-**WARNING**: only disable this check if the message feed host is fully trusted,
-and there is no possibility of man-in-the-middle attacks.
-
-`expire`: The message will only be displayed if this is a future date/time.
-It can be left blank to cancel a previous message.
+`expire`: Date/time when the message will expire, using [RFC 3339]
+`full-date` / `full-time` separated by a space.  The message will not be
+displayed after this time.  Leave `expire` blank to cancel a previous message.
 
 ### Natch
 
