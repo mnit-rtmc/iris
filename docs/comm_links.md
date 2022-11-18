@@ -231,26 +231,17 @@ V66E37	CRASH[nl]5 MILES AHEAD[nl]LEFT LANE CLOSED	2019-10-02 11:37:00-05:00
 `dms`: Must be a member of a sign group referenced by a [DMS action].
 Additionally, that action must be associated with the current phase of an
 active [action plan].  The [quick message] of the _DMS action_ must be a `feed`
-[action tag].  For example, if the _message feed_ is on a _Comm Link_ called
-`XYZ`, then the quick message must be `[feedXYZ]`.
+[action tag].  For example, if the `msgfeed` _Comm Link_ name is `XYZ`, then
+the quick message must be `[feedXYZ]`.
 
 `multi`: Each line of the message must be defined in the sign's message
-library.  This requirement restricts the feed to only administrator-approved
-messages.  It may be appropriate to disable this check if the message feed host
-is fully trusted and there is no possibility of man-in-the-middle attacks.  In
-this case the `msg_feed_verify` [system attribute] can be set to `false` to
-disable this check.
+library.  This check allows only "administrator-approved" messages, but it can
+be disabled by changing the `msg_feed_verify` [system attribute] to `false`.
+**WARNING**: only disable this check if the message feed host is fully trusted,
+and there is no possibility of man-in-the-middle attacks.
 
 `expire`: The message will only be displayed if this is a future date/time.
 It can be left blank to cancel a previous message.
-
-#### Msg-Feed Beacons
-
-To activate DMS [beacons] through a message feed, configure 2 message feeds.
-One is for DMS containing messages with activated beacons and the other for
-messages with deactivated beacons.  There is no way to control which message
-feed is executed first, so each message feed must list each DMS and at least one
-of the message feeds must contain a blank _MULTI_ for each DMS.
 
 ### Natch
 
