@@ -1,5 +1,13 @@
 # IRIS 5.x Release Notes
 
+5.35.0 (18 Nov 2022)
+ - Support monitoring externally controlled beacons
+ - Added `sonar.protocols` property to control TLS protocol versions
+ - Improved REST API documentation
+ - Extend "Send Settings" button to also send device settings
+ - Store NTCIP module table in controller `setup`
+ - Improved support for development with Eclipse
+
 5.34.0 (7 Sep 2022)
  - Added beacon "state" attribute/LUT (replaces "flashing")
  - Fixed beacon verify problem
