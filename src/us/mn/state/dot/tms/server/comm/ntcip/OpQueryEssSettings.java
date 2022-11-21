@@ -76,11 +76,6 @@ public class OpQueryEssSettings extends OpEss {
 			mess.add(ess_rec.sys_name.node);
 			mess.add(ess_rec.sys_location.node);
 			mess.queryProps();
-			String version = ess_rec.sys_descr.getValue();
-			// Some models include this at the start
-			if (version.startsWith("sysDescr.0: "))
-				version = version.substring(12);
-			controller.setVersionNotify(version);
 			logQuery(ess_rec.sys_descr.node);
 			logQuery(ess_rec.sys_contact.node);
 			logQuery(ess_rec.sys_name.node);
