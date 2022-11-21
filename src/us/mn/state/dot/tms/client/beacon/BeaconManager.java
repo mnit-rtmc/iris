@@ -68,11 +68,11 @@ public class BeaconManager extends DeviceManager<Beacon> {
 	protected ProxyTheme<Beacon> createTheme() {
 		ProxyTheme<Beacon> theme = new ProxyTheme<Beacon>(this,
 			new BeaconMarker());
-		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(ItemStyle.EXTERNAL, ProxyTheme.COLOR_EXTERNAL);
 		theme.addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
+		theme.addStyle(ItemStyle.EXTERNAL, ProxyTheme.COLOR_EXTERNAL);
+		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
