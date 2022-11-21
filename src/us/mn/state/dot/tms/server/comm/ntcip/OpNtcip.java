@@ -186,6 +186,26 @@ abstract public class OpNtcip extends OpDevice {
 		super.setErrorStatus(s);
 	}
 
+	/** Get the hardware make */
+	protected String getHardwareMake() {
+		return ControllerHelper.getSetup(controller, "hw", "make");
+	}
+
+	/** Get the hardware model */
+	protected String getHardwareModel() {
+		return ControllerHelper.getSetup(controller, "hw", "model");
+	}
+
+	/** Get the software make */
+	protected String getSoftwareMake() {
+		return ControllerHelper.getSetup(controller, "sw", "make");
+	}
+
+	/** Get the software model */
+	protected String getSoftwareModel() {
+		return ControllerHelper.getSetup(controller, "sw", "model");
+	}
+
 	/** Get the firmware version */
 	protected String getVersion() {
 		return ControllerHelper.getSetup(controller, "version");

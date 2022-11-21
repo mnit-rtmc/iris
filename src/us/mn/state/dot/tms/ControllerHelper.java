@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import us.mn.state.dot.tms.geo.Position;
@@ -110,5 +111,35 @@ public class ControllerHelper extends BaseHelper {
 			}
 		}
 		return "";
+	}
+	
+	/** Get controller setup array data.
+	 *
+	 * Finds a value in the "setup" field.  The last JSON object in the
+	 * "arr" array will be found, and the value of "key" returned.
+	 * If not found, "UNKNOWN" will be returned.
+	 */
+	static public String getSetup(Controller ctrl, String arr, String key)
+	{
+		String setup = (ctrl != null) ? ctrl.getSetup() : null;
+		if (setup != null) {
+			try {
+				JSONObject jo = new JSONObject(setup);
+				JSONArray ja = jo.optJSONArray(arr);
+				if (ja != null && ja.length() > 0) {
+					int idx = ja.length() - 1;
+					JSONObject o = ja.optJSONObject(idx);
+					if (o != null) {
+						return o.optString(key,
+							"UNKNOWN");
+					}
+				}
+			}
+			catch (JSONException e) {
+				// malformed JSON
+				e.printStackTrace();
+			}
+		}
+		return "UNKNOWN";
 	}
 }

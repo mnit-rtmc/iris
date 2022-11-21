@@ -100,6 +100,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 			addOp(new OpTestDMSPixels(dms, false));
 			break;
 		case QUERY_CONFIGURATION:
+			addOp(new OpQueryModules(dms));
 			addOp(new OpQueryDMSConfiguration(dms));
 			break;
 		case QUERY_MESSAGE:

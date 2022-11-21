@@ -2,7 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
- * Copyright (C) 2017  	    Iteris Inc.
+ * Copyright (C) 2017       Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,18 +43,6 @@ import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
  * @author Michael Darter
  */
 public class OpQueryDMSConfiguration extends OpDMS {
-
-	/** Hardware module make (manufacturer) */
-	private String hardware_make = "UNKNOWN";
-
-	/** Hardware module model */
-	private String hardware_model = "UNKNOWN";
-
-	/** Software module make (manufacturer) */
-	private String software_make = "UNKNOWN";
-
-	/** Software module model */
-	private String software_model = "UNKNOWN";
 
 	/** Sign access */
 	private final ASN1Flags<DmsSignAccess> access = new ASN1Flags<
@@ -139,69 +127,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase phaseTwo() {
-		return new QueryModuleCount();
-	}
-
-	/** Phase to query the number of modules */
-	protected class QueryModuleCount extends Phase {
-
-		/** Query the number of modules */
-		@SuppressWarnings("unchecked")
-		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer modules = globalMaxModules.makeInt();
-			mess.add(modules);
-			mess.queryProps();
-			logQuery(modules);
-			return new QueryModules(modules.getInteger());
-		}
-	}
-
-	/** Phase to query the module information */
-	protected class QueryModules extends Phase {
-
-		/** Count of rows in the module table */
-		private final int count;
-
-		/** Module number to query */
-		private int mod = 1;
-
-		/** Create a queryModules phase */
-		protected QueryModules(int c) {
-			count = c;
-		}
-
-		/** Query the module make, model and version */
-		@SuppressWarnings("unchecked")
-		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1String make = moduleMake.makeStr(mod);
-			ASN1String model = moduleModel.makeStr(mod);
-			ASN1String version = moduleVersion.makeStr(mod);
-			ASN1Enum<ModuleType> m_type = new ASN1Enum<ModuleType>(
-				ModuleType.class, moduleType.node, mod);
-			mess.add(make);
-			mess.add(model);
-			mess.add(version);
-			mess.add(m_type);
-			mess.queryProps();
-			logQuery(make);
-			logQuery(model);
-			logQuery(version);
-			logQuery(m_type);
-			if (m_type.getEnum() == ModuleType.hardware) {
-				hardware_make = make.getValue();
-				hardware_model = model.getValue();
-			}
-			if (m_type.getEnum() == ModuleType.software) {
-				software_make = make.getValue();
-				software_model = model.getValue();
-				controller.setVersionNotify(version.getValue());
-			}
-			mod += 1;
-			if (mod <= count)
-				return this;
-			else
-				return new QueryDmsInfo();
-		}
+		return new QueryDmsInfo();
 	}
 
 	/** Phase to query the DMS information */
@@ -340,8 +266,9 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			SignDetailImpl sd = SignDetailImpl.findOrCreate(dt, p,
 				tech.getValue(), access.getValue(),
 				legend.getValue(), beaconType.getValue(),
-				hardware_make, hardware_model, software_make,
-				software_model, supported_tags.getInteger(),
+				getHardwareMake(), getHardwareModel(),
+				getSoftwareMake(), getSoftwareModel(),
+				supported_tags.getInteger(),
 				max_pages.getInteger(),
 				max_multi_len.getInteger(),
 				beacon_activation_flag, pixel_service_flag);
