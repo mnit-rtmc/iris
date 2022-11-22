@@ -2,21 +2,21 @@
 
 Select `View ➔ Maintenance ➔ Comm Links` menu item
 
-A **comm link** is a network connection to field [device]s or external systems.
-IRIS is capable of supporting thousands of simultaneous comm links.
+A **comm link** is a network connection to field [device]s or external system
+**feeds**. IRIS is capable of supporting thousands of simultaneous comm links.
 
-## URI
+`Description`: A short text description of the comm link.
 
-The **URI** includes a DNS host name or network IP address, and port number,
-using the standard `host:port` convention.  It can also contain an optional
-**scheme** prefix, which can be either `udp://`, `tcp://` or `modem://`.  If
-present, the scheme will override the _default scheme_ for the selected
-protocol.  For example, to use the [Pelco-D](#pelco-d) protocol over TCP
-(instead of the default UDP), prepend `tcp://` to the URI.
+`URI`: The _Uniform Resource Identifier_ includes a DNS host name or network IP
+address, and port number, using the standard `host:port` convention.  It can
+also contain an optional **scheme** prefix, which can be either `udp://`,
+`tcp://` or `modem://`.  If present, the scheme will override the _default
+scheme_ for the selected protocol.  For example, to use the [Pelco-D](#pelco-d)
+protocol over TCP (instead of the default UDP), prepend `tcp://` to the URI.
 
-## Poll Enabled
+`Poll Enabled`: Polling can be disabled using this value.
 
-Polling can be disabled using this value.
+`Comm Config`: Configuration of properties shared among multiple comm links.
 
 # Comm Config
 
@@ -75,9 +75,9 @@ Up to 4 detectors can be associated with each [controller], using [IO pin]s
 
 ### CAP
 
-The Common Alerting Protocol [CAP] is used for polling feeds such as the
-Integrated Public Alert and Warning System [IPAWS].  [Alerts] can be used to
-automatically post weather and other messages to Dynamic Message Signs.  For
+The Common Alerting Protocol [CAP] is used for polling external feeds such as
+the Integrated Public Alert and Warning System [IPAWS].  [Alerts] can be used
+to automatically post weather and other messages to Dynamic Message Signs.  For
 IPAWS, this requires an `HTTPS` URI provided by the Federal Emergency Management
 Agency and a [controller] set to `ACTIVE` condition.
 

@@ -1,6 +1,6 @@
 # REST API
 
-These are rough notes about the IRIS web API.
+The REST API is provided by the `honeybee` and `graft` services.
 
 ## Requests
 
