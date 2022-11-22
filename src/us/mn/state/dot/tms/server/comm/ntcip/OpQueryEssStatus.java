@@ -511,7 +511,7 @@ public class OpQueryEssStatus extends OpEss {
 	@Override
 	public void cleanup() {
 		if (isSuccess()) {
-			w_sensor.setSampleNotify(ess_rec.toJson());
+			w_sensor.setSample(ess_rec.toJson());
 			ess_rec.store(w_sensor);
 		}
 		super.cleanup();

@@ -128,8 +128,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		cache = new PeriodicSampleCache(PeriodicSampleType.PRECIP_RATE);
 		pt_cache = new PeriodicSampleCache(
 			PeriodicSampleType.PRECIP_TYPE);
-		settings = null; // should this be loaded from DB?
-		sample = null; // should this be loaded from DB?
+		settings = null;
 		initTransients();
 	}
 
@@ -648,12 +647,6 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Settings (JSON) read from sensors */
 	private String settings;
 
-	/** Get the settings as JSON */
-	@Override
-	public String getSettings() {
-		return settings;
-	}
-
 	/** Set the JSON settings */
 	private void setSettings(String s) {
 		try {
@@ -669,36 +662,17 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	public void setSettingsNotify(String s) {
 		if (!objectEquals(s, settings)) {
 			setSettings(s);
-			notifyAttribute("settings");
 		}
 	}
 
-	/** Most recent sample data (JSON) */
-	private String sample;
-
-	/** Get the latest sample as JSON */
-	@Override
-	public String getSample() {
-		return sample;
-	}
-
 	/** Set the current JSON sample */
-	private void setSample(String s) {
+	public void setSample(String s) {
 		try {
 			store.update(this, "sample", s);
-			sample = s;
 		}
 		catch (TMSException e) {
 			logError("sample: " + e.getMessage());
 		}
-	}
-
-	/** Set the current JSON sample */
-	public void setSampleNotify(String s) {
-		// No need for equality check -- samples are always
-		// stored even when equal to previous sample
-		setSample(s);
-		notifyAttribute("sample");
 	}
 
 	/** Time stamp from the last sample */
