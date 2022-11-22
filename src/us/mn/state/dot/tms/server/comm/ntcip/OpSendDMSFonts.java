@@ -279,12 +279,9 @@ public class OpSendDMSFonts extends OpDMS {
 	 *
 	 * @return True if the DMS is affected by this issue */
 	private boolean addcoFontIssue(int fnum) {
-		return fnum > 2 && isAddco() && isVersion("3.4.21");
-	}
-
-	/** Determine if the firmware version matches a given value */
-	private boolean isVersion(String version) {
-		return getVersion().contains(version);
+		return (fnum > 2) &&
+		      isAddco() &&
+		      getVersion().contains("3.4.21");
 	}
 
 	/** Get the first phase of the next font */

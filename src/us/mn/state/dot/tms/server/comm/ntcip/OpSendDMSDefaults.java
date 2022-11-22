@@ -55,13 +55,6 @@ public class OpSendDMSDefaults extends OpDMS {
 	/** Number of missed polling periods for comm loss threshold */
 	static private final int COMM_LOSS_PERIODS = 10;
 
-	/** Certain Ledstar firmware versions can lock up with
-	 * a CTO error if dmsTimeCommLoss is set to a non-zero value */
-	static private final HashSet<String> CTO_BLACKLIST =
-		new HashSet<String>(Arrays.asList(
-		"VMS-MN2A-27x105 V2.6 Apr 20,2011"
-	));
-
 	/** Create a new operation to send DMS default parameters */
 	public OpSendDMSDefaults(DMSImpl d) {
 		super(PriorityLevel.DOWNLOAD, d);
@@ -103,19 +96,17 @@ public class OpSendDMSDefaults extends OpDMS {
 
 	/** Get the comm loss threshold */
 	private int getCommLossMinutes() {
-		return (isCommLossEnabled() && !isCommLossBlacklisted())
+		return isCommLossEnabled()
 		     ? Math.max(COMM_LOSS_MINIMUM_MINS, getLinkCommLossMins())
 		     : 0;
 	}
 
 	/** Is DMS comm loss enabled? */
 	private boolean isCommLossEnabled() {
-		return DMS_COMM_LOSS_ENABLE.getBoolean();
-	}
-
-	/** Is the controller blacklisted for comm loss setting */
-	private boolean isCommLossBlacklisted() {
-		return CTO_BLACKLIST.contains(getVersion());
+		// check for (Ledstar) firmware version which locks up with
+		// a CTO error if dmsTimeCommLoss is set to a non-zero value
+		return DMS_COMM_LOSS_ENABLE.getBoolean() &&
+		      (getVersion() != "VMS-MN2A-27x105 V2.6 Apr 20,2011");
 	}
 
 	/** Get the comm loss threshold for the comm link */
