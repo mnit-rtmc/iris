@@ -112,7 +112,7 @@ public class ControllerHelper extends BaseHelper {
 		}
 		return "";
 	}
-	
+
 	/** Get controller setup array data.
 	 *
 	 * Finds a value in the "setup" field.  The last JSON object in the
