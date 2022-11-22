@@ -25,10 +25,6 @@ This object contains sensor settings and configuration.
 
 Key                      | Value
 -------------------------|---------------------------------------------------
-`sys_descr`              | Sensor system description
-`sys_contact`            | Sensor system contact information
-`sys_name`               | Sensor system name
-`sys_location`           | Sensor system location
 `reference_elevation`    | Reference elevation above mean sea level (meters)
 `pressure_sensor_height` | Height relative to `reference_elevation` (meters)
 `wind_sensor`            | Array of wind sensor settings objects

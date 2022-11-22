@@ -50,7 +50,7 @@ public class OpQueryEssSettings extends OpEss {
 	/** Sub-surface sensors table */
 	private final SubSurfaceSensorsTable ss_table;
 
-	/** Create a new query status object */
+	/** Create a new query settings object */
 	public OpQueryEssSettings(WeatherSensorImpl ws) {
 		super(PriorityLevel.DEVICE_DATA, ws);
 		ws_table = ess_rec.ws_table;
@@ -62,26 +62,7 @@ public class OpQueryEssSettings extends OpEss {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase phaseTwo() {
-		return new QuerySettings();
-	}
-
-	/** Phase to query settings */
-	protected class QuerySettings extends Phase {
-
-		/** Query values */
-		@SuppressWarnings("unchecked")
-		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(ess_rec.sys_descr.node);
-			mess.add(ess_rec.sys_contact.node);
-			mess.add(ess_rec.sys_name.node);
-			mess.add(ess_rec.sys_location.node);
-			mess.queryProps();
-			logQuery(ess_rec.sys_descr.node);
-			logQuery(ess_rec.sys_contact.node);
-			logQuery(ess_rec.sys_name.node);
-			logQuery(ess_rec.sys_location.node);
-			return new QueryElevation();
-		}
+		return new QueryElevation();
 	}
 
 	/** Phase to query elevation values */
