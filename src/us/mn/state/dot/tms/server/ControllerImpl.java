@@ -67,22 +67,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		       io instanceof WeatherSensorImpl;
 	}
 
-	/** Trim and truncate a string, with null checking.
-	 * @param value String to be truncated (may be null).
-	 * @param maxlen Maximum length of string (characters).
-	 * @return Trimmed, truncated string, or null. */
-	static private String trimTruncate(String value, int maxlen) {
-		if (value != null) {
-			String v = value.trim();
-			if (v.length() > 0) {
-				return (v.length() <= maxlen)
-				      ? v
-				      : v.substring(0, maxlen);
-			}
-		}
-		return null;
-	}
-
 	/** Get comm link impl */
 	static private CommLinkImpl commLinkImpl(CommLink cl) {
 		return (cl instanceof CommLinkImpl) ? (CommLinkImpl)cl : null;
