@@ -105,6 +105,17 @@ public interface DMS extends Device {
 	/** Get the current status as JSON */
 	String getStatus();
 
+	/** Status JSON attributes */
+
+	/** Pot base; Integer (LEDSTAR) */
+	String LDC_POT_BASE = "lcd_pot_base";
+
+	/** Pixel low current threshold; Integer (LEDSTAR) */
+	String PIXEL_CURRENT_LOW = "pixel_current_low";
+
+	/** Pixel high current threshold; Integer (LEDSTAR) */
+	String PIXEL_CURRENT_HIGH = "pixel_current_high";
+
 	/* Transient attributes (not stored in database) */
 
 	/** Get the minimum cabinet temperature (Celsius) */
@@ -153,17 +164,4 @@ public interface DMS extends Device {
 	 *         string in the array has 3 fields, seperated by commas.  The
 	 *         fields are: description, status, and current reading. */
 	String[] getPhotocellStatus();
-
-	/* Manufacturer-specific attributes */
-
-	/* LEDSTAR-specific attributes */
-
-	/** Get the LDC pot base (LEDSTAR) */
-	Integer getLdcPotBase();
-
-	/** Get the pixel low current threshold (LEDSTAR) */
-	Integer getPixelCurrentLow();
-
-	/** Get the pixel high current threshold (LEDSTAR) */
-	Integer getPixelCurrentHigh();
 }

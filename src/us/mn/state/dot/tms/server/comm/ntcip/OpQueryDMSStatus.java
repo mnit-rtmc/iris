@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -462,9 +463,9 @@ public class OpQueryDMSStatus extends OpDMS {
 			return new LedstarStatus();
 		else {
 			// blank out LEDSTAR status values
-			dms.setLdcPotBaseNotify(null);
-			dms.setPixelCurrentLowNotify(null);
-			dms.setPixelCurrentHighNotify(null);
+			dms.setStatusNotify(DMS.LDC_POT_BASE, null);
+			dms.setStatusNotify(DMS.PIXEL_CURRENT_LOW, null);
+			dms.setStatusNotify(DMS.PIXEL_CURRENT_HIGH, null);
 			return isSkyline() ? new SkylineStatus() : null;
 		}
 	}
@@ -495,9 +496,12 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(low);
 			logQuery(high);
 			logQuery(bad);
-			dms.setLdcPotBaseNotify(potBase.getInteger());
-			dms.setPixelCurrentLowNotify(low.getInteger());
-			dms.setPixelCurrentHighNotify(high.getInteger());
+			dms.setStatusNotify(DMS.LDC_POT_BASE,
+				potBase.getInteger());
+			dms.setStatusNotify(DMS.PIXEL_CURRENT_LOW,
+				low.getInteger());
+			dms.setStatusNotify(DMS.PIXEL_CURRENT_HIGH,
+				high.getInteger());
 			return null;
 		}
 	}

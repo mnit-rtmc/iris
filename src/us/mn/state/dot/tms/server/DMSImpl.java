@@ -27,6 +27,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
@@ -1274,61 +1276,26 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
+	/** Set a status value and notify clients of the change */
+	public void setStatusNotify(String key, Object value) {
+		String s = status;
+		try {
+			JSONObject jo = (s != null)
+				? new JSONObject(s)
+				: new JSONObject();
+			jo.put(key, value);
+			setStatusNotify(jo.toString());
+		}
+		catch (JSONException e) {
+			// malformed JSON
+			e.printStackTrace();
+		}
+	}
+
 	/** Get the current status as JSON */
 	@Override
 	public String getStatus() {
 		return status;
-	}
-
-	/** LDC pot base (Ledstar-specific value) */
-	private transient Integer ldcPotBase;
-
-	/** Set the LDC pot base */
-	public void setLdcPotBaseNotify(Integer base) {
-		if (!objectEquals(base, ldcPotBase)) {
-			ldcPotBase = base;
-			notifyAttribute("ldcPotBase");
-		}
-	}
-
-	/** Get the LDC pot base */
-	@Override
-	public Integer getLdcPotBase() {
-		return ldcPotBase;
-	}
-
-	/** Pixel low current threshold (Ledstar-specific value) */
-	private transient Integer pixelCurrentLow;
-
-	/** Set the pixel low curent threshold */
-	public void setPixelCurrentLowNotify(Integer low) {
-		if (!objectEquals(low, pixelCurrentLow)) {
-			pixelCurrentLow = low;
-			notifyAttribute("pixelCurrentLow");
-		}
-	}
-
-	/** Get the pixel low current threshold */
-	@Override
-	public Integer getPixelCurrentLow() {
-		return pixelCurrentLow;
-	}
-
-	/** Pixel high current threshold (Ledstar-specific value) */
-	private transient Integer pixelCurrentHigh;
-
-	/** Set the pixel high curent threshold */
-	public void setPixelCurrentHighNotify(Integer high) {
-		if (!objectEquals(high, pixelCurrentHigh)) {
-			pixelCurrentHigh = high;
-			notifyAttribute("pixelCurrentHigh");
-		}
-	}
-
-	/** Get the pixel high current threshold */
-	@Override
-	public Integer getPixelCurrentHigh() {
-		return pixelCurrentHigh;
 	}
 
 	/** Feedback brightness sample data */

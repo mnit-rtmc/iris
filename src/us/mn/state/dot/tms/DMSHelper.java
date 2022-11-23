@@ -17,6 +17,8 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
+import org.json.JSONException;
+import org.json.JSONObject;
 import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.SString;
@@ -451,6 +453,22 @@ public class DMSHelper extends BaseHelper {
 				String ms = String.join(" ", words);
 				if (createPageOne(dms, ms) != null)
 					return ms;
+			}
+		}
+		return null;
+	}
+
+	/** Get DMS status attribute */
+	static public Object getStatus(DMS dms, String key) {
+		String status = (dms != null) ? dms.getStatus() : null;
+		if (status != null) {
+			try {
+				JSONObject jo = new JSONObject(status);
+				return jo.opt(key);
+			}
+			catch (JSONException e) {
+				// malformed JSON
+				e.printStackTrace();
 			}
 		}
 		return null;
