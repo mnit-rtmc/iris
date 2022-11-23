@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import org.json.JSONException;
+import org.json.JSONObject;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -79,6 +81,19 @@ public class OpQueryDMSStatus extends OpDMS {
 		return Math.max(n_test, n_msg);
 	}
 
+	/** DMS status */
+	private final JSONObject status = new JSONObject();
+
+	/** Put an object into status */
+	private void putStatus(String key, Object value) {
+		try {
+			status.put(key, value);
+		}
+		catch (JSONException e) {
+			logError("putStatus: " + e.getMessage() + ", " + key);
+		}
+	}
+
 	/** Create a new DMS query status object */
 	public OpQueryDMSStatus(DMSImpl d) {
 		super(PriorityLevel.DEVICE_DATA, d);
@@ -112,8 +127,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(b_level);
 			logQuery(light);
 			logQuery(control);
-			dms.setStatusNotify(DMS.LIGHT_OUTPUT,
-				getPercent(light));
+			putStatus(DMS.LIGHT_OUTPUT, getPercent(light));
 			return new QueryMessageTable();
 		}
 	}
@@ -166,11 +180,8 @@ public class OpQueryDMSStatus extends OpDMS {
 			int mn = min_cab.getInteger();
 			int mx = max_cab.getInteger();
 			if (mn <= mx) {
-				dms.setStatusNotify(DMS.CABINET_TEMP_MIN, mn);
-				dms.setStatusNotify(DMS.CABINET_TEMP_MAX, mx);
-			} else {
-				dms.setStatusNotify(DMS.CABINET_TEMP_MIN,null);
-				dms.setStatusNotify(DMS.CABINET_TEMP_MAX,null);
+				putStatus(DMS.CABINET_TEMP_MIN, mn);
+				putStatus(DMS.CABINET_TEMP_MAX, mx);
 			}
 			return new AmbientTemperature();
 		}
@@ -193,21 +204,12 @@ public class OpQueryDMSStatus extends OpDMS {
 				int mn = min_amb.getInteger();
 				int mx = max_amb.getInteger();
 				if (mn <= mx) {
-					dms.setStatusNotify(
-						DMS.AMBIENT_TEMP_MIN, mn);
-					dms.setStatusNotify(
-						DMS.AMBIENT_TEMP_MAX, mx);
-				} else {
-					dms.setStatusNotify(
-						DMS.AMBIENT_TEMP_MIN, null);
-					dms.setStatusNotify(
-						DMS.AMBIENT_TEMP_MAX, null);
+					putStatus(DMS.AMBIENT_TEMP_MIN, mn);
+					putStatus(DMS.AMBIENT_TEMP_MAX, mx);
 				}
 			}
 			catch (NoSuchName e) {
 				// Ledstar has no ambient temp objects
-				dms.setStatusNotify(DMS.AMBIENT_TEMP_MIN,null);
-				dms.setStatusNotify(DMS.AMBIENT_TEMP_MAX,null);
 			}
 			return new HousingTemperature();
 		}
@@ -229,11 +231,8 @@ public class OpQueryDMSStatus extends OpDMS {
 			int mn = min_hou.getInteger();
 			int mx = max_hou.getInteger();
 			if (mn <= mx) {
-				dms.setStatusNotify(DMS.HOUSING_TEMP_MIN, mn);
-				dms.setStatusNotify(DMS.HOUSING_TEMP_MAX, mx);
-			} else {
-				dms.setStatusNotify(DMS.HOUSING_TEMP_MIN,null);
-				dms.setStatusNotify(DMS.HOUSING_TEMP_MAX,null);
+				putStatus(DMS.HOUSING_TEMP_MIN, mn);
+				putStatus(DMS.HOUSING_TEMP_MAX, mx);
 			}
 			return new Failures();
 		}
@@ -348,7 +347,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			ASN1Enum<DmsPowerType> p_type = new ASN1Enum<
 				DmsPowerType>(DmsPowerType.class,
 				dmsPowerType.node, row);
-			ASN1Enum<DmsPowerStatus> status = new ASN1Enum<
+			ASN1Enum<DmsPowerStatus> p_stat = new ASN1Enum<
 				DmsPowerStatus>(DmsPowerStatus.class,
 				dmsPowerStatus.node, row);
 			DisplayString mfr_status = new DisplayString(
@@ -356,7 +355,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			ASN1Integer voltage = dmsPowerVoltage.makeInt(row);
 			mess.add(desc);
 			mess.add(p_type);
-			mess.add(status);
+			mess.add(p_stat);
 			mess.add(mfr_status);
 			mess.add(voltage);
 			try {
@@ -370,14 +369,14 @@ public class OpQueryDMSStatus extends OpDMS {
 			}
 			logQuery(desc);
 			logQuery(p_type);
-			logQuery(status);
+			logQuery(p_stat);
 			logQuery(mfr_status);
 			logQuery(voltage);
 			supplies[row - 1] = join(desc.getValue(),
-				p_type.getValue(), status.getValue(),
+				p_type.getValue(), p_stat.getValue(),
 				mfr_status.getValue() + ' ' +
 				formatVoltage(voltage.getInteger()));
-			if (status.getEnum() == DmsPowerStatus.powerFail)
+			if (p_stat.getEnum() == DmsPowerStatus.powerFail)
 				n_failed++;
 			row++;
 			if (row <= supplies.length)
@@ -442,20 +441,20 @@ public class OpQueryDMSStatus extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DisplayString desc = new DisplayString(
 				dmsLightSensorDescription.node, row);
-			ASN1Enum<DmsLightSensorStatus> status = new ASN1Enum<
+			ASN1Enum<DmsLightSensorStatus> s_stat = new ASN1Enum<
 				DmsLightSensorStatus>(DmsLightSensorStatus.class,
 				dmsLightSensorStatus.node, row);
 			ASN1Integer reading = dmsLightSensorCurrentReading
 				.makeInt(row);
 			mess.add(desc);
-			mess.add(status);
+			mess.add(s_stat);
 			mess.add(reading);
 			mess.queryProps();
 			logQuery(desc);
-			logQuery(status);
+			logQuery(s_stat);
 			logQuery(reading);
 			light_sensors.add(desc.getValue() + "," +
-				status.getValue() + "," + reading.getInteger());
+				s_stat.getValue() + "," + reading.getInteger());
 			row++;
 			return (row <= n_sensors) ? this : vendorStatus();
 		}
@@ -466,13 +465,10 @@ public class OpQueryDMSStatus extends OpDMS {
 		// American Signal signs timeout if you ask for unknown objects
 		if (isLedstar())
 			return new LedstarStatus();
-		else {
-			// blank out LEDSTAR status values
-			dms.setStatusNotify(DMS.LDC_POT_BASE, null);
-			dms.setStatusNotify(DMS.PIXEL_CURRENT_LOW, null);
-			dms.setStatusNotify(DMS.PIXEL_CURRENT_HIGH, null);
-			return isSkyline() ? new SkylineStatus() : null;
-		}
+		else if (isSkyline())
+			return new SkylineStatus();
+		else
+			return null;
 	}
 
 	/** Phase to query Ledstar-specific status */
@@ -501,12 +497,9 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(low);
 			logQuery(high);
 			logQuery(bad);
-			dms.setStatusNotify(DMS.LDC_POT_BASE,
-				potBase.getInteger());
-			dms.setStatusNotify(DMS.PIXEL_CURRENT_LOW,
-				low.getInteger());
-			dms.setStatusNotify(DMS.PIXEL_CURRENT_HIGH,
-				high.getInteger());
+			putStatus(DMS.LDC_POT_BASE, potBase.getInteger());
+			putStatus(DMS.PIXEL_CURRENT_LOW, low.getInteger());
+			putStatus(DMS.PIXEL_CURRENT_HIGH, high.getInteger());
 			return null;
 		}
 	}
@@ -542,6 +535,7 @@ public class OpQueryDMSStatus extends OpDMS {
 	public void cleanup() {
 		if (isSuccess()) {
 			dms.setPhotocellStatus(formatPhotocellStatus());
+			dms.setStatusNotify(status.toString());
 			setMaintStatus(formatMaintStatus());
 			setErrorStatus(formatErrorStatus());
 		}
