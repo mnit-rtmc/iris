@@ -137,8 +137,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			"gps, static_graphic, purpose, hidden, beacon, " +
 			"preset, sign_config, sign_detail, override_font, " +
 			"override_foreground, override_background, " +
-			"msg_user, msg_sched, msg_current, expire_time " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+			"msg_user, msg_sched, msg_current, expire_time, " +
+			"status FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DMSImpl(row));
@@ -182,6 +183,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("msg_sched", msg_sched);
 		map.put("msg_current", msg_current);
 		map.put("expire_time", asTimestamp(expire_time));
+		map.put("status", status);
 		return map;
 	}
 
@@ -210,6 +212,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		g.notifyCreate();
 		geo_loc = g;
 		expire_time = null;
+		status = null;
 	}
 
 	/** Create a dynamic message sign */
@@ -233,7 +236,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getString(17),           // msg_user
 		     row.getString(18),           // msg_sched
 		     row.getString(19),           // msg_current
-		     row.getTimestamp(20)         // expire_time
+		     row.getTimestamp(20),        // expire_time
+		     row.getString(21)            // status
 		);
 	}
 
@@ -241,41 +245,26 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private DMSImpl(String n, String loc, String c, int p, String nt,
 		String g, String sg, int dp, boolean h, String b, String cp,
 		String sc, String sd, String of, Integer fg, Integer bg,
-		String mu, String ms, String mc, Date et)
+		String mu, String ms, String mc, Date et, String st)
 	{
-		this(n, lookupGeoLoc(loc), lookupController(c), p, nt,
-		     lookupGps(g), lookupGraphic(sg),
-		     DevicePurpose.fromOrdinal(dp), h, lookupBeacon(b),
-		     lookupPreset(cp), SignConfigHelper.lookup(sc),
-		     SignDetailHelper.lookup(sd), FontHelper.lookup(of), fg, bg,
-		     SignMessageHelper.lookup(mu), SignMessageHelper.lookup(ms),
-		     SignMessageHelper.lookup(mc), et);
-	}
-
-	/** Create a dynamic message sign */
-	private DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, GpsImpl g, Graphic sg, DevicePurpose dp,
-		boolean h, Beacon b, CameraPreset cp, SignConfig sc,
-		SignDetail sd, Font of, Integer fg, Integer bg, SignMessage mu,
-		SignMessage ms, SignMessage mc, Date et)
-	{
-		super(n, c, p, nt);
-		geo_loc = loc;
-		gps = g;
-		static_graphic = sg;
-		purpose = dp;
+		super(n, lookupController(c), p, nt);
+		geo_loc = lookupGeoLoc(loc);
+		gps = lookupGps(g);
+		static_graphic = lookupGraphic(sg);
+		purpose = DevicePurpose.fromOrdinal(dp);
 		hidden = h;
-		beacon = b;
-		setPreset(cp);
-		sign_config = sc;
-		sign_detail = sd;
-		override_font = of;
+		beacon = lookupBeacon(b);
+		setPreset(lookupPreset(cp));
+		sign_config = SignConfigHelper.lookup(sc);
+		sign_detail = SignDetailHelper.lookup(sd);
+		override_font = FontHelper.lookup(of);
 		override_foreground = fg;
 		override_background = bg;
-		msg_user = mu;
-		msg_sched = ms;
-		msg_current = mc;
+		msg_user = SignMessageHelper.lookup(mu);
+		msg_sched = SignMessageHelper.lookup(ms);
+		msg_current = SignMessageHelper.lookup(mc);
 		expire_time = stampMillis(et);
+		status = st;
 		initTransients();
 	}
 
@@ -1266,6 +1255,29 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public Long getExpireTime() {
 		return expire_time;
+	}
+
+	/** Current (JSON) sign status */
+	private String status;
+
+	/** Set the current sign status as JSON */
+	public void setStatusNotify(String st) {
+		if (!objectEquals(st, status)) {
+			try {
+				store.update(this, "status", st);
+				status = st;
+				notifyAttribute("status");
+			}
+			catch (TMSException e) {
+				logError("status: " + e.getMessage());
+			}
+		}
+	}
+
+	/** Get the current status as JSON */
+	@Override
+	public String getStatus() {
+		return status;
 	}
 
 	/** LDC pot base (Ledstar-specific value) */

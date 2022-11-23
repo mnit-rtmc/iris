@@ -87,6 +87,9 @@ public interface DMS extends Device {
 	/** Get override background color (24-bit rgb) */
 	Integer getOverrideBackground();
 
+	/** Set the user sign message */
+	void setMsgUser(SignMessage sm);
+
 	/** Get the scheduled sign message */
 	SignMessage getMsgSched();
 
@@ -99,10 +102,10 @@ public interface DMS extends Device {
 	 * @see java.lang.System#currentTimeMillis */
 	Long getExpireTime();
 
-	/* Transient attributes (not stored in database) */
+	/** Get the current status as JSON */
+	String getStatus();
 
-	/** Set the user sign message */
-	void setMsgUser(SignMessage sm);
+	/* Transient attributes (not stored in database) */
 
 	/** Get the minimum cabinet temperature (Celsius) */
 	Integer getMinCabinetTemp();

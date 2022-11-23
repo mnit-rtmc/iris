@@ -6,11 +6,11 @@
 -- update data (usually blank).
 --
 -- PAYLOAD: 'publish ' || name, 'video_loss' (camera)
---          'fail_time' (controller)
---          'setup' (controller)
+--          'setup', 'fail_time' (controller)
 --          'connected' (comm_link)
 --          'auto_fail' (detector)
---          'msg_user', 'msg_sched', 'msg_current', 'expire_time' (dms)
+--          'msg_user', 'msg_sched', 'msg_current', 'expire_time',
+--              'status' (dms)
 --          'settings', 'sample' (weather_sensor)
 --          'time_stamp' (parking_area)
 --          id (road_class)
@@ -160,7 +160,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.35.0
+database_version	5.36.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
@@ -2967,23 +2967,24 @@ CREATE VIEW graphic_view AS
 GRANT SELECT ON graphic_view TO PUBLIC;
 
 CREATE TABLE iris._dms (
-	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
-	notes text NOT NULL,
-	gps VARCHAR(20) REFERENCES iris._gps,
-	static_graphic VARCHAR(20) REFERENCES iris.graphic,
-	purpose INTEGER NOT NULL REFERENCES iris.device_purpose,
-	hidden BOOLEAN NOT NULL,
-	beacon VARCHAR(20) REFERENCES iris._beacon,
-	sign_config VARCHAR(16) REFERENCES iris.sign_config,
-	sign_detail VARCHAR(12) REFERENCES iris.sign_detail,
-	override_font VARCHAR(16) REFERENCES iris.font,
-	override_foreground INTEGER,
-	override_background INTEGER,
-	msg_user VARCHAR(20) REFERENCES iris.sign_message,
-	msg_sched VARCHAR(20) REFERENCES iris.sign_message,
-	msg_current VARCHAR(20) REFERENCES iris.sign_message,
-	expire_time TIMESTAMP WITH time zone
+    name VARCHAR(20) PRIMARY KEY,
+    geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
+    notes VARCHAR(128) NOT NULL,
+    gps VARCHAR(20) REFERENCES iris._gps,
+    static_graphic VARCHAR(20) REFERENCES iris.graphic,
+    purpose INTEGER NOT NULL REFERENCES iris.device_purpose,
+    hidden BOOLEAN NOT NULL,
+    beacon VARCHAR(20) REFERENCES iris._beacon,
+    sign_config VARCHAR(16) REFERENCES iris.sign_config,
+    sign_detail VARCHAR(12) REFERENCES iris.sign_detail,
+    override_font VARCHAR(16) REFERENCES iris.font,
+    override_foreground INTEGER,
+    override_background INTEGER,
+    msg_user VARCHAR(20) REFERENCES iris.sign_message,
+    msg_sched VARCHAR(20) REFERENCES iris.sign_message,
+    msg_current VARCHAR(20) REFERENCES iris.sign_message,
+    expire_time TIMESTAMP WITH time zone,
+    status JSONB
 );
 
 ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
@@ -3000,6 +3001,8 @@ BEGIN
         NOTIFY dms, 'msg_current';
     ELSIF (NEW.expire_time IS DISTINCT FROM OLD.expire_time) THEN
         NOTIFY dms, 'expire_time';
+    ELSIF (NEW.status IS DISTINCT FROM OLD.status) THEN
+        NOTIFY dms, 'status';
     ELSE
         NOTIFY dms;
     END IF;
@@ -3019,7 +3022,7 @@ CREATE VIEW iris.dms AS
     SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
            purpose, hidden, beacon, preset, sign_config, sign_detail,
            override_font, override_foreground, override_background, msg_user,
-           msg_sched, msg_current, expire_time
+           msg_sched, msg_current, expire_time, status
     FROM iris._dms d
     JOIN iris.controller_io cio ON d.name = cio.name
     JOIN iris._device_preset p ON d.name = p.name;
@@ -3034,12 +3037,14 @@ BEGIN
     INSERT INTO iris._dms (
         name, geo_loc, notes, gps, static_graphic, purpose, hidden, beacon,
         sign_config, sign_detail, override_font, override_foreground,
-        override_background, msg_user, msg_sched, msg_current, expire_time
+        override_background, msg_user, msg_sched, msg_current, expire_time,
+        status
     ) VALUES (
         NEW.name, NEW.geo_loc, NEW.notes, NEW.gps, NEW.static_graphic,
         NEW.purpose, NEW.hidden, NEW.beacon, NEW.sign_config, NEW.sign_detail,
         NEW.override_font, NEW.override_foreground, NEW.override_background,
-        NEW.msg_user, NEW.msg_sched, NEW.msg_current, NEW.expire_time
+        NEW.msg_user, NEW.msg_sched, NEW.msg_current, NEW.expire_time,
+        NEW.status
     );
     RETURN NEW;
 END;
@@ -3075,7 +3080,8 @@ BEGIN
            msg_user = NEW.msg_user,
            msg_sched = NEW.msg_sched,
            msg_current = NEW.msg_current,
-           expire_time = NEW.expire_time
+           expire_time = NEW.expire_time,
+           status = NEW.status
      WHERE name = OLD.name;
     RETURN NEW;
 END;
@@ -3095,7 +3101,8 @@ CREATE VIEW dms_view AS
            p.camera, p.preset_num, d.sign_config, d.sign_detail,
            default_font, override_font, override_foreground,
            override_background, msg_user, msg_sched, msg_current,
-           expire_time, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
+           expire_time, status,
+           l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location
     FROM iris.dms d
     LEFT JOIN iris.camera_preset p ON d.preset = p.name
