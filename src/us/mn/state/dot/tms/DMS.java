@@ -107,6 +107,9 @@ public interface DMS extends Device {
 
 	/** Status JSON attributes */
 
+	/** Light output; Integer (percentage) */
+	String LIGHT_OUTPUT = "light_output";
+
 	/** Minimum cabinet temperature; Integer (Celsius) */
 	String CABINET_TEMP_MIN = "cabinet_temp_min";
 
@@ -135,9 +138,6 @@ public interface DMS extends Device {
 	String PIXEL_CURRENT_HIGH = "pixel_current_high";
 
 	/* Transient attributes (not stored in database) */
-
-	/** Get the light output (percentage) */
-	Integer getLightOutput();
 
 	/** Index of stuck-off bitmap in pixel and lamp status arrays */
 	int STUCK_OFF_BITMAP = 0;

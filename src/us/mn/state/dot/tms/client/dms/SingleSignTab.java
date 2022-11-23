@@ -340,9 +340,9 @@ public class SingleSignTab extends IPanel {
 	private void updateAttribute(DMS dms, String a) {
 		if (a == null || a.equals("name"))
 			name_lbl.setText(dms.getName());
-		if (a == null || a.equals("lightOutput")) {
-			Integer o = dms.getLightOutput();
-			if (o != null)
+		if (a == null || a.equals("status")) {
+			Object o = DMSHelper.getStatus(dms, DMS.LIGHT_OUTPUT);
+			if (o instanceof Integer)
 				brightness_lbl.setText("" + o + "%");
 			else
 				brightness_lbl.setText("");

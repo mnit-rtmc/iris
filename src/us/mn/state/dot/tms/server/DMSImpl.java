@@ -614,23 +614,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return override_background;
 	}
 
-	/** Current light output (percentage) of the sign */
-	private transient Integer lightOutput;
-
-	/** Set the light output of the sign (percentage) */
-	public void setLightOutput(Integer l) {
-		if (!objectEquals(l, lightOutput)) {
-			lightOutput = l;
-			notifyAttribute("lightOutput");
-		}
-	}
-
-	/** Get the light output of the sign (percentage) */
-	@Override
-	public Integer getLightOutput() {
-		return lightOutput;
-	}
-
 	/** Pixel status.  This is an array of two Base64-encoded bitmaps.
 	 * The first indicates stuck-off pixels, the second stuck-on pixels. */
 	private transient String[] pixelStatus;

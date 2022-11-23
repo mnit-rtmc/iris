@@ -112,7 +112,8 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(b_level);
 			logQuery(light);
 			logQuery(control);
-			dms.setLightOutput(getPercent(light));
+			dms.setStatusNotify(DMS.LIGHT_OUTPUT,
+				getPercent(light));
 			return new QueryMessageTable();
 		}
 	}
