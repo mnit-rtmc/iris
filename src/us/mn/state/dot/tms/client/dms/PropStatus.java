@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IPanel;
@@ -56,10 +57,11 @@ public class PropStatus extends IPanel {
 
 	/** Format a temperature.
 	 * @param temp Temperature in degrees Celsius. */
-	static private String formatTemp(Integer temp) {
-		if(temp != null) {
+	static private String formatTemp(Object temp) {
+		if (temp instanceof Integer) {
+			Integer t = (Integer) temp;
 			Temperature.Formatter tf = new Temperature.Formatter(0);
-			return tf.format(new Temperature(temp).convert(
+			return tf.format(new Temperature(t).convert(
 				tempUnits()));
 		} else
 			return UNKNOWN;
@@ -69,10 +71,10 @@ public class PropStatus extends IPanel {
 	 * @param mn Minimum temp (Celsius).
 	 * @param mx Maximum temp (Celsius).
 	 * @return Formatted temperature range. */
-	static private String formatTemp(Integer mn, Integer mx) {
-		if(mn == null || mn == mx)
+	static private String formatTemp(Object mn, Object mx) {
+		if (mn == null || DMSHelper.objectEquals(mn, mx))
 			return formatTemp(mx);
-		else if(mx == null)
+		else if (mx == null)
 			return formatTemp(mn);
 		else
 			return formatTemp(mn) + "..." + formatTemp(mx);
@@ -199,26 +201,19 @@ public class PropStatus extends IPanel {
 
 	/** Update one attribute on the panel */
 	public void updateAttribute(String a) {
-		if(a == null || a.equals("minCabinetTemp") ||
-		   a.equals("maxCabinetTemp"))
-		{
+		if (a == null || a.equals("status")) {
 			temp_cabinet_lbl.setText(formatTemp(
-				dms.getMinCabinetTemp(),
-				dms.getMaxCabinetTemp()));
-		}
-		if(a == null || a.equals("minAmbientTemp") ||
-		   a.equals("maxAmbientTemp"))
-		{
+				DMSHelper.getStatus(dms, DMS.CABINET_TEMP_MIN),
+				DMSHelper.getStatus(dms, DMS.CABINET_TEMP_MAX)
+			));
 			temp_ambient_lbl.setText(formatTemp(
-				dms.getMinAmbientTemp(),
-				dms.getMaxAmbientTemp()));
-		}
-		if(a == null || a.equals("minHousingTemp") ||
-		   a.equals("maxHousingTemp"))
-		{
+				DMSHelper.getStatus(dms, DMS.AMBIENT_TEMP_MIN),
+				DMSHelper.getStatus(dms, DMS.AMBIENT_TEMP_MAX)
+			));
 			temp_housing_lbl.setText(formatTemp(
-				dms.getMinHousingTemp(),
-				dms.getMaxHousingTemp()));
+				DMSHelper.getStatus(dms, DMS.HOUSING_TEMP_MIN),
+				DMSHelper.getStatus(dms, DMS.HOUSING_TEMP_MAX)
+			));
 		}
 		if(a == null || a.equals("powerStatus"))
 			updatePowerStatus();

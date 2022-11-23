@@ -165,11 +165,11 @@ public class OpQueryDMSStatus extends OpDMS {
 			int mn = min_cab.getInteger();
 			int mx = max_cab.getInteger();
 			if (mn <= mx) {
-				dms.setMinCabinetTemp(mn);
-				dms.setMaxCabinetTemp(mx);
+				dms.setStatusNotify(DMS.CABINET_TEMP_MIN, mn);
+				dms.setStatusNotify(DMS.CABINET_TEMP_MAX, mx);
 			} else {
-				dms.setMinCabinetTemp(null);
-				dms.setMaxCabinetTemp(null);
+				dms.setStatusNotify(DMS.CABINET_TEMP_MIN,null);
+				dms.setStatusNotify(DMS.CABINET_TEMP_MAX,null);
 			}
 			return new AmbientTemperature();
 		}
@@ -192,17 +192,21 @@ public class OpQueryDMSStatus extends OpDMS {
 				int mn = min_amb.getInteger();
 				int mx = max_amb.getInteger();
 				if (mn <= mx) {
-					dms.setMinAmbientTemp(mn);
-					dms.setMaxAmbientTemp(mx);
+					dms.setStatusNotify(
+						DMS.AMBIENT_TEMP_MIN, mn);
+					dms.setStatusNotify(
+						DMS.AMBIENT_TEMP_MAX, mx);
 				} else {
-					dms.setMinAmbientTemp(null);
-					dms.setMaxAmbientTemp(null);
+					dms.setStatusNotify(
+						DMS.AMBIENT_TEMP_MIN, null);
+					dms.setStatusNotify(
+						DMS.AMBIENT_TEMP_MAX, null);
 				}
 			}
 			catch (NoSuchName e) {
 				// Ledstar has no ambient temp objects
-				dms.setMinAmbientTemp(null);
-				dms.setMaxAmbientTemp(null);
+				dms.setStatusNotify(DMS.AMBIENT_TEMP_MIN,null);
+				dms.setStatusNotify(DMS.AMBIENT_TEMP_MAX,null);
 			}
 			return new HousingTemperature();
 		}
@@ -224,11 +228,11 @@ public class OpQueryDMSStatus extends OpDMS {
 			int mn = min_hou.getInteger();
 			int mx = max_hou.getInteger();
 			if (mn <= mx) {
-				dms.setMinHousingTemp(mn);
-				dms.setMaxHousingTemp(mx);
+				dms.setStatusNotify(DMS.HOUSING_TEMP_MIN, mn);
+				dms.setStatusNotify(DMS.HOUSING_TEMP_MAX, mx);
 			} else {
-				dms.setMinHousingTemp(null);
-				dms.setMaxHousingTemp(null);
+				dms.setStatusNotify(DMS.HOUSING_TEMP_MIN,null);
+				dms.setStatusNotify(DMS.HOUSING_TEMP_MAX,null);
 			}
 			return new Failures();
 		}

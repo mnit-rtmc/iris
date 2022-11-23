@@ -107,34 +107,34 @@ public interface DMS extends Device {
 
 	/** Status JSON attributes */
 
-	/** Pot base; Integer (LEDSTAR) */
+	/** Minimum cabinet temperature; Integer (Celsius) */
+	String CABINET_TEMP_MIN = "cabinet_temp_min";
+
+	/** Maximum cabinet temperature; Integer (Celsius) */
+	String CABINET_TEMP_MAX = "cabinet_temp_max";
+
+	/** Minimum ambient temperature; Integer (Celsius) */
+	String AMBIENT_TEMP_MIN = "ambient_temp_min";
+
+	/** Maximum ambient temperature; Integer (Celsius) */
+	String AMBIENT_TEMP_MAX = "ambient_temp_max";
+
+	/** Minimum housing temperature; Integer (Celsius) */
+	String HOUSING_TEMP_MIN = "housing_temp_min";
+
+	/** Maximum housing temperature; Integer (Celsius) */
+	String HOUSING_TEMP_MAX = "housing_temp_max";
+
+	/** Pot base; Integer (LEDSTAR only) */
 	String LDC_POT_BASE = "lcd_pot_base";
 
-	/** Pixel low current threshold; Integer (LEDSTAR) */
+	/** Pixel low current threshold; Integer (LEDSTAR only) */
 	String PIXEL_CURRENT_LOW = "pixel_current_low";
 
-	/** Pixel high current threshold; Integer (LEDSTAR) */
+	/** Pixel high current threshold; Integer (LEDSTAR only) */
 	String PIXEL_CURRENT_HIGH = "pixel_current_high";
 
 	/* Transient attributes (not stored in database) */
-
-	/** Get the minimum cabinet temperature (Celsius) */
-	Integer getMinCabinetTemp();
-
-	/** Get the maximum cabinet temperature (Celsius) */
-	Integer getMaxCabinetTemp();
-
-	/** Get the minimum ambient temperature (Celsius) */
-	Integer getMinAmbientTemp();
-
-	/** Get the maximum ambient temperature (Celsius) */
-	Integer getMaxAmbientTemp();
-
-	/** Get the minimum housing temperature (Celsius) */
-	Integer getMinHousingTemp();
-
-	/** Get the maximum housing temperature (Celsius) */
-	Integer getMaxHousingTemp();
 
 	/** Get the light output (percentage) */
 	Integer getLightOutput();
