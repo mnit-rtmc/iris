@@ -648,20 +648,15 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	private String settings;
 
 	/** Set the JSON settings */
-	private void setSettings(String s) {
-		try {
-			store.update(this, "settings", s);
-			settings = s;
-		}
-		catch (TMSException e) {
-			logError("settings: " + e.getMessage());
-		}
-	}
-
-	/** Set the JSON settings */
-	public void setSettingsNotify(String s) {
+	public void setSettings(String s) {
 		if (!objectEquals(s, settings)) {
-			setSettings(s);
+			try {
+				store.update(this, "settings", s);
+				settings = s;
+			}
+			catch (TMSException e) {
+				logError("settings: " + e.getMessage());
+			}
 		}
 	}
 

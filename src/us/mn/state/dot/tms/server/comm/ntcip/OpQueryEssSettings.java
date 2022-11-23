@@ -242,7 +242,7 @@ public class OpQueryEssSettings extends OpEss {
 	@Override
 	public void cleanup() {
 		if (isSuccess())
-			w_sensor.setSettingsNotify(ess_rec.toJson());
+			w_sensor.setSettings(ess_rec.toJson());
 		super.cleanup();
 	}
 }
