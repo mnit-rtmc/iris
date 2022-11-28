@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2021  Minnesota Department of Transportation
+ * Copyright (C) 2013-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ public class OpQueryGateStatus extends OpSTC {
 		// operation loops continuously.  This prevents priority from
 		// being changed due to DeviceContentionException.  Bumping
 		// priority here can starve other operations (due to looping).
-		super(PriorityLevel.DEVICE_DATA, d, false);
+		super(PriorityLevel.IDLE, d, false);
 		status = new StatusProperty(password());
 	}
 
