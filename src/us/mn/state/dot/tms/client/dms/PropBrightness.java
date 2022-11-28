@@ -19,6 +19,7 @@ import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import org.json.JSONArray;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -110,7 +111,7 @@ public class PropBrightness extends IPanel {
 
 	/** Update one attribute on the panel */
 	public void updateAttribute(String a) {
-		if (a == null || a.equals("photocellStatus"))
+		if (a == null || a.equals("status"))
 			updatePhotocellStatus();
 		if (a == null || a.equals("status") ||
 		    a.equals("msgCurrent"))
@@ -126,9 +127,10 @@ public class PropBrightness extends IPanel {
 
 	/** Update the photocell status */
 	private void updatePhotocellStatus() {
-		String[] s = dms.getPhotocellStatus();
-		if(s != null) {
-			PhotocellTableModel m = new PhotocellTableModel(s);
+		Object ps = DMSHelper.getStatus(dms, DMS.PHOTOCELLS);
+		if (ps instanceof JSONArray) {
+			PhotocellTableModel m = new PhotocellTableModel(
+				(JSONArray) ps);
 			photocell_tbl.setColumnModel(m.createColumnModel());
 			photocell_tbl.setModel(m);
 		}

@@ -59,6 +59,8 @@ public class PowerTableModel extends AbstractTableModel {
 
 	/** Get one power supply value */
 	static private String getColumn(JSONObject ps, int column) {
+		if (ps == null)
+			return null;
 		switch (column) {
 			case COL_DESC: return ps.optString("description");
 			case COL_TYPE: return ps.optString("supply_type");

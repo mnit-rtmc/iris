@@ -107,10 +107,17 @@ public interface DMS extends Device {
 
 	/** Status JSON attributes */
 
+	/** Photocell array.
+	 *
+	 * An array of photocell objects, one for each sensor, plus one for the
+	 * composite of all sensors.  Each object has 3 fields: `description`,
+	 * `status`, and `reading` */
+	String PHOTOCELLS = "photocells";
+
 	/** Light output; Integer (percentage) */
 	String LIGHT_OUTPUT = "light_output";
 
-	/** Power supplies attribute.
+	/** Power supplies array.
 	 *
 	 * An array of power supply objects, consisting of `description`,
 	 * `supply_type`, `power_status`, `detail` and `voltage` */
@@ -156,11 +163,4 @@ public interface DMS extends Device {
 	 *         first bitmap is "stuck off", and the second is "stuck on".
 	 *         If the pixel status is not known, null is returned. */
 	String[] getPixelStatus();
-
-	/** Get photocell status.
-	 * @return Photocell status as an array of strings, one for each light
-	 *         sensor (plus one for the composite of all sensors).  Each
-	 *         string in the array has 3 fields, seperated by commas.  The
-	 *         fields are: description, status, and current reading. */
-	String[] getPhotocellStatus();
 }

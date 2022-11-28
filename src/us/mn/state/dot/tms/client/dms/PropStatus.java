@@ -215,9 +215,8 @@ public class PropStatus extends IPanel {
 				DMSHelper.getStatus(dms, DMS.HOUSING_TEMP_MIN),
 				DMSHelper.getStatus(dms, DMS.HOUSING_TEMP_MAX)
 			));
-		}
-		if(a == null || a.equals("powerStatus"))
 			updatePowerStatus();
+		}
 		if (null == a) {
 			boolean r = canRequest();
 			query_msg.setEnabled(r);

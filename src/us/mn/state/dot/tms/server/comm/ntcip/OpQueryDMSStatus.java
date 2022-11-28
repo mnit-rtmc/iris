@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,12 +53,9 @@ public class OpQueryDMSStatus extends OpDMS {
 		return Math.round(light.getInteger() / 655.35f);
 	}
 
-	/** Photocell level */
+	/** Photocell level (composite) */
 	private final ASN1Integer p_level =
 		dmsIllumPhotocellLevelStatus.makeInt();
-
-	/** List of light sensor status */
-	private final ArrayList<String> light_sensors = new ArrayList<String>();
 
 	/** Short Error status */
 	private final ASN1Flags<ShortErrorStatus> shortError = new ASN1Flags<
@@ -329,11 +325,13 @@ public class OpQueryDMSStatus extends OpDMS {
 
 	/** Phase to query power supply status */
 	protected class QueryPowerStatus extends Phase {
-		protected final JSONArray supplies;
-		protected int row = 1; // row in DmsPowerStatusTable
-		protected int n_failed = 0;
-		protected QueryPowerStatus(int n_pwr) {
-			supplies = new JSONArray(n_pwr);
+		private final JSONArray supplies;
+		private final int n_supplies;
+		private int row = 1; // row in DmsPowerStatusTable
+		private int n_failed = 0;
+		protected QueryPowerStatus(int n) {
+			n_supplies = n;
+			supplies = new JSONArray(n_supplies);
 		}
 
 		/** Query status of one power supply */
@@ -379,10 +377,10 @@ public class OpQueryDMSStatus extends OpDMS {
 			if (p_stat.getEnum() == DmsPowerStatus.powerFail)
 				n_failed++;
 			row++;
-			if (row <= supplies.length())
+			if (row <= n_supplies)
 				return this;
 			else {
-				if (2 * n_failed > supplies.length())
+				if (2 * n_failed > n_supplies)
 					setErrorStatus("POWER");
 				putStatus(DMS.POWER_SUPPLIES, supplies);
 				return new LightSensorCount();
@@ -401,7 +399,7 @@ public class OpQueryDMSStatus extends OpDMS {
 		       s3.trim();
 	}
 
-	/** Phase to query 1203v2 light sensors */
+	/** Phase to query 1203v2 light sensor count */
 	protected class LightSensorCount extends Phase {
 
 		/** Query number of light sensors */
@@ -427,10 +425,12 @@ public class OpQueryDMSStatus extends OpDMS {
 
 	/** Phase to query light sensor status */
 	protected class QueryLightSensorStatus extends Phase {
+		private final JSONArray photocells;
 		private final int n_sensors;
 		private int row = 1;	// row in DmsLightSensorStatusTable
-		protected QueryLightSensorStatus(int n_snsr) {
-			n_sensors = n_snsr;
+		protected QueryLightSensorStatus(int n) {
+			n_sensors = n;
+			photocells = new JSONArray(n_sensors);
 		}
 
 		/** Query status of one light sensor */
@@ -450,11 +450,37 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(desc);
 			logQuery(s_stat);
 			logQuery(reading);
-			light_sensors.add(desc.getValue() + "," +
-				s_stat.getValue() + "," + reading.getInteger());
+			JSONObject photocell = new JSONObject();
+			photocell.put("description", desc.getValue());
+			photocell.put("status", s_stat.getValue());
+			photocell.put("reading", reading.getInteger());
+			photocells.put(photocell);
 			row++;
-			return (row <= n_sensors) ? this : vendorStatus();
+			if (row <= n_sensors)
+				return this;
+			else {
+				photocells.put(compositePhotocell());
+				putStatus(DMS.PHOTOCELLS, photocells);
+				return vendorStatus();
+			}
 		}
+	}
+
+	/** Get the composite photocell value */
+	private JSONObject compositePhotocell() {
+		JSONObject photocell = new JSONObject();
+		photocell.put("description", "composite");
+		photocell.put("status", compositePhotocellStatus());
+		photocell.put("reading", p_level.getInteger());
+		return photocell;
+	}
+
+	/** Get the composite photocell status */
+	private String compositePhotocellStatus() {
+		int err = shortError.getInteger();
+		return ShortErrorStatus.PHOTOCELL.isSet(err)
+		      ? "fail"
+		      : "noError";
 	}
 
 	/** Get phase to query vendor-specific status objects */
@@ -531,27 +557,11 @@ public class OpQueryDMSStatus extends OpDMS {
 	@Override
 	public void cleanup() {
 		if (isSuccess()) {
-			dms.setPhotocellStatus(formatPhotocellStatus());
 			dms.setStatusNotify(status.toString());
 			setMaintStatus(formatMaintStatus());
 			setErrorStatus(formatErrorStatus());
 		}
 		super.cleanup();
-	}
-
-	/** Format the photocell status table */
-	private String[] formatPhotocellStatus() {
-		light_sensors.add("composite," + photocellStatus() + "," +
-			p_level.getInteger());
-		return light_sensors.toArray(new String[0]);
-	}
-
-	/** Get the composite photocell status */
-	private String photocellStatus() {
-		if (ShortErrorStatus.PHOTOCELL.isSet(shortError.getInteger()))
-			return "fail";
-		else
-			return "noError";
 	}
 
 	/** Format the new maintenance status */

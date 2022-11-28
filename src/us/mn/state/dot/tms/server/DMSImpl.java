@@ -632,24 +632,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return pixelStatus;
 	}
 
-	/** Photocell status.  This is an array of status for each photocell.
-	 * @see DMS.getPhotocellStatus */
-	private transient String[] photocellStatus = new String[0];
-
-	/** Set the photocell status table */
-	public void setPhotocellStatus(String[] t) {
-		if (!Arrays.equals(t, photocellStatus)) {
-			photocellStatus = t;
-			notifyAttribute("photocellStatus");
-		}
-	}
-
-	/** Get the photocell status table */
-	@Override
-	public String[] getPhotocellStatus() {
-		return photocellStatus;
-	}
-
 	/** Create a blank message for the sign */
 	public SignMessage createMsgBlank() {
 		return findOrCreateMsg(null, "", false,
