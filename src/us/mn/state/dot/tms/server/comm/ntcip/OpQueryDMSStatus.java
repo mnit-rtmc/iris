@@ -53,6 +53,11 @@ public class OpQueryDMSStatus extends OpDMS {
 		return Math.round(light.getInteger() / 655.35f);
 	}
 
+	/** Scale power supply voltage */
+	static private Float scaleVoltage(int value) {
+		return (value >= 0 && value <= 65535) ? (value / 100f) : null;
+	}
+
 	/** Photocell level (composite) */
 	private final ASN1Integer p_level =
 		dmsIllumPhotocellLevelStatus.makeInt();
@@ -386,17 +391,6 @@ public class OpQueryDMSStatus extends OpDMS {
 				return new LightSensorCount();
 			}
 		}
-	}
-
-	/** Scale power supply voltage */
-	static private Float scaleVoltage(int value) {
-		return (value >= 0 && value <= 65535) ? (value / 100f) : null;
-	}
-
-	/** Trim and join four strings */
-	static private String join(String s0, String s1, String s2, String s3) {
-		return s0.trim() + ',' + s1.trim() + ',' + s2.trim() + ',' +
-		       s3.trim();
 	}
 
 	/** Phase to query 1203v2 light sensor count */
