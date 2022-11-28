@@ -21,12 +21,12 @@ package us.mn.state.dot.tms.server.comm;
  * @author Douglas Lau
  */
 public enum PriorityLevel {
-	URGENT,      /* 0 */
-	COMMAND,     /* 1 */
-	SHORT_POLL,  /* 2 */
-	DOWNLOAD,    /* 3 */
-	LONG_POLL,   /* 4 */
-	DEVICE_DATA, /* 5 */
-	DIAGNOSTIC,  /* 6 */
+	CONFIGURE,   /* 0: system-level configuration queries */
+	COMMAND,     /* 1: user initiated commands */
+	SHORT_POLL,  /* 2: periodic poll (short period queries) */
+	DOWNLOAD,    /* 3: sending settings */
+	LONG_POLL,   /* 4: periodic poll (long period queries) */
+	DEVICE_DATA, /* 5: device queries */
+	DIAGNOSTIC,  /* 6: diagnostics and testing */
 	IDLE;        /* 7: idle/continuous queries */
 }
