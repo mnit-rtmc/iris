@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2021  Minnesota Department of Transportation
+ * Copyright (C) 2002-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,5 +27,6 @@ public enum PriorityLevel {
 	DOWNLOAD,    /* 3 */
 	LONG_POLL,   /* 4 */
 	DEVICE_DATA, /* 5 */
-	DIAGNOSTIC;  /* 6 */
+	DIAGNOSTIC,  /* 6 */
+	IDLE;        /* 7: idle/continuous queries */
 }
