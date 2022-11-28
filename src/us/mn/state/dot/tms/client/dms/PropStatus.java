@@ -18,6 +18,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import org.json.JSONArray;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -230,9 +231,9 @@ public class PropStatus extends IPanel {
 
 	/** Update the power status */
 	private void updatePowerStatus() {
-		String[] s = dms.getPowerStatus();
-		if(s != null) {
-			PowerTableModel m = new PowerTableModel(s);
+		Object ps = DMSHelper.getStatus(dms, DMS.POWER_SUPPLIES);
+		if (ps instanceof JSONArray) {
+			PowerTableModel m = new PowerTableModel((JSONArray) ps);
 			power_tbl.setColumnModel(m.createColumnModel());
 			power_tbl.setModel(m);
 		}

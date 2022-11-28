@@ -632,25 +632,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return pixelStatus;
 	}
 
-	/** Power supply status.  This is an array of status for each power
-	 * supply.
-	 * @see DMS.getPowerStatus */
-	private transient String[] powerStatus = new String[0];
-
-	/** Set the power supply status table */
-	public void setPowerStatus(String[] t) {
-		if (!Arrays.equals(t, powerStatus)) {
-			powerStatus = t;
-			notifyAttribute("powerStatus");
-		}
-	}
-
-	/** Get the power supply status table */
-	@Override
-	public String[] getPowerStatus() {
-		return powerStatus;
-	}
-
 	/** Photocell status.  This is an array of status for each photocell.
 	 * @see DMS.getPhotocellStatus */
 	private transient String[] photocellStatus = new String[0];

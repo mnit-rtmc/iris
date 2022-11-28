@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import us.mn.state.dot.tms.DMS;
@@ -317,26 +318,22 @@ public class OpQueryDMSStatus extends OpDMS {
 			}
 			catch (NoSuchName e) {
 				// 1203v2 not supported ...
-				dms.setPowerStatus(new String[0]);
 				return vendorStatus();
 			}
 			logQuery(n_pwr);
-			if (n_pwr.getInteger() > 0)
-				return new QueryPowerStatus(n_pwr.getInteger());
-			else {
-				dms.setPowerStatus(new String[0]);
-				return new LightSensorCount();
-			}
+			return (n_pwr.getInteger() > 0)
+			      ? new QueryPowerStatus(n_pwr.getInteger())
+			      : new LightSensorCount();
 		}
 	}
 
 	/** Phase to query power supply status */
 	protected class QueryPowerStatus extends Phase {
-		protected final String[] supplies;
-		protected int row = 1;		// row in DmsPowerStatusTable
+		protected final JSONArray supplies;
+		protected int row = 1; // row in DmsPowerStatusTable
 		protected int n_failed = 0;
 		protected QueryPowerStatus(int n_pwr) {
-			supplies = new String[n_pwr];
+			supplies = new JSONArray(n_pwr);
 		}
 
 		/** Query status of one power supply */
@@ -364,7 +361,6 @@ public class OpQueryDMSStatus extends OpDMS {
 			catch (NoSuchName e) {
 				// Come on, man!  If we got here, 1203v2
 				// objects should really be supported ...
-				dms.setPowerStatus(new String[0]);
 				return vendorStatus();
 			}
 			logQuery(desc);
@@ -372,30 +368,31 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(p_stat);
 			logQuery(mfr_status);
 			logQuery(voltage);
-			supplies[row - 1] = join(desc.getValue(),
-				p_type.getValue(), p_stat.getValue(),
-				mfr_status.getValue() + ' ' +
-				formatVoltage(voltage.getInteger()));
+			JSONObject supply = new JSONObject();
+			supply.put("description", desc.getValue());
+			supply.put("supply_type", p_type.getValue());
+			supply.put("power_status", p_stat.getValue());
+			supply.put("detail", mfr_status.getValue());
+			supply.put("voltage",
+				scaleVoltage(voltage.getInteger()));
+			supplies.put(supply);
 			if (p_stat.getEnum() == DmsPowerStatus.powerFail)
 				n_failed++;
 			row++;
-			if (row <= supplies.length)
+			if (row <= supplies.length())
 				return this;
 			else {
-				if (2 * n_failed > supplies.length)
+				if (2 * n_failed > supplies.length())
 					setErrorStatus("POWER");
-				dms.setPowerStatus(supplies);
+				putStatus(DMS.POWER_SUPPLIES, supplies);
 				return new LightSensorCount();
 			}
 		}
 	}
 
-	/** Format power supply voltage */
-	static private String formatVoltage(int volts) {
-		if (volts >= 0 && volts < 65535)
-			return "" + (volts / 100f) + " volts";
-		else
-			return "";
+	/** Scale power supply voltage */
+	static private Float scaleVoltage(int value) {
+		return (value >= 0 && value <= 65535) ? (value / 100f) : null;
 	}
 
 	/** Trim and join four strings */
@@ -523,7 +520,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			}
 			logQuery(power);
 			logQuery(sensor);
-			dms.setPowerStatus(power.getPowerStatus());
+			putStatus(DMS.POWER_SUPPLIES, power.getPowerStatus());
 			if (power.isCritical())
 				setErrorStatus("POWER");
 			return null;

@@ -110,6 +110,12 @@ public interface DMS extends Device {
 	/** Light output; Integer (percentage) */
 	String LIGHT_OUTPUT = "light_output";
 
+	/** Power supplies attribute.
+	 *
+	 * An array of power supply objects, consisting of `description`,
+	 * `supply_type`, `power_status`, `detail` and `voltage` */
+	String POWER_SUPPLIES = "power_supplies";
+
 	/** Minimum cabinet temperature; Integer (Celsius) */
 	String CABINET_TEMP_MIN = "cabinet_temp_min";
 
@@ -150,13 +156,6 @@ public interface DMS extends Device {
 	 *         first bitmap is "stuck off", and the second is "stuck on".
 	 *         If the pixel status is not known, null is returned. */
 	String[] getPixelStatus();
-
-	/** Get power supply status.
-	 * @return Power supply status as an array of strings, one for each
-	 *         supply.  Each string in the array has 4 fields, seperated by
-	 *         commas.  The fields are: description, supply type, status,
-	 *         and detail. */
-	String[] getPowerStatus();
 
 	/** Get photocell status.
 	 * @return Photocell status as an array of strings, one for each light

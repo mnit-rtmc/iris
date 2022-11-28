@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2020  Minnesota Department of Transportation
+ * Copyright (C) 2002-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mibskyline;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 
 /**
@@ -34,6 +36,20 @@ public class IllumPowerStatus extends ASN1OctetString {
 					return e;
 			}
 			return unavailable;
+		}
+
+		/** Get value */
+		private String value() {
+			switch (this) {
+			case low:
+			case high:
+				return "powerFail";
+			case marginallyLow:
+			case marginallyHigh:
+				return "voltageOutOfSpec";
+			default:
+				return "noError";
+			}
 		}
 	}
 
@@ -59,40 +75,25 @@ public class IllumPowerStatus extends ASN1OctetString {
 			return sb.substring(2);
 	}
 
-	/** Get power status for all power supplies.
-	 * @see us.mn.state.dot.tms.DMS#getPowerStatus */
-	public String[] getPowerStatus() {
+	/** Get power status for all power supplies. */
+	public JSONArray getPowerStatus() {
 		byte[] vals = getByteValue();
-		String[] supplies = new String[vals.length];
+		if (vals.length == 0)
+			return null;
+		JSONArray supplies = new JSONArray(vals.length);
 		for (int i = 0; i < vals.length; i++)
-			supplies[i] = getPowerStatus(vals, i);
+			supplies.put(getPowerStatus(vals, i));
 		return supplies;
 	}
 
 	/** Get the power status for one power supply */
-	private String getPowerStatus(byte[] vals, int num) {
-		byte v = vals[num];
-		StringBuilder sb = new StringBuilder();
-		sb.append('#');
-		sb.append(num + 1);
-		sb.append(",ledSupply,");	// 1203v2 dmsPowerType
-		Enum e = Enum.fromOrdinal(v);
-		switch (e) {
-		case low:
-		case high:
-			sb.append("powerFail,");
-			sb.append(e);
-			break;
-		case marginallyLow:
-		case marginallyHigh:
-			sb.append("voltageOutOfSpec,");
-			sb.append(e);
-			break;
-		default:
-			sb.append("noError,");
-			break;
-		}
-		return sb.toString();
+	private JSONObject getPowerStatus(byte[] vals, int num) {
+		JSONObject supply = new JSONObject();
+		supply.put("description", "#" + (num + 1));
+		supply.put("supply_type", "ledSupply"); // 1203v2 dmsPowerType
+		Enum e = Enum.fromOrdinal(vals[num]);
+		supply.put("power_status", e.value());
+		return supply;
 	}
 
 	/** Check if the power status is critical */
