@@ -31,7 +31,7 @@ public class OpPerVehicle extends OpG4 {
 
 	/** Create a new "per vehicle" operation */
 	public OpPerVehicle(ControllerImpl c) {
-		super(PriorityLevel.LONG_POLL, c);
+		super(PriorityLevel.IDLE, c);
 		setSuccess(false);
 	}
 
