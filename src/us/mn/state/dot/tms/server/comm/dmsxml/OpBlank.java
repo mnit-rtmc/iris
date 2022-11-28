@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -32,14 +32,14 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  * @author Travis Swanston
  */
-class OpBlank extends OpDms
-{
+class OpBlank extends OpDms {
+
 	/** blank message, which contains owner, duration, priority */
 	private final SignMessage m_sm;
 
-	/** Create a new DMS query configuration object */
+	/** Create a new DMS blank object */
 	OpBlank(DMSImpl d, SignMessage mess, User u) {
-		super(PriorityLevel.DOWNLOAD, d, "Blanking the CMS", u);
+		super(PriorityLevel.COMMAND, d, "Blanking the CMS", u);
 		m_sm = mess;
 	}
 
