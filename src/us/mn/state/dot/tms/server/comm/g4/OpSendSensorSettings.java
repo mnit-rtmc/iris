@@ -58,7 +58,7 @@ public class OpSendSensorSettings extends OpG4 {
 	public OpSendSensorSettings(ControllerImpl c, CommProtocol cp,
 		boolean r)
 	{
-		super(PriorityLevel.DOWNLOAD, c);
+		super(PriorityLevel.SETTINGS, c);
 		interval = c.getPollPeriodSec();
 		protocol = cp;
 		restart = r;

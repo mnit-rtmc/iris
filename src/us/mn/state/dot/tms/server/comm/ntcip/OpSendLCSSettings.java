@@ -28,7 +28,7 @@ public class OpSendLCSSettings extends OpLCS {
 
 	/** Create a new operation to send LCS settings */
 	public OpSendLCSSettings(LCSArrayImpl l) {
-		super(PriorityLevel.DOWNLOAD, l);
+		super(PriorityLevel.SETTINGS, l);
 		sendSettings();
 	}
 

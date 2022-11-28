@@ -57,7 +57,7 @@ public class OpSendDMSDefaults extends OpDMS {
 
 	/** Create a new operation to send DMS default parameters */
 	public OpSendDMSDefaults(DMSImpl d) {
-		super(PriorityLevel.DOWNLOAD, d);
+		super(PriorityLevel.SETTINGS, d);
 	}
 
 	/** Create the second phase of the operation */

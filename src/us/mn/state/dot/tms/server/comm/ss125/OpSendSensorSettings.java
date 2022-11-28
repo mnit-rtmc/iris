@@ -55,14 +55,14 @@ public class OpSendSensorSettings extends OpSS125 {
 	public OpSendSensorSettings(PriorityLevel p, ControllerImpl c,
 		boolean r)
 	{
-		super(PriorityLevel.DOWNLOAD, c);
+		super(PriorityLevel.SETTINGS, c);
 		restart = r;
 		interval = c.getPollPeriodSec();
 	}
 
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(ControllerImpl c, boolean r) {
-		this(PriorityLevel.DOWNLOAD, c, r);
+		this(PriorityLevel.SETTINGS, c, r);
 	}
 
 	/** Create the first phase of the operation */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ public class OpReset170 extends Op170 {
 
 	/** Create a new send level-1 restart operation */
 	public OpReset170(ControllerImpl c) {
-		super(PriorityLevel.DOWNLOAD, c);
+		super(PriorityLevel.SETTINGS, c);
 	}
 
 	/** Create the first phase of the operation */

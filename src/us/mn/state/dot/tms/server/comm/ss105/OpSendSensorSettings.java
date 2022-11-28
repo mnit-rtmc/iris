@@ -44,7 +44,7 @@ public class OpSendSensorSettings extends OpSS105 {
 
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(ControllerImpl c, boolean r) {
-		this(PriorityLevel.DOWNLOAD, c, r);
+		this(PriorityLevel.SETTINGS, c, r);
 	}
 
 	/** Create the first phase of the operation */

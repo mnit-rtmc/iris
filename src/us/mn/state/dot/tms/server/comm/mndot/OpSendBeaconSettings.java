@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ public class OpSendBeaconSettings extends Op170Device {
 
 	/** Create a new send beacon settings operation */
 	public OpSendBeaconSettings(BeaconImpl b) {
-		this(PriorityLevel.DOWNLOAD, b);
+		this(PriorityLevel.SETTINGS, b);
 	}
 
 	/** Create the second phase of the operation */

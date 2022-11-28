@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2022  SRF Consulting Group
- * Copyright (C) 2021       Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,11 +32,9 @@ public class OpQueryGateStatus extends OpGateNdorV5 {
 	/** Create a new gate arm query status operation */
 	@SuppressWarnings("unchecked")
 	public OpQueryGateStatus(GateArmImpl d) {
-		// Don't require exclusive access to device, since this
-		// operation loops continuously.  This prevents priority from
-		// being changed due to DeviceContentionException.  Bumping
-		// priority here can starve other operations (due to looping).
-		super(PriorityLevel.DOWNLOAD, d, false); // priority 3, non-exclusive
+		// Don't require exclusive access to device.  This prevents
+		// priority from being changed due to DeviceContentionException.
+		super(PriorityLevel.SETTINGS, d, false); // non-exclusive
 		if (sGateArm == null) {
 			prop = null;
 			return;

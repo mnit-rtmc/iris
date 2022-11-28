@@ -105,7 +105,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 	/** Create a new operation to send fonts to a DMS */
 	public OpSendDMSFonts(DMSImpl d) {
-		super(PriorityLevel.DOWNLOAD, d);
+		super(PriorityLevel.SETTINGS, d);
 		FontFinder ff = new FontFinder(d);
 		fonts = ff.getFonts();
 	}

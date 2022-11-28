@@ -39,7 +39,7 @@ class OpReset extends OpDms {
 	 *  @param d Current DMS.
 	 *  @param u User performing the action, may be null. */
 	OpReset(DMSImpl d, User u) {
-		super(PriorityLevel.DOWNLOAD, d, "Reinitializing the CMS",u);
+		super(PriorityLevel.SETTINGS, d, "Reinitializing the CMS",u);
 	}
 
 	/** Create the second phase of the operation */

@@ -24,7 +24,7 @@ public enum PriorityLevel {
 	CONFIGURE,   /* 0: system-level configuration queries */
 	COMMAND,     /* 1: user initiated commands */
 	SHORT_POLL,  /* 2: periodic poll (short period queries) */
-	DOWNLOAD,    /* 3: sending settings */
+	SETTINGS,    /* 3: sending settings */
 	LONG_POLL,   /* 4: periodic poll (long period queries) */
 	DEVICE_DATA, /* 5: device queries */
 	DIAGNOSTIC,  /* 6: diagnostics and testing */

@@ -97,23 +97,23 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 	@Override
 	public void resetController(ControllerImpl c) {
 		createOp("system.command.op", c, new OpSystemCommand(counter),
-			PriorityLevel.DOWNLOAD);
+			PriorityLevel.SETTINGS);
 	}
 
 	/** Send settings to a controller */
 	@Override
 	public void sendSettings(ControllerImpl c) {
 		createOp("clock.status.op", c, new OpClockStatus(counter),
-			PriorityLevel.DOWNLOAD);
+			PriorityLevel.SETTINGS);
 		createOp("system.attribute.op", c,
 			new OpSystemAttributes(counter),
-			PriorityLevel.DOWNLOAD);
+			PriorityLevel.SETTINGS);
 		createOp("detector.op.configure", c,
 			new OpDetectorConfigure(counter, 0),
-			PriorityLevel.DOWNLOAD);
+			PriorityLevel.SETTINGS);
 		createOp("firmware.version.op", c,
 			new OpFirmwareVersion(counter),
-			PriorityLevel.DOWNLOAD);
+			PriorityLevel.SETTINGS);
 		RampMeterImpl meter1 = lookupMeter(c, METER_1_PIN);
 		if (meter1 != null)
 			sendRequest(meter1, DeviceRequest.SEND_SETTINGS);
@@ -167,7 +167,7 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 		case SEND_SETTINGS:
 			createOp("ramp.meter.op.configure", meter,
 				new OpMeterConfigure(counter, meter),
-				PriorityLevel.DOWNLOAD);
+				PriorityLevel.SETTINGS);
 			break;
 		case QUERY_STATUS:
 			createOp("ramp.meter.op.query.status", meter,
