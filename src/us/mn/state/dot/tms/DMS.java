@@ -152,13 +152,15 @@ public interface DMS extends Device {
 
 	/* Transient attributes (not stored in database) */
 
-	/** Index of stuck-off bitmap in pixel and lamp status arrays */
+	/** Index of stuck-off bitmap in pixel status array */
 	int STUCK_OFF_BITMAP = 0;
 
-	/** Index of stuck-on bitmap in pixel and lamp status arrays */
+	/** Index of stuck-on bitmap in pixel status array */
 	int STUCK_ON_BITMAP = 1;
 
 	/** Get the pixel status.
+	 *
+	 * FIXME: store in the database using same method as Graphic.
 	 * @return Pixel status as an array of two Base64-encoded bitmaps.  The
 	 *         first bitmap is "stuck off", and the second is "stuck on".
 	 *         If the pixel status is not known, null is returned. */
