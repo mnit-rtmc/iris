@@ -46,7 +46,7 @@ public class OpQuerySystem extends OpNtcip {
 
 	/** Create a new query system object */
 	public OpQuerySystem(DeviceImpl d) {
-		super(PriorityLevel.DEVICE_DATA, d);
+		super(PriorityLevel.CONFIGURE, d);
 	}
 
 	/** Create the second phase of the operation */

@@ -65,7 +65,7 @@ public class OpTestDMSPixels extends OpDMS {
 
 	/** Create a new test DMS pixel operation */
 	public OpTestDMSPixels(DMSImpl d, boolean p) {
-		super(PriorityLevel.DEVICE_DATA, d);
+		super(PriorityLevel.DIAGNOSTIC, d);
 		perform_test = p;
 		SignConfig sc = d.getSignConfig();
 		int w = (sc != null) ? sc.getPixelWidth() : 0;

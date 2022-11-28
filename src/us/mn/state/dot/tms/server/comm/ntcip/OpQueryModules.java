@@ -36,7 +36,7 @@ public class OpQueryModules extends OpNtcip {
 
 	/** Create a new module query operation */
 	public OpQueryModules(DeviceImpl d) {
-		super(PriorityLevel.DOWNLOAD, d);
+		super(PriorityLevel.CONFIGURE, d);
 	}
 
 	/** Create the second phase of the operation */

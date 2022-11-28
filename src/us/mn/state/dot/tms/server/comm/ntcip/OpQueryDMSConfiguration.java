@@ -120,7 +120,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 
 	/** Create a new DMS query configuration object */
 	public OpQueryDMSConfiguration(DMSImpl d) {
-		super(PriorityLevel.DOWNLOAD, d);
+		super(PriorityLevel.CONFIGURE, d);
 		color_scheme.setEnum(ColorScheme.MONOCHROME_1_BIT);
 	}
 
