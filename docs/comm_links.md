@@ -99,6 +99,11 @@ The [IO Pin]s are outputs for controlling relays.
 | X-WR-10R12   | 1 - 10  |
 | X-332        | 1 - 16  |
 
+### ClearGuide
+
+The `clearguide` protocol can be used for to connect with a [ClearGuide]
+external system feed.
+
 ### Cohu
 
 The `cohu` protocol can be used for [PTZ] control of Cohu [camera]s.  The
@@ -344,6 +349,7 @@ camera can be associated with each [controller], using [IO pin] 1.
 [camera keyboard]: cameras.html#camera-keyboards
 [CAP]: http://docs.oasis-open.org/emergency/cap/v1.2/CAP-v1.2.html
 [changeable LCS]: lcs.html#changeable-lcs
+[ClearGuide]: clearguide.html
 [controller]: controllers.html
 [device]: controllers.html#devices
 [DMS]: dms.html
