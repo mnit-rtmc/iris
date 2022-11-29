@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 
 	/** Create a new 5-minute data operation */
 	public OpQuerySamples5Min(ControllerImpl c) {
-		super(PriorityLevel.LONG_POLL, c);
+		super(PriorityLevel.POLL_LOW, c);
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(getStamp());
 		cal.add(Calendar.DATE, -1);

@@ -61,7 +61,7 @@ public class OpQueryDMSFonts extends OpDMS {
 
 	/** Create a new operation to query fonts from a DMS */
 	public OpQueryDMSFonts(DMSImpl d) {
-		super(PriorityLevel.DEVICE_DATA, d);
+		super(PriorityLevel.POLL_LOW, d);
 		writer = createWriter();
 	}
 

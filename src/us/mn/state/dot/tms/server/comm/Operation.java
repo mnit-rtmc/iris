@@ -170,7 +170,7 @@ public final class Operation implements Comparable<Operation> {
 	}
 
 	/** Priority of the operation */
-	private PriorityLevel priority = PriorityLevel.DEVICE_DATA;
+	private PriorityLevel priority = PriorityLevel.POLL_LOW;
 
 	/** Get the priority of the operation.
 	 * @return Priority of the operation (@see PriorityLevel) */

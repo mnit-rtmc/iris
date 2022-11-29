@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -68,7 +68,7 @@ class OpQueryMsg extends OpDms {
 	OpQueryMsg(DMSImpl d, User u, DeviceRequest req,
 		boolean startup)
 	{
-		super(PriorityLevel.DEVICE_DATA, d, "Retrieving message", u);
+		super(PriorityLevel.POLL_LOW, d, "Retrieving message", u);
 		m_req = req;
 		m_startup = startup;
 	}

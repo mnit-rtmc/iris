@@ -25,8 +25,7 @@ public enum PriorityLevel {
 	COMMAND,     /* 1: user initiated commands */
 	POLL_HIGH,   /* 2: high-priority poll (short period) */
 	SETTINGS,    /* 3: sending settings */
-	LONG_POLL,   /* 4: periodic poll (long period queries) */
-	DEVICE_DATA, /* 5: device queries */
-	DIAGNOSTIC,  /* 6: diagnostics and testing */
-	IDLE;        /* 7: idle/continuous queries */
+	POLL_LOW,    /* 4: low-priority poll (long period) */
+	DIAGNOSTIC,  /* 5: diagnostics and testing */
+	IDLE;        /* 6: idle/continuous queries */
 }

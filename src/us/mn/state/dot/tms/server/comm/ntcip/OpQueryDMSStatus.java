@@ -98,7 +98,7 @@ public class OpQueryDMSStatus extends OpDMS {
 
 	/** Create a new DMS query status object */
 	public OpQueryDMSStatus(DMSImpl d) {
-		super(PriorityLevel.DEVICE_DATA, d);
+		super(PriorityLevel.POLL_LOW, d);
 	}
 
 	/** Create the second phase of the operation */

@@ -52,7 +52,7 @@ public class OpQueryEssSettings extends OpEss {
 
 	/** Create a new query settings object */
 	public OpQueryEssSettings(WeatherSensorImpl ws) {
-		super(PriorityLevel.DEVICE_DATA, ws);
+		super(PriorityLevel.POLL_LOW, ws);
 		ws_table = ess_rec.ws_table;
 		ts_table = ess_rec.ts_table;
 		ps_table = ess_rec.ps_table;

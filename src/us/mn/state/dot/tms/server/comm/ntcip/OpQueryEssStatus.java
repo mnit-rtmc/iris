@@ -51,7 +51,7 @@ public class OpQueryEssStatus extends OpEss {
 
 	/** Create new query ESS status operation */
 	public OpQueryEssStatus(WeatherSensorImpl ws) {
-		super(PriorityLevel.DEVICE_DATA, ws);
+		super(PriorityLevel.POLL_LOW, ws);
 		ws_table = ess_rec.ws_table;
 		ts_table = ess_rec.ts_table;
 		ps_table = ess_rec.ps_table;

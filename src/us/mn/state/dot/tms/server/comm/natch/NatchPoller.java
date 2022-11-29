@@ -135,7 +135,7 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 			// Long polling period, check detector configs
 			createOp("detector.op.query.config", c,
 				new OpQueryDetConfig(counter, 0),
-				PriorityLevel.LONG_POLL);
+				PriorityLevel.POLL_LOW);
 		}
 	}
 
