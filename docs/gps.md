@@ -11,9 +11,8 @@ as the DMS, with `_gps` appended.  For [NTCIP], the GPS should be associated
 with the same controller as the DMS (using pin 2).  For [RedLion] or [SierraGX],
 a new comm link and controller must be created to communicate with the modem.
 
-The GPS will be polled once every 5 minutes, unless on a `Modem` comm link.  In
-that case, the comm link period will be used.  The `Query GPS` button can be
-used to manually poll the coördinates.
+The GPS location will be polled on the comm link's long poll period.  The
+`Query GPS` button can be used to manually poll the coördinates.
 
 
 [DMS]: dms.html
