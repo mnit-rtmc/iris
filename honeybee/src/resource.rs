@@ -139,7 +139,7 @@ const CAMERA_RES: Resource = Resource::Simple(
     ) r",
 );
 
-/// Camera public resource
+/// Public Camera resource
 const CAMERA_PUB_RES: Resource = Resource::Simple(
     "camera_pub",
     Listen::Exclude("camera", &["video_loss"]),
@@ -273,7 +273,7 @@ const DETECTOR_RES: Resource = Resource::Simple(
     ) r",
 );
 
-/// Detector resource
+/// Public Detector resource
 const DETECTOR_PUB_RES: Resource = Resource::Simple(
     "detector_pub",
     Listen::Exclude("detector", &["auto_fail"]),
@@ -680,9 +680,9 @@ const SIGN_MSG_RES: Resource = Resource::SignMsg(
     ) r",
 );
 
-/// System attribute resource
-const SYSTEM_ATTRIBUTE_RES: Resource = Resource::Simple(
-    "system_attribute",
+/// Public System attribute resource
+const SYSTEM_ATTRIBUTE_PUB_RES: Resource = Resource::Simple(
+    "system_attribute_pub",
     Listen::All("system_attribute"),
     "SELECT jsonb_object_agg(name, value)::text \
       FROM iris.system_attribute \
@@ -751,8 +751,8 @@ const TPIMS_ARCH_RES: Resource = Resource::Simple(
 
 /// All defined resources
 const ALL: &[Resource] = &[
-    SYSTEM_ATTRIBUTE_RES, // System attributes must be loaded first
-    ROAD_RES,             // Roads must be loaded before R_Nodes
+    SYSTEM_ATTRIBUTE_PUB_RES, // System attributes must be loaded first
+    ROAD_RES,                 // Roads must be loaded before R_Nodes
     ALARM_RES,
     BEACON_STATE_RES,
     BEACON_RES,

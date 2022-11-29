@@ -23,12 +23,12 @@ These resources are JSON arrays, fetched using http `GET` requests.
 - `iris/font`: Bitmapped fonts for DMS
 - `iris/graphic`: Graphics for DMS
 - `iris/incident`: Currently active incidents
-- `iris/rwis`: Weather sensor data
+- `iris/rwis`: [Road Weather Information System]
 - `iris/sign_config`: DMS sign configurations
 - `iris/sign_detail`: DMS sign detail information
 - `iris/sign_message`: Active DMS sign messages
 - `iris/station_sample`: Vehicle detection station data
-- `iris/system_attribute`: System-wide attributes (public only)
+- `iris/system_attribute_pub`: Public [system attributes]
 - `iris/TPIMS_archive`: Truck parking archive data
 - `iris/TPIMS_dynamic`: Truck parking dynamic data
 - `iris/TPIMS_static`: Truck parking static data
@@ -301,5 +301,7 @@ Since `geo_loc` resources can only be created and deleted with an associated
 
 [permission]: #permission
 [resource types]: #resource-types
+[Road Weather Information System]: rwis.html
 [role]: #role
+[system attributes]: system_attributes.html
 [user]: #user

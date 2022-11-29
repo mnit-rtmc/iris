@@ -497,12 +497,12 @@ impl MsgData {
         })
     }
 
-    /// Load system attributes from a JSON file
+    /// Load public system attributes from a JSON file
     fn load_system_attributes(dir: &Path) -> Result<HashMap<String, String>> {
         debug!("load_system_attributes");
         let mut n = PathBuf::new();
         n.push(dir);
-        n.push("system_attribute");
+        n.push("system_attribute_pub");
         let r = BufReader::new(File::open(&n)?);
         let mut j: Vec<HashMap<String, String>> = serde_json::from_reader(r)?;
         match j.pop() {
