@@ -37,7 +37,7 @@ pub struct PowerSupply {
     supply_type: String,
     power_status: String,
     detail: String,
-    voltage: f32,
+    voltage: Option<f32>,
 }
 
 /// Sign status

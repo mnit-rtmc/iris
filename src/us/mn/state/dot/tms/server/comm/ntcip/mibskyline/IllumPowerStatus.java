@@ -93,6 +93,7 @@ public class IllumPowerStatus extends ASN1OctetString {
 		supply.put("supply_type", "ledSupply"); // 1203v2 dmsPowerType
 		Enum e = Enum.fromOrdinal(vals[num]);
 		supply.put("power_status", e.value());
+		supply.put("detail", "skyline");
 		return supply;
 	}
 
