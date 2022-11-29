@@ -40,7 +40,7 @@ public class OpQueryBinned extends OpSS125 {
 
 	/** Create a new "query binned" operation */
 	public OpQueryBinned(ControllerImpl c, int p) {
-		super(PriorityLevel.SHORT_POLL, c);
+		super(PriorityLevel.POLL_HIGH, c);
 		binned_data = new IntervalDataProperty(p);
 	}
 

@@ -31,7 +31,7 @@ public class OpQueryOutlets extends OpDinRelay {
 
 	/** Create a new operation to query the outlets */
 	public OpQueryOutlets(ControllerImpl c, OutletProperty op) {
-		super(PriorityLevel.SHORT_POLL, c);
+		super(PriorityLevel.POLL_HIGH, c);
 		property = op;
 	}
 

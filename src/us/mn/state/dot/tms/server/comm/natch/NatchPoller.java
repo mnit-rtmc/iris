@@ -172,7 +172,7 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 		case QUERY_STATUS:
 			createOp("ramp.meter.op.query.status", meter,
 				new OpQueryMeterStatus(counter, meter),
-				PriorityLevel.SHORT_POLL);
+				PriorityLevel.POLL_HIGH);
 			break;
 		default:
 			// Ignore other requests
@@ -195,7 +195,7 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 		case QUERY_STATUS:
 			createOp("beacon.op.query.state", b,
 				new OpQueryBeaconState(counter, b),
-				PriorityLevel.SHORT_POLL);
+				PriorityLevel.POLL_HIGH);
 			break;
 		default:
 			// Ignore other requests
@@ -235,7 +235,7 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 		case QUERY_STATUS:
 			createOp("alarm.op.query.state", alarm,
 				new OpQueryAlarmState(counter, alarm),
-				PriorityLevel.SHORT_POLL);
+				PriorityLevel.POLL_HIGH);
 			break;
 		default:
 			// Ignore other requests

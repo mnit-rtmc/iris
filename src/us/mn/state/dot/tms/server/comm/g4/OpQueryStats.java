@@ -38,7 +38,7 @@ public class OpQueryStats extends OpG4 {
 
 	/** Create a new "query binned samples" operation */
 	public OpQueryStats(ControllerImpl c, int p) {
-		super(PriorityLevel.SHORT_POLL, c);
+		super(PriorityLevel.POLL_HIGH, c);
 		stat = new StatProperty(p);
 	}
 

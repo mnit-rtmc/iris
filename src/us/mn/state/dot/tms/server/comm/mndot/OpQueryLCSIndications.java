@@ -39,7 +39,7 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Create a new operation to query the LCS */
 	public OpQueryLCSIndications(LCSArrayImpl l) {
-		super(PriorityLevel.SHORT_POLL, l);
+		super(PriorityLevel.POLL_HIGH, l);
 	}
 
 	/** Create the second phase of the operation */

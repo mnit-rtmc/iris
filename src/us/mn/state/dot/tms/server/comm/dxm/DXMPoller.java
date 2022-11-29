@@ -38,7 +38,7 @@ public class DXMPoller extends BasePoller implements SamplePoller {
 	/** Create an operation */
 	private void createOp(String n, ControllerImpl c, OpStep s) {
 		Operation op = new Operation(n, c, s);
-		op.setPriority(PriorityLevel.SHORT_POLL);
+		op.setPriority(PriorityLevel.POLL_HIGH);
 		addOp(op);
 	}
 

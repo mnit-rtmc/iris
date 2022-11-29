@@ -31,7 +31,7 @@ public class OpQueryBeaconState extends Op170Device {
 
 	/** Create a new query beacon state operation */
 	public OpQueryBeaconState(BeaconImpl b) {
-		super(PriorityLevel.SHORT_POLL, b);
+		super(PriorityLevel.POLL_HIGH, b);
 		beacon = b;
 	}
 

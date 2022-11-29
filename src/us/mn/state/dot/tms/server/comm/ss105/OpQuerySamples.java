@@ -37,7 +37,7 @@ public class OpQuerySamples extends OpSS105 {
 
 	/** Create a new "query binned samples" operation */
 	public OpQuerySamples(ControllerImpl c, int p) {
-		super(PriorityLevel.SHORT_POLL, c);
+		super(PriorityLevel.POLL_HIGH, c);
 		sample_data = new BinnedSampleProperty(p);
 	}
 

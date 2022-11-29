@@ -34,7 +34,7 @@ public class OpReadMsgFeed extends OpController<MsgFeedProperty> {
 
 	/** Create a new operation to read msg feed */
 	protected OpReadMsgFeed(ControllerImpl c, String fid) {
-		super(PriorityLevel.SHORT_POLL, c);
+		super(PriorityLevel.POLL_HIGH, c);
 		feed = fid;
 		MsgFeedPoller.slog("Polling feed " + feed);
 	}
