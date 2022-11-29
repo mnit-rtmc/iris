@@ -49,8 +49,11 @@ public class OpQueryDMSStatus extends OpDMS {
 	}
 
 	/** Get the light output as percent */
-	static private int getPercent(ASN1Integer light) {
-		return Math.round(light.getInteger() / 655.35f);
+	static private Integer getPercent(ASN1Integer light) {
+		int value = light.getInteger();
+		return (value >= 0 && value <= 65535)
+		      ? Math.round(value / 655.35f)
+		      : null;
 	}
 
 	/** Scale power supply voltage */

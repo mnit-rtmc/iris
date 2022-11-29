@@ -22,6 +22,41 @@ use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
 
+/// Photocell status
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct Photocell {
+    description: String,
+    status: String,
+    reading: i32,
+}
+
+/// Power supply status
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct PowerSupply {
+    description: String,
+    supply_type: String,
+    power_status: String,
+    detail: String,
+    voltage: f32,
+}
+
+/// Sign status
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct SignStatus {
+    photocells: Option<Vec<Photocell>>,
+    light_output: Option<u32>,
+    power_supplies: Option<Vec<PowerSupply>>,
+    cabinet_temp_min: Option<i32>,
+    cabinet_temp_max: Option<i32>,
+    ambient_temp_min: Option<i32>,
+    ambient_temp_max: Option<i32>,
+    housing_temp_min: Option<i32>,
+    housing_temp_max: Option<i32>,
+    ldc_pot_base: Option<i32>,
+    pixel_current_low: Option<i32>,
+    pixel_current_high: Option<i32>,
+}
+
 /// Dms
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Dms {
@@ -32,6 +67,7 @@ pub struct Dms {
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
     pub msg_current: Option<String>,
+    pub status: Option<SignStatus>,
 }
 
 /// Sign Message
