@@ -300,7 +300,7 @@ const DMS_PUB_RES: Resource = Resource::Simple(
     "dms_pub",
     Listen::Exclude(
         "dms",
-        &["msg_user", "msg_sched", "msg_current", "expire_time"],
+        &["msg_user", "msg_sched", "msg_current", "expire_time", "status"],
     ),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, sign_config, sign_detail, roadway, road_dir, \
