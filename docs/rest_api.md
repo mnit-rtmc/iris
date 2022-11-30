@@ -156,7 +156,7 @@ of `pin`, `name` and `resource_n`.
 
 | Access       | Minimal                      | Full      |
 |--------------|------------------------------|-----------|
-| Read Only    | name, location, msg\_current | sign\_config, sign\_detail, geo\_loc, msg\_sched, status |
+| Read Only    | name, location, msg\_current | sign\_config, sign\_detail, geo\_loc, msg\_sched, status, stuck\_pixels |
 | 👉 Operate   |                              | msg\_user |
 | 💡 Plan      | notes                        |           |
 | 🔧 Configure | controller                   | pin       |

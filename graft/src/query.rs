@@ -81,7 +81,7 @@ WHERE d.name = $1";
 /// SQL query for one DMS
 pub const DMS: &str = "\
 SELECT d.name, location, geo_loc, controller, pin, notes, sign_config, \
-       sign_detail, msg_user, msg_sched, msg_current, status \
+       sign_detail, msg_user, msg_sched, msg_current, status, stuck_pixels \
 FROM iris.dms d \
 LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
 WHERE d.name = $1";

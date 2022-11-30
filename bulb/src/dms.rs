@@ -57,6 +57,13 @@ pub struct SignStatus {
     pixel_current_high: Option<i32>,
 }
 
+/// Stuck pixel bitmaps (Base64-encoded)
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct StuckPixels {
+    off: Option<String>,
+    on: Option<String>,
+}
+
 /// Dms
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Dms {
@@ -68,6 +75,7 @@ pub struct Dms {
     pub pin: Option<u32>,
     pub msg_current: Option<String>,
     pub status: Option<SignStatus>,
+    pub stuck_pixels: Option<StuckPixels>,
 }
 
 /// Sign Message
