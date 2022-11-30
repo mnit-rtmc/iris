@@ -167,6 +167,7 @@ public class DmsCache {
 		if (client.canRead(DMS.SONAR_TYPE)) {
 			dmss.ignoreAttribute("operation");
 			dmss.ignoreAttribute("status");
+			dmss.ignoreAttribute("stuckPixels");
 			// We can't ignore msgCurrent because
 			// DmsCellRenderer lists need the updates
 			dmss.ignoreAttribute("msgSched");
