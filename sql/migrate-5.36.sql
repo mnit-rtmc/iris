@@ -13,6 +13,7 @@ DROP FUNCTION iris.dms_update;
 
 ALTER TABLE iris._dms ALTER COLUMN notes TYPE VARCHAR(128);
 ALTER TABLE iris._dms ADD COLUMN status JSONB;
+ALTER TABLE iris._dms ADD COLUMN stuck_pixels JSONB;
 
 CREATE OR REPLACE FUNCTION iris.dms_notify() RETURNS TRIGGER AS
     $dms_notify$
@@ -27,6 +28,8 @@ BEGIN
         NOTIFY dms, 'expire_time';
     ELSIF (NEW.status IS DISTINCT FROM OLD.status) THEN
         NOTIFY dms, 'status';
+    ELSIF (NEW.stuck_pixels IS DISTINCT FROM OLD.stuck_pixels) THEN
+        NOTIFY DMS, 'stuck_pixels';
     ELSE
         NOTIFY dms;
     END IF;
@@ -38,7 +41,7 @@ CREATE VIEW iris.dms AS
     SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
            purpose, hidden, beacon, preset, sign_config, sign_detail,
            override_font, override_foreground, override_background, msg_user,
-           msg_sched, msg_current, expire_time, status
+           msg_sched, msg_current, expire_time, status, stuck_pixels
     FROM iris._dms d
     JOIN iris.controller_io cio ON d.name = cio.name
     JOIN iris._device_preset p ON d.name = p.name;
@@ -54,13 +57,13 @@ BEGIN
         name, geo_loc, notes, gps, static_graphic, purpose, hidden, beacon,
         sign_config, sign_detail, override_font, override_foreground,
         override_background, msg_user, msg_sched, msg_current, expire_time,
-        status
+        status, stuck_pixels
     ) VALUES (
         NEW.name, NEW.geo_loc, NEW.notes, NEW.gps, NEW.static_graphic,
         NEW.purpose, NEW.hidden, NEW.beacon, NEW.sign_config, NEW.sign_detail,
         NEW.override_font, NEW.override_foreground, NEW.override_background,
         NEW.msg_user, NEW.msg_sched, NEW.msg_current, NEW.expire_time,
-        NEW.status
+        NEW.status, NEW.stuck_pixels
     );
     RETURN NEW;
 END;
@@ -97,7 +100,8 @@ BEGIN
            msg_sched = NEW.msg_sched,
            msg_current = NEW.msg_current,
            expire_time = NEW.expire_time,
-           status = NEW.status
+           status = NEW.status,
+           stuck_pixels = NEW.stuck_pixels
      WHERE name = OLD.name;
     RETURN NEW;
 END;
@@ -117,7 +121,7 @@ CREATE VIEW dms_view AS
            p.camera, p.preset_num, d.sign_config, d.sign_detail,
            default_font, override_font, override_foreground,
            override_background, msg_user, msg_sched, msg_current,
-           expire_time, status,
+           expire_time, status, stuck_pixels,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location
     FROM iris.dms d

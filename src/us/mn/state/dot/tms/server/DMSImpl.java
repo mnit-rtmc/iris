@@ -140,7 +140,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			"preset, sign_config, sign_detail, override_font, " +
 			"override_foreground, override_background, " +
 			"msg_user, msg_sched, msg_current, expire_time, " +
-			"status FROM iris." + SONAR_TYPE + ";",
+			"status, stuck_pixels FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -186,6 +186,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("msg_current", msg_current);
 		map.put("expire_time", asTimestamp(expire_time));
 		map.put("status", status);
+		map.put("stuck_pixels", stuck_pixels);
 		return map;
 	}
 
@@ -215,6 +216,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		geo_loc = g;
 		expire_time = null;
 		status = null;
+		stuck_pixels = null;
 	}
 
 	/** Create a dynamic message sign */
@@ -239,7 +241,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getString(18),           // msg_sched
 		     row.getString(19),           // msg_current
 		     row.getTimestamp(20),        // expire_time
-		     row.getString(21)            // status
+		     row.getString(21),           // status
+		     row.getString(22)            // stuck_pixels
 		);
 	}
 
@@ -247,7 +250,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private DMSImpl(String n, String loc, String c, int p, String nt,
 		String g, String sg, int dp, boolean h, String b, String cp,
 		String sc, String sd, String of, Integer fg, Integer bg,
-		String mu, String ms, String mc, Date et, String st)
+		String mu, String ms, String mc, Date et, String st,
+		String sp)
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(loc);
@@ -267,6 +271,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		msg_current = SignMessageHelper.lookup(mc);
 		expire_time = stampMillis(et);
 		status = st;
+		stuck_pixels = sp;
 		initTransients();
 	}
 
@@ -539,7 +544,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Reset sign state (and notify clients) */
 	public void resetStateNotify() {
-		setPixelStatusNotify(null);
+		setStatusNotify(null);
+		setStuckPixelsNotify(null);
 		setMsgSchedNotify(null);
 		setMsgUserNull();
 		setMsgCurrentNotify(null, "RESET");
@@ -612,24 +618,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public Integer getOverrideBackground() {
 		return override_background;
-	}
-
-	/** Pixel status.  This is an array of two Base64-encoded bitmaps.
-	 * The first indicates stuck-off pixels, the second stuck-on pixels. */
-	private transient String[] pixelStatus;
-
-	/** Set the pixel status array */
-	public void setPixelStatusNotify(String[] p) {
-		if (!Arrays.equals(p, pixelStatus)) {
-			pixelStatus = p;
-			notifyAttribute("pixelStatus");
-		}
-	}
-
-	/** Get the pixel status array */
-	@Override
-	public String[] getPixelStatus() {
-		return pixelStatus;
 	}
 
 	/** Create a blank message for the sign */
@@ -1140,6 +1128,30 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public String getStatus() {
 		return status;
+	}
+
+	/** Stuck pixel bitmaps as JSON.  There are two Base64-encoded bitmaps
+	 * as attributes STUCK_ON_BITMAP and STUCK_OFF_BITMAP. */
+	private String stuck_pixels;
+
+	/** Set the stuck pixel JSON and notify clients */
+	public void setStuckPixelsNotify(String sp) {
+		if (!objectEquals(sp, stuck_pixels)) {
+			try {
+				store.update(this, "stuck_pixels", sp);
+				stuck_pixels = sp;
+				notifyAttribute("stuckPixels");
+			}
+			catch (TMSException e) {
+				logError("stuck_pixels: " + e.getMessage());
+			}
+		}
+	}
+
+	/** Get the stuck pixels as JSON */
+	@Override
+	public String getStuckPixels() {
+		return stuck_pixels;
 	}
 
 	/** Feedback brightness sample data */

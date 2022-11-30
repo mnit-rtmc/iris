@@ -16,9 +16,11 @@
  */
 package us.mn.state.dot.tms;
 
+import java.io.IOException;
 import java.util.Iterator;
 import org.json.JSONException;
 import org.json.JSONObject;
+import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.SString;
@@ -312,17 +314,6 @@ public class DMSHelper extends BaseHelper {
 		return SString.enclosedBy(line, "_");
 	}
 
-	/** Create a bitmap graphic for the specified DMS */
-	static public BitmapGraphic createBitmapGraphic(DMS dms) {
-		SignConfig sc = dms.getSignConfig();
-		if (sc != null) {
-			int pw = sc.getPixelWidth();
-			int ph = sc.getPixelHeight();
-			return new BitmapGraphic(pw, ph);
-		} else
-			return null;
-	}
-
 	/** Create bitmap graphics for all pages of a specified DMS.
 	 * @param dms The sign.
 	 * @param ms Message MULTI string.
@@ -469,6 +460,61 @@ public class DMSHelper extends BaseHelper {
 			catch (JSONException e) {
 				// malformed JSON
 				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	/** Create stuck pixel bitmap */
+	static public BitmapGraphic createStuckBitmap(DMS dms, String key)
+		throws InvalidMsgException
+	{
+		String stuck = (dms != null) ? dms.getStuckPixels() : null;
+		if (stuck != null) {
+			BitmapGraphic bg = createBitmapGraphic(dms);
+			if (bg != null) {
+				try {
+					JSONObject jo = new JSONObject(stuck);
+					return setStuckPixels(bg, jo.opt(key));
+				}
+				catch (JSONException e) {
+					throw new InvalidMsgException(
+						"Malformed JSON");
+				}
+			}
+		}
+		return null;
+	}
+
+	/** Create a bitmap graphic for the specified DMS */
+	static private BitmapGraphic createBitmapGraphic(DMS dms) {
+		SignConfig sc = dms.getSignConfig();
+		if (sc != null) {
+			int pw = sc.getPixelWidth();
+			int ph = sc.getPixelHeight();
+			return new BitmapGraphic(pw, ph);
+		} else
+			return null;
+	}
+
+	/** Get stuck pixel bitmap */
+	static private BitmapGraphic setStuckPixels(BitmapGraphic bg,
+		Object bm) throws InvalidMsgException
+	{
+		if (bm instanceof String) {
+			String bmap = (String) bm;
+			try {
+				byte[] pixels = Base64.decode(bmap);
+				if (pixels.length == bg.length()) {
+					bg.setPixelData(pixels);
+					return bg;
+				}
+			}
+			catch (IOException e) {
+				throw new InvalidMsgException("Base64 decode");
+			}
+			catch (IndexOutOfBoundsException e) {
+				// stuck bitmap doesn't match current dimensions
 			}
 		}
 		return null;

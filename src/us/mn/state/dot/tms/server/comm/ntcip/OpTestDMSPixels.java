@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
@@ -128,7 +130,7 @@ public class OpTestDMSPixels extends OpDMS {
 			logQuery(activation);
 			if (activation.getEnum() == PixelTestActivation.noTest)
 				return new QueryRowCount();
-			if(TimeSteward.currentTimeMillis() > expire) {
+			if (TimeSteward.currentTimeMillis() > expire) {
 				logError("pixel test timeout expired -- " +
 					"giving up");
 				return new QueryRowCount();
@@ -282,14 +284,23 @@ public class OpTestDMSPixels extends OpDMS {
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		if (isSuccess()) {
-			String[] status = new String[2];
-			status[DMS.STUCK_OFF_BITMAP] =
-				stuck_off.getEncodedPixels();
-			status[DMS.STUCK_ON_BITMAP] =
-				stuck_on.getEncodedPixels();
-			dms.setPixelStatusNotify(status);
-		}
+		if (isSuccess())
+			dms.setStuckPixelsNotify(getStuckPixels());
 		super.cleanup();
+	}
+
+	/** Get stuck pixels as JSON */
+	private String getStuckPixels() {
+		JSONObject sp = new JSONObject();
+		try {
+			sp.put(DMS.STUCK_OFF_BITMAP,
+				stuck_off.getEncodedPixels());
+			sp.put(DMS.STUCK_ON_BITMAP,
+				stuck_on.getEncodedPixels());
+		}
+		catch (JSONException e) {
+			logError("getStuckPixels: " + e.getMessage());
+		}
+		return sp.toString();
 	}
 }
