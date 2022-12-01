@@ -57,9 +57,8 @@ public class Json {
 			sb.append(key);
 			sb.append("\":[");
 			for (String v: values) {
-				sb.append('"');
 				sb.append(v);
-				sb.append("\",");
+				sb.append(',');
 			}
 			if (sb.charAt(sb.length() - 1) == ',')
 				sb.setLength(sb.length() - 1);
