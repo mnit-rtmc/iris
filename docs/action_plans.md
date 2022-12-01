@@ -173,7 +173,7 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 [DMS]: dms.html
 [exit ramp backup]: exit_backup.html
 [Msg-Feed]: comm_links.html#msg-feed
-[MULTI]: dms.html#multi
+[MULTI]: multi.html
 [Parking area]: parking_areas.html
 [preset]: cameras.html#presets
 [quick message]: dms.html#quick-messages

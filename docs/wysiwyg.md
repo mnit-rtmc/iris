@@ -364,4 +364,4 @@ Keys                             | Function
 [DMS]: dms.html
 [edit mode]: user_interface.html#edit-mode
 [font]: fonts.html
-[MULTI]: dms.html#multi
+[MULTI]: multi.html

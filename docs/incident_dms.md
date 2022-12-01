@@ -195,6 +195,6 @@ _cleared_ message will be deployed with `PSA` message priority for 5 minutes.
 [allowed words]: dms.html#allowed-words
 [DMS]: dms.html
 [exits]: road_topology.html#r_node-types
-[MULTI]: dms.html#multi
+[MULTI]: multi.html
 [pickable]: road_topology.html#pickable
 [system attribute]: system_attributes.html

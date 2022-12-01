@@ -363,7 +363,7 @@ camera can be associated with each [controller], using [IO pin] 1.
 [IPAWS]: https://www.fema.gov/emergency-managers/practitioners/integrated-public-alert-warning-system
 [LCS]: lcs.html
 [monstream]: video.html#monstream
-[MULTI]: dms.html#multi
+[MULTI]: multi.html
 [Natch protocol]: natch.html
 [parking area]: parking_areas.html
 [PTZ]: cameras.html#pan-tilt-and-zoom

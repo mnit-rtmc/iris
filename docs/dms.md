@@ -67,39 +67,10 @@ The _message preview_ displays a graphical rendering of the selected sign text.
 Select an _override font_ to use a font other than the _default font_ from the
 sign configuration.
 
-## MULTI
-
-**MULTI** is the _MarkUp Language for Transportation Information_ used to
-compose DMS messages.  It is defined by the NTCIP 1203 standard.  Messages in
-_MULTI_ are ASCII strings, with formatting or other instructions denoted by
-tags inside square brackets.  For example, the `[nl]` tag indicates a new line.
-Most of the useful MULTI tags are supported.
-
-Tag                                           | Description              | Supported
-----------------------------------------------|--------------------------|----------
-`[cb`_x_`]`                                   | Message background color | Yes
-`[pb`_z_`]` `[pb`_r,g,b_`]`                   | Page background color    | Yes
-`[cf]` `[cf`_x_`]` `[cf`_r,g,b_`]`            | Foreground color         | Yes
-`[cr`_x,y,w,h,z_`]` `[cr`_x,y,w,h,r,g,b_`]`   | Color rectangle          | Yes
-`[f`_x,y_`]`                                  | Field data               | No
-`[flt`_x_`o`_y_`]` `[flo`_y_`t`_x_`]`         | Flashing text            | No
-`[fo]` `[fo`_x_`]` `[fo`_x,cccc_`]`           | Change font              | Yes
-`[g`_n_`]` `[g`_n,x,y_`]` `[g`_n,x,y,cccc_`]` | Place graphic            | Yes
-`[hc`_n_`]`                                   | Hexadecimal character    | No
-`[jl]` `[jl`_n_`]`                            | Line justification       | Yes
-`[jp]` `[jp`_n_`]`                            | Page justification       | Yes
-`[ms`_x,y_`]`                                 | Manufacturer specific    | No
-`[mv`_…_`]`                                   | Moving text              | No
-`[nl]` `[nl`_s_`]`                            | New line                 | Yes
-`[np]`                                        | New page                 | Yes
-`[pt`_n_`]` `[pt`_n_`o`_f_`]`                 | Page time                | Yes
-`[sc`_x_`]`                                   | Character spacing        | Yes
-`[tr`_x,y,w,h_`]`                             | Text rectangle           | Yes
-
 ## Quick Messages
 
-A _quick message_ is a fully composed DMS message which can be associated with a
-sign group.  They are created using the [WYSIWYG editor].
+A _quick message_ is a fully composed [MULTI] message which can be associated
+with a sign group.  They are created using the [WYSIWYG editor].
 
 When a DMS is selected, a drop-down list is populated with quick messages from
 sign groups of which that DMS is a member.  Quick messages are also used for
@@ -124,9 +95,9 @@ Messages can only be combined in certain cases:
 - Both messages are selected by an operator, the first being a quick message and
   the second composed (line-by-line).
 
-The MULTI string `[cf][fo][jl][jp]` is automatically inserted before the second
-message to reset the foreground color, font, and justification tags to default
-values.
+The [MULTI] string `[cf][fo][jl][jp]` is automatically inserted before the
+second message to reset the foreground color, font, and justification tags to
+default values.
 
 There are two methods of combining messages: **Shared** and **Sequenced**.
 
@@ -208,6 +179,7 @@ rejected message.
 [DMS action]: action_plans.html#dms-actions
 [fonts]: fonts.html
 [incident]: incident_dms.html
+[MULTI]: multi.html
 [NTCIP]: comm_links.html#ntcip
 [Slow traffic]: slow_warning.html
 [system attribute]: system_attributes.html
