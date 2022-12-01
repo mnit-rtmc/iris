@@ -80,7 +80,7 @@ public class IllumPowerStatus extends ASN1OctetString {
 		byte[] vals = getByteValue();
 		if (vals.length == 0)
 			return null;
-		JSONArray supplies = new JSONArray(vals.length);
+		JSONArray supplies = new JSONArray();
 		for (int i = 0; i < vals.length; i++)
 			supplies.put(getPowerStatus(vals, i));
 		return supplies;

@@ -339,7 +339,7 @@ public class OpQueryDMSStatus extends OpDMS {
 		private int n_failed = 0;
 		protected QueryPowerStatus(int n) {
 			n_supplies = n;
-			supplies = new JSONArray(n_supplies);
+			supplies = new JSONArray();
 		}
 
 		/** Query status of one power supply */
@@ -427,7 +427,7 @@ public class OpQueryDMSStatus extends OpDMS {
 		private int row = 1;	// row in DmsLightSensorStatusTable
 		protected QueryLightSensorStatus(int n) {
 			n_sensors = n;
-			photocells = new JSONArray(n_sensors);
+			photocells = new JSONArray();
 		}
 
 		/** Query status of one light sensor */
