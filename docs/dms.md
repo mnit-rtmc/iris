@@ -11,11 +11,11 @@ configurations are supported.
 The following features are supported:
 
 * Querying currently displayed message
-* Displaying new messages
+* Sending and displaying new messages
 * Querying configuration information
 * Querying diagnostic information
 * Querying or sending [fonts]
-* Sending graphics
+* Sending [graphic images] to be displayed
 * [Travel time] estimation
 * [Variable speed advisories]
 * [Slow traffic] warnings
@@ -178,6 +178,7 @@ rejected message.
 [comm link]: comm_links.html
 [DMS action]: action_plans.html#dms-actions
 [fonts]: fonts.html
+[graphic images]: graphics.html
 [incident]: incident_dms.html
 [MULTI]: multi.html
 [NTCIP]: comm_links.html#ntcip

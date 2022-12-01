@@ -27,7 +27,7 @@ characters.  Items to check include:
 
 - Signs of different size and resolution can be included in a single sign group.
   Does the content of message fit on the sigs where you want to use it?
-- Only graphics in the library can be used in messages.  Are all graphic images
+- Only [graphic images] in the library can be used in messages.  Are all images
   you want to use loaded in the IRIS image library?
 - If you want to use color (fonts, rectangles, or images) does the sign where
   you'll use the messages support color?
@@ -175,7 +175,7 @@ position or clicking on the resizing "handles" on the outline of the rectangle.
 ## Working with Graphic Elements
 
 Two types of graphic elements can be added to DMS messages: *color rectangles*
-and *graphic images*.  These can be used to emphasize portions of a message or
+and [graphic images].  These can be used to emphasize portions of a message or
 can be images such as interstate number shields, warning pictographs or other
 signs.  Either element can be easily added by clicking the appropriate button
 in the editor window.
@@ -198,27 +198,16 @@ Click on the desired color and click `OK` to apply.
 
 ### Graphic Images
 
-IRIS can use 1-bit monochrome and 24-bit color graphics.  If being placed on a
-roadside sign, consider restrictions for traffic control devices that may affect
-the design of your graphics.  For example, if a speed limit sign is to be
-displayed, it must conform to the black text on white background (or reverse)
-sign convention.
+If placing an image on a roadside sign, consider restrictions for traffic
+control devices that may affect the design of your graphics.  For example, if
+a speed limit sign is to be displayed, it must conform to the black text on
+white background (or reverse) sign convention.
 
 #### Preparing
 
-The message editor can only load images from the IRIS graphic image library.
-Editing images — resizing, painting, *etc.* — is not supported.  Images should
-be edited and sized properly for the sign prior to importing them into the image
-library.  If necessary, it is recommended to use an editor such as **Microsoft
-Paint**, **KolourPaint** or similar software.
-
-To use a graphic it must:
-
-1. Have vertical and horizontal dimensions equal to or less than the sign on
-   which it will be used.
-2. Have a color depth of either 1 or 24 bits per pixel.
-3. Be saved in a PNG format.
-4. Be loaded into the IRIS image library.
+The message editor can only load [graphic images] from the IRIS image library.
+Also, images must have vertical and horizontal dimensions equal to or less than
+the sign on which they will be used.
 
 #### Using Graphics
 
@@ -364,4 +353,5 @@ Keys                             | Function
 [DMS]: dms.html
 [edit mode]: user_interface.html#edit-mode
 [font]: fonts.html
+[graphic images]: graphics.html
 [MULTI]: multi.html

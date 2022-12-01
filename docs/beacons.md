@@ -1,10 +1,10 @@
-## Beacons
+# Beacons
 
 A beacon is a light or set of lights that flashes toward oncoming traffic.
 Sometimes called _flashers_ or _wig-wags_, their purpose is to draw attention to
 a static sign or [DMS].
 
-### Setup
+## Setup
 
 Select `View ➔ Message Signs ➔ Beacons` menu item
 
@@ -35,7 +35,7 @@ being commanded:
 - true: `Flashing: External` (use when an external system can control the
   beacon)
 
-### State
+## State
 
 Beacons can be controlled in a few ways:
 - Changing state manually through the user interface
@@ -55,7 +55,7 @@ A beacon can be in one of these states:
 | Fault: No Verify   | Flashing commanded, but not verified          |
 
 
-### Events
+## Events
 
 Whenever a beacon's state changes, a time-stamped record is added to the
 `beacon_event` table.  These records are purged automatically when older than
