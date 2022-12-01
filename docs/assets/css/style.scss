@@ -47,16 +47,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  font-size: 2rem;
+  font-size: 1.8rem;
   text-align: center;
 }
 
 h2 {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
 }
 
 h3 {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
 }
 
 p, ul, ol, table, pre {
@@ -139,4 +139,15 @@ hr {
 .footer {
   font-size: 0.7rem;
   color: #696969;
+}
+
+kbd {
+  border-style: outset;
+  border-width: 0.2rem;
+  border-color: #999999;
+  border-radius: 0.5rem;
+  padding: 0.2rem;
+  background-color: #f8f8f8;
+  margin: 0.2rem;
+  white-space: nowrap;
 }

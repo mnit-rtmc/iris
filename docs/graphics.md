@@ -30,3 +30,4 @@ transparency is not supported.
 [DMS]: dms.html
 [edit mode]: user_interface.html#edit-mode
 [GIMP]: https://www.gimp.org/
+[MULTI]: multi.html
