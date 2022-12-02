@@ -2936,34 +2936,34 @@ WEST	W	t
 \.
 
 CREATE TABLE iris.graphic (
-	name VARCHAR(20) PRIMARY KEY,
-	g_number INTEGER NOT NULL UNIQUE,
-	color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
-	height INTEGER NOT NULL,
-	width INTEGER NOT NULL,
-	transparent_color INTEGER,
-	pixels TEXT NOT NULL
+    name VARCHAR(20) PRIMARY KEY,
+    g_number INTEGER NOT NULL UNIQUE,
+    color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
+    height INTEGER NOT NULL,
+    width INTEGER NOT NULL,
+    transparent_color INTEGER,
+    pixels TEXT NOT NULL
 );
 
 CREATE TRIGGER graphic_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris.graphic
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    AFTER INSERT OR UPDATE OR DELETE ON iris.graphic
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 ALTER TABLE iris.graphic
-	ADD CONSTRAINT graphic_number_ck
-	CHECK (g_number > 0 AND g_number <= 999);
+    ADD CONSTRAINT graphic_number_ck
+    CHECK (g_number > 0 AND g_number <= 999);
 ALTER TABLE iris.graphic
-	ADD CONSTRAINT graphic_height_ck
-	CHECK (height > 0);
+    ADD CONSTRAINT graphic_height_ck
+    CHECK (height >= 1 AND height <= 144);
 ALTER TABLE iris.graphic
-	ADD CONSTRAINT graphic_width_ck
-	CHECK (width > 0);
+    ADD CONSTRAINT graphic_width_ck
+    CHECK (width >= 1 AND width <= 240);
 
 CREATE VIEW graphic_view AS
-	SELECT name, g_number, cs.description AS color_scheme, height, width,
-	       transparent_color, pixels
-	FROM iris.graphic
-	JOIN iris.color_scheme cs ON graphic.color_scheme = cs.id;
+    SELECT name, g_number, cs.description AS color_scheme, height, width,
+           transparent_color, pixels
+    FROM iris.graphic
+    JOIN iris.color_scheme cs ON graphic.color_scheme = cs.id;
 GRANT SELECT ON graphic_view TO PUBLIC;
 
 CREATE TABLE iris._dms (
