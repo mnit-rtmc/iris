@@ -27,7 +27,7 @@ use wasm_bindgen::JsValue;
 pub struct Photocell {
     description: String,
     error: Option<String>,
-    reading: i32,
+    reading: Option<i32>,
 }
 
 /// Power supply status

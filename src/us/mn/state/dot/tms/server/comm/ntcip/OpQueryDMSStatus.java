@@ -48,11 +48,20 @@ public class OpQueryDMSStatus extends OpDMS {
 		return SystemAttrEnum.DMS_PIXEL_MAINT_THRESHOLD.getInt();
 	}
 
-	/** Get the light output as percent */
-	static private Integer getPercent(ASN1Integer light) {
-		int value = light.getInteger();
-		return (value >= 0 && value <= 65535)
-		      ? Math.round(value / 655.35f)
+	/** Get integer value from 0 to 65,535 as percent */
+	static private Integer getPercent(ASN1Integer value) {
+		int val = value.getInteger();
+		return (val >= 0 && val <= 65535)
+		      ? Math.round(val / 655.35f)
+		      : null;
+	}
+
+	/** Get integer value from 0 to max as percent */
+	static private Integer getPercent(ASN1Integer value, ASN1Integer max) {
+		int val = value.getInteger();
+		int mx = max.getInteger();
+		return (val >= 0 && val <= mx)
+		      ? Math.round(((float) val) / mx)
 		      : null;
 	}
 
@@ -64,6 +73,10 @@ public class OpQueryDMSStatus extends OpDMS {
 	/** Photocell level (composite) */
 	private final ASN1Integer p_level =
 		dmsIllumPhotocellLevelStatus.makeInt();
+
+	/** Maximum photocell level */
+	private final ASN1Integer max_level =
+		dmsIllumMaxPhotocellLevel.makeInt();
 
 	/** Short Error status */
 	private final ASN1Flags<ShortErrorStatus> shortError = new ASN1Flags<
@@ -124,11 +137,13 @@ public class OpQueryDMSStatus extends OpDMS {
 				DmsIllumControl>(DmsIllumControl.class,
 				dmsIllumControl.node);
 			mess.add(p_level);
+			mess.add(max_level);
 			mess.add(b_level);
 			mess.add(light);
 			mess.add(control);
 			mess.queryProps();
 			logQuery(p_level);
+			logQuery(max_level);
 			logQuery(b_level);
 			logQuery(light);
 			logQuery(control);
@@ -452,7 +467,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			photocell.put("description", desc.getValue());
 			if (s_stat.getEnum().isError())
 				photocell.put("error", s_stat.getValue());
-			photocell.put("reading", reading.getInteger());
+			photocell.put("reading", getPercent(reading));
 			photocells.put(photocell);
 			row++;
 			if (row <= n_sensors)
@@ -470,7 +485,7 @@ public class OpQueryDMSStatus extends OpDMS {
 		JSONObject photocell = new JSONObject();
 		photocell.put("description", "composite");
 		photocell.put("error", compositePhotocellError());
-		photocell.put("reading", p_level.getInteger());
+		photocell.put("reading", getPercent(p_level, max_level));
 		return photocell;
 	}
 
