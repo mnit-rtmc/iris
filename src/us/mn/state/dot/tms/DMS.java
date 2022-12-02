@@ -111,7 +111,7 @@ public interface DMS extends Device {
 	 *
 	 * An array of photocell objects, one for each sensor, plus one for the
 	 * composite of all sensors.  Each object has 3 fields: `description`,
-	 * `status`, and `reading` */
+	 * `error`, and `reading` */
 	String PHOTOCELLS = "photocells";
 
 	/** Light output; Integer (percentage) */

@@ -36,8 +36,8 @@ public class PhotocellTableModel extends AbstractTableModel {
 	/** Photocell description column number */
 	static private final int COL_DESC = 0;
 
-	/** Photocell status column number */
-	static private final int COL_STATUS = 1;
+	/** Photocell error column number */
+	static private final int COL_ERROR = 1;
 
 	/** Photocell reading detail column number */
 	static private final int COL_READING = 2;
@@ -57,7 +57,7 @@ public class PhotocellTableModel extends AbstractTableModel {
 			return null;
 		switch (column) {
 			case COL_DESC: return pc.optString("description");
-			case COL_STATUS: return pc.optString("status");
+			case COL_ERROR: return pc.optString("error");
 			case COL_READING:
 				Number n = pc.optNumber("reading");
 				return (n != null) ? n.toString() : null;
@@ -104,8 +104,8 @@ public class PhotocellTableModel extends AbstractTableModel {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_DESC, 120,
 			I18N.get("dms.photocell.description")));
-		m.addColumn(createColumn(COL_STATUS, 80,
-			I18N.get("dms.photocell.status")));
+		m.addColumn(createColumn(COL_ERROR, 80,
+			I18N.get("dms.photocell.error")));
 		m.addColumn(createColumn(COL_READING, 80,
 			I18N.get("dms.photocell.reading")));
 		return m;

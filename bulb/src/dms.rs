@@ -26,7 +26,7 @@ use wasm_bindgen::JsValue;
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Photocell {
     description: String,
-    status: String,
+    error: Option<String>,
     reading: i32,
 }
 

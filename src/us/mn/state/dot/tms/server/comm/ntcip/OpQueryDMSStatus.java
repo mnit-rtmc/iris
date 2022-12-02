@@ -450,7 +450,8 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(reading);
 			JSONObject photocell = new JSONObject();
 			photocell.put("description", desc.getValue());
-			photocell.put("status", s_stat.getValue());
+			if (s_stat.getEnum().isError())
+				photocell.put("error", s_stat.getValue());
 			photocell.put("reading", reading.getInteger());
 			photocells.put(photocell);
 			row++;
@@ -468,17 +469,15 @@ public class OpQueryDMSStatus extends OpDMS {
 	private JSONObject compositePhotocell() {
 		JSONObject photocell = new JSONObject();
 		photocell.put("description", "composite");
-		photocell.put("status", compositePhotocellStatus());
+		photocell.put("error", compositePhotocellError());
 		photocell.put("reading", p_level.getInteger());
 		return photocell;
 	}
 
-	/** Get the composite photocell status */
-	private String compositePhotocellStatus() {
+	/** Get the composite photocell error */
+	private String compositePhotocellError() {
 		int err = shortError.getInteger();
-		return ShortErrorStatus.PHOTOCELL.isSet(err)
-		      ? "fail"
-		      : "noError";
+		return ShortErrorStatus.PHOTOCELL.isSet(err) ? "fail" : null;
 	}
 
 	/** Get phase to query vendor-specific status objects */

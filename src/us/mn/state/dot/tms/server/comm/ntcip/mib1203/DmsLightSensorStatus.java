@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2015  Minnesota Department of Transportation
+ * Copyright (C) 2010-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,4 +25,9 @@ public enum DmsLightSensorStatus {
 	other,
 	noError,
 	fail;
+
+	/** Is there some kind of error? */
+	public boolean isError() {
+		return this != noError;
+	}
 }
