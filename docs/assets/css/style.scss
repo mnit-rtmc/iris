@@ -143,11 +143,13 @@ hr {
 
 kbd {
   border-style: outset;
-  border-width: 0.2rem;
-  border-color: #999999;
-  border-radius: 0.5rem;
-  padding: 0.2rem;
-  background-color: #f8f8f8;
-  margin: 0.2rem;
+  border-width: 1px;
+  border-color: #999;
+  border-radius: 0.2rem;
+  padding: 0.1rem;
+  font-family: 'Overpass Mono', monospace;
+  color: #283028;
+  background-color: #ffeedd;
+  margin: 0.1rem;
   white-space: nowrap;
 }

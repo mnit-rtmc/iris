@@ -26,8 +26,17 @@ message.
 A single **Transparent Color** can be selected to be fully transparent - alpha
 transparency is not supported. 
 
+## Static Graphics
+
+Graphic images can also represent a [static sign] with a smaller DMS inset.  For
+example, a static sign would contain a travel time message with a destination,
+and the DMS inset would only be large enough to display a 2-digit number of
+minutes.  The static graphic is displayed when selecting the DMS, to help
+operators understand the sign's function.
+
 
 [DMS]: dms.html
 [edit mode]: user_interface.html#edit-mode
 [GIMP]: https://www.gimp.org/
 [MULTI]: multi.html
+[static sign]: dms.html#setup
