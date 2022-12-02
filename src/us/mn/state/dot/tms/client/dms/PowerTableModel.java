@@ -39,8 +39,8 @@ public class PowerTableModel extends AbstractTableModel {
 	/** Power supply type column number */
 	static private final int COL_TYPE = 1;
 
-	/** Power supply status column number */
-	static private final int COL_STATUS = 2;
+	/** Power supply error column number */
+	static private final int COL_ERROR = 2;
 
 	/** Power supply detail column number */
 	static private final int COL_DETAIL = 3;
@@ -64,7 +64,7 @@ public class PowerTableModel extends AbstractTableModel {
 		switch (column) {
 			case COL_DESC: return ps.optString("description");
 			case COL_TYPE: return ps.optString("supply_type");
-			case COL_STATUS: return ps.optString("power_status");
+			case COL_ERROR: return ps.optString("error");
 			case COL_DETAIL: return ps.optString("detail");
 			case COL_VOLTAGE:
 				Number v = ps.optNumber("voltage");
@@ -114,8 +114,8 @@ public class PowerTableModel extends AbstractTableModel {
 			I18N.get("dms.power.description")));
 		m.addColumn(createColumn(COL_TYPE, 80,
 			I18N.get("dms.power.type")));
-		m.addColumn(createColumn(COL_STATUS, 80,
-			I18N.get("dms.power.status")));
+		m.addColumn(createColumn(COL_ERROR, 80,
+			I18N.get("dms.power.error")));
 		m.addColumn(createColumn(COL_DETAIL, 100,
 			I18N.get("dms.power.detail")));
 		m.addColumn(createColumn(COL_VOLTAGE, 80,

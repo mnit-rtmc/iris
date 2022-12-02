@@ -377,7 +377,8 @@ public class OpQueryDMSStatus extends OpDMS {
 			JSONObject supply = new JSONObject();
 			supply.put("description", desc.getValue());
 			supply.put("supply_type", p_type.getValue());
-			supply.put("power_status", p_stat.getValue());
+			if (p_stat.getEnum().isError())
+				supply.put("error", p_stat.getValue());
 			supply.put("detail", mfr_status.getValue());
 			supply.put("voltage",
 				scaleVoltage(voltage.getInteger()));

@@ -35,7 +35,7 @@ pub struct Photocell {
 pub struct PowerSupply {
     description: String,
     supply_type: String,
-    power_status: String,
+    error: Option<String>,
     detail: String,
     voltage: Option<f32>,
 }

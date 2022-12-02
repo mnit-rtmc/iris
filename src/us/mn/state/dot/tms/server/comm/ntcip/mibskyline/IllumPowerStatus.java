@@ -51,6 +51,11 @@ public class IllumPowerStatus extends ASN1OctetString {
 				return "noError";
 			}
 		}
+
+		/** Is there some kind of error? */
+		public boolean isError() {
+			return this != ok;
+		}
 	}
 
 	/** Create a new IllumPowerStatus object */
@@ -92,7 +97,8 @@ public class IllumPowerStatus extends ASN1OctetString {
 		supply.put("description", "#" + (num + 1));
 		supply.put("supply_type", "ledSupply"); // 1203v2 dmsPowerType
 		Enum e = Enum.fromOrdinal(vals[num]);
-		supply.put("power_status", e.value());
+		if (e.isError())
+			supply.put("error", e.value());
 		supply.put("detail", "skyline");
 		return supply;
 	}

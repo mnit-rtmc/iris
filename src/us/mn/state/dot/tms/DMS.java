@@ -120,7 +120,7 @@ public interface DMS extends Device {
 	/** Power supplies array.
 	 *
 	 * An array of power supply objects, consisting of `description`,
-	 * `supply_type`, `power_status`, `detail` and `voltage` */
+	 * `supply_type`, `error`, `detail` and `voltage` */
 	String POWER_SUPPLIES = "power_supplies";
 
 	/** Minimum cabinet temperature; Integer (Celsius) */
