@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -203,7 +203,7 @@ public class PropMessages extends JPanel {
 		}
 		SignText st = sign_text_pnl.getSelectedProxy();
 		if (st != null)
-			pixel_pnl.setGraphic(renderMessage(st));
+			pixel_pnl.setGraphic(renderSignText(st));
 		else
 			pixel_pnl.setGraphic(null);
 	}
@@ -217,18 +217,18 @@ public class PropMessages extends JPanel {
 			return null;
 	}
 
-	/** Render a message to a raster graphic */
-	private RasterGraphic renderMessage(SignText st) {
+	/** Render a sign text to a raster graphic */
+	private RasterGraphic renderSignText(SignText st) {
 		MultiString multi = new MultiString(st.getMulti());
-		RasterGraphic[] pages = renderPages(multi);
+		RasterGraphic[] pages = renderSignText(multi);
 		if (pages != null && pages.length > 0)
 			return pages[0];
 		else
 			return null;
 	}
 
-	/** Render the pages of a text message */
-	private RasterGraphic[] renderPages(MultiString ms) {
+	/** Render a sign text (single-line) */
+	private RasterGraphic[] renderSignText(MultiString ms) {
 		SignConfig sc = proxy.getSignConfig();
 		if (null == sc)
 			return null;
@@ -236,7 +236,7 @@ public class PropMessages extends JPanel {
 		int h = getLineHeightPixels();
 		int cw = sc.getCharWidth();
 		int ch = sc.getCharHeight();
-		int df = DMSHelper.getDefaultFontNumber(proxy);
+		int df = DMSHelper.getDefaultFontNum(proxy);
 		ColorScheme cs = ColorScheme.fromOrdinal(sc.getColorScheme());
 		RasterBuilder rb = new RasterBuilder(w, h, cw, ch, df, cs);
 		try {

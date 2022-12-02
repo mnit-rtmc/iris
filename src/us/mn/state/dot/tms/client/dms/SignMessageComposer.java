@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -65,7 +65,7 @@ public class SignMessageComposer extends JPanel {
 	private int n_lines;
 
 	/** Default font number */
-	private int default_font = FontHelper.DEFAULT_FONT_NUM;
+	private int default_font_num = FontHelper.DEFAULT_FONT_NUM;
 
 	/** Sign text model for the selected sign */
 	private SignTextModel st_model;
@@ -182,7 +182,7 @@ public class SignMessageComposer extends JPanel {
 		setSignTextModel(stm);
 		n_lines = DMSHelper.getLineCount(proxy);
 		n_pages = calculateSignPages(stm);
-		default_font = DMSHelper.getDefaultFontNumber(proxy);
+		default_font_num = DMSHelper.getDefaultFontNum(proxy);
 		initializeWidgets();
 		for (ComposerPagePanel pg: pages) {
 			pg.setModels(stm);
@@ -272,7 +272,7 @@ public class SignMessageComposer extends JPanel {
 	/** Compose a MULTI string using the contents of the widgets */
 	public String getComposedMulti() {
 		MultiString[] mess = new MultiString[n_pages];
-		int fn = default_font;
+		int fn = default_font_num;
 		int p = 0;
 		for (int i = 0; i < n_pages; i++) {
 			mess[i] = pages[i].getMulti(fn);
@@ -336,16 +336,16 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Get the default font number */
-	public int getDefaultFont() {
-		return default_font;
+	public int getDefaultFontNum() {
+		return default_font_num;
 	}
 
 	/** Set all font comboboxes using the specified MultiString */
 	private void setSelectedFonts(MultiString ms) {
-		int[] fnum = ms.getFonts(default_font);
+		int[] fnum = ms.getFonts(default_font_num);
 		for (int i = 0; i < pages.length; i++) {
 			ComposerPagePanel pnl = pages[i];
-			int fn = (i < fnum.length) ? fnum[i] : default_font;
+			int fn = (i < fnum.length) ? fnum[i] : default_font_num;
 			pnl.setFontNumber(fn);
 		}
 	}

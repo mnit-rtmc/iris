@@ -494,7 +494,7 @@ public class MultiConfig {
 			forceBasicColorsMode(msg);
 
 		// Figure out what font we should be using
-		defaultFontNo = DMSHelper.getDefaultFontNumber(dms);
+		defaultFontNo = DMSHelper.getDefaultFontNum(dms);
 		Font f = dms.getOverrideFont();
 		if (f != null)
 			defaultFont = f;

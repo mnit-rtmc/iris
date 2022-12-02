@@ -143,7 +143,7 @@ public class DMSHelper extends BaseHelper {
 	}
 
 	/** Get the default font number for a DMS */
-	static public int getDefaultFontNumber(DMS dms) {
+	static public int getDefaultFontNum(DMS dms) {
 		Font f = getDefaultFont(dms);
 		return (f != null)
 		      ? f.getNumber()
@@ -181,7 +181,7 @@ public class DMSHelper extends BaseHelper {
 	/** Get the font number for a DMS */
 	static private int getFontNumber(DMS dms) {
 		Font f = dms.getOverrideFont();
-		return (f != null) ? f.getNumber() : getDefaultFontNumber(dms);
+		return (f != null) ? f.getNumber() : getDefaultFontNum(dms);
 	}
 
 	/** Get the default background color for a DMS */
