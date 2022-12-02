@@ -192,7 +192,7 @@ will be taken from the `incident_clear_advice_multi` [system attribute].  The
 _cleared_ message will be deployed with `PSA` message priority for 5 minutes.
 
 
-[allowed words]: dms.html#allowed-words
+[allowed words]: words.html
 [DMS]: dms.html
 [exits]: road_topology.html#r_node-types
 [MULTI]: multi.html
