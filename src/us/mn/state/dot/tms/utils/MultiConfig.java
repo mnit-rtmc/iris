@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2019-2020  SRF Consulting Group
+ * Copyright (C) 2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -161,9 +162,6 @@ public class MultiConfig {
 
 	/** Default-font (if it exists in IRIS database) */
 	private Font defaultFont;
-
-	/** Value used in MultiExpandDefaults to expand "default font" tag. */
-	private Integer defaultFontTagVal;
 
 	//-------------
 	// values from SignConfig
@@ -498,10 +496,8 @@ public class MultiConfig {
 		// Figure out what font we should be using
 		defaultFontNo = DMSHelper.getDefaultFontNumber(dms);
 		Font f = dms.getOverrideFont();
-		if (f != null) {
+		if (f != null)
 			defaultFont = f;
-			defaultFontTagVal = f.getNumber();
-		}
 		else
 			defaultFont = FontHelper.find(defaultFontNo);
 		
@@ -911,12 +907,6 @@ public class MultiConfig {
 		if (defaultFont != null)
 			return defaultFont.getNumber();
 		return FontHelper.DEFAULT_FONT_NUM;
-	}
-
-	/* Configured default font tag value.
-	 * If null, indicates no overrides */
-	public Integer getDefaultFontTagVal() {
-		return defaultFontTagVal;
 	}
 
 	/** Get horizontal pitch (mm)
