@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -49,9 +49,9 @@ public class SignMenu extends IMenu {
 		addItem(createFontItem());
 		addItem(createGraphicItem());
 		addItem(createQuickMessageItem());
-		addItem(session.createTableAction(Beacon.SONAR_TYPE));
-		addItem(createWordItem());
 		addItem(createWysiwygSelectorItem());
+		addItem(createWordItem());
+		addItem(session.createTableAction(Beacon.SONAR_TYPE));
 	}
 
 	/** Create a sign config menu item action */
@@ -114,6 +114,16 @@ public class SignMenu extends IMenu {
 		    } : null;
 	}
 
+	/** Create a WYSIWYG Selector menu item action */
+	private IAction createWysiwygSelectorItem() {
+		return WMsgSelectorForm.isPermitted(session) ?
+		    new IAction("wysiwyg.menu") {
+			protected void doActionPerformed(ActionEvent e) {
+				desktop.show(new WMsgSelectorForm(session));
+			}
+		    } : null;
+	}
+
 	/** Create a word menu item action */
 	private IAction createWordItem() {
 		return WordForm.isPermitted(session) ?
@@ -122,15 +132,5 @@ public class SignMenu extends IMenu {
 				desktop.show(new WordForm(session));
 			}
 		    } : null;
-	}
-	
-	/** Create a WYSIWYG Selector menu item action */
-	private IAction createWysiwygSelectorItem() {
-		return WMsgSelectorForm.isPermitted(session) ?
-			new IAction("wysiwyg.menu") {
-			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new WMsgSelectorForm(session));
-			}
-			} : null;
 	}
 }
