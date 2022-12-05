@@ -184,10 +184,10 @@ public class DMSDispatcher extends JPanel {
 		if (combining) {
 			String quick = getQuickMsgFirst();
 			if (quick != null)
-				return makeCombined(quick, ms, null);
+				return makeCombined(quick, ms);
 			String sched = getSchedCombining();
 			if (sched != null)
-				return makeCombined(sched, ms, null);
+				return makeCombined(sched, ms);
 		}
 		return ms;
 	}
@@ -199,7 +199,7 @@ public class DMSDispatcher extends JPanel {
 			String quick2 = getQuickMsgSecond();
 			String sched = getSchedCombining();
 			if (quick2 != null && sched != null)
-				return makeCombined(sched, quick2, null);
+				return makeCombined(sched, quick2);
 			else if (quick != null)
 				return quick;
 			else if (sched != null)
@@ -348,7 +348,7 @@ public class DMSDispatcher extends JPanel {
 		} else {
 			if (QuickMessageHelper.isMsgCombiningFirst(qm)) {
 				String quick = qm.getMulti();
-				String combined = makeCombined(quick, ms, null);
+				String combined = makeCombined(quick, ms);
 				// Does combined message fit?
 				if (DMSHelper.createRasters(dms, combined)
 				    != null)

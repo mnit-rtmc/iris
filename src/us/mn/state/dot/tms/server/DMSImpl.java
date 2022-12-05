@@ -916,7 +916,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	{
 		String inc = user.getIncident();
 		String ms = MultiString.makeCombined(sched.getMulti(),
-			user.getMulti(), null);
+			user.getMulti());
 		boolean be = user.getBeaconEnabled();
 		int mc = MsgCombining.DISABLE.ordinal();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(

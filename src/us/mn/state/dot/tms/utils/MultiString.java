@@ -460,9 +460,7 @@ public class MultiString {
 	}
 
 	/** Make a combined message (either shared or sequenced) */
-	static public String makeCombined(String first, String second,
-		Integer f_num)
-	{
+	static public String makeCombined(String first, String second) {
 		final MultiString ms1 = new MultiString(first);
 		final MultiString ms2 = new MultiString(second);
 		if (ms1.isValidSharedFirst() && ms2.isValidSharedSecond()) {
@@ -475,13 +473,13 @@ public class MultiString {
 					append(ms1);
 					// Reset these to default values
 					setColorForeground(null);
-					setFont(f_num, null);
+					setFont(null, null);
 					setJustificationLine(null);
 					setJustificationPage(null);
 				}
 			};
 			mb.setColorForeground(null);
-			mb.setFont(f_num, null);
+			mb.setFont(null, null);
 			mb.setJustificationLine(null);
 			mb.setJustificationPage(null);
 			ms2.parse(mb);
@@ -490,7 +488,7 @@ public class MultiString {
 			MultiBuilder mb = new MultiBuilder(first);
 			// Reset these to default values
 			mb.setColorForeground(null);
-			mb.setFont(f_num, null);
+			mb.setFont(null, null);
 			mb.setJustificationLine(null);
 			mb.setJustificationPage(null);
 			// Add second page
