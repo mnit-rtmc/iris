@@ -220,7 +220,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			//       need to check that the password is not null
 			//       before attempting to set them.
 			if (isCharMatrix() && controller.getPassword() != null)
-				return new AddcoDefaults();
+				return new AddcoCharMatrixDefaults();
 			else
 				return null;
 		} else
@@ -295,8 +295,8 @@ public class OpSendDMSDefaults extends OpDMS {
 		}
 	}
 
-	/** Phase to set ADDCO-specific object defaults */
-	protected class AddcoDefaults extends Phase {
+	/** Phase to set ADDCO-specific character matrix object defaults */
+	protected class AddcoCharMatrixDefaults extends Phase {
 
 		/** Set ADDCO-specific object defaults */
 		@SuppressWarnings("unchecked")
