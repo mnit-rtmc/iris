@@ -711,14 +711,13 @@ public class IncidentDispatcher extends IPanel
 
 	/** Send new sign message to the specified DMS */
 	private void sendMessage(final DMS dms, final SignConfig sc,
-		final String inc_orig, String ms, final DmsMsgPriority prio,
+		final String inc_orig, final String ms, final DmsMsgPriority prio,
 		final Integer duration)
 	{
-		final String _ms = DMSHelper.addMultiOverrides(dms, ms);
 		runSwing(new Runnable() {
 			public void run() {
 				SignMessage sm = sm_creator.create(sc, inc_orig,
-					_ms, prio, duration);
+					ms, prio, duration);
 				if (sm != null)
 					dms.setMsgUser(sm);
 			}

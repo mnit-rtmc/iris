@@ -153,9 +153,7 @@ public class MultiConfig {
 	private int[] defaultBGTagVal = null;
 	private int[] defaultFGTagVal = null;
 
-	/** Default-font number the database says we
-	 *  should be using (after applying optional
-	 *  sign-specific override). */
+	/** Default-font number */
 	private int defaultFontNo;
 
 	/** Default-font (if it exists in IRIS database) */
@@ -441,40 +439,6 @@ public class MultiConfig {
 
 		genIrisDefaultColors();
 
-		// Apply DMS-specific "override" FG/BG colors
-		Integer oBG = dms.getOverrideBackground();
-		if (oBG != null) {
-			defaultBG = new DmsColor(oBG);
-			switch (colorScheme) {
-				case MONOCHROME_1_BIT:
-				case MONOCHROME_8_BIT:
-				case COLOR_CLASSIC:
-					defaultBGTagVal = genTagVal1(oBG);
-					break;
-				case COLOR_24_BIT:
-					defaultBGTagVal = new int[]{
-							defaultBG.red,
-							defaultBG.green,
-							defaultBG.blue};
-			}
-		}
-		Integer oFG = dms.getOverrideForeground();
-		if (oFG != null) {
-			defaultFG = new DmsColor(oFG);
-			switch (colorScheme) {
-				case MONOCHROME_1_BIT:
-				case MONOCHROME_8_BIT:
-				case COLOR_CLASSIC:
-					defaultFGTagVal = new int[]{oFG};
-					break;
-				case COLOR_24_BIT:
-					defaultFGTagVal = new int[]{
-							defaultFG.red,
-							defaultFG.green,
-							defaultFG.blue};
-			}
-		}
-
 		// SanityCheck: Did we get usable default colors?
 		String msg = null;
 		if (defaultBG == null)
@@ -490,11 +454,7 @@ public class MultiConfig {
 
 		// Figure out what font we should be using
 		defaultFontNo = DMSHelper.getDefaultFontNum(dms);
-		Font f = dms.getOverrideFont();
-		if (f != null)
-			defaultFont = f;
-		else
-			defaultFont = FontHelper.find(defaultFontNo);
+		defaultFont = FontHelper.find(defaultFontNo);
 
 		// SanityCheck: Do we have a copy of the default font?
 		if (defaultFont == null)

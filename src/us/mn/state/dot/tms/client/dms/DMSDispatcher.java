@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2017-2018  Iteris Inc.
  *
@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
-import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.MsgCombining;
@@ -177,37 +176,30 @@ public class DMSDispatcher extends JPanel {
 			singleTab.setMessage();
 	}
 
-	/** Get the composed MULTI string */
-	private String getComposedMulti(DMS dms) {
-		return DMSHelper.addMultiOverrides(dms, multi);
-	}
-
 	/** Get the preview MULTI string */
 	public String getPreviewMulti(DMS dms, boolean combining) {
-		Font of = dms.getOverrideFont();
-		Integer f_num = (of != null) ? of.getNumber() : null;
-		String ms = getComposedMulti(dms);
+		String ms = multi;
 		if (new MultiString(ms).isBlank())
-			return getPreviewBlank(f_num, combining);
+			return getPreviewBlank(combining);
 		if (combining) {
 			String quick = getQuickMsgFirst();
 			if (quick != null)
-				return makeCombined(quick, ms, f_num);
+				return makeCombined(quick, ms, null);
 			String sched = getSchedCombining();
 			if (sched != null)
-				return makeCombined(sched, ms, f_num);
+				return makeCombined(sched, ms, null);
 		}
 		return ms;
 	}
 
 	/** Get preview with blank composed message */
-	private String getPreviewBlank(Integer f_num, boolean combining) {
+	private String getPreviewBlank(boolean combining) {
 		String quick = getQuickMsg();
 		if (combining) {
 			String quick2 = getQuickMsgSecond();
 			String sched = getSchedCombining();
 			if (quick2 != null && sched != null)
-				return makeCombined(sched, quick2, f_num);
+				return makeCombined(sched, quick2, null);
 			else if (quick != null)
 				return quick;
 			else if (sched != null)
@@ -343,7 +335,7 @@ public class DMSDispatcher extends JPanel {
 		SignConfig sc = dms.getSignConfig();
 		if (sc == null)
 			return null;
-		String ms = getComposedMulti(dms);
+		String ms = multi;
 		QuickMessage qm = quick_msg;
 		if (new MultiString(ms).isBlank()) {
 			if (qm != null) {
@@ -355,12 +347,8 @@ public class DMSDispatcher extends JPanel {
 				return creator.createBlankMessage(sc);
 		} else {
 			if (QuickMessageHelper.isMsgCombiningFirst(qm)) {
-				Font of = dms.getOverrideFont();
-				Integer f_num = (of != null)
-					? of.getNumber()
-					: null;
 				String quick = qm.getMulti();
-				String combined = makeCombined(quick, ms, f_num);
+				String combined = makeCombined(quick, ms, null);
 				// Does combined message fit?
 				if (DMSHelper.createRasters(dms, combined)
 				    != null)

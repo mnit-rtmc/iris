@@ -2974,9 +2974,6 @@ CREATE TABLE iris._dms (
     beacon VARCHAR(20) REFERENCES iris._beacon,
     sign_config VARCHAR(16) REFERENCES iris.sign_config,
     sign_detail VARCHAR(12) REFERENCES iris.sign_detail,
-    override_font VARCHAR(16) REFERENCES iris.font,
-    override_foreground INTEGER,
-    override_background INTEGER,
     msg_user VARCHAR(20) REFERENCES iris.sign_message,
     msg_sched VARCHAR(20) REFERENCES iris.sign_message,
     msg_current VARCHAR(20) REFERENCES iris.sign_message,
@@ -3021,8 +3018,7 @@ CREATE TRIGGER dms_table_notify_trig
 CREATE VIEW iris.dms AS
     SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
            purpose, hidden, beacon, preset, sign_config, sign_detail,
-           override_font, override_foreground, override_background, msg_user,
-           msg_sched, msg_current, expire_time, status, stuck_pixels
+           msg_user, msg_sched, msg_current, expire_time, status, stuck_pixels
     FROM iris._dms d
     JOIN iris.controller_io cio ON d.name = cio.name
     JOIN iris._device_preset p ON d.name = p.name;
@@ -3036,13 +3032,11 @@ BEGIN
          VALUES (NEW.name, NEW.preset);
     INSERT INTO iris._dms (
         name, geo_loc, notes, gps, static_graphic, purpose, hidden, beacon,
-        sign_config, sign_detail, override_font, override_foreground,
-        override_background, msg_user, msg_sched, msg_current, expire_time,
-        status, stuck_pixels
+        sign_config, sign_detail, msg_user, msg_sched, msg_current,
+        expire_time, status, stuck_pixels
     ) VALUES (
         NEW.name, NEW.geo_loc, NEW.notes, NEW.gps, NEW.static_graphic,
         NEW.purpose, NEW.hidden, NEW.beacon, NEW.sign_config, NEW.sign_detail,
-        NEW.override_font, NEW.override_foreground, NEW.override_background,
         NEW.msg_user, NEW.msg_sched, NEW.msg_current, NEW.expire_time,
         NEW.status, NEW.stuck_pixels
     );
@@ -3074,9 +3068,6 @@ BEGIN
            beacon = NEW.beacon,
            sign_config = NEW.sign_config,
            sign_detail = NEW.sign_detail,
-           override_font = NEW.override_font,
-           override_foreground = NEW.override_foreground,
-           override_background = NEW.override_background,
            msg_user = NEW.msg_user,
            msg_sched = NEW.msg_sched,
            msg_current = NEW.msg_current,
@@ -3100,9 +3091,8 @@ CREATE VIEW dms_view AS
     SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
            d.static_graphic, dp.description AS purpose, d.hidden, d.beacon,
            p.camera, p.preset_num, d.sign_config, d.sign_detail,
-           default_font, override_font, override_foreground,
-           override_background, msg_user, msg_sched, msg_current,
-           expire_time, status, stuck_pixels,
+           default_font, msg_user, msg_sched, msg_current, expire_time,
+           status, stuck_pixels,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location
     FROM iris.dms d

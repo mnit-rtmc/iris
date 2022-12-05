@@ -160,12 +160,6 @@ public class DMSHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Get the font number for a DMS */
-	static private int getFontNumber(DMS dms) {
-		Font f = dms.getOverrideFont();
-		return (f != null) ? f.getNumber() : getDefaultFontNum(dms);
-	}
-
 	/** Get the default background color for a DMS */
 	static public byte[] getDefaultBackgroundBytes(DMS dms) {
 		return getColorScheme(dms).getDefaultBackgroundBytes();
@@ -182,43 +176,6 @@ public class DMSHelper extends BaseHelper {
 		return (sc != null)
 			? ColorScheme.fromOrdinal(sc.getColorScheme())
 		        : ColorScheme.UNKNOWN;
-	}
-
-	/** Add DMS overrides to a MULTI string */
-	static public String addMultiOverrides(DMS dms, String multi) {
-		ColorScheme scheme = getColorScheme(dms);
-		Font f = dms.getOverrideFont();
-		Integer fg = dms.getOverrideForeground();
-		Integer bg = dms.getOverrideBackground();
-		return (f != null || fg != null || bg != null)
-		      ? addMultiOverrides(multi, f, scheme, fg, bg)
-		      : multi;
-	}
-
-	/** Adjust a MULTI string with override font / colors */
-	static private String addMultiOverrides(String multi, Font f,
-		ColorScheme scheme, Integer fg, Integer bg)
-	{
-		MultiBuilder mb = new MultiBuilder();
-		if (f != null)
-			mb.setFont(f.getNumber(), null);
-		if (ColorScheme.COLOR_24_BIT == scheme) {
-			if (fg != null) {
-				DmsColor c = new DmsColor(fg);
-				mb.setColorForeground(c.red, c.green, c.blue);
-			}
-			if (bg != null) {
-				DmsColor c = new DmsColor(fg);
-				mb.setPageBackground(c.red, c.green, c.blue);
-			}
-		} else {
-			if (fg != null)
-				mb.setColorForeground(fg);
-			if (bg != null)
-				mb.setPageBackground(bg);
-		}
-		mb.append(new MultiString(multi));
-		return mb.toString();
 	}
 
 	/** Get the number of lines on a DMS.
@@ -243,10 +200,10 @@ public class DMSHelper extends BaseHelper {
 			int ph = sc.getPixelHeight();
 			int cw = sc.getCharWidth();
 			int ch = sc.getCharHeight();
-			int f = getFontNumber(dms);
+			int fn = getDefaultFontNum(dms);
 			ColorScheme cs = ColorScheme.fromOrdinal(
 				sc.getColorScheme());
-			return new RasterBuilder(pw, ph, cw, ch, f, cs);
+			return new RasterBuilder(pw, ph, cw, ch, fn, cs);
 		} else
 			return null;
 	}

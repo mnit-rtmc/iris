@@ -202,9 +202,7 @@ public class DmsActionMsg {
 
 	/** Get the MULTI string */
 	public String getMulti() {
-		return (multi != null)
-		      ? DMSHelper.addMultiOverrides(dms, multi)
-		      : null;
+		return multi;
 	}
 
 	/** Fail parsing message */
