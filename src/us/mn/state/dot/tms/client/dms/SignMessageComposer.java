@@ -144,7 +144,6 @@ public class SignMessageComposer extends JPanel {
 			pg.clearWidgets();
 		dispatcher.setComposedMulti("");
 		dispatcher.unlinkIncident();
-		misc_pnl.setComposedMulti("");
 		misc_pnl.clearWidgets();
 		adjusting--;
 	}
@@ -275,13 +274,7 @@ public class SignMessageComposer extends JPanel {
 	private String concatenatePages(MultiString[] mess, int p) {
 		MultiBuilder mb = new MultiBuilder();
 		for (int i = 0; i < p; i++) {
-			if (i == 0) {
-				if (p > 1) {
-					Integer pt = misc_pnl.getPageOnTime();
-					if (pt != null)
-						mb.setPageTimes(pt, null);
-				}
-			} else
+			if (i > 0)
 				mb.addPage();
 			mb.append(mess[i]);
 		}
@@ -291,7 +284,6 @@ public class SignMessageComposer extends JPanel {
 	/** Set the composed MULTI string */
 	public void setComposedMulti(String ms) {
 		adjusting++;
-		misc_pnl.setComposedMulti(ms);
 		MultiString multi = new MultiString(ms);
 		String[] lines = multi.getLines(n_lines);
 		for (int i = 0; i < pages.length; i++)

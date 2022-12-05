@@ -182,7 +182,6 @@ dms_page_off_default_secs	0.0
 dms_page_on_default_secs	2.0
 dms_page_on_max_secs	10.0
 dms_page_on_min_secs	0.5
-dms_page_on_selection_enable	false
 dms_pixel_off_limit	2
 dms_pixel_on_limit	1
 dms_pixel_maint_threshold	35

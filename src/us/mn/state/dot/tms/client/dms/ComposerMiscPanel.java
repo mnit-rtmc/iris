@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +17,10 @@ package us.mn.state.dot.tms.client.dms;
 import javax.swing.GroupLayout;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-import us.mn.state.dot.tms.units.Interval;
-import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
 
 /**
  * The ComposerMiscPanel is a GUI panel for miscellaneous widgets related to
@@ -50,23 +46,6 @@ public class ComposerMiscPanel extends JPanel {
 	private final JComboBox<Expiration> dur_cbx =
 		new JComboBox<Expiration>(Expiration.values());
 
-	/** Page on time label */
-	private final ILabel pg_on_lbl = new ILabel("dms.page.on.time");
-
-	/** Page on time spinner */
-	private final PgTimeSpinner pg_on_spn = new PgTimeSpinner();
-
-	/** Listener for spinner change events */
-	private final ChangeListener spin_listener = new ChangeListener() {
-		public void stateChanged(ChangeEvent e) {
-			if (adjusting == 0) {
-				adjusting++;
-				composer.updateMessage(true);
-				adjusting--;
-			}
-		}
-	};
-
 	/** Counter to indicate we're adjusting widgets.  This needs to be
 	 * incremented before calling dispatcher methods which might cause
 	 * callbacks to this class.  This prevents infinite loops. */
@@ -78,7 +57,6 @@ public class ComposerMiscPanel extends JPanel {
 		quick_cbx = new QuickMessageCBox(ds);
 		layoutPanel();
 		initializeWidgets();
-		pg_on_spn.addChangeListener(spin_listener);
 	}
 
 	/** Layout the panel */
@@ -106,13 +84,6 @@ public class ComposerMiscPanel extends JPanel {
 		GroupLayout.ParallelGroup g2 = gl.createParallelGroup(
 			GroupLayout.Alignment.CENTER);
 		g2.addComponent(dur_lbl).addComponent(dur_cbx);
-		// Page on time widgets
-		pg_on_lbl.setLabelFor(pg_on_spn);
-		lg.addComponent(pg_on_lbl);
-		vg.addComponent(pg_on_spn);
-		GroupLayout.ParallelGroup g3 = gl.createParallelGroup(
-			GroupLayout.Alignment.CENTER);
-		g3.addComponent(pg_on_lbl).addComponent(pg_on_spn);
 		// Finish group layout
 		GroupLayout.SequentialGroup horz_g = gl.createSequentialGroup();
 		horz_g.addGap(UI.hgap).addGroup(lg);
@@ -121,7 +92,6 @@ public class ComposerMiscPanel extends JPanel {
 		GroupLayout.SequentialGroup vert_g = gl.createSequentialGroup();
 		vert_g.addGap(UI.vgap).addGroup(g1).addGap(UI.vgap);
 		vert_g.addGroup(g2).addGap(UI.vgap);
-		vert_g.addGroup(g3).addGap(UI.vgap);
 		gl.setVerticalGroup(vert_g);
 	}
 
@@ -129,14 +99,12 @@ public class ComposerMiscPanel extends JPanel {
 	public void clearWidgets() {
 		adjusting++;
 		quick_cbx.setSelectedItem(null);
-		pg_on_spn.setValue("");
 		adjusting--;
 	}
 
 	/** Dispose of the message selector */
 	public void dispose() {
 		removeAll();
-		pg_on_spn.removeChangeListener(spin_listener);
 		quick_cbx.dispose();
 	}
 
@@ -152,9 +120,6 @@ public class ComposerMiscPanel extends JPanel {
 		boolean dur = SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean();
 		dur_lbl.setVisible(dur);
 		dur_cbx.setVisible(dur);
-		boolean pg = PgTimeSpinner.getIEnabled();
-		pg_on_lbl.setVisible(pg);
-		pg_on_spn.setVisible(pg);
 	}
 
 	/** Enable or Disable the message selector */
@@ -167,31 +132,11 @@ public class ComposerMiscPanel extends JPanel {
 		quick_cbx.setVisible(vis);
 		dur_cbx.setEnabled(b);
 		dur_cbx.setSelectedItem(0);
-		pg_on_spn.setEnabled(b);
-	}
-
-	/** Set the composed MULTI string */
-	public void setComposedMulti(String ms) {
-		adjusting++;
-		pg_on_spn.setValue(ms);
-		adjusting--;
 	}
 
 	/** Get the selected duration */
 	public Integer getDuration() {
 		Expiration e = (Expiration) dur_cbx.getSelectedItem();
 		return (e != null) ? e.duration : null;
-	}
-
-	/** Get the selected page-on time.
-	 * @return Page-on time, in deciseconds, or null. */
-	public Integer getPageOnTime() {
-		if (PgTimeSpinner.getIEnabled()) {
-			Interval poi = pg_on_spn.getValueInterval();
-			int pt = poi.round(DECISECONDS);
-			if (pt > 0)
-				return pt;
-		}
-		return null;
 	}
 }

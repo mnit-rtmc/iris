@@ -174,7 +174,7 @@ public class ComposerPagePanel extends JPanel {
 				m = i + 1;
 		}
 		for (int i = 0; i < m; i++) {
-			if (i != 0)
+			if (i > 0)
 				mb.addLine(null);
 			new MultiString(mess[i]).parse(mb);
 		}

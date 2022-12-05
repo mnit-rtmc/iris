@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,13 +33,13 @@ public class PageTimeHelper {
 	private PageTimeHelper() { }
 
 	/** Get minimum page-on interval */
-	static public Interval minPageOnInterval() {
+	static private Interval minPageOnInterval() {
 		return new Interval(
 			SystemAttrEnum.DMS_PAGE_ON_MIN_SECS.getFloat());
 	}
 
 	/** Get maximum page-on interval */
-	static public Interval maxPageOnInterval() {
+	static private Interval maxPageOnInterval() {
 		return new Interval(
 			SystemAttrEnum.DMS_PAGE_ON_MAX_SECS.getFloat());
 	}
