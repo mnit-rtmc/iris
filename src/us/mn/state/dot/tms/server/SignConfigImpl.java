@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2021  Minnesota Department of Transportation
+ * Copyright (C) 2016-2022  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -75,8 +75,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 			String template = "sc_" + pxw + "x" + pxh + "_%d";
 			String n = createUniqueName(template);
 			SignConfigImpl sci = new SignConfigImpl(n, fw, fh, bh,
-				bv, ph, pv, pxw, pxh, cw, ch, mf, mb, cs, 
-				"", "", 0, 0);
+				bv, ph, pv, pxw, pxh, cw, ch, mf, mb, cs, "",
+				0, 0);
 			return createNotify(sci);
 		}
 	}
@@ -107,9 +107,9 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 			"border_horiz, border_vert, pitch_horiz, pitch_vert, " +
 			"pixel_width, pixel_height, char_width, char_height, " +
 			"monochrome_foreground, monochrome_background, " +
-			"color_scheme, default_font, exclude_font, " +
-			"module_width, module_height FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+			"color_scheme, default_font, module_width, " +
+			"module_height FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new SignConfigImpl(row));
@@ -136,7 +136,6 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		map.put("monochrome_background", monochrome_background);
 		map.put("color_scheme", color_scheme.ordinal());
 		map.put("default_font", default_font);
-		map.put("exclude_font", exclude_font);
 		map.put("module_width", module_width);
 		map.put("module_height", module_height);
 		return map;
@@ -171,16 +170,15 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		     row.getInt(13),     // monochrome_background
 		     row.getInt(14),     // color_scheme
 		     row.getString(15),  // default_font
-		     row.getString(16),  // exclude_font
-		     row.getInt(17),     // module_width
-		     row.getInt(18)      // module_height
+		     row.getInt(16),     // module_width
+		     row.getInt(17)      // module_height
 		);
 	}
 
 	/** Create a sign config */
 	private SignConfigImpl(String n, int fw, int fh, int bh, int bv, int ph,
 		int pv, int pxw, int pxh, int cw, int ch, int mf, int mb,
-		int cs, String df, String ef, int mw, int mh)
+		int cs, String df, int mw, int mh)
 	{
 		super(n);
 		face_width = fw;
@@ -197,7 +195,6 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		monochrome_background = mb;
 		color_scheme = ColorScheme.fromOrdinal(cs);
 		default_font = FontHelper.lookup(df);
-		exclude_font = FontHelper.lookup(ef);
 		module_width = mw;
 		module_height = mh;
 	}
@@ -340,29 +337,6 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 	@Override
 	public Font getDefaultFont() {
 		return default_font;
-	}
-
-	/** Exclude font, can be null */
-	private Font exclude_font;
-
-	/** Set the exclude font */
-	@Override
-	public void setExcludeFont(Font f) {
-		exclude_font = f;
-	}
-
-	/** Set the exclude font */
-	public void doSetExcludeFont(Font f) throws TMSException {
-		if (f != exclude_font) {
-			store.update(this, "exclude_font", f);
-			setExcludeFont(f);
-		}
-	}
-
-	/** Get the exclude font */
-	@Override
-	public Font getExcludeFont() {
-		return exclude_font;
 	}
 
 	/** Module width (pixels) */

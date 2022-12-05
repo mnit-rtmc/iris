@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2021  Minnesota Department of Transportation
+ * Copyright (C) 2016-2022  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -89,8 +89,7 @@ public class SignConfigHelper extends BaseHelper {
 
 	/** Check if a font is usable for a sign configuration */
 	static public boolean isFontUsable(SignConfig sc, Font f) {
-		return isFontWidthUsable(sc, f) && 
-			isFontHeightUsable(sc, f) && !isFontExcluded(sc, f);
+		return isFontWidthUsable(sc, f) &&  isFontHeightUsable(sc, f);
 	}
 
 	/** Check if a font width is usable for a sign configuration. */
@@ -144,15 +143,5 @@ public class SignConfigHelper extends BaseHelper {
 				signs.add(dms);
 		}
 		return signs;
-	}
-
-	/** Check if a font is excluded */
-	static public boolean isFontExcluded(SignConfig sc, Font f) {
-		if (sc != null && f != null) {
-			Font ef = sc.getExcludeFont();
-			return ef != null ? 
-				ef.getNumber() == f.getNumber() : false;
-		}
-		return true;
 	}
 }
