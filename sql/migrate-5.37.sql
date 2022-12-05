@@ -47,4 +47,7 @@ CREATE VIEW dms_view AS
     LEFT JOIN iris.sign_config sc ON d.sign_config = sc.name;
 GRANT SELECT ON dms_view TO PUBLIC;
 
+-- Remove DMS font selection system attribute
+DELETE FROM iris.system_attribute WHERE name = 'dms_font_selection_enable';
+
 COMMIT;

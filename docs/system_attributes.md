@@ -53,7 +53,6 @@ System Attribute                 | Description
 `dms_default_justification_line` | Default [DMS] line justification (2=LEFT, 3=CENTER, 4=RIGHT, 5=FULL)
 `dms_default_justification_page` | Default [DMS] page justification (2=TOP, 3=MIDDLE, 4=BOTTOM)
 `dms_duration_enable`            | Enable widgets to select [DMS] message duration
-`dms_font_selection_enable`      | Allow font to be selected for [DMS] messages
 `dms_gps_jitter_m`               | Threshold (m) for GPS change to update [DMS] location
 `dms_high_temp_cutoff`           | Temperature at which [DMS] should shut off
 `dms_lamp_test_timeout_secs`     | Time to wait for [DMS] lamp test to complete

@@ -18,8 +18,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import javax.swing.GroupLayout;
 import javax.swing.JPanel;
-import us.mn.state.dot.tms.SignConfig;
-import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -47,9 +45,6 @@ public class ComposerPagePanel extends JPanel {
 	/** Message combo box widgets */
 	private final MsgComboBox[] line_cbx;
 
-	/** Font combo box widget */
-	private final FontComboBox font_cbx;
-
 	/** Number of lines on selected sign */
 	private int n_lines;
 
@@ -61,7 +56,6 @@ public class ComposerPagePanel extends JPanel {
 		n_lines = ml;
 		line_cbx = new MsgComboBox[max_lines];
 		line_pnl = new JPanel[max_lines];
-		font_cbx = new FontComboBox(composer);
 		for (int i = 0; i < max_lines; i++) {
 			line_cbx[i] = new MsgComboBox(composer,
 				getLineNumber(i));
@@ -85,21 +79,6 @@ public class ComposerPagePanel extends JPanel {
 			hg.addComponent(line_pnl[i]);
 			vg.addComponent(line_pnl[i]);
 		}
-		if (FontComboBox.getIEnabled()) {
-			ILabel label = new ILabel("font");
-			label.setLabelFor(font_cbx);
-			GroupLayout.SequentialGroup sfg =
-				gl.createSequentialGroup();
-			sfg.addComponent(label);
-			sfg.addGap(UI.hgap);
-			sfg.addComponent(font_cbx);
-			hg.addGroup(sfg);
-			GroupLayout.ParallelGroup vfg =
-				gl.createBaselineGroup(true, false);
-			vfg.addComponent(label);
-			vfg.addComponent(font_cbx);
-			vg.addGroup(vfg);
-		}
 		gl.setHorizontalGroup(hg);
 		gl.setVerticalGroup(vg);
 	}
@@ -120,7 +99,6 @@ public class ComposerPagePanel extends JPanel {
 	public void clearWidgets() {
 		for (MsgComboBox cbox: line_cbx)
 			cbox.setSelectedIndex(-1);
-		font_cbx.setSelectedFontNumber(composer.getDefaultFontNum());
 	}
 
 	/** Dispose of page panel */
@@ -128,7 +106,6 @@ public class ComposerPagePanel extends JPanel {
 		removeAll();
 		for (MsgComboBox cbox: line_cbx)
 			cbox.dispose();
-		font_cbx.dispose();
 	}
 
 	/** Enable or Disable the page panel */
@@ -136,7 +113,6 @@ public class ComposerPagePanel extends JPanel {
 	public void setEnabled(boolean b) {
 		for (MsgComboBox cbx: line_cbx)
 			cbx.setEnabled(b);
-		font_cbx.setEnabled(b);
 		super.setEnabled(b);
 	}
 
@@ -172,11 +148,6 @@ public class ComposerPagePanel extends JPanel {
 		return (short) (n_page * n_lines + n + 1);
 	}
 
-	/** Set the sign configuration */
-	public void setSignConfig(SignConfig sc) {
-		font_cbx.setSignConfig(sc);
-	}
-
 	/** Set the selected lines */
 	public void setSelectedLines(String[] lines) {
 		for (int n = 0; n < max_lines; n++) {
@@ -192,9 +163,8 @@ public class ComposerPagePanel extends JPanel {
 	}
 
 	/** Get a MULTI string for the page.
-	 * @param n_font Current font number.
 	 * @return MULTI string for the page. */
-	public MultiString getMulti(int n_font) {
+	public MultiString getMulti() {
 		MultiBuilder mb = new MultiBuilder();
 		String[] mess = new String[n_lines];
 		int m = 0;
@@ -204,29 +174,10 @@ public class ComposerPagePanel extends JPanel {
 				m = i + 1;
 		}
 		for (int i = 0; i < m; i++) {
-			if (i == 0) {
-				int fn = getFontNumber();
-				if (fn != n_font)
-					mb.setFont(fn, null);
-			} else
+			if (i != 0)
 				mb.addLine(null);
 			new MultiString(mess[i]).parse(mb);
 		}
 		return mb.toMultiString();
-	}
-
-	/** Get the font number for the page */
-	public int getFontNumber() {
-		if (FontComboBox.getIEnabled()) {
-			Integer fn = font_cbx.getFontNumber();
-			if (fn != null)
-				return fn;
-		}
-		return composer.getDefaultFontNum();
-	}
-
-	/** Set the font number for the page */
-	public void setFontNumber(int fn) {
-		font_cbx.setSelectedFontNumber(fn);
 	}
 }

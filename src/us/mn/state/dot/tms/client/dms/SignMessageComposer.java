@@ -22,9 +22,6 @@ import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.Font;
-import us.mn.state.dot.tms.FontHelper;
-import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.SignMessageHelper.DMS_MESSAGE_MAX_PAGES;
 import us.mn.state.dot.tms.client.Session;
@@ -49,9 +46,6 @@ public class SignMessageComposer extends JPanel {
 	/** DMS dispatcher */
 	private final DMSDispatcher dispatcher;
 
-	/** Cache of font proxy objects */
-	private final TypeCache<Font> fonts;
-
 	/** Maximum number of lines on a sign */
 	private final int max_lines;
 
@@ -63,9 +57,6 @@ public class SignMessageComposer extends JPanel {
 
 	/** Number of lines on selected sign */
 	private int n_lines;
-
-	/** Default font number */
-	private int default_font_num = FontHelper.DEFAULT_FONT_NUM;
 
 	/** Sign text model for the selected sign */
 	private SignTextModel st_model;
@@ -105,7 +96,6 @@ public class SignMessageComposer extends JPanel {
 	{
 		session = s;
 		dispatcher = ds;
-		fonts = s.getSonarState().getDmsCache().getFonts();
 		max_lines = SystemAttrEnum.DMS_MAX_LINES.getInt();
 		n_lines = max_lines;
 		min_pages = SystemAttrEnum.DMS_MESSAGE_MIN_PAGES.getInt();
@@ -177,16 +167,13 @@ public class SignMessageComposer extends JPanel {
 
 	/** Update the message combo box models */
 	public void setSign(DMS proxy) {
-		SignConfig sc = (proxy != null) ? proxy.getSignConfig() : null;
 		SignTextModel stm = createSignTextModel(proxy);
 		setSignTextModel(stm);
 		n_lines = DMSHelper.getLineCount(proxy);
 		n_pages = calculateSignPages(stm);
-		default_font_num = DMSHelper.getDefaultFontNum(proxy);
 		initializeWidgets();
 		for (ComposerPagePanel pg: pages) {
 			pg.setModels(stm);
-			pg.setSignConfig(sc);
 		}
 		misc_pnl.setSign(proxy);
 	}
@@ -272,13 +259,11 @@ public class SignMessageComposer extends JPanel {
 	/** Compose a MULTI string using the contents of the widgets */
 	public String getComposedMulti() {
 		MultiString[] mess = new MultiString[n_pages];
-		int fn = default_font_num;
 		int p = 0;
 		for (int i = 0; i < n_pages; i++) {
-			mess[i] = pages[i].getMulti(fn);
+			mess[i] = pages[i].getMulti();
 			if (!mess[i].isBlank())
 				p = i + 1;
-			fn = pages[i].getFontNumber();
 		}
 		return concatenatePages(mess, p);
 	}
@@ -307,12 +292,7 @@ public class SignMessageComposer extends JPanel {
 	public void setComposedMulti(String ms) {
 		adjusting++;
 		misc_pnl.setComposedMulti(ms);
-		// Note: order here is crucial. The font cbox must be updated
-		// first because the line combobox updates (each) result in 
-		// intermediate preview updates which read the (incorrect) 
-		// font from the font combobox.
 		MultiString multi = new MultiString(ms);
-		setSelectedFonts(multi);
 		String[] lines = multi.getLines(n_lines);
 		for (int i = 0; i < pages.length; i++)
 			pages[i].setSelectedLines(lines);
@@ -328,26 +308,6 @@ public class SignMessageComposer extends JPanel {
 	/** Get the selected duration */
 	public Integer getDuration() {
 		return misc_pnl.getDuration();
-	}
-
-	/** Get the font cache */
-	public TypeCache<Font> getFonts() {
-		return fonts;
-	}
-
-	/** Get the default font number */
-	public int getDefaultFontNum() {
-		return default_font_num;
-	}
-
-	/** Set all font comboboxes using the specified MultiString */
-	private void setSelectedFonts(MultiString ms) {
-		int[] fnum = ms.getFonts(default_font_num);
-		for (int i = 0; i < pages.length; i++) {
-			ComposerPagePanel pnl = pages[i];
-			int fn = (i < fnum.length) ? fnum[i] : default_font_num;
-			pnl.setFontNumber(fn);
-		}
 	}
 
 	/** Update the message library with the currently selected messages */
