@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSType;
+import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.SignDetail;
 import static us.mn.state.dot.tms.SystemAttrEnum.*;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -157,10 +158,12 @@ public class OpSendDMSDefaults extends OpDMS {
 			page.setInteger(
 				JustificationPage.defaultValue().ordinal()
 			);
-			on_time.setInteger(Math.round(10 *
-				DMS_PAGE_ON_DEFAULT_SECS.getFloat()));
-			off_time.setInteger(Math.round(10 *
-				DMS_PAGE_OFF_DEFAULT_SECS.getFloat()));
+			on_time.setInteger(
+				PageTimeHelper.defaultPageOnTimeDs()
+			);
+			off_time.setInteger(
+				PageTimeHelper.defaultPageOffTimeDs()
+			);
 			mess.add(line);
 			mess.add(page);
 			mess.add(on_time);

@@ -57,8 +57,6 @@ System Attribute                 | Description
 `dms_manufacturer_enable`        | Enable manufacturer-specific [DMS] widgets
 `dms_max_lines`                  | Maximum lines per page on a [DMS]
 `dms_message_min_pages`          | Minimum number of pages to allow on [DMS] message interface
-`dms_page_off_default_secs`      | Default [DMS] page off time
-`dms_page_on_default_secs`       | Default [DMS] page on time
 `dms_page_on_max_secs`           | Maximum selectable [DMS] page on time (seconds)
 `dms_page_on_min_secs`           | Minimum selectable [DMS] page on time (seconds)
 `dms_pixel_off_limit`            | Number of stuck-off pixels allowed in a [DMS] message

@@ -46,14 +46,22 @@ public class PageTimeHelper {
 
 	/** Get default page-on interval */
 	static public Interval defaultPageOnInterval() {
-		return new Interval(
-			SystemAttrEnum.DMS_PAGE_ON_DEFAULT_SECS.getFloat());
+		return new Interval(2.8f);
+	}
+
+	/** Get default page-on time (ds) */
+	static public int defaultPageOnTimeDs() {
+		return defaultPageOnInterval().round(DECISECONDS);
 	}
 
 	/** Get default page-off interval */
 	static public Interval defaultPageOffInterval() {
-		return new Interval(
-			SystemAttrEnum.DMS_PAGE_OFF_DEFAULT_SECS.getFloat());
+		return new Interval(0.0f);
+	}
+
+	/** Get default page-off time (ds) */
+	static public int defaultPageOffTimeDs() {
+		return defaultPageOffInterval().round(DECISECONDS);
 	}
 
 	/** Validate a page-on interval.

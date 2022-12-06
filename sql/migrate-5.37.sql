@@ -150,4 +150,8 @@ DELETE FROM iris.system_attribute WHERE name = 'dms_page_on_selection_enable';
 DELETE FROM iris.system_attribute WHERE name = 'dms_default_justification_line';
 DELETE FROM iris.system_attribute WHERE name = 'dms_default_justification_page';
 
+-- Remove DMS default page time system attributes
+DELETE FROM iris.system_attribute WHERE name = 'dms_page_on_default_secs';
+DELETE FROM iris.system_attribute WHERE name = 'dms_page_off_default_secs';
+
 COMMIT;

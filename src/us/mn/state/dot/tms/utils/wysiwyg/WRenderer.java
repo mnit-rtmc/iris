@@ -13,12 +13,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.utils.wysiwyg;
 
 import java.util.LinkedList;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.InvalidMsgException;
+import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.MultiSyntaxError;
@@ -457,14 +457,14 @@ public class WRenderer {
 	public void renderPageTimes(WtPageTime tok) {
 		Integer pt_on = tok.getPageOnTime();
 		if (pt_on == null)
-			state.pageOn = WState.getIrisDefaultPageOnTime();
+			state.pageOn = PageTimeHelper.defaultPageOnTimeDs();
 		else if ((pt_on < 1) || (pt_on > 255))
 			reportError(MultiSyntaxError.unsupportedTagValue, tok);
 		else
 			state.pageOn = pt_on;
 		Integer pt_off = tok.getPageOffTime();
 		if (pt_off == null)
-			state.pageOff = WState.getIrisDefaultPageOffTime();
+			state.pageOff = PageTimeHelper.defaultPageOffTimeDs();
 		else if ((pt_off < 0) || (pt_off > 255))
 			reportError(MultiSyntaxError.unsupportedTagValue, tok);
 		else

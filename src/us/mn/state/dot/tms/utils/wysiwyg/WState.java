@@ -12,10 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.utils.wysiwyg;
 
-import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.utils.Multi.JustificationLine;
 import us.mn.state.dot.tms.utils.Multi.JustificationPage;
 import us.mn.state.dot.tms.utils.MultiConfig;
@@ -27,10 +26,10 @@ import us.mn.state.dot.tms.utils.MultiRenderer;
  * @author Gordon Parikh - SRF Consulting
  */
 public class WState {
-	
+
 	/** MultiConfig used to initialize this WState */
 	public MultiConfig mcfg;
-	
+
 	// colors
 	public int bgPixel = WRaster.DEFAULT_BG;
 	public int fgPixel = WRaster.DEFAULT_FG;
@@ -55,23 +54,6 @@ public class WState {
 	// Page timing (deci-seconds)
 	public int pageOn;
 	public int pageOff;
-
-	//-------------------------------------------
-
-	public static int getDeciseconds(SystemAttrEnum attr) {
-		float f = attr.getFloat() * 10;
-		return Math.round(f);
-	}
-	
-	/** Get IRIS default page-on time in deci-seconds. */
-	public static int getIrisDefaultPageOnTime() {
-		return getDeciseconds(SystemAttrEnum.DMS_PAGE_ON_DEFAULT_SECS);
-	}
-
-	/** Get IRIS default page-off time in deci-seconds. */
-	public static int getIrisDefaultPageOffTime() {
-		return getDeciseconds(SystemAttrEnum.DMS_PAGE_OFF_DEFAULT_SECS);
-	}
 
 	//-------------------------------------------
 	
@@ -107,8 +89,8 @@ public class WState {
 		trH         = mcfg.getPixelHeight();
 		justLine    = JustificationLine.defaultValue();
 		justPage    = JustificationPage.defaultValue();
-		pageOn      = getIrisDefaultPageOnTime();
-		pageOff     = getIrisDefaultPageOffTime();
+		pageOn      = PageTimeHelper.defaultPageOnTimeDs();
+		pageOff     = PageTimeHelper.defaultPageOffTimeDs();
 
 		fontcache   = fc;
 		setFont(null);
