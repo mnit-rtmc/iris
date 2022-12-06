@@ -146,4 +146,8 @@ DELETE FROM iris.system_attribute WHERE name = 'dms_font_selection_enable';
 -- Remove DMS page-on selection system attribute
 DELETE FROM iris.system_attribute WHERE name = 'dms_page_on_selection_enable';
 
+-- Remove DMS default line/page justification system attributes
+DELETE FROM iris.system_attribute WHERE name = 'dms_default_justification_line';
+DELETE FROM iris.system_attribute WHERE name = 'dms_default_justification_page';
+
 COMMIT;

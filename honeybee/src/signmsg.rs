@@ -372,8 +372,8 @@ impl SignConfig {
         let char_height = self.char_height()?;
         let page_on_time_ds = msg_data.page_on_default_ds();
         let page_off_time_ds = msg_data.page_off_default_ds();
-        let just_page = msg_data.page_justification_default();
-        let just_line = msg_data.line_justification_default();
+        let just_page = JustificationPage::Top;
+        let just_line = JustificationLine::Center;
         let fname = self.default_font();
         let font_num = msg_data.font_default(fname)?;
         Ok(Pages::builder(width, height)
@@ -544,30 +544,6 @@ impl MsgData {
     /// Get the default page off time
     fn page_off_default_ds(&self) -> u8 {
         self.get_as_ds("dms_page_off_default_secs").unwrap_or(0)
-    }
-
-    /// Get the default page justification
-    fn page_justification_default(&self) -> JustificationPage {
-        const ATTR: &str = "dms_default_justification_page";
-        if let Some(value) = self.attrs.get(ATTR) {
-            if let Some(pj) = JustificationPage::new(value) {
-                return pj;
-            }
-        }
-        debug!("MsgData::page_justification_default, {} missing!", ATTR);
-        JustificationPage::Top
-    }
-
-    /// Get the default line justification
-    fn line_justification_default(&self) -> JustificationLine {
-        const ATTR: &str = "dms_default_justification_line";
-        if let Some(value) = self.attrs.get(ATTR) {
-            if let Some(lj) = JustificationLine::new(value) {
-                return lj;
-            }
-        }
-        debug!("MsgData::line_justification_default, {} missing!", ATTR);
-        JustificationLine::Center
     }
 
     /// Get the default font number

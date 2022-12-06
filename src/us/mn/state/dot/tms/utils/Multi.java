@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  * Copyright (C) 2009  AHMCT, University of California
  * Copyright (C) 2019-2020  SRF Consulting Group
  * Copyright (C) 2021  Iteris Inc.
@@ -109,6 +109,11 @@ public interface Multi {
 			else
 				return UNDEFINED;
 		}
+
+		/** Get the default line justification */
+		static public JustificationLine defaultValue() {
+			return CENTER;
+		}
 	}
 
 	/** Set the line justification.
@@ -128,6 +133,11 @@ public interface Multi {
 				return VALUES[o];
 			else
 				return UNDEFINED;
+		}
+
+		/** Get the default page justification */
+		static public JustificationPage defaultValue() {
+			return TOP;
 		}
 	}
 

@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.utils.MultiRenderer;
  * 
  * @author John L. Stanley - SRF Consulting
  * @author Gordon Parikh - SRF Consulting
- *
  */
 public class WState {
 	
@@ -48,11 +47,11 @@ public class WState {
 	public int trY;
 	public int trW;
 	public int trH;
-	
+
 	// Justification
 	public JustificationLine justLine;
 	public JustificationPage justPage;
-	
+
 	// Page timing (deci-seconds)
 	public int pageOn;
 	public int pageOff;
@@ -106,8 +105,8 @@ public class WState {
 		trY         = 1;
 		trW         = mcfg.getPixelWidth();
 		trH         = mcfg.getPixelHeight();
-		justLine    = MultiRenderer.defaultJustificationLine();
-		justPage    = MultiRenderer.defaultJustificationPage();
+		justLine    = JustificationLine.defaultValue();
+		justPage    = JustificationPage.defaultValue();
 		pageOn      = getIrisDefaultPageOnTime();
 		pageOff     = getIrisDefaultPageOffTime();
 

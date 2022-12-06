@@ -151,8 +151,12 @@ public class OpSendDMSDefaults extends OpDMS {
 				defaultJustificationPage.node);
 			ASN1Integer on_time = defaultPageOnTime.makeInt();
 			ASN1Integer off_time = defaultPageOffTime.makeInt();
-			line.setInteger(DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
-			page.setInteger(DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
+			line.setInteger(
+				JustificationLine.defaultValue().ordinal()
+			);
+			page.setInteger(
+				JustificationPage.defaultValue().ordinal()
+			);
 			on_time.setInteger(Math.round(10 *
 				DMS_PAGE_ON_DEFAULT_SECS.getFloat()));
 			off_time.setInteger(Math.round(10 *
