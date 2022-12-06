@@ -28,6 +28,26 @@ Tag                                           | Description              | Suppo
 `[sc`_x_`]`                                   | Character spacing        | Yes
 `[tr`_x,y,w,h_`]`                             | Text rectangle           | Yes
 
+## Default Values
+
+Some tags have **default** values, which will be used if a tag is not specified
+in a message.
+
+| Description          | Default Value      |
+|----------------------|--------------------|
+| Background color     | black (0)          |
+| Background color RGB | 0, 0, 0            |
+| Foreground color     | amber (9)          |
+| Foreground color RGB | 255, 208, 0        |
+| Flash on time        | 0.0 s              |
+| Flash off time       | 0.0 s              |
+| Font                 | by **sign config** |
+| Line justificaiton   | center (3)         |
+| Page justification   | top (2)            |
+| Page on time         | 2.8 s              |
+| Page off time        | 0.0 s              |
+| Character set        | eightBit (2)       |
+
 
 [DMS]: dms.html
 [NTCIP]: https://www.ntcip.org/document-numbers-and-status/
