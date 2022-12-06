@@ -14,10 +14,10 @@ determine how a message is composed: **exclude_font**, **override_font**,
 
 ![](images/dms_composer_mockup.png)
 
-Now, the operator selects a message **Form** first, or accepts the default.
-Then, depending on the form, may optionally select sign text line-by-line.
-The Form determines which font, foreground and background colors, page times,
-graphics, color rectangles, justifaction, character spacing, etc.  If a form
+Now, the operator selects a message **Pattern** first, or accepts the default.
+Then, depending on the pattern, may optionally select sign text line-by-line.
+The pattern determines which font, foreground and background colors, page times,
+graphics, color rectangles, justifaction, character spacing, etc.  If a pattern
 contains no text, or ends with a text rectangle, then sign text can be placed
 there using the line-by-line method.  Otherwise, it acts like a quick message.
 
@@ -29,4 +29,4 @@ there using the line-by-line method.  Otherwise, it acts like a quick message.
 * Remove `dms.override_background`
 * Remove `dms_font_selection_enable` system attribute
 * Remove `dms_page_on_selection_enable` system attribute
-* Rename `quick_message` to `message_form`
+* Rename `quick_message` to `msg_pattern`
