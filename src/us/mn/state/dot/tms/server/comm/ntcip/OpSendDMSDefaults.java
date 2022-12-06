@@ -91,7 +91,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			mess.storeProps();
 			return supportsPixelService()
 			      ? new PixelService()
-			      : new MessageDefaults();
+			      : new FlashDefaults();
 		}
 	}
 
@@ -134,6 +134,30 @@ public class OpSendDMSDefaults extends OpDMS {
 			logStore(freq);
 			logStore(time);
 			mess.storeProps();
+			return new FlashDefaults();
+		}
+	}
+
+	/** Phase to set the flash defaults */
+	protected class FlashDefaults extends Phase {
+
+		/** Set the flash defaults */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Integer flash_on = defaultFlashOn.makeInt();
+			ASN1Integer flash_off = defaultFlashOff.makeInt();
+			flash_on.setInteger(0);
+			flash_off.setInteger(0);
+			mess.add(flash_on);
+			mess.add(flash_off);
+			logStore(flash_on);
+			logStore(flash_off);
+			try {
+				mess.storeProps();
+			}
+			catch (ControllerException e) {
+				logError("Error setting flash defaults");
+			}
 			return new MessageDefaults();
 		}
 	}
