@@ -65,7 +65,6 @@ System Attribute                 | Description
 `dms_pixel_status_enable`        | Enable reporting of [DMS] pixel status errors
 `dms_pixel_test_timeout_secs`    | Time to wait for [DMS] pixel test to complete
 `dms_querymsg_enable`            | Enable widgets to query [DMS] message
-`dms_quickmsg_store_enable`      | Enable button to store composed [DMS] message as a quick-message
 `dms_render_size`                | Specifies Chooser icon size: 0=Large, 1=Medium, 2=Small, 3=Auto
 `dms_reset_enable`               | Enable button to reset [DMS]
 `dms_send_confirmation_enable`   | Enable a confirmation dialog box when the [DMS] Send button is pressed

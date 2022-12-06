@@ -154,4 +154,7 @@ DELETE FROM iris.system_attribute WHERE name = 'dms_default_justification_page';
 DELETE FROM iris.system_attribute WHERE name = 'dms_page_on_default_secs';
 DELETE FROM iris.system_attribute WHERE name = 'dms_page_off_default_secs';
 
+-- Remove quick message store system attribute
+DELETE FROM iris.system_attribute WHERE name = 'dms_quickmsg_store_enable';
+
 COMMIT;

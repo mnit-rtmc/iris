@@ -308,11 +308,4 @@ public class SignMessageComposer extends JPanel {
 		if (stm != null)
 			stm.updateMessageLibrary();
 	}
-
-	/** Store the composed message as a quick-message */
-	public void storeAsQuickMessage() {
-		String multi = getComposedMulti();
-		session.getDesktop().show(new StoreQuickMessageForm(session,
-			multi));
-	}
 }
