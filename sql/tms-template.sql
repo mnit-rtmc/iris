@@ -3138,7 +3138,7 @@ GRANT SELECT ON dms_sign_group_view TO PUBLIC;
 
 CREATE TABLE iris.quick_message (
 	name VARCHAR(20) PRIMARY KEY,
-	-- FIXME: drop sign_group?
+	-- FIXME: replace sign_group with hashtag
 	sign_group VARCHAR(20) REFERENCES iris.sign_group,
 	sign_config VARCHAR(16) REFERENCES iris.sign_config,
 	msg_combining INTEGER NOT NULL REFERENCES iris.msg_combining,
