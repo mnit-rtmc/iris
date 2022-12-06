@@ -93,8 +93,8 @@ all signs in the selected group from the message selector.
 
 If a sign is later selected for use that is not part of that group, or is
 physically incapable of displaying the message due to size or color
-restrictions, the message will not appear in the list of Quick Messages for the
-sign.
+restrictions, the message will not appear in the list of message patterns for
+the sign.
 
 ## Sign Pages
 

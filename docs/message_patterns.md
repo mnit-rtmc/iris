@@ -1,19 +1,18 @@
-# Quick Messages
+# Message Patterns
 
-Select `View ➔ Message Signs ➔ Quick Messages` or
+Select `View ➔ Message Signs ➔ Message Patterns` or
 `View ➔ Message Signs ➔ Message Editor` menu items
 
-A _quick message_ is a fully composed [MULTI] message which can be associated
-with a sign group.  They are created using the [WYSIWYG editor].
+A _message pattern_ is a partially or fully composed [MULTI] message which can
+be associated with a sign config.  They are created using the [WYSIWYG editor].
 
-Quick messages can be selected directly by operators, or activated by [DMS
-action]s as part of an [action plan].  For these messages, it is best to
-leave the sign group blank.
+Message patterns can be selected directly by operators, or activated by [DMS
+action]s as part of an [action plan].
 
 ## Message Combining
 
 It is sometimes necessary to display two messages on a sign at the same time.
-This is controlled with the quick message _Combining_ field:
+This is controlled with the _Combining_ field:
 
 Combining | Description
 ----------|--------------------
@@ -25,8 +24,7 @@ Either    | May combine as first or second message
 Messages can only be combined in certain cases:
 - The first message is scheduled by a [DMS action] and the second is selected by
   an operator.
-- Both messages are selected by an operator, the first being a quick message and
-  the second composed (line-by-line).
+- Both messages are scheduled by [DMS action]s (TODO: not implemented).
 
 The foreground color, font, and justification are reset to default values
 before the second message.  The [MULTI] string `[cf][fo][jl][jp]` is inserted

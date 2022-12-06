@@ -67,8 +67,8 @@
     - Press the `Create` button
     - The new DMS Action should appear in the table
     - Select the `deployed` phase for the DMS action
-    - Click on the `Quick Message` column in the DMS Action just created
-    - Specify the name of an existing [quick message] to send to the sign
+    - Click on the `Message Pattern` column in the DMS Action just created
+    - Specify the name of an existing [message pattern] to send to the sign
     - Repeat the above DMS Actions steps as many times as desired to send a
       message to additional sign groups
  6. Activate the messages on the signs
@@ -80,13 +80,13 @@
     - Change the phase back to `undeployed` to blank the signs
 
 Notes:
- - Before running through these steps, create the Sign Groups and Quick Messages
-   desired
- - The quick messages that the Action Plan references don't have to be assigned
-   to a Sign Group
+ - Before running through these steps, create the Sign Groups and Message
+   Patterns desired
+ - The message patterns that the Action Plan references don't have to be
+   assigned to a Sign Group
  - Use the device debug log to diagnose problems with scheduled messages not
    appearing on signs
 
 
 [edit mode]: user_interface.html#edit-mode
-[quick message]: dms.html#quick-messages
+[message pattern]: message_patterns.html

@@ -69,9 +69,10 @@ All       | All signs
 ## Composing Messages
 
 When a DMS is selected, the current message is displayed along with location
-information.  A series of _Sign Text_ selectors is populated with messages
-from the message library, one for each line.  Also, a [quick message] selector
-is populated with messages for sign groups containing the DMS.
+information.  A [message pattern] selector is populated with messages for sign
+groups containing the DMS.  When a pattern is selected, a series of _Sign Text_
+selectors is populated with messages from the message library, one for each
+line of the pattern.
 
 
 [beacon]: beacons.html
@@ -79,7 +80,7 @@ is populated with messages for sign groups containing the DMS.
 [fonts]: fonts.html
 [graphic images]: graphics.html
 [NTCIP]: comm_links.html#ntcip
-[quick message]: quick_message.html
+[message pattern]: message_patterns.html
 [Slow traffic]: slow_warning.html
 [Travel time]: travel_time.html
 [Variable speed advisories]: vsa.html

@@ -229,9 +229,9 @@ V66E37\tSNOW PLOW[nl]AHEAD[nl]USE CAUTION\t2022-10-02 11:37:00-05:00
 
 `dms`: Name of the sign to deploy.  Must be a member of a sign group referenced
 by a [DMS action].  Additionally, that action must be associated with the
-current phase of an active [action plan].  The [quick message] of the
+current phase of an active [action plan].  The [message pattern] of the
 _DMS action_ must be a `feed` [action tag].  For example, if the `msgfeed`
-_Comm Link_ name is `XYZ`, then the quick message must be `[feedXYZ]`.
+_Comm Link_ name is `XYZ`, then the pattern must be `[feedXYZ]`.
 
 `multi`: Message to deploy, using the [MULTI] markup language.  Each line of
 the message must be defined in the sign's message library.  This check allows
@@ -362,12 +362,12 @@ camera can be associated with each [controller], using [IO pin] 1.
 [IO pin]: controllers.html#io-pins
 [IPAWS]: https://www.fema.gov/emergency-managers/practitioners/integrated-public-alert-warning-system
 [LCS]: lcs.html
+[message pattern]: message_patterns.html
 [monstream]: video.html#monstream
 [MULTI]: multi.html
 [Natch protocol]: natch.html
 [parking area]: parking_areas.html
 [PTZ]: cameras.html#pan-tilt-and-zoom
-[quick message]: dms.html#quick-messages
 [ramp meters]: ramp_meters.html
 [RFC 3339]: https://tools.ietf.org/html/rfc3339#section-5.6
 [RWIS]: rwis.html

@@ -13,7 +13,7 @@ parking space.  If applicable, lanes 3 (front) and 4 (rear) are for the _tail_.
 ## Parking Area Action Tag
 
 The number of available parking spaces can be displayed in DMS messages using
-[DMS actions].  A `[pa` *…* `]` [action tag] in the [quick message] will be
+[DMS actions].  A `[pa` *…* `]` [action tag] in the [message pattern] will be
 replaced with the appropriate value.  It has the following format:
 
 `[pa` *id,low,closed* `]`
@@ -34,4 +34,4 @@ REST AREA 2 MILES[nl]PARKING [pa1,LOW,CLOSED]
 [action tag]: action_plans.html#dms-action-tags
 [corridor]: road_topology.html#corridors
 [DMS actions]: action_plans.html#dms-actions
-[quick message]: dms.html#quick-messages
+[message pattern]: message_patterns.html

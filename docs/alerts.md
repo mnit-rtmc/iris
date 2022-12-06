@@ -150,12 +150,12 @@ deployment when reviewed in the deployment dialog.
 
 ### Alert Messages
 
-An alert message defines an *alert period* and a [quick message].  The period
+An alert message defines an *alert period* and a [message pattern].  The period
 can be `BEFORE`, `DURING` or `AFTER`, and selects the time relative to the start
-and end of the alert.  The *quick message* will be displayed on signs with a
+and end of the alert.  The message pattern will be displayed on signs with a
 matching **sign config** during the associated period.
 
-A quick message can contain DMS [action tags], since alerts are deployed as
+A message pattern can contain DMS [action tags], since alerts are deployed as
 action plans.  Specifically, the [time action tag] is useful for displaying the
 the alert start or end time as part of a message.
 
@@ -257,6 +257,6 @@ so care must be taken to ensure the testing is done in a controlled manner.
 [controller]: controllers.html
 [CAP]: http://docs.oasis-open.org/emergency/cap/v1.2/CAP-v1.2.html
 [IPAWS]: https://www.fema.gov/emergency-managers/practitioners/integrated-public-alert-warning-system
+[message pattern]: message_patterns.html
 [Public Forecast Zones]: https://www.weather.gov/gis/PublicZones
-[quick message]: dms.html#quick-messages
 [time action tag]: action_plans.html#time-action-tag

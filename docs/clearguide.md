@@ -11,7 +11,7 @@ name.
 ## ClearGuide Action Tag
 
 Real-time ClearGuide data can be embedded in DMS messages using [DMS actions].
-A `[cg` *…* `]` [action tag] in the [quick message] will be replaced by the
+A `[cg` *…* `]` [action tag] in the [message pattern] will be replaced by the
 appropriate value.  The action tag has the following format:
 
 `[cg` *dms,wid,min,mode,idx* `]`
@@ -32,4 +32,4 @@ appropriate value.  The action tag has the following format:
 
 [action tag]: action_plans.html#dms-action-tags
 [DMS actions]: action_plans.html#dms-actions
-[quick message]: dms.html#quick-messages
+[message pattern]: message_patterns.html
